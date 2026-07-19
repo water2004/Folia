@@ -213,6 +213,10 @@ int main()
         R"(\underbrace{a+b+\cdots+z}_{26\text{ terms}})",
         R"(\xrightarrow[\text{below}]{\text{above}})",
         R"(\boldsymbol{\alpha}+\mathbf{x}+\mathsf{A}+\mathtt{code})",
+        R"(\bra{\psi})",
+        R"(\ket{\psi})",
+        R"(\braket{\phi|\psi})",
+        R"(\langle\phi\mid\psi\rangle)",
     };
     bool failed = false;
     for (int index = 0; index < 500; ++index)
@@ -242,6 +246,15 @@ int main()
             auto text = JS_ToCString(context, result);
             if (!text || std::string_view(text).find("<svg") == std::string_view::npos) return 2;
             std::string_view output(text);
+            if (output.find("data-mjx-error=") != std::string_view::npos
+                || output.find("<merror") != std::string_view::npos)
+            {
+                std::cerr << "Unexpected MathJax error for formula " << index
+                          << " (" << tex << "): " << output << '\n';
+                JS_FreeCString(context, text);
+                JS_FreeValue(context, result);
+                return 16;
+            }
             auto first = output.find("<svg");
             if (first == std::string_view::npos) return 3;
             std::size_t cursor = 0;
