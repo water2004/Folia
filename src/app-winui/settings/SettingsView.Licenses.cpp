@@ -111,11 +111,39 @@ namespace winrt::Folia
         auto name = Text(Localize(L"AppName"), 30);
         name.FontWeight(winrt::Windows::UI::Text::FontWeights::SemiBold());
         copy.Children().Append(name);
-        copy.Children().Append(Text(LocalizeFormat(L"Version", {L"0.1.0"})));
+        copy.Children().Append(Text(LocalizeFormat(L"Version", {L"0.1.1"})));
         copy.Children().Append(Text(Localize(L"AppDescription")));
         Grid::SetColumn(copy, 1);
         identity.Children().Append(copy);
         panel.Children().Append(Card(identity));
+
+        Grid openSource;
+        openSource.ColumnSpacing(16);
+        ColumnDefinition openSourceCopyColumn;
+        openSourceCopyColumn.Width(GridLengthHelper::FromValueAndType(
+            1, GridUnitType::Star));
+        ColumnDefinition openSourceLinkColumn;
+        openSourceLinkColumn.Width(GridLengthHelper::Auto());
+        openSource.ColumnDefinitions().Append(openSourceCopyColumn);
+        openSource.ColumnDefinitions().Append(openSourceLinkColumn);
+
+        StackPanel openSourceCopy;
+        openSourceCopy.Spacing(5);
+        auto openSourceHeading = Text(Localize(L"OpenSourceProject"), 18);
+        openSourceHeading.FontWeight(
+            winrt::Windows::UI::Text::FontWeights::SemiBold());
+        openSourceCopy.Children().Append(openSourceHeading);
+        openSourceCopy.Children().Append(Text(Localize(L"OpenSourceDescription")));
+        openSource.Children().Append(openSourceCopy);
+
+        HyperlinkButton repository;
+        repository.Content(box_value(L"water2004/Folia  ↗"));
+        repository.NavigateUri(
+            winrt::Windows::Foundation::Uri(L"https://github.com/water2004/Folia"));
+        repository.VerticalAlignment(VerticalAlignment::Center);
+        Grid::SetColumn(repository, 1);
+        openSource.Children().Append(repository);
+        panel.Children().Append(Card(openSource));
 
         StackPanel technology;
         technology.Spacing(8);
