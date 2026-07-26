@@ -19,12 +19,23 @@ namespace winrt::Folia
             float height = 0.0f;
         };
 
+        struct MermaidDraw
+        {
+            std::uint32_t displayStart = 0;
+            MermaidSvg svg;
+            float width = 0.0f;
+            float height = 0.0f;
+            float lineHeight = 0.0f;
+            float advance = 0.0f;
+        };
+
         struct Block
         {
             DisplayInlineText display;
             ::Microsoft::WRL::ComPtr<IDWriteTextLayout> layout;
             std::vector<EditorInlineImageRenderer::ImageDraw> images;
             std::vector<MathPreview> mathPreviews;
+            std::vector<MermaidDraw> mermaids;
             std::vector<AsyncWorkDependency> pendingMathJaxDependencies;
             std::vector<AsyncWorkDependencyGroup> pendingSvgDependencyGroups;
             std::optional<EditorTableBlockRenderer::PreparedTable> table;
@@ -37,9 +48,11 @@ namespace winrt::Folia
             bool code = false;
             bool containsMath = false;
             bool containsImage = false;
+            bool containsMermaid = false;
             bool embeddedRequested = false;
             bool pendingMath = false;
             bool pendingImage = false;
+            bool pendingMermaid = false;
             bool valid = false;
             std::uint64_t embeddedGeneration = 0;
             std::uint64_t dependencyCheckGeneration = 0;
@@ -59,6 +72,7 @@ namespace winrt::Folia
                 auto retainedContainsMath = containsMath;
                 auto retainedContainsImage = containsImage;
                 auto retainedPendingImage = pendingImage;
+                auto retainedContainsMermaid = containsMermaid;
                 *this = {};
                 height = measuredHeight;
                 sourceId = retainedSourceId;
@@ -69,6 +83,7 @@ namespace winrt::Folia
                 containsMath = retainedContainsMath;
                 containsImage = retainedContainsImage;
                 pendingImage = retainedPendingImage;
+                containsMermaid = retainedContainsMermaid;
             }
         };
 

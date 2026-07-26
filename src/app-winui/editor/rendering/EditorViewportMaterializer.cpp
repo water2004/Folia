@@ -62,7 +62,10 @@ namespace winrt::Folia
                 RequestEmbeddedAt(placement.top, scrollOffset, printMode),
                 highPriority);
             preparedDocument->layoutBlocks.insert(index);
-            if (prepared.embeddedRequested && (prepared.containsMath || prepared.containsImage))
+            if (prepared.embeddedRequested
+                && (prepared.containsMath
+                    || prepared.containsImage
+                    || prepared.containsMermaid))
                 preparedDocument->embeddedBlocks.insert(index);
             else
                 preparedDocument->embeddedBlocks.erase(index);

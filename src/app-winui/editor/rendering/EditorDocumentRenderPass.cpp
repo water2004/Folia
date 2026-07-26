@@ -12,7 +12,8 @@ namespace winrt::Folia
         EditorInlineImageRenderer& valueInlineImages,
         EditorDocumentPainter& valueDocumentPainter,
         EditorDrawMath valueDrawMath,
-        EditorDrawMathFallback valueDrawMathFallback)
+        EditorDrawMathFallback valueDrawMathFallback,
+        EditorDrawMermaid valueDrawMermaid)
         : resources(valueResources),
           styleSheet(valueStyleSheet),
           interactionMap(valueInteractionMap),
@@ -20,7 +21,8 @@ namespace winrt::Folia
           inlineImages(valueInlineImages),
           documentPainter(valueDocumentPainter),
           drawMath(std::move(valueDrawMath)),
-          drawMathFallback(std::move(valueDrawMathFallback))
+          drawMathFallback(std::move(valueDrawMathFallback)),
+          drawMermaid(std::move(valueDrawMermaid))
     {
     }
 
@@ -150,6 +152,34 @@ namespace winrt::Folia
             documentPainter.RegisterFootnotes(
                 prepared.layout.Get(), origin, prepared.display.footnoteOverlays);
             inlineImages.Draw(prepared.layout.Get(), origin, prepared.images);
+            if (!prepared.mermaids.empty() && prepared.layout)
+            {
+                for (auto const& diagram : prepared.mermaids)
+                {
+                    float pointX = 0.0f;
+                    float lineTop = 0.0f;
+                    DWRITE_HIT_TEST_METRICS hit{};
+                    if (FAILED(prepared.layout->HitTestTextPosition(
+                            diagram.displayStart,
+                            FALSE,
+                            &pointX,
+                            &lineTop,
+                            &hit)))
+                        continue;
+                    auto mermaidOrigin = D2D1::Point2F(
+                        origin.x
+                            + pointX
+                            + (diagram.advance - diagram.width) * 0.5f,
+                        origin.y
+                            + lineTop
+                            + (diagram.lineHeight - diagram.height));
+                    drawMermaid(
+                        diagram.svg,
+                        diagram.width,
+                        diagram.height,
+                        mermaidOrigin);
+                }
+            }
             for (auto const& positioned : EditorDocumentPainter::PositionMath(
                     prepared.layout.Get(),
                     prepared.display.mathOverlays,

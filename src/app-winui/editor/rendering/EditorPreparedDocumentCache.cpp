@@ -203,7 +203,10 @@ namespace winrt::Folia
                 block.block_style.margin_bottom
                     + (block.source_mode ? 0.0f : styleSheet.blockGap),
             });
-            if (prepared.embeddedRequested && (prepared.containsMath || prepared.containsImage))
+            if (prepared.embeddedRequested
+                && (prepared.containsMath
+                    || prepared.containsImage
+                    || prepared.containsMermaid))
                 preparedDocument->embeddedBlocks.insert(index);
             for (auto owner : prepared.owners)
                 preparedDocument->ownerBlockIndex[owner.v] = index;

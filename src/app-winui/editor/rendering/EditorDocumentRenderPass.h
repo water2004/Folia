@@ -29,7 +29,8 @@ namespace winrt::Folia
             EditorInlineImageRenderer& inlineImages,
             EditorDocumentPainter& documentPainter,
             EditorDrawMath drawMath,
-            EditorDrawMathFallback drawMathFallback);
+            EditorDrawMathFallback drawMathFallback,
+            EditorDrawMermaid drawMermaid);
 
         void Paint(
             detail::EditorRenderFrame const& frame,
@@ -63,5 +64,6 @@ namespace winrt::Folia
         // temporary std::function conversions do not outlive construction.
         EditorDrawMath drawMath;
         EditorDrawMathFallback drawMathFallback;
+        EditorDrawMermaid drawMermaid;
     };
 }

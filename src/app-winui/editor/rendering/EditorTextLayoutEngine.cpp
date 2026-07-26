@@ -76,6 +76,7 @@ namespace winrt::Folia
             }
             for (auto& overlay : display.mathOverlays) if (overlay.displayStart >= position) ++overlay.displayStart;
             for (auto& overlay : display.imageOverlays) if (overlay.displayStart >= position) ++overlay.displayStart;
+            for (auto& overlay : display.mermaidOverlays) if (overlay.displayStart >= position) ++overlay.displayStart;
             for (auto& overlay : display.indentOverlays) if (overlay.displayStart >= position) ++overlay.displayStart;
             for (auto& overlay : display.taskCheckboxOverlays) if (overlay.displayStart >= position) ++overlay.displayStart;
             for (auto& overlay : display.footnoteOverlays) if (overlay.displayStart >= position) ++overlay.displayStart;
@@ -103,6 +104,7 @@ namespace winrt::Folia
         {
             DisplayInlineText result;
             result.pendingMath = source.pendingMath;
+            result.pendingMermaid = source.pendingMermaid;
             const auto sourceLength = static_cast<UINT32>(folia::utf16_len(source.text));
             start = (std::min)(start, sourceLength);
             end = (std::clamp)(end, start, sourceLength);
@@ -143,6 +145,12 @@ namespace winrt::Folia
                 if (overlay.displayStart < start || overlay.displayStart >= end) continue;
                 overlay.displayStart -= start;
                 result.imageOverlays.push_back(std::move(overlay));
+            }
+            for (auto overlay : source.mermaidOverlays)
+            {
+                if (overlay.displayStart < start || overlay.displayStart >= end) continue;
+                overlay.displayStart -= start;
+                result.mermaidOverlays.push_back(std::move(overlay));
             }
             for (auto overlay : source.taskCheckboxOverlays)
             {

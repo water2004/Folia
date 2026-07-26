@@ -41,6 +41,120 @@ namespace winrt::Folia
             return false;
         }
 
+        bool RenderBlockContainsMermaid(folia::RenderBlock const& block)
+        {
+            if (!block.source_mode
+                && block.kind == folia::RenderBlockKind::Code
+                && IsMermaidLanguage(block.special().language))
+                return true;
+            for (auto const& child : block.child_blocks)
+                if (RenderBlockContainsMermaid(child)) return true;
+            return false;
+        }
+
+        std::size_t CodepointIndexAtUtf16(
+            std::u32string_view text,
+            std::uint32_t utf16Offset)
+        {
+            std::size_t index = 0;
+            std::uint32_t current = 0;
+            while (index < text.size() && current < utf16Offset)
+            {
+                current += text[index] > 0xffff ? 2u : 1u;
+                ++index;
+            }
+            return index;
+        }
+
+        void ReplaceDisplayRangeWithMermaid(
+            DisplayInlineText& display,
+            std::uint32_t start,
+            std::uint32_t end,
+            MermaidSvg svg,
+            folia::TextSpan sourceSpan)
+        {
+            if (start >= end || end > folia::utf16_len(display.text)) return;
+            auto startCodepoint = CodepointIndexAtUtf16(display.text, start);
+            auto endCodepoint = CodepointIndexAtUtf16(display.text, end);
+            display.text.replace(
+                startCodepoint,
+                endCodepoint - startCodepoint,
+                1,
+                U'\uFFFC');
+
+            auto eraseBegin = display.displayToSource.begin()
+                + static_cast<std::ptrdiff_t>(start);
+            auto eraseEnd = display.displayToSource.begin()
+                + static_cast<std::ptrdiff_t>(end);
+            display.displayToSource.erase(eraseBegin, eraseEnd);
+            display.displayToSource.insert(
+                display.displayToSource.begin()
+                    + static_cast<std::ptrdiff_t>(start),
+                EditorDisplayPosition{
+                    {
+                        sourceSpan.container_id,
+                        sourceSpan.source_range.start,
+                        folia::TextAffinity::Downstream,
+                    },
+                    EditorDisplayPositionKind::Generated,
+                });
+
+            auto const removed = end - start;
+            auto const shift = static_cast<std::int64_t>(1)
+                - static_cast<std::int64_t>(removed);
+            std::erase_if(
+                display.ranges,
+                [&](InlineStyleRange& range)
+                {
+                    auto rangeEnd = range.start + range.length;
+                    if (rangeEnd <= start) return false;
+                    if (range.start >= end)
+                    {
+                        range.start = static_cast<std::uint32_t>(
+                            static_cast<std::int64_t>(range.start) + shift);
+                        return false;
+                    }
+                    return true;
+                });
+            auto shiftOverlay = [&](auto& overlays)
+            {
+                std::erase_if(
+                    overlays,
+                    [&](auto& overlay)
+                    {
+                        if (overlay.displayStart >= end)
+                        {
+                            overlay.displayStart = static_cast<std::uint32_t>(
+                                static_cast<std::int64_t>(overlay.displayStart)
+                                + shift);
+                            return false;
+                        }
+                        return overlay.displayStart >= start;
+                    });
+            };
+            shiftOverlay(display.mathOverlays);
+            shiftOverlay(display.imageOverlays);
+            shiftOverlay(display.mermaidOverlays);
+            shiftOverlay(display.indentOverlays);
+            shiftOverlay(display.taskCheckboxOverlays);
+            shiftOverlay(display.footnoteOverlays);
+
+            auto style = folia::InlineStyle::plain();
+            style.code = true;
+            display.ranges.push_back({
+                start,
+                1,
+                style,
+                false,
+                SyntaxHighlightKind::None,
+            });
+            display.mermaidOverlays.push_back({
+                start,
+                std::move(svg),
+                sourceSpan,
+            });
+        }
+
         void CollectInlineOwners(
             std::vector<folia::InlineRenderItem> const& items,
             std::unordered_set<std::uint64_t>& seen,
@@ -84,11 +198,14 @@ namespace winrt::Folia
         EditorInlineImageRenderer& valueInlineImages,
         EditorDocumentPainter& valueDocumentPainter,
         MathJaxRenderer& valueMathJax,
+        MermaidRenderer& valueMermaid,
         SvgNormalizer& valueSvgNormalizer,
         TreeSitterHighlighter& valueTreeSitter,
         folia::TextPosition valueCaret,
         float valueDocumentWidth,
         bool valueMathSvgSupported,
+        bool valueMermaidSvgSupported,
+        bool valueDarkTheme,
         std::uint64_t valueEmbeddedGeneration,
         std::uint64_t valueRemoteImageGeneration)
         : frame(valueFrame),
@@ -99,11 +216,14 @@ namespace winrt::Folia
           inlineImages(valueInlineImages),
           documentPainter(valueDocumentPainter),
           mathJax(valueMathJax),
+          mermaid(valueMermaid),
           svgNormalizer(valueSvgNormalizer),
           treeSitter(valueTreeSitter),
           caret(valueCaret),
           documentWidth(valueDocumentWidth),
           mathSvgSupported(valueMathSvgSupported),
+          mermaidSvgSupported(valueMermaidSvgSupported),
+          darkTheme(valueDarkTheme),
           embeddedGeneration(valueEmbeddedGeneration),
           remoteImageGeneration(valueRemoteImageGeneration)
     {
@@ -127,6 +247,7 @@ namespace winrt::Folia
     {
         prepared.containsMath = RenderBlockContainsMath(block);
         prepared.containsImage = RenderBlockContainsImage(block);
+        prepared.containsMermaid = RenderBlockContainsMermaid(block);
         std::unordered_set<std::uint64_t> owners;
         CollectRenderOwners(block, owners, prepared.owners);
     }
@@ -321,6 +442,75 @@ namespace winrt::Folia
         return display;
     }
 
+    void EditorDocumentBlockPreparer::ApplyMermaidPresentation(
+        DisplayInlineText& display,
+        folia::RenderBlock const& block,
+        bool requestEmbedded)
+    {
+        if (!mermaidSvgSupported) return;
+        struct Replacement
+        {
+            std::uint32_t start = 0;
+            std::uint32_t end = 0;
+            MermaidSvg svg;
+            folia::TextSpan sourceSpan;
+        };
+        std::vector<Replacement> replacements;
+        auto collect = [&](auto& self, folia::RenderBlock const& candidate) -> void
+        {
+            if (!candidate.source_mode
+                && candidate.kind == folia::RenderBlockKind::Code
+                && IsMermaidLanguage(candidate.special().language)
+                && caret.container_id != candidate.id
+                && !candidate.special().code_text.empty())
+            {
+                auto rendered = mermaid.GetOrQueue(
+                    folia::cps_to_utf8(candidate.special().code_text),
+                    darkTheme,
+                    requestEmbedded);
+                if (!rendered)
+                {
+                    display.pendingMermaid =
+                        display.pendingMermaid || requestEmbedded;
+                }
+                else if (static_cast<bool>(*rendered))
+                {
+                    if (auto range = SourceDisplayRangeForContainer(
+                            display.displayToSource,
+                            candidate.id,
+                            folia::utf16_len(display.text)))
+                    {
+                        replacements.push_back({
+                            static_cast<std::uint32_t>(range->first),
+                            static_cast<std::uint32_t>(range->second),
+                            std::move(*rendered),
+                            candidate.source_span,
+                        });
+                    }
+                }
+            }
+            for (auto const& child : candidate.child_blocks) self(self, child);
+        };
+        collect(collect, block);
+        std::ranges::sort(
+            replacements,
+            std::greater<>{},
+            &Replacement::start);
+        for (auto& replacement : replacements)
+        {
+            ReplaceDisplayRangeWithMermaid(
+                display,
+                replacement.start,
+                replacement.end,
+                std::move(replacement.svg),
+                replacement.sourceSpan);
+        }
+        std::ranges::sort(
+            display.mermaidOverlays,
+            {},
+            &DisplayInlineText::MermaidOverlay::displayStart);
+    }
+
     EditorPreparedDocument::Block EditorDocumentBlockPreparer::Prepare(
         folia::RenderBlock const& block,
         bool requestEmbedded,
@@ -384,6 +574,10 @@ namespace winrt::Folia
             contentWidth,
             requestEmbedded,
             highPriority);
+        ApplyMermaidPresentation(
+            prepared.display,
+            block,
+            requestEmbedded);
         if (block.source_mode
             && block.source_code
             && block.special().language
@@ -429,6 +623,7 @@ namespace winrt::Folia
             prepared.display.pendingMathJaxDependencies;
         prepared.pendingSvgDependencyGroups =
             prepared.display.pendingSvgDependencyGroups;
+        prepared.pendingMermaid = prepared.display.pendingMermaid;
         auto format = textLayoutEngine.FormatFor(
             prepared.code || prepared.sourceMode,
             prepared.display.ranges);
@@ -446,6 +641,57 @@ namespace winrt::Folia
                 prepared.pendingImage = std::ranges::any_of(
                     prepared.images,
                     [](auto const& image) { return image.pending; });
+                prepared.mermaids.clear();
+                if (!candidateDisplay.mermaidOverlays.empty())
+                    candidate->SetLineSpacing(
+                        DWRITE_LINE_SPACING_METHOD_DEFAULT,
+                        0.0f,
+                        0.0f);
+                prepared.mermaids.reserve(
+                    candidateDisplay.mermaidOverlays.size());
+                for (auto const& overlay : candidateDisplay.mermaidOverlays)
+                {
+                    float pointX = 0.0f;
+                    float ignoredY = 0.0f;
+                    DWRITE_HIT_TEST_METRICS hit{};
+                    if (FAILED(candidate->HitTestTextPosition(
+                            overlay.displayStart,
+                            FALSE,
+                            &pointX,
+                            &ignoredY,
+                            &hit)))
+                        continue;
+                    auto available = (std::max)(
+                        1.0f,
+                        contentWidth - pointX);
+                    auto scale = (std::min)(
+                        1.0f,
+                        available / overlay.svg.width);
+                    auto width = (std::max)(
+                        1.0f,
+                        overlay.svg.width * scale);
+                    auto height = (std::max)(
+                        1.0f,
+                        overlay.svg.height * scale);
+                    auto lineHeight = (std::max)(
+                        styleSheet.body.lineHeight,
+                        height);
+                    auto advance = (std::max)(width, available);
+                    ApplyInlinePlaceholder(
+                        candidate,
+                        overlay.displayStart,
+                        advance,
+                        lineHeight,
+                        lineHeight);
+                    prepared.mermaids.push_back({
+                        overlay.displayStart,
+                        overlay.svg,
+                        width,
+                        height,
+                        lineHeight,
+                        advance,
+                    });
+                }
             });
         if (prepared.layout && !block.source_mode && block.block_style.text_alignment)
         {

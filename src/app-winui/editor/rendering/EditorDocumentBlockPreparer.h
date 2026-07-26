@@ -12,6 +12,7 @@ import folia.core.text_edit;
 #include "editor/rendering/EditorTextLayoutEngine.h"
 #include "editor/session/EditorRenderFrame.h"
 #include "media/MathJaxRenderer.h"
+#include "media/MermaidRenderer.h"
 #include "media/SvgNormalizer.h"
 #include "media/TreeSitterHighlighter.h"
 
@@ -31,11 +32,14 @@ namespace winrt::Folia
             EditorInlineImageRenderer& inlineImages,
             EditorDocumentPainter& documentPainter,
             MathJaxRenderer& mathJax,
+            MermaidRenderer& mermaid,
             SvgNormalizer& svgNormalizer,
             TreeSitterHighlighter& treeSitter,
             folia::TextPosition caret,
             float documentWidth,
             bool mathSvgSupported,
+            bool mermaidSvgSupported,
+            bool darkTheme,
             std::uint64_t embeddedGeneration,
             std::uint64_t remoteImageGeneration);
 
@@ -60,6 +64,10 @@ namespace winrt::Folia
             float width,
             bool requestEmbedded,
             bool highPriority);
+        void ApplyMermaidPresentation(
+            DisplayInlineText& display,
+            folia::RenderBlock const& block,
+            bool requestEmbedded);
 
         detail::EditorRenderFrame const& frame;
         EditorRenderResources& resources;
@@ -69,11 +77,14 @@ namespace winrt::Folia
         EditorInlineImageRenderer& inlineImages;
         EditorDocumentPainter& documentPainter;
         MathJaxRenderer& mathJax;
+        MermaidRenderer& mermaid;
         SvgNormalizer& svgNormalizer;
         TreeSitterHighlighter& treeSitter;
         folia::TextPosition caret;
         float documentWidth = 0.0f;
         bool mathSvgSupported = false;
+        bool mermaidSvgSupported = false;
+        bool darkTheme = false;
         std::uint64_t embeddedGeneration = 0;
         std::uint64_t remoteImageGeneration = 0;
         std::unordered_map<void const*, std::vector<SyntaxHighlightRange>> sourceCodeHighlights;

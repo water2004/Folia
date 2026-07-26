@@ -284,6 +284,11 @@ namespace winrt::Folia
             overlay.displayStart += offset;
             target.imageOverlays.push_back(std::move(overlay));
         }
+        for (auto& overlay : source.mermaidOverlays)
+        {
+            overlay.displayStart += offset;
+            target.mermaidOverlays.push_back(std::move(overlay));
+        }
         for (auto& overlay : source.indentOverlays)
         {
             overlay.displayStart += offset;
@@ -310,6 +315,7 @@ namespace winrt::Folia
             std::make_move_iterator(
                 source.pendingSvgDependencyGroups.end()));
         target.pendingMath = target.pendingMath || source.pendingMath;
+        target.pendingMermaid = target.pendingMermaid || source.pendingMermaid;
     }
 
     void AppendSourceText(DisplayInlineText& display, std::u32string_view sourceText, folia::TextSpan sourceSpan, folia::InlineStyle style, bool marker)

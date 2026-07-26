@@ -70,6 +70,13 @@ namespace winrt::Folia
             bool block = false;
         };
 
+        struct MermaidOverlay
+        {
+            std::uint32_t displayStart = 0;
+            MermaidSvg svg;
+            folia::TextSpan sourceSpan;
+        };
+
         struct IndentOverlay
         {
             std::uint32_t displayStart = 0;
@@ -102,12 +109,14 @@ namespace winrt::Folia
         std::vector<MathOverlay> mathOverlays;
         std::vector<MathPreview> mathPreviews;
         std::vector<ImageOverlay> imageOverlays;
+        std::vector<MermaidOverlay> mermaidOverlays;
         std::vector<IndentOverlay> indentOverlays;
         std::vector<TaskCheckboxOverlay> taskCheckboxOverlays;
         std::vector<FootnoteOverlay> footnoteOverlays;
         std::vector<AsyncWorkDependency> pendingMathJaxDependencies;
         std::vector<AsyncWorkDependencyGroup> pendingSvgDependencyGroups;
         bool pendingMath = false;
+        bool pendingMermaid = false;
     };
 
     std::wstring ToWide(std::u32string_view text);

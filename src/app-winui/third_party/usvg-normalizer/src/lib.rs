@@ -380,6 +380,35 @@ mod tests {
         (status, value, width, height)
     }
 
+    fn render_mermaid(source: &[u8], dark: bool) -> (i32, String, f32, f32) {
+        let normalizer = folia_svg_normalizer_create();
+        assert!(!normalizer.is_null());
+        let mut output = ptr::null_mut();
+        let mut output_len = 0;
+        let mut width = 0.0;
+        let mut height = 0.0;
+        let status = folia_mermaid_render(
+            normalizer,
+            source.as_ptr(),
+            source.len(),
+            dark,
+            &mut output,
+            &mut output_len,
+            &mut width,
+            &mut height,
+        );
+        let value = if output.is_null() {
+            String::new()
+        } else {
+            let bytes = unsafe { std::slice::from_raw_parts(output, output_len) };
+            let value = String::from_utf8_lossy(bytes).into_owned();
+            folia_svg_buffer_destroy(output, output_len);
+            value
+        };
+        folia_svg_normalizer_destroy(normalizer);
+        (status, value, width, height)
+    }
+
     #[test]
     fn svg_normalization_reports_intrinsic_dimensions() {
         let source = br#"<svg xmlns="http://www.w3.org/2000/svg" width="120" height="80"><rect width="120" height="80"/></svg>"#;
@@ -429,5 +458,15 @@ mod tests {
             expand_embedded_svg_images(malformed.as_bytes()),
             malformed.as_bytes()
         );
+    }
+
+    #[test]
+    fn mermaid_render_returns_normalized_svg_with_dimensions() {
+        let (status, output, width, height) =
+            render_mermaid(b"flowchart TD\n  A[Start] --> B[Finish]", false);
+        assert_eq!(status, 0, "{output}");
+        assert!(output.contains("<svg"));
+        assert!(width.is_finite() && width > 0.0);
+        assert!(height.is_finite() && height > 0.0);
     }
 }

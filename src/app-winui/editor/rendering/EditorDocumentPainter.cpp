@@ -287,7 +287,10 @@ namespace winrt::Folia
         auto apply = [&](auto& self, folia::RenderBlock const& block) -> void
         {
             auto const& special = block.special();
-            if (block.kind == folia::RenderBlockKind::Code && special.language && !special.code_text.empty())
+            if (block.kind == folia::RenderBlockKind::Code
+                && special.language
+                && !IsMermaidLanguage(special.language)
+                && !special.code_text.empty())
             {
                 auto highlights = treeSitter.Highlight(*special.language, folia::cps_to_utf8(special.code_text));
                 for (auto const& highlight : highlights)

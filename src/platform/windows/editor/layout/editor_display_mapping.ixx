@@ -43,6 +43,29 @@ export namespace folia::platform::editor
 
     using EditorDisplayMapping = std::vector<EditorDisplayPosition>;
 
+    inline std::optional<std::pair<std::size_t, std::size_t>>
+    SourceDisplayRangeForContainer(
+        EditorDisplayMapping const& mapping,
+        folia::NodeId containerId,
+        std::size_t displayCharacterCount)
+    {
+        auto const limit = (std::min)(mapping.size(), displayCharacterCount);
+        std::optional<std::size_t> first;
+        std::size_t last = 0;
+        for (std::size_t index = 0; index < limit; ++index)
+        {
+            auto const& position = mapping[index];
+            if (position.container_id != containerId
+                || position.kind != EditorDisplayPositionKind::Source)
+                continue;
+            if (!first) first = index;
+            last = index + 1;
+        }
+        return first
+            ? std::optional{std::pair{*first, last}}
+            : std::nullopt;
+    }
+
     inline std::size_t DisplayPositionForSource(
         EditorDisplayMapping const& mapping,
         folia::TextPosition sourcePosition)

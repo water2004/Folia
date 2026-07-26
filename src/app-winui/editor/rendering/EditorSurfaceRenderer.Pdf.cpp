@@ -221,6 +221,7 @@ namespace winrt::Folia
                 }
                 else if (block.pendingMath
                     || block.pendingImage
+                    || block.pendingMermaid
                     || (imagesPending && block.containsImage && imageStillLoading(block)))
                 {
                     pendingBlocks.push_back(windowEnd);

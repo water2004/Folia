@@ -54,7 +54,8 @@ namespace winrt::Folia
         auto caret = selection.active;
 
         EditorSvgPainter svgPainter(resources, renderCache);
-        auto mathSvgSupported = svgPainter.Supported() && mathJax.Enabled();
+        auto svgSupported = svgPainter.Supported();
+        auto mathSvgSupported = svgSupported && mathJax.Enabled();
         EditorTextLayoutEngine textLayoutEngine(resources, styleSheet);
         EditorInlineImageRenderer inlineImages(
             resources,
@@ -81,6 +82,16 @@ namespace winrt::Folia
                 resources.codeFormat.Get(),
                 D2D1::RectF(origin.x, origin.y, documentRight, origin.y + styleSheet.code.lineHeight),
                 resources.textBrush.Get());
+        };
+        auto drawMermaid = [&](MermaidSvg const& diagram, float width, float height, D2D1_POINT_2F origin) {
+            return svgPainter.Draw(
+                diagram.renderId,
+                diagram.svg,
+                width,
+                height,
+                origin,
+                diagram.width,
+                diagram.height);
         };
         EditorDocumentPainter documentPainter(
             resources,
@@ -115,11 +126,14 @@ namespace winrt::Folia
             inlineImages,
             documentPainter,
             mathJax,
+            mermaid,
             svgNormalizer,
             treeSitter,
             caret,
             documentWidth,
             mathSvgSupported,
+            svgSupported,
+            themeProfile.variant != folia::Theme::Light,
             embeddedGeneration,
             remoteImageGeneration);
         EditorDocumentPreparationPass preparationPass(
@@ -150,7 +164,8 @@ namespace winrt::Folia
             inlineImages,
             documentPainter,
             drawMath,
-            drawMathFallback);
+            drawMathFallback,
+            drawMermaid);
         renderPass.Paint(
             frame,
             *preparedDocument,
