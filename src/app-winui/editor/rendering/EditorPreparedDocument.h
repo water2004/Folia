@@ -29,6 +29,13 @@ namespace winrt::Folia
             float advance = 0.0f;
         };
 
+        struct MermaidPreview
+        {
+            MermaidSvg svg;
+            float width = 0.0f;
+            float height = 0.0f;
+        };
+
         struct Block
         {
             DisplayInlineText display;
@@ -36,6 +43,7 @@ namespace winrt::Folia
             std::vector<EditorInlineImageRenderer::ImageDraw> images;
             std::vector<MathPreview> mathPreviews;
             std::vector<MermaidDraw> mermaids;
+            std::vector<MermaidPreview> mermaidPreviews;
             std::vector<AsyncWorkDependency> pendingMathJaxDependencies;
             std::vector<AsyncWorkDependencyGroup> pendingSvgDependencyGroups;
             std::optional<EditorTableBlockRenderer::PreparedTable> table;

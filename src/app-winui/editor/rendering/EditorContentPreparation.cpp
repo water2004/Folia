@@ -289,6 +289,10 @@ namespace winrt::Folia
             overlay.displayStart += offset;
             target.mermaidOverlays.push_back(std::move(overlay));
         }
+        for (auto& preview : source.mermaidPreviews)
+        {
+            target.mermaidPreviews.push_back(std::move(preview));
+        }
         for (auto& overlay : source.indentOverlays)
         {
             overlay.displayStart += offset;

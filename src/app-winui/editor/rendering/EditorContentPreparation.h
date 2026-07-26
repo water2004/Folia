@@ -77,6 +77,11 @@ namespace winrt::Folia
             folia::TextSpan sourceSpan;
         };
 
+        struct MermaidPreview
+        {
+            MermaidSvg svg;
+        };
+
         struct IndentOverlay
         {
             std::uint32_t displayStart = 0;
@@ -110,6 +115,7 @@ namespace winrt::Folia
         std::vector<MathPreview> mathPreviews;
         std::vector<ImageOverlay> imageOverlays;
         std::vector<MermaidOverlay> mermaidOverlays;
+        std::vector<MermaidPreview> mermaidPreviews;
         std::vector<IndentOverlay> indentOverlays;
         std::vector<TaskCheckboxOverlay> taskCheckboxOverlays;
         std::vector<FootnoteOverlay> footnoteOverlays;

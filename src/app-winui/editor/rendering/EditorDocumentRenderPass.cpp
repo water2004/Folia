@@ -242,6 +242,35 @@ namespace winrt::Folia
                     previewRect.bottom));
                 previewTop = previewRect.bottom;
             }
+            for (auto const& preview : prepared.mermaidPreviews)
+            {
+                auto nonInteractiveTop = previewTop;
+                previewTop += 8.0f;
+                auto previewRect = D2D1::RectF(
+                    documentLeft + paddingLeft,
+                    previewTop,
+                    documentLeft + paddingLeft + contentWidth,
+                    previewTop + preview.height + 16.0f);
+                resources.d2dContext->FillRectangle(
+                    previewRect,
+                    resources.nestedQuoteBrush.Get());
+                auto previewOrigin = D2D1::Point2F(
+                    previewRect.left
+                        + (previewRect.right - previewRect.left
+                            - preview.width) * 0.5f,
+                    previewRect.top + 8.0f);
+                drawMermaid(
+                    preview.svg,
+                    preview.width,
+                    preview.height,
+                    previewOrigin);
+                nonInteractiveRegions.push_back(D2D1::RectF(
+                    previewRect.left,
+                    nonInteractiveTop,
+                    previewRect.right,
+                    previewRect.bottom));
+                previewTop = previewRect.bottom;
+            }
             EditorVisualBlock visual;
             visual.rect = rect;
             visual.textOrigin = origin;

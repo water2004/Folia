@@ -461,7 +461,6 @@ namespace winrt::Folia
             if (!candidate.source_mode
                 && candidate.kind == folia::RenderBlockKind::Code
                 && IsMermaidLanguage(candidate.special().language)
-                && caret.container_id != candidate.id
                 && !candidate.special().code_text.empty())
             {
                 auto rendered = mermaid.GetOrQueue(
@@ -475,10 +474,16 @@ namespace winrt::Folia
                 }
                 else if (static_cast<bool>(*rendered))
                 {
-                    if (auto range = SourceDisplayRangeForContainer(
-                            display.displayToSource,
-                            candidate.id,
-                            folia::utf16_len(display.text)))
+                    if (caret.container_id == candidate.id)
+                    {
+                        display.mermaidPreviews.push_back({
+                            std::move(*rendered),
+                        });
+                    }
+                    else if (auto range = SourceDisplayRangeForContainer(
+                                 display.displayToSource,
+                                 candidate.id,
+                                 folia::utf16_len(display.text)))
                     {
                         replacements.push_back({
                             static_cast<std::uint32_t>(range->first),
@@ -731,6 +736,20 @@ namespace winrt::Folia
                 previewHeight,
             });
         }
+        prepared.mermaidPreviews.reserve(
+            prepared.display.mermaidPreviews.size());
+        for (auto const& preview : prepared.display.mermaidPreviews)
+        {
+            auto available = (std::max)(1.0f, contentWidth - 16.0f);
+            auto scale = (std::min)(
+                1.0f,
+                available / (std::max)(1.0f, preview.svg.width));
+            prepared.mermaidPreviews.push_back({
+                preview.svg,
+                (std::max)(1.0f, preview.svg.width * scale),
+                (std::max)(1.0f, preview.svg.height * scale),
+            });
+        }
         prepared.textHeight = textLayoutEngine.MeasureHeight(
             prepared.layout.Get(),
             textLayoutEngine.LineHeightFor(
@@ -738,6 +757,8 @@ namespace winrt::Folia
                 prepared.display.ranges));
         auto previewHeight = 0.0f;
         for (auto const& preview : prepared.mathPreviews)
+            previewHeight += preview.height + 24.0f;
+        for (auto const& preview : prepared.mermaidPreviews)
             previewHeight += preview.height + 24.0f;
         prepared.height = prepared.textHeight + previewHeight + paddingTop + paddingBottom;
         for (auto const& position : prepared.display.displayToSource)
