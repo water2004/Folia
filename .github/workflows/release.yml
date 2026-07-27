@@ -15,13 +15,18 @@ concurrency:
 jobs:
   windows-msi:
     name: Build and publish Windows MSI
-    runs-on: windows-latest
+    runs-on: windows-2025
 
     steps:
       - name: Check out tagged source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
+
+      - name: Initialize the x64 MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
 
       - name: Validate tag, branch, and release notes
         id: release
