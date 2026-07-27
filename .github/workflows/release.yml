@@ -66,16 +66,19 @@ jobs:
         if: steps.build.outcome == 'failure'
         shell: pwsh
         run: |
+          $diagnostic = 'The build terminated before a log file was created.'
+          if (Test-Path -LiteralPath release-build.log) {
+            $diagnostic = (Get-Content -LiteralPath release-build.log -Tail 80) -join "`n"
+          }
+
           "## MSI build failure" >> $env:GITHUB_STEP_SUMMARY
           "" >> $env:GITHUB_STEP_SUMMARY
           '```text' >> $env:GITHUB_STEP_SUMMARY
-          if (Test-Path -LiteralPath release-build.log) {
-            Get-Content -LiteralPath release-build.log -Tail 200 >> $env:GITHUB_STEP_SUMMARY
-          }
-          else {
-            'The build terminated before a log file was created.' >> $env:GITHUB_STEP_SUMMARY
-          }
+          $diagnostic >> $env:GITHUB_STEP_SUMMARY
           '```' >> $env:GITHUB_STEP_SUMMARY
+
+          $annotation = $diagnostic.Replace('%', '%25').Replace("`r", '%0D').Replace("`n", '%0A')
+          Write-Output "::error title=MSI build failure::$annotation"
           throw 'The self-contained MSI build failed; see the job summary.'
 
       - name: Create SHA-256 checksum
