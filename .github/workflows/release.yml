@@ -54,10 +54,29 @@ jobs:
           "notes=$notes" >> $env:GITHUB_OUTPUT
 
       - name: Build self-contained MSI
+        id: build
+        continue-on-error: true
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          ./build_msi.ps1 -Version '${{ steps.release.outputs.version }}'
+          ./build_msi.ps1 -Version '${{ steps.release.outputs.version }}' *>&1 |
+            Tee-Object -FilePath release-build.log
+
+      - name: Report MSI build failure
+        if: steps.build.outcome == 'failure'
+        shell: pwsh
+        run: |
+          "## MSI build failure" >> $env:GITHUB_STEP_SUMMARY
+          "" >> $env:GITHUB_STEP_SUMMARY
+          '```text' >> $env:GITHUB_STEP_SUMMARY
+          if (Test-Path -LiteralPath release-build.log) {
+            Get-Content -LiteralPath release-build.log -Tail 200 >> $env:GITHUB_STEP_SUMMARY
+          }
+          else {
+            'The build terminated before a log file was created.' >> $env:GITHUB_STEP_SUMMARY
+          }
+          '```' >> $env:GITHUB_STEP_SUMMARY
+          throw 'The self-contained MSI build failed; see the job summary.'
 
       - name: Create SHA-256 checksum
         id: assets
