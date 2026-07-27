@@ -1,0 +1,102 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  windows-msi:
+    name: Build and publish Windows MSI
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out tagged source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate tag, branch, and release notes
+        id: release
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $tag = '${{ github.ref_name }}'
+          if ($tag -notmatch '^v(?<version>\d+\.\d+\.\d+)$') {
+            throw "Release tags must use vMAJOR.MINOR.PATCH; received '$tag'."
+          }
+
+          git fetch origin master --no-tags
+          git merge-base --is-ancestor $env:GITHUB_SHA origin/master
+          if ($LASTEXITCODE -ne 0) {
+            throw "Tagged commit $env:GITHUB_SHA is not contained in origin/master."
+          }
+
+          $version = $Matches.version
+          $notes = "release-notes/$tag.md"
+          if (-not (Test-Path -LiteralPath $notes -PathType Leaf)) {
+            throw "Missing release notes: $notes"
+          }
+
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "notes=$notes" >> $env:GITHUB_OUTPUT
+
+      - name: Build self-contained MSI
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          ./build_msi.ps1 -Version '${{ steps.release.outputs.version }}'
+
+      - name: Create SHA-256 checksum
+        id: assets
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $version = '${{ steps.release.outputs.version }}'
+          $msi = "build/installer/bin/Folia-$version-x64.msi"
+          if (-not (Test-Path -LiteralPath $msi -PathType Leaf)) {
+            throw "Missing release asset: $msi"
+          }
+
+          $item = Get-Item -LiteralPath $msi
+          $hash = (Get-FileHash -LiteralPath $msi -Algorithm SHA256).Hash.ToLowerInvariant()
+          $checksum = "$msi.sha256"
+          "$hash  $($item.Name)" | Set-Content -LiteralPath $checksum -Encoding ascii
+
+          "msi=$msi" >> $env:GITHUB_OUTPUT
+          "checksum=$checksum" >> $env:GITHUB_OUTPUT
+
+      - name: Publish GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $tag = '${{ github.ref_name }}'
+          $title = "Folia $tag"
+          $notes = '${{ steps.release.outputs.notes }}'
+          $msi = '${{ steps.assets.outputs.msi }}'
+          $checksum = '${{ steps.assets.outputs.checksum }}'
+
+          gh release view $tag *> $null
+          if ($LASTEXITCODE -eq 0) {
+            gh release edit $tag --title $title --notes-file $notes --latest
+            if ($LASTEXITCODE -ne 0) { throw "Failed to update release $tag." }
+            gh release upload $tag $msi $checksum --clobber
+            if ($LASTEXITCODE -ne 0) { throw "Failed to upload release assets for $tag." }
+          }
+          else {
+            gh release create $tag $msi $checksum `
+              --title $title `
+              --notes-file $notes `
+              --verify-tag `
+              --latest
+            if ($LASTEXITCODE -ne 0) { throw "Failed to create release $tag." }
+          }
