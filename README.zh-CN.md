@@ -88,7 +88,7 @@ powershell -ExecutionPolicy Bypass -File .\build_app.ps1 -Configuration Release 
 构建当前用户安装的 x64 MSI：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\build_msi.ps1 -Version 0.1.1
+powershell -ExecutionPolicy Bypass -File .\build_msi.ps1 -Version 1.0.1
 ```
 
 安装器会生成自包含 Windows App SDK 的 Release 应用，因此目标电脑无需另行
