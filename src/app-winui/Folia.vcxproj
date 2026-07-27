@@ -678,7 +678,7 @@
       <QuickJsRuntimeOptions Condition="'$(FoliaSelfContained)'=='true' and '$(UseDebugLibraries)'!='true'">/MT /DNDEBUG</QuickJsRuntimeOptions>
       <QuickJsRuntimeOptions Condition="'$(FoliaSelfContained)'!='true' and '$(UseDebugLibraries)'=='true'">/MDd /D_DEBUG</QuickJsRuntimeOptions>
       <QuickJsRuntimeOptions Condition="'$(FoliaSelfContained)'!='true' and '$(UseDebugLibraries)'!='true'">/MD /DNDEBUG</QuickJsRuntimeOptions>
-      <QuickJsCompileOptions>/nologo $(QuickJsRuntimeOptions) /TC /std:c17 /D_CRT_SECURE_NO_WARNINGS /U__SIZEOF_INT128__ -Wno-microsoft-enum-forward-reference /clang:-mno-ms-bitfields</QuickJsCompileOptions>
+      <QuickJsCompileOptions>/nologo $(QuickJsRuntimeOptions) /TC /std:c17 /D_CRT_SECURE_NO_WARNINGS /U__SIZEOF_INT128__ -Wno-microsoft-enum-forward-reference</QuickJsCompileOptions>
     </PropertyGroup>
     <MakeDir Directories="$(IntDir)quickjs" />
     <Exec Command="&quot;$(VCInstallDir)Tools\Llvm\x64\bin\clang-cl.exe&quot; $(QuickJsCompileOptions) /c &quot;$(ProjectDir)third_party\quickjs\cutils.c&quot; /Fo&quot;$(IntDir)quickjs\cutils.obj&quot;" />
