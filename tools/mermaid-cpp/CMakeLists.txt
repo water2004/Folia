@@ -1,0 +1,86 @@
+cmake_minimum_required(VERSION 4.3)
+
+# This gate is pinned to CMake 4.3 and must precede CXX toolchain discovery.
+set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "451f2fe2-a8a2-47c3-bc32-94786d8fc91b")
+if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+    project(folia_mermaid_cpp LANGUAGES CXX)
+    enable_testing()
+endif()
+
+if(NOT CMAKE_GENERATOR MATCHES "^Ninja")
+    message(FATAL_ERROR "The Mermaid C++ module build requires Ninja.")
+endif()
+if(NOT "23" IN_LIST CMAKE_CXX_COMPILER_IMPORT_STD)
+    message(FATAL_ERROR "The selected C++ toolchain does not support import std for C++23.")
+endif()
+
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+get_filename_component(FOLIA_MERMAID_REPO_ROOT "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)
+set(FOLIA_MERMAID_SOURCE_DIR "${FOLIA_MERMAID_REPO_ROOT}/third_party/mermaid-cpp/src")
+
+if(MSVC)
+    add_compile_options(/utf-8 /permissive- /W3 /Zc:preprocessor /Zc:__cplusplus)
+endif()
+
+# The same target is available from this standalone project and add_subdirectory.
+# Source discovery is confined to this library; no MathJax generator is invoked.
+file(GLOB_RECURSE FOLIA_MERMAID_MODULES CONFIGURE_DEPENDS
+    "${FOLIA_MERMAID_SOURCE_DIR}/*.ixx")
+file(GLOB_RECURSE FOLIA_MERMAID_SOURCES CONFIGURE_DEPENDS
+    "${FOLIA_MERMAID_SOURCE_DIR}/*.cpp")
+if(NOT FOLIA_MERMAID_MODULES)
+    message(FATAL_ERROR "No Mermaid C++ module interfaces were found in ${FOLIA_MERMAID_SOURCE_DIR}.")
+endif()
+add_library(folia_mermaid STATIC)
+target_compile_features(folia_mermaid PUBLIC cxx_std_23)
+set_target_properties(folia_mermaid PROPERTIES
+    CXX_MODULE_STD ON
+    CXX_SCAN_FOR_MODULES ON)
+target_sources(folia_mermaid PUBLIC
+    FILE_SET CXX_MODULES
+    BASE_DIRS "${FOLIA_MERMAID_SOURCE_DIR}"
+    FILES ${FOLIA_MERMAID_MODULES})
+target_sources(folia_mermaid PRIVATE ${FOLIA_MERMAID_SOURCES})
+
+if(NOT TARGET Boost::ut_module)
+    set(BOOST_UT_DISABLE_MODULE OFF CACHE BOOL "Build Boost.UT's C++ module" FORCE)
+    set(BOOST_UT_BUILD_EXAMPLES OFF CACHE BOOL "Do not build Boost.UT examples" FORCE)
+    set(BOOST_UT_BUILD_TESTS OFF CACHE BOOL "Do not build Boost.UT self-tests" FORCE)
+    set(BOOST_UT_BUILD_BENCHMARKS OFF CACHE BOOL "Do not build Boost.UT benchmarks" FORCE)
+    set(BOOST_UT_ENABLE_INSTALL OFF CACHE BOOL "Do not install vendored Boost.UT" FORCE)
+    add_subdirectory("${FOLIA_MERMAID_REPO_ROOT}/third_party/ut"
+        "${CMAKE_CURRENT_BINARY_DIR}/boost-ut" EXCLUDE_FROM_ALL)
+endif()
+
+if(WIN32 AND MSVC AND NOT TARGET folia_console_test_runtime)
+    add_library(folia_console_test_runtime OBJECT
+        "${FOLIA_MERMAID_REPO_ROOT}/tools/test-support/windows_console_runtime.cpp")
+    target_compile_features(folia_console_test_runtime PRIVATE cxx_std_23)
+    set_target_properties(folia_console_test_runtime PROPERTIES
+        CXX_MODULE_STD OFF
+        CXX_SCAN_FOR_MODULES OFF)
+endif()
+
+file(GLOB_RECURSE FOLIA_MERMAID_TEST_SOURCES CONFIGURE_DEPENDS
+    "${FOLIA_MERMAID_REPO_ROOT}/tests/mermaid_cpp/*.cpp")
+if(NOT FOLIA_MERMAID_TEST_SOURCES)
+    message(FATAL_ERROR "No native Mermaid tests were found; refusing to build an empty test runner.")
+endif()
+add_executable(FoliaMermaidTests
+    "${FOLIA_MERMAID_REPO_ROOT}/tests/main.cpp"
+    ${FOLIA_MERMAID_TEST_SOURCES})
+target_compile_features(FoliaMermaidTests PRIVATE cxx_std_23)
+set_target_properties(FoliaMermaidTests PROPERTIES
+    CXX_MODULE_STD ON
+    CXX_SCAN_FOR_MODULES ON)
+target_include_directories(FoliaMermaidTests PRIVATE "${FOLIA_MERMAID_REPO_ROOT}/tests")
+target_compile_definitions(FoliaMermaidTests PRIVATE
+    FOLIA_MERMAID_FIXTURE_DIR="${FOLIA_MERMAID_REPO_ROOT}/tests/mermaid_cpp/fixtures")
+target_link_libraries(FoliaMermaidTests PRIVATE folia_mermaid Boost::ut_module)
+if(WIN32 AND MSVC)
+    # The parent directory's executable enumeration does not cover this target.
+    target_link_libraries(FoliaMermaidTests PRIVATE folia_console_test_runtime)
+endif()
+add_test(NAME FoliaMermaidTests COMMAND FoliaMermaidTests)

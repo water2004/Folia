@@ -1,4 +1,14 @@
-# Mermaid paused checkpoint
+# Historical Rust Mermaid backend checkpoint
+
+## Current direction (2026-10-21)
+
+The current request is to build Folia's C++ Mermaid dependency from the official
+mermaid-js/mermaid JS/TS sources, not to port mermaid-rs-renderer or resume this
+Rust Direct2D experiment. See `../mermaid-cpp/README.md` for the new source pin,
+dependency boundary and verification. The historical work below remains
+preserved; its local checks do not establish acceptance of the C++ replacement.
+
+## Historical pause (2026-10-12)
 
 Paused by the user on 2026-10-12: record progress, leave Mermaid aside, finish
 native MathJax first. No Mermaid agent is assigned further work. Future Mermaid

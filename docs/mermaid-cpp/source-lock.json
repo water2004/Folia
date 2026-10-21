@@ -1,0 +1,76 @@
+{
+  "repository": "https://github.com/mermaid-js/mermaid",
+  "tag": "mermaid@12.2.0",
+  "commit": "1fb7869866dd619168d840291c9c54b4f129758b",
+  "license": "MIT",
+  "files": [
+    {
+      "path": "LICENSE",
+      "sha256": "e44b44d50e98cbf0c7e047e58d701fe5f26f181d5403fdcccba371ee31400e10"
+    },
+    {
+      "path": "packages/mermaid/package.json",
+      "sha256": "478334ce02279afc82fe1617996544c0f9b01952556455ae3b6ad060e674a8b8"
+    },
+    {
+      "path": "packages/mermaid/src/diagram-api/regexes.ts",
+      "sha256": "fdb09d839e27f7b71fc2193282649a4d2e1169531c8a62ee3a4c4e0bd1883e7d"
+    },
+    {
+      "path": "packages/mermaid/src/diagram-api/comments.ts",
+      "sha256": "aa637df212ecc22cbcb12387af31a4d0f8c266ece03cc6134d46dd9427acd120"
+    },
+    {
+      "path": "packages/parser/src/language/packet/packet.langium",
+      "sha256": "bf479a00c688630d713efcb850076f16c4758f7cb426b49c973b67b40ea001f0"
+    },
+    {
+      "path": "packages/parser/src/language/common/common.langium",
+      "sha256": "d8b0c0056f6339ca6a0d3b966c02b1f4d53ad768069e2889450dc29312f1f65b"
+    },
+    {
+      "path": "packages/parser/src/language/common/valueConverter.ts",
+      "sha256": "d93aa5dd1f7fed8aa903f55eb3e463c6b69b455af22004a6405a61c7560f58e5"
+    },
+    {
+      "path": "packages/parser/src/language/common/tokenBuilder.ts",
+      "sha256": "e20bdad7aa651779e986cb69dd389670453224dc83fdcae872cff756f0733c82"
+    },
+    {
+      "path": "packages/parser/src/language/common/matcher.ts",
+      "sha256": "9ab232a7fff6052767001b43b3796553431ee80a10a197abf6437cbfa8e0d807"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/packet/parser.ts",
+      "sha256": "88d806b73fab2eae9148a9a6bfaad5579ee273f0ded8e8c7715a1be07542e3ed"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/packet/db.ts",
+      "sha256": "1d030ad2348cc3e342b3725f1770fb760b273880acc9dd393f7111708fe9d6d4"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/packet/renderer.ts",
+      "sha256": "ac2ab5d360fd715deac0d69fc98ab0abbaa3dc8cbc46e20b47723ab4a161b511"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/packet/styles.ts",
+      "sha256": "79714446f3f325d06e940f2c7918a4c6b2e4bd672262a68f4f7cb36768e3285a"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/packet/types.ts",
+      "sha256": "5b2c564ad8d95f3d5dc62bb79fd33e05a10c46d1fc0e3c5325ccde5e152a6d84"
+    },
+    {
+      "path": "packages/parser/package.json",
+      "sha256": "7c7de36b32df30493e16d06cfa0009faf86f4682a32583dc74a368d1df5e001b"
+    },
+    {
+      "path": "packages/mermaid/src/setupGraphViewbox.js",
+      "sha256": "cebb629053c67dac36635cc31262d1c5e8cc7ff26a645ca080474a649326327b"
+    },
+    {
+      "path": "packages/mermaid/src/schemas/config.schema.yaml",
+      "sha256": "537073372efeaba5675e331b813220ee87b4403118952eccaa3362d8b78ca5e8"
+    }
+  ]
+}
