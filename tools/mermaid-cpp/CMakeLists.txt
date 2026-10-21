@@ -44,6 +44,25 @@ target_sources(folia_mermaid PUBLIC
     FILES ${FOLIA_MERMAID_MODULES})
 target_sources(folia_mermaid PRIVATE ${FOLIA_MERMAID_SOURCES})
 
+# Grammar only: schema resolution is owned by folia.mermaid.frontmatter.
+# Keep this native dependency pinned independently of the JS test oracle.
+include(FetchContent)
+find_package(Git REQUIRED)
+set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL "" FORCE)
+set(YAML_CPP_BUILD_CONTRIB OFF CACHE BOOL "" FORCE)
+set(YAML_CPP_INSTALL OFF CACHE BOOL "" FORCE)
+set(YAML_CPP_DISABLE_UNINSTALL ON CACHE BOOL "" FORCE)
+set(YAML_BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+FetchContent_Declare(folia_yaml_cpp
+    GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
+    GIT_TAG 56e3bb550c91fd7005566f19c079cb7a503223cf
+    PATCH_COMMAND "${GIT_EXECUTABLE}" apply --ignore-space-change
+        "${CMAKE_CURRENT_LIST_DIR}/yaml-cpp-json-escapes.patch")
+FetchContent_MakeAvailable(folia_yaml_cpp)
+set_target_properties(yaml-cpp PROPERTIES CXX_MODULE_STD OFF CXX_SCAN_FOR_MODULES OFF)
+target_link_libraries(folia_mermaid PRIVATE yaml-cpp::yaml-cpp)
+
 if(NOT TARGET Boost::ut_module)
     set(BOOST_UT_DISABLE_MODULE OFF CACHE BOOL "Build Boost.UT's C++ module" FORCE)
     set(BOOST_UT_BUILD_EXAMPLES OFF CACHE BOOL "Do not build Boost.UT examples" FORCE)

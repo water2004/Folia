@@ -1,0 +1,41 @@
+diff --git a/src/exp.cpp b/src/exp.cpp
+--- a/src/exp.cpp
++++ b/src/exp.cpp
+@@ -108,8 +108,6 @@ std::string Escape(Stream& in) {
+       return R"( )";
+     case '\"':
+       return "\"";
+-    case '\'':
+-      return "\'";
+     case '\\':
+       return "\\";
+     case '/':
+@@ -117,7 +115,7 @@ std::string Escape(Stream& in) {
+     case 'N':
+-      return "\x85";
++      return "\xC2\x85";
+     case '_':
+-      return "\xA0";
++      return "\xC2\xA0";
+     case 'L':
+       return "\xE2\x80\xA8";  // LS (#x2028)
+     case 'P':
+diff --git a/src/singledocparser.cpp b/src/singledocparser.cpp
+--- a/src/singledocparser.cpp
++++ b/src/singledocparser.cpp
+@@ -144,5 +144,15 @@ void SingleDocParser::HandleNode(EventHandler& eventHandler) {
+   if (tag == "?")
+     eventHandler.OnNull(mark, anchor);
++  else if (m_pCollectionStack->GetCurCollectionType() == CollectionType::FlowMap ||
++           m_pCollectionStack->GetCurCollectionType() == CollectionType::FlowSeq)
++    throw ParserException(mark, ErrorMsg::FLOW_END);
++  else if (tag == "tag:yaml.org,2002:seq") {
++    eventHandler.OnSequenceStart(mark, tag, anchor, EmitterStyle::Default);
++    eventHandler.OnSequenceEnd();
++  } else if (tag == "tag:yaml.org,2002:map") {
++    eventHandler.OnMapStart(mark, tag, anchor, EmitterStyle::Default);
++    eventHandler.OnMapEnd();
++  }
+   else
+     eventHandler.OnScalar(mark, tag, anchor, "");
+ }

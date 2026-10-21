@@ -1,22 +1,62 @@
 # Mermaid C++ continuity
 
-## Current checkpoint — 2026-10-21
+## Current checkpoint - 2026-10-21, stage 4b verification
 
-- Stage 4a in progress on codex/mermaid-cpp-shared-config: common text
-  normalization and directive removal, before YAML/config interpretation.
-  Official preprocess.ts, utils.ts and directiveRegex inspected; 1,221 pinned
-  runtime observations generated from the original function bodies. Oracle batch
-  4ca455de and native implementation 34b22240 are committed and pushed. PR #4:
-  https://github.com/zhao0349/Folia/pull/4. CI 39553752307 is in progress for
-  the implementation head. Self-review found no functional issue; source
-  attribution and README boundaries are clarified in the final docs batch.
-  Next: verify final-head Windows Debug/Release and existing renderer
-  regressions, review any failures, then merge PR #4 preserving commits.
-- Boundary decision: full config is not a simple shallow merge: official
-  diagram-scoped appearance precedence and YAML JSON_SCHEMA need separate
-  implementation. This batch must not expose a pretend complete preprocess API
-  or silently discard configuration in a renderer. Default/dark theme work is
-  still pending. No application switch and no live build/agent handles.
+- Branch codex/mermaid-cpp-frontmatter, fork PR https://github.com/zhao0349/Folia/pull/5.
+  User explicitly reconfirmed this public fork as the push/PR/merge destination.
+- Pushed batches: 9718acb7 (315 source observations), dd3fbc31 (native YAML/config
+  values and frontmatter), 685620a4 / 36dda685 / a19a4153 / 5db1f184 (empty tag
+  refinement, escape patch, and flow collection boundary). Windows CI runs 39561034820
+  and 39561028639 pass native tests (all 421 oracle observations), platform tests,
+  SVG and measurement comparisons in Debug/Release.
+- Final refinement adds 421 total observations, empty tagged-node handling, large
+  scalar/resource checks, and a yaml-cpp patch (correct UTF-8 for N/NBSP escapes,
+  reject escaped apostrophe, handle empty sequence/mapping nodes, and reject empty
+  explicit tags in flow collections). Patch --check and oracle pass.
+  12 cases document explicit rejection of surrogate/out-of-range Unicode escapes;
+  actual official results are retained. README states budgets and this divergence.
+- YAML grammar: pinned yaml-cpp 0.9.0, 56e3bb550c91fd7005566f19c079cb7a503223cf.
+  Separate resolver follows js-yaml 4.3.0 JSON_SCHEMA; config trees own their data.
+  No silent config dropping, renderer wiring, editor changes or app switch.
+- Stage 4b is ready to merge into fork master with preserved commits.
+  Directive args, config precedence and themes remain next stages before common
+  frontend wiring to Packet/Pie.
+- No live agent/local build handles. Ignored reference is .reference/yaml-cpp;
+  stage-4b verification lives in Actions. No upstream PR.
+
+## Stage 4a checkpoint (historical; superseded above) — 2026-10-21
+
+- Stage 4a is merged: https://github.com/zhao0349/Folia/pull/4, merge commit
+  4ec7eea49d260656f737672d87df905be6da4da2 on fork master. Four commits
+  preserved (prior stage closeout, oracle, implementation, boundary docs).
+- Added native UTF-16 cleanupText and removeDirectives primitives in
+  folia.mermaid.source_text. Original function bodies and directiveRegex supply
+  1,221 runtime observations, checked independently and in order. Tests include
+  malformed/unclosed constructs, Unicode, large adversarial inputs and ownership.
+- Final head aaf0f33d00d226e0480f94966421db49d64ae1de passed Windows
+  Debug/Release CI 39553912829: source oracles, native/platform suites,
+  Packet/Pie and SVG comparisons, and same-host Edge/DirectWrite measurement.
+  No local MSVC build was performed. Measurement limits remain as in stage 3.
+- Review: self-review completed, no code issues found or unresolved threads.
+  Copilot hit its quota and supplied no independent code review.
+- Boundary decision: this is a text-primitive substage, NOT a full common
+  frontend. Config extraction must precede directive removal. No family renderer
+  discards config, no editor source is changed, and no application switch exists.
+  YAML JSON_SCHEMA, directive args, config precedence, default/dark themes and
+  remaining diagram families still need implementation and official oracles.
+- Current branch: codex/mermaid-cpp-frontmatter, based on merged fork master;
+  only this closeout checkpoint is added. Prior stage branches are preserved.
+  No live build/agent/process handles or uncommitted implementation candidates.
+  Stage-4a evidence is in Actions 39553912829; earlier local ignored evidence
+  remains under build/mermaid-cpp. No upstream PR has been submitted.
+- Next concrete action: establish official runtime observations for
+  diagram-api/frontmatter.ts (dedent + js-yaml JSON_SCHEMA + supported metadata
+  conversion) and select an explicit native YAML boundary before implementation.
+  Do not replace YAML with a line parser or silently ignore unsupported config.
+  Then implement directive argument interpretation and appearance precedence
+  before wiring shared preprocessing to Packet/Pie. The inspected config.ts
+  gives diagram-scoped values precedence within each layer; it is not a shallow
+  last-object-wins merge. Continue small pushed commits and verified stage PRs.
 
 ## Stage 3 checkpoint (historical; superseded above)
 

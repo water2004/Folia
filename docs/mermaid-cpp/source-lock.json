@@ -111,6 +111,10 @@
     {
       "path": "packages/mermaid/src/utils.ts",
       "sha256": "5968be88bf78df0ccb211f2ddba50e505099607a2770435577deed94551e4c05"
+    },
+    {
+      "path": "packages/mermaid/src/diagram-api/frontmatter.ts",
+      "sha256": "32064e56308192d63355b5719a54172ce9269b9d30ccfddcfbdd11b71ddf5e0a"
     }
   ],
   "packages": [

@@ -48,8 +48,35 @@ are not HTML sanitization or a complete preprocessing API. Configuration must
 be extracted before directive removal; the family renderers do not call these
 operations or silently discard configuration. The editor's source is untouched.
 
-The next frontend boundaries are YAML JSON_SCHEMA metadata extraction and
-directive argument interpretation, followed by config merging and appearance
+The native frontmatter boundary now parses YAML configuration trees and extracts
+title/displayMode/config using the original truthiness and string conversions.
+`parse_config_yaml` exposes owned null/bool/binary64/UTF-16/list/map values;
+`extract_front_matter` dedents only the captured fence indent and preserves the
+remaining diagram text. Config values, including unknown keys and truthy scalar
+config roots, are preserved for the next layer to validate. No settings are
+applied or silently discarded at this boundary.
+
+YAML grammar uses yaml-cpp 0.9.0 at commit
+`56e3bb550c91fd7005566f19c079cb7a503223cf`, fetched into the ignored build tree.
+A small checked-in parser patch fixes UTF-8 encoding of `\\N`/`\\_` and rejects
+the non-YAML `\\'` escape inside double quotes. Schema resolution separately
+follows the pinned upstream js-yaml **4.3.0** `JSON_SCHEMA`, which is more
+permissive than strict JSON (for example, hex integers and `.inf` are supported).
+Both dependencies are MIT licensed; the resolver's notice is retained in
+`third_party/mermaid-cpp/JS-YAML-LICENSE` and yaml-cpp retains its fetched license.
+
+The native boundary explicitly rejects cyclic aliases, malformed UTF-16 input,
+and surrogate or out-of-range Unicode escapes, including adjacent `\\uD83D`
+and `\\uDE00` escapes. A literal supplementary character or `\\U0001F600` works.
+This is stricter than js-yaml; the oracle records these as explicit divergences
+alongside the actual official results. It is not unrestricted YAML parity.
+Default budgets are 1 Mi UTF-16 source units, depth 64, 100,000 materialized
+values and 4 Mi expanded string/key units. Anchor copies and alias expansions
+consume those budgets; depth has a hard ceiling of 64. Duplicate/coerced keys,
+unknown tags and multiple YAML documents fail explicitly. Merge keys have no
+special meaning in this schema. Aliases produce independent owned values.
+
+The next frontend boundaries are directive argument interpretation, config merging and appearance
 precedence (diagram-scoped settings can override globals), and default/dark
 theme resolution. Each needs its own official runtime oracle before wiring a
 shared entry point into the family renderers.
@@ -60,7 +87,7 @@ the Packet dimension, bit-order and sizing options. Its SVG currently uses the
 default Packet styles. The raw parser and renderer are deliberately separate
 from MermaidAPI's frontmatter, directives, entity handling and sanitization.
 
-Full YAML/configuration processing, diagram detection, shared themes, the other
+Full configuration processing, diagram detection, shared themes, the other
 diagram families and the Folia replacement remain separate work. No application
 switch or fallback has been added. The old Rust dependency remains the active
 application dependency until the native pipeline is accepted. The current
@@ -105,6 +132,7 @@ digits per UTF-16 code unit; `-` denotes an empty string or an absent match.
 git -c core.autocrlf=false clone --branch mermaid@12.2.0 --depth 1 https://github.com/mermaid-js/mermaid.git .reference/mermaid-js
 node tools/mermaid-cpp/source-text-oracle.mjs --check
 node tools/mermaid-cpp/preprocess-text-oracle.mjs --check
+node tools/mermaid-cpp/frontmatter-oracle.mjs --check
 pnpm --dir tools/mermaid-cpp/oracle install --frozen-lockfile --ignore-scripts
 node tools/mermaid-cpp/packet-oracle.mjs --check
 node tools/mermaid-cpp/packet-svg-oracle.mjs --check
@@ -136,6 +164,15 @@ It checks 1,221 cases independently and in execution order, including malformed
 tags/directives, all line-terminator kinds, Unicode and lone surrogates. Native
 tests consume the same UTF-16 fixture and separately check large adversarial
 inputs and owned results. It does not claim YAML/config or sanitizer coverage.
+
+The frontmatter oracle executes the original extractor with the exact locked
+js-yaml schema on 421 cases. Typed snapshots preserve negative zero, non-finite
+numbers and UTF-16 text. It checks metadata coercion, block/flow YAML, aliases,
+empty explicit tags, duplicate keys, Unicode/escape boundaries and large-number
+rounding. Native tests also check resource budgets, cycles, independent alias
+ownership and a large numeric scalar. The 12 Unicode-boundary cases assert
+explicit native rejection while retaining upstream's permissive output. This
+does not establish directive/config-precedence/theme or application integration.
 
 The Packet oracles execute the official published parser and Mermaid renderer
 with JSDOM. The exact package versions and transitive integrity hashes are
