@@ -55,8 +55,20 @@ library is a foundation for the requested replacement, not that replacement.
 The Pie core now includes its raw grammar, database validation and first-label
 deduplication, the D3 sector/arc specialization, filtering, percentage labels,
 five legend positions and title-driven viewBox expansion. Layout requires
-explicit measured legend/title widths. The platform measurement adapter,
-theme-resolved SVG output and Folia integration are still outstanding.
+explicit measured legend/title widths. `folia.mermaid.pie_svg` emits the family
+SVG using an explicit resolved theme, including palette cycling, donut paths,
+highlight/hover styles, title expansion and all five legend positions.
+`folia.platform.mermaid_pie::render_measured_pie` joins DirectWrite measurement
+to that renderer using the same font family and sizes for measurement and SVG.
+Folia application integration and shared theme/config resolution remain pending.
+
+The platform API requires one installed font-family name, not a CSS fallback
+list. Missing families, invalid UTF-16, invalid sizes and DirectWrite failures
+return errors; there is no character-count estimate. Glyph fallback is supplied
+by the OS. SVG output accepts literal named/hex theme colors, not CSS paint
+servers or arbitrary CSS expressions. Text and attributes are escaped as XML.
+The raw family renderer accepts display text; commonDb/MermaidAPI sanitization
+must be applied by a future shared frontend, not silently duplicated here.
 
 Packet has explicit native safety boundaries: non-finite bit counts and more
 than 10,000 rows produce an error. Upstream can silently truncate oversized
@@ -84,10 +96,16 @@ node tools/mermaid-cpp/packet-svg-oracle.mjs --check
 node tools/mermaid-cpp/pie-oracle.mjs --check
 node tools/mermaid-cpp/pie-geometry-oracle.mjs --check
 node tools/mermaid-cpp/pie-layout-oracle.mjs --check
+node tools/mermaid-cpp/pie-svg-oracle.mjs --check
 git submodule update --init third_party/ut
 cmake -G Ninja -S tools/mermaid-cpp -B build/mermaid-cpp -DCMAKE_BUILD_TYPE=Debug
-cmake --build build/mermaid-cpp --parallel 4 --target FoliaMermaidTests
+cmake --build build/mermaid-cpp --parallel 4 --target FoliaMermaidTests FoliaMermaidTextProbe FoliaMermaidPlatformTests
+$env:FOLIA_MERMAID_SVG_OUTPUT = Join-Path $pwd 'build/mermaid-cpp/pie-svg'
 ctest --test-dir build/mermaid-cpp --output-on-failure
+node tools/mermaid-cpp/pie-svg-oracle.mjs --compare build/mermaid-cpp/pie-svg
+node tools/mermaid-cpp/browser-text-probe.mjs
+build/mermaid-cpp/FoliaMermaidTextProbe.exe build/mermaid-cpp/browser-text.tsv build/mermaid-cpp/native-text.tsv
+node tools/mermaid-cpp/compare-text-probe.mjs
 ```
 
 Use an x64 MSVC developer environment and CMake 4.3.5, matching the CI job and
@@ -109,6 +127,30 @@ explicitly injected measurement inputs. The last set tests layout arithmetic;
 it does not validate fonts or native/browser text-measurement equivalence.
 Paths are compared exactly; trigonometric centroids allow a 1e-12 tolerance
 because V8 and the platform CRT can differ in their final binary64 bits.
+
+Pie SVG checks run the actual pinned official family renderer and stylesheet on
+80 inputs. They compare 78 finite native SVG DOMs and reject the two official
+empty-left outputs with non-finite coordinates. Checks cover full family style
+declarations, palette order after filtering, all legend placements, showData,
+donut geometry, highlight/hover, Unicode and XML escaping. Titles are supplied
+at the same display-text boundary on both sides; this is not a test of the
+unported commonDb sanitization frontend.
+
+Real font validation runs Edge and DirectWrite on the same Windows machine,
+using Arial, Segoe UI and Times New Roman at 17/25 SVG units. The 96 cases
+include long titles, bidi, combining marks, CJK, emoji and SVG whitespace.
+Native measurement uses the union of glyph ink bounds and the advance interval.
+It is not pixel-identical to Chromium's hinted glyph bounds: local maximum
+advance error was 0.03076171875 units and bounds error 2.14892578125 units.
+The regression ceilings are 0.0625 and 2.5 respectively **for this corpus**;
+they are not universal error guarantees for arbitrary fonts/text/sizes. No
+string-specific correction is applied. CI preserves raw observations, the
+comparison summary, generated SVGs and test executables as artifacts.
+
+The browser uses an isolated ignored profile. Set `FOLIA_BROWSER` to another
+Chromium executable to probe it. Browser code and oracle packages are test
+dependencies only; the native runtime does not execute JavaScript. These checks
+do not establish WinUI integration, arbitrary-font parity or DPI acceptance.
 
 The original source's current functions are the oracle, including behavior not
 covered by its own legacy-regex examples. In particular, detection comment

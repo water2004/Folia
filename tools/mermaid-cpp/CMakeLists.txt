@@ -84,3 +84,33 @@ if(WIN32 AND MSVC)
     target_link_libraries(FoliaMermaidTests PRIVATE folia_console_test_runtime)
 endif()
 add_test(NAME FoliaMermaidTests COMMAND FoliaMermaidTests)
+
+if(WIN32 AND MSVC)
+    if(TARGET folia_platform)
+        # The root project's platform glob already owns this module. Reuse it
+        # instead of providing the same named module from two static libraries.
+        add_library(folia_mermaid_measurement INTERFACE)
+        target_link_libraries(folia_mermaid_measurement INTERFACE folia_platform)
+        target_link_libraries(folia_platform PUBLIC folia_mermaid)
+    else()
+        add_library(folia_mermaid_measurement STATIC)
+        set_target_properties(folia_mermaid_measurement PROPERTIES CXX_MODULE_STD ON)
+        target_sources(folia_mermaid_measurement PUBLIC FILE_SET CXX_MODULES
+            BASE_DIRS "${FOLIA_MERMAID_REPO_ROOT}/src/platform/text" FILES
+            "${FOLIA_MERMAID_REPO_ROOT}/src/platform/text/mermaid_measurer.ixx"
+            "${FOLIA_MERMAID_REPO_ROOT}/src/platform/text/mermaid_pie.ixx")
+        target_link_libraries(folia_mermaid_measurement PUBLIC folia_mermaid PRIVATE dwrite)
+    endif()
+    add_executable(FoliaMermaidTextProbe native-text-probe.cpp)
+    set_target_properties(FoliaMermaidTextProbe PROPERTIES CXX_MODULE_STD ON)
+    target_link_libraries(FoliaMermaidTextProbe PRIVATE
+        folia_mermaid_measurement folia_console_test_runtime)
+    add_executable(FoliaMermaidPlatformTests
+        "${FOLIA_MERMAID_REPO_ROOT}/tests/main.cpp"
+        "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_measurement.cpp")
+    set_target_properties(FoliaMermaidPlatformTests PROPERTIES CXX_MODULE_STD ON)
+    target_include_directories(FoliaMermaidPlatformTests PRIVATE "${FOLIA_MERMAID_REPO_ROOT}/tests")
+    target_link_libraries(FoliaMermaidPlatformTests PRIVATE
+        folia_mermaid_measurement Boost::ut_module folia_console_test_runtime)
+    add_test(NAME FoliaMermaidPlatformTests COMMAND FoliaMermaidPlatformTests)
+endif()
