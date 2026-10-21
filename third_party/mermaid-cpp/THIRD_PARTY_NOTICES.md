@@ -2,6 +2,29 @@
 
 Mermaid-derived code is covered by the MIT license in `LICENSE`.
 
+## D3 Shape 3.2.0 and D3 Path 3.1.0
+
+Pie geometry specializes the unpadded, square-cornered paths used by Mermaid
+from d3-shape (`pie.js`, `arc.js`, `math.js`, `path.js`) and d3-path (`path.js`).
+Source hashes and versions are recorded in `docs/mermaid-cpp/source-lock.json`.
+The complete ISC notice is also preserved in `src/pie_geometry.cpp`.
+
+Copyright 2010-2022 Mike Bostock (d3-shape)
+
+Copyright 2015-2022 Mike Bostock (d3-path)
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER
+RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE
+USE OR PERFORMANCE OF THIS SOFTWARE.
+
 ## Langium 4.4.0
 
 The Packet quoted-string conversion follows Langium's `ValueConverter`

@@ -6,6 +6,8 @@
     "@mermaid-js/parser": "2.0.1",
     "jsdom": "26.1.0",
     "langium": "4.4.0",
-    "mermaid": "12.2.0"
+    "mermaid": "12.2.0",
+    "d3-shape": "3.2.0",
+    "d3-path": "3.1.0"
   }
 }

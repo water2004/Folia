@@ -5,112 +5,15 @@
 module folia.mermaid.packet;
 import std;
 import folia.mermaid.number;
+import folia.mermaid.common_lexer;
 
 namespace folia::mermaid {
 namespace {
 
 constexpr std::size_t maximum_packet_rows = 10'000;
 
-bool is_horizontal_space(char16_t value) {
-    return value == u' ' || value == u'\t';
-}
-
-bool is_line_terminator(char16_t value) {
-    return value == u'\r' || value == u'\n' || value == u'\u2028' || value == u'\u2029';
-}
-
-// ECMAScript WhiteSpace + LineTerminator, used by the source grammar's \s
-// assertions and common value converter, rather than locale-sensitive isspace.
-bool is_js_space(char16_t value) {
-    return (value >= u'\t' && value <= u'\r') || value == u' ' ||
-        value == u'\u00a0' || value == u'\u1680' ||
-        (value >= u'\u2000' && value <= u'\u200a') ||
-        value == u'\u2028' || value == u'\u2029' || value == u'\u202f' ||
-        value == u'\u205f' || value == u'\u3000' || value == u'\ufeff';
-}
-
 bool is_digit(char16_t value) {
     return value >= u'0' && value <= u'9';
-}
-
-std::u16string collapse_horizontal_space(std::u16string_view value) {
-    std::u16string result;
-    for (std::size_t index = 0; index < value.size();) {
-        if (!is_horizontal_space(value[index])) {
-            result.push_back(value[index++]);
-            continue;
-        }
-        auto end = index + 1;
-        while (end < value.size() && is_horizontal_space(value[end])) {
-            ++end;
-        }
-        result.push_back(end - index >= 2 ? u' ' : value[index]);
-        index = end;
-    }
-    return result;
-}
-
-std::u16string common_single_line_value(std::u16string_view value) {
-    while (!value.empty() && is_js_space(value.front())) {
-        value.remove_prefix(1);
-    }
-    while (!value.empty() && is_js_space(value.back())) {
-        value.remove_suffix(1);
-    }
-    return collapse_horizontal_space(value);
-}
-
-std::u16string common_multiline_value(std::u16string_view value) {
-    // Preserve the exact order of CommonValueConverter's four replacements:
-    // /^\s*/gm, /\s+$/gm, /[\t ]{2,}/gm, /[\n\r]{2,}/gm.
-    std::u16string without_leading;
-    for (std::size_t index = 0; index < value.size();) {
-        if (index == 0 || is_line_terminator(value[index - 1])) {
-            while (index < value.size() && is_js_space(value[index])) {
-                ++index;
-            }
-        }
-        if (index < value.size()) {
-            without_leading.push_back(value[index++]);
-        }
-    }
-
-    std::u16string without_trailing;
-    for (std::size_t index = 0; index < without_leading.size();) {
-        if (!is_js_space(without_leading[index])) {
-            without_trailing.push_back(without_leading[index++]);
-            continue;
-        }
-        auto end = index;
-        auto last_line_terminator = index;
-        while (end < without_leading.size() && is_js_space(without_leading[end])) {
-            if (is_line_terminator(without_leading[end])) {
-                last_line_terminator = end;
-            }
-            ++end;
-        }
-        if (end != without_leading.size()) {
-            without_trailing.append(without_leading, last_line_terminator,
-                                    end - last_line_terminator);
-        }
-        index = end;
-    }
-
-    auto collapsed = collapse_horizontal_space(without_trailing);
-    std::u16string result;
-    for (std::size_t index = 0; index < collapsed.size();) {
-        if (collapsed[index] != u'\n' && collapsed[index] != u'\r') {
-            result.push_back(collapsed[index++]);
-            continue;
-        }
-        auto end = index + 1;
-        while (end < collapsed.size() && (collapsed[end] == u'\n' || collapsed[end] == u'\r')) {
-            ++end;
-        }
-        result.push_back(end - index >= 2 ? u'\n' : collapsed[index]);
-        index = end;
-    }
-    return result;
 }
 
 enum class TokenKind {
@@ -125,9 +28,9 @@ struct Token {
     std::u16string text;
 };
 
-class PacketLexer {
+class PacketLexer : private detail::CommonLexer {
 public:
-    explicit PacketLexer(std::u16string_view source) : source_(source) {}
+    explicit PacketLexer(std::u16string_view source) : detail::CommonLexer(source) {}
 
     std::expected<Token, PacketError> next() {
         skip_hidden();
@@ -147,27 +50,8 @@ public:
             position_ += 6;
             return Token{TokenKind::packet, start};
         }
-        if (starts_with(u"accDescr")) {
-            if (auto token = description_token()) {
-                return *token;
-            }
-        }
-        if (starts_with(u"accTitle")) {
-            auto after = position_ + 8;
-            while (after < source_.size() && is_horizontal_space(source_[after])) {
-                ++after;
-            }
-            if (after < source_.size() && source_[after] == u':') {
-                return line_value(TokenKind::acc_title, after + 1);
-            }
-        }
-        if (starts_with(u"title")) {
-            auto after = position_ + 5;
-            if (after < source_.size() && is_horizontal_space(source_[after])) {
-                return line_value(TokenKind::title, after);
-            }
-            position_ = after;
-            return Token{TokenKind::title, start};
+        if (auto token = metadata_token()) {
+            return from_common(std::move(*token));
         }
         auto const value = source_[position_];
         if (value == u'+' || value == u'-' || value == u':') {
@@ -185,128 +69,15 @@ public:
     }
 
 private:
-    std::u16string_view source_;
-    std::size_t position_{};
-
-    bool starts_with(std::u16string_view text) const {
-        return source_.substr(position_).starts_with(text);
-    }
-
-    std::size_t newline_length(std::size_t index) const {
-        if (index < source_.size() && source_[index] == u'\n') {
-            return 1;
+    static Token from_common(detail::CommonToken token) {
+        TokenKind kind = TokenKind::string;
+        switch (token.kind) {
+        case detail::CommonTokenKind::title: kind = TokenKind::title; break;
+        case detail::CommonTokenKind::acc_title: kind = TokenKind::acc_title; break;
+        case detail::CommonTokenKind::acc_description: kind = TokenKind::acc_description; break;
+        case detail::CommonTokenKind::string: kind = TokenKind::string; break;
         }
-        return index + 1 < source_.size() && source_[index] == u'\r' &&
-            source_[index + 1] == u'\n' ? 2 : 0;
-    }
-
-    bool keyword_boundary(std::size_t index) const {
-        return index == source_.size() || is_js_space(source_[index]) ||
-            source_.substr(index).starts_with(u"%%");
-    }
-
-    std::optional<std::size_t> yaml_end() const {
-        if (!starts_with(u"---")) {
-            return std::nullopt;
-        }
-        auto cursor = position_ + 3;
-        while (cursor < source_.size() && is_horizontal_space(source_[cursor])) {
-            ++cursor;
-        }
-        auto const opening_newline = newline_length(cursor);
-        if (!opening_newline) {
-            return std::nullopt;
-        }
-        cursor += opening_newline;
-        for (;;) {
-            if (source_.substr(cursor).starts_with(u"---")) {
-                auto const after = cursor + 3;
-                if (auto length = newline_length(after)) {
-                    return after + length;
-                }
-                if (after == source_.size() || is_js_space(source_[after])) {
-                    return after;
-                }
-            }
-            auto const newline = source_.find(u'\n', cursor);
-            if (newline == std::u16string_view::npos) {
-                return std::nullopt;
-            }
-            cursor = newline + 1;
-        }
-    }
-
-    void skip_hidden() {
-        while (position_ < source_.size()) {
-            if (is_horizontal_space(source_[position_])) {
-                ++position_;
-                continue;
-            }
-            if (auto end = yaml_end()) {
-                position_ = *end;
-                continue;
-            }
-            if (starts_with(u"%%{")) {
-                auto closing = source_.find(u"}%%", position_ + 3);
-                std::optional<std::size_t> directive_end;
-                while (closing != std::u16string_view::npos) {
-                    auto const after = closing + 3;
-                    auto const length = newline_length(after);
-                    if (length || after == source_.size() || is_js_space(source_[after])) {
-                        directive_end = after + length;
-                        break;
-                    }
-                    closing = source_.find(u"}%%", after);
-                }
-                if (directive_end) {
-                    position_ = *directive_end;
-                    continue;
-                }
-            }
-            if (starts_with(u"%%")) {
-                auto end = source_.find_first_of(u"\r\n", position_);
-                position_ = end == std::u16string_view::npos ? source_.size() : end;
-                continue;
-            }
-            break;
-        }
-    }
-
-    Token line_value(TokenKind kind, std::size_t content_start) {
-        auto const start = position_;
-        auto end = content_start;
-        while (end < source_.size() && source_[end] != u'\r' && source_[end] != u'\n' &&
-               !source_.substr(end).starts_with(u"%%")) {
-            ++end;
-        }
-        position_ = end;
-        return Token{kind, start, 0,
-            common_single_line_value(source_.substr(content_start, end - content_start))};
-    }
-
-    std::optional<Token> description_token() {
-        auto const start = position_;
-        auto after = start + 8;
-        while (after < source_.size() && is_horizontal_space(source_[after])) {
-            ++after;
-        }
-        if (after < source_.size() && source_[after] == u':') {
-            return line_value(TokenKind::acc_description, after + 1);
-        }
-        after = start + 8;
-        while (after < source_.size() && is_js_space(source_[after])) {
-            ++after;
-        }
-        if (after == source_.size() || source_[after] != u'{') {
-            return std::nullopt;
-        }
-        auto const closing = source_.find(u'}', after + 1);
-        if (closing == std::u16string_view::npos) {
-            return std::nullopt;
-        }
-        position_ = closing + 1;
-        return Token{TokenKind::acc_description, start, 0,
-            common_multiline_value(source_.substr(after + 1, closing - after - 1))};
+        return Token{kind, token.offset, 0, std::move(token.text)};
     }
 
     std::expected<Token, PacketError> integer_token() {
@@ -332,37 +103,13 @@ private:
     }
 
     std::expected<Token, PacketError> string_token() {
-        auto const start = position_;
-        auto const delimiter = source_[position_++];
-        std::u16string text;
-        while (position_ < source_.size()) {
-            auto const value = source_[position_++];
-            if (value == delimiter) {
-                return Token{TokenKind::string, start, 0, std::move(text)};
-            }
-            if (value == u'\\') {
-                if (position_ == source_.size() || is_line_terminator(source_[position_])) {
-                    return std::unexpected(PacketError{start, u"Invalid escape in Packet string."});
-                }
-                // DefaultValueConverter does not decode JavaScript Unicode or
-                // hexadecimal escapes: an unknown escape keeps its character
-                // and drops only the backslash.
-                switch (auto const escaped = source_[position_++]) {
-                case u'b': text.push_back(u'\b'); break;
-                case u'f': text.push_back(u'\f'); break;
-                case u'n': text.push_back(u'\n'); break;
-                case u'r': text.push_back(u'\r'); break;
-                case u't': text.push_back(u'\t'); break;
-                case u'v': text.push_back(u'\v'); break;
-                case u'0': text.push_back(u'\0'); break;
-                default: text.push_back(escaped); break;
-                }
-            } else {
-                text.push_back(value);
-            }
+        auto result = CommonLexer::string_token();
+        if (!result) {
+            return std::unexpected(PacketError{result.error().offset, std::move(result.error().message)});
         }
-        return std::unexpected(PacketError{start, u"Unterminated Packet string."});
+        return from_common(std::move(*result));
     }
+
 };
 
 std::u16string number_text(double value) {

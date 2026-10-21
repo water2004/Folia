@@ -6,7 +6,8 @@
   original official Mermaid JS/TS. Do not port the Rust rewrite. Website and
   release tooling are excluded; this is unrelated to the MathJax migration.
 - Upstream base: `water2004/Folia` master `72e2d7c7`. Fork: `zhao0349/Folia`.
-  Branch: `codex/mermaid-cpp-official`. Remotes: origin=fork, upstream=author.
+  Current branch: `codex/mermaid-cpp-pie`; Packet stage branch remains
+  `codex/mermaid-cpp-official`. Remotes: origin=fork, upstream=author.
 - Source pin: Mermaid 12.2.0, commit
   `1fb7869866dd619168d840291c9c54b4f129758b`, ignored checkout at
   `.reference/mermaid-js`. `source-lock.json` records file hashes.
@@ -14,16 +15,31 @@
   Debug/Release CI `39543613360` (862 source observations).
 - Number formatting `b3adc989` passes Windows Debug/Release CI `39543875561`
   with 9,695 actual JavaScript binary64 observations. All are pushed.
-- Packet parser/layout `60691de3` and SVG `157e380b` are pushed. Their Node
-  oracles pass: 254 parser/layout cases, 55 SVG cases. Native CI run
-  `39544084249` is in progress, not yet accepted. A subsequent fixture header
-  update adds independent verification of the complete official default CSS.
-- Active agents: `official_parser` owns shared lexer/Pie parsing and Packet
-  lexer extraction; `build_audit` owns Pie oracle/tests; `renderer_audit` owns
-  source-derived D3 Pie geometry and its oracle/tests. These are next-stage
-  changes and must not be mixed into the Packet stage PR.
-- Next concrete action: finish Packet native CI and independent review, create
-  the first PR into the user's fork, merge if verified, then branch for Pie.
+- Packet parser/layout `60691de3`, SVG `157e380b`, and complete official CSS
+  fixture `535e5ab5` are pushed. Their Node oracles pass: 254 parser/layout
+  cases, 55 SVG cases. Native CI `39544210209` passed Debug and Release.
+  Earlier run `39544084249` failed on the missing CSS fixture header, now fixed.
+- Fork stage PR: https://github.com/zhao0349/Folia/pull/1, head `535e5ab5`.
+  PR-event CI `39544508181` passed. PR merged with preserved small commits at
+  `396d814f2d6e03b3767560cab97f8cec794b3a0c`. Upstream has no PR yet.
+- Shared lexer extraction is the first Pie-stage batch: common metadata,
+  hidden tokens and string conversion move out of Packet without changing its
+  public API. CMake discovers the new module; existing Packet fixtures are the
+  required regression check. Commit `8ece2acf` passed Debug/Release regression
+  CI `39544334238`.
+- Pie raw parser/DB `09ad39f6`, D3 geometry `733a3295` and parser tests
+  `3675ec45` are pushed. Native CI `39544894952` is still running; older
+  in-progress Pie runs were superseded by later commits.
+- Geometry has 86 official-runtime cases / 618 sectors, exact paths and
+  1e-12 centroid tolerance for platform libm. Parser oracle has 291 cases.
+- Root added Pie layout with explicit measurement inputs and 40 official
+  renderer observations. This tests arithmetic only; real text measurement,
+  final themed SVG output and host integration remain pending.
+- All three prior agents have delivered their assigned files and are idle.
+  No background local build is running. All active verification is in Actions.
+- Next concrete action: run all Pie native tests, resolve any failures, then
+  open a second fork PR for the Pie core stage. After that, implement measured
+  text and themed SVG integration; do not claim a completed Pie renderer yet.
 
 ## User's incremental persistence instruction — 2026-10-21
 

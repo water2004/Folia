@@ -52,6 +52,12 @@ switch or fallback has been added. The old Rust dependency remains the active
 application dependency until the native pipeline is accepted. The current
 library is a foundation for the requested replacement, not that replacement.
 
+The Pie core now includes its raw grammar, database validation and first-label
+deduplication, the D3 sector/arc specialization, filtering, percentage labels,
+five legend positions and title-driven viewBox expansion. Layout requires
+explicit measured legend/title widths. The platform measurement adapter,
+theme-resolved SVG output and Folia integration are still outstanding.
+
 Packet has explicit native safety boundaries: non-finite bit counts and more
 than 10,000 rows produce an error. Upstream can silently truncate oversized
 fields at that row count. Invalid dimensions, invalid UTF-16, and characters
@@ -75,6 +81,9 @@ node tools/mermaid-cpp/source-text-oracle.mjs --check
 pnpm --dir tools/mermaid-cpp/oracle install --frozen-lockfile --ignore-scripts
 node tools/mermaid-cpp/packet-oracle.mjs --check
 node tools/mermaid-cpp/packet-svg-oracle.mjs --check
+node tools/mermaid-cpp/pie-oracle.mjs --check
+node tools/mermaid-cpp/pie-geometry-oracle.mjs --check
+node tools/mermaid-cpp/pie-layout-oracle.mjs --check
 git submodule update --init third_party/ut
 cmake -G Ninja -S tools/mermaid-cpp -B build/mermaid-cpp -DCMAKE_BUILD_TYPE=Debug
 cmake --build build/mermaid-cpp --parallel 4 --target FoliaMermaidTests
@@ -93,6 +102,13 @@ locked under `tools/mermaid-cpp/oracle`; these packages are test tools, not
 native runtime dependencies. Raw-parser, layout, renderer and full MermaidAPI
 observations are kept distinct so that frontend preprocessing does not become
 an incorrect expectation for a lower-level component.
+
+Pie verification separates 291 parser/database observations, 86 real D3
+geometry cases (618 sectors), and 40 real Mermaid renderer layouts with
+explicitly injected measurement inputs. The last set tests layout arithmetic;
+it does not validate fonts or native/browser text-measurement equivalence.
+Paths are compared exactly; trigonometric centroids allow a 1e-12 tolerance
+because V8 and the platform CRT can differ in their final binary64 bits.
 
 The original source's current functions are the oracle, including behavior not
 covered by its own legacy-regex examples. In particular, detection comment

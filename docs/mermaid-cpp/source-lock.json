@@ -71,6 +71,82 @@
     {
       "path": "packages/mermaid/src/schemas/config.schema.yaml",
       "sha256": "537073372efeaba5675e331b813220ee87b4403118952eccaa3362d8b78ca5e8"
+    },
+    {
+      "path": "packages/parser/src/language/pie/pie.langium",
+      "sha256": "fe9346e70f5d5028fa5aaa0470ba651e445c904e615feaf79a4eb2b5a401118d"
+    },
+    {
+      "path": "packages/parser/src/language/pie/valueConverter.ts",
+      "sha256": "d29b30fd73f0a1d9e1da7cea12eae1a13194bee4c886ace4b212e800857b01a8"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/pie/pieParser.ts",
+      "sha256": "d6f05e3845ec051d07a12d16f45e4ed2d44c0deb0022561582ada77ad4e0b8a4"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/pie/pieDb.ts",
+      "sha256": "e64377c8d3e0501a859b46e329ca1aacd2e205faa0aaed203be012324f868471"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/pie/pieRenderer.ts",
+      "sha256": "12cbb88cead5b79b5a3aa4946d78da32e711feb8687bfd54ca119f98b2dd7df4"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/pie/pieStyles.ts",
+      "sha256": "ecf34f224b510ba51581b37125e9a396350bd9313d47b75c93b874c0efc409a1"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/pie/pieTypes.ts",
+      "sha256": "d4b451e65c4ae18301583853ac60ba7e25ff8fec01b3abfd1fb90bf3760f31ba"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/common/populateCommonDb.ts",
+      "sha256": "5d2a306522f65f8672a42dbec11b060818f8c9d3d07a7ae9328d3a55a8050856"
+    }
+  ],
+  "packages": [
+    {
+      "name": "d3-shape",
+      "version": "3.2.0",
+      "license": "ISC",
+      "files": [
+        {
+          "path": "src/pie.js",
+          "sha256": "5316912248e7e426fd41bab3af62719bada72fb0394a097c6cf251667f053c75"
+        },
+        {
+          "path": "src/arc.js",
+          "sha256": "e657e8455af7c62613bde73cd45cea79709608d97759fe5e4c3e5ef6cdbd8deb"
+        },
+        {
+          "path": "src/math.js",
+          "sha256": "876190a6d1250f781fa8ca8a1bd0fba1a3db718fe2355c5a69b034aac6caf490"
+        },
+        {
+          "path": "src/path.js",
+          "sha256": "121bd97e99ead26d6bd84f20296c10040dc9caa9fceeca34d5ff917ef6e49065"
+        },
+        {
+          "path": "LICENSE",
+          "sha256": "faa682e3e430941f958d26180458f5934a62f58dac4d70ccdd15608c15d0f884"
+        }
+      ]
+    },
+    {
+      "name": "d3-path",
+      "version": "3.1.0",
+      "license": "ISC",
+      "files": [
+        {
+          "path": "src/path.js",
+          "sha256": "2c2d30e2c5279c8f6f42edc6731a4af029949ec83f47ffb48c3e35d21f877800"
+        },
+        {
+          "path": "LICENSE",
+          "sha256": "a09b0d6d76e768fca2085fad05743ee81ddd11946bcda160a3cf5e1081a479aa"
+        }
+      ]
     }
   ]
 }
