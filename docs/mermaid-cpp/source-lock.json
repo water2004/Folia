@@ -103,6 +103,14 @@
     {
       "path": "packages/mermaid/src/diagrams/common/populateCommonDb.ts",
       "sha256": "5d2a306522f65f8672a42dbec11b060818f8c9d3d07a7ae9328d3a55a8050856"
+    },
+    {
+      "path": "packages/mermaid/src/preprocess.ts",
+      "sha256": "db337ae9cc0f7ff189cc50d06d6fb28452dfbc37294f56a966dc3f48b2a628e0"
+    },
+    {
+      "path": "packages/mermaid/src/utils.ts",
+      "sha256": "5968be88bf78df0ccb211f2ddba50e505099607a2770435577deed94551e4c05"
     }
   ],
   "packages": [

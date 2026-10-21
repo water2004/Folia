@@ -40,6 +40,20 @@ UTF-16 strings so positions and even unpaired code units retain JavaScript
 string semantics. Returned matches own their strings. The two comment functions
 have deliberately different behavior and must not be collapsed into one.
 
+The same module now ports `cleanupText` and `removeDirectives` as independent
+UTF-16 operations. Normalization maps CR/CRLF to LF before the official lexical
+HTML-attribute quote rewrite. Directive removal matches the released regex,
+including permissive unclosed matches and its word-argument alternative. These
+are not HTML sanitization or a complete preprocessing API. Configuration must
+be extracted before directive removal; the family renderers do not call these
+operations or silently discard configuration. The editor's source is untouched.
+
+The next frontend boundaries are YAML JSON_SCHEMA metadata extraction and
+directive argument interpretation, followed by config merging and appearance
+precedence (diagram-scoped settings can override globals), and default/dark
+theme resolution. Each needs its own official runtime oracle before wiring a
+shared entry point into the family renderers.
+
 The Packet component ports the official grammar, metadata value conversion,
 contiguous field validation, splitting into rows, and SVG geometry. It supports
 the Packet dimension, bit-order and sizing options. Its SVG currently uses the
@@ -90,6 +104,7 @@ digits per UTF-16 code unit; `-` denotes an empty string or an absent match.
 ```powershell
 git -c core.autocrlf=false clone --branch mermaid@12.2.0 --depth 1 https://github.com/mermaid-js/mermaid.git .reference/mermaid-js
 node tools/mermaid-cpp/source-text-oracle.mjs --check
+node tools/mermaid-cpp/preprocess-text-oracle.mjs --check
 pnpm --dir tools/mermaid-cpp/oracle install --frozen-lockfile --ignore-scripts
 node tools/mermaid-cpp/packet-oracle.mjs --check
 node tools/mermaid-cpp/packet-svg-oracle.mjs --check
@@ -113,6 +128,14 @@ the repository's `import std;` gate. The standalone build avoids unrelated
 MathJax generation, WinUI restoration and Cargo. Native tests also exercise
 large adversarial documents and ownership after the input has been destroyed.
 Source observations alone are not evidence that the C++ implementation passes.
+
+The preprocessing oracle isolates and executes the original pinned
+`cleanupText` and `removeDirectives` function bodies, stripping only TypeScript
+syntax and the export keyword and supplying the original `directiveRegex`.
+It checks 1,221 cases independently and in execution order, including malformed
+tags/directives, all line-terminator kinds, Unicode and lone surrogates. Native
+tests consume the same UTF-16 fixture and separately check large adversarial
+inputs and owned results. It does not claim YAML/config or sanitizer coverage.
 
 The Packet oracles execute the official published parser and Mermaid renderer
 with JSDOM. The exact package versions and transitive integrity hashes are
