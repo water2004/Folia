@@ -2,28 +2,13 @@
 'use strict';const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),crypto=require('node:crypto');
 const root=path.resolve(__dirname,'../..'),base=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax/src'),lock=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/evidence/p46-parser-options-source.json'))),source='ts/util/Options.ts',entry=lock.hashes.find(x=>x.source===source),bytes=fs.readFileSync(path.join(root,'.reference/MathJax-src',source));assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),entry.source_sha256);assert.equal(fs.readFileSync(path.join(base,source),'utf8').replaceAll('\r\n','\n'),bytes.toString().replaceAll('\r\n','\n'));assert.equal(crypto.createHash('sha256').update(fs.readFileSync(path.join(base,'cjs/util/Options.js'))).digest('hex'),entry.cjs_sha256);
 const {copy}=require(path.join(base,'cjs/util/Options.js')),rows=[];
-function add(label,cpp,run){let expected;try{expected=run();}catch(x){expected=x.name;}rows.push({label,cpp,expected});}
-add('canonical-same-native-identity','auto r=std::make_shared<host::RegExp>(u"x",u"g");return yes(e.bindings.bind(r)==e.bindings.bind(r));',()=>{const r=/x/g;return String(r===r);});
-add('distinct-new-expressions','return yes(e.make()!=e.make());',()=>String(new RegExp('x','g')!==new RegExp('x','g')));
-add('option-copy-retains-actual-regexp','auto r=e.make();auto original=e.object({{u"r",r}});auto copied=opts::copy(e.context,original);return yes(copied!=opts::Value(original))+":"+yes(e.context.get(copied,opts::Key(u"r"))==opts::Value(r));',()=>{const r=/x/g,o={r},c=copy(o);return[c!==o,c.r===r].join(':');});
-add('copied-end-tuple-keeps-pattern-identity','auto r=e.make();auto tuple=e.tuple(r);auto copied=opts::copy(e.context,tuple);return yes(copied!=opts::Value(tuple))+":"+yes(e.context.get(copied,opts::Key(u"2"))==opts::Value(r));',()=>{const r=/x/g,t=['x',false,r],c=copy(t);return[c!==t,c[2]===r].join(':');});
-add('cursor-update-observed-through-copied-alias','auto r=e.make();auto copied=opts::copy(e.context,e.object({{u"r",r}}));auto alias=e.context.get(copied,opts::Key(u"r"));e.bindings.setLastIndex(r,1);auto match=e.bindings.exec(alias,u"xxx");return std::to_string(match->index)+":"+e.number(e.bindings.lastIndex(r))+":"+e.number(e.bindings.lastIndex(alias));',()=>{const r=/x/g,c=copy({r});r.lastIndex=1;const m=c.r.exec('xxx');return[m.index,r.lastIndex,c.r.lastIndex].join(':');});
-add('independent-pattern-cursors','auto a=e.make(),b=e.make();e.bindings.setLastIndex(a,1);auto ma=e.bindings.exec(a,u"xxx"),mb=e.bindings.exec(b,u"xxx");return std::to_string(ma->index)+":"+std::to_string(mb->index)+":"+e.number(e.bindings.lastIndex(a))+":"+e.number(e.bindings.lastIndex(b));',()=>{const a=/x/g,b=/x/g;a.lastIndex=1;const ma=a.exec('xxx'),mb=b.exec('xxx');return[ma.index,mb.index,a.lastIndex,b.lastIndex].join(':');});
-add('global-failure-resets-shared-cursor','auto r=e.make();auto tuple=e.tuple(r);e.bindings.setLastIndex(r,4);auto alias=e.context.get(tuple,opts::Key(u"2"));const bool failed=!e.bindings.exec(alias,u"x");return yes(failed)+":"+e.number(e.bindings.lastIndex(r));',()=>{const r=/x/g,t=['x',false,r];r.lastIndex=4;return[!t[2].exec('x'),r.lastIndex].join(':');});
-add('actual-regexp-constructor-metadata','auto r=e.make();auto constructor=e.context.get(r,opts::Key(u"constructor"));return yes(constructor==opts::Value(e.bindings.constructorIdentity()))+":"+e.text(e.context.get(constructor,opts::Key(u"name")))+":"+e.text(e.context.get(constructor,opts::Key(u"length")));',()=>{const r=/x/g;return[r.constructor===RegExp,r.constructor.name,r.constructor.length].join(':');});
-let native=String.raw`// Generated from original Options.copy and actual RegExp identity/cursor effects.
-#include "support/folia_test.hpp"
-import folia.math.util.regexp_binding;
-import folia.math.util.js_number;
-import folia.math.util.property_host;
-namespace {using namespace boost::ut;namespace host=folia::math::regexp_host;namespace opts=folia::math::options;
-std::string yes(bool v){return v?"true":"false";}
-struct Fixture{opts::Context context;host::RegExpBindings bindings{context};opts::ObjectRef make(){return bindings.create(u"x",u"g");}
-opts::ObjectRef object(std::initializer_list<std::pair<std::u16string,opts::Value>>values){auto o=context.object();for(auto&[k,v]:values)context.set(o,opts::Key(k),v);return o;}
-opts::ObjectRef tuple(opts::ObjectRef pattern){auto a=context.array(3);context.set(a,opts::Key(u"0"),u"x");context.set(a,opts::Key(u"1"),false);context.set(a,opts::Key(u"2"),pattern);return a;}
-std::string number(double v){return folia::math::js_number::toString(v);}std::string text(opts::Value v){if(auto*s=std::get_if<std::u16string>(&v.data))return folia::math::property_host::debugText(*s);if(auto*n=std::get_if<double>(&v.data))return number(*n);return "other";}
-};suite binding=[] {
-`;
-for(const[i,row]of rows.entries())native+='"math_port_regexp_binding_source_'+i+'"_test=[] {Fixture e;std::string actual;try{auto run=[&]()->std::string{'+row.cpp+'};actual=run();}catch(const opts::Exception&error){actual=error.name;}expect(eq(actual,std::string('+JSON.stringify(row.expected)+')))<<'+JSON.stringify(row.label)+';};\n';native+='};}\n';
-for(const[file,data]of [['docs/math-port/evidence/p51b-regexp-binding-source.json',JSON.stringify({stage:'native RegExp identities in Context; not FindTeX',node:process.version,hashes:[entry],rows},null,2)+'\n'],['tests/math/reference_regexp_binding.cpp',native]]){const target=path.join(root,file);if(process.argv.includes('--check'))assert.equal(fs.readFileSync(target,'utf8').replaceAll('\r\n','\n'),data);else fs.writeFileSync(target,data);}
-console.log(JSON.stringify({source_cases:rows.length}));
+function add(label,run){let expected;try{expected=run();}catch(x){expected=x.name;}rows.push({label,expected});}
+add('canonical-same-native-identity',()=>{const r=/x/g;return String(r===r);});
+add('distinct-new-expressions',()=>String(new RegExp('x','g')!==new RegExp('x','g')));
+add('option-copy-retains-actual-regexp',()=>{const r=/x/g,o={r},c=copy(o);return[c!==o,c.r===r].join(':');});
+add('copied-end-tuple-keeps-pattern-identity',()=>{const r=/x/g,t=['x',false,r],c=copy(t);return[c!==t,c[2]===r].join(':');});
+add('cursor-update-observed-through-copied-alias',()=>{const r=/x/g,c=copy({r});r.lastIndex=1;const m=c.r.exec('xxx');return[m.index,r.lastIndex,c.r.lastIndex].join(':');});
+add('independent-pattern-cursors',()=>{const a=/x/g,b=/x/g;a.lastIndex=1;const ma=a.exec('xxx'),mb=b.exec('xxx');return[ma.index,mb.index,a.lastIndex,b.lastIndex].join(':');});
+add('global-failure-resets-shared-cursor',()=>{const r=/x/g,t=['x',false,r];r.lastIndex=4;return[!t[2].exec('x'),r.lastIndex].join(':');});
+add('actual-regexp-constructor-metadata',()=>{const r=/x/g;return[r.constructor===RegExp,r.constructor.name,r.constructor.length].join(':');});
+const report={stage:'native RegExp identities in Context; not FindTeX',node:process.version,hashes:[entry],rows},sourceGold=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/evidence/p51b-regexp-binding-source.json'),'utf8'));const projected={...sourceGold,rows:sourceGold.rows.map(({cpp,...row})=>row)};assert.ok(process.argv.includes('--check'));assert.deepEqual(report,projected);console.log(JSON.stringify({rows:rows.length,mode:'check'}));

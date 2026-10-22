@@ -1,0 +1,3505 @@
+{
+  "cases": [
+    {
+      "name": "math_port_tex_token_raw_0",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "null"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "boolean",
+            "value": false
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_macro_raw_0",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "null"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "array",
+            "items": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_token_raw_1",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "null"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "boolean",
+            "value": false
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "boolean",
+            "value": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_macro_raw_1",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "null"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "boolean",
+            "value": false
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "null"
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_token_raw_2",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "boolean",
+            "value": false
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "boolean",
+            "value": true
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "value": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_macro_raw_2",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "boolean",
+            "value": false
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "boolean",
+            "value": true
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "boolean",
+            "value": false
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_token_raw_3",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "boolean",
+            "value": true
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "value": 0
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "value": "-0"
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_macro_raw_3",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "boolean",
+            "value": true
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "value": 0
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "boolean",
+            "value": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_token_raw_4",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "value": 0
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "value": "-0"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "value": "NaN"
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_macro_raw_4",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "value": 0
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "value": "-0"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "value": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_token_raw_5",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "value": "-0"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "value": "NaN"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "value": "Infinity"
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_macro_raw_5",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "value": "-0"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "value": "NaN"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "value": "-0"
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_token_raw_6",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "value": "NaN"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "value": "Infinity"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "value": "-Infinity"
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_macro_raw_6",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "value": "NaN"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "value": "Infinity"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "value": "NaN"
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_token_raw_7",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "value": "Infinity"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "value": "-Infinity"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "string",
+            "units": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_macro_raw_7",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "value": "Infinity"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "value": "-Infinity"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "value": "Infinity"
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_token_raw_8",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "value": "-Infinity"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "string",
+            "units": []
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "string",
+            "units": [
+              92,
+              109,
+              97,
+              116,
+              104,
+              98,
+              98
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_macro_raw_8",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "value": "-Infinity"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "string",
+            "units": []
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "value": "-Infinity"
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_token_raw_9",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "string",
+            "units": []
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "string",
+            "units": [
+              92,
+              109,
+              97,
+              116,
+              104,
+              98,
+              98
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "string",
+            "units": [
+              8477,
+              55349,
+              56632,
+              20013,
+              25991
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_macro_raw_9",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "string",
+            "units": []
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "string",
+            "units": [
+              92,
+              109,
+              97,
+              116,
+              104,
+              98,
+              98
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "string",
+            "units": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_token_raw_10",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "string",
+            "units": [
+              92,
+              109,
+              97,
+              116,
+              104,
+              98,
+              98
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "string",
+            "units": [
+              8477,
+              55349,
+              56632,
+              20013,
+              25991
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "string",
+            "units": [
+              55296,
+              120,
+              57343
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_macro_raw_10",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "string",
+            "units": [
+              92,
+              109,
+              97,
+              116,
+              104,
+              98,
+              98
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "string",
+            "units": [
+              8477,
+              55349,
+              56632,
+              20013,
+              25991
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "string",
+            "units": [
+              92,
+              109,
+              97,
+              116,
+              104,
+              98,
+              98
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_token_raw_11",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "string",
+            "units": [
+              8477,
+              55349,
+              56632,
+              20013,
+              25991
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "string",
+            "units": [
+              55296,
+              120,
+              57343
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "string",
+            "units": [
+              97,
+              0,
+              98
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_macro_raw_11",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "string",
+            "units": [
+              8477,
+              55349,
+              56632,
+              20013,
+              25991
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "string",
+            "units": [
+              55296,
+              120,
+              57343
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "string",
+            "units": [
+              8477,
+              55349,
+              56632,
+              20013,
+              25991
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_token_raw_12",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "string",
+            "units": [
+              55296,
+              120,
+              57343
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "string",
+            "units": [
+              97,
+              0,
+              98
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "array",
+            "items": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_macro_raw_12",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "string",
+            "units": [
+              55296,
+              120,
+              57343
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "string",
+            "units": [
+              97,
+              0,
+              98
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "string",
+            "units": [
+              55296,
+              120,
+              57343
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_token_raw_13",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "string",
+            "units": [
+              97,
+              0,
+              98
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "array",
+            "items": []
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "array",
+            "items": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "boolean",
+                "value": false
+              },
+              {
+                "type": "number",
+                "value": 1
+              },
+              {
+                "type": "string",
+                "units": [
+                  120
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_macro_raw_13",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "string",
+            "units": [
+              97,
+              0,
+              98
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "array",
+            "items": []
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "string",
+            "units": [
+              97,
+              0,
+              98
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_token_raw_14",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "array",
+            "items": []
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "array",
+            "items": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "boolean",
+                "value": false
+              },
+              {
+                "type": "number",
+                "value": 1
+              },
+              {
+                "type": "string",
+                "units": [
+                  120
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "object",
+            "entries": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_macro_raw_14",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "array",
+            "items": []
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "array",
+            "items": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "boolean",
+                "value": false
+              },
+              {
+                "type": "number",
+                "value": 1
+              },
+              {
+                "type": "string",
+                "units": [
+                  120
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "array",
+            "items": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_token_raw_15",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "array",
+            "items": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "boolean",
+                "value": false
+              },
+              {
+                "type": "number",
+                "value": 1
+              },
+              {
+                "type": "string",
+                "units": [
+                  120
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "object",
+            "entries": []
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "object",
+            "entries": [
+              [
+                "key",
+                {
+                  "type": "string",
+                  "units": [
+                    118
+                  ]
+                }
+              ],
+              [
+                "nested",
+                {
+                  "type": "array",
+                  "items": [
+                    {
+                      "type": "number",
+                      "value": 1
+                    },
+                    {
+                      "type": "number",
+                      "value": 2
+                    }
+                  ]
+                }
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_macro_raw_15",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "array",
+            "items": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "boolean",
+                "value": false
+              },
+              {
+                "type": "number",
+                "value": 1
+              },
+              {
+                "type": "string",
+                "units": [
+                  120
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "object",
+            "entries": []
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "array",
+            "items": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "boolean",
+                "value": false
+              },
+              {
+                "type": "number",
+                "value": 1
+              },
+              {
+                "type": "string",
+                "units": [
+                  120
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_token_raw_16",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "object",
+            "entries": []
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "object",
+            "entries": [
+              [
+                "key",
+                {
+                  "type": "string",
+                  "units": [
+                    118
+                  ]
+                }
+              ],
+              [
+                "nested",
+                {
+                  "type": "array",
+                  "items": [
+                    {
+                      "type": "number",
+                      "value": 1
+                    },
+                    {
+                      "type": "number",
+                      "value": 2
+                    }
+                  ]
+                }
+              ]
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "missing"
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_macro_raw_16",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "object",
+            "entries": []
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "object",
+            "entries": [
+              [
+                "key",
+                {
+                  "type": "string",
+                  "units": [
+                    118
+                  ]
+                }
+              ],
+              [
+                "nested",
+                {
+                  "type": "array",
+                  "items": [
+                    {
+                      "type": "number",
+                      "value": 1
+                    },
+                    {
+                      "type": "number",
+                      "value": 2
+                    }
+                  ]
+                }
+              ]
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "object",
+            "entries": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_token_raw_17",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "object",
+            "entries": [
+              [
+                "key",
+                {
+                  "type": "string",
+                  "units": [
+                    118
+                  ]
+                }
+              ],
+              [
+                "nested",
+                {
+                  "type": "array",
+                  "items": [
+                    {
+                      "type": "number",
+                      "value": 1
+                    },
+                    {
+                      "type": "number",
+                      "value": 2
+                    }
+                  ]
+                }
+              ]
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "null"
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_macro_raw_17",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "object",
+            "entries": [
+              [
+                "key",
+                {
+                  "type": "string",
+                  "units": [
+                    118
+                  ]
+                }
+              ],
+              [
+                "nested",
+                {
+                  "type": "array",
+                  "items": [
+                    {
+                      "type": "number",
+                      "value": 1
+                    },
+                    {
+                      "type": "number",
+                      "value": 2
+                    }
+                  ]
+                }
+              ]
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "object",
+            "entries": [
+              [
+                "key",
+                {
+                  "type": "string",
+                  "units": [
+                    118
+                  ]
+                }
+              ],
+              [
+                "nested",
+                {
+                  "type": "array",
+                  "items": [
+                    {
+                      "type": "number",
+                      "value": 1
+                    },
+                    {
+                      "type": "number",
+                      "value": 2
+                    }
+                  ]
+                }
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_token_identity",
+      "observations": [
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "object",
+            "entries": [
+              [
+                "name",
+                {
+                  "type": "string",
+                  "units": [
+                    109,
+                    117,
+                    116,
+                    97,
+                    116,
+                    101,
+                    100
+                  ]
+                }
+              ]
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "array",
+            "items": [
+              {
+                "type": "string",
+                "units": [
+                  116,
+                  114,
+                  97,
+                  110,
+                  115,
+                  108,
+                  97,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "type": "string",
+                "units": [
+                  108,
+                  97,
+                  116,
+                  101,
+                  114
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "object",
+            "entries": [
+              [
+                "nested",
+                {
+                  "type": "array",
+                  "items": [
+                    {
+                      "type": "number",
+                      "value": 1
+                    }
+                  ]
+                }
+              ],
+              [
+                "changed",
+                {
+                  "type": "boolean",
+                  "value": true
+                }
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_macro_identity",
+      "observations": [
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "array",
+            "items": [
+              {
+                "type": "boolean",
+                "value": false
+              },
+              {
+                "type": "number",
+                "value": 1
+              },
+              {
+                "type": "string",
+                "units": [
+                  120
+                ]
+              },
+              {
+                "type": "null"
+              },
+              {
+                "type": "string",
+                "units": [
+                  109,
+                  117,
+                  116,
+                  97,
+                  116,
+                  101,
+                  100
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_macro_default_fresh",
+      "observations": [
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "array",
+            "items": [
+              {
+                "type": "string",
+                "units": [
+                  111,
+                  110,
+                  101
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "array",
+            "items": []
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_token_omitted_attributes",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "missing"
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_table_ConfigurationType",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "object",
+            "entries": [
+              [
+                "HANDLER",
+                {
+                  "type": "string",
+                  "units": [
+                    104,
+                    97,
+                    110,
+                    100,
+                    108,
+                    101,
+                    114
+                  ]
+                }
+              ],
+              [
+                "FALLBACK",
+                {
+                  "type": "string",
+                  "units": [
+                    102,
+                    97,
+                    108,
+                    108,
+                    98,
+                    97,
+                    99,
+                    107
+                  ]
+                }
+              ],
+              [
+                "ITEMS",
+                {
+                  "type": "string",
+                  "units": [
+                    105,
+                    116,
+                    101,
+                    109,
+                    115
+                  ]
+                }
+              ],
+              [
+                "TAGS",
+                {
+                  "type": "string",
+                  "units": [
+                    116,
+                    97,
+                    103,
+                    115
+                  ]
+                }
+              ],
+              [
+                "OPTIONS",
+                {
+                  "type": "string",
+                  "units": [
+                    111,
+                    112,
+                    116,
+                    105,
+                    111,
+                    110,
+                    115
+                  ]
+                }
+              ],
+              [
+                "NODES",
+                {
+                  "type": "string",
+                  "units": [
+                    110,
+                    111,
+                    100,
+                    101,
+                    115
+                  ]
+                }
+              ],
+              [
+                "PREPROCESSORS",
+                {
+                  "type": "string",
+                  "units": [
+                    112,
+                    114,
+                    101,
+                    112,
+                    114,
+                    111,
+                    99,
+                    101,
+                    115,
+                    115,
+                    111,
+                    114,
+                    115
+                  ]
+                }
+              ],
+              [
+                "POSTPROCESSORS",
+                {
+                  "type": "string",
+                  "units": [
+                    112,
+                    111,
+                    115,
+                    116,
+                    112,
+                    114,
+                    111,
+                    99,
+                    101,
+                    115,
+                    115,
+                    111,
+                    114,
+                    115
+                  ]
+                }
+              ],
+              [
+                "INIT",
+                {
+                  "type": "string",
+                  "units": [
+                    105,
+                    110,
+                    105,
+                    116
+                  ]
+                }
+              ],
+              [
+                "CONFIG",
+                {
+                  "type": "string",
+                  "units": [
+                    99,
+                    111,
+                    110,
+                    102,
+                    105,
+                    103
+                  ]
+                }
+              ],
+              [
+                "PRIORITY",
+                {
+                  "type": "string",
+                  "units": [
+                    112,
+                    114,
+                    105,
+                    111,
+                    114,
+                    105,
+                    116,
+                    121
+                  ]
+                }
+              ],
+              [
+                "PARSER",
+                {
+                  "type": "string",
+                  "units": [
+                    112,
+                    97,
+                    114,
+                    115,
+                    101,
+                    114
+                  ]
+                }
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_table_HandlerType",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "object",
+            "entries": [
+              [
+                "DELIMITER",
+                {
+                  "type": "string",
+                  "units": [
+                    100,
+                    101,
+                    108,
+                    105,
+                    109,
+                    105,
+                    116,
+                    101,
+                    114
+                  ]
+                }
+              ],
+              [
+                "MACRO",
+                {
+                  "type": "string",
+                  "units": [
+                    109,
+                    97,
+                    99,
+                    114,
+                    111
+                  ]
+                }
+              ],
+              [
+                "CHARACTER",
+                {
+                  "type": "string",
+                  "units": [
+                    99,
+                    104,
+                    97,
+                    114,
+                    97,
+                    99,
+                    116,
+                    101,
+                    114
+                  ]
+                }
+              ],
+              [
+                "ENVIRONMENT",
+                {
+                  "type": "string",
+                  "units": [
+                    101,
+                    110,
+                    118,
+                    105,
+                    114,
+                    111,
+                    110,
+                    109,
+                    101,
+                    110,
+                    116
+                  ]
+                }
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "math_port_tex_table_TexConstant",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "object",
+            "entries": [
+              [
+                "Variant",
+                {
+                  "type": "object",
+                  "entries": [
+                    [
+                      "NORMAL",
+                      {
+                        "type": "string",
+                        "units": [
+                          110,
+                          111,
+                          114,
+                          109,
+                          97,
+                          108
+                        ]
+                      }
+                    ],
+                    [
+                      "BOLD",
+                      {
+                        "type": "string",
+                        "units": [
+                          98,
+                          111,
+                          108,
+                          100
+                        ]
+                      }
+                    ],
+                    [
+                      "ITALIC",
+                      {
+                        "type": "string",
+                        "units": [
+                          105,
+                          116,
+                          97,
+                          108,
+                          105,
+                          99
+                        ]
+                      }
+                    ],
+                    [
+                      "BOLDITALIC",
+                      {
+                        "type": "string",
+                        "units": [
+                          98,
+                          111,
+                          108,
+                          100,
+                          45,
+                          105,
+                          116,
+                          97,
+                          108,
+                          105,
+                          99
+                        ]
+                      }
+                    ],
+                    [
+                      "DOUBLESTRUCK",
+                      {
+                        "type": "string",
+                        "units": [
+                          100,
+                          111,
+                          117,
+                          98,
+                          108,
+                          101,
+                          45,
+                          115,
+                          116,
+                          114,
+                          117,
+                          99,
+                          107
+                        ]
+                      }
+                    ],
+                    [
+                      "FRAKTUR",
+                      {
+                        "type": "string",
+                        "units": [
+                          102,
+                          114,
+                          97,
+                          107,
+                          116,
+                          117,
+                          114
+                        ]
+                      }
+                    ],
+                    [
+                      "BOLDFRAKTUR",
+                      {
+                        "type": "string",
+                        "units": [
+                          98,
+                          111,
+                          108,
+                          100,
+                          45,
+                          102,
+                          114,
+                          97,
+                          107,
+                          116,
+                          117,
+                          114
+                        ]
+                      }
+                    ],
+                    [
+                      "SCRIPT",
+                      {
+                        "type": "string",
+                        "units": [
+                          115,
+                          99,
+                          114,
+                          105,
+                          112,
+                          116
+                        ]
+                      }
+                    ],
+                    [
+                      "BOLDSCRIPT",
+                      {
+                        "type": "string",
+                        "units": [
+                          98,
+                          111,
+                          108,
+                          100,
+                          45,
+                          115,
+                          99,
+                          114,
+                          105,
+                          112,
+                          116
+                        ]
+                      }
+                    ],
+                    [
+                      "SANSSERIF",
+                      {
+                        "type": "string",
+                        "units": [
+                          115,
+                          97,
+                          110,
+                          115,
+                          45,
+                          115,
+                          101,
+                          114,
+                          105,
+                          102
+                        ]
+                      }
+                    ],
+                    [
+                      "BOLDSANSSERIF",
+                      {
+                        "type": "string",
+                        "units": [
+                          98,
+                          111,
+                          108,
+                          100,
+                          45,
+                          115,
+                          97,
+                          110,
+                          115,
+                          45,
+                          115,
+                          101,
+                          114,
+                          105,
+                          102
+                        ]
+                      }
+                    ],
+                    [
+                      "SANSSERIFITALIC",
+                      {
+                        "type": "string",
+                        "units": [
+                          115,
+                          97,
+                          110,
+                          115,
+                          45,
+                          115,
+                          101,
+                          114,
+                          105,
+                          102,
+                          45,
+                          105,
+                          116,
+                          97,
+                          108,
+                          105,
+                          99
+                        ]
+                      }
+                    ],
+                    [
+                      "SANSSERIFBOLDITALIC",
+                      {
+                        "type": "string",
+                        "units": [
+                          115,
+                          97,
+                          110,
+                          115,
+                          45,
+                          115,
+                          101,
+                          114,
+                          105,
+                          102,
+                          45,
+                          98,
+                          111,
+                          108,
+                          100,
+                          45,
+                          105,
+                          116,
+                          97,
+                          108,
+                          105,
+                          99
+                        ]
+                      }
+                    ],
+                    [
+                      "MONOSPACE",
+                      {
+                        "type": "string",
+                        "units": [
+                          109,
+                          111,
+                          110,
+                          111,
+                          115,
+                          112,
+                          97,
+                          99,
+                          101
+                        ]
+                      }
+                    ],
+                    [
+                      "INITIAL",
+                      {
+                        "type": "string",
+                        "units": [
+                          105,
+                          110,
+                          105,
+                          116,
+                          97,
+                          108
+                        ]
+                      }
+                    ],
+                    [
+                      "TAILED",
+                      {
+                        "type": "string",
+                        "units": [
+                          116,
+                          97,
+                          105,
+                          108,
+                          101,
+                          100
+                        ]
+                      }
+                    ],
+                    [
+                      "LOOPED",
+                      {
+                        "type": "string",
+                        "units": [
+                          108,
+                          111,
+                          111,
+                          112,
+                          101,
+                          100
+                        ]
+                      }
+                    ],
+                    [
+                      "STRETCHED",
+                      {
+                        "type": "string",
+                        "units": [
+                          115,
+                          116,
+                          114,
+                          101,
+                          116,
+                          99,
+                          104,
+                          101,
+                          100
+                        ]
+                      }
+                    ],
+                    [
+                      "CALLIGRAPHIC",
+                      {
+                        "type": "string",
+                        "units": [
+                          45,
+                          116,
+                          101,
+                          120,
+                          45,
+                          99,
+                          97,
+                          108,
+                          108,
+                          105,
+                          103,
+                          114,
+                          97,
+                          112,
+                          104,
+                          105,
+                          99
+                        ]
+                      }
+                    ],
+                    [
+                      "BOLDCALLIGRAPHIC",
+                      {
+                        "type": "string",
+                        "units": [
+                          45,
+                          116,
+                          101,
+                          120,
+                          45,
+                          98,
+                          111,
+                          108,
+                          100,
+                          45,
+                          99,
+                          97,
+                          108,
+                          108,
+                          105,
+                          103,
+                          114,
+                          97,
+                          112,
+                          104,
+                          105,
+                          99
+                        ]
+                      }
+                    ],
+                    [
+                      "OLDSTYLE",
+                      {
+                        "type": "string",
+                        "units": [
+                          45,
+                          116,
+                          101,
+                          120,
+                          45,
+                          111,
+                          108,
+                          100,
+                          115,
+                          116,
+                          121,
+                          108,
+                          101
+                        ]
+                      }
+                    ],
+                    [
+                      "BOLDOLDSTYLE",
+                      {
+                        "type": "string",
+                        "units": [
+                          45,
+                          116,
+                          101,
+                          120,
+                          45,
+                          98,
+                          111,
+                          108,
+                          100,
+                          45,
+                          111,
+                          108,
+                          100,
+                          115,
+                          116,
+                          121,
+                          108,
+                          101
+                        ]
+                      }
+                    ],
+                    [
+                      "MATHITALIC",
+                      {
+                        "type": "string",
+                        "units": [
+                          45,
+                          116,
+                          101,
+                          120,
+                          45,
+                          109,
+                          97,
+                          116,
+                          104,
+                          105,
+                          116
+                        ]
+                      }
+                    ]
+                  ]
+                }
+              ],
+              [
+                "Form",
+                {
+                  "type": "object",
+                  "entries": [
+                    [
+                      "PREFIX",
+                      {
+                        "type": "string",
+                        "units": [
+                          112,
+                          114,
+                          101,
+                          102,
+                          105,
+                          120
+                        ]
+                      }
+                    ],
+                    [
+                      "INFIX",
+                      {
+                        "type": "string",
+                        "units": [
+                          105,
+                          110,
+                          102,
+                          105,
+                          120
+                        ]
+                      }
+                    ],
+                    [
+                      "POSTFIX",
+                      {
+                        "type": "string",
+                        "units": [
+                          112,
+                          111,
+                          115,
+                          116,
+                          102,
+                          105,
+                          120
+                        ]
+                      }
+                    ]
+                  ]
+                }
+              ],
+              [
+                "LineBreak",
+                {
+                  "type": "object",
+                  "entries": [
+                    [
+                      "AUTO",
+                      {
+                        "type": "string",
+                        "units": [
+                          97,
+                          117,
+                          116,
+                          111
+                        ]
+                      }
+                    ],
+                    [
+                      "NEWLINE",
+                      {
+                        "type": "string",
+                        "units": [
+                          110,
+                          101,
+                          119,
+                          108,
+                          105,
+                          110,
+                          101
+                        ]
+                      }
+                    ],
+                    [
+                      "NOBREAK",
+                      {
+                        "type": "string",
+                        "units": [
+                          110,
+                          111,
+                          98,
+                          114,
+                          101,
+                          97,
+                          107
+                        ]
+                      }
+                    ],
+                    [
+                      "GOODBREAK",
+                      {
+                        "type": "string",
+                        "units": [
+                          103,
+                          111,
+                          111,
+                          100,
+                          98,
+                          114,
+                          101,
+                          97,
+                          107
+                        ]
+                      }
+                    ],
+                    [
+                      "BADBREAK",
+                      {
+                        "type": "string",
+                        "units": [
+                          98,
+                          97,
+                          100,
+                          98,
+                          114,
+                          101,
+                          97,
+                          107
+                        ]
+                      }
+                    ]
+                  ]
+                }
+              ],
+              [
+                "LineBreakStyle",
+                {
+                  "type": "object",
+                  "entries": [
+                    [
+                      "BEFORE",
+                      {
+                        "type": "string",
+                        "units": [
+                          98,
+                          101,
+                          102,
+                          111,
+                          114,
+                          101
+                        ]
+                      }
+                    ],
+                    [
+                      "AFTER",
+                      {
+                        "type": "string",
+                        "units": [
+                          97,
+                          102,
+                          116,
+                          101,
+                          114
+                        ]
+                      }
+                    ],
+                    [
+                      "DUPLICATE",
+                      {
+                        "type": "string",
+                        "units": [
+                          100,
+                          117,
+                          112,
+                          108,
+                          105,
+                          99,
+                          97,
+                          116,
+                          101
+                        ]
+                      }
+                    ],
+                    [
+                      "INFIXLINBREAKSTYLE",
+                      {
+                        "type": "string",
+                        "units": [
+                          105,
+                          110,
+                          102,
+                          105,
+                          120,
+                          108,
+                          105,
+                          110,
+                          101,
+                          98,
+                          114,
+                          101,
+                          97,
+                          107,
+                          115,
+                          116,
+                          121,
+                          108,
+                          101
+                        ]
+                      }
+                    ]
+                  ]
+                }
+              ],
+              [
+                "IndentAlign",
+                {
+                  "type": "object",
+                  "entries": [
+                    [
+                      "LEFT",
+                      {
+                        "type": "string",
+                        "units": [
+                          108,
+                          101,
+                          102,
+                          116
+                        ]
+                      }
+                    ],
+                    [
+                      "CENTER",
+                      {
+                        "type": "string",
+                        "units": [
+                          99,
+                          101,
+                          110,
+                          116,
+                          101,
+                          114
+                        ]
+                      }
+                    ],
+                    [
+                      "RIGHT",
+                      {
+                        "type": "string",
+                        "units": [
+                          114,
+                          105,
+                          103,
+                          104,
+                          116
+                        ]
+                      }
+                    ],
+                    [
+                      "AUTO",
+                      {
+                        "type": "string",
+                        "units": [
+                          97,
+                          117,
+                          116,
+                          111
+                        ]
+                      }
+                    ],
+                    [
+                      "ID",
+                      {
+                        "type": "string",
+                        "units": [
+                          105,
+                          100
+                        ]
+                      }
+                    ],
+                    [
+                      "INDENTALIGN",
+                      {
+                        "type": "string",
+                        "units": [
+                          105,
+                          110,
+                          100,
+                          101,
+                          110,
+                          116,
+                          97,
+                          108,
+                          105,
+                          103,
+                          110
+                        ]
+                      }
+                    ]
+                  ]
+                }
+              ],
+              [
+                "IndentShift",
+                {
+                  "type": "object",
+                  "entries": [
+                    [
+                      "INDENTSHIFT",
+                      {
+                        "type": "string",
+                        "units": [
+                          105,
+                          110,
+                          100,
+                          101,
+                          110,
+                          116,
+                          115,
+                          104,
+                          105,
+                          102,
+                          116
+                        ]
+                      }
+                    ]
+                  ]
+                }
+              ],
+              [
+                "LineThickness",
+                {
+                  "type": "object",
+                  "entries": [
+                    [
+                      "THIN",
+                      {
+                        "type": "string",
+                        "units": [
+                          116,
+                          104,
+                          105,
+                          110
+                        ]
+                      }
+                    ],
+                    [
+                      "MEDIUM",
+                      {
+                        "type": "string",
+                        "units": [
+                          109,
+                          101,
+                          100,
+                          105,
+                          117,
+                          109
+                        ]
+                      }
+                    ],
+                    [
+                      "THICK",
+                      {
+                        "type": "string",
+                        "units": [
+                          116,
+                          104,
+                          105,
+                          99,
+                          107
+                        ]
+                      }
+                    ]
+                  ]
+                }
+              ],
+              [
+                "Notation",
+                {
+                  "type": "object",
+                  "entries": [
+                    [
+                      "LONGDIV",
+                      {
+                        "type": "string",
+                        "units": [
+                          108,
+                          111,
+                          110,
+                          103,
+                          100,
+                          105,
+                          118
+                        ]
+                      }
+                    ],
+                    [
+                      "ACTUARIAL",
+                      {
+                        "type": "string",
+                        "units": [
+                          97,
+                          99,
+                          116,
+                          117,
+                          97,
+                          114,
+                          105,
+                          97,
+                          108
+                        ]
+                      }
+                    ],
+                    [
+                      "PHASORANGLE",
+                      {
+                        "type": "string",
+                        "units": [
+                          112,
+                          104,
+                          97,
+                          115,
+                          111,
+                          114,
+                          97,
+                          110,
+                          103,
+                          108,
+                          101
+                        ]
+                      }
+                    ],
+                    [
+                      "RADICAL",
+                      {
+                        "type": "string",
+                        "units": [
+                          114,
+                          97,
+                          100,
+                          105,
+                          99,
+                          97,
+                          108
+                        ]
+                      }
+                    ],
+                    [
+                      "BOX",
+                      {
+                        "type": "string",
+                        "units": [
+                          98,
+                          111,
+                          120
+                        ]
+                      }
+                    ],
+                    [
+                      "ROUNDEDBOX",
+                      {
+                        "type": "string",
+                        "units": [
+                          114,
+                          111,
+                          117,
+                          110,
+                          100,
+                          101,
+                          100,
+                          98,
+                          111,
+                          120
+                        ]
+                      }
+                    ],
+                    [
+                      "CIRCLE",
+                      {
+                        "type": "string",
+                        "units": [
+                          99,
+                          105,
+                          114,
+                          99,
+                          108,
+                          101
+                        ]
+                      }
+                    ],
+                    [
+                      "LEFT",
+                      {
+                        "type": "string",
+                        "units": [
+                          108,
+                          101,
+                          102,
+                          116
+                        ]
+                      }
+                    ],
+                    [
+                      "RIGHT",
+                      {
+                        "type": "string",
+                        "units": [
+                          114,
+                          105,
+                          103,
+                          104,
+                          116
+                        ]
+                      }
+                    ],
+                    [
+                      "TOP",
+                      {
+                        "type": "string",
+                        "units": [
+                          116,
+                          111,
+                          112
+                        ]
+                      }
+                    ],
+                    [
+                      "BOTTOM",
+                      {
+                        "type": "string",
+                        "units": [
+                          98,
+                          111,
+                          116,
+                          116,
+                          111,
+                          109
+                        ]
+                      }
+                    ],
+                    [
+                      "UPDIAGONALSTRIKE",
+                      {
+                        "type": "string",
+                        "units": [
+                          117,
+                          112,
+                          100,
+                          105,
+                          97,
+                          103,
+                          111,
+                          110,
+                          97,
+                          108,
+                          115,
+                          116,
+                          114,
+                          105,
+                          107,
+                          101
+                        ]
+                      }
+                    ],
+                    [
+                      "DOWNDIAGONALSTRIKE",
+                      {
+                        "type": "string",
+                        "units": [
+                          100,
+                          111,
+                          119,
+                          110,
+                          100,
+                          105,
+                          97,
+                          103,
+                          111,
+                          110,
+                          97,
+                          108,
+                          115,
+                          116,
+                          114,
+                          105,
+                          107,
+                          101
+                        ]
+                      }
+                    ],
+                    [
+                      "VERTICALSTRIKE",
+                      {
+                        "type": "string",
+                        "units": [
+                          118,
+                          101,
+                          114,
+                          116,
+                          105,
+                          99,
+                          97,
+                          108,
+                          115,
+                          116,
+                          114,
+                          105,
+                          107,
+                          101
+                        ]
+                      }
+                    ],
+                    [
+                      "HORIZONTALSTRIKE",
+                      {
+                        "type": "string",
+                        "units": [
+                          104,
+                          111,
+                          114,
+                          105,
+                          122,
+                          111,
+                          110,
+                          116,
+                          97,
+                          108,
+                          115,
+                          116,
+                          114,
+                          105,
+                          107,
+                          101
+                        ]
+                      }
+                    ],
+                    [
+                      "NORTHEASTARROW",
+                      {
+                        "type": "string",
+                        "units": [
+                          110,
+                          111,
+                          114,
+                          116,
+                          104,
+                          101,
+                          97,
+                          115,
+                          116,
+                          97,
+                          114,
+                          114,
+                          111,
+                          119
+                        ]
+                      }
+                    ],
+                    [
+                      "MADRUWB",
+                      {
+                        "type": "string",
+                        "units": [
+                          109,
+                          97,
+                          100,
+                          114,
+                          117,
+                          119,
+                          98
+                        ]
+                      }
+                    ],
+                    [
+                      "UPDIAGONALARROW",
+                      {
+                        "type": "string",
+                        "units": [
+                          117,
+                          112,
+                          100,
+                          105,
+                          97,
+                          103,
+                          111,
+                          110,
+                          97,
+                          108,
+                          97,
+                          114,
+                          114,
+                          111,
+                          119
+                        ]
+                      }
+                    ]
+                  ]
+                }
+              ],
+              [
+                "Align",
+                {
+                  "type": "object",
+                  "entries": [
+                    [
+                      "TOP",
+                      {
+                        "type": "string",
+                        "units": [
+                          116,
+                          111,
+                          112
+                        ]
+                      }
+                    ],
+                    [
+                      "BOTTOM",
+                      {
+                        "type": "string",
+                        "units": [
+                          98,
+                          111,
+                          116,
+                          116,
+                          111,
+                          109
+                        ]
+                      }
+                    ],
+                    [
+                      "CENTER",
+                      {
+                        "type": "string",
+                        "units": [
+                          99,
+                          101,
+                          110,
+                          116,
+                          101,
+                          114
+                        ]
+                      }
+                    ],
+                    [
+                      "BASELINE",
+                      {
+                        "type": "string",
+                        "units": [
+                          98,
+                          97,
+                          115,
+                          101,
+                          108,
+                          105,
+                          110,
+                          101
+                        ]
+                      }
+                    ],
+                    [
+                      "AXIS",
+                      {
+                        "type": "string",
+                        "units": [
+                          97,
+                          120,
+                          105,
+                          115
+                        ]
+                      }
+                    ],
+                    [
+                      "LEFT",
+                      {
+                        "type": "string",
+                        "units": [
+                          108,
+                          101,
+                          102,
+                          116
+                        ]
+                      }
+                    ],
+                    [
+                      "RIGHT",
+                      {
+                        "type": "string",
+                        "units": [
+                          114,
+                          105,
+                          103,
+                          104,
+                          116
+                        ]
+                      }
+                    ]
+                  ]
+                }
+              ],
+              [
+                "Lines",
+                {
+                  "type": "object",
+                  "entries": [
+                    [
+                      "NONE",
+                      {
+                        "type": "string",
+                        "units": [
+                          110,
+                          111,
+                          110,
+                          101
+                        ]
+                      }
+                    ],
+                    [
+                      "SOLID",
+                      {
+                        "type": "string",
+                        "units": [
+                          115,
+                          111,
+                          108,
+                          105,
+                          100
+                        ]
+                      }
+                    ],
+                    [
+                      "DASHED",
+                      {
+                        "type": "string",
+                        "units": [
+                          100,
+                          97,
+                          115,
+                          104,
+                          101,
+                          100
+                        ]
+                      }
+                    ]
+                  ]
+                }
+              ],
+              [
+                "Side",
+                {
+                  "type": "object",
+                  "entries": [
+                    [
+                      "LEFT",
+                      {
+                        "type": "string",
+                        "units": [
+                          108,
+                          101,
+                          102,
+                          116
+                        ]
+                      }
+                    ],
+                    [
+                      "RIGHT",
+                      {
+                        "type": "string",
+                        "units": [
+                          114,
+                          105,
+                          103,
+                          104,
+                          116
+                        ]
+                      }
+                    ],
+                    [
+                      "LEFTOVERLAP",
+                      {
+                        "type": "string",
+                        "units": [
+                          108,
+                          101,
+                          102,
+                          116,
+                          111,
+                          118,
+                          101,
+                          114,
+                          108,
+                          97,
+                          112
+                        ]
+                      }
+                    ],
+                    [
+                      "RIGHTOVERLAP",
+                      {
+                        "type": "string",
+                        "units": [
+                          114,
+                          105,
+                          103,
+                          104,
+                          116,
+                          111,
+                          118,
+                          101,
+                          114,
+                          108,
+                          97,
+                          112
+                        ]
+                      }
+                    ]
+                  ]
+                }
+              ],
+              [
+                "Width",
+                {
+                  "type": "object",
+                  "entries": [
+                    [
+                      "AUTO",
+                      {
+                        "type": "string",
+                        "units": [
+                          97,
+                          117,
+                          116,
+                          111
+                        ]
+                      }
+                    ],
+                    [
+                      "FIT",
+                      {
+                        "type": "string",
+                        "units": [
+                          102,
+                          105,
+                          116
+                        ]
+                      }
+                    ]
+                  ]
+                }
+              ],
+              [
+                "Actiontype",
+                {
+                  "type": "object",
+                  "entries": [
+                    [
+                      "TOGGLE",
+                      {
+                        "type": "string",
+                        "units": [
+                          116,
+                          111,
+                          103,
+                          103,
+                          108,
+                          101
+                        ]
+                      }
+                    ],
+                    [
+                      "STATUSLINE",
+                      {
+                        "type": "string",
+                        "units": [
+                          115,
+                          116,
+                          97,
+                          116,
+                          117,
+                          115,
+                          108,
+                          105,
+                          110,
+                          101
+                        ]
+                      }
+                    ],
+                    [
+                      "TOOLTIP",
+                      {
+                        "type": "string",
+                        "units": [
+                          116,
+                          111,
+                          111,
+                          108,
+                          116,
+                          105,
+                          112
+                        ]
+                      }
+                    ],
+                    [
+                      "INPUT",
+                      {
+                        "type": "string",
+                        "units": [
+                          105,
+                          110,
+                          112,
+                          117,
+                          116
+                        ]
+                      }
+                    ]
+                  ]
+                }
+              ],
+              [
+                "Overflow",
+                {
+                  "type": "object",
+                  "entries": [
+                    [
+                      "LINBREAK",
+                      {
+                        "type": "string",
+                        "units": [
+                          108,
+                          105,
+                          110,
+                          101,
+                          98,
+                          114,
+                          101,
+                          97,
+                          107
+                        ]
+                      }
+                    ],
+                    [
+                      "SCROLL",
+                      {
+                        "type": "string",
+                        "units": [
+                          115,
+                          99,
+                          114,
+                          111,
+                          108,
+                          108
+                        ]
+                      }
+                    ],
+                    [
+                      "ELIDE",
+                      {
+                        "type": "string",
+                        "units": [
+                          101,
+                          108,
+                          105,
+                          100,
+                          101
+                        ]
+                      }
+                    ],
+                    [
+                      "TRUNCATE",
+                      {
+                        "type": "string",
+                        "units": [
+                          116,
+                          114,
+                          117,
+                          110,
+                          99,
+                          97,
+                          116,
+                          101
+                        ]
+                      }
+                    ],
+                    [
+                      "SCALE",
+                      {
+                        "type": "string",
+                        "units": [
+                          115,
+                          99,
+                          97,
+                          108,
+                          101
+                        ]
+                      }
+                    ]
+                  ]
+                }
+              ],
+              [
+                "Unit",
+                {
+                  "type": "object",
+                  "entries": [
+                    [
+                      "EM",
+                      {
+                        "type": "string",
+                        "units": [
+                          101,
+                          109
+                        ]
+                      }
+                    ],
+                    [
+                      "EX",
+                      {
+                        "type": "string",
+                        "units": [
+                          101,
+                          120
+                        ]
+                      }
+                    ],
+                    [
+                      "PX",
+                      {
+                        "type": "string",
+                        "units": [
+                          112,
+                          120
+                        ]
+                      }
+                    ],
+                    [
+                      "IN",
+                      {
+                        "type": "string",
+                        "units": [
+                          105,
+                          110
+                        ]
+                      }
+                    ],
+                    [
+                      "CM",
+                      {
+                        "type": "string",
+                        "units": [
+                          99,
+                          109
+                        ]
+                      }
+                    ],
+                    [
+                      "MM",
+                      {
+                        "type": "string",
+                        "units": [
+                          109,
+                          109
+                        ]
+                      }
+                    ],
+                    [
+                      "PT",
+                      {
+                        "type": "string",
+                        "units": [
+                          112,
+                          116
+                        ]
+                      }
+                    ],
+                    [
+                      "PC",
+                      {
+                        "type": "string",
+                        "units": [
+                          112,
+                          99
+                        ]
+                      }
+                    ]
+                  ]
+                }
+              ],
+              [
+                "Attr",
+                {
+                  "type": "object",
+                  "entries": [
+                    [
+                      "LATEX",
+                      {
+                        "type": "string",
+                        "units": [
+                          100,
+                          97,
+                          116,
+                          97,
+                          45,
+                          108,
+                          97,
+                          116,
+                          101,
+                          120
+                        ]
+                      }
+                    ],
+                    [
+                      "LATEXITEM",
+                      {
+                        "type": "string",
+                        "units": [
+                          100,
+                          97,
+                          116,
+                          97,
+                          45,
+                          108,
+                          97,
+                          116,
+                          101,
+                          120,
+                          45,
+                          105,
+                          116,
+                          101,
+                          109
+                        ]
+                      }
+                    ]
+                  ]
+                }
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

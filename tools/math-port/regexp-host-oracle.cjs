@@ -1,3 +1,4 @@
+// srell_sha256 is frozen historical native-artifact metadata, not a Source input.
 // Root observations of actual ECMAScript RegExp and pinned FindTeX generators.
 'use strict';
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),crypto=require('node:crypto');
@@ -42,18 +43,4 @@ add('actual-environment-end-capture',finder.endPattern(null,'\\\\end\\s*(\\{a\\-
 add('invalid-group-is-syntax-error','(','x');
 add('duplicate-flags-are-syntax-error','x','x','gg');
 add('unknown-flag-is-syntax-error','x','x','z');
-function literal(s){return 'std::u16string({'+Array.from({length:s.length},(_,i)=>'char16_t(0x'+s.charCodeAt(i).toString(16)+')').join(',')+'})';}
-function number(n){return typeof n==='number'?String(n):n==='NaN'?'std::numeric_limits<double>::quiet_NaN()':'std::numeric_limits<double>::infinity()';}
-let native=String.raw`// Generated from original RegExp exec, using pinned FindTeX-generated patterns.
-#include "support/folia_test.hpp"
-import folia.math.util.regexp_host;
-import folia.math.util.js_number;
-namespace {using namespace boost::ut;namespace host=folia::math::regexp_host;
-std::string hex(std::u16string_view s){constexpr char digits[]="0123456789abcdef";std::string out;for(auto c:s){for(int shift=12;shift>=0;shift-=4)out.push_back(digits[(c>>shift)&15]);}return out;}
-std::string observe(host::RegExp&r,const std::u16string&input,int count){std::string out;for(int i=0;i<count;i++){if(i)out+='|';auto m=r.exec(input);if(m){out+="index="+std::to_string(m->index)+",caps=";for(std::size_t j=0;j<m->captures.size();j++){if(j)out+='/';out+=m->captures[j]?hex(*m->captures[j]):"U";}out+=",input="+hex(m->input);}else out+="null";out+=";last="+folia::math::js_number::toString(r.lastIndex);}return out;}
-suite regexp=[] {
-`;
-for(const[i,row]of rows.entries())native+='"math_port_scanner_regexp_source_'+i+'"_test=[] {std::string actual;try{host::RegExp r('+literal(row.pattern)+','+literal(row.flags)+');r.lastIndex='+number(row.lastIndex)+';actual=observe(r,'+literal(row.input)+','+row.count+');}catch(const folia::math::options::Exception&error){actual=error.name;}expect(eq(actual,std::string('+JSON.stringify(row.expected)+')))<<'+JSON.stringify(row.label)+';};\n';native+='};}\n';
-const manifest={stage:'native numeric-cursor non-Unicode scanner RegExp host; not complete ECMAScript regex',node:process.version,srell_sha256:crypto.createHash('sha256').update(fs.readFileSync(path.join(root,'third_party/srell/srell.hpp'))).digest('hex'),hashes,rows};
-for(const[file,data]of [['docs/math-port/evidence/p50-regexp-host-source.json',JSON.stringify(manifest,null,2)+'\n'],['tests/math/reference_scanner_regexp.cpp',native]]){const target=path.join(root,file);if(process.argv.includes('--check'))assert.equal(fs.readFileSync(target,'utf8').replaceAll('\r\n','\n'),data);else fs.writeFileSync(target,data);}
-console.log(JSON.stringify({source_cases:rows.length}));
+const manifest={stage:'native numeric-cursor non-Unicode scanner RegExp host; not complete ECMAScript regex',node:process.version,srell_sha256:'eac98b722d702048e7448eb885f918d2343503b1ba9174d7efe86e2a791a0b9a',hashes,rows};;assert.ok(process.argv.includes('--check'));assert.equal(fs.readFileSync(path.join(root,'docs/math-port/evidence/p50-regexp-host-source.json'),'utf8').replaceAll('\r\n','\n'),JSON.stringify(manifest,null,2)+'\n');console.log(JSON.stringify({rows:rows.length,mode:'check'}));

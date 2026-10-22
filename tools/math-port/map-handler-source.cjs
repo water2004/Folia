@@ -85,8 +85,4 @@ const names=xs=>Array.from(xs._configuration).map(r=>r.item.name),items=xs=>Arra
  const logs=[],old=console.log,q=new SubHandler(),name='p20-警告-\ud800';try{console.log=x=>logs.push(x);q.add([name],null);}finally{console.log=old;}add('unicode_warning',[logs.length===1,logs[0]==="TexParser Warning: Configuration '"+name+"' not found! Omitted."]);
 }
 const text=JSON.stringify({stage:'actual Source MapHandler; concrete token maps not accepted',source:'7cacdaef3ed1df90b4f05cc0b3183a2956ae8f848f20ae8833932faa4efcb2a2',cases},null,2)+'\n',target=path.join(root,'docs/math-port/evidence/p20a-map-handler-source.json');
-const header='// Root generated from actual pinned CJS; do not hand edit.\n'+cases.map(c=>`const std::array<bool,${c.flags.length}> source_${c.name}{${c.flags.join(',')}};`).join('\n')+'\n';
-for(const[file,content]of [[target,text],[path.join(root,'tests/math/map_handler_source.inc'),header]]){
- if(process.argv.includes('--check'))assert.equal(fs.readFileSync(file,'utf8').replaceAll('\r\n','\n'),content);else fs.writeFileSync(file,content);
-}
-console.log(JSON.stringify({cases:cases.length,observations:cases.reduce((n,c)=>n+c.flags.length,0),mode:process.argv.includes('--check')?'check':'generate'}));
+assert.ok(process.argv.includes('--check'));assert.equal(fs.readFileSync(target,'utf8').replaceAll('\r\n','\n'),text);console.log(JSON.stringify({cases:cases.length,observations:cases.reduce((n,c)=>n+c.flags.length,0),mode:'check'}));

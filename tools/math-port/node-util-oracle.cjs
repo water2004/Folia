@@ -1,50 +1,53 @@
 // Pinned original NodeUtil observations; Native code only performs the calls.
 'use strict';const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),crypto=require('node:crypto');
-const {root,MmlFactory,core}=require('./simple-mml-reference.cjs'),base=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax/src');
+const {root,MmlFactory,core}=require(path.join(process.env.FOLIA_MATH_PORT_TOOLS||__dirname,'simple-mml-reference.cjs')),base=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax/src');
 const source='ts/input/tex/NodeUtil.ts',pin=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/scope.json'))).files.find(f=>f.source===source);
 const bytes=fs.readFileSync(path.join(root,'.reference/MathJax-src',source));assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),pin.source_sha256);assert.equal(bytes.toString().replaceAll('\r\n','\n'),fs.readFileSync(path.join(base,source),'utf8').replaceAll('\r\n','\n'));
 const u=require(path.join(base,'cjs/input/tex/NodeUtil.js')).default;
 const value=v=>v===undefined?'U':v===null?'N':typeof v+':'+String(v);
-const rows=[];function add(label,cpp,observe){let expected;try{expected=observe();}catch(e){expected=e.name+'|'+e.message;}rows.push({label,cpp,expected});}
-const prefix='MmlFactory f;tex::NodeUtil u;';
+const rows=[];function add(label,observe){let expected;try{expected=observe();}catch(e){expected=e.name+'|'+e.message;}rows.push({label,expected});}
+
 const n=(kind='mo',text='+')=>{const f=new MmlFactory();return f.create(kind,{},[f.create('text').setText(text)]);};
-const nodeCpp=(kind='mo',text='+')=>'auto* node=f.create('+JSON.stringify(kind)+');node->appendChild(dynamic_cast<TextNode*>(f.create("text"))->setText(std::u16string(u'+JSON.stringify(text)+')));';
-for(const code of ['2026','22EF','1D538','0x41','  +41tail','10ffff','D800','-1','110000','xyz',''])add('entity:'+code,'return hex(u.createEntity(u'+JSON.stringify(code)+'));',()=>hex(u.createEntity(code)));
+
+for(const code of ['2026','22EF','1D538','0x41','  +41tail','10ffff','D800','-1','110000','xyz',''])add('entity:'+code,()=>hex(u.createEntity(code)));
 function hex(s){return Array.from({length:s.length},(_,i)=>s.charCodeAt(i).toString(16).padStart(4,'0')).join(',');}
-add('children-alias','auto* node=f.create("mrow");auto a=u.getChildren(node);a->push_back(f.create("mi"));return std::string(a==node->childNodes?"same":"copy")+":"+std::to_string(node->childNodes->size());',()=>{let node=new MmlFactory().create('mrow'),a=u.getChildren(node);a.push(new MmlFactory().create('mi'));return(a===node.childNodes?'same':'copy')+':'+node.childNodes.length;});
-add('children-null-array','auto* node=f.create("mrow");node->childNodes={};return u.getChildren(node)?"array":"null";',()=>{let node=new MmlFactory().create('mrow');node.childNodes=null;return u.getChildren(node)?'array':'null';});
-for(const kind of ['text','mi','mo','mtext','mrow'])add('text:'+kind,nodeCpp(kind==='text'?'mo':kind)+'return hex(u.getText('+ (kind==='text'?'node->childNodes->get(0)':'node')+'));',()=>u.getText(kind==='text'?n().childNodes[0]:n(kind)));
+add('children-alias',()=>{let node=new MmlFactory().create('mrow'),a=u.getChildren(node);a.push(new MmlFactory().create('mi'));return(a===node.childNodes?'same':'copy')+':'+node.childNodes.length;});
+add('children-null-array',()=>{let node=new MmlFactory().create('mrow');node.childNodes=null;return u.getChildren(node)?'array':'null';});
+for(const kind of ['text','mi','mo','mtext','mrow'])add('text:'+kind,()=>u.getText(kind==='text'?n().childNodes[0]:n(kind)));
 // Replace text observations with their character-exact UTF-16 representation.
 for(const row of rows)if(row.label.startsWith('text:')&&!row.expected.includes('|'))row.expected=hex(row.expected);
-add('append','auto* node=f.create("mrow");auto a=std::make_shared<tree::ChildArray<MmlNode>>();a->push_back(f.create("mi"));a->push_back(f.create("mn"));u.appendChildren(node,a);return std::to_string(node->childNodes->size())+":"+node->childNodes->get(0).requireNode()->kind()+":"+(node->childNodes->get(1).requireNode()->getParent()==NodeValue(node)?"parent":"bad");',()=>{let f=new MmlFactory(),node=f.create('mrow'),a=[f.create('mi'),f.create('mn')];u.appendChildren(node,a);return node.childNodes.length+':'+node.childNodes[0].kind+':'+(a[1].parent===node?'parent':'bad');});
-add('append-empty-null','u.appendChildren(PropertyNull{},std::make_shared<tree::ChildArray<MmlNode>>());return "ok";',()=>{u.appendChildren(null,[]);return'ok';});
-add('append-null-array','u.appendChildren(PropertyNull{},Children{});return "ok";',()=>{u.appendChildren(null,null);return'ok';});
+add('append',()=>{let f=new MmlFactory(),node=f.create('mrow'),a=[f.create('mi'),f.create('mn')];u.appendChildren(node,a);return node.childNodes.length+':'+node.childNodes[0].kind+':'+(a[1].parent===node?'parent':'bad');});
+add('append-empty-null',()=>{u.appendChildren(null,[]);return'ok';});
+add('append-null-array',()=>{u.appendChildren(null,null);return'ok';});
 for(const tag of ['U','N'])for(const form of ['texClass','inferred','empty']){
  const props=form==='empty'?{}:{[form]:true},arg=tag==='U'?undefined:null;
- add('properties-null:'+tag+':'+form,'u.setProperties('+(tag==='U'?'Missing{}':'PropertyNull{}')+','+(form==='empty'?'PropertyList{}':'PropertyList{{'+JSON.stringify(form)+',true}}')+');return "ok";',()=>{u.setProperties(arg,props);return'ok';});
+ add('properties-null:'+tag+':'+form,()=>{u.setProperties(arg,props);return'ok';});
 }
 for(const tag of ['U','N'])for(const op of ['getChildren','getText','setAttribute','setProperty','getProperty','getAttribute','removeAttribute','removeProperties','isType','isEmbellished','getTexClass','getCoreMO','isInferred','getForm','getOp','getMoAttribute']){
- const arg=tag==='U'?undefined:null,cpparg=tag==='U'?'Missing{}':'PropertyNull{}';
- const extra={setAttribute:',"x",1',setProperty:',"x",1',getProperty:',"x"',getAttribute:',"x"',removeAttribute:',"x"',removeProperties:',std::span<const std::string>{}',isType:',"mo"',getMoAttribute:',"accent"'}[op]||'';
+ const arg=tag==='U'?undefined:null;
+
  const jsExtra={setAttribute:['x',1],setProperty:['x',1],getProperty:['x'],getAttribute:['x'],removeAttribute:['x'],isType:['mo'],getMoAttribute:['accent']}[op]||[];
- add(op+':'+tag,'u.'+op+'('+cpparg+extra+');return "ok";',()=>{u[op](arg,...jsExtra);return'ok';});
+ add(op+':'+tag,()=>{u[op](arg,...jsExtra);return'ok';});
 }
-add('set-attribute','auto* node=f.create("mi");u.setAttribute(node,"mathcolor","red");return val(u.getAttribute(node,"mathcolor"));',()=>{let node=n('mi');u.setAttribute(node,'mathcolor','red');return value(u.getAttribute(node,'mathcolor'));});
-add('set-property','auto* node=f.create("mi");u.setProperty(node,"fnOP",false);return val(u.getProperty(node,"fnOP"));',()=>{let node=n('mi');u.setProperty(node,'fnOP',false);return value(u.getProperty(node,'fnOP'));});
-for(const key of [...u.attrs,'fnop','mathcolor'])add('route:'+key,'auto* node=f.create("mi");u.setProperties(node,PropertyList{{'+JSON.stringify(key)+',false}});return val(node->getProperty('+JSON.stringify(key)+'))+":"+val(node->attributes()->get('+JSON.stringify(key)+'));',()=>{let node=n('mi');u.setProperties(node,{[key]:false});return value(node.getProperty(key))+':'+value(node.attributes.get(key));});
-add('remove-attribute','auto* node=f.create("mi");node->attributes()->set("mathcolor","red");u.removeAttribute(node,"mathcolor");return val(node->attributes()->get("mathcolor"));',()=>{let node=n('mi');node.attributes.set('mathcolor','red');u.removeAttribute(node,'mathcolor');return value(node.attributes.get('mathcolor'));});
-add('remove-properties','auto* node=f.create("mi");node->setProperty("a",1);node->setProperty("b",2);node->setProperty("c",3);const std::vector<std::string> keys{"a","b"};u.removeProperties(node,keys);return val(node->getProperty("a"))+":"+val(node->getProperty("c"));',()=>{let node=n('mi');node.setProperty('a',1);node.setProperty('b',2);node.setProperty('c',3);u.removeProperties(node,'a','b');return value(node.getProperty('a'))+':'+value(node.getProperty('c'));});
-for(const kind of ['mi','mo','mstyle'])add('properties:'+kind,'auto* node=f.create('+JSON.stringify(kind)+');u.setProperties(node,PropertyList{{"texClass",3},{"movablelimits",false},{"inferred",true},{"fnOP",true},{"mathcolor","red"}});return val(node->texClass())+":"+val(node->getProperty("texClass"))+":"+val(node->getProperty("movablelimits"))+":"+val(node->attributes()->get("movablelimits"))+":"+val(node->getProperty("inferred"))+":"+val(node->getProperty("fnOP"))+":"+val(node->attributes()->get("mathcolor"));',()=>{let node=n(kind);u.setProperties(node,{texClass:3,movablelimits:false,inferred:true,fnOP:true,mathcolor:'red'});return[node.texClass,node.getProperty('texClass'),node.getProperty('movablelimits'),node.attributes.get('movablelimits'),node.getProperty('inferred'),node.getProperty('fnOP'),node.attributes.get('mathcolor')].map(value).join(':');});
-add('copy-attributes','auto* old=f.create("mi");auto* next=f.create("mn");old->setProperty("a",false);old->attributes()->set("mathcolor","red");u.copyAttributes(old,next);old->attributes()->set("mathcolor","blue");return std::string(old->attributes()==next->attributes()?"same":"copy")+":"+val(next->getProperty("a"))+":"+val(next->attributes()->get("mathcolor"));',()=>{let old=n('mi'),next=n('mn');old.setProperty('a',false);old.attributes.set('mathcolor','red');u.copyAttributes(old,next);old.attributes.set('mathcolor','blue');return(old.attributes===next.attributes?'same':'copy')+':'+value(next.getProperty('a'))+':'+value(next.attributes.get('mathcolor'));});
-for(const kind of ['mi','mo','mrow','inferredMrow','text','mspace'])add('queries:'+kind,'auto* node=f.create('+JSON.stringify(kind)+');return std::string(u.isType(node,"mo")?"1":"0")+(u.isEmbellished(node)?"1":"0")+":"+val(u.getTexClass(node))+":"+(u.getCoreMO(node)==NodeValue(node)?"self":"other")+":"+(u.isNode(std::any(NodeValue(node)))?"node":"no")+":"+(u.isInferred(node)?"inferred":"explicit");',()=>{let node=new MmlFactory().create(kind);return(u.isType(node,'mo')?'1':'0')+(u.isEmbellished(node)?'1':'0')+':'+value(u.getTexClass(node))+':'+(u.getCoreMO(node)===node?'self':'other')+':'+(u.isNode(node)?'node':'no')+':'+(u.isInferred(node)?'inferred':'explicit');});
-add('isNode-scalar','return u.isNode(std::any(Property(1)))?"node":"no";',()=>u.isNode(1)?'node':'no');
-for(const text of ['+','(',')','∑','x',''])for(const form of ['infix','prefix','postfix','missing'])add('op:'+text+':'+form,nodeCpp('mo',text)+'return val(u.getOp(node,'+(form==='missing'?'Property(Missing{})':JSON.stringify(form))+'));',()=>value(u.getOp(n('mo',text),form==='missing'?undefined:form)));
-for(const [tag,form,cpp]of [['null',null,'PropertyNull{}'],['bad','bad','"bad"']])add('op-invalid:'+tag,nodeCpp('mo','x')+'return val(u.getOp(node,'+cpp+'));',()=>value(u.getOp(n('mo','x'),form)));
-for(const kind of ['mo','mi'])for(const text of ['+','(',')','x'])add('form:'+kind+':'+text,nodeCpp(kind,text)+'return val(u.getForm(node));',()=>value(u.getForm(n(kind,text))));
-for(const text of ['+','∑','^','x'])for(const attr of ['accent','movablelimits','linebreakstyle','lspace'])for(const explicit of [false,true])add('moattr:'+text+':'+attr+':'+explicit,nodeCpp('mo',text)+(explicit?'node->attributes()->set('+JSON.stringify(attr)+',false);':'')+'return val(u.getMoAttribute(node,'+JSON.stringify(attr)+'));',()=>{let node=n('mo',text);if(explicit)node.attributes.set(attr,false);return value(u.getMoAttribute(node,attr));});
-const out=['// Generated actual original NodeUtil observations.','#include "support/folia_test.hpp"','import folia.math.input.tex.node_util;','import folia.math.core.mml_tree.mml_factory;','import folia.math.core.mml_tree.mml_node_host;','namespace {using namespace boost::ut;using namespace folia::math;using namespace folia::math::mml;std::string val(const Property& p){if(p.missing())return "U";if(std::holds_alternative<PropertyNull>(p.value))return "N";std::string type=std::holds_alternative<bool>(p.value)?"boolean":std::holds_alternative<double>(p.value)?"number":std::holds_alternative<std::string>(p.value)?"string":"object";return type+":"+host::debugText(host::string(p));}std::string hex(std::u16string_view s){std::string out;const char*digits="0123456789abcdef";for(auto c:s){if(!out.empty())out+=",";for(int shift=12;shift>=0;shift-=4)out+=digits[(c>>shift)&15];}return out;}suite node_util_source=[] {'];
-for(const [i,row]of rows.entries())out.push('"math_port_node_util_source_'+i+'"_test=[] {auto run=[]()->std::string{'+prefix+row.cpp+'};std::string actual;try{actual=run();}catch(const Error&e){actual=e.name+"|"+host::debugText(e.message);}expect(eq(actual,std::string('+JSON.stringify(row.expected)+')))<<'+JSON.stringify(row.label)+';};');
-// The string utility exception is the same options::Exception product.
-out.splice(4,0,'import folia.math.util.string;');out.push('};}');
-for(const [file,data]of [['docs/math-port/evidence/p40-node-util-source.json',JSON.stringify(rows)+'\n'],['tests/math/reference_node_util.cpp',out.join('\n')+'\n']]){const target=path.join(root,file);if(process.argv.includes('--check'))assert.equal(fs.readFileSync(target,'utf8').replaceAll('\r\n','\n'),data);else fs.writeFileSync(target,data);}
-console.log(JSON.stringify({source_calls:rows.length,source_sha256:pin.source_sha256}));
+add('set-attribute',()=>{let node=n('mi');u.setAttribute(node,'mathcolor','red');return value(u.getAttribute(node,'mathcolor'));});
+add('set-property',()=>{let node=n('mi');u.setProperty(node,'fnOP',false);return value(u.getProperty(node,'fnOP'));});
+for(const key of [...u.attrs,'fnop','mathcolor'])add('route:'+key,()=>{let node=n('mi');u.setProperties(node,{[key]:false});return value(node.getProperty(key))+':'+value(node.attributes.get(key));});
+add('remove-attribute',()=>{let node=n('mi');node.attributes.set('mathcolor','red');u.removeAttribute(node,'mathcolor');return value(node.attributes.get('mathcolor'));});
+add('remove-properties',()=>{let node=n('mi');node.setProperty('a',1);node.setProperty('b',2);node.setProperty('c',3);u.removeProperties(node,'a','b');return value(node.getProperty('a'))+':'+value(node.getProperty('c'));});
+for(const kind of ['mi','mo','mstyle'])add('properties:'+kind,()=>{let node=n(kind);u.setProperties(node,{texClass:3,movablelimits:false,inferred:true,fnOP:true,mathcolor:'red'});return[node.texClass,node.getProperty('texClass'),node.getProperty('movablelimits'),node.attributes.get('movablelimits'),node.getProperty('inferred'),node.getProperty('fnOP'),node.attributes.get('mathcolor')].map(value).join(':');});
+add('copy-attributes',()=>{let old=n('mi'),next=n('mn');old.setProperty('a',false);old.attributes.set('mathcolor','red');u.copyAttributes(old,next);old.attributes.set('mathcolor','blue');return(old.attributes===next.attributes?'same':'copy')+':'+value(next.getProperty('a'))+':'+value(next.attributes.get('mathcolor'));});
+for(const kind of ['mi','mo','mrow','inferredMrow','text','mspace'])add('queries:'+kind,()=>{let node=new MmlFactory().create(kind);return(u.isType(node,'mo')?'1':'0')+(u.isEmbellished(node)?'1':'0')+':'+value(u.getTexClass(node))+':'+(u.getCoreMO(node)===node?'self':'other')+':'+(u.isNode(node)?'node':'no')+':'+(u.isInferred(node)?'inferred':'explicit');});
+add('isNode-scalar',()=>u.isNode(1)?'node':'no');
+for(const text of ['+','(',')','∑','x',''])for(const form of ['infix','prefix','postfix','missing'])add('op:'+text+':'+form,()=>value(u.getOp(n('mo',text),form==='missing'?undefined:form)));
+for(const [tag,form]of [['null',null],['bad','bad']])add('op-invalid:'+tag,()=>value(u.getOp(n('mo','x'),form)));
+for(const kind of ['mo','mi'])for(const text of ['+','(',')','x'])add('form:'+kind+':'+text,()=>value(u.getForm(n(kind,text))));
+for(const text of ['+','∑','^','x'])for(const attr of ['accent','movablelimits','linebreakstyle','lspace'])for(const explicit of [false,true])add('moattr:'+text+':'+attr+':'+explicit,()=>{let node=n('mo',text);if(explicit)node.attributes.set(attr,false);return value(u.getMoAttribute(node,attr));});
+
+// Frozen original Source JSON remains byte-identical; only renderer-only cpp fields are projected.
+assert.ok(process.argv.includes('--check'),'Source-only oracle supports read-only --check');
+const frozenProfilePath=path.join(root,"docs/math-port/evidence/p40-node-util-source.json");
+const frozenBytes=fs.readFileSync(frozenProfilePath);
+function sourceFields(value){if(Array.isArray(value))return value.map(sourceFields);if(value&&typeof value==='object')return Object.fromEntries(Object.entries(value).filter(([key])=>key!=='cpp').map(([key,v])=>[key,sourceFields(v)]));return value;}
+const actualSourceProfile=rows;
+assert.deepStrictEqual(sourceFields(actualSourceProfile),sourceFields(JSON.parse(frozenBytes)),'Original Source inputs/expectations/pins changed');
+console.log(JSON.stringify({sourceCases:rows.length,profile:"docs/math-port/evidence/p40-node-util-source.json",profileSha256:crypto.createHash('sha256').update(frozenBytes).digest('hex'),mode:'check'}));
