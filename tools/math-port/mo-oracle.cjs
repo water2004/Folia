@@ -1,91 +1,71 @@
 // Root independent observations of the actual pinned MmlMo class.
 'use strict';
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
-const {root,M,u}=require('./mo-pattern-reference.cjs'),npm=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax/src/cjs');
+const {root,M}=require('./mo-pattern-reference.cjs'),npm=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax/src/cjs');
 const {MmlFactory:F}=require(path.join(npm,'core/MmlTree/MmlFactory.js'));
 const D=require(path.join(npm,'core/MmlTree/OperatorDictionary.js'));
 class Mo extends M{op(s){return this.getOperatorDef(s);}table(s){this.checkOperatorTable(s);}forms(a){return this.handleExplicitForm(a);}pseudo(s){this.checkPseudoScripts(s);}prime(s){this.checkPrimes(s);}accent(s){this.checkMathAccent(s);}}
 class Fork extends Mo{}Fork.OPTABLE={infix:{},prefix:{},postfix:{}};Fork.MMLSPACING=Array.from({length:8},()=>[9,8]);
 const f=()=>{const f=new F();f.setNodeClass('mo',Mo);f.setNodeClass('fork',Fork);return f;};
 const token=(f,k,text,attrs={})=>f.create(k,attrs,[f.create('text').setText(text)]);
-const out=['// Generated actual-CJS Mo observations, never native results.','#include "support/folia_test.hpp"',
-'import folia.math.core.mml_tree.mml_nodes.tex_atom;','import folia.math.core.mml_tree.mml_nodes.mo;','import folia.math.core.mml_tree.mo_host;','import folia.math.core.mml_tree.operator_dictionary;',
-'import folia.math.core.mml_tree.class_binding;','import folia.math.core.tree.node_factory;',
-...['math','mrow','mi','mn','mtext','ms','mspace','mstyle','merror','mphantom','msubsup','munderover'].map(n=>'import folia.math.core.mml_tree.mml_nodes.'+n+';'),
-'namespace m=folia::math::mml;namespace h=m::host;namespace d=m::operator_dict;namespace tr=folia::math::tree;using folia::math::Property;using folia::math::PropertyList;using folia::math::PropertyArray;using folia::math::PropertyNull;using folia::math::Missing;using namespace boost::ut;namespace {',
-'std::u16string units(std::initializer_list<unsigned>v){std::u16string s;for(auto x:v)s.push_back(static_cast<char16_t>(x));return s;}',
-'bool prop(const Property&a,const Property&b){if(auto x=std::get_if<double>(&a.value))if(auto y=std::get_if<double>(&b.value))return (std::isnan(*x)&&std::isnan(*y))||std::bit_cast<std::uint64_t>(*x)==std::bit_cast<std::uint64_t>(*y);return a==b;}',
-'m::Children children(std::initializer_list<m::NodeValue>v={}){return std::make_shared<tr::ChildArray<m::MmlNode>>(v);}',
-'struct Mo:m::MmlMo{using MmlMo::MmlMo;Property op(std::u16string_view s){return getOperatorDef(s);}void table(std::u16string_view s){checkOperatorTable(s);}PropertyArray forms(PropertyArray a){return handleExplicitForm(a);}void pseudo(std::u16string_view s){checkPseudoScripts(s);}void prime(std::u16string_view s){checkPrimes(s);}void accent(std::u16string_view s){checkMathAccent(s);}};',
-'struct Fork:Mo{using Mo::Mo;static Property&operatorTable(){static Property p=PropertyList{{"infix",PropertyList{}},{"prefix",PropertyList{}},{"postfix",PropertyList{}}};return p;}static Property&mathSpacing(){static Property p=[] {PropertyArray a;for(int i=0;i<8;++i)a.push(PropertyArray{9,8});return Property(a);}();return p;}};',
-'using NF=tr::AbstractNodeFactory<m::MmlNode>;tr::FactoryClassMap<m::MmlNode> classes(){return {{"TeXAtom",m::classBinding<m::MmlTeXAtom>()},{"mo",m::classBinding<Mo>()},{"fork",m::classBinding<Fork>()},{"math",m::classBinding<m::MmlMath>()},{"mrow",m::classBinding<m::MmlMrow>()},{"inferredMrow",m::classBinding<m::MmlInferredMrow>()},{"mi",m::classBinding<m::MmlMi>()},{"mn",m::classBinding<m::MmlMn>()},{"mtext",m::classBinding<m::MmlMtext>()},{"ms",m::classBinding<m::MmlMs>()},{"mspace",m::classBinding<m::MmlMspace>()},{"mstyle",m::classBinding<m::MmlMstyle>()},{"merror",m::classBinding<m::MmlMerror>()},{"mphantom",m::classBinding<m::MmlMphantom>()},{"msubsup",m::classBinding<m::MmlMsubsup>()},{"msub",m::classBinding<m::MmlMsub>()},{"msup",m::classBinding<m::MmlMsup>()},{"munderover",m::classBinding<m::MmlMunderover>()},{"munder",m::classBinding<m::MmlMunder>()},{"mover",m::classBinding<m::MmlMover>()},{"text",m::classBinding<m::TextNode>()}};}',
-'m::MmlNode* create(NF&f,std::string_view kind,PropertyList a={},m::Children c=children()){return f.create(kind,std::array<std::any,2>{a,c});}',
-'m::MmlNode* token(NF&f,std::string_view k,std::u16string_view s,PropertyList a={}){auto*t=dynamic_cast<m::TextNode*>(f.create("text"));t->setText(std::u16string(s));return create(f,k,a,children({t}));}',
-'Mo* mo(NF&f,std::u16string_view s,PropertyList a={},std::string_view k="mo"){return dynamic_cast<Mo*>(token(f,k,s,a));}',
-'std::u16string checkedCore(Mo*n,m::MmlNode*p){try{return n->coreText(p);}catch(const m::Error&e){std::cerr<<"coreText("<<(p?p->kind():"null")<<"): "<<e.name<<": "<<h::debugText(e.message)<<"\\n";throw;}}',
-'}','suite math_port_mo_tests=[] {'];
-let assertions=0,cases=0;const emit=x=>out.push(x),q=JSON.stringify;
-const number=x=>Number.isNaN(x)?'std::numeric_limits<double>::quiet_NaN()':x===Infinity?'std::numeric_limits<double>::infinity()':Object.is(x,-0)?'-0.0':String(x)+(Number.isInteger(x)?'.0':'');
-function p(x){if(x===undefined)return 'Property(Missing{})';if(x===null)return 'Property(PropertyNull{})';if(typeof x==='boolean')return 'Property('+x+')';if(typeof x==='number')return 'Property('+number(x)+')';if(typeof x==='string')return 'Property(h::debugText('+u(x)+'))';if(Array.isArray(x))return 'Property(PropertyArray{'+x.map(p).join(',')+'})';if(typeof x==='object')return 'Property(PropertyList{'+Object.keys(x).map(k=>'{'+q(k)+','+p(x[k])+'}').join(',')+'})';throw Error('Unbound observation');}
-function eq(x,e){assertions++;emit('expect(bool(('+e+')=='+(typeof x==='string'?q(x):typeof x==='number'?number(x):String(x))+'));');}
-function pp(x,e){assertions++;emit('expect(prop('+e+','+p(x)+'));');}
-function begin(n){cases++;emit(q('math_port_mo_'+n)+'_test=[] {');}function end(){emit('};');}
-function state(n){for(const key of ['form','fence','separator','lspace','rspace','accent','stretchy','movablelimits'])pp(n.attributes.get(key),'n->attributes()->get('+q(key)+')');for(const key of ['noDictDef','pseudoscript','primes','mathaccent','texClass'])pp(n.getProperty(key),'n->getProperty('+q(key)+')');pp(n._texClass,'n->_texClass');pp(n.lspace,'n->lspace');pp(n.rspace,'n->rspace');}
-function attempt(fn,code){let error;try{fn();}catch(e){error=e;}if(error){emit('{bool caught=false;try{'+code+';}catch(const m::Error&e){caught=e.name=='+q(error.name)+';}expect(caught);}');assertions++;}else emit(code+';');return error;}
+const sourceProfile=[];let assertions=0,cases=0;
+function value(x){if(x===undefined)return {type:'missing'};if(x===null)return {type:'null'};if(typeof x==='boolean')return {type:'boolean',value:x};if(typeof x==='number')return {type:'number',value:Number.isNaN(x)?'NaN':Object.is(x,-0)?'-0':x===Infinity?'Infinity':x};if(typeof x==='string')return {type:'string',units:Array.from({length:x.length},(_,i)=>x.charCodeAt(i))};if(Array.isArray(x))return {type:'array',items:x.map(value)};if(typeof x==='object')return {type:'object',entries:Object.keys(x).map(k=>[k,value(x[k])])};throw Error('Unbound observation');}
+const p=value;
+function eq(x){assertions++;sourceProfile.push(['eq',value(x)]);}function pp(x){assertions++;sourceProfile.push(['property',value(x)]);}function begin(n){cases++;sourceProfile.push(['case',n]);}function end(){}
+function state(n){for(const key of ['form','fence','separator','lspace','rspace','accent','stretchy','movablelimits'])pp(n.attributes.get(key));for(const key of ['noDictDef','pseudoscript','primes','mathaccent','texClass'])pp(n.getProperty(key));pp(n._texClass);pp(n.lspace);pp(n.rspace);}
+function attempt(fn){let error;try{fn();}catch(e){error=e;}sourceProfile.push(['attempt',error?error.name:'ok']);if(error)assertions++;return error;}
 begin('source_defaults_aliases_and_initialization');
-emit('NF f(classes());auto*n=mo(f,u"+");');const init=token(f(),'mo','+');pp(init._texClass,'n->_texClass');pp(init.lspace,'n->lspace');pp(init.rspace,'n->rspace');eq(init.kind,'n->kind()');eq(init.isEmbellished,'n->isEmbellished()');
-for(const key of Object.keys(M.defaults))pp(M.defaults[key],'m::MmlMo::defaults().getOwn('+q(key)+')');
-assert.equal(M.OPTABLE,D.OPTABLE);assert.equal(M.MMLSPACING,D.MMLSPACING);eq(true,'m::MmlMo::operatorTable()==Property(d::OPTABLE())');eq(true,'m::MmlMo::mathSpacing()==Property(d::MMLSPACING())');
-emit('const bool had=m::AbstractMmlTokenNode::defaults().hasOwn("form");auto old=m::AbstractMmlTokenNode::defaults().getOwn("form");m::AbstractMmlTokenNode::defaults().setOwn("form","changed");');pp(M.defaults.form,'m::MmlMo::defaults().getOwn("form")');emit('if(had)m::AbstractMmlTokenNode::defaults().setOwn("form",old);else m::AbstractMmlTokenNode::defaults().erase("form");');end();
+;const init=token(f(),'mo','+');pp(init._texClass);pp(init.lspace);pp(init.rspace);eq(init.kind);eq(init.isEmbellished);
+for(const key of Object.keys(M.defaults))pp(M.defaults[key]);
+assert.equal(M.OPTABLE,D.OPTABLE);assert.equal(M.MMLSPACING,D.MMLSPACING);eq(true);eq(true);
+;pp(M.defaults.form);;end();
 begin('dictionary_all_initial_entries');
 const attrKeys=['form','fence','separator','lspace','rspace','accent','stretchy','movablelimits'],propKeys=['noDictDef','pseudoscript','primes','mathaccent','texClass'];
 const states=[],stateIds=new Map(),rows=[];
 for(const form of ['infix','prefix','postfix'])for(const key of Object.keys(D.OPTABLE[form])){
  const n=token(f(),'mo',key,{form});n.table(key);
  const values=[...attrKeys.map(k=>n.attributes.get(k)),...propKeys.map(k=>n.getProperty(k)),n._texClass,n.lspace,n.rspace];
- const serialized=values.map(p).join(',');let id=stateIds.get(serialized);if(id===undefined){id=states.length;stateIds.set(serialized,id);states.push(values);}
+ const serialized=JSON.stringify(values.map(p));let id=stateIds.get(serialized);if(id===undefined){id=states.length;stateIds.set(serialized,id);states.push(values);}
  const extra=Object.keys(D.OPTABLE[form][key][3]||{}).filter(k=>!attrKeys.includes(k)).map(k=>[k,n.attributes.get(k)]);
  assertions+=values.length+extra.length;rows.push({key,form,id,extra});
 }
-emit('const std::vector<std::vector<Property>> expected={'+states.map(s=>'{'+s.map(p).join(',')+'}').join(',')+'};');
-emit('struct Row{std::u16string text;std::string form;std::size_t expected;std::vector<std::pair<std::string,Property>> extra;};const Row rows[]={');
-for(const r of rows)emit('{'+u(r.key)+','+q(r.form)+','+r.id+',{'+r.extra.map(([k,v])=>'{'+q(k)+','+p(v)+'}').join(',')+'}},');
-emit('};NF f(classes());for(const auto&r:rows){auto*n=mo(f,r.text,PropertyList{{"form",r.form}});n->table(r.text);std::vector<Property> observed;');
-for(const k of attrKeys)emit('observed.push_back(n->attributes()->get('+q(k)+'));');for(const k of propKeys)emit('observed.push_back(n->getProperty('+q(k)+'));');
-emit('observed.push_back(n->_texClass);observed.push_back(n->lspace);observed.push_back(n->rspace);for(std::size_t i=0;i<observed.size();++i)expect(prop(observed[i],expected[r.expected][i]))<<r.form<<":"<<h::debugText(r.text)<<":"<<i;for(const auto&[key,value]:r.extra)expect(prop(n->attributes()->get(key),value));}');end();
-begin('prototype_hits_and_misses');emit('NF f(classes());');
+;
+;
+for(const r of rows);
+;
+for(const k of attrKeys);for(const k of propKeys);
+;end();
+begin('prototype_hits_and_misses');;
 for(const text of ['', 'a','ab','x1','😀','+','toString','constructor','__proto__','hasOwnProperty','valueOf','unknown!'])for(const form of ['infix','prefix','postfix']){
- const n=token(f(),'mo',text,{form});emit('{auto*n=mo(f,'+u(text)+',PropertyList{{"form",'+p(form)+'}});');attempt(()=>n.table(text),'n->table('+u(text)+')');state(n);emit('}');
+ const n=token(f(),'mo',text,{form});;attempt(()=>n.table(text));state(n);;
 }end();
-begin('raw_field_getter_and_lazy_writes');emit('NF f(classes());');
-for(const value of [undefined,null,0,-0,1,3,-1,false,true,'','0',NaN]){const n=token(f(),'mo','ab');n._texClass=value;emit('{auto*n=mo(f,u"ab");n->_texClass='+p(value)+';');pp(n.texClass,'n->texClass()');pp(n._texClass,'n->_texClass');pp(n.attributes.getInherited('form'),'n->attributes()->getInherited("form")');pp(n.getProperty('noDictDef'),'n->getProperty("noDictDef")');emit('}');}end();
-begin('positional_forms_and_explicit_filter_identity');emit('NF f(classes());');
-for(const count of [1,2,3])for(let index=0;index<count;index++){const sf=f(),nodes=Array.from({length:count},(_,i)=>token(sf,i===index?'mo':'mi',i===index?'+':'x')),n=nodes[index];sf.create('mrow',{},nodes);emit('{std::vector<m::MmlNode*> items;for(unsigned i=0;i<'+count+';++i)items.push_back(token(f,i=='+index+'?"mo":"mi",i=='+index+'?u"+":u"x"));auto*n=dynamic_cast<Mo*>(items['+index+']);auto list=children();for(auto*item:items)list->push_back(item);create(f,"mrow",{},list);auto forms=n->getForms();');for(let i=0;i<3;i++)pp(n.getForms()[i],'forms.get('+i+')');eq(false,'Property(forms)==Property(n->getForms())');emit('}');}end();
-begin('class_adjustment_matrix');emit('NF f(classes());');
+begin('raw_field_getter_and_lazy_writes');;
+for(const value of [undefined,null,0,-0,1,3,-1,false,true,'','0',NaN]){const n=token(f(),'mo','ab');n._texClass=value;;pp(n.texClass);pp(n._texClass);pp(n.attributes.getInherited('form'));pp(n.getProperty('noDictDef'));;}end();
+begin('positional_forms_and_explicit_filter_identity');;
+for(const count of [1,2,3])for(let index=0;index<count;index++){const sf=f(),nodes=Array.from({length:count},(_,i)=>token(sf,i===index?'mo':'mi',i===index?'+':'x')),n=nodes[index];sf.create('mrow',{},nodes);;for(let i=0;i<3;i++)pp(n.getForms()[i]);eq(false);;}end();
+begin('class_adjustment_matrix');;
 const cls=[undefined,null,0,1,2,3,4,5,6,7,-1,false,'0'];
-for(const own of cls)for(const prev of cls)for(const auto of [false,true]){const sf=f(),n=token(sf,'mo','+'),a=token(sf,'mi','a'),last=token(sf,'mi','z');sf.create('mrow',{},[a,n,last]);n._texClass=own;a.texClass=prev;a.setProperty('autoOP',auto);n.attributes.setInherited('scriptlevel','2');let result,error;try{result=n.adjustTeXclass(a);}catch(e){error=e;}emit('{auto*n=mo(f,u"+");auto*a=token(f,"mi",u"a");auto*last=token(f,"mi",u"z");create(f,"mrow",{},children({a,n,last}));n->_texClass='+p(own)+';a->setTexClass('+p(prev)+');a->setProperty("autoOP",'+auto+');n->attributes()->setInherited("scriptlevel","2");');if(error)attempt(()=>{throw error;},'n->adjustTeXclass(a)');else eq(result===n,'n->adjustTeXclass(a)==n');pp(n._texClass,'n->_texClass');pp(n.prevClass,'n->prevClass()');pp(n.prevLevel,'n->prevLevel()');pp(a.texClass,'a->texClass()');emit('}');}end();
-begin('fence_spacing_and_binary_last');emit('NF f(classes());');
-for(const form of ['prefix','infix','postfix'])for(const spacing of [undefined,0,'0em']){const sf=f(),attrs={form,fence:true};if(spacing!==undefined)attrs.lspace=spacing;const n=token(sf,'mo','⫿',attrs);n._texClass=3;const row=sf.create('mrow',{},[n]);let result;n.setProperty('texClass',undefined);result=n.setTeXclass(null);emit('{PropertyList attrs{{"form",'+p(form)+'},{"fence",true}};'+(spacing===undefined?'':'attrs.set("lspace",'+p(spacing)+');')+'auto*n=mo(f,'+u('⫿')+',attrs);create(f,"mrow",{},children({n}));n->_texClass=3;');eq(result===n,'n->setTeXclass(nullptr)==n');pp(n._texClass,'n->_texClass');pp(n.prevClass,'n->prevClass()');emit('}');}
-{const sf=f(),n=token(sf,'mo','+');sf.create('mrow',{},[n]);n._texClass=2;n.adjustTeXclass(null);emit('{auto*n=mo(f,u"+");create(f,"mrow",{},children({n}));n->_texClass=2;n->adjustTeXclass(nullptr);');pp(n._texClass,'n->_texClass');emit('}');}end();
-begin('primes_pseudoscripts_and_inheritance');emit('NF f(classes());');
-for(const text of ["'",'"',"''",'‘’„‟','*','ª','x','^','→','\n','\u2032'])for(const parent of ['none','msub','msup','msubsup']){const sf=f(),n=token(sf,'mo',text);if(parent!=='none'){const b=token(sf,'mi','b'),other=token(sf,'mi','s');sf.create(parent,{},parent==='msubsup'?[b,other,n]:[b,n]);}n.pseudo(text);n.prime(text);emit('{auto*n=mo(f,'+u(text)+');'+(parent==='none'?'':'auto*b=token(f,"mi",u"b");auto*other=token(f,"mi",u"s");create(f,'+q(parent)+',{},children({b,'+(parent==='msubsup'?'other,':'')+'n}));')+'n->pseudo('+u(text)+');n->prime('+u(text)+');');state(n);emit('}');}
-for(const text of ['+','ab',"'",'→','^']){const n=token(f(),'mo',text);n.setInheritedAttributes({},false,0,false);emit('{auto*n=mo(f,'+u(text)+');n->setInheritedAttributes();');state(n);emit('}');}end();
-begin('accent_source_quirks');emit('NF f(classes());');
-for(const kind of ['munder','mover','munderover'])for(const pos of ['base','under','over'])for(const value of [undefined,false,true,'yes',0]){const sf=f(),n=token(sf,'mo','^'),b=token(sf,'mi','b'),other=token(sf,'mi','o');let list;if(kind==='munder')list=pos==='base'?[n,other]:[b,n];else if(kind==='mover')list=pos==='base'?[n,other]:[b,n];else list=pos==='base'?[n,other,other]:pos==='under'?[b,n,other]:[b,other,n];const attrs={};if(value!==undefined)attrs[kind==='munder'?'accentunder':'accent']=value;sf.create(kind,attrs,list);n.attributes.set('accent','raw');let result,error;try{result=n.isAccent;}catch(e){error=e;}n.accent('^');emit('{auto*n=mo(f,u"^");auto*b=token(f,"mi",u"b");auto*other=token(f,"mi",u"o");PropertyList attrs;'+(value===undefined?'':'attrs.set('+q(kind==='munder'?'accentunder':'accent')+','+p(value)+');')+'create(f,'+q(kind)+',attrs,children({'+list.map(x=>x===n?'n':x===b?'b':'other').join(',')+'}));n->attributes()->set("accent","raw");');if(error)attempt(()=>{throw error;},'n->isAccent()');else pp(result,'n->isAccent()');emit('n->accent(u"^");');pp(n.getProperty('mathaccent'),'n->getProperty("mathaccent")');emit('}');}end();
-begin('constructor_tables_distinct_from_module');emit('NF f(classes());');
-for(const text of ['+','ab','!','😀']){const n=token(f(),'fork',text);const def=n.op(text);emit('{auto*n=mo(f,'+u(text)+',{},"fork");auto def=n->op('+u(text)+');');for(let i=0;i<3;i++)pp(def[i],'h::get(def,'+q(String(i))+')');eq(true,'PropertyArray::array(def).has_value()');eq(false,'def==n->op('+u(text)+')');emit('}');}end();
-begin('accent_optional_text_and_core_traversal');emit('NF f(classes());');
-for(const text of ['^','→','x','',"'",'\u0301']){const sf=f(),n=token(sf,'mo',text);emit('{auto*n=mo(f,'+u(text)+');');eq(n.isMathAccent(),'n->isMathAccent()');eq(n.isMathAccentWithWidth(),'n->isMathAccentWithWidth()');eq(n.isMathAccent(''),'n->isMathAccent(std::u16string_view(u""))');eq(n.isMathAccentWithWidth(''),'n->isMathAccentWithWidth(std::u16string_view(u""))');emit('}');}
-{const sf=f(),n=token(sf,'mo','+'),x=token(sf,'mi','x'),style=sf.create('mstyle',{},[n]),math=sf.create('math',{},[style]);assert.ok(n.coreParent()===math.childNodes[0]);emit('{auto*n=mo(f,u"+");auto*x=token(f,"mi",u"x");auto*style=create(f,"mstyle",{},children({n}));auto*math=create(f,"math",{},children({style}));');eq(true,'n->coreParent()==style->getParent().nodeOrNull()');eq(n.coreText(null),'h::debugText(n->coreText(nullptr))');eq(n.coreText(style),'h::debugText(n->coreText(style))');eq(n.coreText(x),'h::debugText(n->coreText(x))');eq(n.coreText(math),'h::debugText(n->coreText(math))');emit('}');}end();
-begin('orphan_binary_error_and_width_accent');emit('NF f(classes());');
-{const sf=f(),n=token(sf,'mo','+'),a=token(sf,'mi','a');n._texClass=2;emit('{auto*n=mo(f,u"+");auto*a=token(f,"mi",u"a");n->_texClass=2;');attempt(()=>n.adjustTeXclass(a),'n->adjustTeXclass(a)');pp(n.prevClass,'n->prevClass()');pp(n.prevLevel,'n->prevLevel()');emit('}');}
-for(const text of ['^','→','x']){const sf=f(),n=token(sf,'mo',text),b=token(sf,'mi','b'),over=token(sf,'mi','o');sf.create('munderover',{},[b,n,over]);n.accent(text);emit('{auto*n=mo(f,'+u(text)+');auto*b=token(f,"mi",u"b");auto*over=token(f,"mi",u"o");create(f,"munderover",{},children({b,n,over}));n->accent('+u(text)+');');pp(n.getProperty('mathaccent'),'n->getProperty("mathaccent")');emit('}');}end();
-begin('explicit_forms_raw_filter_and_alias');emit('NF f(classes());');
-for(const form of [undefined,null,'infix','prefix','weird',0,false]){const sf=f(),n=token(sf,'mo','+'),a=['infix','prefix','postfix','infix'];if(form!==undefined)n.attributes.set('form',form);const result=n.forms(a);emit('{auto*n=mo(f,u"+");PropertyArray a{"infix","prefix","postfix","infix"};'+(form===undefined?'':'n->attributes()->set("form",'+p(form)+');')+'auto result=n->forms(a);');eq(result===a,'Property(result)==Property(a)');eq(result.length,'static_cast<double>(result.size())');for(let i=0;i<result.length;i++)pp(result[i],'result.get('+i+')');emit('}');}end();
-begin('lookup_hit_alias_and_constructor_capture');emit('NF f(classes());');
-{const sf=f(),n=token(sf,'mo','+',{form:'infix'}),def=n.op('+');assert.ok(def===D.OPTABLE.infix['+']);emit('{auto*n=mo(f,u"+",PropertyList{{"form","infix"}});auto def=n->op(u"+");');eq(true,'def==h::get(h::get(m::MmlMo::operatorTable(),"infix"),"+")');emit('}');}
-{const sf=f(),n=token(sf,'fork','+');sf.setNodeClass('fork',Mo);const def=n.op('+');emit('{auto*n=mo(f,u"+",{},"fork");f.setNodeClass("fork",m::classBinding<Mo>());auto def=n->op(u"+");');for(let i=0;i<3;i++)pp(def[i],'h::get(def,'+q(String(i))+')');emit('}');}end();
-emit('};');const output=out.join('\n')+'\n',target=path.join(root,'tests/math/reference_mo.cpp');
-const diagnosticOutput=output.replaceAll('h::debugText(n->coreText(', 'h::debugText(checkedCore(n,');
-if(process.argv.includes('--check'))assert.equal(fs.readFileSync(target,'utf8').replaceAll('\r\n','\n'),diagnosticOutput);else fs.writeFileSync(target,diagnosticOutput);
-console.log(JSON.stringify({assertions,cases,dictionary_entries:Object.values(D.OPTABLE).reduce((n,t)=>n+Object.keys(t).length,0),mode:process.argv.includes('--check')?'check':'generate'}));
+for(const own of cls)for(const prev of cls)for(const auto of [false,true]){const sf=f(),n=token(sf,'mo','+'),a=token(sf,'mi','a'),last=token(sf,'mi','z');sf.create('mrow',{},[a,n,last]);n._texClass=own;a.texClass=prev;a.setProperty('autoOP',auto);n.attributes.setInherited('scriptlevel','2');let result,error;try{result=n.adjustTeXclass(a);}catch(e){error=e;};if(error)attempt(()=>{throw error;});else eq(result===n);pp(n._texClass);pp(n.prevClass);pp(n.prevLevel);pp(a.texClass);;}end();
+begin('fence_spacing_and_binary_last');;
+for(const form of ['prefix','infix','postfix'])for(const spacing of [undefined,0,'0em']){const sf=f(),attrs={form,fence:true};if(spacing!==undefined)attrs.lspace=spacing;const n=token(sf,'mo','⫿',attrs);n._texClass=3;const row=sf.create('mrow',{},[n]);let result;n.setProperty('texClass',undefined);result=n.setTeXclass(null);;eq(result===n);pp(n._texClass);pp(n.prevClass);;}
+{const sf=f(),n=token(sf,'mo','+');sf.create('mrow',{},[n]);n._texClass=2;n.adjustTeXclass(null);;pp(n._texClass);;}end();
+begin('primes_pseudoscripts_and_inheritance');;
+for(const text of ["'",'"',"''",'‘’„‟','*','ª','x','^','→','\n','\u2032'])for(const parent of ['none','msub','msup','msubsup']){const sf=f(),n=token(sf,'mo',text);if(parent!=='none'){const b=token(sf,'mi','b'),other=token(sf,'mi','s');sf.create(parent,{},parent==='msubsup'?[b,other,n]:[b,n]);}n.pseudo(text);n.prime(text);;state(n);;}
+for(const text of ['+','ab',"'",'→','^']){const n=token(f(),'mo',text);n.setInheritedAttributes({},false,0,false);;state(n);;}end();
+begin('accent_source_quirks');;
+for(const kind of ['munder','mover','munderover'])for(const pos of ['base','under','over'])for(const value of [undefined,false,true,'yes',0]){const sf=f(),n=token(sf,'mo','^'),b=token(sf,'mi','b'),other=token(sf,'mi','o');let list;if(kind==='munder')list=pos==='base'?[n,other]:[b,n];else if(kind==='mover')list=pos==='base'?[n,other]:[b,n];else list=pos==='base'?[n,other,other]:pos==='under'?[b,n,other]:[b,other,n];const attrs={};if(value!==undefined)attrs[kind==='munder'?'accentunder':'accent']=value;sf.create(kind,attrs,list);n.attributes.set('accent','raw');let result,error;try{result=n.isAccent;}catch(e){error=e;}n.accent('^');;if(error)attempt(()=>{throw error;});else pp(result);;pp(n.getProperty('mathaccent'));;}end();
+begin('constructor_tables_distinct_from_module');;
+for(const text of ['+','ab','!','😀']){const n=token(f(),'fork',text);const def=n.op(text);;for(let i=0;i<3;i++)pp(def[i]);eq(true);eq(false);;}end();
+begin('accent_optional_text_and_core_traversal');;
+for(const text of ['^','→','x','',"'",'\u0301']){const sf=f(),n=token(sf,'mo',text);;eq(n.isMathAccent());eq(n.isMathAccentWithWidth());eq(n.isMathAccent(''));eq(n.isMathAccentWithWidth(''));;}
+{const sf=f(),n=token(sf,'mo','+'),x=token(sf,'mi','x'),style=sf.create('mstyle',{},[n]),math=sf.create('math',{},[style]);assert.ok(n.coreParent()===math.childNodes[0]);;eq(true);eq(n.coreText(null));eq(n.coreText(style));eq(n.coreText(x));eq(n.coreText(math));;}end();
+begin('orphan_binary_error_and_width_accent');;
+{const sf=f(),n=token(sf,'mo','+'),a=token(sf,'mi','a');n._texClass=2;;attempt(()=>n.adjustTeXclass(a));pp(n.prevClass);pp(n.prevLevel);;}
+for(const text of ['^','→','x']){const sf=f(),n=token(sf,'mo',text),b=token(sf,'mi','b'),over=token(sf,'mi','o');sf.create('munderover',{},[b,n,over]);n.accent(text);;pp(n.getProperty('mathaccent'));;}end();
+begin('explicit_forms_raw_filter_and_alias');;
+for(const form of [undefined,null,'infix','prefix','weird',0,false]){const sf=f(),n=token(sf,'mo','+'),a=['infix','prefix','postfix','infix'];if(form!==undefined)n.attributes.set('form',form);const result=n.forms(a);;eq(result===a);eq(result.length);for(let i=0;i<result.length;i++)pp(result[i]);;}end();
+begin('lookup_hit_alias_and_constructor_capture');;
+{const sf=f(),n=token(sf,'mo','+',{form:'infix'}),def=n.op('+');assert.ok(def===D.OPTABLE.infix['+']);;eq(true);;}
+{const sf=f(),n=token(sf,'fork','+');sf.setNodeClass('fork',Mo);const def=n.op('+');;for(let i=0;i<3;i++)pp(def[i]);;}end();
+
+const profile=({assertions,cases,sourceProfile,states:states.map(s=>s.map(value)),rows:rows.map(r=>[r.key,r.form,r.id,r.extra.map(([k,v])=>[k,value(v)])])});const frozen=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/evidence/p24-mo-source.json'),'utf8'));assert.deepEqual(profile,frozen);assert.ok(process.argv.includes('--check'),'Source-only owner supports --check');console.log(JSON.stringify({profile:'p24-mo-source.json',cases:profile.cases?.length??profile.cases,assertions:profile.assertions??null,mode:'check'}));

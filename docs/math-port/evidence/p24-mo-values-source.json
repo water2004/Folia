@@ -1,0 +1,609 @@
+{
+  "cases": [
+    {
+      "id": "math_port_mo_value_definition_properties_string",
+      "observations": [
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              55357
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              56832
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              120
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              121
+            ]
+          }
+        },
+        {
+          "kind": "keys",
+          "value": [
+            "0",
+            "1",
+            "2",
+            "3",
+            "form"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 6
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0.5
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0.4444444444444444
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_value_definition_properties_number",
+      "observations": [
+        {
+          "kind": "keys",
+          "value": [
+            "form"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 6
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0.5
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0.4444444444444444
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_value_definition_properties_boolean",
+      "observations": [
+        {
+          "kind": "keys",
+          "value": [
+            "form"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 6
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0.5
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0.4444444444444444
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_value_definition_properties_array",
+      "observations": [
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              120
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              121
+            ]
+          }
+        },
+        {
+          "kind": "keys",
+          "value": [
+            "0",
+            "1",
+            "form"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 6
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0.5
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0.4444444444444444
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_value_definition_properties_null",
+      "observations": [
+        {
+          "kind": "keys",
+          "value": [
+            "form"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 6
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0.5
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0.4444444444444444
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_value_definition_properties_undefined",
+      "observations": [
+        {
+          "kind": "keys",
+          "value": [
+            "form"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 6
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0.5
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0.4444444444444444
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_value_definition_properties_false",
+      "observations": [
+        {
+          "kind": "keys",
+          "value": [
+            "form"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 6
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0.5
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0.4444444444444444
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_value_definition_properties_zero",
+      "observations": [
+        {
+          "kind": "keys",
+          "value": [
+            "form"
+          ]
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 6
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0.5
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0.4444444444444444
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_value_table_failure_null",
+      "observations": [
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              105,
+              110,
+              102,
+              105,
+              120
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "null"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0.2777777777777778
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0.2777777777777778
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_value_table_failure_undefined",
+      "observations": [
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              105,
+              110,
+              102,
+              105,
+              120
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "null"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0.2777777777777778
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0.2777777777777778
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_value_table_failure_missing-form",
+      "observations": [
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              105,
+              110,
+              102,
+              105,
+              120
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "null"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0.2777777777777778
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0.2777777777777778
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_value_table_failure_null-form",
+      "observations": [
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              105,
+              110,
+              102,
+              105,
+              120
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "null"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0.2777777777777778
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0.2777777777777778
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_value_table_failure_false-form",
+      "observations": [
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              105,
+              110,
+              102,
+              105,
+              120
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "null"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0.2777777777777778
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0.2777777777777778
+          }
+        }
+      ]
+    },
+    {
+      "id": "math_port_mo_value_table_failure_number-form",
+      "observations": [
+        {
+          "kind": "error",
+          "name": "TypeError"
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "string",
+            "units": [
+              105,
+              110,
+              102,
+              105,
+              120
+            ]
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "missing"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "null"
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0.2777777777777778
+          }
+        },
+        {
+          "kind": "value",
+          "expected": {
+            "type": "number",
+            "value": 0.2777777777777778
+          }
+        }
+      ]
+    }
+  ],
+  "assertions": 74
+}

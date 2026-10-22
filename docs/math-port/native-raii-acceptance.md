@@ -1824,6 +1824,28 @@ escaped; the operator candidate flattened forms alphabetically instead of the
 original prefix/postfix/infix graph order. No expected mathematical value or
 production implementation was changed to resolve these mapping errors.
 
+### Remaining MML family/node/operator fixtures (2026-10-23)
+
+Seventeen C++ observers and five root includes retire after native acceptance.
+Six original family owners become Source-only and check complete structured
+gold statically decoded from the old C++:7/22/73/934/410/225 cases. Error3204 and
+action-error8 retain their original profiles and pass. The original MathChoice
+profile's409 Source records and all historical metadata remain byte-identical;
+ordinary require replaces the old emitter injection.
+
+MmlNode retains42 Source cases,1051 helper observations and26 additional direct
+values omitted by the original wrapper. Its old43/1084 metadata remains intact,
+and the historical delayed XML trace difference is recorded without changing
+either value. Table-repair64 passes. Parent verification's88 cases/288 values
+map exactly to a frozen projection of the accepted full multiscript profile.
+The four Unimplemented-only includes retire in favor of real typed family checks.
+
+Five operator owners preserve14/50/14/32/12 Source groups; the old order fixture's
+51st group is the now-passing five-assertion native spacing regression. Existing
+token-walk780 and verification3752/math-verification72 profiles stay intact.
+No object-protocol emulation enters the native test target. The per-file Source
+and native responsibility record is `evidence/old-mml-test-retirement.json`.
+
 ### Current Debug and self-contained Release MSI (2026-10-21)
 
 Dependency setup passes. The supported Debug application build and actual
