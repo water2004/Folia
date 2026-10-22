@@ -1,0 +1,2191 @@
+{
+  "schema": 1,
+  "scope": {
+    "files": 48,
+    "runtimeCases": 211,
+    "compileOnlyUnits": 2,
+    "caseDispositionRecords": 213
+  },
+  "meaning": "Each old named case is classified. A native mapping names the exact added native case; relatedNativeOwners document existing mathematical responsibilities and are not blanket claims of equivalent JS protocol coverage. Retirements require Root native integration acceptance.",
+  "staticGold": {
+    "path": "docs/math-port/evidence/old-host-test-static-semantic-values.json",
+    "extraction": "static literals/relationships only; no Source regeneration or executable C++/expressions"
+  },
+  "validation": "Original 48-file SHA/case alignment and 22 Source/profile hashes checked; no new native runtime acceptance claimed here.",
+  "dispositionTypes": {
+    "retire-object-protocol": {
+      "description": "retire object protocol"
+    },
+    "retire-function-metadata": {
+      "description": "retire function metadata"
+    },
+    "retire-tracing-protocol": {
+      "description": "retire tracing protocol"
+    },
+    "retire-object-protocol-with-covered-values": {
+      "description": "retire object protocol with covered values"
+    },
+    "retire-factory-context-protocol": {
+      "description": "retire factory context protocol"
+    },
+    "retire-host-scheduler-with-covered-services": {
+      "description": "retire host scheduler with covered services"
+    },
+    "retire-handle-protocol": {
+      "description": "retire handle protocol"
+    },
+    "retire-language-intrinsic-protocol": {
+      "description": "retire language intrinsic protocol"
+    },
+    "retire-promise-protocol": {
+      "description": "retire promise protocol"
+    },
+    "retain-offline-metadata-retire-runtime-protocol": {
+      "description": "retain offline metadata retire runtime protocol"
+    },
+    "retire-array-bridge-with-covered-values": {
+      "description": "retire array bridge with covered values"
+    },
+    "retire-call-protocol": {
+      "description": "retire call protocol"
+    },
+    "retire-export-identity-with-covered-values": {
+      "description": "retire export identity with covered values"
+    },
+    "retire-mutable-field-protocol-with-covered-values": {
+      "description": "retire mutable field protocol with covered values"
+    },
+    "retire-base-hook-protocol-with-covered-services": {
+      "description": "retire base hook protocol with covered services"
+    },
+    "migrate-real-owner-values": {
+      "description": "migrate real owner values"
+    },
+    "retire-symbol-bridge": {
+      "description": "retire symbol bridge"
+    },
+    "retire-cursor-projection-with-covered-values": {
+      "description": "retire cursor projection with covered values"
+    },
+    "retire-handle-protocol-with-covered-values": {
+      "description": "retire handle protocol with covered values"
+    },
+    "migrate-native-language-value": {
+      "description": "migrate native language value"
+    },
+    "retire-field-bridge": {
+      "description": "retire field bridge"
+    },
+    "retire-class-binding-with-covered-values": {
+      "description": "retire class binding with covered values"
+    },
+    "retire-filter-record-protocol-with-covered-values": {
+      "description": "retire filter record protocol with covered values"
+    },
+    "migrate-real-compile-owner-values": {
+      "description": "migrate real compile owner values"
+    },
+    "retire-arena-checkpoint-protocol": {
+      "description": "retire arena checkpoint protocol"
+    },
+    "retain-offline-ordering-retire-dom-host-owner": {
+      "description": "retain offline ordering retire dom host owner"
+    },
+    "retire-foreign-receiver-protocol-with-covered-values": {
+      "description": "retire foreign receiver protocol with covered values"
+    },
+    "migrate-real-string-value-retire-metadata": {
+      "description": "migrate real string value retire metadata"
+    },
+    "retire-array-and-symbol-projection": {
+      "description": "retire array and symbol projection"
+    },
+    "migrate-real-tree-values": {
+      "description": "migrate real tree values"
+    },
+    "retire-iterator-call-order": {
+      "description": "retire iterator call order"
+    },
+    "migrate-real-current-factory-copy": {
+      "description": "migrate real current factory copy"
+    },
+    "retire-obsolete-type-contract": {
+      "description": "retire obsolete type contract"
+    },
+    "retire-attribute-callback-protocol-with-covered-values": {
+      "description": "retire attribute callback protocol with covered values"
+    }
+  },
+  "nativeOwners": [
+    {
+      "path": "tests/math/mml_native_factory.cpp",
+      "role": "related current responsibility; retired JS protocol is not claimed reproduced",
+      "existingCases": [
+        "typed_factory_owns_attributes_and_borrows_same_document_children",
+        "negative_arity_inserts_one_inferred_row_for_supplied_children",
+        "all_registered_kind_arities_match_pinned_source_classes",
+        "all_registered_node_initial_class_flags_and_empty_state_match_source",
+        "infinite_arity_parent_flattens_inferred_child",
+        "finite_arity_parent_converts_inferred_child_to_explicit_row",
+        "copy_unwraps_single_inferred_child_and_copies_native_attributes",
+        "copy_preserves_metadata_values_without_copying_runtime_inheritance",
+        "invalid_factory_arguments_leave_existing_tree_unchanged",
+        "text_nodes_preserve_owned_utf16_and_token_uses_text_node_child",
+        "tex_error_uses_generic_merror_arity_rule_once"
+      ]
+    },
+    {
+      "path": "tests/math/native_raii_mml_base.cpp",
+      "role": "related current responsibility; retired JS protocol is not claimed reproduced",
+      "existingCases": [
+        "mml_raw_allocation_defers_typed_semantic_initialization",
+        "mml_base_origin_exclusion_and_stop_rules",
+        "mml_base_omitted_verify_is_noop_and_copy_omits_id",
+        "mml_base_spacing_table_finite_arity_and_inferred_rows",
+        "mml_base_tex_spacing_complete_class_matrix_and_script_suppression",
+        "mml_base_variant_validation_preserves_source_truthiness_and_value_text",
+        "mml_numeric_attribute_conversion_uses_ecmascript_string_number",
+        "mml_base_mathvariant_error_replacement_is_stable_on_reverification",
+        "inheritAttributesFrom uses own mathsize over inherited and copies source style values without mutation",
+        "inheritAttributesFrom copies inherited-only mathsize and source style values without mutation",
+        "inheritAttributesFrom does not copy default-only mathsize"
+      ]
+    },
+    {
+      "path": "tests/math/function_list.cpp",
+      "role": "related current responsibility; retired JS protocol is not claimed reproduced",
+      "existingCases": [
+        "processor list preserves void true false and priority ordering",
+        "processor execution observes append and removals at Source iterator positions",
+        "processor insertion before current position repeats current callback in Source order",
+        "processor exceptions propagate with existing list entries and caller data intact"
+      ]
+    },
+    {
+      "path": "tests/math/native_tree_node.cpp",
+      "role": "related current responsibility; retired JS protocol is not claimed reproduced",
+      "existingCases": [
+        "typed owner operations preserve links and source no-ops",
+        "preorder walk visits children appended by the visitor",
+        "empty nodes retain source no-child overrides"
+      ]
+    },
+    {
+      "path": "tests/math/mml_native_raii_foundation.cpp",
+      "role": "related current responsibility; retired JS protocol is not claimed reproduced",
+      "existingCases": [
+        "all_pinned_mml_factory_kinds_round_trip_exact_source_names",
+        "arena_nodes_keep_addresses_for_document_lifetime",
+        "links_reparent_insert_replace_remove_and_root_are_consistent",
+        "cycles_self_parenting_and_foreign_document_references_are_rejected",
+        "subtree_clone_copies_values_and_has_fresh_links",
+        "root_changes_detach_the_previous_root_and_unroot_moved_nodes",
+        "attribute_utf16_literals_remain_text_in_all_layers",
+        "attributes_keep_order_and_lookup_own_then_inherited_then_default"
+      ]
+    },
+    {
+      "path": "tests/math/native_raii_scene.cpp",
+      "role": "related current responsibility; retired JS protocol is not claimed reproduced",
+      "existingCases": [
+        "scene freezes owned hierarchy and metadata",
+        "affine composition follows parent times local",
+        "ordered transforms preserve operations and derive SVG-order matrix",
+        "center rotation is counterclockwise in y-up scene coordinates",
+        "affine convenience creates one explicit operation",
+        "scene rejects non-finite transform data at freeze",
+        "scene rejects a glyph without an immutable outline resource",
+        "scene retains immutable glyph resource beyond builder lifetime",
+        "foreign HTML is owned by one structured group",
+        "HTML DOM snapshot owns ordered attributes text comments and namespace hints",
+        "foreignObject geometry and exclusive group shape are validated",
+        "interleaved primitives and groups keep insertion order",
+        "paint preserves inherited none currentColor and literal color",
+        "scene preserves signed completed mathematical metrics",
+        "scene snapshots retained mutable group aliases",
+        "enclosure geometry values freeze their ownership and preserve typed spelling",
+        "viewport values are validated and deeply frozen with groups and glyphs",
+        "table builder geometry edits stay typed and reparenting validates ancestry",
+        "percentage frame values are owned and validated",
+        "builder edits existing group values and wraps contents in place",
+        "builder reports moved from and invalid ids or insertion positions",
+        "discard group removes its subtree and releases owned values in place",
+        "discard group rejects root and unknown ids without changing the builder",
+        "display and text font values are frozen and validated",
+        "split group contents atomically extracts descendant drawing ids in order",
+        "split group contents rejects invalid ancestry and overlaps without mutation",
+        "frame layout freeze rejects dangling roots and non-finite break spacing",
+        "scene rejects a cyclic shared group before recursive copying",
+        "title primitives preserve order and freeze owned text",
+        "stylesheet colors stay separate and owned beside authored paint",
+        "builder link and viewport getters return owned values"
+      ]
+    },
+    {
+      "path": "tests/math/native_tree_factory.cpp",
+      "role": "related current responsibility; retired JS protocol is not claimed reproduced",
+      "existingCases": [
+        "typed_factory_constructor_ingests_ordered_map_and_optional_default",
+        "typed_factory_registration_fallback_subtyping_and_order",
+        "typed_factory_missing_default_and_requested_kind_throw",
+        "typed_factory_constructor_and_adoption_failures_unwind_unique_owners",
+        "typed_factory_adopted_product_lifetime_and_address_survive_registry_changes",
+        "typed_wrapper_factory_forwards_source_parent_and_live_preorder"
+      ]
+    },
+    {
+      "path": "tests/math/native_math_item.cpp",
+      "role": "related current responsibility; retired JS protocol is not claimed reproduced",
+      "existingCases": [
+        "math_item_initial_values_and_single_display_state",
+        "math_item_compile_gate_borrows_real_node_and_rejects_foreign_document",
+        "math_item_compile_borrows_output_for_only_the_current_compilation",
+        "math_item_null_input_is_measurement_only_without_dummy_compile",
+        "math_item_typeset_and_escaped_gates_commit_only_completed_scene",
+        "math_item_rollback_removal_precedes_data_clears_and_keeps_roots_metrics",
+        "math_item_state_rechecks_current_state_after_virtual_clear",
+        "math_item_exact_thresholds_clear_only_crossed_data",
+        "math_item_renderer_delegation_and_rerender_predecessor_124",
+        "math_item_recompile_captures_precompiled_state_and_restores_record_after_rollback",
+        "math_item_source_default_clear_keeps_values_and_scene_outlives_job"
+      ]
+    },
+    {
+      "path": "tests/math/prioritized_list.cpp",
+      "role": "related current responsibility; retired JS protocol is not claimed reproduced",
+      "existingCases": [
+        "priority insertion is stable and removes the last matching item"
+      ]
+    },
+    {
+      "path": "tests/math/native_common_jax.cpp",
+      "role": "related current responsibility; retired JS protocol is not claimed reproduced",
+      "existingCases": [
+        "common subtree bbox matches real Source profile without changing document root or tree",
+        "common subtree bbox destroys fresh wrapper and visitor arenas over 192 mixed calls",
+        "common subtree bbox honors supplied catalog metrics and unknown text host",
+        "common subtree bbox rejects foreign owner before TeXclass and accepts detached tables",
+        "common subtree bbox helpers remain document owned until each request ends",
+        "metrics_delegate_owned_request_and_set_requested_display",
+        "unknown_text_cache_preserves_variant_text_and_explicit_css_key",
+        "linebreak_width_uses_root_maxwidth_over_configured_width",
+        "operator_marking_and_unmarking_update_typed_layout_state",
+        "nested_style_and_semantic_added_branches_mark_the_scanned_parent",
+        "font_style_collection_uses_face_and_wrapper_catalog_values"
+      ]
+    },
+    {
+      "path": "tests/math/parse_options.cpp",
+      "role": "related current responsibility; retired JS protocol is not claimed reproduced",
+      "existingCases": [
+        "parse options defaults preserve sparse fields and later false zero empty values",
+        "parse options replace arrays and own copied definition values",
+        "parse options merge permissions by domain and preserve explicit package denial",
+        "parse options retain regular expression state across default composition",
+        "parse options style resolvers match original mathematical variant functions"
+      ]
+    },
+    {
+      "path": "tests/math/native_renderer_bridge.cpp",
+      "role": "related current responsibility; retired JS protocol is not claimed reproduced",
+      "existingCases": [
+        "C ABI batch isolates item errors and shares the single rendering path",
+        "Renderer batch shares request fonts and matches batches of one",
+        "opaque C ABI renders the canonical Source profile and retains result storage",
+        "C ABI rejects invalid arguments and null accessors safely",
+        "C ABI enforces owner thread and supports reusable pre-cancelled sessions",
+        "C ABI in-flight deadline cancels and makes the session unusable",
+        "public C++ Renderer retains its RenderResult Scene after destruction",
+        "public C++ Renderer cancellation and RangeError leave the session reusable"
+      ]
+    },
+    {
+      "path": "tests/math/tags.cpp",
+      "role": "related current responsibility; retired JS protocol is not claimed reproduced",
+      "existingCases": [
+        "tags keep nested environment labels and explicit no numbering on the request owner",
+        "tags commit equation counters labels and recompile state using real MathItem",
+        "tags format references and URLs and construct the original labeled table shape",
+        "tags factory resolves configured creators builtins and explicit unknown defaults"
+      ]
+    },
+    {
+      "path": "tests/math/base_items.cpp",
+      "role": "related current responsibility; retired JS protocol is not claimed reproduced",
+      "existingCases": [
+        "base item catalog constructs all26 original frame classes with real ParseOptions",
+        "base prime items honor two and three slot script family positions",
+        "base subsup item preserves sparse primes and explicit false limits",
+        "base group and environment errors retain original names",
+        "base over style and position items retain mathematical node attributes",
+        "base function not nonscript dots and break use original operator rules",
+        "base array row spacing frames and repeating equation columns match Source",
+        "array template scanning uses real TexParser source and preserves nested contents"
+      ]
+    },
+    {
+      "path": "tests/math/amscd.cpp",
+      "role": "related current responsibility; retired JS protocol is not claimed reproduced",
+      "existingCases": [
+        "amscd configuration preserves three original maps defaults and existing ArrayItem",
+        "amscd original row parity fills missing cells and puts struts only in even first cells",
+        "amscd horizontal labels retain upper lower padding and empty label kern",
+        "amscd vertical labels use original raise vcenter llap and rlap layout",
+        "amscd captures dimensions on entry honors scoped overrides and resets each formula",
+        "amscd configured creators receive original arrow attributes and hidden horizontal wrapper",
+        "amscd literal fallback generic arrays and original errors leave following input usable"
+      ]
+    },
+    {
+      "path": "tests/math/bboldx.cpp",
+      "role": "related current responsibility; retired JS protocol is not claimed reproduced",
+      "existingCases": [
+        "bboldx all ten maps retain independent Source character rows and original command arguments",
+        "bboldx every character and command compiles in all four option combinations with Source fonts",
+        "bboldx priority selection text registration and shared options preserve font scope",
+        "bboldx real token creators receive explicit variants and delimiter flag with stable node borrows",
+        "bboldx missing arguments and child errors release parser borrowing and recover next formula",
+        "bboldx fixed macro and token callback tables support let captures across later option changes"
+      ]
+    },
+    {
+      "path": "tests/math/setoptions.cpp",
+      "role": "related current responsibility; retired JS protocol is not claimed reproduced",
+      "existingCases": [
+        "setoptions original configuration metadata and default permissions",
+        "setoptions complete Source schema presence and scalar writes",
+        "setoptions real fonts units grouping and independent options",
+        "setoptions real AMS color undefined and captured parsing options",
+        "setoptions permissions errors partial mutation and presence",
+        "setoptions custom filters are lazy ordered and preserve skipped values",
+        "setoptions scalar typed boundaries regex errors and numeric thresholds",
+        "setoptions clears the nullable reference formatter without changing its native type",
+        "setoptions budgets and captured math style follow actual parser consumers",
+        "setoptions require wrapper fixed let priority and configured tokens"
+      ]
+    },
+    {
+      "path": "tests/math/centernot.cpp",
+      "role": "related current responsibility; retired JS protocol is not claimed reproduced",
+      "existingCases": [
+        "centernot original callbacks and postprocessor copy relation binary operator and ordinary classes",
+        "centernot visible and phantom branches keep original parse order and environment",
+        "centernot nested overlays retain three class-copy list entries and reset them next formula",
+        "centernot let aliases missing arguments and empty base exception leave following input usable"
+      ]
+    },
+    {
+      "path": "tests/math/find_tex.cpp",
+      "role": "related current responsibility; retired JS protocol is not claimed reproduced",
+      "existingCases": [
+        "FindTeX matches every pinned Source ProtoItem field",
+        "FindTeX resets Source regex cursors between repeated calls",
+        "FindTeX rejects an empty opening delimiter in the typed API"
+      ]
+    },
+    {
+      "path": "tests/math/textmacros.cpp",
+      "role": "related current responsibility; retired JS protocol is not claimed reproduced",
+      "existingCases": [
+        "textmacros every original character and command mapping keeps its compiled callback and typed arguments",
+        "textmacros child configuration captures its own style while sharing the configured main options",
+        "textmacros text parsing preserves quotes whitespace comments escapes Unicode and inserts",
+        "textmacros grouped fonts emphasis and argument fonts restore the previous environment",
+        "textmacros all fourteen sizes remain numeric values on the actual text nodes",
+        "textmacros accents create real mover slots and both embedded math delimiters reach TeX",
+        "textmacros eleven Base aliases operate on the real text parser graph",
+        "textmacros loaded Color and HTML macros forward to the text receiver and restore group color",
+        "textmacros errors restore both parser lists and primary borrow before following formulas",
+        "textmacros replacement definitions and fixed callback let captures remain owned across formulas",
+        "textmacros configured creators and copied node lists retain actual accent identity",
+        "textmacros real TextParser construction assigns level after parsing protects explicit attributes and reparents rows"
+      ]
+    },
+    {
+      "path": "tests/math/native_tex_definitions.cpp",
+      "role": "related current responsibility; retired JS protocol is not claimed reproduced",
+      "existingCases": [
+        "native let definitions distinguish builtin operation and captured character token",
+        "native definition suppression shadows outer replacement without falling through",
+        "native persistent definitions own all three Source domains and isolate copied values",
+        "native alias validation leaves an existing definition unchanged"
+      ]
+    },
+    {
+      "path": "tests/math/native_raii_regexp.cpp",
+      "role": "related current responsibility; retired JS protocol is not claimed reproduced",
+      "existingCases": [
+        "legacy and Unicode folding retain their distinct SRELL policies",
+        "typed cursor preserves global capture and failure behavior",
+        "Unicode cursor backs up to a surrogate pair boundary",
+        "split retains unmatched capture as an empty optional",
+        "invalid syntax has a typed native exception",
+        "source serialization and canonical flags stay available"
+      ]
+    },
+    {
+      "path": "tests/math/native_tex_session.cpp",
+      "role": "related current responsibility; retired JS protocol is not claimed reproduced",
+      "existingCases": [
+        "tex_color_session_lifetime_follows_jax_not_equation_or_tag_reset",
+        "macro_definition_owns_utf16_replacement_prefix_delimiters_and_default",
+        "macro_definition_checks_templates_and_preserves_explicit_parameter_declarations",
+        "equation_state_is_owned_and_source_finish_commits_labels_ids_and_counter",
+        "recompile_holds_counter_and_redo_reports_precommit_counter",
+        "finish_commits_given_source_effects_and_tag_reset_preserves_macros",
+        "macro_keys_own_full_utf16_control_sequence_names"
+      ]
+    },
+    {
+      "path": "tests/math/textcomp.cpp",
+      "role": "related current responsibility; retired JS protocol is not claimed reproduced",
+      "existingCases": [
+        "textcomp all 117 original map arguments and math or text symbols match the independent Source table",
+        "textcomp text inserts coalesce the current text buffer and keep font-specific segments separate",
+        "textcomp parser-specific registration works in either package order and without a text parser",
+        "textcomp real creator receives explicit oldstyle definition and the final text child borrow",
+        "textcomp aliases preserve math use while text fallback only admits string replacement macros"
+      ]
+    },
+    {
+      "path": "tests/math/units.cpp",
+      "role": "related current responsibility; retired JS protocol is not claimed reproduced",
+      "existingCases": [
+        "units original three compiled methods and upright argument expansion",
+        "units value prefixes preserve zero string spacing options and remaining input",
+        "units fractions retain explicit bevel option and existing numerator denominator nodes",
+        "units local fraction parsers inherit current environment and keep custom font changes local",
+        "units argument and child errors release local parsers and allow following formulas",
+        "units formal aliases retain three fixed methods across expressions"
+      ]
+    },
+    {
+      "path": "tests/math/typed_mml_scripts.cpp",
+      "role": "related current responsibility; retired JS protocol is not claimed reproduced",
+      "existingCases": [
+        "script_family_kinds_arities_and_child_slots",
+        "msup_inherits_into_its_physical_script_slot_without_a_subscript",
+        "subsup_increases_script_level_only_for_script_children",
+        "mover_uses_over_slot_and_explicit_accent_script_level",
+        "multiscripts_assigns_paired_post_and_prescripts_by_alternating_slot",
+        "multiscripts_adds_owned_none_for_unpaired_postscript",
+        "fixMmultiscripts_true_suppresses_diagnostic_without_repairing_children",
+        "fixMmultiscripts_false_wraps_original_node_with_parity_message",
+        "subsup_set_texclass_routes_each_base_branch_and_isolates_scripts"
+      ]
+    }
+  ],
+  "preservedSources": [
+    {
+      "id": "s1",
+      "path": "tools/math-port/package-callback-metadata-source.cjs",
+      "sha256": "6f120625cb36595c6f2de064652b4c093ccf6754dddacce6759c83fed96c1d9d"
+    },
+    {
+      "id": "s2",
+      "path": "tools/math-port/tags-class-binding-oracle.cjs",
+      "sha256": "e5cb336b08a2194c6ffb2419afb58d44690cab5df60906024b4e756645a22e36"
+    },
+    {
+      "id": "s3",
+      "path": "docs/math-port/evidence/tags-class-binding-source.json",
+      "sha256": "98f5eeea8b6437e854db868f470d362ead35bb5431e779f51f9d6e3dbda72517"
+    },
+    {
+      "id": "s4",
+      "path": "tools/math-port/textmacros-package-original-oracle.cjs",
+      "sha256": "3b27541078fa15cb15d5a97a1e6ce2dca98f61d2dd272af46e6a1e3ca8d81143"
+    },
+    {
+      "id": "s5",
+      "path": "docs/math-port/evidence/textmacros-package-original-source.json",
+      "sha256": "1b387d1de2ee9f5c0ca795cf3e21018c7ba711ab9b9395ea73c64b84aa47ee63"
+    },
+    {
+      "id": "s6",
+      "path": "tools/math-port/output-jax-original-oracle.cjs",
+      "sha256": "260f002ba4a90b1d439a499c3daa97ba817c9f4ed0767f5722a46b4d9476834b"
+    },
+    {
+      "id": "s7",
+      "path": "tools/math-port/regressions/g269/parse-options/source-witness.cjs",
+      "sha256": "59596bbaf5a89897fa1981094104261a459c79042669fa3578dc467766710f1a"
+    },
+    {
+      "id": "s8",
+      "path": "tools/math-port/regressions/g269/parse-options/source-witness.json",
+      "sha256": "918eecc38e889665663df528c2c8555b3ddc63d7de681267d3963698a68ef4be"
+    },
+    {
+      "id": "s9",
+      "path": "tools/math-port/tree-node-source-witness.cjs",
+      "sha256": "e2544c4386e463147e3759590dfd608b6f85eb5b4889c8db55ca3b9bfaaacc78"
+    },
+    {
+      "id": "s10",
+      "path": "tools/math-port/tree-factory-source-witness.cjs",
+      "sha256": "4b3efa8b3fb75333dbdc1e649c3c0e84d296cee2cc2f0229fc1eda2d15b1980f"
+    },
+    {
+      "id": "s11",
+      "path": "tools/math-port/tree-visitor-source-witness.cjs",
+      "sha256": "12f2c82a3db373c908a14f3df2a3a2c90a722669ea62424891e95acbe0c2bb12"
+    },
+    {
+      "id": "s12",
+      "path": "tools/math-port/array-concat-original-oracle.cjs",
+      "sha256": "cae961ae604a1a6860f03031d6c6440f062b1c8cfdbfad417fb354fbfaa1ee24"
+    },
+    {
+      "id": "s13",
+      "path": "tools/math-port/array-concat-structured-oracle.cjs",
+      "sha256": "2a5961d1ceeaafa557788c1355c777c3b5a19ce166eeeff10de2d8e7da8c620c"
+    },
+    {
+      "id": "s14",
+      "path": "tools/math-port/find-tex-source.cjs",
+      "sha256": "cfc7239ab924d312cb3204e5045a533554ad4b05e7d4fd211a2b31a12551c564"
+    },
+    {
+      "id": "s15",
+      "path": "docs/math-port/evidence/p52-find-tex-source.json",
+      "sha256": "e812378ffaad5bc4897c5f58082a648444b10ccfa920ba96b8f501a594ac2261"
+    },
+    {
+      "id": "s16",
+      "path": "docs/math-port/evidence/p51b-regexp-binding-source.json",
+      "sha256": "338d5d730e5da964f3b13d617eac95ec28e12df97ef98a30d9840b47520781b6"
+    },
+    {
+      "id": "s17",
+      "path": "docs/math-port/evidence/p50-regexp-host-source.json",
+      "sha256": "59dc8b015b01b384b50ee35d5bc3ece426be211f4f5d6bf9f8d1845fbcd7edf1"
+    },
+    {
+      "id": "s18",
+      "path": "tests/math/fixtures/textcomp.inc",
+      "sha256": "53e7921035cb9785b1a80e58357e6a8d3bc9bdae7498e0f3899b05c6487da135"
+    },
+    {
+      "id": "s19",
+      "path": "tests/math/fixtures/textmacros-mappings.inc",
+      "sha256": "81f99165a9113a13105e97e9fca05c1fae75222a76284c62fe474a127f69d152"
+    },
+    {
+      "id": "s20",
+      "path": "tests/math/fixtures/bboldx.inc",
+      "sha256": "1784fa48906143e744d4a96d5927eb1f29170e50499ee0f1750125c58148a0ea"
+    },
+    {
+      "id": "s21",
+      "path": "tests/math/fixtures/find_tex.inc",
+      "sha256": "bbd6f1898c3a1254695c0946c3a7cb71d78bbf41e7c30ac4e4864f39e2bee5d9"
+    },
+    {
+      "id": "s22",
+      "path": "tools/math-port/common-layout-reference/profile-source-lock.json",
+      "sha256": "acd3decb56eaeff289493133856413a704e7cc75d67fbc50de221cf716a0bf72"
+    }
+  ],
+  "files": [
+    {
+      "path": "tests/math/attributes_constructor_order.cpp",
+      "sha256": "87f22849676887a57afb504fecf4ea3dea9c10f539f9ec944c78f1fd61526f3d",
+      "reason": "OwnPropertyEnumerable metadata reads, JS constructor coercion of null/string/symbol defaults, inherited getter/setter ordering; no mathematical attribute value algorithm is asserted.",
+      "cases": [
+        {
+          "name": "context_own_property_enumerable_does_not_read_native_field_value",
+          "disposition": "retire-object-protocol"
+        },
+        {
+          "name": "attributes_constructor_validates_global_before_getting_defaults",
+          "disposition": "retire-object-protocol"
+        },
+        {
+          "name": "attributes_constructor_keeps_null_global_and_assigns_string_or_symbol_sources",
+          "disposition": "retire-object-protocol"
+        },
+        {
+          "name": "attributes_constructor_get_and_set_order_uses_live_default_owner",
+          "disposition": "retire-object-protocol"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/mml_native_factory.cpp",
+        "tests/math/native_raii_mml_base.cpp"
+      ],
+      "preservedSourceRefs": [],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/canonical_function_source_metadata.cpp",
+      "sha256": "93933a86c80f3489065a61e099c54e9430963c1d3d7351640de3f4994844b864",
+      "reason": "Anonymous name/arity descriptor flags and canonical OptionFunctionBindings roundtrip; numeric 19 is a synthetic adapter return.",
+      "cases": [
+        {
+          "name": "function_context_binding_retains_source_name_length_and_identity",
+          "disposition": "retire-function-metadata"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/function_list.cpp"
+      ],
+      "preservedSourceRefs": [],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/context_property_bindings.cpp",
+      "sha256": "18ae8c762b6ab51a135447c0519e9135181a3e41e314fea5e5ef875561baebbe",
+      "reason": "Symbol identity, live PropertyList/PropertyArray projection, holes, getters, assign key snapshots and descriptor reads. The mathcolor and MML-definition test mutates a Context-backed definition; native attribute value ownership already has its typed factory owner.",
+      "cases": [
+        {
+          "name": "math_context_property_symbol_keeps_canonical_marker_identity",
+          "disposition": "retire-object-protocol"
+        },
+        {
+          "name": "math_context_property_symbol_rejects_foreign_context_and_coercion",
+          "disposition": "retire-object-protocol"
+        },
+        {
+          "name": "math_context_property_live_alias_and_cycle",
+          "disposition": "retire-object-protocol"
+        },
+        {
+          "name": "math_context_property_cross_binding_identity_and_equality_are_source_object_based",
+          "disposition": "retire-object-protocol"
+        },
+        {
+          "name": "math_context_property_plain_native_record_keeps_shared_storage_identity",
+          "disposition": "retire-object-protocol"
+        },
+        {
+          "name": "math_context_property_array_storage_round_trips_without_dense_copy",
+          "disposition": "retire-object-protocol"
+        },
+        {
+          "name": "math_context_property_array_symbol_lookup_uses_inherited_iterator",
+          "disposition": "retire-object-protocol"
+        },
+        {
+          "name": "math_context_native_array_provider_delegates_to_bound_array_storage",
+          "disposition": "retire-object-protocol"
+        },
+        {
+          "name": "math_context_native_record_view_uses_context_prototype_and_descriptor_dispatch",
+          "disposition": "retire-object-protocol"
+        },
+        {
+          "name": "math_context_property_getter_setter_receiver_and_keys",
+          "disposition": "retire-object-protocol"
+        },
+        {
+          "name": "math_context_property_array_holes_and_live_length",
+          "disposition": "retire-object-protocol"
+        },
+        {
+          "name": "math_context_property_mml_definition_remains_live",
+          "disposition": "retire-object-protocol"
+        },
+        {
+          "name": "math_context_property_canonical_function_identity",
+          "disposition": "retire-object-protocol"
+        },
+        {
+          "name": "math_context_property_assign_copy_uses_own_keys_and_live_gets",
+          "disposition": "retire-object-protocol"
+        },
+        {
+          "name": "math_context_property_assign_checks_metadata_without_reading_native_value",
+          "disposition": "retire-object-protocol"
+        },
+        {
+          "name": "math_tree_context_copy_checks_native_field_metadata_without_reading_value",
+          "disposition": "retire-object-protocol"
+        },
+        {
+          "name": "math_context_property_assign_native_record_metadata_does_not_call_value_descriptor",
+          "disposition": "retire-object-protocol"
+        },
+        {
+          "name": "math_context_property_assign_reads_bound_property_owner_once",
+          "disposition": "retire-object-protocol"
+        },
+        {
+          "name": "math_context_bound_property_list_copy_and_symbol_keys_are_metadata_only",
+          "disposition": "retire-object-protocol"
+        },
+        {
+          "name": "math_context_reprojection_preserves_bound_record_enumerability_without_value_reads",
+          "disposition": "retire-object-protocol"
+        },
+        {
+          "name": "math_context_property_assign_copy_snapshots_keys_but_rechecks_descriptors",
+          "disposition": "retire-object-protocol"
+        },
+        {
+          "name": "math_context_bound_record_assign_snapshots_complete_keys_before_getters",
+          "disposition": "retire-object-protocol"
+        },
+        {
+          "name": "math_context_property_assign_copy_uses_target_set_semantics",
+          "disposition": "retire-object-protocol"
+        },
+        {
+          "name": "math_context_property_assign_copy_native_root_is_new_and_retains_bound_nested_identity",
+          "disposition": "retire-object-protocol"
+        },
+        {
+          "name": "math_context_property_assign_copy_retains_unbound_nested_record_identity",
+          "disposition": "retire-object-protocol"
+        },
+        {
+          "name": "math_context_property_assign_copy_nullish_sources_are_empty",
+          "disposition": "retire-object-protocol"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/mml_native_factory.cpp",
+        "tests/math/native_tree_node.cpp"
+      ],
+      "preservedSourceRefs": [],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/context_raw_edge_trace.cpp",
+      "sha256": "fa325fc73e5cf82a117aaa04059966af467cfdd79c1b02b0fb70d7528d6f3ce8",
+      "reason": "Raw Context GC edge closure, opaque pins, native payload visitor registration and identity registry handles; no TeX/MML/Scene mathematical result.",
+      "cases": [
+        {
+          "name": "math_port_context_raw_trace_keeps_default_intrinsic_prototype_opaque_owners_pinned",
+          "disposition": "retire-tracing-protocol"
+        },
+        {
+          "name": "math_port_context_raw_trace_walks_data_prototype_accessor_and_cycle_without_getting",
+          "disposition": "retire-tracing-protocol"
+        },
+        {
+          "name": "math_port_context_raw_trace_uses_registered_native_owner_edges",
+          "disposition": "retire-tracing-protocol"
+        },
+        {
+          "name": "math_port_context_raw_trace_uses_current_native_record_prototype_without_observing_view",
+          "disposition": "retire-tracing-protocol"
+        },
+        {
+          "name": "math_port_context_raw_trace_visits_registered_callback_and_payload_edges",
+          "disposition": "retire-tracing-protocol"
+        },
+        {
+          "name": "math_port_context_raw_trace_reports_unvisited_opaque_owners_as_pins",
+          "disposition": "retire-tracing-protocol"
+        },
+        {
+          "name": "math_port_context_raw_trace_pins_incomplete_visitor_while_keeping_known_edges",
+          "disposition": "retire-tracing-protocol"
+        },
+        {
+          "name": "math_port_context_raw_trace_invalidates_payload_hook_on_mutable_access_but_not_const_read",
+          "disposition": "retire-tracing-protocol"
+        },
+        {
+          "name": "math_port_context_payload_alias_before_hook_permanently_blocks_trace_registration",
+          "disposition": "retire-tracing-protocol"
+        },
+        {
+          "name": "math_port_context_raw_trace_rejects_duplicate_owner_hook_until_explicit_unregister",
+          "disposition": "retire-tracing-protocol"
+        },
+        {
+          "name": "math_port_context_raw_trace_recomputes_after_root_replacement",
+          "disposition": "retire-tracing-protocol"
+        },
+        {
+          "name": "math_port_context_raw_trace_handles_native_field_visitor",
+          "disposition": "retire-tracing-protocol"
+        },
+        {
+          "name": "math_port_native_identity_registry_enumerates_its_actual_strong_handles",
+          "disposition": "retire-tracing-protocol"
+        },
+        {
+          "name": "math_port_context_raw_trace_visits_raw_context_map_values_without_callbacks",
+          "disposition": "retire-tracing-protocol"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/mml_native_raii_foundation.cpp",
+        "tests/math/native_raii_scene.cpp"
+      ],
+      "preservedSourceRefs": [],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/core_tree_node_context_classes.cpp",
+      "sha256": "4691fb1d843bfc7723acfe4ce7ebb8de996854d2edd6f230f3a0598f2e882ae1",
+      "reason": "Canonical constructors/prototypes, call-existing receivers, array method replacement/raw indices; tree append/copy/find/toString/preorder/empty no-ops are independently owned by typed tree tests.",
+      "cases": [
+        {
+          "name": "math_tree_context_class_objects_are_canonical",
+          "disposition": "retire-object-protocol-with-covered-values"
+        },
+        {
+          "name": "math_tree_context_constructor_dynamic_order_and_partial_fields",
+          "disposition": "retire-object-protocol-with-covered-values"
+        },
+        {
+          "name": "math_tree_context_base_constructor_call_existing",
+          "disposition": "retire-object-protocol-with-covered-values"
+        },
+        {
+          "name": "math_tree_context_empty_call_return_and_noop_children",
+          "disposition": "retire-object-protocol-with-covered-values"
+        },
+        {
+          "name": "math_tree_context_copy_symbol_and_walk",
+          "disposition": "retire-object-protocol-with-covered-values"
+        },
+        {
+          "name": "math_tree_context_replace_uses_raw_child_index",
+          "disposition": "retire-object-protocol-with-covered-values"
+        },
+        {
+          "name": "math_tree_context_array_methods_keep_raw_results",
+          "disposition": "retire-object-protocol-with-covered-values"
+        },
+        {
+          "name": "math_tree_context_walk_dispatches_own_replacements",
+          "disposition": "retire-object-protocol-with-covered-values"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/native_tree_node.cpp"
+      ],
+      "preservedSourceRefs": [
+        "s9",
+        "s10",
+        "s11"
+      ],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/factory_context_bindings.cpp",
+      "sha256": "aa96dbcc8d4ab5594d31b4cb15744fc2ed6f1a59e4e9b14c6bc06fe3bab0401c",
+      "reason": "Module lifetime, mutable constructor/default fields, dynamic apply/getter timing and callable receiver wrappers. Registration/fallback/class predicate/wrapper forwarding have typed owners.",
+      "cases": [
+        {
+          "name": "shared_factory_module_remains_usable_after_first_parser_runtime_dies",
+          "disposition": "retire-factory-context-protocol"
+        },
+        {
+          "name": "source_base_constructor_fields_and_wrapper_adapter_owner",
+          "disposition": "retire-factory-context-protocol"
+        },
+        {
+          "name": "explicit_nodes_do_not_read_constructor_getter_for_base_or_wrapper_call",
+          "disposition": "retire-factory-context-protocol"
+        },
+        {
+          "name": "expired_factory_constructor_call_reports_type_error",
+          "disposition": "retire-factory-context-protocol"
+        },
+        {
+          "name": "class_map_methods_and_wrapper_wrap_use_live_context_owners",
+          "disposition": "retire-factory-context-protocol"
+        },
+        {
+          "name": "create_delegates_to_the_real_owner_source_selection_algorithm",
+          "disposition": "retire-factory-context-protocol"
+        },
+        {
+          "name": "create_reads_and_calls_selected_creator_apply_at_the_source_boundary",
+          "disposition": "retire-factory-context-protocol"
+        },
+        {
+          "name": "create_fallback_rereads_node_before_default_kind",
+          "disposition": "retire-factory-context-protocol"
+        },
+        {
+          "name": "wrapper_apply_noncallable_throws_source_type_error_after_kind_get",
+          "disposition": "retire-factory-context-protocol"
+        },
+        {
+          "name": "source_base_call_initializes_fields_and_preserves_unrelated_payload",
+          "disposition": "retire-factory-context-protocol"
+        },
+        {
+          "name": "constructors_use_current_default_nodes_and_dynamic_setNodeClass",
+          "disposition": "retire-factory-context-protocol"
+        },
+        {
+          "name": "set_node_class_keeps_two_map_reads_and_defers_constructor_call",
+          "disposition": "retire-factory-context-protocol"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/native_tree_factory.cpp"
+      ],
+      "preservedSourceRefs": [
+        "s9",
+        "s10",
+        "s11"
+      ],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/factory_context_field_views.cpp",
+      "sha256": "5966f0e34ca27878625f27b9d89539f7e41438d2755d883ea961a5cbf60e6c9f",
+      "reason": "Projection live cursors, key coercion, null-vs-undefined apply errors, two source map reads and weak bridge cycles; no new native field bridge is needed.",
+      "cases": [
+        {
+          "name": "node_factory_calls_selected_member_directly_before_argument_conversion",
+          "disposition": "retire-factory-context-protocol"
+        },
+        {
+          "name": "native_factory_null_fallback_throws_when_reading_apply",
+          "disposition": "retire-factory-context-protocol"
+        },
+        {
+          "name": "factory_node_map_projection_uses_actual_owner_and_live_cursor",
+          "disposition": "retire-factory-context-protocol"
+        },
+        {
+          "name": "factory_source_kind_enumeration_copies_keys_without_resolving_values",
+          "disposition": "retire-factory-context-protocol"
+        },
+        {
+          "name": "set_node_class_reads_current_map_again_and_defers_captured_constructor_resolution",
+          "disposition": "retire-factory-context-protocol"
+        },
+        {
+          "name": "factory_creator_replacement_is_the_native_owner_and_reads_apply_dynamically",
+          "disposition": "retire-factory-context-protocol"
+        },
+        {
+          "name": "factory_falsy_lookup_keeps_null_vs_undefined_apply_errors_and_skips_arguments",
+          "disposition": "retire-factory-context-protocol"
+        },
+        {
+          "name": "replacement_node_access_keeps_weak_owner_without_factory_cycle",
+          "disposition": "retire-factory-context-protocol"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/native_tree_factory.cpp"
+      ],
+      "preservedSourceRefs": [
+        "s9",
+        "s10",
+        "s11"
+      ],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/factory_creator_cells.cpp",
+      "sha256": "b9b34c3bd985a90b88a0b6a6e1aae6034d1bdb4d08b03a1eb148d8c45f1882be",
+      "reason": "Per-key descriptor cells and Context function/record strong-vs-weak ownership. Current factory arenas own products and unwind constructor/adoption failures without a Context cell model.",
+      "cases": [
+        {
+          "name": "creator_context_record_and_retained_alias_share_per_key_cells",
+          "disposition": "retire-factory-context-protocol"
+        },
+        {
+          "name": "native_factory_dispatch_and_context_share_the_bound_creator_owner",
+          "disposition": "retire-factory-context-protocol"
+        },
+        {
+          "name": "creator_bridge_weak_owner_does_not_form_factory_access_cycle",
+          "disposition": "retire-factory-context-protocol"
+        },
+        {
+          "name": "context_callable_and_record_view_retain_the_concrete_factory_until_context_release",
+          "disposition": "retire-factory-context-protocol"
+        },
+        {
+          "name": "factory_owned_bridge_expose_is_weak_but_returned_source_function_is_strong",
+          "disposition": "retire-factory-context-protocol"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/native_tree_factory.cpp"
+      ],
+      "preservedSourceRefs": [
+        "s9",
+        "s10",
+        "s11"
+      ],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/math_render_actions.cpp",
+      "sha256": "36c1a58ef968aa06bd758fd027fd4ee7cf84aae6ae732ce3a926d831b31565d9",
+      "reason": "Old DOM MathDocument action dictionary, method-name dispatch, canonical action records and convert gate; actual MathItem boundary calls remain native. Stable priority/live iteration/stop/throw are exercised by typed FunctionList; RenderActions stop=true is its own retired scheduler contract and is not claimed equal to FunctionList stop=false.",
+      "cases": [
+        {
+          "name": "create-keeps-priority-order-and-finds-canonical-data",
+          "disposition": "retire-host-scheduler-with-covered-services"
+        },
+        {
+          "name": "method-actions-use-live-document-receiver-and-priority-filter",
+          "disposition": "retire-host-scheduler-with-covered-services"
+        },
+        {
+          "name": "direct-action-can-stop-current-prioritized-iteration",
+          "disposition": "retire-host-scheduler-with-covered-services"
+        },
+        {
+          "name": "method-action-propagates-the-source-callback-exception",
+          "disposition": "retire-host-scheduler-with-covered-services"
+        },
+        {
+          "name": "math-action-preserves-data-item-document-identities-and-convert-gate",
+          "disposition": "retire-host-scheduler-with-covered-services"
+        },
+        {
+          "name": "iteration-observes-later-items-added-by-a-live-callback",
+          "disposition": "retire-host-scheduler-with-covered-services"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/native_math_item.cpp",
+        "tests/math/function_list.cpp",
+        "tests/math/prioritized_list.cpp"
+      ],
+      "preservedSourceRefs": [],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/native_identities_host.cpp",
+      "sha256": "5bfed007e8b5c2733a448b785acd5da8d9383df4b5ec7322ca6d3b63b2e0c8f3",
+      "reason": "Canonical Context handle conflicts, payload ownership and clear/resolve failure, including an MML graph held alive through a handle. Native MML document ownership replaces handle retention, not its observable JS payload behavior.",
+      "cases": [
+        {
+          "name": "math_port_native_identity_host_lifetime",
+          "disposition": "retire-handle-protocol"
+        },
+        {
+          "name": "math_port_native_identity_host_reject_conflicts",
+          "disposition": "retire-handle-protocol"
+        },
+        {
+          "name": "math_port_native_identity_host_reject_noncanonical_payload",
+          "disposition": "retire-handle-protocol"
+        },
+        {
+          "name": "math_port_native_identity_host_raw_owner_retained_and_released",
+          "disposition": "retire-handle-protocol"
+        },
+        {
+          "name": "math_port_native_identity_host_payload_outlives_registry",
+          "disposition": "retire-handle-protocol"
+        },
+        {
+          "name": "math_port_native_identity_host_actual_mml_graph_lifetime",
+          "disposition": "retire-handle-protocol"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/mml_native_raii_foundation.cpp",
+        "tests/math/native_tree_factory.cpp"
+      ],
+      "preservedSourceRefs": [],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/native_identity_request_capture.cpp",
+      "sha256": "43ea874d6080fde30306a6bbeee183a41f5f4958324f21c124a6d6595680c743",
+      "reason": "Capture tokens, promotion, erase-vs-tombstone, requested/payload type errors and retryable retirement. No native math value or scene assertion.",
+      "cases": [
+        {
+          "name": "math_port_native_identity_request_capture_retires_transient_and_preserves_promoted_binding",
+          "disposition": "retire-handle-protocol"
+        },
+        {
+          "name": "math_port_native_identity_registry_enumerates_actual_handles_and_finds_pointee",
+          "disposition": "retire-handle-protocol"
+        },
+        {
+          "name": "math_port_native_identity_erase_keeps_source_record_while_retire_tombstones_handle",
+          "disposition": "retire-handle-protocol"
+        },
+        {
+          "name": "math_port_native_identity_resolution_failure_is_derived_and_keeps_base_diagnostic",
+          "disposition": "retire-handle-protocol"
+        },
+        {
+          "name": "math_port_native_identity_nested_capture_tokens_retire_exact_owner_records",
+          "disposition": "retire-handle-protocol"
+        },
+        {
+          "name": "math_port_native_identity_failed_capture_retirement_keeps_same_token_retryable",
+          "disposition": "retire-handle-protocol"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/mml_native_raii_foundation.cpp",
+        "tests/math/native_common_jax.cpp"
+      ],
+      "preservedSourceRefs": [],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/native_indexed_array_set.cpp",
+      "sha256": "7f3dac20ef37dfb465c772b92e5e7d702442610edb72337f5e0d3357b6f33631",
+      "reason": "NativeArrayView provider length/holes, inherited setter and readonly descriptors, JS array length metadata. Current native children use typed owner operations.",
+      "cases": [
+        {
+          "name": "native_indexed_set_and_define_update_the_provider_and_length",
+          "disposition": "retire-object-protocol"
+        },
+        {
+          "name": "native_indexed_set_calls_inherited_setter_before_length_growth",
+          "disposition": "retire-object-protocol"
+        },
+        {
+          "name": "native_indexed_set_respects_inherited_readonly_and_array_length",
+          "disposition": "retire-object-protocol"
+        },
+        {
+          "name": "native_indexed_array_length_descriptor_is_non_enumerable_and_non_configurable",
+          "disposition": "retire-object-protocol"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/native_tree_node.cpp"
+      ],
+      "preservedSourceRefs": [],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/option_array_concat.cpp",
+      "sha256": "ca01f5235d5282232d0b3c7f0d6e6b3223888f05a34a0939c87b153ef815bf5f",
+      "reason": "Array.concat one-level spread, holes, inherited values, Symbol.isConcatSpreadable/species, boxing and coercion failures; all are JS language host contracts, not math operations. Independent Source concat oracles remain.",
+      "cases": [
+        {
+          "name": "array_concat_has_canonical_function_metadata",
+          "disposition": "retire-language-intrinsic-protocol"
+        },
+        {
+          "name": "array_concat_spreads_only_one_level_and_preserves_identity",
+          "disposition": "retire-language-intrinsic-protocol"
+        },
+        {
+          "name": "array_concat_preserves_holes_but_materializes_inherited_values",
+          "disposition": "retire-language-intrinsic-protocol"
+        },
+        {
+          "name": "array_concat_observes_is_concat_spreadable_and_live_length_slots",
+          "disposition": "retire-language-intrinsic-protocol"
+        },
+        {
+          "name": "array_concat_false_spreadable_keeps_array_identity",
+          "disposition": "retire-language-intrinsic-protocol"
+        },
+        {
+          "name": "array_concat_gets_species_before_spreadability",
+          "disposition": "retire-language-intrinsic-protocol"
+        },
+        {
+          "name": "array_concat_generic_object_receiver_spreads_by_symbol",
+          "disposition": "retire-language-intrinsic-protocol"
+        },
+        {
+          "name": "array_concat_boxes_primitive_receiver_with_actual_internal_value",
+          "disposition": "retire-language-intrinsic-protocol"
+        },
+        {
+          "name": "array_concat_boxes_number_boolean_and_symbol_receivers",
+          "disposition": "retire-language-intrinsic-protocol"
+        },
+        {
+          "name": "array_concat_primitive_arguments_ignore_concat_spreadable_prototype",
+          "disposition": "retire-language-intrinsic-protocol"
+        },
+        {
+          "name": "array_concat_null_receiver_throws_type_error",
+          "disposition": "retire-language-intrinsic-protocol"
+        },
+        {
+          "name": "array_concat_spreadability_getter_error_propagates",
+          "disposition": "retire-language-intrinsic-protocol"
+        },
+        {
+          "name": "array_concat_defines_own_data_without_inherited_setter",
+          "disposition": "retire-language-intrinsic-protocol"
+        },
+        {
+          "name": "array_concat_method_lookup_remains_dynamic",
+          "disposition": "retire-language-intrinsic-protocol"
+        },
+        {
+          "name": "array_concat_custom_species_has_explicit_native_boundary",
+          "disposition": "retire-language-intrinsic-protocol"
+        },
+        {
+          "name": "array_concat_object_length_to_primitive_has_explicit_boundary",
+          "disposition": "retire-language-intrinsic-protocol"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/parse_options.cpp"
+      ],
+      "preservedSourceRefs": [
+        "s12",
+        "s13"
+      ],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/parser_runtime_promise_owner.cpp",
+      "sha256": "a19e0f9fa4d5553f85d03837b0c5700d21b4e16e5ceffae75e21323ce7130053",
+      "reason": "ParserRuntime async FunctionList queue, pending chained promises and expired Context invocation. No mathematical asynchronous renderer behavior is represented by these fake promise records.",
+      "cases": [
+        {
+          "name": "ParserRuntime FunctionList async execution uses the runtime queue and expires with its Context",
+          "disposition": "retire-promise-protocol"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/function_list.cpp",
+        "tests/math/native_renderer_bridge.cpp"
+      ],
+      "preservedSourceRefs": [],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/tags_function_metadata.cpp",
+      "sha256": "a8eb5ef7d2d0d9d671618c0125794d1452c30efed2789c88947def125e7968c7",
+      "reason": "Constructor and 22 method/accessor/enTag JS names/arities/descriptors are extracted as structured offline values; no runtime JS reflection is recreated.",
+      "cases": [
+        {
+          "name": "math_tags_class_and_instance_functions_match_source_metadata",
+          "disposition": "retain-offline-metadata-retire-runtime-protocol"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/tags.cpp"
+      ],
+      "preservedSourceRefs": [
+        "s2",
+        "s3"
+      ],
+      "staticGoldSections": [
+        "tagsMetadata"
+      ]
+    },
+    {
+      "path": "tests/math/tex_stack_clear_child_owner.cpp",
+      "sha256": "91662936a1bb03e55abd535496ac4758013ab72121d7b4ffa6f7c02b82a3b160",
+      "reason": "Clear allocates a new Context array and registry ChildArray payload, retained old aliases remain mutable and null entries roundtrip through argument bridge. Typed stack frames own node borrows and clear directly; Context alias identity has no native counterpart.",
+      "cases": [
+        {
+          "name": "stack_clear_rebinds_a_live_context_array_to_the_native_child_owner",
+          "disposition": "retire-array-bridge-with-covered-values"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/base_items.cpp",
+        "tests/math/mml_native_raii_foundation.cpp"
+      ],
+      "preservedSourceRefs": [],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/tree_ordinary_call.cpp",
+      "sha256": "d150503424390dd2d7d15b118b27970fc015245e58be5bf5ec47e30dbb191469",
+      "reason": "Ordinary member invocation ignores a function own .call while explicit .call observes replacement. The walk/copy semantic operations are independently tested in the typed tree owner.",
+      "cases": [
+        {
+          "name": "tree_ordinary_member_calls_ignore_function_own_call_but_explicit_call_does_not",
+          "disposition": "retire-call-protocol"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/native_tree_node.cpp"
+      ],
+      "preservedSourceRefs": [
+        "s9",
+        "s10",
+        "s11"
+      ],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/amscd_method_table_identity.cpp",
+      "sha256": "31a83601af4786561627079f2462b8f5eb64360bfae42d3fb1897b08783f5fa6",
+      "reason": "Per-runtime module export identity and map callbacks agree, mutation persists in one module and differs across runtimes. Actual callback mappings/arrow math are covered by AmsCd owner.",
+      "cases": [
+        {
+          "name": "amscd_method_exports_are_canonical_per_runtime",
+          "disposition": "retire-export-identity-with-covered-values"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/amscd.cpp"
+      ],
+      "preservedSourceRefs": [],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/bboldx_callback_source_metadata.cpp",
+      "sha256": "eb9acd0dea4761f22633fbd827aff3c3f8bf640df7fc77b09440d677757854c1",
+      "reason": "Bboldx anonymous config and setoptionsConfig names/arity 2, repeated callback identity. Independent pinned package-callback-metadata-source.cjs remains unchanged.",
+      "cases": [
+        {
+          "name": "bboldx_configuration_callback_matches_pinned_source_function_metadata",
+          "disposition": "retire-function-metadata"
+        },
+        {
+          "name": "setoptions_configuration_callback_matches_pinned_source_function_metadata",
+          "disposition": "retire-function-metadata"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/bboldx.cpp",
+        "tests/math/setoptions.cpp"
+      ],
+      "preservedSourceRefs": [
+        "s1",
+        "s20"
+      ],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/centernot_methods_identity.cpp",
+      "sha256": "2882b07ee683aa1846097bf3e3be97527fd40cc130e1f993e6427db1a8b3b564",
+      "reason": "Canonical named filter and configuration priority 5 plus runtime isolation; typed Centernot owner tests actual class-copy filter and phantom branch math.",
+      "cases": [
+        {
+          "name": "math_centernot_named_filter_is_canonical_and_shared_with_configuration",
+          "disposition": "retire-export-identity-with-covered-values"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/centernot.cpp"
+      ],
+      "preservedSourceRefs": [],
+      "staticGoldSections": [
+        "centernotFilter"
+      ]
+    },
+    {
+      "path": "tests/math/find_tex_context_fields.cpp",
+      "sha256": "8f8c45b7123b228c0195d3d730c83442f43a8af829739a8b0ce8c2fd76ec59da",
+      "reason": "Context field deletion/reinit, mutable start/end getters, capture-index rereads and undefined-to-string/TypeError coercion are JS field attacks. Actual delimiter/environment/subscript discovery fields remain checked against all pinned Source ProtoItems.",
+      "cases": [
+        {
+          "name": "find_tex_context_fields_follow_source_deletion_and_reinitialization_order",
+          "disposition": "retire-mutable-field-protocol-with-covered-values"
+        },
+        {
+          "name": "find_tex_algorithms_use_current_end_and_start_accessors",
+          "disposition": "retire-mutable-field-protocol-with-covered-values"
+        },
+        {
+          "name": "find_tex_first_end_setter_failure_precedes_other_source_fields",
+          "disposition": "retire-mutable-field-protocol-with-covered-values"
+        },
+        {
+          "name": "find_tex_env_capture_indices_are_read_in_source_order",
+          "disposition": "retire-mutable-field-protocol-with-covered-values"
+        },
+        {
+          "name": "find_tex_sub_capture_index_is_reread_for_math",
+          "disposition": "retire-mutable-field-protocol-with-covered-values"
+        },
+        {
+          "name": "find_tex_missing_env_quote_capture_uses_context_replace_error",
+          "disposition": "retire-mutable-field-protocol-with-covered-values"
+        },
+        {
+          "name": "find_tex_missing_env_close_capture_stringifies_undefined",
+          "disposition": "retire-mutable-field-protocol-with-covered-values"
+        },
+        {
+          "name": "find_tex_missing_sub_math_capture_uses_context_length_error_after_reread",
+          "disposition": "retire-mutable-field-protocol-with-covered-values"
+        },
+        {
+          "name": "find_tex_missing_sub_end_length_uses_context_length_error",
+          "disposition": "retire-mutable-field-protocol-with-covered-values"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/find_tex.cpp"
+      ],
+      "preservedSourceRefs": [
+        "s14",
+        "s15",
+        "s21"
+      ],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/output_jax_base_methods.cpp",
+      "sha256": "23da9d8771932d25515abbaeb8c5eb2e4d5486487766973da8812452878b01b6",
+      "reason": "Base initialize/reset/getMetrics are no-op host hooks, styleSheet/pageElements return null, name/adaptor are mutable Context fields. executeFilters mutates a live JS data record 3 to 9; current Common output produces typed metrics/Scene and does not expose this old wrapper hook. Source base-hook oracle remains; typed FunctionList tests real by-reference data mutation/order/throw.",
+      "cases": [
+        {
+          "name": "output_jax_base_initialization_name_adaptor_and_default_hooks",
+          "disposition": "retire-base-hook-protocol-with-covered-services"
+        },
+        {
+          "name": "output_jax_execute_filters_returns_the_mutated_live_data_field",
+          "disposition": "retire-base-hook-protocol-with-covered-services"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/native_common_jax.cpp",
+        "tests/math/native_math_item.cpp",
+        "tests/math/function_list.cpp"
+      ],
+      "preservedSourceRefs": [
+        "s6"
+      ],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/parse_options_real_owner_source_oracle.cpp",
+      "sha256": "55cc9bd55162cf23a0dc928f071fab620dc49520ae91c35791c669768ac4be69",
+      "reason": "Parser stack, duplicate custom list membership, in-tree filtering and one-at-a-time removal, persistent owners on clear and clear-before-reset failure move to the existing ParseOptions owner. Context list replacement and accessor exception identity retire; original standalone Source oracle and JSON remain.",
+      "cases": [
+        {
+          "name": "parse_options_real_owner_parser_list_mutations_and_tree_filtering",
+          "disposition": "migrate-real-owner-values",
+          "native": {
+            "path": "tests/math/parse_options.cpp",
+            "case": "parse_options_parser_stack_and_tree_filter_preserve_duplicates"
+          }
+        },
+        {
+          "name": "parse_options_real_owner_clear_retains_persistent_fields_and_writes_before_throw",
+          "disposition": "migrate-real-owner-values",
+          "native": {
+            "path": "tests/math/parse_options.cpp",
+            "case": "parse_options_clear_keeps_persistent_owners_and_clears_before_reset_failure"
+          }
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/parse_options.cpp"
+      ],
+      "preservedSourceRefs": [
+        "s7",
+        "s8"
+      ],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/parse_symbol_binding.cpp",
+      "sha256": "59273bf08245e37d16a83969b81de9757d61c96a261abd8b11c7f6ebd8bdf4da",
+      "reason": "Fallback Symbol canonical identity, same-description symbols stay distinct, foreign Context and null refs rejected. Typed ParseSymbol/TokenLookup/handlers replace runtime symbol identity; no TeX output is asserted.",
+      "cases": [
+        {
+          "name": "math_parse_symbol_bridge_retains_actual_fallback_identity",
+          "disposition": "retire-symbol-bridge"
+        },
+        {
+          "name": "math_parse_symbol_bridge_does_not_merge_same_description_refs",
+          "disposition": "retire-symbol-bridge"
+        },
+        {
+          "name": "math_parse_symbol_bridge_respects_context_ownership_and_rejects_null_ref",
+          "disposition": "retire-symbol-bridge"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/textmacros.cpp",
+        "tests/math/native_tex_definitions.cpp"
+      ],
+      "preservedSourceRefs": [],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/parser_runtime_regexp_context_lastindex.cpp",
+      "sha256": "e1e7380e61558f65b5fba0ce8b759f496167d3aa02ed6186439e8c7356e1cbe3",
+      "reason": "One RegExp aliased Context cursor uses string/object coercion with one conversion; native integer cursor retains exec advance/reset in its existing owner. JS raw lastIndex values deliberately retire.",
+      "cases": [
+        {
+          "name": "math_parser_runtime_regexp_context_test_uses_live_raw_lastindex_through_alias",
+          "disposition": "retire-cursor-projection-with-covered-values"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/native_raii_regexp.cpp"
+      ],
+      "preservedSourceRefs": [
+        "s17",
+        "s16"
+      ],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/regexp_binding_host.cpp",
+      "sha256": "f27f33a63d865f570b51d0fb42913b48fb37ecd216fda48e51c1c51847bc0e35",
+      "reason": "RegExp handle lifetime/teardown/expired methods, exact Context payload identity and coercion exception preservation; actual regex match and native cursor behavior remain tested without handle projection.",
+      "cases": [
+        {
+          "name": "math_port_regexp_binding_payload_retains_actual_owner",
+          "disposition": "retire-handle-protocol-with-covered-values"
+        },
+        {
+          "name": "math_port_regexp_binding_teardown_and_rejections",
+          "disposition": "retire-handle-protocol-with-covered-values"
+        },
+        {
+          "name": "math_port_regexp_source_exec_preserves_identity_error_from_lastindex_coercion",
+          "disposition": "retire-handle-protocol-with-covered-values"
+        },
+        {
+          "name": "math_port_regexp_binding_clear_disables_retained_context_field_without_releasing_external_owner",
+          "disposition": "retire-handle-protocol-with-covered-values"
+        },
+        {
+          "name": "math_port_regexp_binding_last_owner_in_context_payload_destroys_without_context_reentry",
+          "disposition": "retire-handle-protocol-with-covered-values"
+        },
+        {
+          "name": "math_port_regexp_binding_rejects_expired_source_methods_while_context_lives",
+          "disposition": "retire-handle-protocol-with-covered-values"
+        },
+        {
+          "name": "math_port_regexp_binding_owner_really_outlives_context",
+          "disposition": "retire-handle-protocol-with-covered-values"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/native_raii_regexp.cpp"
+      ],
+      "preservedSourceRefs": [
+        "s17",
+        "s16"
+      ],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/regexp_last_index_own_descriptor.cpp",
+      "sha256": "8b90d7768a276114f5797c7805ec1b6a3ac21bedfd2922392c78a17e33f08897",
+      "reason": "Numeric double/raw arbitrary lastIndex descriptor, readonly writeback and primitive/valueOf coercion traces are JS property contracts. Typed integer cursor retains stateful match advance/reset and UTF-16 boundary behavior.",
+      "cases": [
+        {
+          "name": "math_port_regexp_host_numeric_last_index_assignment_keeps_double_cursor_contract",
+          "disposition": "retire-cursor-projection-with-covered-values"
+        },
+        {
+          "name": "math_port_regexp_last_index_is_a_live_non_enumerable_own_data_property",
+          "disposition": "retire-cursor-projection-with-covered-values"
+        },
+        {
+          "name": "math_port_regexp_last_index_readonly_writeback_matches_source_set_semantics",
+          "disposition": "retire-cursor-projection-with-covered-values"
+        },
+        {
+          "name": "math_port_regexp_last_index_to_length_handles_raw_primitives_and_valueof_once",
+          "disposition": "retire-cursor-projection-with-covered-values"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/native_raii_regexp.cpp"
+      ],
+      "preservedSourceRefs": [
+        "s17",
+        "s16"
+      ],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/scanner_regexp_host.cpp",
+      "sha256": "1acd052830a732f60473b599ca508a46ddfb8aca809182fb20ff883e99497df7",
+      "reason": "i/u supported flags and uv/ii SyntaxError outcomes are retained in existing native RegExp owner using typed RegexError; no JS exception wrapper.",
+      "cases": [
+        {
+          "name": "math_port_scanner_regexp_supported_flags_and_invalid_flags_are_explicit",
+          "disposition": "migrate-native-language-value",
+          "native": {
+            "path": "tests/math/native_raii_regexp.cpp",
+            "case": "native_regexp_flags_accept_i_u_and_reject_uv_and_duplicates"
+          }
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/native_raii_regexp.cpp"
+      ],
+      "preservedSourceRefs": [
+        "s17",
+        "s16"
+      ],
+      "staticGoldSections": [
+        "regexFlags"
+      ]
+    },
+    {
+      "path": "tests/math/source_stack_instance_fields.cpp",
+      "sha256": "8a368ab7f4261de244787f42ca3968d835948b6ba264d3fc448da1fa79c49a50",
+      "reason": "Synthetic stack subclass native field initializer vs inherited setter/nonwritable receiver controls write count. No actual stack item mathematical node algorithm is asserted.",
+      "cases": [
+        {
+          "name": "source_stack_instance_fields_assignment_runs_inherited_setter_once",
+          "disposition": "retire-field-bridge"
+        },
+        {
+          "name": "source_stack_instance_fields_rejecting_inherited_setter_does_not_write_owner",
+          "disposition": "retire-field-bridge"
+        },
+        {
+          "name": "source_stack_instance_fields_reused_receiver_obeys_own_nonwritable_descriptor",
+          "disposition": "retire-field-bridge"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/base_items.cpp"
+      ],
+      "preservedSourceRefs": [],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/tags_class_binding.cpp",
+      "sha256": "4446ca9d05851b7795c4f5c6cf3f9f9b1f2fc0294b688b43b85dfb0246fcc831",
+      "reason": "Derived JS allocation/canonical handles/prototype and descriptor tests; actual tag initial/nested state and configured factory creators have typed Tags/session owners, independent Source class oracle remains.",
+      "cases": [
+        {
+          "name": "math_tags_class_binding_initializes_actual_derived_identity",
+          "disposition": "retire-class-binding-with-covered-values"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/tags.cpp",
+        "tests/math/native_tex_session.cpp"
+      ],
+      "preservedSourceRefs": [
+        "s2",
+        "s3"
+      ],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/tags_info_request_retirement.cpp",
+      "sha256": "b3526cf26f5d7fac2f4fb2e051cd05a895b93f2f9c68177f350dfabbf01e11b3",
+      "reason": "Counts of retired tag/label Context handles with prototype data/getters and fail-closed edge scans. Native Tags/session own value records directly, with label/counter persistence tested; there is no registry GC to port.",
+      "cases": [
+        {
+          "name": "math_private_renderer_tag_info_retirement_keeps_current_history_and_stack_roots",
+          "disposition": "retire-tracing-protocol"
+        },
+        {
+          "name": "math_private_renderer_tag_info_retirement_does_not_call_tags_accessors",
+          "disposition": "retire-tracing-protocol"
+        },
+        {
+          "name": "math_private_renderer_tag_info_retirement_follows_inherited_array_data_without_getters",
+          "disposition": "retire-tracing-protocol"
+        },
+        {
+          "name": "math_private_renderer_tag_info_retirement_fails_closed_on_inherited_array_getter",
+          "disposition": "retire-tracing-protocol"
+        },
+        {
+          "name": "math_private_renderer_label_retirement_keeps_current_and_completed_label_roots",
+          "disposition": "retire-tracing-protocol"
+        },
+        {
+          "name": "math_private_renderer_label_retirement_fails_closed_without_calling_map_getters",
+          "disposition": "retire-tracing-protocol"
+        },
+        {
+          "name": "math_private_renderer_label_retirement_retains_inherited_data_roots",
+          "disposition": "retire-tracing-protocol"
+        },
+        {
+          "name": "math_private_renderer_label_retirement_fails_closed_on_inherited_accessor",
+          "disposition": "retire-tracing-protocol"
+        },
+        {
+          "name": "math_private_renderer_label_retirement_keeps_label_map_prototype_and_direct_root",
+          "disposition": "retire-tracing-protocol"
+        },
+        {
+          "name": "math_private_renderer_label_retirement_keeps_modified_object_prototype_data_roots",
+          "disposition": "retire-tracing-protocol"
+        },
+        {
+          "name": "math_private_renderer_label_retirement_skips_when_object_prototype_accessor_changes",
+          "disposition": "retire-tracing-protocol"
+        },
+        {
+          "name": "math_private_renderer_label_retirement_skips_when_object_prototype_chain_changes_to_label",
+          "disposition": "retire-tracing-protocol"
+        },
+        {
+          "name": "math_private_renderer_label_retirement_skips_when_object_prototype_chain_changes_to_data_object",
+          "disposition": "retire-tracing-protocol"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/tags.cpp",
+        "tests/math/native_tex_session.cpp"
+      ],
+      "preservedSourceRefs": [
+        "s2",
+        "s3"
+      ],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/tags_raw_edge_trace.cpp",
+      "sha256": "694395292704defd974f0dbf23953980ef5ea0a16f1a577e5e7247f48090c0de",
+      "reason": "Context traversal of persistent tag/label/id/history roots and opaque pins; no math output. Label and counter persistence are independently owned native values.",
+      "cases": [
+        {
+          "name": "math_port_context_raw_trace_follows_real_persistent_tags_labels_ids_and_history",
+          "disposition": "retire-tracing-protocol"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/tags.cpp",
+        "tests/math/native_tex_session.cpp"
+      ],
+      "preservedSourceRefs": [
+        "s2",
+        "s3"
+      ],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/textcomp_canonical_owner.cpp",
+      "sha256": "3c187595b5e579bf3f4b709eee8a1d5b41976943829a99fbc42cef6babe49efa",
+      "reason": "Per-runtime Textcomp method/map/configuration identities and all 117 entries refer to the same callback. Actual all-117 callback/argument and compiled math/text glyph coverage is in current owner.",
+      "cases": [
+        {
+          "name": "textcomp_method_and_mapping_owners_are_canonical_per_runtime",
+          "disposition": "retire-export-identity-with-covered-values"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/textcomp.cpp"
+      ],
+      "preservedSourceRefs": [
+        "s4",
+        "s5",
+        "s18",
+        "s19"
+      ],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/textmacros_filter_record_roundtrip.cpp",
+      "sha256": "2a14cc0c93cde628254abb26aabfb2ee69f8672e934085d9fa7a00d90e7144a4",
+      "reason": "Roundtrip Source record/native InputJaxFilterData identities, receiver field reads and source-like fake parser fallbacks retire. Real Textcomp/Bboldx text compilation and math-mode fallback/error recovery stay covered by existing package owners.",
+      "cases": [
+        {
+          "name": "textmacros_preprocessor_filter_record_bridge_serves_textcomp_and_bboldx",
+          "disposition": "retire-filter-record-protocol-with-covered-values"
+        },
+        {
+          "name": "textmacros_preprocessor_runs_one_source_algorithm_for_source_record_and_native_filter_record",
+          "disposition": "retire-filter-record-protocol-with-covered-values"
+        },
+        {
+          "name": "textmacros_bboldx_text_fallback_receives_native_parser_and_token_values",
+          "disposition": "retire-filter-record-protocol-with-covered-values"
+        },
+        {
+          "name": "textmacros_fallback_uses_source_visible_compatible_parser_records",
+          "disposition": "retire-filter-record-protocol-with-covered-values"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/textcomp.cpp",
+        "tests/math/bboldx.cpp",
+        "tests/math/textmacros.cpp"
+      ],
+      "preservedSourceRefs": [
+        "s4",
+        "s5",
+        "s18",
+        "s19"
+      ],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/textmacros_package_live_state.cpp",
+      "sha256": "11b649202c2df19e24a62f85067dbf83c69c420e9b0834cf1b45526bd4778c30",
+      "reason": "Real textcomp input is compiled with or without a live uncompiled first jax. Existing Textcomp owner gains shared-registry warmup plus live creator checks of primary parser configuration and mathItem.inputJax; inner options/session borrowing and postcompile parser release are retained. Source packageData Context record identities are retired.",
+      "cases": [
+        {
+          "name": "textmacros_textcomp_package_record_tracks_live_compile_owners_single_jax",
+          "disposition": "migrate-real-compile-owner-values",
+          "native": {
+            "path": "tests/math/textcomp.cpp",
+            "case": "textcomp_compile_borrows_current_jax_after_an_uncompiled_warmup"
+          }
+        },
+        {
+          "name": "textmacros_textcomp_package_record_tracks_live_compile_owners_after_uncompiled_warmup",
+          "disposition": "migrate-real-compile-owner-values",
+          "native": {
+            "path": "tests/math/textcomp.cpp",
+            "case": "textcomp_compile_borrows_current_jax_after_an_uncompiled_warmup"
+          }
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/textcomp.cpp"
+      ],
+      "preservedSourceRefs": [
+        "s4",
+        "s5",
+        "s18",
+        "s19"
+      ],
+      "staticGoldSections": [
+        "textmacrosLiveCompile"
+      ]
+    },
+    {
+      "path": "tests/math/units_methods_identity.cpp",
+      "sha256": "c127fc37cf7a998babeb0a5111eac4901844db7d5c1aa8e457c6b8158b00c7f7",
+      "reason": "Unit/UnitFrac/NiceFrac per-runtime export/map function identities, names/arity 2, map unaffected by exported-property replacement; actual unit layout/callback mappings/aliases live in typed Units owner.",
+      "cases": [
+        {
+          "name": "math_units_methods_are_canonical_exports_shared_with_command_map",
+          "disposition": "retire-export-identity-with-covered-values"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/units.cpp"
+      ],
+      "preservedSourceRefs": [],
+      "staticGoldSections": [
+        "unitsMetadata"
+      ]
+    },
+    {
+      "path": "tests/math/factory_product_mark.cpp",
+      "sha256": "21e752f0081200a6497c7e0bb3feac954674a02069991ec2b146c6c839010712",
+      "reason": "Old shared factory generation product marks, foreign-generation rejection and transient retire counts. Native request owns its entire MmlDocument arena; no independent mathematical result and no factory capture protocol remains.",
+      "cases": [
+        {
+          "name": "math_port_factory_product_mark_is_bound_to_current_factory_generation",
+          "disposition": "retire-arena-checkpoint-protocol"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/mml_native_raii_foundation.cpp",
+        "tests/math/native_common_jax.cpp"
+      ],
+      "preservedSourceRefs": [
+        "s9",
+        "s10",
+        "s11"
+      ],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/parse_callable_source_receiver.cpp",
+      "sha256": "74f6929a79a79ac7e6143ad04241d2c0da71e12b53e318ebb02bb222420e8d47",
+      "reason": "Synthetic ParseMethod calls retain JS this (module object, compatible object, undefined or NativeObjectRef). Typed MacroHandler uses a concrete TexParser reference; return ok is synthetic.",
+      "cases": [
+        {
+          "name": "parse_callable_preserves_source_this_values",
+          "disposition": "retire-call-protocol"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/native_tex_definitions.cpp"
+      ],
+      "preservedSourceRefs": [],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/math_list_is_before.cpp",
+      "sha256": "bfd5212f344246505b3fb6d5789691b1f696a550ff096b835071274a385a085e",
+      "reason": "Four old DOM-location comparisons: repeated numeric i/n reads with short circuit; different primitive types fail strict equality; two string indices compare lexically. MathList and its only MathDocument consumer are outside the active native pipeline, and native MathItem has no start/end DOM location. Preserve inputs/result/read trace as structured offline records; do not invent native DOM-position storage or claim mathematical layout ordering coverage.",
+      "cases": [
+        {
+          "name": "math_list_is_before_preserves_source_short_circuit_and_live_read_order",
+          "disposition": "retain-offline-ordering-retire-dom-host-owner"
+        },
+        {
+          "name": "math_list_is_before_skips_repeated_fields_after_first_less_than",
+          "disposition": "retain-offline-ordering-retire-dom-host-owner"
+        },
+        {
+          "name": "math_list_is_before_uses_abstract_less_than_but_strict_equal_for_index",
+          "disposition": "retain-offline-ordering-retire-dom-host-owner"
+        },
+        {
+          "name": "math_list_is_before_compares_two_string_indices_lexically",
+          "disposition": "retain-offline-ordering-retire-dom-host-owner"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/native_math_item.cpp"
+      ],
+      "preservedSourceRefs": [],
+      "staticGoldSections": [
+        "mathList"
+      ]
+    },
+    {
+      "path": "tests/math/mml_foreign_constructor.cpp",
+      "sha256": "d1b0e3ad31d20923271ad4467cc58317f09d5b49827ca0491d10fa7dec6410f4",
+      "reason": "Context construct vs call-existing mi receiver with foreign/decoy factories, mutable constructor.prototype and partial field writes before failure. Native factory ownership/foreign-document validation already cover real node allocation; arbitrary JS receiver/prototype mutation retires.",
+      "cases": [
+        {
+          "name": "foreign_factory_new_and_call_allocate_one_native_descriptor_product",
+          "disposition": "retire-foreign-receiver-protocol-with-covered-values"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/mml_native_factory.cpp",
+        "tests/math/native_tree_factory.cpp"
+      ],
+      "preservedSourceRefs": [],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/mml_node_to_string.cpp",
+      "sha256": "2904c75ea4b1182fa47cd8691a1e8f7b9add685f20ff8beea1515d32c1aaa1ed",
+      "reason": "Existing typed tree toString() supplies mrow(mi()) directly. Add exact string to current MML factory owner; anonymous function name/length/descriptors and binding equality retire.",
+      "cases": [
+        {
+          "name": "mml_node_toString_metadata_and_output_match_source",
+          "disposition": "migrate-real-string-value-retire-metadata",
+          "native": {
+            "path": "tests/math/mml_native_factory.cpp",
+            "case": "mml_to_string_retains_the_source_row_token_spelling"
+          }
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/mml_native_factory.cpp",
+        "tests/math/native_tree_node.cpp"
+      ],
+      "preservedSourceRefs": [],
+      "staticGoldSections": [
+        "mmlToString"
+      ]
+    },
+    {
+      "path": "tests/math/mml_tree_source_child_owner.cpp",
+      "sha256": "819d3c4fe39aafe58582710f816bc908257a753fce03ab08e07408fe9cc8a0da",
+      "reason": "Context child-array aliasing/symbol copy and custom slice dispatch retire. Retain table copy plus first-row selection identity/cell links, and hidden phantom/padded under-script prevClass ORD/BIN with mediummathspace in native owners. Constructor arraylike iterator timing is host protocol.",
+      "cases": [
+        {
+          "name": "mml_child_nodes_field_and_native_owner_share_the_raw_context_array",
+          "disposition": "retire-array-and-symbol-projection"
+        },
+        {
+          "name": "source_mml_table_copy_and_setChildren_retain_top_row_for_phantom_bbox",
+          "disposition": "migrate-real-tree-values",
+          "native": {
+            "path": "tests/math/mml_native_factory.cpp",
+            "case": "table_copy_then_top_row_selection_retains_copied_cells"
+          }
+        },
+        {
+          "name": "source_owned_mml_base_node_slice_visits_hidden_script_texclass_tree",
+          "disposition": "migrate-real-tree-values",
+          "native": {
+            "path": "tests/math/typed_mml_scripts.cpp",
+            "case": "hidden_phantom_script_keeps_the_copied_operator_spacing_chain"
+          }
+        },
+        {
+          "name": "mml_constructor_defers_arraylike_iteration_until_after_the_length_branch",
+          "disposition": "retire-iterator-call-order"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/mml_native_factory.cpp",
+        "tests/math/typed_mml_scripts.cpp",
+        "tests/math/native_common_jax.cpp"
+      ],
+      "preservedSourceRefs": [
+        "s9",
+        "s10",
+        "s11"
+      ],
+      "staticGoldSections": [
+        "tableCopyFirstRow",
+        "hiddenScript"
+      ]
+    },
+    {
+      "path": "tests/math/native_data_fields.cpp",
+      "sha256": "158c94b4b19f217100bf93358774f8c12b3b79e440f80ed799e3312e0b12d99d",
+      "reason": "NativeDataCell primitive values/descriptor metadata/shadowing/deletion/inherited setter/redefinition and Context lifetime. All fields are synthetic integer probes; no parser mathematical result.",
+      "cases": [
+        {
+          "name": "native_data_cell_reads_and_writes_the_same_actual_owner",
+          "disposition": "retire-field-bridge"
+        },
+        {
+          "name": "native_data_cell_metadata_queries_do_not_load_the_field",
+          "disposition": "retire-field-bridge"
+        },
+        {
+          "name": "native_data_cell_redefinition_keeps_the_owner_as_value_authority",
+          "disposition": "retire-field-bridge"
+        },
+        {
+          "name": "native_data_cell_prototype_assignment_creates_a_receiver_shadow",
+          "disposition": "retire-field-bridge"
+        },
+        {
+          "name": "native_data_cell_deletion_reaches_the_owner_before_removing_metadata",
+          "disposition": "retire-field-bridge"
+        },
+        {
+          "name": "native_data_constructor_assignment_binds_new_cell_without_shadow_value",
+          "disposition": "retire-field-bridge"
+        },
+        {
+          "name": "native_data_constructor_assignment_respects_inherited_descriptors",
+          "disposition": "retire-field-bridge"
+        },
+        {
+          "name": "declared_native_data_stays_absent_until_an_own_assignment_including_undefined_and_null",
+          "disposition": "retire-field-bridge"
+        },
+        {
+          "name": "declared_native_data_obeys_inherited_setters_and_nonwritable_data",
+          "disposition": "retire-field-bridge"
+        },
+        {
+          "name": "declared_native_data_activates_only_after_inherited_writable_data_resolution",
+          "disposition": "retire-field-bridge"
+        },
+        {
+          "name": "declared_native_data_define_data_activates_and_accessor_cancels",
+          "disposition": "retire-field-bridge"
+        },
+        {
+          "name": "declared_native_data_cells_keep_distinct_owners_across_contexts",
+          "disposition": "retire-field-bridge"
+        },
+        {
+          "name": "native_data_cell_invalid_conversion_does_not_change_value_or_metadata",
+          "disposition": "retire-field-bridge"
+        },
+        {
+          "name": "native_data_cell_configurable_accessor_replacement_has_one_active_property",
+          "disposition": "retire-field-bridge"
+        },
+        {
+          "name": "native_data_cell_retains_the_real_owner_lifetime",
+          "disposition": "retire-field-bridge"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/mml_native_raii_foundation.cpp"
+      ],
+      "preservedSourceRefs": [],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/native_tree_binding.cpp",
+      "sha256": "b17a93a4f07c7ba9ac7f139e19a1770c7f92bc637f5ef6c5373db726e6ec4bba",
+      "reason": "Registry replacement affects copy implementation, property value preserved, child deep copy and original links untouched. Add direct MmlFactory current registered implementation test; obsolete generic Property/ChildArray and runtime family protocol retire.",
+      "cases": [
+        {
+          "name": "math_native_tree_binding_copy_uses_current_product_implementation",
+          "disposition": "migrate-real-current-factory-copy",
+          "native": {
+            "path": "tests/math/mml_native_factory.cpp",
+            "case": "mml_copy_uses_the_current_registered_product_implementation"
+          }
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/mml_native_factory.cpp",
+        "tests/math/native_tree_node.cpp"
+      ],
+      "preservedSourceRefs": [
+        "s9",
+        "s10",
+        "s11"
+      ],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/parser_declaration_contract.cpp",
+      "sha256": "930d5e0af87eb131a02acb220e19e77e7aa5de51d05ae17271cdbe0c5071dc4a",
+      "reason": "Compile-only assertions require ParserRuntime, Context-valued options/children and old inheritance/service bases, with an explicit comment that parser was not yet implemented. Current typed parser/RAII request compiles through active tests; retaining these old exact field types would regress architecture.",
+      "cases": [
+        {
+          "name": "compile-time declaration contracts",
+          "disposition": "retire-obsolete-type-contract"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/parse_options.cpp",
+        "tests/math/native_tex_session.cpp"
+      ],
+      "preservedSourceRefs": [],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/promise_context_bindings_owner.cpp",
+      "sha256": "eb300fd6c599b3489ae8406e9ab8e7ee517ff1875cf72ee025ec9ddf8828e456",
+      "reason": "Pending JS Promise reactions, canonical queue identity, rejection/catch chaining and expired binding errors. No math computation or scene lifecycle; native rendering request lifecycle has no promise Context adapter.",
+      "cases": [
+        {
+          "name": "pending real promise reaction does not retain its queue or context bindings",
+          "disposition": "retire-promise-protocol"
+        },
+        {
+          "name": "live canonical queue preserves rejection then catch chaining",
+          "disposition": "retire-promise-protocol"
+        },
+        {
+          "name": "expired bindings reject late invocation and pending reactions explicitly",
+          "disposition": "retire-promise-protocol"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/native_renderer_bridge.cpp",
+        "tests/math/function_list.cpp"
+      ],
+      "preservedSourceRefs": [],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/reference_mml_declarations.cpp",
+      "sha256": "21002c8aae71122ab9e6a5043a8f1b285282122de892a88b0ef6924b9cfd3607",
+      "reason": "Compile-only NodeValue-return and Property-return MML signatures. Existing typed MML methods return document-borrowed references/pointers and closed enum kinds; no original Source gold exists in this file.",
+      "cases": [
+        {
+          "name": "compile-time declaration contracts",
+          "disposition": "retire-obsolete-type-contract"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/mml_native_factory.cpp",
+        "tests/math/native_raii_mml_base.cpp"
+      ],
+      "preservedSourceRefs": [],
+      "staticGoldSections": []
+    },
+    {
+      "path": "tests/math/scene_attribute_freeze_g159.cpp",
+      "sha256": "1ba19df28c475aa07e71dcd5782c2f38bcb2299718e4bebf9499c38649a47a36",
+      "reason": "Counts one keys() read on old dynamic AttributeOwner and one GeometryOwner callback receiving the same captured vector. Current immutable Scene owns typed geometry and ordered metadata values; no runtime attribute/geometry callback interface survives. Deep freeze/value independence and metadata order are covered in native Scene owner; do not create an enumeration hook solely for this test.",
+      "cases": [
+        {
+          "name": "freeze enumerates source attributes once and shares that capture with geometry",
+          "disposition": "retire-attribute-callback-protocol-with-covered-values"
+        }
+      ],
+      "relatedNativeOwners": [
+        "tests/math/native_raii_scene.cpp"
+      ],
+      "preservedSourceRefs": [],
+      "staticGoldSections": []
+    }
+  ],
+  "obsoleteDirectTools": [
+    "tools/math-port/tree-family-binding-test.cjs",
+    "tools/math-port/mml-declaration-build.cjs",
+    "tools/math-port/freeze-mml-declarations.cjs"
+  ]
+}

@@ -1,0 +1,550 @@
+{
+  "schema": 1,
+  "extraction": "static only; existing C++ literals and relationships; no Source execution or gold regeneration",
+  "mathList": [
+    {
+      "case": "math_list_is_before_preserves_source_short_circuit_and_live_read_order",
+      "left": {
+        "iReads": [
+          1,
+          9
+        ],
+        "n": 2
+      },
+      "right": {
+        "iReads": [
+          1,
+          9
+        ],
+        "n": 3
+      },
+      "isBefore": true,
+      "reads": [
+        "L.i",
+        "R.i",
+        "L.i",
+        "R.i",
+        "L.n",
+        "R.n"
+      ]
+    },
+    {
+      "case": "math_list_is_before_skips_repeated_fields_after_first_less_than",
+      "left": {
+        "iReads": [
+          1
+        ],
+        "n": 99
+      },
+      "right": {
+        "iReads": [
+          2
+        ],
+        "n": -99
+      },
+      "isBefore": true,
+      "reads": [
+        "L.i",
+        "R.i"
+      ]
+    },
+    {
+      "case": "math_list_is_before_uses_abstract_less_than_but_strict_equal_for_index",
+      "left": {
+        "iReads": [
+          1
+        ],
+        "n": 1
+      },
+      "right": {
+        "iReads": [
+          "1"
+        ],
+        "n": 0
+      },
+      "isBefore": false,
+      "reads": [
+        "L.i",
+        "R.i",
+        "L.i",
+        "R.i"
+      ]
+    },
+    {
+      "case": "math_list_is_before_compares_two_string_indices_lexically",
+      "left": {
+        "iReads": [
+          "10"
+        ],
+        "n": 0
+      },
+      "right": {
+        "iReads": [
+          "2"
+        ],
+        "n": 0
+      },
+      "isBefore": true,
+      "reads": [
+        "L.i",
+        "R.i"
+      ]
+    }
+  ],
+  "mmlToString": {
+    "rowKind": "mrow",
+    "children": [
+      {
+        "kind": "mi",
+        "children": []
+      }
+    ],
+    "expected": "mrow(mi())",
+    "functionMetadata": {
+      "name": "",
+      "length": 0,
+      "descriptor": {
+        "accessor": false,
+        "enumerable": true,
+        "writable": true,
+        "configurable": true
+      }
+    }
+  },
+  "tableCopyFirstRow": {
+    "rowsBefore": 1,
+    "cellsBefore": 1,
+    "copiedRows": 1,
+    "copiedCells": 1,
+    "selectedRowIsCopiedRow": true,
+    "selectedCellIsCopiedCell": true,
+    "selectedRowCount": 1
+  },
+  "hiddenScript": {
+    "root": "munder",
+    "hidden": "mpadded/inferredMrow/mphantom/inferredMrow",
+    "operands": [
+      "mi",
+      "mo",
+      "mi"
+    ],
+    "texClasses": [
+      "ORD",
+      "BIN",
+      "ORD"
+    ],
+    "previousClasses": [
+      "ORD",
+      "BIN"
+    ],
+    "spacing": [
+      "mediummathspace",
+      "mediummathspace"
+    ]
+  },
+  "regexFlags": [
+    {
+      "flags": "i",
+      "result": "ok"
+    },
+    {
+      "flags": "u",
+      "result": "ok"
+    },
+    {
+      "flags": "uv",
+      "error": "SyntaxError"
+    },
+    {
+      "flags": "ii",
+      "error": "SyntaxError"
+    }
+  ],
+  "textmacrosLiveCompile": {
+    "packages": [
+      "base",
+      "textmacros",
+      "textcomp"
+    ],
+    "input": "\\text{\\textcopyright\\textregistered\\texttrademark}",
+    "scenarios": [
+      "single current jax",
+      "current jax after live uncompiled warmup"
+    ],
+    "innerOptionsDistinct": true,
+    "sharedPackageData": true,
+    "currentJaxOwnsOuterParseOptions": true,
+    "activeParserUsesOuterOptions": true
+  },
+  "tagsMetadata": {
+    "constructors": [
+      {
+        "name": "Label",
+        "length": 2
+      },
+      {
+        "name": "TagInfo",
+        "length": 8
+      },
+      {
+        "name": "AbstractTags",
+        "length": 0
+      },
+      {
+        "name": "NoTags",
+        "length": 0
+      },
+      {
+        "name": "AllTags",
+        "length": 0
+      }
+    ],
+    "methods": [
+      {
+        "ownerMethod": "AbstractTags.start",
+        "property": "start",
+        "name": "",
+        "length": 3,
+        "descriptor": {
+          "accessor": false,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        }
+      },
+      {
+        "ownerMethod": "AbstractTags.end",
+        "property": "end",
+        "name": "",
+        "length": 0,
+        "descriptor": {
+          "accessor": false,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        }
+      },
+      {
+        "ownerMethod": "AbstractTags.tag",
+        "property": "tag",
+        "name": "",
+        "length": 2,
+        "descriptor": {
+          "accessor": false,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        }
+      },
+      {
+        "ownerMethod": "AbstractTags.notag",
+        "property": "notag",
+        "name": "",
+        "length": 0,
+        "descriptor": {
+          "accessor": false,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        }
+      },
+      {
+        "ownerMethod": "AbstractTags.formatUrl",
+        "property": "formatUrl",
+        "name": "",
+        "length": 2,
+        "descriptor": {
+          "accessor": false,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        }
+      },
+      {
+        "ownerMethod": "AbstractTags.formatTag",
+        "property": "formatTag",
+        "name": "",
+        "length": 1,
+        "descriptor": {
+          "accessor": false,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        }
+      },
+      {
+        "ownerMethod": "AbstractTags.formatRef",
+        "property": "formatRef",
+        "name": "",
+        "length": 1,
+        "descriptor": {
+          "accessor": false,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        }
+      },
+      {
+        "ownerMethod": "AbstractTags.formatId",
+        "property": "formatId",
+        "name": "",
+        "length": 1,
+        "descriptor": {
+          "accessor": false,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        }
+      },
+      {
+        "ownerMethod": "AbstractTags.formatNumber",
+        "property": "formatNumber",
+        "name": "",
+        "length": 1,
+        "descriptor": {
+          "accessor": false,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        }
+      },
+      {
+        "ownerMethod": "AbstractTags.autoTag",
+        "property": "autoTag",
+        "name": "",
+        "length": 0,
+        "descriptor": {
+          "accessor": false,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        }
+      },
+      {
+        "ownerMethod": "AbstractTags.clearTag",
+        "property": "clearTag",
+        "name": "",
+        "length": 0,
+        "descriptor": {
+          "accessor": false,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        }
+      },
+      {
+        "ownerMethod": "AbstractTags.getTag",
+        "property": "getTag",
+        "name": "",
+        "length": 1,
+        "descriptor": {
+          "accessor": false,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        }
+      },
+      {
+        "ownerMethod": "AbstractTags.resetTag",
+        "property": "resetTag",
+        "name": "",
+        "length": 0,
+        "descriptor": {
+          "accessor": false,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        }
+      },
+      {
+        "ownerMethod": "AbstractTags.reset",
+        "property": "reset",
+        "name": "",
+        "length": 1,
+        "descriptor": {
+          "accessor": false,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        }
+      },
+      {
+        "ownerMethod": "AbstractTags.startEquation",
+        "property": "startEquation",
+        "name": "",
+        "length": 1,
+        "descriptor": {
+          "accessor": false,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        }
+      },
+      {
+        "ownerMethod": "AbstractTags.finishEquation",
+        "property": "finishEquation",
+        "name": "",
+        "length": 1,
+        "descriptor": {
+          "accessor": false,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        }
+      },
+      {
+        "ownerMethod": "AbstractTags.finalize",
+        "property": "finalize",
+        "name": "",
+        "length": 2,
+        "descriptor": {
+          "accessor": false,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        }
+      },
+      {
+        "ownerMethod": "AbstractTags.makeId",
+        "property": "makeId",
+        "name": "",
+        "length": 0,
+        "descriptor": {
+          "accessor": false,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        }
+      },
+      {
+        "ownerMethod": "AbstractTags.makeTag",
+        "property": "makeTag",
+        "name": "",
+        "length": 0,
+        "descriptor": {
+          "accessor": false,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        }
+      },
+      {
+        "ownerMethod": "NoTags.autoTag",
+        "property": "autoTag",
+        "name": "",
+        "length": 0,
+        "descriptor": {
+          "accessor": false,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        }
+      },
+      {
+        "ownerMethod": "NoTags.getTag",
+        "property": "getTag",
+        "name": "",
+        "length": 0,
+        "descriptor": {
+          "accessor": false,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        }
+      },
+      {
+        "ownerMethod": "AllTags.finalize",
+        "property": "finalize",
+        "name": "",
+        "length": 2,
+        "descriptor": {
+          "accessor": false,
+          "writable": true,
+          "enumerable": true,
+          "configurable": true
+        }
+      }
+    ],
+    "accessors": [
+      {
+        "property": "env",
+        "getterName": "get",
+        "getterLength": 0,
+        "setterName": null,
+        "setterLength": null
+      },
+      {
+        "property": "noTag",
+        "getterName": "get",
+        "getterLength": 0,
+        "setterName": null,
+        "setterLength": null
+      },
+      {
+        "property": "label",
+        "getterName": "get",
+        "getterLength": 0,
+        "setterName": "set",
+        "setterLength": 1
+      }
+    ],
+    "enTag": {
+      "name": "",
+      "length": 2
+    }
+  },
+  "unitsMetadata": [
+    {
+      "name": "Unit",
+      "length": 2
+    },
+    {
+      "name": "UnitFrac",
+      "length": 2
+    },
+    {
+      "name": "NiceFrac",
+      "length": 2
+    }
+  ],
+  "centernotFilter": {
+    "export": "filterCenterOver",
+    "name": "filterCenterOver",
+    "length": 1,
+    "postprocessorPriority": 5
+  },
+  "provenance": [
+    {
+      "path": "tests/math/tags_function_metadata.cpp",
+      "sha256": "a8eb5ef7d2d0d9d671618c0125794d1452c30efed2789c88947def125e7968c7"
+    },
+    {
+      "path": "tests/math/centernot_methods_identity.cpp",
+      "sha256": "2882b07ee683aa1846097bf3e3be97527fd40cc130e1f993e6427db1a8b3b564"
+    },
+    {
+      "path": "tests/math/scanner_regexp_host.cpp",
+      "sha256": "1acd052830a732f60473b599ca508a46ddfb8aca809182fb20ff883e99497df7"
+    },
+    {
+      "path": "tests/math/textmacros_package_live_state.cpp",
+      "sha256": "11b649202c2df19e24a62f85067dbf83c69c420e9b0834cf1b45526bd4778c30"
+    },
+    {
+      "path": "tests/math/units_methods_identity.cpp",
+      "sha256": "c127fc37cf7a998babeb0a5111eac4901844db7d5c1aa8e457c6b8158b00c7f7"
+    },
+    {
+      "path": "tests/math/math_list_is_before.cpp",
+      "sha256": "bfd5212f344246505b3fb6d5789691b1f696a550ff096b835071274a385a085e"
+    },
+    {
+      "path": "tests/math/mml_node_to_string.cpp",
+      "sha256": "2904c75ea4b1182fa47cd8691a1e8f7b9add685f20ff8beea1515d32c1aaa1ed"
+    },
+    {
+      "path": "tests/math/mml_tree_source_child_owner.cpp",
+      "sha256": "819d3c4fe39aafe58582710f816bc908257a753fce03ab08e07408fe9cc8a0da"
+    }
+  ]
+}
