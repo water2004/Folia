@@ -4,10 +4,13 @@
 
 ## 当前 checkpoint：恢复旧测试清理（2026-10-23）
 
+- **继续范围**：用户明确要求将剩余旧测试处理完再停；本轮完成全部剩余旧测试消费者及其失效工具引用，不再以小批进度结束。生产owner链、高CPU和Mermaid不扩展。按下方既有清单分组，Root保留架构/验收/集成/build/Git，Luna准备互不冲突的Source迁移与native覆盖候选。
+
 - 已完成copy/copy_boundary（`15809d75`）与metadata（`45b2d38d`）：旧Cpp/mapper及专用工具退出，全部Source profiles/owners保留。copy既有proof的12pins相符、未重复执行；metadata Source32行与完整Cpp映射通过。原factory owner新增8kind×keepIds值语义，472断言通过，不模拟JS身份/可空attributes。
 - 本轮math全测 **911测试/218824断言通过**，`build/math-port/copy-metadata-review/{final-build,all-math-tests}.log`；先前两个copy用例共50断言通过。仅新增测试，生产/应用/版本不变，parallel≤4。各批proof为`copy-consumer-retirement.json`、`copy-metadata-review/retirement-proof.json`。
 - return_prototype已提交`0b05c59b`：两行Source检查通过，旧Cpp/mapper分支退出，普通155输入/profile/Cpp及生成字节完全保留。旧mapper原检查因历史optional→Property辅助类型漂移失败；完整Cpp经6类明确差异核对、全部输入/期待相符，见`return-prototype-review/{mapping-proof,retirement-proof}.json`，不是旧native执行。共享配置1303/10→1301/9；专用returns配置189/3→187/2并退对应2项原型mutation。最后构建`build.log`成功，沿用字节未变且全测通过的binary；无live build/agent，未重复全测。三个功能批次均本地提交，未推送/打包。
-- 当前class_binding直接旧消费者 **32cpp/ixx+4inc**，未包括全部间接依赖；最新窄清单在return-prototype proof。下一步按`reference_mml_returns.cpp`32行和`reference_mml_return_probes.cpp`155行逐组审查，保留完整Source及现有native数学覆盖，不搬原型/getter/callback协议进native。Luna均完成。Root独占修改/build/Git；高CPU采样、Mermaid及生产owner链仍暂停。
+- returns/predicates本轮已收尾：5Cpp/4mapper/4专用旧runner退出，原Source32/155/75/111/7行完整保留；32/155/111/7实际Source检查通过，75所属sparse299复用字节不变的既有proof。静态全文映射通过，仅列明的历史helper漂移。证明`build/math-port/finish-old-tests/returns/{source-proof,mapping-validation,retirement-proof}.json`。当前直接旧消费者 **28cpp/ixx+4inc**；共享旧配置921/4。native数学测试/已通过binary字节不变。
+- 完整测试范围已按用户新要求枚举：当前开始时122个未配置Cpp（279总Cpp，157活跃），并非都可删；`finish-old-tests/{dispatch.json,inventory/all-unconfigured-tests.json}`逐项分派，32direct只是其中一部分。Root继续集成classes，其余Luna处理inheritance/operators/families/node/contextOptions/hostReceivers/genericReferences/parserReferences/otherOwners。无live native build，所有候选均ignored。Root独占修改/build/Git；高CPU采样、Mermaid及生产owner链仍暂停。
 
 ## 历史：0.2.3运行高CPU，已捕获线程栈（2026-10-22）
 
@@ -40,8 +43,8 @@
 
 ## 旧迁移剩余工作（旧测试已恢复；生产owner链尚未处理）
 
-1. **旧测试直接消费者仍有32个cpp/ixx +4个inc**（按class_binding直接导入文件，不是断言；未包含所有间接依赖）。旧consumer退出必须保留全部Source期待和实际数学覆盖。旧宽图`8ba6b468`是历史；最新窄清单见`return-prototype-review/retirement-proof.json`，不重做宽审。metadata消费者是间接依赖，不计入32。
-2. copy/copy_boundary/metadata及额外return_prototype消费者均已收尾，Source全量profiles/owners保留，见顶部与acceptance记录。普通returns/probes尚未退出；额外prototype退休不代表普通155内所有原型观察已清掉。旧共享工具只是剩余配置，不是当前native验收路径。
+1. **旧测试直接消费者仍有28个cpp/ixx +4个inc**（按class_binding直接导入文件，不是断言；未包含所有间接依赖）。完整本轮122项测试范围见顶部dispatch；旧consumer退出必须保留全部Source期待和实际数学覆盖。旧宽图`8ba6b468`是历史；当前窄清单见`finish-old-tests/returns/retirement-proof.json`，不重做生产宽审。
+2. copy/copy_boundary/metadata、returns/predicates全组均已收尾，Source全量profiles/owners保留，见顶部与acceptance记录。剩余按dispatch分组继续。旧共享工具只是剩余配置，不是当前native验收路径。
 3. 旧生产owner链仍需整体收尾：Fields → ContextBindings → ParserRuntime，values唯一调用仍fields.cpp:439。未配置不等于死代码；不能孤删/stub或新增双轨。`fe5eba6e` 按用户“全部提交”保存了原有4文件投影补丁（context_bindings.cpp/.ixx、mtable_bindings.cpp、semantics_bindings.cpp）；它们不在478活动源内，未重新验旧协议。**这是交接存档，不是继续扩展投影补丁的方向**，仍按RAII架构退出整条旧链。
 4. 整个旧移植清理最终完成前，还要对剩余源码/工具/依赖做对应验收及完整完成审查；D2D不是本轮接入前提。本轮请求字体/批量/视口改动已获用户确认，不代表剩余旧迁移已验收。不要把既有Source-only检查或编译成功当作新的native运行验收。
 

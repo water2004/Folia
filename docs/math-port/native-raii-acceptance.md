@@ -1737,6 +1737,22 @@ is introduced. retirement-proof.json records these preserved hashes and direct
 class_binding consumers33 to32 cpp/ixx, with four inc unchanged. The ordinary
 155-row corpus still includes other protocol observations awaiting review.
 
+### Remaining returns and predicates observers (2026-10-23)
+
+Five old observers retain all 32/155/75/111/7 original Source observations.
+Independent Source checks pass for returns32, returns155, predicates111 and
+rebind7; predicates75 is within the full299 corpus whose existing completed
+proof and owner/profile hashes remain unchanged. The completed proof is reused.
+Full C++ mapping passes with explicit historical Property/accessor/formatter
+drift only; no input or expected row changes. Native mathematical behavior stays
+with the unchanged row/token, exact-clone, arithmetic and container owners.
+Five C++ observers, four mappers and four dedicated old runners retire. Shared
+legacy configuration decreases exactly380/5, to921/4; direct class_binding
+consumers32 to28, four inc unchanged. All profiles, native owners and the passing
+native binary remain byte-identical. Evidence is
+`build/math-port/finish-old-tests/returns/{source-proof,mapping-validation,retirement-proof}.json`.
+This is not a claim that the remaining object-protocol runner executes natively.
+
 ### Current Debug and self-contained Release MSI (2026-10-21)
 
 Dependency setup passes. The supported Debug application build and actual
