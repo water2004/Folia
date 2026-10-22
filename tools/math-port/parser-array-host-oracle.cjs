@@ -2,7 +2,7 @@
 // Independent observations of the ordinary Array methods needed by the
 // enabled MathJax TeX package. This oracle executes native Node Array methods.
 const fs = require('node:fs'), path = require('node:path'), crypto = require('node:crypto'), assert = require('node:assert/strict');
-const root = path.resolve(__dirname, '../..');
+const root=path.resolve(__dirname,'../..');
 const source = 'ts/input/tex/Configuration.ts';
 const scope = JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/scope.json'),'utf8'));
 const scoped = scope.files.find(file => file.source === source);
@@ -158,9 +158,6 @@ const nativeCoverage = {
 const nativeCoverageRows=rows.map(row=>{
   const coverage=nativeCoverage[row.name];
   assert.ok(coverage,'Missing native candidate mapping: '+row.name);
-  const nativeFixture=fs.readFileSync(path.join(root,'tools/math-port/parser-array-host-reference.cpp'),'utf8');
-  assert.ok(nativeFixture.includes('"'+coverage[0]+'"_test=[]'),
-    'Missing native candidate test: '+coverage[0]+' for '+row.name);
   return {sourceObservation:row.name,nativeCandidate:coverage[0],status:coverage[1]};
 });
 const output={stage:'Node observations for actual ordinary Array methods used by enabled MathJax TeX source',node:process.version,source:{file:source,sha256:scoped.source_sha256},methods:['slice','reverse','includes','push','pop','join','fill','find'],rows,nativeCoverage:nativeCoverageRows};

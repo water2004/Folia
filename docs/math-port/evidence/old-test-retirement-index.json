@@ -1,0 +1,507 @@
+{
+  "schema": 1,
+  "originalDispatchedCpp": 122,
+  "completedCpp": 122,
+  "remainingCpp": 0,
+  "remainingMathCppIxx": 159,
+  "unconfiguredMathCppIxx": 0,
+  "nativeTests": {
+    "tests": 965,
+    "assertions": 272734
+  },
+  "coreTests": {
+    "tests": 581,
+    "assertions": 43936
+  },
+  "productionOwnerChain": "Paused separately; not covered by this test retirement.",
+  "entries": [
+    {
+      "file": "tests/math/reference_mml_returns.cpp",
+      "record": "docs/math-port/evidence/old-foundation-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_mml_return_probes.cpp",
+      "record": "docs/math-port/evidence/old-foundation-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_mml_predicates.cpp",
+      "record": "docs/math-port/evidence/old-foundation-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_mml_predicate_probes.cpp",
+      "record": "docs/math-port/evidence/old-foundation-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_mml_predicate_rebind.cpp",
+      "record": "docs/math-port/evidence/old-foundation-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_mml_base_class_boundary.cpp",
+      "record": "docs/math-port/evidence/old-foundation-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_mml_base_class_callbacks.cpp",
+      "record": "docs/math-port/evidence/old-foundation-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_mml_cell_class.cpp",
+      "record": "docs/math-port/evidence/old-foundation-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_mml_forms_boundary.cpp",
+      "record": "docs/math-port/evidence/old-foundation-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_mml_row_class.cpp",
+      "record": "docs/math-port/evidence/old-foundation-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_inheritance_boundary.cpp",
+      "record": "docs/math-port/evidence/old-foundation-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_mml_inherit_from.cpp",
+      "record": "docs/math-port/evidence/old-foundation-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_mml_inheritance.cpp",
+      "record": "docs/math-port/evidence/old-foundation-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_mml_inheritance_align_trace.cpp",
+      "record": "docs/math-port/evidence/old-foundation-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_mml_inheritance_boundaries.cpp",
+      "record": "docs/math-port/evidence/old-foundation-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_mml_inheritance_token_isolation.cpp",
+      "record": "docs/math-port/evidence/old-foundation-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_mml_row_inherit.cpp",
+      "record": "docs/math-port/evidence/old-foundation-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_mml_inheritance_consumers.cpp",
+      "record": "docs/math-port/evidence/old-foundation-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_arithmetic.cpp",
+      "record": "docs/math-port/evidence/old-mml-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_arithmetic_order.cpp",
+      "record": "docs/math-port/evidence/old-mml-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_atom_semantics.cpp",
+      "record": "docs/math-port/evidence/old-mml-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_maction.cpp",
+      "record": "docs/math-port/evidence/old-mml-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_mathchoice.cpp",
+      "record": "docs/math-port/evidence/old-mml-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_mfenced.cpp",
+      "record": "docs/math-port/evidence/old-mml-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_mml_error.cpp",
+      "record": "docs/math-port/evidence/old-mml-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_mml_action_errors.cpp",
+      "record": "docs/math-port/evidence/old-mml-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_mml_node.cpp",
+      "record": "docs/math-port/evidence/old-mml-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_mml_table_repair.cpp",
+      "record": "docs/math-port/evidence/old-mml-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_mo.cpp",
+      "record": "docs/math-port/evidence/old-mml-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_mo_order.cpp",
+      "record": "docs/math-port/evidence/old-mml-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_mo_values.cpp",
+      "record": "docs/math-port/evidence/old-mml-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_mml_spacing.cpp",
+      "record": "docs/math-port/evidence/old-mml-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_mml_operator_access.cpp",
+      "record": "docs/math-port/evidence/old-mml-test-retirement.json"
+    },
+    {
+      "file": "tests/math/mml_operator_walk_budget.cpp",
+      "record": "docs/math-port/evidence/old-mml-test-retirement.json"
+    },
+    {
+      "file": "tests/math/verification_options_boundary.cpp",
+      "record": "docs/math-port/evidence/old-mml-test-retirement.json"
+    },
+    {
+      "file": "tests/math/attributes_constructor_order.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/canonical_function_source_metadata.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/context_property_bindings.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/context_raw_edge_trace.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/core_tree_node_context_classes.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/factory_context_bindings.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/factory_context_field_views.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/factory_creator_cells.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/math_render_actions.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/native_identities_host.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/native_identity_request_capture.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/native_indexed_array_set.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/option_array_concat.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/parser_runtime_promise_owner.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/tags_function_metadata.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/tex_stack_clear_child_owner.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/tree_ordinary_call.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/amscd_method_table_identity.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/bboldx_callback_source_metadata.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/centernot_methods_identity.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/find_tex_context_fields.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/output_jax_base_methods.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/parse_options_real_owner_source_oracle.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/parse_symbol_binding.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/parser_runtime_regexp_context_lastindex.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/regexp_binding_host.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/regexp_last_index_own_descriptor.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/scanner_regexp_host.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/source_stack_instance_fields.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/tags_class_binding.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/tags_info_request_retirement.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/tags_raw_edge_trace.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/textcomp_canonical_owner.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/textmacros_filter_record_roundtrip.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/textmacros_package_live_state.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/units_methods_identity.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/factory_product_mark.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/parse_callable_source_receiver.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/math_list_is_before.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/mml_foreign_constructor.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/mml_node_to_string.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/mml_tree_source_child_owner.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/native_data_fields.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/native_tree_binding.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/parser_declaration_contract.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/promise_context_bindings_owner.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_mml_declarations.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/scene_attribute_freeze_g159.cpp",
+      "record": "docs/math-port/evidence/old-host-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_argument_expansion.cpp",
+      "record": "docs/math-port/evidence/old-generic-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_callable_receiver.cpp",
+      "record": "docs/math-port/evidence/old-generic-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_child_array.cpp",
+      "record": "docs/math-port/evidence/old-generic-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_child_write.cpp",
+      "record": "docs/math-port/evidence/old-generic-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_factory.cpp",
+      "record": "docs/math-port/evidence/old-generic-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_function_property.cpp",
+      "record": "docs/math-port/evidence/old-generic-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_native_identities.cpp",
+      "record": "docs/math-port/evidence/old-generic-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_option_array_iteration.cpp",
+      "record": "docs/math-port/evidence/old-generic-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_option_array_map.cpp",
+      "record": "docs/math-port/evidence/old-generic-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_option_filter.cpp",
+      "record": "docs/math-port/evidence/old-generic-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_options.cpp",
+      "record": "docs/math-port/evidence/old-generic-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_ordered_map_storage.cpp",
+      "record": "docs/math-port/evidence/old-generic-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_string_map.cpp",
+      "record": "docs/math-port/evidence/old-generic-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_case_host.cpp",
+      "record": "docs/math-port/evidence/old-generic-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_numeric.cpp",
+      "record": "docs/math-port/evidence/old-generic-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_numeric_reductions.cpp",
+      "record": "docs/math-port/evidence/old-generic-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_unicode_regexp_host.cpp",
+      "record": "docs/math-port/evidence/old-generic-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_find_math.cpp",
+      "record": "docs/math-port/evidence/old-parser-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_find_tex.cpp",
+      "record": "docs/math-port/evidence/old-parser-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_input_host.cpp",
+      "record": "docs/math-port/evidence/old-parser-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_input_jax.cpp",
+      "record": "docs/math-port/evidence/old-parser-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_map_handler.cpp",
+      "record": "docs/math-port/evidence/old-parser-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_math_item.cpp",
+      "record": "docs/math-port/evidence/old-parser-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_node_util.cpp",
+      "record": "docs/math-port/evidence/old-parser-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_parser_records.cpp",
+      "record": "docs/math-port/evidence/old-parser-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_parser_stack.cpp",
+      "record": "docs/math-port/evidence/old-parser-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_primitives.cpp",
+      "record": "docs/math-port/evidence/old-parser-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_regexp_binding.cpp",
+      "record": "docs/math-port/evidence/old-parser-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_scanner_regexp.cpp",
+      "record": "docs/math-port/evidence/old-parser-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_sparse_node.cpp",
+      "record": "docs/math-port/evidence/old-parser-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_stack_item.cpp",
+      "record": "docs/math-port/evidence/old-parser-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_tex_error.cpp",
+      "record": "docs/math-port/evidence/old-parser-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_tex_token.cpp",
+      "record": "docs/math-port/evidence/old-parser-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_token_map.cpp",
+      "record": "docs/math-port/evidence/old-parser-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_tree.cpp",
+      "record": "docs/math-port/evidence/old-parser-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_mo_patterns.cpp",
+      "record": "docs/math-port/evidence/old-parser-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_operator.cpp",
+      "record": "docs/math-port/evidence/old-parser-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_regexp_ignore_case.cpp",
+      "record": "docs/math-port/evidence/old-parser-test-retirement.json"
+    },
+    {
+      "file": "tests/math/reference_unit_util.cpp",
+      "record": "docs/math-port/evidence/old-parser-test-retirement.json"
+    }
+  ]
+}

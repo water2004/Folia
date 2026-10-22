@@ -217,10 +217,7 @@ const candidates={
 };
 for(const row of rows)row.nativeCandidate=candidates[row.label];
 const output=path.join(root,'docs/math-port/evidence/parser-iterator-source.json');
-fs.writeFileSync(output,JSON.stringify({node:process.version,source,source_sha256:pin.source_sha256,cjs:'cjs/input/tex/Configuration.js',cjs_sha256:cjsSha256,observations:rows},null,2)+'\n');
-if(process.argv.includes('--check')){
-  const saved=JSON.parse(fs.readFileSync(output,'utf8'));assert.deepEqual(saved.observations,rows);
-  const fixture=fs.readFileSync(path.join(__dirname,'parser-iterator-reference.cpp'),'utf8');
-  for(const row of rows)assert.ok(fixture.includes('"'+row.nativeCandidate+'"_test'),`unmapped native candidate for ${row.label}`);
-}
-else process.stdout.write(JSON.stringify({node:process.version,observations:rows.length,output:path.relative(root,output)})+'\n');
+const data=JSON.stringify({node:process.version,source,source_sha256:pin.source_sha256,cjs:'cjs/input/tex/Configuration.js',cjs_sha256:cjsSha256,observations:rows},null,2)+'\n';
+assert.ok(process.argv.includes('--check'),'Frozen Source owner is check-only');
+assert.equal(fs.readFileSync(output,'utf8').replaceAll('\r\n','\n'),data,'Frozen iterator Source profile changed');
+console.log(JSON.stringify({node:process.version,observations:rows.length,mode:'check'}));

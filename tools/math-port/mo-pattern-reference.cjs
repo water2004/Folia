@@ -28,6 +28,5 @@ const specs=names.map(name=>{
  const ranges=[];for(let i=0;i<65536;i++)if(re.test(String.fromCharCode(i).repeat(minimum))){const last=ranges.at(-1);if(last&&last[1]===i-1)last[1]=i;else ranges.push([i,i]);}
  assert.ok(ranges.length);return {name,source:re.source,flags:re.flags,minimum,maximum,ranges};
 });
-function u(value){const units=[];for(let i=0;i<value.length;i++)units.push(value.charCodeAt(i));return 'units({'+units.join(',')+'})';}
-module.exports={root,M,names,specs,u,lock:actual};
+module.exports={root,M,names,specs,lock:actual};
 if(require.main===module)console.log(JSON.stringify({patterns:names,compiled_package:actual.compiled_package,mode:process.argv.includes('--freeze-lock')?'freeze':'check'}));

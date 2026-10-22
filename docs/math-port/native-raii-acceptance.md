@@ -1882,7 +1882,13 @@ Build13 succeeds with parallel4. The final combined FoliaMathTests run passes
 and `final-inventory.json`. The tracked `evidence/old-*-test-retirement.json`
 records the retained Source/native responsibility and hashes for future readers.
 No app rebuild, installation, new MSI, version change, push or Release is claimed.
-This completes the old-test task; the paused production owner chain is separate.
+`evidence/old-test-retirement-index.json` reconciles every one of the122 original
+files with exactly one tracked responsibility record. The final cleanup also
+removes the dead C++ units encoder and its ten-file re-export chain; all other
+AST nodes and pin literals remain unchanged. Changed helpers load successfully,
+and remaining top-level tools have zero missing relative requires and zero old
+C++ filename mentions. This completes the old-test task; the paused production
+owner chain is separate.
 
 ### Current Debug and self-contained Release MSI (2026-10-21)
 

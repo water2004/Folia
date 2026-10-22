@@ -1,0 +1,222 @@
+{
+  "schema": 1,
+  "scope": "First18 dispatched returns/predicates/class/inheritance observers. All original Source profiles and inputs preserved; completed checks are recorded in native-raii-acceptance.md.",
+  "groups": [
+    {
+      "name": "returns",
+      "sourceOwners": [
+        "tools/math-port/sparse-mml-return-oracle.cjs",
+        "tools/math-port/mml-return-probe-oracle.cjs",
+        "tools/math-port/sparse-mml-oracle.cjs",
+        "tools/math-port/mml-predicate-probe-oracle.cjs"
+      ],
+      "sourceRows": [
+        32,
+        155,
+        75,
+        111,
+        7
+      ],
+      "nativeOwners": [
+        "tests/math/native_mml_row_tokens.cpp",
+        "tests/math/mml_exact_clone_row.cpp",
+        "tests/math/native_raii_mo.cpp",
+        "tests/math/typed_mml_arithmetic.cpp",
+        "tests/math/typed_mml_containers.cpp"
+      ],
+      "entries": [
+        {
+          "file": "tests/math/reference_mml_returns.cpp",
+          "sha256": "1e51fb5c7cde5bf75b0ed2c42d491a15eb6284182b4ec33170742b7b98413b60",
+          "disposition": "Complete original Source observations remain offline. Real row/token/class/inheritance mathematics is covered by configured typed native owners; no object-protocol emulation is retained."
+        },
+        {
+          "file": "tests/math/reference_mml_return_probes.cpp",
+          "sha256": "dbd8fd29eea6773efc3b6d5d048dae3c740997ce0676af4db3a015cfd4f2b98b",
+          "disposition": "Complete original Source observations remain offline. Real row/token/class/inheritance mathematics is covered by configured typed native owners; no object-protocol emulation is retained."
+        },
+        {
+          "file": "tests/math/reference_mml_predicates.cpp",
+          "sha256": "a2162d10a2907c0f7e449c707b62c8b53f4b96e7f2d3fe3f372bd5359f853383",
+          "disposition": "Complete original Source observations remain offline. Real row/token/class/inheritance mathematics is covered by configured typed native owners; no object-protocol emulation is retained."
+        },
+        {
+          "file": "tests/math/reference_mml_predicate_probes.cpp",
+          "sha256": "9bc71a1155bc66b928f58f9025faead1c98b9b686f2f690756bb56672fc19be1",
+          "disposition": "Complete original Source observations remain offline. Real row/token/class/inheritance mathematics is covered by configured typed native owners; no object-protocol emulation is retained."
+        },
+        {
+          "file": "tests/math/reference_mml_predicate_rebind.cpp",
+          "sha256": "5e8c863d20578fcc42271cb9f20dace6c6e45ae28a50a66ea761352f1ca4f1d1",
+          "disposition": "Complete original Source observations remain offline. Real row/token/class/inheritance mathematics is covered by configured typed native owners; no object-protocol emulation is retained."
+        }
+      ]
+    },
+    {
+      "name": "classes",
+      "sourceOwners": [
+        "tools/math-port/mml-base-class-boundary-oracle.cjs",
+        "tools/math-port/mml-base-class-callback-oracle.cjs",
+        "tools/math-port/mml-cell-class-oracle.cjs",
+        "tools/math-port/mml-forms-boundary-oracle.cjs",
+        "tools/math-port/mml-row-class-oracle.cjs"
+      ],
+      "sourceRows": [
+        3,
+        432,
+        14,
+        9,
+        28
+      ],
+      "nativeOwners": [
+        "tests/math/native_mml_row_tokens.cpp",
+        "tests/math/mml_exact_clone_row.cpp",
+        "tests/math/native_raii_mo.cpp",
+        "tests/math/typed_mml_arithmetic.cpp",
+        "tests/math/typed_mml_containers.cpp"
+      ],
+      "entries": [
+        {
+          "file": "tests/math/reference_mml_base_class_boundary.cpp",
+          "sha256": "1d26820aaa471fc9c0a2eea373be4c06c356e72a88e4da428bf4b987457ac533",
+          "disposition": "Complete original Source observations remain offline. Real row/token/class/inheritance mathematics is covered by configured typed native owners; no object-protocol emulation is retained."
+        },
+        {
+          "file": "tests/math/reference_mml_base_class_callbacks.cpp",
+          "sha256": "9882601750e6e47cd6f1180e3b8ea7bf5b3fb7e5f727875e1e631f79e42c3d98",
+          "disposition": "Complete original Source observations remain offline. Real row/token/class/inheritance mathematics is covered by configured typed native owners; no object-protocol emulation is retained."
+        },
+        {
+          "file": "tests/math/reference_mml_cell_class.cpp",
+          "sha256": "196938501d268402ec7f7eef2f8467964797d3e7eefdc56f8cddaa84849e6b88",
+          "disposition": "Complete original Source observations remain offline. Real row/token/class/inheritance mathematics is covered by configured typed native owners; no object-protocol emulation is retained."
+        },
+        {
+          "file": "tests/math/reference_mml_forms_boundary.cpp",
+          "sha256": "29ed8967f1ce7a24424de291597e668437b2342cf07f7dd619efcec5b59f0ab9",
+          "disposition": "Complete original Source observations remain offline. Real row/token/class/inheritance mathematics is covered by configured typed native owners; no object-protocol emulation is retained."
+        },
+        {
+          "file": "tests/math/reference_mml_row_class.cpp",
+          "sha256": "94e8edf779ec38f10273b6b4b74bb261aa4b5de544f101881d57d15481f22e64",
+          "disposition": "Complete original Source observations remain offline. Real row/token/class/inheritance mathematics is covered by configured typed native owners; no object-protocol emulation is retained."
+        }
+      ]
+    },
+    {
+      "name": "inheritance",
+      "sourceOwners": [
+        "tools/math-port/inheritance-boundary-oracle.cjs",
+        "tools/math-port/mml-inherit-from-oracle.cjs",
+        "tools/math-port/mml-inheritance-oracle.cjs",
+        "tools/math-port/mml-row-inherit-oracle.cjs",
+        "tools/math-port/sparse-mml-oracle.cjs"
+      ],
+      "sourceRows": [
+        {
+          "file": "tests/math/reference_inheritance_boundary.cpp",
+          "rows": 249
+        },
+        {
+          "file": "tests/math/reference_mml_inherit_from.cpp",
+          "rows": 9344
+        },
+        {
+          "file": "tests/math/reference_mml_inheritance.cpp",
+          "rows": 699
+        },
+        {
+          "file": "tests/math/reference_mml_inheritance_align_trace.cpp",
+          "rows": 8
+        },
+        {
+          "file": "tests/math/reference_mml_inheritance_boundaries.cpp",
+          "rows": 160
+        },
+        {
+          "file": "tests/math/reference_mml_inheritance_token_isolation.cpp",
+          "rows": 8
+        },
+        {
+          "file": "tests/math/reference_mml_row_inherit.cpp",
+          "rows": 6
+        },
+        {
+          "file": "tests/math/reference_mml_inheritance_consumers.cpp",
+          "rows": 54
+        }
+      ],
+      "nativeOwners": [
+        {
+          "file": "tests/math/native_raii_mml_base.cpp",
+          "semantics": [
+            "own and inherited mathsize precedence",
+            "displaystyle/scriptlevel copying",
+            "tex prime style propagation",
+            "defaults excluded from mathsize inheritance"
+          ]
+        },
+        {
+          "file": "tests/math/typed_mml_scripts.cpp",
+          "semantics": [
+            "scriptlevel changes on actual native script slots"
+          ]
+        },
+        {
+          "file": "tests/math/mml_typed_table.cpp",
+          "semantics": [
+            "rowalign and columnalign inheritance to cells"
+          ]
+        },
+        {
+          "file": "tests/math/native_common_mrow.cpp",
+          "semantics": [
+            "inherited mathsize drives native row scale"
+          ]
+        }
+      ],
+      "entries": [
+        {
+          "file": "tests/math/reference_inheritance_boundary.cpp",
+          "sha256": "2a596d2acb71b711dd143be0d5eaa03536ec5d9a824933100ca1314f6929907f",
+          "disposition": "Complete original Source observations remain offline. Real row/token/class/inheritance mathematics is covered by configured typed native owners; no object-protocol emulation is retained."
+        },
+        {
+          "file": "tests/math/reference_mml_inherit_from.cpp",
+          "sha256": "2bf722068d695e32a512d11d4cfcb49f1da054a82485bac1d828794ac6b6aa7d",
+          "disposition": "Complete original Source observations remain offline. Real row/token/class/inheritance mathematics is covered by configured typed native owners; no object-protocol emulation is retained."
+        },
+        {
+          "file": "tests/math/reference_mml_inheritance.cpp",
+          "sha256": "f25aea5fe7a91513495f6bbea0375e59d438286ac1b278bcd03b75bdcba549c3",
+          "disposition": "Complete original Source observations remain offline. Real row/token/class/inheritance mathematics is covered by configured typed native owners; no object-protocol emulation is retained."
+        },
+        {
+          "file": "tests/math/reference_mml_inheritance_align_trace.cpp",
+          "sha256": "27ea67651968028826ca025b1d9c5745283a3f4ea9197eade3d8b5a064dac0a6",
+          "disposition": "Complete original Source observations remain offline. Real row/token/class/inheritance mathematics is covered by configured typed native owners; no object-protocol emulation is retained."
+        },
+        {
+          "file": "tests/math/reference_mml_inheritance_boundaries.cpp",
+          "sha256": "1e3fa2832c577feb175ad9fa042f891c1283a3999ee35e3bc08e1900d7f35935",
+          "disposition": "Complete original Source observations remain offline. Real row/token/class/inheritance mathematics is covered by configured typed native owners; no object-protocol emulation is retained."
+        },
+        {
+          "file": "tests/math/reference_mml_inheritance_token_isolation.cpp",
+          "sha256": "ac6e2188b61b83ed0b9013eafb4b99dabb0cc9e6ee321e6450a01ba999be19ea",
+          "disposition": "Complete original Source observations remain offline. Real row/token/class/inheritance mathematics is covered by configured typed native owners; no object-protocol emulation is retained."
+        },
+        {
+          "file": "tests/math/reference_mml_row_inherit.cpp",
+          "sha256": "90a17e973f0af4a90476f6d7342411e0c513ba334bf1c8fcce66a0e2a5e156af",
+          "disposition": "Complete original Source observations remain offline. Real row/token/class/inheritance mathematics is covered by configured typed native owners; no object-protocol emulation is retained."
+        },
+        {
+          "file": "tests/math/reference_mml_inheritance_consumers.cpp",
+          "sha256": "af8109fb455f8f692d22ea99c162fc77476b11465ebf29f936115620e3f8d459",
+          "disposition": "Complete original Source observations remain offline. Real row/token/class/inheritance mathematics is covered by configured typed native owners; no object-protocol emulation is retained."
+        }
+      ]
+    }
+  ]
+}

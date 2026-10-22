@@ -1,10 +1,10 @@
 // Root-owned actual CJS loader, with pinned clone/package and executable closure.
 'use strict';
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),assert=require('node:assert/strict');
-const {root,u,MmlFactory}=require('./arithmetic-reference.cjs');
+const {root,MmlFactory}=require('./arithmetic-reference.cjs');
 const source='ts/core/MmlTree/MmlNodes/HtmlNode.ts',sha256='1bf0ba981fc72b63a525424fb51e8bc45231fcf768d618fb8c75517bd72ae665';
 const bytes=fs.readFileSync(path.join(root,'.reference/MathJax-src',source));
 assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),sha256);
 assert.equal(fs.readFileSync(path.join(root,'tools/mathjax-bundle/node_modules/@mathjax/src',source),'utf8').replaceAll('\r\n','\n'),bytes.toString().replaceAll('\r\n','\n'));
 const {HtmlNode}=require(path.join(root,'tools/mathjax-bundle/node_modules/@mathjax/src/cjs/core/MmlTree/MmlNodes/HtmlNode.js'));
-module.exports={root,u,MmlFactory,HtmlNode,source,sha256};
+module.exports={root,MmlFactory,HtmlNode,source,sha256};
