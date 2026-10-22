@@ -1,8 +1,0 @@
-// Root test-generation utility: lossless raw value encoding, never math logic.
-'use strict';
-const assert=require('node:assert/strict');
-exports.valueEmitter=function(u){const graph=[],ids=new Map(),q=JSON.stringify;
- function key(v){if(v===undefined)return'undefined';if(v===null)return'null';if(typeof v==='number')return Number.isNaN(v)?'nan':Object.is(v,-0)?'-0':String(v);if(typeof v!=='object')return typeof v+'/'+q(v);return(Array.isArray(v)?'a':'o')+'{'+Object.keys(v).map(k=>q(k)+':'+key(v[k])).join(',')+'}';}
- function id(v){const k=key(v);if(ids.has(k))return ids.get(k);let e;if(v===undefined)e='Property(Missing{})';else if(v===null)e='Property(PropertyNull{})';else if(typeof v==='string')e='Property(h::debugText('+u(v)+'))';else if(typeof v==='boolean')e='Property('+v+')';else if(typeof v==='number'){let n=String(v);if(Number.isNaN(v))n='std::numeric_limits<double>::quiet_NaN()';else if(!Number.isFinite(v))n=(v<0?'-':'')+'std::numeric_limits<double>::infinity()';else if(Object.is(v,-0))n='-0.0';else if(!/[.eE]/.test(n))n+='.0';e='Property('+n+')';}else if(Array.isArray(v))e='Property(PropertyArray{'+v.map(x=>'values['+id(x)+']').join(',')+'})';else {assert.equal(typeof v,'object');e='Property(PropertyList{'+Object.keys(v).map(k=>'{'+q(k)+',values['+id(v[k])+']}').join(',')+'})';}const i=graph.length;graph.push(e);ids.set(k,i);return i;}
- const p=v=>'clone(sourceValues['+id(v)+'])';return {p,list:v=>'PropertyList::record('+p(v)+').value()',size:()=>graph.length,declarations:()=>['namespace {const std::vector<Property> sourceValues=[] {std::vector<Property> values;values.reserve('+graph.length+');',...graph.map(e=>'values.push_back('+e+');'),'return values;}();}']};
-};
