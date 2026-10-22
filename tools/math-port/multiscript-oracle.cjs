@@ -315,3 +315,11 @@ const profile={schema:'folia.math.multiscript-source.v1',source:{node:process.ve
 assert.ok(process.argv.includes('--check'),'Source-only oracle is check-only');
 assert.deepEqual(JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/evidence/multiscript-source-profile.json'),'utf8')),profile);
 console.log(JSON.stringify({...profile.counts,mode:'check'}));
+
+// Independently frozen original parent-verification projection (88 cases / 288 values).
+const parentProfile=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/evidence/multiscript-parent-source-profile.json'),'utf8'));
+const parentNames=new Set(parentProfile.scenarios.map(s=>s.name));
+const parentScenarios=profile.scenarios.filter(s=>parentNames.has(s.name));
+assert.equal(parentScenarios.length,88);
+assert.equal(parentScenarios.reduce((n,s)=>n+s.expected.length,0),288);
+assert.deepStrictEqual(parentScenarios,parentProfile.scenarios);
