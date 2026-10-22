@@ -48,6 +48,7 @@ bool sourceRangeEqual(const RangeDef& actual, const SourceRangeQuery& expected) 
 }
 } // namespace
 #include "fixtures/tex-source/mo_pattern_utf16_masks.inc"
+#include "fixtures/tex-source/mo_pattern_retained_values.inc"
 namespace {
 std::u16string sourceMaskInput(char16_t c, unsigned shape, char16_t first) {
     if (shape == 0) return std::u16string(1, c);
@@ -281,5 +282,50 @@ suite typed_mo_pattern_data = [] {
                 expect(!matchMoPattern(kinds[index], text));
             }
         }
+    };
+
+    "all five retained MoPattern specs preserve every Source metadata field"_test = [] {
+        for (const auto& row : source_mo_retained_values) {
+            const auto& actual = moPatternSpec(row.pattern);
+            expect(actual.source.compare(row.source) == 0);
+            expect(actual.flags == row.flags);
+            expect(actual.minimum == row.minimum);
+            expect(actual.maximum == row.maximum);
+            expect(std::equal(actual.units.begin(), actual.units.end(),
+                row.ranges.begin(), row.ranges.end(), [](const auto& a, const auto& b) {
+                    return a.first == b.first && a.last == b.second;
+                }));
+        }
+    };
+
+    "all retained MoPattern members and mixed products match Source values"_test = [] {
+        for (const auto& row : source_mo_retained_values) {
+            std::vector<unsigned> actualMembers;
+            for (unsigned unit = 0; unit < 65536; ++unit)
+                if (matchMoPattern(row.pattern,
+                    std::u16string(row.minimum, static_cast<char16_t>(unit))))
+                    actualMembers.push_back(unit);
+            expect(std::equal(actualMembers.begin(), actualMembers.end(),
+                row.members.begin(), row.members.end()));
+            const std::array<std::u16string, 7> tails{
+                u"", std::u16string(1, static_cast<char16_t>(row.ranges.front().first)),
+                u"\n", u"\r\n", u"\u2028", u"\u2029", std::u16string(1, char16_t{0})};
+            std::string product;
+            for (const auto x : row.members)
+                for (const auto y : row.members)
+                    for (const auto& tail : tails) {
+                        std::u16string text{static_cast<char16_t>(x), static_cast<char16_t>(y)};
+                        text.append(tail);
+                        product.push_back(matchMoPattern(row.pattern, text) ? '1' : '0');
+                    }
+            expect(product == row.product);
+        }
+    };
+
+    "all 255 additional and 40 independent MoPattern Source truth values match"_test = [] {
+        for (const auto& row : source_mo_retained_samples)
+            expect(matchMoPattern(row.pattern, row.text) == row.expected);
+        for (const auto& row : source_mo_independent_truths)
+            expect(matchMoPattern(row.pattern, row.text) == row.expected);
     };
 };

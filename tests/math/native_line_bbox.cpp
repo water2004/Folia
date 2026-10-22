@@ -135,3 +135,111 @@ suite native_line_bbox = [] {
         expect(rejected);
     };
 };
+
+// Append to the existing native BBox owner; imports folia.math.util.bbox.
+namespace {
+using namespace boost::ut;
+using folia::math::BBox;
+using folia::math::BBoxData;
+
+struct SourceBBoxSnapshot {
+    std::array<double, 11> values;
+    std::string_view pwidth;
+};
+enum class SourceBBoxOp { combine, append, update_from, rescale, empty };
+struct SourceBBoxStep {
+    SourceBBoxSnapshot child;
+    SourceBBoxOp operation;
+    double x, y;
+};
+struct SourceBBoxSide {
+    std::string_view name;
+    int index;
+    std::string_view dimension;
+};
+
+#include "fixtures/tex-source/primitive_bbox_values.inc"
+
+constexpr std::array<double BBox::*, 11> sourceBBoxFields{
+    &BBox::w, &BBox::h, &BBox::d, &BBox::scale, &BBox::rscale, &BBox::L,
+    &BBox::R, &BBox::ic, &BBox::oc, &BBox::sk, &BBox::dx};
+
+bool sourcePrimitiveNumberEqual(double actual, double expected) {
+    if (std::isnan(expected)) return std::isnan(actual);
+    if (std::isinf(expected)) return actual == expected;
+    if (expected == 0) {
+        return actual == 0 && std::signbit(actual) == std::signbit(expected);
+    }
+    return std::isfinite(actual) &&
+           std::abs(actual - expected) <= 1e-10 + 1e-10 * std::abs(expected);
+}
+
+void setSourceBBoxExtras(BBox &box, const SourceBBoxSnapshot &input) {
+    for (std::size_t i = 3; i < sourceBBoxFields.size(); ++i) {
+        box.*sourceBBoxFields[i] = input.values[i];
+    }
+    box.pwidth = input.pwidth;
+}
+
+suite native_primitive_bbox_values = [] {
+    "native complete primitive bbox values"_test = [] {
+        std::size_t snapshot = 0;
+        const auto verify = [&](const BBox &box) {
+            const auto &expected = sourceBBoxExpected[snapshot++];
+            for (std::size_t i = 0; i < sourceBBoxFields.size(); ++i) {
+                expect(sourcePrimitiveNumberEqual(
+                    box.*sourceBBoxFields[i], expected.values[i]));
+            }
+            expect(box.pwidth == expected.pwidth);
+        };
+        for (const auto &definition : sourceBBoxDefinitions) {
+            verify(BBox(definition));
+        }
+
+        BBox box = BBox::makeEmpty();
+        verify(box);
+        box.clean();
+        verify(box);
+        box = BBox::zero();
+        verify(box);
+        setSourceBBoxExtras(box, sourceBBoxZeroSetup);
+
+        for (const auto &step : sourceBBoxSteps) {
+            BBox child(BBoxData{
+                .w = step.child.values[0],
+                .h = step.child.values[1],
+                .d = step.child.values[2]});
+            setSourceBBoxExtras(child, step.child);
+            switch (step.operation) {
+            case SourceBBoxOp::combine: box.combine(child, step.x, step.y); break;
+            case SourceBBoxOp::append: box.append(child); break;
+            case SourceBBoxOp::update_from: box.updateFrom(child); break;
+            case SourceBBoxOp::rescale: box.rescale(step.x); break;
+            case SourceBBoxOp::empty: expect(&box.empty() == &box); break;
+            }
+            verify(box);
+        }
+
+        BBox copied = box.copy();
+        verify(copied);
+        box.w = 99;
+        verify(copied);
+        box = BBox(BBoxData{.w = 1, .h = 2, .d = 3});
+        box.rscale = 0.7;
+        box.L = 0.1;
+        box.R = 0.2;
+        box.append(box);
+        verify(box);
+        box.combine(box, 1, -1);
+        verify(box);
+
+        expect(snapshot == std::size(sourceBBoxExpected));
+        expect(BBox::fullWidth == sourceBBoxFullWidth);
+        for (std::size_t i = 0; i < std::size(sourceBBoxSides); ++i) {
+            expect(BBox::boxSides[i].name == sourceBBoxSides[i].name);
+            expect(BBox::boxSides[i].index == sourceBBoxSides[i].index);
+            expect(BBox::boxSides[i].dimension == sourceBBoxSides[i].dimension);
+        }
+    };
+};
+}

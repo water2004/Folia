@@ -103,3 +103,18 @@ suite find_tex = [] {
         expect(rejected);
     };
 };
+
+namespace {
+#include "math/fixtures/find-tex-retained-source.inc"
+}
+suite retained_find_tex_original_scan_corpus = [] {
+    "FindTeX preserves all 56 directly typed original scan cases"_test = [] {
+        expect(retainedFindTexSourceCases.size() == 56_u);
+        for (auto const& test : retainedFindTexSourceCases) {
+            FindTeX finder(optionsFor(test));
+            auto strings = ownStrings(test);
+            expectSourceRows(test, finder.findMath(strings));
+            expectSourceRows(test, finder.findMath(strings));
+        }
+    };
+};

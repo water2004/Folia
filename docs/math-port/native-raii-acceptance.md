@@ -1846,6 +1846,44 @@ token-walk780 and verification3752/math-verification72 profiles stay intact.
 No object-protocol emulation enters the native test target. The per-file Source
 and native responsibility record is `evidence/old-mml-test-retirement.json`.
 
+### Complete old-test closure and final regression (2026-10-23)
+
+All122 dispatched unconfigured C++ tests and seven root includes are accounted
+for. Real mathematics migrates into configured native owners before retirement;
+Source-only object protocol remains offline. All159 remaining math C++/module
+test files are explicitly configured, with zero class_binding test imports.
+Eighty-two obsolete dedicated generators/runners/helpers retire; the remaining
+top-level tools have no missing literal test-path references. Original production
+math/platform/application sources are unchanged from this task's baseline.
+
+Final native coverage also retains112 UTF16/68 UTF8 decode/60 invalid input rows
+(5227 assertions), four rejected radix values,56 typed FindTeX cases replayed
+twice (953), all1981 original formatted messages (1982), complete stack row
+branches (68), all46 BBox snapshots/32 operations (572), priority snapshots195,
+and the remaining Mo metadata/member/product/sample/truth values330. Test data
+is separated from logic. These run at existing owners; no JS semantic simulation
+or extra public API is introduced. The old prototype/null-array/budget/receiver
+cases have explicit Source-only or retirement decisions in the per-file records.
+
+Complete original operator8 groups/13536 observations and the1114112-codepoint
+Source loop pass under read-only execution; Mo16 groups/2342369 queries retain
+all original Source inputs and mathematical expectations. Canonical Source
+owners now use structured static gold independently of retired C++. A partial
+pristine-only operator candidate was rejected before promotion. Seven revised
+aggregate Source entry points pass after integration. Leaf's26 groups/658 helper
+values plus one direct expected string and callable's8 groups/50 flags retain
+the original gold. Existing historical profiles are not rewritten, including
+their old metadata; new raw-byte locks have explicit checkout line-ending rules.
+
+Build13 succeeds with parallel4. The final combined FoliaMathTests run passes
+**965 tests/272734 assertions**, and `cmd /c build_test.bat` passes
+**581 tests/43936 assertions**. Logs and inventory are under
+`build/math-port/finish-old-tests/{native-combined-build-13,all-math-final-combined,core-final}.log`
+and `final-inventory.json`. The tracked `evidence/old-*-test-retirement.json`
+records the retained Source/native responsibility and hashes for future readers.
+No app rebuild, installation, new MSI, version change, push or Release is claimed.
+This completes the old-test task; the paused production owner chain is separate.
+
 ### Current Debug and self-contained Release MSI (2026-10-21)
 
 Dependency setup passes. The supported Debug application build and actual

@@ -32,3 +32,24 @@ suite tex_error_source_cases = [] {
   };
 };
 }
+
+namespace {
+struct FormatCase { std::u16string format, expected; };
+#include "math/fixtures/tex-source/tex-error-exhaustive-source.inc"
+suite tex_error_complete_original_format_corpus = [] {
+    "tex_error_preserves_all_1981_original_source_format_messages"_test = [] {
+        // The native API receives normalized text arguments. Source Array.join
+        // normalizes null/undefined to empty, -0 to 0, arrays recursively.
+        const std::vector<std::u16string> arguments{
+            u"first", u"0", u"1e+21", u"", u"", u"false", u"a,,b,c",
+            u"[object Object]", u"ninth", u"tenth"};
+        expect(std::size(exhaustiveFormatCases) == 1981_u);
+        std::size_t index = 0;
+        for (auto const& row : exhaustiveFormatCases) {
+            TexError error("ID", row.format, arguments);
+            expect(static_cast<bool>(error.message() == row.expected)) << index;
+            ++index;
+        }
+    };
+};
+}
