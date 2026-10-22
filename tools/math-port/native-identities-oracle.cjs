@@ -1,30 +1,23 @@
+// Source-only check; original profile bytes and all Source fields are preserved.
 // Root real Options/MML identity observations; no native parser substitute.
 'use strict';const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),crypto=require('node:crypto');
 const {root,MmlFactory}=require('./simple-mml-reference.cjs'),base=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax/src');
 const lock=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/evidence/p46-parser-options-source.json'))),hashes=[];
 for(const source of ['ts/util/Options.ts','ts/core/Tree/Factory.ts','ts/core/MmlTree/MmlFactory.ts','ts/core/MmlTree/MmlNode.ts','ts/core/MmlTree/MmlNodes/mi.ts']){const entry=lock.hashes.find(x=>x.source===source);assert.ok(entry,source);const bytes=fs.readFileSync(path.join(root,'.reference/MathJax-src',source));assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),entry.source_sha256);assert.equal(fs.readFileSync(path.join(base,source),'utf8').replaceAll('\r\n','\n'),bytes.toString().replaceAll('\r\n','\n'));assert.equal(crypto.createHash('sha256').update(fs.readFileSync(path.join(base,source.replace(/^ts\//,'cjs/').replace(/\.ts$/,'.js')))).digest('hex'),entry.cjs_sha256);hashes.push(entry);}
 const {defaultOptions,copy}=require(path.join(base,'cjs/util/Options.js')),rows=[];
-function add(label,cpp,run){const factory=new MmlFactory(),node=factory.create('mi'),type=factory.getNodeClass('mi');rows.push({label,cpp,expected:run({factory,node,type})});}
-add('same-node-canonical-handle','auto a=e.nodes.instance(e.node,e.klass,e.factory),b=e.nodes.instance(e.node,e.klass,e.factory);return yes(a==b)+":"+yes(e.nodes.resolve(a)==e.node);',e=>String(e.node===e.node)+':'+String(e.node===e.node));
-add('distinct-native-nodes','auto other=e.factory->create("mi");auto a=e.nodes.instance(e.node,e.klass,e.factory),b=e.nodes.instance(other,e.klass,e.factory);return yes(a!=b)+":"+yes(e.nodes.resolve(b)==other);',e=>{const other=e.factory.create('mi');return String(e.node!==other)+':'+String(other===other);});
-add('actual-factory-class-identity','auto nativeClass=e.factory->getNodeClass("mi");auto value=e.classes.bind(nativeClass,e.klass);mml::MmlFactory second;return yes(e.classes.resolve(value)==second.getNodeClass("mi"));',e=>String(new MmlFactory().getNodeClass('mi')===e.type));
-add('node-alias-through-option-copy','auto node=e.nodes.instance(e.node,e.klass,e.factory);auto source=e.object({{u"node",node},{u"array",e.array({node,node})}});std::array<opts::Value,1> defs{source};auto result=opts::defaultOptions(e.context,e.context.object(),defs);auto array=e.get(result,u"array");return yes(e.get(result,u"node")==opts::Value(node))+":"+yes(e.get(array,u"0")==opts::Value(node))+":"+yes(array!=e.get(source,u"array"));',e=>{const source={node:e.node,array:[e.node,e.node]},result=defaultOptions({},source);return[result.node===e.node,result.array[0]===e.node,result.array!==source.array].join(':');});
-add('factory-class-alias-through-option-copy','auto nativeClass=e.factory->getNodeClass("mi");auto type=e.classes.bind(nativeClass,e.klass);auto source=e.object({{u"items",e.object({{u"mi",type}})}});std::array<opts::Value,1> defs{source};auto result=opts::defaultOptions(e.context,e.context.object(),defs);return yes(e.get(result,u"items")!=e.get(source,u"items"))+":"+yes(e.classes.resolve(std::get<opts::ObjectRef>(e.get(e.get(result,u"items"),u"mi").data))==nativeClass);',e=>{const source={items:{mi:e.type}},result=defaultOptions({},source);return String(result.items!==source.items)+':'+String(result.items.mi===e.type);});
-add('same-node-graph-observed-through-alias','auto node=e.nodes.instance(e.node,e.klass,e.factory);auto source=e.object({{u"node",node}});auto result=opts::copy(e.context,source);auto bound=std::get<opts::ObjectRef>(e.get(result,u"node").data);e.nodes.resolve(bound)->setProperty("probe",9);return property_host::debugText(property_host::string(e.node->getProperty("probe")));',e=>{const result=copy({node:e.node});result.node.setProperty('probe',9);return String(e.node.getProperty('probe'));});
-add('ordinary-node-list-array-and-inherited-key','auto node=e.nodes.instance(e.node,e.klass,e.factory);auto dictionary=e.object({{u"mi",e.array({node,node})}});auto list=e.get(dictionary,u"mi");return yes(e.get(dictionary,u"constructor")==opts::Value(e.context.intrinsics().objectConstructor))+":"+yes(e.get(list,u"0")==e.get(list,u"1"));',e=>{const dict={mi:[e.node,e.node]};return String(dict.constructor===Object)+':'+String(dict.mi[0]===dict.mi[1]);});
-add('dictionary-enumeration-order','auto node=e.nodes.instance(e.node,e.klass,e.factory);auto dictionary=e.object({{u"z",node},{u"2",node},{u"a",node},{u"1",node}});std::string out;for(auto k:e.context.enumerableStringKeys(dictionary)){if(!out.empty())out+=",";out+=property_host::debugText(k);}return out;',e=>Object.keys({z:e.node,2:e.node,a:e.node,1:e.node}).join(','));
-add('node-list-array-rebinding-retains-captured-array','auto node=e.nodes.instance(e.node,e.klass,e.factory);auto dictionary=e.object({{u"mi",e.array({node})}});auto old=e.get(dictionary,u"mi");e.context.set(dictionary,opts::Key(u"mi"),e.array({}));return yes(old!=e.get(dictionary,u"mi"))+":"+yes(e.nodes.resolve(std::get<opts::ObjectRef>(e.get(old,u"0").data))==e.node);',e=>{const dict={mi:[e.node]},old=dict.mi;dict.mi=[];return String(old!==dict.mi)+':'+String(old[0]===e.node);});
-const head=String.raw`// Generated from original Options and actual MML identity observations.
-#include "support/folia_test.hpp"
-import folia.math.util.native_identities;
-import folia.math.core.mml_tree.mml_factory;
-import folia.math.util.property_host;
-namespace {using namespace boost::ut;using namespace folia::math;namespace opts=folia::math::options;
-std::string yes(bool b){return b?"true":"false";}
-struct Fixture{opts::Context context;NativeIdentityBindings<mml::MmlNode*>nodes{context};NativeIdentityBindings<tree::FactoryClassRef<mml::MmlNode>>classes{context};std::shared_ptr<mml::MmlFactory>factory=std::make_shared<mml::MmlFactory>();mml::MmlNode*node=factory->create("mi");opts::ObjectRef klass=context.constructor(u"MmlMi");
-opts::ObjectRef object(std::initializer_list<std::pair<std::u16string,opts::Value>>values){auto o=context.object();for(auto&[k,v]:values)context.set(o,opts::Key(k),v);return o;}opts::ObjectRef array(std::initializer_list<opts::Value>values){auto a=context.array();std::size_t i=0;for(auto v:values){auto k=std::to_string(i++);context.set(a,opts::Key(std::u16string(k.begin(),k.end())),v);}return a;}opts::Value get(opts::Value o,const char16_t*k){return context.get(o,opts::Key(k));}};
-suite native_identity=[] {
-`;
-let native=head;for(const[i,r]of rows.entries())native+='"math_port_native_identity_source_'+i+'"_test=[] {Fixture e;auto run=[&]()->std::string{'+r.cpp+'};expect(eq(run(),std::string('+JSON.stringify(r.expected)+')))<<'+JSON.stringify(r.label)+';};\n';native+='};}\n';
-for(const[file,data]of [['docs/math-port/evidence/p49a-native-identities-source.json',JSON.stringify({stage:'original Options/MML reference observations, not parser acceptance',hashes,rows},null,2)+'\n'],['tests/math/reference_native_identities.cpp',native]]){const target=path.join(root,file);if(process.argv.includes('--check'))assert.equal(fs.readFileSync(target,'utf8').replaceAll('\r\n','\n'),data);else fs.writeFileSync(target,data);}
-console.log(JSON.stringify({source_cases:rows.length}));
+function add(label,run){const factory=new MmlFactory(),node=factory.create('mi'),type=factory.getNodeClass('mi');rows.push({label,expected:run({factory,node,type})});}
+add('same-node-canonical-handle',e=>String(e.node===e.node)+':'+String(e.node===e.node));
+add('distinct-native-nodes',e=>{const other=e.factory.create('mi');return String(e.node!==other)+':'+String(other===other);});
+add('actual-factory-class-identity',e=>String(new MmlFactory().getNodeClass('mi')===e.type));
+add('node-alias-through-option-copy',e=>{const source={node:e.node,array:[e.node,e.node]},result=defaultOptions({},source);return[result.node===e.node,result.array[0]===e.node,result.array!==source.array].join(':');});
+add('factory-class-alias-through-option-copy',e=>{const source={items:{mi:e.type}},result=defaultOptions({},source);return String(result.items!==source.items)+':'+String(result.items.mi===e.type);});
+add('same-node-graph-observed-through-alias',e=>{const result=copy({node:e.node});result.node.setProperty('probe',9);return String(e.node.getProperty('probe'));});
+add('ordinary-node-list-array-and-inherited-key',e=>{const dict={mi:[e.node,e.node]};return String(dict.constructor===Object)+':'+String(dict.mi[0]===dict.mi[1]);});
+add('dictionary-enumeration-order',e=>Object.keys({z:e.node,2:e.node,a:e.node,1:e.node}).join(','));
+add('node-list-array-rebinding-retains-captured-array',e=>{const dict={mi:[e.node]},old=dict.mi;dict.mi=[];return String(old!==dict.mi)+':'+String(old[0]===e.node);});
+const report={stage:'original Options/MML reference observations, not parser acceptance',hashes,rows};
+const profile=path.join(root,'docs/math-port/evidence/p49a-native-identities-source.json');
+const sourceGold=JSON.parse(fs.readFileSync(profile,'utf8'));
+const projected={...sourceGold,rows:sourceGold.rows.map(({cpp,...row})=>row)};
+assert.deepEqual(report,projected);
+console.log(JSON.stringify({sourceCases:rows.length,mode:'read-only-source-check'}));

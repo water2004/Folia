@@ -1,42 +1,32 @@
+// Source-only check; original profile bytes and all Source fields are preserved.
 // Root original Array.forEach observations for the actual FindTeX call boundary.
 'use strict';const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),crypto=require('node:crypto');
 const root=path.resolve(__dirname,'../..'),lock=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/evidence/p50-regexp-host-source.json'))),entry=lock.hashes.find(x=>x.source==='ts/input/tex/FindTeX.ts');assert.equal(crypto.createHash('sha256').update(fs.readFileSync(path.join(root,'.reference/MathJax-src',entry.source))).digest('hex'),entry.source_sha256);
 const rows=[],text=v=>v===undefined?'U':v===null?'N':typeof v==='object'?'object':String(v);
 function fixture(){const e={array:[],trace:[],set(i,v){this.array[i]=v;},callback(body){return function(v,i,a){e.trace.push(i+':'+text(v)+':'+arguments.length+':'+(a===e.array)+':'+text(this));if(body)body(v,i,a);};},each(cb,receiver){return this.array.forEach(cb,receiver);}};return e;}
-function add(label,cpp,body){const e=fixture();let error='ok',result='THREW';try{result=body(e);}catch(x){error=x.name;}rows.push({label,cpp,expected:error+'|'+result+'|'+e.trace.join('/')});}
-add('empty-array-and-undefined-result','return e.text(e.each(e.callback()));',e=>text(e.each(e.callback())));
-add('three-callback-arguments-and-original-array','e.set(0,4);e.set(1,5);return e.text(e.each(e.callback()));',e=>{e.set(0,4);e.set(1,5);return text(e.each(e.callback()));});
-add('holes-skipped','e.context.set(e.array,opts::Key(u"length"),3);e.set(1,7);return e.text(e.each(e.callback()));',e=>{e.array.length=3;e.set(1,7);return text(e.each(e.callback()));});
-add('inherited-slot-is-visited','auto prototype=e.context.objectWithPrototype(e.context.intrinsics().arrayPrototype);e.context.set(prototype,opts::Key(u"1"),8);e.context.setPrototype(e.array,prototype);e.context.set(e.array,opts::Key(u"length"),2);return e.text(e.each(e.callback()));',e=>{const p=Object.create(Array.prototype);p[1]=8;Object.setPrototypeOf(e.array,p);e.array.length=2;return text(e.each(e.callback()));});
-add('appended-entry-outside-original-length-ignored','e.set(0,1);return e.text(e.each(e.callback([&](auto,auto){e.set(1,9);})));',e=>{e.set(0,1);return text(e.each(e.callback(()=>e.set(1,9))));});
-add('deleted-future-slot-skipped','e.set(0,1);e.set(1,2);return e.text(e.each(e.callback([&](auto,auto i){if(i==0)e.context.erase(e.array,opts::Key(u"1"));})));',e=>{e.set(0,1);e.set(1,2);return text(e.each(e.callback((v,i)=>{if(i===0)delete e.array[1];})));});
-add('changed-future-slot-read-live','e.set(0,1);e.set(1,2);return e.text(e.each(e.callback([&](auto,auto i){if(i==0)e.set(1,9);})));',e=>{e.set(0,1);e.set(1,2);return text(e.each(e.callback((v,i)=>{if(i===0)e.set(1,9);})));});
-add('filled-future-hole-is-visited','e.set(0,1);e.context.set(e.array,opts::Key(u"length"),3);return e.text(e.each(e.callback([&](auto,auto i){if(i==0)e.set(2,9);})));',e=>{e.set(0,1);e.array.length=3;return text(e.each(e.callback((v,i)=>{if(i===0)e.set(2,9);})));});
-add('shrinking-array-skips-deleted-slots','e.set(0,1);e.set(1,2);e.set(2,3);return e.text(e.each(e.callback([&](auto,auto i){if(i==0)e.context.set(e.array,opts::Key(u"length"),1);})));',e=>{e.set(0,1);e.set(1,2);e.set(2,3);return text(e.each(e.callback((v,i)=>{if(i===0)e.array.length=1;})));});
-add('replacing-caller-array-keeps-captured-receiver','e.set(0,1);e.set(1,2);return e.text(e.each(e.callback([&](auto,auto i){if(i==0){e.array=e.context.array();e.set(0,9);}})));',e=>{e.set(0,1);e.set(1,2);return text(e.each(e.callback((v,i)=>{if(i===0){e.array=[];e.set(0,9);}})));});
-add('getter-read-once-before-callback','e.getter(0,[&]{e.trace.push_back("get");return opts::Value(6);});return e.text(e.each(e.callback()));',e=>{Object.defineProperty(e.array,0,{get(){e.trace.push('get');return 6;},configurable:true});return text(e.each(e.callback()));});
-add('getter-appends-outside-captured-length','e.getter(0,[&]{e.trace.push_back("get");e.set(1,9);return opts::Value(6);});return e.text(e.each(e.callback()));',e=>{Object.defineProperty(e.array,0,{get(){e.trace.push('get');e.set(1,9);return 6;},configurable:true});return text(e.each(e.callback()));});
-add('callback-throw-propagates','e.set(0,1);e.set(1,2);return e.text(e.each(e.callback([](auto,auto){throw opts::Exception("Error",u"callback");})));',e=>{e.set(0,1);e.set(1,2);return text(e.each(e.callback(()=>{throw Error('callback');})));});
-add('getter-throw-propagates','e.getter(0,[]()->opts::Value{throw opts::Exception("Error",u"getter");});return e.text(e.each(e.callback()));',e=>{Object.defineProperty(e.array,0,{get(){throw Error('getter');}});return text(e.each(e.callback()));});
-add('empty-array-still-validates-callback','return e.text(e.each(opts::Value(4)));',e=>text(e.each(4)));
-add('undefined-callback-is-invalid','return e.text(e.each(opts::Undefined{}));',e=>text(e.each(undefined)));
-for(const[label,value,cpp]of [['null',null,'opts::Null{}'],['false',false,'false'],['zero',0,'0'],['object',{},'e.context.object()']])add('this-argument:'+label,'e.set(0,1);return e.text(e.each(e.callback(),'+cpp+'));',e=>{e.set(0,1);return text(e.each(e.callback(),value));});
-add('method-arity-and-nonenumerable','auto method=e.context.get(e.array,opts::Key(u"forEach"));auto descriptor=e.context.descriptor(e.context.intrinsics().arrayPrototype,opts::Key(u"forEach"));return e.text(e.context.get(method,opts::Key(u"length")))+":"+(descriptor->enumerable?"true":"false");',e=>{const d=Object.getOwnPropertyDescriptor(Array.prototype,'forEach');return e.array.forEach.length+':'+d.enumerable;});
-add('looked-up-native-method-can-be-overridden','auto method=e.context.function(u"override",[&](auto&,auto receiver,auto args)->opts::Value{e.trace.push_back(std::string("override:")+(receiver==opts::Value(e.array)?"true":"false")+":"+std::to_string(args.size()));return 12;});e.context.set(e.array,opts::Key(u"forEach"),method);return e.text(e.each(e.callback()));',e=>{e.array.forEach=function(){e.trace.push('override:'+(this===e.array)+':'+arguments.length);return 12;};return text(e.each(e.callback()));});
-let native=String.raw`// Generated from original ordinary Array.forEach, not a parser implementation.
-#include "support/folia_test.hpp"
-import folia.math.util.option_types;
-import folia.math.util.js_number;
-namespace {using namespace boost::ut;namespace opts=folia::math::options;
-struct Fixture {opts::Context context;opts::ObjectRef array=context.array();std::vector<std::string>trace;
-std::string text(opts::Value v){if(std::holds_alternative<opts::Undefined>(v.data))return "U";if(std::holds_alternative<opts::Null>(v.data))return "N";if(auto*b=std::get_if<bool>(&v.data))return *b?"true":"false";if(auto*n=std::get_if<double>(&v.data))return folia::math::js_number::toString(*n);return "object";}
-void set(std::uint32_t i,opts::Value v){auto key=std::to_string(i);context.set(array,opts::Key(std::u16string(key.begin(),key.end())),v);}
-opts::Value callback(std::function<void(opts::Value,std::uint32_t)>body={}){return context.function(u"callback",[this,body](auto&,auto receiver,auto args)->opts::Value{auto i=static_cast<std::uint32_t>(std::get<double>(args[1].data));trace.push_back(std::to_string(i)+":"+text(args[0])+":"+std::to_string(args.size())+":"+(args[2]==opts::Value(array)?"true":"false")+":"+text(receiver));if(body)body(args[0],i);return 99;});}
-opts::Value each(opts::Value callback,opts::Value receiver=opts::Undefined{}){const auto method=std::get<opts::ObjectRef>(context.get(array,opts::Key(u"forEach")).data);const std::array<opts::Value,2>args{callback,receiver};return context.call(method,array,args);}
-void getter(std::uint32_t i,std::function<opts::Value()>body){auto key=std::to_string(i);auto fn=context.function(u"getter",[body](auto&,auto,auto){return body();});context.define(array,opts::Key(std::u16string(key.begin(),key.end())),opts::Descriptor::access(fn,{}));}
-};std::string join(const std::vector<std::string>&values){std::string out;for(auto&v:values){if(!out.empty())out+='/';out+=v;}return out;}
-suite iteration=[] {
-`;
-for(const[i,row]of rows.entries())native+='"math_port_option_array_for_each_source_'+i+'"_test=[] {Fixture e;std::string error="ok",result="THREW";try{auto run=[&]()->std::string{'+row.cpp+'};result=run();}catch(const opts::Exception&x){error=x.name;}expect(eq(error+"|"+result+"|"+join(e.trace),std::string('+JSON.stringify(row.expected)+')))<<'+JSON.stringify(row.label)+';};\n';native+='};}\n';
-for(const[file,data]of [['docs/math-port/evidence/p51a-option-array-iteration-source.json',JSON.stringify({stage:'ordinary Context array forEach native primitive; not FindTeX',node:process.version,caller:entry,rows},null,2)+'\n'],['tests/math/reference_option_array_iteration.cpp',native]]){const target=path.join(root,file);if(process.argv.includes('--check'))assert.equal(fs.readFileSync(target,'utf8').replaceAll('\r\n','\n'),data);else fs.writeFileSync(target,data);}
-console.log(JSON.stringify({source_cases:rows.length}));
+function add(label,body){const e=fixture();let error='ok',result='THREW';try{result=body(e);}catch(x){error=x.name;}rows.push({label,expected:error+'|'+result+'|'+e.trace.join('/')});}
+add('empty-array-and-undefined-result',e=>text(e.each(e.callback())));
+add('three-callback-arguments-and-original-array',e=>{e.set(0,4);e.set(1,5);return text(e.each(e.callback()));});
+add('holes-skipped',e=>{e.array.length=3;e.set(1,7);return text(e.each(e.callback()));});
+add('inherited-slot-is-visited',e=>{const p=Object.create(Array.prototype);p[1]=8;Object.setPrototypeOf(e.array,p);e.array.length=2;return text(e.each(e.callback()));});
+add('appended-entry-outside-original-length-ignored',e=>{e.set(0,1);return text(e.each(e.callback(()=>e.set(1,9))));});
+add('deleted-future-slot-skipped',e=>{e.set(0,1);e.set(1,2);return text(e.each(e.callback((v,i)=>{if(i===0)delete e.array[1];})));});
+add('changed-future-slot-read-live',e=>{e.set(0,1);e.set(1,2);return text(e.each(e.callback((v,i)=>{if(i===0)e.set(1,9);})));});
+add('filled-future-hole-is-visited',e=>{e.set(0,1);e.array.length=3;return text(e.each(e.callback((v,i)=>{if(i===0)e.set(2,9);})));});
+add('shrinking-array-skips-deleted-slots',e=>{e.set(0,1);e.set(1,2);e.set(2,3);return text(e.each(e.callback((v,i)=>{if(i===0)e.array.length=1;})));});
+add('replacing-caller-array-keeps-captured-receiver',e=>{e.set(0,1);e.set(1,2);return text(e.each(e.callback((v,i)=>{if(i===0){e.array=[];e.set(0,9);}})));});
+add('getter-read-once-before-callback',e=>{Object.defineProperty(e.array,0,{get(){e.trace.push('get');return 6;},configurable:true});return text(e.each(e.callback()));});
+add('getter-appends-outside-captured-length',e=>{Object.defineProperty(e.array,0,{get(){e.trace.push('get');e.set(1,9);return 6;},configurable:true});return text(e.each(e.callback()));});
+add('callback-throw-propagates',e=>{e.set(0,1);e.set(1,2);return text(e.each(e.callback(()=>{throw Error('callback');})));});
+add('getter-throw-propagates',e=>{Object.defineProperty(e.array,0,{get(){throw Error('getter');}});return text(e.each(e.callback()));});
+add('empty-array-still-validates-callback',e=>text(e.each(4)));
+add('undefined-callback-is-invalid',e=>text(e.each(undefined)));
+for(const [label,value]of [['null',null],['false',false],['zero',0],['object',{}]])add('this-argument:'+label,e=>{e.set(0,1);return text(e.each(e.callback(),value));});
+add('method-arity-and-nonenumerable',e=>{const d=Object.getOwnPropertyDescriptor(Array.prototype,'forEach');return e.array.forEach.length+':'+d.enumerable;});
+add('looked-up-native-method-can-be-overridden',e=>{e.array.forEach=function(){e.trace.push('override:'+(this===e.array)+':'+arguments.length);return 12;};return text(e.each(e.callback()));});
+const report={stage:'ordinary Context array forEach native primitive; not FindTeX',node:process.version,caller:entry,rows};
+const profile=path.join(root,'docs/math-port/evidence/p51a-option-array-iteration-source.json');
+const sourceGold=JSON.parse(fs.readFileSync(profile,'utf8'));
+const projected={...sourceGold,rows:sourceGold.rows.map(({cpp,...row})=>row)};
+assert.deepEqual(report,projected);
+console.log(JSON.stringify({sourceCases:rows.length,mode:'read-only-source-check'}));

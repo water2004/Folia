@@ -16,7 +16,6 @@ list.remove(graph['9']);flags.push(Array.from(list).length===0);list.add(graph.x
 function callback(){saved=this;return false}const l=new FunctionList();l.add(callback,13);const record=Array.from(l)[0];flags.push(l.execute()===false,saved===record,record.item===callback);
 const values=[f,g,undefined,null,false,true,0,-0,NaN,'','x',{},[]],equal=values.flatMap(a=>values.map(b=>a===b));
 const report={node:process.version,stage:'actual Source function-data and ordinary slice host only',cases,flags,equal},text=JSON.stringify(report,null,2)+'\n',out=path.join(root,'docs/math-port/evidence/p22a-function-property-source.json');
-if(process.argv.includes('--check'))assert.equal(fs.readFileSync(out,'utf8'),text);else fs.writeFileSync(out,text);
-const expected='// Generated only from actual Node/CJS observations.\nconst std::array<SliceObservation,'+cases.length+'> source_slices{{\n'+cases.map(c=>'SliceObservation{'+[c.length,c.mask,c.first,c.size].join(',')+',{'+c.has.join(',')+'},{'+c.values.join(',')+'},'+c.fresh+'}').join(',\n')+'\n}};\nconst std::array<bool,'+flags.length+'> source_flags{'+flags.join(',')+'};\nconst std::array<bool,'+equal.length+'> source_equal{'+equal.join(',')+'};\n';
-const template=fs.readFileSync(path.join(__dirname,'function-property-native.inc'),'utf8'),native=template.replace('// SOURCE_OBSERVATIONS\n',expected),target=path.join(root,'tests/math/reference_function_property.cpp');assert.notEqual(template,native);if(process.argv.includes('--check'))assert.equal(fs.readFileSync(target,'utf8').replaceAll('\r\n','\n'),native);else fs.writeFileSync(target,native);
-console.log(JSON.stringify({slice_cases:cases.length,source_flags:flags.length,equality:equal.length,sha256:hash(text)}));
+assert.equal(fs.readFileSync(out,'utf8'),text);
+
+console.log(JSON.stringify({sourceCases:cases.length,flags:flags.length,equalities:equal.length,mode:'check'}));

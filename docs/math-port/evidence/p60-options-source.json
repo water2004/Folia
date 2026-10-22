@@ -1,0 +1,4361 @@
+{
+  "cases": [
+    {
+      "name": "classification",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "boolean",
+            "value": false
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "boolean",
+            "value": false
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "boolean",
+            "value": false
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "boolean",
+            "value": false
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "boolean",
+            "value": false
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "boolean",
+            "value": false
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "boolean",
+            "value": true
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "boolean",
+            "value": false
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "boolean",
+            "value": true
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "boolean",
+            "value": false
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "boolean",
+            "value": false
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "boolean",
+            "value": false
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "boolean",
+            "value": true
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "boolean",
+            "value": false
+          }
+        },
+        {
+          "kind": "strings",
+          "value": []
+        }
+      ]
+    },
+    {
+      "name": "keys_and_primitive_boxing",
+      "observations": [
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                48
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                50
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                98
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                97
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                48,
+                49
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                52,
+                50,
+                57,
+                52,
+                57,
+                54,
+                55,
+                50,
+                57,
+                53
+              ]
+            },
+            {
+              "type": "identity",
+              "name": "s"
+            },
+            {
+              "type": "identity",
+              "name": "s2"
+            }
+          ]
+        },
+        {
+          "kind": "keys",
+          "value": []
+        },
+        {
+          "kind": "keys",
+          "value": []
+        },
+        {
+          "kind": "keys",
+          "value": []
+        },
+        {
+          "kind": "keys",
+          "value": []
+        },
+        {
+          "kind": "keys",
+          "value": []
+        },
+        {
+          "kind": "keys",
+          "value": []
+        },
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                48
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                49
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                50
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "identity",
+            "name": "dst"
+          }
+        },
+        {
+          "kind": "kind",
+          "value": "object"
+        },
+        {
+          "kind": "identity",
+          "value": "objectPrototype"
+        },
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                48
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                50
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                98
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                97
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                48,
+                49
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                52,
+                50,
+                57,
+                52,
+                57,
+                54,
+                55,
+                50,
+                57,
+                53
+              ]
+            },
+            {
+              "type": "identity",
+              "name": "s"
+            },
+            {
+              "type": "identity",
+              "name": "s2"
+            }
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4018000000000000"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4000000000000000"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "3ff0000000000000"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4008000000000000"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4010000000000000"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4014000000000000"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "401c000000000000"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4020000000000000"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "kind",
+          "value": "object"
+        },
+        {
+          "kind": "identity",
+          "value": "objectPrototype"
+        },
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                48
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                49
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                50
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            false
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": false
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "string",
+            "units": [
+              55349
+            ]
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            false
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": false
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "string",
+            "units": [
+              56632
+            ]
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            false
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": false
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "string",
+            "units": [
+              97
+            ]
+          }
+        },
+        {
+          "kind": "errorName",
+          "value": "TypeError"
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "errorName",
+          "value": "TypeError"
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "strings",
+          "value": []
+        }
+      ]
+    },
+    {
+      "name": "descriptors_and_copy",
+      "observations": [
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "kind",
+          "value": "object"
+        },
+        {
+          "kind": "identity",
+          "value": "objectPrototype"
+        },
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                97,
+                99,
+                99,
+                101,
+                115,
+                115
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                102,
+                114,
+                111,
+                122,
+                101,
+                110
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            true,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "identity",
+          "value": "g"
+        },
+        {
+          "kind": "identity",
+          "value": "s"
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            false
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": false
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "3ff0000000000000"
+          }
+        },
+        {
+          "kind": "counts",
+          "value": [
+            0,
+            0
+          ]
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4045000000000000"
+          }
+        },
+        {
+          "kind": "counts",
+          "value": [
+            1
+          ]
+        },
+        {
+          "kind": "errorName",
+          "value": "TypeError"
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "kind",
+          "value": "object"
+        },
+        {
+          "kind": "identity",
+          "value": "objectPrototype"
+        },
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                97,
+                99,
+                99,
+                101,
+                115,
+                115
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                102,
+                114,
+                111,
+                122,
+                101,
+                110
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            true,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "identity",
+          "value": "g"
+        },
+        {
+          "kind": "identity",
+          "value": "s"
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            false
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": false
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "3ff0000000000000"
+          }
+        },
+        {
+          "kind": "strings",
+          "value": []
+        }
+      ]
+    },
+    {
+      "name": "deep_copy_and_expandable",
+      "observations": [
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "kind",
+          "value": "object"
+        },
+        {
+          "kind": "identity",
+          "value": "expandablePrototype"
+        },
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                108,
+                101,
+                102,
+                116
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                114,
+                105,
+                103,
+                104,
+                116
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                105,
+                110,
+                115,
+                116,
+                97,
+                110,
+                99,
+                101
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                99,
+                97,
+                108,
+                108,
+                98,
+                97,
+                99,
+                107
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "kind",
+          "value": "object"
+        },
+        {
+          "kind": "identity",
+          "value": "objectPrototype"
+        },
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                118
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4008000000000000"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "kind",
+          "value": "object"
+        },
+        {
+          "kind": "identity",
+          "value": "objectPrototype"
+        },
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                118
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4008000000000000"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "identity",
+            "name": "inst"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "identity",
+            "name": "fn"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "kind",
+          "value": "array"
+        },
+        {
+          "kind": "identity",
+          "value": "arrayPrototype"
+        },
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                48
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                108,
+                101,
+                110,
+                103,
+                116,
+                104
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "identity",
+            "name": "fn"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            false,
+            false
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "3ff0000000000000"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "identity",
+            "name": "ar"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "kind",
+          "value": "object"
+        },
+        {
+          "kind": "identity",
+          "value": "expandablePrototype"
+        },
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                118
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4008000000000000"
+          }
+        },
+        {
+          "kind": "strings",
+          "value": []
+        }
+      ]
+    },
+    {
+      "name": "array_copy_and_holes",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "identity",
+            "name": "dst"
+          }
+        },
+        {
+          "kind": "kind",
+          "value": "object"
+        },
+        {
+          "kind": "identity",
+          "value": "objectPrototype"
+        },
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                105,
+                116,
+                101,
+                109,
+                115
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "kind",
+          "value": "array"
+        },
+        {
+          "kind": "identity",
+          "value": "arrayPrototype"
+        },
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                48
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                51
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                108,
+                101,
+                110,
+                103,
+                116,
+                104
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                101,
+                120,
+                116,
+                114,
+                97
+              ]
+            },
+            {
+              "type": "identity",
+              "name": "s"
+            }
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "kind",
+          "value": "object"
+        },
+        {
+          "kind": "identity",
+          "value": "objectPrototype"
+        },
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                107
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "3ff0000000000000"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "undefined"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            false,
+            false
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4010000000000000"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4010000000000000"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4020000000000000"
+          }
+        },
+        {
+          "kind": "kind",
+          "value": "array"
+        },
+        {
+          "kind": "identity",
+          "value": "arrayPrototype"
+        },
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                48
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                51
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                108,
+                101,
+                110,
+                103,
+                116,
+                104
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                101,
+                120,
+                116,
+                114,
+                97
+              ]
+            },
+            {
+              "type": "identity",
+              "name": "s"
+            }
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "identity",
+            "name": "nested"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "undefined"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            false,
+            false
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4018000000000000"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4010000000000000"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            false,
+            false
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": false
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4020000000000000"
+          }
+        },
+        {
+          "kind": "strings",
+          "value": []
+        }
+      ]
+    },
+    {
+      "name": "append_remove_identity",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "identity",
+            "name": "dst"
+          }
+        },
+        {
+          "kind": "kind",
+          "value": "object"
+        },
+        {
+          "kind": "identity",
+          "value": "objectPrototype"
+        },
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                105,
+                116,
+                101,
+                109,
+                115
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "kind",
+          "value": "array"
+        },
+        {
+          "kind": "identity",
+          "value": "arrayPrototype"
+        },
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                48
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                49
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                50
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                51
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                52
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                108,
+                101,
+                110,
+                103,
+                116,
+                104
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "7ff8000000000000"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "identity",
+            "name": "other"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "undefined"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "undefined"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "identity",
+            "name": "marker"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            false,
+            false
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4014000000000000"
+          }
+        },
+        {
+          "kind": "kind",
+          "value": "array"
+        },
+        {
+          "kind": "identity",
+          "value": "arrayPrototype"
+        },
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                48
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                49
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                50
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                51
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                52
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                53
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                108,
+                101,
+                110,
+                103,
+                116,
+                104
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "identity",
+            "name": "marker"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "7ff8000000000000"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4000000000000000"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4000000000000000"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "identity",
+            "name": "other"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "undefined"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            false,
+            false
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4018000000000000"
+          }
+        },
+        {
+          "kind": "kind",
+          "value": "array"
+        },
+        {
+          "kind": "identity",
+          "value": "arrayPrototype"
+        },
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                49
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                108,
+                101,
+                110,
+                103,
+                116,
+                104
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "identity",
+            "name": "marker"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            false,
+            false
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4000000000000000"
+          }
+        },
+        {
+          "kind": "strings",
+          "value": []
+        }
+      ]
+    },
+    {
+      "name": "malformed_sentinels",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "identity",
+            "name": "dst"
+          }
+        },
+        {
+          "kind": "kind",
+          "value": "array"
+        },
+        {
+          "kind": "identity",
+          "value": "arrayPrototype"
+        },
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                48
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                108,
+                101,
+                110,
+                103,
+                116,
+                104
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "3ff0000000000000"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            false,
+            false
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "3ff0000000000000"
+          }
+        },
+        {
+          "kind": "errorName",
+          "value": "TypeError"
+        },
+        {
+          "kind": "errorMessage",
+          "value": [
+            67,
+            97,
+            110,
+            110,
+            111,
+            116,
+            32,
+            99,
+            111,
+            110,
+            118,
+            101,
+            114,
+            116,
+            32,
+            97,
+            32,
+            83,
+            121,
+            109,
+            98,
+            111,
+            108,
+            32,
+            118,
+            97,
+            108,
+            117,
+            101,
+            32,
+            116,
+            111,
+            32,
+            97,
+            32,
+            115,
+            116,
+            114,
+            105,
+            110,
+            103
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "strings",
+          "value": [
+            [
+              77,
+              97,
+              116,
+              104,
+              74,
+              97,
+              120,
+              58,
+              32,
+              73,
+              110,
+              118,
+              97,
+              108,
+              105,
+              100,
+              32,
+              111,
+              112,
+              116,
+              105,
+              111,
+              110,
+              32,
+              34,
+              91,
+              43,
+              93,
+              34,
+              32,
+              40,
+              110,
+              111,
+              32,
+              100,
+              101,
+              102,
+              97,
+              117,
+              108,
+              116,
+              32,
+              118,
+              97,
+              108,
+              117,
+              101,
+              41,
+              46
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "warn_fatal_inheritance",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "identity",
+            "name": "dst"
+          }
+        },
+        {
+          "kind": "kind",
+          "value": "object"
+        },
+        {
+          "kind": "identity",
+          "value": "proto"
+        },
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                117,
+                110,
+                100,
+                101,
+                102,
+                105,
+                110,
+                101,
+                100,
+                79,
+                119,
+                110
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                107,
+                110,
+                111,
+                119,
+                110
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                105,
+                110,
+                104,
+                101,
+                114,
+                105,
+                116,
+                101,
+                100
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "undefined"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "401c000000000000"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4018000000000000"
+          }
+        },
+        {
+          "kind": "errorName",
+          "value": "Error"
+        },
+        {
+          "kind": "errorMessage",
+          "value": [
+            73,
+            110,
+            118,
+            97,
+            108,
+            105,
+            100,
+            32,
+            111,
+            112,
+            116,
+            105,
+            111,
+            110,
+            32,
+            34,
+            98,
+            97,
+            100,
+            34,
+            32,
+            40,
+            110,
+            111,
+            32,
+            100,
+            101,
+            102,
+            97,
+            117,
+            108,
+            116,
+            32,
+            118,
+            97,
+            108,
+            117,
+            101,
+            41,
+            46
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "kind",
+          "value": "object"
+        },
+        {
+          "kind": "identity",
+          "value": "objectPrototype"
+        },
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                107,
+                110,
+                111,
+                119,
+                110
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4008000000000000"
+          }
+        },
+        {
+          "kind": "strings",
+          "value": [
+            [
+              77,
+              97,
+              116,
+              104,
+              74,
+              97,
+              120,
+              58,
+              32,
+              73,
+              110,
+              118,
+              97,
+              108,
+              105,
+              100,
+              32,
+              111,
+              112,
+              116,
+              105,
+              111,
+              110,
+              32,
+              34,
+              117,
+              110,
+              100,
+              101,
+              102,
+              105,
+              110,
+              101,
+              100,
+              79,
+              119,
+              110,
+              34,
+              32,
+              40,
+              110,
+              111,
+              32,
+              100,
+              101,
+              102,
+              97,
+              117,
+              108,
+              116,
+              32,
+              118,
+              97,
+              108,
+              117,
+              101,
+              41,
+              46
+            ],
+            [
+              77,
+              97,
+              116,
+              104,
+              74,
+              97,
+              120,
+              58,
+              32,
+              73,
+              110,
+              118,
+              97,
+              108,
+              105,
+              100,
+              32,
+              111,
+              112,
+              116,
+              105,
+              111,
+              110,
+              32,
+              34,
+              98,
+              97,
+              100,
+              34,
+              32,
+              40,
+              110,
+              111,
+              32,
+              100,
+              101,
+              102,
+              97,
+              117,
+              108,
+              116,
+              32,
+              118,
+              97,
+              108,
+              117,
+              101,
+              41,
+              46
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "name": "function_destination_and_setter",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "identity",
+            "name": "dst"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "3ff0000000000000"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "identity",
+            "name": "target"
+          }
+        },
+        {
+          "kind": "counts",
+          "value": [
+            2,
+            1
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "strings",
+          "value": []
+        }
+      ]
+    },
+    {
+      "name": "selection_and_separation",
+      "observations": [
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "kind",
+          "value": "object"
+        },
+        {
+          "kind": "identity",
+          "value": "objectPrototype"
+        },
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                97
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                98
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "identity",
+            "name": "child"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "undefined"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "kind",
+          "value": "object"
+        },
+        {
+          "kind": "identity",
+          "value": "objectPrototype"
+        },
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                97
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "identity",
+            "name": "child"
+          }
+        },
+        {
+          "kind": "counts",
+          "value": [
+            3
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "kind",
+          "value": "object"
+        },
+        {
+          "kind": "identity",
+          "value": "objectPrototype"
+        },
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                98
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                114,
+                101,
+                115,
+                116
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "undefined"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4008000000000000"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "kind",
+          "value": "object"
+        },
+        {
+          "kind": "identity",
+          "value": "objectPrototype"
+        },
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                97
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "identity",
+            "name": "child"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "kind",
+          "value": "object"
+        },
+        {
+          "kind": "identity",
+          "value": "objectPrototype"
+        },
+        {
+          "kind": "keys",
+          "value": []
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "identity",
+            "name": "child"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "undefined"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "identity",
+            "name": "child"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "identity",
+            "name": "child"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "null"
+          }
+        },
+        {
+          "kind": "strings",
+          "value": []
+        }
+      ]
+    },
+    {
+      "name": "defaults_and_proto_basket",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "identity",
+            "name": "dst"
+          }
+        },
+        {
+          "kind": "kind",
+          "value": "object"
+        },
+        {
+          "kind": "identity",
+          "value": "objectPrototype"
+        },
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                110,
+                101,
+                119
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                97,
+                110,
+                111,
+                116,
+                104,
+                101,
+                114
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4000000000000000"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4008000000000000"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "kind",
+          "value": "object"
+        },
+        {
+          "kind": "identity",
+          "value": "objectPrototype"
+        },
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                111,
+                114,
+                100,
+                105,
+                110,
+                97,
+                114,
+                121
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "401c000000000000"
+          }
+        },
+        {
+          "kind": "strings",
+          "value": []
+        }
+      ]
+    },
+    {
+      "name": "live_array_adapters",
+      "observations": [
+        {
+          "kind": "counts",
+          "value": [
+            3
+          ]
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4010000000000000"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "undefined"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4022000000000000"
+          }
+        },
+        {
+          "kind": "kind",
+          "value": "array"
+        },
+        {
+          "kind": "identity",
+          "value": "arrayPrototype"
+        },
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                48
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                50
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                108,
+                101,
+                110,
+                103,
+                116,
+                104
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            true,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "identity",
+          "value": "gg"
+        },
+        {
+          "kind": "identity",
+          "value": null
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4022000000000000"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            false,
+            false
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4008000000000000"
+          }
+        },
+        {
+          "kind": "counts",
+          "value": [
+            1
+          ]
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4014000000000000"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "kind",
+          "value": "array"
+        },
+        {
+          "kind": "identity",
+          "value": "arrayPrototype"
+        },
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                48
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                49
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                108,
+                101,
+                110,
+                103,
+                116,
+                104
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "3ff0000000000000"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4000000000000000"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            false,
+            false
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4000000000000000"
+          }
+        },
+        {
+          "kind": "counts",
+          "value": [
+            2
+          ]
+        },
+        {
+          "kind": "kind",
+          "value": "array"
+        },
+        {
+          "kind": "identity",
+          "value": "arrayPrototype"
+        },
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                48
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                49
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                51
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                108,
+                101,
+                110,
+                103,
+                116,
+                104
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "3ff0000000000000"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4000000000000000"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4010000000000000"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            false,
+            false
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4010000000000000"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "bff0000000000000"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "3ff0000000000000"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "bff0000000000000"
+          }
+        },
+        {
+          "kind": "counts",
+          "value": [
+            3
+          ]
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "undefined"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "401c000000000000"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "7ff8000000000000"
+          }
+        },
+        {
+          "kind": "strings",
+          "value": []
+        }
+      ]
+    },
+    {
+      "name": "descriptor_edge_cases",
+      "observations": [
+        {
+          "kind": "errorName",
+          "value": "TypeError"
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "errorName",
+          "value": "TypeError"
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "kind",
+          "value": "array"
+        },
+        {
+          "kind": "identity",
+          "value": "arrayPrototype"
+        },
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                50
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                108,
+                101,
+                110,
+                103,
+                116,
+                104
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            false
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4000000000000000"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            false,
+            false
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": false
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4008000000000000"
+          }
+        },
+        {
+          "kind": "errorName",
+          "value": "TypeError"
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "errorName",
+          "value": "TypeError"
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "strings",
+          "value": []
+        }
+      ]
+    },
+    {
+      "name": "getter_evaluation_order",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "boolean",
+            "value": true
+          }
+        },
+        {
+          "kind": "counts",
+          "value": [
+            2
+          ]
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "identity",
+            "name": "dst"
+          }
+        },
+        {
+          "kind": "kind",
+          "value": "object"
+        },
+        {
+          "kind": "identity",
+          "value": "objectPrototype"
+        },
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                105,
+                116,
+                101,
+                109,
+                115
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "kind",
+          "value": "array"
+        },
+        {
+          "kind": "identity",
+          "value": "arrayPrototype"
+        },
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                48
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                49
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                108,
+                101,
+                110,
+                103,
+                116,
+                104
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "3ff0000000000000"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4008000000000000"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            false,
+            false
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4000000000000000"
+          }
+        },
+        {
+          "kind": "counts",
+          "value": [
+            5
+          ]
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "identity",
+            "name": "dst"
+          }
+        },
+        {
+          "kind": "kind",
+          "value": "object"
+        },
+        {
+          "kind": "identity",
+          "value": "objectPrototype"
+        },
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                105,
+                116,
+                101,
+                109,
+                115
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "kind",
+          "value": "array"
+        },
+        {
+          "kind": "identity",
+          "value": "arrayPrototype"
+        },
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                48
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                49
+              ]
+            },
+            {
+              "type": "string",
+              "units": [
+                108,
+                101,
+                110,
+                103,
+                116,
+                104
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "3ff0000000000000"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4022000000000000"
+          }
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            false,
+            false
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "4000000000000000"
+          }
+        },
+        {
+          "kind": "counts",
+          "value": [
+            3
+          ]
+        },
+        {
+          "kind": "strings",
+          "value": []
+        }
+      ]
+    },
+    {
+      "name": "descriptor_conversion_order",
+      "observations": [
+        {
+          "kind": "errorName",
+          "value": "TypeError"
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "strings",
+          "value": [
+            [
+              101,
+              110,
+              117,
+              109,
+              101,
+              114,
+              97,
+              98,
+              108,
+              101
+            ],
+            [
+              99,
+              111,
+              110,
+              102,
+              105,
+              103,
+              117,
+              114,
+              97,
+              98,
+              108,
+              101
+            ],
+            [
+              118,
+              97,
+              108,
+              117,
+              101
+            ],
+            [
+              119,
+              114,
+              105,
+              116,
+              97,
+              98,
+              108,
+              101
+            ],
+            [
+              103,
+              101,
+              116
+            ],
+            [
+              115,
+              101,
+              116
+            ]
+          ]
+        },
+        {
+          "kind": "strings",
+          "value": []
+        }
+      ]
+    },
+    {
+      "name": "copy_abrupt_mutation",
+      "observations": [
+        {
+          "kind": "errorName",
+          "value": "TypeError"
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "kind",
+          "value": "object"
+        },
+        {
+          "kind": "identity",
+          "value": "objectPrototype"
+        },
+        {
+          "kind": "keys",
+          "value": [
+            {
+              "type": "string",
+              "units": [
+                99,
+                104,
+                105,
+                108,
+                100
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "flags",
+          "value": [
+            false,
+            true,
+            true
+          ]
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "identity",
+            "name": "child"
+          }
+        },
+        {
+          "kind": "strings",
+          "value": []
+        }
+      ]
+    },
+    {
+      "name": "accessor_receiver",
+      "observations": [
+        {
+          "kind": "value",
+          "value": {
+            "type": "identity",
+            "name": "target"
+          }
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "identity",
+            "name": "target"
+          }
+        },
+        {
+          "kind": "strings",
+          "value": []
+        }
+      ]
+    },
+    {
+      "name": "deep_valid_copy",
+      "observations": [
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "boolean",
+          "value": true
+        },
+        {
+          "kind": "value",
+          "value": {
+            "type": "number",
+            "bits": "401c000000000000"
+          }
+        },
+        {
+          "kind": "strings",
+          "value": []
+        }
+      ]
+    },
+    {
+      "name": "warning_utf8_sink",
+      "observations": [
+        {
+          "kind": "bytes",
+          "value": [
+            77,
+            97,
+            116,
+            104,
+            74,
+            97,
+            120,
+            58,
+            32,
+            240,
+            157,
+            148,
+            184,
+            10,
+            77,
+            97,
+            116,
+            104,
+            74,
+            97,
+            120,
+            58,
+            32,
+            120,
+            239,
+            191,
+            189,
+            10,
+            77,
+            97,
+            116,
+            104,
+            74,
+            97,
+            120,
+            58,
+            32,
+            120,
+            239,
+            191,
+            189,
+            10,
+            77,
+            97,
+            116,
+            104,
+            74,
+            97,
+            120,
+            58,
+            32,
+            239,
+            191,
+            189,
+            120,
+            10
+          ]
+        },
+        {
+          "kind": "strings",
+          "value": []
+        }
+      ]
+    }
+  ]
+}

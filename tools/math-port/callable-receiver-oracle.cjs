@@ -50,9 +50,7 @@ for(const kind of ['character','macro','command']){
  const map=new MacroMap('p19b2-closure',{x:typed});flags.push(map.parse([parser,'x'])===1,map.parse([parser,'x'])===2);
  const list=new FunctionList();list.add(function(){return ++genericCount;});list.execute();flags.push(genericCount===1);list.execute();flags.push(genericCount===2);add('closure_state',flags);
 }
-const native=fs.readFileSync(path.join(__dirname,'callable-receiver-native.inc'),'utf8');
-const header='// Generated from actual pinned CJS; maps themselves are not accepted by these host tests.\n'+observations.map(o=>'namespace {const std::array<bool,'+o.flags.length+'> source_'+o.name+'{'+o.flags.join(',')+'};}').join('\n')+'\n';
-const marker='// SOURCE_OBSERVATIONS\n',text=native.replace(marker,header),target=path.join(root,'tests/math/reference_callable_receiver.cpp');
-assert.notEqual(text,native,'Missing native insertion marker');
-if(process.argv.includes('--check'))assert.equal(fs.readFileSync(target,'utf8'),text);else fs.writeFileSync(target,text);
-console.log(JSON.stringify({source_cases:observations.length,source_assertions:count,pins,mode:process.argv.includes('--check')?'check':'generate'}));
+
+const file=path.join(root,'docs/math-port/evidence/callable-receiver-source.json');
+const frozen=JSON.parse(fs.readFileSync(file,'utf8'));assert.deepStrictEqual(pins,frozen.source.pins);assert.deepStrictEqual(observations,frozen.observations);assert.equal(observations.length,8);assert.equal(count,50);
+console.log(JSON.stringify({sourceCases:observations.length,sourceAssertions:count,profileSha256:crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex'),mode:'check'}));

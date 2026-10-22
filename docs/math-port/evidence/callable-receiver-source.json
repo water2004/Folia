@@ -1,0 +1,108 @@
+{
+  "schema": "folia.math.callable-receiver-source.v1",
+  "source": {
+    "pins": {
+      "input/tex/TokenMap": "9e3f086080a6ab052b68b22a5d9ee3dbc5e17d7b0c03a31e789664b01df36cf7",
+      "input/tex/MapHandler": "d82e3034776d2392689aad86500b5e60dbe0aa5540853b48f308841879f3cf67",
+      "util/FunctionList": "571f57801b863b2d9f01a66dc72f2836b7fd06a1a48a3fe0057e4ec3d51a7278"
+    }
+  },
+  "legacy": {
+    "fixture": "tests/math/reference_callable_receiver.cpp",
+    "sha256": "580778f07b25fedefcb9798a231f9a5c52b571610ce16bcbf3963e7306f73686",
+    "caseCount": 8,
+    "assertions": 50
+  },
+  "observations": [
+    {
+      "name": "character",
+      "flags": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "macro",
+      "flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "command",
+      "flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "environment",
+      "flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "fallback",
+      "flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "typed_false",
+      "flags": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "throw",
+      "flags": [
+        true,
+        true
+      ]
+    },
+    {
+      "name": "closure_state",
+      "flags": [
+        true,
+        true,
+        true,
+        true
+      ]
+    }
+  ]
+}

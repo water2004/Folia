@@ -1,0 +1,368 @@
+{
+  "schema": 1,
+  "scope": "Seventeen old generic C++ fixtures; full native value tests accepted before retirement. No existing Source profile changed.",
+  "entries": [
+    {
+      "file": "tests/math/reference_argument_expansion.cpp",
+      "sha256": "8e2f55069337c469c2213d6d64842b6bf6793b627c73dc01f560b5ffc7ec8171",
+      "cases": [
+        "math_port_argument_expansion_source",
+        "math_port_argument_expansion_ownership"
+      ],
+      "sourceOwner": "tools/math-port/argument-expansion-oracle.cjs",
+      "sourceProfile": "docs/math-port/evidence/p60-argument-expansion-source.json",
+      "disposition": "Nine obsolete Property-vector adaptation/alias assertions are host representation behavior; do not recreate JS Property objects in native math."
+    },
+    {
+      "file": "tests/math/reference_callable_receiver.cpp",
+      "sha256": "580778f07b25fedefcb9798a231f9a5c52b571610ce16bcbf3963e7306f73686",
+      "cases": [
+        "math_port_callable_bare",
+        "math_port_callable_environment",
+        "math_port_callable_fallback",
+        "math_port_callable_typed_false",
+        "math_port_callable_throw",
+        "math_port_callable_owned_receiver",
+        "math_port_callable_invalid_native_protocol",
+        "math_port_callable_results_and_snapshot",
+        "math_port_callable_closure_state"
+      ],
+      "sourceOwner": "tools/math-port/callable-receiver-oracle.cjs",
+      "sourceProfile": "docs/math-port/evidence/callable-receiver-source.json",
+      "disposition": "Eight original Source groups/50 flags statically preserved; ninth handwritten C++ receiver protocol retires."
+    },
+    {
+      "file": "tests/math/reference_child_array.cpp",
+      "sha256": "6a66d070a198a2c9e29ffa241f5b5a1eca4e3057c01ad9658dd532bb155f1508",
+      "cases": [
+        "math_port_child_array_actual_source_operations",
+        "math_port_child_value_tag_identity_and_errors",
+        "math_port_child_array_prototype_cycle_and_callback_receiver_lifetime"
+      ],
+      "sourceOwner": "tools/math-port/child-array-oracle.cjs",
+      "sourceProfile": "docs/math-port/evidence/p23-child-array-source.json",
+      "disposition": "Keep original independent profile and Source owner unchanged; retire only freeze-child-array/C++ projection and old host child-value/prototype/lifetime cases. Actual MML tree ownership remains in native tree owners."
+    },
+    {
+      "file": "tests/math/reference_child_write.cpp",
+      "sha256": "cc3ee2758d773754ecba8acda9408ca5e3c8ece526b1bf161ffcc0dc6530ca4e",
+      "cases": [
+        "math_port_child_write_actual_source_receiver_errors"
+      ],
+      "sourceOwner": "tools/math-port/sparse-child-oracle.cjs",
+      "sourceProfile": "docs/math-port/evidence/p23-sparse-child-source.json",
+      "disposition": "Original full sparse-child Source owner independently checks the two nullish append error records; retire freeze-child-write/C++ only."
+    },
+    {
+      "file": "tests/math/reference_factory.cpp",
+      "sha256": "1ce8034fab04ac7db17541ced26130f3feb9ad35430e3533a6198d2b5f792572",
+      "cases": [
+        "math_port_factory_defaults",
+        "math_port_factory_map_order_and_class_identity",
+        "math_port_factory_capture_and_arguments",
+        "math_port_factory_prototype_creator_retained",
+        "math_port_factory_node_factory_direct_and_defaults",
+        "math_port_factory_wrapper_factory_forwarding",
+        "math_port_factory_independent_live_creator_object",
+        "math_port_factory_own_proto_and_falsy_direct",
+        "math_port_factory_predicate_is_not_construction",
+        "math_port_factory_native_session_lifetime"
+      ],
+      "sourceOwner": "tools/math-port/factory-oracle.cjs",
+      "sourceProfile": "docs/math-port/evidence/p58-factory-source.json",
+      "disposition": "math_port_factory_native_session_lifetime retained by existing native_factory_owned_result/native_tree_factory ownership owners"
+    },
+    {
+      "file": "tests/math/reference_function_property.cpp",
+      "sha256": "9380abdc57c1168e98a07d4621850481bb4d097a4fadd7874dbff60ba21a3164",
+      "cases": [
+        "math_port_callable_property_slices",
+        "math_port_callable_property_graph_and_calls",
+        "math_port_callable_property_strict_identity",
+        "math_port_callable_property_retains_same_closure",
+        "math_port_callable_property_invalid_native_boundary"
+      ],
+      "sourceOwner": "tools/math-port/function-property-oracle.cjs",
+      "sourceProfile": "docs/math-port/evidence/p22a-function-property-source.json",
+      "disposition": "All original Source values retained; mathematical values migrate to current native owners. JS object adaptation remains offline only."
+    },
+    {
+      "file": "tests/math/reference_native_identities.cpp",
+      "sha256": "dd0eb7945c243a764a23e54c4e3bbbc36114c2954f3bea7826d63efad8f9456a",
+      "cases": [
+        "math_port_native_identity_source_0",
+        "math_port_native_identity_source_1",
+        "math_port_native_identity_source_2",
+        "math_port_native_identity_source_3",
+        "math_port_native_identity_source_4",
+        "math_port_native_identity_source_5",
+        "math_port_native_identity_source_6",
+        "math_port_native_identity_source_7",
+        "math_port_native_identity_source_8"
+      ],
+      "sourceOwner": "tools/math-port/native-identities-oracle.cjs",
+      "sourceProfile": "docs/math-port/evidence/p49a-native-identities-source.json",
+      "disposition": "All original Source values retained; mathematical values migrate to current native owners. JS object adaptation remains offline only."
+    },
+    {
+      "file": "tests/math/reference_option_array_iteration.cpp",
+      "sha256": "b15216709de51efa70a028f3cfc972c869521c7ec2328cdaf8e6562d9e9fae8c",
+      "cases": [
+        "math_port_option_array_for_each_source_0",
+        "math_port_option_array_for_each_source_1",
+        "math_port_option_array_for_each_source_2",
+        "math_port_option_array_for_each_source_3",
+        "math_port_option_array_for_each_source_4",
+        "math_port_option_array_for_each_source_5",
+        "math_port_option_array_for_each_source_6",
+        "math_port_option_array_for_each_source_7",
+        "math_port_option_array_for_each_source_8",
+        "math_port_option_array_for_each_source_9",
+        "math_port_option_array_for_each_source_10",
+        "math_port_option_array_for_each_source_11",
+        "math_port_option_array_for_each_source_12",
+        "math_port_option_array_for_each_source_13",
+        "math_port_option_array_for_each_source_14",
+        "math_port_option_array_for_each_source_15",
+        "math_port_option_array_for_each_source_16",
+        "math_port_option_array_for_each_source_17",
+        "math_port_option_array_for_each_source_18",
+        "math_port_option_array_for_each_source_19",
+        "math_port_option_array_for_each_source_20",
+        "math_port_option_array_for_each_source_21"
+      ],
+      "sourceOwner": "tools/math-port/option-array-iteration-oracle.cjs",
+      "sourceProfile": "docs/math-port/evidence/p51a-option-array-iteration-source.json",
+      "disposition": "All original Source values retained; mathematical values migrate to current native owners. JS object adaptation remains offline only."
+    },
+    {
+      "file": "tests/math/reference_option_array_map.cpp",
+      "sha256": "d64924a3bf4b1aa96bab2d928b360b7e95c35f11852ecb155850c77125e88e73",
+      "cases": [
+        "math_port_option_array_map_source_0",
+        "math_port_option_array_map_source_1",
+        "math_port_option_array_map_source_2",
+        "math_port_option_array_map_source_3",
+        "math_port_option_array_map_source_4",
+        "math_port_option_array_map_source_5",
+        "math_port_option_array_map_source_6",
+        "math_port_option_array_map_source_7",
+        "math_port_option_array_map_source_8",
+        "math_port_option_array_map_source_9",
+        "math_port_option_array_map_source_10",
+        "math_port_option_array_map_source_11",
+        "math_port_option_array_map_source_12",
+        "math_port_option_array_map_source_13",
+        "math_port_option_array_map_source_14",
+        "math_port_option_array_map_source_15",
+        "math_port_option_array_map_source_16",
+        "math_port_option_array_map_source_17",
+        "math_port_option_array_map_source_18",
+        "math_port_option_array_map_source_19",
+        "math_port_option_array_map_source_20",
+        "math_port_option_array_map_source_21",
+        "math_port_option_array_map_source_22",
+        "math_port_option_array_map_source_23",
+        "math_port_option_array_map_source_24",
+        "math_port_option_array_map_source_25",
+        "math_port_option_array_map_source_26",
+        "math_port_option_array_map_source_27",
+        "math_port_option_array_map_source_28",
+        "math_port_option_array_map_source_29",
+        "math_port_option_array_map_source_30",
+        "math_port_option_array_map_source_31",
+        "math_port_option_array_map_source_32",
+        "math_port_option_array_map_source_33",
+        "math_port_option_array_map_source_34",
+        "math_port_option_array_map_source_35",
+        "math_port_option_array_map_source_36",
+        "math_port_option_array_map_source_37",
+        "math_port_option_array_map_source_38",
+        "math_port_option_array_map_source_39",
+        "math_port_option_array_map_source_40",
+        "math_port_option_array_map_native_scope"
+      ],
+      "sourceOwner": "tools/math-port/option-array-map-oracle.cjs",
+      "sourceProfile": "docs/math-port/evidence/p56-option-array-map-source.json",
+      "disposition": "All original Source values retained; mathematical values migrate to current native owners. JS object adaptation remains offline only."
+    },
+    {
+      "file": "tests/math/reference_option_filter.cpp",
+      "sha256": "8e6bbec667ec5088acaf30bf7b1bf3e07e09504efd7631db76af56d7e9112542",
+      "cases": [
+        "math_port_option_filter_source_0",
+        "math_port_option_filter_source_1",
+        "math_port_option_filter_source_2",
+        "math_port_option_filter_source_3",
+        "math_port_option_filter_source_4",
+        "math_port_option_filter_source_5",
+        "math_port_option_filter_source_6",
+        "math_port_option_filter_source_7",
+        "math_port_option_filter_source_8",
+        "math_port_option_filter_source_9",
+        "math_port_option_filter_source_10",
+        "math_port_option_filter_source_11",
+        "math_port_option_filter_source_12",
+        "math_port_option_filter_source_13",
+        "math_port_option_filter_source_14",
+        "math_port_option_filter_source_15",
+        "math_port_option_filter_source_16",
+        "math_port_option_filter_source_17",
+        "math_port_option_filter_source_18"
+      ],
+      "sourceOwner": "tools/math-port/option-filter-oracle.cjs",
+      "sourceProfile": "docs/math-port/evidence/p47-option-filter-source.json",
+      "disposition": "All original Source values retained; mathematical values migrate to current native owners. JS object adaptation remains offline only."
+    },
+    {
+      "file": "tests/math/reference_options.cpp",
+      "sha256": "ed8ad9501036eb3b0ee23a3149b6a7c7c6ab184fb939d46176f9bfcfaf97135c",
+      "cases": [
+        "math_port_options_classification",
+        "math_port_options_keys_and_primitive_boxing",
+        "math_port_options_descriptors_and_copy",
+        "math_port_options_deep_copy_and_expandable",
+        "math_port_options_array_copy_and_holes",
+        "math_port_options_append_remove_identity",
+        "math_port_options_malformed_sentinels",
+        "math_port_options_warn_fatal_inheritance",
+        "math_port_options_function_destination_and_setter",
+        "math_port_options_selection_and_separation",
+        "math_port_options_defaults_and_proto_basket",
+        "math_port_options_live_array_adapters",
+        "math_port_options_descriptor_edge_cases",
+        "math_port_options_getter_evaluation_order",
+        "math_port_options_descriptor_conversion_order",
+        "math_port_options_copy_abrupt_mutation",
+        "math_port_options_accessor_receiver",
+        "math_port_options_deep_valid_copy",
+        "math_port_options_warning_utf8_sink",
+        "math_port_options_host_lifetime",
+        "math_port_options_host_recursion_limit"
+      ],
+      "sourceOwner": "tools/math-port/options-oracle.cjs",
+      "sourceProfile": "docs/math-port/evidence/p60-options-source.json",
+      "disposition": [
+        "math_port_options_host_lifetime",
+        "math_port_options_host_recursion_limit"
+      ]
+    },
+    {
+      "file": "tests/math/reference_ordered_map_storage.cpp",
+      "sha256": "4665ea8bea8ce124f1f21f9fad6c17966771c532ecfcaef3c05caeceb36a0888",
+      "cases": [
+        "ordered_map_storage_same_value_zero_and_reinsert",
+        "ordered_map_storage_live_cursor_and_owner_release",
+        "ordered_map_storage_projected_context_roundtrip"
+      ],
+      "sourceOwner": null,
+      "sourceProfile": null,
+      "disposition": "Not Source-generated and not inactive dead code: preserve actual native storage tests in one configured native owner.",
+      "nativeReplacement": {
+        "owner": "tests/math/ordered_map_storage.cpp",
+        "scope": "All original native SameValueZero/order/reinsert/live cursor/owner release assertions; remove unused map_bindings import. Third projected_context_roundtrip is legacy JS Context host adaptation and retires."
+      }
+    },
+    {
+      "file": "tests/math/reference_string_map.cpp",
+      "sha256": "a2e0de88582b21c04ae8d082494d66fb293d46fa14323f84c19461fd96d80859",
+      "cases": [
+        "math_port_string_map_source_0",
+        "math_port_string_map_source_1",
+        "math_port_string_map_source_2",
+        "math_port_string_map_source_3",
+        "math_port_string_map_source_4",
+        "math_port_string_map_source_5",
+        "math_port_string_map_source_6",
+        "math_port_string_map_source_7",
+        "math_port_string_map_source_8",
+        "math_port_string_map_source_9",
+        "math_port_string_map_source_10",
+        "math_port_string_map_source_11",
+        "math_port_string_map_source_12",
+        "math_port_string_map_source_13"
+      ],
+      "sourceOwner": "tools/math-port/string-map-oracle.cjs",
+      "sourceProfile": "docs/math-port/evidence/p53-string-map-source.json",
+      "disposition": "All original Source values retained; mathematical values migrate to current native owners. JS object adaptation remains offline only."
+    },
+    {
+      "file": "tests/math/reference_case_host.cpp",
+      "sha256": "f85ecfaa131134ec8243732d68fec556cae42a7aaadac2f736dc87f1a534eeb7",
+      "cases": [
+        "math_port_case_host_full_unicode_domain",
+        "math_port_case_host_full_unicode_sigma_contexts",
+        "math_port_case_host_strings_context_and_lone_surrogates"
+      ],
+      "sourceOwner": "tools/math-port/case-host-oracle.cjs",
+      "sourceProfile": "docs/math-port/evidence/p59-case-host-source.json",
+      "disposition": "All original Source values retained; mathematical values migrate to current native owners. JS object adaptation remains offline only.",
+      "nativeReplacement": {
+        "owner": "tests/math/js_case.cpp",
+        "scope": "3 native js_case tests: full Unicode scalar/sigma context domains and all 474 strings; structured frozen data split from owner"
+      }
+    },
+    {
+      "file": "tests/math/reference_numeric.cpp",
+      "sha256": "62d06df1af4460d96412c37caa020954448284068c5a670c72138d5ddce2b343",
+      "cases": [
+        "math_port_number_format_reference",
+        "math_port_lengths_reference"
+      ],
+      "sourceOwner": "tools/math-port/numeric-oracle.cjs",
+      "sourceProfile": "docs/math-port/evidence/p60-numeric-source.json",
+      "disposition": "All original Source values retained; mathematical values migrate to current native owners. JS object adaptation remains offline only.",
+      "nativeReplacement": {
+        "owner": "tests/math/lengths_native.cpp (Root integration)",
+        "scope": "Complete original mathematical corpus, Source and native focused checks passed."
+      }
+    },
+    {
+      "file": "tests/math/reference_numeric_reductions.cpp",
+      "sha256": "4920c448e362c6ec13707024b82802068fdbe696fb844a9990eb7b64da85820f",
+      "cases": [
+        "math_port_numeric_reductions_source"
+      ],
+      "sourceOwner": "tools/math-port/numeric-reductions-oracle.cjs",
+      "sourceProfile": "docs/math-port/evidence/p20c-numeric-reductions-source.json",
+      "disposition": "All original Source values retained; mathematical values migrate to current native owners. JS object adaptation remains offline only.",
+      "nativeReplacement": {
+        "owner": "tests/math/lengths_native.cpp (Root integration)",
+        "scope": "Complete original mathematical corpus, Source and native focused checks passed."
+      }
+    },
+    {
+      "file": "tests/math/reference_unicode_regexp_host.cpp",
+      "sha256": "755757ea07829f40e95d6bd62f708291c6b3fbd0855a356a6e24488794fd7dde",
+      "cases": [
+        "unicode_regexp_u_scans_code_points_and_keeps_utf16_indices",
+        "legacy_regexp_keeps_surrogate_unit_iteration",
+        "unicode_stateful_start_inside_pair_rewinds_to_scalar_start",
+        "unicode_escaped_astral_ranges_and_quantifiers_use_code_points",
+        "unicode_casefolding_and_word_classes_use_unicode_mode",
+        "unicode_mode_preserves_isolated_surrogates_as_code_points",
+        "unicode_named_groups_preserve_capture_names_order_and_values",
+        "unicode_invalid_identity_escape_is_syntax_error",
+        "unicode_codepoint_escape_metacharacters_stay_literal",
+        "unicode_identity_escape_rejects_punctuation_but_class_hyphen_is_valid",
+        "unicode_decimal_backreferences_count_ordinary_captures",
+        "unicode_decimal_escapes_are_rejected_inside_character_classes",
+        "regexp_split_uses_shared_sticky_host_and_flag_specific_advance"
+      ],
+      "sourceOwner": "tools/math-port/unicode-regexp-original-oracle.cjs",
+      "sourceProfile": null,
+      "disposition": "Preserve all 13 real Unicode regex text/UTF-16 behavior tests with typed API adaptation. Original actual-Node observer remains unchanged and C++-independent; no fabricated new Source gold.",
+      "nativeReplacement": {
+        "owner": "tests/math/native_raii_regexp.cpp",
+        "scope": "Complete original mathematical corpus, Source and native focused checks passed."
+      }
+    },
+    {
+      "file": "tests/math/numeric_reductions_source.inc",
+      "sha256": "2482d7159b8a871d2145764cffcbe35d5024323346b6150fce6a96b6b3fd4b0b",
+      "sourceOwner": "tools/math-port/numeric-reductions-oracle.cjs",
+      "nativeReplacement": "tests/math/lengths_native.cpp + fixtures/tex-source/numeric_source_values.inc",
+      "disposition": "Same original145/290 complete value corpus now configured and passing; old unreferenced data duplicate retires."
+    }
+  ]
+}
