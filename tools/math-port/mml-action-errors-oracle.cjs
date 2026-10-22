@@ -1,12 +1,13 @@
-// Root original exact actiontype string-method errors.
-'use strict';const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),crypto=require('node:crypto');
-const {root}=require('./mo-pattern-reference.cjs');const base=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax/src/cjs');
+'use strict';
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
+const {root}=require(path.join(__dirname,'mo-pattern-reference.cjs'));
+const base=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax/src/cjs');
 const {MmlFactory}=require(path.join(base,'core/MmlTree/MmlFactory.js')),{MmlMaction}=require(path.join(base,'core/MmlTree/MmlNodes/maction.js'));
 class Probe extends MmlMaction{hook(){this.setChildInheritedAttributes({},false,0,false);}}
 const inputs=[['U',undefined],['N',null],['false',false],['zero',0],['array',[]],['object',{}],['tooltip','TOOLTIP'],['toggle','toggle']];
 const rows=inputs.map(([input,value])=>{const f=new MmlFactory();f.setNodeClass('action-errors',Probe);const n=f.create('action-errors');n.attributes.set('actiontype',value);let expected='ok';try{n.hook();}catch(e){expected=e.name+'|'+e.message;}return {input,expected};});
-const data=JSON.stringify(rows)+'\n',out=['// Root generated exact actiontype errors from pinned original.','#include "support/folia_test.hpp"','import folia.math.core.mml_tree.mml_factory;','import folia.math.core.mml_tree.class_binding;','import folia.math.core.mml_tree.mml_nodes.maction;','import folia.math.core.mml_tree.action_host;',
-`namespace {using namespace boost::ut;using namespace folia::math;using namespace folia::math::mml;struct Probe:MmlMaction{using MmlMaction::MmlMaction;void hook(){setChildInheritedAttributes(PropertyList{},false,0,false);}};Property value(std::string_view tag){if(tag=="U")return Missing{};if(tag=="N")return PropertyNull{};if(tag=="false")return false;if(tag=="zero")return 0;if(tag=="array")return PropertyArray{};if(tag=="object")return PropertyList{};return tag=="tooltip"?"TOOLTIP":"toggle";}struct Case{std::string_view input,expected;};std::string run(const Case&i){MmlFactory f;f.setNodeClass("action-errors",classBinding<Probe>());auto*n=dynamic_cast<Probe*>(f.create("action-errors"));n->attributes()->set("actiontype",value(i.input));try{n->hook();return "ok";}catch(const Error&e){return e.name+"|"+host::debugText(e.message);}}suite actionErrors=[] {"math_port_action_exact_errors_source"_test=[] {const Case cases[]={`];
-for(const row of rows)out.push('{'+JSON.stringify(row.input)+','+JSON.stringify(row.expected)+'},');out.push('};for(const auto&i:cases)expect(eq(run(i),i.expected))<<i.input;};};}');
-const profile=path.join(root,'docs/math-port/evidence/p38-action-errors-source.json'),fixture=path.join(root,'tests/math/reference_mml_action_errors.cpp'),output=out.join('\n')+'\n';
-if(process.argv.includes('--check')){assert.equal(fs.readFileSync(profile,'utf8').replaceAll('\r\n','\n'),data);assert.equal(fs.readFileSync(fixture,'utf8').replaceAll('\r\n','\n'),output);}else{assert.ok(!fs.existsSync(profile)&&!fs.existsSync(fixture));fs.writeFileSync(profile,data);fs.writeFileSync(fixture,output);}console.log(JSON.stringify({source_calls:rows.length,sha256:crypto.createHash('sha256').update(data).digest('hex')}));
+const profile=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/evidence',"p38-action-errors-source.json"),'utf8'));
+assert.deepEqual(rows,profile);
+const data=JSON.stringify(rows)+'\n';
+assert.equal(data,fs.readFileSync(path.join(root,'docs/math-port/evidence',"p38-action-errors-source.json"),'utf8').replaceAll('\r\n','\n'));
+console.log(JSON.stringify({sourceCases:rows.length}));
