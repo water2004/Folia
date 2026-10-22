@@ -59,4 +59,4 @@ docs/math-port/evidence/tex-token-source.json text eol=lf
 docs/math-port/evidence/tree-source.json text eol=lf
 docs/math-port/evidence/input-host-source.json -text
 docs/math-port/evidence/operator-source-profile.json text eol=lf
-docs/math-port/evidence/p12b-mo-pattern-complete-source.json text eol=lf
+docs/math-port/evidence/p12b-mo-pattern-complete-source.json -text
