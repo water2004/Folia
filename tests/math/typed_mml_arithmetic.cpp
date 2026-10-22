@@ -126,4 +126,49 @@ suite typed_mml_arithmetic = [] {
         expect(inherited_level(1e21, 3) == 1);
         expect(std::isnan(inherited_level(std::u16string(u"not-a-number"), 3)));
     };
+
+    "fraction and radicals preserve child display level and prime roles"_test = [] {
+        for (const auto kind : {NodeKind::mfrac, NodeKind::msqrt, NodeKind::mroot}) {
+            for (const bool display : {false, true}) {
+                for (const double level : {0.0, 2.0}) {
+                    for (const bool prime : {false, true}) {
+                        MmlDocument document;
+                        auto &factory = document.factory();
+                        auto &owner = factory.make(kind);
+                        auto &first = factory.make(NodeKind::merror);
+                        auto &second = factory.make(NodeKind::merror);
+                        owner.appendChild(first);
+                        if (kind != NodeKind::msqrt)
+                            owner.appendChild(second);
+                        owner.setInheritedAttributes({}, display, level, prime);
+
+                        const auto expectStyle = [](MmlNode const &node, bool expected_display,
+                                                    double expected_level, bool expected_prime) {
+                            const auto *display_value = node.attributes().inherited(u"displaystyle");
+                            const auto *level_value = node.attributes().inherited(u"scriptlevel");
+                            expect(display_value && std::get_if<bool>(display_value) &&
+                                   *std::get_if<bool>(display_value) == expected_display);
+                            expect(level_value && std::get_if<double>(level_value) &&
+                                   *std::get_if<double>(level_value) == expected_level);
+                            expect(node.properties().tex.prime_style.value_or(false) ==
+                                   expected_prime);
+                        };
+                        if (kind == NodeKind::mfrac) {
+                            const double child_level = level + ((!display || level > 0) ? 1 : 0);
+                            expectStyle(first, false, child_level, prime);
+                            expectStyle(second, false, child_level, true);
+                        } else if (kind == NodeKind::msqrt) {
+                            expectStyle(first, display, level, true);
+                            expect(owner.children().size() == 1_u);
+                            expect(owner.children().front()->isInferred());
+                        } else {
+                            expectStyle(first, display, level, true);
+                            expectStyle(second, false, level + 2, prime);
+                        }
+                    }
+                }
+            }
+        }
+    };
+
 };

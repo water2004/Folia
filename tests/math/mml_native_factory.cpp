@@ -464,3 +464,69 @@ suite math_native_tex_node_factory = [] {
         expect(std::get<std::u16string>(*metadata) == u"bad 𝛂");
     };
 };
+
+// Value assertions retained when the old Context child-array adapters retire.
+namespace {
+struct CurrentFactoryRow final : mml::AbstractMmlNode {
+    explicit CurrentFactoryRow(mml::MmlDocument& document)
+        : AbstractMmlNode(document, mml::NodeKind::mrow) {}
+};
+}
+suite math_native_mml_retained_source_values = [] {
+    "mml_copy_uses_the_current_registered_product_implementation"_test = [] {
+        mml::MmlDocument document;
+        auto& row = document.factory().make(mml::NodeKind::mrow);
+        auto& child = document.factory().make(mml::NodeKind::mi);
+        row.appendChild(child);
+        row.properties().layout.force_break = true;
+        document.factory().setNodeClass(mml::NodeKind::mrow, {
+            [](mml::MmlCreationArguments const& args) -> std::unique_ptr<mml::MmlNode> {
+                return std::make_unique<CurrentFactoryRow>(args.document);
+            },
+            [](mml::MmlNode const& node) { return dynamic_cast<CurrentFactoryRow const*>(&node) != nullptr; }
+        });
+        auto& copied = row.copy();
+        expect(dynamic_cast<CurrentFactoryRow*>(&copied) != nullptr);
+        expect(copied.properties().layout.force_break == true);
+        expect(copied.children().size() == 1_u);
+        if (copied.children().size() == 1) {
+            expect(copied.children().front() != &child);
+            expect(copied.children().front()->parent() == &copied);
+        }
+        expect(row.children().size() == 1_u);
+        expect(row.children().front() == &child && child.parent() == &row);
+    };
+    "mml_to_string_retains_the_source_row_token_spelling"_test = [] {
+        mml::MmlDocument document;
+        auto& row = document.make(mml::NodeKind::mrow);
+        auto& token = document.make(mml::NodeKind::mi);
+        row.appendChild(token);
+        expect(row.toString() == "mrow(mi())");
+    };
+    "table_copy_then_top_row_selection_retains_copied_cells"_test = [] {
+        mml::MmlDocument document;
+        auto& table = document.factory().make(mml::NodeKind::mtable);
+        auto& row = document.factory().make(mml::NodeKind::mtr);
+        auto& cell = document.factory().make(mml::NodeKind::mtd);
+        row.appendChild(cell);
+        table.appendChild(row);
+        auto& copied = table.copy();
+        expect(copied.children().size() == 1_u);
+        if (copied.children().size() != 1) return;
+        auto* copiedRow = copied.children().front();
+        expect(copiedRow != &row);
+        expect(copiedRow->children().size() == 1_u);
+        if (copiedRow->children().size() != 1) return;
+        auto* copiedCell = copiedRow->children().front();
+        expect(copiedCell != &cell);
+        copied.setChildren(copied.children().first(1));
+        expect(copied.children().size() == 1_u);
+        expect(copied.children().front() == copiedRow);
+        expect(copiedRow->parent() == &copied);
+        expect(copiedRow->children().size() == 1_u);
+        expect(copiedRow->children().front() == copiedCell);
+        expect(copiedCell->parent() == copiedRow);
+        expect(table.children().front() == &row);
+        expect(row.children().front() == &cell);
+    };
+};

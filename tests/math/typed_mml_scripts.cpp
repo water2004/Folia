@@ -331,3 +331,35 @@ suite typed_mml_script_inheritance = [] {
 
 };
 } // namespace
+
+namespace {
+suite retained_hidden_script_texclass = [] {
+    "hidden_phantom_script_keeps_the_copied_operator_spacing_chain"_test = [] {
+        MmlDocument document;
+        auto make = [&](NodeKind kind) -> MmlNode& { return document.factory().make(kind); };
+        auto& x = make(NodeKind::mi);
+        auto& plus = make(NodeKind::mo);
+        auto& y = make(NodeKind::mi);
+        auto& copied = make(NodeKind::inferred_mrow);
+        copied.appendChild(x); copied.appendChild(plus); copied.appendChild(y);
+        auto& phantom = make(NodeKind::mphantom);
+        phantom.appendChild(copied);
+        auto& padded = make(NodeKind::mpadded);
+        padded.appendChild(phantom);
+        auto& visible = make(NodeKind::mrow);
+        visible.appendChild(make(NodeKind::mi));
+        visible.appendChild(make(NodeKind::mo));
+        visible.appendChild(make(NodeKind::mi));
+        auto& under = make(NodeKind::munder);
+        under.appendChild(visible); under.appendChild(padded);
+        x.setTexClass(TexClass::ord);
+        plus.setTexClass(TexClass::bin);
+        y.setTexClass(TexClass::ord);
+        under.setTeXclass(nullptr);
+        expect(plus.prevClass() == TexClass::ord);
+        expect(y.prevClass() == TexClass::bin);
+        expect(plus.texSpacing() == "mediummathspace");
+        expect(y.texSpacing() == "mediummathspace");
+    };
+};
+}

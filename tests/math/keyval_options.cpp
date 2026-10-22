@@ -8,6 +8,7 @@ namespace {
 using folia::math::mml::AttributeSet;
 using folia::math::mml::AttributeValue;
 namespace numeric = folia::math::js_input;
+#include "fixtures/tex-source/input_host_numeric_values.inc"
 void optionText(AttributeSet const &options, std::u16string_view key,
                 std::u16string_view expected) {
     auto value = options.own(key);
@@ -219,6 +220,17 @@ suite keyval_options = [] {
             auto zero = std::get<double>(KeyValueTypes::number.convert(u"-0"));
             expect(zero == 0.0 && std::signbit(zero));
         };
+    "input_host_source_binary64_number_and_parseInt_values"_test = [] {
+        const auto matches = [](double actual, std::uint64_t bits) {
+            const auto expected = std::bit_cast<double>(bits);
+            return std::isnan(expected) ? std::isnan(actual)
+                 : std::bit_cast<std::uint64_t>(actual) == bits;
+        };
+        for (const auto& row : source_number_cases)
+            expect(matches(numeric::number(row.input), row.bits));
+        for (const auto& row : source_parse_int_cases)
+            expect(matches(numeric::parseInt(row.input, row.radix), row.bits));
+    };
     "keyval options oneof owns choices including empty set and custom types use compiled functions"_test =
         [] {
             std::u16string first = u"up";

@@ -679,6 +679,8 @@ add_executable(FoliaMathTests EXCLUDE_FROM_ALL
     tests/math/mml_native_raii_foundation.cpp
     tests/math/native_raii_scene.cpp
     tests/math/lengths_native.cpp
+    tests/math/js_case.cpp
+    tests/math/ordered_map_storage.cpp
     tests/math/native_raii_regexp.cpp
     tests/math/native_tex_session.cpp
     tests/math/native_tex_definitions.cpp
@@ -832,6 +834,14 @@ add_executable(FoliaMathTests EXCLUDE_FROM_ALL
     tests/math/radical_native.cpp)
 target_compile_features(FoliaMathTests PRIVATE cxx_std_23)
 set_target_properties(FoliaMathTests PROPERTIES CXX_MODULE_STD ON CXX_SCAN_FOR_MODULES ON)
+
+# Replay the retained numeric Source corpus against the original typed utility.
+# This unused application utility is compiled only for its mathematical tests.
+target_sources(FoliaMathTests PRIVATE src/math/util/numeric.cpp)
+target_sources(FoliaMathTests PRIVATE
+    FILE_SET CXX_MODULES FILES
+    src/math/util/numeric.ixx
+    src/math/util/ordered_map_storage.ixx)
 target_include_directories(FoliaMathTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 target_compile_definitions(FoliaMathTests PRIVATE
     FOLIA_MATH_FIXTURE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/math/fixtures")

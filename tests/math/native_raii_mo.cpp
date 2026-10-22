@@ -312,4 +312,46 @@ suite typed_mml_mo = [] {
         // Pinned Source's isOver branch tests under.coreMO() against this mo.
         expect(!overAccent.properties().tex.math_accent.has_value());
     };
+    // Migrated from the handwritten first case in reference_mo_order.cpp.
+    // Preserve operator spacing through the phantom copy inside mpadded.
+    "mo spacing survives mpadded phantom copy"_test = [] {
+        MmlDocument document;
+        const auto token = [&](NodeKind kind, std::u16string text) -> MmlNode & {
+            auto &node = document.factory().make(kind);
+            auto &textNode = dynamic_cast<TextNode &>(document.factory().make(NodeKind::text));
+            textNode.setText(text);
+            node.appendChild(textNode);
+            return node;
+        };
+        const auto group = [&](NodeKind kind, std::initializer_list<MmlNode *> children)
+            -> MmlNode & {
+            auto &node = document.factory().make(kind);
+            for (auto *child : children) node.appendChild(*child);
+            return node;
+        };
+        auto &x = token(NodeKind::mi, u"x");
+        auto &plus = token(NodeKind::mo, u"+");
+        auto &y = token(NodeKind::mi, u"y");
+        auto &copy = group(NodeKind::inferred_mrow, {&x, &plus, &y});
+        auto &phantom = group(NodeKind::mphantom, {&copy});
+        auto &phantomRow = group(NodeKind::inferred_mrow, {&phantom});
+        auto &padded = group(NodeKind::mpadded, {&phantomRow});
+        padded.attributes().set(u"style", std::u16string(u"border: 0.1em solid; border-top: none"));
+        padded.attributes().set(u"height", std::u16string(u".2em"));
+        padded.attributes().set(u"depth", 0.0);
+        auto &visibleX = token(NodeKind::mi, u"x");
+        auto &visiblePlus = token(NodeKind::mo, u"+");
+        auto &visibleY = token(NodeKind::mi, u"y");
+        auto &visible = group(NodeKind::mrow, {&visibleX, &visiblePlus, &visibleY});
+        auto &under = group(NodeKind::munder, {&visible, &padded});
+        under.attributes().set(u"displaystyle", true);
+        under.attributes().set(u"accentunder", true);
+        under.setInheritedAttributes({}, true, 0, false);
+        expect(under.setTeXclass(nullptr) == &under);
+        expect(plus.prevClass() == TexClass::ord);
+        expect(plus.texSpacing() == "mediummathspace");
+        expect(y.prevClass() == TexClass::bin);
+        expect(y.texSpacing() == "mediummathspace");
+    };
+
 };

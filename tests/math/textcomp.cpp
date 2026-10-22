@@ -189,3 +189,67 @@ suite textcomp = [] {
             f.ok(u"\\text{\\texteuro}");
         };
 };
+
+namespace {
+struct TextcompLiveOwnerProbe { ParseOptions* outer; TeX* jax; std::size_t calls{}; };
+thread_local TextcompLiveOwnerProbe* textcompLiveOwner{};
+MmlNode& observeTextcompLiveOwner(NodeFactory& factory, NodeKind kind,
+    std::span<MmlNode* const> children, NodeDefinition definition, MmlNode* text) {
+    if (textcompLiveOwner && kind == NodeKind::mtext) {
+        auto& probe = *textcompLiveOwner;
+        auto& inner = dynamic_cast<ParseOptions&>(factory.configuration());
+        auto* primary = inner.request().texParser;
+        expect(primary != nullptr);
+        if (primary) {
+            expect(&primary->configuration == probe.outer);
+            expect(primary == probe.outer->parser());
+        }
+        expect(probe.outer->request().mathItem != nullptr);
+        if (probe.outer->request().mathItem)
+            expect(probe.outer->request().mathItem->inputJax == probe.jax);
+        ++probe.calls;
+    }
+    return NodeFactory::createNode(factory, kind, children, std::move(definition), text);
+}
+}
+suite textcomp_compile_owner_lifetime = [] {
+    "textcomp_compile_borrows_current_jax_after_an_uncompiled_warmup"_test = [] {
+        for (bool warmupFirst : {false, true}) {
+            TextcompFixture f;
+            std::unique_ptr<TeX> warmup;
+            if (warmupFirst) {
+                TexOptionValues options;
+                options.packages = std::vector<PackageSelection>{
+                    {u"base", {}}, {u"textmacros", {}}, {u"textcomp", {}}};
+                f.request.reset();
+                warmup = std::move(f.jax);
+                f.jax = std::make_unique<TeX>(f.registry, f.maps, f.callbacks, f.warnings, options);
+                f.request = std::make_unique<TeXRequest>(*f.jax, f.document.factory());
+            }
+            auto& outer = f.jax->parseOptions();
+            auto* text = outer.textmacros;
+            expect(text != nullptr);
+            if (!text) continue;
+            auto& inner = *text->parseOptions;
+            expect(&inner != &outer);
+            expect(&inner.options == &f.jax->options);
+            expect(&inner.packageData == &outer.packageData);
+            if (warmup) expect(warmup->parseOptions().textmacros != text);
+            TextcompLiveOwnerProbe probe{&outer, f.jax.get()};
+            struct RestoreProbe { ~RestoreProbe() { textcompLiveOwner = nullptr; } } restore;
+            textcompLiveOwner = &probe;
+            inner.setNodeCreators(NodeCreators{.node = &observeTextcompLiveOwner});
+            for (int repeat = 0; repeat < 2; ++repeat) {
+                auto& root = f.ok(u"\\text{\\textcopyright\\textregistered\\texttrademark}");
+                auto texts = textcompTexts(root);
+                std::u16string actual;
+                for (auto* node : texts) actual += NodeUtil::getText(*node);
+                expect(actual == u"©®™");
+                expect(outer.request().root == &root);
+                expect(outer.request().parsers.empty() && inner.request().parsers.empty());
+                expect(inner.request().texParser == nullptr);
+                expect(probe.calls > 0_u);
+            }
+        }
+    };
+};

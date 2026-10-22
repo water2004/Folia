@@ -1789,6 +1789,41 @@ The shared table gate removes only row-inherit6; direct class_binding test
 consumers decrease23 to16, four inc unchanged. Evidence is under
 `build/math-port/finish-old-tests/inheritance/`.
 
+### Full-domain native value regression coverage (2026-10-23)
+
+The old-test inventory includes useful typed tests that were never configured,
+as well as obsolete object adapters. Real values are migrated before retirement.
+The existing arithmetic owner adds24 display/level/prime combinations (136
+assertions); Mo preserves the phantom-copy spacing regression (5). Five existing
+owners retain8 factory/table/script/ParseOptions/regex/textcomp cases, including
+the current compiled factory implementation, nodeFactory lifetime and live
+text parser's current input-jax owner.
+
+The existing numeric owner replays every6412 shortest/fixed pair, all608 typed
+length conversions,512 percent/em and1024 pixel strings,30 unit/table values,
+defaults and145 dense reductions:15293 assertions pass. The48 JS intrinsic
+return rows remain offline Source evidence. Numeric/storage's original typed
+modules are configured only in the test target; application code does not change.
+Dedicated js_case/storage owners retain the original full Unicode domain,
+1460 mappings,1162 sigma ranges and474 examples (477 assertions), and two real
+ordered-storage cases (19). The original13 Unicode regex cases migrate into
+the existing RegExp owner with the same35 assertions.
+
+Input Number1013/parseInt944 values pass bit-exactly (NaN payload excluded).
+Casefold replays1141 groups/2307 members including complete BMP match positions
+and state,18434 assertions. Operator data checks all1252 ordered entries,
+944 properties,1252 lookups,27 named definitions,50 ranges/eight spacing rows
+and228 range queries. Thirty complete BMP masks match every original shape.
+BBox constructor/mutation values pass13 assertions. Build8 and all21 focused
+patterns pass; logs are `finish-old-tests/native-{combined-build-8,focused-*}`.
+Final combined full-suite validation is still pending.
+
+Candidate mistakes were corrected against the original frozen literals: mask
+anchors contained a generator placeholder; input UTF16 literals were double
+escaped; the operator candidate flattened forms alphabetically instead of the
+original prefix/postfix/infix graph order. No expected mathematical value or
+production implementation was changed to resolve these mapping errors.
+
 ### Current Debug and self-contained Release MSI (2026-10-21)
 
 Dependency setup passes. The supported Debug application build and actual

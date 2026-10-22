@@ -7,7 +7,133 @@ using namespace folia::math;
 using namespace folia::math::mml;
 using namespace folia::math::mml::operator_dict;
 
+#include "fixtures/tex-source/operator_source_entries.inc"
+#include "fixtures/tex-source/operator_source_named.inc"
+#include "fixtures/tex-source/operator_source_ranges.inc"
+#include "fixtures/tex-source/operator_source_spacing.inc"
+#include "fixtures/tex-source/operator_source_queries.inc"
+
+namespace {
+bool sourcePropertyEqual(const AttributeValue& actual,
+                         const SourceOperatorProperty& expected) {
+    if (expected.isText) {
+        const auto* value = std::get_if<std::u16string>(&actual);
+        return value && *value == expected.text;
+    }
+    const auto* value = std::get_if<bool>(&actual);
+    return value && *value == expected.boolean;
+}
+
+bool sourceDefinitionEqual(const OperatorDef& actual, double left, double right,
+                           TexClass texClass, std::size_t propertyOffset,
+                           std::size_t propertyCount,
+                           const SourceOperatorProperty* properties) {
+    if (actual.left != left || actual.right != right ||
+        actual.texClass != texClass || actual.properties.size() != propertyCount)
+        return false;
+    for (std::size_t i = 0; i < propertyCount; ++i) {
+        if (actual.properties[i].first != properties[propertyOffset + i].key ||
+            !sourcePropertyEqual(actual.properties[i].second,
+                                 properties[propertyOffset + i]))
+            return false;
+    }
+    return true;
+}
+
+bool sourceRangeEqual(const RangeDef& actual, const SourceRangeQuery& expected) {
+    return actual.first == expected.first && actual.last == expected.last &&
+           actual.texClass == expected.texClass && actual.kind == expected.kind &&
+           actual.variant.has_value() == expected.hasVariant &&
+           (!expected.hasVariant || *actual.variant == expected.variant);
+}
+} // namespace
+#include "fixtures/tex-source/mo_pattern_utf16_masks.inc"
+namespace {
+std::u16string sourceMaskInput(char16_t c, unsigned shape, char16_t first) {
+    if (shape == 0) return std::u16string(1, c);
+    if (shape == 1) return std::u16string(2, c);
+    if (shape == 2) return std::u16string(3, c);
+    if (shape == 3) return std::u16string(1, first) + c;
+    if (shape == 4) return std::u16string(1, c) + first;
+    return std::u16string(1, first) + c + first;
+}
+std::string sourceMask(const SourceMoMask& row) {
+    constexpr char digits[] = "0123456789abcdef";
+    std::string result;
+    for (unsigned start = 0; start < 65536; start += 4) {
+        unsigned bits = 0;
+        for (unsigned j = 0; j < 4; ++j)
+            if (matchMoPattern(row.pattern, sourceMaskInput(static_cast<char16_t>(start + j), row.shape, row.first)))
+                bits |= 1U << j;
+        result.push_back(digits[bits]);
+    }
+    return result;
+}
+}
+
 suite typed_operator_dictionary = [] {
+    "all pinned Source operator records preserve order and every field"_test = [] {
+        const auto actual = OPTABLE();
+        expect(actual.size() == std::size(source_operator_entries));
+        const auto count = std::min(actual.size(), std::size(source_operator_entries));
+        for (std::size_t i = 0; i < count; ++i) {
+            const auto& expected = source_operator_entries[i];
+            const auto* lookup = findOperatorDefinition(expected.form, expected.text);
+            expect(actual[i].form == expected.form);
+            expect(static_cast<bool>(actual[i].text == expected.text));
+            expect(sourceDefinitionEqual(actual[i].definition, expected.left,
+                expected.right, expected.texClass, expected.propertyOffset,
+                expected.propertyCount, source_operator_properties));
+            expect(lookup != nullptr);
+            if (lookup) {
+                expect(sourceDefinitionEqual(*lookup, expected.left, expected.right,
+                    expected.texClass, expected.propertyOffset, expected.propertyCount,
+                    source_operator_properties));
+            }
+        }
+    };
+
+    "all 27 pinned Source named MO records preserve every field"_test = [] {
+        const auto actual = MO();
+        expect(actual.size() == std::size(source_named_operators));
+        const auto count = std::min(actual.size(), std::size(source_named_operators));
+        for (std::size_t i = 0; i < count; ++i) {
+            const auto& expected = source_named_operators[i];
+            expect(actual[i].first == expected.name);
+            expect(sourceDefinitionEqual(actual[i].second, expected.left,
+                expected.right, expected.texClass, expected.propertyOffset,
+                expected.propertyCount, source_named_properties));
+        }
+    };
+
+    "all 50 pinned Source ranges and eight spacing rows match"_test = [] {
+        const auto actualRanges = RANGES();
+        expect(actualRanges.size() == std::size(source_ranges));
+        const auto rangeCount = std::min(actualRanges.size(), std::size(source_ranges));
+        for (std::size_t i = 0; i < rangeCount; ++i) {
+            const auto& actual = actualRanges[i];
+            const auto& expected = source_ranges[i];
+            expect(actual.first == expected.first);
+            expect(actual.last == expected.last);
+            expect(actual.texClass == expected.texClass);
+            expect(actual.kind == expected.kind);
+            expect(actual.variant == expected.variant);
+        }
+        const auto actualSpacing = MMLSPACING();
+        expect(actualSpacing.size() == std::size(source_spacing));
+        const auto spacingCount = std::min(actualSpacing.size(), std::size(source_spacing));
+        for (std::size_t i = 0; i < spacingCount; ++i)
+            expect(actualSpacing[i] == source_spacing[i]);
+    };
+
+    "all pinned Source operator lookups and range boundaries match"_test = [] {
+        for (const auto& expected : source_operator_queries)
+            expect(sourceRangeEqual(getRange(expected.input), expected));
+    };
+    "all pinned Source MoPattern UTF16 masks match every unit for each source shape"_test = [] {
+        for (const auto& row : source_mo_masks)
+            expect(sourceMask(row) == row.expected);
+    };
     "operator_tables_preserve_source_order_and_records"_test = [] {
         const auto named = MO();
         const auto ranges = RANGES();

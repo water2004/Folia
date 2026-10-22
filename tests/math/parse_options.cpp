@@ -1,4 +1,4 @@
-#include "support/folia_test.hpp"
+#include "math/support/tex_fixture.hpp"
 import folia.math.input.tex.parser;
 
 using namespace boost::ut;
@@ -110,3 +110,80 @@ suite parse_options = [] {
         }
     };
 };
+
+namespace {
+struct ResetWitnessTags final : NoTags {
+    using NoTags::NoTags;
+    void resetTag() override { throw std::runtime_error("reset-witness"); }
+};
+suite retained_parse_options_owner_values = [] {
+    "parse_options_parser_stack_and_tree_filter_preserve_duplicates"_test = [] {
+        Fixture f;
+        auto& options = *f.options;
+        TexParser parser(u"", {}, options);
+        expect(options.parser() == &parser);
+        parser.mml();
+        expect(options.parser() == nullptr);
+        options.pushParser(parser);
+        expect(options.parser() == &parser);
+        options.popParser();
+        expect(options.parser() == nullptr);
+        auto& root = f.node(NodeKind::mrow);
+        auto& live = f.node(NodeKind::mi);
+        auto& detached = f.node(NodeKind::mn);
+        root.appendChild(live);
+        options.request().root = &root;
+        options.addNode(u"custom", live);
+        options.addNode(u"custom", detached);
+        options.addNode(u"custom", live);
+        expect(live.properties().tex.in_lists ==
+               std::optional<std::vector<std::u16string>>(std::vector<std::u16string>{u"custom", u"custom"}));
+        expect(detached.properties().tex.in_lists ==
+               std::optional<std::vector<std::u16string>>(std::vector<std::u16string>{u"custom"}));
+        auto filtered = options.getList(u"custom");
+        expect(filtered.size() == 2_u);
+        if (filtered.size() == 2) expect(filtered[0] == &live && filtered[1] == &live);
+        const std::array removed{&live};
+        options.removeFromList(u"custom", removed);
+        expect(options.getList(u"custom").size() == 1_u);
+        expect(options.getList(u"custom").front() == &live);
+        options.addNode(u"root", root);
+        expect(options.getList(u"root").size() == 1_u);
+    };
+    "parse_options_clear_keeps_persistent_owners_and_clears_before_reset_failure"_test = [] {
+        Fixture f;
+        auto& options = *f.options;
+        auto* effective = &options.options;
+        auto* packageData = &options.packageData;
+        auto* handlers = &options.handlers;
+        auto* itemFactory = options.itemFactory.get();
+        auto* nodeFactory = &options.request().nodeFactory;
+        options.options.maxBuffer = 17;
+        TexParser parser(u"", {}, options);
+        parser.mml();
+        auto populate = [&] {
+            options.pushParser(parser);
+            options.request().root = &f.node(NodeKind::mrow);
+            options.request().error = true;
+            options.addNode(u"custom", *options.request().root);
+        };
+        auto check = [&] {
+            expect(options.parser() == nullptr);
+            expect(options.request().root == nullptr);
+            expect(options.request().nodeLists.empty());
+            expect(!options.request().error);
+            expect(&options.options == effective && &options.packageData == packageData);
+            expect(&options.handlers == handlers && options.itemFactory.get() == itemFactory);
+            expect(&options.request().nodeFactory == nodeFactory);
+            expect(options.options.maxBuffer.value() == 17.0);
+        };
+        populate(); options.clear(); check();
+        options.tags = std::make_unique<ResetWitnessTags>(options);
+        auto* tags = options.tags.get();
+        populate();
+        expect(throws<std::runtime_error>([&] { options.clear(); }));
+        check();
+        expect(options.tags.get() == tags);
+    };
+};
+}
