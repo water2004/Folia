@@ -1,0 +1,500 @@
+{
+  "schema": 1,
+  "scope": "Obsolete C++ test generators, adapters and runners after all122 dispatched consumers retired.",
+  "count": 82,
+  "sourceOwners": "Original canonical Source producers/profiles remain. Mixed aggregate entry points now replay Source independently of retired C++; production table generators remain.",
+  "entries": [
+    {
+      "file": "tools/math-port/argument-expansion-mutation-specs.cjs",
+      "sha256": "5708ce9df1300c7b568da98f8c2c63cd8c19992c41c6ffba13e9801a8997b2f7",
+      "reason": "Native replacement-anchor list consumed only by argument-expansion-mutations.cjs; does not contain Source gold.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/argument-expansion-mutations.cjs",
+      "sha256": "bcd2e19d3f223f391b21e487d24e42105f4b4afe99bda3ea9b80ab1fffb1e5d5",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/arithmetic-bindings-data.cjs",
+      "sha256": "af05ebc8f81b2aca598cae23c1e01ed96e85b466a634658b9fc67394fe6773dd",
+      "reason": "Old native binding/default/getter emitter (PropertyList/classBinding/initializeClassFields/_bindings.cpp). Current typed node defaults/classes own this behavior. Original pinned Source loaders, complete Source profiles and member ledgers remain; this tool has no independent frozen observation corpus.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/arithmetic-mutation-test.cjs",
+      "sha256": "5cedbbf4334af1ce51118ba31521403f7ebb27267505e97768f31cfb468762c1",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/atom-semantics-bindings-data.cjs",
+      "sha256": "f2c7497e3964e30ce6570c0035e54c3223c0fece86501750b4dcf49878749e57",
+      "reason": "Old native binding/default/getter emitter (PropertyList/classBinding/initializeClassFields/_bindings.cpp). Current typed node defaults/classes own this behavior. Original pinned Source loaders, complete Source profiles and member ledgers remain; this tool has no independent frozen observation corpus.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/atom-semantics-mutation-test.cjs",
+      "sha256": "f4eee85d9d03540967450c8f3ada78d4d53424239f8a68fa5ab1c560b8251fbd",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/callable-receiver-mutation-test.cjs",
+      "sha256": "1108908413974ac3d0054541ccd3a54e29e0ab2efe6992ee0a24502fdc2d0572",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/callable-receiver-native.inc",
+      "sha256": "d978c3ab8c229945413e1d9316ffd904ce275285422acc4afc17ccafd476f132",
+      "reason": "Pure old C++ observer adapter/template fragment. Its only canonical emitter callers are retired or replaced by the specified same-owner Source-only candidates; all original Source gold remains in the independent immutable profiles.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/case-host-mutation-test.cjs",
+      "sha256": "0a82816097718619d4a0eab4075069f300e33d5f7dfce15959a8c56065924808",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/child-array-mutations.cjs",
+      "sha256": "a1b257567155f3e103b64b6de4c6297121098e3cd88d91fb442c37d1ea7fcf8b",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/child-write-mutations.cjs",
+      "sha256": "0b6fda39bf4eb60ec0b1716dcf6c6dab8d7a0fbb1cb140292c108102d905955c",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/container-observer-compile.cjs",
+      "sha256": "64c24dc91c7dfb05ace68e7927259c6c61f341a18fe19bb5722e8582f42cad8d",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/factory-mutation-test.cjs",
+      "sha256": "3d54e1518476126c6fecac9bed1c041360bee1ef64aacd4ed630941383ec279d",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/factory-sparse-binding-check.cjs",
+      "sha256": "cb7ee1e0a259c5850c875b5da20697377eb04aae0a67ef9b7ab2a215e472a02d",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/find-math-mutation-test.cjs",
+      "sha256": "1a472524d7e17d7b6a458cd767f2702484c456cb3b833300d8cb8ddb13074261",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/find-tex-mutation-test.cjs",
+      "sha256": "dde2cfcbf767e5b6d4b6d5dc5fc29b075268d7bdf11d5989f710268d2fa4fe39",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/freeze-child-array.cjs",
+      "sha256": "d17289de8437cdcf6953a775ad9442a050aa4976ef036c1db4cfa9188dc32e97",
+      "reason": "Pure old C++ projection of the unchanged independently checked child-array-oracle.cjs / p23-child-array-source.json corpus; no original Source execution here.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/freeze-child-write.cjs",
+      "sha256": "d96c3b3c912c35e05e8ea1697c47bdbd629e43149565add7367136794f36af28",
+      "reason": "Pure old C++ projection of sparse-child-oracle.cjs / p23-sparse-child-source.json append failure rows; independent full Source owner/profile remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/freeze-mml-declarations.cjs",
+      "sha256": "11047d51f5e2f2071d47bc1730901e473084dfda2182af34d7740469dbd0cfe0",
+      "reason": "One-shot old NodeValue/Property interface rewrite used by the retired declaration observer; no independent Source profile.",
+      "alreadyRetired": true
+    },
+    {
+      "file": "tools/math-port/freeze-mml-definitions.cjs",
+      "sha256": "66f1605a74a2f289fd025f914e893d9a463bbc7d380d955bd295bbd44041029c",
+      "reason": "One-shot old definition/stub emitter for the old NodeValue/Property protocol; original Source algorithms/profiles stay with their canonical owners.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/freeze-node-stubs.cjs",
+      "sha256": "f1f271d8de09d5df5c4cfee4f5c503d29319a5878d61273d495f16fa6f51108e",
+      "reason": "One-shot old ChildValue/Context declaration/stub generator; would reintroduce the retired JS object model into the established native tree. No independent Source profile.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/function-property-mutations.cjs",
+      "sha256": "bd03315dfe1b0e6008a053846dd1af7bbfa8c0c94f43b5aad3d0363ffadc3655",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/function-property-native.inc",
+      "sha256": "1685bb0168a9cb1d40ba8020857f42e63b5e1a061a9eb41785cd66d218a23e1d",
+      "reason": "Pure old C++ observer adapter/template fragment. Its only canonical emitter callers are retired or replaced by the specified same-owner Source-only candidates; all original Source gold remains in the independent immutable profiles.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/html-node-bindings-data.cjs",
+      "sha256": "1b142421b5b924be8f219e166c962e5b5e9e94c8733601ca1b523b4e2042eb5d",
+      "reason": "Old native binding/default/getter emitter (PropertyList/classBinding/initializeClassFields/_bindings.cpp). Current typed node defaults/classes own this behavior. Original pinned Source loaders, complete Source profiles and member ledgers remain; this tool has no independent frozen observation corpus.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/input-host-mutation-test.cjs",
+      "sha256": "ebfa41de60449463699692c04617462df68645f6831d6d7dcd2d0524b6334944",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/input-jax-mutation-test.cjs",
+      "sha256": "8614b359fed1176c03a3c69e84b885ad1fd16a3d840efd27565faf7034c785af",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/maction-mutation-test.cjs",
+      "sha256": "6e31ec63854eecbe7e16e25653383e51fa856c5eccabfc85c1ab1c70c07538e3",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/map-handler-mutation-test.cjs",
+      "sha256": "79eb1aea6b9162bb23bf7a1b7059304edb51865adc709f573b50303e6687e821",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/math-item-mutation-test.cjs",
+      "sha256": "b9eb4457f1a3d7ddcf59a64d84aba9400c718421dfdd79a7890ca1d28b38f02f",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/mathchoice-mutation-test.cjs",
+      "sha256": "4d1a85850d1890a510f463941ce71c3e7902b6f15b1ab2bcb772276c3176dd15",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/mathchoice-observer-compile.cjs",
+      "sha256": "2310eb37fb204298baf8615bc0d8753b59504c8030b3fe3df7f64d01501384b6",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/mfenced-bindings-data.cjs",
+      "sha256": "f9f985ade3a7b26a32fe23be062d6d61b24e729c3072bfb75eee08fc76b449ad",
+      "reason": "Old native binding/default/getter emitter (PropertyList/classBinding/initializeClassFields/_bindings.cpp). Current typed node defaults/classes own this behavior. Original pinned Source loaders, complete Source profiles and member ledgers remain; this tool has no independent frozen observation corpus.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/mfenced-mutation-test.cjs",
+      "sha256": "00ae6f2306b6e3b465bb709c7c6965131bac494d6c96b65f255a1276922fa4b1",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/mml-action-choice-gate.cjs",
+      "sha256": "ec470327293e4f6c9cd69ce2249048ea3c029f88489dd940bf4b96b3805d7c99",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/mml-action-choice-red.cjs",
+      "sha256": "f0374f3db8a1f786402aa1bc3adebdc4bebf35555362fb4f17b9036e1f5063f0",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/mml-consumer-gate.cjs",
+      "sha256": "fc84c5ed00c1618f4919aa7be502cb4166d74238ae9bd0156ad3fa256a8e80b1",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/mml-declaration-build.cjs",
+      "sha256": "c8a91640db2d841e339455dd4e2b18d387a199f5fc2428a723bb9c0a1aeb5645",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": true
+    },
+    {
+      "file": "tools/math-port/mml-mfenced-gate.cjs",
+      "sha256": "5bba681bf434ecfc2c6fe4054ea325e92cfb2c302b38c029bcca474bde18d3c0",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/mml-mfenced-red.cjs",
+      "sha256": "24d3d4e3d04795acc287ed81f8e1e76c48826d2388d8febf3da72fadc9838740",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/mml-node-mutation-test.cjs",
+      "sha256": "ad0a8d8a385fe950a7ad6d83e5b9d41635d306b93e710a2a986279289f16b35c",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/mml-node-observer-compile.cjs",
+      "sha256": "883ce6041d2d0307040fc99da154ecee28ede15f379054bf9dffd53f1b8d3799",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/mml-operator-script-gate.cjs",
+      "sha256": "a0e9d24903c4477ad99371302b74b311f20d540be460fde5319c671b960c9abb",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/mml-operator-script-red.cjs",
+      "sha256": "a096a7d48ad0e800ba7f98abc1a625fb51131447ba5dba65ab903d7c4502f618",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/mml-table-multiscript-gate.cjs",
+      "sha256": "4f76e952444e06248c8d301f1a936768598be70309f37eb31cb32f8e90e50b2d",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/mml-table-multiscript-red.cjs",
+      "sha256": "1d635474b63077e00c9081fa33ba6be43f1536aab5ca823f8a69b922c6e5ccbf",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/mo-bindings-data.cjs",
+      "sha256": "2c170d2b3ece36ad5a3540588590f3b0d1a7bd2dccfd9db97419aa136e9ead74",
+      "reason": "Old native binding/default/getter emitter (PropertyList/classBinding/initializeClassFields/_bindings.cpp). Current typed node defaults/classes own this behavior. Original pinned Source loaders, complete Source profiles and member ledgers remain; this tool has no independent frozen observation corpus.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/mo-mutation-test.cjs",
+      "sha256": "1d7a428dbabdad845d9201fa896976f7e9ceb7020da19b015fb97597f12d2202",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/mo-pattern-mutation-test.cjs",
+      "sha256": "d4bb4955556acc647e4161d57e20fcedd0aa903fd2e9130bc8716c12b62ff2c2",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/multiscript-bindings-data.cjs",
+      "sha256": "b177c8e024c6103cf7e7e8517566239b5ed4d06db974d2f9083cd4a3c15b5e41",
+      "reason": "Old native binding/default/getter emitter (PropertyList/classBinding/initializeClassFields/_bindings.cpp). Current typed node defaults/classes own this behavior. Original pinned Source loaders, complete Source profiles and member ledgers remain; this tool has no independent frozen observation corpus.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/mutation-test.cjs",
+      "sha256": "fc8f4fe730e083006842dc9753613188c514895c5040f24b6d4d5687d337d977",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/native-identities-mutation-test.cjs",
+      "sha256": "2bc1959c1e0b666ae11dec9e82d5815166ffd071280f3c8b5479963807f6e3e0",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/native-mutation-runner.cjs",
+      "sha256": "a69d0baed3fe5e1ae8309a2640b22c62c8007f771ab8151910b1530ec99fd769",
+      "reason": "Shared old isolated native build/mutation engine. All canonical callers are the retired observer runners listed here; no Source profile logic.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/numeric-mutation-test.cjs",
+      "sha256": "9bf3286d80e1d49c57329120176ad622be2bb88bf7acec29c336dbe05d28da0c",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/numeric-reductions-mutation-test.cjs",
+      "sha256": "0512524194741c3703a5bd594fe7b7d8394a2a5d296d1ebad432e190b7318644",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/operator-mutation-test.cjs",
+      "sha256": "38baa0143b7f94abb8f2c9592e5f2f53f105654e7d179b824cf8295331ebe0c4",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/operator-registry-observer-compile.cjs",
+      "sha256": "8c20fdb956f95e9dc28e339068584a603ff855938be84d99a3d9858cded1e122",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/option-array-iteration-mutation-test.cjs",
+      "sha256": "ddcd8731fd74d66fae829f73df73f190f7556f6223ab0bb168de2fadd5f5ba0f",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/option-array-map-mutation-test.cjs",
+      "sha256": "218f19fde0ec25c92529995f7a913a139fc17da2bcfdaa2b88d580128d7d49d2",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/option-filter-mutation-test.cjs",
+      "sha256": "034781562c96786ba99441655be1b404515607a812fc55a36936ca16a497e030",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/options-mutation-test.cjs",
+      "sha256": "9344adddf860637b30d4ae83055b9e203a87222010d37103336b18e082ebf969",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/oracle-values.cjs",
+      "sha256": "9bc7ee2a1e2d1d7d2739a233c2e8725af6f6b43e534064709ad42fdaba4ebb1b",
+      "reason": "Pure C++ Property/sourceValues serialization utility. After the listed same-owner Source-only promotions no canonical oracle imports it; it contains no MathJax algorithm or frozen gold.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/parser-record-mutation-test.cjs",
+      "sha256": "0634e4797062bfcdbfa5b50cfd990fdc9b22dedd3cba110e51924521d7920d20",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/parser-stack-mutation-test.cjs",
+      "sha256": "773581704d377cafe9c3db7b9dd63f32df7ea50cfec7bee302abf12ebb7f6067",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/parser-utilities-mutation-test.cjs",
+      "sha256": "55b3fbdfa90bf9250e171d2dbdd28bd077b98878560ed93a28f875db13879f87",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/regexp-binding-mutation-test.cjs",
+      "sha256": "33747061a719677770c484a86b4a4f17075de8f6240ff7463fececbdd502dc04",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/regexp-host-mutation-test.cjs",
+      "sha256": "3c2fe77a55a994ed6c9489ab692058c6bdd9633d28600b1221592081759be036",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/remaining-observer-compile.cjs",
+      "sha256": "221b033fe0c6aafa82edf00677c36892dcfd164aad513f2af0d0a9421c64e4ff",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/simple-mml-bindings-data.cjs",
+      "sha256": "9ef50de749bd996f1e57030670a7e8931089e43f7c3f22860002841836d70d3a",
+      "reason": "Old native binding/default/getter emitter (PropertyList/classBinding/initializeClassFields/_bindings.cpp). Current typed node defaults/classes own this behavior. Original pinned Source loaders, complete Source profiles and member ledgers remain; this tool has no independent frozen observation corpus.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/sparse-node-mutations.cjs",
+      "sha256": "4e17d5be1c53c63059b30f24f2e0df49bef6efe35829dac5aa90c35755192f1e",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/sparse-node-red.cjs",
+      "sha256": "6dc710a98af5014f52abe34cd04cec51296961e904bca62cba5a58de4197c5b7",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/sparse-tree-mutations.cjs",
+      "sha256": "4bb7d3c923e9715fb1c03af736ad4351b60bf3c23bcf622ed47d0adadd756e53",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/sparse-tree-red.cjs",
+      "sha256": "56ea3698097e8af70181b9ee0a3c0a84ecf1e398da1183f58699f63d91c980ab",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/stack-item-mutation-test.cjs",
+      "sha256": "5827a9557eda95b72c654fb1b6ec18ab40f563ce935f9fc2bdb5d217ded8ce0f",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/string-map-mutation-test.cjs",
+      "sha256": "b8e6737d38e1d4209dc4ac80d7000ee3454deb799d785ad66315107b0cb3aa68",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/table-bindings-data.cjs",
+      "sha256": "4e1cd0f5d7c8658ccc0e188dc6a5d4300db113ce75c3129725c44d4b53005a3d",
+      "reason": "Old native binding/default/getter emitter (PropertyList/classBinding/initializeClassFields/_bindings.cpp). Current typed node defaults/classes own this behavior. Original pinned Source loaders, complete Source profiles and member ledgers remain; this tool has no independent frozen observation corpus.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/tex-token-mutation-test.cjs",
+      "sha256": "d478f9a7aa2d60c6e326efa1396817936420666221a5900e47d52ae0c2aeba1b",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/token-map-mutations.cjs",
+      "sha256": "a9f9fa558af52a036a08c93d215dc66cf66d54128169826e63f44533350e3baf",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/token-map-native.inc",
+      "sha256": "6ddff0e049d239b78b4b5542261db6d53c9a2967a4aa26b3e6096759b7d58e3e",
+      "reason": "Pure old C++ observer adapter/template fragment. Its only canonical emitter callers are retired or replaced by the specified same-owner Source-only candidates; all original Source gold remains in the independent immutable profiles.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/tree-family-binding-test.cjs",
+      "sha256": "b2b0fae78a608bfe491fce117551d32d7d0cd08db3b21d5a56b3d63611c9f494",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": true
+    },
+    {
+      "file": "tools/math-port/tree-mutation-test.cjs",
+      "sha256": "d07ffbd55243446582621b572e01cbd9ddd97657d51f8f25ecf34d7dffe8f22e",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/tree-native-observer-binding.cjs",
+      "sha256": "972a64c2cb6118dcc0845d6f2015aef258aa1aad67c180ce674efa661dae19ad",
+      "reason": "Pure old C++ observer adapter/template fragment. Its only canonical emitter callers are retired or replaced by the specified same-owner Source-only candidates; all original Source gold remains in the independent immutable profiles.",
+      "alreadyRetired": false
+    },
+    {
+      "file": "tools/math-port/unit-util-mutation-test.cjs",
+      "sha256": "dec924a8f55f0f7fa35d915e5f103b07e1c62f1cb84391869fe0063f0baaa9c4",
+      "reason": "Build/run/compile/mutate the retired legacy native observer corpus. It has no independent Source-observation algorithm or gold; Source owners/profiles remain.",
+      "alreadyRetired": false
+    }
+  ]
+}
