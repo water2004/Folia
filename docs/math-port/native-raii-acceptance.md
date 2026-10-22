@@ -1774,6 +1774,21 @@ the actual gate summary. Direct class_binding consumers28 to23, four inc remain.
 Proofs and logs are under `build/math-port/finish-old-tests/classes/`; no full
 native run is claimed for this batch, pending the final combined regression run.
 
+### Inheritance observer closure (2026-10-23)
+
+Eight old C++ observers, five freeze mappers and five dedicated runners retire.
+The boundary's 249 cases, 350 expected values and seven pins are retained as
+structured gold decoded from the frozen fixture. Existing profiles remain
+byte-identical. The completed boundary249, inherit-from9344 and row6 Source
+proofs are reused after exact loader/profile relocation; the six independent
+inheritance modes pass699/128/16/8/16/8 rows. Consumer54 remains within the
+previously checked sparse299 corpus. All 10528 original rows are accounted for;
+Source protocol observations remain offline and native inheritance remains at
+the existing typed family owners. No production code or native binary changes.
+The shared table gate removes only row-inherit6; direct class_binding test
+consumers decrease23 to16, four inc unchanged. Evidence is under
+`build/math-port/finish-old-tests/inheritance/`.
+
 ### Current Debug and self-contained Release MSI (2026-10-21)
 
 Dependency setup passes. The supported Debug application build and actual
