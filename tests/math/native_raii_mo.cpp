@@ -171,6 +171,20 @@ suite typed_mml_mo = [] {
         expect(static_cast<bool>(right.getForms() ==
                std::vector<std::u16string>{u"postfix", u"infix", u"prefix"}));
     };
+    "mo forms select prefix and postfix at both ends of a two child row"_test = [] {
+        MmlDocument document;
+        auto &row = document.factory().make(NodeKind::mrow);
+        auto &left = makeMo(document, u"(");
+        auto &right = makeMo(document, u")");
+        document.append(row, left);
+        document.append(row, right);
+
+        expect(static_cast<bool>(left.getForms() ==
+               std::vector<std::u16string>{u"prefix", u"infix", u"postfix"}));
+        expect(static_cast<bool>(right.getForms() ==
+               std::vector<std::u16string>{u"postfix", u"infix", u"prefix"}));
+    };
+
     "mo accent predicates follow script roles and typed attribute presence"_test = [] {
         MmlDocument document;
         auto &mover = dynamic_cast<MmlMover &>(document.factory().make(NodeKind::mover));

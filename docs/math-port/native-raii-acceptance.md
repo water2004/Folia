@@ -1753,6 +1753,27 @@ native binary remain byte-identical. Evidence is
 `build/math-port/finish-old-tests/returns/{source-proof,mapping-validation,retirement-proof}.json`.
 This is not a claim that the remaining object-protocol runner executes natively.
 
+### Class observer closure and real two-child operator forms (2026-10-23)
+
+Five class observers retain all3/432/14/9/28 Source observations. Their original
+oracles now only execute Source and check the unchanged complete profiles;
+C++ template generation, fixture paths and unused emitter variables are removed.
+All five Source checks pass. Protected method return representation, callback
+alias/rebind/throw timing and prototype slots remain offline Source evidence.
+Actual mathematical row/cell/class behavior stays at existing native owners.
+The existing Mo owner adds a real two-child row: first operator form order is
+prefix/infix/postfix, last is postfix/infix/prefix. Parallel4 build succeeds and
+the single focused case passes2 assertions. The initial test compile exposed
+Boost.UT's unsupported UTF16-container diagnostic printer; the comparison uses
+the repository's existing boolean form, with production and expectations unchanged.
+
+Five C++ observers and their dedicated base-class gate retire. Shared legacy
+configurations remove only the corresponding fixture/suite: cell14, row28 and
+forms9. The earlier candidate's row32 count was corrected against its28 rows and
+the actual gate summary. Direct class_binding consumers28 to23, four inc remain.
+Proofs and logs are under `build/math-port/finish-old-tests/classes/`; no full
+native run is claimed for this batch, pending the final combined regression run.
+
 ### Current Debug and self-contained Release MSI (2026-10-21)
 
 Dependency setup passes. The supported Debug application build and actual
