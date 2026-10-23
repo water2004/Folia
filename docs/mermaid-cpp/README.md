@@ -34,6 +34,26 @@ Cytoscape, date calculations) needs its own source and behavior verification.
 
 ## Current state
 
+`folia.mermaid.flowchart::prepare_flowchart` connects shared preparation and
+configuration to owned Flowchart layout input. The current classic-syntax
+stage supports rectangular/rounded/circle/stadium/subroutine/cylinder/diamond/
+hexagon/slanted/flag nodes, plain and quoted Unicode labels, labelled edges,
+normal/thick/dotted/invisible and double-ended links, chains, grouped endpoints,
+subgraphs, directions, classDef/class/style/linkStyle and accessibility metadata.
+Node declaration order, repeated-label replacement, parallel edge ids, compound
+parents and compiled class styles follow the official FlowDB/getData boundary.
+Spacing, padding, curves, inherited direction and titles consume shared config.
+
+This is layout input, not a Flowchart renderer: Dagre coordinates, measurement,
+SVG and application integration are next. HTML/entity/Markdown label adaptation,
+shape metadata, explicit edge ids and interpolation commands are not implemented
+by this stage; unsupported input returns an error. Browser callbacks are outside
+the Folia dependency path. No partial graph escapes failures. Default limits
+are 10,000 nodes/groups, 500 edges (also bounded by site maxEdges), 64 nested
+subgraphs and the shared frontend source budget. Error offsets refer to prepared
+UTF-16 text. The representative oracle compares the original parser/DB's layout
+nodes and edges, metadata, styles and configuration with the native result.
+
 `folia.platform.mermaid_renderer::render_mermaid` is an opt-in Packet/Pie
 source-to-SVG entry. It composes the shared frontend, family configuration,
 default/dark theme values, parsing, layout, font selection, real DirectWrite
