@@ -204,7 +204,6 @@ inline void project_inline_nodes(
                 auto n = element("del");
                 project_inline_nodes(n, doc, item.children, limitations);
                 append_node(parent, std::move(n));
-                limitation(limitations, "gfm-strikethrough-extension");
                 break;
             }
             case K::CodeSpan: {
@@ -403,16 +402,32 @@ inline bool project_block(
             append_node(parent, std::move(n));
             return true;
         }
-        case BlockKind::List: {
+        case BlockKind::List:
+        case BlockKind::TaskList: {
             auto const& list = block.list_special();
             std::vector<std::pair<std::string, std::string>> attrs;
             if (list.ordered && list.start != 1) attrs.emplace_back("start", std::to_string(list.start));
             auto n = element(list.ordered ? "ol" : "ul", std::move(attrs));
             for (auto const& item : block.children) {
                 auto li = element("li");
+                const bool task_item = item.kind == BlockKind::TaskListItem;
+                bool checkbox_pending = task_item;
+                auto checkbox_attrs = std::vector<std::pair<std::string, std::string>>{
+                    {"disabled", ""}, {"type", "checkbox"}};
+                if (task_item && item.item_special().checked) checkbox_attrs.emplace_back("checked", "");
+                auto checkbox = task_item ? element("input", std::move(checkbox_attrs)) : Node{};
+                auto append_checkbox = [&](Node& target) {
+                    append_node(target, std::move(checkbox));
+                    checkbox_pending = false;
+                    auto const& marker = item.item_special().marker;
+                    if (!marker.empty() && (marker.back() == U' ' || marker.back() == U'\t')) {
+                        append_text(target, utf8(std::u32string_view(marker).substr(marker.size() - 1)));
+                    }
+                };
                 for (auto const& child : item.children) {
                     if (list.tight && child.kind == BlockKind::Paragraph) {
                         if (!child.inline_content.source.empty()) {
+                            if (checkbox_pending) append_checkbox(li);
                             if (child.inline_content.syntax_mode == InlineSyntaxMode::HtmlText) {
                                 append_raw_html(li, utf8(child.inline_content.source) + "\n");
                             } else {
@@ -426,10 +441,18 @@ inline bool project_block(
                                     limitations);
                             }
                         }
+                    } else if (!list.tight && child.kind == BlockKind::Paragraph && checkbox_pending) {
+                        auto p = element("p");
+                        append_checkbox(p);
+                        auto semantic_nodes = semantic_inline_nodes(
+                            child.inline_content, InlineBlockWhitespacePolicy::Paragraph);
+                        project_inline_nodes(p, child.inline_content, semantic_nodes, limitations);
+                        append_node(li, std::move(p));
                     } else {
                         project_block(li, child, limitations);
                     }
                 }
+                if (checkbox_pending) append_checkbox(li);
                 append_node(n, std::move(li));
             }
             append_node(parent, std::move(n));
@@ -479,7 +502,6 @@ inline bool project_block(
             append_node(parent, std::move(p));
             return true;
         }
-        case BlockKind::TaskList:
         case BlockKind::TaskListItem:
         case BlockKind::CalloutTitle:
         case BlockKind::MathBlock:
@@ -507,6 +529,51 @@ inline bool project_block(
                     append_node(parent, placeholder("extension", "kind", "UnsupportedMarkup"));
                     limitation(limitations, "block-extension:UnsupportedMarkup");
                 }
+            } else if (block.kind == BlockKind::Table) {
+                auto table = element("table");
+                auto const& table_data = block.table_special();
+                auto alignment = [&](std::size_t column) -> std::optional<std::string> {
+                    if (column >= table_data.table_aligns.size()) return std::nullopt;
+                    switch (table_data.table_aligns[column]) {
+                        case TableAlignment::Left: return "left";
+                        case TableAlignment::Center: return "center";
+                        case TableAlignment::Right: return "right";
+                        case TableAlignment::None: return std::nullopt;
+                    }
+                    return std::nullopt;
+                };
+                for (auto const& row : block.children) {
+                    const bool header = row.table_special().table_header_row;
+                    auto tr = element("tr");
+                    for (std::size_t column = 0; column < row.children.size(); ++column) {
+                        auto const& cell = row.children[column];
+                        std::vector<std::pair<std::string, std::string>> attrs;
+                        if (auto align = alignment(column)) attrs.emplace_back("align", *align);
+                        auto th = element(header ? "th" : "td", std::move(attrs));
+                        auto semantic_nodes = semantic_inline_nodes(
+                            cell.inline_content, InlineBlockWhitespacePolicy::Paragraph);
+                        project_inline_nodes(th, cell.inline_content, semantic_nodes, limitations);
+                        append_node(tr, std::move(th));
+                    }
+                    if (header) {
+                        auto thead = element("thead");
+                        append_node(thead, std::move(tr));
+                        append_node(table, std::move(thead));
+                    } else {
+                        if (!table.children.empty() && table.children.back().node
+                            && table.children.back().node->tag == "tbody") {
+                            append_node(*table.children.back().node, std::move(tr));
+                        } else {
+                            auto tbody = element("tbody");
+                            append_node(tbody, std::move(tr));
+                            append_node(table, std::move(tbody));
+                        }
+                    }
+                }
+                append_node(parent, std::move(table));
+            } else if (block.kind == BlockKind::TaskListItem) {
+                append_node(parent, placeholder("extension", "kind", "orphan-task-list-item"));
+                limitation(limitations, "block-extension:orphan-task-list-item");
             } else if (block.kind == BlockKind::HtmlContainer) {
                 append_node(parent, placeholder("html-policy/projection", "kind", block_kind_name(block.kind)));
                 limitation(limitations, "block-html-policy/projection");
@@ -672,6 +739,9 @@ inline void render_html_node(Node const& node, std::string& out) {
     }
     if (!node.html_prefix.empty()) out += node.html_prefix;
     else html_start_tag(out, node.tag, node.attrs);
+    const bool table_structure = node.tag == "table" || node.tag == "thead"
+        || node.tag == "tbody" || node.tag == "tr";
+    if (table_structure) out.push_back('\n');
     for (const auto& child : node.children) {
         if (child.node) render_html_node(*child.node, out);
         else append_html_text(out, child.text);
@@ -680,7 +750,9 @@ inline void render_html_node(Node const& node, std::string& out) {
     else if (node.html_prefix.empty() && !html_void_element(node.tag)) out += "</" + node.tag + ">";
     // These line endings belong to generated Markdown block markup. They
     // matter inside an open raw HTML element and even within an HTML comment.
-    if (is_block(node.tag)) out.push_back('\n');
+    if (is_block(node.tag) || table_structure || node.tag == "td" || node.tag == "th") {
+        out.push_back('\n');
+    }
 }
 
 inline std::string render_html(Node const& root) {
@@ -724,6 +796,13 @@ inline MarkdownDialect dialect() {
     d.wiki_links = false;
     d.tables = {false, false};
     d.diagrams = {false, false, false};
+    return d;
+}
+
+inline MarkdownDialect gfm_dialect() {
+    auto d = dialect();
+    d.gfm = {true, true, true, true};
+    d.tables = {true, true};
     return d;
 }
 

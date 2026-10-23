@@ -653,6 +653,7 @@ list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/platform/")
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/encoding/")
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/math/")
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/parsing/test_commonmark\\.cpp$")
+list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/parsing/test_gfm\\.cpp$")
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/parsing/test_md4c_reference\\.cpp$")
 target_sources(FoliaTests PRIVATE
     ${FOLIA_TEST_SRC})
@@ -935,6 +936,24 @@ add_test(NAME FoliaCommonMarkTests
         --executable "$<TARGET_FILE:FoliaCommonMarkTests>"
         --output "${CMAKE_CURRENT_BINARY_DIR}/markdown-conformance")
 set_tests_properties(FoliaCommonMarkTests PROPERTIES LABELS "commonmark;conformance")
+
+set(FOLIA_GFM_CASES "${CMAKE_CURRENT_BINARY_DIR}/gfm/gfm_cases.inc")
+add_custom_command(OUTPUT "${FOLIA_GFM_CASES}"
+    COMMAND python "${CMAKE_CURRENT_SOURCE_DIR}/tools/markdown-conformance/prepare_gfm.py"
+        --output "${FOLIA_GFM_CASES}"
+    DEPENDS tools/markdown-conformance/prepare_gfm.py tools/markdown-conformance/prepare.py
+        tools/markdown-conformance/gfm-sources.lock.json
+    VERBATIM)
+add_executable(FoliaGfmTests EXCLUDE_FROM_ALL tests/main.cpp tests/parsing/test_gfm.cpp "${FOLIA_GFM_CASES}")
+target_compile_features(FoliaGfmTests PRIVATE cxx_std_23)
+set_target_properties(FoliaGfmTests PROPERTIES CXX_MODULE_STD ON)
+target_include_directories(FoliaGfmTests PRIVATE tests "${CMAKE_CURRENT_BINARY_DIR}/gfm")
+target_link_libraries(FoliaGfmTests PRIVATE folia_core Boost::ut_module)
+add_test(NAME FoliaGfmTests
+    COMMAND python "${CMAKE_CURRENT_SOURCE_DIR}/tools/markdown-conformance/run.py" --suite gfm
+        --executable "$<TARGET_FILE:FoliaGfmTests>"
+        --output "${CMAKE_CURRENT_BINARY_DIR}/gfm-conformance")
+set_tests_properties(FoliaGfmTests PROPERTIES LABELS "gfm;conformance")
 
 option(FOLIA_BUILD_MD4C_REFERENCE_TESTS "Build md4c controls for failing official CommonMark cases" OFF)
 if(FOLIA_BUILD_MD4C_REFERENCE_TESTS)
