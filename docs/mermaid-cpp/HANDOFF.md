@@ -1,6 +1,30 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-23, init mapping and clean merge verified
+## Current checkpoint - 2026-10-23, configuration session batch in progress
+
+- User authorizes public fork zhao0349/Folia pushes and verified updates to
+  https://github.com/water2004/Folia/pull/1. Keep OPEN; DO NOT merge.
+- Verification branch `codex/mermaid-cpp-session`, delivery branch remains
+  `feat/mermaid-cpp-port` at `d0dc8920`. Baseline delivery CI 39901224923
+  passed all four Windows jobs; upstream PR is open at that delivery head.
+- Selected boundary: original config.ts lifecycle, owned per-session state,
+  default/dark re-derivation, scoped appearance, secure directive replay,
+  initialize snapshots and reset. No global singleton or renderer integration.
+- Oracle executes the complete pinned config.ts in fresh scopes with original
+  dependencies. Compare full JSON-data state via lossless recursive deltas,
+  not selected properties. Defaults omit undefined values and family callbacks;
+  those callbacks are never invoked by this session boundary.
+- Native restrictions will explicitly exclude unported theme derivation,
+  non-mapping command inputs, object arrays and containers below depth two
+  that would require JS cross-layer identity; secure keys must be string lists.
+  Native failures are transactional; caller inputs/getter results own their data.
+- Oracle generation completed: 69 scenarios / 584 steps, with generated default
+  data. Native lifecycle and focused ownership/budget tests are written but not
+  yet compiled. Next: local oracle check and small commits, then four-job Windows
+  CI before delivery. Local MSVC/CMake are still unavailable. No agents, native
+  builds, local processes or ignored implementation candidates are live.
+
+## Init mapping and clean merge verified (historical)
 
 - User authorizes public fork zhao0349/Folia pushes and verified updates to
   https://github.com/water2004/Folia/pull/1. Keep it OPEN; DO NOT merge.

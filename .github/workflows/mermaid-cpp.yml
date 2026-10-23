@@ -137,6 +137,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/init-merge-oracle.mjs --check
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/session-oracle.mjs --check
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/theme-oracle.mjs --check
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/generate-themes.mjs --check
