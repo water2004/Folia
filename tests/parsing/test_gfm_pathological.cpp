@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <iterator>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -20,6 +21,7 @@ import folia.core.block_source;
 import folia.core.dialect;
 import folia.core.utf;
 #include "support/commonmark_projection.hpp"
+#include "support/gfm_capacity_projection.hpp"
 
 using namespace folia;
 using namespace boost::ut;
@@ -261,9 +263,20 @@ void run_case(Case which) {
     dialect.gfm.tables = true;
     dialect.tables = {true, true};
     const auto parsed = parse_text(1, input, dialect);
-    const auto html = which == Case::NestedStrongEmph
-        ? project_deep_emphasis(parsed.document.root)
-        : folia::test::commonmark::project(parsed.document.root).projected_html;
+    std::string html;
+    if (which == Case::NestedBlockquotes || which == Case::DeepLists) {
+        const auto fixture = which == Case::NestedBlockquotes
+            ? folia::test::gfm_capacity::ContainerFixture::NestedBlockquotes
+            : folia::test::gfm_capacity::ContainerFixture::DeepLists;
+        const auto projected = folia::test::gfm_capacity::project_pathological_containers(
+            parsed.document.root, fixture);
+        expect(projected.has_value()) << "unexpected AST/CST/source shape for iterative container projector";
+        html = projected.value_or(std::string{});
+    } else if (which == Case::NestedStrongEmph) {
+        html = project_deep_emphasis(parsed.document.root);
+    } else {
+        html = folia::test::commonmark::project(parsed.document.root).projected_html;
+    }
     const auto semantics_match = has_expected_semantics(which, html);
     expect(semantics_match) << "pinned cmark-gfm semantic output pattern; HTML bytes=" << html.size()
         << "; head=" << html.substr(0, 160)
@@ -272,16 +285,8 @@ void run_case(Case which) {
     expect(saved == input) << "character-exact Markdown save, input bytes=" << input.size();
 
     std::size_t inline_nodes = 0;
-    auto visit = [&](auto&& self, const BlockNode& block) -> void {
-        if (is_editable_block_owner(block.kind)) {
-            const auto& document = block.inline_content;
-            expect(flatten_tokens(document.tree, document.source) == document.source);
-            expect(serialize_lossless(document.tree, document.source) == document.source);
-            ++inline_nodes;
-        }
-        for (const auto& child : block.children) self(self, child);
-    };
-    visit(visit, parsed.document.root);
+    expect(folia::test::gfm_capacity::pathological_inline_sources_lossless(
+        parsed.document.root, inline_nodes));
     expect(inline_nodes > 0_u) << "parser produced editable content nodes";
 }
 
