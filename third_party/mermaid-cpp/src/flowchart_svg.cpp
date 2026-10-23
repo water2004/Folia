@@ -50,6 +50,37 @@ void shorten(FlowchartPoint& p,FlowchartPoint neighbor,double amount) {
     const auto dx=neighbor.x-p.x,dy=neighbor.y-p.y,length=std::hypot(dx,dy);
     if(length>0) {p.x+=amount*dx/length;p.y+=amount*dy/length;}
 }
+// utils.calcLabelPosition/calculatePoint: midpoint by polyline distance, with
+// the original five-decimal interpolation. This is not the curve's midpoint.
+FlowchartPoint label_midpoint(std::span<const FlowchartPoint> points) {
+    double distance=0;
+    for(std::size_t i=1;i<points.size();++i) distance+=std::hypot(points[i].x-points[i-1].x,points[i].y-points[i-1].y);
+    distance/=2;
+    for(std::size_t i=1;i<points.size();++i) {
+        const auto a=points[i-1],b=points[i];const double length=std::hypot(b.x-a.x,b.y-a.y);
+        if(length==0) return a;
+        if(length<distance) {distance-=length;continue;}
+        const double ratio=distance/length;
+        if(ratio<=0) return a;if(ratio>=1) return b;
+        return {std::floor(((1-ratio)*a.x+ratio*b.x)*1e5+0.5)/1e5,
+            std::floor(((1-ratio)*a.y+ratio*b.y)*1e5+0.5)/1e5};
+    }
+    return points.back();
+}
+// Preserve utils.isLabelCoordinateInPath's literal rounded-coordinate lookup.
+// It controls whether resolveEdgeLabelPosition applies the clipping delta.
+bool label_coordinate_in_path(FlowchartPoint point,const std::string& path) {
+    static const std::regex decimal(R"(\d+\.\d+)");
+    std::string sanitized;std::size_t cursor=0;
+    for(auto it=std::sregex_iterator(path.begin(),path.end(),decimal);it!=std::sregex_iterator();++it) {
+        sanitized+=path.substr(cursor,it->position()-cursor);
+        sanitized+=number(std::floor(std::stod(it->str())+0.5));
+        cursor=it->position()+it->length();
+    }
+    sanitized+=path.substr(cursor);
+    return sanitized.find(number(std::floor(point.x+0.5)))!=std::string::npos ||
+        sanitized.find(number(std::floor(point.y+0.5)))!=std::string::npos;
+}
 // prepareLayoutForDagre supplies the actual layout graph, including its two
 // labelRect dummy nodes per self loop. getEdgesToRender then collapses the
 // three segments into one compact logical loop using the dummy placement hint.
@@ -174,9 +205,16 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
             const auto a=ids.at(e.start),b=ids.at(e.end);
             points.front()=intersect(layout->nodes[a],graph.nodes[a].shape,points[1]);
             points.back()=intersect(layout->nodes[b],graph.nodes[b].shape,points[points.size()-2]);
+            const auto clipped_points=points;
             if(e.arrow_start==u"arrow_point") shorten(points.front(),points[1],4);
             if(e.arrow_end==u"arrow_point") shorten(points.back(),points[points.size()-2],4);
-            svg+="<path class=\"flowchart-link\" d=\""+curve_path(points,e.curve==u"linear")+"\" fill=\"none\" stroke=\""+theme.line+
+            const auto path=curve_path(points,e.curve==u"linear");
+            if(auto& label=layout->edges[i].label;label &&
+                !label_coordinate_in_path(clipped_points[clipped_points.size()/2],path)) {
+                const auto before=label_midpoint(layout->edges[i].points),after=label_midpoint(clipped_points);
+                label->x+=after.x-before.x;label->y+=after.y-before.y;
+            }
+            svg+="<path class=\"flowchart-link\" d=\""+path+"\" fill=\"none\" stroke=\""+theme.line+
                 "\" stroke-width=\""+(e.stroke==u"thick"?std::string("3.5"):e.stroke==u"invisible"?std::string("0"):std::string("1"))+"\"";
             svg+=e.stroke==u"dotted"?" stroke-dasharray=\"2\"":" stroke-dasharray=\"0\"";
             if(e.arrow_start==u"arrow_point") svg+=" marker-start=\"url(#flow-point-start)\"";

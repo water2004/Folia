@@ -17,6 +17,11 @@
   placement. Exit: same-host official/native SVG comparisons in four directions
   and both themes, including label positions and viewport containment. Recursive
   cluster measurement/painting is the next remaining Flowchart adapter.
+- Run 39968512435 compiled the new adapters and passed the native suites, but
+  the newly added label comparison exposed an existing decision-graph label
+  offset after diamond intersection. The eight new self-loop SVG comparisons
+  pass with that run's downloaded artifacts. Port the original label midpoint
+  correction and rerun the full gate; this run is diagnostic, not acceptance.
 - Work on fork/mermaid-development; cherry-pick only functional/tests/public-doc
   commits into the existing contribution worktree. Keep upstream PR #1 open.
 
