@@ -56,3 +56,11 @@ from Khroma 2.1.0 by Fabio Spampinato, under the MIT license reproduced in
 `KHROMA-LICENSE`. Source and distribution hashes are recorded in
 `docs/mermaid-cpp/source-lock.json`. Khroma is an oracle-only Node dependency;
 the shipped native library contains no JavaScript runtime.
+
+## es-toolkit compatibility merge
+
+The native cleanAndMerge operation follows es-toolkit 1.45.1's compatibility
+merge, pinned to the dependency embedded in the official Mermaid 12.2.0 bundle.
+The MIT notice, including the OpenJS/Lodash compatibility attribution, is
+reproduced in `ES-TOOLKIT-LICENSE`. The package and transitive helper sources are
+hash-locked in `docs/mermaid-cpp/source-lock.json` and used only by the oracle.

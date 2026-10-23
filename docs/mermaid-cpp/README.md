@@ -231,6 +231,31 @@ sanitizer, merge and appearance observations, including explicit dense-tree
 restrictions, plus the generated 720-key registry and appearance defaults.
 Successful raw detection is not permission to apply a setting.
 
+`detect_init_config` ports the original detectInit directive-to-diagram mapping.
+One directive retains its raw arguments; multiple directives sanitize and merge
+with assignWithDepth first. A caller-owned detector is invoked once on unchanged
+source whenever the resulting arguments are truthy, even without a `config`
+property. Errors propagate; only `flowchart-v2` maps to `flowchart`. This callback
+boundary does not implement the diagram registry or config.ts session lifecycle.
+Prototype setter effects fail explicitly; primitive setter arguments are ignored
+and ordinary own `__proto__` data remains data. Results are owned and optional
+(absent models JavaScript undefined), with directive and config resource bounds.
+
+`clean_and_merge_config` ports `merge({}, defaults, data)` independently of
+assignWithDepth. Arrays merge by index, primitives replace nested values, root
+primitives are ignored and recursive `__proto__` writes are skipped. The oracle
+pins es-toolkit 1.45.1, matching the official full Mermaid bundle; the newer
+transitive core-package dependency has different array-null behavior. Internal
+undefined values, holes and array properties survive intermediate merges; a
+final result outside the dense ConfigValue tree is rejected rather than silently
+normalized. Array-like conversions and array length coercions follow the original
+plain-data behavior. Owned inputs exclude functions, symbols, custom prototypes,
+cycles and shared identities. Input/output and cumulative intermediate nodes/text
+are bounded; no JavaScript runtime or shared mutable config is introduced.
+The original bodies provide 1,746 init mapping observations and 1,210 clean merge
+observations (the latter cross-checked against the official full bundle), plus
+native ownership, input preservation and resource-limit tests.
+
 `derive_theme_variables` resolves the pinned default and dark themes from an
 optional owned override mapping. It preserves the constructor/update/override
 order (including default's extra constructor update), JavaScript short-circuit

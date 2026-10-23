@@ -10,15 +10,16 @@
 - Original detectInit body supplies 1,746 mapping observations with injected
   detector results/errors and call-count checks. Registry dispatch is a later
   boundary. Single directives bypass sanitization; multiple directives do not.
-- Original cleanAndMerge supplies 1,176 observations cross-checked against the
+- Original cleanAndMerge supplies 1,210 observations cross-checked against the
   official full bundle. Pin es-toolkit 1.45.1 (22 hashed dependency files), not
   the core package's newer transitive 1.52.0: array-null behavior differs.
 - Native init mapping and clean merge are implemented with fixture tests,
   ownership/resource checks and explicit dense-output restrictions. Native
-  compile/runtime verification is pending; next push verification branch and
-  inspect all four CI jobs before updating delivery branch/PR. No local builds,
-  agents or ignored candidates. Final array length writes currently require
-  numeric values; review that boundary against further official observations.
+  compile/runtime verification is pending in CI 39899131976 at `77b693e0`.
+  Added array-length coercion and 34 official boundary cases locally; next
+  inspect first CI results, commit these refinements and verify the final head
+  in all four jobs before updating delivery branch/PR. No local builds, agents
+  or ignored implementation candidates.
 - Local MSVC/CMake remain unavailable; native evidence must come from CI.
   Config session lifecycle, dispatch, renderer integration and application
   dependency replacement remain pending. No WinUI/DPI acceptance is claimed.

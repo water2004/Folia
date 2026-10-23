@@ -96,7 +96,7 @@ suite config = [] {
             }
             ++count;
         }
-        expect(count == 1176_u);
+        expect(count == 1210_u);
     };
     "mermaid_clean_merge_ownership_limits_and_undefined_intermediates"_test = [] {
         auto defaults = json(uR"({"a":[null,2],"b":{"x":1}})");

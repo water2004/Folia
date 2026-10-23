@@ -61,6 +61,9 @@ const atoms=[null,false,true,0,-0,3,'','word','中文\ud800',{},[],[1,2],[null,2
   {length:2,0:'a',1:'b'},JSON.parse('{"__proto__":{"bad":1},"constructor":{"prototype":{"x":1}},"toString":{"__proto__":{"x":1}}}')];
 for(const a of atoms) for(const b of [...atoms,undefined]) { addClean(a,b); addClean({v:a},{v:b}); }
 for(const a of [[1,2],[null,2],[{x:1}],[]]) for(const b of [{0:9},{1:8},{2:7},{length:0},{length:4},{length:-1},{custom:1},{constructor:3},{__defineGetter__:{x:1}}]) addClean({v:a},{v:b});
+for(const length of [null,false,true,'',' 0 ','\ufeff1\u2003','0x1','0b1','0o1','+1','+-0','-0','-1',
+  '.0','1.','1e-999','1e999','0e999','0x','-0x0','NaN','Infinity','word','\ud800',[],[null],[1],[1,2],{},
+  {toString:1},'9'.repeat(400)+'e-999','0'.repeat(400)+'1',1.5,3]) addClean({v:[1,2]},{v:{length}});
 let seed=0x1927;
 const random=()=>seed=(Math.imul(seed,1664525)+1013904223)>>>0;
 function tree(depth=0) {
