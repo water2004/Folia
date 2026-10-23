@@ -40,6 +40,8 @@ struct FlowchartLimits {
 // than producing a partial graph. Errors include offsets into prepared UTF-16
 // text (frontmatter preprocessing can change offsets from the original source).
 // Request state is private; failure never changes the session or returns data.
+// As in Folia's render entry, initialize the session with an explicit default
+// (light) or dark theme. The upstream family's redux-color default is unported.
 std::expected<FlowchartInput, std::string> prepare_flowchart(
     std::u16string_view source, const ConfigSession& session, FlowchartLimits limits = {});
 }

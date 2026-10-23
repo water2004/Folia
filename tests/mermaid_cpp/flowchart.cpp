@@ -63,8 +63,15 @@ suite flowchart = [] {
     };
     "mermaid_flowchart_request_isolation_limits_and_explicit_stage_errors"_test = [] {
         auto session = ConfigSession::create(); expect(fatal(session.has_value()));
+        // Folia supplies an explicit light/dark theme. The untouched upstream
+        // Flowchart default selects redux-color, outside the current theme port.
+        const auto site = json(uR"({"theme":"default"})");
+        expect(fatal(session->save_initialize_config(site).has_value()));
+        expect(fatal(session->set_site_config(site).has_value()));
         const auto source = u"graph TD\nA-->B";
-        auto before = prepare_flowchart(source,*session); expect(fatal(before.has_value()));
+        auto before = prepare_flowchart(source,*session);
+        expect(before.has_value()) << (before ? "" : before.error());
+        expect(fatal(before.has_value()));
         FlowchartLimits limits; limits.edges = 0;
         expect(!prepare_flowchart(source,*session,limits));
         limits = {}; limits.nodes = 1;

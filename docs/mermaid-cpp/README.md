@@ -43,6 +43,9 @@ subgraphs, directions, classDef/class/style/linkStyle and accessibility metadata
 Node declaration order, repeated-label replacement, parallel edge ids, compound
 parents and compiled class styles follow the official FlowDB/getData boundary.
 Spacing, padding, curves, inherited direction and titles consume shared config.
+Initialize the supplied session with `theme: default` (light) or `theme: dark`,
+as Folia's render entry does. An untouched upstream Flowchart session selects
+the unported redux-color theme and returns the existing explicit theme error.
 
 This is layout input, not a Flowchart renderer: Dagre coordinates, measurement,
 SVG and application integration are next. HTML/entity/Markdown label adaptation,
