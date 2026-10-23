@@ -161,8 +161,10 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
             style.minimum_label_width=number(member(config,u"minNodeWidth"));
             style.wrapping_width=number(member(config,u"wrappingWidth"));style.padding=number(member(config,u"diagramPadding"));
             if(auto value=theme.find(u"radius")) style.radius=size(*value);
-            const auto html=config.find(u"htmlLabels");
-            style.html_label_spacing=html && html->kind!=ConfigKind::null?boolean(*html):boolean(member(effective,u"htmlLabels"));
+            // getEffectiveHtmlLabels: root override, family override, then true.
+            auto html=effective.find(u"htmlLabels");
+            if(!html || html->kind==ConfigKind::null) html=config.find(u"htmlLabels");
+            style.html_label_spacing=!html || html->kind==ConfigKind::null || boolean(*html);
             style.fill=narrow(text(member(theme,u"mainBkg")));style.border=narrow(text(member(theme,u"nodeBorder")));
             const auto node_text=theme.find(u"nodeTextColor");
             style.text=narrow(text(node_text && node_text->kind==ConfigKind::string && !node_text->string.empty()?*node_text:member(theme,u"textColor")));
