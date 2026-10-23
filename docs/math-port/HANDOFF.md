@@ -5,10 +5,10 @@
 ## 当前 checkpoint：0.3.0 发布构建（2026-10-23）
 
 - 用户明确要求发布 **0.3.0**，此前固定0.2.3的约束属于历史。本次不修改数学运行时或重开暂停事项。
-- 原标签 `v0.3.0` 固定在 `36b0bd43`；首次CI `39978114243` 因全新检出未恢复字体生成npm输入而失败，未创建Release。
+- 原标签 `v0.3.0` 固定在 `36b0bd43`；CI `39978114243` 缺字体npm输入，重跑 `39979817441` 随后发现缺实体生成器的`.reference/MathJax-src` TS输入，均未创建Release。
 - 已补流水线的锁定依赖恢复和按已有标签重新构建入口；保留标签不变，并校验实际checkout与标签commit一致、且属于master。
-- 隔离目录仅从tracked package/lock恢复22包，原生成器实际通过，生成33,550,605字节字体表；日志 `build/release-0.3.0-{font-restore,clean-font-generation}.log`。没有更改Source锁或生成期待值。
-- 下一步：提交CI修复，按原标签重跑既有MSI/校验文件/Release发布步骤，确认最终附件后更新此checkpoint。无agents；字体验证native句柄53338待收尾。
+- 隔离目录从tracked package/lock恢复22包，字体生成33,550,605字节表；再从原MathJax commit `fb987178...` sparse checkout `ts/util`，保留Source锁对应的Windows checkout字节，实体生成也实际通过。两处configure生成器依赖已完整检查；日志 `build/release-0.3.0-{font-restore,clean-font-generation,clean-entity-generation}.log`。未更改Source锁或期待值。
+- 已推送首个CI修复 `ff2609f1`，现补上述TS输入checkout后再次按原标签dispatch。下一步跟踪MSI/校验文件/Release，确认附件后更新本checkpoint。无agents或本地native/build句柄。
 
 ## 已完成：旧测试全部完成（2026-10-23）
 

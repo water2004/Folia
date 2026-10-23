@@ -48,6 +48,20 @@ jobs:
           npm ci --prefix tools/mathjax-bundle --include=dev --ignore-scripts --no-audit --no-fund
           if ($LASTEXITCODE -ne 0) { throw 'Pinned MathJax font input restore failed.' }
 
+      - name: Restore pinned entity-generation sources
+        uses: actions/checkout@v5
+        env:
+          # Preserve the Windows checkout bytes recorded by the Source lock.
+          GIT_CONFIG_COUNT: '1'
+          GIT_CONFIG_KEY_0: core.autocrlf
+          GIT_CONFIG_VALUE_0: 'true'
+        with:
+          repository: mathjax/MathJax-src
+          ref: fb987178c2d279a99b0db5ea02e751691703955e
+          path: .reference/MathJax-src
+          fetch-depth: 1
+          sparse-checkout: ts/util
+
       - name: Initialize the x64 MSVC environment
         uses: ilammy/msvc-dev-cmd@v1
         with:
