@@ -10,12 +10,14 @@
   original sanitizer, assignWithDepth and resolveAppearance bodies, generates
   schema defaults with the original AJV generator (locked AJV 8.18.0), and
   verifies packaged theme source maps against the source lock. Local check passes.
-- Native sanitizer files are an uncommitted implementation candidate in
-  `third_party/mermaid-cpp/src/config_*`. Next: implement merge and appearance
-  selection, consume the fixture in native tests, run four Windows CI jobs.
+- Commits: `9ee6ca72` oracle, `fe532427` bounded sanitizers, `d1cb9998`
+  depth merge/appearance and fixture-driven native tests/CI. No uncommitted
+  implementation candidates. Local config and directive oracle checks pass.
+  Next: push this verification branch, inspect all four Windows CI jobs, fix
+  any native mismatches before fast-forwarding the existing PR branch.
   Theme-name selection is distinct from theme-variable/color derivation, which
   still needs a native implementation. No common frontend integration is claimed.
-- Local MSVC/CMake unavailable. No live builds/agents. Prior head's CI rerun
+- Local MSVC/CMake unavailable. No live local builds/agents. Prior head's CI rerun
   39888412728 was in progress when checked; prior code passed 39886836325.
 
 ## Directive interpretation verified (historical, stage 4c)

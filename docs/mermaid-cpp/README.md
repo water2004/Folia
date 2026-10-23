@@ -96,7 +96,43 @@ independent calls. Default safety limits are 1 Mi UTF-16 source units, depth 64
 (also a hard ceiling), 100,000 values, 4 Mi decoded key/string/type units and
 10,000 scanned directives, including filtered matches. Budgets are cumulative
 within a call, including overwritten JSON properties, and fail explicitly.
-These raw values are not yet sanitized or applied to a renderer.
+These raw values are not automatically sanitized or applied to a renderer.
+
+The configuration primitives now expose two separate, bounded operations:
+`sanitize_directive_config` implements the default-key whitelist, dictionary
+color/icon patterns, CSS brace checks and theme-variable filtering;
+`sanitize_secure_config` removes protected site keys and the original recursive
+tag/data-URL patterns. These reproduce the pinned policies, not a general CSS
+or HTML sanitizer. Both return owned results without mutating inputs.
+
+`assign_config_with_depth` preserves the original depth-two merge semantics:
+object/scalar type conflicts do not clobber, null source fields are skipped
+above the depth boundary, arrays union primitives with SameValueZero, and
+objects at depth zero use shallow assignment. Separate owned objects remain
+distinct array entries. Inputs cannot encode JS object aliases, array holes or
+custom array properties; operations that would create the latter two fail
+explicitly. The fixture retains the official result alongside each restriction.
+
+`resolve_config_appearance` selects `theme`, `look` and `layout` from the
+directive sum, saved directives in reverse order, initialize delta and pinned
+defaults. Diagram-specific values precede root values within each layer, invalid
+theme/look names fall through, and existing section fields stay synchronized.
+It includes the official diagram aliases and theme registry, including the
+literal `"null"` sentinel. It operates on already-sanitized, merged layers;
+it does not implement the full config.ts session lifecycle or derive colors.
+
+All configuration operations preflight the owned inputs before copying. Default
+limits are depth 64 (also a hard ceiling), 100,000 values, 4 Mi UTF-16 key/string
+units and 1,000,000 work steps; array-union comparisons consume work steps.
+Inputs collectively and output separately obey the same size bounds.
+Failures never publish a partial result. Config schema keys and appearance
+defaults are generated from the original schema/AJV pipeline and defaultConfig,
+including keys contributed by the original theme implementation. JavaScript and
+AJV are oracle tools only; they are not native runtime dependencies.
+
+Remaining common frontend work includes detectInit mapping, cleanAndMerge,
+config.ts session updates and default/dark theme-variable/color derivation.
+Theme name precedence alone does not establish native theme rendering parity.
 
 The next frontend boundaries are init sanitization and diagram mapping, config merging and appearance
 precedence (diagram-scoped settings can override globals), and default/dark
@@ -158,6 +194,7 @@ node tools/mermaid-cpp/frontmatter-oracle.mjs --check
 node tools/mermaid-cpp/directive-oracle.mjs --check
 pnpm --dir tools/mermaid-cpp/oracle install --frozen-lockfile --ignore-scripts
 node tools/mermaid-cpp/packet-oracle.mjs --check
+node tools/mermaid-cpp/config-oracle.mjs --check
 node tools/mermaid-cpp/packet-svg-oracle.mjs --check
 node tools/mermaid-cpp/pie-oracle.mjs --check
 node tools/mermaid-cpp/pie-geometry-oracle.mjs --check
@@ -185,8 +222,10 @@ regular expressions on 3,279 observations (1,093 inputs, three filters),
 including malformed JSON, lexical alternatives, quotes, Unicode, comments,
 line endings, duplicate keys, non-finite numbers and error recovery boundaries.
 Native tests separately cover ownership, aggregate budgets, depth ceilings and
-adversarial source sizes. Configuration security and merging are subsequent
-stages; successful raw detection is not permission to apply a setting.
+adversarial source sizes. The separate configuration oracle checks 2,928
+sanitizer, merge and appearance observations, including explicit dense-tree
+restrictions, plus the generated 720-key registry and appearance defaults.
+Successful raw detection is not permission to apply a setting.
 
 The preprocessing oracle isolates and executes the original pinned
 `cleanupText` and `removeDirectives` function bodies, stripping only TypeScript
