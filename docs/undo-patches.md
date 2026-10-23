@@ -27,7 +27,9 @@ search/format/redo, failed-patch atomicity and capacity. Hand-built text operati
 also roll back CST identities. Fixed callout/frontmatter save boundaries and the
 pre-existing WinUI XML/module registration issues exposed by application checks.
 
-No MSI, version bump or push. No further work required for this request; investigate
+The undo task itself did not build an MSI, change the version or push. A subsequent
+explicit release request published v0.3.0 through CI, including this implementation;
+see the current checkpoint in math-port/HANDOFF.md. No further work required for this request; investigate
 new concrete failures without reopening completed audits. The ignored staging helper
 build/undo-stage-foundation.py was one-use only; do not run it against the new HEAD.
 Previous Markdown task complete (markdown-conformance.md).

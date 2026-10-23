@@ -2,13 +2,13 @@
 
 恢复/压缩后先实际读本文。架构、职责和详细验收见 [architecture](native-raii-architecture.md)、[files](native-raii-files.json)、[acceptance](native-raii-acceptance.md)。只复查新变化；ignored候选用 `rg --no-ignore`。
 
-## 当前 checkpoint：0.3.0 发布构建（2026-10-23）
+## 当前 checkpoint：0.3.0 已发布（2026-10-24）
 
 - 用户明确要求发布 **0.3.0**，此前固定0.2.3的约束属于历史。本次不修改数学运行时或重开暂停事项。
-- 原标签 `v0.3.0` 固定在 `36b0bd43`；CI `39978114243` 缺字体npm输入，重跑 `39979817441` 随后发现缺实体生成器的`.reference/MathJax-src` TS输入，均未创建Release。
-- 已补流水线的锁定依赖恢复和按已有标签重新构建入口；保留标签不变，并校验实际checkout与标签commit一致、且属于master。
-- 隔离目录从tracked package/lock恢复22包，字体生成33,550,605字节表；再从原MathJax commit `fb987178...` sparse checkout `ts/util`，保留Source锁对应的Windows checkout字节，实体生成也实际通过。两处configure生成器依赖已完整检查；日志 `build/release-0.3.0-{font-restore,clean-font-generation,clean-entity-generation}.log`。未更改Source锁或期待值。
-- 已推送首个CI修复 `ff2609f1`，现补上述TS输入checkout后再次按原标签dispatch。下一步跟踪MSI/校验文件/Release，确认附件后更新本checkpoint。无agents或本地native/build句柄。
+- [Release v0.3.0](https://github.com/water2004/Folia/releases/tag/v0.3.0) 已公开并设为latest；[CI 39980955488](https://github.com/water2004/Folia/actions/runs/39980955488) 全部成功。原标签固定在 `36b0bd43`，CI修复位于master `ffae1abd`；通过既有流水线的按标签重跑入口发布，实际checkout与标签一致且属于master。
+- 附件 `Folia-0.3.0-x64.msi` **53,497,523 bytes** 与同名 `.sha256` 均已上传；校验文件与GitHub附件digest一致：`84a26dbbc1c7cff609a9df698b44f5d65d1a78af031325298f1891c05a323bfc`。验收记录 `build/release-0.3.0-published.json`。未安装或交互试用本次CI产物。
+- 前两次CI缺锁定字体npm和实体TS输入，已修复恢复步骤。隔离恢复的84个字体Cpp/inc及实体inc与已测本机构建逐字节一致，未改Source锁或期待值；日志 `build/release-0.3.0-{font-restore,clean-font-generation,clean-entity-generation}.log`。
+- 本次发布无剩余步骤，无活动agents、本地native/build句柄或待处理候选。后续仅响应新任务；以下已完成验收及暂停事项保持原结论。
 
 ## 已完成：旧测试全部完成（2026-10-23）
 
