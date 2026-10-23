@@ -657,6 +657,7 @@ list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/parsing/test_gfm\\.cpp$")
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/parsing/test_gfm_pathological\\.cpp$")
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/parsing/test_inline_cst_ownership\\.cpp$")
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/parsing/test_deep_block_ownership\\.cpp$")
+list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/parsing/test_serializer_deep\\.cpp$")
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/parsing/test_md4c_reference\\.cpp$")
 target_sources(FoliaTests PRIVATE
     ${FOLIA_TEST_SRC})
@@ -995,6 +996,21 @@ set_tests_properties(FoliaParserCompletionTests PROPERTIES LABELS "gfm;generated
 add_test(NAME FoliaDeepBlockOwnershipTests
     COMMAND FoliaGfmPathologicalTests "*deep_block_ownership_copy_move_clear_and_traversal*")
 set_tests_properties(FoliaDeepBlockOwnershipTests PROPERTIES LABELS "gfm;generated;bounded" TIMEOUT 30)
+# Full-depth serializer cases have independent bounded processes.
+add_executable(FoliaDeepSerializerTests EXCLUDE_FROM_ALL
+    tests/main.cpp tests/parsing/test_serializer_deep.cpp)
+target_compile_features(FoliaDeepSerializerTests PRIVATE cxx_std_23)
+set_target_properties(FoliaDeepSerializerTests PROPERTIES
+    CXX_MODULE_STD ON CXX_SCAN_FOR_MODULES ON)
+target_include_directories(FoliaDeepSerializerTests PRIVATE tests)
+target_link_libraries(FoliaDeepSerializerTests PRIVATE folia_core Boost::ut_module)
+add_test(NAME FoliaDeepSerializerQuotes
+    COMMAND FoliaDeepSerializerTests "*deep_quote_50000*")
+add_test(NAME FoliaDeepSerializerLists
+    COMMAND FoliaDeepSerializerTests "*deep_nested_lists_1000*")
+set_tests_properties(FoliaDeepSerializerQuotes FoliaDeepSerializerLists
+    PROPERTIES LABELS "gfm;generated;bounded" TIMEOUT 60)
+
 add_test(NAME FoliaGfmPathologicalRunnerTests
     COMMAND python -m unittest discover
         -s "${CMAKE_CURRENT_SOURCE_DIR}/tools/markdown-conformance/tests"

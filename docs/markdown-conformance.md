@@ -1,124 +1,133 @@
 # Markdown syntax conformance
 
-## Current checkpoint (2026-10-23, expanded GFM validation in progress)
+## Current checkpoint (2026-10-23)
 
-User requested all finer upstream cases and fixes. Starting Git checkpoint is
-984558a4. Production syntax/consumer fixes plus focused tests are committed as
-**5f455590**; corpus/runner integration is committed as **73032708**. Formal GFM corpus is now 1426:
-published 677, repository spec 672 (including two upstream-disabled task cases),
-extensions 30, regressions 26, smart punctuation 16, table-style option one,
-full-info option four. Every record has qualified ID, original numeric ID,
-pinned source/hash/license, profile and original/decoded tab spelling.
+Task: user requested all finer GitHub tests plus fixes. Formal integration/fixes
+are complete; two generated deep-block capacity cases remain in active work.
+Keep the established unified block tree, block-local source/lossless CST, source
+positions, transactions and WYSIWYG behavior. No second parser/model or depth cap.
 
-Latest formal run: `build/gfm-conformance/expanded-final/results.json`, exit 0:
-**1395 strict pass, 20 explicit unscored HTML/no-oracle cases, 11 independently
-verified reference differences, zero unresolved differences**. Source checks:
-1426/1426 lossless CST, exact save and exact fixture-input binding. Nine older
-GFM nested-strong expectations conflict with exact same Markdown in pinned
-CommonMark 0.31.2; two old HTML-comment examples conflict with its current rule.
-Original GFM expectations and strict_diff remain visible; these eleven are
-neither passes nor skips. Policy validates independent modern expectations and
-all source invariants. Smart typography 16, tagfilter three, upstream <IGNORE>
-one are explicit unscored cases; none can hide a native/source failure.
+### Verified commits and results
 
-Production changes: table row syntax gaps + owner IDs (no body copies),
-remapping/formatting/history consumers; table bounds; TableCell code-escape
-projection with source-mapped hidden backslash; item-based task-list semantics
-and existing editing/export consumers; bounded bare-autolinks; exact one/two
-strikethrough delimiter runs; footnote first-line spaces. Test projection uses
-existing AST/CST for footnotes, style attrs and full code-info HTML attributes.
-NUL fixture truncation was fixed with byte-counted views, independently checked
-against full fixture input. Python contracts: **36 passed**.
+Starting checkpoint984558a4. Commits5f455590 (syntax/source consumers),73032708
+(pinned complete corpora),d3e25b1c (inline scope/scanning/RAII),dc50d694 (single-column
+table recognition/source ranges),9ccb4185 (derived NUL display),4feba6e9 (checkpoint),
+edc6be39 (iterative block ownership/walk/index),cd9bade5 (local completion facts).
+No MSI, push or version change requested. Root alone builds, sequentially,
+**parallel4**. Tests link console runtime; stop broad evaluation after abnormal
+native exit, then diagnose a bounded focus. Do not count unrun cases as passes.
 
-Current validation:
-- Core **638 tests / 59625 assertions**, exit 0,
-  `build/gfm-expanded/core-final.log` (all 2125 named entities executed).
-- CommonMark **652/652 strict, lossless and exact save**, exit 0,
-  `build/markdown-conformance/gfm-expanded-final/results.json`.
-- Windows editor **80 tests / 3429 assertions**, exit 0,
-  `build/gfm-expanded/platform-final.log`.
-- Formal GFM final **1395 strict pass / 20 unscored / 11 independently
-  verified reference differences / zero unresolved**, native all source checks
-  1426/1426. `build/gfm-conformance/expanded-final/results.json`, exit 0.
-- Python main contracts **36 passed**, isolated generated runner **11 passed**.
+Formal corpus **1426**: published677, cmark spec672 (incl2 upstream-disabled
+retained cases), extensions30, regressions26, smart16, style-option1, full-info4.
+Pinned cmark-gfm27d942c8b0a62d192f616e5bf3578f4b6a89e180. Every fixture retains
+qualified ID, input/HTML, source/hash/license/profile/tab transform provenance.
+Input binding is independently checked; C++ views include byte length for NUL.
 
-Separate full-size generated-input suite is NOT complete; all 21 exact upstream
-inputs and predicates are retained. Full run `build/gfm-expanded/generated-third.json`
-ran all cases without abnormal exits: **10 pass / 11 fail** (four semantics,
-seven 10s timeouts). This is separate from the fully resolved formal corpus.
-Generated tests are isolated per process; do not turn timeouts into skips.
+Latest regression after canonical Batch D integration (all exit0):
+- GFM **1395 strict pass /20 unscored /11 independently verified reference
+  differences /0 unresolved**; all1426 lossless/exact-save/input checks pass.
+  `build/gfm-conformance/serializer/results.json`.
+- Nine old nested-strong expectations conflict with exact same Markdown in pinned
+  CM0.31.2; two old HTML comments conflict its current rule. Original GFM HTML and
+  strict_diff stay visible; verified differences are neither passes nor skips.
+- Unscored: smart typography16, tagfilter3, upstream IGNORE/no HTML oracle1.
+  Source/native assertions still run. Policy cannot hide implementation failures.
+- CommonMark **652/652 strict/source/save**,
+  `build/markdown-conformance/serializer/results.json`.
+- Core **672 tests /491236 assertions**, `build/gfm-expanded/core-serializer.log`.
+- Windows editor **80 tests /3429 assertions**, `platform-serializer.log`.
+- Python main36 + isolated-runner11 contracts pass. Entity table2125 cases execute
+  in core. Logs above are under `build/gfm-expanded/` unless explicitly named.
 
-Capacity fixes committed as **d3e25b1c** (inline scopes/scans/RAII),
-**dc50d694** (table recognition + source-range lookup), **9ccb4185** (NUL display):
-- Inline bracket close index/read-only nested-link preflight, eligible emphasis
-  opener categories and pair lookup; one shared dispatch engine with explicit
-  emphasis frames. Real matched nesting is preserved; unmatched opener errors
-  become independent source-preserving spans instead of deep error tails.
-- InlineCstNodes remains vector-compatible, with iterative copy/destruction;
-  node aggregate status/noexcept move/shared metadata/NodeIds are preserved.
-  Symbol derivation uses iterative inline DFS. Ownership focus at 130000 levels
-  passed 6 assertions (`owner-focus.log`). Exact upstream nested emphasis65000
-  passed in 3.797s, then 3.422s; openers/closers65000 passed about1s each.
-- Incomplete link right-parenthesis index; parser source-range tail lookup avoids
-  repeated linear scans; pipe-less single-column tables/VT+FF marker whitespace,
-  while setext precedence is preserved. Root reviewed these candidates.
-- Generated adapter now uses the actual upstream profile (pure CM + table),
-  contiguous regex repetitions/search vs anchored predicates, and direct iterative
-  CST projection for the deep emphasis fixture. Runner aggregates multiple UT
-  suite summaries; abnormal exits stop evaluation. Python runner **11 passed**.
-- Indexed code runs/HTML terminators (escaped run starts/clipped scope ends),
-  necessary right-parenthesis preflight and shared angle-autolink stopper index
-  eliminate repeated suffix scans. NUL visible text/render/HTML sinks replace
-  U+0000 with U+FFFD without touching source/save/ranges/math input. Render uses
-  its existing source-attachment traversal; no extra rendering pass.
-- Read-only table recognition now validates header+delimiter before constructing
-  cells. This preserves the existing paste inline-reparse count (3), rather than
-  parsing rejected ordinary paragraphs again. Focus25 assertions passed.
+Capacity tests keep all21 original full-size inputs and upstream predicates,
+profile pure CommonMark+table. Latest `build/gfm-expanded/nondeep-current.json`:
+**19 pass /0 fail /2 not_run**. Two known earlier timeouts were deliberately not
+repeated until fixed: quotes50000 and lists1000. Final full21 not yet passed.
+Prior `generated-third.json` was10pass/11fail; its other eleven issues are resolved.
+Original emphasis65000 now2.875s; image/link1600009.750s; code4999 runs/12.5MB1.750s;
+comments3000001.453s; table300008.859s; references499997.797s. No abnormal exit.
 
-Completed checks after these fixes:
-- CommonMark after deep emphasis, before latest code/link/table/NUL edits:
-  **652/652**, `build/markdown-conformance/gfm-deep/results.json`.
-- `build/gfm-expanded/fourth-focus.json`: image/link160000 pass11.203s;
-  nested brackets50000 pass0.141s; tables30000 pass8.922s; references49999 pass8.063s.
-- `fifth-focus.json` after latest scans/profile/NUL: original deep emphasis65000
-  pass3.172s; bracket-paren80000 pass0.203s; embeddedNUL pass0.015s; increasing
-  ticks4999 runs/12.5MB pass1.829s; angle-links30000 pass0.281s; comments300000
-  pass1.453s. Native NUL render/query/source tests31 assertions passed.
-- All capacity paths except quotes50000/lists1000 now have successful native
-  focused evidence (a final combined report is still pending).
+Accepted repairs: one inline dispatch with explicit matched-emphasis frames and
+eligible opener index; scoped bracket/read-only link preflight; cached code runs,
+HTML terminators, angle stops and suffix necessary-end test. Unclosed emphasis
+error spans are independent but source-preserving; complete nesting stays real.
+InlineCstNodes is vector-compatible with iterative copy/destruction, aggregate
+node/noexcept move/NodeIds/shared metadata preserved. Inline symbols DFS is
+iterative. Table source stays gap syntax+owner IDs, cells own bodies only; setext
+precedence and exactly3 paste inline reparses remain verified. NUL replacement
+occurs only in derived display/HTML, not source/save/ranges/math input.
 
-Final regression on these three commits (all exit0):
-- Core661 tests /491096 assertions, `build/gfm-expanded/core-scaled-final2.log`.
-- CommonMark652/652 strict/source/save,
-  `build/markdown-conformance/gfm-scaled-final/results.json`.
-- GFM1426:1395 strict pass/20 unscored/11 verified reference differences/0 unresolved,
-  all source/save/input checks pass, `build/gfm-conformance/scaled-final/results.json`.
-- Windows editor80 tests /3429 assertions, `platform-scaled-final.log`.
-- Main Python36 + isolated runner11 contracts pass, `python-*-scaled-final.log`.
-No live native builds. Root alone builds sequentially with **parallel4**.
-Live candidate-only work:
-- Luna `gfm_reference_scaling`: parser completion metadata Batch B, ignored
-  `build/gfm-expanded/block-completion/`. Root approved replacing parser's four
-  serializer probes with transient per-node ending facts, no AST fields or
-  production serializer fallback; must be differential-tested before integration.
-- Luna `gfm_deep_blocks_design`: serializer event/writer algorithm design only,
-  ignored `build/gfm-expanded/deep-block-design/`; no implementation authorized yet.
-- Sol `gfm_emphasis_scaling` delivered UNINTEGRATED Batch A BlockNode iterative
-  copy/destruction + block walks/index, `build/gfm-expanded/deep-blocks/`. Keeps
-  BlockVec/std::vector interface unchanged; candidate tests50000-level lifecycle.
-  Parser/serializer frame implementation not started. Quotes50000/lists1000 remain
-  unresolved: recursive ParseInput copies/maps and subtree serializer probes are
-  O(depth*source). Root has read FRAME_DESIGN.md and owns integration decisions.
-All agents are candidate-only, no native builds/Git. Other agents idle.
+### Current live work and exact next action
 
-Next: verify model Batch A in isolated target, then review Batch B producer-local
-completion facts (the first central formatter-mirroring switch was rejected).
-Batch C/D are candidate work, not verified/integrated. Finish quote/list capacity
-within existing model/responsibilities: no depth cap, source-specific branch,
-reduced scale, parallel old/new parser, or softened oracle. Final combined19-case
-report is pending; original full21 still has two unresolved deep-block cases.
-Ignored candidates live under `build/gfm-expanded/`; use `rg --no-ignore`.
-No MSI/push/version change requested.
+Batch A BlockNode ownership/walk/index committed **edc6be39**:
+`ast.ixx`, `block_tree.ixx`, `document.ixx`, isolated ownership test/CMake.
+BlockVec/std::vector interface unchanged. Exact50000-layer copy/move/path/index/
+clear/RAII focus passed10 assertions, `block-owner-focus.log`. Core661/491096,
+Windows80/3429 and CM652/GFM1426 all retain their verified results after this
+change (`core-block-owner.log`, `platform-block-owner.log`, reports under
+`build/markdown-conformance/block-owner/`, `build/gfm-conformance/block-owner/`).
+
+Batch B local completion facts committed **cd9bade5**, all24 differential
+fixtures/93 assertions passed (`completion-focus3.log`) and full regressions above.
+Parser no longer imports serializer or reserializes subtrees for ending probes.
+Transient Completion{Empty,Other,LineEnding} is produced locally by recognizers;
+nested facts transfer with the existing range pass. The centralized formatter
+switch remains rejected. No completion build is running.
+
+Current candidates are ignored beneath `build/gfm-expanded/deep-blocks/`:
+- Sol `gfm_emphasis_scaling`: Batch C source session/flat container frame engine
+  in `parser/`. Shared Leaf API v1 is frozen in LEAF_ENGINE_CONTRACT.inc. Leaf
+  methods are delivered (paragraph/image, table, code/math, HTML); container
+  dispatch/close/lazy/blank separator routing still incomplete, not integrated.
+Batch D is now integrated UNCOMMITTED in serializer.ixx (public facade), new
+serializer_writer.ixx (line/event planning and iterative emission), new
+serializer_visitor.ixx (single block grammar action stack); the old recursive
+ProjectedText formatter chain is removed. document_block_reparse now calls the
+public fragment API. Writer/visitor/HTML tests are ordinary core tests; deep
+serializer direct-AST cases are a separate bounded target (not ordinary core).
+Before replacement, isolated candidate passed2110 tests/2132 assertions including
+all652+1426 exact text/ordered maps plus edited tables; HTML parity4/25 also
+passed. Logs serializer-parity-all1.log and serializer-html-focus3.log.
+Root fixed vector-reference invalidation and next-line boundary mapping before
+those passes; neither remains unresolved. No runtime dual formatter is shipped.
+Live native build **75731**, `serializer-canonical-deep.log`, is building/running
+the canonical FoliaDeepSerializerTests with CTest60s per case. Finish before a new
+native build. Temporary candidate CMake cache hook is removed by this build's
+configure (`-U CMAKE_PROJECT_folia_INCLUDE`); no hook should remain afterward.
+
+Ignored candidate roots remain under `build/gfm-expanded/deep-blocks/` (find with
+`rg --no-ignore`). Sol and Luna leaf owners are completing C dispatch and adapter
+contract fixes; none are integrated. No agents run native builds or tracked/Git
+edits. `test-projection/` contains an iterative two-case native AST HTML streamer
+and bounded1/2/8-depth comparison tests. First comparison differed only in generated
+HTML formatting; exact tag gaps/list separators are normalized only in the bounded
+comparison. Latest normalization is not run yet; helper not integrated.
+
+Accepted C decisions: no unresolved image/table/paragraph alternative trees.
+Block grammar fixes leaf boundaries before final inline CST/definitions.
+Only complete sole-image Paragraphs with no CR/LF promote to existing atomic
+ImageBlock. Multiline remains Paragraph+inline image. Setext/table precedence
+and image+text paragraphs follow normal block grammar. Raw HTML type7 determines
+its full block boundary first; only a sole complete img HTML CST (surrounding
+whitespace only) invokes existing ImageBlock factory/envelope/safe dimensions.
+Other type7 stays HtmlText Paragraph. No second HTML parse or early line consume.
+Fresh NodeId numeric allocation order is not invariant; unique IDs, stable
+untouched IDs on edit, source anchors, selection and history remain mandatory.
+Partial same-line math closes use accept_leaf_prefix, retain suffix with logical
+line-start false; complete closing EOL is consumed but outside owner source.
+
+Next: commit verified D separately; compile frozen C helper snapshot using
+`build/gfm-expanded/build-leaf-helper.bat` (isolated FoliaLeafSourceTests, root
+alone, parallel4). That configure enables ignored
+`deep-blocks/leaf-helper-verify/snapshot-hook.cmake`; unset cache hook with CMake
+`-U CMAKE_PROJECT_folia_INCLUDE` when done. Snapshot includes source-session,
+accumulator, HTML/code/image helpers and bounded projector comparison tests.
+Fix helper compiler/runtime failures before broad runs. Sol's parser.candidate.ixx
+now has actual frame dispatch/open-close, but is explicitly NOT COMPILE-READY:
+leaf hunks/simple leaves/callout/blank routing still incomplete. No C parser
+integration or capacity-pass claim. Original quotes50000/lists1000 parser cases
+must pass unchanged semantics/source/save/lifecycle;19/21 currently pass, two
+known deep cases notrun. Keep this checkpoint current; old messages never override.
 
 ## Historical checkpoints
 
