@@ -37,7 +37,7 @@ for(const [name,source] of ${JSON.stringify(cases)}) {
     fill:getComputedStyle(shape).fill,stroke:getComputedStyle(shape).stroke};
   });
   const edges=[...host.querySelectorAll('.flowchart-link')].map(p=>{
-    const length=p.getTotalLength();return {length,stroke:getComputedStyle(p).stroke,points:Array.from({length:7},(_,i)=>{const a=p.getPointAtLength(length*i/6);return {x:a.x,y:a.y};})};
+    const length=p.getTotalLength();return {length,stroke:getComputedStyle(p).stroke,dash:getComputedStyle(p).strokeDasharray,thickness:getComputedStyle(p).strokeWidth,points:Array.from({length:7},(_,i)=>{const a=p.getPointAtLength(length*i/6);return {x:a.x,y:a.y};})};
   });
   result.push({name:name+'-'+theme,source,theme,svg,nodes,edges});host.remove();
  }

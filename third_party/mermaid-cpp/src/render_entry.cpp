@@ -157,7 +157,6 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
             const auto look=text(member(effective,u"look"));
             if(look!=u"classic") return std::unexpected("Native Flowchart SVG currently requires classic look");
             if(text(member(effective,u"layout"))!=u"dagre") return std::unexpected("Native Flowchart requires Dagre layout");
-            style.neo=look==u"neo";
             style.font_family=text(member(theme,u"fontFamily"));style.font_size=size(member(theme,u"fontSize"));
             style.minimum_label_width=number(member(config,u"minNodeWidth"));
             style.wrapping_width=number(member(config,u"wrappingWidth"));style.padding=number(member(config,u"diagramPadding"));
@@ -165,7 +164,9 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
             const auto html=config.find(u"htmlLabels");
             style.html_label_spacing=html && html->kind!=ConfigKind::null?boolean(*html):boolean(member(effective,u"htmlLabels"));
             style.fill=narrow(text(member(theme,u"mainBkg")));style.border=narrow(text(member(theme,u"nodeBorder")));
-            style.text=narrow(text(member(theme,u"nodeTextColor")));style.line=narrow(text(member(theme,u"lineColor")));
+            const auto node_text=theme.find(u"nodeTextColor");
+            style.text=narrow(text(node_text && node_text->kind==ConfigKind::string && !node_text->string.empty()?*node_text:member(theme,u"textColor")));
+            style.line=narrow(text(member(theme,u"lineColor")));
             style.label_background=narrow(text(member(theme,u"edgeLabelBackground")));
             return NativeDiagram{std::move(*prepared),FlowchartRenderInput{std::move(*graph),std::move(style)}};
         }

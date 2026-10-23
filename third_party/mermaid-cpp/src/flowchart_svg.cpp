@@ -74,10 +74,10 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
             if(b.width>theme.wrapping_width && theme.wrapping_width>0) return std::unexpected("Flowchart wrapped labels require the wrapping adapter");
             const double w=n.label.empty()?0:std::max(b.width,theme.minimum_label_width),h=n.label.empty()?0:height(b);
             FlowchartNodeBox box;
-            if(n.shape==u"squareRect") box={w+(theme.neo?32:4*n.padding),h+(theme.neo?24:2*n.padding)};
+            if(n.shape==u"squareRect") box={w+4*n.padding,h+2*n.padding};
             else if(n.shape==u"roundedRect") box={w+2*n.padding,h+2*n.padding};
             else if(n.shape==u"diamond") {const double side=w+h+2*n.padding;box={side,side};}
-            else if(n.shape==u"circle") {const double diameter=std::hypot(b.width,h)+(theme.neo?32:n.padding);box={diameter,diameter};}
+            else if(n.shape==u"circle") {const double diameter=std::hypot(b.width,h)+n.padding;box={diameter,diameter};}
             else return std::unexpected("Flowchart SVG shape is not implemented yet");
             boxes.push_back(box);ids.emplace(n.id,i);
         }
@@ -114,7 +114,7 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
             if(e.arrow_end==u"arrow_point") shorten(points.back(),points[points.size()-2],4);
             svg+="<path class=\"flowchart-link\" d=\""+curve_path(points,e.curve==u"linear")+"\" fill=\"none\" stroke=\""+theme.line+
                 "\" stroke-width=\""+(e.stroke==u"thick"?std::string("3.5"):e.stroke==u"invisible"?std::string("0"):std::string("1"))+"\"";
-            if(e.stroke==u"dotted") svg+=" stroke-dasharray=\"3\"";
+            if(e.stroke==u"dotted") svg+=" stroke-dasharray=\"2\"";
             if(e.arrow_start==u"arrow_point") svg+=" marker-start=\"url(#flow-point-start)\"";
             if(e.arrow_end==u"arrow_point") svg+=" marker-end=\"url(#flow-point-end)\"";
             svg+="/>";

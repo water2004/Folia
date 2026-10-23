@@ -23,7 +23,7 @@ try {
      contained:t.x>=b.x-1&&t.y>=b.y-1&&t.x+t.width<=b.x+b.width+1&&t.y+t.height<=b.y+b.height+1};
    });
    const edges=[...svg.querySelectorAll('.flowchart-link')].map(p=>{
-    const length=p.getTotalLength();return {length,stroke:getComputedStyle(p).stroke,points:Array.from({length:7},(_,i)=>{const a=p.getPointAtLength(length*i/6);return {x:a.x,y:a.y};})};
+    const length=p.getTotalLength();return {length,stroke:getComputedStyle(p).stroke,dash:getComputedStyle(p).strokeDasharray,thickness:getComputedStyle(p).strokeWidth,points:Array.from({length:7},(_,i)=>{const a=p.getPointAtLength(length*i/6);return {x:a.x,y:a.y};})};
    });
    return {offset:outer.getAttribute('transform'),nodes,edges};
   });
@@ -39,6 +39,7 @@ try {
   for(let i=0;i<actual.edges.length;++i) {
    const a=actual.edges[i],e=row.edges[i];near(a.length,e.length,`${row.name} edge ${i} length`,3);
    assert.equal(a.stroke,e.stroke,`${row.name} edge paint`);
+   assert.equal(a.dash,e.dash,`${row.name} edge dash`);assert.equal(a.thickness,e.thickness,`${row.name} edge thickness`);
    for(let j=0;j<a.points.length;++j) {near(a.points[j].x+offset[0],e.points[j].x,`${row.name} edge ${i} x`,3);near(a.points[j].y+offset[1],e.points[j].y,`${row.name} edge ${i} y`,3);}
   }
   report.push({name:row.name,nodes:actual.nodes.length,edges:actual.edges.length});

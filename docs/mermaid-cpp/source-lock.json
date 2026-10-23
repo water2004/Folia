@@ -443,6 +443,10 @@
     {
       "path": "packages/mermaid/src/utils/lineWithOffset.ts",
       "sha256": "e09a06c66e1e35e29390fb68d08a0df459cf1dcecfe5d5b6466e89b30a9935d5"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/flowchart/styles.ts",
+      "sha256": "697ffb86fef2787307ddc42cd5d3d1544042f08c2452e170691d28ab3d252a50"
     }
   ],
   "packages": [

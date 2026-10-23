@@ -7,7 +7,7 @@ export namespace folia::mermaid {
 struct FlowchartSvgTheme {
     std::u16string font_family=u"Arial";
     double font_size=16,minimum_label_width=120,wrapping_width=120,padding=8,radius=5;
-    bool html_label_spacing=true,neo=true;
+    bool html_label_spacing=true;
     std::string fill="#ECECFF",border="#9370DB",text="#333333",line="#333333",label_background="#e8e8e8";
 };
 struct FlowchartTextBox {
