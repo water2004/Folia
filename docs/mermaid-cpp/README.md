@@ -47,8 +47,22 @@ Initialize the supplied session with `theme: default` (light) or `theme: dark`,
 as Folia's render entry does. An untouched upstream Flowchart session selects
 the unported redux-color theme and returns the existing explicit theme error.
 
-This is layout input, not a Flowchart renderer: Dagre coordinates, measurement,
-SVG and application integration are next. HTML/entity/Markdown label adaptation,
+`folia.mermaid.dagre_rank::rank_flowchart` advances this input through Dagre's
+first layout stage: DFS back-edge reversal, compound nesting constraints,
+default network simplex, edge-label rank reservation and rank normalization.
+It returns owned node ranks, group rank intervals and per-edge reversal/self/
+label-rank data in the original input order. Edge label boxes are supplied by
+the caller; the oracle supplies explicit boxes, not font measurements. Parallel
+edges are aggregated only inside the rank optimizer. The original graph stays
+unchanged. The default Flowchart node/edge/depth limits also apply to this API.
+The original dagre-d3-es 7.0.14 rank pipeline is hash-locked and observed directly.
+
+Flowchart coordinates, measured SVG and application integration remain pending.
+Next are edge normalization, crossing reduction and coordinate assignment, then
+Mermaid cluster-endpoint/direction adaptation and measured rendering. The rank
+API rejects links to nonempty group nodes until that adapter is available;
+subgraph directions do not independently lay out clusters at this boundary.
+HTML/entity/Markdown label adaptation,
 shape metadata, explicit edge ids and interpolation commands are not implemented
 by this stage; unsupported input returns an error. Browser callbacks are outside
 the Folia dependency path. No partial graph escapes failures. Default limits

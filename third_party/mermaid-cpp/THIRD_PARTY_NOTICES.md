@@ -49,6 +49,14 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FO
 DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+## Dagre graph ranking
+
+The native rank pipeline follows dagre-d3-es 7.0.14's Dagre and Graphlib
+algorithms, including DFS cycle removal, nesting constraints, feasible-tree
+construction and network simplex. Its MIT notices are reproduced in
+`DAGRE-LICENSE`; the original source hashes are in
+`docs/mermaid-cpp/source-lock.json`. Dagre's JavaScript package is test-only.
+
 ## Khroma color primitives
 
 The native theme color operations and generated named-color table are derived

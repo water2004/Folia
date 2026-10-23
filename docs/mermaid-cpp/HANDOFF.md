@@ -1,6 +1,22 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-23, Flowchart parser and layout input verified
+## Current checkpoint - 2026-10-23, Dagre rank stage in progress
+
+- Deliver the first native Flowchart layout stage: DFS cycle removal, compound
+  nesting constraints, default network-simplex ranking, measured edge-label
+  rank reservation and rank normalization. Use the existing Flowchart input.
+- Scope/exit: original dagre-d3-es 7.0.14 pipeline observations for chains,
+  branches, cycles, parallel links and nested groups match native results;
+  standalone/integrated Windows Debug/Release checks pass. No repeated audit
+  of completed configuration or Packet/Pie work.
+- Next: edge normalization, crossing reduction and coordinate assignment, then
+  Mermaid cluster adaptation and measured Flowchart SVG. Group endpoints and
+  independently directed cluster extraction are not claimed by this rank API.
+- Baseline delivery 5d18e4cf and run 39929358866 verified green; upstream PR #1
+  remains OPEN and unmerged. Work on fork/mermaid-development; select only
+  functional/test/public-documentation commits into the contribution worktree.
+
+## Flowchart parser and layout input verified (historical)
 
 - Delivered common Flowchart source through shared preparation/configuration to
   owned nodes, edges and compound-graph layout input. Scope: classic shapes,
