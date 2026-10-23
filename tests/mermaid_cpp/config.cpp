@@ -2,6 +2,7 @@
 import folia.mermaid.config_sanitize;
 import folia.mermaid.config_merge;
 import folia.mermaid.config_appearance;
+import folia.mermaid.config_init;
 import folia.mermaid.directives;
 import folia.mermaid.number;
 
@@ -65,6 +66,58 @@ const ConfigValue& field(const ConfigValue& value, std::u16string_view key) {
     return *found;
 }
 suite config = [] {
+    "mermaid_init_mapping_matches_official_oracle"_test = [] {
+        const auto override = std::getenv("FOLIA_MERMAID_FIXTURES");
+        std::ifstream input{std::filesystem::path{override ? override : FOLIA_MERMAID_FIXTURE_DIR} / "init-merge.tsv"};
+        expect(fatal(input.is_open()));
+        std::string line;
+        std::size_t count{};
+        while (std::getline(input, line)) {
+            if (!line.empty() && line.back() == '\r') line.pop_back();
+            if (!line.starts_with("init\t")) continue;
+            std::vector<std::string_view> fields;
+            std::string_view rest{line};
+            while (true) {
+                const auto tab = rest.find('\t'); fields.push_back(rest.substr(0, tab));
+                if (tab == rest.npos) break;
+                rest.remove_prefix(tab + 1);
+            }
+            expect(fatal(fields.size() == 7_u));
+            const auto source = decode(fields[2]), type = decode(fields[3]);
+            std::size_t calls{};
+            auto result = detect_init_config(source, [&](std::u16string_view actual) -> std::expected<std::u16string, std::string> {
+                expect(bool(actual == source)); ++calls;
+                if (type == u"!error") return std::unexpected("oracle detector failure");
+                return type;
+            });
+            expect(calls == static_cast<std::size_t>(std::stoul(std::string{fields[6]}))) << fields[1];
+            if (fields[4] == "E" || fields[5] != "-") expect(!result) << fields[1];
+            else {
+                expect(result.has_value()) << fields[1] << (result ? "" : result.error());
+                if (result) expect((*result ? snapshot(**result) : "U") == fields[4]) << fields[1];
+            }
+            ++count;
+        }
+        expect(count == 1746_u);
+    };
+    "mermaid_init_mapping_ownership_limits_and_resolver_errors"_test = [] {
+        std::u16string source = uR"(%%{init:{"config":{"curve":"basis"}}}%%)";
+        const InitDiagramResolver resolver = [](auto) -> std::expected<std::u16string, std::string> { return u"flowchart-v2"; };
+        auto result = detect_init_config(source, resolver);
+        expect(fatal(result.has_value() && result->has_value()));
+        source.clear();
+        expect(bool((**result).find(u"flowchart")->find(u"curve")->string == u"basis"));
+        source = uR"(%%{init:{"config":{"curve":"basis"}}}%%)";
+        expect(!detect_init_config(source, resolver, {.depth = 1}));
+        expect(!detect_init_config(source, resolver, {.values = 1}));
+        expect(!detect_init_config(source, resolver, {.string_units = 1}));
+        expect(!detect_init_config(source, resolver, {.operations = 1}));
+        expect(!detect_init_config(source, resolver, {}, {.source_units = 1}));
+        const auto error = detect_init_config(source, [](auto) -> std::expected<std::u16string, std::string> { return std::unexpected("dispatch failure"); });
+        expect(!error && error.error() == "dispatch failure");
+        const auto absent = detect_init_config(u"pie", [](auto) -> std::expected<std::u16string, std::string> { throw std::runtime_error("must not be called"); });
+        expect(absent.has_value() && !absent->has_value());
+    };
     "mermaid_config_matches_official_sanitizer_merge_appearance"_test = [] {
         const auto override = std::getenv("FOLIA_MERMAID_FIXTURES");
         std::ifstream input{std::filesystem::path{override ? override : FOLIA_MERMAID_FIXTURE_DIR} / "config.tsv"};
