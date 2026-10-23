@@ -34,6 +34,42 @@ Cytoscape, date calculations) needs its own source and behavior verification.
 
 ## Current state
 
+`folia.mermaid.diagram_registry` ports `detectType.ts` and the detector portion
+of `addDiagrams`: 37 official detector modules plus the `error` and `---`
+sentinels, in original order. Registration is once per owned registry; the
+large-feature switch controls ELK, mindmap and architecture. Overwriting a key
+retains its position but replaces its detector and loader route. Canonical
+uint32 keys enumerate first, and dispatch snapshots callback records just as
+`Object.entries` does. All builtin regex predicates use linear UTF-16 scans,
+including ASCII word boundaries/case folding and the unanchored C4 alternatives.
+
+Detection removes an initial frontmatter fence, directives, then detection
+comments before returning the first match. It does not validate a diagram's
+grammar. Explicit `flowchart-elk` changes the returned owned config's `layout`
+to `elk`; disabling large features instead lets the flowchart-v2 predicate
+match. Input text and configuration are preserved. Unknown-diagram errors retain
+the exact cleaned UTF-16 text, including lone surrogates.
+
+Host detectors may be registered with an optional opaque loader route. This
+models lookup/presence without executing JS dynamic imports or claiming native
+renderers for those ids. Actual loader execution, `diagramAPI` styles/utils,
+shared frontend wiring and application integration remain separate boundaries.
+The host owns callback captures and must bound their work/side effects. Registry
+copies have independent registration vectors with shared callback handles.
+
+The official oracle executes original modules and orchestration with only the
+renderer-registration sink observed: 8,084 detection cases and 39 registry
+steps cover preprocessing, Unicode, keyword boundaries, large-feature selection,
+numeric-key ordering, overwrite/removal, config writes, errors, and registration
+during a dispatch snapshot. Native tests also cover ownership, isolated
+registries and budgets. Defaults bound source to 4 Mi UTF-16 units, registrations
+to 1,024 and total id/route text to 64 Ki units; configuration uses `ConfigLimits`
+before copying and after callbacks. Native restrictions are mapping configuration
+inputs and no Object.prototype ids. Builtin registration is transactional on
+budget failure; detection failures expose no partial configuration. External
+callback side effects cannot be rolled back. These explicit native restrictions
+are separate from the original successful-dispatch observations.
+
 The first portable module implements the official front-matter fence scanner,
 diagram-detection comment stripping, and preprocessing comment cleanup. It uses
 UTF-16 strings so positions and even unpaired code units retain JavaScript

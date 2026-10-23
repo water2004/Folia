@@ -1,6 +1,6 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-23, registry oracle in progress
+## Current checkpoint - 2026-10-23, registry native verification pending
 
 - User authorizes fork pushes and verified updates to water2004/Folia PR #1;
   keep OPEN, DO NOT merge. Working branch `codex/mermaid-cpp-registry` starts
@@ -13,8 +13,15 @@
   detector functions. Important behaviors: overwrite keeps order; numeric keys
   enumerate first; Object.entries snapshots callbacks; ELK changes config.layout;
   C4 non-first alternatives are unanchored. No grammar validation at detection.
-- Next: validate source oracle, commit oracle batch, implement native boundary
-  and focused tests, then Windows standalone/integrated Debug/Release CI.
+- Oracle commit `767078c1`: 8,084 detection observations and 39 registry steps;
+  local generation/check pass. All 37 detector modules and orchestration pinned.
+- Native diagram_registry module implements ordered registration, all builtin
+  predicates and once-only setup, config-copy dispatch, callback snapshots and
+  loader route lookup. Tests consume original observations and cover ownership,
+  isolation, resource budgets and transactional failure. README states limits.
+- Next: commit native batch and push verification branch; inspect Windows
+  standalone/integrated Debug/Release CI, fix any failures in small commits,
+  and only then fast-forward the delivery branch/update existing PR #1.
 - No live agents or native builds. Local compiler remains unavailable. Baseline
   delivery rerun 39909853656 was in progress when inspected; previous verified
   code evidence remains 39908290555. PR live head/base unchanged from below.
