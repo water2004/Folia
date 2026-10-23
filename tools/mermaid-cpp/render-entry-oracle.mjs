@@ -29,6 +29,8 @@ const cases = [
   ['pie-theme', 'pie\n"Tea":3', {theme:'dark',themeVariables:{fontFamily:'Arial',pie1:'rgb(1, 2, 3)',pieLegendTextSize:'21px',pieTitleTextSize:'30px',pieOuterStrokeWidth:'4px'}}],
   ['pie-font-list', 'pie\n"Tea":3', {fontFamily:'"Trebuchet MS", Arial, sans-serif'}],
   ['pie-entities', 'pie showData\ntitle A & B\n"#quot;Tea#quot; #9733;":3'],
+  ['pie-front-entity', '---\ntitle: "Literal #quot;"\n---\npie\n"Tea":1'],
+  ['pie-entity-distinct-labels', 'pie\n"A":1\n"#65;":2'],
   ['pie-incomplete', 'pie\n"Tea":'],
   ['packet-gap', 'packet\n3-8: "Gap"'],
 ];

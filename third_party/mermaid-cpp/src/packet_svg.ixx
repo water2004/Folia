@@ -13,8 +13,16 @@ struct PacketSvg {
     double height{};
 };
 
-// Renders the official Packet family's elements with its default Packet CSS.
-// This does not implement MermaidAPI preprocessing, theme overrides, or the
+struct PacketSvgTheme {
+    std::string start_color = "black", end_color = "black", label_color = "black";
+    std::string title_color = "black", stroke_color = "black", fill_color = "#efefef";
+    double byte_size = 10, label_size = 12, title_size = 14, stroke_width = 1;
+    // Empty retains the low-level renderer's inherited font.
+    std::u16string font_family;
+};
+
+// Renders the official Packet family's elements with resolved Packet CSS.
+// This does not implement MermaidAPI preprocessing, theme resolution, or the
 // outer API's accessibility DOM. The document and config are authoritative:
 // words are rebuilt rather than trusting a caller-modified layout cache.
 //
@@ -22,6 +30,7 @@ struct PacketSvg {
 // by XML 1.0, non-finite coordinates and negative dimensions return an error.
 // Render errors use offset zero because PacketLayout has no source-location
 // map; text diagnostics identify the field-local UTF-16 offset in the message.
-std::expected<PacketSvg, PacketError> render_packet_svg(PacketLayout const& layout);
+std::expected<PacketSvg, PacketError> render_packet_svg(
+    PacketLayout const& layout, PacketSvgTheme const& theme = {});
 
 }

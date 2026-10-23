@@ -5,6 +5,7 @@ module folia.mermaid.packet_svg;
 import std;
 import folia.mermaid.number;
 import folia.mermaid.svg_text;
+import folia.mermaid.theme_color;
 
 namespace folia::mermaid {
 namespace {
@@ -64,19 +65,19 @@ bool finite_coordinates(std::initializer_list<double> values) {
     return std::ranges::all_of(values, [](double value) { return std::isfinite(value); });
 }
 
-constexpr std::string_view default_packet_style =
-    "<style>"
-    ".packetByte{font-size:10px;}"
-    ".packetByte.start{fill:black;}"
-    ".packetByte.end{fill:black;}"
-    ".packetLabel{fill:black;font-size:12px;}"
-    ".packetTitle{fill:black;font-size:14px;}"
-    ".packetBlock{stroke:black;stroke-width:1;fill:#efefef;}"
-    "</style>";
-
 }
 
-std::expected<PacketSvg, PacketError> render_packet_svg(PacketLayout const& supplied) {
+std::expected<PacketSvg, PacketError> render_packet_svg(
+    PacketLayout const& supplied, PacketSvgTheme const& theme) {
+    for (auto size : {theme.byte_size, theme.label_size, theme.title_size, theme.stroke_width})
+        if (!std::isfinite(size) || size < 0) return render_error(u"Invalid Packet style size.");
+    for (const auto& paint : {theme.start_color, theme.end_color, theme.label_color,
+        theme.title_color, theme.stroke_color, theme.fill_color}) {
+        try { theme_detail::color_adjust(std::u16string(paint.begin(), paint.end()), {}); }
+        catch (const std::runtime_error&) { return render_error(u"Invalid Packet style color."); }
+    }
+    auto font = xml_text(theme.font_family, u"Packet font family");
+    if (!font) return std::unexpected(font.error());
     auto rebuilt = layout_packet(supplied.document, supplied.config);
     if (!rebuilt) {
         return std::unexpected(std::move(rebuilt.error()));
@@ -113,8 +114,23 @@ std::expected<PacketSvg, PacketError> render_packet_svg(PacketLayout const& supp
         svg.numeric_attribute("height", svg_height);
         svg.numeric_attribute("width", svg_width);
     }
-    svg.append(">");
-    svg.append(default_packet_style);
+    if (!font->empty()) {
+        // Attribute quotes are separate from XML text escaping.
+        std::string quoted;
+        for (auto c : *font) quoted += c == '"' ? "&quot;" : std::string(1,c);
+        svg.append(" font-family=\""); svg.append(quoted); svg.append("\"");
+    }
+    svg.append("><style>.packetByte{font-size:");
+    svg.number(theme.byte_size); svg.append("px;}.packetByte.start{fill:");
+    svg.append(theme.start_color); svg.append(";}.packetByte.end{fill:");
+    svg.append(theme.end_color); svg.append(";}.packetLabel{fill:");
+    svg.append(theme.label_color); svg.append(";font-size:");
+    svg.number(theme.label_size); svg.append("px;}.packetTitle{fill:");
+    svg.append(theme.title_color); svg.append(";font-size:");
+    svg.number(theme.title_size); svg.append("px;}.packetBlock{stroke:");
+    svg.append(theme.stroke_color); svg.append(";stroke-width:");
+    svg.number(theme.stroke_width); svg.append(";fill:");
+    svg.append(theme.fill_color); svg.append(";}</style>");
 
     for (std::size_t row = 0; row < layout.words.size(); ++row) {
         auto const word_y = static_cast<double>(row) * total_row_height + padding_y;

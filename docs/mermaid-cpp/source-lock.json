@@ -367,6 +367,14 @@
     {
       "path": "packages/mermaid/src/Diagram.ts",
       "sha256": "ea89f69368ddf3c386f3012fd912ae79c012f87e2a91e1bb2d2236e74d23dbec"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/common/commonDb.ts",
+      "sha256": "40579cae9a11c8267eea337388892f2d5b508c29b4e77458f2b37bddd45a5f0e"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/common/common.ts",
+      "sha256": "b14851667f7d45d101d4e028204babb1628faefe4812a88ae2d8acac72f8e144"
     }
   ],
   "packages": [

@@ -3,6 +3,7 @@ module folia.mermaid.pie_svg;
 import std;
 import folia.mermaid.number;
 import folia.mermaid.svg_text;
+import folia.mermaid.theme_color;
 
 namespace folia::mermaid {
 namespace {
@@ -10,17 +11,10 @@ std::unexpected<PieError> failure(std::u16string message) {
     return std::unexpected(PieError{0, std::move(message)});
 }
 bool color(std::string_view value) {
-    if (value.empty()) return false;
-    if (value.front() == '#') {
-        auto digits = value.substr(1);
-        return (digits.size()==3 || digits.size()==4 || digits.size()==6 || digits.size()==8) &&
-            std::ranges::all_of(digits, [](char c) {
-                return (c>='0' && c<='9') || (c>='a' && c<='f') || (c>='A' && c<='F');
-            });
-    }
-    // CSS named colors are safe attribute tokens; their semantic resolution is
-    // the caller's theme responsibility. No functional paint/server syntax.
-    return std::ranges::all_of(value, [](char c) { return (c>='a'&&c<='z') || (c>='A'&&c<='Z'); });
+    try {
+        theme_detail::color_adjust(std::u16string(value.begin(), value.end()), {});
+        return true;
+    } catch (const std::runtime_error&) { return false; }
 }
 std::string attribute(std::string value) {
     std::string result;
