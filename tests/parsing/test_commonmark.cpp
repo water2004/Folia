@@ -21,6 +21,7 @@ import folia.core.inline_document;
 import folia.core.serializer;
 import folia.core.utf;
 
+import folia.core.markdown_html;
 #include "support/commonmark_projection.hpp"
 
 using namespace folia;
@@ -69,8 +70,6 @@ void append_error_report(const CommonMarkCase& test_case, std::string_view error
 
 void append_case_report(
     const CommonMarkCase& test_case,
-    bool semantic_match,
-    bool relaxed_list_match,
     bool inline_lossless,
     bool roundtrip,
     const folia::test::commonmark::Projection& projection,
@@ -85,8 +84,6 @@ void append_case_report(
                << ",\"section\":" << folia::test::commonmark::json_string(test_case.section)
                << ",\"markdown\":" << folia::test::commonmark::json_string(test_case.markdown)
                << ",\"expected_html\":" << folia::test::commonmark::json_string(test_case.html)
-               << ",\"semantic_match\":" << (semantic_match ? "true" : "false")
-               << ",\"relaxed_list_match\":" << (relaxed_list_match ? "true" : "false")
                << ",\"inline_lossless\":" << (inline_lossless ? "true" : "false")
                << ",\"roundtrip\":" << (roundtrip ? "true" : "false")
                << ",\"limitations\":[";
@@ -95,8 +92,7 @@ void append_case_report(
             output << folia::test::commonmark::json_string(projection.limitations[index]);
         }
         output << "]"
-               << ",\"expected\":" << test_case.expected_tree
-               << ",\"actual\":" << projection.strict_tree
+               << ",\"projected_html\":" << folia::test::commonmark::json_string(projection.projected_html)
                << ",\"serialized\":" << folia::test::commonmark::json_string(serialized)
                << "}\n";
         output.flush();
@@ -111,26 +107,22 @@ void run_commonmark_case(const CommonMarkCase& test_case) {
     try {
         const auto parsed = parse_text(1, std::string(test_case.markdown), folia::test::commonmark::dialect());
         const auto projection = folia::test::commonmark::project(parsed.document.root);
-        const bool semantic_match = std::string_view(projection.strict_tree) == test_case.expected_tree;
-        const bool relaxed_list_match = projection.relaxed_tree == test_case.relaxed_tree;
         const bool lossless = folia::test::commonmark::inline_lossless(parsed.document.root);
         const auto serialized = serialize_markdown(parsed.document);
         const bool roundtrip = std::string_view(serialized) == test_case.markdown;
 
         append_case_report(
             test_case,
-            semantic_match,
-            relaxed_list_match,
             lossless,
             roundtrip,
             projection,
             serialized);
 
-        expect(semantic_match) << case_label << "; see FOLIA_COMMONMARK_REPORT JSONL for expected and actual trees";
+        // The formal Python runner canonicalizes projected_html with the same
+        // HTMLParser used for official expected HTML. Keep this native case
+        // focused on the independent lossless/save invariants.
         expect(lossless) << case_label << "; inline CST did not preserve source";
         expect(roundtrip) << case_label << "; Markdown serialization changed the source";
-        // The relaxed projection is diagnostic only; it never masks a strict failure.
-        (void)relaxed_list_match;
     } catch (const std::exception& error) {
         append_error_report(test_case, error.what());
         expect(false) << case_label << "; exception recorded in FOLIA_COMMONMARK_REPORT JSONL";

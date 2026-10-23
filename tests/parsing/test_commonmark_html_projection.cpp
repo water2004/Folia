@@ -16,6 +16,7 @@ import folia.core.inline_document;
 import folia.core.serializer;
 import folia.core.utf;
 
+import folia.core.markdown_html;
 #include "support/commonmark_projection.hpp"
 using namespace folia;
 using namespace boost::ut;
@@ -30,8 +31,8 @@ suite commonmark_html_projection_tests = [] {
     const auto projection = folia::test::commonmark::project(parsed.document.root);
     expect(fatal(bool(folia::test::commonmark::inline_lossless(parsed.document.root))));
     expect(fatal(bool(serialize_markdown_cps(parsed.document) == utf8_to_cps(source))));
-    expect(fatal(bool(projection.strict_tree
-        == "[\"root\",[],[[\"p\",[],[\"*\",[\"img\",[[\"src\",\"foo\"],[\"title\",\"*\"]],[]]]]]]")));
+    expect(fatal(bool(projection.projected_html
+        == "<p>*<img src=\"foo\" title=\"*\"/></p>\n")));
     expect(fatal(bool(projection.limitations.empty())));
 };
 
@@ -41,8 +42,8 @@ suite commonmark_html_projection_tests = [] {
     const auto projection = folia::test::commonmark::project(parsed.document.root);
     expect(fatal(bool(folia::test::commonmark::inline_lossless(parsed.document.root))));
     expect(fatal(bool(serialize_markdown_cps(parsed.document) == utf8_to_cps(source))));
-    expect(fatal(bool(projection.strict_tree
-        == "[\"root\",[],[[\"p\",[],[\"foo \",[\"comment\",[[\"text\",\" this is a --\\ncomment - with hyphens \"]],[]]]]]]")));
+    expect(fatal(bool(projection.projected_html
+        == "<p>foo <!-- this is a --\ncomment - with hyphens --></p>\n")));
     expect(fatal(bool(projection.limitations.empty())));
 };
 
@@ -50,22 +51,19 @@ suite commonmark_html_projection_tests = [] {
     const std::string source = "<span>*word*</span><br/><img src=\"x\" alt=\"*\">\n";
     const auto parsed = parse_text(1, source);
     const auto projection = folia::test::commonmark::project(parsed.document.root);
-    expect(fatal(bool(projection.strict_tree
-        == "[\"root\",[],[[\"p\",[],[[\"span\",[],[\"*word*\"]],[\"br\",[],[]],[\"img\",[[\"alt\",\"*\"],[\"src\",\"x\"]],[]]]]]]")));
+    expect(fatal(bool(projection.projected_html
+        == "<p><span><em>word</em></span><br/><img src=\"x\" alt=\"*\"></p>\n")));
 };
 
-"html_attribute_entity_stays_raw_and_is_reported_as_projection_limit"_test = [] {
+"html_attribute_entity_spelling_reaches_the_shared_html_canonicalizer"_test = [] {
     const std::string source = "<a href=\"&amp;\">x</a>\n";
     const auto parsed = parse_text(1, source);
     const auto projection = folia::test::commonmark::project(parsed.document.root);
-    expect(fatal(bool(projection.strict_tree
-        == "[\"root\",[],[[\"p\",[],[[\"a\",[[\"href\",\"&amp;\"]],[\"x\"]]]]]]")));
-    expect(fatal(bool(std::ranges::find(
-        projection.limitations, "inline-html-attribute-reference-not-decoded")
-        != projection.limitations.end())));
+    expect(fatal(bool(projection.projected_html == "<p><a href=\"&amp;\">x</a></p>\n")));
+    expect(fatal(bool(projection.limitations.empty())));
 };
 
-"unknown_and_incomplete_html_do_not_project_as_recognized_elements"_test = [] {
+"unknown_html_tokens_and_incomplete_html_openings_emit_raw_markup"_test = [] {
     const auto unknown = parse_text(1, "<widget>x</widget>\n");
     expect(fatal(bool(unknown.document.root.children.size() == 1u)));
     if (unknown.document.root.children.empty()) return;
@@ -73,10 +71,12 @@ suite commonmark_html_projection_tests = [] {
         unknown.document.root.children.front().inline_content,
         InlineCstKind::Raw) != nullptr)));
     const auto unknown_projection = folia::test::commonmark::project(unknown.document.root);
-    expect(fatal(bool(unknown_projection.strict_tree
-        == "[\"root\",[],[[\"p\",[],[\"<widget>x</widget>\"]]]]")));
-    expect(fatal(bool(unknown_projection.strict_tree
-        != "[\"root\",[],[[\"p\",[],[[\"widget\",[],[\"x\"]]]]]]")));
+    expect(fatal(bool(unknown_projection.projected_html == "<p><widget>x</widget></p>\n")));
+
+    const auto escaped = parse_text(1, "&lt;widget&gt;x&lt;/widget&gt;\n");
+    const auto escaped_projection = folia::test::commonmark::project(escaped.document.root);
+    expect(fatal(bool(escaped_projection.projected_html
+        == "<p>&lt;widget&gt;x&lt;/widget&gt;</p>\n")));
 
     const auto incomplete = parse_text(1, "<span>unfinished\n");
     expect(fatal(bool(incomplete.document.root.children.size() == 1u)));
@@ -90,10 +90,7 @@ suite commonmark_html_projection_tests = [] {
     }
     expect(fatal(bool(folia::test::commonmark::inline_lossless(incomplete.document.root))));
     const auto incomplete_projection = folia::test::commonmark::project(incomplete.document.root);
-    expect(fatal(bool(incomplete_projection.strict_tree
-        == "[\"root\",[],[[\"p\",[],[\"<span>unfinished\"]]]]")));
-    expect(fatal(bool(incomplete_projection.strict_tree
-        != "[\"root\",[],[[\"p\",[],[[\"span\",[],[\"unfinished\"]]]]]]")));
+    expect(fatal(bool(incomplete_projection.projected_html == "<p><span>unfinished</p>\n")));
 };
 
 };

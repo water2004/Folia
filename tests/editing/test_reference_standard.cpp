@@ -92,7 +92,7 @@ suite reference_standard_tests = [] {
     });
     expect(fatal(bool(paragraph != parsed.document.root.children.end())));
     if (paragraph != parsed.document.root.children.end()) {
-        expect(fatal(bool(!reference_inline_kind(paragraph->inline_content, InlineCstKind::Strong))));
+        expect(fatal(bool(reference_inline_kind(paragraph->inline_content, InlineCstKind::Strong))));
         expect(fatal(bool(!reference_inline_kind(paragraph->inline_content, InlineCstKind::Emphasis))));
         expect(fatal(bool(!reference_inline_kind(paragraph->inline_content, InlineCstKind::Strikethrough))));
         expect(fatal(bool(!reference_inline_kind(paragraph->inline_content, InlineCstKind::Link))));

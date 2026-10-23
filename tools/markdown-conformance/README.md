@@ -6,6 +6,17 @@ the ordinary core and Windows editor suites. The fixture preparation step
 checks the pinned `spec.json` SHA-256 and verifies that all 652 examples are
 present in their official order before a run starts.
 
+The C++ test emits an HTML stream from the parsed Markdown AST and lossless
+inline CST. Markdown text and generated attributes are escaped; raw HTML is
+passed through only from classified CST ranges or HTML-backed block sources.
+The Python runner canonicalizes this stream and the immutable official expected
+HTML with the same `canonical_html.py` implementation. This checks CommonMark
+semantic output and is not Folia's WinUI HTML renderer. Native Boost.UT
+assertions separately retain inline source losslessness and exact Markdown save
+checks.
+CTest invokes this same complete runner; launching only the native executable
+checks source invariants but does not run the HTML semantic comparison.
+
 ## Run
 
 From a Windows command prompt or PowerShell session with the Visual Studio C++
@@ -51,8 +62,9 @@ python tools\markdown-conformance\prepare.py --fetch
 python tools\markdown-conformance\run.py --executable build\core\FoliaCommonMarkTests.exe
 ```
 
-The formal test's exit status is preserved for ordinary success and test
-failure. In particular, a test failure remains exit code 1. A timeout or
+The formal run returns 1 if either native source assertions or HTML semantic
+assertions fail, including filtered runs. Missing or invalid full-suite records
+also fail the run. The report retains `native_exit_code` separately. A timeout or
 abnormal process exit stops evaluation, retains any partial JSONL records, and
 marks the report incomplete.
 

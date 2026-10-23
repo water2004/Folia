@@ -12,6 +12,8 @@ import time
 ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
 DEFAULT_OUTPUT = ROOT / 'build' / 'markdown-conformance'
+sys.path.insert(0, str(HERE))
+from canonical_html import canonical as canonical_html
 
 
 def load_fixtures():
@@ -62,6 +64,7 @@ def first_diff(expected, actual, path='$'):
 
 
 def read_results(path):
+    """Read per-example records; semantic truth is computed only with fixtures."""
     results = []
     malformed = []
     if not path.exists():
@@ -73,10 +76,14 @@ def read_results(path):
             item = json.loads(line)
             if not isinstance(item, dict) or 'example' not in item:
                 raise ValueError('record must be an object with an example field')
+            if isinstance(item['example'], bool):
+                raise ValueError('example must be an integer')
             item['example'] = int(item['example'])
-            item['expected'] = normalize_tree(item.get('expected'))
-            item['actual'] = normalize_tree(item.get('actual'))
-            item['first_tree_difference'] = first_diff(item['expected'], item['actual'])
+            # A per-case exception is a distinct failure record. Every ordinary
+            # record must provide the CST-derived HTML stream; never trust a
+            # precomputed semantic_match as a fallback.
+            if not item.get('error') and not isinstance(item.get('projected_html'), str):
+                raise ValueError('normal record must contain string projected_html')
             item['limitations'] = item.get('limitations') or []
             if isinstance(item['limitations'], str):
                 item['limitations'] = [item['limitations']]
@@ -87,30 +94,44 @@ def read_results(path):
 
 
 def case_result(example, fixture, result):
+    """Bind report output to immutable fixture input and compute HTML semantics."""
     row = dict(result or {})
-    row.setdefault('example', example)
-    row.setdefault('section', fixture['section'])
-    row.setdefault('markdown', fixture['markdown'])
-    row.setdefault('expected_html', fixture['html'])
-    row.setdefault('expected', None)
-    row.setdefault('actual', None)
-    row.setdefault('serialized', None)
-    row.setdefault('semantic_match', None)
-    row.setdefault('relaxed_list_match', None)
-    row.setdefault('inline_lossless', None)
-    if 'exact_serialization' not in row:
-        row['exact_serialization'] = row.pop('roundtrip', None)
-    row.setdefault('limitations', [])
-    row.setdefault('error', None)
-    row.setdefault('first_tree_difference', None)
+    row['example'] = example
+    row['section'] = fixture['section']
+    row['markdown'] = fixture['markdown']
+    row['expected_html'] = fixture['html']
+    row['expected'] = canonical_html(fixture['html'])
+    row['actual'] = None
+    row['serialized'] = row.get('serialized')
+    row['inline_lossless'] = row.get('inline_lossless')
+    row['exact_serialization'] = row.get('exact_serialization', row.pop('roundtrip', None))
+    row['limitations'] = row.get('limitations') or []
+    row['error'] = row.get('error')
     row['reported'] = result is not None
-    if row.get('semantic_match') is False or (
-            row.get('semantic_match') is None and row['first_tree_difference']):
-        row['first_tree_difference'] = row.get('first_tree_difference') or first_diff(
-            row.get('expected'), row.get('actual'))
-    else:
-        row['first_tree_difference'] = None
+    row['semantic_match'] = None
+    row['relaxed_list_match'] = None
+    if result is not None and not row['error'] and isinstance(row.get('projected_html'), str):
+        row['actual'] = canonical_html(row['projected_html'])
+        row['semantic_match'] = row['expected'] == row['actual']
+        row['relaxed_list_match'] = (
+            canonical_html(fixture['html'], relax_list_paragraphs=True) ==
+            canonical_html(row['projected_html'], relax_list_paragraphs=True))
+    row['first_tree_difference'] = first_diff(row['expected'], row['actual'])
     return row
+
+
+def calculate_formal_exit_code(native_exit_code, cases, missing, unexpected, duplicates,
+                     malformed, filtered):
+    """Combine native assertions with required semantic/report assertions."""
+    if native_exit_code != 0:
+        return native_exit_code
+    semantic_failed = any(
+        case.get('reported') and (case.get('semantic_match') is False or case.get('error'))
+        for case in cases)
+    report_failed = bool(duplicates or malformed)
+    if not filtered:
+        report_failed = report_failed or bool(missing or unexpected)
+    return 1 if semantic_failed or report_failed else 0
 
 
 def summarize(cases):
@@ -198,7 +219,7 @@ def markdown_report(report):
         f"Fixture source: [CommonMark 0.31.2 spec.json](https://spec.commonmark.org/0.31.2/spec.json), SHA-256 `{report['source']['spec_json_sha256']}`.",
         f"License: [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Reference renderer pin: md4c commit `{report['source']['md4c_commit']}` (MIT), fetched only for later investigation.",
         '',
-        'The official tests compare Folia’s normalized test-tree projection with the normalized expected HTML tree. This projection is not Folia’s WinUI HTML renderer. Tree shape differences and implementation limitations are reported separately; this suite does not use md4c as its standard.',
+        'The formal test canonicalizes C++ projected HTML and immutable official expected HTML with the same Python HTMLParser. This checks CommonMark semantic output and is not Folia’s WinUI HTML renderer. Native assertions separately check inline source losslessness and exact Markdown save serialization.',
         '',
         '## Totals',
         '',
@@ -343,6 +364,11 @@ def main():
     expected_ids = {case['example'] for case in fixtures}
     missing = sorted(expected_ids - present)
     unexpected = sorted(present - expected_ids)
+    semantic_failed = any(
+        case.get('reported') and (case.get('semantic_match') is False or case.get('error'))
+        for case in all_cases)
+    formal_exit_code = calculate_formal_exit_code(
+        exit_code, all_cases, missing, unexpected, duplicates, malformed, bool(filters))
     status = ('completed' if exit_code in (0, 1) and not timed_out and not launch_error
               else 'timed_out' if timed_out else 'abnormal_exit' if exit_code is not None
               else 'launch_error')
@@ -351,7 +377,8 @@ def main():
     spec = next(item for item in lock['files'] if item['name'] == 'spec.json')
     report = {
         'status': status,
-        'exit_code': exit_code,
+        'exit_code': formal_exit_code,
+        'native_exit_code': exit_code,
         'elapsed_seconds': round(elapsed, 3),
         'timeout_seconds': args.timeout,
         'filtered': bool(filters),
@@ -366,7 +393,7 @@ def main():
             'md4c_commit': lock['md4c_commit'],
             'md4c_license': lock['md4c_license'],
         },
-        'comparison_scope': 'Normalized semantic test-tree projection; not the Folia WinUI HTML renderer.',
+        'comparison_scope': 'C++ projected HTML semantics canonicalized with the same Python HTMLParser used for official HTML; not the Folia WinUI HTML renderer.',
         'missing_examples': missing,
         'unexpected_examples': unexpected,
         'duplicate_examples': sorted(set(duplicates)),
@@ -392,7 +419,10 @@ def main():
     if exit_code == 0 and not filters and (missing or unexpected or duplicates or malformed):
         print('Formal test returned success but its per-example report is incomplete or malformed.', file=sys.stderr)
         return 1
-    return exit_code
+    if exit_code == 0 and semantic_failed:
+        print('Formal test found CommonMark HTML semantic differences; details are recorded in the report.', file=sys.stderr)
+        return 1
+    return formal_exit_code
 
 
 if __name__ == '__main__':

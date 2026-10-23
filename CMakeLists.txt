@@ -913,8 +913,8 @@ if(WIN32)
 endif()
 
 # These CMake executables are console tests/probes; the WinUI app uses MSBuild.
-# Official specification tests are separate because the current parser is not
-# conformant yet. They fail normally; they are not a snapshot/probe baseline.
+# Official specification tests run the native source invariants and compare
+# projected HTML with the same canonicalizer used for official expected HTML.
 set(FOLIA_COMMONMARK_CASES "${CMAKE_CURRENT_BINARY_DIR}/commonmark/commonmark_cases.inc")
 add_custom_command(OUTPUT "${FOLIA_COMMONMARK_CASES}"
     COMMAND python "${CMAKE_CURRENT_SOURCE_DIR}/tools/markdown-conformance/prepare.py"
@@ -930,7 +930,10 @@ target_compile_features(FoliaCommonMarkTests PRIVATE cxx_std_23)
 set_target_properties(FoliaCommonMarkTests PROPERTIES CXX_MODULE_STD ON)
 target_include_directories(FoliaCommonMarkTests PRIVATE tests "${CMAKE_CURRENT_BINARY_DIR}/commonmark")
 target_link_libraries(FoliaCommonMarkTests PRIVATE folia_core Boost::ut_module)
-add_test(NAME FoliaCommonMarkTests COMMAND FoliaCommonMarkTests)
+add_test(NAME FoliaCommonMarkTests
+    COMMAND python "${CMAKE_CURRENT_SOURCE_DIR}/tools/markdown-conformance/run.py"
+        --executable "$<TARGET_FILE:FoliaCommonMarkTests>"
+        --output "${CMAKE_CURRENT_BINARY_DIR}/markdown-conformance")
 set_tests_properties(FoliaCommonMarkTests PROPERTIES LABELS "commonmark;conformance")
 
 option(FOLIA_BUILD_MD4C_REFERENCE_TESTS "Build md4c controls for failing official CommonMark cases" OFF)

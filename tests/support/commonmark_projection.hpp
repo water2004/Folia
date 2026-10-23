@@ -1,4 +1,5 @@
 #pragma once
+import folia.core.markdown_html;
 
 // Semantic HTML-shaped projection for the official CommonMark conformance
 // tests. This consumes Folia's parsed tree and lossless inline CST; it is not
@@ -9,6 +10,10 @@ namespace folia::test::commonmark {
 struct Projection {
     std::string strict_tree;
     std::string relaxed_tree;
+    // HTML consumed by the shared Python HTMLParser canonicalizer. Markdown
+    // text is escaped during projection; raw chunks come only from classified
+    // HTML CST nodes or HTML-backed block sources.
+    std::string projected_html;
     std::vector<std::string> limitations;
 };
 
@@ -30,6 +35,9 @@ struct Node {
     std::string tag;
     std::vector<std::pair<std::string, std::string>> attrs;
     std::vector<Child> children;
+    std::optional<std::string> html_override;
+    std::string html_prefix;
+    std::string html_suffix;
 };
 inline Child::Child(Node value) : node(std::make_unique<Node>(std::move(value))) {}
 inline Child::~Child() = default;
@@ -86,6 +94,16 @@ inline void append_text(Node& node, std::string value) {
 
 inline void append_node(Node& parent, Node child) {
     parent.children.emplace_back(std::move(child));
+}
+
+inline Node raw_html_node(std::string value) {
+    Node raw{"#raw-html", {}, {}};
+    raw.children.emplace_back(std::move(value));
+    return raw;
+}
+
+inline void append_raw_html(Node& parent, std::string value) {
+    if (!value.empty()) append_node(parent, raw_html_node(std::move(value)));
 }
 
 inline Node clone(Node const& source) {
@@ -246,13 +264,17 @@ inline void project_inline_nodes(
                 attrs.reserve(semantic.html_attributes.size());
                 for (const auto& [name, value] : semantic.html_attributes) {
                     attrs.emplace_back(name, value);
-                    if (value.find('&') != std::string::npos) {
-                        limitation(limitations, "inline-html-attribute-reference-not-decoded");
-                    }
                 }
                 auto n = element(semantic.html_tag, std::move(attrs));
+                const auto& ranges = item.delimiter_ranges();
+                if (ranges.opening.valid_for(doc.source.size())) {
+                    n.html_prefix = utf8(inline_source_slice(doc, ranges.opening));
+                }
                 if (semantic.html_tag != "img" && semantic.html_tag != "br") {
                     project_inline_nodes(n, doc, item.children, limitations);
+                }
+                if (ranges.closing && ranges.closing->valid_for(doc.source.size())) {
+                    n.html_suffix = utf8(inline_source_slice(doc, *ranges.closing));
                 }
                 append_node(parent, std::move(n));
                 break;
@@ -264,13 +286,31 @@ inline void project_inline_nodes(
                     limitation(limitations, "inline-html-policy/projection");
                     break;
                 }
-                append_node(parent, element("comment", {{"text", utf8(inline_source_slice(doc, content_range))}}));
+                auto comment = element("comment", {{"text", utf8(inline_source_slice(doc, content_range))}});
+                comment.html_override = raw();
+                append_node(parent, std::move(comment));
                 break;
             }
-            case K::Raw:
-                append_text(parent, raw());
+            case K::Raw: {
+                const auto tag = scan_markdown_html_tag(doc.source, item.range.start, item.range.end);
+                const auto special = scan_markdown_html_special(doc.source, item.range.start, item.range.end);
+                if ((tag && tag->range.end == item.range.end)
+                    || (special && special->range.end == item.range.end)) {
+                    append_raw_html(parent, raw());
+                } else append_text(parent, raw());
                 break;
-            case K::Incomplete:
+            }
+            case K::Incomplete: {
+                const auto& semantic = item.semantics();
+                const auto& ranges = item.delimiter_ranges();
+                if (!semantic.html_tag.empty() && ranges.opening.valid_for(doc.source.size())) {
+                    auto n = element(semantic.html_tag);
+                    n.html_prefix = utf8(inline_source_slice(doc, ranges.opening));
+                    project_inline_nodes(n, doc, item.children, limitations);
+                    append_node(parent, std::move(n));
+                } else append_text(parent, raw());
+                break;
+            }
             case K::Error:
                 // Preserve the exact incomplete/error spelling as literal text.
                 append_text(parent, raw());
@@ -313,6 +353,13 @@ inline bool project_block(
     Node& parent,
     BlockNode const& block,
     std::vector<std::string>& limitations) {
+    // HTML-backed semantic trees retain their original source as the HTML
+    // projection input. This test parses fresh documents; editing/save checks
+    // remain separate and do not use this rendering convenience.
+    if (block.has_html_source()) {
+        append_raw_html(parent, utf8(block.html_special().source) + "\n");
+        return true;
+    }
     auto add_children = [&](Node& node) {
         for (auto const& child : block.children) project_block(node, child, limitations);
     };
@@ -329,8 +376,7 @@ inline bool project_block(
                         return ch == U' ' || ch == U'\t';
                     }))) return false;
             if (block.inline_content.syntax_mode == InlineSyntaxMode::HtmlText) {
-                project_inline_nodes(parent, block.inline_content,
-                    block.inline_content.tree.nodes, limitations);
+                append_raw_html(parent, utf8(block.inline_content.source) + "\n");
                 return true;
             }
             auto n = element("p");
@@ -367,14 +413,18 @@ inline bool project_block(
                 for (auto const& child : item.children) {
                     if (list.tight && child.kind == BlockKind::Paragraph) {
                         if (!child.inline_content.source.empty()) {
-                            auto semantic_nodes = semantic_inline_nodes(
-                                child.inline_content,
-                                InlineBlockWhitespacePolicy::Paragraph);
-                            project_inline_nodes(
-                                li,
-                                child.inline_content,
-                                semantic_nodes,
-                                limitations);
+                            if (child.inline_content.syntax_mode == InlineSyntaxMode::HtmlText) {
+                                append_raw_html(li, utf8(child.inline_content.source) + "\n");
+                            } else {
+                                auto semantic_nodes = semantic_inline_nodes(
+                                    child.inline_content,
+                                    InlineBlockWhitespacePolicy::Paragraph);
+                                project_inline_nodes(
+                                    li,
+                                    child.inline_content,
+                                    semantic_nodes,
+                                    limitations);
+                            }
                         }
                     } else {
                         project_block(li, child, limitations);
@@ -392,6 +442,10 @@ inline bool project_block(
             return true;
         }
         case BlockKind::CodeBlock: {
+            if (block.block_source.tree().kind == BlockSourceKind::HtmlCode) {
+                append_raw_html(parent, utf8(block.block_source.source()) + "\n");
+                return true;
+            }
             auto pre = element("pre");
             std::vector<std::pair<std::string, std::string>> attrs;
             auto const& language = block.block_source.tree().language;
@@ -439,7 +493,21 @@ inline bool project_block(
         case BlockKind::UnsupportedMarkup:
         case BlockKind::HtmlContainer:
         case BlockKind::Extension:
-            if (block.kind == BlockKind::HtmlContainer || block.has_html_source()) {
+            if (block.kind == BlockKind::UnsupportedMarkup) {
+                const auto& atomic = block.atomic_special();
+                const auto source = utf8_to_cps(atomic.raw);
+                const auto line_end = source.find_first_of(U"\r\n");
+                const auto start = scan_markdown_html_block_start(
+                    source, 0, line_end == std::u32string::npos ? source.size() : line_end);
+                if ((atomic.unsup_reason == UnsupportedMarkupReason::UnsafeHtml
+                        || atomic.unsup_reason == UnsupportedMarkupReason::MalformedSyntax)
+                    && start) {
+                    append_raw_html(parent, atomic.raw + "\n");
+                } else {
+                    append_node(parent, placeholder("extension", "kind", "UnsupportedMarkup"));
+                    limitation(limitations, "block-extension:UnsupportedMarkup");
+                }
+            } else if (block.kind == BlockKind::HtmlContainer) {
                 append_node(parent, placeholder("html-policy/projection", "kind", block_kind_name(block.kind)));
                 limitation(limitations, "block-html-policy/projection");
             } else {
@@ -536,6 +604,90 @@ inline bool inline_lossless_nodes(InlineCstNodes const& nodes, InlineDocument co
     return true;
 }
 
+inline void append_html_text(std::string& out, std::string_view value) {
+    for (const char ch : value) {
+        switch (ch) {
+            case '&': out += "&amp;"; break;
+            case '<': out += "&lt;"; break;
+            case '>': out += "&gt;"; break;
+            default: out.push_back(ch); break;
+        }
+    }
+}
+
+inline void append_html_attribute(std::string& out, std::string_view value) {
+    for (const char ch : value) {
+        switch (ch) {
+            case '&': out += "&amp;"; break;
+            case '<': out += "&lt;"; break;
+            case '>': out += "&gt;"; break;
+            case '\"': out += "&quot;"; break;
+            default: out.push_back(ch); break;
+        }
+    }
+}
+
+inline void html_start_tag(
+    std::string& out,
+    std::string_view tag,
+    std::vector<std::pair<std::string, std::string>> attrs = {}) {
+    std::ranges::sort(attrs, {}, [](auto const& attr) -> auto const& { return attr.first; });
+    out.push_back('<');
+    out.append(tag);
+    for (const auto& [name, value] : attrs) {
+        out.push_back(' ');
+        out += name;
+        out += "=\"";
+        append_html_attribute(out, value);
+        out.push_back('\"');
+    }
+    out.push_back('>');
+}
+
+inline bool html_void_element(std::string_view tag) {
+    return tag == "area" || tag == "base" || tag == "br" || tag == "col"
+        || tag == "embed" || tag == "hr" || tag == "img" || tag == "input"
+        || tag == "link" || tag == "meta" || tag == "param" || tag == "source"
+        || tag == "track" || tag == "wbr";
+}
+
+inline void render_html_node(Node const& node, std::string& out) {
+    if (node.tag == "#raw-html") {
+        for (const auto& child : node.children) {
+            if (child.node) render_html_node(*child.node, out);
+            else out += child.text;
+        }
+        return;
+    }
+    if (node.tag == "root") {
+        for (const auto& child : node.children) {
+            if (child.node) render_html_node(*child.node, out);
+            else append_html_text(out, child.text);
+        }
+        return;
+    }
+    if (node.html_override) {
+        out += *node.html_override;
+        return;
+    }
+    if (!node.html_prefix.empty()) out += node.html_prefix;
+    else html_start_tag(out, node.tag, node.attrs);
+    for (const auto& child : node.children) {
+        if (child.node) render_html_node(*child.node, out);
+        else append_html_text(out, child.text);
+    }
+    if (!node.html_suffix.empty()) out += node.html_suffix;
+    else if (node.html_prefix.empty() && !html_void_element(node.tag)) out += "</" + node.tag + ">";
+    // These line endings belong to generated Markdown block markup. They
+    // matter inside an open raw HTML element and even within an HTML comment.
+    if (is_block(node.tag)) out.push_back('\n');
+}
+
+inline std::string render_html(Node const& root) {
+    std::string result;
+    render_html_node(root, result);
+    return result;
+}
 } // namespace projection_detail
 
 inline std::string json_string(std::string_view value) {
@@ -584,6 +736,7 @@ inline Projection project(BlockNode const& block) {
     } else {
         project_block(strict, block, result.limitations);
     }
+    result.projected_html = render_html(strict);
     Node relaxed = clone(strict);
     clean(strict, false);
     clean(relaxed, true);

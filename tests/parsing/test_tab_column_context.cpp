@@ -12,6 +12,7 @@ import folia.core.block_source;
 import folia.core.serializer;
 import folia.core.utf;
 import folia.core.text_edit;
+import folia.core.markdown_html;
 
 using namespace folia;
 using namespace boost::ut;

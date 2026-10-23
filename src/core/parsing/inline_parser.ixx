@@ -148,11 +148,11 @@ struct Parser {
             return run_end;
         }
         if (src[at] == U'<') {
-            if (starts_with_at(at, U"<!--")) {
-                const auto close = src.find(U"-->", at + 4);
-                return close != std::u32string_view::npos && close + 3 <= limit ? close + 3 : at + 1;
+            if (const auto special = scan_markdown_html_special(src, at, limit)) {
+                return special->range.end;
             }
             if (const auto tag = html_tag_at(at, limit)) {
+                if (ctx.syntax_mode == InlineSyntaxMode::Markdown) return tag->end;
                 if (tag->closing || (tag->name != "img" && tag->name != "br"
                         && !safe_html_container(tag->name))) return tag->end;
                 if (tag->name == "img" || tag->name == "br" || tag->self_closing) return tag->end;
@@ -1497,35 +1497,19 @@ struct Parser {
             || name == "samp";
     }
 
-    bool parse_html_comment(InlineCstNodes& out, std::size_t& run_start) {
-        static constexpr auto opener = std::u32string_view{U"<!--"};
-        static constexpr auto closer = std::u32string_view{U"-->"};
-        if (!starts_with(pos, opener)) return false;
-
-        const auto start = pos;
-        const auto content_start = start + opener.size();
-        auto closing_start = content_start;
-        while (closing_start + closer.size() <= limit
-            && !starts_with(closing_start, closer)) {
-            ++closing_start;
-        }
-        // An unfinished comment is an ordinary editing state.  Keep it
-        // visible and editable as literal text until the closing marker is
-        // present instead of hiding the remainder of the block.
-        if (closing_start + closer.size() > limit) return false;
-
-        flush_text_to(out, run_start, start);
-        pos = closing_start + closer.size();
+    bool parse_html_special(InlineCstNodes& out, std::size_t& run_start) {
+        const auto special = scan_markdown_html_special(src, pos, limit);
+        // Unfinished markup stays visible in the normal editable text run.
+        if (!special) return false;
+        flush_text_to(out, run_start, pos);
+        pos = special->range.end;
         InlineCstNode node;
         node.id = next_id();
-        node.kind = InlineCstKind::HtmlComment;
-        node.status = ParseStatus::Complete;
-        node.range = {start, pos};
-        node.ensure_delimiter_ranges() = {
-            {start, pos},
-            {start, content_start},
-            {content_start, closing_start},
-            SourceRange{closing_start, pos}};
+        node.kind = special->kind == MarkdownHtmlSpecialKind::Comment
+            ? InlineCstKind::HtmlComment : InlineCstKind::Raw;
+        node.range = special->range;
+        node.ensure_delimiter_ranges() = {special->range, special->opening,
+            special->content, special->closing};
         out.push_back(std::move(node));
         run_start = pos;
         return true;
@@ -1587,6 +1571,16 @@ struct Parser {
             node.status = ParseStatus::MissingCloser;
             node.range = {start, pos};
             node.ensure_delimiter_ranges() = {{start, pos}, {start, tag->end}, {tag->end, pos}, std::nullopt};
+            auto& semantic = node.ensure_semantics();
+            semantic.html_tag = tag->name;
+            semantic.html_attributes = tag->attributes;
+            if (ctx.syntax_mode == InlineSyntaxMode::Markdown) {
+                Parser inner{src, ctx};
+                inner.counter = counter;
+                inner.pos = tag->end;
+                node.children = inner.parse_until(pos);
+                counter = inner.counter;
+            }
             out.push_back(std::move(node));
             run_start = pos;
             return true;
@@ -1597,7 +1591,9 @@ struct Parser {
         const auto source_end = closing->second;
         InlineCstNodes children;
         auto html_context = ctx;
-        html_context.syntax_mode = InlineSyntaxMode::HtmlText;
+        // Inline HTML does not switch off Markdown in its body. HtmlText is
+        // selected by the block parser only for an actual raw HTML block.
+        html_context.syntax_mode = ctx.syntax_mode;
         Parser inner{src, html_context};
         inner.counter = counter;
         inner.pos = content_start;
@@ -1770,7 +1766,7 @@ struct Parser {
             if (is_line_ending(peek())) { advance(line_ending_length(pos)); continue; }
             if (ctx.syntax_mode == InlineSyntaxMode::HtmlText) {
                 if (parse_entity(out, run_start)) continue;
-                if (peek() == U'<' && parse_html_comment(out, run_start)) continue;
+                if (peek() == U'<' && parse_html_special(out, run_start)) continue;
                 if (peek() == U'<' && parse_html_element(out, run_start)) continue;
                 advance();
                 continue;
@@ -1792,7 +1788,7 @@ struct Parser {
                 if (parse_link_or_image(out, run_start)) continue;
             }
             if (peek() == U'<') {
-                if (parse_html_comment(out, run_start)) continue;
+                if (parse_html_special(out, run_start)) continue;
                 if (parse_autolink(out, run_start)) continue;
                 if (parse_html_element(out, run_start)) continue;
             }
@@ -1814,7 +1810,7 @@ struct Parser {
             if (parse_break(out, run_start, ctx.syntax_mode == InlineSyntaxMode::Markdown)) continue;
             if (ctx.syntax_mode == InlineSyntaxMode::HtmlText) {
                 if (parse_entity(out, run_start)) continue;
-                if (peek() == U'<' && parse_html_comment(out, run_start)) continue;
+                if (peek() == U'<' && parse_html_special(out, run_start)) continue;
                 if (peek() == U'<' && parse_html_element(out, run_start)) continue;
                 advance();
                 continue;
@@ -1832,7 +1828,7 @@ struct Parser {
                 if (parse_link_or_image(out, run_start)) continue;
             }
             if (peek() == U'<') {
-                if (parse_html_comment(out, run_start)) continue;
+                if (parse_html_special(out, run_start)) continue;
                 if (parse_autolink(out, run_start)) continue;
                 if (parse_html_element(out, run_start)) continue;
             }

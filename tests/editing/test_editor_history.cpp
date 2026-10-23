@@ -60,7 +60,7 @@ suite editor_history_tests = [] {
     expect(fatal(bool(editor.selection() == after_selection)));
 };
 
-"inline_html_edit_undo_redo_preserves_the_syntax_island_exactly"_test = [] {
+"inline_html_edit_undo_redo_preserves_source_and_nested_markdown_exactly"_test = [] {
     constexpr std::string_view source =
         "before <span style=\"color:#123456\"><strong>*literal*</strong></span> after";
     Editor editor{std::string(source)};
@@ -83,9 +83,9 @@ suite editor_history_tests = [] {
     expect(bool(inline_contains_kind(
         first_text(editor).inline_content,
         InlineCstKind::HtmlElement))) << "html element";
-    expect(bool(!inline_contains_kind(
+    expect(bool(inline_contains_kind(
         first_text(editor).inline_content,
-        InlineCstKind::Emphasis))) << "markdown disabled inside html";
+        InlineCstKind::Emphasis))) << "markdown retained inside inline html";
     expect(bool(flatten_tokens(
         first_text(editor).inline_content.tree,
         first_text(editor).inline_content.source)

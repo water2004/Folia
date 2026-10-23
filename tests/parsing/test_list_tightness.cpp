@@ -17,6 +17,7 @@ import folia.core.parser;
 import folia.core.serializer;
 import folia.core.utf;
 
+import folia.core.markdown_html;
 #include "support/commonmark_projection.hpp"
 
 using namespace folia;
