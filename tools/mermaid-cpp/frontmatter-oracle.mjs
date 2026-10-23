@@ -81,6 +81,28 @@ for (const [name, body] of Object.entries({
   nonSpecific: 'config: ! 12', reusedAnchor: 'a: &x first\nb: &x second\ntitle: *x',
   nul: 'title: before\u0000after', unicodeSeparators: 'title: a\u0085b\u2028c\u2029d',
 })) bodyCase(name, body);
+// Regression: non-verbatim tag suffixes stop at whitespace, not flow
+// punctuation. Empty nodes with a separator are valid; attached punctuation
+// is invalid. Keep both outcomes so a blanket collection rejection cannot pass.
+for (const tag of ['!!str', '!!null', '!!seq', '!!map', '!']) {
+  for (const [separatorName, separator] of Object.entries({space: ' ', tab: '\t', lf: '\n', crlf: '\r\n'})) {
+    bodyCase(`empty-tag-map-${tag}-${separatorName}`, `config: {value: ${tag}${separator}}`);
+    bodyCase(`empty-tag-sequence-${tag}-${separatorName}`, `config: [${tag}${separator}]`);
+    bodyCase(`empty-tag-comma-${tag}-${separatorName}`, `config: {value: ${tag}${separator}, other: yes}`);
+  }
+  for (const [name, body] of Object.entries({map: `config: {value: ${tag}}`, sequence: `config: [${tag}]`, comma: `config: [${tag}, 1]`})) {
+    bodyCase(`attached-tag-${tag}-${name}`, body);
+  }
+}
+for (const type of ['str', 'null', 'seq', 'map']) {
+  bodyCase(`verbatim-empty-${type}`, `config: {value: !<tag:yaml.org,2002:${type}>}`);
+  bodyCase(`verbatim-sequence-${type}`, `config: [!<tag:yaml.org,2002:${type}>, 1]`);
+}
+bodyCase('empty-tag-nested', 'config: {a: [!!str , {b: !!seq }], c: !!map }');
+bodyCase('empty-tag-anchor', 'config: {a: &empty !!seq , b: *empty}');
+bodyCase('empty-tag-schema-error', 'config: {a: !!int }');
+bodyCase('adjacent-tag-collection', 'config: !!seq[]');
+bodyCase('separated-tag-collection', 'config: !!seq []');
 for (let i = 0; i < 80; ++i) bodyCase(`generated-${i}`, `title: ${i}\nconfig: {pie: {showData: ${i % 2 ? 'true' : 'false'}, width: ${i * 17}}, values: [${i}, "${i}"]}`);
 const lines = cases.map(({ name, input }) => {
   try {

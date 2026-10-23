@@ -1,7 +1,8 @@
 diff --git a/src/exp.cpp b/src/exp.cpp
+index 992620f..7936e49 100644
 --- a/src/exp.cpp
 +++ b/src/exp.cpp
-@@ -108,8 +108,6 @@ std::string Escape(Stream& in) {
+@@ -108,16 +108,14 @@ std::string Escape(Stream& in) {
        return R"( )";
      case '\"':
        return "\"";
@@ -10,7 +11,7 @@ diff --git a/src/exp.cpp b/src/exp.cpp
      case '\\':
        return "\\";
      case '/':
-@@ -117,7 +115,7 @@ std::string Escape(Stream& in) {
+       return "/";
      case 'N':
 -      return "\x85";
 +      return "\xC2\x85";
@@ -20,15 +21,39 @@ diff --git a/src/exp.cpp b/src/exp.cpp
      case 'L':
        return "\xE2\x80\xA8";  // LS (#x2028)
      case 'P':
+diff --git a/src/scantoken.cpp b/src/scantoken.cpp
+index b13d211..4e4aea5 100644
+--- a/src/scantoken.cpp
++++ b/src/scantoken.cpp
+@@ -289,6 +289,17 @@ void Scanner::ScanTag() {
+       token.params.push_back(ScanTagSuffix(INPUT));
+       token.data = Tag::NAMED_HANDLE;
+     }
++
++    // js-yaml reads a non-verbatim tag through whitespace. A flow indicator
++    // immediately after the suffix is therefore an invalid part of the tag,
++    // not the end of an empty tagged node. Whitespace-separated empty nodes
++    // and verbatim tags remain valid.
++    if (INPUT && (INPUT.peek() == Keys::FlowSeqStart ||
++                  INPUT.peek() == Keys::FlowSeqEnd ||
++                  INPUT.peek() == Keys::FlowMapStart ||
++                  INPUT.peek() == Keys::FlowMapEnd ||
++                  INPUT.peek() == Keys::FlowEntry))
++      throw ParserException(INPUT.mark(), ErrorMsg::INVALID_TAG);
+   }
+
+   m_tokens.push(token);
 diff --git a/src/singledocparser.cpp b/src/singledocparser.cpp
+index 04ea4f2..33db068 100644
 --- a/src/singledocparser.cpp
 +++ b/src/singledocparser.cpp
-@@ -144,5 +144,15 @@ void SingleDocParser::HandleNode(EventHandler& eventHandler) {
-   if (tag == "?")
+@@ -141,8 +141,15 @@ void SingleDocParser::HandleNode(EventHandler& eventHandler) {
+       break;
+   }
+
+-  if (tag == "?")
++  if (tag == "?" || tag == "!")
      eventHandler.OnNull(mark, anchor);
-+  else if (m_pCollectionStack->GetCurCollectionType() == CollectionType::FlowMap ||
-+           m_pCollectionStack->GetCurCollectionType() == CollectionType::FlowSeq)
-+    throw ParserException(mark, ErrorMsg::FLOW_END);
 +  else if (tag == "tag:yaml.org,2002:seq") {
 +    eventHandler.OnSequenceStart(mark, tag, anchor, EmitterStyle::Default);
 +    eventHandler.OnSequenceEnd();

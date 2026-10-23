@@ -1,6 +1,28 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-21, upstream PR #1 created
+## Current checkpoint - 2026-10-23, PR #1 review fixes in progress
+
+- User authorized fixing the review findings, positive tests, CI, upstream
+  conflicts and documentation in small commits. Update existing upstream PR #1
+  only after verification. DO NOT merge either the upstream PR or a fork PR.
+- Work on codex/mermaid-cpp-yaml-review, based on PR head 74ac2c8c. Commit
+  10a43da7 merges upstream 508423f200f815beb7e686d64858501c58cef28b, preserving
+  both Mermaid and CommonMark/reference exclusions in the core test glob.
+- YAML candidate moves attached-flow-punctuation rejection to ScanTag and
+  accepts whitespace-separated empty tagged nodes. Empty non-specific tags are
+  null; explicit seq/map empty nodes remain typed. The original source oracle
+  now has 509 observations (88 added), including positive space/tab/LF/CRLF,
+  comma, nested/anchor/verbatim cases and paired malformed inputs.
+- Local official oracle and patch reverse-check pass. Native final-head checks
+  are pending. Existing PR branch remains unchanged until validation completes.
+- Next: restore portable Windows CI including root build integration, push the
+  validation branch, inspect Debug/Release results, then fast-forward the existing
+  PR branch and correct its description. No application dependency switch.
+- No live local builds/agents. Review evidence and old CI executable are under
+  ignored build/mermaid-cpp/review-gemini-20261023. The ignored yaml-cpp reference
+  checkout contains the candidate patch; use a fresh source tree for apply-checks.
+
+## Upstream packaging checkpoint (historical) - 2026-10-21
 
 - Upstream PR created: https://github.com/water2004/Folia/pull/1
   ("feat(mermaid): port official Mermaid C++ foundation, Packet, Pie, preprocessing, and YAML frontmatter (stages 1-4b)").
@@ -27,7 +49,7 @@
 ## Stage 4b merged checkpoint (historical; superseded above) — 2026-10-21
 
 - Stage 4b is merged: https://github.com/zhao0349/Folia/pull/5, merge commit
-  357d5bb1b2e616238b7eec931751fa05ef1be8d1 on fork master. Eight commits
+  357d5bb1a3426ccde32d5c798061f07b0f81188f on fork master. Eight commits
   preserved on the feature branch codex/mermaid-cpp-frontmatter.
 - Native YAML configuration trees and frontmatter extraction:
   `parse_config_yaml` exposes owned null/bool/binary64/UTF-16/list/map values
