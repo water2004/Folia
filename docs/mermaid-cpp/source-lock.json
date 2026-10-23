@@ -5,6 +5,18 @@
   "license": "MIT",
   "files": [
     {
+      "path": "packages/mermaid/src/diagrams/flowchart/parser/flow.jison",
+      "sha256": "9597faffe2a133b104c6dd4f38a162f6980bff4e0a841a83ff94af3900ea7ba8"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/flowchart/flowDb.ts",
+      "sha256": "33577b9ade8c65be6049c3093089dbf81abf44214f49c2b2ea46434183889288"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/flowchart/types.ts",
+      "sha256": "692016b3acc50f484602f7c1741233156aa4bc4e01caa6ce260bd7e2b9530d8d"
+    },
+    {
       "path": "LICENSE",
       "sha256": "e44b44d50e98cbf0c7e047e58d701fe5f26f181d5403fdcccba371ee31400e10"
     },

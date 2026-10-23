@@ -1,6 +1,18 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-23, Packet/Pie render entry verified
+## Current checkpoint - 2026-10-23, Flowchart parser and layout input in progress
+
+- Deliver common Flowchart source through shared preparation/configuration to
+  owned nodes, edges and compound-graph layout input. Scope: classic shapes,
+  labelled/chained/grouped links, subgraphs, direction and basic style classes.
+- Exit: representative original parser/DB/getData observations match native
+  output; affected Windows standalone/integrated Debug/Release checks pass.
+  Commit and push small batches, update upstream PR #1, keep it OPEN.
+- Next stage: official Dagre layout and measured Flowchart SVG; other required
+  families and the final application dependency switch remain outstanding.
+- No Flowchart rendering or application integration is claimed by this stage.
+
+## Packet/Pie render entry verified (historical)
 
 - Delivered the opt-in folia.platform.mermaid_renderer::render_mermaid entry:
   source -> shared preparation -> Packet/Pie configuration and theme -> family
