@@ -387,6 +387,18 @@
     {
       "path": "packages/mermaid/src/diagrams/common/common.ts",
       "sha256": "b14851667f7d45d101d4e028204babb1628faefe4812a88ae2d8acac72f8e144"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/flowchart/flowRenderer-v3-unified.ts",
+      "sha256": "9eba228f1d94dce7cbd6cda7c8baf00eba9f6571d9de26f41c9ebadee62e7d31"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/dagre/index.js",
+      "sha256": "3f366de80d978873099c7c9bf7ceaa61f779dba372a4dc11dab3ec61e000512e"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/dagre/mermaid-graphlib.js",
+      "sha256": "8eff208d3b11645dea47ffcd6e7ad7bfd3b0032a3612b9ba3506633510497a2d"
     }
   ],
   "packages": [
@@ -942,5 +954,68 @@
         }
       ]
     }
-  ]
+  ],
+  "dagreRank": {
+    "package": "dagre-d3-es",
+    "version": "7.0.14",
+    "license": "MIT",
+    "files": [
+      {
+        "path": "package.json",
+        "sha256": "24643bcd30aef3932d4776eae974005354e34eb1036c24e6090b8a38b05fcc8e"
+      },
+      {
+        "path": "LICENSE.md",
+        "sha256": "d01eb84ccce437dbf5fd40853bceea0f287930920acea066597a4a25ead63858"
+      },
+      {
+        "path": "src/dagre/layout.js",
+        "sha256": "76d6a92030279ea5c22bd034d71debdf6d46f2e56b94c26babd6a34e907e192c"
+      },
+      {
+        "path": "src/dagre/acyclic.js",
+        "sha256": "8718f354dca625bf0213a4719fa8d90723a624a5c12074f3af8e19cffaec0b1a"
+      },
+      {
+        "path": "src/dagre/nesting-graph.js",
+        "sha256": "377d16b13bd03f6b81ed0214f01ba766ee4dafec89ff370a1c6c9aa184da864d"
+      },
+      {
+        "path": "src/dagre/util.js",
+        "sha256": "9bb955ebb814eadbb2f5f191f4f770af6cc3fe60a52f76d8208febf325ad98ce"
+      },
+      {
+        "path": "src/dagre/rank/index.js",
+        "sha256": "d6bda6a568923fa8aa6e425b44e10dbd777ea8a07afa7b0306adc53cfe840669"
+      },
+      {
+        "path": "src/dagre/rank/util.js",
+        "sha256": "867f1f3f8a4c2493bede73417e23b494c7ac7064217590c4e831f1f64a041135"
+      },
+      {
+        "path": "src/dagre/rank/feasible-tree.js",
+        "sha256": "ac4db776d64d0788fbcc51e18760ebfb2d7f7495ec5ff1d9b7639a1873d2d84f"
+      },
+      {
+        "path": "src/dagre/rank/network-simplex.js",
+        "sha256": "62f8bfdc486ea82a62bad39194b9f9fa2c24f22c27459a6d2ddf7db42c641c3f"
+      },
+      {
+        "path": "src/graphlib/graph.js",
+        "sha256": "3edb5adb4962643e0f743fa9183dad3b36df94c0a1af476eec2b0d8b77b2054b"
+      },
+      {
+        "path": "src/graphlib/alg/dfs.js",
+        "sha256": "c49dc05a344566f15eadc172d1034c63d89796a498d0691a4069da3c7e06cbf7"
+      },
+      {
+        "path": "src/graphlib/alg/preorder.js",
+        "sha256": "09fed89780f9036b59abd2d7eba6150e0c8bb5feb558ce24937ca5a814648b6d"
+      },
+      {
+        "path": "src/graphlib/alg/postorder.js",
+        "sha256": "726ab5f891e60d97765a5bb15fd58df7f51bb063be7da11df9b2fa07c027dd70"
+      }
+    ]
+  }
 }
