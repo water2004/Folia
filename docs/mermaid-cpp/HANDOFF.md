@@ -1,24 +1,25 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-23, configuration session batch in progress
+## Current checkpoint - 2026-10-23, configuration sessions verified
 
 - User authorizes public fork zhao0349/Folia pushes and verified updates to
   https://github.com/water2004/Folia/pull/1. Keep OPEN; DO NOT merge.
-- Verification branch `codex/mermaid-cpp-session`, delivery branch remains
-  `feat/mermaid-cpp-port` at `d0dc8920`. Baseline delivery CI 39901224923
-  passed all four Windows jobs; upstream PR is open at that delivery head.
-- Previous verification head `4354acb776ab9c13c9ada795b1e9da3de270cbec` passed
-  all four jobs of https://github.com/zhao0349/Folia/actions/runs/39906574476.
-  DO NOT deliver yet: new getter regression cases reveal a source-contract gap.
-  Pending tracked changes make getters perform assignWithDepth copies, as the
-  original does, rather than return raw stored trees. They now return expected
-  results for bounded copy failures. Next: commit and push this focused fix,
-  then rerun all four Windows jobs before delivery. No live local processes.
-- Selected boundary: original config.ts lifecycle, owned per-session state,
+- Verification branch `codex/mermaid-cpp-session`; delivery branch
+  `feat/mermaid-cpp-port`. Upstream base remains `508423f2`. Baseline delivery
+  CI 39901224923 passed before this batch.
+- Verified code head `c61bda4e1da00f10a165e6f5ec0ca951464d534b`:
+  https://github.com/zhao0349/Folia/actions/runs/39908290555 passed all four
+  standalone/integrated Windows Debug/Release jobs. Integrated jobs passed
+  FoliaTests, FoliaWindowsEditorTests and both Mermaid suites; standalone jobs
+  passed both Mermaid suites. All jobs checked official source/SVG oracles,
+  78 native SVG DOM comparisons and 96 browser/DirectWrite measurement cases.
+  This final checkpoint commit changes documentation only, not tested code/CI.
+- Implemented original config.ts lifecycle with owned per-session state,
   default/dark re-derivation, scoped appearance, secure directive replay,
   initialize snapshots and reset. No global singleton or renderer integration.
 - Oracle executes the complete pinned config.ts in fresh scopes with original
-  dependencies. Compare full JSON-data state via lossless recursive deltas,
+  dependencies: 101 scenarios / 640 steps, with a passing local oracle check.
+  Compare full JSON-data state via lossless recursive deltas,
   not selected properties. Defaults omit undefined values and family callbacks;
   those callbacks are never invoked by this session boundary.
 - Native restrictions explicitly exclude unported theme derivation,
@@ -27,26 +28,26 @@
   Native failures are transactional; caller inputs/getter results own their data.
 - Small commits: `5f25dad7` official oracle/default data; `653cacbe` native
   lifecycle and ownership/budget tests; `4354acb7` callback guard and fixture
-  transport. The superseded 39905882983 run is cancelled: native compilation
-  passed, but tests failed in fixture transport at a raw
-  Unicode line separator, which the reused directive JSON codec treats as a
-  lexical delimiter. This is a harness issue, not a session semantic mismatch.
-  Local MSVC/CMake are still unavailable. Do not rerun that superseded head.
-- Original defaults include 25 font
-  callbacks. A generated callback-slot table rejects container overrides that
+  transport; `c61bda4e` getter copy semantics. Getters perform assignWithDepth
+  copies, preserving skipped null fields and primitive array union. Bounded
+  copy failures return expected errors rather than exposing raw stored trees.
+- Original defaults include 25 font callbacks. A generated table rejects container overrides that
   would otherwise change assignWithDepth's callable-vs-object behavior; scalar
-  replacements remain supported. Oracle now has 101 scenarios / 640 steps;
-  its local check passes. Additional cases cover null theme fields and duplicate
-  primitive arrays in getter copies (top-level null omitted, array values union).
-- Escaping directive delimiters/line separators in fixture JSON preserves the
-  decoded data. Downloaded original Release runner passes the corrected original
-  584 steps and all three focused session tests (4,496 assertions), under
-  `build/mermaid-cpp/session-review/{fixtures,focused.log}`. The newer callback
-  guard passed the previous CI. No abnormal native exit.
-- `build/mermaid-cpp/session-getter-review/FoliaMermaidTests.exe` is the old
-  4354acb7 Release runner. It exposes 12 real getter mismatches on the new cases
-  (plus the expected 640-vs-615 fixture-count mismatch); evidence is
-  `before-fix.log`. Do not mistake this old executable for the pending fix.
+  replacements remain supported. Fixture JSON escapes directive delimiters and
+  line separators solely for transport; decoded session inputs remain exact.
+- Next concrete work: original diagram registry/detector dispatch oracle and
+  native dispatch. Shared frontend wiring, remaining theme derivations, family
+  font callbacks/effective-htmlLabels helpers and renderer theme integration
+  remain separate boundaries. Other families and application dependency
+  replacement remain pending; no WinUI packaging or DPI acceptance is claimed.
+- No live local builds/agents or uncommitted implementation candidates. Local
+  MSVC/CMake remain unavailable; native evidence is the Windows CI above.
+  Ignored session-review and session-getter-review contain OLD Release runners
+  (653cacbe and 4354acb7) and diagnostic fixtures/logs, not the final binary.
+  The latter exposed 12 getter mismatches before the fix. Superseded runs
+  39905882983 and 39906574476 are not pending acceptance work. A delivery push
+  can trigger another automatic run; inspect live checks on recovery rather
+  than asserting that the later documentation run has completed.
 
 ## Init mapping and clean merge verified (historical)
 

@@ -309,7 +309,7 @@ null fields and primitive array union), rather than exposing raw stored trees.
 Session command inputs are mappings. Arrays contain primitives; nested input
 containers stop at depth two (root zero), before `assignWithDepth` could retain
 shared deeper objects. Theme names are primitive values, secure lists contain
-strings, and prototype setters are rejected. Existing theme/sanitizer/merge
+strings, and `__proto__` input fields are rejected. Existing theme/sanitizer/merge
 restrictions still apply. Limits bound aggregate retained state, command input
 and cumulative intermediate tree inspections; each delegated primitive also
 has its own work limit. Saved directives have a hard ceiling of 256. Failed
