@@ -1,17 +1,50 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-23, Flowchart coordinates in progress
+## Current checkpoint - 2026-10-23, Flowchart coordinates and initial measured SVG verified
 
-- Deliver the next original Dagre stage on the retained private ranked graph:
-  long-edge normalization/parenting, group borders, crossing reduction, BK
-  coordinates and restored edge paths. Scope is the existing representative
-  chain/branch/cycle/parallel/self-edge/nested-group corpus with supplied boxes.
-- Exit: original full-layout oracle agrees with native coordinates and paths;
-  affected Mermaid and integrated Windows Debug/Release checks pass. Next:
-  real DirectWrite measurement and source-to-SVG Flowchart rendering.
-- Work on fork/mermaid-development; select only functional/public-document
-  commits into build/mermaid-cpp/entry-contribution after validation. Upstream
-  PR #1 is confirmed OPEN at d4228fb1; do not merge.
+- Delivered the retained Dagre graph through crossing reduction/order, BK
+  coordinates, compound borders, direction transforms and restored edge paths.
+  The 19 original dagre-d3-es 7.0.14 observations match native ranks/orders,
+  node/group boxes and paths, including parallel/self edges, cycles and groups.
+- Connected source preparation -> real DirectWrite measurement -> native layout
+  -> SVG through render_mermaid. Current SVG scope: explicit Dagre/classic,
+  default/dark, ungrouped square/rounded/diamond/circle nodes, plain single-line
+  labels, basis/linear paths, point/plain arrow ends and basic stroke styles.
+  The full Dagre layout and the initial Mermaid SVG adapter have distinct scope.
+- Exit conditions passed at 7a45f1bbeb4d9e1fb81e39fc535b347fd607bfbc:
+  https://github.com/zhao0349/Folia/actions/runs/39962169371
+  All four Windows standalone/integrated Debug/Release jobs succeeded.
+  Integrated jobs passed FoliaTests, FoliaWindowsEditorTests and both Mermaid
+  suites. Each job compared 14 real browser/native SVGs for measured node boxes,
+  coordinates, text containment, paint and sampled edge geometry, plus existing
+  source/SVG and browser/DirectWrite checks. Final native preview was inspected.
+  Earlier Dagre-only validation also passed in run 39956107352 at fbcb56a3.
+- Source batches: 4e0d308e (oracle), fbcb56a3 (layout), ebcb6588 (measured SVG),
+  followed by focused paint/configuration and test fixes through 7a45f1bb.
+  The omitted-htmlLabels failure is fixed using the original root/family/default
+  precedence. Test initialization and MSVC lambda failures are resolved; no
+  failed acceptance check remains from these superseded diagnostic runs.
+- Contribution worktree: build/mermaid-cpp/entry-contribution, branch
+  feat/mermaid-cpp-port. Selected implementation head 27d572b8 matches the
+  verified Mermaid code, tests, source pins and workflow exactly; this final
+  public documentation checkpoint follows it. The diff against upstream
+  master 508423f2 contains no AGENTS.md changes. Update upstream PR #1 with
+  this batch and keep OPEN; DO NOT merge. Delivery can trigger automatic
+  reruns, separate from the completed implementation validation above.
+- Next concrete stage: Mermaid cluster endpoint/extraction and independently
+  directed subgraphs, then self-loop SVG adaptation, using the original
+  rendering-util/layout-algorithms/dagre/{index.js,mermaid-graphlib.js} path.
+  Keep the verified Dagre graph; add the required Mermaid adapters around it.
+  Continue the needed label/shape/style adapters afterward. Do not reopen
+  passed layout/configuration stages without a relevant change or regression.
+- Limits: SVG clusters, self loops, rich/wrapped labels, remaining shapes/styles
+  and titles still return explicit adapter errors. Other required families and
+  the application dependency switch remain outstanding; Folia still uses Rust
+  in the application. No WinUI packaging, GPU or DPI acceptance is claimed.
+- No local build, agent or browser probe is active. Final ignored evidence is
+  build/mermaid-cpp/flowchart-verified (downloaded standalone Debug artifacts),
+  with flowchart-browser/native-preview.png and comparison.json. Earlier
+  flowchart-check-880 and flowchart-chrome artifacts are diagnostic only.
 
 ## Dagre rank pipeline verified (historical)
 
