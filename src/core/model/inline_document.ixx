@@ -25,6 +25,7 @@ export namespace folia {
 struct InlineLinkDef {
     std::string href;
     std::optional<std::string> title;
+    bool operator==(const InlineLinkDef&) const=default;
 };
 
 enum class InlineSyntaxMode : std::uint8_t {

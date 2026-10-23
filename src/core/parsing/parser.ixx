@@ -63,6 +63,8 @@ struct ParseInput {
     // Parse-time container context; never an editing coordinate.
     std::vector<std::size_t> lazy_lines;
     std::vector<BlockLineIndentation> indentation;
+    std::function<std::optional<InlineLinkDef>(const std::string&)> references_before;
+    std::function<std::optional<InlineLinkDef>(const std::string&)> references_after;
 
     ParseInput() = default;
     ParseInput(
@@ -265,8 +267,11 @@ public:
         context.dialect = input->dialect;
         context.allocate_id = [this] { return next_node_id(); };
         context.resolve_link_label = [this](const std::string& label) -> std::optional<InlineLinkDef> {
+            if (input->references_before)
+                if (auto definition=input->references_before(label)) return definition;
             const auto found = link_definitions.find(label);
-            if (found == link_definitions.end()) return std::nullopt;
+            if (found == link_definitions.end())
+                return input->references_after ? input->references_after(label) : std::nullopt;
             return InlineLinkDef{found->second.href, found->second.title};
         };
         return context;
@@ -2253,8 +2258,12 @@ void close_innermost_frame() {
     const auto* quote_state=std::get_if<QuoteFrameState>(&frame.state);
     const bool title_only=quote_state && quote_state->callout && frame.node.children.size()==1
         && frame.node.children.front().kind==BlockKind::CalloutTitle;
-    if ((frame.node.children.empty() || title_only) && !std::holds_alternative<ListFrameState>(frame.state))
+    if ((frame.node.children.empty() || title_only) && !std::holds_alternative<ListFrameState>(frame.state)) {
         append_empty_frame_body(frame,title_only ? frame.source.end : frame.content.begin);
+        // This synthetic editing owner contributes no physical body line. The
+        // document ending or following sibling owns the header's final ending.
+        if (quote_state && quote_state->callout) frame.node.children.back().separator_before=U"";
+    }
     auto tail=frame.children_completion;
     if (auto* quote=std::get_if<QuoteFrameState>(&frame.state)) {
         // A quoted blank boundary has a source-editable empty owner unless an
@@ -2346,16 +2355,25 @@ std::optional<BlockNode> try_parse_frontmatter(LeafLine const& first) {
         if (trim_utf8(cps_to_utf8(copy_leaf_line_text(physical_source(),*next)))=="---") break;
     }
     LeafSourceAccumulator raw(physical_source());
-    std::size_t closing_start=0;
+    std::size_t opening_end=0,closing_start=0;
     for (std::size_t i=0;i<=count;++i) {
         auto const* line=peek_leaf_line();
         if (i==count) closing_start=raw.size();
         raw.append_line(*line,true);
+        if (i==0) opening_end=raw.size();
         accept_leaf_line(*line);
     }
     BlockNode block; block.id=next_node_id(); block.kind=BlockKind::Frontmatter;
     block.ensure_atomic_special().fmt=format;
-    block.ensure_atomic_special().raw=cps_to_utf8(std::u32string_view(raw.materialize()).substr(3,closing_start-3));
+    const auto source=raw.materialize();
+    block.ensure_atomic_special().raw=cps_to_utf8(std::u32string_view(source).substr(opening_end,closing_start-opening_end));
+    auto closing_end=source.size();
+    if (closing_end && source[closing_end-1]==U'\n') {
+        --closing_end;
+        if (closing_end && source[closing_end-1]==U'\r') --closing_end;
+    } else if (closing_end && source[closing_end-1]==U'\r') --closing_end;
+    block.ensure_text_special().opening_marker=source.substr(0,opening_end);
+    block.ensure_text_special().closing_marker=source.substr(closing_start,closing_end-closing_start);
     push_leaf_range(block.id,raw,{0,raw.size()},{0,raw.size()});
     record_completion(block.id,Completion::Other);
     return block;
@@ -2425,13 +2443,6 @@ void recognize_callout_header() {
     if (title_start<text.size()) {
         LeafSourceAccumulator title_source(physical_source());
         title_source.append_content_range(*first,title_start,text.size());
-        // The title owns the CR of a CRLF header; the Callout producer emits
-        // the remaining LF. Preserve that exact source boundary and its map.
-        const auto header_ending=first->ending;
-        const auto physical=physical_source().source();
-        if (header_ending.size()==2 && physical[header_ending.begin]==U'\r'
-            && physical[header_ending.begin+1]==U'\n')
-            title_source.append({header_ending.begin,header_ending.begin+1});
         BlockNode title; title.id=next_node_id(); title.kind=BlockKind::CalloutTitle;
         title.inline_content=make_inline_document(title_source);
         register_leaf_ownership(title.id,title_source);
@@ -2447,8 +2458,11 @@ void recognize_callout_header() {
     for (auto const& prefix : staged) if (prefix.frame_handle==handle)
         for (auto const range : prefix.prefix.spelling) prefix_exclusions.add(range);
     std::erase_if(staged,[&](auto const& prefix){return prefix.frame_handle==handle;});
+    const auto header_end=first->ending.begin;
     accept_leaf_line(*first);
-    frame.preceding_child_end=pos;
+    // The first body's separator owns the complete physical header ending.
+    // Do not split CRLF between the title's inline source and generated syntax.
+    frame.preceding_child_end=header_end;
 }
 
 
@@ -3137,6 +3151,8 @@ std::optional<BlockNode> try_parse_link_definition(const LeafLine& first) {
     block.id = next_node_id();
     block.kind = BlockKind::LinkDefinition;
     block.ensure_atomic_special().raw = cps_to_utf8(source);
+    block.ensure_atomic_special().reference_definition=std::make_shared<const LinkDefinitionData>(
+        LinkDefinitionData{definition->label,InlineLinkDef{definition->href,definition->title}});
     push_leaf_range(block.id, raw, SourceRange{0, raw.size()}, SourceRange{0, raw.size()});
     record_completion(block.id, completion_from_source(source));
     return block;
@@ -3751,19 +3767,7 @@ inline ParseOutput parse(const ParseInput& input) {
         }
     }
     if (!has_fm) {
-        std::size_t lc = 0, wc = 0; std::u32string buf;
-        auto flush = [&]() {
-            if (!buf.empty()) { ++wc; buf.clear(); }
-        };
-        for (char32_t c : p.cps) {
-            if (c == '\n') ++lc;
-            if (c == ' ' || c == '\t' || c == '\n' || c == '\r') flush();
-            else buf.push_back(c);
-        }
-        flush();
-        doc.metadata.char_count = p.cps.size();
-        doc.metadata.line_count = lc + 1;
-        doc.metadata.word_count = wc;
+        doc.metadata=metadata_from_text(p.cps);
     }
 
     doc.diagnostics = std::move(p.diagnostics);
@@ -3788,8 +3792,12 @@ inline ParseOutput parse_text(
 
 inline ParsedBlockFragment parse_block_fragment(
     std::u32string_view source,
-    MarkdownDialect dialect = default_dialect()) {
+    MarkdownDialect dialect = default_dialect(),
+    std::function<std::optional<InlineLinkDef>(const std::string&)> references_before={},
+    std::function<std::optional<InlineLinkDef>(const std::string&)> references_after={}) {
     ParseInput input{0, cps_to_utf8(source), std::move(dialect)};
+    input.references_before=std::move(references_before);
+    input.references_after=std::move(references_after);
     detail::Parser parser(&input);
     ParsedBlockFragment result;
     result.blocks = parser.parse_blocks(nullptr);

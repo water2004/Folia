@@ -264,6 +264,30 @@
     <ClCompile Include="..\core\query\outline.ixx">
       <Filter>Core Modules\Query</Filter>
     </ClCompile>
+    <ClCompile Include="..\core\parsing\serializer_writer.ixx">
+      <Filter>Core Modules\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\core\parsing\serializer_visitor.ixx">
+      <Filter>Core Modules\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\core\parsing\parser_source_session.ixx">
+      <Filter>Core Modules\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\core\parsing\parser_leaf_line_view.ixx">
+      <Filter>Core Modules\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\core\parsing\parser_html_source_view.ixx">
+      <Filter>Core Modules\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\core\parsing\parser_code_math_leaf_source.ixx">
+      <Filter>Core Modules\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\core\parsing\image_block_promotion.ixx">
+      <Filter>Core Modules\Parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\core\parsing\gfm_autolink.ixx">
+      <Filter>Core Modules\Parsing</Filter>
+    </ClCompile>
     <ClCompile Include="..\core\parsing\parser.ixx">
       <Filter>Core Modules\Parsing</Filter>
     </ClCompile>
@@ -284,6 +308,9 @@
     </ClCompile>
     <ClCompile Include="..\core\source\source_editor.ixx">
       <Filter>Core Modules\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\core\query\document_references.ixx">
+      <Filter>Core Modules\Query</Filter>
     </ClCompile>
     <ClCompile Include="..\core\source\source_render.ixx">
       <Filter>Core Modules\Source</Filter>

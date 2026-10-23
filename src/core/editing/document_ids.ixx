@@ -2,6 +2,7 @@
 export module folia.core.document_ids;
 import std;
 import folia.core.ast;
+import folia.core.block_tree;
 import folia.core.document;
 import folia.core.ids;
 import folia.core.inline_cst;
@@ -30,6 +31,38 @@ inline NodeId allocate_document_node_id(EditorDocument& document) {
         throw std::logic_error("document node id cursor is not initialized");
     }
     return NodeId{document.next_node_id++};
+}
+
+// Import a parsed fragment without parsing its CST again. Every reference to
+// a block identity is translated in the same pass as that identity's owner.
+inline void assign_fresh_document_ids(EditorDocument& document,BlockNode& root) {
+    std::unordered_map<std::uint64_t,NodeId> remapped;
+    walk_blocks(root,[&](BlockNode& block) {
+        const auto old=block.id;
+        block.id=allocate_document_node_id(document);
+        remapped.emplace(old.v,block.id);
+        std::vector<InlineCstNode*> pending;
+        for (auto& node:block.inline_content.tree.nodes) pending.push_back(&node);
+        while (!pending.empty()) {
+            auto* node=pending.back(); pending.pop_back();
+            node->id=allocate_document_node_id(document);
+            for (auto& child:node->children) pending.push_back(&child);
+        }
+    });
+    auto translate=[&](NodeId& id) {
+        if (const auto found=remapped.find(id.v);found!=remapped.end()) id=found->second;
+    };
+    walk_blocks(root,[&](BlockNode& block) {
+        if (block.has_container_source())
+            for (auto& line:block.ensure_container_source().lines) translate(line.anchor.owner_id);
+        if (block.has_html_source())
+            for (auto& slot:block.ensure_html_special().content_slots) translate(slot.owner_id);
+        if (block.kind==BlockKind::TableRow && block.table_special().row_syntax) {
+            auto& row=*block.ensure_table_special().row_syntax;
+            for (auto& id:row.cell_owners) translate(id);
+            for (auto& id:row.implicit_cell_owners) translate(id);
+        }
+    });
 }
 
 // Blocks may cross a document boundary through a semantic paste/import. Keep

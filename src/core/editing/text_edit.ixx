@@ -64,9 +64,17 @@ struct TextEdit {
 // reparse their CST after applying it; code and math owners edit their local
 // source and reparse their block-source CST. History uses the same operation
 // shape for both.
+// Structural identities, not a copy of the inline tree or its source. Replaying
+// a patch reparses only its owner and restores these identities on that result.
+struct InlineIdentityPatch {
+    std::vector<NodeId> before;
+    std::vector<NodeId> after;
+};
+
 struct AppliedSourceEdit {
     TextEdit forward;
     TextEdit inverse;
+    std::optional<InlineIdentityPatch> inline_identities;
 };
 
 inline std::ptrdiff_t text_edit_delta(const TextEdit& edit) {

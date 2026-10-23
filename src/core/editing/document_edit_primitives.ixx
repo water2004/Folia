@@ -7,6 +7,7 @@ import folia.core.block_source;
 import folia.core.block_tree;
 import folia.core.document;
 import folia.core.document_ids;
+import folia.core.document_references;
 import folia.core.document_operation_apply;
 import folia.core.document_text;
 import folia.core.document_container_source;
@@ -39,7 +40,8 @@ public:
         EditorDocument& document,
         const std::vector<DocumentOperation>& operations,
         std::uint64_t revision_before)
-        : document_(&document), operations_(&operations), revision_before_(revision_before) {}
+        : document_(&document), operations_(&operations), revision_before_(revision_before),
+          allocation_before_(document.next_node_id) {}
 
     MutationRollback(const MutationRollback&) = delete;
     MutationRollback& operator=(const MutationRollback&) = delete;
@@ -48,6 +50,7 @@ public:
         if (!active_) return;
         if (!apply_document_operations(*document_, *operations_, false)) std::terminate();
         document_->revision = revision_before_;
+        document_->next_node_id=allocation_before_;
     }
 
     void commit() noexcept { active_ = false; }
@@ -56,6 +59,7 @@ private:
     EditorDocument* document_;
     const std::vector<DocumentOperation>* operations_;
     std::uint64_t revision_before_;
+    std::uint64_t allocation_before_;
     bool active_ = true;
 };
 
@@ -111,10 +115,7 @@ struct NodeAllocator {
 };
 
 inline InlineParseContext parse_context(const EditorDocument& document, NodeAllocator& allocator) {
-    InlineParseContext context;
-    context.dialect = document.dialect;
-    context.allocate_id = [&allocator] { return allocator.allocate(); };
-    return context;
+    return document_inline_parse_context(document,[&allocator]{return allocator.allocate();});
 }
 
 inline void reparse(InlineDocument& document, const EditorDocument& owner, NodeAllocator& allocator) {
@@ -199,6 +200,7 @@ inline std::optional<DocumentSourceEdit> edit_inline(
     DocumentSourceEdit result;
     result.forward = std::move(applied.forward);
     result.inverse = std::move(applied.inverse);
+    result.inline_identities = std::move(applied.inline_identities);
     result.metadata_edits = document_container_source::apply_source_edit_to_ancestors(
         document, result.forward);
     return result;
@@ -220,6 +222,7 @@ inline std::optional<DocumentSourceEdit> edit_block_source(
         DocumentSourceEdit result;
         result.forward = std::move(applied.forward);
         result.inverse = std::move(applied.inverse);
+        result.inline_identities = std::move(applied.inline_identities);
         result.metadata_edits = document_container_source::apply_source_edit_to_ancestors(
             document, result.forward);
         return result;

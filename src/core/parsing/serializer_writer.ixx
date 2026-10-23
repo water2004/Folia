@@ -675,6 +675,12 @@ private:
     bool invalid_scope_order_ = false;
 };
 
+struct SerializerBlockRange {
+    NodeId owner{};
+    std::size_t begin=0;
+    std::size_t end=0;
+};
+
 class SerializerLinePlanner {
 public:
     SerializerLinePlanner(SerializerEventWriter& writer, SerializerPlanArena& plan)
@@ -716,9 +722,15 @@ public:
                     break;
                 case SerializerEventKind::BlockBegin:
                     block_starts_[event.owner.v] = stack_.back().total_codepoints;
+                    if (stack_.size()==1) outer_starts_[event.owner.v]=stack_.back().total_codepoints;
                     break;
                 case SerializerEventKind::BlockCompletion:
                     complete_block(event.owner);
+                    if (stack_.size()==1) {
+                        const auto found=outer_starts_.find(event.owner.v);
+                        if (found!=outer_starts_.end())
+                            block_ranges_.push_back({event.owner,found->second,stack_.back().total_codepoints});
+                    }
                     break;
                 case SerializerEventKind::SiblingSeparator:
                     append_separator(event);
@@ -731,6 +743,7 @@ public:
     }
 
     SerializerAnchorLineIndex const& anchor_lines() const noexcept { return anchor_lines_; }
+    std::span<const SerializerBlockRange> block_ranges() const noexcept { return block_ranges_; }
 
 private:
     struct Frame {
@@ -1003,6 +1016,8 @@ private:
     std::unordered_set<SerializerAnchorKey, SerializerAnchorKeyHash> requested_anchors_;
     std::unordered_map<std::uint64_t, std::size_t> block_starts_;
     std::unordered_map<std::uint64_t, bool> completed_terminal_;
+    std::unordered_map<std::uint64_t, std::size_t> outer_starts_;
+    std::vector<SerializerBlockRange> block_ranges_;
     std::vector<Frame> stack_;
 };
 
@@ -1020,6 +1035,7 @@ struct SerializerEmission {
     std::u32string text;
     std::vector<SerializerEmittedMap> source_maps;
     std::vector<SerializerEmittedAnchor> syntax_anchors;
+    std::vector<SerializerBlockRange> blocks;
 };
 
 // Final output traversal. Rope edges are numeric IDs and the traversal stack is

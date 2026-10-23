@@ -9,6 +9,7 @@ import folia.core.metadata;
 import folia.core.diagnostics;
 import folia.core.dialect;
 import folia.core.instrumentation;
+import folia.core.inline_document;
 
 export namespace folia {
 
@@ -17,6 +18,11 @@ struct BlockLocator {
     std::size_t child_index = 0;
 
     bool operator==(BlockLocator const&) const = default;
+};
+
+struct ReferenceDefinitionBinding {
+    NodeId owner{};
+    std::shared_ptr<const LinkDefinitionData> syntax;
 };
 
 struct EditorDocument {
@@ -47,6 +53,10 @@ struct EditorDocument {
     // offsets remain block-local and are always resolved against the tree.
     std::vector<NodeId> cached_editable_order;
     std::unordered_map<std::uint64_t, std::size_t> cached_editable_index;
+    // Derived from LinkDefinition block syntax, in tree order. Duplicate labels
+    // remain available when their first definition is removed by a patch.
+    mutable std::unordered_map<std::string,std::vector<ReferenceDefinitionBinding>> cached_reference_definitions;
+    mutable bool reference_definitions_dirty=true;
 
     static EditorDocument empty(std::uint64_t rev) {
         EditorDocument d;
@@ -65,6 +75,7 @@ struct EditorDocument {
 };
 
 inline void rebuild_document_block_index(EditorDocument& document) {
+    document.reference_definitions_dirty=true;
     record_full_document_block_index_scan();
     document.cached_block_locators.clear();
     document.cached_editable_order.clear();

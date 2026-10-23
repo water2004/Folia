@@ -7,6 +7,7 @@ import folia.core.block_source;
 import folia.core.block_tree;
 import folia.core.document;
 import folia.core.document_ids;
+import folia.core.document_references;
 import folia.core.document_text;
 import folia.core.document_transaction;
 import folia.core.ids;
@@ -136,15 +137,29 @@ inline bool apply_text_edit(
     if (block && editable_inline_document(*block)) {
         auto* owner = editable_inline_document(*block);
         if (!edit.range.valid_for(owner->source.size())) return false;
-        InlineParseContext context;
-        context.dialect = document.dialect;
-        context.allocate_id = [&document] { return allocate_document_node_id(document); };
-        apply_inline_source_edit(edit.container_id, *owner, edit, context);
+        const auto& expected=forward ? operation.inverse.replacement : operation.forward.replacement;
+        if (std::u32string_view(owner->source).substr(edit.range.start,edit.range.length())!=expected)
+            return false;
+        auto candidate=*owner;
+        const auto allocation_before=document.next_node_id;
+        auto context=document_inline_parse_context(document,[&document]{return allocate_document_node_id(document);});
+        apply_inline_source_edit(edit.container_id, candidate, edit, context);
+        if (operation.inline_identities) {
+            const auto& identities=forward ? operation.inline_identities->after : operation.inline_identities->before;
+            if (!inline_source_edit_detail::restore_identities(candidate.tree.nodes,identities)) {
+                document.next_node_id=allocation_before;
+                return false;
+            }
+        }
+        *owner=std::move(candidate);
         return true;
     }
     if (!block) return false;
     auto* source = editable_raw_block_source(*block);
     if (!source || !edit.range.valid_for(source->size())) return false;
+    const auto& expected=forward ? operation.inverse.replacement : operation.forward.replacement;
+    if (std::u32string_view(*source).substr(edit.range.start,edit.range.length())!=expected)
+        return false;
     folia::apply_text_edit(*source, edit);
     const auto& indentation = forward
         ? operation.indentation_after
@@ -165,9 +180,21 @@ inline bool apply_document_operation(
     return std::visit([&](const auto& value) {
         using T = std::decay_t<decltype(value)>;
         if constexpr (std::is_same_v<T, DocumentTreeEdit>) {
-            return document_operation_detail::apply_tree_edit(document.root, value, forward);
-        } else {
+            const auto applied=document_operation_detail::apply_tree_edit(document.root,value,forward);
+            if (applied) document.reference_definitions_dirty=true;
+            return applied;
+        } else if constexpr (std::is_same_v<T,DocumentTextOperation>) {
             return document_operation_detail::apply_text_edit(document, value, forward);
+        } else if constexpr (std::is_same_v<T,DocumentEndingEdit>) {
+            const auto& expected=forward ? value.before : value.after;
+            if (document.trailing_line_ending!=expected) return false;
+            document.trailing_line_ending=forward ? value.after : value.before;
+            return true;
+        } else {
+            const auto& expected=forward ? value.before : value.after;
+            if (document.metadata!=expected) return false;
+            document.metadata=forward ? value.after : value.before;
+            return true;
         }
     }, operation);
 }
@@ -178,14 +205,47 @@ inline bool apply_document_operations(
     EditorDocument& document,
     const std::vector<DocumentOperation>& operations,
     bool forward) {
+    const auto allocation_before=document.next_node_id;
+    // Public callers can construct operations without identity metadata. Keep
+    // transient identities for their rollback too; normal recorded commands
+    // already supply these and allocate no additional rollback storage.
+    const auto needs_identities=std::ranges::any_of(operations,[](const DocumentOperation& operation) {
+        const auto* text=std::get_if<DocumentTextOperation>(&operation);
+        return text && !text->inline_identities;
+    });
+    std::vector<std::optional<InlineIdentityPatch>> transient(needs_identities ? operations.size() : 0);
+    auto replay=[&](std::size_t index,bool direction,bool recovering=false) {
+        const auto* text=std::get_if<DocumentTextOperation>(&operations[index]);
+        if (!text || text->inline_identities) return apply_document_operation(document,operations[index],direction);
+        if (recovering && transient[index]) {
+            auto recorded=*text;recorded.inline_identities=transient[index];
+            return apply_document_operation(document,DocumentOperation{std::move(recorded)},direction);
+        }
+        auto* block=find_document_block(document,text->forward.container_id);
+        auto* owner=block ? editable_inline_document(*block) : nullptr;
+        std::optional<InlineIdentityPatch> identities;
+        if (owner) {
+            identities.emplace();
+            (direction ? identities->before : identities->after)=inline_source_edit_detail::node_identities(owner->tree.nodes);
+        }
+        if (!apply_document_operation(document,operations[index],direction)) return false;
+        if (identities) {
+            block=find_document_block(document,text->forward.container_id);
+            owner=editable_inline_document(*block);
+            (direction ? identities->after : identities->before)=inline_source_edit_detail::node_identities(owner->tree.nodes);
+            transient[index]=std::move(identities);
+        }
+        return true;
+    };
     if (forward) {
         std::size_t applied = 0;
         for (; applied < operations.size(); ++applied) {
-            if (apply_document_operation(document, operations[applied], true)) continue;
+            if (replay(applied,true)) continue;
             while (applied > 0) {
                 --applied;
-                if (!apply_document_operation(document, operations[applied], false)) std::terminate();
+                if (!replay(applied,false,true)) std::terminate();
             }
+            document.next_node_id=allocation_before;
             return false;
         }
         return true;
@@ -194,10 +254,11 @@ inline bool apply_document_operations(
     std::size_t index = operations.size();
     while (index > 0) {
         --index;
-        if (apply_document_operation(document, operations[index], false)) continue;
+        if (replay(index,false)) continue;
         for (auto restore = index + 1; restore < operations.size(); ++restore) {
-            if (!apply_document_operation(document, operations[restore], true)) std::terminate();
+            if (!replay(restore,true,true)) std::terminate();
         }
+        document.next_node_id=allocation_before;
         return false;
     }
     return true;

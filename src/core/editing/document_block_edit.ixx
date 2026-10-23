@@ -11,6 +11,7 @@ import folia.core.text_edit;
 import folia.core.utf;
 import folia.core.document_edit_primitives;
 import folia.core.document_container_source;
+import folia.core.document_transaction;
 
 export namespace folia::document_edit_detail {
 
@@ -27,6 +28,7 @@ inline void append_source_operation(
         edit.inverse,
         edit.indentation_before,
         edit.indentation_after,
+        std::move(edit.inline_identities),
     });
     for (auto& metadata_edit : edit.metadata_edits) {
         operations.emplace_back(std::move(metadata_edit));
@@ -76,6 +78,18 @@ inline std::optional<RecordedBlockEdit> split_direct(
             if (!parent) return std::nullopt;
         }
 
+        // The old first body is becoming a separate paragraph after the new
+        // split body. Its saved header ending is no longer a sibling gap.
+        const auto body_index=!parent->children.empty() && parent->children.front().kind==BlockKind::CalloutTitle ? 1u : 0u;
+        if (body_index<parent->children.size() && parent->children[body_index].separator_before) {
+            auto& body=parent->children[body_index];
+            DocumentTreeEdit gap;
+            gap.kind=DocumentTreeEditKind::UpdatePayload;
+            gap.before=document_transaction_detail::payload_shell(body);
+            body.separator_before.reset();
+            gap.after=document_transaction_detail::payload_shell(body);
+            result.operations.emplace_back(std::move(gap));
+        }
         BlockNode right;
         right.id = allocator.allocate();
         right.kind = BlockKind::Paragraph;

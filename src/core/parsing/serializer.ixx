@@ -19,9 +19,14 @@ struct SerializedSourceMap {
     std::vector<std::size_t> source_to_serialized;
 };
 
+using SerializedBlockRange=serializer_detail::SerializerBlockRange;
+
 struct SerializedMarkdownProjection {
     std::u32string text;
     std::vector<SerializedSourceMap> source_maps;
+    // Presentation boundaries of the requested direct blocks, not a second
+    // position inside an editable owner. Used to update the source view locally.
+    std::vector<SerializedBlockRange> blocks;
 };
 
 inline std::optional<std::size_t> serialized_offset_for_source_position(
@@ -69,6 +74,7 @@ inline SerializedMarkdownProjection to_public_projection(
     serializer_detail::SerializerEmission emission) {
     SerializedMarkdownProjection projection;
     projection.text = std::move(emission.text);
+    projection.blocks = std::move(emission.blocks);
     projection.source_maps.reserve(emission.source_maps.size());
     for (auto& map : emission.source_maps) {
         projection.source_maps.push_back({map.owner, std::move(map.source_to_serialized)});
@@ -83,6 +89,20 @@ inline SerializedMarkdownProjection to_public_projection(
 inline std::u32string serialize_markdown_fragment(BlockVec const& blocks) {
     auto emission = serializer_detail::serialize_blocks(blocks);
     return std::move(emission.text);
+}
+
+inline SerializedMarkdownProjection serialize_markdown_fragment_projection(
+    BlockVec const& blocks, std::size_t begin=0,
+    std::size_t end=(std::numeric_limits<std::size_t>::max)()) {
+    return serializer_facade_detail::to_public_projection(
+        serializer_detail::serialize_blocks(blocks,begin,end));
+}
+
+inline SerializedMarkdownProjection serialize_markdown_region_projection(
+    const EditorDocument& document,std::size_t begin,std::size_t end) {
+    auto emission=serializer_detail::serialize_blocks(document.root.children,begin,end);
+    if (end==document.root.children.size()) serializer_detail::append_document_ending(emission,document);
+    return serializer_facade_detail::to_public_projection(std::move(emission));
 }
 
 inline SerializedMarkdownProjection serialize_markdown_projection(

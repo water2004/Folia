@@ -71,6 +71,7 @@ struct DelimitedRanges {
     SourceRange opening;
     SourceRange content;
     std::optional<SourceRange> closing;
+    bool operator==(const DelimitedRanges&) const=default;
 };
 
 struct InlineCstSemantic {
@@ -89,6 +90,7 @@ struct InlineCstSemantic {
     // spelling remains in InlineDocument.source; this case-folded projection
     // is used only by safe rendering and interaction policy.
     std::unordered_map<std::string, std::string> html_attributes;
+    bool operator==(const InlineCstSemantic&) const=default;
 };
 
 struct InlineCstNode;

@@ -38,8 +38,9 @@ class SerializerActionVisitor {
 public:
     SerializerEventWriter& writer() noexcept { return writer_; }
 
-    void serialize(BlockVec const& blocks) {
-        push_blocks(blocks, 0, blocks.size(), false, false, true);
+    void serialize(BlockVec const& blocks, std::size_t begin=0,
+        std::size_t end=(std::numeric_limits<std::size_t>::max)()) {
+        push_blocks(blocks, begin, end, false, false, true);
         run();
     }
 
@@ -595,7 +596,7 @@ private:
                 }
                 const auto body_begin = callout_body_start(block);
                 if (body_begin < block.children.size()) {
-                    writer_.generated_span(U"\n");
+                    writer_.generated_span(block.children[body_begin].separator_before.value_or(U"\n"));
                     SerializerPrefixPolicy policy;
                     policy.rule = SerializerPrefixRule::FixedLines;
                     policy.fixed_prefix_on_first_line = true;
@@ -603,7 +604,7 @@ private:
                     policy.suppress_if_empty_body = true;
                     policy.nonempty_prefix = U"> ";
                     policy.empty_prefix = U">";
-                    writer_.begin_prefix_scope(block.id, no_container_prefixes_, std::move(policy));
+                    writer_.begin_prefix_scope(block.id, block.container_source(), std::move(policy));
                     Action close;
                     close.kind = ActionKind::EndPrefixScope;
                     close.block = &block;
@@ -638,9 +639,15 @@ private:
                 return;
             case BK::Frontmatter: {
                 const auto& special = block.atomic_special();
-                const std::u32string marker = special.fmt == FrontmatterFormat::Toml ? U"+++" : U"---";
-                writer_.atomic_generated_span(block.id,
-                    marker + U"\n" + utf8_to_cps(special.raw) + U"\n" + marker);
+                const auto& syntax=block.text_special();
+                auto opening=syntax.opening_marker;
+                if (opening.empty()) opening=special.fmt==FrontmatterFormat::Toml ? U"---toml\n"
+                    : special.fmt==FrontmatterFormat::Json ? U"---json\n" : U"---\n";
+                auto body=utf8_to_cps(special.raw);
+                if (syntax.opening_marker.empty() && !body.empty() && body.back()!=U'\n' && body.back()!=U'\r')
+                    body.push_back(U'\n');
+                writer_.atomic_generated_span(block.id,opening+body+
+                    (syntax.closing_marker.empty() ? U"---" : syntax.closing_marker));
                 return;
             }
             case BK::ThematicBreak: {
@@ -666,18 +673,25 @@ private:
     ContainerSource no_container_prefixes_;
 };
 
-inline SerializerEmission serialize_blocks(BlockVec const& blocks) {
+inline SerializerEmission serialize_blocks(BlockVec const& blocks, std::size_t begin=0,
+    std::size_t end=(std::numeric_limits<std::size_t>::max)()) {
     SerializerActionVisitor visitor;
-    visitor.serialize(blocks);
+    visitor.serialize(blocks,begin,end);
     SerializerPlanArena arena;
     SerializerLinePlanner planner(visitor.writer(), arena);
     const auto output_lines = planner.build();
-    return emit_serializer_lines(arena, output_lines, visitor.writer().events());
+    auto result=emit_serializer_lines(arena, output_lines, visitor.writer().events());
+    std::unordered_map<std::uint64_t,SerializerBlockRange> ranges;
+    for (const auto& range:planner.block_ranges()) ranges.emplace(range.owner.v,range);
+    end=(std::min)(end,blocks.size());
+    for (auto i=begin;i<end;++i) {
+        if (const auto found=ranges.find(blocks[i].id.v);found!=ranges.end())
+            result.blocks.push_back(found->second);
+    }
+    return result;
 }
 
-inline SerializerEmission serialize_document(EditorDocument const& document) {
-    record_full_document_serialization();
-    auto result = serialize_blocks(document.root.children);
+inline void append_document_ending(SerializerEmission& result,const EditorDocument& document) {
     const bool trailing_empty_paragraph = !document.root.children.empty()
         && serializer_empty_paragraph(document.root.children.back());
     if (!document.trailing_line_ending.empty()
@@ -686,6 +700,12 @@ inline SerializerEmission serialize_document(EditorDocument const& document) {
             || trailing_empty_paragraph)) {
         result.text.append(document.trailing_line_ending);
     }
+}
+
+inline SerializerEmission serialize_document(EditorDocument const& document) {
+    record_full_document_serialization();
+    auto result = serialize_blocks(document.root.children);
+    append_document_ending(result,document);
     return result;
 }
 

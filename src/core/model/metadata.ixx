@@ -17,7 +17,21 @@ struct DocumentMetadata {
     std::size_t word_count = 0;
     std::size_t char_count = 0;
     std::size_t line_count = 0;
+    bool operator==(const DocumentMetadata&) const=default;
 };
+
+inline DocumentMetadata metadata_from_text(std::u32string_view source) {
+    DocumentMetadata result;
+    result.char_count=source.size();result.line_count=1;
+    bool in_word=false;
+    for (const auto value:source) {
+        if (value==U'\n') ++result.line_count;
+        const bool whitespace=value==U' ' || value==U'\t' || value==U'\r' || value==U'\n';
+        if (!whitespace && !in_word) ++result.word_count;
+        in_word=!whitespace;
+    }
+    return result;
+}
 
 // Lightweight frontmatter to metadata: extract a few keys (title/author/date/tags)
 // from YAML-ish or plain text. A full YAML parser is out of scope at v1.

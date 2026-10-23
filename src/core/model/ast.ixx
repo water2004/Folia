@@ -68,6 +68,12 @@ struct BlockItemSpecial {
     bool checked = false;               // TaskListItem
 };
 
+struct LinkDefinitionData {
+    std::string label;
+    InlineLinkDef target;
+    bool operator==(const LinkDefinitionData&) const=default;
+};
+
 struct BlockAtomicSpecial {
     bool code_indented = false;
     MathDelimiter math_delim = MathDelimiter::BlockDollar; // MathBlock / InlineMath (in inline)
@@ -76,6 +82,7 @@ struct BlockAtomicSpecial {
     std::string raw;                    // Frontmatter.raw / UnsupportedMarkup.raw
     UnsupportedMarkupReason unsup_reason = UnsupportedMarkupReason::UnsafeHtml;
     std::string ext_name;               // Extension
+    std::shared_ptr<const LinkDefinitionData> reference_definition;
 };
 
 struct BlockTableSpecial {

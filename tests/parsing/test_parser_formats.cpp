@@ -23,6 +23,17 @@ using namespace boost::ut;
 
 suite parser_format_tests = [] {
 
+"frontmatter_roundtrip_keeps_physical_markers_and_endings"_test=[] {
+    for (const auto& source:std::vector<std::string>{"---\ntitle: One\n---", "---\r\ntitle: One\r\n---\r\n\r\nbody",
+        "---\rtitle: One\r---\r", "---\n---", "---toml\ntitle = 'One'\n---\n",
+        "--- json\n{\"title\":\"One\"}\n---\n", "  ---  \ntitle: One\n ---  \n\nbody"}) {
+        const auto parsed=parse_text(1,source);
+        expect(serialize_markdown(parsed.document)==source)<<source;
+        const auto reloaded=parse_text(2,serialize_markdown(parsed.document));
+        expect(serialize_markdown(reloaded.document)==source)<<source;
+    }
+};
+
 "tables_give_every_cell_its_own_inline_document"_test = [] {
     const auto parsed = parse_text(1,
         "| **A** | $B$ |\n"

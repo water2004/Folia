@@ -8,6 +8,7 @@ import folia.core.ast;
 import folia.core.block_source;
 import folia.core.document;
 import folia.core.text_edit;
+import folia.core.metadata;
 
 export namespace folia {
 
@@ -18,6 +19,7 @@ struct DocumentTextOperation {
     TextEdit inverse;
     std::optional<std::vector<BlockLineIndentation>> indentation_before;
     std::optional<std::vector<BlockLineIndentation>> indentation_after;
+    std::optional<InlineIdentityPatch> inline_identities;
 };
 
 enum class DocumentTreeEditKind { Insert, Remove, Move, UpdatePayload };
@@ -39,7 +41,17 @@ struct DocumentSourceEdit : AppliedSourceEdit {
     std::optional<std::vector<BlockLineIndentation>> indentation_after;
 };
 
-using DocumentOperation = std::variant<DocumentTextOperation, DocumentTreeEdit>;
+struct DocumentEndingEdit {
+    std::u32string before;
+    std::u32string after;
+};
+
+struct DocumentMetadataEdit {
+    DocumentMetadata before;
+    DocumentMetadata after;
+};
+
+using DocumentOperation = std::variant<DocumentTextOperation,DocumentTreeEdit,DocumentEndingEdit,DocumentMetadataEdit>;
 
 struct DocumentTransaction {
     std::vector<DocumentOperation> operations;

@@ -69,6 +69,7 @@ inline DocumentTransaction source_transaction(
         edit.inverse,
         edit.indentation_before,
         edit.indentation_after,
+        std::move(edit.inline_identities),
     });
     for (auto& metadata_edit : edit.metadata_edits) {
         operations.emplace_back(std::move(metadata_edit));

@@ -4,6 +4,7 @@ import std;
 import folia.core.ast;
 import folia.core.block_tree;
 import folia.core.document;
+import folia.core.document_ids;
 import folia.core.document_edit_support;
 import folia.core.document_source_edit;
 import folia.core.document_text;
@@ -34,62 +35,8 @@ inline std::u32string normalize_newlines(std::u32string_view text) {
     return result;
 }
 
-inline void assign_fresh_ids(
-    InlineCstNodes& nodes,
-    document_edit_detail::NodeAllocator& allocator) {
-    for (auto& node : nodes) {
-        node.id = allocator.allocate();
-        assign_fresh_ids(node.children, allocator);
-    }
-}
-
-inline void assign_fresh_ids(
-    InlineDocument& document,
-    document_edit_detail::NodeAllocator& allocator) {
-    assign_fresh_ids(document.tree.nodes, allocator);
-}
-
-inline void assign_fresh_ids(
-    BlockNode& block,
-    document_edit_detail::NodeAllocator& allocator,
-    std::unordered_map<std::uint64_t, NodeId>& id_map) {
-    const auto old_id = block.id;
-    block.id = allocator.allocate();
-    id_map.insert_or_assign(old_id.v, block.id);
-    if (auto* inline_document = editable_inline_document(block)) {
-        assign_fresh_ids(*inline_document, allocator);
-    }
-    for (auto& child : block.children) assign_fresh_ids(child, allocator, id_map);
-}
-
-inline void assign_fresh_ids(
-    BlockNode& block,
-    document_edit_detail::NodeAllocator& allocator) {
-    std::unordered_map<std::uint64_t, NodeId> id_map;
-    assign_fresh_ids(block, allocator, id_map);
-    walk_blocks(block, [&](BlockNode& owner) {
-        if (owner.has_container_source()) {
-            auto& lines = owner.ensure_container_source().lines;
-            for (auto& line : lines) {
-                if (const auto found = id_map.find(line.anchor.owner_id.v);
-                    found != id_map.end()) {
-                    line.anchor.owner_id = found->second;
-                }
-            }
-        }
-        if (owner.kind == BlockKind::TableRow && owner.table_special().row_syntax) {
-            auto remap_owners = [&](std::vector<NodeId>& owners) {
-                for (auto& owner_id : owners) {
-                    if (const auto found = id_map.find(owner_id.v); found != id_map.end()) {
-                        owner_id = found->second;
-                    }
-                }
-            };
-            auto& syntax = *owner.ensure_table_special().row_syntax;
-            remap_owners(syntax.cell_owners);
-            remap_owners(syntax.implicit_cell_owners);
-        }
-    });
+inline void assign_fresh_ids(BlockNode& block,document_edit_detail::NodeAllocator& allocator) {
+    assign_fresh_document_ids(*allocator.document,block);
 }
 
 inline bool record_insert(

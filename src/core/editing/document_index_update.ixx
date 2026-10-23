@@ -115,6 +115,7 @@ inline bool update_document_block_index(
     for (const auto& operation : operations) {
         const auto* tree = std::get_if<DocumentTreeEdit>(&operation);
         if (!tree) continue;
+        document.reference_definitions_dirty=true;
         if (tree->kind == DocumentTreeEditKind::Move) {
             if (tree->moved_id.v == 0) return false;
             note_parent(tree->parent_id, tree->index);
