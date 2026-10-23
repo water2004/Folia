@@ -1,6 +1,25 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-23, registry and detector dispatch verified
+## Current checkpoint - 2026-10-23, shared frontend in progress
+
+- Deliver an owned preparation API composing normalization, frontmatter,
+  directives, configuration scope and final builtin detection for Folia's
+  text-to-SVG path. Preserve raw/cleaned/comment-bearing source, title and
+  frontmatter line offset. This batch stops before parser/renderer execution.
+- Scope: the original preprocessDiagram and processAndSetConfigs sequence,
+  using existing native components and default/dark configuration sessions.
+  Validate representative Packet/Pie and existing family detection inputs,
+  configuration precedence, common incomplete input and request isolation.
+  Pass condition: original composed oracle plus native standalone/integrated
+  Windows Debug/Release checks. Next: Packet/Pie renderer entry integration.
+- Work on fork/mermaid-development; keep its guideline commit out of delivery.
+  Publish only selected feature/test/public-documentation commits through a
+  clean verification branch, then update feat/mermaid-cpp-port and upstream
+  PR #1 after verification. Do not merge. Baseline delivery 31770996 passed
+  all four jobs in run 39912778063; live PR/base are unchanged.
+- No local native compiler, build or agent. Implementation has not started.
+
+## Registry and detector dispatch verified (historical)
 
 - User authorizes public fork zhao0349/Folia pushes and verified updates to
   https://github.com/water2004/Folia/pull/1; keep OPEN, DO NOT merge.

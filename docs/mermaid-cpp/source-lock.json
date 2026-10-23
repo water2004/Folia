@@ -359,6 +359,14 @@
     {
       "path": "packages/mermaid/src/diagrams/railroad/pegDetector.ts",
       "sha256": "0e625108150e543f01f96a22eb965c01c766e3fc331cb8cca2d0d9bc10ca26ea"
+    },
+    {
+      "path": "packages/mermaid/src/mermaidAPI.ts",
+      "sha256": "c38ef136d815a638993d271f253d2ca825046fb97292d30a7a4de8ea57fc0318"
+    },
+    {
+      "path": "packages/mermaid/src/Diagram.ts",
+      "sha256": "ea89f69368ddf3c386f3012fd912ae79c012f87e2a91e1bb2d2236e74d23dbec"
     }
   ],
   "packages": [
