@@ -36,7 +36,7 @@ inline std::vector<ContainerSourceSnapshot> snapshot_ancestors(
 }
 
 inline std::u32string canonical_prefix(const BlockNode& container) {
-    if (container.kind == BlockKind::BlockQuote) return U"> ";
+    if (container.kind == BlockKind::BlockQuote || container.kind == BlockKind::Callout) return U"> ";
     if (container.kind != BlockKind::ListItem && container.kind != BlockKind::TaskListItem) return {};
     const auto& marker = container.item_special().marker;
     std::size_t columns = 0;

@@ -88,6 +88,7 @@ suite document_boundary_tests = [] {
 
 "callout_title_boundaries_use_tree_split_join_and_unwrap"_test = [] {
     auto document = parse_document("> [!NOTE] title\n> body");
+    expect(!document.root.children.front().children[1].separator_before.has_value());
     const auto callout_id = document.root.children.front().id;
     const auto title_id = document.root.children.front().children.front().id;
 
@@ -172,7 +173,7 @@ suite document_boundary_tests = [] {
             expect(fatal(bool(quote.children[0].id == title_id)));
             expect(fatal(bool(quote.children[0].inline_content.source == U"title\nbody")));
         }
-        expect(fatal(bool(serialize_markdown(unwrapped->after) == "> title\n> body")));
+        expect(bool(serialize_markdown(unwrapped->after) == "> title\n> body")) << serialize_markdown(unwrapped->after);
         expect_document_valid(unwrapped->after);
     }
 };
