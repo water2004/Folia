@@ -23,6 +23,10 @@ struct SerializerLineFacts {
     bool empty = true;
     bool all_space_or_tab = true;
     bool terminal_line_ending = false;
+    // Block separation historically inspects the last emitted code point and
+    // compresses only an LF-terminated block to one additional LF. A lone CR
+    // still uses the ordinary blank-line separator.
+    bool terminal_lf = false;
 };
 
 inline SerializerLineFacts summarize_line_text(std::u32string_view text) {
@@ -33,6 +37,7 @@ inline SerializerLineFacts summarize_line_text(std::u32string_view text) {
     });
     facts.terminal_line_ending = !text.empty()
         && (text.back() == U'\r' || text.back() == U'\n');
+    facts.terminal_lf = !text.empty() && text.back() == U'\n';
     return facts;
 }
 
@@ -43,6 +48,7 @@ inline SerializerLineFacts combine_line_facts(
         left.empty && right.empty,
         left.all_space_or_tab && right.all_space_or_tab,
         right.empty ? left.terminal_line_ending : right.terminal_line_ending,
+        right.empty ? left.terminal_lf : right.terminal_lf,
     };
 }
 
@@ -136,6 +142,7 @@ struct SerializerPlannedLine {
     SerializerRopeId ending = no_serializer_rope;
     SerializerLineFacts facts{};
     bool terminal = false;
+    bool terminal_lf = false;
 };
 
 struct SerializerEolPiece {
@@ -424,7 +431,7 @@ public:
         SerializerRopeNode node;
         node.kind = SerializerRopeKind::SyntaxAnchor;
         node.anchor = anchor;
-        node.facts = {true, true, false};
+        node.facts = {true, true, false, false};
         return add_rope(std::move(node));
     }
     SerializerRopeId append_atomic_boundary(NodeId owner, bool end_boundary) {
@@ -432,7 +439,7 @@ public:
         node.kind = SerializerRopeKind::AtomicMapBoundary;
         node.map_owner = owner;
         node.map_end_boundary = end_boundary;
-        node.facts = {true, true, false};
+        node.facts = {true, true, false, false};
         return add_rope(std::move(node));
     }
 
@@ -468,6 +475,7 @@ public:
             ? SerializerLineFacts{}
             : rope(ending).facts;
         line.terminal = ending_facts.terminal_line_ending;
+        line.terminal_lf = ending_facts.terminal_lf;
         lines_.push_back(std::move(line));
         return static_cast<SerializerLineRecordId>(lines_.size());
     }
@@ -867,6 +875,27 @@ private:
     }
 
     void finish_line(Frame& frame, SerializerRopeId ending = no_serializer_rope) {
+        const bool empty_content = frame.content == no_serializer_rope
+            || plan_.rope(frame.content).codepoint_count == 0;
+        if (ending != no_serializer_rope && empty_content && !frame.lines.empty()) {
+            const auto previous = plan_.line(frame.lines.back());
+            const auto& ending_facts = plan_.rope(ending).facts;
+            const bool previous_is_lone_cr = previous.terminal && !previous.terminal_lf
+                && previous.ending != no_serializer_rope
+                && plan_.rope(previous.ending).codepoint_count == 1;
+            const bool current_is_lone_lf = ending_facts.terminal_lf
+                && plan_.rope(ending).codepoint_count == 1;
+            if (previous_is_lone_cr && current_is_lone_lf) {
+                auto merged_ending = plan_.concat(previous.ending, frame.content);
+                merged_ending = plan_.concat(merged_ending, ending);
+                frame.lines.back() = plan_.append_line(
+                    previous.content, merged_ending, previous.id);
+                anchor_lines_.alias(frame.current_line, previous.id);
+                frame.content = no_serializer_rope;
+                frame.current_line = plan_.new_line_id();
+                return;
+            }
+        }
         frame.lines.push_back(plan_.append_line(frame.content, ending, frame.current_line));
         frame.content = no_serializer_rope;
         frame.current_line = plan_.new_line_id();
@@ -894,7 +923,7 @@ private:
         const bool current_line_empty = stack_.back().content == no_serializer_rope
             || plan_.rope(stack_.back().content).codepoint_count == 0;
         const bool terminal = emitted && current_line_empty
-            && !stack_.back().lines.empty() && plan_.line(stack_.back().lines.back()).terminal;
+            && !stack_.back().lines.empty() && plan_.line(stack_.back().lines.back()).terminal_lf;
         completed_terminal_.insert_or_assign(id.v, terminal);
     }
 

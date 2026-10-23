@@ -12,7 +12,7 @@ No second parser/model, depth cap, source-specific fast path or runtime dual pat
 Starting984558a4. Commits5f455590 (syntax/source consumers),73032708 (full pinned
 corpora),d3e25b1c (inline scopes/scans/RAII),dc50d694 (tables/ranges),9ccb4185
 (derived NUL display),4feba6e9 (checkpoint),edc6be39 (iterative BlockNode ownership/
-walk/index),cd9bade5 (recognizer-local completion),**0eeab9f4** (iterative serializer).
+walk/index),cd9bade5 (recognizer-local completion),**0eeab9f4** (iterative serializer),2f46430e (iterative generated-test projection).
 No MSI/push/version change. Only root builds, sequentially **parallel4**; agents
 write ignored candidates only. Link console runtime. After abnormal native exit,
 stop broad evaluation and use bounded focus; no outstanding abnormal exit now.
@@ -24,16 +24,16 @@ Markdown/HTML, hashes/license/profile/tab provenance and NUL byte lengths retain
 Latest all exit0 after0eeab9f4:
 - GFM **1395 strict pass /20 unscored /11 verified reference differences /
   0 unresolved**; all1426 exact input/source/save checks pass.
-  `build/gfm-conformance/serializer/results.json`.
+  `build/gfm-conformance/serializer-eol/results.json`.
 - Reference differences:9 old nested-strong and2 old HTML-comment expectations
   conflict pinned CommonMark0.31.2 for identical input/current rule. Original
   expected HTML and strict_diff remain visible; neither pass nor skip.
 - Unscored:16 optional smart typography,3 tagfilter,1 upstream IGNORE/no HTML
   oracle. Source/native checks still run; no implementation failure is hidden.
 - CM **652/652** strict/source/save,
-  `build/markdown-conformance/serializer/results.json`.
-- Core **672 tests /491236 assertions**, `build/gfm-expanded/core-serializer.log`.
-- Windows **80 tests /3429 assertions**, `platform-serializer.log`.
+  `build/markdown-conformance/serializer-eol/results.json`.
+- Core **679 tests /491276 assertions**, `build/gfm-expanded/core-serializer-eol.log`.
+- Windows **80 tests /3429 assertions**, `platform-serializer-eol.log`.
 - Python main36 + isolated-runner11 pass (unchanged tools). All2125 entities run
   in core. Remaining short log paths are under `build/gfm-expanded/`.
 
@@ -62,7 +62,8 @@ before the passing evidence; neither is unresolved. No old formatter ships.
 
 No root native handle running. No candidate CMake cache hook remains (cleared
 with `-U CMAKE_PROJECT_folia_INCLUDE`, log `clear-candidate-hook.log`).
-Tracked C parser work remains untouched; only test-projector integration/checkpoint edits follow D.
+Tracked C parser work remains untouched. Current working changes are writer LF correction
+and new test_serializer_separator.cpp; final focused CRLF correction pending.
 Find deliveries with `rg --no-ignore` under `build/gfm-expanded/deep-blocks/`.
 
 - Sol `gfm_emphasis_scaling`: sole container engine in `parser/`. Latest
@@ -105,20 +106,27 @@ stays HtmlText Paragraph. No second HTML parse. Initial numeric NodeId order is
 not invariant; uniqueness, stable untouched IDs on edit, anchors/history/selection
 are mandatory. HTML slots remain existing leaf-local representation.
 
-New focused serializer review evidence: old dynamic sibling separator recognizes
-only final LF, while D complete_block currently treats loneCR as terminal too.
-Parsed-corpus explicit separators mask this case. Luna gfm_deep_blocks_design is
-preparing native focused cases and correction under ignored serializer/. Do not
-claim dynamic-separator parity until that case is reproduced/fixed. Prefix grammar
-must still recognize CR/LF/CRLF; only sibling separation follows prior LF rule.
+Supplemental edited-tree separator gaps are fixed/verified: root reproduced the
+loneCR sibling rule and cross-event CRLF mismatch, then retained LF-only sibling
+completion and merged loneCR+zero-width-events+loneLF in finish_line. Prefix EOL
+classification remains CR/LF/CRLF. Exact source maps for quoted aCR={2,3,4}, b={9,10}
+pass. `serializer-cross-eol-after.log`, full core679/491276 and CM/GFM/Windows above
+pass. Changes are staged for their own small commit before C integration.
 
-Next: commit verified test-projector integration separately. Reproduce/fix that
-small dynamic-separator case via focused native test. Await actual leaf assembly
-+ Sol engine delta, inspect one-parser branch coverage, then first native C build.
-Remaining engine reviews: collapsed item-opening prefixes, terminal prefix
-completion, loose-item blanks, footnote context. No C parser integration/pass claim
-yet. After fullC works run original quotes50000/lists1000 semantics/source/save/
-lifecycle, then CM/GFM/core/Windows and full21. Keep checkpoint current.
+Sol delivered FIRST COMPILE CUT at parser/parser.candidate.ixx SHA256
+432AF1F7022FF284D3D9E1225F1A1A0543212B15F189FB96BF4BC51AA9FD5590,
+canonical parser baseCB0A89BB4CC5DC85A2EACE44B9F946490D3A2EE7D0958C6AABC725DF7ED80760.
+FIRST_COMPILE_MANIFEST.json lists five helper paths/modules and focused tests.
+Actual leaf assembly/final paragraph context/suffix correction merged; no nested
+Parser/offset_map/owned_offsets/old parse_block/early-image methods. Sol holds
+candidate edits pending root compilation. No C native/integration pass yet.
+
+Next: commit verified separator correction separately; verify base/candidate
+hashes then copy firstCcut and five modules into src/core/parsing, compile folia_core
+first (no tests until compilation succeeds). Add focused frame/helper tests and
+run bounded mixed cases before full corpora. Stop broad evaluation after abnormal
+exit. Then original quotes50000/lists1000 semantics/source/save/lifecycle, all
+CM/GFM/core/Windows and full21. Keep checkpoint current before compaction.
 
 ## Historical checkpoints
 
