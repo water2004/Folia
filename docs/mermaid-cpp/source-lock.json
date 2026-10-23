@@ -199,6 +199,166 @@
     {
       "path": "packages/mermaid/src/themes/erDiagram-oldHardcodedValues.ts",
       "sha256": "af20f3378fb0663ba4db71ccec792a7deeb74749dc16f2c284b74d4cafe30ca3"
+    },
+    {
+      "path": "packages/mermaid/src/diagram-api/detectType.ts",
+      "sha256": "5f2103ea6c95196400dd6dd99143f4dde07668ba69e54c40805bc90adfd4b7c1"
+    },
+    {
+      "path": "packages/mermaid/src/diagram-api/diagram-orchestration.ts",
+      "sha256": "f2b9df976bcdd3470b02bdaeb8bd56691825ea49b1e8c01eb0ea68306a7d3866"
+    },
+    {
+      "path": "packages/mermaid/src/errors.ts",
+      "sha256": "3583cc420b051a94dc93ee8f46ae99c38ef281b35e42f417b631615e58221c76"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/c4/c4Detector.ts",
+      "sha256": "f5dc043320467ef3665919ad3d0db61e8503fd66b7e896c7f2ff74c227181004"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/flowchart/flowDetector-v2.ts",
+      "sha256": "e261b51e381767b67e969ace3e638b32b8d1d8398403b70c054d0c2116fbc49f"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/agentflow/afDetector.ts",
+      "sha256": "2cd1708802ab8f40bb580ec59472b2ecabc8ceec9cc930b0adb3d37228a79773"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/swimlanes/detector.ts",
+      "sha256": "442a8bbc4e29a5102c58fd0b62a0139550cf3e1b5b3cd2dd172ec69ce187035c"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/er/erDetector.ts",
+      "sha256": "412182f33add1a6281bf9c49951af979b6694610847996690995216f8a2bef55"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/git/gitGraphDetector.ts",
+      "sha256": "27c1dec55ad721e92fb165547c481eeee8a113333bae7cf49d8f54a1e71196a1"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/gantt/ganttDetector.ts",
+      "sha256": "3b5f7878cd67b0b6d5ed0322bf154d238401630d5095d653c97c0b46ecdde05d"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/info/infoDetector.ts",
+      "sha256": "e51c401135a4f265c0f05f1072691f167f67e45294ad894aa1e7e616df8f66a2"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/pie/pieDetector.ts",
+      "sha256": "fc68842096e643818a0860b2f95ac6fafdf786d619963d83ffcbe7cde6cfdd7e"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/quadrant-chart/quadrantDetector.ts",
+      "sha256": "e1251d98d80105af94946c1f53d5cf31860b2fedd2586ba0b951ff10a63a77d2"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/xychart/xychartDetector.ts",
+      "sha256": "785cd5308e9eb165d9b9ef7cc54373cfece92e96884ea1dcb1df886f78f4c569"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/requirement/requirementDetector.ts",
+      "sha256": "2cce26e229aa5ba5adce9b77c219e2ece12ba893dc8d545cff0d876b221837ea"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/sequence/sequenceDetector.ts",
+      "sha256": "e1b2df4407c736bdd7f6a06abe12759495b316d1cf76f83eb77bd6782d9a412e"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/class/classDetector-V2.ts",
+      "sha256": "1a6c58983e963f02cd5e6b04cef3257ae9b70b705e463a7ab4445afc3aa1b6dd"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/state/stateDetector-V2.ts",
+      "sha256": "6c8672b3636568741a3f09d641886349064937e9cfde2d48fab7dbb46f05020b"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/user-journey/journeyDetector.ts",
+      "sha256": "553572ac590a3514f8f3180fefdf577d3dfd5701bf015164a2cecdc7531c2496"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/flowchart/elk/detector.ts",
+      "sha256": "b4eece883310920a6b190024db93338e942480ea8f423b85705d38a3fe69f150"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/timeline/detector.ts",
+      "sha256": "0b2f9e83ac40bd9e4faf5081b109373889d9a6c0073786f80a84c1ba22c2c11f"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/mindmap/detector.ts",
+      "sha256": "f1e6486cd28190e5e0778b57752d94f28658f49f9a7a747c4f891fd07fe04637"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/kanban/detector.ts",
+      "sha256": "20e5cbc746f12f9f812caf52839972748a52d15a7aed76b00c8143b30e27fe84"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/sankey/sankeyDetector.ts",
+      "sha256": "64e2a10abce191f01753241506ee536c98ab58eb2c85a264e594543e700dfc46"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/packet/detector.ts",
+      "sha256": "82460c3383b72a89987872b4f31f177c59423fc2da0443ffe672d875c7f8e2e0"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/radar/detector.ts",
+      "sha256": "91025d60124d26f09b8041371938775b2b685e65bb6d7d092f8131fbf5ca0007"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/block/blockDetector.ts",
+      "sha256": "3440d13a9369230133d6e4af466cf7625159a7972a7efcbe50e7c9c6045bbb46"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/treeView/detector.ts",
+      "sha256": "f7b15ed622d67770128f5726ad73ccbdcf807d35830a13d7074275ba6ea5605b"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/architecture/architectureDetector.ts",
+      "sha256": "b44940658b16f5854f293f51272ed6eefba1b2b5fb3e2e2ab24503ccb031e0c1"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/eventmodeling/detector.ts",
+      "sha256": "66d485f298a4ab3ae569865d4dd3ca26217a58c771773b4aa068ae76f9b40fcd"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/ishikawa/ishikawaDetector.ts",
+      "sha256": "aa7fe9e0d0b048e8115cf4892c2985c68121c5ce386ca48be72f55a863024d59"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/venn/vennDetector.ts",
+      "sha256": "538427883a5d3feab930e1df1a77290dadc3ba03185d7cde3c982e6f7b94f840"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/treemap/detector.ts",
+      "sha256": "f544c157fa76c29503eed3919694db4a02f61731da19003db43e14f1db6f2e1c"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/usecase/usecaseDetector.ts",
+      "sha256": "c663bccc3050675e1bed7cd32fd536418adbc53d2e56e478b48866cc5533a9d2"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/wardley/wardleyDetector.ts",
+      "sha256": "0f4c2c3b4868893b06e549a6ab8c5409c891ae3298abc4ca679d88876740457b"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/cynefin/cynefinDetector.ts",
+      "sha256": "4bdc48c9996ebcfaaea3978b43f27bdc38e558a94518ed1b207e8f0488ef0545"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/railroad/railroadDetector.ts",
+      "sha256": "421118de2cdb25184050ab3d5133fdc8544167c7579ceddfd2ed4d56c23fa07d"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/railroad/ebnfDetector.ts",
+      "sha256": "99c240f413e2810f967534d86c6c6ad7c182c1491b62fc88efe89f4bcdd0342e"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/railroad/abnfDetector.ts",
+      "sha256": "fd38fa7c6e11d32bc9cae2cdd0aed43f2f9cc1aa453350bdbb7e70b8552ac42f"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/railroad/pegDetector.ts",
+      "sha256": "0e625108150e543f01f96a22eb965c01c766e3fc331cb8cca2d0d9bc10ca26ea"
     }
   ],
   "packages": [

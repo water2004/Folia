@@ -1,6 +1,25 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-23, configuration sessions verified
+## Current checkpoint - 2026-10-23, registry oracle in progress
+
+- User authorizes fork pushes and verified updates to water2004/Folia PR #1;
+  keep OPEN, DO NOT merge. Working branch `codex/mermaid-cpp-registry` starts
+  at delivery head `02870740`; delivery branch remains `feat/mermaid-cpp-port`.
+- Read the pinned original detectType.ts, diagram-orchestration.ts and all
+  detector modules. Selected boundary: detector registration, ordered dispatch,
+  builtin registration guard/large-feature switch, loader route lookup. Actual
+  lazy imports, diagramAPI styles/utils and renderer execution are separate.
+- Original oracle executes full detectType/addDiagrams bodies and unchanged
+  detector functions. Important behaviors: overwrite keeps order; numeric keys
+  enumerate first; Object.entries snapshots callbacks; ELK changes config.layout;
+  C4 non-first alternatives are unanchored. No grammar validation at detection.
+- Next: validate source oracle, commit oracle batch, implement native boundary
+  and focused tests, then Windows standalone/integrated Debug/Release CI.
+- No live agents or native builds. Local compiler remains unavailable. Baseline
+  delivery rerun 39909853656 was in progress when inspected; previous verified
+  code evidence remains 39908290555. PR live head/base unchanged from below.
+
+## Configuration sessions verified (historical)
 
 - User authorizes public fork zhao0349/Folia pushes and verified updates to
   https://github.com/water2004/Folia/pull/1. Keep OPEN; DO NOT merge.
