@@ -1,6 +1,24 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-23, directive interpretation verified (stage 4c)
+## Current checkpoint - 2026-10-23, configuration batch in progress
+
+- User requests small commits for configuration sanitization, precedence and
+  theme resolution; verify before updating upstream PR #1, never merge.
+- Branch `codex/mermaid-cpp-config` starts at `5207e931`. Existing PR #1 is
+  OPEN/unmerged at that head; base remains `508423f2`. Working tree was clean.
+- New official oracle has 2,928 observations and 720 config keys. It executes
+  original sanitizer, assignWithDepth and resolveAppearance bodies, generates
+  schema defaults with the original AJV generator (locked AJV 8.18.0), and
+  verifies packaged theme source maps against the source lock. Local check passes.
+- Native sanitizer files are an uncommitted implementation candidate in
+  `third_party/mermaid-cpp/src/config_*`. Next: implement merge and appearance
+  selection, consume the fixture in native tests, run four Windows CI jobs.
+  Theme-name selection is distinct from theme-variable/color derivation, which
+  still needs a native implementation. No common frontend integration is claimed.
+- Local MSVC/CMake unavailable. No live builds/agents. Prior head's CI rerun
+  39888412728 was in progress when checked; prior code passed 39886836325.
+
+## Directive interpretation verified (historical, stage 4c)
 
 - User explicitly approved pushing this batch to public fork zhao0349/Folia,
   running CI and updating existing upstream PR #1 after verification. Do not

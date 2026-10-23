@@ -115,6 +115,86 @@
     {
       "path": "packages/mermaid/src/diagram-api/frontmatter.ts",
       "sha256": "32064e56308192d63355b5719a54172ce9269b9d30ccfddcfbdd11b71ddf5e0a"
+    },
+    {
+      "path": ".build/jsonSchema.ts",
+      "sha256": "0933883cc0bfef84c255e9a138258fcb59ede9a39367414d26a5873edd5ce95c"
+    },
+    {
+      "path": ".vite/jsonSchemaPlugin.ts",
+      "sha256": "a74941c2dbde345a8d70d47876e519cd7ea3fb334f76bdf9e7bf7450978532c0"
+    },
+    {
+      "path": "packages/mermaid/src/defaultConfig.ts",
+      "sha256": "6f2ec3c231ee970fb0368d158975090d488c93c9801a618b06cb18d58488b068"
+    },
+    {
+      "path": "packages/mermaid/src/utils/sanitizeDirective.ts",
+      "sha256": "b4b3a906c608be0dc3b72136680c8d29bd87978857da6ba8234adede06b0ffa1"
+    },
+    {
+      "path": "packages/mermaid/src/assignWithDepth.ts",
+      "sha256": "84216a585174308d91550e69fdf0081801cce41c040738190a47ed764d77674f"
+    },
+    {
+      "path": "packages/mermaid/src/config.ts",
+      "sha256": "91dd68a9e7d57c4635a04fab0ccd78ec230b4417a02f4f4b3cd9a6bb445f09ef"
+    },
+    {
+      "path": "packages/mermaid/src/diagram-api/diagramConfigKeys.ts",
+      "sha256": "033ef53469f73db8051e70f9686d27f58272edfc9a071ea153ff39a014c17d8f"
+    },
+    {
+      "path": "packages/mermaid/src/themes/index.js",
+      "sha256": "6277f68da19a2b75f2e6b60c02d590c71a1da926b50969f2523f66e372a40861"
+    },
+    {
+      "path": "packages/mermaid/src/themes/theme-base.js",
+      "sha256": "c13caf87f1a547eb65596ebaabf94ad80055546dff5458f3b6475799bb5ec52c"
+    },
+    {
+      "path": "packages/mermaid/src/themes/theme-dark.js",
+      "sha256": "79e5faeb17f0ad47c2e97cbbab7491bf12ab93115546eaebda741e00fad75d37"
+    },
+    {
+      "path": "packages/mermaid/src/themes/theme-default.js",
+      "sha256": "c7676f84269d433c83f089bd978439a0d5e783ba48f1dfd87a294efb674e3b66"
+    },
+    {
+      "path": "packages/mermaid/src/themes/theme-forest.js",
+      "sha256": "473eed6464c38764c59c15768cdedb44766f40aa736bb96ef1fa94cea2315cc5"
+    },
+    {
+      "path": "packages/mermaid/src/themes/theme-helpers.js",
+      "sha256": "8bcfaf8426fcff2d033843ca2c38d3bdc23f8443c5721c686951b56e9c612289"
+    },
+    {
+      "path": "packages/mermaid/src/themes/theme-neo-dark.js",
+      "sha256": "f2d3469f8fe6aae719654bba2fe776802617a72449db8a6a299bc070e07673c3"
+    },
+    {
+      "path": "packages/mermaid/src/themes/theme-neo.js",
+      "sha256": "0ef8cf2a93e4629984c6c57382ce69f37d5bffb6a6fe5b949a972ee8d268bf9f"
+    },
+    {
+      "path": "packages/mermaid/src/themes/theme-neutral.js",
+      "sha256": "a09bdc75fabfaddb19626f8c8af8e5d9df0dcee31ed09522dcbccd6418ca1a43"
+    },
+    {
+      "path": "packages/mermaid/src/themes/theme-redux-color.js",
+      "sha256": "5e4278fb33825a501ffae1c6ac13a869763c4e611de9ad6077b58513e4e1b6d0"
+    },
+    {
+      "path": "packages/mermaid/src/themes/theme-redux-dark-color.js",
+      "sha256": "0c1899419d5a06afe61bd183d6fc2b59bf5b1be12528e2bf1c7f3fc36788b535"
+    },
+    {
+      "path": "packages/mermaid/src/themes/theme-redux-dark.js",
+      "sha256": "aa769f4fa5992f04bce44af4f1e568d98140477f53406a29a66248b4e6f5d1bc"
+    },
+    {
+      "path": "packages/mermaid/src/themes/theme-redux.js",
+      "sha256": "a2eeb8fc623614c4853e39e90abd1ebf6b8e6f9f4028cf40962d6d6414d6443f"
     }
   ],
   "packages": [
