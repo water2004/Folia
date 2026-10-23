@@ -76,13 +76,23 @@ coordinates, text containment, colors and sampled edge geometry. Native font
 rasterization can differ slightly from Chromium; geometric tolerances are 1.5
 SVG units for boxes/coordinates and 3 for sampled edge paths/lengths.
 
-Mermaid cluster-endpoint/direction adaptation and complete Flowchart rendering
-remain pending. The initial SVG entry explicitly rejects groups, self loops,
+`folia.mermaid.flowchart_graph::prepare_flowchart_graph` now prepares the
+Mermaid graph around that Dagre engine. It anchors edges to externally connected
+clusters, extracts independent subgraphs with their original direction settings,
+and expands self loops into the original three layout segments. The owned result
+retains the source graph, source node/edge indexes, cluster endpoint markers and
+nested graph trees for subsequent measurement and painting. The source oracle
+executes the pinned original prepareLayoutForDagre/mermaid-graphlib functions on
+representative nested, independent, externally connected and self-loop inputs.
+This preparation API does not itself measure, lay out or paint the nested tree.
+
+Measured cluster and merged self-loop SVG adapters and complete Flowchart
+rendering remain pending. The initial SVG entry explicitly rejects groups, self loops,
 titles, custom styles, rich/multiline/wrapped labels, other classic shapes and
 markers, and non-classic looks; it does not silently drop these features.
 The complete existing family requirements remain unchanged. The rank/layout
-API rejects links to nonempty group nodes until that adapter is available;
-subgraph directions do not independently lay out clusters at this boundary.
+API requires prepared graphs without nonempty group endpoints; callers must
+measure and lay out extracted subgraphs separately before the enclosing graph.
 HTML/entity/Markdown label adaptation,
 shape metadata, explicit edge ids and interpolation commands are not implemented
 by this stage; unsupported input returns an error. Browser callbacks are outside

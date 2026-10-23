@@ -1,6 +1,21 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-23, Flowchart coordinates and initial measured SVG verified
+## Current checkpoint - 2026-10-23, Mermaid graph adapter in progress
+
+- Deliver the required layout preparation around the verified Dagre engine:
+  cluster endpoint anchors, extraction of independently directed subgraphs and
+  the original three-segment self-loop layout input. Keep source ownership and
+  original edge identity so the next SVG adapter can paint one logical edge.
+- Scope/exit: representative nested, externally connected and independent
+  groups plus ordinary self loops match the pinned original prepareLayoutForDagre
+  and mermaid-graphlib outputs; native Windows standalone/integrated Debug and
+  Release checks pass. Do not reopen the verified layout/configuration stages.
+- Next: consume this prepared graph for measured recursive clusters and merged
+  self-loop SVG. Existing unsupported SVG cases remain explicit until connected.
+- Work on fork/mermaid-development; cherry-pick only functional/tests/public-doc
+  commits into the existing contribution worktree. Keep upstream PR #1 open.
+
+## Flowchart coordinates and initial measured SVG verified (historical)
 
 - Delivered the retained Dagre graph through crossing reduction/order, BK
   coordinates, compound borders, direction transforms and restored edge paths.
