@@ -114,7 +114,7 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
             if(e.arrow_end==u"arrow_point") shorten(points.back(),points[points.size()-2],4);
             svg+="<path class=\"flowchart-link\" d=\""+curve_path(points,e.curve==u"linear")+"\" fill=\"none\" stroke=\""+theme.line+
                 "\" stroke-width=\""+(e.stroke==u"thick"?std::string("3.5"):e.stroke==u"invisible"?std::string("0"):std::string("1"))+"\"";
-            if(e.stroke==u"dotted") svg+=" stroke-dasharray=\"2\"";
+            svg+=e.stroke==u"dotted"?" stroke-dasharray=\"2\"":" stroke-dasharray=\"0\"";
             if(e.arrow_start==u"arrow_point") svg+=" marker-start=\"url(#flow-point-start)\"";
             if(e.arrow_end==u"arrow_point") svg+=" marker-end=\"url(#flow-point-end)\"";
             svg+="/>";
