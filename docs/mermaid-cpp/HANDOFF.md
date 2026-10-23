@@ -1,6 +1,23 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-23, shared frontend verified
+## Current checkpoint - 2026-10-23, Packet/Pie render entry in progress
+
+- Deliver a source-to-SVG entry for Packet/Pie using prepared configuration,
+  default/dark theme paints, family style overrides, metadata and real Windows
+  font measurement. Keep the production application dependency unchanged until
+  the remaining required families can replace it together.
+- Scope: ordinary Folia text diagrams, numeric/px style sizes, literal colors,
+  configured font lists and the existing Packet/Pie layout options. No browser
+  plugin, DOM callback or arbitrary CSS execution support.
+- Exit: representative original runtime observations, native entry tests,
+  actual DirectWrite entry tests and existing affected Windows Debug/Release
+  regression checks. Then push small commits and update upstream PR #1 without
+  merging. Next: continue required family renderers and application integration.
+- Working branch: fork/mermaid-development. Select only functional, test and
+  public documentation commits for feat/mermaid-cpp-port; never transfer the
+  separate fork instruction commit. No local compiler or running build.
+
+## Shared frontend verified (historical)
 
 - Delivered an owned preparation API composing normalization, frontmatter,
   directives, configuration scope and final builtin detection for Folia's

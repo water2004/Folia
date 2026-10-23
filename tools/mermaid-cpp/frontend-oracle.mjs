@@ -35,7 +35,7 @@ const clone = value => Array.isArray(value) ? value.map(clone) : value && typeof
   ? Object.fromEntries(Object.entries(value).map(([k,v]) => [k,clone(v)])) : value;
 const clean = value => JSON.parse(JSON.stringify(value));
 const utilsSource = src('utils.ts');
-function frontend(site) {
+export function frontend(site) {
   // Each request is isolated, including the upstream global directive regexp.
   const directiveRegex = new RegExp(regexes.directiveRegex.source, regexes.directiveRegex.flags);
   const configApi = vm.runInNewContext(strip(withoutImports(src('config.ts'))) +
