@@ -51,9 +51,13 @@ std::string snapshot(const ConfigValue& value) {
     throw std::runtime_error("Invalid config kind");
 }
 ConfigValue json(std::u16string_view source) {
-    auto parsed = detect_directives(u"%%{init:" + std::u16string{source} + u"}%%");
+    // Bare directive words (null/false/numbers) intentionally remain strings.
+    // Wrap the fixture's JSON value in an array to enter the strict JSON branch.
+    auto parsed = detect_directives(u"%%{init:[" + std::u16string{source} + u"]}%%");
     if (!parsed || parsed->size() != 1 || !parsed->front().type) throw std::runtime_error("Invalid fixture JSON");
-    return std::move(parsed->front().args);
+    if (parsed->front().args.kind != ConfigKind::sequence || parsed->front().args.sequence.size() != 1)
+        throw std::runtime_error("Invalid wrapped fixture JSON");
+    return std::move(parsed->front().args.sequence.front());
 }
 const ConfigValue& field(const ConfigValue& value, std::u16string_view key) {
     const auto found = value.find(key);
@@ -101,7 +105,7 @@ suite config = [] {
             }
             ++count;
         }
-        expect(count == 2928_u);
+        expect(count == 2940_u);
     };
     "mermaid_config_owns_results_and_enforces_resource_limits"_test = [] {
         auto source = json(uR"({"theme":"dark","flowchart":{"curve":"basis"}})");

@@ -6,17 +6,26 @@
   theme resolution; verify before updating upstream PR #1, never merge.
 - Branch `codex/mermaid-cpp-config` starts at `5207e931`. Existing PR #1 is
   OPEN/unmerged at that head; base remains `508423f2`. Working tree was clean.
-- New official oracle has 2,928 observations and 720 config keys. It executes
+- New official oracle has 2,940 observations and 720 config keys. It executes
   original sanitizer, assignWithDepth and resolveAppearance bodies, generates
   schema defaults with the original AJV generator (locked AJV 8.18.0), and
   verifies packaged theme source maps against the source lock. Local check passes.
 - Commits: `9ee6ca72` oracle, `fe532427` bounded sanitizers, `d1cb9998`
   depth merge/appearance and fixture-driven native tests/CI. No uncommitted
   implementation candidates. Local config and directive oracle checks pass.
-  Next: push this verification branch, inspect all four Windows CI jobs, fix
-  any native mismatches before fast-forwarding the existing PR branch.
+  First CI 39889791100 compiled native code but exposed oracle harness issues:
+  CRLF-sensitive extraction was swallowed as an expected exception; JS input
+  aliases survived structuredClone but not fixture serialization; bare scalar
+  fixture JSON entered directive word parsing. Fixed by normalized extraction
+  before cases, strict module semantics, TypeError-only expected failures,
+  JSON tree cloning and array-wrapped fixture decoding. Nested array custom
+  properties are explicitly marked. Added primitive-string/prototype-setter
+  restrictions and regressions. Next: validate the corrected head in all four
+  Windows jobs before fast-forwarding the PR branch.
   Theme-name selection is distinct from theme-variable/color derivation, which
   still needs a native implementation. No common frontend integration is claimed.
+- User explicitly authorized this batch's public fork push after automatic
+  review asked for confirmation; push/CI/PR update are authorized, merge is not.
 - Local MSVC/CMake unavailable. No live local builds/agents. Prior head's CI rerun
   39888412728 was in progress when checked; prior code passed 39886836325.
 

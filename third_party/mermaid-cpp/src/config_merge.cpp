@@ -39,7 +39,12 @@ void assign(ConfigValue& dst, const ConfigValue& src, int depth, Budget& budget,
     if (dst.kind == ConfigKind::null || depth <= 0) {
         if (dst.kind != ConfigKind::null && object(dst) && object(src)) {
             if (dst.kind == ConfigKind::mapping && src.kind == ConfigKind::mapping)
-                for (const auto& [key, item] : src.mapping) { budget.step(); dst.mapping.insert_or_assign(key, item); }
+                for (const auto& [key, item] : src.mapping) {
+                    budget.step();
+                    if (key == u"__proto__" && !dst.mapping.contains(key))
+                        throw std::runtime_error("Configuration merge would invoke a JavaScript prototype setter");
+                    dst.mapping.insert_or_assign(key, item);
+                }
         } else if (accept_replacement) dst = src;
         return;
     }

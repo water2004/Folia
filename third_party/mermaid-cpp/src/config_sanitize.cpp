@@ -116,6 +116,13 @@ void secure_walk(ConfigValue& value, const std::vector<std::u16string>& secure, 
             if (denied(std::u16string(ascii.begin(), ascii.end()), value.sequence[i])) throw std::runtime_error("Secure sanitization would create a sparse array");
             if (object(value.sequence[i])) secure_walk(value.sequence[i], secure, budget);
         }
+    } else if (value.kind == ConfigKind::string) {
+        for (std::size_t i = 0; i < value.string.size(); ++i) {
+            const auto ascii = std::to_string(i);
+            const auto character = config_detail::string(std::u16string_view{value.string}.substr(i, 1));
+            if (denied(std::u16string(ascii.begin(), ascii.end()), character))
+                throw std::runtime_error("Cannot delete an indexed property of a primitive string");
+        }
     }
 }
 }

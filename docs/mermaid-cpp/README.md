@@ -111,7 +111,9 @@ above the depth boundary, arrays union primitives with SameValueZero, and
 objects at depth zero use shallow assignment. Separate owned objects remain
 distinct array entries. Inputs cannot encode JS object aliases, array holes or
 custom array properties; operations that would create the latter two fail
-explicitly. The fixture retains the official result alongside each restriction.
+explicitly. Shallow assignment that would invoke JS's inherited `__proto__`
+setter is also rejected. The fixture retains the official result alongside
+each restriction.
 
 `resolve_config_appearance` selects `theme`, `look` and `layout` from the
 directive sum, saved directives in reverse order, initialize delta and pinned
@@ -222,7 +224,7 @@ regular expressions on 3,279 observations (1,093 inputs, three filters),
 including malformed JSON, lexical alternatives, quotes, Unicode, comments,
 line endings, duplicate keys, non-finite numbers and error recovery boundaries.
 Native tests separately cover ownership, aggregate budgets, depth ceilings and
-adversarial source sizes. The separate configuration oracle checks 2,928
+adversarial source sizes. The separate configuration oracle checks 2,940
 sanitizer, merge and appearance observations, including explicit dense-tree
 restrictions, plus the generated 720-key registry and appearance defaults.
 Successful raw detection is not permission to apply a setting.

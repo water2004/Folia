@@ -47,10 +47,29 @@ for (const diagram of ['flowchart-v2','flowchart-elk','classDiagram','stateDiagr
 add('appearance',{cfg:{theme:'default',flowchart:{theme:'default'}},sum:{},directives:[{theme:'dark'},{theme:'forest'}],site:{theme:'neutral'},diagram:'flowchart-v2'});
 add('appearance',{cfg:{},sum:{},directives:[],site:{},diagram:'flowchart-v2'});
 add('appearance',{cfg:{},sum:{},directives:[],site:{},diagram:'pie'});
+for (const value of ['<tag>','url(data:x)','abc']) for (const secure of [[],['0']]) add('secure',{value,secure});
+for (const depth of [0,1,2]) add('merge',{
+  dst:{},src:JSON.parse('{"__proto__":{"theme":"dark"},"constructor":4}'),depth
+},depth===0?'prototype-setter':'');
+add('sanitize',JSON.parse('{"__proto__":{"theme":"dark"},"constructor":4,"theme":"dark"}'));
+add('appearance',{cfg:{},sum:{theme:['dark']},directives:[],site:{},diagram:'pie'});
+add('appearance',{cfg:{},sum:{theme:['null']},directives:[],site:{},diagram:'pie'});
 const rows = [];
+function treeRestriction(value) {
+  if (!value || typeof value !== 'object') return '';
+  if (Array.isArray(value)) {
+    if (Object.keys(value).some(k=>!/^\d+$/.test(k) || Number(k)>=value.length)) return 'array-properties';
+    for(let i=0;i<value.length;i++) if(!Object.hasOwn(value,i)) return 'sparse-array';
+  }
+  for(const item of Object.values(value)) { const reason=treeRestriction(item); if(reason) return reason; }
+  return '';
+}
 for (let i=0;i<cases.length;i++) {
   const {op,input,divergence} = cases[i];
-  const arg = structuredClone(input);
+  // Match the serialized input's independent owned trees, not accidental aliases
+  // introduced by the Cartesian-product case builder reusing JS object references.
+  const arg = JSON.parse(JSON.stringify(input));
+  let restriction=divergence;
   let output;
   try {
     switch(op) {
@@ -59,9 +78,14 @@ for (let i=0;i<cases.length;i++) {
       case 'merge': output=assign(arg.dst,arg.src,{depth:arg.depth}); break;
       case 'appearance': output=appearance(arg.cfg,arg.sum,arg.directives,arg.site,arg.diagram); break;
     }
+    restriction ||= treeRestriction(output);
     output=snapshot(output);
-  } catch (error) { output='E'; }
-  rows.push([String(i),op,hex(JSON.stringify(input)),output,divergence||'-'].join('\t'));
+  } catch (error) {
+    // Harness/assertion/wiring failures must never become expected native errors.
+    if(error.name!=='TypeError') throw error;
+    output='E';
+  }
+  rows.push([String(i),op,hex(JSON.stringify(input)),output,restriction||'-'].join('\t'));
 }
 const writeOrCheck = (relative,content) => {
   const file=path.join(root,relative);
