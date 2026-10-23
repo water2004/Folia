@@ -1,6 +1,6 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-23, theme oracle established; native work in progress
+## Current checkpoint - 2026-10-23, native theme derivation awaiting CI
 
 - User authorizes public fork zhao0349/Folia pushes and updating existing
   water2004/Folia PR #1 only after verification. DO NOT merge.
@@ -16,10 +16,20 @@
   ConfigValue output omits undefined fields, as JSON serialization does.
   Native input is an owned mapping with no prototype/method replacement or
   mutable Khroma channel objects; THEME_COLOR_LIMIT is bounded to integer 0..12.
-- Next: implement native color primitives, then default/dark derivation with
-  fixture-driven tests; run Windows standalone/integrated Debug/Release CI.
-  No native build or application integration is claimed at this checkpoint.
-  No live agents/builds. Local MSVC/CMake remain unavailable.
+- Native color primitives compile on Windows Debug/Release. First CI
+  39894860027 exposed an oracle harness mistake: passing null as invert's
+  optional weight requested zero inversion. Corrected to omitted/undefined;
+  downloaded Release runner passes all 2,295 color observations / 4,594 focused
+  assertions locally. No color implementation change was needed for that fix.
+- Default/dark assignments are compiled from pinned source AST to ordinary
+  C++ functions, checked by generate-themes.mjs. No JS execution in production.
+  Native derive_theme_variables implements ordered evaluation, shallow final
+  overrides, owned outputs, and bounded intermediate/final trees.
+- Next: run Windows standalone/integrated Debug/Release CI for native themes;
+  diagnose mismatches with a focused downloaded runner before delivery.
+  The full theme implementation is not yet natively verified. No application
+  integration is claimed. No live agents/local builds; CI for a6f90193 may still
+  be finishing. Local MSVC/CMake remain unavailable.
 
 ## Configuration primitives verified (historical)
 

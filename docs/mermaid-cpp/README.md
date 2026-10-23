@@ -204,6 +204,8 @@ node tools/mermaid-cpp/pie-oracle.mjs --check
 node tools/mermaid-cpp/pie-geometry-oracle.mjs --check
 node tools/mermaid-cpp/pie-layout-oracle.mjs --check
 node tools/mermaid-cpp/pie-svg-oracle.mjs --check
+node tools/mermaid-cpp/theme-oracle.mjs --check
+node tools/mermaid-cpp/generate-themes.mjs --check
 git submodule update --init third_party/ut
 cmake -G Ninja -S tools/mermaid-cpp -B build/mermaid-cpp -DCMAKE_BUILD_TYPE=Debug
 cmake --build build/mermaid-cpp --parallel 4 --target FoliaMermaidTests FoliaMermaidTextProbe FoliaMermaidPlatformTests
@@ -230,6 +232,28 @@ adversarial source sizes. The separate configuration oracle checks 2,940
 sanitizer, merge and appearance observations, including explicit dense-tree
 restrictions, plus the generated 720-key registry and appearance defaults.
 Successful raw detection is not permission to apply a setting.
+
+`derive_theme_variables` resolves the pinned default and dark themes from an
+optional owned override mapping. It preserves the constructor/update/override
+order (including default's extra constructor update), JavaScript short-circuit
+and nullish choices, and final shallow object overrides. Unknown data keys are
+retained; undefined generated fields are omitted as in JSON serialization.
+The assignment functions are generated as ordinary C++ from the hash-locked
+official AST, checked in and reproducibly checked in CI. This is neither a
+static theme table nor a JavaScript runtime. Khroma 2.1.0 arithmetic, parsing,
+color-name data, and decimal formatting are ported independently; the official
+runtime supplies 1,218 theme observations and 2,295 color observations.
+
+The native theme boundary accepts mapping overrides and literal string colors.
+It explicitly rejects mutable Khroma channel objects, prototype/method-key
+replacement, color strings over 4,096 UTF-16 units, and THEME_COLOR_LIMIT values
+outside integer 0..12. Fixtures retain the corresponding official outcomes.
+Input and final output use ConfigLimits, and cumulative intermediate assignment
+trees have the same size limits. All operations return owned values or errors,
+without modifying the input. CSS variables/currentColor require browser context
+and are not resolved here. These theme-variable checks do not wire the shared
+frontend or convert the existing Packet/Pie literal-paint SVG boundary; rendering
+and application theme integration remain separate work.
 
 The preprocessing oracle isolates and executes the original pinned
 `cleanupText` and `removeDirectives` function bodies, stripping only TypeScript
