@@ -29,4 +29,29 @@ struct FlowchartRanks {
 // stages. The source graph is never mutated; failure returns no partial result.
 std::expected<FlowchartRanks, std::string> rank_flowchart(
     const FlowchartInput& input, std::span<const FlowchartEdgeLabelSize> labels);
+
+struct FlowchartPoint { double x = 0, y = 0; };
+struct FlowchartNodeBox { double width = 0, height = 0; };
+struct FlowchartPlacedNode {
+    std::u16string id;
+    double x = 0, y = 0, width = 0, height = 0;
+    std::optional<int> rank, order;
+};
+struct FlowchartPlacedEdge {
+    std::vector<FlowchartPoint> points;
+    std::optional<FlowchartPoint> label;
+};
+struct FlowchartLayout {
+    double width = 0, height = 0;
+    // Same order as the input, including compound nodes and self edges.
+    std::vector<FlowchartPlacedNode> nodes;
+    std::vector<FlowchartPlacedEdge> edges;
+};
+// Full Dagre pipeline with caller-supplied node and centered edge-label boxes.
+// Continues on the private ranked graph; no graph reconstruction from summaries.
+// Paths include rectangular endpoint intersections; the SVG shape adapter may
+// refine those intersections for non-rectangular shapes. No font measurement.
+std::expected<FlowchartLayout, std::string> layout_flowchart(
+    const FlowchartInput& input, std::span<const FlowchartNodeBox> nodes,
+    std::span<const FlowchartEdgeLabelSize> labels);
 }

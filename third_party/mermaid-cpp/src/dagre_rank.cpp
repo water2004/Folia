@@ -7,10 +7,17 @@ namespace folia::mermaid {
 namespace {
 using Id = std::size_t;
 constexpr Id absent = std::numeric_limits<Id>::max();
+enum class Dummy { none, border, edge, label, self };
 struct Node {
     std::u16string id;
     Id parent = absent, top = absent, bottom = absent;
     std::optional<int> rank;
+    bool active = true;
+    Dummy kind = Dummy::none;
+    int min_rank = 0, max_rank = 0, order = 0, border_side = 0;
+    double width = 0, height = 0, x = 0, y = 0;
+    Id edge = absent;
+    std::vector<Id> left, right;
 };
 struct Edge {
     Id v, w;
@@ -39,12 +46,13 @@ struct Graph {
         });
     }
     std::vector<Id> node_order() const {
-        std::vector<Id> result(nodes.size()); std::iota(result.begin(),result.end(),Id{0});
+        std::vector<Id> result;
+        for(Id i=0;i<nodes.size();++i) if(nodes[i].active) result.push_back(i);
         key_order(result); return result;
     }
     std::vector<Id> children(Id parent) const {
         std::vector<Id> result;
-        for (Id i=0;i<nodes.size();++i) if (nodes[i].parent == parent) result.push_back(i);
+        for (Id i=0;i<nodes.size();++i) if (nodes[i].active && nodes[i].parent == parent) result.push_back(i);
         key_order(result); return result;
     }
     std::vector<Id> incident(Id v) const {
@@ -60,6 +68,14 @@ struct Graph {
             id = prefix; for (auto c:number) id.push_back(static_cast<char16_t>(c));
         } while (std::ranges::any_of(nodes,[&](const Node& n) { return n.id == id; }));
         nodes.push_back({std::move(id),parent}); return nodes.size()-1;
+    }
+    std::vector<Id> neighbors(Id v, bool outgoing) const {
+        std::vector<Id> result;
+        for(const auto& e:edges) if(e.active && (outgoing?e.v:e.w)==v) {
+            auto w=outgoing?e.w:e.v;
+            if(std::ranges::find(result,w)==result.end()) result.push_back(w);
+        }
+        key_order(result); return result;
     }
     int slack(const Edge& e) const { return *nodes[e.w].rank - *nodes[e.v].rank - e.minlen; }
 };
@@ -103,6 +119,7 @@ Nesting add_nesting(Graph& g) {
         }
         const auto top=g.dummy(u"_bt",v),bottom=g.dummy(u"_bb",v);
         g.nodes[v].top=top; g.nodes[v].bottom=bottom;
+        g.nodes[top].kind=g.nodes[bottom].kind=Dummy::border;
         for(auto c:children) {
             self(self,c);
             const bool group=g.nodes[c].top!=absent;
@@ -272,9 +289,9 @@ void normalize_ranks(Graph& g,Nesting nesting) {
     for(const auto& n:g.nodes) if(n.rank) minimum=std::min(minimum,*n.rank);
     for(auto& n:g.nodes) if(n.rank) *n.rank-=minimum;
 }
-} // namespace
+struct RankedGraph { Graph graph; FlowchartRanks summary; };
 
-std::expected<FlowchartRanks,std::string> rank_flowchart(
+std::expected<RankedGraph,std::string> build_ranked_graph(
     const FlowchartInput& input,std::span<const FlowchartEdgeLabelSize> labels) {
     try {
         if(labels.size()!=input.edges.size()) return std::unexpected("Dagre needs one label box per edge");
@@ -327,8 +344,48 @@ std::expected<FlowchartRanks,std::string> rank_flowchart(
             if(n.top!=absent) {output.min_rank=g.nodes[n.top].rank;output.max_rank=g.nodes[n.bottom].rank;}
             result.nodes.push_back(std::move(output));
         }
-        for(auto [proxy,edge]:proxies) result.edges[edge].label_rank=g.nodes[proxy].rank;
-        return result;
+        for(auto [proxy,edge]:proxies) {
+            result.edges[edge].label_rank=g.nodes[proxy].rank;
+            g.nodes[proxy].active=false;
+        }
+        g.nodes[nesting.root].active=false;
+        for(auto& e:g.edges) if(e.nesting || e.v==nesting.root || e.w==nesting.root) e.active=false;
+        for(auto& n:g.nodes) if(n.top!=absent) {
+            n.min_rank=*g.nodes[n.top].rank; n.max_rank=*g.nodes[n.bottom].rank;
+        }
+        return RankedGraph{std::move(g),std::move(result)};
     } catch(const std::exception& error) {return std::unexpected(error.what());}
+}
+#include "dagre_order.inc"
+#include "dagre_position.inc"
+} // namespace
+
+std::expected<FlowchartRanks,std::string> rank_flowchart(
+    const FlowchartInput& input,std::span<const FlowchartEdgeLabelSize> labels) {
+    auto ranked=build_ranked_graph(input,labels);
+    if(!ranked) return std::unexpected(ranked.error());
+    return std::move(ranked->summary);
+}
+
+std::expected<FlowchartLayout,std::string> layout_flowchart(
+    const FlowchartInput& input,std::span<const FlowchartNodeBox> nodes,
+    std::span<const FlowchartEdgeLabelSize> labels) {
+    try {
+        if(nodes.size()!=input.nodes.size()) return std::unexpected("Dagre needs one box per node");
+        if(!std::isfinite(input.node_spacing)||input.node_spacing<0) return std::unexpected("Invalid Dagre node spacing");
+        if(input.direction!=u"TB" && input.direction!=u"BT" && input.direction!=u"LR" && input.direction!=u"RL")
+            return std::unexpected("Invalid Dagre direction");
+        for(auto box:nodes) if(!std::isfinite(box.width)||!std::isfinite(box.height)||box.width<0||box.height<0)
+            return std::unexpected("Invalid Dagre node box");
+        auto ranked=build_ranked_graph(input,labels);
+        if(!ranked) return std::unexpected(ranked.error());
+        auto& g=ranked->graph;
+        if(input.nodes.empty()) return FlowchartLayout{};
+        for(Id i=0;i<nodes.size();++i) {g.nodes[i].width=nodes[i].width;g.nodes[i].height=nodes[i].height;}
+        auto chains=normalize_edges(g,ranked->summary,labels);
+        add_side_borders(g);
+        order_nodes(g);
+        return place_graph(g,input,ranked->summary,labels,chains);
+    } catch(const std::exception& e) {return std::unexpected(e.what());}
 }
 } // namespace folia::mermaid
