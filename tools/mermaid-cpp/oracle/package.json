@@ -4,11 +4,13 @@
   "type": "module",
   "dependencies": {
     "@mermaid-js/parser": "2.0.1",
+    "acorn": "8.15.0",
     "ajv": "8.18.0",
     "d3-path": "3.1.0",
     "d3-shape": "3.2.0",
     "js-yaml": "4.3.0",
     "jsdom": "26.1.0",
+    "khroma": "2.1.0",
     "langium": "4.4.0",
     "mermaid": "12.2.0"
   }

@@ -195,6 +195,10 @@
     {
       "path": "packages/mermaid/src/themes/theme-redux.js",
       "sha256": "a2eeb8fc623614c4853e39e90abd1ebf6b8e6f9f4028cf40962d6d6414d6443f"
+    },
+    {
+      "path": "packages/mermaid/src/themes/erDiagram-oldHardcodedValues.ts",
+      "sha256": "af20f3378fb0663ba4db71ccec792a7deeb74749dc16f2c284b74d4cafe30ca3"
     }
   ],
   "packages": [
@@ -237,6 +241,421 @@
         {
           "path": "LICENSE",
           "sha256": "a09b0d6d76e768fca2085fad05743ee81ddd11946bcda160a3cf5e1081a479aa"
+        }
+      ]
+    },
+    {
+      "name": "khroma",
+      "version": "2.1.0",
+      "license": "MIT",
+      "files": [
+        {
+          "path": "package.json",
+          "sha256": "0d2145738d3cab828da4c5724b45e0dd2577c0ce84503c956d76897e93fa7de2"
+        },
+        {
+          "path": "license",
+          "sha256": "66b333b0f66759a0b710459e03f7029abe17f4358114a128d2c972e642961b49"
+        },
+        {
+          "path": "src/constants.ts",
+          "sha256": "c5810dfaf470f2c2618d683bccd6d117a58e64c62c162a8c1dbd11fece677577"
+        },
+        {
+          "path": "src/index.ts",
+          "sha256": "e39e5fbb6578c7785fe8a89aa42691ac46fa3303de59baeb02b2b7b14643f945"
+        },
+        {
+          "path": "src/types.ts",
+          "sha256": "36362c6719814de8ec13121c6bc725bc48d58bf30f7dda769be0c6f6d1bd674b"
+        },
+        {
+          "path": "src/channels/index.ts",
+          "sha256": "b5dfa8b3e866f10658afad939346579ea645630993e362dfc3ad985ca1600d1b"
+        },
+        {
+          "path": "src/channels/reusable.ts",
+          "sha256": "ec9abcd85721e8d97ef20db82160a3cd8dc3011b17b4df25e52ecf504e4507c4"
+        },
+        {
+          "path": "src/channels/type.ts",
+          "sha256": "7a9e48fd1c0b0f62049abae807e481a92ac283e4b816905952c37f7cb1244379"
+        },
+        {
+          "path": "src/color/hex.ts",
+          "sha256": "6cce403dab79c622d67347a52d0a448c2f8ad264d229aaea5a8420b81776d53e"
+        },
+        {
+          "path": "src/color/hsl.ts",
+          "sha256": "401a5dca80bbe8e613323c08767f4b3a99b425927083bf150010dce0bc108547"
+        },
+        {
+          "path": "src/color/index.ts",
+          "sha256": "6ae47cdc9303dcd6a144f831dbc29a1deb1a4cf9445bd6041e746eb30708361d"
+        },
+        {
+          "path": "src/color/keyword.ts",
+          "sha256": "2c291a653c7bfa775f812818618de9b6fc353f9cdcb02325c952d2fc323636da"
+        },
+        {
+          "path": "src/color/rgb.ts",
+          "sha256": "c8efde4808e7be226ec2a2650bf71063b3e18070f8191c92640d0dab292e0b8a"
+        },
+        {
+          "path": "src/methods/adjust.ts",
+          "sha256": "d0a899c3a92b49a12b02574632f7d11b549896449ef0df6adae02bd1965b691e"
+        },
+        {
+          "path": "src/methods/adjust_channel.ts",
+          "sha256": "83bf0846e16b9d5b2196ba18069e0e2fd131b343de27e83504acd7575e3b5f8e"
+        },
+        {
+          "path": "src/methods/alpha.ts",
+          "sha256": "94f082ce3191f7aaa219eea6c4ceb02393e11bb140d86de33acde2fe9294cde6"
+        },
+        {
+          "path": "src/methods/blue.ts",
+          "sha256": "9786af03d9d8a3b8a91c5cc30ec6ba0552aa6a8a3d550cb202de06c2ffae572d"
+        },
+        {
+          "path": "src/methods/change.ts",
+          "sha256": "f772cb47374c4f279e3f18c41916b57a3cc025cae74ac93658e3749d6eb1f0a1"
+        },
+        {
+          "path": "src/methods/channel.ts",
+          "sha256": "c3798405b063d9a866d5d80dc94cae8b22eed1947e65cb65c3b234d88a5433be"
+        },
+        {
+          "path": "src/methods/complement.ts",
+          "sha256": "ab0073a0822c6ce5012d0a2373fd21cf935a83871e801c85df3f071c736fb059"
+        },
+        {
+          "path": "src/methods/contrast.ts",
+          "sha256": "999c5a1ebebee80311182434f46c74de657a06073fc3c3f1f79e5bddec134acd"
+        },
+        {
+          "path": "src/methods/darken.ts",
+          "sha256": "6d2efed9796afb28b792db3e86655cd33c00b0f2f8d30f2a38aa92f5f928ddc8"
+        },
+        {
+          "path": "src/methods/desaturate.ts",
+          "sha256": "4adb800b0e65250e79b5d37b68838c9eeb9f51a22ce98cb2a78f9807134aa076"
+        },
+        {
+          "path": "src/methods/grayscale.ts",
+          "sha256": "42036271e285308b8c5c2e60d2bb21b8aa0164c3cd0d576240c61497d9ad6aaa"
+        },
+        {
+          "path": "src/methods/green.ts",
+          "sha256": "2e5ce7ff998a055520544144084c74684cd4aa7bfebd59886bf72bf5460e9b54"
+        },
+        {
+          "path": "src/methods/hsla.ts",
+          "sha256": "bc61bfaddfec7cb0adb05b2d5dc162ae5deb0d2443a563ea53108d83493b0ae2"
+        },
+        {
+          "path": "src/methods/hue.ts",
+          "sha256": "1ca5be53c27ba5bcd96f16bf46ecc5e6f2084cb7d5147a3bf353ebbcb00bd2e0"
+        },
+        {
+          "path": "src/methods/index.ts",
+          "sha256": "8fe5e8dd9e2a343c79f05f66c51f127dbb19e3805094d8b18fafdac5f85ff42a"
+        },
+        {
+          "path": "src/methods/invert.ts",
+          "sha256": "d1e68ced59ae6c43cc20760a77b6047d5174d99f67a6334dac5b4dfc1bd21123"
+        },
+        {
+          "path": "src/methods/is_dark.ts",
+          "sha256": "07efdfb5d27911da7892d6febe6c55e059a64684bad28dcc9321011a7e7d4665"
+        },
+        {
+          "path": "src/methods/is_light.ts",
+          "sha256": "5183cdb8b5462430547bf1dd1a7fc4780f15b1a30da9db4246d952e09f132abf"
+        },
+        {
+          "path": "src/methods/is_transparent.ts",
+          "sha256": "00c5ff1eb80c0a7db3cd9955493f99b6c31c4dab8a7e7ea6d35c378c3f5b4a7e"
+        },
+        {
+          "path": "src/methods/is_valid.ts",
+          "sha256": "19b9fd6c42725c2a33469f6c8df2db5e5ffca715f570510699db6d2c2ec01a68"
+        },
+        {
+          "path": "src/methods/lighten.ts",
+          "sha256": "792152d33b46acb6764c101f331639c80ee3b6e786ec25b4bfd66084333cf091"
+        },
+        {
+          "path": "src/methods/lightness.ts",
+          "sha256": "891e3618688c953cf2884ba3d04a997c0ebe10ee0f7ce564643250f670e408d7"
+        },
+        {
+          "path": "src/methods/luminance.ts",
+          "sha256": "9528865f48c81278330ee3026f8485f742cd8f34b9d9f3f86129e4faaaad1227"
+        },
+        {
+          "path": "src/methods/mix.ts",
+          "sha256": "bb1e90b3390294917d41ac4ee049f57cc4e3cf4c6807cd0f8d429bf7e1326627"
+        },
+        {
+          "path": "src/methods/opacify.ts",
+          "sha256": "97d11b0296c9fbef81797a3a2a9139198210af4393da8599eb0b660c16da4b8b"
+        },
+        {
+          "path": "src/methods/red.ts",
+          "sha256": "5e074f3ff6fa7c39fb9325ae21523942bf2416454b2d56c4c8ad98b811c8ec25"
+        },
+        {
+          "path": "src/methods/rgba.ts",
+          "sha256": "959ec3327cb12d790dd7fe8657d1a81b2d9c2ae96e1ad153ca07472fa5bfe94d"
+        },
+        {
+          "path": "src/methods/saturate.ts",
+          "sha256": "d414e1476d0533691795d354822c23b3c2a3678a33aa4fa2f5b67e492b8a2e6f"
+        },
+        {
+          "path": "src/methods/saturation.ts",
+          "sha256": "c7e93d0f2b7044feaa1347639fffa7cf6b127dd9484ffa9482e4ddf8d9dde040"
+        },
+        {
+          "path": "src/methods/scale.ts",
+          "sha256": "3207d76e4518b6616a3c092f25f5ddbe6288145d4da677214021d26c2a5ad253"
+        },
+        {
+          "path": "src/methods/to_hex.ts",
+          "sha256": "0ae483705d239761e78e0e2b0e3712fe76ad44e26c95d0f7a6b06a461f386297"
+        },
+        {
+          "path": "src/methods/to_hsla.ts",
+          "sha256": "1f9e6ced2679ea9e5d2d2dab7456a8c7d56714e66b5ccfd0a700063e3c64b565"
+        },
+        {
+          "path": "src/methods/to_keyword.ts",
+          "sha256": "bff1be9485237f7cd9bf6797b4cf3d958dd140bebecc9b65c1acbd2de0d5b60e"
+        },
+        {
+          "path": "src/methods/to_rgba.ts",
+          "sha256": "025057c7b65b2b958af38ef03ba2594c4163b95fa6cf3fa48fbdfa0080b441d9"
+        },
+        {
+          "path": "src/methods/transparentize.ts",
+          "sha256": "d55dcf6ba5a56cbe66159a12c3e2aa75be8442e88b5fbaae34069898bed4ccde"
+        },
+        {
+          "path": "src/utils/channel.ts",
+          "sha256": "a6cc6f0ab35f36f2693317d5d02302775a0082e66bdc02e49a73f11de5d6ed34"
+        },
+        {
+          "path": "src/utils/index.ts",
+          "sha256": "514467c4e0039e34657ef249f51fb376b8661eef693723bad0047067c5623cf2"
+        },
+        {
+          "path": "src/utils/lang.ts",
+          "sha256": "452f3f24a31bdafa0426fccbafab05902bd0112bcc8ab26b8af62a6f8e47f680"
+        },
+        {
+          "path": "src/utils/unit.ts",
+          "sha256": "0f0f541be7a9686954bedc536ded5c3bc97f5e3e4a19b4b0db3ee361e70724a0"
+        },
+        {
+          "path": "dist/constants.js",
+          "sha256": "4166c00634b27de54200ab6223e1252dbed596f453344ae8081454c3b643c486"
+        },
+        {
+          "path": "dist/index.js",
+          "sha256": "d680e9b6ce330c535af09ae4d40a3aef6d20af3c525986153ea226b9e99469ac"
+        },
+        {
+          "path": "dist/types.js",
+          "sha256": "890d11a23698a3a51375f14b954a986b103a0a45eb6689675a63529c3b2614ae"
+        },
+        {
+          "path": "dist/channels/index.js",
+          "sha256": "50dc111006608da002e7bd87e2531d5e0d830f88ecb0149d4cbb8ff8b2a96f94"
+        },
+        {
+          "path": "dist/channels/reusable.js",
+          "sha256": "18078f69d0d9089a41824a193c00b01e51d97c1a6e1dad2c878d1c8b50f4ce93"
+        },
+        {
+          "path": "dist/channels/type.js",
+          "sha256": "1deecd732887a0e019defd9c1ac955fce5b253099195bd23b6889682d7c0928f"
+        },
+        {
+          "path": "dist/color/hex.js",
+          "sha256": "3afcf8941b4d6ad1e613b7d94c26f8965a81239cc0a533912720e65045c99646"
+        },
+        {
+          "path": "dist/color/hsl.js",
+          "sha256": "b6767f0ecac4b46fea44f3c86bddc26335e007363cf5f3bf3eaf0d89f3768d38"
+        },
+        {
+          "path": "dist/color/index.js",
+          "sha256": "b85e469e4d75f419fcf82aa8df4f6ce44e842505af4044404023c312eca5cceb"
+        },
+        {
+          "path": "dist/color/keyword.js",
+          "sha256": "3346e2ffc43741b809712bf7b2340814aa3527867e607eac0c5a5db51985aa26"
+        },
+        {
+          "path": "dist/color/rgb.js",
+          "sha256": "937ffdac1196ae7c05103a15c9f199124c2aa5e32a472613dacf8b3701097e08"
+        },
+        {
+          "path": "dist/methods/adjust.js",
+          "sha256": "cb3d91c1190c97ceb9a4ef6a77b285b9d7eb58e426802c28781f27d62a223d41"
+        },
+        {
+          "path": "dist/methods/adjust_channel.js",
+          "sha256": "cec6acf3e6234427a35beb8ce5bc4374df2b49653d52da2434fb62248d63bc4e"
+        },
+        {
+          "path": "dist/methods/alpha.js",
+          "sha256": "3ca83ccf6deb31fcfdf65326f5fec8a72890e89ed3b122f7d90cc0ae01c3de3e"
+        },
+        {
+          "path": "dist/methods/blue.js",
+          "sha256": "dc3d45bc4c47c9426db0a5b548b9ddfc415361edb89844425267b07490c9e62e"
+        },
+        {
+          "path": "dist/methods/change.js",
+          "sha256": "196dcda5ad7044129a52a457680efae92e86933a9ff814b6b1594d4f7f87e3bf"
+        },
+        {
+          "path": "dist/methods/channel.js",
+          "sha256": "881c6e39067b20ef0204cb730d83bb28d65e69aac6d120ab81b713e2305243ee"
+        },
+        {
+          "path": "dist/methods/complement.js",
+          "sha256": "326431e47ee66201ee5d852ca6e0122d57d73f68f7b5e71770f14aa224cc3370"
+        },
+        {
+          "path": "dist/methods/contrast.js",
+          "sha256": "8b844da44290f015b24739e8616ebd8f987011baa25ff75ae11935fb8261eea4"
+        },
+        {
+          "path": "dist/methods/darken.js",
+          "sha256": "005dda417a76783271cd8149a34f8712465bccc91c17fa6252cea7e766798104"
+        },
+        {
+          "path": "dist/methods/desaturate.js",
+          "sha256": "53df4a264a9523a8d2d2d123bebe596b3dba0e429a288af94efd794911626f97"
+        },
+        {
+          "path": "dist/methods/grayscale.js",
+          "sha256": "debd27ddf6f6c1bed43023961bd4f642dc084b5e9cd2f426ba867ca0d3221afa"
+        },
+        {
+          "path": "dist/methods/green.js",
+          "sha256": "c817f7355ea3f6a4785b7de05efc795d90ba7e779a213d76043cd469c097f78b"
+        },
+        {
+          "path": "dist/methods/hsla.js",
+          "sha256": "eaf454da791cb2c9dea0c78f87e1405b185069bd51aeeba3fbb6313b3de86448"
+        },
+        {
+          "path": "dist/methods/hue.js",
+          "sha256": "f8ef4a07c2e45f0cb8c7d4a81af8d84cf38b2d3379f1dc0790d0d3f80d93a121"
+        },
+        {
+          "path": "dist/methods/index.js",
+          "sha256": "d2b3b1c4681231ce37f75a7f24855ecb2e935abb7cd3d2694f1b28d97158d737"
+        },
+        {
+          "path": "dist/methods/invert.js",
+          "sha256": "35c4f2ab5b97a708c1f77c4a2ab2c9a1d1c6dd88ae9045ecad4de8d2c485a2e4"
+        },
+        {
+          "path": "dist/methods/is_dark.js",
+          "sha256": "3030ad5cb6a200b0875b1d9a2fc6092475fb43916150d05e0f8d843b30ae7381"
+        },
+        {
+          "path": "dist/methods/is_light.js",
+          "sha256": "57814dbb6553fe5b42ffd20d1b4cf5949c5ba9def10a02b4daff1bf0e4b008b2"
+        },
+        {
+          "path": "dist/methods/is_transparent.js",
+          "sha256": "ffa4118274f08e22f1f910749f283da4ebb185fb49fc44904eff251136f00793"
+        },
+        {
+          "path": "dist/methods/is_valid.js",
+          "sha256": "7fc3e540240030cb8bdaff218d064cf804f7dd9d5d540042c5c86dc3fa7d305e"
+        },
+        {
+          "path": "dist/methods/lighten.js",
+          "sha256": "293ec9233c7be19f9a2555663e9d62b1157e5bca12280d5782a218fcd608cca6"
+        },
+        {
+          "path": "dist/methods/lightness.js",
+          "sha256": "2c904b9aaf2a482a05989f071e95ba9ec681f671b383cc69c02641b8f8326697"
+        },
+        {
+          "path": "dist/methods/luminance.js",
+          "sha256": "3cfbcdfd73cb2e05176828815cfc14a88ef3d8bf467d664060c2d32e7e931a92"
+        },
+        {
+          "path": "dist/methods/mix.js",
+          "sha256": "febb7516c6eb170a769d36d5e2702366b5a787a3e695ca6fa5f1b702049c60ac"
+        },
+        {
+          "path": "dist/methods/opacify.js",
+          "sha256": "a6b8d7795bf4a8acccd013fe1374fb59482a6e139108bdf34277359dfff81023"
+        },
+        {
+          "path": "dist/methods/red.js",
+          "sha256": "734813498828df233c3fdf5c6ca6fb3d44a2adfb83bb79edf95bb5489f76a379"
+        },
+        {
+          "path": "dist/methods/rgba.js",
+          "sha256": "02d31f143e8af9b8a8d0c8ae61399f49b1a4af6531be2932e0fa134702734a11"
+        },
+        {
+          "path": "dist/methods/saturate.js",
+          "sha256": "86234aeaef028981bd35bbd2bde3f5378677ad57d7f8c80d6b34a9ce98fc77b2"
+        },
+        {
+          "path": "dist/methods/saturation.js",
+          "sha256": "d8a521b5d4a847b024486c50ad12404fd5d7f64a62097e9494585c71095fa4b1"
+        },
+        {
+          "path": "dist/methods/scale.js",
+          "sha256": "de1e3f16d2efbe9f8989e71659730716dd4e9c2b76474b8bde2359a78c606f33"
+        },
+        {
+          "path": "dist/methods/to_hex.js",
+          "sha256": "73d844164783c94e6438e84f726aca1fc68974d172b5123bef98919f498c32e3"
+        },
+        {
+          "path": "dist/methods/to_hsla.js",
+          "sha256": "907b16b8e0ff81db25c9d31a4b941a5b7845b2a5281012cbb9647baba47f4737"
+        },
+        {
+          "path": "dist/methods/to_keyword.js",
+          "sha256": "f803a90a3f0fac1669797a2fd3987dc430f94e6b535dabcbc483c6ca645c07a7"
+        },
+        {
+          "path": "dist/methods/to_rgba.js",
+          "sha256": "4b2aa4005f3e270c93461ea84c7e82dcf740d361ca5b6dfff00b11e39f1391d0"
+        },
+        {
+          "path": "dist/methods/transparentize.js",
+          "sha256": "b12a06e8c3ee1d3032d698583a052c507df8ae694b5cb33f389a64a94bb8919f"
+        },
+        {
+          "path": "dist/utils/channel.js",
+          "sha256": "6a4c576f50c8bfc211550291865f159c21dee1745b94a14542ec0f39c2d47146"
+        },
+        {
+          "path": "dist/utils/index.js",
+          "sha256": "45efcba4f74f17caac6e8432e6f00c2462c41ead6a9b130a1f5da8bdaec7bc19"
+        },
+        {
+          "path": "dist/utils/lang.js",
+          "sha256": "e5adf6c36fe79f2783e00f054ec830947734ecad28b2770749b622d9626c84f6"
+        },
+        {
+          "path": "dist/utils/unit.js",
+          "sha256": "d3716f0c22219657135b217f23ded2c708ba3e944f252217af3d4e2128f5576d"
         }
       ]
     }

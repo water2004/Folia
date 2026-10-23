@@ -1,6 +1,27 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-23, configuration primitives verified
+## Current checkpoint - 2026-10-23, theme oracle established; native work in progress
+
+- User authorizes public fork zhao0349/Folia pushes and updating existing
+  water2004/Folia PR #1 only after verification. DO NOT merge.
+- Working branch `codex/mermaid-cpp-themes`, based on delivery head `26d1b9f5`.
+  Baseline Windows CI 39892083467 passed. Delivery branch remains
+  `feat/mermaid-cpp-port` until this batch is verified.
+- Selected boundary is independent default/dark theme-variable derivation.
+  Official oracle has 1,218 theme observations and 2,295 Khroma observations;
+  source-map-verified official theme bodies run before native implementation.
+  Khroma 2.1.0 source/distribution hashes and ER constants are pinned.
+- Preserve constructor/update/override/update/final shallow object-override
+  order. Default constructor already calls updateColors; dark does not.
+  ConfigValue output omits undefined fields, as JSON serialization does.
+  Native input is an owned mapping with no prototype/method replacement or
+  mutable Khroma channel objects; THEME_COLOR_LIMIT is bounded to integer 0..12.
+- Next: implement native color primitives, then default/dark derivation with
+  fixture-driven tests; run Windows standalone/integrated Debug/Release CI.
+  No native build or application integration is claimed at this checkpoint.
+  No live agents/builds. Local MSVC/CMake remain unavailable.
+
+## Configuration primitives verified (historical)
 
 - User explicitly authorizes this batch's public fork push and verified update
   of https://github.com/water2004/Folia/pull/1. Keep it OPEN; DO NOT merge.

@@ -11,6 +11,9 @@ importers:
       '@mermaid-js/parser':
         specifier: 2.0.1
         version: 2.0.1
+      acorn:
+        specifier: 8.15.0
+        version: 8.15.0
       ajv:
         specifier: 8.18.0
         version: 8.18.0
@@ -26,6 +29,9 @@ importers:
       jsdom:
         specifier: 26.1.0
         version: 26.1.0
+      khroma:
+        specifier: 2.1.0
+        version: 2.1.0
       langium:
         specifier: 4.4.0
         version: 4.4.0
@@ -198,6 +204,11 @@ packages:
 
   '@upsetjs/venn.js@2.0.0':
     resolution: {integrity: sha512-WbBhLrooyePuQ1VZxrJjtLvTc4NVfpOyKx0sKqioq9bX1C1m7Jgykkn8gLrtwumBioXIqam8DLxp88Adbue6Hw==}
+
+  acorn@8.15.0:
+    resolution: {integrity: sha512-NZyJarBfL7nWwIq+FDL6Zp/yHEhePMNnnJ0y3qfieCrmNvYct8uvtiV41UvlSe6apAfk0fY1FbWx+NwfmpvtTg==}
+    engines: {node: '>=0.4.0'}
+    hasBin: true
 
   agent-base@7.1.4:
     resolution: {integrity: sha512-MnA+YT8fwfJPgBx3m60MNqakm30XOkyIoH1y6huTQvC0PwZG7ki8NacLBcrPbNoo8vEZy7Jpuk7+jMO+CUovTQ==}
@@ -844,6 +855,8 @@ snapshots:
     optionalDependencies:
       d3-selection: 3.0.0
       d3-transition: 3.0.1(d3-selection@3.0.0)
+
+  acorn@8.15.0: {}
 
   agent-base@7.1.4: {}
 
