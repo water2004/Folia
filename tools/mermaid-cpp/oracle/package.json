@@ -13,6 +13,7 @@
     "jsdom": "26.1.0",
     "khroma": "2.1.0",
     "langium": "4.4.0",
-    "mermaid": "12.2.0"
+    "mermaid": "12.2.0",
+    "playwright-core": "1.62.1"
   }
 }

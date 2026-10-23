@@ -25,8 +25,8 @@ struct FlowchartRanks {
 // zero boxes for absent labels. No guessed text widths or text measurement.
 // This consumes an already adapted graph: links to nonempty groups need the
 // separate Mermaid cluster-endpoint adapter and currently fail explicitly.
-// Subgraph direction/extraction, node ordering, coordinates and SVG are later
-// stages. The source graph is never mutated; failure returns no partial result.
+// Subgraph direction/extraction is a separate adapter. layout_flowchart below
+// continues with ordering/coordinates. Failure returns no partial result.
 std::expected<FlowchartRanks, std::string> rank_flowchart(
     const FlowchartInput& input, std::span<const FlowchartEdgeLabelSize> labels);
 

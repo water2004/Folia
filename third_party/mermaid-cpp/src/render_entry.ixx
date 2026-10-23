@@ -1,16 +1,17 @@
-// Folia's native Packet/Pie source-to-render boundary. Mermaid 12.2.0, MIT.
+// Folia's native source-to-render boundary. Mermaid 12.2.0, MIT.
 export module folia.mermaid.render_entry;
 import std;
 export import folia.mermaid.frontend;
 export import folia.mermaid.packet_svg;
 export import folia.mermaid.pie_svg;
+export import folia.mermaid.flowchart_svg;
 
 export namespace folia::mermaid {
 struct PacketRenderInput { PacketLayout layout; PacketSvgTheme theme; };
 struct PieRenderInput { PieDocument document; PieSvgTheme theme; PieSvgConfig config; };
 struct NativeDiagram {
     PreparedDiagram prepared;
-    std::variant<PacketRenderInput, PieRenderInput> content;
+    std::variant<PacketRenderInput, PieRenderInput, FlowchartRenderInput> content;
 };
 struct DiagramSvg { std::string svg; double width{}, height{}; };
 
@@ -25,8 +26,10 @@ std::expected<NativeDiagram, std::string> prepare_native_diagram(
 std::expected<std::u16string, std::string> diagram_display_text(std::u16string_view);
 
 // Measurement uses the selected Pie font and decoded final legend/title text.
+// Flowchart consumes node/edge label metrics and requires Dagre/classic config.
 // Packet does not need measured widths. Output includes plain accessibility
 // metadata; no DOM id or event bindings are required by Folia's SVG consumer.
 std::expected<DiagramSvg, std::string> render_native_diagram(
-    const NativeDiagram&, const PieMeasurements& measurements = {});
+    const NativeDiagram&, const PieMeasurements& measurements = {},
+    const FlowchartMeasurements& flowchart_measurements = {});
 }

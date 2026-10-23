@@ -8,6 +8,39 @@ using namespace boost::ut;
 using namespace folia::platform;
 using namespace folia::mermaid;
 suite mermaid_measurement = [] {
+    "mermaid_flowchart_measured_source_to_svg"_test=[] {
+        auto session=ConfigSession::create();expect(fatal(session.has_value()));
+        const std::vector<std::pair<std::string,std::u16string>> cases={
+            {"chain",u"flowchart TD\nA[Start] --> B[Finish]"},
+            {"decision",u"flowchart TD\nA[Read] --> B{Valid?}\nB -->|yes| C(Done)\nB -->|no| A"},
+            {"horizontal",u"flowchart LR\nA((Input)) --> B[Process]\nA --> C[Store]\nB --> D(Output)\nC --> D"},
+            {"reverse",u"flowchart RL\nA[First] -->|next| B[Second]"},
+            {"upward",u"flowchart BT\nA[First] --> B[Second]"},
+            {"parallel",u"flowchart TD\nA[Source] -->|one| B[Target]\nA -. two .-> B"},
+            {"unicode",u"flowchart LR\nA[\u4e2d\u6587] --> B[Caf\u00e9 \U0001f600]"},
+        };
+        for(const auto theme:{u"default",u"dark"}) for(const auto& [name,body]:cases) {
+            const auto source=std::u16string(u"---\nconfig:\n  theme: ")+theme+
+                u"\n  look: classic\n  layout: dagre\n  fontFamily: Arial\n  themeVariables: {fontFamily: Arial}\n  flowchart: {htmlLabels: true}\n---\n"+body;
+            const auto svg=render_mermaid(source,*session);
+            expect(svg.has_value())<<name<<(svg?"":svg.error());
+            if(!svg) continue;
+            expect(svg->width>0 && svg->height>0);
+            expect(svg->svg.find("font-family=\"Arial\"")!=std::string::npos);
+            expect(svg->svg.find("class=\"flowchart-link\"")!=std::string::npos);
+            if(auto directory=std::getenv("FOLIA_MERMAID_SVG_OUTPUT")) {
+                std::filesystem::create_directories(directory);
+                const auto suffix=theme==std::u16string_view(u"dark")?"dark":"default";
+                std::ofstream out(std::filesystem::path(directory)/("flowchart-"+name+"-"+suffix+".svg"),std::ios::binary);
+                out<<svg->svg;expect(out.good());
+            }
+        }
+        const std::u16string prefix=u"---\nconfig: {theme: default, look: classic, layout: dagre, fontFamily: Arial}\n---\n";
+        expect(!render_mermaid(prefix+u"flowchart TD\nA-->",*session));
+        expect(!render_mermaid(prefix+u"flowchart TD\nsubgraph G\nA-->B\nend",*session));
+        expect(!render_mermaid(prefix+u"flowchart TD\nA-->A",*session));
+        expect(render_mermaid(prefix+u"flowchart TD\nA-->B",*session).has_value());
+    };
     "mermaid_source_to_svg_resolves_fonts_and_measures_display_text"_test=[] {
         MermaidMeasurer measurer;
         auto family=measurer.resolve_family(u"'Folia Missing Family 792743', Arial, sans-serif");

@@ -149,6 +149,26 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
     try {
         const auto& effective=prepared->effective_config;
         const auto& theme=member(effective,u"themeVariables");
+        if(prepared->type==u"flowchart" || prepared->type==u"flowchart-v2") {
+            auto graph=prepare_flowchart(source,session,FlowchartLimits{.frontend=limits});
+            if(!graph) return std::unexpected(graph.error());
+            FlowchartSvgTheme style;
+            const auto& config=member(effective,u"flowchart");
+            const auto look=text(member(effective,u"look"));
+            if(look!=u"classic") return std::unexpected("Native Flowchart SVG currently requires classic look");
+            if(text(member(effective,u"layout"))!=u"dagre") return std::unexpected("Native Flowchart requires Dagre layout");
+            style.neo=look==u"neo";
+            style.font_family=text(member(theme,u"fontFamily"));style.font_size=size(member(theme,u"fontSize"));
+            style.minimum_label_width=number(member(config,u"minNodeWidth"));
+            style.wrapping_width=number(member(config,u"wrappingWidth"));style.padding=number(member(config,u"diagramPadding"));
+            if(auto value=theme.find(u"radius")) style.radius=size(*value);
+            const auto html=config.find(u"htmlLabels");
+            style.html_label_spacing=html && html->kind!=ConfigKind::null?boolean(*html):boolean(member(effective,u"htmlLabels"));
+            style.fill=narrow(text(member(theme,u"mainBkg")));style.border=narrow(text(member(theme,u"nodeBorder")));
+            style.text=narrow(text(member(theme,u"nodeTextColor")));style.line=narrow(text(member(theme,u"lineColor")));
+            style.label_background=narrow(text(member(theme,u"edgeLabelBackground")));
+            return NativeDiagram{std::move(*prepared),FlowchartRenderInput{std::move(*graph),std::move(style)}};
+        }
         if (prepared->type==u"packet") {
             auto document=parse_packet(encode_source(prepared->code.cleaned));
             if (!document) return std::unexpected(error_text(document.error().message));
@@ -214,8 +234,13 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
     } catch(const std::runtime_error& e) { return std::unexpected(e.what()); }
 }
 
-std::expected<DiagramSvg,std::string> render_native_diagram(const NativeDiagram& input,const PieMeasurements& widths) {
+std::expected<DiagramSvg,std::string> render_native_diagram(const NativeDiagram& input,const PieMeasurements& widths,const FlowchartMeasurements& flowchart_measurements) {
     return std::visit([&](const auto& content)->std::expected<DiagramSvg,std::string> {
+        if constexpr(std::is_same_v<std::decay_t<decltype(content)>,FlowchartRenderInput>) {
+            auto result=render_flowchart_svg(content,flowchart_measurements);
+            if(!result) return std::unexpected(result.error());
+            return DiagramSvg{std::move(result->svg),result->width,result->height};
+        } else {
         auto result=[&] {
             if constexpr(std::is_same_v<std::decay_t<decltype(content)>,PacketRenderInput>)
                 return render_packet_svg(content.layout,content.theme);
@@ -238,6 +263,7 @@ std::expected<DiagramSvg,std::string> render_native_diagram(const NativeDiagram&
             decode_svg_text(result->svg);
             return DiagramSvg{std::move(result->svg),result->width,result->height};
         } catch(const std::runtime_error& e) { return std::unexpected(e.what()); }
+        }
     },input.content);
 }
 }

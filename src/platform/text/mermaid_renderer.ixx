@@ -43,6 +43,25 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
         if(!title) return std::unexpected(title.error());
         widths.title_width=*title;
     }
-    return render_native_diagram(*input,widths);
+    FlowchartMeasurements flowchart_measurements;
+    if(auto flow=std::get_if<FlowchartRenderInput>(&input->content)) {
+        auto measure=[&](std::u16string_view text)->std::expected<FlowchartTextBox,std::string> {
+            const auto size=flow->theme.font_size;
+            if(!std::isfinite(size)||size<=0||size>std::numeric_limits<float>::max())
+                return std::unexpected("Invalid Mermaid font size");
+            auto metrics=measurer.measure(text,{flow->theme.font_family,static_cast<float>(size)});
+            if(!metrics) return std::unexpected(metrics.error());
+            return FlowchartTextBox{metrics->bounds_width,metrics->line_height,metrics->baseline};
+        };
+        for(const auto& node:flow->document.nodes) {
+            auto box=measure(node.label);if(!box) return std::unexpected(box.error());
+            flowchart_measurements.nodes.push_back(*box);
+        }
+        for(const auto& edge:flow->document.edges) {
+            auto box=measure(edge.label);if(!box) return std::unexpected(box.error());
+            flowchart_measurements.edges.push_back(*box);
+        }
+    }
+    return render_native_diagram(*input,widths,flowchart_measurements);
 }
 }

@@ -1,0 +1,62 @@
+// Real browser observations from the locked Mermaid bundle. No estimated boxes.
+import assert from 'node:assert/strict';
+import {mkdirSync,writeFileSync,readFileSync} from 'node:fs';
+import {resolve} from 'node:path';
+import {pathToFileURL} from 'node:url';
+import {chromium} from './oracle/node_modules/playwright-core/index.mjs';
+import {createHash} from 'node:crypto';
+const lock=JSON.parse(readFileSync('docs/mermaid-cpp/source-lock.json'));
+for(const file of lock.files) assert.equal(createHash('sha256').update(readFileSync('.reference/mermaid-js/'+file.path)).digest('hex'),file.sha256,file.path);
+for(const file of lock.flowchartCurve.files) assert.equal(createHash('sha256').update(readFileSync('tools/mermaid-cpp/oracle/node_modules/d3-shape/'+file.path)).digest('hex'),file.sha256,file.path);
+const directory=resolve(process.argv[2]??'build/mermaid-cpp/flowchart-browser');
+mkdirSync(directory,{recursive:true});
+const cases=[
+  ['chain','flowchart TD\nA[Start] --> B[Finish]'],
+  ['decision','flowchart TD\nA[Read] --> B{Valid?}\nB -->|yes| C(Done)\nB -->|no| A'],
+  ['horizontal','flowchart LR\nA((Input)) --> B[Process]\nA --> C[Store]\nB --> D(Output)\nC --> D'],
+  ['reverse','flowchart RL\nA[First] -->|next| B[Second]'],
+  ['upward','flowchart BT\nA[First] --> B[Second]'],
+  ['parallel','flowchart TD\nA[Source] -->|one| B[Target]\nA -. two .-> B'],
+  ['unicode','flowchart LR\nA[中文] --> B[Café 😀]'],
+];
+const url=pathToFileURL(resolve('tools/mermaid-cpp/oracle/node_modules/mermaid/dist/mermaid.esm.mjs')).href;
+assert.equal(JSON.parse(readFileSync('tools/mermaid-cpp/oracle/node_modules/mermaid/package.json')).version,'12.2.0');
+const html=`<!doctype html><meta charset="utf-8"><body><script type="module">
+const {default:mermaid}=await import(${JSON.stringify(url)});
+try {
+const result=[];
+for(const [name,source] of ${JSON.stringify(cases)}) {
+ for(const theme of ['default','dark']) {
+  mermaid.initialize({startOnLoad:false,theme,look:'classic',layout:'dagre',fontFamily:'Arial',themeVariables:{fontFamily:'Arial'},flowchart:{htmlLabels:true}});
+  const {svg}=await mermaid.render('probe'+result.length,source);
+  const host=document.createElement('div');host.innerHTML=svg;document.body.append(host);
+  const nodes=[...host.querySelectorAll('g.node')].map(n=>{
+   const shape=n.querySelector('.label-container');const b=shape.getBBox();const label=n.querySelector('.label');
+   const lb=label.getBBox();
+   return {id:n.id,transform:n.getAttribute('transform'),width:b.width,height:b.height,label:label.textContent,labelWidth:lb.width,labelHeight:lb.height,
+    fill:getComputedStyle(shape).fill,stroke:getComputedStyle(shape).stroke};
+  });
+  const edges=[...host.querySelectorAll('.flowchart-link')].map(p=>{
+    const length=p.getTotalLength();return {length,stroke:getComputedStyle(p).stroke,points:Array.from({length:7},(_,i)=>{const a=p.getPointAtLength(length*i/6);return {x:a.x,y:a.y};})};
+  });
+  result.push({name:name+'-'+theme,source,theme,svg,nodes,edges});host.remove();
+ }
+}
+document.body.replaceChildren(Object.assign(document.createElement('pre'),{id:'result',textContent:encodeURIComponent(JSON.stringify(result))}));
+} catch(e) {document.body.innerHTML='<pre id="error"></pre>';document.querySelector('pre').textContent=String(e.stack);}
+</script>`;
+const file=resolve(directory,'probe.html');writeFileSync(file,html);
+const browser=process.env.FOLIA_BROWSER??'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe';
+const instance=await chromium.launch({executablePath:browser,headless:true,args:['--allow-file-access-from-files']});
+let rows;
+try {
+ const page=await instance.newPage({viewport:{width:1600,height:1200}});
+ await page.goto(pathToFileURL(file).href);
+ await page.waitForSelector('pre#result,pre#error',{timeout:60000});
+ const error=await page.locator('pre#error').count();assert.equal(error,0,error?await page.locator('pre#error').textContent():'');
+ rows=JSON.parse(decodeURIComponent(await page.locator('pre#result').textContent()));
+ assert.equal(rows.length,14);
+} finally {await instance.close();}
+writeFileSync(resolve(directory,'original.json'),JSON.stringify(rows,null,2));
+for(const row of rows) {assert(row.nodes.length>1);assert(row.edges.length>0);writeFileSync(resolve(directory,row.name+'.svg'),row.svg);}
+console.log(`Measured ${rows.length} official Flowchart SVGs in ${directory}`);

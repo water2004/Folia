@@ -399,6 +399,50 @@
     {
       "path": "packages/mermaid/src/rendering-util/layout-algorithms/dagre/mermaid-graphlib.js",
       "sha256": "8eff208d3b11645dea47ffcd6e7ad7bfd3b0032a3612b9ba3506633510497a2d"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/squareRect.ts",
+      "sha256": "2456ebbc205f1c73fcaf34e63d055a18b17ae71fbce2b1f4ff08e910d8cc2dfd"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/roundedRect.ts",
+      "sha256": "ec467557e20d023100fe6be03f3d478b619d5c5b9b0f283f632d90a14593dc10"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/drawRect.ts",
+      "sha256": "1d03397624d31f5a244f32260fd8d109dd41751f1970858feb453f09a95d849e"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/circle.ts",
+      "sha256": "0583cce7bef770d20cd108c620ef546ae2cd423da2ebd913a93e6546ff28a167"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/question.ts",
+      "sha256": "c662ad9199b6de3b38580bc59adc15c8e0d05162cae777dcc3c605fbaaa96b06"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/util.ts",
+      "sha256": "bc63b16d067e4dd1c429e9cf249f4d73260819696de122dff0ce16b12db321c1"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/edges.js",
+      "sha256": "8fee7300ea0bffd008f5d2c12a05e85f5ea8bc22a9855d4d2e2b6c0e6c92a33a"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/markers.js",
+      "sha256": "10af49778781a739f213b2f7f4387df2c70597c00bee23d92f705c4a41909ddc"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/createText.ts",
+      "sha256": "8a26f2b01b952d2044184d5ad7a4122d37c9b7ab781400fd3bb7ee37c5419865"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/setupViewPortForSVG.ts",
+      "sha256": "8242d3e2112f371b8551c2aeb09680cdc608b8452c6eb82cbd5a2e6d3f465fd4"
+    },
+    {
+      "path": "packages/mermaid/src/utils/lineWithOffset.ts",
+      "sha256": "e09a06c66e1e35e29390fb68d08a0df459cf1dcecfe5d5b6466e89b30a9935d5"
     }
   ],
   "packages": [
@@ -1081,6 +1125,20 @@
       {
         "path": "src/dagre/position/bk.js",
         "sha256": "d37012c11a27f1da050798792854e4a39102b400dec46d8af6b84975690680e7"
+      }
+    ]
+  },
+  "flowchartCurve": {
+    "package": "d3-shape",
+    "version": "3.2.0",
+    "files": [
+      {
+        "path": "src/curve/basis.js",
+        "sha256": "2b75b71399e8d92d021e28bb2b4f7d6c41e3d2dff89f69c877ea7f664698086b"
+      },
+      {
+        "path": "LICENSE",
+        "sha256": "faa682e3e430941f958d26180458f5934a62f58dac4d70ccdd15608c15d0f884"
       }
     ]
   }

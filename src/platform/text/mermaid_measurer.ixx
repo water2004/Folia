@@ -22,6 +22,8 @@ struct MermaidTextMetrics {
     // Chromium's raster-hinted SVG bounding box. See compare-text-probe.mjs
     // for measured corpus-specific error ceilings; no per-string correction.
     double bounds_width{};
+    double line_height{};
+    double baseline{};
 };
 
 // Measures UTF-16 after SVG's default whitespace processing (collapse ASCII
@@ -134,7 +136,10 @@ public:
             std::max(0.0, static_cast<double>(ink.left));
         if (!std::isfinite(advance) || !std::isfinite(ink_width) || advance < 0 || ink_width < 0)
             return std::unexpected("Invalid DirectWrite metrics");
-        return MermaidTextMetrics{advance, ink_width, bounds_width};
+        DWRITE_LINE_METRICS line{};UINT32 line_count{};
+        if (FAILED(layout->GetLineMetrics(&line,1,&line_count)) || line_count!=1)
+            return std::unexpected("DirectWrite single-line metrics query failed");
+        return MermaidTextMetrics{advance, ink_width, bounds_width,line.height,line.baseline};
     }
 };
 }

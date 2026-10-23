@@ -6,6 +6,7 @@ Mermaid-derived code is covered by the MIT license in `LICENSE`.
 
 Pie geometry specializes the unpadded, square-cornered paths used by Mermaid
 from d3-shape (`pie.js`, `arc.js`, `math.js`, `path.js`) and d3-path (`path.js`).
+Flowchart's spline writer follows d3-shape `src/curve/basis.js`.
 Source hashes and versions are recorded in `docs/mermaid-cpp/source-lock.json`.
 The complete ISC notice is also preserved in `src/pie_geometry.cpp`.
 
@@ -49,11 +50,12 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FO
 DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-## Dagre graph ranking
+## Dagre graph layout
 
 The native rank pipeline follows dagre-d3-es 7.0.14's Dagre and Graphlib
 algorithms, including DFS cycle removal, nesting constraints, feasible-tree
-construction and network simplex. Its MIT notices are reproduced in
+construction, network simplex, edge normalization, compound crossing reduction
+and Brandes-Kopf coordinate assignment. Its MIT notices are reproduced in
 `DAGRE-LICENSE`; the original source hashes are in
 `docs/mermaid-cpp/source-lock.json`. Dagre's JavaScript package is test-only.
 

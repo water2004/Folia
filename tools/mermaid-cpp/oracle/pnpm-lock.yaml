@@ -41,6 +41,9 @@ importers:
       mermaid:
         specifier: 12.2.0
         version: 12.2.0
+      playwright-core:
+        specifier: 1.62.1
+        version: 1.62.1
 
 packages:
 
@@ -544,6 +547,11 @@ packages:
 
   path-data-parser@0.1.0:
     resolution: {integrity: sha512-NOnmBpt5Y2RWbuv0LMzsayp3lVylAHLPUTut412ZA3l+C4uw4ZVkQbjShYCQ8TCpUMdPapr4YjUqLYD6v68j+w==}
+
+  playwright-core@1.62.1:
+    resolution: {integrity: sha512-wPYSwEBJY9GHraISXqyqtx0na0LpO3XEX7jNDhntbex7tzUS7kLnZsOlFruFJB4Hi/rhDMjXGqHewDZ68nYZVw==}
+    engines: {node: '>=20'}
+    hasBin: true
 
   points-on-curve@0.2.0:
     resolution: {integrity: sha512-0mYKnYYe9ZcqMCWhUjItv/oHjvgEsfKvnUTg8sAtnHr3GVy7rGkXCb6d5cSyqrWqL4k81b9CPg3urd+T7aop3A==}
@@ -1251,6 +1259,8 @@ snapshots:
       entities: 6.0.1
 
   path-data-parser@0.1.0: {}
+
+  playwright-core@1.62.1: {}
 
   points-on-curve@0.2.0: {}
 

@@ -57,9 +57,30 @@ edges are aggregated only inside the rank optimizer. The original graph stays
 unchanged. The default Flowchart node/edge/depth limits also apply to this API.
 The original dagre-d3-es 7.0.14 rank pipeline is hash-locked and observed directly.
 
-Flowchart coordinates, measured SVG and application integration remain pending.
-Next are edge normalization, crossing reduction and coordinate assignment, then
-Mermaid cluster-endpoint/direction adaptation and measured rendering. The rank
+`layout_flowchart` continues on the same private ranked graph through long-edge
+normalization, dummy parenting, compound borders, crossing reduction, BK
+coordinates, self-loop placement, direction transforms and restored edge paths.
+It accepts explicit node/edge boxes and returns owned node boxes and edge paths
+in input order. The full original Dagre oracle covers the same representative
+diagrams, including compound groups and all four directions.
+
+The first measured Flowchart SVG stage supports explicit `layout: dagre` and
+`look: classic`, default/dark themes, square/rounded/diamond/circle nodes,
+single-line plain labels, basis/linear paths, point/plain arrow ends, and
+normal/thick/dotted/invisible links. Real DirectWrite widths, line heights and
+baselines drive rendering; the plain HTML-label spacing mode retains Mermaid's
+CSS line height and minimum node width while emitting native SVG text. There is
+no browser runtime, HTML execution or character-count measurement in production.
+The same-host browser check compares actual official/native node boxes,
+coordinates, text containment, colors and sampled edge geometry. Native font
+rasterization can differ slightly from Chromium; geometric tolerances are 1.5
+SVG units for boxes/coordinates and 3 for sampled edge paths/lengths.
+
+Mermaid cluster-endpoint/direction adaptation and complete Flowchart rendering
+remain pending. The initial SVG entry explicitly rejects groups, self loops,
+titles, custom styles, rich/multiline/wrapped labels, other classic shapes and
+markers, and non-classic looks; it does not silently drop these features.
+The complete existing family requirements remain unchanged. The rank/layout
 API rejects links to nonempty group nodes until that adapter is available;
 subgraph directions do not independently lay out clusters at this boundary.
 HTML/entity/Markdown label adaptation,
@@ -71,7 +92,7 @@ subgraphs and the shared frontend source budget. Error offsets refer to prepared
 UTF-16 text. The representative oracle compares the original parser/DB's layout
 nodes and edges, metadata, styles and configuration with the native result.
 
-`folia.platform.mermaid_renderer::render_mermaid` is an opt-in Packet/Pie
+`folia.platform.mermaid_renderer::render_mermaid` is an opt-in Packet/Pie/Flowchart
 source-to-SVG entry. It composes the shared frontend, family configuration,
 default/dark theme values, parsing, layout, font selection, real DirectWrite
 measurement and SVG output. `folia.mermaid.render_entry` exposes the owned
