@@ -45,10 +45,11 @@ suite mermaid_measurement = [] {
             }
         }
         const std::u16string prefix=u"---\nconfig: {theme: default, look: classic, layout: dagre, fontFamily: Arial}\n---\n";
-        expect(!render_mermaid(prefix+u"flowchart TD\nA-->",*session));
-        expect(!render_mermaid(prefix+u"flowchart TD\nsubgraph G\nA-->B\nend",*session));
-        expect(!render_mermaid(prefix+u"flowchart TD\nA-->A",*session));
-        expect(render_mermaid(prefix+u"flowchart TD\nA-->B",*session).has_value());
+        expect(!render_mermaid(prefix+u"flowchart TD\nA-->",*session))<<"unfinished edge";
+        expect(!render_mermaid(prefix+u"flowchart TD\nsubgraph G\nA-->B\nend",*session))<<"cluster adapter";
+        expect(!render_mermaid(prefix+u"flowchart TD\nA-->A",*session))<<"self-loop adapter";
+        const auto recovered=render_mermaid(prefix+u"flowchart TD\nA-->B",*session);
+        expect(recovered.has_value())<<"request after errors"<<(recovered?"":recovered.error());
     };
     "mermaid_source_to_svg_resolves_fonts_and_measures_display_text"_test=[] {
         MermaidMeasurer measurer;
