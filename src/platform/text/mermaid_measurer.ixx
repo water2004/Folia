@@ -30,6 +30,48 @@ struct MermaidTextMetrics {
 // is returned on failure. Sizes and results are 96-DPI SVG user units.
 class MermaidMeasurer {
 public:
+    // Resolve the configured CSS family list once, then share that exact family
+    // between DirectWrite measurement and SVG emission. Generic families have
+    // explicit Windows mappings; missing named candidates advance in list order.
+    std::expected<std::u16string, std::string> resolve_family(std::u16string_view list) const {
+        using Microsoft::WRL::ComPtr;
+        ComPtr<IDWriteFactory> factory;
+        if (FAILED(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory),
+            reinterpret_cast<IUnknown**>(factory.GetAddressOf()))))
+            return std::unexpected("DirectWrite factory creation failed");
+        ComPtr<IDWriteFontCollection> fonts;
+        if (FAILED(factory->GetSystemFontCollection(&fonts)))
+            return std::unexpected("DirectWrite font collection failed");
+        std::size_t pos=0;
+        while (pos<list.size()) {
+            std::u16string candidate;
+            char16_t quote=0;
+            while (pos<list.size()) {
+                auto c=list[pos++];
+                if (c==u'\0') return std::unexpected("Invalid font family list");
+                if (quote) { if(c==quote) quote=0; else candidate+=c; }
+                else if(c==u'\'' || c==u'"') quote=c;
+                else if(c==u',') break;
+                else candidate+=c;
+            }
+            if (quote) return std::unexpected("Unclosed font family quote");
+            auto first=candidate.find_first_not_of(u" \t\r\n");
+            if(first==candidate.npos) continue;
+            candidate=candidate.substr(first,candidate.find_last_not_of(u" \t\r\n")-first+1);
+            auto lower=candidate;
+            for(auto& c:lower) if(c>=u'A' && c<=u'Z') c+=u'a'-u'A';
+            if(lower==u"sans-serif") candidate=u"Arial";
+            else if(lower==u"serif") candidate=u"Times New Roman";
+            else if(lower==u"monospace") candidate=u"Courier New";
+            else if(lower==u"system-ui") candidate=u"Segoe UI";
+            std::wstring family(candidate.begin(),candidate.end());
+            UINT32 index{}; BOOL exists{};
+            if(FAILED(fonts->FindFamilyName(family.c_str(),&index,&exists)))
+                return std::unexpected("DirectWrite family lookup failed");
+            if(exists) return candidate;
+        }
+        return std::unexpected("No configured Mermaid font is installed");
+    }
     std::expected<MermaidTextMetrics, std::string> measure(
         std::u16string_view source, MermaidFont const& font) const {
         using Microsoft::WRL::ComPtr;

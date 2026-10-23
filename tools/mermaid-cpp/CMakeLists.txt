@@ -117,6 +117,7 @@ if(WIN32 AND MSVC)
         target_sources(folia_mermaid_measurement PUBLIC FILE_SET CXX_MODULES
             BASE_DIRS "${FOLIA_MERMAID_REPO_ROOT}/src/platform/text" FILES
             "${FOLIA_MERMAID_REPO_ROOT}/src/platform/text/mermaid_measurer.ixx"
+            "${FOLIA_MERMAID_REPO_ROOT}/src/platform/text/mermaid_renderer.ixx"
             "${FOLIA_MERMAID_REPO_ROOT}/src/platform/text/mermaid_pie.ixx")
         target_link_libraries(folia_mermaid_measurement PUBLIC folia_mermaid PRIVATE dwrite)
     endif()

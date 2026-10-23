@@ -34,6 +34,34 @@ Cytoscape, date calculations) needs its own source and behavior verification.
 
 ## Current state
 
+`folia.platform.mermaid_renderer::render_mermaid` is an opt-in Packet/Pie
+source-to-SVG entry. It composes the shared frontend, family configuration,
+default/dark theme values, parsing, layout, font selection, real DirectWrite
+measurement and SVG output. `folia.mermaid.render_entry` exposes the owned
+intermediate data and the platform-independent renderer for other hosts.
+Packet uses its own default style in both themes unless themeVariables.packet
+overrides it, matching upstream. Pie consumes the resolved palette and sizes.
+Pie showData comes from the grammar, not a similarly named configuration key.
+
+Family style sizes accept numeric values or px units; paints accept literal
+named/hex/RGB/HSL colors through the existing theme color parser. Fonts are
+selected in configured list order from installed Windows families. Generic
+sans-serif/serif/monospace/system-ui map to Arial/Times New Roman/Courier New/
+Segoe UI. The selected family and sizes are shared by measurement and output.
+Missing fonts, malformed input and unavailable families return explicit errors.
+
+Frontmatter titles precede body titles; plain accessibility title/description
+are retained in SVG. Source entities are protected before parsing and decoded
+for final measurement/output, preserving the DB's original deduplication keys.
+Decimal escapes and quot/amp/apos/lt/gt/nbsp/copy/reg are supported. Other named
+entities require decimal spelling. HTML metadata is explicitly rejected: this
+entry does not emulate browser DOM sanitization or execute HTML, arbitrary CSS,
+URLs, event bindings or host callbacks. Labels remain escaped SVG text.
+
+The application still uses its Rust dependency. Remaining required families
+and the application switch are the next functional work; this opt-in entry is
+not evidence of a completed dependency replacement or WinUI/DPI acceptance.
+
 `folia.mermaid.frontend::prepare_diagram` composes the original shared frontend
 sequence for a configured session: normalize text, extract frontmatter, process
 init/wrap directives, clean-and-merge configuration, remove comments, reset a
@@ -54,7 +82,7 @@ after malformed JSON while keeping independent requests isolated. Existing YAML,
 configuration and theme restrictions still apply. Source is capped before copying;
 delegated operations retain their existing budgets. Preparation does not validate
 family grammar, encode parser entities, run loaders, or produce SVG. Packet/Pie
-renderer entry integration is the next step; the application still uses Rust.
+rendering is performed by the separate native entry described above.
 
 `folia.mermaid.diagram_registry` ports `detectType.ts` and the detector portion
 of `addDiagrams`: 37 official detector modules plus the `error` and `---`
@@ -224,7 +252,7 @@ Folia application integration and shared theme/config resolution remain pending.
 The platform API requires one installed font-family name, not a CSS fallback
 list. Missing families, invalid UTF-16, invalid sizes and DirectWrite failures
 return errors; there is no character-count estimate. Glyph fallback is supplied
-by the OS. SVG output accepts literal named/hex theme colors, not CSS paint
+by the OS. SVG output accepts literal named/hex/RGB/HSL theme colors, not CSS paint
 servers or arbitrary CSS expressions. Text and attributes are escaped as XML.
 The raw family renderer accepts display text; commonDb/MermaidAPI sanitization
 must be supplied by the shared frontend's family adapter, not silently duplicated here.

@@ -1,12 +1,39 @@
 #include "support/folia_test.hpp"
 import folia.platform.mermaid_measurer;
 import folia.platform.mermaid_pie;
+import folia.platform.mermaid_renderer;
 
 namespace {
 using namespace boost::ut;
 using namespace folia::platform;
 using namespace folia::mermaid;
 suite mermaid_measurement = [] {
+    "mermaid_source_to_svg_resolves_fonts_and_measures_display_text"_test=[] {
+        MermaidMeasurer measurer;
+        auto family=measurer.resolve_family(u"'Folia Missing Family 792743', Arial, sans-serif");
+        expect(fatal(family.has_value())); expect(bool(*family==u"Arial"));
+        expect(!measurer.resolve_family(u"'Folia Missing Family 792743'"));
+        auto session=ConfigSession::create(); expect(fatal(session.has_value()));
+        for(const auto theme:{u"default",u"dark"}) {
+            auto source=std::u16string(u"---\ntitle: Drinks\nconfig:\n  theme: ")+theme+
+                u"\n  themeVariables:\n    fontFamily: Arial\n  pie:\n    legendPosition: bottom\n    donutHole: 0.5\n---\npie showData\n\"#quot;Tea#quot; #9733;\":3\n\"Coffee\":2";
+            auto svg=render_mermaid(source,*session);
+            expect(fatal(svg.has_value()))<<(svg?"":svg.error());
+            expect(svg->svg.find("font-family=\"Arial\"")!=std::string::npos);
+            expect(svg->svg.find("#quot;")==std::string::npos);
+            expect(svg->svg.find("[3]")!=std::string::npos);
+            if(auto directory=std::getenv("FOLIA_MERMAID_SVG_OUTPUT")) {
+                std::filesystem::create_directories(directory);
+                std::ofstream out(std::filesystem::path(directory)/(theme==std::u16string_view(u"dark")?"entry-dark.svg":"entry-default.svg"),std::ios::binary);
+                out<<svg->svg; expect(out.good());
+            }
+        }
+        auto packet=render_mermaid(u"---\nconfig: {packet: {showBits: false, bitsPerRow: 8}}\n---\npacket\n+8: \"Data\"",*session);
+        expect(fatal(packet.has_value())); expect(packet->width==258.0);
+        expect(packet->svg.find("class=\"packetByte")==std::string::npos);
+        expect(!render_mermaid(u"pie\n\"Tea\":",*session));
+        expect(render_mermaid(u"pie\n\"Tea\":1",*session).has_value());
+    };
     "mermaid_real_font_measurement_has_no_estimate_fallback"_test=[] {
         MermaidMeasurer measurer;
         auto narrow=measurer.measure(u"iiii",{u"Arial",17});
