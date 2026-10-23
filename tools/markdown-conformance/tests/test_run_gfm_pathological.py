@@ -86,6 +86,19 @@ class PathologicalRunnerTests(unittest.TestCase):
         self.assertEqual(result["skipped_tests"], 20)
         self.assertEqual(result["matched_tests"], 1)
 
+    def test_boost_fatal_exit_minus_one_with_failure_summary_is_test_failure(self) -> None:
+        fatal = subprocess.CompletedProcess(
+            args=[], returncode=0xFFFFFFFF,
+            stdout="Suite unnamed suite\ntests:   21 | 1 failed\nasserts: 3 | 1 failed\n20 tests skipped\n",
+            stderr="",
+        )
+        invoke = Mock(side_effect=[fatal, self.completed(0, 21, 20)])
+        results = runner.run_cases(Path("FoliaGfmPathologicalTests.exe"), 30, invoke, runner.CASES[:2])
+        self.assertEqual(results[0]["status"], "failed")
+        self.assertEqual(results[0]["reason"], "process exited 4294967295")
+        self.assertEqual(results[0]["matched_tests"], 1)
+        self.assertEqual(results[1]["status"], "passed")
+
     def test_real_failure_summary_counts_registered_minus_skipped_and_fails(self) -> None:
         invoke = Mock(side_effect=[
             self.completed(1, 21, 20),
@@ -108,6 +121,35 @@ class PathologicalRunnerTests(unittest.TestCase):
                                   runner.CASES[:1])[0]
         self.assertEqual(result["matched_tests"], 21)
         self.assertEqual(result["status"], "failed")
+
+    def test_all_success_and_failure_suite_summaries_are_aggregated(self) -> None:
+        completed = subprocess.CompletedProcess(
+            args=[], returncode=1,
+            stdout=("Suite 'parser suite': all tests passed (4 asserts in 5 tests); 4 tests skipped\n"
+                    "Suite ownership suite\ntests:   20 | 1 failed\nasserts: 2 | 1 failed\n"
+                    "15 tests skipped\n"),
+            stderr="",
+        )
+        result = runner.run_cases(Path("FoliaGfmPathologicalTests.exe"), 30, Mock(return_value=completed),
+                                  runner.CASES[:1])[0]
+        self.assertEqual(result["registered_tests"], 25)
+        self.assertEqual(result["skipped_tests"], 19)
+        self.assertEqual(result["matched_tests"], 6)
+        self.assertEqual(result["status"], "failed")
+
+    def test_multiple_suites_can_aggregate_to_exactly_one_match(self) -> None:
+        completed = subprocess.CompletedProcess(
+            args=[], returncode=0,
+            stdout=("Suite 'other suite': all tests passed (0 asserts in 5 tests); 5 tests skipped\n"
+                    "Suite 'pathological suite': all tests passed (3 asserts in 21 tests); 20 tests skipped\n"),
+            stderr="",
+        )
+        result = runner.run_cases(Path("FoliaGfmPathologicalTests.exe"), 30, Mock(return_value=completed),
+                                  runner.CASES[:1])[0]
+        self.assertEqual(result["registered_tests"], 26)
+        self.assertEqual(result["skipped_tests"], 25)
+        self.assertEqual(result["matched_tests"], 1)
+        self.assertEqual(result["status"], "passed")
 
 
 if __name__ == "__main__":

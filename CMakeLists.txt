@@ -655,6 +655,7 @@ list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/math/")
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/parsing/test_commonmark\\.cpp$")
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/parsing/test_gfm\\.cpp$")
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/parsing/test_gfm_pathological\\.cpp$")
+list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/parsing/test_inline_cst_ownership\\.cpp$")
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/parsing/test_md4c_reference\\.cpp$")
 target_sources(FoliaTests PRIVATE
     ${FOLIA_TEST_SRC})
@@ -970,7 +971,8 @@ set_tests_properties(FoliaGfmTests PROPERTIES LABELS "gfm;conformance")
 # Full-size generated parser stress cases are isolated in one process per case
 # by the runner so a pathological input cannot hold the ordinary console suite.
 add_executable(FoliaGfmPathologicalTests EXCLUDE_FROM_ALL
-    tests/main.cpp tests/parsing/test_gfm_pathological.cpp)
+    tests/main.cpp tests/parsing/test_gfm_pathological.cpp
+    tests/parsing/test_inline_cst_ownership.cpp)
 target_compile_features(FoliaGfmPathologicalTests PRIVATE cxx_std_23)
 set_target_properties(FoliaGfmPathologicalTests PROPERTIES CXX_MODULE_STD ON)
 target_include_directories(FoliaGfmPathologicalTests PRIVATE tests)
@@ -981,6 +983,9 @@ add_test(NAME FoliaGfmPathologicalTests
         --report "${CMAKE_CURRENT_BINARY_DIR}/gfm-pathological/results.json"
         --timeout-seconds 30)
 set_tests_properties(FoliaGfmPathologicalTests PROPERTIES LABELS "gfm;generated;bounded")
+add_test(NAME FoliaInlineCstOwnershipTests
+    COMMAND FoliaGfmPathologicalTests "*inline_cst_deep_owner_copy_move_and_clear*")
+set_tests_properties(FoliaInlineCstOwnershipTests PROPERTIES LABELS "gfm;generated;bounded" TIMEOUT 30)
 add_test(NAME FoliaGfmPathologicalRunnerTests
     COMMAND python -m unittest discover
         -s "${CMAKE_CURRENT_SOURCE_DIR}/tools/markdown-conformance/tests"

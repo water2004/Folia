@@ -91,12 +91,35 @@ struct InlineCstSemantic {
     std::unordered_map<std::string, std::string> html_attributes;
 };
 
+struct InlineCstNode;
+
+// Vector-compatible owner for the existing CST nodes. Node stays an aggregate;
+// ownership operations, unlike node queries, must handle arbitrary tree depth.
+class InlineCstNodes : public std::vector<InlineCstNode> {
+    using Base = std::vector<InlineCstNode>;
+    void clear_owned_tree() noexcept;
+    void copy_owned_tree(Base const& source);
+public:
+    using Base::Base;
+    InlineCstNodes() = default;
+    InlineCstNodes(InlineCstNodes const& source);
+    InlineCstNodes(InlineCstNodes&& source) noexcept = default;
+    InlineCstNodes(Base const& source);
+    InlineCstNodes(Base&& source) noexcept;
+    InlineCstNodes& operator=(InlineCstNodes const& source);
+    InlineCstNodes& operator=(InlineCstNodes&& source) noexcept;
+    InlineCstNodes& operator=(Base const& source);
+    InlineCstNodes& operator=(Base&& source) noexcept;
+    InlineCstNodes& operator=(std::initializer_list<InlineCstNode> source);
+    ~InlineCstNodes();
+};
+
 struct InlineCstNode {
     NodeId id{};
     InlineCstKind kind = InlineCstKind::Text;
     SourceRange range;
     ParseStatus status = ParseStatus::Complete;
-    std::vector<InlineCstNode> children;
+    InlineCstNodes children;
     // Plain text is by far the most frequent CST node. Delimiter ranges and
     // semantic projection data are therefore allocated only for node kinds
     // that use them instead of widening every text node.
@@ -124,7 +147,83 @@ struct InlineCstNode {
     }
 };
 
-using InlineCstNodes = std::vector<InlineCstNode>;
+inline void InlineCstNodes::clear_owned_tree() noexcept {
+    if (empty()) return;
+    // Ordinary leaves and shallow sibling collections allocate no worklist.
+    if (std::ranges::none_of(*this, [](InlineCstNode const& node) {
+            return std::ranges::any_of(node.children, [](InlineCstNode const& child) { return !child.children.empty(); });
+        })) {
+        Base::clear();
+        return;
+    }
+    std::vector<InlineCstNodes*> frames;
+    frames.push_back(this);
+    while (!frames.empty()) {
+        auto* nodes = frames.back();
+        if (nodes->empty()) { frames.pop_back(); continue; }
+        if (!nodes->back().children.empty()) {
+            frames.push_back(&nodes->back().children);
+        } else {
+            // Its child owner is already empty, so this destruction cannot
+            // recurse. Metadata keeps precisely the usual shared ownership.
+            nodes->pop_back();
+        }
+    }
+}
+
+inline void InlineCstNodes::copy_owned_tree(Base const& source) {
+    if (std::ranges::none_of(source, [](InlineCstNode const& node) {
+            return std::ranges::any_of(node.children, [](InlineCstNode const& child) { return !child.children.empty(); });
+        })) {
+        Base::operator=(source);
+        return;
+    }
+    struct Frame { Base const* source; InlineCstNodes* destination; };
+    std::vector<Frame> frames;
+    frames.push_back({&source, this});
+    while (!frames.empty()) {
+        const auto frame = frames.back();
+        frames.pop_back();
+        frame.destination->reserve(frame.source->size());
+        for (auto const& node : *frame.source) {
+            frame.destination->push_back(InlineCstNode{
+                node.id, node.kind, node.range, node.status, {}, node.delimited, node.semantic});
+        }
+        for (std::size_t index = frame.source->size(); index > 0; --index) {
+            const auto& original = (*frame.source)[index-1];
+            if (!original.children.empty()) frames.push_back({
+                &original.children, &(*frame.destination)[index-1].children});
+        }
+    }
+}
+
+inline InlineCstNodes::InlineCstNodes(InlineCstNodes const& source) { copy_owned_tree(source); }
+inline InlineCstNodes::InlineCstNodes(Base const& source) { copy_owned_tree(source); }
+inline InlineCstNodes::InlineCstNodes(Base&& source) noexcept : Base(std::move(source)) {}
+inline InlineCstNodes::~InlineCstNodes() { clear_owned_tree(); }
+inline InlineCstNodes& InlineCstNodes::operator=(std::initializer_list<InlineCstNode> source) {
+    InlineCstNodes copy(source); swap(copy); return *this;
+}
+inline InlineCstNodes& InlineCstNodes::operator=(InlineCstNodes const& source) {
+    if (this != &source) { InlineCstNodes copy(source); swap(copy); }
+    return *this;
+}
+inline InlineCstNodes& InlineCstNodes::operator=(InlineCstNodes&& source) noexcept {
+    if (this != &source) { clear_owned_tree(); Base::operator=(std::move(source)); }
+    return *this;
+}
+inline InlineCstNodes& InlineCstNodes::operator=(Base const& source) {
+    if (static_cast<Base const*>(this) != &source) { InlineCstNodes copy(source); swap(copy); }
+    return *this;
+}
+inline InlineCstNodes& InlineCstNodes::operator=(Base&& source) noexcept {
+    if (static_cast<Base*>(this) != &source) { clear_owned_tree(); Base::operator=(std::move(source)); }
+    return *this;
+}
+
+static_assert(std::is_aggregate_v<InlineCstNode>);
+static_assert(std::is_nothrow_move_constructible_v<InlineCstNode>);
+static_assert(std::is_nothrow_move_assignable_v<InlineCstNode>);
 
 struct InlineCstTree {
     InlineCstNodes nodes;

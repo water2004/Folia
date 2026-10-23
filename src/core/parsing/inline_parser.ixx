@@ -125,11 +125,111 @@ struct Parser {
     struct LinkLabelRange { std::size_t open = 0; std::size_t close = 0; };
 
     std::optional<std::vector<EmphasisPair>> emphasis_pairs_cache;
+    std::vector<std::size_t> emphasis_opener_starts_cache;
+    std::optional<EmphasisPair> pending_emphasis;
+    // Last independent construct in this parser scope. Suffix queries must not
+    // rescan the source for every unmatched delimiter run.
+    std::optional<std::vector<std::size_t>> separate_structure_positions_cache;
+    mutable std::optional<MarkdownHtmlSpecialIndex> markdown_html_special_index_cache;
+    struct CodeRun { std::size_t start = 0; std::size_t end = 0; };
+    struct CodeRunIndex {
+        std::vector<CodeRun> runs;
+        std::unordered_map<std::size_t, std::vector<std::size_t>> starts_by_length;
+    };
+    mutable std::optional<CodeRunIndex> code_runs_cache;
     struct StrikePair { std::size_t open = 0; std::size_t close = 0; std::size_t length = 0; };
     std::optional<std::vector<StrikePair>> strikethrough_pairs_cache;
+    mutable std::optional<std::vector<std::size_t>> bracket_close_index_cache;
+    mutable std::size_t bracket_index_scope_start = npos;
+    mutable std::size_t bracket_index_limit = npos;
+    struct NestedLinkRange { std::size_t start = 0; std::size_t end = 0; };
+    std::optional<std::vector<NestedLinkRange>> nested_link_ranges_cache;
+    std::size_t nested_link_index_scope_start = npos;
+    std::size_t nested_link_index_limit = npos;
+    mutable std::optional<std::vector<std::size_t>> unescaped_close_parens_cache;
+    mutable std::size_t close_parens_scope_start = npos;
+    mutable std::size_t close_parens_limit = npos;
+    mutable std::optional<std::vector<std::size_t>> angle_stoppers_cache;
+    mutable std::size_t angle_index_scope_start = npos;
+    mutable std::size_t angle_index_limit = npos;
 
     bool starts_with_at(std::size_t at, std::u32string_view value) const {
         return at + value.size() <= limit && src.substr(at, value.size()) == value;
+    }
+
+    const MarkdownHtmlSpecialIndex& markdown_html_special_index() const {
+        if (!markdown_html_special_index_cache) {
+            markdown_html_special_index_cache.emplace(src);
+        }
+        return *markdown_html_special_index_cache;
+    }
+
+    std::optional<MarkdownHtmlSpecial> html_special_at(std::size_t at, std::size_t end) const {
+        if (at + 1 >= end || src[at] != U'<'
+            || (src[at + 1] != U'!' && src[at + 1] != U'?')) return std::nullopt;
+        return scan_markdown_html_special(src, at, end, &markdown_html_special_index());
+    }
+
+    const std::vector<CodeRun>& code_runs() const {
+        if (!code_runs_cache) {
+            CodeRunIndex index;
+            for (std::size_t at = 0; at < src.size();) {
+                if (src[at] != U'`') { ++at; continue; }
+                const auto start = at++;
+                while (at < src.size() && src[at] == U'`') ++at;
+                const auto run_index = index.runs.size();
+                index.runs.push_back({start, at});
+                index.starts_by_length[at - start].push_back(run_index);
+            }
+            code_runs_cache.emplace(std::move(index));
+        }
+        return code_runs_cache->runs;
+    }
+
+    const CodeRun* code_run_covering(std::size_t at) const {
+        const auto& runs = code_runs();
+        const auto after = std::upper_bound(runs.begin(), runs.end(), at,
+            [](std::size_t value, const CodeRun& run) { return value < run.start; });
+        if (after == runs.begin()) return nullptr;
+        const auto& run = *std::prev(after);
+        return run.start <= at && at < run.end ? &run : nullptr;
+    }
+
+    const CodeRun* next_code_run(std::size_t at, std::size_t end) const {
+        const auto& runs = code_runs();
+        const auto found = std::lower_bound(runs.begin(), runs.end(), at,
+            [](const CodeRun& run, std::size_t value) { return run.start < value; });
+        return found != runs.end() && found->start < end ? &*found : nullptr;
+    }
+
+    std::size_t exact_code_run_end(std::size_t after, std::size_t end, std::size_t length) const {
+        if (length == 0 || after >= end) return npos;
+        (void)code_runs();
+        const auto& runs = code_runs_cache->runs;
+        auto match = npos;
+        const auto found_length = code_runs_cache->starts_by_length.find(length);
+        if (found_length != code_runs_cache->starts_by_length.end()) {
+            const auto& starts = found_length->second;
+            const auto found = std::lower_bound(starts.begin(), starts.end(), after,
+                [&](std::size_t run_index, std::size_t value) { return runs[run_index].start < value; });
+            if (found != starts.end()) {
+                const auto& run = runs[*found];
+                if (run.start < end && run.end <= end) match = run.end;
+            }
+        }
+
+        // The old scanner measured a candidate run only up to the active
+        // parse limit. A scope can end in the middle of a source-wide run, so
+        // consider that single clipped tail separately from full indexed runs.
+        if (end > after) {
+            if (const auto* tail = code_run_covering(end - 1);
+                tail && tail->start >= after && tail->end > end
+                && end - tail->start == length
+                && (match == npos || tail->start + length < match)) {
+                match = end;
+            }
+        }
+        return match;
     }
 
     // Return the end of an opaque inline construct for delimiter collection.
@@ -152,7 +252,7 @@ struct Parser {
             return run_end;
         }
         if (src[at] == U'<') {
-            if (const auto special = scan_markdown_html_special(src, at, limit)) {
+            if (const auto special = html_special_at(at, limit)) {
                 return special->range.end;
             }
             if (const auto tag = html_tag_at(at, limit)) {
@@ -186,7 +286,7 @@ struct Parser {
             return run_end;
         }
         if (src[at] == U'<') {
-            if (const auto special = scan_markdown_html_special(src, at, limit)) return special->range.end;
+            if (const auto special = html_special_at(at, limit)) return special->range.end;
             const auto tag_end = html_tag_end(at, limit);
             if (tag_end != npos) return tag_end;
             const auto autolink_end = valid_autolink_end(at, limit);
@@ -265,16 +365,45 @@ struct Parser {
         return *strikethrough_pairs_cache;
     }
 
-    std::size_t find_link_label_close(std::size_t open) const {
-        std::size_t depth = 1;
-        for (auto scan = open + 1; scan < limit;) {
+    const std::vector<std::size_t>& bracket_close_index() const {
+        if (bracket_close_index_cache
+            && bracket_index_scope_start <= scope_start
+            && bracket_index_limit >= limit) return *bracket_close_index_cache;
+
+        std::vector<std::size_t> close_at;
+        std::vector<std::size_t> openers;
+        for (auto scan = scope_start; scan < limit;) {
             const auto skipped = skip_emphasis_opaque(scan);
             if (skipped != scan) { scan = skipped; continue; }
-            if (src[scan] == U'[') ++depth;
-            else if (src[scan] == U']' && --depth == 0) return scan;
+            if (src[scan] == U'[') {
+                if (close_at.empty()) close_at.resize(limit - scope_start, npos);
+                openers.push_back(scan);
+            }
+            else if (src[scan] == U']' && !openers.empty()) {
+                close_at[openers.back() - scope_start] = scan - scope_start;
+                openers.pop_back();
+            }
             ++scan;
         }
-        return npos;
+        bracket_index_scope_start = scope_start;
+        bracket_index_limit = limit;
+        bracket_close_index_cache = std::move(close_at);
+        return *bracket_close_index_cache;
+    }
+
+    std::size_t bracket_close_for(std::size_t open) const {
+        if (open < scope_start || open >= limit) return npos;
+        const auto& index = bracket_close_index();
+        const auto relative_open = open - bracket_index_scope_start;
+        if (relative_open >= index.size() || index[relative_open] == npos) return npos;
+        const auto close = bracket_index_scope_start + index[relative_open];
+        return close < limit ? close : npos;
+    }
+
+    std::size_t find_link_label_close(std::size_t open) const {
+        if (open < scope_start || open >= limit || src[open] != U'[') return npos;
+        const auto close = bracket_close_for(open);
+        return close < limit ? close : npos;
     }
 
     std::vector<LinkLabelRange> emphasis_link_labels() const {
@@ -288,8 +417,8 @@ struct Parser {
                     bool is_link_candidate = close + 1 < limit
                         && (src[close + 1] == U'(' || src[close + 1] == U'[');
                     if (!is_link_candidate && ctx.resolve_link_label) {
-                        const auto label = normalized_reference_label(src.substr(scan + 1, close - scan - 1));
-                        is_link_candidate = ctx.resolve_link_label(label).has_value();
+                        is_link_candidate = resolve_reference_label(
+                            src.substr(scan + 1, close - scan - 1)).has_value();
                     }
                     if (is_link_candidate) ranges.push_back({scan, close});
                 }
@@ -299,35 +428,39 @@ struct Parser {
         return ranges;
     }
 
-    bool has_separate_inline_structure(std::size_t from) const {
-        const auto labels = emphasis_link_labels();
-        for (auto scan = from; scan < limit;) {
-            const auto skipped = skip_emphasis_opaque(scan);
-            if (skipped != scan) {
-                if ((src[scan] == U'\\' && scan + 1 < limit
-                        && (ascii_punct(src[scan + 1]) || is_line_ending(src[scan + 1])))
-                    || src[scan] == U'`' || src[scan] == U'<') return true;
-                scan = skipped;
-                continue;
+    bool has_separate_inline_structure(std::size_t from) {
+        if (!separate_structure_positions_cache) {
+            const auto labels = emphasis_link_labels();
+            std::vector<std::size_t> positions;
+            for (auto scan = scope_start; scan < limit;) {
+                const auto skipped = skip_emphasis_opaque(scan);
+                if (skipped != scan) {
+                    if ((src[scan] == U'\\' && scan + 1 < limit
+                            && (ascii_punct(src[scan + 1]) || is_line_ending(src[scan + 1])))
+                        || src[scan] == U'`' || src[scan] == U'<') positions.push_back(scan);
+                    scan = skipped;
+                    continue;
+                }
+                if (src[scan] == U'&') {
+                    const auto entity = entity_end(src, scan);
+                    if (entity != npos && entity <= limit) positions.push_back(scan);
+                }
+                if (src[scan] == U'[' && std::ranges::any_of(labels,
+                        [&](LinkLabelRange const& range) { return range.open == scan; })) positions.push_back(scan);
+                if (src[scan] == U'!' && scan + 1 < limit && src[scan + 1] == U'[') {
+                    const auto close = find_link_label_close(scan + 1);
+                    if (close != npos && close + 1 < limit
+                        && (src[close + 1] == U'(' || src[close + 1] == U'[')) positions.push_back(scan);
+                }
+                ++scan;
             }
-            if (src[scan] == U'&') {
-                const auto entity = entity_end(src, scan);
-                if (entity != npos && entity <= limit) return true;
-            }
-            if (src[scan] == U'[') {
-                if (std::ranges::any_of(labels, [&](LinkLabelRange const& range) { return range.open == scan; })) return true;
-            }
-            if (src[scan] == U'!' && scan + 1 < limit && src[scan + 1] == U'[') {
-                const auto close = find_link_label_close(scan + 1);
-                if (close != npos && close + 1 < limit
-                    && (src[close + 1] == U'(' || src[close + 1] == U'[')) return true;
-            }
-            ++scan;
+            separate_structure_positions_cache = std::move(positions);
         }
-        return false;
+        const auto next = std::ranges::lower_bound(*separate_structure_positions_cache, from);
+        return next != separate_structure_positions_cache->end() && *next < limit;
     }
 
-    std::vector<EmphasisPair> resolve_emphasis_pairs() const {
+    std::vector<EmphasisPair> resolve_emphasis_pairs() {
         std::vector<EmphasisRun> runs;
         const auto labels = emphasis_link_labels();
         for (auto scan = scope_start; scan < limit;) {
@@ -357,28 +490,42 @@ struct Parser {
                 if (start > label.open && start < label.close) run.link_context.push_back(label.open);
             }
             run.open_remaining = length;
+            if (can_open) emphasis_opener_starts_cache.push_back(start);
             runs.push_back(std::move(run));
         }
 
         std::vector<EmphasisPair> pairs;
+        // Eligible opener categories differ only by marker, original run
+        // length modulo three, and whether the run can also close. Keep the
+        // most recent active opener in each category for each link context.
+        // Failed searches therefore inspect six heads, not all earlier runs.
+        using OpenerHeads = std::array<std::vector<std::size_t>, 12>;
+        std::map<std::vector<std::size_t>, OpenerHeads> heads_by_context;
+        std::vector<std::size_t> active;
+        auto category = [](EmphasisRun const& run) {
+            return (run.marker == U'_' ? 6u : 0u)
+                + (run.can_close ? 3u : 0u) + run.length % 3;
+        };
         for (std::size_t closer_index = 0; closer_index < runs.size(); ++closer_index) {
             auto& closer = runs[closer_index];
+            auto& heads = heads_by_context[closer.link_context];
             std::size_t closer_remaining = closer.length;
             while (closer.can_close && closer_remaining != 0) {
                 std::size_t opener_index = npos;
-                for (std::size_t back = closer_index; back > 0; --back) {
-                    auto const& opener = runs[back - 1];
-                    if (!opener.active_opener || opener.marker != closer.marker
-                        || opener.open_remaining == 0 || opener.link_context != closer.link_context) continue;
+                const auto base = closer.marker == U'_' ? 6u : 0u;
+                for (std::size_t which = base; which < base + 6; ++which) {
+                    auto& candidates = heads[which];
+                    while (!candidates.empty() && !runs[candidates.back()].active_opener)
+                        candidates.pop_back();
+                    if (candidates.empty()) continue;
+                    const auto index = candidates.back();
+                    auto const& opener = runs[index];
                     const bool rule_of_three = (closer.can_open || opener.can_close)
                         && ((opener.length + closer.length) % 3 == 0)
                         && (opener.length % 3 != 0 || closer.length % 3 != 0);
-                    if (rule_of_three) continue;
-                    opener_index = back - 1;
-                    break;
+                    if (!rule_of_three && (opener_index == npos || index > opener_index)) opener_index = index;
                 }
                 if (opener_index == npos) break;
-
                 auto& opener = runs[opener_index];
                 const auto use = opener.open_remaining >= 2 && closer_remaining >= 2 ? 2u : 1u;
                 const auto open_start = opener.start + opener.open_remaining - use;
@@ -389,16 +536,19 @@ struct Parser {
                 if (opener.open_remaining == 0) opener.active_opener = false;
                 closer.close_consumed += use;
                 closer_remaining -= use;
-
-                // CommonMark removes all intervening openers after resolving
-                // a closer, which prevents crossing emphasis ranges.
-                for (std::size_t between = opener_index + 1; between < closer_index; ++between) {
-                    runs[between].active_opener = false;
+                // Each intervening opener is removed once across this scope.
+                while (!active.empty() && active.back() > opener_index) {
+                    runs[active.back()].active_opener = false;
+                    active.pop_back();
                 }
+                if (!opener.active_opener && !active.empty() && active.back() == opener_index)
+                    active.pop_back();
             }
             if (closer.can_open && closer_remaining != 0) {
                 closer.open_remaining = closer_remaining;
                 closer.active_opener = true;
+                heads[category(closer)].push_back(closer_index);
+                active.push_back(closer_index);
             }
         }
         std::ranges::sort(pairs, {}, &EmphasisPair::open_start);
@@ -449,17 +599,11 @@ struct Parser {
 
     std::size_t matching_code_span_end(std::size_t at, std::size_t end) const {
         if (at >= end || src[at] != U'`') return npos;
-        std::size_t run_end = at + 1;
-        while (run_end < end && src[run_end] == U'`') ++run_end;
+        const auto* opener = code_run_covering(at);
+        if (!opener) return npos;
+        const auto run_end = (std::min)(opener->end, end);
         const auto run_size = run_end - at;
-        for (std::size_t cursor = run_end; cursor < end;) {
-            if (src[cursor] != U'`') { ++cursor; continue; }
-            auto candidate_end = cursor + 1;
-            while (candidate_end < end && src[candidate_end] == U'`') ++candidate_end;
-            if (candidate_end - cursor == run_size) return candidate_end;
-            cursor = candidate_end;
-        }
-        return npos;
+        return exact_code_run_end(run_end, end, run_size);
     }
 
     std::size_t html_tag_end(std::size_t at, std::size_t end) const {
@@ -468,30 +612,10 @@ struct Parser {
     }
 
     std::size_t matching_bracket(std::size_t open, std::size_t end) const {
-        if (open >= end || src[open] != U'[') return npos;
-        std::size_t depth = 1;
-        for (std::size_t cursor = open + 1; cursor < end;) {
-            if (src[cursor] == U'\\' && cursor + 1 < end && ascii_punct(src[cursor + 1])) {
-                cursor += 2;
-                continue;
-            }
-            if (src[cursor] == U'`') {
-                const auto code_end = matching_code_span_end(cursor, end);
-                if (code_end != npos) { cursor = code_end; continue; }
-                while (cursor < end && src[cursor] == U'`') ++cursor;
-                continue;
-            }
-            if (src[cursor] == U'<') {
-                const auto tag_end = html_tag_end(cursor, end);
-                if (tag_end != npos) { cursor = tag_end; continue; }
-                const auto autolink_end = valid_autolink_end(cursor, end);
-                if (autolink_end != npos) { cursor = autolink_end; continue; }
-            }
-            if (src[cursor] == U'[') ++depth;
-            else if (src[cursor] == U']' && --depth == 0) return cursor;
-            ++cursor;
-        }
-        return npos;
+        end = (std::min)(end, limit);
+        if (open < scope_start || open >= end || src[open] != U'[') return npos;
+        const auto close = bracket_close_for(open);
+        return close < end ? close : npos;
     }
 
     static std::u32string decode_link_escapes_and_entities(std::u32string_view raw) {
@@ -597,11 +721,36 @@ struct Parser {
         return true;
     }
 
+    const std::vector<std::size_t>& angle_stoppers() const {
+        if (angle_stoppers_cache
+            && angle_index_scope_start == scope_start
+            && angle_index_limit == limit) return *angle_stoppers_cache;
+        std::vector<std::size_t> positions;
+        for (std::size_t scan = scope_start; scan < limit; ++scan) {
+            // These are the first positions where the angle scanner must stop:
+            // line endings terminate it, while another `<`, whitespace, or a
+            // control character makes both URI and email candidates invalid.
+            if (src[scan] == U'>' || src[scan] == U'<' || is_line_ending(src[scan])
+                || src[scan] <= 0x20 || src[scan] == 0x7f) positions.push_back(scan);
+        }
+        angle_index_scope_start = scope_start;
+        angle_index_limit = limit;
+        angle_stoppers_cache = std::move(positions);
+        return *angle_stoppers_cache;
+    }
+
+    std::size_t next_angle_stopper(std::size_t from, std::size_t end) const {
+        end = (std::min)(end, limit);
+        if (from < scope_start || from >= end) return npos;
+        const auto& positions = angle_stoppers();
+        const auto found = std::ranges::lower_bound(positions, from);
+        return found != positions.end() && *found < end ? *found : npos;
+    }
+
     std::size_t valid_autolink_end(std::size_t at, std::size_t end) const {
         if (at >= end || src[at] != U'<') return npos;
-        auto close = at + 1;
-        while (close < end && src[close] != U'>' && !is_line_ending(src[close])) ++close;
-        if (close >= end || src[close] != U'>' || close == at + 1) return npos;
+        const auto close = next_angle_stopper(at + 1, end);
+        if (close == npos || src[close] != U'>' || close == at + 1) return npos;
         const auto contents = src.substr(at + 1, close - at - 1);
         return valid_uri_autolink(contents) || valid_email_autolink(contents) ? close + 1 : npos;
     }
@@ -649,6 +798,9 @@ struct Parser {
         std::string& href,
         std::optional<std::string>& title) const {
         if (suffix >= end || src[suffix] != U'(') return false;
+        // A complete inline link suffix must end in an unescaped `)`.
+        // Reject impossible suffixes before title/destination scans walk a tail.
+        if (!has_unescaped_close_paren_after(suffix, end)) return false;
         std::size_t cursor = suffix + 1;
         const auto after_open = cursor;
         if (!skip_link_whitespace(cursor, end)) return false;
@@ -820,10 +972,102 @@ struct Parser {
         return children;
     }
 
+    const std::vector<NestedLinkRange>& nested_link_ranges() {
+        if (nested_link_ranges_cache
+            && nested_link_index_scope_start == scope_start
+            && nested_link_index_limit == limit) return *nested_link_ranges_cache;
+
+        std::vector<NestedLinkRange> ranges;
+        const auto add_range = [&](std::size_t start, std::size_t end) {
+            if (ranges.empty() || ranges.back().start != start) ranges.push_back({start, end});
+        };
+        const auto local_char = [](char32_t c) {
+            return ascii_alnum(c) || c == U'.' || c == U'+' || c == U'-' || c == U'_';
+        };
+        for (auto scan = scope_start; scan < limit;) {
+            if (src[scan] == U'<') {
+                if (const auto special = html_special_at(scan, limit)) {
+                    scan = special->range.end;
+                    continue;
+                }
+                if (const auto tag = html_tag_at(scan, limit)) {
+                    scan = tag->end;
+                    continue;
+                }
+                const auto auto_end = valid_autolink_end(scan, limit);
+                if (auto_end != npos) {
+                    add_range(scan, auto_end);
+                    scan = auto_end;
+                    continue;
+                }
+            }
+
+            const auto skipped = skip_emphasis_opaque(scan);
+            if (skipped != scan) { scan = skipped; continue; }
+
+            if (src[scan] == U'[') {
+                const auto close = bracket_close_for(scan);
+                if (close < limit) {
+                    const bool image = scan > scope_start && src[scan - 1] == U'!';
+                    const auto after = close + 1;
+                    bool is_link = false;
+                    auto link_end = after;
+                    if (after < limit && src[after] == U'(') {
+                        std::string href;
+                        std::optional<std::string> title;
+                        is_link = parse_inline_link_suffix(after, limit, link_end, href, title);
+                    } else if (after < limit && src[after] == U'[') {
+                        const auto reference_close = bracket_close_for(after);
+                        if (reference_close < limit) {
+                            auto label = src.substr(after + 1, reference_close - after - 1);
+                            if (label.empty()) label = src.substr(scan + 1, close - scan - 1);
+                            is_link = resolve_reference_label(label).has_value();
+                            link_end = reference_close + 1;
+                        }
+                    } else {
+                        const auto label = src.substr(scan + 1, close - scan - 1);
+                        is_link = resolve_reference_label(label).has_value();
+                        link_end = close + 1;
+                    }
+                    if (is_link && !image) add_range(scan, link_end);
+                }
+            }
+
+            if (!suppress_bare_autolinks && ctx.dialect.gfm.autolinks
+                && inline_syntax_allows_markdown(ctx.syntax_mode)) {
+                const bool prefix = starts_with_at(scan, U"www.")
+                    || starts_with_at(scan, U"http://") || starts_with_at(scan, U"https://")
+                    || starts_with_at(scan, U"ftp://") || starts_with_at(scan, U"mailto:")
+                    || starts_with_at(scan, U"xmpp:");
+                const bool email_start = local_char(src[scan])
+                    && (scan == scope_start || !local_char(src[scan - 1]));
+                if (prefix || email_start) {
+                    const auto bare = scan_gfm_autolink(src, scan, limit, scope_start);
+                    if (bare) {
+                        add_range(scan, bare->range.end);
+                        scan = bare->range.end;
+                        continue;
+                    }
+                }
+            }
+            ++scan;
+        }
+        nested_link_index_scope_start = scope_start;
+        nested_link_index_limit = limit;
+        nested_link_ranges_cache = std::move(ranges);
+        return *nested_link_ranges_cache;
+    }
+
     bool nested_link_after(std::size_t begin, std::size_t end) {
+        end = (std::min)(end, limit);
         if (begin >= end) return false;
-        auto nodes = parse_label_content(begin, end);
-        return contains_link_or_autolink(nodes);
+        const auto& ranges = nested_link_ranges();
+        const auto first = std::ranges::lower_bound(ranges, begin, {}, &NestedLinkRange::start);
+        if (end == limit) return first != ranges.end();
+        for (auto candidate = first; candidate != ranges.end() && candidate->start < end; ++candidate) {
+            if (candidate->end <= end) return true;
+        }
+        return false;
     }
 
     bool emit_link_or_image(
@@ -869,7 +1113,15 @@ struct Parser {
     std::string normalized_reference_label(std::u32string_view raw) const {
         // Reference labels are normalized as raw label strings; CommonMark
         // does not parse escapes or character references inside them.
+        // The reference-label limit bounds both normalization and lookup work.
+        if (raw.size() > 999) return {};
         return normalize_markdown_link_label(raw);
+    }
+
+    auto resolve_reference_label(std::u32string_view raw) const {
+        using Result = decltype(ctx.resolve_link_label(std::declval<const std::string&>()));
+        if (!ctx.resolve_link_label || raw.empty() || raw.size() > 999) return Result{};
+        return ctx.resolve_link_label(normalized_reference_label(raw));
     }
 
     // ---- entity (preserved verbatim as an Entity node) ----
@@ -1166,11 +1418,9 @@ struct Parser {
         while (run_end_source < limit && src[run_end_source] == marker) ++run_end_source;
 
         const auto& pairs = emphasis_pairs();
-        const EmphasisPair* match = nullptr;
-        for (auto const& pair : pairs) {
-            if (pair.open_start < pos || pair.open_start >= run_end_source) continue;
-            if (!match || pair.open_start < match->open_start) match = &pair;
-        }
+        const auto first = std::ranges::lower_bound(pairs, pos, {}, &EmphasisPair::open_start);
+        const EmphasisPair* match = first != pairs.end() && first->open_start < run_end_source
+            && first->close_end <= limit ? &*first : nullptr;
 
         if (match && match->open_start > pos) {
             flush_text_to(out, run_start, pos);
@@ -1196,10 +1446,9 @@ struct Parser {
                 : flank.left;
             flush_text_to(out, run_start, pos);
 
-            const auto later_pair = std::ranges::find_if(pairs, [&](EmphasisPair const& pair) {
-                return pair.open_start >= run_end_source;
-            });
-            if ((can_open && later_pair != pairs.end())
+            const auto later_pair = std::ranges::lower_bound(
+                pairs, run_end_source, {}, &EmphasisPair::open_start);
+            if ((can_open && later_pair != pairs.end() && later_pair->open_start < limit)
                 || has_separate_inline_structure(run_end_source)) {
                 InlineCstNode incomplete;
                 incomplete.id = next_id();
@@ -1216,8 +1465,15 @@ struct Parser {
             }
 
             auto incomplete_end = run_end_source;
-            if (can_open) incomplete_end = find_line_or_doc_end(run_end_source);
-            else incomplete_end = run_end_source;
+            if (can_open) {
+                // A later opening run begins its own editable incomplete
+                // construct. Do not recursively wrap unrelated unclosed runs
+                // through the entire rest of the line.
+                const auto next = std::ranges::lower_bound(emphasis_opener_starts_cache, run_end_source);
+                const auto boundary = next == emphasis_opener_starts_cache.end() ? limit : (std::min)(limit, *next);
+                incomplete_end = run_end_source;
+                while (incomplete_end < boundary && !is_line_ending(src[incomplete_end])) ++incomplete_end;
+            } else incomplete_end = run_end_source;
             Parser inner{src, ctx};
             inner.suppress_bare_autolinks = suppress_bare_autolinks;
             inner.counter = counter;
@@ -1240,26 +1496,8 @@ struct Parser {
         }
 
         flush_text_to(out, run_start, match->open_start);
-        Parser inner{src, ctx};
-        inner.suppress_bare_autolinks = suppress_bare_autolinks;
-        inner.counter = counter;
-        inner.pos = match->open_end;
-        InlineCstNodes children = inner.parse_until(match->close_start);
-        counter = inner.counter;
-        pos = match->close_end;
-
-        InlineCstNode node;
-        node.id = next_id();
-        node.kind = match->kind;
-        node.status = ParseStatus::Complete;
-        node.range = {match->open_start, match->close_end};
-        node.ensure_delimiter_ranges() = {
-            {match->open_start, match->close_end},
-            {match->open_start, match->open_end},
-            {match->open_end, match->close_start},
-            SourceRange{match->close_start, match->close_end}};
-        node.children = std::move(children);
-        out.push_back(std::move(node));
+        pending_emphasis = *match;
+        pos = match->open_end;
         run_start = pos;
         return true;
     }
@@ -1308,25 +1546,15 @@ struct Parser {
         // CommonMark closes on an exact-length run and code spans can cross
         // blank lines. Keep the first other-length run available as a possible
         // opener if this delimiter remains unmatched.
-        std::size_t search = pos;
-        std::size_t closing = npos;
-        std::size_t next_candidate_run = npos;
-        while (search < limit) {
-            if (src[search] == U'`') {
-                std::size_t run = search;
-                while (search < limit && src[search] == U'`') ++search;
-                if (search - run == count) { closing = run; break; }
-                if (next_candidate_run == npos) next_candidate_run = run;
-            } else {
-                ++search;
-            }
-        }
+        const auto closing_end = exact_code_run_end(pos, limit, count);
+        const auto closing = closing_end == npos ? npos : closing_end - count;
+        const auto* next_candidate = closing == npos ? next_code_run(pos, limit) : nullptr;
         if (closing == npos) {
             // Preserve an unmatched opener as an incomplete CST segment. If a
             // later, differently sized run can begin another valid span, stop
             // before it so that run can be parsed on the next iteration.
             flush_text_to(out, run_start, start);
-            pos = next_candidate_run == npos ? find_line_or_doc_end(pos) : next_candidate_run;
+            pos = next_candidate ? next_candidate->start : find_line_or_doc_end(pos);
             InlineCstNode node;
             node.id = next_id();
             node.kind = InlineCstKind::Incomplete;
@@ -1424,6 +1652,32 @@ struct Parser {
         return false;
     }
 
+    const std::vector<std::size_t>& unescaped_close_parens() const {
+        if (unescaped_close_parens_cache
+            && close_parens_scope_start == scope_start
+            && close_parens_limit == limit) return *unescaped_close_parens_cache;
+        std::vector<std::size_t> closes;
+        for (std::size_t scan = scope_start; scan < limit;) {
+            if (src[scan] == U'\\' && scan + 1 < limit && ascii_punct(src[scan + 1])) {
+                scan += 2;
+                continue;
+            }
+            if (src[scan] == U')') closes.push_back(scan);
+            ++scan;
+        }
+        close_parens_scope_start = scope_start;
+        close_parens_limit = limit;
+        unescaped_close_parens_cache = std::move(closes);
+        return *unescaped_close_parens_cache;
+    }
+
+    bool has_unescaped_close_paren_after(std::size_t position, std::size_t end) const {
+        end = (std::min)(end, limit);
+        const auto& closes = unescaped_close_parens();
+        const auto found = std::ranges::upper_bound(closes, position);
+        return found != closes.end() && *found < end;
+    }
+
     // ---- link / image [text](url) / ![alt](url) / [text][ref] ----
     bool parse_link_or_image(InlineCstNodes& out, std::size_t& run_start) {
         const auto start = pos;
@@ -1456,20 +1710,12 @@ struct Parser {
             }
             // A partial destination remains an editable incomplete construct;
             // a closed but invalid form is ordinary literal Markdown.
-            bool has_close_paren = false;
-            for (auto cursor = after_text + 1; cursor < limit; ++cursor) {
-                if (src[cursor] == U'\\' && cursor + 1 < limit && ascii_punct(src[cursor + 1])) {
-                    ++cursor;
-                    continue;
-                }
-                if (src[cursor] == U')') { has_close_paren = true; break; }
-            }
+            const bool has_close_paren = has_unescaped_close_paren_after(after_text, limit);
             if (!has_close_paren && !nested_link_after(text_start, text_end)) {
                 return parse_incomplete_bracket(out, run_start, start);
             }
             if (has_close_paren && ctx.resolve_link_label) {
-                const auto key = normalized_reference_label(src.substr(text_start, text_end - text_start));
-                if (auto definition = ctx.resolve_link_label(key)) {
+                if (auto definition = resolve_reference_label(src.substr(text_start, text_end - text_start))) {
                     auto href = percent_encode_url(definition->href);
                     auto title = definition->title
                         ? std::optional<std::string>(*definition->title)
@@ -1495,8 +1741,7 @@ struct Parser {
         }
 
         if (ctx.resolve_link_label) {
-            const auto key = normalized_reference_label(label);
-            auto definition = ctx.resolve_link_label(key);
+            auto definition = resolve_reference_label(label);
             if (definition) {
                 // Link-definition parsing already decodes escapes and HTML
                 // character references. Only URL-attribute escaping remains.
@@ -1543,9 +1788,8 @@ struct Parser {
         if (peek() != U'<') return false;
         const auto start = pos;
         const auto content_start = start + 1;
-        auto close = content_start;
-        while (close < limit && src[close] != U'>' && !is_line_ending(src[close])) ++close;
-        if (close >= limit || src[close] != U'>' || close == content_start) return false;
+        const auto close = next_angle_stopper(content_start, limit);
+        if (close == npos || src[close] != U'>' || close == content_start) return false;
         const auto value = src.substr(content_start, close - content_start);
         const bool is_email = valid_email_autolink(value);
         if (!is_email && !valid_uri_autolink(value)) return false;
@@ -1748,7 +1992,7 @@ struct Parser {
     }
 
     bool parse_html_special(InlineCstNodes& out, std::size_t& run_start) {
-        const auto special = scan_markdown_html_special(src, pos, limit);
+        const auto special = html_special_at(pos, limit);
         // Unfinished markup stays visible in the normal editable text run.
         if (!special) return false;
         flush_text_to(out, run_start, pos);
@@ -2005,61 +2249,51 @@ struct Parser {
         return tokens;
     }
 
-    // Parse the full source into a structural tree and an exhaustive token
-    // stream over the same source.
-    InlineCstTree parse_all() {
-        InlineCstNodes out;
-        std::size_t run_start = 0;
-        while (!eof()) {
-            if (parse_break(
-                    out,
-                    run_start,
-                    inline_syntax_allows_markdown(ctx.syntax_mode))) continue;
-            if (is_line_ending(peek())) { advance(line_ending_length(pos)); continue; }
-            if (ctx.syntax_mode == InlineSyntaxMode::HtmlText) {
-                if (parse_entity(out, run_start)) continue;
-                if (peek() == U'<' && parse_html_special(out, run_start)) continue;
-                if (peek() == U'<' && parse_html_element(out, run_start)) continue;
-                advance();
-                continue;
-            }
-            // Math precedes escapes because `\(` is a delimiter pair in a
-            // math-enabled dialect, not an escaped parenthesis.
-            if (peek() == U'$' || (peek() == U'\\' && peek(1) == U'(')) {
-                if (parse_math(out, run_start)) continue;
-            }
-            if (parse_escape(out, run_start)) continue;
-            if (parse_entity(out, run_start)) continue;
-            if (peek() == U'*' || peek() == U'_') { if (parse_commonmark_emphasis(out, run_start)) continue; }
-            if (peek() == U'~' && parse_strikethrough(out, run_start)) continue;
-            if (peek() == U'`') { if (parse_code_span(out, run_start)) continue; }
-            if (peek() == U'!' && peek(1) == U'[') { if (parse_link_or_image(out, run_start)) continue; }
-            if (peek() == U'[') {
-                if (peek(1) == U'^') { if (parse_footnote_ref(out, run_start)) continue; }
-                if (ctx.dialect.wiki_links && peek(1) == U'[') { if (parse_wiki_link(out, run_start)) continue; }
-                if (parse_link_or_image(out, run_start)) continue;
-            }
-            if (peek() == U'<') {
-                if (parse_html_special(out, run_start)) continue;
-                if (parse_autolink(out, run_start)) continue;
-                if (parse_html_element(out, run_start)) continue;
-            }
-            if (parse_gfm_bare_autolink(out, run_start)) continue;
-            // ordinary character — accumulate into the text run.
-            advance();
-        }
-        flush_text(out, run_start);
-        return InlineCstTree{std::move(out), tokenize()};
-    }
-
-    // Parse [from, limit) — used for nested content.
-    InlineCstNodes parse_until(std::size_t requested_limit) {
-        limit = (std::min)(limit, requested_limit);
-        const auto previous_scope_start = scope_start;
-        scope_start = pos;
+    // One dispatch engine for the source scope and its matched emphasis
+    // views. Other constructs retain their existing independent Parser scopes.
+    InlineCstNodes parse_scope() {
+        struct EmphasisFrame {
+            EmphasisPair pair;
+            InlineCstNodes parent;
+            std::size_t parent_scope_start;
+            std::size_t parent_limit;
+            std::optional<std::vector<StrikePair>> strikes;
+            std::optional<std::vector<NestedLinkRange>> links;
+            std::size_t link_scope_start;
+            std::size_t link_limit;
+        };
+        std::vector<EmphasisFrame> frames;
         InlineCstNodes out;
         std::size_t run_start = pos;
-        while (!eof()) {
+        while (true) {
+            if (eof()) {
+                flush_text(out, run_start);
+                if (frames.empty()) break;
+                auto frame = std::move(frames.back());
+                frames.pop_back();
+                InlineCstNode node;
+                node.id = next_id();
+                node.kind = frame.pair.kind;
+                node.status = ParseStatus::Complete;
+                node.range = {frame.pair.open_start, frame.pair.close_end};
+                node.ensure_delimiter_ranges() = {
+                    node.range,
+                    {frame.pair.open_start, frame.pair.open_end},
+                    {frame.pair.open_end, frame.pair.close_start},
+                    SourceRange{frame.pair.close_start, frame.pair.close_end}};
+                node.children = std::move(out);
+                out = std::move(frame.parent);
+                scope_start = frame.parent_scope_start;
+                limit = frame.parent_limit;
+                strikethrough_pairs_cache = std::move(frame.strikes);
+                nested_link_ranges_cache = std::move(frame.links);
+                nested_link_index_scope_start = frame.link_scope_start;
+                nested_link_index_limit = frame.link_limit;
+                out.push_back(std::move(node));
+                pos = frame.pair.close_end;
+                run_start = pos;
+                continue;
+            }
             if (parse_break(out, run_start, inline_syntax_allows_markdown(ctx.syntax_mode))) continue;
             if (ctx.syntax_mode == InlineSyntaxMode::HtmlText) {
                 if (parse_entity(out, run_start)) continue;
@@ -2071,7 +2305,29 @@ struct Parser {
             if (peek() == U'$' || (peek() == U'\\' && peek(1) == U'(')) { if (parse_math(out, run_start)) continue; }
             if (parse_escape(out, run_start)) continue;
             if (parse_entity(out, run_start)) continue;
-            if (peek() == U'*' || peek() == U'_') { if (parse_commonmark_emphasis(out, run_start)) continue; }
+            if (peek() == U'*' || peek() == U'_') {
+                if (parse_commonmark_emphasis(out, run_start)) {
+                    if (pending_emphasis) {
+                        // Build source-scope indexes once before the first
+                        // emphasis view narrows its bounds. Child views only
+                        // filter these immutable matches.
+                        (void)bracket_close_index();
+                        (void)has_separate_inline_structure(scope_start);
+                        const auto pair = *pending_emphasis;
+                        pending_emphasis.reset();
+                        frames.push_back({pair, std::move(out), scope_start, limit,
+                            std::move(strikethrough_pairs_cache), std::move(nested_link_ranges_cache),
+                            nested_link_index_scope_start, nested_link_index_limit});
+                        strikethrough_pairs_cache.reset();
+                        nested_link_ranges_cache.reset();
+                        out = {};
+                        scope_start = pair.open_end;
+                        limit = pair.close_start;
+                        run_start = pos;
+                    }
+                    continue;
+                }
+            }
             if (peek() == U'~' && parse_strikethrough(out, run_start)) continue;
             if (peek() == U'`') { if (parse_code_span(out, run_start)) continue; }
             if (peek() == U'!' && peek(1) == U'[') { if (parse_link_or_image(out, run_start)) continue; }
@@ -2088,10 +2344,23 @@ struct Parser {
             if (parse_gfm_bare_autolink(out, run_start)) continue;
             advance();
         }
-        flush_text(out, run_start);
-        scope_start = previous_scope_start;
         return out;
     }
+
+    InlineCstTree parse_all() {
+        auto nodes = parse_scope();
+        return InlineCstTree{std::move(nodes), tokenize()};
+    }
+
+    InlineCstNodes parse_until(std::size_t requested_limit) {
+        limit = (std::min)(limit, requested_limit);
+        const auto previous_scope_start = scope_start;
+        scope_start = pos;
+        auto nodes = parse_scope();
+        scope_start = previous_scope_start;
+        return nodes;
+    }
+
 };
 
 } // namespace inline_parser_detail

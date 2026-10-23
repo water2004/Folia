@@ -43,17 +43,29 @@ inline bool has_symbols(const DocumentSymbolIndex& symbols) {
         || !symbols.code_blocks.empty();
 }
 
-inline bool inline_nodes_have_symbols(const InlineCstNodes& nodes) {
-    for (const auto& node : nodes) {
-        if (node.kind == InlineCstKind::Link
-            || node.kind == InlineCstKind::Autolink
-            || node.kind == InlineCstKind::Image
-            || node.kind == InlineCstKind::FootnoteRef) {
-            return true;
-        }
-        if (inline_nodes_have_symbols(node.children)) return true;
+// Keep source-order traversal without putting inline CST depth on the C++
+// call stack. Both full derivation and local contribution checks use this walk.
+template<class Visitor>
+inline bool visit_inline_nodes_until(const InlineCstNodes& nodes, Visitor&& visitor) {
+    struct Frame { const InlineCstNodes* nodes; std::size_t index; };
+    std::vector<Frame> frames{{&nodes, 0}};
+    while (!frames.empty()) {
+        auto& frame = frames.back();
+        if (frame.index == frame.nodes->size()) { frames.pop_back(); continue; }
+        const auto& node = (*frame.nodes)[frame.index++];
+        if (visitor(node)) return true;
+        if (!node.children.empty()) frames.push_back({&node.children, 0});
     }
     return false;
+}
+
+inline bool inline_nodes_have_symbols(const InlineCstNodes& nodes) {
+    return visit_inline_nodes_until(nodes, [](InlineCstNode const& node) {
+        return node.kind == InlineCstKind::Link
+            || node.kind == InlineCstKind::Autolink
+            || node.kind == InlineCstKind::Image
+            || node.kind == InlineCstKind::FootnoteRef;
+    });
 }
 
 inline bool block_has_symbols(const BlockNode& block) {
@@ -73,7 +85,7 @@ inline void collect_inline_symbols(
     const InlineCstNodes& nodes,
     NodeId container_id,
     DocumentSymbolIndex& symbols) {
-    for (const auto& node : nodes) {
+    visit_inline_nodes_until(nodes, [&](InlineCstNode const& node) {
         if (node.kind == InlineCstKind::Link || node.kind == InlineCstKind::Autolink) {
             std::u32string label;
             append_inline_visible_text(document, node.children, label);
@@ -89,8 +101,8 @@ inline void collect_inline_symbols(
                 node.semantics().label,
             });
         }
-        collect_inline_symbols(document, node.children, container_id, symbols);
-    }
+        return false;
+    });
 }
 
 inline DocumentSymbolIndex collect_block_symbols(const BlockNode& block) {

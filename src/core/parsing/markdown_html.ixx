@@ -45,6 +45,41 @@ struct MarkdownHtmlSpecial {
     SourceRange closing;
 };
 
+// A source-local index for repeated special-construct queries. Inline parsing
+// can encounter many openers with no terminator; indexing each possible close
+// once avoids rescanning the remaining source from every opener.
+class MarkdownHtmlSpecialIndex {
+    std::vector<std::size_t> comments_;
+    std::vector<std::size_t> processing_instructions_;
+    std::vector<std::size_t> cdata_;
+    std::vector<std::size_t> declarations_;
+
+public:
+    explicit MarkdownHtmlSpecialIndex(std::u32string_view source) {
+        for (std::size_t at = 0; at < source.size(); ++at) {
+            if (at + 3 <= source.size() && source.substr(at, 3) == U"-->") comments_.push_back(at);
+            if (at + 2 <= source.size() && source.substr(at, 2) == U"?>") processing_instructions_.push_back(at);
+            if (at + 3 <= source.size() && source.substr(at, 3) == U"]]>") cdata_.push_back(at);
+            if (source[at] == U'>') declarations_.push_back(at);
+        }
+    }
+
+    std::size_t first_after(MarkdownHtmlSpecialKind kind, std::size_t at, std::size_t limit) const {
+        const std::vector<std::size_t>* positions = nullptr;
+        std::size_t terminator_length = 0;
+        switch (kind) {
+            case MarkdownHtmlSpecialKind::Comment: positions = &comments_; terminator_length = 3; break;
+            case MarkdownHtmlSpecialKind::ProcessingInstruction: positions = &processing_instructions_; terminator_length = 2; break;
+            case MarkdownHtmlSpecialKind::Cdata: positions = &cdata_; terminator_length = 3; break;
+            case MarkdownHtmlSpecialKind::Declaration: positions = &declarations_; terminator_length = 1; break;
+        }
+        const auto found = std::lower_bound(positions->begin(), positions->end(), at);
+        return found != positions->end() && *found <= limit
+                && terminator_length <= limit - *found
+            ? *found : std::u32string_view::npos;
+    }
+};
+
 namespace markdown_html_detail {
 
 inline bool ascii_letter(char32_t value) {
@@ -443,7 +478,8 @@ inline bool markdown_html_block_ends_on_line(
 
 // Complete non-element raw HTML constructs, with no decoding or body copies.
 inline std::optional<MarkdownHtmlSpecial> scan_markdown_html_special(
-    std::u32string_view source, std::size_t start, std::size_t limit) {
+    std::u32string_view source, std::size_t start, std::size_t limit,
+    const MarkdownHtmlSpecialIndex* index = nullptr) {
     limit = (std::min)(limit, source.size());
     if (start >= limit || source[start] != U'<') return std::nullopt;
     const auto input = source.substr(start, limit - start);
@@ -475,8 +511,14 @@ inline std::optional<MarkdownHtmlSpecial> scan_markdown_html_special(
     } else {
         return std::nullopt;
     }
-    const auto close = input.find(terminator, opening_length);
-    if (close == std::u32string_view::npos) return std::nullopt;
+    const auto close_at = index
+        ? index->first_after(kind, start + opening_length, limit)
+        : [&] {
+            const auto found = input.find(terminator, opening_length);
+            return found == std::u32string_view::npos ? found : start + found;
+        }();
+    if (close_at == std::u32string_view::npos) return std::nullopt;
+    const auto close = close_at - start;
     const auto end = start + close + terminator.size();
     return MarkdownHtmlSpecial{kind, {start, end}, {start, start + opening_length},
         {start + opening_length, start + close}, {start + close, end}};

@@ -92,22 +92,21 @@ def run_cases(executable: Path, timeout: float,
             output = ANSI_ESCAPE.sub("", completed.stdout + "\n" + completed.stderr)
             success = SUCCESS_SUMMARY.findall(output)
             failure = FAILURE_SUMMARY.findall(output)
-            if success:
-                registered_tests = int(success[-1][1])
-            elif failure:
-                registered_tests = int(failure[-1][0])
-            else:
-                registered_tests = 0
+            registered_tests = sum(int(summary[1]) for summary in success)
+            registered_tests += sum(int(summary[0]) for summary in failure)
             skipped = SKIPPED_SUMMARY.findall(output)
             if skipped:
-                skipped_tests = int(skipped[-1])
+                skipped_tests = sum(int(summary) for summary in skipped)
             else:
                 skipped_tests = len(re.findall(r"\bSKIPPED\b", output))
             matched_tests = max(0, registered_tests - skipped_tests)
             item["registered_tests"] = registered_tests
             item["skipped_tests"] = skipped_tests
             item["matched_tests"] = matched_tests
-            if completed.returncode not in (0, 1):
+            # Boost.UT's fatal assertion path calls std::exit(-1) after printing
+            # its ordinary failure summary. Windows reports that as 0xffffffff.
+            is_ut_fatal_failure = completed.returncode in (-1, 0xFFFFFFFF) and bool(failure)
+            if completed.returncode not in (0, 1) and not is_ut_fatal_failure:
                 item["status"] = "failed"
                 item["reason"] = f"abnormal process exit {completed.returncode}"
                 for remaining in results[results.index(item) + 1:]:
