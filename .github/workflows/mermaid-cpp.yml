@@ -1,0 +1,238 @@
+name: Mermaid C++
+
+on:
+  push:
+    branches:
+      - master
+      - 'codex/mermaid-cpp-*'
+      - feat/mermaid-cpp-port
+    paths:
+      - .github/workflows/mermaid-cpp.yml
+      - CMakeLists.txt
+      - docs/mermaid-cpp/**
+      - .gitattributes
+      - .gitmodules
+      - third_party/mermaid-cpp/**
+      - third_party/ut
+      - tests/mermaid_cpp/**
+      - tests/main.cpp
+      - tests/support/**
+      - tools/mermaid-cpp/**
+      - src/platform/text/mermaid_measurer.ixx
+      - src/platform/text/mermaid_pie.ixx
+      - src/core/**
+      - src/platform/**
+      - tests/platform/mermaid_measurement.cpp
+      - tools/test-support/windows_console_runtime.cpp
+  pull_request:
+    paths:
+      - .github/workflows/mermaid-cpp.yml
+      - CMakeLists.txt
+      - docs/mermaid-cpp/**
+      - .gitattributes
+      - .gitmodules
+      - third_party/mermaid-cpp/**
+      - third_party/ut
+      - tests/mermaid_cpp/**
+      - tests/main.cpp
+      - tests/support/**
+      - tools/mermaid-cpp/**
+      - src/platform/text/mermaid_measurer.ixx
+      - src/platform/text/mermaid_pie.ixx
+      - src/core/**
+      - src/platform/**
+      - tests/platform/mermaid_measurement.cpp
+      - tools/test-support/windows_console_runtime.cpp
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mermaid-cpp-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows:
+    name: Windows ${{ matrix.scope }} ${{ matrix.configuration }}
+    runs-on: windows-2025
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration: [Debug, Release]
+        scope: [standalone, integrated]
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      - name: Preserve source bytes during checkout
+        run: git config --global core.autocrlf false
+
+      - name: Check out Folia and the pinned Boost.UT fork
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+          persist-credentials: false
+
+      - name: Check out the official Mermaid 12.2.0 source oracle
+        uses: actions/checkout@v5
+        with:
+          repository: mermaid-js/mermaid
+          ref: 1fb7869866dd619168d840291c9c54b4f129758b
+          path: .reference/mermaid-js
+          persist-credentials: false
+
+      - name: Set up Node for the source oracle
+        uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+
+      - name: Install the locked official oracle packages
+        run: |
+          npm install --global pnpm@11.25.0
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          pnpm --dir tools/mermaid-cpp/oracle install --frozen-lockfile --ignore-scripts
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Check the source oracle
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $commit = git -C .reference/mermaid-js rev-parse HEAD
+          if ($LASTEXITCODE -ne 0 -or $commit -ne '1fb7869866dd619168d840291c9c54b4f129758b') {
+            throw 'The Mermaid source oracle is not at the pinned commit.'
+          }
+          New-Item -ItemType Directory -Force -Path build/mermaid-cpp | Out-Null
+          node tools/mermaid-cpp/source-text-oracle.mjs --check 2>&1 |
+            Tee-Object -FilePath build/mermaid-cpp/source-oracle.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Check the Packet parser and SVG oracles
+        run: |
+          node tools/mermaid-cpp/preprocess-text-oracle.mjs --check
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/frontmatter-oracle.mjs --check
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/number-oracle.mjs --check
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/packet-oracle.mjs --check 2>&1 |
+            Tee-Object -FilePath build/mermaid-cpp/packet-oracle.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/packet-svg-oracle.mjs --check 2>&1 |
+            Tee-Object -FilePath build/mermaid-cpp/packet-svg-oracle.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/pie-geometry-oracle.mjs --check 2>&1 |
+            Tee-Object -FilePath build/mermaid-cpp/pie-geometry-oracle.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/pie-oracle.mjs --check 2>&1 |
+            Tee-Object -FilePath build/mermaid-cpp/pie-oracle.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/pie-layout-oracle.mjs --check 2>&1 |
+            Tee-Object -FilePath build/mermaid-cpp/pie-layout-oracle.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/pie-svg-oracle.mjs --check
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Initialize the x64 MSVC environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Install the pinned CMake 4.3.5 binary
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $archive = Join-Path $env:RUNNER_TEMP 'cmake-4.3.5-windows-x86_64.zip'
+          $destination = Join-Path $env:RUNNER_TEMP 'folia-mermaid-cmake'
+          $url = 'https://github.com/Kitware/CMake/releases/download/v4.3.5/cmake-4.3.5-windows-x86_64.zip'
+          # SHA-256 of the official Kitware release asset.
+          $expected = 'c05a60d22d5df22d75a72ae9b6628ef5f20daee4f4ba380920e1fbbeaf244fc1'
+          Invoke-WebRequest -Uri $url -OutFile $archive
+          $actual = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($actual -ne $expected) {
+            throw "CMake archive checksum mismatch: expected $expected, got $actual."
+          }
+          Expand-Archive -LiteralPath $archive -DestinationPath $destination
+          $binaryDirectory = Join-Path $destination 'cmake-4.3.5-windows-x86_64/bin'
+          Add-Content -LiteralPath $env:GITHUB_PATH -Value $binaryDirectory
+
+      - name: Configure the C++ module project
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $versionOutput = @(cmake --version)
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $version = $versionOutput[0]
+          if ($version -ne 'cmake version 4.3.5') {
+            throw "The pinned CMake was not selected: $version"
+          }
+          ninja --version
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $source = if ('${{ matrix.scope }}' -eq 'integrated') { '.' } else { 'tools/mermaid-cpp' }
+          $binary = if ('${{ matrix.scope }}' -eq 'integrated') { 'build/mermaid-cpp/tools/mermaid-cpp' } else { 'build/mermaid-cpp' }
+          "FOLIA_MERMAID_BINARY_DIR=$binary" >> $env:GITHUB_ENV
+          cmake -Wno-dev -G Ninja -S $source -B build/mermaid-cpp `
+            -DCMAKE_BUILD_TYPE=${{ matrix.configuration }} 2>&1 |
+            Tee-Object -FilePath build/mermaid-cpp/configure.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Build the native Mermaid tests
+        run: |
+          $targets = @('FoliaMermaidTests', 'FoliaMermaidTextProbe', 'FoliaMermaidPlatformTests')
+          if ('${{ matrix.scope }}' -eq 'integrated') {
+            $targets += @('FoliaTests', 'FoliaWindowsEditorTests')
+          }
+          cmake --build build/mermaid-cpp --parallel 4 --target $targets 2>&1 |
+            Tee-Object -FilePath build/mermaid-cpp/build.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Run the native Mermaid tests
+        run: |
+          $env:FOLIA_MERMAID_SVG_OUTPUT = Join-Path $pwd 'build/mermaid-cpp/pie-svg'
+          # Match built suites exactly; unrelated optional Math/encoding/spec
+          # runners are not part of the Mermaid integration check.
+          ctest --test-dir build/mermaid-cpp --output-on-failure --no-tests=error `
+            -R '^Folia(MermaidTests|MermaidPlatformTests|Tests|WindowsEditorTests)$' 2>&1 |
+            Tee-Object -FilePath build/mermaid-cpp/tests.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/pie-svg-oracle.mjs --compare build/mermaid-cpp/pie-svg
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Compare real browser and DirectWrite text measurements
+        run: |
+          node tools/mermaid-cpp/browser-text-probe.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & "$env:FOLIA_MERMAID_BINARY_DIR/FoliaMermaidTextProbe.exe" build/mermaid-cpp/browser-text.tsv build/mermaid-cpp/native-text.tsv
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/compare-text-probe.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Upload text measurement evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mermaid-text-${{ matrix.scope }}-${{ matrix.configuration }}
+          path: |
+            build/mermaid-cpp/*text.tsv
+            build/mermaid-cpp/browser-text.json
+            build/mermaid-cpp/text-comparison.json
+            build/mermaid-cpp/pie-svg/*.svg
+            ${{ env.FOLIA_MERMAID_BINARY_DIR }}/FoliaMermaidTextProbe.exe
+            ${{ env.FOLIA_MERMAID_BINARY_DIR }}/FoliaMermaidPlatformTests.exe
+
+      - name: Upload the native test executable
+        if: always() && hashFiles('build/mermaid-cpp/**/FoliaMermaidTests.exe') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: mermaid-cpp-${{ matrix.scope }}-${{ matrix.configuration }}-tests
+          path: ${{ env.FOLIA_MERMAID_BINARY_DIR }}/FoliaMermaidTests.exe
+
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mermaid-cpp-${{ matrix.scope }}-${{ matrix.configuration }}-diagnostics
+          if-no-files-found: ignore
+          path: |
+            build/mermaid-cpp/*.log
+            build/mermaid-cpp/CMakeFiles/CMakeConfigureLog.yaml
+            build/mermaid-cpp/Testing/Temporary/*.log
