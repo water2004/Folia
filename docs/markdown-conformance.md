@@ -1,6 +1,65 @@
 # Markdown syntax conformance
 
-## Current checkpoint (2026-10-22)
+## Current checkpoint (2026-10-23)
+
+The HTML syntax/projection batch is implemented and committed. Formal
+CommonMark: **652/652 strict semantics, 652/652 inline CST losslessness and
+652/652 character-exact save**, normal exit 0. Report:
+`build/markdown-conformance/html-final/results.json`. Baseline rerun at
+`html-phase-start/` reproduced 586/652 before edits. No official expectations,
+case omissions, or source-specific branches were introduced.
+
+Shared `markdown_html` owns CommonMark block-start/end and inline-special
+recognition; `parser` applies block boundaries before deriving the existing HTML
+presentation. Complete supported HTML retains existing editable semantic nodes;
+malformed/unsupported types 1–6 retain their established inert presentation,
+bounded to the correct CommonMark block. Type 7 remains one existing Paragraph
+in HtmlText mode. Inline HTML bodies retain their surrounding syntax mode:
+Markdown inline tags allow Markdown children; raw HTML blocks remain HtmlText.
+
+New regression evidence: `html_block_text_alignment_is_semantic_and_lossless`
+contains four adjacent `<p>` roots without blank lines. Treating that whole
+CommonMark block as plain HtmlText lost each paragraph's alignment. It now uses
+the existing HtmlContainer/source-slot model with each semantic root as a child;
+render tests verify independent child styles. For containers without element
+provenance, the existing HTML semantic serializer emits their children rather
+than inventing a `<div>` on Enter. Source edits/split/history tests cover this
+case. This is not the rejected type-7 wrapper design: type 7 still has no added
+container, outer links/styles stay on their existing CST/semantic owners, and
+there is no extra source model or new serializer module.
+
+Formal semantics now use **one** C++ Node projection that emits escaped Markdown
+semantics and only parser-classified raw HTML source. Python `run.py` compares
+that output using the existing `canonical_html.py`, also used by immutable
+official expected HTML. Native Boost.UT retains independent lossless/save
+assertions for all 652 cases; the Python stage is mandatory for strict semantic
+assertions. CTest is wired through this complete runner. This avoids a second
+HTML parser and handles HTML tags spanning multiple Markdown blocks.
+
+Verification on the final implementation:
+- Formal runner: **652/652 strict, 652/652 lossless, 652/652 exact save**, exit 0,
+  `build/markdown-conformance/html-final/results.json` (all reported; no skips).
+- CTest `FoliaCommonMarkTests`: passed through the complete Python/native runner,
+  `html-ctest.log`; its per-case report is `build/core/markdown-conformance/`.
+- Core: **598 tests / 44248 assertions**, exit 0, `html-core.log`.
+- Windows editor: **80 tests / 3429 assertions**, exit 0, `html-platform.log`.
+- Fixture/runner Python contracts: **17 tests**, passed. Invalid output records,
+  missing HTML projections, altered report-side expectations, incomplete suites,
+  per-case errors and filtered semantic mismatches cannot report success.
+
+All logs above are under ignored `build/markdown-conformance/`. Old expectations
+that disabled Markdown inside inline HTML were corrected; explicit HtmlText
+checks still require literal Markdown. Added source edits/split/undo/redo checks
+perform zero full-document parses, serializations and full-tree transaction diffs.
+
+Commit checkpoint: scanner + scanner tests **c1d987f7**; inline syntax and formal
+HTML comparison **3f7a930b**; block bounds and editable presentation **bf8a3d42**.
+No live agents or builds. Build parallelism remains **4**. No official failures
+remain; retain this verified state for the next user task. Ignored
+`html-current/` deliveries are historical inputs, not replacements for reviewed
+production code. No MSI, push or version change was requested in this batch.
+
+## Previous verified checkpoint (2026-10-22, historical)
 
 User priority 2/3 is verified: the known Tab/lazy-continuation failures and all
 21 exact-save failures are fixed. Commits e489a0b0 (column context/layout) and
@@ -101,7 +160,8 @@ Rejected history: initial type-7 v1 duplicated tag grammar and body text. v2's
 extra HTML containers/fragments lost outer anchor/style rendering because the
 container renderer walks only children. Accepted v3 keeps existing HtmlText CST
 semantics, with real Editor/render regression coverage. Do not restore v1/v2 or
-add a new serializer fragment branch. See Git through 9a4ff577 for prior batches.
+add body copies. See Git through 9a4ff577 for prior batches. The separately tested
+adjacent-root container case is recorded in the current checkpoint above.
 
 ## Reproduction and provenance
 
