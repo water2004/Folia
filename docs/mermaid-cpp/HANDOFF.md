@@ -1,16 +1,49 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-23, Flowchart parser and layout input in progress
+## Current checkpoint - 2026-10-23, Flowchart parser and layout input verified
 
-- Deliver common Flowchart source through shared preparation/configuration to
+- Delivered common Flowchart source through shared preparation/configuration to
   owned nodes, edges and compound-graph layout input. Scope: classic shapes,
   labelled/chained/grouped links, subgraphs, direction and basic style classes.
-- Exit: representative original parser/DB/getData observations match native
-  output; affected Windows standalone/integrated Debug/Release checks pass.
-  Commit and push small batches, update upstream PR #1, keep it OPEN.
+- Exit conditions passed: original parser/DB/getData observations match native
+  output; all four Windows standalone/integrated Debug/Release jobs passed at
+  53900985625fd7a883d82c318eefd53c77aea83c:
+  https://github.com/zhao0349/Folia/actions/runs/39927427317
+  Integrated jobs passed FoliaTests, FoliaWindowsEditorTests and both Mermaid
+  suites. All jobs checked source/SVG oracles and browser/DirectWrite measurement.
+  No WinUI packaging or DPI acceptance is claimed.
 - Next stage: official Dagre layout and measured Flowchart SVG; other required
   families and the final application dependency switch remain outstanding.
+  Start from flowRenderer-v3-unified.ts and rendering-util/layout-algorithms/
+  dagre/{index.js,mermaid-graphlib.js}; the official dependency is dagre-d3-es
+  7.0.14 (already pinned in the test-only pnpm lock). Extract its measured-node
+  graph layout oracle, then port the required rank/order/position path. Use
+  representative chains, branches, cycles and compound groups as exit cases;
+  do not reopen completed configuration or Packet/Pie stages without a regression.
 - No Flowchart rendering or application integration is claimed by this stage.
+- Original parser/DB/getData oracle: 20 representative successful inputs and
+  four common parse/DB errors. All source observations matched at 30948524.
+  Run 39925896588 exposed dotted infix endings (`A -. text .-> B`), corrected
+  in 30948524. Run 39926552864 then exposed incorrect test initialization:
+  untouched Flowchart config selects unported redux-color. 53900985 sets the
+  explicit default theme used by Folia; public session semantics stay intact.
+- Delivery uses worktree build/mermaid-cpp/entry-contribution on
+  feat/mermaid-cpp-port, selected commits 047827b2, a88bfa49, 7175d829, f95a016f,
+  followed by this documentation-only checkpoint. Source batches were
+  b3aa1019, 4ae58955, 30948524 and 53900985.
+  Its Mermaid code/docs/fixtures/workflow match the validation branch, and its
+  diff from upstream 508423f2 contains no AGENTS.md changes.
+  Update https://github.com/water2004/Folia/pull/1 and keep it OPEN; DO NOT merge.
+  Delivery pushes may trigger automatic reruns; the completed evidence above
+  is for the verified implementation/test head, not those later reruns.
+- Stage limits: explicit default/dark appearance; classic syntax and plain/
+  quoted labels. Rich text/entity adaptation, shape metadata, explicit edge ids
+  and per-edge interpolation commands remain unimplemented; the required
+  Flowchart family has not been reduced to the current representative corpus.
+- No local compiler/build/agent is active. Downloaded runners in flowchart-check
+  and flowchart-fixed-check and edited fixtures in flowchart-diagnostic under
+  build/mermaid-cpp are diagnostic artifacts from superseded heads, not final
+  acceptance evidence.
 
 ## Packet/Pie render entry verified (historical)
 
