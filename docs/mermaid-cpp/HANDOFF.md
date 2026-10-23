@@ -1,35 +1,45 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-23, configuration batch in progress
+## Current checkpoint - 2026-10-23, configuration primitives verified
 
-- User requests small commits for configuration sanitization, precedence and
-  theme resolution; verify before updating upstream PR #1, never merge.
-- Branch `codex/mermaid-cpp-config` starts at `5207e931`. Existing PR #1 is
-  OPEN/unmerged at that head; base remains `508423f2`. Working tree was clean.
-- New official oracle has 2,940 observations and 720 config keys. It executes
-  original sanitizer, assignWithDepth and resolveAppearance bodies, generates
-  schema defaults with the original AJV generator (locked AJV 8.18.0), and
-  verifies packaged theme source maps against the source lock. Local check passes.
-- Commits: `9ee6ca72` oracle, `fe532427` bounded sanitizers, `d1cb9998`
-  depth merge/appearance and fixture-driven native tests/CI. No uncommitted
-  implementation candidates. Local config and directive oracle checks pass.
-  First CI 39889791100 compiled native code but exposed oracle harness issues:
-  CRLF-sensitive extraction was swallowed as an expected exception; JS input
-  aliases survived structuredClone but not fixture serialization; bare scalar
-  fixture JSON entered directive word parsing. Fixed by normalized extraction
-  before cases, strict module semantics, TypeError-only expected failures,
-  JSON tree cloning and array-wrapped fixture decoding. Nested array custom
-  properties are explicitly marked. Added primitive-string/prototype-setter
-  restrictions and regressions. Next: validate the corrected head in all four
-  Windows jobs before fast-forwarding the PR branch. Shared preflight also
-  rejects manually constructed inactive ConfigValue payloads before copying;
-  all four public operations have regression checks for this budget boundary.
-  Theme-name selection is distinct from theme-variable/color derivation, which
-  still needs a native implementation. No common frontend integration is claimed.
-- User explicitly authorized this batch's public fork push after automatic
-  review asked for confirmation; push/CI/PR update are authorized, merge is not.
-- Local MSVC/CMake unavailable. No live local builds/agents. Prior head's CI rerun
-  39888412728 was in progress when checked; prior code passed 39886836325.
+- User explicitly authorizes this batch's public fork push and verified update
+  of https://github.com/water2004/Folia/pull/1. Keep it OPEN; DO NOT merge.
+  Verification branch `codex/mermaid-cpp-config`; delivery branch
+  `feat/mermaid-cpp-port`. Upstream base remains `508423f2`.
+- Verified code head `6e64cbf1abdf8064633647ba629f1bc6b59e21e5`:
+  https://github.com/zhao0349/Folia/actions/runs/39890354498 passed all four
+  standalone/integrated Windows Debug/Release jobs. Integrated jobs passed
+  FoliaTests, FoliaWindowsEditorTests and both Mermaid suites; standalone jobs
+  passed both Mermaid suites. All jobs checked official source/SVG oracles,
+  78 native SVG DOM comparisons and 96 same-host browser/DirectWrite cases.
+  This final checkpoint-only commit does not change the verified code or CI.
+- Implemented two distinct configuration sanitizers, bounded assignWithDepth,
+  diagram config aliases and theme/look/layout selection. Layer precedence is
+  directive sum, reversed saved directives, initialize delta, pinned defaults;
+  diagram-scoped appearance wins within each layer. These APIs own their output
+  and preserve inputs; no shared configuration singleton is introduced.
+- Official oracle: 2,940 observations, 720 keys, original schema/AJV generator
+  (AJV 8.18.0), original functions in strict mode and source-map-verified themes.
+  Local config/directive oracle and diff checks pass. Source/schema/theme files
+  are pinned in source-lock.json; generated source tables are checked by CI.
+- Small commits: `9ee6ca72` oracle, `fe532427` sanitizers, `d1cb9998` merge and
+  appearance, `fecd0435` boundaries, `d4641c49` strict oracle/fixture corrections,
+  `6e64cbf1` pre-copy payload validation. First CI exposed CRLF extraction,
+  accidental JS input aliases and bare-word fixture decoding errors; final CI
+  verifies the fixes. Never catch harness/assertion failures as expected results.
+- Explicit dense-tree restrictions: no sparse-array creation, custom array
+  properties or inherited prototype-setter effects. Inactive payloads on manual
+  ConfigValue objects fail before copying. Original outcomes remain in fixtures.
+- Next concrete work: implement detectInit mapping and cleanAndMerge with an
+  official oracle, then config.ts session lifecycle and native default/dark
+  theme-variable/color derivation. Current appearance API selects names only;
+  it expects already-sanitized, merged layers. Keep these as separate batches.
+  Full common frontend, other diagram families and application dependency switch
+  remain pending. WinUI packaging and DPI acceptance are not established.
+- No live local builds/agents or ignored implementation candidates. Local
+  MSVC/CMake unavailable; native evidence is the Windows CI above. A checkpoint
+  or delivery push may trigger another automatic run; inspect live checks when
+  resuming instead of treating the old superseded CI runs as active work.
 
 ## Directive interpretation verified (historical, stage 4c)
 
