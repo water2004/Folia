@@ -1017,5 +1017,71 @@
         "sha256": "726ab5f891e60d97765a5bb15fd58df7f51bb063be7da11df9b2fa07c027dd70"
       }
     ]
+  },
+  "dagreLayout": {
+    "package": "dagre-d3-es",
+    "version": "7.0.14",
+    "files": [
+      {
+        "path": "src/dagre/normalize.js",
+        "sha256": "a1b73cf647d867471289b2f152b233752bc966d5b24586681790640eea46d078"
+      },
+      {
+        "path": "src/dagre/parent-dummy-chains.js",
+        "sha256": "d65e598d4442bb5bb7c6e67b2255dda169d2eac9b1cfc41702741307c295fb28"
+      },
+      {
+        "path": "src/dagre/add-border-segments.js",
+        "sha256": "9314952cefec131ce59aada2ab8fe33e50894fda60b374c376dd5d39c27be3ba"
+      },
+      {
+        "path": "src/dagre/coordinate-system.js",
+        "sha256": "7eec6e8ca940210d337f2473b8cdf2976ac0fb71c77b90e2a3a0a251d5dfc017"
+      },
+      {
+        "path": "src/dagre/order/index.js",
+        "sha256": "fd467b87dedbc57a58d36d48e5774574ad9e8210e79410e20f9b53be33681218"
+      },
+      {
+        "path": "src/dagre/order/init-order.js",
+        "sha256": "bdd808c33a321d921f7ecd58fd232784f5c042571800af47dc999d25ba7c3f03"
+      },
+      {
+        "path": "src/dagre/order/build-layer-graph.js",
+        "sha256": "d3043229487746c910b0fc6adf12720654fe78ef970b127db0cf867f8d425cab"
+      },
+      {
+        "path": "src/dagre/order/sort-subgraph.js",
+        "sha256": "46f098510a17cfbe9c95181035f2a4b90f619b8e6586df5c14fc676b7a5bf599"
+      },
+      {
+        "path": "src/dagre/order/barycenter.js",
+        "sha256": "37e173da019c25ee13743b3f304cb1ddb0d159536375de0a8dc191e128bc1a8e"
+      },
+      {
+        "path": "src/dagre/order/resolve-conflicts.js",
+        "sha256": "537e4f7e9e0a0cd8105916ff9bb200c9d66a2713b5e65d18797a78fadf788601"
+      },
+      {
+        "path": "src/dagre/order/sort.js",
+        "sha256": "1f6cc7da538549f788a74549b8843c78516cb38b8bcdc26858db9c8cfecaaa71"
+      },
+      {
+        "path": "src/dagre/order/add-subgraph-constraints.js",
+        "sha256": "f38a5099f604c68b5138c0e95ac483425e1ced4fa62e3b432145cb7c78c9e369"
+      },
+      {
+        "path": "src/dagre/order/cross-count.js",
+        "sha256": "87b7c9135bb2cafdfdb0f5131fdf6ceb33af0102f3a5306070a24e9111c50702"
+      },
+      {
+        "path": "src/dagre/position/index.js",
+        "sha256": "bf7803a5bceab7e5bf3064b3833faadac7fd6c5b50446a5b328dda0652e5af7d"
+      },
+      {
+        "path": "src/dagre/position/bk.js",
+        "sha256": "d37012c11a27f1da050798792854e4a39102b400dec46d8af6b84975690680e7"
+      }
+    ]
   }
 }

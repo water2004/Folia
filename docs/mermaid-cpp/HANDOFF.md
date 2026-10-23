@@ -1,6 +1,19 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-23, Dagre rank pipeline verified
+## Current checkpoint - 2026-10-23, Flowchart coordinates in progress
+
+- Deliver the next original Dagre stage on the retained private ranked graph:
+  long-edge normalization/parenting, group borders, crossing reduction, BK
+  coordinates and restored edge paths. Scope is the existing representative
+  chain/branch/cycle/parallel/self-edge/nested-group corpus with supplied boxes.
+- Exit: original full-layout oracle agrees with native coordinates and paths;
+  affected Mermaid and integrated Windows Debug/Release checks pass. Next:
+  real DirectWrite measurement and source-to-SVG Flowchart rendering.
+- Work on fork/mermaid-development; select only functional/public-document
+  commits into build/mermaid-cpp/entry-contribution after validation. Upstream
+  PR #1 is confirmed OPEN at d4228fb1; do not merge.
+
+## Dagre rank pipeline verified (historical)
 
 - Delivered the first native Flowchart layout stage: DFS back-edge reversal,
   compound nesting constraints, default network simplex, edge-label rank
