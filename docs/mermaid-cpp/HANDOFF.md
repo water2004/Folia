@@ -1,35 +1,43 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-23, directive argument interpretation
+## Current checkpoint - 2026-10-23, directive interpretation verified (stage 4c)
 
-- Continuing the authorized native migration on `codex/mermaid-cpp-directives`,
-  based on verified PR head `0e2f32c1`. Upstream PR #1 remains OPEN; do not merge.
-  Live PR read confirmed the same head and upstream base `508423f2`.
-- Selected this batch: isolated `detectDirective` calls with the all/init/wrap
-  filters used by the common frontend. Official `utils.ts` and `regexes.ts` are
-  already hash-locked. Local oracle passes 3,279 observations / 1,093 inputs.
-- Native implementation uses owned ConfigValue trees and a strict UTF-16 JSON
-  parser, with shared directive captures for deletion/detection. Syntax failure
-  matches upstream's absent type/null args; resource failures remain explicit.
-  Calls are isolated, intentionally avoiding upstream global-regex lastIndex
-  leakage after errors. This does not implement detectInit, sanitization,
-  configuration merging, diagram dispatch or theme resolution.
-- Local commits: `6e4c1996` (oracle) and `cda332c1` (native implementation,
-  tests, CI hook and documentation). Local directive/source-text/preprocessing/
-  frontmatter oracle checks and `git diff --check` pass. Baseline PR head
-  `0e2f32c1` also passed all four CI jobs in run `39884671629`; that run does
-  not test the new directive implementation.
-- Native tests and new Windows CI are pending. Local MSVC/CMake are unavailable
-  (PATH and installed VS toolchain discovery checked). No live local builds or
-  agents, and no ignored implementation candidates.
 - User explicitly approved pushing this batch to public fork zhao0349/Folia,
-  running CI and updating existing upstream PR #1 after verification. This
-  resolves the previous automatic-approval rejection. Do not merge any PR.
-- Next concrete action: push the oracle and native commits to
-  the working branch, run all four standalone/integrated Windows jobs, fix
-  any failures, then fast-forward the existing PR branch only after verification.
-  Continue next with detectInit sanitization/diagram mapping and configuration
-  precedence, with official oracles; theme resolution follows that boundary.
+  running CI and updating existing upstream PR #1 after verification. Do not
+  merge any PR. This resolves the earlier automatic-approval rejection.
+- Working branch `codex/mermaid-cpp-directives` is pushed and preserved at
+  `ef0966b2188e3c9cebcb1c9d987dcc8fbceb5ceb`. Local `feat/mermaid-cpp-port`
+  was fast-forwarded after checking the remote PR branch remains an ancestor.
+  Delivery target: https://github.com/water2004/Folia/pull/1, keep OPEN.
+  Upstream base remains `508423f200f815beb7e686d64858501c58cef28b`.
+- Implemented isolated `detectDirective` calls with the all/init/wrap filters.
+  Original hash-locked `utils.ts` and `regexes.ts` generate 3,279 observations
+  across 1,093 inputs. Commit `6e4c1996` adds the oracle; `cda332c1` adds native
+  code, tests and CI. Detection/removal share one lexical capture scanner.
+- Owned ConfigValue trees retain strict JSON values and UTF-16 code units.
+  Syntax errors return absent type/null args and discard previous matches;
+  cumulative source/depth/value/string/directive budgets fail explicitly.
+  Calls intentionally avoid upstream global-regex lastIndex leakage following
+  an exception. The oracle models independent calls, not shared regex state.
+- Verified code/documentation head `ef0966b2188e3c9cebcb1c9d987dcc8fbceb5ceb`:
+  https://github.com/zhao0349/Folia/actions/runs/39886836325 passed all four
+  standalone/integrated Windows Debug/Release jobs. Integrated jobs passed
+  FoliaTests, FoliaWindowsEditorTests and both Mermaid suites; standalone jobs
+  passed both Mermaid suites. All four checked the source/SVG oracles, 78 native
+  SVG DOM comparisons and 96 same-host browser/DirectWrite measurement cases.
+  Local directive/source-text/preprocessing/frontmatter oracles and diff checks
+  pass. The final checkpoint-only commit does not change this tested code.
+- No live local builds/agents or ignored implementation candidates. Local
+  MSVC/CMake remain unavailable; native verification above ran in Windows CI.
+  Publishing the final documentation checkpoint may trigger an automatic CI
+  rerun; consult the live PR checks instead of treating this as a code change.
+- Next concrete implementation: pin `utils/sanitizeDirective.ts`,
+  `defaultConfig.ts` and its schema/default-key generation, then establish an
+  official sanitizer oracle before implementing init configuration handling.
+  Follow with detectInit diagram mapping, assignWithDepth/cleanAndMerge and
+  config.ts layer/appearance precedence; theme resolution follows that boundary.
+  No detectInit, sanitizer, config application, shared frontend or application
+  dependency switch is claimed. WinUI packaging/DPI acceptance remains pending.
 
 ## PR #1 review fixes verified (historical) - 2026-10-23
 
