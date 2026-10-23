@@ -654,11 +654,22 @@ list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/encoding/")
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/math/")
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/parsing/test_commonmark\\.cpp$")
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/parsing/test_gfm\\.cpp$")
+list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/parsing/test_gfm_pathological\\.cpp$")
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/parsing/test_md4c_reference\\.cpp$")
 target_sources(FoliaTests PRIVATE
     ${FOLIA_TEST_SRC})
 target_include_directories(FoliaTests PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+    ${CMAKE_CURRENT_SOURCE_DIR}/tests
+    "${CMAKE_CURRENT_BINARY_DIR}/gfm-entities")
+set(FOLIA_GFM_ENTITY_CASES "${CMAKE_CURRENT_BINARY_DIR}/gfm-entities/gfm_entity_cases.inc")
+add_custom_command(OUTPUT "${FOLIA_GFM_ENTITY_CASES}"
+    COMMAND python "${CMAKE_CURRENT_SOURCE_DIR}/tools/markdown-conformance/generate_pinned_gfm_entities.py"
+        --fetch --output "${FOLIA_GFM_ENTITY_CASES}"
+    DEPENDS tools/markdown-conformance/generate_pinned_gfm_entities.py
+        tools/markdown-conformance/gfm-sources.lock.json
+    VERBATIM)
+add_custom_target(FoliaGfmEntityFixtures DEPENDS "${FOLIA_GFM_ENTITY_CASES}")
+add_dependencies(FoliaTests FoliaGfmEntityFixtures)
 target_link_libraries(FoliaTests PRIVATE folia_core folia_math Boost::ut_module)
 if(MSVC)
     # Native math recursion tests must reach the explicit 512-call resource
@@ -944,7 +955,8 @@ add_custom_command(OUTPUT "${FOLIA_GFM_CASES}"
     DEPENDS tools/markdown-conformance/prepare_gfm.py tools/markdown-conformance/prepare.py
         tools/markdown-conformance/gfm-sources.lock.json
     VERBATIM)
-add_executable(FoliaGfmTests EXCLUDE_FROM_ALL tests/main.cpp tests/parsing/test_gfm.cpp "${FOLIA_GFM_CASES}")
+add_executable(FoliaGfmTests EXCLUDE_FROM_ALL
+    tests/main.cpp tests/parsing/test_gfm.cpp tests/parsing/test_gfm_footnotes.cpp "${FOLIA_GFM_CASES}")
 target_compile_features(FoliaGfmTests PRIVATE cxx_std_23)
 set_target_properties(FoliaGfmTests PROPERTIES CXX_MODULE_STD ON)
 target_include_directories(FoliaGfmTests PRIVATE tests "${CMAKE_CURRENT_BINARY_DIR}/gfm")
@@ -954,6 +966,26 @@ add_test(NAME FoliaGfmTests
         --executable "$<TARGET_FILE:FoliaGfmTests>"
         --output "${CMAKE_CURRENT_BINARY_DIR}/gfm-conformance")
 set_tests_properties(FoliaGfmTests PROPERTIES LABELS "gfm;conformance")
+
+# Full-size generated parser stress cases are isolated in one process per case
+# by the runner so a pathological input cannot hold the ordinary console suite.
+add_executable(FoliaGfmPathologicalTests EXCLUDE_FROM_ALL
+    tests/main.cpp tests/parsing/test_gfm_pathological.cpp)
+target_compile_features(FoliaGfmPathologicalTests PRIVATE cxx_std_23)
+set_target_properties(FoliaGfmPathologicalTests PROPERTIES CXX_MODULE_STD ON)
+target_include_directories(FoliaGfmPathologicalTests PRIVATE tests)
+target_link_libraries(FoliaGfmPathologicalTests PRIVATE folia_core Boost::ut_module)
+add_test(NAME FoliaGfmPathologicalTests
+    COMMAND python "${CMAKE_CURRENT_SOURCE_DIR}/tools/markdown-conformance/run_gfm_pathological.py"
+        --executable "$<TARGET_FILE:FoliaGfmPathologicalTests>"
+        --report "${CMAKE_CURRENT_BINARY_DIR}/gfm-pathological/results.json"
+        --timeout-seconds 30)
+set_tests_properties(FoliaGfmPathologicalTests PROPERTIES LABELS "gfm;generated;bounded")
+add_test(NAME FoliaGfmPathologicalRunnerTests
+    COMMAND python -m unittest discover
+        -s "${CMAKE_CURRENT_SOURCE_DIR}/tools/markdown-conformance/tests"
+        -p test_run_gfm_pathological.py)
+set_tests_properties(FoliaGfmPathologicalRunnerTests PROPERTIES LABELS "gfm;runner")
 
 option(FOLIA_BUILD_MD4C_REFERENCE_TESTS "Build md4c controls for failing official CommonMark cases" OFF)
 if(FOLIA_BUILD_MD4C_REFERENCE_TESTS)

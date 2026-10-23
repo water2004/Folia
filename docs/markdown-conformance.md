@@ -1,6 +1,76 @@
 # Markdown syntax conformance
 
-## Current checkpoint (2026-10-23, GFM formal tests)
+## Current checkpoint (2026-10-23, expanded GFM validation in progress)
+
+User requested all finer upstream cases and fixes. Starting Git checkpoint is
+984558a4. Production syntax/consumer fixes plus focused tests are committed as
+**5f455590**; corpus/runner integration is the next reviewable commit. Formal GFM corpus is now 1426:
+published 677, repository spec 672 (including two upstream-disabled task cases),
+extensions 30, regressions 26, smart punctuation 16, table-style option one,
+full-info option four. Every record has qualified ID, original numeric ID,
+pinned source/hash/license, profile and original/decoded tab spelling.
+
+Latest formal run: `build/gfm-conformance/expanded-final/results.json`, exit 0:
+**1395 strict pass, 20 explicit unscored HTML/no-oracle cases, 11 independently
+verified reference differences, zero unresolved differences**. Source checks:
+1426/1426 lossless CST, exact save and exact fixture-input binding. Nine older
+GFM nested-strong expectations conflict with exact same Markdown in pinned
+CommonMark 0.31.2; two old HTML-comment examples conflict with its current rule.
+Original GFM expectations and strict_diff remain visible; these eleven are
+neither passes nor skips. Policy validates independent modern expectations and
+all source invariants. Smart typography 16, tagfilter three, upstream <IGNORE>
+one are explicit unscored cases; none can hide a native/source failure.
+
+Production changes: table row syntax gaps + owner IDs (no body copies),
+remapping/formatting/history consumers; table bounds; TableCell code-escape
+projection with source-mapped hidden backslash; item-based task-list semantics
+and existing editing/export consumers; bounded bare-autolinks; exact one/two
+strikethrough delimiter runs; footnote first-line spaces. Test projection uses
+existing AST/CST for footnotes, style attrs and full code-info HTML attributes.
+NUL fixture truncation was fixed with byte-counted views, independently checked
+against full fixture input. Python contracts: **36 passed**.
+
+Current validation:
+- Core **638 tests / 59625 assertions**, exit 0,
+  `build/gfm-expanded/core-final.log` (all 2125 named entities executed).
+- CommonMark **652/652 strict, lossless and exact save**, exit 0,
+  `build/markdown-conformance/gfm-expanded-final/results.json`.
+- Windows editor **80 tests / 3429 assertions**, exit 0,
+  `build/gfm-expanded/platform-final.log`.
+- Formal GFM final **1395 strict pass / 20 unscored / 11 independently
+  verified reference differences / zero unresolved**, native all source checks
+  1426/1426. `build/gfm-conformance/expanded-final/results.json`, exit 0.
+- Python main contracts **36 passed**, isolated generated runner **8 passed**.
+
+Separate full-size generated-input suite is NOT complete. Root built
+`FoliaGfmPathologicalTests` and ran its timed per-process runner (10s diagnostics)
+in `build/gfm-expanded/generated-first.{json,log}`: first three emphasis cases
+exceeded 10s; link_closers native passed but ANSI skewed runner skipped counts
+(now fixed and contract tested); link_openers [a repeated 65000 ended with
+0xC00000FD. Broad evaluation stopped there; 16 later cases were not run.
+Do not count them as passes or rerun a broad evaluation until the abnormal case
+is diagnosed/fixed with a bounded focused run. Generated target remains excluded
+from default core. All generated fixtures stay in ignored build directories.
+
+No live native build. Root alone runs sequential builds, **parallel 4**.
+Active candidate-only owners:
+- Luna `gfm_autolink_impl`: `build/gfm-expanded/brackets/`, replace recursive
+  nested_link_after preflight with read-only, scope-indexed bracket matching;
+  preserve complete-inner-link precedence and incomplete CST/source behavior.
+- gpt-6.1-sol `gfm_emphasis_scaling`: `build/gfm-expanded/emphasis-scaling/`,
+  review/repair repeated emphasis scans and plan deep-pair iterative CST handling.
+  User allows Sol when needed; other work uses Luna. No native builds/Git by
+  agents. They must report design before implementation, never lower case sizes
+  or add source-specific conditions/depth-limit passes.
+
+Next: review candidate designs, fix and focus-test the generated link-opener
+exit, then address generated emphasis timeouts. Complete the remaining isolated
+cases without weakening their semantic/source assertions. Preserve verified
+CM/GFM behavior and local editing/history invariants. Candidate sources/inventory
+are in ignored `build/gfm-expanded/` and `build/gfm-expanded-source/`; use
+rg --no-ignore when locating deliveries. No MSI, push or version change requested.
+
+## Historical GFM 28-case baseline (2026-10-23)
 
 GFM extension **test integration and first full baseline are complete**. This
 batch changes test infrastructure only; it does not claim GFM implementation

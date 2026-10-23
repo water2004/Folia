@@ -99,10 +99,22 @@ def read_results(path):
 def case_result(example, fixture, result, skip_reason=None):
     """Bind report output to immutable fixture input and compute HTML semantics."""
     row = dict(result or {})
-    row['example'] = example
+    row['reported_markdown'] = result.get('markdown') if result is not None else None
+    row['reported_expected_html'] = result.get('expected_html') if result is not None else None
+    row['fixture_input_match'] = (
+        None if result is None else
+        result.get('markdown') == fixture['markdown'] and
+        result.get('expected_html') == fixture['html'])
+    row['native_id'] = fixture.get('native_id', example)
+    row['example'] = fixture['example']
+    row['id'] = fixture.get('id', f"commonmark:{fixture['example']}")
+    row['corpus'] = fixture.get('corpus', 'commonmark')
     row['section'] = fixture['section']
     row['markdown'] = fixture['markdown']
     row['expected_html'] = fixture['html']
+    row['source_markdown_raw'] = fixture.get('source_markdown_raw', fixture['markdown'])
+    row['source_html_raw'] = fixture.get('source_html_raw', fixture['html'])
+    row['fixture_transformations'] = fixture.get('fixture_transformations', [])
     row['expected'] = canonical_html(fixture['html'])
     row['actual'] = None
     row['serialized'] = row.get('serialized')
@@ -113,6 +125,19 @@ def case_result(example, fixture, result, skip_reason=None):
     row['reported'] = result is not None
     row['semantic_skip_reason'] = None
     row['source_lines'] = fixture.get('source_lines')
+    row['source_path'] = fixture.get('source_path')
+    row['upstream_extensions'] = fixture.get('upstream_extensions', [])
+    row['upstream_disabled'] = fixture.get('upstream_disabled', False)
+    row['native_profile'] = fixture.get('native_profile')
+    row['native_interface_gaps'] = fixture.get('native_interface_gaps', [])
+    row['license'] = fixture.get('license')
+    row['expected_html_ignore'] = fixture.get('expected_html_ignore', False)
+    reference_difference = fixture.get('reviewed_reference_difference')
+    row['reviewed_reference_difference'] = reference_difference
+    row['reference_current_expected_html'] = (
+        reference_difference.get('current_expected_html') if reference_difference else None)
+    row['reference_difference_html_match'] = None
+    row['reference_difference_verified'] = None
     row['semantic_match'] = None
     row['relaxed_list_match'] = None
     if result is not None and not row['error'] and isinstance(row.get('projected_html'), str):
@@ -121,6 +146,14 @@ def case_result(example, fixture, result, skip_reason=None):
         row['relaxed_list_match'] = (
             canonical_html(fixture['html'], relax_list_paragraphs=True) ==
             canonical_html(row['projected_html'], relax_list_paragraphs=True))
+        if reference_difference:
+            row['reference_difference_html_match'] = (
+                row['actual'] == canonical_html(reference_difference['current_expected_html']))
+            row['reference_difference_verified'] = (
+                row['reference_difference_html_match']
+                and row.get('fixture_input_match') is True
+                and row.get('inline_lossless') is True
+                and row.get('exact_serialization') is True)
     if skip_reason and result is not None and not row['error']:
         row['semantic_skip_reason'] = skip_reason
         row['semantic_match'] = None
@@ -135,7 +168,14 @@ def calculate_formal_exit_code(native_exit_code, cases, missing, unexpected, dup
     if native_exit_code != 0:
         return native_exit_code
     semantic_failed = any(
-        case.get('reported') and (case.get('semantic_match') is False or case.get('error'))
+        case.get('reported') and (
+            case.get('error') or case.get('fixture_input_match') is False
+            or case.get('inline_lossless') is not True
+            or case.get('exact_serialization') is not True
+            or (case.get('reviewed_reference_difference')
+                and case.get('reference_difference_verified') is not True)
+            or (case.get('semantic_match') is False
+                and case.get('reference_difference_verified') is not True))
         for case in cases)
     report_failed = bool(duplicates or malformed)
     if not filtered:
@@ -146,7 +186,9 @@ def calculate_formal_exit_code(native_exit_code, cases, missing, unexpected, dup
 def summarize(cases):
     by_section = defaultdict(list)
     for case in cases:
-        by_section[str(case['section'])].append(case)
+        section = str(case['section'])
+        key = f"{case['corpus']} / {section}" if case.get('corpus') else section
+        by_section[key].append(case)
     section_counts = {}
     for section, items in sorted(by_section.items()):
         section_counts[section] = {
@@ -162,6 +204,12 @@ def summarize(cases):
             'inline_lossless_fail': sum(item.get('inline_lossless') is False for item in items),
             'exact_serialization': sum(item.get('exact_serialization') is True for item in items),
             'exact_serialization_fail': sum(item.get('exact_serialization') is False for item in items),
+            'reference_difference_verified': sum(
+                item.get('reference_difference_verified') is True for item in items),
+            'unresolved_diff': sum(
+                bool(item.get('semantic_match') is False or
+                     (item.get('reviewed_reference_difference') and item.get('reported')))
+                and item.get('reference_difference_verified') is not True for item in items),
         }
     all_results = [case for items in by_section.values() for case in items]
     limitations = Counter(limit for case in all_results for limit in case.get('limitations', []))
@@ -169,10 +217,16 @@ def summarize(cases):
     difference_categories = {
         'only_list_tightness': [],
         'html_policy_or_projection': [],
+        'reviewed_reference_difference': [],
         'other_reported_projection_limit': [],
         'no_known_projection_limit': [],
     }
     for case in strict_diffs:
+        if case.get('reference_difference_verified') is True:
+            case['difference_category'] = 'reviewed_reference_difference'
+            difference_categories['reviewed_reference_difference'].append(
+                case.get('id', case['example']))
+            continue
         labels = [str(label).casefold() for label in case.get('limitations', [])]
         has_html_policy_label = any('html-policy/projection' in label for label in labels)
         other_labels = [label for label in labels if 'list-tightness' not in label]
@@ -185,7 +239,7 @@ def summarize(cases):
         else:
             category = 'no_known_projection_limit'
         case['difference_category'] = category
-        difference_categories[category].append(case['example'])
+        difference_categories[category].append(case.get('id', case['example']))
     return {
         'sections': section_counts,
         'totals': {
@@ -201,6 +255,17 @@ def summarize(cases):
             'inline_lossless_fail': sum(case.get('inline_lossless') is False for case in all_results),
             'exact_serialization': sum(case.get('exact_serialization') is True for case in all_results),
             'exact_serialization_fail': sum(case.get('exact_serialization') is False for case in all_results),
+            'fixture_input_mismatch': sum(case.get('fixture_input_match') is False for case in all_results),
+            'reference_difference_reported': sum(
+                case.get('reviewed_reference_difference') is not None and case.get('reported')
+                for case in all_results),
+            'reference_difference_verified': sum(
+                case.get('reference_difference_verified') is True for case in all_results),
+            'unresolved_diff': sum(
+                bool(case.get('semantic_match') is False or
+                     (case.get('reviewed_reference_difference') and case.get('reported')))
+                and case.get('reference_difference_verified') is not True
+                for case in all_results),
             'with_reported_limitations': sum(bool(case.get('limitations')) for case in all_results),
         },
         'limitations': dict(sorted(limitations.items())),
@@ -233,10 +298,15 @@ def markdown_report(report):
         '',
         '## Totals',
         '',
-        f"- Official examples: {report['fixture_count']}; records: {totals['reported']}; missing: {len(report['missing_examples'])}; malformed JSONL lines: {len(report['malformed_records'])}.",
+        f"- Fixture cases: {report['fixture_count']}; records: {totals['reported']}; missing: {len(report['missing_examples'])}; malformed JSONL lines: {len(report['malformed_records'])}.",
+        f"- Upstream-disabled cases retained and run: {report.get('upstream_disabled_fixture_count', 0)}.",
+        "- Cases by corpus: " + ", ".join(
+            f"{name} {count}" for name, count in report.get('fixture_counts_by_corpus', {}).items()) + ".",
         f"- Strict semantic matches: {totals['strict_pass']}; strict differences: {totals['strict_diff']}; explicit HTML skips: {totals['semantic_skipped']}; unreported: {totals['unreported']}.",
+        f"- Reviewed current-reference differences: {totals['reference_difference_verified']} verified; {totals['unresolved_diff']} unresolved strict/reference differences.",
         f"- List tight/loose diagnostic only (strict fail, relaxed list comparison passes): {totals['relaxed_list_only']}.",
         f"- Inline source lossless: {totals['inline_lossless']} pass, {totals['inline_lossless_fail']} fail; exact Markdown save serialization: {totals['exact_serialization']} pass, {totals['exact_serialization_fail']} fail.",
+        f"- Native-reported Markdown/expected HTML matched fixture bytes: {totals['reported'] - totals['fixture_input_mismatch']} pass, {totals['fixture_input_mismatch']} mismatch.",
         f"- Cases with one or more reported projection/implementation limitations: {totals['with_reported_limitations']}.",
         '',
         '## Sections',
@@ -251,7 +321,7 @@ def markdown_report(report):
     if not skipped:
         lines.append('None.')
     for case in skipped:
-        lines.append(f"- Example {case['example']} ({case['section']}): {case['semantic_skip_reason']}. Native source/CST/save assertions still run.")
+        lines.append(f"- {case.get('id', case['example'])} ({case['section']}): {case['semantic_skip_reason']}. Native source/CST/save assertions still run.")
     lines.extend(['', '## Difference categories', ''])
     if report['summary']['limitations']:
         lines.extend(['Reported limitations are counts of case-level limitation labels:'])
@@ -259,6 +329,13 @@ def markdown_report(report):
             lines.append(f'- `{label}`: {count}')
     else:
         lines.append('The formal test reported no per-case limitation labels.')
+    gaps = report.get('native_interface_gaps', {})
+    lines.extend(['', '## Missing native output options', ''])
+    if gaps:
+        for name, count in gaps.items():
+            lines.append(f'- {name}: {count} fixture cases retain and compare the pinned upstream expectation.')
+    else:
+        lines.append('None.')
     lines.extend(['', '## Sections with most strict differences', ''])
     worst = report['summary']['worst_sections']
     if worst:
@@ -276,7 +353,7 @@ def markdown_report(report):
     for case in diffs:
         diff = case.get('first_tree_difference') or {}
         lines.extend([
-            f"### Example {case['example']} — {case['section']}",
+            f"### {case.get('id', case['example'])} — {case['section']}",
             '',
             '**Markdown source:**',
             '',
@@ -307,10 +384,10 @@ def markdown_report(report):
             failed.append('inline source lossless')
         if case.get('exact_serialization') is False:
             failed.append('exact Markdown save serialization')
-        lines.append(f"- Example {case['example']} ({case['section']}): {', '.join(failed)}.")
+        lines.append(f"- {case.get('id', case['example'])} ({case['section']}): {', '.join(failed)}.")
     for case in incomplete:
         lines.extend([
-            f"### Example {case['example']} — {case['section']} raised an error",
+            f"### {case.get('id', case['example'])} — {case['section']} raised an error",
             '',
             f"Error: {case['error']}",
             '',
@@ -342,7 +419,7 @@ def main():
     policy = {}
     if args.suite == 'gfm':
         policy = json.loads((HERE / 'gfm-policy.json').read_text(encoding='utf-8'))['semantic_skips']
-        known = {str(case['example']): case for case in fixtures}
+        known = {case['id']: case for case in fixtures}
         for example, entry in policy.items():
             if example not in known or known[example]['section'] != entry['section'] or not entry['reason']:
                 raise ValueError('Invalid GFM semantic skip policy: ' + example)
@@ -388,16 +465,39 @@ def main():
         if number in indexed:
             duplicates.append(number)
         indexed[number] = item
-    all_cases = [case_result(case['example'], case, indexed.get(case['example']), policy.get(str(case['example']), {}).get('reason')) for case in fixtures]
+    native_to_fixture = {
+        case.get('native_id', case['example']): case for case in fixtures
+    }
+    all_cases = [
+        case_result(
+            case.get('native_id', case['example']),
+            case,
+            indexed.get(case.get('native_id', case['example'])),
+            policy.get(case.get('id', ''), {}).get('reason'))
+        for case in fixtures]
     present = set(indexed)
-    expected_ids = {case['example'] for case in fixtures}
-    missing = sorted(expected_ids - present)
-    unexpected = sorted(present - expected_ids)
+    expected_ids = set(native_to_fixture)
+    missing_native = sorted(expected_ids - present)
+    unexpected_native = sorted(present - expected_ids)
+    missing = [native_to_fixture[number]['id'] for number in missing_native]
+    unexpected = [
+        native_to_fixture[number]['id'] if number in native_to_fixture else number
+        for number in unexpected_native]
+    duplicate_ids = [
+        native_to_fixture[number]['id'] if number in native_to_fixture else number
+        for number in duplicates]
     semantic_failed = any(
-        case.get('reported') and (case.get('semantic_match') is False or case.get('error'))
+        case.get('reported') and (
+            case.get('error') or case.get('fixture_input_match') is False
+            or case.get('inline_lossless') is not True
+            or case.get('exact_serialization') is not True
+            or (case.get('reviewed_reference_difference')
+                and case.get('reference_difference_verified') is not True)
+            or (case.get('semantic_match') is False
+                and case.get('reference_difference_verified') is not True))
         for case in all_cases)
     formal_exit_code = calculate_formal_exit_code(
-        exit_code, all_cases, missing, unexpected, duplicates, malformed, bool(filters))
+        exit_code, all_cases, missing, unexpected, duplicate_ids, malformed, bool(filters))
     status = ('completed' if exit_code in (0, 1) and not timed_out and not launch_error
               else 'timed_out' if timed_out else 'abnormal_exit' if exit_code is not None
               else 'launch_error')
@@ -413,8 +513,14 @@ def main():
         'filtered': bool(filters),
         'filters': filters,
         'fixture_count': len(fixtures),
+        'fixture_counts_by_corpus': dict(sorted(Counter(
+            case.get('corpus', 'commonmark') for case in fixtures).items())),
+        'upstream_disabled_fixture_count': sum(
+            case.get('upstream_disabled', False) for case in fixtures),
+        'native_interface_gaps': dict(sorted(Counter(
+            gap for case in fixtures for gap in case.get('native_interface_gaps', [])).items())),
         'jsonl_record_count': len(raw),
-        'suite_title': 'GFM 0.29 extensions' if args.suite == 'gfm' else 'CommonMark 0.31.2',
+        'suite_title': 'GFM published page and pinned cmark-gfm corpora' if args.suite == 'gfm' else 'CommonMark 0.31.2',
         'source': lock if args.suite == 'gfm' else {
             'commonmark_version': lock['commonmark_version'],
             'spec_json_url': spec['url'],
@@ -426,7 +532,7 @@ def main():
         'comparison_scope': 'C++ projected HTML semantics canonicalized with the same Python HTMLParser used for official HTML; not the Folia WinUI HTML renderer.',
         'missing_examples': missing,
         'unexpected_examples': unexpected,
-        'duplicate_examples': sorted(set(duplicates)),
+        'duplicate_examples': sorted(set(map(str, duplicate_ids))),
         'malformed_records': malformed,
         'launch_error': launch_error,
         'summary': summarize(all_cases),

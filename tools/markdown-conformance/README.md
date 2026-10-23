@@ -68,30 +68,66 @@ also fail the run. The report retains `native_exit_code` separately. A timeout o
 abnormal process exit stops evaluation, retains any partial JSONL records, and
 marks the report incomplete.
 
-## GitHub Flavored Markdown extension tests
+## GitHub Flavored Markdown tests
 
-Run `cmd /c build_gfm_test.bat` (CTest: `FoliaGfmTests`). Reports default to
-`build/gfm-conformance/`; `--output` and positional Boost.UT filters work as above.
-The five extension sections of the [published GFM spec](https://github.github.com/gfm/)
-contain 28 examples. `prepare_gfm.py` reads its paired Markdown/HTML code samples,
-preserves the published IDs and source lines, and verifies the page hash in
-`gfm-sources.lock.json`. If the page changes, verification fails until its new
-contents are reviewed. The older cmark-gfm repository spec and extra corpus are
-listed separately in the lock; neither replaces the published examples.
+Run cmd /c build_gfm_test.bat (CTest: FoliaGfmTests). Reports default to
+build/gfm-conformance/; --output and positional Boost.UT filters work as above.
+The formal runner checks 1,426 paired cases from separate sources:
 
-The native test profile enables only GFM extensions over CommonMark. Tables,
-alignments, checkboxes and inline formatting project from Folia's actual block
-tree/CST into the official semantic comparison. Missing native syntax remains a
-formal failure; the projector never parses bare source to invent that syntax.
-`tests/parsing/test_gfm_native_projection.cpp` checks this mapping separately.
+| Corpus | Cases | Native mode |
+|---|---:|---|
+| All paired examples on the published GFM page | 677 | CommonMark baseline; each GFM extension section enables only that extension |
+| Pinned test/spec.txt | 672 | CommonMark baseline; extension examples follow their explicit tags or upstream section; two upstream-disabled task-list examples run with task lists enabled |
+| Pinned test/extensions.txt | 30 | GFM extensions plus footnotes |
+| Pinned test/smart_punct.txt | 16 | CommonMark mode; upstream --smart HTML typography option is an explicit semantic skip |
+| Pinned test/regression.txt | 26 | CommonMark; per-example extension tags are honored |
+| Pinned table style-attribute option spec | 1 | Tables; test projection emits the upstream `style` alignment attributes |
+| Pinned full-info-string option spec | 4 | CommonMark; test projection uses the preserved code info string for `data-meta` |
 
-`gfm-policy.json` explicitly skips the HTML comparison for #657: Folia's inert
-HTML presentation does not implement GitHub's tagfilter output spelling.
-All 28 native source/CST/save assertions still execute. Skip counts and reasons
-are separate from pass/fail/missing counts. A native error or source failure
-still fails the run. Current implementation differences are recorded in
-`docs/markdown-conformance.md`; the baseline is deliberately a failing formal
-test, not a marked-success reference or disabled suite.
+The published page retains all IDs 1–677, including examples 176 and 188 whose
+expected HTML is empty. The repository's 672 cases remain a distinct corpus.
+Each record has a corpus-qualified ID, original numeric ID, source path and line
+range, source strings, upstream enable/disable tags, license, and native profile.
+The native executable uses collision-free numeric IDs; reports restore the
+original IDs and provenance. Arrows in repository specs map to tabs as upstream
+does, and intentional CR characters are preserved. Files are SHA-256 locked in
+gfm-sources.lock.json.
+
+The pinned repository also registers C API, normalizer, pathological, entity,
+roundtrip, fuzz, and corpus-option tests. gfm-sources.lock.json inventories the
+complete test/ and api_test/ trees and exact CTest registration. The
+pathological suite contains 21 generated adversarial inputs; entity coverage
+contains 2,125 API lookups; API lifecycle tests and fuzz inputs have no paired
+HTML oracle, so the formal HTML runner reports them as separate migration
+targets rather than inventing expected output. Roundtrip tests reuse the
+extension source cases and add a Markdown serialization step.
+
+The published page's baseline examples and the upstream CommonMark baseline
+remain CommonMark; extension mode is enabled per section or upstream example
+tag. This preserves the published non-extension autolink examples' historical
+CommonMark interpretation. Smart punctuation is an optional HTML typography
+mode; all 16 exact upstream expectations remain in the report as explicit
+semantic skips because Folia does not apply `--smart` output substitutions.
+Table alignment style attributes and full-info-string `data-meta` are handled
+by test projection options over the existing AST and preserved block-source
+ranges. The three tagfilter examples (`published-gfm:657`, `cmark-spec:652`,
+`extensions:22`) are explicit HTML presentation skips because Folia does not
+serialize GitHub's tagfilter output. `extensions:20` is also an explicit skip
+because upstream supplies no HTML oracle for that case. All native
+source/CST/save assertions still execute for every skipped case. Upstream-
+disabled inputs and `<IGNORE>` expectations remain visible in reports.
+
+The nine reviewed nested-strong cases and published examples 649–650 retain
+their pinned GFM expectations and remain strict differences. The policy also
+records their separate CommonMark 0.31.2 reference expectations. For the nine
+strong-emphasis cases, the loader verifies exact Markdown and expected HTML
+against the hash-locked CommonMark examples. The malformed-comment references
+use the pinned CommonMark HTML-comment rule and explicit expected HTML. A
+`reference_difference_verified` result is neither a strict pass nor a skip: it
+means the actual projection matched that reviewed current reference and native
+input, lossless-source, and exact-save invariants passed. Every other mismatch
+remains an unresolved difference and fails the formal runner. Reports retain
+the original GFM expected HTML and strict-difference row.
 
 ## md4c diagnostic reference
 

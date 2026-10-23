@@ -1,8 +1,174 @@
 {
   "semantic_skips": {
-    "657": {
+    "published-gfm:657": {
       "section": "Disallowed Raw HTML (extension)",
-      "reason": "Folia uses inert HTML presentation and does not implement GitHub tagfilter HTML serialization. Only this HTML semantic comparison is skipped; native source, CST and exact-save assertions remain enabled."
+      "reason": "The upstream GFM tagfilter rewrites disallowed raw HTML for HTML serialization. Folia uses inert HTML presentation; this HTML presentation comparison is not counted as a pass, while native source/CST/exact-save assertions remain required."
+    },
+    "cmark-spec:652": {
+      "section": "Disallowed Raw HTML (extension)",
+      "reason": "The upstream GFM tagfilter rewrites disallowed raw HTML for HTML serialization. Folia uses inert HTML presentation; this HTML presentation comparison is not counted as a pass, while native source/CST/exact-save assertions remain required."
+    },
+    "extensions:22": {
+      "section": "HTML tag filter",
+      "reason": "The upstream GFM tagfilter rewrites disallowed raw HTML for HTML serialization. Folia uses inert HTML presentation; this HTML presentation comparison is not counted as a pass, while native source/CST/exact-save assertions remain required."
+    },
+    "smart-punctuation:1": {
+      "section": "Smart punctuation",
+      "reason": "The upstream --smart option changes rendered HTML typography only. Folia intentionally has no smart-typography projection mode; this HTML presentation comparison is not counted as a pass, while native source/CST/exact-save assertions remain required."
+    },
+    "smart-punctuation:2": {
+      "section": "Smart punctuation",
+      "reason": "The upstream --smart option changes rendered HTML typography only. Folia intentionally has no smart-typography projection mode; this HTML presentation comparison is not counted as a pass, while native source/CST/exact-save assertions remain required."
+    },
+    "smart-punctuation:3": {
+      "section": "Smart punctuation",
+      "reason": "The upstream --smart option changes rendered HTML typography only. Folia intentionally has no smart-typography projection mode; this HTML presentation comparison is not counted as a pass, while native source/CST/exact-save assertions remain required."
+    },
+    "smart-punctuation:4": {
+      "section": "Smart punctuation",
+      "reason": "The upstream --smart option changes rendered HTML typography only. Folia intentionally has no smart-typography projection mode; this HTML presentation comparison is not counted as a pass, while native source/CST/exact-save assertions remain required."
+    },
+    "smart-punctuation:5": {
+      "section": "Smart punctuation",
+      "reason": "The upstream --smart option changes rendered HTML typography only. Folia intentionally has no smart-typography projection mode; this HTML presentation comparison is not counted as a pass, while native source/CST/exact-save assertions remain required."
+    },
+    "smart-punctuation:6": {
+      "section": "Smart punctuation",
+      "reason": "The upstream --smart option changes rendered HTML typography only. Folia intentionally has no smart-typography projection mode; this HTML presentation comparison is not counted as a pass, while native source/CST/exact-save assertions remain required."
+    },
+    "smart-punctuation:7": {
+      "section": "Smart punctuation",
+      "reason": "The upstream --smart option changes rendered HTML typography only. Folia intentionally has no smart-typography projection mode; this HTML presentation comparison is not counted as a pass, while native source/CST/exact-save assertions remain required."
+    },
+    "smart-punctuation:8": {
+      "section": "Smart punctuation",
+      "reason": "The upstream --smart option changes rendered HTML typography only. Folia intentionally has no smart-typography projection mode; this HTML presentation comparison is not counted as a pass, while native source/CST/exact-save assertions remain required."
+    },
+    "smart-punctuation:9": {
+      "section": "Smart punctuation",
+      "reason": "The upstream --smart option changes rendered HTML typography only. Folia intentionally has no smart-typography projection mode; this HTML presentation comparison is not counted as a pass, while native source/CST/exact-save assertions remain required."
+    },
+    "smart-punctuation:10": {
+      "section": "Smart punctuation",
+      "reason": "The upstream --smart option changes rendered HTML typography only. Folia intentionally has no smart-typography projection mode; this HTML presentation comparison is not counted as a pass, while native source/CST/exact-save assertions remain required."
+    },
+    "smart-punctuation:11": {
+      "section": "Smart punctuation",
+      "reason": "The upstream --smart option changes rendered HTML typography only. Folia intentionally has no smart-typography projection mode; this HTML presentation comparison is not counted as a pass, while native source/CST/exact-save assertions remain required."
+    },
+    "smart-punctuation:12": {
+      "section": "Smart punctuation",
+      "reason": "The upstream --smart option changes rendered HTML typography only. Folia intentionally has no smart-typography projection mode; this HTML presentation comparison is not counted as a pass, while native source/CST/exact-save assertions remain required."
+    },
+    "smart-punctuation:13": {
+      "section": "Smart punctuation",
+      "reason": "The upstream --smart option changes rendered HTML typography only. Folia intentionally has no smart-typography projection mode; this HTML presentation comparison is not counted as a pass, while native source/CST/exact-save assertions remain required."
+    },
+    "smart-punctuation:14": {
+      "section": "Smart punctuation",
+      "reason": "The upstream --smart option changes rendered HTML typography only. Folia intentionally has no smart-typography projection mode; this HTML presentation comparison is not counted as a pass, while native source/CST/exact-save assertions remain required."
+    },
+    "smart-punctuation:15": {
+      "section": "Smart punctuation",
+      "reason": "The upstream --smart option changes rendered HTML typography only. Folia intentionally has no smart-typography projection mode; this HTML presentation comparison is not counted as a pass, while native source/CST/exact-save assertions remain required."
+    },
+    "smart-punctuation:16": {
+      "section": "Smart punctuation",
+      "reason": "The upstream --smart option changes rendered HTML typography only. Folia intentionally has no smart-typography projection mode; this HTML presentation comparison is not counted as a pass, while native source/CST/exact-save assertions remain required."
+    },
+    "extensions:20": {
+      "section": "Autolinks",
+      "reason": "The pinned upstream fixture marks this input <IGNORE> and supplies no HTML oracle. The source remains in the formal corpus; only semantic comparison is unscored, while native source/CST/exact-save assertions remain required."
+    }
+  },
+  "reviewed_reference_differences": {
+    "cmark-spec:398": {
+      "kind": "current-commonmark-reference",
+      "commonmark_version": "0.31.2",
+      "commonmark_example": 389,
+      "source_url": "https://spec.commonmark.org/0.31.2/#example-389",
+      "current_expected_html": "<p><strong>foo, <strong>bar</strong>, baz</strong></p>\n",
+      "policy": "Keep pinned GFM expected HTML and strict difference visible. Do not downgrade parser semantics or add a legacy mode. A reported case is reference-verified only when current projected HTML matches this pinned CommonMark HTML and native source/save invariants pass."
+    },
+    "cmark-spec:426": {
+      "kind": "current-commonmark-reference",
+      "commonmark_version": "0.31.2",
+      "commonmark_example": 417,
+      "source_url": "https://spec.commonmark.org/0.31.2/#example-417",
+      "current_expected_html": "<p>foo<strong><strong><strong>bar</strong></strong></strong>***baz</p>\n",
+      "policy": "Keep pinned GFM expected HTML and strict difference visible. Do not downgrade parser semantics or add a legacy mode. A reported case is reference-verified only when current projected HTML matches this pinned CommonMark HTML and native source/save invariants pass."
+    },
+    "cmark-spec:434": {
+      "kind": "current-commonmark-reference",
+      "commonmark_version": "0.31.2",
+      "commonmark_example": 425,
+      "source_url": "https://spec.commonmark.org/0.31.2/#example-425",
+      "current_expected_html": "<p><strong>foo <strong>bar</strong> baz</strong></p>\n",
+      "policy": "Keep pinned GFM expected HTML and strict difference visible. Do not downgrade parser semantics or add a legacy mode. A reported case is reference-verified only when current projected HTML matches this pinned CommonMark HTML and native source/save invariants pass."
+    },
+    "cmark-spec:435": {
+      "kind": "current-commonmark-reference",
+      "commonmark_version": "0.31.2",
+      "commonmark_example": 426,
+      "source_url": "https://spec.commonmark.org/0.31.2/#example-426",
+      "current_expected_html": "<p><strong><strong>foo</strong> bar</strong></p>\n",
+      "policy": "Keep pinned GFM expected HTML and strict difference visible. Do not downgrade parser semantics or add a legacy mode. A reported case is reference-verified only when current projected HTML matches this pinned CommonMark HTML and native source/save invariants pass."
+    },
+    "cmark-spec:436": {
+      "kind": "current-commonmark-reference",
+      "commonmark_version": "0.31.2",
+      "commonmark_example": 427,
+      "source_url": "https://spec.commonmark.org/0.31.2/#example-427",
+      "current_expected_html": "<p><strong>foo <strong>bar</strong></strong></p>\n",
+      "policy": "Keep pinned GFM expected HTML and strict difference visible. Do not downgrade parser semantics or add a legacy mode. A reported case is reference-verified only when current projected HTML matches this pinned CommonMark HTML and native source/save invariants pass."
+    },
+    "cmark-spec:473": {
+      "kind": "current-commonmark-reference",
+      "commonmark_version": "0.31.2",
+      "commonmark_example": 464,
+      "source_url": "https://spec.commonmark.org/0.31.2/#example-464",
+      "current_expected_html": "<p><strong><strong>foo</strong></strong></p>\n",
+      "policy": "Keep pinned GFM expected HTML and strict difference visible. Do not downgrade parser semantics or add a legacy mode. A reported case is reference-verified only when current projected HTML matches this pinned CommonMark HTML and native source/save invariants pass."
+    },
+    "cmark-spec:474": {
+      "kind": "current-commonmark-reference",
+      "commonmark_version": "0.31.2",
+      "commonmark_example": 465,
+      "source_url": "https://spec.commonmark.org/0.31.2/#example-465",
+      "current_expected_html": "<p><strong><strong>foo</strong></strong></p>\n",
+      "policy": "Keep pinned GFM expected HTML and strict difference visible. Do not downgrade parser semantics or add a legacy mode. A reported case is reference-verified only when current projected HTML matches this pinned CommonMark HTML and native source/save invariants pass."
+    },
+    "cmark-spec:475": {
+      "kind": "current-commonmark-reference",
+      "commonmark_version": "0.31.2",
+      "commonmark_example": 466,
+      "source_url": "https://spec.commonmark.org/0.31.2/#example-466",
+      "current_expected_html": "<p><strong><strong><strong>foo</strong></strong></strong></p>\n",
+      "policy": "Keep pinned GFM expected HTML and strict difference visible. Do not downgrade parser semantics or add a legacy mode. A reported case is reference-verified only when current projected HTML matches this pinned CommonMark HTML and native source/save invariants pass."
+    },
+    "cmark-spec:477": {
+      "kind": "current-commonmark-reference",
+      "commonmark_version": "0.31.2",
+      "commonmark_example": 468,
+      "source_url": "https://spec.commonmark.org/0.31.2/#example-468",
+      "current_expected_html": "<p><em><strong><strong>foo</strong></strong></em></p>\n",
+      "policy": "Keep pinned GFM expected HTML and strict difference visible. Do not downgrade parser semantics or add a legacy mode. A reported case is reference-verified only when current projected HTML matches this pinned CommonMark HTML and native source/save invariants pass."
+    },
+    "published-gfm:649": {
+      "kind": "current-commonmark-html-comment-reference",
+      "commonmark_version": "0.31.2",
+      "source_url": "https://spec.commonmark.org/0.31.2/#html-comment",
+      "current_expected_markdown": "foo <!-- not a comment -- two hyphens -->\n",
+      "current_expected_html": "<p>foo <!-- not a comment -- two hyphens --></p>\n",
+      "policy": "Apply the 0.31.2 HTML-comment grammar. This explicit expected HTML is derived from the specification rule (the body may not contain the terminator `-->`; `<!-->` is a complete special comment). Keep pinned GFM expected HTML and strict difference visible; do not add a legacy mode."
+    },
+    "published-gfm:650": {
+      "kind": "current-commonmark-html-comment-reference",
+      "commonmark_version": "0.31.2",
+      "source_url": "https://spec.commonmark.org/0.31.2/#html-comment",
+      "current_expected_markdown": "foo <!--> foo -->\n\nfoo <!-- foo--->\n",
+      "current_expected_html": "<p>foo <!--> foo --&gt;</p>\n<p>foo <!-- foo---></p>\n",
+      "policy": "Apply the 0.31.2 HTML-comment grammar. This explicit expected HTML is derived from the specification rule (the body may not contain the terminator `-->`; `<!-->` is a complete special comment). Keep pinned GFM expected HTML and strict difference visible; do not add a legacy mode."
     }
   }
 }
