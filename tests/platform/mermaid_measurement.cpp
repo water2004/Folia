@@ -19,7 +19,9 @@ suite mermaid_measurement = [] {
             {"parallel",u"flowchart TD\nA[Source] -->|one| B[Target]\nA -. two .-> B"},
             {"unicode",u"flowchart LR\nA[\u4e2d\u6587] --> B[Caf\u00e9 \U0001f600]"},
         };
-        for(const auto theme:{u"default",u"dark"}) for(const auto& [name,body]:cases) {
+        for(const auto theme:{u"default",u"dark"}) for(const auto& sample:cases) {
+            const auto& name=sample.first;
+            const auto& body=sample.second;
             const auto source=std::u16string(u"---\nconfig:\n  theme: ")+theme+
                 u"\n  look: classic\n  layout: dagre\n  fontFamily: Arial\n  themeVariables: {fontFamily: Arial}\n  flowchart: {htmlLabels: true}\n---\n"+body;
             const auto svg=render_mermaid(source,*session);
