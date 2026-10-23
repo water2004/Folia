@@ -69,6 +69,11 @@ add([op('set',{lazyLoadedDiagrams:true}),op('reset'),op('set',{loadExternalDiagr
 add([op('site',{fontFamily:'A\ud800\n\u2028\udc00'}),op('set',{fontFamily:'B\ud800'}),op('reset')]);
 add([op('site',{sequence:{messageFont:'plain-data'}}),op('update',{sequence:{messageFont:false}}),op('reset')]);
 add([op('site',{fontFamily:"A'}%%\u2029B"}),op('get'),op('reset')]);
+for(const variables of [{lineColor:null},{custom:[1,1,2]},{custom:[null,null,false,false]},
+  {xyChart:{custom:null,titleColor:null}},{packet:{custom:null}}]) {
+  add([op('save',{themeVariables:variables}),op('site',{theme:'dark',themeVariables:variables}),
+    op('get'),op('set',{theme:'default',themeVariables:variables}),op('reset')]);
+}
 let seed=0x516e123;
 const random=()=>seed=(Math.imul(seed,1664525)+1013904223)>>>0;
 for(let i=0;i<24;i++) {

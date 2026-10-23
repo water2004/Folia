@@ -292,7 +292,7 @@ does not independently derive a theme. Deprecated-diagram warnings are exposed
 as a once-per-session flag, without a process-global logger.
 
 The session oracle executes the complete original module in fresh VM scopes.
-Its 96 scenarios / 615 steps compare full site/current/user JSON-data state and
+Its 101 scenarios / 640 steps compare full site/current/user JSON-data state and
 warning counts. Lossless recursive deltas and interned strings reduce fixture
 size without hashes or selected-field sampling. Generated native defaults are
 the original defaults' data projection: undefined properties and family font
@@ -303,6 +303,8 @@ otherwise change the original type-sensitive merge. Primitive overrides still
 follow the original behavior. Source getters' mutation aliases and
 partially applied failures are deliberately replaced with independent owned
 values and transactional errors.
+Getter copies retain the original `assignWithDepth` behavior (including skipped
+null fields and primitive array union), rather than exposing raw stored trees.
 
 Session command inputs are mappings. Arrays contain primitives; nested input
 containers stop at depth two (root zero), before `assignWithDepth` could retain

@@ -7,6 +7,13 @@
 - Verification branch `codex/mermaid-cpp-session`, delivery branch remains
   `feat/mermaid-cpp-port` at `d0dc8920`. Baseline delivery CI 39901224923
   passed all four Windows jobs; upstream PR is open at that delivery head.
+- Previous verification head `4354acb776ab9c13c9ada795b1e9da3de270cbec` passed
+  all four jobs of https://github.com/zhao0349/Folia/actions/runs/39906574476.
+  DO NOT deliver yet: new getter regression cases reveal a source-contract gap.
+  Pending tracked changes make getters perform assignWithDepth copies, as the
+  original does, rather than return raw stored trees. They now return expected
+  results for bounded copy failures. Next: commit and push this focused fix,
+  then rerun all four Windows jobs before delivery. No live local processes.
 - Selected boundary: original config.ts lifecycle, owned per-session state,
   default/dark re-derivation, scoped appearance, secure directive replay,
   initialize snapshots and reset. No global singleton or renderer integration.
@@ -14,29 +21,32 @@
   dependencies. Compare full JSON-data state via lossless recursive deltas,
   not selected properties. Defaults omit undefined values and family callbacks;
   those callbacks are never invoked by this session boundary.
-- Native restrictions will explicitly exclude unported theme derivation,
+- Native restrictions explicitly exclude unported theme derivation,
   non-mapping command inputs, object arrays and containers below depth two
   that would require JS cross-layer identity; secure keys must be string lists.
   Native failures are transactional; caller inputs/getter results own their data.
-- Oracle `5f25dad7` completed: 69 scenarios / 584 steps, with generated default
-  data; local oracle check passes. Native lifecycle/ownership/budget tests are
-  committed in `653cacbe` and pushed to the verification branch. Windows CI
-  https://github.com/zhao0349/Folia/actions/runs/39905882983 is running on that
-  head. Native compilation passed; tests failed in fixture transport at a raw
+- Small commits: `5f25dad7` official oracle/default data; `653cacbe` native
+  lifecycle and ownership/budget tests; `4354acb7` callback guard and fixture
+  transport. The superseded 39905882983 run is cancelled: native compilation
+  passed, but tests failed in fixture transport at a raw
   Unicode line separator, which the reused directive JSON codec treats as a
   lexical delimiter. This is a harness issue, not a session semantic mismatch.
-  Local MSVC/CMake are still unavailable. No agents, local builds/processes or
-  ignored implementation candidates are live.
-- Follow-up under review (not yet committed): original defaults include 25 font
+  Local MSVC/CMake are still unavailable. Do not rerun that superseded head.
+- Original defaults include 25 font
   callbacks. A generated callback-slot table rejects container overrides that
   would otherwise change assignWithDepth's callable-vs-object behavior; scalar
-  replacements remain supported. Oracle now has 96 scenarios / 615 steps.
+  replacements remain supported. Oracle now has 101 scenarios / 640 steps;
+  its local check passes. Additional cases cover null theme fields and duplicate
+  primitive arrays in getter copies (top-level null omitted, array values union).
 - Escaping directive delimiters/line separators in fixture JSON preserves the
   decoded data. Downloaded original Release runner passes the corrected original
   584 steps and all three focused session tests (4,496 assertions), under
   `build/mermaid-cpp/session-review/{fixtures,focused.log}`. The newer callback
-  guard still needs fresh CI. Next: commit the guard/harness fixes, rerun four
-  Windows jobs, then deliver only a passing head. No abnormal native exit.
+  guard passed the previous CI. No abnormal native exit.
+- `build/mermaid-cpp/session-getter-review/FoliaMermaidTests.exe` is the old
+  4354acb7 Release runner. It exposes 12 real getter mismatches on the new cases
+  (plus the expected 640-vs-615 fixture-count mismatch); evidence is
+  `before-fix.log`. Do not mistake this old executable for the pending fix.
 
 ## Init mapping and clean merge verified (historical)
 

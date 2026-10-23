@@ -30,8 +30,10 @@ std::string delta(const ConfigValue* value, const ConfigValue* base) {
 std::string state(const ConfigSession& session, const ConfigValue& baseline) {
     const auto site = session.site_config(), current = session.current_config();
     const auto user = session.user_config();
+    if (!site) throw std::runtime_error(site.error());
+    if (!current) throw std::runtime_error(current.error());
     if (!user) throw std::runtime_error(user.error());
-    return delta(&site, &baseline) + "|" + delta(&current, &baseline) + "|" + snapshot(*user) +
+    return delta(&*site, &baseline) + "|" + delta(&*current, &baseline) + "|" + snapshot(*user) +
         "|" + (session.deprecated_diagrams_warning() ? "1" : "0");
 }
 std::expected<void, std::string> run(ConfigSession& session, const ConfigValue& step) {
@@ -101,29 +103,33 @@ suite config_session = [] {
                         references.remove_prefix(split + 1);
                     }
                     expected += references;
-                    expect(state(*session, defaults) == expected) << scenario << fields[1]
-                        << state(*session, defaults) << expected;
+                    const auto actual = state(*session, defaults);
+                    const auto mismatch = std::mismatch(actual.begin(), actual.end(), expected.begin(), expected.end());
+                    const auto offset = static_cast<std::size_t>(mismatch.first - actual.begin());
+                    expect(actual == expected) << scenario << fields[1] << "at" << offset
+                        << actual.substr(offset, 100) << expected.substr(offset, 100);
                 }
             }
             ++count;
         }
-        expect(count == 615_u); expect(baselines == 1_u);
+        expect(count == 640_u); expect(baselines == 1_u);
     };
     "mermaid_config_session_owned_results_and_isolated_instances"_test = [] {
         auto a = ConfigSession::create(), b = ConfigSession::create();
         expect(fatal(a.has_value() && b.has_value()));
-        const auto defaults = default_session_config(), original = b->current_config();
+        const auto original = b->current_config();
+        expect(fatal(original.has_value()));
         auto conf = json(uR"({"theme":"dark","themeVariables":{"primaryColor":"#123"}})");
         expect(a->save_initialize_config(conf).has_value());
         expect(a->set_site_config(conf).has_value());
         conf.mapping.clear();
-        auto returned = a->current_config(); returned.mapping.clear();
+        auto returned = a->current_config(); expect(fatal(returned.has_value())); returned->mapping.clear();
         auto user = a->user_config(); expect(fatal(user.has_value())); user->mapping.clear();
-        expect(a->current_config().find(u"theme")->string == std::u16string{u"dark"});
-        expect(snapshot(b->current_config()) == snapshot(original));
+        expect(a->current_config()->find(u"theme")->string == std::u16string{u"dark"});
+        expect(snapshot(*b->current_config()) == snapshot(*original));
         auto c = *a;
         expect(a->set_config(json(uR"({"theme":"default"})")).has_value());
-        expect(c.current_config().find(u"theme")->string == std::u16string{u"dark"});
+        expect(c.current_config()->find(u"theme")->string == std::u16string{u"dark"});
         expect(c.set_diagram_scope(u"flowchart-v2").has_value());
         expect(c.reset().has_value());
         expect(snapshot(*c.user_config()) != snapshot(json(u"{}")));

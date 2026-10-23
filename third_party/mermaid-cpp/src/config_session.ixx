@@ -20,8 +20,10 @@ public:
     static std::expected<ConfigSession, std::string> create(ConfigSessionLimits limits = {});
     // Returned trees and inputs never alias session state. A failed command
     // leaves every state field, including saved directives and warnings, intact.
-    ConfigValue site_config() const { return site_; }
-    ConfigValue current_config() const { return current_; }
+    // Match original assignWithDepth getter copies, including skipped null
+    // fields and primitive array union; these are not raw state snapshots.
+    std::expected<ConfigValue, std::string> site_config() const;
+    std::expected<ConfigValue, std::string> current_config() const;
     std::expected<ConfigValue, std::string> user_config() const;
     bool deprecated_diagrams_warning() const { return warned_; }
 

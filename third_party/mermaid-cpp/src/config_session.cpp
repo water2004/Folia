@@ -98,6 +98,12 @@ std::expected<ConfigValue, std::string> ConfigSession::user_config() const {
         return result;
     } catch (const std::exception& error) { return std::unexpected(error.what()); }
 }
+std::expected<ConfigValue, std::string> ConfigSession::site_config() const {
+    return assign_config_with_depth(map(), site_, 2, limits_.config);
+}
+std::expected<ConfigValue, std::string> ConfigSession::current_config() const {
+    return assign_config_with_depth(map(), current_, 2, limits_.config);
+}
 std::expected<void, std::string> ConfigSession::apply(Operation operation, const ConfigValue* input,
     std::optional<std::u16string_view> scope) {
     try {
