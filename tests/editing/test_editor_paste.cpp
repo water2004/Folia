@@ -45,7 +45,8 @@ suite editor_paste_tests = [] {
     expect(fatal(bool(counters.full_document_parses == 0u)));
     expect(fatal(bool(counters.full_document_serializations == 0u)));
     expect(fatal(bool(counters.full_tree_transaction_diffs == 0u)));
-    expect(fatal(bool(counters.inline_reparses == 3u)));
+    // One parse for the clipboard fragment and one for the edited owner.
+    expect(counters.inline_reparses == 2u) << counters.inline_reparses;
     expect(fatal(bool(transaction->operations.size() == 1u)));
     expect(fatal(bool(std::holds_alternative<DocumentTextOperation>(transaction->operations.front()))));
     expect(fatal(bool(editor.markdown_utf8() == "aXb")));

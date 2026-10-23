@@ -1,4 +1,4 @@
-// folia.core.block_line_recognizer — read-only Markdown block line recognition.
+﻿// folia.core.block_line_recognizer — read-only Markdown block line recognition.
 //
 // This scanner classifies physical lines. It never allocates document nodes,
 // advances parser state, or owns source coordinates.
@@ -65,19 +65,30 @@ public:
 
     bool line_is_thematic_break(std::size_t start, std::size_t* end = nullptr) const {
         const auto line_end = line_content_end(start);
-        std::size_t cursor = start;
-        std::size_t leading_spaces = 0;
-        while (cursor < line_end && source[cursor] == U' ' && leading_spaces < 4) {
+        auto cursor = start;
+        std::size_t indentation = 0;
+        while (cursor < line_end && source[cursor] == U' ' && indentation < 4) {
             ++cursor;
-            ++leading_spaces;
+            ++indentation;
         }
-        if (leading_spaces > 3 || cursor >= line_end) return false;
-        auto marker = source[cursor];
+        if (indentation > 3 || cursor >= line_end) return false;
+        const auto marker = source[cursor];
         if (marker != U'-' && marker != U'*' && marker != U'_') return false;
         std::size_t count = 0;
-        while (cursor < line_end && source[cursor] == marker) { ++count; ++cursor; }
-        while (cursor < line_end && (source[cursor] == U' ' || source[cursor] == U'\t')) ++cursor;
-        if (cursor != line_end || count < 3) return false;
+        bool need_marker = false;
+        while (cursor < line_end) {
+            if (source[cursor] == marker) {
+                ++count;
+                need_marker = false;
+                ++cursor;
+            } else if ((source[cursor] == U' ' || source[cursor] == U'\t') && !need_marker) {
+                need_marker = true;
+                while (cursor < line_end && (source[cursor] == U' ' || source[cursor] == U'\t')) ++cursor;
+            } else {
+                return false;
+            }
+        }
+        if (count < 3) return false;
         if (end) *end = line_end;
         return true;
     }

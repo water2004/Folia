@@ -976,7 +976,9 @@ add_executable(FoliaGfmPathologicalTests EXCLUDE_FROM_ALL
     tests/main.cpp tests/parsing/test_gfm_pathological.cpp
     tests/parsing/test_inline_cst_ownership.cpp
     tests/parsing/test_deep_block_ownership.cpp
-    tests/parsing/test_parser_completion.cpp)
+    tests/parsing/test_parser_completion.cpp
+    tests/parsing/test_parser_container_frames.cpp
+    tests/parsing/test_block_line_thematic.cpp)
 target_compile_features(FoliaGfmPathologicalTests PRIVATE cxx_std_23)
 set_target_properties(FoliaGfmPathologicalTests PROPERTIES CXX_MODULE_STD ON)
 target_include_directories(FoliaGfmPathologicalTests PRIVATE tests)
@@ -993,6 +995,12 @@ set_tests_properties(FoliaInlineCstOwnershipTests PROPERTIES LABELS "gfm;generat
 add_test(NAME FoliaParserCompletionTests
     COMMAND FoliaGfmPathologicalTests "*parser_completion_matches_serializer_and_exact_save*")
 set_tests_properties(FoliaParserCompletionTests PROPERTIES LABELS "gfm;generated;bounded" TIMEOUT 30)
+add_test(NAME FoliaParserContainerFrameTests
+    COMMAND FoliaGfmPathologicalTests "*container_frame*")
+set_tests_properties(FoliaParserContainerFrameTests PROPERTIES LABELS "gfm;parser;bounded" TIMEOUT 30)
+add_test(NAME FoliaBlockLineThematicTests
+    COMMAND FoliaGfmPathologicalTests "*block_line_thematic*")
+set_tests_properties(FoliaBlockLineThematicTests PROPERTIES LABELS "gfm;parser;bounded" TIMEOUT 30)
 add_test(NAME FoliaDeepBlockOwnershipTests
     COMMAND FoliaGfmPathologicalTests "*deep_block_ownership_copy_move_clear_and_traversal*")
 set_tests_properties(FoliaDeepBlockOwnershipTests PROPERTIES LABELS "gfm;generated;bounded" TIMEOUT 30)
