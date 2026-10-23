@@ -24,6 +24,10 @@ suite mermaid_measurement = [] {
             {"reverse",u"flowchart RL\nA[First] -->|next| B[Second]"},
             {"upward",u"flowchart BT\nA[First] --> B[Second]"},
             {"parallel",u"flowchart TD\nA[Source] -->|one| B[Target]\nA -. two .-> B"},
+            {"loop-down",u"flowchart TD\nA[Retry] -->|again| A\nA --> B[Done]"},
+            {"loop-right",u"flowchart LR\nA((Retry)) -->|again| A\nA --> B[Done]"},
+            {"loop-left",u"flowchart RL\nA[Retry] --> A\nA --> B[Done]"},
+            {"loop-up",u"flowchart BT\nA{Retry?} -->|yes| A\nA --> B[Done]"},
             {"unicode",u"flowchart LR\nA[\u4e2d\u6587] --> B[Caf\u00e9 \U0001f600]"},
         };
         for(const auto theme:{u"default",u"dark"}) for(const auto& sample:cases) {
@@ -47,7 +51,7 @@ suite mermaid_measurement = [] {
         const std::u16string prefix=u"---\nconfig: {theme: default, look: classic, layout: dagre, fontFamily: Arial}\n---\n";
         expect(!render_mermaid(prefix+u"flowchart TD\nA-->",*session))<<"unfinished edge";
         expect(!render_mermaid(prefix+u"flowchart TD\nsubgraph G\nA-->B\nend",*session))<<"cluster adapter";
-        expect(!render_mermaid(prefix+u"flowchart TD\nA-->A",*session))<<"self-loop adapter";
+        expect(render_mermaid(prefix+u"flowchart TD\nA-->A",*session).has_value())<<"self-loop adapter";
         const auto recovered=render_mermaid(prefix+u"flowchart TD\nA-->B",*session);
         expect(recovered.has_value())<<"request after errors"<<(recovered?"":recovered.error());
     };

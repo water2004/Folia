@@ -67,7 +67,10 @@ diagrams, including compound groups and all four directions.
 The first measured Flowchart SVG stage supports explicit `layout: dagre` and
 `look: classic`, default/dark themes, square/rounded/diamond/circle nodes,
 single-line plain labels, basis/linear paths, point/plain arrow ends, and
-normal/thick/dotted/invisible links. Real DirectWrite widths, line heights and
+normal/thick/dotted/invisible links, and compact merged self loops. Self loops
+use the original three-segment Dagre graph for placement, then the original
+dummy-node side selection, compact path and label-offset rules for one logical
+SVG edge. Real DirectWrite widths, line heights and
 baselines drive rendering; the plain HTML-label spacing mode retains Mermaid's
 CSS line height and minimum node width while emitting native SVG text. There is
 no browser runtime, HTML execution or character-count measurement in production.
@@ -86,8 +89,8 @@ executes the pinned original prepareLayoutForDagre/mermaid-graphlib functions on
 representative nested, independent, externally connected and self-loop inputs.
 This preparation API does not itself measure, lay out or paint the nested tree.
 
-Measured cluster and merged self-loop SVG adapters and complete Flowchart
-rendering remain pending. The initial SVG entry explicitly rejects groups, self loops,
+Measured cluster SVG adapters and complete Flowchart rendering remain pending.
+The initial SVG entry explicitly rejects groups,
 titles, custom styles, rich/multiline/wrapped labels, other classic shapes and
 markers, and non-classic looks; it does not silently drop these features.
 The complete existing family requirements remain unchanged. The rank/layout

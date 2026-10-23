@@ -3,6 +3,7 @@ import std;
 import folia.mermaid.svg_text;
 import folia.mermaid.number;
 import folia.mermaid.theme_color;
+import folia.mermaid.flowchart_graph;
 
 namespace folia::mermaid {
 namespace {
@@ -49,6 +50,66 @@ void shorten(FlowchartPoint& p,FlowchartPoint neighbor,double amount) {
     const auto dx=neighbor.x-p.x,dy=neighbor.y-p.y,length=std::hypot(dx,dy);
     if(length>0) {p.x+=amount*dx/length;p.y+=amount*dy/length;}
 }
+// prepareLayoutForDagre supplies the actual layout graph, including its two
+// labelRect dummy nodes per self loop. getEdgesToRender then collapses the
+// three segments into one compact logical loop using the dummy placement hint.
+std::expected<FlowchartLayout,std::string> layout_for_svg(const FlowchartInput& source,
+    std::span<const FlowchartNodeBox> boxes,std::span<const FlowchartEdgeLabelSize> labels) {
+    auto prepared=prepare_flowchart_graph(source);
+    if(!prepared) return std::unexpected(prepared.error());
+    const auto& graph=prepared->graph;
+    if(!graph.subgraphs.empty()) return std::unexpected("Flowchart recursive SVG clusters require the cluster painter");
+    FlowchartInput input;input.direction=graph.direction;
+    input.node_spacing=graph.node_spacing;input.rank_spacing=graph.rank_spacing;
+    std::vector<FlowchartNodeBox> layout_boxes;
+    std::vector<FlowchartEdgeLabelSize> layout_labels;
+    std::unordered_map<std::u16string,std::size_t> ids;
+    for(const auto& n:graph.nodes) {
+        ids.emplace(n.data.id,input.nodes.size());input.nodes.push_back(n.data);
+        // labelRect.ts measures its deliberately hidden rectangle, not text.
+        layout_boxes.push_back(n.source_index?boxes[*n.source_index]:FlowchartNodeBox{0.1,0.1});
+    }
+    for(const auto& e:graph.edges) {
+        input.edges.push_back(e.data);
+        layout_labels.push_back(e.loop_segment==0||e.loop_segment==2?FlowchartEdgeLabelSize{}:labels[e.source_index]);
+    }
+    auto placed=layout_flowchart(input,layout_boxes,layout_labels);
+    if(!placed) return std::unexpected(placed.error());
+    FlowchartLayout result;result.width=placed->width;result.height=placed->height;
+    result.nodes.resize(source.nodes.size());result.edges.resize(source.edges.size());
+    for(std::size_t i=0;i<graph.nodes.size();++i) if(graph.nodes[i].source_index)
+        result.nodes[*graph.nodes[i].source_index]=placed->nodes[i];
+    for(std::size_t i=0;i<graph.edges.size();++i) {
+        const auto& e=graph.edges[i];
+        if(e.loop_segment==-1) {result.edges[e.source_index]=placed->edges[i];continue;}
+        if(e.loop_segment!=1) continue;
+        const auto& original=source.edges[e.source_index];
+        const auto& node=placed->nodes[ids.at(original.start)];
+        const auto& first=placed->nodes[ids.at(e.data.start)];
+        const auto& second=placed->nodes[ids.at(e.data.end)];
+        const double dx=(first.x+second.x)/2-node.x,dy=(first.y+second.y)/2-node.y;
+        enum class Side {top,bottom,left,right};
+        Side side=source.direction==u"BT"?Side::bottom:source.direction==u"LR"?Side::right:
+            source.direction==u"RL"?Side::left:Side::top;
+        if(std::abs(dx)>std::abs(dy)) side=dx>0?Side::right:Side::left;
+        else if(std::abs(dy)>0) side=dy>0?Side::bottom:Side::top;
+        const auto label=labels[e.source_index];
+        const double max_span=std::max(36.0,std::min(100.0,node.width*0.8));
+        const double span=std::clamp(std::max(label.width,node.width*0.35),36.0,max_span);
+        const double depth=std::clamp(std::min(node.width,node.height)*0.45,24.0,48.0);
+        auto& out=result.edges[e.source_index];
+        if(side==Side::left||side==Side::right) {
+            const double sign=side==Side::right?1.0:-1.0,x=node.x+sign*node.width/2;
+            out.points={{x,node.y-span/2},{x+sign*depth,node.y-span/2},{x+sign*depth,node.y+span/2},{x,node.y+span/2}};
+            if(!original.label.empty()) out.label=FlowchartPoint{x+sign*(depth+label.width/2+4),node.y};
+        } else {
+            const double sign=side==Side::bottom?1.0:-1.0,y=node.y+sign*node.height/2;
+            out.points={{node.x-span/2,y},{node.x-span/2,y+sign*depth},{node.x+span/2,y+sign*depth},{node.x+span/2,y}};
+            if(!original.label.empty()) out.label=FlowchartPoint{node.x,y+sign*(depth+label.height/2+4)};
+        }
+    }
+    return result;
+}
 }
 
 std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRenderInput& input,const FlowchartMeasurements& measured) {
@@ -85,14 +146,13 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
             const auto& e=graph.edges[i];const auto& b=measured.edges[i];
             plain_label(e.label,e.label_type);
             if(!valid_box(b)) return std::unexpected("Invalid measured Flowchart edge label");
-            if(e.start==e.end) return std::unexpected("Flowchart SVG self loops require the Mermaid self-loop adapter");
             if(!e.styles.empty()||!e.compiled_styles.empty()) return std::unexpected("Flowchart custom edge styles require the style adapter");
             if(e.curve!=u"basis" && e.curve!=u"linear" && !e.curve.empty()) return std::unexpected("Flowchart SVG curve is not implemented yet");
             for(auto arrow:{e.arrow_start,e.arrow_end}) if(arrow!=u"none" && arrow!=u"arrow_point")
                 return std::unexpected("Flowchart SVG marker is not implemented yet");
             labels.push_back(e.label.empty()?FlowchartEdgeLabelSize{}:FlowchartEdgeLabelSize{b.width,height(b)});
         }
-        auto layout=layout_flowchart(graph,boxes,labels);if(!layout) return std::unexpected(layout.error());
+        auto layout=layout_for_svg(graph,boxes,labels);if(!layout) return std::unexpected(layout.error());
         FlowchartSvg output;output.width=layout->width+2*theme.padding;output.height=layout->height+2*theme.padding;
         std::string svg="<svg xmlns=\"http://www.w3.org/2000/svg\" class=\"flowchart\" width=\""+number(output.width)+
             "\" height=\""+number(output.height)+"\" viewBox=\"0 0 "+number(output.width)+" "+number(output.height)+"\">";
@@ -105,7 +165,11 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
             return "<text class=\""+std::string(css)+"\" x=\""+number(center.x)+"\" y=\""+number(center.y+b.baseline-b.height/2)+
                 "\" text-anchor=\"middle\" fill=\""+theme.text+"\">"+xml(label)+"</text>";
         };
-        for(std::size_t i=0;i<graph.edges.size();++i) {
+        // Original getEdgesToRender paints ordinary edges first, merged loops last.
+        std::vector<std::size_t> edge_order;
+        for(bool loops:{false,true}) for(std::size_t i=0;i<graph.edges.size();++i)
+            if((graph.edges[i].start==graph.edges[i].end)==loops && !layout->edges[i].points.empty()) edge_order.push_back(i);
+        for(auto i:edge_order) {
             const auto& e=graph.edges[i];auto points=layout->edges[i].points;
             const auto a=ids.at(e.start),b=ids.at(e.end);
             points.front()=intersect(layout->nodes[a],graph.nodes[a].shape,points[1]);
@@ -119,7 +183,7 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
             if(e.arrow_end==u"arrow_point") svg+=" marker-end=\"url(#flow-point-end)\"";
             svg+="/>";
         }
-        for(std::size_t i=0;i<graph.edges.size();++i) if(!graph.edges[i].label.empty() && layout->edges[i].label) {
+        for(auto i:edge_order) if(!graph.edges[i].label.empty() && layout->edges[i].label) {
             const auto p=*layout->edges[i].label;const auto b=labels[i];
             svg+="<g class=\"edgeLabel\"><rect x=\""+number(p.x-b.width/2)+"\" y=\""+number(p.y-b.height/2)+"\" width=\""+number(b.width)+"\" height=\""+number(b.height)+"\" fill=\""+theme.label_background+"\"/>";
             svg+=text(graph.edges[i].label,p,measured.edges[i],"edge-text")+"</g>";

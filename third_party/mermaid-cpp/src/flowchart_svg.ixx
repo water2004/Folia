@@ -22,8 +22,8 @@ struct FlowchartSvg {std::string svg;double width=0,height=0;};
 struct FlowchartRenderInput {FlowchartInput document;FlowchartSvgTheme theme;};
 // Initial measured SVG stage: ungrouped square/rounded/diamond/circle nodes,
 // plain single-line labels, basis/linear paths, plain/point arrow ends and
-// normal/thick/dotted/invisible edges. Unsupported adapters fail explicitly.
-// The Dagre layout API separately supports compound graphs and self loops.
+// normal/thick/dotted/invisible edges and merged self loops. Unsupported
+// adapters fail explicitly. Recursive cluster painting remains separate.
 std::expected<FlowchartSvg,std::string> render_flowchart_svg(
     const FlowchartRenderInput&,const FlowchartMeasurements&);
 }

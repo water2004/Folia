@@ -409,6 +409,10 @@
       "sha256": "ec467557e20d023100fe6be03f3d478b619d5c5b9b0f283f632d90a14593dc10"
     },
     {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/labelRect.ts",
+      "sha256": "41da654e959fe0bb5d9d25a4dae9f7f717fa1d50d8dde6a2f8d0003c2c91dea9"
+    },
+    {
       "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/drawRect.ts",
       "sha256": "1d03397624d31f5a244f32260fd8d109dd41751f1970858feb453f09a95d849e"
     },

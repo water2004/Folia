@@ -17,6 +17,10 @@ const cases=[
   ['reverse','flowchart RL\nA[First] -->|next| B[Second]'],
   ['upward','flowchart BT\nA[First] --> B[Second]'],
   ['parallel','flowchart TD\nA[Source] -->|one| B[Target]\nA -. two .-> B'],
+  ['loop-down','flowchart TD\nA[Retry] -->|again| A\nA --> B[Done]'],
+  ['loop-right','flowchart LR\nA((Retry)) -->|again| A\nA --> B[Done]'],
+  ['loop-left','flowchart RL\nA[Retry] --> A\nA --> B[Done]'],
+  ['loop-up','flowchart BT\nA{Retry?} -->|yes| A\nA --> B[Done]'],
   ['unicode','flowchart LR\nA[中文] --> B[Café 😀]'],
 ];
 const url=pathToFileURL(resolve('tools/mermaid-cpp/oracle/node_modules/mermaid/dist/mermaid.esm.mjs')).href;
@@ -39,7 +43,10 @@ for(const [name,source] of ${JSON.stringify(cases)}) {
   const edges=[...host.querySelectorAll('.flowchart-link')].map(p=>{
     const length=p.getTotalLength();return {length,stroke:getComputedStyle(p).stroke,dash:getComputedStyle(p).strokeDasharray,thickness:getComputedStyle(p).strokeWidth,points:Array.from({length:7},(_,i)=>{const a=p.getPointAtLength(length*i/6);return {x:a.x,y:a.y};})};
   });
-  result.push({name:name+'-'+theme,source,theme,svg,nodes,edges});host.remove();
+  const labels=[...host.querySelectorAll('g.edgeLabel')].filter(n=>n.textContent.trim()).map(n=>{
+    const b=n.getBBox();return {text:n.textContent,transform:n.getAttribute('transform'),width:b.width,height:b.height};
+  });
+  result.push({name:name+'-'+theme,source,theme,svg,nodes,edges,labels});host.remove();
  }
 }
 document.body.replaceChildren(Object.assign(document.createElement('pre'),{id:'result',textContent:encodeURIComponent(JSON.stringify(result))}));
@@ -55,7 +62,7 @@ try {
  await page.waitForSelector('pre#result,pre#error',{timeout:60000});
  const error=await page.locator('pre#error').count();assert.equal(error,0,error?await page.locator('pre#error').textContent():'');
  rows=JSON.parse(decodeURIComponent(await page.locator('pre#result').textContent()));
- assert.equal(rows.length,14);
+ assert.equal(rows.length,cases.length*2);
 } finally {await instance.close();}
 writeFileSync(resolve(directory,'original.json'),JSON.stringify(rows,null,2));
 for(const row of rows) {assert(row.nodes.length>1);assert(row.edges.length>0);writeFileSync(resolve(directory,row.name+'.svg'),row.svg);}

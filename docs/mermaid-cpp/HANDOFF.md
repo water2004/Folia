@@ -12,6 +12,11 @@
   Release checks pass. Do not reopen the verified layout/configuration stages.
 - Next: consume this prepared graph for measured recursive clusters and merged
   self-loop SVG. Existing unsupported SVG cases remain explicit until connected.
+- Follow-on self-loop SVG batch now connects graph preparation to the existing
+  measured renderer: dummy labelRect boxes, compact merged paths and label
+  placement. Exit: same-host official/native SVG comparisons in four directions
+  and both themes, including label positions and viewport containment. Recursive
+  cluster measurement/painting is the next remaining Flowchart adapter.
 - Work on fork/mermaid-development; cherry-pick only functional/tests/public-doc
   commits into the existing contribution worktree. Keep upstream PR #1 open.
 
