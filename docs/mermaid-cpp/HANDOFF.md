@@ -1,10 +1,11 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-23, registry native verification pending
+## Current checkpoint - 2026-10-23, registry and detector dispatch verified
 
-- User authorizes fork pushes and verified updates to water2004/Folia PR #1;
-  keep OPEN, DO NOT merge. Working branch `codex/mermaid-cpp-registry` starts
-  at delivery head `02870740`; delivery branch remains `feat/mermaid-cpp-port`.
+- User authorizes public fork zhao0349/Folia pushes and verified updates to
+  https://github.com/water2004/Folia/pull/1; keep OPEN, DO NOT merge.
+  Verification branch: `codex/mermaid-cpp-registry`. Delivery branch:
+  `feat/mermaid-cpp-port`. Upstream base remains `508423f2`.
 - Read the pinned original detectType.ts, diagram-orchestration.ts and all
   detector modules. Selected boundary: detector registration, ordered dispatch,
   builtin registration guard/large-feature switch, loader route lookup. Actual
@@ -19,12 +20,31 @@
   predicates and once-only setup, config-copy dispatch, callback snapshots and
   loader route lookup. Tests consume original observations and cover ownership,
   isolation, resource budgets and transactional failure. README states limits.
-- Next: commit native batch and push verification branch; inspect Windows
-  standalone/integrated Debug/Release CI, fix any failures in small commits,
-  and only then fast-forward the delivery branch/update existing PR #1.
-- No live agents or native builds. Local compiler remains unavailable. Baseline
-  delivery rerun 39909853656 was in progress when inspected; previous verified
-  code evidence remains 39908290555. PR live head/base unchanged from below.
+- Verified code head `26a4842991108244635482656c7c8a63da3b5e14`:
+  https://github.com/zhao0349/Folia/actions/runs/39910892034 passed all four
+  standalone/integrated Windows Debug/Release jobs. Integrated jobs passed
+  FoliaTests, FoliaWindowsEditorTests and both Mermaid suites; standalone jobs
+  passed both Mermaid suites. All jobs checked original source/SVG oracles,
+  78 native SVG DOM comparisons and 96 browser/DirectWrite measurements.
+  Local source-text, preprocessing and detector oracle checks also pass.
+- Self-review found no outstanding defects. Native restrictions are mapping
+  config inputs and no Object.prototype ids; callback captures/work/side effects
+  remain host-owned. Detection failures expose no partial configuration. Builtin
+  registration rolls back on budget failure. Loader routes are opaque metadata;
+  they do not execute imports or establish renderer availability.
+- Small batches: `767078c1` official oracle/source pins; `26a48429` native
+  registration, dispatch and tests; this final documentation checkpoint changes
+  no tested code or CI. Delivery uses a normal fast-forward from `02870740`.
+  Checkpoint/delivery pushes can trigger new CI; recheck live heads and checks
+  on recovery rather than claiming those later automatic reruns have completed.
+- Next concrete work: establish an original shared-frontend sequencing oracle
+  before composing preprocessing, configuration sessions and detection. Renderer
+  loader/styles/utils integration, remaining themes and family callbacks, other
+  diagram renderers and application dependency replacement remain separate.
+  No WinUI packaging or DPI acceptance is claimed.
+- No live local builds/agents or uncommitted implementation candidates. No new
+  ignored candidate directory or local runner was created for this batch. Local
+  MSVC/CMake remain unavailable; native evidence is the Windows run above.
 
 ## Configuration sessions verified (historical)
 
