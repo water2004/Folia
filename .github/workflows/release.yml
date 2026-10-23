@@ -4,12 +4,18 @@ on:
   push:
     tags:
       - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag to build and publish
+        required: true
+        type: string
 
 permissions:
   contents: write
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: release-${{ inputs.tag || github.ref_name }}
   cancel-in-progress: false
 
 jobs:
@@ -21,6 +27,7 @@ jobs:
       - name: Check out tagged source
         uses: actions/checkout@v5
         with:
+          ref: ${{ inputs.tag || github.ref }}
           fetch-depth: 0
           submodules: recursive
 
@@ -34,6 +41,13 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Could not locate the Python scripts directory.' }
           $scripts >> $env:GITHUB_PATH
 
+      - name: Restore pinned font-generation inputs
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          npm ci --prefix tools/mathjax-bundle --include=dev --ignore-scripts --no-audit --no-fund
+          if ($LASTEXITCODE -ne 0) { throw 'Pinned MathJax font input restore failed.' }
+
       - name: Initialize the x64 MSVC environment
         uses: ilammy/msvc-dev-cmd@v1
         with:
@@ -42,25 +56,32 @@ jobs:
       - name: Validate tag, branch, and release notes
         id: release
         shell: pwsh
+        env:
+          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
         run: |
           $ErrorActionPreference = 'Stop'
-          $tag = '${{ github.ref_name }}'
+          $tag = $env:RELEASE_TAG
           if ($tag -notmatch '^v(?<version>\d+\.\d+\.\d+)$') {
             throw "Release tags must use vMAJOR.MINOR.PATCH; received '$tag'."
           }
+          $version = $Matches.version
+          $taggedCommit = git rev-parse "refs/tags/$tag^{commit}"
+          if ($LASTEXITCODE -ne 0) { throw "Release tag '$tag' does not exist." }
+          $sourceCommit = git rev-parse HEAD
+          if ($sourceCommit -ne $taggedCommit) { throw 'Checked-out source does not match the release tag.' }
 
           git fetch origin master --no-tags
-          git merge-base --is-ancestor $env:GITHUB_SHA origin/master
+          git merge-base --is-ancestor $sourceCommit origin/master
           if ($LASTEXITCODE -ne 0) {
-            throw "Tagged commit $env:GITHUB_SHA is not contained in origin/master."
+            throw "Tagged commit $sourceCommit is not contained in origin/master."
           }
 
-          $version = $Matches.version
           $notes = "release-notes/$tag.md"
           if (-not (Test-Path -LiteralPath $notes -PathType Leaf)) {
             throw "Missing release notes: $notes"
           }
 
+          "tag=$tag" >> $env:GITHUB_OUTPUT
           "version=$version" >> $env:GITHUB_OUTPUT
           "notes=$notes" >> $env:GITHUB_OUTPUT
 
@@ -117,7 +138,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           $ErrorActionPreference = 'Stop'
-          $tag = '${{ github.ref_name }}'
+          $tag = '${{ steps.release.outputs.tag }}'
           $title = "Folia $tag"
           $notes = '${{ steps.release.outputs.notes }}'
           $msi = '${{ steps.assets.outputs.msi }}'

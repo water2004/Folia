@@ -2,7 +2,15 @@
 
 恢复/压缩后先实际读本文。架构、职责和详细验收见 [architecture](native-raii-architecture.md)、[files](native-raii-files.json)、[acceptance](native-raii-acceptance.md)。只复查新变化；ignored候选用 `rg --no-ignore`。
 
-## 当前 checkpoint：旧测试全部完成（2026-10-23）
+## 当前 checkpoint：0.3.0 发布构建（2026-10-23）
+
+- 用户明确要求发布 **0.3.0**，此前固定0.2.3的约束属于历史。本次不修改数学运行时或重开暂停事项。
+- 原标签 `v0.3.0` 固定在 `36b0bd43`；首次CI `39978114243` 因全新检出未恢复字体生成npm输入而失败，未创建Release。
+- 已补流水线的锁定依赖恢复和按已有标签重新构建入口；保留标签不变，并校验实际checkout与标签commit一致、且属于master。
+- 隔离目录仅从tracked package/lock恢复22包，原生成器实际通过，生成33,550,605字节字体表；日志 `build/release-0.3.0-{font-restore,clean-font-generation}.log`。没有更改Source锁或生成期待值。
+- 下一步：提交CI修复，按原标签重跑既有MSI/校验文件/Release发布步骤，确认最终附件后更新此checkpoint。无agents；字体验证native句柄53338待收尾。
+
+## 已完成：旧测试全部完成（2026-10-23）
 
 - **范围已完成**：本轮122个未配置旧Cpp全部逐项处理；有效数学行为先迁入正式typed owner，JS对象/回调/描述符规则只留离线Source记录。现在159个math Cpp/ixx全部正式配置，旧class_binding测试import为0，7个根目录旧inc退出；82个专用旧runner/mapper/helper退出，顶层工具无缺失测试路径引用。生产owner链、高CPU、Mermaid继续暂停。
 - **最终验收**：build13成功（parallel≤4）；最终math **965测试/272734断言通过**，Core **581测试/43936断言通过**。日志`build/math-port/finish-old-tests/{native-combined-build-13,all-math-final-combined,core-final}.log`；`final-inventory.json`记录122/122、159/159、零旧import/缺失引用、生产源改动0。所有native/build已结束，无live句柄。
