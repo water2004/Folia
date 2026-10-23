@@ -22,11 +22,10 @@
 - Native tests and new Windows CI are pending. Local MSVC/CMake are unavailable
   (PATH and installed VS toolchain discovery checked). No live local builds or
   agents, and no ignored implementation candidates.
-- Automatic approval review rejected pushing to the public fork, stating that
-  this payload/destination lacked explicit authorization. An explicit user
-  question is pending for push + CI + verified update of upstream PR #1.
-  Do not bypass the rejection; wait for the answer before network writes.
-- Next concrete action after approval: push the oracle and native commits to
+- User explicitly approved pushing this batch to public fork zhao0349/Folia,
+  running CI and updating existing upstream PR #1 after verification. This
+  resolves the previous automatic-approval rejection. Do not merge any PR.
+- Next concrete action: push the oracle and native commits to
   the working branch, run all four standalone/integrated Windows jobs, fix
   any failures, then fast-forward the existing PR branch only after verification.
   Continue next with detectInit sanitization/diagram mapping and configuration
