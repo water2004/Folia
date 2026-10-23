@@ -1,29 +1,48 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-23, Mermaid graph adapter in progress
+## Current checkpoint - 2026-10-23, cluster preparation and self-loop SVG verified
 
-- Deliver the required layout preparation around the verified Dagre engine:
-  cluster endpoint anchors, extraction of independently directed subgraphs and
-  the original three-segment self-loop layout input. Keep source ownership and
-  original edge identity so the next SVG adapter can paint one logical edge.
-- Scope/exit: representative nested, externally connected and independent
-  groups plus ordinary self loops match the pinned original prepareLayoutForDagre
-  and mermaid-graphlib outputs; native Windows standalone/integrated Debug and
-  Release checks pass. Do not reopen the verified layout/configuration stages.
-- Next: consume this prepared graph for measured recursive clusters and merged
-  self-loop SVG. Existing unsupported SVG cases remain explicit until connected.
-- Follow-on self-loop SVG batch now connects graph preparation to the existing
-  measured renderer: dummy labelRect boxes, compact merged paths and label
-  placement. Exit: same-host official/native SVG comparisons in four directions
-  and both themes, including label positions and viewport containment. Recursive
-  cluster measurement/painting is the next remaining Flowchart adapter.
-- Run 39968512435 compiled the new adapters and passed the native suites, but
-  the newly added label comparison exposed an existing decision-graph label
-  offset after diamond intersection. The eight new self-loop SVG comparisons
-  pass with that run's downloaded artifacts. Port the original label midpoint
-  correction and rerun the full gate; this run is diagnostic, not acceptance.
-- Work on fork/mermaid-development; cherry-pick only functional/tests/public-doc
-  commits into the existing contribution worktree. Keep upstream PR #1 open.
+- Delivered owned prepare_flowchart_graph around the retained Dagre engine:
+  cluster endpoint anchors, independently directed subgraph extraction and
+  three-segment self-loop input, with source indexes and cluster markers.
+  Fifteen original prepareLayoutForDagre/mermaid-graphlib observations match
+  native output for nested, independent, externally connected and loop graphs.
+- Connected graph preparation to measured ungrouped SVG. Self loops now use
+  the original dummy labelRect boxes, placement hint, compact logical path and
+  label offsets. Ordinary shape intersections also apply the original label
+  midpoint correction, fixing the observed decision-graph label offset.
+- Exit conditions passed at 13fb6c067f2821e258d28edbdc9106d6839da3a8:
+  https://github.com/zhao0349/Folia/actions/runs/39970098266
+  All four Windows standalone/integrated Debug/Release jobs succeeded.
+  Integrated jobs passed FoliaTests, FoliaWindowsEditorTests and both Mermaid
+  suites. Each job compared 22 real browser/native SVGs across eleven diagrams
+  and two themes, including four self-loop directions, labels, viewport
+  containment, node geometry, paints and sampled paths. Existing source/SVG
+  and browser/DirectWrite checks passed; final native previews were inspected.
+- Source batches: b543c633 (oracle), 753dfdd2 (graph preparation), 29011730
+  (self-loop SVG), 13fb6c06 (intersection label correction). Contribution
+  equivalents: 7d65a098, b89706d2, 7a406fa8, 700e2dc0. The contribution worktree
+  build/mermaid-cpp/entry-contribution on feat/mermaid-cpp-port matches the
+  verified implementation/tests/pins/workflow. This documentation checkpoint
+  follows it. The upstream diff against 508423f2 contains no AGENTS.md change.
+  Update upstream PR #1 and keep OPEN/unmerged; DO NOT merge. Delivery-triggered
+  reruns are separate from the completed validation linked above.
+- Next concrete stage: measured recursive cluster SVG using the prepared graph
+  tree. Follow measureDagreGraph/renderDagreSubgraph (parent rank spacing + 25,
+  parent-cluster reinsertion and title margins), clusters.js, positionNode and
+  edge cutPathAtIntersect. Validate representative independent/nested groups
+  and external group endpoints, then proceed to remaining label/shape adapters.
+  Do not reopen passed graph/layout stages without a related change/regression.
+- Limits: grouped SVG is still explicitly rejected; graph extraction alone is
+  not cluster painting. Rich/wrapped labels, remaining shapes/styles, titles,
+  other required families and the application dependency switch remain.
+  Folia still uses Rust in the application. No WinUI/GPU/DPI acceptance claimed.
+- No local build, agent or browser process remains active. Final ignored
+  evidence: build/mermaid-cpp/cluster-loop-verified, including comparison.json
+  under flowchart-browser and native-preview.png. loop-check and run
+  39968512435 are superseded diagnostics; its label failure is resolved by the
+  final passing run. The intermediate graph-only run 39967598357 was superseded
+  by combined validation, not used as final acceptance. No failed check remains.
 
 ## Flowchart coordinates and initial measured SVG verified (historical)
 
