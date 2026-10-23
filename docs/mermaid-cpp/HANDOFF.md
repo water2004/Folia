@@ -1,32 +1,55 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-23, Packet/Pie render entry in progress
+## Current checkpoint - 2026-10-23, Packet/Pie render entry verified
 
-- Deliver a source-to-SVG entry for Packet/Pie using prepared configuration,
-  default/dark theme paints, family style overrides, metadata and real Windows
-  font measurement. Keep the production application dependency unchanged until
-  the remaining required families can replace it together.
-- Scope: ordinary Folia text diagrams, numeric/px style sizes, literal colors,
-  configured font lists and the existing Packet/Pie layout options. No browser
-  plugin, DOM callback or arbitrary CSS execution support.
-- Exit: representative original runtime observations, native entry tests,
-  actual DirectWrite entry tests and existing affected Windows Debug/Release
-  regression checks. Then push small commits and update upstream PR #1 without
-  merging. Next: continue required family renderers and application integration.
-- Pushed batches: 44fd7570 original entry oracle; e246cbcb native configuration,
-  styles and rendering; 8583c931 Windows font resolution and source-to-SVG API.
-- First Windows run 39920905524 compiled the native library/platform API but
-  exposed the official dark theme's absent pie12. The adapter now preserves
-  optional palette entries and omits their SVG fill/stroke, matching the actual
-  official draw. Local oracle passes 18 representative cases, including final
-  SVG dimensions and the dark palette. A focused old-runner diagnostic confirms
-  the other entry cases pass when supplying pie12; it is not final acceptance.
-- No local compiler, build or agent. Downloaded OLD runners/evidence live in
-  build/mermaid-cpp/entry-check and entry-platform-check. The diagnostic fixture
-  under entry-check/fixtures is deliberately modified, not the committed oracle.
-- Next action: run Windows validation of the optional-palette fix, then select these
-  functional commits for feat/mermaid-cpp-port and update upstream PR #1 after
-  validation. Keep the PR open. Source production dependency remains Rust.
+- Delivered the opt-in folia.platform.mermaid_renderer::render_mermaid entry:
+  source -> shared preparation -> Packet/Pie configuration and theme -> family
+  parsing/layout -> installed font selection and real DirectWrite measurement
+  -> SVG with intrinsic dimensions or an explicit error. The core render_entry
+  module also exposes owned intermediate data for platform-independent hosts.
+- This phase's exit conditions passed at implementation head
+  118e021ae47c531b6a78ed857ec9f663a8d0d5f2:
+  https://github.com/zhao0349/Folia/actions/runs/39921739398
+  All four standalone/integrated Windows Debug/Release jobs passed. Integrated
+  jobs passed FoliaTests, FoliaWindowsEditorTests and both Mermaid suites; all
+  jobs checked the source oracles, existing SVG DOM comparisons and real
+  browser/DirectWrite measurements. No WinUI packaging/DPI acceptance is claimed.
+- The new original-runtime oracle covers 18 representative source/config/theme
+  cases and final SVG dimensions. Native tests cover the family adapter and
+  request failures; platform tests exercise actual font resolution, default/dark
+  rendering, bottom legends, donuts, data labels and entity display text.
+- Packet retains its official family defaults unless themeVariables.packet
+  overrides them. Pie consumes effective themeVariables and grammar showData.
+  Source entity spelling remains intact through DB deduplication; body titles
+  override frontmatter titles and plain accessibility metadata is emitted.
+- First run 39920905524 revealed that the official dark theme omits pie12.
+  Fix 118e021a preserves an absent palette entry and omits fill/stroke attributes
+  exactly as the original D3 draw does. That failure is closed by the full run
+  above; no further verification expansion is pending for this batch.
+- Small implementation batches: 44fd7570 oracle, e246cbcb core adapter/styles,
+  8583c931 Windows source-to-SVG entry, 118e021a absent-palette fix. Selected
+  contribution commits are 886a8204, b2c9d4e5, 6da4a668 and 82bfeca2, followed
+  by this documentation-only checkpoint. Functional code/fixtures/workflows
+  match the verified tree. Contribution diff against upstream base 508423f2
+  contains no AGENTS.md change. Upstream PR #1 must remain OPEN; DO NOT merge:
+  https://github.com/water2004/Folia/pull/1
+- Actual default/dark SVGs were visually inspected: titles, legends, values and
+  quote/star entities display correctly. Ignored evidence is under
+  build/mermaid-cpp/entry-verified (preview.png and pie-svg/entry-*.svg).
+  OLD runners and modified diagnostic fixtures under entry-check and
+  entry-platform-check are superseded, not final acceptance evidence.
+- Limits: plain-text metadata, numeric/px style sizes, literal colors and
+  documented decimal/common named entities. No HTML/DOM/CSS execution or
+  event binding layer. README records the supported font-list behavior.
+- No live local build, browser or agent. The contribution worktree is
+  build/mermaid-cpp/entry-contribution on feat/mermaid-cpp-port. Delivery pushes
+  may trigger automatic reruns; the completed evidence is the run linked above.
+- Next concrete function stage: start the required Flowchart parser/DB and
+  layout-input boundary with representative Folia diagrams and the pinned
+  original algorithms. Keep the existing required-family inventory intact.
+  Other family renderers and final application integration remain; the active
+  application dependency is still Rust. Do not reopen completed Packet/Pie
+  checks without a related change or an actual regression.
 
 ## Shared frontend verified (historical)
 

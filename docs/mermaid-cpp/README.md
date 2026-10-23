@@ -52,7 +52,7 @@ sans-serif/serif/monospace/system-ui map to Arial/Times New Roman/Courier New/
 Segoe UI. The selected family and sizes are shared by measurement and output.
 Missing fonts, malformed input and unavailable families return explicit errors.
 
-Frontmatter titles precede body titles; plain accessibility title/description
+Body titles override frontmatter titles; plain accessibility title/description
 are retained in SVG. Source entities are protected before parsing and decoded
 for final measurement/output, preserving the DB's original deduplication keys.
 Decimal escapes and quot/amp/apos/lt/gt/nbsp/copy/reg are supported. Other named
