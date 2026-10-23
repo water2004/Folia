@@ -403,6 +403,20 @@ suite render_model_content_tests = [] {
     expect(fatal(separating_spaces == 2u));
 };
 
+"adjacent_html_paragraphs_keep_independent_alignment_in_one_html_block"_test = [] {
+    const auto model = build_model(
+        "<p align='center'>first</p>\n<p align='right'>second</p>");
+    expect(fatal(model.blocks.size() == 1u));
+    const auto& children = model.blocks.front().child_blocks;
+    expect(fatal(children.size() == 2u));
+    expect(children[0].block_style.text_alignment == std::optional{TextAlignment::Center});
+    expect(children[1].block_style.text_alignment == std::optional{TextAlignment::End});
+    expect(fatal(!children[0].inline_items.empty()));
+    expect(fatal(!children[1].inline_items.empty()));
+    expect(children[0].inline_items.front().text == U"first");
+    expect(children[1].inline_items.front().text == U"second");
+};
+
 "math_inside_emphasis_renders_without_inheriting_text_style"_test = [] {
     auto m = build_model("**before $x$ after** *\\(y\\)* ~~$z$~~\n- **$q$**\n");
     std::vector<InlineRenderItem> math;

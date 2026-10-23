@@ -424,7 +424,11 @@ inline ProjectedText serialize_html_semantic_block(
                 source_text(block.id, block.inline_content.source));
         }
         case BK::HtmlContainer:
-            return wrap_html_element(block, "div", serialize_html_semantic_children(block));
+            // A container with no element provenance groups sibling HTML
+            // roots. A structural edit must not invent an enclosing element.
+            return block.has_html_element_provenance()
+                ? wrap_html_element(block, "div", serialize_html_semantic_children(block))
+                : serialize_html_semantic_children(block);
         case BK::BlockQuote:
             return wrap_html_element(block, "blockquote", serialize_html_semantic_children(block));
         case BK::List:

@@ -4,7 +4,7 @@
 // advances parser state, or owns source coordinates.
 export module folia.core.block_line_recognizer;
 import std;
-import folia.core.html_cst;
+import folia.core.markdown_html;
 import folia.core.utf;
 
 export namespace folia::detail {
@@ -101,26 +101,8 @@ public:
     }
 
     bool line_starts_block_html(std::size_t at) const {
-        if (ch_at(at) != U'<') return false;
-        auto cursor = at + 1;
-        if (cursor >= source.size() || source[cursor] == U'/') return false;
-        const auto name_start = cursor;
-        while (cursor < source.size()
-            && (is_ascii_alnum(source[cursor]) || source[cursor] == U'-')) {
-            ++cursor;
-        }
-        if (cursor == name_start) return false;
-        if (cursor < source.size()
-            && source[cursor] != U' ' && source[cursor] != U'\t'
-            && source[cursor] != U'\r' && source[cursor] != U'\n'
-            && source[cursor] != U'>' && source[cursor] != U'/') {
-            return false;
-        }
-        auto name = cps_to_utf8(source.substr(name_start, cursor - name_start));
-        std::ranges::transform(name, name.begin(), [](unsigned char value) {
-            return static_cast<char>(std::tolower(value));
-        });
-        return html_is_block_element(name);
+        const auto start = scan_markdown_html_block_start(source, at, line_content_end(at));
+        return start && markdown_html_block_can_interrupt(start->kind);
     }
 
     bool line_starts_interrupting_block(std::size_t at) const {

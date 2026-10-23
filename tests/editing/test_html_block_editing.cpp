@@ -109,6 +109,50 @@ constexpr std::string_view kHtmlType7Body =
 
 suite html_block_editing_tests = [] {
 
+"adjacent_html_roots_keep_exact_source_and_local_edit_history"_test = [] {
+    const std::string source = "<p align='center'>one</p>\n<p align='right'>two</p>";
+    Editor editor{source};
+    expect(fatal(editor.document().root.children.size() == 1u));
+    const auto& container = editor.document().root.children.front();
+    expect(fatal(container.kind == BlockKind::HtmlContainer));
+    expect(fatal(container.children.size() == 2u));
+    const auto owner = container.children[1].id;
+    const auto initial = caret_at(container.children[1], 1u);
+    editor.set_selection(initial);
+
+    reset_core_operation_counters();
+    expect(fatal(editor.execute_document_insert_text(initial, U"!").has_value()));
+    expect_no_global_rebuild("adjacent HTML source edit");
+    expect(editor.markdown_utf8() == "<p align='center'>one</p>\n<p align='right'>t!wo</p>");
+    reset_core_operation_counters();
+    expect(fatal(editor.undo()));
+    expect_no_global_rebuild("adjacent HTML source edit undo");
+    expect(editor.markdown_utf8() == source);
+    expect(editor.selection() == initial);
+
+    reset_core_operation_counters();
+    expect(fatal(editor.execute_document_enter(initial).has_value()));
+    expect_no_global_rebuild("adjacent HTML Enter");
+    const auto split = editor.markdown_utf8();
+    expect(split.starts_with("<p align='center'>one</p>"));
+    expect(split.find("<div") == std::string::npos);
+    expect(split.find("</div>") == std::string::npos);
+    const auto* left = find_document_block(editor.document(), owner);
+    expect(fatal(left != nullptr));
+    if (left) expect(left->inline_content.source == U"t");
+    const auto split_selection = editor.selection();
+    reset_core_operation_counters();
+    expect(fatal(editor.undo()));
+    expect_no_global_rebuild("adjacent HTML Enter undo");
+    expect(editor.markdown_utf8() == source);
+    expect(editor.selection() == initial);
+    reset_core_operation_counters();
+    expect(fatal(editor.redo()));
+    expect_no_global_rebuild("adjacent HTML Enter redo");
+    expect(editor.markdown_utf8() == split);
+    expect(editor.selection() == split_selection);
+};
+
 "type7_block_is_one_paragraph_whose_html_text_source_is_lossless"_test = [] {
     const auto parsed = parse_text(1, std::string(kHtmlType7Source));
     expect(fatal(parsed.document.root.children.size() == 1u));

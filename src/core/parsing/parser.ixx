@@ -527,6 +527,13 @@ public:
                 quote_paragraph_open = false;
             }
 
+            if (const auto html = html_block_start(line_start);
+                html && markdown_html_block_can_interrupt(html->kind)) {
+                line_start = html_block_end(line_start, html->kind);
+                paragraph_open = false;
+                continue;
+            }
+
             if (!paragraph_open) {
                 if (auto definition = link_definition_at(line_start)) {
                     link_definitions.try_emplace(definition->label, *definition);
@@ -538,8 +545,8 @@ public:
                     continue;
                 }
 
-                if (type7_tag_name_at_line(line_start)) {
-                    line_start = type7_block_end(line_start);
+                if (const auto html = html_block_start(line_start)) {
+                    line_start = html_block_end(line_start, html->kind);
                     paragraph_open = false;
                     continue;
                 }
@@ -587,43 +594,24 @@ public:
         return tag;
     }
 
-    std::optional<std::string> type7_tag_name_at_line(std::size_t line_start) const {
-        const auto line_end = line_content_end(line_start);
-        auto tag_start = line_start;
-        std::size_t indentation = 0;
-        while (tag_start < line_end && cps[tag_start] == U' ' && indentation < 4) {
-            ++tag_start;
-            ++indentation;
-        }
-        if (indentation > 3) return std::nullopt;
-        const auto tag = scan_markdown_html_tag(cps, tag_start, line_end);
-        if (!tag) return std::nullopt;
-        for (auto cursor = tag->range.end; cursor < line_end; ++cursor) {
-            if (cps[cursor] != U' ' && cps[cursor] != U'\t') return std::nullopt;
-        }
-
-        // Keep opening tags on the existing type 1/6 route. Complete closing
-        // tags are eligible for type 7 even when their names are block tags.
-        if (!tag->closing && (tag->name == "pre" || tag->name == "script"
-            || tag->name == "style" || tag->name == "textarea"
-            || html_is_block_element(tag->name))) {
-            return std::nullopt;
-        }
-        return tag->name;
+    std::optional<MarkdownHtmlBlockStart> html_block_start(std::size_t line_start) const {
+        return scan_markdown_html_block_start(cps, line_start, line_content_end(line_start));
     }
 
-    std::size_t type7_block_end(std::size_t start) const {
-        auto line_end = line_content_end(start);
-        auto block_end = line_end;
-        while (line_end < cps.size()) {
+    std::size_t html_block_end(std::size_t start, MarkdownHtmlBlockKind kind) const {
+        auto cursor = start;
+        while (cursor < cps.size()) {
+            if (cursor != start && (kind == MarkdownHtmlBlockKind::BlockTag
+                    || kind == MarkdownHtmlBlockKind::OtherTag) && is_blank_line_at(cursor)) {
+                return cursor;
+            }
+            const auto line_end = line_content_end(cursor);
             const auto next = next_line_start(line_end);
-            if (next == line_end) break;
-            block_end = next; // own preceding EOL, leave the blank separator
-            if (next >= cps.size() || is_blank_line_at(next)) break;
-            line_end = line_content_end(next);
-            block_end = line_end;
+            if (markdown_html_block_ends_on_line(kind, cps, cursor, line_end)) return next;
+            if (next <= cursor) return line_end;
+            cursor = next;
         }
-        return block_end;
+        return cursor;
     }
 
     std::optional<std::pair<std::size_t, std::size_t>> html_closing_tag(std::string_view name, std::size_t from, std::size_t limit) const {
@@ -1226,7 +1214,7 @@ public:
             if (auto b = try_parse_list_or_task())       return b;
             if (try_match_toc())                          return parse_toc();
         }
-        if (peek1() == '<' || type7_tag_name_at_line(pos)) {
+        if (html_block_start(pos)) {
             if (auto b = try_parse_raw_html_block())     return b;
         }
         return parse_paragraph();
@@ -1703,7 +1691,7 @@ public:
     }
 
     std::vector<BlockNode> make_html_children(
-        const HtmlCstNode& container,
+        std::span<const HtmlCstNode> children,
         std::size_t source_start,
         std::vector<HtmlContentSlot>& slots) {
         std::vector<BlockNode> blocks;
@@ -1719,7 +1707,7 @@ public:
             inline_run.reset();
         };
 
-        for (const auto& child : container.children) {
+        for (const auto& child : children) {
             const auto is_block = child.kind == HtmlCstKind::Element
                 && html_is_block_element(child.tag_name);
             if (!is_block) {
@@ -1756,7 +1744,7 @@ public:
             BlockNode item;
             item.id = next_node_id();
             item.kind = BlockKind::ListItem;
-            item.children = make_html_children(child, source_start, slots);
+            item.children = make_html_children(child.children, source_start, slots);
             if (item.children.empty()) {
                 item.children.push_back(make_html_inline_run(
                     {child.content.start, child.content.start}, source_start, slots));
@@ -1797,7 +1785,7 @@ public:
             BlockNode quote;
             quote.id = next_node_id();
             quote.kind = BlockKind::BlockQuote;
-            quote.children = make_html_children(node, source_start, slots);
+            quote.children = make_html_children(node.children, source_start, slots);
             if (quote.children.empty()) {
                 quote.children.push_back(make_html_inline_run(
                     {node.content.start, node.content.start}, source_start, slots));
@@ -1832,7 +1820,7 @@ public:
         BlockNode container;
         container.id = next_node_id();
         container.kind = BlockKind::HtmlContainer;
-        container.children = make_html_children(node, source_start, slots);
+        container.children = make_html_children(node.children, source_start, slots);
         if (container.children.empty()) {
             container.children.push_back(make_html_inline_run(
                 node.content, source_start, slots));
@@ -1844,49 +1832,64 @@ public:
 
     std::optional<BlockNode> try_parse_raw_html_block() {
         const auto start = pos;
-        if (type7_tag_name_at_line(start)) {
-            const auto block_end = type7_block_end(start);
-            auto content_end = block_end;
-            if (content_end > start && cps[content_end - 1] == U'\n') {
-                --content_end;
-                if (content_end > start && cps[content_end - 1] == U'\r') --content_end;
-            } else if (content_end > start && cps[content_end - 1] == U'\r') {
-                --content_end;
-            }
-            // Raw HTML is still one editable content source. Its inline CST
-            // retains tag/link/style structure; the block language prevents
-            // Markdown interpretation of the remaining HTML text.
+        const auto opening = html_block_start(start);
+        if (!opening) return std::nullopt;
+        const auto block_end = html_block_end(start, opening->kind);
+        auto content_end = block_end;
+        if (content_end > start && cps[content_end - 1] == U'\n') {
+            --content_end;
+            if (content_end > start && cps[content_end - 1] == U'\r') --content_end;
+        } else if (content_end > start && cps[content_end - 1] == U'\r') {
+            --content_end;
+        }
+
+        // Type 7 keeps the established one-source editable paragraph. It does
+        // not need a second HTML tree to decide its presentation.
+        if (opening->kind == MarkdownHtmlBlockKind::OtherTag) {
             BlockNode block;
             block.id = next_node_id();
             block.kind = BlockKind::Paragraph;
-            block.inline_content = make_inline_document(
-                start, content_end, InlineSyntaxMode::HtmlText);
+            block.inline_content = make_inline_document(start, content_end, InlineSyntaxMode::HtmlText);
             push_range(block.id, {start, block_end}, {start, content_end});
             pos = block_end;
             return block;
         }
 
-        auto remainder = std::u32string_view(cps).substr(start);
-        auto scanned = parse_html_cst(remainder);
-        if (scanned.nodes.empty()) return std::nullopt;
-        const auto& first = scanned.nodes.front();
-        const auto comment = first.kind == HtmlCstKind::Comment;
-        if ((!comment && (first.kind != HtmlCstKind::Element
-                || !html_is_block_element(first.tag_name)))
-            || first.range.start != 0
-            || first.range.empty()) {
-            return std::nullopt;
-        }
-
-        const auto source_length = first.range.end;
-        auto raw = std::u32string(remainder.substr(0, source_length));
+        auto raw = std::u32string(std::u32string_view(cps).substr(start, content_end - start));
         auto tree = parse_html_cst(raw);
-        if (tree.nodes.empty()) return std::nullopt;
-        const auto& root = tree.nodes.front();
-
-        if (comment && !tree.has_error && root.status == HtmlParseStatus::Complete) {
-            pos = start + source_length;
-            consume_line_ending();
+        const HtmlCstNode* element = nullptr;
+        bool single_element = true;
+        for (const auto& node : tree.nodes) {
+            if (node.kind == HtmlCstKind::Text && std::ranges::all_of(
+                    std::u32string_view(raw).substr(node.range.start, node.range.length()),
+                    [](char32_t ch) { return ch == U' ' || ch == U'\t'
+                        || ch == U'\r' || ch == U'\n'; })) continue;
+            if (element || (node.kind != HtmlCstKind::Element && node.kind != HtmlCstKind::Comment)) {
+                single_element = false;
+                break;
+            }
+            element = &node;
+        }
+        const bool complete = !tree.has_error && std::ranges::all_of(tree.nodes,
+            [](const HtmlCstNode& node) { return node.status == HtmlParseStatus::Complete; });
+        // CommonMark owns the boundary; presentation errors cannot extend it.
+        const auto unsafe = std::ranges::any_of(tree.nodes,
+            [](const auto& node) { return html_contains_unsafe(node); });
+        if (!complete || unsafe) {
+            BlockNode block;
+            block.id = next_node_id();
+            block.kind = BlockKind::UnsupportedMarkup;
+            block.ensure_atomic_special().raw = cps_to_utf8(raw);
+            block.ensure_atomic_special().unsup_reason = unsafe
+                ? UnsupportedMarkupReason::UnsafeHtml : UnsupportedMarkupReason::MalformedSyntax;
+            push_range(block.id, {start, content_end}, {start, content_end});
+            diagnostics.push_back(make_diagnostic(DiagnosticSeverity::Warning,
+                unsafe ? "Unsafe HTML block is shown as text" : "Malformed HTML block is shown as text",
+                std::nullopt, DIAG_UNSAFE_HTML));
+            pos = block_end;
+            return block;
+        }
+        if (single_element && element && element->kind == HtmlCstKind::Comment) {
             BlockNode block;
             block.id = next_node_id();
             block.kind = BlockKind::HtmlContainer;
@@ -1894,46 +1897,32 @@ public:
             html.source = std::move(raw);
             html.tree = std::move(tree);
             html.structure_shape = html_block_structure_shape(block);
-            push_range(
-                block.id,
-                {start, start + source_length},
-                {start, start + source_length});
-            return block;
-        }
-
-        if (tree.has_error || root.status != HtmlParseStatus::Complete
-            || html_contains_unsafe(root)) {
-            pos = start + source_length;
-            consume_line_ending();
-            BlockNode block;
-            block.id = next_node_id();
-            block.kind = BlockKind::UnsupportedMarkup;
-            block.ensure_atomic_special().raw = cps_to_utf8(raw);
-            block.ensure_atomic_special().unsup_reason = root.status == HtmlParseStatus::Complete
-                ? UnsupportedMarkupReason::UnsafeHtml
-                : UnsupportedMarkupReason::MalformedSyntax;
-            push_range(
-                block.id,
-                {start, start + source_length},
-                {start, start + source_length});
-            diagnostics.push_back(make_diagnostic(
-                DiagnosticSeverity::Warning,
-                html_contains_unsafe(root)
-                    ? "Unsafe HTML block is shown as text"
-                    : "Malformed HTML block is shown as text",
-                std::nullopt,
-                DIAG_UNSAFE_HTML));
+            push_range(block.id, {start, content_end}, {start, content_end});
+            pos = block_end;
             return block;
         }
 
         std::vector<HtmlContentSlot> slots;
-        auto block = make_html_semantic(root, start, slots);
+        std::optional<BlockNode> block;
+        std::string root_tag;
+        if (single_element && element) {
+            root_tag = element->tag_name;
+            block = make_html_semantic(*element, start, slots);
+        } else {
+            // A raw HTML block can contain adjacent complete elements. Keep
+            // each element's existing semantic owner/style under the existing
+            // container; the container owns only wrapper syntax and slots.
+            BlockNode container;
+            container.id = next_node_id();
+            container.kind = BlockKind::HtmlContainer;
+            container.children = make_html_children(tree.nodes, start, slots);
+            push_range(container.id, {start, content_end}, {start, content_end});
+            block = std::move(container);
+        }
         if (!block) return std::nullopt;
-        // A <pre> block is itself one exact block-local source owner; all
-        // other supported HTML structures retain their wrapper source plus
-        // slots that point at editable semantic descendants.
+        // <pre> is already an exact block-local source owner. All other HTML
+        // structures retain wrapper source and slots for editable descendants.
         if (block->kind != BlockKind::CodeBlock) {
-            auto root_tag = root.tag_name;
             auto& html = block->ensure_html_special();
             html.source = std::move(raw);
             html.tree = std::move(tree);
@@ -1941,8 +1930,7 @@ public:
             html.structure_shape = html_block_structure_shape(*block);
             html.root_tag = std::move(root_tag);
         }
-        pos = start + source_length;
-        consume_line_ending();
+        pos = block_end;
         return block;
     }
 
