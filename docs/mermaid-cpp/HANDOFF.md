@@ -1,20 +1,47 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-23, Dagre rank stage in progress
+## Current checkpoint - 2026-10-23, Dagre rank pipeline verified
 
-- Deliver the first native Flowchart layout stage: DFS cycle removal, compound
-  nesting constraints, default network-simplex ranking, measured edge-label
-  rank reservation and rank normalization. Use the existing Flowchart input.
-- Scope/exit: original dagre-d3-es 7.0.14 pipeline observations for chains,
-  branches, cycles, parallel links and nested groups match native results;
-  standalone/integrated Windows Debug/Release checks pass. No repeated audit
-  of completed configuration or Packet/Pie work.
-- Next: edge normalization, crossing reduction and coordinate assignment, then
-  Mermaid cluster adaptation and measured Flowchart SVG. Group endpoints and
-  independently directed cluster extraction are not claimed by this rank API.
-- Baseline delivery 5d18e4cf and run 39929358866 verified green; upstream PR #1
-  remains OPEN and unmerged. Work on fork/mermaid-development; select only
-  functional/test/public-documentation commits into the contribution worktree.
+- Delivered the first native Flowchart layout stage: DFS back-edge reversal,
+  compound nesting constraints, default network simplex, edge-label rank
+  reservation and rank normalization. rank_flowchart consumes the existing
+  owned Flowchart input and caller-supplied edge label boxes. It returns node
+  ranks, group intervals and reversal/self-loop/label-rank metadata without
+  mutating the input. Parallel edges aggregate only inside the optimizer.
+- Exit conditions passed at b80d8b9f7dee79e9d2fcb4de7886197d46ddd4e6:
+  https://github.com/zhao0349/Folia/actions/runs/39951056843
+  All four Windows standalone/integrated Debug/Release jobs succeeded.
+  Integrated jobs passed FoliaTests, FoliaWindowsEditorTests and both Mermaid
+  suites. All jobs checked original source/SVG oracles and browser/DirectWrite
+  measurements. The unchanged dagre-d3-es 7.0.14 rank pipeline supplies the new
+  representative chain/branch/cycle/parallel-edge/nested-group observations.
+- Two source commits: 5ada03ea (official oracle/source pins), b80d8b9f (native
+  ranking, tests, attribution, CI and documentation). Selected contribution
+  commits: 14b8d474 and e925802d, followed by this documentation checkpoint.
+  Contribution worktree: build/mermaid-cpp/entry-contribution on
+  feat/mermaid-cpp-port. Its Mermaid code/tests/docs/workflow match the verified
+  tree; the upstream diff against 508423f2 contains no AGENTS.md change.
+  Update https://github.com/water2004/Folia/pull/1 and keep OPEN; DO NOT merge.
+  Delivery pushes can trigger automatic reruns; the completed evidence above
+  is for the implementation head, not those later documentation reruns.
+- Next concrete stage: retain the private ranked graph through Dagre long-edge
+  normalization and dummy parenting (normalize.js, parent-dummy-chains.js),
+  group side borders (add-border-segments.js), crossing reduction (order/), and
+  coordinate assignment (position/bk.js and layout.js). These source paths are
+  under the locked dagre-d3-es package. Do not reconstruct a second graph from
+  the public rank summary or reopen passed configuration/Packet/Pie stages.
+  Use the same representative diagrams and explicit measured boxes for the
+  next original-layout oracle, then connect actual measurement and SVG.
+- Limits: this is Dagre ranking, not complete Mermaid cluster adaptation or
+  Flowchart rendering. Group endpoints fail explicitly; independently directed
+  cluster extraction, self-loop rendering and coordinates remain pending.
+  The new oracle boxes are supplied layout inputs, not font measurements.
+  Other required families and the final Rust/application dependency switch
+  remain outstanding. No WinUI packaging or DPI acceptance is claimed.
+- No local compiler/build/agent is active, and no new ignored implementation
+  candidate or downloaded runner was created. The validation branch is
+  codex/mermaid-cpp-dagre-rank; the workflow was dispatched explicitly because
+  initial branch creation did not start a push run. No test failure is pending.
 
 ## Flowchart parser and layout input verified (historical)
 
