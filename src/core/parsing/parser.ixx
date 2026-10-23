@@ -994,14 +994,25 @@ public:
 
     // Retain only transient physical mappings while extracting nested inputs.
     // Durable prefix anchors use the existing block's source or syntax fields.
-    void record_owned_offsets(const BlockNode& block) {
-        auto range = std::ranges::find_if(source_ranges, [&](const auto& r) {
-            return r.node_id == block.id;
+    ParserSourceRange* source_range_for(NodeId id) {
+        // parse_block appends the completed outer block range after any nested
+        // child ranges. Most callers have just completed that block, so avoid
+        // searching all earlier ranges on the common path.
+        if (!source_ranges.empty() && source_ranges.back().node_id == id) {
+            return &source_ranges.back();
+        }
+        const auto found = std::ranges::find_if(source_ranges, [&](const auto& range) {
+            return range.node_id == id;
         });
-        if (range == source_ranges.end() || !range->owned_offsets.empty()) return;
+        return found == source_ranges.end() ? nullptr : &*found;
+    }
+
+    void record_owned_offsets(const BlockNode& block) {
         const std::u32string* source = editable_inline_document(block)
             ? &block.inline_content.source : editable_raw_block_source(block);
         if (!source) return;
+        auto* range = source_range_for(block.id);
+        if (!range || !range->owned_offsets.empty()) return;
         const auto begin = editable_inline_document(block)
             ? range->content_range.start : range->source_range.start;
         if (begin + source->size() > cps.size()
@@ -1160,8 +1171,9 @@ public:
                             block_start - *preceding_source_end));
                 }
                 if (b->separator_before) {
-                    auto mapped = std::ranges::find_if(source_ranges, [&](const auto& range) { return range.node_id == b->id; });
-                    if (mapped != source_ranges.end()) mapped->separator_range = PhysicalRange{*preceding_source_end, block_start};
+                    if (auto* mapped = source_range_for(b->id)) {
+                        mapped->separator_range = PhysicalRange{*preceding_source_end, block_start};
+                    }
                 }
                 record_owned_offsets(*b);
                 auto block_end = cur();
@@ -2410,9 +2422,12 @@ public:
         if (scan_indentation(at, 3).columns > 3) return false;
         const auto end = line_content_end(at);
         const auto header = cps.substr(at, end - at);
-        if (header.find(U'|') == std::u32string::npos) return false;
         const auto next = next_line_start(end);
         if (next >= cps.size() || scan_indentation(next, 3).columns > 3) return false;
+        // cmark resolves a legal setext underline before trying extension
+        // block openers. Preserve that precedence for pipe-less headers.
+        if (header.find(U'|') == std::u32string_view::npos
+            && setext_underline_at(next)) return false;
         const auto separator = cps.substr(next, line_content_end(next) - next);
         const auto alignments = parse_table_separator(separator);
         return alignments && alignments->size() == table_cell_segments(header).size();
@@ -2420,7 +2435,9 @@ public:
 
     // ---- table ----
     std::optional<BlockNode> try_parse_table() {
-        if (!input->dialect.gfm.tables || !input->dialect.tables.gfm_pipe_tables) return std::nullopt;
+        // Recognize both rows before constructing editable cells. A rejected
+        // table must not parse an ordinary paragraph's inline source twice.
+        if (!line_starts_gfm_table(pos)) return std::nullopt;
         std::size_t save = pos;
         std::size_t range_count = source_ranges.size();
         std::uint64_t node_count = node_counter;
@@ -2431,7 +2448,6 @@ public:
             return std::nullopt;
         };
         auto [header_line, _] = rest_of_line();
-        if (header_line.find(U'|') == std::u32string::npos) return fail();
         const auto header_end = save + header_line.size();
         std::vector<std::u32string> physical_line_endings;
         physical_line_endings.emplace_back(std::u32string_view(cps).substr(
@@ -2555,19 +2571,26 @@ public:
         return r;
     }
 
+    static bool is_table_marker_space_(char32_t ch) {
+        return ch == U' ' || ch == U'\t' || ch == U'\v' || ch == U'\f' || ch == U'\r';
+    }
+
     std::optional<std::vector<TableAlignment>> parse_table_separator(const std::u32string& line) const {
         auto segments = table_cell_segments(line);
         if (segments.empty()) return std::nullopt;
         std::vector<TableAlignment> alignments;
         for (auto const& segment : segments) {
-            auto marker = trim_cps_(line.substr(segment.first, segment.second - segment.first));
-            if (marker.empty()) return std::nullopt;
-            bool leading_colon = marker.front() == U':';
-            bool trailing_colon = marker.back() == U':';
-            std::size_t begin = leading_colon ? 1 : 0;
-            std::size_t end = marker.size() - (trailing_colon ? 1 : 0);
+            auto begin = segment.first;
+            auto end = segment.second;
+            while (begin < end && is_table_marker_space_(line[begin])) ++begin;
+            while (end > begin && is_table_marker_space_(line[end - 1])) --end;
+            if (begin == end) return std::nullopt;
+            bool leading_colon = line[begin] == U':';
+            bool trailing_colon = line[end - 1] == U':';
+            if (leading_colon) ++begin;
+            if (trailing_colon) --end;
             if (begin >= end) return std::nullopt;
-            for (std::size_t index = begin; index < end; ++index) if (marker[index] != U'-') return std::nullopt;
+            for (std::size_t index = begin; index < end; ++index) if (line[index] != U'-') return std::nullopt;
             TableAlignment alignment = TableAlignment::None;
             if (leading_colon && trailing_colon) alignment = TableAlignment::Center;
             else if (leading_colon) alignment = TableAlignment::Left;
