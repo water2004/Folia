@@ -28,8 +28,8 @@
   feat/mermaid-cpp-port. Selected implementation head 27d572b8 matches the
   verified Mermaid code, tests, source pins and workflow exactly; this final
   public documentation checkpoint follows it. The diff against upstream
-  master 508423f2 contains no AGENTS.md changes. Update upstream PR #1 with
-  this batch and keep OPEN; DO NOT merge. Delivery can trigger automatic
+  master 508423f2 contains no AGENTS.md changes. Upstream PR #1 is updated
+  with this batch and confirmed OPEN/unmerged; DO NOT merge. Delivery can trigger automatic
   reruns, separate from the completed implementation validation above.
 - Next concrete stage: Mermaid cluster endpoint/extraction and independently
   directed subgraphs, then self-loop SVG adaptation, using the original
