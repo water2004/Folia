@@ -106,6 +106,12 @@ class Parser {
     bool link_start(std::size_t p) const {
         auto s = source.substr(p);
         if (!s.empty() && (s[0] == u'<' || s[0] == u'o' || s[0] == u'x')) s.remove_prefix(1);
+        // The dotted-edge lexer also accepts a dot-leading ending (.->),
+        // especially after an infix label: A -. text .-> B.
+        if (s.starts_with(u'.')) {
+            while (s.starts_with(u'.')) s.remove_prefix(1);
+            return s.starts_with(u'-');
+        }
         return s.starts_with(u"--") || s.starts_with(u"==") || s.starts_with(u"-.") || s.starts_with(u"~~");
     }
     Text identifier() {

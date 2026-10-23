@@ -33,7 +33,8 @@ suite flowchart = [] {
             const auto expected = json(decode(fields[3]));
             auto actual = prepare_flowchart(decode(fields[1]),*session);
             if (expected.kind == ConfigKind::null) { expect(!actual) << fields[0]; continue; }
-            expect(fatal(actual.has_value())) << fields[0] << (actual ? "" : actual.error());
+            expect(actual.has_value()) << fields[0] << (actual ? "" : actual.error());
+            if (!actual) continue;
             same(actual->direction,expected,u"direction"); same(actual->title,expected,u"title");
             same(actual->acc_title,expected,u"accTitle"); same(actual->acc_description,expected,u"accDescription");
             expect(actual->node_spacing == field(expected,u"nodeSpacing").number);
