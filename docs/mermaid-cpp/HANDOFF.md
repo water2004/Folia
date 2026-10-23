@@ -14,10 +14,20 @@
   Calls are isolated, intentionally avoiding upstream global-regex lastIndex
   leakage after errors. This does not implement detectInit, sanitization,
   configuration merging, diagram dispatch or theme resolution.
-- Native tests and Windows CI are pending. Local MSVC/CMake are unavailable.
-  No live local build/agent handles or ignored implementation candidates.
-- Next concrete action: push the oracle and native commits to the working
-  branch, run all four standalone/integrated Windows Debug/Release jobs, fix
+- Local commits: `6e4c1996` (oracle) and `cda332c1` (native implementation,
+  tests, CI hook and documentation). Local directive/source-text/preprocessing/
+  frontmatter oracle checks and `git diff --check` pass. Baseline PR head
+  `0e2f32c1` also passed all four CI jobs in run `39884671629`; that run does
+  not test the new directive implementation.
+- Native tests and new Windows CI are pending. Local MSVC/CMake are unavailable
+  (PATH and installed VS toolchain discovery checked). No live local builds or
+  agents, and no ignored implementation candidates.
+- Automatic approval review rejected pushing to the public fork, stating that
+  this payload/destination lacked explicit authorization. An explicit user
+  question is pending for push + CI + verified update of upstream PR #1.
+  Do not bypass the rejection; wait for the answer before network writes.
+- Next concrete action after approval: push the oracle and native commits to
+  the working branch, run all four standalone/integrated Windows jobs, fix
   any failures, then fast-forward the existing PR branch only after verification.
   Continue next with detectInit sanitization/diagram mapping and configuration
   precedence, with official oracles; theme resolution follows that boundary.
