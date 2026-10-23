@@ -1,6 +1,48 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-23, native theme derivation awaiting CI
+## Current checkpoint - 2026-10-23, default/dark theme derivation verified
+
+- User authorizes public fork zhao0349/Folia pushes and a verified update to
+  https://github.com/water2004/Folia/pull/1. Keep it OPEN; DO NOT merge.
+  Verification branch: `codex/mermaid-cpp-themes`. Delivery branch:
+  `feat/mermaid-cpp-port`. Upstream base remains `508423f2`.
+- Verified code head `e77b27b307707039e974b9bda6ffb7fa385e984c`:
+  https://github.com/zhao0349/Folia/actions/runs/39896046297 passed all four
+  standalone/integrated Windows Debug/Release jobs. Integrated jobs passed
+  FoliaTests, FoliaWindowsEditorTests and both Mermaid suites; standalone jobs
+  passed both Mermaid suites. All four checked the official source/SVG oracles,
+  78 native SVG DOM comparisons and 96 same-host browser/DirectWrite cases.
+  This final checkpoint-only commit changes no tested code or CI.
+- Implemented `derive_theme_variables` for default/dark, preserving the exact
+  constructor/update order, short-circuit and nullish branches, and final shallow
+  object overrides. Owned ConfigValue output omits undefined generated fields.
+  Theme ASTs generate checked-in ordinary C++ assignment functions; Khroma 2.1.0
+  arithmetic and bounded linear literal scanning are native, without JS runtime.
+- Official oracle: 1,218 theme observations and 2,412 color observations.
+  Original theme source and official bundle outcomes are cross-checked; actual
+  Khroma argument types identify native restrictions. Includes every default
+  property override, random colors, nested objects, extremes and long literals.
+  Inputs/outputs and intermediate assignments have explicit resource budgets.
+- Native restrictions remain explicit: mapping overrides, literal string
+  evaluated colors up to 4,096 UTF-16 units, integer THEME_COLOR_LIMIT 0..12,
+  and no prototype/method replacement or mutable Khroma channel objects.
+  Fixtures retain the original results. See README for the rendering boundary.
+- Small implementation commits: `d884ca69` oracle, `a6f90193` color primitives,
+  `6176c6fb` oracle inversion default, `e1d31a84` generated theme assignments,
+  `98870049` owned derivation, `e77b27b3` linear scanning/source cross-checks.
+- Next concrete work: official detectInit/cleanAndMerge and config.ts session
+  lifecycle oracles, then renderer/common frontend theme integration. Existing
+  Packet/Pie SVG accepts named/hex paints; derived HSL/RGB literals need an
+  explicit integration boundary. Other families and application dependency
+  replacement remain pending; no WinUI packaging or DPI acceptance is claimed.
+- No live local builds/agents or uncommitted candidates. Local MSVC/CMake remain
+  unavailable. Ignored focused runners/logs are under build/mermaid-cpp in
+  theme-color-check, theme-derive-check and theme-derive-release. The Debug
+  artifact needs unavailable debug CRT DLLs (0xC0000135); use Release locally.
+  Checkpoint/delivery pushes can trigger new CI; the code evidence is the run
+  above, not an assertion that every subsequent documentation run has finished.
+
+## Theme implementation checkpoints (historical; superseded above)
 
 - User authorizes public fork zhao0349/Folia pushes and updating existing
   water2004/Folia PR #1 only after verification. DO NOT merge.
