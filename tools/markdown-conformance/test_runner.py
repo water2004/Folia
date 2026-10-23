@@ -79,6 +79,32 @@ class RunnerContractTests(unittest.TestCase):
         self.assertEqual(run.calculate_formal_exit_code(0, [base], [], [], [], [{'line': 2}], False), 1)
         self.assertEqual(run.calculate_formal_exit_code(0, [error], [], [], [], [], False), 1)
 
+    def test_html_policy_skip_is_explicit_and_not_a_pass(self):
+        row = run.case_result(626, self.fixture, self.result('<div>different</div>'),
+                              skip_reason='Unsupported HTML presentation')
+        self.assertIsNone(row['semantic_match'])
+        self.assertTrue(row['reported'])
+        self.assertEqual(row['semantic_skip_reason'], 'Unsupported HTML presentation')
+        totals = run.summarize([row])['totals']
+        self.assertEqual(totals['semantic_skipped'], 1)
+        self.assertEqual(totals['strict_pass'], 0)
+        self.assertEqual(totals['unreported'], 0)
+
+    def test_native_error_or_source_failure_is_not_skipped_by_html_policy(self):
+        error = run.case_result(626, self.fixture, {'error': 'parse error'},
+                                skip_reason='Unsupported HTML presentation')
+        self.assertIsNone(error['semantic_skip_reason'])
+        self.assertEqual(run.calculate_formal_exit_code(0, [error], [], [], [], [], False), 1)
+        row = run.case_result(626, self.fixture, self.result(self.fixture['html']),
+                              skip_reason='Unsupported HTML presentation')
+        self.assertEqual(run.calculate_formal_exit_code(1, [row], [], [], [], [], False), 1)
+
+    def test_record_cannot_skip_its_own_semantic_difference(self):
+        row = run.case_result(626, self.fixture, self.result('<div>different</div>',
+                              semantic_skip_reason='unsupported'))
+        self.assertIsNone(row['semantic_skip_reason'])
+        self.assertFalse(row['semantic_match'])
+
 
 if __name__ == '__main__':
     unittest.main()

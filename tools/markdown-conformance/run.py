@@ -16,9 +16,12 @@ sys.path.insert(0, str(HERE))
 from canonical_html import canonical as canonical_html
 
 
-def load_fixtures():
+def load_fixtures(suite="commonmark"):
     sys.path.insert(0, str(HERE))
-    from prepare import prepare
+    if suite == 'gfm':
+        from prepare_gfm import prepare
+    else:
+        from prepare import prepare
     return prepare(fetch=True)
 
 
@@ -93,7 +96,7 @@ def read_results(path):
     return results, malformed
 
 
-def case_result(example, fixture, result):
+def case_result(example, fixture, result, skip_reason=None):
     """Bind report output to immutable fixture input and compute HTML semantics."""
     row = dict(result or {})
     row['example'] = example
@@ -108,6 +111,8 @@ def case_result(example, fixture, result):
     row['limitations'] = row.get('limitations') or []
     row['error'] = row.get('error')
     row['reported'] = result is not None
+    row['semantic_skip_reason'] = None
+    row['source_lines'] = fixture.get('source_lines')
     row['semantic_match'] = None
     row['relaxed_list_match'] = None
     if result is not None and not row['error'] and isinstance(row.get('projected_html'), str):
@@ -116,6 +121,10 @@ def case_result(example, fixture, result):
         row['relaxed_list_match'] = (
             canonical_html(fixture['html'], relax_list_paragraphs=True) ==
             canonical_html(row['projected_html'], relax_list_paragraphs=True))
+    if skip_reason and result is not None and not row['error']:
+        row['semantic_skip_reason'] = skip_reason
+        row['semantic_match'] = None
+        row['relaxed_list_match'] = None
     row['first_tree_difference'] = first_diff(row['expected'], row['actual'])
     return row
 
@@ -144,8 +153,9 @@ def summarize(cases):
             'total': len(items),
             'reported': sum(item.get('reported', False) for item in items),
             'strict_pass': sum(item.get('semantic_match') is True for item in items),
+            'semantic_skipped': sum(bool(item.get('semantic_skip_reason')) for item in items),
             'strict_diff': sum(item.get('semantic_match') is False for item in items),
-            'unreported': sum(item.get('semantic_match') is None for item in items),
+            'unreported': sum(not item.get('reported') for item in items),
             'relaxed_list_only': sum(item.get('semantic_match') is False and
                                      item.get('relaxed_list_match') is True for item in items),
             'inline_lossless': sum(item.get('inline_lossless') is True for item in items),
@@ -182,8 +192,9 @@ def summarize(cases):
             'fixture_rows': len(all_results),
             'reported': sum(case.get('reported', False) for case in all_results),
             'strict_pass': sum(case.get('semantic_match') is True for case in all_results),
+            'semantic_skipped': sum(bool(case.get('semantic_skip_reason')) for case in all_results),
             'strict_diff': len(strict_diffs),
-            'unreported': sum(case.get('semantic_match') is None for case in all_results),
+            'unreported': sum(not case.get('reported') for case in all_results),
             'relaxed_list_only': sum(case.get('semantic_match') is False and
                                      case.get('relaxed_list_match') is True for case in all_results),
             'inline_lossless': sum(case.get('inline_lossless') is True for case in all_results),
@@ -213,18 +224,17 @@ def fenced(value, language='json'):
 def markdown_report(report):
     totals = report['summary']['totals']
     lines = [
-        '# CommonMark 0.31.2 conformance results',
+        f"# {report.get('suite_title', 'CommonMark 0.31.2')} conformance results",
         '',
         f"Status: **{report['status']}**. Formal test exit code: **{report.get('exit_code')}**.",
-        f"Fixture source: [CommonMark 0.31.2 spec.json](https://spec.commonmark.org/0.31.2/spec.json), SHA-256 `{report['source']['spec_json_sha256']}`.",
-        f"License: [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Reference renderer pin: md4c commit `{report['source']['md4c_commit']}` (MIT), fetched only for later investigation.",
+        f"Fixture source and provenance: `{json.dumps(report['source'], ensure_ascii=False)}`.",
         '',
         'The formal test canonicalizes C++ projected HTML and immutable official expected HTML with the same Python HTMLParser. This checks CommonMark semantic output and is not Folia’s WinUI HTML renderer. Native assertions separately check inline source losslessness and exact Markdown save serialization.',
         '',
         '## Totals',
         '',
         f"- Official examples: {report['fixture_count']}; records: {totals['reported']}; missing: {len(report['missing_examples'])}; malformed JSONL lines: {len(report['malformed_records'])}.",
-        f"- Strict semantic matches: {totals['strict_pass']}; strict differences: {totals['strict_diff']}; unreported: {totals['unreported']}.",
+        f"- Strict semantic matches: {totals['strict_pass']}; strict differences: {totals['strict_diff']}; explicit HTML skips: {totals['semantic_skipped']}; unreported: {totals['unreported']}.",
         f"- List tight/loose diagnostic only (strict fail, relaxed list comparison passes): {totals['relaxed_list_only']}.",
         f"- Inline source lossless: {totals['inline_lossless']} pass, {totals['inline_lossless_fail']} fail; exact Markdown save serialization: {totals['exact_serialization']} pass, {totals['exact_serialization_fail']} fail.",
         f"- Cases with one or more reported projection/implementation limitations: {totals['with_reported_limitations']}.",
@@ -236,6 +246,12 @@ def markdown_report(report):
     ]
     for section, counts in report['summary']['sections'].items():
         lines.append(f"| {section} | {counts['total']} | {counts['strict_pass']} | {counts['strict_diff']} | {counts['relaxed_list_only']} | {counts['inline_lossless_fail']} | {counts['exact_serialization_fail']} |")
+    lines.extend(['', '## Explicit HTML presentation skips', ''])
+    skipped = [case for case in report['results'] if case.get('semantic_skip_reason')]
+    if not skipped:
+        lines.append('None.')
+    for case in skipped:
+        lines.append(f"- Example {case['example']} ({case['section']}): {case['semantic_skip_reason']}. Native source/CST/save assertions still run.")
     lines.extend(['', '## Difference categories', ''])
     if report['summary']['limitations']:
         lines.extend(['Reported limitations are counts of case-level limitation labels:'])
@@ -309,14 +325,27 @@ def markdown_report(report):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--executable', type=Path, default=ROOT / 'build' / 'core' / 'FoliaCommonMarkTests.exe')
-    parser.add_argument('--output', type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument('--suite', choices=['commonmark', 'gfm'], default='commonmark')
+    parser.add_argument('--executable', type=Path)
+    parser.add_argument('--output', type=Path)
     parser.add_argument('--timeout', type=float, default=120.0)
     args, filters = parser.parse_known_args()
+    if args.executable is None:
+        target = 'FoliaGfmTests.exe' if args.suite == 'gfm' else 'FoliaCommonMarkTests.exe'
+        args.executable = ROOT / 'build' / 'core' / target
+    if args.output is None:
+        args.output = ROOT / 'build' / 'gfm-conformance' if args.suite == 'gfm' else DEFAULT_OUTPUT
     if args.timeout <= 0:
         parser.error('--timeout must be greater than zero')
 
-    fixtures = load_fixtures()
+    fixtures = load_fixtures(args.suite)
+    policy = {}
+    if args.suite == 'gfm':
+        policy = json.loads((HERE / 'gfm-policy.json').read_text(encoding='utf-8'))['semantic_skips']
+        known = {str(case['example']): case for case in fixtures}
+        for example, entry in policy.items():
+            if example not in known or known[example]['section'] != entry['section'] or not entry['reason']:
+                raise ValueError('Invalid GFM semantic skip policy: ' + example)
     args.output.mkdir(parents=True, exist_ok=True)
     jsonl_path = args.output / 'results.jsonl'
     report_path = args.output / 'results.json'
@@ -325,7 +354,7 @@ def main():
     jsonl_path.unlink(missing_ok=True)
 
     env = os.environ.copy()
-    env['FOLIA_COMMONMARK_REPORT'] = str(jsonl_path.resolve())
+    env['FOLIA_MARKDOWN_REPORT'] = str(jsonl_path.resolve())
     command = [str(args.executable.resolve()), *filters]
     started = time.time()
     stdout = stderr = ''
@@ -359,7 +388,7 @@ def main():
         if number in indexed:
             duplicates.append(number)
         indexed[number] = item
-    all_cases = [case_result(case['example'], case, indexed.get(case['example'])) for case in fixtures]
+    all_cases = [case_result(case['example'], case, indexed.get(case['example']), policy.get(str(case['example']), {}).get('reason')) for case in fixtures]
     present = set(indexed)
     expected_ids = {case['example'] for case in fixtures}
     missing = sorted(expected_ids - present)
@@ -373,8 +402,8 @@ def main():
               else 'timed_out' if timed_out else 'abnormal_exit' if exit_code is not None
               else 'launch_error')
 
-    lock = json.loads((HERE / 'sources.lock.json').read_text(encoding='utf-8'))
-    spec = next(item for item in lock['files'] if item['name'] == 'spec.json')
+    lock = json.loads((HERE / ('gfm-sources.lock.json' if args.suite == 'gfm' else 'sources.lock.json')).read_text(encoding='utf-8'))
+    spec = next((item for item in lock.get('files', []) if item['name'] == 'spec.json'), None)
     report = {
         'status': status,
         'exit_code': formal_exit_code,
@@ -385,7 +414,8 @@ def main():
         'filters': filters,
         'fixture_count': len(fixtures),
         'jsonl_record_count': len(raw),
-        'source': {
+        'suite_title': 'GFM 0.29 extensions' if args.suite == 'gfm' else 'CommonMark 0.31.2',
+        'source': lock if args.suite == 'gfm' else {
             'commonmark_version': lock['commonmark_version'],
             'spec_json_url': spec['url'],
             'spec_json_sha256': spec['sha256'],
@@ -404,7 +434,7 @@ def main():
     }
     report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     markdown_path.write_text(markdown_report(report), encoding='utf-8')
-    print(f"CommonMark report: {markdown_path}")
+    print(f"Markdown conformance report: {markdown_path}")
     print(f"JSON report: {report_path}")
 
     if timed_out:

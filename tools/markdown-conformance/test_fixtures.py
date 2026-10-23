@@ -23,7 +23,7 @@ class FixtureTests(unittest.TestCase):
             prepare.generate(output, self.cases)
             generated = output.read_text(encoding='utf-8')
 
-        rows = re.findall(r'^\{(\d+),((?:"(?:\\x[0-9a-f]{2})*"(?:,|$))+)', generated, re.M)
+        rows = re.findall(r'^\{(\d+),((?:"(?:\\x[0-9a-f]{2})*"(?:,|(?=\})))+)', generated, re.M)
         self.assertEqual(len(rows), len(self.cases))
         self.assertEqual([int(example) for example, _ in rows], list(range(1, 653)))
 
@@ -35,7 +35,7 @@ class FixtureTests(unittest.TestCase):
         for case, (example, encoded) in zip(self.cases, rows):
             self.assertEqual(int(example), case['example'])
             fields = decode_literals(encoded)
-            self.assertGreaterEqual(len(fields), 3)
+            self.assertEqual(len(fields), 3)
             self.assertEqual(fields[0], case['section'])
             self.assertEqual(fields[1], case['markdown'])
             self.assertEqual(fields[2], case['html'])

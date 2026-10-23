@@ -1,0 +1,85 @@
+{
+  "repository": "github/cmark-gfm",
+  "commit": "27d942c8b0a62d192f616e5bf3578f4b6a89e180",
+  "official_spec": "https://github.github.com/gfm/",
+  "published_page_sha256": "b153d814fdfc8624bb6da7449162c1cd707a637f7d1c1b636eb44b9cf63fa220",
+  "spec_version": "0.29-gfm (2019-04-06)",
+  "fixture_license": "CC BY-SA 4.0, as declared in test/spec.txt and test/extensions.txt front matter",
+  "sources": [
+    {
+      "name": "published.html",
+      "url": "https://github.github.com/gfm/",
+      "sha256": "b153d814fdfc8624bb6da7449162c1cd707a637f7d1c1b636eb44b9cf63fa220",
+      "purpose": "current official published examples; active GFM extension expectations"
+    },
+    {
+      "name": "spec.txt",
+      "path": "test/spec.txt",
+      "url": "https://raw.githubusercontent.com/github/cmark-gfm/27d942c8b0a62d192f616e5bf3578f4b6a89e180/test/spec.txt",
+      "sha256": "7d8e5814befec287ac116786d81ff14e0adc9b13295b4494649e995408fd871c",
+      "purpose": "pinned cmark-gfm source; retained separately for documented page/source drift"
+    },
+    {
+      "name": "extensions.txt",
+      "path": "test/extensions.txt",
+      "url": "https://raw.githubusercontent.com/github/cmark-gfm/27d942c8b0a62d192f616e5bf3578f4b6a89e180/test/extensions.txt",
+      "sha256": "a2a45e98be9fca95f564f927265a0f63beea6cae5369d1cf4bde44caa51b2a3a",
+      "purpose": "separate cmark-gfm extra corpus"
+    },
+    {
+      "name": "COPYING",
+      "path": "COPYING",
+      "url": "https://raw.githubusercontent.com/github/cmark-gfm/27d942c8b0a62d192f616e5bf3578f4b6a89e180/COPYING",
+      "sha256": "c22e885f33b821bddb24cf007145e5540655b6c0f403e49e6c76a93c28e6d9a9",
+      "purpose": "cmark-gfm implementation repository license (BSD-2-Clause)"
+    }
+  ],
+  "published_page_drift": [
+    "The pinned cmark-gfm test/spec.txt is byte-identical to its 0.29.0.gfm.13 version but is not current with the published page.",
+    "Published Strikethrough Example 491 includes ~there~ and the page has Example 493; test/spec.txt has only examples 491 and 492.",
+    "The page includes additional cases before its Disallowed Raw HTML Example 657; test/spec.txt numbers the corresponding case 652."
+  ],
+  "counts": {
+    "published_gfm_extension_cases": 28,
+    "published_cases_by_section": {
+      "Tables (extension)": 8,
+      "Task list items (extension)": 2,
+      "Strikethrough (extension)": 3,
+      "Autolinks (extension)": 14,
+      "Disallowed Raw HTML (extension)": 1
+    },
+    "cmark_gfm_unpublished_extension_cases": 24,
+    "cmark_gfm_extra_cases": 30
+  },
+  "extraction": "Published HTML examples are extracted from paired pre/code.language-markdown and pre/code.language-html nodes, with HTMLParser entity decoding and space marker spans converted to literal spaces. Markdown is never reverse-derived from expected HTML. Pinned spec_tests.py convention maps U+2192 to a tab on both Markdown and expected HTML in the source corpora.",
+  "published_example_ids": [
+    198,
+    199,
+    200,
+    201,
+    202,
+    203,
+    204,
+    205,
+    279,
+    280,
+    491,
+    492,
+    493,
+    622,
+    623,
+    624,
+    625,
+    626,
+    627,
+    628,
+    629,
+    630,
+    631,
+    632,
+    633,
+    634,
+    635,
+    657
+  ]
+}

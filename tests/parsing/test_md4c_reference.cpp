@@ -11,19 +11,17 @@
 
 using namespace boost::ut;
 
-struct CommonMarkCase {
+struct MarkdownCase {
     int example;
     std::string_view section;
     std::string_view markdown;
     std::string_view html;
-    std::string_view expected_tree;
-    std::string_view relaxed_tree;
 };
 
 #include "commonmark_cases.inc"
 #include "md4c_failed_examples.inc"
 
-static_assert(std::size(commonmark_cases) == 652,
+static_assert(std::size(markdown_cases) == 652,
               "the official CommonMark fixture must contain all 652 examples");
 
 namespace {
@@ -78,15 +76,15 @@ std::string report_path() {
     return path ? path : "";
 }
 
-const CommonMarkCase* find_case(int example) {
-    for (const auto& test_case : commonmark_cases) {
+const MarkdownCase* find_case(int example) {
+    for (const auto& test_case : markdown_cases) {
         if (test_case.example == example) return &test_case;
     }
     return nullptr;
 }
 
 void append_report(
-    const CommonMarkCase& test_case,
+    const MarkdownCase& test_case,
     bool exact_html_match,
     std::string_view actual_html,
     int return_code) noexcept {
@@ -108,7 +106,7 @@ void append_report(
     }
 }
 
-void run_md4c_case(const CommonMarkCase& test_case) {
+void run_md4c_case(const MarkdownCase& test_case) {
     std::string markdown(test_case.markdown);
     HtmlOutput output;
     const int return_code = md_html(

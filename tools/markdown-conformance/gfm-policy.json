@@ -1,0 +1,8 @@
+{
+  "semantic_skips": {
+    "657": {
+      "section": "Disallowed Raw HTML (extension)",
+      "reason": "Folia uses inert HTML presentation and does not implement GitHub tagfilter HTML serialization. Only this HTML semantic comparison is skipped; native source, CST and exact-save assertions remain enabled."
+    }
+  }
+}

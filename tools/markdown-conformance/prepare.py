@@ -5,8 +5,6 @@ import json
 from pathlib import Path
 import urllib.request
 
-from canonical_html import canonical
-
 ROOT = Path(__file__).resolve().parents[2]
 DEPENDENCIES = ROOT / 'build/dependencies/markdown-conformance'
 
@@ -37,14 +35,11 @@ def literal(value):
     return '"' + ''.join(f'\\x{byte:02x}' for byte in value.encode('utf-8')) + '"'
 
 
-def generate(path, cases):
-    output = ['// Generated from hash-verified CommonMark 0.31.2; do not edit.',
-              'static constexpr CommonMarkCase commonmark_cases[] = {']
+def generate(path, cases, label="CommonMark 0.31.2"):
+    output = [f'// Generated from hash-verified {label}; do not edit.',
+              'static constexpr MarkdownCase markdown_cases[] = {']
     for case in cases:
-        tree = json.dumps(canonical(case['html']), ensure_ascii=False, separators=(',', ':'))
-        relaxed = json.dumps(canonical(case['html'], relax_list_paragraphs=True),
-                             ensure_ascii=False, separators=(',', ':'))
-        values = [case['section'], case['markdown'], case['html'], tree, relaxed]
+        values = [case['section'], case['markdown'], case['html']]
         output.append('{' + str(case['example']) + ',' + ','.join(map(literal, values)) + '},')
     output.append('};\n')
     path.parent.mkdir(parents=True, exist_ok=True)
