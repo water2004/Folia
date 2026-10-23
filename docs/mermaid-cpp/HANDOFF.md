@@ -21,7 +21,9 @@
   JSON tree cloning and array-wrapped fixture decoding. Nested array custom
   properties are explicitly marked. Added primitive-string/prototype-setter
   restrictions and regressions. Next: validate the corrected head in all four
-  Windows jobs before fast-forwarding the PR branch.
+  Windows jobs before fast-forwarding the PR branch. Shared preflight also
+  rejects manually constructed inactive ConfigValue payloads before copying;
+  all four public operations have regression checks for this budget boundary.
   Theme-name selection is distinct from theme-variable/color derivation, which
   still needs a native implementation. No common frontend integration is claimed.
 - User explicitly authorized this batch's public fork push after automatic

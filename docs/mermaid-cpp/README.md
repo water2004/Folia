@@ -126,7 +126,9 @@ it does not implement the full config.ts session lifecycle or derive colors.
 All configuration operations preflight the owned inputs before copying. Default
 limits are depth 64 (also a hard ceiling), 100,000 values, 4 Mi UTF-16 key/string
 units and 1,000,000 work steps; array-union comparisons consume work steps.
-Inputs collectively and output separately obey the same size bounds.
+Inputs collectively and output separately obey the same size bounds. Manually
+constructed values with inactive string/list/map payloads are rejected before
+copying, so hidden storage cannot evade these bounds.
 Failures never publish a partial result. Config schema keys and appearance
 defaults are generated from the original schema/AJV pipeline and defaultConfig,
 including keys contributed by the original theme implementation. JavaScript and

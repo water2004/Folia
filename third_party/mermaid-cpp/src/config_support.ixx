@@ -20,6 +20,12 @@ struct Budget {
         if (depth > std::min(limits.depth, std::size_t{64})) throw std::runtime_error("Configuration depth budget exceeded");
         if (values >= limits.values) throw std::runtime_error("Configuration value budget exceeded");
         ++values;
+        // ConfigValue is publicly constructible. Reject hidden inactive payloads
+        // before copying, so they cannot bypass the active-tree size/depth walk.
+        if ((value.kind != ConfigKind::string && !value.string.empty()) ||
+            (value.kind != ConfigKind::sequence && !value.sequence.empty()) ||
+            (value.kind != ConfigKind::mapping && !value.mapping.empty()))
+            throw std::runtime_error("Configuration value has an inactive payload");
         if (value.kind == ConfigKind::string) text(value.string.size());
         if (value.kind == ConfigKind::sequence) for (const auto& item : value.sequence) inspect(item, depth + 1);
         if (value.kind == ConfigKind::mapping) for (const auto& [key, item] : value.mapping) {

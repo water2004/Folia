@@ -130,6 +130,12 @@ suite config = [] {
         for (int i = 0; i < 70; ++i) { auto outer = empty; outer.mapping.emplace(u"flowchart", std::move(deep)); deep = std::move(outer); }
         expect(!sanitize_directive_config(deep, {.depth = 1000}));
         expect(!assign_config_with_depth(empty, deep, 2, {.depth = 1000}));
+        ConfigValue malformed;
+        malformed.mapping.emplace(u"hidden", deep);
+        expect(!sanitize_directive_config(malformed));
+        expect(!sanitize_secure_config(malformed, {}));
+        expect(!assign_config_with_depth(empty, malformed));
+        expect(!resolve_config_appearance(empty, malformed, {}, empty, u"pie"));
     };
     "mermaid_config_array_union_uses_identity_and_same_value_zero"_test = [] {
         auto a = json(u"[0]");
