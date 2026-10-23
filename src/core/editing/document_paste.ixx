@@ -68,13 +68,26 @@ inline void assign_fresh_ids(
     std::unordered_map<std::uint64_t, NodeId> id_map;
     assign_fresh_ids(block, allocator, id_map);
     walk_blocks(block, [&](BlockNode& owner) {
-        if (!owner.has_container_source()) return;
-        auto& lines = owner.ensure_container_source().lines;
-        for (auto& line : lines) {
-            if (const auto found = id_map.find(line.anchor.owner_id.v);
-                found != id_map.end()) {
-                line.anchor.owner_id = found->second;
+        if (owner.has_container_source()) {
+            auto& lines = owner.ensure_container_source().lines;
+            for (auto& line : lines) {
+                if (const auto found = id_map.find(line.anchor.owner_id.v);
+                    found != id_map.end()) {
+                    line.anchor.owner_id = found->second;
+                }
             }
+        }
+        if (owner.kind == BlockKind::TableRow && owner.table_special().row_syntax) {
+            auto remap_owners = [&](std::vector<NodeId>& owners) {
+                for (auto& owner_id : owners) {
+                    if (const auto found = id_map.find(owner_id.v); found != id_map.end()) {
+                        owner_id = found->second;
+                    }
+                }
+            };
+            auto& syntax = *owner.ensure_table_special().row_syntax;
+            remap_owners(syntax.cell_owners);
+            remap_owners(syntax.implicit_cell_owners);
         }
     });
 }
@@ -271,8 +284,8 @@ inline char32_t unordered_marker(const BlockNode& list) {
 }
 
 inline bool paste_compatible_lists(const BlockNode& current, const BlockNode& pasted) {
-    if (current.kind != pasted.kind
-        || (current.kind != BlockKind::List && current.kind != BlockKind::TaskList)) {
+    if ((current.kind != BlockKind::List && current.kind != BlockKind::TaskList)
+        || (pasted.kind != BlockKind::List && pasted.kind != BlockKind::TaskList)) {
         return false;
     }
     if (current.list_special().ordered != pasted.list_special().ordered) return false;
@@ -330,7 +343,7 @@ inline std::optional<TextPosition> paste_matching_list(
     auto* current_item = find_block(document.root, context.item_id);
     auto* head = find_block(document.root, head_id);
     if (!current_list || !current_item || !head) return std::nullopt;
-    const auto can_fold = current_list->kind != BlockKind::TaskList
+    const auto can_fold = current_item->kind != BlockKind::TaskListItem
         && !pasted_list.children.empty()
         && !pasted_list.children.front().children.empty()
         && pasted_list.children.front().children.front().kind == BlockKind::Paragraph;

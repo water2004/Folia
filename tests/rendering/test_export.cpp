@@ -3,6 +3,7 @@
 #include "support/folia_test.hpp"
 import folia.core.exporter;
 import folia.core.parser;
+import folia.core.dialect;
 import folia.core.ast;
 import folia.core.document;
 import folia.core.settings;
@@ -13,6 +14,40 @@ using namespace boost::ut;
 
 
 suite export_tests = [] {
+
+"test_export_html_uses_each_mixed_list_item_kind"_test = [] {
+    auto dialect = default_dialect();
+    dialect.gfm.task_lists = true;
+    auto out = parse_text(
+        1,
+        "- [@] regular\n- [x] task\n",
+        dialect);
+    auto res = export_html("", out.document, ExportOptions{});
+    expect(fatal(bool(res.ok)));
+    const auto& html = res.value.content;
+    expect(fatal(bool(html.find("<ul class=\"task-list\">") != std::string::npos)));
+    const auto regular_start = html.find("<li>");
+    const auto regular_end = html.find("</li>", regular_start);
+    expect(fatal(bool(regular_start != std::string::npos && regular_end != std::string::npos)));
+    if (regular_start != std::string::npos && regular_end != std::string::npos) {
+        expect(fatal(bool(html.substr(regular_start, regular_end - regular_start).find("checkbox")
+            == std::string::npos)));
+        expect(fatal(bool(html.substr(regular_start, regular_end - regular_start).find("[@] regular")
+            != std::string::npos)));
+    }
+    expect(fatal(bool(html.find(
+        "<li><input type=\"checkbox\" checked=\"\" disabled=\"\" /> <p>task</p>")
+        != std::string::npos)));
+
+    auto ordered = parse_text(2, "3. [x] done\n", dialect);
+    auto ordered_html = export_html("", ordered.document, ExportOptions{});
+    expect(fatal(bool(ordered_html.ok)));
+    expect(fatal(bool(ordered_html.value.content.find(
+        "<ol class=\"task-list\" start=\"3\">") != std::string::npos)));
+    expect(fatal(bool(ordered_html.value.content.find(
+        "<li><input type=\"checkbox\" checked=\"\" disabled=\"\" /> <p>done</p>")
+        != std::string::npos)));
+};
 
 "test_escape_raw_html_scripts"_test = [] {
     std::string input = "<script>alert(1)</script>";

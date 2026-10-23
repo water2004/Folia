@@ -155,6 +155,20 @@ inline void assign_fresh_ids(
             if (mapping != remapped_ids.end()) slot.owner_id = mapping->second;
         }
     }
+    if (block.kind == BlockKind::TableRow && block.table_special().row_syntax) {
+        auto& syntax = *block.ensure_table_special().row_syntax;
+        auto remap_owners = [&](std::vector<NodeId>& owners) {
+            for (auto& owner_id : owners) {
+                const auto mapping = std::ranges::find(
+                    remapped_ids,
+                    owner_id,
+                    &std::pair<NodeId, NodeId>::first);
+                if (mapping != remapped_ids.end()) owner_id = mapping->second;
+            }
+        };
+        remap_owners(syntax.cell_owners);
+        remap_owners(syntax.implicit_cell_owners);
+    }
 }
 
 inline BlockNode exact_paragraph(

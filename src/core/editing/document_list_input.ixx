@@ -26,11 +26,21 @@ inline BlockNode list_shell_from(const BlockNode& source, NodeId id) {
 }
 
 inline bool compatible_lists(const BlockNode& left, const BlockNode& right) {
-    if (left.kind != right.kind || (left.kind != BlockKind::List && left.kind != BlockKind::TaskList)) return false;
+    if ((left.kind != BlockKind::List && left.kind != BlockKind::TaskList)
+        || (right.kind != BlockKind::List && right.kind != BlockKind::TaskList)) return false;
     if (left.list_special().ordered != right.list_special().ordered
         || left.list_special().delimiter != right.list_special().delimiter) return false;
-    return !left.list_special().ordered
-        || right.list_special().start == left.list_special().start + left.children.size();
+    if (!left.list_special().ordered) {
+        const auto marker = [](const BlockNode& list) {
+            if (list.children.empty()) return U'-';
+            for (const auto value : list.children.front().item_special().marker) {
+                if (value == U'-' || value == U'+' || value == U'*') return value;
+            }
+            return U'-';
+        };
+        return marker(left) == marker(right);
+    }
+    return right.list_special().start == left.list_special().start + left.children.size();
 }
 
 struct DirectListContext {
@@ -63,13 +73,14 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> upgrade_task_item(
     if (leaf.kind != BlockKind::Paragraph || target.source_offset != 4
         || leaf.inline_content.source.size() < 4) return std::nullopt;
     const auto prefix = leaf.inline_content.source.substr(0, 4);
-    if (prefix[0] != U'[' || (prefix[1] != U' ' && prefix[1] != U'x' && prefix[1] != U'X')
+    if (prefix[0] != U'[' || (!horizontal_space(prefix[1]) && prefix[1] != U'x' && prefix[1] != U'X')
         || prefix[2] != U']' || !horizontal_space(prefix[3])) return std::nullopt;
     auto context = direct_list_context(document, target.container_id);
     if (!context) return std::nullopt;
     auto* list = block_at_path(document.root, context->list_path);
-    if (!list || list->kind != BlockKind::List || list->list_special().ordered
+    if (!list || (list->kind != BlockKind::List && list->kind != BlockKind::TaskList)
         || context->item_index >= list->children.size()) return std::nullopt;
+    if (list->children[context->item_index].kind != BlockKind::ListItem) return std::nullopt;
 
     document_edit_detail::RecordedBlockEdit result;
     auto source_edit = document_edit_detail::edit_inline(
@@ -80,16 +91,7 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> upgrade_task_item(
     result.target = target;
     const auto checked = prefix[1] == U'x' || prefix[1] == U'X';
 
-    auto parent_path = context->list_path;
-    if (parent_path.empty()) return std::nullopt;
-    const auto list_index = parent_path.back();
-    parent_path.pop_back();
-    auto* parent = block_at_path(document.root, parent_path);
-    if (!parent || list_index >= parent->children.size()) return std::nullopt;
-    const auto parent_id = parent->id;
-    const auto list_id = list->id;
     const auto item_id = list->children[context->item_index].id;
-    auto normal_shell = list_shell_from(*list, NodeId{});
 
     auto* item = find_block(document.root, item_id);
     if (!item) return std::nullopt;
@@ -102,104 +104,72 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> upgrade_task_item(
     update_item.after = document_transaction_detail::payload_shell(*item);
     result.operations.emplace_back(std::move(update_item));
 
-    if (context->item_index == 0) {
+    if (context->item_index == 0 && list->kind != BlockKind::TaskList) {
         DocumentTreeEdit update_list;
         update_list.kind = DocumentTreeEditKind::UpdatePayload;
         update_list.before = document_transaction_detail::payload_shell(*list);
         list->kind = BlockKind::TaskList;
         update_list.after = document_transaction_detail::payload_shell(*list);
         result.operations.emplace_back(std::move(update_list));
-    } else {
-        BlockNode tasks;
-        tasks.id = allocator.allocate();
-        tasks.kind = BlockKind::TaskList;
-        const auto tasks_id = tasks.id;
-        DocumentTreeEdit insert_tasks;
-        insert_tasks.kind = DocumentTreeEditKind::Insert;
-        insert_tasks.parent_id = parent_id;
-        insert_tasks.index = list_index + 1;
-        insert_tasks.after = tasks;
-        result.operations.emplace_back(std::move(insert_tasks));
-        parent->children.insert(
-            parent->children.begin() + static_cast<std::ptrdiff_t>(list_index + 1),
-            std::move(tasks));
-
-        list = find_block(document.root, list_id);
-        auto* tasks_list = find_block(document.root, tasks_id);
-        if (!list || !tasks_list) return std::nullopt;
-        DocumentTreeEdit move_item;
-        move_item.kind = DocumentTreeEditKind::Move;
-        move_item.parent_id = list_id;
-        move_item.index = context->item_index;
-        move_item.other_parent_id = tasks_id;
-        move_item.other_index = 0;
-        move_item.moved_id = list->children[context->item_index].id;
-        auto moved = remove_block(*list, context->item_index);
-        if (!moved || !insert_block(*tasks_list, 0, std::move(*moved))) return std::nullopt;
-        document_container_source::append_container_tree_operation(document, result.operations, std::move(move_item));
-    }
-
-    list = find_block(document.root, list_id);
-    parent = find_block(document.root, parent_id);
-    if (!list || !parent) return std::nullopt;
-    const auto first_after = context->item_index == 0 ? 1u : context->item_index;
-    if (first_after < list->children.size()) {
-        normal_shell.id = allocator.allocate();
-        const auto after_id = normal_shell.id;
-        const auto after_index = list_index + (context->item_index == 0 ? 1u : 2u);
-        DocumentTreeEdit insert_after;
-        insert_after.kind = DocumentTreeEditKind::Insert;
-        insert_after.parent_id = parent_id;
-        insert_after.index = after_index;
-        insert_after.after = normal_shell;
-        result.operations.emplace_back(std::move(insert_after));
-        parent->children.insert(
-            parent->children.begin() + static_cast<std::ptrdiff_t>(after_index),
-            std::move(normal_shell));
-
-        list = find_block(document.root, list_id);
-        auto* after = find_block(document.root, after_id);
-        if (!list || !after) return std::nullopt;
-        std::size_t target_index = 0;
-        while (first_after < list->children.size()) {
-            DocumentTreeEdit move_after;
-            move_after.kind = DocumentTreeEditKind::Move;
-            move_after.parent_id = list_id;
-            move_after.index = first_after;
-            move_after.other_parent_id = after_id;
-            move_after.other_index = target_index;
-            move_after.moved_id = list->children[first_after].id;
-            auto moved = remove_block(*list, first_after);
-            if (!moved || !insert_block(*after, target_index, std::move(*moved))) {
-                return std::nullopt;
-            }
-        document_container_source::append_container_tree_operation(document, result.operations, std::move(move_after));
-            ++target_index;
-        }
     }
     return result;
 }
 
-inline std::u32string next_item_marker(const BlockNode& list, const BlockNode& item, std::size_t item_index) {
-    if (list.kind == BlockKind::TaskList) return U"- [ ] ";
+inline std::u32string next_item_marker(
+    const BlockNode& list,
+    const BlockNode& item,
+    std::size_t item_index,
+    bool new_item = false) {
     const auto& list_special = list.list_special();
     const auto& item_special = item.item_special();
-    if (!list_special.ordered) return item_special.marker.empty() ? U"- " : item_special.marker;
+    const bool task_item = item.kind == BlockKind::TaskListItem;
+    std::size_t checkbox_open = std::u32string::npos;
+    if (task_item) checkbox_open = item_special.marker.find(U'[');
+    if (!list_special.ordered && !task_item) {
+        return item_special.marker.empty() ? U"- " : item_special.marker;
+    }
+
     std::u32string indent;
     std::size_t cursor = 0;
     while (cursor < item_special.marker.size() && item_special.marker[cursor] == U' ') {
         indent.push_back(item_special.marker[cursor++]);
     }
-    while (cursor < item_special.marker.size() && item_special.marker[cursor] >= U'0'
-        && item_special.marker[cursor] <= U'9') ++cursor;
-    auto delimiter = cursor < item_special.marker.size()
-        && (item_special.marker[cursor] == U'.' || item_special.marker[cursor] == U')')
-        ? item_special.marker[cursor++] : list_special.delimiter;
-    auto spacing = cursor < item_special.marker.size()
-        ? item_special.marker.substr(cursor) : std::u32string(U" ");
-    if (spacing.empty()) spacing = U" ";
-    return indent + utf8_to_cps(std::to_string(list_special.start + item_index + 1))
-        + std::u32string(1, delimiter) + spacing;
+    std::u32string list_marker_prefix;
+    if (list_special.ordered) {
+        while (cursor < item_special.marker.size() && item_special.marker[cursor] >= U'0'
+            && item_special.marker[cursor] <= U'9') ++cursor;
+        const auto delimiter = cursor < item_special.marker.size()
+                && (item_special.marker[cursor] == U'.' || item_special.marker[cursor] == U')')
+            ? item_special.marker[cursor++] : list_special.delimiter;
+        const auto spacing_end = task_item && checkbox_open != std::u32string::npos
+            ? checkbox_open : item_special.marker.size();
+        auto spacing = spacing_end > cursor
+            ? item_special.marker.substr(cursor, spacing_end - cursor) : std::u32string(U" ");
+        if (spacing.empty()) spacing = U" ";
+        list_marker_prefix = indent + utf8_to_cps(std::to_string(list_special.start + item_index))
+            + std::u32string(1, delimiter) + spacing;
+    } else if (checkbox_open != std::u32string::npos) {
+        list_marker_prefix = item_special.marker.substr(0, checkbox_open);
+    } else {
+        for (const auto value : item_special.marker) {
+            if (value == U'-' || value == U'+' || value == U'*') {
+                list_marker_prefix = item_special.marker.substr(0, item_special.marker.find(value) + 1);
+                break;
+            }
+        }
+        if (list_marker_prefix.empty()) list_marker_prefix = U"-";
+        list_marker_prefix += U" ";
+    }
+    if (!task_item) return list_marker_prefix;
+
+    if (checkbox_open == std::u32string::npos || checkbox_open + 2 >= item_special.marker.size()) {
+        return list_marker_prefix + U"[ ] ";
+    }
+    const auto checkbox_close = checkbox_open + 2;
+    const auto checked = new_item ? U' ' : item_special.marker[checkbox_open + 1];
+    const auto suffix = checkbox_close + 1 < item_special.marker.size()
+        ? item_special.marker.substr(checkbox_close + 1) : std::u32string{};
+    return list_marker_prefix + U"[" + checked + U"]" + suffix;
 }
 
 inline BlockNode empty_item(
@@ -210,8 +180,9 @@ inline BlockNode empty_item(
     document_edit_detail::NodeAllocator& allocator) {
     BlockNode item;
     item.id = allocator.allocate();
-    item.kind = list.kind == BlockKind::TaskList ? BlockKind::TaskListItem : BlockKind::ListItem;
-    item.ensure_item_special().marker = next_item_marker(list, reference, item_index);
+    item.kind = reference.kind == BlockKind::TaskListItem
+        ? BlockKind::TaskListItem : BlockKind::ListItem;
+    item.ensure_item_special().marker = next_item_marker(list, reference, item_index, true);
     auto syntax_mode = InlineSyntaxMode::Markdown;
     auto find_mode = [&](auto& self, const BlockNode& block) -> bool {
         if (const auto* inline_document = editable_inline_document(block)) {
@@ -382,15 +353,12 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> split_list_item(
     };
 
     if (context->child_index == 0 && offset == 0) {
-        auto inserted = empty_item(*list, item, context->item_index == 0 ? 0 : context->item_index - 1, document, allocator);
+        auto inserted = empty_item(*list, item, context->item_index, document, allocator);
         if (list->list_special().ordered) {
-            inserted.ensure_item_special().marker = utf8_to_cps(
-                std::to_string(list->list_special().start + context->item_index))
-                + std::u32string(1, list->list_special().delimiter) + U" ";
             DocumentTreeEdit update;
             update.kind = DocumentTreeEditKind::UpdatePayload;
             update.before = document_transaction_detail::payload_shell(item);
-            item.ensure_item_special().marker = next_item_marker(*list, item, context->item_index);
+            item.ensure_item_special().marker = next_item_marker(*list, item, context->item_index + 1);
             update.after = document_transaction_detail::payload_shell(item);
             result.operations.emplace_back(std::move(update));
         }
@@ -402,7 +370,7 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> split_list_item(
     next.id = allocator.allocate();
     next.kind = item.kind;
     next.ensure_item_special().checked = false;
-    next.ensure_item_special().marker = next_item_marker(*list, item, context->item_index);
+    next.ensure_item_special().marker = next_item_marker(*list, item, context->item_index + 1, true);
 
     if (offset == leaf.inline_content.source.size() && context->child_index + 1 == item.children.size()) {
         auto paragraph = document_edit_detail::empty_paragraph(

@@ -69,12 +69,14 @@ inline void append_case_report(
     }
 }
 
-inline void run_case(const MarkdownCase& test_case, std::string_view suite_name, const MarkdownDialect& dialect) {
+inline void run_case(const MarkdownCase& test_case, std::string_view suite_name,
+    const MarkdownDialect& dialect,
+    const folia::test::commonmark::ProjectionOptions& options = {}) {
     const auto case_label = std::string(suite_name) + " example "
         + std::to_string(test_case.example) + " [" + std::string(test_case.section) + "]";
     try {
         const auto parsed = parse_text(1, std::string(test_case.markdown), dialect);
-        const auto projection = folia::test::commonmark::project(parsed.document.root);
+        const auto projection = folia::test::commonmark::project(parsed.document.root, options);
         const bool lossless = folia::test::commonmark::inline_lossless(parsed.document.root);
         const auto serialized = serialize_markdown(parsed.document);
         const bool roundtrip = std::string_view(serialized) == test_case.markdown;

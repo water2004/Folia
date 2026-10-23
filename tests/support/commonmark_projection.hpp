@@ -17,6 +17,11 @@ struct Projection {
     std::vector<std::string> limitations;
 };
 
+struct ProjectionOptions {
+    bool table_prefer_style_attributes = false;
+    bool full_info_string = false;
+};
+
 namespace projection_detail {
 
 struct Node;
@@ -208,7 +213,8 @@ inline void project_inline_nodes(
             }
             case K::CodeSpan: {
                 auto n = element("code");
-                append_text(n, cps_to_utf8(normalize_inline_code_span(inline_source_slice(doc, item.delimiter_ranges().content))));
+                append_text(n, cps_to_utf8(normalize_inline_code_span(
+                    inline_source_slice(doc, item.delimiter_ranges().content), doc.syntax_mode)));
                 append_node(parent, std::move(n));
                 break;
             }
@@ -314,8 +320,12 @@ inline void project_inline_nodes(
                 // Preserve the exact incomplete/error spelling as literal text.
                 append_text(parent, raw());
                 break;
+            case K::FootnoteRef: {
+                Node ref{"#footnote-ref", {{"label", item.semantics().label}, {"source", raw()}}, {}};
+                append_node(parent, std::move(ref));
+                break;
+            }
             case K::InlineMath:
-            case K::FootnoteRef:
             case K::WikiLink:
             case K::Extension:
                 append_node(parent, placeholder("extension", "kind", std::to_string(static_cast<int>(item.kind))));
@@ -328,6 +338,39 @@ inline void project_inline_nodes(
                 break;
         }
     }
+}
+
+inline std::u32string decoded_code_meta(std::u32string_view raw) {
+    std::u32string decoded;
+    for (std::size_t cursor = 0; cursor < raw.size();) {
+        if (raw[cursor] == U'&') {
+            auto end = cursor + 1;
+            while (end < raw.size() && raw[end] != U';'
+                && raw[end] != U' ' && raw[end] != U'\t') ++end;
+            if (end < raw.size() && raw[end] == U';') {
+                if (auto value = decode_html_character_reference(raw.substr(cursor, end - cursor + 1))) {
+                    decoded.append(*value);
+                    cursor = end + 1;
+                    continue;
+                }
+            }
+        }
+        if (raw[cursor] == U'\\' && cursor + 1 < raw.size()) {
+            const auto next = raw[cursor + 1];
+            const bool punctuation = (next >= U'!' && next <= U'/')
+                || (next >= U':' && next <= U'@')
+                || (next >= U'[' && next <= U'`')
+                || (next >= U'{' && next <= U'~');
+            if (punctuation) {
+                decoded.push_back(next);
+                cursor += 2;
+                continue;
+            }
+        }
+        decoded.push_back(raw[cursor++]);
+    }
+    for (auto& ch : decoded) if (ch == U'\0') ch = U'\uFFFD';
+    return decoded;
 }
 
 inline InlineCstNodes semantic_inline_nodes(
@@ -351,7 +394,8 @@ inline InlineCstNodes semantic_inline_nodes(
 inline bool project_block(
     Node& parent,
     BlockNode const& block,
-    std::vector<std::string>& limitations) {
+    std::vector<std::string>& limitations,
+    ProjectionOptions const& options) {
     // HTML-backed semantic trees retain their original source as the HTML
     // projection input. This test parses fresh documents; editing/save checks
     // remain separate and do not use this rendering convenience.
@@ -360,7 +404,7 @@ inline bool project_block(
         return true;
     }
     auto add_children = [&](Node& node) {
-        for (auto const& child : block.children) project_block(node, child, limitations);
+        for (auto const& child : block.children) project_block(node, child, limitations, options);
     };
     switch (block.kind) {
         case BlockKind::Document:
@@ -449,7 +493,7 @@ inline bool project_block(
                         project_inline_nodes(p, child.inline_content, semantic_nodes, limitations);
                         append_node(li, std::move(p));
                     } else {
-                        project_block(li, child, limitations);
+                        project_block(li, child, limitations, options);
                     }
                 }
                 if (checkbox_pending) append_checkbox(li);
@@ -473,6 +517,21 @@ inline bool project_block(
             std::vector<std::pair<std::string, std::string>> attrs;
             auto const& language = block.block_source.tree().language;
             if (language && !language->empty()) attrs.emplace_back("class", "language-" + *language);
+            auto const& source = block.block_source.source();
+            auto const& source_tree = block.block_source.tree();
+            if (options.full_info_string && source_tree.info_range) {
+                auto meta_start = source_tree.language_range
+                    ? source_tree.language_range->end : source_tree.info_range->start;
+                auto meta_end = source_tree.info_range->end;
+                while (meta_start < meta_end
+                    && (source[meta_start] == U' ' || source[meta_start] == U'\t')) ++meta_start;
+                while (meta_end > meta_start
+                    && (source[meta_end - 1] == U' ' || source[meta_end - 1] == U'\t')) --meta_end;
+                if (meta_start < meta_end) {
+                    attrs.emplace_back("data-meta", utf8(decoded_code_meta(
+                        std::u32string_view(source).substr(meta_start, meta_end - meta_start))));
+                }
+            }
             auto code = element("code", std::move(attrs));
             append_text(code, code_block_text(block.block_source));
             append_node(pre, std::move(code));
@@ -548,7 +607,11 @@ inline bool project_block(
                     for (std::size_t column = 0; column < row.children.size(); ++column) {
                         auto const& cell = row.children[column];
                         std::vector<std::pair<std::string, std::string>> attrs;
-                        if (auto align = alignment(column)) attrs.emplace_back("align", *align);
+                        if (auto align = alignment(column)) {
+                            if (options.table_prefer_style_attributes)
+                                attrs.emplace_back("style", "text-align: " + *align);
+                            else attrs.emplace_back("align", *align);
+                        }
                         auto th = element(header ? "th" : "td", std::move(attrs));
                         auto semantic_nodes = semantic_inline_nodes(
                             cell.inline_content, InlineBlockWhitespacePolicy::Paragraph);
@@ -571,6 +634,10 @@ inline bool project_block(
                     }
                 }
                 append_node(parent, std::move(table));
+            } else if (block.kind == BlockKind::FootnoteDefinition) {
+                Node definition{"#footnote-definition", {{"label", block.container_special().footnote_label}}, {}};
+                add_children(definition);
+                append_node(parent, std::move(definition));
             } else if (block.kind == BlockKind::TaskListItem) {
                 append_node(parent, placeholder("extension", "kind", "orphan-task-list-item"));
                 limitation(limitations, "block-extension:orphan-task-list-item");
@@ -593,6 +660,7 @@ inline bool is_container(std::string_view tag) {
 }
 inline bool is_block(std::string_view tag) {
     return is_container(tag) || tag == "p" || tag == "pre" || tag == "hr"
+        || tag == "section"
         || (tag.size() == 2 && tag[0] == 'h' && tag[1] >= '1' && tag[1] <= '6');
 }
 inline bool whitespace_only(std::string const& text) {
@@ -760,6 +828,138 @@ inline std::string render_html(Node const& root) {
     render_html_node(root, result);
     return result;
 }
+
+inline std::string footnote_id(std::string_view label) {
+    static constexpr char hex[] = "0123456789ABCDEF";
+    std::string out;
+    for (unsigned char c : label) {
+        if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')
+            || (c >= '0' && c <= '9') || c == '-' || c == '_' || c == '.' || c == '~'
+            || c == '/' || c == '(' || c == ')') {
+            out.push_back(static_cast<char>(c));
+        } else {
+            out.push_back('%'); out.push_back(hex[c >> 4]); out.push_back(hex[c & 15]);
+        }
+    }
+    return out;
+}
+
+inline std::string const& attr(Node const& node, std::string_view name) {
+    static const std::string empty;
+    auto found = std::ranges::find_if(node.attrs, [&](auto const& value) { return value.first == name; });
+    return found == node.attrs.end() ? empty : found->second;
+}
+
+struct FootnoteState {
+    std::unordered_map<std::string, Node> definitions;
+    std::unordered_map<std::string, std::size_t> counts;
+    std::unordered_map<std::string, std::size_t> ordinals;
+    std::vector<std::string> used;
+    std::unordered_set<std::string> expanded;
+    std::size_t next_ordinal = 1;
+};
+
+inline Node footnote_ref(std::string const& label, FootnoteState& state) {
+    const auto ordinal = state.ordinals.try_emplace(label, state.next_ordinal).first->second;
+    if (ordinal == state.next_ordinal) ++state.next_ordinal;
+    const auto occurrence = ++state.counts[label];
+    const auto safe = footnote_id(label);
+    auto id = "fnref-" + safe + (occurrence == 1 ? "" : "-" + std::to_string(occurrence));
+    auto anchor = element("a", {{"data-footnote-ref", ""}, {"href", "#fn-" + safe}, {"id", id}});
+    append_text(anchor, std::to_string(ordinal));
+    auto sup = element("sup", {{"class", "footnote-ref"}});
+    append_node(sup, std::move(anchor));
+    if (state.expanded.insert(label).second) {
+        state.used.push_back(label);
+    }
+    return sup;
+}
+
+inline void append_backrefs(Node& definition, std::string const& label, FootnoteState const& state) {
+    const auto count = state.counts.at(label);
+    auto make_link = [&](std::size_t occurrence) {
+        auto safe = footnote_id(label);
+        auto id = "fnref-" + safe + (occurrence == 1 ? "" : "-" + std::to_string(occurrence));
+        auto index = std::to_string(state.ordinals.at(label))
+            + (occurrence == 1 ? "" : "-" + std::to_string(occurrence));
+        auto link = element("a", {{"aria-label", "Back to reference " + index},
+            {"class", "footnote-backref"}, {"data-footnote-backref", ""},
+            {"data-footnote-backref-idx", index}, {"href", "#" + id}});
+        append_text(link, "↩");
+        if (occurrence > 1) {
+            auto sup = element("sup", {{"class", "footnote-ref"}});
+            append_text(sup, std::to_string(occurrence));
+            append_node(link, std::move(sup));
+        }
+        return link;
+    };
+    Node* last_paragraph = nullptr;
+    auto find_last = [&](auto&& self, Node& node) -> void {
+        for (auto& child : node.children) if (child.node) {
+            self(self, *child.node);
+            if (child.node->tag == "p") last_paragraph = child.node.get();
+        }
+    };
+    find_last(find_last, definition);
+    Node* target = last_paragraph ? last_paragraph : &definition;
+    for (std::size_t i = 1; i <= count; ++i) {
+        if (!target->children.empty()) append_text(*target, " ");
+        append_node(*target, make_link(i));
+    }
+}
+
+inline void finish_footnotes(Node& root) {
+    FootnoteState state;
+    auto extract = [&](auto&& self, Node& node) -> void {
+        std::vector<Child> body;
+        for (auto& child : node.children) {
+            if (child.node && child.node->tag == "#footnote-definition") {
+                auto label = attr(*child.node, "label");
+                state.definitions.emplace(std::move(label), std::move(*child.node));
+            } else {
+                if (child.node) self(self, *child.node);
+                body.emplace_back(std::move(child));
+            }
+        }
+        node.children = std::move(body);
+    };
+    extract(extract, root);
+    auto visit = [&](auto&& self, Node& node) -> void {
+        std::vector<Child> children;
+        for (auto& child : node.children) {
+            if (child.node && child.node->tag == "#footnote-ref") {
+                if (state.definitions.contains(attr(*child.node, "label")))
+                    children.emplace_back(footnote_ref(attr(*child.node, "label"), state));
+                else children.emplace_back(attr(*child.node, "source"));
+            } else {
+                if (child.node) self(self, *child.node);
+                children.emplace_back(std::move(child));
+            }
+        }
+        node.children = std::move(children);
+    };
+    visit(visit, root);
+    for (std::size_t index = 0; index < state.used.size(); ++index) {
+        auto& definition = state.definitions.at(state.used[index]);
+        visit(visit, definition);
+    }
+    if (state.used.empty()) return;
+    auto section = element("section", {{"class", "footnotes"}, {"data-footnotes", ""}});
+    auto ol = element("ol");
+    for (auto const& label : state.used) {
+        auto li = element("li", {{"id", "fn-" + footnote_id(label)}});
+        auto& definition = state.definitions.at(label);
+        for (auto& child : definition.children) {
+            if (child.node) append_node(li, std::move(*child.node));
+            else append_text(li, std::move(child.text));
+        }
+        append_backrefs(li, label, state);
+        append_node(ol, std::move(li));
+    }
+    append_text(section, "\n");
+    append_node(section, std::move(ol));
+    append_node(root, std::move(section));
+}
 } // namespace projection_detail
 
 inline std::string json_string(std::string_view value) {
@@ -806,15 +1006,16 @@ inline MarkdownDialect gfm_dialect() {
     return d;
 }
 
-inline Projection project(BlockNode const& block) {
+inline Projection project(BlockNode const& block, ProjectionOptions const& options = {}) {
     using namespace projection_detail;
     Node strict = element("root");
     Projection result;
     if (block.kind == BlockKind::Document) {
-        for (auto const& child : block.children) project_block(strict, child, result.limitations);
+        for (auto const& child : block.children) project_block(strict, child, result.limitations, options);
     } else {
-        project_block(strict, block, result.limitations);
+        project_block(strict, block, result.limitations, options);
     }
+    finish_footnotes(strict);
     result.projected_html = render_html(strict);
     Node relaxed = clone(strict);
     clean(strict, false);

@@ -257,22 +257,29 @@ inline std::string block_to_html(const BlockNode& b, ExportRawHtmlPolicy pol) {
         }
         case BK::BlockQuote:
             return "<blockquote>\n" + blocks_to_html(b.children, pol) + "</blockquote>\n";
-        case BK::List: {
+        case BK::List:
+        case BK::TaskList: {
             auto const& special = b.list_special();
             std::string items;
-            for (const auto& it : b.children) items += "<li>" + blocks_to_html(it.children, pol) + "</li>\n";
+            bool has_task_items = b.kind == BK::TaskList;
+            for (const auto& it : b.children) {
+                const bool task_item = it.kind == BK::TaskListItem;
+                has_task_items = has_task_items || task_item;
+                items += "<li>";
+                if (task_item) {
+                    items += "<input type=\"checkbox\"";
+                    if (it.item_special().checked) items += " checked=\"\"";
+                    items += " disabled=\"\" /> ";
+                }
+                items += blocks_to_html(it.children, pol) + "</li>\n";
+            }
             if (special.ordered) {
                 auto start = special.start == 1 ? std::string{} : " start=\"" + std::to_string(special.start) + "\"";
-                return "<ol" + start + ">\n" + items + "</ol>\n";
+                auto task_class = has_task_items ? " class=\"task-list\"" : "";
+                return std::string("<ol") + task_class + start + ">\n" + items + "</ol>\n";
             }
-            return "<ul>\n" + items + "</ul>\n";
-        }
-        case BK::TaskList: {
-            std::string items;
-            for (const auto& it : b.children) {
-                items += "<li>" + std::string(it.item_special().checked ? "[x] " : "[ ] ") + blocks_to_html(it.children, pol) + "</li>\n";
-            }
-            return "<ul class=\"task-list\">\n" + items + "</ul>\n";
+            auto task_class = has_task_items ? " class=\"task-list\"" : "";
+            return "<ul" + std::string(task_class) + ">\n" + items + "</ul>\n";
         }
         case BK::MathBlock:
             return "<div class=\"math-block\">" + escape_raw_html(cps_to_utf8(block_source_content(b.block_source))) + "</div>\n";

@@ -85,6 +85,19 @@ struct BlockTableSpecial {
     // the final row's ending remains ordinary sibling separator metadata.
     std::u32string table_separator_source;
     std::vector<std::u32string> table_internal_line_endings;
+    // Parsed table rows retain only syntax around cell bodies. Cell bodies
+    // continue to live exclusively in the referenced TableCell sources.
+    struct RowSyntax {
+        std::vector<NodeId> cell_owners;
+        // IDs of table-width padding cells have no row-source spelling until
+        // their source is edited. This distinguishes them from later inserts.
+        std::vector<NodeId> implicit_cell_owners;
+        // Exactly one more gap than owner. Gaps contain delimiters/padding,
+        // never cell-body text. An empty optional distinguishes generated
+        // rows from parsed rows with no physical cells.
+        std::vector<std::u32string> gaps;
+    };
+    std::optional<RowSyntax> row_syntax; // TableRow
     bool table_header_row = false;      // TableRow
 };
 

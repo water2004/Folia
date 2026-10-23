@@ -348,7 +348,12 @@ struct Builder {
     };
 
     std::size_t list_marker_columns(const BlockNode& list, std::size_t index) const {
-        if (list.kind == BlockKind::TaskList) return 6;
+        if (index < list.children.size()
+            && list.children[index].kind == BlockKind::TaskListItem) {
+            return list.list_special().ordered
+                ? std::to_string(list.list_special().start + index).size() + 6
+                : 6;
+        }
         if (list.list_special().ordered) return std::to_string(list.list_special().start + index).size() + 2;
         return 2;
     }
@@ -450,9 +455,9 @@ struct Builder {
             case BlockKind::List:
             case BlockKind::TaskList: {
                 auto rendered = make_flow_container(block, context, parent_indent_columns);
-                const bool tasks = block.kind == BlockKind::TaskList;
                 for (std::size_t index = 0; index < block.children.size(); ++index) {
                     auto const& item = block.children[index];
+                    const bool task_item = item.kind == BlockKind::TaskListItem;
                     auto item_owner = list_item_marker_owner(item);
                     if (index > 0) {
                         auto previous = last_editable_position(block.children[index - 1])
@@ -461,7 +466,9 @@ struct Builder {
                     }
                     auto marker = item.item_special().marker;
                     if (marker.empty()) {
-                        if (tasks) marker = item.item_special().checked ? U"- [x] " : U"- [ ] ";
+                        if (task_item) {
+                            marker = item.item_special().checked ? U"- [x] " : U"- [ ] ";
+                        }
                         else if (block.list_special().ordered) marker = utf8_to_cps(std::to_string(block.list_special().start + index)) + std::u32string(1, block.list_special().delimiter) + U" ";
                         else marker = U"- ";
                     }
@@ -469,7 +476,7 @@ struct Builder {
                     auto missing_indent = context.indent_columns > (index == 0 ? emitted_columns : 0)
                         ? context.indent_columns - (index == 0 ? emitted_columns : 0)
                         : 0;
-                    auto display_marker = tasks
+                    auto display_marker = task_item
                         ? marker
                         : block.list_special().ordered
                             ? utf8_to_cps(std::to_string(block.list_special().start + index)) + std::u32string(1, block.list_special().delimiter) + U" "
@@ -480,10 +487,10 @@ struct Builder {
                         item_owner,
                         cursor,
                         marker,
-                        tasks ? MarkerRole::TaskCheckbox : block.list_special().ordered ? MarkerRole::ListNumber : MarkerRole::ListBullet,
+                        task_item ? MarkerRole::TaskCheckbox : block.list_special().ordered ? MarkerRole::ListNumber : MarkerRole::ListBullet,
                         TextAffinity::Downstream,
                         std::u32string(missing_indent, U' ') + display_marker);
-                    if (tasks) out.back().ensure_special().task_checked = item.item_special().checked;
+                    if (task_item) out.back().ensure_special().task_checked = item.item_special().checked;
 
                     FlowContext item_context{context.indent_columns + marker_columns};
                     auto item_rendered = make_flow_container(item, item_context, context.indent_columns);
@@ -740,15 +747,23 @@ struct Builder {
                     struct ProjectedCharacter {
                         char32_t value;
                         SourceRange source_range;
+                        bool hidden = false;
                     };
                     const auto content = code_node.delimiter_ranges().content;
                     const auto raw = inline_source_slice(document, content);
-                    const auto normalized = normalize_inline_code_span(raw);
+                    const auto normalized = normalize_inline_code_span(raw, document.syntax_mode);
                     std::vector<ProjectedCharacter> projected;
                     projected.reserve(raw.size());
                     for (std::size_t offset = 0; offset < raw.size(); ++offset) {
                         const auto source_start = content.start + offset;
                         const auto value = raw[offset];
+                        if (document.syntax_mode == InlineSyntaxMode::TableCell
+                            && value == U'\\' && offset + 1 < raw.size() && raw[offset + 1] == U'|') {
+                            projected.push_back({U'\\', {source_start, source_start + 1}, true});
+                            projected.push_back({U'|', {source_start + 1, source_start + 2}});
+                            ++offset;
+                            continue;
+                        }
                         if (value == U'\r') {
                             auto source_end = source_start + 1;
                             if (offset + 1 < raw.size() && raw[offset + 1] == U'\n') {
@@ -778,30 +793,48 @@ struct Builder {
                     }
 
                     auto cursor = content_start;
+                    auto display_cursor = std::size_t{0};
                     while (cursor < content_end) {
+                        if (projected[cursor].hidden) {
+                            InlineRenderItem marker;
+                            marker.kind = InlineRenderItem::Kind::Marker;
+                            marker.id = code_node.id;
+                            marker.source_span = source_span(projected[cursor].source_range);
+                            marker.text = inline_source_slice(document, projected[cursor].source_range);
+                            auto& marker_payload = marker.ensure_special();
+                            marker_payload.marker_owner = code_node.id;
+                            marker_payload.marker_role = MarkerRole::Syntax;
+                            marker_payload.marker_style = MarkerStyle{true, {}};
+                            marker_payload.visibility = MarkerVisibility::HiddenButEditable;
+                            target.push_back(std::move(marker));
+                            ++cursor;
+                            continue;
+                        }
                         if (projected[cursor].source_range.length() != 1) {
-                            const auto display_start = cursor - content_start;
                             append_text(
-                                normalized.substr(display_start, 1),
+                                normalized.substr(display_cursor, 1),
                                 projected[cursor].source_range,
                                 text_style);
                             ++cursor;
+                            ++display_cursor;
                             continue;
                         }
                         auto run_end = cursor + 1;
                         while (run_end < content_end
+                            && !projected[run_end].hidden
                             && projected[run_end].source_range.length() == 1
                             && projected[run_end - 1].source_range.end
                                 == projected[run_end].source_range.start) {
                             ++run_end;
                         }
-                        const auto display_start = cursor - content_start;
-                        auto text = normalized.substr(display_start, run_end - cursor);
+                        auto text = normalized.substr(display_cursor, run_end - cursor);
+                        const auto displayed_count = run_end - cursor;
                         append_text(
                             std::move(text),
                             {projected[cursor].source_range.start, projected[run_end - 1].source_range.end},
                             text_style);
                         cursor = run_end;
+                        display_cursor += displayed_count;
                     }
 
                     if (trim_outer_spaces) {

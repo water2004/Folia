@@ -631,6 +631,39 @@ inline ProjectedText serialize_list(const BlockNode& block) {
 }
 
 inline ProjectedText serialize_table_row(const BlockNode& row) {
+    const auto& syntax = row.table_special().row_syntax;
+    if (syntax && syntax->gaps.size() == syntax->cell_owners.size() + 1
+        && row.children.size() == syntax->cell_owners.size() + syntax->implicit_cell_owners.size()) {
+        bool owners_match = true;
+        for (std::size_t index = 0; index < syntax->cell_owners.size(); ++index) {
+            if (row.children[index].id != syntax->cell_owners[index]
+                || row.children[index].kind != BlockKind::TableCell) {
+                owners_match = false;
+                break;
+            }
+        }
+        for (std::size_t index = 0; owners_match && index < syntax->implicit_cell_owners.size(); ++index) {
+            const auto child_index = syntax->cell_owners.size() + index;
+            if (row.children[child_index].id != syntax->implicit_cell_owners[index]
+                || row.children[child_index].kind != BlockKind::TableCell
+                || !row.children[child_index].inline_content.source.empty()) {
+                owners_match = false;
+            }
+        }
+        if (owners_match) {
+            auto preserved = generated(U"");
+            for (std::size_t index = 0; index < syntax->cell_owners.size(); ++index) {
+                preserved.append_generated(syntax->gaps[index]);
+                const auto& cell = row.children[index];
+                preserved.append(source_text(cell.id, cell.inline_content.source));
+            }
+            preserved.append_generated(syntax->gaps.back());
+            return preserved;
+        }
+    }
+
+    // Structural edits invalidate the parsed owner ordering. Generate valid
+    // table syntax from the current row tree in that case.
     auto result = generated(U"|");
     for (const auto& cell : row.children) {
         result.append_generated(U" ");

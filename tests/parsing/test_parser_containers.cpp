@@ -144,6 +144,7 @@ suite parser_container_tests = [] {
         "[^n]:\n    body on the next line\n",
         "[^n]:\n\n    body after a blank line\n",
         "[^n]: inline body\n\n    continuation paragraph\n",
+        "[^n]:       no code block here (spaces are stripped away)\n",
     };
     for (auto const& source : simple_forms) {
         const auto parsed = parse_text(1, source);
@@ -153,6 +154,22 @@ suite parser_container_tests = [] {
         expect(bool(footnote.kind == BlockKind::FootnoteDefinition)) << "footnote kind: " << source;
         expect(bool(first_block(footnote.children, BlockKind::Paragraph) != nullptr)) << "paragraph body: " << source;
         expect(fatal(bool(serialize_markdown(parsed.document) == source))) << source;
+    }
+
+    const std::string spaced_first_line = "[^n]:       no code block here (spaces are stripped away)\n";
+    const auto spaced = parse_text(2, spaced_first_line);
+    expect(fatal(bool(spaced.document.root.children.size() == 1u)));
+    if (spaced.document.root.children.size() == 1u) {
+        auto const& definition = spaced.document.root.children.front();
+        expect(fatal(bool(definition.kind == BlockKind::FootnoteDefinition)));
+        expect(fatal(bool(definition.text_special().opening_marker == U"[^n]:       ")));
+        expect(fatal(bool(definition.children.size() == 1u)));
+        if (definition.children.size() == 1u) {
+            expect(fatal(bool(definition.children.front().kind == BlockKind::Paragraph)));
+            expect(fatal(bool(definition.children.front().inline_content.source
+                == U"no code block here (spaces are stripped away)")));
+        }
+        expect(fatal(bool(serialize_markdown(spaced.document) == spaced_first_line)));
     }
 
     const std::string multiblock =

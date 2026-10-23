@@ -27,6 +27,7 @@ import folia.core.markdown_html;
 import folia.core.inline_cst;
 import folia.core.inline_document;
 import folia.core.instrumentation;
+import folia.core.gfm_autolink;
 
 export namespace folia {
 
@@ -39,6 +40,7 @@ struct Parser {
     std::size_t limit = 0;
     InlineParseContext ctx;
     std::uint64_t counter;
+    bool suppress_bare_autolinks = false;
 
     explicit Parser(std::u32string_view s, const InlineParseContext& c)
         : src(s), limit(s.size()), ctx(c), counter(c.next_id.v) {}
@@ -123,6 +125,8 @@ struct Parser {
     struct LinkLabelRange { std::size_t open = 0; std::size_t close = 0; };
 
     std::optional<std::vector<EmphasisPair>> emphasis_pairs_cache;
+    struct StrikePair { std::size_t open = 0; std::size_t close = 0; std::size_t length = 0; };
+    std::optional<std::vector<StrikePair>> strikethrough_pairs_cache;
 
     bool starts_with_at(std::size_t at, std::u32string_view value) const {
         return at + value.size() <= limit && src.substr(at, value.size()) == value;
@@ -152,7 +156,7 @@ struct Parser {
                 return special->range.end;
             }
             if (const auto tag = html_tag_at(at, limit)) {
-                if (ctx.syntax_mode == InlineSyntaxMode::Markdown) return tag->end;
+                if (inline_syntax_allows_markdown(ctx.syntax_mode)) return tag->end;
                 if (tag->closing || (tag->name != "img" && tag->name != "br"
                         && !safe_html_container(tag->name))) return tag->end;
                 if (tag->name == "img" || tag->name == "br" || tag->self_closing) return tag->end;
@@ -165,6 +169,100 @@ struct Parser {
             if (autolink_end != npos) return autolink_end;
         }
         return at;
+    }
+
+    // Skip only syntax that is opaque to Markdown delimiters. Inline HTML
+    // bodies remain scannable; only tags/attributes and HTML special tokens
+    // are skipped here.
+    std::size_t skip_strikethrough_opaque(std::size_t at) const {
+        if (at >= limit) return at;
+        if (src[at] == U'\\' && at + 1 < limit
+            && (ascii_punct(src[at + 1]) || is_line_ending(src[at + 1]))) return at + 2;
+        if (src[at] == U'`') {
+            const auto end = matching_code_span_end(at, limit);
+            if (end != npos) return end;
+            auto run_end = at;
+            while (run_end < limit && src[run_end] == U'`') ++run_end;
+            return run_end;
+        }
+        if (src[at] == U'<') {
+            if (const auto special = scan_markdown_html_special(src, at, limit)) return special->range.end;
+            const auto tag_end = html_tag_end(at, limit);
+            if (tag_end != npos) return tag_end;
+            const auto autolink_end = valid_autolink_end(at, limit);
+            if (autolink_end != npos) return autolink_end;
+        }
+        return at;
+    }
+
+    const std::vector<StrikePair>& strikethrough_pairs() {
+        if (strikethrough_pairs_cache) return *strikethrough_pairs_cache;
+        struct Run { std::size_t start; std::size_t length; std::size_t previous_same; };
+        std::vector<Run> runs;
+        std::vector<std::size_t> delimiter_stack;
+        std::array<std::size_t, 3> last_open{npos, npos, npos};
+        std::vector<StrikePair> pairs;
+        std::unordered_set<std::size_t> inline_link_closes;
+        for (const auto& label : emphasis_link_labels()) {
+            if (label.close + 1 < limit && src[label.close + 1] == U'(') {
+                inline_link_closes.insert(label.close);
+            }
+        }
+        for (auto scan = scope_start; scan + 1 < limit; ++scan) {
+            if (src[scan] != U'!' || src[scan + 1] != U'[') continue;
+            const auto close = find_link_label_close(scan + 1);
+            if (close != npos && close + 1 < limit && src[close + 1] == U'(') {
+                inline_link_closes.insert(close);
+            }
+        }
+        for (std::size_t scan = scope_start; scan < limit;) {
+            if (is_line_ending(src[scan])) {
+                const auto next_line = scan + line_ending_length(scan);
+                if (next_line < limit && is_line_ending(src[next_line])) break;
+            }
+            const auto skipped = skip_strikethrough_opaque(scan);
+            if (skipped != scan) { scan = skipped; continue; }
+            if (src[scan] == U']' && inline_link_closes.contains(scan)) {
+                std::size_t end = npos;
+                std::string href;
+                std::optional<std::string> title;
+                if (parse_inline_link_suffix(scan + 1, limit, end, href, title)) {
+                    scan = end;
+                    continue;
+                }
+            }
+            if (src[scan] != U'~') { ++scan; continue; }
+            const auto start = scan;
+            while (scan < limit && src[scan] == U'~') ++scan;
+            const auto length = scan - start;
+            if (length != 1 && length != 2) continue;
+            const auto flank = delimiter_flanking(start, length);
+            if (!flank.left && !flank.right) continue;
+            if (flank.right) {
+                const auto opener = last_open[length];
+                if (opener != npos) {
+                    pairs.push_back({runs[opener].start, start, length});
+                    while (!delimiter_stack.empty()) {
+                        const auto popped = delimiter_stack.back();
+                        delimiter_stack.pop_back();
+                        const auto popped_length = runs[popped].length;
+                        if (last_open[popped_length] == popped) {
+                            last_open[popped_length] = runs[popped].previous_same;
+                        }
+                        if (popped == opener) break;
+                    }
+                }
+            }
+            if (flank.left) {
+                const auto index = runs.size();
+                runs.push_back({start, length, last_open[length]});
+                last_open[length] = index;
+                delimiter_stack.push_back(index);
+            }
+        }
+        std::ranges::sort(pairs, {}, &StrikePair::open);
+        strikethrough_pairs_cache = std::move(pairs);
+        return *strikethrough_pairs_cache;
     }
 
     std::size_t find_link_label_close(std::size_t open) const {
@@ -303,6 +401,7 @@ struct Parser {
                 closer.active_opener = true;
             }
         }
+        std::ranges::sort(pairs, {}, &EmphasisPair::open_start);
         return pairs;
     }
 
@@ -711,10 +810,11 @@ struct Parser {
         }
     }
 
-    InlineCstNodes parse_label_content(std::size_t begin, std::size_t end) {
+    InlineCstNodes parse_label_content(std::size_t begin, std::size_t end, bool suppress_bare_links = false) {
         Parser inner{src, ctx};
         inner.counter = counter;
         inner.pos = begin;
+        inner.suppress_bare_autolinks = suppress_bare_autolinks || suppress_bare_links;
         auto children = inner.parse_until(end);
         counter = inner.counter;
         return children;
@@ -736,7 +836,9 @@ struct Parser {
         bool is_image,
         std::string href,
         std::optional<std::string> title) {
-        auto children = parse_label_content(text_start, text_end);
+        // GFM's post-processing skips links, but does process image children.
+        // This mirrors that behavior while keeping source ownership in the label.
+        auto children = parse_label_content(text_start, text_end, !is_image);
         if (!is_image && contains_link_or_autolink(children)) return false;
         flush_text_to(out, run_start, start);
         InlineCstNode node;
@@ -955,6 +1057,7 @@ struct Parser {
             std::size_t end = find_line_or_doc_end(pos);
             if (end > pos) pos = end;
             Parser inner{src, ctx};
+            inner.suppress_bare_autolinks = suppress_bare_autolinks;
             inner.counter = counter;
             inner.pos = content_start;
             auto children = inner.parse_until(pos);
@@ -975,6 +1078,7 @@ struct Parser {
         std::size_t close_end = closer + opener.size();
         // Recurse into content for nested structure.
         Parser inner{src, ctx};
+        inner.suppress_bare_autolinks = suppress_bare_autolinks;
         inner.counter = counter;
         inner.pos = content_start;
         InlineCstNodes children = inner.parse_until(content_end);
@@ -986,6 +1090,66 @@ struct Parser {
         node.status = ParseStatus::Complete;
         node.range = {start, pos};
         node.ensure_delimiter_ranges() = {{start, pos}, {start, content_start}, {content_start, content_end}, SourceRange{content_end, close_end}};
+        node.children = std::move(children);
+        out.push_back(std::move(node));
+        run_start = pos;
+        return true;
+    }
+
+    // GFM strike recognizes exact one- or two-tilde runs. Longer runs remain
+    // literal source, including during editing.
+    bool parse_strikethrough(InlineCstNodes& out, std::size_t& run_start) {
+        if (!ctx.dialect.gfm.strikethrough || peek() != U'~') return false;
+        if (pos > scope_start && ch(pos - 1) == U'~') return false;
+        auto opener_end = pos;
+        while (opener_end < limit && ch(opener_end) == U'~') ++opener_end;
+        const auto delimiter_size = opener_end - pos;
+        if (delimiter_size != 1 && delimiter_size != 2) return false;
+        const auto opening_flank = delimiter_flanking(pos, delimiter_size);
+        if (!opening_flank.left) return false;
+
+        const auto start = pos;
+        const auto content_start = opener_end;
+        const auto& pairs = strikethrough_pairs();
+        const auto pair = std::ranges::lower_bound(pairs, start, {}, &StrikePair::open);
+        const auto closer = pair != pairs.end() && pair->open == start
+            && pair->length == delimiter_size ? pair->close : npos;
+        if (closer == npos) {
+            flush_text_to(out, run_start, start);
+            pos = content_start;
+            const auto end = find_line_or_doc_end(pos);
+            if (end > pos) pos = end;
+            InlineCstNode node;
+            node.id = next_id();
+            node.kind = InlineCstKind::Incomplete;
+            node.status = ParseStatus::MissingCloser;
+            node.range = {start, pos};
+            node.ensure_delimiter_ranges() = {{start, pos}, {start, content_start}, {content_start, pos}, std::nullopt};
+            Parser inner{src, ctx};
+            inner.suppress_bare_autolinks = suppress_bare_autolinks;
+        inner.counter = counter;
+            inner.pos = content_start;
+            node.children = inner.parse_until(pos);
+            counter = inner.counter;
+            out.push_back(std::move(node));
+            run_start = pos;
+            return true;
+        }
+
+        flush_text_to(out, run_start, start);
+        Parser inner{src, ctx};
+        inner.suppress_bare_autolinks = suppress_bare_autolinks;
+        inner.counter = counter;
+        inner.pos = content_start;
+        auto children = inner.parse_until(closer);
+        counter = inner.counter;
+        pos = closer + delimiter_size;
+        InlineCstNode node;
+        node.id = next_id();
+        node.kind = InlineCstKind::Strikethrough;
+        node.status = ParseStatus::Complete;
+        node.range = {start, pos};
+        node.ensure_delimiter_ranges() = {{start, pos}, {start, content_start}, {content_start, closer}, SourceRange{closer, pos}};
         node.children = std::move(children);
         out.push_back(std::move(node));
         run_start = pos;
@@ -1055,6 +1219,7 @@ struct Parser {
             if (can_open) incomplete_end = find_line_or_doc_end(run_end_source);
             else incomplete_end = run_end_source;
             Parser inner{src, ctx};
+            inner.suppress_bare_autolinks = suppress_bare_autolinks;
             inner.counter = counter;
             inner.pos = run_end_source;
             auto children = inner.parse_until(incomplete_end);
@@ -1076,6 +1241,7 @@ struct Parser {
 
         flush_text_to(out, run_start, match->open_start);
         Parser inner{src, ctx};
+        inner.suppress_bare_autolinks = suppress_bare_autolinks;
         inner.counter = counter;
         inner.pos = match->open_end;
         InlineCstNodes children = inner.parse_until(match->close_start);
@@ -1404,6 +1570,90 @@ struct Parser {
         return true;
     }
 
+    bool parse_gfm_bare_autolink(InlineCstNodes& out, std::size_t& run_start) {
+        if (suppress_bare_autolinks || !ctx.dialect.gfm.autolinks
+            || !inline_syntax_allows_markdown(ctx.syntax_mode)) return false;
+        auto match = scan_gfm_autolink(src, pos, limit, scope_start);
+        if (!match) return false;
+
+        // cmark-gfm runs this extension over inline text nodes after ordinary
+        // Markdown parsing. Keep the same boundary: a bare URL cannot swallow
+        // code spans, emphasis, math, strike, or an explicit link in its tail.
+        const auto& emphasis = emphasis_pairs();
+        const auto* strikes = ctx.dialect.gfm.strikethrough
+            ? &strikethrough_pairs() : nullptr;
+        auto syntax_start = match->range.end;
+        for (auto cursor = pos + 1; cursor < syntax_start;) {
+            if (src[cursor] == U'\\' && cursor + 1 < syntax_start
+                && src[cursor + 1] == U'(' && ctx.dialect.math.inline_paren) {
+                syntax_start = cursor;
+                break;
+            }
+            if (src[cursor] == U'\\' && cursor + 1 < syntax_start && ascii_punct(src[cursor + 1])) {
+                cursor += 2;
+                continue;
+            }
+            if (src[cursor] == U'`') { syntax_start = cursor; break; }
+            if (src[cursor] == U'$' && ctx.dialect.math.inline_dollar
+                && !(cursor + 1 < syntax_start && src[cursor + 1] == U'$')) {
+                syntax_start = cursor;
+                break;
+            }
+            if (src[cursor] == U'*' || src[cursor] == U'_') {
+                const auto pair = std::ranges::lower_bound(emphasis, cursor, {}, &EmphasisPair::open_start);
+                if (pair != emphasis.end() && pair->open_start == cursor) {
+                    syntax_start = cursor;
+                    break;
+                }
+            }
+            if (src[cursor] == U'~' && strikes) {
+                const auto pair = std::ranges::lower_bound(*strikes, cursor, {}, &StrikePair::open);
+                if (pair != strikes->end() && pair->open == cursor) {
+                    syntax_start = cursor;
+                    break;
+                }
+            }
+            const auto bracket = src[cursor] == U'!' && cursor + 1 < syntax_start && src[cursor + 1] == U'['
+                ? cursor + 1 : cursor;
+            if (src[bracket] == U'[') {
+                const auto close = matching_bracket(bracket, syntax_start);
+                if (close != npos && close + 1 < syntax_start && src[close + 1] == U'(') {
+                    auto source_end = close + 1;
+                    std::string href;
+                    std::optional<std::string> title;
+                    if (parse_inline_link_suffix(close + 1, syntax_start, source_end, href, title)) {
+                        syntax_start = cursor;
+                        break;
+                    }
+                }
+            }
+            ++cursor;
+        }
+        if (syntax_start < match->range.end) {
+            match = scan_gfm_autolink(src, pos, syntax_start, scope_start);
+            if (!match) return false;
+        }
+
+        flush_text_to(out, run_start, pos);
+        pos = match->range.end;
+        InlineCstNode node;
+        node.id = next_id();
+        node.kind = InlineCstKind::Autolink;
+        node.status = ParseStatus::Complete;
+        node.range = match->range;
+        node.ensure_delimiter_ranges() = {
+            match->range,
+            SourceRange{match->range.start, match->range.start},
+            match->content_range,
+            std::nullopt};
+        node.ensure_semantics().href = normalize_link_destination(match->href);
+        node.children.push_back(InlineCstNode{
+            next_id(), InlineCstKind::Text, match->content_range, ParseStatus::Complete});
+        out.push_back(std::move(node));
+        run_start = pos;
+        return true;
+    }
+
     struct HtmlTag {
         std::string name;
         std::unordered_map<std::string, std::string> attributes;
@@ -1574,8 +1824,9 @@ struct Parser {
             auto& semantic = node.ensure_semantics();
             semantic.html_tag = tag->name;
             semantic.html_attributes = tag->attributes;
-            if (ctx.syntax_mode == InlineSyntaxMode::Markdown) {
+            if (inline_syntax_allows_markdown(ctx.syntax_mode)) {
                 Parser inner{src, ctx};
+                inner.suppress_bare_autolinks = suppress_bare_autolinks || tag->name == "a";
                 inner.counter = counter;
                 inner.pos = tag->end;
                 node.children = inner.parse_until(pos);
@@ -1595,6 +1846,7 @@ struct Parser {
         // selected by the block parser only for an actual raw HTML block.
         html_context.syntax_mode = ctx.syntax_mode;
         Parser inner{src, html_context};
+        inner.suppress_bare_autolinks = suppress_bare_autolinks || tag->name == "a";
         inner.counter = counter;
         inner.pos = content_start;
         children = inner.parse_until(content_end);
@@ -1706,10 +1958,10 @@ struct Parser {
                 std::size_t slash_count = 0;
                 while (cursor > slash_count && src[cursor - slash_count - 1] == U'\\') ++slash_count;
                 auto after_break = cursor + line_ending_length(cursor);
-                if (ctx.syntax_mode == InlineSyntaxMode::Markdown) {
+                if (inline_syntax_allows_markdown(ctx.syntax_mode)) {
                     while (after_break < limit && (src[after_break] == U' ' || src[after_break] == U'\t')) ++after_break;
                 }
-                const bool hard = ctx.syntax_mode == InlineSyntaxMode::Markdown
+                const bool hard = inline_syntax_allows_markdown(ctx.syntax_mode)
                     && ((cursor >= 2 && src[cursor - 1] == U' ' && src[cursor - 2] == U' ')
                         || (slash_count % 2 == 1 && after_break < limit));
                 cursor += line_ending_length(cursor);
@@ -1762,7 +2014,7 @@ struct Parser {
             if (parse_break(
                     out,
                     run_start,
-                    ctx.syntax_mode == InlineSyntaxMode::Markdown)) continue;
+                    inline_syntax_allows_markdown(ctx.syntax_mode))) continue;
             if (is_line_ending(peek())) { advance(line_ending_length(pos)); continue; }
             if (ctx.syntax_mode == InlineSyntaxMode::HtmlText) {
                 if (parse_entity(out, run_start)) continue;
@@ -1779,7 +2031,7 @@ struct Parser {
             if (parse_escape(out, run_start)) continue;
             if (parse_entity(out, run_start)) continue;
             if (peek() == U'*' || peek() == U'_') { if (parse_commonmark_emphasis(out, run_start)) continue; }
-            if (peek() == U'~' && peek(1) == U'~') { if (parse_delimited(out, run_start, U"~~", InlineCstKind::Strikethrough)) continue; }
+            if (peek() == U'~' && parse_strikethrough(out, run_start)) continue;
             if (peek() == U'`') { if (parse_code_span(out, run_start)) continue; }
             if (peek() == U'!' && peek(1) == U'[') { if (parse_link_or_image(out, run_start)) continue; }
             if (peek() == U'[') {
@@ -1792,6 +2044,7 @@ struct Parser {
                 if (parse_autolink(out, run_start)) continue;
                 if (parse_html_element(out, run_start)) continue;
             }
+            if (parse_gfm_bare_autolink(out, run_start)) continue;
             // ordinary character — accumulate into the text run.
             advance();
         }
@@ -1807,7 +2060,7 @@ struct Parser {
         InlineCstNodes out;
         std::size_t run_start = pos;
         while (!eof()) {
-            if (parse_break(out, run_start, ctx.syntax_mode == InlineSyntaxMode::Markdown)) continue;
+            if (parse_break(out, run_start, inline_syntax_allows_markdown(ctx.syntax_mode))) continue;
             if (ctx.syntax_mode == InlineSyntaxMode::HtmlText) {
                 if (parse_entity(out, run_start)) continue;
                 if (peek() == U'<' && parse_html_special(out, run_start)) continue;
@@ -1819,7 +2072,7 @@ struct Parser {
             if (parse_escape(out, run_start)) continue;
             if (parse_entity(out, run_start)) continue;
             if (peek() == U'*' || peek() == U'_') { if (parse_commonmark_emphasis(out, run_start)) continue; }
-            if (peek() == U'~' && peek(1) == U'~') { if (parse_delimited(out, run_start, U"~~", InlineCstKind::Strikethrough)) continue; }
+            if (peek() == U'~' && parse_strikethrough(out, run_start)) continue;
             if (peek() == U'`') { if (parse_code_span(out, run_start)) continue; }
             if (peek() == U'!' && peek(1) == U'[') { if (parse_link_or_image(out, run_start)) continue; }
             if (peek() == U'[') {
@@ -1832,6 +2085,7 @@ struct Parser {
                 if (parse_autolink(out, run_start)) continue;
                 if (parse_html_element(out, run_start)) continue;
             }
+            if (parse_gfm_bare_autolink(out, run_start)) continue;
             advance();
         }
         flush_text(out, run_start);

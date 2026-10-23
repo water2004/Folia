@@ -1,3 +1,5 @@
+#include <unordered_map>
+#include <unordered_set>
 #include <algorithm>
 #include <cstdlib>
 #include <exception>
@@ -23,6 +25,7 @@ import folia.core.serializer;
 import folia.core.utf;
 
 import folia.core.markdown_html;
+import folia.core.dialect;
 #include "support/commonmark_projection.hpp"
 
 #include "support/markdown_conformance.hpp"

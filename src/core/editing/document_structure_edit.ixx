@@ -17,6 +17,7 @@ import folia.core.table_selection;
 import folia.core.utf;
 import folia.core.document_edit_support;
 import folia.core.document_input_rules;
+import folia.core.document_list_input;
 import folia.core.document_source_edit;
 
 export namespace folia {
@@ -448,7 +449,8 @@ inline BlockNode make_table_block(EditorDocument& document, std::size_t rows, st
     BlockNode header; header.id = allocator.allocate(); header.kind = BlockKind::TableRow; header.ensure_table_special().table_header_row = true;
     for (std::size_t column = 0; column < columns; ++column) {
         BlockNode cell; cell.id = allocator.allocate(); cell.kind = BlockKind::TableCell;
-        cell.inline_content = document_edit_detail::make_inline(U"Header", document, allocator);
+        cell.inline_content = document_edit_detail::make_inline(
+            U"Header", document, allocator, InlineSyntaxMode::TableCell);
         header.children.push_back(std::move(cell));
     }
     table.children.push_back(std::move(header));
@@ -456,7 +458,8 @@ inline BlockNode make_table_block(EditorDocument& document, std::size_t rows, st
         BlockNode row; row.id = allocator.allocate(); row.kind = BlockKind::TableRow;
         for (std::size_t column = 0; column < columns; ++column) {
             BlockNode cell; cell.id = allocator.allocate(); cell.kind = BlockKind::TableCell;
-            cell.inline_content = document_edit_detail::make_inline(U"Cell", document, allocator);
+            cell.inline_content = document_edit_detail::make_inline(
+                U"Cell", document, allocator, InlineSyntaxMode::TableCell);
             row.children.push_back(std::move(cell));
         }
         table.children.push_back(std::move(row));
@@ -557,7 +560,8 @@ inline std::optional<DocumentTransaction> document_indent_list_item(EditorDocume
     auto* previous = find_block(after.root, previous_id);
     if (!previous) return std::nullopt;
     BlockNode* nested = nullptr;
-    if (!previous->children.empty() && previous->children.back().kind == list->kind) {
+    if (!previous->children.empty()
+        && document_input_rules::detail::compatible_lists(previous->children.back(), *list)) {
         nested = &previous->children.back();
     }
     std::vector<DocumentOperation> operations;
@@ -656,7 +660,7 @@ inline std::optional<DocumentTransaction> document_edit_table(
         : std::size_t{0};
     const auto cell_syntax_mode = table->has_html_source()
         ? InlineSyntaxMode::HtmlText
-        : InlineSyntaxMode::Markdown;
+        : InlineSyntaxMode::TableCell;
     auto make_cell = [&] {
         BlockNode cell;
         cell.id = allocator.allocate();

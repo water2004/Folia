@@ -53,6 +53,8 @@ inline bool needs_local_format(
         if (!special.table_separator_source.empty()
             || !special.table_internal_line_endings.empty()) return true;
     }
+    if (options.canonical_tables && block.kind == BlockKind::TableRow
+        && block.table_special().row_syntax) return true;
     if (options.canonical_containers
         && (block.kind == BlockKind::Callout || block.kind == BlockKind::FootnoteDefinition)
         && !block.text_special().opening_marker.empty()) return true;
@@ -84,6 +86,9 @@ inline void apply_local_format(
         auto& special = block.ensure_table_special();
         special.table_separator_source.clear();
         special.table_internal_line_endings.clear();
+    }
+    if (options.canonical_tables && block.kind == BlockKind::TableRow) {
+        block.ensure_table_special().row_syntax.reset();
     }
     if (options.canonical_containers
         && (block.kind == BlockKind::Callout || block.kind == BlockKind::FootnoteDefinition)) {

@@ -295,7 +295,80 @@ suite editor_block_semantic_tests = [] {
     }
 };
 
-"typed_task_markers_split_list_segments_with_recorded_moves"_test = [] {
+"typed_regular_markers_coalesce_with_task_lists_by_marker_grammar"_test = [] {
+    const struct Case {
+        std::string before;
+        std::string after;
+        BlockKind parent_kind;
+        BlockKind first_item_kind;
+        BlockKind second_item_kind;
+    } cases[]{
+        {"- [x] before\n\nafter", "- [x] before\n\n- after",
+            BlockKind::TaskList, BlockKind::TaskListItem, BlockKind::ListItem},
+        {"before\n\n- [x] after", "- before\n\n- [x] after",
+            BlockKind::List, BlockKind::ListItem, BlockKind::TaskListItem},
+    };
+    for (const auto& test : cases) {
+        Editor editor(test.before);
+        const auto diagnostic = [&](std::string_view stage) {
+            const auto& roots = editor.document().root.children;
+            const auto selection = editor.selection();
+            std::string message = "case.before=[" + test.before + "] stage="
+                + std::string(stage) + " actualmarkdown=[" + editor.markdown_utf8() + "]"
+                + " root_count=" + std::to_string(roots.size())
+                + " selection.anchor=" + std::to_string(selection.anchor.source_offset)
+                + " selection.active=" + std::to_string(selection.active.source_offset);
+            if (roots.size() == 1u) {
+                const auto& root_list = roots.front();
+                message += " root_list_kind="
+                    + std::to_string(static_cast<int>(root_list.kind))
+                    + " list_item_count=" + std::to_string(root_list.children.size());
+                for (std::size_t index = 0; index < root_list.children.size(); ++index) {
+                    message += " item" + std::to_string(index) + "_kind="
+                        + std::to_string(static_cast<int>(root_list.children[index].kind));
+                }
+            }
+            return message;
+        };
+        const auto paragraph = std::ranges::find_if(
+            editor.document().root.children,
+            [](const BlockNode& block) {
+                return block.kind == BlockKind::Paragraph
+                    && !block.inline_content.source.empty();
+            });
+        expect(fatal(paragraph != editor.document().root.children.end())) << diagnostic("find-paragraph");
+        if (paragraph == editor.document().root.children.end()) continue;
+        editor.set_selection(TextSelection::caret(
+            {paragraph->id, 0, TextAffinity::Downstream}));
+        const auto before_selection = editor.selection();
+        reset_core_operation_counters();
+        auto transaction = editor.execute_document_insert_text(editor.selection(), U"- ");
+        expect(fatal(transaction.has_value())) << diagnostic("insert-marker");
+        if (!transaction) continue;
+        auto counters = read_core_operation_counters();
+        expect(fatal(counters.full_tree_transaction_diffs == 0u)) << diagnostic("transaction-counter");
+        expect(fatal(editor.document().root.children.size() == 1u)) << diagnostic("root-count");
+        if (editor.document().root.children.size() != 1u) continue;
+        const auto& list = editor.document().root.children.front();
+        expect(fatal(list.kind == test.parent_kind)) << diagnostic("list-kind");
+        expect(fatal(list.children.size() == 2u)) << diagnostic("item-count");
+        if (list.children.size() == 2u) {
+            expect(fatal(list.children[0].kind == test.first_item_kind)) << diagnostic("item0-kind");
+            expect(fatal(list.children[1].kind == test.second_item_kind)) << diagnostic("item1-kind");
+        }
+        expect(editor.markdown_utf8() == test.after) << diagnostic("after-markdown");
+        if (editor.markdown_utf8() != test.after) return;
+        const auto after_selection = editor.selection();
+        expect(fatal(editor.undo())) << diagnostic("undo");
+        expect(fatal(editor.markdown_utf8() == test.before)) << diagnostic("undo-markdown");
+        expect(fatal(editor.selection() == before_selection)) << diagnostic("undo-selection");
+        expect(fatal(editor.redo())) << diagnostic("redo");
+        expect(fatal(editor.markdown_utf8() == test.after)) << diagnostic("redo-markdown");
+        expect(fatal(editor.selection() == after_selection)) << diagnostic("redo-selection");
+    }
+};
+
+"typed_task_markers_keep_mixed_items_in_one_list_with_recorded_edits"_test = [] {
     Editor single;
     expect(fatal(bool(single.execute_document_insert_text(single.selection(), U"- ").has_value())));
     const auto single_before_markdown = single.markdown_utf8();
@@ -337,13 +410,19 @@ suite editor_block_semantic_tests = [] {
     if (!split) return;
     counters = read_core_operation_counters();
     expect(fatal(bool(counters.full_tree_transaction_diffs == 0u)));
-    expect(fatal(bool(middle.document().root.children.size() == 3u)));
-    if (middle.document().root.children.size() == 3u) {
-        expect(fatal(bool(middle.document().root.children[0].kind == BlockKind::List)));
-        expect(fatal(bool(middle.document().root.children[1].kind == BlockKind::TaskList)));
-        expect(fatal(bool(middle.document().root.children[2].kind == BlockKind::List)));
+    expect(fatal(bool(middle.document().root.children.size() == 1u)));
+    if (middle.document().root.children.size() == 1u) {
+        const auto& list = middle.document().root.children.front();
+        expect(fatal(bool(list.kind == BlockKind::List)));
+        expect(fatal(bool(list.children.size() == 3u)));
+        if (list.children.size() == 3u) {
+            expect(fatal(bool(list.children[0].kind == BlockKind::ListItem)));
+            expect(fatal(bool(list.children[1].kind == BlockKind::TaskListItem)));
+            expect(fatal(bool(list.children[2].kind == BlockKind::ListItem)));
+        }
     }
     const auto middle_after_markdown = middle.markdown_utf8();
+    expect(fatal(bool(middle_after_markdown == "- before\n- [x] current\n- after")));
     const auto middle_after = middle.selection();
     expect(fatal(bool(middle.undo())));
     expect(fatal(bool(middle.markdown_utf8() == middle_before_markdown)));
@@ -351,6 +430,136 @@ suite editor_block_semantic_tests = [] {
     expect(fatal(bool(middle.redo())));
     expect(fatal(bool(middle.markdown_utf8() == middle_after_markdown)));
     expect(fatal(bool(middle.selection() == middle_after)));
+};
+
+"ordered_task_item_upgrade_and_mixed_item_toggle_keep_item_semantics"_test = [] {
+    const std::string ordered_source = "3. before\n4. current\n5. after";
+    Editor ordered(ordered_source);
+    const BlockNode* current = nullptr;
+    walk_blocks(ordered.document().root, [&](const BlockNode& block) {
+        if (!current && block.kind == BlockKind::Paragraph
+            && block.inline_content.source == U"current") current = &block;
+    });
+    expect(fatal(current != nullptr));
+    if (!current) return;
+    const auto before_selection = TextSelection::caret(
+        {current->id, 0, TextAffinity::Downstream});
+    ordered.set_selection(before_selection);
+    reset_core_operation_counters();
+    auto upgraded = ordered.execute_document_insert_text(ordered.selection(), U"[x] ");
+    expect(fatal(upgraded.has_value()));
+    if (!upgraded) return;
+    auto counters = read_core_operation_counters();
+    expect(fatal(counters.full_document_parses == 0u));
+    expect(fatal(counters.full_document_serializations == 0u));
+    expect(fatal(counters.full_tree_transaction_diffs == 0u));
+    const std::string ordered_after = "3. before\n4. [x] current\n5. after";
+    expect(fatal(ordered.markdown_utf8() == ordered_after));
+    expect(fatal(ordered.document().root.children.size() == 1u));
+    if (ordered.document().root.children.size() == 1u) {
+        const auto& list = ordered.document().root.children.front();
+        expect(fatal(list.kind == BlockKind::List));
+        expect(fatal(list.list_special().ordered));
+        expect(fatal(list.children.size() == 3u));
+        if (list.children.size() == 3u) {
+            expect(fatal(list.children[0].kind == BlockKind::ListItem));
+            expect(fatal(list.children[1].kind == BlockKind::TaskListItem));
+            expect(fatal(list.children[2].kind == BlockKind::ListItem));
+        }
+    }
+    const auto after_selection = ordered.selection();
+    expect(fatal(ordered.undo()));
+    expect(fatal(ordered.markdown_utf8() == ordered_source));
+    expect(fatal(ordered.selection() == before_selection));
+    expect(fatal(ordered.redo()));
+    expect(fatal(ordered.markdown_utf8() == ordered_after));
+    expect(fatal(ordered.selection() == after_selection));
+
+    const std::string mixed_source = "- [@] regular\n- [x] task\n";
+    Editor mixed(mixed_source);
+    const BlockNode* task_text = nullptr;
+    walk_blocks(mixed.document().root, [&](const BlockNode& block) {
+        if (!task_text && block.kind == BlockKind::Paragraph
+            && block.inline_content.source == U"task") task_text = &block;
+    });
+    expect(fatal(task_text != nullptr));
+    if (!task_text) return;
+    mixed.set_selection(TextSelection::caret(
+        {task_text->id, 0, TextAffinity::Downstream}));
+    const auto toggle_selection = mixed.selection();
+    reset_core_operation_counters();
+    auto toggled = mixed.execute_document_toggle_task_checkbox(mixed.selection());
+    expect(fatal(toggled.has_value()));
+    if (!toggled) return;
+    counters = read_core_operation_counters();
+    expect(fatal(counters.full_document_parses == 0u));
+    expect(fatal(counters.full_document_serializations == 0u));
+    expect(fatal(counters.full_tree_transaction_diffs == 0u));
+    expect(fatal(mixed.markdown_utf8() == "- [@] regular\n- [ ] task\n"));
+    expect(fatal(mixed.document().root.children.size() == 1u));
+    if (mixed.document().root.children.size() == 1u) {
+        const auto& list = mixed.document().root.children.front();
+        expect(fatal(list.kind == BlockKind::List));
+        expect(fatal(list.children.size() == 2u));
+        if (list.children.size() == 2u) {
+            expect(fatal(list.children[0].kind == BlockKind::ListItem));
+            expect(fatal(list.children[1].kind == BlockKind::TaskListItem));
+        }
+    }
+    expect(fatal(mixed.undo()));
+    expect(fatal(mixed.markdown_utf8() == mixed_source));
+    expect(fatal(mixed.selection() == toggle_selection));
+    expect(fatal(mixed.redo()));
+    expect(fatal(mixed.markdown_utf8() == "- [@] regular\n- [ ] task\n"));
+};
+
+"enter_in_mixed_task_item_inserts_an_unchecked_task_item"_test = [] {
+    const std::string source =
+        "- [@] regular\n"
+        "- [x] task\n"
+        "- [@] after\n";
+    Editor editor(source);
+    const BlockNode* paragraph = nullptr;
+    walk_blocks(editor.document().root, [&](const BlockNode& block) {
+        if (!paragraph && block.kind == BlockKind::Paragraph
+            && block.inline_content.source == U"task") paragraph = &block;
+    });
+    expect(fatal(paragraph != nullptr));
+    if (!paragraph) return;
+    editor.set_selection(TextSelection::caret(
+        {paragraph->id, paragraph->inline_content.source.size(), TextAffinity::Downstream}));
+    const auto before_selection = editor.selection();
+    reset_core_operation_counters();
+    auto transaction = editor.execute_document_enter(editor.selection());
+    expect(fatal(transaction.has_value()));
+    if (!transaction) return;
+    const auto counters = read_core_operation_counters();
+    expect(fatal(counters.full_document_parses == 0u));
+    expect(fatal(counters.full_document_serializations == 0u));
+    expect(fatal(counters.full_tree_transaction_diffs == 0u));
+    const std::string after =
+        "- [@] regular\n"
+        "- [x] task\n"
+        "- [ ] \n"
+        "- [@] after\n";
+    expect(fatal(editor.markdown_utf8() == after));
+    expect(fatal(editor.document().root.children.size() == 1u));
+    if (editor.document().root.children.size() == 1u) {
+        const auto& list = editor.document().root.children.front();
+        expect(fatal(list.kind == BlockKind::List));
+        expect(fatal(list.children.size() == 4u));
+        if (list.children.size() == 4u) {
+            expect(fatal(list.children[2].kind == BlockKind::TaskListItem));
+            expect(fatal(!list.children[2].item_special().checked));
+        }
+    }
+    const auto after_selection = editor.selection();
+    expect(fatal(editor.undo()));
+    expect(fatal(editor.markdown_utf8() == source));
+    expect(fatal(editor.selection() == before_selection));
+    expect(fatal(editor.redo()));
+    expect(fatal(editor.markdown_utf8() == after));
+    expect(fatal(editor.selection() == after_selection));
 };
 
 }; // suite editor_block_semantic_tests

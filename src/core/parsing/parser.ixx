@@ -816,7 +816,7 @@ public:
         return indentation <= 3 && cursor < cps.size() && cps[cursor] == U'>';
     }
 
-    bool line_starts_ordered_list(std::size_t at) const {
+    bool line_starts_ordered_list(std::size_t at, bool paragraph_open = true) const {
         auto cursor = at;
         if (cursor >= cps.size() || cps[cursor] < U'0' || cps[cursor] > U'9') return false;
         std::size_t digits = 0;
@@ -827,13 +827,14 @@ public:
         if (digits == 0 || digits > 9 || cursor >= cps.size()
             || (cps[cursor] != U'.' && cps[cursor] != U')')) return false;
         // Only an ordered list starting at 1 may interrupt a paragraph.
-        if (digits != 1 || cps[at] != U'1') return false;
+        if (paragraph_open && (digits != 1 || cps[at] != U'1')) return false;
         ++cursor;
         const auto line_end = line_content_end(at);
-        if (cursor >= line_end || (cps[cursor] != U' ' && cps[cursor] != U'\t')) return false;
+        if (cursor == line_end) return !paragraph_open;
+        if (cps[cursor] != U' ' && cps[cursor] != U'\t') return false;
         while (cursor < line_end && (cps[cursor] == U' ' || cps[cursor] == U'\t')) ++cursor;
         // An empty ordered item does not interrupt an open paragraph.
-        return cursor < line_end;
+        return !paragraph_open || cursor < line_end;
     }
     using SetextUnderline = BlockLineRecognizer::SetextUnderline;
     std::optional<SetextUnderline> setext_underline_at(std::size_t start) const {
@@ -859,14 +860,14 @@ public:
     bool line_starts_block_html() const {
         return peek_line_start() && line_starts_block_html(pos);
     }
-    bool line_starts_interrupting_block(std::size_t at) const {
+    bool line_starts_interrupting_block(std::size_t at, bool paragraph_open = true) const {
         const auto leading = scan_indentation(at, 3);
         auto cursor = leading.end;
         const auto indentation = leading.columns;
         if (indentation > 3) return false;
-        return setext_underline_at(at).has_value()
+        return (paragraph_open && (setext_underline_at(at).has_value() || line_starts_gfm_table(at)))
             || line_is_thematic_break(at)
-            || line_starts_block_html(cursor)
+            || (paragraph_open ? line_starts_block_html(cursor) : html_block_start(at).has_value())
             || ch_at(cursor) == U'>'
             || line_starts_fenced_code(at)
             || line_starts_atx_heading(at)
@@ -875,8 +876,9 @@ public:
             || (input->dialect.math.block_bracket
                 && ch_at(cursor) == U'\\' && ch_at(cursor + 1) == U'[')
             || ((ch_at(cursor) == U'-' || ch_at(cursor) == U'+' || ch_at(cursor) == U'*')
-                && (ch_at(cursor + 1) == U' ' || ch_at(cursor + 1) == U'\t'))
-            || line_starts_ordered_list(cursor);
+                && (ch_at(cursor + 1) == U' ' || ch_at(cursor + 1) == U'\t'
+                    || (!paragraph_open && cursor + 1 == line_content_end(at))))
+            || line_starts_ordered_list(cursor, paragraph_open);
     }
     bool line_starts_interrupting_block() const {
         return peek_line_start() && line_starts_interrupting_block(pos);
@@ -1948,7 +1950,7 @@ public:
         advance();
         if (peek1() != ':') { pos = save; return std::nullopt; }
         advance();
-        if (peek1() == ' ') advance();
+        while (peek1() == ' ') advance();
         const auto content_start = pos;
 
         struct BodyLine {
@@ -2400,8 +2402,25 @@ public:
         return b;
     }
 
+    // A delimiter row closes the preceding paragraph before the physical
+    // header line. Recognition is read-only; node/source ownership remains in
+    // try_parse_table, including when a table follows text without a blank line.
+    bool line_starts_gfm_table(std::size_t at) const {
+        if (!input->dialect.gfm.tables || !input->dialect.tables.gfm_pipe_tables) return false;
+        if (scan_indentation(at, 3).columns > 3) return false;
+        const auto end = line_content_end(at);
+        const auto header = cps.substr(at, end - at);
+        if (header.find(U'|') == std::u32string::npos) return false;
+        const auto next = next_line_start(end);
+        if (next >= cps.size() || scan_indentation(next, 3).columns > 3) return false;
+        const auto separator = cps.substr(next, line_content_end(next) - next);
+        const auto alignments = parse_table_separator(separator);
+        return alignments && alignments->size() == table_cell_segments(header).size();
+    }
+
     // ---- table ----
     std::optional<BlockNode> try_parse_table() {
+        if (!input->dialect.gfm.tables || !input->dialect.tables.gfm_pipe_tables) return std::nullopt;
         std::size_t save = pos;
         std::size_t range_count = source_ranges.size();
         std::uint64_t node_count = node_counter;
@@ -2434,7 +2453,7 @@ public:
         while (!eof()) {
             std::size_t row_start = pos;
             auto [line, row_length] = rest_of_line();
-            if (line.find(U'|') == std::u32string::npos) break;
+            if (is_blank_line_at(pos) || line_starts_interrupting_block(pos, false)) break;
             const auto row_end = row_start + row_length;
             auto row = parse_table_row(header_row->children.size());
             if (!row) break;
@@ -2445,9 +2464,11 @@ public:
                 BlockNode cell;
                 cell.id = next_node_id();
                 cell.kind = BlockKind::TableCell;
-                cell.inline_content = make_inline_document(row_start + row_length, row_start + row_length);
+                cell.inline_content = make_inline_document(
+                    row_start + row_length, row_start + row_length, InlineSyntaxMode::TableCell);
                 auto offset = std::size_t(row_start + row_length);
                 push_range(cell.id, PhysicalRange(offset, offset), PhysicalRange(offset, offset));
+                row->ensure_table_special().row_syntax->implicit_cell_owners.push_back(cell.id);
                 row->children.push_back(std::move(cell));
             }
             rows.push_back(std::move(*row));
@@ -2468,7 +2489,8 @@ public:
 
     std::vector<std::pair<std::size_t, std::size_t>> table_cell_segments(const std::u32string& line) const {
         std::vector<std::pair<std::size_t, std::size_t>> segments;
-        std::size_t start = line.empty() || line.front() != U'|' ? 0 : 1;
+        auto first = line.find_first_not_of(U" \t");
+        std::size_t start = first != std::u32string::npos && line[first] == U'|' ? first + 1 : 0;
         for (std::size_t index = start; index < line.size(); ++index) {
             if (line[index] == U'\\' && index + 1 < line.size()) {
                 ++index;
@@ -2478,7 +2500,8 @@ public:
             segments.push_back({start, index});
             start = index + 1;
         }
-        if (start < line.size()) segments.push_back({start, line.size()});
+        if (start < line.size() && (segments.empty() || line.find_first_not_of(U" \t", start) != std::u32string::npos))
+            segments.push_back({start, line.size()});
         return segments;
     }
 
@@ -2489,6 +2512,8 @@ public:
         if (segments.empty()) return std::nullopt;
         BlockVec cells;
         cells.reserve(segments.size());
+        BlockTableSpecial::RowSyntax row_syntax;
+        std::vector<std::pair<std::size_t, std::size_t>> body_ranges;
         for (auto const& segment : segments) {
             if (cells.size() >= maximum_cells) break;
             std::size_t content_start = segment.first;
@@ -2508,15 +2533,25 @@ public:
             BlockNode cell;
             cell.id = cell_id;
             cell.kind = BlockKind::TableCell;
-            cell.inline_content = make_inline_document(text_start, text_end);
+            cell.inline_content = make_inline_document(text_start, text_end, InlineSyntaxMode::TableCell);
             push_range(cell_id, PhysicalRange(source_start, source_end), PhysicalRange(text_start, text_end));
+            row_syntax.cell_owners.push_back(cell_id);
+            body_ranges.emplace_back(content_start, content_end);
             cells.push_back(std::move(cell));
         }
+        row_syntax.gaps.reserve(body_ranges.size() + 1);
+        std::size_t gap_start = 0;
+        for (const auto& [body_start, body_end] : body_ranges) {
+            row_syntax.gaps.push_back(line.substr(gap_start, body_start - gap_start));
+            gap_start = body_end;
+        }
+        row_syntax.gaps.push_back(line.substr(gap_start));
         advance_n(length);
         consume_line_ending();
         NodeId row_id = next_node_id();
         push_range(row_id, PhysicalRange(std::size_t(row_start), cur()), PhysicalRange(std::size_t(row_start), std::size_t(row_start + length)));
         BlockNode r; r.id = row_id; r.kind = BlockKind::TableRow; r.children = std::move(cells);
+        r.ensure_table_special().row_syntax = std::move(row_syntax);
         return r;
     }
 
@@ -2643,13 +2678,17 @@ public:
             }
 
             if (!has_content) marker.content_start = line_end;
-            if (input->dialect.gfm.task_lists && !marker.ordered
+            if (input->dialect.gfm.task_lists
                 && marker.content_start + 2 < line_end
                 && cps[marker.content_start] == U'['
                 && (cps[marker.content_start + 1] == U' '
+                    || cps[marker.content_start + 1] == U'\t'
                     || cps[marker.content_start + 1] == U'x'
                     || cps[marker.content_start + 1] == U'X')
-                && cps[marker.content_start + 2] == U']') {
+                && cps[marker.content_start + 2] == U']'
+                && (marker.content_start + 3 == line_end
+                    || cps[marker.content_start + 3] == U' '
+                    || cps[marker.content_start + 3] == U'\t')) {
                 marker.task = true;
                 marker.checked = cps[marker.content_start + 1] == U'x'
                     || cps[marker.content_start + 1] == U'X';
@@ -2658,18 +2697,9 @@ public:
                     && (cps[marker.content_start] == U' ' || cps[marker.content_start] == U'\t')) {
                     ++marker.content_start;
                 }
-                // The checkbox belongs to the serialized list marker. Align
-                // following blocks with the actual source column after that
-                // marker, expanding tabs by their physical four-column stops.
-                // Keep marker.text and content_start source-exact; only the
-                // structural indentation used for continuation lines changes.
-                std::size_t task_content_column = 0;
-                for (auto source = marker.start; source < marker.content_start; ++source) {
-                    task_content_column = cps[source] == U'\t'
-                        ? task_content_column + (4 - task_content_column % 4)
-                        : task_content_column + 1;
-                }
-                marker.content_indent = task_content_column;
+                // The checkbox spelling belongs to the item marker, but does
+                // not change its structural content column. Continuation
+                // indentation is the same as for an ordinary list item.
             }
             marker.content_end = line_end;
             marker.source_end = next_line_start(line_end);
@@ -2689,7 +2719,6 @@ public:
         if (!first) return std::nullopt;
         auto same_list_kind = [](const Marker& left, const Marker& right) {
             return left.ordered == right.ordered
-                && left.task == right.task
                 && (left.ordered ? left.delimiter == right.delimiter : left.bullet == right.bullet);
         };
         auto start = pos;

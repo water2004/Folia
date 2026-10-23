@@ -426,4 +426,53 @@ suite lazy_container_source_history_tests = [] {
     }
 };
 
+"nested_task_item_edits_preserve_source_and_exact_undo_redo"_test = [] {
+    const std::string source =
+        "- [x] foo\n"
+        "  - [ ] bar\n"
+        "  - [x] baz\n"
+        "- [ ] bim\n";
+    Editor editor(source);
+    const auto* nested_list = find_kind(editor.document().root, BlockKind::TaskList);
+    expect(fatal(nested_list != nullptr));
+    if (!nested_list || nested_list->children.size() != 2) return;
+    const auto* paragraph = find_paragraph(editor.document(), U"bar");
+    expect(fatal(paragraph != nullptr));
+    if (!paragraph) return;
+    expect(fatal(inline_sources_are_lossless(editor.document().root)));
+    const auto before_prefixes = prefix_snapshot(editor.document());
+    const auto before_selection = TextSelection::caret(
+        {paragraph->id, 1, TextAffinity::Downstream});
+    editor.set_selection(before_selection);
+
+    reset_core_operation_counters();
+    expect(fatal(editor.execute_document_insert_text(editor.selection(), U"X").has_value()));
+    expect_local_counters("nested task inline edit");
+    const std::string edited =
+        "- [x] foo\n"
+        "  - [ ] bXar\n"
+        "  - [x] baz\n"
+        "- [ ] bim\n";
+    const auto after_selection = editor.selection();
+    const auto after_prefixes = prefix_snapshot(editor.document());
+    expect(fatal(editor.markdown_utf8() == edited));
+    expect(fatal(inline_sources_are_lossless(editor.document().root)));
+
+    reset_core_operation_counters();
+    expect(fatal(editor.undo()));
+    expect_local_counters("nested task inline undo");
+    expect(fatal(editor.markdown_utf8() == source));
+    expect(fatal(editor.selection() == before_selection));
+    expect(fatal(prefix_snapshot(editor.document()) == before_prefixes));
+
+    reset_core_operation_counters();
+    expect(fatal(editor.redo()));
+    expect_local_counters("nested task inline redo");
+    expect(fatal(editor.markdown_utf8() == edited));
+    expect(fatal(editor.selection() == after_selection));
+    expect(fatal(prefix_snapshot(editor.document()) == after_prefixes));
+    Editor reloaded(edited);
+    expect(fatal(reloaded.markdown_utf8() == edited));
+};
+
 }; // suite lazy_container_source_history_tests

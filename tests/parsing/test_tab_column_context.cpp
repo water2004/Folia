@@ -1,3 +1,5 @@
+#include <unordered_map>
+#include <unordered_set>
 #include <algorithm>
 #include <cstddef>
 #include <string>
@@ -18,6 +20,8 @@ using namespace folia;
 using namespace boost::ut;
 
 #include "support/parser_test_support.hpp"
+import folia.core.dialect;
+import folia.core.inline_cst;
 #include "support/commonmark_projection.hpp"
 
 suite tab_column_context_tests = [] {

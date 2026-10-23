@@ -10,6 +10,7 @@
 
 #include "support/folia_test.hpp"
 import folia.core.parser;
+import folia.core.dialect;
 import folia.core.document_edit;
 import folia.core.document;
 import folia.core.document_symbols;
@@ -32,6 +33,57 @@ using namespace boost::ut;
 #include "support/render_layout_test_support.hpp"
 
 suite render_model_basic_tests = [] {
+
+"mixed_task_list_renders_checkbox_only_for_task_items"_test = [] {
+    auto dialect = default_dialect();
+    dialect.gfm.task_lists = true;
+    auto parsed = parse_text(
+        1,
+        "- [@] regular\n- [x] task\n",
+        dialect);
+    auto model = build_render_model(
+        parsed.document,
+        parsed.outline,
+        parsed.symbols,
+        default_theme_profile());
+    expect(fatal(model.blocks.size() == 1));
+    if (model.blocks.empty()) return;
+    std::size_t checkboxes = 0;
+    std::size_t bullets = 0;
+    for (const auto& item : model.blocks.front().inline_items) {
+        if (item.kind != InlineRenderItem::Kind::Marker) continue;
+        if (item.special().marker_role == MarkerRole::TaskCheckbox) {
+            ++checkboxes;
+            expect(fatal(item.special().task_checked));
+        }
+        if (item.special().marker_role == MarkerRole::ListBullet) ++bullets;
+    }
+    expect(fatal(checkboxes == 1));
+    expect(fatal(bullets == 1));
+};
+
+"ordered_task_item_keeps_the_ordered_list_and_checkbox_markers"_test = [] {
+    auto dialect = default_dialect();
+    dialect.gfm.task_lists = true;
+    auto parsed = parse_text(1, "3. [x] done\n", dialect);
+    auto model = build_render_model(
+        parsed.document,
+        parsed.outline,
+        parsed.symbols,
+        default_theme_profile());
+    expect(fatal(model.blocks.size() == 1));
+    if (model.blocks.empty()) return;
+    bool task_marker = false;
+    for (const auto& item : model.blocks.front().inline_items) {
+        if (item.kind == InlineRenderItem::Kind::Marker
+            && item.special().marker_role == MarkerRole::TaskCheckbox) {
+            task_marker = true;
+            expect(fatal(item.special().task_checked));
+            expect(fatal(item.special().display_text == U"3. [x] "));
+        }
+    }
+    expect(fatal(task_marker));
+};
 
 "list_nested_quote_keeps_structural_layout_metadata"_test = [] {
     auto model = build_model("- item\n  > quoted");

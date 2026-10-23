@@ -1,3 +1,5 @@
+#include <unordered_map>
+#include <unordered_set>
 #include <algorithm>
 #include <memory>
 #include <optional>
@@ -44,6 +46,81 @@ bool contains_inline_kind(InlineCstNodes const& nodes, InlineCstKind kind) {
 } // namespace
 
 suite gfm_native_projection_tests = [] {
+
+"gfm_task_lists_nest_at_the_ordinary_list_content_indent"_test = [] {
+    constexpr std::string_view markdown =
+        "- [x] foo\n"
+        "  - [ ] bar\n"
+        "  - [x] baz\n"
+        "- [ ] bim\n";
+    auto parsed = parse_text(4, std::string(markdown), folia::test::commonmark::gfm_dialect());
+    expect(fatal(serialize_markdown(parsed.document) == markdown));
+    expect(fatal(folia::test::commonmark::inline_lossless(parsed.document.root)));
+    auto const* list = find_kind(parsed.document.root, BlockKind::TaskList);
+    expect(fatal(list != nullptr));
+    if (!list) return;
+    expect(fatal(list->children.size() == 2));
+    auto const& outer_item = list->children[0];
+    expect(fatal(outer_item.kind == BlockKind::TaskListItem));
+    expect(fatal(outer_item.children.size() == 2));
+    if (outer_item.children.size() != 2) return;
+    expect(fatal(outer_item.children[0].kind == BlockKind::Paragraph));
+    expect(fatal(outer_item.children[1].kind == BlockKind::TaskList));
+    auto const& nested = outer_item.children[1];
+    expect(fatal(nested.children.size() == 2));
+    if (nested.children.size() == 2) {
+        expect(fatal(nested.children[0].kind == BlockKind::TaskListItem));
+        expect(fatal(!nested.children[0].item_special().checked));
+        expect(fatal(nested.children[1].kind == BlockKind::TaskListItem));
+        expect(fatal(nested.children[1].item_special().checked));
+    }
+};
+
+"gfm_task_and_regular_markers_share_one_list_and_keep_item_kinds"_test = [] {
+    constexpr std::string_view markdown = "- [@] regular\n- [x] task\n";
+    auto parsed = parse_text(5, std::string(markdown), folia::test::commonmark::gfm_dialect());
+    expect(fatal(serialize_markdown(parsed.document) == markdown));
+    auto const* list = find_kind(parsed.document.root, BlockKind::List);
+    expect(fatal(list != nullptr));
+    if (!list) return;
+    expect(fatal(list->children.size() == 2));
+    if (list->children.size() == 2) {
+        expect(fatal(list->children[0].kind == BlockKind::ListItem));
+        expect(fatal(list->children[1].kind == BlockKind::TaskListItem));
+    }
+};
+
+"gfm_ordered_list_items_can_be_tasks"_test = [] {
+    constexpr std::string_view markdown = "3. [x] done\n4. [ ] open\n";
+    auto parsed = parse_text(6, std::string(markdown), folia::test::commonmark::gfm_dialect());
+    expect(fatal(serialize_markdown(parsed.document) == markdown));
+    auto const* list = find_kind(parsed.document.root, BlockKind::TaskList);
+    expect(fatal(list != nullptr));
+    if (!list) return;
+    expect(fatal(list->list_special().ordered));
+    expect(fatal(list->list_special().start == 3));
+    expect(fatal(list->children.size() == 2));
+    if (list->children.size() == 2) {
+        expect(fatal(list->children[0].kind == BlockKind::TaskListItem));
+        expect(fatal(list->children[0].item_special().checked));
+        expect(fatal(list->children[1].kind == BlockKind::TaskListItem));
+        expect(fatal(!list->children[1].item_special().checked));
+    }
+};
+
+"gfm_task_marker_requires_whitespace_or_end_of_item_line"_test = [] {
+    for (const auto& [markdown, is_task] : std::vector<std::pair<std::string_view, bool>>{
+             {"- [x]", true}, {"- [x] text", true}, {"- [x]\ttext", true},
+             {"- [\t] text", true},
+             {"- [x]text", false}, {"- [ ]text", false}}) {
+        auto parsed = parse_text(7, std::string(markdown), folia::test::commonmark::gfm_dialect());
+        expect(fatal(serialize_markdown(parsed.document) == markdown));
+        auto const* task = find_kind(parsed.document.root, BlockKind::TaskList);
+        expect(fatal((task != nullptr) == is_task)) << markdown;
+        auto const* regular = find_kind(parsed.document.root, BlockKind::List);
+        expect(fatal((regular != nullptr) == !is_task)) << markdown;
+    }
+};
 
 "gfm_table_projection_uses_native_header_alignment_and_cell_cst"_test = [] {
     constexpr std::string_view markdown =

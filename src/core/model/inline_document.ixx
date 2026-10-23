@@ -29,8 +29,13 @@ struct InlineLinkDef {
 
 enum class InlineSyntaxMode : std::uint8_t {
     Markdown,
+    TableCell,
     HtmlText,
 };
+
+inline bool inline_syntax_allows_markdown(InlineSyntaxMode mode) {
+    return mode != InlineSyntaxMode::HtmlText;
+}
 
 struct InlineParseContext {
     MarkdownDialect dialect{};
@@ -172,7 +177,9 @@ inline std::u32string decode_inline_entity(std::u32string_view raw) {
 // CommonMark's code-span text projection: line endings become spaces, then
 // one outer ASCII space is removed only when both ends are spaces and the
 // result contains a non-space. The source and its CST range remain untouched.
-inline std::u32string normalize_inline_code_span(std::u32string_view raw) {
+inline std::u32string normalize_inline_code_span(
+    std::u32string_view raw,
+    InlineSyntaxMode syntax_mode = InlineSyntaxMode::Markdown) {
     std::u32string normalized;
     normalized.reserve(raw.size());
     for (std::size_t index = 0; index < raw.size(); ++index) {
@@ -185,6 +192,16 @@ inline std::u32string normalize_inline_code_span(std::u32string_view raw) {
         } else {
             normalized.push_back(ch);
         }
+    }
+    if (syntax_mode == InlineSyntaxMode::TableCell) {
+        std::u32string table_text;
+        table_text.reserve(normalized.size());
+        for (std::size_t index = 0; index < normalized.size(); ++index) {
+            if (normalized[index] == U'\\' && index + 1 < normalized.size()
+                && normalized[index + 1] == U'|') ++index;
+            table_text.push_back(normalized[index]);
+        }
+        normalized = std::move(table_text);
     }
     if (normalized.size() >= 2 && normalized.front() == U' ' && normalized.back() == U' '
         && std::ranges::any_of(normalized, [](char32_t ch) { return ch != U' '; })) {
@@ -228,7 +245,8 @@ inline void append_inline_visible_text(
                 output += U"[^" + utf8_to_cps(node.semantics().label) + U"]";
                 break;
             case K::CodeSpan:
-                output += normalize_inline_code_span(inline_source_slice(document, node.delimiter_ranges().content));
+                output += normalize_inline_code_span(
+                    inline_source_slice(document, node.delimiter_ranges().content), document.syntax_mode);
                 break;
             case K::InlineMath:
             case K::Autolink:
