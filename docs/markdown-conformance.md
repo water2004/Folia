@@ -1,6 +1,67 @@
 # Markdown syntax conformance
 
-## Current checkpoint (2026-10-23)
+## Current checkpoint (2026-10-23, GFM formal tests)
+
+GFM extension **test integration and first full baseline are complete**. This
+batch changes test infrastructure only; it does not claim GFM implementation
+conformance or modify production parser/editor code.
+
+The published [GitHub GFM 0.29 spec](https://github.github.com/gfm/) has **28**
+extension examples: tables 8, task items 2, strikethrough 3, extended autolinks
+14, tagfilter 1. `prepare_gfm.py` extracts the paired Markdown and expected HTML
+code samples from the hash-pinned published HTML, preserving original IDs,
+characters, whitespace, and page line ranges. It never reverse-generates
+Markdown from rendered HTML. `gfm-sources.lock.json` records page SHA-256 and
+licenses. The pinned cmark-gfm repository spec is older than the published page
+(24 extension cases); that drift and its separate 30-case extra corpus are
+recorded as provenance, not silently substituted for published expectations.
+
+`tests/support/markdown_conformance.hpp` shares the native source checks between
+CommonMark and GFM. Both use the same CST/AST-to-HTML projector and Python formal
+runner. The projector now consumes native table alignments/cell CST and task-item
+checked state. It cannot invent missing bare-autolink semantics. Generated input
+uses one `MarkdownCase` shape, including the existing md4c test consumer.
+
+Run `cmd /c build_gfm_test.bat`. CTest target `FoliaGfmTests` runs the same complete
+native/Python path. Current report: `build/gfm-conformance/baseline/results.json`:
+
+| Check | Result |
+|---|---:|
+| GFM strict semantics | **8 pass / 19 fail / 1 explicit HTML skip** |
+| GFM inline CST losslessness | **28/28** |
+| GFM character-exact save | **25/28** |
+| CommonMark regression | **652/652**, all source checks also pass |
+| Core regression | **601 tests / 44280 assertions**, exit 0 |
+| Python fixture/runner contracts | **26 passed** |
+
+Only published **#657, Disallowed Raw HTML**, skips the semantic comparison:
+Folia's inert HTML presentation does not implement GitHub's tagfilter HTML
+serialization. Its native CST/source/save assertions still run (focused #657
+run confirms both assertions). `gfm-policy.json` is the explicit reviewed policy;
+report records cannot declare their own skips. A skip is never counted as a
+pass; parser errors and native failures remain failures.
+
+Established implementation gaps (not skipped): escaped pipes in table code spans
+#200; unpiped table continuation #202; task nesting #280; single/triple-tilde
+rules #491/#493; all 14 extended autolinks #622–635. Save failures #199/#200/#204
+normalize table row delimiters, padding or surplus cells. Full GFM run returns
+normal exit 1, all 28 cases reported, no abnormal exit. Next implementation work:
+fix exact table source ownership first, then these semantic failures, preserving
+the existing block/source/CST/editing model. No production fixes started here.
+
+Logs under `build/markdown-conformance/`: `gfm-baseline-final.log`, `gfm-core.log`,
+`gfm-commonmark.log`, `gfm-ctest-commonmark.log`, `gfm-reference-build.log`.
+CommonMark report is `gfm-commonmark-regression/results.json`. The md4c target
+compiled successfully after the shared fixture shape change; it was not rerun.
+No Windows/editor code changed; the prior 80-test Windows result below remains
+historical. No live agents/builds. Build parallelism stays **4**. Commits:
+**7cc3abc1** (shared runner and pinned published fixtures), **95300483** (GFM
+target and native projections). A final focused 7-assertion check confirms the
+projector leaves CommonMark plain-text URL CST as text; this check will remain
+valid when GFM bare-autolink implementation is added.
+No MSI/push/version change requested.
+
+## CommonMark HTML checkpoint (2026-10-23, verified before GFM)
 
 The HTML syntax/projection batch is implemented and committed. Formal
 CommonMark: **652/652 strict semantics, 652/652 inline CST losslessness and

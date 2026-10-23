@@ -68,6 +68,31 @@ also fail the run. The report retains `native_exit_code` separately. A timeout o
 abnormal process exit stops evaluation, retains any partial JSONL records, and
 marks the report incomplete.
 
+## GitHub Flavored Markdown extension tests
+
+Run `cmd /c build_gfm_test.bat` (CTest: `FoliaGfmTests`). Reports default to
+`build/gfm-conformance/`; `--output` and positional Boost.UT filters work as above.
+The five extension sections of the [published GFM spec](https://github.github.com/gfm/)
+contain 28 examples. `prepare_gfm.py` reads its paired Markdown/HTML code samples,
+preserves the published IDs and source lines, and verifies the page hash in
+`gfm-sources.lock.json`. If the page changes, verification fails until its new
+contents are reviewed. The older cmark-gfm repository spec and extra corpus are
+listed separately in the lock; neither replaces the published examples.
+
+The native test profile enables only GFM extensions over CommonMark. Tables,
+alignments, checkboxes and inline formatting project from Folia's actual block
+tree/CST into the official semantic comparison. Missing native syntax remains a
+formal failure; the projector never parses bare source to invent that syntax.
+`tests/parsing/test_gfm_native_projection.cpp` checks this mapping separately.
+
+`gfm-policy.json` explicitly skips the HTML comparison for #657: Folia's inert
+HTML presentation does not implement GitHub's tagfilter output spelling.
+All 28 native source/CST/save assertions still execute. Skip counts and reasons
+are separate from pass/fail/missing counts. A native error or source failure
+still fails the run. Current implementation differences are recorded in
+`docs/markdown-conformance.md`; the baseline is deliberately a failing formal
+test, not a marked-success reference or disabled suite.
+
 ## md4c diagnostic reference
 
 After the official suite completes with strict semantic failures, run the
