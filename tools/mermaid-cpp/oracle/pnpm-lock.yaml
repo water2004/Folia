@@ -23,6 +23,9 @@ importers:
       d3-shape:
         specifier: 3.2.0
         version: 3.2.0
+      es-toolkit:
+        specifier: 1.45.1
+        version: 1.45.1
       js-yaml:
         specifier: 4.3.0
         version: 4.3.0
@@ -434,6 +437,9 @@ packages:
   entities@6.0.1:
     resolution: {integrity: sha512-aN97NXWF6AWBTahfVOIrB/NShkzi5H7F9r1s9mD3cDj4Ko5f2qhhVoYMibXF7GlLveb/D2ioWay8lxI97Ven3g==}
     engines: {node: '>=0.12'}
+
+  es-toolkit@1.45.1:
+    resolution: {integrity: sha512-/jhoOj/Fx+A+IIyDNOvO3TItGmlMKhtX8ISAHKE90c4b/k1tqaqEZ+uUqfpU8DMnW5cgNJv606zS55jGvza0Xw==}
 
   es-toolkit@1.52.0:
     resolution: {integrity: sha512-XTNEJQh1tY1ZJVcf6ayP/2n4ZPyaHlW2FWs7xvw5ddPuhUVjLD3olQVQS7kf58JbAB48iL0uL/jerTrjtV3lDA==}
@@ -1107,6 +1113,8 @@ snapshots:
   elkjs@0.9.3: {}
 
   entities@6.0.1: {}
+
+  es-toolkit@1.45.1: {}
 
   es-toolkit@1.52.0: {}
 

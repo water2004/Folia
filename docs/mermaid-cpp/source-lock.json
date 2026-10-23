@@ -658,6 +658,101 @@
           "sha256": "d3716f0c22219657135b217f23ded2c708ba3e944f252217af3d4e2128f5576d"
         }
       ]
+    },
+    {
+      "name": "es-toolkit",
+      "version": "1.45.1",
+      "purpose": "cleanAndMerge official bundle dependency",
+      "files": [
+        {
+          "path": "dist/_internal/isUnsafeProperty.js",
+          "sha256": "0901e9f7f3e4dd20928c4b66651aa59fd88dd2a0e6c91d993f1d7b37b277842c"
+        },
+        {
+          "path": "dist/compat/_internal/getSymbols.js",
+          "sha256": "b2f27728c96e57b313c6e1b608b03d7b8218eec893b0d237660404f606c085a3"
+        },
+        {
+          "path": "dist/compat/_internal/getTag.js",
+          "sha256": "5b92a21871b8d3b58d11264bd68f9fd41c0d5d01270b2ee52919cba4aaa3701b"
+        },
+        {
+          "path": "dist/compat/_internal/tags.js",
+          "sha256": "3224853fef2263c773ae03f82196f7ecbad0b52396e74a9965fa48e69c539bc3"
+        },
+        {
+          "path": "dist/compat/object/cloneDeep.js",
+          "sha256": "1818c9b3fd96c47e1a56f42aad95c74c0af3dd8788c483684fae0b551e2ff672"
+        },
+        {
+          "path": "dist/compat/object/cloneDeepWith.js",
+          "sha256": "162fd8f970248d9c0d14e469722a6cc5111ca121bab4a055f6abf8311f81463c"
+        },
+        {
+          "path": "dist/compat/object/merge.js",
+          "sha256": "de7eccab7d1053f60814b951887eba0acd20a0c840c37c7bc7b96e51e37a18be"
+        },
+        {
+          "path": "dist/compat/object/mergeWith.js",
+          "sha256": "5ca268990182bf2f4763574ff371b8faf30b41f8d71ffd443c35e139f5850470"
+        },
+        {
+          "path": "dist/compat/predicate/isArguments.js",
+          "sha256": "940a8c4a77442bd28028d55601614a95d20defa846d2876f3799345a7dfcc603"
+        },
+        {
+          "path": "dist/compat/predicate/isArrayLike.js",
+          "sha256": "33d9db4401cbbb663fee81f0fc7c651009616a2d29c3d4a242d7507a1d359e3a"
+        },
+        {
+          "path": "dist/compat/predicate/isArrayLikeObject.js",
+          "sha256": "e2143e077ccec95ef408b1deac985885ee49f102357d405fabd66c4bb3910abd"
+        },
+        {
+          "path": "dist/compat/predicate/isObjectLike.js",
+          "sha256": "7edd1f736409e62c68f883b5563541c02c3fc601db7ab0be79cfe40f83637206"
+        },
+        {
+          "path": "dist/compat/predicate/isPlainObject.js",
+          "sha256": "ef6ab08f4784e17bf0a8ffbb4690035be9b7f5c3ae3ac32058cb4acbc1248552"
+        },
+        {
+          "path": "dist/compat/predicate/isTypedArray.js",
+          "sha256": "dca6f7b360ff16fe729d1891ce809b26663da8d491cb8ad8a61bcd75232ac8ff"
+        },
+        {
+          "path": "dist/function/noop.js",
+          "sha256": "6b2d154b3e56ddcc6a443a94fe7dca4acb76eec6304903eb7d0fdd17227554aa"
+        },
+        {
+          "path": "dist/object/clone.js",
+          "sha256": "198ae4498b6357844c4fccb9ed7d35eb174e7800a4ae978b3dfb071f27463f74"
+        },
+        {
+          "path": "dist/object/cloneDeepWith.js",
+          "sha256": "44ad6ab5cad3d4da0714a754cbb4b5e98680371be59964f275928da555f5fc0d"
+        },
+        {
+          "path": "dist/predicate/isLength.js",
+          "sha256": "1a8e0dfa969c1b21271e39f33f883ad708e47ff7ad9c4937fa627ef9995e2c28"
+        },
+        {
+          "path": "dist/predicate/isPrimitive.js",
+          "sha256": "059f07a5b7fae9fcdd558b41ce176ecc0cd32aeea1d632cca5c15950ff42e66e"
+        },
+        {
+          "path": "dist/predicate/isTypedArray.js",
+          "sha256": "11e71cfd155ccaffbfc593183310df08d57615ddb26bd62338c734ce6c3daa18"
+        },
+        {
+          "path": "LICENSE",
+          "sha256": "ed68888a2a28f32a05e88f24d4d4ee75075a1bda2b6372a1f2e00fa0576a5524"
+        },
+        {
+          "path": "package.json",
+          "sha256": "a71b45472ab2cd327292503176b286508cc84a226e6bd7bdd10dfeae5ed5c3d8"
+        }
+      ]
     }
   ]
 }

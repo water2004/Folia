@@ -1,6 +1,26 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-23, default/dark theme derivation verified
+## Current checkpoint - 2026-10-23, init mapping and clean merge oracle
+
+- User authorizes public fork pushes and verified updates to existing upstream
+  PR #1; DO NOT merge. Working branch `codex/mermaid-cpp-init-merge` starts at
+  delivery head `808db04d`. Delivery branch stays unchanged until verification.
+- Baseline rerun 39897662560: standalone Debug/Release and integrated Debug
+  passed; integrated Release is still running. No native implementation yet.
+- Original detectInit body supplies 1,746 mapping observations with injected
+  detector results/errors and call-count checks. Registry dispatch is a later
+  boundary. Single directives bypass sanitization; multiple directives do not.
+- Original cleanAndMerge supplies 1,176 observations cross-checked against the
+  official full bundle. Pin es-toolkit 1.45.1 (22 hashed dependency files), not
+  the core package's newer transitive 1.52.0: array-null behavior differs.
+- Next: confirm final baseline CI, commit oracle, implement bounded owned native
+  operations in separate small batches, then run four-job Windows CI before
+  updating delivery branch/PR. No local builds/agents or candidate files.
+- Local MSVC/CMake remain unavailable; native evidence must come from CI.
+  Config session lifecycle, dispatch, renderer integration and application
+  dependency replacement remain pending. No WinUI/DPI acceptance is claimed.
+
+## Default/dark theme derivation verified (historical)
 
 - User authorizes public fork zhao0349/Folia pushes and a verified update to
   https://github.com/water2004/Folia/pull/1. Keep it OPEN; DO NOT merge.
