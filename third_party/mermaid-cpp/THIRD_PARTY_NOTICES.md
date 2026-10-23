@@ -48,11 +48,11 @@ BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR P
 NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-# Khroma color primitives
+
+## Khroma color primitives
 
 The native theme color operations and generated named-color table are derived
 from Khroma 2.1.0 by Fabio Spampinato, under the MIT license reproduced in
 `KHROMA-LICENSE`. Source and distribution hashes are recorded in
 `docs/mermaid-cpp/source-lock.json`. Khroma is an oracle-only Node dependency;
 the shipped native library contains no JavaScript runtime.
-

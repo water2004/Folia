@@ -85,7 +85,7 @@ const paints=[...keywords.map(([k])=>k),'RED','#ABC','#abcd','#aabbcc','#aabbccd
   '','#12','#12345','#1234567',' red','red ','currentColor','var(--x)','\ud800','rgb(1e-2,2,3)',
   'rgb(+1,2,3)','hsl(1,2,3)','rgb(1,2,3)\n'];
 for(let i=0;i<80;i++) paints.push(randomHex());
-const operations=[['invert',null],['isDark',null],['lighten',10],['darken',25],['lighten',0],
+const operations=[['invert',undefined],['isDark',undefined],['lighten',10],['darken',25],['lighten',0],
   ['lighten',undefined],['adjust',{h:120,s:-40,l:10}],['adjust',{r:5,g:-10,b:15}],['adjust',{h:0}]];
 for(const paint of paints) for(const [op,arg] of operations) {
   let output;
