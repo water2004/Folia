@@ -656,6 +656,7 @@ list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/parsing/test_commonmark\\.cpp$"
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/parsing/test_gfm\\.cpp$")
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/parsing/test_gfm_pathological\\.cpp$")
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/parsing/test_inline_cst_ownership\\.cpp$")
+list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/parsing/test_deep_block_ownership\\.cpp$")
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/parsing/test_md4c_reference\\.cpp$")
 target_sources(FoliaTests PRIVATE
     ${FOLIA_TEST_SRC})
@@ -972,7 +973,8 @@ set_tests_properties(FoliaGfmTests PROPERTIES LABELS "gfm;conformance")
 # by the runner so a pathological input cannot hold the ordinary console suite.
 add_executable(FoliaGfmPathologicalTests EXCLUDE_FROM_ALL
     tests/main.cpp tests/parsing/test_gfm_pathological.cpp
-    tests/parsing/test_inline_cst_ownership.cpp)
+    tests/parsing/test_inline_cst_ownership.cpp
+    tests/parsing/test_deep_block_ownership.cpp)
 target_compile_features(FoliaGfmPathologicalTests PRIVATE cxx_std_23)
 set_target_properties(FoliaGfmPathologicalTests PROPERTIES CXX_MODULE_STD ON)
 target_include_directories(FoliaGfmPathologicalTests PRIVATE tests)
@@ -986,6 +988,9 @@ set_tests_properties(FoliaGfmPathologicalTests PROPERTIES LABELS "gfm;generated;
 add_test(NAME FoliaInlineCstOwnershipTests
     COMMAND FoliaGfmPathologicalTests "*inline_cst_deep_owner_copy_move_and_clear*")
 set_tests_properties(FoliaInlineCstOwnershipTests PROPERTIES LABELS "gfm;generated;bounded" TIMEOUT 30)
+add_test(NAME FoliaDeepBlockOwnershipTests
+    COMMAND FoliaGfmPathologicalTests "*deep_block_ownership_copy_move_clear_and_traversal*")
+set_tests_properties(FoliaDeepBlockOwnershipTests PROPERTIES LABELS "gfm;generated;bounded" TIMEOUT 30)
 add_test(NAME FoliaGfmPathologicalRunnerTests
     COMMAND python -m unittest discover
         -s "${CMAKE_CURRENT_SOURCE_DIR}/tools/markdown-conformance/tests"

@@ -216,25 +216,54 @@ struct BlockNode {
     // semantics through the deep-copy operations below.
     std::unique_ptr<BlockNodeSpecial> payload;
 
-    BlockNode() = default;
-    BlockNode(BlockNode const& other)
-        : id(other.id), kind(other.kind), children(other.children),
+private:
+    struct ShallowCopyTag {};
+    BlockNode(BlockNode const& other, ShallowCopyTag)
+        : id(other.id), kind(other.kind),
           inline_content(other.inline_content), block_source(other.block_source),
           separator_before(other.separator_before),
           payload(other.payload ? std::make_unique<BlockNodeSpecial>(*other.payload) : nullptr) {}
+public:
+    BlockNode() = default;
+    BlockNode(BlockNode const& other) : BlockNode(other, ShallowCopyTag{}) {
+        if (other.children.empty()) return;
+        if (std::ranges::none_of(other.children, [](BlockNode const& child) { return !child.children.empty(); })) {
+            children = other.children;
+            return;
+        }
+        struct Frame { BlockNode const* source; BlockNode* destination; };
+        std::vector<Frame> frames{{&other, this}};
+        while (!frames.empty()) {
+            const auto frame = frames.back(); frames.pop_back();
+            frame.destination->children.reserve(frame.source->children.size());
+            for (auto const& child : frame.source->children) {
+                // The private shallow constructor copies exactly the existing
+                // value fields once, leaving only child ownership to the walk.
+                frame.destination->children.push_back(BlockNode(child, ShallowCopyTag{}));
+            }
+            for (std::size_t index=frame.source->children.size(); index>0; --index) {
+                if (!frame.source->children[index-1].children.empty()) frames.push_back({
+                    &frame.source->children[index-1], &frame.destination->children[index-1]});
+            }
+        }
+    }
     BlockNode& operator=(BlockNode const& other) {
-        if (this == &other) return *this;
-        id = other.id;
-        kind = other.kind;
-        children = other.children;
-        inline_content = other.inline_content;
-        block_source = other.block_source;
-        separator_before = other.separator_before;
-        payload = other.payload ? std::make_unique<BlockNodeSpecial>(*other.payload) : nullptr;
+        if (this != &other) *this = BlockNode(other);
         return *this;
     }
     BlockNode(BlockNode&&) noexcept = default;
     BlockNode& operator=(BlockNode&&) noexcept = default;
+    ~BlockNode() {
+        // Leaf/shallow trees keep the ordinary allocation-free vector cleanup.
+        if (std::ranges::none_of(children, [](BlockNode const& child) { return !child.children.empty(); })) return;
+        std::vector<BlockVec*> frames{&children};
+        while (!frames.empty()) {
+            auto* nodes = frames.back();
+            if (nodes->empty()) { frames.pop_back(); continue; }
+            if (!nodes->back().children.empty()) frames.push_back(&nodes->back().children);
+            else nodes->pop_back();
+        }
+    }
 
     BlockNodeSpecial const& special() const {
         static const BlockNodeSpecial empty{};

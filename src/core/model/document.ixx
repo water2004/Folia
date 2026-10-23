@@ -69,7 +69,7 @@ inline void rebuild_document_block_index(EditorDocument& document) {
     document.cached_block_locators.clear();
     document.cached_editable_order.clear();
     document.cached_editable_index.clear();
-    auto visit = [&](auto& self, const BlockNode& block, NodeId parent_id, std::size_t child_index) -> void {
+    auto visit = [&](const BlockNode& block, NodeId parent_id, std::size_t child_index) {
         document.cached_block_locators[block.id.v] = {parent_id, child_index};
         if (block.kind != BlockKind::Document && is_editable_block_owner(block.kind)) {
             document.cached_editable_index.emplace(
@@ -77,11 +77,18 @@ inline void rebuild_document_block_index(EditorDocument& document) {
                 document.cached_editable_order.size());
             document.cached_editable_order.push_back(block.id);
         }
-        for (std::size_t index = 0; index < block.children.size(); ++index) {
-            self(self, block.children[index], block.id, index);
-        }
     };
-    visit(visit, document.root, NodeId{}, 0);
+    struct Frame { const BlockNode* node; std::size_t next; };
+    visit(document.root, NodeId{}, 0);
+    std::vector<Frame> frames{{&document.root, 0}};
+    while (!frames.empty()) {
+        auto& frame = frames.back();
+        if (frame.next == frame.node->children.size()) { frames.pop_back(); continue; }
+        const auto index = frame.next++;
+        const auto& child = frame.node->children[index];
+        visit(child, frame.node->id, index);
+        if (!child.children.empty()) frames.push_back({&child, 0});
+    }
 }
 
 inline std::optional<BlockPath> cached_document_block_path(

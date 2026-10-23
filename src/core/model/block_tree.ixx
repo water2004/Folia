@@ -27,18 +27,25 @@ inline const BlockNode* block_at_path(const BlockNode& root, const BlockPath& pa
 }
 
 inline std::optional<BlockPath> block_path(const BlockNode& root, NodeId id) {
+    if (root.id == id) return BlockPath{};
+    struct Frame { const BlockNode* node; std::size_t next; };
+    std::vector<Frame> frames{{&root, 0}};
     BlockPath path;
-    std::function<bool(const BlockNode&)> visit = [&](const BlockNode& node) {
-        if (node.id == id) return true;
-        for (std::size_t index = 0; index < node.children.size(); ++index) {
-            path.push_back(index);
-            if (visit(node.children[index])) return true;
-            path.pop_back();
+    while (!frames.empty()) {
+        auto& frame = frames.back();
+        if (frame.next == frame.node->children.size()) {
+            frames.pop_back();
+            if (!path.empty()) path.pop_back();
+            continue;
         }
-        return false;
-    };
-    if (!visit(root)) return std::nullopt;
-    return path;
+        const auto index = frame.next++;
+        const auto& child = frame.node->children[index];
+        path.push_back(index);
+        if (child.id == id) return path;
+        if (child.children.empty()) path.pop_back();
+        else frames.push_back({&child, 0});
+    }
+    return std::nullopt;
 }
 
 inline BlockNode* find_block(BlockNode& root, NodeId id) {
@@ -83,14 +90,30 @@ inline std::size_t callout_body_start(const BlockNode& callout) {
 
 template <class Visitor>
 inline void walk_blocks(BlockNode& root, Visitor&& visitor) {
+    struct Frame { BlockNode* node; std::size_t next; };
     visitor(root);
-    for (auto& child : root.children) walk_blocks(child, visitor);
+    std::vector<Frame> frames{{&root, 0}};
+    while (!frames.empty()) {
+        auto& frame = frames.back();
+        if (frame.next == frame.node->children.size()) { frames.pop_back(); continue; }
+        auto& child = frame.node->children[frame.next++];
+        visitor(child);
+        if (!child.children.empty()) frames.push_back({&child, 0});
+    }
 }
 
 template <class Visitor>
 inline void walk_blocks(const BlockNode& root, Visitor&& visitor) {
+    struct Frame { const BlockNode* node; std::size_t next; };
     visitor(root);
-    for (const auto& child : root.children) walk_blocks(child, visitor);
+    std::vector<Frame> frames{{&root, 0}};
+    while (!frames.empty()) {
+        auto& frame = frames.back();
+        if (frame.next == frame.node->children.size()) { frames.pop_back(); continue; }
+        const auto& child = frame.node->children[frame.next++];
+        visitor(child);
+        if (!child.children.empty()) frames.push_back({&child, 0});
+    }
 }
 
 inline bool insert_block(BlockNode& parent, std::size_t index, BlockNode node) {
