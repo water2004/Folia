@@ -4,7 +4,7 @@
 
 User requested all finer upstream cases and fixes. Starting Git checkpoint is
 984558a4. Production syntax/consumer fixes plus focused tests are committed as
-**5f455590**; corpus/runner integration is the next reviewable commit. Formal GFM corpus is now 1426:
+**5f455590**; corpus/runner integration is committed as **73032708**. Formal GFM corpus is now 1426:
 published 677, repository spec 672 (including two upstream-disabled task cases),
 extensions 30, regressions 26, smart punctuation 16, table-style option one,
 full-info option four. Every record has qualified ID, original numeric ID,
@@ -40,182 +40,96 @@ Current validation:
 - Formal GFM final **1395 strict pass / 20 unscored / 11 independently
   verified reference differences / zero unresolved**, native all source checks
   1426/1426. `build/gfm-conformance/expanded-final/results.json`, exit 0.
-- Python main contracts **36 passed**, isolated generated runner **8 passed**.
+- Python main contracts **36 passed**, isolated generated runner **11 passed**.
 
-Separate full-size generated-input suite is NOT complete. Root built
-`FoliaGfmPathologicalTests` and ran its timed per-process runner (10s diagnostics)
-in `build/gfm-expanded/generated-first.{json,log}`: first three emphasis cases
-exceeded 10s; link_closers native passed but ANSI skewed runner skipped counts
-(now fixed and contract tested); link_openers [a repeated 65000 ended with
-0xC00000FD. Broad evaluation stopped there; 16 later cases were not run.
-Do not count them as passes or rerun a broad evaluation until the abnormal case
-is diagnosed/fixed with a bounded focused run. Generated target remains excluded
-from default core. All generated fixtures stay in ignored build directories.
+Separate full-size generated-input suite is NOT complete; all 21 exact upstream
+inputs and predicates are retained. Full run `build/gfm-expanded/generated-third.json`
+ran all cases without abnormal exits: **10 pass / 11 fail** (four semantics,
+seven 10s timeouts). This is separate from the fully resolved formal corpus.
+Generated tests are isolated per process; do not turn timeouts into skips.
 
-No live native build. Root alone runs sequential builds, **parallel 4**.
-Active candidate-only owners:
-- Luna `gfm_autolink_impl`: `build/gfm-expanded/brackets/`, replace recursive
-  nested_link_after preflight with read-only, scope-indexed bracket matching;
-  preserve complete-inner-link precedence and incomplete CST/source behavior.
-- gpt-6.1-sol `gfm_emphasis_scaling`: `build/gfm-expanded/emphasis-scaling/`,
-  review/repair repeated emphasis scans and plan deep-pair iterative CST handling.
-  User allows Sol when needed; other work uses Luna. No native builds/Git by
-  agents. They must report design before implementation, never lower case sizes
-  or add source-specific conditions/depth-limit passes.
+Capacity fixes committed as **d3e25b1c** (inline scopes/scans/RAII),
+**dc50d694** (table recognition + source-range lookup), **9ccb4185** (NUL display):
+- Inline bracket close index/read-only nested-link preflight, eligible emphasis
+  opener categories and pair lookup; one shared dispatch engine with explicit
+  emphasis frames. Real matched nesting is preserved; unmatched opener errors
+  become independent source-preserving spans instead of deep error tails.
+- InlineCstNodes remains vector-compatible, with iterative copy/destruction;
+  node aggregate status/noexcept move/shared metadata/NodeIds are preserved.
+  Symbol derivation uses iterative inline DFS. Ownership focus at 130000 levels
+  passed 6 assertions (`owner-focus.log`). Exact upstream nested emphasis65000
+  passed in 3.797s, then 3.422s; openers/closers65000 passed about1s each.
+- Incomplete link right-parenthesis index; parser source-range tail lookup avoids
+  repeated linear scans; pipe-less single-column tables/VT+FF marker whitespace,
+  while setext precedence is preserved. Root reviewed these candidates.
+- Generated adapter now uses the actual upstream profile (pure CM + table),
+  contiguous regex repetitions/search vs anchored predicates, and direct iterative
+  CST projection for the deep emphasis fixture. Runner aggregates multiple UT
+  suite summaries; abnormal exits stop evaluation. Python runner **11 passed**.
+- Indexed code runs/HTML terminators (escaped run starts/clipped scope ends),
+  necessary right-parenthesis preflight and shared angle-autolink stopper index
+  eliminate repeated suffix scans. NUL visible text/render/HTML sinks replace
+  U+0000 with U+FFFD without touching source/save/ranges/math input. Render uses
+  its existing source-attachment traversal; no extra rendering pass.
+- Read-only table recognition now validates header+delimiter before constructing
+  cells. This preserves the existing paste inline-reparse count (3), rather than
+  parsing rejected ordinary paragraphs again. Focus25 assertions passed.
 
-Next: review candidate designs, fix and focus-test the generated link-opener
-exit, then address generated emphasis timeouts. Complete the remaining isolated
-cases without weakening their semantic/source assertions. Preserve verified
-CM/GFM behavior and local editing/history invariants. Candidate sources/inventory
-are in ignored `build/gfm-expanded/` and `build/gfm-expanded-source/`; use
-rg --no-ignore when locating deliveries. No MSI, push or version change requested.
+Completed checks after these fixes:
+- CommonMark after deep emphasis, before latest code/link/table/NUL edits:
+  **652/652**, `build/markdown-conformance/gfm-deep/results.json`.
+- `build/gfm-expanded/fourth-focus.json`: image/link160000 pass11.203s;
+  nested brackets50000 pass0.141s; tables30000 pass8.922s; references49999 pass8.063s.
+- `fifth-focus.json` after latest scans/profile/NUL: original deep emphasis65000
+  pass3.172s; bracket-paren80000 pass0.203s; embeddedNUL pass0.015s; increasing
+  ticks4999 runs/12.5MB pass1.829s; angle-links30000 pass0.281s; comments300000
+  pass1.453s. Native NUL render/query/source tests31 assertions passed.
+- All capacity paths except quotes50000/lists1000 now have successful native
+  focused evidence (a final combined report is still pending).
 
-## Historical GFM 28-case baseline (2026-10-23)
+Final regression on these three commits (all exit0):
+- Core661 tests /491096 assertions, `build/gfm-expanded/core-scaled-final2.log`.
+- CommonMark652/652 strict/source/save,
+  `build/markdown-conformance/gfm-scaled-final/results.json`.
+- GFM1426:1395 strict pass/20 unscored/11 verified reference differences/0 unresolved,
+  all source/save/input checks pass, `build/gfm-conformance/scaled-final/results.json`.
+- Windows editor80 tests /3429 assertions, `platform-scaled-final.log`.
+- Main Python36 + isolated runner11 contracts pass, `python-*-scaled-final.log`.
+No live native builds. Root alone builds sequentially with **parallel4**.
+Live candidate-only work:
+- Luna `gfm_reference_scaling`: parser completion metadata Batch B, ignored
+  `build/gfm-expanded/block-completion/`. Root approved replacing parser's four
+  serializer probes with transient per-node ending facts, no AST fields or
+  production serializer fallback; must be differential-tested before integration.
+- Luna `gfm_deep_blocks_design`: serializer event/writer algorithm design only,
+  ignored `build/gfm-expanded/deep-block-design/`; no implementation authorized yet.
+- Sol `gfm_emphasis_scaling` delivered UNINTEGRATED Batch A BlockNode iterative
+  copy/destruction + block walks/index, `build/gfm-expanded/deep-blocks/`. Keeps
+  BlockVec/std::vector interface unchanged; candidate tests50000-level lifecycle.
+  Parser/serializer frame implementation not started. Quotes50000/lists1000 remain
+  unresolved: recursive ParseInput copies/maps and subtree serializer probes are
+  O(depth*source). Root has read FRAME_DESIGN.md and owns integration decisions.
+All agents are candidate-only, no native builds/Git. Other agents idle.
 
-GFM extension **test integration and first full baseline are complete**. This
-batch changes test infrastructure only; it does not claim GFM implementation
-conformance or modify production parser/editor code.
-
-The published [GitHub GFM 0.29 spec](https://github.github.com/gfm/) has **28**
-extension examples: tables 8, task items 2, strikethrough 3, extended autolinks
-14, tagfilter 1. `prepare_gfm.py` extracts the paired Markdown and expected HTML
-code samples from the hash-pinned published HTML, preserving original IDs,
-characters, whitespace, and page line ranges. It never reverse-generates
-Markdown from rendered HTML. `gfm-sources.lock.json` records page SHA-256 and
-licenses. The pinned cmark-gfm repository spec is older than the published page
-(24 extension cases); that drift and its separate 30-case extra corpus are
-recorded as provenance, not silently substituted for published expectations.
-
-`tests/support/markdown_conformance.hpp` shares the native source checks between
-CommonMark and GFM. Both use the same CST/AST-to-HTML projector and Python formal
-runner. The projector now consumes native table alignments/cell CST and task-item
-checked state. It cannot invent missing bare-autolink semantics. Generated input
-uses one `MarkdownCase` shape, including the existing md4c test consumer.
-
-Run `cmd /c build_gfm_test.bat`. CTest target `FoliaGfmTests` runs the same complete
-native/Python path. Current report: `build/gfm-conformance/baseline/results.json`:
-
-| Check | Result |
-|---|---:|
-| GFM strict semantics | **8 pass / 19 fail / 1 explicit HTML skip** |
-| GFM inline CST losslessness | **28/28** |
-| GFM character-exact save | **25/28** |
-| CommonMark regression | **652/652**, all source checks also pass |
-| Core regression | **601 tests / 44280 assertions**, exit 0 |
-| Python fixture/runner contracts | **26 passed** |
-
-Only published **#657, Disallowed Raw HTML**, skips the semantic comparison:
-Folia's inert HTML presentation does not implement GitHub's tagfilter HTML
-serialization. Its native CST/source/save assertions still run (focused #657
-run confirms both assertions). `gfm-policy.json` is the explicit reviewed policy;
-report records cannot declare their own skips. A skip is never counted as a
-pass; parser errors and native failures remain failures.
-
-Established implementation gaps (not skipped): escaped pipes in table code spans
-#200; unpiped table continuation #202; task nesting #280; single/triple-tilde
-rules #491/#493; all 14 extended autolinks #622–635. Save failures #199/#200/#204
-normalize table row delimiters, padding or surplus cells. Full GFM run returns
-normal exit 1, all 28 cases reported, no abnormal exit. Next implementation work:
-fix exact table source ownership first, then these semantic failures, preserving
-the existing block/source/CST/editing model. No production fixes started here.
-
-Logs under `build/markdown-conformance/`: `gfm-baseline-final.log`, `gfm-core.log`,
-`gfm-commonmark.log`, `gfm-ctest-commonmark.log`, `gfm-reference-build.log`.
-CommonMark report is `gfm-commonmark-regression/results.json`. The md4c target
-compiled successfully after the shared fixture shape change; it was not rerun.
-No Windows/editor code changed; the prior 80-test Windows result below remains
-historical. No live agents/builds. Build parallelism stays **4**. Commits:
-**7cc3abc1** (shared runner and pinned published fixtures), **95300483** (GFM
-target and native projections). A final focused 7-assertion check confirms the
-projector leaves CommonMark plain-text URL CST as text; this check will remain
-valid when GFM bare-autolink implementation is added.
+Next: verify model Batch A in isolated target, then review Batch B producer-local
+completion facts (the first central formatter-mirroring switch was rejected).
+Batch C/D are candidate work, not verified/integrated. Finish quote/list capacity
+within existing model/responsibilities: no depth cap, source-specific branch,
+reduced scale, parallel old/new parser, or softened oracle. Final combined19-case
+report is pending; original full21 still has two unresolved deep-block cases.
+Ignored candidates live under `build/gfm-expanded/`; use `rg --no-ignore`.
 No MSI/push/version change requested.
 
-## CommonMark HTML checkpoint (2026-10-23, verified before GFM)
+## Historical checkpoints
 
-The HTML syntax/projection batch is implemented and committed. Formal
-CommonMark: **652/652 strict semantics, 652/652 inline CST losslessness and
-652/652 character-exact save**, normal exit 0. Report:
-`build/markdown-conformance/html-final/results.json`. Baseline rerun at
-`html-phase-start/` reproduced 586/652 before edits. No official expectations,
-case omissions, or source-specific branches were introduced.
-
-Shared `markdown_html` owns CommonMark block-start/end and inline-special
-recognition; `parser` applies block boundaries before deriving the existing HTML
-presentation. Complete supported HTML retains existing editable semantic nodes;
-malformed/unsupported types 1–6 retain their established inert presentation,
-bounded to the correct CommonMark block. Type 7 remains one existing Paragraph
-in HtmlText mode. Inline HTML bodies retain their surrounding syntax mode:
-Markdown inline tags allow Markdown children; raw HTML blocks remain HtmlText.
-
-New regression evidence: `html_block_text_alignment_is_semantic_and_lossless`
-contains four adjacent `<p>` roots without blank lines. Treating that whole
-CommonMark block as plain HtmlText lost each paragraph's alignment. It now uses
-the existing HtmlContainer/source-slot model with each semantic root as a child;
-render tests verify independent child styles. For containers without element
-provenance, the existing HTML semantic serializer emits their children rather
-than inventing a `<div>` on Enter. Source edits/split/history tests cover this
-case. This is not the rejected type-7 wrapper design: type 7 still has no added
-container, outer links/styles stay on their existing CST/semantic owners, and
-there is no extra source model or new serializer module.
-
-Formal semantics now use **one** C++ Node projection that emits escaped Markdown
-semantics and only parser-classified raw HTML source. Python `run.py` compares
-that output using the existing `canonical_html.py`, also used by immutable
-official expected HTML. Native Boost.UT retains independent lossless/save
-assertions for all 652 cases; the Python stage is mandatory for strict semantic
-assertions. CTest is wired through this complete runner. This avoids a second
-HTML parser and handles HTML tags spanning multiple Markdown blocks.
-
-Verification on the final implementation:
-- Formal runner: **652/652 strict, 652/652 lossless, 652/652 exact save**, exit 0,
-  `build/markdown-conformance/html-final/results.json` (all reported; no skips).
-- CTest `FoliaCommonMarkTests`: passed through the complete Python/native runner,
-  `html-ctest.log`; its per-case report is `build/core/markdown-conformance/`.
-- Core: **598 tests / 44248 assertions**, exit 0, `html-core.log`.
-- Windows editor: **80 tests / 3429 assertions**, exit 0, `html-platform.log`.
-- Fixture/runner Python contracts: **17 tests**, passed. Invalid output records,
-  missing HTML projections, altered report-side expectations, incomplete suites,
-  per-case errors and filtered semantic mismatches cannot report success.
-
-All logs above are under ignored `build/markdown-conformance/`. Old expectations
-that disabled Markdown inside inline HTML were corrected; explicit HtmlText
-checks still require literal Markdown. Added source edits/split/undo/redo checks
-perform zero full-document parses, serializations and full-tree transaction diffs.
-
-Commit checkpoint: scanner + scanner tests **c1d987f7**; inline syntax and formal
-HTML comparison **3f7a930b**; block bounds and editable presentation **bf8a3d42**.
-No live agents or builds. Build parallelism remains **4**. No official failures
-remain; retain this verified state for the next user task. Ignored
-`html-current/` deliveries are historical inputs, not replacements for reviewed
-production code. No MSI, push or version change was requested in this batch.
-
-## Previous verified checkpoint (2026-10-22, historical)
-
-User priority 2/3 is verified: the known Tab/lazy-continuation failures and all
-21 exact-save failures are fixed. Commits e489a0b0 (column context/layout) and
-69f7a062 (container syntax and edit history) contain the implementation.
-The formal regression tests accompanying this checkpoint complete the batch.
-No live agents or native builds. Build parallelism remains **4**.
-
-| Check | Initial baseline | Current |
-|---|---:|---:|
-| Strict CommonMark 0.31.2 semantics | 292/652 | **586/652** |
-| Inline source/CST losslessness | 652/652 | **652/652** |
-| Character-exact document serialization | 571/652 | **652/652** |
-
-All 652 official cases ran, with no omissions, skips or abnormal exit. Against
-phase-five-start/ (9a4ff577), new semantic passes are #5/#6/#7/#9/#93/#238/#312;
-all 21 former save differences pass. No previously passing semantic, save or
-inline-CST assertion regressed. Expected official trees were not weakened.
-
-Next: resume priority 1, the remaining **66 semantic differences** involving HTML
-syntax, block boundaries, supported presentation and test projection. Eighteen
-carry HTML policy/projection labels; nine carry other extension/projection limits;
-39 have no such label. These are not 66 separately established parser bugs.
-Inspect each official failure first, then consult pinned md4c implementation.
-The earlier UI high-CPU investigation is paused; the pre-existing Math handoff
-edits are separate and were not included in these commits.
+These are provenance only; resume from the current checkpoint above.
+- 28 published extension examples: first baseline8 strict/19fail/1HTML skip;
+  integration commits7cc3abc1/95300483. The expanded corpus supersedes that count.
+- CommonMark HTML reached652/652 strict/source/save in c1d987f7, 3f7a930b,
+  bf8a3d42. Earlier586/652 and source-save failures are resolved.
+- Tab/lazy continuation and21 save gaps were fixed in e489a0b0/69f7a062.
+  Prefix anchors, physical tab/residual-column mapping and exact undo metadata
+  remain accepted. Do not restart those audits without new regression evidence.
 
 ## Accepted responsibilities
 
@@ -253,46 +167,6 @@ edits are separate and were not included in these commits.
 The established block tree, block-local authoritative inline source/CST, selection
 and transaction model remain in place. Ordinary edits do not serialize or parse
 the full document or compute a full-tree transaction diff.
-
-## Verification and limits
-
-- Core: **581 tests / 43936 assertions**, exit 0. Includes bounded randomized
-  source edit/delete/newline history, mixed prefixes, split/join, list outdent,
-  literal lazy-line edits, raw-code column-context history, task/ordered markers,
-  CR/CRLF, generated indentation layout/hit testing, and source-key invalidation.
-- Windows editor: **80 tests / 3429 assertions**, exit 0.
-- Remaining official subset against md4c: **66/66 semantic matches**; 64 exact HTML
-  matches and two formatting-only differences (#175/#309). The exact-byte
-  reference assertions return normal test-failure code 1, not an abnormal exit.
-- Official suite returns normal test-failure code 1 for the remaining 66 HTML
-  semantic differences. The application installer was not built in this batch.
-- Fixture/generator Python checks previously passed 10 tests; this batch did not
-  change those tools. Fixture hashes were checked by the official/reference runs.
-
-Ignored `build/markdown-conformance/` contains current `results.{json,jsonl,md}`,
-`prefix-{core,official,platform,md4c}.log`, and `md4c/results.json`.
-Immutable comparison reports: `baseline/`, `phase-three-start/` (d5dfc16b),
-`phase-four-start/` (c5d8da4c), `phase-five-start/` (9a4ff577).
-Candidate deliveries under `candidates/prefix-phase/` are historical inputs:
-production includes root fixes that candidates must never overwrite.
-
-## Settled HTML decisions
-
-The shared `parsing/markdown_html.ixx` scanner recognizes complete tag syntax and
-source ranges, without body copies, decoding or presentation policy. Block and
-inline parsers consume it. Complete unknown/closing tags stay opaque Raw CST
-nodes; attribute brackets/delimiters cannot become Markdown links/emphasis.
-Type-7 HTML blocks use one existing editable Paragraph in HtmlText mode, ending
-at a blank line/EOF and never interrupting an open paragraph. Its source excludes
-only the terminal physical EOL, owned by the existing document/separator syntax.
-Recognized HTML CST elements/comments project directly in formal tests.
-
-Rejected history: initial type-7 v1 duplicated tag grammar and body text. v2's
-extra HTML containers/fragments lost outer anchor/style rendering because the
-container renderer walks only children. Accepted v3 keeps existing HtmlText CST
-semantics, with real Editor/render regression coverage. Do not restore v1/v2 or
-add body copies. See Git through 9a4ff577 for prior batches. The separately tested
-adjacent-root container case is recorded in the current checkpoint above.
 
 ## Reproduction and provenance
 
