@@ -21,6 +21,23 @@ index 992620f..7936e49 100644
      case 'L':
        return "\xE2\x80\xA8";  // LS (#x2028)
      case 'P':
+diff --git a/src/scanner.cpp b/src/scanner.cpp
+index d0eb03c..401ad8b 100644
+--- a/src/scanner.cpp
++++ b/src/scanner.cpp
+@@ -128,9 +128,9 @@ void Scanner::ScanNextToken() {
+   }
+
+   if (INPUT.peek() == Keys::FlowEntry) {
+-    // values starting with `,` are not allowed.
+-    // eg: reject `,foo`
+-    if (INPUT.column() == 0) {
++    // A leading comma cannot start a block value, but remains a flow
++    // separator when a collection continues at column zero on a new line.
++    if (InBlockContext() && INPUT.column() == 0) {
+       throw ParserException(INPUT.mark(), ErrorMsg::UNEXPECTED_FLOW);
+     }
+     // if we already parsed a quoted scalar value and we are not in a flow,
 diff --git a/src/scantoken.cpp b/src/scantoken.cpp
 index b13d211..4e4aea5 100644
 --- a/src/scantoken.cpp

@@ -103,6 +103,12 @@ bodyCase('empty-tag-anchor', 'config: {a: &empty !!seq , b: *empty}');
 bodyCase('empty-tag-schema-error', 'config: {a: !!int }');
 bodyCase('adjacent-tag-collection', 'config: !!seq[]');
 bodyCase('separated-tag-collection', 'config: !!seq []');
+for (const [name, separator] of Object.entries({lf: '\n', crlf: '\r\n'})) {
+  bodyCase(`flow-map-leading-comma-${name}`, `config: {a: 1${separator}, b: 2}`);
+  bodyCase(`flow-sequence-leading-comma-${name}`, `config: [1${separator}, 2]`);
+}
+bodyCase('block-leading-comma', ',value');
+bodyCase('block-leading-comma-after-key', 'config:\n,value');
 for (let i = 0; i < 80; ++i) bodyCase(`generated-${i}`, `title: ${i}\nconfig: {pie: {showData: ${i % 2 ? 'true' : 'false'}, width: ${i * 17}}, values: [${i}, "${i}"]}`);
 const lines = cases.map(({ name, input }) => {
   try {
