@@ -1,11 +1,11 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-23, PR #1 review fixes in progress
+## Current checkpoint - 2026-10-23, PR #1 review fixes verified
 
 - User authorized fixing the review findings, positive tests, CI, upstream
   conflicts and documentation in small commits. Update existing upstream PR #1
   only after verification. DO NOT merge either the upstream PR or a fork PR.
-- Work on codex/mermaid-cpp-yaml-review, based on PR head 74ac2c8c. Commit
+- Review work used codex/mermaid-cpp-yaml-review, based on PR head 74ac2c8c. Commit
   10a43da7 merges upstream 508423f200f815beb7e686d64858501c58cef28b, preserving
   both Mermaid and CommonMark/reference exclusions in the core test glob.
 - YAML candidate moves attached-flow-punctuation rejection to ScanTag and
@@ -17,11 +17,20 @@
   pass. First CI run 39882584178 exposed yaml-cpp's unrelated rejection of a flow
   comma at column zero after a newline; its context check is now corrected and
   six ordinary flow/block cases supplement the empty-tag regression cases.
-  Native final-head checks are pending. Existing PR branch remains unchanged
-  until validation completes. Actions was manually enabled by the user.
-- Next: restore portable Windows CI including root build integration, push the
-  validation branch, inspect Debug/Release results, then fast-forward the existing
-  PR branch and correct its description. No application dependency switch.
+  Actions was manually enabled by the user.
+- Verified code/documentation head 89c417818f0a91703097a15a80cb3230cfd7080e:
+  https://github.com/zhao0349/Folia/actions/runs/39883033095 passed all four
+  Windows jobs (standalone/root, Debug/Release). Root jobs passed FoliaTests,
+  FoliaWindowsEditorTests and both Mermaid suites. Both build modes also passed
+  official source/SVG oracles, 78 native DOM comparisons and 96 browser/DirectWrite
+  measurements. This checkpoint-only update does not change tested code or CI.
+- Delivery: fast-forward the existing feat/mermaid-cpp-port branch for upstream
+  https://github.com/water2004/Folia/pull/1 and keep it OPEN, with no force push or
+  merge. Recheck its live head/checks before further work; the run above is the
+  evidence for the verified code, and later documentation pushes can trigger CI.
+- Next implementation stage, when requested: directive argument interpretation,
+  configuration precedence and theme resolution against official oracles.
+  No application dependency switch or WinUI/packaged/DPI acceptance is claimed.
 - No live local builds/agents. Review evidence and old CI executable are under
   ignored build/mermaid-cpp/review-gemini-20261023. The ignored yaml-cpp reference
   checkout contains the candidate patch; use a fresh source tree for apply-checks.
