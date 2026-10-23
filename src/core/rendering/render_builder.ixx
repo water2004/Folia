@@ -337,6 +337,7 @@ struct Builder {
                     display_range.start,
                     display_range.length()),
                 {block.id, {source_start, source_end}});
+            replace_inline_display_nuls(item.text);
             item.style.code = true;
             out.push_back(std::move(item));
             first_line = false;
@@ -1037,6 +1038,8 @@ struct Builder {
         }
         auto attach_source = [&](auto& self, std::vector<InlineRenderItem>& items) -> void {
             for (auto& item : items) {
+                replace_inline_display_nuls(item.text);
+                if (item.payload) replace_inline_display_nuls(item.payload->display_text);
                 if (item.kind != InlineRenderItem::Kind::Text
                     && item.kind != InlineRenderItem::Kind::Marker) {
                     item.ensure_special().ensure_semantic().source_text =
@@ -1162,6 +1165,7 @@ struct Builder {
                 special.generated_code_indentation = b.block_source.tree().generated_indentation;
                 special.language = b.block_source.tree().language;
                 special.code_text = block_source_content(b.block_source);
+                replace_inline_display_nuls(special.code_text);
                 special.code_indented = b.atomic_special().code_indented;
                 special.line_count = code_presentation_lines(special.code_text).size();
                 if (!special.content_to_source.empty()) {

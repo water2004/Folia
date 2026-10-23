@@ -169,6 +169,14 @@ inline std::u32string inline_source_slice(const InlineDocument& document, Source
     return document.source.substr(range.start, range.length());
 }
 
+// Replace source NUL only in a derived string that will be displayed. The
+// source and its offsets remain unchanged, and each scalar keeps one position.
+inline bool replace_inline_display_nuls(std::u32string& display_text) {
+    if (std::ranges::find(display_text, U'\0') == display_text.end()) return false;
+    std::ranges::replace(display_text, U'\0', U'\uFFFD');
+    return true;
+}
+
 inline std::u32string decode_inline_entity(std::u32string_view raw) {
     if (auto decoded = decode_html_character_reference(raw)) return std::move(*decoded);
     return std::u32string(raw);
@@ -274,6 +282,7 @@ inline void append_inline_visible_text(
 inline std::u32string inline_visible_text(const InlineDocument& document) {
     std::u32string output;
     append_inline_visible_text(document, document.tree.nodes, output);
+    replace_inline_display_nuls(output);
     return output;
 }
 

@@ -739,9 +739,17 @@ inline bool inline_lossless_nodes(InlineCstNodes const& nodes, InlineDocument co
     return true;
 }
 
+inline void append_html_raw_display(std::string& out, std::string_view value) {
+    for (const char ch : value) {
+        if (ch == '\0') out += "\xef\xbf\xbd";
+        else out.push_back(ch);
+    }
+}
+
 inline void append_html_text(std::string& out, std::string_view value) {
     for (const char ch : value) {
         switch (ch) {
+            case '\0': out += "\xef\xbf\xbd"; break;
             case '&': out += "&amp;"; break;
             case '<': out += "&lt;"; break;
             case '>': out += "&gt;"; break;
@@ -753,6 +761,7 @@ inline void append_html_text(std::string& out, std::string_view value) {
 inline void append_html_attribute(std::string& out, std::string_view value) {
     for (const char ch : value) {
         switch (ch) {
+            case '\0': out += "\xef\xbf\xbd"; break;
             case '&': out += "&amp;"; break;
             case '<': out += "&lt;"; break;
             case '>': out += "&gt;"; break;
@@ -790,7 +799,7 @@ inline void render_html_node(Node const& node, std::string& out) {
     if (node.tag == "#raw-html") {
         for (const auto& child : node.children) {
             if (child.node) render_html_node(*child.node, out);
-            else out += child.text;
+            else append_html_raw_display(out, child.text);
         }
         return;
     }
@@ -802,10 +811,10 @@ inline void render_html_node(Node const& node, std::string& out) {
         return;
     }
     if (node.html_override) {
-        out += *node.html_override;
+        append_html_raw_display(out, *node.html_override);
         return;
     }
-    if (!node.html_prefix.empty()) out += node.html_prefix;
+    if (!node.html_prefix.empty()) append_html_raw_display(out, node.html_prefix);
     else html_start_tag(out, node.tag, node.attrs);
     const bool table_structure = node.tag == "table" || node.tag == "thead"
         || node.tag == "tbody" || node.tag == "tr";
@@ -814,7 +823,7 @@ inline void render_html_node(Node const& node, std::string& out) {
         if (child.node) render_html_node(*child.node, out);
         else append_html_text(out, child.text);
     }
-    if (!node.html_suffix.empty()) out += node.html_suffix;
+    if (!node.html_suffix.empty()) append_html_raw_display(out, node.html_suffix);
     else if (node.html_prefix.empty() && !html_void_element(node.tag)) out += "</" + node.tag + ">";
     // These line endings belong to generated Markdown block markup. They
     // matter inside an open raw HTML element and even within an HTML comment.
