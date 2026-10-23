@@ -3,6 +3,7 @@ import folia.mermaid.config_sanitize;
 import folia.mermaid.config_merge;
 import folia.mermaid.config_appearance;
 import folia.mermaid.config_init;
+import folia.mermaid.config_clean_merge;
 import folia.mermaid.directives;
 import folia.mermaid.number;
 
@@ -66,6 +67,60 @@ const ConfigValue& field(const ConfigValue& value, std::u16string_view key) {
     return *found;
 }
 suite config = [] {
+    "mermaid_clean_merge_matches_official_oracle"_test = [] {
+        const auto override = std::getenv("FOLIA_MERMAID_FIXTURES");
+        std::ifstream input{std::filesystem::path{override ? override : FOLIA_MERMAID_FIXTURE_DIR} / "init-merge.tsv"};
+        expect(fatal(input.is_open()));
+        std::string line;
+        std::size_t count{};
+        while (std::getline(input, line)) {
+            if (!line.empty() && line.back() == '\r') line.pop_back();
+            if (!line.starts_with("clean\t")) continue;
+            std::vector<std::string_view> fields;
+            std::string_view rest{line};
+            while (true) {
+                const auto tab = rest.find('\t'); fields.push_back(rest.substr(0, tab));
+                if (tab == rest.npos) break;
+                rest.remove_prefix(tab + 1);
+            }
+            expect(fatal(fields.size() == 7_u));
+            const auto defaults = json(decode(fields[2]));
+            const auto data = fields[3] == "U" ? std::optional<ConfigValue>{} : std::optional{json(decode(fields[3]))};
+            const auto before = snapshot(defaults) + (data ? snapshot(*data) : "U");
+            auto result = clean_and_merge_config(defaults, data ? &*data : nullptr);
+            expect(snapshot(defaults) + (data ? snapshot(*data) : "U") == before) << fields[1];
+            if (fields[4] == "E" || fields[5] != "-") expect(!result) << fields[1];
+            else {
+                expect(result.has_value()) << fields[1] << (result ? "" : result.error());
+                if (result) expect(snapshot(*result) == fields[4]) << fields[1] << snapshot(*result) << fields[4];
+            }
+            ++count;
+        }
+        expect(count == 1176_u);
+    };
+    "mermaid_clean_merge_ownership_limits_and_undefined_intermediates"_test = [] {
+        auto defaults = json(uR"({"a":[null,2],"b":{"x":1}})");
+        auto data = json(uR"({"a":[1]})");
+        auto result = clean_and_merge_config(defaults, &data);
+        expect(fatal(result.has_value()));
+        defaults.mapping.clear(); data.mapping.clear();
+        expect(snapshot(*result) == snapshot(json(uR"({"a":[1,2],"b":{"x":1}})")));
+        const auto value = json(uR"({"x":{"y":[1,2]}})");
+        expect(!clean_and_merge_config(value, nullptr, {.depth = 1}));
+        expect(!clean_and_merge_config(value, nullptr, {.values = 1}));
+        expect(!clean_and_merge_config(value, nullptr, {.string_units = 1}));
+        expect(!clean_and_merge_config(value, nullptr, {.operations = 1}));
+        auto deep = value;
+        for (int i = 0; i < 70; ++i) { auto outer = json(u"{}"); outer.mapping.emplace(u"x", std::move(deep)); deep = std::move(outer); }
+        expect(!clean_and_merge_config(deep, nullptr, {.depth = 1000}));
+        ConfigValue malformed; malformed.mapping.emplace(u"hidden", deep);
+        expect(!clean_and_merge_config(malformed));
+        const auto huge = json(uR"({"a":{"length":9007199254740991}})");
+        const auto array = json(uR"({"a":[]})");
+        expect(!clean_and_merge_config(huge, &array));
+        const auto huge_index = json(uR"({"a":{"4294967294":1}})");
+        expect(!clean_and_merge_config(array, &huge_index));
+    };
     "mermaid_init_mapping_matches_official_oracle"_test = [] {
         const auto override = std::getenv("FOLIA_MERMAID_FIXTURES");
         std::ifstream input{std::filesystem::path{override ? override : FOLIA_MERMAID_FIXTURE_DIR} / "init-merge.tsv"};
