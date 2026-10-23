@@ -280,6 +280,38 @@ and are not resolved here. These theme-variable checks do not wire the shared
 frontend or convert the existing Packet/Pie literal-paint SVG boundary; rendering
 and application theme integration remain separate work.
 
+The configuration session is an explicit `ConfigSession` instance with owned
+site/current/initialize data and saved directives. It ports the original
+`config.ts` command order: `setConfig` is temporary, directive replay uses the
+current site's secure list, reset clears directives and scope, and a changed
+theme derives variables from the original initialize overrides. Default/dark
+are the supported derived themes. Other known theme names fail when derivation
+is requested, including a diagram's scoped default; unknown names and the
+`null` sentinel retain the original no-derivation behavior. `updateSiteConfig`
+does not independently derive a theme. Deprecated-diagram warnings are exposed
+as a once-per-session flag, without a process-global logger.
+
+The session oracle executes the complete original module in fresh VM scopes.
+Its 69 scenarios / 584 steps compare full site/current/user JSON-data state and
+warning counts. Lossless recursive deltas and interned strings reduce fixture
+size without hashes or selected-field sampling. Generated native defaults are
+the original defaults' data projection: undefined properties and family font
+callbacks are omitted. The session never invokes those callbacks; diagram
+family integration remains separate. Source getters' mutation aliases and
+partially applied failures are deliberately replaced with independent owned
+values and transactional errors.
+
+Session command inputs are mappings. Arrays contain primitives; nested input
+containers stop at depth two (root zero), before `assignWithDepth` could retain
+shared deeper objects. Theme names are primitive values, secure lists contain
+strings, and prototype setters are rejected. Existing theme/sanitizer/merge
+restrictions still apply. Limits bound aggregate retained state, command input
+and cumulative intermediate tree inspections; each delegated primitive also
+has its own work limit. Saved directives have a hard ceiling of 256. Failed
+commands preserve all state and warning flags. No singleton, diagram detector,
+renderer wiring, application dependency switch or general JS object model is
+introduced by this boundary.
+
 The preprocessing oracle isolates and executes the original pinned
 `cleanupText` and `removeDirectives` function bodies, stripping only TypeScript
 syntax and the export keyword and supplying the original `directiveRegex`.
