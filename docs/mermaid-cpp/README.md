@@ -134,8 +134,8 @@ defaults are generated from the original schema/AJV pipeline and defaultConfig,
 including keys contributed by the original theme implementation. JavaScript and
 AJV are oracle tools only; they are not native runtime dependencies.
 
-Remaining common frontend work includes detectInit mapping, cleanAndMerge,
-config.ts session updates and connecting derived theme variables to renderers.
+Remaining common frontend work includes diagram registry dispatch, config.ts
+session updates and connecting derived theme variables to renderers.
 The isolated default/dark derivation API is described below. Theme name
 precedence and variable derivation do not establish native rendering parity.
 The remaining frontend boundaries need their own official runtime oracles

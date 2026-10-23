@@ -1,10 +1,11 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-23, init mapping and clean merge oracle
+## Current checkpoint - 2026-10-23, init mapping and clean merge verified
 
-- User authorizes public fork pushes and verified updates to existing upstream
-  PR #1; DO NOT merge. Working branch `codex/mermaid-cpp-init-merge` starts at
-  delivery head `808db04d`. Delivery branch stays unchanged until verification.
+- User authorizes public fork zhao0349/Folia pushes and verified updates to
+  https://github.com/water2004/Folia/pull/1. Keep it OPEN; DO NOT merge.
+  Verification branch: `codex/mermaid-cpp-init-merge`; delivery branch:
+  `feat/mermaid-cpp-port`. Upstream base remains `508423f2`.
 - Baseline rerun 39897662560 passed all four standalone/integrated Windows
   Debug/Release jobs. Oracle commit `cee47ee5`, init mapping `e48c814d`.
 - Original detectInit body supplies 1,746 mapping observations with injected
@@ -13,17 +14,30 @@
 - Original cleanAndMerge supplies 1,210 observations cross-checked against the
   official full bundle. Pin es-toolkit 1.45.1 (22 hashed dependency files), not
   the core package's newer transitive 1.52.0: array-null behavior differs.
-- Native init mapping and clean merge are implemented with fixture tests,
-  ownership/resource checks and explicit dense-output restrictions. Native
-  standalone Debug/Release native tests passed at `77b693e0` in 39899131976.
-  Added array-length coercion and 34 official boundary cases in `391ee7d1`,
-  then charged generated array keys and undefined temporary nodes to budgets.
-  Next push this budget refinement and verify the final head in all four jobs
-  before updating delivery branch/PR. No local builds, agents or ignored
-  implementation candidates. Superseded CI may be cancelled by newer pushes.
-- Local MSVC/CMake remain unavailable; native evidence must come from CI.
-  Config session lifecycle, dispatch, renderer integration and application
-  dependency replacement remain pending. No WinUI/DPI acceptance is claimed.
+- Native APIs own results and preserve inputs. Init mapping invokes the explicit
+  detector only for truthy results and propagates errors. Clean merge preserves
+  intermediate undefined values, merges arrays by index, converts array-like
+  mappings and coerces array lengths. Final undefined/holes/custom array
+  properties and init prototype-setter effects fail explicitly. No JS runtime.
+- Verified code head `c447511a4f0f8e30eb726c51e60ec3290649fa81`:
+  https://github.com/zhao0349/Folia/actions/runs/39899656149 passed all four
+  standalone/integrated Windows Debug/Release jobs. Integrated jobs passed
+  FoliaTests, FoliaWindowsEditorTests and both Mermaid suites; standalone jobs
+  passed both Mermaid suites. All jobs checked source/SVG oracles, 78 native
+  SVG DOM comparisons and 96 same-host browser/DirectWrite measurement cases.
+  Local init-merge/config/directive oracles and git diff checks also pass.
+- Small code commits: `cee47ee5` oracle, `e48c814d` init mapping, `77b693e0`
+  clean merge, `391ee7d1` array length coercion, `c447511a` generated key/value
+  budgets. This final documentation checkpoint changes no tested code or CI.
+- Next concrete work: original config.ts session lifecycle oracle, then native
+  session state. Diagram registry dispatch and renderer integration of derived
+  themes follow as separate batches. Other families and application dependency
+  replacement remain pending; no WinUI packaging or DPI acceptance is claimed.
+- No live local builds/agents or ignored implementation candidates. Local
+  MSVC/CMake remain unavailable; native evidence is the Windows CI above.
+  Superseded runs 39899131976 and 39899536116 are not pending acceptance work.
+  Delivery/checkpoint pushes can trigger another automatic run; inspect live
+  checks on recovery rather than asserting that a later documentation run ended.
 
 ## Default/dark theme derivation verified (historical)
 
