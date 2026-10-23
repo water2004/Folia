@@ -111,7 +111,7 @@ namespace winrt::Folia
         auto name = Text(Localize(L"AppName"), 30);
         name.FontWeight(winrt::Windows::UI::Text::FontWeights::SemiBold());
         copy.Children().Append(name);
-        copy.Children().Append(Text(LocalizeFormat(L"Version", {L"0.2.3"})));
+        copy.Children().Append(Text(LocalizeFormat(L"Version", {L"0.3.0"})));
         copy.Children().Append(Text(Localize(L"AppDescription")));
         Grid::SetColumn(copy, 1);
         identity.Children().Append(copy);
