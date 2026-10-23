@@ -12,12 +12,14 @@
   configuration precedence, common incomplete input and request isolation.
   Pass condition: original composed oracle plus native standalone/integrated
   Windows Debug/Release checks. Next: Packet/Pie renderer entry integration.
-- Work on fork/mermaid-development; keep its guideline commit out of delivery.
-  Publish only selected feature/test/public-documentation commits through a
-  clean verification branch, then update feat/mermaid-cpp-port and upstream
+- Verification branch: codex/mermaid-cpp-frontend. Publish selected
+  feature/test/public-documentation commits, then update feat/mermaid-cpp-port and upstream
   PR #1 after verification. Do not merge. Baseline delivery 31770996 passed
   all four jobs in run 39912778063; live PR/base are unchanged.
-- No local native compiler, build or agent. Implementation has not started.
+- Composed oracle: 49 representative inputs, local check passes. Native
+  prepare_diagram implementation and fixture tests are ready for Windows CI.
+  Init/wrap scanning retains a request-local cursor after malformed JSON;
+  independent calls remain isolated. No local native compiler, build or agent.
 
 ## Registry and detector dispatch verified (historical)
 

@@ -34,6 +34,25 @@ Cytoscape, date calculations) needs its own source and behavior verification.
 
 ## Current state
 
+`folia.mermaid.frontend::prepare_diagram` composes the original shared frontend
+sequence for a configured session: normalize text, extract frontmatter, process
+init/wrap directives, clean-and-merge configuration, remove comments, reset a
+private session copy, detect diagram scope, apply configuration, then detect
+again with the effective configuration. It returns owned raw/cleaned/comment-
+bearing source, frontmatter line offset, title, extracted configuration, diagram
+type and effective configuration. Folia's caller can reuse a site session without
+one request's directives or errors changing the next request.
+
+The original composed oracle covers representative family detection, Packet/Pie
+inputs, default/dark appearance, secure keys, directive/frontmatter precedence,
+legacy displayMode, Unicode, line endings and incomplete editing input. The init
+and wrap scans share a request-local cursor, preserving the original behavior
+after malformed JSON while keeping independent requests isolated. Existing YAML,
+configuration and theme restrictions still apply. Source is capped before copying;
+delegated operations retain their existing budgets. Preparation does not validate
+family grammar, encode parser entities, run loaders, or produce SVG. Packet/Pie
+renderer entry integration is the next step; the application still uses Rust.
+
 `folia.mermaid.diagram_registry` ports `detectType.ts` and the detector portion
 of `addDiagrams`: 37 official detector modules plus the `error` and `---`
 sentinels, in original order. Registration is once per owned registry; the
@@ -53,7 +72,7 @@ the exact cleaned UTF-16 text, including lone surrogates.
 Host detectors may be registered with an optional opaque loader route. This
 models lookup/presence without executing JS dynamic imports or claiming native
 renderers for those ids. Actual loader execution, `diagramAPI` styles/utils,
-shared frontend wiring and application integration remain separate boundaries.
+family parser/renderer execution and application integration remain separate boundaries.
 The host owns callback captures and must bound their work/side effects. Registry
 copies have independent registration vectors with shared callback handles.
 
@@ -126,9 +145,9 @@ the transformed source as its type; malformed selected JSON returns one absent
 type/null argument entry and discards previous matches. Filtering happens before
 argument parsing. The shared lexical scanner also drives `remove_directives`.
 
-Each native call starts from offset zero. This deliberately avoids upstream's
-shared global-regex `lastIndex` leakage after a JSON exception; the oracle models
-independent calls. Default safety limits are 1 Mi UTF-16 source units, depth 64
+Independent native calls start from offset zero. The composed frontend uses an
+explicit request-local cursor for the init/wrap sequence, without leaking the
+upstream global regexp state across requests. Default safety limits are 1 Mi UTF-16 source units, depth 64
 (also a hard ceiling), 100,000 values, 4 Mi decoded key/string/type units and
 10,000 scanned directives, including filtered matches. Budgets are cumulative
 within a call, including overwritten JSON properties, and fail explicitly.

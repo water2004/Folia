@@ -7,9 +7,11 @@ import folia.mermaid.config_merge;
 namespace folia::mermaid {
 std::expected<std::optional<ConfigValue>, std::string> detect_init_config(
     std::u16string_view source, const InitDiagramResolver& resolve_diagram,
-    ConfigLimits limits, const DirectiveLimits& directive_limits) {
+    ConfigLimits limits, const DirectiveLimits& directive_limits, DirectiveScanState* scan_state) {
     try {
-        auto directives = detect_directives(source, DirectiveFilter::init, directive_limits);
+        DirectiveScanState local;
+        auto directives = detect_directives(source, DirectiveFilter::init,
+            scan_state ? *scan_state : local, directive_limits);
         if (!directives) return std::unexpected(directives.error());
         config_detail::Budget budget{limits};
         ConfigValue result;

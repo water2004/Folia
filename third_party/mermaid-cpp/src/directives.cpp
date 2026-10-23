@@ -220,14 +220,20 @@ bool matches(std::u16string_view type, DirectiveFilter filter) {
 
 std::expected<std::vector<Directive>, std::string> detect_directives(
     std::u16string_view text, DirectiveFilter filter, const DirectiveLimits& limits) {
+    DirectiveScanState state;
+    return detect_directives(text, filter, state, limits);
+}
+std::expected<std::vector<Directive>, std::string> detect_directives(
+    std::u16string_view text, DirectiveFilter filter, DirectiveScanState& state,
+    const DirectiveLimits& limits) {
     if (text.size() > limits.source_units) return std::unexpected("Directive source budget exceeded");
     try {
         const auto prepared = prepare(text);
         std::vector<Directive> result;
         Budget budget{limits};
-        std::size_t cursor{}, count{};
-        while (const auto match = detail::next_directive(prepared, cursor)) {
-            cursor = match->end;
+        std::size_t count{};
+        while (const auto match = detail::next_directive(prepared, state.cursor)) {
+            state.cursor = match->end;
             if (count >= limits.directives) throw LimitError{"Directive count budget exceeded"};
             ++count;
             if (!matches(match->type, filter)) continue;
@@ -245,6 +251,7 @@ std::expected<std::vector<Directive>, std::string> detect_directives(
             }
             result.push_back(std::move(directive));
         }
+        state.cursor = 0;
         if (result.empty()) {
             budget.value();
             budget.string(prepared.size());

@@ -19,6 +19,13 @@ struct DirectiveLimits {
     std::size_t string_units = 4 * 1024 * 1024; // Decoded keys, strings and types.
     std::size_t directives = 10000; // All matches, even if filtered out.
 };
+// A single preprocessing request shares the original regexp cursor between
+// init and wrap scans. Syntax failures retain it; a completed scan resets it.
+// Never share this state between requests or store it globally.
+struct DirectiveScanState { std::size_t cursor = 0; };
+std::expected<std::vector<Directive>, std::string> detect_directives(
+    std::u16string_view text, DirectiveFilter filter, DirectiveScanState& state,
+    const DirectiveLimits& limits = {});
 // Owned, ordered results; the JS singleton/array union is normalized to a vector.
 // No match returns one entry with the transformed input as type and null args.
 // Invalid selected JSON discards earlier results and returns one absent type.
