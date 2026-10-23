@@ -8,7 +8,7 @@
   Baseline Windows CI 39892083467 passed. Delivery branch remains
   `feat/mermaid-cpp-port` until this batch is verified.
 - Selected boundary is independent default/dark theme-variable derivation.
-  Official oracle has 1,218 theme observations and 2,295 Khroma observations;
+  Official oracle has 1,218 theme observations and 2,412 Khroma observations;
   source-map-verified official theme bodies run before native implementation.
   Khroma 2.1.0 source/distribution hashes and ER constants are pinned.
 - Preserve constructor/update/override/update/final shallow object-override
@@ -25,11 +25,22 @@
   C++ functions, checked by generate-themes.mjs. No JS execution in production.
   Native derive_theme_variables implements ordered evaluation, shallow final
   overrides, owned outputs, and bounded intermediate/final trees.
-- Next: run Windows standalone/integrated Debug/Release CI for native themes;
-  diagnose mismatches with a focused downloaded runner before delivery.
-  The full theme implementation is not yet natively verified. No application
-  integration is claimed. No live agents/local builds; CI for a6f90193 may still
-  be finishing. Local MSVC/CMake remain unavailable.
+- CI 39895366688 compiles both themes in Debug/Release. Its original fixture
+  did not classify all non-string calls into Khroma. The oracle now runs both
+  original source and official bundle, compares their outcomes, and observes
+  actual color-function arguments. With these corrected restrictions the same
+  downloaded Release binary passes the full 1,218-case theme fixture locally
+  (612,361 focused assertions). Debug artifact cannot load locally (0xC0000135,
+  debug CRT imports); do not rerun it without the debug runtime.
+- Further color tests expose extreme exponent underflow; native literal parsing
+  now uses a linear scanner instead of recursive std::regex and distinguishes
+  underflow from overflow. Adds long malformed/valid literals and Unicode space
+  observations. This scanner change still needs fresh native CI.
+- Next: run Windows standalone/integrated Debug/Release CI for the corrected
+  fixture and scanner, then deliver only the verified head to PR #1.
+  No application integration is claimed. No live agents/local builds.
+  Ignored Release runners/logs: build/mermaid-cpp/theme-color-check and
+  theme-derive-release. Local MSVC/CMake remain unavailable.
 
 ## Configuration primitives verified (historical)
 

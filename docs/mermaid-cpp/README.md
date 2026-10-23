@@ -135,13 +135,11 @@ including keys contributed by the original theme implementation. JavaScript and
 AJV are oracle tools only; they are not native runtime dependencies.
 
 Remaining common frontend work includes detectInit mapping, cleanAndMerge,
-config.ts session updates and default/dark theme-variable/color derivation.
-Theme name precedence alone does not establish native theme rendering parity.
-
-The next frontend boundaries are init sanitization and diagram mapping, config merging and appearance
-precedence (diagram-scoped settings can override globals), and default/dark
-theme resolution. Each needs its own official runtime oracle before wiring a
-shared entry point into the family renderers.
+config.ts session updates and connecting derived theme variables to renderers.
+The isolated default/dark derivation API is described below. Theme name
+precedence and variable derivation do not establish native rendering parity.
+The remaining frontend boundaries need their own official runtime oracles
+before wiring a shared entry point into the family renderers.
 
 The Packet component ports the official grammar, metadata value conversion,
 contiguous field validation, splitting into rows, and SVG geometry. It supports
@@ -242,7 +240,9 @@ The assignment functions are generated as ordinary C++ from the hash-locked
 official AST, checked in and reproducibly checked in CI. This is neither a
 static theme table nor a JavaScript runtime. Khroma 2.1.0 arithmetic, parsing,
 color-name data, and decimal formatting are ported independently; the official
-runtime supplies 1,218 theme observations and 2,295 color observations.
+runtime supplies 1,218 theme observations and 2,412 color observations. The
+theme oracle cross-checks the original source against the official bundle and
+observes actual color-function arguments to classify non-string restrictions.
 
 The native theme boundary accepts mapping overrides and literal string colors.
 It explicitly rejects mutable Khroma channel objects, prototype/method-key

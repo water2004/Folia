@@ -39,7 +39,7 @@ suite theme_colors = [] {
             expect(result==fields[3]) << count << fields[0] << hex(paint) << result << fields[3];
             ++count;
         }
-        expect(count==2295_u);
+        expect(count==2412_u);
     };
     "mermaid_theme_color_rejects_unbounded_literals"_test = [] {
         bool rejected=false;

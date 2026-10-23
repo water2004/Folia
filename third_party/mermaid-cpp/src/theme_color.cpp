@@ -71,7 +71,7 @@ bool js_space(char16_t c) {
         (c>=0x2000 && c<=0x200a) || c==0x2028 || c==0x2029 || c==0x202f || c==0x205f || c==0x3000 || c==0xfeff;
 }
 Color parse(std::u16string_view input) {
-    // Bound the standard regex engine, including malformed whitespace runs.
+    // Bound literal work and temporary storage before scanning malformed input.
     if (input.size()>4096) throw std::runtime_error("Theme color literal exceeds 4096 UTF-16 units");
     std::string text;
     for (char16_t c : input) {
@@ -101,40 +101,100 @@ Color parse(std::u16string_view input) {
         result.a=alpha?(n&mask)*multiplier/255.0:1;
         return result;
     }
-    // The expressions mirror Khroma's accepted grammar (including its exponent
-    // and sign differences). Do not broaden these to browser CSS parsing.
-    static const std::regex rgb(R"(^rgba?\(\s*?(-?(?:\d+(?:\.\d+)?|(?:\.\d+))(?:e\d+)?(%?))\s*?(?:,|\s)\s*?(-?(?:\d+(?:\.\d+)?|(?:\.\d+))(?:e\d+)?(%?))\s*?(?:,|\s)\s*?(-?(?:\d+(?:\.\d+)?|(?:\.\d+))(?:e\d+)?(%?))(?:\s*?(?:,|\/)\s*?\+?(-?(?:\d+(?:\.\d+)?|(?:\.\d+))(?:e\d+)?(%?)))?\s*?\)$)",std::regex::icase);
-    static const std::regex hsl(R"(^hsla?\(\s*?(-?(?:\d+(?:\.\d+)?|(?:\.\d+))(?:e-?\d+)?(?:deg|grad|rad|turn)?)\s*?(?:,|\s)\s*?(-?(?:\d+(?:\.\d+)?|(?:\.\d+))(?:e-?\d+)?%)\s*?(?:,|\s)\s*?(-?(?:\d+(?:\.\d+)?|(?:\.\d+))(?:e-?\d+)?%)(?:\s*?(?:,|\/)\s*?\+?(-?(?:\d+(?:\.\d+)?|(?:\.\d+))(?:e-?\d+)?(%)?))?\s*?\)$)",std::regex::icase);
-    std::smatch match;
-    const auto numeric=[](const std::ssub_match& m) {
-        auto str=m.str();
-        // from_chars has locale-independent binary64 conversion; suffixes are
-        // intentional (parseFloat). Overflow has JS's infinity semantics.
-        double d{}; auto p=std::from_chars(str.data(),str.data()+str.size(),d);
-        if(p.ec==std::errc::result_out_of_range) return str.starts_with('-')?-std::numeric_limits<double>::infinity():std::numeric_limits<double>::infinity();
-        if(p.ec!=std::errc{}) throw std::runtime_error("Invalid color number");
-        return d;
+    // Linear scanner for the exact Khroma regex grammar. Whitespace and
+    // malformed numeric runs never recurse through a standard regex engine.
+    const bool hsl=lower.starts_with("hsl(") || lower.starts_with("hsla(");
+    const bool rgb=lower.starts_with("rgb(") || lower.starts_with("rgba(");
+    if(!hsl && !rgb) throw std::runtime_error("Unsupported color format");
+    std::size_t pos=text.find('(')+1;
+    const auto fail=[] { throw std::runtime_error("Unsupported color format"); };
+    const auto spaces=[&] { const auto first=pos; while(pos<text.size() && text[pos]==' ') ++pos; return pos!=first; };
+    const auto digit=[](char c) { return c>='0' && c<='9'; };
+    struct Component { double value; bool percent; std::string unit; };
+    const auto component=[&](bool hue, bool alpha) -> Component {
+        if(alpha && pos<text.size() && text[pos]=='+') ++pos;
+        const auto first=pos;
+        if(pos<text.size() && text[pos]=='-') ++pos;
+        const auto digitsStart=pos;
+        while(pos<text.size() && digit(text[pos])) ++pos;
+        const bool integral=pos!=digitsStart;
+        if(pos<text.size() && text[pos]=='.') {
+            ++pos; const auto fractionalStart=pos;
+            while(pos<text.size() && digit(text[pos])) ++pos;
+            if(pos==fractionalStart) fail();
+        } else if(!integral) fail();
+        const auto mantissaEnd=pos;
+        int exponent=0;
+        if(pos<text.size() && (text[pos]=='e' || text[pos]=='E')) {
+            ++pos; bool negative=false;
+            if(hsl && pos<text.size() && text[pos]=='-') { negative=true; ++pos; }
+            const auto exponentStart=pos;
+            while(pos<text.size() && digit(text[pos])) {
+                exponent=std::min(100000,exponent*10+text[pos]-'0'); ++pos;
+            }
+            if(pos==exponentStart) fail();
+            if(negative) exponent=-exponent;
+        }
+        double value{};
+        const auto parsed=std::from_chars(text.data()+first,text.data()+pos,value);
+        if(parsed.ec==std::errc::result_out_of_range) {
+            // Distinguish underflow from overflow without a locale-dependent
+            // strtod fallback. Count the first significant decimal exponent.
+            const auto begin=first+(text[first]=='-'?1:0);
+            int beforeDot=0, firstSignificant=-1, digitsSeen=0;
+            bool dot=false;
+            for(auto i=begin;i<mantissaEnd;++i) {
+                if(text[i]=='.') { dot=true; continue; }
+                if(!dot) ++beforeDot;
+                if(firstSignificant<0 && text[i]!='0') firstSignificant=digitsSeen;
+                ++digitsSeen;
+            }
+            const bool tiny=firstSignificant<0 || beforeDot-firstSignificant-1+exponent<0;
+            value=tiny?0:std::numeric_limits<double>::infinity();
+            if(text[first]=='-') value=-value;
+        } else if(parsed.ec!=std::errc{} || parsed.ptr!=text.data()+pos) fail();
+        bool percent=false; std::string unit;
+        if(hue) {
+            for(const auto suffix:{"deg","grad","rad","turn"}) {
+                const std::string_view view=suffix;
+                if(std::string_view(lower).substr(pos).starts_with(view)) {
+                    unit=text.substr(pos,view.size()); pos+=view.size(); break;
+                }
+            }
+        } else if(pos<text.size() && text[pos]=='%') { percent=true; ++pos; }
+        return {value,percent,unit};
     };
-    if(std::regex_match(text,match,rgb)) {
-        result.r=clamp(numeric(match[1])*(match[2].length()?2.55:1),255);
-        result.g=clamp(numeric(match[3])*(match[4].length()?2.55:1),255);
-        result.b=clamp(numeric(match[5])*(match[6].length()?2.55:1),255);
-        result.a=match[7].matched?clamp(numeric(match[7])/(match[8].length()?100:1),1):1;
-        return result;
+    const auto separator=[&] {
+        const auto spaced=spaces();
+        if(pos<text.size() && text[pos]==',') ++pos;
+        else if(!spaced) fail();
+        spaces();
+    };
+    spaces(); const auto first=component(hsl,false); separator();
+    const auto second=component(false,false); separator();
+    const auto third=component(false,false); spaces();
+    double alpha=1;
+    if(pos<text.size() && (text[pos]==',' || text[pos]=='/')) {
+        ++pos; spaces(); const auto a=component(false,true);
+        alpha=clamp(a.value/(a.percent?100:1),1); spaces();
     }
-    if(std::regex_match(text,match,hsl)) {
-        result.h=numeric(match[1]); const auto hue=match[1].str();
-        // Upstream regex is case-insensitive but its unit switch is not.
-        if(hue.ends_with("grad")) result.h*=0.9;
-        else if(hue.ends_with("rad")) result.h=result.h*180/std::numbers::pi;
-        else if(hue.ends_with("turn")) result.h*=360;
+    if(pos>=text.size() || text[pos++]!=')' || pos!=text.size()) fail();
+    if(hsl) {
+        if(!second.percent || !third.percent) fail();
+        result.h=first.value;
+        // The upstream unit match is case-insensitive, but its switch is not.
+        if(first.unit=="grad") result.h*=0.9;
+        else if(first.unit=="rad") result.h=result.h*180/std::numbers::pi;
+        else if(first.unit=="turn") result.h*=360;
         result.h=std::fmod(result.h,360);
-        result.s=clamp(numeric(match[2]),100); result.l=clamp(numeric(match[3]),100);
-        result.a=match[4].matched?clamp(numeric(match[4])/(match[5].length()?100:1),1):1;
-        result.hsl=true;
-        return result;
+        result.s=clamp(second.value,100); result.l=clamp(third.value,100); result.hsl=true;
+    } else {
+        result.r=clamp(first.value*(first.percent?2.55:1),255);
+        result.g=clamp(second.value*(second.percent?2.55:1),255);
+        result.b=clamp(third.value*(third.percent?2.55:1),255);
     }
-    throw std::runtime_error("Unsupported color format");
+    result.a=alpha;
+    return result;
 }
 }
 std::u16string color_adjust(std::u16string_view input, const std::map<char,double>& adjustments) {

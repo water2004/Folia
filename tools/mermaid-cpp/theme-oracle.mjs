@@ -3,8 +3,9 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
+import vm from 'node:vm';
 import * as color from './oracle/node_modules/khroma/dist/index.js';
-import { root, lock, themes, hex, snapshot } from './config-reference.mjs';
+import { root, lock, themes, hex, snapshot, src, withoutImports } from './config-reference.mjs';
 
 export const khromaRoot = path.join(root, 'tools/mermaid-cpp/oracle/node_modules/khroma');
 for (const file of lock.packages.find(p => p.name === 'khroma').files) {
@@ -20,6 +21,21 @@ export function writeOrCheck(relative, content) {
 }
 const encode = value => hex(JSON.stringify(value));
 const clean = value => JSON.parse(JSON.stringify(value)); // ConfigValue has no undefined: omit absent properties.
+// Observe exactly which arguments reach Khroma, rather than guessing from
+// property names. The official library also accepts mutable channel objects;
+// the native string-color boundary deliberately rejects those calls.
+let nonStringColor=false;
+const observedColor=Object.fromEntries(Object.entries(color).map(([name,fn])=>[name,(...args)=>{
+  if(name!=='rgba' && typeof args[0]!=='string') nonStringColor=true;
+  return fn(...args);
+}]));
+const helpers=vm.runInNewContext('"use strict";\n'+withoutImports(src('themes/theme-helpers.js')).replace(/^export /gm,'')+
+  '\n({mkBorder,applyOverride})', observedColor);
+const erConstants=vm.runInNewContext('"use strict";\n'+src('themes/erDiagram-oldHardcodedValues.ts').replace(/^export /gm,'')+
+  '\n({oldAttributeBackgroundColorOdd,oldAttributeBackgroundColorEven})');
+const sourceThemes=Object.fromEntries(['default','dark'].map(name=>[name,vm.runInNewContext('"use strict";\n'+
+  withoutImports(src(`themes/theme-${name}.js`)).replace(/^export /gm,'')+'\ngetThemeVariables',
+  {...observedColor,...helpers,...erConstants})]));
 const themeRows = [];
 let seed = 0x573812;
 const random = () => (seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0);
@@ -61,6 +77,17 @@ for (const name of ['default', 'dark']) {
     }
     let restriction='-';
     if(snapshot(argument)!==before) restriction='no-mutable-color-channel-objects';
+    nonStringColor=false;
+    let sourceResult, sourceError;
+    try { sourceResult=sourceThemes[name](input===undefined?undefined:clean(input)); }
+    catch(e) {
+      if(e.name!=='TypeError' && !String(e.message).startsWith('Unsupported color format:')) throw e;
+      sourceError=e.name;
+    }
+    // Harness and bundle/source mismatches stay outside the expected-error catch.
+    assert.equal(sourceError,error?.split(':')[0],`${name}/${i} source/bundle error`);
+    if(!error) assert.equal(snapshot(clean(sourceResult)),snapshot(clean(result)),`${name}/${i} source/bundle value`);
+    if(nonStringColor) restriction='literal-string-colors-only';
     if(input!==undefined && (input===null || typeof input!=='object' || Array.isArray(input))) restriction='mapping-only';
     if(input && Object.keys(input).some(k=>['__proto__','constructor','prototype','updateColors','calculate'].includes(k))) restriction='no-prototype-or-method-overrides';
     if(input && typeof input==='object' && 'THEME_COLOR_LIMIT' in input && (!Number.isInteger(input.THEME_COLOR_LIMIT) || input.THEME_COLOR_LIMIT<0 || input.THEME_COLOR_LIMIT>12)) restriction='color-limit-0-through-12';
@@ -83,7 +110,12 @@ const paints=[...keywords.map(([k])=>k),'RED','#ABC','#abcd','#aabbcc','#aabbccd
   'hsl(-400, 20%, 30%)','hsl(.5turn 50% 50%)','hsl(1rad, 0%, 30%)','hsl(100grad, 20%, 30%)',
   'HSLA(90DEG, 20%, 30%, 40%)','rgba(1,2,3,+.2)','hsl(1e-2,20%,40%)',
   '','#12','#12345','#1234567',' red','red ','currentColor','var(--x)','\ud800','rgb(1e-2,2,3)',
-  'rgb(+1,2,3)','hsl(1,2,3)','rgb(1,2,3)\n'];
+  'rgb(+1,2,3)','hsl(1,2,3)','rgb(1,2,3)\n',
+  'hsl(1e-999,20%,40%)','hsl(-1e-999,20%,40%)','hsl(1e999,20%,40%)',
+  'hsl(.0000000000000001e-999,20%,40%)','rgb(1e999,2,3)','rgba(1 2 3 / +-0.5)',
+  'rgb(1\u00a02\u20033)','rgb(1.,2,3)','hsl(1e+2,20%,30%)','rgb(1 2,3)',
+  'rgb('+' '.repeat(3900)+')','rgb('+'0'.repeat(3900)+',2,3)',
+  'hsl('+ '9'.repeat(500)+'e-1,20%,40%)'];
 for(let i=0;i<80;i++) paints.push(randomHex());
 const operations=[['invert',undefined],['isDark',undefined],['lighten',10],['darken',25],['lighten',0],
   ['lighten',undefined],['adjust',{h:120,s:-40,l:10}],['adjust',{r:5,g:-10,b:15}],['adjust',{h:0}]];

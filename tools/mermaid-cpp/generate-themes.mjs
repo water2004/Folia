@@ -5,14 +5,15 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { parse } from './oracle/node_modules/acorn/dist/acorn.mjs';
 import { root, src } from './config-reference.mjs';
+const constants=Object.fromEntries(parse(src('themes/erDiagram-oldHardcodedValues.ts'),
+  {ecmaVersion:2022,sourceType:'module'}).body.flatMap(n=>n.declaration.declarations.map(d=>[d.id.name,d.init.value])));
 const str = s => 'u'+JSON.stringify(s);
 function expression(n) {
   switch(n.type) {
     case 'Literal': return typeof n.value==='string'?`Value(${str(n.value)})`:`Value(${String(n.value)})`;
     case 'Identifier':
       if(n.name==='i') return 'Value(i)';
-      if(n.name==='oldAttributeBackgroundColorOdd') return 'Value(u"#ffffff")';
-      if(n.name==='oldAttributeBackgroundColorEven') return 'Value(u"#f2f2f2")';
+      if(Object.hasOwn(constants,n.name)) return `Value(${str(constants[n.name])})`;
       throw Error('Unexpected identifier '+n.name);
     case 'MemberExpression': {
       const key=n.computed?expression(n.property):`Value(${str(n.property.name)})`;
