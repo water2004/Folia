@@ -11,10 +11,14 @@
 - YAML candidate moves attached-flow-punctuation rejection to ScanTag and
   accepts whitespace-separated empty tagged nodes. Empty non-specific tags are
   null; explicit seq/map empty nodes remain typed. The original source oracle
-  now has 509 observations (88 added), including positive space/tab/LF/CRLF,
+  now has 515 observations (94 added), including positive space/tab/LF/CRLF,
   comma, nested/anchor/verbatim cases and paired malformed inputs.
-- Local official oracle and patch reverse-check pass. Native final-head checks
-  are pending. Existing PR branch remains unchanged until validation completes.
+- Local official oracle, clean pinned-source apply-check and patch reverse-check
+  pass. First CI run 39882584178 exposed yaml-cpp's unrelated rejection of a flow
+  comma at column zero after a newline; its context check is now corrected and
+  six ordinary flow/block cases supplement the empty-tag regression cases.
+  Native final-head checks are pending. Existing PR branch remains unchanged
+  until validation completes. Actions was manually enabled by the user.
 - Next: restore portable Windows CI including root build integration, push the
   validation branch, inspect Debug/Release results, then fast-forward the existing
   PR branch and correct its description. No application dependency switch.
@@ -231,7 +235,8 @@
 
 ## User's incremental persistence instruction — 2026-10-21
 
-Persist every completed small part as a commit pushed to the user's fork.
+Historical policy from 2026-10-21 (the current no-merge instruction above takes
+precedence): persist every completed small part as a commit pushed to the user's fork.
 For each completed stage, open a PR into `zhao0349/Folia` and merge when
 verification and review support it. Preserve the small commits with a merge
 commit. Only after the entire dependency replacement is complete should a PR
@@ -240,10 +245,12 @@ to avoid losing work when usage quota interrupts a session.
 
 ## Acceptance and remaining scope
 
-No upstream PR has been created. The application still uses the Rust Mermaid
+Upstream PR #1 is open for the foundation stages; the user authorized updating
+that existing PR after review fixes and verification, and explicitly prohibited
+merging it on 2026-10-23. The application still uses the Rust Mermaid
 dependency; current C++ work is foundational and must not be described as a
 completed replacement. The user has authorized implementation, GitHub Actions,
-fork/branch pushes and a final upstream PR; no repeated approval is needed.
+fork/branch pushes and updates to that PR; no repeated approval is needed.
 
 Folia's current caller has no diagram-family whitelist. The existing dependency
 inventory is 23 families (listed in README). Packet is the first native family,
@@ -257,9 +264,11 @@ a separate Rust dependency and does not disappear just because Mermaid moves.
 
 ## Build environment
 
-Use PowerShell 7. Local MSVC/CMake/Ninja are unavailable; the fork's
-`.github/workflows/mermaid-cpp.yml` builds the isolated module with VS, CMake
-4.3.5, Ninja, the forked Boost.UT module and the console runtime. CI uploads
+Use PowerShell 7. Local MSVC/CMake/Ninja are unavailable. The restored
+`.github/workflows/mermaid-cpp.yml` defines standalone and integrated root builds
+with VS, CMake 4.3.5, Ninja, the forked Boost.UT module and the console runtime.
+Root jobs restore locked MathJax build inputs and verify existing source hashes;
+they do not change MathJax implementation or application dependency selection. CI uploads
 test executables. Set `FOLIA_MERMAID_FIXTURES` to the local absolute fixture
 directory before running a downloaded executable.
 

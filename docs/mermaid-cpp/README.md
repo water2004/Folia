@@ -59,7 +59,12 @@ applied or silently discarded at this boundary.
 YAML grammar uses yaml-cpp 0.9.0 at commit
 `56e3bb550c91fd7005566f19c079cb7a503223cf`, fetched into the ignored build tree.
 A small checked-in parser patch fixes UTF-8 encoding of `\\N`/`\\_` and rejects
-the non-YAML `\\'` escape inside double quotes. Schema resolution separately
+the non-YAML `\\'` escape inside double quotes. Tag scanning rejects punctuation
+attached to a non-verbatim tag (`!!str}`), while preserving whitespace-separated
+empty nodes (`!!str }`), empty non-specific null nodes, and verbatim tags.
+Empty explicit sequence/map nodes are emitted as collections, distinct from
+incorrectly tagged empty quoted strings. Flow separators remain valid at column
+zero after a line break; a comma still cannot begin a block value. Schema resolution separately
 follows the pinned upstream js-yaml **4.3.0** `JSON_SCHEMA`, which is more
 permissive than strict JSON (for example, hex integers and `.inf` are supported).
 Both dependencies are MIT licensed; the resolver's notice is retained in
@@ -166,13 +171,23 @@ tests consume the same UTF-16 fixture and separately check large adversarial
 inputs and owned results. It does not claim YAML/config or sanitizer coverage.
 
 The frontmatter oracle executes the original extractor with the exact locked
-js-yaml schema on 421 cases. Typed snapshots preserve negative zero, non-finite
+js-yaml schema on 515 cases. Typed snapshots preserve negative zero, non-finite
 numbers and UTF-16 text. It checks metadata coercion, block/flow YAML, aliases,
 empty explicit tags, duplicate keys, Unicode/escape boundaries and large-number
-rounding. Native tests also check resource budgets, cycles, independent alias
+rounding. The 94 boundary regression cases include valid empty tags with
+space/tab/LF/CRLF separators, comma/nested/anchor/verbatim forms, and paired
+invalid attached punctuation, plus ordinary flow and block comma boundaries.
+Native tests also check resource budgets, cycles, independent alias
 ownership and a large numeric scalar. The 12 Unicode-boundary cases assert
 explicit native rejection while retaining upstream's permissive output. This
 does not establish directive/config-precedence/theme or application integration.
+
+The PR workflow defines four Windows jobs: standalone and root-project builds in
+Debug and Release. Root jobs also build and run `FoliaTests` and
+`FoliaWindowsEditorTests`, exercising the CMake module dependency wiring and
+core test exclusions. Both modes retain the source oracles, native Mermaid and
+platform suites, SVG comparisons and same-host text measurements. This does not
+build the WinUI shell or establish packaged application/DPI acceptance.
 
 The Packet oracles execute the official published parser and Mermaid renderer
 with JSDOM. The exact package versions and transitive integrity hashes are
