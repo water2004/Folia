@@ -41,6 +41,8 @@ measurement and SVG output. `folia.mermaid.render_entry` exposes the owned
 intermediate data and the platform-independent renderer for other hosts.
 Packet uses its own default style in both themes unless themeVariables.packet
 overrides it, matching upstream. Pie consumes the resolved palette and sizes.
+An undefined palette entry (pie12 in the official dark theme) leaves SVG
+fill/stroke attributes absent, matching D3's inherited-paint behavior.
 Pie showData comes from the grammar, not a similarly named configuration key.
 
 Family style sizes accept numeric values or px units; paints accept literal
@@ -220,21 +222,19 @@ defaults are generated from the original schema/AJV pipeline and defaultConfig,
 including keys contributed by the original theme implementation. JavaScript and
 AJV are oracle tools only; they are not native runtime dependencies.
 
-Remaining common frontend work connects the prepared configuration and derived
-theme variables to family parsers and renderers.
+The shared render entry connects prepared configuration and derived theme
+variables to Packet/Pie; additional family adapters remain to be implemented.
 The isolated default/dark derivation API is described below. Theme name
 precedence and variable derivation do not establish native rendering parity.
-The remaining frontend boundaries need their own official runtime oracles
-before wiring a shared entry point into the family renderers.
+The entry oracle checks the configuration actually consumed by both families.
 
 The Packet component ports the official grammar, metadata value conversion,
 contiguous field validation, splitting into rows, and SVG geometry. It supports
-the Packet dimension, bit-order and sizing options. Its SVG currently uses the
-default Packet styles. The raw parser and renderer are deliberately separate
+the Packet dimension, bit-order and sizing options, with default or explicitly
+resolved Packet styles. The raw parser and renderer are deliberately separate
 from MermaidAPI's frontmatter, directives, entity handling and sanitization.
 
-Full configuration processing, diagram detection, shared themes, the other
-diagram families and the Folia replacement remain separate work. No application
+The other diagram families and the Folia replacement remain separate work. No application
 switch or fallback has been added. The old Rust dependency remains the active
 application dependency until the native pipeline is accepted. The current
 library is a foundation for the requested replacement, not that replacement.
@@ -247,9 +247,9 @@ SVG using an explicit resolved theme, including palette cycling, donut paths,
 highlight/hover styles, title expansion and all five legend positions.
 `folia.platform.mermaid_pie::render_measured_pie` joins DirectWrite measurement
 to that renderer using the same font family and sizes for measurement and SVG.
-Folia application integration and shared theme/config resolution remain pending.
+The source entry supplies shared configuration/themes; Folia application integration remains pending.
 
-The platform API requires one installed font-family name, not a CSS fallback
+The low-level measurement API requires one installed font-family name, not a CSS fallback
 list. Missing families, invalid UTF-16, invalid sizes and DirectWrite failures
 return errors; there is no character-count estimate. Glyph fallback is supplied
 by the OS. SVG output accepts literal named/hex/RGB/HSL theme colors, not CSS paint
@@ -363,9 +363,8 @@ outside integer 0..12. Fixtures retain the corresponding official outcomes.
 Input and final output use ConfigLimits, and cumulative intermediate assignment
 trees have the same size limits. All operations return owned values or errors,
 without modifying the input. CSS variables/currentColor require browser context
-and are not resolved here. These theme-variable checks do not wire the shared
-frontend or convert the existing Packet/Pie literal-paint SVG boundary; rendering
-and application theme integration remain separate work.
+and are not resolved here. The render entry consumes these derived values;
+application theme integration remains separate work.
 
 The configuration session is an explicit `ConfigSession` instance with owned
 site/current/initialize data and saved directives. It ports the original

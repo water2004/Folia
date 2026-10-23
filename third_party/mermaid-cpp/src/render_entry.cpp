@@ -198,7 +198,8 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
         PieSvgTheme t;
         for(std::size_t i=0; i<12; ++i) {
             const auto suffix=std::to_string(i+1);
-            t.colors[i]=narrow(text(member(theme,u"pie"+std::u16string(suffix.begin(),suffix.end()))));
+            if(auto paint=theme.find(u"pie"+std::u16string(suffix.begin(),suffix.end())))
+                t.colors[i]=narrow(text(*paint));
         }
         t.font_family=text(member(theme,u"fontFamily"));
         t.stroke_color=narrow(text(member(theme,u"pieStrokeColor")));

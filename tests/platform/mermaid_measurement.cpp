@@ -18,7 +18,8 @@ suite mermaid_measurement = [] {
             auto source=std::u16string(u"---\ntitle: Drinks\nconfig:\n  theme: ")+theme+
                 u"\n  themeVariables:\n    fontFamily: Arial\n  pie:\n    legendPosition: bottom\n    donutHole: 0.5\n---\npie showData\n\"#quot;Tea#quot; #9733;\":3\n\"Coffee\":2";
             auto svg=render_mermaid(source,*session);
-            expect(fatal(svg.has_value()))<<(svg?"":svg.error());
+            expect(svg.has_value())<<(svg?"":svg.error());
+            expect(fatal(svg.has_value()));
             expect(svg->svg.find("font-family=\"Arial\"")!=std::string::npos);
             expect(svg->svg.find("#quot;")==std::string::npos);
             expect(svg->svg.find("[3]")!=std::string::npos);

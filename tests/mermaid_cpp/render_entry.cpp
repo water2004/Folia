@@ -34,7 +34,8 @@ suite render_entry = [] {
             auto observed=json(decode(fields[3]));
             auto native=prepare_native_diagram(decode(fields[1]),*session);
             if(observed.kind==ConfigKind::null) { expect(!native)<<fields[0]; continue; }
-            expect(fatal(native.has_value()))<<fields[0]<<(native?"":native.error());
+            expect(native.has_value())<<fields[0]<<(native?"":native.error());
+            expect(fatal(native.has_value()));
             const auto& config=field(observed,u"config"); const auto& theme=field(observed,u"theme");
             PieMeasurements widths;
             if(auto packet=std::get_if<PacketRenderInput>(&native->content)) {
@@ -71,7 +72,9 @@ suite render_entry = [] {
                     expect(value==ascii(field(theme,key).string))<<fields[0];
                 for(std::size_t i=0;i<12;++i) {
                     const auto suffix=std::to_string(i+1);
-                    expect(t.colors[i]==ascii(field(theme,u"pie"+std::u16string(suffix.begin(),suffix.end())).string));
+                    auto paint=theme.find(u"pie"+std::u16string(suffix.begin(),suffix.end()));
+                    if(paint) expect(t.colors[i]==ascii(paint->string));
+                    else expect(!t.colors[i]);
                 }
                 for(std::size_t i=0;i<pie.document.sections.size();++i) {
                     auto display=diagram_display_text(pie.document.sections[i].label); expect(fatal(display.has_value()));
@@ -90,8 +93,11 @@ suite render_entry = [] {
                 expect(bool(doc.acc_description==field(observed,u"accDescription").string));
             },native->content);
             auto svg=render_native_diagram(*native,widths);
-            expect(fatal(svg.has_value()))<<fields[0]<<(svg?"":svg.error());
+            expect(svg.has_value())<<fields[0]<<(svg?"":svg.error());
+            expect(fatal(svg.has_value()));
             expect(svg->width>0 && svg->height>=0);
+            expect(std::abs(svg->width-field(observed,u"width").number)<1e-10)<<fields[0];
+            expect(std::abs(svg->height-field(observed,u"height").number)<1e-10)<<fields[0];
             if(std::holds_alternative<PacketRenderInput>(native->content)) {
                 auto start=svg->svg.find("<style>")+7, end=svg->svg.find("</style>");
                 expect(compact(svg->svg.substr(start,end-start))==ascii(field(observed,u"style").string))<<fields[0];
@@ -100,8 +106,13 @@ suite render_entry = [] {
             expect(fatal(title.has_value())); expect(svg->svg.find(*title)!=std::string::npos);
             if(fields[0]!="pie-front-entity") expect(svg->svg.find("#quot;")==std::string::npos);
             if(fields[0]=="packet-title") expect(svg->svg.find("<title>Accessible</title><desc>Details</desc>")!=std::string::npos);
+            if(fields[0]=="pie-dark-palette") {
+                auto start=svg->svg.rfind("<path "), end=svg->svg.find('>',start);
+                expect(svg->svg.substr(start,end-start).find("fill=")==std::string::npos);
+                expect(svg->svg.find("<rect width=\"18\" height=\"18\"/>")!=std::string::npos);
+            }
         }
-        expect(count==17_u);
+        expect(count==18_u);
     };
     "mermaid_render_entry_errors_are_isolated"_test=[] {
         auto session=ConfigSession::create(); expect(fatal(session.has_value()));

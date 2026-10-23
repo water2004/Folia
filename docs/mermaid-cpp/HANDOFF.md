@@ -13,9 +13,20 @@
   actual DirectWrite entry tests and existing affected Windows Debug/Release
   regression checks. Then push small commits and update upstream PR #1 without
   merging. Next: continue required family renderers and application integration.
-- Working branch: fork/mermaid-development. Select only functional, test and
-  public documentation commits for feat/mermaid-cpp-port; never transfer the
-  separate fork instruction commit. No local compiler or running build.
+- Pushed batches: 44fd7570 original entry oracle; e246cbcb native configuration,
+  styles and rendering; 8583c931 Windows font resolution and source-to-SVG API.
+- First Windows run 39920905524 compiled the native library/platform API but
+  exposed the official dark theme's absent pie12. The adapter now preserves
+  optional palette entries and omits their SVG fill/stroke, matching the actual
+  official draw. Local oracle passes 18 representative cases, including final
+  SVG dimensions and the dark palette. A focused old-runner diagnostic confirms
+  the other entry cases pass when supplying pie12; it is not final acceptance.
+- No local compiler, build or agent. Downloaded OLD runners/evidence live in
+  build/mermaid-cpp/entry-check and entry-platform-check. The diagnostic fixture
+  under entry-check/fixtures is deliberately modified, not the committed oracle.
+- Next action: run Windows validation of the optional-palette fix, then select these
+  functional commits for feat/mermaid-cpp-port and update upstream PR #1 after
+  validation. Keep the PR open. Source production dependency remains Rust.
 
 ## Shared frontend verified (historical)
 

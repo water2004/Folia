@@ -23,6 +23,7 @@ const cases = [
   ['packet-title', '---\ntitle: Front title\n---\npacket\ntitle Body & more\naccTitle: Accessible\naccDescr: Details\n+8: "#quot;Data#quot;"'],
   ['pie-default', 'pie\n"Tea":3\n"Coffee":2'],
   ['pie-dark', 'pie\n"Tea":3', {theme:'dark'}],
+  ['pie-dark-palette', 'pie\n'+Array.from({length:12},(_,i)=>`"Section ${i}":1`).join('\n'), {theme:'dark'}],
   ['pie-config', '%%{init:{"pie":{"legendPosition":"bottom","donutHole":0.5,"textPosition":0.6,"highlightSlice":"Tea","useMaxWidth":false}}}%%\npie showData\n"Tea":3\n"Tea":9\n"Coffee":2'],
   ['pie-front-title', '---\ntitle: Drinks\n---\npie\n"Tea":3'],
   ['pie-body-title', '---\ntitle: Front\n---\npie\ntitle Body\n"Tea":3'],
@@ -60,6 +61,21 @@ for (const [name, source, options = {}] of cases) {
       config:prepared.type === 'packet' ? config : {...config,...prepared.effective.pie},
       theme, labels:prepared.type === 'packet' ? db.getPacket().flat().map(b=>display(b.label)) : [...db.getSections().keys()].map(display),
       showData:prepared.type === 'pie' ? db.getShowData() : false};
+    document.body.innerHTML='<svg id="entry" xmlns="http://www.w3.org/2000/svg"></svg>';
+    dom.window.Element.prototype.getBoundingClientRect=function() {
+      if(this.classList.contains('pieTitleText')) return {width:100};
+      const i=[...document.querySelectorAll('.legend text')].indexOf(this);
+      assert(i>=0); return {width:40+i*7.25};
+    };
+    await diagram.render('entry','12.2.0');
+    const svg=document.querySelector('svg');
+    const box=svg.getAttribute('viewBox').split(' ').map(Number);
+    result.width=box[2]; result.height=box[3];
+    if(name==='pie-dark-palette') {
+      result.lastFill=svg.querySelector('path:last-of-type').getAttribute('fill');
+      result.lastLegendStroke=[...svg.querySelectorAll('.legend rect')].at(-1).getAttribute('stroke');
+      assert.equal(result.lastFill,null); assert.equal(result.lastLegendStroke,null);
+    }
   } catch (error) {
     if (!['pie-incomplete','packet-gap'].includes(name)) throw error;
     result = null;

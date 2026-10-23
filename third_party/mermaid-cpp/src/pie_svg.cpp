@@ -37,7 +37,7 @@ std::expected<PieSvg, PieError> render_pie_svg(PieDocument const& document,
         if (!std::isfinite(value) || value < 0) return failure(u"Invalid Pie theme dimension.");
     if (theme.opacity > 1 || theme.title_size == 0 || theme.section_size == 0 || theme.legend_size == 0)
         return failure(u"Invalid Pie theme font size or opacity.");
-    for (auto const& paint : theme.colors) if (!color(paint)) return failure(u"Invalid Pie palette color.");
+    for (auto const& paint : theme.colors) if (paint && !color(*paint)) return failure(u"Invalid Pie palette color.");
     for (auto const& paint : {theme.stroke_color, theme.outer_stroke_color,
         theme.title_color, theme.section_color, theme.legend_color})
         if (!color(paint)) return failure(u"Invalid Pie theme color.");
@@ -72,8 +72,9 @@ std::expected<PieSvg, PieError> render_pie_svg(PieDocument const& document,
         if (config.highlight_slice == u"hover") classes += " highlightedOnHover";
         else if (config.highlight_slice == layout->document.sections[slice.section_index].label)
             classes += " highlighted";
-        svg += "<path d=\""+slice.geometry.path+"\" fill=\""+theme.colors[slice.section_index%12]+
-            "\" class=\""+classes+"\" stroke=\""+theme.stroke_color+"\" stroke-width=\""+
+        const auto& paint=theme.colors[slice.section_index%12];
+        svg += "<path d=\""+slice.geometry.path+"\""+(paint?" fill=\""+*paint+"\"":"")+
+            " class=\""+classes+"\" stroke=\""+theme.stroke_color+"\" stroke-width=\""+
             num(theme.stroke_width)+"\" opacity=\""+num(theme.opacity)+"\"/>";
     }
     for (auto const& slice : layout->slices)
@@ -86,8 +87,8 @@ std::expected<PieSvg, PieError> render_pie_svg(PieDocument const& document,
         auto const& legend = layout->legends[i];
         auto const& paint = theme.colors[i%12];
         svg += "<g class=\"legend\" transform=\""+translate(legend.x,legend.y)+
-            "\"><rect width=\"18\" height=\"18\" fill=\""+paint+"\" stroke=\""+paint+
-            "\"/><text x=\"22\" y=\"14\" fill=\""+theme.legend_color+"\" font-size=\""+
+            "\"><rect width=\"18\" height=\"18\""+(paint?" fill=\""+*paint+"\" stroke=\""+*paint+"\"":"")+
+            "/><text x=\"22\" y=\"14\" fill=\""+theme.legend_color+"\" font-size=\""+
             num(theme.legend_size)+"\">"+legends[i]+"</text></g>";
     }
     svg += "</g></svg>";

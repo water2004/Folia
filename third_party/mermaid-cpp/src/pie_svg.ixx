@@ -7,7 +7,9 @@ export namespace folia::mermaid {
 // Fully resolved theme input. Shared Mermaid theme/config resolution is a
 // separate boundary. Paints are literal CSS colors, never URLs or CSS rules.
 struct PieSvgTheme {
-    std::array<std::string, 12> colors;
+    // The official dark theme omits pie12. An absent palette entry omits
+    // fill/stroke attributes, preserving SVG inheritance just like D3.attr.
+    std::array<std::optional<std::string>, 12> colors;
     std::string stroke_color, outer_stroke_color;
     std::string title_color, section_color, legend_color;
     std::u16string font_family;
