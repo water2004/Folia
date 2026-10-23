@@ -64,7 +64,10 @@ struct Merge {
         result.scalar.boolean = source.boolean; result.scalar.number = source.number; result.scalar.string = source.string;
         if (source.kind == ConfigKind::sequence) {
             result.length = source.sequence.size();
-            for (std::size_t i = 0; i < source.sequence.size(); ++i) result.properties.emplace(index_key(i), from(source.sequence[i]));
+            for (std::size_t i = 0; i < source.sequence.size(); ++i) {
+                const auto key = index_key(i); allocate(key.size());
+                result.properties.emplace(key, from(source.sequence[i]));
+            }
         } else for (const auto& [key, child] : source.mapping) {
             allocate(key.size()); result.properties.emplace(key, from(child));
         }
@@ -79,6 +82,7 @@ struct Merge {
     }
     Value property(const Value& target, const std::u16string& key) {
         if (target.array() && key == u"length") {
+            allocate();
             Value value; value.undefined = false; value.scalar.kind = ConfigKind::number;
             value.scalar.number = static_cast<double>(target.length); return value;
         }
@@ -86,9 +90,9 @@ struct Merge {
         if (inherited_function(key, target.array())) {
             // A function is non-null and non-object-like for merge's branches.
             // It is never emitted: an undefined source leaves it inherited.
-            Value value; value.undefined = false; value.scalar.kind = ConfigKind::boolean; value.scalar.boolean = true; return value;
+            allocate(); Value value; value.undefined = false; value.scalar.kind = ConfigKind::boolean; value.scalar.boolean = true; return value;
         }
-        return {};
+        allocate(); return {};
     }
     std::u16string primitive_text(const Value& value) {
         budget.step();
@@ -219,7 +223,8 @@ struct Merge {
                             if (n > static_cast<double>(budget.limits.values)) throw std::runtime_error("Clean merge array-like length budget exceeded");
                             converted.length = static_cast<std::size_t>(n);
                             for (std::size_t i = 0; i < converted.length; ++i) {
-                                const auto k = index_key(i); converted.properties.emplace(k, property(value, k));
+                                const auto k = index_key(i); allocate(k.size());
+                                converted.properties.emplace(k, property(value, k));
                             }
                         }
                     }

@@ -120,6 +120,10 @@ suite config = [] {
         expect(!clean_and_merge_config(huge, &array));
         const auto huge_index = json(uR"({"a":{"4294967294":1}})");
         expect(!clean_and_merge_config(array, &huge_index));
+        const auto sparse_like = json(uR"({"a":{"length":100}})");
+        expect(!clean_and_merge_config(sparse_like, &array, {.values = 100}));
+        const auto dense_like = json(uR"({"a":{"length":2,"0":1,"1":2}})");
+        expect(!clean_and_merge_config(dense_like, &array, {.string_units = 20}));
     };
     "mermaid_init_mapping_matches_official_oracle"_test = [] {
         const auto override = std::getenv("FOLIA_MERMAID_FIXTURES");

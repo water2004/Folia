@@ -15,11 +15,12 @@
   the core package's newer transitive 1.52.0: array-null behavior differs.
 - Native init mapping and clean merge are implemented with fixture tests,
   ownership/resource checks and explicit dense-output restrictions. Native
-  compile/runtime verification is pending in CI 39899131976 at `77b693e0`.
-  Added array-length coercion and 34 official boundary cases locally; next
-  inspect first CI results, commit these refinements and verify the final head
-  in all four jobs before updating delivery branch/PR. No local builds, agents
-  or ignored implementation candidates.
+  standalone Debug/Release native tests passed at `77b693e0` in 39899131976.
+  Added array-length coercion and 34 official boundary cases in `391ee7d1`,
+  then charged generated array keys and undefined temporary nodes to budgets.
+  Next push this budget refinement and verify the final head in all four jobs
+  before updating delivery branch/PR. No local builds, agents or ignored
+  implementation candidates. Superseded CI may be cancelled by newer pushes.
 - Local MSVC/CMake remain unavailable; native evidence must come from CI.
   Config session lifecycle, dispatch, renderer integration and application
   dependency replacement remain pending. No WinUI/DPI acceptance is claimed.
