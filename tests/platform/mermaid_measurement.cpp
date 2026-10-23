@@ -10,6 +10,13 @@ using namespace folia::mermaid;
 suite mermaid_measurement = [] {
     "mermaid_flowchart_measured_source_to_svg"_test=[] {
         auto session=ConfigSession::create();expect(fatal(session.has_value()));
+        const ConfigValue site{.kind=ConfigKind::mapping,.mapping={
+            {u"theme",ConfigValue{.kind=ConfigKind::string,.string=u"default"}},
+            {u"look",ConfigValue{.kind=ConfigKind::string,.string=u"classic"}},
+            {u"layout",ConfigValue{.kind=ConfigKind::string,.string=u"dagre"}},
+        }};
+        expect(fatal(session->save_initialize_config(site).has_value()));
+        expect(fatal(session->set_site_config(site).has_value()));
         const std::vector<std::pair<std::string,std::u16string>> cases={
             {"chain",u"flowchart TD\nA[Start] --> B[Finish]"},
             {"decision",u"flowchart TD\nA[Read] --> B{Valid?}\nB -->|yes| C(Done)\nB -->|no| A"},
