@@ -134,8 +134,8 @@ defaults are generated from the original schema/AJV pipeline and defaultConfig,
 including keys contributed by the original theme implementation. JavaScript and
 AJV are oracle tools only; they are not native runtime dependencies.
 
-Remaining common frontend work includes diagram registry dispatch, config.ts
-session updates and connecting derived theme variables to renderers.
+Remaining common frontend work includes diagram registry dispatch and
+connecting configuration sessions and derived theme variables to renderers.
 The isolated default/dark derivation API is described below. Theme name
 precedence and variable derivation do not establish native rendering parity.
 The remaining frontend boundaries need their own official runtime oracles
@@ -292,12 +292,15 @@ does not independently derive a theme. Deprecated-diagram warnings are exposed
 as a once-per-session flag, without a process-global logger.
 
 The session oracle executes the complete original module in fresh VM scopes.
-Its 69 scenarios / 584 steps compare full site/current/user JSON-data state and
+Its 96 scenarios / 615 steps compare full site/current/user JSON-data state and
 warning counts. Lossless recursive deltas and interned strings reduce fixture
 size without hashes or selected-field sampling. Generated native defaults are
 the original defaults' data projection: undefined properties and family font
 callbacks are omitted. The session never invokes those callbacks; diagram
-family integration remains separate. Source getters' mutation aliases and
+family integration remains separate. A generated registry of the 25 callback
+slots rejects container overrides there, since omitting a callable would
+otherwise change the original type-sensitive merge. Primitive overrides still
+follow the original behavior. Source getters' mutation aliases and
 partially applied failures are deliberately replaced with independent owned
 values and transactional errors.
 

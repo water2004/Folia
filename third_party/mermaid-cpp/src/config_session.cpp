@@ -13,13 +13,14 @@ ConfigValue default_session_config() {
 }
 namespace {
 using namespace config_detail;
+#include "config_callbacks.inc"
 ConfigValue required(std::expected<ConfigValue, std::string> value) {
     if (!value) throw std::runtime_error(value.error());
     return std::move(*value);
 }
 // assignWithDepth shares deeper containers and array-object identities in JS.
 // This API accepts data for which those identities cannot affect later replay.
-void owned_shape(const ConfigValue& value, std::size_t depth = 0) {
+void owned_shape(const ConfigValue& value, std::size_t depth = 0, std::u16string_view section = {}) {
     if (value.kind == ConfigKind::mapping || value.kind == ConfigKind::sequence) {
         if (depth > 2) throw std::runtime_error("Session input contains a shared-depth container");
     }
@@ -28,10 +29,14 @@ void owned_shape(const ConfigValue& value, std::size_t depth = 0) {
             throw std::runtime_error("Session arrays must contain primitive values");
     }
     if (value.kind == ConfigKind::mapping) for (const auto& [key, item] : value.mapping) {
+        if (depth == 1 && (item.kind == ConfigKind::mapping || item.kind == ConfigKind::sequence))
+            for (const auto& callback : default_callback_fields)
+                if (section == callback.section && key == callback.key)
+                    throw std::runtime_error("Session cannot replace an unported default callback with a container");
         if (key == u"__proto__") throw std::runtime_error("Session prototype setters are unsupported");
         if (key == u"theme" && (item.kind == ConfigKind::mapping || item.kind == ConfigKind::sequence))
             throw std::runtime_error("Session theme names must be primitive values");
-        owned_shape(item, depth + 1);
+        owned_shape(item, depth + 1, depth == 0 ? std::u16string_view{key} : section);
     }
 }
 std::vector<std::u16string> secure_keys(const ConfigValue& site) {

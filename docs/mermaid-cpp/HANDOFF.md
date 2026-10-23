@@ -18,11 +18,25 @@
   non-mapping command inputs, object arrays and containers below depth two
   that would require JS cross-layer identity; secure keys must be string lists.
   Native failures are transactional; caller inputs/getter results own their data.
-- Oracle generation completed: 69 scenarios / 584 steps, with generated default
-  data. Native lifecycle and focused ownership/budget tests are written but not
-  yet compiled. Next: local oracle check and small commits, then four-job Windows
-  CI before delivery. Local MSVC/CMake are still unavailable. No agents, native
-  builds, local processes or ignored implementation candidates are live.
+- Oracle `5f25dad7` completed: 69 scenarios / 584 steps, with generated default
+  data; local oracle check passes. Native lifecycle/ownership/budget tests are
+  committed in `653cacbe` and pushed to the verification branch. Windows CI
+  https://github.com/zhao0349/Folia/actions/runs/39905882983 is running on that
+  head. Native compilation passed; tests failed in fixture transport at a raw
+  Unicode line separator, which the reused directive JSON codec treats as a
+  lexical delimiter. This is a harness issue, not a session semantic mismatch.
+  Local MSVC/CMake are still unavailable. No agents, local builds/processes or
+  ignored implementation candidates are live.
+- Follow-up under review (not yet committed): original defaults include 25 font
+  callbacks. A generated callback-slot table rejects container overrides that
+  would otherwise change assignWithDepth's callable-vs-object behavior; scalar
+  replacements remain supported. Oracle now has 96 scenarios / 615 steps.
+- Escaping directive delimiters/line separators in fixture JSON preserves the
+  decoded data. Downloaded original Release runner passes the corrected original
+  584 steps and all three focused session tests (4,496 assertions), under
+  `build/mermaid-cpp/session-review/{fixtures,focused.log}`. The newer callback
+  guard still needs fresh CI. Next: commit the guard/harness fixes, rerun four
+  Windows jobs, then deliver only a passing head. No abnormal native exit.
 
 ## Init mapping and clean merge verified (historical)
 
