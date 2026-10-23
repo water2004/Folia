@@ -25,7 +25,8 @@
   build/mermaid-cpp/entry-contribution on feat/mermaid-cpp-port matches the
   verified implementation/tests/pins/workflow. This documentation checkpoint
   follows it. The upstream diff against 508423f2 contains no AGENTS.md change.
-  Update upstream PR #1 and keep OPEN/unmerged; DO NOT merge. Delivery-triggered
+  Upstream PR #1 now includes these batches and its description is updated;
+  confirmed OPEN/unmerged after delivery. DO NOT merge. Delivery-triggered
   reruns are separate from the completed validation linked above.
 - Next concrete stage: measured recursive cluster SVG using the prepared graph
   tree. Follow measureDagreGraph/renderDagreSubgraph (parent rank spacing + 25,
