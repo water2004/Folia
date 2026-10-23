@@ -6,28 +6,13 @@
 module folia.mermaid.source_text;
 
 import std;
+import folia.mermaid.directive_lexer;
 
 namespace folia::mermaid {
 namespace {
 
-// ECMAScript non-Unicode \w (upstream uses /gi, not /giu).
-constexpr bool is_word(char16_t value) noexcept {
-    return (value >= u'a' && value <= u'z') ||
-           (value >= u'A' && value <= u'Z') ||
-           (value >= u'0' && value <= u'9') || value == u'_';
-}
-
-// ECMAScript WhiteSpace and LineTerminator, independent of the process locale.
-// U+0085, U+180E and U+200B are deliberately not included.
-constexpr bool is_ecmascript_whitespace(char16_t value) noexcept {
-    return (value >= u'\u0009' && value <= u'\u000D') ||
-           value == u'\u0020' || value == u'\u00A0' ||
-           value == u'\u1680' ||
-           (value >= u'\u2000' && value <= u'\u200A') ||
-           value == u'\u2028' || value == u'\u2029' ||
-           value == u'\u202F' || value == u'\u205F' ||
-           value == u'\u3000' || value == u'\uFEFF';
-}
+using detail::is_word;
+using detail::is_ecmascript_whitespace;
 
 constexpr bool is_fence_line_break(char16_t value) noexcept {
     return value == u'\n' || value == u'\r';
@@ -110,44 +95,9 @@ std::u16string remove_directives(std::u16string_view text) {
     result.reserve(text.size());
     std::size_t copied = 0;
     std::size_t search = 0;
-    const auto skip_space = [&](std::size_t cursor) {
-        while (cursor < text.size() && is_ecmascript_whitespace(text[cursor])) ++cursor;
-        return cursor;
-    };
-    while (search < text.size()) {
-        const auto start = text.find(u"%%{", search);
-        if (start == text.npos) break;
-        auto cursor = skip_space(start + 3);
-        const auto type_start = cursor;
-        while (cursor < text.size() && is_word(text[cursor])) ++cursor;
-        if (cursor == type_start) {
-            search = cursor; // Skipped whitespace cannot contain an opener.
-            continue;
-        }
-        const auto after_type = skip_space(cursor);
-        // The colon alternative is tried before the plain-word alternative.
-        cursor = after_type < text.size() && text[after_type] == u':'
-            ? skip_space(after_type + 1) : after_type;
-        if (cursor < text.size() && is_word(text[cursor])) {
-            // The optional argument's word alternative wins even if it leaves
-            // trailing text or an unmatched closing delimiter in the input.
-            while (cursor < text.size() && is_word(text[cursor])) ++cursor;
-        } else {
-            while (cursor < text.size() && !text.substr(cursor).starts_with(u"}%%")) {
-                if (text[cursor] == u'\r') {
-                    if (cursor + 1 == text.size() || text[cursor + 1] != u'\n') break;
-                    cursor += 2;
-                } else if (text[cursor] == u'\u2028' || text[cursor] == u'\u2029') {
-                    break;
-                } else {
-                    ++cursor; // Dot or the separate LF alternative.
-                }
-            }
-        }
-        cursor = skip_space(cursor);
-        if (text.substr(cursor).starts_with(u"}%%")) cursor += 3;
-        result += text.substr(copied, start - copied);
-        copied = search = cursor;
+    while (const auto match = detail::next_directive(text, search)) {
+        result += text.substr(copied, match->start - copied);
+        copied = search = match->end;
     }
     result += text.substr(copied);
     return result;

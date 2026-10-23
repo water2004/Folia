@@ -1,6 +1,28 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-23, PR #1 review fixes verified
+## Current checkpoint - 2026-10-23, directive argument interpretation
+
+- Continuing the authorized native migration on `codex/mermaid-cpp-directives`,
+  based on verified PR head `0e2f32c1`. Upstream PR #1 remains OPEN; do not merge.
+  Live PR read confirmed the same head and upstream base `508423f2`.
+- Selected this batch: isolated `detectDirective` calls with the all/init/wrap
+  filters used by the common frontend. Official `utils.ts` and `regexes.ts` are
+  already hash-locked. Local oracle passes 3,279 observations / 1,093 inputs.
+- Native implementation uses owned ConfigValue trees and a strict UTF-16 JSON
+  parser, with shared directive captures for deletion/detection. Syntax failure
+  matches upstream's absent type/null args; resource failures remain explicit.
+  Calls are isolated, intentionally avoiding upstream global-regex lastIndex
+  leakage after errors. This does not implement detectInit, sanitization,
+  configuration merging, diagram dispatch or theme resolution.
+- Native tests and Windows CI are pending. Local MSVC/CMake are unavailable.
+  No live local build/agent handles or ignored implementation candidates.
+- Next concrete action: push the oracle and native commits to the working
+  branch, run all four standalone/integrated Windows Debug/Release jobs, fix
+  any failures, then fast-forward the existing PR branch only after verification.
+  Continue next with detectInit sanitization/diagram mapping and configuration
+  precedence, with official oracles; theme resolution follows that boundary.
+
+## PR #1 review fixes verified (historical) - 2026-10-23
 
 - User authorized fixing the review findings, positive tests, CI, upstream
   conflicts and documentation in small commits. Update existing upstream PR #1

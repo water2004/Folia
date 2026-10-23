@@ -81,7 +81,24 @@ consume those budgets; depth has a hard ceiling of 64. Duplicate/coerced keys,
 unknown tags and multiple YAML documents fail explicitly. Merge keys have no
 special meaning in this schema. Aliases produce independent owned values.
 
-The next frontend boundaries are directive argument interpretation, config merging and appearance
+The directive boundary now ports isolated `detectDirective` calls with the
+all/init/wrap filters used by the common frontend. It preserves the original
+quote replacement, bare-word string arguments, strict JSON arguments, duplicate
+key overwrite, numeric overflow/underflow and UTF-16 surrogate code units.
+The singleton/array result is normalized to an owned vector. No match retains
+the transformed source as its type; malformed selected JSON returns one absent
+type/null argument entry and discards previous matches. Filtering happens before
+argument parsing. The shared lexical scanner also drives `remove_directives`.
+
+Each native call starts from offset zero. This deliberately avoids upstream's
+shared global-regex `lastIndex` leakage after a JSON exception; the oracle models
+independent calls. Default safety limits are 1 Mi UTF-16 source units, depth 64
+(also a hard ceiling), 100,000 values, 4 Mi decoded key/string/type units and
+10,000 scanned directives, including filtered matches. Budgets are cumulative
+within a call, including overwritten JSON properties, and fail explicitly.
+These raw values are not yet sanitized or applied to a renderer.
+
+The next frontend boundaries are init sanitization and diagram mapping, config merging and appearance
 precedence (diagram-scoped settings can override globals), and default/dark
 theme resolution. Each needs its own official runtime oracle before wiring a
 shared entry point into the family renderers.
@@ -138,6 +155,7 @@ git -c core.autocrlf=false clone --branch mermaid@12.2.0 --depth 1 https://githu
 node tools/mermaid-cpp/source-text-oracle.mjs --check
 node tools/mermaid-cpp/preprocess-text-oracle.mjs --check
 node tools/mermaid-cpp/frontmatter-oracle.mjs --check
+node tools/mermaid-cpp/directive-oracle.mjs --check
 pnpm --dir tools/mermaid-cpp/oracle install --frozen-lockfile --ignore-scripts
 node tools/mermaid-cpp/packet-oracle.mjs --check
 node tools/mermaid-cpp/packet-svg-oracle.mjs --check
@@ -161,6 +179,14 @@ the repository's `import std;` gate. The standalone build avoids unrelated
 MathJax generation, WinUI restoration and Cargo. Native tests also exercise
 large adversarial documents and ownership after the input has been destroyed.
 Source observations alone are not evidence that the C++ implementation passes.
+
+The directive oracle executes the pinned original `detectDirective` body and
+regular expressions on 3,279 observations (1,093 inputs, three filters),
+including malformed JSON, lexical alternatives, quotes, Unicode, comments,
+line endings, duplicate keys, non-finite numbers and error recovery boundaries.
+Native tests separately cover ownership, aggregate budgets, depth ceilings and
+adversarial source sizes. Configuration security and merging are subsequent
+stages; successful raw detection is not permission to apply a setting.
 
 The preprocessing oracle isolates and executes the original pinned
 `cleanupText` and `removeDirectives` function bodies, stripping only TypeScript
