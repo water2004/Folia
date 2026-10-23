@@ -17,9 +17,21 @@
   PR #1 after verification. Do not merge. Baseline delivery 31770996 passed
   all four jobs in run 39912778063; live PR/base are unchanged.
 - Composed oracle: 49 representative inputs, local check passes. Native
-  prepare_diagram implementation and fixture tests are ready for Windows CI.
+  prepare_diagram implementation and fixture tests compile in Windows CI.
   Init/wrap scanning retains a request-local cursor after malformed JSON;
   independent calls remain isolated. No local native compiler, build or agent.
+- Initial run 39916287900 exposed four oracle capture mismatches: original
+  addDirective mutates the extracted object. Capture extraction before that
+  call; effective renderer configuration already matched in every case.
+  The unchanged Release runner passes both frontend tests (708 assertions)
+  with the corrected fixture. Full CI for that correction is still required.
+  Downloaded runner: build/mermaid-cpp/frontend-check/FoliaMermaidTests.exe.
+- Next adapter evidence: PacketDB.getConfig overlays default/global packet
+  settings and adds showBits padding (already done by native layout rendering).
+  Pie draw clean-merges default/global pie settings; its style and palette read
+  effective themeVariables. Bridge those inputs to existing native renderers,
+  including derived HSL/RGB paints and resolved real font measurement. Preserve
+  commonDb metadata/entity handling as part of the source-to-render entry work.
 
 ## Registry and detector dispatch verified (historical)
 

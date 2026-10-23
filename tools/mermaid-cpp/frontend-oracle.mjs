@@ -61,16 +61,24 @@ function frontend(site) {
   const cleanupComments = vm.runInNewContext(strip(src('diagram-api/comments.ts'))+'\ncleanupComments');
   const preprocessDiagram = vm.runInNewContext(strip(withoutImports(src('preprocess.ts'))) +
     '\npreprocessDiagram', {extractFrontMatter,cleanupComments,utils,...utils});
+  let extractedConfig;
   const processAndSetConfigs = vm.runInNewContext(strip(extract(src('mermaidAPI.ts'),
     'function processAndSetConfigs(', '\n/**'))+'\nprocessAndSetConfigs',
-    {preprocessDiagram,configApi,detectType:registry.detectType});
+    {preprocessDiagram:text=>{
+      const processed=preprocessDiagram(text);
+      // Observe extraction before addDirective mutates this same JS object.
+      // The owned native API intentionally retains this pre-sanitization data
+      // separately from the effective configuration consumed by the renderer.
+      extractedConfig=clone(processed.config);
+      return processed;
+    },configApi,detectType:registry.detectType});
   return text => {
     const processed = processAndSetConfigs(text);
     // Diagram.fromText reads an owned getConfig copy and detects again before
     // loading a parser. Record that actual configuration, including ELK writes.
     const effective = configApi.getConfig();
     const type = registry.detectType(processed.code.cleaned,effective);
-    return {...processed,type,effective:clean(effective)};
+    return {...processed,config:extractedConfig,type,effective:clean(effective)};
   };
 }
 const cases = [];

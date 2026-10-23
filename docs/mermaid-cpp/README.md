@@ -42,6 +42,9 @@ again with the effective configuration. It returns owned raw/cleaned/comment-
 bearing source, frontmatter line offset, title, extracted configuration, diagram
 type and effective configuration. Folia's caller can reuse a site session without
 one request's directives or errors changing the next request.
+The extracted configuration is captured before sanitization; unlike the original
+aliased return object it remains unchanged when the session applies directives.
+The effective configuration is the separately verified renderer input.
 
 The original composed oracle covers representative family detection, Packet/Pie
 inputs, default/dark appearance, secure keys, directive/frontmatter precedence,
@@ -189,8 +192,8 @@ defaults are generated from the original schema/AJV pipeline and defaultConfig,
 including keys contributed by the original theme implementation. JavaScript and
 AJV are oracle tools only; they are not native runtime dependencies.
 
-Remaining common frontend work includes diagram registry dispatch and
-connecting configuration sessions and derived theme variables to renderers.
+Remaining common frontend work connects the prepared configuration and derived
+theme variables to family parsers and renderers.
 The isolated default/dark derivation API is described below. Theme name
 precedence and variable derivation do not establish native rendering parity.
 The remaining frontend boundaries need their own official runtime oracles
@@ -224,7 +227,7 @@ return errors; there is no character-count estimate. Glyph fallback is supplied
 by the OS. SVG output accepts literal named/hex theme colors, not CSS paint
 servers or arbitrary CSS expressions. Text and attributes are escaped as XML.
 The raw family renderer accepts display text; commonDb/MermaidAPI sanitization
-must be applied by a future shared frontend, not silently duplicated here.
+must be supplied by the shared frontend's family adapter, not silently duplicated here.
 
 Packet has explicit native safety boundaries: non-finite bit counts and more
 than 10,000 rows produce an error. Upstream can silently truncate oversized
@@ -252,6 +255,7 @@ node tools/mermaid-cpp/directive-oracle.mjs --check
 pnpm --dir tools/mermaid-cpp/oracle install --frozen-lockfile --ignore-scripts
 node tools/mermaid-cpp/packet-oracle.mjs --check
 node tools/mermaid-cpp/config-oracle.mjs --check
+node tools/mermaid-cpp/frontend-oracle.mjs --check
 node tools/mermaid-cpp/packet-svg-oracle.mjs --check
 node tools/mermaid-cpp/pie-oracle.mjs --check
 node tools/mermaid-cpp/pie-geometry-oracle.mjs --check
