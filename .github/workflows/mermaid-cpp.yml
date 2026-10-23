@@ -18,10 +18,9 @@ on:
       - tests/main.cpp
       - tests/support/**
       - tools/mermaid-cpp/**
-      - src/platform/text/mermaid_measurer.ixx
-      - src/platform/text/mermaid_pie.ixx
       - src/core/**
       - src/platform/**
+      - tools/mathjax-bundle/package*.json
       - tests/platform/mermaid_measurement.cpp
       - tools/test-support/windows_console_runtime.cpp
   pull_request:
@@ -37,10 +36,9 @@ on:
       - tests/main.cpp
       - tests/support/**
       - tools/mermaid-cpp/**
-      - src/platform/text/mermaid_measurer.ixx
-      - src/platform/text/mermaid_pie.ixx
       - src/core/**
       - src/platform/**
+      - tools/mathjax-bundle/package*.json
       - tests/platform/mermaid_measurement.cpp
       - tools/test-support/windows_console_runtime.cpp
   workflow_dispatch:
@@ -95,6 +93,25 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           pnpm --dir tools/mermaid-cpp/oracle install --frozen-lockfile --ignore-scripts
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Restore root-project generation inputs
+        if: matrix.scope == 'integrated'
+        run: |
+          npm ci --prefix tools/mathjax-bundle --ignore-scripts
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          # The existing entity lock records a CRLF TypeScript checkout. Restore
+          # those exact bytes from the locked npm package without changing locks.
+          $lock = Get-Content docs/math-port/evidence/entities-source-lock.json -Raw | ConvertFrom-Json
+          foreach ($entry in $lock.source.ts.PSObject.Properties) {
+            $source = Join-Path tools/mathjax-bundle/node_modules/@mathjax/src/ts/util $entry.Name
+            $target = Join-Path .reference/MathJax-src/ts/util $entry.Name
+            $content = [IO.File]::ReadAllText($source) -replace "`r?`n", "`r`n"
+            New-Item -ItemType Directory -Force (Split-Path $target) | Out-Null
+            [IO.File]::WriteAllText($target, $content, [Text.UTF8Encoding]::new($false))
+            if ((Get-FileHash $target -Algorithm SHA256).Hash.ToLowerInvariant() -ne $entry.Value) {
+              throw "Pinned MathJax entity source mismatch: $($entry.Name)"
+            }
+          }
 
       - name: Check the source oracle
         run: |
