@@ -44,7 +44,6 @@ import folia.core.inline_document;
 import folia.core.inline_parser;
 import folia.core.html_cst;
 import folia.core.instrumentation;
-import folia.core.serializer;
 import folia.core.text_edit;
 
 export namespace folia {
@@ -144,12 +143,60 @@ public:
     std::uint64_t node_counter = 1;
     std::vector<Diagnostic> diagnostics;
     std::vector<ParserSourceRange> source_ranges;
+    enum class Completion : std::uint8_t { Empty, Other, LineEnding };
+    // Transient facts are emitted at recognizer completion. They are not AST
+    // state and deliberately carry no serialized text.
+    std::unordered_map<std::uint64_t, Completion> completions;
     std::unordered_map<std::string, LinkDefinition> link_definitions;
     std::unordered_map<std::size_t, LinkDefinition> link_definitions_by_start;
 
     explicit Parser(const ParseInput* in) : input(in) {
         cps = utf8_to_cps(in->text);
         scan_link_definitions();
+    }
+
+    static Completion completion_from_source(std::u32string_view source) {
+        if (source.empty()) return Completion::Empty;
+        return is_line_ending_character(source.back()) ? Completion::LineEnding : Completion::Other;
+    }
+
+    static Completion completion_from_utf8(std::string_view source) {
+        if (source.empty()) return Completion::Empty;
+        return source.back() == '\r' || source.back() == '\n'
+            ? Completion::LineEnding : Completion::Other;
+    }
+
+    void record_completion(NodeId id, Completion fact) {
+        completions.insert_or_assign(id.v, fact);
+    }
+
+    Completion completion(NodeId id) const { return completions.at(id.v); }
+
+    static Completion append_completion(Completion previous, Completion separator, Completion child) {
+        if (child != Completion::Empty) return child;
+        if (separator != Completion::Empty) return separator;
+        return previous;
+    }
+
+    Completion sequence_completion(const BlockVec& blocks) const {
+        auto result = Completion::Empty;
+        for (std::size_t index = 0; index < blocks.size(); ++index) {
+            auto separator = Completion::Empty;
+            if (index > 0) {
+                if (blocks[index].separator_before) {
+                    separator = completion_from_source(*blocks[index].separator_before);
+                } else {
+                    separator = Completion::LineEnding;
+                }
+            }
+            result = append_completion(result, separator, completion(blocks[index].id));
+        }
+        return result;
+    }
+
+    void transfer_completion(const Parser& nested, NodeId id) {
+        const auto found = nested.completions.find(id.v);
+        if (found != nested.completions.end()) record_completion(id, found->second);
     }
 
     BlockIndentation scan_indentation(
@@ -1144,6 +1191,7 @@ public:
                     *preceding_source_end, blank_ranges[index].start};
             }
             record_owned_offsets(paragraph);
+            record_completion(paragraph.id, completion_from_source(paragraph.inline_content.source));
             blocks.push_back(std::move(paragraph));
             preceding_source_end = blank_ranges[index].content_end;
         }
@@ -1177,11 +1225,9 @@ public:
                 }
                 record_owned_offsets(*b);
                 auto block_end = cur();
-                const auto serialized = serializer_detail::serialize_block(*b);
                 if (block_end > block_start
                     && is_line_ending_character(cps[block_end - 1])
-                    && (serialized.text.empty()
-                        || !is_line_ending_character(serialized.text.back()))) {
+                    && completion(b->id) != Completion::LineEnding) {
                     --block_end;
                     if (block_end > block_start
                         && cps[block_end] == U'\n'
@@ -1269,6 +1315,7 @@ public:
                 NodeId id = next_node_id();
                 push_range(id, PhysicalRange(std::size_t(save), std::size_t(pos)), PhysicalRange(std::size_t(save), std::size_t(pos)));
                 BlockNode b; b.id = id; b.kind = BlockKind::Frontmatter; b.ensure_atomic_special().fmt = fmt; b.ensure_atomic_special().raw = inner;
+                record_completion(id, Completion::Other);
                 return b;
             }
             if (!consume_line_ending()) advance();
@@ -1321,6 +1368,10 @@ public:
         BlockNode b; b.id = id; b.kind = BlockKind::Heading; b.ensure_text_special().level = level; b.inline_content = std::move(inline_content); b.ensure_text_special().slug = slug;
         b.ensure_text_special().opening_marker = std::u32string(std::u32string_view(cps).substr(start, content_start - start));
         if (content_end < line_end) b.ensure_text_special().closing_marker = std::u32string(std::u32string_view(cps).substr(content_end, line_end - content_end));
+        const auto& tail_source = !b.text_special().closing_marker.empty()
+            ? b.text_special().closing_marker
+            : !b.inline_content.source.empty() ? b.inline_content.source : b.text_special().opening_marker;
+        record_completion(id, completion_from_source(tail_source));
         return b;
     }
 
@@ -1337,6 +1388,7 @@ public:
         block.kind = BlockKind::LinkDefinition;
         block.ensure_atomic_special().raw = cps_to_utf8(std::u32string_view(cps).substr(start, definition.source_end - start));
         push_range(block.id, PhysicalRange(std::size_t(start), std::size_t(pos)), PhysicalRange(std::size_t(start), std::size_t(definition.source_end)));
+        record_completion(block.id, completion_from_utf8(block.atomic_special().raw));
         return block;
     }
 
@@ -1397,6 +1449,10 @@ public:
             heading.ensure_text_special().slug = std::move(slug);
             if (body_start > start) heading.ensure_text_special().opening_marker = std::u32string(std::u32string_view(cps).substr(start, body_start - start));
             heading.ensure_text_special().closing_marker = std::u32string(std::u32string_view(cps).substr(body_end, underline->line_end - body_end));
+            const auto& tail_source = !heading.text_special().closing_marker.empty()
+                ? heading.text_special().closing_marker
+                : heading.inline_content.source;
+            record_completion(id, completion_from_source(tail_source));
             return heading;
         }
 
@@ -1406,6 +1462,7 @@ public:
         paragraph.id = id;
         paragraph.kind = BlockKind::Paragraph;
         paragraph.inline_content = make_inline_document(start, content_end);
+        record_completion(id, completion_from_source(paragraph.inline_content.source));
         return paragraph;
     }
 
@@ -1443,6 +1500,7 @@ public:
                 html.structure_shape = html_block_structure_shape(block);
                 html.root_tag = "img";
                 push_range(block.id, PhysicalRange(std::size_t(start), std::size_t(pos)), PhysicalRange(std::size_t(start), std::size_t(line_end)));
+                record_completion(block.id, completion_from_source(html.source));
                 return block;
             }
         }
@@ -1472,6 +1530,7 @@ public:
         block.ensure_image_special().image_link = std::move(link);
         block.inline_content = std::move(inline_document);
         push_range(block.id, PhysicalRange(std::size_t(start), std::size_t(pos)), PhysicalRange(std::size_t(start), std::size_t(line_end)));
+        record_completion(block.id, completion_from_source(block.inline_content.source));
         return block;
     }
 
@@ -1625,6 +1684,9 @@ public:
         attach_html_element(block, node, source_start);
         push_html_range(block.id, node, source_start);
         slots.push_back({block.id, node.content});
+        auto tail = completion_from_source(block.inline_content.source);
+        if (kind == BlockKind::Heading && tail == Completion::Empty) tail = Completion::Other;
+        record_completion(block.id, tail);
         return block;
     }
 
@@ -1644,6 +1706,7 @@ public:
             {source_start + range.start, source_start + range.end},
             {source_start + range.start, source_start + range.end});
         slots.push_back({block.id, range});
+        record_completion(block.id, completion_from_source(block.inline_content.source));
         return block;
     }
 
@@ -1695,12 +1758,14 @@ public:
             row.ensure_table_special().table_header_row = header;
             attach_html_element(row, *html_row, source_start);
             push_html_range(row.id, *html_row, source_start);
+            record_completion(row.id, Completion::Other);
             table.children.push_back(std::move(row));
         }
         if (table.children.empty()) return std::nullopt;
         table.ensure_table_special().table_aligns.assign(columns, TableAlignment::None);
         attach_html_element(table, node, source_start);
         push_html_range(table.id, node, source_start);
+        record_completion(table.id, Completion::Other);
         return table;
     }
 
@@ -1765,11 +1830,15 @@ public:
             }
             attach_html_element(item, child, source_start);
             push_html_range(item.id, child, source_start);
+            record_completion(item.id, sequence_completion(item.children));
             list.children.push_back(std::move(item));
         }
         if (list.children.empty()) return std::nullopt;
         attach_html_element(list, node, source_start);
         push_html_range(list.id, node, source_start);
+            auto tail = sequence_completion(list.children);
+            if (tail == Completion::Empty) tail = Completion::Other; // generated list marker
+            record_completion(list.id, tail);
         return list;
     }
 
@@ -1806,6 +1875,11 @@ public:
             }
             attach_html_element(quote, node, source_start);
             push_html_range(quote.id, node, source_start);
+            const auto tail = !quote.children.empty()
+                    && quote.children.back().kind == BlockKind::Paragraph
+                    && quote.children.back().inline_content.source.empty()
+                ? Completion::Other : sequence_completion(quote.children);
+            record_completion(quote.id, tail);
             return quote;
         }
         if (node.tag_name == "hr") {
@@ -1814,6 +1888,7 @@ public:
             rule.kind = BlockKind::ThematicBreak;
             attach_html_element(rule, node, source_start);
             push_html_range(rule.id, node, source_start);
+            record_completion(rule.id, Completion::Other);
             return rule;
         }
         if (node.tag_name == "pre") {
@@ -1828,6 +1903,7 @@ public:
             attach_html_element(code, node, source_start);
             slots.push_back({code.id, node.range});
             push_html_range(code.id, node, source_start);
+            record_completion(code.id, completion_from_source(code.block_source.source()));
             return code;
         }
 
@@ -1841,6 +1917,7 @@ public:
         }
         attach_html_element(container, node, source_start);
         push_html_range(container.id, node, source_start);
+        record_completion(container.id, sequence_completion(container.children));
         return container;
     }
 
@@ -1865,6 +1942,7 @@ public:
             block.kind = BlockKind::Paragraph;
             block.inline_content = make_inline_document(start, content_end, InlineSyntaxMode::HtmlText);
             push_range(block.id, {start, block_end}, {start, content_end});
+            record_completion(block.id, completion_from_source(block.inline_content.source));
             pos = block_end;
             return block;
         }
@@ -1897,6 +1975,7 @@ public:
             block.ensure_atomic_special().unsup_reason = unsafe
                 ? UnsupportedMarkupReason::UnsafeHtml : UnsupportedMarkupReason::MalformedSyntax;
             push_range(block.id, {start, content_end}, {start, content_end});
+            record_completion(block.id, completion_from_utf8(block.atomic_special().raw));
             diagnostics.push_back(make_diagnostic(DiagnosticSeverity::Warning,
                 unsafe ? "Unsafe HTML block is shown as text" : "Malformed HTML block is shown as text",
                 std::nullopt, DIAG_UNSAFE_HTML));
@@ -1912,6 +1991,7 @@ public:
             html.tree = std::move(tree);
             html.structure_shape = html_block_structure_shape(block);
             push_range(block.id, {start, content_end}, {start, content_end});
+            record_completion(block.id, completion_from_source(html.source));
             pos = block_end;
             return block;
         }
@@ -1943,6 +2023,12 @@ public:
             html.content_slots = std::move(slots);
             html.structure_shape = html_block_structure_shape(*block);
             html.root_tag = std::move(root_tag);
+            // This is a fresh parse: the recognizer owns this exact envelope,
+            // including its final editable-owner source. Its physical tail is
+            // known without rechecking serializer slot/shape conditions.
+            record_completion(block->id, completion_from_source(html.source));
+        } else {
+            record_completion(block->id, completion_from_source(block->block_source.source()));
         }
         pos = block_end;
         return block;
@@ -2066,10 +2152,12 @@ public:
         nested.node_counter = node_counter;
         auto children = nested.parse_blocks(nullptr);
         node_counter = nested.node_counter;
+        const bool body_was_empty = children.empty();
         auto remap = [&](std::size_t value) {
             return offset_map[(std::min)(value, offset_map.size() - 1)];
         };
         for (auto& range : nested.source_ranges) {
+            transfer_completion(nested, range.node_id);
             range.source_range = PhysicalRange(remap(range.source_range.start), remap(range.source_range.end));
             range.content_range = PhysicalRange(remap(range.content_range.start), remap(range.content_range.end));
             for (auto& offset : range.owned_offsets) offset = remap(offset);
@@ -2084,6 +2172,8 @@ public:
             BlockNode paragraph;
             paragraph.id = next_node_id();
             paragraph.kind = BlockKind::Paragraph;
+            nested.record_completion(paragraph.id, completion_from_source(paragraph.inline_content.source));
+            transfer_completion(nested, paragraph.id);
             source_ranges.emplace_back(
                 paragraph.id,
                 PhysicalRange(content_start, content_start),
@@ -2105,6 +2195,8 @@ public:
         block.ensure_container_special().footnote_label = cps_to_utf8(label);
         block.ensure_text_special().opening_marker = std::u32string(std::u32string_view(cps).substr(start, content_start - start));
         block.children = std::move(children);
+        record_completion(id, body_was_empty
+            ? Completion::Other : sequence_completion(block.children));
         return block;
     }
 
@@ -2176,6 +2268,7 @@ public:
             BlockSourceKind::IndentedCode,
             std::move(code_contexts));
         trim_indented_code_blank_edges(block.block_source);
+        record_completion(block.id, completion_from_source(block.block_source.source()));
         return block;
     }
 
@@ -2310,6 +2403,7 @@ public:
             b.block_source = make_block_source(
                 std::u32string(std::u32string_view(cps).substr(start, local_end - start)),
                 BlockSourceKind::FencedMath);
+            record_completion(b.id, completion_from_source(b.block_source.source()));
             return b;
         }
         const auto local_end = closing_marker ? closing_marker->end : pos;
@@ -2318,6 +2412,7 @@ public:
             std::u32string(std::u32string_view(cps).substr(start, local_end - start)),
             BlockSourceKind::FencedCode);
         project_fenced_code_indentation(b.block_source, opening_indent);
+        record_completion(b.id, completion_from_source(b.block_source.source()));
         return b;
     }
 
@@ -2393,6 +2488,7 @@ public:
                 b.block_source = make_block_source(
                     std::u32string(std::u32string_view(cps).substr(start, closing_end - start)),
                     dollar ? BlockSourceKind::DollarMath : BlockSourceKind::BracketMath);
+                record_completion(b.id, completion_from_source(b.block_source.source()));
                 return b;
             }
             tex.push_back(peek1()); advance();
@@ -2411,6 +2507,7 @@ public:
         b.block_source = make_block_source(
             std::u32string(std::u32string_view(cps).substr(start, pos - start)),
             dollar ? BlockSourceKind::DollarMath : BlockSourceKind::BracketMath);
+        record_completion(b.id, completion_from_source(b.block_source.source()));
         return b;
     }
 
@@ -2500,6 +2597,11 @@ public:
         table.table_separator_source = std::move(separator_line);
         physical_line_endings.resize(b.children.size());
         table.table_internal_line_endings = std::move(physical_line_endings);
+        for (const auto& row : b.children) {
+            for (const auto& cell : row.children) record_completion(cell.id, completion_from_source(cell.inline_content.source));
+            record_completion(row.id, Completion::Other);
+        }
+        record_completion(b.id, Completion::Other);
         return b;
     }
 
@@ -2779,6 +2881,7 @@ public:
 
         std::optional<std::u32string> separator_before_next_item;
         bool separator_before_next_item_has_blank_line = false;
+        bool list_terminal_prefix_emits_text = false;
         while (auto marker = inspect(pos)) {
             // A thematic break can look like a same-marker list item (for
             // example, `* * *`). The item scanner leaves it at `pos`; keep
@@ -2973,9 +3076,7 @@ public:
             node_counter = nested.node_counter;
             for (std::size_t child_index = 1; child_index < children.size(); ++child_index) {
                 const auto& separator = children[child_index].separator_before;
-                const auto previous_serialized = serializer_detail::serialize_block(children[child_index - 1]);
-                const bool previous_owns_ending = !previous_serialized.text.empty()
-                    && is_line_ending_character(previous_serialized.text.back());
+                const bool previous_owns_ending = nested.completion(children[child_index - 1].id) == Completion::LineEnding;
                 if (separator && is_blank_separator(*separator, previous_owns_ending)) {
                     // Only direct block siblings of this item determine its
                     // list's looseness. A nested list's internal gaps remain
@@ -2993,10 +3094,49 @@ public:
                 paragraph.kind = BlockKind::Paragraph;
                 nested.push_range(paragraph.id, {0, 0}, {0, 0});
                 nested.record_owned_offsets(paragraph);
+                nested.record_completion(paragraph.id, completion_from_source(paragraph.inline_content.source));
+                transfer_completion(nested, paragraph.id);
                 children.push_back(std::move(paragraph));
             }
             auto prefixes = bind_prefix_lines(inner, nested.source_ranges, prefix_lines);
+            bool terminal_prefix_emits_text = false;
+            if (!children.empty() && nested.completion(children.back().id) == Completion::LineEnding) {
+                const auto* terminal_range = nested.source_range_for(children.back().id);
+                const auto terminal_line_start = terminal_range
+                    ? terminal_range->source_range.end : inner.size();
+                // Only bound records whose owner anchor resolves to this
+                // exact terminal physical offset can alter the final line.
+                // This rejects a later-in-vector ItemOpening record and any
+                // prefix that bind_prefix_lines could not attach to a source.
+                for (const auto& prefix : prefixes.lines) {
+                    if (prefix.role == ContainerPrefixRole::ItemOpening || prefix.text.empty()) continue;
+                    const auto* owner = nested.source_range_for(prefix.anchor.owner_id);
+                    if (!owner) continue;
+                    bool resolves_to_terminal = false;
+                    switch (prefix.anchor.part) {
+                        case ContainerAnchorPart::Source:
+                            resolves_to_terminal = prefix.anchor.offset < owner->owned_offsets.size()
+                                && owner->owned_offsets[prefix.anchor.offset] == terminal_line_start;
+                            break;
+                        case ContainerAnchorPart::Separator:
+                            resolves_to_terminal = owner->separator_range
+                                && owner->separator_range->start + prefix.anchor.offset == terminal_line_start;
+                            break;
+                        case ContainerAnchorPart::Start:
+                            resolves_to_terminal = owner->source_range.start == terminal_line_start;
+                            break;
+                        case ContainerAnchorPart::End:
+                            resolves_to_terminal = owner->source_range.end == terminal_line_start;
+                            break;
+                    }
+                    if (resolves_to_terminal) {
+                        terminal_prefix_emits_text = true;
+                        break;
+                    }
+                }
+            }
             for (auto& range : nested.source_ranges) {
+                transfer_completion(nested, range.node_id);
                 range.source_range = PhysicalRange(remap(range.source_range.start), remap(range.source_range.end));
                 range.content_range = PhysicalRange(remap(range.content_range.start), remap(range.content_range.end));
                 for (auto& offset : range.owned_offsets) offset = remap(offset);
@@ -3023,12 +3163,15 @@ public:
             item.separator_before = std::move(separator_before_this_item);
             item.ensure_container_source() = std::move(prefixes);
             item.children = std::move(children);
+            record_completion(item.id, sequence_completion(item.children));
+            list_terminal_prefix_emits_text = terminal_prefix_emits_text;
             // The stored gap starts after the item's serialized source, just
             // like separators between ordinary blocks. Code may already own
             // the ending of its last content line.
             if (separator_before_next_item) {
-                const auto serialized = serializer_detail::serialize_list_item_blocks(item.children);
-                if (!serialized.text.empty() && is_line_ending_character(serialized.text.back())) {
+                const bool item_body_owns_ending = !item.children.empty()
+                    && completion(item.children.back().id) == Completion::LineEnding;
+                if (item_body_owns_ending) {
                     auto& gap = *separator_before_next_item;
                     const auto ending = gap.starts_with(U"\r\n") ? 2u
                         : !gap.empty() && is_line_ending_character(gap.front()) ? 1u : 0u;
@@ -3042,6 +3185,10 @@ public:
             if (pos >= cps.size()) break;
         }
         push_range(list_id, PhysicalRange(std::size_t(start), std::size_t(pos)), PhysicalRange(std::size_t(first_content), std::size_t(last_content)));
+        auto list_tail = result.children.empty()
+            ? Completion::Empty : completion(result.children.back().id);
+        if (list_tail == Completion::Empty || list_terminal_prefix_emits_text) list_tail = Completion::Other;
+        record_completion(list_id, list_tail);
         return result;
     }
 
@@ -3203,6 +3350,7 @@ public:
             paragraph.kind = BlockKind::Paragraph;
             nested.push_range(paragraph.id, {0, 0}, {0, 0});
             nested.record_owned_offsets(paragraph);
+            nested.record_completion(paragraph.id, completion_from_source(paragraph.inline_content.source));
             children.push_back(std::move(paragraph));
         } else if (last_line_empty
             && !trailing_blank_belongs_to_unclosed_fence
@@ -3214,8 +3362,7 @@ public:
             paragraph.id = next_node_id();
             paragraph.kind = BlockKind::Paragraph;
             const auto blank = body.size();
-            const auto previous = serializer_detail::serialize_block(children.back());
-            if (!previous.text.empty() && is_line_ending_character(previous.text.back())) {
+            if (nested.completion(children.back().id) == Completion::LineEnding) {
                 paragraph.separator_before = U"";
             } else {
                 auto ending = blank;
@@ -3225,6 +3372,7 @@ public:
             }
             nested.push_range(paragraph.id, {blank, blank}, {blank, blank});
             nested.record_owned_offsets(paragraph);
+            nested.record_completion(paragraph.id, completion_from_source(paragraph.inline_content.source));
             children.push_back(std::move(paragraph));
         }
         auto body_prefixes = prefix_lines;
@@ -3234,6 +3382,7 @@ public:
         }
         auto prefixes = bind_prefix_lines(body, nested.source_ranges, body_prefixes);
         for (auto& range : nested.source_ranges) {
+            transfer_completion(nested, range.node_id);
             range.source_range = PhysicalRange(remap(range.source_range.start), remap(range.source_range.end));
             range.content_range = PhysicalRange(remap(range.content_range.start), remap(range.content_range.end));
             for (auto& offset : range.owned_offsets) offset = remap(offset);
@@ -3255,6 +3404,7 @@ public:
                 callout->children.end(),
                 std::make_move_iterator(children.begin()),
                 std::make_move_iterator(children.end()));
+            record_completion(id, Completion::Other);
             return callout;
         }
         BlockNode b;
@@ -3262,6 +3412,10 @@ public:
         b.kind = BlockKind::BlockQuote;
         b.ensure_container_source() = std::move(prefixes);
         b.children = std::move(children);
+        record_completion(id,
+            !b.children.empty() && b.children.back().kind == BlockKind::Paragraph
+                && b.children.back().inline_content.source.empty()
+                ? Completion::Other : sequence_completion(b.children));
         return b;
     }
     std::optional<BlockNode> try_parse_callout_from_line(const std::u32string& line) {
@@ -3292,6 +3446,7 @@ public:
                 title.inline_content.tree = parse_inline(
                     title.inline_content.source,
                     inline_parse_context());
+                record_completion(title.id, completion_from_source(title.inline_content.source));
                 BlockNode b;
                 b.id = NodeId(0);
                 b.kind = BlockKind::Callout;
@@ -3318,6 +3473,7 @@ public:
         push_range(id, PhysicalRange(std::size_t(start), std::size_t(line_end)), PhysicalRange(std::size_t(start), std::size_t(line_end)));
         BlockNode b; b.id = id; b.kind = BlockKind::ThematicBreak;
         b.ensure_text_special().opening_marker = cps.substr(start, line_end - start);
+        record_completion(id, Completion::Other);
         return b;
     }
 
@@ -3336,6 +3492,7 @@ public:
         NodeId id = next_node_id();
         push_range(id, PhysicalRange(std::size_t(start), cur()), PhysicalRange(std::size_t(start), cur()));
         BlockNode b; b.id = id; b.kind = BlockKind::Toc; b.ensure_atomic_special().toc_marker = mk;
+        record_completion(id, Completion::Other);
         return b;
     }
 
