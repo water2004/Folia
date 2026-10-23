@@ -15,6 +15,7 @@ import folia.core.ast;
 import folia.core.block_tree;
 import folia.core.document_edit;
 import folia.core.document_history;
+import folia.core.document_operation_apply;
 import folia.core.document_search_replace;
 import folia.core.document_index_update;
 import folia.core.document_transaction;
@@ -25,6 +26,10 @@ import folia.core.outline;
 import folia.core.parser;
 import folia.core.serializer;
 import folia.core.search;
+import folia.core.source_editor;
+import folia.core.source_patch;
+import folia.core.source_projection;
+import folia.core.source_patch_adapter;
 
 export namespace folia {
 
@@ -58,9 +63,9 @@ inline EditorDocumentChange summarize_document_change(
     for (const auto& operation : operations) {
         if (const auto* text = std::get_if<DocumentTextOperation>(&operation)) {
             change.text_operations.push_back(*text);
-        } else {
+        } else if (const auto* tree_operation=std::get_if<DocumentTreeEdit>(&operation)) {
             change.structural = true;
-            const auto& tree = std::get<DocumentTreeEdit>(operation);
+            const auto& tree = *tree_operation;
             if (tree.kind == DocumentTreeEditKind::Move) {
                 change.structural_anchors.push_back(tree.parent_id);
                 change.structural_anchors.push_back(tree.other_parent_id);
@@ -81,6 +86,8 @@ inline EditorDocumentChange summarize_document_change(
                     || subtree_has_heading(subtree_has_heading, tree.before)
                     || subtree_has_heading(subtree_has_heading, tree.after);
             }
+        } else {
+            change.structural=true;
         }
     }
     std::ranges::sort(change.structural_anchors, {}, &NodeId::v);
@@ -108,19 +115,21 @@ public:
     const EditorDocument& document() const { return document_; }
     const DocumentSymbolIndex& symbols() const { return symbols_; }
     const Outline& outline() const { return outline_; }
-    std::u32string text_cps() const { return serialize_markdown_cps(document_); }
-    std::string text_utf8() const { return serialize_markdown(document_); }
-    std::u32string markdown_cps() const { return serialize_markdown_cps(document_); }
-    std::string markdown_utf8() const { return serialize_markdown(document_); }
-    const TextSelection& selection() const { return selection_; }
+    std::u32string text_cps() const { return source_view_ ? source_view_->editor.source() : serialize_markdown_cps(document_); }
+    std::string text_utf8() const { return source_view_ ? cps_to_utf8(source_view_->editor.source()) : serialize_markdown(document_); }
+    std::u32string markdown_cps() const { return text_cps(); }
+    std::string markdown_utf8() const { return text_utf8(); }
+    const TextSelection& selection() const { return rendered_selection_.value(); }
     std::optional<std::u32string> editable_source(NodeId id) const {
         return document_editable_text(document_, id);
     }
     std::u32string selected_text_cps() const {
-        return document_selected_text(document_, selection_).value_or(std::u32string{});
+        if (source_view_) return source_view_->editor.selected_text();
+        return document_selected_text(document_, rendered_selection_.value()).value_or(std::u32string{});
     }
     std::u32string selected_markdown_cps() const {
-        return document_selected_markdown(document_, selection_).value_or(std::u32string{});
+        if (source_view_) return source_view_->editor.selected_text();
+        return document_selected_markdown(document_, rendered_selection_.value()).value_or(std::u32string{});
     }
     std::uint64_t revision() const { return document_.revision; }
     void set_selection(TextSelection selection) {
@@ -128,7 +137,7 @@ public:
         const auto active_length = document_edit_detail::editable_length(document_, selection.active.container_id);
         if (!anchor_length || !active_length || selection.anchor.source_offset > *anchor_length
             || selection.active.source_offset > *active_length) throw std::out_of_range("selection is outside editable source");
-        selection_ = std::move(selection);
+        rendered_selection_.value() = std::move(selection);
     }
     MarkdownDialect const& dialect() const { return dialect_; }
     void set_dialect(MarkdownDialect dialect) {
@@ -147,7 +156,7 @@ public:
         auto transaction = document_enter(document_, selection);
         if (!transaction) return std::nullopt;
         if (transaction->revision_before == transaction->revision_after) {
-            selection_ = transaction->selection_after;
+            rendered_selection_.value() = transaction->selection_after;
         } else {
             apply_document_transaction_(*transaction);
         }
@@ -158,7 +167,7 @@ public:
         auto transaction = document_insert_text(document_, selection, text);
         if (!transaction) return std::nullopt;
         if (transaction->revision_before == transaction->revision_after) {
-            selection_ = transaction->selection_after;
+            rendered_selection_.value() = transaction->selection_after;
         } else {
             apply_document_transaction_(*transaction);
         }
@@ -168,7 +177,7 @@ public:
     std::optional<DocumentTransaction> execute_document_replace_matches(
         std::span<const RenderedSearchMatch> matches) {
         auto transaction = document_replace_rendered_matches(
-            document_, selection_, matches);
+            document_, rendered_selection_.value(), matches);
         if (!transaction) return std::nullopt;
         apply_document_transaction_(*transaction);
         return transaction;
@@ -189,9 +198,9 @@ public:
     }
 
     bool execute_document_move(DocumentMove movement, bool extend_selection) {
-        auto selection = document_move_selection(document_, selection_, movement, extend_selection);
+        auto selection = document_move_selection(document_, rendered_selection_.value(), movement, extend_selection);
         if (!selection) return false;
-        selection_ = *selection;
+        rendered_selection_.value() = *selection;
         return true;
     }
 
@@ -321,7 +330,7 @@ public:
         auto transaction = document_edit_table(document_, selection, edit, alignment, requested_index);
         if (!transaction) return std::nullopt;
         if (transaction->revision_before == transaction->revision_after) {
-            selection_ = transaction->selection_after;
+            rendered_selection_.value() = transaction->selection_after;
         } else {
             apply_document_transaction_(*transaction);
         }
@@ -352,38 +361,58 @@ public:
         return transaction;
     }
 
-    bool undo() {
+    bool undo() { return replay_history_(false); }
+    bool redo() { return replay_history_(true); }
+
+    const SourceEditor* source_editor() const { return source_view_ ? &source_view_->editor : nullptr; }
+
+    void set_source_selection(SourceSelection selection) {
+        if (!source_view_) throw std::logic_error("source view is not active");
+        source_view_->editor.set_selection(selection);
+    }
+
+    bool enter_source_mode() {
+        if (source_view_) return false;
+        const auto selected=selection();
+        auto projection=serialize_markdown_projection(document_);
+        SourceViewState view;
+        view.index.reset(document_,projection);
+        const SourceSelection source_selection{
+            view.index.offset(selected.anchor).value_or(0),view.index.offset(selected.active).value_or(0),
+            selected.anchor.affinity,selected.active.affinity};
+        view.editor=SourceEditor(std::move(projection.text));
+        view.editor.set_selection(source_selection);
+        source_view_=std::move(view);
+        rendered_selection_.reset();
         last_document_change_.reset();
-        const auto* entry = document_history_.next_undo();
-        if (!entry) return false;
-        auto change = summarize_document_change(
-            entry->operations, false, entry->revision_after, entry->revision_before);
-        if (!document_history_.undo(document_, selection_)) return false;
-        const auto* applied = document_history_.next_redo();
-        if (!applied) std::terminate();
-        last_document_change_ = std::move(change);
-        refresh_derived_from_document_(*last_document_change_, applied->operations);
         return true;
     }
 
-    bool redo() {
+    bool exit_source_mode() {
+        if (!source_view_) return false;
+        const auto selected=source_view_->editor.selection();
+        const auto restored=TextSelection{
+            source_view_->index.position(document_,selected.anchor,selected.anchor_affinity),
+            source_view_->index.position(document_,selected.active,selected.active_affinity)};
+        source_view_.reset();
+        rendered_selection_=restored;
         last_document_change_.reset();
-        const auto* entry = document_history_.next_redo();
-        if (!entry) return false;
-        auto change = summarize_document_change(
-            entry->operations, true, entry->revision_before, entry->revision_after);
-        if (!document_history_.redo(document_, selection_)) return false;
-        const auto* applied = document_history_.next_undo();
-        if (!applied) std::terminate();
-        last_document_change_ = std::move(change);
-        refresh_derived_from_document_(*last_document_change_, applied->operations);
         return true;
+    }
+
+    bool replace_source(SourceRange range,std::u32string replacement) {
+        return source_view_ && source_view_->editor.replace(range,std::move(replacement)) && commit_source_patch_();
+    }
+
+    bool replace_all_source(std::span<const SourceReplacement> replacements) {
+        return source_view_ && source_view_->editor.replace_all(replacements) && commit_source_patch_();
     }
 
     bool execute_command(const Command& cmd) {
         last_document_change_.reset();
         if (cmd.kind == CommandKind::Undo) return undo();
         if (cmd.kind == CommandKind::Redo) return redo();
+        if (source_view_) return execute_source_command_(cmd);
         if (cmd.kind == CommandKind::MoveLeft || cmd.kind == CommandKind::MoveRight
             || cmd.kind == CommandKind::MoveUp || cmd.kind == CommandKind::MoveDown
             || cmd.kind == CommandKind::MoveLineStart || cmd.kind == CommandKind::MoveLineEnd
@@ -404,11 +433,11 @@ public:
         if (cmd.kind == CommandKind::SelectAll) {
             auto selection = document_select_all(document_);
             if (!selection) return false;
-            selection_ = *selection;
+            rendered_selection_.value() = *selection;
             return true;
         }
         if (cmd.kind == CommandKind::FormatDocument) {
-            auto transaction = document_format_markdown(document_, selection_);
+            auto transaction = document_format_markdown(document_, rendered_selection_.value());
             if (!transaction) return false;
             apply_document_transaction_(*transaction);
             return true;
@@ -417,10 +446,10 @@ public:
             || cmd.kind == CommandKind::InsertFootnote
             || cmd.kind == CommandKind::CreateFootnoteDefinition) {
             const auto changed = cmd.kind == CommandKind::ToggleCallout
-                ? execute_document_toggle_callout(selection_, cmd).has_value()
+                ? execute_document_toggle_callout(rendered_selection_.value(), cmd).has_value()
                 : cmd.kind == CommandKind::InsertFootnote
-                    ? execute_document_insert_footnote(selection_, cmd).has_value()
-                    : execute_document_create_footnote_definition(selection_, cmd.footnote_label).has_value();
+                    ? execute_document_insert_footnote(rendered_selection_.value(), cmd).has_value()
+                    : execute_document_create_footnote_definition(rendered_selection_.value(), cmd.footnote_label).has_value();
             return changed;
         }
         if (cmd.kind == CommandKind::MoveTableCellNext || cmd.kind == CommandKind::MoveTableCellPrevious
@@ -453,19 +482,19 @@ public:
                 case CommandKind::MoveTableColumnTo: edit = DocumentTableEdit::MoveColumnTo; break;
                 default: break;
             }
-            return execute_document_table_edit(selection_, edit, cmd.table_alignment, cmd.table_index).has_value();
+            return execute_document_table_edit(rendered_selection_.value(), edit, cmd.table_alignment, cmd.table_index).has_value();
         }
         if (cmd.kind == CommandKind::InsertCodeBlock || cmd.kind == CommandKind::InsertMathBlock
             || cmd.kind == CommandKind::InsertToc || cmd.kind == CommandKind::InsertTable) {
-            return execute_document_insert_atomic_block(selection_, cmd).has_value();
+            return execute_document_insert_atomic_block(rendered_selection_.value(), cmd).has_value();
         }
         if (cmd.kind == CommandKind::SetCodeBlockLanguage) {
-            return execute_document_set_code_block_language(selection_, cmd).has_value();
+            return execute_document_set_code_block_language(rendered_selection_.value(), cmd).has_value();
         }
         if (cmd.kind == CommandKind::InsertLink || cmd.kind == CommandKind::InsertImage) {
             const auto changed = cmd.kind == CommandKind::InsertLink
-                ? execute_document_insert_link(selection_, cmd).has_value()
-                : execute_document_insert_image(selection_, cmd).has_value();
+                ? execute_document_insert_link(rendered_selection_.value(), cmd).has_value()
+                : execute_document_insert_image(rendered_selection_.value(), cmd).has_value();
             return changed;
         }
         if (cmd.kind == CommandKind::SetHeading || cmd.kind == CommandKind::ClearHeading
@@ -474,14 +503,14 @@ public:
             || cmd.kind == CommandKind::ToggleTaskCheckbox) {
             bool changed = false;
             if (cmd.kind == CommandKind::SetHeading || cmd.kind == CommandKind::ClearHeading) {
-                changed = execute_document_set_heading(selection_,
+                changed = execute_document_set_heading(rendered_selection_.value(),
                     cmd.kind == CommandKind::ClearHeading ? 0 : (std::min)(cmd.level, std::uint8_t{6})).has_value();
             } else if (cmd.kind == CommandKind::ToggleBlockQuote) {
-                changed = execute_document_toggle_block_quote(selection_).has_value();
+                changed = execute_document_toggle_block_quote(rendered_selection_.value()).has_value();
             } else if (cmd.kind == CommandKind::ToggleTaskCheckbox) {
-                changed = execute_document_toggle_task_checkbox(selection_).has_value();
+                changed = execute_document_toggle_task_checkbox(rendered_selection_.value()).has_value();
             } else {
-                changed = execute_document_toggle_list(selection_,
+                changed = execute_document_toggle_list(rendered_selection_.value(),
                     cmd.kind == CommandKind::ToggleOrderedList,
                     cmd.kind == CommandKind::ToggleTaskList).has_value();
             }
@@ -495,34 +524,34 @@ public:
             else if (cmd.kind == CommandKind::ToggleStrikethrough) kind = InlineFormat::Strikethrough;
             else if (cmd.kind == CommandKind::ToggleInlineCode) kind = InlineFormat::Code;
             else if (cmd.kind == CommandKind::InsertMathInline) kind = InlineFormat::Math;
-            return execute_document_toggle_inline_format(selection_, kind).has_value();
+            return execute_document_toggle_inline_format(rendered_selection_.value(), kind).has_value();
         }
         if (cmd.kind == CommandKind::InsertText || cmd.kind == CommandKind::Paste) {
             const auto changed = cmd.kind == CommandKind::Paste
-                ? execute_document_paste_text(selection_, cmd.text).has_value()
-                : execute_document_insert_text(selection_, cmd.text).has_value();
+                ? execute_document_paste_text(rendered_selection_.value(), cmd.text).has_value()
+                : execute_document_insert_text(rendered_selection_.value(), cmd.text).has_value();
             return changed;
         }
         if (cmd.kind == CommandKind::IndentListItem || cmd.kind == CommandKind::OutdentListItem) {
             const auto changed = cmd.kind == CommandKind::IndentListItem
-                ? execute_document_indent_list_item(selection_).has_value()
-                : execute_document_outdent_list_item(selection_).has_value();
+                ? execute_document_indent_list_item(rendered_selection_.value()).has_value()
+                : execute_document_outdent_list_item(rendered_selection_.value()).has_value();
             return changed;
         }
         if (cmd.kind == CommandKind::InsertNewline || cmd.kind == CommandKind::InsertSoftBreak) {
             const auto changed = cmd.kind == CommandKind::InsertNewline
-                ? execute_document_enter(selection_).has_value()
-                : execute_document_insert_soft_break(selection_).has_value();
+                ? execute_document_enter(rendered_selection_.value()).has_value()
+                : execute_document_insert_soft_break(rendered_selection_.value()).has_value();
             return changed;
         }
         if (cmd.kind == CommandKind::DeleteBackward || cmd.kind == CommandKind::DeleteForward || cmd.kind == CommandKind::DeleteSelection) {
             bool changed = false;
-            if (!selection_.is_caret() || cmd.kind == CommandKind::DeleteSelection) {
-                changed = execute_document_delete_selection(selection_).has_value();
+            if (!rendered_selection_.value().is_caret() || cmd.kind == CommandKind::DeleteSelection) {
+                changed = execute_document_delete_selection(rendered_selection_.value()).has_value();
             } else if (cmd.kind == CommandKind::DeleteBackward) {
-                changed = execute_document_delete_backward(selection_).has_value();
+                changed = execute_document_delete_backward(rendered_selection_.value()).has_value();
             } else {
-                changed = execute_document_delete_forward(selection_).has_value();
+                changed = execute_document_delete_forward(rendered_selection_.value()).has_value();
             }
             return changed;
         }
@@ -584,13 +613,128 @@ private:
     Outline outline_;
     DocumentHistory document_history_{1000};
     std::optional<EditorDocumentChange> last_document_change_;
-    TextSelection selection_{};
+    std::optional<TextSelection> rendered_selection_{TextSelection{}};
+    struct SourceViewState { SourceEditor editor; SourceProjectionIndex index; };
+    std::optional<SourceViewState> source_view_;
     MarkdownDialect dialect_ = default_dialect();
+
+    SourceSelection projected_selection_(const TextSelection& selection) const {
+        const auto& index=source_view_->index;
+        return {index.offset(selection.anchor).value_or(0),index.offset(selection.active).value_or(0),
+            selection.anchor.affinity,selection.active.affinity};
+    }
+
+    bool execute_source_command_(const Command& command) {
+        auto& source=source_view_->editor;
+        bool handled=false;
+        switch (command.kind) {
+            case CommandKind::InsertText:
+            case CommandKind::Paste: handled=source.insert_text(command.text);break;
+            case CommandKind::InsertNewline:
+            case CommandKind::InsertSoftBreak: handled=source.insert_newline();break;
+            case CommandKind::DeleteBackward: handled=source.delete_backward();break;
+            case CommandKind::DeleteForward: handled=source.delete_forward();break;
+            case CommandKind::DeleteSelection: handled=!source.selection().is_caret() && source.replace_selection({});break;
+            case CommandKind::IndentListItem: handled=source.indent();break;
+            case CommandKind::OutdentListItem: handled=source.outdent();break;
+            case CommandKind::FormatDocument: {
+                auto formatted=format_markdown_source(source.source(),source.selection(),dialect_);
+                handled=source.replace_document(std::move(formatted.source),formatted.selection);break;
+            }
+            case CommandKind::SelectAll: source.select_all();return true;
+            case CommandKind::MoveLeft: source.move_left(command.extend_selection);return true;
+            case CommandKind::MoveRight: source.move_right(command.extend_selection);return true;
+            case CommandKind::MoveLineStart: source.move_line_start(command.extend_selection);return true;
+            case CommandKind::MoveLineEnd: source.move_line_end(command.extend_selection);return true;
+            case CommandKind::MoveDocumentStart: source.move_document_start(command.extend_selection);return true;
+            case CommandKind::MoveDocumentEnd: source.move_document_end(command.extend_selection);return true;
+            default:return false;
+        }
+        return handled && commit_source_patch_();
+    }
+
+    bool commit_source_patch_() {
+        auto& view=*source_view_;
+        auto patch=view.editor.take_patch();
+        if (!patch) return false;
+        const auto selected_before=view.index.capture(patch->selection_before);
+        const auto allocation_before=document_.next_node_id;
+        auto applied=apply_source_document_patch(document_,view.index,view.editor.source(),*patch);
+        if (!applied) {
+            if (!view.editor.apply_projection_patch(*patch,false)) std::terminate();
+            document_.next_node_id=allocation_before;
+            return false;
+        }
+        const auto [first,last]=view.index.current_region(document_,applied->region);
+        auto projection=serialize_markdown_region_projection(document_,first,last);
+        const auto expected_end=static_cast<std::size_t>(static_cast<std::ptrdiff_t>(applied->region.end)
+            +source_patch_delta(*patch));
+        const auto expected=std::u32string_view(view.editor.source()).substr(applied->region.begin,
+            expected_end-applied->region.begin);
+        if (projection.text!=expected) {
+            if (!apply_document_operations(document_,applied->transaction.operations,false)) std::terminate();
+            document_.revision=applied->transaction.revision_before;
+            document_.next_node_id=allocation_before;
+            if (!view.editor.apply_projection_patch(*patch,false)) std::terminate();
+            return false;
+        }
+        view.index.replace(applied->region,document_,projection,first,last);
+        const auto selected_after=view.index.capture(patch->selection_after);
+        document_history_.push_source(applied->transaction,selected_before,selected_after);
+        last_document_change_=summarize_document_change(applied->transaction.operations,true,
+            applied->transaction.revision_before,applied->transaction.revision_after);
+        refresh_derived_from_document_(*last_document_change_,applied->transaction.operations);
+        return true;
+    }
+
+    bool replay_history_(bool forward) {
+        last_document_change_.reset();
+        const auto* entry=forward ? document_history_.next_redo() : document_history_.next_undo();
+        if (!entry) return false;
+        const auto selected=entry->selection;
+        auto change=summarize_document_change(entry->operations,forward,
+            forward ? entry->revision_before : entry->revision_after,
+            forward ? entry->revision_after : entry->revision_before);
+        std::optional<SourceProjectionRegion> source_region;
+        if (source_view_) source_region=source_region_for_operations(document_,source_view_->index,entry->operations);
+        TextSelection restored=rendered_selection_.value_or(TextSelection{});
+        if (!(forward ? document_history_.redo(document_,restored) : document_history_.undo(document_,restored))) return false;
+        const auto* applied=forward ? document_history_.next_undo() : document_history_.next_redo();
+        if (!applied) std::terminate();
+        last_document_change_=std::move(change);
+        refresh_derived_from_document_(*last_document_change_,applied->operations);
+        if (source_view_) {
+            auto& view=*source_view_;
+            const auto [first,last]=view.index.current_region(document_,*source_region);
+            auto projection=serialize_markdown_region_projection(document_,first,last);
+            auto temporary=view.editor.selection();
+            const auto new_size=view.editor.source().size()-(source_region->end-source_region->begin)+projection.text.size();
+            temporary.anchor=(std::min)(temporary.anchor,new_size);temporary.active=(std::min)(temporary.active,new_size);
+            SourcePatch patch{{SourceTextPatch{{source_region->begin,source_region->end},projection.text,
+                view.editor.source().substr(source_region->begin,source_region->end-source_region->begin)}},
+                view.editor.selection(),temporary};
+            if (!view.editor.apply_projection_patch(patch,true)) std::terminate();
+            view.index.replace(*source_region,document_,projection,first,last);
+            if (const auto* rich=std::get_if<RenderedHistorySelection>(&selected))
+                view.editor.set_selection(projected_selection_(forward ? rich->after : rich->before));
+            else {
+                const auto& source=std::get<SourceHistorySelection>(selected);
+                view.editor.set_selection(view.index.restore(forward ? source.after : source.before));
+            }
+        } else {
+            if (const auto* source=std::get_if<SourceHistorySelection>(&selected))
+                restored=source_view_selection_in_document(document_,forward ? source->after : source->before);
+            rendered_selection_=restored;
+        }
+        return true;
+    }
 
     void rebuild_document_full_(
         std::string markdown,
         std::optional<std::uint64_t> requested_revision = std::nullopt,
         ParseProgressCallback progress = {}) {
+        source_view_.reset();
+        rendered_selection_.emplace();
         const auto revision = requested_revision.value_or(document_.revision);
         auto parsed = parse_text(revision, std::move(markdown), dialect_, std::move(progress));
         document_ = std::move(parsed.document);
@@ -604,7 +748,7 @@ private:
             rebuild_document_block_index(document_);
         }
         if (auto position = first_document_text_position(document_)) {
-            selection_ = TextSelection::caret(*position);
+            rendered_selection_.value() = TextSelection::caret(*position);
         }
     }
 
@@ -710,7 +854,7 @@ private:
 
     void apply_document_transaction_(const DocumentTransaction& transaction) {
         document_history_.push(transaction);
-        selection_ = transaction.selection_after;
+        rendered_selection_.value() = transaction.selection_after;
         last_document_change_ = summarize_document_change(
             transaction.operations,
             true,

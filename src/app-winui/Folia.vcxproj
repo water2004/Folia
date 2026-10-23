@@ -508,6 +508,15 @@
     <ClCompile Include="..\core\source\source_editor.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\core\source\source_patch.ixx">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\core\source\source_projection.ixx">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\core\source\source_patch_adapter.ixx">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\core\query\document_references.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>

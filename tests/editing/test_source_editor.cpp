@@ -18,10 +18,12 @@ suite source_editor_tests = [] {
     expect(fatal(editor.insert_text(U"X")));
     expect(fatal(bool(editor.source() == U"# Xtitle\n\ntext")));
     expect(fatal(bool(editor.selection() == SourceSelection::caret(3))));
-    expect(fatal(editor.undo()));
+    auto patch=editor.take_patch();
+    expect(fatal(patch.has_value()));
+    expect(fatal(editor.apply_projection_patch(*patch,false)));
     expect(fatal(bool(editor.source() == U"# title\n\ntext")));
     expect(fatal(bool(editor.selection() == SourceSelection::caret(2))));
-    expect(fatal(editor.redo()));
+    expect(fatal(editor.apply_projection_patch(*patch,true)));
     expect(fatal(bool(editor.source() == U"# Xtitle\n\ntext")));
     expect(fatal(bool(editor.selection() == SourceSelection::caret(3))));
 };
@@ -249,11 +251,13 @@ suite source_editor_tests = [] {
     expect(fatal(bool(editor.source() == U"    one\n    two\nthree")));
     expect(fatal(bool(editor.selection().anchor == 5u)));
     expect(fatal(bool(editor.selection().active == 15u)));
-    expect(fatal(editor.undo()));
+    auto patch=editor.take_patch();
+    expect(fatal(patch.has_value()));
+    expect(fatal(editor.apply_projection_patch(*patch,false)));
     expect(fatal(bool(editor.source() == U"one\ntwo\nthree")));
     expect(fatal(bool(editor.selection().anchor == 1u)));
     expect(fatal(bool(editor.selection().active == 7u)));
-    expect(fatal(editor.redo()));
+    expect(fatal(editor.apply_projection_patch(*patch,true)));
     expect(fatal(editor.outdent()));
     expect(fatal(bool(editor.source() == U"one\ntwo\nthree")));
     expect(fatal(bool(editor.selection().anchor == 1u)));
@@ -305,13 +309,16 @@ suite source_editor_tests = [] {
     expect(fatal(bool(editor.selection().active == 7u))) << "left crosses CRLF atomically";
     expect(fatal(editor.delete_forward()));
     expect(fatal(bool(editor.source() == U"# first\r\n## second\rthird\n")));
-    expect(fatal(editor.undo()));
+    auto patch=editor.take_patch();
+    expect(fatal(patch.has_value()));
+    expect(fatal(editor.apply_projection_patch(*patch,false)));
     expect(fatal(bool(editor.source() == source)));
 };
 
 "random source edits preserve the flat source and render projection"_test = [] {
     SourceEditor editor(U"# start\n\ntext");
     auto initial = editor.source();
+    std::vector<SourcePatch> patches;
     auto model = build_source_render_model(editor);
     std::mt19937 random(0x5eedu);
     std::u32string alphabet = U"ab*_`$\\&#=>-[]() 012\U0001f642";
@@ -331,6 +338,7 @@ suite source_editor_tests = [] {
                 break;
             }
         }
+        if (auto patch=editor.take_patch()) patches.push_back(std::move(*patch));
         if (editor.revision() != previous_revision)
             model = build_source_render_model_incremental(editor, std::move(model));
         auto selection = editor.selection();
@@ -365,7 +373,7 @@ suite source_editor_tests = [] {
             expect(fatal(bool(incremental_headings[index]->slug == rebuilt_headings[index]->slug))) << step;
         }
     }
-    while (editor.has_undo()) expect(fatal(editor.undo()));
+    for (auto i=patches.size();i>0;--i) expect(fatal(editor.apply_projection_patch(patches[i-1],false)));
     expect(fatal(bool(editor.source() == initial)));
 };
 

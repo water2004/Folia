@@ -53,7 +53,6 @@ namespace winrt::Folia
             };
 
             folia::Editor editor;
-            std::optional<folia::SourceEditor> sourceEditor;
             folia::RenderModel renderModel;
             folia::ThemeProfile theme = folia::default_theme_profile();
             std::wstring baseDirectory;

@@ -2,14 +2,12 @@
 #include "editor/session/EditorSession.h"
 
 import folia.core.serializer;
-import folia.core.document_format;
-import folia.core.utf;
 
 namespace winrt::Folia
 {
     namespace
     {
-        // Mode switches consume the serializer's exact source-boundary map.
+        // Reload restores the view through the serializer's source-boundary map.
         // This remains a boundary projection and never becomes editor state.
         struct SerializedSourceProjection
         {
@@ -31,96 +29,29 @@ namespace winrt::Folia
             folia::SerializedMarkdownProjection projection;
         };
 
-        bool ExecuteSourceCommand(
-            folia::SourceEditor& editor,
-            folia::Command const& command,
-            folia::MarkdownDialect const& dialect)
-        {
-            using folia::CommandKind;
-            switch (command.kind)
-            {
-                case CommandKind::Undo: return editor.undo();
-                case CommandKind::Redo: return editor.redo();
-                case CommandKind::InsertText:
-                case CommandKind::Paste: return editor.insert_text(command.text);
-                case CommandKind::InsertNewline:
-                case CommandKind::InsertSoftBreak: return editor.insert_newline();
-                case CommandKind::DeleteBackward: return editor.delete_backward();
-                case CommandKind::DeleteForward: return editor.delete_forward();
-                case CommandKind::DeleteSelection:
-                    return editor.selection().is_caret() ? false : editor.replace_selection({});
-                case CommandKind::SelectAll: editor.select_all(); return true;
-                case CommandKind::MoveLeft: editor.move_left(command.extend_selection); return true;
-                case CommandKind::MoveRight: editor.move_right(command.extend_selection); return true;
-                case CommandKind::MoveLineStart: editor.move_line_start(command.extend_selection); return true;
-                case CommandKind::MoveLineEnd: editor.move_line_end(command.extend_selection); return true;
-                case CommandKind::MoveDocumentStart: editor.move_document_start(command.extend_selection); return true;
-                case CommandKind::MoveDocumentEnd: editor.move_document_end(command.extend_selection); return true;
-                case CommandKind::IndentListItem: return editor.indent();
-                case CommandKind::OutdentListItem: return editor.outdent();
-                case CommandKind::FormatDocument:
-                {
-                    auto formatted = folia::format_markdown_source(
-                        editor.source(), editor.selection(), dialect);
-                    if (formatted.source == editor.source()) return false;
-                    return editor.replace_document(
-                        std::move(formatted.source), formatted.selection);
-                }
-                default: return false;
-            }
-        }
     }
 
     bool EditorSession::IsSourceMode() const
     {
-        return core_ && core_->sourceEditor.has_value();
+        return core_ && core_->editor.source_editor()!=nullptr;
     }
 
     bool EditorSession::EnterSourceMode()
     {
-        if (IsSourceMode()) return false;
+        if (!core_->editor.enter_source_mode()) return false;
         ClearSearch();
         core_->renderedSearchFragments.clear();
-        SerializedSourceProjection projection(folia::serialize_markdown_projection(core_->editor.document()));
-        auto richSelection = core_->editor.selection();
-        auto sourceSelection = folia::SourceSelection{
-            projection.SourceOffset(richSelection.anchor),
-            projection.SourceOffset(richSelection.active),
-            richSelection.anchor.affinity,
-            richSelection.active.affinity,
-        };
-        core_->sourceEditor.emplace(std::move(projection.projection.text));
-        core_->sourceEditor->set_selection({
-            sourceSelection.anchor,
-            sourceSelection.active,
-            sourceSelection.anchor_affinity,
-            sourceSelection.active_affinity,
-        });
         ++revision_;
-        core_->characterCount = core_->sourceEditor->source().size();
+        core_->characterCount=core_->editor.source_editor()->source().size();
         RebuildRenderModel();
         return true;
     }
 
     bool EditorSession::ExitSourceMode()
     {
-        if (!IsSourceMode()) return false;
+        if (!core_->editor.exit_source_mode()) return false;
         ClearSearch();
         core_->renderedSearchFragments.clear();
-        auto sourceSelection = core_->sourceEditor->selection();
-        if (core_->sourceEditor->dirty())
-        {
-            core_->editor = folia::Editor(folia::cps_to_utf8(core_->sourceEditor->source()));
-        }
-        SerializedSourceProjection projection(folia::serialize_markdown_projection(core_->editor.document()));
-        auto anchor = projection.Position(sourceSelection.anchor, sourceSelection.anchor_affinity);
-        auto active = projection.Position(sourceSelection.active, sourceSelection.active_affinity);
-        core_->sourceEditor.reset();
-        if (core_->editor.editable_source(anchor.container_id)
-            && core_->editor.editable_source(active.container_id))
-        {
-            core_->editor.set_selection({anchor, active});
-        }
         ++revision_;
         RefreshCharacterCount();
         RebuildRenderModel();
@@ -136,9 +67,9 @@ namespace winrt::Folia
     {
         EditorReloadViewState state;
         state.sourceMode = IsSourceMode();
-        if (core_->sourceEditor)
+        if (core_->editor.source_editor())
         {
-            auto selection = core_->sourceEditor->selection();
+            auto selection = core_->editor.source_editor()->selection();
             state.anchor = selection.anchor;
             state.active = selection.active;
             state.anchorAffinity = selection.anchor_affinity;
@@ -161,8 +92,8 @@ namespace winrt::Folia
         if (state.sourceMode)
         {
             EnterSourceMode();
-            auto length = core_->sourceEditor->source().size();
-            core_->sourceEditor->set_selection({
+            auto length = core_->editor.source_editor()->source().size();
+            core_->editor.set_source_selection({
                 (std::min)(state.anchor, length),
                 (std::min)(state.active, length),
                 state.anchorAffinity,
@@ -184,14 +115,13 @@ namespace winrt::Folia
 
     bool EditorSession::ExecuteCommand(folia::Command const& command)
     {
-        if (core_->sourceEditor)
+        if (core_->editor.source_editor())
         {
-            auto previousRevision = core_->sourceEditor->revision();
-            if (!ExecuteSourceCommand(
-                *core_->sourceEditor, command, core_->editor.dialect())) return false;
-            if (core_->sourceEditor->revision() == previousRevision) return true;
+            auto previousRevision = core_->editor.source_editor()->revision();
+            if (!core_->editor.execute_command(command)) return false;
+            if (core_->editor.source_editor()->revision() == previousRevision) return true;
             ++revision_;
-            core_->characterCount = core_->sourceEditor->source().size();
+            core_->characterCount = core_->editor.source_editor()->source().size();
             RebuildRenderModel();
             return true;
         }

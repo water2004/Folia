@@ -10,16 +10,16 @@ namespace winrt::Folia
         ClearSearch();
         if (query.empty()) return {};
 
-        if (core_->sourceEditor)
+        if (core_->editor.source_editor())
         {
-            auto result = folia::search_text(core_->sourceEditor->source(), query, options);
+            auto result = folia::search_text(core_->editor.source_editor()->source(), query, options);
             if (!result.valid()) return {0, std::move(result.error)};
             core_->searchTargets.reserve(result.matches.size());
             for (auto const& match : result.matches)
             {
                 detail::EditorSessionCore::SearchTarget target;
                 target.sourceRange = match.range;
-                for (auto const& line : core_->sourceEditor->lines())
+                for (auto const& line : core_->editor.source_editor()->lines())
                 {
                     auto const lineStart = line.source_start;
                     auto const lineEnd = line.source_end();
@@ -34,7 +34,7 @@ namespace winrt::Folia
                 }
                 if (target.spans.empty())
                 {
-                    auto position = core_->sourceEditor->position_from_source_offset(
+                    auto position = core_->editor.source_editor()->position_from_source_offset(
                         match.range.start);
                     target.spans.push_back({
                         position.container_id,
@@ -70,9 +70,9 @@ namespace winrt::Folia
         core_->activeSearchMatch = index;
         RebuildSearchHighlights();
 
-        if (core_->sourceEditor && target.sourceRange)
+        if (core_->editor.source_editor() && target.sourceRange)
         {
-            core_->sourceEditor->set_selection({
+            core_->editor.set_source_selection({
                 target.sourceRange->start,
                 target.sourceRange->end,
                 folia::TextAffinity::Downstream,
@@ -111,16 +111,16 @@ namespace winrt::Folia
         folia::SearchOptions options)
     {
         if (query.empty()) return false;
-        if (core_->sourceEditor)
+        if (core_->editor.source_editor())
         {
             auto result = folia::search_text_for_replacement(
-                core_->sourceEditor->source(), query, replacement, options);
+                core_->editor.source_editor()->source(), query, replacement, options);
             if (!result.valid() || index >= result.matches.size()) return false;
             auto const& match = result.matches[index];
             if (!match.replacement
-                || !core_->sourceEditor->replace(match.range, *match.replacement)) return false;
+                || !core_->editor.replace_source(match.range, *match.replacement)) return false;
             ++revision_;
-            core_->characterCount = core_->sourceEditor->source().size();
+            core_->characterCount = core_->editor.source_editor()->source().size();
             RebuildRenderModel();
             ClearSearch();
             return true;
@@ -139,10 +139,10 @@ namespace winrt::Folia
         folia::SearchOptions options)
     {
         if (query.empty()) return false;
-        if (core_->sourceEditor)
+        if (core_->editor.source_editor())
         {
             auto result = folia::search_text_for_replacement(
-                core_->sourceEditor->source(), query, replacement, options);
+                core_->editor.source_editor()->source(), query, replacement, options);
             if (!result.valid() || result.matches.empty()) return false;
             std::vector<folia::SourceReplacement> replacements;
             replacements.reserve(result.matches.size());
@@ -151,9 +151,9 @@ namespace winrt::Folia
                 if (!match.replacement) return false;
                 replacements.push_back({match.range, *match.replacement});
             }
-            if (!core_->sourceEditor->replace_all(replacements)) return false;
+            if (!core_->editor.replace_all_source(replacements)) return false;
             ++revision_;
-            core_->characterCount = core_->sourceEditor->source().size();
+            core_->characterCount = core_->editor.source_editor()->source().size();
             RebuildRenderModel();
             ClearSearch();
             return true;

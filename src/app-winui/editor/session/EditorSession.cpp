@@ -66,7 +66,6 @@ namespace winrt::Folia
         core_->renderedSearchFragments.clear();
         core_->renderedSearchRevision = (std::numeric_limits<std::uint64_t>::max)();
         core_->baseDirectory = file_ ? std::filesystem::path(file_.Path().c_str()).parent_path().wstring() : std::wstring{};
-        core_->sourceEditor.reset();
         core_->editor = folia::Editor(
             winrt::to_string(text_),
             folia::default_dialect(),
@@ -78,10 +77,10 @@ namespace winrt::Folia
 
     void EditorSession::RebuildRenderModel(folia::EditorDocumentChange const* change)
     {
-        if (core_->sourceEditor)
+        if (core_->editor.source_editor())
         {
             core_->renderModel = folia::build_source_render_model_incremental(
-                *core_->sourceEditor,
+                *core_->editor.source_editor(),
                 std::move(core_->renderModel));
         }
         else if (change)
@@ -126,7 +125,7 @@ namespace winrt::Folia
 
     bool EditorSession::ShouldVirtualizeRenderModel() const
     {
-        if (!core_ || core_->sourceEditor) return false;
+        if (!core_ || core_->editor.source_editor()) return false;
         auto const& document = core_->editor.document();
         return document.root.children.size() > 4096
             || document.cached_editable_order.size() > 8192;
@@ -134,7 +133,7 @@ namespace winrt::Folia
 
     void EditorSession::MaterializeRenderBlocks(std::size_t begin, std::size_t end)
     {
-        if (!core_ || core_->sourceEditor || !core_->renderModel.virtualized) return;
+        if (!core_ || core_->editor.source_editor() || !core_->renderModel.virtualized) return;
         folia::materialize_render_model_range(
             core_->renderModel,
             core_->editor.document(),
@@ -146,7 +145,7 @@ namespace winrt::Folia
 
     void EditorSession::ReleaseRenderBlocksOutside(std::size_t begin, std::size_t end)
     {
-        if (!core_ || core_->sourceEditor || !core_->renderModel.virtualized) return;
+        if (!core_ || core_->editor.source_editor() || !core_->renderModel.virtualized) return;
         folia::release_render_model_blocks_outside(
             core_->renderModel,
             core_->editor.document(),
@@ -157,12 +156,12 @@ namespace winrt::Folia
 
     void EditorSession::SetSelection(folia::TextPosition anchor, folia::TextPosition active)
     {
-        if (core_->sourceEditor)
+        if (core_->editor.source_editor())
         {
-            auto anchorOffset = core_->sourceEditor->source_offset_from_position(anchor);
-            auto activeOffset = core_->sourceEditor->source_offset_from_position(active);
+            auto anchorOffset = core_->editor.source_editor()->source_offset_from_position(anchor);
+            auto activeOffset = core_->editor.source_editor()->source_offset_from_position(active);
             if (!anchorOffset || !activeOffset) return;
-            core_->sourceEditor->set_selection({*anchorOffset, *activeOffset, anchor.affinity, active.affinity});
+            core_->editor.set_source_selection({*anchorOffset, *activeOffset, anchor.affinity, active.affinity});
             return;
         }
         auto anchorSource = core_->editor.editable_source(anchor.container_id);
@@ -180,15 +179,15 @@ namespace winrt::Folia
 
     bool EditorSession::HasSelection() const
     {
-        return core_->sourceEditor
-            ? !core_->sourceEditor->selection().is_caret()
+        return core_->editor.source_editor()
+            ? !core_->editor.source_editor()->selection().is_caret()
             : !core_->editor.selection().is_caret();
     }
 
     std::u32string EditorSession::SelectedSource() const
     {
-        return core_->sourceEditor
-            ? core_->sourceEditor->selected_text()
+        return core_->editor.source_editor()
+            ? core_->editor.source_editor()->selected_text()
             : core_->editor.selected_markdown_cps();
     }
 
@@ -215,8 +214,8 @@ namespace winrt::Folia
     std::string EditorSession::TextUtf8() const
     {
         if (!core_) return winrt::to_string(text_);
-        return core_->sourceEditor
-            ? folia::cps_to_utf8(core_->sourceEditor->source())
+        return core_->editor.source_editor()
+            ? folia::cps_to_utf8(core_->editor.source_editor()->source())
             : core_->editor.markdown_utf8();
     }
 
@@ -260,8 +259,8 @@ namespace winrt::Folia
 
     void EditorSession::RefreshCharacterCount()
     {
-        core_->characterCount = core_->sourceEditor
-            ? core_->sourceEditor->source().size()
+        core_->characterCount = core_->editor.source_editor()
+            ? core_->editor.source_editor()->source().size()
             : folia::document_text_character_count(core_->editor.document());
     }
 
@@ -272,7 +271,7 @@ namespace winrt::Folia
 
     std::optional<EditorDocumentInteraction> EditorSession::InteractionAt(folia::TextPosition position) const
     {
-        if (core_->sourceEditor) return std::nullopt;
+        if (core_->editor.source_editor()) return std::nullopt;
         auto interaction = folia::document_interaction_at(core_->editor.document(), position);
         if (!interaction) return std::nullopt;
         return EditorDocumentInteraction{
@@ -283,14 +282,14 @@ namespace winrt::Folia
 
     folia::TextSelection EditorSession::Selection() const
     {
-        return core_->sourceEditor ? core_->sourceEditor->projected_selection() : core_->editor.selection();
+        return core_->editor.source_editor() ? core_->editor.source_editor()->projected_selection() : core_->editor.selection();
     }
 
     folia::platform::editor::EditorShortcutScope EditorSession::ShortcutScope() const
     {
         using folia::DocumentContentContext;
         using folia::platform::editor::EditorShortcutScope;
-        if (core_->sourceEditor) return EditorShortcutScope::Global;
+        if (core_->editor.source_editor()) return EditorShortcutScope::Global;
         switch (folia::document_content_context_at(
             core_->editor.document(), core_->editor.selection().active))
         {
@@ -303,7 +302,7 @@ namespace winrt::Folia
 
     std::optional<EditorLatexCompletionSource> EditorSession::LatexCompletionSourceAtCaret() const
     {
-        if (core_->sourceEditor) return std::nullopt;
+        if (core_->editor.source_editor()) return std::nullopt;
         auto selection = core_->editor.selection();
         if (selection.anchor != selection.active) return std::nullopt;
         if (folia::document_content_context_at(core_->editor.document(), selection.active)
@@ -326,7 +325,7 @@ namespace winrt::Folia
 
     folia::RenderModel EditorSession::BuildPrintRenderModel() const
     {
-        if (core_->sourceEditor) return core_->renderModel;
+        if (core_->editor.source_editor()) return core_->renderModel;
         return folia::build_render_model(
             core_->editor.document(),
             core_->editor.outline(),
@@ -336,21 +335,21 @@ namespace winrt::Folia
 
     std::optional<folia::TextPosition> EditorSession::FootnoteDefinitionTarget(std::string_view label) const
     {
-        if (core_->sourceEditor) return std::nullopt;
+        if (core_->editor.source_editor()) return std::nullopt;
         return folia::footnote_definition_target(
             core_->editor.document(), core_->editor.symbols(), label);
     }
 
     std::optional<folia::TextPosition> EditorSession::FirstFootnoteReferenceTarget(std::string_view label) const
     {
-        if (core_->sourceEditor) return std::nullopt;
+        if (core_->editor.source_editor()) return std::nullopt;
         return folia::first_footnote_reference_target(
             core_->editor.symbols(), label);
     }
 
     std::string EditorSession::FootnotePreview(std::string_view label) const
     {
-        if (core_->sourceEditor) return {};
+        if (core_->editor.source_editor()) return {};
         return folia::footnote_preview(
             core_->editor.document(), core_->editor.symbols(), label, 240);
     }

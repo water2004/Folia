@@ -1,10 +1,8 @@
-// folia.core.source_editor — authoritative plain-source editing session.
-//
-// This is deliberately separate from EditorDocument. While source mode is
-// active, one flat lossless source buffer and one flat source selection are
-// authoritative. The block tree is rebuilt only when leaving source mode.
+// Source-view text, lines and styling. The owning Editor commits its patches
+// to the authoritative block tree and owns the sole undo/redo history.
 export module folia.core.source_editor;
 import std;
+export import folia.core.source_patch;
 import folia.core.ids;
 import folia.core.text_edit;
 import folia.core.selection;
@@ -15,20 +13,6 @@ import folia.core.source_style;
 import folia.core.utf;
 
 export namespace folia {
-
-struct SourceSelection {
-    std::size_t anchor = 0;
-    std::size_t active = 0;
-    TextAffinity anchor_affinity = TextAffinity::Downstream;
-    TextAffinity active_affinity = TextAffinity::Downstream;
-
-    static SourceSelection caret(std::size_t offset, TextAffinity affinity = TextAffinity::Downstream) {
-        return {offset, offset, affinity, affinity};
-    }
-    bool is_caret() const { return anchor == active; }
-    SourceRange ordered_range() const { return {(std::min)(anchor, active), (std::max)(anchor, active)}; }
-    bool operator==(SourceSelection const&) const = default;
-};
 
 struct SourceLineState {
     char32_t fence_character = U'\0';
@@ -57,19 +41,6 @@ struct SourceLine {
     std::size_t source_end() const { return source_start + text.size(); }
     std::size_t next_source_start() const { return source_end() + line_ending.size(); }
     bool has_line_ending() const { return !line_ending.empty(); }
-};
-
-struct SourceEditTransaction {
-    SourceRange range_before;
-    std::u32string inserted;
-    std::u32string removed;
-    SourceSelection selection_before;
-    SourceSelection selection_after;
-};
-
-struct SourceReplacement {
-    SourceRange range;
-    std::u32string replacement;
 };
 
 struct SourceLineChange {
@@ -270,10 +241,12 @@ public:
     std::vector<SourceLine> const& lines() const { return lines_; }
     SourceSelection selection() const { return selection_; }
     std::uint64_t revision() const { return revision_; }
-    bool dirty() const { return !committed_edits_.empty(); }
-    bool has_undo() const { return !undo_.empty(); }
-    bool has_redo() const { return !redo_.empty(); }
-    std::vector<SourceEditTransaction> const& committed_edits() const { return committed_edits_; }
+    std::optional<SourcePatch> take_patch() { return std::exchange(pending_patch_,std::nullopt); }
+
+    bool apply_projection_patch(const SourcePatch& patch,bool forward=true) {
+        return apply_(patch,forward);
+    }
+
     SourceLineChange const& last_line_change() const { return last_line_change_; }
 
     void set_selection(SourceSelection selection) {
@@ -317,22 +290,18 @@ public:
             if (!ordered[index].range.valid_for(source_.size())) return false;
             if (index > 0 && ordered[index].range.start < ordered[index - 1].range.end) return false;
         }
-        auto const enclosing = SourceRange{
-            ordered.front().range.start,
-            ordered.back().range.end};
-        std::u32string replacement;
-        auto cursor = enclosing.start;
-        for (auto const& edit : ordered) {
-            replacement.append(source_, cursor, edit.range.start - cursor);
-            replacement += edit.replacement;
-            cursor = edit.range.end;
+        SourcePatch patch;
+        patch.selection_before=selection_;
+        patch.selection_after=SourceSelection::caret(ordered.front().range.start+ordered.front().replacement.size());
+        for (auto i=ordered.size();i>0;--i) {
+            const auto& edit=ordered[i-1];
+            auto removed=source_.substr(edit.range.start,edit.range.length());
+            if (removed!=edit.replacement)
+                patch.edits.push_back({edit.range,edit.replacement,std::move(removed)});
         }
-        auto const first_target = ordered.front().range.start
-            + ordered.front().replacement.size();
-        return replace_with_selection_(
-            enclosing,
-            std::move(replacement),
-            SourceSelection::caret(first_target));
+        if (patch.edits.empty() || !apply_(patch,true)) return false;
+        pending_patch_=std::move(patch);
+        return true;
     }
 
     bool indent() {
@@ -347,16 +316,11 @@ public:
 private:
     bool replace_with_selection_(SourceRange range, std::u32string replacement, SourceSelection selection_after) {
         if (!range.valid_for(source_.size())) return false;
-        SourceEditTransaction transaction;
-        transaction.range_before = range;
-        transaction.inserted = std::move(replacement);
-        transaction.removed = source_.substr(range.start, range.length());
-        transaction.selection_before = selection_;
-        transaction.selection_after = selection_after;
-        apply_(transaction, true);
-        undo_.push_back(transaction);
-        committed_edits_.push_back(transaction);
-        redo_.clear();
+        auto removed=source_.substr(range.start,range.length());
+        if (removed==replacement) return false;
+        SourcePatch patch{{SourceTextPatch{range,std::move(replacement),std::move(removed)}},selection_,selection_after};
+        if (!apply_(patch,true)) return false;
+        pending_patch_=std::move(patch);
         return true;
     }
 
@@ -375,26 +339,6 @@ public:
         if (!selection_.is_caret()) return replace_selection({});
         if (selection_.active >= source_.size()) return false;
         return replace({selection_.active, next_grapheme_boundary_char(source_, selection_.active)}, {});
-    }
-
-    bool undo() {
-        if (undo_.empty()) return false;
-        auto transaction = undo_.back();
-        undo_.pop_back();
-        apply_(transaction, false);
-        redo_.push_back(std::move(transaction));
-        if (!committed_edits_.empty()) committed_edits_.pop_back();
-        return true;
-    }
-
-    bool redo() {
-        if (redo_.empty()) return false;
-        auto transaction = redo_.back();
-        redo_.pop_back();
-        apply_(transaction, true);
-        undo_.push_back(transaction);
-        committed_edits_.push_back(std::move(transaction));
-        return true;
     }
 
     void select_all() { selection_ = {0, source_.size(), TextAffinity::Downstream, TextAffinity::Upstream}; }
@@ -455,9 +399,7 @@ private:
     std::u32string source_;
     std::vector<SourceLine> lines_;
     SourceSelection selection_{};
-    std::vector<SourceEditTransaction> undo_;
-    std::vector<SourceEditTransaction> redo_;
-    std::vector<SourceEditTransaction> committed_edits_;
+    std::optional<SourcePatch> pending_patch_;
     std::uint64_t revision_ = 1;
     std::uint64_t next_line_id_ = 0xf000000000000001ull;
     SourceLineChange last_line_change_{};
@@ -541,26 +483,24 @@ private:
             after);
     }
 
-    void apply_(SourceEditTransaction const& transaction, bool forward) {
-        auto old_start = transaction.range_before.start;
-        auto old_length = forward ? transaction.removed.size() : transaction.inserted.size();
-        auto new_length = forward ? transaction.inserted.size() : transaction.removed.size();
-        auto first_line = line_index_for_offset_(old_start);
-        auto last_line = line_index_for_offset_(old_start + old_length);
-        auto old_lines = std::move(lines_);
-        if (forward) {
-            source_.replace(transaction.range_before.start, transaction.removed.size(), transaction.inserted);
-            selection_ = transaction.selection_after;
-        } else {
-            source_.replace(transaction.range_before.start, transaction.inserted.size(), transaction.removed);
-            selection_ = transaction.selection_before;
+    bool apply_(const SourcePatch& patch,bool forward) {
+        if (patch.edits.empty() || !validate_source_patch(source_,patch,forward)) return false;
+        const auto start=patch.edits.back().range_before.start;
+        const auto& last=patch.edits.front();
+        auto end=last.range_before.end;
+        auto delta=source_patch_delta(patch);
+        if (!forward) {
+            end=static_cast<std::size_t>(static_cast<std::ptrdiff_t>(end)+delta);
+            delta=-delta;
         }
+        const auto first_line=line_index_for_offset_(start);
+        const auto last_line=line_index_for_offset_(end);
+        auto old_lines=std::move(lines_);
+        if (!apply_source_patch(source_,patch,forward)) std::terminate();
+        selection_=forward ? patch.selection_after : patch.selection_before;
         ++revision_;
-        rebuild_lines_after_edit_(
-            std::move(old_lines),
-            first_line,
-            last_line,
-            static_cast<std::ptrdiff_t>(new_length) - static_cast<std::ptrdiff_t>(old_length));
+        rebuild_lines_after_edit_(std::move(old_lines),first_line,last_line,delta);
+        return true;
     }
 
     void rebuild_lines_after_edit_(

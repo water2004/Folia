@@ -82,11 +82,11 @@ namespace winrt::Folia
     std::optional<std::u32string_view> EditorSession::TextInputSourceView(
         folia::NodeId containerId) const
     {
-        if (core_->sourceEditor)
+        if (core_->editor.source_editor())
         {
             auto found = std::ranges::find(
-                core_->sourceEditor->lines(), containerId, &folia::SourceLine::id);
-            if (found == core_->sourceEditor->lines().end()) return std::nullopt;
+                core_->editor.source_editor()->lines(), containerId, &folia::SourceLine::id);
+            if (found == core_->editor.source_editor()->lines().end()) return std::nullopt;
             return std::u32string_view{found->text};
         }
         return folia::document_editable_text_view(core_->editor.document(), containerId);
@@ -94,10 +94,10 @@ namespace winrt::Folia
 
     std::optional<std::u32string> EditorSession::EditableSource(folia::NodeId id) const
     {
-        if (core_->sourceEditor)
+        if (core_->editor.source_editor())
         {
-            auto found = std::ranges::find(core_->sourceEditor->lines(), id, &folia::SourceLine::id);
-            if (found == core_->sourceEditor->lines().end()) return std::nullopt;
+            auto found = std::ranges::find(core_->editor.source_editor()->lines(), id, &folia::SourceLine::id);
+            if (found == core_->editor.source_editor()->lines().end()) return std::nullopt;
             return found->text;
         }
         return core_->editor.editable_source(id);

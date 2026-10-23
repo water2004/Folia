@@ -4,6 +4,7 @@
 #include "support/folia_test.hpp"
 import folia.core.search;
 import folia.core.source_editor;
+import folia.core.editor;
 import folia.math.util.regexp_host;
 
 using namespace folia;
@@ -69,22 +70,24 @@ suite search_engine_tests = [] {
 };
 
 "source replace all is one exact reversible flat-source transaction"_test = [] {
-    SourceEditor source(U"one **one** <one>");
+    Editor editor("one **one** <one>");
+    expect(fatal(editor.enter_source_mode()));
+    const auto* source=editor.source_editor();
     auto found = search_text_for_replacement(
-        source.source(), U"one", U"two", exact_options());
+        source->source(), U"one", U"two", exact_options());
     expect(fatal(found.valid()));
     std::vector<SourceReplacement> replacements;
     for (auto const& match : found.matches) {
         replacements.push_back({match.range, *match.replacement});
     }
-    auto const before_selection = source.selection();
-    expect(fatal(source.replace_all(replacements)));
-    expect(bool(source.source() == U"two **two** <two>"));
-    expect(fatal(source.undo()));
-    expect(bool(source.source() == U"one **one** <one>"));
-    expect(bool(source.selection() == before_selection));
-    expect(fatal(source.redo()));
-    expect(bool(source.source() == U"two **two** <two>"));
+    auto const before_selection = source->selection();
+    expect(fatal(editor.replace_all_source(replacements)));
+    expect(bool(source->source() == U"two **two** <two>"));
+    expect(fatal(editor.undo()));
+    expect(bool(source->source() == U"one **one** <one>"));
+    expect(bool(source->selection() == before_selection));
+    expect(fatal(editor.redo()));
+    expect(bool(source->source() == U"two **two** <two>"));
 };
 
 };

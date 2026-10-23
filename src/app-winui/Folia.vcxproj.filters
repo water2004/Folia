@@ -309,6 +309,15 @@
     <ClCompile Include="..\core\source\source_editor.ixx">
       <Filter>Core Modules\Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\core\source\source_patch.ixx">
+      <Filter>Core Modules\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\core\source\source_projection.ixx">
+      <Filter>Core Modules\Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\core\source\source_patch_adapter.ixx">
+      <Filter>Core Modules\Source</Filter>
+    </ClCompile>
     <ClCompile Include="..\core\query\document_references.ixx">
       <Filter>Core Modules\Query</Filter>
     </ClCompile>

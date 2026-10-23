@@ -8,13 +8,25 @@ import folia.core.document;
 import folia.core.document_operation_apply;
 import folia.core.document_transaction;
 import folia.core.text_edit;
+import folia.core.source_patch;
 
 export namespace folia {
 
+struct RenderedHistorySelection {
+    TextSelection before;
+    TextSelection after;
+};
+
+struct SourceHistorySelection {
+    SourceViewSelection before;
+    SourceViewSelection after;
+};
+
+using DocumentHistorySelection=std::variant<RenderedHistorySelection,SourceHistorySelection>;
+
 struct DocumentHistoryEntry {
     std::vector<DocumentOperation> operations;
-    TextSelection selection_before;
-    TextSelection selection_after;
+    DocumentHistorySelection selection;
     std::uint64_t revision_before = 0;
     std::uint64_t revision_after = 0;
 };
@@ -24,8 +36,7 @@ namespace document_history_detail {
 inline DocumentHistoryEntry make_entry(const DocumentTransaction& transaction) {
     DocumentHistoryEntry entry;
     entry.operations = transaction.operations;
-    entry.selection_before = transaction.selection_before;
-    entry.selection_after = transaction.selection_after;
+    entry.selection = RenderedHistorySelection{transaction.selection_before,transaction.selection_after};
     entry.revision_before = transaction.revision_before;
     entry.revision_after = transaction.revision_after;
     return entry;
@@ -33,14 +44,15 @@ inline DocumentHistoryEntry make_entry(const DocumentTransaction& transaction) {
 
 inline bool apply_entry(EditorDocument& document, TextSelection& selection,
                         const DocumentHistoryEntry& entry, bool forward) {
+    if (document.revision!=(forward ? entry.revision_before : entry.revision_after)) return false;
     if (!apply_document_operations(document, entry.operations, forward)) return false;
     if (forward) {
         document.revision = entry.revision_after;
-        selection = entry.selection_after;
     } else {
         document.revision = entry.revision_before;
-        selection = entry.selection_before;
     }
+    if (const auto* rendered=std::get_if<RenderedHistorySelection>(&entry.selection))
+        selection=forward ? rendered->after : rendered->before;
     return true;
 }
 
@@ -51,9 +63,18 @@ public:
     explicit DocumentHistory(std::size_t capacity = 1000) : capacity_(capacity) {}
 
     void push(const DocumentTransaction& transaction) {
+        if (transaction.operations.empty() || transaction.revision_before==transaction.revision_after) return;
         undo_.push_back(document_history_detail::make_entry(transaction));
         redo_.clear();
         if (undo_.size() > capacity_) undo_.erase(undo_.begin());
+    }
+
+    void push_source(const DocumentTransaction& transaction,
+        SourceViewSelection before,SourceViewSelection after) {
+        if (transaction.operations.empty() || transaction.revision_before==transaction.revision_after) return;
+        push(transaction);
+        if (!undo_.empty() && capacity_!=0)
+            undo_.back().selection=SourceHistorySelection{before,after};
     }
 
     bool undo(EditorDocument& document, TextSelection& selection) {
