@@ -21,7 +21,7 @@ Full GFM corpus **1426**: published677, cmark-spec672 (incl2 upstream-disabled
 retained/run), extensions30, regressions26, smart16, style-option1, full-info4.
 Pinned cmark-gfm27d942c8b0a62d192f616e5bf3578f4b6a89e180. Qualified IDs, original
 Markdown/HTML, hashes/license/profile/tab provenance and NUL byte lengths retained.
-Latest all exit0 after0eeab9f4:
+Latest verified baseline before pending C parser changes (all exit0 aftercccaeecb):
 - GFM **1395 strict pass /20 unscored /11 verified reference differences /
   0 unresolved**; all1426 exact input/source/save checks pass.
   `build/gfm-conformance/serializer-eol/results.json`.
@@ -60,10 +60,11 @@ before the passing evidence; neither is unresolved. No old formatter ships.
 
 ### Live work and exact next action
 
-No root native handle running. No candidate CMake cache hook remains (cleared
-with `-U CMAKE_PROJECT_folia_INCLUDE`, log `clear-candidate-hook.log`).
-Tracked C parser work remains untouched. Current working changes are writer LF correction
-and new test_serializer_separator.cpp; final focused CRLF correction pending.
+No root native handle running; no temporary CMake cache hook active. Working tree
+now contains UNCOMMITTED C parser cut, five new helper modules under
+src/core/parsing, focused/helper tests and CMake bounded-frame test registration.
+No C tests/pass claim yet. Serializer separator correction committed **cccaeecb**;
+2f46430e test-projector integration committed. Ignore small serializer test EOF tidy.
 Find deliveries with `rg --no-ignore` under `build/gfm-expanded/deep-blocks/`.
 
 - Sol `gfm_emphasis_scaling`: sole container engine in `parser/`. Latest
@@ -106,27 +107,57 @@ stays HtmlText Paragraph. No second HTML parse. Initial numeric NodeId order is
 not invariant; uniqueness, stable untouched IDs on edit, anchors/history/selection
 are mandatory. HTML slots remain existing leaf-local representation.
 
-Supplemental edited-tree separator gaps are fixed/verified: root reproduced the
-loneCR sibling rule and cross-event CRLF mismatch, then retained LF-only sibling
-completion and merged loneCR+zero-width-events+loneLF in finish_line. Prefix EOL
-classification remains CR/LF/CRLF. Exact source maps for quoted aCR={2,3,4}, b={9,10}
-pass. `serializer-cross-eol-after.log`, full core679/491276 and CM/GFM/Windows above
-pass. Changes are staged for their own small commit before C integration.
+Supplemental edited-tree separator fixes committed **cccaeecb**: loneCR dynamic
+separator and cross-event CRLF coalescing, exact quoted owner maps passed; core679/
+491276, CM/GFM/Windows passed (serializer-eol logs/reports above).
 
-Sol delivered FIRST COMPILE CUT at parser/parser.candidate.ixx SHA256
-432AF1F7022FF284D3D9E1225F1A1A0543212B15F189FB96BF4BC51AA9FD5590,
-canonical parser baseCB0A89BB4CC5DC85A2EACE44B9F946490D3A2EE7D0958C6AABC725DF7ED80760.
-FIRST_COMPILE_MANIFEST.json lists five helper paths/modules and focused tests.
-Actual leaf assembly/final paragraph context/suffix correction merged; no nested
-Parser/offset_map/owned_offsets/old parse_block/early-image methods. Sol holds
-candidate edits pending root compilation. No C native/integration pass yet.
+C cut3 is currently canonical UNCOMMITTED: Parser SHA
+AD1B485D67A1ED6B262FC6165A7579B6EB02A4AE808BFBF7CCFCE796A678ABA9;
+shared BlockLineRecognizer SHA7D34B83F16FE2EF50588E44CA6969CC3F37C7DB7EF2EA235937DE50B1D68330B.
+Five new helper modules +8focused/helper TUs, CMake bounded frame and thematic
+rules targets/tests are uncommitted. Helper lazy_origin_cursor directborrow was
+added in cut2; no further helperdelta. No C final pass/commit claim.
 
-Next: commit verified separator correction separately; verify base/candidate
-hashes then copy firstCcut and five modules into src/core/parsing, compile folia_core
-first (no tests until compilation succeeds). Add focused frame/helper tests and
-run bounded mixed cases before full corpora. Stop broad evaluation after abnormal
-exit. Then original quotes50000/lists1000 semantics/source/save/lifecycle, all
-CM/GFM/core/Windows and full21. Keep checkpoint current before compaction.
+First full CM run hung after10 inputs; bounded case11 `*\t*\t*\t\n` timed out5s.
+Shared thematic scanner was wrong (consecutive-only) and empty-opening blank
+routing could close/reoffer the same unaccepted marker forever. Cut3 fixes shared
+thematic grammar (Parser delegates), and accepts exactly the empty opening line
+before considering later blank ownership. No parser/input specialcase.
+Correctly quoted case11 focus passed1strict/source/save (`frames-case11-focused.log`,
+report `build/markdown-conformance/frames-case11-focused/`). Earlier
+`frames-case11-after.log` accidentally matched0 tests: NOT verification.
+Bounded6container_frame cases passed0.41s (`parser-frame-progress.log`), read-only
+thematic recognition passed (`thematic-frame-rules.log`). No outstanding abnormal
+exit; all prior native handles closed except active **30411** below.
+
+Full CM now completes0.44s: **645strict/7semanticdiff,652lossless/650exactsave**,
+report `build/markdown-conformance/frames-grammar/results.json`. Nine failing
+inputs (7 semantic +2 source-save), all concrete regressions pending:
+- CM7/273/274 opening item retained padding/tab code is Paragraph instead of
+  indented CodeBlock. Luna gfm_code_math_leaf owns `code-math-leaf/indent-fix/`;
+  inspect retained padding preceding content_cursor offset/context.
+- CM259/260 HTML semantics correct, quote-prefix save spelling changes. Luna
+  gfm_deep_blocks_design owns `prefix-binding-fix/`; no D formatter change.
+- Sol gfm_emphasis_scaling owns CM280 empty header+blank closes item, and
+  CM283/302/315 existing-list sibling markers wrongly accepted as lazy paragraph
+  (normal outside-paragraph numbered-list restriction misapplied inside List).
+Agents deliver ignored narrow patches against cut3; Sol merges one candidate.
+
+Root active native build **30411**, `gfm-frames-first.log`: full GFM1426 against
+cut3 with20s timeout. Finish/read result before next native build. On timeout or
+abnormal native exit stop broad tests and diagnose bounded focus. No other builds.
+
+Formal runner exposed unrelated partial/filtered CommonMark report KeyError from
+fixture['id']; fixed qualified identity fallback and labels for missing/duplicate/
+unexpected. Also fixed success with0 reported filtered cases and always rejects
+unknown native IDs. Python40/40 passed (`python-frames.log`); isolated runner11
+unchanged/prior pass. Changes run.py/test_runner.py are being committed separately.
+
+Next: finish30411, give additional extension failures to relevant Luna owners,
+merge narrow C fixes, bounded failing-example retests then CM/GFM. Compile/run
+new ordinary core tests and Windows after semantic/source regressions resolve.
+Then original full-size quotes50000/lists1000 semantics/source/save/lifecycle and
+full21. Do not count old baseline as C pass. Keep checkpoint current.
 
 ## Historical checkpoints
 

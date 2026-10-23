@@ -54,6 +54,20 @@ class RunnerContractTests(unittest.TestCase):
         self.assertEqual(row['source_lines'], fixture['source_lines'])
         self.assertTrue(row['semantic_match'])
 
+    def test_partial_commonmark_report_labels_unreported_fixture_without_missing_id(self):
+        # A filtered run or timeout may leave this fixture absent from JSONL.
+        # Its stable report identity must still be available for the missing list.
+        native_to_fixture = {626: self.fixture}
+        self.assertEqual(run.label_native_examples([626], native_to_fixture), ['commonmark:626'])
+
+    def test_missing_and_duplicate_gfm_labels_keep_corpus_qualified_ids(self):
+        fixture = {'id': 'published-gfm:1', 'native_id': 1, 'example': 1,
+                   'corpus': 'published-gfm', 'section': 'Introduction',
+                   'markdown': 'foo\n', 'html': '<p>foo</p>\n'}
+        native_to_fixture = {1: fixture}
+        self.assertEqual(run.label_native_examples([1], native_to_fixture), ['published-gfm:1'])
+        self.assertEqual(run.label_native_examples([999], native_to_fixture), [999])
+
     def test_corpus_ids_keep_colliding_original_numbers_separate(self):
         published = {'id': 'published-gfm:279', 'native_id': 279, 'example': 279,
                      'corpus': 'published-gfm', 'section': 'Task list items',
@@ -182,6 +196,20 @@ class RunnerContractTests(unittest.TestCase):
             0, [source_failure], [], [], [], [], False), 1)
         self.assertEqual(run.calculate_formal_exit_code(
             0, [missing_source_check], [], [], [], [], False), 1)
+
+    def test_filtered_run_requires_at_least_one_reported_case(self):
+        self.assertEqual(run.calculate_formal_exit_code(
+            0, [], [], [], [], [], True), 1)
+        unreported = run.case_result(626, self.fixture, None)
+        self.assertEqual(run.calculate_formal_exit_code(
+            0, [unreported], [], [], [], [], True), 1)
+
+    def test_valid_filtered_case_passes_but_unexpected_native_id_fails(self):
+        base = run.case_result(626, self.fixture, self.result(self.fixture['html']))
+        self.assertEqual(run.calculate_formal_exit_code(
+            0, [base], [], [], [], [], True), 0)
+        self.assertEqual(run.calculate_formal_exit_code(
+            0, [base], [], [999], [], [], True), 1)
 
     def test_html_policy_skip_is_explicit_and_not_a_pass(self):
         row = run.case_result(626, self.fixture, self.result('<div>different</div>'),

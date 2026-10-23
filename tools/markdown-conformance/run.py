@@ -107,7 +107,7 @@ def case_result(example, fixture, result, skip_reason=None):
         result.get('expected_html') == fixture['html'])
     row['native_id'] = fixture.get('native_id', example)
     row['example'] = fixture['example']
-    row['id'] = fixture.get('id', f"commonmark:{fixture['example']}")
+    row['id'] = fixture_identity(fixture)
     row['corpus'] = fixture.get('corpus', 'commonmark')
     row['section'] = fixture['section']
     row['markdown'] = fixture['markdown']
@@ -162,6 +162,17 @@ def case_result(example, fixture, result, skip_reason=None):
     return row
 
 
+def fixture_identity(fixture):
+    """Return the public corpus-qualified label, including for CommonMark fixtures."""
+    return fixture.get('id', f"commonmark:{fixture['example']}")
+
+
+def label_native_examples(numbers, native_to_fixture):
+    """Use fixture identities for known native IDs while retaining unknown IDs."""
+    return [fixture_identity(native_to_fixture[number]) if number in native_to_fixture else number
+            for number in numbers]
+
+
 def calculate_formal_exit_code(native_exit_code, cases, missing, unexpected, duplicates,
                      malformed, filtered):
     """Combine native assertions with required semantic/report assertions."""
@@ -177,9 +188,10 @@ def calculate_formal_exit_code(native_exit_code, cases, missing, unexpected, dup
             or (case.get('semantic_match') is False
                 and case.get('reference_difference_verified') is not True))
         for case in cases)
-    report_failed = bool(duplicates or malformed)
+    reported_count = sum(bool(case.get('reported')) for case in cases)
+    report_failed = bool(duplicates or malformed or unexpected or reported_count == 0)
     if not filtered:
-        report_failed = report_failed or bool(missing or unexpected)
+        report_failed = report_failed or bool(missing)
     return 1 if semantic_failed or report_failed else 0
 
 
@@ -479,13 +491,9 @@ def main():
     expected_ids = set(native_to_fixture)
     missing_native = sorted(expected_ids - present)
     unexpected_native = sorted(present - expected_ids)
-    missing = [native_to_fixture[number]['id'] for number in missing_native]
-    unexpected = [
-        native_to_fixture[number]['id'] if number in native_to_fixture else number
-        for number in unexpected_native]
-    duplicate_ids = [
-        native_to_fixture[number]['id'] if number in native_to_fixture else number
-        for number in duplicates]
+    missing = label_native_examples(missing_native, native_to_fixture)
+    unexpected = label_native_examples(unexpected_native, native_to_fixture)
+    duplicate_ids = label_native_examples(duplicates, native_to_fixture)
     semantic_failed = any(
         case.get('reported') and (
             case.get('error') or case.get('fixture_input_match') is False
