@@ -1,8 +1,8 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-23, shared frontend in progress
+## Current checkpoint - 2026-10-23, shared frontend verified
 
-- Deliver an owned preparation API composing normalization, frontmatter,
+- Delivered an owned preparation API composing normalization, frontmatter,
   directives, configuration scope and final builtin detection for Folia's
   text-to-SVG path. Preserve raw/cleaned/comment-bearing source, title and
   frontmatter line offset. This batch stops before parser/renderer execution.
@@ -10,21 +10,31 @@
   using existing native components and default/dark configuration sessions.
   Validate representative Packet/Pie and existing family detection inputs,
   configuration precedence, common incomplete input and request isolation.
-  Pass condition: original composed oracle plus native standalone/integrated
-  Windows Debug/Release checks. Next: Packet/Pie renderer entry integration.
-- Verification branch: codex/mermaid-cpp-frontend. Publish selected
-  feature/test/public-documentation commits, then update feat/mermaid-cpp-port and upstream
-  PR #1 after verification. Do not merge. Baseline delivery 31770996 passed
-  all four jobs in run 39912778063; live PR/base are unchanged.
+  Exit conditions passed: original composed oracle plus native standalone/
+  integrated Windows Debug/Release checks. Next: Packet/Pie renderer entry integration.
+- Verified code/fixture head: e9b7827e76d37889066b46ff8c5d090dec237472 on
+  codex/mermaid-cpp-frontend. Run 39917035248 passed all four Windows jobs:
+  https://github.com/zhao0349/Folia/actions/runs/39917035248
+  Integrated jobs passed FoliaTests, FoliaWindowsEditorTests and both Mermaid
+  suites. All jobs checked source/SVG oracles, 78 native SVG DOM comparisons
+  and 96 browser/DirectWrite measurements. No WinUI packaging/DPI acceptance.
+- Delivery: normal fast-forward from 31770996 to the verified feature commits
+  plus this documentation-only checkpoint on feat/mermaid-cpp-port; update
+  https://github.com/water2004/Folia/pull/1 and keep it OPEN. DO NOT merge.
+  Upstream base remains 508423f2. No AGENTS.md changes in the contribution.
+  Delivery/checkpoint pushes can start automatic reruns; the completed evidence
+  above is for the tested code and fixture head, not those later reruns.
 - Composed oracle: 49 representative inputs, local check passes. Native
   prepare_diagram implementation and fixture tests compile in Windows CI.
   Init/wrap scanning retains a request-local cursor after malformed JSON;
   independent calls remain isolated. No local native compiler, build or agent.
+- Small delivery commits: 9c7d3659 original composition oracle; 81235d0b native
+  frontend and request isolation; e9b7827e pre-sanitization oracle capture.
 - Initial run 39916287900 exposed four oracle capture mismatches: original
   addDirective mutates the extracted object. Capture extraction before that
   call; effective renderer configuration already matched in every case.
   The unchanged Release runner passes both frontend tests (708 assertions)
-  with the corrected fixture. Full CI for that correction is still required.
+  with the corrected fixture; the full passing CI above verifies that correction.
   Downloaded runner: build/mermaid-cpp/frontend-check/FoliaMermaidTests.exe.
 - Next adapter evidence: PacketDB.getConfig overlays default/global packet
   settings and adds showBits padding (already done by native layout rendering).
