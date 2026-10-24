@@ -99,7 +99,7 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
                 else d+=" C "+num(start+60)+","+num(line_y-10)+" "+num(start+60)+","+num(line_y+30)+" "+num(start)+","+num(line_y+20);
                 signals+="<path d=\""+d+"\"";
             } else signals+="<line x1=\""+num(start)+"\" y1=\""+num(line_y)+"\" x2=\""+num(stop)+"\" y2=\""+num(line_y)+"\"";
-            signals+=" class=\""+std::string(cls)+"\" stroke=\""+paint(t.signal)+"\" stroke-width=\"2\" fill=\"none\"";
+            signals+=" class=\""+std::string(cls)+"\" stroke=\""+paint(t.signal)+"\" stroke-width=\"1.5\" fill=\"none\"";
             if(dotted(m.type)) signals+=" stroke-dasharray=\"3 3\"";
             if(!open(m.type)) signals+=" marker-end=\"url(#sequence-arrowhead)\"";
             if(both(m.type)) signals+=" marker-start=\"url(#sequence-arrowhead)\"";
@@ -116,7 +116,7 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
         svg+="<defs><marker id=\"sequence-arrowhead\" refX=\"7.9\" refY=\"5\" markerUnits=\"userSpaceOnUse\" markerWidth=\"12\" markerHeight=\"12\" orient=\"auto-start-reverse\"><path d=\"M -1 0 L 10 5 L 0 10 z\" fill=\""+paint(t.signal)+"\" stroke=\""+paint(t.signal)+"\"/></marker></defs>";
         for(std::size_t i=0;i<actors.size();++i) {
             const auto& a=actors[i];const auto center=a.x+a.width/2;
-            svg+="<line class=\"actor-line\" x1=\""+num(center)+"\" x2=\""+num(center)+"\" y1=\""+num(c.height)+"\" y2=\""+num(footer_y)+"\" stroke=\""+paint(t.actor_line)+"\" stroke-width=\"2\"/>";
+            svg+="<line class=\"actor-line\" x1=\""+num(center)+"\" x2=\""+num(center)+"\" y1=\""+num(c.height)+"\" y2=\""+num(footer_y)+"\" stroke=\""+paint(t.actor_line)+"\" fill=\""+paint(t.actor_fill)+"\" stroke-width=\"2\"/>";
             for(const auto actor_y:{0.0,footer_y}) {
                 svg+="<rect class=\"actor "+std::string(actor_y==0?"actor-top":"actor-bottom")+"\" name=\""+xml(doc.actors[i].id)+"\" x=\""+num(a.x)+"\" y=\""+num(actor_y)+"\" width=\""+num(a.width)+"\" height=\""+num(c.height)+"\" rx=\"3\" ry=\"3\" fill=\""+paint(t.actor_fill)+"\" stroke=\""+paint(t.actor_border)+"\"/>";
                 svg+="<text class=\"actor actor-box\" x=\""+num(center)+"\" y=\""+num(actor_y+c.height/2)+"\" text-anchor=\"middle\" dominant-baseline=\"central\" alignment-baseline=\"central\" fill=\""+paint(t.actor_text)+"\""+font+">"+xml(measured.actors[i].display)+"</text>";

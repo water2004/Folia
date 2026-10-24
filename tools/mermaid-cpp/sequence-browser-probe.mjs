@@ -49,7 +49,7 @@ if(!process.argv.includes('--library')) {
   const page=await browser.newPage();const cdp=await page.context().newCDPSession(page);
   // The original probes sans-serif as well as the configured family. Fix its
   // browser mapping, just as the native resolver explicitly maps it to Arial.
-  await cdp.send('Page.setFontFamilies',{fontFamilies:{sansSerif:'Arial'}});
+  await cdp.send('Page.setFontFamilies',{fontFamilies:{sansSerif:'Arial'},forScripts:['Hans','Hant','Latn','Zyyy'].map(script=>({script,fontFamilies:{sansSerif:'Arial'}}))});
   await page.goto(pathToFileURL(file).href);await page.waitForSelector('pre#result,pre#error',{timeout:60000});
   assert.equal(await page.locator('#error').count(),0,await page.locator('pre').textContent());
   rows=JSON.parse(await page.locator('#result').textContent());
