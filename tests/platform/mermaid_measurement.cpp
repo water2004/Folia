@@ -18,6 +18,9 @@ suite mermaid_measurement = [] {
         expect(fatal(session->save_initialize_config(site).has_value()));
         expect(fatal(session->set_site_config(site).has_value()));
         const std::vector<std::pair<std::string,std::u16string>> cases={
+            {"markers-ends",u"flowchart LR\nA[Read] --o|open| B[Check]\nB --x|stop| C[Done]"},
+            {"markers-both",u"flowchart TD\nA[Read] o--o|open| B[Check]\nB x--x|stop| C[Save]\nC <--> D[Done]"},
+            {"markers-group",u"flowchart RL\nsubgraph g[Operations]\ndirection BT\nA[Read] x--x B[Check]\nend\ng o--o|ready| C[Done]"},
             {"labels-wrap",u"flowchart TD\nA[\"Read the input and validate the document\"] -->|\"continue with the next operation\"| B(\"Write the updated document to disk\")"},
             {"labels-wrap-group",u"%%{init: {\"flowchart\": {\"wrappingWidth\": 150, \"minNodeWidth\": 0}}}%%\nflowchart LR\nsubgraph g[\"Input and output operations\"]\ndirection TB\nA[\"Read the source document\"] --> B[\"Write the output document\"]\nend\ng --> C[\"All work completed\"]"},
             {"labels-entities",u"flowchart LR\nA[\"Say #quot;hello#quot;\"] -->|\"A &amp; B\"| B[\"Cost #36;5\"]\nB --> C[\"x &lt; 5\"]"},

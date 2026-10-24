@@ -61,6 +61,33 @@ void shorten(FlowchartPoint& p,FlowchartPoint neighbor,double amount) {
     const auto dx=neighbor.x-p.x,dy=neighbor.y-p.y,length=std::hypot(dx,dy);
     if(length>0) {p.x+=amount*dx/length;p.y+=amount*dy/length;}
 }
+std::string_view marker_name(std::u16string_view arrow) {
+    if(arrow==u"none") return {};
+    if(arrow==u"arrow_point") return "point";
+    if(arrow==u"arrow_circle") return "circle";
+    if(arrow==u"arrow_cross") return "cross";
+    throw std::runtime_error("Flowchart SVG marker is not implemented yet");
+}
+// Original markers.js classic geometry. Circle/cross use their refX positions;
+// lineWithOffset shortens only point arrows in this look, not the neo offsets.
+std::string marker_definitions(std::string_view color) {
+    std::string out="<defs>";
+    for(auto type:{"point","circle","cross"}) for(bool start:{false,true}) {
+        const std::string_view name=type;
+        const bool point=name=="point",cross=name=="cross";
+        out+="<marker id=\"flow-"+std::string(name)+(start?"-start":"-end")+
+            "\" viewBox=\""+(cross?"0 0 11 11":"0 0 10 10")+
+            "\" refX=\""+(point?(start?"4.5":"5"):(start?"-1":cross?"12":"11"))+
+            "\" refY=\""+(cross?"5.2":"5")+"\" markerUnits=\"userSpaceOnUse\" markerWidth=\""+
+            (point?"8":"11")+"\" markerHeight=\""+(point?"8":"11")+"\" orient=\"auto\">";
+        if(name=="circle") out+="<circle cx=\"5\" cy=\"5\" r=\"5\"";
+        else out+="<path d=\""+std::string(cross?"M 1,1 l 9,9 M 10,1 l -9,9":
+            start?"M 0 5 L 10 10 L 10 0 z":"M 0 0 L 10 5 L 0 10 z")+"\"";
+        out+=" fill=\""+std::string(color)+"\" stroke=\""+std::string(color)+
+            "\" stroke-width=\""+(cross?"2":"1")+"\" stroke-dasharray=\"1,0\"/></marker>";
+    }
+    return out+"</defs>";
+}
 // utils.calcLabelPosition/calculatePoint: midpoint by polyline distance, with
 // the original five-decimal interpolation. This is not the curve's midpoint.
 FlowchartPoint label_midpoint(std::span<const FlowchartPoint> points) {
@@ -140,8 +167,7 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
             if(!valid_box(b)) return std::unexpected("Invalid measured Flowchart edge label");
             if(!e.styles.empty()||!e.compiled_styles.empty()) return std::unexpected("Flowchart custom edge styles require the style adapter");
             if(e.curve!=u"basis" && e.curve!=u"linear" && !e.curve.empty()) return std::unexpected("Flowchart SVG curve is not implemented yet");
-            for(auto arrow:{e.arrow_start,e.arrow_end}) if(arrow!=u"none" && arrow!=u"arrow_point")
-                return std::unexpected("Flowchart SVG marker is not implemented yet");
+            for(auto arrow:{e.arrow_start,e.arrow_end}) marker_name(arrow);
             labels.push_back(e.label.empty()?FlowchartEdgeLabelSize{}:FlowchartEdgeLabelSize{b.width,height(b)});
         }
         auto prepared=prepare_flowchart_graph(graph);if(!prepared) return std::unexpected(prepared.error());
@@ -152,8 +178,7 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
             "\" height=\""+number(output.height)+"\" viewBox=\""+number(scene.min_x)+" "+number(scene.min_y)+" "+number(output.width)+" "+number(output.height)+"\">";
         for(auto [tag,value]:{std::pair{"title",std::u16string_view(graph.acc_title)},{"desc",std::u16string_view(graph.acc_description)}})
             if(!value.empty()) svg+="<"+std::string(tag)+">"+xml(value)+"</"+tag+">";
-        svg+="<defs><marker id=\"flow-point-end\" viewBox=\"0 0 10 10\" refX=\"5\" refY=\"5\" markerUnits=\"userSpaceOnUse\" markerWidth=\"8\" markerHeight=\"8\" orient=\"auto\"><path d=\"M0 0L10 5L0 10Z\" fill=\""+theme.line+"\"/></marker>";
-        svg+="<marker id=\"flow-point-start\" viewBox=\"0 0 10 10\" refX=\"4.5\" refY=\"5\" markerUnits=\"userSpaceOnUse\" markerWidth=\"8\" markerHeight=\"8\" orient=\"auto\"><path d=\"M0 5L10 10L10 0Z\" fill=\""+theme.line+"\"/></marker></defs>";
+        svg+=marker_definitions(theme.line);
         svg+="<g font-family=\""+xml(theme.font_family)+"\" font-size=\""+number(theme.font_size)+"\" transform=\"translate("+number(theme.padding)+","+number(theme.padding)+")\">";
         const auto text=[&](std::u16string_view,FlowchartPoint center,const FlowchartTextBox& b,std::string_view css) {
             std::string out="<text class=\""+std::string(css)+"\" xml:space=\"preserve\" text-anchor=\"middle\" fill=\""+theme.text+"\">";
@@ -189,8 +214,8 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
             svg+="<path class=\"flowchart-link\" data-edge=\""+xml(e.id)+"\" d=\""+path+"\" fill=\"none\" stroke=\""+theme.line+
                 "\" stroke-width=\""+(e.stroke==u"thick"?std::string("3.5"):e.stroke==u"invisible"?std::string("0"):std::string("1"))+"\"";
             svg+=e.stroke==u"dotted"?" stroke-dasharray=\"2\"":" stroke-dasharray=\"0\"";
-            if(e.arrow_start==u"arrow_point") svg+=" marker-start=\"url(#flow-point-start)\"";
-            if(e.arrow_end==u"arrow_point") svg+=" marker-end=\"url(#flow-point-end)\"";
+            if(auto name=marker_name(e.arrow_start);!name.empty()) svg+=" marker-start=\"url(#flow-"+std::string(name)+"-start)\"";
+            if(auto name=marker_name(e.arrow_end);!name.empty()) svg+=" marker-end=\"url(#flow-"+std::string(name)+"-end)\"";
             svg+="/>";
         }
         for(auto i:edge_order) if(!graph.edges[i].label.empty() && layout->edges[i].label) {

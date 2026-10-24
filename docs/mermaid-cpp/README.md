@@ -69,7 +69,7 @@ The measured Flowchart SVG entry supports explicit `layout: dagre` and
 stadium/subroutine/cylinder, hexagon, slanted parallelogram, trapezoid,
 inverse trapezoid, asymmetric notch and double-circle nodes,
 quoted/entity plain labels, explicit line breaks and measured automatic wrapping,
-basis/linear paths, point/plain arrow ends, and
+basis/linear paths, point/circle/cross/plain arrow ends, and
 normal/thick/dotted/invisible links, and compact merged self loops. Self loops
 use the original three-segment Dagre graph for placement, then the original
 dummy-node side selection, compact path and label-offset rules for one logical
@@ -114,10 +114,13 @@ compound groups share the parent layout; edges with group endpoint markers use
 the original boundary-path cut and label repositioning. Group backgrounds and
 plain titles use default/dark theme colors and real DirectWrite measurements.
 The browser comparison observes absolute nested coordinates, group boxes and
-title positions in addition to the existing nodes and sampled paths.
+title positions in addition to the existing nodes and sampled paths. Classic
+edge markers retain the original start/end reference points, dimensions,
+outlines and theme paints, including bidirectional and group-connected links.
+Only point arrows shorten the classic path; circle/cross use marker offsets.
 
 Complete Flowchart rendering remains pending. The SVG entry explicitly rejects
-diagram titles, custom styles, styled HTML/Markdown labels, additional markers,
+diagram titles, custom styles, styled HTML/Markdown labels,
 and non-classic looks; it does not silently drop these features.
 The complete existing family requirements remain unchanged. The rank/layout
 API requires prepared graphs without nonempty group endpoints; callers must
