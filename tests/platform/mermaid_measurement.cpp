@@ -19,6 +19,9 @@ suite mermaid_measurement = [] {
         expect(fatal(session->set_site_config(site).has_value()));
         struct Example {std::string name;std::u16string body,title;};
         const std::vector<Example> cases={
+            {"rich-markdown",u"flowchart LR\nA[\"`Read **bold** and *italic*`\"] -->|\"`next **operation**`\"| B[\"`Save ***both***\nthen finish`\"]"},
+            {"rich-markdown-group",u"flowchart TD\nsubgraph g[Operations]\ndirection LR\nA[\"`Read the __source document__ and _validate input_`\"] -->|\"`continue with **next step** and *save*`\"| B[\"`Write **updated _data_**`\"]\nend\ng --> C[Done]"},
+            {"rich-markdown-literal",u"flowchart LR\nA[\"`Read \\*literal\\* &amp; **bold**`\"] --> B[\"`Save file_name and *unfinished`\"]"},
             {"rich-html",u"flowchart LR\nA[\"Read <b>bold</b> and <i>italic</i>\"] -->|\"next <strong>operation</strong>\"| B[\"Save <strong><em>both</em></strong><br/>then finish\"]"},
             {"rich-html-group",u"flowchart TD\nsubgraph g[Operations]\ndirection LR\nA[\"Read the <strong>source document</strong> and <em>validate input</em>\"] -->|\"continue with <b>next step</b> and <i>save</i>\"| B[\"Write <i>updated data</i>\"]\nend\ng --> C[Done]"},
             {"rich-html-font",u"flowchart LR\nA[\"Read <b>bold</b> and normal\"] --> B[\"Write <em>italic</em> and normal\"]\nstyle A font-size:20px,font-weight:300\nstyle B font-size:18px,font-weight:bold"},

@@ -84,8 +84,9 @@ class Parser {
             while (pos < source.size() && source[pos] != u'"') ++pos;
             if (pos == source.size()) fail("Unclosed quoted label");
             value.text = trim(source.substr(start,pos-start)); ++pos; horizontal();
-            if (value.text.starts_with(u'`') && value.text.ends_with(u'`'))
-                fail("Markdown labels are not supported by this Flowchart stage");
+            if (value.text.size()>=2 && value.text.starts_with(u'`') && value.text.ends_with(u'`')) {
+                value.type=u"markdown";value.text=value.text.substr(1,value.text.size()-2);
+            }
         } else {
             const auto start = pos;
             while (pos < source.size() && !at(close)) {
@@ -187,10 +188,11 @@ class Parser {
             auto text = trim(source.substr(start,end-start));
             if (text.starts_with(u'"') && text.ends_with(u'"')) {
                 edge.label_type = u"string"; text = text.substr(1,text.size()-2);
+                if(text.size()>=2 && text.starts_with(u'`') && text.ends_with(u'`')) {
+                    edge.label_type=u"markdown";text=text.substr(1,text.size()-2);
+                }
             }
             edge.label = std::move(text);
-            if (edge.label.find(u'`') != Text::npos)
-                fail("Markdown edge labels require the rich-text adapter");
         }
         if (token.size() < 3 && token != u"-.-") fail("Incomplete edge");
         View line = token; auto last = line.back(); line.remove_suffix(1);

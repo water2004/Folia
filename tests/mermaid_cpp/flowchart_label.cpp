@@ -1,11 +1,38 @@
 #include "support/folia_test.hpp"
 import folia.mermaid.flowchart_label;
 import folia.mermaid.render_entry;
+import folia.mermaid.number;
 
 namespace {
 using namespace boost::ut;
 using namespace folia::mermaid;
+#include "theme_fixture.hpp"
 suite flowchart_labels=[] {
+    "mermaid_flowchart_markdown_runs_match_original"_test=[] {
+        const auto override=std::getenv("FOLIA_MERMAID_FIXTURES");
+        std::ifstream input{std::filesystem::path{override?override:FOLIA_MERMAID_FIXTURE_DIR}/"flowchart-label.tsv"};
+        expect(fatal(input.is_open()));std::string row;std::size_t count=0;
+        while(std::getline(input,row)) {
+            if(!row.empty()&&row.back()=='\r') row.pop_back();
+            if(row.empty()||row.front()=='#') continue;
+            const auto first=row.find('\t'),last=row.rfind('\t');
+            const auto source=decode(std::string_view(row).substr(first+1,last-first-1));
+            const auto expected=decode(std::string_view(row).substr(last+1));
+            auto lines=flowchart_label_runs(source,u"markdown");
+            expect(lines.has_value())<<row.substr(0,first)<<(lines?"":lines.error());
+            if(!lines) continue;
+            std::u16string observed;
+            for(std::size_t i=0;i<lines->size();++i) {
+                if(i) observed+=u'\n';
+                for(const auto& run:(*lines)[i]) for(auto c:run.text) {
+                    if(c==u' '||c==u'\t'||c==u'\r'||c==u'\n') continue;
+                    observed+=static_cast<char16_t>(u'0'+run.strong+2*run.emphasis);observed+=c;
+                }
+            }
+            expect(bool(observed==expected))<<row.substr(0,first)<<hex(observed)<<hex(expected);++count;
+        }
+        expect(count==8_u);
+    };
     "mermaid_flowchart_display_lines_preserve_source_labels"_test=[] {
         auto session=ConfigSession::create();expect(fatal(session.has_value()));
         const ConfigValue site{.kind=ConfigKind::mapping,.mapping={

@@ -11,6 +11,14 @@
 - Batch 2 follows immediately: common Markdown strong/emphasis labels using
   the same measured-run boundary, with original parser/display observations.
   Then continue other required families and the application call chain.
+- Batch 1 source commits 54a34fc4/b03c4fa9 are on the rich-html validation
+  branch. Initial run 40096440489 passed native suites but found CSS
+  break-spaces versus DirectWrite trailing-space wrapping differences; b03c4fa9
+  fixes that measured boundary. The replacement Windows run is pending.
+- Batch 2 implementation retains markdown parser labels/types and converts
+  common star/underscore strong/emphasis, nesting and escaped punctuation to
+  the same measured runs. Original parser fixtures, 8 original Markdown display
+  observations and 92 browser SVG observations are generated; native CI pending.
 - Implementation is not yet verified or delivered. Local MSVC/CMake remain
   unavailable; use the existing four-job Windows gate before updating PR #1.
 

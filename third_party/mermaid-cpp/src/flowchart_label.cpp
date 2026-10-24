@@ -3,6 +3,7 @@ import std;
 
 namespace folia::mermaid {
 namespace {
+#include "flowchart_markdown.inc"
 std::u16string decode_entity(std::u16string_view name) {
     int base=10;
     if(name.starts_with(u'#')) {
@@ -26,8 +27,10 @@ std::u16string decode_entity(std::u16string_view name) {
 std::expected<std::vector<FlowchartLabelLine>,std::string> flowchart_label_runs(
     std::u16string_view label,std::u16string_view type) {
     try {
-        if(type!=u"text"&&type!=u"string")
+        if(type!=u"text"&&type!=u"string"&&type!=u"markdown")
             return std::unexpected("Flowchart styled labels require the rich-text adapter");
+        std::u16string markdown;
+        if(type==u"markdown") {markdown=markdown_label_html(label);label=markdown;}
         std::vector<FlowchartLabelLine> lines(1);
         std::vector<std::u16string> tags;
         bool strong=false,emphasis=false;
@@ -52,7 +55,7 @@ std::expected<std::vector<FlowchartLabelLine>,std::string> flowchart_label_runs(
         for(std::size_t i=0;i<label.size();) {
             auto rest=label.substr(i);std::size_t break_size=0;
             if(rest.starts_with(u'\n')) break_size=1;
-            else if(rest.starts_with(u"\\n")) break_size=2;
+            else if(type!=u"markdown"&&rest.starts_with(u"\\n")) break_size=2;
             else if(rest.starts_with(u'<')) {
                 const auto end=rest.find(u'>');
                 if(end!=rest.npos) {
