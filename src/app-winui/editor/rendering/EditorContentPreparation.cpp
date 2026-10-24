@@ -501,10 +501,14 @@ namespace winrt::Folia
                 }
                 auto displayMath = item.special().display == folia::MathDisplayMode::Block;
                 auto editing = CaretTouchesSpan(caret, item.source_span);
-                auto math = mathJax.Render(
-                    folia::cps_to_utf8(item.text), displayMath, fontSize,
-                    containerWidth, SvgColor(svgColor), {},
-                    editing ? MathRenderPurpose::Preview : MathRenderPurpose::Document);
+                auto purpose = editing ? MathRenderPurpose::Preview : MathRenderPurpose::Document;
+                auto tex = folia::cps_to_utf8(item.text);
+                auto color = SvgColor(svgColor);
+                // highPriority identifies the visible band. Offscreen layout
+                // reuses existing geometry and must not restart canceled jobs.
+                auto math = highPriority
+                    ? mathJax.Render(tex, displayMath, fontSize, containerWidth, color, {}, purpose)
+                    : mathJax.Lookup(tex, displayMath, fontSize, containerWidth, color, purpose);
                 display.pendingMath = display.pendingMath || !math;
                 auto delimiterLength = item.special().display == folia::MathDisplayMode::Block
                     ? std::size_t{0}

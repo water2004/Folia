@@ -89,7 +89,7 @@ namespace winrt::Folia
         float containerWidth,
         bool svgSupported,
         bool /*requestMath*/,
-        bool /*highPriority*/)
+        bool highPriority)
     {
         DisplayInlineText display;
         auto const& special = block.special();
@@ -119,10 +119,12 @@ namespace winrt::Folia
             return display;
         }
 
-        auto math = mathJax.Render(
-            folia::cps_to_utf8(special.tex), true, fontSize,
-            containerWidth, SvgColor(svgColor), {},
-            editing ? MathRenderPurpose::Preview : MathRenderPurpose::Document);
+        auto purpose = editing ? MathRenderPurpose::Preview : MathRenderPurpose::Document;
+        auto tex = folia::cps_to_utf8(special.tex);
+        auto color = SvgColor(svgColor);
+        auto math = highPriority
+            ? mathJax.Render(tex, true, fontSize, containerWidth, color, {}, purpose)
+            : mathJax.Lookup(tex, true, fontSize, containerWidth, color, purpose);
         display.pendingMath = !math;
         if (editing)
         {

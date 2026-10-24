@@ -89,6 +89,7 @@ namespace winrt::Folia
             std::optional<float> sourceTopOverride = std::nullopt);
         void ClearPreparedDocument();
         void AttachMathCompletion();
+        std::function<void()> EmbeddedCompletionCallback();
 
         void Invalidate();
 
@@ -97,6 +98,8 @@ namespace winrt::Folia
             std::mutex mutex;
             std::function<void()> callback;
             bool active = true;
+            bool repaintQueued = false;
+            bool embeddedQueued = false;
         };
 
         using VisualBlock = EditorVisualBlock;
@@ -113,7 +116,6 @@ namespace winrt::Folia
         SvgNormalizer svgNormalizer;
         TreeSitterHighlighter treeSitter;
         std::shared_ptr<InvalidationState> invalidationState = std::make_shared<InvalidationState>();
-        std::atomic_bool embeddedCompletionPending = false;
         folia::ThemeProfile themeProfile = folia::default_theme_profile();
         std::uint64_t themeRevision = 1;
         EditorStyleSheet styleSheet = CreateEditorStyleSheet(themeProfile);

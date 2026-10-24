@@ -52,6 +52,20 @@ namespace winrt::Folia
         return entry->result;
     }
 
+    std::shared_ptr<MathJaxSvg const> MathJaxRenderer::Lookup(
+        std::string_view tex, bool display, float em, float containerWidth,
+        std::string_view color, MathRenderPurpose purpose)
+    {
+        auto current = CurrentState();
+        if (!current) return {};
+        std::scoped_lock lock(current->mutex);
+        auto key = State::MakeKey(tex, display, em, containerWidth, color, purpose);
+        auto found = current->index.find(key);
+        if (found == current->index.end()) return {};
+        if (current->activeOwner) current->blockEntries.insert(found->second->id);
+        return found->second->result;
+    }
+
     std::shared_ptr<MathJaxSvg const> MathJaxRenderer::Prepare(
         std::string_view tex, bool display, float em, float containerWidth,
         std::string_view color, std::stop_token stop, MathRenderPurpose purpose)

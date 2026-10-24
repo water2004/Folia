@@ -58,14 +58,14 @@ namespace winrt::Folia
                 && (prepared.remoteImageGeneration != remoteImageGeneration
                     || (prepared.pendingImage
                         && prepared.embeddedGeneration != embeddedGeneration));
-            auto refreshForMath = prepared.pendingMath
-                && prepared.embeddedGeneration != embeddedGeneration;
+            auto highPriority = index >= embeddedPlan.visible.begin
+                && index < embeddedPlan.visible.end;
+            auto refreshForMath = prepared.pendingMath && (printMode || highPriority)
+                && (prepared.embeddedGeneration != embeddedGeneration || viewportActive);
             auto refreshForMermaid = prepared.containsMermaid
                 && prepared.embeddedRequested
                 && prepared.pendingMermaid
                 && prepared.embeddedGeneration != embeddedGeneration;
-            auto highPriority = index >= embeddedPlan.visible.begin
-                && index < embeddedPlan.visible.end;
             auto enteredEmbeddedBand = !prepared.embeddedRequested
                 && (prepared.containsImage
                     || prepared.containsMermaid)

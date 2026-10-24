@@ -10,6 +10,10 @@ Folia's Boost.UT C++23-module test executables include:
   WinRT UI dispatcher, production app objects and a bounded message pump. File
   loading tests hold the surface unavailable, then initialize it or cancel the
   operation; they check UI thread affinity, exact document content and reopening.
+  Math scrolling tests cover UI queue fairness under repeated slow frames,
+  deferred repaint without recursion, canceled-work notification, offscreen
+  geometry lookup without new native work/IO, and rapid viewport replacements
+  that settle while preserving document content and selection.
 - `FoliaEncodingTests` covers the app storage boundary against the pinned ICU
   runtime: BOM handling, detection candidate ordering, strict transcoding,
   converter enumeration, and byte-faithful round trips.

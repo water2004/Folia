@@ -224,7 +224,7 @@ namespace winrt::Folia
                 previousSubmission = now;
                 if (!state->attached.load(std::memory_order_acquire)) break;
                 auto queued = state->dispatcher.TryEnqueue(
-                    winrt::Microsoft::UI::Dispatching::DispatcherQueuePriority::High,
+                    winrt::Microsoft::UI::Dispatching::DispatcherQueuePriority::Low,
                     [state, requestedGeneration, frameId]
                     {
                         auto expected = frameId;

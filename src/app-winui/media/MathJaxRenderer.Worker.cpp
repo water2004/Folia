@@ -303,7 +303,8 @@ namespace winrt::Folia
                 if (!entry->removed && current != index.end() && current->second->id == entry->id)
                     RemoveEntryLocked(entry, cancelAfterUnlock);
                 entry->pending = false;
-                if (!stopping) callback = completion;
+                // Canceled/removed work publishes no new visible state. A
+                // completion here would refresh and resubmit offscreen work.
             }
             if (pending) --pending;
             activeRender.reset();

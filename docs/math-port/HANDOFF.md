@@ -2,7 +2,15 @@
 
 恢复/压缩后先实际读本文。架构、职责和详细验收见 [architecture](native-raii-architecture.md)、[files](native-raii-files.json)、[acceptance](native-raii-acceptance.md)。只复查新变化；ignored候选用 `rg --no-ignore`。
 
-## 当前 checkpoint：偶发打开跨线程错误已修复（2026-10-24）
+## 当前 checkpoint：快速拖动公式文档的输入停滞已修复（2026-10-25）
+
+- 用户重新要求排查，确认高CPU、滚动条/点击停滞，十几二十分钟后有时恢复；本轮未发现运行中的Folia，未取新现场堆栈，不把历史38588样本当成当前复现。只沿渲染调度/公式取消链调查，旧生产owner链及Mermaid移植继续暂停。
+- 已确认并修复：FrameScheduler持续以High优先级提交重帧，普通UI回调测试被推迟至第12帧结束；Render退出的deferredInvalidate又同步调用Render，使帧预算不能让出UI。现均以Low优先级异步补帧，重绘和embedded完成通知各合并至一个待处理回调，弱生命周期保护复用原invalidation state。
+- 公式重复工作也已修复：离屏布局原先会Render排队，帧末取消，取消完成仍触发刷新。新Lookup仅借用已有geometry并登记原owner，不排渲染/读取；只有visible band启动补算，pending公式回到视口会重提，取消不发完成通知。原SVG按当前视口后台读取/离屏丢弃、预览只在内存、请求字体/批量/Common布局均未改变。
+- 新正式测试 `tests/app/test_math_scrolling.cpp` 覆盖调度公平性、递延补帧不递归、取消通知、inline/display离屏查询与owner保留、400公式20次视口替换后停止重绘及文档/选择不变。WinUI Debug构建成功；app **11项/52断言**、Windows editor **80项/3429断言**通过。隔离替换原3个公式Cpp后，新增math6项有3项失败（取消多通知、两类离屏任务）；原调度/递延测试失败记录也保留。日志 `build/math-scroll-{app-build,tests-before,tests-after,feedback-before.stdout,platform}.log`。
+- 最终连续10轮app复验全部通过：**110项/520断言**，逐轮记录 `build/math-scroll-repeat-summary.log`，日志 `build/tests/winui/Debug/scroll-final-*.stdout.log`。快速切换已完成时允许零补帧，要求输入回调得到执行、重绘停止及无递归；专门的递延测试则强制渲染中请求新帧并验证让出UI。修复与测试以本地提交保存，无活动agent/native/build句柄、候选或剩余检查；未改版本/推送/MSI/已安装程序。尚未用用户原文档复测十几分钟停滞，后续交付/实测按用户要求；不展开旧生产owner链或Mermaid移植。
+
+## 已完成：偶发打开跨线程错误已修复（2026-10-24）
 
 - 新任务来自用户截图“打开失败：应用程序调用一个已为另一线程整理的接口”。`LoadDocumentAsync` 的表面未就绪32ms等待及读文件变化100ms重试，均在 `resume_after` 后遗漏返回UI；进入这些时序后会从线程池访问renderer/界面回调。已在入口捕获 `apartment_context`，两处等待后显式返回，再检查取消/生命周期。未更改数学算法、文档模型、版本号或重新发布0.3.0。
 - 正式应用测试 `tests/app/test_document_loading.cpp` 使用真实DispatcherQueue和生产控制器/Session/Renderer，检查延迟就绪（普通/公式文档）、取消、取消后重开及已就绪路径。`tools/run_winui_tests.ps1` 复用app对象与相同Boost.UT模块编译配置，console runtime已链接；产物仅在 `build/tests/winui/`，不进入MSI。
@@ -28,7 +36,7 @@
 
 ## 历史：0.2.3运行高CPU，已捕获线程栈（2026-10-22）
 
-- **当前优先级**：用户已要求“先暂时不管”高CPU/无响应问题，暂停继续采样、计数及修复；保留下方证据，待用户重启此项。当前转为评估Markdown解析器与md4c的规范对照/接入取舍，尚未授权或实施解析器替换。
+- **当时优先级（历史）**：用户当时要求“先暂时不管”高CPU/无响应问题，暂停继续采样、计数及修复。2026-10-25已按新请求恢复对应调用链排查，当前结果以上方checkpoint为准；保留下方历史证据。
 - **新证据/当前任务**：用户报告Folia卡死及高CPU，要求捕获堆栈。已对运行中安装版PID38588采样8次：`build/hang-diagnostics/folia-38588-sample-{1..3}.txt`及`followup-{1..5}.txt`；工具 `capture.ps1`/`capture-followup.ps1` 用Windows线程/DbgHelp API，finally恢复线程，未关闭目标进程。安装Folia.exe与本地Release SHA256相同（D1CD68A92469CEF99412287AE2FE2F3AF1E52745CD253703C6DC0C0B96E176D1），App PDB可解析；Release Math DLL没有匹配PDB，内部仅模块偏移/最近导出名，不能把最近导出名当真实函数。
 - **恢复前后已抓到**：用户随后确认突然恢复响应。新增 `unresponsive-{1..5}.txt` 五次样本：1为math完成回调→Invalidate→Render→DrawDocument→EditorEmbeddedContentUpdater::Update:84→BlockPreparer::Prepare:745→DirectWrite文本测量；2/3在EndDraw；4/5主线程已回到GetMessageW、math线程条件变量空闲等待且累计CPU未再增加。随后Responding=true（窗口标题“折笺 — 整合.md”）。因此是长时间UI计算/绘制后恢复，**不可宣称永久死锁或已证明无限循环**；下述请求/取消反馈仍待证明。目标未关闭/未改代码，无live采样工具。
 - **已确认采样结果**：主线程62912持续在D2D EndDraw/DXGI Present；全部8次均经math完成通知→Invalidate→MainWindow::RenderEditorSurface→Render，部分同时出现Render退出RAII再次同步Invalidate→Render。followup1→5主线程累计增加4046.875ms，math线程18220增加3437.5ms。math线程在RenderBatch、取消catch清理renderer和条件变量等待之间变化，证据不支持单个公式一直不返回。GPU驱动线程35848也有工作。
