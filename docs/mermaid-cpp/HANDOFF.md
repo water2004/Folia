@@ -1,26 +1,56 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-24, markers validating and titles in progress
+## Current checkpoint - 2026-10-24, classic markers and measured titles verified
 
-- This batch connects parsed circle/cross start/end markers to the measured
-  Flowchart SVG entry. Scope is classic default/dark diagrams, connected and
-  grouped edges, and retained shape/cluster clipping and label placement.
-- Exit: original-browser/native comparisons of marker references, geometry,
-  paint and edge paths plus the affected Windows native checks. Next batch:
-  measured diagram titles, then required styles/rich labels, remaining families
-  and the application call chain. Do not expand the completed label/layout work.
-- Baseline ae0ad3d8 is clean; contribution a75189d5 passed Windows run
-  40068918348. Upstream PR #1 remains OPEN/unmerged. Keep it unmerged.
-- Marker source commits 903800e3/f48643f3 are pushed to the development fork
-  and codex/mermaid-cpp-markers. Windows run 40092570628 is in progress; no
-  native acceptance is claimed yet. Local browser captured 60 official SVGs.
-- The next bounded title batch implements utils.insertTitle followed by
-  setupViewPortForSVG: real 18px DirectWrite metrics, theme text color, centered
-  title baseline at -titleTopMargin, and viewport expansion for wide titles.
-  Exit on ordinary/wide/group titles in default/dark and affected native checks.
-  Original observations are in build/mermaid-cpp/titles-work (66 SVGs including
-  marker/previous cases). Styled HTML titles remain outside this plain-text
-  adapter. Next after titles: common explicit node/edge/class style adaptation.
+- Delivered parsed circle/cross start/end markers through render_mermaid,
+  including bidirectional and group-connected links in default/dark. Original
+  marker reference points, dimensions, outlines and paints are retained; point
+  marker strokes now match too. Classic circle/cross use marker positioning,
+  not neo path offsets. Existing shape/cluster clipping and labels stay intact.
+- Delivered plain frontmatter diagram titles using real 18px DirectWrite
+  metrics and theme text color. Original insertTitle centers the title over
+  the graph and places its baseline at -titleTopMargin; viewport bounds then
+  expand to include ordinary/wide titles and custom margins on grouped graphs.
+- Both batches met their exit conditions. Marker head
+  f48643f3f3d798b91290673ff7e49655f08966b6 passed all four Windows jobs:
+  https://github.com/zhao0349/Folia/actions/runs/40092570628
+  Final title head ca5d84c236132951d646e551bbd4a4e2caecf51c also passed all four:
+  https://github.com/zhao0349/Folia/actions/runs/40092789707
+  Each run covers standalone/integrated Debug/Release. Integrated jobs passed
+  FoliaTests, FoliaWindowsEditorTests and both Mermaid suites. Final jobs
+  compared 66 original/native SVGs across 33 diagrams and two themes, including
+  marker geometry/references/paint, title anchors/size/color and viewport bounds,
+  plus existing labels, shapes, groups and paths. Existing source/SVG and real
+  browser/DirectWrite checks passed. Downloaded native previews were inspected.
+- Small source commits: 903800e3/f48643f3 (markers), 4f4c7426/ca5d84c2 (titles).
+  Contribution equivalents 05dbc4b7/92d0f083/5a41153b/301c2d04 are pushed to
+  feat/mermaid-cpp-port in build/mermaid-cpp/entry-contribution. Preview-only
+  follow-up e4ff1664/df955e07 isolates SVGs as images in composite screenshots
+  so their marker IDs do not collide; its 66-case comparison passed locally.
+  Runtime code, native tests, pins and workflow match the final verified head.
+  This documentation checkpoint follows them. Upstream PR #1 contains both
+  batches; keep OPEN/unmerged, DO NOT merge:
+  https://github.com/water2004/Folia/pull/1
+  Contribution diffs against PR base 508423f2 and upstream/master 81bed653 have
+  no AGENTS.md change. Delivery-triggered reruns are separate from the completed
+  implementation validation above.
+- Next concrete batch: common explicit node/edge/class styles already parsed
+  by Flowchart. Start with shapes/handDrawnShapeStyles.ts::compileStyles and
+  styles2String, the classic shape/cluster paint paths and edgeMarker.ts colored
+  markers. Preserve compiled-class then direct-style precedence. Scope the first
+  batch to actual fill/stroke/text-color/line-width/dash properties in connected
+  and grouped diagrams; exit on representative default/dark source-to-SVG
+  comparisons and affected native checks. Then continue needed styled labels,
+  other required families and the application call chain. Do not reopen passed
+  shape/layout/plain-label/marker/title stages without a relevant regression.
+- Limits: custom styles, styled HTML/Markdown labels and HTML titles, shape
+  metadata, other required families and application dependency switching remain.
+  Folia still uses Rust in the application. No WinUI/GPU/DPI acceptance claimed.
+- No local build, agent, browser or CI watcher remains active. No failed check
+  remains. Ignored evidence: build/mermaid-cpp/markers-verified and titles-verified
+  (downloaded Release artifacts, comparison.json and native-preview.png);
+  markers-work/titles-work contain original-browser observations. Local native
+  builds remain unavailable; Windows CI supplies the native verification.
 
 ## Measured display labels verified (historical)
 
