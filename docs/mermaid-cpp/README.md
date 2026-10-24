@@ -111,8 +111,8 @@ The browser comparison observes absolute nested coordinates, group boxes and
 title positions in addition to the existing nodes and sampled paths.
 
 Complete Flowchart rendering remains pending. The SVG entry explicitly rejects
-diagram titles, custom styles, rich/multiline/wrapped labels, other classic shapes and
-markers, and non-classic looks; it does not silently drop these features.
+diagram titles, custom styles, rich/multiline/wrapped labels, additional markers,
+and non-classic looks; it does not silently drop these features.
 The complete existing family requirements remain unchanged. The rank/layout
 API requires prepared graphs without nonempty group endpoints; callers must
 measure and lay out extracted subgraphs separately before the enclosing graph.

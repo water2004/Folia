@@ -1,25 +1,50 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-24, classic shape SVG in progress
+## Current checkpoint - 2026-10-24, measured classic shapes verified
 
-- Deliver measured stadium/subroutine/cylinder nodes through render_mermaid,
-  including their original outlines, label placement and edge intersections.
-  Reuse the verified Dagre and recursive group adapters.
-- Exit: representative connected and grouped diagrams in default/dark match
-  original browser geometry and paints; affected native checks and existing
-  Windows standalone/integrated Debug/Release workflow pass. Then select the
-  small verified commits into feat/mermaid-cpp-port and update upstream PR #1,
-  keeping it OPEN and unmerged. Baseline contribution run 40055566579 passed.
-- Next: remaining required classic shape/label adapters, other required families
-  and application wiring. No broader compatibility or rare-input work in this batch.
-- Local MSVC/CMake remain unavailable. Use Windows CI for native validation.
-- First batch committed/pushed as 6c11e387 (observations) and d411e656
-  (implementation). Windows run 40065410266 is validating that exact head.
-- Prepared next batch: measured hexagon, slanted parallelograms, both trapezoids,
-  asymmetric notch and double circle, already accepted by the current parser.
-  Exit on connected/grouped default/dark geometry, real label placement and
-  edge clipping, including configured minNodeWidth: 0; then continue label adapters.
-  Local original-browser observations are in classic-polygons-work (44 SVGs).
+- Delivered all classic node shapes accepted by the current native Flowchart
+  parser through render_mermaid. New adapters cover stadium/subroutine/cylinder,
+  hexagon, both slanted parallelograms, both trapezoids, asymmetric notch and
+  double circle. They retain original measured dimensions, sampled stadium arcs,
+  side frames, cylinder caps/label offset, polygon intersections and double rings.
+  Existing Dagre placement, recursive groups and self loops remain in use.
+- Exit conditions passed at e2527ad9b0bc2a105570d998af2e3937abde31c9:
+  https://github.com/zhao0349/Folia/actions/runs/40065755650
+  All four Windows standalone/integrated Debug/Release jobs succeeded.
+  Integrated jobs passed FoliaTests, FoliaWindowsEditorTests and both Mermaid
+  suites. Each job compared 44 original-browser/native SVGs across 22 diagrams
+  and two themes, including painted outlines, label centers, edge clipping,
+  groups, self loops and minNodeWidth: 0. Existing source/SVG and real browser/
+  DirectWrite checks passed. Native previews were inspected locally.
+- Small source batches: 6c11e387/d411e656 (three measured shapes), then
+  0692166f/e2527ad9 (remaining parsed classic shapes). The first batch also
+  passed all four jobs in run 40065410266. Contribution equivalents are
+  2a01cf32/a583aad3/a1cf0272/28e429cd in build/mermaid-cpp/entry-contribution
+  on feat/mermaid-cpp-port. Implementation/tests/pins/workflow match the final
+  verified head exactly; this public documentation checkpoint follows them.
+  The contribution diff against both PR base 508423f2 and upstream master
+  81bed653 contains no AGENTS.md change. Update upstream PR #1 and keep OPEN;
+  DO NOT merge: https://github.com/water2004/Folia/pull/1
+  Delivery-triggered reruns are separate from the completed validation above.
+- Next concrete batch: Flowchart display-label adaptation and measured line
+  layout. Start from pinned shapes/util.ts::labelHelper, createText.ts and
+  decodeEntities/sanitizeText, then the current platform render_mermaid label
+  measurement path. Preserve source/DB labels while deriving displayed text;
+  measure actual lines and feed resulting boxes/baselines into existing shapes.
+  Exit on representative quoted/entity labels, explicit line breaks and wrapped
+  labels in connected/grouped diagrams and affected native checks. Continue
+  required styles/titles/markers, other families and the application call chain.
+  Do not reopen passed shape/layout stages without a relevant change/regression.
+- Limits: plain single-line labels; rich/wrapped labels, custom styles, extra
+  markers, diagram titles, shape metadata, other required families and the
+  application dependency switch remain. Folia still uses Rust in the app.
+  No WinUI packaging, GPU or DPI acceptance is claimed.
+- No local build, agent or browser remains active. Ignored evidence is under
+  build/mermaid-cpp/classic-shapes-verified and classic-polygons-verified,
+  each with flowchart-browser/comparison.json and native-preview.png. The
+  corresponding *-work directories contain local original-browser observations.
+  No failed acceptance check remains. Local MSVC/CMake are unavailable;
+  Windows CI supplies native builds and local previews inspect downloaded SVGs.
 
 ## Measured recursive cluster SVG verified (historical)
 
