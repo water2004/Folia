@@ -53,7 +53,10 @@ try {
     const b=n.querySelector('rect').getBBox();return {text:n.textContent,x:b.x+b.width/2,y:b.y+b.height/2,width:b.width,height:b.height};
    });
    const bounds=outer.getBBox(),view=svg.viewBox.baseVal;
-   return {offset:outer.getAttribute('transform'),nodes,edges,labels,clusters,
+   const heading=svg.querySelector('.flowchartTitleText');
+   const diagramTitle=heading?{text:heading.textContent,...position(heading,heading.x.baseVal[0].value,heading.y.baseVal[0].value),
+    width:heading.getBBox().width,height:heading.getBBox().height,fill:getComputedStyle(heading).fill,size:getComputedStyle(heading).fontSize}:null;
+   return {offset:outer.getAttribute('transform'),nodes,edges,labels,clusters,diagramTitle,
     bounds:{x:bounds.x,y:bounds.y,width:bounds.width,height:bounds.height},
     view:{x:view.x,y:view.y,width:view.width,height:view.height}};
   });
@@ -61,6 +64,12 @@ try {
   const b=actual.bounds,v=actual.view;
   assert(b.x+offset[0]>=v.x-1 && b.y+offset[1]>=v.y-1 &&
     b.x+b.width+offset[0]<=v.x+v.width+1 && b.y+b.height+offset[1]<=v.y+v.height+1,`${row.name}: clipped SVG content`);
+  assert.equal(!!actual.diagramTitle,!!row.diagramTitle,`${row.name} diagram title`);
+  if(row.diagramTitle) {
+   for(const key of ['text','fill','size']) assert.equal(actual.diagramTitle[key],row.diagramTitle[key],`${row.name} title ${key}`);
+   for(const key of ['x','y','width','height']) near(actual.diagramTitle[key],row.diagramTitle[key],`${row.name} title ${key}`);
+   for(const key of ['x','y','width','height']) near(actual.view[key],row.view[key],`${row.name} view ${key}`);
+  }
   for(let i=0;i<actual.nodes.length;++i) {
    const a=actual.nodes[i],e=row.nodes.find(n=>n.label===a.label),p=translate(a.transform);
    assert(e,`${row.name}: missing node ${a.label}`);const q=[e.x,e.y];
@@ -119,7 +128,7 @@ try {
   }
   report.push({name:row.name,nodes:actual.nodes.length,edges:actual.edges.length,groups:actual.clusters.length});
  }
- const selected=rows.filter(x=>['markers-ends-default','markers-both-dark','markers-group-default'].includes(x.name));
+ const selected=rows.filter(x=>['title-wide-default','title-group-dark','markers-both-default'].includes(x.name));
  await page.setContent('<body style="margin:20px;background:#f1f3f5;font:16px Arial"><div style="display:flex;gap:24px;align-items:start">'+selected.map(x=>
   `<div style="background:${x.theme==='dark'?'#202124':'white'};padding:20px;border-radius:12px"><h3 style="color:${x.theme==='dark'?'white':'#222'}">${x.name}</h3>`+readFileSync(resolve(output,'flowchart-'+x.name+'.svg'),'utf8')+'</div>').join('')+'</div></body>');
  await page.screenshot({path:resolve(dirname(reference),'native-preview.png'),fullPage:true});

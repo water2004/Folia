@@ -1,6 +1,6 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-24, classic edge markers in progress
+## Current checkpoint - 2026-10-24, markers validating and titles in progress
 
 - This batch connects parsed circle/cross start/end markers to the measured
   Flowchart SVG entry. Scope is classic default/dark diagrams, connected and
@@ -11,6 +11,16 @@
   and the application call chain. Do not expand the completed label/layout work.
 - Baseline ae0ad3d8 is clean; contribution a75189d5 passed Windows run
   40068918348. Upstream PR #1 remains OPEN/unmerged. Keep it unmerged.
+- Marker source commits 903800e3/f48643f3 are pushed to the development fork
+  and codex/mermaid-cpp-markers. Windows run 40092570628 is in progress; no
+  native acceptance is claimed yet. Local browser captured 60 official SVGs.
+- The next bounded title batch implements utils.insertTitle followed by
+  setupViewPortForSVG: real 18px DirectWrite metrics, theme text color, centered
+  title baseline at -titleTopMargin, and viewport expansion for wide titles.
+  Exit on ordinary/wide/group titles in default/dark and affected native checks.
+  Original observations are in build/mermaid-cpp/titles-work (66 SVGs including
+  marker/previous cases). Styled HTML titles remain outside this plain-text
+  adapter. Next after titles: common explicit node/edge/class style adaptation.
 
 ## Measured display labels verified (historical)
 

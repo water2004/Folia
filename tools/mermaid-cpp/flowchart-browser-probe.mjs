@@ -11,6 +11,9 @@ for(const file of lock.flowchartCurve.files) assert.equal(createHash('sha256').u
 const directory=resolve(process.argv[2]??'build/mermaid-cpp/flowchart-browser');
 mkdirSync(directory,{recursive:true});
 const cases=[
+  ['title-short','flowchart TD\nA[Read] --> B[Write]','Document pipeline'],
+  ['title-wide','flowchart TD\nA[Read] --> B[Write]','Read and validate the source document before saving the updated output'],
+  ['title-group','%%{init: {"flowchart": {"titleTopMargin": 40}}}%%\nflowchart LR\nsubgraph g[Storage]\ndirection TB\nA[Read] --> B[Write]\nend\ng --> C[Done]','Storage & recovery'],
   ['markers-ends','flowchart LR\nA[Read] --o|open| B[Check]\nB --x|stop| C[Done]'],
   ['markers-both','flowchart TD\nA[Read] o--o|open| B[Check]\nB x--x|stop| C[Save]\nC <--> D[Done]'],
   ['markers-group','flowchart RL\nsubgraph g[Operations]\ndirection BT\nA[Read] x--x B[Check]\nend\ng o--o|ready| C[Done]'],
@@ -48,7 +51,8 @@ const html=`<!doctype html><meta charset="utf-8"><body><script type="module">
 const {default:mermaid}=await import(${JSON.stringify(url)});
 try {
 const result=[];
-for(const [name,source] of ${JSON.stringify(cases)}) {
+for(const [name,body,title] of ${JSON.stringify(cases)}) {
+ const source=title?'---\\ntitle: '+JSON.stringify(title)+'\\n---\\n'+body:body;
  for(const theme of ['default','dark']) {
   mermaid.initialize({startOnLoad:false,theme,look:'classic',layout:'dagre',fontFamily:'Arial',themeVariables:{fontFamily:'Arial'},flowchart:{htmlLabels:true}});
   const {svg}=await mermaid.render('probe'+result.length,source);
@@ -104,7 +108,12 @@ for(const [name,source] of ${JSON.stringify(cases)}) {
   const labels=[...host.querySelectorAll('g.edgeLabel')].filter(n=>n.textContent.trim()).map(n=>{
     const b=n.getBBox();return {text:n.textContent,...position(n),transform:n.getAttribute('transform'),width:b.width,height:b.height};
   });
-  result.push({name:name+'-'+theme,source,theme,svg,nodes,edges,labels,clusters});host.remove();
+  const heading=root.querySelector('.flowchartTitleText');
+  const diagramTitle=heading?{text:heading.textContent,...position(heading,heading.x.baseVal[0].value,heading.y.baseVal[0].value),
+   width:heading.getBBox().width,height:heading.getBBox().height,fill:getComputedStyle(heading).fill,size:getComputedStyle(heading).fontSize}:null;
+  const view=root.viewBox.baseVal;
+  result.push({name:name+'-'+theme,source,theme,svg,nodes,edges,labels,clusters,diagramTitle,
+   view:{x:view.x,y:view.y,width:view.width,height:view.height}});host.remove();
  }
 }
 document.body.replaceChildren(Object.assign(document.createElement('pre'),{id:'result',textContent:encodeURIComponent(JSON.stringify(result))}));
