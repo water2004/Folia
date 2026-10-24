@@ -1,5 +1,11 @@
 # Third-party notices
 
+Flowchart display-line adaptation follows Mermaid 12.2.0's labelHelper,
+createText, createLabel, nonMarkdownToHTML and decodeEntities. Their original
+source hashes are recorded in docs/mermaid-cpp/source-lock.json; the Mermaid
+MIT license is reproduced in LICENSE. Native line measurement and wrapping use
+DirectWrite, without an HTML or JavaScript runtime.
+
 Mermaid-derived code is covered by the MIT license in `LICENSE`.
 Flowchart's classic node geometry follows the pinned Mermaid rendering-elements
 shapes and line/polygon intersection functions.

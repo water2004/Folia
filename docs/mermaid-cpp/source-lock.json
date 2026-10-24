@@ -527,6 +527,10 @@
     {
       "path": "packages/mermaid/src/rendering-util/handle-markdown-text.ts",
       "sha256": "6f99a7b3f5b11f87f5509a370663f14650f8f8c3cbb9a34ea496a1aa183cd0ca"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/createLabel.js",
+      "sha256": "a8d8146d7a1f097058e32309ee56cb7ca9c6f46c8d24bd1d8b8e94b8e24babfe"
     }
   ],
   "packages": [

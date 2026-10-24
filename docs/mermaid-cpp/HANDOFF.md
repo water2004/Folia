@@ -1,26 +1,55 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-24, display lines and wrapping in validation
+## Current checkpoint - 2026-10-24, measured display labels verified
 
-- Deliver quoted/entity plain labels and explicit line breaks through the
-  existing Flowchart source-to-SVG entry, preserving source/DB label values.
-  Scope is display conversion and actual line measurements for nodes, edge
-  labels and group titles; existing shapes and Dagre remain unchanged.
-- Exit on representative connected/grouped browser comparisons in both themes,
-  focused source-preservation checks and the existing Windows native suites.
-  Then commit/push this batch and proceed to measured automatic wrapping,
-  followed by required styles/titles/markers and the application call chain.
-- Display-line batches 2e8d066c/b5ccaee5 are pushed; Windows validation is
-  running at https://github.com/zhao0349/Folia/actions/runs/40067362147.
-  The next small batch adds DirectWrite Unicode wrapping at the original node
-  width, 200px edge-label default and unbounded plain group-title width.
-  Exit on actual browser/native line splits, boxes and connected/grouped layout
-  in both themes plus affected native checks. Then proceed to styles/titles/
-  markers. Do not expand this batch into styled HTML/Markdown or other families.
-- PR #1 remains OPEN/unmerged at c5df2b88 until the new implementation passes.
-  The previous implementation validation below remains valid. No merge is
-  authorized. Local browser observations: build/mermaid-cpp/labels-work and
-  wrapping-work; no local compiler or browser process remains active.
+- Delivered quoted/entity plain labels, explicit breaks and automatic wrapping
+  through render_mermaid. Parser labels remain unchanged while the separate
+  display adapter derives lines. DirectWrite supplies actual UTF-16 line breaks,
+  widths and baselines; the existing shapes, Dagre and clusters consume those
+  boxes. Node labels use wrappingWidth, edges use createText's 200px default,
+  and plain group titles retain createLabel's unbounded width.
+- Exit conditions passed at 2866962929106c59962a95d1181c9c3471646d8f:
+  https://github.com/zhao0349/Folia/actions/runs/40067659200
+  All four standalone/integrated Windows Debug/Release jobs succeeded.
+  Integrated jobs passed FoliaTests, FoliaWindowsEditorTests and both Mermaid
+  suites. Each job compared 54 original/native SVGs across 27 diagrams and two
+  themes, including actual display lines, label centers, geometry, groups,
+  paints and sampled paths. Existing source/SVG and browser/DirectWrite checks
+  passed. Downloaded native previews were inspected locally.
+- Source batches: 2e8d066c/b5ccaee5 (display labels), a806ae47 (wrapping),
+  28669629 (test-session initialization). Contribution equivalents
+  719b9ad1/adee4d44/5fa16088/b2516bd2 are pushed to feat/mermaid-cpp-port in
+  build/mermaid-cpp/entry-contribution. Implementation/tests/workflow match the
+  verified head exactly. This documentation/provenance checkpoint follows them;
+  the added createLabel.js source hash was also verified locally.
+  Upstream PR #1 includes the batches and its description is updated; confirmed
+  OPEN/unmerged. The contribution diff against both PR base 508423f2 and
+  upstream/master contains no AGENTS.md change. DO NOT merge:
+  https://github.com/water2004/Folia/pull/1
+  Delivery-triggered reruns are separate from the completed validation above.
+- Next concrete batch: connect the already parsed arrow_circle/arrow_cross
+  markers to SVG. Follow rendering-elements/{markers.js,edgeMarker.ts} and
+  utils/lineWithOffset.ts, retaining shape/cluster clipping and label placement.
+  Exit on representative start/end/bidirectional markers in connected/grouped
+  default/dark diagrams and affected native checks. Then continue required
+  diagram titles/styles, rich labels, other families and the app call chain.
+  Do not reopen passed shape/layout/label stages without a relevant regression.
+- Limits: common/numeric entities and plain labels in the tested HTML-spacing
+  mode; styled HTML/Markdown, custom styles, additional markers, diagram titles,
+  other required families and application dependency switching remain. Folia
+  still uses Rust in the application. No WinUI/GPU/DPI acceptance is claimed.
+  Original and native multiline group titles may overlap a child at default
+  margins; existing subGraphTitleMargin controls this spacing. The batch retains
+  the original placement rather than changing cluster layout semantics.
+- No local build, agent or browser remains active. Final ignored evidence:
+  build/mermaid-cpp/labels-verified, including flowchart-browser/comparison.json
+  and native-preview.png. labels-work/wrapping-work hold original observations.
+  labels-initial and run 40067362147 are superseded: the new core test failed
+  before label assertions because its session lacked Folia's theme initialization;
+  28669629 fixed it and the final run passed. Run 40067601320 was superseded by
+  the corrected head. No failed acceptance check remains. Local MSVC/CMake are
+  unavailable; native builds use Windows CI. Its integrated Release job took
+  about 17 minutes, consistent with recent successful runs.
 
 ## Measured classic shapes verified (historical)
 
