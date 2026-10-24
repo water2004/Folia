@@ -16,6 +16,10 @@ try {
   await page.setContent(svg);
   const actual=await page.evaluate(()=>{
    const svg=document.querySelector('svg'),outer=svg.querySelector('g[font-family]');
+   const position=(element,x,y)=>{
+    const p=new DOMPoint(x,y).matrixTransform(svg.getScreenCTM().inverse().multiply(element.getScreenCTM()));
+    return {x:p.x,y:p.y};
+   };
    const clusters=[...svg.querySelectorAll('g.cluster')].map(n=>{
     const shape=n.querySelector('rect'),b=shape.getBBox(),label=n.querySelector('text'),lb=label.getBBox();
     return {id:n.dataset.node,x:b.x+b.width/2,y:b.y+b.height/2,width:b.width,height:b.height,label:label.textContent,
@@ -23,9 +27,16 @@ try {
    });
    const nodes=[...svg.querySelectorAll('g.node')].map(n=>{
     const shape=n.querySelector('.label-container'),b=shape.getBBox(),text=n.querySelector('text'),t=text.getBBox();
+    const local=n.getScreenCTM().inverse().multiply(shape.getScreenCTM());
+    const corner=new DOMPoint(b.x,b.y).matrixTransform(local);
+    const paths=shape.matches('path,polygon')?[shape]:[...shape.querySelectorAll('path')];
+    const outline=paths.flatMap(p=>Array.from({length:201},(_,i)=>{
+     const a=p.getPointAtLength(p.getTotalLength()*i/200);return position(p,a.x,a.y);
+    }));
     return {transform:n.getAttribute('transform'),width:b.width,height:b.height,label:text.textContent,
+     labelCenter:position(text,t.x+t.width/2,t.y+t.height/2),outline,
      fill:getComputedStyle(shape).fill,stroke:getComputedStyle(shape).stroke,
-     contained:t.x>=b.x-1&&t.y>=b.y-1&&t.x+t.width<=b.x+b.width+1&&t.y+t.height<=b.y+b.height+1};
+     contained:t.x>=corner.x-1&&t.y>=corner.y-1&&t.x+t.width<=corner.x+b.width+1&&t.y+t.height<=corner.y+b.height+1};
    });
    const edges=[...svg.querySelectorAll('.flowchart-link')].map(p=>{
     const length=p.getTotalLength();return {id:p.dataset.edge,length,stroke:getComputedStyle(p).stroke,dash:getComputedStyle(p).strokeDasharray,thickness:getComputedStyle(p).strokeWidth,points:Array.from({length:7},(_,i)=>{const a=p.getPointAtLength(length*i/6);return {x:a.x,y:a.y};})};
@@ -49,6 +60,15 @@ try {
    for(const key of ['width','height']) near(a[key],e[key],`${row.name} ${i} ${key}`);
    for(let axis=0;axis<2;++axis) near(p[axis]+offset[axis],q[axis],`${row.name} ${i} axis ${axis}`);
    assert.equal(a.fill,e.fill,`${row.name} fill`);assert.equal(a.stroke,e.stroke,`${row.name} stroke`);
+   if(e.outline.length) {
+    near(a.labelCenter.x,e.labelCenter.x,`${row.name} label center x`,2);
+    near(a.labelCenter.y,e.labelCenter.y,`${row.name} label center y`,2);
+    assert(a.outline.length,`${row.name}: missing shape outline`);
+    for(const [from,to] of [[a.outline,e.outline],[e.outline,a.outline]]) for(const p of from) {
+     const distance=Math.min(...to.map(q=>Math.hypot(p.x-q.x,p.y-q.y)));
+     near(distance,0,`${row.name} ${a.label} outline`,2);
+    }
+   }
   }
   assert.equal(actual.edges.length,row.edges.length,row.name);
   assert.equal(actual.labels.length,row.labels.length,row.name+' labels');
@@ -78,7 +98,7 @@ try {
   }
   report.push({name:row.name,nodes:actual.nodes.length,edges:actual.edges.length,groups:actual.clusters.length});
  }
- const selected=rows.filter(x=>['group-independent-default','group-nested-dark','group-external-default','group-loop-default'].includes(x.name));
+ const selected=rows.filter(x=>['shapes-down-default','shapes-right-dark','shapes-group-default'].includes(x.name));
  await page.setContent('<body style="margin:20px;background:#f1f3f5;font:16px Arial"><div style="display:flex;gap:24px;align-items:start">'+selected.map(x=>
   `<div style="background:${x.theme==='dark'?'#202124':'white'};padding:20px;border-radius:12px"><h3 style="color:${x.theme==='dark'?'white':'#222'}">${x.name}</h3>`+readFileSync(resolve(output,'flowchart-'+x.name+'.svg'),'utf8')+'</div>').join('')+'</div></body>');
  await page.screenshot({path:resolve(dirname(reference),'native-preview.png'),fullPage:true});

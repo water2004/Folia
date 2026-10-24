@@ -467,6 +467,34 @@
     {
       "path": "packages/mermaid/src/rendering-util/layout-algorithms/common/index.ts",
       "sha256": "d8321ba51ba42bc860f7e8fc3ef3026e8eadbbeccc6014df86a249546c62c964"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/stadium.ts",
+      "sha256": "cb15be21132dbb2eb118815b37f3b9cdc08e4f6d4ffe63c408a04796ee6b5b6a"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/subroutine.ts",
+      "sha256": "bbf3ec95a0518b5796bdf23e17375323b000a02051a9b1119cf91adeab69b4a4"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/cylinder.ts",
+      "sha256": "66cf21a2d0777a3a2188ac616d68bbd62e4569615e570c150a45e3c08477a9a0"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/insertPolygonShape.ts",
+      "sha256": "56279058530c0e398a835d3932e672be2a44111da30b92920435d3584e306c86"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/intersect/intersect-polygon.js",
+      "sha256": "074c184e56f9327828a4a53e317e0ad2e776532528ebde775f23b451a0c9a2e8"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/intersect/intersect-line.js",
+      "sha256": "0e888ca4a19afc35ff7567297c277755717472187212f495410946c566b26a85"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/intersect/intersect-rect.js",
+      "sha256": "f7e0849b9a31e2cd7b1a3a7c288442abbb93f7c8d0bac89417c9072f35be76a9"
     }
   ],
   "packages": [

@@ -11,6 +11,9 @@ for(const file of lock.flowchartCurve.files) assert.equal(createHash('sha256').u
 const directory=resolve(process.argv[2]??'build/mermaid-cpp/flowchart-browser');
 mkdirSync(directory,{recursive:true});
 const cases=[
+  ['shapes-down','flowchart TD\nA([Start]) -->|run| B[[Process]]\nA --> C[(Database)]\nB --> D([Finish])\nC --> D'],
+  ['shapes-right','flowchart LR\nA([Start]) --> B[[Process]] --> C[(Database)]'],
+  ['shapes-group','flowchart TD\nsubgraph g[Storage]\ndirection LR\nA([Begin]) --> B[[Save]] --> C[(Records)]\nC -->|retry| C\nend\ng --> D([End])'],
   ['chain','flowchart TD\nA[Start] --> B[Finish]'],
   ['decision','flowchart TD\nA[Read] --> B{Valid?}\nB -->|yes| C(Done)\nB -->|no| A'],
   ['horizontal','flowchart LR\nA((Input)) --> B[Process]\nA --> C[Store]\nB --> D(Output)\nC --> D'],
@@ -53,8 +56,15 @@ for(const [name,source] of ${JSON.stringify(cases)}) {
   const nodes=[...host.querySelectorAll('g.node')].map(n=>{
    const shape=n.querySelector('.label-container');const b=shape.getBBox();const label=n.querySelector('.label');
    const lb=label.getBBox();
+   const paths=shape.matches('path,polygon')?[shape]:[...shape.querySelectorAll('path')];
+   const outline=name.startsWith('shapes-')?paths.flatMap(p=>Array.from({length:201},(_,i)=>{
+    const a=p.getPointAtLength(p.getTotalLength()*i/200);return position(p,a.x,a.y);
+   })):[];
+   const fillShape=paths.find(p=>getComputedStyle(p).fill!=='none')??shape;
+   const strokeShape=paths.find(p=>getComputedStyle(p).stroke!=='none')??shape;
    return {id:n.id,...position(n),transform:n.getAttribute('transform'),width:b.width,height:b.height,label:label.textContent,labelWidth:lb.width,labelHeight:lb.height,
-    fill:getComputedStyle(shape).fill,stroke:getComputedStyle(shape).stroke};
+    labelCenter:position(label,lb.x+lb.width/2,lb.y+lb.height/2),outline,
+    fill:getComputedStyle(fillShape).fill,stroke:getComputedStyle(strokeShape).stroke};
   });
   const edges=[...host.querySelectorAll('.flowchart-link')].map(p=>{
     const length=p.getTotalLength();return {id:p.id,length,stroke:getComputedStyle(p).stroke,dash:getComputedStyle(p).strokeDasharray,thickness:getComputedStyle(p).strokeWidth,points:Array.from({length:7},(_,i)=>{const a=p.getPointAtLength(length*i/6);return position(p,a.x,a.y);})};

@@ -1,6 +1,20 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-24, measured recursive cluster SVG verified
+## Current checkpoint - 2026-10-24, classic shape SVG in progress
+
+- Deliver measured stadium/subroutine/cylinder nodes through render_mermaid,
+  including their original outlines, label placement and edge intersections.
+  Reuse the verified Dagre and recursive group adapters.
+- Exit: representative connected and grouped diagrams in default/dark match
+  original browser geometry and paints; affected native checks and existing
+  Windows standalone/integrated Debug/Release workflow pass. Then select the
+  small verified commits into feat/mermaid-cpp-port and update upstream PR #1,
+  keeping it OPEN and unmerged. Baseline contribution run 40055566579 passed.
+- Next: remaining required classic shape/label adapters, other required families
+  and application wiring. No broader compatibility or rare-input work in this batch.
+- Local MSVC/CMake remain unavailable. Use Windows CI for native validation.
+
+## Measured recursive cluster SVG verified (historical)
 
 - Delivered recursive Flowchart group rendering through render_mermaid: real
   title measurement, independent/nested directions, parent cluster reinsertion,
