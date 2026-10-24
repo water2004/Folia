@@ -68,18 +68,19 @@ The measured Flowchart SVG entry supports explicit `layout: dagre` and
 `look: classic`, default/dark themes, square/rounded/diamond/circle and
 stadium/subroutine/cylinder, hexagon, slanted parallelogram, trapezoid,
 inverse trapezoid, asymmetric notch and double-circle nodes,
-quoted/entity plain labels, explicit line breaks and measured automatic wrapping,
+quoted/entity and common styled labels, explicit line breaks and measured automatic wrapping,
 basis/linear paths, point/circle/cross/plain arrow ends, and
 normal/thick/dotted/invisible links, and compact merged self loops. Self loops
 use the original three-segment Dagre graph for placement, then the original
 dummy-node side selection, compact path and label-offset rules for one logical
 SVG edge. Real DirectWrite widths, line heights and
-baselines drive rendering; the plain HTML-label spacing mode retains Mermaid's
+baselines drive rendering; the HTML-label spacing mode retains Mermaid's
 CSS line height and minimum node width while emitting native SVG text. There is
 no browser runtime, HTML execution or character-count measurement in production.
 The display adapter keeps original parser labels, decodes numeric and common
 named entities, and converts explicit breaks into display lines. DirectWrite
-supplies the actual line breaks and metrics. Nodes use `wrappingWidth`, edge
+supplies actual glyph-cluster widths and Unicode break opportunities. The
+adapter retains CSS `break-spaces` accounting at wrap points. Nodes use `wrappingWidth`, edge
 labels use createText's 200px default and plain group titles remain unbounded.
 Native SVG uses measured text spans, including preserved spaces at wrap points.
 The same-host browser check compares actual official/native node boxes,
@@ -134,20 +135,24 @@ color from the theme. The source declarations remain owned parser data.
 Node and edge labels support an installed font family, positive pixel font
 size, normal/bold or numeric 100-900 weight, and normal/italic style. DirectWrite
 wraps and measures with those parameters; SVG retains the same resolved family,
-size, weight and style. This covers whole-label typography in connected and
-grouped diagrams. Group-title typography and mixed HTML/Markdown runs remain
-separate adapters. The comparison checks computed font properties, display
+size, weight and style. HTML `b`/`strong` and `i`/`em`, and Markdown star/underscore
+strong/emphasis can mix with normal text, including nested emphasis, escaped
+punctuation and explicit breaks. The owned parser labels remain unchanged;
+DirectWrite receives styled UTF-16 ranges and SVG emits the same measured runs.
+This boundary covers node and edge labels in HTML-label mode, with the default
+Markdown auto-wrap setting. It is not a general Markdown document renderer.
+The comparison checks per-character font properties, display
 lines, label positions, node boxes and edge geometry in default/dark themes.
 
 Complete Flowchart rendering remains pending. The SVG entry explicitly rejects
 style properties beyond the supported paints/typography, group-title font
-overrides, styled HTML/Markdown labels and HTML diagram titles,
+overrides, other HTML tags, styled labels in non-HTML mode and HTML diagram titles,
 and non-classic looks; it does not silently drop these features.
 The complete existing family requirements remain unchanged. The rank/layout
 API requires prepared graphs without nonempty group endpoints; callers must
 measure and lay out extracted subgraphs separately before the enclosing graph.
-Styled HTML/Markdown label adaptation,
-shape metadata, explicit edge ids and interpolation commands are not implemented
+Group-title rich text, remaining Markdown constructs/configuration, shape
+metadata, explicit edge ids and interpolation commands are not implemented
 by this stage; unsupported input returns an error. Browser callbacks are outside
 the Folia dependency path. No partial graph escapes failures. Default limits
 are 10,000 nodes/groups, 500 edges (also bounded by site maxEdges), 64 nested
