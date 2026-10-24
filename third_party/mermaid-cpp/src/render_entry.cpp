@@ -170,6 +170,11 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
             style.text=narrow(text(node_text && node_text->kind==ConfigKind::string && !node_text->string.empty()?*node_text:member(theme,u"textColor")));
             style.line=narrow(text(member(theme,u"lineColor")));
             style.label_background=narrow(text(member(theme,u"edgeLabelBackground")));
+            style.cluster_fill=narrow(text(member(theme,u"clusterBkg")));
+            style.cluster_border=narrow(text(member(theme,u"clusterBorder")));
+            const auto& margins=member(config,u"subGraphTitleMargin");
+            style.group_title_top=number(member(margins,u"top"));
+            style.group_title_bottom=number(member(margins,u"bottom"));
             return NativeDiagram{std::move(*prepared),FlowchartRenderInput{std::move(*graph),std::move(style)}};
         }
         if (prepared->type==u"packet") {

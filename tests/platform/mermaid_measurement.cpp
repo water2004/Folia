@@ -28,6 +28,11 @@ suite mermaid_measurement = [] {
             {"loop-right",u"flowchart LR\nA((Retry)) -->|again| A\nA --> B[Done]"},
             {"loop-left",u"flowchart RL\nA[Retry] --> A\nA --> B[Done]"},
             {"loop-up",u"flowchart BT\nA{Retry?} -->|yes| A\nA --> B[Done]"},
+            {"group-independent",u"flowchart TD\nsubgraph g[Group]\ndirection LR\nA[Read]-->B[Write]\nend\ng-->|done|C[Exit]"},
+            {"group-incoming",u"flowchart LR\nC[Enter]-->g\nsubgraph g[Group]\ndirection BT\nA[Read]-->B[Write]\nend"},
+            {"group-external",u"flowchart TD\nsubgraph g[Group]\ndirection LR\nA[Read]-->B[Write]\nend\nB-->C[Exit]\ng-->|done|D[Report]"},
+            {"group-nested",u"flowchart TD\nsubgraph g[Outer]\ndirection LR\nsubgraph h[Inner]\ndirection BT\nA[Read]-->B[Write]\nend\nh-->C[Store]\nend\ng-->D[Exit]"},
+            {"group-loop",u"flowchart LR\nsubgraph g[Group]\ndirection TB\nA[Retry]-->|again|A\nA-->B[Done]\nend\ng-->C[Exit]"},
             {"unicode",u"flowchart LR\nA[\u4e2d\u6587] --> B[Caf\u00e9 \U0001f600]"},
         };
         for(const auto theme:{u"default",u"dark"}) for(const auto& sample:cases) {
@@ -50,7 +55,7 @@ suite mermaid_measurement = [] {
         }
         const std::u16string prefix=u"---\nconfig: {theme: default, look: classic, layout: dagre, fontFamily: Arial}\n---\n";
         expect(!render_mermaid(prefix+u"flowchart TD\nA-->",*session))<<"unfinished edge";
-        expect(!render_mermaid(prefix+u"flowchart TD\nsubgraph G\nA-->B\nend",*session))<<"cluster adapter";
+        expect(render_mermaid(prefix+u"flowchart TD\nsubgraph G\nA-->B\nend",*session).has_value())<<"cluster adapter";
         expect(render_mermaid(prefix+u"flowchart TD\nA-->A",*session).has_value())<<"self-loop adapter";
         const auto recovered=render_mermaid(prefix+u"flowchart TD\nA-->B",*session);
         expect(recovered.has_value())<<"request after errors"<<(recovered?"":recovered.error());

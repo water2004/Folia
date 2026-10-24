@@ -81,66 +81,8 @@ bool label_coordinate_in_path(FlowchartPoint point,const std::string& path) {
     return sanitized.find(number(std::floor(point.x+0.5)))!=std::string::npos ||
         sanitized.find(number(std::floor(point.y+0.5)))!=std::string::npos;
 }
-// prepareLayoutForDagre supplies the actual layout graph, including its two
-// labelRect dummy nodes per self loop. getEdgesToRender then collapses the
-// three segments into one compact logical loop using the dummy placement hint.
-std::expected<FlowchartLayout,std::string> layout_for_svg(const FlowchartInput& source,
-    std::span<const FlowchartNodeBox> boxes,std::span<const FlowchartEdgeLabelSize> labels) {
-    auto prepared=prepare_flowchart_graph(source);
-    if(!prepared) return std::unexpected(prepared.error());
-    const auto& graph=prepared->graph;
-    if(!graph.subgraphs.empty()) return std::unexpected("Flowchart recursive SVG clusters require the cluster painter");
-    FlowchartInput input;input.direction=graph.direction;
-    input.node_spacing=graph.node_spacing;input.rank_spacing=graph.rank_spacing;
-    std::vector<FlowchartNodeBox> layout_boxes;
-    std::vector<FlowchartEdgeLabelSize> layout_labels;
-    std::unordered_map<std::u16string,std::size_t> ids;
-    for(const auto& n:graph.nodes) {
-        ids.emplace(n.data.id,input.nodes.size());input.nodes.push_back(n.data);
-        // labelRect.ts measures its deliberately hidden rectangle, not text.
-        layout_boxes.push_back(n.source_index?boxes[*n.source_index]:FlowchartNodeBox{0.1,0.1});
-    }
-    for(const auto& e:graph.edges) {
-        input.edges.push_back(e.data);
-        layout_labels.push_back(e.loop_segment==0||e.loop_segment==2?FlowchartEdgeLabelSize{}:labels[e.source_index]);
-    }
-    auto placed=layout_flowchart(input,layout_boxes,layout_labels);
-    if(!placed) return std::unexpected(placed.error());
-    FlowchartLayout result;result.width=placed->width;result.height=placed->height;
-    result.nodes.resize(source.nodes.size());result.edges.resize(source.edges.size());
-    for(std::size_t i=0;i<graph.nodes.size();++i) if(graph.nodes[i].source_index)
-        result.nodes[*graph.nodes[i].source_index]=placed->nodes[i];
-    for(std::size_t i=0;i<graph.edges.size();++i) {
-        const auto& e=graph.edges[i];
-        if(e.loop_segment==-1) {result.edges[e.source_index]=placed->edges[i];continue;}
-        if(e.loop_segment!=1) continue;
-        const auto& original=source.edges[e.source_index];
-        const auto& node=placed->nodes[ids.at(original.start)];
-        const auto& first=placed->nodes[ids.at(e.data.start)];
-        const auto& second=placed->nodes[ids.at(e.data.end)];
-        const double dx=(first.x+second.x)/2-node.x,dy=(first.y+second.y)/2-node.y;
-        enum class Side {top,bottom,left,right};
-        Side side=source.direction==u"BT"?Side::bottom:source.direction==u"LR"?Side::right:
-            source.direction==u"RL"?Side::left:Side::top;
-        if(std::abs(dx)>std::abs(dy)) side=dx>0?Side::right:Side::left;
-        else if(std::abs(dy)>0) side=dy>0?Side::bottom:Side::top;
-        const auto label=labels[e.source_index];
-        const double max_span=std::max(36.0,std::min(100.0,node.width*0.8));
-        const double span=std::clamp(std::max(label.width,node.width*0.35),36.0,max_span);
-        const double depth=std::clamp(std::min(node.width,node.height)*0.45,24.0,48.0);
-        auto& out=result.edges[e.source_index];
-        if(side==Side::left||side==Side::right) {
-            const double sign=side==Side::right?1.0:-1.0,x=node.x+sign*node.width/2;
-            out.points={{x,node.y-span/2},{x+sign*depth,node.y-span/2},{x+sign*depth,node.y+span/2},{x,node.y+span/2}};
-            if(!original.label.empty()) out.label=FlowchartPoint{x+sign*(depth+label.width/2+4),node.y};
-        } else {
-            const double sign=side==Side::bottom?1.0:-1.0,y=node.y+sign*node.height/2;
-            out.points={{node.x-span/2,y},{node.x-span/2,y+sign*depth},{node.x+span/2,y+sign*depth},{node.x+span/2,y}};
-            if(!original.label.empty()) out.label=FlowchartPoint{node.x,y+sign*(depth+label.height/2+4)};
-        }
-    }
-    return result;
-}
+#include "flowchart_clusters.inc"
+
 }
 
 std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRenderInput& input,const FlowchartMeasurements& measured) {
@@ -148,10 +90,10 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
         const auto& graph=input.document;const auto& theme=input.theme;
         if(measured.nodes.size()!=graph.nodes.size() || measured.edges.size()!=graph.edges.size())
             return std::unexpected("Flowchart needs one measured label per node and edge");
-        for(auto v:{theme.font_size,theme.minimum_label_width,theme.wrapping_width,theme.padding,theme.radius})
+        for(auto v:{theme.font_size,theme.minimum_label_width,theme.wrapping_width,theme.padding,theme.radius,theme.group_title_top,theme.group_title_bottom})
             if(!std::isfinite(v)||v<0) return std::unexpected("Invalid Flowchart style dimension");
         if(theme.font_size==0||theme.font_family.empty()) return std::unexpected("Invalid Flowchart font");
-        for(const auto& paint:{theme.fill,theme.border,theme.text,theme.line,theme.label_background})
+        for(const auto& paint:{theme.fill,theme.border,theme.text,theme.line,theme.label_background,theme.cluster_fill,theme.cluster_border})
             theme_detail::color_adjust(std::u16string(paint.begin(),paint.end()),{});
         if(!graph.title.empty()) return std::unexpected("Flowchart title placement requires the title adapter");
         std::vector<FlowchartNodeBox> boxes;std::vector<FlowchartEdgeLabelSize> labels;
@@ -159,14 +101,15 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
         const auto height=[&](const FlowchartTextBox& b){return theme.html_label_spacing?theme.font_size*1.5:b.height;};
         for(std::size_t i=0;i<graph.nodes.size();++i) {
             const auto& n=graph.nodes[i];const auto& b=measured.nodes[i];
-            if(n.group||!n.parent.empty()) return std::unexpected("Flowchart SVG clusters require the Mermaid cluster adapter");
+
             if(!n.styles.empty()||!n.compiled_styles.empty()) return std::unexpected("Flowchart custom SVG styles require the style adapter");
             plain_label(n.label,n.label_type);
             if(!valid_box(b)) return std::unexpected("Invalid measured Flowchart label");
-            if(b.width>theme.wrapping_width && theme.wrapping_width>0) return std::unexpected("Flowchart wrapped labels require the wrapping adapter");
+            if(!n.group && b.width>theme.wrapping_width && theme.wrapping_width>0) return std::unexpected("Flowchart wrapped labels require the wrapping adapter");
             const double w=n.label.empty()?0:std::max(b.width,theme.minimum_label_width),h=n.label.empty()?0:height(b);
             FlowchartNodeBox box;
-            if(n.shape==u"squareRect") box={w+4*n.padding,h+2*n.padding};
+            if(n.group) box={b.width,h};
+            else if(n.shape==u"squareRect") box={w+4*n.padding,h+2*n.padding};
             else if(n.shape==u"roundedRect") box={w+2*n.padding,h+2*n.padding};
             else if(n.shape==u"diamond") {const double side=w+h+2*n.padding;box={side,side};}
             else if(n.shape==u"circle") {const double diameter=std::hypot(b.width,h)+n.padding;box={diameter,diameter};}
@@ -183,10 +126,12 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
                 return std::unexpected("Flowchart SVG marker is not implemented yet");
             labels.push_back(e.label.empty()?FlowchartEdgeLabelSize{}:FlowchartEdgeLabelSize{b.width,height(b)});
         }
-        auto layout=layout_for_svg(graph,boxes,labels);if(!layout) return std::unexpected(layout.error());
-        FlowchartSvg output;output.width=layout->width+2*theme.padding;output.height=layout->height+2*theme.padding;
+        auto prepared=prepare_flowchart_graph(graph);if(!prepared) return std::unexpected(prepared.error());
+        auto scene=layout_prepared(graph,prepared->graph,boxes,labels,measured,theme);
+        const auto* layout=&scene.layout;
+        FlowchartSvg output;output.width=scene.max_x-scene.min_x+2*theme.padding;output.height=scene.max_y-scene.min_y+2*theme.padding;
         std::string svg="<svg xmlns=\"http://www.w3.org/2000/svg\" class=\"flowchart\" width=\""+number(output.width)+
-            "\" height=\""+number(output.height)+"\" viewBox=\"0 0 "+number(output.width)+" "+number(output.height)+"\">";
+            "\" height=\""+number(output.height)+"\" viewBox=\""+number(scene.min_x)+" "+number(scene.min_y)+" "+number(output.width)+" "+number(output.height)+"\">";
         for(auto [tag,value]:{std::pair{"title",std::u16string_view(graph.acc_title)},{"desc",std::u16string_view(graph.acc_description)}})
             if(!value.empty()) svg+="<"+std::string(tag)+">"+xml(value)+"</"+tag+">";
         svg+="<defs><marker id=\"flow-point-end\" viewBox=\"0 0 10 10\" refX=\"5\" refY=\"5\" markerUnits=\"userSpaceOnUse\" markerWidth=\"8\" markerHeight=\"8\" orient=\"auto\"><path d=\"M0 0L10 5L0 10Z\" fill=\""+theme.line+"\"/></marker>";
@@ -196,25 +141,32 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
             return "<text class=\""+std::string(css)+"\" x=\""+number(center.x)+"\" y=\""+number(center.y+b.baseline-b.height/2)+
                 "\" text-anchor=\"middle\" fill=\""+theme.text+"\">"+xml(label)+"</text>";
         };
+        std::vector<std::size_t> groups;
+        for(std::size_t i=0;i<graph.nodes.size();++i) if(graph.nodes[i].group) groups.push_back(i);
+        const auto depth=[&](std::size_t i) {
+            std::size_t value=0;
+            while(!graph.nodes[i].parent.empty()) {i=ids.at(graph.nodes[i].parent);++value;}
+            return value;
+        };
+        std::stable_sort(groups.begin(),groups.end(),[&](auto a,auto b){return depth(a)<depth(b);});
+        for(auto i:groups) {
+            const auto& n=layout->nodes[i];const auto& source=graph.nodes[i];
+            svg+="<g class=\"cluster\" data-node=\""+xml(n.id)+"\"><rect x=\""+number(n.x-n.width/2)+
+                "\" y=\""+number(n.y-n.height/2)+"\" width=\""+number(n.width)+"\" height=\""+number(n.height)+
+                "\" fill=\""+theme.cluster_fill+"\" stroke=\""+theme.cluster_border+"\"/>";
+            svg+=text(source.label,{n.x,n.y-n.height/2+theme.group_title_top+height(measured.nodes[i])/2},
+                measured.nodes[i],"cluster-label")+"</g>";
+        }
         // Original getEdgesToRender paints ordinary edges first, merged loops last.
         std::vector<std::size_t> edge_order;
         for(bool loops:{false,true}) for(std::size_t i=0;i<graph.edges.size();++i)
             if((graph.edges[i].start==graph.edges[i].end)==loops && !layout->edges[i].points.empty()) edge_order.push_back(i);
         for(auto i:edge_order) {
             const auto& e=graph.edges[i];auto points=layout->edges[i].points;
-            const auto a=ids.at(e.start),b=ids.at(e.end);
-            points.front()=intersect(layout->nodes[a],graph.nodes[a].shape,points[1]);
-            points.back()=intersect(layout->nodes[b],graph.nodes[b].shape,points[points.size()-2]);
-            const auto clipped_points=points;
             if(e.arrow_start==u"arrow_point") shorten(points.front(),points[1],4);
             if(e.arrow_end==u"arrow_point") shorten(points.back(),points[points.size()-2],4);
             const auto path=curve_path(points,e.curve==u"linear");
-            if(auto& label=layout->edges[i].label;label &&
-                !label_coordinate_in_path(clipped_points[clipped_points.size()/2],path)) {
-                const auto before=label_midpoint(layout->edges[i].points),after=label_midpoint(clipped_points);
-                label->x+=after.x-before.x;label->y+=after.y-before.y;
-            }
-            svg+="<path class=\"flowchart-link\" d=\""+path+"\" fill=\"none\" stroke=\""+theme.line+
+            svg+="<path class=\"flowchart-link\" data-edge=\""+xml(e.id)+"\" d=\""+path+"\" fill=\"none\" stroke=\""+theme.line+
                 "\" stroke-width=\""+(e.stroke==u"thick"?std::string("3.5"):e.stroke==u"invisible"?std::string("0"):std::string("1"))+"\"";
             svg+=e.stroke==u"dotted"?" stroke-dasharray=\"2\"":" stroke-dasharray=\"0\"";
             if(e.arrow_start==u"arrow_point") svg+=" marker-start=\"url(#flow-point-start)\"";
@@ -228,6 +180,7 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
         }
         for(std::size_t i=0;i<graph.nodes.size();++i) {
             const auto& n=layout->nodes[i];const auto& source=graph.nodes[i];
+            if(source.group) continue;
             svg+="<g class=\"node\" data-node=\""+xml(n.id)+"\" transform=\"translate("+number(n.x)+","+number(n.y)+")\">";
             const auto paint=" fill=\""+theme.fill+"\" stroke=\""+theme.border+"\" stroke-width=\"1\"";
             if(source.shape==u"circle") svg+="<circle class=\"label-container\" r=\""+number(n.width/2)+"\""+paint+"/>";
