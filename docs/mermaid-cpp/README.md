@@ -35,16 +35,18 @@ Cytoscape, date calculations) needs its own source and behavior verification.
 ## Current state
 
 `folia.mermaid.sequence::prepare_sequence` connects shared preparation to owned
-Sequence actors and ordered messages. This first parser/DB batch covers actor
+Sequence actors and ordered messages. The parser/DB boundary covers actor
 and participant declarations, aliases, implicit participants, common solid/
 dotted/open/cross/async/bidirectional arrows, self messages, left/right/over
 notes, nested activation, wrap directives and plain accessibility/title metadata.
-Activation markers remain separate events in the original message order.
-Control regions, autonumber, participant metadata/creation/destruction and
+Activation markers and nested control-region boundaries remain separate events
+in the original message order. Regions include loop, opt, alt/else, par/and,
+par_over, critical/option, break and rect, with owned labels and wrap flags.
+Unclosed regions and misplaced sections return errors. Autonumber, participant metadata/creation/destruction and
 links are not implemented yet and return explicit errors.
 
 The measured Sequence SVG adapter connects `render_mermaid` to classic
-rectangular participants, mirrored footers, lifelines, ordinary and self
+rectangular participants and human actor figures, mirrored footers, lifelines, ordinary and self
 messages, solid/dotted/open/bidirectional arrows, actor spacing and default/dark
 paints. Its first boundary uses single-line plain labels and centered messages.
 It retains the original actor-margin and message-height algorithms, including
@@ -52,9 +54,11 @@ rounded real text measurements and optional right-angle self calls. DirectWrite
 provides widths and font ascent/descent; the native generic sans-serif mapping
 is Arial, explicitly matched by the browser oracle. The current comparison
 corpus uses Arial at 16/20 units; it does not establish arbitrary-font parity.
-Notes, activation bars, human actor figures, wrapping/multiline/entity labels,
-titles and further Sequence configuration remain the next SVG steps. Parser
-support for those events does not imply SVG support; the adapter returns an
+Plain left/right/over notes and nested activation bars use the original bounds
+and event order; active bars also determine message endpoint clipping.
+Control regions, wrapping/multiline/entity labels, titles and further Sequence
+configuration remain the next SVG steps. Parser support for those events does
+not imply SVG support; the adapter returns an
 error for unsupported input. Folia's application dependency remains unchanged.
 The original Sequence grammar credits Knut Sveidqvist (2014-2015, MIT) and
 Andrew Brampton (2012-2013, Simplified BSD); that notice is retained in the

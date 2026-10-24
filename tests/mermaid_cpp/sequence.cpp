@@ -49,7 +49,7 @@ suite sequence = [] {
                 expect(m.placement == field(e,u"placement").number);
             }
         }
-        expect(count == 17_u);
+        expect(count == 28_u);
     };
     "mermaid_sequence_owned_requests_and_unsupported_statements"_test = [] {
         auto session = ConfigSession::create(); expect(fatal(session.has_value()));
@@ -61,7 +61,7 @@ suite sequence = [] {
         expect(fatal(first.has_value())) << (first ? "" : first.error());
         source.clear();
         expect(bool(first->messages[0].message == u"Save"));
-        for (const auto bad : {u"sequenceDiagram\nloop Repeat\nA->>B: Go\nend",
+        for (const auto bad : {u"sequenceDiagram\nautonumber\nA->>B: Go",
             u"sequenceDiagram\nparticipant A@{type:database}",u"sequenceDiagram\nA->>-B: Invalid"})
             expect(!prepare_sequence(bad,*session));
         SequenceLimits limits; limits.actors = 1;

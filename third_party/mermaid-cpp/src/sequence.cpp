@@ -29,6 +29,18 @@ class Parser {
     SequenceLimits limits;
     std::map<Text,std::size_t,std::less<>> actor_index;
     std::map<Text,int,std::less<>> activations;
+    struct Region { View keyword; SequenceKind start, end; View section; SequenceKind branch; };
+    static constexpr Region region_types[] = {
+        {u"loop",SequenceKind::loop_start,SequenceKind::loop_end,{},{}},
+        {u"opt",SequenceKind::opt_start,SequenceKind::opt_end,{},{}},
+        {u"alt",SequenceKind::alt_start,SequenceKind::alt_end,u"else",SequenceKind::alt_else},
+        {u"par",SequenceKind::par_start,SequenceKind::par_end,u"and",SequenceKind::par_and},
+        {u"par_over",SequenceKind::par_over_start,SequenceKind::par_end,u"and",SequenceKind::par_and},
+        {u"critical",SequenceKind::critical_start,SequenceKind::critical_end,u"option",SequenceKind::critical_option},
+        {u"break",SequenceKind::break_start,SequenceKind::break_end,{},{}},
+        {u"rect",SequenceKind::rect_start,SequenceKind::rect_end,{},{}},
+    };
+    std::vector<const Region*> regions;
     bool auto_wrap = false;
     std::size_t offset = 0;
     [[noreturn]] void fail(const char* message) const {
@@ -70,6 +82,27 @@ class Parser {
     }
     void statement(View line) {
         View rest = line;
+        for(const auto& region:region_types) {
+            if(take(rest,region.keyword)) {
+                message({},{},label(rest),region.start);
+                regions.push_back(&region);
+                return;
+            }
+        }
+        if(take(rest,u"end")) {
+            if(!rest.empty() || regions.empty()) fail("Unexpected Sequence region end");
+            message({},{},label({}),regions.back()->end);
+            regions.pop_back();
+            return;
+        }
+        for(const auto keyword:{u"else",u"and",u"option"}) {
+            if(take(rest,keyword)) {
+                if(regions.empty() || regions.back()->section!=keyword)
+                    fail("Unexpected Sequence region section");
+                message({},{},label(rest),regions.back()->branch);
+                return;
+            }
+        }
         bool human = take(rest,u"actor");
         if (human || take(rest,u"participant")) {
             const auto lowered = lower(rest);
@@ -151,6 +184,7 @@ public:
             offset = end+1;
         }
         if (!header) fail("Expected Sequence header");
+        if (!regions.empty()) fail("Unclosed Sequence control region");
         result.effective_config = std::move(prepared.effective_config);
         return std::move(result);
     }

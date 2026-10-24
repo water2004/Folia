@@ -49,7 +49,7 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
             const auto& m=doc.messages[i]; const auto& box=measured.messages[i];
             if(m.type==SequenceKind::active_start || m.type==SequenceKind::active_end) continue;
             if(m.wrap || !(m.type==SequenceKind::note||m.type==SequenceKind::solid||m.type==SequenceKind::dotted||open(m.type)||both(m.type)))
-                return std::unexpected("Sequence wrapping/extended arrows require the next SVG adapter");
+                return std::unexpected("Sequence control regions/wrapping/extended arrows require the next SVG adapter");
             if(!std::isfinite(box.width)||box.width<0||!std::isfinite(box.height)||box.height<0)
                 return std::unexpected("Invalid Sequence message measurement");
             auto from=ids.find(m.from),to=ids.find(m.to);

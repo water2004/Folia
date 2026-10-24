@@ -1,6 +1,19 @@
 # Mermaid C++ continuity
 
-## Current batch - 2026-10-24, Sequence notes, activations and human actors
+## Current batches - 2026-10-24, Sequence notes SVG and control-region parser
+
+- Notes/activation/human-actor SVG implementation e23bcd3a and reference e1e870ed
+  are on codex/mermaid-cpp-sequence-notes. Windows run 40103155651 is in progress;
+  acceptance is pending. Twenty original SVGs are in
+  build/mermaid-cpp/sequence-notes-work. No local native build is available.
+- Next parser batch delivers ordered nested loop, opt, alt/else, par/and,
+  par_over, critical/option, break and rect events. Exit on representative
+  original/native DB comparisons, common incomplete/misplaced-section errors
+  and affected Windows checks. Then connect measured control-region SVG.
+  Original fixtures now contain 22 successes and 6 parse/DB failures.
+- Contribution remains at 4bf19146 while validation runs; do not merge PR #1.
+
+### Notes SVG batch scope
 
 - Deliver the already-parsed plain notes, ordered activation bars and classic
   human actor figures through measured source-to-SVG rendering. Scope is common
