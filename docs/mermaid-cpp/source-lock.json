@@ -1,0 +1,1274 @@
+{
+  "repository": "https://github.com/mermaid-js/mermaid",
+  "tag": "mermaid@12.2.0",
+  "commit": "1fb7869866dd619168d840291c9c54b4f129758b",
+  "license": "MIT",
+  "files": [
+    {
+      "path": "packages/mermaid/src/diagrams/flowchart/parser/flow.jison",
+      "sha256": "9597faffe2a133b104c6dd4f38a162f6980bff4e0a841a83ff94af3900ea7ba8"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/flowchart/flowDb.ts",
+      "sha256": "33577b9ade8c65be6049c3093089dbf81abf44214f49c2b2ea46434183889288"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/flowchart/types.ts",
+      "sha256": "692016b3acc50f484602f7c1741233156aa4bc4e01caa6ce260bd7e2b9530d8d"
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "e44b44d50e98cbf0c7e047e58d701fe5f26f181d5403fdcccba371ee31400e10"
+    },
+    {
+      "path": "packages/mermaid/package.json",
+      "sha256": "478334ce02279afc82fe1617996544c0f9b01952556455ae3b6ad060e674a8b8"
+    },
+    {
+      "path": "packages/mermaid/src/diagram-api/regexes.ts",
+      "sha256": "fdb09d839e27f7b71fc2193282649a4d2e1169531c8a62ee3a4c4e0bd1883e7d"
+    },
+    {
+      "path": "packages/mermaid/src/diagram-api/comments.ts",
+      "sha256": "aa637df212ecc22cbcb12387af31a4d0f8c266ece03cc6134d46dd9427acd120"
+    },
+    {
+      "path": "packages/parser/src/language/packet/packet.langium",
+      "sha256": "bf479a00c688630d713efcb850076f16c4758f7cb426b49c973b67b40ea001f0"
+    },
+    {
+      "path": "packages/parser/src/language/common/common.langium",
+      "sha256": "d8b0c0056f6339ca6a0d3b966c02b1f4d53ad768069e2889450dc29312f1f65b"
+    },
+    {
+      "path": "packages/parser/src/language/common/valueConverter.ts",
+      "sha256": "d93aa5dd1f7fed8aa903f55eb3e463c6b69b455af22004a6405a61c7560f58e5"
+    },
+    {
+      "path": "packages/parser/src/language/common/tokenBuilder.ts",
+      "sha256": "e20bdad7aa651779e986cb69dd389670453224dc83fdcae872cff756f0733c82"
+    },
+    {
+      "path": "packages/parser/src/language/common/matcher.ts",
+      "sha256": "9ab232a7fff6052767001b43b3796553431ee80a10a197abf6437cbfa8e0d807"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/packet/parser.ts",
+      "sha256": "88d806b73fab2eae9148a9a6bfaad5579ee273f0ded8e8c7715a1be07542e3ed"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/packet/db.ts",
+      "sha256": "1d030ad2348cc3e342b3725f1770fb760b273880acc9dd393f7111708fe9d6d4"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/packet/renderer.ts",
+      "sha256": "ac2ab5d360fd715deac0d69fc98ab0abbaa3dc8cbc46e20b47723ab4a161b511"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/packet/styles.ts",
+      "sha256": "79714446f3f325d06e940f2c7918a4c6b2e4bd672262a68f4f7cb36768e3285a"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/packet/types.ts",
+      "sha256": "5b2c564ad8d95f3d5dc62bb79fd33e05a10c46d1fc0e3c5325ccde5e152a6d84"
+    },
+    {
+      "path": "packages/parser/package.json",
+      "sha256": "7c7de36b32df30493e16d06cfa0009faf86f4682a32583dc74a368d1df5e001b"
+    },
+    {
+      "path": "packages/mermaid/src/setupGraphViewbox.js",
+      "sha256": "cebb629053c67dac36635cc31262d1c5e8cc7ff26a645ca080474a649326327b"
+    },
+    {
+      "path": "packages/mermaid/src/schemas/config.schema.yaml",
+      "sha256": "537073372efeaba5675e331b813220ee87b4403118952eccaa3362d8b78ca5e8"
+    },
+    {
+      "path": "packages/parser/src/language/pie/pie.langium",
+      "sha256": "fe9346e70f5d5028fa5aaa0470ba651e445c904e615feaf79a4eb2b5a401118d"
+    },
+    {
+      "path": "packages/parser/src/language/pie/valueConverter.ts",
+      "sha256": "d29b30fd73f0a1d9e1da7cea12eae1a13194bee4c886ace4b212e800857b01a8"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/pie/pieParser.ts",
+      "sha256": "d6f05e3845ec051d07a12d16f45e4ed2d44c0deb0022561582ada77ad4e0b8a4"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/pie/pieDb.ts",
+      "sha256": "e64377c8d3e0501a859b46e329ca1aacd2e205faa0aaed203be012324f868471"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/pie/pieRenderer.ts",
+      "sha256": "12cbb88cead5b79b5a3aa4946d78da32e711feb8687bfd54ca119f98b2dd7df4"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/pie/pieStyles.ts",
+      "sha256": "ecf34f224b510ba51581b37125e9a396350bd9313d47b75c93b874c0efc409a1"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/pie/pieTypes.ts",
+      "sha256": "d4b451e65c4ae18301583853ac60ba7e25ff8fec01b3abfd1fb90bf3760f31ba"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/common/populateCommonDb.ts",
+      "sha256": "5d2a306522f65f8672a42dbec11b060818f8c9d3d07a7ae9328d3a55a8050856"
+    },
+    {
+      "path": "packages/mermaid/src/preprocess.ts",
+      "sha256": "db337ae9cc0f7ff189cc50d06d6fb28452dfbc37294f56a966dc3f48b2a628e0"
+    },
+    {
+      "path": "packages/mermaid/src/utils.ts",
+      "sha256": "5968be88bf78df0ccb211f2ddba50e505099607a2770435577deed94551e4c05"
+    },
+    {
+      "path": "packages/mermaid/src/diagram-api/frontmatter.ts",
+      "sha256": "32064e56308192d63355b5719a54172ce9269b9d30ccfddcfbdd11b71ddf5e0a"
+    },
+    {
+      "path": ".build/jsonSchema.ts",
+      "sha256": "0933883cc0bfef84c255e9a138258fcb59ede9a39367414d26a5873edd5ce95c"
+    },
+    {
+      "path": ".vite/jsonSchemaPlugin.ts",
+      "sha256": "a74941c2dbde345a8d70d47876e519cd7ea3fb334f76bdf9e7bf7450978532c0"
+    },
+    {
+      "path": "packages/mermaid/src/defaultConfig.ts",
+      "sha256": "6f2ec3c231ee970fb0368d158975090d488c93c9801a618b06cb18d58488b068"
+    },
+    {
+      "path": "packages/mermaid/src/utils/sanitizeDirective.ts",
+      "sha256": "b4b3a906c608be0dc3b72136680c8d29bd87978857da6ba8234adede06b0ffa1"
+    },
+    {
+      "path": "packages/mermaid/src/assignWithDepth.ts",
+      "sha256": "84216a585174308d91550e69fdf0081801cce41c040738190a47ed764d77674f"
+    },
+    {
+      "path": "packages/mermaid/src/config.ts",
+      "sha256": "91dd68a9e7d57c4635a04fab0ccd78ec230b4417a02f4f4b3cd9a6bb445f09ef"
+    },
+    {
+      "path": "packages/mermaid/src/diagram-api/diagramConfigKeys.ts",
+      "sha256": "033ef53469f73db8051e70f9686d27f58272edfc9a071ea153ff39a014c17d8f"
+    },
+    {
+      "path": "packages/mermaid/src/themes/index.js",
+      "sha256": "6277f68da19a2b75f2e6b60c02d590c71a1da926b50969f2523f66e372a40861"
+    },
+    {
+      "path": "packages/mermaid/src/themes/theme-base.js",
+      "sha256": "c13caf87f1a547eb65596ebaabf94ad80055546dff5458f3b6475799bb5ec52c"
+    },
+    {
+      "path": "packages/mermaid/src/themes/theme-dark.js",
+      "sha256": "79e5faeb17f0ad47c2e97cbbab7491bf12ab93115546eaebda741e00fad75d37"
+    },
+    {
+      "path": "packages/mermaid/src/themes/theme-default.js",
+      "sha256": "c7676f84269d433c83f089bd978439a0d5e783ba48f1dfd87a294efb674e3b66"
+    },
+    {
+      "path": "packages/mermaid/src/themes/theme-forest.js",
+      "sha256": "473eed6464c38764c59c15768cdedb44766f40aa736bb96ef1fa94cea2315cc5"
+    },
+    {
+      "path": "packages/mermaid/src/themes/theme-helpers.js",
+      "sha256": "8bcfaf8426fcff2d033843ca2c38d3bdc23f8443c5721c686951b56e9c612289"
+    },
+    {
+      "path": "packages/mermaid/src/themes/theme-neo-dark.js",
+      "sha256": "f2d3469f8fe6aae719654bba2fe776802617a72449db8a6a299bc070e07673c3"
+    },
+    {
+      "path": "packages/mermaid/src/themes/theme-neo.js",
+      "sha256": "0ef8cf2a93e4629984c6c57382ce69f37d5bffb6a6fe5b949a972ee8d268bf9f"
+    },
+    {
+      "path": "packages/mermaid/src/themes/theme-neutral.js",
+      "sha256": "a09bdc75fabfaddb19626f8c8af8e5d9df0dcee31ed09522dcbccd6418ca1a43"
+    },
+    {
+      "path": "packages/mermaid/src/themes/theme-redux-color.js",
+      "sha256": "5e4278fb33825a501ffae1c6ac13a869763c4e611de9ad6077b58513e4e1b6d0"
+    },
+    {
+      "path": "packages/mermaid/src/themes/theme-redux-dark-color.js",
+      "sha256": "0c1899419d5a06afe61bd183d6fc2b59bf5b1be12528e2bf1c7f3fc36788b535"
+    },
+    {
+      "path": "packages/mermaid/src/themes/theme-redux-dark.js",
+      "sha256": "aa769f4fa5992f04bce44af4f1e568d98140477f53406a29a66248b4e6f5d1bc"
+    },
+    {
+      "path": "packages/mermaid/src/themes/theme-redux.js",
+      "sha256": "a2eeb8fc623614c4853e39e90abd1ebf6b8e6f9f4028cf40962d6d6414d6443f"
+    },
+    {
+      "path": "packages/mermaid/src/themes/erDiagram-oldHardcodedValues.ts",
+      "sha256": "af20f3378fb0663ba4db71ccec792a7deeb74749dc16f2c284b74d4cafe30ca3"
+    },
+    {
+      "path": "packages/mermaid/src/diagram-api/detectType.ts",
+      "sha256": "5f2103ea6c95196400dd6dd99143f4dde07668ba69e54c40805bc90adfd4b7c1"
+    },
+    {
+      "path": "packages/mermaid/src/diagram-api/diagram-orchestration.ts",
+      "sha256": "f2b9df976bcdd3470b02bdaeb8bd56691825ea49b1e8c01eb0ea68306a7d3866"
+    },
+    {
+      "path": "packages/mermaid/src/errors.ts",
+      "sha256": "3583cc420b051a94dc93ee8f46ae99c38ef281b35e42f417b631615e58221c76"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/c4/c4Detector.ts",
+      "sha256": "f5dc043320467ef3665919ad3d0db61e8503fd66b7e896c7f2ff74c227181004"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/flowchart/flowDetector-v2.ts",
+      "sha256": "e261b51e381767b67e969ace3e638b32b8d1d8398403b70c054d0c2116fbc49f"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/agentflow/afDetector.ts",
+      "sha256": "2cd1708802ab8f40bb580ec59472b2ecabc8ceec9cc930b0adb3d37228a79773"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/swimlanes/detector.ts",
+      "sha256": "442a8bbc4e29a5102c58fd0b62a0139550cf3e1b5b3cd2dd172ec69ce187035c"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/er/erDetector.ts",
+      "sha256": "412182f33add1a6281bf9c49951af979b6694610847996690995216f8a2bef55"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/git/gitGraphDetector.ts",
+      "sha256": "27c1dec55ad721e92fb165547c481eeee8a113333bae7cf49d8f54a1e71196a1"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/gantt/ganttDetector.ts",
+      "sha256": "3b5f7878cd67b0b6d5ed0322bf154d238401630d5095d653c97c0b46ecdde05d"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/info/infoDetector.ts",
+      "sha256": "e51c401135a4f265c0f05f1072691f167f67e45294ad894aa1e7e616df8f66a2"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/pie/pieDetector.ts",
+      "sha256": "fc68842096e643818a0860b2f95ac6fafdf786d619963d83ffcbe7cde6cfdd7e"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/quadrant-chart/quadrantDetector.ts",
+      "sha256": "e1251d98d80105af94946c1f53d5cf31860b2fedd2586ba0b951ff10a63a77d2"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/xychart/xychartDetector.ts",
+      "sha256": "785cd5308e9eb165d9b9ef7cc54373cfece92e96884ea1dcb1df886f78f4c569"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/requirement/requirementDetector.ts",
+      "sha256": "2cce26e229aa5ba5adce9b77c219e2ece12ba893dc8d545cff0d876b221837ea"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/sequence/sequenceDetector.ts",
+      "sha256": "e1b2df4407c736bdd7f6a06abe12759495b316d1cf76f83eb77bd6782d9a412e"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/class/classDetector-V2.ts",
+      "sha256": "1a6c58983e963f02cd5e6b04cef3257ae9b70b705e463a7ab4445afc3aa1b6dd"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/state/stateDetector-V2.ts",
+      "sha256": "6c8672b3636568741a3f09d641886349064937e9cfde2d48fab7dbb46f05020b"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/user-journey/journeyDetector.ts",
+      "sha256": "553572ac590a3514f8f3180fefdf577d3dfd5701bf015164a2cecdc7531c2496"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/flowchart/elk/detector.ts",
+      "sha256": "b4eece883310920a6b190024db93338e942480ea8f423b85705d38a3fe69f150"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/timeline/detector.ts",
+      "sha256": "0b2f9e83ac40bd9e4faf5081b109373889d9a6c0073786f80a84c1ba22c2c11f"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/mindmap/detector.ts",
+      "sha256": "f1e6486cd28190e5e0778b57752d94f28658f49f9a7a747c4f891fd07fe04637"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/kanban/detector.ts",
+      "sha256": "20e5cbc746f12f9f812caf52839972748a52d15a7aed76b00c8143b30e27fe84"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/sankey/sankeyDetector.ts",
+      "sha256": "64e2a10abce191f01753241506ee536c98ab58eb2c85a264e594543e700dfc46"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/packet/detector.ts",
+      "sha256": "82460c3383b72a89987872b4f31f177c59423fc2da0443ffe672d875c7f8e2e0"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/radar/detector.ts",
+      "sha256": "91025d60124d26f09b8041371938775b2b685e65bb6d7d092f8131fbf5ca0007"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/block/blockDetector.ts",
+      "sha256": "3440d13a9369230133d6e4af466cf7625159a7972a7efcbe50e7c9c6045bbb46"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/treeView/detector.ts",
+      "sha256": "f7b15ed622d67770128f5726ad73ccbdcf807d35830a13d7074275ba6ea5605b"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/architecture/architectureDetector.ts",
+      "sha256": "b44940658b16f5854f293f51272ed6eefba1b2b5fb3e2e2ab24503ccb031e0c1"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/eventmodeling/detector.ts",
+      "sha256": "66d485f298a4ab3ae569865d4dd3ca26217a58c771773b4aa068ae76f9b40fcd"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/ishikawa/ishikawaDetector.ts",
+      "sha256": "aa7fe9e0d0b048e8115cf4892c2985c68121c5ce386ca48be72f55a863024d59"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/venn/vennDetector.ts",
+      "sha256": "538427883a5d3feab930e1df1a77290dadc3ba03185d7cde3c982e6f7b94f840"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/treemap/detector.ts",
+      "sha256": "f544c157fa76c29503eed3919694db4a02f61731da19003db43e14f1db6f2e1c"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/usecase/usecaseDetector.ts",
+      "sha256": "c663bccc3050675e1bed7cd32fd536418adbc53d2e56e478b48866cc5533a9d2"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/wardley/wardleyDetector.ts",
+      "sha256": "0f4c2c3b4868893b06e549a6ab8c5409c891ae3298abc4ca679d88876740457b"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/cynefin/cynefinDetector.ts",
+      "sha256": "4bdc48c9996ebcfaaea3978b43f27bdc38e558a94518ed1b207e8f0488ef0545"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/railroad/railroadDetector.ts",
+      "sha256": "421118de2cdb25184050ab3d5133fdc8544167c7579ceddfd2ed4d56c23fa07d"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/railroad/ebnfDetector.ts",
+      "sha256": "99c240f413e2810f967534d86c6c6ad7c182c1491b62fc88efe89f4bcdd0342e"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/railroad/abnfDetector.ts",
+      "sha256": "fd38fa7c6e11d32bc9cae2cdd0aed43f2f9cc1aa453350bdbb7e70b8552ac42f"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/railroad/pegDetector.ts",
+      "sha256": "0e625108150e543f01f96a22eb965c01c766e3fc331cb8cca2d0d9bc10ca26ea"
+    },
+    {
+      "path": "packages/mermaid/src/mermaidAPI.ts",
+      "sha256": "c38ef136d815a638993d271f253d2ca825046fb97292d30a7a4de8ea57fc0318"
+    },
+    {
+      "path": "packages/mermaid/src/Diagram.ts",
+      "sha256": "ea89f69368ddf3c386f3012fd912ae79c012f87e2a91e1bb2d2236e74d23dbec"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/common/commonDb.ts",
+      "sha256": "40579cae9a11c8267eea337388892f2d5b508c29b4e77458f2b37bddd45a5f0e"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/common/common.ts",
+      "sha256": "b14851667f7d45d101d4e028204babb1628faefe4812a88ae2d8acac72f8e144"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/flowchart/flowRenderer-v3-unified.ts",
+      "sha256": "9eba228f1d94dce7cbd6cda7c8baf00eba9f6571d9de26f41c9ebadee62e7d31"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/dagre/index.js",
+      "sha256": "3f366de80d978873099c7c9bf7ceaa61f779dba372a4dc11dab3ec61e000512e"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/dagre/mermaid-graphlib.js",
+      "sha256": "8eff208d3b11645dea47ffcd6e7ad7bfd3b0032a3612b9ba3506633510497a2d"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/squareRect.ts",
+      "sha256": "2456ebbc205f1c73fcaf34e63d055a18b17ae71fbce2b1f4ff08e910d8cc2dfd"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/roundedRect.ts",
+      "sha256": "ec467557e20d023100fe6be03f3d478b619d5c5b9b0f283f632d90a14593dc10"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/labelRect.ts",
+      "sha256": "41da654e959fe0bb5d9d25a4dae9f7f717fa1d50d8dde6a2f8d0003c2c91dea9"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/drawRect.ts",
+      "sha256": "1d03397624d31f5a244f32260fd8d109dd41751f1970858feb453f09a95d849e"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/circle.ts",
+      "sha256": "0583cce7bef770d20cd108c620ef546ae2cd423da2ebd913a93e6546ff28a167"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/question.ts",
+      "sha256": "c662ad9199b6de3b38580bc59adc15c8e0d05162cae777dcc3c605fbaaa96b06"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/util.ts",
+      "sha256": "bc63b16d067e4dd1c429e9cf249f4d73260819696de122dff0ce16b12db321c1"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/edges.js",
+      "sha256": "8fee7300ea0bffd008f5d2c12a05e85f5ea8bc22a9855d4d2e2b6c0e6c92a33a"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/markers.js",
+      "sha256": "10af49778781a739f213b2f7f4387df2c70597c00bee23d92f705c4a41909ddc"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/createText.ts",
+      "sha256": "8a26f2b01b952d2044184d5ad7a4122d37c9b7ab781400fd3bb7ee37c5419865"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/setupViewPortForSVG.ts",
+      "sha256": "8242d3e2112f371b8551c2aeb09680cdc608b8452c6eb82cbd5a2e6d3f465fd4"
+    },
+    {
+      "path": "packages/mermaid/src/utils/lineWithOffset.ts",
+      "sha256": "e09a06c66e1e35e29390fb68d08a0df459cf1dcecfe5d5b6466e89b30a9935d5"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/flowchart/styles.ts",
+      "sha256": "697ffb86fef2787307ddc42cd5d3d1544042f08c2452e170691d28ab3d252a50"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/clusters.js",
+      "sha256": "65363a1bb619eb0d0e0635f3c3bd4410c2ade873053ea864506a3323496f940b"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/nodes.ts",
+      "sha256": "3f36796e264f4e08a3e4a9d1a4030ac9e6fe712320d934b2101587b24814828f"
+    },
+    {
+      "path": "packages/mermaid/src/utils/subGraphTitleMargins.ts",
+      "sha256": "930251bdacddb756050e9d41ccb46a12ce0af10fadfb2c82add65fab0626ec19"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/common/index.ts",
+      "sha256": "d8321ba51ba42bc860f7e8fc3ef3026e8eadbbeccc6014df86a249546c62c964"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/stadium.ts",
+      "sha256": "cb15be21132dbb2eb118815b37f3b9cdc08e4f6d4ffe63c408a04796ee6b5b6a"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/subroutine.ts",
+      "sha256": "bbf3ec95a0518b5796bdf23e17375323b000a02051a9b1119cf91adeab69b4a4"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/cylinder.ts",
+      "sha256": "66cf21a2d0777a3a2188ac616d68bbd62e4569615e570c150a45e3c08477a9a0"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/insertPolygonShape.ts",
+      "sha256": "56279058530c0e398a835d3932e672be2a44111da30b92920435d3584e306c86"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/intersect/intersect-polygon.js",
+      "sha256": "074c184e56f9327828a4a53e317e0ad2e776532528ebde775f23b451a0c9a2e8"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/intersect/intersect-line.js",
+      "sha256": "0e888ca4a19afc35ff7567297c277755717472187212f495410946c566b26a85"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/intersect/intersect-rect.js",
+      "sha256": "f7e0849b9a31e2cd7b1a3a7c288442abbb93f7c8d0bac89417c9072f35be76a9"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/hexagon.ts",
+      "sha256": "2c5d559cf52495aee42b250c6ca556be1f5f0c244ee2993d53d22d405d52dcf3"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/leanRight.ts",
+      "sha256": "92c03498df78448186f2114231439338c73e7a8d6a2ad47ad1d7dea1b336f56c"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/leanLeft.ts",
+      "sha256": "7a156d3830ee833484e381351bd2f298b79c11081595e8bfaae224c7288608aa"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/trapezoid.ts",
+      "sha256": "7347c2439b54e296ff6e426bc5aefcd00236b78d4c0f859258feae83c1183cfe"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/invertedTrapezoid.ts",
+      "sha256": "811f49eeba78032b5a64f2266d57d7c220ea1841c45f35b854d6381a68a93e1a"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/doubleCircle.ts",
+      "sha256": "e13030a09455da35a76545c9f27d7c07c3ba450fa065a65d367d40a824bfbc3e"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/rectLeftInvArrow.ts",
+      "sha256": "62472fe5c9d63775db12dfc6914f9995681cdbfe193b945b13bb6216f687f06e"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/handle-markdown-text.ts",
+      "sha256": "6f99a7b3f5b11f87f5509a370663f14650f8f8c3cbb9a34ea496a1aa183cd0ca"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/createLabel.js",
+      "sha256": "a8d8146d7a1f097058e32309ee56cb7ca9c6f46c8d24bd1d8b8e94b8e24babfe"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/edgeMarker.ts",
+      "sha256": "5e710734cf33c37c95c77f40df5b675880711da18bb54a6374139290d1c37395"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/handDrawnShapeStyles.ts",
+      "sha256": "baf8572491842caa518e8ba35a313253ede78ba2fef9b4c43ac9a4b910630402"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/sequence/sequenceDiagram.ts",
+      "sha256": "c0cd6245f6b44e2d13e84183d5b40a399f3f3d7477722d8d1c43117f25a55160"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/sequence/sequenceDb.ts",
+      "sha256": "e2a967402784168ec358794dd78db18e28ca94d7d4ca771724c9840374f4e134"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/sequence/parser/sequenceDiagram.jison",
+      "sha256": "45c71ea8dfd62594c9b315f7285efa497ed8f88219ec016625c37d4bd5823ebf"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/sequence/types.ts",
+      "sha256": "ac936688f396b779df69e456db93668a3843e2b21a74c92c5f037e856d255be4"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/sequence/sequenceRenderer.ts",
+      "sha256": "282530e0e948684101e19d083205f235d7d2263933d1c74d99fc018aa914312c"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/sequence/svgDraw.js",
+      "sha256": "54dfd9f1a67bf7e935a4800150a086818fe639ada82f06c3b1c7cb04874023db"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/sequence/styles.js",
+      "sha256": "f80f572951cb6367a52b9ceeb443ce2872a020d8356ce14685237ff0b9bbcfa4"
+    }
+  ],
+  "packages": [
+    {
+      "name": "d3-shape",
+      "version": "3.2.0",
+      "license": "ISC",
+      "files": [
+        {
+          "path": "src/pie.js",
+          "sha256": "5316912248e7e426fd41bab3af62719bada72fb0394a097c6cf251667f053c75"
+        },
+        {
+          "path": "src/arc.js",
+          "sha256": "e657e8455af7c62613bde73cd45cea79709608d97759fe5e4c3e5ef6cdbd8deb"
+        },
+        {
+          "path": "src/math.js",
+          "sha256": "876190a6d1250f781fa8ca8a1bd0fba1a3db718fe2355c5a69b034aac6caf490"
+        },
+        {
+          "path": "src/path.js",
+          "sha256": "121bd97e99ead26d6bd84f20296c10040dc9caa9fceeca34d5ff917ef6e49065"
+        },
+        {
+          "path": "LICENSE",
+          "sha256": "faa682e3e430941f958d26180458f5934a62f58dac4d70ccdd15608c15d0f884"
+        }
+      ]
+    },
+    {
+      "name": "d3-path",
+      "version": "3.1.0",
+      "license": "ISC",
+      "files": [
+        {
+          "path": "src/path.js",
+          "sha256": "2c2d30e2c5279c8f6f42edc6731a4af029949ec83f47ffb48c3e35d21f877800"
+        },
+        {
+          "path": "LICENSE",
+          "sha256": "a09b0d6d76e768fca2085fad05743ee81ddd11946bcda160a3cf5e1081a479aa"
+        }
+      ]
+    },
+    {
+      "name": "khroma",
+      "version": "2.1.0",
+      "license": "MIT",
+      "files": [
+        {
+          "path": "package.json",
+          "sha256": "0d2145738d3cab828da4c5724b45e0dd2577c0ce84503c956d76897e93fa7de2"
+        },
+        {
+          "path": "license",
+          "sha256": "66b333b0f66759a0b710459e03f7029abe17f4358114a128d2c972e642961b49"
+        },
+        {
+          "path": "src/constants.ts",
+          "sha256": "c5810dfaf470f2c2618d683bccd6d117a58e64c62c162a8c1dbd11fece677577"
+        },
+        {
+          "path": "src/index.ts",
+          "sha256": "e39e5fbb6578c7785fe8a89aa42691ac46fa3303de59baeb02b2b7b14643f945"
+        },
+        {
+          "path": "src/types.ts",
+          "sha256": "36362c6719814de8ec13121c6bc725bc48d58bf30f7dda769be0c6f6d1bd674b"
+        },
+        {
+          "path": "src/channels/index.ts",
+          "sha256": "b5dfa8b3e866f10658afad939346579ea645630993e362dfc3ad985ca1600d1b"
+        },
+        {
+          "path": "src/channels/reusable.ts",
+          "sha256": "ec9abcd85721e8d97ef20db82160a3cd8dc3011b17b4df25e52ecf504e4507c4"
+        },
+        {
+          "path": "src/channels/type.ts",
+          "sha256": "7a9e48fd1c0b0f62049abae807e481a92ac283e4b816905952c37f7cb1244379"
+        },
+        {
+          "path": "src/color/hex.ts",
+          "sha256": "6cce403dab79c622d67347a52d0a448c2f8ad264d229aaea5a8420b81776d53e"
+        },
+        {
+          "path": "src/color/hsl.ts",
+          "sha256": "401a5dca80bbe8e613323c08767f4b3a99b425927083bf150010dce0bc108547"
+        },
+        {
+          "path": "src/color/index.ts",
+          "sha256": "6ae47cdc9303dcd6a144f831dbc29a1deb1a4cf9445bd6041e746eb30708361d"
+        },
+        {
+          "path": "src/color/keyword.ts",
+          "sha256": "2c291a653c7bfa775f812818618de9b6fc353f9cdcb02325c952d2fc323636da"
+        },
+        {
+          "path": "src/color/rgb.ts",
+          "sha256": "c8efde4808e7be226ec2a2650bf71063b3e18070f8191c92640d0dab292e0b8a"
+        },
+        {
+          "path": "src/methods/adjust.ts",
+          "sha256": "d0a899c3a92b49a12b02574632f7d11b549896449ef0df6adae02bd1965b691e"
+        },
+        {
+          "path": "src/methods/adjust_channel.ts",
+          "sha256": "83bf0846e16b9d5b2196ba18069e0e2fd131b343de27e83504acd7575e3b5f8e"
+        },
+        {
+          "path": "src/methods/alpha.ts",
+          "sha256": "94f082ce3191f7aaa219eea6c4ceb02393e11bb140d86de33acde2fe9294cde6"
+        },
+        {
+          "path": "src/methods/blue.ts",
+          "sha256": "9786af03d9d8a3b8a91c5cc30ec6ba0552aa6a8a3d550cb202de06c2ffae572d"
+        },
+        {
+          "path": "src/methods/change.ts",
+          "sha256": "f772cb47374c4f279e3f18c41916b57a3cc025cae74ac93658e3749d6eb1f0a1"
+        },
+        {
+          "path": "src/methods/channel.ts",
+          "sha256": "c3798405b063d9a866d5d80dc94cae8b22eed1947e65cb65c3b234d88a5433be"
+        },
+        {
+          "path": "src/methods/complement.ts",
+          "sha256": "ab0073a0822c6ce5012d0a2373fd21cf935a83871e801c85df3f071c736fb059"
+        },
+        {
+          "path": "src/methods/contrast.ts",
+          "sha256": "999c5a1ebebee80311182434f46c74de657a06073fc3c3f1f79e5bddec134acd"
+        },
+        {
+          "path": "src/methods/darken.ts",
+          "sha256": "6d2efed9796afb28b792db3e86655cd33c00b0f2f8d30f2a38aa92f5f928ddc8"
+        },
+        {
+          "path": "src/methods/desaturate.ts",
+          "sha256": "4adb800b0e65250e79b5d37b68838c9eeb9f51a22ce98cb2a78f9807134aa076"
+        },
+        {
+          "path": "src/methods/grayscale.ts",
+          "sha256": "42036271e285308b8c5c2e60d2bb21b8aa0164c3cd0d576240c61497d9ad6aaa"
+        },
+        {
+          "path": "src/methods/green.ts",
+          "sha256": "2e5ce7ff998a055520544144084c74684cd4aa7bfebd59886bf72bf5460e9b54"
+        },
+        {
+          "path": "src/methods/hsla.ts",
+          "sha256": "bc61bfaddfec7cb0adb05b2d5dc162ae5deb0d2443a563ea53108d83493b0ae2"
+        },
+        {
+          "path": "src/methods/hue.ts",
+          "sha256": "1ca5be53c27ba5bcd96f16bf46ecc5e6f2084cb7d5147a3bf353ebbcb00bd2e0"
+        },
+        {
+          "path": "src/methods/index.ts",
+          "sha256": "8fe5e8dd9e2a343c79f05f66c51f127dbb19e3805094d8b18fafdac5f85ff42a"
+        },
+        {
+          "path": "src/methods/invert.ts",
+          "sha256": "d1e68ced59ae6c43cc20760a77b6047d5174d99f67a6334dac5b4dfc1bd21123"
+        },
+        {
+          "path": "src/methods/is_dark.ts",
+          "sha256": "07efdfb5d27911da7892d6febe6c55e059a64684bad28dcc9321011a7e7d4665"
+        },
+        {
+          "path": "src/methods/is_light.ts",
+          "sha256": "5183cdb8b5462430547bf1dd1a7fc4780f15b1a30da9db4246d952e09f132abf"
+        },
+        {
+          "path": "src/methods/is_transparent.ts",
+          "sha256": "00c5ff1eb80c0a7db3cd9955493f99b6c31c4dab8a7e7ea6d35c378c3f5b4a7e"
+        },
+        {
+          "path": "src/methods/is_valid.ts",
+          "sha256": "19b9fd6c42725c2a33469f6c8df2db5e5ffca715f570510699db6d2c2ec01a68"
+        },
+        {
+          "path": "src/methods/lighten.ts",
+          "sha256": "792152d33b46acb6764c101f331639c80ee3b6e786ec25b4bfd66084333cf091"
+        },
+        {
+          "path": "src/methods/lightness.ts",
+          "sha256": "891e3618688c953cf2884ba3d04a997c0ebe10ee0f7ce564643250f670e408d7"
+        },
+        {
+          "path": "src/methods/luminance.ts",
+          "sha256": "9528865f48c81278330ee3026f8485f742cd8f34b9d9f3f86129e4faaaad1227"
+        },
+        {
+          "path": "src/methods/mix.ts",
+          "sha256": "bb1e90b3390294917d41ac4ee049f57cc4e3cf4c6807cd0f8d429bf7e1326627"
+        },
+        {
+          "path": "src/methods/opacify.ts",
+          "sha256": "97d11b0296c9fbef81797a3a2a9139198210af4393da8599eb0b660c16da4b8b"
+        },
+        {
+          "path": "src/methods/red.ts",
+          "sha256": "5e074f3ff6fa7c39fb9325ae21523942bf2416454b2d56c4c8ad98b811c8ec25"
+        },
+        {
+          "path": "src/methods/rgba.ts",
+          "sha256": "959ec3327cb12d790dd7fe8657d1a81b2d9c2ae96e1ad153ca07472fa5bfe94d"
+        },
+        {
+          "path": "src/methods/saturate.ts",
+          "sha256": "d414e1476d0533691795d354822c23b3c2a3678a33aa4fa2f5b67e492b8a2e6f"
+        },
+        {
+          "path": "src/methods/saturation.ts",
+          "sha256": "c7e93d0f2b7044feaa1347639fffa7cf6b127dd9484ffa9482e4ddf8d9dde040"
+        },
+        {
+          "path": "src/methods/scale.ts",
+          "sha256": "3207d76e4518b6616a3c092f25f5ddbe6288145d4da677214021d26c2a5ad253"
+        },
+        {
+          "path": "src/methods/to_hex.ts",
+          "sha256": "0ae483705d239761e78e0e2b0e3712fe76ad44e26c95d0f7a6b06a461f386297"
+        },
+        {
+          "path": "src/methods/to_hsla.ts",
+          "sha256": "1f9e6ced2679ea9e5d2d2dab7456a8c7d56714e66b5ccfd0a700063e3c64b565"
+        },
+        {
+          "path": "src/methods/to_keyword.ts",
+          "sha256": "bff1be9485237f7cd9bf6797b4cf3d958dd140bebecc9b65c1acbd2de0d5b60e"
+        },
+        {
+          "path": "src/methods/to_rgba.ts",
+          "sha256": "025057c7b65b2b958af38ef03ba2594c4163b95fa6cf3fa48fbdfa0080b441d9"
+        },
+        {
+          "path": "src/methods/transparentize.ts",
+          "sha256": "d55dcf6ba5a56cbe66159a12c3e2aa75be8442e88b5fbaae34069898bed4ccde"
+        },
+        {
+          "path": "src/utils/channel.ts",
+          "sha256": "a6cc6f0ab35f36f2693317d5d02302775a0082e66bdc02e49a73f11de5d6ed34"
+        },
+        {
+          "path": "src/utils/index.ts",
+          "sha256": "514467c4e0039e34657ef249f51fb376b8661eef693723bad0047067c5623cf2"
+        },
+        {
+          "path": "src/utils/lang.ts",
+          "sha256": "452f3f24a31bdafa0426fccbafab05902bd0112bcc8ab26b8af62a6f8e47f680"
+        },
+        {
+          "path": "src/utils/unit.ts",
+          "sha256": "0f0f541be7a9686954bedc536ded5c3bc97f5e3e4a19b4b0db3ee361e70724a0"
+        },
+        {
+          "path": "dist/constants.js",
+          "sha256": "4166c00634b27de54200ab6223e1252dbed596f453344ae8081454c3b643c486"
+        },
+        {
+          "path": "dist/index.js",
+          "sha256": "d680e9b6ce330c535af09ae4d40a3aef6d20af3c525986153ea226b9e99469ac"
+        },
+        {
+          "path": "dist/types.js",
+          "sha256": "890d11a23698a3a51375f14b954a986b103a0a45eb6689675a63529c3b2614ae"
+        },
+        {
+          "path": "dist/channels/index.js",
+          "sha256": "50dc111006608da002e7bd87e2531d5e0d830f88ecb0149d4cbb8ff8b2a96f94"
+        },
+        {
+          "path": "dist/channels/reusable.js",
+          "sha256": "18078f69d0d9089a41824a193c00b01e51d97c1a6e1dad2c878d1c8b50f4ce93"
+        },
+        {
+          "path": "dist/channels/type.js",
+          "sha256": "1deecd732887a0e019defd9c1ac955fce5b253099195bd23b6889682d7c0928f"
+        },
+        {
+          "path": "dist/color/hex.js",
+          "sha256": "3afcf8941b4d6ad1e613b7d94c26f8965a81239cc0a533912720e65045c99646"
+        },
+        {
+          "path": "dist/color/hsl.js",
+          "sha256": "b6767f0ecac4b46fea44f3c86bddc26335e007363cf5f3bf3eaf0d89f3768d38"
+        },
+        {
+          "path": "dist/color/index.js",
+          "sha256": "b85e469e4d75f419fcf82aa8df4f6ce44e842505af4044404023c312eca5cceb"
+        },
+        {
+          "path": "dist/color/keyword.js",
+          "sha256": "3346e2ffc43741b809712bf7b2340814aa3527867e607eac0c5a5db51985aa26"
+        },
+        {
+          "path": "dist/color/rgb.js",
+          "sha256": "937ffdac1196ae7c05103a15c9f199124c2aa5e32a472613dacf8b3701097e08"
+        },
+        {
+          "path": "dist/methods/adjust.js",
+          "sha256": "cb3d91c1190c97ceb9a4ef6a77b285b9d7eb58e426802c28781f27d62a223d41"
+        },
+        {
+          "path": "dist/methods/adjust_channel.js",
+          "sha256": "cec6acf3e6234427a35beb8ce5bc4374df2b49653d52da2434fb62248d63bc4e"
+        },
+        {
+          "path": "dist/methods/alpha.js",
+          "sha256": "3ca83ccf6deb31fcfdf65326f5fec8a72890e89ed3b122f7d90cc0ae01c3de3e"
+        },
+        {
+          "path": "dist/methods/blue.js",
+          "sha256": "dc3d45bc4c47c9426db0a5b548b9ddfc415361edb89844425267b07490c9e62e"
+        },
+        {
+          "path": "dist/methods/change.js",
+          "sha256": "196dcda5ad7044129a52a457680efae92e86933a9ff814b6b1594d4f7f87e3bf"
+        },
+        {
+          "path": "dist/methods/channel.js",
+          "sha256": "881c6e39067b20ef0204cb730d83bb28d65e69aac6d120ab81b713e2305243ee"
+        },
+        {
+          "path": "dist/methods/complement.js",
+          "sha256": "326431e47ee66201ee5d852ca6e0122d57d73f68f7b5e71770f14aa224cc3370"
+        },
+        {
+          "path": "dist/methods/contrast.js",
+          "sha256": "8b844da44290f015b24739e8616ebd8f987011baa25ff75ae11935fb8261eea4"
+        },
+        {
+          "path": "dist/methods/darken.js",
+          "sha256": "005dda417a76783271cd8149a34f8712465bccc91c17fa6252cea7e766798104"
+        },
+        {
+          "path": "dist/methods/desaturate.js",
+          "sha256": "53df4a264a9523a8d2d2d123bebe596b3dba0e429a288af94efd794911626f97"
+        },
+        {
+          "path": "dist/methods/grayscale.js",
+          "sha256": "debd27ddf6f6c1bed43023961bd4f642dc084b5e9cd2f426ba867ca0d3221afa"
+        },
+        {
+          "path": "dist/methods/green.js",
+          "sha256": "c817f7355ea3f6a4785b7de05efc795d90ba7e779a213d76043cd469c097f78b"
+        },
+        {
+          "path": "dist/methods/hsla.js",
+          "sha256": "eaf454da791cb2c9dea0c78f87e1405b185069bd51aeeba3fbb6313b3de86448"
+        },
+        {
+          "path": "dist/methods/hue.js",
+          "sha256": "f8ef4a07c2e45f0cb8c7d4a81af8d84cf38b2d3379f1dc0790d0d3f80d93a121"
+        },
+        {
+          "path": "dist/methods/index.js",
+          "sha256": "d2b3b1c4681231ce37f75a7f24855ecb2e935abb7cd3d2694f1b28d97158d737"
+        },
+        {
+          "path": "dist/methods/invert.js",
+          "sha256": "35c4f2ab5b97a708c1f77c4a2ab2c9a1d1c6dd88ae9045ecad4de8d2c485a2e4"
+        },
+        {
+          "path": "dist/methods/is_dark.js",
+          "sha256": "3030ad5cb6a200b0875b1d9a2fc6092475fb43916150d05e0f8d843b30ae7381"
+        },
+        {
+          "path": "dist/methods/is_light.js",
+          "sha256": "57814dbb6553fe5b42ffd20d1b4cf5949c5ba9def10a02b4daff1bf0e4b008b2"
+        },
+        {
+          "path": "dist/methods/is_transparent.js",
+          "sha256": "ffa4118274f08e22f1f910749f283da4ebb185fb49fc44904eff251136f00793"
+        },
+        {
+          "path": "dist/methods/is_valid.js",
+          "sha256": "7fc3e540240030cb8bdaff218d064cf804f7dd9d5d540042c5c86dc3fa7d305e"
+        },
+        {
+          "path": "dist/methods/lighten.js",
+          "sha256": "293ec9233c7be19f9a2555663e9d62b1157e5bca12280d5782a218fcd608cca6"
+        },
+        {
+          "path": "dist/methods/lightness.js",
+          "sha256": "2c904b9aaf2a482a05989f071e95ba9ec681f671b383cc69c02641b8f8326697"
+        },
+        {
+          "path": "dist/methods/luminance.js",
+          "sha256": "3cfbcdfd73cb2e05176828815cfc14a88ef3d8bf467d664060c2d32e7e931a92"
+        },
+        {
+          "path": "dist/methods/mix.js",
+          "sha256": "febb7516c6eb170a769d36d5e2702366b5a787a3e695ca6fa5f1b702049c60ac"
+        },
+        {
+          "path": "dist/methods/opacify.js",
+          "sha256": "a6b8d7795bf4a8acccd013fe1374fb59482a6e139108bdf34277359dfff81023"
+        },
+        {
+          "path": "dist/methods/red.js",
+          "sha256": "734813498828df233c3fdf5c6ca6fb3d44a2adfb83bb79edf95bb5489f76a379"
+        },
+        {
+          "path": "dist/methods/rgba.js",
+          "sha256": "02d31f143e8af9b8a8d0c8ae61399f49b1a4af6531be2932e0fa134702734a11"
+        },
+        {
+          "path": "dist/methods/saturate.js",
+          "sha256": "86234aeaef028981bd35bbd2bde3f5378677ad57d7f8c80d6b34a9ce98fc77b2"
+        },
+        {
+          "path": "dist/methods/saturation.js",
+          "sha256": "d8a521b5d4a847b024486c50ad12404fd5d7f64a62097e9494585c71095fa4b1"
+        },
+        {
+          "path": "dist/methods/scale.js",
+          "sha256": "de1e3f16d2efbe9f8989e71659730716dd4e9c2b76474b8bde2359a78c606f33"
+        },
+        {
+          "path": "dist/methods/to_hex.js",
+          "sha256": "73d844164783c94e6438e84f726aca1fc68974d172b5123bef98919f498c32e3"
+        },
+        {
+          "path": "dist/methods/to_hsla.js",
+          "sha256": "907b16b8e0ff81db25c9d31a4b941a5b7845b2a5281012cbb9647baba47f4737"
+        },
+        {
+          "path": "dist/methods/to_keyword.js",
+          "sha256": "f803a90a3f0fac1669797a2fd3987dc430f94e6b535dabcbc483c6ca645c07a7"
+        },
+        {
+          "path": "dist/methods/to_rgba.js",
+          "sha256": "4b2aa4005f3e270c93461ea84c7e82dcf740d361ca5b6dfff00b11e39f1391d0"
+        },
+        {
+          "path": "dist/methods/transparentize.js",
+          "sha256": "b12a06e8c3ee1d3032d698583a052c507df8ae694b5cb33f389a64a94bb8919f"
+        },
+        {
+          "path": "dist/utils/channel.js",
+          "sha256": "6a4c576f50c8bfc211550291865f159c21dee1745b94a14542ec0f39c2d47146"
+        },
+        {
+          "path": "dist/utils/index.js",
+          "sha256": "45efcba4f74f17caac6e8432e6f00c2462c41ead6a9b130a1f5da8bdaec7bc19"
+        },
+        {
+          "path": "dist/utils/lang.js",
+          "sha256": "e5adf6c36fe79f2783e00f054ec830947734ecad28b2770749b622d9626c84f6"
+        },
+        {
+          "path": "dist/utils/unit.js",
+          "sha256": "d3716f0c22219657135b217f23ded2c708ba3e944f252217af3d4e2128f5576d"
+        }
+      ]
+    },
+    {
+      "name": "es-toolkit",
+      "version": "1.45.1",
+      "purpose": "cleanAndMerge official bundle dependency",
+      "files": [
+        {
+          "path": "dist/_internal/isUnsafeProperty.js",
+          "sha256": "0901e9f7f3e4dd20928c4b66651aa59fd88dd2a0e6c91d993f1d7b37b277842c"
+        },
+        {
+          "path": "dist/compat/_internal/getSymbols.js",
+          "sha256": "b2f27728c96e57b313c6e1b608b03d7b8218eec893b0d237660404f606c085a3"
+        },
+        {
+          "path": "dist/compat/_internal/getTag.js",
+          "sha256": "5b92a21871b8d3b58d11264bd68f9fd41c0d5d01270b2ee52919cba4aaa3701b"
+        },
+        {
+          "path": "dist/compat/_internal/tags.js",
+          "sha256": "3224853fef2263c773ae03f82196f7ecbad0b52396e74a9965fa48e69c539bc3"
+        },
+        {
+          "path": "dist/compat/object/cloneDeep.js",
+          "sha256": "1818c9b3fd96c47e1a56f42aad95c74c0af3dd8788c483684fae0b551e2ff672"
+        },
+        {
+          "path": "dist/compat/object/cloneDeepWith.js",
+          "sha256": "162fd8f970248d9c0d14e469722a6cc5111ca121bab4a055f6abf8311f81463c"
+        },
+        {
+          "path": "dist/compat/object/merge.js",
+          "sha256": "de7eccab7d1053f60814b951887eba0acd20a0c840c37c7bc7b96e51e37a18be"
+        },
+        {
+          "path": "dist/compat/object/mergeWith.js",
+          "sha256": "5ca268990182bf2f4763574ff371b8faf30b41f8d71ffd443c35e139f5850470"
+        },
+        {
+          "path": "dist/compat/predicate/isArguments.js",
+          "sha256": "940a8c4a77442bd28028d55601614a95d20defa846d2876f3799345a7dfcc603"
+        },
+        {
+          "path": "dist/compat/predicate/isArrayLike.js",
+          "sha256": "33d9db4401cbbb663fee81f0fc7c651009616a2d29c3d4a242d7507a1d359e3a"
+        },
+        {
+          "path": "dist/compat/predicate/isArrayLikeObject.js",
+          "sha256": "e2143e077ccec95ef408b1deac985885ee49f102357d405fabd66c4bb3910abd"
+        },
+        {
+          "path": "dist/compat/predicate/isObjectLike.js",
+          "sha256": "7edd1f736409e62c68f883b5563541c02c3fc601db7ab0be79cfe40f83637206"
+        },
+        {
+          "path": "dist/compat/predicate/isPlainObject.js",
+          "sha256": "ef6ab08f4784e17bf0a8ffbb4690035be9b7f5c3ae3ac32058cb4acbc1248552"
+        },
+        {
+          "path": "dist/compat/predicate/isTypedArray.js",
+          "sha256": "dca6f7b360ff16fe729d1891ce809b26663da8d491cb8ad8a61bcd75232ac8ff"
+        },
+        {
+          "path": "dist/function/noop.js",
+          "sha256": "6b2d154b3e56ddcc6a443a94fe7dca4acb76eec6304903eb7d0fdd17227554aa"
+        },
+        {
+          "path": "dist/object/clone.js",
+          "sha256": "198ae4498b6357844c4fccb9ed7d35eb174e7800a4ae978b3dfb071f27463f74"
+        },
+        {
+          "path": "dist/object/cloneDeepWith.js",
+          "sha256": "44ad6ab5cad3d4da0714a754cbb4b5e98680371be59964f275928da555f5fc0d"
+        },
+        {
+          "path": "dist/predicate/isLength.js",
+          "sha256": "1a8e0dfa969c1b21271e39f33f883ad708e47ff7ad9c4937fa627ef9995e2c28"
+        },
+        {
+          "path": "dist/predicate/isPrimitive.js",
+          "sha256": "059f07a5b7fae9fcdd558b41ce176ecc0cd32aeea1d632cca5c15950ff42e66e"
+        },
+        {
+          "path": "dist/predicate/isTypedArray.js",
+          "sha256": "11e71cfd155ccaffbfc593183310df08d57615ddb26bd62338c734ce6c3daa18"
+        },
+        {
+          "path": "LICENSE",
+          "sha256": "ed68888a2a28f32a05e88f24d4d4ee75075a1bda2b6372a1f2e00fa0576a5524"
+        },
+        {
+          "path": "package.json",
+          "sha256": "a71b45472ab2cd327292503176b286508cc84a226e6bd7bdd10dfeae5ed5c3d8"
+        }
+      ]
+    }
+  ],
+  "dagreRank": {
+    "package": "dagre-d3-es",
+    "version": "7.0.14",
+    "license": "MIT",
+    "files": [
+      {
+        "path": "package.json",
+        "sha256": "24643bcd30aef3932d4776eae974005354e34eb1036c24e6090b8a38b05fcc8e"
+      },
+      {
+        "path": "LICENSE.md",
+        "sha256": "d01eb84ccce437dbf5fd40853bceea0f287930920acea066597a4a25ead63858"
+      },
+      {
+        "path": "src/dagre/layout.js",
+        "sha256": "76d6a92030279ea5c22bd034d71debdf6d46f2e56b94c26babd6a34e907e192c"
+      },
+      {
+        "path": "src/dagre/acyclic.js",
+        "sha256": "8718f354dca625bf0213a4719fa8d90723a624a5c12074f3af8e19cffaec0b1a"
+      },
+      {
+        "path": "src/dagre/nesting-graph.js",
+        "sha256": "377d16b13bd03f6b81ed0214f01ba766ee4dafec89ff370a1c6c9aa184da864d"
+      },
+      {
+        "path": "src/dagre/util.js",
+        "sha256": "9bb955ebb814eadbb2f5f191f4f770af6cc3fe60a52f76d8208febf325ad98ce"
+      },
+      {
+        "path": "src/dagre/rank/index.js",
+        "sha256": "d6bda6a568923fa8aa6e425b44e10dbd777ea8a07afa7b0306adc53cfe840669"
+      },
+      {
+        "path": "src/dagre/rank/util.js",
+        "sha256": "867f1f3f8a4c2493bede73417e23b494c7ac7064217590c4e831f1f64a041135"
+      },
+      {
+        "path": "src/dagre/rank/feasible-tree.js",
+        "sha256": "ac4db776d64d0788fbcc51e18760ebfb2d7f7495ec5ff1d9b7639a1873d2d84f"
+      },
+      {
+        "path": "src/dagre/rank/network-simplex.js",
+        "sha256": "62f8bfdc486ea82a62bad39194b9f9fa2c24f22c27459a6d2ddf7db42c641c3f"
+      },
+      {
+        "path": "src/graphlib/graph.js",
+        "sha256": "3edb5adb4962643e0f743fa9183dad3b36df94c0a1af476eec2b0d8b77b2054b"
+      },
+      {
+        "path": "src/graphlib/alg/dfs.js",
+        "sha256": "c49dc05a344566f15eadc172d1034c63d89796a498d0691a4069da3c7e06cbf7"
+      },
+      {
+        "path": "src/graphlib/alg/preorder.js",
+        "sha256": "09fed89780f9036b59abd2d7eba6150e0c8bb5feb558ce24937ca5a814648b6d"
+      },
+      {
+        "path": "src/graphlib/alg/postorder.js",
+        "sha256": "726ab5f891e60d97765a5bb15fd58df7f51bb063be7da11df9b2fa07c027dd70"
+      }
+    ]
+  },
+  "dagreLayout": {
+    "package": "dagre-d3-es",
+    "version": "7.0.14",
+    "files": [
+      {
+        "path": "src/dagre/normalize.js",
+        "sha256": "a1b73cf647d867471289b2f152b233752bc966d5b24586681790640eea46d078"
+      },
+      {
+        "path": "src/dagre/parent-dummy-chains.js",
+        "sha256": "d65e598d4442bb5bb7c6e67b2255dda169d2eac9b1cfc41702741307c295fb28"
+      },
+      {
+        "path": "src/dagre/add-border-segments.js",
+        "sha256": "9314952cefec131ce59aada2ab8fe33e50894fda60b374c376dd5d39c27be3ba"
+      },
+      {
+        "path": "src/dagre/coordinate-system.js",
+        "sha256": "7eec6e8ca940210d337f2473b8cdf2976ac0fb71c77b90e2a3a0a251d5dfc017"
+      },
+      {
+        "path": "src/dagre/order/index.js",
+        "sha256": "fd467b87dedbc57a58d36d48e5774574ad9e8210e79410e20f9b53be33681218"
+      },
+      {
+        "path": "src/dagre/order/init-order.js",
+        "sha256": "bdd808c33a321d921f7ecd58fd232784f5c042571800af47dc999d25ba7c3f03"
+      },
+      {
+        "path": "src/dagre/order/build-layer-graph.js",
+        "sha256": "d3043229487746c910b0fc6adf12720654fe78ef970b127db0cf867f8d425cab"
+      },
+      {
+        "path": "src/dagre/order/sort-subgraph.js",
+        "sha256": "46f098510a17cfbe9c95181035f2a4b90f619b8e6586df5c14fc676b7a5bf599"
+      },
+      {
+        "path": "src/dagre/order/barycenter.js",
+        "sha256": "37e173da019c25ee13743b3f304cb1ddb0d159536375de0a8dc191e128bc1a8e"
+      },
+      {
+        "path": "src/dagre/order/resolve-conflicts.js",
+        "sha256": "537e4f7e9e0a0cd8105916ff9bb200c9d66a2713b5e65d18797a78fadf788601"
+      },
+      {
+        "path": "src/dagre/order/sort.js",
+        "sha256": "1f6cc7da538549f788a74549b8843c78516cb38b8bcdc26858db9c8cfecaaa71"
+      },
+      {
+        "path": "src/dagre/order/add-subgraph-constraints.js",
+        "sha256": "f38a5099f604c68b5138c0e95ac483425e1ced4fa62e3b432145cb7c78c9e369"
+      },
+      {
+        "path": "src/dagre/order/cross-count.js",
+        "sha256": "87b7c9135bb2cafdfdb0f5131fdf6ceb33af0102f3a5306070a24e9111c50702"
+      },
+      {
+        "path": "src/dagre/position/index.js",
+        "sha256": "bf7803a5bceab7e5bf3064b3833faadac7fd6c5b50446a5b328dda0652e5af7d"
+      },
+      {
+        "path": "src/dagre/position/bk.js",
+        "sha256": "d37012c11a27f1da050798792854e4a39102b400dec46d8af6b84975690680e7"
+      }
+    ]
+  },
+  "flowchartCurve": {
+    "package": "d3-shape",
+    "version": "3.2.0",
+    "files": [
+      {
+        "path": "src/curve/basis.js",
+        "sha256": "2b75b71399e8d92d021e28bb2b4f7d6c41e3d2dff89f69c877ea7f664698086b"
+      },
+      {
+        "path": "LICENSE",
+        "sha256": "faa682e3e430941f958d26180458f5934a62f58dac4d70ccdd15608c15d0f884"
+      }
+    ]
+  },
+  "markdownLabels": {
+    "version": "16.4.2",
+    "file": "lib/marked.esm.js",
+    "sha256": "6540aa2544be84b3abdd9424fa287120e9ed7c7600512dd92c097493121a5951"
+  }
+}
