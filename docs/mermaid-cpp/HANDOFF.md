@@ -1,6 +1,20 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-24, measured classic shapes verified
+## Current checkpoint - 2026-10-24, display-label batch in progress
+
+- Deliver quoted/entity plain labels and explicit line breaks through the
+  existing Flowchart source-to-SVG entry, preserving source/DB label values.
+  Scope is display conversion and actual line measurements for nodes, edge
+  labels and group titles; existing shapes and Dagre remain unchanged.
+- Exit on representative connected/grouped browser comparisons in both themes,
+  focused source-preservation checks and the existing Windows native suites.
+  Then commit/push this batch and proceed to measured automatic wrapping,
+  followed by required styles/titles/markers and the application call chain.
+- Worktree is clean at 651f60a0 before this batch. PR #1 is OPEN/unmerged at
+  c5df2b88; its documentation-triggered CI rerun is still running. The previous
+  implementation validation below remains valid. No merge is authorized.
+
+## Measured classic shapes verified (historical)
 
 - Delivered all classic node shapes accepted by the current native Flowchart
   parser through render_mermaid. New adapters cover stadium/subroutine/cylinder,

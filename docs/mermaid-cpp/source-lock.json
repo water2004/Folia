@@ -523,6 +523,10 @@
     {
       "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/rectLeftInvArrow.ts",
       "sha256": "62472fe5c9d63775db12dfc6914f9995681cdbfe193b945b13bb6216f687f06e"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/handle-markdown-text.ts",
+      "sha256": "6f99a7b3f5b11f87f5509a370663f14650f8f8c3cbb9a34ea496a1aa183cd0ca"
     }
   ],
   "packages": [

@@ -11,6 +11,9 @@ for(const file of lock.flowchartCurve.files) assert.equal(createHash('sha256').u
 const directory=resolve(process.argv[2]??'build/mermaid-cpp/flowchart-browser');
 mkdirSync(directory,{recursive:true});
 const cases=[
+  ['labels-entities','flowchart LR\nA["Say #quot;hello#quot;"] -->|"A &amp; B"| B["Cost #36;5"]\nB --> C["x &lt; 5"]'],
+  ['labels-lines','flowchart TD\nA["Read<br/>input"] -->|"next\\nstep"| B("Check\nresult")\nB --> C[("Save<br>record")]'],
+  ['labels-group','flowchart LR\nsubgraph g["Read<br/>and write"]\ndirection TB\nA["Input #38; data"] --> B["Write<br />output"]\nend\ng -->|"all<br/>done"| C["End"]'],
   ['shapes-polygons','flowchart TD\nA{{Prepare}} --> B[/Read/]\nA --> C[\\Write\\]\nB --> D[/Collect\\]\nC --> E[\\Expand/]\nD --> F>Route]\nE --> F\nF --> G(((Done)))'],
   ['shapes-polygons-group','%%{init: {"flowchart": {"minNodeWidth": 0}}}%%\nflowchart LR\nsubgraph g[Steps]\ndirection BT\nA{{Init}} --> B[/In/] --> C[\\Out\\] --> D[/Join\\] --> E[\\Fork/] --> F>Next]\nend\ng --> G(((End)))'],
   ['shapes-down','flowchart TD\nA([Start]) -->|run| B[[Process]]\nA --> C[(Database)]\nB --> D([Finish])\nC --> D'],
