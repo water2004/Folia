@@ -451,6 +451,22 @@
     {
       "path": "packages/mermaid/src/diagrams/flowchart/styles.ts",
       "sha256": "697ffb86fef2787307ddc42cd5d3d1544042f08c2452e170691d28ab3d252a50"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/clusters.js",
+      "sha256": "65363a1bb619eb0d0e0635f3c3bd4410c2ade873053ea864506a3323496f940b"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/nodes.ts",
+      "sha256": "3f36796e264f4e08a3e4a9d1a4030ac9e6fe712320d934b2101587b24814828f"
+    },
+    {
+      "path": "packages/mermaid/src/utils/subGraphTitleMargins.ts",
+      "sha256": "930251bdacddb756050e9d41ccb46a12ce0af10fadfb2c82add65fab0626ec19"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/common/index.ts",
+      "sha256": "d8321ba51ba42bc860f7e8fc3ef3026e8eadbbeccc6014df86a249546c62c964"
     }
   ],
   "packages": [

@@ -21,6 +21,11 @@ const cases=[
   ['loop-right','flowchart LR\nA((Retry)) -->|again| A\nA --> B[Done]'],
   ['loop-left','flowchart RL\nA[Retry] --> A\nA --> B[Done]'],
   ['loop-up','flowchart BT\nA{Retry?} -->|yes| A\nA --> B[Done]'],
+  ['group-independent','flowchart TD\nsubgraph g[Group]\ndirection LR\nA[Read]-->B[Write]\nend\ng-->|done|C[Exit]'],
+  ['group-incoming','flowchart LR\nC[Enter]-->g\nsubgraph g[Group]\ndirection BT\nA[Read]-->B[Write]\nend'],
+  ['group-external','flowchart TD\nsubgraph g[Group]\ndirection LR\nA[Read]-->B[Write]\nend\nB-->C[Exit]\ng-->|done|D[Report]'],
+  ['group-nested','flowchart TD\nsubgraph g[Outer]\ndirection LR\nsubgraph h[Inner]\ndirection BT\nA[Read]-->B[Write]\nend\nh-->C[Store]\nend\ng-->D[Exit]'],
+  ['group-loop','flowchart LR\nsubgraph g[Group]\ndirection TB\nA[Retry]-->|again|A\nA-->B[Done]\nend\ng-->C[Exit]'],
   ['unicode','flowchart LR\nA[中文] --> B[Café 😀]'],
 ];
 const url=pathToFileURL(resolve('tools/mermaid-cpp/oracle/node_modules/mermaid/dist/mermaid.esm.mjs')).href;
@@ -34,19 +39,29 @@ for(const [name,source] of ${JSON.stringify(cases)}) {
   mermaid.initialize({startOnLoad:false,theme,look:'classic',layout:'dagre',fontFamily:'Arial',themeVariables:{fontFamily:'Arial'},flowchart:{htmlLabels:true}});
   const {svg}=await mermaid.render('probe'+result.length,source);
   const host=document.createElement('div');host.innerHTML=svg;document.body.append(host);
+  const root=host.querySelector('svg');
+  const position=(element,x=0,y=0)=>{
+   const p=new DOMPoint(x,y).matrixTransform(root.getScreenCTM().inverse().multiply(element.getScreenCTM()));
+   return {x:p.x,y:p.y};
+  };
+  const clusters=[...host.querySelectorAll('g.cluster')].map(n=>{
+   const shape=n.querySelector('rect'),b=shape.getBBox(),label=n.querySelector('.cluster-label'),lb=label.getBBox();
+   return {id:n.id,...position(shape,b.x+b.width/2,b.y+b.height/2),width:b.width,height:b.height,label:label.textContent,
+    title:position(label,lb.x+lb.width/2,lb.y+lb.height/2),fill:getComputedStyle(shape).fill,stroke:getComputedStyle(shape).stroke};
+  });
   const nodes=[...host.querySelectorAll('g.node')].map(n=>{
    const shape=n.querySelector('.label-container');const b=shape.getBBox();const label=n.querySelector('.label');
    const lb=label.getBBox();
-   return {id:n.id,transform:n.getAttribute('transform'),width:b.width,height:b.height,label:label.textContent,labelWidth:lb.width,labelHeight:lb.height,
+   return {id:n.id,...position(n),transform:n.getAttribute('transform'),width:b.width,height:b.height,label:label.textContent,labelWidth:lb.width,labelHeight:lb.height,
     fill:getComputedStyle(shape).fill,stroke:getComputedStyle(shape).stroke};
   });
   const edges=[...host.querySelectorAll('.flowchart-link')].map(p=>{
-    const length=p.getTotalLength();return {length,stroke:getComputedStyle(p).stroke,dash:getComputedStyle(p).strokeDasharray,thickness:getComputedStyle(p).strokeWidth,points:Array.from({length:7},(_,i)=>{const a=p.getPointAtLength(length*i/6);return {x:a.x,y:a.y};})};
+    const length=p.getTotalLength();return {id:p.id,length,stroke:getComputedStyle(p).stroke,dash:getComputedStyle(p).strokeDasharray,thickness:getComputedStyle(p).strokeWidth,points:Array.from({length:7},(_,i)=>{const a=p.getPointAtLength(length*i/6);return position(p,a.x,a.y);})};
   });
   const labels=[...host.querySelectorAll('g.edgeLabel')].filter(n=>n.textContent.trim()).map(n=>{
-    const b=n.getBBox();return {text:n.textContent,transform:n.getAttribute('transform'),width:b.width,height:b.height};
+    const b=n.getBBox();return {text:n.textContent,...position(n),transform:n.getAttribute('transform'),width:b.width,height:b.height};
   });
-  result.push({name:name+'-'+theme,source,theme,svg,nodes,edges,labels});host.remove();
+  result.push({name:name+'-'+theme,source,theme,svg,nodes,edges,labels,clusters});host.remove();
  }
 }
 document.body.replaceChildren(Object.assign(document.createElement('pre'),{id:'result',textContent:encodeURIComponent(JSON.stringify(result))}));
