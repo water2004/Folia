@@ -39,7 +39,15 @@ try {
      contained:t.x>=corner.x-1&&t.y>=corner.y-1&&t.x+t.width<=corner.x+b.width+1&&t.y+t.height<=corner.y+b.height+1};
    });
    const edges=[...svg.querySelectorAll('.flowchart-link')].map(p=>{
-    const length=p.getTotalLength();return {id:p.dataset.edge,length,stroke:getComputedStyle(p).stroke,dash:getComputedStyle(p).strokeDasharray,thickness:getComputedStyle(p).strokeWidth,points:Array.from({length:7},(_,i)=>{const a=p.getPointAtLength(length*i/6);return {x:a.x,y:a.y};})};
+    const marker=side=>{
+     const ref=p.getAttribute('marker-'+side);if(!ref) return null;
+     const m=svg.querySelector('[id="'+ref.slice(ref.lastIndexOf('#')+1,-1)+'"]');
+     const shape=m.querySelector('path,circle'),style=getComputedStyle(shape);
+     return {attributes:Object.fromEntries(['viewBox','refX','refY','markerUnits','markerWidth','markerHeight','orient'].map(key=>[key,m.getAttribute(key)])),
+      fill:style.fill,stroke:style.stroke,width:style.strokeWidth,dash:style.strokeDasharray,
+      points:Array.from({length:21},(_,i)=>{const a=shape.getPointAtLength(shape.getTotalLength()*i/20);return {x:a.x,y:a.y};})};
+    };
+    const length=p.getTotalLength();return {id:p.dataset.edge,length,start:marker('start'),end:marker('end'),stroke:getComputedStyle(p).stroke,dash:getComputedStyle(p).strokeDasharray,thickness:getComputedStyle(p).strokeWidth,points:Array.from({length:7},(_,i)=>{const a=p.getPointAtLength(length*i/6);return {x:a.x,y:a.y};})};
    });
    const labels=[...svg.querySelectorAll('g.edgeLabel')].map(n=>{
     const b=n.querySelector('rect').getBBox();return {text:n.textContent,x:b.x+b.width/2,y:b.y+b.height/2,width:b.width,height:b.height};
@@ -90,6 +98,14 @@ try {
    assert(e,`${row.name}: missing edge ${a.id}`);near(a.length,e.length,`${row.name} edge ${i} length`,3);
    assert.equal(a.stroke,e.stroke,`${row.name} edge paint`);
    assert.equal(a.dash,e.dash,`${row.name} edge dash`);assert.equal(a.thickness,e.thickness,`${row.name} edge thickness`);
+   for(const side of ['start','end']) {
+    assert.equal(!!a[side],!!e[side],`${row.name} ${a.id} ${side} marker`);
+    if(!e[side]) continue;
+    for(const key of ['attributes','fill','stroke','width','dash'])
+     assert.deepEqual(a[side][key],e[side][key],`${row.name} ${side} marker ${key}`);
+    for(let j=0;j<e[side].points.length;++j) for(const axis of ['x','y'])
+     near(a[side].points[j][axis],e[side].points[j][axis],`${row.name} ${side} marker outline`,0.01);
+   }
    for(let j=0;j<a.points.length;++j) {near(a.points[j].x+offset[0],e.points[j].x,`${row.name} edge ${i} x`,3);near(a.points[j].y+offset[1],e.points[j].y,`${row.name} edge ${i} y`,3);}
   }
   assert.equal(actual.clusters.length,row.clusters.length,`${row.name}: groups`);
@@ -103,7 +119,7 @@ try {
   }
   report.push({name:row.name,nodes:actual.nodes.length,edges:actual.edges.length,groups:actual.clusters.length});
  }
- const selected=rows.filter(x=>['labels-entities-default','labels-lines-dark','labels-wrap-default','labels-wrap-group-default'].includes(x.name));
+ const selected=rows.filter(x=>['markers-ends-default','markers-both-dark','markers-group-default'].includes(x.name));
  await page.setContent('<body style="margin:20px;background:#f1f3f5;font:16px Arial"><div style="display:flex;gap:24px;align-items:start">'+selected.map(x=>
   `<div style="background:${x.theme==='dark'?'#202124':'white'};padding:20px;border-radius:12px"><h3 style="color:${x.theme==='dark'?'white':'#222'}">${x.name}</h3>`+readFileSync(resolve(output,'flowchart-'+x.name+'.svg'),'utf8')+'</div>').join('')+'</div></body>');
  await page.screenshot({path:resolve(dirname(reference),'native-preview.png'),fullPage:true});

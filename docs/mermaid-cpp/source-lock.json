@@ -531,6 +531,10 @@
     {
       "path": "packages/mermaid/src/rendering-util/rendering-elements/createLabel.js",
       "sha256": "a8d8146d7a1f097058e32309ee56cb7ca9c6f46c8d24bd1d8b8e94b8e24babfe"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/edgeMarker.ts",
+      "sha256": "5e710734cf33c37c95c77f40df5b675880711da18bb54a6374139290d1c37395"
     }
   ],
   "packages": [

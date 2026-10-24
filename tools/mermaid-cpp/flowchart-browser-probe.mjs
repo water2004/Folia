@@ -11,6 +11,9 @@ for(const file of lock.flowchartCurve.files) assert.equal(createHash('sha256').u
 const directory=resolve(process.argv[2]??'build/mermaid-cpp/flowchart-browser');
 mkdirSync(directory,{recursive:true});
 const cases=[
+  ['markers-ends','flowchart LR\nA[Read] --o|open| B[Check]\nB --x|stop| C[Done]'],
+  ['markers-both','flowchart TD\nA[Read] o--o|open| B[Check]\nB x--x|stop| C[Save]\nC <--> D[Done]'],
+  ['markers-group','flowchart RL\nsubgraph g[Operations]\ndirection BT\nA[Read] x--x B[Check]\nend\ng o--o|ready| C[Done]'],
   ['labels-wrap','flowchart TD\nA["Read the input and validate the document"] -->|"continue with the next operation"| B("Write the updated document to disk")'],
   ['labels-wrap-group','%%{init: {"flowchart": {"wrappingWidth": 150, "minNodeWidth": 0}}}%%\nflowchart LR\nsubgraph g["Input and output operations"]\ndirection TB\nA["Read the source document"] --> B["Write the output document"]\nend\ng --> C["All work completed"]'],
   ['labels-entities','flowchart LR\nA["Say #quot;hello#quot;"] -->|"A &amp; B"| B["Cost #36;5"]\nB --> C["x &lt; 5"]'],
@@ -88,7 +91,15 @@ for(const [name,source] of ${JSON.stringify(cases)}) {
     fill:getComputedStyle(fillShape).fill,stroke:getComputedStyle(strokeShape).stroke};
   });
   const edges=[...host.querySelectorAll('.flowchart-link')].map(p=>{
-    const length=p.getTotalLength();return {id:p.id,length,stroke:getComputedStyle(p).stroke,dash:getComputedStyle(p).strokeDasharray,thickness:getComputedStyle(p).strokeWidth,points:Array.from({length:7},(_,i)=>{const a=p.getPointAtLength(length*i/6);return position(p,a.x,a.y);})};
+    const marker=side=>{
+     const ref=p.getAttribute('marker-'+side);if(!ref) return null;
+     const m=root.querySelector('[id="'+ref.slice(ref.lastIndexOf('#')+1,-1)+'"]');
+     const shape=m.querySelector('path,circle'),style=getComputedStyle(shape);
+     return {attributes:Object.fromEntries(['viewBox','refX','refY','markerUnits','markerWidth','markerHeight','orient'].map(key=>[key,m.getAttribute(key)])),
+      fill:style.fill,stroke:style.stroke,width:style.strokeWidth,dash:style.strokeDasharray,
+      points:Array.from({length:21},(_,i)=>{const a=shape.getPointAtLength(shape.getTotalLength()*i/20);return {x:a.x,y:a.y};})};
+    };
+    const length=p.getTotalLength();return {id:p.id,length,start:marker('start'),end:marker('end'),stroke:getComputedStyle(p).stroke,dash:getComputedStyle(p).strokeDasharray,thickness:getComputedStyle(p).strokeWidth,points:Array.from({length:7},(_,i)=>{const a=p.getPointAtLength(length*i/6);return position(p,a.x,a.y);})};
   });
   const labels=[...host.querySelectorAll('g.edgeLabel')].filter(n=>n.textContent.trim()).map(n=>{
     const b=n.getBBox();return {text:n.textContent,...position(n),transform:n.getAttribute('transform'),width:b.width,height:b.height};

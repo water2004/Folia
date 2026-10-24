@@ -1,6 +1,18 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-24, measured display labels verified
+## Current checkpoint - 2026-10-24, classic edge markers in progress
+
+- This batch connects parsed circle/cross start/end markers to the measured
+  Flowchart SVG entry. Scope is classic default/dark diagrams, connected and
+  grouped edges, and retained shape/cluster clipping and label placement.
+- Exit: original-browser/native comparisons of marker references, geometry,
+  paint and edge paths plus the affected Windows native checks. Next batch:
+  measured diagram titles, then required styles/rich labels, remaining families
+  and the application call chain. Do not expand the completed label/layout work.
+- Baseline ae0ad3d8 is clean; contribution a75189d5 passed Windows run
+  40068918348. Upstream PR #1 remains OPEN/unmerged. Keep it unmerged.
+
+## Measured display labels verified (historical)
 
 - Delivered quoted/entity plain labels, explicit breaks and automatic wrapping
   through render_mermaid. Parser labels remain unchanged while the separate
