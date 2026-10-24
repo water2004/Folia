@@ -34,6 +34,19 @@ Cytoscape, date calculations) needs its own source and behavior verification.
 
 ## Current state
 
+`folia.mermaid.sequence::prepare_sequence` connects shared preparation to owned
+Sequence actors and ordered messages. This first parser/DB batch covers actor
+and participant declarations, aliases, implicit participants, common solid/
+dotted/open/cross/async/bidirectional arrows, self messages, left/right/over
+notes, nested activation, wrap directives and plain accessibility/title metadata.
+Activation markers remain separate events in the original message order.
+Control regions, autonumber, participant metadata/creation/destruction and
+links are not implemented yet and return explicit errors. Sequence measurement
+and source-to-SVG registration are the next stage; the application is unchanged.
+The original Sequence grammar credits Knut Sveidqvist (2014-2015, MIT) and
+Andrew Brampton (2012-2013, Simplified BSD); that notice is retained in the
+pinned grammar and the native source attribution.
+
 `folia.mermaid.flowchart::prepare_flowchart` connects shared preparation and
 configuration to owned Flowchart layout input. The current classic-syntax
 stage supports rectangular/rounded/circle/stadium/subroutine/cylinder/diamond/

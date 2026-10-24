@@ -1,6 +1,19 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-24, common HTML/Markdown labels verified
+## Current checkpoint - 2026-10-24, Sequence actor/message batch in progress
+
+- Functional goal: owned Sequence actors and ordered messages through shared
+  preprocessing/configuration, including aliases, common arrows, notes and
+  activation. Scope is the request/response and note/self-message path recorded
+  below. Control regions and extended participant metadata remain later work.
+- Exit: pinned original parser/DB fixtures match native actor order, aliases,
+  signal kinds, note placement and activation events; affected Windows native
+  checks pass. Then commit/deliver the batch and proceed to real measurement
+  and the original Sequence renderer layout, without reopening Flowchart.
+- Work starts on fork/mermaid-development at 60e7cc7a. Contribution worktree is
+  build/mermaid-cpp/entry-contribution; PR #1 remains open and must not merge.
+
+## Common HTML/Markdown labels verified (historical)
 
 - Delivered common HTML node/edge normal, strong and emphasis runs, including
   nested strong/emphasis, explicit breaks, real DirectWrite wrapping and
