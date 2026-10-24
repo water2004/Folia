@@ -15,7 +15,7 @@ try {
   await page.setContent(readFileSync(resolve(directory,'sequence-'+row.name+'.svg'),'utf8'));
   const actual=await page.evaluate(inspectSequence);
   for(const key of ['x','y','width','height']) near(actual.view[key],row.view[key],row.name+' view '+key);
-  for(const category of ['actors','lines','texts','signals']) {
+  for(const category of ['actors','notes','activations','figures','lines','texts','signals']) {
    assert.equal(actual[category].length,row[category].length,row.name+' '+category+' count');
    actual[category].forEach((a,i)=>{
     const e=row[category][i],label=row.name+' '+category+' '+i;

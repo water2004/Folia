@@ -14,19 +14,26 @@ const cases=[
  ['reverse','sequenceDiagram\nparticipant A as Editor\nparticipant B as Store\nparticipant C as Watcher\nC->>A: Open\nA->B: Read\nB-->A: Ready\nA<<->>C: Update\nC<<-->>A: Done'],
  ['spacing','%%{init: {"sequence": {"width": 120, "height": 55, "actorMargin": 40, "boxMargin": 8, "rightAngles": true}}}%%\nsequenceDiagram\nA->>A: Check\nA-->>B: Ready'],
  ['font','%%{init: {"fontSize": 20}}%%\nsequenceDiagram\nparticipant A as Source document\nA->>B: Read the updated document\nB-->>A: Saved'],
+ ["activation-note", "sequenceDiagram\nactor U as User\nparticipant S as Service\nU->>+S: Save document\nNote right of S: Validate input\nS->>S: Write output\nS-->>-U: Saved"],
+ ["note-over", "sequenceDiagram\nparticipant A as Editor\nparticipant B as Store\nNote over A,B: Save operations\nA->>B: Commit\nNote left of A: Ready"],
+ ["note-spacing", "sequenceDiagram\nA->>B: Read\nNote right of A: Validate document before saving all changes\nNote over B: Storage ready\nNote left of B: Return the current document to the editor\nB-->>A: Done"],
+ ["nested-activation", "sequenceDiagram\nactor A as User\nparticipant B as Service\nA->>+B: Save\nB->>+B: Validate\nNote over B: Checking\nB-->>-B: Valid\nB-->>-A: Saved"],
 ];
 export function inspectSequence() {
  const root=document.querySelector('svg');
  const box=e=>{const b=e.getBBox();return {x:b.x,y:b.y,width:b.width,height:b.height};};
  const style=e=>{const s=getComputedStyle(e);return {fill:s.fill,stroke:s.stroke,strokeWidth:s.strokeWidth};};
  const actors=[...root.querySelectorAll('rect.actor')].map(e=>({id:e.getAttribute('name'),footer:e.classList.contains('actor-bottom'),...box(e),...style(e)})).sort((a,b)=>a.id.localeCompare(b.id)||Number(a.footer)-Number(b.footer));
+ const notes=[...root.querySelectorAll('rect.note')].map(e=>({...box(e),...style(e)}));
+ const activations=[...root.querySelectorAll('rect[class^=activation]')].map(e=>({...box(e),...style(e)})).sort((a,b)=>a.x-b.x||a.y-b.y);
+ const figures=[...root.querySelectorAll('g.actor-man')].flatMap(g=>[...g.querySelectorAll('line,circle')].map(e=>({id:g.getAttribute('name'),footer:g.classList.contains('actor-bottom'),...box(e),...style(e)}))).sort((a,b)=>a.id.localeCompare(b.id)||Number(a.footer)-Number(b.footer)||a.y-b.y||a.x-b.x);
  const lines=[...root.querySelectorAll('.actor-line')].map(e=>({...box(e),...style(e)})).sort((a,b)=>a.x-b.x);
  const texts=[...root.querySelectorAll('text')].map(e=>({text:e.textContent,...box(e),...style(e.querySelector('tspan')??e),size:getComputedStyle(e).fontSize})).sort((a,b)=>a.text.localeCompare(b.text)||a.y-b.y);
  const signals=[...root.querySelectorAll('.messageLine0,.messageLine1')].map(e=>{
    const marker=side=>{const value=e.getAttribute('marker-'+side);if(!value)return null;const id=value.slice(value.lastIndexOf('#')+1,-1);const m=root.querySelector('[id="'+id+'"]');const path=m.querySelector('path');return {refX:m.getAttribute('refX'),refY:m.getAttribute('refY'),d:path.getAttribute('d'),...style(path)};};
    return {kind:e.classList.contains('messageLine1')?1:0,...style(e),points:Array.from({length:21},(_,i)=>{const p=e.getPointAtLength(e.getTotalLength()*i/20);return [p.x,p.y];}),start:marker('start'),end:marker('end')};
  });
- const v=root.viewBox.baseVal;return {actors,lines,texts,signals,view:{x:v.x,y:v.y,width:v.width,height:v.height}};
+ const v=root.viewBox.baseVal;return {actors,notes,activations,figures,lines,texts,signals,view:{x:v.x,y:v.y,width:v.width,height:v.height}};
 }
 if(!process.argv.includes('--library')) {
  const directory=resolve(process.argv[2]??'build/mermaid-cpp/sequence-browser');mkdirSync(directory,{recursive:true});
