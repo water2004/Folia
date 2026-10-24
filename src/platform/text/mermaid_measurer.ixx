@@ -182,7 +182,7 @@ public:
         ComPtr<IDWriteTextFormat> format;
         if(FAILED(factory->CreateTextFormat(family.c_str(),nullptr,static_cast<DWRITE_FONT_WEIGHT>(font.weight),
             font.italic?DWRITE_FONT_STYLE_ITALIC:DWRITE_FONT_STYLE_NORMAL,DWRITE_FONT_STRETCH_NORMAL,font.size,L"en-us",&format)) ||
-            FAILED(format->SetWordWrapping(DWRITE_WORD_WRAPPING_WHOLE_WORD)))
+            FAILED(format->SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP)))
             return std::unexpected("DirectWrite wrapping format failed");
         ComPtr<IDWriteTextLayout> layout;
         if(FAILED(factory->CreateTextLayout(text.data(),static_cast<UINT32>(text.size()),format.Get(),
@@ -190,14 +190,25 @@ public:
             return std::unexpected("DirectWrite wrapped layout failed");
         if(!apply_styles(layout.Get(),styles,text.size()))
             return std::unexpected("Invalid DirectWrite styled text ranges");
-        UINT32 count{};layout->GetLineMetrics(nullptr,0,&count);
-        std::vector<DWRITE_LINE_METRICS> metrics(count);
-        if(FAILED(layout->GetLineMetrics(metrics.data(),count,&count)))
-            return std::unexpected("DirectWrite wrapped line metrics failed");
-        std::vector<std::u16string> lines;std::size_t offset=0;
-        for(const auto& line:metrics) {
-            lines.emplace_back(source.substr(offset,line.length));offset+=line.length;
+        UINT32 count{};layout->GetClusterMetrics(nullptr,0,&count);
+        std::vector<DWRITE_CLUSTER_METRICS> metrics(count);
+        if(FAILED(layout->GetClusterMetrics(metrics.data(),count,&count)))
+            return std::unexpected("DirectWrite cluster metrics failed");
+        // createText uses CSS break-spaces after constraining the container.
+        // Its trailing spaces take width; DirectWrite's built-in wrapping
+        // excludes them when deciding whether another word fits. Retain native
+        // cluster widths and Unicode break opportunities, including those spaces.
+        std::vector<std::u16string> lines;
+        std::size_t start=0,segment=0,end=0;double used=0,segment_width=0;
+        for(std::size_t i=0;i<metrics.size();++i) {
+            const auto& cluster=metrics[i];end+=cluster.length;segment_width+=cluster.width;
+            if(!cluster.canWrapLineAfter && i+1<metrics.size()) continue;
+            if(segment>start && used+segment_width>width) {
+                lines.emplace_back(source.substr(start,segment-start));start=segment;used=0;
+            }
+            used+=segment_width;segment_width=0;segment=end;
         }
+        lines.emplace_back(source.substr(start));
         return lines;
     }
 };
