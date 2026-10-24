@@ -14,6 +14,8 @@ struct MermaidFont {
     // One resolved installed family, not a CSS family-list expression.
     std::u16string family;
     float size = 17;
+    unsigned weight = 400;
+    bool italic = false;
 };
 struct MermaidTextMetrics {
     double advance{};
@@ -111,7 +113,7 @@ public:
         if (text.empty()) return MermaidTextMetrics{};
         ComPtr<IDWriteTextFormat> format;
         if (FAILED(factory->CreateTextFormat(family.c_str(), fonts.Get(),
-            DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL,
+            static_cast<DWRITE_FONT_WEIGHT>(font.weight), font.italic?DWRITE_FONT_STYLE_ITALIC:DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL,
             font.size, L"en-us", &format)))
             return std::unexpected("DirectWrite format creation failed");
         if (FAILED(format->SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP)))
@@ -158,8 +160,8 @@ public:
         const std::wstring family(font.family.begin(),font.family.end());
         const std::wstring text(source.begin(),source.end());
         ComPtr<IDWriteTextFormat> format;
-        if(FAILED(factory->CreateTextFormat(family.c_str(),nullptr,DWRITE_FONT_WEIGHT_NORMAL,
-            DWRITE_FONT_STYLE_NORMAL,DWRITE_FONT_STRETCH_NORMAL,font.size,L"en-us",&format)) ||
+        if(FAILED(factory->CreateTextFormat(family.c_str(),nullptr,static_cast<DWRITE_FONT_WEIGHT>(font.weight),
+            font.italic?DWRITE_FONT_STYLE_ITALIC:DWRITE_FONT_STYLE_NORMAL,DWRITE_FONT_STRETCH_NORMAL,font.size,L"en-us",&format)) ||
             FAILED(format->SetWordWrapping(DWRITE_WORD_WRAPPING_WHOLE_WORD)))
             return std::unexpected("DirectWrite wrapping format failed");
         ComPtr<IDWriteTextLayout> layout;

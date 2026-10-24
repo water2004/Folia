@@ -11,6 +11,14 @@
   call chain. Existing shape/layout/label/marker/title acceptance stays closed.
 - Starting source head 4c877496; contribution head dd635cbf. PR #1 is open and
   unmerged. Local MSVC/CMake remain unavailable; native verification uses CI.
+- Paint implementation 7fe29b26 and observation commit 38b60703 are pushed.
+  Windows validation is running at actions/runs/40094547510 in zhao0349/Folia.
+  Local original browser probe passed 74 cases; native acceptance is pending.
+- Next batch prepared while CI runs: class/direct node and edge font family,
+  pixel size, weight and italic style measured by DirectWrite and retained in
+  SVG. Exit: connected/wrapped/grouped node and edge label comparisons in both
+  themes and affected native checks. Group-title typography and mixed HTML/
+  Markdown runs remain separate adapters. Then continue required rich labels.
 
 ## Classic markers and measured titles verified (historical)
 

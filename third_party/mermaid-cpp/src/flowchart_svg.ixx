@@ -15,12 +15,24 @@ struct FlowchartSvgTheme {
     bool html_label_spacing=true;
     std::string fill="#ECECFF",border="#9370DB",text="#333333",line="#333333",label_background="#e8e8e8";
 };
+struct FlowchartLabelFont {
+    std::u16string family;
+    double size=16;
+    unsigned weight=400;
+    bool italic=false;
+};
+// Resolve class/direct typography before native measurement. The platform
+// resolves the installed family and retains it in the measured text box.
+std::expected<FlowchartLabelFont,std::string> flowchart_label_font(
+    const std::vector<std::u16string>& classes,const std::vector<std::u16string>& direct,
+    const FlowchartSvgTheme&);
 struct FlowchartTextBox {
     // Real measured display box and first baseline, in SVG user units.
     // Lines are the exact display strings measured by the platform adapter.
     double width=0,height=0,baseline=0;
     double line_step=0;
     std::vector<std::u16string> lines;
+    std::optional<FlowchartLabelFont> font;
 };
 struct FlowchartMeasurements {
     std::vector<FlowchartTextBox> nodes,edges;

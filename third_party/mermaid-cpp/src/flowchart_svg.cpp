@@ -126,6 +126,13 @@ bool label_coordinate_in_path(FlowchartPoint point,const std::string& path) {
 
 }
 
+std::expected<FlowchartLabelFont,std::string> flowchart_label_font(
+    const std::vector<std::u16string>& classes,const std::vector<std::u16string>& direct,
+    const FlowchartSvgTheme& theme) {
+    try {return compile_paint(classes,direct).font(theme);}
+    catch(const std::exception& e) {return std::unexpected(e.what());}
+}
+
 std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRenderInput& input,const FlowchartMeasurements& measured) {
     try {
         const auto& graph=input.document;const auto& theme=input.theme;
@@ -203,7 +210,10 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
             svg+=marker_definitions(theme.line,"flow-"+std::to_string(i),xml(edge_paints[i].marker_stroke));
         svg+="<g font-family=\""+xml(theme.font_family)+"\" font-size=\""+number(theme.font_size)+"\" transform=\"translate("+number(theme.padding)+","+number(theme.padding)+")\">";
         const auto text=[&](std::u16string_view,FlowchartPoint center,const FlowchartTextBox& b,std::string_view css,const FlowchartPaint& paint) {
-            std::string out="<text class=\""+std::string(css)+"\" xml:space=\"preserve\" text-anchor=\"middle\" fill=\""+paint.get(u"color",css=="cluster-label"?theme.cluster_text:theme.text)+"\">";
+            std::string out="<text class=\""+std::string(css)+"\" xml:space=\"preserve\" text-anchor=\"middle\" fill=\""+paint.get(u"color",css=="cluster-label"?theme.cluster_text:theme.text)+"\"";
+            if(b.font) out+=" font-family=\""+xml(b.font->family)+"\" font-size=\""+number(b.font->size)+
+                "\" font-weight=\""+std::to_string(b.font->weight)+"\" font-style=\""+(b.font->italic?"italic":"normal")+"\"";
+            out+=">";
             for(std::size_t i=0;i<b.lines.size();++i)
                 out+="<tspan x=\""+number(center.x)+"\" y=\""+number(center.y+b.baseline-b.height/2+i*b.line_step)+"\">"+xml(b.lines[i])+"</tspan>";
             return out+"</text>";
