@@ -189,8 +189,8 @@ class Parser {
                 edge.label_type = u"string"; text = text.substr(1,text.size()-2);
             }
             edge.label = std::move(text);
-            if (edge.label.find_first_of(u"<&`#") != Text::npos)
-                fail("Rich edge labels require the later Flowchart text adapter");
+            if (edge.label.find(u'`') != Text::npos)
+                fail("Markdown edge labels require the rich-text adapter");
         }
         if (token.size() < 3 && token != u"-.-") fail("Incomplete edge");
         View line = token; auto last = line.back(); line.remove_suffix(1);

@@ -34,7 +34,7 @@ try {
      const a=p.getPointAtLength(p.getTotalLength()*i/200);return position(p,a.x,a.y);
     }));
     return {transform:n.getAttribute('transform'),width:b.width,height:b.height,label:text.textContent,
-     labelCenter:position(text,t.x+t.width/2,t.y+t.height/2),outline,
+     labelCenter:position(text,t.x+t.width/2,t.y+t.height/2),lines:[...text.querySelectorAll('tspan')].map(n=>n.textContent.trimEnd()),outline,
      fill:getComputedStyle(shape).fill,stroke:getComputedStyle(shape).stroke,
      contained:t.x>=corner.x-1&&t.y>=corner.y-1&&t.x+t.width<=corner.x+b.width+1&&t.y+t.height<=corner.y+b.height+1};
    });
@@ -57,6 +57,11 @@ try {
    const a=actual.nodes[i],e=row.nodes.find(n=>n.label===a.label),p=translate(a.transform);
    assert(e,`${row.name}: missing node ${a.label}`);const q=[e.x,e.y];
    assert.equal(a.label,e.label,row.name);assert(a.contained,`${row.name}: clipped label ${a.label}`);
+   if(row.name.startsWith('labels-')) {
+    assert.deepEqual(a.lines,e.lines,`${row.name}: displayed lines`);
+    near(a.labelCenter.x,e.labelCenter.x,`${row.name} label center x`,2);
+    near(a.labelCenter.y,e.labelCenter.y,`${row.name} label center y`,2);
+   }
    for(const key of ['width','height']) near(a[key],e[key],`${row.name} ${i} ${key}`);
    for(let axis=0;axis<2;++axis) near(p[axis]+offset[axis],q[axis],`${row.name} ${i} axis ${axis}`);
    assert.equal(a.fill,e.fill,`${row.name} fill`);assert.equal(a.stroke,e.stroke,`${row.name} stroke`);
@@ -98,7 +103,7 @@ try {
   }
   report.push({name:row.name,nodes:actual.nodes.length,edges:actual.edges.length,groups:actual.clusters.length});
  }
- const selected=rows.filter(x=>['shapes-polygons-default','shapes-down-default','shapes-right-dark','shapes-group-default'].includes(x.name));
+ const selected=rows.filter(x=>['labels-entities-default','labels-lines-dark','labels-wrap-default','labels-wrap-group-default'].includes(x.name));
  await page.setContent('<body style="margin:20px;background:#f1f3f5;font:16px Arial"><div style="display:flex;gap:24px;align-items:start">'+selected.map(x=>
   `<div style="background:${x.theme==='dark'?'#202124':'white'};padding:20px;border-radius:12px"><h3 style="color:${x.theme==='dark'?'white':'#222'}">${x.name}</h3>`+readFileSync(resolve(output,'flowchart-'+x.name+'.svg'),'utf8')+'</div>').join('')+'</div></body>');
  await page.screenshot({path:resolve(dirname(reference),'native-preview.png'),fullPage:true});

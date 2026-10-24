@@ -11,6 +11,8 @@ for(const file of lock.flowchartCurve.files) assert.equal(createHash('sha256').u
 const directory=resolve(process.argv[2]??'build/mermaid-cpp/flowchart-browser');
 mkdirSync(directory,{recursive:true});
 const cases=[
+  ['labels-wrap','flowchart TD\nA["Read the input and validate the document"] -->|"continue with the next operation"| B("Write the updated document to disk")'],
+  ['labels-wrap-group','%%{init: {"flowchart": {"wrappingWidth": 150, "minNodeWidth": 0}}}%%\nflowchart LR\nsubgraph g["Input and output operations"]\ndirection TB\nA["Read the source document"] --> B["Write the output document"]\nend\ng --> C["All work completed"]'],
   ['labels-entities','flowchart LR\nA["Say #quot;hello#quot;"] -->|"A &amp; B"| B["Cost #36;5"]\nB --> C["x &lt; 5"]'],
   ['labels-lines','flowchart TD\nA["Read<br/>input"] -->|"next\\nstep"| B("Check\nresult")\nB --> C[("Save<br>record")]'],
   ['labels-group','flowchart LR\nsubgraph g["Read<br/>and write"]\ndirection TB\nA["Input #38; data"] --> B["Write<br />output"]\nend\ng -->|"all<br/>done"| C["End"]'],
@@ -53,6 +55,20 @@ for(const [name,source] of ${JSON.stringify(cases)}) {
    const p=new DOMPoint(x,y).matrixTransform(root.getScreenCTM().inverse().multiply(element.getScreenCTM()));
    return {x:p.x,y:p.y};
   };
+  const displayLines=label=>{
+   const lines=[];const walker=document.createTreeWalker(label,NodeFilter.SHOW_TEXT);
+   while(walker.nextNode()) {
+    const node=walker.currentNode;
+    for(let i=0;i<node.length;i++) {
+     const range=document.createRange();range.setStart(node,i);range.setEnd(node,i+1);
+     const rect=range.getBoundingClientRect();if(!rect.width&&!rect.height) continue;
+     let line=lines.find(line=>Math.abs(line.y-rect.y)<1);
+     if(!line) {line={y:rect.y,text:''};lines.push(line);}
+     line.text+=node.data[i];
+    }
+   }
+   return lines.map(line=>line.text.trimEnd());
+  };
   const clusters=[...host.querySelectorAll('g.cluster')].map(n=>{
    const shape=n.querySelector('rect'),b=shape.getBBox(),label=n.querySelector('.cluster-label'),lb=label.getBBox();
    return {id:n.id,...position(shape,b.x+b.width/2,b.y+b.height/2),width:b.width,height:b.height,label:label.textContent,
@@ -68,7 +84,7 @@ for(const [name,source] of ${JSON.stringify(cases)}) {
    const fillShape=paths.find(p=>getComputedStyle(p).fill!=='none')??shape;
    const strokeShape=paths.find(p=>getComputedStyle(p).stroke!=='none')??shape;
    return {id:n.id,...position(n),transform:n.getAttribute('transform'),width:b.width,height:b.height,label:label.textContent,labelWidth:lb.width,labelHeight:lb.height,
-    labelCenter:position(label,lb.x+lb.width/2,lb.y+lb.height/2),outline,
+    labelCenter:position(label,lb.x+lb.width/2,lb.y+lb.height/2),lines:displayLines(label),outline,
     fill:getComputedStyle(fillShape).fill,stroke:getComputedStyle(strokeShape).stroke};
   });
   const edges=[...host.querySelectorAll('.flowchart-link')].map(p=>{

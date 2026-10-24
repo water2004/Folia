@@ -68,7 +68,8 @@ The measured Flowchart SVG entry supports explicit `layout: dagre` and
 `look: classic`, default/dark themes, square/rounded/diamond/circle and
 stadium/subroutine/cylinder, hexagon, slanted parallelogram, trapezoid,
 inverse trapezoid, asymmetric notch and double-circle nodes,
-single-line plain labels, basis/linear paths, point/plain arrow ends, and
+quoted/entity plain labels, explicit line breaks and measured automatic wrapping,
+basis/linear paths, point/plain arrow ends, and
 normal/thick/dotted/invisible links, and compact merged self loops. Self loops
 use the original three-segment Dagre graph for placement, then the original
 dummy-node side selection, compact path and label-offset rules for one logical
@@ -76,6 +77,11 @@ SVG edge. Real DirectWrite widths, line heights and
 baselines drive rendering; the plain HTML-label spacing mode retains Mermaid's
 CSS line height and minimum node width while emitting native SVG text. There is
 no browser runtime, HTML execution or character-count measurement in production.
+The display adapter keeps original parser labels, decodes numeric and common
+named entities, and converts explicit breaks into display lines. DirectWrite
+supplies the actual line breaks and metrics. Nodes use `wrappingWidth`, edge
+labels use createText's 200px default and plain group titles remain unbounded.
+Native SVG uses measured text spans, including preserved spaces at wrap points.
 The same-host browser check compares actual official/native node boxes,
 coordinates, text containment, colors and sampled edge geometry. Native font
 rasterization can differ slightly from Chromium; geometric tolerances are 1.5
@@ -111,12 +117,12 @@ The browser comparison observes absolute nested coordinates, group boxes and
 title positions in addition to the existing nodes and sampled paths.
 
 Complete Flowchart rendering remains pending. The SVG entry explicitly rejects
-diagram titles, custom styles, rich/multiline/wrapped labels, additional markers,
+diagram titles, custom styles, styled HTML/Markdown labels, additional markers,
 and non-classic looks; it does not silently drop these features.
 The complete existing family requirements remain unchanged. The rank/layout
 API requires prepared graphs without nonempty group endpoints; callers must
 measure and lay out extracted subgraphs separately before the enclosing graph.
-HTML/entity/Markdown label adaptation,
+Styled HTML/Markdown label adaptation,
 shape metadata, explicit edge ids and interpolation commands are not implemented
 by this stage; unsupported input returns an error. Browser callbacks are outside
 the Folia dependency path. No partial graph escapes failures. Default limits

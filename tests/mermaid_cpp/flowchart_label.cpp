@@ -11,7 +11,7 @@ suite flowchart_labels=[] {
         const std::u16string source=u"---\nconfig: {theme: default, look: classic, layout: dagre}\n---\nflowchart TD\nA[\"Say #quot;hello#quot;<br/>x &lt; 5\"] -->|\"next\\nstep\"| B[End]";
         auto native=prepare_native_diagram(source,*session);expect(fatal(native.has_value()));
         const auto& graph=std::get<FlowchartRenderInput>(native->content).document;
-        const auto& label=graph.nodes[0].label;
+        const auto label=graph.nodes[0].label;
         expect(bool(label==u"Say #quot;hello#quot;<br/>x &lt; 5"));
         auto lines=flowchart_label_lines(label,graph.nodes[0].label_type);
         expect(fatal(lines.has_value()));expect(fatal(lines->size()==2_u));

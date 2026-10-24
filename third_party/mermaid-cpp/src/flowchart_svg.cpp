@@ -115,7 +115,6 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
 
             if(!n.styles.empty()||!n.compiled_styles.empty()) return std::unexpected("Flowchart custom SVG styles require the style adapter");
             if(!valid_box(b)) return std::unexpected("Invalid measured Flowchart label");
-            if(!n.group && b.width>theme.wrapping_width && theme.wrapping_width>0) return std::unexpected("Flowchart wrapped labels require the wrapping adapter");
             const double w=n.label.empty()?0:std::max(b.width,theme.minimum_label_width),h=n.label.empty()?0:height(b);
             FlowchartNodeBox box;
             if(n.group) box={b.width,h};
@@ -157,7 +156,7 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
         svg+="<marker id=\"flow-point-start\" viewBox=\"0 0 10 10\" refX=\"4.5\" refY=\"5\" markerUnits=\"userSpaceOnUse\" markerWidth=\"8\" markerHeight=\"8\" orient=\"auto\"><path d=\"M0 5L10 10L10 0Z\" fill=\""+theme.line+"\"/></marker></defs>";
         svg+="<g font-family=\""+xml(theme.font_family)+"\" font-size=\""+number(theme.font_size)+"\" transform=\"translate("+number(theme.padding)+","+number(theme.padding)+")\">";
         const auto text=[&](std::u16string_view,FlowchartPoint center,const FlowchartTextBox& b,std::string_view css) {
-            std::string out="<text class=\""+std::string(css)+"\" text-anchor=\"middle\" fill=\""+theme.text+"\">";
+            std::string out="<text class=\""+std::string(css)+"\" xml:space=\"preserve\" text-anchor=\"middle\" fill=\""+theme.text+"\">";
             for(std::size_t i=0;i<b.lines.size();++i)
                 out+="<tspan x=\""+number(center.x)+"\" y=\""+number(center.y+b.baseline-b.height/2+i*b.line_step)+"\">"+xml(b.lines[i])+"</tspan>";
             return out+"</text>";

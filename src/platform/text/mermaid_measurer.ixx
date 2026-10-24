@@ -75,7 +75,7 @@ public:
         return std::unexpected("No configured Mermaid font is installed");
     }
     std::expected<MermaidTextMetrics, std::string> measure(
-        std::u16string_view source, MermaidFont const& font) const {
+        std::u16string_view source, MermaidFont const& font, bool preserve_spaces=false) const {
         using Microsoft::WRL::ComPtr;
         if (font.family.empty() || font.family.find(u'\0') != std::u16string::npos ||
             !std::isfinite(font.size) || font.size <= 0)
@@ -101,7 +101,7 @@ public:
             } else if (c >= 0xdc00 && c <= 0xdfff &&
                 (i == 0 || source[i-1] < 0xd800 || source[i-1] > 0xdbff))
                 return std::unexpected("Invalid UTF-16 display text");
-            if (c == u' ' || c == u'\t' || c == u'\n' || c == u'\r') { pending_space = !text.empty(); continue; }
+            if (!preserve_spaces && (c == u' ' || c == u'\t' || c == u'\n' || c == u'\r')) { pending_space = !text.empty(); continue; }
             if (pending_space) text += L' ';
             pending_space = false;
             text += static_cast<wchar_t>(c);
@@ -140,6 +140,41 @@ public:
         if (FAILED(layout->GetLineMetrics(&line,1,&line_count)) || line_count!=1)
             return std::unexpected("DirectWrite single-line metrics query failed");
         return MermaidTextMetrics{advance, ink_width, bounds_width,line.height,line.baseline};
+    }
+    // Native Unicode line-break opportunities; preserve each UTF-16 slice so
+    // measured display lines and SVG text use the same characters and spacing.
+    std::expected<std::vector<std::u16string>,std::string> wrap(
+        std::u16string_view source, MermaidFont const& font, double width) const {
+        using Microsoft::WRL::ComPtr;
+        auto valid=measure(source,font,true);
+        if(!valid) return std::unexpected(valid.error());
+        if(source.empty()||valid->advance<=width) return std::vector<std::u16string>{std::u16string(source)};
+        if(!std::isfinite(width)||width<=0||width>std::numeric_limits<float>::max())
+            return std::unexpected("Invalid Mermaid wrapping width");
+        ComPtr<IDWriteFactory> factory;
+        if(FAILED(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED,__uuidof(IDWriteFactory),
+            reinterpret_cast<IUnknown**>(factory.GetAddressOf()))))
+            return std::unexpected("DirectWrite factory creation failed");
+        const std::wstring family(font.family.begin(),font.family.end());
+        const std::wstring text(source.begin(),source.end());
+        ComPtr<IDWriteTextFormat> format;
+        if(FAILED(factory->CreateTextFormat(family.c_str(),nullptr,DWRITE_FONT_WEIGHT_NORMAL,
+            DWRITE_FONT_STYLE_NORMAL,DWRITE_FONT_STRETCH_NORMAL,font.size,L"en-us",&format)) ||
+            FAILED(format->SetWordWrapping(DWRITE_WORD_WRAPPING_WHOLE_WORD)))
+            return std::unexpected("DirectWrite wrapping format failed");
+        ComPtr<IDWriteTextLayout> layout;
+        if(FAILED(factory->CreateTextLayout(text.data(),static_cast<UINT32>(text.size()),format.Get(),
+            static_cast<float>(width),1000000,&layout)))
+            return std::unexpected("DirectWrite wrapped layout failed");
+        UINT32 count{};layout->GetLineMetrics(nullptr,0,&count);
+        std::vector<DWRITE_LINE_METRICS> metrics(count);
+        if(FAILED(layout->GetLineMetrics(metrics.data(),count,&count)))
+            return std::unexpected("DirectWrite wrapped line metrics failed");
+        std::vector<std::u16string> lines;std::size_t offset=0;
+        for(const auto& line:metrics) {
+            lines.emplace_back(source.substr(offset,line.length));offset+=line.length;
+        }
+        return lines;
     }
 };
 }

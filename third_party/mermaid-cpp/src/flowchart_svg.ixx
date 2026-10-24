@@ -27,7 +27,8 @@ struct FlowchartSvg {std::string svg;double width=0,height=0;};
 struct FlowchartRenderInput {FlowchartInput document;FlowchartSvgTheme theme;};
 // Measured SVG stage: recursive plain-title groups; square/rounded/diamond/circle,
 // stadium/subroutine/cylinder, double-circle and classic polygon nodes;
-// quoted/entity plain labels and explicit line breaks, basis/linear paths, plain/point arrow ends and
+// quoted/entity plain labels with explicit/measured wrapped lines,
+// basis/linear paths, plain/point arrow ends and
 // normal/thick/dotted/invisible edges and merged self loops. Unsupported
 // adapters fail explicitly. Group titles use the same real measurement boundary.
 std::expected<FlowchartSvg,std::string> render_flowchart_svg(

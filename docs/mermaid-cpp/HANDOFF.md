@@ -1,6 +1,6 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-24, display-label batch in progress
+## Current checkpoint - 2026-10-24, display lines and wrapping in validation
 
 - Deliver quoted/entity plain labels and explicit line breaks through the
   existing Flowchart source-to-SVG entry, preserving source/DB label values.
@@ -10,9 +10,17 @@
   focused source-preservation checks and the existing Windows native suites.
   Then commit/push this batch and proceed to measured automatic wrapping,
   followed by required styles/titles/markers and the application call chain.
-- Worktree is clean at 651f60a0 before this batch. PR #1 is OPEN/unmerged at
-  c5df2b88; its documentation-triggered CI rerun is still running. The previous
-  implementation validation below remains valid. No merge is authorized.
+- Display-line batches 2e8d066c/b5ccaee5 are pushed; Windows validation is
+  running at https://github.com/zhao0349/Folia/actions/runs/40067362147.
+  The next small batch adds DirectWrite Unicode wrapping at the original node
+  width, 200px edge-label default and unbounded plain group-title width.
+  Exit on actual browser/native line splits, boxes and connected/grouped layout
+  in both themes plus affected native checks. Then proceed to styles/titles/
+  markers. Do not expand this batch into styled HTML/Markdown or other families.
+- PR #1 remains OPEN/unmerged at c5df2b88 until the new implementation passes.
+  The previous implementation validation below remains valid. No merge is
+  authorized. Local browser observations: build/mermaid-cpp/labels-work and
+  wrapping-work; no local compiler or browser process remains active.
 
 ## Measured classic shapes verified (historical)
 
