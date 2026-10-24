@@ -42,9 +42,10 @@ std::string curve_path(std::span<const FlowchartPoint> points,bool linear) {
 FlowchartPoint intersect(const FlowchartPlacedNode& n,std::u16string_view shape,FlowchartPoint p) {
     if(shape==u"stadium") return polygon_intersection(n,stadium_points(n.width,n.height),p);
     if(shape==u"subroutine") return polygon_intersection(n,subroutine_points(n.width,n.height),p);
+    if(classic_polygon(shape)) return polygon_intersection(n,classic_polygon_points(shape,n.width,n.height),p);
     const double dx=p.x-n.x,dy=p.y-n.y;
     double factor;
-    if(shape==u"circle") factor=(n.width/2)/std::hypot(dx,dy);
+    if(shape==u"circle" || shape==u"doublecircle") factor=(n.width/2)/std::hypot(dx,dy);
     else if(shape==u"diamond") factor=1/(std::abs(dx)/(n.width/2)+std::abs(dy)/(n.height/2));
     else factor=1/std::max(std::abs(dx)/(n.width/2),std::abs(dy)/(n.height/2));
     if(!std::isfinite(factor)) throw std::runtime_error("Invalid Flowchart shape intersection");
@@ -130,6 +131,13 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
             else if(n.shape==u"stadium") box=stadium_box(w,h,n.padding);
             else if(n.shape==u"subroutine") box={w+16+n.padding,h+n.padding};
             else if(n.shape==u"cylinder") {const double width=w+n.padding;box={width,h+n.padding+3*cylinder_radius_y(width)};}
+            else if(n.shape==u"doublecircle") {const double diameter=std::hypot(b.width,h)+2*n.padding+10;box={diameter,diameter};}
+            else if(classic_polygon(n.shape)) {
+                const double padding=n.shape==u"inv_trapezoid"?2*n.padding:n.padding;
+                const double height=h+padding;
+                const double extra=n.shape==u"hexagon"?height/2:n.shape==u"odd"?height/4:height;
+                box={w+padding+extra,height};
+            }
             else return std::unexpected("Flowchart SVG shape is not implemented yet");
             boxes.push_back(box);ids.emplace(n.id,i);
         }
@@ -201,14 +209,17 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
             svg+="<g class=\"node\" data-node=\""+xml(n.id)+"\" transform=\"translate("+number(n.x)+","+number(n.y)+")\">";
             const auto paint=" fill=\""+theme.fill+"\" stroke=\""+theme.border+"\" stroke-width=\"1\"";
             if(source.shape==u"circle") svg+="<circle class=\"label-container\" r=\""+number(n.width/2)+"\""+paint+"/>";
+            else if(source.shape==u"doublecircle") svg+="<g class=\"label-container\""+paint+"><circle r=\""+number(n.width/2)+"\"/><circle r=\""+number(n.width/2-5)+"\"/></g>";
             else if(source.shape==u"diamond") svg+="<polygon class=\"label-container\" points=\"0,"+number(-n.height/2)+" "+number(n.width/2)+",0 0,"+number(n.height/2)+" "+number(-n.width/2)+",0\""+paint+"/>";
             else if(source.shape==u"stadium" || source.shape==u"subroutine" || source.shape==u"cylinder") {
                 const auto path=source.shape==u"cylinder"?cylinder_path(n.width,n.height):
                     polygon_path(source.shape==u"stadium"?stadium_points(n.width,n.height):subroutine_points(n.width,n.height));
                 svg+="<path class=\"label-container\" d=\""+path+"\""+paint+"/>";
             }
+            else if(classic_polygon(source.shape)) svg+="<path class=\"label-container\" d=\""+
+                polygon_path(classic_polygon_points(source.shape,n.width,n.height))+"\""+paint+"/>";
             else svg+="<rect class=\"label-container\" x=\""+number(-n.width/2)+"\" y=\""+number(-n.height/2)+"\" width=\""+number(n.width)+"\" height=\""+number(n.height)+"\" rx=\""+number(source.shape==u"roundedRect"?theme.radius:0)+"\""+paint+"/>";
-            svg+=text(source.label,{0,source.shape==u"cylinder"?source.padding/1.5:0},measured.nodes[i],"nodeLabel")+"</g>";
+            svg+=text(source.label,{source.shape==u"odd"?n.height/8:0,source.shape==u"cylinder"?source.padding/1.5:0},measured.nodes[i],"nodeLabel")+"</g>";
         }
         output.svg=svg+"</g></svg>";return output;
     } catch(const std::exception& e) {return std::unexpected(e.what());}

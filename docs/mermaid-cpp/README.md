@@ -66,7 +66,8 @@ diagrams, including compound groups and all four directions.
 
 The measured Flowchart SVG entry supports explicit `layout: dagre` and
 `look: classic`, default/dark themes, square/rounded/diamond/circle and
-stadium/subroutine/cylinder nodes,
+stadium/subroutine/cylinder, hexagon, slanted parallelogram, trapezoid,
+inverse trapezoid, asymmetric notch and double-circle nodes,
 single-line plain labels, basis/linear paths, point/plain arrow ends, and
 normal/thick/dotted/invisible links, and compact merged self loops. Self loops
 use the original three-segment Dagre graph for placement, then the original
@@ -84,6 +85,10 @@ subroutines retain their eight-unit side frames. Cylinders retain the original
 elliptical caps, label offset and curved edge intersection adjustment. The shape
 comparison checks painted outlines and label centers in connected and grouped
 default/dark diagrams, including a contained cylinder self loop.
+Classic polygons reuse the original polygon intersections and retain their
+shape-specific padding; the asymmetric node shifts its label past the notch.
+Double circles measure the inner ring from the label diagonal and retain the
+five-unit outer gap. Connected and grouped checks include minNodeWidth: 0.
 
 `folia.mermaid.flowchart_graph::prepare_flowchart_graph` now prepares the
 Mermaid graph around that Dagre engine. It anchors edges to externally connected

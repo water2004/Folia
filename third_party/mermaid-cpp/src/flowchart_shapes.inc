@@ -1,4 +1,4 @@
-// Mermaid 12.2.0 stadium/subroutine/cylinder and polygon intersections. MIT.
+// Mermaid 12.2.0 classic shape geometry and polygon intersections. MIT.
 // Included in flowchart_svg's private namespace; dimensions are measured SVG units.
 constexpr double stadium_arc_step=std::numbers::pi/49;
 
@@ -35,6 +35,25 @@ std::vector<FlowchartPoint> subroutine_points(double width,double height) {
     const double left=-width/2,right=width/2,top=-height/2,bottom=height/2;
     return {{left+8,bottom},{right-8,bottom},{right-8,top},{left+8,top},
         {left+8,bottom},{left,bottom},{right,bottom},{right,top},{left,top},{left,bottom}};
+}
+
+bool classic_polygon(std::u16string_view shape) {
+    return shape==u"hexagon" || shape==u"lean_right" || shape==u"lean_left" ||
+        shape==u"trapezoid" || shape==u"inv_trapezoid" || shape==u"odd";
+}
+
+// Center the original points after insertPolygonShape/rectLeftInvArrow's
+// translation. Width is the painted bounds, including slants and the notch.
+std::vector<FlowchartPoint> classic_polygon_points(std::u16string_view shape,double width,double height) {
+    const double left=-width/2,right=width/2,top=-height/2,bottom=height/2;
+    const double slant=height/2;
+    if(shape==u"hexagon") return {{left+height/4,bottom},{right-height/4,bottom},
+        {right,0},{right-height/4,top},{left+height/4,top},{left,0}};
+    if(shape==u"lean_right") return {{left,bottom},{right-slant,bottom},{right,top},{left+slant,top}};
+    if(shape==u"lean_left") return {{left+slant,bottom},{right,bottom},{right-slant,top},{left,top}};
+    if(shape==u"trapezoid") return {{left,bottom},{right,bottom},{right-slant,top},{left+slant,top}};
+    if(shape==u"inv_trapezoid") return {{left+slant,bottom},{right-slant,bottom},{right,top},{left,top}};
+    return {{left,top},{left+height/4,0},{left,bottom},{right,bottom},{right,top}};
 }
 
 // Preserve the pinned intersect-line predicate, including its near-zero test.
