@@ -539,6 +539,22 @@
     {
       "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/handDrawnShapeStyles.ts",
       "sha256": "baf8572491842caa518e8ba35a313253ede78ba2fef9b4c43ac9a4b910630402"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/sequence/sequenceDiagram.ts",
+      "sha256": "c0cd6245f6b44e2d13e84183d5b40a399f3f3d7477722d8d1c43117f25a55160"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/sequence/sequenceDb.ts",
+      "sha256": "e2a967402784168ec358794dd78db18e28ca94d7d4ca771724c9840374f4e134"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/sequence/parser/sequenceDiagram.jison",
+      "sha256": "45c71ea8dfd62594c9b315f7285efa497ed8f88219ec016625c37d4bd5823ebf"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/sequence/types.ts",
+      "sha256": "ac936688f396b779df69e456db93668a3843e2b21a74c92c5f037e856d255be4"
     }
   ],
   "packages": [
