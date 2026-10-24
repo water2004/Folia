@@ -129,6 +129,38 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             flowchart_measurements.edges.push_back(*box);
         }
     }
-    return render_native_diagram(*input,widths,flowchart_measurements);
+    SequenceMeasurements sequence_measurements;
+    if(auto seq=std::get_if<SequenceRenderInput>(&input->content)) {
+        if(seq->theme.font_size>std::numeric_limits<float>::max()) return std::unexpected("Invalid Sequence font size");
+        const MermaidFont font{seq->theme.font_family,static_cast<float>(seq->theme.font_size),seq->theme.font_weight};
+        auto height=measurer.svg_font_height(font);
+        if(!height) return std::unexpected(height.error());
+        const MermaidFont fallback{u"Arial",font.size,font.weight};
+        auto fallback_height=measurer.svg_font_height(fallback);
+        if(!fallback_height) return std::unexpected(fallback_height.error());
+        auto measure=[&](std::u16string_view text)->std::expected<SequenceTextBox,std::string> {
+            if(text.find_first_of(u"<>&\r\n")!=text.npos)
+                return std::unexpected("Sequence rich/entity/multiline text requires the next display adapter");
+            auto metrics=measurer.measure(text,font);
+            if(!metrics) return std::unexpected(metrics.error());
+            auto generic=measurer.measure(text,fallback);
+            if(!generic) return std::unexpected(generic.error());
+            auto width=std::round(metrics->bounds_width),line_height=text.empty()?0:*height;
+            // Original chooses sans-serif only when all dimensions are larger.
+            if(*fallback_height>line_height && std::round(generic->bounds_width)>width && !text.empty()) {
+                width=std::round(generic->bounds_width);line_height=*fallback_height;
+            }
+            return SequenceTextBox{width,line_height,std::u16string{text}};
+        };
+        for(const auto& actor:seq->document.actors) {
+            auto box=measure(actor.description);if(!box) return std::unexpected(box.error());
+            sequence_measurements.actors.push_back(*box);
+        }
+        for(const auto& message:seq->document.messages) {
+            auto box=measure(message.message);if(!box) return std::unexpected(box.error());
+            sequence_measurements.messages.push_back(*box);
+        }
+    }
+    return render_native_diagram(*input,widths,flowchart_measurements,sequence_measurements);
 }
 }

@@ -8,6 +8,40 @@ using namespace boost::ut;
 using namespace folia::platform;
 using namespace folia::mermaid;
 suite mermaid_measurement = [] {
+    "mermaid_sequence_measured_source_to_svg"_test=[] {
+        const std::vector<std::pair<std::string,std::u16string>> cases={
+            {"basic",u"sequenceDiagram\nparticipant U as User\nparticipant S as Service\nU->>S: Read document\nS-->>U: Document"},
+            {"wide",u"sequenceDiagram\nparticipant A as Document editor\nparticipant B as Storage\nA->>B: Read and validate the document before saving changes\nB-->>A: Complete"},
+            {"self",u"sequenceDiagram\nparticipant A as Worker\nA->>A: Save"},
+            {"reverse",u"sequenceDiagram\nparticipant A as Editor\nparticipant B as Store\nparticipant C as Watcher\nC->>A: Open\nA->B: Read\nB-->A: Ready\nA<<->>C: Update\nC<<-->>A: Done"},
+            {"spacing",u"%%{init: {\"sequence\": {\"width\": 120, \"height\": 55, \"actorMargin\": 40, \"boxMargin\": 8, \"rightAngles\": true}}}%%\nsequenceDiagram\nA->>A: Check\nA-->>B: Ready"},
+            {"font",u"%%{init: {\"fontSize\": 20}}%%\nsequenceDiagram\nparticipant A as Source document\nA->>B: Read the updated document\nB-->>A: Saved"},
+        };
+        for(const auto theme:{u"default",u"dark"}) {
+            auto session=ConfigSession::create();expect(fatal(session.has_value()));
+            const ConfigValue site{.kind=ConfigKind::mapping,.mapping={
+                {u"theme",ConfigValue{.kind=ConfigKind::string,.string=theme}},
+                {u"look",ConfigValue{.kind=ConfigKind::string,.string=u"classic"}},
+                {u"fontFamily",ConfigValue{.kind=ConfigKind::string,.string=u"Arial"}},
+            }};
+            expect(fatal(session->save_initialize_config(site).has_value()));
+            expect(fatal(session->set_site_config(site).has_value()));
+            for(const auto& [name,source]:cases) {
+                auto svg=render_mermaid(source,*session);
+                expect(svg.has_value())<<name<<(svg?"":svg.error());
+                if(!svg) continue;
+                expect(svg->width>0&&svg->height>0);
+                if(auto directory=std::getenv("FOLIA_MERMAID_SVG_OUTPUT")) {
+                    std::filesystem::create_directories(directory);
+                    const std::u16string_view theme_name{theme};
+                    std::ofstream output(std::filesystem::path(directory)/("sequence-"+name+"-"+std::string(theme_name.begin(),theme_name.end())+".svg"),std::ios::binary);
+                    output<<svg->svg;expect(output.good());
+                }
+            }
+            expect(!render_mermaid(u"sequenceDiagram\nactor A\nA->>B: Go",*session));
+            expect(!render_mermaid(u"sequenceDiagram\nA->>+B: Go",*session));
+        }
+    };
     "mermaid_flowchart_measured_source_to_svg"_test=[] {
         auto session=ConfigSession::create();expect(fatal(session.has_value()));
         const ConfigValue site{.kind=ConfigKind::mapping,.mapping={

@@ -236,6 +236,8 @@ jobs:
         run: |
           node tools/mermaid-cpp/flowchart-browser-probe.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/sequence-browser-probe.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Run the native Mermaid tests
         run: |
@@ -247,6 +249,8 @@ jobs:
             Tee-Object -FilePath build/mermaid-cpp/tests.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/compare-flowchart-svg.mjs build/mermaid-cpp/flowchart-browser/original.json build/mermaid-cpp/pie-svg
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/compare-sequence-svg.mjs build/mermaid-cpp/sequence-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/pie-svg-oracle.mjs --compare build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -272,6 +276,8 @@ jobs:
             build/mermaid-cpp/pie-svg/*.svg
             build/mermaid-cpp/flowchart-browser/*.json
             build/mermaid-cpp/flowchart-browser/*.svg
+            build/mermaid-cpp/sequence-browser/*.json
+            build/mermaid-cpp/sequence-browser/*.svg
             ${{ env.FOLIA_MERMAID_BINARY_DIR }}/FoliaMermaidTextProbe.exe
             ${{ env.FOLIA_MERMAID_BINARY_DIR }}/FoliaMermaidPlatformTests.exe
 

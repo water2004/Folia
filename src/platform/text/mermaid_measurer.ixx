@@ -50,6 +50,28 @@ class MermaidMeasurer {
         return true;
     }
 public:
+    // Sequence needs the font's ascent/descent box, excluding line gap.
+    std::expected<double,std::string> svg_font_height(const MermaidFont& font) const {
+        using Microsoft::WRL::ComPtr;
+        ComPtr<IDWriteFactory> factory;
+        if(FAILED(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED,__uuidof(IDWriteFactory),
+            reinterpret_cast<IUnknown**>(factory.GetAddressOf()))))
+            return std::unexpected("DirectWrite factory creation failed");
+        ComPtr<IDWriteFontCollection> collection;
+        ComPtr<IDWriteFontFamily> family;
+        ComPtr<IDWriteFont> selected;
+        const std::wstring name(font.family.begin(),font.family.end());
+        UINT32 index{}; BOOL exists{};
+        if(FAILED(factory->GetSystemFontCollection(&collection)) ||
+            FAILED(collection->FindFamilyName(name.c_str(),&index,&exists)) || !exists ||
+            FAILED(collection->GetFontFamily(index,&family)) ||
+            FAILED(family->GetFirstMatchingFont(static_cast<DWRITE_FONT_WEIGHT>(font.weight),
+                DWRITE_FONT_STRETCH_NORMAL,font.italic?DWRITE_FONT_STYLE_ITALIC:DWRITE_FONT_STYLE_NORMAL,&selected)))
+            return std::unexpected("DirectWrite SVG font metric lookup failed");
+        DWRITE_FONT_METRICS metrics{}; selected->GetMetrics(&metrics);
+        const auto scale=font.size/static_cast<double>(metrics.designUnitsPerEm);
+        return std::round(metrics.ascent*scale)+std::round(metrics.descent*scale);
+    }
     // Resolve the configured CSS family list once, then share that exact family
     // between DirectWrite measurement and SVG emission. Generic families have
     // explicit Windows mappings; missing named candidates advance in list order.

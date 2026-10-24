@@ -12,6 +12,20 @@
   and the original Sequence renderer layout, without reopening Flowchart.
 - Work starts on fork/mermaid-development at 60e7cc7a. Contribution worktree is
   build/mermaid-cpp/entry-contribution; PR #1 remains open and must not merge.
+- Parser source commits: 377eef4e/2d07c483/e753cad8. The first Windows run
+  40099571308 passed original/native parser fixtures but its new isolation test
+  omitted the supported default theme. e753cad8 fixes that test setup; current
+  validation is https://github.com/zhao0349/Folia/actions/runs/40100026843.
+- Second batch now implements the measured classic participant/request-response
+  source-to-SVG path: solid/dotted/open/bidirectional signals, self calls, mirrored
+  footers and configured spacing. Exit is six representative diagrams in two
+  themes with original/native actor boxes, labels, lifelines, markers, paths,
+  paints and viewport comparisons, plus affected native tests. Next add notes,
+  activation bars and human actor figures using the already-owned parser events.
+- Local original observations: build/mermaid-cpp/sequence-svg-work/original.json.
+  Browser sans-serif is explicitly Arial to match the native generic mapping;
+  system/browser generic-font defaults can otherwise differ. Labels here are
+  plain single-line Arial at 16/20 units. No application switch is claimed.
 
 ## Common HTML/Markdown labels verified (historical)
 

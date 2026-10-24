@@ -5,13 +5,14 @@ export import folia.mermaid.frontend;
 export import folia.mermaid.packet_svg;
 export import folia.mermaid.pie_svg;
 export import folia.mermaid.flowchart_svg;
+export import folia.mermaid.sequence_svg;
 
 export namespace folia::mermaid {
 struct PacketRenderInput { PacketLayout layout; PacketSvgTheme theme; };
 struct PieRenderInput { PieDocument document; PieSvgTheme theme; PieSvgConfig config; };
 struct NativeDiagram {
     PreparedDiagram prepared;
-    std::variant<PacketRenderInput, PieRenderInput, FlowchartRenderInput> content;
+    std::variant<PacketRenderInput, PieRenderInput, FlowchartRenderInput, SequenceRenderInput> content;
 };
 struct DiagramSvg { std::string svg; double width{}, height{}; };
 
@@ -31,5 +32,6 @@ std::expected<std::u16string, std::string> diagram_display_text(std::u16string_v
 // metadata; no DOM id or event bindings are required by Folia's SVG consumer.
 std::expected<DiagramSvg, std::string> render_native_diagram(
     const NativeDiagram&, const PieMeasurements& measurements = {},
-    const FlowchartMeasurements& flowchart_measurements = {});
+    const FlowchartMeasurements& flowchart_measurements = {},
+    const SequenceMeasurements& sequence_measurements = {});
 }

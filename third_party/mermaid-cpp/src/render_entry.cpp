@@ -149,6 +149,41 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
     try {
         const auto& effective=prepared->effective_config;
         const auto& theme=member(effective,u"themeVariables");
+        if(prepared->type==u"sequence") {
+            auto document=prepare_sequence(source,session,SequenceLimits{.frontend=limits});
+            if(!document) return std::unexpected(document.error());
+            const auto& config=member(effective,u"sequence");
+            if(text(member(effective,u"look"))!=u"classic")
+                return std::unexpected("Native Sequence SVG currently requires classic look");
+            if(!document->title.empty() || !boolean(member(config,u"mirrorActors")) ||
+                boolean(member(config,u"hideUnusedParticipants")) || boolean(member(config,u"showSequenceNumbers")) ||
+                text(member(config,u"messageAlign"))!=u"center")
+                return std::unexpected("Sequence titles, numbering and alternate actor/message placement require the next SVG adapter");
+            SequenceSvgConfig c;
+            for(auto [key,target]:{std::pair{u"width",&c.width},{u"height",&c.height},{u"actorMargin",&c.actor_margin},
+                {u"boxMargin",&c.box_margin},{u"wrapPadding",&c.wrap_padding},{u"diagramMarginX",&c.margin_x},
+                {u"diagramMarginY",&c.margin_y},{u"bottomMarginAdj",&c.bottom_margin}}) {
+                *target=number(member(config,key));
+                if(*target<0) return std::unexpected("Sequence spacing must be nonnegative");
+            }
+            c.right_angles=boolean(member(config,u"rightAngles"));
+            SequenceSvgTheme t;
+            // Original setConf assigns root fontFamily/fontSize to all three
+            // Sequence text categories before measurement and drawing.
+            t.font_family=text(member(effective,u"fontFamily"));
+            t.font_size=size(member(effective,u"fontSize"));
+            if(t.font_size<=0) return std::unexpected("Sequence font size must be positive");
+            if(auto weight=effective.find(u"fontWeight")) {
+                const auto value=number(*weight);
+                if(value<100||value>900||std::floor(value)!=value) return std::unexpected("Invalid Sequence font weight");
+                t.font_weight=static_cast<unsigned>(value);
+            } else if(number(member(config,u"actorFontWeight"))!=400 || number(member(config,u"messageFontWeight"))!=400)
+                return std::unexpected("Separate Sequence label weights require the next SVG adapter");
+            for(auto [key,target]:{std::pair{u"actorBkg",&t.actor_fill},{u"actorBorder",&t.actor_border},
+                {u"actorTextColor",&t.actor_text},{u"actorLineColor",&t.actor_line},
+                {u"signalColor",&t.signal},{u"signalTextColor",&t.signal_text}}) *target=narrow(text(member(theme,key)));
+            return NativeDiagram{std::move(*prepared),SequenceRenderInput{std::move(*document),std::move(t),c}};
+        }
         if(prepared->type==u"flowchart" || prepared->type==u"flowchart-v2") {
             auto graph=prepare_flowchart(source,session,FlowchartLimits{.frontend=limits});
             if(!graph) return std::unexpected(graph.error());
@@ -246,9 +281,13 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
     } catch(const std::runtime_error& e) { return std::unexpected(e.what()); }
 }
 
-std::expected<DiagramSvg,std::string> render_native_diagram(const NativeDiagram& input,const PieMeasurements& widths,const FlowchartMeasurements& flowchart_measurements) {
+std::expected<DiagramSvg,std::string> render_native_diagram(const NativeDiagram& input,const PieMeasurements& widths,const FlowchartMeasurements& flowchart_measurements,const SequenceMeasurements& sequence_measurements) {
     return std::visit([&](const auto& content)->std::expected<DiagramSvg,std::string> {
-        if constexpr(std::is_same_v<std::decay_t<decltype(content)>,FlowchartRenderInput>) {
+        if constexpr(std::is_same_v<std::decay_t<decltype(content)>,SequenceRenderInput>) {
+            auto result=render_sequence_svg(content,sequence_measurements);
+            if(!result) return std::unexpected(result.error());
+            return DiagramSvg{std::move(result->svg),result->width,result->height};
+        } else if constexpr(std::is_same_v<std::decay_t<decltype(content)>,FlowchartRenderInput>) {
             auto result=render_flowchart_svg(content,flowchart_measurements);
             if(!result) return std::unexpected(result.error());
             return DiagramSvg{std::move(result->svg),result->width,result->height};
