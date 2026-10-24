@@ -33,6 +33,7 @@ suite mermaid_measurement = [] {
             {"group-external",u"flowchart TD\nsubgraph g[Group]\ndirection LR\nA[Read]-->B[Write]\nend\nB-->C[Exit]\ng-->|done|D[Report]"},
             {"group-nested",u"flowchart TD\nsubgraph g[Outer]\ndirection LR\nsubgraph h[Inner]\ndirection BT\nA[Read]-->B[Write]\nend\nh-->C[Store]\nend\ng-->D[Exit]"},
             {"group-loop",u"flowchart LR\nsubgraph g[Group]\ndirection TB\nA[Retry]-->|again|A\nA-->B[Done]\nend\ng-->C[Exit]"},
+            {"group-margins",u"%%{init: {\"flowchart\": {\"subGraphTitleMargin\": {\"top\": 6, \"bottom\": 4}}}}%%\nflowchart LR\nsubgraph g[Group title]\ndirection TB\nA[Read]-->|next|B[Write]\nend\ng-->|done|C[Exit]"},
             {"unicode",u"flowchart LR\nA[\u4e2d\u6587] --> B[Caf\u00e9 \U0001f600]"},
         };
         for(const auto theme:{u"default",u"dark"}) for(const auto& sample:cases) {
