@@ -23,8 +23,9 @@
   on feat/mermaid-cpp-port. Implementation/tests/pins/workflow match the final
   verified head exactly; this public documentation checkpoint follows them.
   The contribution diff against both PR base 508423f2 and upstream master
-  81bed653 contains no AGENTS.md change. Update upstream PR #1 and keep OPEN;
-  DO NOT merge: https://github.com/water2004/Folia/pull/1
+  81bed653 contains no AGENTS.md change. Upstream PR #1 includes both batches;
+  its description is updated and it is confirmed OPEN/unmerged. DO NOT merge:
+  https://github.com/water2004/Folia/pull/1
   Delivery-triggered reruns are separate from the completed validation above.
 - Next concrete batch: Flowchart display-label adaptation and measured line
   layout. Start from pinned shapes/util.ts::labelHelper, createText.ts and
