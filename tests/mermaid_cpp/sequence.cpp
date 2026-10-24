@@ -53,8 +53,12 @@ suite sequence = [] {
     };
     "mermaid_sequence_owned_requests_and_unsupported_statements"_test = [] {
         auto session = ConfigSession::create(); expect(fatal(session.has_value()));
+        const auto site = json(uR"({"theme":"default"})");
+        expect(fatal(session->save_initialize_config(site).has_value()));
+        expect(fatal(session->set_site_config(site).has_value()));
         std::u16string source = u"sequenceDiagram\nA->>+B: Save\nB-->>-A: Done";
-        auto first = prepare_sequence(source,*session); expect(fatal(first.has_value()));
+        auto first = prepare_sequence(source,*session);
+        expect(fatal(first.has_value())) << (first ? "" : first.error());
         source.clear();
         expect(bool(first->messages[0].message == u"Save"));
         for (const auto bad : {u"sequenceDiagram\nloop Repeat\nA->>B: Go\nend",
