@@ -1,24 +1,55 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-24, common Flowchart styles in progress
+## Current checkpoint - 2026-10-24, Flowchart paints and label typography verified
 
-- Batch: connect parsed class/direct node, cluster and edge paints to SVG.
-  Scope: fill, stroke, color, stroke-width and stroke-dasharray, preserving
-  class-before-direct precedence and the original colored marker behavior.
-  Exit: representative connected/grouped default/dark browser comparisons plus
-  affected native checks and the existing Windows CI jobs. No layout rework.
-- Next: measured styled labels, then remaining required families and the app
-  call chain. Existing shape/layout/label/marker/title acceptance stays closed.
-- Starting source head 4c877496; contribution head dd635cbf. PR #1 is open and
-  unmerged. Local MSVC/CMake remain unavailable; native verification uses CI.
-- Paint implementation 7fe29b26 and observation commit 38b60703 are pushed.
-  Windows validation is running at actions/runs/40094547510 in zhao0349/Folia.
-  Local original browser probe passed 74 cases; native acceptance is pending.
-- Next batch prepared while CI runs: class/direct node and edge font family,
-  pixel size, weight and italic style measured by DirectWrite and retained in
-  SVG. Exit: connected/wrapped/grouped node and edge label comparisons in both
-  themes and affected native checks. Group-title typography and mixed HTML/
-  Markdown runs remain separate adapters. Then continue required rich labels.
+- Delivered common class/direct node, cluster and edge paints through
+  render_mermaid: fill, stroke, text color, line width and dash patterns.
+  Class styles precede direct styles. Colored point markers change fill/stroke;
+  circle/cross keep the theme fill and change stroke. Marker selection retains
+  the original first stroke declaration while paths use the final declaration.
+  Dark group titles now use the theme's separate title color.
+- Delivered node/edge label font family, positive pixel size, normal/bold or
+  numeric 100-900 weight, and normal/italic style. DirectWrite wraps/measures
+  with those settings; SVG retains the same resolved family and parameters.
+  Existing Dagre, classic shapes, groups, paths and title placement remain.
+- Both batches met their exit conditions. Paint head
+  7fe29b269f404bbf9780caa73fe4d13099d7c4b5 passed all four Windows jobs:
+  https://github.com/zhao0349/Folia/actions/runs/40094547510
+  Font head 10172a532673edf45c9f761c352c028a98c5ca7c passed all four:
+  https://github.com/zhao0349/Folia/actions/runs/40094859877
+  Each run covers standalone/integrated Debug/Release. Integrated jobs passed
+  FoliaTests, FoliaWindowsEditorTests and both Mermaid suites. Final jobs
+  compared 80 original/native SVGs across 40 diagrams and two themes, including
+  class/direct paint precedence, colored markers, label fonts, displayed lines,
+  node/group boxes, positions and paths. Existing source/SVG and real browser/
+  DirectWrite checks passed. Downloaded native previews were inspected.
+- Source commits: 38b60703/7fe29b26 (paints), 15d6406d/10172a53 (fonts).
+  Contribution equivalents 4e025129/d8a4fb2a/8a80a610/57e79544 are delivered on
+  feat/mermaid-cpp-port in build/mermaid-cpp/entry-contribution. Runtime, tests,
+  pins and workflow match the final verified head; this documentation checkpoint
+  follows them. Contribution diffs against PR base 508423f2 and upstream/master
+  81bed653 contain no AGENTS.md change. PR #1 includes both batches; keep
+  OPEN/unmerged, DO NOT merge: https://github.com/water2004/Folia/pull/1
+  Delivery-triggered reruns are separate from completed implementation checks.
+- Next concrete batch: common mixed normal/strong/emphasis node and edge labels.
+  Start from rendering-util/{handle-markdown-text.ts,createText.ts}, original
+  HTML/Markdown observations, the retained parser label types, and the current
+  DirectWrite/SVG label boundary. Keep owned source labels and add measured
+  styled runs, with representative wrapping/explicit breaks in connected and
+  grouped default/dark diagrams as the exit condition. Then advance remaining
+  required families and the application call chain. Do not reopen passed
+  geometry/paint/whole-label font stages without a relevant regression.
+- Limits: group-title font overrides (original clusters apply styles after
+  container sizing), mixed HTML/Markdown labels, HTML titles, other style
+  properties, shape metadata, other required families and the application
+  dependency switch remain. Folia still uses Rust in the application. No
+  WinUI/GPU/DPI acceptance is claimed.
+- No local build, agent, browser or CI watcher remains active. No failed check
+  remains. Ignored evidence: build/mermaid-cpp/styles-verified and fonts-verified
+  (downloaded Release artifacts, comparison.json and native-preview.png);
+  styles-work/fonts-work contain original observations. The font validation
+  branch codex/mermaid-cpp-font-styles remains at 10172a53. Local native builds
+  remain unavailable; Windows CI supplies native verification.
 
 ## Classic markers and measured titles verified (historical)
 

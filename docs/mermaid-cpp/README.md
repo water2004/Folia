@@ -123,8 +123,25 @@ Plain frontmatter diagram titles use real DirectWrite metrics at the original
 viewport expands, use `titleTopMargin` for their baseline and remain unwrapped.
 The comparison covers ordinary/wide titles and custom title margins on groups.
 
+Common class/direct styles now paint node and cluster fills, outlines, text
+colors, stroke widths and dash patterns. Class declarations precede direct
+styles. Link styles also paint edge labels and clone colored markers using the
+original rules: point markers change both fill and stroke, circle/cross change
+stroke only, and marker color takes the first stroke declaration while the
+path uses the final declaration. Dark cluster titles use the separate title
+color from the theme. The source declarations remain owned parser data.
+
+Node and edge labels support an installed font family, positive pixel font
+size, normal/bold or numeric 100-900 weight, and normal/italic style. DirectWrite
+wraps and measures with those parameters; SVG retains the same resolved family,
+size, weight and style. This covers whole-label typography in connected and
+grouped diagrams. Group-title typography and mixed HTML/Markdown runs remain
+separate adapters. The comparison checks computed font properties, display
+lines, label positions, node boxes and edge geometry in default/dark themes.
+
 Complete Flowchart rendering remains pending. The SVG entry explicitly rejects
-custom styles, styled HTML/Markdown labels and HTML diagram titles,
+style properties beyond the supported paints/typography, group-title font
+overrides, styled HTML/Markdown labels and HTML diagram titles,
 and non-classic looks; it does not silently drop these features.
 The complete existing family requirements remain unchanged. The rank/layout
 API requires prepared graphs without nonempty group endpoints; callers must
