@@ -29,7 +29,7 @@ try {
     const shape=n.querySelector('.label-container'),b=shape.getBBox(),text=n.querySelector('text'),t=text.getBBox();
     const local=n.getScreenCTM().inverse().multiply(shape.getScreenCTM());
     const corner=new DOMPoint(b.x,b.y).matrixTransform(local);
-    const paths=shape.matches('path,polygon')?[shape]:[...shape.querySelectorAll('path')];
+    const paths=shape.matches('path,polygon,circle')?[shape]:[...shape.querySelectorAll('path,circle')];
     const outline=paths.flatMap(p=>Array.from({length:201},(_,i)=>{
      const a=p.getPointAtLength(p.getTotalLength()*i/200);return position(p,a.x,a.y);
     }));
@@ -98,7 +98,7 @@ try {
   }
   report.push({name:row.name,nodes:actual.nodes.length,edges:actual.edges.length,groups:actual.clusters.length});
  }
- const selected=rows.filter(x=>['shapes-down-default','shapes-right-dark','shapes-group-default'].includes(x.name));
+ const selected=rows.filter(x=>['shapes-polygons-default','shapes-down-default','shapes-right-dark','shapes-group-default'].includes(x.name));
  await page.setContent('<body style="margin:20px;background:#f1f3f5;font:16px Arial"><div style="display:flex;gap:24px;align-items:start">'+selected.map(x=>
   `<div style="background:${x.theme==='dark'?'#202124':'white'};padding:20px;border-radius:12px"><h3 style="color:${x.theme==='dark'?'white':'#222'}">${x.name}</h3>`+readFileSync(resolve(output,'flowchart-'+x.name+'.svg'),'utf8')+'</div>').join('')+'</div></body>');
  await page.screenshot({path:resolve(dirname(reference),'native-preview.png'),fullPage:true});

@@ -13,6 +13,13 @@
 - Next: remaining required classic shape/label adapters, other required families
   and application wiring. No broader compatibility or rare-input work in this batch.
 - Local MSVC/CMake remain unavailable. Use Windows CI for native validation.
+- First batch committed/pushed as 6c11e387 (observations) and d411e656
+  (implementation). Windows run 40065410266 is validating that exact head.
+- Prepared next batch: measured hexagon, slanted parallelograms, both trapezoids,
+  asymmetric notch and double circle, already accepted by the current parser.
+  Exit on connected/grouped default/dark geometry, real label placement and
+  edge clipping, including configured minNodeWidth: 0; then continue label adapters.
+  Local original-browser observations are in classic-polygons-work (44 SVGs).
 
 ## Measured recursive cluster SVG verified (historical)
 

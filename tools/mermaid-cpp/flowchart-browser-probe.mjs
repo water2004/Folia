@@ -11,6 +11,8 @@ for(const file of lock.flowchartCurve.files) assert.equal(createHash('sha256').u
 const directory=resolve(process.argv[2]??'build/mermaid-cpp/flowchart-browser');
 mkdirSync(directory,{recursive:true});
 const cases=[
+  ['shapes-polygons','flowchart TD\nA{{Prepare}} --> B[/Read/]\nA --> C[\\Write\\]\nB --> D[/Collect\\]\nC --> E[\\Expand/]\nD --> F>Route]\nE --> F\nF --> G(((Done)))'],
+  ['shapes-polygons-group','%%{init: {"flowchart": {"minNodeWidth": 0}}}%%\nflowchart LR\nsubgraph g[Steps]\ndirection BT\nA{{Init}} --> B[/In/] --> C[\\Out\\] --> D[/Join\\] --> E[\\Fork/] --> F>Next]\nend\ng --> G(((End)))'],
   ['shapes-down','flowchart TD\nA([Start]) -->|run| B[[Process]]\nA --> C[(Database)]\nB --> D([Finish])\nC --> D'],
   ['shapes-right','flowchart LR\nA([Start]) --> B[[Process]] --> C[(Database)]'],
   ['shapes-group','flowchart TD\nsubgraph g[Storage]\ndirection LR\nA([Begin]) --> B[[Save]] --> C[(Records)]\nC -->|retry| C\nend\ng --> D([End])'],
@@ -56,7 +58,7 @@ for(const [name,source] of ${JSON.stringify(cases)}) {
   const nodes=[...host.querySelectorAll('g.node')].map(n=>{
    const shape=n.querySelector('.label-container');const b=shape.getBBox();const label=n.querySelector('.label');
    const lb=label.getBBox();
-   const paths=shape.matches('path,polygon')?[shape]:[...shape.querySelectorAll('path')];
+   const paths=shape.matches('path,polygon,circle')?[shape]:[...shape.querySelectorAll('path,circle')];
    const outline=name.startsWith('shapes-')?paths.flatMap(p=>Array.from({length:201},(_,i)=>{
     const a=p.getPointAtLength(p.getTotalLength()*i/200);return position(p,a.x,a.y);
    })):[];

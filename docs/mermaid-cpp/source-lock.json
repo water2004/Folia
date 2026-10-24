@@ -495,6 +495,34 @@
     {
       "path": "packages/mermaid/src/rendering-util/rendering-elements/intersect/intersect-rect.js",
       "sha256": "f7e0849b9a31e2cd7b1a3a7c288442abbb93f7c8d0bac89417c9072f35be76a9"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/hexagon.ts",
+      "sha256": "2c5d559cf52495aee42b250c6ca556be1f5f0c244ee2993d53d22d405d52dcf3"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/leanRight.ts",
+      "sha256": "92c03498df78448186f2114231439338c73e7a8d6a2ad47ad1d7dea1b336f56c"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/leanLeft.ts",
+      "sha256": "7a156d3830ee833484e381351bd2f298b79c11081595e8bfaae224c7288608aa"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/trapezoid.ts",
+      "sha256": "7347c2439b54e296ff6e426bc5aefcd00236b78d4c0f859258feae83c1183cfe"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/invertedTrapezoid.ts",
+      "sha256": "811f49eeba78032b5a64f2266d57d7c220ea1841c45f35b854d6381a68a93e1a"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/doubleCircle.ts",
+      "sha256": "e13030a09455da35a76545c9f27d7c07c3ba450fa065a65d367d40a824bfbc3e"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/rectLeftInvArrow.ts",
+      "sha256": "62472fe5c9d63775db12dfc6914f9995681cdbfe193b945b13bb6216f687f06e"
     }
   ],
   "packages": [
