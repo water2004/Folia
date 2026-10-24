@@ -2,10 +2,11 @@
 
 恢复/压缩后先实际读本文。架构、职责和详细验收见 [architecture](native-raii-architecture.md)、[files](native-raii-files.json)、[acceptance](native-raii-acceptance.md)。只复查新变化；ignored候选用 `rg --no-ignore`。
 
-## 当前 checkpoint：0.3.1 发布（2026-10-25）
+## 当前 checkpoint：0.3.1 已发布（2026-10-25）
 
 - 用户明确要求推送并按既有CI/CD发布0.3.1，包含 `9a72e432` 打开线程修复和 `e5c39fda` 数学滚动修复。统一更新CMake/MSI默认/manifest/rc/About及README版本，新增 `release-notes/v0.3.1.md`。
-- 延续原tag push流水线，使用上次已通过的CMake及锁定依赖恢复步骤，不另建发布方式。下一步校验版本并提交推送master与v0.3.1标签，跟踪CI至MSI/校验文件/Release核验完成。暂无活动agent或本地build。
+- 版本/XML/workflow/notes静态检查通过；固定标签 `v0.3.1` 指向 `92ac9f54`，原tag push流水线 [40119208893](https://github.com/water2004/Folia/actions/runs/40119208893) 全部成功。[Release v0.3.1](https://github.com/water2004/Folia/releases/tag/v0.3.1) 已公开并设为latest，两次修复与版本提交均已推送。
+- 附件 `Folia-0.3.1-x64.msi` **53,493,427 bytes** 和同名 `.sha256` 已上传，校验文件与GitHub附件digest一致：`fe0099f3ff4a48b8a0426cb71d7f9a6d5ed4e54895bb46292d11989eff77e053`。验收记录 `build/release-0.3.1-published.json`。发布无剩余步骤，无活动agent/native/build句柄；未安装或交互试用CI产物。
 - 现有应用与平台验收已完成，见下方；本次只改版本与说明，不重复宽审。用户补充窗口也拖不动：与UI线程被持续绘制占用吻合，但没有当前现场堆栈或原文档标题栏拖动实测，不把已有测试宣称为完整现场复现。
 
 ## 已完成：快速拖动公式文档的输入停滞修复（2026-10-25）
@@ -14,14 +15,14 @@
 - 已确认并修复：FrameScheduler持续以High优先级提交重帧，普通UI回调测试被推迟至第12帧结束；Render退出的deferredInvalidate又同步调用Render，使帧预算不能让出UI。现均以Low优先级异步补帧，重绘和embedded完成通知各合并至一个待处理回调，弱生命周期保护复用原invalidation state。
 - 公式重复工作也已修复：离屏布局原先会Render排队，帧末取消，取消完成仍触发刷新。新Lookup仅借用已有geometry并登记原owner，不排渲染/读取；只有visible band启动补算，pending公式回到视口会重提，取消不发完成通知。原SVG按当前视口后台读取/离屏丢弃、预览只在内存、请求字体/批量/Common布局均未改变。
 - 新正式测试 `tests/app/test_math_scrolling.cpp` 覆盖调度公平性、递延补帧不递归、取消通知、inline/display离屏查询与owner保留、400公式20次视口替换后停止重绘及文档/选择不变。WinUI Debug构建成功；app **11项/52断言**、Windows editor **80项/3429断言**通过。隔离替换原3个公式Cpp后，新增math6项有3项失败（取消多通知、两类离屏任务）；原调度/递延测试失败记录也保留。日志 `build/math-scroll-{app-build,tests-before,tests-after,feedback-before.stdout,platform}.log`。
-- 最终连续10轮app复验全部通过：**110项/520断言**，逐轮记录 `build/math-scroll-repeat-summary.log`，日志 `build/tests/winui/Debug/scroll-final-*.stdout.log`。快速切换已完成时允许零补帧，要求输入回调得到执行、重绘停止及无递归；专门的递延测试则强制渲染中请求新帧并验证让出UI。修复与测试以本地提交保存，无活动agent/native/build句柄、候选或剩余检查；未改版本/推送/MSI/已安装程序。尚未用用户原文档复测十几分钟停滞，后续交付/实测按用户要求；不展开旧生产owner链或Mermaid移植。
+- 最终连续10轮app复验全部通过：**110项/520断言**，逐轮记录 `build/math-scroll-repeat-summary.log`，日志 `build/tests/winui/Debug/scroll-final-*.stdout.log`。快速切换已完成时允许零补帧，要求输入回调得到执行、重绘停止及无递归；专门的递延测试则强制渲染中请求新帧并验证让出UI。修复提交 `e5c39fda` 已随顶部0.3.1发布；无活动agent/native/build句柄、候选或剩余检查。尚未用用户原文档复测十几分钟停滞或实际标题栏拖动；不展开旧生产owner链或Mermaid移植。
 
 ## 已完成：偶发打开跨线程错误已修复（2026-10-24）
 
 - 新任务来自用户截图“打开失败：应用程序调用一个已为另一线程整理的接口”。`LoadDocumentAsync` 的表面未就绪32ms等待及读文件变化100ms重试，均在 `resume_after` 后遗漏返回UI；进入这些时序后会从线程池访问renderer/界面回调。已在入口捕获 `apartment_context`，两处等待后显式返回，再检查取消/生命周期。未更改数学算法、文档模型、版本号或重新发布0.3.0。
 - 正式应用测试 `tests/app/test_document_loading.cpp` 使用真实DispatcherQueue和生产控制器/Session/Renderer，检查延迟就绪（普通/公式文档）、取消、取消后重开及已就绪路径。`tools/run_winui_tests.ps1` 复用app对象与相同Boost.UT模块编译配置，console runtime已链接；产物仅在 `build/tests/winui/`，不进入MSI。
 - 验收：setup及WinUI Debug编译链接通过；新测试5项/22断言通过，连续10次50项/220断言全部通过。隔离使用修复前 `81bed653` 控制器的同套测试5项有4项失败并检出错误线程；没有改回工作区源码。日志 `build/open-thread-{app-build,winui-tests,before.stdout}.log` 和 `build/tests/winui/Debug/repeat-*.stdout.log`。100ms文件变化重试分支已按相同规则修复，未强制制造该分支；未交互操作用户安装版。
-- 当前无活动agents/build/native句柄或待处理候选。本次修复以一个本地提交保存，未推送/打包，已发布0.3.0仍是下方原标签产物；后续按用户要求处理交付。原高CPU/旧生产owner链/Mermaid继续暂停，不重新宽审。
+- 本修复提交 `9a72e432` 已随顶部0.3.1发布；无活动agents/build/native句柄或待处理候选。后续高CPU滚动问题的修复见上方，旧生产owner链/Mermaid继续暂停，不重新宽审。
 
 ## 已完成：0.3.0 已发布（2026-10-24）
 
