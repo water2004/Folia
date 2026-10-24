@@ -2,6 +2,7 @@
 export module folia.mermaid.flowchart_svg;
 import std;
 export import folia.mermaid.dagre_rank;
+export import folia.mermaid.flowchart_label;
 
 export namespace folia::mermaid {
 struct FlowchartSvgTheme {
@@ -13,9 +14,11 @@ struct FlowchartSvgTheme {
     std::string fill="#ECECFF",border="#9370DB",text="#333333",line="#333333",label_background="#e8e8e8";
 };
 struct FlowchartTextBox {
-    // Real measured width, line-box height and baseline from its top. The
-    // plain HTML-label mode adds the original CSS 1.5 line height separately.
+    // Real measured display box and first baseline, in SVG user units.
+    // Lines are the exact display strings measured by the platform adapter.
     double width=0,height=0,baseline=0;
+    double line_step=0;
+    std::vector<std::u16string> lines;
 };
 struct FlowchartMeasurements {
     std::vector<FlowchartTextBox> nodes,edges;
@@ -24,7 +27,7 @@ struct FlowchartSvg {std::string svg;double width=0,height=0;};
 struct FlowchartRenderInput {FlowchartInput document;FlowchartSvgTheme theme;};
 // Measured SVG stage: recursive plain-title groups; square/rounded/diamond/circle,
 // stadium/subroutine/cylinder, double-circle and classic polygon nodes;
-// plain single-line labels, basis/linear paths, plain/point arrow ends and
+// quoted/entity plain labels and explicit line breaks, basis/linear paths, plain/point arrow ends and
 // normal/thick/dotted/invisible edges and merged self loops. Unsupported
 // adapters fail explicitly. Group titles use the same real measurement boundary.
 std::expected<FlowchartSvg,std::string> render_flowchart_svg(

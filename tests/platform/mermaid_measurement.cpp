@@ -18,6 +18,9 @@ suite mermaid_measurement = [] {
         expect(fatal(session->save_initialize_config(site).has_value()));
         expect(fatal(session->set_site_config(site).has_value()));
         const std::vector<std::pair<std::string,std::u16string>> cases={
+            {"labels-entities",u"flowchart LR\nA[\"Say #quot;hello#quot;\"] -->|\"A &amp; B\"| B[\"Cost #36;5\"]\nB --> C[\"x &lt; 5\"]"},
+            {"labels-lines",u"flowchart TD\nA[\"Read<br/>input\"] -->|\"next\\nstep\"| B(\"Check\nresult\")\nB --> C[(\"Save<br>record\")]"},
+            {"labels-group",u"flowchart LR\nsubgraph g[\"Read<br/>and write\"]\ndirection TB\nA[\"Input #38; data\"] --> B[\"Write<br />output\"]\nend\ng -->|\"all<br/>done\"| C[\"End\"]"},
             {"shapes-polygons",u"flowchart TD\nA{{Prepare}} --> B[/Read/]\nA --> C[\\Write\\]\nB --> D[/Collect\\]\nC --> E[\\Expand/]\nD --> F>Route]\nE --> F\nF --> G(((Done)))"},
             {"shapes-polygons-group",u"%%{init: {\"flowchart\": {\"minNodeWidth\": 0}}}%%\nflowchart LR\nsubgraph g[Steps]\ndirection BT\nA{{Init}} --> B[/In/] --> C[\\Out\\] --> D[/Join\\] --> E[\\Fork/] --> F>Next]\nend\ng --> G(((End)))"},
             {"shapes-down",u"flowchart TD\nA([Start]) -->|run| B[[Process]]\nA --> C[(Database)]\nB --> D([Finish])\nC --> D"},
@@ -61,6 +64,7 @@ suite mermaid_measurement = [] {
         }
         const std::u16string prefix=u"---\nconfig: {theme: default, look: classic, layout: dagre, fontFamily: Arial}\n---\n";
         expect(!render_mermaid(prefix+u"flowchart TD\nA-->",*session))<<"unfinished edge";
+        expect(!render_mermaid(prefix+u"flowchart TD\nA[\"<b>HTML</b>\"]",*session))<<"styled HTML adapter pending";
         expect(render_mermaid(prefix+u"flowchart TD\nsubgraph G\nA-->B\nend",*session).has_value())<<"cluster adapter";
         expect(render_mermaid(prefix+u"flowchart TD\nA-->A",*session).has_value())<<"self-loop adapter";
         const auto recovered=render_mermaid(prefix+u"flowchart TD\nA-->B",*session);

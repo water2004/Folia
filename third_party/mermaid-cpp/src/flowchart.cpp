@@ -98,9 +98,6 @@ class Parser {
             value.text = trim(source.substr(start,pos-start));
         }
         if (value.text.empty() || !take(close)) fail("Unclosed or empty Flowchart label");
-        if (value.text.find(u'<') != Text::npos || value.text.find(u'&') != Text::npos ||
-            value.text.find(u'#') != Text::npos)
-            fail("HTML and entity labels require the later Flowchart text adapter");
         return value;
     }
     bool link_start(std::size_t p) const {

@@ -45,20 +45,34 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
     }
     FlowchartMeasurements flowchart_measurements;
     if(auto flow=std::get_if<FlowchartRenderInput>(&input->content)) {
-        auto measure=[&](std::u16string_view text)->std::expected<FlowchartTextBox,std::string> {
+        auto measure=[&](std::u16string_view text,std::u16string_view type)->std::expected<FlowchartTextBox,std::string> {
             const auto size=flow->theme.font_size;
             if(!std::isfinite(size)||size<=0||size>std::numeric_limits<float>::max())
                 return std::unexpected("Invalid Mermaid font size");
-            auto metrics=measurer.measure(text,{flow->theme.font_family,static_cast<float>(size)});
-            if(!metrics) return std::unexpected(metrics.error());
-            return FlowchartTextBox{metrics->bounds_width,metrics->line_height,metrics->baseline};
+            auto lines=flowchart_label_lines(text,type);
+            if(!lines) return std::unexpected(lines.error());
+            FlowchartTextBox box;box.lines=std::move(*lines);
+            // Empty lines still occupy a font line box, measured with a space's
+            // font metrics rather than an estimated glyph height.
+            auto font_metrics=measurer.measure(u"M",{flow->theme.font_family,static_cast<float>(size)});
+            if(!font_metrics) return std::unexpected(font_metrics.error());
+            box.line_step=flow->theme.html_label_spacing?size*1.5:font_metrics->line_height;
+            box.baseline=font_metrics->baseline+(box.line_step-font_metrics->line_height)/2;
+            for(const auto& line:box.lines) {
+                auto metrics=measurer.measure(line,{flow->theme.font_family,static_cast<float>(size)});
+                if(!metrics) return std::unexpected(metrics.error());
+                box.width=std::max(box.width,metrics->bounds_width);
+            }
+            box.height=text.empty()?0:box.line_step*box.lines.size();
+            if(text.empty()) box.baseline=0;
+            return box;
         };
         for(const auto& node:flow->document.nodes) {
-            auto box=measure(node.label);if(!box) return std::unexpected(box.error());
+            auto box=measure(node.label,node.label_type);if(!box) return std::unexpected(box.error());
             flowchart_measurements.nodes.push_back(*box);
         }
         for(const auto& edge:flow->document.edges) {
-            auto box=measure(edge.label);if(!box) return std::unexpected(box.error());
+            auto box=measure(edge.label,edge.label_type);if(!box) return std::unexpected(box.error());
             flowchart_measurements.edges.push_back(*box);
         }
     }

@@ -16,10 +16,6 @@ std::string xml(std::u16string_view s) {
 bool valid_box(const FlowchartTextBox& b) {
     return std::isfinite(b.width)&&std::isfinite(b.height)&&std::isfinite(b.baseline)&&b.width>=0&&b.height>=0&&b.baseline>=0&&b.baseline<=b.height;
 }
-void plain_label(std::u16string_view text,std::u16string_view kind) {
-    if(kind!=u"text" || text.find_first_of(u"\n\r<>")!=text.npos)
-        throw std::runtime_error("Flowchart rich or multiline labels require the label adapter");
-}
 std::string point(FlowchartPoint p) {return number(p.x)+","+number(p.y);}
 FlowchartPoint mix(FlowchartPoint a,FlowchartPoint b,double wa,double wb,double divisor) {
     return {(wa*a.x+wb*b.x)/divisor,(wa*a.y+wb*b.y)/divisor};
@@ -113,12 +109,11 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
         if(!graph.title.empty()) return std::unexpected("Flowchart title placement requires the title adapter");
         std::vector<FlowchartNodeBox> boxes;std::vector<FlowchartEdgeLabelSize> labels;
         std::unordered_map<std::u16string,std::size_t> ids;
-        const auto height=[&](const FlowchartTextBox& b){return theme.html_label_spacing?theme.font_size*1.5:b.height;};
+        const auto height=[](const FlowchartTextBox& b){return b.height;};
         for(std::size_t i=0;i<graph.nodes.size();++i) {
             const auto& n=graph.nodes[i];const auto& b=measured.nodes[i];
 
             if(!n.styles.empty()||!n.compiled_styles.empty()) return std::unexpected("Flowchart custom SVG styles require the style adapter");
-            plain_label(n.label,n.label_type);
             if(!valid_box(b)) return std::unexpected("Invalid measured Flowchart label");
             if(!n.group && b.width>theme.wrapping_width && theme.wrapping_width>0) return std::unexpected("Flowchart wrapped labels require the wrapping adapter");
             const double w=n.label.empty()?0:std::max(b.width,theme.minimum_label_width),h=n.label.empty()?0:height(b);
@@ -143,7 +138,6 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
         }
         for(std::size_t i=0;i<graph.edges.size();++i) {
             const auto& e=graph.edges[i];const auto& b=measured.edges[i];
-            plain_label(e.label,e.label_type);
             if(!valid_box(b)) return std::unexpected("Invalid measured Flowchart edge label");
             if(!e.styles.empty()||!e.compiled_styles.empty()) return std::unexpected("Flowchart custom edge styles require the style adapter");
             if(e.curve!=u"basis" && e.curve!=u"linear" && !e.curve.empty()) return std::unexpected("Flowchart SVG curve is not implemented yet");
@@ -162,9 +156,11 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
         svg+="<defs><marker id=\"flow-point-end\" viewBox=\"0 0 10 10\" refX=\"5\" refY=\"5\" markerUnits=\"userSpaceOnUse\" markerWidth=\"8\" markerHeight=\"8\" orient=\"auto\"><path d=\"M0 0L10 5L0 10Z\" fill=\""+theme.line+"\"/></marker>";
         svg+="<marker id=\"flow-point-start\" viewBox=\"0 0 10 10\" refX=\"4.5\" refY=\"5\" markerUnits=\"userSpaceOnUse\" markerWidth=\"8\" markerHeight=\"8\" orient=\"auto\"><path d=\"M0 5L10 10L10 0Z\" fill=\""+theme.line+"\"/></marker></defs>";
         svg+="<g font-family=\""+xml(theme.font_family)+"\" font-size=\""+number(theme.font_size)+"\" transform=\"translate("+number(theme.padding)+","+number(theme.padding)+")\">";
-        const auto text=[&](std::u16string_view label,FlowchartPoint center,const FlowchartTextBox& b,std::string_view css) {
-            return "<text class=\""+std::string(css)+"\" x=\""+number(center.x)+"\" y=\""+number(center.y+b.baseline-b.height/2)+
-                "\" text-anchor=\"middle\" fill=\""+theme.text+"\">"+xml(label)+"</text>";
+        const auto text=[&](std::u16string_view,FlowchartPoint center,const FlowchartTextBox& b,std::string_view css) {
+            std::string out="<text class=\""+std::string(css)+"\" text-anchor=\"middle\" fill=\""+theme.text+"\">";
+            for(std::size_t i=0;i<b.lines.size();++i)
+                out+="<tspan x=\""+number(center.x)+"\" y=\""+number(center.y+b.baseline-b.height/2+i*b.line_step)+"\">"+xml(b.lines[i])+"</tspan>";
+            return out+"</text>";
         };
         std::vector<std::size_t> groups;
         for(std::size_t i=0;i<graph.nodes.size();++i) if(graph.nodes[i].group) groups.push_back(i);

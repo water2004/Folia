@@ -1,0 +1,69 @@
+module folia.mermaid.flowchart_label;
+import std;
+
+namespace folia::mermaid {
+namespace {
+std::u16string decode_entity(std::u16string_view name) {
+    int base=10;
+    if(name.starts_with(u'#')) {
+        name.remove_prefix(1);
+        if(name.starts_with(u'x')||name.starts_with(u'X')) {base=16;name.remove_prefix(1);}
+    }
+    if(!name.empty() && (name.front()>=u'0'&&name.front()<=u'9' || base==16)) {
+        std::string digits(name.begin(),name.end());std::uint32_t cp{};
+        auto parsed=std::from_chars(digits.data(),digits.data()+digits.size(),cp,base);
+        if(parsed.ec!=std::errc{}||parsed.ptr!=digits.data()+digits.size()||cp==0||cp>0x10ffff||
+            (cp>=0xd800&&cp<=0xdfff)) throw std::runtime_error("Invalid Flowchart character entity");
+        if(cp<0x10000) return std::u16string(1,static_cast<char16_t>(cp));
+        cp-=0x10000;return {static_cast<char16_t>(0xd800+(cp>>10)),static_cast<char16_t>(0xdc00+(cp&1023))};
+    }
+    for(auto [key,value]:{std::pair{u"quot",u"\""},{u"amp",u"&"},{u"apos",u"'"},
+        {u"lt",u"<"},{u"gt",u">"},{u"nbsp",u"\u00a0"},{u"copy",u"\u00a9"},{u"reg",u"\u00ae"}})
+        if(name==key) return value;
+    throw std::runtime_error("Unsupported named Flowchart entity; use its decimal code point");
+}
+}
+std::expected<std::vector<std::u16string>,std::string> flowchart_label_lines(
+    std::u16string_view label,std::u16string_view type) {
+    try {
+        if(type!=u"text"&&type!=u"string")
+            return std::unexpected("Flowchart styled labels require the rich-text adapter");
+        std::vector<std::u16string> lines(1);
+        bool pending_space=false;
+        auto append=[&](std::u16string_view text) {
+            for(auto c:text) {
+                if(c==u' '||c==u'\t'||c==u'\r'||c==u'\f') {pending_space=!lines.back().empty();continue;}
+                if(pending_space) lines.back()+=u' ';
+                pending_space=false;lines.back()+=c;
+            }
+        };
+        for(std::size_t i=0;i<label.size();) {
+            auto rest=label.substr(i);std::size_t break_size=0;
+            if(rest.starts_with(u'\n')) break_size=1;
+            else if(rest.starts_with(u"\\n")) break_size=2;
+            else if(rest.starts_with(u'<')) {
+                const auto end=rest.find(u'>');
+                if(end!=rest.npos) {
+                    std::u16string tag;
+                    for(auto c:rest.substr(1,end-1)) if(c!=u' '&&c!=u'\t'&&c!=u'/')
+                        tag+=c>=u'A'&&c<=u'Z'?c+u'a'-u'A':c;
+                    if(tag==u"br") break_size=end+1;
+                    else return std::unexpected("Flowchart HTML formatting requires the rich-text adapter");
+                }
+            }
+            if(break_size) {lines.emplace_back();pending_space=false;i+=break_size;continue;}
+            if(rest.starts_with(u'&')||rest.starts_with(u'#')) {
+                auto end=rest.find(u';');
+                if(end!=rest.npos && rest.substr(1,end-1).find_first_of(u" \t\n&<#")==rest.npos) {
+                    append(decode_entity(rest.substr(1,end-1)));i+=end+1;continue;
+                }
+                if(rest.starts_with(u"&#") && end!=rest.npos) {
+                    append(decode_entity(rest.substr(1,end-1)));i+=end+1;continue;
+                }
+            }
+            append(rest.substr(0,1));++i;
+        }
+        return lines;
+    } catch(const std::runtime_error& e) {return std::unexpected(e.what());}
+}
+}
