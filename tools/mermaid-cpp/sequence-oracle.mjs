@@ -30,6 +30,17 @@ const cases = [
   ['metadata','---\ntitle: Save flow\n---\nsequenceDiagram\naccTitle: Accessible sequence\naccDescr: A request and response\nA->>B: Save'],
   ['inline-title','sequenceDiagram\ntitle Request\nA->>B: Go'],
   ['comments-separators','sequenceDiagram; participant A; participant B\r\n%% Request\r\nA ->> B: Start # comment\r\nB -->> A: Done'],
+  ["loop", "sequenceDiagram\nloop Retry request\nA->>B: Save\nB-->>A: Retry\nend"],
+  ["alt", "sequenceDiagram\nalt Valid\nA->>B: Save\nelse Invalid\nB-->>A: Rejected\nelse Missing\nB-->>A: Not found\nend"],
+  ["opt-nested", "sequenceDiagram\nopt Cache available\nloop Read twice\nA->>+B: Read\nNote over B: Loading\nB-->>-A: Data\nend\nend"],
+  ["par", "sequenceDiagram\npar Read store\nA->>B: Read\nand Refresh cache\nA->>C: Refresh\nend"],
+  ["par-over", "sequenceDiagram\npar_over Read\nA->>B: Read\nand Log\nA->>C: Log\nend"],
+  ["critical", "sequenceDiagram\ncritical Save transaction\nA->>B: Commit\noption Timeout\nB-->>A: Retry\nend"],
+  ["break-rect", "sequenceDiagram\nrect rgb(240, 240, 255)\nA->>B: Save\nbreak Cancelled\nB-->>A: Stop\nend\nend"],
+  ["control-wrap", "sequenceDiagram\nloop wrap: Retry the request\nA->>B: Go\nend", {"sequence": {"wrap": true}}],
+  ["unclosed-region", "sequenceDiagram\nloop Retry\nA->>B: Go"],
+  ["unexpected-section", "sequenceDiagram\nopt Ready\nA->>B: Go\nelse Wait\nend"],
+  ["unexpected-end", "sequenceDiagram\nA->>B: Go\nend"],
   ['unfinished-message','sequenceDiagram\nA->>'],
   ['missing-message-colon','sequenceDiagram\nA->>B'],
   ['inactive-end','sequenceDiagram\nA->>-B: Invalid'],
@@ -49,7 +60,7 @@ for (const [name,source,options={}] of cases) {
         type:m.type,wrap:m.wrap,activate:m.activate??false,placement:m.placement??-1}))};
     ++successes;
   } catch(error) {
-    assert(['unfinished-message','missing-message-colon','inactive-end'].includes(name),`${name}: ${error.stack}`);
+    assert(['unfinished-message','missing-message-colon','inactive-end','unclosed-region','unexpected-section','unexpected-end'].includes(name),`${name}: ${error.stack}`);
   }
   rows.push([name,hex(source),hex(JSON.stringify(site)),hex(JSON.stringify(result))].join('\t'));
 }
