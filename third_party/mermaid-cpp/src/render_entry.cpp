@@ -162,11 +162,13 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
             SequenceSvgConfig c;
             for(auto [key,target]:{std::pair{u"width",&c.width},{u"height",&c.height},{u"actorMargin",&c.actor_margin},
                 {u"boxMargin",&c.box_margin},{u"wrapPadding",&c.wrap_padding},{u"diagramMarginX",&c.margin_x},
-                {u"diagramMarginY",&c.margin_y},{u"bottomMarginAdj",&c.bottom_margin}}) {
+                {u"diagramMarginY",&c.margin_y},{u"bottomMarginAdj",&c.bottom_margin},
+                {u"noteMargin",&c.note_margin},{u"activationWidth",&c.activation_width}}) {
                 *target=number(member(config,key));
                 if(*target<0) return std::unexpected("Sequence spacing must be nonnegative");
             }
             c.right_angles=boolean(member(config,u"rightAngles"));
+            c.note_align=text(member(config,u"noteAlign"));
             SequenceSvgTheme t;
             // Original setConf assigns root fontFamily/fontSize to all three
             // Sequence text categories before measurement and drawing.
@@ -177,11 +179,14 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
                 const auto value=number(*weight);
                 if(value<100||value>900||std::floor(value)!=value) return std::unexpected("Invalid Sequence font weight");
                 t.font_weight=static_cast<unsigned>(value);
-            } else if(number(member(config,u"actorFontWeight"))!=400 || number(member(config,u"messageFontWeight"))!=400)
+            } else if(number(member(config,u"actorFontWeight"))!=400 || number(member(config,u"messageFontWeight"))!=400 ||
+                number(member(config,u"noteFontWeight"))!=400)
                 return std::unexpected("Separate Sequence label weights require the next SVG adapter");
             for(auto [key,target]:{std::pair{u"actorBkg",&t.actor_fill},{u"actorBorder",&t.actor_border},
                 {u"actorTextColor",&t.actor_text},{u"actorLineColor",&t.actor_line},
-                {u"signalColor",&t.signal},{u"signalTextColor",&t.signal_text}}) *target=narrow(text(member(theme,key)));
+                {u"signalColor",&t.signal},{u"signalTextColor",&t.signal_text},
+                {u"noteBkgColor",&t.note_fill},{u"noteBorderColor",&t.note_border},{u"noteTextColor",&t.note_text},
+                {u"activationBkgColor",&t.activation_fill},{u"activationBorderColor",&t.activation_border}}) *target=narrow(text(member(theme,key)));
             return NativeDiagram{std::move(*prepared),SequenceRenderInput{std::move(*document),std::move(t),c}};
         }
         if(prepared->type==u"flowchart" || prepared->type==u"flowchart-v2") {

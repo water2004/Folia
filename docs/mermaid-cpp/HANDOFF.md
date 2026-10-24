@@ -1,6 +1,17 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-24, Sequence parser and measured SVG verified
+## Current batch - 2026-10-24, Sequence notes, activations and human actors
+
+- Deliver the already-parsed plain notes, ordered activation bars and classic
+  human actor figures through measured source-to-SVG rendering. Scope is common
+  request/response, nested activation and self-call diagrams in default/dark.
+- Exit on original/native note/figure/bar geometry, text, endpoint clipping,
+  paints and viewport comparisons plus affected Windows native checks. Then
+  advance Sequence control regions; do not reopen passed Flowchart stages.
+- Starting implementation 0f4c838d; contribution 4bf19146. PR #1 is open/unmerged.
+  Original source remains 1fb7869866dd619168d840291c9c54b4f129758b.
+
+## Sequence parser and measured SVG verified (previous checkpoint)
 
 - Delivered owned Sequence actors/messages through shared preprocessing and
   configuration: aliases, implicit participants, common arrows, self messages,

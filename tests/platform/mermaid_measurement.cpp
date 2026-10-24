@@ -16,6 +16,10 @@ suite mermaid_measurement = [] {
             {"reverse",u"sequenceDiagram\nparticipant A as Editor\nparticipant B as Store\nparticipant C as Watcher\nC->>A: Open\nA->B: Read\nB-->A: Ready\nA<<->>C: Update\nC<<-->>A: Done"},
             {"spacing",u"%%{init: {\"sequence\": {\"width\": 120, \"height\": 55, \"actorMargin\": 40, \"boxMargin\": 8, \"rightAngles\": true}}}%%\nsequenceDiagram\nA->>A: Check\nA-->>B: Ready"},
             {"font",u"%%{init: {\"fontSize\": 20}}%%\nsequenceDiagram\nparticipant A as Source document\nA->>B: Read the updated document\nB-->>A: Saved"},
+            {"activation-note",u"sequenceDiagram\nactor U as User\nparticipant S as Service\nU->>+S: Save document\nNote right of S: Validate input\nS->>S: Write output\nS-->>-U: Saved"},
+            {"note-over",u"sequenceDiagram\nparticipant A as Editor\nparticipant B as Store\nNote over A,B: Save operations\nA->>B: Commit\nNote left of A: Ready"},
+            {"note-spacing",u"sequenceDiagram\nA->>B: Read\nNote right of A: Validate document before saving all changes\nNote over B: Storage ready\nNote left of B: Return the current document to the editor\nB-->>A: Done"},
+            {"nested-activation",u"sequenceDiagram\nactor A as User\nparticipant B as Service\nA->>+B: Save\nB->>+B: Validate\nNote over B: Checking\nB-->>-B: Valid\nB-->>-A: Saved"},
         };
         for(const auto theme:{u"default",u"dark"}) {
             auto session=ConfigSession::create();expect(fatal(session.has_value()));
@@ -38,8 +42,8 @@ suite mermaid_measurement = [] {
                     output<<svg->svg;expect(output.good());
                 }
             }
-            expect(!render_mermaid(u"sequenceDiagram\nactor A\nA->>B: Go",*session));
-            expect(!render_mermaid(u"sequenceDiagram\nA->>+B: Go",*session));
+            expect(!render_mermaid(u"sequenceDiagram\nA->>B: <b>Go</b>",*session));
+
         }
     };
     "mermaid_flowchart_measured_source_to_svg"_test=[] {
