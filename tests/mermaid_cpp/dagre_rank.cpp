@@ -52,7 +52,7 @@ suite dagre_rank=[] {
                 same_rank(actual->edges[i].label_rank,field(edges[i],u"labelRank"));
             }
         }
-        expect(count==19_u);
+        expect(count==21_u);
     };
     "mermaid_dagre_rank_validates_adapter_input_and_owns_output"_test=[] {
         FlowchartInput graph;
