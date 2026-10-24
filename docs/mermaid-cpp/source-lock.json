@@ -535,6 +535,10 @@
     {
       "path": "packages/mermaid/src/rendering-util/rendering-elements/edgeMarker.ts",
       "sha256": "5e710734cf33c37c95c77f40df5b675880711da18bb54a6374139290d1c37395"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/handDrawnShapeStyles.ts",
+      "sha256": "baf8572491842caa518e8ba35a313253ede78ba2fef9b4c43ac9a4b910630402"
     }
   ],
   "packages": [
