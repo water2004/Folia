@@ -290,6 +290,9 @@ namespace winrt::Folia
         bool preserveView)
     {
         if (!Active(state, generation) || !file) co_return;
+        // Timer awaits resume on a pool thread. Keep the entry apartment for
+        // every retry before touching the session, renderer or UI callbacks.
+        winrt::apartment_context uiContext;
         auto loadTicket = state->loadSerial.fetch_add(1) + 1;
         state->loadStop.request_stop();
         state->loadStop = std::stop_source{};
@@ -336,6 +339,7 @@ namespace winrt::Folia
             }
             if (attempt == 4) throw std::runtime_error("document kept changing while it was read");
             co_await winrt::resume_after(std::chrono::milliseconds(100));
+            co_await uiContext;
             if (!Active(state, generation) || state->loadSerial.load() != loadTicket) co_return;
         }
         if (state->setStatus) state->setStatus(LocalizeFormat(L"StatusParsingFile", { file.Name() }));
@@ -343,7 +347,6 @@ namespace winrt::Folia
         auto dispatcher = winrt::Microsoft::UI::Dispatching::DispatcherQueue::GetForCurrentThread();
         auto reportedPercent = std::make_shared<std::atomic_size_t>(0);
         auto progressActive = std::make_shared<std::atomic_bool>(true);
-        winrt::apartment_context uiContext;
         std::exception_ptr loadFailure;
         std::optional<EditorSession> loaded;
         folia::platform::reload::DocumentContentFingerprint loadedFingerprint;
@@ -420,6 +423,7 @@ namespace winrt::Folia
             if (!context.ready)
             {
                 co_await winrt::resume_after(std::chrono::milliseconds(32));
+                co_await uiContext;
                 continue;
             }
             if (state->setStatus) state->setStatus(LocalizeFormat(L"StatusPreparingMath", {file.Name()}));

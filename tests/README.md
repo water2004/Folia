@@ -6,6 +6,10 @@ Folia's Boost.UT C++23-module test executables include:
   `parsing/`, `editing/`, `query/`, and `rendering/`.
 - `FoliaWindowsEditorTests` covers deterministic Windows editor adapters under
   `platform/` without creating a WinUI window.
+- `FoliaWinUITests` covers application controllers under `app/` using the real
+  WinRT UI dispatcher, production app objects and a bounded message pump. File
+  loading tests hold the surface unavailable, then initialize it or cancel the
+  operation; they check UI thread affinity, exact document content and reopening.
 - `FoliaEncodingTests` covers the app storage boundary against the pinned ICU
   runtime: BOM handling, detection candidate ordering, strict transcoding,
   converter enumeration, and byte-faithful round trips.
@@ -25,6 +29,17 @@ cmd /c build_platform_test.bat
 cmd /c build_encoding_test.bat
 ```
 
+After `setup.ps1` and a Debug `build_app.ps1`, run application tests with:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\tools\run_winui_tests.ps1
+```
+
+The application runner compiles the same Boost.UT module against the app's
+module/PCH settings and links its existing production objects plus the console
+test runtime. Tests and logs stay in `build/tests/winui/`, outside the MSI payload.
+It does not launch the normal application or change an installed copy.
+
 The wrappers configure an ignored build directory, build only the requested
 executable, and forward command-line arguments. Boost.UT accepts a positional name pattern,
 for example `cmd /c build_test.bat "*inline*"`; `-t` lists tags.
@@ -34,6 +49,7 @@ for example `cmd /c build_test.bat "*inline*"`; `-t` lists tags.
 - Every test translation unit includes `support/folia_test.hpp` first. That
   shared header imports the repository's forked `boost.ut` module and exposes
   the common literals; test files deliberately do not `import std;`.
+  Application tests use the required `pch.h` before this shared header.
 - Import the narrowest required `folia.core.*` or `folia.platform.*` modules.
   Do not use the header-only `<boost/ut.hpp>` path.
 - Shared fixtures belong in `support/`; feature tests stay beside the owning
