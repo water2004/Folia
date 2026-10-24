@@ -130,7 +130,7 @@ try {
  }
  const selected=rows.filter(x=>['title-wide-default','title-group-dark','markers-both-default'].includes(x.name));
  await page.setContent('<body style="margin:20px;background:#f1f3f5;font:16px Arial"><div style="display:flex;gap:24px;align-items:start">'+selected.map(x=>
-  `<div style="background:${x.theme==='dark'?'#202124':'white'};padding:20px;border-radius:12px"><h3 style="color:${x.theme==='dark'?'white':'#222'}">${x.name}</h3>`+readFileSync(resolve(output,'flowchart-'+x.name+'.svg'),'utf8')+'</div>').join('')+'</div></body>');
+  `<div style="background:${x.theme==='dark'?'#202124':'white'};padding:20px;border-radius:12px"><h3 style="color:${x.theme==='dark'?'white':'#222'}">${x.name}</h3><img src="data:image/svg+xml;base64,`+readFileSync(resolve(output,'flowchart-'+x.name+'.svg')).toString('base64')+'"></div>').join('')+'</div></body>');
  await page.screenshot({path:resolve(dirname(reference),'native-preview.png'),fullPage:true});
 } finally {await browser.close();}
 writeFileSync(resolve(dirname(reference),'comparison.json'),JSON.stringify(report,null,2));
