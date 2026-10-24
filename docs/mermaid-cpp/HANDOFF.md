@@ -1,6 +1,53 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-23, cluster preparation and self-loop SVG verified
+## Current checkpoint - 2026-10-24, measured recursive cluster SVG verified
+
+- Delivered recursive Flowchart group rendering through render_mermaid: real
+  title measurement, independent/nested directions, parent cluster reinsertion,
+  parent rank-spacing + 25, default/dark cluster paints, title margins, external
+  group endpoint clipping and contained self loops. Existing Dagre stays intact.
+- Exit conditions passed at f7fb19cdf72157a26d34e1175bc58b3cc2983f4f:
+  https://github.com/zhao0349/Folia/actions/runs/40054241033
+  All four Windows standalone/integrated Debug/Release jobs succeeded.
+  Integrated jobs passed FoliaTests, FoliaWindowsEditorTests and both Mermaid
+  suites. Each job compared 34 original-browser/native SVGs across seventeen
+  diagrams and two themes: absolute nested coordinates, group boxes/title
+  positions, node/edge labels, paints, sampled paths and viewport containment.
+  Existing source/SVG and browser/DirectWrite checks passed. Final native
+  group and title-margin previews were inspected locally.
+- Source batches: be797b81 (browser observations/pins), 5e325e41 (recursive
+  measurement/painting), 33157a3b (title-margin regression case), f7fb19cd
+  (corrected label offsets). Contribution equivalents: a8e09b8a, 9d0f1064,
+  43159c9d, 61f9f349. The contribution worktree build/mermaid-cpp/entry-contribution
+  on feat/mermaid-cpp-port matches the verified implementation/tests/pins/workflow.
+  This public documentation checkpoint follows them. Contribution diffs against
+  both the reported PR base 508423f2 and fetched upstream master 81bed653 contain
+  no AGENTS.md change. Target https://github.com/water2004/Folia/pull/1 remains
+  OPEN; DO NOT merge. Delivery-triggered reruns are distinct from the completed
+  implementation validation linked above.
+- Next concrete batch: measured classic stadium/subroutine/cylinder SVG for
+  shapes already parsed by Flowchart. Start with pinned rendering-elements/
+  shapes/{stadium,subroutine,cylinder}.ts, labelHelper and their intersection
+  functions. Deliver measured outlines and clipped edges; exit on representative
+  connected and grouped diagrams in default/dark plus affected native checks.
+  Then continue remaining required label/shape adapters, other required families
+  and the application call chain. Do not reopen passed cluster/layout stages
+  without a related change, actual regression or explicit project requirement.
+- Limits: plain single-line group titles; rich/wrapped labels, other shapes/
+  styles, diagram titles, other required families and the application dependency
+  switch remain. Folia still uses Rust in the application. No WinUI packaging,
+  GPU or DPI acceptance is claimed.
+- No local build, agent or browser remains active. Final ignored evidence is
+  build/mermaid-cpp/cluster-svg-final, including flowchart-browser/comparison.json,
+  native-preview.png and title-margins-preview.png. cluster-svg-initial and
+  run 40053446633 are superseded. Despite its directory name, cluster-svg-verified
+  holds the FAILED run 40053809086 artifact: its only mismatch was the 5px
+  recursive label offset in both title-margin themes, resolved by f7fb19cd and
+  the final passing run. cluster-svg-work contains local oracle/diagnostic files.
+  No failed acceptance check remains. Local MSVC/CMake are unavailable; Windows
+  CI supplies native builds and the local browser inspects downloaded outputs.
+
+## Cluster preparation and self-loop SVG verified (historical)
 
 - Delivered owned prepare_flowchart_graph around the retained Dagre engine:
   cluster endpoint anchors, independently directed subgraph extraction and

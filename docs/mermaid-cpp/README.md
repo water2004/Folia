@@ -64,7 +64,7 @@ It accepts explicit node/edge boxes and returns owned node boxes and edge paths
 in input order. The full original Dagre oracle covers the same representative
 diagrams, including compound groups and all four directions.
 
-The first measured Flowchart SVG stage supports explicit `layout: dagre` and
+The measured Flowchart SVG entry supports explicit `layout: dagre` and
 `look: classic`, default/dark themes, square/rounded/diamond/circle nodes,
 single-line plain labels, basis/linear paths, point/plain arrow ends, and
 normal/thick/dotted/invisible links, and compact merged self loops. Self loops
@@ -89,9 +89,18 @@ executes the pinned original prepareLayoutForDagre/mermaid-graphlib functions on
 representative nested, independent, externally connected and self-loop inputs.
 This preparation API does not itself measure, lay out or paint the nested tree.
 
-Measured cluster SVG adapters and complete Flowchart rendering remain pending.
-The initial SVG entry explicitly rejects groups,
-titles, custom styles, rich/multiline/wrapped labels, other classic shapes and
+The measured cluster adapter recursively measures independently directed groups,
+reinserts their parent cluster, and passes the resulting bounds to the parent
+Dagre layout. It retains the original parent rank-spacing increment, cluster
+label width/diff, title margins and node-position translations. Non-extracted
+compound groups share the parent layout; edges with group endpoint markers use
+the original boundary-path cut and label repositioning. Group backgrounds and
+plain titles use default/dark theme colors and real DirectWrite measurements.
+The browser comparison observes absolute nested coordinates, group boxes and
+title positions in addition to the existing nodes and sampled paths.
+
+Complete Flowchart rendering remains pending. The SVG entry explicitly rejects
+diagram titles, custom styles, rich/multiline/wrapped labels, other classic shapes and
 markers, and non-classic looks; it does not silently drop these features.
 The complete existing family requirements remain unchanged. The rank/layout
 API requires prepared graphs without nonempty group endpoints; callers must
