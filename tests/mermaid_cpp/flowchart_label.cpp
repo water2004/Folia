@@ -8,8 +8,17 @@ using namespace folia::mermaid;
 suite flowchart_labels=[] {
     "mermaid_flowchart_display_lines_preserve_source_labels"_test=[] {
         auto session=ConfigSession::create();expect(fatal(session.has_value()));
+        const ConfigValue site{.kind=ConfigKind::mapping,.mapping={
+            {u"theme",ConfigValue{.kind=ConfigKind::string,.string=u"default"}},
+            {u"look",ConfigValue{.kind=ConfigKind::string,.string=u"classic"}},
+            {u"layout",ConfigValue{.kind=ConfigKind::string,.string=u"dagre"}},
+        }};
+        expect(fatal(session->save_initialize_config(site).has_value()));
+        expect(fatal(session->set_site_config(site).has_value()));
         const std::u16string source=u"---\nconfig: {theme: default, look: classic, layout: dagre}\n---\nflowchart TD\nA[\"Say #quot;hello#quot;<br/>x &lt; 5\"] -->|\"next\\nstep\"| B[End]";
-        auto native=prepare_native_diagram(source,*session);expect(fatal(native.has_value()));
+        auto native=prepare_native_diagram(source,*session);
+        expect(native.has_value())<<(native?"":native.error());
+        expect(fatal(native.has_value()));
         const auto& graph=std::get<FlowchartRenderInput>(native->content).document;
         const auto label=graph.nodes[0].label;
         expect(bool(label==u"Say #quot;hello#quot;<br/>x &lt; 5"));
