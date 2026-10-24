@@ -135,9 +135,11 @@ FlowchartScene layout_prepared(const FlowchartInput& source,FlowchartPreparedGra
             }
         }
     }
+    // Both positionEdgeLabel (recursive paint) and positionRenderedEdgeLabel
+    // (root paint) add half the title margin to the label's Dagre center.
     for(auto& edge:placed->edges) {
         for(auto& p:edge.points) {p.x+=margin_x;p.y+=margin_y+title_margin/2;}
-        if(edge.label) {edge.label->x+=margin_x;edge.label->y+=margin_y+(parent?0:title_margin/2);}
+        if(edge.label) {edge.label->x+=margin_x;edge.label->y+=margin_y+title_margin/2;}
     }
     for(std::size_t i=0;i<graph.edges.size();++i) {
         const auto& e=graph.edges[i];
@@ -169,9 +171,6 @@ FlowchartScene layout_prepared(const FlowchartInput& source,FlowchartPreparedGra
             out.points={{node.x-span/2,y},{node.x-span/2,y+sign*depth},{node.x+span/2,y+sign*depth},{node.x+span/2,y}};
             if(!original.label.empty()) out.label=FlowchartPoint{node.x,y+sign*(depth+label.height/2+4)};
         }
-        // Recursive positionEdgeLabel uses the unshifted label center; the
-        // root common painter adds half the configured title margin.
-        if(parent && out.label) out.label->y-=title_margin/2;
     }
     for(const auto& e:graph.edges) if(e.loop_segment==-1||e.loop_segment==1) {
         auto& edge=result.edges[e.source_index];
