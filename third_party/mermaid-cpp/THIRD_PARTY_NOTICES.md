@@ -1,6 +1,8 @@
 # Third-party notices
 
 Mermaid-derived code is covered by the MIT license in `LICENSE`.
+Flowchart's classic stadium, subroutine and cylinder geometry follows the pinned
+Mermaid rendering-elements shapes and line/polygon intersection functions.
 
 ## D3 Shape 3.2.0 and D3 Path 3.1.0
 

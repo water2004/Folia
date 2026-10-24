@@ -65,7 +65,8 @@ in input order. The full original Dagre oracle covers the same representative
 diagrams, including compound groups and all four directions.
 
 The measured Flowchart SVG entry supports explicit `layout: dagre` and
-`look: classic`, default/dark themes, square/rounded/diamond/circle nodes,
+`look: classic`, default/dark themes, square/rounded/diamond/circle and
+stadium/subroutine/cylinder nodes,
 single-line plain labels, basis/linear paths, point/plain arrow ends, and
 normal/thick/dotted/invisible links, and compact merged self loops. Self loops
 use the original three-segment Dagre graph for placement, then the original
@@ -78,6 +79,11 @@ The same-host browser check compares actual official/native node boxes,
 coordinates, text containment, colors and sampled edge geometry. Native font
 rasterization can differ slightly from Chromium; geometric tolerances are 1.5
 SVG units for boxes/coordinates and 3 for sampled edge paths/lengths.
+Stadium nodes retain the original sampled semicircles and measured aspect ratio;
+subroutines retain their eight-unit side frames. Cylinders retain the original
+elliptical caps, label offset and curved edge intersection adjustment. The shape
+comparison checks painted outlines and label centers in connected and grouped
+default/dark diagrams, including a contained cylinder self loop.
 
 `folia.mermaid.flowchart_graph::prepare_flowchart_graph` now prepares the
 Mermaid graph around that Dagre engine. It anchors edges to externally connected

@@ -37,14 +37,28 @@ std::string curve_path(std::span<const FlowchartPoint> points,bool linear) {
     for(std::size_t i=2;i<points.size();++i) segment(points[i-2],points[i-1],points[i]);
     segment(points[points.size()-2],points.back(),points.back());return path+"L"+point(points.back());
 }
+#include "flowchart_shapes.inc"
+
 FlowchartPoint intersect(const FlowchartPlacedNode& n,std::u16string_view shape,FlowchartPoint p) {
+    if(shape==u"stadium") return polygon_intersection(n,stadium_points(n.width,n.height),p);
+    if(shape==u"subroutine") return polygon_intersection(n,subroutine_points(n.width,n.height),p);
     const double dx=p.x-n.x,dy=p.y-n.y;
     double factor;
     if(shape==u"circle") factor=(n.width/2)/std::hypot(dx,dy);
     else if(shape==u"diamond") factor=1/(std::abs(dx)/(n.width/2)+std::abs(dy)/(n.height/2));
     else factor=1/std::max(std::abs(dx)/(n.width/2),std::abs(dy)/(n.height/2));
     if(!std::isfinite(factor)) throw std::runtime_error("Invalid Flowchart shape intersection");
-    return {n.x+dx*factor,n.y+dy*factor};
+    FlowchartPoint result{n.x+dx*factor,n.y+dy*factor};
+    if(shape==u"cylinder") {
+        const double rx=n.width/2,ry=cylinder_radius_y(n.width),x=result.x-n.x;
+        if(rx!=0 && (std::abs(x)<rx || (std::abs(x)==rx && std::abs(result.y-n.y)>n.height/2-ry))) {
+            double y=ry*ry*(1-x*x/(rx*rx));
+            if(y>0) y=std::sqrt(y);
+            y=ry-y;if(dy>0) y=-y;
+            result.y+=y;
+        }
+    }
+    return result;
 }
 void shorten(FlowchartPoint& p,FlowchartPoint neighbor,double amount) {
     const auto dx=neighbor.x-p.x,dy=neighbor.y-p.y,length=std::hypot(dx,dy);
@@ -113,6 +127,9 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
             else if(n.shape==u"roundedRect") box={w+2*n.padding,h+2*n.padding};
             else if(n.shape==u"diamond") {const double side=w+h+2*n.padding;box={side,side};}
             else if(n.shape==u"circle") {const double diameter=std::hypot(b.width,h)+n.padding;box={diameter,diameter};}
+            else if(n.shape==u"stadium") box=stadium_box(w,h,n.padding);
+            else if(n.shape==u"subroutine") box={w+16+n.padding,h+n.padding};
+            else if(n.shape==u"cylinder") {const double width=w+n.padding;box={width,h+n.padding+3*cylinder_radius_y(width)};}
             else return std::unexpected("Flowchart SVG shape is not implemented yet");
             boxes.push_back(box);ids.emplace(n.id,i);
         }
@@ -185,8 +202,13 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
             const auto paint=" fill=\""+theme.fill+"\" stroke=\""+theme.border+"\" stroke-width=\"1\"";
             if(source.shape==u"circle") svg+="<circle class=\"label-container\" r=\""+number(n.width/2)+"\""+paint+"/>";
             else if(source.shape==u"diamond") svg+="<polygon class=\"label-container\" points=\"0,"+number(-n.height/2)+" "+number(n.width/2)+",0 0,"+number(n.height/2)+" "+number(-n.width/2)+",0\""+paint+"/>";
+            else if(source.shape==u"stadium" || source.shape==u"subroutine" || source.shape==u"cylinder") {
+                const auto path=source.shape==u"cylinder"?cylinder_path(n.width,n.height):
+                    polygon_path(source.shape==u"stadium"?stadium_points(n.width,n.height):subroutine_points(n.width,n.height));
+                svg+="<path class=\"label-container\" d=\""+path+"\""+paint+"/>";
+            }
             else svg+="<rect class=\"label-container\" x=\""+number(-n.width/2)+"\" y=\""+number(-n.height/2)+"\" width=\""+number(n.width)+"\" height=\""+number(n.height)+"\" rx=\""+number(source.shape==u"roundedRect"?theme.radius:0)+"\""+paint+"/>";
-            svg+=text(source.label,{0,0},measured.nodes[i],"nodeLabel")+"</g>";
+            svg+=text(source.label,{0,source.shape==u"cylinder"?source.padding/1.5:0},measured.nodes[i],"nodeLabel")+"</g>";
         }
         output.svg=svg+"</g></svg>";return output;
     } catch(const std::exception& e) {return std::unexpected(e.what());}

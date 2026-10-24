@@ -18,6 +18,9 @@ suite mermaid_measurement = [] {
         expect(fatal(session->save_initialize_config(site).has_value()));
         expect(fatal(session->set_site_config(site).has_value()));
         const std::vector<std::pair<std::string,std::u16string>> cases={
+            {"shapes-down",u"flowchart TD\nA([Start]) -->|run| B[[Process]]\nA --> C[(Database)]\nB --> D([Finish])\nC --> D"},
+            {"shapes-right",u"flowchart LR\nA([Start]) --> B[[Process]] --> C[(Database)]"},
+            {"shapes-group",u"flowchart TD\nsubgraph g[Storage]\ndirection LR\nA([Begin]) --> B[[Save]] --> C[(Records)]\nC -->|retry| C\nend\ng --> D([End])"},
             {"chain",u"flowchart TD\nA[Start] --> B[Finish]"},
             {"decision",u"flowchart TD\nA[Read] --> B{Valid?}\nB -->|yes| C(Done)\nB -->|no| A"},
             {"horizontal",u"flowchart LR\nA((Input)) --> B[Process]\nA --> C[Store]\nB --> D(Output)\nC --> D"},
