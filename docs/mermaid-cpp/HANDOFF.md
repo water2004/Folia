@@ -1,31 +1,62 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-24, Sequence actor/message batch in progress
+## Current checkpoint - 2026-10-24, Sequence parser and measured SVG verified
 
-- Functional goal: owned Sequence actors and ordered messages through shared
-  preprocessing/configuration, including aliases, common arrows, notes and
-  activation. Scope is the request/response and note/self-message path recorded
-  below. Control regions and extended participant metadata remain later work.
-- Exit: pinned original parser/DB fixtures match native actor order, aliases,
-  signal kinds, note placement and activation events; affected Windows native
-  checks pass. Then commit/deliver the batch and proceed to real measurement
-  and the original Sequence renderer layout, without reopening Flowchart.
-- Work starts on fork/mermaid-development at 60e7cc7a. Contribution worktree is
-  build/mermaid-cpp/entry-contribution; PR #1 remains open and must not merge.
-- Parser source commits: 377eef4e/2d07c483/e753cad8. The first Windows run
-  40099571308 passed original/native parser fixtures but its new isolation test
-  omitted the supported default theme. e753cad8 fixes that test setup; current
-  validation is https://github.com/zhao0349/Folia/actions/runs/40100026843.
-- Second batch now implements the measured classic participant/request-response
-  source-to-SVG path: solid/dotted/open/bidirectional signals, self calls, mirrored
-  footers and configured spacing. Exit is six representative diagrams in two
-  themes with original/native actor boxes, labels, lifelines, markers, paths,
-  paints and viewport comparisons, plus affected native tests. Next add notes,
-  activation bars and human actor figures using the already-owned parser events.
-- Local original observations: build/mermaid-cpp/sequence-svg-work/original.json.
-  Browser sans-serif is explicitly Arial to match the native generic mapping;
-  system/browser generic-font defaults can otherwise differ. Labels here are
-  plain single-line Arial at 16/20 units. No application switch is claimed.
+- Delivered owned Sequence actors/messages through shared preprocessing and
+  configuration: aliases, implicit participants, common arrows, self messages,
+  notes, nested activation, wrap flags and plain title/accessibility metadata.
+  Fourteen successful original/native parser/DB cases and three common failure
+  cases passed. Source commits 377eef4e/2d07c483/e753cad8 passed all four Windows
+  standalone/integrated Debug/Release jobs:
+  https://github.com/zhao0349/Folia/actions/runs/40100026843
+- Delivered the first measured Sequence source-to-SVG path through render_mermaid:
+  classic rectangular participants, mirrored footers, lifelines, centered plain
+  single-line messages, solid/dotted/open/bidirectional arrows, curved/right-angle
+  self calls and configured spacing. Original actor-margin/message-height
+  algorithms consume real DirectWrite widths and font ascent/descent. Browser
+  generic sans-serif is explicitly mapped to Arial like the native resolver;
+  the corpus uses Arial at 16/20 units, not an arbitrary-font parity claim.
+- SVG source commits db9a1173/7e4f31b3/f49be6ab met their exit conditions at
+  f49be6abae19141b06244001eb8c2b17a2a25e6d. All four Windows jobs passed:
+  https://github.com/zhao0349/Folia/actions/runs/40100933496
+  Each job compared 12 official/native Sequence SVGs across six diagrams and
+  default/dark themes: actor boxes, lifelines, text, paths, marker geometry,
+  paints and viewports. The 92 existing Flowchart comparisons and other source,
+  SVG and real browser/DirectWrite checks passed. Integrated jobs also passed
+  FoliaTests, FoliaWindowsEditorTests and both Mermaid suites. Downloaded final
+  native previews were inspected. No local MSVC build or WinUI/GPU/DPI acceptance
+  is claimed; Folia still uses Rust in the application.
+- Both batches are pushed to feat/mermaid-cpp-port. Contribution equivalents:
+  4cf16ea5/f75f0bee/947ddcac and deb7f20a/3d28e944/453efa56. Runtime, tests,
+  pins and workflow match the final verified head. This documentation checkpoint
+  follows those commits. No AGENTS.md diff against PR base 508423f2 or
+  upstream/master 81bed653. PR #1 remains OPEN/unmerged; do not merge:
+  https://github.com/water2004/Folia/pull/1
+  Delivery-triggered reruns are separate from completed implementation checks.
+- Next functional batch: connect the already-parsed notes, activation events and
+  human actor figures to measured Sequence SVG. Original functions are
+  sequenceRenderer.ts::{buildNoteModel,drawNote,activationBounds,newActivation,
+  activeEnd} and svgDraw.js::{drawActorTypeActor,drawActivation}. Keep activation
+  events in message order; use their geometry to clip message endpoints. Exit on
+  representative note/self-call/activation request-response diagrams in both
+  themes and the affected native checks, then advance Sequence control regions
+  and the remaining required family/application chain. Do not reopen passed
+  Flowchart or plain Sequence stages without relevant changes or regressions.
+- Next-stage original observations are already saved in
+  build/mermaid-cpp/sequence-notes-next/observations.json, generated by
+  sequence-notes-next.mjs. Promote those representative references first.
+  Final evidence: build/mermaid-cpp/sequence-svg-verified (comparison.json under
+  sequence-browser, native-preview.png under pie-svg); sequence-svg-work contains
+  local original references. The earlier theme-test setup run 40099571308 and
+  SVG-style run 40100367601 are superseded. Diagnostic copies in sequence-svg-first
+  and sequence-svg-diagnostic are not final verification; do not rerun them.
+- Limits: Sequence notes/activation/human shapes have parser support only;
+  wrapping, multiline/entity/rich labels, titles and additional Sequence options
+  still require SVG adapters. Control regions, numbering, extended participants,
+  other required families and the app dependency switch remain. No failed check,
+  uncommitted implementation candidate, local build, browser, agent or watcher
+  remains active. Continue from this checkpoint and the existing contribution
+  worktree build/mermaid-cpp/entry-contribution.
 
 ## Common HTML/Markdown labels verified (historical)
 
