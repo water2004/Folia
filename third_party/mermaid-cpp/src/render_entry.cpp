@@ -175,6 +175,7 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
             style.label_background=narrow(text(member(theme,u"edgeLabelBackground")));
             style.cluster_fill=narrow(text(member(theme,u"clusterBkg")));
             style.cluster_border=narrow(text(member(theme,u"clusterBorder")));
+            style.cluster_text=narrow(text(member(theme,u"titleColor")));
             const auto& margins=member(config,u"subGraphTitleMargin");
             style.group_title_top=number(member(margins,u"top"));
             style.group_title_bottom=number(member(margins,u"bottom"));

@@ -11,7 +11,7 @@ struct FlowchartSvgTheme {
     double group_title_top=0,group_title_bottom=0;
     double title_top_margin=25;
     std::string title_color="#333333";
-    std::string cluster_fill="#ffffde",cluster_border="#aaaa33";
+    std::string cluster_fill="#ffffde",cluster_border="#aaaa33",cluster_text="#333333";
     bool html_label_spacing=true;
     std::string fill="#ECECFF",border="#9370DB",text="#333333",line="#333333",label_background="#e8e8e8";
 };
@@ -34,7 +34,9 @@ struct FlowchartRenderInput {FlowchartInput document;FlowchartSvgTheme theme;};
 // stadium/subroutine/cylinder, double-circle and classic polygon nodes;
 // quoted/entity plain labels with explicit/measured wrapped lines,
 // basis/linear paths, plain/point/circle/cross arrow ends and
-// normal/thick/dotted/invisible edges and merged self loops. Unsupported
+// normal/thick/dotted/invisible edges and merged self loops. Class/direct fill,
+// stroke, text color, line width and dashes retain the original precedence.
+// Unsupported
 // adapters fail explicitly. Group titles use the same real measurement boundary.
 std::expected<FlowchartSvg,std::string> render_flowchart_svg(
     const FlowchartRenderInput&,const FlowchartMeasurements&);

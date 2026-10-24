@@ -1,6 +1,18 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-24, classic markers and measured titles verified
+## Current checkpoint - 2026-10-24, common Flowchart styles in progress
+
+- Batch: connect parsed class/direct node, cluster and edge paints to SVG.
+  Scope: fill, stroke, color, stroke-width and stroke-dasharray, preserving
+  class-before-direct precedence and the original colored marker behavior.
+  Exit: representative connected/grouped default/dark browser comparisons plus
+  affected native checks and the existing Windows CI jobs. No layout rework.
+- Next: measured styled labels, then remaining required families and the app
+  call chain. Existing shape/layout/label/marker/title acceptance stays closed.
+- Starting source head 4c877496; contribution head dd635cbf. PR #1 is open and
+  unmerged. Local MSVC/CMake remain unavailable; native verification uses CI.
+
+## Classic markers and measured titles verified (historical)
 
 - Delivered parsed circle/cross start/end markers through render_mermaid,
   including bidirectional and group-connected links in default/dark. Original
