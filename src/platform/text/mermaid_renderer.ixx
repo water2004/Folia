@@ -67,8 +67,13 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             if(!std::isfinite(size)||size<=0||size>std::numeric_limits<float>::max())
                 return std::unexpected("Invalid Mermaid font size");
             const MermaidFont font{label_font->family,static_cast<float>(size),label_font->weight,label_font->italic};
-            auto lines=flowchart_label_lines(text,source.label_type);
+            auto lines=flowchart_label_runs(text,source.label_type);
             if(!lines) return std::unexpected(lines.error());
+            const bool styled=std::ranges::any_of(*lines,[](const auto& line) {
+                return std::ranges::any_of(line,[](const auto& run){return run.strong||run.emphasis;});
+            });
+            if(styled && (group||!flow->theme.html_label_spacing))
+                return std::unexpected("Styled Flowchart labels currently require node/edge HTML label mode");
             FlowchartTextBox box;
             box.font=*label_font;
             // Empty lines still occupy a font line box, measured with a glyph's
@@ -79,15 +84,33 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             box.baseline=font_metrics->baseline+(box.line_step-font_metrics->line_height)/2;
             bool wrapped=false;
             for(const auto& line:*lines) {
-                auto wrapped_lines=measurer.wrap(line,font,wrapping_width);
+                std::u16string display;
+                std::vector<MermaidTextStyle> styles;
+                for(const auto& run:line) {
+                    const auto weight=run.strong?(font.weight<350?400u:font.weight<550?700u:900u):font.weight;
+                    styles.push_back({display.size(),run.text.size(),weight,font.italic||run.emphasis});
+                    display+=run.text;
+                }
+                auto wrapped_lines=measurer.wrap(display,font,wrapping_width,styles);
                 if(!wrapped_lines) return std::unexpected(wrapped_lines.error());
                 wrapped=wrapped||wrapped_lines->size()>1;
-                for(auto& value:*wrapped_lines) box.lines.push_back(std::move(value));
-            }
-            for(const auto& line:box.lines) {
-                auto metrics=measurer.measure(line,font,true);
-                if(!metrics) return std::unexpected(metrics.error());
-                box.width=std::max(box.width,metrics->bounds_width);
+                std::size_t start=0;
+                for(auto& value:*wrapped_lines) {
+                    const auto end=start+value.size();
+                    FlowchartLabelLine runs;
+                    std::vector<MermaidTextStyle> line_styles;
+                    for(std::size_t i=0;i<styles.size();++i) {
+                        const auto& style=styles[i];
+                        const auto first=std::max(start,style.offset),last=std::min(end,style.offset+style.length);
+                        if(first>=last) continue;
+                        runs.push_back({display.substr(first,last-first),line[i].strong,line[i].emphasis});
+                        line_styles.push_back({first-start,last-first,style.weight,style.italic});
+                    }
+                    auto metrics=measurer.measure(value,font,true,line_styles);
+                    if(!metrics) return std::unexpected(metrics.error());
+                    box.width=std::max(box.width,metrics->bounds_width);
+                    box.lines.push_back(std::move(value));box.runs.push_back(std::move(runs));start=end;
+                }
             }
             if(wrapped && flow->theme.html_label_spacing) box.width=std::max(box.width,wrapping_width);
             box.height=text.empty()?0:box.line_step*box.lines.size();

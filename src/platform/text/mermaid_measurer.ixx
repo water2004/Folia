@@ -27,12 +27,28 @@ struct MermaidTextMetrics {
     double line_height{};
     double baseline{};
 };
+struct MermaidTextStyle {
+    std::size_t offset=0,length=0;
+    unsigned weight=400;
+    bool italic=false;
+};
 
 // Measures UTF-16 after SVG's default whitespace processing (collapse ASCII
 // whitespace, including LF/CR/TAB). The browser probe checks the
 // chosen width against real SVG bounds on the same machine. No approximation
 // is returned on failure. Sizes and results are 96-DPI SVG user units.
 class MermaidMeasurer {
+    static bool apply_styles(IDWriteTextLayout* layout,std::span<const MermaidTextStyle> styles,
+        std::size_t length) {
+        for(const auto& style:styles) {
+            if(style.offset>length||style.length>length-style.offset) return false;
+            const DWRITE_TEXT_RANGE range{static_cast<UINT32>(style.offset),static_cast<UINT32>(style.length)};
+            if(FAILED(layout->SetFontWeight(static_cast<DWRITE_FONT_WEIGHT>(style.weight),range))||
+                FAILED(layout->SetFontStyle(style.italic?DWRITE_FONT_STYLE_ITALIC:DWRITE_FONT_STYLE_NORMAL,range)))
+                return false;
+        }
+        return true;
+    }
 public:
     // Resolve the configured CSS family list once, then share that exact family
     // between DirectWrite measurement and SVG emission. Generic families have
@@ -77,7 +93,8 @@ public:
         return std::unexpected("No configured Mermaid font is installed");
     }
     std::expected<MermaidTextMetrics, std::string> measure(
-        std::u16string_view source, MermaidFont const& font, bool preserve_spaces=false) const {
+        std::u16string_view source, MermaidFont const& font, bool preserve_spaces=false,
+        std::span<const MermaidTextStyle> styles={}) const {
         using Microsoft::WRL::ComPtr;
         if (font.family.empty() || font.family.find(u'\0') != std::u16string::npos ||
             !std::isfinite(font.size) || font.size <= 0)
@@ -123,6 +140,8 @@ public:
         if (FAILED(factory->CreateTextLayout(text.data(), static_cast<UINT32>(text.size()),
             format.Get(), extent, extent, &layout)))
             return std::unexpected("DirectWrite layout creation failed");
+        if(!styles.empty() && (!preserve_spaces||!apply_styles(layout.Get(),styles,text.size())))
+            return std::unexpected("Invalid DirectWrite styled text ranges");
         DWRITE_TEXT_METRICS metrics{};
         DWRITE_OVERHANG_METRICS ink{};
         if (FAILED(layout->GetMetrics(&metrics)))
@@ -146,9 +165,10 @@ public:
     // Native Unicode line-break opportunities; preserve each UTF-16 slice so
     // measured display lines and SVG text use the same characters and spacing.
     std::expected<std::vector<std::u16string>,std::string> wrap(
-        std::u16string_view source, MermaidFont const& font, double width) const {
+        std::u16string_view source, MermaidFont const& font, double width,
+        std::span<const MermaidTextStyle> styles={}) const {
         using Microsoft::WRL::ComPtr;
-        auto valid=measure(source,font,true);
+        auto valid=measure(source,font,true,styles);
         if(!valid) return std::unexpected(valid.error());
         if(source.empty()||valid->advance<=width) return std::vector<std::u16string>{std::u16string(source)};
         if(!std::isfinite(width)||width<=0||width>std::numeric_limits<float>::max())
@@ -168,6 +188,8 @@ public:
         if(FAILED(factory->CreateTextLayout(text.data(),static_cast<UINT32>(text.size()),format.Get(),
             static_cast<float>(width),1000000,&layout)))
             return std::unexpected("DirectWrite wrapped layout failed");
+        if(!apply_styles(layout.Get(),styles,text.size()))
+            return std::unexpected("Invalid DirectWrite styled text ranges");
         UINT32 count{};layout->GetLineMetrics(nullptr,0,&count);
         std::vector<DWRITE_LINE_METRICS> metrics(count);
         if(FAILED(layout->GetLineMetrics(metrics.data(),count,&count)))

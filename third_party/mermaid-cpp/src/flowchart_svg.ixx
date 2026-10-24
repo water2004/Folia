@@ -32,6 +32,7 @@ struct FlowchartTextBox {
     double width=0,height=0,baseline=0;
     double line_step=0;
     std::vector<std::u16string> lines;
+    std::vector<FlowchartLabelLine> runs;
     std::optional<FlowchartLabelFont> font;
 };
 struct FlowchartMeasurements {

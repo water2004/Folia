@@ -29,7 +29,14 @@ suite flowchart_labels=[] {
         auto edge=flowchart_label_lines(graph.edges[0].label,graph.edges[0].label_type);
         expect(fatal(edge.has_value()));expect(fatal(edge->size()==2_u));
         expect(bool((*edge)[0]==u"next"));expect(bool((*edge)[1]==u"step"));
-        expect(!flowchart_label_lines(u"<b>bold</b>",u"string"));
+        auto styled=flowchart_label_runs(u"normal <b>bold <i>both</i></b><br/>x &lt; y",u"string");
+        expect(fatal(styled.has_value()));expect(fatal(styled->size()==2_u));
+        expect(fatal((*styled)[0].size()==3_u));
+        expect(bool((*styled)[0][0].text==u"normal "));
+        expect((*styled)[0][1].strong && !(*styled)[0][1].emphasis);
+        expect((*styled)[0][2].strong && (*styled)[0][2].emphasis);
+        expect(bool((*styled)[1][0].text==u"x < y"));
+        expect(!flowchart_label_runs(u"<img src='image'>",u"string"));
     };
 };
 }

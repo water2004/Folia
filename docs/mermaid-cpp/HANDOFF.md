@@ -1,6 +1,20 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-24, Flowchart paints and label typography verified
+## Current checkpoint - 2026-10-24, styled label delivery in progress
+
+- Batch 1: common HTML node/edge normal, strong and emphasis runs, including
+  nested strong/emphasis, explicit breaks, real DirectWrite wrapping and
+  inherited label fonts. Preserve owned parser labels. Exit on default/dark
+  connected/grouped browser comparisons of characters, per-character styles,
+  lines, boxes and paths plus the affected native suites. Group-title styling,
+  arbitrary HTML and non-HTML layout mode are outside this batch.
+- Batch 2 follows immediately: common Markdown strong/emphasis labels using
+  the same measured-run boundary, with original parser/display observations.
+  Then continue other required families and the application call chain.
+- Implementation is not yet verified or delivered. Local MSVC/CMake remain
+  unavailable; use the existing four-job Windows gate before updating PR #1.
+
+## Flowchart paints and label typography verified (historical)
 
 - Delivered common class/direct node, cluster and edge paints through
   render_mermaid: fill, stroke, text color, line width and dash patterns.

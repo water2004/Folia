@@ -23,18 +23,30 @@ std::u16string decode_entity(std::u16string_view name) {
     throw std::runtime_error("Unsupported named Flowchart entity; use its decimal code point");
 }
 }
-std::expected<std::vector<std::u16string>,std::string> flowchart_label_lines(
+std::expected<std::vector<FlowchartLabelLine>,std::string> flowchart_label_runs(
     std::u16string_view label,std::u16string_view type) {
     try {
         if(type!=u"text"&&type!=u"string")
             return std::unexpected("Flowchart styled labels require the rich-text adapter");
-        std::vector<std::u16string> lines(1);
+        std::vector<FlowchartLabelLine> lines(1);
+        std::vector<std::u16string> tags;
+        bool strong=false,emphasis=false;
         bool pending_space=false;
+        bool space_strong=false,space_emphasis=false;
+        auto character=[&](char16_t c,bool bold,bool italic) {
+            auto& line=lines.back();
+            if(line.empty()||line.back().strong!=bold||line.back().emphasis!=italic)
+                line.push_back({{},bold,italic});
+            line.back().text+=c;
+        };
         auto append=[&](std::u16string_view text) {
             for(auto c:text) {
-                if(c==u' '||c==u'\t'||c==u'\r'||c==u'\f') {pending_space=!lines.back().empty();continue;}
-                if(pending_space) lines.back()+=u' ';
-                pending_space=false;lines.back()+=c;
+                if(c==u' '||c==u'\t'||c==u'\r'||c==u'\f') {
+                    if(!pending_space) {space_strong=strong;space_emphasis=emphasis;}
+                    pending_space=!lines.back().empty();continue;
+                }
+                if(pending_space) character(u' ',space_strong,space_emphasis);
+                pending_space=false;character(c,strong,emphasis);
             }
         };
         for(std::size_t i=0;i<label.size();) {
@@ -48,7 +60,16 @@ std::expected<std::vector<std::u16string>,std::string> flowchart_label_lines(
                     for(auto c:rest.substr(1,end-1)) if(c!=u' '&&c!=u'\t'&&c!=u'/')
                         tag+=c>=u'A'&&c<=u'Z'?c+u'a'-u'A':c;
                     if(tag==u"br") break_size=end+1;
-                    else return std::unexpected("Flowchart HTML formatting requires the rich-text adapter");
+                    else if(tag==u"b"||tag==u"strong"||tag==u"i"||tag==u"em") {
+                        if(rest[1]==u'/') {
+                            if(tags.empty()||tags.back()!=tag)
+                                return std::unexpected("Unbalanced Flowchart label formatting");
+                            tags.pop_back();
+                        } else tags.push_back(tag);
+                        strong=std::ranges::any_of(tags,[](const auto& t){return t==u"b"||t==u"strong";});
+                        emphasis=std::ranges::any_of(tags,[](const auto& t){return t==u"i"||t==u"em";});
+                        i+=end+1;continue;
+                    } else return std::unexpected("Unsupported Flowchart label HTML tag");
                 }
             }
             if(break_size) {lines.emplace_back();pending_space=false;i+=break_size;continue;}
@@ -63,7 +84,20 @@ std::expected<std::vector<std::u16string>,std::string> flowchart_label_lines(
             }
             append(rest.substr(0,1));++i;
         }
+        if(!tags.empty()) return std::unexpected("Unclosed Flowchart label formatting");
         return lines;
     } catch(const std::runtime_error& e) {return std::unexpected(e.what());}
+}
+std::expected<std::vector<std::u16string>,std::string> flowchart_label_lines(
+    std::u16string_view label,std::u16string_view type) {
+    auto runs=flowchart_label_runs(label,type);
+    if(!runs) return std::unexpected(runs.error());
+    std::vector<std::u16string> lines;
+    for(const auto& line:*runs) {
+        std::u16string text;
+        for(const auto& run:line) text+=run.text;
+        lines.push_back(std::move(text));
+    }
+    return lines;
 }
 }

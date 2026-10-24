@@ -21,6 +21,14 @@ try {
     return {x:p.x,y:p.y};
    };
    const fontStyle=text=>{const s=getComputedStyle(text);return {family:s.fontFamily,size:s.fontSize,weight:s.fontWeight,style:s.fontStyle};};
+   const styledCharacters=label=>{
+    const chars=[],walker=document.createTreeWalker(label,NodeFilter.SHOW_TEXT);
+    while(walker.nextNode()) {
+     const n=walker.currentNode,s=getComputedStyle(n.parentElement);
+     for(const c of n.textContent) if(!/\s/.test(c)) chars.push([c,s.fontWeight,s.fontStyle]);
+    }
+    return chars;
+   };
    const clusters=[...svg.querySelectorAll('g.cluster')].map(n=>{
     const shape=n.querySelector('rect'),b=shape.getBBox(),label=n.querySelector('text'),lb=label.getBBox();
     return {id:n.dataset.node,x:b.x+b.width/2,y:b.y+b.height/2,width:b.width,height:b.height,label:label.textContent,
@@ -36,7 +44,7 @@ try {
      const a=p.getPointAtLength(p.getTotalLength()*i/200);return position(p,a.x,a.y);
     }));
     return {transform:n.getAttribute('transform'),width:b.width,height:b.height,label:text.textContent,
-     labelCenter:position(text,t.x+t.width/2,t.y+t.height/2),lines:[...text.querySelectorAll('tspan')].map(n=>n.textContent.trimEnd()),outline,
+     labelCenter:position(text,t.x+t.width/2,t.y+t.height/2),lines:[...text.children].map(n=>n.textContent.trimEnd()),characters:styledCharacters(text),outline,
      fill:getComputedStyle(shape).fill,stroke:getComputedStyle(shape).stroke,
      thickness:getComputedStyle(shape).strokeWidth,dash:getComputedStyle(shape).strokeDasharray,color:getComputedStyle(text).fill,font:fontStyle(text),
      contained:t.x>=corner.x-1&&t.y>=corner.y-1&&t.x+t.width<=corner.x+b.width+1&&t.y+t.height<=corner.y+b.height+1};
@@ -53,7 +61,7 @@ try {
     const length=p.getTotalLength();return {id:p.dataset.edge,length,start:marker('start'),end:marker('end'),stroke:getComputedStyle(p).stroke,dash:getComputedStyle(p).strokeDasharray,thickness:getComputedStyle(p).strokeWidth,points:Array.from({length:7},(_,i)=>{const a=p.getPointAtLength(length*i/6);return {x:a.x,y:a.y};})};
    });
    const labels=[...svg.querySelectorAll('g.edgeLabel')].map(n=>{
-    const b=n.querySelector('rect').getBBox();return {text:n.textContent,x:b.x+b.width/2,y:b.y+b.height/2,width:b.width,height:b.height,color:getComputedStyle(n.querySelector('text')).fill,font:fontStyle(n.querySelector('text'))};
+    const b=n.querySelector('rect').getBBox(),text=n.querySelector('text');return {text:n.textContent,x:b.x+b.width/2,y:b.y+b.height/2,width:b.width,height:b.height,color:getComputedStyle(text).fill,font:fontStyle(text),lines:[...text.children].map(n=>n.textContent.trimEnd()),characters:styledCharacters(text)};
    });
    const bounds=outer.getBBox(),view=svg.viewBox.baseVal;
    const heading=svg.querySelector('.flowchartTitleText');
@@ -77,7 +85,7 @@ try {
    const a=actual.nodes[i],e=row.nodes.find(n=>n.label===a.label),p=translate(a.transform);
    assert(e,`${row.name}: missing node ${a.label}`);const q=[e.x,e.y];
    assert.equal(a.label,e.label,row.name);assert(a.contained,`${row.name}: clipped label ${a.label}`);
-   if((row.name.startsWith('labels-')||row.name.startsWith('fonts-'))) {
+   if((row.name.startsWith('labels-')||row.name.startsWith('fonts-')||row.name.startsWith('rich-'))) {
     assert.deepEqual(a.lines,e.lines,`${row.name}: displayed lines`);
     near(a.labelCenter.x,e.labelCenter.x,`${row.name} label center x`,2);
     near(a.labelCenter.y,e.labelCenter.y,`${row.name} label center y`,2);
@@ -85,6 +93,7 @@ try {
    for(const key of ['width','height']) near(a[key],e[key],`${row.name} ${i} ${key}`);
    for(let axis=0;axis<2;++axis) near(p[axis]+offset[axis],q[axis],`${row.name} ${i} axis ${axis}`);
    assert.deepEqual(a.font,e.font,`${row.name} label font`);
+   assert.deepEqual(a.characters,e.characters,`${row.name} styled characters`);
    for(const key of ['fill','stroke','thickness','dash','color']) assert.equal(a[key],e[key],`${row.name} node ${a.label} ${key}`);
    if(e.outline.length) {
     near(a.labelCenter.x,e.labelCenter.x,`${row.name} label center x`,2);
@@ -106,6 +115,8 @@ try {
    near(a.x+offset[0],p[0],`${row.name} label x`);near(a.y+offset[1],p[1],`${row.name} label y`);
    assert.equal(a.color,e.color,`${row.name} edge label color`);
    assert.deepEqual(a.font,e.font,`${row.name} edge label font`);
+   assert.deepEqual(a.characters,e.characters,`${row.name} styled edge characters`);
+   assert.deepEqual(a.lines,e.lines,`${row.name} edge lines`);
    near(a.width,e.width,`${row.name} label width`);near(a.height,e.height,`${row.name} label height`);
   }
   for(let i=0;i<actual.edges.length;++i) {
@@ -135,7 +146,7 @@ try {
   }
   report.push({name:row.name,nodes:actual.nodes.length,edges:actual.edges.length,groups:actual.clusters.length});
  }
- const selected=rows.filter(x=>['fonts-nodes-default','fonts-group-dark','fonts-edges-default'].includes(x.name));
+ const selected=rows.filter(x=>['rich-html-default','rich-html-group-dark','rich-html-font-default'].includes(x.name));
  await page.setContent('<body style="margin:20px;background:#f1f3f5;font:16px Arial"><div style="display:flex;gap:24px;align-items:start">'+selected.map(x=>
   `<div style="background:${x.theme==='dark'?'#202124':'white'};padding:20px;border-radius:12px"><h3 style="color:${x.theme==='dark'?'white':'#222'}">${x.name}</h3><img src="data:image/svg+xml;base64,`+readFileSync(resolve(output,'flowchart-'+x.name+'.svg')).toString('base64')+'"></div>').join('')+'</div></body>');
  await page.screenshot({path:resolve(dirname(reference),'native-preview.png'),fullPage:true});

@@ -19,6 +19,9 @@ suite mermaid_measurement = [] {
         expect(fatal(session->set_site_config(site).has_value()));
         struct Example {std::string name;std::u16string body,title;};
         const std::vector<Example> cases={
+            {"rich-html",u"flowchart LR\nA[\"Read <b>bold</b> and <i>italic</i>\"] -->|\"next <strong>operation</strong>\"| B[\"Save <strong><em>both</em></strong><br/>then finish\"]"},
+            {"rich-html-group",u"flowchart TD\nsubgraph g[Operations]\ndirection LR\nA[\"Read the <strong>source document</strong> and <em>validate input</em>\"] -->|\"continue with <b>next step</b> and <i>save</i>\"| B[\"Write <i>updated data</i>\"]\nend\ng --> C[Done]"},
+            {"rich-html-font",u"flowchart LR\nA[\"Read <b>bold</b> and normal\"] --> B[\"Write <em>italic</em> and normal\"]\nstyle A font-size:20px,font-weight:300\nstyle B font-size:18px,font-weight:bold"},
             {"fonts-nodes",u"flowchart LR\nA[Read the source document]:::large -->|next| B[Save the updated document]:::large\nclassDef large font-size:20px,font-weight:bold,color:#334466\nstyle B font-size:18px,font-weight:normal,font-style:italic"},
             {"fonts-edges",u"flowchart TD\nA[Read] -->|Continue with the next operation| B[Write]\nB -->|Saved output| C[Done]\nlinkStyle 0 font-size:20px,font-weight:bold,color:#773311\nlinkStyle 1 font-size:18px,font-family:Courier New,font-style:italic"},
             {"fonts-group",u"flowchart LR\nsubgraph g[Operations]\ndirection TB\nA[Read input]:::mono --> B[Write output]\nend\ng -->|done| C[Exit]\nclassDef mono font-family:Courier New,font-size:18px,font-weight:700\nstyle B font-size:22px\nstyle g color:#887733"},
@@ -82,7 +85,7 @@ suite mermaid_measurement = [] {
         }
         const std::u16string prefix=u"---\nconfig: {theme: default, look: classic, layout: dagre, fontFamily: Arial}\n---\n";
         expect(!render_mermaid(prefix+u"flowchart TD\nA-->",*session))<<"unfinished edge";
-        expect(!render_mermaid(prefix+u"flowchart TD\nA[\"<b>HTML</b>\"]",*session))<<"styled HTML adapter pending";
+        expect(!render_mermaid(prefix+u"flowchart TD\nA[\"<img src='image'>\"]",*session))<<"image label adapter pending";
         expect(!render_mermaid(prefix+u"flowchart TD\nA-->B\nstyle A font-size:0px",*session))<<"invalid label font size";
         expect(render_mermaid(prefix+u"flowchart TD\nsubgraph G\nA-->B\nend",*session).has_value())<<"cluster adapter";
         expect(render_mermaid(prefix+u"flowchart TD\nA-->A",*session).has_value())<<"self-loop adapter";

@@ -214,8 +214,19 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
             if(b.font) out+=" font-family=\""+xml(b.font->family)+"\" font-size=\""+number(b.font->size)+
                 "\" font-weight=\""+std::to_string(b.font->weight)+"\" font-style=\""+(b.font->italic?"italic":"normal")+"\"";
             out+=">";
-            for(std::size_t i=0;i<b.lines.size();++i)
-                out+="<tspan x=\""+number(center.x)+"\" y=\""+number(center.y+b.baseline-b.height/2+i*b.line_step)+"\">"+xml(b.lines[i])+"</tspan>";
+            for(std::size_t i=0;i<b.lines.size();++i) {
+                out+="<tspan x=\""+number(center.x)+"\" y=\""+number(center.y+b.baseline-b.height/2+i*b.line_step)+"\">";
+                if(b.runs.empty()) out+=xml(b.lines[i]);
+                else for(const auto& run:b.runs.at(i)) {
+                    out+="<tspan";
+                    // HTML strong uses CSS bolder relative to the label font.
+                    if(run.strong) out+=" font-weight=\""+std::to_string(
+                        b.font && b.font->weight>=550?900:b.font && b.font->weight<350?400:700)+"\"";
+                    if(run.emphasis) out+=" font-style=\"italic\"";
+                    out+=">"+xml(run.text)+"</tspan>";
+                }
+                out+="</tspan>";
+            }
             return out+"</text>";
         };
         std::vector<std::size_t> groups;
