@@ -45,6 +45,12 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
     }
     FlowchartMeasurements flowchart_measurements;
     if(auto flow=std::get_if<FlowchartRenderInput>(&input->content)) {
+        if(!flow->document.title.empty()) {
+            auto title=measurer.measure(flow->document.title,{flow->theme.font_family,18});
+            if(!title) return std::unexpected(title.error());
+            flowchart_measurements.title=FlowchartTextBox{
+                .width=title->bounds_width,.height=title->line_height,.baseline=title->baseline};
+        }
         auto measure=[&](std::u16string_view text,std::u16string_view type,double wrapping_width)->std::expected<FlowchartTextBox,std::string> {
             const auto size=flow->theme.font_size;
             if(!std::isfinite(size)||size<=0||size>std::numeric_limits<float>::max())

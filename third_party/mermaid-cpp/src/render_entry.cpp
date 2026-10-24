@@ -152,6 +152,7 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
         if(prepared->type==u"flowchart" || prepared->type==u"flowchart-v2") {
             auto graph=prepare_flowchart(source,session,FlowchartLimits{.frontend=limits});
             if(!graph) return std::unexpected(graph.error());
+            plain_metadata(graph->title);
             FlowchartSvgTheme style;
             const auto& config=member(effective,u"flowchart");
             const auto look=text(member(effective,u"look"));
@@ -169,6 +170,8 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
             const auto node_text=theme.find(u"nodeTextColor");
             style.text=narrow(text(node_text && node_text->kind==ConfigKind::string && !node_text->string.empty()?*node_text:member(theme,u"textColor")));
             style.line=narrow(text(member(theme,u"lineColor")));
+            style.title_color=narrow(text(member(theme,u"textColor")));
+            style.title_top_margin=number(member(config,u"titleTopMargin"));
             style.label_background=narrow(text(member(theme,u"edgeLabelBackground")));
             style.cluster_fill=narrow(text(member(theme,u"clusterBkg")));
             style.cluster_border=narrow(text(member(theme,u"clusterBorder")));

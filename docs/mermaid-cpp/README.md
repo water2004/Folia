@@ -118,9 +118,13 @@ title positions in addition to the existing nodes and sampled paths. Classic
 edge markers retain the original start/end reference points, dimensions,
 outlines and theme paints, including bidirectional and group-connected links.
 Only point arrows shorten the classic path; circle/cross use marker offsets.
+Plain frontmatter diagram titles use real DirectWrite metrics at the original
+18px size and theme text color. Titles are centered over the graph before the
+viewport expands, use `titleTopMargin` for their baseline and remain unwrapped.
+The comparison covers ordinary/wide titles and custom title margins on groups.
 
 Complete Flowchart rendering remains pending. The SVG entry explicitly rejects
-diagram titles, custom styles, styled HTML/Markdown labels,
+custom styles, styled HTML/Markdown labels and HTML diagram titles,
 and non-classic looks; it does not silently drop these features.
 The complete existing family requirements remain unchanged. The rank/layout
 API requires prepared graphs without nonempty group endpoints; callers must

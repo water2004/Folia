@@ -9,6 +9,8 @@ struct FlowchartSvgTheme {
     std::u16string font_family=u"Arial";
     double font_size=16,minimum_label_width=120,wrapping_width=120,padding=8,radius=5;
     double group_title_top=0,group_title_bottom=0;
+    double title_top_margin=25;
+    std::string title_color="#333333";
     std::string cluster_fill="#ffffde",cluster_border="#aaaa33";
     bool html_label_spacing=true;
     std::string fill="#ECECFF",border="#9370DB",text="#333333",line="#333333",label_background="#e8e8e8";
@@ -22,6 +24,9 @@ struct FlowchartTextBox {
 };
 struct FlowchartMeasurements {
     std::vector<FlowchartTextBox> nodes,edges;
+    // Plain diagram title measured at the original fixed 18px size. Its
+    // baseline/height are native font metrics, independent of HTML labels.
+    std::optional<FlowchartTextBox> title;
 };
 struct FlowchartSvg {std::string svg;double width=0,height=0;};
 struct FlowchartRenderInput {FlowchartInput document;FlowchartSvgTheme theme;};

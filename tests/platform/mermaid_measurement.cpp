@@ -17,7 +17,11 @@ suite mermaid_measurement = [] {
         }};
         expect(fatal(session->save_initialize_config(site).has_value()));
         expect(fatal(session->set_site_config(site).has_value()));
-        const std::vector<std::pair<std::string,std::u16string>> cases={
+        struct Example {std::string name;std::u16string body,title;};
+        const std::vector<Example> cases={
+            {"title-short",u"flowchart TD\nA[Read] --> B[Write]",u"Document pipeline"},
+            {"title-wide",u"flowchart TD\nA[Read] --> B[Write]",u"Read and validate the source document before saving the updated output"},
+            {"title-group",u"%%{init: {\"flowchart\": {\"titleTopMargin\": 40}}}%%\nflowchart LR\nsubgraph g[Storage]\ndirection TB\nA[Read] --> B[Write]\nend\ng --> C[Done]",u"Storage & recovery"},
             {"markers-ends",u"flowchart LR\nA[Read] --o|open| B[Check]\nB --x|stop| C[Done]"},
             {"markers-both",u"flowchart TD\nA[Read] o--o|open| B[Check]\nB x--x|stop| C[Save]\nC <--> D[Done]"},
             {"markers-group",u"flowchart RL\nsubgraph g[Operations]\ndirection BT\nA[Read] x--x B[Check]\nend\ng o--o|ready| C[Done]"},
@@ -50,9 +54,9 @@ suite mermaid_measurement = [] {
             {"unicode",u"flowchart LR\nA[\u4e2d\u6587] --> B[Caf\u00e9 \U0001f600]"},
         };
         for(const auto theme:{u"default",u"dark"}) for(const auto& sample:cases) {
-            const auto& name=sample.first;
-            const auto& body=sample.second;
-            const auto source=std::u16string(u"---\nconfig:\n  theme: ")+theme+
+            const auto& name=sample.name;
+            const auto& body=sample.body;
+            const auto source=std::u16string(u"---\n")+(sample.title.empty()?std::u16string{}:u"title: "+sample.title+u"\n")+u"config:\n  theme: "+theme+
                 u"\n  look: classic\n  layout: dagre\n  fontFamily: Arial\n  themeVariables: {fontFamily: Arial}\n  flowchart: {htmlLabels: true}\n---\n"+body;
             const auto svg=render_mermaid(source,*session);
             expect(svg.has_value())<<name<<(svg?"":svg.error());

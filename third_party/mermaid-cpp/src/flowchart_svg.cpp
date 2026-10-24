@@ -133,7 +133,11 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
         if(theme.font_size==0||theme.font_family.empty()) return std::unexpected("Invalid Flowchart font");
         for(const auto& paint:{theme.fill,theme.border,theme.text,theme.line,theme.label_background,theme.cluster_fill,theme.cluster_border})
             theme_detail::color_adjust(std::u16string(paint.begin(),paint.end()),{});
-        if(!graph.title.empty()) return std::unexpected("Flowchart title placement requires the title adapter");
+        if(!graph.title.empty()) {
+            if(!measured.title || !valid_box(*measured.title) || !std::isfinite(theme.title_top_margin))
+                return std::unexpected("Flowchart needs valid measured title metrics and margin");
+            theme_detail::color_adjust(std::u16string(theme.title_color.begin(),theme.title_color.end()),{});
+        }
         std::vector<FlowchartNodeBox> boxes;std::vector<FlowchartEdgeLabelSize> labels;
         std::unordered_map<std::u16string,std::size_t> ids;
         const auto height=[](const FlowchartTextBox& b){return b.height;};
@@ -173,6 +177,18 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
         auto prepared=prepare_flowchart_graph(graph);if(!prepared) return std::unexpected(prepared.error());
         auto scene=layout_prepared(graph,prepared->graph,boxes,labels,measured,theme);
         const auto* layout=&scene.layout;
+        // insertTitle centers over the graph before setupViewPortForSVG expands
+        // its bounds. This group is translated by padding, so compensate the
+        // title baseline to retain the original root-space -titleTopMargin.
+        const double title_x=(scene.min_x+scene.max_x)/2;
+        const double title_y=-theme.title_top_margin-theme.padding;
+        if(!graph.title.empty()) {
+            const auto& title=*measured.title;
+            scene.min_x=std::min(scene.min_x,title_x-title.width/2);
+            scene.max_x=std::max(scene.max_x,title_x+title.width/2);
+            scene.min_y=std::min(scene.min_y,title_y-title.baseline);
+            scene.max_y=std::max(scene.max_y,title_y+title.height-title.baseline);
+        }
         FlowchartSvg output;output.width=scene.max_x-scene.min_x+2*theme.padding;output.height=scene.max_y-scene.min_y+2*theme.padding;
         std::string svg="<svg xmlns=\"http://www.w3.org/2000/svg\" class=\"flowchart\" width=\""+number(output.width)+
             "\" height=\""+number(output.height)+"\" viewBox=\""+number(scene.min_x)+" "+number(scene.min_y)+" "+number(output.width)+" "+number(output.height)+"\">";
@@ -241,6 +257,8 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
             else svg+="<rect class=\"label-container\" x=\""+number(-n.width/2)+"\" y=\""+number(-n.height/2)+"\" width=\""+number(n.width)+"\" height=\""+number(n.height)+"\" rx=\""+number(source.shape==u"roundedRect"?theme.radius:0)+"\""+paint+"/>";
             svg+=text(source.label,{source.shape==u"odd"?n.height/8:0,source.shape==u"cylinder"?source.padding/1.5:0},measured.nodes[i],"nodeLabel")+"</g>";
         }
+        if(!graph.title.empty()) svg+="<text class=\"flowchartTitleText\" text-anchor=\"middle\" font-size=\"18\" fill=\""+
+            theme.title_color+"\" x=\""+number(title_x)+"\" y=\""+number(title_y)+"\">"+xml(graph.title)+"</text>";
         output.svg=svg+"</g></svg>";return output;
     } catch(const std::exception& e) {return std::unexpected(e.what());}
 }
