@@ -555,6 +555,18 @@
     {
       "path": "packages/mermaid/src/diagrams/sequence/types.ts",
       "sha256": "ac936688f396b779df69e456db93668a3843e2b21a74c92c5f037e856d255be4"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/sequence/sequenceRenderer.ts",
+      "sha256": "282530e0e948684101e19d083205f235d7d2263933d1c74d99fc018aa914312c"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/sequence/svgDraw.js",
+      "sha256": "54dfd9f1a67bf7e935a4800150a086818fe639ada82f06c3b1c7cb04874023db"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/sequence/styles.js",
+      "sha256": "f80f572951cb6367a52b9ceeb443ce2872a020d8356ce14685237ff0b9bbcfa4"
     }
   ],
   "packages": [
