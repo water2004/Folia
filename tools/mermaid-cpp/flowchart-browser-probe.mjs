@@ -11,6 +11,10 @@ for(const file of lock.flowchartCurve.files) assert.equal(createHash('sha256').u
 const directory=resolve(process.argv[2]??'build/mermaid-cpp/flowchart-browser');
 mkdirSync(directory,{recursive:true});
 const cases=[
+  ["fonts-nodes", "flowchart LR\nA[Read the source document]:::large -->|next| B[Save the updated document]:::large\nclassDef large font-size:20px,font-weight:bold,color:#334466\nstyle B font-size:18px,font-weight:normal,font-style:italic"],
+  ["fonts-edges", "flowchart TD\nA[Read] -->|Continue with the next operation| B[Write]\nB -->|Saved output| C[Done]\nlinkStyle 0 font-size:20px,font-weight:bold,color:#773311\nlinkStyle 1 font-size:18px,font-family:Courier New,font-style:italic"],
+  ["fonts-group", "flowchart LR\nsubgraph g[Operations]\ndirection TB\nA[Read input]:::mono --> B[Write output]\nend\ng -->|done| C[Exit]\nclassDef mono font-family:Courier New,font-size:18px,font-weight:700\nstyle B font-size:22px\nstyle g color:#887733"],
+
   ["styles-nodes", "flowchart LR\nA[Read]:::base -->|next| B([Write]):::base\nclassDef default fill:#eeeeee,stroke:#444444\nclassDef base fill:#ddeeff,stroke:#224466,color:#112233,stroke-width:2px,stroke-dasharray:5 3\nstyle A fill:#ffddaa,color:#663300\nstyle B stroke:#aa3300,stroke-width:3px"],
   ["styles-group", "flowchart LR\nsubgraph g[Storage]\ndirection TB\nA[(Records)]:::record --> B{Ready?}\nend\ng -->|done| C(((Exit)))\nclassDef record fill:#ddffee,stroke:#228855,color:#114433\nclassDef group fill:#fff4cc,stroke:#997711,color:#665500,stroke-width:2px,stroke-dasharray:6 2\nclass g group\nstyle g fill:#ffeebb\nstyle B fill:none,stroke:#aa5522,stroke-width:2px\nstyle C fill:#eeddee,stroke:#884488,color:#442244"],
   ["styles-edges", "flowchart TD\nA[Read] -->|next| B[Check]\nB o--o|open| C[Save]\nC x--x|stop| D[Done]\nlinkStyle 0 stroke:#bb3300,color:#663300,stroke-width:3px,stroke-dasharray:5 3\nlinkStyle 1 stroke:#228844,color:#114422,stroke-width:2px\nlinkStyle 2 stroke:#3344bb,color:#112266,stroke-width:2px"],
@@ -81,11 +85,12 @@ for(const [name,body,title] of ${JSON.stringify(cases)}) {
    }
    return lines.map(line=>line.text.trimEnd());
   };
+  const fontStyle=label=>{const s=getComputedStyle(label.querySelector('span')??label);return {family:s.fontFamily,size:s.fontSize,weight:s.fontWeight,style:s.fontStyle};};
   const clusters=[...host.querySelectorAll('g.cluster')].map(n=>{
    const shape=n.querySelector('rect'),b=shape.getBBox(),label=n.querySelector('.cluster-label'),lb=label.getBBox();
    return {id:n.id,...position(shape,b.x+b.width/2,b.y+b.height/2),width:b.width,height:b.height,label:label.textContent,
     title:position(label,lb.x+lb.width/2,lb.y+lb.height/2),fill:getComputedStyle(shape).fill,stroke:getComputedStyle(shape).stroke,
-    thickness:getComputedStyle(shape).strokeWidth,dash:getComputedStyle(shape).strokeDasharray,color:getComputedStyle(label.querySelector('span')??label).color};
+    thickness:getComputedStyle(shape).strokeWidth,dash:getComputedStyle(shape).strokeDasharray,color:getComputedStyle(label.querySelector('span')??label).color,font:fontStyle(label)};
   });
   const nodes=[...host.querySelectorAll('g.node')].map(n=>{
    const shape=n.querySelector('.label-container');const b=shape.getBBox();const label=n.querySelector('.label');
@@ -99,7 +104,7 @@ for(const [name,body,title] of ${JSON.stringify(cases)}) {
    return {id:n.id,...position(n),transform:n.getAttribute('transform'),width:b.width,height:b.height,label:label.textContent,labelWidth:lb.width,labelHeight:lb.height,
     labelCenter:position(label,lb.x+lb.width/2,lb.y+lb.height/2),lines:displayLines(label),outline,
     fill:getComputedStyle(fillShape).fill,stroke:getComputedStyle(strokeShape).stroke,
-    thickness:getComputedStyle(strokeShape).strokeWidth,dash:getComputedStyle(strokeShape).strokeDasharray,color:getComputedStyle(label.querySelector('span')??label).color};
+    thickness:getComputedStyle(strokeShape).strokeWidth,dash:getComputedStyle(strokeShape).strokeDasharray,color:getComputedStyle(label.querySelector('span')??label).color,font:fontStyle(label)};
   });
   const edges=[...host.querySelectorAll('.flowchart-link')].map(p=>{
     const marker=side=>{
@@ -113,7 +118,7 @@ for(const [name,body,title] of ${JSON.stringify(cases)}) {
     const length=p.getTotalLength();return {id:p.id,length,start:marker('start'),end:marker('end'),stroke:getComputedStyle(p).stroke,dash:getComputedStyle(p).strokeDasharray,thickness:getComputedStyle(p).strokeWidth,points:Array.from({length:7},(_,i)=>{const a=p.getPointAtLength(length*i/6);return position(p,a.x,a.y);})};
   });
   const labels=[...host.querySelectorAll('g.edgeLabel')].filter(n=>n.textContent.trim()).map(n=>{
-    const b=n.getBBox();return {text:n.textContent,...position(n),transform:n.getAttribute('transform'),width:b.width,height:b.height,color:getComputedStyle(n.querySelector('span')??n).color};
+    const b=n.getBBox();return {text:n.textContent,...position(n),transform:n.getAttribute('transform'),width:b.width,height:b.height,color:getComputedStyle(n.querySelector('span')??n).color,font:fontStyle(n)};
   });
   const heading=root.querySelector('.flowchartTitleText');
   const diagramTitle=heading?{text:heading.textContent,...position(heading,heading.x.baseVal[0].value,heading.y.baseVal[0].value),

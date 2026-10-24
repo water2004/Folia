@@ -20,11 +20,12 @@ try {
     const p=new DOMPoint(x,y).matrixTransform(svg.getScreenCTM().inverse().multiply(element.getScreenCTM()));
     return {x:p.x,y:p.y};
    };
+   const fontStyle=text=>{const s=getComputedStyle(text);return {family:s.fontFamily,size:s.fontSize,weight:s.fontWeight,style:s.fontStyle};};
    const clusters=[...svg.querySelectorAll('g.cluster')].map(n=>{
     const shape=n.querySelector('rect'),b=shape.getBBox(),label=n.querySelector('text'),lb=label.getBBox();
     return {id:n.dataset.node,x:b.x+b.width/2,y:b.y+b.height/2,width:b.width,height:b.height,label:label.textContent,
      title:{x:lb.x+lb.width/2,y:lb.y+lb.height/2},fill:getComputedStyle(shape).fill,stroke:getComputedStyle(shape).stroke,
-     thickness:getComputedStyle(shape).strokeWidth,dash:getComputedStyle(shape).strokeDasharray,color:getComputedStyle(label).fill};
+     thickness:getComputedStyle(shape).strokeWidth,dash:getComputedStyle(shape).strokeDasharray,color:getComputedStyle(label).fill,font:fontStyle(label)};
    });
    const nodes=[...svg.querySelectorAll('g.node')].map(n=>{
     const shape=n.querySelector('.label-container'),b=shape.getBBox(),text=n.querySelector('text'),t=text.getBBox();
@@ -37,7 +38,7 @@ try {
     return {transform:n.getAttribute('transform'),width:b.width,height:b.height,label:text.textContent,
      labelCenter:position(text,t.x+t.width/2,t.y+t.height/2),lines:[...text.querySelectorAll('tspan')].map(n=>n.textContent.trimEnd()),outline,
      fill:getComputedStyle(shape).fill,stroke:getComputedStyle(shape).stroke,
-     thickness:getComputedStyle(shape).strokeWidth,dash:getComputedStyle(shape).strokeDasharray,color:getComputedStyle(text).fill,
+     thickness:getComputedStyle(shape).strokeWidth,dash:getComputedStyle(shape).strokeDasharray,color:getComputedStyle(text).fill,font:fontStyle(text),
      contained:t.x>=corner.x-1&&t.y>=corner.y-1&&t.x+t.width<=corner.x+b.width+1&&t.y+t.height<=corner.y+b.height+1};
    });
    const edges=[...svg.querySelectorAll('.flowchart-link')].map(p=>{
@@ -52,7 +53,7 @@ try {
     const length=p.getTotalLength();return {id:p.dataset.edge,length,start:marker('start'),end:marker('end'),stroke:getComputedStyle(p).stroke,dash:getComputedStyle(p).strokeDasharray,thickness:getComputedStyle(p).strokeWidth,points:Array.from({length:7},(_,i)=>{const a=p.getPointAtLength(length*i/6);return {x:a.x,y:a.y};})};
    });
    const labels=[...svg.querySelectorAll('g.edgeLabel')].map(n=>{
-    const b=n.querySelector('rect').getBBox();return {text:n.textContent,x:b.x+b.width/2,y:b.y+b.height/2,width:b.width,height:b.height,color:getComputedStyle(n.querySelector('text')).fill};
+    const b=n.querySelector('rect').getBBox();return {text:n.textContent,x:b.x+b.width/2,y:b.y+b.height/2,width:b.width,height:b.height,color:getComputedStyle(n.querySelector('text')).fill,font:fontStyle(n.querySelector('text'))};
    });
    const bounds=outer.getBBox(),view=svg.viewBox.baseVal;
    const heading=svg.querySelector('.flowchartTitleText');
@@ -76,13 +77,14 @@ try {
    const a=actual.nodes[i],e=row.nodes.find(n=>n.label===a.label),p=translate(a.transform);
    assert(e,`${row.name}: missing node ${a.label}`);const q=[e.x,e.y];
    assert.equal(a.label,e.label,row.name);assert(a.contained,`${row.name}: clipped label ${a.label}`);
-   if(row.name.startsWith('labels-')) {
+   if((row.name.startsWith('labels-')||row.name.startsWith('fonts-'))) {
     assert.deepEqual(a.lines,e.lines,`${row.name}: displayed lines`);
     near(a.labelCenter.x,e.labelCenter.x,`${row.name} label center x`,2);
     near(a.labelCenter.y,e.labelCenter.y,`${row.name} label center y`,2);
    }
    for(const key of ['width','height']) near(a[key],e[key],`${row.name} ${i} ${key}`);
    for(let axis=0;axis<2;++axis) near(p[axis]+offset[axis],q[axis],`${row.name} ${i} axis ${axis}`);
+   assert.deepEqual(a.font,e.font,`${row.name} label font`);
    for(const key of ['fill','stroke','thickness','dash','color']) assert.equal(a[key],e[key],`${row.name} node ${a.label} ${key}`);
    if(e.outline.length) {
     near(a.labelCenter.x,e.labelCenter.x,`${row.name} label center x`,2);
@@ -103,6 +105,7 @@ try {
    const e=expectedLabels.splice(index,1)[0],p=[e.x,e.y];
    near(a.x+offset[0],p[0],`${row.name} label x`);near(a.y+offset[1],p[1],`${row.name} label y`);
    assert.equal(a.color,e.color,`${row.name} edge label color`);
+   assert.deepEqual(a.font,e.font,`${row.name} edge label font`);
    near(a.width,e.width,`${row.name} label width`);near(a.height,e.height,`${row.name} label height`);
   }
   for(let i=0;i<actual.edges.length;++i) {
@@ -127,11 +130,12 @@ try {
    near(a.x+offset[0],e.x,row.name+' group x');near(a.y+offset[1],e.y,row.name+' group y');
    near(a.width,e.width,row.name+' group width');near(a.height,e.height,row.name+' group height');
    near(a.title.x+offset[0],e.title.x,row.name+' title x');near(a.title.y+offset[1],e.title.y,row.name+' title y',2);
+   assert.deepEqual(a.font,e.font,`${row.name} label font`);
    for(const key of ['fill','stroke','thickness','dash','color']) assert.equal(a[key],e[key],`${row.name} group ${a.label} ${key}`);
   }
   report.push({name:row.name,nodes:actual.nodes.length,edges:actual.edges.length,groups:actual.clusters.length});
  }
- const selected=rows.filter(x=>['styles-nodes-default','styles-group-dark','styles-edges-default'].includes(x.name));
+ const selected=rows.filter(x=>['fonts-nodes-default','fonts-group-dark','fonts-edges-default'].includes(x.name));
  await page.setContent('<body style="margin:20px;background:#f1f3f5;font:16px Arial"><div style="display:flex;gap:24px;align-items:start">'+selected.map(x=>
   `<div style="background:${x.theme==='dark'?'#202124':'white'};padding:20px;border-radius:12px"><h3 style="color:${x.theme==='dark'?'white':'#222'}">${x.name}</h3><img src="data:image/svg+xml;base64,`+readFileSync(resolve(output,'flowchart-'+x.name+'.svg')).toString('base64')+'"></div>').join('')+'</div></body>');
  await page.screenshot({path:resolve(dirname(reference),'native-preview.png'),fullPage:true});
