@@ -341,13 +341,13 @@ suite document_input_tests = [] {
     expect_document_valid(transaction->after);
 };
 
-"backspace_inside_markers_reparses_one_inline_document"_test = [] {
+"backspace_on_a_complete_format_marker_removes_its_pair"_test = [] {
     auto document = parse_document("**alpha**");
     const auto& paragraph = first_editable(document);
     auto transaction = test_edit::document_delete_backward(document, caret(paragraph, 1));
     expect(fatal(bool(transaction.has_value())));
     if (!transaction) return;
-    expect(fatal(bool(first_editable(transaction->after).inline_content.source == U"*alpha**")));
+    expect(fatal(bool(first_editable(transaction->after).inline_content.source == U"alpha")));
     expect(fatal(bool(transaction->selection_after.active.source_offset == 0u)));
     expect_document_valid(transaction->after);
 };

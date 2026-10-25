@@ -14,6 +14,7 @@ import folia.core.utf;
 import folia.core.document_edit_support;
 import folia.core.document_block_reparse;
 import folia.core.document_input_rules;
+import folia.core.document_inline_format;
 
 export namespace folia {
 
@@ -48,6 +49,18 @@ inline std::vector<DocumentInvariantError> validate_document(const EditorDocumen
 }
 
 inline std::optional<DocumentTransaction> document_delete_selection(EditorDocument&, const TextSelection&);
+
+inline std::optional<DocumentTransaction> document_delete_marker(
+    EditorDocument& document, const TextSelection& selection, bool backward) {
+    if (auto inline_edit = document_delete_inline_marker(document, selection, backward)) return inline_edit;
+    const auto revision = document.revision;
+    document_edit_detail::NodeAllocator allocator(document);
+    auto block_edit = document_edit_detail::unwrap_math_marker(document, selection, backward, allocator);
+    if (!block_edit) return std::nullopt;
+    ++document.revision;
+    return make_recorded_document_transaction(std::move(block_edit->operations), selection,
+        TextSelection::caret(block_edit->target), revision, document.revision, DocumentTransactionReason::Delete);
+}
 
 inline DocumentTransaction source_transaction_with_block_reparse(
     EditorDocument& after,
@@ -347,6 +360,7 @@ inline std::optional<DocumentTransaction> document_set_code_block_language(
 
 inline std::optional<DocumentTransaction> document_delete_backward(EditorDocument& document, const TextSelection& selection) {
     if (!selection.is_caret()) return document_delete_selection(document, selection);
+    if (auto marker = document_delete_marker(document, selection, true)) return marker;
     const auto revision_before = document.revision;
     auto& after = document; auto target = selection.active; document_edit_detail::NodeAllocator allocator(after);
     std::optional<DocumentSourceEdit> source_edit;
@@ -430,6 +444,7 @@ inline std::optional<DocumentTransaction> document_delete_backward(EditorDocumen
 
 inline std::optional<DocumentTransaction> document_delete_forward(EditorDocument& document, const TextSelection& selection) {
     if (!selection.is_caret()) return document_delete_selection(document, selection);
+    if (auto marker = document_delete_marker(document, selection, false)) return marker;
     const auto revision_before = document.revision;
     auto& after = document; auto target = selection.active; document_edit_detail::NodeAllocator allocator(after);
     std::optional<DocumentSourceEdit> source_edit;
@@ -528,6 +543,7 @@ inline std::optional<DocumentTransaction> document_delete_forward(EditorDocument
 
 inline std::optional<DocumentTransaction> document_delete_selection(EditorDocument& document, const TextSelection& selection) {
     if (selection.is_caret()) return std::nullopt;
+    if (auto marker = document_delete_marker(document, selection, false)) return marker;
     const auto revision_before = document.revision;
     auto& after = document; document_edit_detail::NodeAllocator allocator(after);
     if (selection.anchor.container_id == selection.active.container_id) {
@@ -883,6 +899,11 @@ inline std::optional<TextSelection> document_move_selection(const EditorDocument
         target.source_offset = raw_mapping
             ? (*raw_mapping)[(std::min)(destination, raw_mapping->size() - 1)]
             : destination;
+    }
+    if (const auto* owner = document_edit_detail::find_inline_owner(document, target.container_id)) {
+        const auto forward = movement == DocumentMove::Right || movement == DocumentMove::Down
+            || movement == DocumentMove::LineEnd || movement == DocumentMove::DocumentEnd;
+        target.source_offset = inline_format_marker_boundary(*owner, target.source_offset, forward);
     }
     if (target == selection.active) return std::nullopt;
     return extend ? TextSelection{selection.anchor, target} : TextSelection::caret(target);

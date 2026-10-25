@@ -127,6 +127,38 @@ inline void reconcile_nodes(
 
 } // namespace inline_source_edit_detail
 
+// Complete paired formatting markers are semantic editing units. Incomplete
+// input remains ordinary source; recognition always comes from the CST.
+inline const InlineCstNode* inline_format_marker_at(
+    const InlineCstNodes& nodes, std::size_t character) {
+    for (const auto& node : nodes) {
+        if (character < node.range.start || character >= node.range.end) continue;
+        if (auto child = inline_format_marker_at(node.children, character)) return child;
+        switch (node.kind) {
+            case InlineCstKind::Emphasis: case InlineCstKind::Strong:
+            case InlineCstKind::Strikethrough: case InlineCstKind::CodeSpan:
+            case InlineCstKind::InlineMath: break;
+            default: continue;
+        }
+        const auto& delimiters = node.delimiter_ranges();
+        if (node.status != ParseStatus::Complete || !delimiters.closing) continue;
+        for (auto range : {delimiters.opening, *delimiters.closing})
+            if (character >= range.start && character < range.end) return &node;
+    }
+    return nullptr;
+}
+
+inline std::size_t inline_format_marker_boundary(
+    const InlineDocument& document, std::size_t offset, bool forward) {
+    if (auto node = inline_format_marker_at(document.tree.nodes, offset)) {
+        const auto& delimiters = node->delimiter_ranges();
+        for (auto range : {delimiters.opening, *delimiters.closing})
+            if (offset > range.start && offset < range.end)
+                return forward ? range.end : range.start;
+    }
+    return offset;
+}
+
 inline std::optional<SourceRange> inline_backward_delete_range(
     const InlineDocument& document,
     std::size_t offset,

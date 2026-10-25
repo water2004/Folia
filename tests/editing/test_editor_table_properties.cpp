@@ -567,6 +567,34 @@ suite editor_table_property_tests = [] {
         editor.set_selection(before);
         const auto before_markdown = editor.markdown_utf8();
 
+        if (insert) expected.insert(offset, 1, U'X');
+        else {
+            expected.erase(offset - 1, 1);
+            // The command removes a complete formatting pair when its target
+            // is a delimiter. Build the oracle from the original CST, before
+            // mutation; ordinary/incomplete text still loses one character.
+            const auto* original_block = find_block(editor.document().root, owner->container_id);
+            std::vector<const InlineCstNode*> pending;
+            for (const auto& node : original_block->inline_content.tree.nodes) pending.push_back(&node);
+            while (!pending.empty()) {
+                const auto* node = pending.back(); pending.pop_back();
+                for (const auto& child : node->children) pending.push_back(&child);
+                if (node->status != ParseStatus::Complete || !node->delimited || !node->delimited->closing) continue;
+                const auto paired = node->kind == InlineCstKind::Emphasis || node->kind == InlineCstKind::Strong
+                    || node->kind == InlineCstKind::Strikethrough || node->kind == InlineCstKind::CodeSpan
+                    || node->kind == InlineCstKind::InlineMath;
+                const auto& parts = *node->delimited;
+                const auto character = offset - 1;
+                const auto in_marker = (character >= parts.opening.start && character < parts.opening.end)
+                    || (character >= parts.closing->start && character < parts.closing->end);
+                if (!paired || !in_marker) continue;
+                expected = original.substr(0, node->range.start)
+                    + original.substr(parts.content.start, parts.content.length())
+                    + original.substr(node->range.end);
+                break;
+            }
+        }
+
         reset_core_operation_counters();
         auto transaction = insert
             ? editor.execute_document_insert_text(editor.selection(), U"X")
@@ -579,8 +607,6 @@ suite editor_table_property_tests = [] {
         expect(fatal(bool(counters.full_tree_transaction_diffs == 0u))) << iteration;
         expect(fatal(bool(counters.inline_reparses == 1u))) << iteration;
 
-        if (insert) expected.insert(offset, 1, U'X');
-        else expected.erase(offset - 1, 1);
         const auto* block = find_block(editor.document().root, owner->container_id);
         expect(fatal(bool(block != nullptr))) << iteration;
         if (!block) continue;

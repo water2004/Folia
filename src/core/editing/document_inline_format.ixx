@@ -10,6 +10,7 @@ import folia.core.document_edit_primitives;
 import folia.core.document_edit_validation;
 import folia.core.inline_cst;
 import folia.core.inline_document;
+import folia.core.inline_source_edit;
 import folia.core.text_edit;
 
 export namespace folia {
@@ -275,6 +276,36 @@ inline std::optional<DocumentTransaction> document_toggle_inline_format(
         change->selection_after,
         revision_before,
         DocumentTransactionReason::Format);
+}
+
+inline std::optional<DocumentTransaction> document_delete_inline_marker(
+    EditorDocument& document, const TextSelection& selection, bool backward) {
+    if (selection.anchor.container_id != selection.active.container_id) return std::nullopt;
+    auto owner = document_edit_detail::find_inline_owner(document, selection.active.container_id);
+    if (!owner) return std::nullopt;
+    auto start = (std::min)(selection.anchor.source_offset, selection.active.source_offset);
+    auto end = (std::max)(selection.anchor.source_offset, selection.active.source_offset);
+    if (selection.is_caret()) {
+        if (backward && start == 0) return std::nullopt;
+        start = backward ? start - 1 : start;
+        end = start + 1;
+    }
+    auto node = inline_format_marker_at(owner->tree.nodes, start);
+    if (!node) return std::nullopt;
+    const auto& delim = node->delimiter_ranges();
+    const auto marker = start < delim.content.start ? delim.opening : *delim.closing;
+    if (end > marker.end) return std::nullopt;
+    const auto caret = node->range.start
+        + (std::clamp)(selection.active.source_offset, delim.content.start, delim.content.end) - delim.content.start;
+    const auto revision = document.revision;
+    document_edit_detail::NodeAllocator allocator(document);
+    auto applied = document_edit_detail::edit_inline(document, selection.active.container_id,
+        node->range, inline_source_slice(*owner, delim.content), allocator);
+    if (!applied) return std::nullopt;
+    ++document.revision;
+    return document_edit_detail::source_transaction(document, std::move(*applied), selection,
+        TextSelection::caret({selection.active.container_id, caret, selection.active.affinity}),
+        revision, DocumentTransactionReason::Delete);
 }
 
 } // namespace folia

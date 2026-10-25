@@ -2,13 +2,15 @@
 
 恢复/压缩后先实际读本文。架构、职责和详细验收见 [architecture](native-raii-architecture.md)、[files](native-raii-files.json)、[acceptance](native-raii-acceptance.md)。只复查新变化；ignored候选用 `rg --no-ignore`。
 
-## 当前 checkpoint：图标语义边界、行间公式、主题包（2026-10-25，进行中）
+## 当前 checkpoint：CST语义编辑、图标主题（2026-10-25，验收完成，整理提交中）
 
-- 用户接受了下方SVG外观，随后要求图标属于主题包，并特别核对所见即所得编辑。又发现单独输入 `*` 被图标化、行间公式无图标；优先修正这两个语义/投影遗漏，然后接入主题。禁止子代理；0.3.2不变；不推送发布。
-- 已确认根因：本轮新增 `AppendDisplayText` 无条件按 `marker + SyntaxIconFor(text)` 选图标。已有CST把未闭合语法标成 `Incomplete/MissingCloser`，render_builder也据此设置Always显式源文；新增显示路径丢掉该语义信息，并非已证明CST整体错误。不能用“单个*”/正则特判或重写解析器补救。应由render_builder根据CST种类、完成状态、已有delimiter_ranges给出明确图标种类，App只消费；撤出UI字符串推断。
-- 行间公式已定位：`BuildMathBlockText`只投影special.tex/content_to_source，丢掉定界符显示。BlockSourceTree已有OpeningMarker/ClosingMarker tokens、complete_opening/closing；应传递并消费这些解析结果，不在App扫描原文找`$$`。仍正文原位编辑+异步内存预览，不改为面板。
-- 主题当前是完整单文件JSON（ThemeConfig解析，ThemeCatalog导入复制JSON），不是zip；待沿现有流程增加SVG资源与尺寸/间距，支持自定义/切换/随主题导入，绘制路径零文件IO。尚未实施，先解决上两项。
-- 已接受视觉基线本地提交 `593a9407`，当前除本文外干净。无活动agent/build/test；Debug预览PID16448/窗口24780394仍是76字符/修订1本轮样例，可能被用户继续操作，必须重新观察再输入/关闭。下一步：补CST→render metadata的正式测试，修语义接线与MathBlock投影，再做主题资源。不要重新尝试每字符inline object。
+- **固定规则**：全部所见即所得编辑按CST/块树语义；编辑层不依赖SVG、SyntaxIcon/SyntaxMarker或图标位置。公式定界符不可逐字符编辑，删除任一端成对去除、保留TeX为普通文本；ATX标题逐级降级。源码模式仍编辑原始源码。禁止子代理；版本0.3.2不变，不推送发布。
+- **实现**：inline_source_edit查询完整CST定界符及移动边界；document_inline_format生成成对去格式TextEdit；document_block_edit将数学块通过树事务转换为段落；document_source_edit协调既有删除/移动入口；document_block_input按已解析标题等级退一级。未完成输入和code/math正文保持可编辑。没有扩大math原可编辑边界；block_source.ixx无diff，不得恢复已撤回候选。
+- **显示根因已修复**：App按文字拼写选择图标曾丢掉CST完成状态，导致单独`*`图标化。现由render_builder消费CST种类/状态/范围给出图标身份，App只消费。显示数学块也使用block_source已有tokens，补齐两端SVG。删除593a9407引入的图标内部字符命中插值，恢复单个DirectWrite对象的整体命中；保持平时隐藏、点击出现、正文原位编辑与异步内存数学预览。
+- **主题**：schemaVersion2单文件JSON包含15个SVG与sizeEm/gapEm，7主题更新；共享不可变资源、有限D2D缓存按主题/设备失效，绘制无文件IO。105个内嵌SVG与原资源逐一一致。v1自定义主题需按docs/THEMES.md升级格式，加载错误仍整份拒绝；不自动修改导入文件。
+- **最终验证**：Core **759项/499811断言**、WinUI **41项/13919断言**、Windows editor **82项/3446断言**全部通过；Debug应用构建成功。日志`build/semantic-editing-{core-final,app-final,platform-final,app-build}.log`。覆盖CST完成/未完成、无图标的四反引号、嵌套格式、数学块根/quote/list、每字符编辑与Unicode、整体命中、复制粘贴、源码切换、精确Undo/Redo、零全文parse/serialize、主题像素/资源释放。未做本轮人工UI/真实IME复验；未改math引擎，不重复旧宽审。
+- **MSI**：Generate-WixPayload只给打包themes顶层JSON添加精确文件名RemoveFile；正式隔离测试`tests/installer/test_theme_upgrade.ps1`实际同版本升级与repair均更新7主题，custom/settings字节不变，测试产品已卸载。证据`build/marker-theme-upgrade-test.log`，隔离目录`build/tests/theme-upgrade/3e9ae47f17c54b1d90e8a22ca3f35796`。未安装/卸载实际Folia，未生成正式MSI。
+- **停止点**：无活动agent/build/test句柄（8320和17147均exit0）；准备按核心语义、CST显示元数据、主题/App、安装升级分批本地提交。用户按Escape停止Computer Use，本轮不得再操作UI；运行中Debug Folia.exe PID16448可能含用户修改，不关闭/覆盖。新Debug使用TargetName=FoliaMarkerPreview，没有启动。native构建一次一个、parallel≤4。历史视觉基线593a9407、范围记录5ce20a98。
 
 ## 历史：SVG 外观与整对象排版（用户已接受，语义遗漏以上方为准）
 

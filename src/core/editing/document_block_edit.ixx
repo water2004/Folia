@@ -676,6 +676,60 @@ inline std::optional<RecordedBlockEdit> remove_empty_raw_block(
     return remove_direct_block(document, id, allocator);
 }
 
+inline std::optional<RecordedBlockEdit> unwrap_math_marker(
+    EditorDocument& document, const TextSelection& selection, bool backward,
+    NodeAllocator& allocator) {
+    if (selection.anchor.container_id != selection.active.container_id) return std::nullopt;
+    auto path = block_path(document.root, selection.active.container_id);
+    if (!path || path->empty()) return std::nullopt;
+    auto* block = block_at_path(document.root, *path);
+    if (!block || block->kind != BlockKind::MathBlock) return std::nullopt;
+    const auto& tree = block->block_source.tree();
+    if (!tree.complete_opening || !tree.complete_closing) return std::nullopt;
+    auto start = (std::min)(selection.anchor.source_offset, selection.active.source_offset);
+    auto end = (std::max)(selection.anchor.source_offset, selection.active.source_offset);
+    const auto content = block_source_editable_range(block->block_source);
+    bool touches_marker = false;
+    if (selection.is_caret()) {
+        touches_marker = backward ? start == content.start : start == content.end;
+        if (backward && start > 0) --start;
+        else if (backward) return std::nullopt;
+        end = start + 1;
+    }
+    for (const auto& token : tree.tokens) {
+        if (token.kind != BlockSourceTokenKind::OpeningMarker
+            && token.kind != BlockSourceTokenKind::ClosingMarker) continue;
+        touches_marker = touches_marker || (start >= token.source_range.start && end <= token.source_range.end);
+    }
+    if (!touches_marker) return std::nullopt;
+    BlockNode paragraph;
+    paragraph.id = block->id;
+    paragraph.kind = BlockKind::Paragraph;
+    paragraph.separator_before = block->separator_before;
+    paragraph.inline_content = make_inline(tree.content, document, allocator);
+    RecordedBlockEdit result;
+    result.target = {paragraph.id,
+        (std::clamp)(selection.active.source_offset, content.start, content.end) - content.start,
+        selection.active.affinity};
+    const auto index = path->back();
+    path->pop_back();
+    auto* parent = block_at_path(document.root, *path);
+    DocumentTreeEdit remove;
+    remove.kind = DocumentTreeEditKind::Remove;
+    remove.parent_id = parent->id;
+    remove.index = index;
+    remove.before = *block;
+    document_container_source::append_container_tree_operation(document, result.operations, std::move(remove));
+    DocumentTreeEdit insert;
+    insert.kind = DocumentTreeEditKind::Insert;
+    insert.parent_id = parent->id;
+    insert.index = index;
+    insert.after = paragraph;
+    result.operations.emplace_back(std::move(insert));
+    parent->children[index] = std::move(paragraph);
+    return result;
+}
+
 inline bool remove_node_recorded(
     EditorDocument& document,
     NodeId id,

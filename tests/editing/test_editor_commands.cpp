@@ -92,16 +92,17 @@ suite editor_command_tests = [] {
     expect(fatal(bool(editor.selection() == after_selection)));
 };
 
-"source_offset_movement_counts_markers"_test = [] {
+"source_offset_movement_keeps_complete_markers_as_semantic_units"_test = [] {
     Editor editor("**abc**");
     editor.set_selection(caret(first_text(editor), 0));
-    for (std::size_t offset = 1; offset <= 7; ++offset) {
+    for (std::size_t offset : {2u, 3u, 4u, 5u, 7u}) {
         expect(fatal(bool(editor.execute_document_move(DocumentMove::Right, false))));
         expect(fatal(bool(editor.selection().active.source_offset == offset)));
     }
     expect(fatal(bool(!editor.execute_document_move(DocumentMove::Right, false))));
     expect(fatal(bool(editor.execute_document_move(DocumentMove::Left, true))));
     expect(fatal(bool(!editor.selection().is_caret())));
+    expect(fatal(bool(editor.selection().active.source_offset == 5u)));
 };
 
 "select_all_uses_container_ids_and_source_offsets"_test = [] {

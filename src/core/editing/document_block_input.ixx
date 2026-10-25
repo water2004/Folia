@@ -281,11 +281,20 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> remove_heading_pre
     DocumentTreeEdit update;
     update.kind = DocumentTreeEditKind::UpdatePayload;
     update.before = document_transaction_detail::payload_shell(*block);
-    block->kind = BlockKind::Paragraph;
-    block->ensure_text_special().level = 0;
-    block->ensure_text_special().slug.clear();
-    block->ensure_text_special().opening_marker.clear();
-    block->ensure_text_special().closing_marker.clear();
+    auto& heading = block->ensure_text_special();
+    const auto hash = heading.opening_marker.find(U'#');
+    if (heading.level > 1 && hash != std::u32string::npos) {
+        // The parser already classified this as an ATX heading. Preserve its
+        // exact surrounding whitespace while reducing the semantic level.
+        --heading.level;
+        heading.opening_marker.erase(hash, 1);
+    } else {
+        block->kind = BlockKind::Paragraph;
+        heading.level = 0;
+        heading.slug.clear();
+        heading.opening_marker.clear();
+        heading.closing_marker.clear();
+    }
     update.after = document_transaction_detail::payload_shell(*block);
     result.operations.emplace_back(std::move(update));
     return result;
