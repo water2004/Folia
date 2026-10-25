@@ -60,7 +60,7 @@ use measured lines, note-specific padding/theme colors and dotted attachment
 paths inserted before ordinary relationships. Missing attachment targets leave
 notes independent rather than creating classes. Namespace containers use measured plain titles and the shared recursive Dagre
 adapter, retaining nested/qualified ownership, padding, title margins, theme
-colors and cross-container relationships. Class titles and relationship labels
+colors and cross-container relationships. Class labels and relationship labels
 retain explicit line breaks and decoded entities; member angle brackets retain
 the original escaped display semantics. Rich/automatically wrapped labels
 require further adapters.

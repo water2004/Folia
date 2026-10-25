@@ -1,16 +1,49 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-25, Class display lines in progress
+## Current checkpoint - 2026-10-25, Class namespaces and display lines verified
 
-- Deliver explicit line breaks and decoded entities in Class titles/relationships,
-  using the shared display parser and DirectWrite. Member source uses its original
-  escaped text so angle brackets stay literal; generics remain visible.
-- Scope/exit: the two display-lines/display-entities inputs in both themes and
-  affected checks. Styled runs and automatic wrapping remain the next boundary.
-- Namespace c4285f6f passed standalone Release with all 32 Class SVG comparisons;
-  six new native previews were inspected. Other jobs in run 40195483652 are
-  still pending; do not claim that full validation is complete yet.
-- Candidate display implementation is local and unverified. Application stays Rust.
+- Namespace c4285f6f delivers measured plain container titles, nested/qualified
+  ownership, original padding/title margins and recursive Dagre geometry with
+  class compartments, notes and cross-container relationships intact.
+  https://github.com/zhao0349/Folia/actions/runs/40195483652
+- Display batch b523acf3 delivers explicit label/relationship line breaks and
+  decoded entities. Member text uses its original escaped source, retaining
+  literal angle brackets, generics and static/abstract classifiers. Correction
+  8ee4c092 normalizes member break tags before parsing; a0291ede updates the
+  fixture count. Final verification head:
+  a0291ede753aedb27c7f2456cbf1b2ca75f145c9
+  https://github.com/zhao0349/Folia/actions/runs/40197420681
+- Both runs passed all four standalone/integrated Debug/Release jobs. Integrated
+  jobs passed FoliaTests, FoliaWindowsEditorTests and both Mermaid suites. Both
+  batches met their exit conditions; do not expand their verification matrix.
+  The Class parser corpus has 14 successes/seven errors; 36 Class SVG comparisons
+  cover 18 diagrams/both themes. Existing 92 Flowchart, 82 Sequence and 96
+  browser/DirectWrite comparisons passed. Tolerances unchanged.
+- Final Release evidence is in build/mermaid-cpp/class-display-verified. Four new
+  previews were inspected at class-display-runtime-verified/pie-svg/native-preview.png;
+  all 36 final SVGs are byte-identical to those outputs. Namespace evidence and
+  six inspected previews are in class-namespace-verified. Earlier 40196170419
+  exposed canonical member break spelling; 40196801428 exposed the stale fixture
+  count. Those failures are superseded by the final verified head above.
+- Contribution equivalents f31f36c7/1173764c/32e94c46/208b68eb are prepared on
+  feat/mermaid-cpp-port in build/mermaid-cpp/entry-contribution. Runtime, tests,
+  pins, workflow and public docs match the verified head; this documentation
+  checkpoint follows it. No AGENTS.md diff against PR base 508423f2. Delivery-
+  triggered reruns are separate from completed implementation validation.
+  PR #1 stays open/unmerged: https://github.com/water2004/Folia/pull/1
+- Next functional boundary is common Class emphasis. Six original observations
+  from class-display-next.mjs are in build/mermaid-cpp/class-display-next/original.json;
+  display-lines/entities are now covered, leaving display-emphasis/both themes.
+  Start from shapeUtil.addText, createText, handle-markdown-text, ClassMember.text
+  and the existing measured Flowchart styled-run adapter. Preserve member
+  classifier parsing and escaped angle brackets; use per-run native font metrics.
+  Exit on that representative input and affected checks, then continue automatic
+  wrapping and the remaining required Class/family chain.
+- Folia still uses Rust in the application. Rich/automatically wrapped labels,
+  default ELK, remaining required families/configuration and app integration remain.
+  Local MSVC/CMake are unavailable; no WinUI/GPU/DPI or arbitrary-font parity claim.
+- No failed acceptance check, uncommitted implementation candidate or live local
+  browser/build/agent remains. Resume at the measured emphasis boundary above.
 
 ## Previous checkpoint - 2026-10-25, measured Class namespaces in progress
 
