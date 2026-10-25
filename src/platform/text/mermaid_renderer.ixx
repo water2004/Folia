@@ -237,23 +237,36 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             auto metrics=measurer.svg_font_metrics(font);if(!metrics) return std::unexpected(metrics.error());
             class_measurements.title={cls->document.title,title->bounds_width,metrics->height,metrics->baseline};
         }
-        auto measure=[&](std::u16string_view source,unsigned weight=400,bool italic=false,double size=0)->std::expected<ClassTextBox,std::string> {
+        auto measure=[&](std::u16string_view source,unsigned weight=400,bool italic=false,double size=0,bool markdown=true)->std::expected<ClassTextBox,std::string> {
             auto display=diagram_display_text(source);if(!display) return std::unexpected(display.error());
-            if(display->find_first_of(u"\r\n")!=display->npos) return std::unexpected("Multiline Class labels require the line-breaking adapter");
             if(display->empty()) return ClassTextBox{};
             if(size==0) size=theme.font_size;
             const MermaidFont font{theme.font_family,static_cast<float>(size),weight,italic};
-            auto metrics=measurer.measure(*display,font,true);if(!metrics) return std::unexpected(metrics.error());
-            const auto height=size*1.5;
-            return ClassTextBox{std::move(*display),metrics->advance,height,metrics->baseline+(height-metrics->line_height)/2};
+            auto lines=flowchart_label_runs(*display,markdown?u"markdown":u"text");
+            if(!lines) return std::unexpected(lines.error());
+            ClassTextBox box;box.line_step=size*1.5;
+            for(const auto& line:*lines) {
+                std::u16string value;
+                for(const auto& run:line) {
+                    if(run.strong||run.emphasis) return std::unexpected("Styled Class labels require the rich-label adapter");
+                    value+=run.text;
+                }
+                auto metrics=measurer.measure(value.empty()?std::u16string_view{u"M"}:std::u16string_view{value},font,true);
+                if(!metrics) return std::unexpected(metrics.error());
+                const double width=value.empty()?0:metrics->advance;
+                box.width=std::max(box.width,width);box.line_widths.push_back(width);
+                box.baseline=metrics->baseline+(box.line_step-metrics->line_height)/2;
+                box.text+=value;box.lines.push_back(std::move(value));
+            }
+            box.height=box.line_step*box.lines.size();return box;
         };
         for(const auto& group:cls->document.namespaces) {
-            auto label=measure(group.label);if(!label) return std::unexpected(label.error());
+            auto label=measure(group.label,400,false,0,false);if(!label) return std::unexpected(label.error());
             class_measurements.namespaces.push_back(std::move(*label));
         }
         for(const auto& node:cls->document.classes) {
             ClassNodeMeasurements m;
-            auto label=measure(node.label+(node.type.empty()?std::u16string{}:u"<"+node.type+u">"),700);
+            auto label=measure(node.label+(node.type.empty()?std::u16string{}:u"&lt;"+node.type+u"&gt;"),700);
             if(!label) return std::unexpected(label.error());m.label=std::move(*label);
             if(!node.annotations.empty()) {
                 auto annotation=measure(u"\u00ab"+node.annotations.front()+u"\u00bb");
@@ -261,7 +274,7 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             }
             for(auto [members,output]:{std::pair{&node.members,&m.members},{&node.methods,&m.methods}})
                 for(const auto& member:*members) {
-                    auto box=measure(member.display_text,400,member.classifier==u"*");
+                    auto box=measure(member.text,400,member.classifier==u"*");
                     if(!box) return std::unexpected(box.error());output->push_back(std::move(*box));
                 }
             class_measurements.nodes.push_back(std::move(m));

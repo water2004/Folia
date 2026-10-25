@@ -71,10 +71,15 @@ NodeBox node_box(const ClassNodeMeasurements& m,const ClassSvgConfig& c) {
 std::string text(const ClassTextBox& t,double x,double y,const ClassSvgTheme& theme,
     unsigned weight=400,std::u16string_view classifier={},double size=0) {
     if(t.text.empty()) return {};
+    std::string content;
+    if(t.lines.size()>1) {
+        for(std::size_t i=0;i<t.lines.size();++i)
+            content+="<tspan x=\""+num(x+(t.width-t.line_widths[i])/2)+"\" y=\""+num(y+t.baseline+i*t.line_step)+"\">"+xml(t.lines[i])+"</tspan>";
+    } else content=xml(t.text);
     return "<g class=\"label\"><text x=\""+num(x)+"\" y=\""+num(y+t.baseline)+"\" font-size=\""+
         num(size?size:theme.font_size)+"\" font-weight=\""+std::to_string(weight)+"\""+
         (classifier==u"*"?" font-style=\"italic\"":classifier==u"$"?" text-decoration=\"underline\"":"")+
-        " fill=\""+theme.text+"\">"+xml(t.text)+"</text></g>";
+        " fill=\""+theme.text+"\">"+content+"</text></g>";
 }
 FlowchartPoint terminal(std::vector<FlowchartPoint> points,bool start) {
     if(!start) std::ranges::reverse(points);

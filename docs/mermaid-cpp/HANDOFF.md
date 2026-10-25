@@ -1,6 +1,18 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-25, measured Class namespaces in progress
+## Current checkpoint - 2026-10-25, Class display lines in progress
+
+- Deliver explicit line breaks and decoded entities in Class titles/relationships,
+  using the shared display parser and DirectWrite. Member source uses its original
+  escaped text so angle brackets stay literal; generics remain visible.
+- Scope/exit: the two display-lines/display-entities inputs in both themes and
+  affected checks. Styled runs and automatic wrapping remain the next boundary.
+- Namespace c4285f6f passed standalone Release with all 32 Class SVG comparisons;
+  six new native previews were inspected. Other jobs in run 40195483652 are
+  still pending; do not claim that full validation is complete yet.
+- Candidate display implementation is local and unverified. Application stays Rust.
+
+## Previous checkpoint - 2026-10-25, measured Class namespaces in progress
 
 - Deliver measured namespace containers using the existing unified Dagre
   recursive adapter, preserving class compartments, notes and cross-container

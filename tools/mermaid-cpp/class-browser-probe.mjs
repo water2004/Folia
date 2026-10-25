@@ -5,6 +5,8 @@ import {resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {chromium} from './oracle/node_modules/playwright-core/index.mjs';
 export const cases = [
+ ["display-lines","classDiagram\nclass D[\"Document<br/>model\"] {\n+name<br/>String\n+save()<br/>bool\n}\nD --> Store : save<br/>changes"],
+ ["display-entities","classDiagram\nclass D[\"Editor &amp; viewer\"]\nD --> Store : save #38; reload"],
  ["namespace","classDiagram\nnamespace Storage {\nclass Document {\n+save() bool\n}\nclass Store\nnote for Store \"Local storage\"\n}\nDocument --> Store : persists"],
  ["namespace-nested","classDiagram\nnamespace App[\"Application\"] {\nnamespace Storage {\nclass Document\n}\nclass Editor\n}\nEditor --> Document : saves"],
  ["namespace-qualified","classDiagram\nnamespace App.Storage {\nclass Store\n}\nnamespace App {\nclass Editor\n}\nEditor --> Store"],
@@ -32,6 +34,12 @@ export function inspectClass() {
    // HTML Range width is the inline advance. SVG getBBox also includes glyph
    // overhang; compare advance origin/width and retain vertical glyph bounds.
    if(e.tagName!=='foreignObject') {
+     const lines=[...e.querySelectorAll(':scope > tspan')];
+     if(lines.length>1) {
+       const spans=lines.filter(l=>l.textContent).map(l=>{const p=l.getStartPositionOfChar(0),o=point(l,p.x,p.y);return {x:o.x,width:l.getComputedTextLength()};});
+       const x=Math.min(...spans.map(s=>s.x)),right=Math.max(...spans.map(s=>s.x+s.width));
+       return {...box(e),x,width:right-x};
+     }
      const first=e.getStartPositionOfChar(0),origin=point(e,first.x,first.y);
      return {...box(e),x:origin.x,width:e.getComputedTextLength()};
    }

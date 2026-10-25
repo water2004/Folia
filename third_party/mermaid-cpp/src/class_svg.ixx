@@ -9,6 +9,9 @@ export namespace folia::mermaid {
 struct ClassTextBox {
     std::u16string text;
     double width = 0, height = 0, baseline = 0;
+    std::vector<std::u16string> lines;
+    std::vector<double> line_widths;
+    double line_step = 0;
 };
 struct ClassNodeMeasurements {
     ClassTextBox label, annotation;
