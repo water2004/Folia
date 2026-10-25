@@ -607,6 +607,26 @@
     {
       "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/note.ts",
       "sha256": "f358bb583f624930c1118e91a6cf07db949c1ad6ac722f9d0ae4207118c1d552"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/quadrant-chart/quadrantBuilder.ts",
+      "sha256": "62f2e191dbe3521848c38595b23644288728f912ab8b344a1ea77eafe712fbcb"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/quadrant-chart/quadrantDb.ts",
+      "sha256": "cee47dc6e16fc27f5371575cbf7e3c3ec13db53cb2b9108748b8eab8b828c207"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/quadrant-chart/quadrantRenderer.ts",
+      "sha256": "ec3355a031c5b66c3df218ad44432581866cc1cbe2b502f01019dfbafc7f0639"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/quadrant-chart/utils.ts",
+      "sha256": "96280a48ff9a6e932abdb786903d8384a5e96579f021bc9ae8e0f0c0fe29d950"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/quadrant-chart/parser/quadrant.jison",
+      "sha256": "b4cf7e71d667e51c2082ef8e6b1c897d2d3124933026bef0ab72c959a8f46b6a"
     }
   ],
   "packages": [
@@ -1310,5 +1330,26 @@
     "version": "16.4.2",
     "file": "lib/marked.esm.js",
     "sha256": "6540aa2544be84b3abdd9424fa287120e9ed7c7600512dd92c097493121a5951"
+  },
+  "elkCycle": {
+    "license": "EPL-2.0",
+    "repository": "https://github.com/kieler/elkjs",
+    "package": "elkjs",
+    "files": [
+      {
+        "path": "package.json",
+        "sha256": "fb9bb80b980c72022fb4540b38aa0545242b4eb67b82250aeae2f0beb67eea25"
+      },
+      {
+        "path": "lib/elk-worker.js",
+        "sha256": "90ab078ad34ff826ca0ece1ee338ae98071a6b3e6cfbb00ce2eb671b32eacd88"
+      },
+      {
+        "path": "LICENSE.md",
+        "sha256": "89591d4578fb1ebd91501312a3d25f021bd865a2e436641c1cf7b1bc7e3c1617"
+      }
+    ],
+    "version": "0.9.3",
+    "boundary": "DepthFirstCycleBreaker feedback-edge selection, before graph reversal"
   }
 }
