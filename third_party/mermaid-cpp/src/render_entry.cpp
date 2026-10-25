@@ -130,7 +130,7 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
         if(prepared->type==u"classDiagram" || prepared->type==u"class") {
             if(text(member(effective,u"layout"))!=u"dagre" || text(member(effective,u"look"))!=u"classic")
                 return std::unexpected("Native Class SVG currently requires explicit Dagre layout and classic look; ELK is not yet ported");
-            if(!boolean(member(effective,u"htmlLabels")))
+            if(auto html=effective.find(u"htmlLabels");html&&!boolean(*html))
                 return std::unexpected("Class SVG currently uses the measured HTML label spacing adapter");
             auto doc=prepare_class(source,session,ClassLimits{.frontend=limits});
             if(!doc) return std::unexpected(doc.error());
