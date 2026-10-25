@@ -7,6 +7,25 @@ namespace winrt::Folia
 {
     namespace
     {
+        struct CompositorClockApi
+        {
+            CompositorClockApi() = default;
+            CompositorClockApi(CompositorClockApi const&) = delete;
+            CompositorClockApi& operator=(CompositorClockApi const&) = delete;
+            using Wait = DWORD(WINAPI*)(UINT, HANDLE const*, DWORD);
+            using Boost = HRESULT(WINAPI*)(BOOL);
+            HMODULE module = LoadLibraryExW(L"dcomp.dll", nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);
+            Wait wait = module ? reinterpret_cast<Wait>(GetProcAddress(module, "DCompositionWaitForCompositorClock")) : nullptr;
+            Boost boost = module ? reinterpret_cast<Boost>(GetProcAddress(module, "DCompositionBoostCompositorClock")) : nullptr;
+            ~CompositorClockApi() { if (module) FreeLibrary(module); }
+        };
+
+        CompositorClockApi const& CompositorClock()
+        {
+            static const CompositorClockApi api;
+            return api;
+        }
+
         float DisplayRefreshInterval(HWND window)
         {
             if (!window) return 1.0f / 60.0f;
@@ -136,6 +155,9 @@ namespace winrt::Folia
         dispatchState->targetFrameIntervalSeconds.store(
             DisplayRefreshInterval(windowHandle),
             std::memory_order_release);
+        auto const& clock = CompositorClock();
+        if (clock.wait && clock.boost)
+            compositorBoostActive = SUCCEEDED(clock.boost(TRUE));
         running = true;
         lastFrame = std::chrono::steady_clock::now();
         generation = dispatchState->generation.fetch_add(1, std::memory_order_acq_rel) + 1;
@@ -146,6 +168,11 @@ namespace winrt::Folia
     {
         if (!running) return;
         running = false;
+        if (compositorBoostActive)
+        {
+            CompositorClock().boost(FALSE);
+            compositorBoostActive = false;
+        }
         lastFrame = {};
         if (dispatchState)
         {
@@ -186,7 +213,8 @@ namespace winrt::Folia
         auto requestEvent = frameRequestEvent;
         auto stopEvent = schedulerStopEvent;
         auto pacingTimer = framePacingTimer;
-        frameThread = std::jthread([state, requestEvent, stopEvent, pacingTimer, frameLatencyWaitableObject](std::stop_token stopToken)
+        auto waitForClock = CompositorClock().wait;
+        frameThread = std::jthread([state, requestEvent, stopEvent, pacingTimer, frameLatencyWaitableObject, waitForClock](std::stop_token stopToken)
         {
             std::stop_callback stopCallback(stopToken, [stopEvent] { SetEvent(stopEvent); });
             HANDLE requestHandles[] = { stopEvent, requestEvent };
@@ -201,10 +229,23 @@ namespace winrt::Folia
                 auto requestedGeneration = state->requestedGeneration.load(std::memory_order_acquire);
                 if (frameId == 0 || frameId == lastRequestId) continue;
                 lastRequestId = frameId;
+                bool compositorPaced = false;
+                if (waitForClock)
+                {
+                    auto result = waitForClock(1, &stopEvent, INFINITE);
+                    if (result == WAIT_OBJECT_0) break;
+                    compositorPaced = result == WAIT_OBJECT_0 + 1;
+                }
+                // Wait for the compositor before checking buffer availability.
+                // Waiting for another clock tick after a buffer becomes ready
+                // can miss that tick and reduce presentation to half cadence.
                 if (WaitForMultipleObjects(2, frameHandles, FALSE, INFINITE) != WAIT_OBJECT_0 + 1) break;
                 auto now = std::chrono::steady_clock::now();
                 auto intervalSeconds = state->targetFrameIntervalSeconds.load(std::memory_order_acquire);
-                if (previousSubmission.time_since_epoch().count() != 0)
+                // Older Windows versions and an unavailable display retain
+                // the high-resolution timer; active compositor pacing needs
+                // no second timer based on a separately queried refresh rate.
+                if (!compositorPaced && previousSubmission.time_since_epoch().count() != 0)
                 {
                     auto deadline = folia::platform::editor::FramePacingDeadline(previousSubmission, intervalSeconds);
                     if (now < deadline)

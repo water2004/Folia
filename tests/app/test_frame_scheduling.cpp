@@ -74,5 +74,22 @@ namespace {
             // A manual ready event deliberately removes GPU/compositor cost.
             // These timings diagnose pacing; they are not displayed-frame FPS.
         };
+
+        "frame scheduling detach cancels a pending compositor or GPU wait"_test = [] {
+            auto queue = winrt::Microsoft::UI::Dispatching::DispatcherQueue::GetForCurrentThread();
+            auto ready = winrt::handle{::CreateEventW(nullptr, TRUE, FALSE, nullptr)};
+            winrt::check_bool(ready.get() != nullptr);
+            for (int cycle = 0; cycle < 4; ++cycle) {
+                EditorFrameScheduler scheduler;
+                std::size_t frames = 0;
+                scheduler.Attach(queue, ready.get(), ::GetDesktopWindow(), [&](float) { ++frames; return true; });
+                scheduler.Start();
+                std::this_thread::sleep_for(std::chrono::milliseconds(12));
+                auto start = std::chrono::steady_clock::now();
+                scheduler.Detach();
+                expect(std::chrono::steady_clock::now() - start < std::chrono::milliseconds(500));
+                expect(frames == 0_u);
+            }
+        };
     };
 }

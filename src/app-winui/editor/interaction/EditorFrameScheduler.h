@@ -36,5 +36,6 @@ namespace winrt::Folia
         std::uint64_t generation = 0;
         std::chrono::steady_clock::time_point lastFrame{};
         bool running = false;
+        bool compositorBoostActive = false;
     };
 }
