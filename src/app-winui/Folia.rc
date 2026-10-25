@@ -4,6 +4,8 @@
 
 IDI_FOLIA ICON "Assets\\branding\\Folia.ico"
 
+#include "Assets/markers/markers.rc2"
+
 VS_VERSION_INFO VERSIONINFO
  FILEVERSION 0,3,2,0
  PRODUCTVERSION 0,3,2,0

@@ -93,7 +93,7 @@ $linkFlags = if ($Configuration -eq 'Debug') { '/DEBUG' } else { '/LTCG' }
 Set-Content -LiteralPath $linkResponse -Encoding ascii -Value ((@(
     '/NOLOGO /SUBSYSTEM:CONSOLE /INCREMENTAL:NO /MANIFEST:NO /MACHINE:X64 /STACK:33554432',
     $linkFlags, ('/OUT:"{0}" /PDB:"{1}"' -f $executable, (Join-Path $scratch 'tests.pdb'))) +
-    @($appObjects + $testObjects | ForEach-Object { '"{0}"' -f $_ }) + $libraryArgs) -join "`n")
+    @($appObjects + $testObjects + (Join-Path $objects 'Folia.res') | ForEach-Object { '"{0}"' -f $_ }) + $libraryArgs) -join "`n")
 & link.exe "@$linkResponse"
 if ($LASTEXITCODE -ne 0) { throw 'WinUI test link failed.' }
 $process = Start-Process -FilePath $executable -ArgumentList "`"$TestFilter`"" -WorkingDirectory $app -WindowStyle Hidden -PassThru `

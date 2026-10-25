@@ -151,6 +151,7 @@ namespace winrt::Folia
             range.length = length;
             range.style = style;
             range.marker = marker;
+            if (marker) range.icon = SyntaxIconFor(text);
             display.ranges.push_back(range);
         }
     }

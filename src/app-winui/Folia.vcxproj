@@ -175,6 +175,7 @@
     <ClInclude Include="media\EditorGifDecoder.h" />
     <ClInclude Include="editor\rendering\EditorRenderCache.h" />
     <ClInclude Include="editor\rendering\EditorSvgPainter.h" />
+    <ClInclude Include="editor\rendering\EditorSyntaxIcons.h" />
     <ClInclude Include="editor\rendering\EditorTextLayoutEngine.h" />
     <ClInclude Include="editor\interaction\EditorTableInteraction.h" />
     <ClInclude Include="editor\rendering\EditorInlineImageRenderer.h" />
@@ -596,6 +597,7 @@
     <ClCompile Include="editor\rendering\EditorRenderCache.Images.cpp" />
     <ClCompile Include="editor\rendering\EditorRenderCache.Layout.cpp" />
     <ClCompile Include="editor\rendering\EditorSvgPainter.cpp" />
+    <ClCompile Include="editor\rendering\EditorSyntaxIcons.cpp" />
     <ClCompile Include="editor\rendering\EditorTextLayoutEngine.cpp" />
     <ClCompile Include="editor\interaction\EditorTableInteraction.cpp" />
     <ClCompile Include="editor\rendering\EditorInlineImageRenderer.cpp" />

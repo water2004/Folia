@@ -11,6 +11,7 @@ import folia.platform.editor_block_spacing;
 #include "media/MermaidRenderer.h"
 #include "media/SvgNormalizer.h"
 #include "media/TreeSitterHighlighter.h"
+#include "editor/rendering/EditorSyntaxIcons.h"
 
 namespace winrt::Folia
 {
@@ -37,6 +38,7 @@ namespace winrt::Folia
         bool marker = false;
         SyntaxHighlightKind syntax = SyntaxHighlightKind::None;
         std::optional<EditorFootnoteControlKind> footnoteControl;
+        SyntaxIcon icon = SyntaxIcon::None;
     };
 
     struct DisplayInlineText

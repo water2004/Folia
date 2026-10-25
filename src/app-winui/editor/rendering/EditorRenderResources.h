@@ -1,6 +1,7 @@
 #pragma once
 
 #include "editor/rendering/EditorStyleSheet.h"
+#include "editor/rendering/EditorSyntaxIcons.h"
 
 namespace winrt::Folia
 {
@@ -44,7 +45,7 @@ namespace winrt::Folia
         ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> lineNumberBrush;
         ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> lineNumberBackgroundBrush;
         ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> accentBrush;
-        ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> markerBrush;
+        EditorSyntaxIcons syntaxIcons;
         ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> codeBrush;
         ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> panelBrush;
         ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> canvasBrush;

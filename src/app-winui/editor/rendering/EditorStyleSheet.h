@@ -20,17 +20,11 @@ namespace winrt::Folia
 
     struct EditorStyleSheet
     {
-        // Marker box dimensions are relative to its font size. Layout reserves
-        // both gap and padding; painting consumes only the padded inner box.
+        // Fixed SVG tile and external clearance, relative to the body size.
         struct MarkerStyle
         {
-            float fontScale = 0.9f;
+            float sizeEm = 1.05f;
             float gapEm = 0.30f;
-            float paddingEm = 0.11f;
-            float heightEm = 1.35f;
-            float radiusEm = 0.2f;
-            float backgroundOpacity = 0.08f;
-            float ruleOpacity = 0.22f;
         } marker;
         EditorFontStyle body;
         EditorFontStyle heading1;

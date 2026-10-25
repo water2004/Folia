@@ -35,10 +35,11 @@ namespace {
                 italic.italic = true;
                 std::vector<InlineStyleRange> ranges{
                     {0, 1, {}, true}, {1, length, italic, false}, {length + 1, 1, {}, true}};
+                ranges.front().icon = ranges.back().icon = SyntaxIcon::Star;
                 auto layout = engine.Create(text, format.Get(), 1000);
                 engine.ApplyStyles(layout.Get(), ranges);
-                auto opening = MarkerRangeRectangles(layout.Get(), ranges.front(), {0, 0}, sheet.marker);
-                auto closing = MarkerRangeRectangles(layout.Get(), ranges.back(), {0, 0}, sheet.marker);
+                auto opening = SyntaxIconRectangles(layout.Get(), ranges.front(), {0, 0}, sheet.marker);
+                auto closing = SyntaxIconRectangles(layout.Get(), ranges.back(), {0, 0}, sheet.marker);
                 expect(opening.size() == 1_u);
                 expect(closing.size() == 1_u);
                 if (opening.empty() || closing.empty()) continue;
@@ -237,6 +238,41 @@ namespace {
             expect(session.Text() == original);
             expect(session.ExitSourceMode());
             expect(session.Text() == original);
+        };
+
+        "syntax icon source positions remain editable through the real editor renderer"_test = [] {
+            auto xaml = winrt::Microsoft::UI::Xaml::Hosting::WindowsXamlManager::InitializeForCurrentThread();
+            winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel panel;
+            EditorSession session;
+            session.SetText(L"***a\U0001F600b*** tail\n");
+            auto original = session.Text();
+            auto owner = session.Selection().active.container_id;
+            session.SetSelection(folia::TextSelection::caret({owner, 3, folia::TextAffinity::Downstream}));
+            EditorSurfaceRenderer renderer;
+            renderer.Initialize(panel);
+            renderer.Resize(panel, 500, 350);
+            renderer.Render(session.RenderFrame());
+            for (std::size_t offset : {0u, 1u, 2u, 3u, 6u, 7u, 8u}) {
+                auto position = folia::TextPosition{owner, offset, folia::TextAffinity::Downstream};
+                auto bounds = renderer.CaretBounds(position);
+                expect(bounds.has_value());
+                if (!bounds) continue;
+                auto hit = renderer.HitTest(bounds->left + .1f, (bounds->top + bounds->bottom) * .5f);
+                expect(hit.has_value());
+                if (hit) {
+                    expect(hit->container_id == owner);
+                    expect(hit->source_offset == offset);
+                }
+            }
+            auto betweenStars = folia::TextSelection::caret({owner, 1, folia::TextAffinity::Downstream});
+            session.SetSelection(betweenStars);
+            expect(session.ExecuteCommand(folia::Command::InsertText(U"_")));
+            expect(session.EditableSource(owner) == std::optional<std::u32string>{U"*_**a\U0001F600b*** tail"});
+            folia::Command undo;
+            undo.kind = folia::CommandKind::Undo;
+            expect(session.ExecuteCommand(undo));
+            expect(session.Text() == original);
+            expect(session.Selection() == betweenStars);
         };
 
         "revealing long inline format markers cannot turn a stationary click into a selection"_test = [] {

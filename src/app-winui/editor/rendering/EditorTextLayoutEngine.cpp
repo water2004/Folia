@@ -7,7 +7,6 @@ import folia.core.utf;
 
 #include "editor/rendering/EditorContentPreparation.h"
 #include "editor/rendering/EditorTextLayoutEngine.h"
-#include <dwrite_1.h>
 
 namespace winrt::Folia
 {
@@ -289,35 +288,24 @@ namespace winrt::Folia
         return MergeRangeRectangles(InlineRangeMetrics(layout, start, length, origin));
     }
 
-    std::vector<D2D1_RECT_F> MarkerRangeRectangles(
+    std::vector<D2D1_RECT_F> SyntaxIconRectangles(
         IDWriteTextLayout* layout, InlineStyleRange const& range, D2D1_POINT_2F origin,
         EditorStyleSheet::MarkerStyle const& style)
     {
-        if (!range.marker || range.length == 0 || !layout) return {};
-        auto metrics = InlineRangeMetrics(layout, range.start, range.length, origin);
-        FLOAT size = 0;
-        winrt::check_hresult(layout->GetFontSize(range.start, &size));
-        for (auto& metric : metrics)
+        if (range.icon == SyntaxIcon::None || range.length == 0 || !layout) return {};
+        auto rectangles = InlineRangeRectangles(layout, range.start, range.length, origin);
+        for (auto& rect : rectangles)
         {
-            // Use source endpoints from the range metrics, not caret boxes:
-            // caret boxes use a run baseline, range boxes use line geometry.
-            bool rtl = (metric.bidiLevel & 1) != 0;
-            auto gap = size * style.gapEm;
-            if (metric.textPosition == range.start)
-            {
-                if (!rtl) metric.left += gap;
-                metric.width -= gap;
-            }
-            if (metric.textPosition + metric.length == range.start + range.length)
-            {
-                if (rtl) metric.left += gap;
-                metric.width -= gap;
-            }
-            auto height = (std::min)(metric.height, size * style.heightEm);
-            metric.top += (metric.height - height) * 0.5f;
-            metric.height = height;
+            // The entire source marker is one indivisible inline object.
+            auto em = (rect.right - rect.left) / (style.sizeEm + 2 * style.gapEm);
+            auto gap = em * style.gapEm;
+            rect.left += gap;
+            rect.right -= gap;
+            auto height = em * style.sizeEm;
+            rect.top += (rect.bottom - rect.top - height) * .5f;
+            rect.bottom = rect.top + height;
         }
-        return MergeRangeRectangles(std::move(metrics));
+        return rectangles;
     }
 
     void DrawInlinePresentationBackgrounds(
@@ -505,7 +493,6 @@ namespace winrt::Folia
     {
         if (!layout) return;
         bool requiresDefaultLineSpacing = false;
-        ::Microsoft::WRL::ComPtr<IDWriteTextLayout1> spaced;
         for (auto const& range : ranges)
         {
             DWRITE_TEXT_RANGE textRange{ range.start, range.length };
@@ -542,21 +529,16 @@ namespace winrt::Folia
             }
             if (range.marker)
             {
-                auto size = BaseFontSize(range.style, styleSheet) * styleSheet.marker.fontScale;
+                auto size = BaseFontSize(range.style, styleSheet);
                 layout->SetFontSize(size, textRange);
                 layout->SetFontWeight(DWRITE_FONT_WEIGHT_NORMAL, textRange);
                 layout->SetFontStyle(DWRITE_FONT_STYLE_NORMAL, textRange);
                 layout->SetUnderline(false, textRange);
                 layout->SetStrikethrough(false, textRange);
-                if (!spaced) winrt::check_hresult(layout->QueryInterface(IID_PPV_ARGS(spaced.GetAddressOf())));
-                auto inset = size * (styleSheet.marker.gapEm + styleSheet.marker.paddingEm);
-                winrt::check_hresult(spaced->SetCharacterSpacing(0, 0, 0, textRange));
-                if (range.length == 1)
-                    winrt::check_hresult(spaced->SetCharacterSpacing(inset, inset, 0, textRange));
-                else if (range.length > 1)
+                if (range.icon != SyntaxIcon::None)
                 {
-                    winrt::check_hresult(spaced->SetCharacterSpacing(inset, 0, 0, {range.start, 1}));
-                    winrt::check_hresult(spaced->SetCharacterSpacing(0, inset, 0, {range.start + range.length - 1, 1}));
+                    ApplySyntaxIconObject(layout, range.start, range.length,
+                        size * styleSheet.marker.sizeEm, size * styleSheet.marker.gapEm);
                 }
                 if (resources.mutedBrush) layout->SetDrawingEffect(resources.mutedBrush.Get(), textRange);
             }
