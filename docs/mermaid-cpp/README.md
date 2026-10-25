@@ -42,12 +42,13 @@ notes, nested activation, wrap directives and plain accessibility/title metadata
 Activation markers and nested control-region boundaries remain separate events
 in the original message order. Regions include loop, opt, alt/else, par/and,
 par_over, critical/option, break and rect, with owned labels and wrap flags.
-Unclosed regions and misplaced sections return errors. Autonumber, participant metadata/creation/destruction and
+Autonumber events retain optional starts/steps and visibility in message order.
+Unclosed regions and misplaced sections return errors. Participant metadata/creation/destruction and
 links are not implemented yet and return explicit errors.
 
 The measured Sequence SVG adapter connects `render_mermaid` to classic
 rectangular participants and human actor figures, mirrored footers, lifelines, ordinary and self
-messages, solid/dotted/open/bidirectional arrows, actor spacing and default/dark
+messages, solid/dotted/open/cross/async/bidirectional arrows, actor spacing and default/dark
 paints and centered messages.
 It retains the original actor-margin and message-height algorithms, including
 rounded real text measurements and optional right-angle self calls. DirectWrite
@@ -67,7 +68,12 @@ calculated first; final message spans, note widths and nested control bounds
 then determine wrapping and vertical placement. Wrapped actors can increase
 the shared actor row height. Sequence uses DirectWrite glyph-run coverage
 bounds for the integer width comparisons that decide line breaks.
-Rich labels, numbering, extended participants and further Sequence
+Numbering supports start/step, off/resume, two-decimal increments and the
+showSequenceNumbers setting. Notes and activation events do not advance the
+counter; hidden message numbers still do. Number discs retain message bounds
+and theme paints. hideUnusedParticipants filters the displayed actors after
+spacing calculation; mirrorActors controls footer boxes and viewport height.
+Rich labels, extended participants and further Sequence
 configuration remain subsequent SVG steps.
 Parser support alone does not imply SVG support. Folia's application dependency
 remains unchanged.

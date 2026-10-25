@@ -43,8 +43,10 @@ std::string paint(std::string_view value) {
     return xml(std::u16string{value.begin(),value.end()});
 }
 bool dotted(SequenceKind kind) {
-    return kind == SequenceKind::dotted || kind == SequenceKind::dotted_open || kind == SequenceKind::bidirectional_dotted;
+    return kind == SequenceKind::dotted || kind == SequenceKind::dotted_open || kind == SequenceKind::bidirectional_dotted || kind == SequenceKind::dotted_cross || kind == SequenceKind::dotted_point;
 }
+bool cross(SequenceKind kind) { return kind==SequenceKind::solid_cross||kind==SequenceKind::dotted_cross; }
+bool point(SequenceKind kind) { return kind==SequenceKind::solid_point||kind==SequenceKind::dotted_point; }
 bool open(SequenceKind kind) { return kind == SequenceKind::solid_open || kind == SequenceKind::dotted_open; }
 bool both(SequenceKind kind) { return kind == SequenceKind::bidirectional_solid || kind == SequenceKind::bidirectional_dotted; }
 }
@@ -80,7 +82,7 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
             if(m.type==SequenceKind::active_start || m.type==SequenceKind::active_end || m.type==SequenceKind::autonumber) continue;
             if(sequence_region_start(m.type)||sequence_region_end(m.type)||sequence_region_section(m.type)||
                 m.type==SequenceKind::rect_start||m.type==SequenceKind::rect_end) continue;
-            if(!(m.type==SequenceKind::note||m.type==SequenceKind::solid||m.type==SequenceKind::dotted||open(m.type)||both(m.type)))
+            if(!(m.type==SequenceKind::note||m.type==SequenceKind::solid||m.type==SequenceKind::dotted||open(m.type)||both(m.type)||cross(m.type)||point(m.type)))
                 return std::unexpected("Sequence extended arrows require the next SVG adapter");
             if(!std::isfinite(box.width)||box.width<0||!std::isfinite(box.height)||box.height<0)
                 return std::unexpected("Invalid Sequence message measurement");
@@ -359,7 +361,7 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
             } else signals+="<line x1=\""+num(start+(numbered?(both(m.type)?(start<stop?12:-6):6):0))+"\" y1=\""+num(line_y)+"\" x2=\""+num(stop)+"\" y2=\""+num(line_y)+"\"";
             signals+=" class=\""+std::string(cls)+"\" stroke=\""+paint(t.signal)+"\" stroke-width=\"1.5\" fill=\"none\"";
             if(dotted(m.type)) signals+=" stroke-dasharray=\"3 3\"";
-            if(!open(m.type)) signals+=" marker-end=\"url(#sequence-arrowhead)\"";
+            if(!open(m.type)) signals+=" marker-end=\"url(#sequence-"+std::string(cross(m.type)?"crosshead":point(m.type)?"filled-head":"arrowhead")+")\"";
             if(both(m.type)) signals+=" marker-start=\"url(#sequence-arrowhead)\"";
             signals+="/>";
             if(numbered) {
@@ -384,6 +386,8 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
         if(!doc.acc_title.empty()) svg+="<title>"+xml(doc.acc_title)+"</title>";
         if(!doc.acc_description.empty()) svg+="<desc>"+xml(doc.acc_description)+"</desc>";
         svg+="<defs><marker id=\"sequence-arrowhead\" refX=\"7.9\" refY=\"5\" markerUnits=\"userSpaceOnUse\" markerWidth=\"12\" markerHeight=\"12\" orient=\"auto-start-reverse\"><path d=\"M -1 0 L 10 5 L 0 10 z\" fill=\""+paint(t.signal)+"\" stroke=\""+paint(t.signal)+"\"/></marker></defs>";
+        svg+="<defs><marker id=\"sequence-crosshead\" markerWidth=\"15\" markerHeight=\"8\" orient=\"auto\" refX=\"4\" refY=\"4.5\"><path d=\"M 1,2 L 6,7 M 6,2 L 1,7\" fill=\""+paint(t.signal)+"\" stroke=\""+paint(t.signal)+"\" stroke-width=\"1pt\" stroke-dasharray=\"0, 0\"/></marker>";
+        svg+="<marker id=\"sequence-filled-head\" refX=\"15.5\" refY=\"7\" markerWidth=\"20\" markerHeight=\"28\" orient=\"auto\"><path d=\"M 18,7 L9,13 L14,7 L9,1 Z\" fill=\""+paint(t.title_text)+"\"/></marker></defs>";
         svg+=region_backgrounds;
         for(std::size_t i=0;i<actors.size();++i) {
             const auto& a=actors[i];const auto center=a.x+a.width/2;

@@ -8,6 +8,8 @@ import {chromium} from './oracle/node_modules/playwright-core/index.mjs';
 const lock=JSON.parse(readFileSync('docs/mermaid-cpp/source-lock.json'));
 for(const f of lock.files) assert.equal(createHash('sha256').update(readFileSync('.reference/mermaid-js/'+f.path)).digest('hex'),f.sha256,f.path);
 const cases=[
+ ["cross-async","sequenceDiagram\nautonumber\nA-xB: Cancel\nB--xA: Rejected\nA-)B: Start\nB--)A: Accepted\nB-)B: Continue"],
+ ["cross-async-activation","%%{init: {\"sequence\": {\"rightAngles\": true}}}%%\nsequenceDiagram\nA-)+B: Start\nB--)-A: Accepted\nA-xA: Cancel"],
  ["numbered","sequenceDiagram\nautonumber\nA->>+B: Save\nNote over B: Validate\nB->>B: Commit\nB-->>-A: Done"],
  ["number-controls","sequenceDiagram\nautonumber 10 5\nA->>B: Open\nautonumber off\nB-->>A: Ready\nautonumber\nA->>B: Save"],
  ["number-config","%%{init: {\"sequence\": {\"showSequenceNumbers\": true}}}%%\nsequenceDiagram\nA->>B: Open\nB-->>A: Ready"],
