@@ -26,6 +26,8 @@ struct SequenceTextBox {
     // Original calculateTextDimensions rounds real SVG boxes to whole units.
     double width = 0, height = 0;
     std::u16string display;
+    std::vector<std::u16string> lines;
+    double line_height = 0;
 };
 struct SequenceMeasurements { std::vector<SequenceTextBox> actors, messages; };
 // Region events have no participant endpoints and use bracketed display labels.

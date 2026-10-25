@@ -27,6 +27,8 @@ const cases=[
  ["background","sequenceDiagram\nrect rgb(220, 240, 255)\nA->>+B: Save\nNote over B: Write\nB-->>-A: Done\nend"],
  ["nested-background","sequenceDiagram\nrect rgba(200, 230, 255, 0.4)\nloop Retry\nrect rgb(245, 245, 200)\nA->>B: Save\nend\nB-->>A: Done\nend\nend"],
  ["title","sequenceDiagram\ntitle Save document\nA->>B: Save\nB-->>A: Done"],
+ ["line-breaks","sequenceDiagram\nparticipant A as Document<br/>editor\nA->>B: Read<br/>document\nNote over A,B: Save<br/>changes\nB-->>A: Done"],
+ ["entities","sequenceDiagram\nparticipant A as Editor #38; viewer\nA->>B: Save #60;document#62;\nNote over B: Value #35;1"],
 ];
 export function inspectSequence() {
  const root=document.querySelector('svg');

@@ -139,18 +139,37 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
         auto fallback_height=measurer.svg_font_height(fallback);
         if(!fallback_height) return std::unexpected(fallback_height.error());
         auto measure=[&](std::u16string_view text)->std::expected<SequenceTextBox,std::string> {
-            if(text.find_first_of(u"<>&\r\n")!=text.npos)
-                return std::unexpected("Sequence rich/entity/multiline text requires the next display adapter");
-            auto metrics=measurer.measure(text,font);
-            if(!metrics) return std::unexpected(metrics.error());
-            auto generic=measurer.measure(text,fallback);
-            if(!generic) return std::unexpected(generic.error());
-            auto width=std::round(metrics->bounds_width),line_height=text.empty()?0:*height;
-            // Original chooses sans-serif only when all dimensions are larger.
-            if(*fallback_height>line_height && std::round(generic->bounds_width)>width && !text.empty()) {
-                width=std::round(generic->bounds_width);line_height=*fallback_height;
+            // Sequence splits explicit HTML breaks before measuring; protected
+            // Mermaid entities remain encoded until the final SVG text pass.
+            std::vector<std::u16string> lines(1);
+            for(std::size_t i=0;i<text.size();) {
+                if(text[i]==u'<') {
+                    const auto end=text.find(u'>',i);
+                    if(end==text.npos) return std::unexpected("Unsupported Sequence text markup");
+                    auto tag=std::u16string{text.substr(i+1,end-i-1)};
+                    std::erase_if(tag,[](char16_t c){return c==u'/'||c==u' '||c==u'\t';});
+                    for(auto& c:tag) if(c>=u'A'&&c<=u'Z') c+=u'a'-u'A';
+                    if(tag!=u"br") return std::unexpected("Sequence rich text requires its display adapter");
+                    lines.emplace_back();i=end+1;
+                } else lines.back()+=text[i++];
             }
-            return SequenceTextBox{width,line_height,std::u16string{text}};
+            SequenceTextBox box{.display=std::u16string{text},.lines=lines};
+            double width=0,generic_width=0;
+            for(const auto& line:lines) {
+            auto metrics=measurer.measure(line.empty()?u"\u200b":std::u16string_view{line},font);
+            if(!metrics) return std::unexpected(metrics.error());
+            auto generic=measurer.measure(line.empty()?u"\u200b":std::u16string_view{line},fallback);
+            if(!generic) return std::unexpected(generic.error());
+            width=std::max(width,std::round(metrics->bounds_width));
+            generic_width=std::max(generic_width,std::round(generic->bounds_width));
+            }
+            auto line_height=text.empty()?0:*height;
+            // Original chooses sans-serif only when all dimensions are larger.
+            if(*fallback_height>line_height && generic_width>width && !text.empty()) {
+                width=generic_width;line_height=*fallback_height;
+            }
+            box.width=width;box.line_height=line_height;box.height=line_height*lines.size();
+            return box;
         };
         for(const auto& actor:seq->document.actors) {
             auto box=measure(actor.description);if(!box) return std::unexpected(box.error());

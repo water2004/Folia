@@ -1,6 +1,18 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-25, Sequence control regions/backgrounds/titles verified
+## Current checkpoint - 2026-10-25, Sequence display text in progress
+
+- Batch 1: explicit line breaks and protected entity display in participants,
+  messages, notes and region labels; preserve measured line/total heights.
+  Exit: original/native line-break and entity diagrams in default/dark plus
+  affected native/source checks. Next batch: original automatic wrapping for
+  participants/messages/notes and control labels, then numbering/participants.
+- Local MSVC/CMake are unavailable (rechecked). Use the existing four Windows
+  standalone/integrated jobs for native validation; no native result claimed yet.
+- Work continues on fork/mermaid-development; contribution worktree remains
+  clean at 1f93feb2 until this batch is verified. PR #1 is open/unmerged.
+
+## Previous checkpoint - 2026-10-25, Sequence control regions/backgrounds/titles verified
 
 - Control-region commits 96252223/566aeafa passed all four Windows standalone/
   integrated Debug/Release jobs on codex/mermaid-cpp-sequence-controls:
