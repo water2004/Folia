@@ -1,6 +1,17 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-25, Class notes and namespace parsing verified
+## Current checkpoint - 2026-10-25, measured Class namespaces in progress
+
+- Deliver measured namespace containers using the existing unified Dagre
+  recursive adapter, preserving class compartments, notes and cross-container
+  relationships. Scope: the three existing namespace inputs in default/dark.
+- Exit: original/native container, label, viewport and relationship comparisons
+  plus affected Windows standalone/integrated Debug/Release checks. Then advance
+  to the next required Class label/configuration boundary; no broader matrix.
+- Candidate implementation is local and unverified. Prior verified code and
+  contribution state are recorded below. No application dependency switch.
+
+## Previous checkpoint - 2026-10-25, Class notes and namespace parsing verified
 
 - Note batch ae7e8694 delivers owned standalone/attached declarations, literal
   multiline text and measured note SVGs with original padding, theme colors,

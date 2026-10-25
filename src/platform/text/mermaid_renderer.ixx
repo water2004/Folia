@@ -247,6 +247,10 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             const auto height=size*1.5;
             return ClassTextBox{std::move(*display),metrics->advance,height,metrics->baseline+(height-metrics->line_height)/2};
         };
+        for(const auto& group:cls->document.namespaces) {
+            auto label=measure(group.label);if(!label) return std::unexpected(label.error());
+            class_measurements.namespaces.push_back(std::move(*label));
+        }
         for(const auto& node:cls->document.classes) {
             ClassNodeMeasurements m;
             auto label=measure(node.label+(node.type.empty()?std::u16string{}:u"<"+node.type+u">"),700);

@@ -119,6 +119,15 @@ std::expected<FlowchartLabelFont,std::string> flowchart_label_font(
     catch(const std::exception& e) {return std::unexpected(e.what());}
 }
 
+std::expected<FlowchartScene,std::string> layout_measured_flowchart(
+    const FlowchartInput& graph,std::span<const FlowchartNodeBox> boxes,
+    std::span<const FlowchartEdgeLabelSize> labels,const FlowchartMeasurements& measured,const FlowchartSvgTheme& theme) {
+    try {
+        auto prepared=prepare_flowchart_graph(graph);if(!prepared) return std::unexpected(prepared.error());
+        return layout_prepared(graph,prepared->graph,boxes,labels,measured,theme);
+    } catch(const std::exception& e) {return std::unexpected(e.what());}
+}
+
 std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRenderInput& input,const FlowchartMeasurements& measured) {
     try {
         const auto& graph=input.document;const auto& theme=input.theme;

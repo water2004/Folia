@@ -10,6 +10,9 @@ using namespace folia::mermaid;
 suite mermaid_measurement = [] {
     "mermaid_class_source_to_measured_svg"_test = [] {
         const std::vector<std::pair<std::string,std::u16string>> cases={
+            {"namespace",u"classDiagram\nnamespace Storage {\nclass Document {\n+save() bool\n}\nclass Store\nnote for Store \"Local storage\"\n}\nDocument --> Store : persists"},
+            {"namespace-nested",u"classDiagram\nnamespace App[\"Application\"] {\nnamespace Storage {\nclass Document\n}\nclass Editor\n}\nEditor --> Document : saves"},
+            {"namespace-qualified",u"classDiagram\nnamespace App.Storage {\nclass Store\n}\nnamespace App {\nclass Editor\n}\nEditor --> Store"},
             {"note-only",u"classDiagram\nnote \"Document model\""},
             {"note-attached",u"classDiagram\nnote for Document \"Validate before saving\nKeep revisions\"\nclass Document {\n+save() bool\n}"},
             {"note-related",u"classDiagram\ndirection LR\nclass Document\nDocument --> Store : persists\nnote for Store \"Local storage\"\nnote for Missing \"Unattached\""},
@@ -42,7 +45,6 @@ suite mermaid_measurement = [] {
                     output<<svg->svg;expect(output.good());
                 }
             }
-            expect(!render_mermaid(u"classDiagram\nnamespace Storage {\nclass Document\n}",*session));
             ConfigValue elk=site;elk.mapping.at(u"layout").string=u"elk";
             expect(fatal(session->save_initialize_config(elk).has_value()));
             expect(fatal(session->set_site_config(elk).has_value()));

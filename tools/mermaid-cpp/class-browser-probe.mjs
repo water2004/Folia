@@ -5,6 +5,9 @@ import {resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {chromium} from './oracle/node_modules/playwright-core/index.mjs';
 export const cases = [
+ ["namespace","classDiagram\nnamespace Storage {\nclass Document {\n+save() bool\n}\nclass Store\nnote for Store \"Local storage\"\n}\nDocument --> Store : persists"],
+ ["namespace-nested","classDiagram\nnamespace App[\"Application\"] {\nnamespace Storage {\nclass Document\n}\nclass Editor\n}\nEditor --> Document : saves"],
+ ["namespace-qualified","classDiagram\nnamespace App.Storage {\nclass Store\n}\nnamespace App {\nclass Editor\n}\nEditor --> Store"],
  ['note-only','classDiagram\nnote "Document model"'],
  ['note-attached','classDiagram\nnote for Document "Validate before saving\nKeep revisions"\nclass Document {\n+save() bool\n}'],
  ['note-related','classDiagram\ndirection LR\nclass Document\nDocument --> Store : persists\nnote for Store "Local storage"\nnote for Missing "Unattached"'],
@@ -77,7 +80,13 @@ export function inspectClass() {
  const v=root.viewBox.baseVal;
  const titleElement=root.querySelector('.classDiagramTitleText');
  const title=titleElement?{text:titleElement.textContent,...textBox(titleElement),size:getComputedStyle(titleElement).fontSize,fill:getComputedStyle(titleElement).fill,baseline:Number(titleElement.getAttribute('y'))}:null;
- return {nodes,edges,labels,title,view:{x:v.x,y:v.y,width:v.width,height:v.height}};
+ const clusters=[...root.querySelectorAll('g.cluster')].map(g=>{
+   const e=g.querySelector('.cluster-label foreignObject,.cluster-label text');
+   const style=getComputedStyle(e.tagName==='foreignObject'?e.querySelector('span'):e);
+   return {id:g.getAttribute('data-namespace')??g.id.replace(/^class\d+-/,''),...box(g.querySelector('rect')),...paint(g.querySelector('rect')),
+     label:{text:e.textContent,...textBox(e),color:e.tagName==='foreignObject'?style.color:style.fill,size:style.fontSize}};
+ });
+ return {clusters,nodes,edges,labels,title,view:{x:v.x,y:v.y,width:v.width,height:v.height}};
 }
 if(!process.argv.includes('--library')) {
  const directory=resolve(process.argv[2]??'build/mermaid-cpp/class-browser');mkdirSync(directory,{recursive:true});

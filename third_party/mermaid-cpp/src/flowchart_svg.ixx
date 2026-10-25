@@ -43,6 +43,14 @@ struct FlowchartMeasurements {
 };
 struct FlowchartSvg {std::string svg;double width=0,height=0;};
 struct FlowchartRenderInput {FlowchartInput document;FlowchartSvgTheme theme;};
+// Shared unified-Dagre container geometry for measured family-specific nodes.
+struct FlowchartScene {
+    FlowchartLayout layout;
+    double min_x=0,min_y=0,max_x=0,max_y=0,diff=0;
+};
+std::expected<FlowchartScene,std::string> layout_measured_flowchart(
+    const FlowchartInput&,std::span<const FlowchartNodeBox>,
+    std::span<const FlowchartEdgeLabelSize>,const FlowchartMeasurements&,const FlowchartSvgTheme&);
 // Measured SVG stage: recursive plain-title groups; square/rounded/diamond/circle,
 // stadium/subroutine/cylinder, double-circle and classic polygon nodes;
 // quoted/entity plain labels with explicit/measured wrapped lines,

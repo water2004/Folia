@@ -138,7 +138,9 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
             const auto& cfg=member(effective,u"class");const auto& state=member(effective,u"state");
             ClassSvgConfig c;
             if(auto value=state.find(u"titleTopMargin")) c.title_top_margin=number(*value);
-            if(auto value=cfg.find(u"padding")) c.padding=c.note_padding=number(*value);
+            if(auto value=cfg.find(u"padding")) c.padding=c.note_padding=c.group_padding=number(*value);
+            const auto& margins=member(member(effective,u"flowchart"),u"subGraphTitleMargin");
+            c.group_title_top=number(member(margins,u"top"));c.group_title_bottom=number(member(margins,u"bottom"));
             c.hide_empty_members=boolean(member(cfg,u"hideEmptyMembersBox"));
             for(auto [key,target]:{std::pair{u"nodeSpacing",&c.node_spacing},{u"rankSpacing",&c.rank_spacing}}) {
                 if(auto value=state.find(key);value&&number(*value)!=0) *target=number(*value);
@@ -150,7 +152,8 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
             if(t.font_size<=0||t.stroke_width<0) return std::unexpected("Invalid Class font or stroke size");
             for(auto [key,target]:{std::pair{u"mainBkg",&t.fill},{u"nodeBorder",&t.border},{u"classText",&t.text},
                 {u"lineColor",&t.line},{u"edgeLabelBackground",&t.label_background},{u"textColor",&t.title_color},
-                {u"noteBkgColor",&t.note_fill},{u"noteBorderColor",&t.note_border},{u"noteTextColor",&t.note_text}}) *target=narrow(text(member(theme,key)));
+                {u"noteBkgColor",&t.note_fill},{u"noteBorderColor",&t.note_border},{u"noteTextColor",&t.note_text},
+                {u"clusterBkg",&t.cluster_fill},{u"clusterBorder",&t.cluster_border},{u"titleColor",&t.cluster_text}}) *target=narrow(text(member(theme,key)));
             return NativeDiagram{std::move(*prepared),ClassRenderInput{std::move(*doc),std::move(t),c}};
         }
         if(prepared->type==u"sequence") {

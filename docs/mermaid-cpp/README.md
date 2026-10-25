@@ -58,9 +58,10 @@ three-segment Dagre preparation and compact-loop geometry, followed by Class
 rectangle clipping, original markers and multiplicity placement. Plain notes
 use measured lines, note-specific padding/theme colors and dotted attachment
 paths inserted before ordinary relationships. Missing attachment targets leave
-notes independent rather than creating classes. Namespace SVG containers and
-rich/wrapped labels require further adapters; namespace rendering currently
-returns an explicit error.
+notes independent rather than creating classes. Namespace containers use measured plain titles and the shared recursive Dagre
+adapter, retaining nested/qualified ownership, padding, title margins, theme
+colors and cross-container relationships. Rich/wrapped labels require further
+adapters.
 
 `folia.mermaid.sequence::prepare_sequence` connects shared preparation to owned
 Sequence actors and ordered messages. The parser/DB boundary covers actor

@@ -13,7 +13,7 @@ try {
  for(const original of originals) {
   await page.setContent(readFileSync(resolve(process.argv[3],'class-'+original.name+'.svg'),'utf8'));
   const actual=await page.evaluate(inspectClass);const name=original.name;
-  for(const key of ['nodes','edges','labels'])assert.equal(actual[key].length,original[key].length,name+'.'+key);
+  for(const key of ['nodes','edges','labels','clusters'])assert.equal(actual[key].length,original[key].length,name+'.'+key);
   for(const key of ['x','y','width','height'])near(actual.view[key],original.view[key],0.2,name+'.view.'+key);
   assert.equal(!!actual.title,!!original.title,name+'.title');
   if(original.title) {
@@ -22,8 +22,16 @@ try {
    for(const key of ['x','width','baseline'])near(a[key],e[key],0.25,name+'.title.'+key);
    near(a.y+a.height/2,e.y+e.height/2,2.5,name+'.title.centerY');
   }
+  for(const e of original.clusters) {
+   const a=actual.clusters.find(n=>n.id===e.id);assert(a,name+'.cluster.'+e.id);
+   for(const key of ['x','y','width','height'])near(a[key],e[key],0.2,name+'.cluster.'+e.id+'.'+key);
+   for(const key of ['fill','stroke','strokeWidth'])assert.equal(a[key],e[key],name+'.cluster.'+key);
+   for(const key of ['text','color','size'])assert.equal(a.label[key],e.label[key],name+'.clusterLabel.'+key);
+   for(const key of ['x','width'])near(a.label[key],e.label[key],0.25,name+'.clusterLabel.'+key);
+   near(a.label.y+a.label.height/2,e.label.y+e.label.height/2,2.5,name+'.clusterLabel.centerY');
+  }
   for(let i=0;i<original.nodes.length;i++) {
-   const a=actual.nodes[i],e=original.nodes[i];assert.equal(a.id,e.id,name+'.id');
+   const e=original.nodes[i],a=actual.nodes.find(n=>n.id===e.id);assert(a,name+'.node.'+e.id);assert.equal(a.id,e.id,name+'.id');
    for(const key of ['x','y','width','height'])near(a[key],e[key],0.2,name+'.'+a.id+'.'+key);
    for(const key of ['fill','stroke','strokeWidth'])assert.equal(a[key],e[key],name+'.'+a.id+'.'+key);
    assert.equal(a.dividers.length,e.dividers.length,name+'.dividers');

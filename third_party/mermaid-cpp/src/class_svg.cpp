@@ -3,6 +3,7 @@ import std;
 import folia.mermaid.number;
 import folia.mermaid.svg_text;
 import folia.mermaid.flowchart_graph;
+import folia.mermaid.flowchart_svg;
 
 namespace folia::mermaid {
 namespace {
@@ -90,8 +91,7 @@ FlowchartPoint terminal(std::vector<FlowchartPoint> points,bool start) {
 std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& input,const ClassMeasurements& measured) {
     try {
         const auto& doc=input.document;const auto& theme=input.theme;const auto& config=input.config;
-        if(!doc.namespaces.empty()) return std::unexpected("Class namespaces require the measured container layout adapter");
-        if(measured.nodes.size()!=doc.classes.size()||measured.edges.size()!=doc.relations.size()||measured.notes.size()!=doc.notes.size())
+        if(measured.nodes.size()!=doc.classes.size()||measured.edges.size()!=doc.relations.size()||measured.notes.size()!=doc.notes.size()||measured.namespaces.size()!=doc.namespaces.size())
             return std::unexpected("Class needs one measured box per class and relationship");
         // ClassDB inserts note attachments before ordinary relationships.
         std::vector<ClassRelation> relations;
@@ -106,70 +106,92 @@ std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& inp
         edge_measurements.insert(edge_measurements.end(),measured.edges.begin(),measured.edges.end());
         FlowchartInput graph;graph.direction=doc.direction;graph.node_spacing=config.node_spacing;graph.rank_spacing=config.rank_spacing;
         std::vector<NodeBox> boxes;std::vector<FlowchartNodeBox> sizes;std::vector<FlowchartEdgeLabelSize> labels;
+        const auto group_count=doc.namespaces.size();
+        FlowchartMeasurements group_measurements;
+        for(std::size_t i=0;i<group_count;++i) {
+            const auto& n=doc.namespaces[i];const auto& m=measured.namespaces[i];
+            graph.nodes.push_back({.id=n.id,.label=n.label,.shape=u"rect",.parent=n.parent,.group=true,.padding=config.group_padding});
+            sizes.push_back({m.width,m.height});
+            group_measurements.nodes.push_back({.width=m.width,.height=m.height,.baseline=m.baseline});
+        }
         for(std::size_t i=0;i<doc.classes.size();++i) {
             const auto& n=doc.classes[i];const auto& m=measured.nodes[i];
             if(m.members.size()!=n.members.size()||m.methods.size()!=n.methods.size()) return std::unexpected("Class member measurement count mismatch");
             const auto b=node_box(m,config);boxes.push_back(b);sizes.push_back({b.width,b.height});
-            graph.nodes.push_back({.id=n.id});
+            graph.nodes.push_back({.id=n.id,.parent=n.parent});
         }
         for(std::size_t i=0;i<doc.notes.size();++i) {
             const auto& m=measured.notes[i];
-            graph.nodes.push_back({.id=doc.notes[i].id});
+            graph.nodes.push_back({.id=doc.notes[i].id,.parent=doc.notes[i].parent});
             sizes.push_back({m.width+2*config.note_padding,m.height+2*config.note_padding});
         }
         for(std::size_t i=0;i<relations.size();++i) {
             const auto& e=relations[i];
             const auto id=std::to_string(i);
-            graph.edges.push_back({.id=std::u16string{id.begin(),id.end()},.start=e.from,.end=e.to,.label=e.title});
+            graph.edges.push_back({.id=std::u16string{id.begin(),id.end()},.start=e.from,.end=e.to,.label=e.title,.arrow_end=u"none"});
             labels.push_back({edge_measurements[i].label.width,edge_measurements[i].label.height});
         }
-        auto preparation=prepare_flowchart_graph(graph);if(!preparation) return std::unexpected(preparation.error());
-        const auto& prepared=preparation->graph;
-        FlowchartInput layout_input;layout_input.direction=graph.direction;
-        layout_input.node_spacing=graph.node_spacing;layout_input.rank_spacing=graph.rank_spacing;
-        std::vector<FlowchartNodeBox> layout_sizes;std::vector<FlowchartEdgeLabelSize> layout_labels;
-        std::unordered_map<std::u16string,std::size_t> ids;
-        for(const auto& n:prepared.nodes) {
-            ids.emplace(n.data.id,layout_input.nodes.size());layout_input.nodes.push_back(n.data);
-            layout_sizes.push_back(n.source_index?sizes[*n.source_index]:FlowchartNodeBox{0.1,0.1});
-        }
-        for(const auto& e:prepared.edges) {
-            layout_input.edges.push_back(e.data);
-            layout_labels.push_back(e.loop_segment==0||e.loop_segment==2?FlowchartEdgeLabelSize{}:labels[e.source_index]);
-        }
-        auto layout=layout_flowchart(layout_input,layout_sizes,layout_labels);if(!layout) return std::unexpected(layout.error());
-        FlowchartLayout logical;logical.width=layout->width;logical.height=layout->height;
-        logical.nodes.resize(graph.nodes.size());logical.edges.resize(graph.edges.size());
+        FlowchartLayout logical;
         std::vector<std::vector<FlowchartPoint>> label_paths(graph.edges.size());
-        for(std::size_t i=0;i<prepared.nodes.size();++i)
-            if(auto index=prepared.nodes[i].source_index) logical.nodes[*index]=layout->nodes[i];
-        for(std::size_t i=0;i<prepared.edges.size();++i) {
-            const auto& e=prepared.edges[i];
-            if(e.loop_segment==-1) {
-                logical.edges[e.source_index]=layout->edges[i];label_paths[e.source_index]=layout->edges[i].points;continue;
+        double graph_min_x=0,graph_min_y=0,graph_max_x=0,graph_max_y=0;
+        if(group_count) {
+            group_measurements.nodes.resize(graph.nodes.size());
+            FlowchartSvgTheme group_theme;
+            group_theme.group_title_top=config.group_title_top;group_theme.group_title_bottom=config.group_title_bottom;
+            auto scene=layout_measured_flowchart(graph,sizes,labels,group_measurements,group_theme);
+            if(!scene) return std::unexpected(scene.error());
+            graph_min_x=scene->min_x;graph_min_y=scene->min_y;graph_max_x=scene->max_x;graph_max_y=scene->max_y;
+            logical=std::move(scene->layout);
+            for(std::size_t i=0;i<logical.edges.size();++i) label_paths[i]=logical.edges[i].points;
+        } else {
+            auto preparation=prepare_flowchart_graph(graph);if(!preparation) return std::unexpected(preparation.error());
+            const auto& prepared=preparation->graph;
+            FlowchartInput layout_input;layout_input.direction=graph.direction;
+            layout_input.node_spacing=graph.node_spacing;layout_input.rank_spacing=graph.rank_spacing;
+            std::vector<FlowchartNodeBox> layout_sizes;std::vector<FlowchartEdgeLabelSize> layout_labels;
+            std::unordered_map<std::u16string,std::size_t> ids;
+            for(const auto& n:prepared.nodes) {
+                ids.emplace(n.data.id,layout_input.nodes.size());layout_input.nodes.push_back(n.data);
+                layout_sizes.push_back(n.source_index?sizes[*n.source_index]:FlowchartNodeBox{0.1,0.1});
             }
-            if(e.loop_segment!=1) continue;
-            const auto& original=graph.edges[e.source_index];
-            const auto& node=layout->nodes[ids.at(original.start)];
-            const auto& first=layout->nodes[ids.at(e.data.start)];
-            const auto& second=layout->nodes[ids.at(e.data.end)];
-            auto edge=route_dagre_self_loop(node,{(first.x+second.x)/2,(first.y+second.y)/2},
-                graph.direction,labels[e.source_index],!original.label.empty());
-            label_paths[e.source_index]=edge.points;
-            // ClassBox uses intersect.rect after the compact loop is merged.
-            const auto intersect=[&](FlowchartPoint p) {
-                const auto dx=p.x-node.x,dy=p.y-node.y,w=node.width/2,h=node.height/2;
-                const auto scale=std::abs(dy)*w>std::abs(dx)*h?h/std::abs(dy):w/std::abs(dx);
-                return FlowchartPoint{node.x+dx*scale,node.y+dy*scale};
-            };
-            edge.points.front()=intersect(edge.points[1]);edge.points.back()=intersect(edge.points[edge.points.size()-2]);
-            logical.edges[e.source_index]=std::move(edge);
+            for(const auto& e:prepared.edges) {
+                layout_input.edges.push_back(e.data);
+                layout_labels.push_back(e.loop_segment==0||e.loop_segment==2?FlowchartEdgeLabelSize{}:labels[e.source_index]);
+            }
+            auto layout=layout_flowchart(layout_input,layout_sizes,layout_labels);if(!layout) return std::unexpected(layout.error());
+            logical.width=layout->width;logical.height=layout->height;
+            logical.nodes.resize(graph.nodes.size());logical.edges.resize(graph.edges.size());
+            for(std::size_t i=0;i<prepared.nodes.size();++i)
+                if(auto index=prepared.nodes[i].source_index) logical.nodes[*index]=layout->nodes[i];
+            for(std::size_t i=0;i<prepared.edges.size();++i) {
+                const auto& e=prepared.edges[i];
+                if(e.loop_segment==-1) {
+                    logical.edges[e.source_index]=layout->edges[i];label_paths[e.source_index]=layout->edges[i].points;continue;
+                }
+                if(e.loop_segment!=1) continue;
+                const auto& original=graph.edges[e.source_index];
+                const auto& node=layout->nodes[ids.at(original.start)];
+                const auto& first=layout->nodes[ids.at(e.data.start)];
+                const auto& second=layout->nodes[ids.at(e.data.end)];
+                auto edge=route_dagre_self_loop(node,{(first.x+second.x)/2,(first.y+second.y)/2},
+                    graph.direction,labels[e.source_index],!original.label.empty());
+                label_paths[e.source_index]=edge.points;
+                // ClassBox uses intersect.rect after the compact loop is merged.
+                const auto intersect=[&](FlowchartPoint p) {
+                    const auto dx=p.x-node.x,dy=p.y-node.y,w=node.width/2,h=node.height/2;
+                    const auto scale=std::abs(dy)*w>std::abs(dx)*h?h/std::abs(dy):w/std::abs(dx);
+                    return FlowchartPoint{node.x+dx*scale,node.y+dy*scale};
+                };
+                edge.points.front()=intersect(edge.points[1]);edge.points.back()=intersect(edge.points[edge.points.size()-2]);
+                logical.edges[e.source_index]=std::move(edge);
+            }
+            graph_max_x=logical.width;graph_max_y=logical.height;
         }
         const auto* placed=&logical;
         // insertTitle uses the pre-title graph bounds; setupViewPortForSVG then
         // includes the SVG text bounds before adding its fixed eight-unit pad.
-        const double title_x=placed->width/2+8,title_y=-config.title_top_margin;
-        double min_x=8,min_y=8,max_x=placed->width+8,max_y=placed->height+8;
+        const double title_x=(graph_min_x+graph_max_x)/2+8,title_y=-config.title_top_margin;
+        double min_x=graph_min_x+8,min_y=graph_min_y+8,max_x=graph_max_x+8,max_y=graph_max_y+8;
         if(!doc.title.empty()) {
             const auto& t=measured.title;
             if(t.text!=doc.title||t.height<=0) return std::unexpected("Class title needs measured SVG text bounds");
@@ -182,6 +204,25 @@ std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& inp
         for(auto [tag,value]:{std::pair{"title",doc.acc_title},{"desc",doc.acc_description}})
             if(!value.empty()) svg+="<"+std::string(tag)+">"+xml(value)+"</"+tag+">";
         svg+=markers(theme);
+        auto group_theme=theme;group_theme.text=theme.cluster_text;
+        // Containers paint before relationships and nodes, outermost first.
+        std::vector<std::size_t> groups(group_count);std::iota(groups.begin(),groups.end(),0);
+        const auto depth=[&](std::size_t i) {
+            std::size_t value=0;auto parent=doc.namespaces[i].parent;
+            while(!parent.empty()) {
+                const auto found=std::ranges::find(doc.namespaces,parent,&ClassNamespace::id);
+                parent=found->parent;++value;
+            }
+            return value;
+        };
+        std::stable_sort(groups.begin(),groups.end(),[&](auto a,auto b){return depth(a)<depth(b);});
+        for(auto i:groups) {
+            const auto& n=placed->nodes[i];const auto& m=measured.namespaces[i];
+            const double x=n.x+8-n.width/2,y=n.y+8-n.height/2;
+            svg+="<g class=\"cluster\" data-namespace=\""+xml(doc.namespaces[i].id)+"\"><rect x=\""+num(x)+"\" y=\""+num(y)+
+                "\" width=\""+num(n.width)+"\" height=\""+num(n.height)+"\" fill=\""+theme.cluster_fill+"\" stroke=\""+theme.cluster_border+"\" stroke-width=\"1\"/>";
+            svg+="<g class=\"cluster-label\">"+text(m,n.x+8-m.width/2,y+config.group_title_top,group_theme)+"</g></g>";
+        }
         for(std::size_t i=0;i<relations.size();++i) {
             const auto& e=relations[i];auto points=placed->edges[i].points;
             for(auto& p:points) {p.x+=8;p.y+=8;}
@@ -214,7 +255,7 @@ std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& inp
         }
         svg+="</g>";
         for(std::size_t i=0;i<doc.classes.size();++i) {
-            const auto& n=doc.classes[i];const auto& m=measured.nodes[i];const auto& b=boxes[i];const auto& position=placed->nodes[i];
+            const auto& n=doc.classes[i];const auto& m=measured.nodes[i];const auto& b=boxes[i];const auto& position=placed->nodes[group_count+i];
             const auto p=config.padding,x=position.x+8-b.width/2,y=position.y+8-b.height/2;
             svg+="<g class=\"node\" data-class-id=\""+xml(n.id)+"\"><rect class=\"outer-path\" x=\""+num(x)+"\" y=\""+num(y)+
                 "\" width=\""+num(b.width)+"\" height=\""+num(b.height)+"\" fill=\""+theme.fill+"\" stroke=\""+theme.border+"\" stroke-width=\""+num(theme.stroke_width)+"\"/>";
@@ -237,7 +278,7 @@ std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& inp
         }
         auto note_theme=theme;note_theme.text=theme.note_text;
         for(std::size_t i=0;i<doc.notes.size();++i) {
-            const auto& m=measured.notes[i];const auto& position=placed->nodes[doc.classes.size()+i];
+            const auto& m=measured.notes[i];const auto& position=placed->nodes[group_count+doc.classes.size()+i];
             const auto w=m.width+2*config.note_padding,h=m.height+2*config.note_padding;
             const auto x=position.x+8-w/2,y=position.y+8-h/2;
             svg+="<g class=\"node\" data-class-id=\""+xml(doc.notes[i].id)+"\"><rect class=\"outer-path\" x=\""+num(x)+"\" y=\""+num(y)+

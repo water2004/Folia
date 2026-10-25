@@ -2,11 +2,6 @@
 // positionNode. Included inside flowchart_svg's private namespace. MIT.
 // A scene owns painted geometry in one coordinate space. Extracted scenes are
 // measured before their parent layout, then translated once into that parent.
-struct FlowchartScene {
-    FlowchartLayout layout;
-    double min_x=0,min_y=0,max_x=0,max_y=0,diff=0;
-};
-
 FlowchartPoint cluster_intersection(const FlowchartPlacedNode& n,FlowchartPoint outside,FlowchartPoint inside) {
     const double x=n.x,y=n.y,w=n.width/2,h=n.height/2;
     const double q_distance=std::abs(outside.y-inside.y),r_distance=std::abs(outside.x-inside.x);
