@@ -34,7 +34,7 @@ Cytoscape, date calculations) needs its own source and behavior verification.
 
 ## Current state
 
-The public native entry now contains Packet, Pie, Flowchart, Sequence, Class
+The public native entry now contains Packet, Pie, Flowchart, Sequence, Class,
 Quadrant and Radar. Entry coverage does not imply that every family default or the
 WinUI dependency switch is finished. The unconfigured global layout is ELK;
 both Flowchart and Class still require explicit source/session Dagre selection.

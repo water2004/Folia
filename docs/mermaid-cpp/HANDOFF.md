@@ -1,6 +1,44 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-25, Class paints and lollipop interfaces verified
+## Current checkpoint - 2026-10-26, seven native families and host ABI
+
+- Native public entry: Packet, Pie, Flowchart, Sequence, Class, Quadrant and
+  Radar. Quadrant and Radar retain their original fixed-canvas/linear and
+  polar/Catmull-Rom algorithms, configuration, labels, styles and accessibility.
+  Class adds SVG-label spacing and font painting; Sequence adds alignment,
+  category font weights and literal non-break markup.
+- ELK depth-first cycle selection, flat network-simplex layering and long-edge
+  splitting are internal original-algorithm phases. Port ordering/crossing,
+  placement, routing and compound handling remain. Flowchart/Class default ELK
+  is still explicitly unavailable; explicit Dagre is a separate working route.
+- The UTF-8 DLL ABI owns SVG/error buffers and returns dimensions. Each request
+  gets fresh default/dark + classic initialization, preserving source precedence
+  and family defaults. Windows conversion lives in the platform host module.
+- Final runtime head 52b6be2c (contribution equivalent 116e2a8a) passed all four Windows standalone/integrated Debug/Release jobs:
+  https://github.com/zhao0349/Folia/actions/runs/40215740739
+  It differs from the seven-family run only by the platform host module move:
+  https://github.com/zhao0349/Folia/actions/runs/40214517262
+  The preceding seven-family run also passed all four jobs. Integrated jobs
+  passed FoliaTests/FoliaWindowsEditorTests and all three Mermaid suites.
+- Original/native comparisons cover 92 Flowchart, 92 Sequence, 66 Class,
+  20 Quadrant and 16 Radar SVGs, plus existing Packet/Pie and 96 text metrics.
+  Native Class/Sequence/Quadrant/Radar previews were inspected. Geometry/text
+  tolerances are unchanged; Unicode data probes explicitly declare UTF-8.
+- A separate WinUI candidate built the actual Release shell successfully:
+  https://github.com/zhao0349/Folia/actions/runs/40214720270
+  Its C++ ABI is wired through the existing queue/cache/completion path and
+  ordinary usvg normalization. This candidate uses the earlier five-family
+  runtime and is outside this contribution. Build success is not real window,
+  editing/preview, theme, PDF or GPU/DPI acceptance. Production still uses Rust.
+- Next: XY data-family parsing/configuration/original scales and SVG; required
+  Flowchart closeout; ELK port ordering and original crossing minimization.
+  Sixteen retained families lack native rendering. Full default and application
+  gates remain required before the production dependency switch.
+- No AGENTS.md changes belong to this contribution. PR #1 remains open/unmerged:
+  https://github.com/water2004/Folia/pull/1
+  No local native build, browser or application process remains active.
+
+## Historical checkpoint - 2026-10-25, Class paints and lollipop interfaces verified
 
 - Paint batch 8aa88d5c connects style/classDef/cssClass/inline ::: assignments
   to fill, border, stroke width/dash and text colors, retaining statement order,
