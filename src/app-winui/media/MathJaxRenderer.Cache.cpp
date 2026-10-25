@@ -193,7 +193,15 @@ namespace winrt::Folia
         if (!activeOwner) throw std::logic_error("EndBlock called without BeginBlock");
         auto owner = *activeOwner;
         std::erase_if(blockEntries, [&](std::uint64_t id) { return !entriesById.contains(id); });
-        auto previous = ownerEntries[owner];
+        auto& owned = ownerEntries[owner];
+        if (owned == blockEntries)
+        {
+            blockEntries.clear();
+            activeOwner.reset();
+            if (owned.empty()) ownerEntries.erase(owner);
+            return;
+        }
+        auto previous = std::move(owned);
         for (auto id : previous)
         {
             if (blockEntries.contains(id)) continue;
@@ -203,13 +211,13 @@ namespace winrt::Folia
         for (auto id : blockEntries)
             if (auto found = entriesById.find(id); found != entriesById.end())
                 found->second->owners.insert(owner);
-        ownerEntries[owner] = blockEntries;
+        ownerEntries[owner] = std::move(blockEntries);
         if (ownerEntries[owner].empty()) ownerEntries.erase(owner);
-        auto affected = std::move(previous);
-        affected.insert(blockEntries.begin(), blockEntries.end());
         blockEntries.clear();
         activeOwner.reset();
-        for (auto id : affected) RemoveIfOrphanLocked(id, cancelAfterUnlock);
+        // Every newly acquired entry now has this owner. Only old membership
+        // can have lost its last owner; do not copy/union both sets to scan it.
+        for (auto id : previous) RemoveIfOrphanLocked(id, cancelAfterUnlock);
     }
 
     void MathJaxRenderer::State::Retain(std::span<std::uint64_t const> owners,
