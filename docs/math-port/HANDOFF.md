@@ -2,7 +2,7 @@
 
 恢复/压缩后先实际读本文。架构、职责和详细验收见 [architecture](native-raii-architecture.md)、[files](native-raii-files.json)、[acceptance](native-raii-acceptance.md)。只复查新变化；ignored候选用 `rg --no-ignore`。
 
-## 当前 checkpoint：CST语义编辑、图标主题（2026-10-25，验收完成，整理提交中）
+## 当前 checkpoint：CST语义编辑、图标主题（2026-10-25，验收完成，已本地提交）
 
 - **固定规则**：全部所见即所得编辑按CST/块树语义；编辑层不依赖SVG、SyntaxIcon/SyntaxMarker或图标位置。公式定界符不可逐字符编辑，删除任一端成对去除、保留TeX为普通文本；ATX标题逐级降级。源码模式仍编辑原始源码。禁止子代理；版本0.3.2不变，不推送发布。
 - **实现**：inline_source_edit查询完整CST定界符及移动边界；document_inline_format生成成对去格式TextEdit；document_block_edit将数学块通过树事务转换为段落；document_source_edit协调既有删除/移动入口；document_block_input按已解析标题等级退一级。未完成输入和code/math正文保持可编辑。没有扩大math原可编辑边界；block_source.ixx无diff，不得恢复已撤回候选。
@@ -10,8 +10,8 @@
 - **主题**：schemaVersion2单文件JSON包含15个SVG与sizeEm/gapEm，7主题更新；共享不可变资源、有限D2D缓存按主题/设备失效，绘制无文件IO。105个内嵌SVG与原资源逐一一致。v1自定义主题需按docs/THEMES.md升级格式，加载错误仍整份拒绝；不自动修改导入文件。
 - **最终验证**：Core **759项/499811断言**、WinUI **41项/13919断言**、Windows editor **82项/3446断言**全部通过；Debug应用构建成功。日志`build/semantic-editing-{core-final,app-final,platform-final,app-build}.log`。覆盖CST完成/未完成、无图标的四反引号、嵌套格式、数学块根/quote/list、每字符编辑与Unicode、整体命中、复制粘贴、源码切换、精确Undo/Redo、零全文parse/serialize、主题像素/资源释放。未做本轮人工UI/真实IME复验；未改math引擎，不重复旧宽审。
 - **MSI**：Generate-WixPayload只给打包themes顶层JSON添加精确文件名RemoveFile；正式隔离测试`tests/installer/test_theme_upgrade.ps1`实际同版本升级与repair均更新7主题，custom/settings字节不变，测试产品已卸载。证据`build/marker-theme-upgrade-test.log`，隔离目录`build/tests/theme-upgrade/3e9ae47f17c54b1d90e8a22ca3f35796`。未安装/卸载实际Folia，未生成正式MSI。
-- **本地提交**：核心语义与回归测试 `5cfbe37c`；CST显示元数据 `1cface23`；App主题/显示及安装待分批保存。
-- **停止点**：无活动agent/build/test句柄（8320和17147均exit0）；准备按核心语义、CST显示元数据、主题/App、安装升级分批本地提交。用户按Escape停止Computer Use，本轮不得再操作UI；运行中Debug Folia.exe PID16448可能含用户修改，不关闭/覆盖。新Debug使用TargetName=FoliaMarkerPreview，没有启动。native构建一次一个、parallel≤4。历史视觉基线593a9407、范围记录5ce20a98。
+- **本地提交**：核心语义与回归测试 `5cfbe37c`；CST显示元数据 `1cface23`；App主题/显示 `7628deb3`；安装升级测试与最终checkpoint见本文件所属提交。全部本地保存，未推送。
+- **停止点**：无活动agent/build/test句柄（8320和17147均exit0）；本轮实现和正式测试全部完成并分批本地提交；下一步由用户验看，不自动发布或打正式MSI。用户按Escape停止Computer Use，本轮不得再操作UI；运行中Debug Folia.exe PID16448可能含用户修改，不关闭/覆盖。新Debug使用TargetName=FoliaMarkerPreview，没有启动。native构建一次一个、parallel≤4。历史视觉基线593a9407、范围记录5ce20a98。
 
 ## 历史：SVG 外观与整对象排版（用户已接受，语义遗漏以上方为准）
 

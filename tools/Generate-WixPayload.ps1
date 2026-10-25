@@ -134,6 +134,19 @@ function Write-Component {
     $Writer.WriteAttributeString('Guid', $Record.ComponentGuid)
     $Writer.WriteAttributeString('Bitness', 'always64')
 
+    if ($Record.Kind -eq 'Asset' -and $Record.Directory -ieq 'themes' -and
+        [System.IO.Path]::GetExtension($Record.Name) -ieq '.json') {
+        # Built-in themes are application resources, not user configuration.
+        # Remove exactly this packaged file before InstallFiles, including on
+        # repair, so MSI's unversioned-file preservation cannot retain schema 1.
+        # Imported themes and settings are excluded from the payload entirely.
+        $Writer.WriteStartElement('RemoveFile')
+        $Writer.WriteAttributeString('Id', (Get-StableId -Prefix 'ReplaceTheme' -Value $Record.Relative))
+        $Writer.WriteAttributeString('Name', $Record.Name)
+        $Writer.WriteAttributeString('On', 'install')
+        $Writer.WriteEndElement()
+    }
+
     $Writer.WriteStartElement('File')
     $Writer.WriteAttributeString('Id', $Record.FileId)
     $Writer.WriteAttributeString('Name', $Record.Name)
