@@ -281,12 +281,12 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
                 box.width=std::max(box.width,width);box.line_widths.push_back(width);
                 // HTML inline boxes share a baseline but each font retains its
                 // own half-leading. Include the parent strut as createText does.
-                auto strut=measurer.measure(u"M",font);if(!strut) return std::unexpected(strut.error());
-                double above=strut->baseline+(box.line_step-strut->line_height)/2,below=box.line_step-above;
+                auto strut=measurer.svg_font_metrics(font);if(!strut) return std::unexpected(strut.error());
+                double above=strut->baseline+(box.line_step-strut->height)/2,below=box.line_step-above;
                 for(const auto& style:styles) {
-                    auto run_metrics=measurer.measure(u"M",{font.family,font.size,style.weight,style.italic});
+                    auto run_metrics=measurer.svg_font_metrics({font.family,font.size,style.weight,style.italic});
                     if(!run_metrics) return std::unexpected(run_metrics.error());
-                    const auto baseline=run_metrics->baseline+(box.line_step-run_metrics->line_height)/2;
+                    const auto baseline=run_metrics->baseline+(box.line_step-run_metrics->height)/2;
                     above=std::max(above,baseline);below=std::max(below,box.line_step-baseline);
                 }
                 box.line_baselines.push_back(box.height+above);box.height+=above+below;
