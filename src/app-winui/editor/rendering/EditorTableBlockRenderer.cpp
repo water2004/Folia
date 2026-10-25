@@ -214,6 +214,7 @@ namespace winrt::Folia
                         resources.d2dContext->FillRoundedRectangle(D2D1::RoundedRect(D2D1::RectF(metric.left - 3.0f, metric.top + 2.0f, metric.left + metric.width + 3.0f, metric.top + metric.height - 1.0f), 4.0f, 4.0f), resources.panelBrush.Get());
                     }
                 }
+                documentPainter.DrawSyntaxMarkers(cell.layout.Get(), cell.textOrigin, display);
                 documentPainter.DrawSelection(
                     cell.layout.Get(),
                     cell.textOrigin,

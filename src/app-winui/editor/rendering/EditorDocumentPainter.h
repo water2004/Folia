@@ -57,6 +57,10 @@ namespace winrt::Folia
             D2D1_POINT_2F origin,
             folia::RenderBlock const& parent,
             DisplayInlineText const& display);
+        void DrawSyntaxMarkers(
+            IDWriteTextLayout* layout,
+            D2D1_POINT_2F origin,
+            DisplayInlineText const& display);
 
         static std::vector<PositionedMath> PositionMath(
             IDWriteTextLayout* layout,

@@ -239,6 +239,44 @@ namespace winrt::Folia
         }
     }
 
+    std::vector<D2D1_RECT_F> InlineRangeRectangles(
+        IDWriteTextLayout* layout, UINT32 start, UINT32 length, D2D1_POINT_2F origin)
+    {
+        std::vector<D2D1_RECT_F> rectangles;
+        if (!layout || length == 0) return rectangles;
+        UINT32 count = 0;
+        if (layout->HitTestTextRange(start, length, origin.x, origin.y,
+                nullptr, 0, &count) != E_NOT_SUFFICIENT_BUFFER || count == 0) return rectangles;
+        std::vector<DWRITE_HIT_TEST_METRICS> metrics(count);
+        if (FAILED(layout->HitTestTextRange(start, length, origin.x, origin.y,
+                metrics.data(), count, &count))) return rectangles;
+        // Style runs and bidi runs may split one visual line. Join touching
+        // pieces only; never bridge a bidi gap or two wrapped lines.
+        std::sort(metrics.begin(), metrics.begin() + count, [](auto const& a, auto const& b) {
+            return a.top != b.top ? a.top < b.top : a.left < b.left;
+        });
+        for (UINT32 i = 0; i < count; ++i)
+        {
+            auto const& metric = metrics[i];
+            if (metric.width <= 0 || metric.height <= 0) continue;
+            auto rect = D2D1::RectF(metric.left, metric.top,
+                metric.left + metric.width, metric.top + metric.height);
+            if (!rectangles.empty())
+            {
+                auto& last = rectangles.back();
+                if (std::abs(last.top - rect.top) < 0.5f
+                    && std::abs(last.bottom - rect.bottom) < 0.5f
+                    && rect.left <= last.right + 0.5f)
+                {
+                    last.right = (std::max)(last.right, rect.right);
+                    continue;
+                }
+            }
+            rectangles.push_back(rect);
+        }
+        return rectangles;
+    }
+
     void DrawInlinePresentationBackgrounds(
         EditorRenderResources& resources,
         EditorStyleSheet const& styleSheet,
@@ -458,7 +496,14 @@ namespace winrt::Folia
                 if (range.style.italic) fontStyle = DWRITE_FONT_STYLE_ITALIC;
                 layout->SetFontStyle(fontStyle, textRange);
             }
-            if (range.marker && !range.style.heading_level) layout->SetFontSize(styleSheet.body.size * 0.82f, textRange);
+            if (range.marker)
+            {
+                if (!range.style.heading_level) layout->SetFontSize(styleSheet.body.size * 0.9f, textRange);
+                layout->SetFontStyle(DWRITE_FONT_STYLE_NORMAL, textRange);
+                layout->SetUnderline(false, textRange);
+                layout->SetStrikethrough(false, textRange);
+                if (resources.mutedBrush) layout->SetDrawingEffect(resources.mutedBrush.Get(), textRange);
+            }
             if (range.footnoteControl)
             {
                 auto const reference = *range.footnoteControl == EditorFootnoteControlKind::Reference;

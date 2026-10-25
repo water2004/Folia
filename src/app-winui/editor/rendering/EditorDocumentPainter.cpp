@@ -1,11 +1,42 @@
 #include "pch.h"
 #include "EditorDocumentPainter.h"
+#include "EditorTextLayoutEngine.h"
 
 import folia.core.callout;
 import folia.core.utf;
 
 namespace winrt::Folia
 {
+    void EditorDocumentPainter::DrawSyntaxMarkers(
+        IDWriteTextLayout* layout, D2D1_POINT_2F origin, DisplayInlineText const& display)
+    {
+        if (printMode || !layout || !resources.markerBrush) return;
+        auto brush = resources.markerBrush.Get();
+        for (auto const& range : display.ranges)
+        {
+            if (!range.marker) continue;
+            auto color = styleSheet.accentColor;
+            color.a = 0.10f;
+            brush->SetColor(color);
+            auto rectangles = InlineRangeRectangles(layout, range.start, range.length, origin);
+            for (auto rect : rectangles)
+            {
+                // Decoration stays inside existing advances: it must not add
+                // padding, move a source position or change line breaking.
+                rect.top += 1.0f;
+                rect.bottom -= 1.0f;
+                if (rect.bottom <= rect.top) continue;
+                auto shape = D2D1::RoundedRect(rect, 3.0f, 3.0f);
+                color.a = 0.10f;
+                brush->SetColor(color);
+                resources.d2dContext->FillRoundedRectangle(shape, brush);
+                color.a = 0.40f;
+                brush->SetColor(color);
+                resources.d2dContext->DrawRoundedRectangle(shape, brush, 0.8f);
+            }
+        }
+    }
+
     EditorDocumentPainter::EditorDocumentPainter(
         EditorRenderResources& resources,
         EditorStyleSheet const& styleSheet,

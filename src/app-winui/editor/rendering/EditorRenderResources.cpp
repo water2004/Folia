@@ -48,6 +48,7 @@ namespace winrt::Folia
         lineNumberBrush = nullptr;
         lineNumberBackgroundBrush = nullptr;
         accentBrush = nullptr;
+        markerBrush = nullptr;
         codeBrush = nullptr;
         panelBrush = nullptr;
         canvasBrush = nullptr;
@@ -246,6 +247,7 @@ namespace winrt::Folia
             winrt::check_hresult(d2dContext->CreateSolidColorBrush(styleSheet.lineNumberColor, lineNumberBrush.GetAddressOf()));
             winrt::check_hresult(d2dContext->CreateSolidColorBrush(styleSheet.lineNumberBackgroundColor, lineNumberBackgroundBrush.GetAddressOf()));
             winrt::check_hresult(d2dContext->CreateSolidColorBrush(styleSheet.accentColor, accentBrush.GetAddressOf()));
+            winrt::check_hresult(d2dContext->CreateSolidColorBrush(styleSheet.accentColor, markerBrush.GetAddressOf()));
             winrt::check_hresult(d2dContext->CreateSolidColorBrush(styleSheet.codeTextColor, codeBrush.GetAddressOf()));
             winrt::check_hresult(d2dContext->CreateSolidColorBrush(styleSheet.panelColor, panelBrush.GetAddressOf()));
             winrt::check_hresult(d2dContext->CreateSolidColorBrush(styleSheet.canvasColor, canvasBrush.GetAddressOf()));

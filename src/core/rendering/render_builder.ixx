@@ -687,14 +687,14 @@ struct Builder {
             marker.kind = InlineRenderItem::Kind::Marker;
             marker.id = owner.id;
             marker.ensure_special().marker_owner = owner.id;
+            marker.ensure_special().marker_construct = owner.range;
             marker.source_span = source_span(range);
             marker.text = inline_source_slice(document, range);
             marker.ensure_special().marker_style = MarkerStyle{true, {}};
-            // Complete CST constructs retain their exact source markers, but
-            // the rendered editor edits their content through format controls.
+            // Reveal exact source delimiters when editing their CST construct.
             // Incomplete syntax remains visible so it can be finished normally.
             marker.ensure_special().visibility = owner.status == ParseStatus::Complete
-                ? MarkerVisibility::HiddenButEditable : MarkerVisibility::Always;
+                ? MarkerVisibility::WhenCaretInsideNode : MarkerVisibility::Always;
             target.push_back(std::move(marker));
         };
         std::function<void(const InlineCstNodes&, const InlineStyle&, std::vector<InlineRenderItem>&)> append_nodes;
@@ -883,6 +883,7 @@ struct Builder {
                         item.text = inline_source_slice(document, delim.content);
                         item.ensure_special().display = MathDisplayMode::Inline;
                         item.ensure_special().math_delim = semantic.math_delim;
+                        item.ensure_special().ensure_semantic().content_range = delim.content;
                         item.style = style;
                         item.style.bold = false;
                         item.style.italic = false;
@@ -899,6 +900,7 @@ struct Builder {
                         item.source_span = source_span(node.range);
                         auto& special = item.ensure_special().ensure_semantic();
                         special.href = semantic.href;
+                        special.content_range = delim.content;
                         special.title = semantic.title;
                         auto child_style = style; child_style.link = true;
                         if (node.kind == K::Link) {
@@ -926,6 +928,7 @@ struct Builder {
                         auto& special = item.ensure_special().ensure_semantic();
                         special.src = semantic.href;
                         special.alt = semantic.alt;
+                        special.content_range = delim.content;
                         special.title = semantic.title;
                         special.image_width = semantic.image_width;
                         special.image_height = semantic.image_height;

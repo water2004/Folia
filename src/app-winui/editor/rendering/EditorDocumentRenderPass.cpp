@@ -140,6 +140,7 @@ namespace winrt::Folia
                 prepared.layout.Get(),
                 origin,
                 prepared.display.ranges);
+            documentPainter.DrawSyntaxMarkers(prepared.layout.Get(), origin, prepared.display);
             documentPainter.DrawSelection(prepared.layout.Get(), origin, prepared.display.displayToSource);
             documentPainter.DrawSearchHighlights(
                 prepared.layout.Get(), origin, prepared.display.displayToSource);

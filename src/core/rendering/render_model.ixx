@@ -231,6 +231,7 @@ struct InlineRenderItem;
 
 struct InlineRenderSemanticPayload {
     std::u32string source_text;          // exact source spelling for this span
+    std::optional<SourceRange> content_range; // CST content excluding source delimiters
     std::string href, src, alt;          // Image/Link
     std::string footnote_label;          // FootnoteReference / generated footnote controls
     std::optional<std::string> title;
@@ -244,6 +245,8 @@ struct InlineRenderPayload {
     float block_spacing_height = 0.0f;
     std::u32string display_text;         // generated/normalized visual spelling
     std::optional<NodeId> marker_owner;
+    // The owning CST construct, not a second editing coordinate.
+    std::optional<SourceRange> marker_construct;
     MathDisplayMode display = MathDisplayMode::Inline;
     MathDelimiter math_delim = MathDelimiter::InlineDollar;
     MarkerStyle marker_style;

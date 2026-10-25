@@ -237,6 +237,25 @@ namespace winrt::Folia
         AppendDisplayText(display, std::u32string(sourceText.substr(0, length)), sourceSpan, style, marker);
     }
 
+    static void AppendInlineSource(DisplayInlineText& display, folia::InlineRenderItem const& item)
+    {
+        auto const& semantic = item.special().semantic();
+        if (!semantic.content_range)
+        {
+            AppendSourceText(display, semantic.source_text, item.source_span, item.style, false);
+            return;
+        }
+        auto content = *semantic.content_range;
+        auto append = [&](folia::SourceRange range, bool marker) {
+            auto offset = range.start - item.source_span.source_range.start;
+            AppendSourceText(display, std::u32string_view{semantic.source_text}.substr(offset, range.length()),
+                {item.source_span.container_id, range}, item.style, marker);
+        };
+        append({item.source_span.source_range.start, content.start}, true);
+        append(content, false);
+        append({content.end, item.source_span.source_range.end}, true);
+    }
+
     void AppendProjectedSourceText(
         DisplayInlineText& display,
         std::u32string_view text,
@@ -363,28 +382,35 @@ namespace winrt::Folia
         bool highPriority)
     {
         DisplayInlineText display;
+        auto inside = [&](folia::TextSpan span) {
+            return caret.container_id == span.container_id
+                && caret.source_offset >= span.source_range.start
+                && caret.source_offset <= span.source_range.end;
+        };
         for (std::size_t index = 0; index < items.size(); ++index)
         {
             auto const& item = items[index];
-            if (item.kind == folia::InlineRenderItem::Kind::Marker
-                && (item.special().visibility == folia::MarkerVisibility::HiddenButEditable
-                    || item.special().marker_role == folia::MarkerRole::Heading))
-                continue;
+            if (item.kind == folia::InlineRenderItem::Kind::Marker)
+            {
+                auto const& payload = item.special();
+                if (payload.marker_construct)
+                {
+                    auto span = folia::TextSpan{item.source_span.container_id, *payload.marker_construct};
+                    if (payload.visibility == folia::MarkerVisibility::WhenCaretInsideNode && !inside(span)) continue;
+                }
+                if (payload.visibility == folia::MarkerVisibility::HiddenButEditable) continue;
+                if (payload.marker_role == folia::MarkerRole::Heading
+                    && caret.container_id != item.source_span.container_id) continue;
+            }
             if (item.kind == folia::InlineRenderItem::Kind::Link)
             {
-                if (CaretTouchesSpan(caret, item.source_span))
-                {
-                    AppendSourceText(display, item.special().semantic().source_text, item.source_span, item.style, false);
-                }
-                else
-                {
-                    MergeDisplayText(display, BuildDisplayInlineText(item.special().semantic().children, caret, {item.source_span.container_id, item.source_span.source_range.end, folia::TextAffinity::Downstream}, mathJax, svgNormalizer, svgColor, fontSize, containerWidth, svgSupported, requestMath, highPriority));
-                }
+                if (CaretTouchesSpan(caret, item.source_span)) AppendInlineSource(display, item);
+                else MergeDisplayText(display, BuildDisplayInlineText(item.special().semantic().children, caret, {item.source_span.container_id, item.source_span.source_range.end, folia::TextAffinity::Downstream}, mathJax, svgNormalizer, svgColor, fontSize, containerWidth, svgSupported, requestMath, highPriority));
                 continue;
             }
             if (item.kind == folia::InlineRenderItem::Kind::Image)
             {
-                if (CaretTouchesSpan(caret, item.source_span)) AppendSourceText(display, item.special().semantic().source_text, item.source_span, item.style, false);
+                if (CaretTouchesSpan(caret, item.source_span)) AppendInlineSource(display, item);
                 else
                 {
                     auto displayStart = static_cast<std::uint32_t>(folia::utf16_len(display.text));
@@ -405,7 +431,7 @@ namespace winrt::Folia
             {
                 if (!svgSupported)
                 {
-                    AppendSourceText(display, item.special().semantic().source_text, item.source_span, item.style, false);
+                    AppendInlineSource(display, item);
                     continue;
                 }
                 auto displayMath = item.special().display == folia::MathDisplayMode::Block;
@@ -428,13 +454,13 @@ namespace winrt::Folia
                     : contentStart;
                 if (!math || !static_cast<bool>(*math))
                 {
-                    AppendSourceText(display, item.special().semantic().source_text, item.source_span, item.style, false);
+                    AppendInlineSource(display, item);
                     continue;
                 }
 
                 if (editing)
                 {
-                    AppendSourceText(display, item.special().semantic().source_text, item.source_span, item.style, false);
+                    AppendInlineSource(display, item);
                     display.mathPreviews.push_back(DisplayInlineText::MathPreview{
                         *math,
                         folia::TextSpan{item.source_span.container_id, {contentStart, contentEnd}},
@@ -523,6 +549,8 @@ namespace winrt::Folia
                     markerPosition,
                     item.style,
                     EditorDisplayPositionKind::BoundaryDecoration);
+                if (item.special().marker_role == folia::MarkerRole::Heading && !display.ranges.empty())
+                    display.ranges.back().marker = true;
                 if (item.special().marker_role == folia::MarkerRole::BlockSpacing)
                 {
                     auto objectOffset = markerText.find(U'\uFFFC');

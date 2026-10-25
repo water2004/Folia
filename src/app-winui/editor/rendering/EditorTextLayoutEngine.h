@@ -8,6 +8,9 @@ namespace winrt::Folia
     struct InlineStyleRange;
     struct DisplayInlineText;
 
+    std::vector<D2D1_RECT_F> InlineRangeRectangles(
+        IDWriteTextLayout* layout, UINT32 start, UINT32 length, D2D1_POINT_2F origin);
+
     void DrawInlinePresentationBackgrounds(
         EditorRenderResources& resources,
         EditorStyleSheet const& styleSheet,

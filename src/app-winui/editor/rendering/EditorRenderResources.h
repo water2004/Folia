@@ -44,6 +44,7 @@ namespace winrt::Folia
         ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> lineNumberBrush;
         ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> lineNumberBackgroundBrush;
         ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> accentBrush;
+        ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> markerBrush;
         ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> codeBrush;
         ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> panelBrush;
         ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> canvasBrush;
