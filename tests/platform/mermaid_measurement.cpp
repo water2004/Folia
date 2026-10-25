@@ -21,7 +21,7 @@ suite mermaid_measurement = [] {
             auto session=ConfigSession::create();expect(fatal(session.has_value()));
             ConfigValue site;site.kind=ConfigKind::mapping;
             for(auto [key,value]:{std::pair{u"theme",theme_name},{u"look",u"classic"},{u"layout",u"dagre"},{u"fontFamily",u"Arial"}})
-                site.mapping.emplace_back(key,ConfigValue{.kind=ConfigKind::string,.string=value});
+                site.mapping.emplace(key,ConfigValue{.kind=ConfigKind::string,.string=value});
             expect(fatal(session->save_initialize_config(site).has_value()));
             expect(fatal(session->set_site_config(site).has_value()));
             for(const auto& [name,source]:cases) {
@@ -35,7 +35,7 @@ suite mermaid_measurement = [] {
                     output<<svg->svg;expect(output.good());
                 }
             }
-            ConfigValue elk=site;elk.find(u"layout")->string=u"elk";
+            ConfigValue elk=site;elk.mapping.at(u"layout").string=u"elk";
             expect(fatal(session->save_initialize_config(elk).has_value()));
             expect(fatal(session->set_site_config(elk).has_value()));
             expect(!render_mermaid(u"classDiagram\nclass Document",*session));
