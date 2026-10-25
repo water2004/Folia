@@ -126,6 +126,27 @@ class Parser {
     static void add_unique(std::vector<Text>& values,const Text& value) {
         if (std::ranges::find(values,value) == values.end()) values.push_back(value);
     }
+    static std::vector<Text> style_list(View value) {
+        std::vector<Text> output;
+        for(;;) {
+            const auto comma=value.find(u',');
+            const auto item=trim(value.substr(0,comma));
+            if(item.empty()) fail("Expected Class style declaration");
+            output.emplace_back(item);
+            if(comma==value.npos) break;
+            value=trim(value.substr(comma+1));
+        }
+        return output;
+    }
+    void css_class(View ids,View value) {
+        for(;;) {
+            const auto comma=ids.find(u',');const auto id=split(trim(ids.substr(0,comma))).first;
+            if(auto found=indices.find(id);found!=indices.end())
+                result.classes[found->second].css_classes+=u" "+Text{value};
+            if(comma==ids.npos) break;
+            ids.remove_prefix(comma+1);
+        }
+    }
     void open_namespace(View rest) {
         const auto local_id = name(rest); Text label;
         if (take(rest,u"[")) {
@@ -240,6 +261,30 @@ class Parser {
         if (take(rest,u"namespace ")) { open_namespace(rest); return; }
         if (!scopes.empty() && !line.starts_with(u"class ") && !line.starts_with(u"note "))
             fail("Class namespaces contain class, note and namespace declarations");
+        if (take(rest,u"style ")) {
+            const auto id=name(rest);const auto styles=style_list(rest);
+            if(auto found=indices.find(id);found!=indices.end()) {
+                auto& output=result.classes[found->second].styles;
+                output.insert(output.end(),styles.begin(),styles.end());
+            }
+            return;
+        }
+        if (take(rest,u"cssClass ")) {
+            const auto ids=quoted(rest,u'"');const auto value=name(rest);
+            if(!rest.empty()) fail("Unexpected text after Class cssClass");
+            css_class(ids,value);return;
+        }
+        if (take(rest,u"classDef ")) {
+            std::vector<Text> names{name(rest)};
+            while(take(rest,u",")) names.push_back(name(rest));
+            const auto styles=style_list(rest);
+            // ClassDB.defineClass appends these declarations to currently
+            // assigned classes, in statement order (including default).
+            for(const auto& id:names) for(auto& node:result.classes)
+                if(node.css_classes.find(id)!=Text::npos)
+                    node.styles.insert(node.styles.end(),styles.begin(),styles.end());
+            return;
+        }
         if (take(rest,u"direction ")) {
             if (rest != u"LR" && rest != u"RL" && rest != u"TB" && rest != u"BT") fail("Unsupported Class direction");
             result.direction = rest; return;
@@ -264,6 +309,7 @@ class Parser {
                 result.classes[index].label = quoted(rest,u'"');
                 if (!take(rest,u"]")) fail("Unclosed Class display label");
             }
+            if (take(rest,u":::")) css_class(result.classes[index].id,name(rest));
             if (rest.starts_with(u"<<")) {
                 const auto end = rest.find(u">>");
                 if (end == rest.npos) fail("Unclosed Class annotation");

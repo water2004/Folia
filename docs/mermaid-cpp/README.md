@@ -42,7 +42,9 @@ aggregation, composition, dependency, solid/dotted lines, multiplicity and
 direction. Standalone and class-attached notes retain their quoted text, including
 literal newlines. Namespace declarations retain labels, nested/qualified ids,
 parents and class/note membership; a qualified name creates its ancestor
-containers. Custom Class styles, richer content and interfaces rendered as
+containers. Common direct and class-defined fill, border, stroke width/dash and text color
+are supported through style/classDef/cssClass/inline assignments, retaining
+original statement order. Styled typography and interfaces rendered as
 lollipops remain separate work. Unsupported statements return errors.
 
 The Class SVG adapter supports explicit `layout: dagre` with classic appearance

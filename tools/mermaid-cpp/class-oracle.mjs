@@ -15,6 +15,9 @@ for (const file of ['classDb.ts','classTypes.ts']) {
   assert.equal(map.sourcesContent[index].replaceAll('\r\n','\n'),read('packages/mermaid/src/diagrams/class/'+file));
 }
 const cases = [
+  ["class-direct-style", "classDiagram\nclass Document {\n+title String\n+save() bool\n}\nDocument --> Store : saves\nstyle Document fill:#ffeecc,stroke:#aa5500,color:#552200,stroke-width:2px"],
+  ["class-defined-style", "classDiagram\nclass Document:::highlight\nclass Store\nclassDef highlight fill:#ffeecc,stroke:#aa5500,color:#552200,stroke-width:2px\nDocument --> Store : saves"],
+  ["class-assigned-style", "classDiagram\nclass Document {\n+count int$\n+save() bool*\n}\nclass Store\ncssClass \"Document,Store\" highlight\nclassDef highlight fill:#ffeecc,stroke:#aa5500,color:#552200,stroke-width:2px,stroke-dasharray:4 2\nstyle Store fill:#ddffee,stroke:#008855\nDocument --> Store : saves"],
   ['member-breaks','classDiagram\nclass Document {\n+name<br/>String\n+save()<br/>bool\n}'],
   ['namespace','classDiagram\nnamespace Storage {\nclass Document {\n+save() bool\n}\nclass Store\nnote for Store "Local storage"\n}\nDocument --> Store : persists'],
   ['namespace-nested','classDiagram\nnamespace App["Application"] {\nnamespace Storage {\nclass Document\n}\nclass Editor\n}\nEditor --> Document : saves'],
@@ -32,12 +35,14 @@ const cases = [
   ['direction-bt','classDiagram\ndirection BT\nclass A {}\nA : +read()'],
   ['direction-rl','classDiagram-v2\ndirection RL\nclass A <<interface>> {\n+read() String\n}'],
   ['metadata','---\ntitle: Document storage\n---\nclassDiagram\naccTitle: Storage model\naccDescr: Classes used to save documents\n%% comment\nclass Document\nDocument : +name String'],
+  ['style-order','classDiagram\nclassDef highlight fill:#ffeecc\nclass Document:::highlight\nclass Store\nclassDef default stroke:#aa5500\nstyle Missing fill:#abcdef'],
+  ['empty-style','classDiagram\nclass Document\nstyle Document'],
   ['empty','classDiagram\n'],
   ['unclosed-body','classDiagram\nclass Document {\n+name String'],
   ['missing-endpoint','classDiagram\nDocument -->'],
   ['nested-body','classDiagram\nclass Document {\nclass Store {\n}\n}'],
 ];
-const errors = ['empty','unclosed-body','missing-endpoint','nested-body','unclosed-note','namespace-unclosed','namespace-relation'];
+const errors = ['empty-style','empty','unclosed-body','missing-endpoint','nested-body','unclosed-note','namespace-unclosed','namespace-relation'];
 const rows = ['# Original Mermaid 12.2.0 Class parser/DB; UTF-16 hex JSON.'];
 for (const [name,source] of cases) {
   const site = {theme:'default'}; let result = null;
@@ -49,7 +54,7 @@ for (const [name,source] of cases) {
       parameters:m.parameters??'',returnType:m.returnType??'',text:m.text,...m.getDisplayDetails()});
     result = {title:db.getDiagramTitle(),accTitle:db.getAccTitle(),accDescription:db.getAccDescription(),
       direction:db.getDirection(),classes:[...db.getClasses()].map(([id,c])=>({id,label:c.label,type:c.type,parent:c.parent??'',
-        annotations:c.annotations,members:c.members.map(member),methods:c.methods.map(member)})),
+        cssClasses:c.cssClasses,styles:c.styles,annotations:c.annotations,members:c.members.map(member),methods:c.methods.map(member)})),
       namespaces:[...db.getNamespaces().values()].map(n=>({id:n.id,label:n.label,parent:n.parent??'',explicit:n.explicit,
         classes:[...n.classes.keys()],notes:[...n.notes.keys()],children:[...n.children.keys()]})),
       notes:[...db.getNotes().values()].map(n=>({id:n.id,class:n.class??'',text:n.text,parent:n.parent??''})),

@@ -4,6 +4,7 @@ import folia.mermaid.number;
 import folia.mermaid.svg_text;
 import folia.mermaid.flowchart_graph;
 import folia.mermaid.flowchart_svg;
+import folia.mermaid.theme_color;
 
 namespace folia::mermaid {
 namespace {
@@ -14,6 +15,7 @@ std::string xml(std::u16string_view value) {
     auto s = escape_svg_text(value,u"Class text"); if (!s) throw std::runtime_error("Invalid Class XML text");
     std::string out; for (auto c : *s) out += c == '"' ? "&quot;" : std::string(1,c); return out;
 }
+#include "flowchart_styles.inc"
 std::string point(FlowchartPoint p) { return num(p.x)+","+num(p.y); }
 FlowchartPoint mix(FlowchartPoint a,FlowchartPoint b,double x,double y,double d) {
     return {(a.x*x+b.x*y)/d,(a.y*x+b.y*y)/d};
@@ -292,25 +294,29 @@ std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& inp
         svg+="</g>";
         for(std::size_t i=0;i<doc.classes.size();++i) {
             const auto& n=doc.classes[i];const auto& m=measured.nodes[i];const auto& b=boxes[i];const auto& position=placed->nodes[group_count+i];
+            const auto paint=compile_paint({},n.styles);
+            for(const auto& [key,value]:paint.values)
+                if(key.starts_with(u"font-")) return std::unexpected("Class styled typography requires a measured adapter");
+            auto node_theme=theme;node_theme.text=paint.get(u"color",theme.text);
             const auto p=config.padding,x=position.x+8-b.width/2,y=position.y+8-b.height/2;
             svg+="<g class=\"node\" data-class-id=\""+xml(n.id)+"\"><rect class=\"outer-path\" x=\""+num(x)+"\" y=\""+num(y)+
-                "\" width=\""+num(b.width)+"\" height=\""+num(b.height)+"\" fill=\""+theme.fill+"\" stroke=\""+theme.border+"\" stroke-width=\""+num(theme.stroke_width)+"\"/>";
+                "\" width=\""+num(b.width)+"\" height=\""+num(b.height)+"\""+paint.attributes(theme.fill,theme.border,num(theme.stroke_width))+"/>";
             const auto group=[&](std::string_view kind,const std::string& content){svg+="<g class=\"text "+std::string(kind)+"-group\">"+content+"</g>";};
             const bool hidden_empty=m.members.empty()&&m.methods.empty()&&config.hide_empty_members;
             const auto top=[&](const ClassTextBox& t){return hidden_empty?y+p:y+2*p-text_half_line(t);};
-            group("annotation",text(m.annotation,position.x+8-m.annotation.width/2,top(m.annotation),theme));
-            group("label",text(m.label,position.x+8-m.label.width/2,top(m.label)+m.annotation.height,theme,700));
+            group("annotation",text(m.annotation,position.x+8-m.annotation.width/2,top(m.annotation),node_theme));
+            group("label",text(m.label,position.x+8-m.label.width/2,top(m.label)+m.annotation.height,node_theme,700));
             std::string content;double row_y=b.header+2*p;
-            for(std::size_t j=0;j<m.members.size();++j) {content+=text(m.members[j],x+p,top(m.members[j])+row_y,theme,400,n.members[j].classifier);row_y+=m.members[j].height;}
+            for(std::size_t j=0;j<m.members.size();++j) {content+=text(m.members[j],x+p,top(m.members[j])+row_y,node_theme,400,n.members[j].classifier);row_y+=m.members[j].height;}
             group("members",content);content.clear();row_y=b.header+std::max(b.member_height,p/2)+4*p;
-            for(std::size_t j=0;j<m.methods.size();++j) {content+=text(m.methods[j],x+p,top(m.methods[j])+row_y,theme,400,n.methods[j].classifier);row_y+=m.methods[j].height;}
+            for(std::size_t j=0;j<m.methods.size();++j) {content+=text(m.methods[j],x+p,top(m.methods[j])+row_y,node_theme,400,n.methods[j].classifier);row_y+=m.methods[j].height;}
             group("methods",content);
             if(b.extra||!m.members.empty()||!m.methods.empty()) {
                 // Empty group getBBox heights are reduced by PADDING/2 in the
                 // original extra compartment branch, including the empty member group.
                 const double first=y+2*p+b.header,second=first+b.member_height+2*p-(b.extra?p/2:0);
                 for(double line_y:{first,second}) svg+="<path class=\"divider\" d=\"M"+num(x)+","+num(line_y)+"L"+num(x+b.width)+","+num(line_y+0.001)+
-                    "\" stroke=\""+theme.border+"\" stroke-width=\"1\" fill=\"none\"/>";
+                    "\""+paint.attributes(theme.fill,theme.border,num(theme.stroke_width),"0 0")+"/>";
             }
             svg+="</g>";
         }

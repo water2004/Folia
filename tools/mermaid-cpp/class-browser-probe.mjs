@@ -5,6 +5,9 @@ import {resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {chromium} from './oracle/node_modules/playwright-core/index.mjs';
 export const cases = [
+ ["class-direct-style", "classDiagram\nclass Document {\n+title String\n+save() bool\n}\nDocument --> Store : saves\nstyle Document fill:#ffeecc,stroke:#aa5500,color:#552200,stroke-width:2px"],
+ ["class-defined-style", "classDiagram\nclass Document:::highlight\nclass Store\nclassDef highlight fill:#ffeecc,stroke:#aa5500,color:#552200,stroke-width:2px\nDocument --> Store : saves"],
+ ["class-assigned-style", "classDiagram\nclass Document {\n+count int$\n+save() bool*\n}\nclass Store\ncssClass \"Document,Store\" highlight\nclassDef highlight fill:#ffeecc,stroke:#aa5500,color:#552200,stroke-width:2px,stroke-dasharray:4 2\nstyle Store fill:#ddffee,stroke:#008855\nDocument --> Store : saves"],
  ["namespace-compact", "%%{init: {\"class\": {\"hierarchicalNamespaces\": false}}}%%\nclassDiagram\nnamespace App.Storage[\"Storage\"] {\nclass Store\nnote for Store \"Local storage\"\n}\nnamespace App {\nclass Editor\n}\nEditor --> Store : saves"],
  ["namespace-compact-nested", "%%{init: {\"class\": {\"hierarchicalNamespaces\": false}}}%%\nclassDiagram\nnamespace App[\"Application\"] {\nnamespace Storage {\nclass Document\n}\nclass Editor\n}\nEditor --> Document"],
  ["note-emphasis", "classDiagram\nclass Document\nnote for Document \"**Validate** the *document*\nKeep revisions\""],
@@ -35,7 +38,7 @@ export function inspectClass() {
  const matrix=e=>root.getCTM().inverse().multiply(e.getCTM());
  const point=(e,x,y)=>new DOMPoint(x,y).matrixTransform(matrix(e));
  const box=e=>{const b=e.getBBox(),p=point(e,b.x,b.y),q=point(e,b.x+b.width,b.y+b.height);return {x:p.x,y:p.y,width:q.x-p.x,height:q.y-p.y};};
- const paint=e=>{const s=getComputedStyle(e);return {fill:s.fill,stroke:s.stroke,strokeWidth:s.strokeWidth};};
+ const paint=e=>{const s=getComputedStyle(e);return {fill:s.fill,stroke:s.stroke,strokeWidth:s.strokeWidth,strokeDasharray:s.strokeDasharray};};
  const textStyles=e=>{
    const walker=document.createTreeWalker(e,NodeFilter.SHOW_TEXT),runs=[];
    while(walker.nextNode()) {
@@ -93,7 +96,7 @@ export function inspectClass() {
      })});
    }
    return {id,...box(outer),...paint(outer.querySelector('path')??outer),groups,
-     dividers:[...g.querySelectorAll('.divider')].map(e=>box(e))};
+     dividers:[...g.querySelectorAll('.divider')].map(e=>({...box(e),...paint(e.querySelector('path')??e)}))};
  });
  const edges=[...root.querySelectorAll('path.relation')].map(e=>{
    const marker=side=>{const url=e.getAttribute('marker-'+side);if(!url)return null;const id=url.slice(url.lastIndexOf('#')+1,-1),m=root.querySelector('[id="'+id+'"]'),p=m.querySelector('path');return {refX:m.getAttribute('refX'),refY:m.getAttribute('refY'),d:p.getAttribute('d'),...paint(p)};};

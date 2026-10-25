@@ -15,6 +15,8 @@ struct ClassNode {
     std::vector<std::u16string> annotations;
     std::vector<ClassMember> members, methods;
     std::u16string parent;
+    std::u16string css_classes = u"default";
+    std::vector<std::u16string> styles;
 };
 struct ClassRelation {
     std::u16string from, to, title, start_label = u"none", end_label = u"none";

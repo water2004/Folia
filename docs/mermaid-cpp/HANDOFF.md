@@ -1,6 +1,16 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-25, Class note emphasis and compact namespaces verified
+## Current checkpoint - 2026-10-25, Class common paints in progress
+
+- Deliver direct/class-defined fill, border, stroke width/dash and text color
+  through style, classDef, cssClass and inline ::: assignments. Preserve
+  ClassDB statement ordering, member classifiers and measured geometry.
+- Exit: representative parser observations and default/dark SVG comparisons,
+  plus affected Windows checks. Then continue the next required Class boundary.
+  No generic CSS engine, typography expansion or application switch in this batch.
+- Candidate is unverified; previous accepted evidence follows below.
+
+## Previous checkpoint - 2026-10-25, Class note emphasis and compact namespaces verified
 
 - Note emphasis b1ce03a2 delivers measured bold/italic runs, left-aligned explicit
   lines, note colors and attachments. Long notes retain ClassDB nowrap behavior.
