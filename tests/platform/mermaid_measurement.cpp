@@ -10,6 +10,8 @@ using namespace folia::mermaid;
 suite mermaid_measurement = [] {
     "mermaid_sequence_measured_source_to_svg"_test=[] {
         const std::vector<std::pair<std::string,std::u16string>> cases={
+            {"typed-participants",u"sequenceDiagram\nparticipant U@{type: boundary, alias: Editor}\nparticipant C@{type: control} as Save service\nparticipant D@{type: database} as Storage\nU->>C: Save\nC->>D: Commit\nD-->>U: Saved"},
+            {"typed-lifelines",u"sequenceDiagram\nparticipant E@{type: entity} as Document\nparticipant Q@{type: queue} as Pending\nparticipant C@{type: collections} as Revisions\nE->>+Q: Enqueue\nQ->>C: Append\nQ-->>-E: Done"},
             {"numbered",u"sequenceDiagram\nautonumber\nA->>+B: Save\nNote over B: Validate\nB->>B: Commit\nB-->>-A: Done"},
             {"number-controls",u"sequenceDiagram\nautonumber 10 5\nA->>B: Open\nautonumber off\nB-->>A: Ready\nautonumber\nA->>B: Save"},
             {"number-config",u"%%{init: {\"sequence\": {\"showSequenceNumbers\": true}}}%%\nsequenceDiagram\nA->>B: Open\nB-->>A: Ready"},

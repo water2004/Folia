@@ -73,7 +73,11 @@ showSequenceNumbers setting. Notes and activation events do not advance the
 counter; hidden message numbers still do. Number discs retain message bounds
 and theme paints. hideUnusedParticipants filters the displayed actors after
 spacing calculation; mirrorActors controls footer boxes and viewport height.
-Rich labels, extended participants and further Sequence
+Participant metadata uses owned YAML type/alias values, including multiline
+metadata and explicit alias precedence. Classic boundary, control, entity,
+database, collections and queue shapes preserve their original geometry,
+measured labels, lifeline starts and mirrored footer heights.
+Rich labels, participant lifecycle/grouping and further Sequence
 configuration remain subsequent SVG steps.
 Parser support alone does not imply SVG support. Folia's application dependency
 remains unchanged.
