@@ -223,8 +223,11 @@ namespace winrt::Folia
                 }
                 previousSubmission = now;
                 if (!state->attached.load(std::memory_order_acquire)) break;
+                // Scroll frames share the normal UI queue so recurring UI work
+                // cannot postpone them until idle. Display pacing and the single
+                // outstanding request still bound submissions between input turns.
                 auto queued = state->dispatcher.TryEnqueue(
-                    winrt::Microsoft::UI::Dispatching::DispatcherQueuePriority::Low,
+                    winrt::Microsoft::UI::Dispatching::DispatcherQueuePriority::Normal,
                     [state, requestedGeneration, frameId]
                     {
                         auto expected = frameId;
