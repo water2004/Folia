@@ -16,6 +16,11 @@ for (const file of ['sequenceDb.ts','sequenceDiagram.ts']) {
   assert.equal(map.sourcesContent[index].replaceAll('\r\n','\n'),read('packages/mermaid/src/diagrams/sequence/'+file));
 }
 const cases = [
+  ["typed-participants","sequenceDiagram\nparticipant U@{type: boundary, alias: Editor}\nparticipant C@{type: control} as Save service\nparticipant D@{type: database} as Storage\nU->>C: Save\nC->>D: Commit\nD-->>U: Saved"],
+  ["typed-lifelines","sequenceDiagram\nparticipant E@{type: entity} as Document\nparticipant Q@{type: queue} as Pending\nparticipant C@{type: collections} as Revisions\nE->>+Q: Enqueue\nQ->>C: Append\nQ-->>-E: Done"],
+  ["metadata-alias","sequenceDiagram\nparticipant A@{type: database, alias: Ignored} as Storage\nactor B@{type: boundary, alias: Editor}\nA->>B: Read\nparticipant A@{type: queue, alias: Pending}\nB->>A: Save"],
+  ["metadata-multiline","sequenceDiagram\nparticipant A@{\ntype: collections\nalias: Revisions\n}\nA->>B: Read"],
+  ["metadata-incomplete","sequenceDiagram\nparticipant A@{type: database\nA->>B: Read"],
   ["numbered","sequenceDiagram\nautonumber\nA->>+B: Save\nNote over B: Validate\nB->>B: Commit\nB-->>-A: Done"],
   ["number-controls","sequenceDiagram\nautonumber 10 5\nA->>B: Open\nautonumber off\nB-->>A: Ready\nautonumber\nA->>B: Save"],
   ["number-config","%%{init: {\"sequence\": {\"showSequenceNumbers\": true}}}%%\nsequenceDiagram\nA->>B: Open\nB-->>A: Ready"],
@@ -67,7 +72,7 @@ for (const [name,source,options={}] of cases) {
         type:m.type,wrap:m.wrap,activate:m.activate??false,placement:m.placement??-1}))};
     ++successes;
   } catch(error) {
-    assert(['invalid-number','unfinished-message','missing-message-colon','inactive-end','unclosed-region','unexpected-section','unexpected-end'].includes(name),`${name}: ${error.stack}`);
+    assert(['metadata-incomplete','invalid-number','unfinished-message','missing-message-colon','inactive-end','unclosed-region','unexpected-section','unexpected-end'].includes(name),`${name}: ${error.stack}`);
   }
   rows.push([name,hex(source),hex(JSON.stringify(site)),hex(JSON.stringify(result))].join('\t'));
 }

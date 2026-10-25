@@ -58,7 +58,7 @@ suite sequence = [] {
                 expect(m.placement == field(e,u"placement").number);
             }
         }
-        expect(count == 35_u);
+        expect(count == 40_u);
     };
     "mermaid_sequence_owned_requests_and_unsupported_statements"_test = [] {
         auto session = ConfigSession::create(); expect(fatal(session.has_value()));

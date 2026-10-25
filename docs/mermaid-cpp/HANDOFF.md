@@ -1,6 +1,18 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-25, Sequence numbering, visibility and arrows verified
+## Current batch - 2026-10-25, Sequence participant metadata and shapes
+
+- Deliver owned type/alias metadata parsing and the six classic participant shapes:
+  boundary, control, entity, database, collections and queue. Reuse YAML parsing
+  and measured labels; preserve original geometry, lifelines and footer heights.
+- Exit on representative metadata/alias/multiline inputs, one incomplete metadata
+  input, the two prepared shape diagrams in both themes and affected regressions.
+- Next: required Sequence participant lifecycle/grouping, then remaining families
+  and the application chain. No broader compatibility audit or app switch here.
+- Work is on fork/mermaid-development; native verification uses a separate
+  codex/mermaid-cpp-* branch before contribution cherry-picks and PR #1 update.
+
+## Previous checkpoint - 2026-10-25, Sequence numbering, visibility and arrows verified
 
 - Commit 5ebec914 delivers autonumber start/step, off/resume, configured numbers,
   number discs/arrow offsets, hideUnusedParticipants and mirrorActors. Hidden

@@ -3,6 +3,7 @@
 // see docs/mermaid-cpp/README.md for attribution and the supported boundary.
 module folia.mermaid.sequence;
 import std;
+import folia.mermaid.frontmatter;
 
 namespace folia::mermaid {
 namespace {
@@ -134,10 +135,40 @@ class Parser {
         }
         bool human = take(rest,u"actor");
         if (human || take(rest,u"participant")) {
+            Text type = human ? u"actor" : u"participant";
+            std::optional<ConfigValue> metadata;
+            const auto config = rest.find(u"@{");
+            View id = rest;
+            if (config != rest.npos) {
+                id = trim(rest.substr(0,config));
+                const auto end = rest.find(u'}',config+2);
+                if (end == rest.npos) fail("Unclosed Sequence participant metadata");
+                const auto body = trim(rest.substr(config+2,end-config-2));
+                const auto yaml = body.find(u'\n') == body.npos ? u"{\n"+Text{body}+u"\n}" : Text{body}+u"\n";
+                auto parsed = parse_config_yaml(yaml,limits.frontend.yaml);
+                if (!parsed) throw std::runtime_error(parsed.error());
+                metadata = std::move(*parsed);
+                rest = trim(rest.substr(end+1));
+                if (const auto* value = metadata->find(u"type"); value && value->kind != ConfigKind::null) {
+                    if (value->kind != ConfigKind::string) fail("Expected a Sequence participant type string");
+                    type = value->string;
+                }
+            }
             const auto lowered = lower(rest);
             auto as = lowered.find(u" as ");
-            if (as == Text::npos) actor(rest,{},human ? u"actor" : u"participant");
-            else actor(rest.substr(0,as),label(rest.substr(as+4)),human ? u"actor" : u"participant");
+            std::optional<Label> description;
+            if (metadata) {
+                if (!rest.empty()) {
+                    if (!take(rest,u"as")) fail("Expected Sequence participant alias");
+                    description = label(rest);
+                }
+                if (const auto* alias = metadata->find(u"alias"); alias && alias->kind == ConfigKind::string &&
+                    !alias->string.empty() && (!description || description->text == id))
+                    description = Label{alias->string,description ? description->wrap : auto_wrap};
+            } else if (as != Text::npos) {
+                id = rest.substr(0,as); description = label(rest.substr(as+4));
+            }
+            actor(id,std::move(description),type);
             return;
         }
         if (take(rest,u"activate")) { message(Text{rest},{},label({}),SequenceKind::active_start); return; }
@@ -201,7 +232,14 @@ public:
         const View source = encoded;
         bool header = false;
         while (offset < source.size()) {
-            const auto end = source.find_first_of(u"\n;",offset);
+            auto end = source.find_first_of(u"\n;",offset);
+            // CONFIG_CONTENT is one grammar token, including multiline YAML.
+            const auto config = source.find(u"@{",offset);
+            if (config != source.npos && (end == source.npos || config < end)) {
+                const auto close = source.find(u'}',config+2);
+                if (close == source.npos) fail("Unclosed Sequence participant metadata");
+                end = source.find_first_of(u"\n;",close+1);
+            }
             View line = trim(source.substr(offset,end == source.npos ? source.size()-offset : end-offset));
             if (const auto comment = line.find(u'#'); comment != line.npos) line = trim(line.substr(0,comment));
             if (!line.empty() && !line.starts_with(u"%%")) {
