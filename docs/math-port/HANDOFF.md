@@ -2,11 +2,21 @@
 
 恢复/压缩后先实际读本文。架构、职责和详细验收见 [architecture](native-raii-architecture.md)、[files](native-raii-files.json)、[acceptance](native-raii-acceptance.md)。只复查新变化；ignored候选用 `rg --no-ignore`。
 
-## 当前 checkpoint：0.3.2 发布进行中（2026-10-25）
+## 当前 checkpoint：只装饰 marker（2026-10-25，用户纠正后）
+
+- 用户明确：**背景、轮廓和线条只属于 marker 本身，不属于被包裹的正文**；保留平时隐藏、点击编辑时显示。上轮把整段正文画框是错误实现，用户已否定，未提交。本轮已删除整段 StructureRange 投影和绘制，只使用现有 InlineStyleRange.marker。禁止子代理；数学保持正文原位编辑和异步内存预览。
+- Web参考已实际查阅 SilverBullet `docs.silverbullet.md/API/syntax` 的 startMarkerClass/bodyClass/endMarkerClass 和 `client/styles/editor.scss` 的 sb-meta 独立样式（尤其删除线排除 marker）。只借鉴 marker/body 分离，原生 D2D 绘制 marker 淡底色与细边线，不引入 WebView/逐 span 控件。
+- 实现：CST owning range 控制显隐；CST content_range 区分数学/链接/图片的定界符和内容，编辑时继续逐字显示原 source（含实体和转义），不改为语义文本。Painter 只绘制 marker=true 的范围；复用一支 brush，无整段装饰列表、额外控件、IO、解析或选区体系。标题 marker 同样按焦点显示；打印不画标记背景。
+- 最终验收：Core **752项/499404断言**、platform **82项/3446断言**、WinUI **32项/775断言**全部通过，Debug应用构建成功。新增检查只允许 marker 进入装饰范围，正文/链接标题/TeX/图片alt不得进入；含跨行几何、Unicode、嵌套、实体源文保留、撤销及真实点击展开不误选。日志 `build/marker-only-{core-final,platform,app-tests,app-build-final}.log`。未改数学引擎，不重跑旧数学宽审。
+- 界面已实际核验：阅读态正文无新增底色/轮廓；点击粗体仅两端星号有底色细线，中间文字无框且无选区。使用调试版默认回退主题（工具启动cwd非应用目录导致主题文件路径提示），未测自定义主题。旧测试窗口已关闭；当前新 Debug 窗口 PID8296 保留本轮生成的未保存演示文字供查看，无用户文件更改。无活动 agent/build。下一步为用户验看效果，不自动加正文容器、改版本或发布。
+- 修正代码与正式测试已本地提交 `f1e0af64`（12文件，287新增/26删除），未推送；错误的整段装饰实现没有提交。版本保持0.3.2。
+- 0.3.2 已发布，tag 固定 `e9b48e4a`；CI [40167476352](https://github.com/water2004/Folia/actions/runs/40167476352) 成功，公开/latest、MSI及checksum一致。`Folia-0.3.2-x64.msi` 53,485,235 bytes，SHA256 `9933ab6b2d2efaffb2c156dac081029f328db314721df120f59ed83b7b4b186a`，证据 `build/release-0.3.2-published.json`。未安装CI产物；已发布版本仍含旧的永久隐藏交互。本轮不改版本、不移动tag、不自动发布。
+
+## 历史：0.3.2 发布过程（已完成）
 
 - 用户已明确授权推送0.3.2，按既有tag触发release.yml发布；版本统一更新CMake/MSI默认/manifest/rc/About/README，新增release-notes/v0.3.2.md。此前不发布/固定0.3.1仅属上一阶段约束。
-- 远端已fetch，master无新提交，本地10项已验收提交待推送；工作开始时干净，v0.3.2本地tag不存在。应用/Core/platform/math的最终验收见下方，不重复宽审。
-- 下一步：版本/发布配置校验→提交→master与v0.3.2标签推送→等待既有GitHub Release CI成功及MSI/checksum验收。禁止移动已有tag。无本地build或agent。
+- 版本/XML/workflow/notes静态校验通过，master及新annotated tag已原子推送；v0.3.2固定在`e9b48e4a`。既有tag push流水线已触发：[40167476352](https://github.com/water2004/Folia/actions/runs/40167476352)。应用/Core/platform/math既有验收见下方。
+- 发布已完成，最终验收以上方 checkpoint 为准。禁止移动已有 tag。
 
 ## 历史验收：编辑体验、WinUI生命周期与math优化（2026-10-25）
 
