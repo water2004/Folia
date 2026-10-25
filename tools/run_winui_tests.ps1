@@ -1,5 +1,8 @@
 [CmdletBinding()]
-param([ValidateSet('Debug', 'Release')][string]$Configuration = 'Debug')
+param(
+    [ValidateSet('Debug', 'Release')][string]$Configuration = 'Debug',
+    [string]$TestFilter = '*'
+)
 
 # Run after build_app.ps1. Reuse its exact module/PCH/runtime/link settings so
 # these tests exercise the production controllers, not a separate model.
@@ -93,7 +96,7 @@ Set-Content -LiteralPath $linkResponse -Encoding ascii -Value ((@(
     @($appObjects + $testObjects | ForEach-Object { '"{0}"' -f $_ }) + $libraryArgs) -join "`n")
 & link.exe "@$linkResponse"
 if ($LASTEXITCODE -ne 0) { throw 'WinUI test link failed.' }
-$process = Start-Process -FilePath $executable -WorkingDirectory $app -WindowStyle Hidden -PassThru `
+$process = Start-Process -FilePath $executable -ArgumentList "`"$TestFilter`"" -WorkingDirectory $app -WindowStyle Hidden -PassThru `
     -RedirectStandardOutput (Join-Path $scratch 'stdout.log') -RedirectStandardError (Join-Path $scratch 'stderr.log')
 $null = $process.Handle
 if (-not $process.WaitForExit(60000)) {

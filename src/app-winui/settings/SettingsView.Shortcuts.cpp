@@ -131,9 +131,9 @@ namespace winrt::Folia
             scope.Items().Append(box_value(Localize(L"ShortcutScopeCode")));
             scope.Items().Append(box_value(Localize(L"ShortcutScopeMath")));
             scope.SelectedIndex(ShortcutScopeIndex(binding.scope));
-            scope.SelectionChanged([this, index, scope](auto const&, auto const&)
+            scope.SelectionChanged([this, index](auto const& sender, auto const&)
             {
-                if (!refreshing_) ChangeShortcutScope(index, scope.SelectedIndex());
+                if (!refreshing_) ChangeShortcutScope(index, sender.template as<ComboBox>().SelectedIndex());
             });
             Grid::SetColumn(scope, 1);
             row.Children().Append(scope);
