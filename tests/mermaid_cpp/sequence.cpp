@@ -71,7 +71,7 @@ suite sequence = [] {
         source.clear();
         expect(bool(first->messages[0].message == u"Save"));
         for (const auto bad : {u"sequenceDiagram\nautonumber invalid\nA->>B: Go",
-            u"sequenceDiagram\nparticipant A@{type:database}",u"sequenceDiagram\nA->>-B: Invalid"})
+            u"sequenceDiagram\nparticipant A@{type: database",u"sequenceDiagram\nA->>-B: Invalid"})
             expect(!prepare_sequence(bad,*session));
         SequenceLimits limits; limits.actors = 1;
         expect(!prepare_sequence(u"sequenceDiagram\nA->>B: Go",*session,limits));
