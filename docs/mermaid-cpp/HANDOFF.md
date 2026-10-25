@@ -1,15 +1,45 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-25, compact Class namespaces in progress
+## Current checkpoint - 2026-10-25, Class note emphasis and compact namespaces verified
 
-- Note emphasis b1ce03a2 is pushed; Windows verification is running at
-  https://github.com/zhao0349/Folia/actions/runs/40202478829 .
-- Next batch connects class.hierarchicalNamespaces=false to the measured
-  rendering projection: omit implicit ancestors, flatten explicit groups,
-  use qualified-id titles and preserve class/note attachments.
-- Exit: two original compact namespace inputs in both themes and affected
-  Windows checks. Then proceed to remaining Class styles/layout/family work.
-- Candidate is unverified; no application switch or upstream update yet.
+- Note emphasis b1ce03a2 delivers measured bold/italic runs, left-aligned explicit
+  lines, note colors and attachments. Long notes retain ClassDB nowrap behavior.
+- Compact namespaces 5213e3d4 connects class.hierarchicalNamespaces=false to
+  the measured rendering projection: omit implicit ancestors, flatten explicit
+  groups, use qualified-id titles and retain class/note ownership.
+- Correction 11b33fdf rounds intrinsic SVG viewport dimensions up while keeping
+  precise viewBox bounds. This prevents CSS width rounding from scaling font
+  rasterization down. Final verification head 11b33fdf passed all four Windows
+  standalone/integrated Debug/Release jobs:
+  https://github.com/zhao0349/Folia/actions/runs/40203191310
+- Integrated jobs passed FoliaTests, FoliaWindowsEditorTests and both Mermaid
+  suites. Forty-eight Class SVG comparisons cover 24 diagrams/both themes,
+  including both batches. Existing 92 Flowchart, 82 Sequence and 96 real
+  browser/DirectWrite comparisons passed. Tolerances unchanged. Both batches
+  met exit conditions; do not expand their verification matrix.
+- Final Release evidence and eight visually inspected new previews are in
+  build/mermaid-cpp/class-note-compact-verified (class-browser/comparison.json,
+  text-comparison.json, pie-svg and native-preview.png). Earlier run 40202478829
+  exposed the 0.35px long-note width difference; it is superseded by the final
+  verified head. Diagnostic transformed SVGs in class-note-viewport-check were
+  only a focused diagnosis, not build evidence. No acceptance failure remains.
+- Contribution equivalents a72cf41b/8bc62383/ab4a5dc3 are on feat/mermaid-cpp-port
+  in build/mermaid-cpp/entry-contribution. Runtime/tests match the verified head;
+  this documentation checkpoint follows it. No AGENTS.md difference against
+  PR base 508423f2. Delivery-triggered reruns are separate from completed
+  implementation validation. PR #1 stays open/unmerged:
+  https://github.com/water2004/Folia/pull/1
+- Next functional boundary: common Class direct/class-defined paints. Four
+  original observations are in build/mermaid-cpp/class-style-next/original.json
+  (class-direct-style and class-defined-style, both themes). Start from
+  ClassDB.setCssStyle/defineClass/setCssClass, classDiagram.jison style statements
+  and shape style resolution. Preserve member classifiers and measured geometry.
+  Exit on these representative inputs and affected checks, then continue the
+  remaining required Class configuration/layout and family chain.
+- Folia still uses Rust in the application. Default Class ELK, remaining required
+  families/configuration and app integration remain. Local MSVC/CMake are
+  unavailable; no WinUI/GPU/DPI or arbitrary-font parity claim. No uncommitted
+  implementation candidate or live local browser/build/agent remains.
 
 ## Previous checkpoint - 2026-10-25, Class note emphasis in progress
 
