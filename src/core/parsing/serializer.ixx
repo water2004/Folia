@@ -13,6 +13,24 @@ import folia.core.utf;
 
 export namespace folia {
 
+// Formatting for newly inserted image source; existing inline source is saved verbatim.
+inline std::u32string serialize_image_source(std::u32string_view destination, std::u32string_view alt = {}) {
+    std::u32string result = U"![";
+    for (auto c : alt) {
+        if (c == U'\\' || c == U'[' || c == U']') result += U'\\';
+        result += c;
+    }
+    result += U"](<";
+    for (auto c : destination) {
+        if (c == U'\n') { result += U"%0A"; continue; }
+        if (c == U'\r') { result += U"%0D"; continue; }
+        if (c == U'\\' || c == U'<' || c == U'>') result += U'\\';
+        result += c;
+    }
+    result += U">)";
+    return result;
+}
+
 struct SerializedSourceMap {
     NodeId container_id{};
     // Index i stores the serialized Markdown offset for source offset i.
