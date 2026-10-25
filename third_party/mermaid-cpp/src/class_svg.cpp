@@ -120,7 +120,7 @@ std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& inp
             if(points.size()<2) return std::unexpected("Class relation needs a routed path");
             shorten(points.front(),points[1],e.start);shorten(points.back(),points[points.size()-2],e.end);
             svg+="<path class=\"relation\" d=\""+curve(points)+"\" fill=\"none\" stroke=\""+theme.line+"\" stroke-width=\""+num(theme.stroke_width)+"\"";
-            if(e.dotted) svg+=" stroke-dasharray=\"3\"";
+            svg+=e.dotted?" stroke-dasharray=\"3\"":" stroke-dasharray=\"0\"";
             if(e.start!=ClassMarker::none) svg+=" marker-start=\"url(#"+marker_id(e.start,true)+")\"";
             if(e.end!=ClassMarker::none) svg+=" marker-end=\"url(#"+marker_id(e.end,false)+")\"";
             svg+="/>";
