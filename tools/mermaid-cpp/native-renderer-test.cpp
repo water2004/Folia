@@ -29,13 +29,17 @@ suite host_contract = [] {
         expect(render(source).text == light.text);
     };
     "mermaid_host_family_defaults_and_errors"_test = [] {
-        for (auto source : {"packet\n0-7: \"Header\"", "flowchart TD\nA-->B", "sequenceDiagram\nA->>B: Save"}) {
+        for (auto source : {"packet\n0-7: \"Header\"", "sequenceDiagram\nA->>B: Save"}) {
             auto result = render(source);
             expect(result.status == 0_i) << result.text;
         }
         auto default_class = render("classDiagram\nclass Document");
         expect(default_class.status == 1_i);
         expect(default_class.text.find("ELK") != std::string::npos);
+        auto default_flow = render("flowchart TD\nA-->B");
+        expect(default_flow.status == 1_i);
+        auto explicit_flow = render("---\nconfig:\n  layout: dagre\n---\nflowchart TD\nA-->B");
+        expect(explicit_flow.status == 0_i) << explicit_flow.text;
         auto explicit_class = render("---\nconfig:\n  layout: dagre\n---\nclassDiagram\nclass Document");
         expect(explicit_class.status == 0_i) << explicit_class.text;
         auto invalid = render("\xff");
