@@ -4,6 +4,8 @@ import {readFileSync, writeFileSync, readdirSync} from 'node:fs';
 import {JSDOM} from './oracle/node_modules/jsdom/lib/api.js';
 const dom = new JSDOM('<!doctype html><body></body>');
 globalThis.window = dom.window; globalThis.document = dom.window.document;
+// Use DOM CSS declaration validation for the browser color-detection branch.
+window.CSS = {supports(property,value) {const style=document.createElement('span').style;style.setProperty(property,value);return !!style.getPropertyValue(property);}};
 const {frontend} = await import('./frontend-oracle.mjs');
 const {read, hex} = await import('./config-reference.mjs');
 const {default: mermaid} = await import('./oracle/node_modules/mermaid/dist/mermaid.core.mjs');
@@ -16,6 +18,11 @@ for (const file of ['sequenceDb.ts','sequenceDiagram.ts']) {
   assert.equal(map.sourcesContent[index].replaceAll('\r\n','\n'),read('packages/mermaid/src/diagrams/sequence/'+file));
 }
 const cases = [
+  ["participant-boxes","sequenceDiagram\nbox rgb(230,240,255) Client\nactor U as User\nparticipant E as Editor\nend\nbox transparent Storage\nparticipant D@{type: database} as Documents\nend\nU->>E: Save\nE->>D: Commit\nD-->>U: Saved"],
+  ["participant-box-title","sequenceDiagram\nbox LightGray Document processing service\nparticipant A as Service\nend\nparticipant B as Store\nA->>+B: Save\nB-->>-A: Done"],
+  ["participant-box-wrap","%%{init: {\"sequence\": {\"mirrorActors\": false}}}%%\nsequenceDiagram\nbox transparent wrap: Document processing and synchronization service across local storage\nparticipant A as Service\nend\nbox\nparticipant B as Storage\nend\nA->>B: Save\nB-->>A: Done"],
+  ["unclosed-box","sequenceDiagram\nbox Client\nparticipant A"],
+  ["duplicate-box","sequenceDiagram\nbox Client\nparticipant A\nend\nbox Server\nparticipant A\nend\nA->>B: Save"],
   ["typed-participants","sequenceDiagram\nparticipant U@{type: boundary, alias: Editor}\nparticipant C@{type: control} as Save service\nparticipant D@{type: database} as Storage\nU->>C: Save\nC->>D: Commit\nD-->>U: Saved"],
   ["typed-lifelines","sequenceDiagram\nparticipant E@{type: entity} as Document\nparticipant Q@{type: queue} as Pending\nparticipant C@{type: collections} as Revisions\nE->>+Q: Enqueue\nQ->>C: Append\nQ-->>-E: Done"],
   ["metadata-alias","sequenceDiagram\nparticipant A@{type: database, alias: Ignored} as Storage\nactor B@{type: boundary, alias: Editor}\nA->>B: Read\nparticipant A@{type: queue, alias: Pending}\nB->>A: Save"],
@@ -67,12 +74,13 @@ for (const [name,source,options={}] of cases) {
     mermaid.initialize({...prepared.effective,startOnLoad:false});
     const {db} = await mermaid.mermaidAPI.getDiagramFromText(prepared.code.cleaned,{title:prepared.title});
     result = {title:db.getDiagramTitle(),accTitle:db.getAccTitle(),accDescription:db.getAccDescription(),
-      actors:[...db.getActors()].map(([id,a])=>({id,name:a.name,description:a.description,type:a.type,wrap:a.wrap})),
+      actors:[...db.getActors()].map(([id,a])=>({id,name:a.name,description:a.description,type:a.type,wrap:a.wrap,box:a.box?db.getBoxes().indexOf(a.box):-1})),
+      boxes:db.getBoxes().map(b=>({name:b.name??'',fill:b.fill,wrap:b.wrap,actors:b.actorKeys})),
       messages:db.getMessages().map(m=>({id:m.id,from:m.from??'',to:m.to??'',message:m.message,
         type:m.type,wrap:m.wrap,activate:m.activate??false,placement:m.placement??-1}))};
     ++successes;
   } catch(error) {
-    assert(['metadata-incomplete','invalid-number','unfinished-message','missing-message-colon','inactive-end','unclosed-region','unexpected-section','unexpected-end'].includes(name),`${name}: ${error.stack}`);
+    assert(['unclosed-box','duplicate-box','metadata-incomplete','invalid-number','unfinished-message','missing-message-colon','inactive-end','unclosed-region','unexpected-section','unexpected-end'].includes(name),`${name}: ${error.stack}`);
   }
   rows.push([name,hex(source),hex(JSON.stringify(site)),hex(JSON.stringify(result))].join('\t'));
 }

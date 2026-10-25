@@ -77,7 +77,10 @@ Participant metadata uses owned YAML type/alias values, including multiline
 metadata and explicit alias precedence. Classic boundary, control, entity,
 database, collections and queue shapes preserve their original geometry,
 measured labels, lifeline starts and mirrored footer heights.
-Rich labels, participant lifecycle/grouping and further Sequence
+Participant boxes retain ordered membership, literal CSS colors, measured and
+wrapped titles, group margins, header offsets and footer-dependent backgrounds.
+Incomplete boxes and conflicting participant membership return errors.
+Rich labels, participant lifecycle and further Sequence
 configuration remain subsequent SVG steps.
 Parser support alone does not imply SVG support. Folia's application dependency
 remains unchanged.

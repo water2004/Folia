@@ -1,6 +1,16 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-25, Sequence participant metadata and shapes verified
+## Current batch - 2026-10-25, participant grouping then lifecycle
+
+- Deliver box parsing, measured titles/margins, background bounds and footer
+  placement. Exit on the two prepared grouping inputs, a wrapped/no-footer
+  configuration, incomplete/duplicate-group errors and affected checks.
+- Then deliver create/destroy participant events, message endpoints, shifted
+  headers/footers and clipped lifelines with representative ordinary/self and
+  activation messages. Keep the two batches separately committed and verified.
+- PR #1 is open at d9651048; no merge. Development starts from 91c9bef6.
+
+## Previous checkpoint - 2026-10-25, Sequence participant metadata and shapes verified
 
 - Commits dba432ed/347187cd/88a2212e deliver owned YAML type/alias metadata,
   multiline metadata and explicit alias precedence; classic boundary, control,

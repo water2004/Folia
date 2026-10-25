@@ -31,7 +31,7 @@ struct SequenceTextBox {
     double line_height = 0;
 };
 struct SequenceMeasurements {
-    std::vector<SequenceTextBox> actors, messages;
+    std::vector<SequenceTextBox> actors, messages, boxes;
     // Layout-dependent wrapping calls the host's real text measurement.
     std::function<std::expected<SequenceTextBox,std::string>(std::u16string_view,double)> wrap;
 };

@@ -10,6 +10,9 @@ using namespace folia::mermaid;
 suite mermaid_measurement = [] {
     "mermaid_sequence_measured_source_to_svg"_test=[] {
         const std::vector<std::pair<std::string,std::u16string>> cases={
+            {"participant-boxes",u"sequenceDiagram\nbox rgb(230,240,255) Client\nactor U as User\nparticipant E as Editor\nend\nbox transparent Storage\nparticipant D@{type: database} as Documents\nend\nU->>E: Save\nE->>D: Commit\nD-->>U: Saved"},
+            {"participant-box-title",u"sequenceDiagram\nbox LightGray Document processing service\nparticipant A as Service\nend\nparticipant B as Store\nA->>+B: Save\nB-->>-A: Done"},
+            {"participant-box-wrap",u"%%{init: {\"sequence\": {\"mirrorActors\": false}}}%%\nsequenceDiagram\nbox transparent wrap: Document processing and synchronization service across local storage\nparticipant A as Service\nend\nbox\nparticipant B as Storage\nend\nA->>B: Save\nB-->>A: Done"},
             {"typed-participants",u"sequenceDiagram\nparticipant U@{type: boundary, alias: Editor}\nparticipant C@{type: control} as Save service\nparticipant D@{type: database} as Storage\nU->>C: Save\nC->>D: Commit\nD-->>U: Saved"},
             {"typed-lifelines",u"sequenceDiagram\nparticipant E@{type: entity} as Document\nparticipant Q@{type: queue} as Pending\nparticipant C@{type: collections} as Revisions\nE->>+Q: Enqueue\nQ->>C: Append\nQ-->>-E: Done"},
             {"numbered",u"sequenceDiagram\nautonumber\nA->>+B: Save\nNote over B: Validate\nB->>B: Commit\nB-->>-A: Done"},

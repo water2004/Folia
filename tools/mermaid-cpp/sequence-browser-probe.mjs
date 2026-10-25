@@ -8,6 +8,9 @@ import {chromium} from './oracle/node_modules/playwright-core/index.mjs';
 const lock=JSON.parse(readFileSync('docs/mermaid-cpp/source-lock.json'));
 for(const f of lock.files) assert.equal(createHash('sha256').update(readFileSync('.reference/mermaid-js/'+f.path)).digest('hex'),f.sha256,f.path);
 const cases=[
+ ["participant-boxes","sequenceDiagram\nbox rgb(230,240,255) Client\nactor U as User\nparticipant E as Editor\nend\nbox transparent Storage\nparticipant D@{type: database} as Documents\nend\nU->>E: Save\nE->>D: Commit\nD-->>U: Saved"],
+ ["participant-box-title","sequenceDiagram\nbox LightGray Document processing service\nparticipant A as Service\nend\nparticipant B as Store\nA->>+B: Save\nB-->>-A: Done"],
+ ["participant-box-wrap","%%{init: {\"sequence\": {\"mirrorActors\": false}}}%%\nsequenceDiagram\nbox transparent wrap: Document processing and synchronization service across local storage\nparticipant A as Service\nend\nbox\nparticipant B as Storage\nend\nA->>B: Save\nB-->>A: Done"],
  ["typed-participants","sequenceDiagram\nparticipant U@{type: boundary, alias: Editor}\nparticipant C@{type: control} as Save service\nparticipant D@{type: database} as Storage\nU->>C: Save\nC->>D: Commit\nD-->>U: Saved"],
  ["typed-lifelines","sequenceDiagram\nparticipant E@{type: entity} as Document\nparticipant Q@{type: queue} as Pending\nparticipant C@{type: collections} as Revisions\nE->>+Q: Enqueue\nQ->>C: Append\nQ-->>-E: Done"],
  ["cross-async","sequenceDiagram\nautonumber\nA-xB: Cancel\nB--xA: Rejected\nA-)B: Start\nB--)A: Accepted\nB-)B: Continue"],

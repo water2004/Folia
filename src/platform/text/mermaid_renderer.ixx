@@ -207,6 +207,11 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             return measure(joined);
         };
         sequence_measurements.wrap=wrap;
+        for(const auto& group:seq->document.boxes) {
+            auto box=measure(group.name);
+            if(!box) return std::unexpected(box.error());
+            sequence_measurements.boxes.push_back(*box);
+        }
         for(const auto& actor:seq->document.actors) {
             auto box=actor.wrap?wrap(actor.description,seq->config.width-2*seq->config.wrap_padding):measure(actor.description);
             if(!box) return std::unexpected(box.error());

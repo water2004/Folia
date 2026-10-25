@@ -38,6 +38,17 @@ suite sequence = [] {
                 const auto& a = actual->actors[i]; const auto& e = actors[i];
                 same(a.id,e,u"id"); same(a.name,e,u"name"); same(a.description,e,u"description"); same(a.type,e,u"type");
                 expect(a.wrap == field(e,u"wrap").boolean) << fields[0];
+                expect((a.box?static_cast<double>(*a.box):-1) == field(e,u"box").number) << fields[0];
+            }
+            const auto& boxes = field(expected,u"boxes").sequence;
+            expect(fatal(actual->boxes.size() == boxes.size())) << fields[0];
+            for(std::size_t i=0;i<boxes.size();++i) {
+                const auto& a=actual->boxes[i];const auto& e=boxes[i];
+                same(a.name,e,u"name");same(a.fill,e,u"fill");
+                expect(a.wrap==field(e,u"wrap").boolean);
+                const auto& ids=field(e,u"actors").sequence;
+                expect(fatal(a.actors.size()==ids.size()));
+                for(std::size_t j=0;j<ids.size();++j) expect(bool(a.actors[j]==ids[j].string));
             }
             const auto& messages = field(expected,u"messages").sequence;
             expect(fatal(actual->messages.size() == messages.size())) << fields[0];
@@ -58,7 +69,7 @@ suite sequence = [] {
                 expect(m.placement == field(e,u"placement").number);
             }
         }
-        expect(count == 40_u);
+        expect(count == 45_u);
     };
     "mermaid_sequence_owned_requests_and_unsupported_statements"_test = [] {
         auto session = ConfigSession::create(); expect(fatal(session.has_value()));

@@ -4,6 +4,7 @@
 module folia.mermaid.sequence;
 import std;
 import folia.mermaid.frontmatter;
+import folia.mermaid.theme_color;
 
 namespace folia::mermaid {
 namespace {
@@ -30,6 +31,7 @@ class Parser {
     SequenceLimits limits;
     std::map<Text,std::size_t,std::less<>> actor_index;
     std::map<Text,int,std::less<>> activations;
+    std::optional<std::size_t> current_box;
     struct Region { View keyword; SequenceKind start, end; View section; SequenceKind branch; };
     static constexpr Region region_types[] = {
         {u"loop",SequenceKind::loop_start,SequenceKind::loop_end,{},{}},
@@ -61,14 +63,23 @@ class Parser {
         if (value.empty() || value.find_first_of(u"<>:,+;@()\\/") != value.npos)
             fail("Expected a supported Sequence actor identifier");
         const auto found = actor_index.find(value);
+        auto box = current_box;
+        if (found != actor_index.end()) {
+            auto& old = result.actors[found->second];
+            if (old.box && current_box && old.box != current_box)
+                fail("A Sequence participant cannot belong to two boxes");
+            if (old.box) box = old.box;
+            old.box = box;
+        }
         if (found != actor_index.end() && !description) return Text{value};
         SequenceActor a{Text{value},Text{value},description ? description->text : Text{value},
-            Text{type},description ? description->wrap : auto_wrap};
+            Text{type},description ? description->wrap : auto_wrap,box};
         if (found != actor_index.end()) result.actors[found->second] = std::move(a);
         else {
             if (result.actors.size() >= limits.actors) fail("Sequence actor limit exceeded");
             actor_index.emplace(value,result.actors.size()); result.actors.push_back(std::move(a));
         }
+        if (current_box) result.boxes[*current_box].actors.emplace_back(value);
         return Text{value};
     }
     void message(Text from, Text to, Label text, SequenceKind type, bool activate = false, int placement = -1) {
@@ -83,6 +94,31 @@ class Parser {
     }
     void statement(View line) {
         View rest = line;
+        if (current_box) {
+            if (take(rest,u"end") && rest.empty()) { current_box.reset(); return; }
+            rest = line;
+            if (!take(rest,u"participant") && !take(rest,u"actor"))
+                fail("Expected a participant declaration or end inside a Sequence box");
+            rest = line;
+        }
+        if (take(rest,u"box")) {
+            auto end = rest.find_first_of(u" \t");
+            const auto folded = lower(rest);
+            if (folded.starts_with(u"rgb") || folded.starts_with(u"hsl")) {
+                const auto close = rest.rfind(u')');
+                if (close != rest.npos) end = close+1;
+            }
+            auto color = rest.substr(0,end);
+            bool valid = color == u"transparent";
+            if (!valid && !color.empty()) {
+                try { (void)theme_detail::color_is_dark(color); valid = true; }
+                catch (const std::runtime_error&) {}
+            }
+            auto title = label(valid && end != rest.npos ? rest.substr(end) : valid ? View{} : rest);
+            result.boxes.push_back({std::move(title.text),valid?Text{color}:u"transparent",title.wrap,{}});
+            current_box = result.boxes.size()-1;
+            return;
+        }
         if (take(rest,u"autonumber")) {
             std::optional<double> start, step;
             const bool visible = lower(rest) != u"off";
@@ -253,6 +289,7 @@ public:
         }
         if (!header) fail("Expected Sequence header");
         if (!regions.empty()) fail("Unclosed Sequence control region");
+        if (current_box) fail("Unclosed Sequence participant box");
         result.effective_config = std::move(prepared.effective_config);
         return std::move(result);
     }

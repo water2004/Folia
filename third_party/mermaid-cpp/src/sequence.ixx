@@ -17,6 +17,12 @@ enum class SequenceKind {
 struct SequenceActor {
     std::u16string id, name, description, type = u"participant";
     bool wrap = false;
+    std::optional<std::size_t> box;
+};
+struct SequenceBox {
+    std::u16string name, fill;
+    bool wrap = false;
+    std::vector<std::u16string> actors;
 };
 struct SequenceMessage {
     std::u16string id, from, to, message;
@@ -31,6 +37,7 @@ struct SequenceInput {
     std::u16string title, acc_title, acc_description;
     std::vector<SequenceActor> actors;
     std::vector<SequenceMessage> messages;
+    std::vector<SequenceBox> boxes;
     ConfigValue effective_config;
 };
 struct SequenceLimits {
