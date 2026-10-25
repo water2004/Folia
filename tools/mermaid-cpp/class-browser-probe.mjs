@@ -5,6 +5,7 @@ import {resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {chromium} from './oracle/node_modules/playwright-core/index.mjs';
 export const cases = [
+ ["display-emphasis","classDiagram\nclass D[\"Document **model**\"] {\n+**name** String\n+save() *bool*\n}\nD --> Store : **save** changes"],
  ["display-lines","classDiagram\nclass D[\"Document<br/>model\"] {\n+name<br/>String\n+save()<br/>bool\n}\nD --> Store : save<br/>changes"],
  ["display-entities","classDiagram\nclass D[\"Editor &amp; viewer\"]\nD --> Store : save #38; reload"],
  ["namespace","classDiagram\nnamespace Storage {\nclass Document {\n+save() bool\n}\nclass Store\nnote for Store \"Local storage\"\n}\nDocument --> Store : persists"],
@@ -30,6 +31,16 @@ export function inspectClass() {
  const point=(e,x,y)=>new DOMPoint(x,y).matrixTransform(matrix(e));
  const box=e=>{const b=e.getBBox(),p=point(e,b.x,b.y),q=point(e,b.x+b.width,b.y+b.height);return {x:p.x,y:p.y,width:q.x-p.x,height:q.y-p.y};};
  const paint=e=>{const s=getComputedStyle(e);return {fill:s.fill,stroke:s.stroke,strokeWidth:s.strokeWidth};};
+ const textStyles=e=>{
+   const walker=document.createTreeWalker(e,NodeFilter.SHOW_TEXT),runs=[];
+   while(walker.nextNode()) {
+     const node=walker.currentNode;if(!node.textContent)continue;
+     const s=getComputedStyle(node.parentElement),last=runs.at(-1);
+     if(last&&last.weight===s.fontWeight&&last.italic===s.fontStyle)last.text+=node.textContent;
+     else runs.push({text:node.textContent,weight:s.fontWeight,italic:s.fontStyle});
+   }
+   return runs;
+ };
  const textBox=e=>{
    // HTML Range width is the inline advance. SVG getBBox also includes glyph
    // overhang; compare advance origin/width and retain vertical glyph bounds.
@@ -57,7 +68,7 @@ export function inspectClass() {
        const fo=l.querySelector('foreignObject'),text=l.querySelector('text'),element=fo??text;
        const b=textBox(element);
        const s=getComputedStyle(fo?.querySelector('span')??text);
-       return {text:element.textContent,...b,color:fo?s.color:s.fill,size:s.fontSize,weight:s.fontWeight,italic:s.fontStyle,decoration:fo?getComputedStyle(l).textDecorationLine:s.textDecorationLine};
+       return {text:element.textContent,runs:textStyles(element),...b,color:fo?s.color:s.fill,size:s.fontSize,weight:s.fontWeight,italic:s.fontStyle,decoration:fo?getComputedStyle(l).textDecorationLine:s.textDecorationLine};
      })}));
    const note=g.querySelector('.noteLabel');
    if(note) {
@@ -84,7 +95,7 @@ export function inspectClass() {
    return {...paint(e),dash:getComputedStyle(e).strokeDasharray,
      points:Array.from({length:21},(_,i)=>{const p=e.getPointAtLength(e.getTotalLength()*i/20),q=point(e,p.x,p.y);return [q.x,q.y];}),start:marker('start'),end:marker('end')};
  });
- const labels=[...root.querySelectorAll('.edgeLabels foreignObject,.edgeLabels text')].filter(e=>e.textContent).map(e=>({text:e.textContent,...textBox(e)}));
+ const labels=[...root.querySelectorAll('.edgeLabels foreignObject,.edgeLabels text')].filter(e=>e.textContent).map(e=>({text:e.textContent,runs:textStyles(e),...textBox(e)}));
  const v=root.viewBox.baseVal;
  const titleElement=root.querySelector('.classDiagramTitleText');
  const title=titleElement?{text:titleElement.textContent,...textBox(titleElement),size:getComputedStyle(titleElement).fontSize,fill:getComputedStyle(titleElement).fill,baseline:Number(titleElement.getAttribute('y'))}:null;

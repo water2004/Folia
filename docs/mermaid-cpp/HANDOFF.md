@@ -1,6 +1,17 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-25, Class namespaces and display lines verified
+## Current checkpoint - 2026-10-25, Class emphasis in progress
+
+- Deliver common Class label/member/relationship emphasis through existing
+  display runs, real per-run DirectWrite metrics and SVG tspans. Preserve
+  member classifier parsing, escaped angle brackets and existing geometry.
+- Exit: the existing display-emphasis input in both themes, including run
+  weights/styles and affected standalone/integrated Windows checks. Then move
+  to automatic wrapping and the remaining required Class/family chain.
+- Candidate changes are local and unverified; no app dependency switch.
+  Prior verified implementation and delivery evidence follows below.
+
+## Previous checkpoint - 2026-10-25, Class namespaces and display lines verified
 
 - Namespace c4285f6f delivers measured plain container titles, nested/qualified
   ownership, original padding/title margins and recursive Dagre geometry with

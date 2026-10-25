@@ -40,6 +40,7 @@ try {
     const ag=a.groups[j],eg=e.groups[j];assert.equal(ag.kind,eg.kind);assert.equal(ag.labels.length,eg.labels.length);
     for(let k=0;k<eg.labels.length;k++) {
      const at=ag.labels[k],et=eg.labels[k];
+     assert.deepEqual(at.runs,et.runs,name+'.text.runs');
      for(const key of ['text','color','size','weight','italic','decoration'])assert.equal(at[key],et[key],name+'.text.'+key);
      near(at.x,et.x,0.25,name+'.text.x');near(at.width,et.width,0.25,name+'.text.width');
      near(at.y+at.height/2,et.y+et.height/2,2.5,name+'.text.centerY');
@@ -53,6 +54,7 @@ try {
   }
   for(let i=0;i<original.labels.length;i++) {
    const a=actual.labels[i],e=original.labels[i];assert.equal(a.text,e.text,name+'.edgeLabel');
+   assert.deepEqual(a.runs,e.runs,name+'.edgeLabel.runs');
    near(a.x,e.x,0.25,name+'.edgeLabel.x');near(a.width,e.width,0.25,name+'.edgeLabel.width');
    near(a.y+a.height/2,e.y+e.height/2,2.5,name+'.edgeLabel.centerY');
   }

@@ -62,8 +62,9 @@ notes independent rather than creating classes. Namespace containers use measure
 adapter, retaining nested/qualified ownership, padding, title margins, theme
 colors and cross-container relationships. Class labels and relationship labels
 retain explicit line breaks and decoded entities; member angle brackets retain
-the original escaped display semantics. Rich/automatically wrapped labels
-require further adapters.
+the original escaped display semantics. Common label/member/relationship
+emphasis uses measured font runs, relative bold weights and SVG spans, preserving
+member classifiers. Automatic wrapping and rich notes require further adapters.
 
 `folia.mermaid.sequence::prepare_sequence` connects shared preparation to owned
 Sequence actors and ordered messages. The parser/DB boundary covers actor

@@ -247,18 +247,30 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             ClassTextBox box;box.line_step=size*1.5;
             for(const auto& line:*lines) {
                 std::u16string value;
+                std::vector<MermaidTextStyle> styles;
                 for(const auto& run:line) {
-                    if(run.strong||run.emphasis) return std::unexpected("Styled Class labels require the rich-label adapter");
+                    styles.push_back({value.size(),run.text.size(),run.strong?(weight<350?400u:weight<550?700u:900u):weight,italic||run.emphasis});
                     value+=run.text;
                 }
-                auto metrics=measurer.measure(value.empty()?std::u16string_view{u"M"}:std::u16string_view{value},font,true);
+                auto metrics=measurer.measure(value.empty()?std::u16string_view{u"M"}:std::u16string_view{value},font,true,styles);
                 if(!metrics) return std::unexpected(metrics.error());
                 const double width=value.empty()?0:metrics->advance;
                 box.width=std::max(box.width,width);box.line_widths.push_back(width);
-                box.baseline=metrics->baseline+(box.line_step-metrics->line_height)/2;
+                // HTML inline boxes share a baseline but each font retains its
+                // own half-leading. Include the parent strut as createText does.
+                auto strut=measurer.measure(u"M",font);if(!strut) return std::unexpected(strut.error());
+                double above=strut->baseline+(box.line_step-strut->line_height)/2,below=box.line_step-above;
+                for(const auto& style:styles) {
+                    auto run_metrics=measurer.measure(u"M",{font.family,font.size,style.weight,style.italic});
+                    if(!run_metrics) return std::unexpected(run_metrics.error());
+                    const auto baseline=run_metrics->baseline+(box.line_step-run_metrics->line_height)/2;
+                    above=std::max(above,baseline);below=std::max(below,box.line_step-baseline);
+                }
+                box.line_baselines.push_back(box.height+above);box.height+=above+below;
+                box.baseline=box.line_baselines.front();box.runs.push_back(line);
                 box.text+=value;box.lines.push_back(std::move(value));
             }
-            box.height=box.line_step*box.lines.size();return box;
+            return box;
         };
         for(const auto& group:cls->document.namespaces) {
             auto label=measure(group.label,400,false,0,false);if(!label) return std::unexpected(label.error());

@@ -4,6 +4,7 @@ export module folia.mermaid.class_svg;
 import std;
 export import folia.mermaid.class_diagram;
 export import folia.mermaid.dagre_rank;
+export import folia.mermaid.flowchart_label;
 
 export namespace folia::mermaid {
 struct ClassTextBox {
@@ -12,6 +13,8 @@ struct ClassTextBox {
     std::vector<std::u16string> lines;
     std::vector<double> line_widths;
     double line_step = 0;
+    std::vector<FlowchartLabelLine> runs;
+    std::vector<double> line_baselines;
 };
 struct ClassNodeMeasurements {
     ClassTextBox label, annotation;

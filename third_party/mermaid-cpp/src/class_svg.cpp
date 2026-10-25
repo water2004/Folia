@@ -72,7 +72,18 @@ std::string text(const ClassTextBox& t,double x,double y,const ClassSvgTheme& th
     unsigned weight=400,std::u16string_view classifier={},double size=0) {
     if(t.text.empty()) return {};
     std::string content;
-    if(t.lines.size()>1) {
+    if(!t.runs.empty()) {
+        for(std::size_t i=0;i<t.runs.size();++i) {
+            content+="<tspan x=\""+num(x+(t.width-t.line_widths[i])/2)+"\" y=\""+num(y+t.line_baselines[i])+"\">";
+            for(const auto& run:t.runs[i]) {
+                content+="<tspan";
+                if(run.strong) content+=" font-weight=\""+std::to_string(weight<350?400u:weight<550?700u:900u)+"\"";
+                if(run.emphasis) content+=" font-style=\"italic\"";
+                content+=">"+xml(run.text)+"</tspan>";
+            }
+            content+="</tspan>";
+        }
+    } else if(t.lines.size()>1) {
         for(std::size_t i=0;i<t.lines.size();++i)
             content+="<tspan x=\""+num(x+(t.width-t.line_widths[i])/2)+"\" y=\""+num(y+t.baseline+i*t.line_step)+"\">"+xml(t.lines[i])+"</tspan>";
     } else content=xml(t.text);
