@@ -19,7 +19,7 @@ if(!process.argv.includes('--library')) {
  const directory=resolve(process.argv[2]??'build/mermaid-cpp/quadrant-browser');mkdirSync(directory,{recursive:true});
  const url=pathToFileURL(resolve('tools/mermaid-cpp/oracle/node_modules/mermaid/dist/mermaid.esm.mjs')).href;
  const successes=cases.filter(c=>c[2]!==null);
- const html=`<!doctype html><body><script type="module">
+ const html=`<!doctype html><meta charset="utf-8"><body><script type="module">
  const {default:mermaid}=await import(${JSON.stringify(url)});const inspect=${inspectQuadrant.toString()};
  try{const rows=[];for(const [name,source] of ${JSON.stringify(successes)})for(const theme of ['default','dark']) {
  mermaid.initialize({startOnLoad:false,theme,fontFamily:'Arial'});
