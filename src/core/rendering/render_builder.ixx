@@ -1051,7 +1051,8 @@ struct Builder {
                         break;
                     case K::Incomplete:
                         append_marker(target, node, delim.opening);
-                        if (!delim.content.empty()) append_text(inline_source_slice(document, delim.content), delim.content, style);
+                        if (!node.children.empty()) append_nodes(node.children, style, target);
+                        else if (!delim.content.empty()) append_text(inline_source_slice(document, delim.content), delim.content, style);
                         break;
                     case K::Text:
                     case K::Whitespace:

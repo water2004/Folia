@@ -10,6 +10,7 @@ import folia.core.render_builder;
 import folia.core.render_model;
 import folia.core.syntax_marker;
 import folia.core.theme;
+import folia.core.utf;
 
 using namespace folia;
 using namespace boost::ut;
@@ -72,6 +73,40 @@ namespace { suite syntax_marker_tests = [] {
             expect((marker.icon != SyntaxMarker::None) == complete);
             if (complete) expect(marker.range.length() == 2_u);
         }
+    }
+};
+"incomplete formatting preserves independently parsed math in its content"_test = [] {
+    for (auto prefix : {"~", "~~", "*", "**"})
+    for (auto container : {"", "1. ", "> ", "- "}) {
+        auto source = std::string{container} + "微观粒子质量" + prefix
+            + "原子质量单位 $1u=1.6605655\\timesz10^{-27}kg$\n";
+        auto parsed = parse_text(1, source);
+        auto model = build_render_model(parsed.document, parsed.outline, parsed.symbols, default_theme_profile());
+        auto count_cst = [&](auto& self, const auto& block) -> std::size_t {
+            auto inline_count = [&](auto& visit, const InlineCstNodes& nodes) -> std::size_t {
+                std::size_t count = 0;
+                for (const auto& node : nodes) {
+                    count += node.kind == InlineCstKind::InlineMath ? 1 : 0;
+                    count += visit(visit, node.children);
+                }
+                return count;
+            };
+            std::size_t count = inline_count(inline_count, block.inline_content.tree.nodes);
+            for (const auto& child : block.children) count += self(self, child);
+            return count;
+        };
+        expect(count_cst(count_cst, parsed.document.root) == 1_u) << prefix << container;
+        auto count_math = [&](auto& self, const std::vector<InlineRenderItem>& items) -> std::size_t {
+            std::size_t count = 0;
+            for (const auto& item : items) {
+                count += item.kind == InlineRenderItem::Kind::Math ? 1 : 0;
+                count += self(self, item.special().semantic().children);
+            }
+            return count;
+        };
+        std::size_t math_count = 0;
+        for (const auto& block : model.blocks) math_count += count_math(count_math, block.inline_items);
+        expect(math_count == 1_u) << prefix << container;
     }
 };
 }; }

@@ -2,7 +2,14 @@
 
 恢复/压缩后先实际读本文。架构、职责和详细验收见 [architecture](native-raii-architecture.md)、[files](native-raii-files.json)、[acceptance](native-raii-acceptance.md)。只复查新变化；ignored候选用 `rg --no-ignore`。
 
-## 当前 checkpoint：CST语义编辑、图标主题（2026-10-25，验收完成，MSI已安装）
+## 当前 checkpoint：未闭合波浪线与行间公式图标（2026-10-25，验收通过，准备更新安装）
+
+- 新用户反馈：已安装版行间公式图标过小且相对TeX缩进；`1. 微观粒子质量~原子质量单位 $1u=1.6605655\timesz10^{-27}kg$`不渲染，删掉`~`正常。**根因与TeX无关**：inline parser已有Incomplete(~)内的正确InlineMath子节点，但render_builder的Incomplete分支把content整体原文输出。新正式测试在旧实现8处失败（~/~~ × paragraph/list/quote/bullet），修复后完整Core通过`build/math-marker-core-final.log`；只改CST→render递归，不在App扫描波浪线。
+- 图标候选：显示数学块明确设置Block placement，按主题行高×sizeEm分配方形图标，去除行内左右gap；行内图标维持原尺寸/间距。SyntaxIconRectangles改为直接读取排版对象metrics，不再从主题比例反推尺寸，使绘制/命中同源。源码、块缩进、语义编辑规则不改；主题仍schema2，docs/THEMES.md说明行间尺寸规则。
+- 验证完成：Core **760项/499843断言**，WinUI **43项/14109断言**全部通过；Debug构建成功。两种块定界符×3字号×2宽度检查图标与TeX左沿一致、尺寸/整对象/源文不变；完整用户例子（含timesz）和移除~均走NativeMathSession得到SVG。日志`build/math-marker-core-final.log`、`build/math-marker-app-{setup,build,tests}.log`，9773/20640已exit0。旧用例8失败证据`build/math-marker-nested-before.log`（此前两次只是测试TU缺类型import的编译问题，最后确实运行并8失败；不能把编译失败当回归证据）。无代理/Computer Use；未改parser/数学引擎/源编辑/历史，不重跑旧移植宽审。
+- 下一步：按CST投影修复、行间图标布局分批提交，再构建安装同版本0.3.2（用户上一轮明确要求直接安装，本轮是在该安装上修复其反馈）。当前无运行中Folia；安装前再检查，不强制关闭用户进程。无推送发布。
+
+## 历史：CST语义编辑、图标主题（2026-10-25，验收完成，MSI已安装）
 
 - **固定规则**：全部所见即所得编辑按CST/块树语义；编辑层不依赖SVG、SyntaxIcon/SyntaxMarker或图标位置。公式定界符不可逐字符编辑，删除任一端成对去除、保留TeX为普通文本；ATX标题逐级降级。源码模式仍编辑原始源码。禁止子代理；版本0.3.2不变，不推送发布。
 - **实现**：inline_source_edit查询完整CST定界符及移动边界；document_inline_format生成成对去格式TextEdit；document_block_edit将数学块通过树事务转换为段落；document_source_edit协调既有删除/移动入口；document_block_input按已解析标题等级退一级。未完成输入和code/math正文保持可编辑。没有扩大math原可编辑边界；block_source.ixx无diff，不得恢复已撤回候选。
