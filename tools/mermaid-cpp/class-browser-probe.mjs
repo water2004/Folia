@@ -20,7 +20,9 @@ export function inspectClass() {
  const paint=e=>{const s=getComputedStyle(e);return {fill:s.fill,stroke:s.stroke,strokeWidth:s.strokeWidth};};
  const textBox=e=>{
    if(e.tagName!=='foreignObject')return box(e);
-   const range=document.createRange();range.selectNodeContents(e.querySelector('span')??e.firstElementChild);
+   const walker=document.createTreeWalker(e,NodeFilter.SHOW_TEXT);const texts=[];while(walker.nextNode())if(walker.currentNode.textContent)texts.push(walker.currentNode);
+   if(!texts.length)return box(e);
+   const range=document.createRange();range.setStart(texts[0],0);range.setEnd(texts.at(-1),texts.at(-1).textContent.length);
    const b=range.getBoundingClientRect(),m=root.getScreenCTM().inverse(),p=new DOMPoint(b.x,b.y).matrixTransform(m),q=new DOMPoint(b.right,b.bottom).matrixTransform(m);
    return {x:p.x,y:p.y,width:q.x-p.x,height:q.y-p.y};
  };
@@ -32,7 +34,7 @@ export function inspectClass() {
        const fo=l.querySelector('foreignObject'),text=l.querySelector('text'),element=fo??text;
        const b=textBox(element);
        const s=getComputedStyle(fo?.querySelector('span')??text);
-       return {text:element.textContent,...b,color:fo?s.color:s.fill,size:s.fontSize,weight:s.fontWeight,italic:s.fontStyle,decoration:s.textDecorationLine};
+       return {text:element.textContent,...b,color:fo?s.color:s.fill,size:s.fontSize,weight:s.fontWeight,italic:s.fontStyle,decoration:fo?getComputedStyle(l).textDecorationLine:s.textDecorationLine};
      })}));
    return {id,...box(outer),...paint(outer.querySelector('path')??outer),groups,
      dividers:[...g.querySelectorAll('.divider')].map(e=>box(e))};
