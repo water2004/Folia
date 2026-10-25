@@ -108,20 +108,6 @@ FlowchartPoint label_midpoint(std::span<const FlowchartPoint> points) {
     }
     return points.back();
 }
-// Preserve utils.isLabelCoordinateInPath's literal rounded-coordinate lookup.
-// It controls whether resolveEdgeLabelPosition applies the clipping delta.
-bool label_coordinate_in_path(FlowchartPoint point,const std::string& path) {
-    static const std::regex decimal(R"(\d+\.\d+)");
-    std::string sanitized;std::size_t cursor=0;
-    for(auto it=std::sregex_iterator(path.begin(),path.end(),decimal);it!=std::sregex_iterator();++it) {
-        sanitized+=path.substr(cursor,it->position()-cursor);
-        sanitized+=number(std::floor(std::stod(it->str())+0.5));
-        cursor=it->position()+it->length();
-    }
-    sanitized+=path.substr(cursor);
-    return sanitized.find(number(std::floor(point.x+0.5)))!=std::string::npos ||
-        sanitized.find(number(std::floor(point.y+0.5)))!=std::string::npos;
-}
 #include "flowchart_clusters.inc"
 
 }

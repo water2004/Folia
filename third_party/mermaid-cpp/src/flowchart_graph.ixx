@@ -45,4 +45,5 @@ std::expected<FlowchartGraphPreparation, std::string> prepare_flowchart_graph(
 // mean position of the two prepared dummy nodes; caller clips shape endpoints.
 FlowchartPlacedEdge route_dagre_self_loop(const FlowchartPlacedNode& node,
     FlowchartPoint hint,std::u16string_view direction,FlowchartEdgeLabelSize label,bool has_label);
+bool label_coordinate_in_path(FlowchartPoint point,const std::string& path);
 }

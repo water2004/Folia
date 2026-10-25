@@ -123,11 +123,14 @@ std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& inp
         auto layout=layout_flowchart(layout_input,layout_sizes,layout_labels);if(!layout) return std::unexpected(layout.error());
         FlowchartLayout logical;logical.width=layout->width;logical.height=layout->height;
         logical.nodes.resize(graph.nodes.size());logical.edges.resize(graph.edges.size());
+        std::vector<std::vector<FlowchartPoint>> label_paths(graph.edges.size());
         for(std::size_t i=0;i<prepared.nodes.size();++i)
             if(auto index=prepared.nodes[i].source_index) logical.nodes[*index]=layout->nodes[i];
         for(std::size_t i=0;i<prepared.edges.size();++i) {
             const auto& e=prepared.edges[i];
-            if(e.loop_segment==-1) {logical.edges[e.source_index]=layout->edges[i];continue;}
+            if(e.loop_segment==-1) {
+                logical.edges[e.source_index]=layout->edges[i];label_paths[e.source_index]=layout->edges[i].points;continue;
+            }
             if(e.loop_segment!=1) continue;
             const auto& original=graph.edges[e.source_index];
             const auto& node=layout->nodes[ids.at(original.start)];
@@ -135,6 +138,7 @@ std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& inp
             const auto& second=layout->nodes[ids.at(e.data.end)];
             auto edge=route_dagre_self_loop(node,{(first.x+second.x)/2,(first.y+second.y)/2},
                 graph.direction,labels[e.source_index],!original.label.empty());
+            label_paths[e.source_index]=edge.points;
             // ClassBox uses intersect.rect after the compact loop is merged.
             const auto intersect=[&](FlowchartPoint p) {
                 const auto dx=p.x-node.x,dy=p.y-node.y,w=node.width/2,h=node.height/2;
@@ -166,7 +170,12 @@ std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& inp
             for(auto& p:points) {p.x+=8;p.y+=8;}
             if(points.size()<2) return std::unexpected("Class relation needs a routed path");
             shorten(points.front(),points[1],e.start);shorten(points.back(),points[points.size()-2],e.end);
-            svg+="<path class=\"relation\" d=\""+curve(points)+"\" fill=\"none\" stroke=\""+theme.line+"\" stroke-width=\""+num(theme.stroke_width)+"\"";
+            const auto path=curve(points);
+            // insertEdge returns the original compact route unless its literal
+            // rounded-coordinate lookup selects the clipped path. Symmetric
+            // rectangle clipping retains the self-loop main-label midpoint.
+            if(!label_coordinate_in_path(points[points.size()/2],path)) label_paths[i]=placed->edges[i].points;
+            svg+="<path class=\"relation\" d=\""+path+"\" fill=\"none\" stroke=\""+theme.line+"\" stroke-width=\""+num(theme.stroke_width)+"\"";
             svg+=e.dotted?" stroke-dasharray=\"3\"":" stroke-dasharray=\"0\"";
             if(e.start!=ClassMarker::none) svg+=" marker-start=\"url(#"+marker_id(e.start,true)+")\"";
             if(e.end!=ClassMarker::none) svg+=" marker-end=\"url(#"+marker_id(e.end,false)+")\"";
@@ -182,7 +191,7 @@ std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& inp
             }
             for(bool start:{true,false}) {
                 const auto& t=start?m.start:m.end;if(t.text.empty()) continue;
-                const auto p=terminal(route.points,start);
+                const auto p=terminal(label_paths[i],start);
                 svg+=text(t,p.x+8-t.width/2,p.y+8-t.height/2,theme,400,{},11);
             }
         }

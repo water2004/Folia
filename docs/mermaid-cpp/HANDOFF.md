@@ -14,6 +14,15 @@
   validate a single loop and an LR loop with an ordinary relation/multiplicity,
   both themes, plus affected existing Flowchart checks. Deliver each green batch
   separately; neither candidate is yet accepted or on the contribution branch.
+- Candidate runs 40189132927/40189349482 are superseded, not acceptance:
+  native tests passed but browser comparison found the title viewport one unit
+  too high and self-loop multiplicity positioned from the clipped route.
+  7bbbf8b5 uses rounded font ascent/descent rather than the layout-line baseline.
+  The next correction shares the original isLabelCoordinateInPath rule and
+  retains the pre-clipping loop for terminal labels when selected. Downloaded
+  evidence in build/mermaid-cpp/class-self-diagnostic confirms only those two
+  mismatches across the existing 20 outputs. Verify the combined corrected head;
+  keep title and self functionality as separate contribution commits.
 
 - Parser commits b46c6486/ef11e206 met their exit conditions: all four Windows
   standalone/integrated Debug/Release jobs passed at

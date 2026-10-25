@@ -2,6 +2,7 @@
 // Copyright (c) 2014-2022 Knut Sveidqvist. MIT; see ../LICENSE.
 module folia.mermaid.flowchart_graph;
 import std;
+import folia.mermaid.number;
 
 namespace folia::mermaid {
 namespace {
@@ -222,6 +223,21 @@ void validate(const FlowchartInput& source) {
 }
 }
 
+// Preserve utils.isLabelCoordinateInPath's literal rounded-coordinate lookup.
+// It controls whether resolveEdgeLabelPosition applies the clipping delta.
+bool label_coordinate_in_path(FlowchartPoint point,const std::string& path) {
+    const auto number=[](double value) {return *format_number(value);};
+    static const std::regex decimal(R"(\d+\.\d+)");
+    std::string sanitized;std::size_t cursor=0;
+    for(auto it=std::sregex_iterator(path.begin(),path.end(),decimal);it!=std::sregex_iterator();++it) {
+        sanitized+=path.substr(cursor,it->position()-cursor);
+        sanitized+=number(std::floor(std::stod(it->str())+0.5));
+        cursor=it->position()+it->length();
+    }
+    sanitized+=path.substr(cursor);
+    return sanitized.find(number(std::floor(point.x+0.5)))!=std::string::npos ||
+        sanitized.find(number(std::floor(point.y+0.5)))!=std::string::npos;
+}
 FlowchartPlacedEdge route_dagre_self_loop(const FlowchartPlacedNode& node,
     FlowchartPoint hint,std::u16string_view direction,FlowchartEdgeLabelSize label,bool has_label) {
     const double dx=hint.x-node.x,dy=hint.y-node.y;
