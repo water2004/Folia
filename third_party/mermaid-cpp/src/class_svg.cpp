@@ -90,6 +90,7 @@ FlowchartPoint terminal(std::vector<FlowchartPoint> points,bool start) {
 std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& input,const ClassMeasurements& measured) {
     try {
         const auto& doc=input.document;const auto& theme=input.theme;const auto& config=input.config;
+        if(!doc.namespaces.empty()) return std::unexpected("Class namespaces require the measured container layout adapter");
         if(measured.nodes.size()!=doc.classes.size()||measured.edges.size()!=doc.relations.size()||measured.notes.size()!=doc.notes.size())
             return std::unexpected("Class needs one measured box per class and relationship");
         // ClassDB inserts note attachments before ordinary relationships.

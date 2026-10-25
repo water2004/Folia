@@ -57,6 +57,13 @@ class Parser {
     ClassInput result;
     ClassLimits limits;
     std::map<Text,std::size_t,std::less<>> indices;
+    std::map<Text,std::size_t,std::less<>> namespace_indices;
+    struct NamespaceScope {
+        std::size_t index;
+        std::vector<std::size_t> classes, notes;
+        bool has_statement = false;
+    };
+    std::vector<NamespaceScope> scopes;
     std::optional<std::size_t> body;
     std::size_t member_count = 0;
     [[noreturn]] static void fail(const char* message) { throw std::runtime_error(message); }
@@ -95,6 +102,53 @@ class Parser {
         if (result.classes.size() >= limits.classes) fail("Class count limit exceeded");
         const auto index = result.classes.size(); indices.emplace(id,index);
         result.classes.push_back({id,id,std::move(type)}); return index;
+    }
+    static void add_unique(std::vector<Text>& values,const Text& value) {
+        if (std::ranges::find(values,value) == values.end()) values.push_back(value);
+    }
+    void open_namespace(View rest) {
+        const auto local_id = name(rest); Text label;
+        if (take(rest,u"[")) {
+            label = quoted(rest,u'"');
+            if (!take(rest,u"]")) fail("Unclosed Class namespace label");
+        }
+        if (!take(rest,u"{") || !rest.empty()) fail("Expected Class namespace body");
+        Text id = scopes.empty()?local_id:result.namespaces[scopes.back().index].id+u"."+local_id;
+        Text parent; std::size_t start = 0, index = 0;
+        for (;;) {
+            const auto dot = id.find(u'.',start); const bool leaf = dot == id.npos;
+            const Text current{id.substr(0,dot)};
+            auto found = namespace_indices.find(current);
+            if (found == namespace_indices.end()) {
+                if (result.namespaces.size() >= limits.namespaces) fail("Class namespace limit exceeded");
+                index = result.namespaces.size(); namespace_indices.emplace(current,index);
+                result.namespaces.push_back({.id=current,.label=leaf&&!label.empty()?label:Text{id.substr(start,dot-start)},
+                    .parent=parent,.explicit_declaration=leaf});
+            } else {
+                index = found->second;
+                if (leaf) {
+                    result.namespaces[index].explicit_declaration = true;
+                    if (!label.empty()) result.namespaces[index].label = label;
+                }
+            }
+            if (!parent.empty()) add_unique(result.namespaces[namespace_indices.at(parent)].children,current);
+            if (leaf) break;
+            parent = current; start = dot+1;
+        }
+        if (!scopes.empty()) scopes.back().has_statement = true;
+        scopes.push_back({.index=index});
+    }
+    void close_namespace() {
+        if (scopes.empty()) fail("Unexpected Class namespace closing brace");
+        const auto scope = std::move(scopes.back()); scopes.pop_back();
+        if (!scope.has_statement) fail("Expected Class namespace statements");
+        auto& ns = result.namespaces[scope.index];
+        for (const auto index : scope.classes) {
+            auto& node = result.classes[index]; node.parent = ns.id; add_unique(ns.classes,node.id);
+        }
+        for (const auto index : scope.notes) {
+            auto& note = result.notes[index]; note.parent = ns.id; add_unique(ns.notes,note.id);
+        }
     }
     void annotation(std::size_t index, View value) {
         if (!value.starts_with(u"<<") || !value.ends_with(u">>")) fail("Expected Class annotation");
@@ -161,6 +215,10 @@ class Parser {
     void statement(View line) {
         if (body) { body_line(line); return; }
         View rest = line;
+        if (line == u"}") { close_namespace(); return; }
+        if (take(rest,u"namespace ")) { open_namespace(rest); return; }
+        if (!scopes.empty() && !line.starts_with(u"class ") && !line.starts_with(u"note "))
+            fail("Class namespaces contain class, note and namespace declarations");
         if (take(rest,u"direction ")) {
             if (rest != u"LR" && rest != u"RL" && rest != u"TB" && rest != u"BT") fail("Unsupported Class direction");
             result.direction = rest; return;
@@ -175,10 +233,12 @@ class Parser {
             if (result.notes.size() >= limits.notes) fail("Class note limit exceeded");
             const auto index = std::to_string(result.notes.size());
             note.id = u"note"+Text{index.begin(),index.end()};
+            if (!scopes.empty()) { scopes.back().notes.push_back(result.notes.size()); scopes.back().has_statement = true; }
             result.notes.push_back(std::move(note)); return;
         }
         if (take(rest,u"class ")) {
             const auto index = add_class(name(rest));
+            if (!scopes.empty()) { scopes.back().classes.push_back(index); scopes.back().has_statement = true; }
             if (take(rest,u"[")) {
                 result.classes[index].label = quoted(rest,u'"');
                 if (!take(rest,u"]")) fail("Unclosed Class display label");
@@ -246,6 +306,7 @@ public:
         }
         if (!header || !content) fail("Expected Class diagram statements");
         if (body) fail("Unclosed Class body");
+        if (!scopes.empty()) fail("Unclosed Class namespace body");
         result.effective_config = std::move(prepared.effective_config);
         return std::move(result);
     }

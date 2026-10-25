@@ -44,7 +44,7 @@ suite class_diagram = [] {
             expect(fatal(actual->classes.size() == nodes.size())) << fields[0];
             for (std::size_t i = 0; i < nodes.size(); ++i) {
                 const auto& a = actual->classes[i]; const auto& e = nodes[i];
-                same(a.id,e,u"id"); same(a.label,e,u"label"); same(a.type,e,u"type");
+                same(a.id,e,u"id"); same(a.label,e,u"label"); same(a.type,e,u"type"); same(a.parent,e,u"parent");
                 const auto& annotations = field(e,u"annotations").sequence;
                 expect(fatal(a.annotations.size() == annotations.size()));
                 for (std::size_t j = 0; j < annotations.size(); ++j) expect(bool(a.annotations[j] == annotations[j].string));
@@ -57,6 +57,19 @@ suite class_diagram = [] {
                 same(actual->notes[i].id,notes[i],u"id");
                 same(actual->notes[i].class_id,notes[i],u"class");
                 same(actual->notes[i].text,notes[i],u"text");
+                same(actual->notes[i].parent,notes[i],u"parent");
+            }
+            const auto& namespaces = field(expected,u"namespaces").sequence;
+            expect(fatal(actual->namespaces.size() == namespaces.size())) << fields[0];
+            for (std::size_t i = 0; i < namespaces.size(); ++i) {
+                const auto& a = actual->namespaces[i]; const auto& e = namespaces[i];
+                same(a.id,e,u"id"); same(a.label,e,u"label"); same(a.parent,e,u"parent");
+                expect(a.explicit_declaration == field(e,u"explicit").boolean);
+                for (auto [key,values] : {std::pair{u"classes",&a.classes},{u"notes",&a.notes},{u"children",&a.children}}) {
+                    const auto& entries = field(e,key).sequence;
+                    expect(fatal(values->size() == entries.size()));
+                    for (std::size_t j = 0; j < entries.size(); ++j) expect(bool((*values)[j] == entries[j].string));
+                }
             }
             expect(fatal(actual->relations.size() == relations.size())) << fields[0];
             for (std::size_t i = 0; i < relations.size(); ++i) {
@@ -68,7 +81,7 @@ suite class_diagram = [] {
                 expect(a.dotted == field(e,u"dotted").boolean);
             }
         }
-        expect(count == 15_u);
+        expect(count == 20_u);
     };
     "mermaid_class_owned_requests_and_explicit_boundary"_test = [] {
         auto session = ConfigSession::create(); expect(fatal(session.has_value()));
@@ -78,7 +91,7 @@ suite class_diagram = [] {
         std::u16string source = u"classDiagram\nclass Document {\n+save() bool\n}";
         auto first = prepare_class(source,*session); expect(fatal(first.has_value())); source.clear();
         expect(bool(first->classes[0].methods[0].display_text == u"+save() : bool"));
-        expect(!prepare_class(u"classDiagram\nnamespace Storage {\nclass Document\n}",*session));
+        expect(!prepare_class(u"classDiagram\nnamespace Storage {\nclass Document",*session));
         ClassLimits limits; limits.classes = 1;
         expect(!prepare_class(u"classDiagram\nA --> B",*session,limits));
         const auto second = prepare_class(u"classDiagram\nclass Store",*session);

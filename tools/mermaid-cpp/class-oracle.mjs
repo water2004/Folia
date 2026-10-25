@@ -15,6 +15,11 @@ for (const file of ['classDb.ts','classTypes.ts']) {
   assert.equal(map.sourcesContent[index].replaceAll('\r\n','\n'),read('packages/mermaid/src/diagrams/class/'+file));
 }
 const cases = [
+  ['namespace','classDiagram\nnamespace Storage {\nclass Document {\n+save() bool\n}\nclass Store\nnote for Store "Local storage"\n}\nDocument --> Store : persists'],
+  ['namespace-nested','classDiagram\nnamespace App["Application"] {\nnamespace Storage {\nclass Document\n}\nclass Editor\n}\nEditor --> Document : saves'],
+  ['namespace-qualified','classDiagram\nnamespace App.Storage {\nclass Store\n}\nnamespace App {\nclass Editor\n}\nEditor --> Store'],
+  ['namespace-unclosed','classDiagram\nnamespace Storage {\nclass Document'],
+  ['namespace-relation','classDiagram\nnamespace Storage {\nclass Document\nDocument --> Store\n}'],
   ['notes','classDiagram\nnote "Document model"\nnote for Document "Validate before saving"\nclass Document\nnote for Missing "Unattached"'],
   ['note-multiline','classDiagram\nclass `Local Store`\nnote for `Local Store` "Keep revisions\nSave locally"'],
   ['unclosed-note','classDiagram\nclass Document\nnote for Document "Incomplete'],
@@ -31,7 +36,7 @@ const cases = [
   ['missing-endpoint','classDiagram\nDocument -->'],
   ['nested-body','classDiagram\nclass Document {\nclass Store {\n}\n}'],
 ];
-const errors = ['empty','unclosed-body','missing-endpoint','nested-body','unclosed-note'];
+const errors = ['empty','unclosed-body','missing-endpoint','nested-body','unclosed-note','namespace-unclosed','namespace-relation'];
 const rows = ['# Original Mermaid 12.2.0 Class parser/DB; UTF-16 hex JSON.'];
 for (const [name,source] of cases) {
   const site = {theme:'default'}; let result = null;
@@ -42,9 +47,11 @@ for (const [name,source] of cases) {
     const member = m => ({id:m.id,visibility:m.visibility,classifier:m.classifier,
       parameters:m.parameters??'',returnType:m.returnType??'',text:m.text,...m.getDisplayDetails()});
     result = {title:db.getDiagramTitle(),accTitle:db.getAccTitle(),accDescription:db.getAccDescription(),
-      direction:db.getDirection(),classes:[...db.getClasses()].map(([id,c])=>({id,label:c.label,type:c.type,
+      direction:db.getDirection(),classes:[...db.getClasses()].map(([id,c])=>({id,label:c.label,type:c.type,parent:c.parent??'',
         annotations:c.annotations,members:c.members.map(member),methods:c.methods.map(member)})),
-      notes:[...db.getNotes().values()].map(n=>({id:n.id,class:n.class??'',text:n.text})),
+      namespaces:[...db.getNamespaces().values()].map(n=>({id:n.id,label:n.label,parent:n.parent??'',explicit:n.explicit,
+        classes:[...n.classes.keys()],notes:[...n.notes.keys()],children:[...n.children.keys()]})),
+      notes:[...db.getNotes().values()].map(n=>({id:n.id,class:n.class??'',text:n.text,parent:n.parent??''})),
       relations:db.getRelations().map(r=>({from:r.id1,to:r.id2,title:r.title??'',
         startLabel:r.relationTitle1,endLabel:r.relationTitle2,
         start:r.relation.type1==='none'?-1:r.relation.type1,end:r.relation.type2==='none'?-1:r.relation.type2,

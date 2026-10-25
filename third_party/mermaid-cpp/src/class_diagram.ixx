@@ -14,23 +14,30 @@ struct ClassNode {
     std::u16string id, label, type;
     std::vector<std::u16string> annotations;
     std::vector<ClassMember> members, methods;
+    std::u16string parent;
 };
 struct ClassRelation {
     std::u16string from, to, title, start_label = u"none", end_label = u"none";
     ClassMarker start = ClassMarker::none, end = ClassMarker::none;
     bool dotted = false;
 };
-struct ClassNote { std::u16string id, class_id, text; };
+struct ClassNote { std::u16string id, class_id, text, parent; };
+struct ClassNamespace {
+    std::u16string id, label, parent;
+    std::vector<std::u16string> classes, notes, children;
+    bool explicit_declaration = false;
+};
 struct ClassInput {
     std::u16string title, acc_title, acc_description, direction = u"TB";
     std::vector<ClassNode> classes;
     std::vector<ClassRelation> relations;
     std::vector<ClassNote> notes;
+    std::vector<ClassNamespace> namespaces;
     ConfigValue effective_config;
 };
 struct ClassLimits {
     FrontendLimits frontend;
-    std::size_t classes = 10000, members = 10000, relations = 10000, notes = 10000;
+    std::size_t classes = 10000, members = 10000, relations = 10000, notes = 10000, namespaces = 10000;
 };
 // Owned Class declarations, attributes/methods and ordinary relationships.
 // Unsupported statements fail explicitly; rendering is a separate boundary.
