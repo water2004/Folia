@@ -39,7 +39,10 @@ Class declarations, labels, generic types, annotations, ordered attributes and
 methods. Member display details retain visibility, parameters, return types and
 static/abstract classifiers. Ordinary relationships retain inheritance,
 aggregation, composition, dependency, solid/dotted lines, multiplicity and
-direction. The first Class batch covers plain text; namespaces, notes, styles,
+direction. Standalone and class-attached notes retain their quoted text, including
+literal newlines. Namespace declarations retain labels, nested/qualified ids,
+parents and class/note membership; a qualified name creates its ancestor
+containers. The first Class batches cover plain text; styles,
 rich labels and interfaces rendered as lollipops remain separate work. Unsupported
 statements return errors.
 
@@ -52,8 +55,12 @@ default Class layout is ELK and remains unported; it returns an explicit error
 instead of silently substituting Dagre. Plain titles preserve theme typography,
 state.titleTopMargin and the padded viewport. Self relationships use the shared
 three-segment Dagre preparation and compact-loop geometry, followed by Class
-rectangle clipping, original markers and multiplicity placement. Namespaces,
-notes and rich/wrapped labels require further adapters.
+rectangle clipping, original markers and multiplicity placement. Plain notes
+use measured lines, note-specific padding/theme colors and dotted attachment
+paths inserted before ordinary relationships. Missing attachment targets leave
+notes independent rather than creating classes. Namespace SVG containers and
+rich/wrapped labels require further adapters; namespace rendering currently
+returns an explicit error.
 
 `folia.mermaid.sequence::prepare_sequence` connects shared preparation to owned
 Sequence actors and ordered messages. The parser/DB boundary covers actor

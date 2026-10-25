@@ -1,6 +1,53 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-25, Class titles and self relationships verified
+## Current checkpoint - 2026-10-25, Class notes and namespace parsing verified
+
+- Note batch ae7e8694 delivers owned standalone/attached declarations, literal
+  multiline text and measured note SVGs with original padding, theme colors,
+  line positions and dotted attachments preceding ordinary Dagre relationships.
+  Missing attachment targets remain independent notes. Verification:
+  https://github.com/zhao0349/Folia/actions/runs/40191965170
+- Namespace parser batch 60088e16 retains labels, nested/qualified ids, implicit
+  ancestors, parents and ordered class/note membership. Three representative
+  namespace inputs and two common failures extend the Class parser corpus to
+  13 successes/seven errors. Namespace SVG remains an explicit error until the
+  measured container adapter. Final verification head:
+  60088e16f9f13e290fc9ce0df0745108542cff50
+  https://github.com/zhao0349/Folia/actions/runs/40192256291
+- Both runs passed all four standalone/integrated Debug/Release jobs. Integrated
+  jobs passed FoliaTests, FoliaWindowsEditorTests and both Mermaid suites. Both
+  batches met their exit conditions; do not expand their verification matrix.
+  The 26 Class SVG comparisons cover 13 diagrams/both themes, including the new
+  note-only, attached/multiline and LR relationship cases. Existing 92 Flowchart,
+  82 Sequence and 96 browser/DirectWrite comparisons passed. Tolerances unchanged.
+- Release evidence is in build/mermaid-cpp/class-notes-verified and
+  class-namespace-parser-verified. Six note previews in the former directory's
+  pie-svg/native-preview.png were visually inspected. All 26 Class SVGs in the
+  final parser batch are byte-identical to those inspected outputs.
+- Contribution equivalents 9db5ffab/89aff4bc are on feat/mermaid-cpp-port in
+  build/mermaid-cpp/entry-contribution. Runtime/tests/pins match the verified
+  head; this documentation checkpoint follows it. No AGENTS.md diff against
+  PR base 508423f2. Delivery-triggered reruns are separate from the completed
+  implementation validation. PR #1 remains open/unmerged:
+  https://github.com/water2004/Folia/pull/1
+- The next measured namespace stage already has six official SVG observations
+  in build/mermaid-cpp/class-namespace-svg-next/original.json. Start with
+  ClassDB.getData (namespace groups precede classes/notes), clusters.rect and
+  the existing flowchart_clusters.inc recursive layout adapter. Use measured
+  plain group titles, original group padding/title margins and parent rank
+  spacing; preserve class compartments, notes and cross-container relations.
+  Exit on the three existing namespace inputs/both themes and affected checks,
+  then continue the remaining required Class/family chain.
+- The parser observations are also retained in
+  build/mermaid-cpp/class-namespace-next/original.json. Rich Class labels, default
+  ELK, remaining required families/configuration and application integration
+  remain. Folia still uses Rust in the application. Local MSVC/CMake remain
+  unavailable; no local native build or WinUI/GPU/DPI acceptance is claimed.
+  The comparison corpus uses controlled fonts, not arbitrary-font parity.
+- No failed acceptance check, uncommitted implementation candidate or live local
+  browser/build/agent remains. Continue at the measured namespace boundary above.
+
+## Previous checkpoint - 2026-10-25, Class titles and self relationships verified
 
 - Title batch 622e2f97 connects plain diagram titles through DirectWrite to
   original insertTitle placement, theme typography, state.titleTopMargin and
