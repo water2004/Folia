@@ -2,6 +2,13 @@
 
 ## Current checkpoint - 2026-10-25, Class parser and measured SVG verified
 
+- Active batch: connect plain Class titles through root-font measurement,
+  original insertTitle placement and padded SVG viewport. Validate a normal
+  title and a wider title with the supported state.titleTopMargin setting in
+  both themes, plus the affected existing checks. Commit and deliver once those
+  pass; next batch connects ordinary self relationships through the existing
+  unified Dagre preparation/merge path. No extra boundary matrix is planned.
+
 - Parser commits b46c6486/ef11e206 met their exit conditions: all four Windows
   standalone/integrated Debug/Release jobs passed at
   https://github.com/zhao0349/Folia/actions/runs/40184783701

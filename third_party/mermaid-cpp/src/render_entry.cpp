@@ -137,6 +137,7 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
             metadata(*doc,*prepared);
             const auto& cfg=member(effective,u"class");const auto& state=member(effective,u"state");
             ClassSvgConfig c;
+            if(auto value=state.find(u"titleTopMargin")) c.title_top_margin=number(*value);
             if(auto value=cfg.find(u"padding")) c.padding=number(*value);
             c.hide_empty_members=boolean(member(cfg,u"hideEmptyMembersBox"));
             for(auto [key,target]:{std::pair{u"nodeSpacing",&c.node_spacing},{u"rankSpacing",&c.rank_spacing}}) {
@@ -148,7 +149,7 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
             t.stroke_width=size(member(theme,u"strokeWidth"));
             if(t.font_size<=0||t.stroke_width<0) return std::unexpected("Invalid Class font or stroke size");
             for(auto [key,target]:{std::pair{u"mainBkg",&t.fill},{u"nodeBorder",&t.border},{u"classText",&t.text},
-                {u"lineColor",&t.line},{u"edgeLabelBackground",&t.label_background}}) *target=narrow(text(member(theme,key)));
+                {u"lineColor",&t.line},{u"edgeLabelBackground",&t.label_background},{u"textColor",&t.title_color}}) *target=narrow(text(member(theme,key)));
             return NativeDiagram{std::move(*prepared),ClassRenderInput{std::move(*doc),std::move(t),c}};
         }
         if(prepared->type==u"sequence") {

@@ -91,7 +91,6 @@ std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& inp
         const auto& doc=input.document;const auto& theme=input.theme;const auto& config=input.config;
         if(measured.nodes.size()!=doc.classes.size()||measured.edges.size()!=doc.relations.size())
             return std::unexpected("Class needs one measured box per class and relationship");
-        if(!doc.title.empty()) return std::unexpected("Class titles require the title SVG adapter");
         FlowchartInput graph;graph.direction=doc.direction;graph.node_spacing=config.node_spacing;graph.rank_spacing=config.rank_spacing;
         std::vector<NodeBox> boxes;std::vector<FlowchartNodeBox> sizes;std::vector<FlowchartEdgeLabelSize> labels;
         for(std::size_t i=0;i<doc.classes.size();++i) {
@@ -108,9 +107,19 @@ std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& inp
             labels.push_back({measured.edges[i].label.width,measured.edges[i].label.height});
         }
         auto placed=layout_flowchart(graph,sizes,labels);if(!placed) return std::unexpected(placed.error());
-        ClassSvg result;result.width=placed->width+16;result.height=placed->height+16;
+        // insertTitle uses the pre-title graph bounds; setupViewPortForSVG then
+        // includes the SVG text bounds before adding its fixed eight-unit pad.
+        const double title_x=placed->width/2+8,title_y=-config.title_top_margin;
+        double min_x=8,min_y=8,max_x=placed->width+8,max_y=placed->height+8;
+        if(!doc.title.empty()) {
+            const auto& t=measured.title;
+            if(t.text!=doc.title||t.height<=0) return std::unexpected("Class title needs measured SVG text bounds");
+            min_x=std::min(min_x,title_x-t.width/2);max_x=std::max(max_x,title_x+t.width/2);
+            min_y=std::min(min_y,title_y-t.baseline);max_y=std::max(max_y,title_y+t.height-t.baseline);
+        }
+        ClassSvg result;result.width=max_x-min_x+16;result.height=max_y-min_y+16;
         std::string svg="<svg xmlns=\"http://www.w3.org/2000/svg\" width=\""+num(result.width)+"\" height=\""+num(result.height)+
-            "\" viewBox=\"0 0 "+num(result.width)+" "+num(result.height)+"\" font-family=\""+xml(theme.font_family)+"\">";
+            "\" viewBox=\""+num(min_x-8)+" "+num(min_y-8)+" "+num(result.width)+" "+num(result.height)+"\" font-family=\""+xml(theme.font_family)+"\">";
         for(auto [tag,value]:{std::pair{"title",doc.acc_title},{"desc",doc.acc_description}})
             if(!value.empty()) svg+="<"+std::string(tag)+">"+xml(value)+"</"+tag+">";
         svg+=markers(theme);
@@ -162,6 +171,8 @@ std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& inp
             }
             svg+="</g>";
         }
+        if(!doc.title.empty()) svg+="<text class=\"classDiagramTitleText\" text-anchor=\"middle\" x=\""+num(title_x)+
+            "\" y=\""+num(title_y)+"\" font-size=\""+num(theme.font_size)+"\" fill=\""+theme.title_color+"\">"+xml(doc.title)+"</text>";
         result.svg=svg+"</svg>";return result;
     } catch(const std::exception& e) {return std::unexpected(std::string{e.what()});}
 }

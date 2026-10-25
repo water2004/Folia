@@ -230,6 +230,13 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
     if(auto cls=std::get_if<ClassRenderInput>(&input->content)) {
         const auto& theme=cls->theme;
         if(theme.font_size>std::numeric_limits<float>::max()) return std::unexpected("Invalid Class font size");
+        if(!cls->document.title.empty()) {
+            const MermaidFont font{theme.font_family,static_cast<float>(theme.font_size)};
+            auto title=measurer.measure(cls->document.title,font,true);
+            if(!title) return std::unexpected(title.error());
+            auto height=measurer.svg_font_height(font);if(!height) return std::unexpected(height.error());
+            class_measurements.title={cls->document.title,title->bounds_width,*height,std::round(title->baseline)};
+        }
         auto measure=[&](std::u16string_view source,unsigned weight=400,bool italic=false,double size=0)->std::expected<ClassTextBox,std::string> {
             auto display=diagram_display_text(source);if(!display) return std::unexpected(display.error());
             if(display->find_first_of(u"\r\n")!=display->npos) return std::unexpected("Multiline Class labels require the line-breaking adapter");

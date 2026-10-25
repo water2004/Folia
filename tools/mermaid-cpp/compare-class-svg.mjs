@@ -15,6 +15,13 @@ try {
   const actual=await page.evaluate(inspectClass);const name=original.name;
   for(const key of ['nodes','edges','labels'])assert.equal(actual[key].length,original[key].length,name+'.'+key);
   for(const key of ['x','y','width','height'])near(actual.view[key],original.view[key],0.2,name+'.view.'+key);
+  assert.equal(!!actual.title,!!original.title,name+'.title');
+  if(original.title) {
+   const a=actual.title,e=original.title;
+   for(const key of ['text','size','fill'])assert.equal(a[key],e[key],name+'.title.'+key);
+   for(const key of ['x','width','baseline'])near(a[key],e[key],0.25,name+'.title.'+key);
+   near(a.y+a.height/2,e.y+e.height/2,2.5,name+'.title.centerY');
+  }
   for(let i=0;i<original.nodes.length;i++) {
    const a=actual.nodes[i],e=original.nodes[i];assert.equal(a.id,e.id,name+'.id');
    for(const key of ['x','y','width','height'])near(a[key],e[key],0.2,name+'.'+a.id+'.'+key);

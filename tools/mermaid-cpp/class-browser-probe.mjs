@@ -5,6 +5,8 @@ import {resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {chromium} from './oracle/node_modules/playwright-core/index.mjs';
 export const cases = [
+ ['title','---\ntitle: Document storage\n---\nclassDiagram\nclass Document {\n+save() bool\n}\nDocument --> Store : persists'],
+ ['title-wide','---\ntitle: Read and validate the document before saving to storage\nconfig:\n  fontSize: 20\n  state:\n    titleTopMargin: 40\n---\nclassDiagram\nclass Document'],
  ['members','classDiagram\nclass Document {\n+String title\n+save() bool\n}\nclass Store {\n+load(id) Document\n}\nDocument --> Store : persists'],
  ['relations','classDiagram\ndirection LR\nclass Shape\n<<interface>> Shape\nclass Circle\nShape <|-- Circle\nCircle "1" o-- "*" Point : contains'],
  ['empty-boxes','classDiagram\nclass Document\nclass Store\nDocument ..> Store : uses'],
@@ -51,7 +53,9 @@ export function inspectClass() {
  });
  const labels=[...root.querySelectorAll('.edgeLabels foreignObject,.edgeLabels text')].filter(e=>e.textContent).map(e=>({text:e.textContent,...textBox(e)}));
  const v=root.viewBox.baseVal;
- return {nodes,edges,labels,view:{x:v.x,y:v.y,width:v.width,height:v.height}};
+ const titleElement=root.querySelector('.classDiagramTitleText');
+ const title=titleElement?{text:titleElement.textContent,...textBox(titleElement),size:getComputedStyle(titleElement).fontSize,fill:getComputedStyle(titleElement).fill,baseline:Number(titleElement.getAttribute('y'))}:null;
+ return {nodes,edges,labels,title,view:{x:v.x,y:v.y,width:v.width,height:v.height}};
 }
 if(!process.argv.includes('--library')) {
  const directory=resolve(process.argv[2]??'build/mermaid-cpp/class-browser');mkdirSync(directory,{recursive:true});
