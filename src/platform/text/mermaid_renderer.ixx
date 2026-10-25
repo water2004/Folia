@@ -156,9 +156,9 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             SequenceTextBox box{.display=std::u16string{text},.lines=lines};
             double width=0,generic_width=0;
             for(const auto& line:lines) {
-            auto metrics=measurer.measure(line.empty()?u"\u200b":std::u16string_view{line},font);
+            auto metrics=measurer.measure(line.empty()?u"\u200b":std::u16string_view{line},font,false,{},true);
             if(!metrics) return std::unexpected(metrics.error());
-            auto generic=measurer.measure(line.empty()?u"\u200b":std::u16string_view{line},fallback);
+            auto generic=measurer.measure(line.empty()?u"\u200b":std::u16string_view{line},fallback,false,{},true);
             if(!generic) return std::unexpected(generic.error());
             width=std::max(width,std::round(metrics->bounds_width));
             generic_width=std::max(generic_width,std::round(generic->bounds_width));

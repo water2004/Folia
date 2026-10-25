@@ -38,6 +38,54 @@ struct MermaidTextStyle {
 // chosen width against real SVG bounds on the same machine. No approximation
 // is returned on failure. Sizes and results are 96-DPI SVG user units.
 class MermaidMeasurer {
+    // SVG text boxes use raster-hinted glyph bounds. Sequence's integer width
+    // comparisons can change a wrap at a one-pixel difference, so retain shaped
+    // advances but measure each glyph's coverage at its origin.
+    class SvgBounds final : public IDWriteTextRenderer {
+        IDWriteFactory* factory;
+    public:
+        double left=0,right=0;
+        explicit SvgBounds(IDWriteFactory* value):factory(value) {}
+        HRESULT STDMETHODCALLTYPE QueryInterface(REFIID iid,void** out) override {
+            if(iid==__uuidof(IUnknown)||iid==__uuidof(IDWritePixelSnapping)||iid==__uuidof(IDWriteTextRenderer)) {
+                *out=static_cast<IDWriteTextRenderer*>(this);AddRef();return S_OK;
+            }
+            *out=nullptr;return E_NOINTERFACE;
+        }
+        ULONG STDMETHODCALLTYPE AddRef() override {return 1;}
+        ULONG STDMETHODCALLTYPE Release() override {return 1;}
+        HRESULT STDMETHODCALLTYPE IsPixelSnappingDisabled(void*,BOOL* value) override {*value=TRUE;return S_OK;}
+        HRESULT STDMETHODCALLTYPE GetCurrentTransform(void*,DWRITE_MATRIX* value) override {*value={1,0,0,1,0,0};return S_OK;}
+        HRESULT STDMETHODCALLTYPE GetPixelsPerDip(void*,FLOAT* value) override {*value=1;return S_OK;}
+        HRESULT STDMETHODCALLTYPE DrawGlyphRun(void*,FLOAT x,FLOAT,DWRITE_MEASURING_MODE,
+            const DWRITE_GLYPH_RUN* run,const DWRITE_GLYPH_RUN_DESCRIPTION*,IUnknown*) override {
+            double pen=x;
+            const bool rtl=run->bidiLevel%2;
+            for(UINT32 i=0;i<run->glyphCount;++i) {
+                const auto advance=run->glyphAdvances[i];
+                if(rtl) pen-=advance;
+                const float zero=0;
+                const DWRITE_GLYPH_RUN glyph{run->fontFace,run->fontEmSize,1,run->glyphIndices+i,&zero,nullptr,run->isSideways,0};
+                Microsoft::WRL::ComPtr<IDWriteGlyphRunAnalysis> analysis;
+                auto hr=factory->CreateGlyphRunAnalysis(&glyph,1,nullptr,DWRITE_RENDERING_MODE_NATURAL_SYMMETRIC,
+                    DWRITE_MEASURING_MODE_NATURAL,0,0,&analysis);
+                if(FAILED(hr)) return hr;
+                RECT bounds{};
+                if(FAILED(hr=analysis->GetAlphaTextureBounds(DWRITE_TEXTURE_CLEARTYPE_3x1,&bounds))) return hr;
+                const auto offset=run->glyphOffsets?run->glyphOffsets[i].advanceOffset:0;
+                if(bounds.right>bounds.left) {
+                    const auto origin=pen+(rtl?-offset:offset);
+                    left=std::min(left,origin+bounds.left);right=std::max(right,origin+bounds.right);
+                }
+                if(!rtl) pen+=advance;
+                left=std::min(left,pen);right=std::max(right,pen);
+            }
+            return S_OK;
+        }
+        HRESULT STDMETHODCALLTYPE DrawUnderline(void*,FLOAT,FLOAT,const DWRITE_UNDERLINE*,IUnknown*) override {return E_NOTIMPL;}
+        HRESULT STDMETHODCALLTYPE DrawStrikethrough(void*,FLOAT,FLOAT,const DWRITE_STRIKETHROUGH*,IUnknown*) override {return E_NOTIMPL;}
+        HRESULT STDMETHODCALLTYPE DrawInlineObject(void*,FLOAT,FLOAT,IDWriteInlineObject*,BOOL,BOOL,IUnknown*) override {return E_NOTIMPL;}
+    };
     static bool apply_styles(IDWriteTextLayout* layout,std::span<const MermaidTextStyle> styles,
         std::size_t length) {
         for(const auto& style:styles) {
@@ -116,7 +164,7 @@ public:
     }
     std::expected<MermaidTextMetrics, std::string> measure(
         std::u16string_view source, MermaidFont const& font, bool preserve_spaces=false,
-        std::span<const MermaidTextStyle> styles={}) const {
+        std::span<const MermaidTextStyle> styles={},bool svg_bounds=false) const {
         using Microsoft::WRL::ComPtr;
         if (font.family.empty() || font.family.find(u'\0') != std::u16string::npos ||
             !std::isfinite(font.size) || font.size <= 0)
@@ -175,8 +223,14 @@ public:
             return std::unexpected("DirectWrite ink bounds query failed");
         double const advance = metrics.widthIncludingTrailingWhitespace;
         double const ink_width = advance + static_cast<double>(ink.right) + ink.left;
-        double const bounds_width = advance + std::max(0.0, static_cast<double>(ink.right)) +
+        double bounds_width = advance + std::max(0.0, static_cast<double>(ink.right)) +
             std::max(0.0, static_cast<double>(ink.left));
+        if(svg_bounds) {
+            SvgBounds bounds{factory.Get()};
+            if(FAILED(layout->Draw(nullptr,&bounds,0,0)))
+                return std::unexpected("DirectWrite SVG glyph bounds query failed");
+            bounds_width=std::max(advance,bounds.right)-bounds.left;
+        }
         if (!std::isfinite(advance) || !std::isfinite(ink_width) || advance < 0 || ink_width < 0)
             return std::unexpected("Invalid DirectWrite metrics");
         DWRITE_LINE_METRICS line{};UINT32 line_count{};
