@@ -82,6 +82,35 @@ class Parser {
     }
     void statement(View line) {
         View rest = line;
+        if (take(rest,u"autonumber")) {
+            std::optional<double> start, step;
+            const bool visible = lower(rest) != u"off";
+            if (visible && !rest.empty()) {
+                auto number = [&]() {
+                    const auto end = rest.find_first_of(u" \t");
+                    const auto token = rest.substr(0,end);
+                    const auto dot = token.find(u'.');
+                    if (token.empty() || token == u"." ||
+                        token.find_first_not_of(u"0123456789.") != token.npos ||
+                        (dot != token.npos && (token.find(u'.',dot+1) != token.npos ||
+                            token.size()-dot-1 < 1 || token.size()-dot-1 > 2)))
+                        fail("Expected a Sequence autonumber value with at most two decimal places");
+                    double value = 0;
+                    const std::string ascii{token.begin(),token.end()};
+                    const auto parsed = std::from_chars(ascii.data(),ascii.data()+ascii.size(),value);
+                    if (parsed.ec != std::errc{} || parsed.ptr != ascii.data()+ascii.size())
+                        fail("Invalid Sequence autonumber value");
+                    rest = end == rest.npos ? View{} : trim(rest.substr(end));
+                    return value;
+                };
+                start = number(); step = rest.empty() ? 1 : number();
+                if (!rest.empty()) fail("Unexpected Sequence autonumber argument");
+            }
+            message({},{},label({}),SequenceKind::autonumber);
+            auto& event = result.messages.back();
+            event.number_start=start; event.number_step=step; event.number_visible=visible;
+            return;
+        }
         for(const auto& region:region_types) {
             if(take(rest,region.keyword)) {
                 message({},{},label(rest),region.start);

@@ -1,6 +1,16 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-25, Sequence display text verified
+## Active batch - 2026-10-25, Sequence numbering and participant visibility
+
+- Deliver autonumber events and measured SVG numbering, hideUnusedParticipants
+  and mirrorActors configuration through the existing native entry. Scope is the
+  prepared four representative diagrams plus decimal/bidirectional numbering.
+- Exit: original/native parser events, displayed numbers/discs, actor/footer
+  placement and affected Windows checks. Then advance the parsed cross/async
+  arrows to SVG, followed by required extended participants and families.
+- Implementation in progress; no native verification is claimed yet.
+
+## Previous checkpoint - 2026-10-25, Sequence display text verified
 
 - Commits 3f3791af/d0388a9a/b1e26d45/852648c9 deliver explicit HTML breaks,
   protected Mermaid character entities and automatic wrapping for actors,

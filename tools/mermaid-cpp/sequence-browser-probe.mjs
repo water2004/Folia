@@ -8,6 +8,11 @@ import {chromium} from './oracle/node_modules/playwright-core/index.mjs';
 const lock=JSON.parse(readFileSync('docs/mermaid-cpp/source-lock.json'));
 for(const f of lock.files) assert.equal(createHash('sha256').update(readFileSync('.reference/mermaid-js/'+f.path)).digest('hex'),f.sha256,f.path);
 const cases=[
+ ["numbered","sequenceDiagram\nautonumber\nA->>+B: Save\nNote over B: Validate\nB->>B: Commit\nB-->>-A: Done"],
+ ["number-controls","sequenceDiagram\nautonumber 10 5\nA->>B: Open\nautonumber off\nB-->>A: Ready\nautonumber\nA->>B: Save"],
+ ["number-config","%%{init: {\"sequence\": {\"showSequenceNumbers\": true}}}%%\nsequenceDiagram\nA->>B: Open\nB-->>A: Ready"],
+ ["participant-footers","%%{init: {\"sequence\": {\"mirrorActors\": false, \"hideUnusedParticipants\": true}}}%%\nsequenceDiagram\nparticipant Unused\nactor A as User\nparticipant B as Storage\nA->>B: Save"],
+ ["number-decimals","sequenceDiagram\nautonumber 10.1 .1\nA<<->>B: Open\nB<<-->>A: Ready\nA<<->>A: Check\nautonumber 1000\nA->>B: Save"],
  ['basic','sequenceDiagram\nparticipant U as User\nparticipant S as Service\nU->>S: Read document\nS-->>U: Document'],
  ['wide','sequenceDiagram\nparticipant A as Document editor\nparticipant B as Storage\nA->>B: Read and validate the document before saving changes\nB-->>A: Complete'],
  ['self','sequenceDiagram\nparticipant A as Worker\nA->>A: Save'],
@@ -38,6 +43,11 @@ export function inspectSequence() {
  const root=document.querySelector('svg');
  const box=e=>{const b=e.getBBox();return {x:b.x,y:b.y,width:b.width,height:b.height};};
  const style=e=>{const s=getComputedStyle(e);return {fill:s.fill,stroke:s.stroke,strokeWidth:s.strokeWidth};};
+ const numbers=[...root.querySelectorAll('line[marker-start*="sequencenumber"],circle.sequence-number-disc')].map(e=>{
+  if(e.tagName==='circle') return {x:+e.getAttribute('cx'),y:+e.getAttribute('cy'),r:+e.getAttribute('r'),fill:getComputedStyle(e).fill};
+  const id=e.getAttribute('marker-start').split('#').at(-1).slice(0,-1);const circle=root.querySelector('[id="'+id+'"] circle');
+  return {x:+e.getAttribute('x1'),y:+e.getAttribute('y1'),r:+circle.getAttribute('r'),fill:getComputedStyle(circle).fill};
+ });
  const actors=[...root.querySelectorAll('rect.actor')].map(e=>({id:e.getAttribute('name'),footer:e.classList.contains('actor-bottom'),...box(e),...style(e)})).sort((a,b)=>a.id.localeCompare(b.id)||Number(a.footer)-Number(b.footer));
  const regions=[...root.querySelectorAll('.loopLine,.labelBox')].map(e=>({tag:e.tagName,...box(e),...style(e),dash:getComputedStyle(e).strokeDasharray,points:e.tagName==='polygon'?[...e.points].map(p=>[p.x,p.y]):null}));
  const backgrounds=[...root.querySelectorAll('rect.rect')].map(e=>({...box(e),...style(e)}));
@@ -50,7 +60,7 @@ export function inspectSequence() {
    const marker=side=>{const value=e.getAttribute('marker-'+side);if(!value)return null;const id=value.slice(value.lastIndexOf('#')+1,-1);const m=root.querySelector('[id="'+id+'"]');const path=m.querySelector('path');return {refX:m.getAttribute('refX'),refY:m.getAttribute('refY'),d:path.getAttribute('d'),...style(path)};};
    return {kind:e.classList.contains('messageLine1')?1:0,...style(e),points:Array.from({length:21},(_,i)=>{const p=e.getPointAtLength(e.getTotalLength()*i/20);return [p.x,p.y];}),start:marker('start'),end:marker('end')};
  });
- const v=root.viewBox.baseVal;return {backgrounds,regions,actors,notes,activations,figures,lines,texts,signals,view:{x:v.x,y:v.y,width:v.width,height:v.height}};
+ const v=root.viewBox.baseVal;return {numbers,backgrounds,regions,actors,notes,activations,figures,lines,texts,signals,view:{x:v.x,y:v.y,width:v.width,height:v.height}};
 }
 if(!process.argv.includes('--library')) {
  const directory=resolve(process.argv[2]??'build/mermaid-cpp/sequence-browser');mkdirSync(directory,{recursive:true});

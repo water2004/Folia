@@ -10,6 +10,11 @@ using namespace folia::mermaid;
 suite mermaid_measurement = [] {
     "mermaid_sequence_measured_source_to_svg"_test=[] {
         const std::vector<std::pair<std::string,std::u16string>> cases={
+            {"numbered",u"sequenceDiagram\nautonumber\nA->>+B: Save\nNote over B: Validate\nB->>B: Commit\nB-->>-A: Done"},
+            {"number-controls",u"sequenceDiagram\nautonumber 10 5\nA->>B: Open\nautonumber off\nB-->>A: Ready\nautonumber\nA->>B: Save"},
+            {"number-config",u"%%{init: {\"sequence\": {\"showSequenceNumbers\": true}}}%%\nsequenceDiagram\nA->>B: Open\nB-->>A: Ready"},
+            {"participant-footers",u"%%{init: {\"sequence\": {\"mirrorActors\": false, \"hideUnusedParticipants\": true}}}%%\nsequenceDiagram\nparticipant Unused\nactor A as User\nparticipant B as Storage\nA->>B: Save"},
+            {"number-decimals",u"sequenceDiagram\nautonumber 10.1 .1\nA<<->>B: Open\nB<<-->>A: Ready\nA<<->>A: Check\nautonumber 1000\nA->>B: Save"},
             {"basic",u"sequenceDiagram\nparticipant U as User\nparticipant S as Service\nU->>S: Read document\nS-->>U: Document"},
             {"wide",u"sequenceDiagram\nparticipant A as Document editor\nparticipant B as Storage\nA->>B: Read and validate the document before saving changes\nB-->>A: Complete"},
             {"self",u"sequenceDiagram\nparticipant A as Worker\nA->>A: Save"},

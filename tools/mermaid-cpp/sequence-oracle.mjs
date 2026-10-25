@@ -16,6 +16,12 @@ for (const file of ['sequenceDb.ts','sequenceDiagram.ts']) {
   assert.equal(map.sourcesContent[index].replaceAll('\r\n','\n'),read('packages/mermaid/src/diagrams/sequence/'+file));
 }
 const cases = [
+  ["numbered","sequenceDiagram\nautonumber\nA->>+B: Save\nNote over B: Validate\nB->>B: Commit\nB-->>-A: Done"],
+  ["number-controls","sequenceDiagram\nautonumber 10 5\nA->>B: Open\nautonumber off\nB-->>A: Ready\nautonumber\nA->>B: Save"],
+  ["number-config","%%{init: {\"sequence\": {\"showSequenceNumbers\": true}}}%%\nsequenceDiagram\nA->>B: Open\nB-->>A: Ready"],
+  ["participant-footers","%%{init: {\"sequence\": {\"mirrorActors\": false, \"hideUnusedParticipants\": true}}}%%\nsequenceDiagram\nparticipant Unused\nactor A as User\nparticipant B as Storage\nA->>B: Save"],
+  ["number-decimals","sequenceDiagram\nautonumber 10.1 .1\nA<<->>B: Open\nB<<-->>A: Ready\nA<<->>A: Check\nautonumber 1000\nA->>B: Save"],
+  ["invalid-number","sequenceDiagram\nautonumber invalid\nA->>B: Go"],
   ['request-response','sequenceDiagram\nparticipant U as User\nparticipant S as Service\nU->>S: Read document\nS-->>U: Document'],
   ['activation-note','sequenceDiagram\nactor U as User\nparticipant S as Service\nU->>+S: Save document\nNote right of S: Validate input\nS->>S: Write output\nS-->>-U: Saved'],
   ['implicit','sequenceDiagram\nClient->>Server: Open\nServer-->>Client: Ready'],
@@ -61,7 +67,7 @@ for (const [name,source,options={}] of cases) {
         type:m.type,wrap:m.wrap,activate:m.activate??false,placement:m.placement??-1}))};
     ++successes;
   } catch(error) {
-    assert(['unfinished-message','missing-message-colon','inactive-end','unclosed-region','unexpected-section','unexpected-end'].includes(name),`${name}: ${error.stack}`);
+    assert(['invalid-number','unfinished-message','missing-message-colon','inactive-end','unclosed-region','unexpected-section','unexpected-end'].includes(name),`${name}: ${error.stack}`);
   }
   rows.push([name,hex(source),hex(JSON.stringify(site)),hex(JSON.stringify(result))].join('\t'));
 }

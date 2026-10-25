@@ -15,12 +15,12 @@ try {
   await page.setContent(readFileSync(resolve(directory,'sequence-'+row.name+'.svg'),'utf8'));
   const actual=await page.evaluate(inspectSequence);
   for(const key of ['x','y','width','height']) near(actual.view[key],row.view[key],row.name+' view '+key);
-  for(const category of ['backgrounds','regions','actors','notes','activations','figures','lines','texts','signals']) {
+  for(const category of ['numbers','backgrounds','regions','actors','notes','activations','figures','lines','texts','signals']) {
    assert.equal(actual[category].length,row[category].length,row.name+' '+category+' count');
    actual[category].forEach((a,i)=>{
     const e=row[category][i],label=row.name+' '+category+' '+i;
     for(const key of ['tag','dash','id','footer','text','size','fill','stroke','strokeWidth','kind']) if(key in e) assert.equal(a[key],e[key],label+' '+key);
-    for(const key of ['x','y','width','height']) if(key in e) near(a[key],e[key],label+' '+key,category==='texts'?1.1:1);
+    for(const key of ['x','y','width','height','r']) if(key in e) near(a[key],e[key],label+' '+key,category==='texts'?1.1:1);
     if(category==='regions' && e.points) a.points.forEach((p,j)=>p.forEach((v,k)=>near(v,e.points[j][k],label+' polygon',1)));
     if(category==='signals') {
      assert.deepEqual(a.start,e.start,label+' start marker');assert.deepEqual(a.end,e.end,label+' end marker');

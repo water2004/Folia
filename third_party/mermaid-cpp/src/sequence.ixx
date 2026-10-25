@@ -12,7 +12,7 @@ enum class SequenceKind {
     opt_start = 15, opt_end = 16, par_start = 19, par_and = 20, par_end = 21,
     rect_start = 22, rect_end = 23, critical_start = 27, critical_option = 28,
     critical_end = 29, break_start = 30, break_end = 31, par_over_start = 32,
-    solid_point = 24, dotted_point = 25, bidirectional_solid = 33, bidirectional_dotted = 34
+    solid_point = 24, dotted_point = 25, autonumber = 26, bidirectional_solid = 33, bidirectional_dotted = 34
 };
 struct SequenceActor {
     std::u16string id, name, description, type = u"participant";
@@ -24,6 +24,8 @@ struct SequenceMessage {
     bool wrap = false, activate = false;
     // Original LEFTOF=0, RIGHTOF=1, OVER=2; absent for signals/activations.
     int placement = -1;
+    std::optional<double> number_start, number_step;
+    bool number_visible = false;
 };
 struct SequenceInput {
     std::u16string title, acc_title, acc_description;
