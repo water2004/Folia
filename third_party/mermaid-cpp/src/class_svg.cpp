@@ -233,7 +233,9 @@ std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& inp
             min_y=std::min(min_y,title_y-t.baseline);max_y=std::max(max_y,title_y+t.height-t.baseline);
         }
         ClassSvg result;result.width=max_x-min_x+16;result.height=max_y-min_y+16;
-        std::string svg="<svg xmlns=\"http://www.w3.org/2000/svg\" width=\""+num(result.width)+"\" height=\""+num(result.height)+
+        // Keep the CSS viewport from rounding below the precise viewBox and
+        // shrinking font rasterization at the intrinsic display size.
+        std::string svg="<svg xmlns=\"http://www.w3.org/2000/svg\" width=\""+num(std::ceil(result.width))+"\" height=\""+num(std::ceil(result.height))+
             "\" viewBox=\""+num(min_x-8)+" "+num(min_y-8)+" "+num(result.width)+" "+num(result.height)+"\" font-family=\""+xml(theme.font_family)+"\">";
         for(auto [tag,value]:{std::pair{"title",doc.acc_title},{"desc",doc.acc_description}})
             if(!value.empty()) svg+="<"+std::string(tag)+">"+xml(value)+"</"+tag+">";
