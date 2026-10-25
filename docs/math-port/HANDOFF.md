@@ -2,7 +2,14 @@
 
 恢复/压缩后先实际读本文。架构、职责和详细验收见 [architecture](native-raii-architecture.md)、[files](native-raii-files.json)、[acceptance](native-raii-acceptance.md)。只复查新变化；ignored候选用 `rg --no-ignore`。
 
-## 当前 checkpoint：滚动修复已获用户验证；行间公式 SVG 外观待用户确认（2026-10-25）
+## 当前 checkpoint：按用户指示发布 0.4.0（2026-10-25，准备中）
+
+- 用户已接受新版公式图标，并明确要求“推送0.4.0 release”。本轮允许升至0.4.0、推送master/新标签并按现有.github/workflows/release.yml发布；之前固定0.3.2/不发布为历史约束。无子代理/Computer Use，不关闭用户Release候选窗口PID38752，不覆盖正在运行的exe。
+- 已统一CMake、MSI默认值、资源版本、Appx manifest、“关于”页及两份README为0.4.0，新增release-notes/v0.4.0.md。发布范围为v0.3.2之后SVG主题标记、CST语义编辑、主题升级、公式投影及滚动修复；不展开旧数学移植/Mermaid事项。
+- 开始时工作区干净，origin/master为v0.3.2提交e9b48e4a，本地全部修改已分批提交至53c967f9；origin没有v0.4.0标签。现有Core760项、platform83项、WinUI47项及最新SVG专项3项均已通过，证据见下方历史。最终WinUI全测47项/14767断言通过（35838 exit0），日志build/release-0.4.0-app-tests.log；无活动native句柄。
+- 下一步：版本和diff已核对，提交本轮版本/说明，推送master后创建并推送v0.4.0标签；跟踪Actions到完成，核对GitHub Release MSI和SHA256，不手工绕过现有CI/CD。远端尚未推送，未发布新版本。
+
+## 历史：滚动修复与公式 SVG 外观（2026-10-25，均获用户认可）
 
 - **用户已验证滚动修复**：“不用采了，我验证已经修复了”。第二次对照采样取消，未执行新UAC/PresentMon，不再采样。Release候选 `build/app-winui/bin/x64/Release/Folia.exe`（最后所见PID38752）由用户使用，不能关闭/覆盖；安装版仍旧0.3.2，尚未更新此候选。版本保持0.3.2，无推送发布/子代理/Computer Use；native一次一个，并发≤4。
 - **已完成滚动实现**：EditorFrameScheduler使用系统合成时钟，先等合成tick再等GPU buffer；现代路径不再叠加独立刷新率timer，旧系统保留高精度timer。Start/Stop成对DRR boost覆盖惯性阶段；Normal优先级、单待处理帧、取消和异步让出保持。scroll_state内部offset/target/Snapshot用double，渲染边缘仍float，修复大坐标末段舍入停滞，惯性曲线不变。原实现新测试276断言失败，修复完整platform **83项/4230断言通过**：`build/scroll-inertia-{precision-before,platform-after}.log`。
