@@ -1,5 +1,5 @@
-#include "support/folia_test.hpp"
 #include "native-renderer.h"
+#include "support/folia_test.hpp"
 
 namespace {
 using namespace boost::ut;
