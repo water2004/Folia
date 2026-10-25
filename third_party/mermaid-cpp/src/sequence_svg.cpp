@@ -121,9 +121,9 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
     try {
         const auto& doc = input.document; auto c = input.config; const auto& t = input.theme;
         auto messages=measured.messages;
-        auto wrap=[&](std::u16string_view text,double width) {
+        auto wrap=[&](std::u16string_view text,double width,unsigned weight=0) {
             if(!measured.wrap) throw std::runtime_error("Sequence wrapping requires text measurement");
-            auto result=measured.wrap(text,width);
+            auto result=measured.wrap(text,width,weight?weight:t.message_font_weight);
             if(!result) throw std::runtime_error(result.error());
             return *result;
         };
@@ -295,7 +295,7 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
             if(m.type==SequenceKind::rect_start||m.type==SequenceKind::rect_end) continue;
             const auto& a=actors[ids.at(m.from)];const auto& b=actors[ids.at(m.to)];
             if(m.type==SequenceKind::note) {
-                if(m.wrap) box=wrap(m.message,c.width);
+                if(m.wrap) box=wrap(m.message,c.width,t.note_font_weight);
                 auto width=m.wrap?c.width:std::max(c.width,box.width+2*c.note_margin),x=a.x;
                 if(m.placement==0||m.placement==1) {
                     width=m.wrap?std::max(c.width,box.width+(m.placement==0?2*c.note_margin:0)):
@@ -308,7 +308,7 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
                     x=std::min(a.x+a.width/2,b.x+b.width/2)-c.actor_margin/2;
                 }
                 notes[i]={x,width};
-                if(m.wrap) box=wrap(m.message,width-2*c.wrap_padding);
+                if(m.wrap) box=wrap(m.message,width-2*c.wrap_padding,t.note_font_weight);
                 for(auto& loop:loops) {
                     loop.from=std::min(loop.from,x);loop.to=std::max(loop.to,x+width);
                     loop.width=std::max(loop.width,std::abs(loop.from-loop.to))-c.label_box_width;
@@ -331,7 +331,8 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
             }
         }
         active.clear();
-        const auto font=" font-family=\""+xml(t.font_family)+"\" font-size=\""+num(t.font_size)+"\" font-weight=\""+std::to_string(t.font_weight)+"\"";
+        const auto font_attributes=[&](unsigned weight) {return " font-family=\""+xml(t.font_family)+"\" font-size=\""+num(t.font_size)+"\" font-weight=\""+std::to_string(weight)+"\"";};
+        const auto font=font_attributes(t.message_font_weight),actor_font=font_attributes(t.actor_font_weight),note_font=font_attributes(t.note_font_weight);
         double sequence_index=1,sequence_step=1;
         bool sequence_visible=false;
         for(std::size_t i=0;i<doc.messages.size();++i) {
@@ -427,7 +428,7 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
                     "\" fill=\""+paint(t.note_fill)+"\" stroke=\""+paint(t.note_border)+"\"/>";
                 for(std::size_t j=0;j<box.lines.size();++j)
                     note+="<text class=\"noteText\" x=\""+num(tx)+"\" y=\""+num(std::floor(y+c.note_margin/2+j*box.line_height+0.5))+"\" text-anchor=\""+anchor+
-                    "\" dominant-baseline=\"middle\" alignment-baseline=\"middle\" dy=\"1em\" fill=\""+paint(t.note_text)+"\""+font+">"+xml(box.lines[j].empty()?u"\u200b":std::u16string_view{box.lines[j]})+"</text>";
+                    "\" dominant-baseline=\"middle\" alignment-baseline=\"middle\" dy=\"1em\" fill=\""+paint(t.note_text)+"\""+note_font+">"+xml(box.lines[j].empty()?u"\u200b":std::u16string_view{box.lines[j]})+"</text>";
                 backgrounds.push_back(std::move(note));
                 insert(x,y,x+width,y+h);y+=h;
                 continue;
@@ -478,9 +479,12 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
                 else actor.stop_y=line_y-c.height/2;
                 y+=c.height/2;bottom=std::max(bottom,y);
             }
+            const bool left_align=c.message_align==u"left"||c.message_align==u"start",right_align=c.message_align==u"right"||c.message_align==u"end";
+            const auto message_x=left_align?std::min(start,stop)+c.wrap_padding:right_align?std::max(start,stop)-c.wrap_padding:(start+stop)/2;
+            const std::string message_anchor=left_align?"start":right_align?"end":"middle";
             for(std::size_t j=0;j<box.lines.size();++j)
-                signals+="<text class=\"messageText\" x=\""+num(std::floor((start+stop)/2+0.5))+"\" y=\""+num(text_y+j*box.line_height)+
-                "\" text-anchor=\"middle\" dominant-baseline=\"middle\" alignment-baseline=\"middle\" dy=\"1em\" fill=\""+paint(t.signal_text)+"\""+font+">"+xml(box.lines[j].empty()?u"\u200b":std::u16string_view{box.lines[j]})+"</text>";
+                signals+="<text class=\"messageText\" x=\""+num(std::floor(message_x+0.5))+"\" y=\""+num(text_y+j*box.line_height)+
+                "\" text-anchor=\""+message_anchor+"\" dominant-baseline=\"middle\" alignment-baseline=\"middle\" dy=\"1em\" fill=\""+paint(t.signal_text)+"\""+font+">"+xml(box.lines[j].empty()?u"\u200b":std::u16string_view{box.lines[j]})+"</text>";
             const auto cls=dotted(m.type)?"messageLine1":"messageLine0";
             const bool numbered=sequence_visible||c.show_numbers;
             if(start==stop) {
@@ -542,13 +546,13 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
             const auto start=type==u"actor"||type==u"boundary"?80:type==u"control"||type==u"entity"?75:
                 type==u"database"?c.height+2*c.box_text_margin:c.height;
             svg+="<line class=\"actor-line\" x1=\""+num(center)+"\" x2=\""+num(center)+"\" y1=\""+num(a.start_y+start)+"\" y2=\""+num(c.mirror_actors?a.stop_y.value_or(footer_y):a.stop_y?*a.stop_y+participant_height(type,a.width,c.height,c.label_box_height)/2:2000)+"\" stroke=\""+paint(t.actor_line)+"\" fill=\""+paint(t.actor_fill)+"\" stroke-width=\"2\"/>";
-            svg+=participant_svg(doc.actors[i],measured.actors[i],t,c,a.x,a.width,a.start_y,false,font);
-            if(c.mirror_actors) svg+=participant_svg(doc.actors[i],measured.actors[i],t,c,a.x,a.width,a.stop_y.value_or(footer_y),true,font);
+            svg+=participant_svg(doc.actors[i],measured.actors[i],t,c,a.x,a.width,a.start_y,false,actor_font);
+            if(c.mirror_actors) svg+=participant_svg(doc.actors[i],measured.actors[i],t,c,a.x,a.width,a.stop_y.value_or(footer_y),true,actor_font);
         }
 
         for(const auto& layer:backgrounds) svg+=layer;
         svg+=signals;
-        if(!doc.title.empty()) svg+="<text x=\""+num((right-left)/2-2*c.margin_x)+"\" y=\"-25\" fill=\""+paint(t.title_text)+"\""+font+">"+xml(doc.title)+"</text>";
+        if(!doc.title.empty()) svg+="<text x=\""+num((right-left)/2-2*c.margin_x)+"\" y=\"-25\" fill=\""+paint(t.title_text)+"\""+font_attributes(t.font_weight)+">"+xml(doc.title)+"</text>";
         svg+="</svg>";
         return SequenceSvg{std::move(svg),width,height};
     } catch(const std::exception& error) { return std::unexpected(std::string{error.what()}); }

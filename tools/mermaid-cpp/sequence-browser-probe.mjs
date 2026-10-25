@@ -8,6 +8,11 @@ import {chromium} from './oracle/node_modules/playwright-core/index.mjs';
 const lock=JSON.parse(readFileSync('docs/mermaid-cpp/source-lock.json'));
 for(const f of lock.files) assert.equal(createHash('sha256').update(readFileSync('.reference/mermaid-js/'+f.path)).digest('hex'),f.sha256,f.path);
 const cases=[
+ ["alignment-left","%%{init: {\"sequence\":{\"messageAlign\":\"left\"}}}%%\nsequenceDiagram\nA->>B: Save\nB-->>A: Done\nA->>A: Check"],
+ ["alignment-right","%%{init: {\"sequence\":{\"messageAlign\":\"right\"}}}%%\nsequenceDiagram\nA->>B: Save\nB-->>A: Done\nA->>A: Check"],
+ ["category-weights","%%{init: {\"sequence\":{\"actorFontWeight\":700,\"messageFontWeight\":600,\"noteFontWeight\":300}}}%%\nsequenceDiagram\nparticipant A as Editor\nA->>B: Read document\nNote over A,B: Validate changes\nB-->>A: Done"],
+ ["literal-labels","sequenceDiagram\nparticipant A as <b>Editor</b>\nA->>B: <b>Read</b> document\nNote over B: <i>Validate</i> changes\nB-->>A: Done"],
+ ["root-weight","%%{init: {\"fontWeight\":500,\"sequence\":{\"actorFontWeight\":700,\"messageFontWeight\":600,\"noteFontWeight\":300}}}%%\nsequenceDiagram\nA->>B: Read document\nNote over A,B: Validate changes"],
  ["participant-lifecycle","sequenceDiagram\nparticipant U as User\ncreate participant W as Worker\nU->>W: Start\nW->>W: Work\ndestroy W\nW-->>U: Done"],
  ["lifecycle-late","sequenceDiagram\nautonumber\nparticipant L as Log\nparticipant U as User\nU->>L: Open\ncreate actor W as Worker\nU->>W: Start\nW-->>U: Ready\ndestroy W\nU-xW: Stop"],
  ["lifecycle-no-footer","%%{init: {\"sequence\": {\"mirrorActors\": false}}}%%\nsequenceDiagram\nparticipant A\ncreate participant B\nA->>+B: Start\nB-->>-A: Ready\ndestroy B\nA-xB: Stop"],
@@ -69,7 +74,7 @@ export function inspectSequence() {
  const figures=[...root.querySelectorAll('g.actor-man')].flatMap(g=>[...g.querySelectorAll('line,circle')].map(e=>({id:g.getAttribute('name'),footer:g.classList.contains('actor-bottom'),...box(e),...style(e)}))).sort((a,b)=>a.id.localeCompare(b.id)||Number(a.footer)-Number(b.footer)||a.y-b.y||a.x-b.x);
  const shapes=[...root.querySelectorAll('g.actor:not(.actor-man) path,g.actor:not(.actor-man) circle,g.actor:not(.actor-man) line')].map(e=>({tag:e.tagName,...box(e),...style(e),points:e.tagName==='path'?Array.from({length:21},(_,i)=>{const p=e.getPointAtLength(e.getTotalLength()*i/20),q=point(e,p.x,p.y);return [q.x,q.y];}):null})).sort((a,b)=>a.x-b.x||a.y-b.y||a.width-b.width);
  const lines=[...root.querySelectorAll('.actor-line')].map(e=>({...box(e),...style(e)})).sort((a,b)=>a.x-b.x);
- const texts=[...root.querySelectorAll('text')].map(e=>({text:e.textContent,...box(e),...style(e.querySelector('tspan')??e),size:getComputedStyle(e).fontSize})).sort((a,b)=>a.text.localeCompare(b.text)||a.y-b.y);
+ const texts=[...root.querySelectorAll('text')].map(e=>({text:e.textContent,...box(e),...style(e.querySelector('tspan')??e),size:getComputedStyle(e).fontSize,weight:getComputedStyle(e).fontWeight})).sort((a,b)=>a.text.localeCompare(b.text)||a.y-b.y);
  const signals=[...root.querySelectorAll('.messageLine0,.messageLine1')].map(e=>{
    const marker=side=>{const value=e.getAttribute('marker-'+side);if(!value)return null;const id=value.slice(value.lastIndexOf('#')+1,-1);const m=root.querySelector('[id="'+id+'"]');const path=m.querySelector('path');return {refX:m.getAttribute('refX'),refY:m.getAttribute('refY'),d:path.getAttribute('d'),...style(path)};};
    return {kind:e.classList.contains('messageLine1')?1:0,...style(e),points:Array.from({length:21},(_,i)=>{const p=e.getPointAtLength(e.getTotalLength()*i/20);return [p.x,p.y];}),start:marker('start'),end:marker('end')};

@@ -132,25 +132,25 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
     SequenceMeasurements sequence_measurements;
     if(auto seq=std::get_if<SequenceRenderInput>(&input->content)) {
         if(seq->theme.font_size>std::numeric_limits<float>::max()) return std::unexpected("Invalid Sequence font size");
-        const MermaidFont font{seq->theme.font_family,static_cast<float>(seq->theme.font_size),seq->theme.font_weight};
-        auto height=measurer.svg_font_height(font);
-        if(!height) return std::unexpected(height.error());
-        const MermaidFont fallback{u"Arial",font.size,font.weight};
-        auto fallback_height=measurer.svg_font_height(fallback);
-        if(!fallback_height) return std::unexpected(fallback_height.error());
-        auto measure=[&,font,fallback,height,fallback_height](std::u16string_view text)->std::expected<SequenceTextBox,std::string> {
+        auto measure_font=[&,seq](std::u16string_view text,unsigned weight)->std::expected<SequenceTextBox,std::string> {
+            const MermaidFont font{seq->theme.font_family,static_cast<float>(seq->theme.font_size),weight};
+            auto height=measurer.svg_font_height(font);if(!height)return std::unexpected(height.error());
+            const MermaidFont fallback{u"Arial",font.size,font.weight};
+            auto fallback_height=measurer.svg_font_height(fallback);if(!fallback_height)return std::unexpected(fallback_height.error());
             // Sequence splits explicit HTML breaks before measuring; protected
             // Mermaid entities remain encoded until the final SVG text pass.
             std::vector<std::u16string> lines(1);
             for(std::size_t i=0;i<text.size();) {
                 if(text[i]==u'<') {
                     const auto end=text.find(u'>',i);
-                    if(end==text.npos) return std::unexpected("Unsupported Sequence text markup");
-                    auto tag=std::u16string{text.substr(i+1,end-i-1)};
-                    std::erase_if(tag,[](char16_t c){return c==u'/'||c==u' '||c==u'\t';});
-                    for(auto& c:tag) if(c>=u'A'&&c<=u'Z') c+=u'a'-u'A';
-                    if(tag!=u"br") return std::unexpected("Sequence rich text requires its display adapter");
-                    lines.emplace_back();i=end+1;
+                    if(end!=text.npos) {
+                        auto tag=std::u16string{text.substr(i+1,end-i-1)};
+                        std::erase_if(tag,[](char16_t c){return c==u'/'||c==u' '||c==u'\t';});
+                        for(auto& c:tag) if(c>=u'A'&&c<=u'Z') c+=u'a'-u'A';
+                        if(tag==u"br") {lines.emplace_back();i=end+1;continue;}
+                    }
+                    // Sequence drawText uses .text(); non-break markup is literal.
+                    lines.back()+=text[i++];
                 } else lines.back()+=text[i++];
             }
             SequenceTextBox box{.display=std::u16string{text},.lines=lines};
@@ -171,7 +171,8 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             box.width=width;box.line_height=line_height;box.height=line_height*lines.size();
             return box;
         };
-        auto wrap=[measure](std::u16string_view text,double max_width)->std::expected<SequenceTextBox,std::string> {
+        auto wrap=[measure_font](std::u16string_view text,double max_width,unsigned weight)->std::expected<SequenceTextBox,std::string> {
+            const auto measure=[&](std::u16string_view value){return measure_font(value,weight);};
             auto initial=measure(text);if(!initial) return initial;
             if(initial->lines.size()>1 || text.empty()) return initial;
             // Original utils.wrapLabel/breakString: rounded SVG widths, a
@@ -208,20 +209,21 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
         };
         sequence_measurements.wrap=wrap;
         for(const auto& group:seq->document.boxes) {
-            auto box=measure(group.name);
+            auto box=measure_font(group.name,seq->theme.message_font_weight);
             if(!box) return std::unexpected(box.error());
             sequence_measurements.boxes.push_back(*box);
         }
         for(const auto& actor:seq->document.actors) {
-            auto box=actor.wrap?wrap(actor.description,seq->config.width-2*seq->config.wrap_padding):measure(actor.description);
+            auto box=actor.wrap?wrap(actor.description,seq->config.width-2*seq->config.wrap_padding,seq->theme.actor_font_weight):measure_font(actor.description,seq->theme.actor_font_weight);
             if(!box) return std::unexpected(box.error());
             sequence_measurements.actors.push_back(*box);
         }
-        if(auto title=measure(seq->document.title);!title) return std::unexpected(title.error());
+        if(auto title=measure_font(seq->document.title,seq->theme.font_weight);!title) return std::unexpected(title.error());
         for(const auto& message:seq->document.messages) {
             const bool bracket=sequence_region_start(message.type)||sequence_region_section(message.type);
             const auto text=bracket&&!message.message.empty()?u"["+message.message+u"]":message.message;
-            auto box=message.wrap&&!bracket?wrap(text,seq->config.width-2*seq->config.wrap_padding):measure(text);
+            const auto weight=message.type==SequenceKind::note?seq->theme.note_font_weight:seq->theme.message_font_weight;
+            auto box=message.wrap&&!bracket?wrap(text,seq->config.width-2*seq->config.wrap_padding,weight):measure_font(text,weight);
             if(!box) return std::unexpected(box.error());
             sequence_measurements.messages.push_back(*box);
         }

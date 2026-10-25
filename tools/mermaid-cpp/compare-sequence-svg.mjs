@@ -19,7 +19,7 @@ try {
    assert.equal(actual[category].length,row[category].length,row.name+' '+category+' count');
    actual[category].forEach((a,i)=>{
     const e=row[category][i],label=row.name+' '+category+' '+i;
-    for(const key of ['tag','dash','id','footer','text','size','fill','stroke','strokeWidth','kind']) if(key in e) assert.equal(a[key],e[key],label+' '+key);
+    for(const key of ['tag','dash','id','footer','text','size','weight','fill','stroke','strokeWidth','kind']) if(key in e) assert.equal(a[key],e[key],label+' '+key);
     for(const key of ['x','y','width','height','r']) if(key in e) near(a[key],e[key],label+' '+key,category==='texts'?1.1:1);
     if((category==='regions'||category==='shapes') && e.points) a.points.forEach((p,j)=>p.forEach((v,k)=>near(v,e.points[j][k],label+' polygon',1)));
     if(category==='signals') {

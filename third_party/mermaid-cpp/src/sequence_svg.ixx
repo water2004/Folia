@@ -8,6 +8,7 @@ struct SequenceSvgTheme {
     std::u16string font_family = u"Arial";
     double font_size = 16;
     unsigned font_weight = 400;
+    unsigned actor_font_weight = 400, message_font_weight = 400, note_font_weight = 400;
     std::string actor_fill, actor_border, actor_text, actor_line, signal, signal_text;
     std::string note_fill, note_border, note_text, activation_fill, activation_border;
     std::string label_fill, label_border, label_text, loop_text;
@@ -19,6 +20,7 @@ struct SequenceSvgConfig {
     double note_margin = 10, activation_width = 10;
     double box_text_margin = 5, label_box_width = 50, label_box_height = 20;
     std::u16string note_align = u"center";
+    std::u16string message_align = u"center";
     bool right_angles = false;
     bool mirror_actors = true, hide_unused = false, show_numbers = false;
 };
@@ -33,7 +35,7 @@ struct SequenceTextBox {
 struct SequenceMeasurements {
     std::vector<SequenceTextBox> actors, messages, boxes;
     // Layout-dependent wrapping calls the host's real text measurement.
-    std::function<std::expected<SequenceTextBox,std::string>(std::u16string_view,double)> wrap;
+    std::function<std::expected<SequenceTextBox,std::string>(std::u16string_view,double,unsigned)> wrap;
 };
 // Region events have no participant endpoints and use bracketed display labels.
 bool sequence_region_start(SequenceKind);

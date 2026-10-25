@@ -186,9 +186,8 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
             const auto& config=member(effective,u"sequence");
             if(text(member(effective,u"look"))!=u"classic")
                 return std::unexpected("Native Sequence SVG currently requires classic look");
-            if(text(member(config,u"messageAlign"))!=u"center")
-                return std::unexpected("Sequence alternate message alignment requires the next SVG adapter");
             SequenceSvgConfig c;
+            c.message_align=text(member(config,u"messageAlign"));
             c.mirror_actors=boolean(member(config,u"mirrorActors"));
             c.hide_unused=boolean(member(config,u"hideUnusedParticipants"));
             c.show_numbers=boolean(member(config,u"showSequenceNumbers"));
@@ -212,9 +211,15 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
                 const auto value=number(*weight);
                 if(value<100||value>900||std::floor(value)!=value) return std::unexpected("Invalid Sequence font weight");
                 t.font_weight=static_cast<unsigned>(value);
-            } else if(number(member(config,u"actorFontWeight"))!=400 || number(member(config,u"messageFontWeight"))!=400 ||
-                number(member(config,u"noteFontWeight"))!=400)
-                return std::unexpected("Separate Sequence label weights require the next SVG adapter");
+                t.actor_font_weight=t.message_font_weight=t.note_font_weight=t.font_weight;
+            } else {
+                for(auto [key,target]:{std::pair{u"actorFontWeight",&t.actor_font_weight},
+                    {u"messageFontWeight",&t.message_font_weight},{u"noteFontWeight",&t.note_font_weight}}) {
+                    const auto value=number(member(config,key));
+                    if(value<100||value>900||std::floor(value)!=value) return std::unexpected("Invalid Sequence font weight");
+                    *target=static_cast<unsigned>(value);
+                }
+            }
             for(auto [key,target]:{std::pair{u"actorBkg",&t.actor_fill},{u"actorBorder",&t.actor_border},
                 {u"actorTextColor",&t.actor_text},{u"actorLineColor",&t.actor_line},
                 {u"signalColor",&t.signal},{u"signalTextColor",&t.signal_text},

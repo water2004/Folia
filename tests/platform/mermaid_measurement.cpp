@@ -71,6 +71,11 @@ suite mermaid_measurement = [] {
 
     "mermaid_sequence_measured_source_to_svg"_test=[] {
         const std::vector<std::pair<std::string,std::u16string>> cases={
+            {"alignment-left",u"%%{init: {\"sequence\":{\"messageAlign\":\"left\"}}}%%\nsequenceDiagram\nA->>B: Save\nB-->>A: Done\nA->>A: Check"},
+            {"alignment-right",u"%%{init: {\"sequence\":{\"messageAlign\":\"right\"}}}%%\nsequenceDiagram\nA->>B: Save\nB-->>A: Done\nA->>A: Check"},
+            {"category-weights",u"%%{init: {\"sequence\":{\"actorFontWeight\":700,\"messageFontWeight\":600,\"noteFontWeight\":300}}}%%\nsequenceDiagram\nparticipant A as Editor\nA->>B: Read document\nNote over A,B: Validate changes\nB-->>A: Done"},
+            {"literal-labels",u"sequenceDiagram\nparticipant A as <b>Editor</b>\nA->>B: <b>Read</b> document\nNote over B: <i>Validate</i> changes\nB-->>A: Done"},
+            {"root-weight",u"%%{init: {\"fontWeight\":500,\"sequence\":{\"actorFontWeight\":700,\"messageFontWeight\":600,\"noteFontWeight\":300}}}%%\nsequenceDiagram\nA->>B: Read document\nNote over A,B: Validate changes"},
             {"participant-lifecycle",u"sequenceDiagram\nparticipant U as User\ncreate participant W as Worker\nU->>W: Start\nW->>W: Work\ndestroy W\nW-->>U: Done"},
             {"lifecycle-late",u"sequenceDiagram\nautonumber\nparticipant L as Log\nparticipant U as User\nU->>L: Open\ncreate actor W as Worker\nU->>W: Start\nW-->>U: Ready\ndestroy W\nU-xW: Stop"},
             {"lifecycle-no-footer",u"%%{init: {\"sequence\": {\"mirrorActors\": false}}}%%\nsequenceDiagram\nparticipant A\ncreate participant B\nA->>+B: Start\nB-->>-A: Ready\ndestroy B\nA-xB: Stop"},
