@@ -2,7 +2,16 @@
 
 恢复/压缩后先实际读本文。架构、职责和详细验收见 [architecture](native-raii-architecture.md)、[files](native-raii-files.json)、[acceptance](native-raii-acceptance.md)。只复查新变化；ignored候选用 `rg --no-ignore`。
 
-## 当前 checkpoint：目录换行与正文同步已完成（2026-10-26，未打包安装）
+## 当前 checkpoint：图片粘贴与未保存关闭确认已完成（2026-10-26，未打包安装）
+
+- 用户要求剪贴板图片落在MD同目录、新文档先保存，关闭有修改时保存/丢弃/取消。已本地提交：serializer新图片引用格式化 **38117303**；图片存储/粘贴、统一保存/关闭与正式测试 **ae14280a**。原目录提交57e85f0b保留；版本固定0.4.0，不自动推送/发布/安装，无子代理/Computer Use。
+- ClipboardImageStore后台解码位图为唯一PNG；复制的图片文件按ContentType识别并异步保留原格式复制，同目录唯一名称不覆盖原图。Controller.Clipboard优先Bitmap，其次图片StorageItems（多图一个撤销事务），其余文本沿用普通粘贴。未命名文档先await保存，取消不插入/不写图片。相对引用由serializer生成，富文本/源码统一Command::Paste事务；失败/过期时清理仅本次已创建文件，Undo保留图片以支持Redo。未扫描Markdown/引入第二编辑模型。
+- Controller.Save归并三个重复保存路径为awaitable bool；按钮、首次图片保存、关闭共用。后台编码/OpenTransactedWriteAsync成功提交后才mark saved，取消/失败不关闭。使用既有reload fingerprint作保存基线，后台加载后对编辑器表示计算一次基线，避免CRLF/块分隔格式误报；不增加每字符全文遍历或常驻全文副本。保存完成仍有新编辑则再次询问。
+- AppWindow.Closing先Cancel并排队离开同步通知，再由强生命周期协程显示保存/不保存/取消ContentDialog，批准后Close；重复请求不叠加提示。打开/编码重开替换文档也确认，ExternalReload既有流程不变。异步操作捕获loadSerial+已提交documentSerial/选区/修订，替换中禁止Save/Paste，文档切换后旧结果不写入新文档。保存/提示回调复制到协程帧，Detach期间仍保持必要生命周期。
+- **验收完成**：setup和Debug构建成功，最终WinUI完整 **68项/14971断言通过**（新clipboard6项/76、lifecycle10项/57）。覆盖实际PNG像素/相对路径/同目录、两模式Undo/Redo与零全文parse/serialize、首次保存取消/成功、多图文件复制、坏图片/过期请求/文本粘贴；关闭保存/取消/失败/新编辑重查、精确保存基线Undo/Redo、CRLF/视图切换、打开替换、重复关闭/Detach回调生命周期与替换中禁止Save/Paste。日志build/clipboard-close-{setup,app-build-final,app-final}.log；43793 exit0，无活动native/build/test句柄。
+- **交付/停止点**：候选build/app-winui/bin/x64/Debug/FoliaClipboardPreview.exe；未启动实际UI、未安装/生成新MSI。测试使用真实DataPackageView/编码/存储和正式Controller，注入保存目标/提示结果，不改系统剪贴板；未做真实ContentDialog/FileSavePicker交互或窗口关闭按钮人工复验。图片是用户文档资源，非旧数学临时缓存；不自动删除Undo后的图片。下一步按用户要求试用/打包，不移动已发布0.4.0标签、不重开旧宽审。
+
+## 历史：目录换行与正文同步已完成（2026-10-26，未打包安装）
 
 - 用户任务：长目录标题自动wrap、目录跟随正文。实现本地提交 **57e85f0b**。版本保持0.4.0，不自动推送/发布；无子代理/Computer Use，不重开旧数学移植或Mermaid事项。
 - SidebarController使用Wrap/不截断的TextBlock模板、禁用横向滚动及Stretch容器，层级padding独立于标题文字。保持虚拟化；按outline.content_key更新标题投影，滚动不重建列表。SyncViewport在draw后读取既有visual-to-source映射的顶部可见行，按renderModel.editable_index二分对应标题；不依赖标题文字匹配/不扫Markdown，不改正文选择、文档或历史。行边界采用可见行规则，避免鼠标命中上一空行而晚切章节；短尾章节在文档底部高亮末标题。
