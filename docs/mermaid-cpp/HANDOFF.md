@@ -1,6 +1,22 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-25, participant grouping and lifecycle verified
+## Current checkpoint - 2026-10-25, Class parser/DB batch in progress
+
+- Deliver the next required Class family boundary: owned classes, members,
+  methods and ordinary relationships, including labels, annotations, generics,
+  classifiers, multiplicity and direction. Keep layout/rendering separate.
+- Exit condition: the representative original Class DB fixtures and common
+  incomplete-input errors pass natively in Windows standalone/integrated
+  Debug/Release, with existing affected checks. Then commit/deliver this batch
+  and advance to measured Class boxes and the original unified Dagre adapter.
+- New source oracle: tools/mermaid-cpp/class-oracle.mjs; fixtures: class.tsv.
+  Eight success inputs and four errors are source-matched locally. Native
+  validation is pending; no Class rendering or application integration claimed.
+- Working implementation is in the main development worktree. The clean
+  contribution worktree remains build/mermaid-cpp/entry-contribution.
+  PR #1 is open/unmerged at 0b458e74; do not merge.
+
+## Previous checkpoint - 2026-10-25, participant grouping and lifecycle verified
 
 - Grouping commit 71b85336 delivers owned box membership, CSS color/title parsing,
   measured/wrapped group titles, group margins, header offsets and backgrounds

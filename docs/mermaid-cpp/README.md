@@ -34,6 +34,15 @@ Cytoscape, date calculations) needs its own source and behavior verification.
 
 ## Current state
 
+`folia.mermaid.class_diagram::prepare_class` connects shared preparation to owned
+Class declarations, labels, generic types, annotations, ordered attributes and
+methods. Member display details retain visibility, parameters, return types and
+static/abstract classifiers. Ordinary relationships retain inheritance,
+aggregation, composition, dependency, solid/dotted lines, multiplicity and
+direction. The first Class batch covers plain text; namespaces, notes, styles,
+rich labels and interfaces rendered as lollipops remain separate work. Unsupported
+statements return errors. Class SVG rendering is not yet connected.
+
 `folia.mermaid.sequence::prepare_sequence` connects shared preparation to owned
 Sequence actors and ordered messages. The parser/DB boundary covers actor
 and participant declarations, aliases, implicit participants, common solid/
