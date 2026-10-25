@@ -2,7 +2,16 @@
 
 恢复/压缩后先实际读本文。架构、职责和详细验收见 [architecture](native-raii-architecture.md)、[files](native-raii-files.json)、[acceptance](native-raii-acceptance.md)。只复查新变化；ignored候选用 `rg --no-ignore`。
 
-## 当前 checkpoint：0.4.0 本地更新 MSI 已构建并安装（2026-10-26，完成）
+## 当前 checkpoint：启动崩溃已修复、重新安装并实际验证（2026-10-26，完成）
+
+- 用户反馈安装版不能启动；根因是新增AppWindow.Closing(auto_revoke)：AppWindow不支持IWeakReferenceSource，C++/WinRT weak_ref构造对查询后的null解引用。WER与自建空白诊断实例均为0xc0000005/RVA **0x12a00e**；带符号栈定位MainWindow::RegisterWindowHandlers，MainWindow.Events.cpp:116。已向用户承认之前只测Controller/核包、漏测完整MainWindow启动。
+- **修复提交3bcb3885**：MainWindow.Lifecycle.h的WindowClosingSubscription强持有事件源+token，Reset/析构成对退订；不走弱auto_revoker，关闭保存确认保留。Release开启/Zi、DEBUG:FULL并保留REF/ICF优化，PDB排除MSI，便于后续定位。未修改生成的SDK代码、用户设置或CST/数学引擎。
+- **正式启动门禁**：tests/app/test_startup.ps1运行真实GUI入口与真实manifest，仅创建自己的无参数空白子进程，接收App.OnLaunched的Folia.StartupComplete标记，等1秒后正常关闭该子进程，要求exit0；异常保存小dump不弹WER。build_msi.ps1打包前必须通过此测试，无新WndProc shell/产品交互模式。旧安装exe正式测试复现相同AV（build/startup-before-test.log）；修复Release连续 **3次构造/激活/正常关闭通过**（startup-fixed-tests.log），打包内置门禁另1次通过。
+- **修复MSI已直接更新安装**，msiexec exit0、无需重启：build/installer/bin/Folia-0.4.0-x64.msi，**53,533,534 bytes**，SHA256 `257C5E885985D6488C0CF93D9716FBED234435BEC0E9C67133F8DE7BDF6A3BB9`，ProductCode `{CDA9C1E8-0880-4CA6-BACD-41C4E5A890C6}`。原崩溃包01659E0C产品已升级；包排除PDB/测试exe，文件数仍165。安装路径LocalAppData/Programs/Folia/Folia.exe。
+- **实际安装版连续3次完整启动/激活/正常关闭exit0通过**：build/startup-installed-tests.log、build/tests/startup-installed/run-{1..3}/result.json；165个安装payload SHA256逐一与构建源匹配，settings.json和latex/commands.user.json两个用户文件哈希不变。证据build/startup-fixed-{release-msi,msi-install}.log及{msi-info,msi-install-result,installed-payload-hashes,install-verification}.json。此前68项编辑/保存策略测试保持，本轮不重复无关宽审。
+- **停止点**：实现、Release、回归复现/修复、重打包、安装和实际安装路径启动验收全部完成。无活动native/build/test/install/诊断句柄；测试仅关闭自己创建的空白子进程，未终止用户进程。版本保持0.4.0，无推送/另发Release/移动标签，无子代理/CUA。下一步由用户正常使用；不要重开已定位的依赖/设置猜测或旧数学迁移。早期完整栈build/startup-crash-stack.txt，ignored诊断helper不是正式门禁依赖。
+
+## 历史：0.4.0 本地更新 MSI 安装（2026-10-26，随后启动失败）
 
 - 用户明确要求构建MSI并直接安装，本轮已完成。版本保持0.4.0，包含目录同步、图片粘贴、关闭保存确认（源码38f38c69及之前提交）。未推送/另发Release/移动既有标签，无子代理/Computer Use。此前68项/14971断言验收保持，不重复宽测。
 - 自包含Release及既有WiX构建成功，native一次一个、并发≤4。MSI `build/installer/bin/Folia-0.4.0-x64.msi`，**53,537,630 bytes**，SHA256 `7A517552AC218283A4A1B8592D3D3B1151964591242B509D2C346C4BC01094DC`；同目录.sha256已写。新ProductCode `{01659E0C-1FE1-465F-A5A3-B6D56C2A4591}`，包版本0.4.0，165个payload且无测试/候选exe。日志build/clipboard-close-release-msi.log；build-info/msi-properties.json记录包信息。ICE61同版本升级warning为既有预期。
