@@ -1350,6 +1350,6 @@
       }
     ],
     "version": "0.9.3",
-    "boundary": "DepthFirstCycleBreaker feedback-edge selection, before graph reversal"
+    "boundary": "DepthFirstCycleBreaker feedback-edge selection and flat NetworkSimplexLayerer"
   }
 }

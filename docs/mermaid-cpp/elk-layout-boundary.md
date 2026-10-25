@@ -3,7 +3,7 @@
 The pinned Mermaid commit `1fb7869866dd619168d840291c9c54b4f129758b`
 uses `elkjs` 0.9.3. Its npm package contains the readable GWT-generated
 `lib/elk-worker.js`, including the original Eclipse ELK layered processors.
-The package is EPL-2.0; the derived native cycle-selection files retain that
+The package is EPL-2.0; the derived native cycle-selection and layering files retain that
 license separately from Mermaid's MIT adapter. See `ELK-LICENSE` and the
 `elkCycle` source-lock entry. No JavaScript engine is part of the native library.
 
@@ -68,16 +68,24 @@ property and reverse bend points. The original pipeline restores reversed edges
 after routing. This slice is not connected to `render_entry` and does not make
 ELK a supported public render path.
 
+## Flat network-simplex layering
+
+`folia.mermaid.elk_layering` ports `NetworkSimplexLayerer` (`$process_68` /
+`$initialize_4`) and its `NetworkSimplex` helpers from the same locked worker.
+It applies the cycle reversal plan for ordinary ports and retains component
+traversal/order, minimum shortness weight one, unit edge delta, the default
+thoroughness-derived iteration limit, tight trees, cut/slack exchange,
+normalization and previous-component balancing. The original subtree detach
+optimization is retained. The worker oracle records 11 exact rank observations;
+this remains an internal flat-graph phase without compound handling or explicit
+layer constraints, not an ELK renderer.
+
 ## Next algorithm boundary
 
-Continue with the actual layered graph and network-simplex layering package,
-starting at `NetworkSimplexLayerer` (`$process_68` / `$initialize_4`) and its
-`NGraph`, `NNode`, `NEdge`, `NetworkSimplex` helpers in the same locked worker.
-Preserve component traversal/order, the minimum edge shortness weight of one,
-unit edge delta, the thoroughness-derived iteration limit and previous-component
-layer balancing. Use the same real-worker harness to observe layer assignment
-for the Class/State representative graphs after cycle reversal. Reusing Dagre's
-network-simplex implementation merely because its name matches is insufficient.
+Port the original LongEdgeSplitter to insert the layered graph's dummy nodes,
+then LayerSweepCrossingMinimizer/BarycenterHeuristic and required port ordering.
+Brandes-Koepf placement, routing, compound groups and the measured family adapter
+still follow those phases. The existing Dagre algorithm is not a substitute.
 
 Node ordering, Brandes-Koepf placement, orthogonal routing, compound-graph
 processors, measured label geometry and the common-renderer adapter remain
