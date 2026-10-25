@@ -39,6 +39,7 @@ namespace winrt::Folia
         SyntaxHighlightKind syntax = SyntaxHighlightKind::None;
         std::optional<EditorFootnoteControlKind> footnoteControl;
         SyntaxIcon icon = SyntaxIcon::None;
+        SyntaxIconPlacement iconPlacement = SyntaxIconPlacement::Inline;
     };
 
     struct DisplayInlineText

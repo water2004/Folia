@@ -5,6 +5,7 @@ import folia.core.syntax_marker;
 namespace winrt::Folia
 {
     using SyntaxIcon = folia::SyntaxMarker;
+    enum class SyntaxIconPlacement { Inline, Block };
     void ApplySyntaxIconObject(IDWriteTextLayout* layout, UINT32 start, UINT32 length,
         float size, float gap);
 

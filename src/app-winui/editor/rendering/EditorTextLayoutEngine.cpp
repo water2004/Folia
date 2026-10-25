@@ -289,19 +289,22 @@ namespace winrt::Folia
     }
 
     std::vector<D2D1_RECT_F> SyntaxIconRectangles(
-        IDWriteTextLayout* layout, InlineStyleRange const& range, D2D1_POINT_2F origin,
-        EditorStyleSheet::MarkerStyle const& style)
+        IDWriteTextLayout* layout, InlineStyleRange const& range, D2D1_POINT_2F origin)
     {
         if (range.icon == SyntaxIcon::None || range.length == 0 || !layout) return {};
+        ::Microsoft::WRL::ComPtr<IDWriteInlineObject> object;
+        DWRITE_INLINE_OBJECT_METRICS metrics{};
+        if (FAILED(layout->GetInlineObject(range.start, object.GetAddressOf())) || !object
+            || FAILED(object->GetMetrics(&metrics))) return {};
         auto rectangles = InlineRangeRectangles(layout, range.start, range.length, origin);
         for (auto& rect : rectangles)
         {
-            // The entire source marker is one indivisible inline object.
-            auto em = (rect.right - rect.left) / (style.sizeEm + 2 * style.gapEm);
-            auto gap = em * style.gapEm;
+            // Consume the actual inline object's allocation. Block delimiter
+            // rows have no clearance intended for neighboring inline text.
+            auto gap = (metrics.width - metrics.height) * .5f;
             rect.left += gap;
             rect.right -= gap;
-            auto height = em * style.sizeEm;
+            auto height = metrics.height;
             rect.top += (rect.bottom - rect.top - height) * .5f;
             rect.bottom = rect.top + height;
         }
@@ -537,8 +540,11 @@ namespace winrt::Folia
                 layout->SetStrikethrough(false, textRange);
                 if (range.icon != SyntaxIcon::None)
                 {
+                    auto block = range.iconPlacement == SyntaxIconPlacement::Block;
+                    auto iconSize = (block ? BaseLineHeight(range.style, styleSheet) : size) * styleSheet.marker.sizeEm;
                     ApplySyntaxIconObject(layout, range.start, range.length,
-                        size * styleSheet.marker.sizeEm, size * styleSheet.marker.gapEm);
+                        iconSize, block ? 0.0f : size * styleSheet.marker.gapEm);
+                    requiresDefaultLineSpacing = requiresDefaultLineSpacing || iconSize > BaseLineHeight(range.style, styleSheet);
                 }
                 if (resources.mutedBrush) layout->SetDrawingEffect(resources.mutedBrush.Get(), textRange);
             }

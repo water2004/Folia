@@ -71,7 +71,7 @@ namespace
                 {
                     if (!range.marker) { expect(range.icon == SyntaxIcon::None); continue; }
                     expect(range.icon != SyntaxIcon::None);
-                    auto rectangles = SyntaxIconRectangles(layout.Get(), range, {}, sheet.marker);
+                    auto rectangles = SyntaxIconRectangles(layout.Get(), range, {});
                     expect(rectangles.size() == 1_u) << "a marker must not split across lines" << size << width;
                     if (rectangles.size() != 1) continue;
                     auto rect = rectangles.front();

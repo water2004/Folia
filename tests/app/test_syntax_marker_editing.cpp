@@ -3,7 +3,11 @@
 #include "editor/session/EditorSession.h"
 #include "editor/rendering/EditorContentPreparation.h"
 #include "editor/rendering/EditorSurfaceRenderer.h"
+#include "editor/rendering/EditorTextLayoutEngine.h"
+#include "media/NativeMathSession.h"
 #include <winrt/Microsoft.UI.Xaml.Hosting.h>
+
+import folia.core.utf;
 
 using namespace boost::ut;
 using namespace winrt::Folia;
@@ -183,6 +187,83 @@ namespace
                     auto acp = session.TextInputAcpOffset(session.Selection().active);
                     expect(session.TextInputPositionFromAcp(owner, acp).source_offset == offset);
                 }
+                expect(session.Text() == original);
+            }
+        };
+        "block delimiter tiles align with TeX and scale with the source line height"_test = [] {
+            EditorRenderResources resources;
+            winrt::check_hresult(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory),
+                reinterpret_cast<IUnknown**>(resources.dwriteFactory.GetAddressOf())));
+            MathJaxRenderer math;
+            SvgNormalizer normalizer;
+            for (auto source : {L"$$\nx+1\n$$\n", L"\\[\nx+1\n\\]\n"})
+            for (float size : {12.f, 18.f, 32.f})
+            for (float width : {80.f, 600.f}) {
+                EditorSession session;
+                session.SetText(source);
+                auto original = session.Text();
+                auto frame = session.RenderFrame();
+                if (frame.materializeBlocks) frame.materializeBlocks(0, frame.renderModel.blocks.size());
+                auto const& block = frame.renderModel.blocks.front();
+                EditorStyleSheet sheet;
+                sheet.body = {L"Segoe UI", size, size * 1.6f};
+                sheet.code = sheet.body;
+                ::Microsoft::WRL::ComPtr<IDWriteTextFormat> format;
+                winrt::check_hresult(resources.dwriteFactory->CreateTextFormat(sheet.body.family.c_str(), nullptr,
+                    DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL,
+                    size, L"en-us", format.GetAddressOf()));
+                auto display = BuildMathBlockText(block, {block.id, 3, folia::TextAffinity::Downstream},
+                    math, normalizer, {}, size, width, false, false, false);
+                EditorTextLayoutEngine engine(resources, sheet);
+                auto layout = engine.CreateFlow(display, format.Get(), width, {});
+                FLOAT bodyX = 0, bodyY = 0;
+                DWRITE_HIT_TEST_METRICS body{};
+                winrt::check_hresult(layout->HitTestTextPosition(
+                    static_cast<UINT32>(block.special().content_to_source.front()), FALSE, &bodyX, &bodyY, &body));
+                std::size_t count = 0;
+                for (auto const& range : display.ranges) {
+                    if (range.icon == SyntaxIcon::None) continue;
+                    ++count;
+                    expect(range.iconPlacement == SyntaxIconPlacement::Block);
+                    auto rectangles = SyntaxIconRectangles(layout.Get(), range, {});
+                    expect(rectangles.size() == 1_u);
+                    if (rectangles.size() != 1) continue;
+                    auto rect = rectangles.front();
+                    expect(std::abs(rect.left - bodyX) < .01f) << "no inline clearance on block marker rows";
+                    expect(std::abs(rect.right - rect.left - sheet.body.lineHeight * sheet.marker.sizeEm) < .01f);
+                    expect(rect.bottom - rect.top >= sheet.body.lineHeight);
+                    ::Microsoft::WRL::ComPtr<IDWriteInlineObject> object;
+                    winrt::check_hresult(layout->GetInlineObject(range.start, object.GetAddressOf()));
+                    DWRITE_INLINE_OBJECT_METRICS metrics{};
+                    winrt::check_hresult(object->GetMetrics(&metrics));
+                    expect(std::abs(metrics.width - metrics.height) < .01f);
+                }
+                expect(count == 2_u);
+                expect(static_cast<bool>(display.text == block.special().raw_source));
+                expect(session.Text() == original);
+            }
+        };
+
+        "unmatched tilde keeps the list formula on the native math rendering path"_test = [] {
+            NativeMathSession native;
+            for (auto source : {L"1. 微观粒子质量~原子质量单位 $1u=1.6605655\\timesz10^{-27}kg$\n",
+                L"1. 微观粒子质量原子质量单位 $1u=1.6605655\\timesz10^{-27}kg$\n"}) {
+                EditorSession session;
+                session.SetText(source);
+                auto original = session.Text();
+                auto frame = session.RenderFrame();
+                if (frame.materializeBlocks) frame.materializeBlocks(0, frame.renderModel.blocks.size());
+                std::size_t count = 0;
+                for (auto const& block : frame.renderModel.blocks)
+                for (auto const& item : block.inline_items) {
+                    if (item.kind != folia::InlineRenderItem::Kind::Math) continue;
+                    ++count;
+                    expect(static_cast<bool>(item.text == U"1u=1.6605655\\timesz10^{-27}kg"));
+                    auto svg = native.Render(folia::cps_to_utf8(item.text), false, 18, 500);
+                    expect(static_cast<bool>(svg)) << svg.error;
+                    expect(!svg.fragments.empty());
+                }
+                expect(count == 1_u);
                 expect(session.Text() == original);
             }
         };

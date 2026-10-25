@@ -14,7 +14,7 @@ namespace winrt::Folia
         for (auto const& range : display.ranges)
         {
             if (range.icon == SyntaxIcon::None) continue;
-            auto rectangles = SyntaxIconRectangles(layout, range, origin, styleSheet.marker);
+            auto rectangles = SyntaxIconRectangles(layout, range, origin);
             for (auto rect : rectangles)
             {
                 if (rect.bottom <= rect.top || rect.right <= rect.left) continue;

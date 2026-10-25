@@ -16,7 +16,10 @@ namespace winrt::Folia
                 auto before = display.ranges.size();
                 AppendSourceText(display, source.substr(range.start, range.length()),
                     {block.id, range}, {}, marker);
-                if (display.ranges.size() > before) display.ranges.back().icon = icon;
+                if (display.ranges.size() > before) {
+                    display.ranges.back().icon = icon;
+                    display.ranges.back().iconPlacement = SyntaxIconPlacement::Block;
+                }
             };
             std::size_t cursor = 0;
             for (auto const& marker : special.source_markers)

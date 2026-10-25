@@ -38,8 +38,8 @@ namespace {
                 ranges.front().icon = ranges.back().icon = SyntaxIcon::Star;
                 auto layout = engine.Create(text, format.Get(), 1000);
                 engine.ApplyStyles(layout.Get(), ranges);
-                auto opening = SyntaxIconRectangles(layout.Get(), ranges.front(), {0, 0}, sheet.marker);
-                auto closing = SyntaxIconRectangles(layout.Get(), ranges.back(), {0, 0}, sheet.marker);
+                auto opening = SyntaxIconRectangles(layout.Get(), ranges.front(), {0, 0});
+                auto closing = SyntaxIconRectangles(layout.Get(), ranges.back(), {0, 0});
                 expect(opening.size() == 1_u);
                 expect(closing.size() == 1_u);
                 if (opening.empty() || closing.empty()) continue;

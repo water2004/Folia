@@ -20,7 +20,9 @@ Colors use `#RRGGBB` or `#RRGGBBAA`, with alpha in the final byte. Font weights 
 `syntaxMarkers` contains `sizeEm` (positive square size), `gapEm` (non-negative
 clearance on each side), and an `icons` object of embedded SVG strings. The two
 dimensions are relative to the marker's font size. Built-in profiles use 1.05
-and 0.30. SVGs use `viewBox="0 0 24 24"`, contain vector shapes rather than text
+and 0.30. For block delimiter rows, size is relative to the line height and
+inline clearance is omitted, aligning their tiles with the source content.
+SVGs use `viewBox="0 0 24 24"`, contain vector shapes rather than text
 or images, and are limited to 64 KiB UTF-8 each. `currentColor` uses the profile's
 `colors.marker`. Keep drawing inside the view box so layout and ink agree.
 
