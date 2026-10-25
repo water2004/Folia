@@ -136,6 +136,25 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
             if(!doc) return std::unexpected(doc.error());
             metadata(*doc,*prepared);
             const auto& cfg=member(effective,u"class");const auto& state=member(effective,u"state");
+            // ClassDB.getData projects compact namespaces before measurement:
+            // implicit ancestors disappear and explicit groups become siblings.
+            if(auto value=cfg.find(u"hierarchicalNamespaces");value&&!boolean(*value)) {
+                auto explicit_parent=[&](std::u16string parent) {
+                    while(!parent.empty()) {
+                        const auto found=std::ranges::find(doc->namespaces,parent,&ClassNamespace::id);
+                        if(found==doc->namespaces.end()) return std::u16string{};
+                        if(found->explicit_declaration) return parent;
+                        parent=found->parent;
+                    }
+                    return parent;
+                };
+                for(auto& node:doc->classes) node.parent=explicit_parent(node.parent);
+                for(auto& note:doc->notes) note.parent=explicit_parent(note.parent);
+                std::erase_if(doc->namespaces,[](const auto& group){return !group.explicit_declaration;});
+                for(auto& group:doc->namespaces) {
+                    group.label=group.id;group.parent.clear();group.children.clear();
+                }
+            }
             ClassSvgConfig c;
             if(auto value=state.find(u"titleTopMargin")) c.title_top_margin=number(*value);
             if(auto value=cfg.find(u"padding")) c.padding=c.note_padding=c.group_padding=number(*value);

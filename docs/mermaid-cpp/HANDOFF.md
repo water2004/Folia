@@ -1,6 +1,17 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-25, Class note emphasis in progress
+## Current checkpoint - 2026-10-25, compact Class namespaces in progress
+
+- Note emphasis b1ce03a2 is pushed; Windows verification is running at
+  https://github.com/zhao0349/Folia/actions/runs/40202478829 .
+- Next batch connects class.hierarchicalNamespaces=false to the measured
+  rendering projection: omit implicit ancestors, flatten explicit groups,
+  use qualified-id titles and preserve class/note attachments.
+- Exit: two original compact namespace inputs in both themes and affected
+  Windows checks. Then proceed to remaining Class styles/layout/family work.
+- Candidate is unverified; no application switch or upstream update yet.
+
+## Previous checkpoint - 2026-10-25, Class note emphasis in progress
 
 - Deliver measured bold/italic note runs with explicit lines, left alignment,
   existing colors and attachments; preserve ClassDB nowrap for long notes.
