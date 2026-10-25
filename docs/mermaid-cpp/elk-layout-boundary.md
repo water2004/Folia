@@ -82,8 +82,14 @@ layer constraints, not an ELK renderer.
 
 ## Next algorithm boundary
 
-Port the original LongEdgeSplitter to insert the layered graph's dummy nodes,
-then LayerSweepCrossingMinimizer/BarycenterHeuristic and required port ordering.
+`folia.mermaid.elk_long_edges` now retains the original layered node order,
+ordinary-port reversal and adjacency in a stable-index working graph, then
+inserts the original LongEdgeSplitter dummy nodes and segments. Five exact
+worker observations cover adjacent/long/parallel/reversed edges and port order.
+This initial flat graph excludes compound and label dummy processing.
+
+Continue on this same graph with LayerSweepCrossingMinimizer/BarycenterHeuristic
+and required port ordering.
 Brandes-Koepf placement, routing, compound groups and the measured family adapter
 still follow those phases. The existing Dagre algorithm is not a substitute.
 

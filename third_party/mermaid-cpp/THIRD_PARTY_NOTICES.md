@@ -2,8 +2,9 @@
 
 ## Eclipse Layout Kernel / elkjs 0.9.3
 
-`src/elk_cycle.cpp`, `src/elk_layering.cpp` and their module interfaces port
-the original ELK DepthFirstCycleBreaker and flat NetworkSimplexLayerer.
+`src/elk_cycle.cpp`, `src/elk_layering.cpp`, `src/elk_long_edges.cpp` and their
+module interfaces port the original ELK DepthFirstCycleBreaker, flat
+NetworkSimplexLayerer and LongEdgeSplitter.
 These files are licensed under
 EPL-2.0, not the Mermaid MIT license. The full license is in `ELK-LICENSE`.
 Original source: https://github.com/kieler/elkjs, package `elkjs` 0.9.3,

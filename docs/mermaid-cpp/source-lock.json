@@ -1374,6 +1374,6 @@
       }
     ],
     "version": "0.9.3",
-    "boundary": "DepthFirstCycleBreaker feedback-edge selection and flat NetworkSimplexLayerer"
+    "boundary": "DepthFirstCycleBreaker, flat NetworkSimplexLayerer and LongEdgeSplitter"
   }
 }
