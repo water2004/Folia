@@ -1,24 +1,46 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-25, Class paints verifying and interface parser in progress
+## Current checkpoint - 2026-10-25, Class paints and lollipop interfaces verified
 
-- Paint batch 8aa88d5c is pushed; Windows verification is running at
-  https://github.com/zhao0349/Folia/actions/runs/40207510779 .
-- Interface parser batch retains () endpoint markers, original independently
-  allocated interface ids/labels/class ownership and relation rewrites. Scope:
-  both directions and repeated names in two original inputs. Exit on parser
-  oracle/native tests and affected checks; measured interface SVG remains an
-  explicit error until its next adapter rather than dropping interface nodes.
-- Four original interface SVG observations are saved in
-  build/mermaid-cpp/class-lollipop-next/original.json. After these batches pass,
-  continue interface measurement/rectangle anchors and circle markers using
-  ClassDB.addRelation/getData, rectWithTitle/plain rect and markers.lollipop.
-- Parser ece83aea is pushed. The next measured adapter candidate connects
-  interface labels through DirectWrite, transparent rectangle anchors and
-  original lollipop circle markers/13.5-unit path shortening. Two inputs/both
-  themes cover both directions and repeated names; exit on those comparisons
-  and affected checks, then proceed to the next Class requirement.
-- Candidate is unverified; no contribution update yet.
+- Paint batch 8aa88d5c connects style/classDef/cssClass/inline ::: assignments
+  to fill, border, stroke width/dash and text colors, retaining statement order,
+  direct overrides, divider paints and static/abstract member typography.
+  All four Windows standalone/integrated Debug/Release jobs passed:
+  https://github.com/zhao0349/Folia/actions/runs/40207510779
+- Interface parser ece83aea and measured SVG 157f54fb retain independently
+  allocated ids/labels/class ownership for each relationship, including repeated
+  names. DirectWrite label measurements feed transparent rectangle anchors;
+  SVG uses original circle markers and 13.5-unit endpoint shortening.
+  Final head 157f54fb passed all four Windows jobs:
+  https://github.com/zhao0349/Folia/actions/runs/40208084657
+  This run used codex/mermaid-cpp-class-interfaces to preserve the earlier run.
+- Both integrated configurations passed FoliaTests, FoliaWindowsEditorTests and
+  both Mermaid suites. Class parser observations now cover 20 successes/eight
+  failures; 58 Class SVG comparisons cover 29 diagrams/both themes, including
+  paints, interface labels, transparent anchors, circle geometry and paths.
+  Existing 92 Flowchart, 82 Sequence and 96 browser/DirectWrite comparisons
+  passed. Tolerances unchanged. Both functional batches met exit conditions;
+  do not expand their verification matrix. No acceptance failure remains.
+- Actual Release evidence is in build/mermaid-cpp/class-paints-verified and
+  class-interfaces-verified (class-browser/comparison.json, text-comparison.json,
+  pie-svg and native-preview.png). Six paint and four interface previews were
+  visually inspected. No local native build or WinUI/GPU/DPI acceptance claimed.
+- Contribution equivalents f884283f/cf7fda2f/bdb081dd are on feat/mermaid-cpp-port
+  in build/mermaid-cpp/entry-contribution. Runtime/tests match the verified head;
+  this documentation checkpoint follows it. No AGENTS.md difference against
+  PR base 508423f2. Delivery-triggered reruns are separate from completed
+  implementation validation. PR #1 stays open/unmerged:
+  https://github.com/water2004/Folia/pull/1
+- Next functional boundary: Class htmlLabels=false measured SVG-label spacing.
+  Four original observations are in build/mermaid-cpp/class-svg-label-next/
+  original.json (members and classifiers, both themes). Start from shapeUtil
+  addText/createText's SVG path and per-run native font bounds. Preserve member
+  classifiers and compartment layout. Exit on those inputs and affected checks,
+  then continue remaining required Class configuration/layout and family work.
+- Folia still uses Rust in the application. Default Class ELK, styled typography,
+  remaining families and app integration remain. Local MSVC/CMake are unavailable;
+  no arbitrary-font parity claim. No uncommitted implementation candidate or
+  live local browser/build/agent remains.
 
 ## Previous checkpoint - 2026-10-25, Class common paints in progress
 
