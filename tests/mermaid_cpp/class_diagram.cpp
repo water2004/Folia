@@ -81,7 +81,7 @@ suite class_diagram = [] {
                 expect(a.dotted == field(e,u"dotted").boolean);
             }
         }
-        expect(count == 20_u);
+        expect(count == 21_u);
     };
     "mermaid_class_owned_requests_and_explicit_boundary"_test = [] {
         auto session = ConfigSession::create(); expect(fatal(session.has_value()));
