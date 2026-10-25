@@ -2,12 +2,13 @@
 
 恢复/压缩后先实际读本文。架构、职责和详细验收见 [architecture](native-raii-architecture.md)、[files](native-raii-files.json)、[acceptance](native-raii-acceptance.md)。只复查新变化；ignored候选用 `rg --no-ignore`。
 
-## 当前 checkpoint：通用滚动调度回归（2026-10-25，验收通过，准备安装）
+## 当前 checkpoint：通用滚动调度回归（2026-10-25，已修复并安装）
 
 - 用户反馈通用滚动似乎锁60帧，特别怀疑上次卡死修复；明确不按数学专属问题排查。新证据：e5c39fda把EditorFrameScheduler帧回调High改为Low；正式测试显示持续Normal UI任务让Low滚动帧等完全部64个任务才执行。不是已证明固定60帧锁，也没有现场呈现FPS。当前无运行中Folia，未操作UI/用户窗口。
 - 修复仅把帧回调改Normal，保留显示刷新率/高精度计时/DXGI等待/单待处理帧/异步让出和嵌入通知合并；不恢复High或同步递归。新test_frame_scheduling.cpp覆盖普通任务与绘制相互及时运行及无GPU开销的调度节奏，旧输入公平性/延迟重绘测试仍通过。
 - 验收：Debug成功；WinUI **45项/14153断言**全过。旧实现新测试失败：第一帧64/64；修复后1/64。无GPU开销的调度中位6.373ms、p95 6.586ms、约156.9回调/秒，**不是实际呈现FPS**。WMI报60不能单独当Folia锁帧证据；当前代码已按QDC物理刷新率选择。证据build/scroll-frame-{priority-before,app-build,app-tests}.log。无core/platform/math改动，不重复旧宽测。
-- 下一步：小批提交，然后构建并安装同版本0.3.2，逐文件核验，用户复测实际滚动。本轮不发布推送、不改版本，无子代理/Computer Use；13031已exit0，无活动build/test句柄。此前图标/波浪线修复保持，以下为历史。
+- 本地修复提交`a80aec83`。Release/MSI构建成功并已同版本安装0.3.2，msiexec exit0；165个安装文件逐一哈希相符，settings字节不变（custom文件0）。MSI `build/installer/bin/Folia-0.3.2-x64.msi`，53,488,478 bytes，SHA256 `09D57E09242B334B8F3DE249EA7285B283A42A2A576301DF7FCCAEC3355A0748`，新ProductCode `{13BF8BD4-1154-4CDB-B8F1-B403134DF001}`。证据build/scroll-frame-{release-msi,msi-install}.log及{msi-properties,installed-payload-hashes,user-files-before}.json。安装前确认没有运行中Folia；没有启动/操作用户窗口。
+- 停止点：本轮调度修复、正式测试与安装全部完成，无活动agent/build/test/install句柄（72650已exit0），版本0.3.2，无推送发布/子代理/Computer Use。下一步用户复测实际滚动；未采集实际呈现FPS，不把157回调/秒当屏幕FPS。若仍见稳定60需要现场呈现统计，不重开数学引擎。此前图标/波浪线修复保持，以下为历史。
 
 ## 历史：未闭合波浪线与行间公式图标（2026-10-25，已修复并更新安装）
 
