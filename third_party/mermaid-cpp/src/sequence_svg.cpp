@@ -6,7 +6,28 @@ import folia.mermaid.number;
 import folia.mermaid.svg_text;
 
 namespace folia::mermaid {
+bool sequence_region_start(SequenceKind k) {
+    return k==SequenceKind::loop_start||k==SequenceKind::opt_start||k==SequenceKind::alt_start||
+        k==SequenceKind::par_start||k==SequenceKind::par_over_start||k==SequenceKind::critical_start||k==SequenceKind::break_start;
+}
+bool sequence_region_end(SequenceKind k) {
+    return k==SequenceKind::loop_end||k==SequenceKind::opt_end||k==SequenceKind::alt_end||
+        k==SequenceKind::par_end||k==SequenceKind::critical_end||k==SequenceKind::break_end;
+}
+bool sequence_region_section(SequenceKind k) {
+    return k==SequenceKind::alt_else||k==SequenceKind::par_and||k==SequenceKind::critical_option;
+}
 namespace {
+std::u16string_view region_name(SequenceKind k) {
+    switch(k) {
+    case SequenceKind::loop_start:return u"loop";
+    case SequenceKind::opt_start:return u"opt";
+    case SequenceKind::alt_start:return u"alt";
+    case SequenceKind::critical_start:return u"critical";
+    case SequenceKind::break_start:return u"break";
+    default:return u"par";
+    }
+}
 std::string num(double value) {
     auto result = format_number(value);
     if (!result) throw std::runtime_error("Invalid Sequence geometry");
@@ -48,8 +69,9 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
         for(std::size_t i=0;i<doc.messages.size();++i) {
             const auto& m=doc.messages[i]; const auto& box=measured.messages[i];
             if(m.type==SequenceKind::active_start || m.type==SequenceKind::active_end) continue;
+            if(sequence_region_start(m.type)||sequence_region_end(m.type)||sequence_region_section(m.type)) continue;
             if(m.wrap || !(m.type==SequenceKind::note||m.type==SequenceKind::solid||m.type==SequenceKind::dotted||open(m.type)||both(m.type)))
-                return std::unexpected("Sequence control regions/wrapping/extended arrows require the next SVG adapter");
+                return std::unexpected("Sequence background regions/wrapping/extended arrows require the next SVG adapter");
             if(!std::isfinite(box.width)||box.width<0||!std::isfinite(box.height)||box.height<0)
                 return std::unexpected("Invalid Sequence message measurement");
             auto from=ids.find(m.from),to=ids.find(m.to);
@@ -78,10 +100,24 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
         std::vector<std::string> backgrounds;
         struct Activation { std::u16string actor; double x, y; std::size_t anchor; };
         std::vector<Activation> active;
+        struct Section { double y; std::size_t message; };
+        struct Region {
+            double left=std::numeric_limits<double>::infinity(),right=-std::numeric_limits<double>::infinity();
+            double top=0,bottom=0;
+            std::size_t message=0;
+            std::vector<Section> sections;
+        };
+        std::vector<Region> regions;
         auto insert=[&](double x1,double y1,double x2,double y2) {
             left=std::min({left,x1,x2});right=std::max({right,x1,x2});bottom=std::max({bottom,y1,y2});
-            // Original updateBounds with no control-region stack. Each nested
-            // activation's start is bounded by the rendered sequence items.
+            // Original updateBounds applies decreasing margins through the
+            // region stack, then updates active bars with the same counter.
+            for(std::size_t j=0;j<regions.size();++j) {
+                auto& r=regions[j]; const auto margin=(regions.size()-j)*c.box_margin;
+                r.left=std::min(r.left,std::min(x1,x2)-margin);r.right=std::max(r.right,std::max(x1,x2)+margin);
+                r.top=std::min(r.top,std::min(y1,y2)-margin);r.bottom=std::max(r.bottom,std::max(y1,y2)+margin);
+                left=std::min(left,r.left);right=std::max(right,r.right);bottom=std::max(bottom,r.bottom);
+            }
             for(std::size_t j=0;j<active.size();++j)
                 active[j].y=std::min(active[j].y,std::min(y1,y2)+j*c.box_margin);
         };
@@ -97,6 +133,47 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
         const auto font=" font-family=\""+xml(t.font_family)+"\" font-size=\""+num(t.font_size)+"\" font-weight=\""+std::to_string(t.font_weight)+"\"";
         for(std::size_t i=0;i<doc.messages.size();++i) {
             const auto& m=doc.messages[i]; const auto& box=measured.messages[i];
+            if(sequence_region_start(m.type)||sequence_region_section(m.type)) {
+                const bool section=sequence_region_section(m.type);
+                y+=c.box_margin+(section?c.box_text_margin:0);
+                if(section) {
+                    if(regions.empty()) return std::unexpected("Sequence section has no region");
+                    regions.back().sections.push_back({y,i});
+                } else regions.push_back(Region{.top=y,.message=i});
+                y+=c.box_margin+(section?0:c.box_text_margin)+
+                    (box.display.empty()?0:std::max(box.height,c.label_box_height));
+                bottom=std::max(bottom,y);
+                continue;
+            }
+            if(sequence_region_end(m.type)) {
+                if(regions.empty()) return std::unexpected("Sequence region end has no start");
+                const auto r=regions.back();regions.pop_back();
+                if(!std::isfinite(r.left)||!std::isfinite(r.right)) return std::unexpected("Sequence region needs rendered content");
+                auto line=[&](double x1,double y1,double x2,double y2,bool section=false) {
+                    signals+="<line class=\"loopLine\" x1=\""+num(x1)+"\" y1=\""+num(y1)+"\" x2=\""+num(x2)+"\" y2=\""+num(y2)+
+                        "\" stroke-width=\"2\" stroke-dasharray=\""+(section?"3 3":"2 2")+"\" stroke=\""+paint(t.label_border)+"\" fill=\""+paint(t.label_border)+"\"/>";
+                };
+                line(r.left,r.top,r.right,r.top);line(r.right,r.top,r.right,r.bottom);
+                line(r.left,r.bottom,r.right,r.bottom);line(r.left,r.top,r.left,r.bottom);
+                for(const auto& s:r.sections) line(r.left,s.y,r.right,s.y,true);
+                const auto w=std::max(c.label_box_width,50.0),h=c.label_box_height?c.label_box_height:20;
+                signals+="<polygon class=\"labelBox\" points=\""+num(r.left)+","+num(r.top)+" "+num(r.left+w)+","+num(r.top)+" "+
+                    num(r.left+w)+","+num(r.top+h-7)+" "+num(r.left+w-8.4)+","+num(r.top+h)+" "+num(r.left)+","+num(r.top+h)+
+                    "\" stroke=\""+paint(t.label_border)+"\" fill=\""+paint(t.label_fill)+"\"/>";
+                auto text=[&](std::string_view cls,std::u16string_view value,double x,double ty,bool label) {
+                    signals+="<text class=\""+std::string(cls)+"\" x=\""+num(label?std::floor(x+0.5):x)+"\" y=\""+
+                        num(std::floor(ty+c.box_text_margin/2+0.5))+"\" text-anchor=\"middle\" fill=\""+paint(label?t.label_text:t.loop_text)+"\""+font;
+                    if(label) signals+=" dominant-baseline=\"middle\" alignment-baseline=\"middle\"";
+                    signals+=">"+xml(value)+"</text>";
+                };
+                text("labelText",region_name(doc.messages[r.message].type),r.left+w/2,r.top+h/2,true);
+                const auto center=(r.left+r.right)/2;
+                text("loopText",measured.messages[r.message].display,center+c.label_box_width/2,r.top+c.box_margin+c.box_text_margin,false);
+                for(const auto& s:r.sections) if(!measured.messages[s.message].display.empty())
+                    text("sectionTitle",measured.messages[s.message].display,center,s.y+c.box_margin+c.box_text_margin,false);
+                y=r.bottom;bottom=std::max(bottom,y);
+                continue;
+            }
             if(m.type==SequenceKind::active_start) {
                 const auto& a=actors[ids.at(m.from)];
                 const auto depth=std::ranges::count(active,m.from,&Activation::actor);

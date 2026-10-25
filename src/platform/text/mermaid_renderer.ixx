@@ -157,7 +157,9 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             sequence_measurements.actors.push_back(*box);
         }
         for(const auto& message:seq->document.messages) {
-            auto box=measure(message.message);if(!box) return std::unexpected(box.error());
+            const bool bracket=sequence_region_start(message.type)||sequence_region_section(message.type);
+            auto box=measure(bracket&&!message.message.empty()?u"["+message.message+u"]":message.message);
+            if(!box) return std::unexpected(box.error());
             sequence_measurements.messages.push_back(*box);
         }
     }

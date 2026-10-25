@@ -20,6 +20,12 @@ suite mermaid_measurement = [] {
             {"note-over",u"sequenceDiagram\nparticipant A as Editor\nparticipant B as Store\nNote over A,B: Save operations\nA->>B: Commit\nNote left of A: Ready"},
             {"note-spacing",u"sequenceDiagram\nA->>B: Read\nNote right of A: Validate document before saving all changes\nNote over B: Storage ready\nNote left of B: Return the current document to the editor\nB-->>A: Done"},
             {"nested-activation",u"sequenceDiagram\nactor A as User\nparticipant B as Service\nA->>+B: Save\nB->>+B: Validate\nNote over B: Checking\nB-->>-B: Valid\nB-->>-A: Saved"},
+            {"loop",u"sequenceDiagram\nloop Retry\nA->>B: Save\nB-->>A: Done\nend"},
+            {"alt",u"sequenceDiagram\nalt Valid\nA->>B: Save\nelse Invalid\nB-->>A: Reject\nend"},
+            {"nested",u"sequenceDiagram\nopt Cached\nloop Read\nA->>+B: Read\nNote over B: Loading\nB-->>-A: Data\nend\nend"},
+            {"parallel",u"sequenceDiagram\npar Read\nA->>B: Fetch\nand Write\nB->>A: Store\nend"},
+            {"critical-break",u"sequenceDiagram\ncritical Save\nA->>B: Write\noption Failure\nbreak Abort\nB-->>A: Failed\nend\nend"},
+            {"region-spacing",u"%%{init: {\"fontSize\": 20, \"sequence\": {\"boxMargin\": 8, \"boxTextMargin\": 7, \"labelBoxWidth\": 60, \"labelBoxHeight\": 24}}}%%\nsequenceDiagram\nloop Retry\nA->>A: Check\nA->>B: Save\nend"},
         };
         for(const auto theme:{u"default",u"dark"}) {
             auto session=ConfigSession::create();expect(fatal(session.has_value()));

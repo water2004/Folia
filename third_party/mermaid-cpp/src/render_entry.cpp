@@ -163,7 +163,8 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
             for(auto [key,target]:{std::pair{u"width",&c.width},{u"height",&c.height},{u"actorMargin",&c.actor_margin},
                 {u"boxMargin",&c.box_margin},{u"wrapPadding",&c.wrap_padding},{u"diagramMarginX",&c.margin_x},
                 {u"diagramMarginY",&c.margin_y},{u"bottomMarginAdj",&c.bottom_margin},
-                {u"noteMargin",&c.note_margin},{u"activationWidth",&c.activation_width}}) {
+                {u"noteMargin",&c.note_margin},{u"activationWidth",&c.activation_width},
+                {u"boxTextMargin",&c.box_text_margin},{u"labelBoxWidth",&c.label_box_width},{u"labelBoxHeight",&c.label_box_height}}) {
                 *target=number(member(config,key));
                 if(*target<0) return std::unexpected("Sequence spacing must be nonnegative");
             }
@@ -186,7 +187,9 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
                 {u"actorTextColor",&t.actor_text},{u"actorLineColor",&t.actor_line},
                 {u"signalColor",&t.signal},{u"signalTextColor",&t.signal_text},
                 {u"noteBkgColor",&t.note_fill},{u"noteBorderColor",&t.note_border},{u"noteTextColor",&t.note_text},
-                {u"activationBkgColor",&t.activation_fill},{u"activationBorderColor",&t.activation_border}}) *target=narrow(text(member(theme,key)));
+                {u"activationBkgColor",&t.activation_fill},{u"activationBorderColor",&t.activation_border},
+                {u"labelBoxBkgColor",&t.label_fill},{u"labelBoxBorderColor",&t.label_border},
+                {u"labelTextColor",&t.label_text},{u"loopTextColor",&t.loop_text}}) *target=narrow(text(member(theme,key)));
             return NativeDiagram{std::move(*prepared),SequenceRenderInput{std::move(*document),std::move(t),c}};
         }
         if(prepared->type==u"flowchart" || prepared->type==u"flowchart-v2") {

@@ -1,6 +1,17 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-24, Sequence notes SVG and control-region parser verified
+## Current checkpoint - 2026-10-25, measured Sequence control regions in progress
+
+- Deliver loop/opt/alt, parallel and critical/break regions with nested bounds,
+  section separators, bracketed measured plain labels, notes and activations.
+- Exit: representative original/native default/dark geometry, paints and text
+  comparisons plus affected native suites in Windows standalone/integrated
+  Debug/Release. Local MSVC is unavailable; CI supplies native verification.
+- Next: Sequence text display/wrapping, then remaining family/application chain.
+  No application dependency switch or merge is authorized by this batch.
+- Implementation and original comparison inputs are currently uncommitted.
+
+## Previous checkpoint - 2026-10-24, Sequence notes SVG and control-region parser verified
 
 - Notes/activation/human-actor SVG: e1e870ed/e23bcd3a, validation branch
   codex/mermaid-cpp-sequence-notes. All four Windows standalone/integrated
