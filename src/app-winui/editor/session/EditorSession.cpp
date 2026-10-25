@@ -4,6 +4,7 @@
 import folia.core.editor;
 import folia.core.document_text;
 import folia.core.document_interaction;
+import folia.core.document_inline_format;
 import folia.core.document_content_context;
 import folia.core.document_footnotes;
 import folia.core.render_builder;
@@ -283,6 +284,22 @@ namespace winrt::Folia
     folia::TextSelection EditorSession::Selection() const
     {
         return core_->editor.source_editor() ? core_->editor.source_editor()->projected_selection() : core_->editor.selection();
+    }
+
+    folia::InlineStyle EditorSession::ActiveInlineStyle() const
+    {
+        folia::InlineStyle style;
+        if (core_->editor.source_editor()) return style;
+        auto const& document = core_->editor.document();
+        auto const& selection = core_->editor.selection();
+        auto active = [&](folia::InlineFormat kind) {
+            return folia::document_inline_format_active(document, selection, kind);
+        };
+        style.bold = active(folia::InlineFormat::Strong);
+        style.italic = active(folia::InlineFormat::Emphasis);
+        style.strikethrough = active(folia::InlineFormat::Strikethrough);
+        style.code = active(folia::InlineFormat::Code);
+        return style;
     }
 
     folia::platform::editor::EditorShortcutScope EditorSession::ShortcutScope() const

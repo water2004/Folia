@@ -90,7 +90,7 @@ namespace winrt::Folia::implementation
             editorRenderer,
             EditorSurface(),
             CodeBlockOverlay(),
-            CodeLanguageComboBox(),
+            CodeLanguageBox(),
             [this](folia::Command const& command) { return ExecuteEditorCommand(command); });
         pointerController.Attach(
             editorSession,

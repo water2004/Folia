@@ -106,6 +106,7 @@ namespace winrt::Folia::implementation
         tooltip(ItalicButton(), L"Italic");
         StrikeButton().Label(Localize(L"Strike"));
         tooltip(StrikeButton(), L"Strikethrough");
+        CodeLanguageBox().PlaceholderText(Localize(L"Language"));
         InlineCodeButton().Label(Localize(L"InlineCode"));
         tooltip(InlineCodeButton(), L"InlineCode");
         BlocksButton().Label(Localize(L"Blocks"));
@@ -416,6 +417,11 @@ namespace winrt::Folia::implementation
             frame.snippetPlaceholders = snippetPlaceholders;
             editorRenderer.Render(frame);
             codeLanguageController.Refresh();
+            auto style = editorSession.ActiveInlineStyle();
+            BoldButton().IsChecked(style.bold);
+            ItalicButton().IsChecked(style.italic);
+            StrikeButton().IsChecked(style.strikethrough);
+            InlineCodeButton().IsChecked(style.code);
             scrollController.Sync();
         }
         catch (winrt::hresult_error const& error)

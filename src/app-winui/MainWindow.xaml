@@ -88,10 +88,10 @@
             <AppBarButton x:Name="SaveButton" Icon="Save" Label="Save" ToolTipService.ToolTip="Save the current document"/>
             <AppBarButton x:Name="ExportPdfButton" Icon="Print" Label="PDF" ToolTipService.ToolTip="Export with Windows PDF printing"/>
             <AppBarSeparator x:Name="FileFormatSeparator"/>
-            <AppBarButton x:Name="BoldButton" Icon="Bold" Label="Bold" ToolTipService.ToolTip="Bold"/>
-            <AppBarButton x:Name="ItalicButton" Icon="Italic" Label="Italic" ToolTipService.ToolTip="Italic"/>
-            <AppBarButton x:Name="StrikeButton" Label="Strike" ToolTipService.ToolTip="Strikethrough"/>
-            <AppBarButton x:Name="InlineCodeButton" Label="Inline Code" ToolTipService.ToolTip="Inline code"/>
+            <AppBarToggleButton x:Name="BoldButton" Icon="Bold" Label="Bold" ToolTipService.ToolTip="Bold"/>
+            <AppBarToggleButton x:Name="ItalicButton" Icon="Italic" Label="Italic" ToolTipService.ToolTip="Italic"/>
+            <AppBarToggleButton x:Name="StrikeButton" Label="Strike" ToolTipService.ToolTip="Strikethrough"/>
+            <AppBarToggleButton x:Name="InlineCodeButton" Label="Inline Code" ToolTipService.ToolTip="Inline code"/>
             <AppBarSeparator x:Name="InlineBlockSeparator"/>
             <AppBarButton x:Name="BlocksButton" Icon="Bullets" Label="Blocks" ToolTipService.ToolTip="Block structure">
                 <AppBarButton.Flyout>
@@ -281,13 +281,13 @@
                 x:Name="CodeBlockOverlay"
                 IsHitTestVisible="False"
                 Canvas.ZIndex="19">
-                <ComboBox
-                    x:Name="CodeLanguageComboBox"
-                    Height="30"
-                    MinWidth="96"
-                    IsEditable="True"
-                    IsTextSearchEnabled="True"
-                    MaxDropDownHeight="320"
+                <AutoSuggestBox
+                    x:Name="CodeLanguageBox"
+                    Height="28"
+                    MinWidth="0"
+                    BorderThickness="0"
+                    PlaceholderText="Language"
+                    QueryIcon="Find"
                     Padding="8,0"
                     Visibility="Collapsed"/>
             </Canvas>
@@ -299,7 +299,7 @@
                     x:Name="LatexSuggestionPopup"
                     Width="430"
                     MaxHeight="330"
-                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    Background="{ThemeResource AcrylicInAppFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1"
                     CornerRadius="10"

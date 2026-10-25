@@ -84,6 +84,31 @@ namespace
         });
     }
 
+    bool IsField(TSNode parent, TSNode node, char const* field)
+    {
+        auto child = ts_node_child_by_field_name(parent, field, static_cast<std::uint32_t>(std::strlen(field)));
+        return !ts_node_is_null(child) && ts_node_eq(child, node);
+    }
+
+    bool IsFunctionName(TSNode node)
+    {
+        auto parent = ts_node_parent(node);
+        if (ts_node_is_null(parent)) return false;
+        std::string_view type = ts_node_type(parent);
+        if ((type == "call_expression" || type == "call") && IsField(parent, node, "function")) return true;
+        if ((Contains(type, "function") || Contains(type, "method")) && IsField(parent, node, "name")) return true;
+        if (type == "function_declarator" && IsField(parent, node, "declarator")) return true;
+        // Member calls color the member, never the receiver or arguments.
+        if ((type == "member_expression" && IsField(parent, node, "property"))
+            || (type == "field_expression" && IsField(parent, node, "field"))
+            || (type == "attribute" && IsField(parent, node, "attribute")))
+        {
+            auto call = ts_node_parent(parent);
+            return !ts_node_is_null(call) && IsField(call, parent, "function");
+        }
+        return false;
+    }
+
     winrt::Folia::SyntaxHighlightKind ClassifyLeaf(TSNode node, winrt::Folia::SyntaxHighlightKind inherited)
     {
         using Kind = winrt::Folia::SyntaxHighlightKind;
@@ -92,31 +117,26 @@ namespace
         if (Contains(type, "comment")) return Kind::Comment;
         if (Contains(type, "string") || Contains(type, "char_literal") || Contains(type, "template_literal")) return Kind::String;
         if (Contains(type, "number") || Contains(type, "integer") || Contains(type, "float")) return Kind::Number;
+        if (type.starts_with("#") || type == "preproc_directive") return Kind::Preprocessor;
+        if (IsFunctionName(node)) return Kind::Function;
         if (Contains(type, "type_identifier") || Contains(type, "primitive_type") || IsPrimitive(type)) return Kind::Type;
         if (Contains(type, "field_identifier") || Contains(type, "property_identifier") || Contains(type, "attribute_name")) return Kind::Property;
         if (Contains(type, "constant") || Contains(type, "enum_member")) return Kind::Constant;
         if (IsKeyword(type)) return Kind::Keyword;
         if (IsOperator(type)) return Kind::Operator;
-        if (type == "identifier") {
-            auto parent = ts_node_parent(node);
-            for (int depth = 0; depth < 4 && !ts_node_is_null(parent); ++depth) {
-                std::string_view parentType = ts_node_type(parent);
-                if (Contains(parentType, "call") || Contains(parentType, "function") || Contains(parentType, "method") || Contains(parentType, "constructor")) return Kind::Function;
-                if (Contains(parentType, "type")) return Kind::Type;
-                parent = ts_node_parent(parent);
-            }
-        }
         return Kind::None;
     }
 
     winrt::Folia::SyntaxHighlightKind InheritedKind(TSNode node, winrt::Folia::SyntaxHighlightKind inherited)
     {
         using Kind = winrt::Folia::SyntaxHighlightKind;
-        if (inherited != Kind::None) return inherited;
         std::string_view type = ts_node_type(node);
+        // Embedded expressions are code even though their surrounding template
+        // or formatted string owns string-colored literal fragments.
+        if (type == "template_substitution" || type == "interpolation") return Kind::None;
+        if (inherited != Kind::None) return inherited;
         if (Contains(type, "comment")) return Kind::Comment;
         if (Contains(type, "string") || Contains(type, "char_literal") || Contains(type, "template_literal")) return Kind::String;
-        if (type.starts_with("preproc") || type.starts_with("preprocessor")) return Kind::Preprocessor;
         return Kind::None;
     }
 

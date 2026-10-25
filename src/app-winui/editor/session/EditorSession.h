@@ -119,6 +119,7 @@ namespace winrt::Folia
         std::optional<std::u32string> EditableSource(folia::NodeId id) const;
         std::optional<EditorDocumentInteraction> InteractionAt(folia::TextPosition position) const;
         folia::TextSelection Selection() const;
+        folia::InlineStyle ActiveInlineStyle() const;
         folia::platform::editor::EditorShortcutScope ShortcutScope() const;
         std::optional<EditorLatexCompletionSource> LatexCompletionSourceAtCaret() const;
         folia::RenderModel const& RenderModel() const;

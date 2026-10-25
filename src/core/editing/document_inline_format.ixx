@@ -201,6 +201,18 @@ inline FormatSourceChange add_format(
 
 } // namespace document_inline_format_detail
 
+inline bool document_inline_format_active(
+    const EditorDocument& document, const TextSelection& selection, InlineFormat format) {
+    if (selection.anchor.container_id != selection.active.container_id) return false;
+    const auto* owner = document_edit_detail::find_inline_owner(document, selection.active.container_id);
+    if (!owner) return false;
+    const auto start = (std::min)(selection.anchor.source_offset, selection.active.source_offset);
+    const auto end = (std::max)(selection.anchor.source_offset, selection.active.source_offset);
+    return end <= owner->source.size() && document_inline_format_detail::find_innermost_format(
+        owner->tree.nodes, document_inline_format_detail::cst_kind(format), start, end,
+        selection.is_caret()).has_value();
+}
+
 inline std::optional<DocumentTransaction> document_toggle_inline_format(
     EditorDocument& document,
     const TextSelection& selection,

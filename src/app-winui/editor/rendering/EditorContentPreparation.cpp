@@ -94,34 +94,6 @@ namespace winrt::Folia
         return result;
     }
 
-    bool IsStyleMarker(folia::InlineRenderItem const& item)
-    {
-        if (item.kind != folia::InlineRenderItem::Kind::Marker) return false;
-        if (item.special().marker_role == folia::MarkerRole::Heading) return false;
-        if (item.special().marker_owner) return true;
-        bool backticks = !item.text.empty();
-        for (char32_t ch : item.text) if (ch != U'`') backticks = false;
-        return item.text == U"*" || item.text == U"**" || item.text == U"~~" || backticks;
-    }
-
-    bool IsHeadingMarker(folia::InlineRenderItem const& item)
-    {
-        if (item.kind == folia::InlineRenderItem::Kind::Marker
-            && item.special().marker_role == folia::MarkerRole::Heading) return true;
-        if (item.kind != folia::InlineRenderItem::Kind::Marker || item.text.size() < 2 || item.text.back() != U' ')
-        {
-            return false;
-        }
-        for (std::size_t index = 0; index + 1 < item.text.size(); ++index)
-        {
-            if (item.text[index] != U'#')
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-
     bool CaretTouchesSpan(folia::TextPosition caret, folia::TextSpan const& span)
     {
         if (caret.container_id != span.container_id) return false;
@@ -152,64 +124,6 @@ namespace winrt::Folia
             }
         }
         return result;
-    }
-
-    std::vector<bool> RevealedStyleMarkers(std::vector<folia::InlineRenderItem> const& items, folia::TextPosition caret)
-    {
-        std::vector<bool> visible(items.size(), true);
-        std::vector<std::pair<std::u32string, std::size_t>> stack;
-        std::unordered_map<std::uint64_t, std::size_t> owners;
-        for (std::size_t index = 0; index < items.size(); ++index)
-        {
-            auto const& item = items[index];
-            if (!IsStyleMarker(item))
-            {
-                continue;
-            }
-
-            if (item.special().marker_owner)
-            {
-                auto found = owners.find(item.special().marker_owner->v);
-                if (found == owners.end())
-                {
-                    owners.emplace(item.special().marker_owner->v, index);
-                    visible[index] = false;
-                }
-                else
-                {
-                    auto openIndex = found->second;
-                    auto reveal = CaretTouchesSpan(caret, {item.source_span.container_id, {items[openIndex].source_span.source_range.start, item.source_span.source_range.end}});
-                    visible[openIndex] = reveal;
-                    visible[index] = reveal;
-                    owners.erase(found);
-                }
-                continue;
-            }
-
-            auto open = std::find_if(stack.rbegin(), stack.rend(), [&](auto const& entry)
-            {
-                return entry.first == item.text;
-            });
-            if (open == stack.rend())
-            {
-                stack.push_back({ item.text, index });
-                visible[index] = false;
-                continue;
-            }
-
-            auto openIndex = open->second;
-            auto reveal = CaretTouchesSpan(caret, {item.source_span.container_id, {items[openIndex].source_span.source_range.start, item.source_span.source_range.end}});
-            visible[openIndex] = reveal;
-            visible[index] = reveal;
-            stack.erase(std::next(open).base());
-        }
-
-        for (auto const& entry : stack)
-        {
-            visible[entry.second] = true;
-        }
-        for (auto const& entry : owners) visible[entry.second] = true;
-        return visible;
     }
 
     void AppendDisplayText(DisplayInlineText& display, std::u32string const& text, folia::TextSpan sourceSpan, folia::InlineStyle style, bool marker)
@@ -449,18 +363,13 @@ namespace winrt::Folia
         bool highPriority)
     {
         DisplayInlineText display;
-        auto markerVisibility = RevealedStyleMarkers(items, caret);
         for (std::size_t index = 0; index < items.size(); ++index)
         {
             auto const& item = items[index];
-            if (IsStyleMarker(item) && !markerVisibility[index])
-            {
+            if (item.kind == folia::InlineRenderItem::Kind::Marker
+                && (item.special().visibility == folia::MarkerVisibility::HiddenButEditable
+                    || item.special().marker_role == folia::MarkerRole::Heading))
                 continue;
-            }
-            if (IsHeadingMarker(item) && caret.container_id != item.source_span.container_id)
-            {
-                continue;
-            }
             if (item.kind == folia::InlineRenderItem::Kind::Link)
             {
                 if (CaretTouchesSpan(caret, item.source_span))

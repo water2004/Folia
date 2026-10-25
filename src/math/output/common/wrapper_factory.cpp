@@ -150,30 +150,33 @@ CommonWrapperClassData CommonWrapperClassData::commonDefaults() {
     // output/common/Wrapper.ts: CommonWrapperClassData defaults.
     // Keep the nested maps as value data; no live Source class objects or
     // callable projections are retained in the native factory.
-    data.boldVariants = {{"bold",
-                          {{"normal", "bold"},
-                           {"italic", "bold-italic"},
-                           {"fraktur", "bold-fraktur"},
-                           {"script", "bold-script"},
-                           {"sans-serif", "bold-sans-serif"},
-                           {"sans-serif-italic", "sans-serif-bold-italic"}}},
-                         {"normal",
-                          {{"bold", "normal"},
-                           {"bold-italic", "italic"},
-                           {"bold-fraktur", "fraktur"},
-                           {"bold-script", "script"},
-                           {"bold-sans-serif", "sans-serif"},
-                           {"sans-serif-bold-italic", "sans-serif-italic"}}}};
-    data.italicVariants = {{"italic",
-                            {{"normal", "italic"},
-                             {"bold", "bold-italic"},
-                             {"sans-serif", "sans-serif-italic"},
-                             {"bold-sans-serif", "sans-serif-bold-italic"}}},
-                           {"normal",
-                            {{"italic", "normal"},
-                             {"bold-italic", "bold"},
-                             {"sans-serif-italic", "sans-serif"},
-                             {"sans-serif-bold-italic", "bold-sans-serif"}}}};
+    // Construct the inner maps in their final nodes. A nested initializer_list
+    // copies its const map values, allocating and discarding every inner node
+    // for each registered wrapper family in every layout request.
+    auto &bold = data.boldVariants.try_emplace("bold").first->second;
+    bold.emplace("normal", "bold");
+    bold.emplace("italic", "bold-italic");
+    bold.emplace("fraktur", "bold-fraktur");
+    bold.emplace("script", "bold-script");
+    bold.emplace("sans-serif", "bold-sans-serif");
+    bold.emplace("sans-serif-italic", "sans-serif-bold-italic");
+    auto &unbold = data.boldVariants.try_emplace("normal").first->second;
+    unbold.emplace("bold", "normal");
+    unbold.emplace("bold-italic", "italic");
+    unbold.emplace("bold-fraktur", "fraktur");
+    unbold.emplace("bold-script", "script");
+    unbold.emplace("bold-sans-serif", "sans-serif");
+    unbold.emplace("sans-serif-bold-italic", "sans-serif-italic");
+    auto &italic = data.italicVariants.try_emplace("italic").first->second;
+    italic.emplace("normal", "italic");
+    italic.emplace("bold", "bold-italic");
+    italic.emplace("sans-serif", "sans-serif-italic");
+    italic.emplace("bold-sans-serif", "sans-serif-bold-italic");
+    auto &unitalic = data.italicVariants.try_emplace("normal").first->second;
+    unitalic.emplace("italic", "normal");
+    unitalic.emplace("bold-italic", "bold");
+    unitalic.emplace("sans-serif-italic", "sans-serif");
+    unitalic.emplace("sans-serif-bold-italic", "bold-sans-serif");
     return data;
 }
 

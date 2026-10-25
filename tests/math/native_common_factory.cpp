@@ -132,6 +132,39 @@ const suite<"native-raii-common-factory"> common_factory_tests = [] {
         expect(defaults.styles.empty());
     };
 
+    "common-default-variant-maps-preserve-all-values-and-independent-ownership"_test = [] {
+        auto first = CommonWrapperClassData::commonDefaults();
+        const auto second = CommonWrapperClassData::commonDefaults();
+        const decltype(first.boldVariants) expectedBold{
+            {"bold", {{"normal", "bold"}, {"italic", "bold-italic"},
+                      {"fraktur", "bold-fraktur"}, {"script", "bold-script"},
+                      {"sans-serif", "bold-sans-serif"},
+                      {"sans-serif-italic", "sans-serif-bold-italic"}}},
+            {"normal", {{"bold", "normal"}, {"bold-italic", "italic"},
+                        {"bold-fraktur", "fraktur"}, {"bold-script", "script"},
+                        {"bold-sans-serif", "sans-serif"},
+                        {"sans-serif-bold-italic", "sans-serif-italic"}}}};
+        const decltype(first.italicVariants) expectedItalic{
+            {"italic", {{"normal", "italic"}, {"bold", "bold-italic"},
+                        {"sans-serif", "sans-serif-italic"},
+                        {"bold-sans-serif", "sans-serif-bold-italic"}}},
+            {"normal", {{"italic", "normal"}, {"bold-italic", "bold"},
+                        {"sans-serif-italic", "sans-serif"},
+                        {"sans-serif-bold-italic", "bold-sans-serif"}}}};
+        expect(first.boldVariants == expectedBold);
+        expect(first.italicVariants == expectedItalic);
+        auto copy = first;
+        first.boldVariants.at("bold").at("normal") = "custom-bold";
+        first.italicVariants.erase("normal");
+        expect(second.boldVariants == expectedBold);
+        expect(second.italicVariants == expectedItalic);
+        expect(copy.boldVariants == expectedBold);
+        expect(copy.italicVariants == expectedItalic);
+        copy.boldVariants.clear();
+        expect(first.boldVariants.at("bold").at("normal") == "custom-bold");
+        expect(eq(first.italicVariants.size(), 1_u));
+    };
+
     "adopt-initializes-once-and-owns-until-job-destruction"_test = [] {
         ProbeCounts counts;
         ProbeLinebreaks::constructed = 0;

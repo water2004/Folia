@@ -420,12 +420,26 @@ namespace winrt::Folia
                 auto range = displayRange(nested);
                 if (range)
                 {
-                    auto contentLeft = contentLeftFor(nested, *range, indentColumns);
+                    // Standalone raw blocks own this layout directly. Flow
+                    // anchors describe children flattened into a container's
+                    // layout and are intentionally absent on these roots.
+                    const auto standaloneRaw = root
+                        && (nested.kind == folia::RenderBlockKind::Code
+                            || nested.kind == folia::RenderBlockKind::Math);
+                    auto contentLeft = standaloneRaw
+                        ? std::optional<float>{origin.x - nested.block_style.padding_left}
+                        : contentLeftFor(nested, *range, indentColumns);
                     float top = (std::numeric_limits<float>::max)();
                     float bottom = (std::numeric_limits<float>::lowest)();
                     if (contentLeft && accumulateRange(*range, top, bottom))
                     {
-                        auto left = (std::clamp)(*contentLeft, origin.x, documentRight);
+                        auto left = standaloneRaw ? *contentLeft
+                            : (std::clamp)(*contentLeft, origin.x, documentRight);
+                        if (standaloneRaw)
+                        {
+                            top -= nested.block_style.padding_top;
+                            bottom += nested.block_style.padding_bottom;
+                        }
                         if (nested.kind == folia::RenderBlockKind::Math)
                         {
                             if (!printMode)
@@ -460,14 +474,11 @@ namespace winrt::Folia
                         }
                         if (rawBlock)
                         {
-                            resources.d2dContext->DrawRoundedRectangle(
-                                D2D1::RoundedRect(rect, 6.0f, 6.0f),
-                                resources.mutedBrush.Get(),
-                                1.0f);
                             auto headerTop = rect.top + nested.block_style.padding_top;
                             auto headerBottom = (std::min)(
                                 rect.bottom, headerTop + styleSheet.code.lineHeight);
-                            if (nested.kind == folia::RenderBlockKind::Code)
+                            if (printMode || selection.active.container_id != nested.id
+                                || nested.special().code_indented)
                             {
                                 auto label = winrt::to_hstring(
                                     nested.special().language.value_or("text"));

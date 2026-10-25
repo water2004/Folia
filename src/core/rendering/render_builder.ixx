@@ -690,7 +690,11 @@ struct Builder {
             marker.source_span = source_span(range);
             marker.text = inline_source_slice(document, range);
             marker.ensure_special().marker_style = MarkerStyle{true, {}};
-            marker.ensure_special().visibility = MarkerVisibility::Always;
+            // Complete CST constructs retain their exact source markers, but
+            // the rendered editor edits their content through format controls.
+            // Incomplete syntax remains visible so it can be finished normally.
+            marker.ensure_special().visibility = owner.status == ParseStatus::Complete
+                ? MarkerVisibility::HiddenButEditable : MarkerVisibility::Always;
             target.push_back(std::move(marker));
         };
         std::function<void(const InlineCstNodes&, const InlineStyle&, std::vector<InlineRenderItem>&)> append_nodes;
