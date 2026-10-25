@@ -18,12 +18,19 @@ const cases=[
  ["note-over", "sequenceDiagram\nparticipant A as Editor\nparticipant B as Store\nNote over A,B: Save operations\nA->>B: Commit\nNote left of A: Ready"],
  ["note-spacing", "sequenceDiagram\nA->>B: Read\nNote right of A: Validate document before saving all changes\nNote over B: Storage ready\nNote left of B: Return the current document to the editor\nB-->>A: Done"],
  ["nested-activation", "sequenceDiagram\nactor A as User\nparticipant B as Service\nA->>+B: Save\nB->>+B: Validate\nNote over B: Checking\nB-->>-B: Valid\nB-->>-A: Saved"],
+ ["loop","sequenceDiagram\nloop Retry\nA->>B: Save\nB-->>A: Done\nend"],
+ ["alt","sequenceDiagram\nalt Valid\nA->>B: Save\nelse Invalid\nB-->>A: Reject\nend"],
+ ["nested","sequenceDiagram\nopt Cached\nloop Read\nA->>+B: Read\nNote over B: Loading\nB-->>-A: Data\nend\nend"],
+ ["parallel","sequenceDiagram\npar Read\nA->>B: Fetch\nand Write\nB->>A: Store\nend"],
+ ["critical-break","sequenceDiagram\ncritical Save\nA->>B: Write\noption Failure\nbreak Abort\nB-->>A: Failed\nend\nend"],
+ ["region-spacing","%%{init: {\"fontSize\": 20, \"sequence\": {\"boxMargin\": 8, \"boxTextMargin\": 7, \"labelBoxWidth\": 60, \"labelBoxHeight\": 24}}}%%\nsequenceDiagram\nloop Retry\nA->>A: Check\nA->>B: Save\nend"],
 ];
 export function inspectSequence() {
  const root=document.querySelector('svg');
  const box=e=>{const b=e.getBBox();return {x:b.x,y:b.y,width:b.width,height:b.height};};
  const style=e=>{const s=getComputedStyle(e);return {fill:s.fill,stroke:s.stroke,strokeWidth:s.strokeWidth};};
  const actors=[...root.querySelectorAll('rect.actor')].map(e=>({id:e.getAttribute('name'),footer:e.classList.contains('actor-bottom'),...box(e),...style(e)})).sort((a,b)=>a.id.localeCompare(b.id)||Number(a.footer)-Number(b.footer));
+ const regions=[...root.querySelectorAll('.loopLine,.labelBox')].map(e=>({tag:e.tagName,...box(e),...style(e),dash:getComputedStyle(e).strokeDasharray,points:e.tagName==='polygon'?[...e.points].map(p=>[p.x,p.y]):null}));
  const notes=[...root.querySelectorAll('rect.note')].map(e=>({...box(e),...style(e)}));
  const activations=[...root.querySelectorAll('rect[class^=activation]')].map(e=>({...box(e),...style(e)})).sort((a,b)=>a.x-b.x||a.y-b.y);
  const figures=[...root.querySelectorAll('g.actor-man')].flatMap(g=>[...g.querySelectorAll('line,circle')].map(e=>({id:g.getAttribute('name'),footer:g.classList.contains('actor-bottom'),...box(e),...style(e)}))).sort((a,b)=>a.id.localeCompare(b.id)||Number(a.footer)-Number(b.footer)||a.y-b.y||a.x-b.x);
@@ -33,7 +40,7 @@ export function inspectSequence() {
    const marker=side=>{const value=e.getAttribute('marker-'+side);if(!value)return null;const id=value.slice(value.lastIndexOf('#')+1,-1);const m=root.querySelector('[id="'+id+'"]');const path=m.querySelector('path');return {refX:m.getAttribute('refX'),refY:m.getAttribute('refY'),d:path.getAttribute('d'),...style(path)};};
    return {kind:e.classList.contains('messageLine1')?1:0,...style(e),points:Array.from({length:21},(_,i)=>{const p=e.getPointAtLength(e.getTotalLength()*i/20);return [p.x,p.y];}),start:marker('start'),end:marker('end')};
  });
- const v=root.viewBox.baseVal;return {actors,notes,activations,figures,lines,texts,signals,view:{x:v.x,y:v.y,width:v.width,height:v.height}};
+ const v=root.viewBox.baseVal;return {regions,actors,notes,activations,figures,lines,texts,signals,view:{x:v.x,y:v.y,width:v.width,height:v.height}};
 }
 if(!process.argv.includes('--library')) {
  const directory=resolve(process.argv[2]??'build/mermaid-cpp/sequence-browser');mkdirSync(directory,{recursive:true});
