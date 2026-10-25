@@ -571,6 +571,18 @@
     {
       "path": "packages/mermaid/src/diagrams/common/svgDrawCommon.ts",
       "sha256": "da5e706bf4c78ff55172c4eb1eec2725c87ab290ff4e76905b8f85ce12fdc6ba"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/class/parser/classDiagram.jison",
+      "sha256": "3c99e4613bd8235f4d3485d8444a8b119e8af9ede50f88505c24d5a6cc93280f"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/class/classDb.ts",
+      "sha256": "694ae4bb58801b72cb703cb481e662d4e1a6208b91ab84b574786467ea0054c5"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/class/classTypes.ts",
+      "sha256": "c2440d462496d66a4878a1dbc57a4dbde753b6111820ded7c4f627ccbcfa7c75"
     }
   ],
   "packages": [
