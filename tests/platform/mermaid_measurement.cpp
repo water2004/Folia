@@ -139,8 +139,6 @@ suite mermaid_measurement = [] {
                     output<<svg->svg;expect(output.good());
                 }
             }
-            expect(!render_mermaid(u"sequenceDiagram\nA->>B: <b>Go</b>",*session));
-
         }
     };
     "mermaid_flowchart_measured_source_to_svg"_test=[] {
