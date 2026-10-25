@@ -239,6 +239,7 @@ class Parser {
     }
     static ClassMarker marker(View& s) {
         if (take(s,u"<|") || take(s,u"|>")) return ClassMarker::extension;
+        if (take(s,u"()")) return ClassMarker::lollipop;
         if (take(s,u"*")) return ClassMarker::composition;
         if (take(s,u"o")) return ClassMarker::aggregation;
         if (take(s,u"<") || take(s,u">")) return ClassMarker::dependency;
@@ -341,8 +342,19 @@ class Parser {
         const auto to = name(rest);
         if (take(rest,u":")) r.title = rest;
         else if (!rest.empty()) fail("Unexpected text after Class relationship");
-        const auto from_index = add_class(from), to_index = add_class(to);
-        r.from = result.classes[from_index].id; r.to = result.classes[to_index].id;
+        const auto add_interface=[&](View label,View class_id) {
+            const auto number=std::to_string(result.interfaces.size());
+            Text id=u"interface"+Text{number.begin(),number.end()};
+            result.interfaces.push_back({id,Text{label},Text{class_id}});return id;
+        };
+        if(r.start==ClassMarker::lollipop && r.end==ClassMarker::none) {
+            r.to=result.classes[add_class(to)].id;r.from=add_interface(from,to);
+        } else if(r.end==ClassMarker::lollipop && r.start==ClassMarker::none) {
+            r.from=result.classes[add_class(from)].id;r.to=add_interface(to,from);
+        } else {
+            const auto from_index=add_class(from),to_index=add_class(to);
+            r.from=result.classes[from_index].id;r.to=result.classes[to_index].id;
+        }
         if (result.relations.size() >= limits.relations) fail("Class relationship limit exceeded");
         result.relations.push_back(std::move(r));
     }

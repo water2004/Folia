@@ -15,6 +15,8 @@ for (const file of ['classDb.ts','classTypes.ts']) {
   assert.equal(map.sourcesContent[index].replaceAll('\r\n','\n'),read('packages/mermaid/src/diagrams/class/'+file));
 }
 const cases = [
+  ["lollipop", "classDiagram\nclass Service {\n+save() bool\n}\nService --() Storage\nInput ()-- Service"],
+  ["lollipop-repeated", "classDiagram\ndirection LR\nEditor --() Storage : saves\nViewer --() Storage : reads"],
   ["class-direct-style", "classDiagram\nclass Document {\n+title String\n+save() bool\n}\nDocument --> Store : saves\nstyle Document fill:#ffeecc,stroke:#aa5500,color:#552200,stroke-width:2px"],
   ["class-defined-style", "classDiagram\nclass Document:::highlight\nclass Store\nclassDef highlight fill:#ffeecc,stroke:#aa5500,color:#552200,stroke-width:2px\nDocument --> Store : saves"],
   ["class-assigned-style", "classDiagram\nclass Document {\n+count int$\n+save() bool*\n}\nclass Store\ncssClass \"Document,Store\" highlight\nclassDef highlight fill:#ffeecc,stroke:#aa5500,color:#552200,stroke-width:2px,stroke-dasharray:4 2\nstyle Store fill:#ddffee,stroke:#008855\nDocument --> Store : saves"],
@@ -55,6 +57,7 @@ for (const [name,source] of cases) {
     result = {title:db.getDiagramTitle(),accTitle:db.getAccTitle(),accDescription:db.getAccDescription(),
       direction:db.getDirection(),classes:[...db.getClasses()].map(([id,c])=>({id,label:c.label,type:c.type,parent:c.parent??'',
         cssClasses:c.cssClasses,styles:c.styles,annotations:c.annotations,members:c.members.map(member),methods:c.methods.map(member)})),
+      interfaces:db.interfaces.map(n=>({id:n.id,label:n.label,classId:n.classId})),
       namespaces:[...db.getNamespaces().values()].map(n=>({id:n.id,label:n.label,parent:n.parent??'',explicit:n.explicit,
         classes:[...n.classes.keys()],notes:[...n.notes.keys()],children:[...n.children.keys()]})),
       notes:[...db.getNotes().values()].map(n=>({id:n.id,class:n.class??'',text:n.text,parent:n.parent??''})),

@@ -5,7 +5,7 @@ import std;
 export import folia.mermaid.frontend;
 
 export namespace folia::mermaid {
-enum class ClassMarker { none = -1, aggregation = 0, extension = 1, composition = 2, dependency = 3 };
+enum class ClassMarker { none = -1, aggregation = 0, extension = 1, composition = 2, dependency = 3, lollipop = 4 };
 struct ClassMember {
     std::u16string id, visibility, classifier, parameters, return_type;
     std::u16string text, display_text, css_style;
@@ -24,6 +24,7 @@ struct ClassRelation {
     bool dotted = false;
 };
 struct ClassNote { std::u16string id, class_id, text, parent; };
+struct ClassInterface { std::u16string id, label, class_id; };
 struct ClassNamespace {
     std::u16string id, label, parent;
     std::vector<std::u16string> classes, notes, children;
@@ -34,6 +35,7 @@ struct ClassInput {
     std::vector<ClassNode> classes;
     std::vector<ClassRelation> relations;
     std::vector<ClassNote> notes;
+    std::vector<ClassInterface> interfaces;
     std::vector<ClassNamespace> namespaces;
     ConfigValue effective_config;
 };

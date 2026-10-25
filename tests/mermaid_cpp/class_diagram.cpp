@@ -54,6 +54,13 @@ suite class_diagram = [] {
                 for (std::size_t j = 0; j < annotations.size(); ++j) expect(bool(a.annotations[j] == annotations[j].string));
                 members(a.members,field(e,u"members")); members(a.methods,field(e,u"methods"));
             }
+            const auto& interfaces=field(expected,u"interfaces").sequence;
+            expect(fatal(actual->interfaces.size()==interfaces.size()));
+            for(std::size_t i=0;i<interfaces.size();++i) {
+                same(actual->interfaces[i].id,interfaces[i],u"id");
+                same(actual->interfaces[i].label,interfaces[i],u"label");
+                same(actual->interfaces[i].class_id,interfaces[i],u"classId");
+            }
             const auto& relations = field(expected,u"relations").sequence;
             const auto& notes = field(expected,u"notes").sequence;
             expect(fatal(actual->notes.size() == notes.size())) << fields[0];
@@ -85,7 +92,7 @@ suite class_diagram = [] {
                 expect(a.dotted == field(e,u"dotted").boolean);
             }
         }
-        expect(count == 26_u);
+        expect(count == 28_u);
     };
     "mermaid_class_owned_requests_and_explicit_boundary"_test = [] {
         auto session = ConfigSession::create(); expect(fatal(session.has_value()));

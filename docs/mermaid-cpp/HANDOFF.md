@@ -1,6 +1,21 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-25, Class common paints in progress
+## Current checkpoint - 2026-10-25, Class paints verifying and interface parser in progress
+
+- Paint batch 8aa88d5c is pushed; Windows verification is running at
+  https://github.com/zhao0349/Folia/actions/runs/40207510779 .
+- Interface parser batch retains () endpoint markers, original independently
+  allocated interface ids/labels/class ownership and relation rewrites. Scope:
+  both directions and repeated names in two original inputs. Exit on parser
+  oracle/native tests and affected checks; measured interface SVG remains an
+  explicit error until its next adapter rather than dropping interface nodes.
+- Four original interface SVG observations are saved in
+  build/mermaid-cpp/class-lollipop-next/original.json. After these batches pass,
+  continue interface measurement/rectangle anchors and circle markers using
+  ClassDB.addRelation/getData, rectWithTitle/plain rect and markers.lollipop.
+- Candidate is unverified; no contribution update yet.
+
+## Previous checkpoint - 2026-10-25, Class common paints in progress
 
 - Deliver direct/class-defined fill, border, stroke width/dash and text color
   through style, classDef, cssClass and inline ::: assignments. Preserve
