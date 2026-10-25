@@ -5,6 +5,7 @@ import {resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {chromium} from './oracle/node_modules/playwright-core/index.mjs';
 export const cases = [
+ ["wrapped-edge","classDiagram\nclass Document\nDocument --> Store : **Validate** the document before saving changes to local storage"],
  ["display-emphasis","classDiagram\nclass D[\"Document **model**\"] {\n+**name** String\n+save() *bool*\n}\nD --> Store : **save** changes"],
  ["display-lines","classDiagram\nclass D[\"Document<br/>model\"] {\n+name<br/>String\n+save()<br/>bool\n}\nD --> Store : save<br/>changes"],
  ["display-entities","classDiagram\nclass D[\"Editor &amp; viewer\"]\nD --> Store : save #38; reload"],

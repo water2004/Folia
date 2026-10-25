@@ -237,7 +237,8 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             auto metrics=measurer.svg_font_metrics(font);if(!metrics) return std::unexpected(metrics.error());
             class_measurements.title={cls->document.title,title->bounds_width,metrics->height,metrics->baseline};
         }
-        auto measure=[&](std::u16string_view source,unsigned weight=400,bool italic=false,double size=0,bool markdown=true)->std::expected<ClassTextBox,std::string> {
+        auto measure=[&](std::u16string_view source,unsigned weight=400,bool italic=false,double size=0,bool markdown=true,
+            double wrapping_width=std::numeric_limits<double>::infinity())->std::expected<ClassTextBox,std::string> {
             auto display=diagram_display_text(source);if(!display) return std::unexpected(display.error());
             if(display->empty()) return ClassTextBox{};
             if(size==0) size=theme.font_size;
@@ -245,7 +246,29 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             auto lines=flowchart_label_runs(*display,markdown?u"markdown":u"text");
             if(!lines) return std::unexpected(lines.error());
             ClassTextBox box;box.line_step=size*1.5;
+            std::vector<FlowchartLabelLine> display_lines;
+            bool wrapped=false;
             for(const auto& line:*lines) {
+                std::u16string value;
+                std::vector<MermaidTextStyle> styles;
+                for(const auto& run:line) {
+                    styles.push_back({value.size(),run.text.size(),run.strong?(weight<350?400u:weight<550?700u:900u):weight,italic||run.emphasis});
+                    value+=run.text;
+                }
+                auto slices=measurer.wrap(value,font,wrapping_width,styles);
+                if(!slices) return std::unexpected(slices.error());
+                wrapped=wrapped||slices->size()>1;
+                std::size_t start=0;
+                for(const auto& slice:*slices) {
+                    const auto end=start+slice.size();FlowchartLabelLine runs;
+                    for(std::size_t i=0;i<styles.size();++i) {
+                        const auto first=std::max(start,styles[i].offset),last=std::min(end,styles[i].offset+styles[i].length);
+                        if(first<last) runs.push_back({value.substr(first,last-first),line[i].strong,line[i].emphasis});
+                    }
+                    display_lines.push_back(std::move(runs));start=end;
+                }
+            }
+            for(const auto& line:display_lines) {
                 std::u16string value;
                 std::vector<MermaidTextStyle> styles;
                 for(const auto& run:line) {
@@ -270,6 +293,7 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
                 box.baseline=box.line_baselines.front();box.runs.push_back(line);
                 box.text+=value;box.lines.push_back(std::move(value));
             }
+            if(wrapped) box.width=std::max(box.width,wrapping_width);
             return box;
         };
         for(const auto& group:cls->document.namespaces) {
@@ -312,7 +336,8 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
         }
         for(const auto& edge:cls->document.relations) {
             ClassEdgeMeasurements m;
-            auto label=measure(edge.title);if(!label) return std::unexpected(label.error());m.label=std::move(*label);
+            // The unified edge painter uses createText's default 200px width.
+            auto label=measure(edge.title,400,false,0,true,200);if(!label) return std::unexpected(label.error());m.label=std::move(*label);
             for(auto [value,target]:{std::pair{&edge.start_label,&m.start},{&edge.end_label,&m.end}}) {
                 if(*value==u"none") continue;
                 auto box=measure(*value,400,false,11);if(!box) return std::unexpected(box.error());*target=std::move(*box);

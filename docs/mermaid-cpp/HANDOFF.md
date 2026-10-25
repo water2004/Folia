@@ -1,6 +1,6 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-25, Class emphasis in progress
+## Current checkpoint - 2026-10-25, Class emphasis and relationship wrapping in progress
 
 - Deliver common Class label/member/relationship emphasis through existing
   display runs, real per-run DirectWrite metrics and SVG tspans. Preserve
@@ -8,7 +8,15 @@
 - Exit: the existing display-emphasis input in both themes, including run
   weights/styles and affected standalone/integrated Windows checks. Then move
   to automatic wrapping and the remaining required Class/family chain.
-- Candidate changes are local and unverified; no app dependency switch.
+- Emphasis 8b5d304c is pushed. CI 40199353436 passed the standalone Debug native
+  suites but its Class SVG comparison found a 0.98-unit mixed-weight height
+  difference. Use native rounded ascent/descent for CSS half-leading; keep
+  tolerances unchanged. This is an unresolved acceptance failure until rerun.
+- The next separate batch adds default 200px relationship wrapping with retained
+  styled runs and native line-break opportunities. Exit on wrapped-edge in both
+  themes and affected checks. Original observations: class-wrap-next/original.json
+  under build/mermaid-cpp. Then advance to measured rich/wrapped Class notes.
+- Wrapping candidate is local and unverified; no app dependency switch.
   Prior verified implementation and delivery evidence follows below.
 
 ## Previous checkpoint - 2026-10-25, Class namespaces and display lines verified
