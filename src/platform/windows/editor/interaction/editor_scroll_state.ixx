@@ -9,12 +9,12 @@ export namespace folia::platform::editor
     public:
         struct Snapshot
         {
-            float offset = 0.0f;
-            float target = 0.0f;
+            double offset = 0.0;
+            double target = 0.0;
         };
 
-        float Offset() const noexcept { return offset_; }
-        float Target() const noexcept { return target_; }
+        float Offset() const noexcept { return static_cast<float>(offset_); }
+        float Target() const noexcept { return static_cast<float>(target_); }
         bool Animating() const noexcept { return std::fabs(target_ - offset_) >= 0.1f; }
         Snapshot Save() const noexcept { return {offset_, target_}; }
 
@@ -54,7 +54,7 @@ export namespace folia::platform::editor
         bool Advance(float elapsedSeconds)
         {
             auto distance = target_ - offset_;
-            auto elapsed = (std::max)(0.0f, elapsedSeconds);
+            auto elapsed = (std::max)(0.0, static_cast<double>(elapsedSeconds));
             if (std::fabs(distance) < 0.1f)
             {
                 offset_ = target_;
@@ -63,21 +63,24 @@ export namespace folia::platform::editor
 
             // Actual elapsed time and an analytic exponential response give
             // one monotonic deceleration phase independent of frame rate.
-            constexpr float responseHalfLifeSeconds = 0.075f;
-            auto response = 1.0f - std::exp2(-elapsed / responseHalfLifeSeconds);
+            constexpr double responseHalfLifeSeconds = 0.075;
+            auto response = 1.0 - std::exp2(-elapsed / responseHalfLifeSeconds);
             offset_ += distance * response;
             return true;
         }
 
     private:
-        static float ClampValue(float value, float maximum)
+        static double ClampValue(double value, double maximum)
         {
             if (!std::isfinite(value)) return 0.0f;
-            maximum = std::isfinite(maximum) ? (std::max)(0.0f, maximum) : 0.0f;
-            return (std::clamp)(value, 0.0f, maximum);
+            maximum = std::isfinite(maximum) ? (std::max)(0.0, maximum) : 0.0;
+            return (std::clamp)(value, 0.0, maximum);
         }
 
-        float offset_ = 0.0f;
-        float target_ = 0.0f;
+        // Keep subpixel progress until it reaches the float rendering edge.
+        // At large document offsets a float increment can round to zero while
+        // the remaining distance still says the animation must continue.
+        double offset_ = 0.0;
+        double target_ = 0.0;
     };
 }

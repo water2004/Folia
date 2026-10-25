@@ -64,6 +64,28 @@ suite editor_scroll_state_tests = [] {
     expect(!state.Animating());
 };
 
+"inertia settles at large document offsets across refresh rates"_test = [] {
+    for (float start : {0.f, 1000.f, 100000.f, 131072.f, 500000.f, 1000000.f, 8000000.f})
+    for (float delta : {-1440.f, -180.f, 180.f, 1440.f})
+    for (int rate : {30, 60, 120, 144, 180, 240, 500}) {
+        EditorScrollState state;
+        state.Set(start, 10000000.f);
+        state.Queue(delta, 10000000.f);
+        auto target = state.Target();
+        bool monotonic = true;
+        bool active = true;
+        for (int frame = 0; frame < rate * 3 && active; ++frame) {
+            auto previous = state.Offset();
+            active = state.Advance(1.f / rate);
+            monotonic = monotonic && (delta < 0 ? state.Offset() <= previous : state.Offset() >= previous);
+        }
+        expect(monotonic);
+        expect(!active) << "animation must stop" << start << rate;
+        expect(!state.Animating()) << "offset/rate" << start << rate;
+        expect(state.Offset() == target) << "inertia must reach its target" << start << rate;
+    }
+};
+
 "extent changes and anchor shifts clamp offset and target together"_test = [] {
     EditorScrollState state;
     state.Set(900.0f, 1000.0f);
