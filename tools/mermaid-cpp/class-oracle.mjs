@@ -15,6 +15,7 @@ for (const file of ['classDb.ts','classTypes.ts']) {
   assert.equal(map.sourcesContent[index].replaceAll('\r\n','\n'),read('packages/mermaid/src/diagrams/class/'+file));
 }
 const cases = [
+  ['member-breaks','classDiagram\nclass Document {\n+name<br/>String\n+save()<br/>bool\n}'],
   ['namespace','classDiagram\nnamespace Storage {\nclass Document {\n+save() bool\n}\nclass Store\nnote for Store "Local storage"\n}\nDocument --> Store : persists'],
   ['namespace-nested','classDiagram\nnamespace App["Application"] {\nnamespace Storage {\nclass Document\n}\nclass Editor\n}\nEditor --> Document : saves'],
   ['namespace-qualified','classDiagram\nnamespace App.Storage {\nclass Store\n}\nnamespace App {\nclass Editor\n}\nEditor --> Store'],

@@ -53,6 +53,26 @@ Text html_angles(View value) {
     for (auto c : value) { if (c == u'<') out += u"&lt;"; else if (c == u'>') out += u"&gt;"; else out += c; }
     return out;
 }
+// ClassMember sanitizes its input before parsing/escaping angle brackets.
+// HTML break tags therefore retain the canonical <br> spelling as literal
+// member text, unlike the display breaks in class/relationship labels.
+Text member_breaks(View value) {
+    Text out;
+    for(std::size_t i=0;i<value.size();) {
+        if(value[i]==u'<') {
+            auto end=value.find(u'>',i+1);
+            if(end!=View::npos) {
+                Text tag;
+                for(auto c:value.substr(i+1,end-i-1))
+                    if(c!=u'/'&&c!=u' '&&c!=u'\t'&&c!=u'\r'&&c!=u'\n')
+                        tag+=c>=u'A'&&c<=u'Z'?c+u'a'-u'A':c;
+                if(tag==u"br") {out+=u"<br>";i=end+1;continue;}
+            }
+        }
+        out+=value[i++];
+    }
+    return out;
+}
 class Parser {
     ClassInput result;
     ClassLimits limits;
@@ -155,6 +175,7 @@ class Parser {
         result.classes[index].annotations.emplace_back(value.substr(2,value.size()-4));
     }
     void member(std::size_t index, View value) {
+        const auto normalized=member_breaks(value);value=normalized;
         value = trim(value); if (value.empty()) return;
         if (++member_count > limits.members) fail("Class member limit exceeded");
         if (value.starts_with(u"<<") && value.ends_with(u">>")) { annotation(index,value); return; }
