@@ -8,6 +8,12 @@
   both themes, plus the affected existing checks. Commit and deliver once those
   pass; next batch connects ordinary self relationships through the existing
   unified Dagre preparation/merge path. No extra boundary matrix is planned.
+- Title candidate 622e2f97 is verifying in run 40189132927. Its original browser
+  corpus is in build/mermaid-cpp/class-title-work (16 outputs). Self-relationship
+  work now reuses prepare_flowchart_graph and the extracted compact-loop router;
+  validate a single loop and an LR loop with an ordinary relation/multiplicity,
+  both themes, plus affected existing Flowchart checks. Deliver each green batch
+  separately; neither candidate is yet accepted or on the contribution branch.
 
 - Parser commits b46c6486/ef11e206 met their exit conditions: all four Windows
   standalone/integrated Debug/Release jobs passed at

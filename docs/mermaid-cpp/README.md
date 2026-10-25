@@ -49,7 +49,10 @@ annotation, attribute, method and relationship text. It preserves compartments,
 static/abstract member typography, inheritance/aggregation/composition/dependency
 markers, multiplicity and the unified renderer's Dagre geometry. The original
 default Class layout is ELK and remains unported; it returns an explicit error
-instead of silently substituting Dagre. Titles, self relationships, namespaces,
+instead of silently substituting Dagre. Plain titles preserve theme typography,
+state.titleTopMargin and the padded viewport. Self relationships use the shared
+three-segment Dagre preparation and compact-loop geometry, followed by Class
+rectangle clipping, original markers and multiplicity placement. Namespaces,
 notes and rich/wrapped labels require further adapters.
 
 `folia.mermaid.sequence::prepare_sequence` connects shared preparation to owned

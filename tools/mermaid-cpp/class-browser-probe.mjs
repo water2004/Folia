@@ -5,6 +5,8 @@ import {resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {chromium} from './oracle/node_modules/playwright-core/index.mjs';
 export const cases = [
+ ['self','classDiagram\nclass Document {\n+validate() bool\n}\nDocument --> Document : validates'],
+ ['self-related','classDiagram\ndirection LR\nclass Document {\n+save() bool\n}\nDocument --> Store : persists\nDocument "1" o-- "*" Document : revisions'],
  ['title','---\ntitle: Document storage\n---\nclassDiagram\nclass Document {\n+save() bool\n}\nDocument --> Store : persists'],
  ['title-wide','---\ntitle: Read and validate the document before saving to storage\nconfig:\n  fontSize: 20\n  state:\n    titleTopMargin: 40\n---\nclassDiagram\nclass Document'],
  ['members','classDiagram\nclass Document {\n+String title\n+save() bool\n}\nclass Store {\n+load(id) Document\n}\nDocument --> Store : persists'],

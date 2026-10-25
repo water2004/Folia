@@ -222,6 +222,30 @@ void validate(const FlowchartInput& source) {
 }
 }
 
+FlowchartPlacedEdge route_dagre_self_loop(const FlowchartPlacedNode& node,
+    FlowchartPoint hint,std::u16string_view direction,FlowchartEdgeLabelSize label,bool has_label) {
+    const double dx=hint.x-node.x,dy=hint.y-node.y;
+    enum class Side {top,bottom,left,right};
+    Side side=direction==u"BT"?Side::bottom:direction==u"LR"?Side::right:
+        direction==u"RL"?Side::left:Side::top;
+    if(std::abs(dx)>std::abs(dy)) side=dx>0?Side::right:Side::left;
+    else if(std::abs(dy)>0) side=dy>0?Side::bottom:Side::top;
+    const double max_span=std::max(36.0,std::min(100.0,node.width*0.8));
+    const double span=std::clamp(std::max(label.width,node.width*0.35),36.0,max_span);
+    const double depth=std::clamp(std::min(node.width,node.height)*0.45,24.0,48.0);
+    FlowchartPlacedEdge out;
+    if(side==Side::left||side==Side::right) {
+        const double sign=side==Side::right?1.0:-1.0,x=node.x+sign*node.width/2;
+        out.points={{x,node.y-span/2},{x+sign*depth,node.y-span/2},{x+sign*depth,node.y+span/2},{x,node.y+span/2}};
+        if(has_label) out.label=FlowchartPoint{x+sign*(depth+label.width/2+4),node.y};
+    } else {
+        const double sign=side==Side::bottom?1.0:-1.0,y=node.y+sign*node.height/2;
+        out.points={{node.x-span/2,y},{node.x-span/2,y+sign*depth},{node.x+span/2,y+sign*depth},{node.x+span/2,y}};
+        if(has_label) out.label=FlowchartPoint{node.x,y+sign*(depth+label.height/2+4)};
+    }
+    return out;
+}
+
 std::expected<FlowchartGraphPreparation,std::string> prepare_flowchart_graph(const FlowchartInput& source) {
     try {
         validate(source);

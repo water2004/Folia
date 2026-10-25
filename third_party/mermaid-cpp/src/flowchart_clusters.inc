@@ -151,26 +151,9 @@ FlowchartScene layout_prepared(const FlowchartInput& source,FlowchartPreparedGra
         const auto& node=placed->nodes[ids.at(original.start)];
         const auto& first=placed->nodes[ids.at(e.data.start)];
         const auto& second=placed->nodes[ids.at(e.data.end)];
-        const double dx=(first.x+second.x)/2-node.x,dy=(first.y+second.y)/2-node.y;
-        enum class Side {top,bottom,left,right};
-        Side side=graph.direction==u"BT"?Side::bottom:graph.direction==u"LR"?Side::right:
-            graph.direction==u"RL"?Side::left:Side::top;
-        if(std::abs(dx)>std::abs(dy)) side=dx>0?Side::right:Side::left;
-        else if(std::abs(dy)>0) side=dy>0?Side::bottom:Side::top;
-        const auto label=labels[e.source_index];
-        const double max_span=std::max(36.0,std::min(100.0,node.width*0.8));
-        const double span=std::clamp(std::max(label.width,node.width*0.35),36.0,max_span);
-        const double depth=std::clamp(std::min(node.width,node.height)*0.45,24.0,48.0);
-        auto& out=result.edges[e.source_index];
-        if(side==Side::left||side==Side::right) {
-            const double sign=side==Side::right?1.0:-1.0,x=node.x+sign*node.width/2;
-            out.points={{x,node.y-span/2},{x+sign*depth,node.y-span/2},{x+sign*depth,node.y+span/2},{x,node.y+span/2}};
-            if(!original.label.empty()) out.label=FlowchartPoint{x+sign*(depth+label.width/2+4),node.y};
-        } else {
-            const double sign=side==Side::bottom?1.0:-1.0,y=node.y+sign*node.height/2;
-            out.points={{node.x-span/2,y},{node.x-span/2,y+sign*depth},{node.x+span/2,y+sign*depth},{node.x+span/2,y}};
-            if(!original.label.empty()) out.label=FlowchartPoint{node.x,y+sign*(depth+label.height/2+4)};
-        }
+        result.edges[e.source_index]=route_dagre_self_loop(node,
+            {(first.x+second.x)/2,(first.y+second.y)/2},graph.direction,
+            labels[e.source_index],!original.label.empty());
     }
     for(const auto& e:graph.edges) if(e.loop_segment==-1||e.loop_segment==1) {
         auto& edge=result.edges[e.source_index];

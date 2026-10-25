@@ -2,6 +2,7 @@ module folia.mermaid.class_svg;
 import std;
 import folia.mermaid.number;
 import folia.mermaid.svg_text;
+import folia.mermaid.flowchart_graph;
 
 namespace folia::mermaid {
 namespace {
@@ -101,12 +102,49 @@ std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& inp
         }
         for(std::size_t i=0;i<doc.relations.size();++i) {
             const auto& e=doc.relations[i];
-            if(e.from==e.to) return std::unexpected("Class self relationships require the unified self-loop adapter");
             const auto id=std::to_string(i);
             graph.edges.push_back({.id=std::u16string{id.begin(),id.end()},.start=e.from,.end=e.to,.label=e.title});
             labels.push_back({measured.edges[i].label.width,measured.edges[i].label.height});
         }
-        auto placed=layout_flowchart(graph,sizes,labels);if(!placed) return std::unexpected(placed.error());
+        auto preparation=prepare_flowchart_graph(graph);if(!preparation) return std::unexpected(preparation.error());
+        const auto& prepared=preparation->graph;
+        FlowchartInput layout_input;layout_input.direction=graph.direction;
+        layout_input.node_spacing=graph.node_spacing;layout_input.rank_spacing=graph.rank_spacing;
+        std::vector<FlowchartNodeBox> layout_sizes;std::vector<FlowchartEdgeLabelSize> layout_labels;
+        std::unordered_map<std::u16string,std::size_t> ids;
+        for(const auto& n:prepared.nodes) {
+            ids.emplace(n.data.id,layout_input.nodes.size());layout_input.nodes.push_back(n.data);
+            layout_sizes.push_back(n.source_index?sizes[*n.source_index]:FlowchartNodeBox{0.1,0.1});
+        }
+        for(const auto& e:prepared.edges) {
+            layout_input.edges.push_back(e.data);
+            layout_labels.push_back(e.loop_segment==0||e.loop_segment==2?FlowchartEdgeLabelSize{}:labels[e.source_index]);
+        }
+        auto layout=layout_flowchart(layout_input,layout_sizes,layout_labels);if(!layout) return std::unexpected(layout.error());
+        FlowchartLayout logical;logical.width=layout->width;logical.height=layout->height;
+        logical.nodes.resize(graph.nodes.size());logical.edges.resize(graph.edges.size());
+        for(std::size_t i=0;i<prepared.nodes.size();++i)
+            if(auto index=prepared.nodes[i].source_index) logical.nodes[*index]=layout->nodes[i];
+        for(std::size_t i=0;i<prepared.edges.size();++i) {
+            const auto& e=prepared.edges[i];
+            if(e.loop_segment==-1) {logical.edges[e.source_index]=layout->edges[i];continue;}
+            if(e.loop_segment!=1) continue;
+            const auto& original=graph.edges[e.source_index];
+            const auto& node=layout->nodes[ids.at(original.start)];
+            const auto& first=layout->nodes[ids.at(e.data.start)];
+            const auto& second=layout->nodes[ids.at(e.data.end)];
+            auto edge=route_dagre_self_loop(node,{(first.x+second.x)/2,(first.y+second.y)/2},
+                graph.direction,labels[e.source_index],!original.label.empty());
+            // ClassBox uses intersect.rect after the compact loop is merged.
+            const auto intersect=[&](FlowchartPoint p) {
+                const auto dx=p.x-node.x,dy=p.y-node.y,w=node.width/2,h=node.height/2;
+                const auto scale=std::abs(dy)*w>std::abs(dx)*h?h/std::abs(dy):w/std::abs(dx);
+                return FlowchartPoint{node.x+dx*scale,node.y+dy*scale};
+            };
+            edge.points.front()=intersect(edge.points[1]);edge.points.back()=intersect(edge.points[edge.points.size()-2]);
+            logical.edges[e.source_index]=std::move(edge);
+        }
+        const auto* placed=&logical;
         // insertTitle uses the pre-title graph bounds; setupViewPortForSVG then
         // includes the SVG text bounds before adding its fixed eight-unit pad.
         const double title_x=placed->width/2+8,title_y=-config.title_top_margin;

@@ -2,6 +2,7 @@
 export module folia.mermaid.flowchart_graph;
 import std;
 export import folia.mermaid.flowchart;
+export import folia.mermaid.dagre_rank;
 
 export namespace folia::mermaid {
 struct FlowchartPreparedNode {
@@ -40,4 +41,8 @@ struct FlowchartGraphPreparation {
 // Invalid graphs return an error without modifying the caller's source.
 std::expected<FlowchartGraphPreparation, std::string> prepare_flowchart_graph(
     const FlowchartInput& source);
+// Unified Dagre getSelfLoopPoints/getSelfLoopLabelPosition. The hint is the
+// mean position of the two prepared dummy nodes; caller clips shape endpoints.
+FlowchartPlacedEdge route_dagre_self_loop(const FlowchartPlacedNode& node,
+    FlowchartPoint hint,std::u16string_view direction,FlowchartEdgeLabelSize label,bool has_label);
 }
