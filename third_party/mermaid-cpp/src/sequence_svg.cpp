@@ -298,7 +298,7 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
         }
         for(const auto& layer:backgrounds) svg+=layer;
         svg+=signals;
-        if(!doc.title.empty()) svg+="<text x=\""+num((right-left)/2-2*c.margin_x)+"\" y=\"-25\" fill=\""+paint(t.signal_text)+"\""+font+">"+xml(doc.title)+"</text>";
+        if(!doc.title.empty()) svg+="<text x=\""+num((right-left)/2-2*c.margin_x)+"\" y=\"-25\" fill=\""+paint(t.title_text)+"\""+font+">"+xml(doc.title)+"</text>";
         svg+="</svg>";
         return SequenceSvg{std::move(svg),width,height};
     } catch(const std::exception& error) { return std::unexpected(std::string{error.what()}); }

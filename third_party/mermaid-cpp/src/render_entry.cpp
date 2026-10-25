@@ -189,7 +189,8 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
                 {u"noteBkgColor",&t.note_fill},{u"noteBorderColor",&t.note_border},{u"noteTextColor",&t.note_text},
                 {u"activationBkgColor",&t.activation_fill},{u"activationBorderColor",&t.activation_border},
                 {u"labelBoxBkgColor",&t.label_fill},{u"labelBoxBorderColor",&t.label_border},
-                {u"labelTextColor",&t.label_text},{u"loopTextColor",&t.loop_text}}) *target=narrow(text(member(theme,key)));
+                {u"labelTextColor",&t.label_text},{u"loopTextColor",&t.loop_text},
+                {u"textColor",&t.title_text}}) *target=narrow(text(member(theme,key)));
             t.rect_fill=t.actor_fill;
             if(auto fill=theme.find(u"rectBkgColor");fill&&fill->kind==ConfigKind::string&&!fill->string.empty())
                 t.rect_fill=narrow(fill->string);

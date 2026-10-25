@@ -11,7 +11,7 @@ struct SequenceSvgTheme {
     std::string actor_fill, actor_border, actor_text, actor_line, signal, signal_text;
     std::string note_fill, note_border, note_text, activation_fill, activation_border;
     std::string label_fill, label_border, label_text, loop_text;
-    std::string rect_fill;
+    std::string rect_fill, title_text;
 };
 struct SequenceSvgConfig {
     double width = 150, height = 65, actor_margin = 50, box_margin = 10;
