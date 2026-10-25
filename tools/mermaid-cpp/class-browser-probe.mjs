@@ -5,6 +5,8 @@ import {resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {chromium} from './oracle/node_modules/playwright-core/index.mjs';
 export const cases = [
+ ["note-emphasis", "classDiagram\nclass Document\nnote for Document \"**Validate** the *document*\nKeep revisions\""],
+ ["note-nowrap", "classDiagram\nclass Document\nnote for Document \"Validate the document before saving changes to local storage and keep revisions\""],
  ["wrapped-edge","classDiagram\nclass Document\nDocument --> Store : **Validate** the document before saving changes to local storage"],
  ["display-emphasis","classDiagram\nclass D[\"Document **model**\"] {\n+**name** String\n+save() *bool*\n}\nD --> Store : **save** changes"],
  ["display-lines","classDiagram\nclass D[\"Document<br/>model\"] {\n+name<br/>String\n+save()<br/>bool\n}\nD --> Store : save<br/>changes"],
@@ -76,7 +78,7 @@ export function inspectClass() {
      const fo=note.querySelector('foreignObject');
      const elements=[];
      if(fo) {const walker=document.createTreeWalker(fo,NodeFilter.SHOW_TEXT);while(walker.nextNode())if(walker.currentNode.textContent)elements.push(walker.currentNode);}
-     else elements.push(...note.querySelectorAll('text'));
+     else elements.push(...[...note.querySelectorAll('text')].flatMap(t=>t.querySelector('tspan')?[...t.querySelectorAll('tspan')].filter(s=>!s.querySelector('tspan')&&s.textContent):[t]));
      groups.push({kind:'note-group',labels:elements.map(e=>{
        let b;
        if(fo) {

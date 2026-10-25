@@ -10,6 +10,8 @@ using namespace folia::mermaid;
 suite mermaid_measurement = [] {
     "mermaid_class_source_to_measured_svg"_test = [] {
         const std::vector<std::pair<std::string,std::u16string>> cases={
+            {"note-emphasis",u"classDiagram\nclass Document\nnote for Document \"**Validate** the *document*\nKeep revisions\""},
+            {"note-nowrap",u"classDiagram\nclass Document\nnote for Document \"Validate the document before saving changes to local storage and keep revisions\""},
             {"wrapped-edge",u"classDiagram\nclass Document\nDocument --> Store : **Validate** the document before saving changes to local storage"},
             {"display-emphasis",u"classDiagram\nclass D[\"Document **model**\"] {\n+**name** String\n+save() *bool*\n}\nD --> Store : **save** changes"},
             {"display-lines",u"classDiagram\nclass D[\"Document<br/>model\"] {\n+name<br/>String\n+save()<br/>bool\n}\nD --> Store : save<br/>changes"},

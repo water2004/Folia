@@ -64,8 +64,8 @@ retain explicit line breaks and decoded entities; member angle brackets retain
 the original escaped display semantics. Common label/member/relationship
 emphasis uses measured font runs, relative bold weights and SVG spans, preserving
 member classifiers. Relationship labels wrap at the original 200px default using
-native line-break opportunities and preserve style runs across lines. Rich notes
-require a further adapter; original Class notes retain nowrap behavior.
+native line-break opportunities and preserve style runs across lines. Notes use the same measured emphasis runs, preserve left-aligned explicit lines,
+and retain the original nowrap behavior.
 
 `folia.mermaid.sequence::prepare_sequence` connects shared preparation to owned
 Sequence actors and ordered messages. The parser/DB boundary covers actor

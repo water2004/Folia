@@ -1,6 +1,15 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-25, Class emphasis and relationship wrapping verified
+## Current checkpoint - 2026-10-25, Class note emphasis in progress
+
+- Deliver measured bold/italic note runs with explicit lines, left alignment,
+  existing colors and attachments; preserve ClassDB nowrap for long notes.
+- Scope/exit: note-emphasis and note-nowrap in both themes, affected Class SVG
+  comparisons and existing Windows standalone/integrated checks. Then advance
+  to the next required Class configuration/layout boundary. No app switch.
+- Candidate is unverified; prior accepted evidence follows below.
+
+## Previous checkpoint - 2026-10-25, Class emphasis and relationship wrapping verified
 
 - Emphasis 8b5d304c delivers Class label/member/relationship font runs through
   DirectWrite and SVG spans, including relative bold weights inside class titles,

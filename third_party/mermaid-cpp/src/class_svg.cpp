@@ -87,12 +87,12 @@ NodeBox node_box(const ClassNodeMeasurements& m,const ClassSvgConfig& c) {
     return {half+right+2*p,h,head,member_height,extra};
 }
 std::string text(const ClassTextBox& t,double x,double y,const ClassSvgTheme& theme,
-    unsigned weight=400,std::u16string_view classifier={},double size=0) {
+    unsigned weight=400,std::u16string_view classifier={},double size=0,bool left_aligned=false) {
     if(t.text.empty()) return {};
     std::string content;
     if(!t.runs.empty()) {
         for(std::size_t i=0;i<t.runs.size();++i) {
-            content+="<tspan x=\""+num(x+(t.width-t.line_widths[i])/2)+"\" y=\""+num(y+t.line_baselines[i])+"\">";
+            content+="<tspan x=\""+num(x+(left_aligned?0:(t.width-t.line_widths[i])/2))+"\" y=\""+num(y+t.line_baselines[i])+"\">";
             for(const auto& run:t.runs[i]) {
                 content+="<tspan";
                 if(run.strong) content+=" font-weight=\""+std::to_string(weight<350?400u:weight<550?700u:900u)+"\"";
@@ -103,7 +103,7 @@ std::string text(const ClassTextBox& t,double x,double y,const ClassSvgTheme& th
         }
     } else if(t.lines.size()>1) {
         for(std::size_t i=0;i<t.lines.size();++i)
-            content+="<tspan x=\""+num(x+(t.width-t.line_widths[i])/2)+"\" y=\""+num(y+t.baseline+i*t.line_step)+"\">"+xml(t.lines[i])+"</tspan>";
+            content+="<tspan x=\""+num(x+(left_aligned?0:(t.width-t.line_widths[i])/2))+"\" y=\""+num(y+t.baseline+i*t.line_step)+"\">"+xml(t.lines[i])+"</tspan>";
     } else content=xml(t.text);
     return "<g class=\"label\"><text x=\""+num(x)+"\" y=\""+num(y+t.baseline)+"\" font-size=\""+
         num(size?size:theme.font_size)+"\" font-weight=\""+std::to_string(weight)+"\""+
@@ -320,7 +320,7 @@ std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& inp
             svg+="<g class=\"node\" data-class-id=\""+xml(doc.notes[i].id)+"\"><rect class=\"outer-path\" x=\""+num(x)+"\" y=\""+num(y)+
                 "\" width=\""+num(w)+"\" height=\""+num(h)+"\" fill=\""+theme.note_fill+"\" stroke=\""+theme.note_border+"\" stroke-width=\""+num(theme.stroke_width)+"\"/>";
             svg+="<g class=\"noteLabel\">";double row_y=y+config.note_padding;
-            for(const auto& line:m.lines) {svg+=text(line,x+config.note_padding,row_y,note_theme);row_y+=line.height;}
+            for(const auto& line:m.lines) {svg+=text(line,x+config.note_padding,row_y,note_theme,400,{},0,true);row_y+=line.height;}
             svg+="</g></g>";
         }
         if(!doc.title.empty()) svg+="<text class=\"classDiagramTitleText\" text-anchor=\"middle\" x=\""+num(title_x)+
