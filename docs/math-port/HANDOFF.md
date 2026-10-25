@@ -2,7 +2,16 @@
 
 恢复/压缩后先实际读本文。架构、职责和详细验收见 [architecture](native-raii-architecture.md)、[files](native-raii-files.json)、[acceptance](native-raii-acceptance.md)。只复查新变化；ignored候选用 `rg --no-ignore`。
 
-## 当前 checkpoint：只装饰 marker（2026-10-25，用户纠正后）
+## 当前 checkpoint：marker 样式与排版留白（2026-10-25）
+
+- 用户认为上一版样式难看，并截图证明斜体正文与 marker 框重叠。只画框、未让排版保留空间的设计被否定；不得通过遮盖正文、绘制偏移或文本特判补救。marker-only/点击显隐/禁止子代理等边界仍有效。
+- 实现仅在平台样式/DirectWrite排版/绘制层：字体恢复正体常规字重，SetCharacterSpacing只在 marker 首尾分配外间隙+内留白；绘制消费同一 HitTestTextRange 的 source endpoints/bidi 几何，扣除外间隙后画紧凑中性底色和轻底线，删除蓝色硬边框。样式集中于 EditorStyleSheet::MarkerStyle，不改 source/CST/选区/历史，不插入虚拟字符或控件。只有一套排版，光标/换行/命中自动使用已分配的间距。
+- 验证中的发现：HitTestTextPosition 的字形run高度与 HitTestTextRange 的整行高度不同，不能按top相等匹配；已统一使用后者的文本范围，删除前者混用。中文模拟斜体伸出约0.234em，默认外间隙为marker字高0.30em（body约0.27em）；无按文本/字体名特判。失败候选日志 `build/marker-layout-{geometry-edges,focused-final,ink-details}.log` 保留，不把它们当最终验收。
+- 已实际查阅 Zettlr `theme/editor.ts` 的标记字体/颜色处理及 Minimal 的弱化界面配色。正式测试覆盖 Segoe UI/Times New Roman/Consolas、12/16/32字号、中英文斜体实际墨迹边界和逐字符光标往返；完整 WinUI **33项/1090断言**通过，Debug构建成功（`build/marker-layout-{app-final,app-tests}.log`）。仅App样式/布局变化，Core/platform/math无改动，不重复宽测。Debug构建显式传 `-AssetsDirectory D:/md-cpp/src/app-winui/Assets`，实际主题加载正常，无源码路径改动。
+- 界面已核对截图中的“斜体内容”：marker与正文之间有实际间隔，紧凑浅底/轻底线替代硬框；无误选。当前预览 PID62876 留着本轮生成样例（原始91字符/修订1），Computer Use 已检测到用户操作，停止继续输入。无活动agent/build/test；下一步用户验看新样式，不自动发布/改版本。自定义字体及深色主题未逐个交互验看。
+- 代码/测试本地提交 `8bf67a4c`（5文件），未推送，版本0.3.2不变。
+
+## 历史：marker-only 边界已完成，视觉与留白待上方改进
 
 - 用户明确：**背景、轮廓和线条只属于 marker 本身，不属于被包裹的正文**；保留平时隐藏、点击编辑时显示。上轮把整段正文画框是错误实现，用户已否定，未提交。本轮已删除整段 StructureRange 投影和绘制，只使用现有 InlineStyleRange.marker。禁止子代理；数学保持正文原位编辑和异步内存预览。
 - Web参考已实际查阅 SilverBullet `docs.silverbullet.md/API/syntax` 的 startMarkerClass/bodyClass/endMarkerClass 和 `client/styles/editor.scss` 的 sb-meta 独立样式（尤其删除线排除 marker）。只借鉴 marker/body 分离，原生 D2D 绘制 marker 淡底色与细边线，不引入 WebView/逐 span 控件。
