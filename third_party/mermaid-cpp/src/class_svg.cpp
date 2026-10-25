@@ -54,16 +54,34 @@ std::string markers(const ClassSvgTheme& theme) {
     return out+"</defs>";
 }
 struct NodeBox { double width,height,header,member_height; bool extra; };
+double text_half_line(const ClassTextBox& t) {
+    return t.height/(2*std::max<std::size_t>(1,t.lines.size()));
+}
+struct TextBounds {
+    double top=std::numeric_limits<double>::infinity(),bottom=-std::numeric_limits<double>::infinity();
+    void add(const ClassTextBox& text,double y) {
+        if(text.height==0) return;
+        top=std::min(top,y-text_half_line(text));
+        bottom=std::max(bottom,y-text_half_line(text)+text.height);
+    }
+    double height() const {return std::isfinite(top)?bottom-top:0;}
+};
 NodeBox node_box(const ClassNodeMeasurements& m,const ClassSvgConfig& c) {
     const double half=std::max(m.label.width,m.annotation.width)/2;
-    double right=half,member_height=0,method_height=0;
-    for(const auto& t:m.members) {right=std::max(right,t.width);member_height+=t.height;}
-    for(const auto& t:m.methods) {right=std::max(right,t.width);method_height+=t.height;}
+    double right=half,offset=0;TextBounds members;
+    for(const auto& t:m.members) {right=std::max(right,t.width);members.add(t,offset);offset+=t.height;}
+    for(const auto& t:m.methods) right=std::max(right,t.width);
+    const auto member_height=members.height();
     const auto p=c.padding,head=m.annotation.height+m.label.height;
     const bool empty=m.members.empty()&&m.methods.empty(),extra=empty&&!c.hide_empty_members;
-    double h=head;
-    if(!m.members.empty()) h=std::max(h,head+2*p+member_height);
-    if(!m.methods.empty()) h=std::max(h,head+std::max(member_height,p/2)+4*p+method_height);
+    // shapeUtil.addText centers each label by its own first-line height before
+    // the group transforms. Union those bounds, including mixed font heights.
+    TextBounds bounds;bounds.add(m.annotation,0);bounds.add(m.label,m.annotation.height);
+    offset=head+2*p;
+    for(const auto& t:m.members) {bounds.add(t,offset);offset+=t.height;}
+    offset=head+std::max(member_height,p/2)+4*p;
+    for(const auto& t:m.methods) {bounds.add(t,offset);offset+=t.height;}
+    double h=bounds.height();
     if(empty) h+=p; else if(m.methods.empty()) h+=2*p;
     h+=2*p+(extra?2*p:empty?-p:0);
     return {half+right+2*p,h,head,member_height,extra};
@@ -276,12 +294,14 @@ std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& inp
             svg+="<g class=\"node\" data-class-id=\""+xml(n.id)+"\"><rect class=\"outer-path\" x=\""+num(x)+"\" y=\""+num(y)+
                 "\" width=\""+num(b.width)+"\" height=\""+num(b.height)+"\" fill=\""+theme.fill+"\" stroke=\""+theme.border+"\" stroke-width=\""+num(theme.stroke_width)+"\"/>";
             const auto group=[&](std::string_view kind,const std::string& content){svg+="<g class=\"text "+std::string(kind)+"-group\">"+content+"</g>";};
-            group("annotation",text(m.annotation,position.x+8-m.annotation.width/2,y+p,theme));
-            group("label",text(m.label,position.x+8-m.label.width/2,y+p+m.annotation.height,theme,700));
-            std::string content;double row_y=y+p+b.header+2*p;
-            for(std::size_t j=0;j<m.members.size();++j) {content+=text(m.members[j],x+p,row_y,theme,400,n.members[j].classifier);row_y+=m.members[j].height;}
-            group("members",content);content.clear();row_y=y+p+b.header+std::max(b.member_height,p/2)+4*p;
-            for(std::size_t j=0;j<m.methods.size();++j) {content+=text(m.methods[j],x+p,row_y,theme,400,n.methods[j].classifier);row_y+=m.methods[j].height;}
+            const bool hidden_empty=m.members.empty()&&m.methods.empty()&&config.hide_empty_members;
+            const auto top=[&](const ClassTextBox& t){return hidden_empty?y+p:y+2*p-text_half_line(t);};
+            group("annotation",text(m.annotation,position.x+8-m.annotation.width/2,top(m.annotation),theme));
+            group("label",text(m.label,position.x+8-m.label.width/2,top(m.label)+m.annotation.height,theme,700));
+            std::string content;double row_y=b.header+2*p;
+            for(std::size_t j=0;j<m.members.size();++j) {content+=text(m.members[j],x+p,top(m.members[j])+row_y,theme,400,n.members[j].classifier);row_y+=m.members[j].height;}
+            group("members",content);content.clear();row_y=b.header+std::max(b.member_height,p/2)+4*p;
+            for(std::size_t j=0;j<m.methods.size();++j) {content+=text(m.methods[j],x+p,top(m.methods[j])+row_y,theme,400,n.methods[j].classifier);row_y+=m.methods[j].height;}
             group("methods",content);
             if(b.extra||!m.members.empty()||!m.methods.empty()) {
                 // Empty group getBBox heights are reduced by PADDING/2 in the
