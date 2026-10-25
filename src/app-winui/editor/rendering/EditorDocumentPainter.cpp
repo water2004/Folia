@@ -14,25 +14,25 @@ namespace winrt::Folia
         auto brush = resources.markerBrush.Get();
         for (auto const& range : display.ranges)
         {
-            if (!range.marker) continue;
-            auto color = styleSheet.accentColor;
-            color.a = 0.10f;
-            brush->SetColor(color);
-            auto rectangles = InlineRangeRectangles(layout, range.start, range.length, origin);
+            if (!range.marker || range.length == 0) continue;
+            FLOAT size = 0;
+            winrt::check_hresult(layout->GetFontSize(range.start, &size));
+            auto color = styleSheet.mutedColor;
+            auto rectangles = MarkerRangeRectangles(layout, range, origin, styleSheet.marker);
             for (auto rect : rectangles)
             {
-                // Decoration stays inside existing advances: it must not add
-                // padding, move a source position or change line breaking.
-                rect.top += 1.0f;
-                rect.bottom -= 1.0f;
-                if (rect.bottom <= rect.top) continue;
-                auto shape = D2D1::RoundedRect(rect, 3.0f, 3.0f);
-                color.a = 0.10f;
+                if (rect.bottom <= rect.top || rect.right <= rect.left) continue;
+                auto radius = size * styleSheet.marker.radiusEm;
+                auto shape = D2D1::RoundedRect(rect, radius, radius);
+                color.a = styleSheet.marker.backgroundOpacity;
                 brush->SetColor(color);
                 resources.d2dContext->FillRoundedRectangle(shape, brush);
-                color.a = 0.40f;
+                color.a = styleSheet.marker.ruleOpacity;
                 brush->SetColor(color);
-                resources.d2dContext->DrawRoundedRectangle(shape, brush, 0.8f);
+                auto inset = (std::min)(radius, (rect.right - rect.left) * 0.25f);
+                resources.d2dContext->DrawLine(
+                    {rect.left + inset, rect.bottom - 0.5f},
+                    {rect.right - inset, rect.bottom - 0.5f}, brush, 0.8f);
             }
         }
     }

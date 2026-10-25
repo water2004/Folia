@@ -5,12 +5,73 @@
 #include "editor/rendering/EditorTextLayoutEngine.h"
 #include "editor/interaction/EditorSelectionDrag.h"
 #include <winrt/Microsoft.UI.Xaml.Hosting.h>
+#include <dwrite_1.h>
 
 using namespace boost::ut;
 using namespace winrt::Folia;
 
 namespace {
     suite inline_format_controls_tests = [] {
+        "marker layout reserves space outside italic ink at multiple font sizes"_test = [] {
+            EditorRenderResources resources;
+            winrt::check_hresult(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED,
+                __uuidof(IDWriteFactory), reinterpret_cast<IUnknown**>(resources.dwriteFactory.GetAddressOf())));
+            for (auto family : {L"Segoe UI", L"Times New Roman", L"Consolas"})
+            for (auto size : {12.0f, 16.0f, 32.0f})
+            for (auto body : {L"斜体内容", L"italic", L"ffff"}) {
+                EditorStyleSheet sheet;
+                sheet.body.family = family;
+                sheet.body.size = size;
+                sheet.body.lineHeight = size * 1.5f;
+                sheet.code = sheet.body;
+                ::Microsoft::WRL::ComPtr<IDWriteTextFormat> format;
+                winrt::check_hresult(resources.dwriteFactory->CreateTextFormat(family, nullptr,
+                    DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL,
+                    size, L"en-us", format.GetAddressOf()));
+                EditorTextLayoutEngine engine(resources, sheet);
+                auto text = std::wstring{L"*"} + body + L"*";
+                auto length = static_cast<UINT32>(std::wcslen(body));
+                auto italic = folia::InlineStyle::plain();
+                italic.italic = true;
+                std::vector<InlineStyleRange> ranges{
+                    {0, 1, {}, true}, {1, length, italic, false}, {length + 1, 1, {}, true}};
+                auto layout = engine.Create(text, format.Get(), 1000);
+                engine.ApplyStyles(layout.Get(), ranges);
+                auto opening = MarkerRangeRectangles(layout.Get(), ranges.front(), {0, 0}, sheet.marker);
+                auto closing = MarkerRangeRectangles(layout.Get(), ranges.back(), {0, 0}, sheet.marker);
+                expect(opening.size() == 1_u);
+                expect(closing.size() == 1_u);
+                if (opening.empty() || closing.empty()) continue;
+                auto bodyLayout = engine.Create(body, format.Get(), 1000);
+                bodyLayout->SetFontStyle(DWRITE_FONT_STYLE_ITALIC, {0, length});
+                bodyLayout->SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP);
+                DWRITE_TEXT_METRICS metrics{};
+                winrt::check_hresult(bodyLayout->GetMetrics(&metrics));
+                bodyLayout->SetMaxWidth(metrics.widthIncludingTrailingWhitespace);
+                DWRITE_OVERHANG_METRICS ink{};
+                winrt::check_hresult(bodyLayout->GetOverhangMetrics(&ink));
+                FLOAT bodyX = 0, bodyY = 0;
+                DWRITE_HIT_TEST_METRICS hit{};
+                winrt::check_hresult(layout->HitTestTextPosition(1, false, &bodyX, &bodyY, &hit));
+                auto inkLeft = bodyX - (std::max)(0.0f, ink.left);
+                auto inkRight = bodyX + metrics.widthIncludingTrailingWhitespace + (std::max)(0.0f, ink.right);
+                expect(opening.front().right < inkLeft) << "opening marker intersects italic ink" << size;
+                expect(closing.front().left > inkRight) << "closing marker intersects italic ink" << size;
+                expect(closing.front().right > closing.front().left);
+                // Space belongs to the actual layout, so each source position
+                // still round-trips through DirectWrite hit testing.
+                for (UINT32 position = 0; position < text.size(); ++position) {
+                    FLOAT x = 0, y = 0;
+                    winrt::check_hresult(layout->HitTestTextPosition(position, false, &x, &y, &hit));
+                    BOOL trailing = false, inside = false;
+                    DWRITE_HIT_TEST_METRICS back{};
+                    winrt::check_hresult(layout->HitTestPoint(x + 0.1f, y + hit.height * 0.5f,
+                        &trailing, &inside, &back));
+                    expect(back.textPosition == position);
+                }
+            }
+        };
+
         "inline format markers reveal their exact source only while editing the construct"_test = [] {
             struct Example { wchar_t const* source; std::u32string_view visible; };
             for (auto const& example : {

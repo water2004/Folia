@@ -7,6 +7,7 @@ import folia.core.utf;
 
 #include "editor/rendering/EditorContentPreparation.h"
 #include "editor/rendering/EditorTextLayoutEngine.h"
+#include <dwrite_1.h>
 
 namespace winrt::Folia
 {
@@ -239,25 +240,30 @@ namespace winrt::Folia
         }
     }
 
-    std::vector<D2D1_RECT_F> InlineRangeRectangles(
+    static std::vector<DWRITE_HIT_TEST_METRICS> InlineRangeMetrics(
         IDWriteTextLayout* layout, UINT32 start, UINT32 length, D2D1_POINT_2F origin)
     {
-        std::vector<D2D1_RECT_F> rectangles;
-        if (!layout || length == 0) return rectangles;
+        if (!layout || length == 0) return {};
         UINT32 count = 0;
         if (layout->HitTestTextRange(start, length, origin.x, origin.y,
-                nullptr, 0, &count) != E_NOT_SUFFICIENT_BUFFER || count == 0) return rectangles;
+                nullptr, 0, &count) != E_NOT_SUFFICIENT_BUFFER || count == 0) return {};
         std::vector<DWRITE_HIT_TEST_METRICS> metrics(count);
         if (FAILED(layout->HitTestTextRange(start, length, origin.x, origin.y,
-                metrics.data(), count, &count))) return rectangles;
+                metrics.data(), count, &count))) return {};
+        metrics.resize(count);
+        return metrics;
+    }
+
+    static std::vector<D2D1_RECT_F> MergeRangeRectangles(std::vector<DWRITE_HIT_TEST_METRICS> metrics)
+    {
+        std::vector<D2D1_RECT_F> rectangles;
         // Style runs and bidi runs may split one visual line. Join touching
         // pieces only; never bridge a bidi gap or two wrapped lines.
-        std::sort(metrics.begin(), metrics.begin() + count, [](auto const& a, auto const& b) {
+        std::sort(metrics.begin(), metrics.end(), [](auto const& a, auto const& b) {
             return a.top != b.top ? a.top < b.top : a.left < b.left;
         });
-        for (UINT32 i = 0; i < count; ++i)
+        for (auto const& metric : metrics)
         {
-            auto const& metric = metrics[i];
             if (metric.width <= 0 || metric.height <= 0) continue;
             auto rect = D2D1::RectF(metric.left, metric.top,
                 metric.left + metric.width, metric.top + metric.height);
@@ -275,6 +281,43 @@ namespace winrt::Folia
             rectangles.push_back(rect);
         }
         return rectangles;
+    }
+
+    std::vector<D2D1_RECT_F> InlineRangeRectangles(
+        IDWriteTextLayout* layout, UINT32 start, UINT32 length, D2D1_POINT_2F origin)
+    {
+        return MergeRangeRectangles(InlineRangeMetrics(layout, start, length, origin));
+    }
+
+    std::vector<D2D1_RECT_F> MarkerRangeRectangles(
+        IDWriteTextLayout* layout, InlineStyleRange const& range, D2D1_POINT_2F origin,
+        EditorStyleSheet::MarkerStyle const& style)
+    {
+        if (!range.marker || range.length == 0 || !layout) return {};
+        auto metrics = InlineRangeMetrics(layout, range.start, range.length, origin);
+        FLOAT size = 0;
+        winrt::check_hresult(layout->GetFontSize(range.start, &size));
+        for (auto& metric : metrics)
+        {
+            // Use source endpoints from the range metrics, not caret boxes:
+            // caret boxes use a run baseline, range boxes use line geometry.
+            bool rtl = (metric.bidiLevel & 1) != 0;
+            auto gap = size * style.gapEm;
+            if (metric.textPosition == range.start)
+            {
+                if (!rtl) metric.left += gap;
+                metric.width -= gap;
+            }
+            if (metric.textPosition + metric.length == range.start + range.length)
+            {
+                if (rtl) metric.left += gap;
+                metric.width -= gap;
+            }
+            auto height = (std::min)(metric.height, size * style.heightEm);
+            metric.top += (metric.height - height) * 0.5f;
+            metric.height = height;
+        }
+        return MergeRangeRectangles(std::move(metrics));
     }
 
     void DrawInlinePresentationBackgrounds(
@@ -462,6 +505,7 @@ namespace winrt::Folia
     {
         if (!layout) return;
         bool requiresDefaultLineSpacing = false;
+        ::Microsoft::WRL::ComPtr<IDWriteTextLayout1> spaced;
         for (auto const& range : ranges)
         {
             DWRITE_TEXT_RANGE textRange{ range.start, range.length };
@@ -498,10 +542,22 @@ namespace winrt::Folia
             }
             if (range.marker)
             {
-                if (!range.style.heading_level) layout->SetFontSize(styleSheet.body.size * 0.9f, textRange);
+                auto size = BaseFontSize(range.style, styleSheet) * styleSheet.marker.fontScale;
+                layout->SetFontSize(size, textRange);
+                layout->SetFontWeight(DWRITE_FONT_WEIGHT_NORMAL, textRange);
                 layout->SetFontStyle(DWRITE_FONT_STYLE_NORMAL, textRange);
                 layout->SetUnderline(false, textRange);
                 layout->SetStrikethrough(false, textRange);
+                if (!spaced) winrt::check_hresult(layout->QueryInterface(IID_PPV_ARGS(spaced.GetAddressOf())));
+                auto inset = size * (styleSheet.marker.gapEm + styleSheet.marker.paddingEm);
+                winrt::check_hresult(spaced->SetCharacterSpacing(0, 0, 0, textRange));
+                if (range.length == 1)
+                    winrt::check_hresult(spaced->SetCharacterSpacing(inset, inset, 0, textRange));
+                else if (range.length > 1)
+                {
+                    winrt::check_hresult(spaced->SetCharacterSpacing(inset, 0, 0, {range.start, 1}));
+                    winrt::check_hresult(spaced->SetCharacterSpacing(0, inset, 0, {range.start + range.length - 1, 1}));
+                }
                 if (resources.mutedBrush) layout->SetDrawingEffect(resources.mutedBrush.Get(), textRange);
             }
             if (range.footnoteControl)
@@ -516,7 +572,7 @@ namespace winrt::Folia
             {
                 layout->SetDrawingEffect(resources.syntaxBrushes[syntaxIndex].Get(), textRange);
             }
-            if (auto const& presentation = range.style.presentation)
+            if (auto const& presentation = range.style.presentation; presentation && !range.marker)
             {
                 if (presentation->font_family)
                 {

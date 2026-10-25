@@ -10,6 +10,9 @@ namespace winrt::Folia
 
     std::vector<D2D1_RECT_F> InlineRangeRectangles(
         IDWriteTextLayout* layout, UINT32 start, UINT32 length, D2D1_POINT_2F origin);
+    std::vector<D2D1_RECT_F> MarkerRangeRectangles(
+        IDWriteTextLayout* layout, InlineStyleRange const& range, D2D1_POINT_2F origin,
+        EditorStyleSheet::MarkerStyle const& style);
 
     void DrawInlinePresentationBackgrounds(
         EditorRenderResources& resources,
