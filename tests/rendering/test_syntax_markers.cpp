@@ -1,0 +1,77 @@
+#include <algorithm>
+#include <string>
+#include <vector>
+#include "support/folia_test.hpp"
+import folia.core.parser;
+import folia.core.inline_parser;
+import folia.core.inline_cst;
+import folia.core.inline_document;
+import folia.core.render_builder;
+import folia.core.render_model;
+import folia.core.syntax_marker;
+import folia.core.theme;
+
+using namespace folia;
+using namespace boost::ut;
+
+namespace { suite syntax_marker_tests = [] {
+
+"syntax marker projection follows complete CST constructs rather than character spelling"_test = [] {
+    struct Example { const char* text; SyntaxMarker icon; };
+    for (auto example : {
+        Example{"*", SyntaxMarker::None}, {"**", SyntaxMarker::None}, {"*x", SyntaxMarker::None},
+        {"**x", SyntaxMarker::None}, {"_", SyntaxMarker::None}, {"__x", SyntaxMarker::None},
+        {"~~", SyntaxMarker::None}, {"~~x", SyntaxMarker::None}, {"`", SyntaxMarker::None},
+        {"`x", SyntaxMarker::None}, {"$", SyntaxMarker::None}, {"$x", SyntaxMarker::None},
+        {"\\*x\\*", SyntaxMarker::None}, {"a_b_c", SyntaxMarker::None},
+        {"*x*", SyntaxMarker::Star}, {"_x_", SyntaxMarker::Underscore},
+        {"**x**", SyntaxMarker::DoubleStar}, {"__x__", SyntaxMarker::DoubleUnderscore},
+        {"~~x~~", SyntaxMarker::DoubleTilde}, {"`*x*`", SyntaxMarker::Backtick},
+        {"``x``", SyntaxMarker::DoubleBacktick}, {"$x$", SyntaxMarker::Dollar}
+    }) {
+        auto parsed = parse_text(1, std::string(example.text) + "\n");
+        auto model = build_render_model(parsed.document, parsed.outline, parsed.symbols, default_theme_profile());
+        std::vector<SyntaxMarker> icons;
+        for (auto const& block : model.blocks)
+        for (auto const& item : block.inline_items) {
+            if (item.special().syntax_marker != SyntaxMarker::None) icons.push_back(item.special().syntax_marker);
+            auto const& semantic = item.special().semantic();
+            if (semantic.opening_marker != SyntaxMarker::None) icons.push_back(semantic.opening_marker);
+            if (semantic.closing_marker != SyntaxMarker::None) icons.push_back(semantic.closing_marker);
+        }
+        if (example.icon == SyntaxMarker::None) expect(icons.empty()) << example.text;
+        else {
+            expect(icons.size() == 2_u) << example.text;
+            expect(std::ranges::all_of(icons, [&](auto icon) { return icon == example.icon; })) << example.text;
+        }
+    }
+    for (auto source : {U"*", U"**", U"*x", U"`x", U"$x"}) {
+        InlineParseContext context;
+        context.next_id = NodeId{1000};
+        auto tree = parse_inline(source, context);
+        expect(static_cast<bool>(flatten_tokens(tree, source) == std::u32string{source}));
+        expect(std::ranges::any_of(tree.nodes, [](auto const& node) {
+            return node.kind == InlineCstKind::Incomplete && node.status == ParseStatus::MissingCloser;
+        }));
+    }
+};
+
+"display math marker projection consumes block source tokens and completeness"_test = [] {
+    for (auto text : {"$$\nx\n$$\n", "\\[\nx\n\\]\n", "$$\nx", "\\[\nx"}) {
+        auto parsed = parse_text(1, text);
+        auto model = build_render_model(parsed.document, parsed.outline, parsed.symbols, default_theme_profile());
+        expect(model.blocks.size() == 1_u);
+        if (model.blocks.empty()) continue;
+        auto const& block = model.blocks.front();
+        expect(block.kind == RenderBlockKind::Math);
+        auto const& markers = block.special().source_markers;
+        auto complete = std::string_view{text}.ends_with("\n");
+        expect(markers.size() == (complete ? 2u : 1u));
+        for (auto const& marker : markers) {
+            expect(marker.range.end <= block.special().raw_source.size());
+            expect((marker.icon != SyntaxMarker::None) == complete);
+            if (complete) expect(marker.range.length() == 2_u);
+        }
+    }
+};
+}; }

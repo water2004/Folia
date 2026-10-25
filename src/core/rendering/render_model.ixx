@@ -14,6 +14,7 @@ import folia.core.selection;
 import folia.core.text_edit;
 import folia.core.source_style;
 import folia.core.block_source;
+export import folia.core.syntax_marker;
 
 export namespace folia {
 
@@ -232,6 +233,8 @@ struct InlineRenderItem;
 struct InlineRenderSemanticPayload {
     std::u32string source_text;          // exact source spelling for this span
     std::optional<SourceRange> content_range; // CST content excluding source delimiters
+    SyntaxMarker opening_marker = SyntaxMarker::None;
+    SyntaxMarker closing_marker = SyntaxMarker::None;
     std::string href, src, alt;          // Image/Link
     std::string footnote_label;          // FootnoteReference / generated footnote controls
     std::optional<std::string> title;
@@ -242,6 +245,7 @@ struct InlineRenderSemanticPayload {
 };
 
 struct InlineRenderPayload {
+    SyntaxMarker syntax_marker = SyntaxMarker::None;
     float block_spacing_height = 0.0f;
     std::u32string display_text;         // generated/normalized visual spelling
     std::optional<NodeId> marker_owner;
@@ -302,6 +306,11 @@ enum class RenderBlockKind {
 };
 
 struct RenderBlockSpecial {
+    struct SourceMarker {
+        SourceRange range;
+        SyntaxMarker icon = SyntaxMarker::None;
+    };
+    std::vector<SourceMarker> source_markers;
     // CodeBlock
     std::u32string raw_source;
     std::vector<std::size_t> content_to_source;

@@ -681,6 +681,27 @@ struct Builder {
         auto source_span = [&](SourceRange range) {
             return TextSpan{owner_id, range};
         };
+        auto delimiter_icon = [&](InlineCstNode const& node, SourceRange range) {
+            using M = SyntaxMarker;
+            using K = InlineCstKind;
+            if (node.status != ParseStatus::Complete || !node.delimiter_ranges().closing || range.empty()) return M::None;
+            switch (node.kind) {
+                case K::Emphasis: return document.source[range.start] == U'*' ? M::Star : M::Underscore;
+                case K::Strong: return document.source[range.start] == U'*' ? M::DoubleStar : M::DoubleUnderscore;
+                case K::Strikethrough: return range.length() == 1 ? M::Tilde : M::DoubleTilde;
+                case K::CodeSpan:
+                    switch (range.length()) {
+                        case 1: return M::Backtick;
+                        case 2: return M::DoubleBacktick;
+                        case 3: return M::TripleBacktick;
+                        default: return M::None;
+                    }
+                case K::InlineMath:
+                    if (node.semantics().math_delim == MathDelimiter::InlineDollar) return M::Dollar;
+                    return range == node.delimiter_ranges().opening ? M::MathOpen : M::MathClose;
+                default: return M::None;
+            }
+        };
         auto append_marker = [&](std::vector<InlineRenderItem>& target, const InlineCstNode& owner, SourceRange range) {
             if (range.empty()) return;
             InlineRenderItem marker;
@@ -688,6 +709,7 @@ struct Builder {
             marker.id = owner.id;
             marker.ensure_special().marker_owner = owner.id;
             marker.ensure_special().marker_construct = owner.range;
+            marker.ensure_special().syntax_marker = delimiter_icon(owner, range);
             marker.source_span = source_span(range);
             marker.text = inline_source_slice(document, range);
             marker.ensure_special().marker_style = MarkerStyle{true, {}};
@@ -884,6 +906,8 @@ struct Builder {
                         item.ensure_special().display = MathDisplayMode::Inline;
                         item.ensure_special().math_delim = semantic.math_delim;
                         item.ensure_special().ensure_semantic().content_range = delim.content;
+                        item.ensure_special().ensure_semantic().opening_marker = delimiter_icon(node, delim.opening);
+                        if (delim.closing) item.ensure_special().ensure_semantic().closing_marker = delimiter_icon(node, *delim.closing);
                         item.style = style;
                         item.style.bold = false;
                         item.style.italic = false;
@@ -1187,6 +1211,22 @@ struct Builder {
                 special.content_to_source = b.block_source.tree().content_to_source;
                 special.tex = block_source_content(b.block_source);
                 special.math_delim = b.atomic_special().math_delim;
+                auto const& sourceTree = b.block_source.tree();
+                for (auto const& token : sourceTree.tokens) {
+                    auto opening = token.kind == BlockSourceTokenKind::OpeningMarker;
+                    auto closing = token.kind == BlockSourceTokenKind::ClosingMarker;
+                    if (!opening && !closing) continue;
+                    auto range = token.source_range;
+                    auto icon = SyntaxMarker::None;
+                    if (sourceTree.complete_opening && sourceTree.complete_closing) {
+                        // The block parser includes indentation in the opening
+                        // token; both math delimiter spellings have two codepoints.
+                        if (opening) range.start = range.end - 2;
+                        icon = special.math_delim == MathDelimiter::BlockDollar ? SyntaxMarker::DoubleDollar
+                            : opening ? SyntaxMarker::MathBracketOpen : SyntaxMarker::MathBracketClose;
+                    }
+                    special.source_markers.push_back({range, icon});
+                }
                 if (!special.content_to_source.empty()) {
                     rb.content_span = {b.id, {special.content_to_source.front(), special.content_to_source.back()}};
                 }
