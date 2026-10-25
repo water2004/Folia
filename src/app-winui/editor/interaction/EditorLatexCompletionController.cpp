@@ -124,7 +124,7 @@ namespace winrt::Folia
         if (!insertSnippet_ || !catalog_) return false;
         auto accepted = completion_.Accept();
         if (!accepted) return false;
-        popup_.Visibility(Visibility::Collapsed);
+        Cancel();
         auto inserted = insertSnippet_(
             accepted->container, accepted->replacement, accepted->command.snippet);
         if (inserted) catalog_->RecordUsage(accepted->command.id);
@@ -142,9 +142,28 @@ namespace winrt::Folia
 
     void EditorLatexCompletionController::RefreshItems()
     {
-        list_.Items().Clear();
-        for (auto const& candidate : completion_.Candidates())
+        auto items = list_.Items();
+        auto candidates = completion_.Candidates();
+        while (items.Size() > candidates.size()) items.RemoveAtEnd();
+        std::uint32_t index = 0;
+        for (auto const& candidate : candidates)
         {
+            // Only live rows belong to the popup. Reuse their visual trees
+            // while typing, and release surplus rows as the query narrows.
+            if (index < items.Size())
+            {
+                auto row = items.GetAt(index++).as<Grid>();
+                row.Tag(box_value(winrt::to_hstring(candidate.command.id)));
+                auto command = row.Children().GetAt(0).as<StackPanel>();
+                command.Children().GetAt(0).as<TextBlock>().Text(CandidateLabel(candidate.command));
+                command.Children().GetAt(1).as<TextBlock>().Text(
+                    Localize(candidate.command.built_in ? L"BuiltIn" : L"Custom"));
+                auto detail = row.Children().GetAt(1).as<StackPanel>();
+                detail.Children().GetAt(0).as<TextBlock>().Text(CandidateDescription(candidate.command));
+                detail.Children().GetAt(1).as<TextBlock>().Text(
+                    winrt::to_hstring(folia::cps_to_utf8(candidate.command.snippet)));
+                continue;
+            }
             Grid row;
             row.Tag(box_value(winrt::to_hstring(candidate.command.id)));
             row.Padding(Thickness{12, 8, 12, 8});
@@ -187,7 +206,8 @@ namespace winrt::Folia
             detail.Children().Append(snippet);
             Grid::SetColumn(detail, 1);
             row.Children().Append(detail);
-            list_.Items().Append(row);
+            items.Append(row);
+            ++index;
         }
         list_.SelectedIndex(static_cast<std::int32_t>(completion_.SelectedIndex()));
     }
