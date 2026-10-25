@@ -38,6 +38,7 @@ struct SequenceInput {
     std::vector<SequenceActor> actors;
     std::vector<SequenceMessage> messages;
     std::vector<SequenceBox> boxes;
+    std::map<std::u16string,std::size_t,std::less<>> created, destroyed;
     ConfigValue effective_config;
 };
 struct SequenceLimits {

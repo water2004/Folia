@@ -8,6 +8,10 @@ import {chromium} from './oracle/node_modules/playwright-core/index.mjs';
 const lock=JSON.parse(readFileSync('docs/mermaid-cpp/source-lock.json'));
 for(const f of lock.files) assert.equal(createHash('sha256').update(readFileSync('.reference/mermaid-js/'+f.path)).digest('hex'),f.sha256,f.path);
 const cases=[
+ ["participant-lifecycle","sequenceDiagram\nparticipant U as User\ncreate participant W as Worker\nU->>W: Start\nW->>W: Work\ndestroy W\nW-->>U: Done"],
+ ["lifecycle-late","sequenceDiagram\nautonumber\nparticipant L as Log\nparticipant U as User\nU->>L: Open\ncreate actor W as Worker\nU->>W: Start\nW-->>U: Ready\ndestroy W\nU-xW: Stop"],
+ ["lifecycle-no-footer","%%{init: {\"sequence\": {\"mirrorActors\": false}}}%%\nsequenceDiagram\nparticipant A\ncreate participant B\nA->>+B: Start\nB-->>-A: Ready\ndestroy B\nA-xB: Stop"],
+ ["lifecycle-reverse","sequenceDiagram\nparticipant A@{type: database} as Store\nparticipant B as Client\nB->>A: Open\ndestroy A\nB-xA: Close"],
  ["participant-boxes","sequenceDiagram\nbox rgb(230,240,255) Client\nactor U as User\nparticipant E as Editor\nend\nbox transparent Storage\nparticipant D@{type: database} as Documents\nend\nU->>E: Save\nE->>D: Commit\nD-->>U: Saved"],
  ["participant-box-title","sequenceDiagram\nbox LightGray Document processing service\nparticipant A as Service\nend\nparticipant B as Store\nA->>+B: Save\nB-->>-A: Done"],
  ["participant-box-wrap","%%{init: {\"sequence\": {\"mirrorActors\": false}}}%%\nsequenceDiagram\nbox transparent wrap: Document processing and synchronization service across local storage\nparticipant A as Service\nend\nbox\nparticipant B as Storage\nend\nA->>B: Save\nB-->>A: Done"],

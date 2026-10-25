@@ -10,6 +10,10 @@ using namespace folia::mermaid;
 suite mermaid_measurement = [] {
     "mermaid_sequence_measured_source_to_svg"_test=[] {
         const std::vector<std::pair<std::string,std::u16string>> cases={
+            {"participant-lifecycle",u"sequenceDiagram\nparticipant U as User\ncreate participant W as Worker\nU->>W: Start\nW->>W: Work\ndestroy W\nW-->>U: Done"},
+            {"lifecycle-late",u"sequenceDiagram\nautonumber\nparticipant L as Log\nparticipant U as User\nU->>L: Open\ncreate actor W as Worker\nU->>W: Start\nW-->>U: Ready\ndestroy W\nU-xW: Stop"},
+            {"lifecycle-no-footer",u"%%{init: {\"sequence\": {\"mirrorActors\": false}}}%%\nsequenceDiagram\nparticipant A\ncreate participant B\nA->>+B: Start\nB-->>-A: Ready\ndestroy B\nA-xB: Stop"},
+            {"lifecycle-reverse",u"sequenceDiagram\nparticipant A@{type: database} as Store\nparticipant B as Client\nB->>A: Open\ndestroy A\nB-xA: Close"},
             {"participant-boxes",u"sequenceDiagram\nbox rgb(230,240,255) Client\nactor U as User\nparticipant E as Editor\nend\nbox transparent Storage\nparticipant D@{type: database} as Documents\nend\nU->>E: Save\nE->>D: Commit\nD-->>U: Saved"},
             {"participant-box-title",u"sequenceDiagram\nbox LightGray Document processing service\nparticipant A as Service\nend\nparticipant B as Store\nA->>+B: Save\nB-->>-A: Done"},
             {"participant-box-wrap",u"%%{init: {\"sequence\": {\"mirrorActors\": false}}}%%\nsequenceDiagram\nbox transparent wrap: Document processing and synchronization service across local storage\nparticipant A as Service\nend\nbox\nparticipant B as Storage\nend\nA->>B: Save\nB-->>A: Done"},

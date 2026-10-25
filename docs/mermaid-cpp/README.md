@@ -80,7 +80,12 @@ measured labels, lifeline starts and mirrored footer heights.
 Participant boxes retain ordered membership, literal CSS colors, measured and
 wrapped titles, group margins, header offsets and footer-dependent backgrounds.
 Incomplete boxes and conflicting participant membership return errors.
-Rich labels, participant lifecycle and further Sequence
+Create/destroy declarations retain their associated message indices. Created
+participants enter at the receiving message; destroyed senders/receivers stop
+their lifelines and place mirrored footers at the destroying message. Message
+endpoints, labels, activation offsets and subsequent spacing follow that layout.
+Duplicate creation and unrelated creating/destroying messages return errors.
+Rich labels and further Sequence
 configuration remain subsequent SVG steps.
 Parser support alone does not imply SVG support. Folia's application dependency
 remains unchanged.

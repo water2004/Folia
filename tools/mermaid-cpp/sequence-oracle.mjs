@@ -18,6 +18,13 @@ for (const file of ['sequenceDb.ts','sequenceDiagram.ts']) {
   assert.equal(map.sourcesContent[index].replaceAll('\r\n','\n'),read('packages/mermaid/src/diagrams/sequence/'+file));
 }
 const cases = [
+  ["participant-lifecycle","sequenceDiagram\nparticipant U as User\ncreate participant W as Worker\nU->>W: Start\nW->>W: Work\ndestroy W\nW-->>U: Done"],
+  ["lifecycle-late","sequenceDiagram\nautonumber\nparticipant L as Log\nparticipant U as User\nU->>L: Open\ncreate actor W as Worker\nU->>W: Start\nW-->>U: Ready\ndestroy W\nU-xW: Stop"],
+  ["lifecycle-no-footer","%%{init: {\"sequence\": {\"mirrorActors\": false}}}%%\nsequenceDiagram\nparticipant A\ncreate participant B\nA->>+B: Start\nB-->>-A: Ready\ndestroy B\nA-xB: Stop"],
+  ["lifecycle-reverse","sequenceDiagram\nparticipant A@{type: database} as Store\nparticipant B as Client\nB->>A: Open\ndestroy A\nB-xA: Close"],
+  ["create-existing","sequenceDiagram\nparticipant A\ncreate participant A\nB->>A: Start"],
+  ["create-wrong-message","sequenceDiagram\ncreate participant A\nB->>C: Start"],
+  ["destroy-wrong-message","sequenceDiagram\nparticipant A\ndestroy A\nB->>C: Stop"],
   ["participant-boxes","sequenceDiagram\nbox rgb(230,240,255) Client\nactor U as User\nparticipant E as Editor\nend\nbox transparent Storage\nparticipant D@{type: database} as Documents\nend\nU->>E: Save\nE->>D: Commit\nD-->>U: Saved"],
   ["participant-box-title","sequenceDiagram\nbox LightGray Document processing service\nparticipant A as Service\nend\nparticipant B as Store\nA->>+B: Save\nB-->>-A: Done"],
   ["participant-box-wrap","%%{init: {\"sequence\": {\"mirrorActors\": false}}}%%\nsequenceDiagram\nbox transparent wrap: Document processing and synchronization service across local storage\nparticipant A as Service\nend\nbox\nparticipant B as Storage\nend\nA->>B: Save\nB-->>A: Done"],
@@ -75,12 +82,13 @@ for (const [name,source,options={}] of cases) {
     const {db} = await mermaid.mermaidAPI.getDiagramFromText(prepared.code.cleaned,{title:prepared.title});
     result = {title:db.getDiagramTitle(),accTitle:db.getAccTitle(),accDescription:db.getAccDescription(),
       actors:[...db.getActors()].map(([id,a])=>({id,name:a.name,description:a.description,type:a.type,wrap:a.wrap,box:a.box?db.getBoxes().indexOf(a.box):-1})),
+      created:[...db.getCreatedActors()],destroyed:[...db.getDestroyedActors()],
       boxes:db.getBoxes().map(b=>({name:b.name??'',fill:b.fill,wrap:b.wrap,actors:b.actorKeys})),
       messages:db.getMessages().map(m=>({id:m.id,from:m.from??'',to:m.to??'',message:m.message,
         type:m.type,wrap:m.wrap,activate:m.activate??false,placement:m.placement??-1}))};
     ++successes;
   } catch(error) {
-    assert(['unclosed-box','duplicate-box','metadata-incomplete','invalid-number','unfinished-message','missing-message-colon','inactive-end','unclosed-region','unexpected-section','unexpected-end'].includes(name),`${name}: ${error.stack}`);
+    assert(['create-existing','create-wrong-message','destroy-wrong-message','unclosed-box','duplicate-box','metadata-incomplete','invalid-number','unfinished-message','missing-message-colon','inactive-end','unclosed-region','unexpected-section','unexpected-end'].includes(name),`${name}: ${error.stack}`);
   }
   rows.push([name,hex(source),hex(JSON.stringify(site)),hex(JSON.stringify(result))].join('\t'));
 }

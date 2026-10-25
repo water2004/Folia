@@ -9,6 +9,14 @@
   headers/footers and clipped lifelines with representative ordinary/self and
   activation messages. Keep the two batches separately committed and verified.
 - PR #1 is open at d9651048; no merge. Development starts from 91c9bef6.
+- Grouping commit 71b85336 is on codex/mermaid-cpp-sequence-groups. Standalone
+  Release has passed 74 SVG comparisons; the remaining Windows jobs are active:
+  https://github.com/zhao0349/Folia/actions/runs/40182169493
+- Lifecycle implementation follows as its own batch. Four representative diagrams
+  cover first/late creation, sender/receiver destruction, human/database shapes,
+  self calls, numbering, activation and no-footer output. Three common DB errors
+  cover duplicate creation and unrelated creating/destroying messages. Original
+  observations are in build/mermaid-cpp/sequence-lifecycle-work (82 SVGs total).
 
 ## Previous checkpoint - 2026-10-25, Sequence participant metadata and shapes verified
 

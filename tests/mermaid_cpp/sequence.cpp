@@ -40,6 +40,15 @@ suite sequence = [] {
                 expect(a.wrap == field(e,u"wrap").boolean) << fields[0];
                 expect((a.box?static_cast<double>(*a.box):-1) == field(e,u"box").number) << fields[0];
             }
+            for(const auto& [key,events]:{std::pair{u"created",&actual->created},std::pair{u"destroyed",&actual->destroyed}}) {
+                const auto& values=field(expected,key).sequence;
+                expect(events->size()==values.size()) << fields[0];
+                for(const auto& value:values) {
+                    const auto found=events->find(value.sequence[0].string);
+                    expect(fatal(found!=events->end())) << fields[0];
+                    expect(found->second==value.sequence[1].number) << fields[0];
+                }
+            }
             const auto& boxes = field(expected,u"boxes").sequence;
             expect(fatal(actual->boxes.size() == boxes.size())) << fields[0];
             for(std::size_t i=0;i<boxes.size();++i) {
@@ -69,7 +78,7 @@ suite sequence = [] {
                 expect(m.placement == field(e,u"placement").number);
             }
         }
-        expect(count == 45_u);
+        expect(count == 52_u);
     };
     "mermaid_sequence_owned_requests_and_unsupported_statements"_test = [] {
         auto session = ConfigSession::create(); expect(fatal(session.has_value()));

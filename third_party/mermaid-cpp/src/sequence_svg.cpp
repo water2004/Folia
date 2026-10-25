@@ -131,7 +131,11 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
             measured.boxes.size() != doc.boxes.size())
             return std::unexpected("Sequence measurement counts do not match the document");
         if (doc.actors.empty()) return std::unexpected("Sequence SVG needs at least one participant");
-        struct Actor { double x = 0, width = 0, margin = 0; bool visible = true; };
+        struct Actor {
+            double x=0,width=0,margin=0,start_y=0;
+            std::optional<double> stop_y;
+            bool visible=true;
+        };
         std::vector<Actor> actors(doc.actors.size());
         std::map<std::u16string,std::size_t,std::less<>> ids;
         std::vector<double> max_message(doc.actors.size(),0);
@@ -197,11 +201,15 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
                 auto& g=groups[*box];g.x=previous_right+previous_margin;g.visible=true;
                 previous_margin+=g.margin;
             }
+            // The original margin adjustment treats event index zero as false.
+            if(const auto created=doc.created.find(doc.actors[i].id);created!=doc.created.end() && created->second)
+                previous_margin+=a.width/2;
             a.x=previous_right+previous_margin;previous_right=a.x+a.width;actor_right=previous_right;
             if(box) {auto& g=groups[*box];g.width=previous_right+g.margin-g.x;}
             previous_margin=a.margin;previous_box=box;
         }
         const auto header_y=groups.empty()?0:c.box_margin+group_text_height;
+        for(auto& actor:actors) actor.start_y=header_y;
         double left=0,right=actor_right,y=header_y+(actor_right?c.height:0),bottom=y;
         std::string signals;
         // Anchors retain event order: nested bars overlay outer bars, while
@@ -427,12 +435,9 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
             const auto [from_left,from_right]=activation_bounds(m.from);
             const auto [to_left,to_right]=activation_bounds(m.to);
             const bool self=m.from==m.to;
-            const auto [start,stop]=endpoints(m);
+            auto [start,stop]=endpoints(m);
             const auto start_y=y;
             const auto text_y=std::floor(y+10+c.wrap_padding/2+0.5);
-            for(std::size_t j=0;j<box.lines.size();++j)
-                signals+="<text class=\"messageText\" x=\""+num(std::floor((start+stop)/2+0.5))+"\" y=\""+num(text_y+j*box.line_height)+
-                "\" text-anchor=\"middle\" dominant-baseline=\"middle\" alignment-baseline=\"middle\" dy=\"1em\" fill=\""+paint(t.signal_text)+"\""+font+">"+xml(box.lines[j].empty()?u"\u200b":std::u16string_view{box.lines[j]})+"</text>";
             // Original boundMessage: one measured line, then the remaining
             // text offset and the family-specific self-loop/box margin.
             y+=10+box.line_height;
@@ -446,9 +451,39 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
             } else insert(start,line_y-10,stop,line_y);
             y+=offset;bottom=std::max(bottom,y);
             insert(std::min(from_left,to_left),start_y,std::max(from_right,to_right),y);
+            // Lifecycle adjustment follows boundMessage and precedes final text/line drawing.
+            auto at_event=[&](const auto& events,const auto& id) {
+                const auto found=events.find(id);return found!=events.end() && found->second==i;
+            };
+            const bool creation=at_event(doc.created,m.to);
+            const bool destroy_sender=!creation && at_event(doc.destroyed,m.from);
+            const bool destruction=destroy_sender || (!creation && at_event(doc.destroyed,m.to));
+            if(creation || destruction) {
+                const auto id=destroy_sender?m.from:m.to;
+                auto& actor=actors[ids.at(id)];
+                const auto& type=doc.actors[ids.at(id)].type;
+                const bool icon=type==u"actor"||type==u"control"||type==u"entity"||type==u"database";
+                if(creation || c.mirror_actors) {
+                    const auto adjustment=(icon?18:actor.width/2)+(destroy_sender?0:3);
+                    // These bounds retain the original pre-adjustment message model.
+                    if(destroy_sender) {
+                        if(actor.x < b.x) {insert(start-adjustment,start_y,stop,y-10+c.height/2+c.note_margin);start+=adjustment;}
+                        else {insert(stop,start_y,start+adjustment,y-10+c.height/2+c.note_margin);start-=adjustment;}
+                    } else {
+                        if(actor.x < a.x) {insert(stop-adjustment,start_y,start,y-10+c.height/2+c.note_margin);stop+=adjustment;}
+                        else {insert(start,start_y,stop+adjustment,y-10+c.height/2+c.note_margin);stop-=adjustment;}
+                    }
+                }
+                if(creation) actor.start_y=line_y-c.height/2;
+                else actor.stop_y=line_y-c.height/2;
+                y+=c.height/2;bottom=std::max(bottom,y);
+            }
+            for(std::size_t j=0;j<box.lines.size();++j)
+                signals+="<text class=\"messageText\" x=\""+num(std::floor((start+stop)/2+0.5))+"\" y=\""+num(text_y+j*box.line_height)+
+                "\" text-anchor=\"middle\" dominant-baseline=\"middle\" alignment-baseline=\"middle\" dy=\"1em\" fill=\""+paint(t.signal_text)+"\""+font+">"+xml(box.lines[j].empty()?u"\u200b":std::u16string_view{box.lines[j]})+"</text>";
             const auto cls=dotted(m.type)?"messageLine1":"messageLine0";
             const bool numbered=sequence_visible||c.show_numbers;
-            if(self) {
+            if(start==stop) {
                 const auto line_start=start+(numbered&&both(m.type)?10:0);
                 std::string d="M "+num(line_start)+","+num(line_y);
                 if(c.right_angles) d+=" H "+num(start+std::max(c.width/2,box.width/2))+" V "+num(line_y+25)+" H "+num(start);
@@ -506,9 +541,9 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
             const auto& type=doc.actors[i].type;
             const auto start=type==u"actor"||type==u"boundary"?80:type==u"control"||type==u"entity"?75:
                 type==u"database"?c.height+2*c.box_text_margin:c.height;
-            svg+="<line class=\"actor-line\" x1=\""+num(center)+"\" x2=\""+num(center)+"\" y1=\""+num(header_y+start)+"\" y2=\""+num(c.mirror_actors?footer_y:2000)+"\" stroke=\""+paint(t.actor_line)+"\" fill=\""+paint(t.actor_fill)+"\" stroke-width=\"2\"/>";
-            svg+=participant_svg(doc.actors[i],measured.actors[i],t,c,a.x,a.width,header_y,false,font);
-            if(c.mirror_actors) svg+=participant_svg(doc.actors[i],measured.actors[i],t,c,a.x,a.width,footer_y,true,font);
+            svg+="<line class=\"actor-line\" x1=\""+num(center)+"\" x2=\""+num(center)+"\" y1=\""+num(a.start_y+start)+"\" y2=\""+num(c.mirror_actors?a.stop_y.value_or(footer_y):a.stop_y?*a.stop_y+participant_height(type,a.width,c.height,c.label_box_height)/2:2000)+"\" stroke=\""+paint(t.actor_line)+"\" fill=\""+paint(t.actor_fill)+"\" stroke-width=\"2\"/>";
+            svg+=participant_svg(doc.actors[i],measured.actors[i],t,c,a.x,a.width,a.start_y,false,font);
+            if(c.mirror_actors) svg+=participant_svg(doc.actors[i],measured.actors[i],t,c,a.x,a.width,a.stop_y.value_or(footer_y),true,font);
         }
 
         for(const auto& layer:backgrounds) svg+=layer;

@@ -32,6 +32,7 @@ class Parser {
     std::map<Text,std::size_t,std::less<>> actor_index;
     std::map<Text,int,std::less<>> activations;
     std::optional<std::size_t> current_box;
+    std::optional<Text> last_created, last_destroyed;
     struct Region { View keyword; SequenceKind start, end; View section; SequenceKind branch; };
     static constexpr Region region_types[] = {
         {u"loop",SequenceKind::loop_start,SequenceKind::loop_end,{},{}},
@@ -97,7 +98,7 @@ class Parser {
         if (current_box) {
             if (take(rest,u"end") && rest.empty()) { current_box.reset(); return; }
             rest = line;
-            if (!take(rest,u"participant") && !take(rest,u"actor"))
+            if (!take(rest,u"participant") && !take(rest,u"actor") && !take(rest,u"destroy"))
                 fail("Expected a participant declaration or end inside a Sequence box");
             rest = line;
         }
@@ -169,6 +170,12 @@ class Parser {
                 return;
             }
         }
+        if (take(rest,u"destroy")) {
+            auto id=actor(rest);
+            result.destroyed[id]=result.messages.size();last_destroyed=std::move(id);
+            return;
+        }
+        const bool create = take(rest,u"create");
         bool human = take(rest,u"actor");
         if (human || take(rest,u"participant")) {
             Text type = human ? u"actor" : u"participant";
@@ -204,9 +211,12 @@ class Parser {
             } else if (as != Text::npos) {
                 id = rest.substr(0,as); description = label(rest.substr(as+4));
             }
-            actor(id,std::move(description),type);
+            if(create && actor_index.contains(trim(id))) fail("Cannot create an existing Sequence participant");
+            auto added=actor(id,std::move(description),type);
+            if(create) {result.created[added]=result.messages.size();last_created=std::move(added);}
             return;
         }
+        if(create) fail("Expected a Sequence participant declaration after create");
         if (take(rest,u"activate")) { message(Text{rest},{},label({}),SequenceKind::active_start); return; }
         if (take(rest,u"deactivate")) { message(Text{rest},{},label({}),SequenceKind::active_end); return; }
         if (take(rest,u"note")) {
@@ -252,6 +262,14 @@ class Parser {
             activation = rest.front(); rest = trim(rest.substr(1));
         }
         auto to = actor(rest);
+        if(last_created) {
+            if(to!=*last_created) fail("Created Sequence participant needs an associated receiving message");
+            last_created.reset();
+        } else if(last_destroyed) {
+            if(from!=*last_destroyed && to!=*last_destroyed)
+                fail("Destroyed Sequence participant needs an associated message");
+            last_destroyed.reset();
+        }
         message(from,to,label(line.substr(colon+1)),arrow->kind,activation == u'+');
         if (activation == u'+') message(to,{},label({}),SequenceKind::active_start);
         if (activation == u'-') message(from,{},label({}),SequenceKind::active_end);
