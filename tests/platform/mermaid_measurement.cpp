@@ -8,6 +8,40 @@ using namespace boost::ut;
 using namespace folia::platform;
 using namespace folia::mermaid;
 suite mermaid_measurement = [] {
+    "mermaid_class_source_to_measured_svg"_test = [] {
+        const std::vector<std::pair<std::string,std::u16string>> cases={
+            {"members",u"classDiagram\nclass Document {\n+String title\n+save() bool\n}\nclass Store {\n+load(id) Document\n}\nDocument --> Store : persists"},
+            {"relations",u"classDiagram\ndirection LR\nclass Shape\n<<interface>> Shape\nclass Circle\nShape <|-- Circle\nCircle \"1\" o-- \"*\" Point : contains"},
+            {"empty-boxes",u"classDiagram\nclass Document\nclass Store\nDocument ..> Store : uses"},
+            {"classifiers",u"classDiagram\nclass Repository~T~ {\n<<service>>\n-items List~T~\n+count int$\n#find(id) T*\n~reset()$\n}"},
+            {"attributes",u"classDiagram\nclass Document {\n+String title\n+int revision\n}"},
+            {"configured",u"%%{init: {\"fontSize\": 20, \"class\": {\"padding\": 8, \"hideEmptyMembersBox\": true}, \"state\": {\"nodeSpacing\": 60, \"rankSpacing\": 70}}}%%\nclassDiagram\ndirection RL\nclass View\nclass Document\nView *-- Document"}
+        };
+        for(const auto theme_name:{u"default",u"dark"}) {
+            auto session=ConfigSession::create();expect(fatal(session.has_value()));
+            ConfigValue site;site.kind=ConfigKind::mapping;
+            for(auto [key,value]:{std::pair{u"theme",theme_name},{u"look",u"classic"},{u"layout",u"dagre"},{u"fontFamily",u"Arial"}})
+                site.mapping.emplace_back(key,ConfigValue{.kind=ConfigKind::string,.string=value});
+            expect(fatal(session->save_initialize_config(site).has_value()));
+            expect(fatal(session->set_site_config(site).has_value()));
+            for(const auto& [name,source]:cases) {
+                auto svg=render_mermaid(source,*session);
+                expect(svg.has_value()) << name << (svg?"":svg.error());if(!svg)continue;
+                expect(svg->width>0 && svg->height>0);
+                if(auto directory=std::getenv("FOLIA_MERMAID_SVG_OUTPUT")) {
+                    std::filesystem::create_directories(directory);
+                    const std::u16string theme{theme_name};
+                    std::ofstream output(std::filesystem::path(directory)/("class-"+name+"-"+std::string(theme.begin(),theme.end())+".svg"),std::ios::binary);
+                    output<<svg->svg;expect(output.good());
+                }
+            }
+            ConfigValue elk=site;elk.find(u"layout")->string=u"elk";
+            expect(fatal(session->save_initialize_config(elk).has_value()));
+            expect(fatal(session->set_site_config(elk).has_value()));
+            expect(!render_mermaid(u"classDiagram\nclass Document",*session));
+        }
+    };
+
     "mermaid_sequence_measured_source_to_svg"_test=[] {
         const std::vector<std::pair<std::string,std::u16string>> cases={
             {"participant-lifecycle",u"sequenceDiagram\nparticipant U as User\ncreate participant W as Worker\nU->>W: Start\nW->>W: Work\ndestroy W\nW-->>U: Done"},
