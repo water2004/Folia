@@ -13,6 +13,8 @@ complete ELK layout engine or the public Class/State render path.
 
 Quadrant parsing, fixed-canvas geometry and SVG output follow the pinned
 Mermaid quadrant-chart sources under the MIT license reproduced in `LICENSE`.
+Radar parsing, polar geometry and its closed Catmull-Rom curves follow the
+pinned Mermaid Radar sources under the same license; source hashes are locked.
 
 Flowchart display-line adaptation follows Mermaid 12.2.0's labelHelper,
 createText, createLabel, nonMarkdownToHTML and decodeEntities. Their original

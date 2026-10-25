@@ -127,6 +127,12 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
     try {
         const auto& effective=prepared->effective_config;
         const auto& theme=member(effective,u"themeVariables");
+        if(prepared->type==u"radar") {
+            auto input=prepare_radar(source,session);
+            if(!input) return std::unexpected(input.error());
+            metadata(input->document,*prepared);
+            return NativeDiagram{std::move(*prepared),std::move(*input)};
+        }
         if(prepared->type==u"quadrantChart") {
             auto input=prepare_quadrant(source,session);
             if(!input) return std::unexpected(input.error());
@@ -332,7 +338,13 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
 
 std::expected<DiagramSvg,std::string> render_native_diagram(const NativeDiagram& input,const PieMeasurements& widths,const FlowchartMeasurements& flowchart_measurements,const SequenceMeasurements& sequence_measurements,const ClassMeasurements& class_measurements) {
     return std::visit([&](const auto& content)->std::expected<DiagramSvg,std::string> {
-        if constexpr(std::is_same_v<std::decay_t<decltype(content)>,QuadrantRenderInput>) {
+        if constexpr(std::is_same_v<std::decay_t<decltype(content)>,RadarRenderInput>) {
+            auto result=render_radar_svg(content);
+            if(!result) return std::unexpected(result.error());
+            try { decode_svg_text(result->svg); }
+            catch(const std::runtime_error& e) { return std::unexpected(e.what()); }
+            return DiagramSvg{std::move(result->svg),result->width,result->height};
+        } else if constexpr(std::is_same_v<std::decay_t<decltype(content)>,QuadrantRenderInput>) {
             auto result=render_quadrant_svg(content);
             if(!result) return std::unexpected(result.error());
             try { decode_svg_text(result->svg); }

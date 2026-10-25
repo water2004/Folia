@@ -29,7 +29,8 @@ suite host_contract = [] {
         expect(render(source).text == light.text);
     };
     "mermaid_host_family_defaults_and_errors"_test = [] {
-        for (auto source : {"packet\n0-7: \"Header\"", "sequenceDiagram\nA->>B: Save"}) {
+        for (auto source : {"packet\n0-7: \"Header\"", "sequenceDiagram\nA->>B: Save",
+            "quadrantChart\nEditor: [0.2, 0.7]", "radar-beta\naxis A,B,C\ncurve current{1,2,3}"}) {
             auto result = render(source);
             expect(result.status == 0_i) << result.text;
         }

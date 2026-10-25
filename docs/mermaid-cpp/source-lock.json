@@ -627,6 +627,30 @@
     {
       "path": "packages/mermaid/src/diagrams/quadrant-chart/parser/quadrant.jison",
       "sha256": "b4cf7e71d667e51c2082ef8e6b1c897d2d3124933026bef0ab72c959a8f46b6a"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/radar/renderer.ts",
+      "sha256": "b8b6a6b1df23f57e0ef01277bec8148091eb9b0cf9b6ce8863f13b8cd2c904c2"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/radar/db.ts",
+      "sha256": "33dfa58db934d067b19e04bcc5555dff0dd5bb00c70c10a14759daafbfc1f57a"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/radar/parser.ts",
+      "sha256": "85d050ccaad3a8556dffcd5ae5a11cf6f0adcd5b343569587de9e1b43cb38449"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/radar/styles.ts",
+      "sha256": "5320ca60c99f5fa8b3babb6848db10485a6116e0559d1249172e91b4ec4f7c9f"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/radar/types.ts",
+      "sha256": "e1e7f0a84159c8dbf2b63e086a6c4395c098d8a30c636d532529831610880cfb"
+    },
+    {
+      "path": "packages/parser/src/language/radar/radar.langium",
+      "sha256": "acd5171f3413f29242e8250c5a9c9d67e247a6b87acfbe7543bfc333bbdf3ac5"
     }
   ],
   "packages": [
