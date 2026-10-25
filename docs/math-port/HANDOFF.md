@@ -2,13 +2,15 @@
 
 恢复/压缩后先实际读本文。架构、职责和详细验收见 [architecture](native-raii-architecture.md)、[files](native-raii-files.json)、[acceptance](native-raii-acceptance.md)。只复查新变化；ignored候选用 `rg --no-ignore`。
 
-## 当前 checkpoint：编辑体验与性能改进进行中（2026-10-25）
+## 当前 checkpoint：编辑体验、WinUI生命周期与math优化已完成（2026-10-25）
 
-- 当前用户要求：格式控件化、点击公式/长格式不误选、代码块样式/高亮/语言选择、补全背景Acrylic；Astra并行优化math与Folia性能/内存。**用户明确否决数学局部面板，保留正文原位数学编辑与实时预览**，面板候选已撤，不引入独立TextBox/worker。
-- Root实现：完整CST标记隐藏但source保持原字节，格式按钮显示当前状态；隐藏offset映射到对应显示边界；拖选依据物理4DIP阈值，release无移动不重复命中。Math源码/实时preview仍原位。代码候选：单AutoSuggestBox明确提交，去外框与修Tree-sitter染色。新增WinUI候选复用当前补全行，关闭/接受清Items及overlay命中，不加缓存池。
-- 已验证：Core **752项/499404断言**、Windows editor **82项/3446断言**、math **968项/536030断言**通过，WinUI Debug应用构建通过。math首次60s边界不足，停止后trim/NewCM窄测通过，180s有界全测通过（非无限循环/崩溃）。正式app测试仍在编译/执行，句柄`56004`；已修新测试Boost对hstring/UTF16诊断输出的编译问题，不改期待。
-- 三个性能改动：trimTex扫描替代逐token正则；请求字体去结果vector/重复表查找；EndBlock转移集合/相同成员快返。前两者全math验收通过，可分批提交；App cache等待app测试。trim微基准同输入/校验和，30000调用旧12166–14305ms、新41–50ms，**仅局部Debug微基准，不是整引擎倍数**。字体前4轮旧/新中位数约598/414ms暖查询、1701/1234ms冷批，需最终独占复核；第5轮与全math重叠不采用。
-- 所有Astra候选完成，无活动agent。对照旧对象在`build/editing-perf/before/`（Cache、LatexCompletion、两font对象），ignored基准在`build/editing-perf/`；独立WinUI before/after编译脚本已准备未运行。下一步：app回归→WinUI与Cache同输入旧新对照→审查分批提交。root独占build/native，parallel≤4。临时CMake project include仅build/core cache指向ignored benchmarks，完成后去掉该cache变量。版本仍0.3.1，不推送/发布；旧owner链/Mermaid继续暂停。
+- 用户约束保持：**不使用数学局部面板，正文原位数学编辑和异步内存预览保留**；source/CST/selection/history架构不变。版本仍0.3.1，无推送/发布/MSI。旧生产owner链和Mermaid继续暂停，无活动agent/build/native句柄或待落候选。
+- UX：完整格式标记隐藏、工具栏显示格式状态，未完成语法可见；4DIP物理拖选阈值阻止公式展开后静止点击误选。代码块去整框、修独立Code/Math定位、语言搜索显式提交、修函数/预处理/模板高亮。补全采用内置Acrylic，复用当前行并在接受/关闭时释放。
+- WinUI：设置快捷键ComboBox事件曾强捕获自身，重建后不能释放；真实旧对象测试两次均失败，去捕获后11断言全过。补全身份复用/关闭weak引用释放25断言通过。未改变设置页架构；首次打开后6页仍保留，按需页创建未展开。**没有证明整App常驻内存下降的MB数**。
+- 最终验证：Core **752项/499404断言**，Windows editor **82项/3446断言**，math **972项/536146断言**，WinUI app **28项/557断言**全部通过。WinUI Debug最终构建成功，应用`build/app-winui/bin/x64/Debug/Folia.exe`，与build/core数学DLL哈希一致。日志均在ignored `build/editing-perf/`：`core.log`、`platform-final.log`、`math-final-full.*.log`、`app-build-settings-final.log`、`app-tests-complete.log`。测试runner部署normalizer到EXE旁，避免源码fallback假覆盖，支持`-TestFilter`。未做人工界面观感、真实IME输入或用户原文档复测。
+- 本机Debug同输入对照：Common默认表/catalog约-39%，4公式×20完整render中位1184.7→1096.2ms（约-7.5%）；SVG64glyph local/none及512 none约-18..23%，512 local无明显变化，四场景各6份完整SVG逐字节一致。Cache512×32成员登记中位24403→2868µs。trim30000调用旧12–14s/新41–50ms仅局部微基准。字体局部查询也减少分配；不把这些数值当整App或Release倍数。
+- 明确否定：ParseOptions批量删除候选实测更慢，生产与新增专属测试已精确撤回，ignored `rejected-tex-list/`和日志保留否定证据，不再次引入。上下标去每次\d正则保留简单等价实现，96新增断言及全测通过，但整compile中位仅约1%，不称大热点收益。补全1000×8行刷新中位3057→2586ms，private均稳定，不称常驻内存减少。
+- 提交：`1ed3cd67` trim；`b1be2b26` 请求字体；`82a51cb8` Math owner集合；`1a631266` 拖选/真实SVG测试；`b155f576` 补全生命周期；`3b987cc1` **包含编辑UI/格式/代码块及Common默认表（标题仅写后者，已有UI暂存被一并提交，按实际diff验阅）**；`0ba16482` SVG；`293fa021` script数字；`754b067b` 设置控件生命周期。本轮未重写历史。基准、旧obj和日志仅ignored证据，正式测试全部tracked；build/core临时CMAKE_PROJECT_INCLUDE已移除。下一工作以用户新要求为准，不自动发布或重开历史迁移审计。
 
 ## 已完成：0.3.1 已发布（2026-10-25）
 
