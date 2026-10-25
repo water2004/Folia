@@ -2,13 +2,14 @@
 
 恢复/压缩后先实际读本文。架构、职责和详细验收见 [architecture](native-raii-architecture.md)、[files](native-raii-files.json)、[acceptance](native-raii-acceptance.md)。只复查新变化；ignored候选用 `rg --no-ignore`。
 
-## 当前 checkpoint：未闭合波浪线与行间公式图标（2026-10-25，验收通过，准备更新安装）
+## 当前 checkpoint：未闭合波浪线与行间公式图标（2026-10-25，已修复并更新安装）
 
 - 新用户反馈：已安装版行间公式图标过小且相对TeX缩进；`1. 微观粒子质量~原子质量单位 $1u=1.6605655\timesz10^{-27}kg$`不渲染，删掉`~`正常。**根因与TeX无关**：inline parser已有Incomplete(~)内的正确InlineMath子节点，但render_builder的Incomplete分支把content整体原文输出。新正式测试在旧实现8处失败（~/~~ × paragraph/list/quote/bullet），修复后完整Core通过`build/math-marker-core-final.log`；只改CST→render递归，不在App扫描波浪线。
-- 图标候选：显示数学块明确设置Block placement，按主题行高×sizeEm分配方形图标，去除行内左右gap；行内图标维持原尺寸/间距。SyntaxIconRectangles改为直接读取排版对象metrics，不再从主题比例反推尺寸，使绘制/命中同源。源码、块缩进、语义编辑规则不改；主题仍schema2，docs/THEMES.md说明行间尺寸规则。
-- 验证完成：Core **760项/499843断言**，WinUI **43项/14109断言**全部通过；Debug构建成功。两种块定界符×3字号×2宽度检查图标与TeX左沿一致、尺寸/整对象/源文不变；完整用户例子（含timesz）和移除~均走NativeMathSession得到SVG。日志`build/math-marker-core-final.log`、`build/math-marker-app-{setup,build,tests}.log`，9773/20640已exit0。旧用例8失败证据`build/math-marker-nested-before.log`（此前两次只是测试TU缺类型import的编译问题，最后确实运行并8失败；不能把编译失败当回归证据）。无代理/Computer Use；未改parser/数学引擎/源编辑/历史，不重跑旧移植宽审。
-- 本地提交：CST投影与回归用例`ffb6e9a2`，行间图标布局见本文件所属后续提交。
-- 下一步：构建安装同版本0.3.2（用户上一轮明确要求直接安装，本轮是在该安装上修复其反馈）。当前无运行中Folia；安装前再检查，不强制关闭用户进程。无推送发布。
+- 图标已修复：显示数学块明确设置Block placement，按主题行高×sizeEm分配方形图标，去除行内左右gap；行内图标维持原尺寸/间距。SyntaxIconRectangles改为直接读取排版对象metrics，不再从主题比例反推尺寸，使绘制/命中同源。源码、块缩进、语义编辑规则不改；主题仍schema2，docs/THEMES.md说明行间尺寸规则。
+- 验证完成：Core **760项/499843断言**，WinUI **43项/14109断言**全部通过；Debug构建成功。两种块定界符×3字号×2宽度检查图标与TeX左沿一致、尺寸/整对象/源文不变；完整用户例子（含timesz）和移除~均走NativeMathSession得到SVG。日志`build/math-marker-core-final.log`、`build/math-marker-app-{setup,build,tests}.log`，9773/20640已exit0。旧用例8失败证据`build/math-marker-nested-before.log`。无代理/Computer Use；未改parser/数学引擎/源编辑/历史，不重跑旧移植宽审。
+- 本地提交：CST投影与回归用例`ffb6e9a2`，行间图标布局与App测试`4dc6f85a`。
+- MSI已构建并安装同版本0.3.2：`build/installer/bin/Folia-0.3.2-x64.msi`，53,508,958 bytes，SHA256 `9810AF1000803F2E28FBE75B3AE7B7EC376F3430D6693823DD0F1B6183C03654`；新ProductCode `{631F6F9D-A9FF-4895-9A33-D80A67332E88}`，msiexec exit0。165个已安装payload文件逐一哈希匹配，settings字节不变（本机custom文件0）。日志`build/math-marker-release-msi.log`、`build/math-marker-msi-install.log`，核验`build/math-marker-{msi-properties,installed-payload-hashes,user-files-before}.json`。安装版位于`%LOCALAPPDATA%/Programs/Folia/Folia.exe`；未启动或做本轮人工UI/真实IME复测。
+- 停止点：无活动agent/build/test/install句柄（74657已exit0）；本轮实现/正式测试/安装核验全部完成并本地提交，版本保持0.3.2，无推送发布，无Computer Use。下一步用户试用已更新的安装版；不要重开TeX错误调查，原完整例子已经Native SVG测试通过。
 
 ## 历史：CST语义编辑、图标主题（2026-10-25，验收完成，MSI已安装）
 
