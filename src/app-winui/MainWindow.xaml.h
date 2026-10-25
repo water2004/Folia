@@ -16,6 +16,7 @@
 #include "theme/ThemeCatalog.h"
 #include "theme/ThemeConfig.h"
 #include "MainWindow.g.h"
+#include "MainWindow.Lifecycle.h"
 
 namespace winrt::Folia::implementation
 {
@@ -89,7 +90,7 @@ namespace winrt::Folia::implementation
         bool settingsMode = false;
         bool closePending = false;
         bool closeApproved = false;
-        winrt::Microsoft::UI::Windowing::AppWindow::Closing_revoker closingHandler;
+        winrt::Folia::detail::WindowClosingSubscription closingHandler;
         bool documentPaneWasOpen = true;
         std::optional<std::size_t> activeSearchMatch;
         std::size_t searchMatchCount = 0;

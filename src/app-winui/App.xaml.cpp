@@ -67,5 +67,6 @@ namespace winrt::Folia::implementation
             ? make<MainWindow>(*initialDocument)
             : make<MainWindow>();
         window.Activate();
+        ::OutputDebugStringW(L"Folia.StartupComplete\n");
     }
 }

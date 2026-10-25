@@ -56,6 +56,10 @@ if (-not (Test-Path -LiteralPath (Join-Path $ProgramRoot 'Folia.exe') -PathType 
     throw "Folia executable was not produced under $ProgramRoot"
 }
 
+& (Join-Path $Root 'tests\app\test_startup.ps1') -Executable (Join-Path $ProgramRoot 'Folia.exe') `
+    -ReportDirectory (Join-Path $BuildRoot 'tests\startup-msi')
+if ($LASTEXITCODE -ne 0) { throw 'Folia startup and normal-close test failed.' }
+
 & $PayloadGenerator -ProgramRoot $ProgramRoot -AssetsRoot $AssetsRoot -OutputPath $GeneratedPayload
 if ($LASTEXITCODE -ne 0) { throw "WiX payload generation failed with exit code $LASTEXITCODE" }
 

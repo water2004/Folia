@@ -113,7 +113,7 @@ namespace winrt::Folia::implementation
 
     void MainWindow::RegisterWindowHandlers()
     {
-        closingHandler = AppWindow().Closing(winrt::auto_revoke,
+        closingHandler.Attach(AppWindow(),
             [this](auto const&, Microsoft::UI::Windowing::AppWindowClosingEventArgs const& args)
             {
                 if (closeApproved) return;
@@ -127,7 +127,7 @@ namespace winrt::Folia::implementation
             });
         Closed([this](auto const&, auto const&)
         {
-            closingHandler.revoke();
+            closingHandler.Reset();
             if (latexCommandCatalog) latexCommandCatalog->Flush();
             if (settingsView) settingsView->Detach();
             documentController.Detach();
