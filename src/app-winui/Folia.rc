@@ -5,8 +5,8 @@
 IDI_FOLIA ICON "Assets\\branding\\Folia.ico"
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,3,1,0
- PRODUCTVERSION 0,3,1,0
+ FILEVERSION 0,3,2,0
+ PRODUCTVERSION 0,3,2,0
  FILEFLAGSMASK VS_FFI_FILEFLAGSMASK
 #ifdef _DEBUG
  FILEFLAGS VS_FF_DEBUG
@@ -23,11 +23,11 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "water2004\0"
             VALUE "FileDescription", "Folia Markdown editor\0"
-            VALUE "FileVersion", "0.3.1.0\0"
+            VALUE "FileVersion", "0.3.2.0\0"
             VALUE "InternalName", "Folia\0"
             VALUE "OriginalFilename", "Folia.exe\0"
             VALUE "ProductName", "Folia\0"
-            VALUE "ProductVersion", "0.3.1\0"
+            VALUE "ProductVersion", "0.3.2\0"
         END
     END
     BLOCK "VarFileInfo"

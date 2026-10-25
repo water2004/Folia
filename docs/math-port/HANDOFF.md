@@ -2,7 +2,13 @@
 
 恢复/压缩后先实际读本文。架构、职责和详细验收见 [architecture](native-raii-architecture.md)、[files](native-raii-files.json)、[acceptance](native-raii-acceptance.md)。只复查新变化；ignored候选用 `rg --no-ignore`。
 
-## 当前 checkpoint：编辑体验、WinUI生命周期与math优化已完成（2026-10-25）
+## 当前 checkpoint：0.3.2 发布进行中（2026-10-25）
+
+- 用户已明确授权推送0.3.2，按既有tag触发release.yml发布；版本统一更新CMake/MSI默认/manifest/rc/About/README，新增release-notes/v0.3.2.md。此前不发布/固定0.3.1仅属上一阶段约束。
+- 远端已fetch，master无新提交，本地10项已验收提交待推送；工作开始时干净，v0.3.2本地tag不存在。应用/Core/platform/math的最终验收见下方，不重复宽审。
+- 下一步：版本/发布配置校验→提交→master与v0.3.2标签推送→等待既有GitHub Release CI成功及MSI/checksum验收。禁止移动已有tag。无本地build或agent。
+
+## 历史验收：编辑体验、WinUI生命周期与math优化（2026-10-25）
 
 - 用户约束保持：**不使用数学局部面板，正文原位数学编辑和异步内存预览保留**；source/CST/selection/history架构不变。版本仍0.3.1，无推送/发布/MSI。旧生产owner链和Mermaid继续暂停，无活动agent/build/native句柄或待落候选。
 - UX：完整格式标记隐藏、工具栏显示格式状态，未完成语法可见；4DIP物理拖选阈值阻止公式展开后静止点击误选。代码块去整框、修独立Code/Math定位、语言搜索显式提交、修函数/预处理/模板高亮。补全采用内置Acrylic，复用当前行并在接受/关闭时释放。
