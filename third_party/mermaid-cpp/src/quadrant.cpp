@@ -60,7 +60,8 @@ void axis(std::array<std::u16string,2>& out,std::u16string_view s) {
     }
     out[0]=label(s.substr(0,arrow));
     if(arrow!=s.npos) {
-        if(trim(s.substr(end)).empty())out[0]+=u" ⟶ ";else out[1]=label(s.substr(end));
+        // The grammar appends an arrow with spaces; textSanitizer trims it.
+        if(trim(s.substr(end)).empty())out[0]+=u" ⟶";else out[1]=label(s.substr(end));
     }
 }
 }
