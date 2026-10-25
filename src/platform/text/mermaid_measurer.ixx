@@ -32,6 +32,7 @@ struct MermaidTextStyle {
     unsigned weight=400;
     bool italic=false;
 };
+struct MermaidSvgFontMetrics { double height{},baseline{}; };
 
 // Measures UTF-16 after SVG's default whitespace processing (collapse ASCII
 // whitespace, including LF/CR/TAB). The browser probe checks the
@@ -98,8 +99,8 @@ class MermaidMeasurer {
         return true;
     }
 public:
-    // Sequence needs the font's ascent/descent box, excluding line gap.
-    std::expected<double,std::string> svg_font_height(const MermaidFont& font) const {
+    // SVG needs the font's ascent/descent box, excluding the layout line gap.
+    std::expected<MermaidSvgFontMetrics,std::string> svg_font_metrics(const MermaidFont& font) const {
         using Microsoft::WRL::ComPtr;
         ComPtr<IDWriteFactory> factory;
         if(FAILED(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED,__uuidof(IDWriteFactory),
@@ -118,7 +119,12 @@ public:
             return std::unexpected("DirectWrite SVG font metric lookup failed");
         DWRITE_FONT_METRICS metrics{}; selected->GetMetrics(&metrics);
         const auto scale=font.size/static_cast<double>(metrics.designUnitsPerEm);
-        return std::round(metrics.ascent*scale)+std::round(metrics.descent*scale);
+        const auto baseline=std::round(metrics.ascent*scale);
+        return MermaidSvgFontMetrics{baseline+std::round(metrics.descent*scale),baseline};
+    }
+    std::expected<double,std::string> svg_font_height(const MermaidFont& font) const {
+        auto metrics=svg_font_metrics(font);if(!metrics) return std::unexpected(metrics.error());
+        return metrics->height;
     }
     // Resolve the configured CSS family list once, then share that exact family
     // between DirectWrite measurement and SVG emission. Generic families have

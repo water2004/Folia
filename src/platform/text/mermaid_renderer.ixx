@@ -234,8 +234,8 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             const MermaidFont font{theme.font_family,static_cast<float>(theme.font_size)};
             auto title=measurer.measure(cls->document.title,font,true);
             if(!title) return std::unexpected(title.error());
-            auto height=measurer.svg_font_height(font);if(!height) return std::unexpected(height.error());
-            class_measurements.title={cls->document.title,title->bounds_width,*height,std::round(title->baseline)};
+            auto metrics=measurer.svg_font_metrics(font);if(!metrics) return std::unexpected(metrics.error());
+            class_measurements.title={cls->document.title,title->bounds_width,metrics->height,metrics->baseline};
         }
         auto measure=[&](std::u16string_view source,unsigned weight=400,bool italic=false,double size=0)->std::expected<ClassTextBox,std::string> {
             auto display=diagram_display_text(source);if(!display) return std::unexpected(display.error());
