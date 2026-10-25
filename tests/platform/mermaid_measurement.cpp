@@ -26,6 +26,9 @@ suite mermaid_measurement = [] {
             {"parallel",u"sequenceDiagram\npar Read\nA->>B: Fetch\nand Write\nB->>A: Store\nend"},
             {"critical-break",u"sequenceDiagram\ncritical Save\nA->>B: Write\noption Failure\nbreak Abort\nB-->>A: Failed\nend\nend"},
             {"region-spacing",u"%%{init: {\"fontSize\": 20, \"sequence\": {\"boxMargin\": 8, \"boxTextMargin\": 7, \"labelBoxWidth\": 60, \"labelBoxHeight\": 24}}}%%\nsequenceDiagram\nloop Retry\nA->>A: Check\nA->>B: Save\nend"},
+            {"background",u"sequenceDiagram\nrect rgb(220, 240, 255)\nA->>+B: Save\nNote over B: Write\nB-->>-A: Done\nend"},
+            {"nested-background",u"sequenceDiagram\nrect rgba(200, 230, 255, 0.4)\nloop Retry\nrect rgb(245, 245, 200)\nA->>B: Save\nend\nB-->>A: Done\nend\nend"},
+            {"title",u"sequenceDiagram\ntitle Save document\nA->>B: Save\nB-->>A: Done"},
         };
         for(const auto theme:{u"default",u"dark"}) {
             auto session=ConfigSession::create();expect(fatal(session.has_value()));

@@ -156,6 +156,7 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             auto box=measure(actor.description);if(!box) return std::unexpected(box.error());
             sequence_measurements.actors.push_back(*box);
         }
+        if(auto title=measure(seq->document.title);!title) return std::unexpected(title.error());
         for(const auto& message:seq->document.messages) {
             const bool bracket=sequence_region_start(message.type)||sequence_region_section(message.type);
             auto box=measure(bracket&&!message.message.empty()?u"["+message.message+u"]":message.message);

@@ -9,7 +9,13 @@
   Debug/Release. Local MSVC is unavailable; CI supplies native verification.
 - Next: Sequence text display/wrapping, then remaining family/application chain.
   No application dependency switch or merge is authorized by this batch.
-- Implementation and original comparison inputs are currently uncommitted.
+- Control-region commits 96252223/566aeafa are pushed to validation branch
+  codex/mermaid-cpp-sequence-controls. Windows run 40165172369 is in progress.
+- The next bounded batch connects already-parsed rect backgrounds and plain
+  titles to SVG, including nested/transparent backgrounds. Original observations
+  are in build/mermaid-cpp/sequence-backgrounds-work. Exit on the three added
+  diagrams in both themes and the same affected native/browser checks.
+- No upstream update yet; only verified batches will reach PR #1.
 
 ## Previous checkpoint - 2026-10-24, Sequence notes SVG and control-region parser verified
 

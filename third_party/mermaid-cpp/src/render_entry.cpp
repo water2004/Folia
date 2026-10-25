@@ -155,10 +155,10 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
             const auto& config=member(effective,u"sequence");
             if(text(member(effective,u"look"))!=u"classic")
                 return std::unexpected("Native Sequence SVG currently requires classic look");
-            if(!document->title.empty() || !boolean(member(config,u"mirrorActors")) ||
+            if(!boolean(member(config,u"mirrorActors")) ||
                 boolean(member(config,u"hideUnusedParticipants")) || boolean(member(config,u"showSequenceNumbers")) ||
                 text(member(config,u"messageAlign"))!=u"center")
-                return std::unexpected("Sequence titles, numbering and alternate actor/message placement require the next SVG adapter");
+                return std::unexpected("Sequence numbering and alternate actor/message placement require the next SVG adapter");
             SequenceSvgConfig c;
             for(auto [key,target]:{std::pair{u"width",&c.width},{u"height",&c.height},{u"actorMargin",&c.actor_margin},
                 {u"boxMargin",&c.box_margin},{u"wrapPadding",&c.wrap_padding},{u"diagramMarginX",&c.margin_x},
@@ -190,6 +190,9 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
                 {u"activationBkgColor",&t.activation_fill},{u"activationBorderColor",&t.activation_border},
                 {u"labelBoxBkgColor",&t.label_fill},{u"labelBoxBorderColor",&t.label_border},
                 {u"labelTextColor",&t.label_text},{u"loopTextColor",&t.loop_text}}) *target=narrow(text(member(theme,key)));
+            t.rect_fill=t.actor_fill;
+            if(auto fill=theme.find(u"rectBkgColor");fill&&fill->kind==ConfigKind::string&&!fill->string.empty())
+                t.rect_fill=narrow(fill->string);
             return NativeDiagram{std::move(*prepared),SequenceRenderInput{std::move(*document),std::move(t),c}};
         }
         if(prepared->type==u"flowchart" || prepared->type==u"flowchart-v2") {

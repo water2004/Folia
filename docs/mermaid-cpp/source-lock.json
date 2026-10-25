@@ -567,6 +567,10 @@
     {
       "path": "packages/mermaid/src/diagrams/sequence/styles.js",
       "sha256": "f80f572951cb6367a52b9ceeb443ce2872a020d8356ce14685237ff0b9bbcfa4"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/common/svgDrawCommon.ts",
+      "sha256": "da5e706bf4c78ff55172c4eb1eec2725c87ab290ff4e76905b8f85ce12fdc6ba"
     }
   ],
   "packages": [

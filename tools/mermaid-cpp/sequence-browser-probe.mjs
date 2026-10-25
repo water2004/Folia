@@ -24,6 +24,9 @@ const cases=[
  ["parallel","sequenceDiagram\npar Read\nA->>B: Fetch\nand Write\nB->>A: Store\nend"],
  ["critical-break","sequenceDiagram\ncritical Save\nA->>B: Write\noption Failure\nbreak Abort\nB-->>A: Failed\nend\nend"],
  ["region-spacing","%%{init: {\"fontSize\": 20, \"sequence\": {\"boxMargin\": 8, \"boxTextMargin\": 7, \"labelBoxWidth\": 60, \"labelBoxHeight\": 24}}}%%\nsequenceDiagram\nloop Retry\nA->>A: Check\nA->>B: Save\nend"],
+ ["background","sequenceDiagram\nrect rgb(220, 240, 255)\nA->>+B: Save\nNote over B: Write\nB-->>-A: Done\nend"],
+ ["nested-background","sequenceDiagram\nrect rgba(200, 230, 255, 0.4)\nloop Retry\nrect rgb(245, 245, 200)\nA->>B: Save\nend\nB-->>A: Done\nend\nend"],
+ ["title","sequenceDiagram\ntitle Save document\nA->>B: Save\nB-->>A: Done"],
 ];
 export function inspectSequence() {
  const root=document.querySelector('svg');
@@ -31,6 +34,7 @@ export function inspectSequence() {
  const style=e=>{const s=getComputedStyle(e);return {fill:s.fill,stroke:s.stroke,strokeWidth:s.strokeWidth};};
  const actors=[...root.querySelectorAll('rect.actor')].map(e=>({id:e.getAttribute('name'),footer:e.classList.contains('actor-bottom'),...box(e),...style(e)})).sort((a,b)=>a.id.localeCompare(b.id)||Number(a.footer)-Number(b.footer));
  const regions=[...root.querySelectorAll('.loopLine,.labelBox')].map(e=>({tag:e.tagName,...box(e),...style(e),dash:getComputedStyle(e).strokeDasharray,points:e.tagName==='polygon'?[...e.points].map(p=>[p.x,p.y]):null}));
+ const backgrounds=[...root.querySelectorAll('rect.rect')].map(e=>({...box(e),...style(e)}));
  const notes=[...root.querySelectorAll('rect.note')].map(e=>({...box(e),...style(e)}));
  const activations=[...root.querySelectorAll('rect[class^=activation]')].map(e=>({...box(e),...style(e)})).sort((a,b)=>a.x-b.x||a.y-b.y);
  const figures=[...root.querySelectorAll('g.actor-man')].flatMap(g=>[...g.querySelectorAll('line,circle')].map(e=>({id:g.getAttribute('name'),footer:g.classList.contains('actor-bottom'),...box(e),...style(e)}))).sort((a,b)=>a.id.localeCompare(b.id)||Number(a.footer)-Number(b.footer)||a.y-b.y||a.x-b.x);
@@ -40,7 +44,7 @@ export function inspectSequence() {
    const marker=side=>{const value=e.getAttribute('marker-'+side);if(!value)return null;const id=value.slice(value.lastIndexOf('#')+1,-1);const m=root.querySelector('[id="'+id+'"]');const path=m.querySelector('path');return {refX:m.getAttribute('refX'),refY:m.getAttribute('refY'),d:path.getAttribute('d'),...style(path)};};
    return {kind:e.classList.contains('messageLine1')?1:0,...style(e),points:Array.from({length:21},(_,i)=>{const p=e.getPointAtLength(e.getTotalLength()*i/20);return [p.x,p.y];}),start:marker('start'),end:marker('end')};
  });
- const v=root.viewBox.baseVal;return {regions,actors,notes,activations,figures,lines,texts,signals,view:{x:v.x,y:v.y,width:v.width,height:v.height}};
+ const v=root.viewBox.baseVal;return {backgrounds,regions,actors,notes,activations,figures,lines,texts,signals,view:{x:v.x,y:v.y,width:v.width,height:v.height}};
 }
 if(!process.argv.includes('--library')) {
  const directory=resolve(process.argv[2]??'build/mermaid-cpp/sequence-browser');mkdirSync(directory,{recursive:true});

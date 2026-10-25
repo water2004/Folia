@@ -69,9 +69,10 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
         for(std::size_t i=0;i<doc.messages.size();++i) {
             const auto& m=doc.messages[i]; const auto& box=measured.messages[i];
             if(m.type==SequenceKind::active_start || m.type==SequenceKind::active_end) continue;
-            if(sequence_region_start(m.type)||sequence_region_end(m.type)||sequence_region_section(m.type)) continue;
+            if(sequence_region_start(m.type)||sequence_region_end(m.type)||sequence_region_section(m.type)||
+                m.type==SequenceKind::rect_start||m.type==SequenceKind::rect_end) continue;
             if(m.wrap || !(m.type==SequenceKind::note||m.type==SequenceKind::solid||m.type==SequenceKind::dotted||open(m.type)||both(m.type)))
-                return std::unexpected("Sequence background regions/wrapping/extended arrows require the next SVG adapter");
+                return std::unexpected("Sequence wrapping/extended arrows require the next SVG adapter");
             if(!std::isfinite(box.width)||box.width<0||!std::isfinite(box.height)||box.height<0)
                 return std::unexpected("Invalid Sequence message measurement");
             auto from=ids.find(m.from),to=ids.find(m.to);
@@ -108,6 +109,7 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
             std::vector<Section> sections;
         };
         std::vector<Region> regions;
+        std::string region_backgrounds;
         auto insert=[&](double x1,double y1,double x2,double y2) {
             left=std::min({left,x1,x2});right=std::max({right,x1,x2});bottom=std::max({bottom,y1,y2});
             // Original updateBounds applies decreasing margins through the
@@ -133,22 +135,32 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
         const auto font=" font-family=\""+xml(t.font_family)+"\" font-size=\""+num(t.font_size)+"\" font-weight=\""+std::to_string(t.font_weight)+"\"";
         for(std::size_t i=0;i<doc.messages.size();++i) {
             const auto& m=doc.messages[i]; const auto& box=measured.messages[i];
-            if(sequence_region_start(m.type)||sequence_region_section(m.type)) {
+            if(sequence_region_start(m.type)||sequence_region_section(m.type)||m.type==SequenceKind::rect_start) {
                 const bool section=sequence_region_section(m.type);
+                const bool background=m.type==SequenceKind::rect_start;
                 y+=c.box_margin+(section?c.box_text_margin:0);
                 if(section) {
                     if(regions.empty()) return std::unexpected("Sequence section has no region");
                     regions.back().sections.push_back({y,i});
                 } else regions.push_back(Region{.top=y,.message=i});
-                y+=c.box_margin+(section?0:c.box_text_margin)+
-                    (box.display.empty()?0:std::max(box.height,c.label_box_height));
+                y+=c.box_margin+(section||background?0:c.box_text_margin)+
+                    (background||box.display.empty()?0:std::max(box.height,c.label_box_height));
                 bottom=std::max(bottom,y);
                 continue;
             }
-            if(sequence_region_end(m.type)) {
+            if(sequence_region_end(m.type)||m.type==SequenceKind::rect_end) {
                 if(regions.empty()) return std::unexpected("Sequence region end has no start");
                 const auto r=regions.back();regions.pop_back();
                 if(!std::isfinite(r.left)||!std::isfinite(r.right)) return std::unexpected("Sequence region needs rendered content");
+                if(m.type==SequenceKind::rect_end) {
+                    const auto& fill=doc.messages[r.message].message;
+                    // Original drawBackgroundRect lowers each completed rect;
+                    // outer backgrounds therefore precede nested backgrounds.
+                    region_backgrounds="<rect class=\"rect\" x=\""+num(r.left)+"\" y=\""+num(r.top)+"\" width=\""+num(r.right-r.left)+
+                        "\" height=\""+num(r.bottom-r.top)+"\" fill=\""+(fill.empty()?paint(t.rect_fill):xml(fill))+"\"/>"+region_backgrounds;
+                    y=r.bottom;bottom=std::max(bottom,y);
+                    continue;
+                }
                 auto line=[&](double x1,double y1,double x2,double y2,bool section=false) {
                     signals+="<line class=\"loopLine\" x1=\""+num(x1)+"\" y1=\""+num(y1)+"\" x2=\""+num(x2)+"\" y2=\""+num(y2)+
                         "\" stroke-width=\"2\" stroke-dasharray=\""+(section?"3 3":"2 2")+"\" stroke=\""+paint(t.label_border)+"\" fill=\""+paint(t.label_border)+"\"/>";
@@ -261,12 +273,14 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
         for(const auto& actor:doc.actors) footer_height=std::max(footer_height,actor.type==u"actor"?65:c.height);
         bottom=std::max(bottom,footer_y+footer_height+c.box_margin);
         const auto width=right-left+2*c.margin_x;
-        const auto height=bottom+2*c.margin_y-c.box_margin+c.bottom_margin;
+        const auto title_height=doc.title.empty()?0:40;
+        const auto height=bottom+2*c.margin_y-c.box_margin+c.bottom_margin+title_height;
         std::string svg="<svg xmlns=\"http://www.w3.org/2000/svg\" width=\""+num(width)+"\" height=\""+num(height)+"\" viewBox=\""+
-            num(left-c.margin_x)+" "+num(-c.margin_y)+" "+num(width)+" "+num(height)+"\" role=\"img\">";
+            num(left-c.margin_x)+" "+num(-c.margin_y-title_height)+" "+num(width)+" "+num(height)+"\" role=\"img\">";
         if(!doc.acc_title.empty()) svg+="<title>"+xml(doc.acc_title)+"</title>";
         if(!doc.acc_description.empty()) svg+="<desc>"+xml(doc.acc_description)+"</desc>";
         svg+="<defs><marker id=\"sequence-arrowhead\" refX=\"7.9\" refY=\"5\" markerUnits=\"userSpaceOnUse\" markerWidth=\"12\" markerHeight=\"12\" orient=\"auto-start-reverse\"><path d=\"M -1 0 L 10 5 L 0 10 z\" fill=\""+paint(t.signal)+"\" stroke=\""+paint(t.signal)+"\"/></marker></defs>";
+        svg+=region_backgrounds;
         for(std::size_t i=0;i<actors.size();++i) {
             const auto& a=actors[i];const auto center=a.x+a.width/2;
             const bool human=doc.actors[i].type==u"actor";
@@ -283,7 +297,9 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
             }
         }
         for(const auto& layer:backgrounds) svg+=layer;
-        svg+=signals+"</svg>";
+        svg+=signals;
+        if(!doc.title.empty()) svg+="<text x=\""+num((right-left)/2-2*c.margin_x)+"\" y=\"-25\" fill=\""+paint(t.signal_text)+"\""+font+">"+xml(doc.title)+"</text>";
+        svg+="</svg>";
         return SequenceSvg{std::move(svg),width,height};
     } catch(const std::exception& error) { return std::unexpected(std::string{error.what()}); }
 }
