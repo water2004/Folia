@@ -144,7 +144,7 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
                 if(auto value=effective.find(key);value&&number(*value)!=0) *target=number(*value);
             }
             if(c.padding<0||c.node_spacing<0||c.rank_spacing<0) return std::unexpected("Class spacing must be nonnegative");
-            ClassSvgTheme t;t.font_family=text(member(theme,u"fontFamily"));t.font_size=size(member(theme,u"fontSize"));
+            ClassSvgTheme t;t.font_family=text(member(effective,u"fontFamily"));t.font_size=size(member(theme,u"fontSize"));
             t.stroke_width=size(member(theme,u"strokeWidth"));
             if(t.font_size<=0||t.stroke_width<0) return std::unexpected("Invalid Class font or stroke size");
             for(auto [key,target]:{std::pair{u"mainBkg",&t.fill},{u"nodeBorder",&t.border},{u"classText",&t.text},
