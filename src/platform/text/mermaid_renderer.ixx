@@ -242,17 +242,20 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             auto display=diagram_display_text(source);if(!display) return std::unexpected(display.error());
             if(display->empty()) return ClassTextBox{};
             if(size==0) size=theme.font_size;
-            const MermaidFont font{theme.font_family,static_cast<float>(size),weight,italic};
+            const bool svg_label=!cls->config.html_labels;
+            // SVG createText puts an explicit normal/italic style on each run,
+            // overriding the classifier's inherited italic presentation.
+            const MermaidFont font{theme.font_family,static_cast<float>(size),weight,italic&&!svg_label};
             auto lines=flowchart_label_runs(*display,markdown?u"markdown":u"text");
             if(!lines) return std::unexpected(lines.error());
-            ClassTextBox box;box.line_step=size*1.5;
+            ClassTextBox box;box.line_step=size*(svg_label?1.1:1.5);box.svg_label=svg_label;
             std::vector<FlowchartLabelLine> display_lines;
             bool wrapped=false;
             for(const auto& line:*lines) {
                 std::u16string value;
                 std::vector<MermaidTextStyle> styles;
                 for(const auto& run:line) {
-                    styles.push_back({value.size(),run.text.size(),run.strong?(weight<350?400u:weight<550?700u:900u):weight,italic||run.emphasis});
+                    styles.push_back({value.size(),run.text.size(),run.strong?(weight<350?400u:weight<550?700u:900u):weight,font.italic||run.emphasis});
                     value+=run.text;
                 }
                 auto slices=measurer.wrap(value,font,wrapping_width,styles);
@@ -272,16 +275,22 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
                 std::u16string value;
                 std::vector<MermaidTextStyle> styles;
                 for(const auto& run:line) {
-                    styles.push_back({value.size(),run.text.size(),run.strong?(weight<350?400u:weight<550?700u:900u):weight,italic||run.emphasis});
+                    styles.push_back({value.size(),run.text.size(),run.strong?(weight<350?400u:weight<550?700u:900u):weight,font.italic||run.emphasis});
                     value+=run.text;
                 }
-                auto metrics=measurer.measure(value.empty()?std::u16string_view{u"M"}:std::u16string_view{value},font,true,styles);
+                auto metrics=measurer.measure(value.empty()?std::u16string_view{u"M"}:std::u16string_view{value},font,true,styles,svg_label);
                 if(!metrics) return std::unexpected(metrics.error());
-                const double width=value.empty()?0:metrics->advance;
+                const double width=value.empty()?0:svg_label?metrics->bounds_width:metrics->advance;
                 box.width=std::max(box.width,width);box.line_widths.push_back(width);
                 // HTML inline boxes share a baseline but each font retains its
                 // own half-leading. Include the parent strut as createText does.
                 auto strut=measurer.svg_font_metrics(font);if(!strut) return std::unexpected(strut.error());
+                if(svg_label) {
+                    box.line_baselines.push_back(size+box.lines.size()*box.line_step);
+                    box.height=strut->height+box.lines.size()*box.line_step;
+                    box.baseline=size;box.runs.push_back(line);box.text+=value;box.lines.push_back(std::move(value));
+                    continue;
+                }
                 double above=strut->baseline+(box.line_step-strut->height)/2,below=box.line_step-above;
                 for(const auto& style:styles) {
                     auto run_metrics=measurer.svg_font_metrics({font.family,font.size,style.weight,style.italic});
@@ -302,16 +311,40 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
         }
         for(const auto& node:cls->document.classes) {
             ClassNodeMeasurements m;
+            const bool styled=cls->config.html_labels&&std::ranges::any_of(node.styles,[](const auto& style){return style.find(u"font-")!=style.npos;});
+            auto apply_paint=[&](ClassTextBox& box,unsigned weight,bool italic)->std::expected<void,std::string> {
+                if(!styled||box.text.empty()) return {};
+                auto style=class_text_style(node,theme,weight,italic);if(!style)return std::unexpected(style.error());
+                auto family=measurer.resolve_family(style->family);if(!family)return std::unexpected(family.error());
+                style->family=std::move(*family);
+                const MermaidFont font{style->family,static_cast<float>(style->size),style->weight,style->italic};
+                auto strut=measurer.svg_font_metrics(font);if(!strut)return std::unexpected(strut.error());
+                for(std::size_t i=0;i<box.lines.size();++i) {
+                    double above=strut->baseline+(style->size*1.5-strut->height)/2;
+                    for(const auto& run:box.runs[i]) {
+                        auto metrics=measurer.svg_font_metrics({font.family,font.size,
+                            run.strong?(font.weight<350?400u:font.weight<550?700u:900u):font.weight,font.italic||run.emphasis});
+                        if(!metrics)return std::unexpected(metrics.error());
+                        above=std::max(above,metrics->baseline+(style->size*1.5-metrics->height)/2);
+                    }
+                    box.paint_baselines.push_back(i*style->size*1.5+above);
+                }
+                box.paint_font=std::move(*style);return {};
+            };
             auto label=measure(node.label+(node.type.empty()?std::u16string{}:u"&lt;"+node.type+u"&gt;"),700);
             if(!label) return std::unexpected(label.error());m.label=std::move(*label);
+            if(auto painted=apply_paint(m.label,700,false);!painted)return std::unexpected(painted.error());
             if(!node.annotations.empty()) {
                 auto annotation=measure(u"\u00ab"+node.annotations.front()+u"\u00bb");
                 if(!annotation) return std::unexpected(annotation.error());m.annotation=std::move(*annotation);
+                if(auto painted=apply_paint(m.annotation,400,false);!painted)return std::unexpected(painted.error());
             }
             for(auto [members,output]:{std::pair{&node.members,&m.members},{&node.methods,&m.methods}})
                 for(const auto& member:*members) {
                     auto box=measure(member.text,400,member.classifier==u"*");
-                    if(!box) return std::unexpected(box.error());output->push_back(std::move(*box));
+                    if(!box) return std::unexpected(box.error());
+                    if(auto painted=apply_paint(*box,400,member.classifier==u"*");!painted)return std::unexpected(painted.error());
+                    output->push_back(std::move(*box));
                 }
             class_measurements.nodes.push_back(std::move(m));
         }
@@ -331,6 +364,10 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             ClassEdgeMeasurements m;
             // The unified edge painter uses createText's default 200px width.
             auto label=measure(edge.title,400,false,0,true,200);if(!label) return std::unexpected(label.error());m.label=std::move(*label);
+            if(!cls->config.html_labels&&!m.label.text.empty()) {
+                // createText's centered edge background adds two units per side.
+                m.label.width+=4;m.label.height+=4;
+            }
             for(auto [value,target]:{std::pair{&edge.start_label,&m.start},{&edge.end_label,&m.end}}) {
                 if(*value==u"none") continue;
                 auto box=measure(*value,400,false,11);if(!box) return std::unexpected(box.error());*target=std::move(*box);

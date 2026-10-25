@@ -5,6 +5,10 @@ import {resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {chromium} from './oracle/node_modules/playwright-core/index.mjs';
 export const cases = [
+ ["svg-label-members", '%%{init: {"htmlLabels": false}}%%\nclassDiagram\nclass Document {\n+title String\n+save() bool\n}\nDocument --> Store : saves'],
+ ["svg-label-classifiers", '%%{init: {"htmlLabels": false}}%%\nclassDiagram\nclass Repository~T~ {\n<<service>>\n-items List~T~\n+count int$\n#find(id) T*\n~reset()$\n}'],
+ ["class-font-style", 'classDiagram\nclass Document {\n+title String\n+save() bool\n}\nstyle Document fill:#ECECFF,font-size:20px,font-family:Courier New,font-weight:bold,font-style:italic\nDocument --> Store : saves'],
+ ["svg-font-style", '%%{init: {"htmlLabels": false, "fontSize":20}}%%\nclassDiagram\nclass Document {\n+title String\n+save() bool\n}\nstyle Document fill:#ECECFF,font-size:24px,font-family:Courier New,font-weight:bold,font-style:italic\nDocument --> Store : saves'],
  ["lollipop", "classDiagram\nclass Service {\n+save() bool\n}\nService --() Storage\nInput ()-- Service"],
  ["lollipop-repeated", "classDiagram\ndirection LR\nEditor --() Storage : saves\nViewer --() Storage : reads"],
  ["class-direct-style", "classDiagram\nclass Document {\n+title String\n+save() bool\n}\nDocument --> Store : saves\nstyle Document fill:#ffeecc,stroke:#aa5500,color:#552200,stroke-width:2px"],

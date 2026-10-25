@@ -7,6 +7,12 @@ export import folia.mermaid.dagre_rank;
 export import folia.mermaid.flowchart_label;
 
 export namespace folia::mermaid {
+struct ClassTextStyle {
+    std::u16string family;
+    double size = 16;
+    unsigned weight = 400;
+    bool italic = false;
+};
 struct ClassTextBox {
     std::u16string text;
     double width = 0, height = 0, baseline = 0;
@@ -15,6 +21,9 @@ struct ClassTextBox {
     double line_step = 0;
     std::vector<FlowchartLabelLine> runs;
     std::vector<double> line_baselines;
+    std::optional<ClassTextStyle> paint_font;
+    std::vector<double> paint_baselines;
+    bool svg_label = false;
 };
 struct ClassNodeMeasurements {
     ClassTextBox label, annotation;
@@ -42,10 +51,12 @@ struct ClassSvgTheme {
 struct ClassSvgConfig {
     double padding = 12, note_padding = 6, node_spacing = 50, rank_spacing = 50, title_top_margin = 25;
     bool hide_empty_members = false;
+    bool html_labels = true;
     double group_padding = 16, group_title_top = 0, group_title_bottom = 0;
 };
 struct ClassRenderInput { ClassInput document; ClassSvgTheme theme; ClassSvgConfig config; };
 struct ClassSvg { std::string svg; double width = 0, height = 0; };
+std::expected<ClassTextStyle,std::string> class_text_style(const ClassNode&,const ClassSvgTheme&,unsigned,bool);
 // Explicit classic/Dagre configuration; the official default ELK remains a
 // separate layout boundary. Inputs contain real final display measurements.
 std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput&,const ClassMeasurements&);

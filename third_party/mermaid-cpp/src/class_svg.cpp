@@ -74,7 +74,7 @@ struct TextBounds {
 NodeBox node_box(const ClassNodeMeasurements& m,const ClassSvgConfig& c) {
     const double half=std::max(m.label.width,m.annotation.width)/2;
     double right=half,offset=0;TextBounds members;
-    for(const auto& t:m.members) {right=std::max(right,t.width);members.add(t,offset);offset+=t.height;}
+    for(const auto& t:m.members) {right=std::max(right,t.width);members.add(t,offset);offset+=t.height+(c.html_labels?0:3);}
     for(const auto& t:m.methods) right=std::max(right,t.width);
     const auto member_height=members.height();
     const auto p=c.padding,head=m.annotation.height+m.label.height;
@@ -83,9 +83,9 @@ NodeBox node_box(const ClassNodeMeasurements& m,const ClassSvgConfig& c) {
     // the group transforms. Union those bounds, including mixed font heights.
     TextBounds bounds;bounds.add(m.annotation,0);bounds.add(m.label,m.annotation.height);
     offset=head+2*p;
-    for(const auto& t:m.members) {bounds.add(t,offset);offset+=t.height;}
+    for(const auto& t:m.members) {bounds.add(t,offset);offset+=t.height+(c.html_labels?0:3);}
     offset=head+std::max(member_height,p/2)+4*p;
-    for(const auto& t:m.methods) {bounds.add(t,offset);offset+=t.height;}
+    for(const auto& t:m.methods) {bounds.add(t,offset);offset+=t.height+(c.html_labels?0:3);}
     double h=bounds.height();
     if(empty) h+=p; else if(m.methods.empty()) h+=2*p;
     h+=2*p+(extra?2*p:empty?-p:0);
@@ -94,14 +94,15 @@ NodeBox node_box(const ClassNodeMeasurements& m,const ClassSvgConfig& c) {
 std::string text(const ClassTextBox& t,double x,double y,const ClassSvgTheme& theme,
     unsigned weight=400,std::u16string_view classifier={},double size=0,bool left_aligned=false) {
     if(t.text.empty()) return {};
+    if(t.paint_font) {weight=t.paint_font->weight;size=t.paint_font->size;}
     std::string content;
     if(!t.runs.empty()) {
         for(std::size_t i=0;i<t.runs.size();++i) {
-            content+="<tspan x=\""+num(x+(left_aligned?0:(t.width-t.line_widths[i])/2))+"\" y=\""+num(y+t.line_baselines[i])+"\">";
+            content+="<tspan x=\""+num(x+(left_aligned?0:(t.width-t.line_widths[i])/2))+"\" y=\""+num(y+(t.paint_font?t.paint_baselines[i]:t.line_baselines[i]))+"\">";
             for(const auto& run:t.runs[i]) {
                 content+="<tspan";
                 if(run.strong) content+=" font-weight=\""+std::to_string(weight<350?400u:weight<550?700u:900u)+"\"";
-                if(run.emphasis) content+=" font-style=\"italic\"";
+                if(run.emphasis||t.svg_label) content+=" font-style=\""+std::string(run.emphasis?"italic":"normal")+"\"";
                 content+=">"+xml(run.text)+"</tspan>";
             }
             content+="</tspan>";
@@ -110,9 +111,11 @@ std::string text(const ClassTextBox& t,double x,double y,const ClassSvgTheme& th
         for(std::size_t i=0;i<t.lines.size();++i)
             content+="<tspan x=\""+num(x+(left_aligned?0:(t.width-t.line_widths[i])/2))+"\" y=\""+num(y+t.baseline+i*t.line_step)+"\">"+xml(t.lines[i])+"</tspan>";
     } else content=xml(t.text);
-    return "<g class=\"label\"><text x=\""+num(x)+"\" y=\""+num(y+t.baseline)+"\" font-size=\""+
+    return "<g class=\"label\""+std::string(classifier==u"$"&&t.svg_label?" text-decoration=\"underline\"":"")+
+        "><text x=\""+num(x)+"\" y=\""+num(y+t.baseline)+"\" font-size=\""+
         num(size?size:theme.font_size)+"\" font-weight=\""+std::to_string(weight)+"\""+
-        (classifier==u"*"?" font-style=\"italic\"":classifier==u"$"?" text-decoration=\"underline\"":"")+
+        (t.paint_font?" font-family=\""+xml(t.paint_font->family)+"\" font-style=\""+(t.paint_font->italic?"italic":"normal")+"\"":classifier==u"*"?" font-style=\"italic\"":"")+
+        (classifier==u"$"&&!t.svg_label?" text-decoration=\"underline\"":"")+
         " fill=\""+theme.text+"\">"+content+"</text></g>";
 }
 FlowchartPoint terminal(std::vector<FlowchartPoint> points,bool start) {
@@ -126,6 +129,15 @@ FlowchartPoint terminal(std::vector<FlowchartPoint> points,bool start) {
     const double angle=std::atan2(first.y-center.y,first.x-center.x);
     return {std::sin(angle)*15+(first.x+center.x)/2,-std::cos(angle)*15+(first.y+center.y)/2};
 }
+}
+std::expected<ClassTextStyle,std::string> class_text_style(const ClassNode& node,const ClassSvgTheme& theme,unsigned weight,bool italic) {
+    try {
+        const auto paint=compile_paint({},node.styles);
+        FlowchartSvgTheme base;base.font_family=theme.font_family;base.font_size=theme.font_size;
+        const auto font=paint.font(base);
+        return ClassTextStyle{font.family,font.size,paint.values.contains(u"font-weight")?font.weight:weight,
+            paint.values.contains(u"font-style")?font.italic:italic};
+    } catch(const std::exception& e) {return std::unexpected(e.what());}
 }
 std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& input,const ClassMeasurements& measured) {
     try {
@@ -304,21 +316,19 @@ std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& inp
         for(std::size_t i=0;i<doc.classes.size();++i) {
             const auto& n=doc.classes[i];const auto& m=measured.nodes[i];const auto& b=boxes[i];const auto& position=placed->nodes[group_count+i];
             const auto paint=compile_paint({},n.styles);
-            for(const auto& [key,value]:paint.values)
-                if(key.starts_with(u"font-")) return std::unexpected("Class styled typography requires a measured adapter");
             auto node_theme=theme;node_theme.text=paint.get(u"color",theme.text);
             const auto p=config.padding,x=position.x+8-b.width/2,y=position.y+8-b.height/2;
             svg+="<g class=\"node\" data-class-id=\""+xml(n.id)+"\"><rect class=\"outer-path\" x=\""+num(x)+"\" y=\""+num(y)+
                 "\" width=\""+num(b.width)+"\" height=\""+num(b.height)+"\""+paint.attributes(theme.fill,theme.border,num(theme.stroke_width))+"/>";
             const auto group=[&](std::string_view kind,const std::string& content){svg+="<g class=\"text "+std::string(kind)+"-group\">"+content+"</g>";};
             const bool hidden_empty=m.members.empty()&&m.methods.empty()&&config.hide_empty_members;
-            const auto top=[&](const ClassTextBox& t){return hidden_empty?y+p:y+2*p-text_half_line(t);};
+            const auto top=[&](const ClassTextBox& t){return (hidden_empty?y+p:y+2*p-text_half_line(t))-(config.html_labels?0:4);};
             group("annotation",text(m.annotation,position.x+8-m.annotation.width/2,top(m.annotation),node_theme));
             group("label",text(m.label,position.x+8-m.label.width/2,top(m.label)+m.annotation.height,node_theme,700));
             std::string content;double row_y=b.header+2*p;
-            for(std::size_t j=0;j<m.members.size();++j) {content+=text(m.members[j],x+p,top(m.members[j])+row_y,node_theme,400,n.members[j].classifier);row_y+=m.members[j].height;}
+            for(std::size_t j=0;j<m.members.size();++j) {content+=text(m.members[j],x+p,top(m.members[j])+row_y,node_theme,400,n.members[j].classifier);row_y+=m.members[j].height+(config.html_labels?0:3);}
             group("members",content);content.clear();row_y=b.header+std::max(b.member_height,p/2)+4*p;
-            for(std::size_t j=0;j<m.methods.size();++j) {content+=text(m.methods[j],x+p,top(m.methods[j])+row_y,node_theme,400,n.methods[j].classifier);row_y+=m.methods[j].height;}
+            for(std::size_t j=0;j<m.methods.size();++j) {content+=text(m.methods[j],x+p,top(m.methods[j])+row_y,node_theme,400,n.methods[j].classifier);row_y+=m.methods[j].height+(config.html_labels?0:3);}
             group("methods",content);
             if(b.extra||!m.members.empty()||!m.methods.empty()) {
                 // Empty group getBBox heights are reduced by PADDING/2 in the
