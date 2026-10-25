@@ -145,7 +145,7 @@ namespace winrt::Folia
                 return;
             }
         }
-        selectionDrag_.Begin(*hit);
+        selectionDrag_.Begin(*hit, static_cast<float>(point.X), static_cast<float>(point.Y));
         surface_.CapturePointer(args.Pointer());
         if (render_) render_();
         args.Handled(true);
@@ -191,8 +191,8 @@ namespace winrt::Folia
             return;
         }
         SetLinkCursor(false);
-        selectionDrag_.Update(static_cast<float>(point.X), static_cast<float>(point.Y));
-        if (render_) render_();
+        auto changed = selectionDrag_.Update(static_cast<float>(point.X), static_cast<float>(point.Y));
+        if ((changed || hoverVisualChanged) && render_) render_();
         args.Handled(true);
     }
 
@@ -228,8 +228,9 @@ namespace winrt::Folia
         if (selectionDrag_.Active())
         {
             auto point = args.GetCurrentPoint(surface_).Position();
-            selectionDrag_.Finish(static_cast<float>(point.X), static_cast<float>(point.Y));
+            auto changed = selectionDrag_.Finish(static_cast<float>(point.X), static_cast<float>(point.Y));
             surface_.ReleasePointerCapture(args.Pointer());
+            if (changed && render_) render_();
             args.Handled(true);
         }
     }

@@ -35,12 +35,15 @@ namespace winrt::Folia
         return active;
     }
 
-    void EditorSelectionDrag::Begin(folia::TextPosition valueAnchor)
+    void EditorSelectionDrag::Begin(folia::TextPosition valueAnchor, float x, float y)
     {
         if (!session) return;
         StopAutoScroll();
         active = true;
         anchor = valueAnchor;
+        pointerX = x;
+        pointerY = y;
+        gesture.Begin(x, y);
         session->SetSelection(anchor, anchor);
         if (textInput) textInput->NotifySelectionChanged();
     }
@@ -49,7 +52,7 @@ namespace winrt::Folia
     {
         pointerX = x;
         pointerY = y;
-        return UpdateSelection(x, y, true);
+        return active && gesture.Update(x, y) && UpdateSelection(x, y, true);
     }
 
     bool EditorSelectionDrag::Finish(float x, float y)
@@ -57,7 +60,7 @@ namespace winrt::Folia
         if (!active) return false;
         pointerX = x;
         pointerY = y;
-        auto changed = UpdateSelection(x, y, false);
+        auto changed = gesture.Update(x, y) && UpdateSelection(x, y, false);
         StopAutoScroll();
         active = false;
         return changed;

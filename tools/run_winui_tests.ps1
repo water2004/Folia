@@ -9,6 +9,9 @@ $objects = Join-Path $root "build/app-winui/obj/x64/$Configuration"
 $app = Join-Path $root "build/app-winui/bin/x64/$Configuration"
 $scratch = Join-Path $root "build/tests/winui/$Configuration"
 New-Item -ItemType Directory -Force -Path $scratch | Out-Null
+# The SVG normalizer resolves its DLL relative to the executable, not the
+# working directory. Keep the test host's math pipeline identical to the app.
+Copy-Item -LiteralPath (Join-Path $app 'folia_svg_normalizer.dll') -Destination $scratch -Force
 $linkRecords = @(Get-Content (Join-Path $objects 'Folia.tlog/link.command.1.tlog'))
 $start = 0
 for ($i = 0; $i -lt $linkRecords.Count; ++$i) {

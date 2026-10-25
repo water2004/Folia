@@ -650,6 +650,7 @@ set_target_properties(FoliaTests PROPERTIES
 file(GLOB_RECURSE FOLIA_TEST_SRC CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/*.cpp)
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/platform/")
+list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/app/")
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/encoding/")
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/math/")
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/parsing/test_commonmark\\.cpp$")

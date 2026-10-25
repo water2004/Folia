@@ -4,6 +4,26 @@ import std;
 
 export namespace folia::platform::editor
 {
+    // Movement is measured from the physical press, never from a caret that
+    // may move when the focused content is laid out again.
+    class EditorSelectionDragGesture
+    {
+    public:
+        void Begin(float x, float y) { startX_ = x; startY_ = y; dragging_ = false; }
+        bool Update(float x, float y)
+        {
+            constexpr float threshold = 4.0f;
+            if (std::isfinite(x) && std::isfinite(y)
+                && (std::abs(x - startX_) >= threshold || std::abs(y - startY_) >= threshold))
+                dragging_ = true;
+            return dragging_;
+        }
+    private:
+        float startX_ = 0.0f;
+        float startY_ = 0.0f;
+        bool dragging_ = false;
+    };
+
     struct EditorSelectionDragPolicy
     {
         float minimumAutoScrollSpeed = 80.0f;

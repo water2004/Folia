@@ -7,6 +7,19 @@ using namespace folia::platform::editor;
 
 suite editor_selection_drag_model_tests = [] {
 
+"selection click and small pointer jitter never start a drag"_test = [] {
+    EditorSelectionDragGesture gesture;
+    gesture.Begin(100, 80);
+    expect(!gesture.Update(100, 80));
+    expect(!gesture.Update(102, 78));
+    expect(!gesture.Update(100, 80));
+    expect(gesture.Update(104, 80));
+    expect(gesture.Update(100, 80));
+    gesture.Begin(300, 200);
+    expect(!gesture.Update(300, 200));
+    expect(gesture.Update(300, 196));
+};
+
 "selection pointer inside viewport does not auto scroll"_test = [] {
     auto sample = ProjectEditorSelectionPointer(40.0f, 60.0f, 200.0f, 100.0f);
     expect(sample.hitX == 40.0f);
