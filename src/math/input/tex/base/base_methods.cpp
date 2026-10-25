@@ -181,7 +181,10 @@ MmlNode *parseRoot(TexParser &p, std::u16string source) {
     return result;
 }
 DispatchOutcome script(TexParser &p, bool sup) {
-    if (match(u"\\d", p.GetNext())) {
+    const auto next = p.GetNext();
+    // Source /\d/ searches for an ASCII digit. Keep GetNext's whitespace
+    // advancement and search the complete returned token without a regex.
+    if (std::ranges::any_of(next, [](char16_t c) { return c >= u'0' && c <= u'9'; })) {
         std::u16string source(p.string());
         source.insert(std::min(p.position() + 1, source.size()), 1, u' ');
         p.setString(std::move(source));

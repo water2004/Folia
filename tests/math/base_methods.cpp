@@ -198,6 +198,40 @@ MmlNode &parse(Fixture &f, std::u16string source) {
 } // namespace
 
 suite base_methods = [] {
+    "base methods script digit recognition preserves source and argument boundaries"_test = [] {
+        struct Case {
+            std::u16string suffix, rewritten, argument, rendered;
+        };
+        const std::array cases{
+            Case{u"12", u"1 2", u"1", u"x12"},
+            Case{u" \t\u00a012", u" \t\u00a01 2", u"1", u"x12"},
+            Case{u"{12}", u"{12}", u"12", u"x12"},
+            Case{u"a", u"a", u"a", u"xa"},
+            Case{u"١٢", u"١٢", u"١", u"x١٢"},
+            Case{u"１２", u"１２", u"１", u"x１２"},
+            Case{u"𝟙", u"𝟙", u"𝟙", u"x𝟙"},
+            Case{u"\\mathrm{12}", u"\\mathrm{12}", u"12", u"x12"}};
+        for (auto marker : {u'_', u'^'})
+            for (auto const &item : cases) {
+                Fixture f;
+                baseSetup(f);
+                auto prefix = std::u16string(u"x") + marker;
+                TexParser parser(prefix + item.suffix, {}, *f.options);
+                expect(static_cast<bool>(parser.string() == prefix + item.rewritten));
+                auto root = parser.mml();
+                expect(root != nullptr);
+                if (!root) continue;
+                expect(static_cast<bool>(visible(*root) == item.rendered));
+                auto scripts = nodes(*root, NodeKind::msubsup);
+                expect(scripts.size() == 1_u);
+                if (scripts.empty()) continue;
+                const auto slot = marker == u'_' ? 1u : 2u;
+                auto const &children = scripts.front()->children();
+                expect(children.size() > slot && children[slot] != nullptr);
+                if (children.size() > slot && children[slot])
+                    expect(static_cast<bool>(visible(*children[slot]) == item.argument));
+            }
+    };
     "base methods actual parser scripts primes braces and comments"_test = [] {
         Fixture f;
         baseSetup(f);
