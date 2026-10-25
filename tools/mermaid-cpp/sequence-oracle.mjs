@@ -41,6 +41,7 @@ const cases = [
   ["unclosed-region", "sequenceDiagram\nloop Retry\nA->>B: Go"],
   ["unexpected-section", "sequenceDiagram\nopt Ready\nA->>B: Go\nelse Wait\nend"],
   ["unexpected-end", "sequenceDiagram\nA->>B: Go\nend"],
+  ['entities','sequenceDiagram\nparticipant A as Editor #38; viewer\nA->>B: Save #60;document#62;\nNote over B: Value #35;1'],
   ['unfinished-message','sequenceDiagram\nA->>'],
   ['missing-message-colon','sequenceDiagram\nA->>B'],
   ['inactive-end','sequenceDiagram\nA->>-B: Invalid'],

@@ -28,6 +28,8 @@ struct PreparedDiagram {
     // Configuration for family init/render, including final detector writes.
     ConfigValue effective_config;
 };
+// Protect Mermaid character entities after preprocessing and before family parsing.
+std::u16string encode_diagram_source(std::u16string_view source);
 // Compose preprocessing -> reset -> detect scope -> apply directive -> detect.
 // A private session copy isolates requests; the caller's state/source are never
 // changed, including on failure. Builtin detection does not imply an available

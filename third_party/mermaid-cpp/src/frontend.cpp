@@ -7,6 +7,29 @@ import folia.mermaid.config_clean_merge;
 import folia.mermaid.diagram_registry;
 
 namespace folia::mermaid {
+static bool entity_word(char16_t c) {
+    return (c>=u'0'&&c<=u'9')||(c>=u'a'&&c<=u'z')||(c>=u'A'&&c<=u'Z')||c==u'_';
+}
+std::u16string encode_diagram_source(std::u16string_view value) {
+    // Diagram.fromText protects escapes before parsing. Frontmatter metadata
+    // is supplied separately and must not be interpreted as encoded source.
+    std::u16string out;
+    for(std::size_t i=0;i<value.size();) {
+        auto end=i+1;
+        if(value[i]==u'#') {
+            while(end<value.size() && entity_word(value[end])) ++end;
+            if(end>i+1 && end<value.size() && value[end]==u';') {
+                auto name=value.substr(i+1,end-i-1);
+                const bool numeric=std::ranges::all_of(name,[](char16_t c){return c>=u'0'&&c<=u'9';});
+                out+=numeric?u"\ufb02\u00b0\u00b0":u"\ufb02\u00b0";
+                out+=name; out+=u"\u00b6\u00df"; i=end+1; continue;
+            }
+        }
+        out+=value[i++];
+    }
+    return out+u"\n";
+}
+
 std::expected<PreparedDiagram, std::string> prepare_diagram(
     std::u16string_view source, const ConfigSession& session, FrontendLimits limits) {
     if (source.size() > limits.source_units) return std::unexpected("Frontend source budget exceeded");

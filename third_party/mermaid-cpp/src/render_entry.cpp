@@ -57,28 +57,6 @@ template<class Document> void metadata(Document& document, const PreparedDiagram
     if (document.title.empty() && prepared.title) document.title = *prepared.title;
     plain_metadata(document.title); plain_metadata(document.acc_title); plain_metadata(document.acc_description);
 }
-bool word(char16_t c) {
-    return (c>=u'0'&&c<=u'9')||(c>=u'a'&&c<=u'z')||(c>=u'A'&&c<=u'Z')||c==u'_';
-}
-std::u16string encode_source(std::u16string_view value) {
-    // Diagram.fromText protects escapes before parsing. Frontmatter metadata
-    // is supplied separately and must not be interpreted as encoded source.
-    std::u16string out;
-    for(std::size_t i=0;i<value.size();) {
-        auto end=i+1;
-        if(value[i]==u'#') {
-            while(end<value.size() && word(value[end])) ++end;
-            if(end>i+1 && end<value.size() && value[end]==u';') {
-                auto name=value.substr(i+1,end-i-1);
-                const bool numeric=std::ranges::all_of(name,[](char16_t c){return c>=u'0'&&c<=u'9';});
-                out+=numeric?u"\ufb02\u00b0\u00b0":u"\ufb02\u00b0";
-                out+=name; out+=u"\u00b6\u00df"; i=end+1; continue;
-            }
-        }
-        out+=value[i++];
-    }
-    return out+u"\n";
-}
 std::u16string entity(std::u16string_view name) {
     if (std::ranges::all_of(name,[](char16_t c){ return c>=u'0'&&c<=u'9'; })) {
         auto digits=narrow(name); std::uint32_t cp{};
@@ -229,7 +207,7 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
             return NativeDiagram{std::move(*prepared),FlowchartRenderInput{std::move(*graph),std::move(style)}};
         }
         if (prepared->type==u"packet") {
-            auto document=parse_packet(encode_source(prepared->code.cleaned));
+            auto document=parse_packet(encode_diagram_source(prepared->code.cleaned));
             if (!document) return std::unexpected(error_text(document.error().message));
             metadata(*document,*prepared);
             const auto& config=member(effective,u"packet");
@@ -257,7 +235,7 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
             return NativeDiagram{std::move(*prepared),PacketRenderInput{std::move(*layout),std::move(style)}};
         }
         if (prepared->type!=u"pie") return std::unexpected("Native renderer is not available for this diagram family");
-        auto parsed=parse_pie(encode_source(prepared->code.cleaned));
+        auto parsed=parse_pie(encode_diagram_source(prepared->code.cleaned));
         if (!parsed) return std::unexpected(error_text(parsed.error().message));
         metadata(*parsed,*prepared);
         auto document=populate_pie(*parsed);
@@ -298,6 +276,8 @@ std::expected<DiagramSvg,std::string> render_native_diagram(const NativeDiagram&
         if constexpr(std::is_same_v<std::decay_t<decltype(content)>,SequenceRenderInput>) {
             auto result=render_sequence_svg(content,sequence_measurements);
             if(!result) return std::unexpected(result.error());
+            try { decode_svg_text(result->svg); }
+            catch(const std::runtime_error& e) { return std::unexpected(e.what()); }
             return DiagramSvg{std::move(result->svg),result->width,result->height};
         } else if constexpr(std::is_same_v<std::decay_t<decltype(content)>,FlowchartRenderInput>) {
             auto result=render_flowchart_svg(content,flowchart_measurements);

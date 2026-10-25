@@ -168,7 +168,8 @@ public:
         const auto* wrap = prepared.effective_config.find(u"wrap");
         if (!wrap && cfg) wrap = cfg->find(u"wrap");
         if (wrap) auto_wrap = wrap->kind == ConfigKind::boolean && wrap->boolean;
-        const View source = prepared.code.cleaned;
+        const auto encoded = encode_diagram_source(prepared.code.cleaned);
+        const View source = encoded;
         bool header = false;
         while (offset < source.size()) {
             const auto end = source.find_first_of(u"\n;",offset);
