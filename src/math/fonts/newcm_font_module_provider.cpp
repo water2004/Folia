@@ -38,11 +38,21 @@ std::size_t NewcmFontRequest::loadedResourceCount() const noexcept {
 
 std::vector<NewcmGlyphData const *>
 NewcmFontRequest::read(std::span<SvgFontGlyphKey const> keys) const {
+    std::vector<NewcmGlyphData const *> result(keys.size());
+    read(keys, result);
+    return result;
+}
+
+void NewcmFontRequest::read(std::span<SvgFontGlyphKey const> keys,
+                            std::span<NewcmGlyphData const *> result) const {
     std::scoped_lock lock(state_->mutex);
     std::set<SvgFontGlyphKey> missing;
-    for (auto const &key : keys)
-        if (!state_->loaded.contains(key))
-            missing.insert(key);
+    for (std::size_t i = 0; i < keys.size(); ++i) {
+        const auto found = state_->loaded.find(keys[i]);
+        result[i] = found == state_->loaded.end() ? nullptr : &found->second;
+        if (!result[i])
+            missing.insert(keys[i]);
+    }
     if (!missing.empty()) {
         const std::vector<SvgFontGlyphKey> requested(missing.begin(), missing.end());
         const auto records = state_->tables->lookup(requested);
@@ -75,20 +85,20 @@ NewcmFontRequest::read(std::span<SvgFontGlyphKey const> keys) const {
             state_->loaded.emplace(requested[i], std::move(data));
         }
     }
-    std::vector<NewcmGlyphData const *> result;
-    result.reserve(keys.size());
-    for (auto const &key : keys)
-        result.push_back(&state_->loaded.at(key));
-    return result;
+    for (std::size_t i = 0; i < keys.size(); ++i)
+        if (!result[i])
+            result[i] = &state_->loaded.at(keys[i]);
 }
 FontGlyph const *NewcmFontRequest::glyph(std::string_view variant, std::uint32_t codepoint) const {
     const SvgFontGlyphKey key{std::string(variant), codepoint};
-    auto values = read(std::span{&key, std::size_t{1}});
-    return values.front()->glyph ? &*values.front()->glyph : nullptr;
+    NewcmGlyphData const *value = nullptr;
+    read(std::span{&key, std::size_t{1}}, std::span{&value, std::size_t{1}});
+    return value->glyph ? &*value->glyph : nullptr;
 }
 SvgFontGlyphSource const *NewcmFontRequest::find(SvgFontGlyphKey const &key) const {
-    auto values = read(std::span{&key, std::size_t{1}});
-    return values.front()->svg ? &*values.front()->svg : nullptr;
+    NewcmGlyphData const *value = nullptr;
+    read(std::span{&key, std::size_t{1}}, std::span{&value, std::size_t{1}});
+    return value->svg ? &*value->svg : nullptr;
 }
 
 std::shared_ptr<NewcmFontSource const> newcmFontSource() {

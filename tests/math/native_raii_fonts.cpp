@@ -15,6 +15,65 @@ using output::scene::MoveTo;
 using output::scene::LineTo;
 
 suite font_repository_contract = [] {
+    "NewCM request scalar and batch reads share stable loaded values"_test = [] {
+        using namespace folia::math::fonts;
+        const auto source = newcmFontSource();
+        NewcmFontRequest request(source->tables);
+        const SvgFontGlyphKey a{"normal", 0x41};
+        const SvgFontGlyphKey b{"normal", 0x42};
+        const SvgFontGlyphKey missing{"absent-variant", 0x41};
+        const auto* first = request.glyph(a.variant, a.codepoint);
+        expect(first != nullptr);
+        const auto* svg = request.find(a);
+        expect(svg != nullptr);
+        const std::array<SvgFontGlyphKey, 5> keys{a, missing, b, a, missing};
+        const auto values = request.read(keys);
+        expect(values.size() == keys.size());
+        expect(values[0] == values[3]);
+        expect(values[1] == values[4]);
+        expect(&*values[0]->glyph == first);
+        expect(&*values[0]->svg == svg);
+        expect(!values[1]->glyph.has_value());
+        expect(!values[1]->svg.has_value());
+        expect(request.loadedGlyphCount() == 3_u);
+        expect(request.glyph(missing.variant, missing.codepoint) == nullptr);
+        expect(request.find(missing) == nullptr);
+        expect(request.glyph(a.variant, a.codepoint) == first);
+        expect(request.find(a) == svg);
+        expect(request.read(keys) == values);
+        expect(request.read({}).empty());
+        expect(request.loadedGlyphCount() == 3_u);
+        NewcmFontRequest next(source->tables);
+        expect(next.loadedGlyphCount() == 0_u);
+    };
+    "NewCM table lookup preserves extension and SVG alias precedence"_test = [] {
+        using namespace folia::math::fonts;
+        const std::array<NewcmFontGlyphRow, 2> base{{
+            {.variant = "normal", .code = 0x41},
+            {.variant = "normal", .code = 0x42}}};
+        const std::array<NewcmFontGlyphRow, 1> extension{{
+            {.variant = "normal", .code = 0x41}}};
+        const std::array<NewcmSvgAliasRow, 1> aliases{{
+            {"alias", 0x41, "normal", 0x42}}};
+        const std::array<NewcmSvgAliasRow, 1> overrides{{
+            {"alias", 0x41, "normal", 0x41}}};
+        NewcmFontTables tables;
+        tables.addRows(base);
+        tables.addRows(extension);
+        tables.addAliases(aliases);
+        tables.addAliases(overrides);
+        const std::array<SvgFontGlyphKey, 4> keys{{
+            {"normal", 0x41}, {"normal", 0x42}, {"alias", 0x41}, {"missing", 0x41}}};
+        const auto values = tables.lookup(keys);
+        expect(values[0].glyph == &extension[0]);
+        expect(values[0].svg == &extension[0]);
+        expect(values[1].glyph == &base[1]);
+        expect(values[1].svg == &base[1]);
+        expect(values[2].glyph == nullptr);
+        expect(values[2].svg == &extension[0]);
+        expect(values[3].glyph == nullptr);
+        expect(values[3].svg == nullptr);
+    };
     "NewCM batch font bodies belong only to the active request"_test = [] {
         using namespace folia::math::fonts;
         std::weak_ptr<FontGlyphLookup const> requestLifetime;

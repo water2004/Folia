@@ -22,7 +22,8 @@ struct NewcmFontTables::State {
         }
         return nullptr;
     }
-    NewcmFontGlyphRow const *svgRow(SvgFontGlyphKey const &key) const {
+    NewcmFontGlyphRow const *svgRow(SvgFontGlyphKey const &key,
+                                   NewcmFontGlyphRow const *direct) const {
         for (auto table = aliases.rbegin(); table != aliases.rend(); ++table) {
             auto found = std::lower_bound(
                 table->begin(), table->end(), key, [](auto const &row, auto const &target) {
@@ -34,7 +35,7 @@ struct NewcmFontTables::State {
                 found->from_codepoint == key.codepoint)
                 return row({found->to_variant, found->to_codepoint});
         }
-        return row(key);
+        return direct;
     }
 };
 
@@ -55,8 +56,10 @@ bool NewcmFontTables::contains(SvgFontGlyphKey const &key) const {
 std::vector<NewcmGlyphRecord> NewcmFontTables::lookup(std::span<SvgFontGlyphKey const> keys) const {
     std::vector<NewcmGlyphRecord> result;
     result.reserve(keys.size());
-    for (auto const &key : keys)
-        result.push_back({state_->row(key), state_->svgRow(key)});
+    for (auto const &key : keys) {
+        const auto direct = state_->row(key);
+        result.push_back({direct, state_->svgRow(key, direct)});
+    }
     return result;
 }
 std::vector<SvgFontGlyphKey> NewcmFontTables::keys() const {

@@ -11,6 +11,10 @@ class NewcmFontRequest final : public output::common::FontGlyphLookup,
                                public output::svg::SvgFontGlyphLookup {
     struct State;
     std::unique_ptr<State> state_;
+    // Shared batch loader; scalar callers supply one stack slot, so repeated
+    // Common/SVG borrows do not allocate a result container. Sizes must match.
+    void read(std::span<output::svg::SvgFontGlyphKey const> keys,
+              std::span<NewcmGlyphData const *> result) const;
 
   public:
     explicit NewcmFontRequest(std::shared_ptr<NewcmFontTables const> tables);
