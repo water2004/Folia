@@ -83,3 +83,72 @@ Node ordering, Brandes-Koepf placement, orthogonal routing, compound-graph
 processors, measured label geometry and the common-renderer adapter remain
 necessary after layering. Their absence is an implementation gap, not a missing
 source/package blocker; the original worker is available and hash locked.
+
+## Other retained families: source availability
+
+This bounded source inventory establishes where the other independent original
+algorithms can be obtained. It does not claim their native implementation or
+extend their required feature lists.
+
+| Consumer | Locally available original implementation | License |
+| --- | --- | --- |
+| Mindmap | `cytoscape-cose-bilkent` 4.1.0, `cose-base` 1.0.3, `layout-base` 1.0.2 | MIT |
+| Architecture | `cytoscape-fcose` 2.2.0, `cose-base` 2.2.0, `layout-base` 2.0.1 | MIT |
+
+These installed packages include their `src` files under the oracle's pnpm
+directory. Mindmap's pinned `mindmapRenderer.ts` selects `cose-bilkent` as its
+fallback; `rendering-util/layout-algorithms/cose-bilkent/cytoscape-setup.ts`
+passes measured node dimensions and runs the original layout with `quality:
+'proof'`, no animation and no style engine. Architecture's
+`architectureRenderer.ts` calls fCoSE directly, also with `quality: 'proof'`,
+and supplies seeded randomization, group-dependent edge lengths/elasticity and
+alignment/relative-placement constraints. The different CoSE dependency
+generations and these constraints must remain distinct.
+
+Before establishing their layout oracles, resolve the known dependency-version
+difference: the installed oracle has Cytoscape 3.34.4, while the pinned Mermaid
+repository's pnpm lock resolves Cytoscape 3.34.0. This observation does not
+invalidate unrelated accepted renderers. The next package should pin the
+consumer's original adapter and necessary force-layout sources together, then
+observe one representative measured diagram through each original pipeline.
+
+### ZenUML package evidence
+
+The pinned Mermaid lock resolves `@zenuml/core` 3.49.2. The exact public npm
+archive is `https://registry.npmjs.org/@zenuml/core/-/core-3.49.2.tgz`.
+Its registry SHA-512 integrity was verified on download:
+
+```text
+sha512-qeQMapuE0XETML2mRw2MIIrMCjcZBhRDSwW10//q8XQ+VyExzkAn39VCBwxIbbPdTBt6gJnaBBixF9A4hsIxcA==
+```
+
+The package license is MIT, copyright 2022 Peng Xiao. The distribution's
+`dist/zenuml.esm.mjs.map` supplies all 457 `sourcesContent` entries, including
+the generated `sequenceLexer.js` / `sequenceParser.js`, parser adapters,
+`Coordinates`, `VerticalCoordinates`, `buildGeometry` and `renderToSvg`.
+That source map has SHA-256:
+
+```text
+c090e83b377121186edaa097c6e402562f72a9a694319c7a57cf3d06b4eba061
+```
+
+Local static evidence is in ignored `build/mermaid-cpp/elk-boundary/`:
+`zenuml-package-metadata.json`, `zenuml-core-3.49.2.tgz`, and
+`zenuml-package/package/{LICENSE,package.json,dist/zenuml.esm.mjs.map}`.
+No downloaded ZenUML code was executed for this inventory.
+
+The registry reports git head `213c239587ffa1f3dbb54d8b64468c3038ced55d`
+at `mermaid-js/zenuml-core`; that commit's `package.json` identifies itself as
+4.0.0, whereas the verified archive identifies itself as 3.49.2. Use the exact
+archive and embedded source content as the initial reference rather than
+assuming the reported repository head is source-identical.
+
+Mermaid's `packages/mermaid-zenuml/src/zenumlRenderer.ts` removes the `zenuml`
+prefix and calls `renderToSvg(code)`, then adopts its dimensions, viewBox and
+inner SVG. The package's implementation runs parse, its own coordinate engines,
+geometry construction and SVG composition; `WidthProviderOnCanvas` supplies
+text measurements. The next native boundary is therefore the exact grammar /
+generated parser and coordinate engine with a real native measurement adapter.
+First lock the required parser/runtime and positioning sources from this
+distribution and capture a representative call/return/fragment oracle. Porting
+the entire surrounding React/DOM product is not required by this call path.
