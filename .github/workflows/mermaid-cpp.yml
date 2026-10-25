@@ -149,6 +149,10 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/class-oracle.mjs --check
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/quadrant-oracle.mjs --check
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/elk-cycle-oracle.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/flowchart-oracle.mjs --check
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/flowchart-label-oracle.mjs --check
@@ -242,6 +246,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/class-browser-probe.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/quadrant-browser-probe.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Run the native Mermaid tests
         run: |
@@ -257,6 +263,8 @@ jobs:
           node tools/mermaid-cpp/compare-sequence-svg.mjs build/mermaid-cpp/sequence-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/compare-class-svg.mjs build/mermaid-cpp/class-browser/original.json build/mermaid-cpp/pie-svg
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/compare-quadrant-svg.mjs build/mermaid-cpp/quadrant-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/pie-svg-oracle.mjs --compare build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -286,6 +294,8 @@ jobs:
             build/mermaid-cpp/sequence-browser/*.svg
             build/mermaid-cpp/class-browser/*.json
             build/mermaid-cpp/class-browser/*.svg
+            build/mermaid-cpp/quadrant-browser/*.json
+            build/mermaid-cpp/quadrant-browser/*.svg
             ${{ env.FOLIA_MERMAID_BINARY_DIR }}/FoliaMermaidTextProbe.exe
             ${{ env.FOLIA_MERMAID_BINARY_DIR }}/FoliaMermaidPlatformTests.exe
             ${{ env.FOLIA_MERMAID_BINARY_DIR }}/FoliaMermaidHostTests.exe

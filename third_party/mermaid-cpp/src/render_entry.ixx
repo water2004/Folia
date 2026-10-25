@@ -7,13 +7,14 @@ export import folia.mermaid.pie_svg;
 export import folia.mermaid.flowchart_svg;
 export import folia.mermaid.sequence_svg;
 export import folia.mermaid.class_svg;
+export import folia.mermaid.quadrant_svg;
 
 export namespace folia::mermaid {
 struct PacketRenderInput { PacketLayout layout; PacketSvgTheme theme; };
 struct PieRenderInput { PieDocument document; PieSvgTheme theme; PieSvgConfig config; };
 struct NativeDiagram {
     PreparedDiagram prepared;
-    std::variant<PacketRenderInput, PieRenderInput, FlowchartRenderInput, SequenceRenderInput, ClassRenderInput> content;
+    std::variant<PacketRenderInput, PieRenderInput, FlowchartRenderInput, SequenceRenderInput, ClassRenderInput, QuadrantRenderInput> content;
 };
 struct DiagramSvg { std::string svg; double width{}, height{}; };
 
