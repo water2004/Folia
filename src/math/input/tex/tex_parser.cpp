@@ -14,8 +14,10 @@ std::u16string attribute(mml::MmlNode const &node, std::u16string_view name,
             return *text;
     return std::u16string(fallback);
 }
-bool match(std::u16string_view text, std::u16string pattern) {
-    return regexp_host::RegExp(std::move(pattern)).exec(std::u16string(text)).has_value();
+bool texWhitespace(char16_t c) noexcept {
+    return (c >= 0x0009 && c <= 0x000D) || c == 0x0020 || c == 0x00A0 ||
+           c == 0x1680 || (c >= 0x2000 && c <= 0x200A) || c == 0x2028 ||
+           c == 0x2029 || c == 0x202F || c == 0x205F || c == 0x3000 || c == 0xFEFF;
 }
 bool letter(char16_t c) {
     return (c >= u'a' && c <= u'z') || (c >= u'A' && c <= u'Z');
@@ -283,8 +285,27 @@ mml::MmlNode &TexParser::createError(std::u16string_view message) {
     return finishCreatedNode(configuration.request().nodeFactory.makeError(message));
 }
 std::u16string TexParser::trimTex(std::u16string tex) {
-    return UnitUtil::instance().trimSpaces(tex) +
-           (match(tex, u"(?:^|[^\\\\])(?:\\\\\\\\)*\\\\\\s+$") ? u" " : u"");
+    std::size_t first{}, last = tex.size();
+    while (first < last && texWhitespace(tex[first]))
+        ++first;
+    while (last > first && texWhitespace(tex[last - 1]))
+        --last;
+
+    std::size_t spaces{};
+    if (last > first && last < tex.size() && tex[last - 1] == u'\\') {
+        // UnitUtil.trimSpaces preserves a final ASCII space after any slash;
+        // TexParser.trimTex additionally preserves one for an odd slash run.
+        // These are independent Source rules (one escaped space yields two).
+        spaces = tex.back() == u' ' ? 1 : 0;
+        auto slashStart = last;
+        while (slashStart > first && tex[slashStart - 1] == u'\\')
+            --slashStart;
+        spaces += (last - slashStart) % 2;
+    }
+    tex.resize(last);
+    tex.erase(0, first);
+    tex.append(spaces, u' ');
+    return tex;
 }
 void TexParser::updateResult(std::u16string_view input, std::size_t old) {
     auto node = stack.Prev(true);

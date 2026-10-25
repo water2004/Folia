@@ -1,6 +1,11 @@
 #include "math/support/tex_fixture.hpp"
+import folia.math.input.tex.unit_util;
 
 namespace {
+struct TrimParser : TexParser {
+    using TexParser::TexParser;
+    using TexParser::trimTex;
+};
 DispatchOutcome literal(TexParser &parser, TokenInput const &input) {
     auto text = std::get<std::u16string_view>(input.value);
     parser.Push(&parser.createToken(NodeKind::mi, text));
@@ -36,6 +41,42 @@ std::u16string shape(MmlNode const &node) {
 } // namespace
 
 suite tex_parser = [] {
+    "tex parser trim preserves escaped whitespace and all UTF16 boundaries"_test = [] {
+        Fixture fixture;
+        TrimParser parser(u"", ParserEnvironmentSeed{}, *fixture.options);
+        folia::math::regexp_host::RegExp escapedSpace(u"(?:^|[^\\\\])(?:\\\\\\\\)*\\\\\\s+$");
+        auto reference = [&](std::u16string const &source) {
+            return UnitUtil::instance().trimSpaces(source) +
+                   (escapedSpace.exec(source).has_value() ? u" " : u"");
+        };
+        expect(parser.trimTex(u"  x  ") == u"x");
+        expect(parser.trimTex(u"\\ ") == u"\\  ");
+        expect(parser.trimTex(u"\\\t") == u"\\ ");
+        expect(parser.trimTex(u"\\\\ ") == u"\\\\ ");
+        expect(parser.trimTex(u"\\\\\t") == u"\\\\");
+        expect(parser.trimTex(u" \t\r\n") == u"");
+        // Enumerate UTF-16 units, including lone surrogates and non-whitespace
+        // neighbors of the ECMA whitespace set. The oracle is the unchanged
+        // Source expression, compiled once for this exhaustive comparison.
+        for (std::uint32_t code = 0; code <= 0xFFFF; ++code) {
+            auto c = static_cast<char16_t>(code);
+            for (std::size_t slashes : {0u, 1u, 2u, 3u}) {
+                std::u16string source(1, c);
+                source += u'x';
+                source.append(slashes, u'\\');
+                source += c;
+                expect(static_cast<bool>(parser.trimTex(source) == reference(source))) << code << slashes;
+            }
+        }
+        const std::array<std::u16string, 7> endings{
+            u"", u" ", u"\t", u"\r\n", u"\u2028\u2029", u"\t ", u" \t"};
+        for (auto const &ending : endings)
+            for (std::size_t slashes = 0; slashes < 40; ++slashes)
+                for (auto prefix : {u"", u"x", u" \t", u"𝛼"}) {
+                    auto source = std::u16string(prefix) + std::u16string(slashes, u'\\') + ending;
+                    expect(static_cast<bool>(parser.trimTex(source) == reference(source))) << slashes;
+                }
+    };
     "tex parser uses real configured dispatch and matches Source token trees"_test = [] {
         Fixture fixture;
         install(fixture);

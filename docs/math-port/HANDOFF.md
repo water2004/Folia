@@ -2,7 +2,15 @@
 
 恢复/压缩后先实际读本文。架构、职责和详细验收见 [architecture](native-raii-architecture.md)、[files](native-raii-files.json)、[acceptance](native-raii-acceptance.md)。只复查新变化；ignored候选用 `rg --no-ignore`。
 
-## 当前 checkpoint：0.3.1 已发布（2026-10-25）
+## 当前 checkpoint：编辑体验与性能改进进行中（2026-10-25）
+
+- 当前用户要求：格式控件化、点击公式/长格式不误选、代码块样式/高亮/语言选择、补全背景Acrylic；Astra并行优化math与Folia性能/内存。**用户明确否决数学局部面板，保留正文原位数学编辑与实时预览**，面板候选已撤，不引入独立TextBox/worker。
+- Root实现：完整CST标记隐藏但source保持原字节，格式按钮显示当前状态；隐藏offset映射到对应显示边界；拖选依据物理4DIP阈值，release无移动不重复命中。Math源码/实时preview仍原位。代码候选：单AutoSuggestBox明确提交，去外框与修Tree-sitter染色。新增WinUI候选复用当前补全行，关闭/接受清Items及overlay命中，不加缓存池。
+- 已验证：Core **752项/499404断言**、Windows editor **82项/3446断言**、math **968项/536030断言**通过，WinUI Debug应用构建通过。math首次60s边界不足，停止后trim/NewCM窄测通过，180s有界全测通过（非无限循环/崩溃）。正式app测试仍在编译/执行，句柄`56004`；已修新测试Boost对hstring/UTF16诊断输出的编译问题，不改期待。
+- 三个性能改动：trimTex扫描替代逐token正则；请求字体去结果vector/重复表查找；EndBlock转移集合/相同成员快返。前两者全math验收通过，可分批提交；App cache等待app测试。trim微基准同输入/校验和，30000调用旧12166–14305ms、新41–50ms，**仅局部Debug微基准，不是整引擎倍数**。字体前4轮旧/新中位数约598/414ms暖查询、1701/1234ms冷批，需最终独占复核；第5轮与全math重叠不采用。
+- 所有Astra候选完成，无活动agent。对照旧对象在`build/editing-perf/before/`（Cache、LatexCompletion、两font对象），ignored基准在`build/editing-perf/`；独立WinUI before/after编译脚本已准备未运行。下一步：app回归→WinUI与Cache同输入旧新对照→审查分批提交。root独占build/native，parallel≤4。临时CMake project include仅build/core cache指向ignored benchmarks，完成后去掉该cache变量。版本仍0.3.1，不推送/发布；旧owner链/Mermaid继续暂停。
+
+## 已完成：0.3.1 已发布（2026-10-25）
 
 - 用户明确要求推送并按既有CI/CD发布0.3.1，包含 `9a72e432` 打开线程修复和 `e5c39fda` 数学滚动修复。统一更新CMake/MSI默认/manifest/rc/About及README版本，新增 `release-notes/v0.3.1.md`。
 - 版本/XML/workflow/notes静态检查通过；固定标签 `v0.3.1` 指向 `92ac9f54`，原tag push流水线 [40119208893](https://github.com/water2004/Folia/actions/runs/40119208893) 全部成功。[Release v0.3.1](https://github.com/water2004/Folia/releases/tag/v0.3.1) 已公开并设为latest，两次修复与版本提交均已推送。
