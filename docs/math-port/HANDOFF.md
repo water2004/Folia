@@ -2,7 +2,23 @@
 
 恢复/压缩后先实际读本文。架构、职责和详细验收见 [architecture](native-raii-architecture.md)、[files](native-raii-files.json)、[acceptance](native-raii-acceptance.md)。只复查新变化；ignored候选用 `rg --no-ignore`。
 
-## 当前 checkpoint：marker 样式与排版留白（2026-10-25）
+## 当前 checkpoint：图标语义边界、行间公式、主题包（2026-10-25，进行中）
+
+- 用户接受了下方SVG外观，随后要求图标属于主题包，并特别核对所见即所得编辑。又发现单独输入 `*` 被图标化、行间公式无图标；优先修正这两个语义/投影遗漏，然后接入主题。禁止子代理；0.3.2不变；不推送发布。
+- 已确认根因：本轮新增 `AppendDisplayText` 无条件按 `marker + SyntaxIconFor(text)` 选图标。已有CST把未闭合语法标成 `Incomplete/MissingCloser`，render_builder也据此设置Always显式源文；新增显示路径丢掉该语义信息，并非已证明CST整体错误。不能用“单个*”/正则特判或重写解析器补救。应由render_builder根据CST种类、完成状态、已有delimiter_ranges给出明确图标种类，App只消费；撤出UI字符串推断。
+- 行间公式已定位：`BuildMathBlockText`只投影special.tex/content_to_source，丢掉定界符显示。BlockSourceTree已有OpeningMarker/ClosingMarker tokens、complete_opening/closing；应传递并消费这些解析结果，不在App扫描原文找`$$`。仍正文原位编辑+异步内存预览，不改为面板。
+- 主题当前是完整单文件JSON（ThemeConfig解析，ThemeCatalog导入复制JSON），不是zip；待沿现有流程增加SVG资源与尺寸/间距，支持自定义/切换/随主题导入，绘制路径零文件IO。尚未实施，先解决上两项。
+- 已接受视觉基线本地提交 `593a9407`，当前除本文外干净。无活动agent/build/test；Debug预览PID16448/窗口24780394仍是76字符/修订1本轮样例，可能被用户继续操作，必须重新观察再输入/关闭。下一步：补CST→render metadata的正式测试，修语义接线与MathBlock投影，再做主题资源。不要重新尝试每字符inline object。
+
+## 历史：SVG 外观与整对象排版（用户已接受，语义遗漏以上方为准）
+
+- 用户否定继续给字体字形套背景，已选择保留 `*`/`**`/`~~`/`$` 等 Markdown 形状的成套 SVG；美观优先，统一尺寸、笔画、留白，保持平时隐藏/点击出现。禁止子代理、版本0.3.2不变，不自动推送发布。
+- 用户再次纠正：图标必须是单一排版对象。已撤销每字符占位方案（窄列会拆图标），不再尝试给拆分方案补换行规则。采用一个IDWriteInlineObject覆盖完整marker范围；交互层通过既有display/source映射换算光标位置，source/CST/history不变。资源内嵌SVG、有限设备缓存；链接URL等文本不整段替换。
+- 已实现13个原创SVG（强调/粗体/删除线/代码/数学定界符），统一24单位画布、1.7笔画、轻底色，成对共用资源。EditorSyntaxIcons只负责字形表/单个inline object/有限设备资源；排版与Painter消费同一几何。旧字符间距补偿、marker背景画框和专用brush已删除。链接URL/HTML及未收录拼写保持原始文本，不按任意字符替换。Core/parser/编辑事务不改。
+- Debug构建成功；WinUI **36项/9738断言**、Windows editor **82项/3446断言**通过。包含整对象宽度/窄列不可分割、逐source位置命中/插入/撤销、Unicode、显隐、嵌套、斜体墨迹间距、真实SVG像素与资源重置。日志 `build/marker-icons-{atomic-build,all-app-tests,platform-tests}.log`；生产D2D渲染的深浅主题16/20/32 DIP样张 `build/syntax-icons-preview.png`。此前分占位/资源名带引号的失败候选不属于最终结果，诊断代码已删；不得恢复拆分占位或特殊换行补丁。
+- 本地Debug界面已核对斜体/粗体/嵌套的对称、间距、点击显隐与无误选。预览PID16448、窗口24780394留着本轮76字符/修订1的未保存样例，不是用户文件。无活动agent/build/test；下一步用户验看外观，不自动发布。版本0.3.2不变。
+
+## 历史：marker 样式与排版留白（被上方 SVG 方向替代）
 
 - 用户认为上一版样式难看，并截图证明斜体正文与 marker 框重叠。只画框、未让排版保留空间的设计被否定；不得通过遮盖正文、绘制偏移或文本特判补救。marker-only/点击显隐/禁止子代理等边界仍有效。
 - 实现仅在平台样式/DirectWrite排版/绘制层：字体恢复正体常规字重，SetCharacterSpacing只在 marker 首尾分配外间隙+内留白；绘制消费同一 HitTestTextRange 的 source endpoints/bidi 几何，扣除外间隙后画紧凑中性底色和轻底线，删除蓝色硬边框。样式集中于 EditorStyleSheet::MarkerStyle，不改 source/CST/选区/历史，不插入虚拟字符或控件。只有一套排版，光标/换行/命中自动使用已分配的间距。
