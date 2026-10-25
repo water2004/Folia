@@ -138,7 +138,7 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
         const MermaidFont fallback{u"Arial",font.size,font.weight};
         auto fallback_height=measurer.svg_font_height(fallback);
         if(!fallback_height) return std::unexpected(fallback_height.error());
-        auto measure=[&](std::u16string_view text)->std::expected<SequenceTextBox,std::string> {
+        auto measure=[&,font,fallback,height,fallback_height](std::u16string_view text)->std::expected<SequenceTextBox,std::string> {
             // Sequence splits explicit HTML breaks before measuring; protected
             // Mermaid entities remain encoded until the final SVG text pass.
             std::vector<std::u16string> lines(1);
@@ -171,14 +171,52 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             box.width=width;box.line_height=line_height;box.height=line_height*lines.size();
             return box;
         };
+        auto wrap=[measure](std::u16string_view text,double max_width)->std::expected<SequenceTextBox,std::string> {
+            auto initial=measure(text);if(!initial) return initial;
+            if(initial->lines.size()>1 || text.empty()) return initial;
+            // Original utils.wrapLabel/breakString: rounded SVG widths, a
+            // space measured with each word, and code-point hyphenation.
+            std::vector<std::u16string> lines;
+            std::u16string next;
+            auto finish=[&](std::u16string value) {if(!value.empty()) lines.push_back(std::move(value));};
+            for(std::size_t pos=0;pos<text.size();) {
+                if(text[pos]==u' ') {++pos;continue;}
+                const auto end=text.find(u' ',pos);
+                const auto word=text.substr(pos,end==text.npos?text.size()-pos:end-pos);
+                pos=end==text.npos?text.size():end;
+                auto word_box=measure(std::u16string{word}+u" ");if(!word_box) return word_box;
+                auto next_box=measure(next);if(!next_box) return next_box;
+                if(word_box->width>max_width) {
+                    finish(std::move(next));next.clear();
+                    for(std::size_t i=0;i<word.size();) {
+                        next+=word[i++];
+                        if(next.back()>=0xd800&&next.back()<=0xdbff&&i<word.size()) next+=word[i++];
+                        auto part=measure(next);if(!part) return part;
+                        if(part->width>=max_width) {
+                            if(i<word.size()) next+=u'-';
+                            finish(std::move(next));next.clear();
+                        }
+                    }
+                } else if(next_box->width+word_box->width>=max_width) {
+                    finish(std::move(next));next=word;
+                } else {if(!next.empty()) next+=u' ';next+=word;}
+            }
+            finish(std::move(next));
+            std::u16string joined;
+            for(const auto& line:lines) {if(!joined.empty()) joined+=u"<br/>";joined+=line;}
+            return measure(joined);
+        };
+        sequence_measurements.wrap=wrap;
         for(const auto& actor:seq->document.actors) {
-            auto box=measure(actor.description);if(!box) return std::unexpected(box.error());
+            auto box=actor.wrap?wrap(actor.description,seq->config.width-2*seq->config.wrap_padding):measure(actor.description);
+            if(!box) return std::unexpected(box.error());
             sequence_measurements.actors.push_back(*box);
         }
         if(auto title=measure(seq->document.title);!title) return std::unexpected(title.error());
         for(const auto& message:seq->document.messages) {
             const bool bracket=sequence_region_start(message.type)||sequence_region_section(message.type);
-            auto box=measure(bracket&&!message.message.empty()?u"["+message.message+u"]":message.message);
+            const auto text=bracket&&!message.message.empty()?u"["+message.message+u"]":message.message;
+            auto box=message.wrap&&!bracket?wrap(text,seq->config.width-2*seq->config.wrap_padding):measure(text);
             if(!box) return std::unexpected(box.error());
             sequence_measurements.messages.push_back(*box);
         }

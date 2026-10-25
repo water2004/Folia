@@ -51,7 +51,14 @@ bool both(SequenceKind kind) { return kind == SequenceKind::bidirectional_solid 
 std::expected<SequenceSvg,std::string> render_sequence_svg(
     const SequenceRenderInput& input, const SequenceMeasurements& measured) {
     try {
-        const auto& doc = input.document; const auto& c = input.config; const auto& t = input.theme;
+        const auto& doc = input.document; auto c = input.config; const auto& t = input.theme;
+        auto messages=measured.messages;
+        auto wrap=[&](std::u16string_view text,double width) {
+            if(!measured.wrap) throw std::runtime_error("Sequence wrapping requires text measurement");
+            auto result=measured.wrap(text,width);
+            if(!result) throw std::runtime_error(result.error());
+            return *result;
+        };
         if (measured.actors.size() != doc.actors.size() || measured.messages.size() != doc.messages.size())
             return std::unexpected("Sequence measurement counts do not match the document");
         if (doc.actors.empty()) return std::unexpected("Sequence SVG needs at least one participant");
@@ -61,18 +68,19 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
         std::vector<double> max_message(doc.actors.size(),0);
         for (std::size_t i=0;i<doc.actors.size();++i) {
             const auto& a=doc.actors[i]; const auto& box=measured.actors[i];
-            if((a.type!=u"participant" && a.type!=u"actor") || a.wrap) return std::unexpected("Sequence extended actor shapes/wrapping require the next SVG adapter");
+            if(a.type!=u"participant" && a.type!=u"actor") return std::unexpected("Sequence extended actor shapes require the next SVG adapter");
             if(!std::isfinite(box.width)||box.width<0||!std::isfinite(box.height)||box.height<0)
                 return std::unexpected("Invalid Sequence actor measurement");
-            ids.emplace(a.id,i); actors[i].width=std::max(c.width,box.width+2*c.wrap_padding);
+            ids.emplace(a.id,i); actors[i].width=a.wrap?c.width:std::max(c.width,box.width+2*c.wrap_padding);
+            if(a.wrap) c.height=std::max(c.height,box.height);
         }
         for(std::size_t i=0;i<doc.messages.size();++i) {
             const auto& m=doc.messages[i]; const auto& box=measured.messages[i];
             if(m.type==SequenceKind::active_start || m.type==SequenceKind::active_end) continue;
             if(sequence_region_start(m.type)||sequence_region_end(m.type)||sequence_region_section(m.type)||
                 m.type==SequenceKind::rect_start||m.type==SequenceKind::rect_end) continue;
-            if(m.wrap || !(m.type==SequenceKind::note||m.type==SequenceKind::solid||m.type==SequenceKind::dotted||open(m.type)||both(m.type)))
-                return std::unexpected("Sequence wrapping/extended arrows require the next SVG adapter");
+            if(!(m.type==SequenceKind::note||m.type==SequenceKind::solid||m.type==SequenceKind::dotted||open(m.type)||both(m.type)))
+                return std::unexpected("Sequence extended arrows require the next SVG adapter");
             if(!std::isfinite(box.width)||box.width<0||!std::isfinite(box.height)||box.height<0)
                 return std::unexpected("Invalid Sequence message measurement");
             auto from=ids.find(m.from),to=ids.find(m.to);
@@ -132,9 +140,91 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
             }
             return result;
         };
+        auto endpoints=[&](const SequenceMessage& m) {
+            const auto [fl,fr]=activation_bounds(m.from);
+            const auto [tl,tr]=activation_bounds(m.to);
+            const bool forward=fl<=tl;
+            auto start=forward?fr:fl,stop=forward?tl:tr;
+            if(m.from==m.to) stop=start;
+            else {
+                if(m.activate && std::abs(tl-tr)<=2) stop+=(forward?-1:1)*(c.activation_width/2-1);
+                if(!open(m.type)) stop+=forward?-3:3;
+                if(both(m.type)) start+=forward?3:-3;
+            }
+            return std::pair{start,stop};
+        };
+        // calculateLoopBounds builds note/message models before laying out the
+        // vertical events. Its widths drive control-label wrapping, independently
+        // of the nested margins used by the eventual painted region bounds.
+        struct LoopWidth {
+            double from=std::numeric_limits<double>::max(),to=std::numeric_limits<double>::lowest(),width=0;
+            std::vector<std::size_t> labels;
+        };
+        std::vector<LoopWidth> loops;
+        std::vector<std::pair<double,double>> notes(doc.messages.size());
+        for(std::size_t i=0;i<doc.messages.size();++i) {
+            const auto& m=doc.messages[i];auto& box=messages[i];
+            if(sequence_region_start(m.type)) {loops.push_back(LoopWidth{.labels={i}});continue;}
+            if(sequence_region_section(m.type)) {if(!m.message.empty()) loops.back().labels.push_back(i);continue;}
+            if(sequence_region_end(m.type)) {
+                const auto loop=loops.back();loops.pop_back();
+                for(auto label:loop.labels) if(!doc.messages[label].message.empty())
+                    messages[label]=wrap(u"["+doc.messages[label].message+u"]",loop.width-2*c.wrap_padding);
+                continue;
+            }
+            if(m.type==SequenceKind::active_start) {
+                const auto& a=actors[ids.at(m.from)];
+                const auto depth=std::ranges::count(active,m.from,&Activation::actor);
+                active.push_back({m.from,a.x+a.width/2+(static_cast<double>(depth)-1)*c.activation_width/2,0,0});
+                continue;
+            }
+            if(m.type==SequenceKind::active_end) {
+                auto it=std::find_if(active.rbegin(),active.rend(),[&](const auto& bar){return bar.actor==m.from;});
+                if(it!=active.rend()) active.erase(std::next(it).base());
+                continue;
+            }
+            if(m.type==SequenceKind::rect_start||m.type==SequenceKind::rect_end) continue;
+            const auto& a=actors[ids.at(m.from)];const auto& b=actors[ids.at(m.to)];
+            if(m.type==SequenceKind::note) {
+                if(m.wrap) box=wrap(m.message,c.width);
+                auto width=m.wrap?c.width:std::max(c.width,box.width+2*c.note_margin),x=a.x;
+                if(m.placement==0||m.placement==1) {
+                    width=m.wrap?std::max(c.width,box.width+(m.placement==0?2*c.note_margin:0)):
+                        std::max((a.width+b.width)/2,box.width+2*c.note_margin);
+                    x=m.placement==0?a.x-width+(a.width-c.actor_margin)/2:a.x+(a.width+c.actor_margin)/2;
+                } else if(m.from==m.to) {
+                    width=m.wrap?std::max(c.width,a.width):std::max(width,a.width);x=a.x+(a.width-width)/2;
+                } else {
+                    width=std::abs(a.x+a.width/2-b.x-b.width/2)+c.actor_margin;
+                    x=std::min(a.x+a.width/2,b.x+b.width/2)-c.actor_margin/2;
+                }
+                notes[i]={x,width};
+                if(m.wrap) box=wrap(m.message,width-2*c.wrap_padding);
+                for(auto& loop:loops) {
+                    loop.from=std::min(loop.from,x);loop.to=std::max(loop.to,x+width);
+                    loop.width=std::max(loop.width,std::abs(loop.from-loop.to))-c.label_box_width;
+                }
+            } else {
+                const auto [start,stop]=endpoints(m);
+                const auto bounded=std::abs(start-stop)+2*c.wrap_padding;
+                if(m.wrap) box=wrap(m.message,std::max(bounded,c.width));
+                const auto width=std::max({m.wrap?0:box.width+2*c.wrap_padding,bounded,c.width});
+                for(auto& loop:loops) {
+                    if(start==stop) {
+                        loop.from=std::min({loop.from,a.x-width/2,a.x-a.width/2});
+                        loop.to=std::max({loop.to,b.x+width/2,b.x+a.width/2});
+                        loop.width=std::max(loop.width,std::abs(loop.to-loop.from))-c.label_box_width;
+                    } else {
+                        loop.from=std::min(loop.from,start);loop.to=std::max(loop.to,stop);
+                        loop.width=std::max(loop.width,width)-c.label_box_width;
+                    }
+                }
+            }
+        }
+        active.clear();
         const auto font=" font-family=\""+xml(t.font_family)+"\" font-size=\""+num(t.font_size)+"\" font-weight=\""+std::to_string(t.font_weight)+"\"";
         for(std::size_t i=0;i<doc.messages.size();++i) {
-            const auto& m=doc.messages[i]; const auto& box=measured.messages[i];
+            const auto& m=doc.messages[i]; const auto& box=messages[i];
             if(sequence_region_start(m.type)||sequence_region_section(m.type)||m.type==SequenceKind::rect_start) {
                 const bool section=sequence_region_section(m.type);
                 const bool background=m.type==SequenceKind::rect_start;
@@ -184,9 +274,9 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
                     for(std::size_t j=0;j<label.lines.size();++j)
                         text(cls,label.lines[j].empty()?u"\u200b":std::u16string_view{label.lines[j]},x,ty+j*label.line_height,false);
                 };
-                label_lines("loopText",measured.messages[r.message],center+c.label_box_width/2,r.top+c.box_margin+c.box_text_margin);
-                for(const auto& s:r.sections) if(!measured.messages[s.message].display.empty())
-                    label_lines("sectionTitle",measured.messages[s.message],center,s.y+c.box_margin+c.box_text_margin);
+                label_lines("loopText",messages[r.message],center+c.label_box_width/2,r.top+c.box_margin+c.box_text_margin);
+                for(const auto& s:r.sections) if(!messages[s.message].display.empty())
+                    label_lines("sectionTitle",messages[s.message],center,s.y+c.box_margin+c.box_text_margin);
                 y=r.bottom;bottom=std::max(bottom,y);
                 continue;
             }
@@ -211,16 +301,7 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
             }
             const auto& a=actors[ids.at(m.from)];const auto& b=actors[ids.at(m.to)];
             if(m.type==SequenceKind::note) {
-                auto width=std::max(c.width,box.width+2*c.note_margin),x=a.x;
-                if(m.placement==0 || m.placement==1) {
-                    width=std::max((a.width+b.width)/2,box.width+2*c.note_margin);
-                    x=m.placement==0?a.x-width+(a.width-c.actor_margin)/2:a.x+(a.width+c.actor_margin)/2;
-                } else if(m.from==m.to) {
-                    width=std::max(width,a.width);x=a.x+(a.width-width)/2;
-                } else {
-                    width=std::abs(a.x+a.width/2-b.x-b.width/2)+c.actor_margin;
-                    x=std::min(a.x+a.width/2,b.x+b.width/2)-c.actor_margin/2;
-                }
+                const auto [x,width]=notes[i];
                 y+=c.box_margin;
                 const auto h=box.height+2*c.note_margin;
                 const auto anchor=c.note_align==u"left"?"start":c.note_align==u"right"?"end":"middle";
@@ -236,14 +317,8 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
             }
             const auto [from_left,from_right]=activation_bounds(m.from);
             const auto [to_left,to_right]=activation_bounds(m.to);
-            const bool forward=from_left<=to_left,self=m.from==m.to;
-            auto start=forward?from_right:from_left,stop=forward?to_left:to_right;
-            if(self) stop=start;
-            else {
-                if(m.activate && std::abs(to_left-to_right)<=2) stop+=(forward?-1:1)*(c.activation_width/2-1);
-                if(!open(m.type)) stop+=forward?-3:3;
-                if(both(m.type)) start+=forward?3:-3;
-            }
+            const bool self=m.from==m.to;
+            const auto [start,stop]=endpoints(m);
             const auto start_y=y;
             const auto text_y=std::floor(y+10+c.wrap_padding/2+0.5);
             for(std::size_t j=0;j<box.lines.size();++j)

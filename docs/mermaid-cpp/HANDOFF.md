@@ -9,6 +9,12 @@
   participants/messages/notes and control labels, then numbering/participants.
 - Local MSVC/CMake are unavailable (rechecked). Use the existing four Windows
   standalone/integrated jobs for native validation; no native result claimed yet.
+- Batch 1 is committed as 3f3791af; Windows run 40175444332 is in progress.
+- Batch 2 implements original wrapLabel/breakString with DirectWrite widths,
+  actor height/spacing and layout-dependent note/message/control-label widths.
+  Exit: the existing four display cases plus nested activation/region wrapping
+  and a configured tall actor/note case in both themes; affected native checks.
+  Original references are in build/mermaid-cpp/sequence-wrap-work.
 - Work continues on fork/mermaid-development; contribution worktree remains
   clean at 1f93feb2 until this batch is verified. PR #1 is open/unmerged.
 

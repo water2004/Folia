@@ -29,7 +29,11 @@ struct SequenceTextBox {
     std::vector<std::u16string> lines;
     double line_height = 0;
 };
-struct SequenceMeasurements { std::vector<SequenceTextBox> actors, messages; };
+struct SequenceMeasurements {
+    std::vector<SequenceTextBox> actors, messages;
+    // Layout-dependent wrapping calls the host's real text measurement.
+    std::function<std::expected<SequenceTextBox,std::string>(std::u16string_view,double)> wrap;
+};
 // Region events have no participant endpoints and use bracketed display labels.
 bool sequence_region_start(SequenceKind);
 bool sequence_region_end(SequenceKind);

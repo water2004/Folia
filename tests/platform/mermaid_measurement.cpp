@@ -31,6 +31,10 @@ suite mermaid_measurement = [] {
             {"title",u"sequenceDiagram\ntitle Save document\nA->>B: Save\nB-->>A: Done"},
             {"line-breaks",u"sequenceDiagram\nparticipant A as Document<br/>editor\nA->>B: Read<br/>document\nNote over A,B: Save<br/>changes\nB-->>A: Done"},
             {"entities",u"sequenceDiagram\nparticipant A as Editor #38; viewer\nA->>B: Save #60;document#62;\nNote over B: Value #35;1"},
+            {"wrapped-labels",u"sequenceDiagram\nparticipant A as wrap: A document editor with a descriptive name\nA->>B: wrap: Read the document and validate every required field before saving\nNote over B: wrap: Store the updated document after validation succeeds"},
+            {"region-wrap",u"sequenceDiagram\nloop Retry until the document has been saved successfully\nA->>B: Save\nB-->>A: Done\nend"},
+            {"nested-wrap",u"sequenceDiagram\nalt The current document has unsaved local changes\nloop Retry saving the edited document to storage\nA->>+B: wrap: Save all changes made to the current document\nNote right of B: wrap: Validate the document before committing to storage\nB-->>-A: Saved\nend\nelse No local changes need to be written to storage\nA->>A: wrap: Continue editing the current document\nend"},
+            {"tall-wrap",u"%%{init: {\"sequence\": {\"width\": 100, \"height\": 40}}}%%\nsequenceDiagram\nparticipant A as wrap: A document editor with a descriptive name\nparticipant B as Storage\nA->>B: wrap: Save the current document\nNote left of B: wrap: Review the current document before saving\nNote over A,B: wrap: Both participants finish the save operation"},
         };
         for(const auto theme:{u"default",u"dark"}) {
             auto session=ConfigSession::create();expect(fatal(session.has_value()));
