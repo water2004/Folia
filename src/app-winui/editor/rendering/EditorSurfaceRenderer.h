@@ -29,6 +29,7 @@ namespace winrt::Folia
     using folia::platform::editor::EditorVisualTableCell;
 
     struct EditorPreparedDocument;
+    enum class EditorScrollAlignment { Nearest, Start };
 
     struct EditorSurfaceRenderer
     {
@@ -59,6 +60,7 @@ namespace winrt::Folia
         void SetInvalidateCallback(std::function<void()> callback);
 
         std::optional<folia::TextPosition> HitTest(float x, float y) const;
+        std::optional<folia::TextPosition> ViewportPosition() const;
         std::optional<folia::TextPosition> TaskCheckboxAt(float x, float y) const;
         std::optional<EditorVisualFootnoteHit> FootnoteAt(float x, float y) const;
         std::optional<EditorVisualRawBlock> RawBlockFor(folia::NodeId owner) const;
@@ -79,7 +81,7 @@ namespace winrt::Folia
         float MaximumScrollOffset() const;
         float ViewportHeight() const;
         HANDLE FrameLatencyWaitableObject() const;
-        bool ScrollToPosition(folia::TextPosition position);
+        bool ScrollToPosition(folia::TextPosition position, EditorScrollAlignment alignment = EditorScrollAlignment::Nearest);
 
     private:
         struct PdfExportState;

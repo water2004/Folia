@@ -18,6 +18,7 @@ namespace winrt::Folia
             Render render);
         void Detach();
         void Refresh();
+        void SyncViewport();
         void SelectOutline(winrt::Windows::Foundation::IInspectable const& selectedItem);
 
     private:
@@ -31,6 +32,9 @@ namespace winrt::Folia
             winrt::Windows::Foundation::IInspectable> outlineItems_{ nullptr };
         Render render_;
         std::vector<folia::TextPosition> outlinePositions_;
+        std::vector<std::uint8_t> outlineLevels_;
         std::optional<std::uint64_t> outlineContentKey_;
+        winrt::Microsoft::UI::Xaml::Controls::ListViewBase::ContainerContentChanging_revoker containerChanging_;
+        bool updatingOutline_ = false;
     };
 }

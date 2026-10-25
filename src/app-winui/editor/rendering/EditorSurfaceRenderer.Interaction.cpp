@@ -29,14 +29,15 @@ namespace winrt::Folia
     std::optional<EditorTableAction> EditorSurfaceRenderer::TableActionAt(float x, float y) const { return interactionMap.TableActionAt(x, y); }
     std::optional<std::size_t> EditorSurfaceRenderer::TableDropIndexAt(float x, float y, bool rows) const { return interactionMap.TableDropIndexAt(draggedTableAction, x, y, rows); }
 
-    bool EditorSurfaceRenderer::ScrollToPosition(folia::TextPosition position)
+    bool EditorSurfaceRenderer::ScrollToPosition(folia::TextPosition position, EditorScrollAlignment alignment)
     {
         auto previous = scrollState.Offset();
         if (auto bounds = CaretBounds(position))
         {
             auto margin = styleSheet.verticalPadding;
             auto next = previous;
-            if (bounds->top < margin) next = (std::max)(0.0f, previous - (margin - bounds->top));
+            if (alignment == EditorScrollAlignment::Start) next = previous + bounds->top - margin;
+            else if (bounds->top < margin) next = (std::max)(0.0f, previous - (margin - bounds->top));
             else if (bounds->bottom > resources.surfaceHeightDip - margin) next = (std::min)(MaximumScrollOffset(), previous + bounds->bottom - (resources.surfaceHeightDip - margin));
             scrollState.Set(next, MaximumScrollOffset());
             return scrollState.Offset() != previous;
@@ -70,6 +71,27 @@ namespace winrt::Folia
             if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom)
                 return std::nullopt;
         return interactionMap.HitTest(x, y);
+    }
+    std::optional<folia::TextPosition> EditorSurfaceRenderer::ViewportPosition() const
+    {
+        // Use the existing lossless visual-to-source mapping, including nested
+        // block flows and source mode. This does not move the editing selection.
+        EditorVisualLine const* first = nullptr;
+        for (auto const& line : interactionMap.lines)
+        {
+            // A line ending exactly at the reading edge has already scrolled
+            // away. Pointer hit testing deliberately has different edge rules.
+            if (line.sourceSpans.empty() || line.rect.bottom <= styleSheet.verticalPadding + 0.1f
+                || line.rect.top >= resources.surfaceHeightDip) continue;
+            if (!first || line.rect.top < first->rect.top
+                || (line.rect.top == first->rect.top && line.rect.left < first->rect.left)) first = &line;
+        }
+        if (first)
+        {
+            auto const& span = first->sourceSpans.front();
+            return folia::TextPosition{span.container_id, span.source_range.start, folia::TextAffinity::Downstream};
+        }
+        return interactionMap.HitTest(0.0f, styleSheet.verticalPadding);
     }
     std::optional<folia::TextPosition> EditorSurfaceRenderer::TaskCheckboxAt(float x, float y) const { return interactionMap.TaskCheckboxAt(x, y); }
     std::optional<EditorVisualFootnoteHit> EditorSurfaceRenderer::FootnoteAt(float x, float y) const { return interactionMap.FootnoteAt(x, y); }

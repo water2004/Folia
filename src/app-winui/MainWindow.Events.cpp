@@ -306,11 +306,22 @@ namespace winrt::Folia::implementation
             pointerController.DoubleTapped(args);
         });
 
-        OutlineList().SelectionChanged([this](auto const&, Microsoft::UI::Xaml::Controls::SelectionChangedEventArgs const& args)
+        OutlineList().ItemClick([this](auto const&, Microsoft::UI::Xaml::Controls::ItemClickEventArgs const& args)
         {
-            if (args.AddedItems().Size() > 0)
+            sidebarController.SelectOutline(args.ClickedItem());
+        });
+        OutlineList().KeyUp([this](auto const&, Microsoft::UI::Xaml::Input::KeyRoutedEventArgs const& args)
+        {
+            // ItemClick handles mouse/Enter/Space activation. After the native
+            // list has moved its keyboard selection, navigate that item too.
+            using winrt::Windows::System::VirtualKey;
+            switch (args.Key())
             {
-                sidebarController.SelectOutline(args.AddedItems().GetAt(0));
+            case VirtualKey::Up: case VirtualKey::Down:
+            case VirtualKey::Home: case VirtualKey::End:
+            case VirtualKey::PageUp: case VirtualKey::PageDown:
+                sidebarController.SelectOutline(OutlineList().SelectedItem());
+                break;
             }
         });
 

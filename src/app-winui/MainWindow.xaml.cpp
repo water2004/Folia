@@ -416,6 +416,7 @@ namespace winrt::Folia::implementation
             auto frame = editorSession.RenderFrame();
             frame.snippetPlaceholders = snippetPlaceholders;
             editorRenderer.Render(frame);
+            sidebarController.SyncViewport();
             codeLanguageController.Refresh();
             auto style = editorSession.ActiveInlineStyle();
             BoldButton().IsChecked(style.bold);
