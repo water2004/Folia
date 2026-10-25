@@ -42,12 +42,11 @@ aggregation, composition, dependency, solid/dotted lines, multiplicity and
 direction. Standalone and class-attached notes retain their quoted text, including
 literal newlines. Namespace declarations retain labels, nested/qualified ids,
 parents and class/note membership; a qualified name creates its ancestor
-containers. The first Class batches cover plain text; styles,
-rich labels and interfaces rendered as lollipops remain separate work. Unsupported
-statements return errors.
+containers. Custom Class styles, richer content and interfaces rendered as
+lollipops remain separate work. Unsupported statements return errors.
 
 The Class SVG adapter supports explicit `layout: dagre` with classic appearance
-and HTML label spacing, using real DirectWrite measurements for plain class,
+and HTML label spacing, using real DirectWrite measurements for class,
 annotation, attribute, method and relationship text. It preserves compartments,
 static/abstract member typography, inheritance/aggregation/composition/dependency
 markers, multiplicity and the unified renderer's Dagre geometry. The original
@@ -65,8 +64,8 @@ retain explicit line breaks and decoded entities; member angle brackets retain
 the original escaped display semantics. Common label/member/relationship
 emphasis uses measured font runs, relative bold weights and SVG spans, preserving
 member classifiers. Relationship labels wrap at the original 200px default using
-native line-break opportunities and preserve style runs across lines. Rich and
-automatically wrapped notes require further adapters.
+native line-break opportunities and preserve style runs across lines. Rich notes
+require a further adapter; original Class notes retain nowrap behavior.
 
 `folia.mermaid.sequence::prepare_sequence` connects shared preparation to owned
 Sequence actors and ordered messages. The parser/DB boundary covers actor

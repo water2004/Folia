@@ -1,23 +1,48 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-25, Class emphasis and relationship wrapping in progress
+## Current checkpoint - 2026-10-25, Class emphasis and relationship wrapping verified
 
-- Deliver common Class label/member/relationship emphasis through existing
-  display runs, real per-run DirectWrite metrics and SVG tspans. Preserve
-  member classifier parsing, escaped angle brackets and existing geometry.
-- Exit: the existing display-emphasis input in both themes, including run
-  weights/styles and affected standalone/integrated Windows checks. Then move
-  to automatic wrapping and the remaining required Class/family chain.
-- Emphasis 8b5d304c is pushed. CI 40199353436 passed the standalone Debug native
-  suites but its Class SVG comparison found a 0.98-unit mixed-weight height
-  difference. Use native rounded ascent/descent for CSS half-leading; keep
-  tolerances unchanged. This is an unresolved acceptance failure until rerun.
-- The next separate batch adds default 200px relationship wrapping with retained
-  styled runs and native line-break opportunities. Exit on wrapped-edge in both
-  themes and affected checks. Original observations: class-wrap-next/original.json
-  under build/mermaid-cpp. Then advance to measured rich/wrapped Class notes.
-- Wrapping candidate is local and unverified; no app dependency switch.
-  Prior verified implementation and delivery evidence follows below.
+- Emphasis 8b5d304c delivers Class label/member/relationship font runs through
+  DirectWrite and SVG spans, including relative bold weights inside class titles,
+  while preserving member classifiers and escaped angle brackets.
+- Wrapping 5924ba97 connects long relationship labels to createText's original
+  200px default using native line-break opportunities, preserving styles and
+  spaces across lines. The existing Dagre adapter consumes the measured boxes.
+- Corrections 298bc947/045c6872 retain rounded font ascent/descent for CSS
+  half-leading and shapeUtil's centered text-group bounds for mixed font heights.
+  Final verification head 045c6872ded4c1db1a6f753707ba7e79f07ef51e passed:
+  https://github.com/zhao0349/Folia/actions/runs/40200486830
+- All four standalone/integrated Debug/Release jobs passed. Integrated jobs
+  passed FoliaTests, FoliaWindowsEditorTests and both Mermaid suites. Forty
+  Class SVG comparisons cover 20 diagrams/both themes, including emphasis runs
+  and wrapped relationships. Existing 92 Flowchart, 82 Sequence and 96
+  browser/DirectWrite comparisons passed. Tolerances unchanged. Both batches
+  met their exit conditions; do not expand their verification matrix.
+- Release evidence and four visually inspected new previews are in
+  build/mermaid-cpp/class-emphasis-wrap-verified (class-browser/comparison.json,
+  text-comparison.json, pie-svg and native-preview.png). Earlier runs
+  40199353436/40199922642 exposed the two mixed-font height issues; superseded
+  by the final verified head. Diagnostic outputs remain in class-emphasis-diagnostic
+  and class-emphasis-metrics-diagnostic. No acceptance failure remains.
+- Contribution equivalents 22e352d3/e7a5ffde/153efbed/2dfdb772 are on
+  feat/mermaid-cpp-port in build/mermaid-cpp/entry-contribution. Runtime/tests
+  match the verified head; this documentation checkpoint follows it. No
+  AGENTS.md difference against PR base 508423f2. Delivery-triggered reruns are
+  separate from completed implementation validation. PR #1 stays open/unmerged:
+  https://github.com/water2004/Folia/pull/1
+- Next functional boundary: measured Class note emphasis. Four original
+  observations are in build/mermaid-cpp/class-note-display-next/original.json:
+  note-emphasis and note-wrapped, both themes. Despite the latter probe name,
+  the original long note stays on one line: ClassDB specifies white-space: nowrap.
+  Preserve that behavior; do not introduce an automatic note-wrapping requirement.
+  Start from ClassDB.getData, note.ts/labelHelper and the new Class measured run
+  adapter. Preserve note left alignment, explicit lines, colors and attachments.
+  Exit on these representative inputs and affected checks, then continue the
+  remaining required Class configuration/layout and family chain.
+- Folia still uses Rust in the application. Default Class ELK, remaining required
+  families/configuration and app integration remain. Local MSVC/CMake are
+  unavailable; no WinUI/GPU/DPI or arbitrary-font parity claim. No uncommitted
+  implementation candidate or live local browser/build/agent remains.
 
 ## Previous checkpoint - 2026-10-25, Class namespaces and display lines verified
 
