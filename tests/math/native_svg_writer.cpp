@@ -45,6 +45,49 @@ suite native_svg_writer = [] {
         expect(output.find("><text transform=\"scale(1,-1)\">&lt;&amp;&gt;</text>") != output.npos);
     };
 
+    "SVG attributes preserve long spans adjacent escapes empty and UTF8 values"_test = [] {
+        const std::string plain(4096, 'x');
+        const std::string utf8 = "\xCE\xB1\xF0\x9F\x98\x80";
+        svg::SvgWriteOptions options;
+        options.font_cache = svg::FontCacheMode::none;
+        options.container_attributes = {{"data-long", "&\"<>" + plain + utf8 + "'&"},
+                                        {"data-empty", ""}};
+        const auto output = svg::write(make_scene(), options);
+        expect(output.starts_with("<mjx-container data-long=\"&amp;&quot;&lt;&gt;" + plain +
+                                  utf8 + "'&amp;\" data-empty=\"\">"));
+        expect(options.container_attributes[0].value == "&\"<>" + plain + utf8 + "'&");
+    };
+
+    "SVG repeated long glyph paths keep local and uncached source bytes"_test = [] {
+        std::string path = "M0 0";
+        for (unsigned i = 0; i < 256; ++i) path += "L10 20L30 40";
+        path += "Z";
+        const auto resource = scene::GlyphResource::make("test", {});
+        scene::Builder builder;
+        builder.set_metrics({1, .5, .1});
+        builder.set_font_metrics({1, .5, .5, .7});
+        const scene::Glyph glyph{resource, {"normal", "NCM-N", 0x41}};
+        builder.add_primitive(0, scene::GlyphRun{{glyph, glyph}});
+        const auto source = std::move(builder).freeze();
+        svg::SvgFontResourcesBuilder fonts;
+        fonts.add({"normal", 0x41}, {true, path, {}});
+        const auto catalog = std::move(fonts).freeze();
+        const auto emptyCatalog = svg::SvgFontResources{};
+        for (const auto mode : {svg::FontCacheMode::local, svg::FontCacheMode::none}) {
+            svg::SvgWriteOptions options{.font_cache = mode, .font_resources = &catalog,
+                                         .local_cache_prefixes = {"1-"}};
+            const auto output = svg::write(source, options);
+            const auto first = output.find(path);
+            expect(first != output.npos);
+            const auto second = output.find(path, first + path.size());
+            expect((second != output.npos) == (mode == svg::FontCacheMode::none));
+            expect(svg::write(source, options) == output);
+            expect(catalog.find({"normal", 0x41})->path_data == path);
+            options.font_resources = &emptyCatalog;
+            expect(throws<svg::UnsupportedError>([&] { (void)svg::write(source, options); }));
+        }
+    };
+
     "ordered groups retain SVG-space arc flags under reflection and metadata"_test = [] {
         scene::Builder builder;
         builder.set_metrics({1, 0.5, 0.1});

@@ -7,21 +7,6 @@ import std;
 namespace folia::math::output::svg::detail {
 using Attribute = folia::math::output::scene::SemanticAttribute;
 
-std::string escape_attribute(std::string_view value) {
-    std::string result;
-    result.reserve(value.size());
-    for (const char ch : value) {
-        switch (ch) {
-        case '&': result += "&amp;"; break;
-        case '"': result += "&quot;"; break;
-        case '<': result += "&lt;"; break;
-        case '>': result += "&gt;"; break;
-        default: result += ch; break;
-        }
-    }
-    return result;
-}
-
 std::string escape_text(std::string_view value) {
     std::string result;
     result.reserve(value.size());
@@ -48,7 +33,23 @@ void append_attribute(std::string& out, std::string_view name,
     out += ' ';
     out += name;
     out += "=\"";
-    out += escape_attribute(value);
+    // Append plain spans directly, especially the long Source glyph paths.
+    // Escaping never requires a second complete copy of an attribute value.
+    while (!value.empty()) {
+        const auto next = value.find_first_of("&\"<>");
+        if (next == std::string_view::npos) {
+            out.append(value);
+            break;
+        }
+        out.append(value.substr(0, next));
+        switch (value[next]) {
+        case '&': out += "&amp;"; break;
+        case '"': out += "&quot;"; break;
+        case '<': out += "&lt;"; break;
+        case '>': out += "&gt;"; break;
+        }
+        value.remove_prefix(next + 1);
+    }
     out += '"';
 }
 

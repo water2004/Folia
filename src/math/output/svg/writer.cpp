@@ -11,7 +11,6 @@ import folia.math.util.utf16;
 namespace folia::math::output::svg {
 namespace scene = folia::math::output::scene;
 namespace detail {
-std::string escape_attribute(std::string_view);
 std::string escape_text(std::string_view);
 void append_attribute(std::string &, std::string_view, std::string_view);
 void append_metadata(std::string &, scene::SemanticMetadata const &,
@@ -302,7 +301,7 @@ std::string codepoint(std::uint32_t value) {
     return result;
 }
 
-std::string path_data(scene::Glyph const &glyph, SvgWriteOptions const &options) {
+std::string_view path_data(scene::Glyph const &glyph, SvgWriteOptions const &options) {
     if (!glyph.resource)
         throw UnsupportedError("Scene glyph has no immutable common outline resource");
     if (!options.font_resources)
@@ -314,6 +313,8 @@ std::string path_data(scene::Glyph const &glyph, SvgWriteOptions const &options)
     if (!source->path_defined)
         throw UnsupportedError(
             "SVG glyph has no Source path; composition must be completed in Scene");
+    // The catalog/request owns this immutable value throughout write(). The
+    // caller immediately appends it, without another font lookup in between.
     return source->path_data;
 }
 
