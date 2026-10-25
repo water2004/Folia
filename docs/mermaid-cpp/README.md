@@ -56,10 +56,15 @@ is Arial, explicitly matched by the browser oracle. The current comparison
 corpus uses Arial at 16/20 units; it does not establish arbitrary-font parity.
 Plain left/right/over notes and nested activation bars use the original bounds
 and event order; active bars also determine message endpoint clipping.
-Control regions, wrapping/multiline/entity labels, titles and further Sequence
-configuration remain the next SVG steps. Parser support for those events does
-not imply SVG support; the adapter returns an
-error for unsupported input. Folia's application dependency remains unchanged.
+Nested loop/opt/alt, par/and, critical/option and break regions now use the
+original bounds stack, section separators, bracketed single-line labels and
+configured label boxes. Rect regions paint behind the diagram in nested order,
+including transparent fills; plain titles extend the viewport above the actors.
+Control-label automatic wrapping, general wrapping/multiline/entity labels,
+numbering and further Sequence configuration remain subsequent SVG steps.
+The current control-label comparison boundary is plain text fitting one line.
+Parser support alone does not imply SVG support. Folia's application dependency
+remains unchanged.
 The original Sequence grammar credits Knut Sveidqvist (2014-2015, MIT) and
 Andrew Brampton (2012-2013, Simplified BSD); that notice is retained in the
 pinned grammar and the native source attribution.
