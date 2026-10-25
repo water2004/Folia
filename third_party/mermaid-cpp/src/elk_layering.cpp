@@ -281,6 +281,11 @@ std::expected<ElkLayeringResult, std::string> elk_layer_flat_graph(
                 ns.nodes[source].outgoing.push_back(index); ns.nodes[target].incoming.push_back(index);
             }
             ns.execute(28 * static_cast<int>(std::floor(std::sqrt(static_cast<double>(group.size())) + 0.5)), previous);
+            for (const auto i : ns.order) {
+                const auto layer = static_cast<Index>(ns.nodes[i].layer);
+                if (result.layer_nodes.size() <= layer) result.layer_nodes.resize(layer + 1);
+                result.layer_nodes[layer].push_back(group[i]);
+            }
             for (Index i = 0; i < group.size(); ++i) {
                 result.layers[group[i]] = ns.nodes[i].layer;
                 if (previous.size() <= static_cast<Index>(ns.nodes[i].layer)) previous.resize(ns.nodes[i].layer + 1);

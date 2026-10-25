@@ -26,7 +26,8 @@ const original=vm.runInContext(`(count, owners, endpoints, priorities) => {
   try{$process_57(new DepthFirstCycleBreaker(),graph,new BasicProgressMonitor());}
   finally{$reverse_0=reverse;}
   $process_68(new NetworkSimplexLayerer(),graph,new BasicProgressMonitor());
-  return {reversed,layers:nodes.map(n=>graph.layers.array.indexOf(n.layer))};
+  return {reversed,layers:nodes.map(n=>graph.layers.array.indexOf(n.layer)),
+    layerNodes:graph.layers.array.map(layer=>layer.nodes.array.map(n=>nodes.indexOf(n)))};
 }`,context);
 const cases=[
   ['empty',0,[],[],[]],
@@ -43,10 +44,11 @@ const cases=[
   ['subtree-threshold',40,Array.from({length:40},(_,i)=>i),Array.from({length:39},(_,i)=>[i,i+1]),[]],
 ];
 const encode=items=>items.length?items.join(','):'-';
-const rows=['# ELK 0.9.3 flat network-simplex layering; name, node count, port owners, endpoints, priorities, reversed edges, layers.'];
+const rows=['# ELK 0.9.3 flat network-simplex layering; name, node count, port owners, endpoints, priorities, reversed edges, layers, layer node order.'];
 for(const [name,count,ports,edges,priorities] of cases){
   const actual=original(count,ports,edges,priorities);
-  rows.push([name,count,encode(ports),encode(edges.map(e=>e.join(':'))),encode(priorities),encode(actual.reversed),encode(actual.layers)].join('\t'));
+  rows.push([name,count,encode(ports),encode(edges.map(e=>e.join(':'))),encode(priorities),encode(actual.reversed),encode(actual.layers),
+    actual.layerNodes.length?actual.layerNodes.map(encode).join(';'):'-'].join('\t'));
 }
 const fixture=new URL('../../tests/mermaid_cpp/fixtures/elk-layering.tsv',import.meta.url);
 const expected=rows.join('\n')+'\n';

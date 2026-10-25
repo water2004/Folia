@@ -33,7 +33,7 @@ suite elk_layering = [] {
             if (!line.empty() && line.back() == '\r') line.pop_back();
             if (line.empty() || line.front() == '#') continue;
             const auto fields = elk_fields(line, '\t');
-            expect(fatal(fields.size() == 7_u));
+            expect(fatal(fields.size() == 8_u));
             ElkCycleGraph graph{.node_count=static_cast<std::size_t>(elk_int(fields[1]))};
             for (const auto owner : elk_fields(fields[2], ',')) graph.ports.push_back({static_cast<std::size_t>(elk_int(owner))});
             for (const auto edge : elk_fields(fields[3], ',')) {
@@ -50,6 +50,12 @@ suite elk_layering = [] {
             expect(fatal(actual.has_value())) << fields[0] << (actual ? "" : actual.error());
             expect(actual->layers == layers) << fields[0];
             expect(actual->reversed_edges == reversed) << fields[0];
+            std::vector<std::vector<std::size_t>> layer_nodes;
+            for (const auto layer : elk_fields(fields[7], ';')) {
+                auto& nodes = layer_nodes.emplace_back();
+                for (const auto value : elk_fields(layer, ',')) nodes.push_back(static_cast<std::size_t>(elk_int(value)));
+            }
+            expect(actual->layer_nodes == layer_nodes) << fields[0];
             ++count;
         }
         expect(count == 11_u);
