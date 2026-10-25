@@ -48,7 +48,7 @@ links are not implemented yet and return explicit errors.
 The measured Sequence SVG adapter connects `render_mermaid` to classic
 rectangular participants and human actor figures, mirrored footers, lifelines, ordinary and self
 messages, solid/dotted/open/bidirectional arrows, actor spacing and default/dark
-paints. Its first boundary uses single-line plain labels and centered messages.
+paints and centered messages.
 It retains the original actor-margin and message-height algorithms, including
 rounded real text measurements and optional right-angle self calls. DirectWrite
 provides widths and font ascent/descent; the native generic sans-serif mapping
@@ -57,12 +57,18 @@ corpus uses Arial at 16/20 units; it does not establish arbitrary-font parity.
 Plain left/right/over notes and nested activation bars use the original bounds
 and event order; active bars also determine message endpoint clipping.
 Nested loop/opt/alt, par/and, critical/option and break regions now use the
-original bounds stack, section separators, bracketed single-line labels and
+original bounds stack, section separators, bracketed labels and
 configured label boxes. Rect regions paint behind the diagram in nested order,
 including transparent fills; plain titles extend the viewport above the actors.
-Control-label automatic wrapping, general wrapping/multiline/entity labels,
-numbering and further Sequence configuration remain subsequent SVG steps.
-The current control-label comparison boundary is plain text fitting one line.
+Explicit HTML breaks and protected Mermaid entities retain the original
+measurement/display order. Participants, messages, notes and control labels
+use the original word wrapping with measured glyph bounds. Actor spacing is
+calculated first; final message spans, note widths and nested control bounds
+then determine wrapping and vertical placement. Wrapped actors can increase
+the shared actor row height. Sequence uses DirectWrite glyph-run coverage
+bounds for the integer width comparisons that decide line breaks.
+Rich labels, numbering, extended participants and further Sequence
+configuration remain subsequent SVG steps.
 Parser support alone does not imply SVG support. Folia's application dependency
 remains unchanged.
 The original Sequence grammar credits Knut Sveidqvist (2014-2015, MIT) and
