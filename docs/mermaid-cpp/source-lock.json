@@ -603,6 +603,10 @@
     {
       "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/classBox.ts",
       "sha256": "7523a7e1bc504d4b56050e3f3f7dfd3aeb3156124e11856218ad6edf8101b541"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/note.ts",
+      "sha256": "f358bb583f624930c1118e91a6cf07db949c1ad6ac722f9d0ae4207118c1d552"
     }
   ],
   "packages": [

@@ -90,8 +90,19 @@ FlowchartPoint terminal(std::vector<FlowchartPoint> points,bool start) {
 std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& input,const ClassMeasurements& measured) {
     try {
         const auto& doc=input.document;const auto& theme=input.theme;const auto& config=input.config;
-        if(measured.nodes.size()!=doc.classes.size()||measured.edges.size()!=doc.relations.size())
+        if(measured.nodes.size()!=doc.classes.size()||measured.edges.size()!=doc.relations.size()||measured.notes.size()!=doc.notes.size())
             return std::unexpected("Class needs one measured box per class and relationship");
+        // ClassDB inserts note attachments before ordinary relationships.
+        std::vector<ClassRelation> relations;
+        std::vector<ClassEdgeMeasurements> edge_measurements;
+        for(const auto& note:doc.notes)
+            if(std::ranges::any_of(doc.classes,[&](const auto& n){return n.id==note.class_id;})) {
+                relations.push_back({.from=note.id,.to=note.class_id,.dotted=true});
+                edge_measurements.emplace_back();
+            }
+        const auto attachment_count=relations.size();
+        relations.insert(relations.end(),doc.relations.begin(),doc.relations.end());
+        edge_measurements.insert(edge_measurements.end(),measured.edges.begin(),measured.edges.end());
         FlowchartInput graph;graph.direction=doc.direction;graph.node_spacing=config.node_spacing;graph.rank_spacing=config.rank_spacing;
         std::vector<NodeBox> boxes;std::vector<FlowchartNodeBox> sizes;std::vector<FlowchartEdgeLabelSize> labels;
         for(std::size_t i=0;i<doc.classes.size();++i) {
@@ -100,11 +111,16 @@ std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& inp
             const auto b=node_box(m,config);boxes.push_back(b);sizes.push_back({b.width,b.height});
             graph.nodes.push_back({.id=n.id});
         }
-        for(std::size_t i=0;i<doc.relations.size();++i) {
-            const auto& e=doc.relations[i];
+        for(std::size_t i=0;i<doc.notes.size();++i) {
+            const auto& m=measured.notes[i];
+            graph.nodes.push_back({.id=doc.notes[i].id});
+            sizes.push_back({m.width+2*config.note_padding,m.height+2*config.note_padding});
+        }
+        for(std::size_t i=0;i<relations.size();++i) {
+            const auto& e=relations[i];
             const auto id=std::to_string(i);
             graph.edges.push_back({.id=std::u16string{id.begin(),id.end()},.start=e.from,.end=e.to,.label=e.title});
-            labels.push_back({measured.edges[i].label.width,measured.edges[i].label.height});
+            labels.push_back({edge_measurements[i].label.width,edge_measurements[i].label.height});
         }
         auto preparation=prepare_flowchart_graph(graph);if(!preparation) return std::unexpected(preparation.error());
         const auto& prepared=preparation->graph;
@@ -165,8 +181,8 @@ std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& inp
         for(auto [tag,value]:{std::pair{"title",doc.acc_title},{"desc",doc.acc_description}})
             if(!value.empty()) svg+="<"+std::string(tag)+">"+xml(value)+"</"+tag+">";
         svg+=markers(theme);
-        for(std::size_t i=0;i<doc.relations.size();++i) {
-            const auto& e=doc.relations[i];auto points=placed->edges[i].points;
+        for(std::size_t i=0;i<relations.size();++i) {
+            const auto& e=relations[i];auto points=placed->edges[i].points;
             for(auto& p:points) {p.x+=8;p.y+=8;}
             if(points.size()<2) return std::unexpected("Class relation needs a routed path");
             shorten(points.front(),points[1],e.start);shorten(points.back(),points[points.size()-2],e.end);
@@ -176,14 +192,14 @@ std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& inp
             // rectangle clipping retains the self-loop main-label midpoint.
             if(!label_coordinate_in_path(points[points.size()/2],path)) label_paths[i]=placed->edges[i].points;
             svg+="<path class=\"relation\" d=\""+path+"\" fill=\"none\" stroke=\""+theme.line+"\" stroke-width=\""+num(theme.stroke_width)+"\"";
-            svg+=e.dotted?" stroke-dasharray=\"3\"":" stroke-dasharray=\"0\"";
+            svg+=i<attachment_count?" stroke-dasharray=\"2\"":e.dotted?" stroke-dasharray=\"3\"":" stroke-dasharray=\"0\"";
             if(e.start!=ClassMarker::none) svg+=" marker-start=\"url(#"+marker_id(e.start,true)+")\"";
             if(e.end!=ClassMarker::none) svg+=" marker-end=\"url(#"+marker_id(e.end,false)+")\"";
             svg+="/>";
         }
         svg+="<g class=\"edgeLabels\">";
-        for(std::size_t i=0;i<doc.relations.size();++i) {
-            const auto& e=doc.relations[i];const auto& m=measured.edges[i];const auto& route=placed->edges[i];
+        for(std::size_t i=0;i<relations.size();++i) {
+            const auto& m=edge_measurements[i];const auto& route=placed->edges[i];
             if(route.label&&!m.label.text.empty()) {
                 const auto x=route.label->x+8-m.label.width/2,y=route.label->y+8-m.label.height/2;
                 svg+="<rect x=\""+num(x)+"\" y=\""+num(y)+"\" width=\""+num(m.label.width)+"\" height=\""+num(m.label.height)+"\" fill=\""+theme.label_background+"\"/>";
@@ -217,6 +233,17 @@ std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& inp
                     "\" stroke=\""+theme.border+"\" stroke-width=\"1\" fill=\"none\"/>";
             }
             svg+="</g>";
+        }
+        auto note_theme=theme;note_theme.text=theme.note_text;
+        for(std::size_t i=0;i<doc.notes.size();++i) {
+            const auto& m=measured.notes[i];const auto& position=placed->nodes[doc.classes.size()+i];
+            const auto w=m.width+2*config.note_padding,h=m.height+2*config.note_padding;
+            const auto x=position.x+8-w/2,y=position.y+8-h/2;
+            svg+="<g class=\"node\" data-class-id=\""+xml(doc.notes[i].id)+"\"><rect class=\"outer-path\" x=\""+num(x)+"\" y=\""+num(y)+
+                "\" width=\""+num(w)+"\" height=\""+num(h)+"\" fill=\""+theme.note_fill+"\" stroke=\""+theme.note_border+"\" stroke-width=\""+num(theme.stroke_width)+"\"/>";
+            svg+="<g class=\"noteLabel\">";double row_y=y+config.note_padding;
+            for(const auto& line:m.lines) {svg+=text(line,x+config.note_padding,row_y,note_theme);row_y+=line.height;}
+            svg+="</g></g>";
         }
         if(!doc.title.empty()) svg+="<text class=\"classDiagramTitleText\" text-anchor=\"middle\" x=\""+num(title_x)+
             "\" y=\""+num(title_y)+"\" font-size=\""+num(theme.font_size)+"\" fill=\""+theme.title_color+"\">"+xml(doc.title)+"</text>";

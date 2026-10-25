@@ -167,6 +167,16 @@ class Parser {
         }
         if (take(rest,u"accTitle:")) { result.acc_title = rest; return; }
         if (take(rest,u"accDescr:")) { result.acc_description = rest; return; }
+        if (take(rest,u"note ")) {
+            ClassNote note;
+            if (take(rest,u"for ")) note.class_id = name(rest);
+            note.text = quoted(rest,u'"');
+            if (!rest.empty()) fail("Unexpected text after Class note");
+            if (result.notes.size() >= limits.notes) fail("Class note limit exceeded");
+            const auto index = std::to_string(result.notes.size());
+            note.id = u"note"+Text{index.begin(),index.end()};
+            result.notes.push_back(std::move(note)); return;
+        }
         if (take(rest,u"class ")) {
             const auto index = add_class(name(rest));
             if (take(rest,u"[")) {
@@ -216,7 +226,15 @@ public:
         const auto encoded = encode_diagram_source(prepared.code.cleaned);
         View source = encoded; bool header = false, content = false;
         while (!source.empty()) {
-            const auto end = source.find(u'\n'); auto line = trim(source.substr(0,end));
+            auto end = source.find(u'\n'); auto line = trim(source.substr(0,end));
+            if (!body && line.starts_with(u"note ")) {
+                const auto open = source.find(u'"');
+                if (open != source.npos && (end == source.npos || open < end)) {
+                    const auto close = source.find(u'"',open+1);
+                    if (close == source.npos) fail("Unclosed quoted Class note");
+                    end = source.find(u'\n',close+1); line = trim(source.substr(0,end));
+                }
+            }
             if (!line.empty() && !line.starts_with(u"%%")) {
                 if (!header) {
                     if (line != u"classDiagram" && line != u"classDiagram-v2") fail("Expected Class diagram header");

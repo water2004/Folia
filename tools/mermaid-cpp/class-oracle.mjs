@@ -15,6 +15,9 @@ for (const file of ['classDb.ts','classTypes.ts']) {
   assert.equal(map.sourcesContent[index].replaceAll('\r\n','\n'),read('packages/mermaid/src/diagrams/class/'+file));
 }
 const cases = [
+  ['notes','classDiagram\nnote "Document model"\nnote for Document "Validate before saving"\nclass Document\nnote for Missing "Unattached"'],
+  ['note-multiline','classDiagram\nclass `Local Store`\nnote for `Local Store` "Keep revisions\nSave locally"'],
+  ['unclosed-note','classDiagram\nclass Document\nnote for Document "Incomplete'],
   ['members','classDiagram\nclass Document {\n+String title\n+save() bool\n}\nclass Store {\n+load(id) Document\n}\nDocument --> Store : persists'],
   ['relations','classDiagram\ndirection LR\nclass Shape\n<<interface>> Shape\nclass Circle\nShape <|-- Circle\nCircle "1" o-- "*" Point : contains'],
   ['member-details','classDiagram\nclass Repository~T~ {\n<<service>>\n-items List~T~\n+count int$\n#find( id, key ) T*\n~reset()$\n}\nRepository : +append(T item) void\nclass Repository'],
@@ -28,7 +31,7 @@ const cases = [
   ['missing-endpoint','classDiagram\nDocument -->'],
   ['nested-body','classDiagram\nclass Document {\nclass Store {\n}\n}'],
 ];
-const errors = ['empty','unclosed-body','missing-endpoint','nested-body'];
+const errors = ['empty','unclosed-body','missing-endpoint','nested-body','unclosed-note'];
 const rows = ['# Original Mermaid 12.2.0 Class parser/DB; UTF-16 hex JSON.'];
 for (const [name,source] of cases) {
   const site = {theme:'default'}; let result = null;
@@ -41,6 +44,7 @@ for (const [name,source] of cases) {
     result = {title:db.getDiagramTitle(),accTitle:db.getAccTitle(),accDescription:db.getAccDescription(),
       direction:db.getDirection(),classes:[...db.getClasses()].map(([id,c])=>({id,label:c.label,type:c.type,
         annotations:c.annotations,members:c.members.map(member),methods:c.methods.map(member)})),
+      notes:[...db.getNotes().values()].map(n=>({id:n.id,class:n.class??'',text:n.text})),
       relations:db.getRelations().map(r=>({from:r.id1,to:r.id2,title:r.title??'',
         startLabel:r.relationTitle1,endLabel:r.relationTitle2,
         start:r.relation.type1==='none'?-1:r.relation.type1,end:r.relation.type2==='none'?-1:r.relation.type2,

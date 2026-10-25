@@ -5,6 +5,9 @@ import {resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {chromium} from './oracle/node_modules/playwright-core/index.mjs';
 export const cases = [
+ ['note-only','classDiagram\nnote "Document model"'],
+ ['note-attached','classDiagram\nnote for Document "Validate before saving\nKeep revisions"\nclass Document {\n+save() bool\n}'],
+ ['note-related','classDiagram\ndirection LR\nclass Document\nDocument --> Store : persists\nnote for Store "Local storage"\nnote for Missing "Unattached"'],
  ['self','classDiagram\nclass Document {\n+validate() bool\n}\nDocument --> Document : validates'],
  ['self-related','classDiagram\ndirection LR\nclass Document {\n+save() bool\n}\nDocument --> Store : persists\nDocument "1" o-- "*" Document : revisions'],
  ['title','---\ntitle: Document storage\n---\nclassDiagram\nclass Document {\n+save() bool\n}\nDocument --> Store : persists'],
@@ -37,7 +40,7 @@ export function inspectClass() {
  };
  const nodes=[...root.querySelectorAll('g.node')].map(g=>{
    const outer=g.querySelector('.outer-path');
-   const id=g.getAttribute('data-class-id')??g.id.replace(/^.*classId-/,'').replace(/-\d+$/,'');
+   const id=g.getAttribute('data-class-id')??g.id.replace(/^.*classId-/,'').replace(/^.*-(note\d+)$/,'$1').replace(/-\d+$/,'');
    const groups=[...g.querySelectorAll('.text')].map(t=>({kind:[...t.classList].find(c=>c.endsWith('-group')),
      labels:[...t.querySelectorAll('.label')].map(l=>{
        const fo=l.querySelector('foreignObject'),text=l.querySelector('text'),element=fo??text;
@@ -45,6 +48,23 @@ export function inspectClass() {
        const s=getComputedStyle(fo?.querySelector('span')??text);
        return {text:element.textContent,...b,color:fo?s.color:s.fill,size:s.fontSize,weight:s.fontWeight,italic:s.fontStyle,decoration:fo?getComputedStyle(l).textDecorationLine:s.textDecorationLine};
      })}));
+   const note=g.querySelector('.noteLabel');
+   if(note) {
+     const fo=note.querySelector('foreignObject');
+     const elements=[];
+     if(fo) {const walker=document.createTreeWalker(fo,NodeFilter.SHOW_TEXT);while(walker.nextNode())if(walker.currentNode.textContent)elements.push(walker.currentNode);}
+     else elements.push(...note.querySelectorAll('text'));
+     groups.push({kind:'note-group',labels:elements.map(e=>{
+       let b;
+       if(fo) {
+         const range=document.createRange();range.selectNodeContents(e);
+         const r=range.getBoundingClientRect(),m=root.getScreenCTM().inverse(),p=new DOMPoint(r.x,r.y).matrixTransform(m),q=new DOMPoint(r.right,r.bottom).matrixTransform(m);
+         b={x:p.x,y:p.y,width:q.x-p.x,height:q.y-p.y};
+       } else b=textBox(e);
+       const s=getComputedStyle(fo?e.parentElement:e);
+       return {text:e.textContent,...b,color:fo?s.color:s.fill,size:s.fontSize,weight:s.fontWeight,italic:s.fontStyle,decoration:s.textDecorationLine};
+     })});
+   }
    return {id,...box(outer),...paint(outer.querySelector('path')??outer),groups,
      dividers:[...g.querySelectorAll('.divider')].map(e=>box(e))};
  });

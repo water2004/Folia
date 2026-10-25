@@ -15,18 +15,24 @@ struct ClassNodeMeasurements {
     std::vector<ClassTextBox> members, methods;
 };
 struct ClassEdgeMeasurements { ClassTextBox label, start, end; };
+struct ClassNoteMeasurements {
+    std::vector<ClassTextBox> lines;
+    double width = 0, height = 0;
+};
 struct ClassMeasurements {
     ClassTextBox title;
     std::vector<ClassNodeMeasurements> nodes;
     std::vector<ClassEdgeMeasurements> edges;
+    std::vector<ClassNoteMeasurements> notes;
 };
 struct ClassSvgTheme {
     std::u16string font_family = u"Arial";
     double font_size = 16, stroke_width = 1;
     std::string fill = "#ECECFF", border = "#9370DB", text = "#131300", line = "#333333", label_background = "#e8e8e8", title_color = "#333333";
+    std::string note_fill = "#fff5ad", note_border = "#aaaa33", note_text = "#333333";
 };
 struct ClassSvgConfig {
-    double padding = 12, node_spacing = 50, rank_spacing = 50, title_top_margin = 25;
+    double padding = 12, note_padding = 6, node_spacing = 50, rank_spacing = 50, title_top_margin = 25;
     bool hide_empty_members = false;
 };
 struct ClassRenderInput { ClassInput document; ClassSvgTheme theme; ClassSvgConfig config; };

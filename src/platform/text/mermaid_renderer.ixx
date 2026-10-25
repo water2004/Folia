@@ -262,6 +262,25 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
                 }
             class_measurements.nodes.push_back(std::move(m));
         }
+        for(const auto& note:cls->document.notes) {
+            auto lines=flowchart_label_runs(note.text,u"markdown");
+            if(!lines) return std::unexpected(lines.error());
+            ClassNoteMeasurements m;
+            for(const auto& line:*lines) {
+                std::u16string display;
+                for(const auto& run:line) {
+                    if(run.strong||run.emphasis) return std::unexpected("Styled Class notes require the rich-label adapter");
+                    display+=run.text;
+                }
+                const MermaidFont font{theme.font_family,static_cast<float>(theme.font_size)};
+                auto metrics=measurer.measure(display.empty()?u"M":display,font,true);
+                if(!metrics) return std::unexpected(metrics.error());
+                const auto height=theme.font_size*1.5;
+                ClassTextBox box{display,display.empty()?0:metrics->advance,height,metrics->baseline+(height-metrics->line_height)/2};
+                m.width=std::max(m.width,box.width);m.height+=height;m.lines.push_back(std::move(box));
+            }
+            class_measurements.notes.push_back(std::move(m));
+        }
         for(const auto& edge:cls->document.relations) {
             ClassEdgeMeasurements m;
             auto label=measure(edge.title);if(!label) return std::unexpected(label.error());m.label=std::move(*label);
