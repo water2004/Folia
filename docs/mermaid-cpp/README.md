@@ -43,8 +43,9 @@ Activation markers and nested control-region boundaries remain separate events
 in the original message order. Regions include loop, opt, alt/else, par/and,
 par_over, critical/option, break and rect, with owned labels and wrap flags.
 Autonumber events retain optional starts/steps and visibility in message order.
-Unclosed regions and misplaced sections return errors. Participant metadata/creation/destruction and
-links are not implemented yet and return explicit errors.
+Unclosed regions and misplaced sections return errors. Participant metadata,
+grouping and lifecycle are supported as described below. Host-facing participant
+links are not implemented and return explicit errors.
 
 The measured Sequence SVG adapter connects `render_mermaid` to classic
 rectangular participants and human actor figures, mirrored footers, lifelines, ordinary and self
