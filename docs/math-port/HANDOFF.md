@@ -2,7 +2,15 @@
 
 恢复/压缩后先实际读本文。架构、职责和详细验收见 [architecture](native-raii-architecture.md)、[files](native-raii-files.json)、[acceptance](native-raii-acceptance.md)。只复查新变化；ignored候选用 `rg --no-ignore`。
 
-## 当前 checkpoint：图片粘贴与未保存关闭确认已完成（2026-10-26，未打包安装）
+## 当前 checkpoint：0.4.0 本地更新 MSI 已构建并安装（2026-10-26，完成）
+
+- 用户明确要求构建MSI并直接安装，本轮已完成。版本保持0.4.0，包含目录同步、图片粘贴、关闭保存确认（源码38f38c69及之前提交）。未推送/另发Release/移动既有标签，无子代理/Computer Use。此前68项/14971断言验收保持，不重复宽测。
+- 自包含Release及既有WiX构建成功，native一次一个、并发≤4。MSI `build/installer/bin/Folia-0.4.0-x64.msi`，**53,537,630 bytes**，SHA256 `7A517552AC218283A4A1B8592D3D3B1151964591242B509D2C346C4BC01094DC`；同目录.sha256已写。新ProductCode `{01659E0C-1FE1-465F-A5A3-B6D56C2A4591}`，包版本0.4.0，165个payload且无测试/候选exe。日志build/clipboard-close-release-msi.log；build-info/msi-properties.json记录包信息。ICE61同版本升级warning为既有预期。
+- 直接msiexec同版本安装 **exit0**，无需重启；安装前确认无运行Folia，没有关闭用户窗口。安装路径 `%LOCALAPPDATA%/Programs/Folia/Folia.exe`，ProductVersion0.4.0/FileVersion0.4.0.0，新MSI ProductState=5。**165个已安装payload SHA256逐一匹配**；settings.json与latex/commands.user.json两个用户文件字节不变，本机自定义主题文件0。未启动或人工操作安装后的窗口。
+- 证据：build/clipboard-close-msi-install.log、msi-install-result.json、installed-payload-hashes.json、install-user-files-before.json、install-verification.json（文件名前缀均clipboard-close-）。本地MSI包含发布标签之后的功能，GitHub既有0.4.0附件/标签保持原样。
+- **停止点**：构建75813已exit0，无活动native/build/test/install句柄，未打开UI；实现、打包、安装、逐文件/用户设置核验均已完成。下一步由用户使用安装版复测目录、剪贴板及关闭提示；不重开旧数学移植/旁支或自动继续发布。
+
+## 历史：图片粘贴与未保存关闭确认已完成（2026-10-26）
 
 - 用户要求剪贴板图片落在MD同目录、新文档先保存，关闭有修改时保存/丢弃/取消。已本地提交：serializer新图片引用格式化 **38117303**；图片存储/粘贴、统一保存/关闭与正式测试 **ae14280a**。原目录提交57e85f0b保留；版本固定0.4.0，不自动推送/发布/安装，无子代理/Computer Use。
 - ClipboardImageStore后台解码位图为唯一PNG；复制的图片文件按ContentType识别并异步保留原格式复制，同目录唯一名称不覆盖原图。Controller.Clipboard优先Bitmap，其次图片StorageItems（多图一个撤销事务），其余文本沿用普通粘贴。未命名文档先await保存，取消不插入/不写图片。相对引用由serializer生成，富文本/源码统一Command::Paste事务；失败/过期时清理仅本次已创建文件，Undo保留图片以支持Redo。未扫描Markdown/引入第二编辑模型。
