@@ -1,28 +1,48 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-25, Class parser and measured SVG verified
+## Current checkpoint - 2026-10-25, Class titles and self relationships verified
 
-- Active batch: connect plain Class titles through root-font measurement,
-  original insertTitle placement and padded SVG viewport. Validate a normal
-  title and a wider title with the supported state.titleTopMargin setting in
-  both themes, plus the affected existing checks. Commit and deliver once those
-  pass; next batch connects ordinary self relationships through the existing
-  unified Dagre preparation/merge path. No extra boundary matrix is planned.
-- Title candidate 622e2f97 is verifying in run 40189132927. Its original browser
-  corpus is in build/mermaid-cpp/class-title-work (16 outputs). Self-relationship
-  work now reuses prepare_flowchart_graph and the extracted compact-loop router;
-  validate a single loop and an LR loop with an ordinary relation/multiplicity,
-  both themes, plus affected existing Flowchart checks. Deliver each green batch
-  separately; neither candidate is yet accepted or on the contribution branch.
-- Candidate runs 40189132927/40189349482 are superseded, not acceptance:
-  native tests passed but browser comparison found the title viewport one unit
-  too high and self-loop multiplicity positioned from the clipped route.
-  7bbbf8b5 uses rounded font ascent/descent rather than the layout-line baseline.
-  The next correction shares the original isLabelCoordinateInPath rule and
-  retains the pre-clipping loop for terminal labels when selected. Downloaded
-  evidence in build/mermaid-cpp/class-self-diagnostic confirms only those two
-  mismatches across the existing 20 outputs. Verify the combined corrected head;
-  keep title and self functionality as separate contribution commits.
+- Title batch 622e2f97 connects plain diagram titles through DirectWrite to
+  original insertTitle placement, theme typography, state.titleTopMargin and
+  padded viewport bounds. Normal and wide titles cover both default/dark themes.
+- Self-relationship batch 59babe2e reuses prepare_flowchart_graph's three layout
+  segments and a shared compact-loop router. Class keeps its rectangle clipping,
+  relationship markers, main labels and terminal multiplicity. Representative
+  inputs cover a single loop and an LR loop alongside an ordinary relationship.
+- Corrections 7bbbf8b5/ec262213 use SVG font ascent/descent for title bounds and
+  the original rounded-coordinate path selection for terminal labels. The first
+  runs found those two concrete differences; their failures are superseded, not
+  accepted. No tolerance change or additional boundary matrix was introduced.
+- Final verification head ec2622137468beb7edede167da45d64f64857813 passed all four
+  standalone/integrated Debug/Release jobs:
+  https://github.com/zhao0349/Folia/actions/runs/40189914812
+  Both integrated jobs passed FoliaTests, FoliaWindowsEditorTests and both Mermaid
+  suites. The 20 Class SVGs across ten diagrams/both themes compare title bounds,
+  compartments, text, ordinary/self paths, markers and multiplicity. Existing
+  92 Flowchart, 82 Sequence and 96 browser/DirectWrite comparisons also passed.
+  Both requested batches met their exit conditions; do not expand validation.
+- Final Release evidence is in build/mermaid-cpp/class-title-self-verified:
+  class-browser/comparison.json, pie-svg, text-comparison.json and
+  native-preview.png. The preview isolates the eight new title/self outputs as
+  images; all were visually inspected. Earlier diagnostic evidence remains in
+  class-self-diagnostic; class-title-work/class-self-work hold local references.
+- Contribution equivalents af30a28f/ffcd28ac/bb15d81c/1cf5258d are on
+  feat/mermaid-cpp-port in build/mermaid-cpp/entry-contribution. Runtime, tests,
+  pins, workflow and public docs match the verified head. This checkpoint follows
+  the tested code. No AGENTS.md diff against PR base 508423f2. Delivery-triggered
+  reruns are separate from the completed implementation validation above.
+  PR #1 stays open/unmerged: https://github.com/water2004/Folia/pull/1
+- Next concrete Class batch: owned note declarations and measured note SVG,
+  starting with the pinned classDiagram.jison/classDb.ts note handling and the
+  unified note shape/relationship placement. Then continue required namespace
+  containers and remaining Class/family work. Preserve the explicit Dagre
+  boundary; default ELK remains unported and must not be silently substituted.
+- Folia still uses Rust in the application. Local MSVC/CMake are unavailable;
+  no local native build or WinUI/GPU/DPI acceptance is claimed. The Class corpus
+  uses controlled fonts, not arbitrary-font parity. No local browser/build/agent,
+  failed acceptance check or uncommitted implementation candidate remains.
+
+## Previous checkpoint - 2026-10-25, Class parser and measured SVG verified
 
 - Parser commits b46c6486/ef11e206 met their exit conditions: all four Windows
   standalone/integrated Debug/Release jobs passed at
