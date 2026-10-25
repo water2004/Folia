@@ -34,7 +34,7 @@ std::string curve(std::span<const FlowchartPoint> p) {
     segment(p[p.size()-2],p.back(),p.back());return out+"L"+point(p.back());
 }
 void shorten(FlowchartPoint& p,FlowchartPoint q,ClassMarker marker) {
-    const double amount = marker==ClassMarker::none?0:marker==ClassMarker::dependency?6:17.25;
+    const double amount = marker==ClassMarker::none?0:marker==ClassMarker::dependency?6:marker==ClassMarker::lollipop?13.5:17.25;
     const double length=std::hypot(q.x-p.x,q.y-p.y);
     if(length>0) {p.x+=(q.x-p.x)*amount/length;p.y+=(q.y-p.y)*amount/length;}
 }
@@ -53,6 +53,9 @@ std::string markers(const ClassSvgTheme& theme) {
                 "\" refY=\"7\" markerWidth=\"20\" markerHeight=\"28\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><path d=\""+path+
                 "\" fill=\""+(dep||type==ClassMarker::composition?theme.line:"transparent")+"\" stroke=\""+theme.line+"\" stroke-width=\"1\"/></marker>";
         }
+    for(bool start:{false,true})
+        out+="<marker id=\""+marker_id(ClassMarker::lollipop,start)+"\" refX=\""+num(start?13:1)+
+            "\" refY=\"7\" markerWidth=\"190\" markerHeight=\"240\" orient=\"auto\" markerUnits=\"userSpaceOnUse\"><circle cx=\"7\" cy=\"7\" r=\"6\" fill=\"transparent\" stroke=\""+theme.line+"\" stroke-width=\"1\"/></marker>";
     return out+"</defs>";
 }
 struct NodeBox { double width,height,header,member_height; bool extra; };
@@ -127,10 +130,7 @@ FlowchartPoint terminal(std::vector<FlowchartPoint> points,bool start) {
 std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& input,const ClassMeasurements& measured) {
     try {
         const auto& doc=input.document;const auto& theme=input.theme;const auto& config=input.config;
-        if(!doc.interfaces.empty() || std::ranges::any_of(doc.relations,[](const auto& relation){
-            return relation.start==ClassMarker::lollipop||relation.end==ClassMarker::lollipop;
-        })) return std::unexpected("Class lollipop interfaces require the measured interface adapter");
-        if(measured.nodes.size()!=doc.classes.size()||measured.edges.size()!=doc.relations.size()||measured.notes.size()!=doc.notes.size()||measured.namespaces.size()!=doc.namespaces.size())
+        if(measured.nodes.size()!=doc.classes.size()||measured.edges.size()!=doc.relations.size()||measured.notes.size()!=doc.notes.size()||measured.namespaces.size()!=doc.namespaces.size()||measured.interfaces.size()!=doc.interfaces.size())
             return std::unexpected("Class needs one measured box per class and relationship");
         // ClassDB inserts note attachments before ordinary relationships.
         std::vector<ClassRelation> relations;
@@ -163,6 +163,12 @@ std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& inp
             const auto& m=measured.notes[i];
             graph.nodes.push_back({.id=doc.notes[i].id,.parent=doc.notes[i].parent});
             sizes.push_back({m.width+2*config.note_padding,m.height+2*config.note_padding});
+        }
+        // ClassDB appends independently allocated interface anchors after notes.
+        for(std::size_t i=0;i<doc.interfaces.size();++i) {
+            const auto& label=measured.interfaces[i];
+            graph.nodes.push_back({.id=doc.interfaces[i].id});
+            sizes.push_back({label.width,label.height});
         }
         for(std::size_t i=0;i<relations.size();++i) {
             const auto& e=relations[i];
@@ -333,6 +339,14 @@ std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& inp
             svg+="<g class=\"noteLabel\">";double row_y=y+config.note_padding;
             for(const auto& line:m.lines) {svg+=text(line,x+config.note_padding,row_y,note_theme,400,{},0,true);row_y+=line.height;}
             svg+="</g></g>";
+        }
+        for(std::size_t i=0;i<doc.interfaces.size();++i) {
+            const auto& label=measured.interfaces[i];
+            const auto& position=placed->nodes[group_count+doc.classes.size()+doc.notes.size()+i];
+            const auto x=position.x+8-label.width/2,y=position.y+8-label.height/2;
+            svg+="<g class=\"node\" data-class-id=\""+xml(doc.interfaces[i].id)+"\"><rect class=\"outer-path\" x=\""+num(x)+"\" y=\""+num(y)+
+                "\" width=\""+num(label.width)+"\" height=\""+num(label.height)+"\" fill=\""+theme.fill+"\" stroke=\""+theme.border+"\" stroke-width=\""+num(theme.stroke_width)+"\" opacity=\"0\"/>";
+            svg+="<g class=\"text interface-group\">"+text(label,x,y,theme)+"</g></g>";
         }
         if(!doc.title.empty()) svg+="<text class=\"classDiagramTitleText\" text-anchor=\"middle\" x=\""+num(title_x)+
             "\" y=\""+num(title_y)+"\" font-size=\""+num(theme.font_size)+"\" fill=\""+theme.title_color+"\">"+xml(doc.title)+"</text>";

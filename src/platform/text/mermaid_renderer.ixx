@@ -322,6 +322,11 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             m.width=box->width;m.height=box->height;m.lines.push_back(std::move(*box));
             class_measurements.notes.push_back(std::move(m));
         }
+        for(const auto& interface_node:cls->document.interfaces) {
+            auto label=measure(interface_node.label,400,false,0,false);
+            if(!label) return std::unexpected(label.error());
+            class_measurements.interfaces.push_back(std::move(*label));
+        }
         for(const auto& edge:cls->document.relations) {
             ClassEdgeMeasurements m;
             // The unified edge painter uses createText's default 200px width.

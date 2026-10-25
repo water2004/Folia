@@ -45,8 +45,9 @@ parents and class/note membership; a qualified name creates its ancestor
 containers. Common direct and class-defined fill, border, stroke width/dash and text color
 are supported through style/classDef/cssClass/inline assignments, retaining
 original statement order. Lollipop relationships retain independently allocated interface ids, labels
-and owning classes, including repeated names. Their measured SVG adapter and
-styled typography remain separate work; interface rendering fails explicitly. Unsupported statements return errors.
+and owning classes, including repeated names. Their labels use real measurements and transparent rectangle layout anchors;
+SVG output retains the original circle markers and endpoint shortening.
+Styled typography remains separate work. Unsupported statements return errors.
 
 The Class SVG adapter supports explicit `layout: dagre` with classic appearance
 and HTML label spacing, using real DirectWrite measurements for class,

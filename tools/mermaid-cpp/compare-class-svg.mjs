@@ -33,7 +33,7 @@ try {
   for(let i=0;i<original.nodes.length;i++) {
    const e=original.nodes[i],a=actual.nodes.find(n=>n.id===e.id);assert(a,name+'.node.'+e.id);assert.equal(a.id,e.id,name+'.id');
    for(const key of ['x','y','width','height'])near(a[key],e[key],0.2,name+'.'+a.id+'.'+key);
-   for(const key of ['fill','stroke','strokeWidth','strokeDasharray'])assert.equal(a[key],e[key],name+'.'+a.id+'.'+key);
+   for(const key of ['fill','stroke','strokeWidth','strokeDasharray','opacity'])assert.equal(a[key],e[key],name+'.'+a.id+'.'+key);
    assert.equal(a.dividers.length,e.dividers.length,name+'.dividers');
    for(let j=0;j<e.dividers.length;j++)for(const key of ['x','y','width','height'])near(a.dividers[j][key],e.dividers[j][key],0.2,name+'.divider.'+key);
    for(let j=0;j<e.dividers.length;j++)for(const key of ['fill','stroke','strokeWidth','strokeDasharray'])assert.equal(a.dividers[j][key],e.dividers[j][key],name+'.divider.'+key);

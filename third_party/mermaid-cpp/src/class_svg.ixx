@@ -30,7 +30,7 @@ struct ClassMeasurements {
     std::vector<ClassNodeMeasurements> nodes;
     std::vector<ClassEdgeMeasurements> edges;
     std::vector<ClassNoteMeasurements> notes;
-    std::vector<ClassTextBox> namespaces;
+    std::vector<ClassTextBox> namespaces, interfaces;
 };
 struct ClassSvgTheme {
     std::u16string font_family = u"Arial";

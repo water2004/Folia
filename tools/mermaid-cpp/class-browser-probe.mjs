@@ -5,6 +5,8 @@ import {resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {chromium} from './oracle/node_modules/playwright-core/index.mjs';
 export const cases = [
+ ["lollipop", "classDiagram\nclass Service {\n+save() bool\n}\nService --() Storage\nInput ()-- Service"],
+ ["lollipop-repeated", "classDiagram\ndirection LR\nEditor --() Storage : saves\nViewer --() Storage : reads"],
  ["class-direct-style", "classDiagram\nclass Document {\n+title String\n+save() bool\n}\nDocument --> Store : saves\nstyle Document fill:#ffeecc,stroke:#aa5500,color:#552200,stroke-width:2px"],
  ["class-defined-style", "classDiagram\nclass Document:::highlight\nclass Store\nclassDef highlight fill:#ffeecc,stroke:#aa5500,color:#552200,stroke-width:2px\nDocument --> Store : saves"],
  ["class-assigned-style", "classDiagram\nclass Document {\n+count int$\n+save() bool*\n}\nclass Store\ncssClass \"Document,Store\" highlight\nclassDef highlight fill:#ffeecc,stroke:#aa5500,color:#552200,stroke-width:2px,stroke-dasharray:4 2\nstyle Store fill:#ddffee,stroke:#008855\nDocument --> Store : saves"],
@@ -69,8 +71,8 @@ export function inspectClass() {
    return {x:p.x,y:p.y,width:q.x-p.x,height:q.y-p.y};
  };
  const nodes=[...root.querySelectorAll('g.node')].map(g=>{
-   const outer=g.querySelector('.outer-path');
-   const id=g.getAttribute('data-class-id')??g.id.replace(/^.*classId-/,'').replace(/^.*-(note\d+)$/,'$1').replace(/-\d+$/,'');
+   const outer=g.querySelector('.outer-path')??g.querySelector('rect');
+   const id=g.getAttribute('data-class-id')??g.id.replace(/^class\d+-/,'').replace(/^.*classId-/,'').replace(/^.*-(note\d+)$/,'$1').replace(/-\d+$/,'');
    const groups=[...g.querySelectorAll('.text')].map(t=>({kind:[...t.classList].find(c=>c.endsWith('-group')),
      labels:[...t.querySelectorAll('.label')].map(l=>{
        const fo=l.querySelector('foreignObject'),text=l.querySelector('text'),element=fo??text;
@@ -78,6 +80,11 @@ export function inspectClass() {
        const s=getComputedStyle(fo?.querySelector('span')??text);
        return {text:element.textContent,runs:textStyles(element),...b,color:fo?s.color:s.fill,size:s.fontSize,weight:s.fontWeight,italic:s.fontStyle,decoration:fo?getComputedStyle(l).textDecorationLine:s.textDecorationLine};
      })}));
+   if(id.startsWith('interface')&&!groups.length) {
+     const e=g.querySelector('foreignObject'),style=getComputedStyle(e.querySelector('span'));
+     groups.push({kind:'interface-group',labels:[{text:e.textContent,runs:textStyles(e),...textBox(e),
+       color:style.color,size:style.fontSize,weight:style.fontWeight,italic:style.fontStyle,decoration:style.textDecorationLine}]});
+   }
    const note=g.querySelector('.noteLabel');
    if(note) {
      const fo=note.querySelector('foreignObject');
@@ -95,11 +102,11 @@ export function inspectClass() {
        return {text:e.textContent,...b,color:fo?s.color:s.fill,size:s.fontSize,weight:s.fontWeight,italic:s.fontStyle,decoration:s.textDecorationLine};
      })});
    }
-   return {id,...box(outer),...paint(outer.querySelector('path')??outer),groups,
+   return {id,opacity:getComputedStyle(outer).opacity,...box(outer),...paint(outer.querySelector('path')??outer),groups,
      dividers:[...g.querySelectorAll('.divider')].map(e=>({...box(e),...paint(e.querySelector('path')??e)}))};
  });
  const edges=[...root.querySelectorAll('path.relation')].map(e=>{
-   const marker=side=>{const url=e.getAttribute('marker-'+side);if(!url)return null;const id=url.slice(url.lastIndexOf('#')+1,-1),m=root.querySelector('[id="'+id+'"]'),p=m.querySelector('path');return {refX:m.getAttribute('refX'),refY:m.getAttribute('refY'),d:p.getAttribute('d'),...paint(p)};};
+   const marker=side=>{const url=e.getAttribute('marker-'+side);if(!url)return null;const id=url.slice(url.lastIndexOf('#')+1,-1),m=root.querySelector('[id="'+id+'"]'),p=m.querySelector('path,circle');return {refX:m.getAttribute('refX'),refY:m.getAttribute('refY'),d:p.getAttribute('d'),shape:p.tagName,cx:p.getAttribute('cx'),cy:p.getAttribute('cy'),r:p.getAttribute('r'),...paint(p)};};
    return {...paint(e),dash:getComputedStyle(e).strokeDasharray,
      points:Array.from({length:21},(_,i)=>{const p=e.getPointAtLength(e.getTotalLength()*i/20),q=point(e,p.x,p.y);return [q.x,q.y];}),start:marker('start'),end:marker('end')};
  });

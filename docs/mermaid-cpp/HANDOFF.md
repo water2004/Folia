@@ -13,6 +13,11 @@
   build/mermaid-cpp/class-lollipop-next/original.json. After these batches pass,
   continue interface measurement/rectangle anchors and circle markers using
   ClassDB.addRelation/getData, rectWithTitle/plain rect and markers.lollipop.
+- Parser ece83aea is pushed. The next measured adapter candidate connects
+  interface labels through DirectWrite, transparent rectangle anchors and
+  original lollipop circle markers/13.5-unit path shortening. Two inputs/both
+  themes cover both directions and repeated names; exit on those comparisons
+  and affected checks, then proceed to the next Class requirement.
 - Candidate is unverified; no contribution update yet.
 
 ## Previous checkpoint - 2026-10-25, Class common paints in progress
