@@ -583,6 +583,26 @@
     {
       "path": "packages/mermaid/src/diagrams/class/classTypes.ts",
       "sha256": "c2440d462496d66a4878a1dbc57a4dbde753b6111820ded7c4f627ccbcfa7c75"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/class/classDiagram-v2.ts",
+      "sha256": "db24470e0ae5e00211452ed1e5ec7f27060a24998c6e031514e9a10600d928b5"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/class/classRenderer-v3-unified.ts",
+      "sha256": "022eeb9a5684c67117e160b64319d287e42a47f21b82c3d87de3a8d2ba70466c"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/class/shapeUtil.ts",
+      "sha256": "e24e83e6a2d848ceb2be6274246267843662ddd08054fbb6268ff87db889cf3e"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/class/styles.js",
+      "sha256": "7354ba9c5bba88ce34aa01b7a79e0b92b2ef5b8926a3cca096b1b90fe3de2c2e"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/classBox.ts",
+      "sha256": "7523a7e1bc504d4b56050e3f3f7dfd3aeb3156124e11856218ad6edf8101b541"
     }
   ],
   "packages": [

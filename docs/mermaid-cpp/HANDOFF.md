@@ -1,6 +1,6 @@
 # Mermaid C++ continuity
 
-## Current checkpoint - 2026-10-25, Class parser/DB batch in progress
+## Current checkpoint - 2026-10-25, Class parser validation and measured SVG batch
 
 - Deliver the next required Class family boundary: owned classes, members,
   methods and ordinary relationships, including labels, annotations, generics,
@@ -9,9 +9,22 @@
   incomplete-input errors pass natively in Windows standalone/integrated
   Debug/Release, with existing affected checks. Then commit/deliver this batch
   and advance to measured Class boxes and the original unified Dagre adapter.
-- New source oracle: tools/mermaid-cpp/class-oracle.mjs; fixtures: class.tsv.
-  Eight success inputs and four errors are source-matched locally. Native
-  validation is pending; no Class rendering or application integration claimed.
+- Parser commits b46c6486/ef11e206 have passed standalone Debug/Release; the
+  integrated jobs are still running at 40184783701. Source oracle class-oracle.mjs
+  covers eight successes and four errors. Do not restart successful checks.
+- The next batch connects plain Class source to measured SVG under explicit
+  classic/Dagre configuration. It retains original shapeUtil/classBox
+  compartments, classifiers, relationship markers and multiplicity. Exit on six
+  representative diagrams in default/dark themes and affected native suites.
+- New evidence corrects the layout assumption: the original Class default is
+  ELK. Explicit `layout: dagre` is supported by the same original unified
+  renderer; default ELK is not substituted or claimed implemented. The six
+  browser observations use explicit Dagre; build/mermaid-cpp/class-svg-work
+  contains the references. Newly used Class renderer/shape sources match the
+  released source maps and are pinned.
+- Class titles, self relationships, namespaces/notes, rich/wrapped text and
+  default ELK remain. After this SVG boundary, continue the next required
+  Class feature; Folia still uses Rust in the application.
 - Working implementation is in the main development worktree. The clean
   contribution worktree remains build/mermaid-cpp/entry-contribution.
   PR #1 is open/unmerged at 0b458e74; do not merge.

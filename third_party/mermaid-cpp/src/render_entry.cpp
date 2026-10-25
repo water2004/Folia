@@ -127,6 +127,30 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
     try {
         const auto& effective=prepared->effective_config;
         const auto& theme=member(effective,u"themeVariables");
+        if(prepared->type==u"classDiagram" || prepared->type==u"class") {
+            if(text(member(effective,u"layout"))!=u"dagre" || text(member(effective,u"look"))!=u"classic")
+                return std::unexpected("Native Class SVG currently requires explicit Dagre layout and classic look; ELK is not yet ported");
+            if(!boolean(member(effective,u"htmlLabels")))
+                return std::unexpected("Class SVG currently uses the measured HTML label spacing adapter");
+            auto doc=prepare_class(source,session,ClassLimits{.frontend=limits});
+            if(!doc) return std::unexpected(doc.error());
+            metadata(*doc,*prepared);
+            const auto& cfg=member(effective,u"class");const auto& state=member(effective,u"state");
+            ClassSvgConfig c;
+            if(auto value=cfg.find(u"padding")) c.padding=number(*value);
+            c.hide_empty_members=boolean(member(cfg,u"hideEmptyMembersBox"));
+            for(auto [key,target]:{std::pair{u"nodeSpacing",&c.node_spacing},{u"rankSpacing",&c.rank_spacing}}) {
+                if(auto value=state.find(key);value&&number(*value)!=0) *target=number(*value);
+                if(auto value=effective.find(key);value&&number(*value)!=0) *target=number(*value);
+            }
+            if(c.padding<0||c.node_spacing<0||c.rank_spacing<0) return std::unexpected("Class spacing must be nonnegative");
+            ClassSvgTheme t;t.font_family=text(member(theme,u"fontFamily"));t.font_size=size(member(theme,u"fontSize"));
+            t.stroke_width=size(member(theme,u"strokeWidth"));
+            if(t.font_size<=0||t.stroke_width<0) return std::unexpected("Invalid Class font or stroke size");
+            for(auto [key,target]:{std::pair{u"mainBkg",&t.fill},{u"nodeBorder",&t.border},{u"classText",&t.text},
+                {u"lineColor",&t.line},{u"edgeLabelBackground",&t.label_background}}) *target=narrow(text(member(theme,key)));
+            return NativeDiagram{std::move(*prepared),ClassRenderInput{std::move(*doc),std::move(t),c}};
+        }
         if(prepared->type==u"sequence") {
             auto document=prepare_sequence(source,session,SequenceLimits{.frontend=limits});
             if(!document) return std::unexpected(document.error());
@@ -272,9 +296,13 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
     } catch(const std::runtime_error& e) { return std::unexpected(e.what()); }
 }
 
-std::expected<DiagramSvg,std::string> render_native_diagram(const NativeDiagram& input,const PieMeasurements& widths,const FlowchartMeasurements& flowchart_measurements,const SequenceMeasurements& sequence_measurements) {
+std::expected<DiagramSvg,std::string> render_native_diagram(const NativeDiagram& input,const PieMeasurements& widths,const FlowchartMeasurements& flowchart_measurements,const SequenceMeasurements& sequence_measurements,const ClassMeasurements& class_measurements) {
     return std::visit([&](const auto& content)->std::expected<DiagramSvg,std::string> {
-        if constexpr(std::is_same_v<std::decay_t<decltype(content)>,SequenceRenderInput>) {
+        if constexpr(std::is_same_v<std::decay_t<decltype(content)>,ClassRenderInput>) {
+            auto result=render_class_svg(content,class_measurements);
+            if(!result) return std::unexpected(result.error());
+            return DiagramSvg{std::move(result->svg),result->width,result->height};
+        } else if constexpr(std::is_same_v<std::decay_t<decltype(content)>,SequenceRenderInput>) {
             auto result=render_sequence_svg(content,sequence_measurements);
             if(!result) return std::unexpected(result.error());
             try { decode_svg_text(result->svg); }

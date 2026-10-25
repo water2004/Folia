@@ -226,6 +226,45 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             sequence_measurements.messages.push_back(*box);
         }
     }
-    return render_native_diagram(*input,widths,flowchart_measurements,sequence_measurements);
+    ClassMeasurements class_measurements;
+    if(auto cls=std::get_if<ClassRenderInput>(&input->content)) {
+        const auto& theme=cls->theme;
+        if(theme.font_size>std::numeric_limits<float>::max()) return std::unexpected("Invalid Class font size");
+        auto measure=[&](std::u16string_view source,unsigned weight=400,bool italic=false,double size=0)->std::expected<ClassTextBox,std::string> {
+            auto display=diagram_display_text(source);if(!display) return std::unexpected(display.error());
+            if(display->find_first_of(u"\r\n")!=display->npos) return std::unexpected("Multiline Class labels require the line-breaking adapter");
+            if(display->empty()) return ClassTextBox{};
+            if(size==0) size=theme.font_size;
+            const MermaidFont font{theme.font_family,static_cast<float>(size),weight,italic};
+            auto metrics=measurer.measure(*display,font,true);if(!metrics) return std::unexpected(metrics.error());
+            const auto height=size*1.5;
+            return ClassTextBox{std::move(*display),metrics->advance,height,metrics->baseline+(height-metrics->line_height)/2};
+        };
+        for(const auto& node:cls->document.classes) {
+            ClassNodeMeasurements m;
+            auto label=measure(node.label+(node.type.empty()?std::u16string{}:u"<"+node.type+u">"),700);
+            if(!label) return std::unexpected(label.error());m.label=std::move(*label);
+            if(!node.annotations.empty()) {
+                auto annotation=measure(u"\u00ab"+node.annotations.front()+u"\u00bb");
+                if(!annotation) return std::unexpected(annotation.error());m.annotation=std::move(*annotation);
+            }
+            for(auto [members,output]:{std::pair{&node.members,&m.members},{&node.methods,&m.methods}})
+                for(const auto& member:*members) {
+                    auto box=measure(member.display_text,400,member.classifier==u"*");
+                    if(!box) return std::unexpected(box.error());output->push_back(std::move(*box));
+                }
+            class_measurements.nodes.push_back(std::move(m));
+        }
+        for(const auto& edge:cls->document.relations) {
+            ClassEdgeMeasurements m;
+            auto label=measure(edge.title);if(!label) return std::unexpected(label.error());m.label=std::move(*label);
+            for(auto [value,target]:{std::pair{&edge.start_label,&m.start},{&edge.end_label,&m.end}}) {
+                if(*value==u"none") continue;
+                auto box=measure(*value,400,false,11);if(!box) return std::unexpected(box.error());*target=std::move(*box);
+            }
+            class_measurements.edges.push_back(std::move(m));
+        }
+    }
+    return render_native_diagram(*input,widths,flowchart_measurements,sequence_measurements,class_measurements);
 }
 }

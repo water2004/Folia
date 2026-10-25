@@ -41,7 +41,16 @@ static/abstract classifiers. Ordinary relationships retain inheritance,
 aggregation, composition, dependency, solid/dotted lines, multiplicity and
 direction. The first Class batch covers plain text; namespaces, notes, styles,
 rich labels and interfaces rendered as lollipops remain separate work. Unsupported
-statements return errors. Class SVG rendering is not yet connected.
+statements return errors.
+
+The Class SVG adapter supports explicit `layout: dagre` with classic appearance
+and HTML label spacing, using real DirectWrite measurements for plain class,
+annotation, attribute, method and relationship text. It preserves compartments,
+static/abstract member typography, inheritance/aggregation/composition/dependency
+markers, multiplicity and the unified renderer's Dagre geometry. The original
+default Class layout is ELK and remains unported; it returns an explicit error
+instead of silently substituting Dagre. Titles, self relationships, namespaces,
+notes and rich/wrapped labels require further adapters.
 
 `folia.mermaid.sequence::prepare_sequence` connects shared preparation to owned
 Sequence actors and ordered messages. The parser/DB boundary covers actor
