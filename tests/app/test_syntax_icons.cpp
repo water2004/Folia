@@ -4,6 +4,9 @@
 #include "editor/rendering/EditorTextLayoutEngine.h"
 #include "theme/ThemeConfig.h"
 
+import folia.core.parser;
+import folia.core.render_builder;
+
 using namespace boost::ut;
 using namespace winrt::Folia;
 
@@ -31,6 +34,47 @@ namespace
         winrt::check_hresult(result);
         winrt::check_hresult(frame->Commit());
         winrt::check_hresult(encoder->Commit());
+    }
+
+    void SaveMathBlockPreview(EditorRenderResources& resources,
+        std::shared_ptr<const folia::SyntaxMarkerTheme> const& assets, wchar_t const* path)
+    {
+        auto theme = folia::default_theme_profile(folia::Theme::Light);
+        theme.syntax_markers = assets;
+        auto sheet = CreateEditorStyleSheet(theme);
+        resources.RebuildTextFormats(sheet);
+        auto parsed = folia::parse_text(1, "$$\nr_0=\\frac{\\mu}{\\lambda}\n$$\n");
+        auto model = folia::build_render_model(parsed.document, parsed.outline, parsed.symbols, theme);
+        auto const& block = model.blocks.front();
+        MathJaxRenderer math;
+        SvgNormalizer normalizer;
+        auto display = BuildMathBlockText(block, {block.id, 3, folia::TextAffinity::Downstream},
+            math, normalizer, sheet.textColor, sheet.body.size, 320, false, false, false);
+        EditorTextLayoutEngine engine(resources, sheet);
+        auto layout = engine.CreateFlow(display, resources.textFormat.Get(), 320, {});
+        auto context = resources.d2dContext.Get();
+        auto properties = D2D1::BitmapProperties1(D2D1_BITMAP_OPTIONS_TARGET,
+            D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED));
+        ::Microsoft::WRL::ComPtr<ID2D1Bitmap1> target, readback;
+        winrt::check_hresult(context->CreateBitmap({720, 260}, nullptr, 0, properties, target.GetAddressOf()));
+        ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> brush;
+        winrt::check_hresult(context->CreateSolidColorBrush(sheet.textColor, brush.GetAddressOf()));
+        context->SetTarget(target.Get());
+        context->SetTransform(D2D1::Matrix3x2F::Scale(2, 2));
+        context->BeginDraw();
+        context->Clear(sheet.canvasColor);
+        auto origin = D2D1::Point2F(16, 10);
+        context->DrawTextLayout(origin, layout.Get(), brush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP);
+        for (auto const& range : display.ranges)
+            for (auto rect : SyntaxIconRectangles(layout.Get(), range, origin))
+                resources.syntaxIcons.Draw(context, range.icon, rect, sheet.markerColor, assets);
+        winrt::check_hresult(context->EndDraw());
+        context->SetTransform(D2D1::Matrix3x2F::Identity());
+        context->SetTarget(nullptr);
+        properties.bitmapOptions = D2D1_BITMAP_OPTIONS_CPU_READ | D2D1_BITMAP_OPTIONS_CANNOT_DRAW;
+        winrt::check_hresult(context->CreateBitmap({720, 260}, nullptr, 0, properties, readback.GetAddressOf()));
+        winrt::check_hresult(readback->CopyFromBitmap(nullptr, target.Get(), nullptr));
+        SavePreview(resources, readback.Get(), path);
     }
 
     suite syntax_icons_tests = [] {
@@ -198,6 +242,8 @@ namespace
             expect(previous.expired()); // switching releases the previous SVG set
             resources.syntaxIcons.Reset();
             expect(static_cast<bool>(pixels(assets) == standard));
+            if (GetEnvironmentVariableW(L"FOLIA_MATH_MARKER_PREVIEW", path, static_cast<DWORD>(std::size(path))))
+                SaveMathBlockPreview(resources, assets, path);
           } catch (winrt::hresult_error const& error) {
               throw std::runtime_error(std::format("syntax SVG rendering: HRESULT 0x{:08X}: {}",
                   static_cast<std::uint32_t>(error.code().value), winrt::to_string(error.message())));

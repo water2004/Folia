@@ -2,7 +2,17 @@
 
 恢复/压缩后先实际读本文。架构、职责和详细验收见 [architecture](native-raii-architecture.md)、[files](native-raii-files.json)、[acceptance](native-raii-acceptance.md)。只复查新变化；ignored候选用 `rg --no-ignore`。
 
-## 当前 checkpoint：通用滚动调度回归（2026-10-25，已修复并安装）
+## 当前 checkpoint：滚动修复已获用户验证；行间公式 SVG 外观待用户确认（2026-10-25）
+
+- **用户已验证滚动修复**：“不用采了，我验证已经修复了”。第二次对照采样取消，未执行新UAC/PresentMon，不再采样。Release候选 `build/app-winui/bin/x64/Release/Folia.exe`（最后所见PID38752）由用户使用，不能关闭/覆盖；安装版仍旧0.3.2，尚未更新此候选。版本保持0.3.2，无推送发布/子代理/Computer Use；native一次一个，并发≤4。
+- **已完成滚动实现**：EditorFrameScheduler使用系统合成时钟，先等合成tick再等GPU buffer；现代路径不再叠加独立刷新率timer，旧系统保留高精度timer。Start/Stop成对DRR boost覆盖惯性阶段；Normal优先级、单待处理帧、取消和异步让出保持。scroll_state内部offset/target/Snapshot用double，渲染边缘仍float，修复大坐标末段舍入停滞，惯性曲线不变。原实现新测试276断言失败，修复完整platform **83项/4230断言通过**：`build/scroll-inertia-{precision-before,platform-after}.log`。
+- **滚动验收**：Debug构建及完整WinUI **47项通过**（`build/scroll-compositor-app-{build,final}.log`），Release自包含构建通过（`build/scroll-compositor-release-build.log`）。新增Detach取消clock/GPU等待、真实renderer连续输入/惯性停止/文档选择不变/零全文parse与serialize测试；后者默认生成CI文档，可用FOLIA_SCROLL_TEST_DOCUMENT只读指定≤16MiB文档。新clock回调约120/s只是回调率，不当作呈现FPS。无after呈现采样，仅用户实际验证。
+- **现场证据/范围**：原整合.md只读338,898 bytes/6840行。已授权的首次20秒PresentMon得到活动段约50.6显示帧/s，间隔中位16.655ms/p95 33.369ms，GPU中位0.868ms；`build/scroll-actual-present-before{.csv,-summary.json}`。旧DwmTiming约60Hz，DCompositionWaitForCompositorClock实测8.33ms。真实文档早期Release renderer测量输入中位0.66–0.89ms/惯性0.43–0.44ms，但该版本未pump异步资源，仅CPU证据，不作FPS结论。
+- **已撤回测试宿主试验**：Release console宿主缺合并manifest导致main激活异常；手工补manifest可跑单个真实文档测试，但完整UI Controls仍0xc000027b。已停止宽测；tools/run_winui_tests.ps1及tests/app/test_document_loading.cpp均恢复HEAD，无diff。不要重开此旁支。ignored `build/scroll-test-host-experiments.patch`、`build/scroll-release-perf-runner.ps1`仅保留失败试验，不能作正式通过。最终验证使用干净Debug正式宿主。
+- **最新公式图标任务**：用户截图指行间$$太粗、像两枚货币符号/大方块。仅重新绘制DoubleDollar、MathBracketOpen/Close三个SVG：底块改扁平浅底、笔画1.7→1.3、收紧留白，7内置主题同步三个嵌入SVG；行内图标、CST/语义编辑、整对象命中、布局尺寸不改。tests/app/test_syntax_icons.cpp增加可选FOLIA_MATH_MARKER_PREVIEW原生离屏上下文预览。Debug构建成功，focused syntax icon **3项/10456断言通过**，`build/math-marker-refined-{build,tests}.log`；`build/math-marker-refined-preview.png`已实际查看（源码/上下两端图标），未安装给用户，视觉待确认。
+- **停止点/下一步**：无活动native/build/test句柄（最新图标构建测试已结束）。7主题×3SVG共21份已逐一核对一致；滚动数值修复提交7bfef664、合成时钟提交759dd35b，本轮SVG/预览与记录在本文件所属提交。将原生预览给用户确认外观。保持正在使用的Release候选窗口，不强制退出、不重打覆盖该exe，不自动发布。此前CST编辑与数学渲染验收不重开。
+
+## 历史：通用滚动调度回归（2026-10-25，已修复并安装）
 
 - 用户反馈通用滚动似乎锁60帧，特别怀疑上次卡死修复；明确不按数学专属问题排查。新证据：e5c39fda把EditorFrameScheduler帧回调High改为Low；正式测试显示持续Normal UI任务让Low滚动帧等完全部64个任务才执行。不是已证明固定60帧锁，也没有现场呈现FPS。当前无运行中Folia，未操作UI/用户窗口。
 - 修复仅把帧回调改Normal，保留显示刷新率/高精度计时/DXGI等待/单待处理帧/异步让出和嵌入通知合并；不恢复High或同步递归。新test_frame_scheduling.cpp覆盖普通任务与绘制相互及时运行及无GPU开销的调度节奏，旧输入公平性/延迟重绘测试仍通过。
