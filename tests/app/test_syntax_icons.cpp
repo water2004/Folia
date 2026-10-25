@@ -2,6 +2,7 @@
 #include "support/folia_test.hpp"
 #include "editor/rendering/EditorContentPreparation.h"
 #include "editor/rendering/EditorTextLayoutEngine.h"
+#include "theme/ThemeConfig.h"
 
 using namespace boost::ut;
 using namespace winrt::Folia;
@@ -39,9 +40,16 @@ namespace
                 __uuidof(IDWriteFactory), reinterpret_cast<IUnknown**>(resources.dwriteFactory.GetAddressOf())));
             for (auto family : {L"Segoe UI", L"Consolas", L"Times New Roman"})
             for (auto size : {12.f, 16.f, 32.f})
-            for (auto token : {U"*", U"**", U"_", U"__", U"~~", U"`", U"``", U"```", U"$", U"$$", U"\\(", U"\\)"})
+            for (auto const& example : {std::pair{U"*", SyntaxIcon::Star}, {U"**", SyntaxIcon::DoubleStar},
+                {U"_", SyntaxIcon::Underscore}, {U"__", SyntaxIcon::DoubleUnderscore},
+                {U"~~", SyntaxIcon::DoubleTilde}, {U"`", SyntaxIcon::Backtick}, {U"``", SyntaxIcon::DoubleBacktick},
+                {U"```", SyntaxIcon::TripleBacktick}, {U"$", SyntaxIcon::Dollar}, {U"$$", SyntaxIcon::DoubleDollar},
+                {U"\\(", SyntaxIcon::MathOpen}, {U"\\)", SyntaxIcon::MathClose},
+                {U"\\[", SyntaxIcon::MathBracketOpen}, {U"\\]", SyntaxIcon::MathBracketClose}})
             for (auto width : {45.f, 120.f, 1000.f})
             {
+                auto token = example.first;
+                auto icon = example.second;
                 EditorStyleSheet sheet;
                 sheet.body = {family, size, size * 1.5f};
                 sheet.code = sheet.body;
@@ -54,6 +62,9 @@ namespace
                 AppendSourceText(display, token, {folia::NodeId{1}, {0, length}}, {}, true);
                 AppendSourceText(display, U"正文 text", {folia::NodeId{1}, {length, length + 7}}, {}, false);
                 AppendSourceText(display, token, {folia::NodeId{1}, {length + 7, 2 * length + 7}}, {}, true);
+                // Geometry fixture receives the same explicit semantic identity
+                // as the render model; source text alone must not choose an icon.
+                display.ranges.front().icon = display.ranges.back().icon = icon;
                 EditorTextLayoutEngine engine(resources, sheet);
                 auto layout = engine.CreateFlow(display, format.Get(), width, {});
                 for (auto const& range : display.ranges)
@@ -85,16 +96,18 @@ namespace
                     }
                 }
             }
-            expect(SyntaxIconFor(U"](https://example.com/a*b)") == SyntaxIcon::None);
-            expect(SyntaxIconFor(U"ordinary text") == SyntaxIcon::None);
+            DisplayInlineText raw;
+            AppendSourceText(raw, U"*", {folia::NodeId{1}, {0, 1}}, {}, true);
+            expect(raw.ranges.front().icon == SyntaxIcon::None);
         };
 
-        "syntax icon embedded SVG resources render in both themes and survive device resource reset"_test = [] {
+        "syntax icon theme SVG resources render in both variants and survive device resource reset"_test = [] {
           try {
             EditorStyleSheet sheet;
             sheet.body = {L"Segoe UI", 16, 24};
             sheet.heading1 = sheet.heading2 = sheet.heading3 = sheet.code = sheet.body;
             EditorRenderResources resources;
+            auto assets = DefaultSyntaxMarkerTheme();
             resources.InitializeOffscreen(sheet, 1000, 560);
             auto context = resources.d2dContext.Get();
             ::Microsoft::WRL::ComPtr<ID2D1Bitmap1> target, readback;
@@ -124,7 +137,7 @@ namespace
                     float y = theme * 280.f + 70;
                     for (float size : {16.f, 20.f, 32.f})
                     {
-                        resources.syntaxIcons.Draw(context, static_cast<SyntaxIcon>(i), {x, y, x + size, y + size}, color);
+                        resources.syntaxIcons.Draw(context, static_cast<SyntaxIcon>(i), {x, y, x + size, y + size}, color, assets);
                         y += 56;
                     }
                 }
@@ -156,6 +169,35 @@ namespace
             wchar_t path[32768]{};
             if (GetEnvironmentVariableW(L"FOLIA_SYNTAX_ICON_PREVIEW", path, static_cast<DWORD>(std::size(path))))
                 SavePreview(resources, readback.Get(), path);
+
+            auto pixels = [&](std::shared_ptr<const folia::SyntaxMarkerTheme> const& themeAssets) {
+                context->SetTarget(target.Get());
+                context->BeginDraw();
+                context->Clear(D2D1::ColorF(D2D1::ColorF::White));
+                resources.syntaxIcons.Draw(context, SyntaxIcon::Star, {0, 0, 24, 24},
+                    D2D1::ColorF(D2D1::ColorF::Black), themeAssets);
+                winrt::check_hresult(context->EndDraw());
+                context->SetTarget(nullptr);
+                winrt::check_hresult(readback->CopyFromBitmap(nullptr, target.Get(), nullptr));
+                winrt::check_hresult(readback->Map(D2D1_MAP_OPTIONS_READ, &mapped));
+                std::vector<std::uint8_t> result;
+                for (UINT32 y = 0; y < 24; ++y)
+                    result.insert(result.end(), mapped.bits + y * mapped.pitch, mapped.bits + y * mapped.pitch + 24 * 4);
+                readback->Unmap();
+                return result;
+            };
+            auto standard = pixels(assets);
+            auto custom = std::make_shared<folia::SyntaxMarkerTheme>(*assets);
+            custom->svg[static_cast<std::size_t>(SyntaxIcon::Star)] =
+                R"(<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="currentColor"/></svg>)";
+            std::weak_ptr<const folia::SyntaxMarkerTheme> previous = custom;
+            expect(static_cast<bool>(pixels(custom) != standard));
+            custom.reset();
+            expect(!previous.expired()); // current device cache owns its theme
+            expect(static_cast<bool>(pixels(assets) == standard));
+            expect(previous.expired()); // switching releases the previous SVG set
+            resources.syntaxIcons.Reset();
+            expect(static_cast<bool>(pixels(assets) == standard));
           } catch (winrt::hresult_error const& error) {
               throw std::runtime_error(std::format("syntax SVG rendering: HRESULT 0x{:08X}: {}",
                   static_cast<std::uint32_t>(error.code().value), winrt::to_string(error.message())));

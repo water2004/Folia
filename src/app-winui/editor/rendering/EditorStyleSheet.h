@@ -26,6 +26,8 @@ namespace winrt::Folia
             float sizeEm = 1.05f;
             float gapEm = 0.30f;
         } marker;
+        std::shared_ptr<const folia::SyntaxMarkerTheme> markerAssets;
+        D2D1_COLOR_F markerColor{};
         EditorFontStyle body;
         EditorFontStyle heading1;
         EditorFontStyle heading2;

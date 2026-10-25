@@ -151,7 +151,6 @@ namespace winrt::Folia
             range.length = length;
             range.style = style;
             range.marker = marker;
-            if (marker) range.icon = SyntaxIconFor(text);
             display.ranges.push_back(range);
         }
     }
@@ -247,14 +246,16 @@ namespace winrt::Folia
             return;
         }
         auto content = *semantic.content_range;
-        auto append = [&](folia::SourceRange range, bool marker) {
+        auto append = [&](folia::SourceRange range, bool marker, SyntaxIcon icon = SyntaxIcon::None) {
             auto offset = range.start - item.source_span.source_range.start;
+            auto firstRange = display.ranges.size();
             AppendSourceText(display, std::u32string_view{semantic.source_text}.substr(offset, range.length()),
                 {item.source_span.container_id, range}, item.style, marker);
+            if (display.ranges.size() > firstRange) display.ranges.back().icon = icon;
         };
-        append({item.source_span.source_range.start, content.start}, true);
+        append({item.source_span.source_range.start, content.start}, true, semantic.opening_marker);
         append(content, false);
-        append({content.end, item.source_span.source_range.end}, true);
+        append({content.end, item.source_span.source_range.end}, true, semantic.closing_marker);
     }
 
     void AppendProjectedSourceText(
@@ -583,6 +584,7 @@ namespace winrt::Folia
                 for (auto rangeIndex = rangeStart; rangeIndex < display.ranges.size(); ++rangeIndex)
                 {
                     display.ranges[rangeIndex].syntax = syntax;
+                    display.ranges[rangeIndex].icon = item.special().syntax_marker;
                 }
             }
         }

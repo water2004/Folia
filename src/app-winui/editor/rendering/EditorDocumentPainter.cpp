@@ -18,7 +18,8 @@ namespace winrt::Folia
             for (auto rect : rectangles)
             {
                 if (rect.bottom <= rect.top || rect.right <= rect.left) continue;
-                resources.syntaxIcons.Draw(resources.d2dContext.Get(), range.icon, rect, styleSheet.mutedColor);
+                resources.syntaxIcons.Draw(resources.d2dContext.Get(), range.icon, rect,
+                    styleSheet.markerColor, styleSheet.markerAssets);
             }
         }
     }

@@ -9,10 +9,42 @@ The theme file is the normal runtime source of truth for:
 - document padding and block spacing;
 - quote, callout, code, math, table, image, TOC, frontmatter, footnote, and unsupported-block geometry;
 - title bar, navigation pane, scrollbar, status bar, and footnote-preview dimensions.
+- Markdown delimiter SVG artwork, icon size, and surrounding clearance.
 
 Every property in the shipped files is required. A file with a missing field, wrong type, invalid color, unsupported schema version, or mismatched variant is rejected as a whole. The application reports the failure in the status bar and uses one complete built-in fail-safe profile; it never combines a partially loaded file with unrelated hardcoded values.
 
-Colors use `#RRGGBB` or `#RRGGBBAA`, with alpha in the final byte. Font weights use numeric OpenType/DirectWrite values from 100 through 999. All sizes and layout values are device-independent pixels and must be finite and non-negative.
+Colors use `#RRGGBB` or `#RRGGBBAA`, with alpha in the final byte. Font weights use numeric OpenType/DirectWrite values from 100 through 999. Font sizes and layout values are device-independent pixels and must be finite and non-negative.
+
+## Syntax marker assets (schema version 2)
+
+`syntaxMarkers` contains `sizeEm` (positive square size), `gapEm` (non-negative
+clearance on each side), and an `icons` object of embedded SVG strings. The two
+dimensions are relative to the marker's font size. Built-in profiles use 1.05
+and 0.30. SVGs use `viewBox="0 0 24 24"`, contain vector shapes rather than text
+or images, and are limited to 64 KiB UTF-8 each. `currentColor` uses the profile's
+`colors.marker`. Keep drawing inside the view box so layout and ink agree.
+
+Required icon keys: `star`, `doubleStar`, `underscore`, `doubleUnderscore`,
+`tilde`, `doubleTilde`, `backtick`, `doubleBacktick`, `tripleBacktick`, `dollar`,
+`doubleDollar`, `mathOpen`, `mathClose`, `mathBracketOpen`, `mathBracketClose`.
+Use native Direct2D-supported SVG shapes and paths; fonts, HTML and external
+assets are unnecessary. The entire theme remains one portable JSON file, so
+the existing import flow also copies its artwork. There is no file access
+during drawing. Applying another theme clears both icon resources and text
+layouts so artwork, size, and hit testing change together.
+
+To update a version 1 custom profile, set `schemaVersion` to 2 and add the
+complete `syntaxMarkers` object from a shipped theme before customizing it.
+Older or incomplete profiles receive the existing whole-profile diagnostic;
+Folia does not silently mix their settings with another theme's artwork.
+
+MSI treats the built-in `themes/*.json` files as application resources. Its
+generated payload replaces each exact packaged filename on install/upgrade
+and repair, including same-version upgrades. `themes/custom/` and
+`settings.json` are excluded from the MSI payload and replacement rules.
+The isolated Windows Installer regression can be run with
+`powershell -ExecutionPolicy Bypass -File tests/installer/test_theme_upgrade.ps1`;
+it creates its own test product and does not install or uninstall Folia.
 
 The `syntax` array has exactly eleven entries in this order:
 
@@ -38,7 +70,6 @@ All application data and resource paths are relative to one Assets root:
 - `themes/*.json` contains protected built-in profiles;
 - `themes/custom/*.json` contains user-managed profiles;
 - `latex/` contains built-in commands plus the separate user catalog and usage data;
-- `mathjax/` contains the QuickJS MathJax bundle and its font modules;
 - `licenses/`, `branding/`, and other media folders contain distributable static resources.
 
 Without an explicit build value, the root is `./Assets` relative to the process working directory. Set the MSBuild property `FoliaAssetsDirectory` to name the Assets directory itself:

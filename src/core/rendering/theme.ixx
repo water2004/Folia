@@ -1,6 +1,7 @@
 // folia.core.theme — platform-independent theme model and built-in fail-safe profiles.
 export module folia.core.theme;
 import std;
+export import folia.core.syntax_marker;
 
 export namespace folia {
 
@@ -116,13 +117,14 @@ struct ThemeLayout {
 };
 
 struct ThemeProfile {
-    std::uint32_t schema_version = 1;
+    std::uint32_t schema_version = 2;
     std::string id;
     std::string name;
     Theme variant = Theme::Dark;
     ThemeTypography typography;
     ThemeColors colors;
     ThemeLayout layout;
+    std::shared_ptr<const SyntaxMarkerTheme> syntax_markers;
 };
 
 namespace detail {

@@ -6,6 +6,29 @@ import folia.core.utf;
 
 namespace winrt::Folia
 {
+    namespace
+    {
+        void AppendMathBlockSource(DisplayInlineText& display, folia::RenderBlock const& block)
+        {
+            auto const& special = block.special();
+            auto source = std::u32string_view{special.raw_source};
+            auto append = [&](folia::SourceRange range, SyntaxIcon icon, bool marker) {
+                auto before = display.ranges.size();
+                AppendSourceText(display, source.substr(range.start, range.length()),
+                    {block.id, range}, {}, marker);
+                if (display.ranges.size() > before) display.ranges.back().icon = icon;
+            };
+            std::size_t cursor = 0;
+            for (auto const& marker : special.source_markers)
+            {
+                append({cursor, marker.range.start}, SyntaxIcon::None, false);
+                append(marker.range, marker.icon, true);
+                cursor = marker.range.end;
+            }
+            append({cursor, source.size()}, SyntaxIcon::None, false);
+        }
+    }
+
     DisplayInlineText BuildCodeBlockText(folia::RenderBlock const& block, folia::TextPosition caret, TreeSitterHighlighter& highlighter)
     {
         (void)caret;
@@ -97,10 +120,11 @@ namespace winrt::Folia
         auto editing = caret.container_id == block.id;
         if (!svgSupported)
         {
-            const auto endpoint = special.content_to_source.empty()
+            const auto endpoint = editing ? special.raw_source.size() : special.content_to_source.empty()
                 ? special.tex.size()
                 : special.content_to_source.back();
-            AppendProjectedSourceText(
+            if (editing) AppendMathBlockSource(display, block);
+            else AppendProjectedSourceText(
                 display,
                 special.tex,
                 block.id,
@@ -128,12 +152,7 @@ namespace winrt::Folia
         display.pendingMath = !math;
         if (editing)
         {
-            AppendProjectedSourceText(
-                display,
-                special.tex,
-                block.id,
-                special.content_to_source,
-                folia::InlineStyle::plain());
+            AppendMathBlockSource(display, block);
             // The preview is rendered below this editable source as its own
             // non-interactive visual block. It must never enter the source
             // display mapping or become a caret target.
@@ -157,7 +176,7 @@ namespace winrt::Folia
         {
             AppendMathFragments(display, *math, span, false, folia::InlineStyle::plain());
         }
-        const auto endpoint = special.content_to_source.empty()
+        const auto endpoint = editing ? special.raw_source.size() : special.content_to_source.empty()
             ? special.tex.size()
             : special.content_to_source.back();
         if (display.text.empty())

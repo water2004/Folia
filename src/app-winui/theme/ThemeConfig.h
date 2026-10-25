@@ -1,6 +1,7 @@
 #pragma once
 
 import folia.core.theme;
+import folia.core.syntax_marker;
 
 namespace winrt::Folia
 {
@@ -20,4 +21,5 @@ namespace winrt::Folia
     std::filesystem::path BuiltinThemeDirectory();
     ThemeFileLoadResult LoadThemeFile(std::filesystem::path const& path);
     ThemeLoadResult LoadThemeProfile(folia::Theme variant);
+    std::shared_ptr<const folia::SyntaxMarkerTheme> DefaultSyntaxMarkerTheme();
 }

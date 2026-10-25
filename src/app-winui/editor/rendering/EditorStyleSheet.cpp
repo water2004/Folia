@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "editor/rendering/EditorStyleSheet.h"
+#include "theme/ThemeConfig.h"
 
 namespace
 {
@@ -32,6 +33,9 @@ namespace winrt::Folia
     EditorStyleSheet CreateEditorStyleSheet(folia::ThemeProfile const& theme)
     {
         EditorStyleSheet sheet;
+        sheet.markerAssets = theme.syntax_markers ? theme.syntax_markers : DefaultSyntaxMarkerTheme();
+        sheet.marker.sizeEm = sheet.markerAssets->size_em;
+        sheet.marker.gapEm = sheet.markerAssets->gap_em;
         sheet.body = ConvertFont(theme.typography.body);
         sheet.heading1 = ConvertFont(theme.typography.heading1);
         sheet.heading2 = ConvertFont(theme.typography.heading2);
@@ -42,6 +46,7 @@ namespace winrt::Folia
         sheet.canvasColor = ToD2D(colors.bg);
         sheet.textColor = ToD2D(colors.fg);
         sheet.mutedColor = ToD2D(colors.muted_fg);
+        sheet.markerColor = ToD2D(colors.marker_fg);
         sheet.lineNumberColor = ToD2D(colors.line_number_fg);
         sheet.lineNumberBackgroundColor = ToD2D(colors.line_number_bg);
         sheet.accentColor = ToD2D(colors.accent_fg);

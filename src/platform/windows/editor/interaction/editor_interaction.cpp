@@ -9,33 +9,6 @@ namespace folia::platform::editor
 {
     namespace
     {
-        // A visual replacement can cover several source characters while
-        // remaining one indivisible layout object. Reuse the existing source
-        // mapping for caret geometry; do not add another selection coordinate.
-        bool IsSourceTextObject(DWRITE_HIT_TEST_METRICS const& hit, EditorDisplayMapping const& mapping)
-        {
-            if (hit.isText || hit.length < 2 || hit.textPosition + hit.length > mapping.size()) return false;
-            auto const& first = mapping[hit.textPosition];
-            for (UINT32 i = 0; i < hit.length; ++i)
-            {
-                auto const& point = mapping[hit.textPosition + i];
-                if (point.kind != EditorDisplayPositionKind::Source
-                    || point.container_id != first.container_id || point.source_offset != first.source_offset + i)
-                    return false;
-            }
-            return true;
-        }
-
-        std::size_t DisplayPositionAtHit(DWRITE_HIT_TEST_METRICS const& hit, BOOL trailing,
-            float x, EditorDisplayMapping const& mapping)
-        {
-            if (!IsSourceTextObject(hit, mapping) || hit.width <= 0)
-                return hit.textPosition + (trailing ? hit.length : 0);
-            auto progress = std::clamp((x - hit.left) / hit.width, 0.f, 1.f);
-            if (hit.bidiLevel & 1) progress = 1 - progress;
-            return hit.textPosition + static_cast<std::size_t>(std::round(progress * hit.length));
-        }
-
         folia::TextSpan const* SourceSpanFor(EditorVisualLine const& line, folia::NodeId containerId)
         {
             auto found = std::find_if(line.sourceSpans.begin(), line.sourceSpans.end(), [&](auto const& span)
@@ -294,12 +267,6 @@ namespace folia::platform::editor
         FLOAT x = 0.0f, y = 0.0f;
         DWRITE_HIT_TEST_METRICS metrics{};
         if (FAILED(layout->HitTestTextPosition(hitPos, trailing, &x, &y, &metrics))) return std::nullopt;
-        if (IsSourceTextObject(metrics, *mapping))
-        {
-            auto progress = std::clamp((static_cast<float>(displayPos) - metrics.textPosition) / metrics.length, 0.f, 1.f);
-            if (metrics.bidiLevel & 1) progress = 1 - progress;
-            x = metrics.left + metrics.width * progress;
-        }
         auto left = textOrigin.x + x;
         return D2D1::RectF(left, line.rect.top, left + 2.0f, line.rect.bottom);
     }
@@ -451,7 +418,7 @@ namespace folia::platform::editor
         DWRITE_HIT_TEST_METRICS metrics{};
         auto localY = (line.rect.top + line.rect.bottom) * 0.5f - textOrigin.y;
         if (FAILED(layout->HitTestPoint(x - textOrigin.x, localY, &trailing, &inside, &metrics))) return start;
-        auto displayPos = DisplayPositionAtHit(metrics, trailing, x - textOrigin.x, *mapping);
+        auto displayPos = static_cast<std::size_t>(metrics.textPosition + (trailing ? metrics.length : 0));
         displayPos = (std::clamp)(displayPos, static_cast<std::size_t>(line.displayStart), static_cast<std::size_t>(line.displayEnd));
         auto resolved = ResolveMappedPosition(line, *mapping, displayPos);
         auto position = resolved.value_or(end);
@@ -688,7 +655,7 @@ namespace folia::platform::editor
             auto targetX = (std::clamp)(x, target.rect.left, target.rect.right - 1.0f);
             if (SUCCEEDED(layout->HitTestPoint(targetX - textOrigin.x, (target.rect.top + target.rect.bottom) * 0.5f - textOrigin.y, &trailing, &inside, &metrics)))
             {
-                auto displayPos = DisplayPositionAtHit(metrics, trailing, targetX - textOrigin.x, *mapping);
+                auto displayPos = static_cast<std::size_t>(metrics.textPosition + (trailing ? metrics.length : 0));
                 displayPos = (std::clamp)(displayPos, static_cast<std::size_t>(target.displayStart), static_cast<std::size_t>(target.displayEnd));
                 if (auto resolved = ResolveMappedPosition(target, *mapping, displayPos)) targetPosition = *resolved;
             }

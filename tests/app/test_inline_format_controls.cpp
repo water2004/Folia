@@ -240,11 +240,11 @@ namespace {
             expect(session.Text() == original);
         };
 
-        "syntax icon source positions remain editable through the real editor renderer"_test = [] {
+        "syntax icon hit testing keeps each delimiter indivisible in the real renderer"_test = [] {
             auto xaml = winrt::Microsoft::UI::Xaml::Hosting::WindowsXamlManager::InitializeForCurrentThread();
             winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel panel;
             EditorSession session;
-            session.SetText(L"***a\U0001F600b*** tail\n");
+            session.SetText(L"**a\U0001F600b** tail\n");
             auto original = session.Text();
             auto owner = session.Selection().active.container_id;
             session.SetSelection(folia::TextSelection::caret({owner, 3, folia::TextAffinity::Downstream}));
@@ -252,7 +252,7 @@ namespace {
             renderer.Initialize(panel);
             renderer.Resize(panel, 500, 350);
             renderer.Render(session.RenderFrame());
-            for (std::size_t offset : {0u, 1u, 2u, 3u, 6u, 7u, 8u}) {
+            for (std::size_t offset : {0u, 2u, 3u, 5u, 7u}) {
                 auto position = folia::TextPosition{owner, offset, folia::TextAffinity::Downstream};
                 auto bounds = renderer.CaretBounds(position);
                 expect(bounds.has_value());
@@ -264,15 +264,26 @@ namespace {
                     expect(hit->source_offset == offset);
                 }
             }
-            auto betweenStars = folia::TextSelection::caret({owner, 1, folia::TextAffinity::Downstream});
-            session.SetSelection(betweenStars);
-            expect(session.ExecuteCommand(folia::Command::InsertText(U"_")));
-            expect(session.EditableSource(owner) == std::optional<std::u32string>{U"*_**a\U0001F600b*** tail"});
+            for (auto start : {0u, 5u}) {
+                auto left = renderer.CaretBounds({owner, start, folia::TextAffinity::Downstream});
+                auto right = renderer.CaretBounds({owner, start + 2, folia::TextAffinity::Downstream});
+                expect(left.has_value() && right.has_value());
+                if (!left || !right) continue;
+                for (float x = left->left; x <= right->left; x += .5f) {
+                    auto hit = renderer.HitTest(x, (left->top + left->bottom) * .5f);
+                    expect(hit.has_value());
+                    if (hit) expect(hit->source_offset == start || hit->source_offset == start + 2);
+                }
+            }
+            auto contentStart = folia::TextSelection::caret({owner, 2, folia::TextAffinity::Downstream});
+            session.SetSelection(contentStart);
+            expect(session.ExecuteCommand(folia::Command::InsertText(U"x")));
+            expect(session.EditableSource(owner) == std::optional<std::u32string>{U"**xa\U0001F600b** tail"});
             folia::Command undo;
             undo.kind = folia::CommandKind::Undo;
             expect(session.ExecuteCommand(undo));
             expect(session.Text() == original);
-            expect(session.Selection() == betweenStars);
+            expect(session.Selection() == contentStart);
         };
 
         "revealing long inline format markers cannot turn a stationary click into a selection"_test = [] {

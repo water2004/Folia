@@ -12,7 +12,7 @@ suite theme_tests = [] {
     auto const& dark = default_theme_profile(Theme::Dark);
     auto const& light = default_theme_profile(Theme::Light);
 
-    expect(dark.schema_version == 1_u);
+    expect(dark.schema_version == 2_u);
     expect(!dark.id.empty());
     expect(dark.typography.body.size > 0.0_f);
     expect(dark.typography.code.family != dark.typography.body.family);
