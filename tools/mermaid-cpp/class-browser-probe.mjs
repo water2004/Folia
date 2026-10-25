@@ -19,7 +19,12 @@ export function inspectClass() {
  const box=e=>{const b=e.getBBox(),p=point(e,b.x,b.y),q=point(e,b.x+b.width,b.y+b.height);return {x:p.x,y:p.y,width:q.x-p.x,height:q.y-p.y};};
  const paint=e=>{const s=getComputedStyle(e);return {fill:s.fill,stroke:s.stroke,strokeWidth:s.strokeWidth};};
  const textBox=e=>{
-   if(e.tagName!=='foreignObject')return box(e);
+   // HTML Range width is the inline advance. SVG getBBox also includes glyph
+   // overhang; compare advance origin/width and retain vertical glyph bounds.
+   if(e.tagName!=='foreignObject') {
+     const first=e.getStartPositionOfChar(0),origin=point(e,first.x,first.y);
+     return {...box(e),x:origin.x,width:e.getComputedTextLength()};
+   }
    const walker=document.createTreeWalker(e,NodeFilter.SHOW_TEXT);const texts=[];while(walker.nextNode())if(walker.currentNode.textContent)texts.push(walker.currentNode);
    if(!texts.length)return box(e);
    const range=document.createRange();range.setStart(texts[0],0);range.setEnd(texts.at(-1),texts.at(-1).textContent.length);
