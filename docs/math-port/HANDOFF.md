@@ -2,12 +2,18 @@
 
 恢复/压缩后先实际读本文。架构、职责和详细验收见 [architecture](native-raii-architecture.md)、[files](native-raii-files.json)、[acceptance](native-raii-acceptance.md)。只复查新变化；ignored候选用 `rg --no-ignore`。
 
-## 当前 checkpoint：按用户指示发布 0.4.0（2026-10-25，准备中）
+## 当前 checkpoint：目录换行与正文同步已完成（2026-10-26，未打包安装）
 
-- 用户已接受新版公式图标，并明确要求“推送0.4.0 release”。本轮允许升至0.4.0、推送master/新标签并按现有.github/workflows/release.yml发布；之前固定0.3.2/不发布为历史约束。无子代理/Computer Use，不关闭用户Release候选窗口PID38752，不覆盖正在运行的exe。
-- 已统一CMake、MSI默认值、资源版本、Appx manifest、“关于”页及两份README为0.4.0，新增release-notes/v0.4.0.md。发布范围为v0.3.2之后SVG主题标记、CST语义编辑、主题升级、公式投影及滚动修复；不展开旧数学移植/Mermaid事项。
-- 开始时工作区干净，origin/master为v0.3.2提交e9b48e4a，本地全部修改已分批提交至53c967f9；origin没有v0.4.0标签。现有Core760项、platform83项、WinUI47项及最新SVG专项3项均已通过，证据见下方历史。最终WinUI全测47项/14767断言通过（35838 exit0），日志build/release-0.4.0-app-tests.log；无活动native句柄。
-- 下一步：版本和diff已核对，提交本轮版本/说明，推送master后创建并推送v0.4.0标签；跟踪Actions到完成，核对GitHub Release MSI和SHA256，不手工绕过现有CI/CD。远端尚未推送，未发布新版本。
+- 用户任务：长目录标题自动wrap、目录跟随正文。实现本地提交 **57e85f0b**。版本保持0.4.0，不自动推送/发布；无子代理/Computer Use，不重开旧数学移植或Mermaid事项。
+- SidebarController使用Wrap/不截断的TextBlock模板、禁用横向滚动及Stretch容器，层级padding独立于标题文字。保持虚拟化；按outline.content_key更新标题投影，滚动不重建列表。SyncViewport在draw后读取既有visual-to-source映射的顶部可见行，按renderModel.editable_index二分对应标题；不依赖标题文字匹配/不扫Markdown，不改正文选择、文档或历史。行边界采用可见行规则，避免鼠标命中上一空行而晚切章节；短尾章节在文档底部高亮末标题。
+- 目录导航改用原生ItemClick（支持重复点击已高亮项），KeyUp保留方向/Home/End/Page导航；程序选中与用户激活分开，RAII guard避免同步重入。renderer新增Start/Nearest滚动对齐，原光标可见性默认Nearest不变；点击离屏嵌套标题先materialize所在flow，再按真实行几何校正到顶部。
+- 验证：setup及最终Debug构建成功，**WinUI完整52项/14838断言通过**；新目录5项/71断言，覆盖真实模板中英/emoji长标题两宽度测量、重复/嵌套标题、滚动不改选择/源文、零全文parse/serialize、目录投影复用、标题编辑Undo、文档替换/Detach、源码模式及table/list/quote/math owner。日志build/outline-{setup,app-build-final,app-final}.log，59486 exit0。无core/platform源码改动，不重复旧宽测。
+- **交付/停止点**：无活动native/build/test句柄。候选build/app-winui/bin/x64/Debug/FoliaOutlinePreview.exe，未启动/安装/生成MSI；测试通过LoadContent测量正式TextBlock模板，没有新人工UI/实际已加载目录容器外观检查。新改动不在已发布0.4.0安装包里；保持版本，不移动既有标签。下一步仅按用户反馈试用/打包，不再重跑完成的宽审。
+
+## 已完成：0.4.0 已发布（2026-10-25，10-26核实）
+
+- 用户接受公式SVG并授权发布0.4.0；版本/说明提交6d20710e已推送master，v0.4.0标签固定6d20710ee5084f7bfcc273f78bb4aa6a83fd1cd2。Release https://github.com/water2004/Folia/releases/tag/v0.4.0 已公开；既有CI https://github.com/water2004/Folia/actions/runs/40190865950 已完成发布，未移动标签。
+- GitHub附件Folia-0.4.0-x64.msi **53,492,587 bytes**，digest SHA256 `85d0e1401ebf778de4754860fca327a969b3fa71f6011badd904591cc1b24470`；同名.sha256附件87 bytes。此前最终WinUI47项/14767断言通过：build/release-0.4.0-app-tests.log。未安装/覆盖用户窗口。新目录改动不在此已发布标签中。
 
 ## 历史：滚动修复与公式 SVG 外观（2026-10-25，均获用户认可）
 
