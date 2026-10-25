@@ -10,23 +10,6 @@ import folia.core.utf;
 
 namespace winrt::Folia
 {
-    namespace
-    {
-        winrt::Windows::Foundation::IAsyncAction WriteBytesAsync(
-            winrt::Windows::Storage::StorageFile const& file,
-            std::vector<std::uint8_t> bytes)
-        {
-            auto stream = co_await file.OpenAsync(winrt::Windows::Storage::FileAccessMode::ReadWrite);
-            stream.Size(0);
-            auto output = stream.GetOutputStreamAt(0);
-            winrt::Windows::Storage::Streams::DataWriter writer(output);
-            writer.WriteBytes(bytes);
-            co_await writer.StoreAsync();
-            co_await writer.FlushAsync();
-            writer.DetachStream();
-        }
-    }
-
     EditorDocumentController::EditorDocumentController() : state_(std::make_shared<State>())
     {
     }
@@ -60,6 +43,8 @@ namespace winrt::Folia
         state_->windowHandle = std::move(windowHandle);
         state_->setExternalChange = std::move(setExternalChange);
         state_->dispatcher = winrt::Microsoft::UI::Dispatching::DispatcherQueue::GetForCurrentThread();
+        state_->reloadState.Reset({}, folia::platform::reload::fingerprint_document_content(
+            session.HasFile() ? session.TextUtf8() : std::string{}));
     }
 
     void EditorDocumentController::Detach()
@@ -86,6 +71,8 @@ namespace winrt::Folia
         state_->render = {};
         state_->windowHandle = {};
         state_->setExternalChange = {};
+        state_->confirmUnsaved = {};
+        state_->pickSaveFile = {};
         state_->dispatcher = nullptr;
     }
 
@@ -109,7 +96,7 @@ namespace winrt::Folia
     void EditorDocumentController::SaveDocumentWithEncoding(DocumentEncoding encoding)
     {
         if (encoding.name.empty()) return;
-        SaveDocumentWithEncodingAsync(state_, state_->generation.load(), std::move(encoding));
+        SaveDocumentAsync(state_, state_->generation.load(), false, std::move(encoding));
     }
 
     void EditorDocumentController::SaveDocument()
@@ -119,7 +106,7 @@ namespace winrt::Folia
 
     void EditorDocumentController::SaveDocumentAs()
     {
-        SaveDocumentAsAsync(state_, state_->generation.load());
+        SaveDocumentAsync(state_, state_->generation.load(), true);
     }
 
     void EditorDocumentController::InsertImage()
@@ -293,6 +280,11 @@ namespace winrt::Folia
         // Timer awaits resume on a pool thread. Keep the entry apartment for
         // every retry before touching the session, renderer or UI callbacks.
         winrt::apartment_context uiContext;
+        if (reason != LoadReason::ExternalReload) {
+            if (!co_await ConfirmCloseAsync(state, generation)) co_return;
+            co_await uiContext;
+            if (!Active(state, generation)) co_return;
+        }
         auto loadTicket = state->loadSerial.fetch_add(1) + 1;
         state->loadStop.request_stop();
         state->loadStop = std::stop_source{};
@@ -358,7 +350,6 @@ namespace winrt::Folia
                 requestedEncoding
                     ? std::optional<std::string_view>{ *requestedEncoding }
                     : std::nullopt);
-            loadedFingerprint = folia::platform::reload::fingerprint_document_content(decoded.utf8);
             loaded.emplace();
             loaded->Open(
                 file,
@@ -393,6 +384,9 @@ namespace winrt::Folia
                     state->setProgress(true, static_cast<double>(percent) / 100.0, true);
                 });
             }, requestedEncoding.has_value());
+            // Compare subsequent edits with the loaded editor representation,
+            // not differences in untouched file-level separator formatting.
+            loadedFingerprint = folia::platform::reload::fingerprint_document_content(loaded->TextUtf8());
             if (viewState) loaded->RestoreReloadViewState(*viewState);
         }
         catch (...)
@@ -469,6 +463,7 @@ namespace winrt::Folia
         auto versionAfterParse = folia::platform::reload::query_watched_file_version(
             std::filesystem::path(file.Path().c_str()));
         *state->session = std::move(*loaded);
+        ++state->documentSerial;
         if (state->renderer)
         {
             state->renderer->AdoptMathPreparation(std::move(preparation));
@@ -487,158 +482,6 @@ namespace winrt::Folia
         if (state->setStatus) state->setStatus(LocalizeFormat(
             reason == LoadReason::ExternalReload ? L"StatusReloadedFile" : L"StatusOpenedFile",
             { file.Name() }));
-    }
-
-    winrt::fire_and_forget EditorDocumentController::SaveDocumentWithEncodingAsync(
-        std::shared_ptr<State> state,
-        std::uint64_t generation,
-        DocumentEncoding encoding)
-    {
-        try
-        {
-            if (!Active(state, generation) || !state->session->HasFile()) co_return;
-            encoding = DocumentEncodingService::NormalizeForSave(std::move(encoding));
-            auto file = state->session->File();
-            auto text = state->session->TextUtf8();
-            winrt::apartment_context uiContext;
-            std::exception_ptr writeFailure;
-            folia::platform::reload::WatchedFileVersion savedVersion;
-            co_await winrt::resume_background();
-            try
-            {
-                auto bytes = DocumentEncodingService::Encode(text, encoding);
-                co_await WriteBytesAsync(file, std::move(bytes));
-                savedVersion = folia::platform::reload::query_watched_file_version(
-                    std::filesystem::path(file.Path().c_str()));
-            }
-            catch (...)
-            {
-                writeFailure = std::current_exception();
-            }
-            co_await uiContext;
-            if (writeFailure) std::rethrow_exception(writeFailure);
-            if (!Active(state, generation)) co_return;
-            state->session->SetEncoding(std::move(encoding));
-            MarkCurrentDocumentSaved(state, savedVersion, text);
-            if (state->documentChanged) state->documentChanged();
-            if (state->setStatus) state->setStatus(LocalizeFormat(L"StatusSavedFile", { file.Name() }));
-        }
-        catch (winrt::hresult_error const& error)
-        {
-            if (Active(state, generation) && state->setStatus)
-                state->setStatus(LocalizeFormat(L"StatusSaveFailed", { error.message() }));
-        }
-        catch (std::exception const& error)
-        {
-            if (Active(state, generation) && state->setStatus)
-                state->setStatus(LocalizeFormat(
-                    L"StatusSaveFailed", { winrt::to_hstring(error.what()) }));
-        }
-    }
-
-    winrt::fire_and_forget EditorDocumentController::SaveDocumentAsync(std::shared_ptr<State> state, std::uint64_t generation)
-    {
-        try
-        {
-            if (!Active(state, generation)) co_return;
-            if (!state->session->HasFile())
-            {
-                SaveDocumentAsAsync(state, generation);
-                co_return;
-            }
-            auto file = state->session->File();
-            auto text = state->session->TextUtf8();
-            auto encoding = state->session->Encoding();
-            winrt::apartment_context uiContext;
-            std::exception_ptr writeFailure;
-            folia::platform::reload::WatchedFileVersion savedVersion;
-            co_await winrt::resume_background();
-            try
-            {
-                auto bytes = DocumentEncodingService::Encode(text, encoding);
-                co_await WriteBytesAsync(file, std::move(bytes));
-                savedVersion = folia::platform::reload::query_watched_file_version(
-                    std::filesystem::path(file.Path().c_str()));
-            }
-            catch (...)
-            {
-                writeFailure = std::current_exception();
-            }
-            co_await uiContext;
-            if (writeFailure) std::rethrow_exception(writeFailure);
-            if (!Active(state, generation)) co_return;
-            MarkCurrentDocumentSaved(state, savedVersion, text);
-            if (state->setStatus) state->setStatus(LocalizeFormat(L"StatusSavedFile", { file.Name() }));
-        }
-        catch (winrt::hresult_error const& error)
-        {
-            if (Active(state, generation) && state->setStatus)
-                state->setStatus(LocalizeFormat(L"StatusSaveFailed", { error.message() }));
-        }
-        catch (std::exception const& error)
-        {
-            if (Active(state, generation) && state->setStatus)
-                state->setStatus(LocalizeFormat(
-                    L"StatusSaveFailed", { winrt::to_hstring(error.what()) }));
-        }
-    }
-
-    winrt::fire_and_forget EditorDocumentController::SaveDocumentAsAsync(std::shared_ptr<State> state, std::uint64_t generation)
-    {
-        try
-        {
-            if (!Active(state, generation) || !state->windowHandle) co_return;
-            auto picker = winrt::Windows::Storage::Pickers::FileSavePicker();
-            picker.DefaultFileExtension(L".md");
-            picker.SuggestedFileName(Localize(L"UntitledMarkdown"));
-            picker.FileTypeChoices().Insert(Localize(L"MarkdownFileType"), winrt::single_threaded_vector<winrt::hstring>({ L".md" }));
-            picker.FileTypeChoices().Insert(Localize(L"TextFileType"), winrt::single_threaded_vector<winrt::hstring>({ L".txt" }));
-            auto initializeWithWindow = picker.as<IInitializeWithWindow>();
-            winrt::check_hresult(initializeWithWindow->Initialize(state->windowHandle()));
-            auto file = co_await picker.PickSaveFileAsync();
-            if (!Active(state, generation)) co_return;
-            if (!file)
-            {
-                if (state->setStatus) state->setStatus(Localize(L"StatusSaveCancelled"));
-                co_return;
-            }
-            auto text = state->session->TextUtf8();
-            auto encoding = state->session->Encoding();
-            winrt::apartment_context uiContext;
-            std::exception_ptr writeFailure;
-            folia::platform::reload::WatchedFileVersion savedVersion;
-            co_await winrt::resume_background();
-            try
-            {
-                auto bytes = DocumentEncodingService::Encode(text, encoding);
-                co_await WriteBytesAsync(file, std::move(bytes));
-                savedVersion = folia::platform::reload::query_watched_file_version(
-                    std::filesystem::path(file.Path().c_str()));
-            }
-            catch (...)
-            {
-                writeFailure = std::current_exception();
-            }
-            co_await uiContext;
-            if (writeFailure) std::rethrow_exception(writeFailure);
-            if (!Active(state, generation)) co_return;
-            state->session->SaveAs(file);
-            MarkCurrentDocumentSaved(state, savedVersion, text);
-            StartWatching(state, generation);
-            if (state->documentChanged) state->documentChanged();
-            if (state->setStatus) state->setStatus(LocalizeFormat(L"StatusSavedFile", { file.Name() }));
-        }
-        catch (winrt::hresult_error const& error)
-        {
-            if (Active(state, generation) && state->setStatus)
-                state->setStatus(LocalizeFormat(L"StatusSaveFailed", { error.message() }));
-        }
-        catch (std::exception const& error)
-        {
-            if (Active(state, generation) && state->setStatus)
-                state->setStatus(LocalizeFormat(
-                    L"StatusSaveFailed", { winrt::to_hstring(error.what()) }));
-        }
     }
 
     winrt::fire_and_forget EditorDocumentController::InsertImageAsync(std::shared_ptr<State> state, std::uint64_t generation)
@@ -722,27 +565,4 @@ namespace winrt::Folia
         }
     }
 
-    winrt::fire_and_forget EditorDocumentController::PasteClipboardAsync(std::shared_ptr<State> state, std::uint64_t generation)
-    {
-        try
-        {
-            if (!Active(state, generation)) co_return;
-            auto content = winrt::Windows::ApplicationModel::DataTransfer::Clipboard::GetContent();
-            if (!content.Contains(winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats::Text())) co_return;
-            auto text = co_await content.GetTextAsync();
-            if (!Active(state, generation) || text.empty()) co_return;
-            if (state->executeCommand)
-            {
-                folia::Command command;
-                command.kind = folia::CommandKind::Paste;
-                command.text = folia::utf8_to_cps(winrt::to_string(text));
-                state->executeCommand(command);
-            }
-        }
-        catch (winrt::hresult_error const& error)
-        {
-            if (Active(state, generation) && state->setStatus)
-                state->setStatus(LocalizeFormat(L"StatusPasteFailed", { error.message() }));
-        }
-    }
 }

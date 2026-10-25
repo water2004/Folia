@@ -292,4 +292,9 @@
   <data name="Reopen" xml:space="preserve"><value>重新打开</value></data>
   <data name="SearchEncodings" xml:space="preserve"><value>搜索编码</value></data>
   <data name="SaveWithEncoding" xml:space="preserve"><value>转换编码并保存</value></data>
+  <data name="UnsavedChangesTitle" xml:space="preserve"><value>是否保存更改？</value></data>
+  <data name="UnsavedChangesMessage" xml:space="preserve"><value>关闭文档前，是否保存对“{0}”的更改？</value></data>
+  <data name="DiscardChanges" xml:space="preserve"><value>不保存</value></data>
+  <data name="SaveBeforePastingImage" xml:space="preserve"><value>请先保存文档，以便将粘贴的图片保存在文档同目录下。</value></data>
+  <data name="StatusPasteContextChanged" xml:space="preserve"><value>文档或选区已改变，请在目标位置重新粘贴。</value></data>
 </root>

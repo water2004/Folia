@@ -48,6 +48,7 @@ namespace winrt::Folia::implementation
                     : Microsoft::UI::Xaml::Visibility::Visible);
                 ExternalChangeInfoBar().IsOpen(visible);
             });
+        documentController.SetSaveDialogs([this] { return ConfirmUnsavedChangesAsync(); });
         keyboardController.Attach(
             editorSession,
             editorRenderer,
@@ -112,8 +113,21 @@ namespace winrt::Folia::implementation
 
     void MainWindow::RegisterWindowHandlers()
     {
+        closingHandler = AppWindow().Closing(winrt::auto_revoke,
+            [this](auto const&, Microsoft::UI::Windowing::AppWindowClosingEventArgs const& args)
+            {
+                if (closeApproved) return;
+                args.Cancel(true);
+                // Even an already-clean document must close outside this
+                // synchronous Closing notification, without nested close events.
+                DispatcherQueue().TryEnqueue([weak = get_weak()]
+                {
+                    if (auto window = weak.get()) window->ConfirmWindowCloseAsync();
+                });
+            });
         Closed([this](auto const&, auto const&)
         {
+            closingHandler.revoke();
             if (latexCommandCatalog) latexCommandCatalog->Flush();
             if (settingsView) settingsView->Detach();
             documentController.Detach();

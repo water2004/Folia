@@ -148,6 +148,7 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="storage\AssetPaths.h" />
     <ClInclude Include="storage\DocumentEncodingService.h" />
+    <ClInclude Include="storage\ClipboardImageStore.h" />
     <ClInclude Include="localization\Localization.h" />
     <ClInclude Include="settings\AppSettings.h" />
     <ClInclude Include="settings\ShortcutSettingsSerialization.h" />
@@ -615,6 +616,10 @@
     <ClCompile Include="editor\interaction\EditorLatexCompletionController.cpp" />
     <ClCompile Include="editor\interaction\EditorCodeLanguageController.cpp" />
     <ClCompile Include="editor\interaction\EditorDocumentController.cpp" />
+    <ClCompile Include="editor\interaction\EditorDocumentController.Save.cpp" />
+    <ClCompile Include="editor\interaction\EditorDocumentController.Clipboard.cpp" />
+    <ClCompile Include="storage\ClipboardImageStore.cpp" />
+    <ClCompile Include="MainWindow.Lifecycle.cpp" />
     <ClCompile Include="editor\interaction\EditorDocumentController.Reload.cpp" />
     <ClCompile Include="storage\DocumentEncodingService.cpp">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>

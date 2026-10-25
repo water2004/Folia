@@ -27,6 +27,8 @@ namespace winrt::Folia::implementation
     private:
         void AttachControllers();
         void RegisterWindowHandlers();
+        winrt::fire_and_forget ConfirmWindowCloseAsync();
+        winrt::Windows::Foundation::IAsyncOperation<winrt::Microsoft::UI::Xaml::Controls::ContentDialogResult> ConfirmUnsavedChangesAsync();
         void InitializeEditorSurface();
         void InitializeTextInput();
         void LocalizeShell();
@@ -85,6 +87,9 @@ namespace winrt::Folia::implementation
         folia::ThemeProfile themeProfile = folia::default_theme_profile();
         bool updatingTheme = false;
         bool settingsMode = false;
+        bool closePending = false;
+        bool closeApproved = false;
+        winrt::Microsoft::UI::Windowing::AppWindow::Closing_revoker closingHandler;
         bool documentPaneWasOpen = true;
         std::optional<std::size_t> activeSearchMatch;
         std::size_t searchMatchCount = 0;

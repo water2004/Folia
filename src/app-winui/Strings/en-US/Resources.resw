@@ -292,4 +292,9 @@
   <data name="Reopen" xml:space="preserve"><value>Reopen</value></data>
   <data name="SearchEncodings" xml:space="preserve"><value>Search encodings</value></data>
   <data name="SaveWithEncoding" xml:space="preserve"><value>Save with Encoding</value></data>
+  <data name="UnsavedChangesTitle" xml:space="preserve"><value>Save changes?</value></data>
+  <data name="UnsavedChangesMessage" xml:space="preserve"><value>Save changes to {0} before closing this document?</value></data>
+  <data name="DiscardChanges" xml:space="preserve"><value>Don't save</value></data>
+  <data name="SaveBeforePastingImage" xml:space="preserve"><value>Save this document first so the pasted image can be stored beside it.</value></data>
+  <data name="StatusPasteContextChanged" xml:space="preserve"><value>The document or selection changed. Paste again at the intended position.</value></data>
 </root>
