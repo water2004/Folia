@@ -133,4 +133,21 @@ if(WIN32 AND MSVC)
     target_link_libraries(FoliaMermaidPlatformTests PRIVATE
         folia_mermaid_measurement Boost::ut_module folia_console_test_runtime)
     add_test(NAME FoliaMermaidPlatformTests COMMAND FoliaMermaidPlatformTests)
+    add_library(FoliaNativeMermaid SHARED native-renderer.cpp)
+    set_target_properties(FoliaNativeMermaid PROPERTIES CXX_MODULE_STD ON)
+    target_link_libraries(FoliaNativeMermaid PRIVATE folia_mermaid_measurement)
+    file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/FoliaNativeMermaid.def" CONTENT
+"LIBRARY FoliaNativeMermaid
+EXPORTS
+FoliaNativeMermaidRender
+FoliaNativeMermaidFree
+")
+    target_sources(FoliaNativeMermaid PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/FoliaNativeMermaid.def")
+    add_executable(FoliaMermaidHostTests
+        "${FOLIA_MERMAID_REPO_ROOT}/tests/main.cpp" native-renderer-test.cpp)
+    set_target_properties(FoliaMermaidHostTests PROPERTIES CXX_MODULE_STD ON)
+    target_include_directories(FoliaMermaidHostTests PRIVATE "${FOLIA_MERMAID_REPO_ROOT}/tests")
+    target_link_libraries(FoliaMermaidHostTests PRIVATE
+        FoliaNativeMermaid Boost::ut_module folia_console_test_runtime)
+    add_test(NAME FoliaMermaidHostTests COMMAND FoliaMermaidHostTests)
 endif()

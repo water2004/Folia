@@ -226,7 +226,7 @@ jobs:
 
       - name: Build the native Mermaid tests
         run: |
-          $targets = @('FoliaMermaidTests', 'FoliaMermaidTextProbe', 'FoliaMermaidPlatformTests')
+          $targets = @('FoliaMermaidTests', 'FoliaMermaidTextProbe', 'FoliaMermaidPlatformTests', 'FoliaMermaidHostTests')
           if ('${{ matrix.scope }}' -eq 'integrated') {
             $targets += @('FoliaTests', 'FoliaWindowsEditorTests')
           }
@@ -249,7 +249,7 @@ jobs:
           # Match built suites exactly; unrelated optional Math/encoding/spec
           # runners are not part of the Mermaid integration check.
           ctest --test-dir build/mermaid-cpp --output-on-failure --no-tests=error `
-            -R '^Folia(MermaidTests|MermaidPlatformTests|Tests|WindowsEditorTests)$' 2>&1 |
+            -R '^Folia(MermaidTests|MermaidPlatformTests|MermaidHostTests|Tests|WindowsEditorTests)$' 2>&1 |
             Tee-Object -FilePath build/mermaid-cpp/tests.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/compare-flowchart-svg.mjs build/mermaid-cpp/flowchart-browser/original.json build/mermaid-cpp/pie-svg
@@ -288,6 +288,8 @@ jobs:
             build/mermaid-cpp/class-browser/*.svg
             ${{ env.FOLIA_MERMAID_BINARY_DIR }}/FoliaMermaidTextProbe.exe
             ${{ env.FOLIA_MERMAID_BINARY_DIR }}/FoliaMermaidPlatformTests.exe
+            ${{ env.FOLIA_MERMAID_BINARY_DIR }}/FoliaMermaidHostTests.exe
+            ${{ env.FOLIA_MERMAID_BINARY_DIR }}/FoliaNativeMermaid.dll
 
       - name: Upload the native test executable
         if: always() && hashFiles('build/mermaid-cpp/**/FoliaMermaidTests.exe') != ''
