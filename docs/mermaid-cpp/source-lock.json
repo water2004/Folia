@@ -2138,5 +2138,19 @@
         "rawFile": ".reference\\mermaid-js\\packages\\mermaid\\src\\diagrams\\kanban\\parser\\kanban.jison"
       }
     ]
+  },
+  "elkAdapter": {
+    "package": "mermaid@12.2.0",
+    "map": "dist/chunks/mermaid.esm/elk-V4PLJRSU.mjs.map",
+    "files": [
+      {
+        "source": "src/rendering-util/layout-algorithms/elk/render.ts",
+        "sha256": "3ac28d2f9c7385d56f6374533df854926515be36cc5323f10040d00dd4f1226f"
+      },
+      {
+        "source": "src/rendering-util/layout-algorithms/elk/geometry.ts",
+        "sha256": "7847e5ee741a54d92542479e2d8f9aade17b549607e95514ba954248f3613517"
+      }
+    ]
   }
 }

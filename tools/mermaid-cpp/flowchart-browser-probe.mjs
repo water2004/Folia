@@ -8,9 +8,12 @@ import {createHash} from 'node:crypto';
 const lock=JSON.parse(readFileSync('docs/mermaid-cpp/source-lock.json'));
 for(const file of lock.files) assert.equal(createHash('sha256').update(readFileSync('.reference/mermaid-js/'+file.path)).digest('hex'),file.sha256,file.path);
 for(const file of lock.flowchartCurve.files) assert.equal(createHash('sha256').update(readFileSync('tools/mermaid-cpp/oracle/node_modules/d3-shape/'+file.path)).digest('hex'),file.sha256,file.path);
-const directory=resolve(process.argv[2]??'build/mermaid-cpp/flowchart-browser');
+const elkAdapter=process.argv.includes('--elk');
+if(elkAdapter){const bundle=JSON.parse(readFileSync('tools/mermaid-cpp/oracle/node_modules/mermaid/'+lock.elkAdapter.map));for(const file of lock.elkAdapter.files){const i=bundle.sources.findIndex(s=>s.endsWith(file.source));assert(i>=0,file.source);assert.equal(createHash('sha256').update(bundle.sourcesContent[i]).digest('hex'),file.sha256,file.source);}}
+const outputArgument=process.argv.slice(2).find(arg=>arg!=='--elk');
+const directory=resolve(outputArgument??(elkAdapter?'build/mermaid-cpp/elk-flowchart-browser':'build/mermaid-cpp/flowchart-browser'));
 mkdirSync(directory,{recursive:true});
-const cases=[
+const dagreCases=[
   ["shapes-metadata", "flowchart LR\nA@{shape: rect, label: Read}\nB@{shape: cyl, label: Store}\nA named@--> B\nB --> C@{shape: terminal, label: Done}\nnamed@{curve: linear}"],
   ["metadata-display", "flowchart LR\nA@{shape: rect, label: \"Read **source**\", labelType: markdown} --> B@{shape: rounded, label: Write}\nA@{label: \"Updated *source*\", labelType: markdown}"],
   ["markdown-nowrap", "%%{init: {\"markdownAutoWrap\": false}}%%\nflowchart TD\nA[\"`Read the **complete source document** and *validate* every entry`\"] -->|\"`Continue with the **next operation** and save the complete document`\"| B[\"`Write the **updated document**\nthen finish`\"]"],
@@ -73,6 +76,7 @@ const cases=[
   ['group-margins','%%{init: {"flowchart": {"subGraphTitleMargin": {"top": 6, "bottom": 4}}}}%%\nflowchart LR\nsubgraph g[Group title]\ndirection TB\nA[Read]-->|next|B[Write]\nend\ng-->|done|C[Exit]'],
   ['unicode','flowchart LR\nA[中文] --> B[Café 😀]'],
 ];
+const cases=elkAdapter?(await import('./elk-flowchart-cases.mjs')).cases:dagreCases;
 const url=pathToFileURL(resolve('tools/mermaid-cpp/oracle/node_modules/mermaid/dist/mermaid.esm.mjs')).href;
 assert.equal(JSON.parse(readFileSync('tools/mermaid-cpp/oracle/node_modules/mermaid/package.json')).version,'12.2.0');
 const html=`<!doctype html><meta charset="utf-8"><body><script type="module">
@@ -82,7 +86,7 @@ const result=[];
 for(const [name,body,title] of ${JSON.stringify(cases)}) {
  const source=title?'---\\ntitle: '+JSON.stringify(title)+'\\n---\\n'+body:body;
  for(const theme of ['default','dark']) {
-  mermaid.initialize({startOnLoad:false,theme,look:'classic',layout:'dagre',fontFamily:'Arial',themeVariables:{fontFamily:'Arial'},htmlLabels:!name.startsWith('svg-label-'),flowchart:{htmlLabels:!name.startsWith('svg-label-')}});
+  mermaid.initialize({startOnLoad:false,theme,look:'classic',layout:${JSON.stringify(elkAdapter?'elk':'dagre')},fontFamily:'Arial',themeVariables:{fontFamily:'Arial'},htmlLabels:!name.startsWith('svg-label-'),flowchart:{htmlLabels:!name.startsWith('svg-label-')}});
   const {svg}=await mermaid.render('probe'+result.length,source);
   const host=document.createElement('div');host.innerHTML=svg;document.body.append(host);
   const root=host.querySelector('svg');
