@@ -1,0 +1,12 @@
+module folia.mermaid.timeline;
+import std;
+namespace folia::mermaid {
+namespace {
+bool space(char16_t c){return c==u' '||c==u'\t'||c==u'\r'||c==u'\n';}
+std::u16string trim(std::u16string_view s){while(!s.empty()&&space(s.front()))s.remove_prefix(1);while(!s.empty()&&space(s.back()))s.remove_suffix(1);return std::u16string(s);}
+std::u16string lower(std::u16string s){for(auto& c:s)if(c>=u'A'&&c<=u'Z')c+=32;return s;}
+}
+std::expected<TimelineDocument,std::string> parse_timeline(std::u16string_view source){try{TimelineDocument d;std::u16string section;bool header=false;std::size_t pos=0;while(pos<source.size()){auto end=source.find(u'\n',pos);if(end==source.npos)end=source.size();auto line=trim(source.substr(pos,end-pos));pos=end+1;auto comment=line.find(u"%%");if(comment!=line.npos)line=trim(line.substr(0,comment));comment=line.find(u'#');if(comment!=line.npos)line=trim(line.substr(0,comment));if(line.empty())continue;auto key=lower(line);if(!header){if(key==u"timeline td")d.direction=u"TD";else if(key!=u"timeline"&&key!=u"timeline lr")throw std::runtime_error("Expected Timeline header");header=true;continue;}if(key.starts_with(u"title ")){d.title=line.substr(6);continue;}if(key.starts_with(u"section ")){section=line.substr(8);d.sections.push_back(section);continue;}if(key.starts_with(u"acctitle:")){d.acc_title=trim(line.substr(9));continue;}if(key.starts_with(u"accdescr:")){d.acc_description=trim(line.substr(9));continue;}if(key.starts_with(u"accdescr")&&line.find(u'{')!=line.npos){auto start=line.find(u'{')+1;auto close=line.find(u'}',start);if(close!=line.npos)d.acc_description=trim(line.substr(start,close-start));else{auto stop=source.find(u'}',pos);if(stop==source.npos)throw std::runtime_error("Incomplete Timeline accessibility description");d.acc_description=trim(line.substr(start)+u"\n"+std::u16string(source.substr(pos,stop-pos)));pos=stop+1;}continue;}
+        auto colon=line.find(u':');if(colon!=0)d.tasks.push_back({section,line.substr(0,colon),{}});while(colon!=line.npos){if(d.tasks.empty()||colon+2>=line.size()||!space(line[colon+1]))throw std::runtime_error("Timeline event needs a period and text");const auto begin=colon+2;auto next=line.find(u':',begin);while(next!=line.npos&&next+1<line.size()&&!space(line[next+1]))next=line.find(u':',next+1);d.tasks.back().events.push_back(line.substr(begin,next==line.npos?line.npos:next-begin));colon=next;}
+    }if(!header)throw std::runtime_error("Expected Timeline header");return d;}catch(const std::runtime_error& e){return std::unexpected(e.what());}}
+}

@@ -454,6 +454,17 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             return JourneyTextBox{box->bounds_width,metrics->height,metrics->baseline,box->line_height,metrics->middle_offset};
         };
     }
-    return render_native_diagram(*input,widths,flowchart_measurements,sequence_measurements,class_measurements,xy_measurements,sankey_measurements,treemap_measure,journey_measure);
+    TimelineMeasure timeline_measure;
+    if(auto timeline=std::get_if<TimelineRenderInput>(&input->content)) {
+        timeline_measure=[timeline,&measurer](std::u16string_view text,double size,unsigned weight)->std::expected<TimelineTextBox,std::string> {
+            const MermaidFont font{timeline->theme.font_family,static_cast<float>(size),weight};
+            auto box=measurer.measure(text,font,false,{},true);
+            if(!box)return std::unexpected(box.error());
+            auto metrics=measurer.svg_font_metrics(font);
+            if(!metrics)return std::unexpected(metrics.error());
+            return TimelineTextBox{box->advance,box->bounds_width,metrics->height,metrics->baseline,metrics->middle_offset};
+        };
+    }
+    return render_native_diagram(*input,widths,flowchart_measurements,sequence_measurements,class_measurements,xy_measurements,sankey_measurements,treemap_measure,journey_measure,timeline_measure);
 }
 }

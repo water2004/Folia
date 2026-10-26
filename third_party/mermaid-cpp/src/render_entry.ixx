@@ -13,13 +13,14 @@ export import folia.mermaid.xy_svg;
 export import folia.mermaid.sankey_svg;
 export import folia.mermaid.treemap_svg;
 export import folia.mermaid.journey_svg;
+export import folia.mermaid.timeline_svg;
 
 export namespace folia::mermaid {
 struct PacketRenderInput { PacketLayout layout; PacketSvgTheme theme; };
 struct PieRenderInput { PieDocument document; PieSvgTheme theme; PieSvgConfig config; };
 struct NativeDiagram {
     PreparedDiagram prepared;
-    std::variant<PacketRenderInput, PieRenderInput, FlowchartRenderInput, SequenceRenderInput, ClassRenderInput, QuadrantRenderInput, RadarRenderInput, XYRenderInput, SankeyRenderInput, TreemapRenderInput, JourneyRenderInput> content;
+    std::variant<PacketRenderInput, PieRenderInput, FlowchartRenderInput, SequenceRenderInput, ClassRenderInput, QuadrantRenderInput, RadarRenderInput, XYRenderInput, SankeyRenderInput, TreemapRenderInput, JourneyRenderInput, TimelineRenderInput> content;
 };
 struct DiagramSvg { std::string svg; double width{}, height{}; };
 
@@ -45,5 +46,6 @@ std::expected<DiagramSvg, std::string> render_native_diagram(
     const XYMeasurements& xy_measurements = {},
     const SankeyMeasurements& sankey_measurements = {},
     const TreemapMeasure& treemap_measure = {},
-    const JourneyMeasure& journey_measure = {});
+    const JourneyMeasure& journey_measure = {},
+    const TimelineMeasure& timeline_measure = {});
 }

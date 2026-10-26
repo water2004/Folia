@@ -787,6 +787,26 @@
     {
       "path": "packages/mermaid/src/diagrams/user-journey/styles.js",
       "sha256": "94803ec99cd36192500f6026826876eb2336d685123c8f14f489280b05d07409"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/timeline/parser/timeline.jison",
+      "sha256": "a201fb1c13cd90ed99ddd9cf9f8526e0e7314ff7e55a4a11b41bcd9cb3201695"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/timeline/timelineDb.js",
+      "sha256": "316f9ac2daefea4c6b42b975c18294b3696da05d0ba1edd32ae4c3c05f84a24f"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/timeline/timelineRenderer.ts",
+      "sha256": "631fe02b6c20ec231121375787f43e737be25588f4e58e7874afa0df6c9896a5"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/timeline/svgDraw.js",
+      "sha256": "adf47cff43567f23db1817720ff97d11499df22e165a48c413624769f515f786"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/timeline/styles.js",
+      "sha256": "6be688e61d5b19800e1d2404c06f35b77a11f95db4df0908f5a0ab05ba4c8077"
     }
   ],
   "packages": [

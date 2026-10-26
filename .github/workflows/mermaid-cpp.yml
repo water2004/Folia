@@ -151,6 +151,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/quadrant-oracle.mjs --check
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/timeline-oracle.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/journey-oracle.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/treemap-oracle.mjs
@@ -278,6 +280,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/quadrant-browser-probe.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/timeline-browser-probe.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/journey-browser-probe.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/treemap-browser-probe.mjs
@@ -306,6 +310,8 @@ jobs:
           node tools/mermaid-cpp/compare-class-svg.mjs build/mermaid-cpp/class-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/compare-quadrant-svg.mjs build/mermaid-cpp/quadrant-browser/original.json build/mermaid-cpp/pie-svg
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/compare-timeline-svg.mjs build/mermaid-cpp/timeline-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/compare-journey-svg.mjs build/mermaid-cpp/journey-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -349,6 +355,8 @@ jobs:
             build/mermaid-cpp/class-browser/*.svg
             build/mermaid-cpp/quadrant-browser/*.json
             build/mermaid-cpp/quadrant-browser/*.svg
+            build/mermaid-cpp/timeline-browser/*.json
+            build/mermaid-cpp/timeline-browser/*.svg
             build/mermaid-cpp/journey-browser/*.json
             build/mermaid-cpp/journey-browser/*.svg
             build/mermaid-cpp/treemap-browser/*.json
