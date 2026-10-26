@@ -110,8 +110,6 @@ namespace winrt::Folia::implementation
         EditPasteButton().Text(Localize(L"Paste"));
         FindButton().Text(Localize(L"Find"));
         ReplaceButton().Text(Localize(L"Replace"));
-        ExplorerHeadingText().Text(Localize(L"Explorer"));
-        ChangeFolderButton().Text(Localize(L"OpenFolder"));
         ExplorerToggleButton().Text(Localize(L"Files"));
         DocumentLoadingText().Text(Localize(L"PreparingDocument"));
         tooltip(ExplorerPaneButton(), L"Files");

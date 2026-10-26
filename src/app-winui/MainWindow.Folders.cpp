@@ -3,6 +3,7 @@ import std;
 #include "MainWindow.xaml.h"
 #include "localization/Localization.h"
 #include "workspace/WorkspaceFileCoordinator.h"
+#include <winrt/Microsoft.Windows.Storage.Pickers.h>
 
 namespace winrt::Folia::implementation {
     winrt::fire_and_forget MainWindow::PickWorkspaceFile() {
@@ -21,9 +22,8 @@ namespace winrt::Folia::implementation {
         if (closePending || closingDocument || windowClosed || relocatingFiles || folderExplorer.IsBusy()) co_return;
         auto lifetime = get_strong();
         try {
-            Windows::Storage::Pickers::FolderPicker picker;
-            picker.FileTypeFilter().Append(L"*");
-            winrt::check_hresult(picker.as<IInitializeWithWindow>()->Initialize(WindowHandle()));
+            Microsoft::Windows::Storage::Pickers::FolderPicker picker{AppWindow().Id()};
+            if (auto folder = folderExplorer.RootPath(); !folder.empty()) picker.SuggestedFolder(folder.native());
             if (auto folder = co_await picker.PickSingleFolderAsync()) {
                 if (windowClosed) co_return;
                 auto path = std::filesystem::path(folder.Path().c_str());
@@ -31,7 +31,6 @@ namespace winrt::Folia::implementation {
 
                 FileTree().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
                 ExplorerEmptyState().Visibility(Microsoft::UI::Xaml::Visibility::Collapsed);
-                FolderActionsButton().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
                 explorerOpen = true;
                 ExplorerToggleButton().IsChecked(true);
                 UpdateWorkspaceLayout();

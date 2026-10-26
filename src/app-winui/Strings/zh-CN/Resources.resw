@@ -315,7 +315,6 @@
   <data name="NoFolderHeading" xml:space="preserve"><value>尚未打开文件夹</value></data>
   <data name="NoFolderHint" xml:space="preserve"><value>打开文件夹以浏览 Markdown 文件。</value></data>
   <data name="ViewMenu" xml:space="preserve"><value>查看</value></data>
-  <data name="Explorer" xml:space="preserve"><value>资源管理器</value></data>
   <data name="NewFile" xml:space="preserve"><value>新建文件…</value></data>
   <data name="NewFolder" xml:space="preserve"><value>新建文件夹…</value></data>
   <data name="Rename" xml:space="preserve"><value>重命名…</value></data>

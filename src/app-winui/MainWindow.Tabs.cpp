@@ -170,7 +170,6 @@ namespace winrt::Folia::implementation {
             if (!window) throw winrt::hresult_illegal_method_call();
             co_return co_await window->ApplyExplorerActionAsync(std::move(action));
         });
-        ChangeFolderButton().Click([this](auto const&, auto const&) { PickWorkspaceFolder(); });
         OpenFolderPaneButton().Click([this](auto const&, auto const&) { PickWorkspaceFolder(); });
         RefreshDocumentTabs();
         RegisterApplicationShortcuts();

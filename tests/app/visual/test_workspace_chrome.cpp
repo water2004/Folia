@@ -6,6 +6,7 @@
 #include <winrt/Microsoft.UI.Xaml.Automation.Peers.h>
 #include <winrt/Microsoft.UI.Xaml.Automation.Provider.h>
 #include <microsoft.ui.xaml.window.h>
+#include <winrt/Microsoft.Windows.Storage.Pickers.h>
 
 namespace {
     using namespace boost::ut;
@@ -83,7 +84,10 @@ namespace {
             expect(tab.IsSelected());
             expect(f.root.FindName(L"CloseOutlineButton") == nullptr);
             expect(!f.Find<SplitView>(L"DocumentWorkspace").IsPaneOpen());
-            expect(f.Find<Button>(L"FolderActionsButton").Visibility() == Visibility::Collapsed);
+            expect(f.root.FindName(L"ExplorerHeadingText") == nullptr);
+            expect(f.root.FindName(L"FolderActionsButton") == nullptr);
+            expect(f.Find<Grid>(L"ExplorerPane").RowDefinitions().Size() == 2_u);
+            expect(Grid::GetRow(f.Find<TreeView>(L"FileTree")) == 1_i);
             for (float scale : {1.f, 1.25f, 1.5f, 2.f}) {
                 Media::Imaging::RenderTargetBitmap bitmap;
                 Await(bitmap.RenderAsync(f.root, static_cast<int>(f.root.ActualWidth() * scale / f.root.XamlRoot().RasterizationScale()), static_cast<int>(f.root.ActualHeight() * scale / f.root.XamlRoot().RasterizationScale())));
@@ -105,6 +109,30 @@ namespace {
                 SavePng(artifacts / (L"light-" + std::to_wstring(int(scale * 100)) + L".png"), bitmap.PixelWidth(), bitmap.PixelHeight(), pixels);
             }
         } catch (winrt::hresult_error const& error) { throw std::runtime_error(winrt::to_string(error.message()) + " HRESULT " + std::to_string(error.code().value)); } };
+
+        "workspace chrome uses a downward main menu and keeps insertion in the editor context menu"_test = [] {
+            ChromeWindow f;
+            auto main = f.Find<Button>(L"MainMenuButton").Flyout().as<MenuFlyout>();
+            expect(main.Placement() == Primitives::FlyoutPlacementMode::BottomEdgeAlignedLeft);
+            for (auto item : main.Items()) if (auto sub = item.try_as<MenuFlyoutSubItem>()) expect(sub.Name() != L"InsertButton");
+            auto context = f.Find<SwapChainPanel>(L"EditorSurface").ContextFlyout().as<MenuFlyout>();
+            MenuFlyoutSubItem insertion{nullptr};
+            for (auto item : context.Items()) if (auto sub = item.try_as<MenuFlyoutSubItem>(); sub && sub.Name() == L"InsertButton") insertion = sub;
+            expect(insertion != nullptr);
+            expect(insertion.Items().Size() >= 7_u);
+            auto divider = f.Find<Border>(L"ShellDivider");
+            auto rect = divider.TransformToVisual(f.root).TransformBounds({0, 0, static_cast<float>(divider.ActualWidth()), static_cast<float>(divider.ActualHeight())});
+            expect(Grid::GetRow(divider) == 1_i);
+            expect(rect.Y >= 48.f);
+            expect(rect.Height == 1.f);
+            expect(rect.Width == f.root.ActualWidth());
+            // Activate the deployed desktop picker factory against the real
+            // owning window without displaying a modal system dialog.
+            winrt::Microsoft::Windows::Storage::Pickers::FolderPicker picker{f.window.AppWindow().Id()};
+            TestDirectory folder;
+            picker.SuggestedFolder(folder.path.native());
+            expect(std::filesystem::path(picker.SuggestedFolder().c_str()) == folder.path);
+        };
 
         "workspace chrome keeps text at native scale and layout buttons beside the captions"_test = [] {
             ChromeWindow f;
@@ -180,6 +208,13 @@ namespace {
             Pump([&] { return std::chrono::steady_clock::now() >= settle; });
             auto active = tabs.SelectedItem().as<TabViewItem>();
             expect(active.IsSelected());
+            for (auto name : {L"ScrollDecreaseButton", L"ScrollIncreaseButton"}) {
+                auto arrow = Descendant(tabs, name).as<Primitives::RepeatButton>();
+                expect(arrow.Content().try_as<Viewbox>() != nullptr) << "native overflow uses a vector chevron";
+                auto at = arrow.TransformToVisual(f.root).TransformPoint({0, 0});
+                expect(arrow.ActualWidth() == 28. && arrow.ActualHeight() == 28.) << "overflow hit target is 28 DIP";
+                expect(std::abs(at.Y + arrow.ActualHeight() / 2 - 24.) < .5) << "overflow center aligns to title strip";
+            }
             auto activeBounds = active.TransformToVisual(f.root).TransformBounds({0, 0, static_cast<float>(active.ActualWidth()), static_cast<float>(active.ActualHeight())});
             expect(activeBounds.X >= 0.f);
             expect(activeBounds.X + activeBounds.Width <= f.Find<Primitives::ToggleButton>(L"ExplorerPaneButton").TransformToVisual(f.root).TransformPoint({0, 0}).X);
@@ -188,6 +223,20 @@ namespace {
             Capture narrow(f.root, f.root.XamlRoot().RasterizationScale());
             auto artifacts = std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path() / L"build/tests/workspace-chrome";
             SavePng(artifacts / L"narrow-tabs.png", narrow.bitmap.PixelWidth(), narrow.bitmap.PixelHeight(), narrow.pixels);
+            SavePng(artifacts / L"overflow-controls-native.png", narrow.bitmap.PixelWidth(), static_cast<int>(50 * narrow.scale), narrow.pixels, narrow.bitmap.PixelWidth());
+            auto viewer = Descendant(tabs, L"ScrollViewer").as<ScrollViewer>();
+            const auto originalOffset = viewer.HorizontalOffset();
+            expect(viewer.ScrollableWidth() > 0.);
+            auto forward = Descendant(tabs, L"ScrollIncreaseButton").as<Primitives::RepeatButton>();
+            Automation::Peers::RepeatButtonAutomationPeer forwardPeer(forward);
+            forwardPeer.GetPattern(Automation::Peers::PatternInterface::Invoke).as<Automation::Provider::IInvokeProvider>().Invoke();
+            Pump([&] { return viewer.HorizontalOffset() > originalOffset; });
+            const auto previousOffset = viewer.HorizontalOffset();
+            auto backward = Descendant(tabs, L"ScrollDecreaseButton").as<Primitives::RepeatButton>();
+            Automation::Peers::RepeatButtonAutomationPeer backwardPeer(backward);
+            backwardPeer.GetPattern(Automation::Peers::PatternInterface::Invoke).as<Automation::Provider::IInvokeProvider>().Invoke();
+            Pump([&] { return viewer.HorizontalOffset() < previousOffset; });
+            expect(static_cast<bool>(tabs.SelectedItem() == active));
             while (tabs.TabItems().Size() > 1) {
                 auto previous = tabs.TabItems().Size();
                 f.root.UpdateLayout();
