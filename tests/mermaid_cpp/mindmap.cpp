@@ -1,5 +1,5 @@
 #include "support/folia_test.hpp"
-import folia.mermaid.mindmap;
+import folia.mermaid.mindmap_shapes;
 import folia.mermaid.number;
 
 namespace {
@@ -7,6 +7,31 @@ using namespace boost::ut;
 using namespace folia::mermaid;
 #include "theme_fixture.hpp"
 suite mindmap=[] {
+    "mermaid_mindmap_shapes_match_original_measured_bounds"_test=[] {
+        const auto override=std::getenv("FOLIA_MERMAID_FIXTURES");
+        std::ifstream input{std::filesystem::path{override?override:FOLIA_MERMAID_FIXTURE_DIR}/"mindmap-shapes.tsv"};
+        expect(fatal(input.is_open()));std::string line;std::size_t count=0;
+        while(std::getline(input,line)) {
+            if(!line.empty()&&line.back()=='\r')line.pop_back();if(line.empty()||line.front()=='#')continue;
+            std::vector<std::string_view> fields;std::string_view rest=line;
+            for(;;){const auto tab=rest.find('\t');fields.push_back(rest.substr(0,tab));if(tab==rest.npos)break;rest.remove_prefix(tab+1);}
+            expect(fatal(fields.size()==4_u));++count;
+            auto session=ConfigSession::create();expect(fatal(session.has_value()));const auto site=json(decode(fields[2]));
+            expect(fatal(session->save_initialize_config(site).has_value()));expect(fatal(session->set_site_config(site).has_value()));
+            const auto graph=prepare_mindmap(decode(fields[1]),*session);expect(fatal(graph.has_value()));
+            const auto boxes=json(decode(fields[3]));expect(fatal(boxes.sequence.size()==graph->nodes.size()));
+            for(std::size_t i=0;i<graph->nodes.size();++i) {
+                const auto& label=field(boxes.sequence[i],u"label");const auto& bounds=field(boxes.sequence[i],u"bounds");
+                const auto shape=measure_mindmap_shape(graph->nodes[i],{field(label,u"width").number,field(label,u"height").number});
+                expect(fatal(shape.has_value()));expect(!shape->path.empty());
+                // Browser getBBox uses float precision; supplied label boxes
+                // are exact inputs, so no font-metric tolerance is involved.
+                for(const auto [key,value]:{std::pair{u"x",shape->min_x},{u"y",shape->min_y},{u"width",shape->width},{u"height",shape->height}})
+                    expect(std::abs(value-field(bounds,key).number)<.0001)<<fields[0]<<value<<field(bounds,key).number;
+            }
+        }
+        expect(count==4_u);
+    };
     "mermaid_mindmap_parser_db_and_user_layout_match_original"_test=[] {
         const auto override=std::getenv("FOLIA_MERMAID_FIXTURES");
         std::ifstream input{std::filesystem::path{override?override:FOLIA_MERMAID_FIXTURE_DIR}/"mindmap.tsv"};

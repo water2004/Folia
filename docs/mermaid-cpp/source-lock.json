@@ -843,6 +843,22 @@
     {
       "path": "packages/mermaid/src/diagrams/gantt/styles.js",
       "sha256": "8e8f606fe9423e2dec6e3e5c0b347c024b80f050011c88ca3a3df4a009019ed7"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/defaultMindmapNode.ts",
+      "sha256": "bbb2414d9843030b1681033fa846594fc2a86155d754f08ddf43b0f370be4ba6"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/mindmapCircle.ts",
+      "sha256": "c31f318bb1a3e03c332915041e9becc63f8ad268a5181195a5daa5ae265c9905"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/cloud.ts",
+      "sha256": "e00d654039e86ddee967629c830ca0c85bc2de1350a7c5ee777a619a85d60839"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/bang.ts",
+      "sha256": "916f0e2b74b80fbbf525f2efbbc2aea2fe87ab0011d30c750f0934c2d197c2e6"
     }
   ],
   "packages": [
