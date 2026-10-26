@@ -68,16 +68,7 @@ class MermaidMeasurer {
                 const float zero=0;
                 const DWRITE_GLYPH_RUN glyph{run->fontFace,run->fontEmSize,1,run->glyphIndices+i,&zero,nullptr,run->isSideways,0};
                 Microsoft::WRL::ComPtr<IDWriteGlyphRunAnalysis> analysis;
-                // Honor the font's hinted/embedded-bitmap mode. Small CJK fonts
-                // can have wider hinted coverage than their scalable outlines.
-                Microsoft::WRL::ComPtr<IDWriteRenderingParams> params;
-                auto hr=factory->CreateRenderingParams(&params);
-                if(FAILED(hr)) return hr;
-                DWRITE_RENDERING_MODE mode;
-                hr=run->fontFace->GetRecommendedRenderingMode(run->fontEmSize,1,
-                    DWRITE_MEASURING_MODE_NATURAL,params.Get(),&mode);
-                if(FAILED(hr)) return hr;
-                hr=factory->CreateGlyphRunAnalysis(&glyph,1,nullptr,mode,
+                auto hr=factory->CreateGlyphRunAnalysis(&glyph,1,nullptr,DWRITE_RENDERING_MODE_NATURAL_SYMMETRIC,
                     DWRITE_MEASURING_MODE_NATURAL,0,0,&analysis);
                 if(FAILED(hr)) return hr;
                 RECT bounds{};
