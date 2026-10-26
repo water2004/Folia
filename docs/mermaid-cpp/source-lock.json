@@ -767,6 +767,26 @@
     {
       "path": "packages/parser/src/language/treemap/valueConverter.ts",
       "sha256": "9de9c402ba5a3f5225599ad86dd3d2846492d7fc7bf50b61dfe2d12655261edf"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/user-journey/parser/journey.jison",
+      "sha256": "40650bb3b7304d27dd9a190c76c34593af8850630985a0423c48fa9375f963c5"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/user-journey/journeyDb.js",
+      "sha256": "686d76d800479eba1a68a2421c41eda469a09ed62356a849d976a7548b78e779"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/user-journey/journeyRenderer.ts",
+      "sha256": "bd96cb487f8121f21fa02524f32d2d880afd09934a2db71e51c51fbc4898d6a6"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/user-journey/svgDraw.js",
+      "sha256": "b3b41ecbddaa7b484a158c753932b4ec04fdcaee88bd2711f44dd401e6b89a7d"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/user-journey/styles.js",
+      "sha256": "94803ec99cd36192500f6026826876eb2336d685123c8f14f489280b05d07409"
     }
   ],
   "packages": [

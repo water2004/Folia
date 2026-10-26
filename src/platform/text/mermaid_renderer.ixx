@@ -441,6 +441,19 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             return TreemapTextBox{box->advance,box->bounds_width,metrics->height,metrics->baseline,metrics->middle_offset};
         };
     }
-    return render_native_diagram(*input,widths,flowchart_measurements,sequence_measurements,class_measurements,xy_measurements,sankey_measurements,treemap_measure);
+    JourneyMeasure journey_measure;
+    if(std::holds_alternative<JourneyRenderInput>(input->content)) {
+        journey_measure=[&measurer](std::u16string_view text,double size,std::u16string_view family,unsigned weight)->std::expected<JourneyTextBox,std::string> {
+            auto resolved=measurer.resolve_family(family);
+            if(!resolved)return std::unexpected(resolved.error());
+            const MermaidFont font{*resolved,static_cast<float>(size),weight};
+            auto box=measurer.measure(text,font,true,{},true);
+            if(!box)return std::unexpected(box.error());
+            auto metrics=measurer.svg_font_metrics(font);
+            if(!metrics)return std::unexpected(metrics.error());
+            return JourneyTextBox{box->bounds_width,metrics->height,metrics->baseline,box->line_height,metrics->middle_offset};
+        };
+    }
+    return render_native_diagram(*input,widths,flowchart_measurements,sequence_measurements,class_measurements,xy_measurements,sankey_measurements,treemap_measure,journey_measure);
 }
 }

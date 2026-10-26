@@ -127,6 +127,11 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
     try {
         const auto& effective=prepared->effective_config;
         const auto& theme=member(effective,u"themeVariables");
+        if(prepared->type==u"journey") {
+            auto input=prepare_journey(source,session);
+            if(!input) return std::unexpected(input.error());
+            return NativeDiagram{std::move(*prepared),std::move(*input)};
+        }
         if(prepared->type==u"treemap") {
             auto input=prepare_treemap(source,session);
             if(!input) return std::unexpected(input.error());
@@ -351,9 +356,13 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
     } catch(const std::runtime_error& e) { return std::unexpected(e.what()); }
 }
 
-std::expected<DiagramSvg,std::string> render_native_diagram(const NativeDiagram& input,const PieMeasurements& widths,const FlowchartMeasurements& flowchart_measurements,const SequenceMeasurements& sequence_measurements,const ClassMeasurements& class_measurements,const XYMeasurements& xy_measurements,const SankeyMeasurements& sankey_measurements,const TreemapMeasure& treemap_measure) {
+std::expected<DiagramSvg,std::string> render_native_diagram(const NativeDiagram& input,const PieMeasurements& widths,const FlowchartMeasurements& flowchart_measurements,const SequenceMeasurements& sequence_measurements,const ClassMeasurements& class_measurements,const XYMeasurements& xy_measurements,const SankeyMeasurements& sankey_measurements,const TreemapMeasure& treemap_measure,const JourneyMeasure& journey_measure) {
     return std::visit([&](const auto& content)->std::expected<DiagramSvg,std::string> {
-        if constexpr(std::is_same_v<std::decay_t<decltype(content)>,TreemapRenderInput>) {
+        if constexpr(std::is_same_v<std::decay_t<decltype(content)>,JourneyRenderInput>) {
+            auto result=render_journey_svg(content,journey_measure);
+            if(!result) return std::unexpected(result.error());
+            return DiagramSvg{std::move(result->svg),result->width,result->height};
+        } else if constexpr(std::is_same_v<std::decay_t<decltype(content)>,TreemapRenderInput>) {
             auto result=render_treemap_svg(content,treemap_measure);
             if(!result) return std::unexpected(result.error());
             return DiagramSvg{std::move(result->svg),result->width,result->height};
