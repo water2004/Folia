@@ -43,24 +43,16 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
         if(!title) return std::unexpected(title.error());
         widths.title_width=*title;
     }
-    FlowchartMeasurements flowchart_measurements;
-    if(auto flow=std::get_if<FlowchartRenderInput>(&input->content)) {
-        if(!flow->document.title.empty()) {
-            auto title=measurer.measure(flow->document.title,{flow->theme.font_family,18});
-            if(!title) return std::unexpected(title.error());
-            flowchart_measurements.title=FlowchartTextBox{
-                .width=title->bounds_width,.height=title->line_height,.baseline=title->baseline};
-        }
-        auto measure=[flow,&measurer](const auto& source,double wrapping_width,bool group=false)->std::expected<FlowchartTextBox,std::string> {
+    auto measure_label=[&measurer](const FlowchartSvgTheme& label_theme,const ConfigValue& effective_config,const auto& source,double wrapping_width,bool group=false)->std::expected<FlowchartTextBox,std::string> {
             const auto& text=source.label;
-            const bool svg_label=!flow->theme.html_label_spacing;
-            const auto* auto_wrap=flow->document.effective_config.find(u"markdownAutoWrap");
+            const bool svg_label=!label_theme.html_label_spacing;
+            const auto* auto_wrap=effective_config.find(u"markdownAutoWrap");
             const bool nowrap=source.label_type==u"markdown" && !svg_label && auto_wrap &&
                 auto_wrap->kind==ConfigKind::boolean && !auto_wrap->boolean;
             if(nowrap)wrapping_width=std::numeric_limits<double>::infinity();
             // Class CSS is inherited during sizing; direct cluster styles are
             // applied to the finished span by clusters.js after its size is fixed.
-            auto label_font=flowchart_label_font(source.compiled_styles,group?std::vector<std::u16string>{}:source.styles,flow->theme);
+            auto label_font=flowchart_label_font(source.compiled_styles,group?std::vector<std::u16string>{}:source.styles,label_theme);
             if(!label_font) return std::unexpected(label_font.error());
             auto family=measurer.resolve_family(label_font->family);
             if(!family) return std::unexpected(family.error());
@@ -118,7 +110,7 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
                     box.lines.push_back(std::move(value));box.runs.push_back(std::move(runs));start=raw_end;
                 }
             }
-            if(wrapped && flow->theme.html_label_spacing) box.width=std::max(box.width,wrapping_width);
+            if(wrapped && label_theme.html_label_spacing) box.width=std::max(box.width,wrapping_width);
             box.height=text.empty()?0:box.line_step*box.lines.size();
             if(svg_label && !text.empty()) {
                 auto metrics=measurer.svg_font_metrics(font);if(!metrics)return std::unexpected(metrics.error());
@@ -126,7 +118,7 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             }
             if(text.empty()) box.baseline=0;
             if(group && !svg_label && !source.styles.empty()) {
-                auto paint=flowchart_label_font(source.compiled_styles,source.styles,flow->theme);
+                auto paint=flowchart_label_font(source.compiled_styles,source.styles,label_theme);
                 if(!paint)return std::unexpected(paint.error());
                 auto family=measurer.resolve_family(paint->family);
                 if(!family)return std::unexpected(family.error());
@@ -137,6 +129,17 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
                 box.paint_baseline=metrics->baseline+(box.paint_line_step-metrics->line_height)/2;
             }
             return box;
+        };
+    FlowchartMeasurements flowchart_measurements;
+    if(auto flow=std::get_if<FlowchartRenderInput>(&input->content)) {
+        if(!flow->document.title.empty()) {
+            auto title=measurer.measure(flow->document.title,{flow->theme.font_family,18});
+            if(!title) return std::unexpected(title.error());
+            flowchart_measurements.title=FlowchartTextBox{
+                .width=title->bounds_width,.height=title->line_height,.baseline=title->baseline};
+        }
+        auto measure=[flow,&measure_label](const auto& source,double width,bool group=false) {
+            return measure_label(flow->theme,flow->document.effective_config,source,width,group);
         };
         flowchart_measurements.measure_group=[flow,measure](std::size_t index,double width) {
             return measure(flow->document.nodes.at(index),width,true);
@@ -158,6 +161,16 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
                 box->width+=4;box->height+=4;box->baseline=metrics->baseline+2;
             }
             flowchart_measurements.edges.push_back(*box);
+        }
+    }
+    MindmapMeasurements mindmap_measurements;
+    if(auto mindmap=std::get_if<MindmapRenderInput>(&input->content)) {
+        for(const auto& node:mindmap->document.nodes) {
+            FlowchartNode label_source;label_source.label=node.label;label_source.label_type=node.label_type;
+            const double width=node.type==1||node.type==2||node.type==6?mindmap->theme.wrapping_width:node.width;
+            auto box=measure_label(mindmap->theme,mindmap->document.effective_config,label_source,width);
+            if(!box)return std::unexpected(box.error());
+            mindmap_measurements.nodes.push_back(std::move(*box));
         }
     }
     SequenceMeasurements sequence_measurements;
@@ -484,6 +497,6 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             return GitGraphTextBox{box->bounds_width,metrics->height,metrics->baseline};
         };
     }
-    return render_native_diagram(*input,widths,flowchart_measurements,sequence_measurements,class_measurements,xy_measurements,sankey_measurements,treemap_measure,journey_measure,timeline_measure,gantt_measure,git_graph_measure);
+    return render_native_diagram(*input,widths,flowchart_measurements,sequence_measurements,class_measurements,xy_measurements,sankey_measurements,treemap_measure,journey_measure,timeline_measure,gantt_measure,git_graph_measure,mindmap_measurements);
 }
 }

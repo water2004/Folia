@@ -347,6 +347,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/compare-quadrant-svg.mjs build/mermaid-cpp/quadrant-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/compare-mindmap-svg.mjs build/mermaid-cpp/mindmap-browser/shapes.json build/mermaid-cpp/pie-svg
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/compare-git-graph-svg.mjs build/mermaid-cpp/git-graph-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/compare-gantt-svg.mjs build/mermaid-cpp/gantt-browser/original.json build/mermaid-cpp/pie-svg

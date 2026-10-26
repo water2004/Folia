@@ -84,7 +84,8 @@ suite render_entry = [] {
                 widths.title_width=100;
             }
             std::visit([&](const auto& content) {
-                if constexpr(!std::is_same_v<std::decay_t<decltype(content)>,SankeyRenderInput>) {
+                if constexpr(!std::is_same_v<std::decay_t<decltype(content)>,SankeyRenderInput> &&
+                    !std::is_same_v<std::decay_t<decltype(content)>,MindmapRenderInput>) {
                 const auto& doc=[&]() -> const auto& {
                     if constexpr(std::is_same_v<std::decay_t<decltype(content)>,PacketRenderInput>) return content.layout.document;
                     else return content.document;
