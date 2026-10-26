@@ -224,6 +224,7 @@
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml" />
     <Page Include="MainWindow.xaml" />
+    <Page Include="workspace\WorkspaceChrome.xaml" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\core\model\ast.ixx">

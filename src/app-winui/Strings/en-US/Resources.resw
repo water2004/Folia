@@ -314,4 +314,5 @@
   <data name="StatusFolderFailed" xml:space="preserve"><value>Unable to read folder: {0}</value></data>
   <data name="NoFolderHeading" xml:space="preserve"><value>No folder open</value></data>
   <data name="NoFolderHint" xml:space="preserve"><value>Open a folder to browse Markdown files.</value></data>
+  <data name="ViewMenu" xml:space="preserve"><value>View</value></data>
 </root>

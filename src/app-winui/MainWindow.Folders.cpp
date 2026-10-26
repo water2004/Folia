@@ -30,6 +30,7 @@ namespace winrt::Folia::implementation {
                 Microsoft::UI::Xaml::Controls::ToolTipService::SetToolTip(ExplorerHeadingText(), winrt::box_value(folder.Path()));
                 FileTree().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
                 ExplorerEmptyState().Visibility(Microsoft::UI::Xaml::Visibility::Collapsed);
+                FolderActionsButton().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
                 explorerOpen = true;
                 ExplorerToggleButton().IsChecked(true);
                 UpdateWorkspaceLayout();

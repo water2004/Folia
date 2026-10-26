@@ -48,12 +48,18 @@ namespace winrt::Folia::implementation {
             TabViewItem tab{nullptr};
             if (found == tabItems.end()) {
                 tab = TabViewItem();
+                tab.Style(Root().Resources().Lookup(winrt::box_value(L"WorkspaceTabStyle")).as<Style>());
+                tab.BorderBrush(Root().Resources().Lookup(winrt::box_value(L"FoliaShellAccentBrush")).as<Media::Brush>());
                 tab.Tag(winrt::box_value(document->id));
+                tab.Loaded([weak = get_weak()](auto const&, auto const&) {
+                    if (auto window = weak.get()) window->EnsureSelectedTabVisible();
+                });
                 StackPanel header;
                 header.Orientation(Orientation::Horizontal);
                 header.Spacing(8);
                 TextBlock title;
-                title.FontSize(13);
+                title.FontSize(14);
+                title.VerticalAlignment(VerticalAlignment::Center);
                 title.MaxWidth(210);
                 title.TextTrimming(TextTrimming::CharacterEllipsis);
                 TextBlock dirty;
@@ -81,7 +87,8 @@ namespace winrt::Folia::implementation {
             ++index;
         }
         if (auto active = tabItems.find(workspaceDocuments.Active()->id); active != tabItems.end()) DocumentTabs().SelectedItem(active->second);
-        AppTitleBar().RecomputeDragRegions();
+        UpdateChromeMetrics();
+        EnsureSelectedTabVisible();
     }
 
     winrt::fire_and_forget MainWindow::CloseDocumentAsync(std::uint64_t id) {
@@ -111,14 +118,10 @@ namespace winrt::Folia::implementation {
         using winrt::Folia::WorkspaceIcon;
         ExplorerPaneButton().Content(MakeWorkspaceIcon(WorkspaceIcon::PanelLeft));
         OutlinePaneButton().Content(MakeWorkspaceIcon(WorkspaceIcon::PanelRight));
-        RefreshFolderButton().Content(MakeWorkspaceIcon(WorkspaceIcon::Refresh));
-        CollapseFoldersButton().Content(MakeWorkspaceIcon(WorkspaceIcon::Collapse));
-        CloseOutlineButton().Content(MakeWorkspaceIcon(WorkspaceIcon::PanelRight));
         Automation::AutomationProperties::SetName(ExplorerPaneButton(), Localize(L"Files"));
         Automation::AutomationProperties::SetName(OutlinePaneButton(), Localize(L"ToggleOutline"));
         Automation::AutomationProperties::SetName(RefreshFolderButton(), Localize(L"RefreshFiles"));
         Automation::AutomationProperties::SetName(CollapseFoldersButton(), Localize(L"CollapseFolders"));
-        Automation::AutomationProperties::SetName(CloseOutlineButton(), Localize(L"CloseOutline"));
         ExplorerPaneButton().Click([this](auto const&, auto const&) {
             explorerOpen = ExplorerPaneButton().IsChecked().GetBoolean();
             UpdateWorkspaceLayout();
@@ -149,21 +152,14 @@ namespace winrt::Folia::implementation {
             std::vector<std::uint64_t> order;
             for (auto item : DocumentTabs().TabItems()) order.push_back(winrt::unbox_value<std::uint64_t>(item.as<TabViewItem>().Tag()));
             workspaceDocuments.Reorder(order);
-            AppTitleBar().RecomputeDragRegions();
+            UpdateChromeMetrics();
         });
-        DocumentTabs().SizeChanged([this](auto const&, auto const&) { AppTitleBar().RecomputeDragRegions(); });
-        AppTitleBar().PaneToggleRequested([this](auto const&, auto const&) {
-            explorerOpen = !explorerOpen;
-            ExplorerToggleButton().IsChecked(explorerOpen);
-            UpdateWorkspaceLayout();
+        DocumentTabs().SizeChanged([this](auto const&, auto const&) {
+            UpdateChromeMetrics();
+            EnsureSelectedTabVisible();
         });
         ExplorerToggleButton().Click([this](auto const&, auto const&) {
             explorerOpen = ExplorerToggleButton().IsChecked();
-            UpdateWorkspaceLayout();
-        });
-        CloseOutlineButton().Click([this](auto const&, auto const&) {
-            outlineOpen = false;
-            SidebarToggleButton().IsChecked(false);
             UpdateWorkspaceLayout();
         });
         folderExplorer.Attach(FileTree(), [weak = get_weak()](auto path, bool keep) {
@@ -177,6 +173,30 @@ namespace winrt::Folia::implementation {
         RefreshDocumentTabs();
         RegisterApplicationShortcuts();
         UpdateWorkspaceLayout();
+    }
+
+    void MainWindow::EnsureSelectedTabVisible() {
+        if (selectedTabVisibilityPending || windowClosed) return;
+        selectedTabVisibilityPending = true;
+        // Let TabView finish its selection/overflow layout first. Coalesce
+        // requests and resolve the current selection when the callback runs.
+        if (!DispatcherQueue().TryEnqueue(Microsoft::UI::Dispatching::DispatcherQueuePriority::Low, [weak = get_weak()] {
+            if (auto window = weak.get()) {
+                window->selectedTabVisibilityPending = false;
+                if (window->windowClosed) return;
+                if (auto selected = window->DocumentTabs().SelectedItem().try_as<TabViewItem>(); selected && selected.IsLoaded()) {
+                    BringIntoViewOptions options;
+                    options.AnimationDesired(false);
+                    selected.StartBringIntoView(options);
+                }
+            }
+        })) selectedTabVisibilityPending = false;
+    }
+
+    void MainWindow::UpdateChromeMetrics() {
+        auto root = Root().XamlRoot();
+        const double scale = root ? root.RasterizationScale() : static_cast<double>(::GetDpiForWindow(WindowHandle())) / 96.0;
+        CaptionInset().Width(AppWindow().TitleBar().RightInset() / (std::max)(1.0, scale));
     }
 
     void MainWindow::UpdateWorkspaceLayout() {

@@ -14,8 +14,10 @@
     <Grid
         x:Name="Root"
         KeyboardAcceleratorPlacementMode="Hidden"
-        RowDefinitions="Auto,Auto,Auto,*,Auto">
+        RowDefinitions="48,Auto,Auto,*,Auto">
         <Grid.Resources>
+          <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries><ResourceDictionary Source="workspace/WorkspaceChrome.xaml"/></ResourceDictionary.MergedDictionaries>
             <SolidColorBrush x:Key="FoliaShellBackgroundBrush" Color="#121419"/>
             <SolidColorBrush x:Key="FoliaShellLayerBrush" Color="#191C23"/>
             <SolidColorBrush x:Key="FoliaShellBorderBrush" Color="#343A46"/>
@@ -30,126 +32,102 @@
                 <Setter Property="FontSize" Value="{ThemeResource FoliaUiFontSize}"/>
                 <Setter Property="Foreground" Value="{ThemeResource FoliaShellForegroundBrush}"/>
             </Style>
-            <Style x:Key="WorkspacePaneToggleStyle" TargetType="ToggleButton" BasedOn="{StaticResource DefaultToggleButtonStyle}">
-                <Setter Property="Background" Value="Transparent"/>
-                <Setter Property="BorderThickness" Value="0"/>
-                <Setter Property="CornerRadius" Value="4"/>
-                <Setter Property="MinWidth" Value="32"/>
-                <Setter Property="MinHeight" Value="32"/>
-            </Style>
+          </ResourceDictionary>
         </Grid.Resources>
-        <TitleBar
-            x:Name="AppTitleBar"
-            Grid.Row="0"
-            MinHeight="48"
-            IsPaneToggleButtonVisible="False"
-            Background="{ThemeResource FoliaShellBackgroundBrush}"
-            Title="">
-            <TitleBar.Resources>
-                <HorizontalAlignment x:Key="TitleBarContentHorizontalAlignment">Stretch</HorizontalAlignment>
-            </TitleBar.Resources>
-            <TitleBar.LeftHeader>
-                <Button x:Name="MainMenuButton" Style="{StaticResource SubtleButtonStyle}" Padding="10" AutomationProperties.Name="Folia">
+        <TabView x:Name="DocumentTabs" Grid.RowSpan="5" VerticalAlignment="Stretch"
+                 TabWidthMode="SizeToContent" CanDragTabs="True" CanReorderTabs="True" AllowDrop="True"
+                 Padding="0,6,0,6" BorderThickness="0" Background="Transparent">
+            <TabView.Resources>
+                <SolidColorBrush x:Key="TabViewBorderBrush" Color="Transparent"/>
+                <Thickness x:Key="TabViewItemAddButtonContainerPadding">4,12,4,12</Thickness>
+            </TabView.Resources>
+            <TabView.TabStripHeader>
+                <Button x:Name="MainMenuButton" Height="32" Margin="8,8,12,8" Padding="10,0" Style="{StaticResource SubtleButtonStyle}">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <TextBlock x:Name="MainMenuLabel" Text="Folia" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"/>
                         <FontIcon Glyph="&#xE70D;" FontSize="10"/>
                     </StackPanel>
                     <Button.Flyout>
-                    <MenuFlyout>
-                        <MenuFlyoutSubItem x:Name="FileMenu" Text="File">
-                            <MenuFlyoutItem x:Name="NewButton" Text="New document" KeyboardAcceleratorTextOverride="Ctrl+N"/>
-                            <MenuFlyoutItem x:Name="OpenButton" Text="Open file" KeyboardAcceleratorTextOverride="Ctrl+O"/>
-                            <MenuFlyoutItem x:Name="OpenFolderButton" Text="Open folder" KeyboardAcceleratorTextOverride="Ctrl+Shift+O"/>
-                            <MenuFlyoutSeparator/>
-                            <MenuFlyoutItem x:Name="SaveButton" Text="Save" KeyboardAcceleratorTextOverride="Ctrl+S"/>
-                            <MenuFlyoutItem x:Name="SaveAsButton" Text="Save as"/>
-                            <MenuFlyoutItem x:Name="ReloadButton" Text="Reload"/>
-                            <MenuFlyoutItem x:Name="ExportPdfButton" Text="PDF"/>
-                            <MenuFlyoutSeparator/>
-                            <MenuFlyoutItem x:Name="CloseTabButton" Text="Close tab" KeyboardAcceleratorTextOverride="Ctrl+W"/>
-                        </MenuFlyoutSubItem>
-                        <MenuFlyoutSubItem x:Name="EditMenu" Text="Edit">
-                            <MenuFlyoutItem x:Name="UndoButton" Text="Undo"/>
-                            <MenuFlyoutItem x:Name="RedoButton" Text="Redo"/>
-                            <MenuFlyoutSeparator/>
-                            <MenuFlyoutItem x:Name="EditCutButton" Text="Cut"/>
-                            <MenuFlyoutItem x:Name="EditCopyButton" Text="Copy"/>
-                            <MenuFlyoutItem x:Name="EditPasteButton" Text="Paste"/>
-                            <MenuFlyoutSeparator/>
-                            <MenuFlyoutItem x:Name="FindButton" Text="Find"/>
-                            <MenuFlyoutItem x:Name="ReplaceButton" Text="Replace"/>
-                        </MenuFlyoutSubItem>
-                        <MenuFlyoutSubItem x:Name="FormatMenu" Text="Format">
-                            <ToggleMenuFlyoutItem x:Name="BoldButton" Text="Bold"/>
-                            <ToggleMenuFlyoutItem x:Name="ItalicButton" Text="Italic"/>
-                            <ToggleMenuFlyoutItem x:Name="StrikeButton" Text="Strikethrough"/>
-                            <ToggleMenuFlyoutItem x:Name="InlineCodeButton" Text="Inline code"/>
-                            <MenuFlyoutSeparator/>
-                            <MenuFlyoutItem x:Name="FormatDocumentButton" Text="Format document"/>
-                        </MenuFlyoutSubItem>
-                        <MenuFlyoutSubItem x:Name="BlocksButton" Text="Blocks">
-                        <MenuFlyoutSubItem x:Name="HeadingMenuItem" Text="Heading">
-                            <MenuFlyoutItem x:Name="Heading1Button" Text="Heading 1"/>
-                            <MenuFlyoutItem x:Name="Heading2Button" Text="Heading 2"/>
-                        </MenuFlyoutSubItem>
-                        <MenuFlyoutItem x:Name="QuoteButton" Text="Quote"/>
-                        <MenuFlyoutSubItem x:Name="ListMenuItem" Text="List">
-                            <MenuFlyoutItem x:Name="UnorderedListButton" Text="Bulleted list"/>
-                            <MenuFlyoutItem x:Name="OrderedListButton" Text="Numbered list"/>
-                            <MenuFlyoutItem x:Name="TaskListButton" Text="Task list"/>
-                        </MenuFlyoutSubItem>
-                        <MenuFlyoutSeparator/>
-                        <MenuFlyoutItem x:Name="CodeBlockButton" Text="Code block"/>
-                        <MenuFlyoutItem x:Name="BlockMathButton" Text="Math block"/>
-                        <MenuFlyoutSubItem x:Name="CalloutMenuItem" Text="Callout">
-                            <MenuFlyoutItem x:Name="CalloutNoteMenuItem" Text="Note"/>
-                            <MenuFlyoutItem x:Name="CalloutTipMenuItem" Text="Tip"/>
-                            <MenuFlyoutItem x:Name="CalloutWarningMenuItem" Text="Warning"/>
-                        </MenuFlyoutSubItem>
-                        </MenuFlyoutSubItem>
-                        <MenuFlyoutSubItem x:Name="InsertButton" Text="Insert">
-                        <MenuFlyoutItem x:Name="TableButton" Text="Table"/>
-                        <MenuFlyoutItem x:Name="InlineMathButton" Text="Inline math"/>
-                        <MenuFlyoutItem x:Name="LinkButton" Text="Link"/>
-                        <MenuFlyoutItem x:Name="ImageButton" Text="Image"/>
-                        <MenuFlyoutItem x:Name="FootnoteButton" Text="Footnote"/>
-                        <MenuFlyoutSeparator/>
-                        <MenuFlyoutItem x:Name="TocButton" Text="Table of contents"/>
-                        </MenuFlyoutSubItem>
-                        <MenuFlyoutSeparator/>
-                        <ToggleMenuFlyoutItem x:Name="ExplorerToggleButton" Text="Files" IsChecked="True"/>
-                        <ToggleMenuFlyoutItem x:Name="SidebarToggleButton" Text="Outline" IsChecked="True"/>
-                        <ToggleMenuFlyoutItem x:Name="SettingsButton" Text="Settings"/>
-                    </MenuFlyout>
+                        <MenuFlyout>
+                            <MenuFlyoutSubItem x:Name="FileMenu" Text="File">
+                                <MenuFlyoutItem x:Name="NewButton" Text="New document" KeyboardAcceleratorTextOverride="Ctrl+N"/>
+                                <MenuFlyoutItem x:Name="OpenButton" Text="Open file" KeyboardAcceleratorTextOverride="Ctrl+O"/>
+                                <MenuFlyoutItem x:Name="OpenFolderButton" Text="Open folder" KeyboardAcceleratorTextOverride="Ctrl+Shift+O"/>
+                                <MenuFlyoutSeparator/>
+                                <MenuFlyoutItem x:Name="SaveButton" Text="Save" KeyboardAcceleratorTextOverride="Ctrl+S"/>
+                                <MenuFlyoutItem x:Name="SaveAsButton" Text="Save as"/>
+                                <MenuFlyoutItem x:Name="ReloadButton" Text="Reload"/>
+                                <MenuFlyoutItem x:Name="ExportPdfButton" Text="PDF"/>
+                                <MenuFlyoutSeparator/>
+                                <MenuFlyoutItem x:Name="CloseTabButton" Text="Close tab" KeyboardAcceleratorTextOverride="Ctrl+W"/>
+                            </MenuFlyoutSubItem>
+                            <MenuFlyoutSubItem x:Name="EditMenu" Text="Edit">
+                                <MenuFlyoutItem x:Name="UndoButton" Text="Undo"/>
+                                <MenuFlyoutItem x:Name="RedoButton" Text="Redo"/>
+                                <MenuFlyoutSeparator/>
+                                <MenuFlyoutItem x:Name="EditCutButton" Text="Cut"/>
+                                <MenuFlyoutItem x:Name="EditCopyButton" Text="Copy"/>
+                                <MenuFlyoutItem x:Name="EditPasteButton" Text="Paste"/>
+                                <MenuFlyoutSeparator/>
+                                <MenuFlyoutItem x:Name="FindButton" Text="Find"/>
+                                <MenuFlyoutItem x:Name="ReplaceButton" Text="Replace"/>
+                                <MenuFlyoutSubItem x:Name="FormatMenu" Text="Format">
+                                    <ToggleMenuFlyoutItem x:Name="BoldButton" Text="Bold"/>
+                                    <ToggleMenuFlyoutItem x:Name="ItalicButton" Text="Italic"/>
+                                    <ToggleMenuFlyoutItem x:Name="StrikeButton" Text="Strikethrough"/>
+                                    <ToggleMenuFlyoutItem x:Name="InlineCodeButton" Text="Inline code"/>
+                                    <MenuFlyoutSeparator/>
+                                    <MenuFlyoutItem x:Name="FormatDocumentButton" Text="Format document"/>
+                                </MenuFlyoutSubItem>
+                            </MenuFlyoutSubItem>
+                            <MenuFlyoutSubItem x:Name="InsertButton" Text="Insert">
+                                <MenuFlyoutItem x:Name="TableButton" Text="Table"/>
+                                <MenuFlyoutItem x:Name="InlineMathButton" Text="Inline math"/>
+                                <MenuFlyoutItem x:Name="LinkButton" Text="Link"/>
+                                <MenuFlyoutItem x:Name="ImageButton" Text="Image"/>
+                                <MenuFlyoutItem x:Name="FootnoteButton" Text="Footnote"/>
+                                <MenuFlyoutSeparator/>
+                                <MenuFlyoutItem x:Name="TocButton" Text="Table of contents"/>
+                                <MenuFlyoutSubItem x:Name="BlocksButton" Text="Blocks">
+                                    <MenuFlyoutSubItem x:Name="HeadingMenuItem" Text="Heading">
+                                        <MenuFlyoutItem x:Name="Heading1Button" Text="Heading 1"/>
+                                        <MenuFlyoutItem x:Name="Heading2Button" Text="Heading 2"/>
+                                    </MenuFlyoutSubItem>
+                                    <MenuFlyoutItem x:Name="QuoteButton" Text="Quote"/>
+                                    <MenuFlyoutSubItem x:Name="ListMenuItem" Text="List">
+                                        <MenuFlyoutItem x:Name="UnorderedListButton" Text="Bulleted list"/>
+                                        <MenuFlyoutItem x:Name="OrderedListButton" Text="Numbered list"/>
+                                        <MenuFlyoutItem x:Name="TaskListButton" Text="Task list"/>
+                                    </MenuFlyoutSubItem>
+                                    <MenuFlyoutSeparator/>
+                                    <MenuFlyoutItem x:Name="CodeBlockButton" Text="Code block"/>
+                                    <MenuFlyoutItem x:Name="BlockMathButton" Text="Math block"/>
+                                    <MenuFlyoutSubItem x:Name="CalloutMenuItem" Text="Callout">
+                                        <MenuFlyoutItem x:Name="CalloutNoteMenuItem" Text="Note"/>
+                                        <MenuFlyoutItem x:Name="CalloutTipMenuItem" Text="Tip"/>
+                                        <MenuFlyoutItem x:Name="CalloutWarningMenuItem" Text="Warning"/>
+                                    </MenuFlyoutSubItem>
+                                </MenuFlyoutSubItem>
+                            </MenuFlyoutSubItem>
+                            <MenuFlyoutSubItem x:Name="ViewMenu" Text="View">
+                                <ToggleMenuFlyoutItem x:Name="ExplorerToggleButton" Text="Files" IsChecked="True"/>
+                                <ToggleMenuFlyoutItem x:Name="SidebarToggleButton" Text="Outline" IsChecked="True"/>
+                                <ToggleMenuFlyoutItem x:Name="SettingsButton" Text="Settings"/>
+                            </MenuFlyoutSubItem>
+                        </MenuFlyout>
                     </Button.Flyout>
                 </Button>
-            </TitleBar.LeftHeader>
-            <TitleBar.Content>
-                    <TabView x:Name="DocumentTabs" Height="48" TabWidthMode="SizeToContent"
-                             CanDragTabs="True" CanReorderTabs="True" AllowDrop="True"
-                             TitleBar.IsDragRegion="False">
-                        <TabView.Resources>
-                            <x:Double x:Key="TabViewItemMinHeight">34</x:Double>
-                            <x:Double x:Key="TabViewItemHeaderFontSize">13</x:Double>
-                            <Thickness x:Key="TabViewHeaderPadding">4,8,0,0</Thickness>
-                            <Thickness x:Key="TabViewItemHeaderIconMargin">0,0,8,0</Thickness>
-                        </TabView.Resources>
-                    </TabView>
-            </TitleBar.Content>
-            <TitleBar.RightHeader>
-                <StackPanel Orientation="Horizontal" Spacing="2" Margin="6,0,4,0">
-                    <StackPanel.Resources>
-                        <StaticResource x:Key="ToggleButtonBackgroundChecked" ResourceKey="SubtleFillColorSecondaryBrush"/>
-                        <StaticResource x:Key="ToggleButtonBackgroundCheckedPointerOver" ResourceKey="SubtleFillColorTertiaryBrush"/>
-                        <StaticResource x:Key="ToggleButtonForegroundChecked" ResourceKey="TextFillColorPrimaryBrush"/>
-                        <StaticResource x:Key="ToggleButtonForegroundCheckedPointerOver" ResourceKey="TextFillColorPrimaryBrush"/>
-                    </StackPanel.Resources>
-                    <ToggleButton x:Name="ExplorerPaneButton" Width="32" Height="32" Padding="8" Style="{StaticResource WorkspacePaneToggleStyle}"/>
-                    <ToggleButton x:Name="OutlinePaneButton" Width="32" Height="32" Padding="8" Style="{StaticResource WorkspacePaneToggleStyle}"/>
-                </StackPanel>
-            </TitleBar.RightHeader>
-        </TitleBar>
-
+            </TabView.TabStripHeader>
+            <TabView.TabStripFooter>
+                <Grid Height="48" MinWidth="124" ColumnDefinitions="*,Auto,Auto,Auto">
+                    <Border x:Name="TitleDragArea" Background="Transparent" MinWidth="48"/>
+                    <ToggleButton x:Name="ExplorerPaneButton" Grid.Column="1" Width="28" Height="28" Margin="0,0,2,0" Style="{StaticResource WorkspacePaneToggleStyle}" VerticalAlignment="Center"/>
+                    <ToggleButton x:Name="OutlinePaneButton" Grid.Column="2" Width="28" Height="28" Margin="0,0,8,0" Style="{StaticResource WorkspacePaneToggleStyle}" VerticalAlignment="Center"/>
+                    <Border x:Name="CaptionInset" Grid.Column="3" Width="138"/>
+                </Grid>
+            </TabView.TabStripFooter>
+        </TabView>
+        <Border x:Name="ShellDivider" Grid.Row="0" Height="1" VerticalAlignment="Bottom" Background="{ThemeResource FoliaShellBorderBrush}" IsHitTestVisible="False"/>
         <InfoBar
             x:Name="ExternalChangeInfoBar"
             Grid.Row="1"
@@ -229,10 +207,15 @@
             <SplitView x:Name="DocumentWorkspace" DisplayMode="Inline" PanePlacement="Left" OpenPaneLength="248" IsPaneOpen="False" PaneBackground="{ThemeResource FoliaShellLayerBrush}">
                 <SplitView.Pane>
                 <Grid x:Name="ExplorerPane" Background="{ThemeResource FoliaShellLayerBrush}" RowDefinitions="Auto,*" BorderBrush="{ThemeResource FoliaShellBorderBrush}" BorderThickness="0,0,1,0">
-                    <Grid Margin="12,6,6,6" ColumnDefinitions="*,Auto,Auto">
-                        <TextBlock x:Name="ExplorerHeadingText" Text="Files" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
-                        <Button x:Name="RefreshFolderButton" Grid.Column="1" Width="28" Height="28" Style="{StaticResource SubtleButtonStyle}" Padding="6"/>
-                        <Button x:Name="CollapseFoldersButton" Grid.Column="2" Width="28" Height="28" Style="{StaticResource SubtleButtonStyle}" Padding="6"/>
+                    <Grid Height="42" Margin="16,0,8,0" ColumnDefinitions="*,Auto">
+                        <TextBlock x:Name="ExplorerHeadingText" Text="Files" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                        <Button x:Name="FolderActionsButton" Grid.Column="1" Visibility="Collapsed" Width="28" Height="28" Padding="0" Style="{StaticResource SubtleButtonStyle}">
+                            <FontIcon Glyph="&#xE712;" FontSize="14"/>
+                            <Button.Flyout><MenuFlyout>
+                                <MenuFlyoutItem x:Name="RefreshFolderButton" Text="Refresh files"/>
+                                <MenuFlyoutItem x:Name="CollapseFoldersButton" Text="Collapse folders"/>
+                            </MenuFlyout></Button.Flyout>
+                        </Button>
                     </Grid>
                     <StackPanel x:Name="ExplorerEmptyState" Grid.Row="1" Margin="16,20" Spacing="8" VerticalAlignment="Top">
                         <TextBlock x:Name="NoFolderHeading" FontSize="13" FontWeight="SemiBold" Text="No folder open"/>
@@ -254,17 +237,17 @@
                    <SplitView.Pane>
                 <Grid
                         x:Name="OutlinePaneContent"
-                        Padding="8,8,8,8"
+                        Padding="8,0,8,8"
                         Background="{ThemeResource FoliaShellLayerBrush}"
                         BorderBrush="{ThemeResource FoliaShellBorderBrush}" BorderThickness="1,0,0,0"
                         RowDefinitions="Auto,*">
-                        <Grid ColumnDefinitions="*,Auto">
+                        <Grid Height="42" ColumnDefinitions="*">
                           <TextBlock
                             x:Name="OutlineHeadingText"
-                            Margin="8,4,8,8"
-                            FontWeight="SemiBold" FontSize="12"
+                            Margin="8,0,8,0" VerticalAlignment="Center"
+                            FontWeight="SemiBold" FontSize="13"
                             Text="Outline"/>
-                          <Button x:Name="CloseOutlineButton" Grid.Column="1" Width="28" Height="28" Style="{StaticResource SubtleButtonStyle}" Padding="6"/>
+
                         </Grid>
                         <ListView
                             x:Name="OutlineList"
@@ -277,6 +260,7 @@
                    </SplitView.Pane>
                    <SplitView.Content>
                 <Grid x:Name="EditorPane">
+
                   <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -390,6 +374,7 @@
                     </StackPanel>
                   </Border>
                 </Grid>
+
                    </SplitView.Content>
                   </SplitView>
                 </SplitView.Content>

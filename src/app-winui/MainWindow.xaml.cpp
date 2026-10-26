@@ -67,7 +67,8 @@ namespace winrt::Folia::implementation
         appSettings = std::move(loadedSettings.settings);
         themeCatalog->Refresh();
         ExtendsContentIntoTitleBar(true);
-        SetTitleBar(AppTitleBar());
+        AppWindow().TitleBar().PreferredHeightOption(Microsoft::UI::Windowing::TitleBarHeightOption::Tall);
+        SetTitleBar(TitleDragArea());
         RegisterCommandHandlers();
         InitializeTextInput();
         AttachControllers();
@@ -93,6 +94,7 @@ namespace winrt::Folia::implementation
         FileMenu().Text(Localize(L"FileMenu"));
         MainMenuLabel().Text(Localize(L"AppName"));
         EditMenu().Text(Localize(L"EditMenu"));
+        ViewMenu().Text(Localize(L"ViewMenu"));
         FormatMenu().Text(Localize(L"FormatMenu"));
         NewButton().Text(Localize(L"NewDocument"));
         OpenFolderButton().Text(Localize(L"OpenFolder"));
@@ -111,12 +113,12 @@ namespace winrt::Folia::implementation
         ExplorerHeadingText().Text(Localize(L"Files"));
         ExplorerToggleButton().Text(Localize(L"Files"));
         DocumentLoadingText().Text(Localize(L"PreparingDocument"));
-        tooltip(MainMenuButton(), L"MainMenu");
         tooltip(RefreshFolderButton(), L"RefreshFiles");
         tooltip(ExplorerPaneButton(), L"Files");
         tooltip(OutlinePaneButton(), L"ToggleOutline");
         tooltip(CollapseFoldersButton(), L"CollapseFolders");
-        tooltip(CloseOutlineButton(), L"CloseOutline");
+        RefreshFolderButton().Text(Localize(L"RefreshFiles"));
+        CollapseFoldersButton().Text(Localize(L"CollapseFolders"));
 
         SidebarToggleButton().Text(Localize(L"Outline"));
         tooltip(SidebarToggleButton(), L"ToggleOutline");
@@ -492,7 +494,7 @@ namespace winrt::Folia::implementation
         resources.Insert(winrt::box_value(L"FoliaMonoFontFamily"), Font(themeProfile.typography.ui_monospace.family));
 
         Root().Background(Brush(colors.shell_bg));
-        AppTitleBar().Background(Brush(colors.shell_bg));
+        ShellDivider().Background(Brush(colors.shell_border));
         StatusBar().Background(Brush(colors.shell_layer_bg));
         StatusBar().BorderBrush(Brush(colors.shell_border));
         EditorScrollBar().Background(Brush(colors.shell_layer_bg));

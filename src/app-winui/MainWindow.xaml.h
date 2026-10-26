@@ -43,6 +43,8 @@ namespace winrt::Folia::implementation
         void RefreshDocumentTabs();
         void UpdateDocumentTab(std::uint64_t id);
         void UpdateWorkspaceLayout();
+        void UpdateChromeMetrics();
+        void EnsureSelectedTabVisible();
         void UpdateLoadingState();
         bool DispatchApplicationAction(std::string_view action);
         void RegisterApplicationShortcuts();
@@ -111,6 +113,7 @@ namespace winrt::Folia::implementation
         bool closePending = false;
         bool closeApproved = false;
         bool closingDocument = false;
+        bool selectedTabVisibilityPending = false;
         bool updatingTabs = false;
         bool explorerOpen = false;
         bool outlineOpen = false;

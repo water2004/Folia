@@ -314,4 +314,5 @@
   <data name="StatusFolderFailed" xml:space="preserve"><value>读取文件夹失败：{0}</value></data>
   <data name="NoFolderHeading" xml:space="preserve"><value>尚未打开文件夹</value></data>
   <data name="NoFolderHint" xml:space="preserve"><value>打开文件夹以浏览 Markdown 文件。</value></data>
+  <data name="ViewMenu" xml:space="preserve"><value>查看</value></data>
 </root>

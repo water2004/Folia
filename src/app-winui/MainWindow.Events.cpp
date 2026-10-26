@@ -131,6 +131,9 @@ namespace winrt::Folia::implementation
             UpdateWorkspaceLayout();
         });
 
+        Root().Loaded([this](auto const&, auto const&) { UpdateChromeMetrics(); });
+        Root().SizeChanged([this](auto const&, auto const&) { UpdateChromeMetrics(); });
+
         EditorSurface().Loaded([this](auto const&, auto const&)
         {
             InitializeEditorSurface();
@@ -148,6 +151,7 @@ namespace winrt::Folia::implementation
 
         EditorSurface().CompositionScaleChanged([this](auto const&, auto const&)
         {
+            UpdateChromeMetrics();
             ResizeEditorSurface(EditorSurface().ActualWidth(), EditorSurface().ActualHeight());
         });
 
