@@ -6,8 +6,9 @@ import std;
 
 namespace folia::mermaid {
 namespace {
-std::expected<void, std::string> supported(const ElkLayeredGraph& g) {
+std::expected<void, std::string> supported(const ElkLayeredGraph& g,const ElkNorthSouthPreparation* north_south=nullptr) {
     for (const auto& p : g.ports) {
+        if (north_south&&(p.side==ElkPortSide::north||p.side==ElkPortSide::south)&&p.incoming.empty()&&p.outgoing.empty())continue;
         if (p.side != ElkPortSide::east && p.side != ElkPortSide::west)
             return std::unexpected("ELK flat ordering requires east/west port preprocessing");
         if (p.incoming.size() + p.outgoing.size() > 1)
@@ -40,10 +41,13 @@ struct Ordering {
     std::vector<double> ranks, port_barycenters;
     std::vector<std::optional<double>> barycenters;
     std::vector<bool> nested_nodes;
+    const ElkNorthSouthPreparation* north_south;
+    std::optional<ElkOrderConstraints> constraints;
 
-    Ordering(ElkLayeredGraph& graph, ElkRandom& graph_random, bool flat_controller = true)
+    Ordering(ElkLayeredGraph& graph, ElkRandom& graph_random, bool flat_controller = true,const ElkNorthSouthPreparation* prepared = nullptr)
         : g(graph), random(graph_random),
-          ranks(g.ports.size()), port_barycenters(g.ports.size()), barycenters(g.nodes.size()), nested_nodes(g.nodes.size()) {
+          ranks(g.ports.size()), port_barycenters(g.ports.size()), barycenters(g.nodes.size()), nested_nodes(g.nodes.size()),north_south(prepared) {
+        if(prepared)constraints=elk_make_order_constraints(g,*prepared);
         const auto sweep_seed = flat_controller ? random.next_long() : 0;
         node_relative = random.next(1) != 0;
         if (flat_controller) random.set_seed(sweep_seed);
@@ -78,6 +82,12 @@ struct Ordering {
             const auto degree = port.outgoing.size() + port.incoming.size();
             if (degree) port_barycenters[p] = sum / degree;
         }
+        if(north_south)for(const auto& dummy:north_south->dummies)if(dummy.origin_node==n) {
+            const auto& layer=g.layers[g.nodes[n].layer];
+            const auto position=std::ranges::find(layer,dummy.node)-layer.begin();
+            const bool input=!g.ports[dummy.proxy_port].incoming.empty();
+            port_barycenters[dummy.origin_port]=input?(dummy.side==ElkPortSide::north?-double(position):2.0*layer.size()+1-position):position+1;
+        }
         std::stable_sort(node.ports.begin(), node.ports.end(), [&](auto a, auto b) {
             if (g.ports[a].side != g.ports[b].side) return g.ports[a].side < g.ports[b].side;
             const auto x = port_barycenters[a], y = port_barycenters[b];
@@ -104,8 +114,7 @@ struct Ordering {
 
     void sort_nodes(std::vector<std::size_t>& layer) {
         std::stable_sort(layer.begin(), layer.end(), [&](auto a, auto b) { return barycenters[a] < barycenters[b]; });
-        // ForsterConstraintResolver is a no-op for normal/long-edge nodes with
-        // no in-layer successors, layout units or hierarchical constraints.
+        if(constraints)elk_resolve_order_constraints(*constraints,layer,barycenters);
     }
 
     void randomize_first(bool forward) {
@@ -117,21 +126,20 @@ struct Ordering {
     void minimize_layer(std::size_t current, bool forward, bool first_sweep) {
         calculate_ranks(g.layers[forward ? current - 1 : current + 1], forward);
         auto& layer = g.layers[current];
-        for (const auto n : layer) {
-            double sum = 0; std::size_t degree = 0;
-            for (const auto p : g.nodes[n].ports) {
-                const auto& edges = forward ? g.ports[p].incoming : g.ports[p].outgoing;
-                for (const auto e : edges) {
-                    sum += ranks[forward ? g.edges[e].source_port : g.edges[e].target_port];
-                    ++degree;
-                }
+        std::vector<bool> visited(g.nodes.size());std::vector<double> weights(g.nodes.size());std::vector<std::size_t> degrees(g.nodes.size());
+        const auto calculate=[&](auto&& self,std::size_t n)->void {
+            if(visited[n])return;visited[n]=true;barycenters[n].reset();
+            for(const auto p:g.nodes[n].ports)for(const auto e:forward?g.ports[p].incoming:g.ports[p].outgoing) {
+                const auto fixed=forward?g.edges[e].source_port:g.edges[e].target_port;
+                weights[n]+=ranks[fixed];++degrees[n];
             }
-            barycenters[n].reset();
-            if (degree) {
-                sum += random.next_float() * 0.07000000029802322 - 0.03500000014901161;
-                barycenters[n] = sum / degree;
+            if(north_south&&n<north_south->barycenter_associates.size())for(const auto associate:north_south->barycenter_associates[n]) {
+                if(g.nodes[associate].layer!=g.nodes[n].layer)continue;
+                self(self,associate);weights[n]+=weights[associate];degrees[n]+=degrees[associate];
             }
-        }
+            if(degrees[n]){weights[n]+=random.next_float()*0.07000000029802322-0.03500000014901161;barycenters[n]=weights[n]/degrees[n];}
+        };
+        for(const auto n:layer)calculate(calculate,n);
         if (!first_sweep || g.nodes[layer.front()].kind==ElkLayerNodeKind::external_port) {
             double last = -1;
             for (std::size_t i = 0; i < layer.size(); ++i) {
@@ -185,6 +193,7 @@ struct Ordering {
                 }
             }
         }
+        if(north_south)for(const auto& layer:g.layers)total+=elk_count_north_south_crossings(g,*north_south,layer);
         return total;
     }
 
@@ -206,14 +215,17 @@ struct Ordering {
 };
 }
 
-std::expected<void, std::string> elk_sort_flat_ports(ElkLayeredGraph& g) {
-    if (const auto valid = supported(g); !valid) return valid;
+static std::expected<void, std::string> sort_ports(ElkLayeredGraph& g,const ElkNorthSouthPreparation* prepared) {
+    if (const auto valid = supported(g,prepared); !valid) return valid;
     for (auto& node : g.nodes) {
         auto& ports = node.ports;
         std::stable_sort(ports.begin(), ports.end(), [&](auto a, auto b) {
             if (g.ports[a].side != g.ports[b].side) return g.ports[a].side < g.ports[b].side;
             if (!node.fixed_port_positions) return false;
-            return g.ports[a].side == ElkPortSide::east ? g.ports[a].y < g.ports[b].y : g.ports[a].y > g.ports[b].y;
+            const auto side=g.ports[a].side;
+            if(side==ElkPortSide::north)return g.ports[a].x<g.ports[b].x;
+            if(side==ElkPortSide::south)return g.ports[a].x>g.ports[b].x;
+            return side == ElkPortSide::east ? g.ports[a].y < g.ports[b].y : g.ports[a].y > g.ports[b].y;
         });
         if (node.fixed_port_positions || node.fixed_port_order || ports.size() <= 1) continue;
         // Preserve the pinned PortListSorter's range and reversal behavior,
@@ -228,16 +240,19 @@ std::expected<void, std::string> elk_sort_flat_ports(ElkLayeredGraph& g) {
     return {};
 }
 
+std::expected<void,std::string> elk_sort_flat_ports(ElkLayeredGraph& g){return sort_ports(g,nullptr);}
+std::expected<void,std::string> elk_sort_north_south_ports(ElkLayeredGraph& g,const ElkNorthSouthPreparation& prepared){return sort_ports(g,&prepared);}
+
 std::expected<std::size_t, std::string> elk_order_flat_graph(ElkLayeredGraph& g, std::int64_t seed, int thoroughness) {
     ElkRandom random(static_cast<std::uint64_t>(seed));
     return elk_order_flat_graph(g,random,thoroughness);
 }
 
-std::expected<std::size_t, std::string> elk_order_flat_graph(ElkLayeredGraph& g, ElkRandom& random, int thoroughness) {
-    if (const auto valid = supported(g); !valid) return std::unexpected(valid.error());
+static std::expected<std::size_t,std::string> order_graph(ElkLayeredGraph& g,ElkRandom& random,int thoroughness,const ElkNorthSouthPreparation* prepared) {
+    if (const auto valid = supported(g,prepared); !valid) return std::unexpected(valid.error());
     if (thoroughness < 1) return std::unexpected("ELK ordering thoroughness must be positive");
     if (g.layers.empty() || (g.layers.size() == 1 && g.layers.front().size() <= 1)) return 0;
-    Ordering ordering(g, random);
+    Ordering ordering(g, random,true,prepared);
     std::size_t best_count = std::numeric_limits<std::size_t>::max();
     std::optional<OrderCopy> best;
     for (int i = 0; i < thoroughness; ++i) {
@@ -251,10 +266,13 @@ std::expected<std::size_t, std::string> elk_order_flat_graph(ElkLayeredGraph& g,
     return best_count;
 }
 
+std::expected<std::size_t,std::string> elk_order_flat_graph(ElkLayeredGraph& g,ElkRandom& random,int thoroughness){return order_graph(g,random,thoroughness,nullptr);}
+std::expected<std::size_t,std::string> elk_order_north_south_graph(ElkLayeredGraph& g,const ElkNorthSouthPreparation& prepared,ElkRandom& random,int thoroughness){return order_graph(g,random,thoroughness,&prepared);}
+
 std::expected<std::size_t, std::string> elk_order_hierarchy(
     std::span<ElkHierarchyOrderGraph> graphs, int thoroughness) {
     if (graphs.empty()) return 0;
-    for (const auto& entry : graphs) if (const auto valid = supported(*entry.graph); !valid)
+    for (const auto& entry : graphs) if (const auto valid = supported(*entry.graph,entry.north_south); !valid)
         return std::unexpected(valid.error());
     if (thoroughness < 1) return std::unexpected("ELK ordering thoroughness must be positive");
     if (graphs[0].graph->layers.empty()) return 0;
@@ -271,7 +289,7 @@ std::expected<std::size_t, std::string> elk_order_hierarchy(
     for (std::size_t i = 0; i < breadth.size(); ++i) {
         const auto index = breadth[i];
         auto& entry = graphs[index]; auto& state = states[index];
-        state.order = std::make_unique<Ordering>(*entry.graph, *entry.random, false);
+        state.order = std::make_unique<Ordering>(*entry.graph, *entry.random, false,entry.north_south);
         // GraphInfoHolder discovers children in current layer/node order.
         for (const auto& layer : entry.graph->layers) for (const auto n : layer)
             for (std::size_t c = 1; c < graphs.size(); ++c)

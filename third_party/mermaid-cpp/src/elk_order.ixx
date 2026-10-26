@@ -5,6 +5,7 @@ import std;
 export import folia.mermaid.elk_long_edges;
 export import folia.mermaid.elk_random;
 export import folia.mermaid.elk_hierarchy_order;
+export import folia.mermaid.elk_order_constraints;
 
 export namespace folia::mermaid {
 // Valid layered graph, after long-edge splitting and port-side assignment.
@@ -19,12 +20,17 @@ export namespace folia::mermaid {
     ElkLayeredGraph& graph, std::int64_t seed = 1, int thoroughness = 7);
 [[nodiscard]] std::expected<std::size_t, std::string> elk_order_flat_graph(
     ElkLayeredGraph& graph, ElkRandom& random, int thoroughness = 7);
+[[nodiscard]] std::expected<void, std::string> elk_sort_north_south_ports(
+    ElkLayeredGraph& graph,const ElkNorthSouthPreparation& prepared);
+[[nodiscard]] std::expected<std::size_t, std::string> elk_order_north_south_graph(
+    ElkLayeredGraph& graph,const ElkNorthSouthPreparation& prepared,ElkRandom& random,int thoroughness=7);
 struct ElkHierarchyOrderGraph {
     ElkLayeredGraph* graph = nullptr;
     ElkRandom* random = nullptr;
     std::optional<std::size_t> parent_graph;
     std::size_t parent_node = 0;
     std::vector<ElkHierarchyPortLink> ports;
+    const ElkNorthSouthPreparation* north_south = nullptr;
 };
 // Root is index zero. Every nested graph has its own current phase RNG.
 // Graphs already have separate external layers, split long edges and sorted
