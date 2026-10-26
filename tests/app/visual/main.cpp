@@ -34,4 +34,3 @@ namespace winrt::Folia::implementation {
         });
     }
 }
-

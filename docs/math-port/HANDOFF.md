@@ -2,7 +2,18 @@
 
 恢复/压缩后先实际读本文。架构、职责和详细验收见 [architecture](native-raii-architecture.md)、[files](native-raii-files.json)、[acceptance](native-raii-acceptance.md)。只复查新变化；ignored候选用 `rg --no-ignore`。
 
-## 当前 checkpoint：文件夹、标签页与简化窗口（2026-10-26，实现完成，外观待用户反馈）
+## 当前 checkpoint：单行页签与右侧布局开关（2026-10-26，最终构建中）
+
+- **用户决定**：页签/收纳主菜单/开关同一顶行；VS Code只参考红框的右上布局开关组，不改两行/常驻菜单。两开关靠右紧邻系统caption；文件树左、大纲右，header不重复开关；没开文件夹默认隐藏文件侧栏，主动展开仍允许。不开代理，native一次一个≤4；0.4.1不变，不自动MSI/安装/推送/发布。
+- **实现**（已本地提交）：TabView的TabStripHeader/Footer统一管理顶行，去旧TitleBar.Content内嵌完整TabView。WorkspaceChrome.xaml仅原生TabViewItem外观/中性开关；ShellDivider单条全宽，TitleDragArea空白拖动，CaptionInset物理RightInset按XamlRoot倍率换算。文件header操作收进有文件夹才显示的菜单，大纲重复开关删除。标题TextBlock14号垂直居中。关闭/缩窄后活动tab经单一合并Low回调StartBringIntoView（无动画），原生布局完成后解析当前选中项；无强制layout/定时重试。共享editor/GPU、CST/history/math/scroll时钟不变。
+- **本轮提交**：图标画布修正 **7545994f**；单行UI **b3ab1191**；真实窗口/DPI正式测试 **c0851899**。本文件此次提交记录最终停止点。
+- **图标原因**：外层Canvas20不够，内层Path自动尺寸仍按geometry bbox裁右/下笔画。工厂/树模板显式Path Width/Height20 Stretch=None。真实像素测试有清除尺寸重现缺笔的负对照，不再仅凭几何声称通过。
+- **模糊原因/验收纠正**：之前新GUI测试宿主漏manifest，DPI unaware，被Windows放大；生产app原有PerMonitorV2没丢。现Visual宿主从生产EXE提取完整merged manifest并嵌入，测试断言线程PerMonitorV2、GetDpiForWindow与XamlRoot一致（本机200%）。RTB输出尺寸也消除重复乘DPI。旧未修manifest的窗口截图/视觉通过记录全部历史，不能代替新结果。修后native-titlebar.png原像素720×96已查看，文字清晰；不能声称所有用户机器问题已排除。
+- **正式测试宿主**：tools/run_winui_tests.ps1 -Visual用生成Application入口+生产MainWindow，仅替换App.xaml.obj；保留XamlTypeInfo的wWinMain、全部XBF/PRI，Unicode __wargv、GUI结果文件必须0。独立window/和原controller/；不复用旧污染目录/不重做WindowsXamlManager假宿主。fixture等Loaded后读XamlRoot（最早取DPI用HWND，避免空root）。自己的窗口正常关闭，未操作用户进程/文档/设置。RTB不含SwapChainPanel正文，不能当完整编辑器截图。
+- **已过**：最终Debug build workspace-chrome-final-debug.log；完整controller **86项16043断言** workspace-chrome-controller-all.log；修好DPI的真实窗口 **4项663断言** workspace-chrome-dpi-final-visual.log（完整线、两开关、各输出像素倍率、文字无缩放/像素对齐、原生新增/关闭6页签、窄窗活动tab可见、两侧pane开关）。已看native-titlebar.png和narrow-tabs.png。无core/platform更改，不重跑旧宽审。
+- **下一步/句柄**：自包含Release build **65560 exit0**（workspace-chrome-release.log），实际Release构造/激活/正常关闭 **exit0/Success=true**（workspace-chrome-release-startup.log，build/tests/workspace-chrome-release-startup/run-1/result.json）。无活动native/build/test句柄。交付候选为build/app-winui/bin/x64/Release/Folia.exe；版本0.4.1.0。尚无本轮人工拖窗/Snap/鼠标重排/IME验收或用户接受外观；不恢复两行方案、不重开旧math/微信调查。
+
+### 上一轮实现与验收（历史，外观被新截图否定）
 
 - **用户规则**：打开文件夹；单击预览，双击或编辑固定，dirty标签不得替换；删除常驻工具栏，命令留主菜单/右键/快捷键；文件树左、大纲右分开；**未打开文件夹默认隐藏文件侧栏，用户可主动展开，打开文件夹后显示**。顶栏独立文件/大纲开关始终可见。不开子代理，保留WinUI3/native、原CST/块树/事务历史；native一次一个、≤4。
 - **架构**：WorkspaceDocuments拥有每标签原EditorSession+Controller，保存原选区/历史/源码模式/视口；一个共享SwapChainPanel/Renderer，不序列化或重建文档切标签。Controller文档生命周期与呈现代次分开，inactive保存归原文档，旧Load/Paste取消；修改圆点用history稳定状态ID，正常编辑不全文hash。Resume后台查文件版本，代次验证后才处理inactive外部变更。数学只停车metadata+文件cache，离屏SVG读取/渲染取消，恢复不重算现成公式；字体/Scene算法与滚动时钟不变。
