@@ -73,9 +73,14 @@ namespace winrt::Folia
     void EditorPointerController::PointerPressed(winrt::Microsoft::UI::Xaml::Input::PointerRoutedEventArgs const& args)
     {
         if (!session_ || !renderer_ || !surface_) return;
+        // Primary contact covers mouse-left, touch and the pen tip. Secondary
+        // input belongs to the context menu and must not start selection,
+        // capture the pointer, activate links or execute table/task actions.
+        auto pointerPoint = args.GetCurrentPoint(surface_);
+        if (!pointerPoint.Properties().IsLeftButtonPressed()) return;
         surface_.Focus(winrt::Microsoft::UI::Xaml::FocusState::Pointer);
         if (resetCaretGoal_) resetCaretGoal_();
-        auto point = args.GetCurrentPoint(surface_).Position();
+        auto point = pointerPoint.Position();
         if (scroll_) scroll_->Stop();
         renderer_->UpdatePointer(static_cast<float>(point.X), static_cast<float>(point.Y));
         if (auto action = renderer_->TableActionAt(static_cast<float>(point.X), static_cast<float>(point.Y)))
