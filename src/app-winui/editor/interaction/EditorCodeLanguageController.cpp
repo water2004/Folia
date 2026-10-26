@@ -1,6 +1,8 @@
 #include "pch.h"
+import std;
 #include "editor/interaction/EditorCodeLanguageController.h"
 #include "editor/interaction/CodeLanguageChoices.h"
+#include "localization/Localization.h"
 
 import folia.core.command;
 import folia.core.utf;
@@ -12,7 +14,8 @@ namespace winrt::Folia
         EditorSurfaceRenderer& renderer,
         winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel const& editorSurface,
         winrt::Microsoft::UI::Xaml::Controls::Flyout const& flyout,
-        winrt::Microsoft::UI::Xaml::Controls::AutoSuggestBox const& languageBox,
+        winrt::Microsoft::UI::Xaml::Controls::TextBox const& languageBox,
+        winrt::Microsoft::UI::Xaml::Controls::ListView const& languages,
         ExecuteCommand executeCommand)
     {
         Detach();
@@ -21,28 +24,20 @@ namespace winrt::Folia
         editorSurface_ = editorSurface;
         flyout_ = flyout;
         languageBox_ = languageBox;
+        languages_ = languages;
+        languageBox_.PlaceholderText(Localize(L"SearchLanguage"));
         executeCommand_ = std::move(executeCommand);
         lifetime_ = std::make_shared<Lifetime>();
         PopulateLanguages();
-        textChangedToken_ = languageBox_.TextChanged([this](auto const&, auto const& args)
+        textChangedToken_ = languageBox_.TextChanged([this](auto const&, auto const&)
         {
-            using namespace winrt::Microsoft::UI::Xaml::Controls;
-            if (!updating_ && args.Reason() == AutoSuggestionBoxTextChangeReason::UserInput)
+            if (!updating_)
                 PopulateLanguages(winrt::to_string(languageBox_.Text()));
         });
-        suggestionChosenToken_ = languageBox_.SuggestionChosen([this](auto const&, auto const& args)
+        itemClickToken_ = languages_.ItemClick([this](auto const&, auto const& args)
         {
-            // Arrow-key navigation previews a choice; only QuerySubmitted accepts it.
-            languageBox_.Text(unbox_value<winrt::hstring>(args.SelectedItem()));
-        });
-        querySubmittedToken_ = languageBox_.QuerySubmitted([this](auto const&, auto const&)
-        {
+            languages_.SelectedItem(args.ClickedItem());
             Submit();
-        });
-        gotFocusToken_ = languageBox_.GotFocus([this](auto const&, auto const&)
-        {
-            PopulateLanguages();
-            languageBox_.IsSuggestionListOpen(true);
         });
         closingToken_ = flyout_.Closing([this](auto const&, auto const&) { closing_ = true; });
         closedToken_ = flyout_.Closed([this](auto const&, auto const&) {
@@ -57,15 +52,8 @@ namespace winrt::Folia
                 });
             }
         });
-        keyDownToken_ = languageBox_.PreviewKeyDown([this](auto const&, auto const& args)
-        {
-            if (args.Key() != winrt::Windows::System::VirtualKey::Escape) return;
-            Cancel();
-            Dismiss();
-            if (editorSurface_) editorSurface_.Focus(
-                winrt::Microsoft::UI::Xaml::FocusState::Programmatic);
-            args.Handled(true);
-        });
+        keyDownToken_ = languageBox_.PreviewKeyDown([this](auto const&, auto const& args) { KeyDown(args); });
+        listKeyDownToken_ = languages_.PreviewKeyDown([this](auto const&, auto const& args) { KeyDown(args); });
     }
 
     void EditorCodeLanguageController::Detach()
@@ -74,12 +62,12 @@ namespace winrt::Folia
         if (languageBox_)
         {
             if (textChangedToken_.value) languageBox_.TextChanged(textChangedToken_);
-            if (suggestionChosenToken_.value) languageBox_.SuggestionChosen(suggestionChosenToken_);
-            if (querySubmittedToken_.value) languageBox_.QuerySubmitted(querySubmittedToken_);
-            if (gotFocusToken_.value) languageBox_.GotFocus(gotFocusToken_);
             if (keyDownToken_.value) languageBox_.PreviewKeyDown(keyDownToken_);
-            languageBox_.IsSuggestionListOpen(false);
             languageBox_.Visibility(winrt::Microsoft::UI::Xaml::Visibility::Collapsed);
+        }
+        if (languages_) {
+            if (itemClickToken_.value) languages_.ItemClick(itemClickToken_);
+            if (listKeyDownToken_.value) languages_.PreviewKeyDown(listKeyDownToken_);
         }
         if (flyout_) {
             if (closedToken_.value) flyout_.Closed(closedToken_);
@@ -89,14 +77,14 @@ namespace winrt::Folia
         activeBlock_.reset();
         executeCommand_ = {};
         languageBox_ = nullptr;
+        languages_ = nullptr;
         flyout_ = nullptr;
         editorSurface_ = nullptr;
         renderer_ = nullptr;
         session_ = nullptr;
         textChangedToken_ = {};
-        suggestionChosenToken_ = {};
-        querySubmittedToken_ = {};
-        gotFocusToken_ = {};
+        itemClickToken_ = {};
+        listKeyDownToken_ = {};
         closedToken_ = {};
         closingToken_ = {};
         closing_ = false;
@@ -106,26 +94,59 @@ namespace winrt::Folia
 
     void EditorCodeLanguageController::PopulateLanguages(std::string_view query)
     {
-        if (!languageBox_) return;
+        if (!languages_) return;
+        auto choices = code_language::Filter(query);
+        if (query.empty() && activeBlock_) {
+            auto current = activeBlock_->language.value_or("text");
+            if (std::find(choices.begin(), choices.end(), current) == choices.end()) choices.insert(choices.begin(), current);
+        }
+        if (choices.empty() && !query.empty())
+            if (auto custom = code_language::Parse(query); custom && !custom->empty()) choices.push_back(*custom);
         auto items = winrt::single_threaded_observable_vector<winrt::Windows::Foundation::IInspectable>();
-        for (auto const& language : code_language::Filter(query))
+        for (auto const& language : choices)
             items.Append(box_value(winrt::to_hstring(language)));
-        languageBox_.ItemsSource(items);
+        languages_.ItemsSource(items);
+        int selected = items.Size() ? 0 : -1;
+        if (query.empty() && activeBlock_) {
+            auto current = activeBlock_->language.value_or("text");
+            auto found = std::find(choices.begin(), choices.end(), current);
+            if (found != choices.end()) selected = static_cast<int>(found - choices.begin());
+        }
+        languages_.SelectedIndex(selected);
+        if (selected >= 0) languages_.ScrollIntoView(languages_.SelectedItem());
     }
 
     void EditorCodeLanguageController::Cancel()
     {
         if (!languageBox_) return;
         updating_ = true;
-        languageBox_.IsSuggestionListOpen(false);
-        languageBox_.Text(winrt::to_hstring(activeBlock_ ? activeBlock_->language.value_or("text") : "text"));
+        languageBox_.Text(L"");
         updating_ = false;
+        PopulateLanguages();
     }
 
     void EditorCodeLanguageController::Dismiss()
     {
-        if (languageBox_) languageBox_.IsSuggestionListOpen(false);
         if (flyout_ && !closing_) flyout_.Hide();
+    }
+
+    void EditorCodeLanguageController::KeyDown(winrt::Microsoft::UI::Xaml::Input::KeyRoutedEventArgs const& args)
+    {
+        using K = winrt::Windows::System::VirtualKey;
+        if (args.Key() == K::Escape) {
+            Cancel(); Dismiss();
+            if (editorSurface_) editorSurface_.Focus(winrt::Microsoft::UI::Xaml::FocusState::Programmatic);
+        } else if (args.Key() == K::Enter) {
+            Submit();
+        } else if (args.Key() == K::Down || args.Key() == K::Up) {
+            auto count = static_cast<int>(languages_.Items().Size());
+            if (count > 0) {
+                auto next = std::clamp(languages_.SelectedIndex() + (args.Key() == K::Down ? 1 : -1), 0, count - 1);
+                languages_.SelectedIndex(next);
+                languages_.ScrollIntoView(languages_.SelectedItem());
+            }
+        } else return;
+        args.Handled(true);
     }
 
     bool EditorCodeLanguageController::Open(folia::NodeId owner)
@@ -140,9 +161,7 @@ namespace winrt::Folia
         if (closing_) { pendingOpen_ = owner; return true; }
         activeBlock_ = control;
         Cancel();
-        auto theme = renderer_->Theme();
-        languageBox_.FontFamily(Media::FontFamily(winrt::to_hstring(theme.typography.code.family)));
-        languageBox_.FontSize(theme.typography.code.size);
+        languageBox_.PlaceholderText(Localize(L"SearchLanguage"));
         languageBox_.Visibility(Visibility::Visible);
         Primitives::FlyoutShowOptions options;
         options.Position(winrt::Windows::Foundation::Point{control->headerRect.left, control->headerRect.bottom});
@@ -185,7 +204,8 @@ namespace winrt::Folia
     bool EditorCodeLanguageController::Commit()
     {
         if (updating_ || !session_ || !activeBlock_ || !languageBox_ || !executeCommand_) return false;
-        auto parsed = code_language::Parse(winrt::to_string(languageBox_.Text()));
+        auto value = languages_.SelectedItem() ? unbox_value<winrt::hstring>(languages_.SelectedItem()) : languageBox_.Text();
+        auto parsed = code_language::Parse(winrt::to_string(value));
         if (!parsed) return false;
         auto const& language = *parsed;
         auto current = activeBlock_->language.value_or("text");

@@ -27,6 +27,31 @@
             <FontFamily x:Key="FoliaUiFontFamily">Segoe UI Variable Text</FontFamily>
             <FontFamily x:Key="FoliaMonoFontFamily">Cascadia Mono</FontFamily>
             <x:Double x:Key="FoliaUiFontSize">14</x:Double>
+            <Style x:Key="CodeLanguagePickerPresenterStyle" TargetType="FlyoutPresenter">
+                <Setter Property="Padding" Value="8"/>
+                <Setter Property="CornerRadius" Value="8"/>
+                <Setter Property="MinWidth" Value="0"/>
+            </Style>
+            <DataTemplate x:Key="CodeLanguagePickerTemplate">
+                <Grid Width="248" RowDefinitions="Auto,Auto">
+                    <TextBox x:Name="Search" MinHeight="32" FontSize="14" FontFamily="{ThemeResource FoliaUiFontFamily}"
+                             BorderThickness="0" Padding="8,4" CornerRadius="4"/>
+                    <ListView x:Name="Languages" Grid.Row="1" Margin="0,6,0,0" MaxHeight="224"
+                              FontSize="14" FontFamily="{ThemeResource FoliaUiFontFamily}" SelectionMode="Single" IsItemClickEnabled="True"
+                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                              ScrollViewer.VerticalScrollBarVisibility="Auto">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="MinHeight" Value="28"/>
+                                <Setter Property="Padding" Value="8,3"/>
+                                <Setter Property="Margin" Value="0"/>
+                                <Setter Property="CornerRadius" Value="4"/>
+                                <Setter Property="FontSize" Value="14"/>
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                    </ListView>
+                </Grid>
+            </DataTemplate>
             <Style TargetType="TextBlock">
                 <Setter Property="FontFamily" Value="{ThemeResource FoliaUiFontFamily}"/>
                 <Setter Property="FontSize" Value="{ThemeResource FoliaUiFontSize}"/>
@@ -226,10 +251,8 @@
                     </Grid.ColumnDefinitions>
                     <SwapChainPanel x:Name="EditorSurface" Grid.Column="0" KeyboardAcceleratorPlacementMode="Hidden">
                         <FlyoutBase.AttachedFlyout>
-                            <Flyout x:Name="CodeLanguageFlyout" Placement="BottomEdgeAlignedLeft">
-                                <AutoSuggestBox x:Name="CodeLanguageBox" Width="280" MinWidth="0"
-                                                PlaceholderText="Language" QueryIcon="Find"/>
-                            </Flyout>
+                            <Flyout x:Name="CodeLanguageFlyout" Placement="BottomEdgeAlignedLeft"
+                                    FlyoutPresenterStyle="{StaticResource CodeLanguagePickerPresenterStyle}"/>
                         </FlyoutBase.AttachedFlyout>
                         <SwapChainPanel.ContextFlyout>
                             <MenuFlyout>

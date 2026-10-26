@@ -131,7 +131,6 @@ namespace winrt::Folia::implementation
         tooltip(ItalicButton(), L"Italic");
         StrikeButton().Text(Localize(L"Strike"));
         tooltip(StrikeButton(), L"Strikethrough");
-        CodeLanguageBox().PlaceholderText(Localize(L"Language"));
         InlineCodeButton().Text(Localize(L"InlineCode"));
         tooltip(InlineCodeButton(), L"InlineCode");
         BlocksButton().Text(Localize(L"Blocks"));

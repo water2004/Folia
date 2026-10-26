@@ -44,12 +44,16 @@ namespace winrt::Folia::implementation
                     container, replacement, snippet);
             });
         latexCompletionController.SetEnabled(appSettings.latexSuggestionsEnabled);
+        auto languagePicker = Root().Resources().Lookup(winrt::box_value(L"CodeLanguagePickerTemplate"))
+            .as<Microsoft::UI::Xaml::DataTemplate>().LoadContent().as<Microsoft::UI::Xaml::Controls::Grid>();
+        CodeLanguageFlyout().Content(languagePicker);
         codeLanguageController.Attach(
             editorSession(),
             editorRenderer,
             EditorSurface(),
             CodeLanguageFlyout(),
-            CodeLanguageBox(),
+            languagePicker.FindName(L"Search").as<Microsoft::UI::Xaml::Controls::TextBox>(),
+            languagePicker.FindName(L"Languages").as<Microsoft::UI::Xaml::Controls::ListView>(),
             [this](folia::Command const& command) { return ExecuteEditorCommand(command); });
         pointerController.Attach(
             editorSession(),

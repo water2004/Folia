@@ -111,6 +111,7 @@
   <data name="GeneralDescription" xml:space="preserve"><value>Control optional rendering services and editor behavior.</value></data>
   <data name="ChangesApplyImmediately" xml:space="preserve"><value>Changes apply immediately</value></data>
   <data name="Language" xml:space="preserve"><value>Language</value></data>
+  <data name="SearchLanguage" xml:space="preserve"><value>Search languages…</value></data>
   <data name="ApplicationLanguage" xml:space="preserve"><value>Application language</value></data>
   <data name="FollowWindowsLanguage" xml:space="preserve"><value>Follow Windows</value></data>
   <data name="EnglishLanguage" xml:space="preserve"><value>English</value></data>

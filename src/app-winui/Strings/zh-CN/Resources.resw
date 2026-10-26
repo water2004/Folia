@@ -111,6 +111,7 @@
   <data name="GeneralDescription" xml:space="preserve"><value>设置应用语言。</value></data>
   <data name="ChangesApplyImmediately" xml:space="preserve"><value>更改立即生效</value></data>
   <data name="Language" xml:space="preserve"><value>语言</value></data>
+  <data name="SearchLanguage" xml:space="preserve"><value>搜索语言…</value></data>
   <data name="ApplicationLanguage" xml:space="preserve"><value>应用语言</value></data>
   <data name="FollowWindowsLanguage" xml:space="preserve"><value>跟随 Windows</value></data>
   <data name="EnglishLanguage" xml:space="preserve"><value>English</value></data>

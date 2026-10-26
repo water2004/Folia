@@ -26,7 +26,8 @@ suite code_language_tests = [] {
         Grid root;
         SwapChainPanel panel;
         Flyout flyout;
-        AutoSuggestBox box;
+        TextBox box;
+        ListView languages;
         root.Children().Append(panel);
         flyout.Content(box);
         EditorSession session;
@@ -63,7 +64,7 @@ suite code_language_tests = [] {
         }
         std::size_t commands = 0;
         EditorCodeLanguageController controller;
-        controller.Attach(session, renderer, panel, flyout, box, [&](auto const&) { ++commands; return true; });
+        controller.Attach(session, renderer, panel, flyout, box, languages, [&](auto const&) { ++commands; return true; });
         controller.Refresh();
         expect(!flyout.IsOpen()) << "focus alone must not overlay a textbox on the code block";
         if (raw) {

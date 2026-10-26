@@ -15,7 +15,8 @@ namespace winrt::Folia
             EditorSurfaceRenderer& renderer,
             winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel const& editorSurface,
             winrt::Microsoft::UI::Xaml::Controls::Flyout const& flyout,
-            winrt::Microsoft::UI::Xaml::Controls::AutoSuggestBox const& languageBox,
+            winrt::Microsoft::UI::Xaml::Controls::TextBox const& languageBox,
+            winrt::Microsoft::UI::Xaml::Controls::ListView const& languages,
             ExecuteCommand executeCommand);
         void Detach();
         void Refresh();
@@ -27,18 +28,19 @@ namespace winrt::Folia
         void Cancel();
         void Dismiss();
         void PopulateLanguages(std::string_view query = {});
+        void KeyDown(winrt::Microsoft::UI::Xaml::Input::KeyRoutedEventArgs const& args);
 
         EditorSession* session_ = nullptr;
         EditorSurfaceRenderer* renderer_ = nullptr;
         winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel editorSurface_{ nullptr };
         winrt::Microsoft::UI::Xaml::Controls::Flyout flyout_{ nullptr };
-        winrt::Microsoft::UI::Xaml::Controls::AutoSuggestBox languageBox_{ nullptr };
+        winrt::Microsoft::UI::Xaml::Controls::TextBox languageBox_{ nullptr };
+        winrt::Microsoft::UI::Xaml::Controls::ListView languages_{ nullptr };
         ExecuteCommand executeCommand_;
         std::optional<folia::platform::editor::EditorVisualRawBlock> activeBlock_;
         winrt::event_token textChangedToken_{};
-        winrt::event_token suggestionChosenToken_{};
-        winrt::event_token querySubmittedToken_{};
-        winrt::event_token gotFocusToken_{};
+        winrt::event_token itemClickToken_{};
+        winrt::event_token listKeyDownToken_{};
         winrt::event_token closedToken_{};
         winrt::event_token closingToken_{};
         winrt::event_token keyDownToken_{};
