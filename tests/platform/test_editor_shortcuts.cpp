@@ -72,4 +72,20 @@ suite editor_shortcut_tests = [] {
     expect(!TranslateEditorKeyGesture({EditorKey::C, true}).Handled());
 };
 
+"workspace application shortcuts have distinct configurable gestures"_test = [] {
+    auto bindings = default_editor_shortcuts();
+    auto check = [&](EditorKeyGesture gesture, std::string_view action) {
+        auto resolved = resolve_editor_shortcut(bindings, gesture, EditorShortcutScope::Global);
+        expect(fatal(resolved.has_value()));
+        expect(bindings[*resolved].action_id == action);
+        expect(!find_editor_shortcut_conflict(bindings, gesture, EditorShortcutScope::Global, *resolved));
+    };
+    check({EditorKey::N, true}, "file.new");
+    check({EditorKey::O, true}, "file.open");
+    check({EditorKey::O, true, true}, "file.open_folder");
+    check({EditorKey::W, true}, "file.close");
+    check({EditorKey::Tab, true}, "view.next_tab");
+    check({EditorKey::Tab, true, true}, "view.previous_tab");
+};
+
 };

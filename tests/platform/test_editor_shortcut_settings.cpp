@@ -72,22 +72,25 @@ suite editor_shortcut_settings_tests = [] {
         &EditorShortcutBinding::id);
     expect(fatal(open != defaults.end()));
     if (open == defaults.end()) return;
+    const auto index = static_cast<std::size_t>(std::distance(defaults.begin(), open));
 
     ShortcutSettingsModel model(defaults);
-    expect(fatal(bool(model.SetGesture(0, std::nullopt))));
-    expect(fatal(bool(model.SetScope(0, EditorShortcutScope::Math))));
-    expect(fatal(bool(model.ResetBuiltIn(0, *open))));
-    expect(model.Bindings()[0].gesture == open->gesture);
-    expect(model.Bindings()[0].scope == open->scope);
+    expect(fatal(bool(model.SetGesture(index, std::nullopt))));
+    expect(fatal(bool(model.SetScope(index, EditorShortcutScope::Math))));
+    expect(fatal(bool(model.ResetBuiltIn(index, *open))));
+    expect(model.Bindings()[index].gesture == open->gesture);
+    expect(model.Bindings()[index].scope == open->scope);
 
     auto conflicting = defaults;
-    conflicting[1].gesture = open->gesture;
+    auto save = std::ranges::find(conflicting, std::string{"file.save"}, &EditorShortcutBinding::id);
+    expect(fatal(save != conflicting.end()));
+    save->gesture = open->gesture;
     ShortcutSettingsModel conflictModel(std::move(conflicting));
-    expect(fatal(bool(conflictModel.SetGesture(0, std::nullopt))));
-    auto before = conflictModel.Bindings()[0];
-    auto result = conflictModel.ResetBuiltIn(0, *open);
+    expect(fatal(bool(conflictModel.SetGesture(index, std::nullopt))));
+    auto before = conflictModel.Bindings()[index];
+    auto result = conflictModel.ResetBuiltIn(index, *open);
     expect(result.error == ShortcutSettingsError::Conflict);
-    expect(conflictModel.Bindings()[0] == before);
+    expect(conflictModel.Bindings()[index] == before);
 };
 
 "reload is a configurable global F5 shortcut"_test = [] {

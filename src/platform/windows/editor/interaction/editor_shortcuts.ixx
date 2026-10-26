@@ -92,7 +92,12 @@ inline std::vector<EditorShortcutBinding> default_editor_shortcuts() {
         return EditorKeyGesture{key, true, shift, alt};
     };
     return {
+        built_in_shortcut("file.new", "file.new", ctrl(K::N)),
         built_in_shortcut("file.open", "file.open", ctrl(K::O)),
+        built_in_shortcut("file.open_folder", "file.open_folder", ctrl(K::O, true)),
+        built_in_shortcut("file.close", "file.close", ctrl(K::W)),
+        built_in_shortcut("view.next_tab", "view.next_tab", ctrl(K::Tab)),
+        built_in_shortcut("view.previous_tab", "view.previous_tab", ctrl(K::Tab, true)),
         built_in_shortcut("file.save", "file.save", ctrl(K::S)),
         unassigned_shortcut("file.save_as", "file.save_as"),
         unassigned_shortcut("file.export_pdf", "file.export_pdf"),
