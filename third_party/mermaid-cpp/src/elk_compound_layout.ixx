@@ -12,14 +12,18 @@ struct ElkCompoundLayoutInput {
     std::vector<ElkEndLabel> end_labels;
     // Optional entries indexed by original node; non-groups are ignored.
     std::vector<ElkGroupLayoutBox> group_boxes;
+    // Optional per-group layered options, indexed by original node. Root
+    // options are supplied to elk_layout_compound; empty entries inherit them.
+    std::vector<std::optional<ElkFlatLayoutOptions>> group_options;
 };
 struct ElkCompoundLayoutResult : ElkFlatLayoutResult {
     std::vector<std::optional<ElkNodeBox>> group_titles;
 };
-// Same-direction compound pipeline (RIGHT/LEFT/DOWN/UP). Group measured dimensions are
+// INCLUDE_CHILDREN layered pipeline. All nested graphs inherit root direction,
+// as in the original ElkGraphImporter. Group measured dimensions are
 // minimum dimensions; children determine the final size. Output coordinates
 // are absolute in the root graph, retaining original node/edge/label indices.
-// Mixed directions need the original north/south hierarchy port processors.
+// Per-group spacing and padding remain independent of the inherited direction.
 [[nodiscard]] std::expected<ElkCompoundLayoutResult,std::string> elk_layout_compound(
     const ElkCompoundLayoutInput& input,const ElkFlatLayoutOptions& options={});
 }

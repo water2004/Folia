@@ -8,8 +8,8 @@ std::expected<ElkCompoundLayoutResult,std::string> elk_layout_compound(
     const ElkCompoundLayoutInput& original,const ElkFlatLayoutOptions& original_options) {
     const auto direction=original_options.direction;
     const bool vertical=direction==ElkLayoutDirection::down||direction==ElkLayoutDirection::up;
-    if(original.hierarchy.direction!=direction||std::ranges::any_of(original.hierarchy.nodes,[&](const auto& n){return n.group&&n.direction!=direction;}))
-        return std::unexpected("ELK compound layout requires matching graph directions");
+    // ElkGraphImporter.importHierarchicalGraph forces parentGraphDirection
+    // (the top-level graph direction) on every included child graph.
     auto input=original;auto options=original_options;
     const auto label_direction=!vertical?ElkLabelDirection::horizontal:direction==ElkLayoutDirection::up?ElkLabelDirection::up:ElkLabelDirection::down;
     input.hierarchy.direction=ElkLayoutDirection::right;options.direction=ElkLayoutDirection::right;
@@ -26,19 +26,31 @@ std::expected<ElkCompoundLayoutResult,std::string> elk_layout_compound(
     }
     if(vertical){for(auto& l:input.center_labels)std::swap(l.width,l.height);for(auto& l:input.end_labels)std::swap(l.width,l.height);}
     if(input.nodes.size()!=input.hierarchy.nodes.size())return std::unexpected("ELK compound layout requires measured original nodes");
-    const auto prepared=elk_prepare_compound_graph(input.hierarchy);if(!prepared)return std::unexpected(prepared.error());const auto& topology=*prepared;
+    auto prepared=elk_prepare_compound_graph(input.hierarchy);if(!prepared)return std::unexpected(prepared.error());auto& topology=*prepared;
+    const auto graph_options=[&](std::size_t graph) {
+        auto selected=options;
+        if(const auto parent=topology.graphs[graph].parent_node) {
+            const auto n=*topology.nodes[*parent].original;
+            if(n<input.group_options.size()&&input.group_options[n])selected=*input.group_options[n];
+        }
+        selected.direction=ElkLayoutDirection::right;return selected;
+    };
+    for(auto& node:topology.nodes)if(node.boundary&&node.boundary->border_offset!=0)
+        node.boundary->border_offset=graph_options(node.graph).placement.edge_edge/2;
     const auto absent=std::numeric_limits<std::size_t>::max();
     struct Local {
         ElkLabelPreparation labels;
         std::vector<ElkEndLabel> ends;
         std::vector<std::size_t> ports,segments;
         ElkRandom random;
-        explicit Local(std::uint64_t seed):random(seed){}
+        ElkFlatLayoutOptions options;
+        explicit Local(const ElkFlatLayoutOptions& selected):random(static_cast<std::uint64_t>(selected.seed)),options(selected){}
     };
     std::vector<Local> locals;locals.reserve(topology.graphs.size());
     std::vector<std::size_t> local_node(topology.nodes.size()),local_port(topology.ports.size(),absent),local_segment(topology.segments.size());
     for(std::size_t gi=0;gi<topology.graphs.size();++gi) {
-        const auto& sub=topology.graphs[gi];auto& local=locals.emplace_back(static_cast<std::uint64_t>(options.seed));
+        const auto& sub=topology.graphs[gi];auto& local=locals.emplace_back(graph_options(gi));
+        const auto& options=local.options;
         ElkCycleGraph source{.node_count=sub.nodes.size()};std::vector<ElkExternalLayerRole> roles(sub.nodes.size());
         for(std::size_t n=0;n<sub.nodes.size();++n)local_node[sub.nodes[n]]=n;
         for(const auto n:sub.nodes)for(const auto p:topology.nodes[n].ports) {
@@ -89,6 +101,7 @@ std::expected<ElkCompoundLayoutResult,std::string> elk_layout_compound(
         if(topology.nodes[n].nested_graph)breadth.push_back(*topology.nodes[n].nested_graph);
     for(const auto gi:breadth|std::views::reverse) {
         auto& local=locals[gi];auto& g=local.labels.graph;const auto& sub=topology.graphs[gi];
+        const auto& options=local.options;
         std::vector<ElkPointPortOptions> port_options(g.nodes.size(),options.ports);
         for(const auto n:sub.nodes)if(topology.nodes[n].original) {
             auto& node=g.nodes[local_node[n]];port_options[local_node[n]].center_alignment=input.nodes[*topology.nodes[n].original].center_ports;
