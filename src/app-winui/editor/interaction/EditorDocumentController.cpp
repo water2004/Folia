@@ -33,6 +33,7 @@ namespace winrt::Folia
     {
         Detach();
         state_->session = &session;
+        state_->presenting = true;
         state_->renderer = &renderer;
         state_->textInput = &textInput;
         state_->executeCommand = std::move(executeCommand);
@@ -43,8 +44,11 @@ namespace winrt::Folia
         state_->windowHandle = std::move(windowHandle);
         state_->setExternalChange = std::move(setExternalChange);
         state_->dispatcher = winrt::Microsoft::UI::Dispatching::DispatcherQueue::GetForCurrentThread();
+        const auto source = session.TextUtf8();
         state_->reloadState.Reset({}, folia::platform::reload::fingerprint_document_content(
-            session.HasFile() ? session.TextUtf8() : std::string{}));
+            session.HasFile() ? std::string_view(source) : std::string_view{}));
+        state_->savedContentState = session.HasFile() || source.empty()
+            ? std::optional{session.ContentState()} : std::nullopt;
     }
 
     void EditorDocumentController::Detach()
@@ -61,6 +65,8 @@ namespace winrt::Folia
             state_->pdfOutputPath.clear();
         }
         state_->generation.fetch_add(1);
+        state_->documentGeneration.fetch_add(1);
+        state_->presenting = false;
         state_->session = nullptr;
         state_->renderer = nullptr;
         state_->textInput = nullptr;
@@ -96,17 +102,17 @@ namespace winrt::Folia
     void EditorDocumentController::SaveDocumentWithEncoding(DocumentEncoding encoding)
     {
         if (encoding.name.empty()) return;
-        SaveDocumentAsync(state_, state_->generation.load(), false, std::move(encoding));
+        SaveDocumentAsync(state_, state_->documentGeneration.load(), false, std::move(encoding));
     }
 
     void EditorDocumentController::SaveDocument()
     {
-        SaveDocumentAsync(state_, state_->generation.load());
+        SaveDocumentAsync(state_, state_->documentGeneration.load());
     }
 
     void EditorDocumentController::SaveDocumentAs()
     {
-        SaveDocumentAsync(state_, state_->generation.load(), true);
+        SaveDocumentAsync(state_, state_->documentGeneration.load(), true);
     }
 
     void EditorDocumentController::InsertImage()
@@ -158,7 +164,69 @@ namespace winrt::Folia
 
     bool EditorDocumentController::Active(std::shared_ptr<State> const& state, std::uint64_t generation)
     {
-        return state && state->generation.load() == generation && state->session;
+        return state && state->generation.load() == generation && state->session && state->presenting;
+    }
+
+    bool EditorDocumentController::OwnsDocument(std::shared_ptr<State> const& state, std::uint64_t generation)
+    {
+        return state && state->documentGeneration.load() == generation && state->session;
+    }
+
+    void EditorDocumentController::SuspendPresentation()
+    {
+        if (!state_->presenting) return;
+        StopWatching(state_);
+        state_->loadStop.request_stop();
+        state_->generation.fetch_add(1);
+        state_->presenting = false;
+        state_->renderer = nullptr;
+        state_->textInput = nullptr;
+    }
+
+    void EditorDocumentController::ResumePresentation(EditorSurfaceRenderer& renderer, EditorTextInputController& textInput)
+    {
+        if (!state_->session) throw std::logic_error("Cannot resume a detached document");
+        if (state_->presenting) throw std::logic_error("Document presentation is already active");
+        state_->renderer = &renderer;
+        state_->textInput = &textInput;
+        state_->presenting = true;
+        state_->loadStop = std::stop_source{};
+        renderer.SetMathPreparationStopToken(state_->loadStop.get_token());
+        StartWatching(state_, state_->generation.load());
+        if (auto pending = state_->reloadState.PendingVersion(); pending && state_->setExternalChange)
+            state_->setExternalChange(true, !pending->exists);
+    }
+
+    bool EditorDocumentController::IsModified() const noexcept
+    {
+        return state_->session && state_->savedContentState != state_->session->ContentState();
+    }
+
+    bool EditorDocumentController::IsLoading() const noexcept
+    {
+        return state_->documentLoading.load();
+    }
+
+    winrt::Windows::Foundation::IAsyncOperation<bool> EditorDocumentController::OpenFileAsync(
+        winrt::Windows::Storage::StorageFile file)
+    {
+        return OpenFileAsync(state_, state_->generation.load(), std::move(file));
+    }
+
+    winrt::Windows::Foundation::IAsyncOperation<bool> EditorDocumentController::OpenFileAsync(
+        std::shared_ptr<State> state, std::uint64_t generation, winrt::Windows::Storage::StorageFile file)
+    {
+        const auto identity = state->documentSerial;
+        try { co_await LoadDocumentAsync(state, generation, file); }
+        catch (winrt::hresult_error const& error) {
+            if (Active(state, generation) && state->setStatus)
+                state->setStatus(LocalizeFormat(L"StatusOpenFailed", {error.message()}));
+        }
+        catch (std::exception const& error) {
+            if (Active(state, generation) && state->setStatus)
+                state->setStatus(LocalizeFormat(L"StatusOpenFailed", {winrt::to_hstring(error.what())}));
+        }
+        co_return Active(state, generation) && state->documentSerial != identity;
     }
 
     winrt::fire_and_forget EditorDocumentController::OpenDocumentAsync(std::shared_ptr<State> state, std::uint64_t generation)
@@ -281,7 +349,7 @@ namespace winrt::Folia
         // every retry before touching the session, renderer or UI callbacks.
         winrt::apartment_context uiContext;
         if (reason != LoadReason::ExternalReload) {
-            if (!co_await ConfirmCloseAsync(state, generation)) co_return;
+            if (!co_await ConfirmCloseAsync(state, state->documentGeneration.load())) co_return;
             co_await uiContext;
             if (!Active(state, generation)) co_return;
         }
@@ -464,6 +532,11 @@ namespace winrt::Folia
             std::filesystem::path(file.Path().c_str()));
         *state->session = std::move(*loaded);
         ++state->documentSerial;
+        state->savedContentState = state->session->ContentState();
+        if (reason == LoadReason::ExternalReload)
+            state->reloadState.Accept(readVersion, loadedFingerprint);
+        else
+            state->reloadState.Reset(readVersion, loadedFingerprint);
         if (state->renderer)
         {
             state->renderer->AdoptMathPreparation(std::move(preparation));
@@ -472,10 +545,6 @@ namespace winrt::Folia
         if (state->textInput) state->textInput->NotifyTextChanged();
         if (state->documentChanged) state->documentChanged();
         if (state->setProgress) state->setProgress(false, std::nullopt, false);
-        if (reason == LoadReason::ExternalReload)
-            state->reloadState.Accept(readVersion, loadedFingerprint);
-        else
-            state->reloadState.Reset(readVersion, loadedFingerprint);
         if (state->setExternalChange) state->setExternalChange(false, false);
         StartWatching(state, generation);
         if (versionAfterParse != readVersion) QueueReloadCheck(state, generation);

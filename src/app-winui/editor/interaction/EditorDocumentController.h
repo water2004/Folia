@@ -41,6 +41,12 @@ namespace winrt::Folia
             WindowHandle windowHandle,
             SetExternalChange setExternalChange);
         void Detach();
+        void SuspendPresentation();
+        void ResumePresentation(EditorSurfaceRenderer& renderer, EditorTextInputController& textInput);
+        bool IsModified() const noexcept;
+        bool IsLoading() const noexcept;
+        winrt::Windows::Foundation::IAsyncOperation<bool> OpenFileAsync(
+            winrt::Windows::Storage::StorageFile file);
         void SetSaveDialogs(ConfirmUnsaved confirm, PickSaveFile picker = {});
         bool HasUnsavedChanges() const;
         winrt::Windows::Foundation::IAsyncOperation<bool> ConfirmCloseAsync();
@@ -68,6 +74,10 @@ namespace winrt::Folia
         struct State;
         enum class LoadReason { Open, EncodingReopen, ExternalReload };
         static bool Active(std::shared_ptr<State> const& state, std::uint64_t generation);
+        static bool OwnsDocument(std::shared_ptr<State> const& state, std::uint64_t generation);
+        static winrt::Windows::Foundation::IAsyncOperation<bool> OpenFileAsync(
+            std::shared_ptr<State> state, std::uint64_t generation,
+            winrt::Windows::Storage::StorageFile file);
         static winrt::fire_and_forget OpenDocumentAsync(std::shared_ptr<State> state, std::uint64_t generation);
         static winrt::fire_and_forget OpenDocumentPathAsync(
             std::shared_ptr<State> state,
@@ -100,7 +110,7 @@ namespace winrt::Folia
         static void MarkCurrentDocumentSaved(
             std::shared_ptr<State> const& state,
             folia::platform::reload::WatchedFileVersion version,
-            std::string_view source);
+            std::string_view source, std::uint64_t contentState);
         static winrt::Windows::Foundation::IAsyncOperation<bool> SaveDocumentAsync(
             std::shared_ptr<State> state, std::uint64_t generation, bool saveAs = false,
             std::optional<DocumentEncoding> encoding = std::nullopt);

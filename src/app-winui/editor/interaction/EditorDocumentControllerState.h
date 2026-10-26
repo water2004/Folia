@@ -22,6 +22,9 @@ namespace winrt::Folia
     struct EditorDocumentController::State
     {
         std::atomic_uint64_t generation = 1;
+        std::atomic_uint64_t documentGeneration = 1;
+        bool presenting = false;
+        std::optional<std::uint64_t> savedContentState;
         EditorSession* session = nullptr;
         EditorSurfaceRenderer* renderer = nullptr;
         EditorTextInputController* textInput = nullptr;

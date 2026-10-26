@@ -48,7 +48,7 @@ namespace winrt::Folia {
             if (bitmap || !files.empty()) {
                 if (!state->session->HasFile()) {
                     if (state->setStatus) state->setStatus(Localize(L"SaveBeforePastingImage"));
-                    if (!co_await SaveDocumentAsync(state, generation)) co_return false;
+                    if (!co_await SaveDocumentAsync(state, state->documentGeneration.load())) co_return false;
                     co_await ui;
                     if (!current()) co_return false;
                 }

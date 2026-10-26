@@ -258,6 +258,11 @@ namespace winrt::Folia
         return revision_;
     }
 
+    std::uint64_t EditorSession::ContentState() const noexcept
+    {
+        return core_->editor.content_state();
+    }
+
     void EditorSession::RefreshCharacterCount()
     {
         core_->characterCount = core_->editor.source_editor()

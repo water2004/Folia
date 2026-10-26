@@ -35,20 +35,20 @@ namespace winrt::Folia {
     }
 
     winrt::Windows::Foundation::IAsyncOperation<bool> EditorDocumentController::SaveAsync(bool saveAs) {
-        return SaveDocumentAsync(state_, state_->generation.load(), saveAs);
+        return SaveDocumentAsync(state_, state_->documentGeneration.load(), saveAs);
     }
 
     winrt::Windows::Foundation::IAsyncOperation<bool> EditorDocumentController::ConfirmCloseAsync() {
-        return ConfirmCloseAsync(state_, state_->generation.load());
+        return ConfirmCloseAsync(state_, state_->documentGeneration.load());
     }
 
     winrt::Windows::Foundation::IAsyncOperation<bool> EditorDocumentController::ConfirmCloseAsync(
         std::shared_ptr<State> state, std::uint64_t generation) {
-        if (!Active(state, generation) || state->confirmingClose) co_return false;
+        if (!OwnsDocument(state, generation) || state->confirmingClose) co_return false;
         PendingOperation pending(state->confirmingClose);
         auto document = state->loadSerial.load();
         auto identity = state->documentSerial;
-        auto current = [&] { return Active(state, generation) && state->loadSerial.load() == document && state->documentSerial == identity; };
+        auto current = [&] { return OwnsDocument(state, generation) && state->loadSerial.load() == document && state->documentSerial == identity; };
         winrt::apartment_context ui;
         try {
             while (current() && state->reloadState.LocallyModified(
@@ -78,11 +78,11 @@ namespace winrt::Folia {
     winrt::Windows::Foundation::IAsyncOperation<bool> EditorDocumentController::SaveDocumentAsync(
         std::shared_ptr<State> state, std::uint64_t generation, bool saveAs,
         std::optional<DocumentEncoding> requestedEncoding) {
-        if (!Active(state, generation) || state->saving || state->documentLoading) co_return false;
+        if (!OwnsDocument(state, generation) || state->saving || state->documentLoading) co_return false;
         PendingOperation pending(state->saving);
         auto document = state->loadSerial.load();
         auto identity = state->documentSerial;
-        auto current = [&] { return Active(state, generation) && state->loadSerial.load() == document && state->documentSerial == identity; };
+        auto current = [&] { return OwnsDocument(state, generation) && state->loadSerial.load() == document && state->documentSerial == identity; };
         winrt::apartment_context ui;
         try {
             auto newFile = saveAs || !state->session->HasFile();
@@ -107,6 +107,7 @@ namespace winrt::Folia {
                 }
             }
             auto text = state->session->TextUtf8();
+            const auto contentState = state->session->ContentState();
             auto encoding = DocumentEncodingService::NormalizeForSave(requestedEncoding.value_or(state->session->Encoding()));
             std::exception_ptr failure;
             folia::platform::reload::WatchedFileVersion version;
@@ -120,9 +121,9 @@ namespace winrt::Folia {
             if (failure) std::rethrow_exception(failure);
             if (newFile) state->session->SaveAs(file);
             if (requestedEncoding) state->session->SetEncoding(std::move(encoding));
-            MarkCurrentDocumentSaved(state, version, text);
-            if (newFile) StartWatching(state, generation);
-            if ((newFile || requestedEncoding) && state->documentChanged) state->documentChanged();
+            MarkCurrentDocumentSaved(state, version, text, contentState);
+            if (newFile) StartWatching(state, state->generation.load());
+            if (state->documentChanged) state->documentChanged();
             if (state->setStatus) state->setStatus(LocalizeFormat(L"StatusSavedFile", {file.Name()}));
             co_return true;
         } catch (winrt::hresult_error const& error) {

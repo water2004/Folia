@@ -109,6 +109,7 @@ namespace winrt::Folia
         winrt::hstring DisplayName() const;
         winrt::hstring Path() const;
         uint64_t Revision() const;
+        std::uint64_t ContentState() const noexcept;
         std::size_t CharacterCount() const;
         std::wstring TextInputTextUtf16(folia::NodeId containerId) const;
         std::size_t TextInputAcpOffset(folia::TextPosition position) const;

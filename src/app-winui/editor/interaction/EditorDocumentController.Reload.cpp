@@ -163,9 +163,10 @@ namespace winrt::Folia
     void EditorDocumentController::MarkCurrentDocumentSaved(
         std::shared_ptr<State> const& state,
         folia::platform::reload::WatchedFileVersion version,
-        std::string_view source)
+        std::string_view source, std::uint64_t contentState)
     {
         if (!state) return;
+        state->savedContentState = contentState;
         state->reloadState.MarkSaved(
             version,
             folia::platform::reload::fingerprint_document_content(source));
