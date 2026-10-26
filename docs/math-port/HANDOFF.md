@@ -5,7 +5,8 @@
 ## 当前 checkpoint：发布0.4.1（2026-10-26，进行中）
 
 - 用户表示微信启动后的滚动现象放置后恢复，明确暂停排查并要求推送发布 **0.4.1**。只读确认过微信父进程拉起安装版（当时PID8120/Normal优先级）；没有帧率测量、没有证明锁60帧，没有滚动修复/进程设置改动。该旁支暂停，不为发布重开。
-- 更新CMake/MSI默认/RC/manifest/About与README版本，新增release-notes/v0.4.1.md；既有公式/目录/图片粘贴/保存关闭功能与验收保持。下一步校验版本一致、提交并推送master及固定v0.4.1标签，沿既有Release Actions构建/发布并核验附件与checksum。远端master已fetch，当前14个本地功能/记录提交待推；无v0.4.1标签，未改既有标签，无活动构建/测试或新子代理。
+- 版本与说明提交 **c3d0e4472ad9e173e03f692cb88a7d0420abdb82** 已连同此前14个本地功能/记录提交推送master；**v0.4.1固定指向该提交**，未改旧标签。CMake/MSI默认/RC/manifest/About/README一致校验通过，新增release-notes/v0.4.1.md；既有验收保持，不重跑无关宽测。
+- **CI正在运行**：https://github.com/water2004/Folia/actions/runs/40263725460（Release，head_sha=c3d0e447，tag v0.4.1）。接下来等待既有流水线构建/真实启动门禁/发布，完成后核验Release附件及SHA256，再更新此checkpoint。build/release-0.4.1-{runs,jobs}.json记录当前进度；无本地native/build/test句柄或新子代理。用户安装版仍0.4.0，此次只发布、不自动安装。
 
 ## 历史：公式批量优化已打包并安装0.4.0（2026-10-26，完成）
 
