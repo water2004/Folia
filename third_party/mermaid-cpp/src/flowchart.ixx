@@ -6,6 +6,9 @@ import std;
 export import folia.mermaid.frontend;
 
 export namespace folia::mermaid {
+// Original registered aliases for the already-ported classic shape handlers.
+// Empty means this shape needs a renderer outside the current classic subset.
+std::u16string_view flowchart_classic_shape(std::u16string_view shape);
 struct FlowchartNode {
     std::u16string id, label, label_type = u"text", shape = u"squareRect";
     std::u16string parent, direction, classes;

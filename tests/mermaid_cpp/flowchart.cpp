@@ -59,7 +59,7 @@ suite flowchart = [] {
                 same(n.styles,e,u"styles"); same(n.compiled_styles,e,u"compiled");
             }
         }
-        expect(count == 30_u);
+        expect(count == 35_u);
     };
     "mermaid_flowchart_request_isolation_limits_and_explicit_stage_errors"_test = [] {
         auto session = ConfigSession::create(); expect(fatal(session.has_value()));
@@ -78,7 +78,7 @@ suite flowchart = [] {
         expect(!prepare_flowchart(source,*session,limits));
         limits = {}; limits.subgraph_depth = 0;
         expect(!prepare_flowchart(u"graph TD\nsubgraph g\nA\nend",*session,limits));
-        for (const auto input : {u"graph TD\nA@{shape:rect}",
+        for (const auto input : {u"graph TD\nA@{img: source}",
             u"graph TD\nA-->B\nclick A callback",u"pie\n\"A\":1"})
             expect(!prepare_flowchart(input,*session));
         auto after = prepare_flowchart(source,*session); expect(fatal(after.has_value()));

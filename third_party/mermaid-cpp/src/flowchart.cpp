@@ -2,6 +2,24 @@ module folia.mermaid.flowchart;
 import std;
 
 namespace folia::mermaid {
+std::u16string_view flowchart_classic_shape(std::u16string_view shape) {
+    for(const auto& [name,handler]:{
+        std::pair{u"rect",u"squareRect"},{u"proc",u"squareRect"},{u"process",u"squareRect"},{u"rectangle",u"squareRect"},
+        {u"rounded",u"roundedRect"},{u"event",u"roundedRect"},{u"terminal",u"stadium"},{u"pill",u"stadium"},
+        {u"fr-rect",u"subroutine"},{u"subprocess",u"subroutine"},{u"subproc",u"subroutine"},{u"framed-rectangle",u"subroutine"},
+        {u"cyl",u"cylinder"},{u"db",u"cylinder"},{u"database",u"cylinder"},{u"circ",u"circle"},
+        {u"diam",u"diamond"},{u"decision",u"diamond"},{u"question",u"diamond"},
+        {u"hex",u"hexagon"},{u"prepare",u"hexagon"},{u"lean-r",u"lean_right"},{u"lean-right",u"lean_right"},{u"in-out",u"lean_right"},
+        {u"lean-l",u"lean_left"},{u"lean-left",u"lean_left"},{u"out-in",u"lean_left"},
+        {u"trap-b",u"trapezoid"},{u"priority",u"trapezoid"},{u"trapezoid-bottom",u"trapezoid"},
+        {u"trap-t",u"inv_trapezoid"},{u"manual",u"inv_trapezoid"},{u"trapezoid-top",u"inv_trapezoid"},{u"inv-trapezoid",u"inv_trapezoid"},
+        {u"dbl-circ",u"doublecircle"},{u"double-circle",u"doublecircle"}})
+        if(shape==name)return handler;
+    for(const auto name:{u"squareRect",u"roundedRect",u"stadium",u"subroutine",u"cylinder",u"circle",u"diamond",
+        u"hexagon",u"lean_right",u"lean_left",u"trapezoid",u"inv_trapezoid",u"doublecircle",u"odd"})
+        if(shape==name)return name;
+    return {};
+}
 namespace {
 using Text = std::u16string;
 using View = std::u16string_view;
@@ -141,8 +159,59 @@ class Parser {
         Vertex v; v.node.id = id; v.node.label = id; v.node.padding = padding;
         vertices.push_back(std::move(v)); return vertices.back();
     }
+    void metadata(const Text& id) {
+        pos+=2;const auto start=pos;bool quoted=false;
+        while(pos<source.size()) {
+            if(source[pos]==u'"')quoted=!quoted;
+            if(source[pos]==u'}'&&!quoted)break;
+            ++pos;
+        }
+        if(pos==source.size())fail("Unclosed Flowchart metadata");
+        Text data{source.substr(start,pos-start)};++pos;
+        // The original shapeData lexer turns newlines inside double quotes
+        // into explicit breaks before FlowDB selects block or flow YAML.
+        Text yaml;quoted=false;
+        for(std::size_t i=0;i<data.size();++i) {
+            const auto c=data[i];if(c==u'"')quoted=!quoted;
+            if(c==u'\n'&&quoted) {
+                yaml+=u"<br/>";while(i+1<data.size()&&(space(data[i+1])||data[i+1]==u'\n'))++i;
+            } else yaml+=c;
+        }
+        if(yaml.find(u'\n')==Text::npos)yaml=u"{\n"+yaml+u"\n}";
+        else yaml+=u'\n';
+        auto doc=parse_config_yaml(yaml,limits.frontend.yaml);
+        if(!doc)throw std::runtime_error(doc.error());
+        if(doc->kind!=ConfigKind::mapping)fail("Flowchart metadata requires a mapping");
+        for(const auto& [key,value]:doc->mapping)
+            if(key!=u"shape"&&key!=u"label"&&key!=u"labelType"&&key!=u"curve")
+                fail("Flowchart asset, animation or group metadata is not implemented");
+        const auto string=[&](View key)->Text {
+            const auto* value=doc->find(key);
+            if(!value||!config_truthy(*value))return {};
+            if(value->kind!=ConfigKind::string)fail("Flowchart metadata field requires text");
+            return value->string;
+        };
+        if(auto edge=std::ranges::find(result.edges,id,&FlowchartEdge::id);edge!=result.edges.end()) {
+            if(auto curve=string(u"curve");!curve.empty())edge->curve=std::move(curve);
+            return;
+        }
+        auto& node=vertex(id).node;
+        if(auto shape=string(u"shape");!shape.empty()) {
+            if(std::ranges::any_of(shape,[](char16_t c){return c==u'_'||(c>=u'A'&&c<=u'Z');}) || flowchart_classic_shape(shape).empty())
+                fail("Flowchart metadata shape is not implemented by the classic renderer");
+            node.shape=std::move(shape);
+        }
+        if(auto label=string(u"label");!label.empty()) {
+            node.label=std::move(label);node.label_type=string(u"labelType");
+            if(node.label_type!=u"text"&&node.label_type!=u"string"&&node.label_type!=u"markdown")node.label_type=u"markdown";
+        }
+    }
     Text node() {
-        auto id = identifier(); auto& v = vertex(id); horizontal();
+        auto id = identifier();horizontal();
+        if(at(u"@{") && std::ranges::find(result.edges,id,&FlowchartEdge::id)!=result.edges.end()) {
+            metadata(id);horizontal();return id;
+        }
+        auto& v = vertex(id);
         struct Shape { View open, close, shape; };
         static constexpr Shape shapes[] = {
             {u"(((",u")))",u"doublecircle"},{u"((",u"))",u"circle"},
@@ -166,6 +235,7 @@ class Parser {
         }
         horizontal();
         if (take(u":::")) v.classes.push_back(identifier());
+        horizontal();if(at(u"@{"))metadata(id);
         return id;
     }
     Texts node_list() {

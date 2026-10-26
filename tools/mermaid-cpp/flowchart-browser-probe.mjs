@@ -11,6 +11,9 @@ for(const file of lock.flowchartCurve.files) assert.equal(createHash('sha256').u
 const directory=resolve(process.argv[2]??'build/mermaid-cpp/flowchart-browser');
 mkdirSync(directory,{recursive:true});
 const cases=[
+  ["shapes-metadata", "flowchart LR\nA@{shape: rect, label: Read}\nB@{shape: cyl, label: Store}\nA named@--> B\nB --> C@{shape: terminal, label: Done}\nnamed@{curve: linear}"],
+  ["metadata-display", "flowchart LR\nA@{shape: rect, label: \"Read **source**\", labelType: markdown} --> B@{shape: rounded, label: Write}\nA@{label: \"Updated *source*\", labelType: markdown}"],
+  ["markdown-nowrap", "%%{init: {\"markdownAutoWrap\": false}}%%\nflowchart TD\nA[\"`Read the **complete source document** and *validate* every entry`\"] -->|\"`Continue with the **next operation** and save the complete document`\"| B[\"`Write the **updated document**\nthen finish`\"]"],
   ["group-font", "flowchart TD\nsubgraph g[Read source files]\nA[Read]-->B[Write]\nend\ng-->C[Done]\nstyle g font-size:22px,font-weight:bold"],
   ["group-font-nested", "flowchart LR\nsubgraph outer[Processing]\nsubgraph inner[Storage and files]\ndirection TB\nA[Read]-->B[Write]\nend\nend\nouter-->C[Done]\nclassDef groupTitle font-family:Courier New,font-size:20px,font-style:italic\nclass inner groupTitle"],
   ["markdown-group", "flowchart TD\nsubgraph g[\"`Read **source** and *write*`\"]\nA[Read]-->B[Write]\nend\ng-->C[Done]"],

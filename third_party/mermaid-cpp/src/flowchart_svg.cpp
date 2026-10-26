@@ -132,7 +132,10 @@ std::expected<FlowchartScene,std::string> layout_measured_flowchart(
 std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRenderInput& input,const FlowchartMeasurements& measurements) {
     try {
         auto measured=measurements;
-        const auto& graph=input.document;const auto& theme=input.theme;
+        auto graph=input.document;const auto& theme=input.theme;
+        for(auto& node:graph.nodes) if(!node.group) {
+            if(const auto shape=flowchart_classic_shape(node.shape);!shape.empty())node.shape=shape;
+        }
         if(measured.nodes.size()!=graph.nodes.size() || measured.edges.size()!=graph.edges.size())
             return std::unexpected("Flowchart needs one measured label per node and edge");
         for(auto v:{theme.font_size,theme.minimum_label_width,theme.wrapping_width,theme.padding,theme.radius,theme.group_title_top,theme.group_title_bottom})

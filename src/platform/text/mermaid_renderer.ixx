@@ -54,6 +54,10 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
         auto measure=[flow,&measurer](const auto& source,double wrapping_width,bool group=false)->std::expected<FlowchartTextBox,std::string> {
             const auto& text=source.label;
             const bool svg_label=!flow->theme.html_label_spacing;
+            const auto* auto_wrap=flow->document.effective_config.find(u"markdownAutoWrap");
+            const bool nowrap=source.label_type==u"markdown" && !svg_label && auto_wrap &&
+                auto_wrap->kind==ConfigKind::boolean && !auto_wrap->boolean;
+            if(nowrap)wrapping_width=std::numeric_limits<double>::infinity();
             // Class CSS is inherited during sizing; direct cluster styles are
             // applied to the finished span by clusters.js after its size is fixed.
             auto label_font=flowchart_label_font(source.compiled_styles,group?std::vector<std::u16string>{}:source.styles,flow->theme);
@@ -67,6 +71,9 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             const MermaidFont font{label_font->family,static_cast<float>(size),label_font->weight,label_font->italic};
             auto lines=svg_label?flowchart_svg_label_runs(text,source.label_type):flowchart_label_runs(text,source.label_type);
             if(!lines) return std::unexpected(lines.error());
+            // markdownToHTML preserves spaces as NBSP when auto wrapping is off.
+            if(nowrap)for(auto& line:*lines)for(auto& run:line)
+                std::ranges::replace(run.text,u' ',u'\u00a0');
             FlowchartTextBox box;
             box.font=*label_font;box.svg_label=svg_label;
             box.centered_group=group && source.label_type==u"markdown";
