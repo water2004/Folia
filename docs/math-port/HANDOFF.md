@@ -2,9 +2,17 @@
 
 恢复/压缩后先实际读本文。架构、职责和详细验收见 [architecture](native-raii-architecture.md)、[files](native-raii-files.json)、[acceptance](native-raii-acceptance.md)。只复查新变化；ignored候选用 `rg --no-ignore`。
 
-## 当前 checkpoint：公式预览留白与行内代码统一完成（2026-10-27）
+## 当前 checkpoint：相似呈现问题的代码审查（2026-10-27）
 
-- 用户纠正：**表格内代码背景是对的，正文缺背景**；要求检查共同职责，不能按容器继续堆特判。仍需修复简单公式1111悬浮预览偏上。不开agents/CUA；一次native构建≤4；不关用户窗口；版本0.4.1，不自动安装/发布。
+- 用户问“是否存在相似的其他问题”，本轮只沿近期改动检查共用呈现边界；没有改产品/测试、构建、安装、操作窗口或开agents。已有Release/验证保持下节，不重复旧宽审。
+- **代码确认的遗漏**：EditorDocumentRenderPass.cpp:147调用DrawSearchHighlights，EditorTableBlockRenderer.Paint只画Selection，没有SearchHighlights调用；表格内搜索命中不会走正文的高亮绘制。EditorContentPreparation.cpp:443用全局svgColor发数学请求，而CST→render保留item.style.presentation.foreground，实际SVG绘制也传styleSheet.textColor；HTML内联颜色没有进入公式SVG呈现请求，文字与公式会有样式断层。尚未做本轮像素/人工复现，不夸大为运行实测。
+- **需正式对照验证的风险**：表格数学另画overlay.strikethrough（TableBlockRenderer:242），正文/preview无相同overlay步骤，两者又都先经ApplyStyles.SetStrikethrough→DrawTextLayout，存在装饰职责重复/位置差异风险，尚未确认最终像素是否重线；行内code背景左右各扩3DIP（TextLayoutEngine:343），没有相应layout advance，紧邻文字/相邻code背景可能侵占邻接区域，需要ink/换行/命中对照，不能仅把相交的layout矩形当实际字形重叠。
+- **测试边界**：新code appearance测试是实际语义投影→共用layout/background helper的native pixel检查，不是完整DocumentRenderPass/Table.Paint对照；因此不能据之前全部通过声称容器接线和所有装饰已统一。若继续修复，先加完整两条生产路径的搜索/公式颜色/删除线对照回归，再收敛共享inline呈现职责；不改CST、坐标、事务/历史，不创建第二文档模型。不自动扩大至整体重写。
+- 停止点：无活动build/test/agent，产品无变更，仅本记录；两处确定遗漏与两处风险已告知。下一步等待用户后续指令；版本0.4.1、不开agents/CUA、不关用户窗口、native并发≤4及不自动发布边界保持。
+
+## 最近完成：公式预览留白与行内代码统一（2026-10-27）
+
+- 用户纠正：**表格内代码背景是对的，正文缺背景**；要求检查共同职责，不能按容器继续堆特判。简单公式1111悬浮及行间预览偏上已同时修复。不开agents/CUA；一次native构建≤4；不关用户窗口；版本0.4.1，不自动安装/发布。
 - 已复现：旧appearance测试6断言失败（正常exit1），1111 SVG上padding10、下25.437；g_j下23.997、root下17.418，fraction正常。证据build/preview-content-bounds-before.log。根因是预览用DirectWrite行高（含body行高下限），不是MathJax生成错误。用户补充行间同问题，已纳入：EditorMathPreview的Prepare/PaintContent统一flow/table×inline/block的测量与绘制，以PositionMath片段矩形并集定框并抵消原点，不改引擎/正文行高/编辑模型。正文和表格原有重复preview代码删去。2主题×2宽度×2模式×5种公式共40样例真实SVG绘制通过；digits-inline/block-light及fraction-inline-dark图已实际查看（生产painter离屏fixture，非完整窗口截图）。
 - 行内代码：表格独有background loop已删除，迁至共享DrawInlinePresentationBackgrounds。原InlineStyle.code bool同时表示块代码/行内代码，现改为唯一uint8 CodeStyle None/Inline/Block，由CST→render与HTML语义投影决定；旧读写显式迁移，源文/编辑/事务架构不改。inline_code_fg/bg接入StyleSheet及2个常驻brush，块code独立背景；HTML显式背景统一覆写而非再叠一层。核心正式**763项499901断言通过**（inline-code-core-tests.log）；Debug最终通过（inline-presentation-debug-final.log）。
 - WinUI完整轮原有**100项17146断言通过**（inline-presentation-app-tests.log），唯一新code测试最初因fixture未判空materializeBlocks而抛bad_function_call（正常exit1），已修正fixture。focused新正式**1项219断言通过**（inline-code-appearance-tests.log），覆盖3主题×2宽度×8容器、native背景pixels/文字brush、块code和marker不误画、brush reset；math/edit/click/drag/undo/异步纯内存/滚动等旧回归均通过。未进行真人鼠标/IME检查。
