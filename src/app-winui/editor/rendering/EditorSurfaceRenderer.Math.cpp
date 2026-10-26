@@ -30,18 +30,18 @@ namespace winrt::Folia
         auto width = EditorDocumentContentWidth(context.surfaceWidth, sheet.horizontalPadding);
         auto color = SvgColor(sheet.textColor);
         auto batch = result->math.BeginBatch();
-        std::size_t batchSize = 0;
         auto formula = [&](std::u32string_view tex, bool display, float available)
         {
             if (stop.stop_requested()) throw winrt::hresult_canceled();
             batch.Render(folia::cps_to_utf8(tex), display, sheet.body.size,
                 available, color, stop);
             ++result->formulaCount;
-            if (++batchSize == 32)
+            // Count newly staged renders, rather than repeated occurrences.
+            // Source-model chunks do not delimit a native/font request.
+            if (batch.Size() == 32)
             {
                 batch.Submit();
                 result->math.WaitForIdle(stop);
-                batchSize = 0;
             }
         };
         auto inlines = [&](auto const& self, std::vector<folia::InlineRenderItem> const& items, float available) -> void
@@ -88,11 +88,8 @@ namespace winrt::Folia
                 if (progress) progress(index + 1, count);
             }
             if (frame.releaseBlocksOutside) frame.releaseBlocksOutside(end, end);
-            // Do not retain a document-sized backlog of TeX/source jobs while
-            // the native worker is slower than the existing render-model walk.
-            batch.Submit();
-            result->math.WaitForIdle(stop);
-            batchSize = 0;
+            // Model materialization remains bounded independently of the
+            // at-most-32 staged native requests, even for sparse formulas.
         }
         batch.Submit();
         result->math.WaitForIdle(stop);

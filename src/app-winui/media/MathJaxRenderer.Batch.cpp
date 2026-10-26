@@ -64,6 +64,10 @@ namespace winrt::Folia
         if (!impl) throw std::logic_error("Math batch was moved");
         impl->state->SubmitBatch(impl->items);
     }
+    std::size_t MathJaxRenderer::Batch::Size() const noexcept
+    {
+        return impl ? impl->items.size() : 0;
+    }
 
     void MathJaxRenderer::State::SubmitBatch(std::vector<Job>& items)
     {
@@ -113,6 +117,9 @@ namespace winrt::Folia
             for (auto const& item : job.items) item.entry->cancel.request_stop();
         }
         if (prepared.size() != job.items.size()) throw std::logic_error("Native math batch size mismatch");
+        NormalizeResults(prepared, job.items, normalizer, cancel.get_token());
+        if (cancel.stop_requested())
+            for (auto const& item : job.items) item.entry->cancel.request_stop();
         for (std::size_t i = 0; i < job.items.size(); ++i)
             CompleteRender(job.items[i], session, normalizer, store, callback, &prepared[i]);
     }

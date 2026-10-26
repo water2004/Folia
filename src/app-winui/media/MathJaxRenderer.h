@@ -78,6 +78,7 @@ namespace winrt::Folia
             void Render(std::string_view tex, bool display, float em, float containerWidth,
                 std::string_view color, std::stop_token stop = {});
             void Submit();
+            std::size_t Size() const noexcept;
         };
         MathJaxRenderer();
         ~MathJaxRenderer();

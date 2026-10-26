@@ -61,6 +61,8 @@ namespace winrt::Folia
         void CompleteBatch(Job const& job, NativeMathSession& session,
             SvgNormalizer& normalizer, std::unique_ptr<MathSvgStore>& store,
             std::function<void()>& callback);
+        static void NormalizeResults(std::span<MathJaxSvg> results, std::span<Job const> jobs,
+            SvgNormalizer& normalizer, std::stop_token stop = {});
         static MathJaxSvg InfrastructureFailure(std::string message, bool display);
         static void AddSaturated(std::uint64_t& value, std::uint64_t add) noexcept;
 

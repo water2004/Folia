@@ -147,6 +147,54 @@ namespace winrt::Folia
         }
     }
 
+    void MathJaxRenderer::State::NormalizeResults(std::span<MathJaxSvg> results,
+        std::span<Job const> items, SvgNormalizer& normalizer, std::stop_token stop)
+    {
+        std::vector<std::string> sources;
+        std::vector<SvgNormalizationInput> inputs;
+        std::vector<std::size_t> offsets{0};
+        std::size_t count = 0;
+        for (auto const& result : results) count += result.fragments.size();
+        sources.reserve(count);
+        inputs.reserve(count);
+        offsets.reserve(results.size() + 1);
+        for (std::size_t i = 0; i < results.size(); ++i)
+        {
+            for (auto const& fragment : results[i].fragments)
+            {
+                auto& colored = sources.emplace_back(fragment.svg ? *fragment.svg : std::string{});
+                constexpr std::string_view marker = "currentColor";
+                for (std::size_t at = 0; (at = colored.find(marker, at)) != std::string::npos;)
+                {
+                    colored.replace(at, marker.size(), items[i].color);
+                    at += items[i].color.size();
+                }
+                inputs.push_back({colored, items[i].em,
+                    stop.stop_possible() ? stop : items[i].entry->cancel.get_token()});
+            }
+            offsets.push_back(inputs.size());
+        }
+        auto normalized = normalizer.NormalizeBatchNow(inputs);
+        for (std::size_t i = 0; i < results.size(); ++i)
+        {
+            auto& result = results[i];
+            for (auto index = offsets[i]; index < offsets[i + 1]; ++index)
+            {
+                auto& value = normalized[index];
+                if (!value)
+                {
+                    result.fragments.clear();
+                    result.error = value.error;
+                    result.errorKind = MathJaxErrorKind::Infrastructure;
+                    break;
+                }
+                auto& fragment = result.fragments[index - offsets[i]];
+                fragment.renderId = value.id;
+                fragment.svg = std::move(value.svg);
+            }
+        }
+    }
+
     void MathJaxRenderer::State::CompleteRender(Job const& job,
         NativeMathSession& session, SvgNormalizer& normalizer,
         std::unique_ptr<MathSvgStore>& store, std::function<void()>& callback, MathJaxSvg* prepared)
@@ -170,28 +218,8 @@ namespace winrt::Folia
                 ++nativeRenders;
             }
             if (stop.stop_requested()) throw winrt::hresult_canceled();
-            for (auto& fragment : result.fragments)
-            {
-                if (!fragment.svg) throw std::runtime_error("Math fragment has no SVG payload");
-                auto colored = *fragment.svg;
-                constexpr std::string_view marker = "currentColor";
-                for (std::size_t at = 0; (at = colored.find(marker, at)) != std::string::npos;)
-                {
-                    colored.replace(at, marker.size(), job.color);
-                    at += job.color.size();
-                }
-                if (stop.stop_requested()) throw winrt::hresult_canceled();
-                auto normalized = normalizer.NormalizeNow(colored, job.em);
-                if (!normalized)
-                {
-                    result.fragments.clear();
-                    result.error = normalized.error;
-                    result.errorKind = MathJaxErrorKind::Infrastructure;
-                    break;
-                }
-                fragment.renderId = normalized.id;
-                fragment.svg = std::move(normalized.svg);
-            }
+            if (!prepared) NormalizeResults(std::span{&result, std::size_t{1}},
+                std::span{&job, std::size_t{1}}, normalizer, stop);
             if (stop.stop_requested()) throw winrt::hresult_canceled();
             if (entry->purpose == MathRenderPurpose::Document
                 && result.errorKind != MathJaxErrorKind::Infrastructure
