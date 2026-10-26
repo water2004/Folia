@@ -62,7 +62,9 @@ void elk_resolve_order_constraints(const ElkOrderConstraints& c,std::vector<std:
         for(std::size_t i=0;i<order.size();) {
             const auto g=order[i];
             if(g==a||g==b){order.erase(order.begin()+i);continue;}
-            if(!inserted&&value(g)>mean){order.insert(order.begin()+i,id);inserted=true;i+=2;continue;}
+            // ListIterator.previous()+add() leaves the original group as the
+            // next item. Revisit it so its constraints target the merged group.
+            if(!inserted&&value(g)>mean){order.insert(order.begin()+i,id);inserted=true;++i;continue;}
             const auto from_a=erase_one(groups[g].outgoing,a),from_b=erase_one(groups[g].outgoing,b);
             if(from_a||from_b){groups[g].outgoing.push_back(id);++groups[id].incoming;}
             ++i;
