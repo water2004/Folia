@@ -807,6 +807,26 @@
     {
       "path": "packages/mermaid/src/diagrams/timeline/styles.js",
       "sha256": "6be688e61d5b19800e1d2404c06f35b77a11f95db4df0908f5a0ab05ba4c8077"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/mindmap/parser/mindmap.jison",
+      "sha256": "85a4b2840ab529bc82c41ea64d9556a7fe4a0552900d1cbdf9484245ba61c8e4"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/mindmap/mindmapDb.ts",
+      "sha256": "df8af0d61221a62053ccacd42b6ff9c95d812139e72e842fbb920044ef2c4223"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/mindmap/mindmapRenderer.ts",
+      "sha256": "bfb0f30c97bbf49f9fd748ddef23bab90ca11cafb44b060b6f494dda5db93c4a"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/mindmap/mindmapTypes.ts",
+      "sha256": "c7dea237b6b11169795fc1f46080cdeaea6b1a82ee9287c525a66c29a459a1dd"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/mindmap/svgDraw.ts",
+      "sha256": "41fb2e6b682a12ddef5d110149b7b27533d2f7e48c1f12d3e514c39af4ab4e4f"
     }
   ],
   "packages": [
