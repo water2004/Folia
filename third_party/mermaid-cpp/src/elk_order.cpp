@@ -333,7 +333,14 @@ std::expected<std::size_t, std::string> elk_order_hierarchy(
         auto best_count = std::numeric_limits<std::size_t>::max();
         for (int attempt = 0; attempt < thoroughness; ++attempt) {
             bool forward = root_random.next(1) != 0;
-            state.order->randomize_first(forward);
+            // The original consumes the direction coin even when an initial
+            // model order already has zero crossings. Its first two attempts
+            // retain initial first-layer order and sweep forward then backward.
+            if(entry.consider_model_order && attempt==0 && count(count,index)==0) {
+                state.best.emplace(*entry.graph);best_count=0;break;
+            }
+            if(entry.consider_model_order && attempt<2)forward=attempt==0;
+            else state.order->randomize_first(forward);
             sweep(sweep,index,forward,true);
             auto crossings = count(count,index);
             for (;;) {

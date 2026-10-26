@@ -31,6 +31,7 @@ struct ElkHierarchyOrderGraph {
     std::size_t parent_node = 0;
     std::vector<ElkHierarchyPortLink> ports;
     const ElkNorthSouthPreparation* north_south = nullptr;
+    bool consider_model_order = false;
 };
 // Root is index zero. Every nested graph has its own current phase RNG.
 // Graphs already have separate external layers, split long edges and sorted

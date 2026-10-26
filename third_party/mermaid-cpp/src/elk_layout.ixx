@@ -23,6 +23,7 @@ struct ElkFlatLayoutOptions {
     double edge_label_spacing=2,label_label_spacing=0,padding=12;
     std::int64_t seed=1;
     bool unnecessary_bendpoints=true;
+    bool consider_model_order=false;
 };
 struct ElkNodeBox { double x=0,y=0,width=0,height=0; };
 struct ElkFlatLayoutResult {

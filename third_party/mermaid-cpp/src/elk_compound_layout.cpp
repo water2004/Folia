@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: EPL-2.0
 module folia.mermaid.elk_compound_layout;
 import std;
+import folia.mermaid.elk_model_order;
 import folia.mermaid.elk_order;
 
 namespace folia::mermaid {
@@ -82,10 +83,11 @@ std::expected<ElkCompoundLayoutResult,std::string> elk_layout_compound(
         }
         elk_split_long_edges(g);elk_assign_flat_port_sides(g);
         if(const auto sorted=elk_sort_flat_ports(g);!sorted)return std::unexpected(sorted.error());
+        if(options.consider_model_order)elk_sort_input_model(g);
     }
     std::vector<ElkHierarchyOrderGraph> order(topology.graphs.size());
     for(std::size_t gi=0;gi<order.size();++gi) {
-        auto& entry=order[gi];const auto& sub=topology.graphs[gi];entry.graph=&locals[gi].labels.graph;entry.random=&locals[gi].random;
+        auto& entry=order[gi];const auto& sub=topology.graphs[gi];entry.graph=&locals[gi].labels.graph;entry.random=&locals[gi].random;entry.consider_model_order=locals[gi].options.consider_model_order;
         if(sub.parent_node){entry.parent_graph=topology.nodes[*sub.parent_node].graph;entry.parent_node=local_node[*sub.parent_node];}
         for(const auto n:sub.nodes)if(topology.nodes[n].boundary_port)
             entry.ports.push_back({local_node[n],local_port[*topology.nodes[n].boundary_port]});
