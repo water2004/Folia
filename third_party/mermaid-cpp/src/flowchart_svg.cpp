@@ -4,6 +4,7 @@ import folia.mermaid.svg_text;
 import folia.mermaid.number;
 import folia.mermaid.theme_color;
 import folia.mermaid.flowchart_graph;
+import folia.mermaid.flowchart_elk;
 
 namespace folia::mermaid {
 namespace {
@@ -109,6 +110,7 @@ FlowchartPoint label_midpoint(std::span<const FlowchartPoint> points) {
     return points.back();
 }
 #include "flowchart_clusters.inc"
+#include "flowchart_elk_paint.inc"
 
 }
 
@@ -133,6 +135,8 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
     try {
         auto measured=measurements;
         auto graph=input.document;const auto& theme=input.theme;
+        const auto selected_layout=graph.effective_config.find(u"layout");
+        const bool use_elk=selected_layout&&selected_layout->string==u"elk";
         for(auto& node:graph.nodes) if(!node.group) {
             if(const auto shape=flowchart_classic_shape(node.shape);!shape.empty())node.shape=shape;
         }
@@ -185,14 +189,30 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
             for(auto arrow:{e.arrow_start,e.arrow_end}) marker_name(arrow);
             labels.push_back(e.label.empty()?FlowchartEdgeLabelSize{}:FlowchartEdgeLabelSize{b.width,height(b)});
         }
-        auto prepared=prepare_flowchart_graph(graph);if(!prepared) return std::unexpected(prepared.error());
-        auto scene=layout_prepared(graph,prepared->graph,boxes,labels,measured,theme);
+        FlowchartScene scene;
+        if(use_elk) {
+            auto placed=layout_measured_elk_flowchart(graph,boxes,labels,measured,theme);
+            if(!placed)return std::unexpected(placed.error());scene=std::move(*placed);
+            for(std::size_t i=0;i<graph.edges.size();++i) {
+                auto& points=scene.layout.edges[i].points;const auto& edge=graph.edges[i];
+                const auto a=ids.at(edge.start),b=ids.at(edge.end);
+                if(graph.nodes[a].group||graph.nodes[b].group)
+                    return std::unexpected("ELK Flowchart group endpoints require frame clipping");
+                clip_elk_node_endpoints(points,scene.layout.nodes[a],scene.layout.nodes[b],graph.nodes[a].shape,graph.nodes[b].shape);
+                if(edge.arrow_end==u"arrow_point")elk_remove_short_marker_segment(points,scene.layout.nodes[b],false);
+                if(edge.arrow_start==u"arrow_point")elk_remove_short_marker_segment(points,scene.layout.nodes[a],true);
+            }
+        }else {
+            auto prepared=prepare_flowchart_graph(graph);if(!prepared)return std::unexpected(prepared.error());
+            scene=layout_prepared(graph,prepared->graph,boxes,labels,measured,theme);
+        }
         const auto* layout=&scene.layout;
+        const double wrapper_offset=use_elk?0:theme.padding;
         // insertTitle centers over the graph before setupViewPortForSVG expands
         // its bounds. This group is translated by padding, so compensate the
         // title baseline to retain the original root-space -titleTopMargin.
         const double title_x=(scene.min_x+scene.max_x)/2;
-        const double title_y=-theme.title_top_margin-theme.padding;
+        const double title_y=-theme.title_top_margin-wrapper_offset;
         if(!graph.title.empty()) {
             const auto& title=*measured.title;
             scene.min_x=std::min(scene.min_x,title_x-title.width/2);
@@ -202,13 +222,13 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
         }
         FlowchartSvg output;output.width=scene.max_x-scene.min_x+2*theme.padding;output.height=scene.max_y-scene.min_y+2*theme.padding;
         std::string svg="<svg xmlns=\"http://www.w3.org/2000/svg\" class=\"flowchart\" width=\""+number(output.width)+
-            "\" height=\""+number(output.height)+"\" viewBox=\""+number(scene.min_x)+" "+number(scene.min_y)+" "+number(output.width)+" "+number(output.height)+"\">";
+            "\" height=\""+number(output.height)+"\" viewBox=\""+number(scene.min_x+(use_elk?-theme.padding:0))+" "+number(scene.min_y+(use_elk?-theme.padding:0))+" "+number(output.width)+" "+number(output.height)+"\">";
         for(auto [tag,value]:{std::pair{"title",std::u16string_view(graph.acc_title)},{"desc",std::u16string_view(graph.acc_description)}})
             if(!value.empty()) svg+="<"+std::string(tag)+">"+xml(value)+"</"+tag+">";
         svg+=marker_definitions(theme.line);
         for(std::size_t i=0;i<edge_paints.size();++i) if(!edge_paints[i].marker_stroke.empty())
             svg+=marker_definitions(theme.line,"flow-"+std::to_string(i),xml(edge_paints[i].marker_stroke));
-        svg+="<g font-family=\""+xml(theme.font_family)+"\" font-size=\""+number(theme.font_size)+"\" transform=\"translate("+number(theme.padding)+","+number(theme.padding)+")\">";
+        svg+="<g font-family=\""+xml(theme.font_family)+"\" font-size=\""+number(theme.font_size)+"\" transform=\"translate("+number(wrapper_offset)+","+number(wrapper_offset)+")\">";
         const auto text=[&](std::u16string_view,FlowchartPoint center,const FlowchartTextBox& b,std::string_view css,const FlowchartPaint& paint) {
             // createLabel's unbounded HTML group box keeps each line left aligned.
             const bool left=css=="cluster-label" && theme.html_label_spacing && !b.centered_group;
@@ -262,7 +282,7 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
             const auto& e=graph.edges[i];auto points=layout->edges[i].points;
             if(e.arrow_start==u"arrow_point") shorten(points.front(),points[1],4);
             if(e.arrow_end==u"arrow_point") shorten(points.back(),points[points.size()-2],4);
-            const auto path=curve_path(points,e.curve==u"linear");
+            const auto path=use_elk?rounded_elk_path(points):curve_path(points,e.curve==u"linear");
             svg+="<path class=\"flowchart-link\" data-edge=\""+xml(e.id)+"\" d=\""+path+"\""+
                 edge_paints[i].attributes("none",theme.line,e.stroke==u"thick"?"3.5":e.stroke==u"invisible"?"0":"1",e.stroke==u"dotted"?"2":"0");
             const auto prefix=edge_paints[i].marker_stroke.empty()?std::string("flow"):"flow-"+std::to_string(i);

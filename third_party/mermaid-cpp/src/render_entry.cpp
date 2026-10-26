@@ -302,7 +302,8 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
             const auto& config=member(effective,u"flowchart");
             const auto look=text(member(effective,u"look"));
             if(look!=u"classic") return std::unexpected("Native Flowchart SVG currently requires classic look");
-            if(text(member(effective,u"layout"))!=u"dagre") return std::unexpected("Native Flowchart requires Dagre layout");
+            const auto layout=text(member(effective,u"layout"));
+            if(layout!=u"dagre"&&layout!=u"elk") return std::unexpected("Native Flowchart requires Dagre or ELK layout");
             style.font_family=text(member(theme,u"fontFamily"));style.font_size=size(member(theme,u"fontSize"));
             style.minimum_label_width=number(member(config,u"minNodeWidth"));
             style.wrapping_width=number(member(config,u"wrappingWidth"));style.padding=number(member(config,u"diagramPadding"));

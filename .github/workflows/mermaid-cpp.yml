@@ -251,6 +251,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/elk-order-oracle.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/elk-model-order-oracle.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/flowchart-oracle.mjs --check
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/flowchart-label-oracle.mjs --check
@@ -340,6 +342,10 @@ jobs:
         run: |
           node tools/mermaid-cpp/flowchart-browser-probe.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/flowchart-browser-probe.mjs --elk
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/flowchart-elk-oracle.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/sequence-browser-probe.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/class-browser-probe.mjs
@@ -383,6 +389,8 @@ jobs:
             Tee-Object -FilePath build/mermaid-cpp/tests.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/compare-flowchart-svg.mjs build/mermaid-cpp/flowchart-browser/original.json build/mermaid-cpp/pie-svg
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/compare-flowchart-svg.mjs build/mermaid-cpp/elk-flowchart-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/compare-sequence-svg.mjs build/mermaid-cpp/sequence-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -439,6 +447,8 @@ jobs:
             build/mermaid-cpp/text-comparison.json
             build/mermaid-cpp/pie-svg/*.svg
             build/mermaid-cpp/flowchart-browser/*.json
+            build/mermaid-cpp/elk-flowchart-browser/*.json
+            build/mermaid-cpp/elk-flowchart-browser/*.svg
             build/mermaid-cpp/flowchart-browser/*.svg
             build/mermaid-cpp/sequence-browser/*.json
             build/mermaid-cpp/sequence-browser/*.svg
