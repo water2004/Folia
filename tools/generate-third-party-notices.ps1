@@ -45,6 +45,8 @@ Add-LicenseFile 'Boost.UT (test dependency) — Boost Software License 1.0' `
     (Join-Path $Root 'third_party\ut\LICENSE.md')
 Add-LicenseFile 'SRELL — BSD 2-Clause License' `
     (Join-Path $Root 'third_party\srell\LICENSE')
+Add-LicenseFile 'Fluent UI System Icons — Microsoft, MIT License (82ecf7cbdb43684403c7125efa160be04a33dca5)' `
+    (Join-Path $Root 'third_party\fluentui-system-icons\LICENSE')
 Add-LicenseFile 'ICU4C 78.3 — Unicode License V3' `
     (Join-Path $Root 'build\dependencies\icu-78.3\root\LICENSE')
 Add-LicenseFile 'QuickJS — MIT License' `
