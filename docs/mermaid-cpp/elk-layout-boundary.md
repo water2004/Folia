@@ -90,12 +90,18 @@ This initial flat graph excludes compound and label dummy processing.
 
 Continue on this same graph with LayerSweepCrossingMinimizer/BarycenterHeuristic
 and required port ordering.
-Brandes-Koepf placement, routing, compound groups and the measured family adapter
+Compound groups and the measured family adapter
 still follow those phases. The existing Dagre algorithm is not a substitute.
 
-Node ordering, Brandes-Koepf placement, orthogonal routing, compound-graph
-processors, measured label geometry and the common-renderer adapter remain
-necessary after layering. Their absence is an implementation gap, not a missing
+The flat pipeline also includes Brandes-Koepf balanced placement, implicit
+point-port preparation and orthogonal routing. The order/routing interfaces
+share the original java.util.Random state; a continuous original-worker oracle
+checks both state and coordinates across the phases. Long-edge joining and
+feedback-edge restoration recover original edge paths after routing without
+adding the optional unnecessary bend points.
+
+Compound-graph processors, measured label geometry and the common-renderer
+adapter remain necessary. Their absence is an implementation gap, not a missing
 source/package blocker; the original worker is available and hash locked.
 
 ## Other retained families: source availability
@@ -111,7 +117,9 @@ extend their required feature lists.
 
 These installed packages include their `src` files under the oracle's pnpm
 directory. Mindmap's pinned `mindmapRenderer.ts` selects `cose-bilkent` as its
-fallback; `rendering-util/layout-algorithms/cose-bilkent/cytoscape-setup.ts`
+fallback. MindmapDB also selects it when the user has not explicitly configured
+a layout; oracle setup must preserve that user-defined configuration distinction.
+`rendering-util/layout-algorithms/cose-bilkent/cytoscape-setup.ts`
 passes measured node dimensions and runs the original layout with `quality:
 'proof'`, no animation and no style engine. Architecture's
 `architectureRenderer.ts` calls fCoSE directly, also with `quality: 'proof'`,

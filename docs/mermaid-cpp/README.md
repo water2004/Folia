@@ -35,7 +35,7 @@ Cytoscape, date calculations) needs its own source and behavior verification.
 ## Current state
 
 The public native entry now contains Packet, Pie, Flowchart, Sequence, Class,
-Quadrant and Radar. Entry coverage does not imply that every family default or the
+Quadrant, Radar, XY, Sankey and Treemap. Entry coverage does not imply that every family default or the
 WinUI dependency switch is finished. The unconfigured global layout is ELK;
 both Flowchart and Class still require explicit source/session Dagre selection.
 The original ELK depth-first feedback-edge selector and flat network-simplex
@@ -47,8 +47,11 @@ strategies and the seeded layer-sweep controller, retaining the best node and
 port order across alternating sweeps. It accepts adjacent-layer edges with one
 edge per port, including long-edge dummies and fixed port positions. Shared-port
 hyperedges, in-layer edges and north/south or compound constraints still need
-their original processors and are rejected by this internal boundary. Placement,
-routing and public default ELK rendering remain outstanding.
+their original processors and are rejected by this internal boundary. Flat
+Brandes-Koepf placement, implicit point-port placement, orthogonal routing and
+original-edge path restoration are now separate native modules. Ordering and
+routing share the original random-generator state. Label processors, compound
+handling and public default ELK rendering remain outstanding.
 
 Quadrant retains its original configured canvas, linear point scales, axis
 positions, title/accessibility metadata, quadrant labels and per-point/class
@@ -59,6 +62,19 @@ Radar supports named/aliased axes, positional or axis-referenced curves, circle
 and polygon grids, configured scales/margins, legends and accessible titles.
 It retains the original polar coordinates, clipping and closed Catmull-Rom
 curves. This family also uses SVG text anchors rather than glyph-width layout.
+
+XY supports vertical/horizontal bar and line plots, category and numeric axes,
+original band/linear scales and ticks, measured titles/axes/legends, data-label
+configuration and accessibility metadata. Algorithm comparisons use original
+browser measurements with strict geometry checks; the platform comparison
+allows the established measured-text tolerance for DirectWrite glyph bounds.
+
+Sankey uses the original CSV parser and d3-sankey layout, with node alignment,
+configured dimensions, values, label styling, node colors and link paints.
+Treemap uses weighted hierarchy sum/sort, d3-hierarchy squarify with original
+rounding/padding, measured label fitting, clipping, titles and class paints.
+Treemap formatting validation covers default grouping and currency grouping;
+it does not establish compatibility with the entire d3-format language.
 
 `FoliaNativeMermaid.dll` provides a UTF-8 host ABI with owned SVG/error buffers
 and dimensions. Each request initializes default/dark theme and classic look;
@@ -281,21 +297,24 @@ size, weight and style. HTML `b`/`strong` and `i`/`em`, and Markdown star/unders
 strong/emphasis can mix with normal text, including nested emphasis, escaped
 punctuation and explicit breaks. The owned parser labels remain unchanged;
 DirectWrite receives styled UTF-16 ranges and SVG emits the same measured runs.
-This boundary covers node and edge labels in HTML-label mode, with the default
-Markdown auto-wrap setting. It is not a general Markdown document renderer.
+HTML and SVG label modes retain their respective spacing and wrapping rules.
+Group titles support plain, rich HTML and Markdown text, including measurement
+at the final group width. Class-defined fonts participate in measurement; direct
+group font styles are applied after the original container size is fixed.
+Markdown HTML labels honor markdownAutoWrap:false. This is not a general
+Markdown document renderer.
 The comparison checks per-character font properties, display
 lines, label positions, node boxes and edge geometry in default/dark themes.
 
 Complete Flowchart rendering remains pending. The SVG entry explicitly rejects
-style properties beyond the supported paints/typography, group-title font
-overrides, other HTML tags, styled labels in non-HTML mode and HTML diagram titles,
-and non-classic looks; it does not silently drop these features.
+style properties beyond the supported paints/typography, unsupported HTML tags,
+HTML diagram titles and non-classic looks; it does not silently drop these features.
 The complete existing family requirements remain unchanged. The rank/layout
 API requires prepared graphs without nonempty group endpoints; callers must
 measure and lay out extracted subgraphs separately before the enclosing graph.
-Group-title rich text, remaining Markdown constructs/configuration, shape
-metadata, explicit edge ids and interpolation commands are not implemented
-by this stage; unsupported input returns an error. Browser callbacks are outside
+Classic shape metadata and aliases, label metadata, explicit edge ids and
+interpolation commands use the existing shape/curve implementations. Asset and
+animation metadata are outside this implementation. Browser callbacks are outside
 the Folia dependency path. No partial graph escapes failures. Default limits
 are 10,000 nodes/groups, 500 edges (also bounded by site maxEdges), 64 nested
 subgraphs and the shared frontend source budget. Error offsets refer to prepared
