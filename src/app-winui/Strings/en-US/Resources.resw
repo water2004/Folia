@@ -316,4 +316,12 @@
   <data name="NoFolderHint" xml:space="preserve"><value>Open a folder to browse Markdown files.</value></data>
   <data name="ViewMenu" xml:space="preserve"><value>View</value></data>
   <data name="Explorer" xml:space="preserve"><value>Explorer</value></data>
+  <data name="NewFile" xml:space="preserve"><value>New File…</value></data>
+  <data name="NewFolder" xml:space="preserve"><value>New Folder…</value></data>
+  <data name="Rename" xml:space="preserve"><value>Rename…</value></data>
+  <data name="DefaultNewFolderName" xml:space="preserve"><value>New folder</value></data>
+  <data name="InvalidEntryName" xml:space="preserve"><value>Enter a valid Windows filename.</value></data>
+  <data name="CopyingFile" xml:space="preserve"><value>Copying {0}…</value></data>
+  <data name="MovingFile" xml:space="preserve"><value>Moving {0}…</value></data>
+  <data name="CreatingFile" xml:space="preserve"><value>Creating {0}…</value></data>
 </root>

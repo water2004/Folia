@@ -10,6 +10,12 @@
     <SolidColorBrush x:Key="TreeViewItemSelectionIndicatorForegroundPressed" Color="Transparent"/>
     <SolidColorBrush x:Key="TreeViewItemSelectionIndicatorForegroundDisabled" Color="Transparent"/>
     <Style x:Key="ExplorerTreeStyle" TargetType="TreeView">
+        <!-- Native content/reorder transitions translate recycled row content
+             over adjacent rows. Keep a short native entrance fade, with fixed
+             geometry; filesystem moves are published by the controller. -->
+        <Setter Property="ItemContainerTransitions"><Setter.Value><TransitionCollection>
+            <EntranceThemeTransition FromHorizontalOffset="0" FromVerticalOffset="0" IsStaggeringEnabled="False"/>
+        </TransitionCollection></Setter.Value></Setter>
         <Setter Property="SelectionMode" Value="Single"/>
         <Setter Property="CanDragItems" Value="False"/>
         <Setter Property="CanReorderItems" Value="False"/>
@@ -57,6 +63,7 @@
                                             </VisualState.Setters></VisualState>
                                         </VisualStateGroup>
                                     </VisualStateManager.VisualStateGroups>
+                                    <Canvas x:Name="IndentGuides" Height="24" IsHitTestVisible="False" Visibility="Collapsed"/>
                                     <!-- WinUI's default template hardcodes 16-DIP levels and
                                          a 40-DIP chevron slot. Geometry stays here, independent
                                          of the native tree's keyboard/expansion behavior. -->

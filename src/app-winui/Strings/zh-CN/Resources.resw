@@ -316,4 +316,12 @@
   <data name="NoFolderHint" xml:space="preserve"><value>打开文件夹以浏览 Markdown 文件。</value></data>
   <data name="ViewMenu" xml:space="preserve"><value>查看</value></data>
   <data name="Explorer" xml:space="preserve"><value>资源管理器</value></data>
+  <data name="NewFile" xml:space="preserve"><value>新建文件…</value></data>
+  <data name="NewFolder" xml:space="preserve"><value>新建文件夹…</value></data>
+  <data name="Rename" xml:space="preserve"><value>重命名…</value></data>
+  <data name="DefaultNewFolderName" xml:space="preserve"><value>新建文件夹</value></data>
+  <data name="InvalidEntryName" xml:space="preserve"><value>请输入有效的 Windows 文件名。</value></data>
+  <data name="CopyingFile" xml:space="preserve"><value>正在复制 {0}…</value></data>
+  <data name="MovingFile" xml:space="preserve"><value>正在移动 {0}…</value></data>
+  <data name="CreatingFile" xml:space="preserve"><value>正在创建 {0}…</value></data>
 </root>

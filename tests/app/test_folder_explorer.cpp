@@ -34,7 +34,7 @@ namespace {
             expect(name != nullptr && name.CanRead() && !name.CanWrite());
             expect(winrt::unbox_value<winrt::hstring>(name.GetValue(root.Content())) == directory.path.filename().c_str());
             expect(winrt::unbox_value<winrt::hstring>(properties.GetCustomProperty(L"FullPath").GetValue(root.Content())) == directory.path.c_str());
-            expect(root.Children().Size() == 3_u);
+            expect(root.Children().Size() == 4_u);
             auto folder = root.Children().GetAt(0);
             expect(folder.HasUnrealizedChildren());
             expect(folder.Children().Size() == 0_u);

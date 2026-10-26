@@ -165,6 +165,11 @@ namespace winrt::Folia::implementation {
         }, [weak = get_weak()](auto error) {
             if (auto window = weak.get()) window->SetStatus(LocalizeFormat(L"StatusFolderFailed", {error}));
         });
+        folderExplorer.SetOperationHandler([weak = get_weak()](winrt::Folia::WorkspaceFileAction action) -> Windows::Foundation::IAsyncOperation<winrt::hstring> {
+            auto window = weak.get();
+            if (!window) throw winrt::hresult_illegal_method_call();
+            co_return co_await window->ApplyExplorerActionAsync(std::move(action));
+        });
         ChangeFolderButton().Click([this](auto const&, auto const&) { PickWorkspaceFolder(); });
         OpenFolderPaneButton().Click([this](auto const&, auto const&) { PickWorkspaceFolder(); });
         RefreshDocumentTabs();

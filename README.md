@@ -51,7 +51,10 @@ the user did not change.
   Windows PDF export with page progress.
 - **Folder workspace** — lazy file browsing, preview tabs that become permanent
   on double-click or editing, and independent history and reading positions per
-  document. The title bar holds the tabs and main menu; file browsing and the
+  document. Create files and folders or rename with F2 directly in the tree;
+  drag onto a folder to move, or hold Ctrl to copy. Long operations show progress,
+  and moving an open document preserves its unsaved edits and undo history.
+  The title bar holds the tabs and main menu; file browsing and the
   document outline have separate animated sidebars.
 - **Encoding aware** — ICU-based charset detection ranks likely encodings when
   reopening a file, while explicit conversion saves in any installed ICU

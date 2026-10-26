@@ -39,6 +39,7 @@ namespace winrt::Folia::implementation
         winrt::fire_and_forget LoadWorkspaceDocument(std::shared_ptr<winrt::Folia::WorkspaceDocument> document);
         winrt::fire_and_forget PickWorkspaceFile();
         winrt::fire_and_forget PickWorkspaceFolder();
+        Windows::Foundation::IAsyncOperation<winrt::hstring> ApplyExplorerActionAsync(winrt::Folia::WorkspaceFileAction action);
         void RegisterWorkspaceHandlers();
         void RefreshDocumentTabs();
         void UpdateDocumentTab(std::uint64_t id);
@@ -113,6 +114,7 @@ namespace winrt::Folia::implementation
         bool closePending = false;
         bool closeApproved = false;
         bool closingDocument = false;
+        bool relocatingFiles = false;
         bool selectedTabVisibilityPending = false;
         bool updatingTabs = false;
         bool explorerOpen = false;

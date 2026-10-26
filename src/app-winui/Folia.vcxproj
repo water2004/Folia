@@ -195,9 +195,10 @@
     <ClInclude Include="workspace\WorkspaceDocuments.h" />
     <ClInclude Include="workspace\WorkspaceIcons.h" />
     <ClInclude Include="workspace\WorkspaceFileOperations.h" />
-    <ClInclude Include="workspace\WorkspaceFileCoordinator.h" />
     <ClInclude Include="workspace\FolderEntry.h" />
     <ClInclude Include="workspace\FolderExplorerView.h" />
+    <ClInclude Include="workspace\FolderExplorerState.h" />
+    <ClInclude Include="workspace\WorkspaceFileCoordinator.h" />
     <ClInclude Include="workspace\FolderExplorerController.h" />
     <ClInclude Include="editor\interaction\EditorDocumentControllerState.h" />
     <ClInclude Include="MainWindow.Lifecycle.h" />
@@ -632,8 +633,10 @@
     <ClCompile Include="workspace\WorkspaceDocuments.cpp" />
     <ClCompile Include="workspace\WorkspaceIcons.cpp" />
     <ClCompile Include="workspace\WorkspaceFileOperations.cpp" />
-    <ClCompile Include="workspace\WorkspaceFileCoordinator.cpp" />
     <ClCompile Include="workspace\FolderExplorerView.cpp" />
+    <ClCompile Include="workspace\FolderExplorerController.Editing.cpp" />
+    <ClCompile Include="workspace\FolderExplorerController.DragDrop.cpp" />
+    <ClCompile Include="workspace\WorkspaceFileCoordinator.cpp" />
     <ClCompile Include="workspace\FolderExplorerController.cpp" />
     <ClCompile Include="editor\interaction\EditorDocumentController.Relocation.cpp" />
     <ClCompile Include="editor\interaction\EditorDocumentController.Save.cpp" />

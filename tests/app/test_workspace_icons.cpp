@@ -18,7 +18,7 @@ namespace {
             struct Restore { ResourceDictionary resources; winrt::Windows::Foundation::IInspectable key; bool inserted;
                 ~Restore() { if (inserted) resources.Remove(key); } } restore{resources, key, inserted};
             for (auto kind : {WorkspaceIcon::PanelLeft, WorkspaceIcon::PanelRight, WorkspaceIcon::Folder,
-                WorkspaceIcon::Document, WorkspaceIcon::Refresh, WorkspaceIcon::Collapse}) {
+                WorkspaceIcon::Document, WorkspaceIcon::NewFile, WorkspaceIcon::NewFolder, WorkspaceIcon::Refresh, WorkspaceIcon::Collapse}) {
                 for (float size : {14.f, 16.f, 20.f, 24.f, 32.f}) {
                     auto icon = MakeWorkspaceIcon(kind);
                     icon.Width(size);

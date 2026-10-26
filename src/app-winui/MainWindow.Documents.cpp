@@ -140,7 +140,17 @@ namespace winrt::Folia::implementation {
 
     winrt::fire_and_forget MainWindow::OpenWorkspaceFile(std::filesystem::path path, winrt::Folia::WorkspaceOpenMode mode) {
         try {
-            if (closePending || closingDocument || windowClosed) co_return;
+            if (closePending || closingDocument || windowClosed || relocatingFiles) co_return;
+            auto extension = path.extension().native();
+            const bool editable = _wcsicmp(extension.c_str(), L".md") == 0 || _wcsicmp(extension.c_str(), L".markdown") == 0 || _wcsicmp(extension.c_str(), L".txt") == 0;
+            if (!editable) {
+                if (mode == winrt::Folia::WorkspaceOpenMode::Keep) {
+                    auto lifetime = get_strong();
+                    auto file = co_await Windows::Storage::StorageFile::GetFileFromPathAsync(path.native());
+                    co_await Windows::System::Launcher::LaunchFileAsync(file);
+                }
+                co_return;
+            }
             textInputController.FocusLeave();
             auto previous = workspaceDocuments.Active();
             auto result = workspaceDocuments.Open(std::move(path), mode);

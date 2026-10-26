@@ -206,7 +206,7 @@
         <Grid x:Name="WorkspaceHost" Grid.Row="3">
             <SplitView x:Name="DocumentWorkspace" DisplayMode="Inline" PanePlacement="Left" OpenPaneLength="248" IsPaneOpen="False" PaneBackground="{ThemeResource FoliaShellLayerBrush}">
                 <SplitView.Pane>
-                <Grid x:Name="ExplorerPane" Background="{ThemeResource FoliaShellLayerBrush}" RowDefinitions="Auto,*" BorderBrush="{ThemeResource FoliaShellBorderBrush}" BorderThickness="0,0,1,0">
+                <Grid x:Name="ExplorerPane" Background="{ThemeResource FoliaShellLayerBrush}" RowDefinitions="Auto,Auto,*" BorderBrush="{ThemeResource FoliaShellBorderBrush}" BorderThickness="0,0,1,0">
                     <Grid Height="42" Margin="16,0,8,0" ColumnDefinitions="*,Auto">
                         <TextBlock x:Name="ExplorerHeadingText" Text="Files" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                         <Button x:Name="FolderActionsButton" Grid.Column="1" Visibility="Collapsed" Width="28" Height="28" Padding="0" Style="{StaticResource SubtleButtonStyle}">
@@ -216,12 +216,16 @@
                             </MenuFlyout></Button.Flyout>
                         </Button>
                     </Grid>
-                    <StackPanel x:Name="ExplorerEmptyState" Grid.Row="1" Margin="16,20" Spacing="8" VerticalAlignment="Top">
+                    <StackPanel x:Name="FileOperationPanel" Grid.Row="1" Margin="16,0,12,8" Spacing="4" Visibility="Collapsed">
+                        <TextBlock x:Name="FileOperationText" FontSize="12" TextTrimming="CharacterEllipsis" Foreground="{ThemeResource FoliaShellMutedForegroundBrush}"/>
+                        <ProgressBar x:Name="FileOperationProgress" Height="2" MinHeight="2" IsIndeterminate="True"/>
+                    </StackPanel>
+                    <StackPanel x:Name="ExplorerEmptyState" Grid.Row="2" Margin="16,20" Spacing="8" VerticalAlignment="Top">
                         <TextBlock x:Name="NoFolderHeading" FontSize="13" FontWeight="SemiBold" Text="No folder open"/>
                         <TextBlock x:Name="NoFolderHint" FontSize="12" TextWrapping="Wrap" Foreground="{ThemeResource FoliaShellMutedForegroundBrush}" Text="Open a folder to browse Markdown files."/>
                         <HyperlinkButton x:Name="OpenFolderPaneButton" Content="Open folder…" HorizontalAlignment="Left" Padding="0" FontSize="13"/>
                     </StackPanel>
-                    <TreeView x:Name="FileTree" Grid.Row="1" Margin="6,0,6,8" Style="{StaticResource ExplorerTreeStyle}" Visibility="Collapsed"/>
+                    <TreeView x:Name="FileTree" Grid.Row="2" Margin="6,0,6,8" Style="{StaticResource ExplorerTreeStyle}" Visibility="Collapsed"/>
                 </Grid>
                 </SplitView.Pane>
                 <SplitView.Content>
