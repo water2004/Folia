@@ -2,11 +2,20 @@
 
 恢复/压缩后先实际读本文。架构、职责和详细验收见 [architecture](native-raii-architecture.md)、[files](native-raii-files.json)、[acceptance](native-raii-acceptance.md)。只复查新变化；ignored候选用 `rg --no-ignore`。
 
-## 当前 checkpoint：发布0.4.1（2026-10-26，进行中）
+## 当前 checkpoint：文件夹浏览、标签页与简化窗口（2026-10-26，设计/实现开始）
 
-- 用户表示微信启动后的滚动现象放置后恢复，明确暂停排查并要求推送发布 **0.4.1**。只读确认过微信父进程拉起安装版（当时PID8120/Normal优先级）；没有帧率测量、没有证明锁60帧，没有滚动修复/进程设置改动。该旁支暂停，不为发布重开。
-- 版本与说明提交 **c3d0e4472ad9e173e03f692cb88a7d0420abdb82** 已连同此前14个本地功能/记录提交推送master；**v0.4.1固定指向该提交**，未改旧标签。CMake/MSI默认/RC/manifest/About/README一致校验通过，新增release-notes/v0.4.1.md；既有验收保持，不重跑无关宽测。
-- **CI正在运行**：https://github.com/water2004/Folia/actions/runs/40263725460（Release，head_sha=c3d0e447，tag v0.4.1）。接下来等待既有流水线构建/真实启动门禁/发布，完成后核验Release附件及SHA256，再更新此checkpoint。build/release-0.4.1-{runs,jobs}.json记录当前进度；无本地native/build/test句柄或新子代理。用户安装版仍0.4.0，此次只发布、不自动安装。
+- 新任务：打开文件夹、成熟编辑器式文件树、独立文档大纲、标签页和简化顶栏。用户已选择 **单击预览，双击或编辑后固定**，未保存标签不替换；最新提出去掉常驻工具栏，按此方向推进。布局：原生TitleBar+TabView共用顶行，主菜单/右键/快捷键保留操作，左文件树、右可收起大纲，中间仅一份SwapChainPanel/Renderer；留窗口拖动区域，不能让标题/按钮/标签相互遮挡。不开子代理，保留WinUI3/C++/WinRT，不改CST/编辑模型。
+- 官方参考已实际阅读：VS Code userinterface Preview mode（单击预览/双击或编辑固定）；微软WinUI TitleBar/TabView规范。标题控件API以本机SDK头文件为准。树节点懒展开、目录IO后台且有代次取消，不能递归预读整棵树/每标签复制GPU资源。
+- 职责方案：workspace文档集合只拥有每标签原EditorSession（含原块树/CST/单选区/事务历史）、文件控制器、视口/必要数学缓存；UI控制器投影TreeView/TabView并路由打开/激活/关闭。现Controller.Attach会重置保存基线，不能切标签时直接重复Attach；需显式分开文档生命周期与当前呈现绑定，保存完成只更新其所属文档，旧异步加载/粘贴不能写入新活动标签。共享输入/renderer在切换时解除旧绑定并恢复该标签状态，不能序列化/重建文档来切换。
+- 先补廉价的history内容状态标识供修改圆点/预览固定使用，Undo/Redo回到保存点恢复标识、新分支不能复用旧保存标识，不能每字符TextUtf8/全文hash。Core的document.revision在Undo后可复用，不能直接当保存点；DocController现HasUnsavedChanges为全文fingerprint，仅用于显式保存/关闭，勿直接放每次编辑的UI刷新。
+- **验收要求**：重复路径聚焦同标签；预览替换/编辑固定/双击固定；每标签源文/选区/UndoRedo/源码模式/滚动恢复；未保存关闭/关闭窗口Save/Discard/Cancel和失败；加载/保存/粘贴跨切换代次与文档所有权；目录失败/展开取消/重复名字/大目录懒加载；缩放/窄窗/标题拖动/按钮命中/快捷键；切换不做全文parse/serialize，只有一套GPU资源。小批提交、native一次一个/≤4。
+- **当前停止点/下一步**：尚无功能代码改动/构建/测试/新窗口，刚完成现有Session/Controller/History/主窗口调查。先实际读document_history完整实现并添加状态标识与专门测试，然后实现文档集合/控制器呈现解绑和文件树，再接窗口/原生控件与UI验收。现有App只有一个editorSession+documentController；ControllerState在EditorDocumentControllerState.h；AttachControllers在MainWindow.Events.cpp，勿猜文件名。现活跃任务是本节，不重开已暂停滚动或数学旧迁移。
+
+## 已完成：0.4.1发布（2026-10-26）
+
+- 发布提交 **c3d0e4472ad9e173e03f692cb88a7d0420abdb82**，master及固定v0.4.1标签已推送；Release https://github.com/water2004/Folia/releases/tag/v0.4.1 已公开，CI https://github.com/water2004/Folia/actions/runs/40263725460 **success**。
+- MSI附件 **53,562,219 bytes**，SHA256 `55df9f0785369579e06c4bec8f702703019e5fab786a6243b7e204fc5cbefa7b`，87bytes的.sha256文件与GitHub digest核验一致。build/release-0.4.1-published.json与published.sha256保留证据。无本地安装/版本改动，用户安装版仍上次0.4.0。发布无剩余步骤。
+- 微信启动滚动现象按用户要求暂停；只读确认过Weixin父进程拉起安装版（当时PID8120/Normal），无帧率测量/锁60证明/修复/进程设置改动，不为新任务重开。
 
 ## 历史：公式批量优化已打包并安装0.4.0（2026-10-26，完成）
 
