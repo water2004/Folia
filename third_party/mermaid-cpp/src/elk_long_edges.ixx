@@ -17,6 +17,7 @@ struct ElkLayerNode {
     bool fixed_port_positions = false;
     std::optional<std::size_t> origin_edge, long_edge_source, long_edge_target;
     bool long_edge_has_label = false, long_edge_before_label = false;
+    bool fixed_port_order = false;
 };
 struct ElkLayerPort {
     std::size_t node = 0;

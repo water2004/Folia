@@ -39,13 +39,14 @@ struct Ordering {
     bool node_relative;
     std::vector<double> ranks, port_barycenters;
     std::vector<std::optional<double>> barycenters;
+    std::vector<bool> nested_nodes;
 
-    Ordering(ElkLayeredGraph& graph, ElkRandom& graph_random)
+    Ordering(ElkLayeredGraph& graph, ElkRandom& graph_random, bool flat_controller = true)
         : g(graph), random(graph_random),
-          ranks(g.ports.size()), port_barycenters(g.ports.size()), barycenters(g.nodes.size()) {
-        const auto sweep_seed = random.next_long();
+          ranks(g.ports.size()), port_barycenters(g.ports.size()), barycenters(g.nodes.size()), nested_nodes(g.nodes.size()) {
+        const auto sweep_seed = flat_controller ? random.next_long() : 0;
         node_relative = random.next(1) != 0;
-        random.set_seed(sweep_seed);
+        if (flat_controller) random.set_seed(sweep_seed);
     }
 
     void calculate_ranks(const std::vector<std::size_t>& layer, bool output) {
@@ -68,7 +69,7 @@ struct Ordering {
 
     void distribute(std::size_t n, ElkPortSide side) {
         auto& node = g.nodes[n];
-        if (node.fixed_port_positions) return;
+        if (node.fixed_port_positions || node.fixed_port_order) return;
         for (const auto p : node.ports) if (g.ports[p].side == side) {
             const auto& port = g.ports[p];
             double sum = 0;
@@ -95,7 +96,7 @@ struct Ordering {
             calculate_ranks(fixed, forward);
             for (const auto n : free) distribute(n, side);
             calculate_ranks(free, !forward);
-            for (const auto n : fixed) distribute(n, forward ? ElkPortSide::east : ElkPortSide::west);
+            for (const auto n : fixed) if (!nested_nodes[n]) distribute(n, forward ? ElkPortSide::east : ElkPortSide::west);
         } else {
             for (const auto n : free) distribute(n, side);
         }
@@ -214,7 +215,7 @@ std::expected<void, std::string> elk_sort_flat_ports(ElkLayeredGraph& g) {
             if (!node.fixed_port_positions) return false;
             return g.ports[a].side == ElkPortSide::east ? g.ports[a].y < g.ports[b].y : g.ports[a].y > g.ports[b].y;
         });
-        if (node.fixed_port_positions || ports.size() <= 1) continue;
+        if (node.fixed_port_positions || node.fixed_port_order || ports.size() <= 1) continue;
         // Preserve the pinned PortListSorter's range and reversal behavior,
         // including its exclusive high index and short-range early return.
         std::size_t low = 0;
@@ -248,5 +249,105 @@ std::expected<std::size_t, std::string> elk_order_flat_graph(ElkLayeredGraph& g,
     }
     best->restore(g);
     return best_count;
+}
+
+std::expected<std::size_t, std::string> elk_order_hierarchy(
+    std::span<ElkHierarchyOrderGraph> graphs, int thoroughness) {
+    if (graphs.empty()) return 0;
+    for (const auto& entry : graphs) if (const auto valid = supported(*entry.graph); !valid)
+        return std::unexpected(valid.error());
+    if (thoroughness < 1) return std::unexpected("ELK ordering thoroughness must be positive");
+    if (graphs[0].graph->layers.empty()) return 0;
+    struct State {
+        std::unique_ptr<Ordering> order;
+        std::vector<std::size_t> children;
+        bool bottom_up = true, changed = false;
+        std::optional<OrderCopy> current_best, best;
+    };
+    std::vector<State> states(graphs.size());
+    auto& root_random = *graphs[0].random;
+    const auto sweep_seed = root_random.next_long();
+    std::vector<std::size_t> breadth{0}, bottom_up;
+    for (std::size_t i = 0; i < breadth.size(); ++i) {
+        const auto index = breadth[i];
+        auto& entry = graphs[index]; auto& state = states[index];
+        state.order = std::make_unique<Ordering>(*entry.graph, *entry.random, false);
+        // GraphInfoHolder discovers children in current layer/node order.
+        for (const auto& layer : entry.graph->layers) for (const auto n : layer)
+            for (std::size_t c = 1; c < graphs.size(); ++c)
+                if (graphs[c].parent_graph == index && graphs[c].parent_node == n) {
+                    state.children.push_back(c); breadth.push_back(c); state.order->nested_nodes[n] = true;
+                }
+        if (entry.parent_graph) {
+            const auto& parent = *graphs[*entry.parent_graph].graph;
+            state.bottom_up = elk_hierarchy_uses_bottom_up(*entry.graph, parent,
+                entry.parent_node, entry.ports, parent.nodes[entry.parent_node].fixed_port_order);
+        }
+        if (state.bottom_up) bottom_up.push_back(index);
+    }
+    const auto count = [&](auto&& self, std::size_t index) -> std::size_t {
+        auto total = states[index].order->crossings();
+        for (const auto c : states[index].children) if (!states[c].bottom_up) total += self(self,c);
+        return total;
+    };
+    const auto sweep = [&](auto&& self, std::size_t index, bool forward, bool first) -> void {
+        auto& state = states[index]; auto& g = *graphs[index].graph;
+        for (std::size_t step = 0; step < g.layers.size(); ++step) {
+            const auto layer = forward ? step : g.layers.size() - 1 - step;
+            if (step) state.order->minimize_layer(layer,forward,first);
+            state.order->distribute_layer(layer,forward);
+            for (const auto n : g.layers[layer]) for (const auto c : state.children)
+                if (graphs[c].parent_node == n && !states[c].bottom_up) {
+                    auto& child = graphs[c];
+                    if (!elk_hierarchy_enter(*child.graph,g,n,child.ports,forward))
+                        states[c].order->randomize_first(forward);
+                    self(self,c,forward,first);
+                    elk_hierarchy_leave(*child.graph,g,n,child.ports,forward);
+                }
+        }
+        state.changed = true;
+    };
+    for (const auto index : bottom_up | std::views::reverse) {
+        auto& entry = graphs[index]; auto& state = states[index];
+        if (entry.graph->layers.empty()) continue;
+        root_random.set_seed(sweep_seed);
+        for (auto& s : states) s.changed = false;
+        auto best_count = std::numeric_limits<std::size_t>::max();
+        for (int attempt = 0; attempt < thoroughness; ++attempt) {
+            bool forward = root_random.next(1) != 0;
+            state.order->randomize_first(forward);
+            sweep(sweep,index,forward,true);
+            auto crossings = count(count,index);
+            for (;;) {
+                for (std::size_t s = 0; s < states.size(); ++s) if (states[s].changed)
+                    states[s].current_best.emplace(*graphs[s].graph);
+                if (!crossings) break;
+                forward = !forward;
+                sweep(sweep,index,forward,false);
+                const auto next = count(count,index);
+                if (next >= crossings) break;
+                crossings = next;
+            }
+            if (crossings < best_count) {
+                best_count = crossings;
+                for (auto& s : states) if (s.changed) s.best = s.current_best;
+                if (!crossings) break;
+            }
+        }
+        if (entry.parent_graph && !entry.ports.empty()) {
+            // Transfer best child layers, not the final unsuccessful sweep.
+            auto best_graph = *entry.graph; state.best->restore(best_graph);
+            auto& parent = *graphs[*entry.parent_graph].graph;
+            elk_hierarchy_leave(best_graph,parent,entry.parent_node,entry.ports,true);
+            elk_hierarchy_leave(best_graph,parent,entry.parent_node,entry.ports,false);
+            parent.nodes[entry.parent_node].fixed_port_order = true;
+        }
+    }
+    std::size_t total = 0;
+    for (std::size_t i = 0; i < states.size(); ++i) {
+        if (states[i].best) states[i].best->restore(*graphs[i].graph);
+        total += states[i].order->crossings();
+    }
+    return total;
 }
 }

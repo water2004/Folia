@@ -171,6 +171,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/architecture-oracle.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/architecture-constraints-oracle.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/git-graph-oracle.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/gantt-oracle.mjs
@@ -214,6 +216,10 @@ jobs:
           node tools/mermaid-cpp/elk-boundary-layout-oracle.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/elk-compound-restore-oracle.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/elk-hierarchy-order-oracle.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/elk-hierarchy-sweep-oracle.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/elk-routing-oracle.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
