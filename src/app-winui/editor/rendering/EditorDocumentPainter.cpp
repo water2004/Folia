@@ -325,7 +325,7 @@ namespace winrt::Folia
                     auto end = DisplayPositionForSource(display.displayToSource, {block.id, sourceEnd, folia::TextAffinity::Downstream});
                     if (end <= start) continue;
                     folia::InlineStyle style = folia::InlineStyle::plain();
-                    style.code = true;
+                    style.code = folia::CodeStyle::Block;
                     display.ranges.push_back({
                         static_cast<UINT32>(start),
                         static_cast<UINT32>(end - start),

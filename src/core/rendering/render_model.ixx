@@ -121,9 +121,14 @@ struct InlinePresentationStyle {
     bool highlight = false;
 };
 
+// Monospace text has different presentation in a code span and a code block.
+// Keep that distinction in the semantic render projection, not in each painter.
+enum class CodeStyle : std::uint8_t { None, Inline, Block };
+
 struct InlineStyle {
     bool bold = false, italic = false, underline = false, strikethrough = false;
-    bool code = false, link = false;
+    CodeStyle code = CodeStyle::None;
+    bool link = false;
     std::optional<std::uint8_t> heading_level;
     std::shared_ptr<const InlinePresentationStyle> presentation;
     static InlineStyle plain() { return {}; }

@@ -142,7 +142,7 @@ namespace winrt::Folia
             shiftOverlay(display.footnoteOverlays);
 
             auto style = folia::InlineStyle::plain();
-            style.code = true;
+            style.code = folia::CodeStyle::Block;
             display.ranges.push_back({
                 start,
                 1,

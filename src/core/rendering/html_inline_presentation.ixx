@@ -243,7 +243,7 @@ inline InlineStyle apply_html_inline_presentation(
     else if (tag == "del" || tag == "s" || tag == "strike") inherited.strikethrough = true;
     else if (tag == "u" || tag == "ins") inherited.underline = true;
     else if (tag == "code" || tag == "kbd" || tag == "samp" || tag == "tt") {
-        inherited.code = true;
+        inherited.code = CodeStyle::Inline;
         if (inherited.presentation) ensure_presentation().font_family.reset();
     }
     else if (tag == "small") scale_font(ensure_presentation(), 0.83f);

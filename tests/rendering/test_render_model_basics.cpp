@@ -34,6 +34,39 @@ using namespace boost::ut;
 
 suite render_model_basic_tests = [] {
 
+"code_presentation_role_comes_from_semantic_projection_in_every_container"_test = [] {
+    struct Case { std::string source; CodeStyle role; };
+    for (auto const& example : {
+        Case{"`alpha`\n", CodeStyle::Inline},
+        Case{"# `alpha`\n", CodeStyle::Inline},
+        Case{"- `alpha`\n", CodeStyle::Inline},
+        Case{"- [ ] `alpha`\n", CodeStyle::Inline},
+        Case{"> `alpha`\n", CodeStyle::Inline},
+        Case{"> [!NOTE]\n> `alpha`\n", CodeStyle::Inline},
+        Case{"[^n]: `alpha`\n\nref[^n]\n", CodeStyle::Inline},
+        Case{"| head |\n| --- |\n| `alpha` |\n", CodeStyle::Inline},
+        Case{"<code>alpha</code>\n", CodeStyle::Inline},
+        Case{"`alpha\n", CodeStyle::None},
+        Case{"> ```txt\n> alpha\n> ```\n", CodeStyle::Block}}) {
+        auto model = build_model(example.source);
+        std::size_t matches = 0;
+        auto inspect = [&](auto const& items) {
+            for (auto const& item : items) {
+                if (item.kind != InlineRenderItem::Kind::Text || item.text.find(U"alpha") == std::u32string::npos) continue;
+                ++matches;
+                expect(item.style.code == example.role) << example.source;
+            }
+        };
+        auto walk = [&](auto&& self, RenderBlock const& block) -> void {
+            inspect(block.inline_items);
+            for (auto const& cell : block.special().table_cells) inspect(cell);
+            for (auto const& child : block.child_blocks) self(self, child);
+        };
+        for (auto const& block : model.blocks) walk(walk, block);
+        expect(matches > 0_u) << example.source;
+    }
+};
+
 "mixed_task_list_renders_checkbox_only_for_task_items"_test = [] {
     auto dialect = default_dialect();
     dialect.gfm.task_lists = true;
@@ -339,7 +372,7 @@ suite render_model_basic_tests = [] {
         if (item.source_span.container_id != code->id
             || item.kind != InlineRenderItem::Kind::Text) continue;
         displayed += item.text;
-        expect(fatal(bool(item.style.code))) << "code style only";
+        expect(fatal(item.style.code == CodeStyle::Block)) << "block code style only";
         expect(fatal(bool(!item.style.bold && !item.style.italic
             && !item.style.link && !item.style.strikethrough))) << "no markdown inline style";
     }
@@ -392,7 +425,7 @@ suite render_model_basic_tests = [] {
             if (item.special().marker_role == MarkerRole::Structural && !item.special().display_text.empty()
                 && std::all_of(item.special().display_text.begin(), item.special().display_text.end(), [](char32_t value) { return value == U' '; })) {
                 ++line_indents;
-            } else if (item.kind == InlineRenderItem::Kind::Text && item.style.code) {
+            } else if (item.kind == InlineRenderItem::Kind::Text && item.style.code == CodeStyle::Block) {
                 flattened_code += item.text;
             }
         }
@@ -419,7 +452,7 @@ suite render_model_basic_tests = [] {
     }
     bool styled_code = false;
     for (auto const& item : list.inline_items) {
-        if (item.kind == InlineRenderItem::Kind::Text && item.style.code) styled_code = true;
+        if (item.kind == InlineRenderItem::Kind::Text && item.style.code == CodeStyle::Block) styled_code = true;
     }
     expect(fatal(bool(styled_code)));
 };

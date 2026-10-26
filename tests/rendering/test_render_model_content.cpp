@@ -462,7 +462,7 @@ suite render_model_content_tests = [] {
     bool code = false;
     bool strike = false;
     for (auto const& item : m.blocks[0].special().table_cells[0]) bold = bold || item.style.bold;
-    for (auto const& item : m.blocks[0].special().table_cells[2]) code = code || item.style.code;
+    for (auto const& item : m.blocks[0].special().table_cells[2]) code = code || item.style.code == CodeStyle::Inline;
     for (auto const& item : m.blocks[0].special().table_cells[3]) strike = strike || item.style.strikethrough;
     expect(fatal(bool(bold)));
     expect(fatal(bool(code)));

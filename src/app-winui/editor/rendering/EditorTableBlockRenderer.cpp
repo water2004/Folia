@@ -203,20 +203,6 @@ namespace winrt::Folia
                 display.ranges);
             if (cell.layout)
             {
-                for (auto const& range : display.ranges)
-                {
-                    if (!range.style.code || range.length == 0) continue;
-                    UINT32 count = 0;
-                    auto result = cell.layout->HitTestTextRange(range.start, range.length, cell.textOrigin.x, cell.textOrigin.y, nullptr, 0, &count);
-                    if (result != E_NOT_SUFFICIENT_BUFFER || count == 0) continue;
-                    std::vector<DWRITE_HIT_TEST_METRICS> metrics(count);
-                    if (FAILED(cell.layout->HitTestTextRange(range.start, range.length, cell.textOrigin.x, cell.textOrigin.y, metrics.data(), count, &count))) continue;
-                    for (UINT32 index = 0; index < count; ++index)
-                    {
-                        auto const& metric = metrics[index];
-                        resources.d2dContext->FillRoundedRectangle(D2D1::RoundedRect(D2D1::RectF(metric.left - 3.0f, metric.top + 2.0f, metric.left + metric.width + 3.0f, metric.top + metric.height - 1.0f), 4.0f, 4.0f), resources.panelBrush.Get());
-                    }
-                }
                 documentPainter.DrawSyntaxMarkers(cell.layout.Get(), cell.textOrigin, display);
                 documentPainter.DrawSelection(
                     cell.layout.Get(),

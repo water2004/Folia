@@ -107,7 +107,7 @@ suite render_recursive_flow_tests = [] {
     std::size_t generated_headers = 0;
     for (auto const& item : model.blocks[0].inline_items) {
         if (item.source_span.container_id != code_id) continue;
-        if (item.kind == InlineRenderItem::Kind::Text && item.style.code) flattened_code += item.text;
+        if (item.kind == InlineRenderItem::Kind::Text && item.style.code == CodeStyle::Block) flattened_code += item.text;
         if (item.special().marker_role == MarkerRole::Structural
             && item.special().display_text == U"\u200B\n") ++generated_headers;
         if (item.special().marker_role == MarkerRole::Structural
@@ -150,7 +150,7 @@ suite render_recursive_flow_tests = [] {
         std::size_t generated_headers = 0;
         for (const auto& inline_item : model.blocks.front().inline_items) {
             if (inline_item.source_span.container_id != code_id) continue;
-            if (inline_item.kind == InlineRenderItem::Kind::Text && inline_item.style.code)
+            if (inline_item.kind == InlineRenderItem::Kind::Text && inline_item.style.code == CodeStyle::Block)
                 displayed_code += inline_item.text;
             if (inline_item.special().marker_role == MarkerRole::Structural
                 && inline_item.special().display_text == U"\u200B\n") {

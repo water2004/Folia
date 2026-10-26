@@ -24,7 +24,7 @@ suite html_inline_presentation_tests = [] {
     style = apply_html_inline_presentation(style, "del", empty);
     expect(style.strikethrough);
     style = apply_html_inline_presentation(style, "kbd", empty);
-    expect(style.code);
+    expect(style.code == CodeStyle::Inline);
 };
 
 "safe_inline_css_is_parsed_and_nested"_test = [] {
@@ -115,7 +115,7 @@ suite html_inline_presentation_tests = [] {
         expect(emphasis.presentation->font_italic == std::optional<bool>{true});
 
     const auto code = apply_html_inline_presentation(outer, "code", empty);
-    expect(code.code);
+    expect(code.code == CodeStyle::Inline);
     expect(fatal(bool(code.presentation != nullptr)));
     if (code.presentation) expect(!code.presentation->font_family.has_value());
 };

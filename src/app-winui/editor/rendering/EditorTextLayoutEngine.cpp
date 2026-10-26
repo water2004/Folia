@@ -220,7 +220,7 @@ namespace winrt::Folia
                     default: return styleSheet.body.size;
                 }
             }
-            return style.code ? styleSheet.code.size : styleSheet.body.size;
+            return style.code != folia::CodeStyle::None ? styleSheet.code.size : styleSheet.body.size;
         }
 
         float BaseLineHeight(folia::InlineStyle const& style, EditorStyleSheet const& styleSheet)
@@ -235,7 +235,7 @@ namespace winrt::Folia
                     default: return styleSheet.body.lineHeight;
                 }
             }
-            return style.code ? styleSheet.code.lineHeight : styleSheet.body.lineHeight;
+            return style.code != folia::CodeStyle::None ? styleSheet.code.lineHeight : styleSheet.body.lineHeight;
         }
     }
 
@@ -322,50 +322,28 @@ namespace winrt::Folia
         ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> brush;
         for (auto const& range : ranges)
         {
+            // Both flows and cells consume the same semantic code-span style.
+            // Fenced/source code also uses a monospace font, but owns its block
+            // background separately and must not receive per-token capsules.
+            const auto inlineCode = !range.marker && range.style.code == folia::CodeStyle::Inline;
             auto const& presentation = range.style.presentation;
-            if (range.length == 0 || !presentation
-                || (!presentation->background && !presentation->highlight)) continue;
-
-            const auto color = presentation->background
-                ? ToD2D(*presentation->background)
-                : styleSheet.calloutWarningBackgroundColor;
-            if (!brush)
-            {
-                if (FAILED(resources.d2dContext->CreateSolidColorBrush(
-                        color,
-                        brush.GetAddressOf()))) return;
+            const auto explicitBackground = presentation && (presentation->background || presentation->highlight);
+            if (range.length == 0 || (!inlineCode && !explicitBackground)) continue;
+            auto paint = resources.inlineCodeBackgroundBrush.Get();
+            if (explicitBackground) {
+                const auto color = presentation->background ? ToD2D(*presentation->background)
+                    : styleSheet.calloutWarningBackgroundColor;
+                if (!brush) {
+                    if (FAILED(resources.d2dContext->CreateSolidColorBrush(color, brush.GetAddressOf()))) return;
+                } else brush->SetColor(color);
+                paint = brush.Get();
             }
-            else brush->SetColor(color);
-
-            UINT32 count = 0;
-            auto result = layout->HitTestTextRange(
-                range.start,
-                range.length,
-                origin.x,
-                origin.y,
-                nullptr,
-                0,
-                &count);
-            if (result != E_NOT_SUFFICIENT_BUFFER || count == 0) continue;
-            std::vector<DWRITE_HIT_TEST_METRICS> metrics(count);
-            if (FAILED(layout->HitTestTextRange(
-                    range.start,
-                    range.length,
-                    origin.x,
-                    origin.y,
-                    metrics.data(),
-                    count,
-                    &count))) continue;
-            for (UINT32 index = 0; index < count; ++index)
-            {
-                auto const& metric = metrics[index];
-                resources.d2dContext->FillRectangle(
-                    D2D1::RectF(
-                        metric.left,
-                        metric.top,
-                        metric.left + metric.width,
-                        metric.top + metric.height),
-                    brush.Get());
+            for (auto rect : InlineRangeRectangles(layout, range.start, range.length, origin)) {
+                if (inlineCode) {
+                    rect.left -= 3; rect.right += 3;
+                    rect.top += 2; rect.bottom -= 1;
+                    resources.d2dContext->FillRoundedRectangle(D2D1::RoundedRect(rect, 4, 4), paint);
+                } else resources.d2dContext->FillRectangle(rect, paint);
             }
         }
     }
@@ -503,11 +481,13 @@ namespace winrt::Folia
             if (range.style.italic) layout->SetFontStyle(DWRITE_FONT_STYLE_ITALIC, textRange);
             if (range.style.link || range.style.underline) layout->SetUnderline(true, textRange);
             if (range.style.strikethrough) layout->SetStrikethrough(true, textRange);
-            if (range.style.code)
+            if (range.style.code != folia::CodeStyle::None)
             {
                 layout->SetFontFamilyName(styleSheet.code.family.c_str(), textRange);
                 layout->SetFontSize(styleSheet.code.size, textRange);
-                if (resources.codeBrush) layout->SetDrawingEffect(resources.codeBrush.Get(), textRange);
+                auto brush = range.style.code == folia::CodeStyle::Inline
+                    ? resources.inlineCodeBrush.Get() : resources.codeBrush.Get();
+                if (brush) layout->SetDrawingEffect(brush, textRange);
             }
             if (range.style.heading_level)
             {
@@ -519,7 +499,7 @@ namespace winrt::Folia
                 auto size = heading ? heading->size
                     : level == 4 ? styleSheet.body.size * 1.15f
                     : styleSheet.body.size;
-                if (heading && !range.style.code)
+                if (heading && range.style.code == folia::CodeStyle::None)
                     layout->SetFontFamilyName(heading->family.c_str(), textRange);
                 layout->SetFontSize(size, textRange);
                 auto weight = heading ? heading->weight : DWRITE_FONT_WEIGHT_SEMI_BOLD;

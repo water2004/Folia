@@ -303,7 +303,7 @@ namespace winrt::Folia
         style.bold = active(folia::InlineFormat::Strong);
         style.italic = active(folia::InlineFormat::Emphasis);
         style.strikethrough = active(folia::InlineFormat::Strikethrough);
-        style.code = active(folia::InlineFormat::Code);
+        style.code = active(folia::InlineFormat::Code) ? folia::CodeStyle::Inline : folia::CodeStyle::None;
         return style;
     }
 

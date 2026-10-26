@@ -66,7 +66,7 @@ suite render_scalar_projection_tests = [] {
         for (auto const& item : items) {
             if (item.id != code_id) continue;
             code_items.push_back(&item);
-            if (item.kind == InlineRenderItem::Kind::Text && item.style.code) {
+            if (item.kind == InlineRenderItem::Kind::Text && item.style.code == CodeStyle::Inline) {
                 displayed += item.text;
                 if (item.text == U" " && item.source_span.source_range.length() == 2) {
                     has_crlf_segment = true;

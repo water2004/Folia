@@ -449,7 +449,7 @@ namespace winrt::Folia::implementation
             BoldButton().IsChecked(style.bold);
             ItalicButton().IsChecked(style.italic);
             StrikeButton().IsChecked(style.strikethrough);
-            InlineCodeButton().IsChecked(style.code);
+            InlineCodeButton().IsChecked(style.code == folia::CodeStyle::Inline);
             scrollController.Sync();
         }
         catch (winrt::hresult_error const& error)

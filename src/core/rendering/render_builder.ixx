@@ -338,7 +338,7 @@ struct Builder {
                     display_range.length()),
                 {block.id, {source_start, source_end}});
             replace_inline_display_nuls(item.text);
-            item.style.code = true;
+            item.style.code = CodeStyle::Block;
             out.push_back(std::move(item));
             first_line = false;
         }
@@ -891,7 +891,7 @@ struct Builder {
                         break;
                     }
                     case K::CodeSpan: {
-                        auto child_style = style; child_style.code = true;
+                        auto child_style = style; child_style.code = CodeStyle::Inline;
                         append_marker(target, node, delim.opening);
                         append_code_span_text(node, child_style);
                         if (delim.closing) append_marker(target, node, *delim.closing);
@@ -911,7 +911,7 @@ struct Builder {
                         item.style = style;
                         item.style.bold = false;
                         item.style.italic = false;
-                        item.style.code = false;
+                        item.style.code = CodeStyle::None;
                         item.style.link = false;
                         target.push_back(std::move(item));
                         break;

@@ -2,7 +2,15 @@
 
 恢复/压缩后先实际读本文。架构、职责和详细验收见 [architecture](native-raii-architecture.md)、[files](native-raii-files.json)、[acceptance](native-raii-acceptance.md)。只复查新变化；ignored候选用 `rg --no-ignore`。
 
-## 当前 checkpoint：行内数学编辑悬浮预览完成（2026-10-27）
+## 当前 checkpoint：公式预览留白与行内代码统一（进行中，2026-10-27）
+
+- 用户纠正：**表格内代码背景是对的，正文缺背景**；要求检查共同职责，不能按容器继续堆特判。仍需修复简单公式1111悬浮预览偏上。不开agents/CUA；一次native构建≤4；不关用户窗口；版本0.4.1，不自动安装/发布。
+- 已复现：旧appearance测试6断言失败（正常exit1），1111 SVG上padding10、下25.437；g_j下23.997、root下17.418，fraction正常。证据build/preview-content-bounds-before.log。根因是预览用DirectWrite行高（含body行高下限），不是MathJax生成错误。用户补充行间同问题，已纳入：EditorMathPreview的Prepare/PaintContent统一flow/table×inline/block的测量与绘制，以PositionMath片段矩形并集定框并抵消原点，不改引擎/正文行高/编辑模型。正文和表格原有重复preview代码删去。2主题×2宽度×2模式×5种公式共40样例真实SVG绘制通过；digits-inline/block-light及fraction-inline-dark图已实际查看（生产painter离屏fixture，非完整窗口截图）。
+- 行内代码：表格独有background loop已删除，迁至共享DrawInlinePresentationBackgrounds。原InlineStyle.code bool同时表示块代码/行内代码，现改为唯一uint8 CodeStyle None/Inline/Block，由CST→render与HTML语义投影决定；旧读写显式迁移，源文/编辑/事务架构不改。inline_code_fg/bg接入StyleSheet及2个常驻brush，块code独立背景；HTML显式背景统一覆写而非再叠一层。核心正式**763项499901断言通过**（inline-code-core-tests.log）；Debug最终通过（inline-presentation-debug-final.log）。
+- WinUI完整轮原有**100项17146断言通过**（inline-presentation-app-tests.log），唯一新code测试最初因fixture未判空materializeBlocks而抛bad_function_call（正常exit1），已修正fixture。focused新正式**1项219断言通过**（inline-code-appearance-tests.log），覆盖3主题×2宽度×8容器、native背景pixels/文字brush、块code和marker不误画、brush reset；math/edit/click/drag/undo/异步纯内存/滚动等旧回归均通过。未进行真人鼠标/IME检查。
+- 停止点：正在按code与math分2个小提交；code已按hunk暂存，math未暂存，不reset。Release自包含构建在运行（session80665，build/inline-presentation-release.log），构建前Folia进程[]，未关闭用户窗口。接下来完成Release→正常startup→第二提交及本checkpoint；无MSI/安装/push/release，不重复前轮宽审。
+
+## 历史：行内数学编辑悬浮预览完成（2026-10-27）
 
 - **用户边界**：行内公式编辑时预览悬浮、不占正文排版空间，特别注意美观；仍在原位编辑source，不加局部输入面板，block math旧位置保持。不开agents/CUA、不关用户窗口。WinUI/native/CST/selection/history/异步纯内存Preview缓存保持，MathJax引擎未改；无新JS/engine/队列/全解析。版本 **0.4.1**，无MSI/安装/push/release。
 - **本地提交827339bd**（21文件350增21删）：EditorMathPreview.h/.cpp统一flow/table原来重复的prepared preview结构，并负责悬浮定位/原生D2D绘制。flow/table在原测量/绘制位置只处理非floating的block preview，inline仅把const preview指针交给RenderPass末绘制，不进块/表行高及source/hit/caret映射。RenderPass.Paint返回可选bounds，Renderer每次Draw/ClearPrepared清空InlineMathPreviewBounds()，浮层区域非交互；离开math/source mode/print无浮层。Legacy display math位置/高度与编辑逻辑未重做。
