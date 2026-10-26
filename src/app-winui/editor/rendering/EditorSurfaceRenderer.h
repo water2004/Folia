@@ -57,6 +57,8 @@ namespace winrt::Folia
         void AdoptMathPreparation(std::unique_ptr<EditorMathPreparation> preparation);
         void SetMathPreparationStopToken(std::stop_token stop);
         void ResetDocumentCaches();
+        MathJaxRenderer TakeMathCache();
+        void RestoreMathCache(MathJaxRenderer cache);
         void SetInvalidateCallback(std::function<void()> callback);
 
         std::optional<folia::TextPosition> HitTest(float x, float y) const;

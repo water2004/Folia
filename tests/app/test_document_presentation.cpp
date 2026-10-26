@@ -105,5 +105,38 @@ namespace {
             expect(f.session.TextUtf8() == "next $x+1$");
             expect(!f.controller.IsModified());
         };
+
+        "document presentation resume notices an external edit made while inactive"_test = [] {
+            Fixture f;
+            auto file = f.File(L"external.md", "before");
+            expect(Await(f.controller.OpenFileAsync(file)));
+            f.controller.SuspendPresentation();
+            std::ofstream(std::filesystem::path(file.Path().c_str()), std::ios::binary | std::ios::trunc) << "after external edit";
+            f.controller.ResumePresentation(f.renderer, f.input);
+            Pump([&] { return f.session.TextUtf8() == "after external edit"; });
+            expect(!f.controller.IsModified());
+            expect(!f.wrongThread);
+        };
+
+        "document presentation switched paste cannot edit either document"_test = [] {
+            Fixture f;
+            auto original = f.session.TextUtf8();
+            winrt::Windows::ApplicationModel::DataTransfer::DataPackage package;
+            winrt::Windows::ApplicationModel::DataTransfer::DataProviderRequest request{nullptr};
+            winrt::Windows::ApplicationModel::DataTransfer::DataProviderDeferral deferral{nullptr};
+            package.SetDataProvider(winrt::Windows::ApplicationModel::DataTransfer::StandardDataFormats::Text(), [&](auto const& value) {
+                request = value;
+                deferral = request.GetDeferral();
+            });
+            auto paste = f.controller.PasteAsync(package.GetView());
+            Pump([&] { return request != nullptr; });
+            f.controller.SuspendPresentation();
+            request.SetData(winrt::box_value(L"paste content"));
+            deferral.Complete();
+            expect(!Await(paste));
+            expect(f.session.TextUtf8() == original);
+            f.controller.ResumePresentation(f.renderer, f.input);
+            expect(!f.controller.IsModified());
+        };
     };
 }

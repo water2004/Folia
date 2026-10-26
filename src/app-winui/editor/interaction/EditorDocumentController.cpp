@@ -193,6 +193,7 @@ namespace winrt::Folia
         state_->loadStop = std::stop_source{};
         renderer.SetMathPreparationStopToken(state_->loadStop.get_token());
         StartWatching(state_, state_->generation.load());
+        QueueReloadCheck(state_, state_->generation.load());
         if (auto pending = state_->reloadState.PendingVersion(); pending && state_->setExternalChange)
             state_->setExternalChange(true, !pending->exists);
     }

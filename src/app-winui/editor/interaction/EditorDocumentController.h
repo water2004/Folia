@@ -102,6 +102,7 @@ namespace winrt::Folia
             std::uint64_t generation,
             std::uint64_t debounceTicket);
         static void EvaluateReload(std::shared_ptr<State> const& state, std::uint64_t generation, bool manual);
+        static winrt::fire_and_forget EvaluateReloadAsync(std::shared_ptr<State> state, std::uint64_t generation, bool manual);
         static void BeginPendingReload(std::shared_ptr<State> const& state, std::uint64_t generation);
         static winrt::fire_and_forget ReloadPendingAsync(
             std::shared_ptr<State> state,

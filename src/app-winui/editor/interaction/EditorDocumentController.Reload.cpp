@@ -90,24 +90,45 @@ namespace winrt::Folia
         std::uint64_t generation,
         bool manual)
     {
+        EvaluateReloadAsync(state, generation, manual);
+    }
+
+    winrt::fire_and_forget EditorDocumentController::EvaluateReloadAsync(
+        std::shared_ptr<State> state, std::uint64_t generation, bool manual)
+    {
+        auto dispatcher = state->dispatcher;
+        try {
         if (!Active(state, generation) || !state->session->HasFile()
-            || state->documentLoading.load(std::memory_order_acquire)) return;
+            || state->documentLoading.load(std::memory_order_acquire)) co_return;
         auto path = std::filesystem::path(state->session->File().Path().c_str());
+        auto identity = state->documentSerial;
+        auto ticket = state->loadSerial.load();
+        winrt::apartment_context ui;
+        co_await winrt::resume_background();
         auto version = folia::platform::reload::query_watched_file_version(path);
-        if (!manual && state->reloadState.IsKnown(version)) return;
+        co_await ui;
+        if (!Active(state, generation) || state->documentSerial != identity || state->loadSerial.load() != ticket
+            || state->documentLoading || (!manual && state->reloadState.IsKnown(version))) co_return;
 
         auto source = folia::platform::reload::fingerprint_document_content(
             state->session->TextUtf8());
         auto action = manual
             ? state->reloadState.StageManual(version, source)
             : state->reloadState.Observe(version, source);
-        if (action == folia::platform::reload::DocumentReloadAction::None) return;
+        if (action == folia::platform::reload::DocumentReloadAction::None) co_return;
         if (action == folia::platform::reload::DocumentReloadAction::Prompt)
         {
             if (state->setExternalChange) state->setExternalChange(true, !version.exists);
-            return;
+            co_return;
         }
         BeginPendingReload(state, generation);
+        } catch (winrt::hresult_error const& error) {
+            if (dispatcher && dispatcher.HasThreadAccess() && Active(state, generation) && state->setStatus)
+                state->setStatus(LocalizeFormat(L"StatusReloadFailed", {error.message()}));
+        } catch (std::exception const& error) {
+            if (dispatcher && dispatcher.HasThreadAccess() && Active(state, generation) && state->setStatus)
+                state->setStatus(LocalizeFormat(L"StatusReloadFailed", {winrt::to_hstring(error.what())}));
+        }
     }
 
     void EditorDocumentController::BeginPendingReload(

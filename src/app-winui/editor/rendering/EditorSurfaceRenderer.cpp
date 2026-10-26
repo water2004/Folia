@@ -50,6 +50,28 @@ namespace winrt::Folia
         preparedDocument.reset();
     }
 
+    MathJaxRenderer EditorSurfaceRenderer::TakeMathCache()
+    {
+        mathJax.SetCompletionCallback({});
+        mathJax.SetVisibleSvgIds({});
+        mathJax.CancelOffscreenRenders({});
+        auto cache = std::move(mathJax);
+        ResetDocumentCaches();
+        interactionMap.Clear();
+        nonInteractiveRegions.clear();
+        ClearPointer();
+        SetTableDrag({}, {});
+        return cache;
+    }
+
+    void EditorSurfaceRenderer::RestoreMathCache(MathJaxRenderer cache)
+    {
+        ResetDocumentCaches();
+        mathJax = std::move(cache);
+        mathJax.SetPreparationStopToken(mathPreparationStop);
+        AttachMathCompletion();
+    }
+
     void EditorSurfaceRenderer::SetInvalidateCallback(std::function<void()> callback)
     {
         std::scoped_lock lock(invalidationState->mutex);
