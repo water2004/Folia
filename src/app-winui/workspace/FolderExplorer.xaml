@@ -1,0 +1,30 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Keep native TreeView expansion, focus, selection and virtualization.
+         Compact rows constrain labels to the available width, never to text length. -->
+    <Thickness x:Key="TreeViewItemPresenterMargin">0</Thickness>
+    <Thickness x:Key="TreeViewItemPresenterPadding">0</Thickness>
+    <x:Double x:Key="TreeViewItemMinHeight">24</x:Double>
+    <SolidColorBrush x:Key="TreeViewItemSelectionIndicatorForeground" Color="Transparent"/>
+    <SolidColorBrush x:Key="TreeViewItemSelectionIndicatorForegroundPointerOver" Color="Transparent"/>
+    <SolidColorBrush x:Key="TreeViewItemSelectionIndicatorForegroundPressed" Color="Transparent"/>
+    <SolidColorBrush x:Key="TreeViewItemSelectionIndicatorForegroundDisabled" Color="Transparent"/>
+    <Style x:Key="ExplorerTreeStyle" TargetType="TreeView">
+        <Setter Property="SelectionMode" Value="Single"/>
+        <Setter Property="CanDragItems" Value="False"/>
+        <Setter Property="CanReorderItems" Value="False"/>
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+        <Setter Property="ScrollViewer.HorizontalScrollMode" Value="Disabled"/>
+        <Setter Property="ItemContainerStyle">
+            <Setter.Value>
+                <Style TargetType="TreeViewItem">
+                    <Setter Property="Height" Value="24"/>
+                    <Setter Property="MinHeight" Value="24"/>
+                    <Setter Property="Padding" Value="0"/>
+                    <Setter Property="CornerRadius" Value="2"/>
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                </Style>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>

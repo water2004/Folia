@@ -194,6 +194,8 @@
     <ClInclude Include="editor\interaction\EditorDocumentController.h" />
     <ClInclude Include="workspace\WorkspaceDocuments.h" />
     <ClInclude Include="workspace\WorkspaceIcons.h" />
+    <ClInclude Include="workspace\FolderEntry.h" />
+    <ClInclude Include="workspace\FolderExplorerView.h" />
     <ClInclude Include="workspace\FolderExplorerController.h" />
     <ClInclude Include="editor\interaction\EditorDocumentControllerState.h" />
     <ClInclude Include="MainWindow.Lifecycle.h" />
@@ -224,6 +226,7 @@
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml" />
     <Page Include="MainWindow.xaml" />
+    <Page Include="workspace\FolderExplorer.xaml"><SubType>Designer</SubType></Page>
     <Page Include="workspace\WorkspaceChrome.xaml" />
   </ItemGroup>
   <ItemGroup>
@@ -626,6 +629,7 @@
     <ClCompile Include="editor\interaction\EditorDocumentController.cpp" />
     <ClCompile Include="workspace\WorkspaceDocuments.cpp" />
     <ClCompile Include="workspace\WorkspaceIcons.cpp" />
+    <ClCompile Include="workspace\FolderExplorerView.cpp" />
     <ClCompile Include="workspace\FolderExplorerController.cpp" />
     <ClCompile Include="editor\interaction\EditorDocumentController.Save.cpp" />
     <ClCompile Include="editor\interaction\EditorDocumentController.Clipboard.cpp" />

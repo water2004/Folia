@@ -1,7 +1,11 @@
 #include "pch.h"
 import std;
 #include "workspace/FolderExplorerController.h"
-#include "workspace/WorkspaceIcons.h"
+#include "workspace/FolderExplorerView.h"
+#include "workspace/FolderEntry.h"
+#include "localization/Localization.h"
+#include <winrt/Microsoft.UI.Xaml.Data.h>
+#include <winrt/Microsoft.UI.Xaml.Input.h>
 
 namespace winrt::Folia {
     namespace {
@@ -9,39 +13,13 @@ namespace winrt::Folia {
         using namespace Microsoft::UI::Xaml::Controls;
         using Windows::Foundation::IInspectable;
 
-        struct FolderEntry : winrt::implements<FolderEntry, Windows::Foundation::IStringable> {
-            std::filesystem::path path;
-            bool directory = false;
-            std::uint64_t ticket = 0;
-            bool loading = false;
-            bool loaded = false;
-            std::stop_source stop;
-            winrt::hstring ToString() const { return winrt::hstring(path.filename().c_str()); }
-        };
+        using explorer_detail::FolderEntry;
 
         FolderEntry* Entry(TreeViewNode const& node) {
             if (!node) return nullptr;
             auto value = node.Content().try_as<Windows::Foundation::IStringable>();
             return value ? winrt::get_self<FolderEntry>(value) : nullptr;
         }
-
-        struct EntryTemplateSelector : DataTemplateSelectorT<EntryTemplateSelector> {
-            DataTemplate folder = Template(WorkspaceIcon::Folder);
-            DataTemplate file = Template(WorkspaceIcon::Document);
-            static DataTemplate Template(WorkspaceIcon icon) {
-                auto xaml = std::wstring(L"<DataTemplate xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation'><StackPanel Orientation='Horizontal' Spacing='8' Height='28'><Viewbox Width='16' Height='16' Stretch='Uniform' Opacity='0.75'><Canvas Width='20' Height='20'><Path Fill='{ThemeResource TextFillColorPrimaryBrush}' Data='")
-                    + std::wstring(WorkspaceIconPath(icon)) + L"' Width='20' Height='20' Stretch='None'/></Canvas></Viewbox><TextBlock Text='{Binding Content}' FontSize='13' TextTrimming='CharacterEllipsis' VerticalAlignment='Center'/></StackPanel></DataTemplate>";
-                return Markup::XamlReader::Load(xaml).as<DataTemplate>();
-            }
-            DataTemplate SelectTemplateCore(IInspectable const& item) {
-                auto node = item.try_as<TreeViewNode>();
-                auto entry = Entry(node);
-                return entry && entry->directory ? folder : file;
-            }
-            DataTemplate SelectTemplateCore(IInspectable const& item, DependencyObject const&) {
-                return SelectTemplateCore(item);
-            }
-        };
 
         bool Editable(std::filesystem::path const& path) {
             auto extension = path.extension().wstring();
@@ -50,10 +28,11 @@ namespace winrt::Folia {
                 || _wcsicmp(extension.c_str(), L".txt") == 0;
         }
 
-        TreeViewNode Node(std::filesystem::path path, bool directory) {
+        TreeViewNode Node(std::filesystem::path path, bool directory, bool root = false) {
             auto entry = winrt::make_self<FolderEntry>();
             entry->path = std::move(path);
             entry->directory = directory;
+            entry->root = root;
             TreeViewNode node;
             node.Content(entry.as<Windows::Foundation::IStringable>());
             node.HasUnrealizedChildren(directory);
@@ -68,6 +47,7 @@ namespace winrt::Folia {
         std::filesystem::path root;
         std::uint64_t generation = 0;
         std::stop_source stop;
+        Input::ICommand refresh{nullptr}, collapse{nullptr};
         event_token expanding{}, collapsed{}, invoked{}, doubleTapped{}, keyDown{};
     };
 
@@ -79,8 +59,14 @@ namespace winrt::Folia {
         state_->tree = tree;
         state_->open = std::move(open);
         state_->report = std::move(report);
-        tree.ItemTemplateSelector(winrt::make<EntryTemplateSelector>());
         auto weak = std::weak_ptr<State>(state_);
+        state_->refresh = winrt::make<explorer_detail::RootCommand>([weak] {
+            if (auto state = weak.lock()) RefreshLoadedNodes(state);
+        });
+        state_->collapse = winrt::make<explorer_detail::RootCommand>([weak] {
+            if (auto state = weak.lock()) CollapseNodes(state);
+        });
+        ConfigureFolderExplorerView(tree);
         state_->expanding = tree.Expanding([weak](auto const&, TreeViewExpandingEventArgs const& args) {
             if (auto state = weak.lock()) Populate(state, args.Node());
         });
@@ -97,12 +83,24 @@ namespace winrt::Folia {
             auto state = weak.lock();
             auto node = args.InvokedItem().try_as<TreeViewNode>();
             auto entry = Entry(node);
-            if (state && entry && !entry->directory && state->open) state->open(entry->path, false);
+            if (!state || !entry) return;
+            if (entry->directory) node.IsExpanded(!node.IsExpanded());
+            else if (state->open) state->open(entry->path, false);
         });
-        state_->doubleTapped = tree.DoubleTapped([weak](auto const&, Input::DoubleTappedRoutedEventArgs const&) {
+        state_->doubleTapped = tree.DoubleTapped([weak](auto const&, Input::DoubleTappedRoutedEventArgs const& args) {
             if (auto state = weak.lock()) {
-                auto entry = Entry(state->tree.SelectedNode());
-                if (entry && !entry->directory && state->open) state->open(entry->path, true);
+                auto target = args.OriginalSource().try_as<DependencyObject>();
+                while (target && target != state->tree) {
+                    if (auto container = target.try_as<TreeViewItem>()) {
+                        auto entry = Entry(state->tree.NodeFromContainer(container));
+                        if (entry && !entry->directory && state->open) {
+                            state->open(entry->path, true);
+                            args.Handled(true);
+                        }
+                        break;
+                    }
+                    target = Media::VisualTreeHelper::GetParent(target);
+                }
             }
         });
         state_->keyDown = tree.KeyDown([weak](auto const&, Input::KeyRoutedEventArgs const& args) {
@@ -129,18 +127,24 @@ namespace winrt::Folia {
         state_->tree = nullptr;
         state_->open = {};
         state_->report = {};
+        state_->refresh = nullptr;
+        state_->collapse = nullptr;
     }
 
-    void FolderExplorerController::Open(std::filesystem::path path) {
-        if (!state_->tree || !path.is_absolute()) throw std::invalid_argument("Folder path must be absolute");
-        state_->stop.request_stop();
-        state_->stop = std::stop_source{};
-        ++state_->generation;
-        state_->root = path.lexically_normal();
-        state_->tree.RootNodes().Clear();
-        auto node = Node(state_->root, true);
-        state_->tree.RootNodes().Append(node);
-        Expand(node);
+    void FolderExplorerController::Open(std::filesystem::path path) { OpenRoot(state_, std::move(path)); }
+
+    void FolderExplorerController::OpenRoot(std::shared_ptr<State> const& state, std::filesystem::path path) {
+        if (!state->tree || !path.is_absolute()) throw std::invalid_argument("Folder path must be absolute");
+        state->stop.request_stop();
+        state->stop = std::stop_source{};
+        ++state->generation;
+        state->root = path.lexically_normal();
+        state->tree.RootNodes().Clear();
+        auto node = Node(state->root, true, true);
+        Entry(node)->actions = std::make_unique<explorer_detail::RootActions>(state->refresh, state->collapse, Localize(L"RefreshFiles"), Localize(L"CollapseFolders"));
+        state->tree.RootNodes().Append(node);
+        node.IsExpanded(true);
+        Populate(state, node);
     }
 
     void FolderExplorerController::Expand(TreeViewNode const& node) {
@@ -149,16 +153,39 @@ namespace winrt::Folia {
         Populate(state_, node);
     }
 
-    void FolderExplorerController::Refresh() { if (!state_->root.empty()) Open(state_->root); }
+    void FolderExplorerController::Refresh() { RefreshLoadedNodes(state_); }
+
+    void FolderExplorerController::RefreshLoadedNodes(std::shared_ptr<State> const& state) {
+        if (!state->tree || state->root.empty()) return;
+        state->stop.request_stop();
+        state->stop = std::stop_source{};
+        ++state->generation;
+        std::vector<TreeViewNode> expanded;
+        auto visit = [&](auto const& self, TreeViewNode const& node) -> void {
+            auto entry = Entry(node);
+            if (!entry || !entry->directory) return;
+            entry->stop.request_stop();
+            ++entry->ticket;
+            entry->loading = false;
+            if (!entry->root && !node.IsExpanded()) return;
+            entry->loaded = false;
+            expanded.push_back(node);
+            if (node.IsExpanded()) for (auto child : node.Children()) self(self, child);
+        };
+        for (auto node : state->tree.RootNodes()) visit(visit, node);
+        for (auto node : expanded) Populate(state, node);
+    }
     std::filesystem::path FolderExplorerController::RootPath() const { return state_->root; }
-    void FolderExplorerController::Collapse() {
-        if (!state_->tree) return;
+    void FolderExplorerController::Collapse() { CollapseNodes(state_); }
+
+    void FolderExplorerController::CollapseNodes(std::shared_ptr<State> const& state) {
+        if (!state->tree) return;
         // The native tree only contains directories already visited by the user.
         auto collapse = [&](auto const& self, TreeViewNode const& node) -> void {
             for (auto child : node.Children()) self(self, child);
             node.IsExpanded(false);
         };
-        for (auto node : state_->tree.RootNodes()) collapse(collapse, node);
+        for (auto node : state->tree.RootNodes()) collapse(collapse, node);
     }
 
     winrt::fire_and_forget FolderExplorerController::Populate(std::shared_ptr<State> state, TreeViewNode node) {
@@ -195,15 +222,28 @@ namespace winrt::Folia {
         auto current = [&] { return state->tree && state->generation == generation && entry->ticket == ticket && !rootStop.stop_requested() && !stop.stop_requested(); };
         if (!current()) co_return;
         if (failure) std::rethrow_exception(failure);
-        node.Children().Clear();
+        auto children = node.Children();
+        std::unordered_map<std::wstring, TreeViewNode> existing;
+        for (auto child : children) if (auto previous = Entry(child)) existing.emplace(previous->path.native(), child);
+        // Clearing even an empty TreeViewNodeVector collapses its parent in
+        // WinUI. Reconcile this level instead, retaining expansion/selection.
         for (std::size_t index = 0; index < entries.size(); ++index) {
             if (index != 0 && index % 128 == 0) {
                 co_await wil::resume_foreground(dispatcher, Microsoft::UI::Dispatching::DispatcherQueuePriority::Low);
                 if (!current()) co_return;
             }
-            node.Children().Append(Node(std::move(entries[index].first), entries[index].second));
+            auto const& [childPath, directory] = entries[index];
+            auto found = existing.find(childPath.native());
+            auto child = found != existing.end() && Entry(found->second)->directory == directory
+                ? found->second : Node(childPath, directory);
+            const auto target = static_cast<std::uint32_t>(index);
+            if (target < children.Size() && children.GetAt(target) == child) continue;
+            std::uint32_t previous = 0;
+            if (found != existing.end() && children.IndexOf(child, previous)) children.RemoveAt(previous);
+            children.InsertAt(target, child);
         }
         entry->loading = false;
+        while (children.Size() > entries.size()) children.RemoveAtEnd();
         entry->loaded = !error;
         node.HasUnrealizedChildren(bool(error));
         if (error && state->report) state->report(winrt::to_hstring(error.message()));

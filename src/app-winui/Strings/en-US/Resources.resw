@@ -315,4 +315,5 @@
   <data name="NoFolderHeading" xml:space="preserve"><value>No folder open</value></data>
   <data name="NoFolderHint" xml:space="preserve"><value>Open a folder to browse Markdown files.</value></data>
   <data name="ViewMenu" xml:space="preserve"><value>View</value></data>
+  <data name="Explorer" xml:space="preserve"><value>Explorer</value></data>
 </root>

@@ -3,6 +3,7 @@
 #include "support/DocumentControllerFixture.h"
 #include "workspace/FolderExplorerController.h"
 #include <winrt/Microsoft.UI.Xaml.Hosting.h>
+#include <winrt/Microsoft.UI.Xaml.Data.h>
 
 namespace {
     using namespace boost::ut;
@@ -27,6 +28,12 @@ namespace {
             Pump([&] { return !tree.RootNodes().GetAt(0).HasUnrealizedChildren(); });
             auto root = tree.RootNodes().GetAt(0);
             expect(error.empty());
+            expect(root.IsExpanded());
+            auto properties = root.Content().as<winrt::Microsoft::UI::Xaml::Data::ICustomPropertyProvider>();
+            auto name = properties.GetCustomProperty(L"Name");
+            expect(name != nullptr && name.CanRead() && !name.CanWrite());
+            expect(winrt::unbox_value<winrt::hstring>(name.GetValue(root.Content())) == directory.path.filename().c_str());
+            expect(winrt::unbox_value<winrt::hstring>(properties.GetCustomProperty(L"FullPath").GetValue(root.Content())) == directory.path.c_str());
             expect(root.Children().Size() == 3_u);
             auto folder = root.Children().GetAt(0);
             expect(folder.HasUnrealizedChildren());
@@ -36,6 +43,7 @@ namespace {
             explorer.Expand(folder);
             Pump([&] { return !folder.HasUnrealizedChildren(); });
             expect(folder.Children().Size() == 1_u);
+            expect(folder.IsExpanded());
             explorer.Collapse();
             expect(!root.IsExpanded());
             expect(!folder.IsExpanded());

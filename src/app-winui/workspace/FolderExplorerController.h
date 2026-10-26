@@ -20,6 +20,9 @@ namespace winrt::Folia {
 
     private:
         struct State;
+        static void OpenRoot(std::shared_ptr<State> const& state, std::filesystem::path path);
+        static void RefreshLoadedNodes(std::shared_ptr<State> const& state);
+        static void CollapseNodes(std::shared_ptr<State> const& state);
         static winrt::fire_and_forget Populate(std::shared_ptr<State> state,
             winrt::Microsoft::UI::Xaml::Controls::TreeViewNode node);
         std::shared_ptr<State> state_;

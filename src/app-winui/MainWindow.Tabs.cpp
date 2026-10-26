@@ -120,8 +120,6 @@ namespace winrt::Folia::implementation {
         OutlinePaneButton().Content(MakeWorkspaceIcon(WorkspaceIcon::PanelRight));
         Automation::AutomationProperties::SetName(ExplorerPaneButton(), Localize(L"Files"));
         Automation::AutomationProperties::SetName(OutlinePaneButton(), Localize(L"ToggleOutline"));
-        Automation::AutomationProperties::SetName(RefreshFolderButton(), Localize(L"RefreshFiles"));
-        Automation::AutomationProperties::SetName(CollapseFoldersButton(), Localize(L"CollapseFolders"));
         ExplorerPaneButton().Click([this](auto const&, auto const&) {
             explorerOpen = ExplorerPaneButton().IsChecked().GetBoolean();
             UpdateWorkspaceLayout();
@@ -167,8 +165,7 @@ namespace winrt::Folia::implementation {
         }, [weak = get_weak()](auto error) {
             if (auto window = weak.get()) window->SetStatus(LocalizeFormat(L"StatusFolderFailed", {error}));
         });
-        RefreshFolderButton().Click([this](auto const&, auto const&) { folderExplorer.Refresh(); });
-        CollapseFoldersButton().Click([this](auto const&, auto const&) { folderExplorer.Collapse(); });
+        ChangeFolderButton().Click([this](auto const&, auto const&) { PickWorkspaceFolder(); });
         OpenFolderPaneButton().Click([this](auto const&, auto const&) { PickWorkspaceFolder(); });
         RefreshDocumentTabs();
         RegisterApplicationShortcuts();

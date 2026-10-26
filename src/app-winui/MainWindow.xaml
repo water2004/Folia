@@ -17,7 +17,7 @@
         RowDefinitions="48,Auto,Auto,*,Auto">
         <Grid.Resources>
           <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries><ResourceDictionary Source="workspace/WorkspaceChrome.xaml"/></ResourceDictionary.MergedDictionaries>
+            <ResourceDictionary.MergedDictionaries><ResourceDictionary Source="workspace/WorkspaceChrome.xaml"/><ResourceDictionary Source="workspace/FolderExplorer.xaml"/></ResourceDictionary.MergedDictionaries>
             <SolidColorBrush x:Key="FoliaShellBackgroundBrush" Color="#121419"/>
             <SolidColorBrush x:Key="FoliaShellLayerBrush" Color="#191C23"/>
             <SolidColorBrush x:Key="FoliaShellBorderBrush" Color="#343A46"/>
@@ -212,8 +212,7 @@
                         <Button x:Name="FolderActionsButton" Grid.Column="1" Visibility="Collapsed" Width="28" Height="28" Padding="0" Style="{StaticResource SubtleButtonStyle}">
                             <FontIcon Glyph="&#xE712;" FontSize="14"/>
                             <Button.Flyout><MenuFlyout>
-                                <MenuFlyoutItem x:Name="RefreshFolderButton" Text="Refresh files"/>
-                                <MenuFlyoutItem x:Name="CollapseFoldersButton" Text="Collapse folders"/>
+                                <MenuFlyoutItem x:Name="ChangeFolderButton" Text="Open folder…"/>
                             </MenuFlyout></Button.Flyout>
                         </Button>
                     </Grid>
@@ -222,14 +221,7 @@
                         <TextBlock x:Name="NoFolderHint" FontSize="12" TextWrapping="Wrap" Foreground="{ThemeResource FoliaShellMutedForegroundBrush}" Text="Open a folder to browse Markdown files."/>
                         <HyperlinkButton x:Name="OpenFolderPaneButton" Content="Open folder…" HorizontalAlignment="Left" Padding="0" FontSize="13"/>
                     </StackPanel>
-                    <TreeView x:Name="FileTree" Grid.Row="1" Margin="4,0,4,8" SelectionMode="Single" CanDragItems="False" CanReorderItems="False" Visibility="Collapsed">
-                        <TreeView.ItemContainerStyle>
-                            <Style TargetType="TreeViewItem">
-                                <Setter Property="MinHeight" Value="28"/>
-                                <Setter Property="Padding" Value="0"/>
-                            </Style>
-                        </TreeView.ItemContainerStyle>
-                    </TreeView>
+                    <TreeView x:Name="FileTree" Grid.Row="1" Margin="6,0,6,8" Style="{StaticResource ExplorerTreeStyle}" Visibility="Collapsed"/>
                 </Grid>
                 </SplitView.Pane>
                 <SplitView.Content>
