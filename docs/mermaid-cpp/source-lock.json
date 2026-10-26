@@ -2103,6 +2103,62 @@
       {
         "source": "cose-base@2.2.0/cose-base.js",
         "sha256": "7cae9509bd36235a63a85e71c8d9fa2cd0bc1d0c1ecc5b5a737976f39d040ddf"
+      },
+      {
+        "source": "layout-base@2.0.1/src/fd/FDLayout.js",
+        "sha256": "00bb7c36dfc279a457ebfd35f5dfb7b04123419f5457e65cc85344361946ca45"
+      },
+      {
+        "source": "layout-base@2.0.1/src/LGraph.js",
+        "sha256": "e65aa685abafcbe3fea72d72ebe8f1e9c22e8c1588bcfd913f8df154ad765346"
+      },
+      {
+        "source": "layout-base@2.0.1/src/LNode.js",
+        "sha256": "fd9a420ea4f92719c25f4bebb68a51255a369ed1afb1ed0a4157db7a4856857b"
+      },
+      {
+        "source": "layout-base@2.0.1/src/LGraphManager.js",
+        "sha256": "09436c5452073f5a9a3b462e5e7ce72565d7273f3b122d6287150465ea8dfd49"
+      },
+      {
+        "source": "layout-base@2.0.1/src/LEdge.js",
+        "sha256": "04a69989b17776ab9e50d2694c7a0b164a602850a3f17893c6956c77a91756e0"
+      },
+      {
+        "source": "layout-base@2.0.1/src/Layout.js",
+        "sha256": "60b52960899d8ff9bebaa42ef1566bab8e1d020653c9e69a76d8ab83e3e6e6b4"
+      },
+      {
+        "source": "layout-base@2.0.1/src/LayoutConstants.js",
+        "sha256": "d3edb1480609dd9617107cae290a43cb80edd395fdb488be9cd4b929a3d38651"
+      },
+      {
+        "source": "layout-base@2.0.1/src/util/IGeometry.js",
+        "sha256": "3fb8a7ddd916641755ef826412d26491647d2a7e94b7ab0775545ed692b99e02"
+      },
+      {
+        "source": "layout-base@2.0.1/layout-base.js",
+        "sha256": "ec15ab5df9af3f20708f4faab994accf91cda71848cd5bb10a23432cc50b6745"
+      },
+      {
+        "source": "cytoscape-fcose@2.2.0/src/fcose/auxiliary.js",
+        "sha256": "c6470c57e258b379545aefa24a4369c8cec926c31864bfed010515c9311f7578"
+      },
+      {
+        "source": "cytoscape@3.34.0/src/collection/layout.mjs",
+        "sha256": "05e914ecbbf88538398048086045f13576f539f0112fae8cd9fb1c02f80d2f4a"
+      },
+      {
+        "source": "cytoscape@3.34.0/src/collection/dimensions/bounds.mjs",
+        "sha256": "9cf64de4554eb5f3bc9e996e296dafdc34269bf4e87f4bdaf671818186cdfe38"
+      },
+      {
+        "source": "cytoscape@3.34.0/src/collection/dimensions/width-height.mjs",
+        "sha256": "5990a1d6f253be2b2eb8d7c545a2f32b01ebbaa3ca12876d2434c06e53c27d14"
+      },
+      {
+        "source": "cytoscape@3.34.0/src/style/properties.mjs",
+        "sha256": "f225007428f52d2e2ad5e0ccbc9fad01f8904851a2159b8c1e2d6c5859de7319"
       }
     ]
   },

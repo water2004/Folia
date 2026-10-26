@@ -8,7 +8,7 @@ const require=createRequire(import.meta.url);
 const isolated='../../build/mermaid-cpp/mindmap-layout-oracle/';
 assert.equal(createHash('sha512').update(readFileSync(new URL(isolated+'cytoscape-3.34.0.tgz',import.meta.url))).digest('base64'),'62rNSrioXw93uliKFBwjukeQyeWwH2PqDrTac31r2P6464u3AUvTk0xS4LVvT251g7IgkFunrI48ZEZGjywSOg==');
 const pins=JSON.parse(readFileSync(new URL('../../docs/mermaid-cpp/source-lock.json',import.meta.url))).fcose.files;
-for(const pin of pins){const [pkg,...rest]=pin.source.split('/');const name=pkg.slice(0,pkg.lastIndexOf('@'));const suffix=pkg.startsWith('cytoscape-fcose@')?'_cytoscape@3.34.4':'';const bytes=readFileSync(new URL('./oracle/node_modules/.pnpm/'+pkg+suffix+'/node_modules/'+name+'/'+rest.join('/'),import.meta.url));assert.equal(createHash('sha256').update(bytes).digest('hex'),pin.sha256,pin.source);}
+for(const pin of pins){const [pkg,...rest]=pin.source.split('/');const name=pkg.slice(0,pkg.lastIndexOf('@'));const suffix=pkg.startsWith('cytoscape-fcose@')?'_cytoscape@3.34.4':'';const bytes=readFileSync(new URL(name==='cytoscape'?isolated+'package/'+rest.join('/'):'./oracle/node_modules/.pnpm/'+pkg+suffix+'/node_modules/'+name+'/'+rest.join('/'),import.meta.url));assert.equal(createHash('sha256').update(bytes).digest('hex'),pin.sha256,pin.source);}
 const cytoscape=require(isolated+'package/dist/cytoscape.cjs.js');
 cytoscape.use(require('./oracle/node_modules/.pnpm/cytoscape-fcose@2.2.0_cytoscape@3.34.4/node_modules/cytoscape-fcose'));
 assert.equal(cytoscape.version,'3.34.0');
