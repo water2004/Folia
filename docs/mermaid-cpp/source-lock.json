@@ -1986,5 +1986,75 @@
         "sha256": "41ae285b6d399e9d96146ca4d2432e02d6928f8bb6d854d68f1562e44749e03c"
       }
     ]
+  },
+  "blockBundle": {
+    "package": "mermaid@12.2.0",
+    "files": [
+      {
+        "path": "src/diagrams/block/parser/block.jison",
+        "sha256": "b1be2aa0487900848a88f2aab6939bb6af57c73e4ae71fa34ea070b7f02d9f71",
+        "sourceMap": "blockDiagram-JBWBOGDQ.mjs.map"
+      },
+      {
+        "path": "src/diagrams/block/blockDB.ts",
+        "sha256": "debd112b4c0382ac1b5f6a73015d2a1aa8e8d13af297d470de3427f75fe82e68",
+        "sourceMap": "blockDiagram-JBWBOGDQ.mjs.map"
+      },
+      {
+        "path": "src/diagrams/block/styles.ts",
+        "sha256": "c71ea579e003553b6d0217232d802ab47edbf613532d027fd80d0cfec904e74a",
+        "sourceMap": "blockDiagram-JBWBOGDQ.mjs.map"
+      },
+      {
+        "path": "src/diagrams/block/layout.ts",
+        "sha256": "1591740fd874cabc118a4fa87b38461d06db853f74b5de02d7bb7ce6e2d61b8c",
+        "sourceMap": "blockDiagram-JBWBOGDQ.mjs.map"
+      },
+      {
+        "path": "src/diagrams/block/renderHelpers.ts",
+        "sha256": "50ce641d6eb07580e7728d823e1b44e2a8d941a64cca536ff935fe432de6f47b",
+        "sourceMap": "blockDiagram-JBWBOGDQ.mjs.map"
+      },
+      {
+        "path": "src/diagrams/block/blockRenderer.ts",
+        "sha256": "0887c0fd2c900fd85403f0bcb483c4ab29de299c15b55ff54740d49043f1c7e0",
+        "sourceMap": "blockDiagram-JBWBOGDQ.mjs.map"
+      },
+      {
+        "path": "src/rendering-util/rendering-elements/shapes/insertPolygonShape.ts",
+        "sha256": "f587eec9b4f04e29dff33613f8913b195f95b9292ec70565c22ee01c98c0a6e3",
+        "sourceMap": "chunk-VFTINRM2.mjs.map"
+      },
+      {
+        "path": "src/rendering-util/rendering-elements/shapes/blockArrow.ts",
+        "sha256": "1e2e91d9d4a5a6f9680e5ad5942c989d405051d1a2fb387e355ee3827a4ff3c7",
+        "sourceMap": "chunk-VFTINRM2.mjs.map"
+      },
+      {
+        "path": "src/rendering-util/rendering-elements/shapes/composite.ts",
+        "sha256": "7798490929bd25d6e88a76f71280c7e5680519b96b3e47d9ede3299fde452892",
+        "sourceMap": "chunk-VFTINRM2.mjs.map"
+      },
+      {
+        "path": "src/rendering-util/rendering-elements/shapes/drawRect.ts",
+        "sha256": "e73e50c7090e1b28f612ad36e6cf2c807979adfe1721ef091853ac7b80203016",
+        "sourceMap": "chunk-VFTINRM2.mjs.map"
+      },
+      {
+        "path": "src/rendering-util/rendering-elements/shapes/question.ts",
+        "sha256": "54d769048857df58072c5d3216da8ad2a61e8a1ed3cbd594f9491bd9e6ff4bf8",
+        "sourceMap": "chunk-VFTINRM2.mjs.map"
+      },
+      {
+        "path": "src/rendering-util/rendering-elements/shapes/squareRect.ts",
+        "sha256": "f865b17f90ea0303245ec08cd1d967239031b1a297d2c32a79842df94f56421d",
+        "sourceMap": "chunk-VFTINRM2.mjs.map"
+      },
+      {
+        "path": "src/diagrams/block/parser/block.jison",
+        "sha256": "50089847bac5c061dee73f11b17b0bdf6b66ef08248915f538efa94ea8b4bac7",
+        "rawFile": ".reference\\mermaid-js\\packages\\mermaid\\src\\diagrams\\block\\parser\\block.jison"
+      }
+    ]
   }
 }

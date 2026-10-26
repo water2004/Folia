@@ -1,0 +1,17 @@
+#include "support/folia_test.hpp"
+import folia.mermaid.block_svg;
+import folia.mermaid.number;
+namespace {
+using namespace boost::ut;using namespace folia::mermaid;
+#include "theme_fixture.hpp"
+std::vector<std::string_view> columns(std::string_view rest){std::vector<std::string_view> out;for(;;){auto tab=rest.find('\t');out.push_back(rest.substr(0,tab));if(tab==rest.npos)return out;rest.remove_prefix(tab+1);}}
+void strings(const std::vector<std::u16string>& actual,const ConfigValue& expected){expect(fatal(actual.size()==expected.sequence.size()));for(std::size_t i=0;i<actual.size();++i)expect(bool(actual[i]==expected.sequence[i].string));}
+void node(const BlockDocument& d,std::size_t index,const ConfigValue& expected){const auto& n=d.nodes[index];expect(bool(n.id==field(expected,u"id").string));expect(bool(n.type==field(expected,u"type").string));expect(bool(n.label==field(expected,u"label").string));expect(n.columns==field(expected,u"columns").number);expect(n.span==field(expected,u"span").number);strings(n.classes,field(expected,u"classes"));strings(n.styles,field(expected,u"styles"));strings(n.directions,field(expected,u"directions"));const auto& children=field(expected,u"children").sequence;expect(fatal(n.children.size()==children.size()));for(std::size_t i=0;i<children.size();++i)node(d,n.children[i],children[i]);}
+suite block=[] {
+ "mermaid_block_parser_and_config_match_original"_test=[] {
+  const auto dir=std::getenv("FOLIA_MERMAID_FIXTURES");std::ifstream input{std::filesystem::path(dir?dir:FOLIA_MERMAID_FIXTURE_DIR)/"block.tsv"};expect(fatal(input.is_open()));std::string line;std::size_t count=0;
+  while(std::getline(input,line)){if(!line.empty()&&line.back()=='\r')line.pop_back();if(line.empty()||line.front()=='#')continue;auto f=columns(line);expect(fatal(f.size()==4_u));++count;auto session=ConfigSession::create();expect(fatal(session.has_value()));auto site=json(decode(f[2]));expect(fatal(session->save_initialize_config(site).has_value()));expect(fatal(session->set_site_config(site).has_value()));auto actual=prepare_block(decode(f[1]),*session);auto expected=json(decode(f[3]));if(expected.kind==ConfigKind::null){expect(!actual)<<f[0];continue;}expect(fatal(actual.has_value()))<<f[0]<<(actual?"":actual.error());const auto& d=actual->document;node(d,0,field(expected,u"root"));const auto& edges=field(expected,u"edges").sequence;expect(fatal(d.edges.size()==edges.size()));for(std::size_t i=0;i<edges.size();++i){const auto& a=d.edges[i];const auto& e=edges[i];expect(bool(a.id==field(e,u"id").string));expect(bool(a.start==field(e,u"start").string));expect(bool(a.end==field(e,u"end").string));expect(bool(a.label==field(e,u"label").string));expect(bool(a.thickness==field(e,u"thickness").string));expect(bool(a.pattern==field(e,u"pattern").string));expect(bool(a.arrow_end==field(e,u"arrowTypeEnd").string));expect(bool(a.arrow_start==field(e,u"arrowTypeStart").string));}const auto& classes=field(expected,u"classes").sequence;expect(fatal(d.classes.size()==classes.size()));for(std::size_t i=0;i<classes.size();++i){const auto& e=classes[i].sequence[1];expect(bool(d.classes[i].id==field(e,u"id").string));strings(d.classes[i].styles,field(e,u"styles"));strings(d.classes[i].text_styles,field(e,u"textStyles"));}expect(actual->config.padding==field(field(expected,u"config"),u"padding").number);expect(!render_block_svg(*actual,{}));
+  }expect(count==10_u);
+ };
+};
+}
