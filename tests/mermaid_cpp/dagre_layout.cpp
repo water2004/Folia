@@ -64,7 +64,7 @@ suite dagre_layout=[] {
                 else {expect(fatal(a.label.has_value()));near(a.label->x,field(e,u"x").number,fields[0]);near(a.label->y,field(e,u"y").number,fields[0]);}
             }
         }
-        expect(count==21_u);
+        expect(count==25_u);
     };
     "mermaid_dagre_layout_common_invalid_boxes_and_isolation"_test=[] {
         FlowchartInput graph;graph.nodes={{.id=u"A"},{.id=u"B"}};
