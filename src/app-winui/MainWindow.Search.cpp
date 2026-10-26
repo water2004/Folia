@@ -38,7 +38,7 @@ namespace winrt::Folia::implementation
     {
         if (FindReplaceBar().Visibility() == Microsoft::UI::Xaml::Visibility::Collapsed) return;
         FindReplaceBar().Visibility(Microsoft::UI::Xaml::Visibility::Collapsed);
-        editorSession.ClearSearch();
+        editorSession().ClearSearch();
         activeSearchMatch.reset();
         searchMatchCount = 0;
         RenderEditorSurface();
@@ -51,7 +51,7 @@ namespace winrt::Folia::implementation
             || FindReplaceBar().Visibility() == Microsoft::UI::Xaml::Visibility::Collapsed) return;
         updatingSearch = true;
         auto query = SearchText(FindQueryBox().Text());
-        auto summary = editorSession.Search(query, CurrentSearchOptions());
+        auto summary = editorSession().Search(query, CurrentSearchOptions());
         searchMatchCount = summary.matchCount;
         if (summary.error)
         {
@@ -68,10 +68,10 @@ namespace winrt::Folia::implementation
         {
             if (!activeSearchMatch || *activeSearchMatch >= summary.matchCount)
                 activeSearchMatch = 0;
-            if (activateMatch && editorSession.ActivateSearchMatch(*activeSearchMatch))
+            if (activateMatch && editorSession().ActivateSearchMatch(*activeSearchMatch))
             {
                 textInputController.NotifySelectionChanged();
-                editorRenderer.ScrollToPosition(editorSession.Selection().active);
+                editorRenderer.ScrollToPosition(editorSession().Selection().active);
             }
             FindMatchCountText().Text(LocalizeFormat(
                 L"FindResultCount",
@@ -94,12 +94,12 @@ namespace winrt::Folia::implementation
         else
             current = (current + 1) % searchMatchCount;
         activeSearchMatch = current;
-        if (!editorSession.ActivateSearchMatch(current)) return;
+        if (!editorSession().ActivateSearchMatch(current)) return;
         FindMatchCountText().Text(LocalizeFormat(
             L"FindResultCount",
             {winrt::to_hstring(current + 1), winrt::to_hstring(searchMatchCount)}));
         textInputController.NotifySelectionChanged();
-        editorRenderer.ScrollToPosition(editorSession.Selection().active);
+        editorRenderer.ScrollToPosition(editorSession().Selection().active);
         RenderEditorSurface();
     }
 
@@ -108,7 +108,7 @@ namespace winrt::Folia::implementation
         if (!activeSearchMatch) return;
         auto query = SearchText(FindQueryBox().Text());
         auto replacement = SearchText(ReplaceTextBox().Text());
-        if (!editorSession.ReplaceSearchMatch(
+        if (!editorSession().ReplaceSearchMatch(
                 *activeSearchMatch, query, replacement, CurrentSearchOptions())) return;
         UpdateDocumentInfo();
         sidebarController.Refresh();
@@ -120,7 +120,7 @@ namespace winrt::Folia::implementation
     {
         auto query = SearchText(FindQueryBox().Text());
         auto replacement = SearchText(ReplaceTextBox().Text());
-        if (!editorSession.ReplaceAllSearchMatches(
+        if (!editorSession().ReplaceAllSearchMatches(
                 query, replacement, CurrentSearchOptions())) return;
         UpdateDocumentInfo();
         sidebarController.Refresh();

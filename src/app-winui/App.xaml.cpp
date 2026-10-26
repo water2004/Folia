@@ -52,6 +52,7 @@ namespace winrt::Folia::implementation
             if (IsDebuggerPresent())
             {
                 auto errorMessage = e.Message();
+                ::OutputDebugStringW((L"Folia.Unhandled: " + errorMessage + L"\n").c_str());
                 __debugbreak();
             }
         });

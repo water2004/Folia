@@ -17,6 +17,8 @@
 #include "theme/ThemeConfig.h"
 #include "MainWindow.g.h"
 #include "MainWindow.Lifecycle.h"
+#include "workspace/WorkspaceDocuments.h"
+#include "workspace/FolderExplorerController.h"
 
 namespace winrt::Folia::implementation
 {
@@ -27,9 +29,27 @@ namespace winrt::Folia::implementation
 
     private:
         void AttachControllers();
+        void AttachDocumentController(std::shared_ptr<winrt::Folia::WorkspaceDocument> const& document);
+        winrt::Folia::EditorSession& editorSession() noexcept;
+        winrt::Folia::EditorDocumentController& documentController() noexcept;
+        bool IsActiveDocument(std::uint64_t id) const noexcept;
+        void ActivateDocument(std::uint64_t id);
+        void NewDocument();
+        winrt::fire_and_forget OpenWorkspaceFile(std::filesystem::path path, winrt::Folia::WorkspaceOpenMode mode);
+        winrt::fire_and_forget LoadWorkspaceDocument(std::shared_ptr<winrt::Folia::WorkspaceDocument> document);
+        winrt::fire_and_forget PickWorkspaceFile();
+        winrt::fire_and_forget PickWorkspaceFolder();
+        void RegisterWorkspaceHandlers();
+        void RefreshDocumentTabs();
+        void UpdateDocumentTab(std::uint64_t id);
+        void UpdateWorkspaceLayout();
+        void UpdateLoadingState();
+        bool DispatchApplicationAction(std::string_view action);
+        void RegisterApplicationShortcuts();
+        winrt::fire_and_forget CloseDocumentAsync(std::uint64_t id);
         void RegisterWindowHandlers();
         winrt::fire_and_forget ConfirmWindowCloseAsync();
-        winrt::Windows::Foundation::IAsyncOperation<winrt::Microsoft::UI::Xaml::Controls::ContentDialogResult> ConfirmUnsavedChangesAsync();
+        winrt::Windows::Foundation::IAsyncOperation<winrt::Microsoft::UI::Xaml::Controls::ContentDialogResult> ConfirmUnsavedChangesAsync(std::uint64_t id);
         void InitializeEditorSurface();
         void InitializeTextInput();
         void LocalizeShell();
@@ -69,7 +89,8 @@ namespace winrt::Folia::implementation
         HWND WindowHandle();
 
         winrt::hstring lastCommand;
-        winrt::Folia::EditorSession editorSession;
+        winrt::Folia::WorkspaceDocuments workspaceDocuments;
+        winrt::Folia::FolderExplorerController folderExplorer;
         winrt::Folia::EditorSurfaceRenderer editorRenderer;
         winrt::Folia::EditorScrollController scrollController;
         winrt::Folia::EditorTextInputController textInputController;
@@ -77,7 +98,6 @@ namespace winrt::Folia::implementation
         winrt::Folia::EditorKeyboardController keyboardController;
         winrt::Folia::EditorLatexCompletionController latexCompletionController;
         winrt::Folia::EditorCodeLanguageController codeLanguageController;
-        winrt::Folia::EditorDocumentController documentController;
         winrt::Folia::EditorSidebarController sidebarController;
         winrt::Microsoft::UI::Xaml::Controls::Flyout footnoteFlyout{ nullptr };
         winrt::Folia::AppSettings appSettings;
@@ -90,8 +110,15 @@ namespace winrt::Folia::implementation
         bool settingsMode = false;
         bool closePending = false;
         bool closeApproved = false;
+        bool closingDocument = false;
+        bool updatingTabs = false;
+        bool explorerOpen = false;
+        bool outlineOpen = false;
+        bool windowClosed = false;
+        std::uint64_t workspaceThemeRevision = 1;
+        std::unordered_map<std::uint64_t, winrt::Microsoft::UI::Xaml::Controls::TabViewItem> tabItems;
+        std::vector<winrt::Microsoft::UI::Xaml::Input::KeyboardAccelerator> applicationShortcuts;
         winrt::Folia::detail::WindowClosingSubscription closingHandler;
-        bool documentPaneWasOpen = true;
         std::optional<std::size_t> activeSearchMatch;
         std::size_t searchMatchCount = 0;
         bool updatingSearch = false;

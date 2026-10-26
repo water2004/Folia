@@ -297,4 +297,21 @@
   <data name="DiscardChanges" xml:space="preserve"><value>Don't save</value></data>
   <data name="SaveBeforePastingImage" xml:space="preserve"><value>Save this document first so the pasted image can be stored beside it.</value></data>
   <data name="StatusPasteContextChanged" xml:space="preserve"><value>The document or selection changed. Paste again at the intended position.</value></data>
+  <data name="CloseOutline" xml:space="preserve"><value>Close outline</value></data>
+  <data name="CloseTab" xml:space="preserve"><value>Close tab</value></data>
+  <data name="CollapseFolders" xml:space="preserve"><value>Collapse folders</value></data>
+  <data name="EditMenu" xml:space="preserve"><value>Edit</value></data>
+  <data name="FileMenu" xml:space="preserve"><value>File</value></data>
+  <data name="Files" xml:space="preserve"><value>Files</value></data>
+  <data name="FormatMenu" xml:space="preserve"><value>Format</value></data>
+  <data name="MainMenu" xml:space="preserve"><value>Main menu</value></data>
+  <data name="NewDocument" xml:space="preserve"><value>New document</value></data>
+  <data name="NextTab" xml:space="preserve"><value>Next tab</value></data>
+  <data name="OpenFolder" xml:space="preserve"><value>Open folder…</value></data>
+  <data name="PreparingDocument" xml:space="preserve"><value>Preparing document…</value></data>
+  <data name="PreviousTab" xml:space="preserve"><value>Previous tab</value></data>
+  <data name="RefreshFiles" xml:space="preserve"><value>Refresh files</value></data>
+  <data name="StatusFolderFailed" xml:space="preserve"><value>Unable to read folder: {0}</value></data>
+  <data name="NoFolderHeading" xml:space="preserve"><value>No folder open</value></data>
+  <data name="NoFolderHint" xml:space="preserve"><value>Open a folder to browse Markdown files.</value></data>
 </root>

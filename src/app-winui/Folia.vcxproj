@@ -679,6 +679,10 @@
     <ClCompile Include="MainWindow.Events.cpp" />
     <ClCompile Include="MainWindow.Encoding.cpp" />
     <ClCompile Include="MainWindow.Commands.cpp" />
+    <ClCompile Include="MainWindow.Documents.cpp" />
+    <ClCompile Include="MainWindow.Tabs.cpp" />
+    <ClCompile Include="MainWindow.Folders.cpp" />
+    <ClCompile Include="MainWindow.Shortcuts.cpp" />
     <ClCompile Include="MainWindow.Settings.cpp" />
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
   </ItemGroup>

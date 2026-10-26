@@ -72,13 +72,14 @@ namespace winrt::Folia::implementation
         InitializeTextInput();
         AttachControllers();
         RegisterWindowHandlers();
+        RegisterWorkspaceHandlers();
         UpdateSourceModeUi();
         UpdateDocumentInfo();
         if (!loadedSettings.diagnostic.empty()) SetStatus(loadedSettings.diagnostic);
         else if (!themeCatalog->Diagnostics().empty()) SetStatus(themeCatalog->Diagnostics().front());
         else if (!latexCommandCatalog->Diagnostics().empty())
             SetStatus(latexCommandCatalog->Diagnostics().front());
-        if (!initialDocumentPath.empty()) documentController.OpenDocumentPath(initialDocumentPath);
+        if (!initialDocumentPath.empty()) OpenWorkspaceFile(std::filesystem::path(initialDocumentPath.c_str()), winrt::Folia::WorkspaceOpenMode::Keep);
     }
 
     void MainWindow::LocalizeShell()
@@ -89,27 +90,54 @@ namespace winrt::Folia::implementation
             ToolTipService::SetToolTip(element, winrt::box_value(Localize(resource)));
         };
 
-        ApplicationNameText().Text(Localize(L"AppName"));
-        SidebarToggleButton().Label(Localize(L"Sidebar"));
+        FileMenu().Text(Localize(L"FileMenu"));
+        MainMenuLabel().Text(Localize(L"AppName"));
+        EditMenu().Text(Localize(L"EditMenu"));
+        FormatMenu().Text(Localize(L"FormatMenu"));
+        NewButton().Text(Localize(L"NewDocument"));
+        OpenFolderButton().Text(Localize(L"OpenFolder"));
+        OpenFolderPaneButton().Content(winrt::box_value(Localize(L"OpenFolder")));
+        NoFolderHeading().Text(Localize(L"NoFolderHeading"));
+        NoFolderHint().Text(Localize(L"NoFolderHint"));
+        SaveAsButton().Text(Localize(L"ShortcutSaveAs"));
+        CloseTabButton().Text(Localize(L"CloseTab"));
+        UndoButton().Text(Localize(L"ShortcutUndo"));
+        RedoButton().Text(Localize(L"ShortcutRedo"));
+        EditCutButton().Text(Localize(L"Cut"));
+        EditCopyButton().Text(Localize(L"Copy"));
+        EditPasteButton().Text(Localize(L"Paste"));
+        FindButton().Text(Localize(L"Find"));
+        ReplaceButton().Text(Localize(L"Replace"));
+        ExplorerHeadingText().Text(Localize(L"Files"));
+        ExplorerToggleButton().Text(Localize(L"Files"));
+        DocumentLoadingText().Text(Localize(L"PreparingDocument"));
+        tooltip(MainMenuButton(), L"MainMenu");
+        tooltip(RefreshFolderButton(), L"RefreshFiles");
+        tooltip(ExplorerPaneButton(), L"Files");
+        tooltip(OutlinePaneButton(), L"ToggleOutline");
+        tooltip(CollapseFoldersButton(), L"CollapseFolders");
+        tooltip(CloseOutlineButton(), L"CloseOutline");
+
+        SidebarToggleButton().Text(Localize(L"Outline"));
         tooltip(SidebarToggleButton(), L"ToggleOutline");
-        OpenButton().Label(Localize(L"Open"));
+        OpenButton().Text(Localize(L"Open"));
         tooltip(OpenButton(), L"OpenTooltip");
-        ReloadButton().Label(Localize(L"Reload"));
+        ReloadButton().Text(Localize(L"Reload"));
         tooltip(ReloadButton(), L"ReloadTooltip");
-        SaveButton().Label(Localize(L"Save"));
+        SaveButton().Text(Localize(L"Save"));
         tooltip(SaveButton(), L"SaveTooltip");
-        ExportPdfButton().Label(Localize(L"Pdf"));
+        ExportPdfButton().Text(Localize(L"Pdf"));
         tooltip(ExportPdfButton(), L"PdfTooltip");
-        BoldButton().Label(Localize(L"Bold"));
+        BoldButton().Text(Localize(L"Bold"));
         tooltip(BoldButton(), L"Bold");
-        ItalicButton().Label(Localize(L"Italic"));
+        ItalicButton().Text(Localize(L"Italic"));
         tooltip(ItalicButton(), L"Italic");
-        StrikeButton().Label(Localize(L"Strike"));
+        StrikeButton().Text(Localize(L"Strike"));
         tooltip(StrikeButton(), L"Strikethrough");
         CodeLanguageBox().PlaceholderText(Localize(L"Language"));
-        InlineCodeButton().Label(Localize(L"InlineCode"));
+        InlineCodeButton().Text(Localize(L"InlineCode"));
         tooltip(InlineCodeButton(), L"InlineCode");
-        BlocksButton().Label(Localize(L"Blocks"));
+        BlocksButton().Text(Localize(L"Blocks"));
         tooltip(BlocksButton(), L"BlockStructure");
         HeadingMenuItem().Text(Localize(L"Heading"));
         Heading1Button().Text(Localize(L"Heading1"));
@@ -125,9 +153,9 @@ namespace winrt::Folia::implementation
         CalloutNoteMenuItem().Text(Localize(L"Note"));
         CalloutTipMenuItem().Text(Localize(L"Tip"));
         CalloutWarningMenuItem().Text(Localize(L"Warning"));
-        FormatDocumentButton().Label(Localize(L"FormatDocument"));
+        FormatDocumentButton().Text(Localize(L"FormatDocument"));
         tooltip(FormatDocumentButton(), L"FormatDocument");
-        InsertButton().Label(Localize(L"Insert"));
+        InsertButton().Text(Localize(L"Insert"));
         tooltip(InsertButton(), L"InsertContent");
         ReloadExternalButton().Content(winrt::box_value(Localize(L"Reload")));
         KeepLocalButton().Content(winrt::box_value(Localize(L"KeepLocalChanges")));
@@ -137,7 +165,7 @@ namespace winrt::Folia::implementation
         ImageButton().Text(Localize(L"Image"));
         FootnoteButton().Text(Localize(L"Footnote"));
         TocButton().Text(Localize(L"TableOfContents"));
-        SettingsButton().Label(Localize(L"Settings"));
+        SettingsButton().Text(Localize(L"Settings"));
         tooltip(SettingsButton(), L"Settings");
         OutlineHeadingText().Text(Localize(L"Outline"));
         CutMenuItem().Text(Localize(L"Cut"));
@@ -162,32 +190,33 @@ namespace winrt::Folia::implementation
 
     winrt::hstring MainWindow::LocalizedDocumentName()
     {
-        return editorSession.HasFile() ? editorSession.DisplayName() : Localize(L"UntitledMarkdown");
+        return editorSession().HasFile() ? editorSession().DisplayName() : Localize(L"UntitledMarkdown");
     }
 
     void MainWindow::UpdateDocumentInfo()
     {
         auto const displayName = LocalizedDocumentName();
-        auto const detail = editorSession.HasFile() ? editorSession.Path() : displayName;
-        TitleDocumentText().Text(displayName);
+        auto const detail = editorSession().HasFile() ? editorSession().Path() : displayName;
         DocumentNameText().Text(displayName);
-        Microsoft::UI::Xaml::Controls::ToolTipService::SetToolTip(TitleDocumentText(), winrt::box_value(detail));
         Microsoft::UI::Xaml::Controls::ToolTipService::SetToolTip(DocumentNameText(), winrt::box_value(detail));
         CharacterCountText().Text(LocalizeFormat(
-            L"CharacterCount", { winrt::to_hstring(editorSession.CharacterCount()) }));
+            L"CharacterCount", { winrt::to_hstring(editorSession().CharacterCount()) }));
         RevisionText().Text(LocalizeFormat(
-            L"Revision", { winrt::to_hstring(editorSession.Revision()) }));
-        auto encodingLabel = winrt::to_hstring(editorSession.Encoding().name);
-        if (editorSession.Encoding().byteOrderMark == DocumentByteOrderMark::Utf8)
+            L"Revision", { winrt::to_hstring(editorSession().Revision()) }));
+        auto encodingLabel = winrt::to_hstring(editorSession().Encoding().name);
+        if (editorSession().Encoding().byteOrderMark == DocumentByteOrderMark::Utf8)
             encodingLabel = encodingLabel + L" BOM";
         EncodingButton().Content(winrt::box_value(encodingLabel));
-        EncodingButton().IsEnabled(editorSession.HasFile());
+        EncodingButton().IsEnabled(editorSession().HasFile());
         if (!settingsMode) Title(LocalizeFormat(L"WindowTitleDocument", { displayName }));
+        workspaceDocuments.RefreshPath(workspaceDocuments.Active()->id);
+        workspaceDocuments.ObserveEdit(workspaceDocuments.Active()->id);
+        UpdateDocumentTab(workspaceDocuments.Active()->id);
     }
 
     void MainWindow::UpdateSourceModeUi()
     {
-        auto source = editorSession.IsSourceMode();
+        auto source = editorSession().IsSourceMode();
         SourceModeButton().IsChecked(source);
         BoldButton().IsEnabled(!source);
         ItalicButton().IsEnabled(!source);
@@ -199,7 +228,8 @@ namespace winrt::Folia::implementation
 
     void MainWindow::ToggleSourceMode()
     {
-        if (!editorSession.ToggleSourceMode())
+        if (workspaceDocuments.Active()->opening || documentController().IsLoading()) return;
+        if (!editorSession().ToggleSourceMode())
         {
             UpdateSourceModeUi();
             return;
@@ -208,14 +238,14 @@ namespace winrt::Folia::implementation
         editorRenderer.ResetDocumentCaches();
         UpdateSourceModeUi();
         UpdateDocumentInfo();
-        SetStatus(Localize(editorSession.IsSourceMode() ? L"SourceMode" : L"RenderedMode"));
+        SetStatus(Localize(editorSession().IsSourceMode() ? L"SourceMode" : L"RenderedMode"));
         sidebarController.Refresh();
         textInputController.NotifyTextChanged();
         if (FindReplaceBar().Visibility() == Microsoft::UI::Xaml::Visibility::Visible)
             RefreshSearch(true);
         else
             RenderEditorSurface();
-        if (editorRenderer.ScrollToPosition(editorSession.Selection().active)) RenderEditorSurface();
+        if (editorRenderer.ScrollToPosition(editorSession().Selection().active)) RenderEditorSurface();
         if (FindReplaceBar().Visibility() != Microsoft::UI::Xaml::Visibility::Visible)
             EditorSurface().Focus(Microsoft::UI::Xaml::FocusState::Programmatic);
     }
@@ -223,7 +253,7 @@ namespace winrt::Folia::implementation
     void MainWindow::InitializeTextInput()
     {
         textInputController.Attach(
-            editorSession,
+            editorSession(),
             editorRenderer,
             EditorSurface(),
             [this](folia::Command const& command) { return ExecuteEditorCommand(command); },
@@ -234,29 +264,30 @@ namespace winrt::Folia::implementation
 
     bool MainWindow::ExecuteEditorCommand(folia::Command const& command)
     {
+        if (windowClosed || settingsMode || workspaceDocuments.Active()->opening || documentController().IsLoading()) return false;
         keyboardController.ResetCaretGoal();
-        auto oldRevision = editorSession.Revision();
-        if (!editorSession.ExecuteCommand(command))
+        auto oldRevision = editorSession().Revision();
+        if (!editorSession().ExecuteCommand(command))
         {
             return false;
         }
 
-        if (editorSession.Revision() != oldRevision) UpdateDocumentInfo();
+        if (editorSession().Revision() != oldRevision) UpdateDocumentInfo();
         sidebarController.Refresh();
-        if (editorSession.Revision() != oldRevision
+        if (editorSession().Revision() != oldRevision
             && FindReplaceBar().Visibility() == Microsoft::UI::Xaml::Visibility::Visible)
             RefreshSearch(true);
         else
             RenderEditorSurface();
-        if (editorRenderer.ScrollToPosition(editorSession.Selection().active)) RenderEditorSurface();
-        if (editorSession.Revision() != oldRevision) textInputController.NotifyTextChanged();
+        if (editorRenderer.ScrollToPosition(editorSession().Selection().active)) RenderEditorSurface();
+        if (editorSession().Revision() != oldRevision) textInputController.NotifyTextChanged();
         else textInputController.NotifySelectionChanged();
         return true;
     }
 
     void MainWindow::NavigateToFootnote(folia::TextPosition position)
     {
-        editorSession.SetSelection(position, position);
+        editorSession().SetSelection(position, position);
         textInputController.NotifySelectionChanged();
         editorRenderer.ScrollToPosition(position);
         RenderEditorSurface();
@@ -285,14 +316,14 @@ namespace winrt::Folia::implementation
 
         const auto isReference = hit.kind == winrt::Folia::EditorFootnoteControlKind::Reference;
         auto target = isReference
-            ? editorSession.FootnoteDefinitionTarget(hit.label)
-            : editorSession.FirstFootnoteReferenceTarget(hit.label);
+            ? editorSession().FootnoteDefinitionTarget(hit.label)
+            : editorSession().FirstFootnoteReferenceTarget(hit.label);
         TextBlock preview;
         preview.TextWrapping(TextWrapping::Wrap);
         preview.IsTextSelectionEnabled(false);
         if (isReference)
         {
-            auto text = editorSession.FootnotePreview(hit.label);
+            auto text = editorSession().FootnotePreview(hit.label);
             preview.Text(target
                 ? text.empty() ? Localize(L"EmptyFootnoteDefinition") : winrt::to_hstring(text)
                 : Localize(L"ReferenceHasNoDefinition"));
@@ -370,10 +401,8 @@ namespace winrt::Folia::implementation
         CancelOperationButton().Visibility(active && cancellable
             ? Microsoft::UI::Xaml::Visibility::Visible
             : Microsoft::UI::Xaml::Visibility::Collapsed);
-        OpenButton().IsEnabled(!active);
         ReloadButton().IsEnabled(!active);
         ExportPdfButton().IsEnabled(!active);
-        SettingsButton().IsEnabled(!active);
     }
 
     HWND MainWindow::WindowHandle()
@@ -413,12 +442,12 @@ namespace winrt::Folia::implementation
         try
         {
             auto snippetPlaceholders = keyboardController.SnippetPlaceholders();
-            auto frame = editorSession.RenderFrame();
+            auto frame = editorSession().RenderFrame();
             frame.snippetPlaceholders = snippetPlaceholders;
             editorRenderer.Render(frame);
             sidebarController.SyncViewport();
             codeLanguageController.Refresh();
-            auto style = editorSession.ActiveInlineStyle();
+            auto style = editorSession().ActiveInlineStyle();
             BoldButton().IsChecked(style.bold);
             ItalicButton().IsChecked(style.italic);
             StrikeButton().IsChecked(style.strikethrough);
@@ -464,8 +493,6 @@ namespace winrt::Folia::implementation
 
         Root().Background(Brush(colors.shell_bg));
         AppTitleBar().Background(Brush(colors.shell_bg));
-        ShellCommandBar().Background(Brush(colors.shell_layer_bg));
-        ShellCommandBar().BorderBrush(Brush(colors.shell_border));
         StatusBar().Background(Brush(colors.shell_layer_bg));
         StatusBar().BorderBrush(Brush(colors.shell_border));
         EditorScrollBar().Background(Brush(colors.shell_layer_bg));
@@ -482,8 +509,7 @@ namespace winrt::Folia::implementation
         titleBar.ButtonInactiveBackgroundColor(ColorReference(colors.shell_bg));
         titleBar.ButtonInactiveForegroundColor(ColorReference(colors.shell_muted_fg));
 
-        Root().RowDefinitions().GetAt(0).Height(Microsoft::UI::Xaml::GridLengthHelper::FromPixels(themeProfile.layout.title_bar_height));
-        DocumentNavigation().OpenPaneLength(themeProfile.layout.navigation_open_width);
+        UpdateWorkspaceLayout();
         EditorScrollBar().Width(themeProfile.layout.scrollbar_width);
         EditorScrollBarColumn().Width(Microsoft::UI::Xaml::GridLengthHelper::FromPixels(themeProfile.layout.scrollbar_width));
         scrollController.SetWidth(themeProfile.layout.scrollbar_width);
@@ -513,7 +539,8 @@ namespace winrt::Folia::implementation
             Root().RequestedTheme(themeProfile.variant == folia::Theme::Dark
                 ? ElementTheme::Dark
                 : ElementTheme::Light);
-        editorSession.SetTheme(themeProfile);
+        editorSession().SetTheme(themeProfile);
+        workspaceDocuments.Active()->themeRevision = ++workspaceThemeRevision;
         editorRenderer.SetTheme(themeProfile);
         if (settingsView)
         {

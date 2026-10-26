@@ -85,9 +85,10 @@ namespace winrt::Folia::implementation
 
     winrt::fire_and_forget MainWindow::ShowEncodingPicker(bool saveWithEncoding)
     {
+        const auto document = workspaceDocuments.Active();
         try
         {
-            if (!editorSession.HasFile()) co_return;
+            if (!editorSession().HasFile()) co_return;
             auto dialog = Microsoft::UI::Xaml::Controls::ContentDialog();
             dialog.XamlRoot(Root().XamlRoot());
             dialog.Title(winrt::box_value(Localize(
@@ -118,7 +119,7 @@ namespace winrt::Folia::implementation
             dialog.Content(root);
 
             auto choices = std::make_shared<std::vector<EncodingChoice>>(
-                BuildChoices(editorSession, saveWithEncoding));
+                BuildChoices(editorSession(), saveWithEncoding));
             auto repopulate = [list, choices](std::wstring_view query)
             {
                 std::wstring lowered(query);
@@ -144,7 +145,7 @@ namespace winrt::Folia::implementation
             };
             repopulate({});
 
-            auto const& current = editorSession.Encoding();
+            auto const& current = editorSession().Encoding();
             for (std::uint32_t index = 0; index < list.Items().Size(); ++index)
             {
                 auto item = list.Items().GetAt(index).as<Microsoft::UI::Xaml::Controls::ListViewItem>();
@@ -173,6 +174,7 @@ namespace winrt::Folia::implementation
                 dialog.IsPrimaryButtonEnabled(view.SelectedItem() != nullptr);
             });
             auto result = co_await dialog.ShowAsync();
+            if (!IsActiveDocument(document->id)) co_return;
             if (result != Microsoft::UI::Xaml::Controls::ContentDialogResult::Primary) co_return;
             auto selected = list.SelectedItem();
             if (!selected) co_return;
@@ -181,7 +183,7 @@ namespace winrt::Folia::implementation
             auto const choice = (*choices)[choiceIndex];
             if (saveWithEncoding)
             {
-                documentController.SaveDocumentWithEncoding({
+                documentController().SaveDocumentWithEncoding({
                     choice.name,
                     choice.byteOrderMark,
                     100,
@@ -190,7 +192,7 @@ namespace winrt::Folia::implementation
             }
             else
             {
-                documentController.ReopenDocumentWithEncoding(choice.name);
+                documentController().ReopenDocumentWithEncoding(choice.name);
             }
         }
         catch (winrt::hresult_error const& error)

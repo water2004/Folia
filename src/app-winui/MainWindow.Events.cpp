@@ -8,71 +8,29 @@ namespace winrt::Folia::implementation
 {
     void MainWindow::AttachControllers()
     {
+        AttachDocumentController(workspaceDocuments.Active());
         sidebarController.Attach(
-            editorSession,
+            editorSession(),
             editorRenderer,
             textInputController,
             OutlineList(),
             [this] { RenderEditorSurface(); });
-        documentController.Attach(
-            editorSession,
-            editorRenderer,
-            textInputController,
-            [this](folia::Command const& command) { return ExecuteEditorCommand(command); },
-            [this](winrt::hstring const& status) { SetStatus(status); },
-            [this](bool active, std::optional<double> value, bool cancellable)
-            {
-                SetOperationProgress(active, value, cancellable);
-            },
-            [this]
-            {
-                latexCompletionController.Cancel();
-                UpdateSourceModeUi();
-                UpdateDocumentInfo();
-                sidebarController.Refresh();
-                if (FindReplaceBar().Visibility() == Microsoft::UI::Xaml::Visibility::Visible)
-                    RefreshSearch(true);
-                else
-                    RenderEditorSurface();
-            },
-            [this] { RenderEditorSurface(); },
-            [this] { return WindowHandle(); },
-            [this](bool visible, bool fileDeleted)
-            {
-                ExternalChangeInfoBar().Title(Localize(
-                    fileDeleted ? L"ExternalFileDeletedTitle" : L"ExternalFileChangedTitle"));
-                ExternalChangeInfoBar().Message(Localize(
-                    fileDeleted ? L"ExternalFileDeletedMessage" : L"ExternalFileChangedMessage"));
-                ReloadExternalButton().Visibility(fileDeleted
-                    ? Microsoft::UI::Xaml::Visibility::Collapsed
-                    : Microsoft::UI::Xaml::Visibility::Visible);
-                ExternalChangeInfoBar().IsOpen(visible);
-            });
-        documentController.SetSaveDialogs([this] { return ConfirmUnsavedChangesAsync(); });
         keyboardController.Attach(
-            editorSession,
+            editorSession(),
             editorRenderer,
             textInputController,
             [this](folia::Command const& command) { return ExecuteEditorCommand(command); },
-            [this] { documentController.CopySelection(); },
-            [this] { documentController.CutSelection(); },
-            [this] { documentController.PasteClipboard(); },
+            [this] { documentController().CopySelection(); },
+            [this] { documentController().CutSelection(); },
+            [this] { documentController().PasteClipboard(); },
             [this](std::string_view action)
             {
-                if (action == "file.open") documentController.OpenDocument();
-                else if (action == "file.save") documentController.SaveDocument();
-                else if (action == "file.save_as") documentController.SaveDocumentAs();
-                else if (action == "file.export_pdf") documentController.ExportPdf();
-                else if (action == "file.reload") documentController.ReloadDocument();
-                else if (action == "search.find") ShowFindBar(false);
-                else if (action == "search.replace") ShowFindBar(true);
-                else if (action == "insert.image") documentController.InsertImage();
-                else if (action == "view.source_mode") ToggleSourceMode();
+                DispatchApplicationAction(action);
             },
             appSettings.shortcutBindings,
             [this] { RenderEditorSurface(); });
         latexCompletionController.Attach(
-            editorSession,
+            editorSession(),
             editorRenderer,
             EditorSurface(),
             EditorOverlay(),
@@ -87,21 +45,21 @@ namespace winrt::Folia::implementation
             });
         latexCompletionController.SetEnabled(appSettings.latexSuggestionsEnabled);
         codeLanguageController.Attach(
-            editorSession,
+            editorSession(),
             editorRenderer,
             EditorSurface(),
             CodeBlockOverlay(),
             CodeLanguageBox(),
             [this](folia::Command const& command) { return ExecuteEditorCommand(command); });
         pointerController.Attach(
-            editorSession,
+            editorSession(),
             editorRenderer,
             scrollController,
             textInputController,
             EditorSurface(),
             [this](folia::Command const& command) { return ExecuteEditorCommand(command); },
             [this] { RenderEditorSurface(); },
-            [this](std::string href) { documentController.OpenLink(std::move(href)); },
+            [this](std::string href) { documentController().OpenLink(std::move(href)); },
             [this](auto hit, auto position) { ShowFootnoteFlyout(hit, position); },
             [this]
             {
@@ -127,10 +85,12 @@ namespace winrt::Folia::implementation
             });
         Closed([this](auto const&, auto const&)
         {
+            windowClosed = true;
             closingHandler.Reset();
             if (latexCommandCatalog) latexCommandCatalog->Flush();
             if (settingsView) settingsView->Detach();
-            documentController.Detach();
+            folderExplorer.Detach();
+            for (auto const& document : workspaceDocuments.Items()) document->controller.Detach();
             sidebarController.Detach();
             pointerController.Detach();
             latexCompletionController.Detach();
@@ -167,7 +127,8 @@ namespace winrt::Folia::implementation
 
         SidebarToggleButton().Click([this](auto const&, auto const&)
         {
-            DocumentNavigation().IsPaneOpen(!DocumentNavigation().IsPaneOpen());
+            outlineOpen = SidebarToggleButton().IsChecked();
+            UpdateWorkspaceLayout();
         });
 
         EditorSurface().Loaded([this](auto const&, auto const&)
@@ -182,7 +143,7 @@ namespace winrt::Folia::implementation
 
         WorkspaceHost().SizeChanged([this](auto const&, Microsoft::UI::Xaml::SizeChangedEventArgs const& args)
         {
-            OutlinePaneContent().Height((std::max)(0.0f, args.NewSize().Height));
+            UpdateWorkspaceLayout();
         });
 
         EditorSurface().CompositionScaleChanged([this](auto const&, auto const&)
@@ -198,6 +159,7 @@ namespace winrt::Folia::implementation
         EditorSurface().IsTabStop(true);
         EditorSurface().CharacterReceived([this](auto const&, Microsoft::UI::Xaml::Input::CharacterReceivedRoutedEventArgs const& args)
         {
+            if (workspaceDocuments.Active()->opening || documentController().IsLoading()) { args.Handled(true); return; }
             auto handled = keyboardController.Character(args.Character());
             if (handled) latexCompletionController.Refresh();
             args.Handled(handled);

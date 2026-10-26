@@ -9,21 +9,16 @@ namespace winrt::Folia::implementation
         auto value = visible
             ? Microsoft::UI::Xaml::Visibility::Visible
             : Microsoft::UI::Xaml::Visibility::Collapsed;
-        SidebarToggleButton().Visibility(value);
-        OpenButton().Visibility(value);
         ReloadButton().Visibility(value);
         SaveButton().Visibility(value);
         ExportPdfButton().Visibility(value);
-        FileFormatSeparator().Visibility(value);
         BoldButton().Visibility(value);
         ItalicButton().Visibility(value);
         StrikeButton().Visibility(value);
         InlineCodeButton().Visibility(value);
-        InlineBlockSeparator().Visibility(value);
         BlocksButton().Visibility(value);
         InsertButton().Visibility(value);
         FormatDocumentButton().Visibility(value);
-        SettingsSeparator().Visibility(value);
     }
 
     std::optional<winrt::hstring> MainWindow::ApplySettings(winrt::Folia::AppSettings const& settings)
@@ -38,7 +33,10 @@ namespace winrt::Folia::implementation
         auto latexSuggestionsChanged =
             appSettings.latexSuggestionsEnabled != settings.latexSuggestionsEnabled;
         appSettings = settings;
-        if (shortcutsChanged) keyboardController.SetShortcuts(appSettings.shortcutBindings);
+        if (shortcutsChanged) {
+            keyboardController.SetShortcuts(appSettings.shortcutBindings);
+            RegisterApplicationShortcuts();
+        }
         if (latexSuggestionsChanged)
             latexCompletionController.SetEnabled(appSettings.latexSuggestionsEnabled);
         if (themeChanged) UpdateTheme();
@@ -65,7 +63,6 @@ namespace winrt::Folia::implementation
         if (enabled)
         {
             HideFindBar();
-            documentPaneWasOpen = DocumentNavigation().IsPaneOpen();
             if (!settingsView)
             {
                 settingsView = std::make_shared<winrt::Folia::SettingsView>(
@@ -83,19 +80,16 @@ namespace winrt::Folia::implementation
             }
             settingsView->SetNavigationWidth(themeProfile.layout.navigation_open_width);
 
-            ShellCommandBar().IsOpen(false);
-            DocumentNavigation().Visibility(Microsoft::UI::Xaml::Visibility::Collapsed);
+            DocumentWorkspace().Visibility(Microsoft::UI::Xaml::Visibility::Collapsed);
             SettingsViewHost().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
             StatusBar().Visibility(Microsoft::UI::Xaml::Visibility::Collapsed);
-            TitleDocumentText().Text(Localize(L"Settings"));
             Title(Localize(L"WindowTitleSettings"));
             return;
         }
 
         SettingsViewHost().Visibility(Microsoft::UI::Xaml::Visibility::Collapsed);
         if (settingsView) settingsView->Reset(appSettings, CurrentThemeVariant());
-        DocumentNavigation().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
-        DocumentNavigation().IsPaneOpen(documentPaneWasOpen);
+        DocumentWorkspace().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
         StatusBar().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
         UpdateDocumentInfo();
         RenderEditorSurface();

@@ -297,4 +297,21 @@
   <data name="DiscardChanges" xml:space="preserve"><value>不保存</value></data>
   <data name="SaveBeforePastingImage" xml:space="preserve"><value>请先保存文档，以便将粘贴的图片保存在文档同目录下。</value></data>
   <data name="StatusPasteContextChanged" xml:space="preserve"><value>文档或选区已改变，请在目标位置重新粘贴。</value></data>
+  <data name="CloseOutline" xml:space="preserve"><value>关闭大纲</value></data>
+  <data name="CloseTab" xml:space="preserve"><value>关闭标签页</value></data>
+  <data name="CollapseFolders" xml:space="preserve"><value>折叠文件夹</value></data>
+  <data name="EditMenu" xml:space="preserve"><value>编辑</value></data>
+  <data name="FileMenu" xml:space="preserve"><value>文件</value></data>
+  <data name="Files" xml:space="preserve"><value>文件</value></data>
+  <data name="FormatMenu" xml:space="preserve"><value>格式</value></data>
+  <data name="MainMenu" xml:space="preserve"><value>主菜单</value></data>
+  <data name="NewDocument" xml:space="preserve"><value>新建文档</value></data>
+  <data name="NextTab" xml:space="preserve"><value>下一个标签页</value></data>
+  <data name="OpenFolder" xml:space="preserve"><value>打开文件夹…</value></data>
+  <data name="PreparingDocument" xml:space="preserve"><value>正在准备文档…</value></data>
+  <data name="PreviousTab" xml:space="preserve"><value>上一个标签页</value></data>
+  <data name="RefreshFiles" xml:space="preserve"><value>刷新文件列表</value></data>
+  <data name="StatusFolderFailed" xml:space="preserve"><value>读取文件夹失败：{0}</value></data>
+  <data name="NoFolderHeading" xml:space="preserve"><value>尚未打开文件夹</value></data>
+  <data name="NoFolderHint" xml:space="preserve"><value>打开文件夹以浏览 Markdown 文件。</value></data>
 </root>

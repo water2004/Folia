@@ -7,39 +7,50 @@ namespace winrt::Folia::implementation
 {
     void MainWindow::RegisterCommandHandlers()
     {
+        NewButton().Click([this](auto const&, auto const&) { NewDocument(); });
+        OpenFolderButton().Click([this](auto const&, auto const&) { PickWorkspaceFolder(); });
+        SaveAsButton().Click([this](auto const&, auto const&) { documentController().SaveDocumentAs(); });
+        CloseTabButton().Click([this](auto const&, auto const&) { CloseDocumentAsync(workspaceDocuments.Active()->id); });
+        UndoButton().Click([this](auto const&, auto const&) { ExecuteEditorCommand(folia::Command{folia::CommandKind::Undo}); });
+        RedoButton().Click([this](auto const&, auto const&) { ExecuteEditorCommand(folia::Command{folia::CommandKind::Redo}); });
+        EditCutButton().Click([this](auto const&, auto const&) { documentController().CutSelection(); });
+        EditCopyButton().Click([this](auto const&, auto const&) { documentController().CopySelection(); });
+        EditPasteButton().Click([this](auto const&, auto const&) { documentController().PasteClipboard(); });
+        FindButton().Click([this](auto const&, auto const&) { ShowFindBar(false); });
+        ReplaceButton().Click([this](auto const&, auto const&) { ShowFindBar(true); });
         OpenButton().Click([this](auto const&, auto const&)
         {
-            documentController.OpenDocument();
+            PickWorkspaceFile();
         });
 
         ReloadButton().Click([this](auto const&, auto const&)
         {
-            documentController.ReloadDocument();
+            documentController().ReloadDocument();
         });
 
         SaveButton().Click([this](auto const&, auto const&)
         {
-            documentController.SaveDocument();
+            documentController().SaveDocument();
         });
 
         ExportPdfButton().Click([this](auto const&, auto const&)
         {
-            documentController.ExportPdf();
+            documentController().ExportPdf();
         });
 
         CancelOperationButton().Click([this](auto const&, auto const&)
         {
-            documentController.CancelOperation();
+            documentController().CancelOperation();
         });
 
         ReloadExternalButton().Click([this](auto const&, auto const&)
         {
-            documentController.AcceptExternalReload();
+            documentController().AcceptExternalReload();
         });
 
         KeepLocalButton().Click([this](auto const&, auto const&)
         {
-            documentController.KeepLocalVersion();
+            documentController().KeepLocalVersion();
         });
 
         SettingsButton().Click([this](auto const&, auto const&)
@@ -159,7 +170,7 @@ namespace winrt::Folia::implementation
 
         ImageButton().Click([this](auto const&, auto const&)
         {
-            documentController.InsertImage();
+            documentController().InsertImage();
         });
 
         FootnoteButton().Click([this](auto const&, auto const&)
@@ -196,17 +207,17 @@ namespace winrt::Folia::implementation
 
         CutMenuItem().Click([this](auto const&, auto const&)
         {
-            documentController.CutSelection();
+            documentController().CutSelection();
         });
 
         CopyMenuItem().Click([this](auto const&, auto const&)
         {
-            documentController.CopySelection();
+            documentController().CopySelection();
         });
 
         PasteMenuItem().Click([this](auto const&, auto const&)
         {
-            documentController.PasteClipboard();
+            documentController().PasteClipboard();
         });
 
         SelectAllMenuItem().Click([this](auto const&, auto const&)
