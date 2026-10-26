@@ -3,6 +3,7 @@
 import folia.platform.editor_interaction;
 
 #include "editor/rendering/EditorEmbeddedDraw.h"
+#include "editor/rendering/EditorMathPreview.h"
 #include "editor/rendering/EditorInlineImageRenderer.h"
 #include "editor/rendering/EditorRenderResources.h"
 #include "editor/rendering/EditorStyleSheet.h"
@@ -29,12 +30,7 @@ namespace winrt::Folia
     {
         struct PreparedTable
         {
-            struct MathPreview
-            {
-                DisplayInlineText display;
-                ::Microsoft::WRL::ComPtr<IDWriteTextLayout> layout;
-                float height = 0.0f;
-            };
+            using MathPreview = EditorPreparedMathPreview;
 
             EditorVisualTable visual;
             std::vector<DisplayInlineText> displays;
@@ -73,6 +69,7 @@ namespace winrt::Folia
             EditorInlineImageRenderer& inlineImageRenderer,
             EditorDrawMath const& drawMath,
             EditorDrawMathFallback const& drawMathFallback,
-            std::vector<D2D1_RECT_F>& nonInteractiveRegions);
+            std::vector<D2D1_RECT_F>& nonInteractiveRegions,
+            EditorPreparedMathPreview const*& floatingPreview);
     };
 }

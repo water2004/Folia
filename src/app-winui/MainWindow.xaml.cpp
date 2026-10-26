@@ -442,6 +442,7 @@ namespace winrt::Folia::implementation
             auto frame = editorSession().RenderFrame();
             frame.snippetPlaceholders = snippetPlaceholders;
             editorRenderer.Render(frame);
+            if (latexCompletionController.Active()) latexCompletionController.UpdatePosition();
             sidebarController.SyncViewport();
             codeLanguageController.Refresh();
             auto style = editorSession().ActiveInlineStyle();

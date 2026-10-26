@@ -32,11 +32,11 @@ namespace winrt::Folia
         bool HandleKey(winrt::Windows::System::VirtualKey key);
         bool AcceptSelected();
         void Cancel();
+        void UpdatePosition();
         bool Active() const { return completion_.Active(); }
 
     private:
         void RefreshItems();
-        void UpdatePosition();
         winrt::hstring CandidateLabel(folia::LatexCommandDefinition const& command) const;
         winrt::hstring CandidateDescription(folia::LatexCommandDefinition const& command) const;
 

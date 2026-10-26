@@ -47,6 +47,7 @@ namespace winrt::Folia
 
     void EditorSurfaceRenderer::ClearPreparedDocument()
     {
+        inlineMathPreviewBounds.reset();
         preparedDocument.reset();
     }
 

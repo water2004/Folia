@@ -184,6 +184,7 @@
     <ClInclude Include="editor\interaction\EditorTableInteraction.h" />
     <ClInclude Include="editor\rendering\EditorInlineImageRenderer.h" />
     <ClInclude Include="editor\rendering\EditorEmbeddedDraw.h" />
+    <ClInclude Include="editor\rendering\EditorMathPreview.h" />
     <ClInclude Include="editor\rendering\EditorTableBlockRenderer.h" />
     <ClInclude Include="editor\interaction\EditorFrameScheduler.h" />
     <ClInclude Include="editor\interaction\EditorSelectionDrag.h" />
@@ -606,6 +607,7 @@
       <ClCompile Include="editor\rendering\EditorViewportMaterializer.cpp" />
       <ClCompile Include="editor\rendering\EditorPreparedDocumentCache.cpp" />
       <ClCompile Include="editor\rendering\EditorPreparedDocumentRetention.cpp" />
+    <ClCompile Include="editor\rendering\EditorMathPreview.cpp" />
     <ClCompile Include="editor\rendering\EditorDocumentRenderPass.cpp" />
     <ClCompile Include="editor\rendering\EditorContentUtilities.cpp" />
     <ClCompile Include="editor\rendering\EditorInlineObjects.cpp" />

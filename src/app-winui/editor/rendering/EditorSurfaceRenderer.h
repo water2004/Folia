@@ -61,6 +61,7 @@ namespace winrt::Folia
         void RestoreMathCache(MathJaxRenderer cache);
         void SetInvalidateCallback(std::function<void()> callback);
 
+        std::optional<D2D1_RECT_F> InlineMathPreviewBounds() const noexcept { return inlineMathPreviewBounds; }
         std::optional<folia::TextPosition> HitTest(float x, float y) const;
         std::optional<folia::TextPosition> ViewportPosition() const;
         std::optional<folia::TextPosition> TaskCheckboxAt(float x, float y) const;
@@ -125,6 +126,7 @@ namespace winrt::Folia
         EditorStyleSheet styleSheet = CreateEditorStyleSheet(themeProfile);
         EditorInteractionMap interactionMap;
         std::vector<D2D1_RECT_F> nonInteractiveRegions;
+        std::optional<D2D1_RECT_F> inlineMathPreviewBounds;
         std::unique_ptr<EditorPreparedDocument> preparedDocument;
         std::shared_ptr<PdfExportState> pdfExportState;
         std::uint64_t embeddedGeneration = 0;

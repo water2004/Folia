@@ -3,6 +3,7 @@
 import folia.platform.editor_geometry;
 
 #include "editor/rendering/EditorContentPreparation.h"
+#include "editor/rendering/EditorMathPreview.h"
 #include "editor/rendering/EditorInlineImageRenderer.h"
 #include "editor/rendering/EditorTableBlockRenderer.h"
 
@@ -12,12 +13,7 @@ namespace winrt::Folia
 
     struct EditorPreparedDocument
     {
-        struct MathPreview
-        {
-            DisplayInlineText display;
-            ::Microsoft::WRL::ComPtr<IDWriteTextLayout> layout;
-            float height = 0.0f;
-        };
+        using MathPreview = EditorPreparedMathPreview;
 
         struct MermaidDraw
         {

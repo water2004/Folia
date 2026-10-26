@@ -229,6 +229,17 @@ namespace winrt::Folia
         auto top = static_cast<double>(below.Y) + 8.0;
         if (top + estimatedHeight > overlay_.ActualHeight() - 8.0)
             top = (std::max)(8.0, static_cast<double>(above.Y) - estimatedHeight - 8.0);
+        if (auto preview = renderer_->InlineMathPreviewBounds()) {
+            auto previewTop = transform.TransformPoint({preview->left, preview->top});
+            auto previewBottom = transform.TransformPoint({preview->right, preview->bottom});
+            if (left < previewBottom.X && left + popupWidth > previewTop.X
+                && top < previewBottom.Y && top + estimatedHeight > previewTop.Y) {
+                if (previewBottom.Y + 8.0 + estimatedHeight <= overlay_.ActualHeight() - 8.0)
+                    top = previewBottom.Y + 8.0;
+                else if (previewTop.Y - 8.0 - estimatedHeight >= 8.0)
+                    top = previewTop.Y - 8.0 - estimatedHeight;
+            }
+        }
         Canvas::SetLeft(popup_, left);
         Canvas::SetTop(popup_, top);
     }

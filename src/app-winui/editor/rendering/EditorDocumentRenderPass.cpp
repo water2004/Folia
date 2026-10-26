@@ -26,7 +26,7 @@ namespace winrt::Folia
     {
     }
 
-    void EditorDocumentRenderPass::Paint(
+    std::optional<D2D1_RECT_F> EditorDocumentRenderPass::Paint(
         detail::EditorRenderFrame const& frame,
         EditorPreparedDocument& preparedDocument,
         folia::TextSelection selection,
@@ -51,6 +51,7 @@ namespace winrt::Folia
                 resources.lineNumberBackgroundBrush.Get());
         }
 
+        EditorPreparedMathPreview const* floatingPreview = nullptr;
         for (auto blockIndex = viewportBegin; blockIndex < viewportEnd; ++blockIndex)
         {
             auto placement = preparedDocument.geometry.At(blockIndex);
@@ -97,7 +98,8 @@ namespace winrt::Folia
                     inlineImages,
                     drawMath,
                     drawMathFallback,
-                    nonInteractiveRegions);
+                    nonInteractiveRegions,
+                    floatingPreview);
                 continue;
             }
             auto flowContainer = !block.inline_items.empty()
@@ -208,6 +210,7 @@ namespace winrt::Folia
             auto previewTop = origin.y + prepared.textHeight;
             for (auto const& preview : prepared.mathPreviews)
             {
+                if (preview.floating) { floatingPreview = &preview; continue; }
                 auto nonInteractiveTop = previewTop;
                 previewTop += 8.0f;
                 auto previewRect = D2D1::RectF(
@@ -303,6 +306,18 @@ namespace winrt::Folia
                     resources.caretBrush.Get(),
                     1.5f);
         }
+        // Paint after every document block: the preview never enters geometry,
+        // line-breaking, selection mapping or table-row height calculation.
+        if (!printMode && floatingPreview) if (auto anchor = interactionMap.CaretBounds(caret, styleSheet.body.lineHeight)) {
+            auto anchorX = anchor->left;
+            for (auto const& range : interactionMap.TextRangeBounds(floatingPreview->contentSpan))
+                if (range.top <= anchor->top + 1 && range.bottom >= anchor->bottom - 1) { anchorX = range.left; break; }
+            if (auto bounds = PaintInlineMathPreview(*floatingPreview, *anchor, anchorX, resources, styleSheet, drawMath, drawMathFallback)) {
+                nonInteractiveRegions.push_back(*bounds);
+                return bounds;
+            }
+        }
+        return std::nullopt;
     }
 
     void EditorDocumentRenderPass::DrawSnippetPlaceholders(

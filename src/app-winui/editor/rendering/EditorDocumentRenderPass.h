@@ -32,7 +32,7 @@ namespace winrt::Folia
             EditorDrawMathFallback drawMathFallback,
             EditorDrawMermaid drawMermaid);
 
-        void Paint(
+        std::optional<D2D1_RECT_F> Paint(
             detail::EditorRenderFrame const& frame,
             EditorPreparedDocument& preparedDocument,
             folia::TextSelection selection,

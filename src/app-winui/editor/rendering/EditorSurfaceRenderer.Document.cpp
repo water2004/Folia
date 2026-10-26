@@ -31,6 +31,7 @@ namespace winrt::Folia
         }
         interactionMap.Clear();
         nonInteractiveRegions.clear();
+        inlineMathPreviewBounds.reset();
         auto padding = (std::min)(styleSheet.horizontalPadding, (std::max)(12.0f, resources.surfaceWidthDip * 0.06f));
         auto sourceDocument = !frame.renderModel.blocks.empty()
             && frame.renderModel.blocks.front().source_mode;
@@ -185,7 +186,7 @@ namespace winrt::Folia
             drawMath,
             drawMathFallback,
             drawMermaid);
-        renderPass.Paint(
+        inlineMathPreviewBounds = renderPass.Paint(
             frame,
             *preparedDocument,
             selection,

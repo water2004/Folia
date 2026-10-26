@@ -52,6 +52,8 @@ namespace winrt::Folia
         sheet.accentColor = ToD2D(colors.accent_fg);
         sheet.codeTextColor = ToD2D(colors.code_block_fg);
         sheet.panelColor = ToD2D(colors.code_block_bg);
+        sheet.previewBackgroundColor = ToD2D(colors.shell_layer_bg);
+        sheet.previewBorderColor = ToD2D(colors.shell_border);
         sheet.nestedQuoteColor = ToD2D(colors.nested_quote_bg);
         sheet.calloutNoteBackgroundColor = ToD2D(colors.callout_note_bg);
         sheet.calloutNoteBorderColor = ToD2D(colors.callout_note_border);

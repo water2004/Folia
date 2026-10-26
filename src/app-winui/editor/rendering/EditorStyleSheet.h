@@ -41,6 +41,7 @@ namespace winrt::Folia
         D2D1_COLOR_F accentColor{};
         D2D1_COLOR_F codeTextColor{};
         D2D1_COLOR_F panelColor{};
+        D2D1_COLOR_F previewBackgroundColor{}, previewBorderColor{};
         D2D1_COLOR_F nestedQuoteColor{};
         D2D1_COLOR_F calloutNoteBackgroundColor{};
         D2D1_COLOR_F calloutNoteBorderColor{};

@@ -96,11 +96,13 @@ namespace winrt::Folia
                     auto height = textLayoutEngine.MeasureHeight(
                         previewLayout.Get(),
                         styleSheet.body.lineHeight);
-                    previewHeight += height + 24.0f;
+                    if (preview.svg.display) previewHeight += height + 24.0f;
                     previews.push_back({
                         std::move(previewDisplay),
                         std::move(previewLayout),
                         height,
+                        preview.contentSpan,
+                        !preview.svg.display,
                     });
                 }
                 rowHeights[row] = (std::max)(
@@ -160,7 +162,8 @@ namespace winrt::Folia
         EditorInlineImageRenderer& inlineImageRenderer,
         EditorDrawMath const& drawMath,
         EditorDrawMathFallback const& drawMathFallback,
-        std::vector<D2D1_RECT_F>& nonInteractiveRegions)
+        std::vector<D2D1_RECT_F>& nonInteractiveRegions,
+        EditorPreparedMathPreview const*& floatingPreview)
     {
         auto translatedTable = prepared.visual;
         translatedTable.rect.left += documentLeft;
@@ -279,6 +282,7 @@ namespace winrt::Folia
                 auto previewTop = cell.textOrigin.y + prepared.textHeights[cellIndex];
                 for (auto const& preview : prepared.mathPreviews[cellIndex])
                 {
+                    if (preview.floating) { floatingPreview = &preview; continue; }
                     auto nonInteractiveTop = previewTop;
                     previewTop += 8.0f;
                     auto previewRect = D2D1::RectF(

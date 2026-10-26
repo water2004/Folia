@@ -726,6 +726,8 @@ namespace winrt::Folia
                 std::move(previewDisplay),
                 std::move(previewLayout),
                 previewHeight,
+                preview.contentSpan,
+                !preview.svg.display,
             });
         }
         prepared.mermaidPreviews.reserve(
@@ -749,7 +751,7 @@ namespace winrt::Folia
                 prepared.display.ranges));
         auto previewHeight = 0.0f;
         for (auto const& preview : prepared.mathPreviews)
-            previewHeight += preview.height + 24.0f;
+            if (!preview.floating) previewHeight += preview.height + 24.0f;
         for (auto const& preview : prepared.mermaidPreviews)
             previewHeight += preview.height + 24.0f;
         prepared.height = prepared.textHeight + previewHeight + paddingTop + paddingBottom;

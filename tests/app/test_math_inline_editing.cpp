@@ -4,6 +4,9 @@
 #include "editor/interaction/EditorSelectionDrag.h"
 #include "editor/rendering/EditorContentGeometry.h"
 #include "editor/rendering/EditorContentPreparation.h"
+#include "editor/rendering/EditorMathPreview.h"
+
+import folia.core.instrumentation;
 
 import folia.core.command;
 import folia.core.utf;
@@ -189,6 +192,7 @@ namespace
         // reflow, even the former release-time re-hit could pass accidentally.
         expect(!expandedHit || *expandedHit != click->position) << "math-edit-07 hit-map-changed";
         expect(fixture.session.Selection() == pressedSelection) << "math-edit-08 preview-selection";
+        if (blockMath) expect(!fixture.renderer.InlineMathPreviewBounds()) << "display math keeps its existing preview placement";
         expect(!fixture.drag.Finish(click->x, click->y)) << "math-edit-09 stationary-release";
         expect(!fixture.drag.Active()) << "math-edit-10 gesture-finished";
         expect(!fixture.session.HasSelection()) << "math-edit-11 click-collapsed";
@@ -252,6 +256,94 @@ namespace
 
     suite math_inline_editing_tests = []
     {
+        "math floating preview placement stays in viewport and clear of its editing line"_test = [] {
+            for (auto viewport : {D2D1::SizeF(180, 90), D2D1::SizeF(320, 160), D2D1::SizeF(540, 720)})
+            for (float width : {20.f, 200.f, 2000.f}) for (float height : {18.f, 100.f, 2000.f})
+            for (float fraction : {.1f, .5f, .9f}) {
+                auto caret = D2D1::RectF(viewport.width * fraction, viewport.height * fraction,
+                    viewport.width * fraction + 1, viewport.height * fraction + 20);
+                auto placement = PlaceInlineMathPreview(caret, caret.left, {width, height}, viewport);
+                if (!placement) continue;
+                auto rect = placement->bounds;
+                expect(rect.left >= 11.99f && rect.top >= 11.99f);
+                expect(rect.right <= viewport.width - 11.99f && rect.bottom <= viewport.height - 11.99f);
+                expect(rect.bottom <= caret.top - 7.99f || rect.top >= caret.bottom + 7.99f);
+                expect(placement->scale > 0 && placement->scale <= 1);
+            }
+            expect(!PlaceInlineMathPreview({0, -40, 1, -20}, 0, {20, 20}, {540, 720}));
+            expect(!PlaceInlineMathPreview({0, 750, 1, 770}, 0, {20, 20}, {540, 720}));
+            expect(!PlaceInlineMathPreview({10, 20, 11, 40}, 10, {20, 20}, {20, 40}));
+        };
+
+        "math floating inline preview does not move following content when asynchronous rendering completes"_test = [] {
+            for (auto source : {L"Introduction.\n\nBefore $\\frac{x+1}{y+2}+\\sqrt{a+b}$ after.\n\nFollowing text.\n",
+                    L"Introduction.\n\n> Before $\\frac{x+1}{y+2}$ after.\n\nFollowing text.\n",
+                    L"Introduction.\n\n- Before $\\frac{x+1}{y+2}$ after.\n\nFollowing text.\n"}) {
+                MathDragFixture f(source);
+                auto formula = FindFormula(f.session, false);
+                expect(formula.has_value());
+                if (!formula) continue;
+                auto position = folia::TextPosition{formula->container_id, formula->source_range.start + 2, folia::TextAffinity::Downstream};
+                f.session.SetSelection(position, position);
+                auto text = f.session.TextUtf8();
+                auto frame = f.session.RenderFrame();
+                auto following = folia::TextPosition{frame.renderModel.blocks.back().id, 0, folia::TextAffinity::Downstream};
+                folia::reset_core_operation_counters();
+                auto beforePreview = f.completions;
+                f.renderer.Render(frame);
+                auto before = f.renderer.CaretBounds(following);
+                expect(before.has_value());
+                expect(f.Settle(beforePreview));
+                auto bounds = f.renderer.InlineMathPreviewBounds();
+                auto after = f.renderer.CaretBounds(following);
+                expect(bounds.has_value());
+                expect(after.has_value());
+                if (before && after) expect(std::abs(before->top - after->top) < .01f);
+                auto caret = f.renderer.CaretBounds(position);
+                if (bounds && caret) {
+                    expect(bounds->bottom <= caret->top || bounds->top >= caret->bottom);
+                    expect(!f.renderer.HitTest((bounds->left + bounds->right) / 2, (bounds->top + bounds->bottom) / 2));
+                }
+                auto counters = folia::read_core_operation_counters();
+                expect(counters.full_document_parses == 0_u && counters.full_document_serializations == 0_u);
+                expect(f.session.Selection().active == position);
+                expect(f.session.TextUtf8() == text);
+                f.session.SetSelection(following, following);
+                f.renderer.Render(f.session.RenderFrame());
+                expect(!f.renderer.InlineMathPreviewBounds());
+                expect(f.session.EnterSourceMode());
+                f.renderer.Render(f.session.RenderFrame());
+                expect(!f.renderer.InlineMathPreviewBounds());
+            }
+        };
+
+        "math floating table preview leaves the next row in place"_test = [] {
+            MathDragFixture f(L"Introduction.\n\n| Before $\\frac{x+1}{y+2}$ after | B |\n| --- | --- |\n| next row | data |\n\nFollowing text.\n");
+            auto frame = f.session.RenderFrame();
+            if (frame.materializeBlocks) frame.materializeBlocks(0, frame.renderModel.blocks.size());
+            std::optional<folia::TextSpan> formula;
+            folia::TextPosition following{};
+            for (auto const& block : frame.renderModel.blocks) if (block.kind == folia::RenderBlockKind::Table) {
+                for (auto const& cell : block.special().table_cells) for (auto const& item : cell)
+                    if (item.kind == folia::InlineRenderItem::Kind::Math) formula = item.source_span;
+                auto span = block.special().table_cell_spans[block.special().column_count];
+                following = {span.container_id, span.source_range.start, folia::TextAffinity::Downstream};
+            }
+            expect(formula.has_value());
+            if (!formula) return;
+            auto position = folia::TextPosition{formula->container_id, formula->source_range.start + 2, folia::TextAffinity::Downstream};
+            f.session.SetSelection(position, position);
+            auto beforePreview = f.completions;
+            f.renderer.Render(f.session.RenderFrame());
+            auto before = f.renderer.CaretBounds(following);
+            expect(before.has_value());
+            expect(f.Settle(beforePreview));
+            auto after = f.renderer.CaretBounds(following);
+            expect(after.has_value());
+            expect(f.renderer.InlineMathPreviewBounds().has_value());
+            if (before && after) expect(std::abs(before->top - after->top) < .01f);
+        };
+
         "math inline click remains collapsed after source expansion and preview"_test = []
         {
             CheckMathGesture(L"Introduction.\n\n**bold** \U0001f642 $\\frac{x+1}{y+2}+\\sqrt{a+b}$ tail.\n", false);
