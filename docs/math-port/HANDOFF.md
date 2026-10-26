@@ -2,7 +2,16 @@
 
 恢复/压缩后先实际读本文。架构、职责和详细验收见 [architecture](native-raii-architecture.md)、[files](native-raii-files.json)、[acceptance](native-raii-acceptance.md)。只复查新变化；ignored候选用 `rg --no-ignore`。
 
-## 当前 checkpoint：启动崩溃已修复、重新安装并实际验证（2026-10-26，完成）
+## 当前 checkpoint：公式启动批量优化已完成（2026-10-26）
+
+- 用户要求优化打开文档、重点批量路径。实现分批提交：字体variant/alias借用索引 **8017e73c**；SVG规范化请求内复用usvg默认字体/fallback返回ID **8fe9a0e5**；启动按32个新请求跨模型chunk组批/批量规范化 **60d35218**；可重跑性能工具与tlog可执行链接选择 **84f2ecf5**。Common/Scene/数学算法未改；字体正文仍仅属本批请求、预览仅内存、滚动UI零IO/离屏取消保持。
+- **最终Release实测**：只读整合.md（338898bytes），3213处公式/2164个去重render/2769片段写入均不变；native批次192→68。原3次math 6983/6839/6898ms，中位6898；新3345/3267/3253ms，中位3267，**耗时下降52.6%，约2.11倍速度**。parse仍17–20ms。准备后private bytes原38.6–41.6MB、新38.3–40.5MB；这是独立准备流程，不当作GUI整体内存/端到端启动测量。build/math-batch-{before,benchmark-final}.log与performance.json。
+- **耗时依据**：分段计时锁定含文字SVG反复选择系统替代字体，约占规范化九成。保留默认选择器与SVG转换，仅批内复用ID；Rust begin/end配C++锁/RAII，成功/错误/取消后清空，无跨请求字形正文/轮廓缓存。临时PERF源和最终DLL计时均已去掉，最终stderr空、部署native DLL SHA与core最终DLL一致。纯索引/组批首轮不足以解释主要耗时，不回到该方向重复宽审。
+- **验收通过**：Rust5项；Release math **974项/536476断言**（75 canonical SVG×32/64批逐字节Source）；完整字体Source **14568049值0差异**；正式Framework Debug WinUI **71项/15541断言**（稠密/稀疏/重复批次、取消恢复、错误隔离、SVG单项/批量字节与尺寸一致、预览/滚动/编辑）。最终自包含Release构建与真实GUI构造/激活/正常关闭exit0通过。日志build/math-batch-{normalizer-tests,math-tests,font-compare,app-full.stdout,release-final,startup}.log，启动报告build/tests/math-batch-startup/run-1/result.json。295MB生成字体dump已删除，只留hash/长度info及对照结果，可重生成。
+- **后续验证固定规则**：WinUI测试用既有Framework Debug；自包含Release用真实启动门禁。已处理一次误重叠编译PDB冲突及SelfContained Debug测试宿主main激活失败；另发现MSBuild tlog最后可能为__WINMD_ONLY__，工具现跳过它并按记录边界读取完整可执行链接。上述无效验证不计通过，不改产品宿主、不重开此旁支。测试文件test_math_preparation.cpp、test_svg_normalization.cpp，原cache_ownership无diff。
+- **交付/停止点**：Release候选build/app-winui/bin/x64/Release/Folia.exe；版本固定0.4.0，本轮未构建MSI/安装/推送/发布，用户已安装版本及原MSI保持上一节启动修复状态。本轮无活动build/test/native/诊断句柄，无新子代理/CUA，未关闭用户进程/改用户文档。无剩余优化验收；下一步由用户试用或另要求MSI。复跑：tools/math-port/winui-math-layout-probe.ps1 -Configuration Release -Benchmark -Document <path>（基于既有Release对象，无实际UI）。
+
+## 已完成：启动崩溃已修复、重新安装并实际验证（2026-10-26）
 
 - 用户反馈安装版不能启动；根因是新增AppWindow.Closing(auto_revoke)：AppWindow不支持IWeakReferenceSource，C++/WinRT weak_ref构造对查询后的null解引用。WER与自建空白诊断实例均为0xc0000005/RVA **0x12a00e**；带符号栈定位MainWindow::RegisterWindowHandlers，MainWindow.Events.cpp:116。已向用户承认之前只测Controller/核包、漏测完整MainWindow启动。
 - **修复提交3bcb3885**：MainWindow.Lifecycle.h的WindowClosingSubscription强持有事件源+token，Reset/析构成对退订；不走弱auto_revoker，关闭保存确认保留。Release开启/Zi、DEBUG:FULL并保留REF/ICF优化，PDB排除MSI，便于后续定位。未修改生成的SDK代码、用户设置或CST/数学引擎。
