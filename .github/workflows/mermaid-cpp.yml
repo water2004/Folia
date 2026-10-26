@@ -274,6 +274,7 @@ jobs:
       - name: Run the native Mermaid tests
         run: |
           $env:FOLIA_MERMAID_SVG_OUTPUT = Join-Path $pwd 'build/mermaid-cpp/pie-svg'
+          $env:FOLIA_MERMAID_XY_MEASUREMENTS = Join-Path $pwd 'build/mermaid-cpp/xy-browser/measurements.tsv'
           # Match built suites exactly; unrelated optional Math/encoding/spec
           # runners are not part of the Mermaid integration check.
           ctest --test-dir build/mermaid-cpp --output-on-failure --no-tests=error `
@@ -291,6 +292,8 @@ jobs:
           node tools/mermaid-cpp/compare-sankey-svg.mjs build/mermaid-cpp/sankey-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/compare-xy-svg.mjs build/mermaid-cpp/xy-browser/original.json build/mermaid-cpp/pie-svg
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/compare-xy-svg.mjs build/mermaid-cpp/xy-browser/original.json build/mermaid-cpp/pie-svg --oracle-measurements
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/compare-radar-svg.mjs build/mermaid-cpp/radar-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -328,6 +331,7 @@ jobs:
             build/mermaid-cpp/sankey-browser/*.svg
             build/mermaid-cpp/xy-browser/*.json
             build/mermaid-cpp/xy-browser/*.svg
+            build/mermaid-cpp/xy-browser/*.tsv
             build/mermaid-cpp/radar-browser/*.json
             build/mermaid-cpp/radar-browser/*.svg
             ${{ env.FOLIA_MERMAID_BINARY_DIR }}/FoliaMermaidTextProbe.exe
