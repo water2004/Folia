@@ -3,6 +3,7 @@
 export module folia.mermaid.elk_labels;
 import std;
 export import folia.mermaid.elk_restore;
+export import folia.mermaid.elk_boundary_layers;
 
 export namespace folia::mermaid {
 enum class ElkLabelDirection { horizontal, down, up };
@@ -28,7 +29,8 @@ struct ElkLabelPosition {
 [[nodiscard]] std::expected<ElkLabelPreparation,std::string> elk_prepare_inline_labels(
     const ElkCycleGraph& source, std::span<const ElkInlineCenterLabel> labels,
     ElkLabelDirection direction = ElkLabelDirection::horizontal,
-    double edge_label_spacing = 2, double label_label_spacing = 0);
+    double edge_label_spacing = 2, double label_label_spacing = 0,
+    std::span<const ElkExternalLayerRole> boundary_roles = {});
 // After crossing order, before node placement: original default MEDIAN_LAYER.
 void elk_switch_label_dummies(ElkLayeredGraph& graph);
 // After crossing order, before placement: LabelSideSelector INLINE geometry.

@@ -5,7 +5,8 @@ import std;
 namespace folia::mermaid {
 std::expected<ElkLabelPreparation,std::string> elk_prepare_inline_labels(
     const ElkCycleGraph& source,std::span<const ElkInlineCenterLabel> labels,
-    ElkLabelDirection direction,double edge_label_spacing,double label_label_spacing) {
+    ElkLabelDirection direction,double edge_label_spacing,double label_label_spacing,
+    std::span<const ElkExternalLayerRole> boundary_roles) {
     const auto reversed=elk_depth_first_feedback_edges(source);
     if(!reversed)return std::unexpected(reversed.error());
     ElkLayeringResult initial{.layers=std::vector<int>(source.node_count),.reversed_edges=*reversed,
@@ -52,7 +53,9 @@ std::expected<ElkLabelPreparation,std::string> elk_prepare_inline_labels(
     for(const auto& e:g.edges)expanded.edges.push_back({e.source_port,e.target_port});
     // The prepared graph is acyclic: the existing layerer's DFS does not change
     // it. One edge per port retains original port-adjacency traversal order.
-    const auto layered=elk_layer_flat_graph(expanded);
+    std::vector<ElkExternalLayerRole> roles(boundary_roles.begin(),boundary_roles.end());
+    if(!roles.empty())roles.resize(expanded.node_count,ElkExternalLayerRole::none);
+    const auto layered=roles.empty()?elk_layer_flat_graph(expanded):elk_layer_boundary_graph(expanded,roles);
     if(!layered)return std::unexpected(layered.error());
     g.layers=layered->layer_nodes;
     for(std::size_t n=0;n<g.nodes.size();++n)g.nodes[n].layer=layered->layers[n];

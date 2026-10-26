@@ -2056,5 +2056,42 @@
         "rawFile": ".reference\\mermaid-js\\packages\\mermaid\\src\\diagrams\\block\\parser\\block.jison"
       }
     ]
+  },
+  "fcose": {
+    "cytoscapeVersion": "3.34.0",
+    "files": [
+      {
+        "source": "cytoscape-fcose@2.2.0/LICENSE",
+        "sha256": "2837634f403949215760fcdd2fa1ed0c64875d02099ecc8318c704b852f1421d"
+      },
+      {
+        "source": "cytoscape-fcose@2.2.0/src/fcose/index.js",
+        "sha256": "40c0f0c51959a9ccc7f1b39b3a9d25e46b6865f3cd281026821521baae66e2d6"
+      },
+      {
+        "source": "cytoscape-fcose@2.2.0/src/fcose/cose.js",
+        "sha256": "297f674e0b55a0c2dbc0a9c665414772dc8179fa5eb9d60431ef11089613cee7"
+      },
+      {
+        "source": "cose-base@2.2.0/LICENSE",
+        "sha256": "5fb3cf4a14c3c5af6e473a192df8bca10c77754e3a0c6492c79fb92a76a5478a"
+      },
+      {
+        "source": "cose-base@2.2.0/src/ConstraintHandler.js",
+        "sha256": "1cbb203d1e4079a52968bce322027a62cd0239801e650fbbd439639fe438999a"
+      },
+      {
+        "source": "cose-base@2.2.0/src/CoSELayout.js",
+        "sha256": "5b4b3ff585665a50a2bc81682b046dbd1f9a2949c3f2390ce5e446d1896494fe"
+      },
+      {
+        "source": "cose-base@2.2.0/src/CoSENode.js",
+        "sha256": "b11c95643eefe241d3d3c51fd6baaefa30304ce470ea9f843d51ecaf1b680820"
+      },
+      {
+        "source": "layout-base@2.0.1/LICENSE",
+        "sha256": "eabb762d8a95109a39c9be3247325529a5239a7aca327d909c3ccdc41f3a06bf"
+      }
+    ]
   }
 }
