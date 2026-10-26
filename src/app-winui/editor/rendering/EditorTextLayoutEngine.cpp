@@ -7,6 +7,7 @@ import folia.core.utf;
 
 #include "editor/rendering/EditorContentPreparation.h"
 #include "editor/rendering/EditorTextLayoutEngine.h"
+#include <dwrite_1.h>
 
 namespace winrt::Folia
 {
@@ -25,6 +26,44 @@ namespace winrt::Folia
 
     namespace
     {
+        struct CodeSpanRange { UINT32 start, length; folia::InlineStyle const* style; };
+        std::vector<CodeSpanRange> CodeSpanRanges(std::vector<InlineStyleRange> const& ranges)
+        {
+            std::vector<CodeSpanRange> spans;
+            for (auto const& range : ranges) {
+                if (range.marker || range.length == 0 || range.style.code != folia::CodeStyle::Inline) continue;
+                if (!spans.empty() && spans.back().start + spans.back().length == range.start
+                    && spans.back().style->code_span_id == range.style.code_span_id)
+                    spans.back().length += range.length;
+                else spans.push_back({range.start, range.length, &range.style});
+            }
+            return spans;
+        }
+
+        void ApplyCodeSpanSpacing(IDWriteTextLayout* layout, std::vector<InlineStyleRange> const& ranges)
+        {
+            auto spans = CodeSpanRanges(ranges);
+            if (spans.empty()) return;
+            ::Microsoft::WRL::ComPtr<IDWriteTextLayout1> spaced;
+            winrt::check_hresult(layout->QueryInterface(IID_PPV_ARGS(spaced.GetAddressOf())));
+            UINT32 count = 0;
+            layout->GetClusterMetrics(nullptr, 0, &count);
+            std::vector<DWRITE_CLUSTER_METRICS> clusters(count);
+            winrt::check_hresult(layout->GetClusterMetrics(clusters.data(), count, &count));
+            std::vector<UINT32> starts{0};
+            for (auto const& cluster : clusters) starts.push_back(starts.back() + cluster.length);
+            for (auto const& span : spans) {
+                auto first = std::upper_bound(starts.begin(), starts.end(), span.start) - starts.begin() - 1;
+                auto last = std::lower_bound(starts.begin(), starts.end(), span.start + span.length) - starts.begin() - 1;
+                // Pad the shaped boundary clusters, preserving surrogate pairs,
+                // combining marks and every source/display caret offset.
+                winrt::check_hresult(spaced->SetCharacterSpacing(3, first == last ? 3.f : 0.f, 0,
+                    {starts[first], clusters[first].length}));
+                if (first != last) winrt::check_hresult(spaced->SetCharacterSpacing(0, 3, 0,
+                    {starts[last], clusters[last].length}));
+            }
+        }
+
         struct LogicalIndent
         {
             UINT32 lineStart = 0;
@@ -320,6 +359,13 @@ namespace winrt::Folia
     {
         if (!layout || !resources.d2dContext) return;
         ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> brush;
+        for (auto const& span : CodeSpanRanges(ranges)) {
+            for (auto rect : InlineRangeRectangles(layout, span.start, span.length, origin)) {
+                rect.top += 2; rect.bottom -= 1;
+                resources.d2dContext->FillRoundedRectangle(D2D1::RoundedRect(rect, 4, 4),
+                    resources.inlineCodeBackgroundBrush.Get());
+            }
+        }
         for (auto const& range : ranges)
         {
             // Both flows and cells consume the same semantic code-span style.
@@ -328,7 +374,7 @@ namespace winrt::Folia
             const auto inlineCode = !range.marker && range.style.code == folia::CodeStyle::Inline;
             auto const& presentation = range.style.presentation;
             const auto explicitBackground = presentation && (presentation->background || presentation->highlight);
-            if (range.length == 0 || (!inlineCode && !explicitBackground)) continue;
+            if (range.length == 0 || !explicitBackground) continue;
             auto paint = resources.inlineCodeBackgroundBrush.Get();
             if (explicitBackground) {
                 const auto color = presentation->background ? ToD2D(*presentation->background)
@@ -340,7 +386,6 @@ namespace winrt::Folia
             }
             for (auto rect : InlineRangeRectangles(layout, range.start, range.length, origin)) {
                 if (inlineCode) {
-                    rect.left -= 3; rect.right += 3;
                     rect.top += 2; rect.bottom -= 1;
                     resources.d2dContext->FillRoundedRectangle(D2D1::RoundedRect(rect, 4, 4), paint);
                 } else resources.d2dContext->FillRectangle(rect, paint);
@@ -598,6 +643,7 @@ namespace winrt::Folia
         }
         if (requiresDefaultLineSpacing)
             layout->SetLineSpacing(DWRITE_LINE_SPACING_METHOD_DEFAULT, 0.0f, 0.0f);
+        ApplyCodeSpanSpacing(layout, ranges);
     }
 
     float EditorTextLayoutEngine::MeasureHeight(IDWriteTextLayout* layout, float fallbackHeight) const

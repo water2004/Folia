@@ -3,6 +3,7 @@
 #include "editor/session/EditorSession.h"
 #include "editor/rendering/EditorContentPreparation.h"
 #include "editor/rendering/EditorTextLayoutEngine.h"
+#include <dwrite_1.h>
 
 namespace {
     using namespace boost::ut;
@@ -30,6 +31,63 @@ namespace {
     }
 
     suite inline_code_appearance = [] {
+        "code padding belongs to shaped boundary clusters and preserves source mapping"_test = [] {
+            for (auto source : {L"甲`a\U0001f600e\u0301`乙\n", L"甲`a`**`b`**乙\n", L"` a\r\nb `\n"}) {
+                EditorSession session;
+                session.SetText(source);
+                auto original = session.Text();
+                auto frame = session.RenderFrame();
+                if (frame.materializeBlocks) frame.materializeBlocks(0, frame.renderModel.blocks.size());
+                auto sheet = CreateEditorStyleSheet(folia::default_theme_profile(folia::Theme::Light));
+                EditorRenderResources resources;
+                resources.InitializeOffscreen(sheet, 600, 240);
+                resources.EnsureFrameResources(sheet);
+                EditorTextLayoutEngine engine(resources, sheet);
+                MathJaxRenderer math; SvgNormalizer normalizer;
+                auto display = BuildDisplayInlineText(frame.renderModel.blocks.front().inline_items, {}, {},
+                    math, normalizer, sheet.textColor, sheet.body.size, 560, false, false, false);
+                auto layout = engine.CreateFlow(display, resources.textFormat.Get(), 560, {});
+                ::Microsoft::WRL::ComPtr<IDWriteTextLayout1> spacing;
+                winrt::check_hresult(layout.As(&spacing));
+                DWRITE_TEXT_METRICS padded{}, plain{};
+                layout->GetMetrics(&padded);
+                std::unordered_set<std::uint64_t> owners;
+                float totalSpacing = 0;
+                auto text = ToWide(display.text);
+                for (UINT32 position = 0; position < text.size(); ++position) {
+                    float leading = 0, trailing = 0, minimum = 0;
+                    winrt::check_hresult(spacing->GetCharacterSpacing(position, &leading, &trailing, &minimum));
+                    if (position > 0 && text[position] >= 0xdc00 && text[position] <= 0xdfff) {
+                        float previousLeading = 0, previousTrailing = 0;
+                        spacing->GetCharacterSpacing(position - 1, &previousLeading, &previousTrailing, &minimum);
+                        expect(leading == previousLeading && trailing == previousTrailing);
+                    }
+                }
+                UINT32 count = 0;
+                layout->GetClusterMetrics(nullptr, 0, &count);
+                std::vector<DWRITE_CLUSTER_METRICS> clusters(count);
+                layout->GetClusterMetrics(clusters.data(), count, &count);
+                UINT32 start = 0;
+                for (auto const& cluster : clusters) {
+                    float leading = 0, trailing = 0, minimum = 0;
+                    spacing->GetCharacterSpacing(start, &leading, &trailing, &minimum);
+                    totalSpacing += leading + trailing;
+                    start += cluster.length;
+                }
+                for (auto const& range : display.ranges)
+                    if (!range.marker && range.style.code == folia::CodeStyle::Inline) {
+                        expect(range.style.code_span_id.v != 0_u);
+                        owners.insert(range.style.code_span_id.v);
+                    }
+                expect(std::abs(totalSpacing - owners.size() * 6.f) < .01f);
+                winrt::check_hresult(spacing->SetCharacterSpacing(0, 0, 0, {0, static_cast<UINT32>(text.size())}));
+                layout->GetMetrics(&plain);
+                expect(std::abs(padded.widthIncludingTrailingWhitespace - plain.widthIncludingTrailingWhitespace - totalSpacing) < .01f);
+                expect(session.Text() == original);
+                expect(display.displayToSource.size() == text.size() + 1);
+            }
+        };
+
         "inline code uses one themed background across flows and table cells"_test = [] {
             for (auto theme : {folia::Theme::Light, folia::Theme::Dark, folia::Theme::HighContrast}) {
                 auto sheet = CreateEditorStyleSheet(folia::default_theme_profile(theme));

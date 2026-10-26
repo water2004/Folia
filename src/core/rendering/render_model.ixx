@@ -128,6 +128,8 @@ enum class CodeStyle : std::uint8_t { None, Inline, Block };
 struct InlineStyle {
     bool bold = false, italic = false, underline = false, strikethrough = false;
     CodeStyle code = CodeStyle::None;
+    // Decoration ownership from the CST, never a selection coordinate.
+    NodeId code_span_id{};
     bool link = false;
     std::optional<std::uint8_t> heading_level;
     std::shared_ptr<const InlinePresentationStyle> presentation;

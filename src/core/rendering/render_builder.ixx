@@ -892,6 +892,7 @@ struct Builder {
                     }
                     case K::CodeSpan: {
                         auto child_style = style; child_style.code = CodeStyle::Inline;
+                        child_style.code_span_id = node.id;
                         append_marker(target, node, delim.opening);
                         append_code_span_text(node, child_style);
                         if (delim.closing) append_marker(target, node, *delim.closing);
@@ -912,6 +913,7 @@ struct Builder {
                         item.style.bold = false;
                         item.style.italic = false;
                         item.style.code = CodeStyle::None;
+                        item.style.code_span_id = {};
                         item.style.link = false;
                         target.push_back(std::move(item));
                         break;
@@ -1003,6 +1005,8 @@ struct Builder {
                             style,
                             semantic.html_tag,
                             semantic.html_attributes);
+                        if (child_style.code == CodeStyle::Inline && style.code != CodeStyle::Inline)
+                            child_style.code_span_id = node.id;
                         append_marker(target, node, delim.opening);
                         std::vector<InlineRenderItem> html_children;
                         append_nodes(node.children, child_style, html_children);
