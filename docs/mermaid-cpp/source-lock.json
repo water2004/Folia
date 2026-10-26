@@ -891,6 +891,22 @@
     {
       "path": "packages/parser/src/language/gitGraph/tokenBuilder.ts",
       "sha256": "5fab3ae37dfc984182c242e83f3478e1eb002236c0674d1c03f4678ae3efa773"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/mindmap/styles.ts",
+      "sha256": "9a1addfd181f3cdca9bbad4e39a575f57fba9b0f291b56e7c3f545ea43f735ac"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/cose-bilkent/layout.ts",
+      "sha256": "342207b5b31c0771f430634be28edf1dbf844cb053aa754e6a0ad39bdce2961e"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/cose-bilkent/render.ts",
+      "sha256": "944345291a215a8894936ed5e7b89ae8e850d86aab7355cbd196c294aa7c3c07"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/cose-bilkent/cytoscape-setup.ts",
+      "sha256": "b743cc8f1365b79e8cad555dced1d42fc7f475d958c5e1c902c61142ae0aa1a7"
     }
   ],
   "packages": [
@@ -1922,6 +1938,20 @@
       {
         "source": "layout-base@1.0.2/src/util/Point.js",
         "sha256": "70670e31d8cda1b2ad7d54fb649dcb02f16f73525a954f3f3f685006581c6ae2"
+      }
+    ]
+  },
+  "timelineBundle": {
+    "package": "mermaid@12.2.0",
+    "map": "dist/chunks/mermaid.esm/timeline-definition-3H7UE7AR.mjs.map",
+    "files": [
+      {
+        "source": "src/diagrams/timeline/timelineRendererVertical.ts",
+        "sha256": "db954e44b4d8864447f8553c09b0122e70e4c697d0e9b0b6a37907ecb38900ec"
+      },
+      {
+        "source": "src/diagrams/timeline/timeline-definition.ts",
+        "sha256": "41ae285b6d399e9d96146ca4d2432e02d6928f8bb6d854d68f1562e44749e03c"
       }
     ]
   }

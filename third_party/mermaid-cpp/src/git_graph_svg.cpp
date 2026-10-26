@@ -8,7 +8,7 @@ const ConfigValue& member(const ConfigValue& value,std::u16string_view key){auto
 std::u16string text(const ConfigValue& value){if(value.kind==ConfigKind::string)return value.string;if(value.kind==ConfigKind::number){auto n=format_number(value.number);return {n->begin(),n->end()};}throw std::runtime_error("Expected Git graph style");}
 double number(const ConfigValue& value){if(value.kind==ConfigKind::number)return value.number;auto s=text(value);std::string raw(s.begin(),s.end());double n=0;auto p=std::from_chars(raw.data(),raw.data()+raw.size(),n);if(p.ec!=std::errc{})throw std::runtime_error("Expected Git graph dimension");return n;}
 std::string num(double value){auto s=format_number(value);if(!s)throw std::runtime_error("Invalid Git graph geometry");return *s;}
-std::string xml(std::u16string_view value){auto s=escape_svg_text(value,u"Git graph text");if(!s)throw std::runtime_error(s.error());return *s;}
+std::string xml(std::u16string_view value){auto s=escape_svg_text(value,u"Git graph text");if(!s)throw std::runtime_error("Invalid Git graph text");return *s;}
 std::string attr(std::u16string_view value){std::string out;for(auto c:xml(value))if(c=='"')out+="&quot;";else out+=c;return out;}
 struct Point {double x=0,y=0;};
 struct Matrix {double a=1,b=0,c=0,d=1,e=0,f=0;Point apply(Point p)const{return {a*p.x+c*p.y+e,b*p.x+d*p.y+f};}};
