@@ -859,6 +859,38 @@
     {
       "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/bang.ts",
       "sha256": "916f0e2b74b80fbbf525f2efbbc2aea2fe87ab0011d30c750f0934c2d197c2e6"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/git/gitGraphParser.ts",
+      "sha256": "5912598f2e3de2d054d2c8b06b148da9e9375454ded919e1f794b0739739c0a9"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/git/gitGraphAst.ts",
+      "sha256": "f3f5e20cd227b55a62e3bfbab8604ef66a48c44a47fa38f9db57b12ebc121abd"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/git/gitGraphTypes.ts",
+      "sha256": "3f1ac58bb8ca1c347b0f9b13c5d6767be9f47caa49d73648740684b830b15a2e"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/git/gitGraphRenderer.ts",
+      "sha256": "d90f6685b76b2f33bebd6e5b47912c076e77f3180c3e27d821ae06261f1aac81"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/git/styles.js",
+      "sha256": "c1991b7c9c58461203857f1e8846e56fb1949e791a7a18d2c8ec780e7c5dab94"
+    },
+    {
+      "path": "packages/parser/src/language/gitGraph/gitGraph.langium",
+      "sha256": "6f3b9c256a1a91964572617aa172f2f0d6a8f8be3d32412f7d90c3982d18b71e"
+    },
+    {
+      "path": "packages/parser/src/language/gitGraph/reference.langium",
+      "sha256": "c71835ae53791642d8229594b2d6f6964526be909f82a2ab27f4af563f9fb78c"
+    },
+    {
+      "path": "packages/parser/src/language/gitGraph/tokenBuilder.ts",
+      "sha256": "5fab3ae37dfc984182c242e83f3478e1eb002236c0674d1c03f4678ae3efa773"
     }
   ],
   "packages": [

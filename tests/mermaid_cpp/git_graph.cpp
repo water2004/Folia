@@ -1,0 +1,16 @@
+#include "support/folia_test.hpp"
+import folia.mermaid.git_graph_svg;
+import folia.mermaid.number;
+namespace {
+using namespace boost::ut;using namespace folia::mermaid;
+#include "theme_fixture.hpp"
+std::vector<std::string_view> columns(std::string_view rest){std::vector<std::string_view> out;for(;;){auto tab=rest.find('\t');out.push_back(rest.substr(0,tab));if(tab==rest.npos)return out;rest.remove_prefix(tab+1);}}
+std::u16string id(const GitCommit& c){if(!c.generated)return c.id;auto n=std::to_string(c.seq);return u"generated-"+std::u16string(n.begin(),n.end());}
+suite git_graph=[] {
+    "mermaid_git_graph_original_branches_commits_merge_and_cherry_pick"_test=[] {
+        const auto dir=std::getenv("FOLIA_MERMAID_FIXTURES");std::ifstream input{std::filesystem::path(dir?dir:FOLIA_MERMAID_FIXTURE_DIR)/"git-graph.tsv"};expect(fatal(input.is_open()));std::string line;std::size_t count=0;
+        while(std::getline(input,line)){if(!line.empty()&&line.back()=='\r')line.pop_back();if(line.empty()||line.front()=='#')continue;auto f=columns(line);expect(fatal(f.size()==4_u));++count;auto session=ConfigSession::create();expect(fatal(session.has_value()));auto site=json(decode(f[2]));expect(fatal(session->save_initialize_config(site).has_value()));expect(fatal(session->set_site_config(site).has_value()));auto actual=prepare_git_graph(decode(f[1]),*session);auto expected=json(decode(f[3]));if(expected.kind==ConfigKind::null){expect(!actual)<<f[0];continue;}expect(fatal(actual.has_value()))<<f[0]<<(actual?"":actual.error());const auto& d=actual->document;for(auto [key,value]:{std::pair{u"title",&d.title},{u"accTitle",&d.acc_title},{u"accDescription",&d.acc_description},{u"direction",&d.direction},{u"current",&d.current}})expect(bool(*value==field(expected,key).string))<<f[0];std::vector<GitBranch> branches=d.branches;std::ranges::stable_sort(branches,{},&GitBranch::order);const auto& ebranches=field(expected,u"branches").sequence;expect(fatal(branches.size()==ebranches.size()));for(std::size_t i=0;i<branches.size();++i)expect(bool(branches[i].name==field(ebranches[i],u"name").string));expect(fatal(d.head.has_value()));expect(bool(id(d.commits[*d.head])==field(expected,u"head").string));const auto& commits=field(expected,u"commits").sequence;expect(fatal(d.commits.size()==commits.size()));for(std::size_t i=0;i<commits.size();++i){const auto& a=d.commits[i];const auto& e=commits[i];expect(bool(id(a)==field(e,u"id").string));expect(bool(a.message==field(e,u"message").string));expect(bool(a.branch==field(e,u"branch").string));expect(double(a.seq)==field(e,u"seq").number);expect(double(static_cast<int>(a.type))==field(e,u"type").number);if(auto custom=e.find(u"customType")){expect(fatal(a.custom_type.has_value()));expect(double(static_cast<int>(*a.custom_type))==custom->number);}if(auto custom=e.find(u"customId"))expect(a.custom_id==custom->boolean);const auto& parents=field(e,u"parents").sequence;expect(fatal(a.parents.size()==parents.size()));for(std::size_t j=0;j<parents.size();++j)expect(bool(id(d.commits[a.parents[j]])==parents[j].string));const auto& tags=field(e,u"tags").sequence;expect(fatal(a.tags.size()==tags.size()));for(std::size_t j=0;j<tags.size();++j)expect(bool(a.tags[j]==tags[j].string));}expect(!render_git_graph_svg(*actual,{}));
+        }expect(count==11_u);
+    };
+};
+}

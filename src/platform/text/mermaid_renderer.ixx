@@ -473,6 +473,17 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             return box->bounds_width;
         };
     }
-    return render_native_diagram(*input,widths,flowchart_measurements,sequence_measurements,class_measurements,xy_measurements,sankey_measurements,treemap_measure,journey_measure,timeline_measure,gantt_measure);
+    GitGraphMeasure git_graph_measure;
+    if(auto git=std::get_if<GitGraphRenderInput>(&input->content)) {
+        git_graph_measure=[git,&measurer](std::u16string_view text,double size)->std::expected<GitGraphTextBox,std::string> {
+            const MermaidFont font{git->theme.font_family,static_cast<float>(size)};
+            auto box=measurer.measure(text,font,false,{},true);
+            if(!box)return std::unexpected(box.error());
+            auto metrics=measurer.svg_font_metrics(font);
+            if(!metrics)return std::unexpected(metrics.error());
+            return GitGraphTextBox{box->bounds_width,metrics->height,metrics->baseline};
+        };
+    }
+    return render_native_diagram(*input,widths,flowchart_measurements,sequence_measurements,class_measurements,xy_measurements,sankey_measurements,treemap_measure,journey_measure,timeline_measure,gantt_measure,git_graph_measure);
 }
 }
