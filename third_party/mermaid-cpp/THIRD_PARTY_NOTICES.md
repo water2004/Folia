@@ -131,3 +131,11 @@ Gantt's bounded civil-date parsing and duration/dependency calculations follow
 Day.js core and its customParseFormat, advancedFormat, isoWeek and duration
 plugins embedded in the pinned Mermaid release. The MIT notice is reproduced
 in `DAYJS-LICENSE`; source-map contents are recorded in source-lock.json.
+
+## Mindmap CoSE tree layout
+
+Mindmap's native flat-tree layout follows cytoscape-cose-bilkent 4.1.0,
+cose-base 1.0.3 and layout-base 1.0.2. Their original MIT notices are reproduced
+in `COSE-LICENSE`. The source-locked original oracle uses Cytoscape 3.34.0,
+matching the Mermaid lockfile. This does not implement Architecture's distinct
+fCoSE/compound layout dependency.

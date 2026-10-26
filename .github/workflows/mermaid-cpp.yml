@@ -94,6 +94,20 @@ jobs:
           pnpm --dir tools/mermaid-cpp/oracle install --frozen-lockfile --ignore-scripts
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
+      - name: Prepare the pinned Mindmap layout oracle
+        run: |
+          $target = 'build/mermaid-cpp/mindmap-layout-oracle'
+          New-Item -ItemType Directory -Force $target | Out-Null
+          $archive = Join-Path $target 'cytoscape-3.34.0.tgz'
+          Invoke-WebRequest https://registry.npmjs.org/cytoscape/-/cytoscape-3.34.0.tgz -OutFile $archive
+          $bytes = [IO.File]::ReadAllBytes($archive)
+          $hash = [Convert]::ToBase64String([Security.Cryptography.SHA512]::HashData($bytes))
+          if ($hash -ne '62rNSrioXw93uliKFBwjukeQyeWwH2PqDrTac31r2P6464u3AUvTk0xS4LVvT251g7IgkFunrI48ZEZGjywSOg==') {
+            throw 'Pinned Cytoscape 3.34.0 archive mismatch'
+          }
+          tar -xzf $archive -C $target
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
       - name: Restore root-project generation inputs
         if: matrix.scope == 'integrated'
         run: |
@@ -150,6 +164,8 @@ jobs:
           node tools/mermaid-cpp/class-oracle.mjs --check
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/quadrant-oracle.mjs --check
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/mindmap-layout-oracle.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/mindmap-oracle.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

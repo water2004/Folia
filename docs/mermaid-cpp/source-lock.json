@@ -1814,5 +1814,83 @@
         "sha256": "7dac282a770e1d475181d428babda30129a0a56907c57defaec9a361b9a8189d"
       }
     ]
+  },
+  "coseTree": {
+    "cytoscapeVersion": "3.34.0",
+    "cytoscapeIntegrity": "sha512-62rNSrioXw93uliKFBwjukeQyeWwH2PqDrTac31r2P6464u3AUvTk0xS4LVvT251g7IgkFunrI48ZEZGjywSOg==",
+    "files": [
+      {
+        "source": "cytoscape-cose-bilkent@4.1.0/LICENSE",
+        "sha256": "440fc58a56a12814e417d2b341da89b050da052dc75bdb235607d37ec5fe74ef"
+      },
+      {
+        "source": "cytoscape-cose-bilkent@4.1.0/src/index.js",
+        "sha256": "c64918213dea57cffef66c8969d45dec6009ac32d2e693f37f090b0d04189f93"
+      },
+      {
+        "source": "cose-base@1.0.3/LICENSE",
+        "sha256": "5fb3cf4a14c3c5af6e473a192df8bca10c77754e3a0c6492c79fb92a76a5478a"
+      },
+      {
+        "source": "cose-base@1.0.3/src/CoSELayout.js",
+        "sha256": "334ee18f0966ad5a8b6390953f67b35fdd26da3e7be4facafe7cf1f0552df817"
+      },
+      {
+        "source": "cose-base@1.0.3/src/CoSENode.js",
+        "sha256": "ee37e6635103693c8b9749ea1776c194540ecc506902e19752d1c9c2fc63a3b0"
+      },
+      {
+        "source": "cose-base@1.0.3/src/CoSEConstants.js",
+        "sha256": "1a80540a4b2f4cf81edb95297a3d99f33f3027132a801be5b03657834e3722b0"
+      },
+      {
+        "source": "layout-base@1.0.2/LICENSE",
+        "sha256": "eabb762d8a95109a39c9be3247325529a5239a7aca327d909c3ccdc41f3a06bf"
+      },
+      {
+        "source": "layout-base@1.0.2/src/fd/FDLayout.js",
+        "sha256": "7219fbce5102d428281e0a2c465ed43b14374ecc7de48612d8ca57f26cad55be"
+      },
+      {
+        "source": "layout-base@1.0.2/src/fd/FDLayoutConstants.js",
+        "sha256": "365a2e54dc82be15703440a954f8d5dff6d0414e426acb444ae5f18b49e2510b"
+      },
+      {
+        "source": "layout-base@1.0.2/src/Layout.js",
+        "sha256": "60b52960899d8ff9bebaa42ef1566bab8e1d020653c9e69a76d8ab83e3e6e6b4"
+      },
+      {
+        "source": "layout-base@1.0.2/src/LayoutConstants.js",
+        "sha256": "d3edb1480609dd9617107cae290a43cb80edd395fdb488be9cd4b929a3d38651"
+      },
+      {
+        "source": "layout-base@1.0.2/src/LGraph.js",
+        "sha256": "e65aa685abafcbe3fea72d72ebe8f1e9c22e8c1588bcfd913f8df154ad765346"
+      },
+      {
+        "source": "layout-base@1.0.2/src/LNode.js",
+        "sha256": "e4a40c19d22d744454b1156445dbf12827c235eacd5b00098e61931ba73f4e1b"
+      },
+      {
+        "source": "layout-base@1.0.2/src/LEdge.js",
+        "sha256": "04a69989b17776ab9e50d2694c7a0b164a602850a3f17893c6956c77a91756e0"
+      },
+      {
+        "source": "layout-base@1.0.2/src/util/IGeometry.js",
+        "sha256": "f120d1fe6b8fc2882e944915b731efbbc7504d4aee2296478d775a6e11e48aa6"
+      },
+      {
+        "source": "layout-base@1.0.2/src/util/Transform.js",
+        "sha256": "441a66aeae1257be23f02e44ba2a9b87f5d3bc52f5454a730362e4c2114da7e4"
+      },
+      {
+        "source": "layout-base@1.0.2/src/util/RectangleD.js",
+        "sha256": "d175bf35848ca186321c146c80699d8fc6f6dc88ffd8a0c7c010cd7bfadb9d7f"
+      },
+      {
+        "source": "layout-base@1.0.2/src/util/Point.js",
+        "sha256": "70670e31d8cda1b2ad7d54fb649dcb02f16f73525a954f3f3f685006581c6ae2"
+      }
+    ]
   }
 }
