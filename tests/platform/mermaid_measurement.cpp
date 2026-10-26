@@ -160,6 +160,8 @@ suite mermaid_measurement = [] {
             {"svg-label-markdown",u"flowchart TD\nA[\"`Read **source** and *save*`\"] -->|\"`next **step** and *write*`\"| B[\"`Write the **updated document** and finish`\"]"},
             {"markdown-group",u"flowchart TD\nsubgraph g[\"`Read **source** and *write*`\"]\nA[Read]-->B[Write]\nend\ng-->C[Done]"},
             {"markdown-group-wrapped",u"flowchart LR\nsubgraph outer[\"`**Processing** the source documents and saving every updated result in the queue`\"]\nsubgraph inner[\"`*Storage*\nand **files**`\"]\ndirection TB\nA[Read]-->B[Write]\nend\nend\nouter-->C[Done]"},
+            {"group-font",u"flowchart TD\nsubgraph g[Read source files]\nA[Read]-->B[Write]\nend\ng-->C[Done]\nstyle g font-size:22px,font-weight:bold"},
+            {"group-font-nested",u"flowchart LR\nsubgraph outer[Processing]\nsubgraph inner[Storage and files]\ndirection TB\nA[Read]-->B[Write]\nend\nend\nouter-->C[Done]\nclassDef groupTitle font-family:Courier New,font-size:20px,font-style:italic\nclass inner groupTitle"},
             {"rich-markdown",u"flowchart LR\nA[\"`Read **bold** and *italic*`\"] -->|\"`next **operation**`\"| B[\"`Save ***both***\nthen finish`\"]"},
             {"rich-markdown-group",u"flowchart TD\nsubgraph g[Operations]\ndirection LR\nA[\"`Read the __source document__ and _validate input_`\"] -->|\"`continue with **next step** and *save*`\"| B[\"`Write **updated _data_**`\"]\nend\ng --> C[Done]"},
             {"rich-markdown-literal",u"flowchart LR\nA[\"`Read \\*literal\\* &amp; **bold**`\"] --> B[\"`Save file_name and *unfinished`\"]"},

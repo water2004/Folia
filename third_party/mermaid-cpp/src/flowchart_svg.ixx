@@ -35,6 +35,9 @@ struct FlowchartTextBox {
     std::vector<std::u16string> lines;
     std::vector<FlowchartLabelLine> runs;
     std::optional<FlowchartLabelFont> font;
+    // Direct cluster font styles apply after its HTML container was measured.
+    std::optional<FlowchartLabelFont> paint_font;
+    double paint_baseline=0,paint_line_step=0;
 };
 struct FlowchartMeasurements {
     std::vector<FlowchartTextBox> nodes,edges;

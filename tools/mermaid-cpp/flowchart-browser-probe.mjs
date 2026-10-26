@@ -11,6 +11,8 @@ for(const file of lock.flowchartCurve.files) assert.equal(createHash('sha256').u
 const directory=resolve(process.argv[2]??'build/mermaid-cpp/flowchart-browser');
 mkdirSync(directory,{recursive:true});
 const cases=[
+  ["group-font", "flowchart TD\nsubgraph g[Read source files]\nA[Read]-->B[Write]\nend\ng-->C[Done]\nstyle g font-size:22px,font-weight:bold"],
+  ["group-font-nested", "flowchart LR\nsubgraph outer[Processing]\nsubgraph inner[Storage and files]\ndirection TB\nA[Read]-->B[Write]\nend\nend\nouter-->C[Done]\nclassDef groupTitle font-family:Courier New,font-size:20px,font-style:italic\nclass inner groupTitle"],
   ["markdown-group", "flowchart TD\nsubgraph g[\"`Read **source** and *write*`\"]\nA[Read]-->B[Write]\nend\ng-->C[Done]"],
   ["markdown-group-wrapped", "flowchart LR\nsubgraph outer[\"`**Processing** the source documents and saving every updated result in the queue`\"]\nsubgraph inner[\"`*Storage*\nand **files**`\"]\ndirection TB\nA[Read]-->B[Write]\nend\nend\nouter-->C[Done]"],
   ["svg-label-plain", "flowchart LR\nA[\"Read input<br/>then save\"] -->|\"next step<br/>when ready\"| B[\"Save the source document and finish\"]"],
@@ -108,10 +110,15 @@ for(const [name,body,title] of ${JSON.stringify(cases)}) {
    }
    return chars;
   };
+  const paintedCenter=label=>{
+   const range=document.createRange();range.selectNodeContents(label);
+   const r=range.getBoundingClientRect();
+   return new DOMPoint(r.x+r.width/2,r.y+r.height/2).matrixTransform(root.getScreenCTM().inverse()).toJSON();
+  };
   const clusters=[...host.querySelectorAll('g.cluster')].map(n=>{
    const shape=n.querySelector('rect'),b=shape.getBBox(),label=n.querySelector('.cluster-label'),lb=label.getBBox();
    return {id:n.id,...position(shape,b.x+b.width/2,b.y+b.height/2),width:b.width,height:b.height,label:label.textContent,
-    title:position(label,lb.x+lb.width/2,lb.y+lb.height/2),fill:getComputedStyle(shape).fill,stroke:getComputedStyle(shape).stroke,
+    title:name.startsWith('group-font')?paintedCenter(label):position(label,lb.x+lb.width/2,lb.y+lb.height/2),fill:getComputedStyle(shape).fill,stroke:getComputedStyle(shape).stroke,
     lines:displayLines(label),characters:styledCharacters(label),thickness:getComputedStyle(shape).strokeWidth,dash:getComputedStyle(shape).strokeDasharray,color:label.querySelector('text')?getComputedStyle(label.querySelector('text')).fill:getComputedStyle(label.querySelector('span')??label).color,font:fontStyle(label)};
   });
   const nodes=[...host.querySelectorAll('g.node')].map(n=>{

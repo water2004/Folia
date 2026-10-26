@@ -211,11 +211,12 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
             const bool left=css=="cluster-label" && theme.html_label_spacing && !b.centered_group;
             if(left) center.x-=b.width/2;
             std::string out="<text class=\""+std::string(css)+"\" xml:space=\"preserve\" text-anchor=\""+(left?"start":"middle")+"\" fill=\""+paint.get(u"color",css=="cluster-label"?theme.cluster_text:theme.text)+"\"";
-            if(b.font) out+=" font-family=\""+xml(b.font->family)+"\" font-size=\""+number(b.font->size)+
-                "\" font-weight=\""+std::to_string(b.font->weight)+"\" font-style=\""+(b.font->italic?"italic":"normal")+"\"";
+            const auto& font=b.paint_font?b.paint_font:b.font;
+            if(font) out+=" font-family=\""+xml(font->family)+"\" font-size=\""+number(font->size)+
+                "\" font-weight=\""+std::to_string(font->weight)+"\" font-style=\""+(font->italic?"italic":"normal")+"\"";
             out+=">";
             for(std::size_t i=0;i<b.lines.size();++i) {
-                out+="<tspan x=\""+number(center.x)+"\" y=\""+number(center.y+b.baseline-b.height/2+i*b.line_step)+"\">";
+                out+="<tspan x=\""+number(center.x)+"\" y=\""+number(center.y+(b.paint_font?b.paint_baseline:b.baseline)-b.height/2+i*(b.paint_font?b.paint_line_step:b.line_step))+"\">";
                 if(b.runs.empty()) out+=xml(b.lines[i]);
                 else for(const auto& run:b.runs.at(i)) {
                     out+="<tspan";
@@ -225,7 +226,7 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
                         out+=" font-style=\""+std::string(run.emphasis?"italic":"normal")+"\"";
                     } else {
                         if(run.strong) out+=" font-weight=\""+std::to_string(
-                            b.font && b.font->weight>=550?900:b.font && b.font->weight<350?400:700)+"\"";
+                            font && font->weight>=550?900:font && font->weight<350?400:700)+"\"";
                         if(run.emphasis) out+=" font-style=\"italic\"";
                     }
                     out+=">"+xml(run.text)+"</tspan>";

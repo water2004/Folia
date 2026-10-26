@@ -54,16 +54,13 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
         auto measure=[flow,&measurer](const auto& source,double wrapping_width,bool group=false)->std::expected<FlowchartTextBox,std::string> {
             const auto& text=source.label;
             const bool svg_label=!flow->theme.html_label_spacing;
-            auto label_font=flowchart_label_font(source.compiled_styles,source.styles,flow->theme);
+            // Class CSS is inherited during sizing; direct cluster styles are
+            // applied to the finished span by clusters.js after its size is fixed.
+            auto label_font=flowchart_label_font(source.compiled_styles,group?std::vector<std::u16string>{}:source.styles,flow->theme);
             if(!label_font) return std::unexpected(label_font.error());
             auto family=measurer.resolve_family(label_font->family);
             if(!family) return std::unexpected(family.error());
             label_font->family=std::move(*family);
-            // Original clusters apply font styles after sizing their HTML
-            // container. That separate group-title adapter is still pending.
-            if(group && (label_font->family!=flow->theme.font_family || label_font->size!=flow->theme.font_size ||
-                label_font->weight!=400 || label_font->italic))
-                return std::unexpected("Flowchart group title font styles require the styled cluster-label adapter");
             const auto size=label_font->size;
             if(!std::isfinite(size)||size<=0||size>std::numeric_limits<float>::max())
                 return std::unexpected("Invalid Mermaid font size");
@@ -121,6 +118,17 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
                 box.height=metrics->height+box.line_step*(box.lines.size()-1);
             }
             if(text.empty()) box.baseline=0;
+            if(group && !svg_label && !source.styles.empty()) {
+                auto paint=flowchart_label_font(source.compiled_styles,source.styles,flow->theme);
+                if(!paint)return std::unexpected(paint.error());
+                auto family=measurer.resolve_family(paint->family);
+                if(!family)return std::unexpected(family.error());
+                paint->family=std::move(*family);
+                const MermaidFont font{paint->family,static_cast<float>(paint->size),paint->weight,paint->italic};
+                auto metrics=measurer.measure(u"M",font);if(!metrics)return std::unexpected(metrics.error());
+                box.paint_font=*paint;box.paint_line_step=paint->size*1.5;
+                box.paint_baseline=metrics->baseline+(box.paint_line_step-metrics->line_height)/2;
+            }
             return box;
         };
         flowchart_measurements.measure_group=[flow,measure](std::size_t index,double width) {
