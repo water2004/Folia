@@ -465,6 +465,17 @@ namespace winrt::Folia
                 top = (std::min)(top, metrics[index].top);
                 bottom = (std::max)(bottom, metrics[index].top + metrics[index].height);
             }
+            // Character hit rectangles do not cover the zero-character row
+            // after a terminal line break. The range owning the layout end
+            // also owns that caret row; measure it through the same layout.
+            if (displayEnd == displayLimit) {
+                FLOAT x = 0, y = 0;
+                DWRITE_HIT_TEST_METRICS end{};
+                if (SUCCEEDED(layout->HitTestTextPosition(static_cast<UINT32>(displayEnd), FALSE, &x, &y, &end))) {
+                    top = (std::min)(top, origin.y + end.top);
+                    bottom = (std::max)(bottom, origin.y + end.top + end.height);
+                }
+            }
             return true;
         };
         auto calloutBrushes = [&](std::string_view kind)

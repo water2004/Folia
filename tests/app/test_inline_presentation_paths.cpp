@@ -117,6 +117,75 @@ namespace {
     };
 
     suite inline_presentation_paths = [] {
+        "code background contains terminal empty rows through enter undo and redo"_test = [] {
+            int caseIndex = 0;
+            for (auto source : {L"```cpp\n1111111\n111111\n```\n", L"```cpp\n\n```\n",
+                L"> ```cpp\n> 1111111\n> 111111\n> ```\n", L"- item\n\n  ```cpp\n  1111111\n  111111\n  ```\n"}) {
+                EditorSession session;
+                session.SetText(source);
+                NativeInlineFrame native;
+                native.Paint(session);
+                auto frame = session.RenderFrame();
+                folia::RenderBlock const* code = nullptr;
+                auto find = [&](auto&& self, folia::RenderBlock const& block) -> void {
+                    if (block.kind == folia::RenderBlockKind::Code) code = &block;
+                    for (auto const& child : block.child_blocks) self(self, child);
+                };
+                for (auto const& block : frame.renderModel.blocks) find(find, block);
+                expect(code != nullptr);
+                if (!code) continue;
+                auto owner = code->id;
+                session.SetSelection(folia::TextSelection::caret({owner, code->content_span.source_range.end, folia::TextAffinity::Downstream}));
+                auto containsCaret = [&] {
+                    auto pixels = native.Paint(session, {}, true, true);
+                    auto caret = native.interaction.CaretBounds(session.Selection().active, native.sheet.body.lineHeight);
+                    auto raw = native.interaction.RawBlockFor(owner);
+                    expect(caret.has_value() && raw.has_value());
+                    auto stillInCode = session.Selection().active.container_id == owner;
+                    if (caret && raw) {
+                        if (stillInCode) expect(caret->top >= raw->rect.top && caret->bottom <= raw->rect.bottom + .5f)
+                            << "terminal editable row fell outside the code background";
+                        else expect(caret->top >= raw->rect.bottom - .5f)
+                            << "exiting an empty code row must place the paragraph after the code block";
+                    }
+                    if (caret && raw && stillInCode && caret->bottom > raw->rect.bottom + .5f) {
+                        DWRITE_TEXT_METRICS metrics{};
+                        if (!native.interaction.blocks.empty() && native.interaction.blocks.front().layout)
+                            native.interaction.blocks.front().layout->GetMetrics(&metrics);
+                        std::fprintf(stderr, "code row case=%d sourceOffset=%zu caret=%.1f..%.1f raw=%.1f..%.1f layoutHeight=%.1f\n",
+                            caseIndex, session.Selection().active.source_offset, caret->top, caret->bottom,
+                            raw->rect.top, raw->rect.bottom, metrics.height);
+                    }
+                    return pixels;
+                };
+                containsCaret();
+                for (int row = 0; row < 3; ++row) {
+                    auto before = session.Text();
+                    auto beforeSelection = session.Selection();
+                    folia::Command enter; enter.kind = folia::CommandKind::InsertNewline;
+                    expect(session.ExecuteCommand(enter));
+                    auto after = session.Text();
+                    auto afterSelection = session.Selection();
+                    auto pixels = containsCaret();
+                    if (row == 0) native.Save(std::filesystem::path(__FILE__).parent_path().parent_path().parent_path()
+                        / "build/tests/inline-presentation/code-newline.png", pixels);
+                    folia::Command undo; undo.kind = folia::CommandKind::Undo;
+                    expect(session.ExecuteCommand(undo));
+                    expect(session.Text() == before);
+                    expect(session.Selection().active.container_id == beforeSelection.active.container_id
+                        && session.Selection().active.source_offset == beforeSelection.active.source_offset);
+                    containsCaret();
+                    folia::Command redo; redo.kind = folia::CommandKind::Redo;
+                    expect(session.ExecuteCommand(redo));
+                    expect(session.Text() == after);
+                    expect(session.Selection().active.container_id == afterSelection.active.container_id
+                        && session.Selection().active.source_offset == afterSelection.active.source_offset);
+                    containsCaret();
+                }
+                ++caseIndex;
+            }
+        };
+
         "native code language header keeps the same font and pixels while editing"_test = [] {
             for (auto theme : {folia::Theme::Light, folia::Theme::Dark}) {
                 EditorSession session;
