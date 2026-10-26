@@ -35,7 +35,31 @@ namespace winrt::Folia {
             winrt::check_bool(::StringFromGUID2(id, text, 40) != 0);
             return parent / (std::wstring(L".folia-copy-") + text);
         }
-        std::filesystem::path CopyExclusive(WorkspaceFileAction action) {
+        struct CopyProgress {
+            WorkspaceFileProgressHandler handler;
+            std::filesystem::path path;
+            ULONGLONG lastUpdate = 0;
+            std::exception_ptr failure;
+            static DWORD CALLBACK Report(LARGE_INTEGER total, LARGE_INTEGER completed, LARGE_INTEGER, LARGE_INTEGER,
+                DWORD, DWORD, HANDLE, HANDLE, LPVOID context) noexcept {
+                auto& self = *static_cast<CopyProgress*>(context);
+                const auto now = ::GetTickCount64();
+                if (self.handler && (self.lastUpdate == 0 || now - self.lastUpdate >= 100)) {
+                    self.lastUpdate = now;
+                    try { self.handler({self.path, static_cast<std::uint64_t>(completed.QuadPart), static_cast<std::uint64_t>(total.QuadPart)}); }
+                    catch (...) { self.failure = std::current_exception(); return PROGRESS_CANCEL; }
+                }
+                return PROGRESS_CONTINUE;
+            }
+            void Copy(std::filesystem::path const& source, std::filesystem::path const& target, bool exclusive) {
+                path = source;
+                auto success = ::CopyFileExW(source.c_str(), target.c_str(), Report, this, nullptr, exclusive ? COPY_FILE_FAIL_IF_EXISTS : 0);
+                if (failure) std::rethrow_exception(failure);
+                winrt::check_bool(success);
+            }
+        };
+        std::filesystem::path CopyExclusive(WorkspaceFileAction action, WorkspaceFileProgressHandler progress) {
+            CopyProgress copy{std::move(progress)};
             const bool sameFolderCopy = Same(PathText(action.source), PathText(action.target));
             auto parent = action.target.parent_path();
             auto base = action.directory ? action.target.filename() : action.target.stem();
@@ -54,8 +78,13 @@ namespace winrt::Folia {
             if (action.directory) {
                 winrt::check_bool(::CreateDirectoryW(stage.path.c_str(), nullptr));
                 stage.owned = true;
-                std::filesystem::copy(action.source, stage.path,
-                    std::filesystem::copy_options::recursive | std::filesystem::copy_options::copy_symlinks);
+                for (auto const& item : std::filesystem::recursive_directory_iterator(action.source)) {
+                    auto target = stage.path / item.path().lexically_relative(action.source);
+                    auto status = item.symlink_status();
+                    if (std::filesystem::is_symlink(status)) std::filesystem::copy_symlink(item.path(), target);
+                    else if (std::filesystem::is_directory(status)) std::filesystem::create_directory(target);
+                    else copy.Copy(item.path(), target, true);
+                }
             } else {
                 // Claim the unique staging name before copying so cleanup can
                 // remove only a file created by this request, including failure.
@@ -64,7 +93,7 @@ namespace winrt::Folia {
                 winrt::check_bool(file.is_valid());
                 stage.owned = true;
                 file.reset();
-                winrt::check_bool(::CopyFileW(action.source.c_str(), stage.path.c_str(), FALSE));
+                copy.Copy(action.source, stage.path, false);
             }
             while (!::MoveFileW(stage.path.c_str(), action.target.c_str())) {
                 auto error = ::GetLastError();
@@ -98,7 +127,7 @@ namespace winrt::Folia {
         return action.target / candidate.substr(offset);
     }
 
-    Windows::Foundation::IAsyncOperation<winrt::hstring> ApplyWorkspaceFileActionAsync(WorkspaceFileAction action) {
+    Windows::Foundation::IAsyncOperation<winrt::hstring> ApplyWorkspaceFileActionAsync(WorkspaceFileAction action, WorkspaceFileProgressHandler progress) {
         co_await winrt::resume_background();
         if (!action.target.is_absolute() || !ValidWorkspaceEntryName(action.target.filename().native()))
             throw winrt::hresult_invalid_argument(L"Invalid destination name");
@@ -119,10 +148,10 @@ namespace winrt::Folia {
         if (std::filesystem::is_directory(action.source) != action.directory)
             throw winrt::hresult_invalid_argument(L"The source item changed; refresh the folder first");
         const bool copyBesideSource = action.kind == WorkspaceFileActionKind::Copy && Same(PathText(action.source), PathText(action.target));
-        if (action.directory && !copyBesideSource && Contains(std::filesystem::weakly_canonical(action.source),
+        if (action.directory && !copyBesideSource && !Same(PathText(action.source), PathText(action.target)) && Contains(std::filesystem::weakly_canonical(action.source),
                 std::filesystem::weakly_canonical(action.target.parent_path()) / action.target.filename()))
             throw winrt::hresult_invalid_argument(L"A folder cannot be placed inside itself");
-        if (action.kind == WorkspaceFileActionKind::Copy) action.target = CopyExclusive(std::move(action));
+        if (action.kind == WorkspaceFileActionKind::Copy) action.target = CopyExclusive(std::move(action), std::move(progress));
         else winrt::check_bool(::MoveFileW(action.source.c_str(), action.target.c_str()));
         co_return winrt::hstring(action.target.c_str());
     }

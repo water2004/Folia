@@ -59,10 +59,44 @@ namespace {
             expect(Rejected(Kind::Copy, folder, folder / L"inside", true));
             expect(!std::filesystem::exists(folder / L"inside"));
             expect(Rejected(Kind::Rename, folder, folder / L"inside", true));
+            auto caseOnly = directory.path / L"FOLDER";
+            Apply(Kind::Rename, folder, caseOnly, true);
+            expect(Bytes(caseOnly / L"renamed.md") == "original bytes\n");
+            Apply(Kind::Rename, caseOnly, folder, true);
             auto before = std::distance(std::filesystem::directory_iterator(directory.path), std::filesystem::directory_iterator{});
             expect(Rejected(Kind::Copy, folder, folderCopy, true));
             auto after = std::distance(std::filesystem::directory_iterator(directory.path), std::filesystem::directory_iterator{});
             expect(before == after);
+        };
+        "workspace file copy reports byte progress off the UI thread and cleans failed staging"_test = [] {
+            TestDirectory directory;
+            auto source = directory.path / L"source.bin", target = directory.path / L"target.bin";
+            std::ofstream output(source, std::ios::binary);
+            std::string bytes(1024 * 1024, 'x');
+            output << bytes << bytes << bytes << bytes;
+            output.close();
+            auto uiThread = ::GetCurrentThreadId();
+            std::atomic<int> reports = 0;
+            std::atomic<bool> wrongThread = false, invalidProgress = false;
+            Await(ApplyWorkspaceFileActionAsync({Kind::Copy, source, target, false}, [&](WorkspaceFileProgress const& progress) {
+                ++reports;
+                if (::GetCurrentThreadId() == uiThread) wrongThread = true;
+                if (progress.path != source || progress.total != 4 * 1024 * 1024 || progress.completed > progress.total) invalidProgress = true;
+            }));
+            expect(reports.load() > 0_i);
+            expect(!wrongThread.load());
+            expect(!invalidProgress.load());
+            expect(Bytes(source) == Bytes(target));
+            auto failed = directory.path / L"failed.bin";
+            bool rejected = false;
+            try { Await(ApplyWorkspaceFileActionAsync({Kind::Copy, source, failed, false}, [](auto const&) { throw std::runtime_error("copy progress callback stopped"); })); }
+            catch (std::exception const&) { rejected = true; }
+            catch (winrt::hresult_error const&) { rejected = true; }
+            expect(rejected);
+            expect(!std::filesystem::exists(failed));
+            int remaining = 0;
+            for (auto const& item : std::filesystem::directory_iterator(directory.path)) if (item.path().filename().native().starts_with(L".folia-copy-")) ++remaining;
+            expect(remaining == 0_i);
         };
         "workspace file relocation projects only moved paths and keeps directory boundaries"_test = [] {
             WorkspaceFileAction rename{Kind::Rename, L"D:/work/project", L"D:/work/renamed", true};
