@@ -67,6 +67,8 @@ namespace winrt::Folia
         state_->generation.fetch_add(1);
         state_->documentGeneration.fetch_add(1);
         state_->presenting = false;
+        state_->fileRelocating = false;
+        ++state_->fileRelocationSerial;
         state_->session = nullptr;
         state_->renderer = nullptr;
         state_->textInput = nullptr;
@@ -164,7 +166,7 @@ namespace winrt::Folia
 
     bool EditorDocumentController::Active(std::shared_ptr<State> const& state, std::uint64_t generation)
     {
-        return state && state->generation.load() == generation && state->session && state->presenting;
+        return state && state->generation.load() == generation && state->session && state->presenting && !state->fileRelocating;
     }
 
     bool EditorDocumentController::OwnsDocument(std::shared_ptr<State> const& state, std::uint64_t generation)

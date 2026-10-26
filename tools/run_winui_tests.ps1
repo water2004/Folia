@@ -2,6 +2,7 @@
 param(
     [ValidateSet('Debug', 'Release')][string]$Configuration = 'Debug',
     [string]$TestFilter = '*',
+    [string]$SourceFilter = '*',
     [switch]$Visual
 )
 
@@ -102,7 +103,10 @@ $boostIfc = Join-Path $scratch 'boost.ut.ifc'
 Compile 'boost.ut' (Join-Path $root 'third_party/ut/include/boost/ut.cppm') "/interface /ifcOutput `"$boostIfc`"" -NoPch
 $references += '/reference "boost.ut={0}"' -f $boostIfc
 $sources = if ($Visual) { Join-Path $root 'tests/app/visual' } else { Join-Path $root 'tests/app' }
-foreach ($source in Get-ChildItem $sources -Filter '*.cpp') {
+$entrySource = if ($Visual) { 'main' } else { 'test_document_loading' }
+$selectedSources = @(Get-ChildItem $sources -Filter '*.cpp' | Where-Object { $_.BaseName -eq $entrySource -or $_.BaseName -like $SourceFilter })
+if (-not @(Get-ChildItem $sources -Filter '*.cpp' | Where-Object { $_.BaseName -like $SourceFilter }).Count) { throw 'No test source files match SourceFilter.' }
+foreach ($source in $selectedSources) {
     Compile $source.BaseName $source.FullName
 }
 Compile 'windows_console_runtime' (Join-Path $root 'tools/test-support/windows_console_runtime.cpp') -NoPch

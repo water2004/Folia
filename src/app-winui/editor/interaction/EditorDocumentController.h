@@ -45,6 +45,8 @@ namespace winrt::Folia
         void ResumePresentation(EditorSurfaceRenderer& renderer, EditorTextInputController& textInput);
         bool IsModified() const noexcept;
         bool IsLoading() const noexcept;
+        std::optional<std::uint64_t> BeginFileRelocation();
+        void FinishFileRelocation(std::uint64_t token, winrt::Windows::Storage::StorageFile const& file = nullptr);
         winrt::Windows::Foundation::IAsyncOperation<bool> OpenFileAsync(
             winrt::Windows::Storage::StorageFile file);
         void SetSaveDialogs(ConfirmUnsaved confirm, PickSaveFile picker = {});

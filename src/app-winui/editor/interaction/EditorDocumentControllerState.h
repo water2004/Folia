@@ -38,6 +38,8 @@ namespace winrt::Folia
         ConfirmUnsaved confirmUnsaved;
         PickSaveFile pickSaveFile;
         bool saving = false;
+        bool fileRelocating = false;
+        std::uint64_t fileRelocationSerial = 0;
         bool confirmingClose = false;
         bool pasting = false;
         winrt::Microsoft::UI::Dispatching::DispatcherQueue dispatcher{ nullptr };

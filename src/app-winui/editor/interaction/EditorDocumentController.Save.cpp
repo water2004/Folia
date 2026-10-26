@@ -44,7 +44,7 @@ namespace winrt::Folia {
 
     winrt::Windows::Foundation::IAsyncOperation<bool> EditorDocumentController::ConfirmCloseAsync(
         std::shared_ptr<State> state, std::uint64_t generation) {
-        if (!OwnsDocument(state, generation) || state->confirmingClose) co_return false;
+        if (!OwnsDocument(state, generation) || state->confirmingClose || state->fileRelocating) co_return false;
         PendingOperation pending(state->confirmingClose);
         auto document = state->loadSerial.load();
         auto identity = state->documentSerial;
@@ -78,7 +78,7 @@ namespace winrt::Folia {
     winrt::Windows::Foundation::IAsyncOperation<bool> EditorDocumentController::SaveDocumentAsync(
         std::shared_ptr<State> state, std::uint64_t generation, bool saveAs,
         std::optional<DocumentEncoding> requestedEncoding) {
-        if (!OwnsDocument(state, generation) || state->saving || state->documentLoading) co_return false;
+        if (!OwnsDocument(state, generation) || state->saving || state->documentLoading || state->fileRelocating) co_return false;
         PendingOperation pending(state->saving);
         auto document = state->loadSerial.load();
         auto identity = state->documentSerial;
