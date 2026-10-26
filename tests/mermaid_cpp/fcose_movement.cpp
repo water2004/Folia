@@ -11,7 +11,8 @@ suite fcose_movement_tests=[] {
         while(std::getline(input,line)) {
             if(!line.empty()&&line.back()=='\r')line.pop_back();if(line.empty()||line.front()=='#')continue;
             const auto last=line.rfind('\t');expect(fatal(last!=line.npos));const auto data=json(decode(std::string_view(line).substr(last+1)));++count;
-            for(const auto& pass:field(data,u"constraintPasses").sequence) {
+            const auto& passes=field(data,u"constraintPasses").sequence;expect(fatal(passes.size()==2_u));
+            for(const auto& pass:passes) {
                 ArchitectureConstraints constraints;const auto& original=field(pass,u"constraints");const auto& alignment=field(original,u"alignmentConstraint");
                 for(const auto& [key,groups]:{std::pair{u"horizontal",&constraints.horizontal},{u"vertical",&constraints.vertical}})if(const auto* array=alignment.find(key))for(const auto& g:array->sequence){std::vector<std::u16string> ids;for(const auto& id:g.sequence)ids.push_back(id.string);groups->push_back(std::move(ids));}
                 if(const auto* relative=original.find(u"relativePlacementConstraint"))for(const auto& edge:relative->sequence) {

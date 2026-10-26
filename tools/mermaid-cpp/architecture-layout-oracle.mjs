@@ -12,7 +12,8 @@ for(const pin of pins){const [pkg,...rest]=pin.source.split('/');const name=pkg.
 const cytoscape=require(isolated+'package/dist/cytoscape.cjs.js');
 cytoscape.use(require('./oracle/node_modules/.pnpm/cytoscape-fcose@2.2.0_cytoscape@3.34.4/node_modules/cytoscape-fcose'));
 assert.equal(cytoscape.version,'3.34.0');
-const handler=require('./oracle/node_modules/.pnpm/cose-base@2.2.0/node_modules/cose-base/src/ConstraintHandler');
+const coseBase=require('./oracle/node_modules/.pnpm/cose-base@2.2.0/node_modules/cose-base');
+const handler=coseBase.ConstraintHandler;
 const originalEnforce=handler.handleConstraints;
 let constraintPasses=[];
 handler.handleConstraints=layout=>{
@@ -21,7 +22,7 @@ handler.handleConstraints=layout=>{
  originalEnforce(layout);
  const pass={input,constraints,output:project(),movement:[]};constraintPasses.push(pass);layout.oraclePass=pass;
 };
-const CoSELayout=require('./oracle/node_modules/.pnpm/cose-base@2.2.0/node_modules/cose-base/src/CoSELayout');
+const CoSELayout=coseBase.CoSELayout;
 const originalMovement=CoSELayout.prototype.updateDisplacements;
 CoSELayout.prototype.updateDisplacements=function(){
  const project=()=>this.getAllNodes().map(n=>({id:n.id,x:n.getCenterX(),y:n.getCenterY(),dx:n.displacementX,dy:n.displacementY}));
@@ -55,6 +56,8 @@ for(const row of readFileSync('tests/mermaid_cpp/fixtures/architecture.tsv','utf
  const cy=await layoutArchitecture(nodes.filter(n=>n.type==='service'),nodes.filter(n=>n.type==='junction'),groups,data.edges,db,{spatialMaps:data.spatialMaps.map(m=>new Map(m)),groupAlignments:new Map(data.groupAlignments)});
  const result={runs,constraintPasses,nodes:cy.nodes().map(n=>({id:n.id(),x:n.position('x'),y:n.position('y'),width:n.width(),height:n.height()}))};
  assert.equal(runs,2,name);
+ assert.equal(constraintPasses.length,2,name+' original constraint passes');
+ for(const pass of constraintPasses){assert(pass.input.length>0,name+' constraint nodes');assert.equal(pass.movement.length,10,name+' movement snapshots');}
  rows.push([name,source,site,hex(JSON.stringify(result))].join('\t'));cy.destroy();
 }
 const file='tests/mermaid_cpp/fixtures/architecture-layout.tsv',expected=rows.join('\n')+'\n';
