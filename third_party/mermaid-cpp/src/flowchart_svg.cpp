@@ -205,7 +205,10 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
             svg+=marker_definitions(theme.line,"flow-"+std::to_string(i),xml(edge_paints[i].marker_stroke));
         svg+="<g font-family=\""+xml(theme.font_family)+"\" font-size=\""+number(theme.font_size)+"\" transform=\"translate("+number(theme.padding)+","+number(theme.padding)+")\">";
         const auto text=[&](std::u16string_view,FlowchartPoint center,const FlowchartTextBox& b,std::string_view css,const FlowchartPaint& paint) {
-            std::string out="<text class=\""+std::string(css)+"\" xml:space=\"preserve\" text-anchor=\"middle\" fill=\""+paint.get(u"color",css=="cluster-label"?theme.cluster_text:theme.text)+"\"";
+            // createLabel's unbounded HTML group box keeps each line left aligned.
+            const bool left=css=="cluster-label" && theme.html_label_spacing;
+            if(left) center.x-=b.width/2;
+            std::string out="<text class=\""+std::string(css)+"\" xml:space=\"preserve\" text-anchor=\""+(left?"start":"middle")+"\" fill=\""+paint.get(u"color",css=="cluster-label"?theme.cluster_text:theme.text)+"\"";
             if(b.font) out+=" font-family=\""+xml(b.font->family)+"\" font-size=\""+number(b.font->size)+
                 "\" font-weight=\""+std::to_string(b.font->weight)+"\" font-style=\""+(b.font->italic?"italic":"normal")+"\"";
             out+=">";

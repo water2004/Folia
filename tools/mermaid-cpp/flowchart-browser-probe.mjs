@@ -11,6 +11,8 @@ for(const file of lock.flowchartCurve.files) assert.equal(createHash('sha256').u
 const directory=resolve(process.argv[2]??'build/mermaid-cpp/flowchart-browser');
 mkdirSync(directory,{recursive:true});
 const cases=[
+  ["rich-group-html", "flowchart TD\nsubgraph g[\"Read <strong>source</strong> and <em>write</em>\"]\nA[Read]-->B[Write]\nend\ng-->C[Done]"],
+  ["rich-group-html-nested", "flowchart LR\nsubgraph outer[\"<b>Processing</b><br/>queue\"]\nsubgraph inner[\"<em>Storage</em> and <strong>files</strong>\"]\ndirection TB\nA[Read]-->B[Write]\nend\nend\nouter-->C[Done]"],
   ['edge-ids-interpolation','flowchart TD\nA first@--> B\nA second@-- next --> C\nB --> D\nC --> D\nlinkStyle 0,1 interpolate linear stroke:#226688\nlinkStyle 2 interpolate basis'],
   ['edge-interpolation-default','flowchart LR\nA-->B\nlinkStyle default interpolate linear\nB-->C\nlinkStyle default interpolate basis\nC-->D\nA-->D'],
   ['rich-markdown','flowchart LR\nA["`Read **bold** and *italic*`"] -->|"`next **operation**`"| B["`Save ***both***\nthen finish`"]'],
@@ -106,7 +108,7 @@ for(const [name,body,title] of ${JSON.stringify(cases)}) {
    const shape=n.querySelector('rect'),b=shape.getBBox(),label=n.querySelector('.cluster-label'),lb=label.getBBox();
    return {id:n.id,...position(shape,b.x+b.width/2,b.y+b.height/2),width:b.width,height:b.height,label:label.textContent,
     title:position(label,lb.x+lb.width/2,lb.y+lb.height/2),fill:getComputedStyle(shape).fill,stroke:getComputedStyle(shape).stroke,
-    thickness:getComputedStyle(shape).strokeWidth,dash:getComputedStyle(shape).strokeDasharray,color:getComputedStyle(label.querySelector('span')??label).color,font:fontStyle(label)};
+    characters:styledCharacters(label),thickness:getComputedStyle(shape).strokeWidth,dash:getComputedStyle(shape).strokeDasharray,color:getComputedStyle(label.querySelector('span')??label).color,font:fontStyle(label)};
   });
   const nodes=[...host.querySelectorAll('g.node')].map(n=>{
    const shape=n.querySelector('.label-container');const b=shape.getBBox();const label=n.querySelector('.label');

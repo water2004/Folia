@@ -154,6 +154,8 @@ suite mermaid_measurement = [] {
         const std::vector<Example> cases={
             {"edge-ids-interpolation",u"flowchart TD\nA first@--> B\nA second@-- next --> C\nB --> D\nC --> D\nlinkStyle 0,1 interpolate linear stroke:#226688\nlinkStyle 2 interpolate basis"},
             {"edge-interpolation-default",u"flowchart LR\nA-->B\nlinkStyle default interpolate linear\nB-->C\nlinkStyle default interpolate basis\nC-->D\nA-->D"},
+            {"rich-group-html",u"flowchart TD\nsubgraph g[\"Read <strong>source</strong> and <em>write</em>\"]\nA[Read]-->B[Write]\nend\ng-->C[Done]"},
+            {"rich-group-html-nested",u"flowchart LR\nsubgraph outer[\"<b>Processing</b><br/>queue\"]\nsubgraph inner[\"<em>Storage</em> and <strong>files</strong>\"]\ndirection TB\nA[Read]-->B[Write]\nend\nend\nouter-->C[Done]"},
             {"rich-markdown",u"flowchart LR\nA[\"`Read **bold** and *italic*`\"] -->|\"`next **operation**`\"| B[\"`Save ***both***\nthen finish`\"]"},
             {"rich-markdown-group",u"flowchart TD\nsubgraph g[Operations]\ndirection LR\nA[\"`Read the __source document__ and _validate input_`\"] -->|\"`continue with **next step** and *save*`\"| B[\"`Write **updated _data_**`\"]\nend\ng --> C[Done]"},
             {"rich-markdown-literal",u"flowchart LR\nA[\"`Read \\*literal\\* &amp; **bold**`\"] --> B[\"`Save file_name and *unfinished`\"]"},

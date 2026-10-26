@@ -72,8 +72,8 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             const bool styled=std::ranges::any_of(*lines,[](const auto& line) {
                 return std::ranges::any_of(line,[](const auto& run){return run.strong||run.emphasis;});
             });
-            if(styled && (group||!flow->theme.html_label_spacing))
-                return std::unexpected("Styled Flowchart labels currently require node/edge HTML label mode");
+            if(styled && ((group && source.label_type==u"markdown")||!flow->theme.html_label_spacing))
+                return std::unexpected("Styled Flowchart labels require HTML mode; Markdown group titles need their own layout");
             FlowchartTextBox box;
             box.font=*label_font;
             // Empty lines still occupy a font line box, measured with a glyph's
