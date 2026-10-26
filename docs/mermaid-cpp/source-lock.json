@@ -1438,7 +1438,7 @@
       }
     ],
     "version": "0.9.3",
-    "boundary": "DepthFirstCycleBreaker, flat NetworkSimplexLayerer, LongEdgeSplitter and flat east/west PortListSorter/BarycenterHeuristic/LayerSweepCrossingMinimizer and flat BKNodePlacer alignment/compaction/coordinate selection"
+    "boundary": "DepthFirstCycleBreaker, flat NetworkSimplexLayerer, LongEdgeSplitter and flat east/west PortListSorter/BarycenterHeuristic/LayerSweepCrossingMinimizer and flat BKNodePlacer alignment/compaction/coordinate selection and flat OrthogonalEdgeRouter"
   },
   "xyScales": {
     "boundary": "Linear/band scales, numeric ticks, number interpolation and linear line paths used by XY",
