@@ -11,7 +11,7 @@
 - 已验Release math **977项546948断言通过**（tex-package-math-all.log）。新增注册表9607断言覆盖75有限map/1763条注册、字符值及最终owner；216个inline/display样例单项与批量均逐字节Source SVG一致（texvc-verified.log，865断言），含101别名、伸缩/定尺寸/middle、begingroup覆盖恢复及未知命令仍显示。首次9差异是测试错误地假定裸花括号/未分组newcommand不持续：参考与native均按既有TeX/begingroup语义；正式样例改显式begingroup，产品无释放/重置补丁。DelimiterMap按原版类型注册，不用CharacterMap代替。
 - 补全catalog新增94条（原sub触发模板保留），生成器检查id/trigger唯一；声明2.7.9来源的第三方notice已重生成。源/验收/职责说明见mediawiki-texvc.md及evidence/tex-package-conformance.json。
 - **交付**：数学包/profile/正式测试本地提交 **77863b07**。自包含Release96206已明确exit0（tex-package-release.log）；真实入口/激活/正常关闭 **Ready=true、Success=true、ExitCode0**（tex-package-startup.log、build/tests/tex-package-startup/run-1/result.json），只关闭owned child38256。候选build/app-winui/bin/x64/Release/Folia.exe **12242432 bytes / ProductVersion0.4.1**；实际math DLL与core-release SHA256相同（1D7094BBA656E192A1A08677F888BCB11A6CAB9729FAABB7F19935487A7AEA5F），候选commands.json与源码字节一致。生成器再次运行exit0且所有生成fixture/alias/evidence相对提交零diff（tex-package-regeneration.log）。
-- **停止点/下一步**：无活动agent/build/test/诊断句柄；补全/notice/checkpoint在随后小提交收尾，工作区随后应干净。实现与自动验收完成，下一步用户试用或新指令，不重复旧宽审。无真人公式编辑/完整窗口外观检查；本次无CST/编辑/布局/SVG算法修改，沿用既有架构。未MSI/安装/推送/发布，不关用户窗口，版本保持0.4.1。
+- **停止点/下一步**：无活动agent/build/test/诊断句柄；补全/notice已另提交 **87e8b1e7**，工作区干净，本行随checkpoint提交收尾。实现与自动验收完成，下一步用户试用或新指令，不重复旧宽审。无真人公式编辑/完整窗口外观检查；本次无CST/编辑/布局/SVG算法修改，沿用既有架构。未MSI/安装/推送/发布，不关用户窗口，版本保持0.4.1。
 
 ## 历史 checkpoint：代码块尾空行与单层语言选择器已完成（2026-10-27）
 
