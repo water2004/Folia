@@ -51,7 +51,7 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             flowchart_measurements.title=FlowchartTextBox{
                 .width=title->bounds_width,.height=title->line_height,.baseline=title->baseline};
         }
-        auto measure=[&](const auto& source,double wrapping_width,bool group=false)->std::expected<FlowchartTextBox,std::string> {
+        auto measure=[flow,&measurer](const auto& source,double wrapping_width,bool group=false)->std::expected<FlowchartTextBox,std::string> {
             const auto& text=source.label;
             const bool svg_label=!flow->theme.html_label_spacing;
             auto label_font=flowchart_label_font(source.compiled_styles,source.styles,flow->theme);
@@ -70,13 +70,9 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             const MermaidFont font{label_font->family,static_cast<float>(size),label_font->weight,label_font->italic};
             auto lines=svg_label?flowchart_svg_label_runs(text,source.label_type):flowchart_label_runs(text,source.label_type);
             if(!lines) return std::unexpected(lines.error());
-            const bool styled=std::ranges::any_of(*lines,[](const auto& line) {
-                return std::ranges::any_of(line,[](const auto& run){return run.strong||run.emphasis;});
-            });
-            if(styled && group && source.label_type==u"markdown")
-                return std::unexpected("Markdown group titles need their own layout");
             FlowchartTextBox box;
             box.font=*label_font;box.svg_label=svg_label;
+            box.centered_group=group && source.label_type==u"markdown";
             // Empty lines still occupy a font line box, measured with a glyph's
             // font metrics rather than an estimated glyph height.
             auto font_metrics=measurer.measure(u"M",font);
@@ -126,6 +122,9 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             }
             if(text.empty()) box.baseline=0;
             return box;
+        };
+        flowchart_measurements.measure_group=[flow,measure](std::size_t index,double width) {
+            return measure(flow->document.nodes.at(index),width,true);
         };
         for(const auto& node:flow->document.nodes) {
             auto box=measure(node,node.group?std::numeric_limits<double>::infinity():flow->theme.wrapping_width,node.group);

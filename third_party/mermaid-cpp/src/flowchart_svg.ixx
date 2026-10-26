@@ -31,13 +31,16 @@ struct FlowchartTextBox {
     // Lines are the exact display strings measured by the platform adapter.
     double width=0,height=0,baseline=0;
     double line_step=0;
-    bool svg_label=false;
+    bool svg_label=false,centered_group=false;
     std::vector<std::u16string> lines;
     std::vector<FlowchartLabelLine> runs;
     std::optional<FlowchartLabelFont> font;
 };
 struct FlowchartMeasurements {
     std::vector<FlowchartTextBox> nodes,edges;
+    // Synchronous cluster createText measurement once recursive Dagre supplies
+    // the actual group width. Only Markdown group labels use this callback.
+    std::function<std::expected<FlowchartTextBox,std::string>(std::size_t,double)> measure_group;
     // Plain diagram title measured at the original fixed 18px size. Its
     // baseline/height are native font metrics, independent of HTML labels.
     std::optional<FlowchartTextBox> title;

@@ -33,7 +33,7 @@ try {
     const shape=n.querySelector('rect'),b=shape.getBBox(),label=n.querySelector('text'),lb=label.getBBox();
     return {id:n.dataset.node,x:b.x+b.width/2,y:b.y+b.height/2,width:b.width,height:b.height,label:label.textContent,
      title:{x:lb.x+lb.width/2,y:lb.y+lb.height/2},fill:getComputedStyle(shape).fill,stroke:getComputedStyle(shape).stroke,
-     characters:styledCharacters(label),thickness:getComputedStyle(shape).strokeWidth,dash:getComputedStyle(shape).strokeDasharray,color:getComputedStyle(label).fill,font:fontStyle(label)};
+     lines:[...label.children].map(n=>n.textContent.trimEnd()),characters:styledCharacters(label),thickness:getComputedStyle(shape).strokeWidth,dash:getComputedStyle(shape).strokeDasharray,color:getComputedStyle(label).fill,font:fontStyle(label)};
    });
    const nodes=[...svg.querySelectorAll('g.node')].map(n=>{
     const shape=n.querySelector('.label-container'),b=shape.getBBox(),text=n.querySelector('text'),t=text.getBBox();
@@ -139,6 +139,7 @@ try {
    const e=row.clusters.find(n=>n.id.endsWith('-'+a.id));assert(e,`${row.name}: missing group ${a.id}`);
    assert.equal(a.label,e.label,row.name+' group title');
    assert.deepEqual(a.characters,e.characters,row.name+' styled group characters');
+   assert.deepEqual(a.lines,e.lines,row.name+' group title lines');
    near(a.x+offset[0],e.x,row.name+' group x');near(a.y+offset[1],e.y,row.name+' group y');
    near(a.width,e.width,row.name+' group width');near(a.height,e.height,row.name+' group height');
    near(a.title.x+offset[0],e.title.x,row.name+' title x');near(a.title.y+offset[1],e.title.y,row.name+' title y',2);

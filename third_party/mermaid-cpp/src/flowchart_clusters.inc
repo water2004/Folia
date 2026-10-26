@@ -66,7 +66,7 @@ void finish_edge(FlowchartPlacedEdge& edge,const FlowchartEdge& source,
 
 FlowchartScene layout_prepared(const FlowchartInput& source,FlowchartPreparedGraph graph,
     std::span<const FlowchartNodeBox> boxes,std::span<const FlowchartEdgeLabelSize> labels,
-    const FlowchartMeasurements& measured,const FlowchartSvgTheme& theme,
+    FlowchartMeasurements& measured,const FlowchartSvgTheme& theme,
     const FlowchartPreparedNode* parent=nullptr) {
     if(parent) {
         for(auto& n:graph.nodes) if(n.data.parent.empty()) n.data.parent=parent->data.id;
@@ -110,6 +110,11 @@ FlowchartScene layout_prepared(const FlowchartInput& source,FlowchartPreparedGra
         else if(compound[i]) n.height+=title_margin;
         else n.y+=title_margin/2;
         if(compound[i]) {
+            if(prepared.data.label_type==u"markdown" && measured.measure_group) {
+                auto label=measured.measure_group(*prepared.source_index,n.width);
+                if(!label) throw std::runtime_error(label.error());
+                measured.nodes[*prepared.source_index]=std::move(*label);
+            }
             const double title_width=measured.nodes[*prepared.source_index].width+prepared.data.padding;
             const double width=std::max(n.width,title_width);
             scene.diff=(n.width<=title_width?(width-n.width)/2:0)-prepared.data.padding;
