@@ -16,11 +16,16 @@ New-Item -ItemType Directory -Force -Path $scratch | Out-Null
 # working directory. Keep the test host's math pipeline identical to the app.
 Copy-Item -LiteralPath (Join-Path $app 'folia_svg_normalizer.dll') -Destination $scratch -Force
 $linkRecords = @(Get-Content (Join-Path $objects 'Folia.tlog/link.command.1.tlog'))
-$start = 0
+$start = -1
 for ($i = 0; $i -lt $linkRecords.Count; ++$i) {
-    if ($linkRecords[$i].StartsWith('^')) { $start = $i }
+    # MSBuild also records the XAML metadata-only link. Its object list omits
+    # generated XAML implementations and cannot link a runnable test host.
+    if ($linkRecords[$i].StartsWith('^') -and $linkRecords[$i] -notmatch '__WINMD_ONLY__') { $start = $i }
 }
-$records = @($linkRecords[$start..($linkRecords.Count - 1)])
+if ($start -lt 0) { throw 'No executable linker record found; run build_app.ps1 first.' }
+$end = $start + 1
+while ($end -lt $linkRecords.Count -and -not $linkRecords[$end].StartsWith('^')) { ++$end }
+$records = @($linkRecords[$start..($end - 1)])
 $appObjects = @((@($records[0].Substring(1).Split('|')) + @($records | Where-Object { $_ -match '(?i)\.obj"?$' })) |
     ForEach-Object { $_.Trim('"') } |
     Where-Object { $_.EndsWith('.obj', [StringComparison]::OrdinalIgnoreCase) -and (Test-Path -LiteralPath $_) } |

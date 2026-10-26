@@ -2,7 +2,9 @@
 param(
     [ValidateSet('Debug', 'Release')]
     [string]$Configuration = 'Debug',
-    [switch]$EditOnly
+    [switch]$EditOnly,
+    [switch]$Benchmark,
+    [string]$Document
 )
 
 $ErrorActionPreference = 'Stop'
@@ -70,11 +72,14 @@ foreach ($objectName in $requiredObjects) {
 }
 
 $allLinkRecords = @(Get-Content -LiteralPath $linkTlog)
-$lastRecord = 0
+$lastRecord = -1
 for ($index = 0; $index -lt $allLinkRecords.Count; $index++) {
-    if ($allLinkRecords[$index].StartsWith('^')) { $lastRecord = $index }
+    if ($allLinkRecords[$index].StartsWith('^') -and $allLinkRecords[$index] -notmatch '__WINMD_ONLY__') { $lastRecord = $index }
 }
-$records = @($allLinkRecords[$lastRecord..($allLinkRecords.Count - 1)])
+if ($lastRecord -lt 0) { throw 'No executable linker record found; run build_app.ps1 first.' }
+$endRecord = $lastRecord + 1
+while ($endRecord -lt $allLinkRecords.Count -and -not $allLinkRecords[$endRecord].StartsWith('^')) { ++$endRecord }
+$records = @($allLinkRecords[$lastRecord..($endRecord - 1)])
 if ($records.Count -lt 2 -or -not $records[0].StartsWith('^')) {
     throw "Could not parse the WinUI linker dependency record: $linkTlog"
 }
@@ -173,6 +178,7 @@ $linkArgs += $libraryPaths
 $linkArgs += @([regex]::Matches($records[1], '(?i)/(?:NODEFAULTLIB|DEFAULTLIB):(?:"[^"]+"|[^\s]+)') |
     ForEach-Object { $_.Value })
 $linkArgs += $appObjects | ForEach-Object { '"{0}"' -f $_ }
+$linkArgs += '"{0}"' -f (Join-Path $objectDirectory 'Folia.res')
 $linkArgs += @(('"{0}"' -f $probeObject), ('"{0}"' -f $runtimeObject))
 $linkArgs += $libraries | ForEach-Object { '"{0}"' -f $_ }
 Set-Content -LiteralPath $linkResponse -Value $linkArgs -Encoding ascii
@@ -197,6 +203,11 @@ $processArguments = @{
     RedirectStandardError = $stderrPath
 }
 if ($EditOnly) { $processArguments.ArgumentList = @('--edit-only') }
+if ($Benchmark) { $processArguments.ArgumentList = @('--benchmark') }
+if ($Document) {
+    if (-not $Benchmark) { throw '-Document requires -Benchmark' }
+    $processArguments.ArgumentList += '"' + (Resolve-Path -LiteralPath $Document).Path + '"'
+}
 $process = Start-Process @processArguments
 $processHandle = $process.Handle
 if (-not $process.WaitForExit(60000)) {

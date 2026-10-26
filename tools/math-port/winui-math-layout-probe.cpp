@@ -13,6 +13,7 @@ import folia.core.render_model;
 #include "editor/rendering/EditorSvgPainter.h"
 #include "editor/rendering/EditorContentGeometry.h"
 #include "media/SvgNormalizer.h"
+#include "media/NativeMathSession.h"
 
 #pragma comment(lib, "Psapi.lib")
 
@@ -351,6 +352,68 @@ namespace
                   << " document-file-writes=" << documentStats.fileWrites << '\n';
     }
 
+    void Benchmark(std::filesystem::path const& path)
+    {
+        using Clock = std::chrono::steady_clock;
+        auto milliseconds = [](auto start) {
+            return std::chrono::duration<double, std::milli>(Clock::now() - start).count();
+        };
+        std::vector<std::string> tex;
+        for (int i = 0; i < 512; ++i)
+            tex.push_back("\\frac{x_{" + std::to_string(i) + "}^2+\\sqrt{a+b}}{1+\\alpha}");
+        NativeMathSession native;
+        // One configured parser stays alive; font bodies belong to each batch.
+        for (std::size_t size : {1, 16, 32, 64})
+        {
+            std::vector<NativeMathInput> inputs;
+            auto start = Clock::now();
+            std::size_t bytes = 0;
+            for (std::size_t begin = 0; begin < tex.size(); begin += size)
+            {
+                inputs.clear();
+                for (auto i = begin; i < (std::min)(begin + size, tex.size()); ++i)
+                    inputs.push_back({tex[i], false, 16, 700});
+                for (auto const& result : native.RenderBatch(inputs))
+                {
+                    Require(static_cast<bool>(result), "native benchmark produces usable SVG");
+                    for (auto const& fragment : result.fragments) bytes += fragment.svg->size();
+                }
+            }
+            std::cout << "benchmark native formulas=" << tex.size() << " batch=" << size
+                << " ms=" << milliseconds(start) << " svg-bytes=" << bytes << '\n';
+        }
+        std::string source;
+        if (!path.empty())
+        {
+            Require(std::filesystem::file_size(path) <= 16 * 1024 * 1024, "benchmark input <=16MiB");
+            std::ifstream file(path, std::ios::binary);
+            Require(static_cast<bool>(file), "benchmark input is readable");
+            source.assign(std::istreambuf_iterator<char>(file), {});
+        }
+        else for (auto const& formula : tex) source += "Formula $" + formula + "$\n\n";
+        EditorMathPreparationContext context;
+        context.theme = folia::default_theme_profile(folia::Theme::Light);
+        context.surfaceWidth = 900;
+        context.surfaceHeight = 600;
+        context.ready = true;
+        for (int repeat = 0; repeat < 3; ++repeat)
+        {
+            auto start = Clock::now();
+            EditorSession session;
+            session.SetText(winrt::to_hstring(source));
+            auto parsed = milliseconds(start);
+            start = Clock::now();
+            auto prepared = EditorSurfaceRenderer::PrepareMath(session.RenderFrame(), context, {}, {});
+            auto elapsed = milliseconds(start);
+            auto stats = prepared->math.Snapshot();
+            Require(stats.pending == 0 && stats.residentSvgBytes == 0, "benchmark leaves no pending work or resident SVG");
+            std::cout << "benchmark preparation repeat=" << repeat << " input-bytes=" << source.size()
+                << " parse-ms=" << parsed << " math-ms=" << elapsed << " formulas=" << prepared->formulaCount
+                << " renders=" << stats.nativeRenders << " batches=" << stats.nativeBatches
+                << " writes=" << stats.fileWrites << " private-bytes=" << ReadProcessMemory().privateBytes << '\n';
+        }
+    }
+
     void RunProbe()
     {
         CheckPlainDocumentCanGainMath();
@@ -498,7 +561,7 @@ namespace
         auto distinct = EditorSurfaceRenderer::PrepareMath(distinctFrame, narrowContext, {}, {});
         auto distinctStats = distinct->math.Snapshot();
         Require(distinct->formulaCount == 512 && distinctStats.nativeRenders == 512
-                && distinctStats.nativeBatches == 32 && distinctStats.pending == 0
+                && distinctStats.nativeBatches == 16 && distinctStats.pending == 0
                 && distinctStats.residentSvgBytes == 0 && distinctStats.nativeSessionActive,
             "opening distinct formulas uses real bounded native batches and retains only the lightweight engine");
 
@@ -546,6 +609,8 @@ int wmain(int argc, wchar_t** argv)
             CheckPlainDocumentCanGainMath();
             std::cout << "editing preview probe: PASS\n";
         }
+        else if (argc >= 2 && std::wstring_view(argv[1]) == L"--benchmark")
+            Benchmark(argc == 3 ? std::filesystem::path(argv[2]) : std::filesystem::path{});
         else RunProbe();
         winrt::uninit_apartment();
         return 0;
