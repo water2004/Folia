@@ -179,6 +179,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/block-oracle.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/kanban-oracle.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/gantt-oracle.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/timeline-oracle.mjs
@@ -334,6 +336,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/block-browser-probe.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/kanban-browser-probe.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/gantt-browser-probe.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/timeline-browser-probe.mjs
@@ -372,6 +376,8 @@ jobs:
           node tools/mermaid-cpp/compare-git-graph-svg.mjs build/mermaid-cpp/git-graph-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/compare-block-svg.mjs build/mermaid-cpp/block-browser/original.json build/mermaid-cpp/pie-svg
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/compare-kanban-svg.mjs build/mermaid-cpp/kanban-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/compare-gantt-svg.mjs build/mermaid-cpp/gantt-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -424,6 +430,8 @@ jobs:
             build/mermaid-cpp/git-graph-browser/*.svg
             build/mermaid-cpp/block-browser/*.json
             build/mermaid-cpp/block-browser/*.svg
+            build/mermaid-cpp/kanban-browser/*.json
+            build/mermaid-cpp/kanban-browser/*.svg
             build/mermaid-cpp/gantt-browser/*.json
             build/mermaid-cpp/gantt-browser/*.svg
             build/mermaid-cpp/timeline-browser/*.json

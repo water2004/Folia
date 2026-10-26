@@ -2093,5 +2093,50 @@
         "sha256": "eabb762d8a95109a39c9be3247325529a5239a7aca327d909c3ccdc41f3a06bf"
       }
     ]
+  },
+  "kanbanBundle": {
+    "package": "mermaid@12.2.0",
+    "files": [
+      {
+        "path": "src/rendering-util/rendering-elements/clusters.js",
+        "sha256": "4a73517c6b85450b99cfe1bb6a6d0478055751d1e15c7feb6ed159fadd8fc733",
+        "sourceMap": "chunk-3YANZBYF.mjs.map"
+      },
+      {
+        "path": "src/rendering-util/rendering-elements/shapes/kanbanItem.ts",
+        "sha256": "bda78e289624e01576e9cdcc15bd9d5acdaa707e280f6ad7a6fa16e52ff9b0fc",
+        "sourceMap": "chunk-VFTINRM2.mjs.map"
+      },
+      {
+        "path": "src/diagrams/kanban/parser/kanban.jison",
+        "sha256": "f2f3894723fb499cf0e0b8285439024d2f5cb8e6a2a2f521d611e0bdd41381f8",
+        "sourceMap": "kanban-definition-UFF7U7HZ.mjs.map"
+      },
+      {
+        "path": "src/diagrams/kanban/kanbanDb.ts",
+        "sha256": "d26473103e8b12917944a97f47f86b7e3785b22784224c66ab0ef1a3a926742b",
+        "sourceMap": "kanban-definition-UFF7U7HZ.mjs.map"
+      },
+      {
+        "path": "src/diagrams/kanban/kanbanRenderer.ts",
+        "sha256": "2902d13a6e03398dc2bd8c889d150e3dfcc3576143994689a86ea0f8457f7a36",
+        "sourceMap": "kanban-definition-UFF7U7HZ.mjs.map"
+      },
+      {
+        "path": "src/diagrams/kanban/styles.ts",
+        "sha256": "4d0060c73c147e98f8891ee48be5367598737cd31e88bea46a5d8a09047bd2b4",
+        "sourceMap": "kanban-definition-UFF7U7HZ.mjs.map"
+      },
+      {
+        "path": "src/diagrams/kanban/kanban-definition.ts",
+        "sha256": "fda98e4656cc1f93ae0a8ca4b3da18a14634d700e7e2ffd4dc0ab46e9ececd03",
+        "sourceMap": "kanban-definition-UFF7U7HZ.mjs.map"
+      },
+      {
+        "path": "src/diagrams/kanban/parser/kanban.jison",
+        "sha256": "b59eba92f4caf14b99343d4058880d958d4326b01dc1d1b4feba710ff94ed0af",
+        "rawFile": ".reference\\mermaid-js\\packages\\mermaid\\src\\diagrams\\kanban\\parser\\kanban.jison"
+      }
+    ]
   }
 }
