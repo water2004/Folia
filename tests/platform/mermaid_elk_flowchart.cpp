@@ -15,7 +15,8 @@ suite mermaid_elk_flowchart=[] {
             {"elk-groups-down",u"flowchart TD\nsubgraph a[Input]\nA[Read] --> B[Check]\nend\nsubgraph b[Output]\nC[Write] --> D[Done]\nend\nB -->|save| C"},
         };
         auto session=ConfigSession::create();expect(fatal(session.has_value()));
-        for(const auto theme:{u"default",u"dark"})for(const auto& [name,body]:cases) {
+        for(const auto theme:{u"default",u"dark"})for(const auto& sample:cases) {
+            const auto& name=sample.first;const auto& body=sample.second;
             const auto source=std::u16string(u"---\nconfig:\n  theme: ")+theme+
                 u"\n  look: classic\n  layout: elk\n  fontFamily: Arial\n  themeVariables: {fontFamily: Arial}\n  htmlLabels: true\n---\n"+body;
             auto svg=render_mermaid(source,*session);
