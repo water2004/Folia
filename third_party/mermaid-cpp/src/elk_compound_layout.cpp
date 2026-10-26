@@ -4,12 +4,28 @@ import std;
 import folia.mermaid.elk_order;
 
 namespace folia::mermaid {
-std::expected<ElkFlatLayoutResult,std::string> elk_layout_compound(
-    const ElkCompoundLayoutInput& input,const ElkFlatLayoutOptions& options) {
+std::expected<ElkCompoundLayoutResult,std::string> elk_layout_compound(
+    const ElkCompoundLayoutInput& original,const ElkFlatLayoutOptions& original_options) {
+    const auto direction=original_options.direction;
+    const bool vertical=direction==ElkLayoutDirection::down||direction==ElkLayoutDirection::up;
+    if(original.hierarchy.direction!=direction||std::ranges::any_of(original.hierarchy.nodes,[&](const auto& n){return n.group&&n.direction!=direction;}))
+        return std::unexpected("ELK compound layout requires matching graph directions");
+    auto input=original;auto options=original_options;
+    const auto label_direction=!vertical?ElkLabelDirection::horizontal:direction==ElkLayoutDirection::up?ElkLabelDirection::up:ElkLabelDirection::down;
+    input.hierarchy.direction=ElkLayoutDirection::right;options.direction=ElkLayoutDirection::right;
+    for(std::size_t n=0;n<input.nodes.size();++n) {
+        input.hierarchy.nodes[n].direction=ElkLayoutDirection::right;
+        if(n<input.group_boxes.size()&&input.hierarchy.nodes[n].group&&input.group_boxes[n].title) {
+            const auto& title=*input.group_boxes[n].title;
+            input.nodes[n].width=std::max(input.nodes[n].width,title.width+2*title.padding);
+        }
+        // Original hierarchy resizing consumes the graph minimum after its
+        // parent's GraphTransformer has transposed the node property.
+        // The child graph minimum therefore retains these original values.
+        if(vertical&&!input.hierarchy.nodes[n].group)std::swap(input.nodes[n].width,input.nodes[n].height);
+    }
+    if(vertical){for(auto& l:input.center_labels)std::swap(l.width,l.height);for(auto& l:input.end_labels)std::swap(l.width,l.height);}
     if(input.nodes.size()!=input.hierarchy.nodes.size())return std::unexpected("ELK compound layout requires measured original nodes");
-    if(input.hierarchy.direction!=ElkLayoutDirection::right||options.direction!=ElkLayoutDirection::right||
-        std::ranges::any_of(input.hierarchy.nodes,[](const auto& n){return n.group&&n.direction!=ElkLayoutDirection::right;}))
-        return std::unexpected("ELK compound layout requires same-direction RIGHT graphs");
     const auto prepared=elk_prepare_compound_graph(input.hierarchy);if(!prepared)return std::unexpected(prepared.error());const auto& topology=*prepared;
     const auto absent=std::numeric_limits<std::size_t>::max();
     struct Local {
@@ -44,7 +60,7 @@ std::expected<ElkFlatLayoutResult,std::string> elk_layout_compound(
             const auto s=label.head?chain.head_segment:chain.tail_segment;
             if(topology.segments[s].graph==gi){label.original_edge=local_segment[s];local.ends.push_back(label);}
         }
-        auto labels=elk_prepare_inline_labels(source,centers,ElkLabelDirection::horizontal,
+        auto labels=elk_prepare_inline_labels(source,centers,label_direction,
             options.edge_label_spacing,options.label_label_spacing,roles);
         if(!labels)return std::unexpected(labels.error());local.labels=std::move(*labels);auto& g=local.labels.graph;
         for(const auto n:sub.nodes) {
@@ -79,6 +95,11 @@ std::expected<ElkFlatLayoutResult,std::string> elk_layout_compound(
             if(const auto nested=topology.nodes[n].nested_graph) {
                 const auto& content=geometry.graphs[*nested];node.width=content.width+content.padding_left+content.padding_right;
                 node.height=content.height+content.padding_top+content.padding_bottom;node.fixed_port_positions=true;
+                const auto original_node=*topology.nodes[n].original;
+                if(vertical&&original_node<input.group_boxes.size()&&input.group_boxes[original_node].title) {
+                    const auto overhang=std::max(0.0,(input.group_boxes[original_node].title->width-node.height)/2);
+                    node.margin_top=std::max(node.margin_top,overhang);node.margin_bottom=std::max(node.margin_bottom,overhang);
+                }
                 for(const auto p:topology.nodes[n].ports){auto& port=g.ports[local_port[p]];port.x=geometry.port_positions[p].x;port.y=geometry.port_positions[p].y;}
             }
         }
@@ -89,7 +110,7 @@ std::expected<ElkFlatLayoutResult,std::string> elk_layout_compound(
             margins[n].left=std::max(margins[n].left,-g.ports[p].x);
             margins[n].right=std::max(margins[n].right,g.ports[p].x-g.nodes[n].width);
         }
-        const auto end_cells=elk_prepare_end_labels(g,local.ends,margins,false,options.edge_label_spacing,options.label_label_spacing,false,false);
+        const auto end_cells=elk_prepare_end_labels(g,local.ends,margins,vertical,options.edge_label_spacing,options.label_label_spacing,vertical,false);
         if(!end_cells)return std::unexpected(end_cells.error());
         const auto y=elk_place_flat_nodes(g,options.placement,false);if(!y)return std::unexpected(y.error());
         double minimum=std::numeric_limits<double>::infinity(),maximum=-minimum;
@@ -102,8 +123,14 @@ std::expected<ElkFlatLayoutResult,std::string> elk_layout_compound(
         }
         if(g.nodes.empty())minimum=maximum=0;
         auto routed=elk_route_flat_edges(g,*y,margins,local.random,options.routing);if(!routed)return std::unexpected(routed.error());
+        ElkGraphPadding padding{options.padding,options.padding,options.padding,options.padding};
+        if(sub.parent_node) {
+            const auto n=*topology.nodes[*sub.parent_node].original;
+            if(n<input.group_boxes.size())padding=elk_group_content_padding(input.group_boxes[n]);
+        }
+        padding=elk_normalize_padding(padding,direction);
         auto& content=geometry.graphs[gi];content={.width=routed->width,.height=maximum-minimum,
-            .padding_left=options.padding,.padding_right=options.padding,.padding_top=options.padding,.padding_bottom=options.padding,.offset={0,-minimum}};
+            .padding_left=padding.left,.padding_right=padding.right,.padding_top=padding.top,.padding_bottom=padding.bottom,.offset={0,-minimum}};
         std::vector<ElkCompoundPortDummy> dummies;std::vector<std::size_t> dummy_nodes;
         for(const auto n:sub.nodes)if(topology.nodes[n].boundary) {
             auto dummy=*topology.nodes[n].boundary;dummy.position={routed->node_x[local_node[n]],(*y)[local_node[n]]};
@@ -119,8 +146,8 @@ std::expected<ElkFlatLayoutResult,std::string> elk_layout_compound(
         }
         auto routes=elk_restore_flat_routes(g,*routed,*y,options.unnecessary_bendpoints);if(!routes)return std::unexpected(routes.error());
         for(auto& route:*routes)geometry.segments[local.segments[route.original_edge]].bends=std::move(route.bends);
-        auto center_labels=elk_restore_inline_labels(g,local.labels.dummies,routed->node_x,*y,ElkLabelDirection::horizontal,options.label_label_spacing);
-        auto end_labels=elk_restore_end_labels(*end_cells,routed->node_x,*y,false,options.label_label_spacing);
+        auto center_labels=elk_restore_inline_labels(g,local.labels.dummies,routed->node_x,*y,label_direction,options.label_label_spacing);
+        auto end_labels=elk_restore_end_labels(*end_cells,routed->node_x,*y,vertical,options.label_label_spacing);
         for(auto label:center_labels) {
             const auto s=local.segments[label.original_edge];label.original_edge=topology.segments[s].original_edge;
             center_positions.emplace_back(gi,label);
@@ -143,7 +170,7 @@ std::expected<ElkFlatLayoutResult,std::string> elk_layout_compound(
             gi=topology.nodes[*parent].graph;}
         return point;
     };
-    ElkFlatLayoutResult result{.nodes=std::move(boxes)};
+    ElkCompoundLayoutResult result;result.nodes=std::move(boxes);
     result.width=geometry.graphs[0].width+2*options.padding;result.height=geometry.graphs[0].height+2*options.padding;
     for(std::size_t n=0;n<input.nodes.size();++n){const auto delta=origin(topology.nodes[n].graph);result.nodes[n].x+=delta.x;result.nodes[n].y+=delta.y;}
     for(auto [gi,label]:center_positions){const auto delta=origin(gi);label.x+=delta.x;label.y+=delta.y;result.center_labels.push_back(label);}
@@ -155,6 +182,16 @@ std::expected<ElkFlatLayoutResult,std::string> elk_layout_compound(
             .source_port=edge.source_port,.target_port=edge.target_port,.start=shift(edge.start),.end=shift(edge.end),.bends=std::move(edge.bends)};
         for(auto& p:route.bends)p=shift(p);result.routes.push_back(std::move(route));
     }
+    const auto width=result.width,height=result.height;
+    const auto transform=[&](ElkNodeBox box){return elk_export_direction_box(box,width,height,direction);};
+    const auto transform_point=[&](ElkRoutingPoint p){const auto b=transform({p.x,p.y,0,0});return ElkRoutingPoint{b.x,b.y};};
+    for(auto& box:result.nodes)box=transform(box);
+    for(auto& route:result.routes){route.start=transform_point(route.start);route.end=transform_point(route.end);for(auto& p:route.bends)p=transform_point(p);}
+    for(auto* labels:{&result.center_labels,&result.end_labels})for(auto& label:*labels){const auto b=transform({label.x,label.y,label.width,label.height});label.x=b.x;label.y=b.y;label.width=b.width;label.height=b.height;}
+    if(vertical)std::swap(result.width,result.height);
+    result.group_titles.resize(input.nodes.size());
+    for(std::size_t n=0;n<input.group_boxes.size();++n)if(input.hierarchy.nodes[n].group&&input.group_boxes[n].title)
+        result.group_titles[n]=elk_group_title_box(result.nodes[n],*input.group_boxes[n].title);
     return result;
 }
 }
