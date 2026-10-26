@@ -67,6 +67,7 @@ namespace winrt::Folia
         std::optional<folia::TextPosition> TaskCheckboxAt(float x, float y) const;
         std::optional<EditorVisualFootnoteHit> FootnoteAt(float x, float y) const;
         std::optional<EditorVisualRawBlock> RawBlockFor(folia::NodeId owner) const;
+        std::optional<EditorVisualRawBlock> CodeLanguageAt(float x, float y) const;
         std::optional<D2D1_RECT_F> CaretBounds(folia::TextPosition position) const;
         std::optional<folia::TextPosition> MoveCaretVertically(folia::TextPosition position, bool down, float& goalX) const;
         std::optional<folia::TextPosition> VisualLineStart(folia::TextPosition position) const;

@@ -171,7 +171,8 @@ namespace winrt::Folia
             auto hit = renderer_->HitTest(static_cast<float>(point.X), static_cast<float>(point.Y));
             auto interaction = hit && session_ ? session_->InteractionAt(*hit) : std::nullopt;
             auto tooltip = interaction ? std::move(interaction->tooltip) : std::nullopt;
-            SetLinkCursor(interaction && interaction->link.has_value());
+            SetLinkCursor((interaction && interaction->link.has_value())
+                || renderer_->CodeLanguageAt(static_cast<float>(point.X), static_cast<float>(point.Y)).has_value());
             if (tooltip != hoverTooltip_)
             {
                 hoverTooltip_ = tooltip;

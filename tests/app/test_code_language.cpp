@@ -25,11 +25,10 @@ suite code_language_tests = [] {
         auto xaml = Hosting::WindowsXamlManager::InitializeForCurrentThread();
         Grid root;
         SwapChainPanel panel;
-        Canvas overlay;
+        Flyout flyout;
         AutoSuggestBox box;
         root.Children().Append(panel);
-        root.Children().Append(overlay);
-        overlay.Children().Append(box);
+        flyout.Content(box);
         EditorSession session;
         EditorSurfaceRenderer renderer;
         session.SetText(L"```cpp\nvalue\n```");
@@ -64,22 +63,28 @@ suite code_language_tests = [] {
         }
         std::size_t commands = 0;
         EditorCodeLanguageController controller;
-        controller.Attach(session, renderer, panel, overlay, box, [&](auto const&) { ++commands; return true; });
+        controller.Attach(session, renderer, panel, flyout, box, [&](auto const&) { ++commands; return true; });
         controller.Refresh();
-        expect(box.Text() == L"cpp") << "refresh must show the current code language";
-        expect(box.Visibility() == Visibility::Visible) << "active code must show language selector";
+        expect(!flyout.IsOpen()) << "focus alone must not overlay a textbox on the code block";
+        if (raw) {
+            auto x = (raw->headerRect.left + raw->headerRect.right) * .5f;
+            auto y = (raw->headerRect.top + raw->headerRect.bottom) * .5f;
+            expect(renderer.CodeLanguageAt(x, y).has_value());
+            expect(!renderer.CodeLanguageAt(raw->rect.right + 1, y));
+            expect(!renderer.CodeLanguageAt(x, raw->headerRect.bottom + 2));
+        }
         auto before = session.TextUtf8();
         box.Text(L"python");
-        // Repainting an unfocused selector discards an unsubmitted draft.
+        // A closed picker has no permanent editor surface or scrolling state.
         controller.Refresh();
-        expect(box.Text() == L"cpp") << "unfocused refresh must discard the draft";
+        expect(!flyout.IsOpen());
         expect(commands == 0_u) << "refresh must not submit a language command";
         expect(session.TextUtf8() == before) << "draft must not change source";
         box.Text(L"rust");
         controller.Detach();
         expect(commands == 0_u) << "detach must not submit a language command";
         expect(box.Visibility() == Visibility::Collapsed) << "detach must hide selector";
-        expect(!overlay.IsHitTestVisible()) << "detached overlay must not intercept input";
+        expect(!flyout.IsOpen()) << "detached picker must not intercept input";
         renderer.SetInvalidateCallback({});
     };
 

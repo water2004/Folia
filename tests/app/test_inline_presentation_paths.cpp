@@ -95,10 +95,49 @@ namespace {
             return result;
         }
 
-
+        void Save(std::filesystem::path const& path, std::vector<std::uint32_t> const& pixels) {
+            std::filesystem::create_directories(path.parent_path());
+            ::Microsoft::WRL::ComPtr<IWICStream> stream;
+            winrt::check_hresult(resources.wicFactory->CreateStream(&stream));
+            winrt::check_hresult(stream->InitializeFromFilename(path.c_str(), GENERIC_WRITE));
+            ::Microsoft::WRL::ComPtr<IWICBitmapEncoder> encoder;
+            winrt::check_hresult(resources.wicFactory->CreateEncoder(GUID_ContainerFormatPng, nullptr, &encoder));
+            winrt::check_hresult(encoder->Initialize(stream.Get(), WICBitmapEncoderNoCache));
+            ::Microsoft::WRL::ComPtr<IWICBitmapFrameEncode> frame;
+            winrt::check_hresult(encoder->CreateNewFrame(&frame, nullptr));
+            winrt::check_hresult(frame->Initialize(nullptr));
+            winrt::check_hresult(frame->SetSize(600, 400));
+            auto format = GUID_WICPixelFormat32bppBGRA;
+            winrt::check_hresult(frame->SetPixelFormat(&format));
+            winrt::check_hresult(frame->WritePixels(400, 600 * 4, 600 * 400 * 4,
+                reinterpret_cast<BYTE*>(const_cast<std::uint32_t*>(pixels.data()))));
+            winrt::check_hresult(frame->Commit());
+            winrt::check_hresult(encoder->Commit());
+        }
     };
 
     suite inline_presentation_paths = [] {
+        "native code language header keeps the same font and pixels while editing"_test = [] {
+            for (auto theme : {folia::Theme::Light, folia::Theme::Dark}) {
+                EditorSession session;
+                session.SetText(L"```text\nminecraft_session.has.joined.server\ninvite.read.any\ninvite.create.any\ninvite.delete.any\n```\n");
+                NativeInlineFrame native(theme);
+                auto reading = native.Paint(session);
+                expect(!native.interaction.rawBlocks.empty());
+                if (native.interaction.rawBlocks.empty()) continue;
+                auto raw = native.interaction.rawBlocks.front();
+                session.SetSelection(folia::TextSelection::caret(raw.contentStart));
+                auto editing = native.Paint(session, {}, true, true);
+                std::size_t changed = 0;
+                for (int y = static_cast<int>(std::ceil(raw.headerRect.top)); y < raw.headerRect.bottom; ++y)
+                for (int x = static_cast<int>(std::ceil(raw.headerRect.left)); x < raw.headerRect.right; ++x)
+                    changed += reading[y * 600 + x] != editing[y * 600 + x];
+                expect(changed == 0_u) << "focusing code replaced its native language label";
+                auto directory = std::filesystem::path(__FILE__).parent_path().parent_path().parent_path() / "build/tests/inline-presentation";
+                native.Save(directory / (theme == folia::Theme::Light ? "code-header-light.png" : "code-header-dark.png"), editing);
+            }
+        };
+
         "production flow and table paint search hits without changing the document"_test = [] {
             for (auto table : {false, true}) {
                 EditorSession session;

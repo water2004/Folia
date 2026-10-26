@@ -96,6 +96,16 @@ namespace winrt::Folia
     std::optional<folia::TextPosition> EditorSurfaceRenderer::TaskCheckboxAt(float x, float y) const { return interactionMap.TaskCheckboxAt(x, y); }
     std::optional<EditorVisualFootnoteHit> EditorSurfaceRenderer::FootnoteAt(float x, float y) const { return interactionMap.FootnoteAt(x, y); }
     std::optional<EditorVisualRawBlock> EditorSurfaceRenderer::RawBlockFor(folia::NodeId owner) const { return interactionMap.RawBlockFor(owner); }
+    std::optional<EditorVisualRawBlock> EditorSurfaceRenderer::CodeLanguageAt(float x, float y) const
+    {
+        if (x < 0 || y < 0 || x >= resources.surfaceWidthDip || y >= resources.surfaceHeightDip) return {};
+        for (auto const& block : interactionMap.rawBlocks) {
+            auto const& r = block.headerRect;
+            if (block.kind == folia::platform::editor::EditorRawBlockKind::Code && block.languageEditable
+                && x >= r.left && x < r.right && y >= r.top && y < r.bottom) return block;
+        }
+        return {};
+    }
     std::optional<D2D1_RECT_F> EditorSurfaceRenderer::CaretBounds(folia::TextPosition position) const { return interactionMap.CaretBounds(position, styleSheet.body.lineHeight); }
     std::optional<folia::TextPosition> EditorSurfaceRenderer::MoveCaretVertically(folia::TextPosition position, bool down, float& goalX) const { return interactionMap.MoveCaretVertically(position, down, goalX, styleSheet.body.lineHeight); }
     std::optional<folia::TextPosition> EditorSurfaceRenderer::VisualLineStart(folia::TextPosition position) const { return interactionMap.VisualLineStart(position); }

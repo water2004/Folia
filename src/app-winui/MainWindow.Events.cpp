@@ -48,7 +48,7 @@ namespace winrt::Folia::implementation
             editorSession(),
             editorRenderer,
             EditorSurface(),
-            CodeBlockOverlay(),
+            CodeLanguageFlyout(),
             CodeLanguageBox(),
             [this](folia::Command const& command) { return ExecuteEditorCommand(command); });
         pointerController.Attach(
@@ -237,6 +237,19 @@ namespace winrt::Folia::implementation
 
         EditorSurface().PointerPressed([this](auto const&, Microsoft::UI::Xaml::Input::PointerRoutedEventArgs const& args)
         {
+            auto point = args.GetCurrentPoint(EditorSurface());
+            if (point.Properties().IsLeftButtonPressed()) {
+                auto at = point.Position();
+                if (auto code = editorRenderer.CodeLanguageAt(static_cast<float>(at.X), static_cast<float>(at.Y))) {
+                    scrollController.Stop();
+                    editorSession().SetSelection(folia::TextSelection::caret(code->contentStart));
+                    textInputController.NotifySelectionChanged();
+                    RenderEditorSurface();
+                    codeLanguageController.Open(code->contentStart.container_id);
+                    args.Handled(true);
+                    return;
+                }
+            }
             pointerController.PointerPressed(args);
         });
 

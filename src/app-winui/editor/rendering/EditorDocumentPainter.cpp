@@ -556,24 +556,33 @@ namespace winrt::Folia
                             auto headerTop = rect.top + nested.block_style.padding_top;
                             auto headerBottom = (std::min)(
                                 rect.bottom, headerTop + styleSheet.code.lineHeight);
-                            if (printMode || selection.active.container_id != nested.id
-                                || nested.special().code_indented)
+                            float labelWidth = 0;
                             {
                                 auto label = winrt::to_hstring(
                                     nested.special().language.value_or("text"));
-                                resources.d2dContext->DrawTextW(
-                                    label.c_str(),
-                                    static_cast<UINT32>(label.size()),
-                                    resources.codeFormat.Get(),
-                                    D2D1::RectF(left + 8.0f, headerTop, rect.right - 8.0f, headerBottom),
-                                    resources.mutedBrush.Get(),
-                                    D2D1_DRAW_TEXT_OPTIONS_CLIP);
+                                ::Microsoft::WRL::ComPtr<IDWriteTextLayout> labelLayout;
+                                winrt::check_hresult(resources.dwriteFactory->CreateTextLayout(label.c_str(),
+                                    static_cast<UINT32>(label.size()), resources.codeFormat.Get(),
+                                    (std::max)(1.f, rect.right - left - 40), styleSheet.code.lineHeight, labelLayout.GetAddressOf()));
+                                labelLayout->SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP);
+                                DWRITE_TEXT_METRICS labelMetrics{};
+                                labelLayout->GetMetrics(&labelMetrics);
+                                labelWidth = (std::min)(labelMetrics.widthIncludingTrailingWhitespace, labelLayout->GetMaxWidth());
+                                resources.d2dContext->DrawTextLayout({left + 8, headerTop}, labelLayout.Get(),
+                                    resources.mutedBrush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP);
+                                if (!printMode && !nested.special().code_indented) {
+                                    auto x = left + 8 + labelWidth + 9;
+                                    auto y = (headerTop + headerBottom) * .5f;
+                                    resources.d2dContext->DrawLine({x - 3, y - 1.5f}, {x, y + 1.5f}, resources.mutedBrush.Get(), 1);
+                                    resources.d2dContext->DrawLine({x, y + 1.5f}, {x + 3, y - 1.5f}, resources.mutedBrush.Get(), 1);
+                                }
                             }
                             if (!printMode)
                             {
                                 interactionMap.rawBlocks.push_back({
                                     rect,
-                                    D2D1::RectF(left, rect.top, rect.right, headerBottom),
+                                    D2D1::RectF(left + 4, headerTop,
+                                        (std::min)(rect.right, left + 8 + labelWidth + 24), headerBottom),
                                     {nested.id, nested.content_span.source_range.start, folia::TextAffinity::Downstream},
                                     nested.kind == folia::RenderBlockKind::Code
                                         ? folia::platform::editor::EditorRawBlockKind::Code

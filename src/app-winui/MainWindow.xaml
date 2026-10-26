@@ -225,6 +225,12 @@
                         <ColumnDefinition x:Name="EditorScrollBarColumn" Width="16"/>
                     </Grid.ColumnDefinitions>
                     <SwapChainPanel x:Name="EditorSurface" Grid.Column="0" KeyboardAcceleratorPlacementMode="Hidden">
+                        <FlyoutBase.AttachedFlyout>
+                            <Flyout x:Name="CodeLanguageFlyout" Placement="BottomEdgeAlignedLeft">
+                                <AutoSuggestBox x:Name="CodeLanguageBox" Width="280" MinWidth="0"
+                                                PlaceholderText="Language" QueryIcon="Find"/>
+                            </Flyout>
+                        </FlyoutBase.AttachedFlyout>
                         <SwapChainPanel.ContextFlyout>
                             <MenuFlyout>
                                 <MenuFlyoutItem x:Name="CutMenuItem" Text="Cut"/>
@@ -279,20 +285,6 @@
                         SmallChange="48"
                         UseLayoutRounding="False"/>
                   </Grid>
-            <Canvas
-                x:Name="CodeBlockOverlay"
-                IsHitTestVisible="False"
-                Canvas.ZIndex="19">
-                <AutoSuggestBox
-                    x:Name="CodeLanguageBox"
-                    Height="28"
-                    MinWidth="0"
-                    BorderThickness="0"
-                    PlaceholderText="Language"
-                    QueryIcon="Find"
-                    Padding="8,0"
-                    Visibility="Collapsed"/>
-            </Canvas>
             <Canvas
                 x:Name="EditorOverlay"
                 IsHitTestVisible="False"

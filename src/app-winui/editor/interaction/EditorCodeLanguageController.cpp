@@ -11,7 +11,7 @@ namespace winrt::Folia
         EditorSession& session,
         EditorSurfaceRenderer& renderer,
         winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel const& editorSurface,
-        winrt::Microsoft::UI::Xaml::Controls::Canvas const& overlay,
+        winrt::Microsoft::UI::Xaml::Controls::Flyout const& flyout,
         winrt::Microsoft::UI::Xaml::Controls::AutoSuggestBox const& languageBox,
         ExecuteCommand executeCommand)
     {
@@ -19,9 +19,10 @@ namespace winrt::Folia
         session_ = &session;
         renderer_ = &renderer;
         editorSurface_ = editorSurface;
-        overlay_ = overlay;
+        flyout_ = flyout;
         languageBox_ = languageBox;
         executeCommand_ = std::move(executeCommand);
+        lifetime_ = std::make_shared<Lifetime>();
         PopulateLanguages();
         textChangedToken_ = languageBox_.TextChanged([this](auto const&, auto const& args)
         {
@@ -36,25 +37,31 @@ namespace winrt::Folia
         });
         querySubmittedToken_ = languageBox_.QuerySubmitted([this](auto const&, auto const&)
         {
-            if (!Commit()) return;
-            languageBox_.IsSuggestionListOpen(false);
-            if (editorSurface_) editorSurface_.Focus(
-                winrt::Microsoft::UI::Xaml::FocusState::Programmatic);
+            Submit();
         });
         gotFocusToken_ = languageBox_.GotFocus([this](auto const&, auto const&)
         {
             PopulateLanguages();
             languageBox_.IsSuggestionListOpen(true);
         });
-        lostFocusToken_ = languageBox_.LostFocus([this](auto const&, auto const&)
-        {
-            // Moving between the textbox and popup is not leaving the control.
-            if (!HasFocus() && !languageBox_.IsSuggestionListOpen()) Cancel();
+        closingToken_ = flyout_.Closing([this](auto const&, auto const&) { closing_ = true; });
+        closedToken_ = flyout_.Closed([this](auto const&, auto const&) {
+            Cancel(); activeBlock_.reset(); closing_ = false;
+            auto pending = std::exchange(pendingOpen_, std::nullopt);
+            if (pending && editorSurface_) {
+                // Closed is raised inside native popup teardown. Reopening
+                // belongs to the next dispatcher turn, after that teardown.
+                auto lifetime = std::weak_ptr<Lifetime>{lifetime_};
+                editorSurface_.DispatcherQueue().TryEnqueue([this, lifetime, owner = *pending] {
+                    if (!lifetime.expired()) Open(owner);
+                });
+            }
         });
         keyDownToken_ = languageBox_.PreviewKeyDown([this](auto const&, auto const& args)
         {
             if (args.Key() != winrt::Windows::System::VirtualKey::Escape) return;
             Cancel();
+            Dismiss();
             if (editorSurface_) editorSurface_.Focus(
                 winrt::Microsoft::UI::Xaml::FocusState::Programmatic);
             args.Handled(true);
@@ -63,22 +70,26 @@ namespace winrt::Folia
 
     void EditorCodeLanguageController::Detach()
     {
+        lifetime_.reset();
         if (languageBox_)
         {
             if (textChangedToken_.value) languageBox_.TextChanged(textChangedToken_);
             if (suggestionChosenToken_.value) languageBox_.SuggestionChosen(suggestionChosenToken_);
             if (querySubmittedToken_.value) languageBox_.QuerySubmitted(querySubmittedToken_);
             if (gotFocusToken_.value) languageBox_.GotFocus(gotFocusToken_);
-            if (lostFocusToken_.value) languageBox_.LostFocus(lostFocusToken_);
             if (keyDownToken_.value) languageBox_.PreviewKeyDown(keyDownToken_);
             languageBox_.IsSuggestionListOpen(false);
             languageBox_.Visibility(winrt::Microsoft::UI::Xaml::Visibility::Collapsed);
         }
-        if (overlay_) overlay_.IsHitTestVisible(false);
+        if (flyout_) {
+            if (closedToken_.value) flyout_.Closed(closedToken_);
+            if (closingToken_.value) flyout_.Closing(closingToken_);
+            flyout_.Hide();
+        }
         activeBlock_.reset();
         executeCommand_ = {};
         languageBox_ = nullptr;
-        overlay_ = nullptr;
+        flyout_ = nullptr;
         editorSurface_ = nullptr;
         renderer_ = nullptr;
         session_ = nullptr;
@@ -86,7 +97,10 @@ namespace winrt::Folia
         suggestionChosenToken_ = {};
         querySubmittedToken_ = {};
         gotFocusToken_ = {};
-        lostFocusToken_ = {};
+        closedToken_ = {};
+        closingToken_ = {};
+        closing_ = false;
+        pendingOpen_.reset();
         keyDownToken_ = {};
     }
 
@@ -108,55 +122,64 @@ namespace winrt::Folia
         updating_ = false;
     }
 
-    bool EditorCodeLanguageController::HasFocus() const
+    void EditorCodeLanguageController::Dismiss()
+    {
+        if (languageBox_) languageBox_.IsSuggestionListOpen(false);
+        if (flyout_ && !closing_) flyout_.Hide();
+    }
+
+    bool EditorCodeLanguageController::Open(folia::NodeId owner)
     {
         using namespace winrt::Microsoft::UI::Xaml;
-        if (!languageBox_) return false;
-        if (languageBox_.FocusState() != FocusState::Unfocused) return true;
-        auto root = languageBox_.XamlRoot();
-        if (!root) return false;
-        auto focused = Input::FocusManager::GetFocusedElement(root).try_as<DependencyObject>();
-        while (focused)
-        {
-            if (focused == languageBox_) return true;
-            focused = Media::VisualTreeHelper::GetParent(focused);
-        }
-        return false;
+        using namespace winrt::Microsoft::UI::Xaml::Controls;
+        if (!session_ || !renderer_ || !editorSurface_ || !flyout_ || !editorSurface_.XamlRoot()) return false;
+        auto control = renderer_->RawBlockFor(owner);
+        if (!control || !control->languageEditable || session_->Selection().active.container_id != owner) return false;
+        // WinUI cannot show a flyout during its native close transition. Honor
+        // a new activation when Closed arrives, rather than adding a timer.
+        if (closing_) { pendingOpen_ = owner; return true; }
+        activeBlock_ = control;
+        Cancel();
+        auto theme = renderer_->Theme();
+        languageBox_.FontFamily(Media::FontFamily(winrt::to_hstring(theme.typography.code.family)));
+        languageBox_.FontSize(theme.typography.code.size);
+        languageBox_.Visibility(Visibility::Visible);
+        Primitives::FlyoutShowOptions options;
+        options.Position(winrt::Windows::Foundation::Point{control->headerRect.left, control->headerRect.bottom});
+        options.Placement(Primitives::FlyoutPlacementMode::BottomEdgeAlignedLeft);
+        flyout_.ShowAt(editorSurface_, options);
+        languageBox_.Focus(FocusState::Programmatic);
+        return true;
     }
 
     void EditorCodeLanguageController::Refresh()
     {
         using namespace winrt::Microsoft::UI::Xaml;
         using namespace winrt::Microsoft::UI::Xaml::Controls;
-        if (!session_ || !renderer_ || !editorSurface_ || !overlay_ || !languageBox_) return;
-        auto control = renderer_->RawBlockFor(session_->Selection().active.container_id);
-        if (!control
-            || control->kind != folia::platform::editor::EditorRawBlockKind::Code
-            || !control->languageEditable)
-        {
-            Cancel();
-            activeBlock_.reset();
-            languageBox_.Visibility(Visibility::Collapsed);
-            overlay_.IsHitTestVisible(false);
+        if (!session_ || !renderer_ || !flyout_ || !flyout_.IsOpen() || !activeBlock_) return;
+        auto control = renderer_->RawBlockFor(activeBlock_->contentStart.container_id);
+        // The native label scrolls in the same draw as its code block. A picker
+        // is transient: close it when the document/anchor moves, never chase
+        // scrolling with a separately composed textbox.
+        if (!control || session_->Selection().active.container_id != activeBlock_->contentStart.container_id
+            || control->headerRect.top != activeBlock_->headerRect.top
+            || control->headerRect.left != activeBlock_->headerRect.left
+            || control->headerRect.bottom != activeBlock_->headerRect.bottom) {
+            Dismiss();
             return;
         }
-
-        auto sameOwner = activeBlock_
-            && activeBlock_->contentStart.container_id == control->contentStart.container_id;
-        auto languageChanged = sameOwner && activeBlock_->language != control->language;
-        activeBlock_ = control;
-        if (!sameOwner || languageChanged || (!HasFocus() && !languageBox_.IsSuggestionListOpen()))
+        if (activeBlock_->language != control->language) {
+            activeBlock_ = control;
             Cancel();
+        }
+    }
 
-        auto transform = editorSurface_.TransformToVisual(overlay_);
-        auto topLeft = transform.TransformPoint({control->headerRect.left, control->headerRect.top});
-        auto width = (std::max)(0.0, (std::min)(190.0,
-            static_cast<double>(control->headerRect.right - control->headerRect.left - 16.0f)));
-        languageBox_.Width(width);
-        Canvas::SetLeft(languageBox_, static_cast<double>(topLeft.X) + 8.0);
-        Canvas::SetTop(languageBox_, static_cast<double>(topLeft.Y) + 2.0);
-        languageBox_.Visibility(Visibility::Visible);
-        overlay_.IsHitTestVisible(true);
+    bool EditorCodeLanguageController::Submit()
+    {
+        if (!Commit()) return false;
+        Dismiss();
+        if (editorSurface_) editorSurface_.Focus(winrt::Microsoft::UI::Xaml::FocusState::Programmatic);
+        return true;
     }
 
     bool EditorCodeLanguageController::Commit()
