@@ -120,7 +120,7 @@ if(WIN32 AND MSVC)
             "${FOLIA_MERMAID_REPO_ROOT}/src/platform/text/mermaid_renderer.ixx"
             "${FOLIA_MERMAID_REPO_ROOT}/src/platform/text/mermaid_host.ixx"
             "${FOLIA_MERMAID_REPO_ROOT}/src/platform/text/mermaid_pie.ixx")
-        target_link_libraries(folia_mermaid_measurement PUBLIC folia_mermaid PRIVATE dwrite)
+        target_link_libraries(folia_mermaid_measurement PUBLIC folia_mermaid PRIVATE dwrite user32)
     endif()
     add_executable(FoliaMermaidTextProbe native-text-probe.cpp)
     set_target_properties(FoliaMermaidTextProbe PROPERTIES CXX_MODULE_STD ON)
@@ -138,7 +138,8 @@ if(WIN32 AND MSVC)
         "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_git_graph.cpp"
         "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_mindmap.cpp"
         "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_block.cpp"
-        "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_kanban.cpp")
+        "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_kanban.cpp"
+        "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_c4.cpp")
     set_target_properties(FoliaMermaidPlatformTests PROPERTIES CXX_MODULE_STD ON)
     target_include_directories(FoliaMermaidPlatformTests PRIVATE "${FOLIA_MERMAID_REPO_ROOT}/tests")
     target_link_libraries(FoliaMermaidPlatformTests PRIVATE

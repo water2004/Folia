@@ -2220,5 +2220,73 @@
         "sha256": "7847e5ee741a54d92542479e2d8f9aade17b549607e95514ba954248f3613517"
       }
     ]
+  },
+  "c4Bundle": {
+    "files": [
+      {
+        "path": "src/diagrams/c4/parser/c4Diagram.jison",
+        "sourceMap": "c4Diagram-IZYMEATF.mjs.map",
+        "sha256": "f2a92ad361d721f4a56361da77f16ae15d9569317cc2d7fa74117d404df7046f"
+      },
+      {
+        "path": "src/diagrams/c4/c4Db.ts",
+        "sourceMap": "c4Diagram-IZYMEATF.mjs.map",
+        "sha256": "0dc55e891eb14e08f93b0951a3592ed11bacf34c539141ee978213aacdb25004"
+      },
+      {
+        "path": "src/diagrams/c4/svgDraw.ts",
+        "sourceMap": "c4Diagram-IZYMEATF.mjs.map",
+        "sha256": "59855ba27570433ca25d6b8a037541cc2553300c6b640d565b28fc6623b2bd2a"
+      },
+      {
+        "path": "src/diagrams/c4/c4ShapeAdapter.ts",
+        "sourceMap": "c4Diagram-IZYMEATF.mjs.map",
+        "sha256": "e86b2557cd3294e2eee387e4146eb310cfd2277a4046173ae43adfcf297b0595"
+      },
+      {
+        "path": "src/diagrams/c4/c4Renderer.ts",
+        "sourceMap": "c4Diagram-IZYMEATF.mjs.map",
+        "sha256": "1d09b55fa11a8c2c0987e02186495d8ed1d8cdbfeda02d4160f0010e3a653e52"
+      },
+      {
+        "path": "src/diagrams/c4/styles.js",
+        "sourceMap": "c4Diagram-IZYMEATF.mjs.map",
+        "sha256": "e0bcb2e3607e6f2007f734a5174f240299f997834de345ae94243ddbabcecd74"
+      },
+      {
+        "path": "src/diagrams/c4/c4Diagram.ts",
+        "sourceMap": "c4Diagram-IZYMEATF.mjs.map",
+        "sha256": "c97bfd8527c3e292ff5befc006f768cae72aab8334e878af93be874d438f0997"
+      },
+      {
+        "path": "src/diagrams/c4/parser/c4Diagram.jison",
+        "sha256": "64b4d7d29b5cebb759a19c1339f98850330070c234861b448e58e7c99f646766"
+      },
+      {
+        "path": "src/diagrams/common/svgDrawCommon.ts",
+        "sourceMap": "chunk-I5QXWRB2.mjs.map",
+        "sha256": "8ad41c8cdeda2f7d4edb047c24fd301a87dc5d2f2cc6984b7a3d880c96f99ede"
+      },
+      {
+        "path": "src/rendering-util/rendering-elements/shapes/c4LabelHelper.ts",
+        "sourceMap": "chunk-VFTINRM2.mjs.map",
+        "sha256": "c7f49196ed3da569e3dbb3dbef6c184e518444af748ca62acb79fb2e28261bce"
+      },
+      {
+        "path": "src/rendering-util/rendering-elements/shapes/person.ts",
+        "sourceMap": "chunk-VFTINRM2.mjs.map",
+        "sha256": "5f66584f62282841a2de4582d14f2ad109f9e1175e36c25ef3e4f606a2fc2a1a"
+      },
+      {
+        "path": "src/rendering-util/rendering-elements/shapes/cylinder.ts",
+        "sourceMap": "chunk-VFTINRM2.mjs.map",
+        "sha256": "0dfc8d226de322efd7de0c22bd6fa3ade1e1bad98ee534813185c9e95ca759f4"
+      },
+      {
+        "path": "src/rendering-util/rendering-elements/shapes/roundedRect.ts",
+        "sourceMap": "chunk-VFTINRM2.mjs.map",
+        "sha256": "aada44a96405afe9883a9f65ddf5e98b58df096102eaf88fd5245d5a9e8e687f"
+      }
+    ]
   }
 }

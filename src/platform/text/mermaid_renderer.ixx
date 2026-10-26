@@ -1,3 +1,9 @@
+module;
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <Windows.h>
+
 export module folia.platform.mermaid_renderer;
 import std;
 import folia.platform.mermaid_measurer;
@@ -9,7 +15,7 @@ export namespace folia::platform {
 // Failures are explicit and never invoke another renderer or estimate widths.
 std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
     std::u16string_view source, const folia::mermaid::ConfigSession& session,
-    folia::mermaid::FrontendLimits limits = {}) {
+    folia::mermaid::FrontendLimits limits = {}, std::optional<double> available_width = {}) {
     using namespace folia::mermaid;
     auto input=prepare_native_diagram(source,session,limits);
     if(!input) return std::unexpected(input.error());
@@ -523,6 +529,18 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             return KanbanTextBox{box->advance,box->bounds_width,metrics->height,metrics->baseline,box->line_height};
         };
     }
-    return render_native_diagram(*input,widths,flowchart_measurements,sequence_measurements,class_measurements,xy_measurements,sankey_measurements,treemap_measure,journey_measure,timeline_measure,gantt_measure,git_graph_measure,mindmap_measurements,block_measure,kanban_measure);
+    C4Measurements c4_measurements;
+    if(std::holds_alternative<C4RenderInput>(input->content)) {
+        if(available_width)c4_measurements.available_width=*available_width;
+        else {RECT area{};if(!SystemParametersInfoW(SPI_GETWORKAREA,0,&area,0))return std::unexpected("Cannot obtain C4 available work area");c4_measurements.available_width=area.right-area.left;}
+        c4_measurements.measure=[&measurer](std::u16string_view text,const C4Font& requested)->std::expected<C4TextBox,std::string> {
+            auto family=measurer.resolve_family(requested.family);if(!family)return std::unexpected(family.error());
+            const MermaidFont font{*family,static_cast<float>(requested.size),requested.weight,requested.italic};
+            auto box=measurer.measure(text,font,false,{},true);if(!box)return std::unexpected(box.error());
+            auto metrics=measurer.svg_font_metrics(font);if(!metrics)return std::unexpected(metrics.error());
+            return C4TextBox{box->advance,box->bounds_width,metrics->height,metrics->baseline,metrics->middle_offset};
+        };
+    }
+    return render_native_diagram(*input,widths,flowchart_measurements,sequence_measurements,class_measurements,xy_measurements,sankey_measurements,treemap_measure,journey_measure,timeline_measure,gantt_measure,git_graph_measure,mindmap_measurements,block_measure,kanban_measure,c4_measurements);
 }
 }
