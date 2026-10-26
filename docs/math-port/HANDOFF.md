@@ -2,7 +2,17 @@
 
 恢复/压缩后先实际读本文。架构、职责和详细验收见 [architecture](native-raii-architecture.md)、[files](native-raii-files.json)、[acceptance](native-raii-acceptance.md)。只复查新变化；ignored候选用 `rg --no-ignore`。
 
-## 当前 checkpoint：文件侧栏操作与层级引导线完成（2026-10-26）
+## 当前 checkpoint：侧栏、菜单与页签控件修正完成
+
+- **范围/边界**：用户累积要求已实现：去左侧“资源管理器”/三个点整行；主菜单向下；“插入”整组移正文右键；右键保选区；caption下分隔线连续等粗；换桌面folder picker；页签溢出按钮改线形箭头且居中。不开agents/CUA，不关用户窗口；WinUI/CST/版本 **0.4.1** 不变，无MSI/安装/push/release。
+- **本地提交**：**8232fe9e** 修正PointerController主/次输入边界，**e0b0655a** 菜单/侧栏/分隔线/目录picker/溢出箭头。没有未提交产品代码；没有core/platform/math/scroll改动。
+- **交互实现**：MainWindow.xaml整行删除42DIP header及引用/废Explorer翻译；tree靠顶部，openFolder保留主菜单/CtrlShiftO/空态。MainMenu.Placement=BottomEdgeAlignedLeft；InsertButton整组原ID迁至EditorSurface.ContextFlyout，现有command handlers/source编辑/事务不改。EditorPointerController在focus/hit/command/drag前只接纳IsLeftButtonPressed主操作（含touch/pen，Microsoft官方已核实），其余不handled交给context menu，防止右键清selection及触发表格/task动作。Root新独立divider行48,1,Auto,Auto,*,Auto：dividerRow1在caption48DIP外，避免原native不透明按钮覆盖；WorkspaceRow4/StatusRow5，其余同步。
+- **目录选择**：改当前已部署Microsoft.Windows.Storage.Pickers.FolderPicker{AppWindow().Id()}，返回Path，不再旧UWP FileTypeFilter/InitializeWithWindow；已有root用SuggestedFolder（SetFolder，始终定位），不是SuggestedStartFolder（SetDefaultFolder，仅无历史时有效）。实际窗口已验证工厂激活及property；**尚未自动/人工点击系统modal dialog验证“停当前目录直接确认”及OneDrive场景**，不能宣称已实点通过。用户若仍复现，按新证据继续，不凭旧截图回退旧picker。
+- **溢出按钮职责**：WorkspaceChrome.xaml自有声明式TabViewListView样式→显式TabScrollViewerStyle→28×28 RepeatButton/16矢量镜像chevron/subtle hover。保留native水平ItemsStackPanel虚拟化、ScrollViewer/ItemsPresenter及native expected parts、原生滚动/长按/keyboard/close/reorder。SDK静态捕获自身TabScrollViewerStyle，仅覆盖资源key不能改容器Bottom，所以明确拥有列表呈现边界；不加Loaded找私有控件改属性的补丁。overflow-controls-native.png已看，箭头centerY24，与页签/加号对齐。Native RepeatButtonAutomationPeer实际forward/back滚动且不改选中tab已过。
+- **最终验收**：Debug成功（shell-overflow-boundary-debug.log）；生产PointerController+确定性WinRT次输入事件正式 **1项63断言**（shell-secondary-pointer-tests-2.log）：富文本/源码×右/中/X1，选区/source/history不变，无semantic action、不handled、0全文parse/serialize；不注入桌面输入。完整真实窗口 **12项791断言通过**（shell-refinements-visual-all.log：explorer6项95+chrome6项696），含菜单归属/方向、删除header、独立divider行/四倍率像素、desktop picker激活、overflow28尺寸/矢量/centerY24/实际双向滚动。旧controller95项16280基线未重跑无关宽审。
+- **交付/停止点**：自包含Release成功（shell-refinements-release.log）；实际启动/激活/正常关闭 **Success=true、exit0**（shell-refinements-startup.log、build/tests/shell-refinements-startup/run-1/result.json，owned child39584）。产物 **build/app-winui/bin/x64/Release/Folia.exe**，12229120 bytes，ProductVersion0.4.1。无活动build/test/agent句柄；测试只正常关闭自己的child，未操作用户进程；构建前看到的用户26552在最后只读检查时已不在，不是我们终止。下一步用户重新打开新版试用/新指令，不自动MSI/安装/发布；实际mouse/IME/OS picker/OneDrive点击仍未人工，不夸大。
+
+## 最近完成基础：文件侧栏操作与层级引导线（历史，2026-10-26）
 
 - **用户要求/边界**：VS Code式紧凑文件树、树内新文件/文件夹、F2/右键重命名、拖动移动/Ctrl复制、必要层级引导线与操作进度。不开子代理；WinUI3/native保持；页签仍单行、布局开关右侧靠caption；文件树左/大纲右，无folder默认隐藏。版本固定 **0.4.1**；本轮无MSI/安装/推送/发布。不要重开旧Math/微信滚动调查。native一次一个≤4，不关用户窗口；前轮用户Escape已终止Computer Use，本轮未使用。
 - **已本地提交**：基础7841ff83（同轮廓图标）、0da4987f（真实Name绑定/单层reconcile）、f18e99cd（8DIP缩进/18DIP箭头槽）、757acce5（exclusive后台文件IO/文档搬迁lease）。本轮 **6162ce2f** 文件操作进度与WorkspaceFileCoordinator；**f3546ebc** 树内编辑/drag-drop/层级线/壳层接入。没有未提交产品代码，没有core/platform/CST/math/scroll改动。
