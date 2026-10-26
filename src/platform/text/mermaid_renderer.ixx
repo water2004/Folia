@@ -394,6 +394,17 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             class_measurements.edges.push_back(std::move(m));
         }
     }
+    SankeyMeasurements sankey_measurements;
+    if(auto sankey=std::get_if<SankeyRenderInput>(&input->content)) {
+        const MermaidFont font{sankey->theme.font_family,14};
+        auto height=measurer.svg_font_metrics(font);
+        if(!height) return std::unexpected(height.error());
+        for(const auto& text:sankey_measurement_requests(*sankey)) {
+            auto metrics=measurer.measure(text,font,false,{},true);
+            if(!metrics) return std::unexpected(metrics.error());
+            sankey_measurements.labels.push_back({metrics->bounds_width,height->height,height->baseline});
+        }
+    }
     XYMeasurements xy_measurements;
     if(auto xy=std::get_if<XYRenderInput>(&input->content)) {
         for(const auto& request:xy_measurement_requests(*xy)) {
@@ -405,6 +416,6 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             xy_measurements.text.push_back({metrics->bounds_width,request.text.empty()?0:*height});
         }
     }
-    return render_native_diagram(*input,widths,flowchart_measurements,sequence_measurements,class_measurements,xy_measurements);
+    return render_native_diagram(*input,widths,flowchart_measurements,sequence_measurements,class_measurements,xy_measurements,sankey_measurements);
 }
 }

@@ -109,3 +109,10 @@ merge, pinned to the dependency embedded in the official Mermaid 12.2.0 bundle.
 The MIT notice, including the OpenJS/Lodash compatibility attribution, is
 reproduced in `ES-TOOLKIT-LICENSE`. The package and transitive helper sources are
 hash-locked in `docs/mermaid-cpp/source-lock.json` and used only by the oracle.
+
+## d3-sankey 0.12.3
+
+Sankey node alignment, six-round relaxation/collision layout and link positioning
+follow d3-sankey 0.12.3. Its BSD-3-Clause notice is reproduced in
+`D3-SANKEY-LICENSE`; source-map contents are hash-pinned in source-lock.json.
+The JavaScript implementation is used only by the test oracle.

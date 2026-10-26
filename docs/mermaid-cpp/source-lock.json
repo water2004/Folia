@@ -715,6 +715,18 @@
     {
       "path": "packages/mermaid/src/diagrams/xychart/chartBuilder/components/plot/linePlot.ts",
       "sha256": "dcf2b16e353d492683ffe6eca8aad2e8fe6cc84ad5c5df91b63690725a06f832"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/sankey/parser/sankey.jison",
+      "sha256": "1f966d7e436d0255233522aca236c301f00c18cbd1b2f98c4845956a4a034f27"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/sankey/sankeyDB.ts",
+      "sha256": "65e242878bfe6b7ca14734c6f9539b9628c9c235dafb554a4d30641ca5b43035"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/sankey/sankeyRenderer.ts",
+      "sha256": "7c9579f8cefdea961c783cac3f7fafbe596358c81ea9547e7ba4161e8f7a58ff"
     }
   ],
   "packages": [
@@ -1482,6 +1494,32 @@
         "source": "d3-shape@3.2.0/src/line.js",
         "map": "chunk-OHNBJXQ2.mjs.map",
         "sha256": "90eac879faa69aa2178a21e4ed2838c8f975e3d3282936dcc415b48573352da6"
+      }
+    ]
+  },
+  "sankeyLayout": {
+    "package": "d3-sankey",
+    "version": "0.12.3",
+    "files": [
+      {
+        "path": "src/align.js",
+        "map": "sankeyDiagram-KZ7VQICK.mjs.map",
+        "sha256": "519ae8524bdc6e4379929ed8cb99e49581400b6600a95158e669b97600e4cb8f"
+      },
+      {
+        "path": "src/constant.js",
+        "map": "sankeyDiagram-KZ7VQICK.mjs.map",
+        "sha256": "59d2ddabcca2b629ada7b1aaa5873b91a7b08b9551c5518ce1296142f0d2b486"
+      },
+      {
+        "path": "src/sankey.js",
+        "map": "sankeyDiagram-KZ7VQICK.mjs.map",
+        "sha256": "14eeab99922cac50331b84f2efe34becba8e1305183ae79f48a08943a03b7f83"
+      },
+      {
+        "path": "src/sankeyLinkHorizontal.js",
+        "map": "sankeyDiagram-KZ7VQICK.mjs.map",
+        "sha256": "4a5f8d61ffa2c8a9734e4308c11e79fb20a4cfb126c433229a1321ac6820c4af"
       }
     ]
   }

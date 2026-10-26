@@ -127,6 +127,11 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
     try {
         const auto& effective=prepared->effective_config;
         const auto& theme=member(effective,u"themeVariables");
+        if(prepared->type==u"sankey") {
+            auto input=prepare_sankey(source,session);
+            if(!input) return std::unexpected(input.error());
+            return NativeDiagram{std::move(*prepared),std::move(*input)};
+        }
         if(prepared->type==u"xychart") {
             auto input=prepare_xy(source,session);
             if(!input) return std::unexpected(input.error());
@@ -341,9 +346,13 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
     } catch(const std::runtime_error& e) { return std::unexpected(e.what()); }
 }
 
-std::expected<DiagramSvg,std::string> render_native_diagram(const NativeDiagram& input,const PieMeasurements& widths,const FlowchartMeasurements& flowchart_measurements,const SequenceMeasurements& sequence_measurements,const ClassMeasurements& class_measurements,const XYMeasurements& xy_measurements) {
+std::expected<DiagramSvg,std::string> render_native_diagram(const NativeDiagram& input,const PieMeasurements& widths,const FlowchartMeasurements& flowchart_measurements,const SequenceMeasurements& sequence_measurements,const ClassMeasurements& class_measurements,const XYMeasurements& xy_measurements,const SankeyMeasurements& sankey_measurements) {
     return std::visit([&](const auto& content)->std::expected<DiagramSvg,std::string> {
-        if constexpr(std::is_same_v<std::decay_t<decltype(content)>,XYRenderInput>) {
+        if constexpr(std::is_same_v<std::decay_t<decltype(content)>,SankeyRenderInput>) {
+            auto result=render_sankey_svg(content,sankey_measurements);
+            if(!result) return std::unexpected(result.error());
+            return DiagramSvg{std::move(result->svg),result->width,result->height};
+        } else if constexpr(std::is_same_v<std::decay_t<decltype(content)>,XYRenderInput>) {
             auto result=render_xy_svg(content,xy_measurements);
             if(!result) return std::unexpected(result.error());
             return DiagramSvg{std::move(result->svg),result->width,result->height};
