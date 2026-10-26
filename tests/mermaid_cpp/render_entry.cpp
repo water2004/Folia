@@ -84,6 +84,7 @@ suite render_entry = [] {
                 widths.title_width=100;
             }
             std::visit([&](const auto& content) {
+                if constexpr(!std::is_same_v<std::decay_t<decltype(content)>,SankeyRenderInput>) {
                 const auto& doc=[&]() -> const auto& {
                     if constexpr(std::is_same_v<std::decay_t<decltype(content)>,PacketRenderInput>) return content.layout.document;
                     else return content.document;
@@ -91,6 +92,7 @@ suite render_entry = [] {
                 expect(bool(doc.title==field(observed,u"title").string))<<fields[0];
                 expect(bool(doc.acc_title==field(observed,u"accTitle").string));
                 expect(bool(doc.acc_description==field(observed,u"accDescription").string));
+                }
             },native->content);
             auto svg=render_native_diagram(*native,widths);
             expect(svg.has_value())<<fields[0]<<(svg?"":svg.error());
