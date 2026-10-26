@@ -114,9 +114,16 @@ for(const [name,body,title] of ${JSON.stringify(cases)}) {
    return chars;
   };
   const paintedCenter=label=>{
-   const range=document.createRange();range.selectNodeContents(label);
-   const r=range.getBoundingClientRect();
-   return new DOMPoint(r.x+r.width/2,r.y+r.height/2).matrixTransform(root.getScreenCTM().inverse()).toJSON();
+   // A range over the whole SVG group includes its stale foreignObject box.
+   // Observe only text nodes when post-measurement fonts overflow that box.
+   const walker=document.createTreeWalker(label,NodeFilter.SHOW_TEXT),rects=[];
+   while(walker.nextNode()) {
+    const range=document.createRange();range.selectNodeContents(walker.currentNode);
+    rects.push(range.getBoundingClientRect());
+   }
+   const left=Math.min(...rects.map(r=>r.left)),right=Math.max(...rects.map(r=>r.right));
+   const top=Math.min(...rects.map(r=>r.top)),bottom=Math.max(...rects.map(r=>r.bottom));
+   return new DOMPoint((left+right)/2,(top+bottom)/2).matrixTransform(root.getScreenCTM().inverse()).toJSON();
   };
   const clusters=[...host.querySelectorAll('g.cluster')].map(n=>{
    const shape=n.querySelector('rect'),b=shape.getBBox(),label=n.querySelector('.cluster-label'),lb=label.getBBox();
