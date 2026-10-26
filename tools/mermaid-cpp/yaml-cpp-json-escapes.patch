@@ -21,6 +21,18 @@ index 992620f..7936e49 100644
      case 'L':
        return "\xE2\x80\xA8";  // LS (#x2028)
      case 'P':
+diff --git a/src/exp.h b/src/exp.h
+--- a/src/exp.h
++++ b/src/exp.h
+@@ -170,5 +170,7 @@ inline const RegEx& EndScalarInFlow() {
+   static const RegEx e =
+       (RegEx(':') + (BlankOrBreak() | RegEx() | RegEx(",]}", REGEX_OR))) |
+-      RegEx(",?[]{}", REGEX_OR);
++      // js-yaml retains question marks inside a plain scalar, including
++      // Flowchart metadata labels such as {label: Ready?}.
++      RegEx(",[]{}", REGEX_OR);
+   return e;
+ }
 diff --git a/src/scanner.cpp b/src/scanner.cpp
 index d0eb03c..401ad8b 100644
 --- a/src/scanner.cpp
