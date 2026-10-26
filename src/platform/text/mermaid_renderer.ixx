@@ -423,6 +423,17 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             xy_measurements.text.push_back({metrics->bounds_width,request.text.empty()?0:*height});
         }
     }
-    return render_native_diagram(*input,widths,flowchart_measurements,sequence_measurements,class_measurements,xy_measurements,sankey_measurements);
+    TreemapMeasure treemap_measure;
+    if(auto treemap=std::get_if<TreemapRenderInput>(&input->content)) {
+        treemap_measure=[treemap,&measurer](std::u16string_view text,double size,unsigned weight,bool italic)->std::expected<TreemapTextBox,std::string> {
+            const MermaidFont font{treemap->theme.font_family,static_cast<float>(size),weight,italic};
+            auto box=measurer.measure(text,font,false,{},true);
+            if(!box)return std::unexpected(box.error());
+            auto metrics=measurer.svg_font_metrics(font);
+            if(!metrics)return std::unexpected(metrics.error());
+            return TreemapTextBox{box->advance,box->bounds_width,metrics->height,metrics->baseline,metrics->middle_offset};
+        };
+    }
+    return render_native_diagram(*input,widths,flowchart_measurements,sequence_measurements,class_measurements,xy_measurements,sankey_measurements,treemap_measure);
 }
 }

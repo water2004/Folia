@@ -727,6 +727,46 @@
     {
       "path": "packages/mermaid/src/diagrams/sankey/sankeyRenderer.ts",
       "sha256": "7c9579f8cefdea961c783cac3f7fafbe596358c81ea9547e7ba4161e8f7a58ff"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/sankey/sankeyUtils.ts",
+      "sha256": "32b5805bcf25a6a669992d011db167fddad79ab14cd8bf6c62dddb8a6214b418"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/sankey/styles.js",
+      "sha256": "8492aecb7e71a1ebf2563b6a1d77fda984860393b914ea2a1d8e4d2133cb5690"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/treemap/db.ts",
+      "sha256": "588deb680b2abb78c5baac3895030e99ad0e26984ad21efa0114e6191768cfeb"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/treemap/parser.ts",
+      "sha256": "61595f35565a916142a1356e9fb3c18e57cb4a9d2cff4b40fbb39dcffe53b25e"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/treemap/utils.ts",
+      "sha256": "e9b91a0f05cf499a0181e64ef30cc382c872c1c0f12f5614f09d0b8b2fbdfd5a"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/treemap/renderer.ts",
+      "sha256": "f70a67c00490c1f9b34b721f37503f21e41c9ad6151a9459e04dbe0a5f8a432b"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/treemap/styles.ts",
+      "sha256": "076636c8e287a8e567a9a1ffcc0a6e62ad4981bd850816b401c4a75b796bad15"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/treemap/types.ts",
+      "sha256": "9b0f116eb319cba614ea95f9a4c431b41d71eb83b042e66e0c588c4785b27fb1"
+    },
+    {
+      "path": "packages/parser/src/language/treemap/treemap.langium",
+      "sha256": "7f1be037f66fb9b42379e36023f1c3c3949a3f02149780003b018eb1c4a706d0"
+    },
+    {
+      "path": "packages/parser/src/language/treemap/valueConverter.ts",
+      "sha256": "9de9c402ba5a3f5225599ad86dd3d2846492d7fc7bf50b61dfe2d12655261edf"
     }
   ],
   "packages": [
@@ -1520,6 +1560,78 @@
         "path": "src/sankeyLinkHorizontal.js",
         "map": "sankeyDiagram-KZ7VQICK.mjs.map",
         "sha256": "4a5f8d61ffa2c8a9734e4308c11e79fb20a4cfb126c433229a1321ac6820c4af"
+      }
+    ]
+  },
+  "treemapLayout": {
+    "files": [
+      {
+        "source": "d3-format@3.1.0/src/formatDecimal.js",
+        "sha256": "6d67ba1ecca6944af952846812c6544aacc4a6a756654f7ef7ab9625c1b495fc"
+      },
+      {
+        "source": "d3-format@3.1.0/src/formatGroup.js",
+        "sha256": "dcf4513a22b77e2323920516f8a290f03d0d12e3b1f862b89ded6bd93ac108e1"
+      },
+      {
+        "source": "d3-format@3.1.0/src/formatTrim.js",
+        "sha256": "b30d7bbbec694c9d5f4a5888e50329f171a6fefb03add082d8de12086298cfa6"
+      },
+      {
+        "source": "d3-format@3.1.0/src/formatTypes.js",
+        "sha256": "4a6c01b84235fd84028b7b71059f4f5f07c19642ec3e8467281660b9db728f3e"
+      },
+      {
+        "source": "d3-format@3.1.0/src/locale.js",
+        "sha256": "61074f36a2497d6c8ae7ac411c716b587b204a1e1bfbdb51c2b5ce49d18535d5"
+      },
+      {
+        "source": "d3-hierarchy@3.1.2/src/hierarchy/eachBefore.js",
+        "sha256": "59b2d27ae2b95230118c076f91b34df2c7538b08f5807ecc49aaef311cc6fb19"
+      },
+      {
+        "source": "d3-hierarchy@3.1.2/src/hierarchy/eachAfter.js",
+        "sha256": "9ac159c092a1c4ac7ae62fe2e5beb784b63196221932f0252150b8b958b62255"
+      },
+      {
+        "source": "d3-hierarchy@3.1.2/src/hierarchy/sum.js",
+        "sha256": "2925ff253e09a1cce6a8154d8ea297278e3523fa3c6a5e15a728ccb2553a9702"
+      },
+      {
+        "source": "d3-hierarchy@3.1.2/src/hierarchy/sort.js",
+        "sha256": "12f2a37886b943764a3e72480d8c05c28f9b96d47da11ea88b67833347b5ed72"
+      },
+      {
+        "source": "d3-hierarchy@3.1.2/src/hierarchy/descendants.js",
+        "sha256": "0cd757d86618492fe383a6258e36c2f7e28a0d6bbd7a05724ce5542f0dd11e54"
+      },
+      {
+        "source": "d3-hierarchy@3.1.2/src/hierarchy/leaves.js",
+        "sha256": "9919c70c209893eef488f2a22aa3bd8f4f5e7ea9fbcc4bd7188158743cbed1da"
+      },
+      {
+        "source": "d3-hierarchy@3.1.2/src/hierarchy/index.js",
+        "sha256": "63bed36dcc1d845ae750b0d377f817d97228e1313d577b52a2753100d781265b"
+      },
+      {
+        "source": "d3-hierarchy@3.1.2/src/treemap/round.js",
+        "sha256": "64435a28e03cb13ad999383d78b09c29510b5bcfaadf54d6dd6bea95da800167"
+      },
+      {
+        "source": "d3-hierarchy@3.1.2/src/treemap/dice.js",
+        "sha256": "d578a63ee720269359cf42a4118d82ed9ce91404b3c7c59081dbba184a81086f"
+      },
+      {
+        "source": "d3-hierarchy@3.1.2/src/treemap/slice.js",
+        "sha256": "832538a72abf4338461bbc6db69759f443225401d0a309d2cacc0a354fe5aaec"
+      },
+      {
+        "source": "d3-hierarchy@3.1.2/src/treemap/squarify.js",
+        "sha256": "b010f697d376eca4ec2e5d4b75f2a079a124df404221a0a2b555d5633c463372"
+      },
+      {
+        "source": "d3-hierarchy@3.1.2/src/treemap/index.js",
+        "sha256": "28b566cdfbf6e87a04eb6ed15d83df2e875544e75ebd904a8275d88922545f8f"
       }
     ]
   }

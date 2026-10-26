@@ -32,7 +32,7 @@ struct MermaidTextStyle {
     unsigned weight=400;
     bool italic=false;
 };
-struct MermaidSvgFontMetrics { double height{},baseline{}; };
+struct MermaidSvgFontMetrics { double height{},baseline{},middle_offset{}; };
 
 // Measures UTF-16 after SVG's default whitespace processing (collapse ASCII
 // whitespace, including LF/CR/TAB). The browser probe checks the
@@ -120,7 +120,7 @@ public:
         DWRITE_FONT_METRICS metrics{}; selected->GetMetrics(&metrics);
         const auto scale=font.size/static_cast<double>(metrics.designUnitsPerEm);
         const auto baseline=std::round(metrics.ascent*scale);
-        return MermaidSvgFontMetrics{baseline+std::round(metrics.descent*scale),baseline};
+        return MermaidSvgFontMetrics{baseline+std::round(metrics.descent*scale),baseline,metrics.xHeight*scale/2};
     }
     std::expected<double,std::string> svg_font_height(const MermaidFont& font) const {
         auto metrics=svg_font_metrics(font);if(!metrics) return std::unexpected(metrics.error());

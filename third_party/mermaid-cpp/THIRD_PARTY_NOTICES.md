@@ -7,6 +7,8 @@ module interfaces port the original ELK DepthFirstCycleBreaker, flat
 NetworkSimplexLayerer and LongEdgeSplitter. `src/elk_order.{ixx,cpp}` ports the
 flat east/west PortListSorter, BarycenterHeuristic, port-rank distributors and
 LayerSweepCrossingMinimizer controller from the same worker.
+Flat BK placement, point ports, orthogonal routing, shared random state and
+long-edge restoration modules follow the same worker.
 These files are licensed under
 EPL-2.0, not the Mermaid MIT license. The full license is in `ELK-LICENSE`.
 Original source: https://github.com/kieler/elkjs, package `elkjs` 0.9.3,
@@ -39,6 +41,9 @@ The complete ISC notice is also preserved in `src/pie_geometry.cpp`.
 
 XY scales and numeric ticks follow d3-scale 4.0.2, d3-array 3.2.4 and
 d3-interpolate 3.0.1. XY line paths use d3-shape linear interpolation.
+Treemap hierarchy summation, stable sorting, squarify, rounding and padding
+follow d3-hierarchy 3.1.2; the bounded value formatter follows d3-format 3.1.0.
+Both carry Copyright 2010-2021 Mike Bostock and the ISC notice below.
 Their source-map contents are hash-pinned alongside the Mermaid sources.
 
 Copyright 2010-2021 Mike Bostock (d3-scale, d3-interpolate)
