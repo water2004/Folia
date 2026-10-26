@@ -2,7 +2,16 @@
 
 恢复/压缩后先实际读本文。架构、职责和详细验收见 [architecture](native-raii-architecture.md)、[files](native-raii-files.json)、[acceptance](native-raii-acceptance.md)。只复查新变化；ignored候选用 `rg --no-ignore`。
 
-## 当前 checkpoint：侧栏、菜单与页签控件修正完成
+## 当前 checkpoint：行内数学编辑悬浮预览完成（2026-10-27）
+
+- **用户边界**：行内公式编辑时预览悬浮、不占正文排版空间，特别注意美观；仍在原位编辑source，不加局部输入面板，block math旧位置保持。不开agents/CUA、不关用户窗口。WinUI/native/CST/selection/history/异步纯内存Preview缓存保持，MathJax引擎未改；无新JS/engine/队列/全解析。版本 **0.4.1**，无MSI/安装/push/release。
+- **本地提交827339bd**（21文件350增21删）：EditorMathPreview.h/.cpp统一flow/table原来重复的prepared preview结构，并负责悬浮定位/原生D2D绘制。flow/table在原测量/绘制位置只处理非floating的block preview，inline仅把const preview指针交给RenderPass末绘制，不进块/表行高及source/hit/caret映射。RenderPass.Paint返回可选bounds，Renderer每次Draw/ClearPrepared清空InlineMathPreviewBounds()，浮层区域非交互；离开math/source mode/print无浮层。Legacy display math位置/高度与编辑逻辑未重做。
+- **样式/坐标**：优先编辑行上方，不足翻到下方；margin12/gap8/padding12×10、最大640宽，超大公式同比缩放，不越viewport/不遮编辑行。锚点使用CST contentSpan的当前视觉行，不扫描TeX/Markdown。7DIP圆角、opaque主题shell_layer_bg底、shell_border细边、6层轻shadow，无中间bitmap/每字符GPU effect分配，3个常驻brush随主题/设备reset。补全Active时Shell每帧重定位，有足够空间则避免和数学浮层重叠；焦点不转移。参考实际读过的MarkText v0.17.1 src/muya/lib/parser/render/renderInlines/inlineMath.js与assets/styles/index.css的非editable/absolute preview（build/marktext-*只读参考），没有引入其Web runtime。
+- **验收**：最终Debug通过（inline-math-themed-build.log）。完整WinUI controller **100项16704断言通过**（inline-math-floating-app-all.log），覆盖旧3项公式click/drag/undo，普通段/quote/list/table异步预览完成前后后文caret.top/表下一行不变，selection/source/0全文parse-serialize，离开/source mode隐藏、block math无浮层、viewport位置/缩放，以及preview backing SVG fileReads/Writes=0、previewSvgBytes>0。这里IO统计指SVG缓存，未改字体按请求后台读取机制。核心未动，不重复旧MathJax移植宽审。
+- **外观实际看过**：build/tests/inline-math-preview/{light,dark}.png是生产PaintInlineMathPreview+真实Native Math SVG/2x D2D绘制；两主题最终图已看，深色用抬高一层底色，浅色柔阴影/细框。test_math_preview_appearance.cpp始终生成ignored图并校验真实SVG/opaque，无HTML/AI图；样例正文是绘制fixture，不宣称完整真实Folia窗口截图。未做真人鼠标/IME/全窗口人工复验，不能夸大。
+- **交付/停止点**：自包含Release成功（inline-math-floating-release.log）；实际构造/激活/正常关闭 **Success=true、exit0**（inline-math-floating-startup.log、build/tests/inline-math-floating-startup/run-1/result.json，owned child40352）。产物 **build/app-winui/bin/x64/Release/Folia.exe**，12233216 bytes，ProductVersion0.4.1。没有活动build/test/agent句柄，构建前只读确认无用户Folia；测试仅正常关自己的窗口。产品已提交，工作区除本checkpoint整理外干净。下一步用户重新打开新版试用/新指令，不自动MSI/安装/发布。
+
+## 最近完成：侧栏、菜单与页签控件（历史）
 
 - **范围/边界**：用户累积要求已实现：去左侧“资源管理器”/三个点整行；主菜单向下；“插入”整组移正文右键；右键保选区；caption下分隔线连续等粗；换桌面folder picker；页签溢出按钮改线形箭头且居中。不开agents/CUA，不关用户窗口；WinUI/CST/版本 **0.4.1** 不变，无MSI/安装/push/release。
 - **本地提交**：**8232fe9e** 修正PointerController主/次输入边界，**e0b0655a** 菜单/侧栏/分隔线/目录picker/溢出箭头。没有未提交产品代码；没有core/platform/math/scroll改动。
