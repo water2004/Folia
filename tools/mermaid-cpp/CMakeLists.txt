@@ -128,7 +128,8 @@ if(WIN32 AND MSVC)
         folia_mermaid_measurement folia_console_test_runtime)
     add_executable(FoliaMermaidPlatformTests
         "${FOLIA_MERMAID_REPO_ROOT}/tests/main.cpp"
-        "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_measurement.cpp")
+        "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_measurement.cpp"
+        "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_xy.cpp")
     set_target_properties(FoliaMermaidPlatformTests PROPERTIES CXX_MODULE_STD ON)
     target_include_directories(FoliaMermaidPlatformTests PRIVATE "${FOLIA_MERMAID_REPO_ROOT}/tests")
     target_link_libraries(FoliaMermaidPlatformTests PRIVATE

@@ -377,6 +377,17 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             class_measurements.edges.push_back(std::move(m));
         }
     }
-    return render_native_diagram(*input,widths,flowchart_measurements,sequence_measurements,class_measurements);
+    XYMeasurements xy_measurements;
+    if(auto xy=std::get_if<XYRenderInput>(&input->content)) {
+        for(const auto& request:xy_measurement_requests(*xy)) {
+            const MermaidFont font{xy->theme.font_family,static_cast<float>(request.font_size)};
+            auto metrics=measurer.measure(request.text,font,true,{},true);
+            if(!metrics) return std::unexpected(metrics.error());
+            auto height=measurer.svg_font_height(font);
+            if(!height) return std::unexpected(height.error());
+            xy_measurements.text.push_back({metrics->bounds_width,request.text.empty()?0:*height});
+        }
+    }
+    return render_native_diagram(*input,widths,flowchart_measurements,sequence_measurements,class_measurements,xy_measurements);
 }
 }

@@ -151,6 +151,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/quadrant-oracle.mjs --check
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/xy-oracle.mjs --check
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/radar-oracle.mjs --check
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/elk-cycle-oracle.mjs
@@ -256,6 +258,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/quadrant-browser-probe.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/xy-browser-probe.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/radar-browser-probe.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
@@ -275,6 +279,8 @@ jobs:
           node tools/mermaid-cpp/compare-class-svg.mjs build/mermaid-cpp/class-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/compare-quadrant-svg.mjs build/mermaid-cpp/quadrant-browser/original.json build/mermaid-cpp/pie-svg
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/compare-xy-svg.mjs build/mermaid-cpp/xy-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/compare-radar-svg.mjs build/mermaid-cpp/radar-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -308,6 +314,8 @@ jobs:
             build/mermaid-cpp/class-browser/*.svg
             build/mermaid-cpp/quadrant-browser/*.json
             build/mermaid-cpp/quadrant-browser/*.svg
+            build/mermaid-cpp/xy-browser/*.json
+            build/mermaid-cpp/xy-browser/*.svg
             build/mermaid-cpp/radar-browser/*.json
             build/mermaid-cpp/radar-browser/*.svg
             ${{ env.FOLIA_MERMAID_BINARY_DIR }}/FoliaMermaidTextProbe.exe
