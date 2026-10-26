@@ -2,14 +2,21 @@
 
 恢复/压缩后先实际读本文。架构、职责和详细验收见 [architecture](native-raii-architecture.md)、[files](native-raii-files.json)、[acceptance](native-raii-acceptance.md)。只复查新变化；ignored候选用 `rg --no-ignore`。
 
-## 当前 checkpoint：公式启动批量优化已完成（2026-10-26）
+## 当前 checkpoint：公式批量优化已打包并安装0.4.0（2026-10-26，完成）
+
+- 用户明确要求构建MSI并直接安装、版本保持 **0.4.0**。既有build_msi.ps1完整setup/自包含Release/真实启动门禁/WiX成功，源码17e7be0e；原974项math、71项WinUI及Source/性能验收保持，不重复宽测。无子代理/CUA，编译≤4。
+- MSI `build/installer/bin/Folia-0.4.0-x64.msi`，**53,517,150 bytes**，SHA256 `EABF580AE9679D04DD4F8003D89472C066F1A56C9A5BA1EF18419699BE87DCFE`，同目录.sha256已更新；ProductCode `{D980C9A5-2810-4E1C-A66E-C36D49EC18B7}`，同版本升级替代原CDA9C1E8产品。MSI数据库版本0.4.0、165文件且无PDB/测试/候选程序。
+- 已直接msiexec安装 **exit0，无需重启**；安装路径 `%LOCALAPPDATA%/Programs/Folia/Folia.exe`，FileVersion0.4.0.0，产品state5。**165个安装文件SHA256全部匹配**，settings.json及latex/commands.user.json两个用户文件安装前后及启动验收后均字节不变。实际安装路径新建空白进程构造/激活/正常关闭exit0通过，未关闭用户进程/改用户文档。
+- 证据build/math-batch-{msi-build,msi-verify-install,installed-startup}.log，msi-{info,properties,payload,user-files-before,install-result,verification}.json及msi-install.log；实际启动build/tests/math-batch-installed-startup/run-1/result.json。**停止点**：全部完成，无活动build/test/install/native句柄，已安装版包含下节约53%耗时降低的优化；未推送/发布/移动既有标签，版本未改。下一步仅由用户正常使用反馈。
+
+## 历史：公式启动批量优化完成（随后已安装，2026-10-26）
 
 - 用户要求优化打开文档、重点批量路径。实现分批提交：字体variant/alias借用索引 **8017e73c**；SVG规范化请求内复用usvg默认字体/fallback返回ID **8fe9a0e5**；启动按32个新请求跨模型chunk组批/批量规范化 **60d35218**；可重跑性能工具与tlog可执行链接选择 **84f2ecf5**。Common/Scene/数学算法未改；字体正文仍仅属本批请求、预览仅内存、滚动UI零IO/离屏取消保持。
 - **最终Release实测**：只读整合.md（338898bytes），3213处公式/2164个去重render/2769片段写入均不变；native批次192→68。原3次math 6983/6839/6898ms，中位6898；新3345/3267/3253ms，中位3267，**耗时下降52.6%，约2.11倍速度**。parse仍17–20ms。准备后private bytes原38.6–41.6MB、新38.3–40.5MB；这是独立准备流程，不当作GUI整体内存/端到端启动测量。build/math-batch-{before,benchmark-final}.log与performance.json。
 - **耗时依据**：分段计时锁定含文字SVG反复选择系统替代字体，约占规范化九成。保留默认选择器与SVG转换，仅批内复用ID；Rust begin/end配C++锁/RAII，成功/错误/取消后清空，无跨请求字形正文/轮廓缓存。临时PERF源和最终DLL计时均已去掉，最终stderr空、部署native DLL SHA与core最终DLL一致。纯索引/组批首轮不足以解释主要耗时，不回到该方向重复宽审。
 - **验收通过**：Rust5项；Release math **974项/536476断言**（75 canonical SVG×32/64批逐字节Source）；完整字体Source **14568049值0差异**；正式Framework Debug WinUI **71项/15541断言**（稠密/稀疏/重复批次、取消恢复、错误隔离、SVG单项/批量字节与尺寸一致、预览/滚动/编辑）。最终自包含Release构建与真实GUI构造/激活/正常关闭exit0通过。日志build/math-batch-{normalizer-tests,math-tests,font-compare,app-full.stdout,release-final,startup}.log，启动报告build/tests/math-batch-startup/run-1/result.json。295MB生成字体dump已删除，只留hash/长度info及对照结果，可重生成。
 - **后续验证固定规则**：WinUI测试用既有Framework Debug；自包含Release用真实启动门禁。已处理一次误重叠编译PDB冲突及SelfContained Debug测试宿主main激活失败；另发现MSBuild tlog最后可能为__WINMD_ONLY__，工具现跳过它并按记录边界读取完整可执行链接。上述无效验证不计通过，不改产品宿主、不重开此旁支。测试文件test_math_preparation.cpp、test_svg_normalization.cpp，原cache_ownership无diff。
-- **交付/停止点**：Release候选build/app-winui/bin/x64/Release/Folia.exe；版本固定0.4.0，本轮未构建MSI/安装/推送/发布，用户已安装版本及原MSI保持上一节启动修复状态。本轮无活动build/test/native/诊断句柄，无新子代理/CUA，未关闭用户进程/改用户文档。无剩余优化验收；下一步由用户试用或另要求MSI。复跑：tools/math-port/winui-math-layout-probe.ps1 -Configuration Release -Benchmark -Document <path>（基于既有Release对象，无实际UI）。
+- **当时交付/停止点（历史）**：Release候选build/app-winui/bin/x64/Release/Folia.exe，优化验收已完成；后续打包安装以上方当前checkpoint为准。复跑：tools/math-port/winui-math-layout-probe.ps1 -Configuration Release -Benchmark -Document <path>（基于既有Release对象，无实际UI）。
 
 ## 已完成：启动崩溃已修复、重新安装并实际验证（2026-10-26）
 
