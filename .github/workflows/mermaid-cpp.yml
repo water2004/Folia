@@ -169,6 +169,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/mindmap-oracle.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/architecture-oracle.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/git-graph-oracle.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/gantt-oracle.mjs

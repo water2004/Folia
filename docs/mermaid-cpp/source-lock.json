@@ -907,6 +907,38 @@
     {
       "path": "packages/mermaid/src/rendering-util/layout-algorithms/cose-bilkent/cytoscape-setup.ts",
       "sha256": "b743cc8f1365b79e8cad555dced1d42fc7f475d958c5e1c902c61142ae0aa1a7"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/architecture/architectureDb.ts",
+      "sha256": "4b1d310ff84a5d0ac10b47f341e858fab486f501f524129a2cebd9c1afa4b5ff"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/architecture/architectureParser.ts",
+      "sha256": "4b26c0a352d9c61a16bb48d61132436ae1cd45b0f77b99719c8a4ec16f7e8a96"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/architecture/architectureTypes.ts",
+      "sha256": "b65769995c9527779a6adacc5ea33fe30819198f142fd472e9014851188981ab"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/architecture/architectureRenderer.ts",
+      "sha256": "a033c3e3d0b7e1106ec47631145da06ec075967b5b9e0f7937d619b4714eacdc"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/architecture/architectureSeed.ts",
+      "sha256": "740db8b2e05d74f5b63b6399e85000633e2e9afe0996165454b2ffc95f66585c"
+    },
+    {
+      "path": "packages/parser/src/language/architecture/architecture.langium",
+      "sha256": "931bec53366f6a652ff92501ec412cc6f6d4c1e0aa95ef1a707cb2d9bef537f6"
+    },
+    {
+      "path": "packages/parser/src/language/architecture/arch.langium",
+      "sha256": "c0e08f5e1c82f97e75cbeb4a2573984012bcec378a67b5b949468acd5311ec5c"
+    },
+    {
+      "path": "packages/parser/src/language/architecture/valueConverter.ts",
+      "sha256": "345955a2b4eca67143af5ec1feccb97ea79b93913f84ab2a0fe7e7791e9624aa"
     }
   ],
   "packages": [
