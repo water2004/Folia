@@ -29,9 +29,16 @@ struct DocumentHistoryEntry {
     DocumentHistorySelection selection;
     std::uint64_t revision_before = 0;
     std::uint64_t revision_after = 0;
+    std::uint64_t state_before = 0;
+    std::uint64_t state_after = 0;
 };
 
 namespace document_history_detail {
+
+inline std::uint64_t next_state() noexcept {
+    static std::atomic_uint64_t sequence{1};
+    return sequence.fetch_add(1, std::memory_order_relaxed);
+}
 
 inline DocumentHistoryEntry make_entry(const DocumentTransaction& transaction) {
     DocumentHistoryEntry entry;
@@ -64,7 +71,11 @@ public:
 
     void push(const DocumentTransaction& transaction) {
         if (transaction.operations.empty() || transaction.revision_before==transaction.revision_after) return;
-        undo_.push_back(document_history_detail::make_entry(transaction));
+        auto entry = document_history_detail::make_entry(transaction);
+        entry.state_before = state_;
+        entry.state_after = document_history_detail::next_state();
+        undo_.push_back(std::move(entry));
+        state_ = undo_.back().state_after;
         redo_.clear();
         if (undo_.size() > capacity_) undo_.erase(undo_.begin());
     }
@@ -85,6 +96,7 @@ public:
             undo_.push_back(std::move(entry));
             return false;
         }
+        state_ = entry.state_before;
         redo_.push_back(std::move(entry));
         return true;
     }
@@ -97,11 +109,16 @@ public:
             redo_.push_back(std::move(entry));
             return false;
         }
+        state_ = entry.state_after;
         undo_.push_back(std::move(entry));
         return true;
     }
 
-    void clear() { undo_.clear(); redo_.clear(); }
+    void clear() { undo_.clear(); redo_.clear(); state_ = document_history_detail::next_state(); }
+    // Revisions can be reused after undo and a new edit. This identity follows
+    // the actual history state, so save points do not mistake a new branch for
+    // previously saved content. Selection and presentation changes keep it.
+    std::uint64_t state() const noexcept { return state_; }
     bool has_undo() const { return !undo_.empty(); }
     bool has_redo() const { return !redo_.empty(); }
     const DocumentHistoryEntry* next_undo() const { return undo_.empty() ? nullptr : &undo_.back(); }
@@ -109,6 +126,7 @@ public:
 
 private:
     std::size_t capacity_;
+    std::uint64_t state_ = document_history_detail::next_state();
     std::vector<DocumentHistoryEntry> undo_;
     std::vector<DocumentHistoryEntry> redo_;
 };

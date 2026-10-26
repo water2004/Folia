@@ -132,6 +132,7 @@ public:
         return document_selected_markdown(document_, rendered_selection_.value()).value_or(std::u32string{});
     }
     std::uint64_t revision() const { return document_.revision; }
+    std::uint64_t content_state() const noexcept { return document_history_.state(); }
     void set_selection(TextSelection selection) {
         const auto anchor_length = document_edit_detail::editable_length(document_, selection.anchor.container_id);
         const auto active_length = document_edit_detail::editable_length(document_, selection.active.container_id);
