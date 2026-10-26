@@ -13,6 +13,7 @@ struct ElkLayerNode {
     std::size_t layer = 0;
     std::vector<std::size_t> ports;
     double width = 0, height = 0;
+    double margin_top = 0, margin_bottom = 0;
     bool fixed_port_positions = false;
     std::optional<std::size_t> origin_edge, long_edge_source, long_edge_target;
 };
