@@ -5,7 +5,7 @@ import std;
 export import folia.mermaid.elk_layering;
 
 export namespace folia::mermaid {
-enum class ElkLayerNodeKind { normal, long_edge, label, external_port };
+enum class ElkLayerNodeKind { normal, long_edge, label, external_port, north_south };
 enum class ElkPortSide { undefined, north, east, south, west };
 struct ElkLayerNode {
     ElkLayerNodeKind kind = ElkLayerNodeKind::normal;

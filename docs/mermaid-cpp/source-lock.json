@@ -2091,6 +2091,14 @@
       {
         "source": "layout-base@2.0.1/LICENSE",
         "sha256": "eabb762d8a95109a39c9be3247325529a5239a7aca327d909c3ccdc41f3a06bf"
+      },
+      {
+        "source": "cose-base@2.2.0/src/CoSEConstants.js",
+        "sha256": "47fe48b69db84d49d80664f638632ec20e0b751ec3324fa2ece96fdebe5645e5"
+      },
+      {
+        "source": "layout-base@2.0.1/src/fd/FDLayoutConstants.js",
+        "sha256": "365a2e54dc82be15703440a954f8d5dff6d0414e426acb444ae5f18b49e2510b"
       }
     ]
   },
