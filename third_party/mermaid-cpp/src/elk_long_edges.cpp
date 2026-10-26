@@ -65,13 +65,18 @@ void elk_split_long_edges(ElkLayeredGraph& graph) {
                     const auto thickness = std::max(0.0, graph.edges[index].thickness);
                     graph.edges[index].thickness = thickness;
                     const auto source_node = graph.ports[graph.edges[index].source_port].node;
-                    const auto long_source = graph.nodes[source_node].kind == ElkLayerNodeKind::long_edge
-                        ? graph.nodes[source_node].long_edge_source : std::optional{graph.edges[index].source_port};
-                    const auto long_target = graph.nodes[source_node].kind == ElkLayerNodeKind::long_edge
-                        ? graph.nodes[source_node].long_edge_target : std::optional{target};
+                    const auto target_node = graph.ports[target].node;
+                    const auto inherited = graph.nodes[source_node].kind != ElkLayerNodeKind::normal
+                        ? std::optional{source_node} : graph.nodes[target_node].kind == ElkLayerNodeKind::label
+                        ? std::optional{target_node} : std::nullopt;
+                    const auto long_source = inherited ? graph.nodes[*inherited].long_edge_source
+                        : std::optional{graph.edges[index].source_port};
+                    const auto long_target = inherited ? graph.nodes[*inherited].long_edge_target : std::optional{target};
+                    const auto has_label = inherited && (graph.nodes[*inherited].kind == ElkLayerNodeKind::label
+                        || graph.nodes[*inherited].long_edge_has_label);
                     graph.nodes.push_back({.kind=ElkLayerNodeKind::long_edge,.layer=layer+1,.ports={input,output},
                         .height=thickness,.fixed_port_positions=true,.origin_edge=index,
-                        .long_edge_source=long_source,.long_edge_target=long_target});
+                        .long_edge_source=long_source,.long_edge_target=long_target,.long_edge_has_label=has_label});
                     graph.layers[layer+1].push_back(dummy);
                     const auto port_y = std::floor(thickness / 2);
                     graph.ports.push_back({.node=dummy,.side=ElkPortSide::west,.y=port_y,.incoming={index}});

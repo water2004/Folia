@@ -139,6 +139,8 @@ struct Compactor {
     double separation(std::size_t a, std::size_t c) const {
         const bool ad=g.nodes[a].kind==ElkLayerNodeKind::long_edge;
         const bool cd=g.nodes[c].kind==ElkLayerNodeKind::long_edge;
+        if(g.nodes[a].kind==ElkLayerNodeKind::label&&g.nodes[c].kind==ElkLayerNodeKind::label)
+            return spacing.edge_edge;
         return ad&&cd ? spacing.edge_edge : ad||cd ? spacing.edge_node : spacing.node_node;
     }
     std::size_t other(std::size_t e, std::size_t n) const {

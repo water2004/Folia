@@ -5,7 +5,7 @@ import std;
 export import folia.mermaid.elk_layering;
 
 export namespace folia::mermaid {
-enum class ElkLayerNodeKind { normal, long_edge };
+enum class ElkLayerNodeKind { normal, long_edge, label };
 enum class ElkPortSide { undefined, north, east, south, west };
 struct ElkLayerNode {
     ElkLayerNodeKind kind = ElkLayerNodeKind::normal;
@@ -16,6 +16,7 @@ struct ElkLayerNode {
     double margin_top = 0, margin_bottom = 0;
     bool fixed_port_positions = false;
     std::optional<std::size_t> origin_edge, long_edge_source, long_edge_target;
+    bool long_edge_has_label = false, long_edge_before_label = false;
 };
 struct ElkLayerPort {
     std::size_t node = 0;
@@ -40,6 +41,6 @@ struct ElkLayeredGraph {
     const ElkCycleGraph& source, const ElkLayeringResult& layering);
 // Input is the valid graph built above; callers attach measured node dimensions,
 // port sides/positions and edge thickness before this processor. This initial
-// flat boundary has no label dummies, endpoint labels or collector ports.
+// flat boundary supports center-label dummies, but not collector ports.
 void elk_split_long_edges(ElkLayeredGraph& graph);
 }
