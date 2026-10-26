@@ -161,6 +161,31 @@ suite native_renderer_bridge = [] {
             if (batch[i].result) expect(batch[i].result->svg == renderer.render(input[i].tex).svg);
         expect(renderer.renderBatch({}).empty());
     };
+    "Renderer bounded batches preserve every canonical Source SVG"_test = [] {
+        for (std::size_t batchSize : {32, 64}) {
+            folia::math::Renderer renderer;
+            for (std::size_t begin = 0; begin < std::size(sourceCanonicalSceneCases); begin += batchSize) {
+                const auto end = (std::min)(begin + batchSize, std::size(sourceCanonicalSceneCases));
+                std::vector<std::u16string> texts;
+                std::vector<folia::math::RenderInput> inputs;
+                texts.reserve(end - begin);
+                inputs.reserve(end - begin);
+                for (auto i = begin; i < end; ++i) {
+                    auto const& source = sourceCanonicalSceneCases[i];
+                    texts.push_back(folia::math::utf16::decode(source.tex).text);
+                    inputs.push_back({texts.back(), {},
+                        {.display = source.requested_display, .em = source.em, .containerWidth = source.width}});
+                }
+                const auto output = renderer.renderBatch(inputs);
+                expect(output.size() == inputs.size());
+                for (std::size_t i = 0; i < output.size(); ++i) {
+                    auto const& source = sourceCanonicalSceneCases[begin + i];
+                    expect(!output[i].error && output[i].result.has_value()) << source.name;
+                    if (output[i].result) expect(output[i].result->svg == source.modes[0].svg) << source.name;
+                }
+            }
+        }
+    };
     "opaque C ABI renders the canonical Source profile and retains result storage"_test = [] {
         static_assert(sizeof(char16_t) == sizeof(std::uint16_t));
         expect(std::size(sourceCanonicalSceneCases) == 75u) << "canonical source has 75 inputs";

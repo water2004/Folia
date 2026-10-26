@@ -110,6 +110,40 @@ suite font_repository_contract = [] {
         retained.reset();
         expect(outlineLifetime.expired());
     };
+    "NewCM variant ranges preserve sparse module and alias overlays"_test = [] {
+        using namespace folia::math::fonts;
+        const std::array<NewcmFontGlyphRow, 4> base{{
+            {.variant = "bold", .code = 1}, {.variant = "bold", .code = 9},
+            {.variant = "normal", .code = 1}, {.variant = "normal", .code = 9}}};
+        const std::array<NewcmFontGlyphRow, 2> extension{{
+            {.variant = "bold", .code = 9}, {.variant = "normal", .code = 2}}};
+        const std::array<NewcmSvgAliasRow, 3> aliases{{
+            {"bold", 1, "normal", 9}, {"bold", 3, "normal", 1},
+            {"normal", 1, "bold", 9}}};
+        const std::array<NewcmSvgAliasRow, 1> overlay{{{"bold", 1, "normal", 2}}};
+        NewcmFontTables tables;
+        tables.addRows({});
+        tables.addRows(base);
+        tables.addRows(extension);
+        tables.addAliases(aliases);
+        tables.addAliases({});
+        tables.addAliases(overlay);
+        const std::array<SvgFontGlyphKey, 8> keys{{
+            {"bold", 1}, {"bold", 3}, {"bold", 9}, {"normal", 1},
+            {"normal", 2}, {"normal", 9}, {"bold", 5}, {"unknown", 1}}};
+        const auto values = tables.lookup(keys);
+        const std::array<NewcmGlyphRecord, 8> expected{{
+            {&base[0], &extension[1]}, {nullptr, &base[2]},
+            {&extension[0], &extension[0]}, {&base[2], &extension[0]},
+            {&extension[1], &extension[1]}, {&base[3], &base[3]}, {}, {}}};
+        for (std::size_t i = 0; i < keys.size(); ++i) {
+            expect(values[i].glyph == expected[i].glyph);
+            expect(values[i].svg == expected[i].svg);
+            expect(tables.contains(keys[i]) == (expected[i].glyph != nullptr));
+        }
+        expect(tables.keys().size() == 5_u);
+        expect(tables.aliases().size() == 3_u);
+    };
     "font parameters distinguish required values from optional lookup"_test = [] {
         FontParameters parameters;
         expect(throws<std::out_of_range>([&] { (void)parameters.required("missing"); }));

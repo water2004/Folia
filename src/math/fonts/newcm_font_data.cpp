@@ -6,33 +6,33 @@ using namespace output::svg;
 struct NewcmFontTables::State {
     std::vector<std::span<NewcmFontGlyphRow const>> tables;
     std::vector<std::span<NewcmSvgAliasRow const>> aliases;
+    std::map<std::string_view, std::vector<std::span<NewcmFontGlyphRow const>>, std::less<>> variants;
+    std::map<std::string_view, std::vector<std::span<NewcmSvgAliasRow const>>, std::less<>> aliasVariants;
     std::size_t recordCount = 0;
 
     NewcmFontGlyphRow const *row(SvgFontGlyphKey const &key) const {
-        for (auto table = tables.rbegin(); table != tables.rend(); ++table) {
+        const auto variant = variants.find(key.variant);
+        if (variant == variants.end()) return nullptr;
+        for (auto table = variant->second.rbegin(); table != variant->second.rend(); ++table) {
             auto found = std::lower_bound(
                 table->begin(), table->end(), key, [](auto const &row, auto const &target) {
-                    const auto name = std::string_view(row.variant);
-                    return name < target.variant ||
-                           (name == target.variant && row.code < target.codepoint);
+                    return row.code < target.codepoint;
                 });
-            if (found != table->end() && found->variant == key.variant &&
-                found->code == key.codepoint)
+            if (found != table->end() && found->code == key.codepoint)
                 return &*found;
         }
         return nullptr;
     }
     NewcmFontGlyphRow const *svgRow(SvgFontGlyphKey const &key,
                                    NewcmFontGlyphRow const *direct) const {
-        for (auto table = aliases.rbegin(); table != aliases.rend(); ++table) {
+        const auto variant = aliasVariants.find(key.variant);
+        if (variant == aliasVariants.end()) return direct;
+        for (auto table = variant->second.rbegin(); table != variant->second.rend(); ++table) {
             auto found = std::lower_bound(
                 table->begin(), table->end(), key, [](auto const &row, auto const &target) {
-                    const auto name = std::string_view(row.from_variant);
-                    return name < target.variant ||
-                           (name == target.variant && row.from_codepoint < target.codepoint);
+                    return row.from_codepoint < target.codepoint;
                 });
-            if (found != table->end() && found->from_variant == key.variant &&
-                found->from_codepoint == key.codepoint)
+            if (found != table->end() && found->from_codepoint == key.codepoint)
                 return row({found->to_variant, found->to_codepoint});
         }
         return direct;
@@ -43,10 +43,27 @@ NewcmFontTables::NewcmFontTables() : state_(std::make_unique<State>()) {}
 NewcmFontTables::~NewcmFontTables() = default;
 void NewcmFontTables::addRows(std::span<NewcmFontGlyphRow const> rows) {
     state_->tables.push_back(rows);
+    // Tables are sorted by (variant, codepoint). Borrow only each variant's
+    // range, preserving module registration order and late-extension priority.
+    // This index contains no glyph bodies or decoded outlines.
+    for (std::size_t begin = 0; begin < rows.size();) {
+        const std::string_view variant = rows[begin].variant;
+        auto end = begin + 1;
+        while (end < rows.size() && rows[end].variant == variant) ++end;
+        state_->variants[variant].push_back(rows.subspan(begin, end - begin));
+        begin = end;
+    }
     state_->recordCount += rows.size();
 }
 void NewcmFontTables::addAliases(std::span<NewcmSvgAliasRow const> rows) {
     state_->aliases.push_back(rows);
+    for (std::size_t begin = 0; begin < rows.size();) {
+        const std::string_view variant = rows[begin].from_variant;
+        auto end = begin + 1;
+        while (end < rows.size() && rows[end].from_variant == variant) ++end;
+        state_->aliasVariants[variant].push_back(rows.subspan(begin, end - begin));
+        begin = end;
+    }
 }
 void NewcmFontTables::setGlyphCount(std::size_t count) { state_->recordCount = count; }
 std::size_t NewcmFontTables::glyphCount() const noexcept { return state_->recordCount; }
