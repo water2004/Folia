@@ -37,6 +37,14 @@ Flowchart's spline writer follows d3-shape `src/curve/basis.js`.
 Source hashes and versions are recorded in `docs/mermaid-cpp/source-lock.json`.
 The complete ISC notice is also preserved in `src/pie_geometry.cpp`.
 
+XY scales and numeric ticks follow d3-scale 4.0.2, d3-array 3.2.4 and
+d3-interpolate 3.0.1. XY line paths use d3-shape linear interpolation.
+Their source-map contents are hash-pinned alongside the Mermaid sources.
+
+Copyright 2010-2021 Mike Bostock (d3-scale, d3-interpolate)
+
+Copyright 2010-2023 Mike Bostock (d3-array)
+
 Copyright 2010-2022 Mike Bostock (d3-shape)
 
 Copyright 2015-2022 Mike Bostock (d3-path)

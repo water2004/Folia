@@ -1,8 +1,17 @@
 // Parser and DB observations for the next XY family package, not native coverage.
 import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
 import {readFileSync,writeFileSync,readdirSync} from 'node:fs';
 import {JSDOM} from './oracle/node_modules/jsdom/lib/api.js';
 import {cases} from './xy-cases.mjs';
+// Pin the original D3 helpers embedded in the shipped XY browser bundle.
+const lock=JSON.parse(readFileSync(new URL('../../docs/mermaid-cpp/source-lock.json',import.meta.url)));
+for(const file of lock.xyScales.files) {
+ const map=JSON.parse(readFileSync(new URL('./oracle/node_modules/mermaid/dist/chunks/mermaid.esm/'+file.map,import.meta.url)));
+ const [pkg,tail]=file.source.split('@'),[version,...parts]=tail.split('/');
+ const index=map.sources.findIndex(s=>s.includes(pkg+'@'+version+'/')&&s.endsWith('/'+pkg+'/'+parts.join('/')));
+ assert(index>=0,file.source);assert.equal(createHash('sha256').update(map.sourcesContent[index]).digest('hex'),file.sha256,file.source);
+}
 const dom=new JSDOM('<!doctype html><body></body>');globalThis.window=dom.window;globalThis.document=dom.window.document;
 const {frontend}=await import('./frontend-oracle.mjs');
 const {read,hex}=await import('./config-reference.mjs');

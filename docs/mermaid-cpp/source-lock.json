@@ -1439,5 +1439,50 @@
     ],
     "version": "0.9.3",
     "boundary": "DepthFirstCycleBreaker, flat NetworkSimplexLayerer, LongEdgeSplitter and flat east/west PortListSorter/BarycenterHeuristic/LayerSweepCrossingMinimizer and flat BKNodePlacer alignment/compaction/coordinate selection"
+  },
+  "xyScales": {
+    "boundary": "Linear/band scales, numeric ticks, number interpolation and linear line paths used by XY",
+    "files": [
+      {
+        "source": "d3-array@3.2.4/src/ticks.js",
+        "map": "chunk-OHNBJXQ2.mjs.map",
+        "sha256": "79eac11e378fd34364801fd59534cfb3b34f46e54693537ad65c06c93bcb9a0f"
+      },
+      {
+        "source": "d3-interpolate@3.0.1/src/number.js",
+        "map": "chunk-OHNBJXQ2.mjs.map",
+        "sha256": "ed494932c08d821136b3566e404608c79356035866a742a79585ef761d61139b"
+      },
+      {
+        "source": "d3-scale@4.0.2/src/ordinal.js",
+        "map": "chunk-OHNBJXQ2.mjs.map",
+        "sha256": "5544d03e8d0addb80b37b6b2fb522de4f19916f545e6b2d6e6648609514aac87"
+      },
+      {
+        "source": "d3-scale@4.0.2/src/continuous.js",
+        "map": "chunk-OHNBJXQ2.mjs.map",
+        "sha256": "a8bd9670abd40c813d047082a35126cb18068f1959bf78b74e6ca4c864de123a"
+      },
+      {
+        "source": "d3-scale@4.0.2/src/linear.js",
+        "map": "chunk-OHNBJXQ2.mjs.map",
+        "sha256": "6223d1339147f7a311374307451183a110912c230e62f484b4dc06914c78ac87"
+      },
+      {
+        "source": "d3-scale@4.0.2/src/band.js",
+        "map": "chunk-OHNBJXQ2.mjs.map",
+        "sha256": "9b6f6d65a4343c446fa3354a899b5f141a707b277ba7474acbef621c4212ec05"
+      },
+      {
+        "source": "d3-shape@3.2.0/src/curve/linear.js",
+        "map": "chunk-OHNBJXQ2.mjs.map",
+        "sha256": "e377d1440cd2547ad2e38050898e2cd765eb9d248cc5702f287763353ac43b87"
+      },
+      {
+        "source": "d3-shape@3.2.0/src/line.js",
+        "map": "chunk-OHNBJXQ2.mjs.map",
+        "sha256": "90eac879faa69aa2178a21e4ed2838c8f975e3d3282936dcc415b48573352da6"
+      }
+    ]
   }
 }
