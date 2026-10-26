@@ -103,6 +103,9 @@ namespace winrt::Folia
             if (object)
             {
                 layout->SetInlineObject(object.Get(), DWRITE_TEXT_RANGE{ overlay.displayStart, 1 });
+                // Mathematical decorations are painted over the SVG once by
+                // the shared math painter, not at the surrounding font's axis.
+                layout->SetStrikethrough(FALSE, DWRITE_TEXT_RANGE{overlay.displayStart, 1});
             }
         }
     }

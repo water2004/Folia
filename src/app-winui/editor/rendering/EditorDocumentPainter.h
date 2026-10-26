@@ -5,6 +5,7 @@ import folia.platform.editor_interaction;
 #include "EditorContentPreparation.h"
 #include "EditorRenderResources.h"
 #include "EditorStyleSheet.h"
+#include "EditorEmbeddedDraw.h"
 #include "editor/session/EditorRenderFrame.h"
 
 namespace winrt::Folia
@@ -19,6 +20,7 @@ namespace winrt::Folia
             DisplayInlineText::MathOverlay const* overlay = nullptr;
             float localX = 0.0f;
             float localTop = 0.0f;
+            std::size_t line = 0;
         };
 
         EditorDocumentPainter(
@@ -61,6 +63,13 @@ namespace winrt::Folia
             IDWriteTextLayout* layout,
             D2D1_POINT_2F origin,
             DisplayInlineText const& display);
+        void DrawInlineText(IDWriteTextLayout* layout, D2D1_POINT_2F origin,
+            DisplayInlineText const& display, EditorDisplayMapping const& mapping, ID2D1Brush* textBrush);
+
+        static std::vector<PositionedMath> PaintMath(IDWriteTextLayout* layout,
+            D2D1_POINT_2F origin, std::vector<DisplayInlineText::MathOverlay> const& overlays, float width,
+            EditorRenderResources& resources, EditorDrawMath const& draw, EditorDrawMathFallback const& fallback,
+            float scale = 1);
 
         static std::vector<PositionedMath> PositionMath(
             IDWriteTextLayout* layout,

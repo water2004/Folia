@@ -303,7 +303,7 @@ namespace winrt::Folia
         }
     }
 
-    void AppendMathFragments(DisplayInlineText& display, MathJaxSvg const& math, folia::TextSpan sourceSpan, bool editing, folia::InlineStyle style)
+    void AppendMathFragments(DisplayInlineText& display, MathJaxSvg const& math, folia::TextSpan sourceSpan, bool editing, folia::InlineStyle style, D2D1_COLOR_F foreground)
     {
         auto sourceStart = sourceSpan.source_range.start;
         auto sourceEnd = sourceSpan.source_range.end;
@@ -347,6 +347,7 @@ namespace winrt::Folia
                 fragmentEnd,
                 style.strikethrough,
                 math.display,
+                foreground,
             });
         }
     }
@@ -361,7 +362,7 @@ namespace winrt::Folia
             preview.svg,
             preview.contentSpan,
             false,
-            style);
+            style, preview.foreground);
         display.displayToSource.push_back({
             preview.contentSpan.container_id,
             preview.contentSpan.source_range.end,
@@ -440,7 +441,8 @@ namespace winrt::Folia
                 auto editing = CaretTouchesSpan(caret, item.source_span);
                 auto purpose = editing ? MathRenderPurpose::Preview : MathRenderPurpose::Document;
                 auto tex = folia::cps_to_utf8(item.text);
-                auto color = SvgColor(svgColor);
+                auto foreground = InlineForeground(item.style, svgColor);
+                auto color = SvgColor(foreground);
                 // highPriority identifies the visible band. Offscreen layout
                 // reuses existing geometry and must not restart canceled jobs.
                 auto math = highPriority
@@ -467,10 +469,11 @@ namespace winrt::Folia
                         *math,
                         folia::TextSpan{item.source_span.container_id, {contentStart, contentEnd}},
                         item.style.strikethrough,
+                        foreground,
                     });
                     continue;
                 }
-                AppendMathFragments(display, *math, {item.source_span.container_id, {contentStart, contentEnd}}, false, item.style);
+                AppendMathFragments(display, *math, {item.source_span.container_id, {contentStart, contentEnd}}, false, item.style, foreground);
                 continue;
             }
             if (item.kind == folia::InlineRenderItem::Kind::FootnoteReference)

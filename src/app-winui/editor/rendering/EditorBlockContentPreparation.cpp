@@ -164,6 +164,7 @@ namespace winrt::Folia
                     *math,
                     span,
                     false,
+                    svgColor,
                 });
         }
         else if (!math || !static_cast<bool>(*math))
@@ -177,7 +178,7 @@ namespace winrt::Folia
         }
         else
         {
-            AppendMathFragments(display, *math, span, false, folia::InlineStyle::plain());
+            AppendMathFragments(display, *math, span, false, folia::InlineStyle::plain(), svgColor);
         }
         const auto endpoint = editing ? special.raw_source.size() : special.content_to_source.empty()
             ? special.tex.size()

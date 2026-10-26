@@ -66,15 +66,9 @@ namespace winrt::Folia {
                 origin.y - content.top * scale) * transform);
         resources.d2dContext->DrawTextLayout(D2D1::Point2F(0, 0), preview.layout.Get(), resources.textBrush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP);
         resources.d2dContext->SetTransform(transform);
-        for (auto const& positioned : EditorDocumentPainter::PositionMath(
-                preview.layout.Get(), preview.display.mathOverlays, preview.layout->GetMaxWidth())) {
-            auto fragment = positioned.overlay->fragment;
-            fragment.width *= scale;
-            fragment.height *= scale;
-            auto fragmentOrigin = D2D1::Point2F(origin.x + (positioned.localX - content.left) * scale,
-                origin.y + (positioned.localTop - content.top) * scale);
-            if (!drawMath(fragment, fragmentOrigin, styleSheet.textColor)) drawFallback(positioned.overlay->sourceSpan, fragmentOrigin);
-        }
+        EditorDocumentPainter::PaintMath(preview.layout.Get(),
+            {origin.x - content.left * scale, origin.y - content.top * scale}, preview.display.mathOverlays,
+            preview.layout->GetMaxWidth(), resources, drawMath, drawFallback, scale);
     }
 
     std::optional<D2D1_RECT_F> PaintInlineMathPreview(

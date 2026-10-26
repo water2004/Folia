@@ -136,22 +136,8 @@ namespace winrt::Folia
                 && block.block_style.background)
                 resources.d2dContext->FillRectangle(rect, resources.panelBrush.Get());
             documentPainter.DrawFlowDecorations(prepared.layout.Get(), origin, block, prepared.display);
-            DrawInlinePresentationBackgrounds(
-                resources,
-                styleSheet,
-                prepared.layout.Get(),
-                origin,
-                prepared.display.ranges);
-            documentPainter.DrawSyntaxMarkers(prepared.layout.Get(), origin, prepared.display);
-            documentPainter.DrawSelection(prepared.layout.Get(), origin, prepared.display.displayToSource);
-            documentPainter.DrawSearchHighlights(
-                prepared.layout.Get(), origin, prepared.display.displayToSource);
-            if (prepared.layout)
-                resources.d2dContext->DrawTextLayout(
-                    origin,
-                    prepared.layout.Get(),
-                    prepared.code ? resources.codeBrush.Get() : resources.textBrush.Get(),
-                    D2D1_DRAW_TEXT_OPTIONS_CLIP);
+            documentPainter.DrawInlineText(prepared.layout.Get(), origin, prepared.display, prepared.display.displayToSource,
+                prepared.code ? resources.codeBrush.Get() : resources.textBrush.Get());
             documentPainter.DrawTaskCheckboxes(
                 prepared.layout.Get(), origin, prepared.display.taskCheckboxOverlays);
             documentPainter.RegisterFootnotes(
@@ -185,17 +171,16 @@ namespace winrt::Folia
                         mermaidOrigin);
                 }
             }
-            for (auto const& positioned : EditorDocumentPainter::PositionMath(
+            for (auto const& positioned : EditorDocumentPainter::PaintMath(
                     prepared.layout.Get(),
+                    origin,
                     prepared.display.mathOverlays,
-                    contentWidth))
+                    contentWidth, resources, drawMath, drawMathFallback))
             {
                 auto const& overlay = *positioned.overlay;
                 auto mathOrigin = D2D1::Point2F(
                     origin.x + positioned.localX,
                     origin.y + positioned.localTop);
-                if (!drawMath(overlay.fragment, mathOrigin, styleSheet.textColor))
-                    drawMathFallback(overlay.sourceSpan, mathOrigin);
                 interactionMap.mathHits.push_back({
                     D2D1::RectF(
                         mathOrigin.x,

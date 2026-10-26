@@ -23,6 +23,14 @@ namespace winrt::Folia
         return wide;
     }
 
+    D2D1_COLOR_F InlineForeground(folia::InlineStyle const& style, D2D1_COLOR_F fallback)
+    {
+        if (!style.presentation || !style.presentation->foreground) return fallback;
+        auto const& color = *style.presentation->foreground;
+        constexpr float scale = 1.f / 255;
+        return D2D1::ColorF(color.r * scale, color.g * scale, color.b * scale, color.a * scale);
+    }
+
     std::string SvgColor(D2D1_COLOR_F color)
     {
         auto component = [](float value)

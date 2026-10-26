@@ -180,20 +180,9 @@ namespace winrt::Folia
         {
             auto& cell = visualTable.cells[cellIndex];
             auto const& display = prepared.displays[cellIndex];
-            DrawInlinePresentationBackgrounds(
-                resources,
-                styleSheet,
-                cell.layout.Get(),
-                cell.textOrigin,
-                display.ranges);
             if (cell.layout)
             {
-                documentPainter.DrawSyntaxMarkers(cell.layout.Get(), cell.textOrigin, display);
-                documentPainter.DrawSelection(
-                    cell.layout.Get(),
-                    cell.textOrigin,
-                    cell.displayToSource);
-                resources.d2dContext->DrawTextLayout(cell.textOrigin, cell.layout.Get(), resources.textBrush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP);
+                documentPainter.DrawInlineText(cell.layout.Get(), cell.textOrigin, display, cell.displayToSource, resources.textBrush.Get());
                 for (auto const& overlay : display.footnoteOverlays)
                 {
                     UINT32 count = 0;
@@ -230,20 +219,12 @@ namespace winrt::Folia
                     }
                 }
                 inlineImageRenderer.Draw(cell.layout.Get(), cell.textOrigin, prepared.imageDraws[cellIndex]);
-                for (auto const& overlay : display.mathOverlays)
+                for (auto const& positioned : EditorDocumentPainter::PaintMath(cell.layout.Get(), cell.textOrigin,
+                        display.mathOverlays, cell.layout->GetMaxWidth(), resources, drawMath, drawMathFallback))
                 {
-                    float pointX = 0.0f;
-                    float pointY = 0.0f;
-                    DWRITE_HIT_TEST_METRICS metrics{};
-                    if (FAILED(cell.layout->HitTestTextPosition(overlay.displayStart, FALSE, &pointX, &pointY, &metrics))) continue;
-                    auto mathY = cell.textOrigin.y + metrics.top;
-                    auto mathX = cell.textOrigin.x + pointX + overlay.leadingSpace;
-                    if (!drawMath(overlay.fragment, D2D1::Point2F(mathX, mathY), styleSheet.textColor)) drawMathFallback(overlay.sourceSpan, D2D1::Point2F(mathX, mathY));
-                    if (overlay.strikethrough)
-                    {
-                        auto strikeY = mathY + overlay.fragment.height * 0.52f;
-                        resources.d2dContext->DrawLine(D2D1::Point2F(cell.textOrigin.x + pointX, strikeY), D2D1::Point2F(mathX + overlay.fragment.width, strikeY), resources.textBrush.Get(), 1.5f);
-                    }
+                    auto const& overlay = *positioned.overlay;
+                    auto mathY = cell.textOrigin.y + positioned.localTop;
+                    auto mathX = cell.textOrigin.x + positioned.localX;
                     interactionMap.mathHits.push_back(EditorVisualMathHit{D2D1::RectF(mathX, mathY, mathX + overlay.fragment.width, mathY + overlay.fragment.height), overlay.sourceSpan, overlay.progressStart, overlay.progressEnd});
                 }
             }

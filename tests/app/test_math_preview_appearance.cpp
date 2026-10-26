@@ -56,7 +56,7 @@ namespace {
                 expect(static_cast<bool>(svg));
                 if (!svg) return;
                 expect(svg->errorKind == MathJaxErrorKind::None);
-                DisplayInlineText::MathPreview input{*svg, {}, false};
+                DisplayInlineText::MathPreview input{*svg, {}, false, sheet.textColor};
                 EditorTextLayoutEngine engine(resources, sheet);
                 auto preview = PrepareMathPreview(input, engine, resources.textFormat.Get(), width);
                 expect(preview.floating == !block);

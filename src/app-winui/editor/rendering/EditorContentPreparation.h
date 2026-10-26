@@ -55,6 +55,7 @@ namespace winrt::Folia
             float progressEnd = 1.0f;
             bool strikethrough = false;
             bool displayMath = false;
+            D2D1_COLOR_F foreground{0, 0, 0, 1};
         };
 
         struct MathPreview
@@ -62,6 +63,7 @@ namespace winrt::Folia
             MathJaxSvg svg;
             folia::TextSpan contentSpan;
             bool strikethrough = false;
+            D2D1_COLOR_F foreground{0, 0, 0, 1};
         };
 
         struct ImageOverlay
@@ -131,6 +133,7 @@ namespace winrt::Folia
 
     std::wstring ToWide(std::u32string_view text);
     std::string SvgColor(D2D1_COLOR_F color);
+    D2D1_COLOR_F InlineForeground(folia::InlineStyle const& style, D2D1_COLOR_F fallback);
     std::optional<std::vector<std::uint8_t>> DecodeBase64(std::string_view source);
     std::optional<MermaidSvg> NormalizeMermaidSvg(MermaidSvg const& source, SvgNormalizer& normalizer, bool allowQueue);
     std::u32string InlineText(std::vector<folia::InlineRenderItem> const& items);
@@ -156,7 +159,7 @@ namespace winrt::Folia
         MathJaxSvg const& math,
         folia::TextSpan sourceSpan,
         bool editing,
-        folia::InlineStyle style);
+        folia::InlineStyle style, D2D1_COLOR_F foreground);
     void ApplyInlinePlaceholder(IDWriteTextLayout* layout, UINT32 displayStart, float width, float height, float baseline);
     void ApplyMathInlineObjects(IDWriteTextLayout* layout, std::vector<DisplayInlineText::MathOverlay> const& overlays);
     void ApplyBlockSpacingInlineObjects(IDWriteTextLayout* layout, DisplayInlineText const& display);

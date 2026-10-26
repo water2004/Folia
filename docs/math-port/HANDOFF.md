@@ -2,7 +2,14 @@
 
 恢复/压缩后先实际读本文。架构、职责和详细验收见 [architecture](native-raii-architecture.md)、[files](native-raii-files.json)、[acceptance](native-raii-acceptance.md)。只复查新变化；ignored候选用 `rg --no-ignore`。
 
-## 当前 checkpoint：相似呈现问题的代码审查（2026-10-27）
+## 当前 checkpoint：统一呈现与原生代码语言入口（2026-10-27，收尾中）
+
+- **边界**：用户授权修复搜索/公式颜色/删除线/code留白，并要求语言控件字体和滚动融入代码块。不开agents/CUA，不关用户窗口，native串行≤4；版本0.4.1，不自动MSI/安装/push/release。
+- **实现**：spacing已提交81efbbe7：CST code_span_id只归属装饰，DWrite1按边界cluster实际分配各3DIP，背景不外扩，Unicode/源坐标不改。公共DrawInlineText统一background/marker/selection/search/text，table传cell实际mapping（display的mapping已move）；PaintMath按sourceSpan+真实视觉行统一SVG/删除线，禁DWrite object strike；InlineForeground统一batch/visible/preview请求与绘制。math/search正在分批提交。语言入口始终D2D/codeFormat+chevron，同块同帧；移除CodeBlockOverlay，点击才ShowAt原生Flyout；scroll/owner位置变化关闭，不追随滚动摆XAML框。WinUI重开需Closed后的下一dispatcher回合，单pending owner+weak lifetime；无timer/sleep，关闭先收ASB候选；Refresh只比较anchor位置而非语言名宽度。语言代码尚未提交。
+- **已验**：core完整763项499901断言（inline-unified-core-tests.log）；Debug串行成功（inline-unified-debug-serial.log）；controller一轮105项17404断言（inline-unified-app-tests.log）。新增生产BlockPreparer→DocumentRenderPass/Table.Paint对照最终4项40断言（inline-paths-header-verified.log）：search像素、单/多片/分式strike单线、继承颜色与batch复用、亮暗code header焦点前后像素相同；亮色PNG build/tests/inline-presentation/code-header-light.png已实际看过。是真实生产painter离屏fixture，非完整窗口截图。实窗picker最终1项14断言（code-language-picker-complete.log），已等实际两次Opened及两次Closed：提交python→Undo、立即重开、滚动关闭/不提交draft。测试Renderer现跟root主题；用户所见黑色来自最初fixture默认Dark，不是CSS，用户已确认无需改产品配色。
+- **失败记录/不要重复**：paths初版夹具误认x+1单片、颜色key大小写及width硬编码504（实际应共用EditorDocumentContentWidth=514），均已修正。GUI早期重开超时由Closed中同步ShowAt导致，最终已过；code-language-picker-events.log记录事件证据。一次误在build未结束时跑tests造成C1041 PDB占用/LNK1181，该轮无效；之后严格串行build已过，不能把它当产品故障或重改编译配置。
+- **停止点**：仅最终完整controller运行session17950（inline-unified-app-final.log）；无其他活动build/test/agent。接下来读exit/最终计数→确认无用户Release占用→Release自包含build→startup；按spacing/math/语言分小提交并整理本记录。spacing已提交，其余仅正常暂存/修改，无reset。语言picker新增visual test位于tests/app/visual/test_code_language_picker.cpp，最终经过原生事件/操作路径，未做真人鼠标/IME。不要忽略原四项而只交付新控件。
+## 历史：相似呈现问题的代码审查（2026-10-27）
 
 - 用户问“是否存在相似的其他问题”，本轮只沿近期改动检查共用呈现边界；没有改产品/测试、构建、安装、操作窗口或开agents。已有Release/验证保持下节，不重复旧宽审。
 - **代码确认的遗漏**：EditorDocumentRenderPass.cpp:147调用DrawSearchHighlights，EditorTableBlockRenderer.Paint只画Selection，没有SearchHighlights调用；表格内搜索命中不会走正文的高亮绘制。EditorContentPreparation.cpp:443用全局svgColor发数学请求，而CST→render保留item.style.presentation.foreground，实际SVG绘制也传styleSheet.textColor；HTML内联颜色没有进入公式SVG呈现请求，文字与公式会有样式断层。尚未做本轮像素/人工复现，不夸大为运行实测。

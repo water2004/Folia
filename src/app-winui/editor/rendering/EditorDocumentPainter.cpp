@@ -7,6 +7,57 @@ import folia.core.utf;
 
 namespace winrt::Folia
 {
+    void EditorDocumentPainter::DrawInlineText(IDWriteTextLayout* layout, D2D1_POINT_2F origin,
+        DisplayInlineText const& display, EditorDisplayMapping const& mapping, ID2D1Brush* textBrush)
+    {
+        if (!layout) return;
+        DrawInlinePresentationBackgrounds(resources, styleSheet, layout, origin, display.ranges);
+        DrawSyntaxMarkers(layout, origin, display);
+        DrawSelection(layout, origin, mapping);
+        DrawSearchHighlights(layout, origin, mapping);
+        resources.d2dContext->DrawTextLayout(origin, layout, textBrush, D2D1_DRAW_TEXT_OPTIONS_CLIP);
+    }
+
+    std::vector<EditorDocumentPainter::PositionedMath> EditorDocumentPainter::PaintMath(
+        IDWriteTextLayout* layout, D2D1_POINT_2F origin,
+        std::vector<DisplayInlineText::MathOverlay> const& overlays, float width,
+        EditorRenderResources& resources, EditorDrawMath const& draw, EditorDrawMathFallback const& fallback,
+        float scale)
+    {
+        auto positioned = PositionMath(layout, overlays, width);
+        for (auto const& item : positioned) {
+            auto fragment = item.overlay->fragment;
+            fragment.width *= scale; fragment.height *= scale;
+            auto at = D2D1::Point2F(origin.x + item.localX * scale, origin.y + item.localTop * scale);
+            if (!draw(fragment, at, item.overlay->foreground)) fallback(item.overlay->sourceSpan, at);
+        }
+        if (std::none_of(positioned.begin(), positioned.end(), [](auto const& item) { return item.overlay->strikethrough; }))
+            return positioned;
+        std::vector<bool> decorated(positioned.size(), false);
+        for (std::size_t i = 0; i < positioned.size(); ++i) {
+            auto const& first = positioned[i];
+            if (decorated[i] || !first.overlay->strikethrough) continue;
+            auto box = D2D1::RectF(first.localX - first.overlay->leadingSpace, first.localTop,
+                first.localX + first.overlay->fragment.width, first.localTop + first.overlay->fragment.height);
+            for (std::size_t j = i; j < positioned.size(); ++j) {
+                auto const& next = positioned[j];
+                auto const& a = first.overlay->sourceSpan; auto const& b = next.overlay->sourceSpan;
+                if (!next.overlay->strikethrough || next.line != first.line || a.container_id != b.container_id
+                    || a.source_range.start != b.source_range.start || a.source_range.end != b.source_range.end) continue;
+                decorated[j] = true;
+                box.left = (std::min)(box.left, next.localX - next.overlay->leadingSpace);
+                box.right = (std::max)(box.right, next.localX + next.overlay->fragment.width);
+                box.top = (std::min)(box.top, next.localTop);
+                box.bottom = (std::max)(box.bottom, next.localTop + next.overlay->fragment.height);
+            }
+            auto y = origin.y + (box.top + (box.bottom - box.top) * .52f) * scale;
+            resources.mathDecorationBrush->SetColor(first.overlay->foreground);
+            resources.d2dContext->DrawLine({origin.x + box.left * scale, y}, {origin.x + box.right * scale, y},
+                resources.mathDecorationBrush.Get(), 1.5f * scale);
+        }
+        return positioned;
+    }
+
     void EditorDocumentPainter::DrawSyntaxMarkers(
         IDWriteTextLayout* layout, D2D1_POINT_2F origin, DisplayInlineText const& display)
     {
@@ -171,16 +222,26 @@ namespace winrt::Folia
         float width)
     {
         std::vector<PositionedMath> positioned;
-        if (!layout) return positioned;
+        if (!layout || overlays.empty()) return positioned;
         positioned.reserve(overlays.size());
+        UINT32 count = 0;
+        layout->GetLineMetrics(nullptr, 0, &count);
+        std::vector<DWRITE_LINE_METRICS> lines(count);
+        if (count) layout->GetLineMetrics(lines.data(), count, &count);
+        std::vector<UINT32> ends;
+        UINT32 end = 0;
+        for (auto const& line : lines) { end += line.length; ends.push_back(end); }
         for (auto const& overlay : overlays)
         {
             FLOAT x = 0.0f;
             FLOAT lineY = 0.0f;
             DWRITE_HIT_TEST_METRICS metrics{};
             if (FAILED(layout->HitTestTextPosition(overlay.displayStart, FALSE, &x, &lineY, &metrics))) continue;
-            positioned.push_back({&overlay, x + overlay.leadingSpace, metrics.top});
+            auto line = std::upper_bound(ends.begin(), ends.end(), overlay.displayStart) - ends.begin();
+            positioned.push_back({&overlay, x + overlay.leadingSpace, metrics.top, static_cast<std::size_t>(line)});
         }
+        if (std::none_of(overlays.begin(), overlays.end(), [](auto const& overlay) { return overlay.displayMath; }))
+            return positioned;
         auto sameSpan = [](folia::TextSpan const& left, folia::TextSpan const& right)
         {
             return left.container_id == right.container_id
@@ -201,7 +262,7 @@ namespace winrt::Folia
                 auto const* candidate = positioned[other].overlay;
                 if (!candidate || !candidate->displayMath
                     || !sameSpan(candidate->sourceSpan, overlay->sourceSpan)
-                    || std::fabs(positioned[other].localTop - positioned[index].localTop) > 0.5f) continue;
+                    || positioned[other].line != positioned[index].line) continue;
                 left = (std::min)(left, positioned[other].localX);
                 right = (std::max)(right, positioned[other].localX + candidate->fragment.width);
                 lineInset = (std::min)(
