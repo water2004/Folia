@@ -43,7 +43,7 @@ class Parser {
     std::vector<Group> groups;
     std::map<Text, Class, std::less<>> classes;
     Texts default_edge_styles;
-    Text curve = u"basis";
+    Text curve = u"basis", default_curve;
     double padding = 15;
     bool inherit_direction = false;
 
@@ -111,6 +111,14 @@ class Parser {
             return s.starts_with(u'-');
         }
         return s.starts_with(u"--") || s.starts_with(u"==") || s.starts_with(u"-.") || s.starts_with(u"~~");
+    }
+    std::size_t edge_id_end() const {
+        auto end = pos;
+        while (end < source.size() && !space(source[end]) && source[end] != u'\n' && source[end] != u'"') {
+            if (source[end] == u'@') return link_start(end+1) ? end : View::npos;
+            ++end;
+        }
+        return View::npos;
     }
     Text identifier() {
         horizontal(); auto start = pos;
@@ -212,7 +220,7 @@ class Parser {
         edge.min_length = std::min<std::size_t>(edge.min_length,10);
         horizontal();
         if (take(u"|")) { auto text = label(u"|"); edge.label = std::move(text.text); edge.label_type = std::move(text.type); }
-        edge.curve = curve;
+        edge.curve = default_curve;
         if (edge.type.starts_with(u"double_")) edge.arrow_start = edge.arrow_end = edge.type.substr(7);
         else edge.arrow_end = edge.type;
         if (edge.stroke == u"invisible" || edge.type == u"arrow_open") edge.arrow_start = edge.arrow_end = u"none";
@@ -223,14 +231,21 @@ class Parser {
             if (result.edges.size() >= limits.edges) fail("Flowchart edge limit exceeded");
             auto edge = prototype; edge.start = start; edge.end = end;
             auto count = std::ranges::count_if(result.edges,[&](const auto& e){return e.start == start && e.end == end;});
-            edge.id = u"L_" + start + u"_" + end + u"_" + digits(count ? count+1 : 0);
+            if (prototype.id.empty() || start != from.back() || end != to.front() ||
+                std::ranges::any_of(result.edges,[&](const auto& e){return e.id == prototype.id;}))
+                edge.id = u"L_" + start + u"_" + end + u"_" + digits(count ? count+1 : 0);
             result.edges.push_back(std::move(edge));
         }
     }
     Texts chain() {
         auto from = node_list(); auto members = from; horizontal();
-        while (link_start(pos)) {
-            auto edge = link(); auto to = node_list(); add_edges(from,to,edge);
+        while (link_start(pos) || edge_id_end() != View::npos) {
+            Text id;
+            if (const auto end = edge_id_end(); end != View::npos) {
+                id = source.substr(pos,end-pos); pos = end+1;
+            }
+            auto edge = link(); edge.id = std::move(id);
+            auto to = node_list(); add_edges(from,to,edge);
             members.insert(members.begin(),to.begin(),to.end()); from = std::move(to); horizontal();
         }
         separator(); return members;
@@ -242,11 +257,17 @@ class Parser {
         }
     }
     void style_statement(const Text& command) {
-        const auto ids = word(); const auto value = rest();
+        const auto ids = word(); auto value = rest();
         if (value.empty()) fail("Missing style or class");
-        if (command == u"linkStyle" && value.starts_with(u"interpolate "))
-            fail("Per-edge interpolation commands are not supported by this stage");
-        auto styles = split(value,u',');
+        Text interpolation;
+        if (command == u"linkStyle" && value.starts_with(u"interpolate ")) {
+            value = trim(View{value}.substr(12));
+            const auto end = value.find_first_of(u" \t");
+            interpolation = value.substr(0,end);
+            if (interpolation.empty()) fail("Missing link interpolation");
+            value = end == Text::npos ? Text{} : trim(View{value}.substr(end));
+        }
+        auto styles = value.empty() ? Texts{} : split(value,u',');
         if (command == u"class") set_class(ids,value);
         else if (command == u"classDef") {
             for (const auto& id : split(ids,u',')) for (const auto& style : styles) {
@@ -258,7 +279,10 @@ class Parser {
                 }
             }
         } else if (command == u"style") append(vertex(ids).node.styles,styles);
-        else if (ids == u"default") default_edge_styles = std::move(styles);
+        else if (ids == u"default") {
+            if (!interpolation.empty()) default_curve = interpolation;
+            if (!value.empty()) default_edge_styles = std::move(styles);
+        }
         else for (const auto& id : split(ids,u',')) {
             std::size_t index = 0;
             for (auto c : id) {
@@ -266,8 +290,11 @@ class Parser {
                 index = index*10 + (c-u'0');
             }
             if (index >= result.edges.size()) fail("linkStyle index out of bounds");
-            auto& target = result.edges[index].styles; target = styles;
-            if (!std::ranges::any_of(target,[](const auto& s){return s.starts_with(u"fill");})) target.push_back(u"fill:none");
+            if (!interpolation.empty()) result.edges[index].curve = interpolation;
+            if (!value.empty()) {
+                auto& target = result.edges[index].styles; target = styles;
+                if (!std::ranges::any_of(target,[](const auto& s){return s.starts_with(u"fill");})) target.push_back(u"fill:none");
+            }
         }
         separator();
     }
@@ -349,7 +376,10 @@ class Parser {
                 result.nodes.push_back(std::move(node));
             }
         }
-        for (auto& edge : result.edges) edge.styles.insert(edge.styles.begin(),default_edge_styles.begin(),default_edge_styles.end());
+        for (auto& edge : result.edges) {
+            edge.styles.insert(edge.styles.begin(),default_edge_styles.begin(),default_edge_styles.end());
+            if (edge.curve.empty()) edge.curve = default_curve.empty() ? curve : default_curve;
+        }
     }
 public:
     Parser(View source_, FlowchartLimits limits_) : source(source_), limits(std::move(limits_)) {}

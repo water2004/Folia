@@ -17,6 +17,10 @@ assert(dbIndex >= 0);
 assert.equal(map.sourcesContent[dbIndex].replaceAll('\r\n', '\n'),
   read('packages/mermaid/src/diagrams/flowchart/flowDb.ts'));
 const cases = [
+  ['edge-ids', 'flowchart LR\nA first@--> B\nA first@--> B\nB named@-- next --> C'],
+  ['edge-ids-group', 'flowchart LR\nA & B group@--> C & D'],
+  ['interpolation', 'flowchart TD\nA-->B-->C\nlinkStyle 0 interpolate linear stroke:#123\nlinkStyle 1 interpolate basis'],
+  ['interpolation-default', 'flowchart LR\nA-->B\nlinkStyle default interpolate linear\nB-->C\nlinkStyle default interpolate basis\nC-->D'],
   ['markdown', 'flowchart LR\nA["`Read **bold** and *italic*`"] -->|"`next **operation**`"| B["`Save ***both***\nthen finish`"]'],
   ['markdown-infix', 'flowchart LR\nA -- "`read **input**`" --> B'],
   ['basic', 'graph TD; A[Start] --> B{Ready?}; B -->|yes| C(End); B -->|no| A'],

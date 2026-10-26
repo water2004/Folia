@@ -11,6 +11,8 @@ for(const file of lock.flowchartCurve.files) assert.equal(createHash('sha256').u
 const directory=resolve(process.argv[2]??'build/mermaid-cpp/flowchart-browser');
 mkdirSync(directory,{recursive:true});
 const cases=[
+  ['edge-ids-interpolation','flowchart TD\nA first@--> B\nA second@-- next --> C\nB --> D\nC --> D\nlinkStyle 0,1 interpolate linear stroke:#226688\nlinkStyle 2 interpolate basis'],
+  ['edge-interpolation-default','flowchart LR\nA-->B\nlinkStyle default interpolate linear\nB-->C\nlinkStyle default interpolate basis\nC-->D\nA-->D'],
   ['rich-markdown','flowchart LR\nA["`Read **bold** and *italic*`"] -->|"`next **operation**`"| B["`Save ***both***\nthen finish`"]'],
   ['rich-markdown-group','flowchart TD\nsubgraph g[Operations]\ndirection LR\nA["`Read the __source document__ and _validate input_`"] -->|"`continue with **next step** and *save*`"| B["`Write **updated _data_**`"]\nend\ng --> C[Done]'],
   ['rich-markdown-literal','flowchart LR\nA["`Read \\*literal\\* &amp; **bold**`"] --> B["`Save file_name and *unfinished`"]'],

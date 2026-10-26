@@ -59,7 +59,7 @@ suite flowchart = [] {
                 same(n.styles,e,u"styles"); same(n.compiled_styles,e,u"compiled");
             }
         }
-        expect(count == 26_u);
+        expect(count == 30_u);
     };
     "mermaid_flowchart_request_isolation_limits_and_explicit_stage_errors"_test = [] {
         auto session = ConfigSession::create(); expect(fatal(session.has_value()));
