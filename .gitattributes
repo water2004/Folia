@@ -1,4 +1,7 @@
 # These observer inputs use byte-exact SHA-256 locks.
+tools/math-port/reference/mediawiki-texvc-2.7.9.js text eol=lf whitespace=-blank-at-eol
+tests/math/fixtures/tex_package_registry_source.hpp text eol=lf
+tests/math/fixtures/texvc_svg_source.hpp text eol=lf
 tools/math-port/common-layout-reference/profile-cases.json text eol=lf
 tools/math-port/common-layout-reference/profile-source-lock.json text eol=lf
 tools/math-port/regressions/g252/common-passive-source.cjs text eol=lf

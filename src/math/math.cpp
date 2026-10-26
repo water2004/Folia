@@ -5,44 +5,7 @@ import folia.math.core.math_item;
 import folia.math.fonts.newcm_font_module_provider;
 import folia.math.handlers.html.html_dom_strings;
 import folia.math.input.tex.parser;
-import folia.math.input.tex.action.configuration;
-import folia.math.input.tex.ams.configuration;
-import folia.math.input.tex.amscd.configuration;
-import folia.math.input.tex.base_configuration;
-import folia.math.input.tex.bbm.configuration;
-import folia.math.input.tex.bboldx.configuration;
-import folia.math.input.tex.bbox.configuration;
-import folia.math.input.tex.begingroup.configuration;
-import folia.math.input.tex.boldsymbol.configuration;
-import folia.math.input.tex.braket.configuration;
-import folia.math.input.tex.bussproofs.configuration;
-import folia.math.input.tex.cancel.configuration;
-import folia.math.input.tex.cases.configuration;
-import folia.math.input.tex.centernot.configuration;
-import folia.math.input.tex.color.configuration;
-import folia.math.input.tex.colortbl.configuration;
-import folia.math.input.tex.configmacros.configuration;
-import folia.math.input.tex.dsfont.configuration;
-import folia.math.input.tex.empheq.configuration;
-import folia.math.input.tex.enclose.configuration;
-import folia.math.input.tex.extpfeil.configuration;
-import folia.math.input.tex.fontsizev3.configuration;
-import folia.math.input.tex.gensymb.configuration;
-import folia.math.input.tex.html.configuration;
-import folia.math.input.tex.mathtools.configuration;
-import folia.math.input.tex.mhchem.configuration;
-import folia.math.input.tex.newcommand.configuration;
-import folia.math.input.tex.noundefined.configuration;
-import folia.math.input.tex.physics.configuration;
-import folia.math.input.tex.setoptions.set_options_configuration;
-import folia.math.input.tex.tagformat.tag_format_configuration;
-import folia.math.input.tex.texhtml.tex_html_configuration;
-import folia.math.input.tex.textcomp.configuration;
-import folia.math.input.tex.textmacros.configuration;
-import folia.math.input.tex.unicode.configuration;
-import folia.math.input.tex.units.configuration;
-import folia.math.input.tex.upgreek.configuration;
-import folia.math.input.tex.verb.configuration;
+import folia.math.input.tex.default_packages;
 import folia.math.output.common;
 import folia.math.output.scene;
 import folia.math.output.svg.wrapper_factory;
@@ -66,18 +29,6 @@ std::unique_ptr<common::Linebreaks> makeLinebreakVisitor(common::CommonWrapperFa
     return std::make_unique<common::LinebreakVisitor>(factory);
 }
 
-std::vector<tex::PackageSelection> rendererPackages() {
-    return {{u"base", {}},         {u"action", {}},     {u"ams", {}},        {u"amscd", {}},
-            {u"bbm", {}},          {u"bboldx", {}},     {u"bbox", {}},       {u"begingroup", {}},
-            {u"boldsymbol", {}},   {u"braket", {}},     {u"bussproofs", {}}, {u"cancel", {}},
-            {u"cases", {}},        {u"centernot", {}},  {u"color", {}},      {u"colortbl", {}},
-            {u"configmacros", {}}, {u"dsfont", {}},     {u"empheq", {}},     {u"enclose", {}},
-            {u"extpfeil", {}},     {u"fontsizev3", {}}, {u"gensymb", {}},    {u"html", {}},
-            {u"mathtools", {}},    {u"mhchem", {}},     {u"newcommand", {}}, {u"noundefined", {}},
-            {u"physics", {}},      {u"setoptions", {}}, {u"tagformat", {}},  {u"texhtml", {}},
-            {u"textcomp", {}},     {u"textmacros", {}}, {u"unicode", {}},    {u"units", {}},
-            {u"upgreek", {}},      {u"verb", {}}};
-}
 
 class LiteMeasurement final : public common::MeasurementTarget {
     adaptors::lite::LiteAdaptor &adaptor_;
@@ -135,46 +86,9 @@ struct Renderer::State {
     void validateOptions(RenderOptions const &) const;
 
     State() {
-        tex::BasePackage::initialize(configurations, maps);
-        tex::ActionConfiguration::initializeModule(configurations, maps);
-        tex::AmsConfiguration::initializeModule(configurations, maps);
-        tex::AmsCdConfiguration::initializeModule(configurations, maps);
-        tex::BbmConfiguration::initializeModule(configurations, maps);
-        tex::BboldxConfiguration::initializeModule(configurations, maps);
-        tex::BboxConfiguration::initializeModule(configurations, maps);
-        tex::BegingroupConfiguration::initializeModule(configurations, maps);
-        tex::BoldsymbolConfiguration::initializeModule(configurations, maps);
-        tex::BraketConfiguration::initializeModule(configurations, maps);
-        tex::BussproofsConfiguration::initializeModule(configurations, maps);
-        tex::CancelConfiguration::initializeModule(configurations, maps);
-        tex::CasesConfiguration::initializeModule(configurations, maps);
-        tex::CenternotConfiguration::initializeModule(configurations, maps);
-        tex::ColorConfiguration::initializeModule(configurations, maps);
-        tex::ColortblConfiguration::initializeModule(configurations, maps);
-        tex::ConfigMacrosConfiguration::initializeModule(configurations, maps);
-        tex::DsfontConfiguration::initializeModule(configurations, maps);
-        tex::EmpheqConfiguration::initializeModule(configurations, maps);
-        tex::EncloseConfiguration::initializeModule(configurations, maps);
-        tex::ExtpfeilConfiguration::initializeModule(configurations, maps);
-        tex::FontSizeV3Configuration::initializeModule(configurations, maps);
-        tex::GensymbConfiguration::initializeModule(configurations, maps);
-        tex::HtmlConfiguration::initializeModule(configurations, maps);
-        tex::MathtoolsConfiguration::initializeModule(configurations, maps);
-        tex::MhchemConfiguration::initializeModule(configurations, maps);
-        tex::NewcommandConfiguration::initializeModule(configurations, maps);
-        tex::NoUndefinedConfiguration::initializeModule(configurations);
-        tex::PhysicsConfiguration::initializeModule(configurations, maps);
-        tex::SetOptionsConfiguration::initializeModule(configurations);
-        tex::TagFormatConfiguration::initializeModule(configurations);
-        tex::TexHtmlConfiguration::initializeModule(configurations, maps, htmlOptions);
-        tex::TextcompConfiguration::initializeModule(configurations, maps);
-        tex::TextMacrosConfiguration::initializeModule(configurations, maps);
-        tex::UnicodeConfiguration::initializeModule(configurations, maps);
-        tex::UnitsConfiguration::initializeModule(configurations, maps);
-        tex::UpgreekConfiguration::initializeModule(configurations, maps);
-        tex::VerbConfiguration::initializeModule(configurations, maps);
+        tex::DefaultPackages::initialize(configurations, maps, htmlOptions);
 
-        texOptions.packages = rendererPackages();
+        texOptions.packages = tex::DefaultPackages::selections();
         texOptions.tagSide = u"right";
         input = std::make_unique<tex::TeX>(configurations, maps, callbacks, warnings, texOptions);
     }

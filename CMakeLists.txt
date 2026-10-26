@@ -229,6 +229,8 @@ target_sources(folia_math PUBLIC FILE_SET CXX_MODULES FILES
     src/math/input/tex/configmacros/configuration.ixx
     src/math/input/tex/verb/configuration.ixx
     src/math/input/tex/upgreek/configuration.ixx
+    src/math/input/tex/default_packages.ixx
+    src/math/input/tex/mediawiki_texvc/configuration.ixx
     src/math/input/tex/gensymb/configuration.ixx
     src/math/input/tex/ams/methods.ixx
     src/math/input/tex/ams/items.ixx
@@ -330,6 +332,8 @@ target_sources(folia_math PUBLIC FILE_SET CXX_MODULES FILES
     src/math/util/regexp_host.ixx)
 target_sources(folia_math PRIVATE
     src/math/math.cpp
+    src/math/input/tex/default_packages.cpp
+    src/math/input/tex/mediawiki_texvc/configuration.cpp
     src/math/core/math_item.cpp
     src/math/core/math_item_state.cpp
     src/math/core/mml_tree/attributes.cpp
@@ -690,6 +694,7 @@ add_test(NAME FoliaTests COMMAND FoliaTests)
 add_executable(FoliaMathTests EXCLUDE_FROM_ALL
     tests/main.cpp
     tests/math/mathjax_full_profile_package_bootstrap.cpp
+    tests/math/tex_package_registry.cpp
     tests/math/math_cancellation_g147.cpp
     tests/math/native_renderer_bridge.cpp
     tests/math/mml_native_raii_foundation.cpp
