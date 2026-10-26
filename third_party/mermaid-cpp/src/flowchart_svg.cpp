@@ -218,9 +218,14 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
                 else for(const auto& run:b.runs.at(i)) {
                     out+="<tspan";
                     // HTML strong uses CSS bolder relative to the label font.
-                    if(run.strong) out+=" font-weight=\""+std::to_string(
-                        b.font && b.font->weight>=550?900:b.font && b.font->weight<350?400:700)+"\"";
-                    if(run.emphasis) out+=" font-style=\"italic\"";
+                    if(b.svg_label) {
+                        out+=" font-weight=\""+std::string(run.strong?"bold":"normal")+"\"";
+                        out+=" font-style=\""+std::string(run.emphasis?"italic":"normal")+"\"";
+                    } else {
+                        if(run.strong) out+=" font-weight=\""+std::to_string(
+                            b.font && b.font->weight>=550?900:b.font && b.font->weight<350?400:700)+"\"";
+                        if(run.emphasis) out+=" font-style=\"italic\"";
+                    }
                     out+=">"+xml(run.text)+"</tspan>";
                 }
                 out+="</tspan>";

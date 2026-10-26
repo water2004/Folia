@@ -11,6 +11,8 @@ for(const file of lock.flowchartCurve.files) assert.equal(createHash('sha256').u
 const directory=resolve(process.argv[2]??'build/mermaid-cpp/flowchart-browser');
 mkdirSync(directory,{recursive:true});
 const cases=[
+  ["svg-label-plain", "flowchart LR\nA[\"Read input<br/>then save\"] -->|\"next step<br/>when ready\"| B[\"Save the source document and finish\"]"],
+  ["svg-label-markdown", "flowchart TD\nA[\"`Read **source** and *save*`\"] -->|\"`next **step** and *write*`\"| B[\"`Write the **updated document** and finish`\"]"],
   ["rich-group-html", "flowchart TD\nsubgraph g[\"Read <strong>source</strong> and <em>write</em>\"]\nA[Read]-->B[Write]\nend\ng-->C[Done]"],
   ["rich-group-html-nested", "flowchart LR\nsubgraph outer[\"<b>Processing</b><br/>queue\"]\nsubgraph inner[\"<em>Storage</em> and <strong>files</strong>\"]\ndirection TB\nA[Read]-->B[Write]\nend\nend\nouter-->C[Done]"],
   ['edge-ids-interpolation','flowchart TD\nA first@--> B\nA second@-- next --> C\nB --> D\nC --> D\nlinkStyle 0,1 interpolate linear stroke:#226688\nlinkStyle 2 interpolate basis'],
@@ -73,7 +75,7 @@ const result=[];
 for(const [name,body,title] of ${JSON.stringify(cases)}) {
  const source=title?'---\\ntitle: '+JSON.stringify(title)+'\\n---\\n'+body:body;
  for(const theme of ['default','dark']) {
-  mermaid.initialize({startOnLoad:false,theme,look:'classic',layout:'dagre',fontFamily:'Arial',themeVariables:{fontFamily:'Arial'},flowchart:{htmlLabels:true}});
+  mermaid.initialize({startOnLoad:false,theme,look:'classic',layout:'dagre',fontFamily:'Arial',themeVariables:{fontFamily:'Arial'},htmlLabels:!name.startsWith('svg-label-'),flowchart:{htmlLabels:!name.startsWith('svg-label-')}});
   const {svg}=await mermaid.render('probe'+result.length,source);
   const host=document.createElement('div');host.innerHTML=svg;document.body.append(host);
   const root=host.querySelector('svg');
@@ -108,7 +110,7 @@ for(const [name,body,title] of ${JSON.stringify(cases)}) {
    const shape=n.querySelector('rect'),b=shape.getBBox(),label=n.querySelector('.cluster-label'),lb=label.getBBox();
    return {id:n.id,...position(shape,b.x+b.width/2,b.y+b.height/2),width:b.width,height:b.height,label:label.textContent,
     title:position(label,lb.x+lb.width/2,lb.y+lb.height/2),fill:getComputedStyle(shape).fill,stroke:getComputedStyle(shape).stroke,
-    characters:styledCharacters(label),thickness:getComputedStyle(shape).strokeWidth,dash:getComputedStyle(shape).strokeDasharray,color:getComputedStyle(label.querySelector('span')??label).color,font:fontStyle(label)};
+    characters:styledCharacters(label),thickness:getComputedStyle(shape).strokeWidth,dash:getComputedStyle(shape).strokeDasharray,color:label.querySelector('text')?getComputedStyle(label.querySelector('text')).fill:getComputedStyle(label.querySelector('span')??label).color,font:fontStyle(label)};
   });
   const nodes=[...host.querySelectorAll('g.node')].map(n=>{
    const shape=n.querySelector('.label-container');const b=shape.getBBox();const label=n.querySelector('.label');
@@ -122,7 +124,7 @@ for(const [name,body,title] of ${JSON.stringify(cases)}) {
    return {id:n.id,...position(n),transform:n.getAttribute('transform'),width:b.width,height:b.height,label:label.textContent,labelWidth:lb.width,labelHeight:lb.height,
     labelCenter:position(label,lb.x+lb.width/2,lb.y+lb.height/2),lines:displayLines(label),characters:styledCharacters(label),outline,
     fill:getComputedStyle(fillShape).fill,stroke:getComputedStyle(strokeShape).stroke,
-    thickness:getComputedStyle(strokeShape).strokeWidth,dash:getComputedStyle(strokeShape).strokeDasharray,color:getComputedStyle(label.querySelector('span')??label).color,font:fontStyle(label)};
+    thickness:getComputedStyle(strokeShape).strokeWidth,dash:getComputedStyle(strokeShape).strokeDasharray,color:label.querySelector('text')?getComputedStyle(label.querySelector('text')).fill:getComputedStyle(label.querySelector('span')??label).color,font:fontStyle(label)};
   });
   const edges=[...host.querySelectorAll('.flowchart-link')].map(p=>{
     const marker=side=>{
@@ -136,7 +138,7 @@ for(const [name,body,title] of ${JSON.stringify(cases)}) {
     const length=p.getTotalLength();return {id:p.id,length,start:marker('start'),end:marker('end'),stroke:getComputedStyle(p).stroke,dash:getComputedStyle(p).strokeDasharray,thickness:getComputedStyle(p).strokeWidth,points:Array.from({length:7},(_,i)=>{const a=p.getPointAtLength(length*i/6);return position(p,a.x,a.y);})};
   });
   const labels=[...host.querySelectorAll('g.edgeLabel')].filter(n=>n.textContent.trim()).map(n=>{
-    const b=n.getBBox();return {text:n.textContent,...position(n),transform:n.getAttribute('transform'),width:b.width,height:b.height,color:getComputedStyle(n.querySelector('span')??n).color,font:fontStyle(n),lines:displayLines(n),characters:styledCharacters(n)};
+    const b=n.getBBox();return {text:n.textContent,...position(n),transform:n.getAttribute('transform'),width:b.width,height:b.height,color:n.querySelector('text')?getComputedStyle(n.querySelector('text')).fill:getComputedStyle(n.querySelector('span')??n).color,font:fontStyle(n),lines:displayLines(n),characters:styledCharacters(n)};
   });
   const heading=root.querySelector('.flowchartTitleText');
   const diagramTitle=heading?{text:heading.textContent,...position(heading,heading.x.baseVal[0].value,heading.y.baseVal[0].value),

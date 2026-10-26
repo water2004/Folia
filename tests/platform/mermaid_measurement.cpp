@@ -156,6 +156,8 @@ suite mermaid_measurement = [] {
             {"edge-interpolation-default",u"flowchart LR\nA-->B\nlinkStyle default interpolate linear\nB-->C\nlinkStyle default interpolate basis\nC-->D\nA-->D"},
             {"rich-group-html",u"flowchart TD\nsubgraph g[\"Read <strong>source</strong> and <em>write</em>\"]\nA[Read]-->B[Write]\nend\ng-->C[Done]"},
             {"rich-group-html-nested",u"flowchart LR\nsubgraph outer[\"<b>Processing</b><br/>queue\"]\nsubgraph inner[\"<em>Storage</em> and <strong>files</strong>\"]\ndirection TB\nA[Read]-->B[Write]\nend\nend\nouter-->C[Done]"},
+            {"svg-label-plain",u"flowchart LR\nA[\"Read input<br/>then save\"] -->|\"next step<br/>when ready\"| B[\"Save the source document and finish\"]"},
+            {"svg-label-markdown",u"flowchart TD\nA[\"`Read **source** and *save*`\"] -->|\"`next **step** and *write*`\"| B[\"`Write the **updated document** and finish`\"]"},
             {"rich-markdown",u"flowchart LR\nA[\"`Read **bold** and *italic*`\"] -->|\"`next **operation**`\"| B[\"`Save ***both***\nthen finish`\"]"},
             {"rich-markdown-group",u"flowchart TD\nsubgraph g[Operations]\ndirection LR\nA[\"`Read the __source document__ and _validate input_`\"] -->|\"`continue with **next step** and *save*`\"| B[\"`Write **updated _data_**`\"]\nend\ng --> C[Done]"},
             {"rich-markdown-literal",u"flowchart LR\nA[\"`Read \\*literal\\* &amp; **bold**`\"] --> B[\"`Save file_name and *unfinished`\"]"},
@@ -209,7 +211,7 @@ suite mermaid_measurement = [] {
             const auto& name=sample.name;
             const auto& body=sample.body;
             const auto source=std::u16string(u"---\n")+(sample.title.empty()?std::u16string{}:u"title: "+sample.title+u"\n")+u"config:\n  theme: "+theme+
-                u"\n  look: classic\n  layout: dagre\n  fontFamily: Arial\n  themeVariables: {fontFamily: Arial}\n  flowchart: {htmlLabels: true}\n---\n"+body;
+                u"\n  look: classic\n  layout: dagre\n  fontFamily: Arial\n  themeVariables: {fontFamily: Arial}\n  htmlLabels: "+(name.starts_with("svg-label-")?u"false":u"true")+u"\n---\n"+body;
             const auto svg=render_mermaid(source,*session);
             expect(svg.has_value())<<name<<(svg?"":svg.error());
             if(!svg) continue;

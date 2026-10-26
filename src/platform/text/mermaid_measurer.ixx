@@ -68,7 +68,16 @@ class MermaidMeasurer {
                 const float zero=0;
                 const DWRITE_GLYPH_RUN glyph{run->fontFace,run->fontEmSize,1,run->glyphIndices+i,&zero,nullptr,run->isSideways,0};
                 Microsoft::WRL::ComPtr<IDWriteGlyphRunAnalysis> analysis;
-                auto hr=factory->CreateGlyphRunAnalysis(&glyph,1,nullptr,DWRITE_RENDERING_MODE_NATURAL_SYMMETRIC,
+                // Honor the font's hinted/embedded-bitmap mode. Small CJK fonts
+                // can have wider hinted coverage than their scalable outlines.
+                Microsoft::WRL::ComPtr<IDWriteRenderingParams> params;
+                auto hr=factory->CreateRenderingParams(&params);
+                if(FAILED(hr)) return hr;
+                DWRITE_RENDERING_MODE mode;
+                hr=run->fontFace->GetRecommendedRenderingMode(run->fontEmSize,1,
+                    DWRITE_MEASURING_MODE_NATURAL,params.Get(),&mode);
+                if(FAILED(hr)) return hr;
+                hr=factory->CreateGlyphRunAnalysis(&glyph,1,nullptr,mode,
                     DWRITE_MEASURING_MODE_NATURAL,0,0,&analysis);
                 if(FAILED(hr)) return hr;
                 RECT bounds{};
@@ -248,7 +257,7 @@ public:
     // measured display lines and SVG text use the same characters and spacing.
     std::expected<std::vector<std::u16string>,std::string> wrap(
         std::u16string_view source, MermaidFont const& font, double width,
-        std::span<const MermaidTextStyle> styles={}) const {
+        std::span<const MermaidTextStyle> styles={},bool break_spaces=true) const {
         using Microsoft::WRL::ComPtr;
         auto valid=measure(source,font,true,styles);
         if(!valid) return std::unexpected(valid.error());
@@ -281,14 +290,15 @@ public:
         // excludes them when deciding whether another word fits. Retain native
         // cluster widths and Unicode break opportunities, including those spaces.
         std::vector<std::u16string> lines;
-        std::size_t start=0,segment=0,end=0;double used=0,segment_width=0;
+        std::size_t start=0,segment=0,end=0;double used=0,segment_width=0,trailing_width=0;
         for(std::size_t i=0;i<metrics.size();++i) {
             const auto& cluster=metrics[i];end+=cluster.length;segment_width+=cluster.width;
+            trailing_width=cluster.isWhitespace?trailing_width+cluster.width:0;
             if(!cluster.canWrapLineAfter && i+1<metrics.size()) continue;
-            if(segment>start && used+segment_width>width) {
+            if(segment>start && used+segment_width-(break_spaces?0:trailing_width)>width) {
                 lines.emplace_back(source.substr(start,segment-start));start=segment;used=0;
             }
-            used+=segment_width;segment_width=0;segment=end;
+            used+=segment_width;segment_width=0;trailing_width=0;segment=end;
         }
         lines.emplace_back(source.substr(start));
         return lines;

@@ -53,6 +53,7 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
         }
         auto measure=[&](const auto& source,double wrapping_width,bool group=false)->std::expected<FlowchartTextBox,std::string> {
             const auto& text=source.label;
+            const bool svg_label=!flow->theme.html_label_spacing;
             auto label_font=flowchart_label_font(source.compiled_styles,source.styles,flow->theme);
             if(!label_font) return std::unexpected(label_font.error());
             auto family=measurer.resolve_family(label_font->family);
@@ -67,35 +68,40 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             if(!std::isfinite(size)||size<=0||size>std::numeric_limits<float>::max())
                 return std::unexpected("Invalid Mermaid font size");
             const MermaidFont font{label_font->family,static_cast<float>(size),label_font->weight,label_font->italic};
-            auto lines=flowchart_label_runs(text,source.label_type);
+            auto lines=svg_label?flowchart_svg_label_runs(text,source.label_type):flowchart_label_runs(text,source.label_type);
             if(!lines) return std::unexpected(lines.error());
             const bool styled=std::ranges::any_of(*lines,[](const auto& line) {
                 return std::ranges::any_of(line,[](const auto& run){return run.strong||run.emphasis;});
             });
-            if(styled && ((group && source.label_type==u"markdown")||!flow->theme.html_label_spacing))
-                return std::unexpected("Styled Flowchart labels require HTML mode; Markdown group titles need their own layout");
+            if(styled && group && source.label_type==u"markdown")
+                return std::unexpected("Markdown group titles need their own layout");
             FlowchartTextBox box;
-            box.font=*label_font;
+            box.font=*label_font;box.svg_label=svg_label;
             // Empty lines still occupy a font line box, measured with a glyph's
             // font metrics rather than an estimated glyph height.
             auto font_metrics=measurer.measure(u"M",font);
             if(!font_metrics) return std::unexpected(font_metrics.error());
-            box.line_step=flow->theme.html_label_spacing?size*1.5:font_metrics->line_height;
-            box.baseline=font_metrics->baseline+(box.line_step-font_metrics->line_height)/2;
+            box.line_step=size*(svg_label?1.1:1.5);
+            box.baseline=svg_label?size:font_metrics->baseline+(box.line_step-font_metrics->line_height)/2;
             bool wrapped=false;
             for(const auto& line:*lines) {
                 std::u16string display;
                 std::vector<MermaidTextStyle> styles;
                 for(const auto& run:line) {
-                    const auto weight=run.strong?(font.weight<350?400u:font.weight<550?700u:900u):font.weight;
-                    styles.push_back({display.size(),run.text.size(),weight,font.italic||run.emphasis});
+                    const auto weight=svg_label?(run.strong?700u:400u):run.strong?(font.weight<350?400u:font.weight<550?700u:900u):font.weight;
+                    styles.push_back({display.size(),run.text.size(),weight,svg_label?run.emphasis:font.italic||run.emphasis});
                     display+=run.text;
                 }
-                auto wrapped_lines=measurer.wrap(display,font,wrapping_width,styles);
+                auto wrapped_lines=measurer.wrap(display,font,wrapping_width,styles,!svg_label);
                 if(!wrapped_lines) return std::unexpected(wrapped_lines.error());
                 wrapped=wrapped||wrapped_lines->size()>1;
                 std::size_t start=0;
                 for(auto& value:*wrapped_lines) {
+                    const auto raw_end=start+value.size();
+                    if(svg_label) {
+                        while(!value.empty() && value.front()==u' ') {value.erase(0,1);++start;}
+                        while(!value.empty() && value.back()==u' ') value.pop_back();
+                    }
                     const auto end=start+value.size();
                     FlowchartLabelLine runs;
                     std::vector<MermaidTextStyle> line_styles;
@@ -106,14 +112,18 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
                         runs.push_back({display.substr(first,last-first),line[i].strong,line[i].emphasis});
                         line_styles.push_back({first-start,last-first,style.weight,style.italic});
                     }
-                    auto metrics=measurer.measure(value,font,true,line_styles);
+                    auto metrics=measurer.measure(value,font,true,line_styles,svg_label);
                     if(!metrics) return std::unexpected(metrics.error());
                     box.width=std::max(box.width,metrics->bounds_width);
-                    box.lines.push_back(std::move(value));box.runs.push_back(std::move(runs));start=end;
+                    box.lines.push_back(std::move(value));box.runs.push_back(std::move(runs));start=raw_end;
                 }
             }
             if(wrapped && flow->theme.html_label_spacing) box.width=std::max(box.width,wrapping_width);
             box.height=text.empty()?0:box.line_step*box.lines.size();
+            if(svg_label && !text.empty()) {
+                auto metrics=measurer.svg_font_metrics(font);if(!metrics)return std::unexpected(metrics.error());
+                box.height=metrics->height+box.line_step*(box.lines.size()-1);
+            }
             if(text.empty()) box.baseline=0;
             return box;
         };
@@ -126,6 +136,13 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             // createText uses its 200px default for edge labels; group titles
             // go through createLabel's unbounded plain-text width above.
             auto box=measure(edge,200);if(!box) return std::unexpected(box.error());
+            if(box->svg_label && !edge.label.empty()) {
+                const auto& f=*box->font;
+                auto metrics=measurer.svg_font_metrics({f.family,static_cast<float>(f.size),f.weight,f.italic});
+                if(!metrics)return std::unexpected(metrics.error());
+                // createText's edge background is the glyph box plus two units per side.
+                box->width+=4;box->height+=4;box->baseline=metrics->baseline+2;
+            }
             flowchart_measurements.edges.push_back(*box);
         }
     }

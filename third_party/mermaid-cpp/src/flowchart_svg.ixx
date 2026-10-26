@@ -31,6 +31,7 @@ struct FlowchartTextBox {
     // Lines are the exact display strings measured by the platform adapter.
     double width=0,height=0,baseline=0;
     double line_step=0;
+    bool svg_label=false;
     std::vector<std::u16string> lines;
     std::vector<FlowchartLabelLine> runs;
     std::optional<FlowchartLabelFont> font;

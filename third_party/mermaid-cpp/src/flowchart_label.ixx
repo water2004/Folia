@@ -12,6 +12,9 @@ struct FlowchartLabelRun {
 using FlowchartLabelLine = std::vector<FlowchartLabelRun>;
 std::expected<std::vector<FlowchartLabelLine>,std::string> flowchart_label_runs(
     std::u16string_view label, std::u16string_view type);
+// createText's SVG words preserve literal HTML tags and use exclusive emphasis.
+std::expected<std::vector<FlowchartLabelLine>,std::string> flowchart_svg_label_runs(
+    std::u16string_view label, std::u16string_view type);
 // Plain projection for consumers that only need display characters.
 std::expected<std::vector<std::u16string>,std::string> flowchart_label_lines(
     std::u16string_view label, std::u16string_view type);
