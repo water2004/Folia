@@ -14,7 +14,7 @@ const cases=[
  ['root-right-child-down',[[-1,1,0,0,2],[-1,0,60,30,0],[-1,0,70,40,0],[0,0,50,30,0],[0,0,60,40,0]],[[1,3],[3,4],[4,2]],[],[],0,[]],
  ['root-down-child-right',[[-1,1,0,0,0],[-1,0,60,30,0],[-1,0,70,40,0],[0,0,50,30,0],[0,0,60,40,0]],[[1,3],[1,4],[3,2],[4,2]],[],[],2,[]],
 ];
-const options={'elk.spacing.baseValue':40,'elk.algorithm':'layered','elk.hierarchyHandling':'INCLUDE_CHILDREN','elk.direction':'RIGHT',
+const options={'spacing.baseValue':40,'elk.algorithm':'layered','elk.hierarchyHandling':'INCLUDE_CHILDREN','elk.direction':'RIGHT',
  'elk.layered.cycleBreaking.strategy':'DEPTH_FIRST','elk.layered.nodePlacement.strategy':'BRANDES_KOEPF',
  'elk.layered.nodePlacement.bk.fixedAlignment':'BALANCED','elk.layered.unnecessaryBendpoints':true,
  'elk.spacing.portsSurrounding':'[top=12,left=12,bottom=12,right=12]'};
@@ -25,7 +25,7 @@ for(const [name,specs,endpoints,centers,ends,direction,groupBoxes]of cases) {
  const root={id:'root',layoutOptions:{...options},children:[],edges:[]};
  const nodes=specs.map(([parent,group,width,height],i)=>({id:'n'+i,width,height,...(group?{children:[],layoutOptions:{...options,
   'elk.nodeSize.constraints':'MINIMUM_SIZE','elk.nodeSize.minimum':`(${width},${height})`,'elk.contentAlignment':'H_CENTER V_TOP','elk.direction':['RIGHT','LEFT','DOWN','UP'][specs[i][4]],
-  'elk.spacing.baseValue':24,'elk.spacing.nodeNode':50,'elk.spacing.edgeEdge':20,
+  'spacing.baseValue':24,'elk.spacing.nodeNode':50,'elk.spacing.edgeEdge':20,
   'elk.layered.spacing.edgeNodeBetweenLayers':30,'elk.padding':'[top=24,left=24,bottom=24,right=24]'}}:{})}));
  for(const [n,top,left,bottom,right,width,height]of groupBoxes) {
   nodes[n].layoutOptions['elk.padding']=`[top=${top},left=${left},bottom=${bottom},right=${right}]`;
@@ -52,3 +52,4 @@ const fixture=new URL('../../tests/mermaid_cpp/fixtures/elk-compound-options.tsv
 if(process.argv.includes('--write'))writeFileSync(fixture,expected);
 else assert.equal(readFileSync(fixture,'utf8').replaceAll('\r\n','\n'),expected);
 console.log(`ELK inherited direction/per-group spacing: ${cases.length} original full geometry cases checked.`);
+
