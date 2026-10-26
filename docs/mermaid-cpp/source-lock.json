@@ -1374,6 +1374,6 @@
       }
     ],
     "version": "0.9.3",
-    "boundary": "DepthFirstCycleBreaker, flat NetworkSimplexLayerer and LongEdgeSplitter"
+    "boundary": "DepthFirstCycleBreaker, flat NetworkSimplexLayerer, LongEdgeSplitter and flat east/west PortListSorter/BarycenterHeuristic/LayerSweepCrossingMinimizer"
   }
 }

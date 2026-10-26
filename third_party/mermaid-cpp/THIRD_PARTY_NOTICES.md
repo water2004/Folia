@@ -4,7 +4,9 @@
 
 `src/elk_cycle.cpp`, `src/elk_layering.cpp`, `src/elk_long_edges.cpp` and their
 module interfaces port the original ELK DepthFirstCycleBreaker, flat
-NetworkSimplexLayerer and LongEdgeSplitter.
+NetworkSimplexLayerer and LongEdgeSplitter. `src/elk_order.{ixx,cpp}` ports the
+flat east/west PortListSorter, BarycenterHeuristic, port-rank distributors and
+LayerSweepCrossingMinimizer controller from the same worker.
 These files are licensed under
 EPL-2.0, not the Mermaid MIT license. The full license is in `ELK-LICENSE`.
 Original source: https://github.com/kieler/elkjs, package `elkjs` 0.9.3,

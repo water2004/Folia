@@ -41,8 +41,14 @@ both Flowchart and Class still require explicit source/session Dagre selection.
 The original ELK depth-first feedback-edge selector and flat network-simplex
 layer assignment are ported separately, but
 the complete layered pipeline is not yet connected.
-Long-edge splitting retains an explicit layered graph for the remaining
-crossing-minimization, placement and routing phases.
+Long-edge splitting retains an explicit layered graph. The flat east/west
+crossing-order phase now ports PortListSorter, both barycenter port-rank
+strategies and the seeded layer-sweep controller, retaining the best node and
+port order across alternating sweeps. It accepts adjacent-layer edges with one
+edge per port, including long-edge dummies and fixed port positions. Shared-port
+hyperedges, in-layer edges and north/south or compound constraints still need
+their original processors and are rejected by this internal boundary. Placement,
+routing and public default ELK rendering remain outstanding.
 
 Quadrant retains its original configured canvas, linear point scales, axis
 positions, title/accessibility metadata, quadrant labels and per-point/class
