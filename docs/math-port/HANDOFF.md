@@ -2,15 +2,16 @@
 
 恢复/压缩后先实际读本文。架构、职责和详细验收见 [architecture](native-raii-architecture.md)、[files](native-raii-files.json)、[acceptance](native-raii-acceptance.md)。只复查新变化；ignored候选用 `rg --no-ignore`。
 
-## 当前 checkpoint：文件夹浏览、标签页与简化窗口（2026-10-26，设计/实现开始）
+## 当前 checkpoint：文件夹、标签页与简化窗口（2026-10-26，实现完成，外观待用户反馈）
 
-- 新任务：打开文件夹、成熟编辑器式文件树、独立文档大纲、标签页和简化顶栏。用户已选择 **单击预览，双击或编辑后固定**，未保存标签不替换；最新提出去掉常驻工具栏，按此方向推进。布局：原生TitleBar+TabView共用顶行，主菜单/右键/快捷键保留操作，左文件树、右可收起大纲，中间仅一份SwapChainPanel/Renderer；留窗口拖动区域，不能让标题/按钮/标签相互遮挡。不开子代理，保留WinUI3/C++/WinRT，不改CST/编辑模型。
-- 官方参考已实际阅读：VS Code userinterface Preview mode（单击预览/双击或编辑固定）；微软WinUI TitleBar/TabView规范。标题控件API以本机SDK头文件为准。树节点懒展开、目录IO后台且有代次取消，不能递归预读整棵树/每标签复制GPU资源。
-- 职责方案：workspace文档集合只拥有每标签原EditorSession（含原块树/CST/单选区/事务历史）、文件控制器、视口/必要数学缓存；UI控制器投影TreeView/TabView并路由打开/激活/关闭。现Controller.Attach会重置保存基线，不能切标签时直接重复Attach；需显式分开文档生命周期与当前呈现绑定，保存完成只更新其所属文档，旧异步加载/粘贴不能写入新活动标签。共享输入/renderer在切换时解除旧绑定并恢复该标签状态，不能序列化/重建文档来切换。
-- 先补廉价的history内容状态标识供修改圆点/预览固定使用，Undo/Redo回到保存点恢复标识、新分支不能复用旧保存标识，不能每字符TextUtf8/全文hash。Core的document.revision在Undo后可复用，不能直接当保存点；DocController现HasUnsavedChanges为全文fingerprint，仅用于显式保存/关闭，勿直接放每次编辑的UI刷新。
-- **验收要求**：重复路径聚焦同标签；预览替换/编辑固定/双击固定；每标签源文/选区/UndoRedo/源码模式/滚动恢复；未保存关闭/关闭窗口Save/Discard/Cancel和失败；加载/保存/粘贴跨切换代次与文档所有权；目录失败/展开取消/重复名字/大目录懒加载；缩放/窄窗/标题拖动/按钮命中/快捷键；切换不做全文parse/serialize，只有一套GPU资源。小批提交、native一次一个/≤4。
-- **当前停止点/下一步**：尚无功能代码改动/构建/测试/新窗口，刚完成现有Session/Controller/History/主窗口调查。先实际读document_history完整实现并添加状态标识与专门测试，然后实现文档集合/控制器呈现解绑和文件树，再接窗口/原生控件与UI验收。现有App只有一个editorSession+documentController；ControllerState在EditorDocumentControllerState.h；AttachControllers在MainWindow.Events.cpp，勿猜文件名。现活跃任务是本节，不重开已暂停滚动或数学旧迁移。
-
+- **用户规则**：打开文件夹；单击预览，双击或编辑固定，dirty标签不得替换；删除常驻工具栏，命令留主菜单/右键/快捷键；文件树左、大纲右分开；**未打开文件夹默认隐藏文件侧栏，用户可主动展开，打开文件夹后显示**。顶栏独立文件/大纲开关始终可见。不开子代理，保留WinUI3/native、原CST/块树/事务历史；native一次一个、≤4。
+- **架构**：WorkspaceDocuments拥有每标签原EditorSession+Controller，保存原选区/历史/源码模式/视口；一个共享SwapChainPanel/Renderer，不序列化或重建文档切标签。Controller文档生命周期与呈现代次分开，inactive保存归原文档，旧Load/Paste取消；修改圆点用history稳定状态ID，正常编辑不全文hash。Resume后台查文件版本，代次验证后才处理inactive外部变更。数学只停车metadata+文件cache，离屏SVG读取/渲染取消，恢复不重算现成公式；字体/Scene算法与滚动时钟不变。
+- **界面**：TitleBar+TabView共用顶行，预览斜体/修改圆点/路径tooltip/原生关闭重排；左懒TreeView，一次后台枚举一层、128条分段发布/代次取消；左右原生SplitView有内置动画，窄窗Overlay。空文件侧栏为文字说明+Hyperlink，不再孤立大按钮。MainWindow.Documents/Tabs/Folders/Shortcuts分责，其他已有partial仅改活动Session访问。
+- **最新视觉修正**：用户截图指出所有新图标被裁切。原PathIcon16边界不能直接容纳20坐标SVG；已统一为16 Viewbox→完整20×20 Canvas→原始Path，树模板同源，保留全画布/留白。6个Fluent UI System Icons 20 Regular路径pin82ecf7cbdb43684403c7125efa160be04a33dca5，MIT/NOTICE/生成器完整。**图标30种尺寸组合240断言检查完整几何未越界已过，最终外观尚未获用户接受**。PathIconSource克隆几何的E_INVALIDARG与SDK私有MUX_TreeViewItemStyle引用已移除；最终Debug真实启动/正常关闭exit0通过（workspace-icon-final-startup.log）。
+- **本地提交**：24688f21 history内容状态；9a03c1a7 Controller呈现所有权；f66f1185 workspace集合/懒文件树/矢量图标与正式测试；4dbddad0 视图恢复/后台外部变更/数学cache转移；bac881c6 可配置workspace快捷键。MainWindow UI整合 **3195c352**；inactive保存不提前标记主题已更新与使用说明 **3fafa3d3**。全部实现已本地提交。不推送/不发布/不改版本（0.4.1）。
+- **验收已过**：Core基础762项499874断言（先前workspace-history-core-all.log，勿重跑无关宽审）；最终Debug完整App **86项16013断言**（workspace-app-final.stdout/stderr.log）；Workspace6项331断言（workspace-focused-final.log），呈现7项125断言（workspace-presentation-final.stdout.log）；Platform **84项4249断言**（workspace-platform-final.log）。覆盖preview/pin/路径/独立source-mode/撤销/零全文parse-serialize，inactive保存/外部变化/stale paste，600文件目录/取消/错误，缓存转移无新native render/write且inactive SVG demand清空，图标画布/几何。旧快捷键reset测试将file.open硬编码索引0，已改按id定位并复验通过。
+- **当前句柄/下一步**：无活动native/build/test/agent句柄。最终自包含Release构建84937已exit0（workspace-release-final.log），实际Release构造/激活/正常关闭exit0通过（workspace-release-final-startup.log，build/tests/workspace-release-final-startup/run-1/result.json）。产物build/app-winui/bin/x64/Release/Folia.exe，FileVersion0.4.1.0/ProductVersion0.4.1；含最终按钮Automation Name、去顶栏冗余空列、inactive主题修正。最终diff/XML已检查；resw的重复Remove键经git show确认是既有基线，未扩大范围修改。实现和自动验收完成，下一步仅用户外观/交互反馈，不自动MSI/安装/推送/发布。不要重开旧math/微信滚动调查。
+- **UI与限制**：computer-use技能已读并announce；node_repl sky初始化、globals存在。曾只get自己Debug窗口，用户接手后停止输入；最后候选 **Debug PID21480**（build/workspace-ui-process.json，First.md是build/tests/workspace-ui自建样例）保持打开，用户按物理Escape停止Computer Use，**本轮禁止再调用Computer Use工具，不关闭/终止该窗口**。最终Viewbox图标版尚未新截图/人工目录点击/标题拖动/真实IME/窄窗互动验收；自动几何/Controller/启动测试如上，不宣称用户已接受外观。未改用户文档/设置，无agent/其他native句柄。
 ## 已完成：0.4.1发布（2026-10-26）
 
 - 发布提交 **c3d0e4472ad9e173e03f692cb88a7d0420abdb82**，master及固定v0.4.1标签已推送；Release https://github.com/water2004/Folia/releases/tag/v0.4.1 已公开，CI https://github.com/water2004/Folia/actions/runs/40263725460 **success**。
