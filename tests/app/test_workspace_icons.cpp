@@ -27,6 +27,7 @@ namespace {
                     expect(canvas.Width() == 20.0);
                     expect(canvas.Height() == 20.0);
                     auto path = canvas.Children().GetAt(0).as<Shapes::Path>();
+                    expect(path.Width() == 20.0 && path.Height() == 20.0);
                     auto bounds = path.Data().Bounds();
                     expect(bounds.X >= 0.f && bounds.Y >= 0.f);
                     expect(bounds.X + bounds.Width <= 20.001f && bounds.Y + bounds.Height <= 20.001f);

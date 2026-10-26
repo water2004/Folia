@@ -30,7 +30,7 @@ namespace winrt::Folia {
             DataTemplate file = Template(WorkspaceIcon::Document);
             static DataTemplate Template(WorkspaceIcon icon) {
                 auto xaml = std::wstring(L"<DataTemplate xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation'><StackPanel Orientation='Horizontal' Spacing='8' Height='28'><Viewbox Width='16' Height='16' Stretch='Uniform' Opacity='0.75'><Canvas Width='20' Height='20'><Path Fill='{ThemeResource TextFillColorPrimaryBrush}' Data='")
-                    + std::wstring(WorkspaceIconPath(icon)) + L"'/></Canvas></Viewbox><TextBlock Text='{Binding Content}' FontSize='13' TextTrimming='CharacterEllipsis' VerticalAlignment='Center'/></StackPanel></DataTemplate>";
+                    + std::wstring(WorkspaceIconPath(icon)) + L"' Width='20' Height='20' Stretch='None'/></Canvas></Viewbox><TextBlock Text='{Binding Content}' FontSize='13' TextTrimming='CharacterEllipsis' VerticalAlignment='Center'/></StackPanel></DataTemplate>";
                 return Markup::XamlReader::Load(xaml).as<DataTemplate>();
             }
             DataTemplate SelectTemplateCore(IInspectable const& item) {

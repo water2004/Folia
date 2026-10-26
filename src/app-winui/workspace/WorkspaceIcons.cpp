@@ -19,7 +19,7 @@ namespace winrt::Folia {
 
     Microsoft::UI::Xaml::Controls::Viewbox MakeWorkspaceIcon(WorkspaceIcon icon) {
         auto xaml = std::wstring(L"<Viewbox xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation' Width='16' Height='16' Stretch='Uniform'><Canvas Width='20' Height='20'><Path Fill='{ThemeResource TextFillColorPrimaryBrush}' Data='")
-            + std::wstring(WorkspaceIconPath(icon)) + L"'/></Canvas></Viewbox>";
+            + std::wstring(WorkspaceIconPath(icon)) + L"' Width='20' Height='20' Stretch='None'/></Canvas></Viewbox>";
         return Microsoft::UI::Xaml::Markup::XamlReader::Load(xaml).as<Microsoft::UI::Xaml::Controls::Viewbox>();
     }
 
