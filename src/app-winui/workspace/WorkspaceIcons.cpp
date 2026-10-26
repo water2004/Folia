@@ -5,10 +5,11 @@ import std;
 // Fluent UI System Icons, Microsoft, MIT. Paths from upstream SVGs at
 // 82ecf7cbdb43684403c7125efa160be04a33dca5. See THIRD_PARTY_NOTICES.md.
 namespace winrt::Folia {
-    std::wstring_view WorkspaceIconPath(WorkspaceIcon icon) noexcept {
+    static std::wstring_view WorkspaceIconPath(WorkspaceIcon icon) noexcept {
         switch (icon) {
+        case WorkspaceIcon::PanelRight:
         case WorkspaceIcon::PanelLeft: return LR"(M15 4C16.6569 4 18 5.34315 18 7V13C18 14.6569 16.6569 16 15 16H5C3.34315 16 2 14.6569 2 13V7C2 5.34315 3.34315 4 5 4H15ZM8.5 15H15C16.1046 15 17 14.1046 17 13V7C17 5.89543 16.1046 5 15 5H8.5V15ZM5 5C3.89543 5 3 5.89543 3 7V13C3 14.1046 3.89543 15 5 15H7.5V5H5Z)";
-        case WorkspaceIcon::PanelRight: return LR"(M18 6C18 4.34315 16.6569 3 15 3H5C3.34315 3 2 4.34315 2 6V13C2 14.6569 3.34315 16 5 16H15C16.6569 16 18 14.6569 18 13V6ZM11.5 4V15H5C3.89543 15 3 14.1046 3 13V6C3 4.89543 3.89543 4 5 4H11.5ZM12.5 4H15C16.1046 4 17 4.89543 17 6V13C17 14.1046 16.1046 15 15 15H12.5V4Z)";
+
         case WorkspaceIcon::Folder: return LR"(M4.5 3C3.11929 3 2 4.11929 2 5.5V14.5C2 15.8807 3.11929 17 4.5 17H15.5C16.8807 17 18 15.8807 18 14.5V7.5C18 6.11929 16.8807 5 15.5 5H9.70711L8.21967 3.51256C7.89148 3.18437 7.44636 3 6.98223 3H4.5ZM3 5.5C3 4.67157 3.67157 4 4.5 4H6.98223C7.18115 4 7.37191 4.07902 7.51256 4.21967L8.79289 5.5L7.43934 6.85355C7.34557 6.94732 7.21839 7 7.08579 7H3V5.5ZM3 8H7.08579C7.48361 8 7.86514 7.84196 8.14645 7.56066L9.70711 6H15.5C16.3284 6 17 6.67157 17 7.5V14.5C17 15.3284 16.3284 16 15.5 16H4.5C3.67157 16 3 15.3284 3 14.5V8Z)";
         case WorkspaceIcon::Document: return LR"(M6 2C4.89543 2 4 2.89543 4 4V16C4 17.1046 4.89543 18 6 18H14C15.1046 18 16 17.1046 16 16V7.41421C16 7.01639 15.842 6.63486 15.5607 6.35355L11.6464 2.43934C11.3651 2.15804 10.9836 2 10.5858 2H6ZM5 4C5 3.44772 5.44772 3 6 3H10V6.5C10 7.32843 10.6716 8 11.5 8H15V16C15 16.5523 14.5523 17 14 17H6C5.44772 17 5 16.5523 5 16V4ZM14.7929 7H11.5C11.2239 7 11 6.77614 11 6.5V3.20711L14.7929 7Z)";
         case WorkspaceIcon::Refresh: return LR"(M4 10C4 6.68629 6.68629 4 10 4C11.7766 4 13.3732 4.77191 14.4723 6H12.5C12.2239 6 12 6.22386 12 6.5C12 6.77614 12.2239 7 12.5 7H15.5C15.7761 7 16 6.77614 16 6.5V3.5C16 3.22386 15.7761 3 15.5 3C15.2239 3 15 3.22386 15 3.5V5.10109C13.7299 3.80499 11.9591 3 10 3C6.13401 3 3 6.13401 3 10C3 13.866 6.13401 17 10 17C13.866 17 17 13.866 17 10C17 9.8191 16.9931 9.6397 16.9796 9.46207C16.9587 9.18673 16.7185 8.98049 16.4431 9.00144C16.1678 9.02239 15.9615 9.26258 15.9825 9.53793C15.9941 9.69034 16 9.84443 16 10C16 13.3137 13.3137 16 10 16C6.68629 16 4 13.3137 4 10Z)";
@@ -17,10 +18,17 @@ namespace winrt::Folia {
         return {};
     }
 
+    std::wstring WorkspaceIconXaml(WorkspaceIcon icon) {
+        return std::wstring(L"<Viewbox xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation' Width='16' Height='16' Stretch='Uniform'><Canvas Width='20' Height='20'><Path Fill='{ThemeResource TextFillColorPrimaryBrush}' Data='")
+            + std::wstring(WorkspaceIconPath(icon)) + L"' Width='20' Height='20' Stretch='None'>"
+            // One contour defines the pair. The native transform reflects the
+            // complete canvas, so geometry and padding cannot drift apart.
+            + (icon == WorkspaceIcon::PanelRight ? L"<Path.RenderTransform><ScaleTransform ScaleX='-1' CenterX='10'/></Path.RenderTransform>" : L"")
+            + L"</Path></Canvas></Viewbox>";
+    }
+
     Microsoft::UI::Xaml::Controls::Viewbox MakeWorkspaceIcon(WorkspaceIcon icon) {
-        auto xaml = std::wstring(L"<Viewbox xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation' Width='16' Height='16' Stretch='Uniform'><Canvas Width='20' Height='20'><Path Fill='{ThemeResource TextFillColorPrimaryBrush}' Data='")
-            + std::wstring(WorkspaceIconPath(icon)) + L"' Width='20' Height='20' Stretch='None'/></Canvas></Viewbox>";
-        return Microsoft::UI::Xaml::Markup::XamlReader::Load(xaml).as<Microsoft::UI::Xaml::Controls::Viewbox>();
+        return Microsoft::UI::Xaml::Markup::XamlReader::Load(WorkspaceIconXaml(icon)).as<Microsoft::UI::Xaml::Controls::Viewbox>();
     }
 
 }

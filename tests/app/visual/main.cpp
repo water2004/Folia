@@ -10,6 +10,27 @@ namespace {
 }
 namespace visual_tests {
     winrt::Microsoft::UI::Xaml::Window Window() { return visualWindow; }
+    void SavePng(std::filesystem::path const& path, std::uint32_t width, std::uint32_t height,
+                 winrt::Windows::Storage::Streams::IBuffer const& pixels, std::uint32_t strideWidth, std::uint32_t firstPixel) {
+        std::filesystem::create_directories(path.parent_path());
+        ::Microsoft::WRL::ComPtr<IWICImagingFactory> factory;
+        winrt::check_hresult(::CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory)));
+        ::Microsoft::WRL::ComPtr<IWICStream> stream;
+        winrt::check_hresult(factory->CreateStream(&stream));
+        winrt::check_hresult(stream->InitializeFromFilename(path.c_str(), GENERIC_WRITE));
+        ::Microsoft::WRL::ComPtr<IWICBitmapEncoder> encoder;
+        winrt::check_hresult(factory->CreateEncoder(GUID_ContainerFormatPng, nullptr, &encoder));
+        winrt::check_hresult(encoder->Initialize(stream.Get(), WICBitmapEncoderNoCache));
+        ::Microsoft::WRL::ComPtr<IWICBitmapFrameEncode> frame;
+        winrt::check_hresult(encoder->CreateNewFrame(&frame, nullptr));
+        winrt::check_hresult(frame->Initialize(nullptr));
+        winrt::check_hresult(frame->SetSize(width, height));
+        auto format = GUID_WICPixelFormat32bppBGRA;
+        winrt::check_hresult(frame->SetPixelFormat(&format));
+        winrt::check_hresult(frame->WritePixels(height, (strideWidth ? strideWidth : width) * 4, pixels.Length() - firstPixel * 4, pixels.data() + firstPixel * 4));
+        winrt::check_hresult(frame->Commit());
+        winrt::check_hresult(encoder->Commit());
+    }
 }
 
 // Use the production XAML application bootstrap and MainWindow. This test

@@ -46,27 +46,7 @@ namespace {
         peer.GetPattern(Automation::Peers::PatternInterface::Invoke).as<Automation::Provider::IInvokeProvider>().Invoke();
     }
 
-    void SavePng(std::filesystem::path const& path, std::uint32_t width, std::uint32_t height,
-                 winrt::Windows::Storage::Streams::IBuffer const& pixels, std::uint32_t strideWidth = 0) {
-        std::filesystem::create_directories(path.parent_path());
-        ::Microsoft::WRL::ComPtr<IWICImagingFactory> factory;
-        winrt::check_hresult(::CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory)));
-        ::Microsoft::WRL::ComPtr<IWICStream> stream;
-        winrt::check_hresult(factory->CreateStream(&stream));
-        winrt::check_hresult(stream->InitializeFromFilename(path.c_str(), GENERIC_WRITE));
-        ::Microsoft::WRL::ComPtr<IWICBitmapEncoder> encoder;
-        winrt::check_hresult(factory->CreateEncoder(GUID_ContainerFormatPng, nullptr, &encoder));
-        winrt::check_hresult(encoder->Initialize(stream.Get(), WICBitmapEncoderNoCache));
-        ::Microsoft::WRL::ComPtr<IWICBitmapFrameEncode> frame;
-        winrt::check_hresult(encoder->CreateNewFrame(&frame, nullptr));
-        winrt::check_hresult(frame->Initialize(nullptr));
-        winrt::check_hresult(frame->SetSize(width, height));
-        auto format = GUID_WICPixelFormat32bppBGRA;
-        winrt::check_hresult(frame->SetPixelFormat(&format));
-        winrt::check_hresult(frame->WritePixels(height, (strideWidth ? strideWidth : width) * 4, pixels.Length(), pixels.data()));
-        winrt::check_hresult(frame->Commit());
-        winrt::check_hresult(encoder->Commit());
-    }
+    using visual_tests::SavePng;
 
     struct Capture {
         Media::Imaging::RenderTargetBitmap bitmap;
@@ -217,6 +197,43 @@ namespace {
                 Pump([&] { return tabs.TabItems().Size() < previous; });
             }
         } catch (winrt::hresult_error const& error) { throw std::runtime_error(winrt::to_string(error.message()) + " HRESULT " + std::to_string(error.code().value)); } };
+
+        "workspace chrome pane icons have aligned complete mirrored contours"_test = [] {
+            ChromeWindow f;
+            auto left = f.Find<Primitives::ToggleButton>(L"ExplorerPaneButton");
+            auto right = f.Find<Primitives::ToggleButton>(L"OutlinePaneButton");
+            auto leftIcon = left.Content().as<Viewbox>(), rightIcon = right.Content().as<Viewbox>();
+            Media::Imaging::RenderTargetBitmap a, b;
+            Await(a.RenderAsync(leftIcon));
+            Await(b.RenderAsync(rightIcon));
+            auto ap = Await(a.GetPixelsAsync()), bp = Await(b.GetPixelsAsync());
+            expect(a.PixelWidth() == b.PixelWidth());
+            expect(a.PixelHeight() == b.PixelHeight());
+            int delta = 0, topA = a.PixelHeight(), topB = b.PixelHeight(), bottomA = -1, bottomB = -1;
+            for (int y = 0; y < a.PixelHeight(); ++y) for (int x = 0; x < a.PixelWidth(); ++x) {
+                int av = ap.data()[(y * a.PixelWidth() + x) * 4 + 3];
+                int bv = bp.data()[(y * b.PixelWidth() + b.PixelWidth() - 1 - x) * 4 + 3];
+                delta += std::abs(av - bv);
+                if (av > 8) { topA = (std::min)(topA, y); bottomA = (std::max)(bottomA, y); }
+                if (bv > 8) { topB = (std::min)(topB, y); bottomB = (std::max)(bottomB, y); }
+            }
+            // Compare the entire alpha mask, including all four corners. The
+            // former upstream pair differs in height and fails this comparison.
+            expect(delta == 0);
+            expect(topA == topB);
+            expect(bottomA == bottomB);
+            expect(topA > 0 && bottomA < a.PixelHeight() - 1);
+            auto atA = leftIcon.TransformToVisual(f.root).TransformPoint({0, 0});
+            auto atB = rightIcon.TransformToVisual(f.root).TransformPoint({0, 0});
+            expect(atA.Y == atB.Y);
+            Capture native(f.root, f.root.XamlRoot().RasterizationScale());
+            auto at = left.TransformToVisual(f.root).TransformPoint({0, 0});
+            auto first = static_cast<std::uint32_t>(at.Y * native.scale) * native.bitmap.PixelWidth()
+                + static_cast<std::uint32_t>(at.X * native.scale);
+            auto artifacts = std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path() / L"build/tests/workspace-chrome";
+            SavePng(artifacts / L"pane-pair-native.png", static_cast<std::uint32_t>(58 * native.scale),
+                static_cast<std::uint32_t>(28 * native.scale), native.pixels, native.bitmap.PixelWidth(), first);
+        };
 
         "workspace chrome icons retain the right and bottom SVG strokes in actual pixels"_test = [] { try {
             ChromeWindow f;

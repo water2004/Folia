@@ -23,7 +23,7 @@ Folia itself is licensed under the MIT License in `LICENSE`.
 
 ## Fluent UI System Icons
 
-Workspace icons use the Panel Left, Panel Right, Folder, Document, Arrow Clockwise and Square Multiple 20 Regular SVG paths from https://github.com/microsoft/fluentui-system-icons at commit 82ecf7cbdb43684403c7125efa160be04a33dca5. The original vector paths are retained in WorkspaceIcons.cpp and rendered by native XAML paths inside their complete SVG viewboxes with theme foreground colors.
+Workspace icons use the Panel Left, Folder, Document, Arrow Clockwise and Square Multiple 20 Regular SVG paths from https://github.com/microsoft/fluentui-system-icons at commit 82ecf7cbdb43684403c7125efa160be04a33dca5. The original vector paths are retained in WorkspaceIcons.cpp; the right-panel variant mirrors Panel Left for an identical silhouette. They are rendered by native XAML paths inside their complete SVG viewboxes with theme foreground colors.
 
 MIT License
 
