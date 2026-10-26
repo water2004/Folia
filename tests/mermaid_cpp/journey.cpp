@@ -1,5 +1,6 @@
 #include "support/folia_test.hpp"
 import folia.mermaid.journey_svg;
+import folia.mermaid.number;
 namespace {
 using namespace boost::ut;using namespace folia::mermaid;
 #include "theme_fixture.hpp"
