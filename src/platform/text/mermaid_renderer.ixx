@@ -465,6 +465,14 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             return TimelineTextBox{box->advance,box->bounds_width,metrics->height,metrics->baseline,metrics->middle_offset};
         };
     }
-    return render_native_diagram(*input,widths,flowchart_measurements,sequence_measurements,class_measurements,xy_measurements,sankey_measurements,treemap_measure,journey_measure,timeline_measure);
+    GanttMeasure gantt_measure;
+    if(auto gantt=std::get_if<GanttRenderInput>(&input->content)) {
+        gantt_measure=[gantt,&measurer](std::u16string_view text,double size)->std::expected<double,std::string> {
+            auto box=measurer.measure(text,{gantt->theme.font_family,static_cast<float>(size)},false,{},true);
+            if(!box)return std::unexpected(box.error());
+            return box->bounds_width;
+        };
+    }
+    return render_native_diagram(*input,widths,flowchart_measurements,sequence_measurements,class_measurements,xy_measurements,sankey_measurements,treemap_measure,journey_measure,timeline_measure,gantt_measure);
 }
 }

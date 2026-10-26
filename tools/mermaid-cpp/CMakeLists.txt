@@ -133,7 +133,8 @@ if(WIN32 AND MSVC)
         "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_sankey.cpp"
         "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_treemap.cpp"
         "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_journey.cpp"
-        "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_timeline.cpp")
+        "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_timeline.cpp"
+        "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_gantt.cpp")
     set_target_properties(FoliaMermaidPlatformTests PROPERTIES CXX_MODULE_STD ON)
     target_include_directories(FoliaMermaidPlatformTests PRIVATE "${FOLIA_MERMAID_REPO_ROOT}/tests")
     target_link_libraries(FoliaMermaidPlatformTests PRIVATE

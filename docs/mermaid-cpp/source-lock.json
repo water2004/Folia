@@ -827,6 +827,22 @@
     {
       "path": "packages/mermaid/src/diagrams/mindmap/svgDraw.ts",
       "sha256": "41fb2e6b682a12ddef5d110149b7b27533d2f7e48c1f12d3e514c39af4ab4e4f"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/gantt/parser/gantt.jison",
+      "sha256": "15023f6e7af35588a206dddf176d7af763729d2bf76ea3de52f1bbe0f4a203ae"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/gantt/ganttDb.js",
+      "sha256": "d783881e9e5966aabc87f6dc170aa0a88ece551c48c49ba0693aa5271e3accec"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/gantt/ganttRenderer.js",
+      "sha256": "bf1c7231c8666070124eed4f6078b1d62ab4dea0973c44cc5d6264469961e488"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/gantt/styles.js",
+      "sha256": "8e8f606fe9423e2dec6e3e5c0b347c024b80f050011c88ca3a3df4a009019ed7"
     }
   ],
   "packages": [
@@ -1692,6 +1708,94 @@
       {
         "source": "d3-hierarchy@3.1.2/src/treemap/index.js",
         "sha256": "28b566cdfbf6e87a04eb6ed15d83df2e875544e75ebd904a8275d88922545f8f"
+      }
+    ]
+  },
+  "ganttTime": {
+    "files": [
+      {
+        "source": "../../../../../node_modules/.pnpm/dayjs@1.11.21/node_modules/dayjs/dayjs.min.js",
+        "sha256": "0198dd0b1f760cded169c7e7ff7eaf56bc36c4c22c7c9b7c683e59437ed8700e"
+      },
+      {
+        "source": "../../../../../node_modules/.pnpm/d3-axis@3.0.0/node_modules/d3-axis/src/identity.js",
+        "sha256": "38f849a76a9268107d92965eafa07e7cb0fef759c9b9fcde23e6cd6846009827"
+      },
+      {
+        "source": "../../../../../node_modules/.pnpm/d3-axis@3.0.0/node_modules/d3-axis/src/axis.js",
+        "sha256": "5123bbf6467fac1e9022cf28ad6fd36f84c590252dadca001b42aa63c68b0bef"
+      },
+      {
+        "source": "../../../../../node_modules/.pnpm/d3-time@3.1.0/node_modules/d3-time/src/interval.js",
+        "sha256": "73bf3a122270a4d1919e95b7c8f7e60e679be42cc97903acfb822296f123f311"
+      },
+      {
+        "source": "../../../../../node_modules/.pnpm/d3-time@3.1.0/node_modules/d3-time/src/millisecond.js",
+        "sha256": "4db5f945a55dcb42e7fce1aad5ab3c516fd8191b54eaa3bcf5cbc0fbed4c470d"
+      },
+      {
+        "source": "../../../../../node_modules/.pnpm/d3-time@3.1.0/node_modules/d3-time/src/duration.js",
+        "sha256": "efffb8ebd5a7b36eaa6d9aa11a4945406612506a809af7b2e8e0602d25a30179"
+      },
+      {
+        "source": "../../../../../node_modules/.pnpm/d3-time@3.1.0/node_modules/d3-time/src/second.js",
+        "sha256": "ad311be6ccec5b32b11cdc456105d9703b6b68865552e7cf3598deeaf5cd8f02"
+      },
+      {
+        "source": "../../../../../node_modules/.pnpm/d3-time@3.1.0/node_modules/d3-time/src/minute.js",
+        "sha256": "39dd7c6a76a97c659bfde2296c83242e390add0f533eebe3f9c0e06b595891a8"
+      },
+      {
+        "source": "../../../../../node_modules/.pnpm/d3-time@3.1.0/node_modules/d3-time/src/hour.js",
+        "sha256": "c0ef30c9b926a985609efa7c19c85c8c6f771faa82af8f158b29cb2c32c1d2f5"
+      },
+      {
+        "source": "../../../../../node_modules/.pnpm/d3-time@3.1.0/node_modules/d3-time/src/day.js",
+        "sha256": "45b32e5c3ac1b5aed42c3e60bc9daf669cf844e5e846fc547748d5b4ce4764e7"
+      },
+      {
+        "source": "../../../../../node_modules/.pnpm/d3-time@3.1.0/node_modules/d3-time/src/week.js",
+        "sha256": "f20da27d58580d1db19f2f7d899854394db4e17876ce1529c2b42bb4a9798086"
+      },
+      {
+        "source": "../../../../../node_modules/.pnpm/d3-time@3.1.0/node_modules/d3-time/src/month.js",
+        "sha256": "d41497348718ebe3855c03216846dd25f92f1b5145ba8f0039576940700873b9"
+      },
+      {
+        "source": "../../../../../node_modules/.pnpm/d3-time@3.1.0/node_modules/d3-time/src/year.js",
+        "sha256": "c54114bd5c5c878c420d01a91d343424feb8e1fd08ded93954cd040f9f2a4b96"
+      },
+      {
+        "source": "../../../../../node_modules/.pnpm/d3-time@3.1.0/node_modules/d3-time/src/ticks.js",
+        "sha256": "ca414e920f4923b08ed3d383b75f4e37706be4221db6136a46ed5a3eb2f222b3"
+      },
+      {
+        "source": "../../../../../node_modules/.pnpm/d3-time-format@4.1.0/node_modules/d3-time-format/src/locale.js",
+        "sha256": "47df570989eca703c1d1a720aed8e8010d5992c2235348f135654ea930fbf4d8"
+      },
+      {
+        "source": "../../../../../node_modules/.pnpm/d3-time-format@4.1.0/node_modules/d3-time-format/src/defaultLocale.js",
+        "sha256": "f2dcb690f729fc8d1b5ab2f2d59477f91fc49bdf2cf60a9f87fc7a6817893804"
+      },
+      {
+        "source": "../../../../../node_modules/.pnpm/d3-scale@4.0.2/node_modules/d3-scale/src/time.js",
+        "sha256": "666b7acd807e2ad4130097bf121ab0a38b02a25cc57de3eff9e07e043b7d8fc9"
+      },
+      {
+        "source": "../../../../../node_modules/.pnpm/dayjs@1.11.21/node_modules/dayjs/plugin/isoWeek.js",
+        "sha256": "9937b6f6e7f852fd180a75d02f223298a4541a8cec415d0cadad5dfde7d40929"
+      },
+      {
+        "source": "../../../../../node_modules/.pnpm/dayjs@1.11.21/node_modules/dayjs/plugin/customParseFormat.js",
+        "sha256": "b199a58d0fbbdc519a072eb9b140a2ca3d4775ea1b054a0c0e5aeed86603c941"
+      },
+      {
+        "source": "../../../../../node_modules/.pnpm/dayjs@1.11.21/node_modules/dayjs/plugin/advancedFormat.js",
+        "sha256": "6f9ca609c4af60f2a03033e72dec5714f4f8e7b240381934040f547a0282463f"
+      },
+      {
+        "source": "../../../../../node_modules/.pnpm/dayjs@1.11.21/node_modules/dayjs/plugin/duration.js",
+        "sha256": "7dac282a770e1d475181d428babda30129a0a56907c57defaec9a361b9a8189d"
       }
     ]
   }

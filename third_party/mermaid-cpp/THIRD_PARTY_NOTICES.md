@@ -44,6 +44,9 @@ d3-interpolate 3.0.1. XY line paths use d3-shape linear interpolation.
 Treemap hierarchy summation, stable sorting, squarify, rounding and padding
 follow d3-hierarchy 3.1.2; the bounded value formatter follows d3-format 3.1.0.
 Both carry Copyright 2010-2021 Mike Bostock and the ISC notice below.
+Gantt time intervals/ticks follow d3-time 3.1.0 (Copyright 2010-2022
+Mike Bostock), and its axis/time formatting follow d3-axis 3.0.0 and
+d3-time-format 4.1.0 (Copyright 2010-2021 Mike Bostock), under the same ISC notice.
 Their source-map contents are hash-pinned alongside the Mermaid sources.
 
 Copyright 2010-2021 Mike Bostock (d3-scale, d3-interpolate)
@@ -121,3 +124,10 @@ Sankey node alignment, six-round relaxation/collision layout and link positionin
 follow d3-sankey 0.12.3. Its BSD-3-Clause notice is reproduced in
 `D3-SANKEY-LICENSE`; source-map contents are hash-pinned in source-lock.json.
 The JavaScript implementation is used only by the test oracle.
+
+## Day.js 1.11.21
+
+Gantt's bounded civil-date parsing and duration/dependency calculations follow
+Day.js core and its customParseFormat, advancedFormat, isoWeek and duration
+plugins embedded in the pinned Mermaid release. The MIT notice is reproduced
+in `DAYJS-LICENSE`; source-map contents are recorded in source-lock.json.
