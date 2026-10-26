@@ -35,7 +35,7 @@ void remove_overlaps(std::vector<ElkEndLabelCell>& cells,std::span<const std::si
 }
 std::expected<std::vector<ElkEndLabelCell>,std::string> elk_prepare_end_labels(
     ElkLayeredGraph& g,std::span<const ElkEndLabel> labels,std::span<ElkHorizontalMargin> margins,
-    bool vertical,double edge_spacing,double label_spacing) {
+    bool vertical,double edge_spacing,double label_spacing,bool default_above,bool select_sides) {
     if(margins.size()!=g.nodes.size())return std::unexpected("ELK end labels require measured node margins");
     std::vector<std::vector<ElkEndLabel>> by_port(g.ports.size());
     for(const auto& label:labels) {
@@ -51,12 +51,12 @@ std::expected<std::vector<ElkEndLabelCell>,std::string> elk_prepare_end_labels(
     for(std::size_t n=0;n<g.nodes.size();++n) {
         auto& node=g.nodes[n];if(node.kind!=ElkLayerNodeKind::normal)continue;
         const auto begin=cells.size();
-        std::vector<bool> above(g.ports.size());
+        std::vector<bool> above(g.ports.size(),select_sides&&default_above);
         // SMART_DOWN counts incident ports, including ones with no end labels.
-        for(const auto side:{ElkPortSide::east,ElkPortSide::west}) {
+        if(select_sides)for(const auto side:{ElkPortSide::east,ElkPortSide::west}) {
             std::vector<std::size_t> group;
             for(const auto p:node.ports)if(g.ports[p].side==side&&(!g.ports[p].incoming.empty()||!g.ports[p].outgoing.empty()))group.push_back(p);
-            if(group.size()==2)above[group[side==ElkPortSide::east?0:1]]=true;
+            if(group.size()==2){above[group[0]]=side==ElkPortSide::east;above[group[1]]=side==ElkPortSide::west;}
         }
         for(const auto p:node.ports)if(!by_port[p].empty()) {
             const auto& port=g.ports[p];

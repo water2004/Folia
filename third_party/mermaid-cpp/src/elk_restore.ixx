@@ -13,9 +13,9 @@ struct ElkRestoredRoute {
 };
 // Project original edge paths from the completed raw routing graph, applying
 // LongEdgeJoiner and ReversedEdgeRestorer semantics without invalidating its
-// stable node/port indices. No label dummies, collector ports or junctions.
-// The original default unnecessaryBendpoints=false is retained.
+// stable node/port indices. Supports center-label dummies; no collector ports.
+// Optional long-dummy anchor bends match the Mermaid adapter's explicit true.
 [[nodiscard]] std::expected<std::vector<ElkRestoredRoute>,std::string> elk_restore_flat_routes(
     const ElkLayeredGraph& graph, const ElkOrthogonalRoutes& routes,
-    std::span<const double> node_y);
+    std::span<const double> node_y, bool unnecessary_bendpoints = false);
 }

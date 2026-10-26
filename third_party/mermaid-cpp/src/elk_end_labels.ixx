@@ -21,7 +21,8 @@ struct ElkEndLabelCell {
 [[nodiscard]] std::expected<std::vector<ElkEndLabelCell>,std::string> elk_prepare_end_labels(
     ElkLayeredGraph& graph, std::span<const ElkEndLabel> labels,
     std::span<ElkHorizontalMargin> margins, bool vertical_layout = false,
-    double edge_label_spacing = 2, double label_label_spacing = 0);
+    double edge_label_spacing = 2, double label_label_spacing = 0,
+    bool default_above = false, bool select_sides = true);
 // Original EndLabelPostprocessor; called with final node positions after route
 // restoration. Original endpoint identities survive feedback-edge reversal.
 [[nodiscard]] std::vector<ElkLabelPosition> elk_restore_end_labels(

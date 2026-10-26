@@ -5,7 +5,7 @@ import std;
 
 namespace folia::mermaid {
 std::expected<std::vector<ElkRestoredRoute>,std::string> elk_restore_flat_routes(
-    const ElkLayeredGraph& g,const ElkOrthogonalRoutes& routes,std::span<const double> y) {
+    const ElkLayeredGraph& g,const ElkOrthogonalRoutes& routes,std::span<const double> y,bool unnecessary_bendpoints) {
     if(routes.node_x.size()!=g.nodes.size()||y.size()!=g.nodes.size()||routes.bends.size()!=g.edges.size())
         return std::unexpected("ELK restoration requires all routed node positions and edge segments");
     const auto anchor=[&](std::size_t p) {
@@ -23,6 +23,8 @@ std::expected<std::vector<ElkRestoredRoute>,std::string> elk_restore_flat_routes
             const auto target=current.target_port;
             const auto& node=g.nodes[g.ports[target].node];
             if(node.kind==ElkLayerNodeKind::normal) {route.target_port=target;break;}
+            if(unnecessary_bendpoints&&node.kind==ElkLayerNodeKind::long_edge)
+                route.bends.push_back(anchor(node.ports.front()));
             // LongEdgeSplitter owns exactly one input and one output per dummy.
             std::optional<std::size_t> continuation;
             for(const auto p:node.ports)if(g.ports[p].side==ElkPortSide::east) {
