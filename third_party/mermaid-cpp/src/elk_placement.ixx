@@ -24,6 +24,7 @@ struct ElkBlockAlignment {
 struct ElkPlacementSpacing {
     double node_node = 20, edge_node = 10, edge_edge = 10;
     double port_port = 10, label_port = 1;
+    double label_node = 5;
 };
 // Original BK compaction with IMPROVE_STRAIGHTNESS, followed by balanced
 // selection (or the original narrowest feasible layout for favorStraightEdges).

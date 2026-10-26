@@ -138,6 +138,12 @@ struct Compactor {
     }
     double separation(std::size_t a, std::size_t c) const {
         const auto ak=g.nodes[a].kind,ck=g.nodes[c].kind;
+        if(ak==ElkLayerNodeKind::north_south||ck==ElkLayerNodeKind::north_south) {
+            const auto other=ak==ElkLayerNodeKind::north_south?ck:ak;
+            if(other==ElkLayerNodeKind::normal)return spacing.edge_node;
+            if(other==ElkLayerNodeKind::label)return spacing.label_node;
+            return spacing.edge_edge;
+        }
         if(ak==ElkLayerNodeKind::external_port||ck==ElkLayerNodeKind::external_port) {
             const auto other=ak==ElkLayerNodeKind::external_port?ck:ak;
             if(other==ElkLayerNodeKind::external_port)return spacing.port_port;
