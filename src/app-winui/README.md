@@ -2,11 +2,18 @@
 
 WinUI 3/C++/WinRT application shell for Folia.
 
-This layer owns the native window, command bar, collapsible outline/settings navigation, status/progress surfaces, file dialogs, and the `SwapChainPanel` host for the self-drawn editor surface. It must not implement Markdown mutations directly; UI actions are translated to core `Command` values and applied through core document transactions.
+This layer owns the native title bar and document tabs, main menu, animated file/outline sidebars, settings navigation, status/progress surfaces, file dialogs, and one shared `SwapChainPanel` host. It must not implement Markdown mutations directly; UI actions are translated to core `Command` values and applied through core document transactions.
 
 Source ownership:
 
 - The directory root contains XAML application/window files and the composition root. `MainWindow.xaml.cpp` owns lifecycle and window state; command and event wiring live in separate translation units.
+- `workspace/` owns the open-document collection, lazy background folder
+  enumeration and the shared vector icon definitions. Each document keeps its
+  original session and document controller; activation only rebinds the shared
+  input and rendering resources. `MainWindow.Documents.cpp` owns that binding,
+  `MainWindow.Tabs.cpp` projects the collection into native tabs and sidebars,
+  `MainWindow.Folders.cpp` owns file/folder pickers, and
+  `MainWindow.Shortcuts.cpp` routes application shortcuts.
 - `editor/session/` adapts the core editor/document state to the native
   application. The session facade is split by boundary: document/render-model
   lifecycle, rendered/source editing dispatch, search, and UTF-32-to-UTF-16
@@ -41,6 +48,18 @@ Source ownership:
   and ICU-backed document byte decoding/encoding. Storage reports ranked
   detection candidates but does not own document state; the session owns the
   encoding selected for the currently open document.
+
+File clicks use a replaceable preview tab. Double-clicking or editing keeps
+that document open; dirty previews cannot be replaced. The folder sidebar is
+hidden until the user opens a folder or explicitly expands it. The outline
+has its own button and pane. Each tab retains its own selection, undo history,
+source-view state, reading position, and file-backed formula geometry; it does
+not own another GPU surface. Switching tabs performs no full-document parse
+or serialization.
+
+The default workspace shortcuts are Ctrl+N (new), Ctrl+O (open file),
+Ctrl+Shift+O (open folder), Ctrl+W (close tab), and Ctrl+Tab / Ctrl+Shift+Tab
+(next / previous tab). They use the existing configurable shortcut catalog.
 
 The document pipeline has three app-owned stages:
 

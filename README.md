@@ -49,6 +49,10 @@ the user did not change.
 - **Focused reading** — configurable themes, English and Chinese interfaces,
   a borderless WinUI shell, file-association support, and cancellable native
   Windows PDF export with page progress.
+- **Folder workspace** — lazy file browsing, preview tabs that become permanent
+  on double-click or editing, and independent history and reading positions per
+  document. The title bar holds the tabs and main menu; file browsing and the
+  document outline have separate animated sidebars.
 - **Encoding aware** — ICU-based charset detection ranks likely encodings when
   reopening a file, while explicit conversion saves in any installed ICU
   encoding and preserves the selected encoding on subsequent saves.

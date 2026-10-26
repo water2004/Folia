@@ -42,7 +42,7 @@ namespace winrt::Folia::implementation {
                 auto previousPath = document->path;
                 window->workspaceDocuments.RefreshPath(id);
                 if (document->session.HasFile()) document->loaded = true;
-                document->themeRevision = window->workspaceThemeRevision;
+                if (window->IsActiveDocument(id)) document->themeRevision = window->workspaceThemeRevision;
                 window->workspaceDocuments.ObserveEdit(id);
                 if (previousPath != document->path) window->RefreshDocumentTabs();
                 else window->UpdateDocumentTab(id);
