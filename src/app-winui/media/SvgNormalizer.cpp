@@ -30,7 +30,9 @@ namespace
             destroy = reinterpret_cast<Destroy>(GetProcAddress(module, "folia_svg_normalizer_destroy"));
             normalize = reinterpret_cast<Normalize>(GetProcAddress(module, "folia_svg_normalize"));
             freeBuffer = reinterpret_cast<FreeBuffer>(GetProcAddress(module, "folia_svg_buffer_destroy"));
-            if (!create || !destroy || !normalize || !freeBuffer)
+            beginRequest = reinterpret_cast<BeginRequest>(GetProcAddress(module, "folia_svg_request_begin"));
+            endRequest = reinterpret_cast<EndRequest>(GetProcAddress(module, "folia_svg_request_end"));
+            if (!create || !destroy || !normalize || !freeBuffer || !beginRequest || !endRequest)
             {
                 error = "SVG normalizer library has an incompatible ABI";
                 return;
@@ -45,7 +47,31 @@ namespace
             if (module) FreeLibrary(module);
         }
 
-        winrt::Folia::NormalizedSvg Process(std::string const& source, float fontSize)
+        std::vector<winrt::Folia::NormalizedSvg> ProcessBatch(
+            std::span<winrt::Folia::SvgNormalizationInput const> inputs)
+        {
+            std::vector<winrt::Folia::NormalizedSvg> results;
+            results.reserve(inputs.size());
+            if (inputs.empty()) return results;
+            if (error.empty() && beginRequest(context) != 0)
+                throw std::logic_error("SVG normalization request is already active");
+            auto end = [this](void*) { if (error.empty()) endRequest(context); };
+            std::unique_ptr<void, decltype(end)> request(this, end);
+            for (auto const& input : inputs)
+            {
+                if (input.stop.stop_requested())
+                {
+                    winrt::Folia::NormalizedSvg canceled;
+                    canceled.error = "SVG normalization canceled";
+                    results.push_back(std::move(canceled));
+                }
+                else results.push_back(Process(input.source, input.fontSize));
+            }
+            return results;
+        }
+
+    private:
+        winrt::Folia::NormalizedSvg Process(std::string_view source, float fontSize)
         {
             winrt::Folia::NormalizedSvg result;
             if (!error.empty())
@@ -75,11 +101,12 @@ namespace
             return result;
         }
 
-    private:
         using Create = void* (*)();
         using Destroy = void (*)(void*);
         using Normalize = std::int32_t (*)(void*, std::uint8_t const*, std::size_t, float, std::uint8_t**, std::size_t*, float*, float*);
         using FreeBuffer = void (*)(std::uint8_t*, std::size_t);
+        using BeginRequest = std::int32_t (*)(void*);
+        using EndRequest = void (*)(void*);
 
         HMODULE module = nullptr;
         void* context = nullptr;
@@ -87,6 +114,8 @@ namespace
         Destroy destroy = nullptr;
         Normalize normalize = nullptr;
         FreeBuffer freeBuffer = nullptr;
+        BeginRequest beginRequest = nullptr;
+        EndRequest endRequest = nullptr;
         std::string error;
     };
 
@@ -110,15 +139,23 @@ namespace
         return shared;
     }
 
-    winrt::Folia::NormalizedSvg NormalizeSvg(
+    std::vector<winrt::Folia::NormalizedSvg> NormalizeSvgBatch(
         std::shared_ptr<SharedRuntime> const& shared,
-        std::string const& source, float fontSize)
+        std::span<winrt::Folia::SvgNormalizationInput const> inputs)
     {
         // Keep the DLL and shared font database alive for every normalization
         // lease, including detached document workers. Loading stays lazy.
         std::scoped_lock lock(shared->mutex);
         if (!shared->runtime) shared->runtime = std::make_unique<Runtime>();
-        return shared->runtime->Process(source, fontSize);
+        return shared->runtime->ProcessBatch(inputs);
+    }
+
+    winrt::Folia::NormalizedSvg NormalizeSvg(std::shared_ptr<SharedRuntime> const& shared,
+        std::string_view source, float fontSize)
+    {
+        winrt::Folia::SvgNormalizationInput input{source, fontSize, {}};
+        auto result = NormalizeSvgBatch(shared, std::span{&input, std::size_t{1}});
+        return std::move(result.front());
     }
 }
 
@@ -220,9 +257,17 @@ namespace winrt::Folia
 
     NormalizedSvg SvgNormalizer::NormalizeNow(std::string_view source, float fontSize)
     {
-        auto result = NormalizeSvg(state->runtimeLease, std::string(source), fontSize);
-        if (result.error.empty()) result.id = nextSvgId.fetch_add(1);
-        return result;
+        const SvgNormalizationInput input{source, fontSize, {}};
+        auto result = NormalizeBatchNow(std::span{&input, std::size_t{1}});
+        return std::move(result.front());
+    }
+
+    std::vector<NormalizedSvg> SvgNormalizer::NormalizeBatchNow(std::span<SvgNormalizationInput const> inputs)
+    {
+        auto results = NormalizeSvgBatch(state->runtimeLease, inputs);
+        for (auto& result : results)
+            if (result.error.empty()) result.id = nextSvgId.fetch_add(1);
+        return results;
     }
 
     std::optional<NormalizedSvg> SvgNormalizer::GetOrQueue(

@@ -7,10 +7,18 @@
 #include <span>
 #include <string>
 #include <string_view>
+#include <stop_token>
+#include <vector>
 
 
 namespace winrt::Folia
 {
+    struct SvgNormalizationInput
+    {
+        std::string_view source;
+        float fontSize;
+        std::stop_token stop;
+    };
     struct NormalizedSvg
     {
         std::uint64_t id = 0;
@@ -37,6 +45,7 @@ namespace winrt::Folia
         // Complete normalization on the caller's preparation thread. Math
         // layout never waits for an asynchronous SVG completion notification.
         NormalizedSvg NormalizeNow(std::string_view source, float fontSize);
+        std::vector<NormalizedSvg> NormalizeBatchNow(std::span<SvgNormalizationInput const> inputs);
 
         std::optional<NormalizedSvg> GetOrQueue(
             std::string_view source,

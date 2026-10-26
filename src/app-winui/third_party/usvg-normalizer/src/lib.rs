@@ -1,7 +1,8 @@
 use std::collections::BTreeMap;
+use std::collections::HashMap;
 use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::ptr;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 use base64::Engine as _;
 use mermaid_rs_renderer::{RenderOptions, Theme, render_with_options};
@@ -147,6 +148,39 @@ fn expand_embedded_svg_images(source: &[u8]) -> Vec<u8> {
 
 pub struct Normalizer {
     fontdb: Option<Arc<usvg::fontdb::Database>>,
+    request: Option<Arc<FontRequest>>,
+}
+
+// Cache selection decisions, not font bytes or glyph outlines. The default
+// fallback selector may inspect many system font files for each character.
+// Reuse its exact answers only within one bounded normalization request.
+#[derive(Default)]
+struct FontRequest {
+    fonts: Mutex<HashMap<usvg::Font, Option<usvg::fontdb::ID>>>,
+    fallback: Mutex<HashMap<(char, Vec<usvg::fontdb::ID>), Option<usvg::fontdb::ID>>>,
+}
+
+impl FontRequest {
+    fn resolver(self: &Arc<Self>) -> usvg::FontResolver<'static> {
+        let fonts = Arc::clone(self);
+        let fallback = Arc::clone(self);
+        let select_font = usvg::FontResolver::default_font_selector();
+        let select_fallback = usvg::FontResolver::default_fallback_selector();
+        usvg::FontResolver {
+            select_font: Box::new(move |font, database| {
+                let mut cache = fonts.fonts.lock().unwrap();
+                *cache
+                    .entry(font.clone())
+                    .or_insert_with(|| select_font(font, database))
+            }),
+            select_fallback: Box::new(move |character, excluded, database| {
+                let mut cache = fallback.fallback.lock().unwrap();
+                *cache
+                    .entry((character, excluded.to_vec()))
+                    .or_insert_with(|| select_fallback(character, excluded, database))
+            }),
+        }
+    }
 }
 
 impl Normalizer {
@@ -178,6 +212,9 @@ impl Normalizer {
                 Arc::new(fontdb)
             });
             options.fontdb = Arc::clone(fontdb);
+            if let Some(request) = &self.request {
+                options.font_resolver = request.resolver();
+            }
         }
         options
     }
@@ -196,9 +233,34 @@ fn write_output(value: String, output: *mut *mut u8, output_len: *mut usize) {
 #[unsafe(no_mangle)]
 pub extern "C" fn folia_svg_normalizer_create() -> *mut Normalizer {
     catch_unwind(AssertUnwindSafe(|| {
-        Box::into_raw(Box::new(Normalizer { fontdb: None }))
+        Box::into_raw(Box::new(Normalizer {
+            fontdb: None,
+            request: None,
+        }))
     }))
     .unwrap_or(ptr::null_mut())
+}
+
+// The host serializes this context and pairs begin/end even on cancellation
+// and exceptions. Outside the request only the existing font catalog remains.
+#[unsafe(no_mangle)]
+pub extern "C" fn folia_svg_request_begin(normalizer: *mut Normalizer) -> i32 {
+    if normalizer.is_null() {
+        return -1;
+    }
+    let normalizer = unsafe { &mut *normalizer };
+    if normalizer.request.is_some() {
+        return -1;
+    }
+    normalizer.request = Some(Arc::new(FontRequest::default()));
+    0
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn folia_svg_request_end(normalizer: *mut Normalizer) {
+    if !normalizer.is_null() {
+        unsafe { &mut *normalizer }.request = None;
+    }
 }
 
 #[unsafe(no_mangle)]
@@ -417,6 +479,71 @@ mod tests {
         assert!(!output.is_empty());
         assert_eq!(width, 120.0);
         assert_eq!(height, 80.0);
+    }
+
+    #[test]
+    fn request_font_selection_matches_uncached_output_and_is_released() {
+        let context = folia_svg_normalizer_create();
+        assert!(!context.is_null());
+        let samples = [
+            r#"<svg xmlns="http://www.w3.org/2000/svg" width="240" height="40"><text x="0" y="25">质量 中文 α Ж</text></svg>"#,
+            r#"<svg xmlns="http://www.w3.org/2000/svg" width="240" height="40"><text x="0" y="25" font-weight="bold" font-style="italic">中文 质量 α Ж</text></svg>"#,
+            r#"<svg xmlns="http://www.w3.org/2000/svg" width="240" height="40"><path d="M0 0L10 10"/></svg>"#,
+        ];
+        let render = |source: &str| {
+            let mut output = ptr::null_mut();
+            let mut length = 0;
+            let (mut width, mut height) = (0.0, 0.0);
+            let status = folia_svg_normalize(
+                context,
+                source.as_ptr(),
+                source.len(),
+                16.0,
+                &mut output,
+                &mut length,
+                &mut width,
+                &mut height,
+            );
+            assert_eq!(status, 0);
+            let bytes = unsafe { std::slice::from_raw_parts(output, length) }.to_vec();
+            folia_svg_buffer_destroy(output, length);
+            (bytes, width, height)
+        };
+        let expected: Vec<_> = samples.iter().map(|source| render(source)).collect();
+        assert_eq!(folia_svg_request_begin(context), 0);
+        assert_eq!(folia_svg_request_begin(context), -1);
+        for (source, expected) in samples.iter().zip(&expected) {
+            assert_eq!(&render(source), expected);
+        }
+        let request = unsafe { &*context }.request.as_ref().unwrap();
+        let font_count = request.fonts.lock().unwrap().len();
+        let fallback_count = request.fallback.lock().unwrap().len();
+        assert!(font_count > 0);
+        for _ in 0..3 {
+            for (source, expected) in samples.iter().zip(&expected) {
+                assert_eq!(&render(source), expected);
+            }
+        }
+        assert_eq!(request.fonts.lock().unwrap().len(), font_count);
+        assert_eq!(request.fallback.lock().unwrap().len(), fallback_count);
+        folia_svg_request_end(context);
+        assert!(unsafe { &*context }.request.is_none());
+        assert_eq!(folia_svg_request_begin(context), 0);
+        assert!(
+            unsafe { &*context }
+                .request
+                .as_ref()
+                .unwrap()
+                .fonts
+                .lock()
+                .unwrap()
+                .is_empty()
+        );
+        folia_svg_request_end(context);
+        for (source, expected) in samples.iter().zip(&expected) {
+            assert_eq!(&render(source), expected);
+        }
+        folia_svg_normalizer_destroy(context);
     }
 
     #[test]
