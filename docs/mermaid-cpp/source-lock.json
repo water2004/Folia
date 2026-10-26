@@ -651,6 +651,70 @@
     {
       "path": "packages/parser/src/language/radar/radar.langium",
       "sha256": "acd5171f3413f29242e8250c5a9c9d67e247a6b87acfbe7543bfc333bbdf3ac5"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/xychart/xychartDb.ts",
+      "sha256": "12d17c3ee9c7b8fdc21438d4c9e41d94fc217437415fcb420a2f8ba6de065b76"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/xychart/xychartRenderer.ts",
+      "sha256": "ef3950e7e6efe016ec211fa4ff8793e28fd77972f870b24921322e144a0cf3f1"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/xychart/parser/xychart.jison",
+      "sha256": "cc1f2f0f8a320bf64c974c132516b7393876188d70bd0fd22c93587e504862f1"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/xychart/chartBuilder/index.ts",
+      "sha256": "807a8dc356ccf1d04e72b58e5fbd0076b87e0225ea1b14bb10ff548c13c4a128"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/xychart/chartBuilder/interfaces.ts",
+      "sha256": "f0fe8953e195c803c8ac563c5e4230d10ed47665eb40d76c59de7e283e1fb2b3"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/xychart/chartBuilder/orchestrator.ts",
+      "sha256": "a8f9a742ff155925ab4f4df719af888c4ee88c7f1669cceffb1ec340e547d93d"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/xychart/chartBuilder/textDimensionCalculator.ts",
+      "sha256": "5c71e95021f3d50f0bc5fc7224e6bac7a1bc581715d47daee33dbc997a55b0c8"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/xychart/chartBuilder/components/chartTitle.ts",
+      "sha256": "4aa15e3f9c40adb709f177d6bb851f2a2d3e385d1c6e6b5a0abec993d87b36dd"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/xychart/chartBuilder/components/legend.ts",
+      "sha256": "1fed6382c5c43925f63d9a77f588ed8ae1127a92f633ab2e08deb007bad1bf9f"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/xychart/chartBuilder/components/axis/index.ts",
+      "sha256": "083b116c688359a6831003f7823bee673d97b76fd576f455d60c67db100b42cc"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/xychart/chartBuilder/components/axis/baseAxis.ts",
+      "sha256": "3aedafd8ce9de8af7092c6d909730f90acf9a8f5c85cd11a09904dd339a117d7"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/xychart/chartBuilder/components/axis/bandAxis.ts",
+      "sha256": "9f2296bc497ba67eb095a05181985bfc2ba8c5a7190a2d38931c2a2ba6868b55"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/xychart/chartBuilder/components/axis/linearAxis.ts",
+      "sha256": "28c067d9de8636c7a8d844cde8ca9b31d7340958465f260e8bcfd96553e3c4c1"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/xychart/chartBuilder/components/plot/index.ts",
+      "sha256": "3fc4263e819b5418512c86a7921588fc1dfef403bb015e290aad25bc724b24e5"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/xychart/chartBuilder/components/plot/barPlot.ts",
+      "sha256": "17569f3371c3629c92e498351f041921699a6f32562a7805da280503853b0526"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/xychart/chartBuilder/components/plot/linePlot.ts",
+      "sha256": "dcf2b16e353d492683ffe6eca8aad2e8fe6cc84ad5c5df91b63690725a06f832"
     }
   ],
   "packages": [
