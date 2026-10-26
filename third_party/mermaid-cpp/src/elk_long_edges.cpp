@@ -66,7 +66,7 @@ void elk_split_long_edges(ElkLayeredGraph& graph) {
                     graph.edges[index].thickness = thickness;
                     const auto source_node = graph.ports[graph.edges[index].source_port].node;
                     const auto target_node = graph.ports[target].node;
-                    const auto inherited = graph.nodes[source_node].kind != ElkLayerNodeKind::normal
+                    const auto inherited = (graph.nodes[source_node].kind == ElkLayerNodeKind::long_edge || graph.nodes[source_node].kind == ElkLayerNodeKind::label)
                         ? std::optional{source_node} : graph.nodes[target_node].kind == ElkLayerNodeKind::label
                         ? std::optional{target_node} : std::nullopt;
                     const auto long_source = inherited ? graph.nodes[*inherited].long_edge_source

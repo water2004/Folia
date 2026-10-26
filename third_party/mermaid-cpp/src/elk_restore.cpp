@@ -14,7 +14,8 @@ std::expected<std::vector<ElkRestoredRoute>,std::string> elk_restore_flat_routes
     std::vector<ElkRestoredRoute> result;
     for(std::size_t index=0;index<g.edges.size();++index) {
         const auto& edge=g.edges[index];
-        if(g.nodes[g.ports[edge.source_port].node].kind!=ElkLayerNodeKind::normal)continue;
+        const auto source_kind=g.nodes[g.ports[edge.source_port].node].kind;
+        if(source_kind==ElkLayerNodeKind::long_edge||source_kind==ElkLayerNodeKind::label)continue;
         ElkRestoredRoute route{.original_edge=edge.original_edge,.source_port=edge.source_port};
         auto segment=index;
         for(;;) {
@@ -22,7 +23,7 @@ std::expected<std::vector<ElkRestoredRoute>,std::string> elk_restore_flat_routes
             route.bends.insert(route.bends.end(),routes.bends[segment].begin(),routes.bends[segment].end());
             const auto target=current.target_port;
             const auto& node=g.nodes[g.ports[target].node];
-            if(node.kind==ElkLayerNodeKind::normal) {route.target_port=target;break;}
+            if(node.kind==ElkLayerNodeKind::normal||node.kind==ElkLayerNodeKind::external_port) {route.target_port=target;break;}
             if(unnecessary_bendpoints&&node.kind==ElkLayerNodeKind::long_edge)
                 route.bends.push_back(anchor(node.ports.front()));
             // LongEdgeSplitter owns exactly one input and one output per dummy.

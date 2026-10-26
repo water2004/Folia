@@ -137,6 +137,13 @@ struct Compactor {
         std::iota(sink.begin(),sink.end(),0);
     }
     double separation(std::size_t a, std::size_t c) const {
+        const auto ak=g.nodes[a].kind,ck=g.nodes[c].kind;
+        if(ak==ElkLayerNodeKind::external_port||ck==ElkLayerNodeKind::external_port) {
+            const auto other=ak==ElkLayerNodeKind::external_port?ck:ak;
+            if(other==ElkLayerNodeKind::external_port)return spacing.port_port;
+            if(other==ElkLayerNodeKind::label)return spacing.label_port;
+            return other==ElkLayerNodeKind::long_edge?spacing.edge_edge:spacing.edge_node;
+        }
         const bool ad=g.nodes[a].kind==ElkLayerNodeKind::long_edge;
         const bool cd=g.nodes[c].kind==ElkLayerNodeKind::long_edge;
         if(g.nodes[a].kind==ElkLayerNodeKind::label&&g.nodes[c].kind==ElkLayerNodeKind::label)

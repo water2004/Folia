@@ -303,14 +303,18 @@ std::expected<ElkOrthogonalRoutes,std::string> elk_route_flat_edges(const ElkLay
             result.node_x[n]=result.width+x;
         }
         result.width+=result.layer_width[l];
+        const auto external=[&](std::size_t layer_index) {
+            return std::ranges::all_of(g.layers[layer_index],[&](auto n){return g.nodes[n].kind==ElkLayerNodeKind::external_port;});
+        };
+        const bool ordinary_gap=l+1<g.layers.size()&&!external(l)&&!external(l+1);
         const auto slots=RoutingGap(g,y,spacing,random).run(layer,result.width+spacing.edge_node_between_layers,result);
         result.gap_slots.push_back(slots);
         if(slots>0) {
             auto width=(slots-1)*spacing.edge_edge_between_layers+spacing.edge_node_between_layers;
             if(l+1<g.layers.size())width+=spacing.edge_node_between_layers;
-            if(l+1<g.layers.size())width=std::max(width,spacing.node_node_between_layers);
+            if(ordinary_gap)width=std::max(width,spacing.node_node_between_layers);
             result.width+=width;
-        } else if(l+1<g.layers.size())result.width+=spacing.node_node_between_layers;
+        } else if(ordinary_gap)result.width+=spacing.node_node_between_layers;
     }
     return result;
 }

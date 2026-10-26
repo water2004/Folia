@@ -131,7 +131,7 @@ struct Ordering {
                 barycenters[n] = sum / degree;
             }
         }
-        if (!first_sweep) {
+        if (!first_sweep || g.nodes[layer.front()].kind==ElkLayerNodeKind::external_port) {
             double last = -1;
             for (std::size_t i = 0; i < layer.size(); ++i) {
                 auto& value = barycenters[layer[i]];
