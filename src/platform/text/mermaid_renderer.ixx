@@ -541,6 +541,46 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             return C4TextBox{box->advance,box->bounds_width,metrics->height,metrics->baseline,metrics->middle_offset};
         };
     }
-    return render_native_diagram(*input,widths,flowchart_measurements,sequence_measurements,class_measurements,xy_measurements,sankey_measurements,treemap_measure,journey_measure,timeline_measure,gantt_measure,git_graph_measure,mindmap_measurements,block_measure,kanban_measure,c4_measurements);
+    ArchitectureMeasurements architecture_measurements;
+    if(auto architecture=std::get_if<ArchitectureRenderInput>(&input->content)) {
+        const auto icon_size=architecture->document.config.find(u"iconSize")->number;
+        const auto node_size=architecture->document.config.find(u"fontSize")->number;
+        auto metrics=measurer.svg_font_metrics({architecture->theme.font_family,static_cast<float>(architecture->theme.font_size)});
+        if(!metrics)return std::unexpected(metrics.error());
+        architecture_measurements.svg_ascent=metrics->baseline;
+        architecture_measurements.svg_middle=metrics->middle_offset;
+        architecture_measurements.measure_label=[architecture,&measure_label](std::u16string_view text,double width) {
+            FlowchartNode label;label.label=text;label.label_type=u"markdown";
+            return measure_label(architecture->theme,architecture->document.effective_config,label,width);
+        };
+        // Cytoscape's canvas labels retain its own default font, independently
+        // of the theme font used by createText in the visible SVG.
+        auto cy_family=measurer.resolve_family(u"Helvetica Neue, Helvetica, sans-serif");
+        if(!cy_family)return std::unexpected(cy_family.error());
+        auto cy_label=[&measurer,&cy_family](std::u16string_view value,double size)->std::expected<ArchitectureCyLabel,std::string> {
+            if(value.empty())return ArchitectureCyLabel{};
+            ArchitectureCyLabel out;
+            std::size_t start=0;
+            while(start<=value.size()) {
+                const auto end=value.find(u'\n',start);const auto line=value.substr(start,end==value.npos?value.size()-start:end-start);
+                auto measured=measurer.measure(line,{*cy_family,static_cast<float>(size)},true);
+                if(!measured)return std::unexpected(measured.error());
+                out.width=std::max(out.width,std::ceil(measured->advance));out.height+=size;
+                if(end==value.npos)break;start=end+1;
+            }
+            return out;
+        };
+        for(const auto& node:architecture->document.nodes) {
+            auto label=architecture_measurements.measure_label(node.title,icon_size*1.5);
+            if(!label)return std::unexpected(label.error());architecture_measurements.services.push_back(std::move(*label));
+            auto icon_text=architecture_measurements.measure_label(node.icon_text,icon_size-2);
+            if(!icon_text)return std::unexpected(icon_text.error());architecture_measurements.icon_text.push_back(std::move(*icon_text));
+            auto cy=cy_label(node.title,node_size);if(!cy)return std::unexpected(cy.error());architecture_measurements.cy_labels.nodes.push_back(*cy);
+        }
+        for(const auto& edge:architecture->document.edges) {
+            auto cy=cy_label(edge.title,16);if(!cy)return std::unexpected(cy.error());architecture_measurements.cy_labels.edges.push_back(*cy);
+        }
+    }
+    return render_native_diagram(*input,widths,flowchart_measurements,sequence_measurements,class_measurements,xy_measurements,sankey_measurements,treemap_measure,journey_measure,timeline_measure,gantt_measure,git_graph_measure,mindmap_measurements,block_measure,kanban_measure,c4_measurements,architecture_measurements);
 }
 }

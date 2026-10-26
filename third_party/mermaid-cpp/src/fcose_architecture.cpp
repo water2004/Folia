@@ -1,7 +1,7 @@
 module folia.mermaid.fcose_architecture;
 import std;
 namespace folia::mermaid {
-std::expected<ArchitectureLayoutResult,std::string> layout_architecture(const ArchitectureDocument& document) {
+std::expected<ArchitectureLayoutResult,std::string> layout_architecture(const ArchitectureDocument& document,const ArchitectureCyMeasurements* measured) {
     try {
         const auto number=[&](std::u16string_view key){const auto* value=document.config.find(key);if(!value)throw std::runtime_error("Missing Architecture layout configuration");return value->number;};
         if(const auto* random=document.config.find(u"randomize");random&&random->boolean)return std::unexpected("Architecture spectral initialization is not connected");
@@ -28,12 +28,16 @@ std::expected<ArchitectureLayoutResult,std::string> layout_architecture(const Ar
         for(const auto& edge:document.edges){const auto& a=data[ids.at(edge.lhs_id)];const auto& b=data[ids.at(edge.rhs_id)];const bool same=a.parent==b.parent;request.edges.push_back({a.id,b.id,icon*(same?number(u"idealEdgeLengthMultiplier"):.5),same?number(u"edgeElasticity"):.001});}
         ArchitectureLayoutResult output;
         for(std::size_t pass=0;pass<2;++pass) {
-            for(const auto i:roots)measure(measure,i);const auto original_center=center(data);request.nodes.clear();for(const auto i:order)request.nodes.push_back(data[i]);
+            std::pair<double,double> original_center;
+            if(measured){const auto box=measure_architecture_cy_bounds(document,data,*measured);if(!box)return std::unexpected(box.error());original_center={box->x+box->width/2,box->y+box->height/2};}
+            else{for(const auto i:roots)measure(measure,i);original_center=center(data);}
+            request.nodes.clear();for(const auto i:order)request.nodes.push_back(data[i]);
             auto result=layout_fcose_incremental(request);if(!result)return std::unexpected(result.error());output.iterations[pass]=result->iterations;
             const auto laid_out_center=center(result->nodes);const double dx=original_center.first-laid_out_center.first,dy=original_center.second-laid_out_center.second;
             for(const auto& node:result->nodes){auto& actual=data[ids.at(node.id)];actual.x=node.x+dx;actual.y=node.y+dy;}
         }
-        for(const auto i:roots)measure(measure,i);
+        if(measured){const auto box=measure_architecture_cy_bounds(document,data,*measured);if(!box)return std::unexpected(box.error());}
+        else for(const auto i:roots)measure(measure,i);
         for(std::size_t i=0;i<data.size();++i)if(!children[i].empty()){data[i].width-=2*data[i].padding+1;data[i].height-=2*data[i].padding+1;}
         output.nodes=std::move(data);return output;
     }catch(const std::exception& e){return std::unexpected(e.what());}

@@ -362,6 +362,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/c4-browser-probe.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/architecture-browser-probe.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/gantt-browser-probe.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/timeline-browser-probe.mjs
@@ -382,6 +384,7 @@ jobs:
           $env:FOLIA_MERMAID_SVG_OUTPUT = Join-Path $pwd 'build/mermaid-cpp/pie-svg'
           $env:FOLIA_MERMAID_XY_MEASUREMENTS = Join-Path $pwd 'build/mermaid-cpp/xy-browser/measurements.tsv'
           $env:FOLIA_MERMAID_MINDMAP_MEASUREMENTS = Join-Path $pwd 'build/mermaid-cpp/mindmap-browser/measurements.tsv'
+          $env:FOLIA_MERMAID_ARCHITECTURE_MEASUREMENTS = Join-Path $pwd 'build/mermaid-cpp/architecture-browser/measurements.tsv'
           # Match built suites exactly; unrelated optional Math/encoding/spec
           # runners are not part of the Mermaid integration check.
           ctest --test-dir build/mermaid-cpp --output-on-failure --no-tests=error `
@@ -407,6 +410,8 @@ jobs:
           node tools/mermaid-cpp/compare-kanban-svg.mjs build/mermaid-cpp/kanban-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/compare-c4-svg.mjs build/mermaid-cpp/c4-browser/original.json build/mermaid-cpp/pie-svg
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/compare-architecture-svg.mjs build/mermaid-cpp/architecture-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/compare-gantt-svg.mjs build/mermaid-cpp/gantt-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -466,6 +471,9 @@ jobs:
             build/mermaid-cpp/kanban-browser/*.svg
             build/mermaid-cpp/c4-browser/*.json
             build/mermaid-cpp/c4-browser/*.svg
+            build/mermaid-cpp/architecture-browser/*.json
+            build/mermaid-cpp/architecture-browser/*.tsv
+            build/mermaid-cpp/architecture-browser/*.svg
             build/mermaid-cpp/gantt-browser/*.json
             build/mermaid-cpp/gantt-browser/*.svg
             build/mermaid-cpp/timeline-browser/*.json

@@ -939,6 +939,18 @@
     {
       "path": "packages/parser/src/language/architecture/valueConverter.ts",
       "sha256": "345955a2b4eca67143af5ec1feccb97ea79b93913f84ab2a0fe7e7791e9624aa"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/architecture/svgDraw.ts",
+      "sha256": "3fb31910400f96127eabf2b8c4106c3a45c0b3a6bc8c03840ecca24e1d6518cd"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/architecture/architectureIcons.ts",
+      "sha256": "fcb43156986bf14e97db38d4c6e0c6a3ea60feb3aa11e752370c8b25bc4eea04"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/architecture/architectureStyles.ts",
+      "sha256": "9c7e00969b448298b01f33cb82738fd971d22f4f861eef55b4bbc110299d316d"
     }
   ],
   "packages": [
@@ -2159,6 +2171,14 @@
       {
         "source": "cytoscape@3.34.0/src/style/properties.mjs",
         "sha256": "f225007428f52d2e2ad5e0ccbc9fad01f8904851a2159b8c1e2d6c5859de7319"
+      },
+      {
+        "source": "cytoscape@3.34.0/src/extensions/renderer/base/coord-ele-math/edge-endpoints.mjs",
+        "sha256": "a34b274ebbe72921dc8908225aa2fc8c0001871a58b8cc6b13e380d0813648e6"
+      },
+      {
+        "source": "cytoscape@3.34.0/src/extensions/renderer/base/coord-ele-math/labels.mjs",
+        "sha256": "f72b00147280efd60da132510646b596d7cdca1d8f4c683e32c42777855518a2"
       }
     ]
   },
