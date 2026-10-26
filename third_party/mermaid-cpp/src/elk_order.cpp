@@ -22,27 +22,6 @@ std::expected<void, std::string> supported(const ElkLayeredGraph& g) {
     return {};
 }
 
-// java.util.Random as used by the pinned GWT worker, including signed nextLong.
-struct Random {
-    std::uint64_t state;
-    explicit Random(std::uint64_t seed) { set_seed(seed); }
-    void set_seed(std::uint64_t seed) { state = (seed ^ 0x5deece66dULL) & ((1ULL << 48) - 1); }
-    std::uint32_t next(int bits) {
-        state = (state * 0x5deece66dULL + 11) & ((1ULL << 48) - 1);
-        return static_cast<std::uint32_t>(state >> (48 - bits));
-    }
-    std::uint64_t next_long() {
-        const auto high = static_cast<std::uint64_t>(next(32)) << 32;
-        const auto low = static_cast<std::int64_t>(std::bit_cast<std::int32_t>(next(32)));
-        return high + static_cast<std::uint64_t>(low);
-    }
-    double next_double() {
-        const auto high = next(26); const auto low = next(27);
-        return high * 0x1p-26 + low * 0x1p-53;
-    }
-    double next_float() { return next(24) * 0x1p-24; }
-};
-
 struct OrderCopy {
     std::vector<std::vector<std::size_t>> layers, ports;
     explicit OrderCopy(const ElkLayeredGraph& g) : layers(g.layers) {
@@ -56,13 +35,13 @@ struct OrderCopy {
 
 struct Ordering {
     ElkLayeredGraph& g;
-    Random random;
+    ElkRandom& random;
     bool node_relative;
     std::vector<double> ranks, port_barycenters;
     std::vector<std::optional<double>> barycenters;
 
-    Ordering(ElkLayeredGraph& graph, std::int64_t seed)
-        : g(graph), random(static_cast<std::uint64_t>(seed)),
+    Ordering(ElkLayeredGraph& graph, ElkRandom& graph_random)
+        : g(graph), random(graph_random),
           ranks(g.ports.size()), port_barycenters(g.ports.size()), barycenters(g.nodes.size()) {
         const auto sweep_seed = random.next_long();
         node_relative = random.next(1) != 0;
@@ -249,10 +228,15 @@ std::expected<void, std::string> elk_sort_flat_ports(ElkLayeredGraph& g) {
 }
 
 std::expected<std::size_t, std::string> elk_order_flat_graph(ElkLayeredGraph& g, std::int64_t seed, int thoroughness) {
+    ElkRandom random(static_cast<std::uint64_t>(seed));
+    return elk_order_flat_graph(g,random,thoroughness);
+}
+
+std::expected<std::size_t, std::string> elk_order_flat_graph(ElkLayeredGraph& g, ElkRandom& random, int thoroughness) {
     if (const auto valid = supported(g); !valid) return std::unexpected(valid.error());
     if (thoroughness < 1) return std::unexpected("ELK ordering thoroughness must be positive");
     if (g.layers.empty() || (g.layers.size() == 1 && g.layers.front().size() <= 1)) return 0;
-    Ordering ordering(g, seed);
+    Ordering ordering(g, random);
     std::size_t best_count = std::numeric_limits<std::size_t>::max();
     std::optional<OrderCopy> best;
     for (int i = 0; i < thoroughness; ++i) {

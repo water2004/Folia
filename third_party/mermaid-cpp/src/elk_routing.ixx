@@ -3,6 +3,7 @@
 export module folia.mermaid.elk_routing;
 import std;
 export import folia.mermaid.elk_long_edges;
+export import folia.mermaid.elk_random;
 
 export namespace folia::mermaid {
 struct ElkHorizontalMargin { double left = 0, right = 0; };
@@ -21,10 +22,14 @@ struct ElkOrthogonalRoutes {
 // Consumes measured, ordered and vertically placed adjacent east/west edges,
 // with one edge per port. Long edges have already been split into dummy nodes.
 // node_y and margins use stable graph node indices; port.y includes its anchor.
-// Seed starts the routing-stage Java RNG; the integrated pipeline must preserve
-// the corresponding original random state when connecting preceding phases.
+// The seed overload is a standalone convenience. A composed pipeline passes
+// the same RNG reference already consumed by crossing minimization.
 [[nodiscard]] std::expected<ElkOrthogonalRoutes, std::string> elk_route_flat_edges(
     const ElkLayeredGraph& graph, std::span<const double> node_y,
     std::span<const ElkHorizontalMargin> margins,
     ElkRoutingSpacing spacing = {}, std::int64_t seed = 1);
+[[nodiscard]] std::expected<ElkOrthogonalRoutes, std::string> elk_route_flat_edges(
+    const ElkLayeredGraph& graph, std::span<const double> node_y,
+    std::span<const ElkHorizontalMargin> margins, ElkRandom& random,
+    ElkRoutingSpacing spacing = {});
 }

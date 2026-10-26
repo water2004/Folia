@@ -3,6 +3,7 @@
 export module folia.mermaid.elk_order;
 import std;
 export import folia.mermaid.elk_long_edges;
+export import folia.mermaid.elk_random;
 
 export namespace folia::mermaid {
 // Valid layered graph, after long-edge splitting and port-side assignment.
@@ -15,4 +16,6 @@ export namespace folia::mermaid {
 // alternating sweeps and best-order restoration. Call after port sorting.
 [[nodiscard]] std::expected<std::size_t, std::string> elk_order_flat_graph(
     ElkLayeredGraph& graph, std::int64_t seed = 1, int thoroughness = 7);
+[[nodiscard]] std::expected<std::size_t, std::string> elk_order_flat_graph(
+    ElkLayeredGraph& graph, ElkRandom& random, int thoroughness = 7);
 }

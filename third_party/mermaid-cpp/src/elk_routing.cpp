@@ -6,22 +6,6 @@ import std;
 namespace folia::mermaid {
 namespace {
 constexpr double epsilon = 1e-3;
-struct RoutingRandom {
-    std::uint64_t state;
-    explicit RoutingRandom(std::int64_t seed) : state((static_cast<std::uint64_t>(seed)^0x5deece66dULL)&((1ULL<<48)-1)) {}
-    std::uint32_t next31() {
-        state=(state*0x5deece66dULL+11)&((1ULL<<48)-1);
-        return static_cast<std::uint32_t>(state>>17);
-    }
-    std::size_t next_int(std::size_t bound) {
-        const auto b=static_cast<std::uint32_t>(bound);
-        if ((b&-b)==b) return (static_cast<std::uint64_t>(b)*next31())>>31;
-        for (;;) {
-            const auto bits=next31(), value=bits%b;
-            if (bits-value+(b-1)<0x80000000U) return value;
-        }
-    }
-};
 struct Segment {
     std::vector<double> incoming, outgoing;
     std::vector<std::size_t> in_deps, out_deps;
@@ -44,12 +28,12 @@ struct RoutingGap {
     const ElkLayeredGraph& g;
     std::span<const double> y;
     ElkRoutingSpacing spacing;
-    RoutingRandom& random;
+    ElkRandom& random;
     std::vector<Segment> segments;
     std::vector<Dependency> deps;
     double critical_threshold = 0;
     RoutingGap(const ElkLayeredGraph& graph, std::span<const double> positions,
-        ElkRoutingSpacing distances, RoutingRandom& rng) : g(graph),y(positions),spacing(distances),random(rng) {}
+        ElkRoutingSpacing distances, ElkRandom& rng) : g(graph),y(positions),spacing(distances),random(rng) {}
     void dependency(std::size_t source,std::size_t target,int weight,bool critical) {
         const auto d=deps.size(); deps.push_back({source,target,weight,critical});
         segments[source].out_deps.push_back(d); segments[target].in_deps.push_back(d);
@@ -287,6 +271,11 @@ struct RoutingGap {
 }
 std::expected<ElkOrthogonalRoutes,std::string> elk_route_flat_edges(const ElkLayeredGraph& g,
     std::span<const double> y,std::span<const ElkHorizontalMargin> margins,ElkRoutingSpacing spacing,std::int64_t seed) {
+    ElkRandom random(static_cast<std::uint64_t>(seed));
+    return elk_route_flat_edges(g,y,margins,random,spacing);
+}
+std::expected<ElkOrthogonalRoutes,std::string> elk_route_flat_edges(const ElkLayeredGraph& g,
+    std::span<const double> y,std::span<const ElkHorizontalMargin> margins,ElkRandom& random,ElkRoutingSpacing spacing) {
     if(y.size()!=g.nodes.size()||margins.size()!=g.nodes.size())return std::unexpected("ELK routing requires measured positions and margins for each node");
     for(const auto& p:g.ports)if(p.incoming.size()+p.outgoing.size()>1)return std::unexpected("ELK flat routing requires one edge per port");
     for(const auto& e:g.edges) {
@@ -300,7 +289,7 @@ std::expected<ElkOrthogonalRoutes,std::string> elk_route_flat_edges(const ElkLay
         for(const auto n:layer)width=std::max(width,g.nodes[n].width+margins[n].left+margins[n].right);
         result.layer_width.push_back(width);
     }
-    RoutingRandom random(seed);result.gap_slots.push_back(0);
+    result.gap_slots.push_back(0);
     for(std::size_t l=0;l<g.layers.size();++l) {
         const auto& layer=g.layers[l];double left=0,right=0;
         for(const auto n:layer){left=std::max(left,margins[n].left);right=std::max(right,margins[n].right);}
