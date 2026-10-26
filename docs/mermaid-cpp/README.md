@@ -35,7 +35,8 @@ Cytoscape, date calculations) needs its own source and behavior verification.
 ## Current state
 
 The public native entry now contains Packet, Pie, Flowchart, Sequence, Class,
-Quadrant, Radar, XY, Sankey and Treemap. Entry coverage does not imply that every family default or the
+Quadrant, Radar, XY, Sankey, Treemap, Journey, Timeline, Gantt, Git graph,
+Mindmap and Block. Entry coverage does not imply that every family default or the
 WinUI dependency switch is finished. The unconfigured global layout is ELK;
 both Flowchart and Class still require explicit source/session Dagre selection.
 The original ELK depth-first feedback-edge selector and flat network-simplex
@@ -50,8 +51,26 @@ hyperedges, in-layer edges and north/south or compound constraints still need
 their original processors and are rejected by this internal boundary. Flat
 Brandes-Koepf placement, implicit point-port placement, orthogonal routing and
 original-edge path restoration are now separate native modules. Ordering and
-routing share the original random-generator state. Label processors, compound
-handling and public default ELK rendering remain outstanding.
+routing share the original random-generator state. Center/end label processors and the four-direction flat pipeline are implemented.
+The compound pipeline now has external-port layers, cross-group segment ownership,
+hierarchical crossing sweeps and a same-direction RIGHT geometry composition.
+These internal stages remain separate from the public default ELK renderer,
+which is not connected. Mixed-direction compound graphs still need their
+north/south hierarchy processors.
+
+Journey and Timeline use measured actor/task/event labels; Timeline dispatches
+its original horizontal and vertical renderers. Gantt retains the required
+civil-date/duration and D3 time-axis behavior. Git graph retains branch lanes,
+commit/merge/cherry-pick symbols and measured labels. Their fixed SVG corpora
+pass against the original browser output with native Release measurements.
+
+Mindmap uses its original default CoSE tree layout, with separate pins for the
+Cytoscape and CoSE dependency versions. Its measured public rendering is under
+validation; force-directed positions are sensitive to the exact input boxes.
+Block adds recursive columns, spans, nested grids, spacers and measured labels;
+its native public rendering is also under validation. Architecture currently
+has parser/DB and constraint stages, not a public renderer. Its fCoSE 2.x
+constraints are separate from Mindmap's CoSE 1.x dependencies.
 
 Quadrant retains its original configured canvas, linear point scales, axis
 positions, title/accessibility metadata, quadrant labels and per-point/class
