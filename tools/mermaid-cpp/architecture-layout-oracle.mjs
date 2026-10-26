@@ -19,7 +19,15 @@ handler.handleConstraints=layout=>{
  const project=()=>layout.getAllNodes().filter(n=>n.getChild()==null).map(n=>({id:n.id,x:n.getCenterX(),y:n.getCenterY()}));
  const input=project(),constraints=structuredClone(layout.constraints);
  originalEnforce(layout);
- constraintPasses.push({input,constraints,output:project()});
+ const pass={input,constraints,output:project(),movement:[]};constraintPasses.push(pass);layout.oraclePass=pass;
+};
+const CoSELayout=require('./oracle/node_modules/.pnpm/cose-base@2.2.0/node_modules/cose-base/src/CoSELayout');
+const originalMovement=CoSELayout.prototype.updateDisplacements;
+CoSELayout.prototype.updateDisplacements=function(){
+ const project=()=>this.getAllNodes().map(n=>({id:n.id,x:n.getCenterX(),y:n.getCenterY(),dx:n.displacementX,dy:n.displacementY}));
+ const input=this.totalIterations<=10?project():null;
+ originalMovement.call(this);
+ if(input)this.oraclePass.movement.push({iteration:this.totalIterations,input,output:project()});
 };
 const base='.reference/mermaid-js/packages/mermaid/src/diagrams/architecture/';
 const moduleOf=async file=>import('data:text/javascript;base64,'+Buffer.from(stripTypeScriptTypes(readFileSync(base+file,'utf8'),{mode:'transform'})).toString('base64'));
