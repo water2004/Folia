@@ -2,7 +2,18 @@
 
 恢复/压缩后先实际读本文。架构、职责和详细验收见 [architecture](native-raii-architecture.md)、[files](native-raii-files.json)、[acceptance](native-raii-acceptance.md)。只复查新变化；ignored候选用 `rg --no-ignore`。
 
-## 当前 checkpoint：代码块尾空行与单层语言选择器已完成（2026-10-27）
+## 当前 checkpoint：数学别名补齐、验收与候选构建完成（2026-10-27）
+
+- 用户新增要求：补齐lang/rang等缺失命令并检查其他遗漏；不开agents/CUA，native串行≤4，不关用户窗口；版本0.4.1，不自动MSI/安装/推送/发布。
+- 已确认本地MathJax4.1.3与scope的38语法包一致；官方v4不含mediawiki-texvc（尚未移植），lang/rang来自2.7.9旧扩展。原文件已只读下载build/math-port/texvc-audit/mediawiki-texvc.js。新证据是用户实际缺失别名，不重开旧RAII迁移审查。
+- 实施边界：独立mediawiki-texvc包按低优先级补全旧别名，保留v4已有命令含义，显式支持伸缩lang/rang定界符；不改BaseMappings生成表/通用扫描器/Common/Scene/SVG。将既有38包组装从math.cpp原样归入TeX profile模块，生产和正式注册表测试同源；增加原版命令注册/优先级与SVG对照。
+- 已实现独立包的完整101定义（95补入、AA/Bbb/oiint/oiiint/real/textvisiblespace六个v4原名优先），lang/rang独立DelimiterMap；生产DefaultPackages从math.cpp搬出原38包组装，新增第39包。全程不改base生成表/通用scanner/Common/Scene/SVG；新生成器锁原版2.7.9文件及既有299个npm runtime/font依赖，保留scope/旧参考profile。
+- 已验Release math **977项546948断言通过**（tex-package-math-all.log）。新增注册表9607断言覆盖75有限map/1763条注册、字符值及最终owner；216个inline/display样例单项与批量均逐字节Source SVG一致（texvc-verified.log，865断言），含101别名、伸缩/定尺寸/middle、begingroup覆盖恢复及未知命令仍显示。首次9差异是测试错误地假定裸花括号/未分组newcommand不持续：参考与native均按既有TeX/begingroup语义；正式样例改显式begingroup，产品无释放/重置补丁。DelimiterMap按原版类型注册，不用CharacterMap代替。
+- 补全catalog新增94条（原sub触发模板保留），生成器检查id/trigger唯一；声明2.7.9来源的第三方notice已重生成。源/验收/职责说明见mediawiki-texvc.md及evidence/tex-package-conformance.json。
+- **交付**：数学包/profile/正式测试本地提交 **77863b07**。自包含Release96206已明确exit0（tex-package-release.log）；真实入口/激活/正常关闭 **Ready=true、Success=true、ExitCode0**（tex-package-startup.log、build/tests/tex-package-startup/run-1/result.json），只关闭owned child38256。候选build/app-winui/bin/x64/Release/Folia.exe **12242432 bytes / ProductVersion0.4.1**；实际math DLL与core-release SHA256相同（1D7094BBA656E192A1A08677F888BCB11A6CAB9729FAABB7F19935487A7AEA5F），候选commands.json与源码字节一致。生成器再次运行exit0且所有生成fixture/alias/evidence相对提交零diff（tex-package-regeneration.log）。
+- **停止点/下一步**：无活动agent/build/test/诊断句柄；补全/notice/checkpoint在随后小提交收尾，工作区随后应干净。实现与自动验收完成，下一步用户试用或新指令，不重复旧宽审。无真人公式编辑/完整窗口外观检查；本次无CST/编辑/布局/SVG算法修改，沿用既有架构。未MSI/安装/推送/发布，不关用户窗口，版本保持0.4.1。
+
+## 历史 checkpoint：代码块尾空行与单层语言选择器已完成（2026-10-27）
 
 - **用户最新决定**：代码背景应包含换行后的真实空行；语言入口保留native header当前值，打开搜索必须空白/“搜索语言…”，不把cpp复制到输入框；单层紧凑面板，不嵌套ASB下拉。不开agents/CUA，不关用户窗口；native严格串行≤4；版本0.4.1，无自动MSI/安装/push/release。
 - **几何已提交8da2a7ad**：DrawFlowDecorations.accumulateRange在范围拥有layout末尾时补HitTestTextPosition终点行bounds，无源码换行扫描；正式生产render test standalone/空code/quote/list×Enter/Undo/Redo **1项168断言通过**（code-terminal-row-verified.log）。原测试28失败中5是真实背景漏末尾零字符行，23是把已有空行Enter退出raw block误认为应留在code；测试已按真实selection owner检查包含/退出后的段落在代码之后，保留原核心语义。core没有改。Native D2D图code-newline.png是测试fixture，不是完整窗口。

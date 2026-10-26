@@ -688,7 +688,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 ==============================================================================
-MathJax 4.1.3 and NewCM, bbm, bboldx, dsfont fonts — Apache License 2.0
+MathJax 4.1.3, mediawiki-texvc 2.7.9 aliases, and NewCM, bbm, bboldx, dsfont fonts — Apache License 2.0
 ==============================================================================
 
 Exit code: 0
