@@ -53,11 +53,15 @@ try {
   const nodes=row.nodes.map((n,i)=>({group:'nodes',data:{id:String(i),width:n.nodeBox.width,height:n.nodeBox.height},position:{x:0,y:0}}));
   const cy=cytoscape({headless:true,styleEnabled:true,elements:[...nodes,...row.links.map(data=>({group:'edges',data}))]});
   cy.nodes().forEach(n=>{n.layoutDimensions=()=>({w:n.data('width'),h:n.data('height')});});
-  cy.layout({name:'cose-bilkent',quality:'proof',styleEnabled:false,animate:false}).run();
+  const layout=cy.layout({name:'cose-bilkent',quality:'proof',styleEnabled:false,animate:false});layout.run();
+  row.iterations=layout.layout.totalIterations;
+  row.layoutPositions=cy.nodes().map(n=>({x:n.position('x'),y:n.position('y')}));
   cy.nodes().forEach((n,i)=>{assert(Math.abs(n.position('x')-row.nodes[i].position.x)<.0001,row.name+' pinned layout x');assert(Math.abs(n.position('y')-row.nodes[i].position.y)<.0001,row.name+' pinned layout y');});
   cy.destroy();
  }
  writeFileSync(resolve(directory,'shapes.json'),JSON.stringify(result,null,2));
+ const encode=s=>Array.from({length:s.length},(_,i)=>s.charCodeAt(i).toString(16).padStart(4,'0')).join('');
+ writeFileSync(resolve(directory,'measurements.tsv'),result.map(row=>row.name+'\t'+encode(JSON.stringify(row))).join('\n')+'\n');
  for(const row of result)writeFileSync(resolve(directory,row.name+'.svg'),row.svg);
  if(process.argv.includes('--write-fixture')) {
   const hex=s=>Array.from({length:s.length},(_,i)=>s.charCodeAt(i).toString(16).padStart(4,'0')).join('');

@@ -67,6 +67,10 @@ pass against the original browser output with native Release measurements.
 Mindmap uses its original default CoSE tree layout, with separate pins for the
 Cytoscape and CoSE dependency versions. Its measured public rendering is under
 validation; force-directed positions are sensitive to the exact input boxes.
+The gate compares identical browser-measured boxes to native positions, routes
+and viewports strictly. The DirectWrite path separately checks local shape/label
+geometry, paint, edge connectivity and enclosure; different measured boxes are
+not required to converge to identical absolute force-layout positions.
 Block adds recursive columns, spans, nested grids, spacers and measured labels;
 its native public rendering is also under validation. Architecture currently
 has parser/DB and constraint stages, not a public renderer. Its fCoSE 2.x

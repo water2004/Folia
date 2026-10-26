@@ -170,6 +170,10 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             const double width=node.type==1||node.type==2||node.type==6?mindmap->theme.wrapping_width:node.width;
             auto box=measure_label(mindmap->theme,mindmap->document.effective_config,label_source,width);
             if(!box)return std::unexpected(box.error());
+            // createText measures a CSS table-cell. Its inline-size is rounded
+            // up to a 1/64px layout unit before it becomes an SVG shape input.
+            if(mindmap->theme.html_label_spacing)
+                box->width=std::ceil(box->width*64)/64;
             mindmap_measurements.nodes.push_back(std::move(*box));
         }
     }

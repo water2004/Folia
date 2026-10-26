@@ -56,12 +56,17 @@ std::expected<MindmapSvg,std::string> render_mindmap_svg(const MindmapRenderInpu
     try {
         const auto& doc=input.document;
         if(measured.nodes.size()!=doc.nodes.size())return std::unexpected("Mindmap needs one measured label per node");
+        if(!measured.node_bounds.empty()&&measured.node_bounds.size()!=doc.nodes.size())return std::unexpected("Mindmap needs one whole-node bound per node");
         std::vector<MindmapShape> shapes;std::vector<CoseTreeNode> nodes;std::vector<CoseTreeEdge> edges;
         std::map<std::u16string,std::size_t> ids;
         for(std::size_t i=0;i<doc.nodes.size();++i) {
             const auto& n=doc.nodes[i];if(!n.icon.empty())return std::unexpected("Native Mindmap icon assets are not implemented");
             auto shape=measure_mindmap_shape(n,{measured.nodes[i].width,measured.nodes[i].height},input.theme.radius);
             if(!shape)return std::unexpected(shape.error());
+            if(!measured.node_bounds.empty()) {
+                const auto& b=measured.node_bounds[i];
+                shape->min_x=b.x;shape->min_y=b.y;shape->width=b.width;shape->height=b.height;
+            }
             ids.emplace(n.id,i);nodes.push_back({n.id,shape->width,shape->height});shapes.push_back(std::move(*shape));
         }
         for(const auto& e:doc.edges)edges.push_back({e.start,e.end});

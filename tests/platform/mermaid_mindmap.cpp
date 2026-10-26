@@ -11,6 +11,9 @@ suite mermaid_mindmap=[] {
         for(const auto theme:{u"default",u"dark"}) {
             auto session=ConfigSession::create();expect(fatal(session.has_value()));ConfigValue site;site.kind=ConfigKind::mapping;
             for(auto [key,value]:{std::pair{u"theme",theme},{u"fontFamily",u"Arial"},{u"look",u"classic"}})site.mapping.emplace(key,ConfigValue{.kind=ConfigKind::string,.string=value});
+            ConfigValue variables;variables.kind=ConfigKind::mapping;
+            variables.mapping.emplace(u"fontFamily",ConfigValue{.kind=ConfigKind::string,.string=u"Arial"});
+            site.mapping.emplace(u"themeVariables",std::move(variables));
             expect(fatal(session->save_initialize_config(site).has_value()));expect(fatal(session->set_site_config(site).has_value()));
             for(const auto& [name,source]:cases) {
                 auto result=render_mermaid(source,*session);expect(result.has_value())<<name<<(result?"":result.error());if(!result)continue;
