@@ -34,6 +34,7 @@ namespace winrt::Folia {
             entry->directory = directory;
             entry->root = root;
             TreeViewNode node;
+            entry->node = winrt::make_weak(node);
             node.Content(entry.as<Windows::Foundation::IStringable>());
             node.HasUnrealizedChildren(directory);
             return node;

@@ -23,6 +23,65 @@
                     <Setter Property="Padding" Value="0"/>
                     <Setter Property="CornerRadius" Value="2"/>
                     <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    <Setter Property="GlyphSize" Value="10"/>
+                    <Setter Property="UseSystemFocusVisuals" Value="True"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="TreeViewItem">
+                                <Grid x:Name="ContentPresenterGrid" Background="{TemplateBinding Background}"
+                                      CornerRadius="2" Control.IsTemplateFocusTarget="True">
+                                    <VisualStateManager.VisualStateGroups>
+                                        <VisualStateGroup x:Name="CommonStates">
+                                            <VisualState x:Name="Normal"/>
+                                            <VisualState x:Name="PointerOver"><VisualState.Setters>
+                                                <Setter Target="ContentPresenterGrid.Background" Value="{ThemeResource TreeViewItemBackgroundPointerOver}"/>
+                                            </VisualState.Setters></VisualState>
+                                            <VisualState x:Name="Pressed"><VisualState.Setters>
+                                                <Setter Target="ContentPresenterGrid.Background" Value="{ThemeResource TreeViewItemBackgroundPressed}"/>
+                                            </VisualState.Setters></VisualState>
+                                            <VisualState x:Name="Selected"><VisualState.Setters>
+                                                <Setter Target="ContentPresenterGrid.Background" Value="{ThemeResource TreeViewItemBackgroundSelected}"/>
+                                            </VisualState.Setters></VisualState>
+                                            <VisualState x:Name="SelectedPointerOver"><VisualState.Setters>
+                                                <Setter Target="ContentPresenterGrid.Background" Value="{ThemeResource TreeViewItemBackgroundSelectedPointerOver}"/>
+                                            </VisualState.Setters></VisualState>
+                                            <VisualState x:Name="SelectedPressed"><VisualState.Setters>
+                                                <Setter Target="ContentPresenterGrid.Background" Value="{ThemeResource TreeViewItemBackgroundSelectedPressed}"/>
+                                            </VisualState.Setters></VisualState>
+                                            <VisualState x:Name="Disabled"><VisualState.Setters>
+                                                <Setter Target="ContentPresenterGrid.Opacity" Value="0.4"/>
+                                            </VisualState.Setters></VisualState>
+                                            <VisualState x:Name="SelectedDisabled"><VisualState.Setters>
+                                                <Setter Target="ContentPresenterGrid.Background" Value="{ThemeResource TreeViewItemBackgroundSelected}"/>
+                                                <Setter Target="ContentPresenterGrid.Opacity" Value="0.4"/>
+                                            </VisualState.Setters></VisualState>
+                                        </VisualStateGroup>
+                                    </VisualStateManager.VisualStateGroups>
+                                    <!-- WinUI's default template hardcodes 16-DIP levels and
+                                         a 40-DIP chevron slot. Geometry stays here, independent
+                                         of the native tree's keyboard/expansion behavior. -->
+                                    <Grid Padding="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Content.Content.Indent}">
+                                        <Grid ColumnDefinitions="18,*">
+                                            <Grid x:Name="ExpandCollapseChevron" Background="Transparent" Opacity="{TemplateBinding GlyphOpacity}">
+                                                <FontIcon x:Name="CollapsedGlyph" Glyph="{TemplateBinding CollapsedGlyph}"
+                                                          FontSize="{TemplateBinding GlyphSize}" Width="12" Height="12"
+                                                          Foreground="{TemplateBinding GlyphBrush}" IsHitTestVisible="False"
+                                                          Visibility="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TreeViewItemTemplateSettings.CollapsedGlyphVisibility}"/>
+                                                <FontIcon x:Name="ExpandedGlyph" Glyph="{TemplateBinding ExpandedGlyph}"
+                                                          FontSize="{TemplateBinding GlyphSize}" Width="12" Height="12"
+                                                          Foreground="{TemplateBinding GlyphBrush}" IsHitTestVisible="False"
+                                                          Visibility="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=TreeViewItemTemplateSettings.ExpandedGlyphVisibility}"/>
+                                            </Grid>
+                                            <ContentPresenter x:Name="ContentPresenter" Grid.Column="1"
+                                                              Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                              HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                                                              HorizontalContentAlignment="Stretch" VerticalContentAlignment="Center"/>
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
                 </Style>
             </Setter.Value>
         </Setter>

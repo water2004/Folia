@@ -16,13 +16,14 @@ namespace winrt::Folia {
             DataTemplate root = Template(WorkspaceIcon::Folder, true);
 
             static DataTemplate Template(WorkspaceIcon icon, bool root = false) {
+                const bool showIcon = icon == WorkspaceIcon::Document;
                 auto xaml = std::wstring(LR"(<DataTemplate xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><Grid ColumnDefinitions=")")
-                    + (root ? L"*,Auto,Auto" : L"16,*")
+                    + (root ? L"*,Auto,Auto" : showIcon ? L"16,*" : L"*")
                     + LR"(" ColumnSpacing="6" Height="24" HorizontalAlignment="Stretch"
                             ToolTipService.ToolTip="{Binding Content.FullPath}">)";
-                if (!root) xaml += WorkspaceIconXaml(icon);
-                xaml += std::wstring(LR"(<TextBlock x:Name="EntryName" Grid.Column=")") + (root ? L"0" : L"1")
+                if (showIcon) xaml += WorkspaceIconXaml(icon);
+                xaml += std::wstring(LR"(<TextBlock x:Name="EntryName" Grid.Column=")") + (showIcon ? L"1" : L"0")
                     + LR"(" Text="{Binding Content.Name}" FontSize="13" TextWrapping="NoWrap"
                            TextTrimming="CharacterEllipsis" VerticalAlignment="Center")";
                 xaml += root ? LR"( FontWeight="SemiBold"/>)" : L"/>";

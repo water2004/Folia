@@ -23,12 +23,13 @@ namespace winrt::Folia::explorer_detail {
         Input::ICommand refresh{nullptr}, collapse{nullptr};
         winrt::hstring refreshName, collapseName;
     };
-    enum class EntryMember { Name, FullPath, Refresh, Collapse, RefreshName, CollapseName };
+    enum class EntryMember { Name, FullPath, Refresh, Collapse, RefreshName, CollapseName, Indent };
 
     // Immutable display properties use WinUI's normal COM binding contract.
     // Enumeration/cancellation state stays native and is never exposed to XAML.
     struct FolderEntry : winrt::implements<FolderEntry, Windows::Foundation::IStringable, Data::ICustomPropertyProvider> {
         std::filesystem::path path;
+        winrt::weak_ref<Microsoft::UI::Xaml::Controls::TreeViewNode> node;
         bool directory = false, root = false;
         std::uint64_t ticket = 0;
         bool loading = false, loaded = false;
@@ -57,10 +58,12 @@ namespace winrt::Folia::explorer_detail {
             case EntryMember::Collapse: return L"Collapse";
             case EntryMember::RefreshName: return L"RefreshName";
             case EntryMember::CollapseName: return L"CollapseName";
+            case EntryMember::Indent: return L"Indent";
             }
             return {};
         }
         TypeName Type() const {
+            if (member == EntryMember::Indent) return winrt::xaml_typename<Microsoft::UI::Xaml::Thickness>();
             return member != EntryMember::Refresh && member != EntryMember::Collapse
                 ? winrt::xaml_typename<winrt::hstring>() : winrt::xaml_typename<Input::ICommand>();
         }
@@ -75,6 +78,11 @@ namespace winrt::Folia::explorer_detail {
             case EntryMember::Collapse: return entry->actions ? entry->actions->collapse : nullptr;
             case EntryMember::RefreshName: return winrt::box_value(entry->actions ? entry->actions->refreshName : winrt::hstring{});
             case EntryMember::CollapseName: return winrt::box_value(entry->actions ? entry->actions->collapseName : winrt::hstring{});
+            case EntryMember::Indent: {
+                auto node = entry->node.get();
+                const double depth = node ? (std::max)(0, node.Depth()) : 0;
+                return winrt::box_value(Microsoft::UI::Xaml::Thickness{depth * 8, 0, 0, 0});
+            }
             }
             return nullptr;
         }
@@ -84,10 +92,11 @@ namespace winrt::Folia::explorer_detail {
     };
 
     inline Data::ICustomProperty FolderEntry::GetCustomProperty(winrt::hstring const& name) const {
-        static const std::array<Data::ICustomProperty, 6> properties = {
+        static const std::array<Data::ICustomProperty, 7> properties = {
             winrt::make<EntryProperty>(EntryMember::Name), winrt::make<EntryProperty>(EntryMember::FullPath),
             winrt::make<EntryProperty>(EntryMember::Refresh), winrt::make<EntryProperty>(EntryMember::Collapse),
-            winrt::make<EntryProperty>(EntryMember::RefreshName), winrt::make<EntryProperty>(EntryMember::CollapseName)};
+            winrt::make<EntryProperty>(EntryMember::RefreshName), winrt::make<EntryProperty>(EntryMember::CollapseName),
+            winrt::make<EntryProperty>(EntryMember::Indent)};
         for (auto const& property : properties) if (property.Name() == name) return property;
         return nullptr;
     }

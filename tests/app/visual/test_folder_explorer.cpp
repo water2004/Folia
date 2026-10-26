@@ -3,6 +3,8 @@
 #include "../support/DocumentControllerFixture.h"
 #include "workspace/FolderExplorerController.h"
 #include "visual_window.h"
+#include <winrt/Microsoft.UI.Xaml.Automation.Peers.h>
+#include <winrt/Microsoft.UI.Xaml.Automation.Provider.h>
 
 namespace {
     using namespace boost::ut;
@@ -26,6 +28,8 @@ namespace {
             std::filesystem::create_directory(folder);
             std::filesystem::create_directory(folder / L"章节");
             std::ofstream(folder / L"章节" / L"inside.md") << "inside";
+            std::filesystem::create_directories(folder / L"章节" / L"小节" / L"更深");
+            std::ofstream(folder / L"章节" / L"小节" / L"更深" / (std::wstring(24, L'深') + L".md")) << "leaf";
             std::ofstream(folder / L"正常.md") << "normal";
             std::ofstream(folder / L"空格 & emoji😀.md") << "unicode";
             std::ofstream(folder / longName) << "long";
@@ -103,6 +107,45 @@ namespace {
             visual_tests::SavePng(artifacts / L"files-native.png", bitmap.PixelWidth(), bitmap.PixelHeight(), pixels);
         } catch (winrt::hresult_error const& error) { throw std::runtime_error(winrt::to_string(error.message()) + " HRESULT " + std::to_string(error.code().value)); } };
 
+        "folder explorer window uses eight DIP levels and a compact chevron"_test = [] { try {
+            ExplorerWindow f;
+            auto rootNode = f.tree.RootNodes().GetAt(0);
+            auto rootName = f.Row(rootNode).FindName(L"EntryName").as<TextBlock>();
+            auto nested = f.Find(L"章节");
+            auto folderName = f.Row(nested).FindName(L"EntryName").as<TextBlock>();
+            auto x = [&](TextBlock const& text) { return text.TransformToVisual(f.tree).TransformPoint({0, 0}).X; };
+            expect(x(rootName) <= 24.f);
+            expect(std::abs(x(folderName) - x(rootName) - 8.f) < 0.5f);
+            auto node = nested;
+            for (int depth = 1; depth <= 3; ++depth) {
+                f.Row(node);
+                Automation::Peers::TreeViewItemAutomationPeer peer(f.tree.ContainerFromNode(node).as<TreeViewItem>());
+                peer.as<Automation::Provider::IExpandCollapseProvider>().Expand();
+                Pump([&] { return node.IsExpanded() && !node.HasUnrealizedChildren(); });
+                f.root.UpdateLayout();
+                auto label = f.Row(node).FindName(L"EntryName").as<TextBlock>();
+                expect(std::abs(x(label) - x(rootName) - 8.f * depth) < 0.5f);
+                if (depth < 3) node = node.Children().GetAt(0);
+            }
+            auto leaf = node.Children().GetAt(0);
+            auto leafName = f.Row(leaf).FindName(L"EntryName").as<TextBlock>();
+            auto firstLevelFile = f.Row(f.Find(L"正常.md")).FindName(L"EntryName").as<TextBlock>();
+            expect(x(firstLevelFile) <= 50.f);
+            expect(std::abs(x(leafName) - x(firstLevelFile) - 24.f) < 0.5f);
+            f.host.Width(160);
+            f.root.UpdateLayout();
+            expect(x(leafName) + leafName.ActualWidth() <= 160.5);
+            expect(leafName.ActualWidth() > 60.);
+            expect(leafName.IsTextTrimmed());
+            f.host.Width(248);
+            f.root.UpdateLayout();
+            Media::Imaging::RenderTargetBitmap bitmap;
+            Await(bitmap.RenderAsync(f.host));
+            auto pixels = Await(bitmap.GetPixelsAsync());
+            auto artifacts = std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path() / L"build/tests/workspace-explorer";
+            visual_tests::SavePng(artifacts / L"compact-deep-native.png", bitmap.PixelWidth(), bitmap.PixelHeight(), pixels);
+        } catch (winrt::hresult_error const& error) { throw std::runtime_error(winrt::to_string(error.message()) + " HRESULT " + std::to_string(error.code().value)); } };
+
         "folder explorer window exposes native root actions and lazy expansion"_test = [] { try {
             ExplorerWindow f;
             auto root = f.tree.RootNodes().GetAt(0);
@@ -111,7 +154,7 @@ namespace {
             expect(nested.Children().Size() == 0_u);
             f.explorer.Expand(nested);
             Pump([&] { return !nested.HasUnrealizedChildren(); });
-            expect(nested.Children().Size() == 1_u);
+            expect(nested.Children().Size() == 2_u);
             auto row = f.Row(root);
             auto refresh = row.Children().GetAt(1).as<Button>();
             auto collapse = row.Children().GetAt(2).as<Button>();
