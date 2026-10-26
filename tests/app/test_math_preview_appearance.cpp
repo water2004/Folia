@@ -36,29 +36,30 @@ namespace {
     }
 
     suite math_preview_appearance = [] {
-        "math floating preview paints real native SVG in light and dark themes"_test = [] {
+        "math previews frame native SVG evenly for inline and block formulas"_test = [] {
             for (auto theme : {folia::Theme::Light, folia::Theme::Dark}) {
+              for (auto block : {false, true})
+              for (auto width : {120.f, 560.f})
+              for (auto tex : {R"(1111)", R"(g_j)", R"(\sqrt{x})", R"(x=\frac{-b\pm\sqrt{b^2-4ac}}{2a})", R"(a+b+c+d+e+f+g+h)"}) {
                 auto sheet = CreateEditorStyleSheet(folia::default_theme_profile(theme));
                 EditorRenderResources resources;
                 resources.InitializeOffscreen(sheet, 600, 280);
                 resources.EnsureFrameResources(sheet);
                 MathJaxRenderer math;
-                constexpr auto tex = R"(x=\frac{-b\pm\sqrt{b^2-4ac}}{2a})";
                 auto color = SvgColor(sheet.textColor);
-                math.Render(tex, false, sheet.body.size, 560, color, {}, MathRenderPurpose::Preview);
+                math.Render(tex, block, sheet.body.size, width, color, {}, MathRenderPurpose::Preview);
                 math.WaitForIdle();
                 auto statistics = math.Snapshot();
                 expect(statistics.fileReads == 0_u && statistics.fileWrites == 0_u);
                 expect(statistics.previewSvgBytes > 0_u);
-                auto svg = math.Lookup(tex, false, sheet.body.size, 560, color, MathRenderPurpose::Preview);
+                auto svg = math.Lookup(tex, block, sheet.body.size, width, color, MathRenderPurpose::Preview);
                 expect(static_cast<bool>(svg));
                 if (!svg) return;
                 expect(svg->errorKind == MathJaxErrorKind::None);
                 DisplayInlineText::MathPreview input{*svg, {}, false};
-                auto display = BuildMathPreviewText(input);
                 EditorTextLayoutEngine engine(resources, sheet);
-                auto layout = engine.CreateFlow(display, resources.textFormat.Get(), 560, {});
-                EditorPreparedMathPreview preview{std::move(display), layout, engine.MeasureHeight(layout.Get(), sheet.body.lineHeight), {}, true};
+                auto preview = PrepareMathPreview(input, engine, resources.textFormat.Get(), width);
+                expect(preview.floating == !block);
                 EditorRenderCache cache;
                 EditorSvgPainter painter(resources, cache);
                 expect(painter.Supported());
@@ -71,27 +72,53 @@ namespace {
                 context->SetTransform(D2D1::Matrix3x2F::Scale(2, 2));
                 context->BeginDraw();
                 context->Clear(sheet.canvasColor);
-                auto line = engine.Create(L"Before $x=\\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}$ after.", resources.codeFormat.Get(), 560);
+                auto source = std::string(block ? "$$" : "$") + tex + (block ? "$$" : "$");
+                auto sourceWide = winrt::to_hstring(source);
+                auto line = engine.Create(std::wstring{sourceWide.c_str()}, resources.codeFormat.Get(), 560);
                 context->DrawTextLayout({20, 150}, line.Get(), resources.textBrush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP);
                 auto following = engine.Create(L"Following paragraph stays in place.", resources.textFormat.Get(), 560);
                 context->DrawTextLayout({20, 220}, following.Get(), resources.textBrush.Get());
                 int fragments = 0;
-                auto bounds = PaintInlineMathPreview(preview, D2D1::RectF(180, 150, 181, 178), 100, resources, sheet,
-                    [&](auto const& fragment, auto origin, auto) {
+                auto ink = D2D1::RectF(FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX);
+                EditorDrawMath draw = [&](auto const& fragment, auto origin, auto) {
                         auto payload = fragment.svg ? fragment.svg : math.GetSvg(fragment.renderId);
                         ++fragments;
+                        ink.left = (std::min)(ink.left, origin.x);
+                        ink.top = (std::min)(ink.top, origin.y);
+                        ink.right = (std::max)(ink.right, origin.x + fragment.width);
+                        ink.bottom = (std::max)(ink.bottom, origin.y + fragment.height);
                         return payload && painter.Draw(fragment.renderId, *payload, fragment.width, fragment.height, origin);
-                    }, [&](auto, auto) { expect(false) << "native preview unexpectedly fell back"; });
+                    };
+                EditorDrawMathFallback fallback = [&](auto, auto) { expect(false) << "native preview unexpectedly fell back"; };
+                std::optional<D2D1_RECT_F> bounds;
+                if (block) {
+                    bounds = D2D1::RectF(20, 20, 580, 20 + preview.Height() + 16);
+                    context->FillRectangle(*bounds, resources.nestedQuoteBrush.Get());
+                    PaintMathPreviewContent(preview, {(600 - preview.Width()) * .5f, 28}, 1,
+                        resources, sheet, draw, fallback);
+                } else bounds = PaintInlineMathPreview(preview, D2D1::RectF(180, 150, 181, 178), 100,
+                    resources, sheet, draw, fallback);
                 expect(bounds.has_value());
                 expect(fragments > 0_i);
-                expect(bounds && bounds->bottom < 150);
+                if (!block) expect(bounds && (bounds->bottom < 150 || bounds->top > 178));
+                if (bounds) {
+                    expect(std::abs((ink.top - bounds->top) - (bounds->bottom - ink.bottom)) < .1f)
+                        << tex << " SVG vertical padding: top=" << ink.top - bounds->top
+                        << " bottom=" << bounds->bottom - ink.bottom;
+                    expect(std::abs((ink.left - bounds->left) - (bounds->right - ink.right)) < .1f)
+                        << tex << " SVG horizontal padding";
+                }
                 expect(resources.previewBackgroundBrush->GetColor().a == 1.f);
                 winrt::check_hresult(context->EndDraw());
                 context->SetTransform(D2D1::Matrix3x2F::Identity());
                 context->SetTarget(nullptr);
                 auto directory = std::filesystem::path(__FILE__).parent_path().parent_path().parent_path() / L"build/tests/inline-math-preview";
                 std::filesystem::create_directories(directory);
-                SaveBitmap(resources, target.Get(), directory / (theme == folia::Theme::Light ? L"light.png" : L"dark.png"));
+                auto name = std::string(tex) == "1111" ? "digits" : std::string(tex) == "g_j" ? "subscript"
+                    : std::string(tex) == R"(\sqrt{x})" ? "root" : std::string(tex).starts_with("a+") ? "wrapped" : "fraction";
+                SaveBitmap(resources, target.Get(), directory / (std::string(name) + (block ? "-block" : "-inline")
+                    + (width < 560 ? "-narrow" : "-wide") + (theme == folia::Theme::Light ? "-light.png" : "-dark.png")));
+              }
             }
         };
     };

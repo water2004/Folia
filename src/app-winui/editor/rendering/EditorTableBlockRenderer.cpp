@@ -85,25 +85,10 @@ namespace winrt::Folia
                 previews.reserve(display.mathPreviews.size());
                 for (auto const& preview : display.mathPreviews)
                 {
-                    auto previewDisplay = BuildMathPreviewText(preview);
-                    auto previewLayout = textLayoutEngine.CreateFlow(
-                        previewDisplay,
-                        resources.textFormat.Get(),
-                        (std::max)(1.0f, columnWidth - 36.0f),
-                        {});
-                    if (previewLayout && preview.svg.display)
-                        previewLayout->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
-                    auto height = textLayoutEngine.MeasureHeight(
-                        previewLayout.Get(),
-                        styleSheet.body.lineHeight);
-                    if (preview.svg.display) previewHeight += height + 24.0f;
-                    previews.push_back({
-                        std::move(previewDisplay),
-                        std::move(previewLayout),
-                        height,
-                        preview.contentSpan,
-                        !preview.svg.display,
-                    });
+                    auto preparedPreview = PrepareMathPreview(preview, textLayoutEngine,
+                        resources.textFormat.Get(), (std::max)(1.0f, columnWidth - 36.0f));
+                    if (!preparedPreview.floating) previewHeight += preparedPreview.Height() + 24.0f;
+                    previews.push_back(std::move(preparedPreview));
                 }
                 rowHeights[row] = (std::max)(
                     rowHeights[row],
@@ -275,32 +260,11 @@ namespace winrt::Folia
                         cell.rect.left + 6.0f,
                         previewTop,
                         cell.rect.right - 6.0f,
-                        previewTop + preview.height + 16.0f);
+                        previewTop + preview.Height() + 16.0f);
                     resources.d2dContext->FillRectangle(previewRect, resources.nestedQuoteBrush.Get());
-                    auto previewOrigin = D2D1::Point2F(previewRect.left + 8.0f, previewRect.top + 8.0f);
-                    if (preview.layout)
-                        resources.d2dContext->DrawTextLayout(
-                            previewOrigin,
-                            preview.layout.Get(),
-                            resources.textBrush.Get(),
-                            D2D1_DRAW_TEXT_OPTIONS_CLIP);
-                    for (auto const& overlay : preview.display.mathOverlays)
-                    {
-                        float pointX = 0.0f;
-                        float pointY = 0.0f;
-                        DWRITE_HIT_TEST_METRICS metrics{};
-                        if (!preview.layout || FAILED(preview.layout->HitTestTextPosition(
-                                overlay.displayStart,
-                                FALSE,
-                                &pointX,
-                                &pointY,
-                                &metrics))) continue;
-                        auto mathOrigin = D2D1::Point2F(
-                            previewOrigin.x + pointX + overlay.leadingSpace,
-                            previewOrigin.y + metrics.top);
-                        if (!drawMath(overlay.fragment, mathOrigin, styleSheet.textColor))
-                            drawMathFallback(overlay.sourceSpan, mathOrigin);
-                    }
+                    auto previewOrigin = D2D1::Point2F(
+                        (previewRect.left + previewRect.right - preview.Width()) * .5f, previewRect.top + 8.0f);
+                    PaintMathPreviewContent(preview, previewOrigin, 1, resources, styleSheet, drawMath, drawMathFallback);
                     nonInteractiveRegions.push_back(D2D1::RectF(
                         previewRect.left,
                         nonInteractiveTop,

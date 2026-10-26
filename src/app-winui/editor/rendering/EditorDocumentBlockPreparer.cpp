@@ -713,22 +713,8 @@ namespace winrt::Folia
         prepared.mathPreviews.reserve(prepared.display.mathPreviews.size());
         for (auto const& preview : prepared.display.mathPreviews)
         {
-            auto previewDisplay = BuildMathPreviewText(preview);
-            auto previewLayout = textLayoutEngine.CreateFlow(
-                previewDisplay,
-                resources.textFormat.Get(),
-                (std::max)(1.0f, contentWidth - 16.0f),
-                {});
-            auto previewHeight = textLayoutEngine.MeasureHeight(
-                previewLayout.Get(),
-                styleSheet.body.lineHeight);
-            prepared.mathPreviews.push_back({
-                std::move(previewDisplay),
-                std::move(previewLayout),
-                previewHeight,
-                preview.contentSpan,
-                !preview.svg.display,
-            });
+            prepared.mathPreviews.push_back(PrepareMathPreview(preview, textLayoutEngine,
+                resources.textFormat.Get(), (std::max)(1.0f, contentWidth - 16.0f)));
         }
         prepared.mermaidPreviews.reserve(
             prepared.display.mermaidPreviews.size());
@@ -751,7 +737,7 @@ namespace winrt::Folia
                 prepared.display.ranges));
         auto previewHeight = 0.0f;
         for (auto const& preview : prepared.mathPreviews)
-            if (!preview.floating) previewHeight += preview.height + 24.0f;
+            if (!preview.floating) previewHeight += preview.Height() + 24.0f;
         for (auto const& preview : prepared.mermaidPreviews)
             previewHeight += preview.height + 24.0f;
         prepared.height = prepared.textHeight + previewHeight + paddingTop + paddingBottom;

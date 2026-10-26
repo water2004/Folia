@@ -217,30 +217,11 @@ namespace winrt::Folia
                     documentLeft + paddingLeft,
                     previewTop,
                     documentLeft + paddingLeft + contentWidth,
-                    previewTop + preview.height + 16.0f);
+                    previewTop + preview.Height() + 16.0f);
                 resources.d2dContext->FillRectangle(previewRect, resources.nestedQuoteBrush.Get());
-                auto previewOrigin = D2D1::Point2F(previewRect.left + 8.0f, previewRect.top + 8.0f);
-                if (preview.layout)
-                    resources.d2dContext->DrawTextLayout(
-                        previewOrigin,
-                        preview.layout.Get(),
-                        resources.textBrush.Get(),
-                        D2D1_DRAW_TEXT_OPTIONS_CLIP);
-                auto previewContentWidth = (std::max)(
-                    1.0f,
-                    previewRect.right - previewRect.left - 16.0f);
-                for (auto const& positioned : EditorDocumentPainter::PositionMath(
-                        preview.layout.Get(),
-                        preview.display.mathOverlays,
-                        previewContentWidth))
-                {
-                    auto const& overlay = *positioned.overlay;
-                    auto mathOrigin = D2D1::Point2F(
-                        previewOrigin.x + positioned.localX,
-                        previewOrigin.y + positioned.localTop);
-                    if (!drawMath(overlay.fragment, mathOrigin, styleSheet.textColor))
-                        drawMathFallback(overlay.sourceSpan, mathOrigin);
-                }
+                auto previewOrigin = D2D1::Point2F(
+                    previewRect.left + (contentWidth - preview.Width()) * .5f, previewRect.top + 8.0f);
+                PaintMathPreviewContent(preview, previewOrigin, 1, resources, styleSheet, drawMath, drawMathFallback);
                 nonInteractiveRegions.push_back(D2D1::RectF(
                     previewRect.left,
                     nonInteractiveTop,

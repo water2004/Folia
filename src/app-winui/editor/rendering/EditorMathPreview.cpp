@@ -2,6 +2,7 @@
 import std;
 #include "editor/rendering/EditorMathPreview.h"
 #include "editor/rendering/EditorDocumentPainter.h"
+#include "editor/rendering/EditorTextLayoutEngine.h"
 
 namespace winrt::Folia {
     std::optional<EditorMathPreviewPlacement> PlaceInlineMathPreview(
@@ -27,14 +28,60 @@ namespace winrt::Folia {
             D2D1::Point2F(left + horizontalPadding, top + verticalPadding), scale};
     }
 
+    EditorPreparedMathPreview PrepareMathPreview(DisplayInlineText::MathPreview const& input,
+        EditorTextLayoutEngine& engine, IDWriteTextFormat* format, float width) {
+        EditorPreparedMathPreview preview;
+        preview.display = BuildMathPreviewText(input);
+        preview.layout = engine.CreateFlow(preview.display, format, width, {});
+        preview.contentSpan = input.contentSpan;
+        preview.floating = !input.svg.display;
+        DWRITE_TEXT_METRICS metrics{};
+        if (!preview.layout || FAILED(preview.layout->GetMetrics(&metrics))) return preview;
+        auto positionedMath = EditorDocumentPainter::PositionMath(
+            preview.layout.Get(), preview.display.mathOverlays, metrics.layoutWidth);
+        if (positionedMath.empty()) return preview;
+        auto content = D2D1::RectF(FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX);
+        for (auto const& positioned : positionedMath) {
+            auto const& fragment = positioned.overlay->fragment;
+            content.left = (std::min)(content.left, positioned.localX);
+            content.top = (std::min)(content.top, positioned.localTop);
+            content.right = (std::max)(content.right, positioned.localX + fragment.width);
+            content.bottom = (std::max)(content.bottom, positioned.localTop + fragment.height);
+        }
+        // Both floating and block previews surround the SVGs, not DirectWrite's
+        // font leading. Keep the fragment positions and line breaks intact.
+        preview.contentBounds = content;
+        return preview;
+    }
+
+    void PaintMathPreviewContent(EditorPreparedMathPreview const& preview, D2D1_POINT_2F origin, float scale,
+        EditorRenderResources& resources, EditorStyleSheet const& styleSheet,
+        EditorDrawMath const& drawMath, EditorDrawMathFallback const& drawFallback) {
+        if (!preview.layout) return;
+        auto const& content = preview.contentBounds;
+        D2D1_MATRIX_3X2_F transform;
+        resources.d2dContext->GetTransform(&transform);
+        resources.d2dContext->SetTransform(D2D1::Matrix3x2F::Scale(scale, scale)
+            * D2D1::Matrix3x2F::Translation(origin.x - content.left * scale,
+                origin.y - content.top * scale) * transform);
+        resources.d2dContext->DrawTextLayout(D2D1::Point2F(0, 0), preview.layout.Get(), resources.textBrush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP);
+        resources.d2dContext->SetTransform(transform);
+        for (auto const& positioned : EditorDocumentPainter::PositionMath(
+                preview.layout.Get(), preview.display.mathOverlays, preview.layout->GetMaxWidth())) {
+            auto fragment = positioned.overlay->fragment;
+            fragment.width *= scale;
+            fragment.height *= scale;
+            auto fragmentOrigin = D2D1::Point2F(origin.x + (positioned.localX - content.left) * scale,
+                origin.y + (positioned.localTop - content.top) * scale);
+            if (!drawMath(fragment, fragmentOrigin, styleSheet.textColor)) drawFallback(positioned.overlay->sourceSpan, fragmentOrigin);
+        }
+    }
+
     std::optional<D2D1_RECT_F> PaintInlineMathPreview(
         EditorPreparedMathPreview const& preview, D2D1_RECT_F caret, float anchorX,
         EditorRenderResources& resources, EditorStyleSheet const& styleSheet,
         EditorDrawMath const& drawMath, EditorDrawMathFallback const& drawFallback) {
-        DWRITE_TEXT_METRICS metrics{};
-        if (!preview.layout || FAILED(preview.layout->GetMetrics(&metrics))) return std::nullopt;
-        auto placement = PlaceInlineMathPreview(caret, anchorX,
-            D2D1::SizeF((std::max)(1.f, metrics.widthIncludingTrailingWhitespace), preview.height),
+        auto placement = PlaceInlineMathPreview(caret, anchorX, D2D1::SizeF(preview.Width(), preview.Height()),
             D2D1::SizeF(resources.surfaceWidthDip, resources.surfaceHeightDip));
         if (!placement) return std::nullopt;
         auto const& box = *placement;
@@ -50,19 +97,7 @@ namespace winrt::Folia {
         }
         resources.d2dContext->FillRoundedRectangle(D2D1::RoundedRect(box.bounds, 7, 7), resources.previewBackgroundBrush.Get());
         resources.d2dContext->DrawRoundedRectangle(D2D1::RoundedRect(box.bounds, 7, 7), resources.previewBorderBrush.Get(), 1);
-        D2D1_MATRIX_3X2_F transform;
-        resources.d2dContext->GetTransform(&transform);
-        resources.d2dContext->SetTransform(D2D1::Matrix3x2F::Scale(box.scale, box.scale)
-            * D2D1::Matrix3x2F::Translation(box.origin.x, box.origin.y) * transform);
-        resources.d2dContext->DrawTextLayout(D2D1::Point2F(0, 0), preview.layout.Get(), resources.textBrush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP);
-        resources.d2dContext->SetTransform(transform);
-        for (auto const& positioned : EditorDocumentPainter::PositionMath(preview.layout.Get(), preview.display.mathOverlays, metrics.layoutWidth)) {
-            auto fragment = positioned.overlay->fragment;
-            fragment.width *= box.scale;
-            fragment.height *= box.scale;
-            auto origin = D2D1::Point2F(box.origin.x + positioned.localX * box.scale, box.origin.y + positioned.localTop * box.scale);
-            if (!drawMath(fragment, origin, styleSheet.textColor)) drawFallback(positioned.overlay->sourceSpan, origin);
-        }
+        PaintMathPreviewContent(preview, box.origin, box.scale, resources, styleSheet, drawMath, drawFallback);
         return box.bounds;
     }
 }
