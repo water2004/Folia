@@ -255,7 +255,10 @@ namespace winrt::Folia::implementation
             [this](folia::Command const& command) { return ExecuteEditorCommand(command); },
             [this] { RenderEditorSurface(); },
             [this] { return WindowHandle(); });
-
+        // Rebinding a document can keep XAML focus on the same surface, so no
+        // new GotFocus event is guaranteed for its new CoreText edit context.
+        if (EditorSurface().FocusState() != Microsoft::UI::Xaml::FocusState::Unfocused
+            && ::GetForegroundWindow() == WindowHandle()) textInputController.FocusEnter();
     }
 
     bool MainWindow::ExecuteEditorCommand(folia::Command const& command)
@@ -413,9 +416,14 @@ namespace winrt::Folia::implementation
     {
         UpdateTheme();
         editorRenderer.Initialize(EditorSurface());
-        scrollController.Attach(editorRenderer, EditorScrollBar(), EditorScrollBarColumn(), [this] { animationController.RequestFrame(); });
-        animationController.Attach(editorRenderer, scrollController, DispatcherQueue(), WindowHandle(), [this] { RenderEditorSurface(); });
-        editorRenderer.SetInvalidateCallback([this] { RenderEditorSurface(); });
+        auto render = [weak = get_weak()] {
+            if (auto owner = weak.get(); owner && !owner->windowClosed) owner->RenderEditorSurface();
+        };
+        scrollController.Attach(editorRenderer, EditorScrollBar(), EditorScrollBarColumn(), [weak = get_weak()] {
+            if (auto owner = weak.get(); owner && !owner->windowClosed) owner->animationController.RequestFrame();
+        });
+        animationController.Attach(editorRenderer, scrollController, DispatcherQueue(), WindowHandle(), render);
+        editorRenderer.SetInvalidateCallback(render);
         RenderEditorSurface();
         EditorSurface().Focus(Microsoft::UI::Xaml::FocusState::Programmatic);
     }
@@ -435,7 +443,7 @@ namespace winrt::Folia::implementation
 
     void MainWindow::RenderEditorSurface()
     {
-        if (settingsMode) return;
+        if (windowClosed || settingsMode) return;
         try
         {
             auto snippetPlaceholders = keyboardController.SnippetPlaceholders();

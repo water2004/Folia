@@ -75,10 +75,13 @@ namespace winrt::Folia::implementation
 
     void MainWindow::RegisterWindowHandlers()
     {
-        Activated([this](auto const&, Microsoft::UI::Xaml::WindowActivatedEventArgs const& args) {
-            animationController.Focus(args.WindowActivationState() != Microsoft::UI::Xaml::WindowActivationState::Deactivated
-                && EditorSurface().FocusState() != Microsoft::UI::Xaml::FocusState::Unfocused && !settingsMode);
-        });
+        Activated(WindowEvent([this](auto const&, Microsoft::UI::Xaml::WindowActivatedEventArgs const& args) {
+            auto editing = args.WindowActivationState() != Microsoft::UI::Xaml::WindowActivationState::Deactivated
+                && EditorSurface().FocusState() != Microsoft::UI::Xaml::FocusState::Unfocused && !settingsMode;
+            animationController.Focus(editing);
+            if (editing) textInputController.FocusEnter();
+            else textInputController.FocusLeave();
+        }));
         closingHandler.Attach(AppWindow(),
             [this](auto const&, Microsoft::UI::Windowing::AppWindowClosingEventArgs const& args)
             {
@@ -91,7 +94,7 @@ namespace winrt::Folia::implementation
                     if (auto window = weak.get()) window->ConfirmWindowCloseAsync();
                 });
             });
-        Closed([this](auto const&, auto const&)
+        Closed(WindowEvent([this](auto const&, auto const&)
         {
             windowClosed = true;
             animationController.Detach();
@@ -107,67 +110,67 @@ namespace winrt::Folia::implementation
             keyboardController.Detach();
             textInputController.Detach();
             scrollController.Detach();
-        });
+        }));
 
-        SourceModeButton().Click([this](auto const&, auto const&)
+        SourceModeButton().Click(WindowEvent([this](auto const&, auto const&)
         {
             ToggleSourceMode();
-        });
+        }));
 
-        EncodingButton().Click([this](auto const&, auto const&)
+        EncodingButton().Click(WindowEvent([this](auto const&, auto const&)
         {
             auto menu = Microsoft::UI::Xaml::Controls::MenuFlyout();
             auto reopen = Microsoft::UI::Xaml::Controls::MenuFlyoutItem();
             reopen.Text(Localize(L"ReopenWithEncoding"));
-            reopen.Click([this](auto const&, auto const&)
+            reopen.Click(WindowEvent([this](auto const&, auto const&)
             {
                 ShowEncodingPicker(false);
-            });
+            }));
             menu.Items().Append(reopen);
             auto save = Microsoft::UI::Xaml::Controls::MenuFlyoutItem();
             save.Text(Localize(L"SaveWithEncoding"));
-            save.Click([this](auto const&, auto const&)
+            save.Click(WindowEvent([this](auto const&, auto const&)
             {
                 ShowEncodingPicker(true);
-            });
+            }));
             menu.Items().Append(save);
             menu.ShowAt(EncodingButton());
-        });
+        }));
 
-        SidebarToggleButton().Click([this](auto const&, auto const&)
+        SidebarToggleButton().Click(WindowEvent([this](auto const&, auto const&)
         {
             outlineOpen = SidebarToggleButton().IsChecked();
             UpdateWorkspaceLayout();
-        });
+        }));
 
-        Root().Loaded([this](auto const&, auto const&) { UpdateChromeMetrics(); });
-        Root().SizeChanged([this](auto const&, auto const&) { UpdateChromeMetrics(); });
+        Root().Loaded(WindowEvent([this](auto const&, auto const&) { UpdateChromeMetrics(); }));
+        Root().SizeChanged(WindowEvent([this](auto const&, auto const&) { UpdateChromeMetrics(); }));
 
-        EditorSurface().Loaded([this](auto const&, auto const&)
+        EditorSurface().Loaded(WindowEvent([this](auto const&, auto const&)
         {
             InitializeEditorSurface();
-        });
+        }));
 
-        EditorSurface().SizeChanged([this](auto const&, Microsoft::UI::Xaml::SizeChangedEventArgs const& args)
+        EditorSurface().SizeChanged(WindowEvent([this](auto const&, Microsoft::UI::Xaml::SizeChangedEventArgs const& args)
         {
             ResizeEditorSurface(args.NewSize().Width, args.NewSize().Height);
-        });
+        }));
 
-        WorkspaceHost().SizeChanged([this](auto const&, Microsoft::UI::Xaml::SizeChangedEventArgs const& args)
+        WorkspaceHost().SizeChanged(WindowEvent([this](auto const&, Microsoft::UI::Xaml::SizeChangedEventArgs const& args)
         {
             UpdateWorkspaceLayout();
-        });
+        }));
 
-        EditorSurface().CompositionScaleChanged([this](auto const&, auto const&)
+        EditorSurface().CompositionScaleChanged(WindowEvent([this](auto const&, auto const&)
         {
             UpdateChromeMetrics();
             ResizeEditorSurface(EditorSurface().ActualWidth(), EditorSurface().ActualHeight());
-        });
+        }));
 
-        Root().ActualThemeChanged([this](auto const&, auto const&)
+        Root().ActualThemeChanged(WindowEvent([this](auto const&, auto const&)
         {
             if (appSettings.themeId == "system") UpdateTheme();
-        });
+        }));
 
         EditorSurface().IsTabStop(true);
         EditorSurface().CharacterReceived([this](auto const&, Microsoft::UI::Xaml::Input::CharacterReceivedRoutedEventArgs const& args)
@@ -178,7 +181,7 @@ namespace winrt::Folia::implementation
             args.Handled(handled);
         });
 
-        EditorSurface().KeyDown([this](auto const&, Microsoft::UI::Xaml::Input::KeyRoutedEventArgs const& args)
+        EditorSurface().KeyDown(WindowEvent([this](auto const&, Microsoft::UI::Xaml::Input::KeyRoutedEventArgs const& args)
         {
             if (latexCompletionController.HandleKey(args.Key()))
             {
@@ -188,7 +191,7 @@ namespace winrt::Folia::implementation
             auto handled = keyboardController.Key(args.Key());
             if (handled) latexCompletionController.Refresh();
             args.Handled(handled);
-        });
+        }));
 
         auto enterAccelerator = Microsoft::UI::Xaml::Input::KeyboardAccelerator();
         enterAccelerator.Key(winrt::Windows::System::VirtualKey::Enter);
@@ -221,30 +224,30 @@ namespace winrt::Folia::implementation
         });
         Root().KeyboardAccelerators().Append(escapeAccelerator);
 
-        FindQueryBox().TextChanged([this](auto const&, auto const&) { RefreshSearch(true); });
-        FindRegexButton().Click([this](auto const&, auto const&) { RefreshSearch(true); });
-        FindCaseButton().Click([this](auto const&, auto const&) { RefreshSearch(true); });
-        FindPreviousButton().Click([this](auto const&, auto const&) { NavigateSearch(-1); });
-        FindNextButton().Click([this](auto const&, auto const&) { NavigateSearch(1); });
-        CloseFindButton().Click([this](auto const&, auto const&) { HideFindBar(); });
-        ReplaceCurrentButton().Click([this](auto const&, auto const&) { ReplaceCurrentSearchMatch(); });
-        ReplaceAllButton().Click([this](auto const&, auto const&) { ReplaceAllSearchMatches(); });
-        FindQueryBox().KeyDown([this](auto const&, Microsoft::UI::Xaml::Input::KeyRoutedEventArgs const& args)
+        FindQueryBox().TextChanged(WindowEvent([this](auto const&, auto const&) { RefreshSearch(true); }));
+        FindRegexButton().Click(WindowEvent([this](auto const&, auto const&) { RefreshSearch(true); }));
+        FindCaseButton().Click(WindowEvent([this](auto const&, auto const&) { RefreshSearch(true); }));
+        FindPreviousButton().Click(WindowEvent([this](auto const&, auto const&) { NavigateSearch(-1); }));
+        FindNextButton().Click(WindowEvent([this](auto const&, auto const&) { NavigateSearch(1); }));
+        CloseFindButton().Click(WindowEvent([this](auto const&, auto const&) { HideFindBar(); }));
+        ReplaceCurrentButton().Click(WindowEvent([this](auto const&, auto const&) { ReplaceCurrentSearchMatch(); }));
+        ReplaceAllButton().Click(WindowEvent([this](auto const&, auto const&) { ReplaceAllSearchMatches(); }));
+        FindQueryBox().KeyDown(WindowEvent([this](auto const&, Microsoft::UI::Xaml::Input::KeyRoutedEventArgs const& args)
         {
             if (args.Key() != winrt::Windows::System::VirtualKey::Enter) return;
             auto shift = Microsoft::UI::Input::InputKeyboardSource::GetKeyStateForCurrentThread(
                 winrt::Windows::System::VirtualKey::Shift);
             NavigateSearch((static_cast<std::uint32_t>(shift) & 0x1u) != 0 ? -1 : 1);
             args.Handled(true);
-        });
-        ReplaceTextBox().KeyDown([this](auto const&, Microsoft::UI::Xaml::Input::KeyRoutedEventArgs const& args)
+        }));
+        ReplaceTextBox().KeyDown(WindowEvent([this](auto const&, Microsoft::UI::Xaml::Input::KeyRoutedEventArgs const& args)
         {
             if (args.Key() != winrt::Windows::System::VirtualKey::Enter) return;
             ReplaceCurrentSearchMatch();
             args.Handled(true);
-        });
+        }));
 
-        EditorSurface().PointerPressed([this](auto const&, Microsoft::UI::Xaml::Input::PointerRoutedEventArgs const& args)
+        EditorSurface().PointerPressed(WindowEvent([this](auto const&, Microsoft::UI::Xaml::Input::PointerRoutedEventArgs const& args)
         {
             auto point = args.GetCurrentPoint(EditorSurface());
             if (point.Properties().IsLeftButtonPressed()) {
@@ -260,61 +263,61 @@ namespace winrt::Folia::implementation
                 }
             }
             pointerController.PointerPressed(args);
-        });
+        }));
 
-        EditorSurface().PointerMoved([this](auto const&, Microsoft::UI::Xaml::Input::PointerRoutedEventArgs const& args)
+        EditorSurface().PointerMoved(WindowEvent([this](auto const&, Microsoft::UI::Xaml::Input::PointerRoutedEventArgs const& args)
         {
             pointerController.PointerMoved(args);
-        });
+        }));
 
-        EditorSurface().PointerReleased([this](auto const&, Microsoft::UI::Xaml::Input::PointerRoutedEventArgs const& args)
+        EditorSurface().PointerReleased(WindowEvent([this](auto const&, Microsoft::UI::Xaml::Input::PointerRoutedEventArgs const& args)
         {
             pointerController.PointerReleased(args);
-        });
+        }));
 
-        EditorSurface().PointerExited([this](auto const&, auto const&)
+        EditorSurface().PointerExited(WindowEvent([this](auto const&, auto const&)
         {
             pointerController.PointerExited();
-        });
+        }));
 
-        EditorSurface().PointerCaptureLost([this](auto const&, auto const&)
+        EditorSurface().PointerCaptureLost(WindowEvent([this](auto const&, auto const&)
         {
             pointerController.CancelPointerInteraction();
-        });
+        }));
 
-        EditorSurface().PointerCanceled([this](auto const&, auto const&)
+        EditorSurface().PointerCanceled(WindowEvent([this](auto const&, auto const&)
         {
             pointerController.CancelPointerInteraction();
-        });
+        }));
 
-        EditorSurface().PointerWheelChanged([this](auto const&, Microsoft::UI::Xaml::Input::PointerRoutedEventArgs const& args)
+        EditorSurface().PointerWheelChanged(WindowEvent([this](auto const&, Microsoft::UI::Xaml::Input::PointerRoutedEventArgs const& args)
         {
             HandlePointerWheel(args);
-        });
+        }));
 
-        EditorSurface().GotFocus([this](auto const&, auto const&)
+        EditorSurface().GotFocus(WindowEvent([this](auto const&, auto const&)
         {
             animationController.Focus(true);
             textInputController.FocusEnter();
-        });
+        }));
 
-        EditorSurface().LostFocus([this](auto const&, auto const&)
+        EditorSurface().LostFocus(WindowEvent([this](auto const&, auto const&)
         {
             animationController.Focus(false);
             pointerController.CancelPointerInteraction();
             textInputController.FocusLeave();
-        });
+        }));
 
-        EditorSurface().DoubleTapped([this](auto const&, Microsoft::UI::Xaml::Input::DoubleTappedRoutedEventArgs const& args)
+        EditorSurface().DoubleTapped(WindowEvent([this](auto const&, Microsoft::UI::Xaml::Input::DoubleTappedRoutedEventArgs const& args)
         {
             pointerController.DoubleTapped(args);
-        });
+        }));
 
-        OutlineList().ItemClick([this](auto const&, Microsoft::UI::Xaml::Controls::ItemClickEventArgs const& args)
+        OutlineList().ItemClick(WindowEvent([this](auto const&, Microsoft::UI::Xaml::Controls::ItemClickEventArgs const& args)
         {
             sidebarController.SelectOutline(args.ClickedItem());
-        });
-        OutlineList().KeyUp([this](auto const&, Microsoft::UI::Xaml::Input::KeyRoutedEventArgs const& args)
+        }));
+        OutlineList().KeyUp(WindowEvent([this](auto const&, Microsoft::UI::Xaml::Input::KeyRoutedEventArgs const& args)
         {
             // ItemClick handles mouse/Enter/Space activation. After the native
             // list has moved its keyboard selection, navigate that item too.
@@ -327,7 +330,7 @@ namespace winrt::Folia::implementation
                 sidebarController.SelectOutline(OutlineList().SelectedItem());
                 break;
             }
-        });
+        }));
 
     }
 }

@@ -38,10 +38,10 @@ namespace visual_tests {
 namespace winrt::Folia::implementation {
     App::App() {}
     void App::OnLaunched(Microsoft::UI::Xaml::LaunchActivatedEventArgs const&) {
-        window = winrt::make<MainWindow>();
+        auto window = CreateMainWindow();
         visualWindow = window;
         window.Activate();
-        window.DispatcherQueue().TryEnqueue([this] {
+        window.DispatcherQueue().TryEnqueue([this, window] {
             std::vector<std::string> utf8Arguments;
             for (int i = 0; i < __argc; ++i) utf8Arguments.push_back(winrt::to_string(__wargv[i]));
             std::vector<char const*> arguments;

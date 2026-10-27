@@ -4,7 +4,6 @@
 #include "localization/Localization.h"
 #include "settings/AppSettings.h"
 #include "media/MathSvgStore.h"
-#include <shellapi.h>
 
 using namespace winrt;
 using namespace winrt::Microsoft::UI::Xaml;
@@ -28,20 +27,6 @@ namespace winrt::Folia::implementation
             }
         }
 
-        std::optional<winrt::hstring> InitialDocumentPath()
-        {
-            struct LocalArguments
-            {
-                wchar_t** value{};
-                ~LocalArguments() { if (value) ::LocalFree(value); }
-            };
-            int argumentCount = 0;
-            LocalArguments arguments{ ::CommandLineToArgvW(::GetCommandLineW(), &argumentCount) };
-            if (!arguments.value) return std::nullopt;
-            if (argumentCount < 2 || !arguments.value[1] || arguments.value[1][0] == L'\0')
-                return std::nullopt;
-            return winrt::hstring{ arguments.value[1] };
-        }
     }
 
     App::App()
@@ -61,13 +46,42 @@ namespace winrt::Folia::implementation
 
     void App::OnLaunched([[maybe_unused]] LaunchActivatedEventArgs const& e)
     {
-        ReclaimMathCacheAsync();
-        ApplyLanguageOverride(LoadAppSettings().settings.languageId);
-        auto initialDocument = InitialDocumentPath();
-        window = initialDocument
-            ? make<MainWindow>(*initialDocument)
-            : make<MainWindow>();
-        window.Activate();
-        ::OutputDebugStringW(L"Folia.StartupComplete\n");
+        LaunchAsync();
+    }
+
+    winrt::fire_and_forget App::LaunchAsync() {
+        auto lifetime = get_strong();
+        try {
+            auto request = ReadWorkspaceCommandLine(::GetCommandLineW());
+            if (!request.newInstance) {
+                std::array<wchar_t, 32768> executable{};
+                auto length = ::GetModuleFileNameW(nullptr, executable.data(), static_cast<DWORD>(executable.size()));
+                if (!length || length == executable.size()) winrt::throw_last_error();
+                activationInstance = Microsoft::Windows::AppLifecycle::AppInstance::FindOrRegisterForKey(
+                    WorkspaceInstanceKey(std::wstring(executable.data(), length)));
+                if (!activationInstance.IsCurrent()) {
+                    co_await activationInstance.RedirectActivationToAsync(MakeWorkspaceActivation(request));
+                    Exit();
+                    co_return;
+                }
+                auto dispatcher = Microsoft::UI::Dispatching::DispatcherQueue::GetForCurrentThread();
+                activationSubscription = activationInstance.Activated(winrt::auto_revoke,
+                    [weak = get_weak(), dispatcher](auto const&, auto const& args) {
+                        auto request = ReadWorkspaceActivation(args);
+                        dispatcher.TryEnqueue([weak, request = std::move(request)] {
+                            if (auto app = weak.get()) app->OpenWorkspaceWindows(request);
+                        });
+                    });
+            }
+            ReclaimMathCacheAsync();
+            ApplyLanguageOverride(LoadAppSettings().settings.languageId);
+            OpenWorkspaceWindows(request);
+        } catch (winrt::hresult_error const& error) {
+            ::OutputDebugStringW((L"Folia.ActivationFailed: " + error.message() + L"\n").c_str());
+            Exit();
+        } catch (std::exception const& error) {
+            ::OutputDebugStringW((L"Folia.ActivationFailed: " + winrt::to_hstring(error.what()) + L"\n").c_str());
+            Exit();
+        }
     }
 }

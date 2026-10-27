@@ -29,6 +29,24 @@ namespace winrt::Folia::implementation
         explicit MainWindow(winrt::hstring const& initialDocumentPath);
 
     private:
+        // Child XAML controls may deliver final notifications after Closed.
+        // Lock the outer window for delivery and discard notifications after it closes.
+        template<class Handler> auto WindowEvent(Handler handler) {
+            return [weak = get_weak(), handler = std::move(handler)](auto const& sender, auto const& args) {
+                if (auto owner = weak.get(); owner && !owner->windowClosed) handler(sender, args);
+            };
+        }
+        friend struct WorkspaceWindowTestAccess;
+        struct DocumentTab {
+            Microsoft::UI::Xaml::Controls::TabViewItem view{nullptr};
+            winrt::weak_ref<MainWindow> owner;
+        };
+        void RegisterTabTransferHandlers();
+        MainWindow* CreateTabWindow();
+        void SynchronizeTabOrder();
+        void QueueTabOrderSync();
+        bool CanAcceptTab(std::shared_ptr<DocumentTab> const& tab) const;
+        bool TransferTab(std::shared_ptr<DocumentTab> tab, std::size_t index);
         void AttachControllers();
         void AttachDocumentController(std::shared_ptr<winrt::Folia::WorkspaceDocument> const& document);
         winrt::Folia::EditorSession& editorSession() noexcept;
@@ -123,7 +141,9 @@ namespace winrt::Folia::implementation
         bool outlineOpen = false;
         bool windowClosed = false;
         std::uint64_t workspaceThemeRevision = 1;
-        std::unordered_map<std::uint64_t, winrt::Microsoft::UI::Xaml::Controls::TabViewItem> tabItems;
+        std::unordered_map<std::uint64_t, std::shared_ptr<DocumentTab>> tabItems;
+        std::optional<std::uint64_t> transferPlaceholder;
+        bool tabOrderSyncPending = false;
         std::vector<winrt::Microsoft::UI::Xaml::Input::KeyboardAccelerator> applicationShortcuts;
         winrt::Folia::detail::WindowClosingSubscription closingHandler;
         std::optional<std::size_t> activeSearchMatch;

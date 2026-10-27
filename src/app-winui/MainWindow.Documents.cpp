@@ -185,6 +185,9 @@ namespace winrt::Folia::implementation {
     }
 
     void MainWindow::UpdateLoadingState() {
+        auto movable = !closePending && !closingDocument && !relocatingFiles;
+        DocumentTabs().CanTearOutTabs(movable);
+        DocumentTabs().CanDragTabs(movable);
         bool loading = workspaceDocuments.Active()->opening || documentController().IsLoading();
         DocumentLoadingOverlay().Visibility(loading ? Visibility::Visible : Visibility::Collapsed);
         SaveButton().IsEnabled(!loading);

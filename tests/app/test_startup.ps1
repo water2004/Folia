@@ -55,6 +55,47 @@ public static class FoliaStartupTest {
  [DllImport("user32.dll",CharSet=CharSet.Unicode)] static extern int GetWindowTextLengthW(IntPtr window);
  [DllImport("user32.dll",SetLastError=true)] static extern bool PostMessageW(IntPtr window,uint message,IntPtr w,IntPtr l);
  [DllImport("dbghelp.dll",SetLastError=true)] static extern bool MiniDumpWriteDump(IntPtr process,uint pid,IntPtr file,uint type,IntPtr exception,IntPtr streams,IntPtr callback);
+ [DllImport("kernel32.dll",SetLastError=true)] static extern IntPtr OpenThread(uint access,bool inherit,uint tid);
+ [DllImport("kernel32.dll",SetLastError=true)] static extern bool GetThreadContext(IntPtr thread,IntPtr context);
+ [DllImport("dbghelp.dll",CharSet=CharSet.Ansi,SetLastError=true)] static extern bool SymInitialize(IntPtr process,string path,bool invade);
+ [DllImport("dbghelp.dll")] static extern bool SymCleanup(IntPtr process);
+ [DllImport("dbghelp.dll")] static extern ulong SymGetModuleBase64(IntPtr process,ulong address);
+ [DllImport("dbghelp.dll")] static extern IntPtr SymFunctionTableAccess64(IntPtr process,ulong address);
+ [DllImport("dbghelp.dll",SetLastError=true)] static extern bool SymFromAddr(IntPtr process,ulong address,out ulong displacement,IntPtr symbol);
+ delegate IntPtr FunctionTable(IntPtr process,ulong address);
+ delegate ulong ModuleBase(IntPtr process,ulong address);
+ [DllImport("dbghelp.dll",SetLastError=true)] static extern bool StackWalk64(uint machine,IntPtr process,IntPtr thread,IntPtr frame,IntPtr context,IntPtr read,FunctionTable table,ModuleBase module,IntPtr translate);
+
+ static void Stack(ProcessInfo child,uint threadId,string symbols,StringBuilder log) {
+  var thread=OpenThread(0x48,false,threadId);
+  var context=Marshal.AllocHGlobal(1232); var frame=Marshal.AllocHGlobal(1024); var symbol=Marshal.AllocHGlobal(4096);
+  bool initialized=false;
+  try {
+   for(int i=0;i<1232;i++) Marshal.WriteByte(context,i,0);
+   for(int i=0;i<1024;i++) Marshal.WriteByte(frame,i,0);
+   Marshal.WriteInt32(context,48,0x10000b);
+   if(thread==IntPtr.Zero || !GetThreadContext(thread,context)) { log.AppendLine("thread context unavailable"); return; }
+   initialized=SymInitialize(child.process,symbols,true);
+   if(!initialized) { log.AppendLine("symbols unavailable: "+Marshal.GetLastWin32Error()); return; }
+   Marshal.WriteInt64(frame,0,Marshal.ReadInt64(context,248)); Marshal.WriteInt32(frame,12,3);
+   Marshal.WriteInt64(frame,32,Marshal.ReadInt64(context,160)); Marshal.WriteInt32(frame,44,3);
+   Marshal.WriteInt64(frame,48,Marshal.ReadInt64(context,152)); Marshal.WriteInt32(frame,60,3);
+   for(int depth=0;depth<40;depth++) {
+    ulong pc=(ulong)Marshal.ReadInt64(frame,0);
+    if(pc==0) break;
+    for(int i=0;i<88;i++) Marshal.WriteByte(symbol,i,0);
+    Marshal.WriteInt32(symbol,0,88); Marshal.WriteInt32(symbol,80,4000);
+    ulong delta; string name=SymFromAddr(child.process,pc,out delta,symbol) ? Marshal.PtrToStringAnsi(IntPtr.Add(symbol,84)) : "?";
+    ulong module=SymGetModuleBase64(child.process,pc);
+    log.AppendLine("frame "+depth+" pc=0x"+pc.ToString("x")+" module=0x"+module.ToString("x")+" rva=0x"+(pc-module).ToString("x")+" "+name);
+    if(!StackWalk64(0x8664,child.process,thread,frame,context,IntPtr.Zero,SymFunctionTableAccess64,SymGetModuleBase64,IntPtr.Zero)) break;
+   }
+  } finally {
+   if(initialized) SymCleanup(child.process);
+   if(thread!=IntPtr.Zero) CloseHandle(thread);
+   Marshal.FreeHGlobal(context); Marshal.FreeHGlobal(frame); Marshal.FreeHGlobal(symbol);
+  }
+ }
 
  static IntPtr OwnWindow(uint process) {
   IntPtr found=IntPtr.Zero;
@@ -73,7 +114,7 @@ public static class FoliaStartupTest {
   var result=new FoliaStartupResult(); var log=new StringBuilder();
   var startup=new StartupInfo(); startup.cb=(uint)Marshal.SizeOf(typeof(StartupInfo)); startup.flags=1; startup.show=0;
   ProcessInfo child;
-  if(!CreateProcessW(exe,new StringBuilder("\""+exe+"\""),IntPtr.Zero,IntPtr.Zero,false,2,IntPtr.Zero,Path.GetDirectoryName(exe),ref startup,out child))
+  if(!CreateProcessW(exe,new StringBuilder("\""+exe+"\" --new-instance"),IntPtr.Zero,IntPtr.Zero,false,2,IntPtr.Zero,Path.GetDirectoryName(exe),ref startup,out child))
    throw new Exception("CreateProcess: "+Marshal.GetLastWin32Error());
   result.ProcessId=child.pid;
   var deadline=DateTime.UtcNow.AddSeconds(20); DateTime readyAt=DateTime.MaxValue; bool exited=false;
@@ -108,6 +149,7 @@ public static class FoliaStartupTest {
       try { imageBase=Process.GetProcessById((int)child.pid).MainModule.BaseAddress.ToInt64(); } catch {}
       result.Fault="0x"+ev.exception.ToString("x")+" at RVA 0x"+(ev.address.ToInt64()-imageBase).ToString("x");
       log.AppendLine(result.Fault);
+      Stack(child,ev.tid,Path.GetDirectoryName(exe),log);
       Dump(child,Path.Combine(directory,"startup.dmp"));
       TerminateProcess(child.process,0xeeef);
       ContinueDebugEvent(ev.pid,ev.tid,0x00010002);

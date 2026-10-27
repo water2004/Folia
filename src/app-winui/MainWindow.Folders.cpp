@@ -43,6 +43,7 @@ namespace winrt::Folia::implementation {
         auto lifetime = get_strong();
         const bool relocate = action.kind == winrt::Folia::WorkspaceFileActionKind::Move || action.kind == winrt::Folia::WorkspaceFileActionKind::Rename;
         relocatingFiles = relocate;
+        UpdateLoadingState();
         struct ProgressState {
             std::mutex mutex;
             winrt::Folia::WorkspaceFileProgress latest;
@@ -68,6 +69,7 @@ namespace winrt::Folia::implementation {
             ~Pending() {
                 { std::scoped_lock lock(progress->mutex); progress->finished = true; }
                 timer.Stop(); window.relocatingFiles = false;
+                if (!window.windowClosed) window.UpdateLoadingState();
                 if (!window.windowClosed) window.FileOperationPanel().Visibility(Microsoft::UI::Xaml::Visibility::Collapsed);
             }
         } pending{*this, progress, timer};

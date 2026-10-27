@@ -25,6 +25,7 @@ namespace winrt::Folia::implementation {
         if (closePending || closingDocument || windowClosed) co_return;
         auto lifetime = get_strong();
         closePending = true;
+        UpdateLoadingState();
         try {
             textInputController.FocusLeave();
             std::vector<std::shared_ptr<winrt::Folia::WorkspaceDocument>> documents(workspaceDocuments.Items().begin(), workspaceDocuments.Items().end());
@@ -38,5 +39,6 @@ namespace winrt::Folia::implementation {
             SetStatus(LocalizeFormat(L"StatusSaveFailed", {winrt::to_hstring(error.what())}));
         }
         closePending = false;
+        if (!windowClosed) UpdateLoadingState();
     }
 }

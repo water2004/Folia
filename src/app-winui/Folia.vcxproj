@@ -725,6 +725,10 @@
     <ClCompile Include="MainWindow.Commands.cpp" />
     <ClCompile Include="MainWindow.Documents.cpp" />
     <ClCompile Include="MainWindow.Tabs.cpp" />
+    <ClCompile Include="MainWindow.TabTransfer.cpp" />
+    <ClCompile Include="App.Windows.cpp" />
+    <ClCompile Include="workspace\WorkspaceLaunch.cpp" />
+    <ClInclude Include="workspace\WorkspaceLaunch.h" />
     <ClCompile Include="editor\rendering\EditorPopupShadow.cpp" />
     <ClCompile Include="editor\rendering\EditorMathSyntax.cpp" />
     <ClCompile Include="editor\rendering\EditorCaretAnimation.cpp" />

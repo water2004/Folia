@@ -13,7 +13,7 @@ namespace winrt::Folia::implementation {
         auto document = workspaceDocuments.Find(id);
         auto found = tabItems.find(id);
         if (!document || found == tabItems.end()) return;
-        auto tab = found->second;
+        auto tab = found->second->view;
         auto header = tab.Header().as<StackPanel>();
         auto title = header.Children().GetAt(1).as<TextBlock>();
         auto dirty = header.Children().GetAt(2).as<TextBlock>();
@@ -47,12 +47,15 @@ namespace winrt::Folia::implementation {
             auto found = tabItems.find(document->id);
             TabViewItem tab{nullptr};
             if (found == tabItems.end()) {
+                auto binding = std::make_shared<DocumentTab>();
+                binding->owner = get_weak();
                 tab = TabViewItem();
+                binding->view = tab;
                 tab.Style(Root().Resources().Lookup(winrt::box_value(L"WorkspaceTabStyle")).as<Style>());
                 tab.BorderBrush(Root().Resources().Lookup(winrt::box_value(L"FoliaShellAccentBrush")).as<Media::Brush>());
                 tab.Tag(winrt::box_value(document->id));
-                tab.Loaded([weak = get_weak()](auto const&, auto const&) {
-                    if (auto window = weak.get()) window->EnsureSelectedTabVisible();
+                tab.Loaded([weak = std::weak_ptr{binding}](auto const&, auto const&) {
+                    if (auto current = weak.lock()) if (auto window = current->owner.get(); window && !window->windowClosed) window->EnsureSelectedTabVisible();
                 });
                 StackPanel header;
                 header.Orientation(Orientation::Horizontal);
@@ -70,23 +73,25 @@ namespace winrt::Folia::implementation {
                 header.Children().Append(title);
                 header.Children().Append(dirty);
                 tab.Header(header);
-                tab.DoubleTapped([weak = get_weak(), id = document->id](auto const&, auto const&) {
-                    if (auto window = weak.get(); window && window->workspaceDocuments.Keep(id)) window->UpdateDocumentTab(id);
+                tab.DoubleTapped([weak = std::weak_ptr{binding}, id = document->id](auto const&, auto const&) {
+                    if (auto current = weak.lock())
+                        if (auto window = current->owner.get(); window && !window->windowClosed && window->workspaceDocuments.Keep(id)) window->UpdateDocumentTab(id);
                 });
-                tab.Tapped([weak = get_weak(), id = document->id](auto const&, auto const&) {
-                    if (auto window = weak.get(); window && window->settingsMode && window->IsActiveDocument(id)) window->SetSettingsMode(false);
+                tab.Tapped([weak = std::weak_ptr{binding}, id = document->id](auto const&, auto const&) {
+                    if (auto current = weak.lock())
+                        if (auto window = current->owner.get(); window && !window->windowClosed && window->settingsMode && window->IsActiveDocument(id)) window->SetSettingsMode(false);
                 });
                 items.InsertAt(index, tab);
-                tabItems.emplace(document->id, tab);
+                tabItems.emplace(document->id, std::move(binding));
             } else {
-                tab = found->second;
+                tab = found->second->view;
                 std::uint32_t at = 0;
                 if (items.IndexOf(tab, at) && at != index) { items.RemoveAt(at); items.InsertAt(index, tab); }
             }
             UpdateDocumentTab(document->id);
             ++index;
         }
-        if (auto active = tabItems.find(workspaceDocuments.Active()->id); active != tabItems.end()) DocumentTabs().SelectedItem(active->second);
+        if (auto active = tabItems.find(workspaceDocuments.Active()->id); active != tabItems.end()) DocumentTabs().SelectedItem(active->second->view);
         UpdateChromeMetrics();
         EnsureSelectedTabVisible();
     }
@@ -97,6 +102,7 @@ namespace winrt::Folia::implementation {
         if (!document) co_return;
         auto lifetime = get_strong();
         closingDocument = true;
+        UpdateLoadingState();
         try {
             if (IsActiveDocument(id)) textInputController.FocusLeave();
             if (co_await document->controller.ConfirmCloseAsync()) {
@@ -111,6 +117,7 @@ namespace winrt::Folia::implementation {
         } catch (winrt::hresult_error const& error) { SetStatus(LocalizeFormat(L"StatusSaveFailed", {error.message()})); }
         catch (std::exception const& error) { SetStatus(LocalizeFormat(L"StatusSaveFailed", {winrt::to_hstring(error.what())})); }
         closingDocument = false;
+        if (!windowClosed) UpdateLoadingState();
     }
 
     void MainWindow::RegisterWorkspaceHandlers() {
@@ -120,46 +127,41 @@ namespace winrt::Folia::implementation {
         OutlinePaneButton().Content(MakeWorkspaceIcon(WorkspaceIcon::PanelRight));
         Automation::AutomationProperties::SetName(ExplorerPaneButton(), Localize(L"Files"));
         Automation::AutomationProperties::SetName(OutlinePaneButton(), Localize(L"ToggleOutline"));
-        ExplorerPaneButton().Click([this](auto const&, auto const&) {
+        ExplorerPaneButton().Click(WindowEvent([this](auto const&, auto const&) {
             explorerOpen = ExplorerPaneButton().IsChecked().GetBoolean();
             UpdateWorkspaceLayout();
-        });
-        OutlinePaneButton().Click([this](auto const&, auto const&) {
+        }));
+        OutlinePaneButton().Click(WindowEvent([this](auto const&, auto const&) {
             outlineOpen = OutlinePaneButton().IsChecked().GetBoolean();
             UpdateWorkspaceLayout();
-        });
-        DocumentWorkspace().PaneClosing([this](auto const&, auto const&) {
+        }));
+        DocumentWorkspace().PaneClosing(WindowEvent([this](auto const&, auto const&) {
             explorerOpen = false;
             ExplorerPaneButton().IsChecked(explorerOpen);
             ExplorerToggleButton().IsChecked(explorerOpen);
-        });
-        OutlineSplitView().PaneClosing([this](auto const&, auto const&) {
+        }));
+        OutlineSplitView().PaneClosing(WindowEvent([this](auto const&, auto const&) {
             outlineOpen = false;
             OutlinePaneButton().IsChecked(outlineOpen);
             SidebarToggleButton().IsChecked(outlineOpen);
-        });
-        DocumentTabs().SelectionChanged([this](auto const&, auto const&) {
+        }));
+        DocumentTabs().SelectionChanged(WindowEvent([this](auto const&, auto const&) {
             if (updatingTabs || windowClosed) return;
             if (auto tab = DocumentTabs().SelectedItem().try_as<TabViewItem>()) ActivateDocument(winrt::unbox_value<std::uint64_t>(tab.Tag()));
-        });
-        DocumentTabs().AddTabButtonClick([this](auto const&, auto const&) { NewDocument(); });
-        DocumentTabs().TabCloseRequested([this](auto const&, TabViewTabCloseRequestedEventArgs const& args) {
+        }));
+        DocumentTabs().AddTabButtonClick(WindowEvent([this](auto const&, auto const&) { NewDocument(); }));
+        DocumentTabs().TabCloseRequested(WindowEvent([this](auto const&, TabViewTabCloseRequestedEventArgs const& args) {
             CloseDocumentAsync(winrt::unbox_value<std::uint64_t>(args.Tab().Tag()));
-        });
-        DocumentTabs().TabDragCompleted([this](auto const&, auto const&) {
-            std::vector<std::uint64_t> order;
-            for (auto item : DocumentTabs().TabItems()) order.push_back(winrt::unbox_value<std::uint64_t>(item.as<TabViewItem>().Tag()));
-            workspaceDocuments.Reorder(order);
-            UpdateChromeMetrics();
-        });
-        DocumentTabs().SizeChanged([this](auto const&, auto const&) {
+        }));
+        RegisterTabTransferHandlers();
+        DocumentTabs().SizeChanged(WindowEvent([this](auto const&, auto const&) {
             UpdateChromeMetrics();
             EnsureSelectedTabVisible();
-        });
-        ExplorerToggleButton().Click([this](auto const&, auto const&) {
+        }));
+        ExplorerToggleButton().Click(WindowEvent([this](auto const&, auto const&) {
             explorerOpen = ExplorerToggleButton().IsChecked();
             UpdateWorkspaceLayout();
-        });
+        }));
         folderExplorer.Attach(FileTree(), [weak = get_weak()](auto path, bool keep) {
             if (auto window = weak.get()) window->OpenWorkspaceFile(std::move(path), keep ? winrt::Folia::WorkspaceOpenMode::Keep : winrt::Folia::WorkspaceOpenMode::Preview);
         }, [weak = get_weak()](auto error) {
@@ -170,7 +172,7 @@ namespace winrt::Folia::implementation {
             if (!window) throw winrt::hresult_illegal_method_call();
             co_return co_await window->ApplyExplorerActionAsync(std::move(action));
         });
-        OpenFolderPaneButton().Click([this](auto const&, auto const&) { PickWorkspaceFolder(); });
+        OpenFolderPaneButton().Click(WindowEvent([this](auto const&, auto const&) { PickWorkspaceFolder(); }));
         RefreshDocumentTabs();
         RegisterApplicationShortcuts();
         UpdateWorkspaceLayout();
