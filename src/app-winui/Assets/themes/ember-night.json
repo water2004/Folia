@@ -3,6 +3,11 @@
   "id": "folia.ember-night",
   "name": "Ember Night",
   "variant": "dark",
+  "editor": {
+    "caretWidth": 1.5, "caretMoveMs": 110, "caretFadeMs": 100, "bracketBorderWidth": 1,
+    "bracketMatchBackground": "#0064001A", "bracketMatchBorder": "#888888",
+    "bracketUnmatchedBackground": "#A0805A14", "bracketUnmatchedBorder": "#A0805A80"
+  },
   "mathPreview": {
     "margin": 12, "gap": 8,
     "paddingHorizontal": 12, "paddingVertical": 10,

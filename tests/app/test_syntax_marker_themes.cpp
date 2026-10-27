@@ -52,6 +52,9 @@ namespace
                 expect(loaded.profile.has_value()) << winrt::to_string(loaded.diagnostic);
                 if (!loaded.profile) continue;
                 expect(loaded.profile->schema_version == 2_u);
+                expect(loaded.profile->editor.bracket_border_width == 1.f);
+                expect(loaded.profile->editor.bracket_match_background.a <= 26);
+                expect(loaded.profile->editor.bracket_match_border != loaded.profile->colors.accent_fg);
                 expect(loaded.profile->syntax_markers != nullptr);
                 if (!loaded.profile->syntax_markers) continue;
                 auto const& assets = *loaded.profile->syntax_markers;

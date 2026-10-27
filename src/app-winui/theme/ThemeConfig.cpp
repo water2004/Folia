@@ -233,6 +233,22 @@ namespace
         profile.typography = ParseTypography(root.GetNamedObject(L"typography"));
         profile.colors = ParseColors(root.GetNamedObject(L"colors"));
         profile.layout = ParseLayout(root.GetNamedObject(L"layout"));
+        if (root.HasKey(L"editor")) {
+            auto object = root.GetNamedObject(L"editor");
+            struct Field { wchar_t const* name; float folia::ThemeEditor::* value; };
+            static constexpr Field fields[] = {
+                {L"caretWidth", &folia::ThemeEditor::caret_width},
+                {L"caretMoveMs", &folia::ThemeEditor::caret_move_ms},
+                {L"caretFadeMs", &folia::ThemeEditor::caret_fade_ms},
+                {L"bracketBorderWidth", &folia::ThemeEditor::bracket_border_width},
+            };
+            for (auto const& field : fields)
+                if (object.HasKey(field.name)) profile.editor.*field.value = Number(object, field.name);
+            if (object.HasKey(L"bracketMatchBackground")) profile.editor.bracket_match_background = ParseColor(object.GetNamedString(L"bracketMatchBackground"));
+            if (object.HasKey(L"bracketMatchBorder")) profile.editor.bracket_match_border = ParseColor(object.GetNamedString(L"bracketMatchBorder"));
+            if (object.HasKey(L"bracketUnmatchedBackground")) profile.editor.bracket_unmatched_background = ParseColor(object.GetNamedString(L"bracketUnmatchedBackground"));
+            if (object.HasKey(L"bracketUnmatchedBorder")) profile.editor.bracket_unmatched_border = ParseColor(object.GetNamedString(L"bracketUnmatchedBorder"));
+        }
         if (profile.variant == folia::Theme::HighContrast) profile.math_preview.shadow_color.a = 0;
         if (root.HasKey(L"mathPreview")) {
             auto object = root.GetNamedObject(L"mathPreview");
