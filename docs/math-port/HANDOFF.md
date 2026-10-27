@@ -2,13 +2,13 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-10-28，功能完成，发布0.5.3）
+## 当前 checkpoint（2026-10-28，0.5.3已发布）
 
-- 用户已授权推送构建发布 **0.5.3**，沿用 `.github/workflows/release.yml` 标签流程。版本/notes已更新，尚未提交推送打标签。下一步：检查版本差异、提交、推送 master 与 v0.5.3，跟进CI到MSI/校验和发布成功，更新本文。
-- 本地提交：06fa7fb2重载、8d746851数学浮层、3409c654容错TeX语法、a53e526a主题、314f3e6b高亮/光标、344895cb会话转移、a28e5209源码历史、c42a924d原生标签跨窗口。发布前均未推送。
+- **0.5.3已正式发布**：版本/标签35e56265，master与v0.5.3已推送。现有CI40577471717/job122447644967全部成功（Release构建、真实startup/close、MSI、校验和、发布）。Release：https://github.com/water2004/Folia/releases/tag/v0.5.3 。MSI为53,722,497字节，已下载至build/releases/0.5.3并验证SHA256为2ca50713200c8f5f5769c35b172ff5dbfac07b15fe2e686500a9c9625a889a35，与发布附件一致。当前请求已完成；无待续构建/发布步骤，不移动标签。
+- 本地提交：06fa7fb2重载、8d746851数学浮层、3409c654容错TeX语法、a53e526a主题、314f3e6b高亮/光标、344895cb会话转移、a28e5209源码历史、c42a924d原生标签跨窗口。已随0.5.3推送。
 - 本轮五项全部实现：磁盘变更重载遮罩；数学高亮/括号；原字号长公式浮层/柔和阴影；平滑光标/渐变闪烁；标签拖出独立窗口/跨窗口移入。
 - 最终全通过：core **764/500069**（tab-source-history-core-all.log），platform **84/4249**（tab-source-history-platform.log），controller **134/18718**（tab-transfer-app-final-all.log），真实WinUI **19/875**（tab-transfer-complete-visual.log）。日志均 build/tag-layout/。
-- Debug构建 tab-input-focus-build.log 成功，候选 build/app-winui/bin/x64/Debug/Folia.exe。真实进程激活 tab-transfer-complete-activation.log 通过（Unicode/相对路径、同进程4窗口、显式独立进程、全部exit0）；startup正常关闭 tab-startup-final.log 3次、最终修改后 tab-input-focus-startup.log 1次均通过。没有手工鼠标拖动验证；Release/MSI由本次CI验证。
+- Debug构建 tab-input-focus-build.log 成功，候选 build/app-winui/bin/x64/Debug/Folia.exe。真实进程激活 tab-transfer-complete-activation.log 通过（Unicode/相对路径、同进程4窗口、显式独立进程、全部exit0）；startup正常关闭 tab-startup-final.log 3次、最终修改后 tab-input-focus-startup.log 1次均通过。没有手工鼠标拖动验证；Release/MSI已由本次CI验证。
 - 无活跃agents、构建、采样句柄。不开agents/CUA，不关用户窗口，native串行最多4workers；测试只清理自己的进程。
 
 ## 本轮实现与已解决问题
