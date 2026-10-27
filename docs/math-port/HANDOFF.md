@@ -9,8 +9,8 @@
 - 当前任务：用户报告长公式的 `\tag{4.9}` 与内容重叠，以及 `aligned` 内 `\tag{4.1}` 不渲染；修好后明确要求发布0.5.1。不开agents/CUA，不关闭用户窗口；native串行≤4，不安装本机。
 - 根因已确认：MathJax完整宽度SVG用 `width="100%"` 和CSS `min-width`；应用MathJaxSvgParser将100%误读为100px且丢失最小宽度。修复在应用SVG边界用请求containerWidth和em解析外层viewport，归一化前写成绝对宽度；保留内层SVG、原版transform和data-mjx-viewBox，不改原生数学布局。
 - 第二条原式在原版MathJax同样报 `\tag not allowed in aligned environment`；正确写法把tag移至end{aligned}之后，不在parser中改写用户TeX。两条原式与修正后的第二条共3例，native与锁定MathJax4.1.3输出逐字符一致（读文件统一CRLF），证据build/tag-layout/{source.cjs,render.py,inputs.json,source-*.svg,native-*.svg}。
-- 本轮Debug应用构建通过（build/tag-layout/debug-build.log）；新增tests/app/test_math_svg_viewport.cpp，4项138断言通过（focused.log），覆盖百分比/最小宽度、16/24px字号、窄/宽容器、单个/批量、归一化实际尺寸、普通inline片段、aligned错误。完整Debug app回归通过：115 项、17766 断言，exit0，日志build/tag-layout/app-all.log。当前无live构建/测试进程。
-- 修复已提交3b265efe。下一步：提交7处产品版本和release-notes/v0.5.1.md，按.github/workflows/release.yml原子推送master/v0.5.1，让CI构建并发布，检查MSI及sha256。尚未新版本提交/推送，没有人工UI外观验收。
+- 本轮Debug应用构建通过（build/tag-layout/debug-build.log）；新增tests/app/test_math_svg_viewport.cpp，4项138断言通过（focused.log），覆盖百分比/最小宽度、16/24px字号、窄/宽容器、单个/批量、归一化实际尺寸、普通inline片段、aligned错误。完整Debug app回归通过：115 项、17766 断言，exit0，日志build/tag-layout/app-all.log。本地Release自包含重建成功，正常配置5次及空Assets/default配置5次startup/close均通过，Debug1次通过（build/tag-layout/startup-{release,clean,debug}）。CI异常尚未定位；不能用重跑通过代替根因结论。当前无live本地进程。
+- 修复3b265efe、版本/说明e4b2dd4e7ed2be398da4ace1917036764f6acfb6已提交；master与annotated tag v0.5.1原子推送成功。CI40494779718失败：Release编译成功，真实关窗测试0xc0000005，RVA0x45328；MSI未发布，旧job122157347806无artifacts。用户要求修CI。当前新增失败时上传startup dump及同构建exe/PDB/log，准备在master通过workflow_dispatch重跑既有v0.5.1，不改标签/产品版本。
 - 0.5.0已发布：5b9b45b507287119357570ba195e4641870205c4；CI40453942062成功，Release含Folia-0.5.0-x64.msi（53,693,825字节）及sha256。不重打旧标签。
 - 上一轮架构/清理已完成并提交：独立folia::markdown目标和38模块+2数据、math公共C header归模块、图片CPU/GPU所有权分离、test入口归tests、移除过期工具/过程文档，详见Git历史。不要重做广泛审计。
 - 基线验证：core763/499901、platform84/4249、encoding5/5、Debug app111/17628、CommonMark652/1304、GFM1428/2878、独立Markdown3/49、math977/546948；Release真实startup成功。最新新增回归以本轮记录为准。

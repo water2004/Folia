@@ -127,6 +127,18 @@ jobs:
           Write-Output "::error title=MSI build failure::$annotation"
           throw 'The self-contained MSI build failed; see the job summary.'
 
+      - name: Preserve failed build diagnostics
+        if: failure() && steps.build.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-failure-${{ steps.release.outputs.tag }}-${{ github.run_attempt }}
+          retention-days: 7
+          path: |
+            release-build.log
+            build/tests/startup-msi/
+            build/app-winui/bin/x64/Release/Folia.exe
+            build/app-winui/bin/x64/Release/Folia.pdb
+
       - name: Create SHA-256 checksum
         id: assets
         shell: pwsh
