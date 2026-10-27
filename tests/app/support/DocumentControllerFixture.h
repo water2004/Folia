@@ -81,7 +81,7 @@ namespace document_tests {
                 saveTarget = file;
             } else session.SetText(text);
             if (initializeRenderer) renderer.InitializeForPdf();
-            controller.Attach(session, renderer, input,
+            controller.Attach(session, {renderer, input,
                 [this](auto const& command) {
                     wrongThread |= ::GetCurrentThreadId() != thread;
                     return session.ExecuteCommand(command);
@@ -100,7 +100,7 @@ namespace document_tests {
                     loadingOverlay = controller.IsLoading();
                     if (!active) loadingAtCompletion.push_back(loadingOverlay);
                     if (progress) progress(active);
-                }, [this] { loadingAtDocumentChange.push_back(controller.IsLoading()); }, {}, {}, {});
+                }, [this] { loadingAtDocumentChange.push_back(controller.IsLoading()); }, {}, {}, {}});
             controller.SetSaveDialogs([this]() -> IAsyncOperation<ContentDialogResult> {
                 ++prompts;
                 co_return choice;

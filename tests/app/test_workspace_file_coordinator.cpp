@@ -26,7 +26,7 @@ namespace {
                 doc->session.Open(file, doc == first ? L"**first**\n" : L"_second_\n", {}, {});
                 workspace.RefreshPath(doc->id);
                 doc->loaded = true;
-                doc->controller.Attach(doc->session, f.renderer, f.input, {}, {}, {}, [&] { ++changed; }, {}, {}, {});
+                doc->controller.Attach(doc->session, {f.renderer, f.input, {}, {}, {}, [&] { ++changed; }, {}, {}, {}});
                 if (doc == second) { expect(doc->session.EnterSourceMode()); doc->controller.SuspendPresentation(); }
                 expect(doc->session.ExecuteCommand(folia::Command::InsertText(U"edited ")));
             }
@@ -66,7 +66,7 @@ namespace {
             doc->session.Open(f.session.File(), L"initial\n", {}, {});
             workspace.RefreshPath(doc->id);
             doc->loaded = true;
-            doc->controller.Attach(doc->session, f.renderer, f.input, {}, {}, {}, {}, {}, {}, {});
+            doc->controller.Attach(doc->session, {f.renderer, f.input, {}, {}, {}, {}, {}, {}, {}});
             expect(doc->session.ExecuteCommand(folia::Command::InsertText(U"pending")));
             auto original = doc->path;
             auto existing = f.File(L"existing.md", "must keep");

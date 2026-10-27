@@ -29,17 +29,19 @@ namespace winrt::Folia
         EditorDocumentController(EditorDocumentController const&) = delete;
         EditorDocumentController& operator=(EditorDocumentController const&) = delete;
 
-        void Attach(
-            EditorSession& session,
-            EditorSurfaceRenderer& renderer,
-            EditorTextInputController& textInput,
-            ExecuteCommand executeCommand,
-            SetStatus setStatus,
-            SetProgress setProgress,
-            DocumentChanged documentChanged,
-            Render render,
-            WindowHandle windowHandle,
-            SetExternalChange setExternalChange);
+        struct Presentation {
+            EditorSurfaceRenderer& renderer;
+            EditorTextInputController& textInput;
+            ExecuteCommand executeCommand;
+            SetStatus setStatus;
+            SetProgress setProgress;
+            DocumentChanged documentChanged;
+            Render render;
+            WindowHandle windowHandle;
+            SetExternalChange setExternalChange;
+        };
+        void Attach(EditorSession& session, Presentation presentation);
+        void RebindPresentation(Presentation presentation);
         void Detach();
         void SuspendPresentation();
         void ResumePresentation(EditorSurfaceRenderer& renderer, EditorTextInputController& textInput);
@@ -74,6 +76,7 @@ namespace winrt::Folia
 
     private:
         struct State;
+        void BindPresentation(Presentation presentation);
         enum class LoadReason { Open, EncodingReopen, ExternalReload };
         static bool Active(std::shared_ptr<State> const& state, std::uint64_t generation);
         static bool OwnsDocument(std::shared_ptr<State> const& state, std::uint64_t generation);

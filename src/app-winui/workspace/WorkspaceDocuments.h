@@ -49,6 +49,8 @@ namespace winrt::Folia {
         bool ObserveEdit(std::uint64_t id);
         void RefreshPath(std::uint64_t id);
         bool Remove(std::uint64_t id);
+        // Move the same session/controller; the source must activate its successor first.
+        void TransferTo(std::uint64_t id, WorkspaceDocuments& target, std::size_t index);
         void Reorder(std::span<std::uint64_t const> ids);
         std::shared_ptr<WorkspaceDocument> Adjacent(std::uint64_t id, int direction) const noexcept;
 
@@ -56,6 +58,5 @@ namespace winrt::Folia {
         static bool SamePath(std::filesystem::path const& left, std::filesystem::path const& right);
         std::vector<std::shared_ptr<WorkspaceDocument>> documents_;
         std::shared_ptr<WorkspaceDocument> active_;
-        std::uint64_t nextId_ = 1;
     };
 }

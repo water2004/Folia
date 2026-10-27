@@ -3,6 +3,12 @@ import std;
 #include "workspace/WorkspaceDocuments.h"
 
 namespace winrt::Folia {
+    namespace {
+        std::uint64_t NextDocumentId() {
+            static std::atomic_uint64_t next{1};
+            return next.fetch_add(1, std::memory_order_relaxed);
+        }
+    }
     WorkspaceDocuments::WorkspaceDocuments() {
         active_ = New(WorkspaceOpenMode::Preview);
     }
@@ -30,7 +36,7 @@ namespace winrt::Folia {
     }
 
     std::shared_ptr<WorkspaceDocument> WorkspaceDocuments::New(WorkspaceOpenMode mode) {
-        auto document = std::make_shared<WorkspaceDocument>(nextId_++);
+        auto document = std::make_shared<WorkspaceDocument>(NextDocumentId());
         document->kept = mode == WorkspaceOpenMode::Keep;
         document->loaded = true;
         documents_.push_back(document);
@@ -50,7 +56,7 @@ namespace winrt::Folia {
         auto preview = std::ranges::find_if(documents_, [](auto const& document) {
             return !document->kept && !document->controller.IsModified();
         });
-        auto document = std::make_shared<WorkspaceDocument>(nextId_++);
+        auto document = std::make_shared<WorkspaceDocument>(NextDocumentId());
         document->path = std::move(path);
         document->kept = mode == WorkspaceOpenMode::Keep;
         if (preview != documents_.end()) {
@@ -104,6 +110,18 @@ namespace winrt::Folia {
             ordered.push_back(std::move(document));
         }
         documents_ = std::move(ordered);
+    }
+
+    void WorkspaceDocuments::TransferTo(std::uint64_t id, WorkspaceDocuments& target, std::size_t index) {
+        auto document = Find(id);
+        if (!document || this == &target || document == active_)
+            throw std::logic_error("Transfer requires an inactive document and a different workspace");
+        if (target.Find(id) || (!document->path.empty() && target.Find(document->path)))
+            throw std::logic_error("The target workspace already owns this document");
+        // Allocate before changing either owner. Shared-pointer moves cannot throw.
+        target.documents_.reserve(target.documents_.size() + 1);
+        target.documents_.insert(target.documents_.begin() + (std::min)(index, target.documents_.size()), document);
+        std::erase(documents_, document);
     }
 
     std::shared_ptr<WorkspaceDocument> WorkspaceDocuments::Adjacent(std::uint64_t id, int direction) const noexcept {

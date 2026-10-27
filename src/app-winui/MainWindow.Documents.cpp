@@ -18,17 +18,13 @@ namespace winrt::Folia::implementation {
     }
 
     void MainWindow::AttachDocumentController(std::shared_ptr<winrt::Folia::WorkspaceDocument> const& document) {
-        if (document->controllerAttached) {
-            document->controller.ResumePresentation(editorRenderer, textInputController);
-            return;
-        }
         auto weak = get_weak();
         auto id = document->id;
         auto active = [weak, id]() -> winrt::com_ptr<MainWindow> {
             auto window = weak.get();
             return window && window->IsActiveDocument(id) ? window : nullptr;
         };
-        document->controller.Attach(document->session, editorRenderer, textInputController,
+        winrt::Folia::EditorDocumentController::Presentation presentation{editorRenderer, textInputController,
             [active](auto const& command) { if (auto window = active()) return window->ExecuteEditorCommand(command); return false; },
             [active](auto const& status) { if (auto window = active()) window->SetStatus(status); },
             [active](bool busy, std::optional<double> value, bool cancellable) {
@@ -63,7 +59,9 @@ namespace winrt::Folia::implementation {
                     window->ReloadExternalButton().Visibility(deleted ? Visibility::Collapsed : Visibility::Visible);
                     window->ExternalChangeInfoBar().IsOpen(visible);
                 }
-            });
+            }};
+        if (document->controllerAttached) document->controller.RebindPresentation(std::move(presentation));
+        else document->controller.Attach(document->session, std::move(presentation));
         document->controller.SetSaveDialogs([weak, id]() -> Windows::Foundation::IAsyncOperation<ContentDialogResult> {
             if (auto window = weak.get()) co_return co_await window->ConfirmUnsavedChangesAsync(id);
             co_return ContentDialogResult::None;

@@ -9,6 +9,34 @@ using namespace document_tests;
 
 namespace {
     suite document_presentation_tests = [] {
+        "document presentation rebinding preserves saved baseline and redirects callbacks to the receiving window"_test = [] {
+            Fixture f;
+            f.Type(U"edit ");
+            auto text = f.session.TextUtf8();
+            auto selection = f.session.Selection();
+            EditorSurfaceRenderer targetRenderer;
+            EditorTextInputController targetInput;
+            targetRenderer.InitializeForPdf();
+            std::size_t changes = 0;
+            f.controller.SuspendPresentation();
+            f.controller.RebindPresentation({targetRenderer, targetInput,
+                [&](auto const& command) { return f.session.ExecuteCommand(command); }, {}, {}, [&] { ++changes; }, {}, {}, {}});
+            expect(f.controller.IsModified());
+            expect(f.session.TextUtf8() == text && f.session.Selection() == selection);
+            expect(f.session.ExecuteCommand(folia::Command{folia::CommandKind::Undo}));
+            expect(!f.controller.IsModified());
+            expect(f.session.ExecuteCommand(folia::Command{folia::CommandKind::Redo}));
+            expect(f.controller.IsModified());
+            expect(Await(f.controller.SaveAsync()));
+            expect(!f.controller.IsModified() && f.DiskText() == text && changes > 0);
+            expect(f.session.ExecuteCommand(folia::Command{folia::CommandKind::Undo}));
+            expect(f.controller.IsModified());
+            f.controller.SuspendPresentation();
+            f.controller.RebindPresentation({f.renderer, f.input, {}, {}, {}, {}, {}, {}, {}});
+            expect(f.controller.IsModified());
+            expect(f.session.ExecuteCommand(folia::Command{folia::CommandKind::Redo}));
+            expect(!f.controller.IsModified());
+        };
         "document presentation modification state follows save undo redo and new branches"_test = [] {
             Fixture f;
             expect(!f.controller.IsModified());

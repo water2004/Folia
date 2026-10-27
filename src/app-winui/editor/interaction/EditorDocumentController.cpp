@@ -19,36 +19,37 @@ namespace winrt::Folia
         Detach();
     }
 
-    void EditorDocumentController::Attach(
-        EditorSession& session,
-        EditorSurfaceRenderer& renderer,
-        EditorTextInputController& textInput,
-        ExecuteCommand executeCommand,
-        SetStatus setStatus,
-        SetProgress setProgress,
-        DocumentChanged documentChanged,
-        Render render,
-        WindowHandle windowHandle,
-        SetExternalChange setExternalChange)
+    void EditorDocumentController::Attach(EditorSession& session, Presentation presentation)
     {
         Detach();
         state_->session = &session;
         state_->presenting = true;
-        state_->renderer = &renderer;
-        state_->textInput = &textInput;
-        state_->executeCommand = std::move(executeCommand);
-        state_->setStatus = std::move(setStatus);
-        state_->setProgress = std::move(setProgress);
-        state_->documentChanged = std::move(documentChanged);
-        state_->render = std::move(render);
-        state_->windowHandle = std::move(windowHandle);
-        state_->setExternalChange = std::move(setExternalChange);
+        BindPresentation(std::move(presentation));
         state_->dispatcher = winrt::Microsoft::UI::Dispatching::DispatcherQueue::GetForCurrentThread();
         const auto source = session.TextUtf8();
         state_->reloadState.Reset({}, folia::platform::reload::fingerprint_document_content(
             session.HasFile() ? std::string_view(source) : std::string_view{}));
         state_->savedContentState = session.HasFile() || source.empty()
             ? std::optional{session.ContentState()} : std::nullopt;
+    }
+
+    void EditorDocumentController::BindPresentation(Presentation value) {
+        state_->renderer = &value.renderer;
+        state_->textInput = &value.textInput;
+        state_->executeCommand = std::move(value.executeCommand);
+        state_->setStatus = std::move(value.setStatus);
+        state_->setProgress = std::move(value.setProgress);
+        state_->documentChanged = std::move(value.documentChanged);
+        state_->render = std::move(value.render);
+        state_->windowHandle = std::move(value.windowHandle);
+        state_->setExternalChange = std::move(value.setExternalChange);
+    }
+
+    void EditorDocumentController::RebindPresentation(Presentation value) {
+        if (!state_->session || state_->presenting)
+            throw std::logic_error("Suspend document presentation before rebinding its window");
+        BindPresentation(std::move(value));
+        ResumePresentation(*state_->renderer, *state_->textInput);
     }
 
     void EditorDocumentController::Detach()

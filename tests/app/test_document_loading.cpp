@@ -54,7 +54,7 @@ namespace
                 timer.IsRepeating(false);
                 timer.Tick([this, action = std::move(afterParsing)](auto const&, auto const&) { action(*this); });
             }
-            controller.Attach(session, renderer, textInput, {},
+            controller.Attach(session, {renderer, textInput, {},
                 [this](auto const& value)
                 {
                     CheckThread();
@@ -73,7 +73,7 @@ namespace
                     CheckThread();
                     if (!active) finished = true;
                 },
-                [this] { CheckThread(); changed = true; }, {}, {}, {});
+                [this] { CheckThread(); changed = true; }, {}, {}, {}});
         }
 
         ~LoadingFixture()
