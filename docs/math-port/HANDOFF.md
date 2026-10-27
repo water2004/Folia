@@ -4,9 +4,9 @@
 [详细约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。
 只复查新变化；ignored候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-10-27，目录与文档清理已完成）
+## 当前 checkpoint（2026-10-27，发布0.5.0进行中）
 
-- 用户当前要求：清理无用文件，根目录测试归tests，docs只放有用开发资料，不堆历史。原重构任务中的主题包归属要求仍待落实。不开agents/CUA、不关闭用户窗口；native串行≤4；版本0.4.1，不自动MSI/安装/推送/发布。
+- 用户当前明确授权发布0.5.0，按现有.github/workflows/release.yml：提交版本/说明，推送master及v0.5.0标签，由CI构建MSI并发布。原主题包归属要求仍待落实。不开agents/CUA、不关闭用户窗口；native串行≤4；不安装本机。
 - 已提交：c6815be6废弃regexp工具；9a7d240d旧candidate patch；55ebb59f图片CPU/GPU所有权分离及math公共C header归src/math/include；f2de59dd独立folia::markdown库（原38模块+2数据文件，算法不重写，core单向依赖）；a1e267ad旧ignore例外；7046522e模块facade禁PCH。
 - 已清理无用ignored构建产物13.60GiB+旧baseline worktree。当前app/core/参考源码/正式生成器依赖保留。明细build/cleanup-disk-{inventory,plan,result,summary}.json。
 - 当前目录整理：6个batch入口归tests，WinUI runner为tests/app/run.ps1，console runtime为tests/support/windows_console_runtime.cpp；旧build_only、空drafts和已完成CST历史计划直接删除，未搬入历史目录。已更新CMake、工具、AGENTS和使用说明。
@@ -16,7 +16,7 @@
 - **待完成主题要求**：WorkspaceIcons.cpp仍手写8个Fluent路径；WorkspaceChrome/FolderExplorer.xaml、MainWindow.Xaml有样式数据；core/rendering/theme.ixx与主题JSON重复默认值。产品尚未改。未接入的tools/themes生成器草稿已清掉，不能算主题完成。后续需确定主题包单一数据源、当前窗口的资源更新、MSI内置包替换/自定义包保留和切换测试；不要用全局可变主题或强制主题翻转修补资源更新。
 - 目录整理已提交4f601e71；旧计划删除6d4c5bd3、旧阶段报告删除94a056bf。当前无live agent/build/test/诊断进程；候选应用仍为build/app-winui/bin/x64/{Debug,Release}/Folia.exe。md4c诊断因CommonMark无失败没有执行；新入口路径按同一仓库定位规则迁移。
 - 最后4个未接入试验路径的删除被工具自动审批拦截（仅返回blocked by policy、无具体原因），未重试：build/tests/winui/Release/controller、build/generated/themes、build/debug_winui_test.py、tools/themes（若只剩__pycache__）。生产代码无依赖，保留不会进入MSI。不要声称这一批已删。
-- 下一步：主题包归属任务仍未实现，按上面列出的实际硬编码位置继续；不重复已完成审计和Release宿主试验。此轮未构建MSI、安装、推送或发布。
+- 当前发布检查：fetch确认origin/master是本地HEAD祖先（仅落后5个本地清理提交），工作区原本干净，无既有v0.5.0标签。版本字段和release-notes/v0.5.0.md已准备；最近完整测试有效，不重复无关宽测试。下一步验证版本一致性，提交并原子推送master/tag，然后跟踪CI产物；禁止将主题资源外置说成已完成。
 
 ## 已确定的边界（仅有新证据才重查）
 
