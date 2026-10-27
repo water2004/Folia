@@ -239,6 +239,7 @@
   <ItemGroup>
     <ClCompile Include="..\markdown\markdown.ixx">
       <CompileAs>CompileAsCppModule</CompileAs>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\markdown\model\ast.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
