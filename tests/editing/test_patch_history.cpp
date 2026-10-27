@@ -428,6 +428,35 @@ suite patch_history_tests=[] {
         patch_expect_valid(editor);
     };
 
+    "source_history_keeps_untouched_line_ids_and_exact_projected_selection"_test=[] {
+        for (auto text : {"first\nsecond", "**math** $x+1$\n"}) {
+            Editor editor(text);
+            expect(fatal(editor.enter_source_mode()));
+            auto end=editor.source_editor()->source().size();
+            editor.set_source_selection(SourceSelection::caret(end));
+            auto before=editor.source_editor()->projected_selection();
+            auto lines=editor.source_editor()->lines();
+            std::vector<NodeId> ids;
+            for (auto const& line:lines) ids.push_back(line.id);
+            expect(fatal(editor.execute_command(Command::InsertText(U" prefix"))));
+            auto selected=editor.source_editor()->projected_selection();
+            auto edited=editor.source_editor()->source();
+            reset_core_operation_counters();
+            for (int i=0;i<10;++i) {
+                expect(fatal(editor.undo()));
+                expect(bool(editor.source_editor()->projected_selection()==before));
+                expect(fatal(editor.redo()));
+                expect(bool(editor.source_editor()->projected_selection()==selected));
+                expect(bool(editor.source_editor()->source()==edited));
+                expect(editor.source_editor()->lines().size()==ids.size());
+                for (std::size_t line=0;line<ids.size();++line)
+                    expect(bool(editor.source_editor()->lines()[line].id==ids[line]));
+            }
+            auto counters=read_core_operation_counters();
+            expect(counters.full_document_parses==0_u);
+            expect(counters.full_document_serializations==0_u);
+        }
+    };
     "source_frontmatter_metadata_is_part_of_the_reversible_patch"_test=[] {
         Editor editor("---\ntitle: before\n---\n\nbody");
         const auto original=editor.document().metadata;

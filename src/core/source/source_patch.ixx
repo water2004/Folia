@@ -35,6 +35,20 @@ struct SourcePatch {
     SourceSelection selection_after;
 };
 
+// A block-tree replay can project a whole block although only a few characters
+// changed. Keep untouched source lines (and their presentation ids) outside the
+// replacement, rather than discarding and recreating them with the block region.
+inline std::optional<SourceTextPatch> minimal_source_replacement(
+    SourceRange range, std::u32string_view before, std::u32string_view after) {
+    if (range.length() != before.size()) throw std::invalid_argument("Source replacement range does not match its text");
+    std::size_t prefix = 0, old_end = before.size(), new_end = after.size();
+    while (prefix < old_end && prefix < new_end && before[prefix] == after[prefix]) ++prefix;
+    while (old_end > prefix && new_end > prefix && before[old_end - 1] == after[new_end - 1]) { --old_end; --new_end; }
+    if (prefix == old_end && prefix == new_end) return std::nullopt;
+    return SourceTextPatch{{range.start + prefix, range.start + old_end},
+        std::u32string(after.substr(prefix, new_end - prefix)), std::u32string(before.substr(prefix, old_end - prefix))};
+}
+
 struct SourceReplacement {
     SourceRange range;
     std::u32string replacement;

@@ -711,10 +711,12 @@ private:
             auto temporary=view.editor.selection();
             const auto new_size=view.editor.source().size()-(source_region->end-source_region->begin)+projection.text.size();
             temporary.anchor=(std::min)(temporary.anchor,new_size);temporary.active=(std::min)(temporary.active,new_size);
-            SourcePatch patch{{SourceTextPatch{{source_region->begin,source_region->end},projection.text,
-                view.editor.source().substr(source_region->begin,source_region->end-source_region->begin)}},
-                view.editor.selection(),temporary};
-            if (!view.editor.apply_projection_patch(patch,true)) std::terminate();
+            auto replacement=minimal_source_replacement({source_region->begin,source_region->end},
+                std::u32string_view(view.editor.source()).substr(source_region->begin,source_region->end-source_region->begin),projection.text);
+            if (replacement) {
+                SourcePatch patch{{std::move(*replacement)},view.editor.selection(),temporary};
+                if (!view.editor.apply_projection_patch(patch,true)) std::terminate();
+            }
             view.index.replace(*source_region,document_,projection,first,last);
             if (const auto* rich=std::get_if<RenderedHistorySelection>(&selected))
                 view.editor.set_selection(projected_selection_(forward ? rich->after : rich->before));
