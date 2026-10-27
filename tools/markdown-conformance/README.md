@@ -23,7 +23,7 @@ From a Windows command prompt or PowerShell session with the Visual Studio C++
 tools installed:
 
 ```bat
-cmd /c build_commonmark_test.bat
+cmd /c tests\parsing\run_commonmark.bat
 ```
 
 The wrapper locates the latest Visual Studio installation with the required
@@ -46,8 +46,8 @@ The runner has a 120-second default timeout. These options can be passed
 through the wrapper to `run.py`:
 
 ```bat
-cmd /c build_commonmark_test.bat --output build\my-commonmark-report --timeout 180
-cmd /c build_commonmark_test.bat "*some Boost.UT test name pattern*"
+cmd /c tests\parsing\run_commonmark.bat --output build\my-commonmark-report --timeout 180
+cmd /c tests\parsing\run_commonmark.bat "*some Boost.UT test name pattern*"
 ```
 
 `--executable PATH` is also available when calling `run.py` directly. Any
@@ -70,7 +70,7 @@ marks the report incomplete.
 
 ## GitHub Flavored Markdown tests
 
-Run cmd /c build_gfm_test.bat (CTest: FoliaGfmTests). Reports default to
+Run cmd /c tests\parsing\run_gfm.bat (CTest: FoliaGfmTests). Reports default to
 build/gfm-conformance/; --output and positional Boost.UT filters work as above.
 The formal runner checks 1,426 paired cases from separate sources:
 
@@ -135,7 +135,7 @@ After the official suite completes with strict semantic failures, run the
 pinned md4c comparison on just those failing example IDs:
 
 ```bat
-cmd /c build_md4c_reference_test.bat
+cmd /c tests\parsing\run_md4c_reference.bat
 ```
 
 The wrapper checks the official report, fetches the hash-pinned md4c reference,

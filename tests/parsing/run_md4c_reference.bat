@@ -1,6 +1,6 @@
 @echo off
 setlocal
-for %%I in ("%~dp0.") do set "ROOT=%%~fI"
+for %%I in ("%~dp0..\..") do set "ROOT=%%~fI"
 set "VSWHERE=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
 for /f "usebackq delims=" %%I in (`"%VSWHERE%" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do set "VSINSTALL=%%I"
 if not defined VSINSTALL exit /b 1

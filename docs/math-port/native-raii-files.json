@@ -2479,7 +2479,7 @@
           "tests/encoding/main.cpp",
           "tests/encoding/test_document_encoding.cpp",
           "src/app-winui/storage/DocumentEncodingService.cpp",
-          "build/core/CMakeFiles/folia_console_test_runtime.dir/tools/test-support/windows_console_runtime.cpp.obj",
+          "build/core/CMakeFiles/folia_console_test_runtime.dir/tests/support/windows_console_runtime.cpp.obj",
           "tests/encoding/document_encoding_test_support.ixx"
         ]
       },
@@ -2489,7 +2489,7 @@
         "type": "EXECUTABLE",
         "sourcePaths": [
           "tools/math-port/font-data-dump.cpp",
-          "build/core/CMakeFiles/folia_console_test_runtime.dir/tools/test-support/windows_console_runtime.cpp.obj"
+          "build/core/CMakeFiles/folia_console_test_runtime.dir/tests/support/windows_console_runtime.cpp.obj"
         ]
       },
       {
@@ -2655,7 +2655,7 @@
           "tests/math/native_tree_visitor.cpp",
           "tests/math/fraction_native.cpp",
           "tests/math/radical_native.cpp",
-          "build/core/CMakeFiles/folia_console_test_runtime.dir/tools/test-support/windows_console_runtime.cpp.obj"
+          "build/core/CMakeFiles/folia_console_test_runtime.dir/tests/support/windows_console_runtime.cpp.obj"
         ]
       },
       {
@@ -2723,7 +2723,7 @@
           "tests/rendering/test_render_model_basics.cpp",
           "tests/rendering/test_render_model_content.cpp",
           "tests/rendering/test_render_recursive_flow.cpp",
-          "build/core/CMakeFiles/folia_console_test_runtime.dir/tools/test-support/windows_console_runtime.cpp.obj"
+          "build/core/CMakeFiles/folia_console_test_runtime.dir/tests/support/windows_console_runtime.cpp.obj"
         ]
       },
       {
@@ -2749,7 +2749,7 @@
           "tests/platform/test_editor_snippet_session.cpp",
           "tests/platform/test_editor_svg_drawing.cpp",
           "tests/platform/test_editor_viewport_plan.cpp",
-          "build/core/CMakeFiles/folia_console_test_runtime.dir/tools/test-support/windows_console_runtime.cpp.obj"
+          "build/core/CMakeFiles/folia_console_test_runtime.dir/tests/support/windows_console_runtime.cpp.obj"
         ]
       },
       {
@@ -2757,7 +2757,7 @@
         "id": "folia_console_test_runtime::@6890427a1f51a3e7e1df",
         "type": "OBJECT_LIBRARY",
         "sourcePaths": [
-          "tools/test-support/windows_console_runtime.cpp"
+          "tests/support/windows_console_runtime.cpp"
         ]
       },
       {

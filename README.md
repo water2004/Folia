@@ -140,13 +140,13 @@ Run the platform-independent core test suite and deterministic Windows editor
 tests with:
 
 ```powershell
-cmd /c build_test.bat
-cmd /c build_platform_test.bat
-cmd /c build_encoding_test.bat
+cmd /c tests\run_core.bat
+cmd /c tests\platform\run.bat
+cmd /c tests\encoding\run.bat
 ```
 
 Both runners forward positional Boost.UT name filters, for example
-`cmd /c build_test.bat "*inline*"`. See the [test layout](tests/README.md) for
+`cmd /c tests\run_core.bat "*inline*"`. See the [test layout](tests/README.md) for
 suite ownership and conventions.
 
 The WinUI project entry point is [Folia.vcxproj](src/app-winui/Folia.vcxproj).

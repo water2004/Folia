@@ -9,7 +9,7 @@ param(
 # Run after build_app.ps1. Reuse its exact module/PCH/runtime/link settings so
 # these tests exercise the production controllers, not a separate model.
 $ErrorActionPreference = 'Stop'
-$root = Split-Path -Parent $PSScriptRoot
+$root = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 $objects = Join-Path $root "build/app-winui/obj/x64/$Configuration"
 $app = Join-Path $root "build/app-winui/bin/x64/$Configuration"
 $hostName = if ($Visual) { 'window' } else { 'controller' }
@@ -109,7 +109,7 @@ if (-not @(Get-ChildItem $sources -Filter '*.cpp' | Where-Object { $_.BaseName -
 foreach ($source in $selectedSources) {
     Compile $source.BaseName $source.FullName
 }
-Compile 'windows_console_runtime' (Join-Path $root 'tools/test-support/windows_console_runtime.cpp') -NoPch
+Compile 'windows_console_runtime' (Join-Path $root 'tests/support/windows_console_runtime.cpp') -NoPch
 $executable = Join-Path $scratch $(if ($Visual) { 'Folia.exe' } else { 'FoliaWinUITests.exe' })
 $linkResponse = Join-Path $scratch 'link.rsp'
 $linkFlags = if ($Configuration -eq 'Debug') { '/DEBUG' } else { '/LTCG' }

@@ -28,12 +28,12 @@ not enough: update stale entries before handoff and actually read it on recovery
 ## Build and test
 
 - Use C++23 modules and `import std;`.
-- Core tests: `cmd /c build_test.bat 2>&1`.
-- Deterministic Windows editor tests: `cmd /c build_platform_test.bat 2>&1`.
+- Core tests: `cmd /c tests\run_core.bat 2>&1`.
+- Deterministic Windows editor tests: `cmd /c tests\platform\run.bat 2>&1`.
 - Core-only builds may target `folia_core` with CMake.
 - Restore WinUI/NuGet and native SVG dependencies with `powershell -ExecutionPolicy Bypass -File .\setup.ps1` before building the WinUI app.
 - Keep generated output in ignored build directories; do not commit build products or restored packages.
-- Windows console tests/probes must link `folia_console_test_runtime`; manual builds must include `tools/test-support/windows_console_runtime.cpp`. CRT failures and `abort()` reports go to stderr without desktop dialogs. Stop a broader evaluation after an abnormal process exit and diagnose it with a bounded focused run.
+- Windows console tests/probes must link `folia_console_test_runtime`; manual builds must include `tests/support/windows_console_runtime.cpp`. CRT failures and `abort()` reports go to stderr without desktop dialogs. Stop a broader evaluation after an abnormal process exit and diagnose it with a bounded focused run.
 
 ## Code and platform boundaries
 

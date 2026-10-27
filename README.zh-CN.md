@@ -121,13 +121,13 @@ MSI 不包含 worker 测试程序和旧 QuickJS 数学、字体脚本。
 运行平台无关核心测试和可确定性 Windows 编辑器测试：
 
 ```powershell
-cmd /c build_test.bat
-cmd /c build_platform_test.bat
-cmd /c build_encoding_test.bat
+cmd /c tests\run_core.bat
+cmd /c tests\platform\run.bat
+cmd /c tests\encoding\run.bat
 ```
 
 两个入口都会把位置参数转交给 Boost.UT，例如
-`cmd /c build_test.bat "*inline*"`。测试套件的职责和约定见
+`cmd /c tests\run_core.bat "*inline*"`。测试套件的职责和约定见
 [测试目录说明](tests/README.md)。
 
 WinUI 工程入口是 [Folia.vcxproj](src/app-winui/Folia.vcxproj)。快捷键、snippet、

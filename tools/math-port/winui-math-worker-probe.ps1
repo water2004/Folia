@@ -62,7 +62,7 @@ function Remove-VerifiedJunction([string]$Path, [string]$FixtureRoot) {
 $root = Find-RepositoryRoot $PSScriptRoot
 $buildApp = Join-Path $root 'build_app.ps1'
 $probeSource = Join-Path $PSScriptRoot 'winui-math-worker-probe.cpp'
-$runtimeSource = Join-Path $root 'tools\test-support\windows_console_runtime.cpp'
+$runtimeSource = Join-Path $root 'tests\support\windows_console_runtime.cpp'
 $appSource = Join-Path $root 'src\app-winui'
 $platformSource = Join-Path $root 'src\platform'
 $configurationDirectory = Join-Path $root "build\app-winui\obj\x64\$Configuration"

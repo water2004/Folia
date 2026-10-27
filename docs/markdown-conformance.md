@@ -126,9 +126,9 @@ the full document or compute a full-tree transaction diff.
 
 ## Reproduction and provenance
 
-Run `build_commonmark_test.bat` and `build_gfm_test.bat`; inspect official failures before running
-`build_md4c_reference_test.bat`. Relevant regression commands are `build_test.bat`
-and `build_platform_test.bat`. Compare individual semantic/source/CST pass sets,
+Run `tests/parsing/run_commonmark.bat` and `tests/parsing/run_gfm.bat`; inspect official failures before running
+`tests/parsing/run_md4c_reference.bat`. Relevant regression commands are `tests/run_core.bat`
+and `tests/platform/run.bat`. Compare individual semantic/source/CST pass sets,
 not just totals. Stop broad native runs after an abnormal process exit and
 use a bounded focused test to diagnose it. Console tests link the repository's
 console runtime so CRT reports stay in stderr.

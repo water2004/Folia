@@ -20,7 +20,7 @@ set_target_properties(FoliaMarkdownConsumer PROPERTIES CXX_MODULE_STD ON)
 target_link_libraries(FoliaMarkdownConsumer PRIVATE folia::markdown Boost::ut_module)
 if(WIN32)
     add_library(folia_console_test_runtime OBJECT
-        "${FOLIA_SOURCE_ROOT}/tools/test-support/windows_console_runtime.cpp")
+        "${FOLIA_SOURCE_ROOT}/tests/support/windows_console_runtime.cpp")
     target_compile_features(folia_console_test_runtime PRIVATE cxx_std_23)
     target_link_libraries(FoliaMarkdownConsumer PRIVATE folia_console_test_runtime)
 endif()

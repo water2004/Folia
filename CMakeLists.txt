@@ -640,6 +640,7 @@ set_target_properties(FoliaTests PROPERTIES
     CXX_SCAN_FOR_MODULES ON)
 file(GLOB_RECURSE FOLIA_TEST_SRC CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/*.cpp)
+list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/support/")
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/platform/")
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/app/")
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/libraries/")
@@ -1052,7 +1053,7 @@ endif()
 
 # Keep CRT reports on stderr, including failures before main().
 if(WIN32 AND MSVC)
-    add_library(folia_console_test_runtime OBJECT tools/test-support/windows_console_runtime.cpp)
+    add_library(folia_console_test_runtime OBJECT tests/support/windows_console_runtime.cpp)
     target_compile_features(folia_console_test_runtime PRIVATE cxx_std_23)
     set_target_properties(folia_console_test_runtime PROPERTIES
         CXX_MODULE_STD OFF CXX_SCAN_FOR_MODULES OFF)
