@@ -19,13 +19,14 @@ namespace winrt::Folia {
     struct EditorMathPreviewPlacement {
         D2D1_RECT_F bounds{};
         D2D1_POINT_2F origin{};
-        float scale = 1;
     };
     std::optional<EditorMathPreviewPlacement> PlaceInlineMathPreview(
-        D2D1_RECT_F caret, float anchorX, D2D1_SIZE_F content, D2D1_SIZE_F viewport);
+        D2D1_RECT_F caret, float anchorX, D2D1_SIZE_F content, D2D1_SIZE_F viewport,
+        folia::ThemeMathPreview const& style = {});
     EditorPreparedMathPreview PrepareMathPreview(DisplayInlineText::MathPreview const& input,
-        EditorTextLayoutEngine& engine, IDWriteTextFormat* format, float width);
-    void PaintMathPreviewContent(EditorPreparedMathPreview const& preview, D2D1_POINT_2F origin, float scale,
+        EditorTextLayoutEngine& engine, IDWriteTextFormat* format, float width, float viewportWidth,
+        folia::ThemeMathPreview const& style);
+    void PaintMathPreviewContent(EditorPreparedMathPreview const& preview, D2D1_POINT_2F origin,
         EditorRenderResources& resources, EditorStyleSheet const& styleSheet,
         EditorDrawMath const& drawMath, EditorDrawMathFallback const& drawFallback);
     std::optional<D2D1_RECT_F> PaintInlineMathPreview(

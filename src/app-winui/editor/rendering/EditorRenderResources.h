@@ -2,6 +2,7 @@
 
 #include "editor/rendering/EditorStyleSheet.h"
 #include "editor/rendering/EditorSyntaxIcons.h"
+#include "editor/rendering/EditorPopupShadow.h"
 
 namespace winrt::Folia
 {
@@ -45,7 +46,8 @@ namespace winrt::Folia
         ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> lineNumberBrush;
         ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> lineNumberBackgroundBrush;
         ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> accentBrush;
-        ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> previewBackgroundBrush, previewBorderBrush, previewShadowBrush;
+        ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> previewBackgroundBrush, previewBorderBrush;
+        EditorPopupShadow popupShadow;
         EditorSyntaxIcons syntaxIcons;
         ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> codeBrush;
         ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> mathDecorationBrush;

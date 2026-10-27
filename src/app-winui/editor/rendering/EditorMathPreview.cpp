@@ -6,8 +6,10 @@ import std;
 
 namespace winrt::Folia {
     std::optional<EditorMathPreviewPlacement> PlaceInlineMathPreview(
-        D2D1_RECT_F caret, float anchorX, D2D1_SIZE_F content, D2D1_SIZE_F viewport) {
-        constexpr float margin = 12, gap = 8, horizontalPadding = 12, verticalPadding = 10;
+        D2D1_RECT_F caret, float anchorX, D2D1_SIZE_F content, D2D1_SIZE_F viewport,
+        folia::ThemeMathPreview const& style) {
+        const auto margin = style.margin, gap = style.gap;
+        const auto horizontalPadding = style.padding_horizontal, verticalPadding = style.padding_vertical;
         if (!std::isfinite(caret.left) || !std::isfinite(caret.top) || !std::isfinite(caret.right) || !std::isfinite(caret.bottom)
             || !std::isfinite(anchorX) || !std::isfinite(content.width) || !std::isfinite(content.height) || content.width <= 0 || content.height <= 0
             || !std::isfinite(viewport.width) || !std::isfinite(viewport.height)
@@ -16,23 +18,24 @@ namespace winrt::Folia {
         const float above = caret.top - margin - gap, below = viewport.height - margin - caret.bottom - gap;
         const bool useAbove = content.height + 2 * verticalPadding <= above || above >= below;
         const auto availableHeight = useAbove ? above : below;
-        const auto availableWidth = (std::min)(640.f, viewport.width - 2 * margin);
+        const auto availableWidth = viewport.width - 2 * margin;
         if (availableWidth <= 2 * horizontalPadding || availableHeight <= 2 * verticalPadding) return std::nullopt;
-        auto scale = (std::min)({1.f, (availableWidth - 2 * horizontalPadding) / content.width,
-            (availableHeight - 2 * verticalPadding) / content.height});
-        auto width = content.width * scale + 2 * horizontalPadding;
-        auto height = content.height * scale + 2 * verticalPadding;
+        auto width = (std::min)(content.width + 2 * horizontalPadding, availableWidth);
+        auto height = (std::min)(content.height + 2 * verticalPadding, availableHeight);
         auto left = std::clamp(anchorX - horizontalPadding, margin, (std::max)(margin, viewport.width - margin - width));
         auto top = useAbove ? caret.top - gap - height : caret.bottom + gap;
         return EditorMathPreviewPlacement{D2D1::RectF(left, top, left + width, top + height),
-            D2D1::Point2F(left + horizontalPadding, top + verticalPadding), scale};
+            D2D1::Point2F(left + horizontalPadding, top + verticalPadding)};
     }
 
     EditorPreparedMathPreview PrepareMathPreview(DisplayInlineText::MathPreview const& input,
-        EditorTextLayoutEngine& engine, IDWriteTextFormat* format, float width) {
+        EditorTextLayoutEngine& engine, IDWriteTextFormat* format, float width, float viewportWidth,
+        folia::ThemeMathPreview const& style) {
         EditorPreparedMathPreview preview;
         preview.display = BuildMathPreviewText(input);
-        preview.layout = engine.CreateFlow(preview.display, format, width, {});
+        auto available = input.svg.display ? width
+            : (std::max)(1.f, viewportWidth - 2 * (style.margin + style.padding_horizontal));
+        preview.layout = engine.CreateFlow(preview.display, format, available, {});
         preview.contentSpan = input.contentSpan;
         preview.floating = !input.svg.display;
         DWRITE_TEXT_METRICS metrics{};
@@ -54,21 +57,15 @@ namespace winrt::Folia {
         return preview;
     }
 
-    void PaintMathPreviewContent(EditorPreparedMathPreview const& preview, D2D1_POINT_2F origin, float scale,
+    void PaintMathPreviewContent(EditorPreparedMathPreview const& preview, D2D1_POINT_2F origin,
         EditorRenderResources& resources, EditorStyleSheet const& styleSheet,
         EditorDrawMath const& drawMath, EditorDrawMathFallback const& drawFallback) {
         if (!preview.layout) return;
         auto const& content = preview.contentBounds;
-        D2D1_MATRIX_3X2_F transform;
-        resources.d2dContext->GetTransform(&transform);
-        resources.d2dContext->SetTransform(D2D1::Matrix3x2F::Scale(scale, scale)
-            * D2D1::Matrix3x2F::Translation(origin.x - content.left * scale,
-                origin.y - content.top * scale) * transform);
-        resources.d2dContext->DrawTextLayout(D2D1::Point2F(0, 0), preview.layout.Get(), resources.textBrush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP);
-        resources.d2dContext->SetTransform(transform);
-        EditorDocumentPainter::PaintMath(preview.layout.Get(),
-            {origin.x - content.left * scale, origin.y - content.top * scale}, preview.display.mathOverlays,
-            preview.layout->GetMaxWidth(), resources, drawMath, drawFallback, scale);
+        auto at = D2D1::Point2F(origin.x - content.left, origin.y - content.top);
+        resources.d2dContext->DrawTextLayout(at, preview.layout.Get(), resources.textBrush.Get(), D2D1_DRAW_TEXT_OPTIONS_CLIP);
+        EditorDocumentPainter::PaintMath(preview.layout.Get(), at, preview.display.mathOverlays,
+            preview.layout->GetMaxWidth(), resources, drawMath, drawFallback);
     }
 
     std::optional<D2D1_RECT_F> PaintInlineMathPreview(
@@ -76,22 +73,19 @@ namespace winrt::Folia {
         EditorRenderResources& resources, EditorStyleSheet const& styleSheet,
         EditorDrawMath const& drawMath, EditorDrawMathFallback const& drawFallback) {
         auto placement = PlaceInlineMathPreview(caret, anchorX, D2D1::SizeF(preview.Width(), preview.Height()),
-            D2D1::SizeF(resources.surfaceWidthDip, resources.surfaceHeightDip));
+            D2D1::SizeF(resources.surfaceWidthDip, resources.surfaceHeightDip), styleSheet.mathPreview);
         if (!placement) return std::nullopt;
         auto const& box = *placement;
-        // A few translucent contours make a soft, small shadow without an
-        // intermediate bitmap or a new GPU effect for each edited character.
-        resources.previewShadowBrush->SetOpacity(.018f);
-        for (int ring = 6; ring >= 1; --ring) {
-            const float spread = static_cast<float>(ring);
-            resources.d2dContext->FillRoundedRectangle(D2D1::RoundedRect(D2D1::RectF(
-                box.bounds.left - spread, box.bounds.top - spread + 2,
-                box.bounds.right + spread, box.bounds.bottom + spread + 2), 7 + spread, 7 + spread),
-                resources.previewShadowBrush.Get());
-        }
-        resources.d2dContext->FillRoundedRectangle(D2D1::RoundedRect(box.bounds, 7, 7), resources.previewBackgroundBrush.Get());
-        resources.d2dContext->DrawRoundedRectangle(D2D1::RoundedRect(box.bounds, 7, 7), resources.previewBorderBrush.Get(), 1);
-        PaintMathPreviewContent(preview, box.origin, box.scale, resources, styleSheet, drawMath, drawFallback);
+        auto const& style = styleSheet.mathPreview;
+        resources.popupShadow.Draw(resources.d2dContext.Get(), box.bounds, style);
+        auto card = D2D1::RoundedRect(box.bounds, style.corner_radius, style.corner_radius);
+        resources.d2dContext->FillRoundedRectangle(card, resources.previewBackgroundBrush.Get());
+        resources.d2dContext->DrawRoundedRectangle(card, resources.previewBorderBrush.Get(), 1);
+        resources.d2dContext->PushAxisAlignedClip(D2D1::RectF(
+            box.bounds.left + style.padding_horizontal, box.bounds.top + style.padding_vertical,
+            box.bounds.right - style.padding_horizontal, box.bounds.bottom - style.padding_vertical), D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
+        PaintMathPreviewContent(preview, box.origin, resources, styleSheet, drawMath, drawFallback);
+        resources.d2dContext->PopAxisAlignedClip();
         return box.bounds;
     }
 }

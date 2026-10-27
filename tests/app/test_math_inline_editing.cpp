@@ -268,7 +268,8 @@ namespace
                 expect(rect.left >= 11.99f && rect.top >= 11.99f);
                 expect(rect.right <= viewport.width - 11.99f && rect.bottom <= viewport.height - 11.99f);
                 expect(rect.bottom <= caret.top - 7.99f || rect.top >= caret.bottom + 7.99f);
-                expect(placement->scale > 0 && placement->scale <= 1);
+                expect(placement->origin.x == rect.left + 12.f);
+                expect(placement->origin.y == rect.top + 10.f);
             }
             expect(!PlaceInlineMathPreview({0, -40, 1, -20}, 0, {20, 20}, {540, 720}));
             expect(!PlaceInlineMathPreview({0, 750, 1, 770}, 0, {20, 20}, {540, 720}));

@@ -75,8 +75,8 @@ namespace winrt::Folia
             frame.baseDirectory,
             !printMode);
         std::vector<std::uint64_t> visibleMath;
-        auto drawMath = [&](MathJaxSvgFragment const& fragment, D2D1_POINT_2F origin, D2D1_COLOR_F) {
-            if (origin.x + fragment.width < 0.0f || origin.y + fragment.height < 0.0f
+        auto drawMath = [&](MathJaxSvgFragment const& fragment, D2D1_POINT_2F origin, D2D1_COLOR_F, float scale) {
+            if (origin.x + fragment.width * scale < 0.0f || origin.y + fragment.height * scale < 0.0f
                 || origin.x > resources.surfaceWidthDip || origin.y > resources.surfaceHeightDip)
                 return true;
             visibleMath.push_back(fragment.renderId);
@@ -92,9 +92,11 @@ namespace winrt::Folia
             return svgPainter.Draw(
                 fragment.renderId,
                 *payload,
+                fragment.width * scale,
+                fragment.height * scale,
+                origin,
                 fragment.width,
-                fragment.height,
-                origin);
+                fragment.height);
         };
         auto drawMathFallback = [&](folia::TextSpan, D2D1_POINT_2F origin) {
             auto label = Localize(L"Formula");

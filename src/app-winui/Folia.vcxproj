@@ -99,7 +99,7 @@
       <AdditionalOptions>%(AdditionalOptions) /bigobj</AdditionalOptions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>$(FoliaNativeMathImportLibrary);$(FoliaIcuRoot)lib64\icuin.lib;$(FoliaIcuRoot)lib64\icuuc.lib;$(FoliaIcuRoot)lib64\icudt.lib;d2d1.lib;d3d11.lib;dwrite.lib;dxgi.lib;windowscodecs.lib;shlwapi.lib;winspool.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(FoliaNativeMathImportLibrary);$(FoliaIcuRoot)lib64\icuin.lib;$(FoliaIcuRoot)lib64\icuuc.lib;$(FoliaIcuRoot)lib64\icudt.lib;d2d1.lib;dxguid.lib;d3d11.lib;dwrite.lib;dxgi.lib;windowscodecs.lib;shlwapi.lib;winspool.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>%(AdditionalOptions) /STACK:33554432</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
@@ -176,6 +176,7 @@
     <ClInclude Include="editor\rendering\EditorViewportMaterializer.h" />
     <ClInclude Include="editor\rendering\EditorDocumentRenderPass.h" />
     <ClInclude Include="editor\rendering\EditorRenderResources.h" />
+    <ClInclude Include="editor\rendering\EditorPopupShadow.h" />
     <ClInclude Include="media\EditorGifDecoder.h" />
     <ClInclude Include="editor\rendering\EditorRenderCache.h" />
     <ClInclude Include="editor\rendering\EditorImageCache.h" />
@@ -705,6 +706,7 @@
     <ClCompile Include="MainWindow.Commands.cpp" />
     <ClCompile Include="MainWindow.Documents.cpp" />
     <ClCompile Include="MainWindow.Tabs.cpp" />
+    <ClCompile Include="editor\rendering\EditorPopupShadow.cpp" />
     <ClCompile Include="MainWindow.Folders.cpp" />
     <ClCompile Include="MainWindow.Shortcuts.cpp" />
     <ClCompile Include="MainWindow.Settings.cpp" />

@@ -3,6 +3,12 @@
   "id": "folia.ember-night",
   "name": "Ember Night",
   "variant": "dark",
+  "mathPreview": {
+    "margin": 12, "gap": 8,
+    "paddingHorizontal": 12, "paddingVertical": 10,
+    "cornerRadius": 8, "shadowBlur": 8, "shadowOffsetY": 2,
+    "shadowColor": "#00000038"
+  },
   "typography": {
     "body": { "family": "Microsoft YaHei UI", "size": 18, "lineHeight": 30, "weight": 400, "italic": false },
     "heading1": { "family": "Segoe UI Variable Display", "size": 39, "lineHeight": 47, "weight": 700, "italic": false },

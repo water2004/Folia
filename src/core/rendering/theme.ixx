@@ -116,6 +116,17 @@ struct ThemeLayout {
     float footnote_preview_spacing = 8.0f;
 };
 
+struct ThemeMathPreview {
+    float margin = 12.0f;
+    float gap = 8.0f;
+    float padding_horizontal = 12.0f;
+    float padding_vertical = 10.0f;
+    float corner_radius = 8.0f;
+    float shadow_blur = 8.0f;
+    float shadow_offset_y = 2.0f;
+    Color shadow_color{0, 0, 0, 24};
+};
+
 struct ThemeProfile {
     std::uint32_t schema_version = 2;
     std::string id;
@@ -124,6 +135,7 @@ struct ThemeProfile {
     ThemeTypography typography;
     ThemeColors colors;
     ThemeLayout layout;
+    ThemeMathPreview math_preview;
     std::shared_ptr<const SyntaxMarkerTheme> syntax_markers;
 };
 
@@ -212,6 +224,7 @@ inline ThemeProfile high_contrast_profile() {
     profile.id = "folia.high-contrast";
     profile.name = "Folia High Contrast";
     profile.variant = Theme::HighContrast;
+    profile.math_preview.shadow_color.a = 0;
     auto& t = profile.colors;
     t.bg = Color(0, 0, 0); t.fg = Color(255, 255, 255); t.muted_fg = Color(220, 220, 220);
     t.accent_fg = Color(0, 255, 255); t.heading_fg = Color(255, 255, 0); t.strong_fg = t.fg; t.emphasis_fg = Color(255, 165, 0);

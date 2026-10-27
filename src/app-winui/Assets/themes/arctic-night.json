@@ -3,6 +3,12 @@
   "id": "folia.arctic-night",
   "name": "Arctic Night",
   "variant": "dark",
+  "mathPreview": {
+    "margin": 12, "gap": 8,
+    "paddingHorizontal": 12, "paddingVertical": 10,
+    "cornerRadius": 8, "shadowBlur": 8, "shadowOffsetY": 2,
+    "shadowColor": "#00000038"
+  },
   "typography": {
     "body": { "family": "Segoe UI Variable Text", "size": 17, "lineHeight": 29, "weight": 400, "italic": false },
     "heading1": { "family": "Segoe UI Variable Display", "size": 37, "lineHeight": 46, "weight": 650, "italic": false },

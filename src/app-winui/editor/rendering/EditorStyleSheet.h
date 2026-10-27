@@ -43,6 +43,7 @@ namespace winrt::Folia
         D2D1_COLOR_F inlineCodeTextColor{}, inlineCodeBackgroundColor{};
         D2D1_COLOR_F panelColor{};
         D2D1_COLOR_F previewBackgroundColor{}, previewBorderColor{};
+        folia::ThemeMathPreview mathPreview;
         D2D1_COLOR_F nestedQuoteColor{};
         D2D1_COLOR_F calloutNoteBackgroundColor{};
         D2D1_COLOR_F calloutNoteBorderColor{};

@@ -67,12 +67,13 @@ namespace {
             math.SetVisibleSvgIds(visibleIds);
             math.WaitForIdle();
             EditorDocumentRenderPass pass(resources, sheet, interaction, nonInteractive, images, painter,
-                [&](auto const& fragment, auto origin, auto color) {
-                    mathRects.push_back({origin.x, origin.y, origin.x + fragment.width, origin.y + fragment.height});
+                [&](auto const& fragment, auto origin, auto color, float scale) {
+                    mathRects.push_back({origin.x, origin.y, origin.x + fragment.width * scale, origin.y + fragment.height * scale});
                     mathColors.push_back(color);
                     if (!paintSvg) return true;
                     auto payload = fragment.svg ? fragment.svg : math.GetSvg(fragment.renderId);
-                    return payload && svg.Draw(fragment.renderId, *payload, fragment.width, fragment.height, origin);
+                    return payload && svg.Draw(fragment.renderId, *payload, fragment.width * scale, fragment.height * scale,
+                        origin, fragment.width, fragment.height);
                 }, [&](auto, auto) { expect(false) << "native formula unexpectedly fell back"; },
                 [](auto const&, float, float, auto) { return true; });
             resources.d2dContext->SetTarget(target.Get());

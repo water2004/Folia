@@ -714,7 +714,8 @@ namespace winrt::Folia
         for (auto const& preview : prepared.display.mathPreviews)
         {
             prepared.mathPreviews.push_back(PrepareMathPreview(preview, textLayoutEngine,
-                resources.textFormat.Get(), (std::max)(1.0f, contentWidth - 16.0f)));
+                resources.textFormat.Get(), (std::max)(1.0f, contentWidth - 16.0f),
+                resources.surfaceWidthDip, styleSheet.mathPreview));
         }
         prepared.mermaidPreviews.reserve(
             prepared.display.mermaidPreviews.size());

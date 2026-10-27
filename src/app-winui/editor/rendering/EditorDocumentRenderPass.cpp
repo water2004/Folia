@@ -206,7 +206,7 @@ namespace winrt::Folia
                 resources.d2dContext->FillRectangle(previewRect, resources.nestedQuoteBrush.Get());
                 auto previewOrigin = D2D1::Point2F(
                     previewRect.left + (contentWidth - preview.Width()) * .5f, previewRect.top + 8.0f);
-                PaintMathPreviewContent(preview, previewOrigin, 1, resources, styleSheet, drawMath, drawMathFallback);
+                PaintMathPreviewContent(preview, previewOrigin, resources, styleSheet, drawMath, drawMathFallback);
                 nonInteractiveRegions.push_back(D2D1::RectF(
                     previewRect.left,
                     nonInteractiveTop,

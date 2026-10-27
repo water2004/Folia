@@ -86,7 +86,8 @@ namespace winrt::Folia
                 for (auto const& preview : display.mathPreviews)
                 {
                     auto preparedPreview = PrepareMathPreview(preview, textLayoutEngine,
-                        resources.textFormat.Get(), (std::max)(1.0f, columnWidth - 36.0f));
+                        resources.textFormat.Get(), (std::max)(1.0f, columnWidth - 36.0f),
+                        resources.surfaceWidthDip, styleSheet.mathPreview);
                     if (!preparedPreview.floating) previewHeight += preparedPreview.Height() + 24.0f;
                     previews.push_back(std::move(preparedPreview));
                 }
@@ -245,7 +246,7 @@ namespace winrt::Folia
                     resources.d2dContext->FillRectangle(previewRect, resources.nestedQuoteBrush.Get());
                     auto previewOrigin = D2D1::Point2F(
                         (previewRect.left + previewRect.right - preview.Width()) * .5f, previewRect.top + 8.0f);
-                    PaintMathPreviewContent(preview, previewOrigin, 1, resources, styleSheet, drawMath, drawMathFallback);
+                    PaintMathPreviewContent(preview, previewOrigin, resources, styleSheet, drawMath, drawMathFallback);
                     nonInteractiveRegions.push_back(D2D1::RectF(
                         previewRect.left,
                         nonInteractiveTop,

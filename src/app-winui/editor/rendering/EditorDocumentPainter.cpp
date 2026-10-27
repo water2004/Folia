@@ -26,10 +26,8 @@ namespace winrt::Folia
     {
         auto positioned = PositionMath(layout, overlays, width);
         for (auto const& item : positioned) {
-            auto fragment = item.overlay->fragment;
-            fragment.width *= scale; fragment.height *= scale;
             auto at = D2D1::Point2F(origin.x + item.localX * scale, origin.y + item.localTop * scale);
-            if (!draw(fragment, at, item.overlay->foreground)) fallback(item.overlay->sourceSpan, at);
+            if (!draw(item.overlay->fragment, at, item.overlay->foreground, scale)) fallback(item.overlay->sourceSpan, at);
         }
         if (std::none_of(positioned.begin(), positioned.end(), [](auto const& item) { return item.overlay->strikethrough; }))
             return positioned;

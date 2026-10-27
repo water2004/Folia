@@ -233,6 +233,23 @@ namespace
         profile.typography = ParseTypography(root.GetNamedObject(L"typography"));
         profile.colors = ParseColors(root.GetNamedObject(L"colors"));
         profile.layout = ParseLayout(root.GetNamedObject(L"layout"));
+        if (profile.variant == folia::Theme::HighContrast) profile.math_preview.shadow_color.a = 0;
+        if (root.HasKey(L"mathPreview")) {
+            auto object = root.GetNamedObject(L"mathPreview");
+            auto& preview = profile.math_preview;
+            struct Field { wchar_t const* name; float folia::ThemeMathPreview::* value; };
+            static constexpr Field fields[] = {
+                {L"margin", &folia::ThemeMathPreview::margin}, {L"gap", &folia::ThemeMathPreview::gap},
+                {L"paddingHorizontal", &folia::ThemeMathPreview::padding_horizontal},
+                {L"paddingVertical", &folia::ThemeMathPreview::padding_vertical},
+                {L"cornerRadius", &folia::ThemeMathPreview::corner_radius},
+                {L"shadowBlur", &folia::ThemeMathPreview::shadow_blur},
+                {L"shadowOffsetY", &folia::ThemeMathPreview::shadow_offset_y},
+            };
+            for (auto const& field : fields)
+                if (object.HasKey(field.name)) preview.*field.value = Number(object, field.name);
+            if (object.HasKey(L"shadowColor")) preview.shadow_color = ParseColor(object.GetNamedString(L"shadowColor"));
+        }
         profile.syntax_markers = ParseSyntaxMarkers(root.GetNamedObject(L"syntaxMarkers"));
         return profile;
     }

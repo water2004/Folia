@@ -3,6 +3,12 @@
   "id": "folia.inkstone-paper",
   "name": "Inkstone Paper",
   "variant": "light",
+  "mathPreview": {
+    "margin": 12, "gap": 8,
+    "paddingHorizontal": 12, "paddingVertical": 10,
+    "cornerRadius": 8, "shadowBlur": 8, "shadowOffsetY": 2,
+    "shadowColor": "#00000018"
+  },
   "typography": {
     "body": { "family": "Microsoft YaHei UI", "size": 18, "lineHeight": 31, "weight": 400, "italic": false },
     "heading1": { "family": "Segoe UI Variable Display", "size": 40, "lineHeight": 50, "weight": 650, "italic": false },
