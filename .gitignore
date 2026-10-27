@@ -46,23 +46,6 @@ compile_commands.json
 /.foreign-object-transform-*/
 /tools/math-port/drafts/**
 
-# Historical verification inputs pending individual retirement review.
-!/tools/math-port/drafts/array-unshift-native-candidate.cpp
-!/tools/math-port/drafts/attributes-bindings-native-probe.cpp
-!/tools/math-port/drafts/attributes-bindings-native-tests.cpp
-!/tools/math-port/drafts/bussproofs-expanded-native-candidate.cpp
-!/tools/math-port/drafts/handler-context-defaults-native-candidate.cpp
-!/tools/math-port/drafts/math-native-session-retirement-next/
-!/tools/math-port/drafts/math-native-session-retirement-next/renderer-owner-counts.cpp
-!/tools/math-port/drafts/mhchem-native-dependency.cpp
-!/tools/math-port/drafts/mml-factory-context-methods-native-tests.cpp
-!/tools/math-port/drafts/parser-projection-native-candidate.cpp
-!/tools/math-port/drafts/subhandlers-live-owner-native-candidate.cpp
-!/tools/math-port/drafts/tag-setoptions-default-methods-native-witness.cpp
-!/tools/math-port/drafts/texhtml-bridge-native-test.cpp
-!/tools/math-port/drafts/texhtml-xml-lifetime-test.cpp
-!/tools/math-port/drafts/token_map_context_bindings.cpp
-
 # Python cache
 __pycache__/
 *.py[cod]
