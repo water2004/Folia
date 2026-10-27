@@ -1,7 +1,0 @@
-diff --git a/tools/math-port/drafts/bussproofs-session-state-native-test.cpp b/tools/math-port/drafts/bussproofs-session-state-native-test.cpp
---- a/tools/math-port/drafts/bussproofs-session-state-native-test.cpp
-+++ b/tools/math-port/drafts/bussproofs-session-state-native-test.cpp
-@@
--        expect(hasGlyph(ordinary,static_cast<std::uint32_t>('x'))&&
-+        expect(hasGlyph(ordinary,0x1D465)&&
-                hasGlyph(ordinary,static_cast<std::uint32_t>('1')))

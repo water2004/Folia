@@ -1,7 +1,0 @@
-diff --git a/CMakeLists.txt b/CMakeLists.txt
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
-@@ -1175,2 +1175,3 @@ folia_add_math_probe(FoliaMathBussproofsDump tools/math-port/bussproofs-native-candidate.cpp)
- folia_add_math_probe(FoliaMathBussproofsUtilDump tools/math-port/bussproofs-util-surface-native-candidate.cpp)
-+folia_add_math_probe(FoliaMathBussproofsPublicRenderDump tools/math-port/candidates/bussproofs-public-render-g143/bussproofs-public-render-native-candidate.cpp)
- folia_add_math_probe(FoliaMathMathtoolsDump tools/math-port/mathtools-native-candidate.cpp)
