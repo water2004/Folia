@@ -37,7 +37,7 @@ namespace winrt::Folia
             draw.displayStart = overlay.displayStart;
             draw.block = overlay.block;
             draw.source = overlay.source;
-            auto svgSource = cache.LoadSvgSource(baseDirectory, overlay.source, loadContent);
+            auto svgSource = cache.images.LoadSvgSource(baseDirectory, overlay.source, loadContent);
             if (svgSource.candidate)
             {
                 if (svgSource.source)
@@ -62,14 +62,14 @@ namespace winrt::Folia
             }
             else if (loadContent)
             {
-                draw.image = cache.LoadRasterImage(resources, baseDirectory, overlay.source);
+                draw.image = cache.images.LoadRasterImage(resources, baseDirectory, overlay.source);
             }
             draw.alt = winrt::to_hstring(overlay.alt.empty() ? std::string("image") : overlay.alt).c_str();
             auto dimensions = draw.svg
-                ? std::optional(EditorRenderCache::ImageDimensions{draw.svg->width, draw.svg->height})
+                ? std::optional(ImageDimensions{draw.svg->width, draw.svg->height})
                 : draw.image
-                    ? std::optional(EditorRenderCache::ImageDimensions{draw.image->width, draw.image->height})
-                    : cache.ProbeImageDimensions(resources, baseDirectory, overlay.source);
+                    ? std::optional(ImageDimensions{draw.image->width, draw.image->height})
+                    : cache.images.ProbeImageDimensions(resources, baseDirectory, overlay.source);
             auto requestedWidth = ResolveImageDimension(overlay.width, availableWidth);
             // Percentage heights require a definite containing-block height.
             // Editor text flow has no such height, matching HTML's automatic
@@ -149,7 +149,7 @@ namespace winrt::Folia
 
     void EditorInlineImageRenderer::ReleaseGif(std::string_view source) const
     {
-        cache.ReleaseGifImage(baseDirectory, source);
+        cache.images.ReleaseGifImage(baseDirectory, source);
     }
 
     void EditorInlineImageRenderer::Draw(IDWriteTextLayout* layout, D2D1_POINT_2F origin, std::vector<ImageDraw> const& images) const
@@ -200,11 +200,11 @@ namespace winrt::Folia
             else if (image.image)
             {
                 std::chrono::milliseconds untilNextFrame{0};
-                auto bitmap = cache.CurrentBitmap(*image.image, untilNextFrame);
+                auto bitmap = cache.images.CurrentBitmap(*image.image, untilNextFrame);
                 if (bitmap)
                     resources.d2dContext->DrawBitmap(bitmap, rect, 1.0f, D2D1_INTERPOLATION_MODE_HIGH_QUALITY_CUBIC);
                 if (animate && untilNextFrame.count() > 0)
-                    cache.RequestAnimationFrame(untilNextFrame);
+                    cache.images.RequestAnimationFrame(untilNextFrame);
             }
             else
             {

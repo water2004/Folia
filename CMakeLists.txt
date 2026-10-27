@@ -43,7 +43,6 @@ if(MSVC)
     endif()
 endif()
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 option(FOLIA_BUILD_WINUI "Build the WinUI 3 C++/WinRT application shell" OFF)
 
@@ -564,6 +563,7 @@ target_sources(folia_math PRIVATE src/math/util/js_case.cpp src/math/util/js_cas
 # Opaque application boundary. Only the C functions cross the DLL boundary;
 # the implementation and its C++ module dependencies remain private.
 add_library(FoliaNativeMath SHARED src/math/native_renderer_bridge.cpp)
+target_include_directories(FoliaNativeMath PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src/math/include)
 target_compile_features(FoliaNativeMath PRIVATE cxx_std_23)
 set_target_properties(FoliaNativeMath PROPERTIES CXX_MODULE_STD ON
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"

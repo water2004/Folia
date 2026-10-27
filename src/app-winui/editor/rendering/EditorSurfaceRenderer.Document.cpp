@@ -138,7 +138,7 @@ namespace winrt::Folia
                 resources.mutedBrush.Get());
         }
 
-        auto remoteImageGeneration = renderCache.RemoteImageGeneration();
+        auto remoteImageGeneration = renderCache.images.ResourceGeneration();
         EditorDocumentBlockPreparer blockPreparer(
             frame,
             resources,

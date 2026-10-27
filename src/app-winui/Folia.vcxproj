@@ -93,7 +93,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)pch.pch</PrecompiledHeaderOutputFile>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\platform;$(ProjectDir)..\..\include;$(FoliaIcuRoot)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\platform;$(ProjectDir)..\math\include;$(FoliaIcuRoot)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level4</WarningLevel>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalOptions>%(AdditionalOptions) /bigobj</AdditionalOptions>
@@ -178,6 +178,9 @@
     <ClInclude Include="editor\rendering\EditorRenderResources.h" />
     <ClInclude Include="media\EditorGifDecoder.h" />
     <ClInclude Include="editor\rendering\EditorRenderCache.h" />
+    <ClInclude Include="editor\rendering\EditorImageCache.h" />
+    <ClInclude Include="media\ImageSource.h" />
+    <ClInclude Include="media\ImageResourceCache.h" />
     <ClInclude Include="editor\rendering\EditorSvgPainter.h" />
     <ClInclude Include="editor\rendering\EditorSyntaxIcons.h" />
     <ClInclude Include="editor\rendering\EditorTextLayoutEngine.h" />
@@ -614,7 +617,9 @@
     <ClCompile Include="editor\rendering\EditorBlockContentPreparation.cpp" />
     <ClCompile Include="editor\rendering\EditorRenderResources.cpp" />
     <ClCompile Include="editor\rendering\EditorRenderCache.cpp" />
-    <ClCompile Include="editor\rendering\EditorRenderCache.Images.cpp" />
+    <ClCompile Include="editor\rendering\EditorImageCache.cpp" />
+    <ClCompile Include="media\ImageSource.cpp" />
+    <ClCompile Include="media\ImageResourceCache.cpp" />
     <ClCompile Include="editor\rendering\EditorRenderCache.Layout.cpp" />
     <ClCompile Include="editor\rendering\EditorSvgPainter.cpp" />
     <ClCompile Include="editor\rendering\EditorSyntaxIcons.cpp" />

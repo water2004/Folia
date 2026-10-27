@@ -299,7 +299,7 @@ namespace winrt::Folia
             auto height = requestedHeight.value_or(0.0f);
             if ((width <= 0.0f || height <= 0.0f) && !special.src.empty())
             {
-                if (auto dimensions = renderCache.ProbeImageDimensions(
+                if (auto dimensions = renderCache.images.ProbeImageDimensions(
                         resources, frame.baseDirectory, special.src))
                 {
                     width = requestedWidth.value_or(dimensions->width);
@@ -326,7 +326,7 @@ namespace winrt::Folia
             : level == 2 ? styleSheet.heading2
             : styleSheet.heading3;
         for (auto const& source : special.inline_image_sources)
-            renderCache.ProbeImageDimensions(resources, frame.baseDirectory, source);
+            renderCache.images.ProbeImageDimensions(resources, frame.baseDirectory, source);
         auto averageAdvance = (std::max)(1.0f, font.size * 0.72f);
         auto charactersPerLine = (std::max)(
             std::size_t{1},

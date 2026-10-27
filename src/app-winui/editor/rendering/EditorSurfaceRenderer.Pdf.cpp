@@ -212,7 +212,7 @@ namespace winrt::Folia
             auto windowBegin = preparedDocument->geometry.FirstIntersecting(state->nextSourceTop);
             auto windowEnd = windowBegin;
             auto ready = true;
-            auto imagesPending = renderCache.HasPendingImages();
+            auto imagesPending = renderCache.images.HasPendingImages();
             std::vector<std::size_t> pendingBlocks;
             while (windowEnd < preparedDocument->geometry.Size())
             {

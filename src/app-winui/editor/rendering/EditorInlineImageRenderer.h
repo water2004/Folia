@@ -14,7 +14,7 @@ namespace winrt::Folia
         struct ImageDraw
         {
             std::uint32_t displayStart = 0;
-            std::optional<EditorRenderCache::RasterImage> image;
+            std::optional<EditorImageCache::RasterImage> image;
             std::optional<NormalizedSvg> svg;
             std::string source;
             std::wstring alt;

@@ -42,32 +42,6 @@ namespace winrt::Folia
         return result;
     }
 
-    std::optional<std::vector<std::uint8_t>> DecodeBase64(std::string_view source)
-    {
-        static constexpr std::string_view alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-        if (source.size() > 24 * 1024 * 1024) return std::nullopt;
-        std::vector<std::uint8_t> result;
-        result.reserve(source.size() * 3 / 4);
-        std::uint32_t accumulator = 0;
-        unsigned bits = 0;
-        for (auto ch : source)
-        {
-            if (ch == '=') break;
-            if (ch == '\r' || ch == '\n' || ch == ' ' || ch == '\t') continue;
-            auto position = alphabet.find(ch);
-            if (position == std::string_view::npos) return std::nullopt;
-            accumulator = (accumulator << 6) | static_cast<std::uint32_t>(position);
-            bits += 6;
-            if (bits >= 8)
-            {
-                bits -= 8;
-                result.push_back(static_cast<std::uint8_t>((accumulator >> bits) & 0xff));
-                if (result.size() > 16 * 1024 * 1024) return std::nullopt;
-            }
-        }
-        return result;
-    }
-
     std::optional<MermaidSvg> NormalizeMermaidSvg(MermaidSvg const& source, SvgNormalizer& normalizer, bool allowQueue)
     {
         auto normalized = normalizer.GetOrQueue(source.svg, 16.0f, allowQueue);
