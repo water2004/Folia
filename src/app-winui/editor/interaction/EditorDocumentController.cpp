@@ -222,12 +222,16 @@ namespace winrt::Folia
         const auto identity = state->documentSerial;
         try { co_await LoadDocumentAsync(state, generation, file); }
         catch (winrt::hresult_error const& error) {
-            if (Active(state, generation) && state->setStatus)
-                state->setStatus(LocalizeFormat(L"StatusOpenFailed", {error.message()}));
+            if (Active(state, generation)) {
+                if (state->setProgress) state->setProgress(false, std::nullopt, false);
+                if (state->setStatus) state->setStatus(LocalizeFormat(L"StatusOpenFailed", {error.message()}));
+            }
         }
         catch (std::exception const& error) {
-            if (Active(state, generation) && state->setStatus)
-                state->setStatus(LocalizeFormat(L"StatusOpenFailed", {winrt::to_hstring(error.what())}));
+            if (Active(state, generation)) {
+                if (state->setProgress) state->setProgress(false, std::nullopt, false);
+                if (state->setStatus) state->setStatus(LocalizeFormat(L"StatusOpenFailed", {winrt::to_hstring(error.what())}));
+            }
         }
         co_return Active(state, generation) && state->documentSerial != identity;
     }
@@ -367,11 +371,13 @@ namespace winrt::Folia
             std::atomic_uint64_t* serial;
             std::uint64_t ticket;
 
-            ~LoadingGuard()
+            void Complete() noexcept
             {
                 if (serial->load(std::memory_order_acquire) == ticket)
                     loading->store(false, std::memory_order_release);
             }
+
+            ~LoadingGuard() { Complete(); }
         } loadingGuard{ &state->documentLoading, &state->loadSerial, loadTicket };
         auto viewState = preserveView
             ? std::optional{state->session->CaptureReloadViewState()}
@@ -469,6 +475,7 @@ namespace winrt::Folia
         if (!Active(state, generation) || state->loadSerial.load() != loadTicket) co_return;
         if (loadStop.stop_requested())
         {
+            loadingGuard.Complete();
             if (state->setProgress) state->setProgress(false, std::nullopt, false);
             if (state->setStatus) state->setStatus(Localize(L"StatusOpenCancelled"));
             co_return;
@@ -480,6 +487,7 @@ namespace winrt::Folia
             if (!Active(state, generation) || state->loadSerial.load() != loadTicket) co_return;
             if (loadStop.stop_requested())
             {
+                loadingGuard.Complete();
                 if (state->setProgress) state->setProgress(false, std::nullopt, false);
                 if (state->setStatus) state->setStatus(Localize(L"StatusOpenCancelled"));
                 co_return;
@@ -521,6 +529,7 @@ namespace winrt::Folia
             if (!Active(state, generation) || state->loadSerial.load() != loadTicket) co_return;
             if (loadStop.stop_requested())
             {
+                loadingGuard.Complete();
                 if (state->setProgress) state->setProgress(false, std::nullopt, false);
                 if (state->setStatus) state->setStatus(Localize(L"StatusOpenCancelled"));
                 co_return;
@@ -545,9 +554,12 @@ namespace winrt::Folia
             state->renderer->AdoptMathPreparation(std::move(preparation));
             state->renderer->SetScrollOffset(scrollOffset);
         }
+        // UI notifications synchronously query IsLoading and may render the
+        // replacement document. Publish the completed state before notifying.
+        loadingGuard.Complete();
+        if (state->setProgress) state->setProgress(false, std::nullopt, false);
         if (state->textInput) state->textInput->NotifyTextChanged();
         if (state->documentChanged) state->documentChanged();
-        if (state->setProgress) state->setProgress(false, std::nullopt, false);
         if (state->setExternalChange) state->setExternalChange(false, false);
         StartWatching(state, generation);
         if (versionAfterParse != readVersion) QueueReloadCheck(state, generation);

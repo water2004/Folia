@@ -4,18 +4,17 @@
 [详细约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。
 只复查新变化；ignored候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-10-27，公式编号修复 / 0.5.1）
+## 当前 checkpoint（2026-10-28，重载遮罩已修 / 跨窗口标签待实现）
 
-- 当前任务：用户报告长公式的 `\tag{4.9}` 与内容重叠，以及 `aligned` 内 `\tag{4.1}` 不渲染；修好后明确要求发布0.5.1。不开agents/CUA，不关闭用户窗口；native串行≤4，不安装本机。
-- 根因已确认：MathJax完整宽度SVG用 `width="100%"` 和CSS `min-width`；应用MathJaxSvgParser将100%误读为100px且丢失最小宽度。修复在应用SVG边界用请求containerWidth和em解析外层viewport，归一化前写成绝对宽度；保留内层SVG、原版transform和data-mjx-viewBox，不改原生数学布局。
-- 第二条原式在原版MathJax同样报 `\tag not allowed in aligned environment`；正确写法把tag移至end{aligned}之后，不在parser中改写用户TeX。两条原式与修正后的第二条共3例，native与锁定MathJax4.1.3输出逐字符一致（读文件统一CRLF），证据build/tag-layout/{source.cjs,render.py,inputs.json,source-*.svg,native-*.svg}。
-- 本轮Debug应用构建通过（build/tag-layout/debug-build.log）；新增tests/app/test_math_svg_viewport.cpp，4项138断言通过（focused.log），覆盖百分比/最小宽度、16/24px字号、窄/宽容器、单个/批量、归一化实际尺寸、普通inline片段、aligned错误。完整Debug app回归通过：115 项、17766 断言，exit0，日志build/tag-layout/app-all.log。本地Release自包含重建成功，正常配置5次及空Assets/default配置5次startup/close均通过，Debug1次通过（build/tag-layout/startup-{release,clean,debug}）。CI异常尚未定位；不能用重跑通过代替根因结论。当前无live本地进程。
-- 修复3b265efe、版本/说明e4b2dd4e7ed2be398da4ace1917036764f6acfb6已提交；master与annotated tag v0.5.1原子推送成功。CI40494779718失败：Release编译成功，真实关窗测试0xc0000005，RVA0x45328；MSI未发布，旧job122157347806无artifacts。用户要求修CI。当前新增失败时上传startup dump及同构建exe/PDB/log，准备在master通过workflow_dispatch重跑既有v0.5.1，不改标签/产品版本。
-- 0.5.0已发布：5b9b45b507287119357570ba195e4641870205c4；CI40453942062成功，Release含Folia-0.5.0-x64.msi（53,693,825字节）及sha256。不重打旧标签。
-- 上一轮架构/清理已完成并提交：独立folia::markdown目标和38模块+2数据、math公共C header归模块、图片CPU/GPU所有权分离、test入口归tests、移除过期工具/过程文档，详见Git历史。不要重做广泛审计。
-- 基线验证：core763/499901、platform84/4249、encoding5/5、Debug app111/17628、CommonMark652/1304、GFM1428/2878、独立Markdown3/49、math977/546948；Release真实startup成功。最新新增回归以本轮记录为准。
-- **未完成主题要求**：WorkspaceIcons.cpp的8个Fluent路径、WorkspaceChrome/FolderExplorer.xaml和MainWindow.xaml样式、core/rendering/theme.ixx默认值仍需归主题包。本次公式修复不处理；不宣称已完成。
-- 最后4个无产品依赖的试验路径清理曾被工具自动审批拦截（仅blocked by policy），未重试：build/tests/winui/Release/controller、build/generated/themes、build/debug_winui_test.py、tools/themes（若只剩__pycache__）。不改路径绕过、不声称已删。此前已回收13.60GiB及旧baseline worktree。
+- 当前授权任务两项：外部文件变更后一直显示“正在准备文档”；标签拖出成独立窗口、跨窗口移入。不开agents/CUA，不关闭用户窗口；native串行≤4，不自动改版本/安装。
+- 重载根因：LoadDocumentAsync先setProgress(false)/documentChanged，随后LoadingGuard析构才清documentLoading，MainWindow同步查询IsLoading读到true；首次open外层刷新掩盖问题。修复显式完成状态后再发成功/取消通知，保留RAII异常退出及loadSerial校验；OpenFileAsync失败补结束进度通知。没有改CST、布局、数学引擎。
+- 新增tests/app/test_document_reload.cpp及fixture观察UI回调时的IsLoading，覆盖监视器自动变更（纯文本/行内/行间公式）、手动刷新、失败保留原文、取消、异步open失败。旧代码5项19断言失败，修复后5项61断言通过；Debug应用构建通过，完整app120项17827断言通过。日志build/tag-layout/reload-{before,after,debug-build,app-all}.log。没有live本地构建/测试进程。
+- 下一项跨窗口标签尚未修改产品：已确认当前WinUI提供CanTearOutTabs及4个原生tear-out事件；官方TabView/WinUI源码证据build/tag-layout/TabView.cpp。WinUI要求移动同一TabViewItem、管理多个Window，并用TabItemsChanged跟踪排序（tear-out模式不发TabDragCompleted）。必须转移原WorkspaceDocument/session（保留未保存、history/selection、source mode、viewport和math cache），更新控制器的窗口UI绑定且保留savedContentState/reloadState，不能重开文件或调用Attach重置存档基线。拟将window注册/生命周期归App，转移流程归专门MainWindow.TabTransfer.cpp，模型Extract/Insert归WorkspaceDocuments。需确认独立启动窗口跨进程的路由边界，不能默称已支持。
+- 0.5.1已发布：修复3b265efe、版本e4b2dd4e（标签未改）；重跑CI40497361463/job122166085103全成功，Release已有Folia-0.5.1-x64.msi（53,681,537字节）和87字节sha256。最初CI40494779718在关窗测试0xc0000005/RVA0x45328，旧job无artifact；本地Release正常5次、空配置5次、立即关闭5次、Debug1次均通过，原始异常根因仍未确认。e23af71a已给后续CI增加失败dump/exe/PDB/log上传，不把重跑通过称作根因修复。
+- 数学公式编号根因和修复已验：应用误将width=100%当100px并漏min-width，现以containerWidth/em确定外层viewport后归一化。3条原式/修正式与锁定MathJax4.1.3输出逐字符一致；aligned内tag原版也拒绝，需放end{aligned}后。回归4项138断言；证据build/tag-layout/{render.py,source.cjs,*svg,focused.log}。
+- 旧架构/目录清理已提交：独立folia::markdown、math C header归模块、图片CPU/GPU所有权分离、入口归tests、移除过期工具和文档。基线core763/499901、platform84/4249、CommonMark652/1304、GFM1428/2878、math977/546948；不重复广泛审计。
+- **未完成主题要求**：WorkspaceIcons.cpp的8个Fluent路径、WorkspaceChrome/FolderExplorer.xaml和MainWindow.xaml样式、core/rendering/theme.ixx默认值仍需归主题包；本轮不混入。
+- 曾有4个无产品依赖的试验路径清理被自动审批拒绝（仅blocked by policy），未重试：build/tests/winui/Release/controller、build/generated/themes、build/debug_winui_test.py、tools/themes（若只剩__pycache__）。不绕过、不声称已删。此前回收13.60GiB及旧baseline worktree。
 
 ## 已确定的边界（仅有新证据才重查）
 

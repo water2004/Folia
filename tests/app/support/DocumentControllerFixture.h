@@ -62,6 +62,10 @@ namespace document_tests {
         DWORD thread = ::GetCurrentThreadId();
         bool wrongThread = false;
         bool loading = false;
+        bool loadingOverlay = false;
+        std::vector<bool> loadingAtCompletion;
+        std::vector<bool> loadingAtDocumentChange;
+        std::function<void(bool)> progress;
 
         StorageFile File(std::wstring_view name, std::string_view source = {}) {
             auto path = directory.path / name;
@@ -88,7 +92,15 @@ namespace document_tests {
                         auto action = saved;
                         action();
                     }
-                }, [this](bool active, auto, bool) { loading = active; }, {}, {}, {}, {});
+                }, [this](bool active, auto, bool) {
+                    wrongThread |= ::GetCurrentThreadId() != thread;
+                    loading = active;
+                    // MainWindow refreshes its overlay from IsLoading inside
+                    // this notification, rather than after the coroutine ends.
+                    loadingOverlay = controller.IsLoading();
+                    if (!active) loadingAtCompletion.push_back(loadingOverlay);
+                    if (progress) progress(active);
+                }, [this] { loadingAtDocumentChange.push_back(controller.IsLoading()); }, {}, {}, {});
             controller.SetSaveDialogs([this]() -> IAsyncOperation<ContentDialogResult> {
                 ++prompts;
                 co_return choice;
