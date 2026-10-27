@@ -14,7 +14,7 @@ native tests' expected values.
 | Verify TeX package registrations and produce alias/SVG fixtures | `tex-package-conformance.cjs` |
 | Compare native font data | `font-data-compare-native.cjs` and `font-data-dump.cpp` |
 | Exercise the app's native layout/worker performance | `winui-math-layout-probe.ps1`, `winui-math-worker-probe.ps1` |
-| Explain native test coverage and historical retirements | `../../docs/math-port/native-raii-acceptance.md` |
+| Native verification requirements | `../../docs/math-port/native-raii-acceptance.md` |
 
 Run scripts from the repository root. The source locks, `reference/`,
 `common-layout-reference/`, and the pinned MathJax/font packages are inputs,

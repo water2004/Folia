@@ -1,10 +1,11 @@
 # Native C++ math architecture
 
-Decision: 2026-10-19, following the user's instruction to remove the JS object
-semantic simulation. This supersedes the Context/ObjectRef implementation and
-its ownership-repair plans. The original MathJax version, 38-package profile,
-fonts and rendering requirements in `scope.json` remain in scope. No runtime
-or container retirement patch is part of this redesign.
+This is the detailed ownership and mathematical-layout reference for the current
+native implementation. The public entry point and module map are in
+[architecture.md](architecture.md). The pinned MathJax profile and fonts are in
+`scope.json`; the additional alias package is documented in `mediawiki-texvc.md`.
+Source algorithms remain the reference. Context/ObjectRef and JS object-semantic
+simulation are not part of the native architecture.
 
 ## Request-scoped font data (implemented 2026-10-22)
 
