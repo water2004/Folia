@@ -106,7 +106,7 @@ powershell -ExecutionPolicy Bypass -File .\build_app.ps1 -Configuration Release 
 Build the per-user x64 MSI with:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\build_msi.ps1 -Version 0.5.1
+powershell -ExecutionPolicy Bypass -File .\build_msi.ps1 -Version 0.5.3
 ```
 
 The installer creates a self-contained Windows App SDK build, so the target
