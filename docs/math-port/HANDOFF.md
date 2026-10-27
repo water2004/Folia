@@ -4,19 +4,18 @@
 [详细约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。
 只复查新变化；ignored候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-10-27，发布0.5.0进行中）
+## 当前 checkpoint（2026-10-27，公式编号修复 / 0.5.1）
 
-- 用户当前明确授权发布0.5.0，按现有.github/workflows/release.yml：提交版本/说明，推送master及v0.5.0标签，由CI构建MSI并发布。原主题包归属要求仍待落实。不开agents/CUA、不关闭用户窗口；native串行≤4；不安装本机。
-- 已提交：c6815be6废弃regexp工具；9a7d240d旧candidate patch；55ebb59f图片CPU/GPU所有权分离及math公共C header归src/math/include；f2de59dd独立folia::markdown库（原38模块+2数据文件，算法不重写，core单向依赖）；a1e267ad旧ignore例外；7046522e模块facade禁PCH。
-- 已清理无用ignored构建产物13.60GiB+旧baseline worktree。当前app/core/参考源码/正式生成器依赖保留。明细build/cleanup-disk-{inventory,plan,result,summary}.json。
-- 当前目录整理：6个batch入口归tests，WinUI runner为tests/app/run.ps1，console runtime为tests/support/windows_console_runtime.cpp；旧build_only、空drafts和已完成CST历史计划直接删除，未搬入历史目录。已更新CMake、工具、AGENTS和使用说明。
-- 当前文档整理：103份无代码/结构化记录消费者的旧阶段报告和分工计划删除；其清单在build/cleanup-doc-{plan,result}.json。architecture.md改为当前开发指南，acceptance.md只保留正式验收规则；HANDOFF去历史流水账。详细数学约束、Source锁/fixture未删。
-- 已验证当前代码：Debug应用构建cleanup-debug-build.log；新入口core763项499901断言、platform84项4249断言、encoding5项5断言、Debug app111项17628断言，均exit0。新入口CommonMark652项1304断言、GFM1428项2878断言、独立Markdown消费者3项49断言通过。日志cleanup-test-entry-*.log、cleanup-app-tests.log。新入口从D:/外部cwd调用仍正确定位仓库。
-- 此前同产品代码验证：独立Markdown消费者3项49断言、数学977项546948断言；Release自包含构建markdown-release.log及真实启动markdown-library-startup.log/result.json通过（Ready/Success=true，exit0），只关闭自建测试子进程。当前未人工检查完整UI外观。
-- **待完成主题要求**：WorkspaceIcons.cpp仍手写8个Fluent路径；WorkspaceChrome/FolderExplorer.xaml、MainWindow.Xaml有样式数据；core/rendering/theme.ixx与主题JSON重复默认值。产品尚未改。未接入的tools/themes生成器草稿已清掉，不能算主题完成。后续需确定主题包单一数据源、当前窗口的资源更新、MSI内置包替换/自定义包保留和切换测试；不要用全局可变主题或强制主题翻转修补资源更新。
-- 目录整理已提交4f601e71；旧计划删除6d4c5bd3、旧阶段报告删除94a056bf。当前无live agent/build/test/诊断进程；候选应用仍为build/app-winui/bin/x64/{Debug,Release}/Folia.exe。md4c诊断因CommonMark无失败没有执行；新入口路径按同一仓库定位规则迁移。
-- 最后4个未接入试验路径的删除被工具自动审批拦截（仅返回blocked by policy、无具体原因），未重试：build/tests/winui/Release/controller、build/generated/themes、build/debug_winui_test.py、tools/themes（若只剩__pycache__）。生产代码无依赖，保留不会进入MSI。不要声称这一批已删。
-- 当前发布检查：fetch确认origin/master是本地HEAD祖先（仅落后5个本地清理提交），工作区原本干净，无既有v0.5.0标签。版本字段和release-notes/v0.5.0.md已准备；最近完整测试有效，不重复无关宽测试。下一步验证版本一致性，提交并原子推送master/tag，然后跟踪CI产物；禁止将主题资源外置说成已完成。
+- 当前任务：用户报告长公式的 `\tag{4.9}` 与内容重叠，以及 `aligned` 内 `\tag{4.1}` 不渲染；修好后明确要求发布0.5.1。不开agents/CUA，不关闭用户窗口；native串行≤4，不安装本机。
+- 根因已确认：MathJax完整宽度SVG用 `width="100%"` 和CSS `min-width`；应用MathJaxSvgParser将100%误读为100px且丢失最小宽度。修复在应用SVG边界用请求containerWidth和em解析外层viewport，归一化前写成绝对宽度；保留内层SVG、原版transform和data-mjx-viewBox，不改原生数学布局。
+- 第二条原式在原版MathJax同样报 `\tag not allowed in aligned environment`；正确写法把tag移至end{aligned}之后，不在parser中改写用户TeX。两条原式与修正后的第二条共3例，native与锁定MathJax4.1.3输出逐字符一致（读文件统一CRLF），证据build/tag-layout/{source.cjs,render.py,inputs.json,source-*.svg,native-*.svg}。
+- 本轮Debug应用构建通过（build/tag-layout/debug-build.log）；新增tests/app/test_math_svg_viewport.cpp，4项138断言通过（focused.log），覆盖百分比/最小宽度、16/24px字号、窄/宽容器、单个/批量、归一化实际尺寸、普通inline片段、aligned错误。完整Debug app回归通过：0 项、0 断言，exit0，日志build/tag-layout/app-all.log。当前无live构建/测试进程。
+- 下一步：提交小范围修复；7处产品版本和release-notes/v0.5.1.md已更新待提交，按.github/workflows/release.yml原子推送master/v0.5.1，让CI构建并发布，检查MSI及sha256。尚未新版本提交/推送，没有人工UI外观验收。
+- 0.5.0已发布：5b9b45b507287119357570ba195e4641870205c4；CI40453942062成功，Release含Folia-0.5.0-x64.msi（53,693,825字节）及sha256。不重打旧标签。
+- 上一轮架构/清理已完成并提交：独立folia::markdown目标和38模块+2数据、math公共C header归模块、图片CPU/GPU所有权分离、test入口归tests、移除过期工具/过程文档，详见Git历史。不要重做广泛审计。
+- 基线验证：core763/499901、platform84/4249、encoding5/5、Debug app111/17628、CommonMark652/1304、GFM1428/2878、独立Markdown3/49、math977/546948；Release真实startup成功。最新新增回归以本轮记录为准。
+- **未完成主题要求**：WorkspaceIcons.cpp的8个Fluent路径、WorkspaceChrome/FolderExplorer.xaml和MainWindow.xaml样式、core/rendering/theme.ixx默认值仍需归主题包。本次公式修复不处理；不宣称已完成。
+- 最后4个无产品依赖的试验路径清理曾被工具自动审批拦截（仅blocked by policy），未重试：build/tests/winui/Release/controller、build/generated/themes、build/debug_winui_test.py、tools/themes（若只剩__pycache__）。不改路径绕过、不声称已删。此前已回收13.60GiB及旧baseline worktree。
 
 ## 已确定的边界（仅有新证据才重查）
 

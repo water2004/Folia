@@ -3,7 +3,7 @@
 
 namespace
 {
-    float ParseLength(std::string_view value, float em)
+    float ParseLength(std::string_view value, float em, float percentageBasis = 0.0f)
     {
         std::size_t consumed = 0;
         float number = 0.0f;
@@ -17,13 +17,15 @@ namespace
         }
 
         auto unit = value.substr(consumed);
+        if (unit.starts_with("%")) return number * percentageBasis / 100.0f;
         if (unit.starts_with("ex")) return number * em * 0.5f;
         if (unit.starts_with("em")) return number * em;
         if (unit.starts_with("pt")) return number * (96.0f / 72.0f);
         return number;
     }
 
-    float AttributeLength(std::string_view svg, std::string_view attribute, float em)
+    float AttributeLength(std::string_view svg, std::string_view attribute, float em,
+                          float percentageBasis = 0.0f)
     {
         auto marker = std::string(attribute) + "=\"";
         auto start = svg.find(marker);
@@ -31,7 +33,7 @@ namespace
         start += marker.size();
         auto end = svg.find('"', start);
         if (end == std::string_view::npos) return 0.0f;
-        return ParseLength(svg.substr(start, end - start), em);
+        return ParseLength(svg.substr(start, end - start), em, percentageBasis);
     }
 
     std::optional<std::string> AttributeText(std::string_view markup, std::string_view attribute)
@@ -43,6 +45,31 @@ namespace
         auto end = markup.find('"', start);
         if (end == std::string_view::npos) return std::nullopt;
         return std::string(markup.substr(start, end - start));
+    }
+
+    float StyleLength(std::string_view header, std::string_view property, float em,
+                      float percentageBasis = 0.0f)
+    {
+        auto style = AttributeText(header, "style");
+        if (!style) return 0.0f;
+        auto remaining = std::string_view(*style);
+        while (!remaining.empty())
+        {
+            auto end = remaining.find(';');
+            auto declaration = remaining.substr(0, end);
+            auto colon = declaration.find(':');
+            if (colon != std::string_view::npos)
+            {
+                auto key = declaration.substr(0, colon);
+                auto first = key.find_first_not_of(" \t\r\n");
+                auto last = key.find_last_not_of(" \t\r\n");
+                if (first != std::string_view::npos && key.substr(first, last - first + 1) == property)
+                    return ParseLength(declaration.substr(colon + 1), em, percentageBasis);
+            }
+            if (end == std::string_view::npos) break;
+            remaining.remove_prefix(end + 1);
+        }
+        return 0.0f;
     }
 
     float VerticalAlignment(std::string_view svg, float em)
@@ -114,7 +141,8 @@ namespace
 
 namespace winrt::Folia
 {
-    MathJaxSvg ParseMathJaxSvgOutput(std::string_view output, bool display, float em)
+    MathJaxSvg ParseMathJaxSvgOutput(std::string_view output, bool display, float em,
+                                   float containerWidth)
     {
         MathJaxSvg rendered;
         rendered.display = display;
@@ -136,10 +164,24 @@ namespace winrt::Folia
             if (!svgEnd) break;
 
             MathJaxSvgFragment fragment;
-            fragment.svg = std::make_shared<std::string const>(output.substr(svgStart, *svgEnd - svgStart));
-            fragment.width = AttributeLength(*fragment.svg, "width", em);
-            fragment.height = AttributeLength(*fragment.svg, "height", em);
-            fragment.verticalAlign = VerticalAlignment(*fragment.svg, em);
+            auto svg = std::string(output.substr(svgStart, *svgEnd - svgStart));
+            auto header = std::string_view(svg).substr(0, svg.find('>') + 1);
+            fragment.width = (std::max)(AttributeLength(header, "width", em, containerWidth),
+                                       StyleLength(header, "min-width", em, containerWidth));
+            fragment.height = AttributeLength(header, "height", em);
+            fragment.verticalAlign = VerticalAlignment(header, em);
+            // A standalone SVG has no browser layout container. Resolve its
+            // outer viewport once, before normalization; nested percentage
+            // viewports then use the same width for content and equation labels.
+            // Keep MathJax's transforms and data-mjx-viewBox metadata unchanged.
+            auto width = AttributeText(header, "width");
+            if (width && (width->find('%') != std::string::npos ||
+                          fragment.width > AttributeLength(header, "width", em)))
+            {
+                auto at = header.find("width=\"") + std::string_view("width=\"").size();
+                svg.replace(at, width->size(), std::format("{}px", fragment.width));
+            }
+            fragment.svg = std::make_shared<std::string const>(std::move(svg));
             if (!rendered.fragments.empty())
             {
                 auto between = output.substr(previousEnd, svgStart - previousEnd);

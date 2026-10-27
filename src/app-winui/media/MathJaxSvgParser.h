@@ -9,5 +9,6 @@ namespace winrt::Folia
     MathJaxSvg ParseMathJaxSvgOutput(
         std::string_view output,
         bool display,
-        float em);
+        float em,
+        float containerWidth);
 }

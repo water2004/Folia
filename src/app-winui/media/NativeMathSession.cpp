@@ -172,7 +172,7 @@ std::vector<MathJaxSvg> NativeMathSession::RenderBatch(std::span<NativeMathInput
             try
             {
                 results.push_back(ParseMathJaxSvgOutput(std::string_view(bytes ? bytes : "", size),
-                                                        input.display, input.em));
+                                                        input.display, input.em, input.containerWidth));
             }
             catch (std::bad_alloc const &)
             {
