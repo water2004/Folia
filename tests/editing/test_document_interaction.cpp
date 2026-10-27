@@ -2,12 +2,12 @@
 #include <string_view>
 
 #include "support/folia_test.hpp"
-import folia.core.ast;
-import folia.core.block_tree;
+import folia.markdown.ast;
+import folia.markdown.block_tree;
 import folia.core.document_interaction;
 import folia.core.editor;
-import folia.core.instrumentation;
-import folia.core.text_edit;
+import folia.markdown.instrumentation;
+import folia.markdown.text_edit;
 
 using namespace folia;
 using namespace boost::ut;

@@ -5,21 +5,21 @@
 
 #include "support/folia_test.hpp"
 
-import folia.core.ast;
-import folia.core.document;
-import folia.core.image_dimension;
-import folia.core.inline_cst;
-import folia.core.inline_parser;
-import folia.core.outline;
-import folia.core.parser;
+import folia.markdown.ast;
+import folia.markdown.document;
+import folia.markdown.image_dimension;
+import folia.markdown.inline_cst;
+import folia.markdown.inline_parser;
+import folia.markdown.outline;
+import folia.markdown.parser;
 import folia.core.render_builder;
 import folia.core.render_model;
-import folia.core.serializer;
-import folia.core.symbols;
+import folia.markdown.serializer;
+import folia.markdown.symbols;
 import folia.core.theme;
-import folia.core.utf;
-import folia.core.html_cst;
-import folia.core.image_block_promotion;
+import folia.markdown.utf;
+import folia.markdown.html_cst;
+import folia.markdown.image_block_promotion;
 
 using namespace folia;
 using namespace boost::ut;

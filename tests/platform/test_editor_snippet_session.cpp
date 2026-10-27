@@ -1,8 +1,8 @@
 #include "support/folia_test.hpp"
 
 import folia.core.snippet_template;
-import folia.core.ids;
-import folia.core.text_edit;
+import folia.markdown.ids;
+import folia.markdown.text_edit;
 import folia.platform.editor_snippet_session;
 
 using namespace boost::ut;

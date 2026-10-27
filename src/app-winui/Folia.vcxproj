@@ -237,41 +237,44 @@
     <Page Include="workspace\WorkspaceChrome.xaml" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\core\model\ast.ixx">
+    <ClCompile Include="..\markdown\markdown.ixx">
+      <CompileAs>CompileAsCppModule</CompileAs>
+    </ClCompile>
+    <ClCompile Include="..\markdown\model\ast.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\model\container_source.ixx">
+    <ClCompile Include="..\markdown\model\container_source.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\parsing\block_source.ixx">
+    <ClCompile Include="..\markdown\parsing\block_source.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\parsing\block_line_recognizer.ixx">
+    <ClCompile Include="..\markdown\parsing\block_line_recognizer.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\parsing\markdown_html.ixx">
+    <ClCompile Include="..\markdown\parsing\markdown_html.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\parsing\html_cst.ixx">
+    <ClCompile Include="..\markdown\parsing\html_cst.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <AdditionalIncludeDirectories>..\..\third_party\tree-sitter\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="..\core\model\block_tree.ixx">
+    <ClCompile Include="..\markdown\model\block_tree.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\model\callout.ixx">
+    <ClCompile Include="..\markdown\model\callout.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\core\editing\command.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\support\diagnostics.ixx">
+    <ClCompile Include="..\markdown\support\diagnostics.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\parsing\dialect.ixx">
+    <ClCompile Include="..\markdown\parsing\dialect.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\model\document.ixx">
+    <ClCompile Include="..\markdown\model\document.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\core\editing\document_edit.ixx">
@@ -349,10 +352,10 @@
     <ClCompile Include="..\core\editing\snippet_template.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\query\document_symbols.ixx">
+    <ClCompile Include="..\markdown\query\document_symbols.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\query\document_text.ixx">
+    <ClCompile Include="..\markdown\query\document_text.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\core\query\table_selection.ixx">
@@ -440,34 +443,34 @@
     <ClCompile Include="..\core\model\extension.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\model\ids.ixx">
+    <ClCompile Include="..\markdown\model\ids.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\core\editing\input.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\support\instrumentation.ixx">
+    <ClCompile Include="..\markdown\support\instrumentation.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\core\support\image_metadata.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\model\image_dimension.ixx">
+    <ClCompile Include="..\markdown\model\image_dimension.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\model\inline_cst.ixx">
+    <ClCompile Include="..\markdown\model\inline_cst.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\model\inline_document.ixx">
+    <ClCompile Include="..\markdown\model\inline_document.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\parsing\link_label.ixx">
+    <ClCompile Include="..\markdown\parsing\link_label.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\support\html_entities.ixx">
+    <ClCompile Include="..\markdown\support\html_entities.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\parsing\inline_parser.ixx">
+    <ClCompile Include="..\markdown\parsing\inline_parser.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\core\editing\inline_source_edit.ixx">
@@ -476,37 +479,37 @@
     <ClCompile Include="..\core\rendering\layout_plan.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\model\metadata.ixx">
+    <ClCompile Include="..\markdown\model\metadata.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\query\outline.ixx">
+    <ClCompile Include="..\markdown\query\outline.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\parsing\serializer_writer.ixx">
+    <ClCompile Include="..\markdown\parsing\serializer_writer.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\parsing\serializer_visitor.ixx">
+    <ClCompile Include="..\markdown\parsing\serializer_visitor.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\parsing\parser_source_session.ixx">
+    <ClCompile Include="..\markdown\parsing\parser_source_session.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\parsing\parser_leaf_line_view.ixx">
+    <ClCompile Include="..\markdown\parsing\parser_leaf_line_view.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\parsing\parser_html_source_view.ixx">
+    <ClCompile Include="..\markdown\parsing\parser_html_source_view.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\parsing\parser_code_math_leaf_source.ixx">
+    <ClCompile Include="..\markdown\parsing\parser_code_math_leaf_source.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\parsing\image_block_promotion.ixx">
+    <ClCompile Include="..\markdown\parsing\image_block_promotion.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\parsing\gfm_autolink.ixx">
+    <ClCompile Include="..\markdown\parsing\gfm_autolink.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\parsing\parser.ixx">
+    <ClCompile Include="..\markdown\parsing\parser.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\core\rendering\html_inline_presentation.ixx">
@@ -542,16 +545,16 @@
     <ClCompile Include="..\core\source\source_render.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\editing\selection.ixx">
+    <ClCompile Include="..\markdown\model\selection.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\parsing\serializer.ixx">
+    <ClCompile Include="..\markdown\parsing\serializer.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\parsing\slug.ixx">
+    <ClCompile Include="..\markdown\parsing\slug.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\model\symbols.ixx">
+    <ClCompile Include="..\markdown\model\symbols.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\core\rendering\theme.ixx">
@@ -560,13 +563,13 @@
     <ClCompile Include="..\core\rendering\syntax_marker.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\editing\text_edit.ixx">
+    <ClCompile Include="..\markdown\model\text_edit.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\core\support\types.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\support\utf.ixx">
+    <ClCompile Include="..\markdown\support\utf.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="pch.cpp">

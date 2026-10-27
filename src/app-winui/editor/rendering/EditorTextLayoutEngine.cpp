@@ -3,7 +3,7 @@
 import folia.core.render_model;
 import folia.core.theme;
 import folia.core.types;
-import folia.core.utf;
+import folia.markdown.utf;
 
 #include "editor/rendering/EditorContentPreparation.h"
 #include "editor/rendering/EditorTextLayoutEngine.h"

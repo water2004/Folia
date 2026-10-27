@@ -4,7 +4,7 @@
 #include "editor/rendering/EditorSurfaceRenderer.h"
 #include <winrt/Microsoft.UI.Xaml.Hosting.h>
 
-import folia.core.instrumentation;
+import folia.markdown.instrumentation;
 
 using namespace boost::ut;
 using namespace winrt::Folia;

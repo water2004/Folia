@@ -6,12 +6,12 @@
 // selection coordinate.
 export module folia.core.table_selection;
 import std;
-import folia.core.ast;
-import folia.core.block_tree;
-import folia.core.document;
-import folia.core.document_text;
-import folia.core.ids;
-import folia.core.text_edit;
+import folia.markdown.ast;
+import folia.markdown.block_tree;
+import folia.markdown.document;
+import folia.markdown.document_text;
+import folia.markdown.ids;
+import folia.markdown.text_edit;
 
 export namespace folia {
 

@@ -1,5 +1,5 @@
 #pragma once
-import folia.core.markdown_html;
+import folia.markdown.markdown_html;
 
 // Semantic HTML-shaped projection for the official CommonMark conformance
 // tests. This consumes Folia's parsed tree and lossless inline CST; it is not

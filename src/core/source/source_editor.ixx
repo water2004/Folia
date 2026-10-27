@@ -3,14 +3,14 @@
 export module folia.core.source_editor;
 import std;
 export import folia.core.source_patch;
-import folia.core.ids;
-import folia.core.text_edit;
-import folia.core.selection;
-import folia.core.inline_cst;
-import folia.core.inline_document;
-import folia.core.inline_parser;
+import folia.markdown.ids;
+import folia.markdown.text_edit;
+import folia.markdown.selection;
+import folia.markdown.inline_cst;
+import folia.markdown.inline_document;
+import folia.markdown.inline_parser;
 import folia.core.source_style;
-import folia.core.utf;
+import folia.markdown.utf;
 
 export namespace folia {
 

@@ -3,7 +3,7 @@
 #include "editor/rendering/EditorContentPreparation.h"
 
 import folia.core.command;
-import folia.core.utf;
+import folia.markdown.utf;
 import folia.platform.editor_input_command;
 
 namespace

@@ -3,21 +3,21 @@
 #include <string_view>
 
 #include "support/folia_test.hpp"
-import folia.core.ast;
-import folia.core.ids;
-import folia.core.block_tree;
-import folia.core.document;
+import folia.markdown.ast;
+import folia.markdown.ids;
+import folia.markdown.block_tree;
+import folia.markdown.document;
 import folia.core.editor;
-import folia.core.inline_cst;
-import folia.core.inline_document;
-import folia.core.instrumentation;
-import folia.core.parser;
+import folia.markdown.inline_cst;
+import folia.markdown.inline_document;
+import folia.markdown.instrumentation;
+import folia.markdown.parser;
 import folia.core.render_builder;
 import folia.core.render_model;
-import folia.core.serializer;
-import folia.core.selection;
+import folia.markdown.serializer;
+import folia.markdown.selection;
 import folia.core.theme;
-import folia.core.utf;
+import folia.markdown.utf;
 
 using namespace folia;
 using namespace boost::ut;

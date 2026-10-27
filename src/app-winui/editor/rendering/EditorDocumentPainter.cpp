@@ -2,8 +2,8 @@
 #include "EditorDocumentPainter.h"
 #include "EditorTextLayoutEngine.h"
 
-import folia.core.callout;
-import folia.core.utf;
+import folia.markdown.callout;
+import folia.markdown.utf;
 
 namespace winrt::Folia
 {

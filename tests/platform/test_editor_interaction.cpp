@@ -3,9 +3,9 @@
 #include <wrl/client.h>
 #include "support/folia_test.hpp"
 
-import folia.core.ids;
-import folia.core.selection;
-import folia.core.text_edit;
+import folia.markdown.ids;
+import folia.markdown.selection;
+import folia.markdown.text_edit;
 import folia.platform.dwrite_factory;
 import folia.platform.editor_display_mapping;
 import folia.platform.editor_interaction;

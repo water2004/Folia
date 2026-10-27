@@ -4,11 +4,11 @@ import std;
 import folia.core.source_editor;
 import folia.core.source_style;
 import folia.core.render_model;
-import folia.core.outline;
-import folia.core.inline_document;
-import folia.core.inline_parser;
-import folia.core.symbols;
-import folia.core.utf;
+import folia.markdown.outline;
+import folia.markdown.inline_document;
+import folia.markdown.inline_parser;
+import folia.markdown.symbols;
+import folia.markdown.utf;
 
 export namespace folia {
 

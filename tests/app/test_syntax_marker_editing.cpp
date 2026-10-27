@@ -7,7 +7,7 @@
 #include "media/NativeMathSession.h"
 #include <winrt/Microsoft.UI.Xaml.Hosting.h>
 
-import folia.core.utf;
+import folia.markdown.utf;
 
 using namespace boost::ut;
 using namespace winrt::Folia;

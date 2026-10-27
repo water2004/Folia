@@ -1,6 +1,6 @@
 #include "support/folia_test.hpp"
 
-import folia.core.text_edit;
+import folia.markdown.text_edit;
 import folia.platform.editor_preparation_plan;
 
 using namespace boost::ut;

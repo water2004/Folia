@@ -3,7 +3,7 @@
 #include "localization/Localization.h"
 #include "support/DocumentControllerFixture.h"
 
-import folia.core.instrumentation;
+import folia.markdown.instrumentation;
 
 using namespace boost::ut;
 using namespace document_tests;

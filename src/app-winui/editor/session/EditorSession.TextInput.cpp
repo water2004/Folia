@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "editor/session/EditorSession.h"
 
-import folia.core.document_text;
+import folia.markdown.document_text;
 
 namespace winrt::Folia
 {

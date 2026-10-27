@@ -1,7 +1,7 @@
 #include "pch.h"
 
 import std;
-import folia.core.utf;
+import folia.markdown.utf;
 #include "editor/rendering/EditorSurfaceRenderer.h"
 #include "editor/rendering/EditorContentGeometry.h"
 #include "editor/rendering/EditorContentPreparation.h"

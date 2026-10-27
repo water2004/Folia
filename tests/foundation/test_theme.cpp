@@ -1,6 +1,6 @@
 #include "support/folia_test.hpp"
 import folia.core.theme;
-import folia.core.parser;
+import folia.markdown.parser;
 import folia.core.render_builder;
 
 using namespace folia;

@@ -1,9 +1,9 @@
 // folia.platform.editor_display_mapping — source/display coordinate bridge.
 export module folia.platform.editor_display_mapping;
 import std;
-export import folia.core.ids;
-export import folia.core.selection;
-export import folia.core.text_edit;
+export import folia.markdown.ids;
+export import folia.markdown.selection;
+export import folia.markdown.text_edit;
 
 export namespace folia::platform::editor
 {

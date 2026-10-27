@@ -1,9 +1,9 @@
 // folia.platform.editor_latex_completion_session — deterministic candidate navigation state.
 export module folia.platform.editor_latex_completion_session;
 import std;
-import folia.core.ids;
+import folia.markdown.ids;
 import folia.core.latex_completion;
-import folia.core.text_edit;
+import folia.markdown.text_edit;
 
 export namespace folia::platform::editor {
 

@@ -71,7 +71,7 @@ def generate(fetch=False):
         points = ','.join(f'0x{x:x}' for x in mapping + [0] * (3 - len(mapping)))
         output.append(f'    {{0x{cp:x},{{{points}}},{len(mapping)}}},')
     output.append('};\n')
-    path = ROOT / 'src/core/support/unicode_properties.inc'
+    path = ROOT / 'src/markdown/support/unicode_properties.inc'
     path.write_text('\n'.join(output), encoding='utf-8')
     print(f'Generated {len(ranges(punctuation))} punctuation/symbol ranges; {len(folding)} case folds')
 

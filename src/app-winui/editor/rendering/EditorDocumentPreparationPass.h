@@ -1,6 +1,6 @@
 #pragma once
 
-import folia.core.text_edit;
+import folia.markdown.text_edit;
 import folia.platform.editor_scroll_state;
 import folia.platform.editor_viewport_plan;
 

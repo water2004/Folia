@@ -4,14 +4,14 @@
 // (module name avoids the `export` keyword: `folia.core.exporter`.)
 export module folia.core.exporter;
 import std;
-import folia.core.ast;
-import folia.core.image_dimension;
-import folia.core.block_source;
-import folia.core.document;
+import folia.markdown.ast;
+import folia.markdown.image_dimension;
+import folia.markdown.block_source;
+import folia.markdown.document;
 import folia.core.settings;
-import folia.core.serializer;
+import folia.markdown.serializer;
 import folia.core.error;
-import folia.core.utf;
+import folia.markdown.utf;
 
 export namespace folia {
 

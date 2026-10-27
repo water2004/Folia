@@ -3,17 +3,17 @@
 #include <vector>
 
 #include "support/folia_test.hpp"
-import folia.core.ast;
-import folia.core.block_tree;
+import folia.markdown.ast;
+import folia.markdown.block_tree;
 import folia.core.command;
 import folia.core.document_format;
 import folia.core.editor;
-import folia.core.utf;
-import folia.core.inline_cst;
-import folia.core.selection;
-import folia.core.serializer;
+import folia.markdown.utf;
+import folia.markdown.inline_cst;
+import folia.markdown.selection;
+import folia.markdown.serializer;
 import folia.core.source_editor;
-import folia.core.text_edit;
+import folia.markdown.text_edit;
 
 using namespace folia;
 using namespace boost::ut;

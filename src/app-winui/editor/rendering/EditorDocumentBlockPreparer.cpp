@@ -2,7 +2,7 @@
 #include "editor/rendering/EditorDocumentBlockPreparer.h"
 #include "editor/rendering/EditorContentGeometry.h"
 
-import folia.core.utf;
+import folia.markdown.utf;
 
 namespace winrt::Folia
 {

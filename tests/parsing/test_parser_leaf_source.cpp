@@ -3,8 +3,8 @@
 
 #include "support/folia_test.hpp"
 
-import folia.core.parser_source_session;
-import folia.core.parser_leaf_line_view;
+import folia.markdown.parser_source_session;
+import folia.markdown.parser_leaf_line_view;
 
 using namespace folia::parser_source_detail;
 using namespace boost::ut;

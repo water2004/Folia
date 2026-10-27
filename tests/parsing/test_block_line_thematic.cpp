@@ -1,7 +1,7 @@
 #include <string>
 #include <vector>
 #include "support/folia_test.hpp"
-import folia.core.block_line_recognizer;
+import folia.markdown.block_line_recognizer;
 using namespace boost::ut;
 using folia::detail::BlockLineRecognizer;
 suite block_line_thematic_rules=[] {

@@ -1,9 +1,9 @@
 #include "support/folia_test.hpp"
 
 import folia.core.document_content_context;
-import folia.core.parser;
-import folia.core.selection;
-import folia.core.text_edit;
+import folia.markdown.parser;
+import folia.markdown.selection;
+import folia.markdown.text_edit;
 
 using namespace boost::ut;
 using namespace folia;

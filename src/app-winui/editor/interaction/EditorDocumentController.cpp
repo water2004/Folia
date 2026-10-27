@@ -5,8 +5,8 @@
 #include "storage/DocumentEncodingService.h"
 
 import folia.core.command;
-import folia.core.slug;
-import folia.core.utf;
+import folia.markdown.slug;
+import folia.markdown.utf;
 
 namespace winrt::Folia
 {

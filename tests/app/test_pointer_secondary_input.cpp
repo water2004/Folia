@@ -3,7 +3,7 @@
 #include "support/DocumentControllerFixture.h"
 #include "editor/interaction/EditorPointerController.h"
 #include <winrt/Microsoft.UI.Xaml.Hosting.h>
-import folia.core.instrumentation;
+import folia.markdown.instrumentation;
 
 namespace {
     using namespace boost::ut;

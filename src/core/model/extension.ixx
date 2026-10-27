@@ -1,6 +1,6 @@
 export module folia.core.extension;
 import std;
-import folia.core.dialect;
+import folia.markdown.dialect;
 
 export namespace folia {
 

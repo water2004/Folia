@@ -2,12 +2,12 @@
 
 #include "support/folia_test.hpp"
 import folia.core.exporter;
-import folia.core.parser;
-import folia.core.dialect;
-import folia.core.ast;
-import folia.core.document;
+import folia.markdown.parser;
+import folia.markdown.dialect;
+import folia.markdown.ast;
+import folia.markdown.document;
 import folia.core.settings;
-import folia.core.utf;
+import folia.markdown.utf;
 
 using namespace folia;
 using namespace boost::ut;

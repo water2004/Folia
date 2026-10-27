@@ -1,10 +1,10 @@
 #include <string>
 #include "support/folia_test.hpp"
 
-import folia.core.inline_cst;
-import folia.core.inline_document;
-import folia.core.inline_parser;
-import folia.core.markdown_html;
+import folia.markdown.inline_cst;
+import folia.markdown.inline_document;
+import folia.markdown.inline_parser;
+import folia.markdown.markdown_html;
 
 using namespace boost::ut;
 using namespace folia;

@@ -3,7 +3,7 @@
 // (unimplemented in v1) and are handled at the editor/UI layer (HANDOFF).
 export module folia.core.command;
 import std;
-import folia.core.dialect;
+import folia.markdown.dialect;
 
 export namespace folia {
 

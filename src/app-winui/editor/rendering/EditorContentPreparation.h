@@ -1,9 +1,9 @@
 #pragma once
 
-import folia.core.ids;
-import folia.core.image_dimension;
+import folia.markdown.ids;
+import folia.markdown.image_dimension;
 import folia.core.render_model;
-import folia.core.text_edit;
+import folia.markdown.text_edit;
 import folia.platform.editor_display_mapping;
 import folia.platform.editor_block_spacing;
 

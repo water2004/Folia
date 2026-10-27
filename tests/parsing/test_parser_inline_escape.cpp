@@ -1,12 +1,12 @@
 #include <string>
 
 #include "support/folia_test.hpp"
-import folia.core.parser;
-import folia.core.ast;
-import folia.core.inline_cst;
-import folia.core.inline_document;
-import folia.core.serializer;
-import folia.core.utf;
+import folia.markdown.parser;
+import folia.markdown.ast;
+import folia.markdown.inline_cst;
+import folia.markdown.inline_document;
+import folia.markdown.serializer;
+import folia.markdown.utf;
 
 using namespace folia;
 using namespace boost::ut;

@@ -5,24 +5,24 @@
 #include <vector>
 
 #include "support/folia_test.hpp"
-import folia.core.parser;
-import folia.core.document;
+import folia.markdown.parser;
+import folia.markdown.document;
 import folia.core.render_builder;
 import folia.core.render_model;
-import folia.core.block_source;
-import folia.core.ast;
-import folia.core.inline_parser;
+import folia.markdown.block_source;
+import folia.markdown.ast;
+import folia.markdown.inline_parser;
 import folia.core.layout_tree;
 import folia.core.types;
 import folia.core.theme;
-import folia.core.ids;
-import folia.core.inline_document;
-import folia.core.block_tree;
+import folia.markdown.ids;
+import folia.markdown.inline_document;
+import folia.markdown.block_tree;
 import folia.core.text_measurer;
 import folia.core.block_layout;
 import folia.core.hit_test;
-import folia.core.selection;
-import folia.core.outline;
+import folia.markdown.selection;
+import folia.markdown.outline;
 
 using namespace folia;
 using namespace boost::ut;

@@ -1,11 +1,11 @@
 // Derived reference-definition lookup shared by editing and history replay.
 export module folia.core.document_references;
 import std;
-import folia.core.ast;
-import folia.core.block_tree;
-import folia.core.document;
-import folia.core.ids;
-import folia.core.inline_document;
+import folia.markdown.ast;
+import folia.markdown.block_tree;
+import folia.markdown.document;
+import folia.markdown.ids;
+import folia.markdown.inline_document;
 
 export namespace folia {
 

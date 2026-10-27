@@ -5,13 +5,13 @@
 // opening/closing spelling, and applies one source TextEdit.
 export module folia.core.document_inline_format;
 import std;
-import folia.core.document;
+import folia.markdown.document;
 import folia.core.document_edit_primitives;
 import folia.core.document_edit_validation;
-import folia.core.inline_cst;
-import folia.core.inline_document;
+import folia.markdown.inline_cst;
+import folia.markdown.inline_document;
 import folia.core.inline_source_edit;
-import folia.core.text_edit;
+import folia.markdown.text_edit;
 
 export namespace folia {
 

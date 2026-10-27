@@ -8,19 +8,19 @@
 #include <vector>
 
 #include "support/folia_test.hpp"
-import folia.core.ast;
-import folia.core.block_tree;
-import folia.core.container_source;
-import folia.core.document;
-import folia.core.document_text;
+import folia.markdown.ast;
+import folia.markdown.block_tree;
+import folia.markdown.container_source;
+import folia.markdown.document;
+import folia.markdown.document_text;
 import folia.core.editor;
-import folia.core.ids;
-import folia.core.inline_cst;
-import folia.core.inline_document;
-import folia.core.instrumentation;
-import folia.core.serializer;
-import folia.core.text_edit;
-import folia.core.utf;
+import folia.markdown.ids;
+import folia.markdown.inline_cst;
+import folia.markdown.inline_document;
+import folia.markdown.instrumentation;
+import folia.markdown.serializer;
+import folia.markdown.text_edit;
+import folia.markdown.utf;
 
 using namespace folia;
 using namespace boost::ut;

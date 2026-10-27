@@ -1,9 +1,9 @@
 #include "support/folia_test.hpp"
-import folia.core.ast;
-import folia.core.document;
-import folia.core.ids;
-import folia.core.serializer;
-import folia.core.utf;
+import folia.markdown.ast;
+import folia.markdown.document;
+import folia.markdown.ids;
+import folia.markdown.serializer;
+import folia.markdown.utf;
 
 using namespace folia;
 

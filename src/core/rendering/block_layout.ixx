@@ -3,14 +3,14 @@
 export module folia.core.block_layout;
 import std;
 import folia.core.types;
-import folia.core.ids;
+import folia.markdown.ids;
 import folia.core.render_model;
 import folia.core.text_measurer;
-import folia.core.utf;
+import folia.markdown.utf;
 import folia.core.layout_tree;
-import folia.core.outline;
-import folia.core.selection;
-import folia.core.text_edit;
+import folia.markdown.outline;
+import folia.markdown.selection;
+import folia.markdown.text_edit;
 
 export namespace folia {
 

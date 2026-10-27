@@ -1,13 +1,13 @@
 #include <string>
 
 #include "support/folia_test.hpp"
-import folia.core.ast;
-import folia.core.dialect;
-import folia.core.document;
+import folia.markdown.ast;
+import folia.markdown.dialect;
+import folia.markdown.document;
 import folia.core.editor;
-import folia.core.inline_document;
-import folia.core.selection;
-import folia.core.utf;
+import folia.markdown.inline_document;
+import folia.markdown.selection;
+import folia.markdown.utf;
 
 using namespace folia;
 using namespace boost::ut;

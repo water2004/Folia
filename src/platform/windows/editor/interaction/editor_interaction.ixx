@@ -6,7 +6,7 @@ module;
 
 export module folia.platform.editor_interaction;
 import std;
-import folia.core.text_edit;
+import folia.markdown.text_edit;
 export import folia.platform.editor_display_mapping;
 
 export namespace folia::platform::editor

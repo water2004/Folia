@@ -2,9 +2,9 @@
 export module folia.core.input;
 import std;
 import folia.core.types;
-import folia.core.selection;
-import folia.core.text_edit;
-import folia.core.ids;
+import folia.markdown.selection;
+import folia.markdown.text_edit;
+import folia.markdown.ids;
 
 export namespace folia {
 

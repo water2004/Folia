@@ -4,7 +4,7 @@ module;
 
 export module folia.platform.editor_block_spacing;
 import std;
-import folia.core.utf;
+import folia.markdown.utf;
 
 export namespace folia::platform::editor {
 

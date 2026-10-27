@@ -2,12 +2,12 @@
 // editable-owner order indexes. The block tree remains authoritative.
 export module folia.core.document_index_update;
 import std;
-import folia.core.ast;
-import folia.core.block_tree;
-import folia.core.document;
+import folia.markdown.ast;
+import folia.markdown.block_tree;
+import folia.markdown.document;
 import folia.core.document_transaction;
-import folia.core.ids;
-import folia.core.instrumentation;
+import folia.markdown.ids;
+import folia.markdown.instrumentation;
 
 export namespace folia {
 

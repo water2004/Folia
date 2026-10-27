@@ -8,7 +8,7 @@ module;
 export module folia.platform.theme;
 import std;
 import folia.core.theme;
-import folia.core.ids;
+import folia.markdown.ids;
 
 using Microsoft::WRL::ComPtr;
 

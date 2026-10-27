@@ -1,8 +1,8 @@
 #pragma once
 
 import folia.core.render_model;
-import folia.core.selection;
-import folia.core.text_edit;
+import folia.markdown.selection;
+import folia.markdown.text_edit;
 import folia.platform.editor_snippet_session;
 
 namespace winrt::Folia::detail

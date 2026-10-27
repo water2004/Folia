@@ -1,9 +1,9 @@
 // folia.platform.editor_snippet_session — deterministic snippet selection navigation.
 export module folia.platform.editor_snippet_session;
 import std;
-import folia.core.ids;
+import folia.markdown.ids;
 import folia.core.snippet_template;
-import folia.core.text_edit;
+import folia.markdown.text_edit;
 
 export namespace folia::platform::editor {
 

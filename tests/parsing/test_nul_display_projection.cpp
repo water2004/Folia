@@ -6,18 +6,18 @@
 
 #include "support/folia_test.hpp"
 
-import folia.core.ast;
-import folia.core.dialect;
-import folia.core.inline_document;
-import folia.core.inline_cst;
-import folia.core.text_edit;
-import folia.core.parser;
-import folia.core.block_source;
-import folia.core.utf;
-import folia.core.html_entities;
+import folia.markdown.ast;
+import folia.markdown.dialect;
+import folia.markdown.inline_document;
+import folia.markdown.inline_cst;
+import folia.markdown.text_edit;
+import folia.markdown.parser;
+import folia.markdown.block_source;
+import folia.markdown.utf;
+import folia.markdown.html_entities;
 import folia.core.render_builder;
 import folia.core.render_model;
-import folia.core.serializer;
+import folia.markdown.serializer;
 import folia.core.theme;
 
 #include "support/commonmark_projection.hpp"

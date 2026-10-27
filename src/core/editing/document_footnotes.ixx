@@ -3,17 +3,17 @@
 // consulted when resolving references and definitions.
 export module folia.core.document_footnotes;
 import std;
-import folia.core.ast;
-import folia.core.block_source;
-import folia.core.block_tree;
-import folia.core.document;
+import folia.markdown.ast;
+import folia.markdown.block_source;
+import folia.markdown.block_tree;
+import folia.markdown.document;
 import folia.core.document_edit_support;
-import folia.core.document_text;
+import folia.markdown.document_text;
 import folia.core.document_transaction;
-import folia.core.inline_document;
-import folia.core.symbols;
-import folia.core.text_edit;
-import folia.core.utf;
+import folia.markdown.inline_document;
+import folia.markdown.symbols;
+import folia.markdown.text_edit;
+import folia.markdown.utf;
 
 export namespace folia {
 

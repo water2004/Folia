@@ -2,10 +2,10 @@
 export module folia.core.hit_test;
 import std;
 import folia.core.types;
-import folia.core.ids;
+import folia.markdown.ids;
 import folia.core.layout_tree;
-import folia.core.selection;
-import folia.core.text_edit;
+import folia.markdown.selection;
+import folia.markdown.text_edit;
 
 export namespace folia {
 

@@ -4,15 +4,15 @@
 #include <vector>
 
 #include "support/folia_test.hpp"
-import folia.core.parser;
-import folia.core.ast;
-import folia.core.inline_cst;
-import folia.core.inline_document;
-import folia.core.block_source;
-import folia.core.block_tree;
-import folia.core.serializer;
-import folia.core.utf;
-import folia.core.dialect;
+import folia.markdown.parser;
+import folia.markdown.ast;
+import folia.markdown.inline_cst;
+import folia.markdown.inline_document;
+import folia.markdown.block_source;
+import folia.markdown.block_tree;
+import folia.markdown.serializer;
+import folia.markdown.utf;
+import folia.markdown.dialect;
 
 using namespace folia;
 using namespace boost::ut;

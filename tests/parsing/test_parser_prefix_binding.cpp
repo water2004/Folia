@@ -4,8 +4,8 @@
 #include <vector>
 
 #include "support/folia_test.hpp"
-import folia.core.parser;
-import folia.core.serializer;
+import folia.markdown.parser;
+import folia.markdown.serializer;
 
 using namespace folia;
 using namespace boost::ut;

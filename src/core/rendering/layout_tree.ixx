@@ -2,12 +2,12 @@
 export module folia.core.layout_tree;
 import std;
 import folia.core.types;
-import folia.core.ids;
-import folia.core.dialect;
+import folia.markdown.ids;
+import folia.markdown.dialect;
 import folia.core.render_model;
 import folia.core.text_measurer;
-import folia.core.selection;
-import folia.core.text_edit;
+import folia.markdown.selection;
+import folia.markdown.text_edit;
 
 export namespace folia {
 

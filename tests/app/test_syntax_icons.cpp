@@ -4,7 +4,7 @@
 #include "editor/rendering/EditorTextLayoutEngine.h"
 #include "theme/ThemeConfig.h"
 
-import folia.core.parser;
+import folia.markdown.parser;
 import folia.core.render_builder;
 
 using namespace boost::ut;

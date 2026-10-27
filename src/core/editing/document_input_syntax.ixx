@@ -1,10 +1,10 @@
 // Pure recognition of block markers typed into a block-local source.
 export module folia.core.document_input_syntax;
 import std;
-import folia.core.ast;
-import folia.core.block_source;
-import folia.core.dialect;
-import folia.core.utf;
+import folia.markdown.ast;
+import folia.markdown.block_source;
+import folia.markdown.dialect;
+import folia.markdown.utf;
 
 export namespace folia::document_input_rules::detail {
 

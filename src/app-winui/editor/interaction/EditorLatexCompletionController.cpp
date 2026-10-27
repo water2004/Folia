@@ -2,7 +2,7 @@
 #include "editor/interaction/EditorLatexCompletionController.h"
 #include "localization/Localization.h"
 
-import folia.core.utf;
+import folia.markdown.utf;
 
 namespace winrt::Folia
 {

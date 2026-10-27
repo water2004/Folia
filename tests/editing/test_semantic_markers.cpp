@@ -1,11 +1,11 @@
 #include "support/folia_test.hpp"
 import folia.core.editor;
 import folia.core.command;
-import folia.core.document;
-import folia.core.document_text;
-import folia.core.inline_document;
-import folia.core.inline_cst;
-import folia.core.instrumentation;
+import folia.markdown.document;
+import folia.markdown.document_text;
+import folia.markdown.inline_document;
+import folia.markdown.inline_cst;
+import folia.markdown.instrumentation;
 
 using namespace folia;
 using namespace boost::ut;

@@ -3,7 +3,7 @@ export module folia.core.math_renderer;
 import std;
 import folia.core.types;
 import folia.core.theme;
-import folia.core.utf;
+import folia.markdown.utf;
 import folia.core.render_model; // MathDisplayMode
 
 export namespace folia {

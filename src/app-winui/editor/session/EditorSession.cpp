@@ -2,7 +2,7 @@
 #include "editor/session/EditorSession.h"
 
 import folia.core.editor;
-import folia.core.document_text;
+import folia.markdown.document_text;
 import folia.core.document_interaction;
 import folia.core.document_inline_format;
 import folia.core.document_content_context;
@@ -12,7 +12,7 @@ import folia.core.render_model;
 import folia.core.search;
 import folia.core.source_editor;
 import folia.core.source_render;
-import folia.core.utf;
+import folia.markdown.utf;
 
 namespace winrt::Folia
 {

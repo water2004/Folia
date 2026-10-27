@@ -2,7 +2,7 @@
 #include "settings/LatexCommandStore.h"
 #include "storage/AssetPaths.h"
 
-import folia.core.utf;
+import folia.markdown.utf;
 
 namespace
 {

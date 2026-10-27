@@ -3,7 +3,7 @@
 
 import folia.core.render_model;
 import folia.core.source_style;
-import folia.core.utf;
+import folia.markdown.utf;
 
 namespace winrt::Folia
 {

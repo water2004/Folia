@@ -53,27 +53,14 @@ endif()
 # ---------------------------------------------------------------------------
 # Core library — pure C++, portable. Acceptance gate: no Windows dependency.
 # ---------------------------------------------------------------------------
-add_library(folia_tree_sitter_html STATIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/tree-sitter/runtime/lib.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/tree-sitter/grammars/html_parser.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/tree-sitter/grammars/html_scanner.c)
-target_include_directories(folia_tree_sitter_html PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/tree-sitter/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/tree-sitter/runtime)
-set_target_properties(folia_tree_sitter_html PROPERTIES
-    C_STANDARD 11
-    C_STANDARD_REQUIRED ON)
-if(MSVC)
-    target_compile_options(folia_tree_sitter_html PRIVATE /wd4244 /wd4996)
-endif()
+add_subdirectory(src/markdown)
 
 add_library(folia_core STATIC)
 target_compile_features(folia_core PUBLIC cxx_std_23)
 set_target_properties(folia_core PROPERTIES CXX_MODULE_STD ON)
 target_include_directories(folia_core PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/third_party/tree-sitter/include
     ${CMAKE_CURRENT_SOURCE_DIR}/third_party/srell)
-target_link_libraries(folia_core PRIVATE folia_tree_sitter_html)
+target_link_libraries(folia_core PUBLIC folia::markdown)
 
 file(GLOB_RECURSE FOLIA_CORE_MODULE CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/src/core/*.ixx)
@@ -655,6 +642,7 @@ file(GLOB_RECURSE FOLIA_TEST_SRC CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/tests/*.cpp)
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/platform/")
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/app/")
+list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/libraries/")
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/encoding/")
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/math/")
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/parsing/test_commonmark\\.cpp$")

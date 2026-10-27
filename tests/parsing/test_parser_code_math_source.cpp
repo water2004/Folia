@@ -2,10 +2,10 @@
 #include <optional>
 #include "support/folia_test.hpp"
 
-import folia.core.block_source;
-import folia.core.parser_source_session;
-import folia.core.parser_leaf_line_view;
-import folia.core.parser_code_math_leaf_source;
+import folia.markdown.block_source;
+import folia.markdown.parser_source_session;
+import folia.markdown.parser_leaf_line_view;
+import folia.markdown.parser_code_math_leaf_source;
 
 using namespace folia::parser_source_detail;
 using folia::BlockLineIndentation;

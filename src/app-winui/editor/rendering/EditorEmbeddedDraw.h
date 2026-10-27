@@ -3,7 +3,7 @@
 #include "media/MathJaxRenderer.h"
 #include "media/MermaidRenderer.h"
 
-import folia.core.text_edit;
+import folia.markdown.text_edit;
 
 namespace winrt::Folia
 {

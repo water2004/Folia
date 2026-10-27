@@ -2,7 +2,7 @@
 #include <wrl/client.h>
 #include "support/folia_test.hpp"
 import folia.platform.editor_block_spacing;
-import folia.core.utf;
+import folia.markdown.utf;
 
 using namespace boost::ut;
 using namespace folia::platform::editor;

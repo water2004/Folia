@@ -8,21 +8,21 @@
 #include <vector>
 
 #include "support/folia_test.hpp"
-import folia.core.ast;
-import folia.core.block_source;
-import folia.core.block_tree;
-import folia.core.document;
+import folia.markdown.ast;
+import folia.markdown.block_source;
+import folia.markdown.block_tree;
+import folia.markdown.document;
 import folia.core.document_edit;
 import folia.core.document_history;
 import folia.core.document_ids;
 import folia.core.document_operation_apply;
-import folia.core.document_symbols;
-import folia.core.document_text;
-import folia.core.inline_cst;
-import folia.core.inline_document;
-import folia.core.parser;
-import folia.core.serializer;
-import folia.core.text_edit;
+import folia.markdown.document_symbols;
+import folia.markdown.document_text;
+import folia.markdown.inline_cst;
+import folia.markdown.inline_document;
+import folia.markdown.parser;
+import folia.markdown.serializer;
+import folia.markdown.text_edit;
 
 using namespace folia;
 using namespace boost::ut;

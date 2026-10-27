@@ -6,7 +6,7 @@
 #include "editor/rendering/EditorContentPreparation.h"
 #include <winrt/Microsoft.UI.Xaml.Hosting.h>
 
-import folia.core.instrumentation;
+import folia.markdown.instrumentation;
 
 namespace {
     using namespace boost::ut;

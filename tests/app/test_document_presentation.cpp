@@ -2,7 +2,7 @@
 #include "support/folia_test.hpp"
 #include "support/DocumentControllerFixture.h"
 
-import folia.core.instrumentation;
+import folia.markdown.instrumentation;
 
 using namespace boost::ut;
 using namespace document_tests;

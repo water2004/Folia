@@ -1,7 +1,7 @@
 // folia.core.snippet_template — source text, variables, and ordered tab stops.
 export module folia.core.snippet_template;
 import std;
-import folia.core.text_edit;
+import folia.markdown.text_edit;
 
 export namespace folia {
 

@@ -4,11 +4,11 @@
 // snapshots.
 export module folia.core.document_transaction;
 import std;
-import folia.core.ast;
-import folia.core.block_source;
-import folia.core.document;
-import folia.core.text_edit;
-import folia.core.metadata;
+import folia.markdown.ast;
+import folia.markdown.block_source;
+import folia.markdown.document;
+import folia.markdown.text_edit;
+import folia.markdown.metadata;
 
 export namespace folia {
 

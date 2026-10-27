@@ -2,15 +2,15 @@
 // survive local edits; no source-view offset is stored in the document tree.
 export module folia.core.source_projection;
 import std;
-import folia.core.ast;
-import folia.core.block_tree;
-import folia.core.document;
-import folia.core.document_text;
-import folia.core.ids;
-import folia.core.serializer;
-import folia.core.selection;
+import folia.markdown.ast;
+import folia.markdown.block_tree;
+import folia.markdown.document;
+import folia.markdown.document_text;
+import folia.markdown.ids;
+import folia.markdown.serializer;
+import folia.markdown.selection;
 import folia.core.source_patch;
-import folia.core.text_edit;
+import folia.markdown.text_edit;
 
 export namespace folia {
 

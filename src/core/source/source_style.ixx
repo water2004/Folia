@@ -3,7 +3,7 @@
 // change presentation only; they never replace text or participate in edits.
 export module folia.core.source_style;
 import std;
-import folia.core.text_edit;
+import folia.markdown.text_edit;
 
 export namespace folia {
 

@@ -3,8 +3,8 @@ export module folia.core.selection_geometry;
 import std;
 import folia.core.types;
 import folia.core.layout_tree;
-import folia.core.selection;
-import folia.core.text_edit;
+import folia.markdown.selection;
+import folia.markdown.text_edit;
 
 export namespace folia {
 

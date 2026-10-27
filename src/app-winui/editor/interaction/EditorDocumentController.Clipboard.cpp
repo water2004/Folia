@@ -3,8 +3,8 @@
 #include "storage/ClipboardImageStore.h"
 #include "localization/Localization.h"
 
-import folia.core.serializer;
-import folia.core.utf;
+import folia.markdown.serializer;
+import folia.markdown.utf;
 
 namespace winrt::Folia {
     winrt::Windows::Foundation::IAsyncOperation<bool> EditorDocumentController::PasteAsync(

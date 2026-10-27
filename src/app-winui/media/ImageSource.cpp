@@ -2,7 +2,7 @@
 #include "media/ImageSource.h"
 
 import folia.core.image_metadata;
-import folia.core.slug;
+import folia.markdown.slug;
 
 namespace winrt::Folia::image_source
 {

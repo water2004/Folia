@@ -2,9 +2,9 @@
 #include <type_traits>
 #include <utility>
 #include "support/folia_test.hpp"
-import folia.core.inline_cst;
-import folia.core.ids;
-import folia.core.text_edit;
+import folia.markdown.inline_cst;
+import folia.markdown.ids;
+import folia.markdown.text_edit;
 using namespace folia;
 using namespace boost::ut;
 static_assert(std::is_aggregate_v<InlineCstNode>);

@@ -1,9 +1,9 @@
 #include <string>
 #include <string_view>
 #include "support/folia_test.hpp"
-import folia.core.utf;
-import folia.core.link_label;
-import folia.core.html_entities;
+import folia.markdown.utf;
+import folia.markdown.link_label;
+import folia.markdown.html_entities;
 
 using namespace folia;
 using namespace boost::ut;

@@ -7,15 +7,15 @@
 
 #include "support/folia_test.hpp"
 
-import folia.core.ast;
-import folia.core.inline_cst;
-import folia.core.parser;
-import folia.core.serializer;
+import folia.markdown.ast;
+import folia.markdown.inline_cst;
+import folia.markdown.parser;
+import folia.markdown.serializer;
 
-import folia.core.block_source;
-import folia.core.dialect;
-import folia.core.inline_document;
-import folia.core.utf;
+import folia.markdown.block_source;
+import folia.markdown.dialect;
+import folia.markdown.inline_document;
+import folia.markdown.utf;
 #include "support/commonmark_projection.hpp"
 
 using namespace folia;

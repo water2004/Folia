@@ -2,9 +2,9 @@
 // become positions inside the document's block-local editing model.
 export module folia.core.source_patch;
 import std;
-import folia.core.ids;
-import folia.core.selection;
-import folia.core.text_edit;
+import folia.markdown.ids;
+import folia.markdown.selection;
+import folia.markdown.text_edit;
 
 export namespace folia {
 

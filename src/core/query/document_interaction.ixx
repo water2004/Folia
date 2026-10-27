@@ -5,12 +5,12 @@
 // walking the complete render projection.
 export module folia.core.document_interaction;
 import std;
-import folia.core.ast;
-import folia.core.document;
-import folia.core.document_text;
-import folia.core.inline_cst;
-import folia.core.inline_document;
-import folia.core.text_edit;
+import folia.markdown.ast;
+import folia.markdown.document;
+import folia.markdown.document_text;
+import folia.markdown.inline_cst;
+import folia.markdown.inline_document;
+import folia.markdown.text_edit;
 
 export namespace folia {
 

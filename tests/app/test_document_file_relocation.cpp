@@ -3,7 +3,7 @@
 #include "support/DocumentControllerFixture.h"
 #include "workspace/WorkspaceFileOperations.h"
 
-import folia.core.instrumentation;
+import folia.markdown.instrumentation;
 
 namespace {
     using namespace boost::ut;

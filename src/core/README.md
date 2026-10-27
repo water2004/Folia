@@ -1,12 +1,14 @@
 # Core layout
 
-`src/core` is platform independent and organized by responsibility:
+`src/core` is the platform-independent editor and rendering model. It consumes
+the standalone [Markdown document library](../markdown/README.md) through
+`folia::markdown`; it does not own a second parser or document representation.
+The dependency direction is `core -> markdown`, never the reverse.
 
-- `support/`: fundamental types, UTF conversion, errors, diagnostics, settings, storage, scheduling, image metadata, export descriptions, and instrumentation.
-- `model/`: node ids, block tree, document state, inline CST/document, metadata, symbols, and extension data.
-- `parsing/`: dialect rules, block/inline/HTML CST parsing, lossless serialization, block source handling, and slug generation.
+- `support/`: geometry, errors, settings, storage, scheduling, image metadata and export descriptions.
+- `model/`: editor extension configuration; document/CST ownership lives in `src/markdown/model`.
 - `editing/`: block-local source edits, block-tree edits, input rules, history, selection, semantic clipboard splicing, snippets, commands, and transactions.
-- `query/`: document content/context projections, outline construction, rendered/source search, SRELL regular expressions, and LaTeX catalog/completion queries.
+- `query/`: editor content/context projections, rendered/source search, SRELL regular expressions, and LaTeX catalog/completion queries. Parse-time symbols and outline live in `src/markdown/query`.
 - `rendering/`: platform-neutral render model, layout plan/tree, hit testing, selection geometry, HTML presentation, and math/render descriptions.
 - `source/`: source-mode editing, line projection, and syntax-style projection.
 
@@ -34,8 +36,8 @@ Callout titles are ordinary `CalloutTitle` block nodes: when present they are th
 
 Some large files are intentionally cohesive:
 
-- `parsing/parser.ixx` owns one block-parser state machine and its source-range accounting.
-- `parsing/inline_parser.ixx` owns the lossless inline CST state machine.
+- `../markdown/parsing/parser.ixx` owns one block-parser state machine and its source-range accounting.
+- `../markdown/parsing/inline_parser.ixx` owns the lossless inline CST state machine.
 - `rendering/render_builder.ixx` owns one recursive block-tree-to-render-model traversal.
 
 HTML remains a lossless syntax island in the document model. The rendering

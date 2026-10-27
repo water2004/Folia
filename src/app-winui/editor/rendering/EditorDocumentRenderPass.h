@@ -1,7 +1,7 @@
 #pragma once
 
 import folia.core.render_model;
-import folia.core.text_edit;
+import folia.markdown.text_edit;
 import folia.platform.editor_interaction;
 
 #include "editor/rendering/EditorDocumentPainter.h"

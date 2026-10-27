@@ -4,10 +4,10 @@
 // retains complete EditorDocument snapshots.
 export module folia.core.document_history;
 import std;
-import folia.core.document;
+import folia.markdown.document;
 import folia.core.document_operation_apply;
 import folia.core.document_transaction;
-import folia.core.text_edit;
+import folia.markdown.text_edit;
 import folia.core.source_patch;
 
 export namespace folia {

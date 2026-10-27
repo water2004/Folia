@@ -3,7 +3,7 @@
 #include "support/folia_test.hpp"
 import folia.core.editor;
 import folia.core.search;
-import folia.core.utf;
+import folia.markdown.utf;
 
 using namespace folia;
 using namespace boost::ut;

@@ -25,7 +25,7 @@ def generate():
              '// SHA256: ' + source_record['sha256'],
              '/*\n' + license_text.replace('*/', '* /') + '\n*/']
     lines.extend(f'{{"{name}",{first}u,{second}u}},' for name, first, second in rows)
-    (ROOT / 'src/core/support/html_entity_data.inc').write_text('\n'.join(lines) + '\n', encoding='utf-8')
+    (ROOT / 'src/markdown/support/html_entity_data.inc').write_text('\n'.join(lines) + '\n', encoding='utf-8')
     print(f'Generated {len(rows)} named character references')
 
 

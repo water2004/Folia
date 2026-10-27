@@ -6,16 +6,16 @@
 // source payload verbatim.
 export module folia.core.document_format;
 import std;
-import folia.core.ast;
-import folia.core.block_tree;
-import folia.core.dialect;
-import folia.core.document;
+import folia.markdown.ast;
+import folia.markdown.block_tree;
+import folia.markdown.dialect;
+import folia.markdown.document;
 import folia.core.document_transaction;
-import folia.core.parser;
-import folia.core.selection;
-import folia.core.serializer;
+import folia.markdown.parser;
+import folia.markdown.selection;
+import folia.markdown.serializer;
 import folia.core.source_editor;
-import folia.core.utf;
+import folia.markdown.utf;
 
 export namespace folia {
 

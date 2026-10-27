@@ -1,11 +1,11 @@
 // folia.core.document_ids — document-owned monotonic NodeId allocation.
 export module folia.core.document_ids;
 import std;
-import folia.core.ast;
-import folia.core.block_tree;
-import folia.core.document;
-import folia.core.ids;
-import folia.core.inline_cst;
+import folia.markdown.ast;
+import folia.markdown.block_tree;
+import folia.markdown.document;
+import folia.markdown.ids;
+import folia.markdown.inline_cst;
 
 export namespace folia {
 

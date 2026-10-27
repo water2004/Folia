@@ -2,7 +2,7 @@
 #include "editor/rendering/EditorContentPreparation.h"
 
 import folia.core.render_model;
-import folia.core.utf;
+import folia.markdown.utf;
 
 namespace winrt::Folia
 {

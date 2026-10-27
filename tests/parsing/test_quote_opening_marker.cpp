@@ -6,24 +6,24 @@
 #include <vector>
 
 #include "support/folia_test.hpp"
-import folia.core.ast;
-import folia.core.container_source;
-import folia.core.document;
+import folia.markdown.ast;
+import folia.markdown.container_source;
+import folia.markdown.document;
 import folia.core.document_edit;
 import folia.core.document_history;
 import folia.core.document_operation_apply;
-import folia.core.document_symbols;
-import folia.core.document_text;
-import folia.core.inline_cst;
-import folia.core.outline;
-import folia.core.parser;
+import folia.markdown.document_symbols;
+import folia.markdown.document_text;
+import folia.markdown.inline_cst;
+import folia.markdown.outline;
+import folia.markdown.parser;
 import folia.core.render_builder;
 import folia.core.render_model;
-import folia.core.selection;
-import folia.core.serializer;
+import folia.markdown.selection;
+import folia.markdown.serializer;
 import folia.core.theme;
-import folia.core.text_edit;
-import folia.core.utf;
+import folia.markdown.text_edit;
+import folia.markdown.utf;
 
 using namespace folia;
 using namespace boost::ut;

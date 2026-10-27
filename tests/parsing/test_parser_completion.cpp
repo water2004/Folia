@@ -5,13 +5,13 @@
 
 #include "support/folia_test.hpp"
 
-import folia.core.parser;
-import folia.core.ast;
-import folia.core.serializer;
-import folia.core.utf;
-import folia.core.inline_cst;
-import folia.core.inline_document;
-import folia.core.document_text;
+import folia.markdown.parser;
+import folia.markdown.ast;
+import folia.markdown.serializer;
+import folia.markdown.utf;
+import folia.markdown.inline_cst;
+import folia.markdown.inline_document;
+import folia.markdown.document_text;
 
 using namespace folia;
 using namespace boost::ut;

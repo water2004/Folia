@@ -4,14 +4,14 @@
 // without serializing or reparsing the full document.
 export module folia.core.document_search_replace;
 import std;
-import folia.core.document;
+import folia.markdown.document;
 import folia.core.document_edit_support;
-import folia.core.document_text;
+import folia.markdown.document_text;
 import folia.core.document_transaction;
-import folia.core.ids;
+import folia.markdown.ids;
 import folia.core.search;
-import folia.core.selection;
-import folia.core.text_edit;
+import folia.markdown.selection;
+import folia.markdown.text_edit;
 
 export namespace folia {
 

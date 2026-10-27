@@ -1,6 +1,6 @@
 export module folia.core.layout_plan;
 import std;
-import folia.core.ids;
+import folia.markdown.ids;
 
 export namespace folia {
 

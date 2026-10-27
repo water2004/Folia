@@ -1,11 +1,11 @@
 // folia.core.inline_source_edit — the sole mutation path for inline content.
 export module folia.core.inline_source_edit;
 import std;
-import folia.core.ids;
-import folia.core.inline_cst;
-import folia.core.inline_document;
-import folia.core.inline_parser;
-import folia.core.text_edit;
+import folia.markdown.ids;
+import folia.markdown.inline_cst;
+import folia.markdown.inline_document;
+import folia.markdown.inline_parser;
+import folia.markdown.text_edit;
 
 export namespace folia {
 

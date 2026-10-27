@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "settings/ShortcutSettingsSerialization.h"
 
-import folia.core.utf;
+import folia.markdown.utf;
 
 namespace
 {

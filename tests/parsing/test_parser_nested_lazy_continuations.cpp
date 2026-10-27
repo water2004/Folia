@@ -6,11 +6,11 @@
 #include <vector>
 
 #include "support/folia_test.hpp"
-import folia.core.ast;
-import folia.core.block_source;
-import folia.core.parser;
-import folia.core.serializer;
-import folia.core.utf;
+import folia.markdown.ast;
+import folia.markdown.block_source;
+import folia.markdown.parser;
+import folia.markdown.serializer;
+import folia.markdown.utf;
 
 using namespace folia;
 using namespace boost::ut;

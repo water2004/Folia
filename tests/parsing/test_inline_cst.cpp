@@ -9,14 +9,14 @@
 #include <vector>
 
 #include "support/folia_test.hpp"
-import folia.core.dialect;
-import folia.core.inline_cst;
-import folia.core.inline_document;
-import folia.core.inline_parser;
+import folia.markdown.dialect;
+import folia.markdown.inline_cst;
+import folia.markdown.inline_document;
+import folia.markdown.inline_parser;
 import folia.core.inline_source_edit;
-import folia.core.selection;
-import folia.core.text_edit;
-import folia.core.utf;
+import folia.markdown.selection;
+import folia.markdown.text_edit;
+import folia.markdown.utf;
 
 using namespace folia;
 using namespace boost::ut;

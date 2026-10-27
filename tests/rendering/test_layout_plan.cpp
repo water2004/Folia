@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "support/folia_test.hpp"
-import folia.core.ids;
+import folia.markdown.ids;
 import folia.core.layout_plan;
 
 using namespace folia;

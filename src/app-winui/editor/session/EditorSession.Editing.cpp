@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "editor/session/EditorSession.h"
 
-import folia.core.serializer;
+import folia.markdown.serializer;
 
 namespace winrt::Folia
 {

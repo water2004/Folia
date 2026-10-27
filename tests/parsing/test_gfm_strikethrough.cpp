@@ -5,10 +5,10 @@
 #include <vector>
 
 #include "support/folia_test.hpp"
-import folia.core.inline_cst;
-import folia.core.inline_parser;
-import folia.core.inline_document;
-import folia.core.text_edit;
+import folia.markdown.inline_cst;
+import folia.markdown.inline_parser;
+import folia.markdown.inline_document;
+import folia.markdown.text_edit;
 
 using namespace folia;
 using namespace boost::ut;

@@ -3,7 +3,7 @@
 #include "localization/Localization.h"
 
 import folia.core.search;
-import folia.core.utf;
+import folia.markdown.utf;
 
 namespace winrt::Folia::implementation
 {

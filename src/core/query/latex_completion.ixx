@@ -1,7 +1,7 @@
 // folia.core.latex_completion — local LaTeX command prefix queries and ranking.
 export module folia.core.latex_completion;
 import std;
-import folia.core.text_edit;
+import folia.markdown.text_edit;
 
 export namespace folia {
 

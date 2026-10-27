@@ -7,7 +7,7 @@
 #endif
 
 import folia.core.command;
-import folia.core.utf;
+import folia.markdown.utf;
 
 namespace winrt::Folia::implementation
 {

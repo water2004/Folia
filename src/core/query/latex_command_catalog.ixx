@@ -2,7 +2,7 @@
 export module folia.core.latex_command_catalog;
 import std;
 export import folia.core.latex_completion;
-import folia.core.utf;
+import folia.markdown.utf;
 
 export namespace folia {
 

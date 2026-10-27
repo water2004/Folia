@@ -7,23 +7,23 @@
 
 #include "support/folia_test.hpp"
 
-import folia.core.ast;
-import folia.core.document;
+import folia.markdown.ast;
+import folia.markdown.document;
 import folia.core.document_edit;
 import folia.core.document_format;
 import folia.core.document_history;
-import folia.core.dialect;
+import folia.markdown.dialect;
 import folia.core.editor;
-import folia.core.instrumentation;
-import folia.core.parser;
-import folia.core.selection;
-import folia.core.serializer;
-import folia.core.text_edit;
+import folia.markdown.instrumentation;
+import folia.markdown.parser;
+import folia.markdown.selection;
+import folia.markdown.serializer;
+import folia.markdown.text_edit;
 
-import folia.core.block_source;
-import folia.core.inline_cst;
-import folia.core.inline_document;
-import folia.core.utf;
+import folia.markdown.block_source;
+import folia.markdown.inline_cst;
+import folia.markdown.inline_document;
+import folia.markdown.utf;
 #include "support/commonmark_projection.hpp"
 
 using namespace folia;

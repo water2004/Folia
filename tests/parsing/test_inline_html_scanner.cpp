@@ -5,17 +5,17 @@
 #include <vector>
 
 #include "support/folia_test.hpp"
-import folia.core.parser;
-import folia.core.ast;
-import folia.core.dialect;
-import folia.core.inline_cst;
-import folia.core.inline_document;
-import folia.core.inline_parser;
+import folia.markdown.parser;
+import folia.markdown.ast;
+import folia.markdown.dialect;
+import folia.markdown.inline_cst;
+import folia.markdown.inline_document;
+import folia.markdown.inline_parser;
 import folia.core.inline_source_edit;
-import folia.core.markdown_html;
-import folia.core.serializer;
-import folia.core.text_edit;
-import folia.core.utf;
+import folia.markdown.markdown_html;
+import folia.markdown.serializer;
+import folia.markdown.text_edit;
+import folia.markdown.utf;
 
 using namespace folia;
 using namespace boost::ut;

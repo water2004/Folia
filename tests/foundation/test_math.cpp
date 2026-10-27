@@ -1,7 +1,7 @@
 #include "support/folia_test.hpp"
 import folia.core.types;
 import folia.core.theme;
-import folia.core.utf;
+import folia.markdown.utf;
 import folia.core.render_model;
 import folia.core.math_renderer;
 

@@ -1,7 +1,7 @@
 #include "support/folia_test.hpp"
-import folia.core.container_source;
-import folia.core.ids;
-import folia.core.serializer_writer;
+import folia.markdown.container_source;
+import folia.markdown.ids;
+import folia.markdown.serializer_writer;
 
 using namespace folia;
 using namespace folia::serializer_detail;

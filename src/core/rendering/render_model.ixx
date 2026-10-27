@@ -3,17 +3,17 @@
 export module folia.core.render_model;
 import std;
 import folia.core.types;
-import folia.core.ids;
-import folia.core.dialect;
-import folia.core.image_dimension;
+import folia.markdown.ids;
+import folia.markdown.dialect;
+import folia.markdown.image_dimension;
 import folia.core.theme;
-import folia.core.outline;
-import folia.core.diagnostics;
-import folia.core.ast; // for AST contents reused during build (children)
-import folia.core.selection;
-import folia.core.text_edit;
+import folia.markdown.outline;
+import folia.markdown.diagnostics;
+import folia.markdown.ast; // for AST contents reused during build (children)
+import folia.markdown.selection;
+import folia.markdown.text_edit;
 import folia.core.source_style;
-import folia.core.block_source;
+import folia.markdown.block_source;
 export import folia.core.syntax_marker;
 
 export namespace folia {

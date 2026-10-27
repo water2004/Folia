@@ -2,11 +2,11 @@
 #include <vector>
 
 #include "support/folia_test.hpp"
-import folia.core.slug;
-import folia.core.outline;
-import folia.core.ast;
-import folia.core.ids;
-import folia.core.parser;
+import folia.markdown.slug;
+import folia.markdown.outline;
+import folia.markdown.ast;
+import folia.markdown.ids;
+import folia.markdown.parser;
 
 using namespace folia;
 using namespace boost::ut;

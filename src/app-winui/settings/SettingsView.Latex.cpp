@@ -4,7 +4,7 @@
 #include "localization/Localization.h"
 
 import folia.core.snippet_template;
-import folia.core.utf;
+import folia.markdown.utf;
 
 namespace winrt::Folia
 {

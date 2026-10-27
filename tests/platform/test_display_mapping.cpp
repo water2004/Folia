@@ -1,8 +1,8 @@
 #include "support/folia_test.hpp"
 
-import folia.core.ids;
-import folia.core.selection;
-import folia.core.text_edit;
+import folia.markdown.ids;
+import folia.markdown.selection;
+import folia.markdown.text_edit;
 import folia.platform.editor_display_mapping;
 
 using namespace boost::ut;

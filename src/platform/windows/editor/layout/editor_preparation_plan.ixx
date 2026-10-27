@@ -1,7 +1,7 @@
 // folia.platform.editor_preparation_plan — pure prepared-cache invalidation policy.
 export module folia.platform.editor_preparation_plan;
 import std;
-import folia.core.text_edit;
+import folia.markdown.text_edit;
 
 export namespace folia::platform::editor
 {

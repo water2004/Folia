@@ -6,10 +6,10 @@
 #include "editor/rendering/EditorContentPreparation.h"
 #include "editor/rendering/EditorMathPreview.h"
 
-import folia.core.instrumentation;
+import folia.markdown.instrumentation;
 
 import folia.core.command;
-import folia.core.utf;
+import folia.markdown.utf;
 
 using namespace boost::ut;
 using namespace winrt::Folia;

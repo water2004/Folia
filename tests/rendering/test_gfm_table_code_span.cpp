@@ -3,18 +3,18 @@
 #include <string>
 
 #include "support/folia_test.hpp"
-import folia.core.ast;
-import folia.core.dialect;
-import folia.core.inline_document;
-import folia.core.parser;
+import folia.markdown.ast;
+import folia.markdown.dialect;
+import folia.markdown.inline_document;
+import folia.markdown.parser;
 import folia.core.render_builder;
 import folia.core.render_model;
-import folia.core.serializer;
+import folia.markdown.serializer;
 import folia.core.theme;
-import folia.core.utf;
+import folia.markdown.utf;
 
-import folia.core.block_source;
-import folia.core.inline_cst;
+import folia.markdown.block_source;
+import folia.markdown.inline_cst;
 #include "support/commonmark_projection.hpp"
 
 using namespace folia;

@@ -1,7 +1,7 @@
 #include "support/folia_test.hpp"
 
 import folia.core.latex_completion;
-import folia.core.ids;
+import folia.markdown.ids;
 import folia.platform.editor_latex_completion_session;
 
 using namespace boost::ut;

@@ -4,15 +4,15 @@
 #include <string_view>
 
 #include "support/folia_test.hpp"
-import folia.core.ast;
-import folia.core.block_source;
-import folia.core.document;
-import folia.core.document_symbols;
-import folia.core.outline;
-import folia.core.parser;
+import folia.markdown.ast;
+import folia.markdown.block_source;
+import folia.markdown.document;
+import folia.markdown.document_symbols;
+import folia.markdown.outline;
+import folia.markdown.parser;
 import folia.core.render_builder;
 import folia.core.render_model;
-import folia.core.serializer;
+import folia.markdown.serializer;
 import folia.core.theme;
 
 using namespace folia;

@@ -6,15 +6,15 @@
 
 #include "support/folia_test.hpp"
 
-import folia.core.ast;
-import folia.core.dialect;
-import folia.core.inline_cst;
-import folia.core.inline_document;
-import folia.core.parser;
-import folia.core.block_source;
-import folia.core.utf;
-import folia.core.html_entities;
-import folia.core.serializer;
+import folia.markdown.ast;
+import folia.markdown.dialect;
+import folia.markdown.inline_cst;
+import folia.markdown.inline_document;
+import folia.markdown.parser;
+import folia.markdown.block_source;
+import folia.markdown.utf;
+import folia.markdown.html_entities;
+import folia.markdown.serializer;
 
 #include "support/commonmark_projection.hpp"
 
