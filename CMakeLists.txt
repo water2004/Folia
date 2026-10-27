@@ -54,6 +54,7 @@ endif()
 # Core library — pure C++, portable. Acceptance gate: no Windows dependency.
 # ---------------------------------------------------------------------------
 add_subdirectory(src/markdown)
+add_subdirectory(src/math/editor)
 
 add_library(folia_core STATIC)
 target_compile_features(folia_core PUBLIC cxx_std_23)
@@ -633,6 +634,12 @@ set(BOOST_UT_ENABLE_INSTALL OFF CACHE BOOL "Do not install vendored Boost.UT" FO
 add_subdirectory(third_party/ut EXCLUDE_FROM_ALL)
 
 enable_testing()
+add_executable(FoliaMathEditorTests tests/main.cpp tests/math/editor_syntax.cpp)
+target_compile_features(FoliaMathEditorTests PRIVATE cxx_std_23)
+set_target_properties(FoliaMathEditorTests PROPERTIES CXX_MODULE_STD ON)
+target_include_directories(FoliaMathEditorTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+target_link_libraries(FoliaMathEditorTests PRIVATE folia::math_editor Boost::ut_module)
+add_test(NAME FoliaMathEditorTests COMMAND FoliaMathEditorTests)
 add_executable(FoliaTests)
 target_compile_features(FoliaTests PRIVATE cxx_std_23)
 set_target_properties(FoliaTests PROPERTIES
@@ -855,7 +862,8 @@ target_sources(FoliaMathTests PRIVATE
 target_include_directories(FoliaMathTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 target_compile_definitions(FoliaMathTests PRIVATE
     FOLIA_MATH_FIXTURE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/math/fixtures")
-target_link_libraries(FoliaMathTests PRIVATE folia_math FoliaNativeMath Boost::ut_module)
+target_sources(FoliaMathTests PRIVATE tests/math/editor_scanner_conformance.cpp)
+target_link_libraries(FoliaMathTests PRIVATE folia_math folia::math_editor FoliaNativeMath Boost::ut_module)
 add_test(NAME FoliaMathTests COMMAND FoliaMathTests)
 add_executable(FoliaMathFontDump EXCLUDE_FROM_ALL
     tools/math-port/font-data-dump.cpp)

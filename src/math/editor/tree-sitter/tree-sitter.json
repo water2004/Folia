@@ -1,0 +1,4 @@
+{
+  "grammars": [{ "name": "folia_tex", "scope": "source.folia_tex", "path": ".", "file-types": ["folia-tex"] }],
+  "metadata": { "version": "0.1.0", "description": "Error-tolerant mathematical editing syntax for Folia", "license": "MIT" }
+}

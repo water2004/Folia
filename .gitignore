@@ -16,6 +16,7 @@ CMakeSettings.json
 .tools/
 .reference/
 tools/mathjax-bundle/node_modules/
+tools/math-editor-grammar/node_modules/
 tools/mermaid-bundle/node_modules/
 !Folia.sln
 !src/app-winui/Folia.vcxproj

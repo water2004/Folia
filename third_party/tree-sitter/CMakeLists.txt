@@ -1,0 +1,6 @@
+add_library(folia_tree_sitter_runtime STATIC runtime/lib.c)
+target_include_directories(folia_tree_sitter_runtime PUBLIC include PRIVATE runtime)
+set_target_properties(folia_tree_sitter_runtime PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED ON)
+if(MSVC)
+    target_compile_options(folia_tree_sitter_runtime PRIVATE /wd4244 /wd4996)
+endif()

@@ -1,0 +1,5 @@
+{
+  "name": "folia-math-editor-grammar-tools",
+  "private": true,
+  "devDependencies": { "tree-sitter-cli": "0.25.10" }
+}

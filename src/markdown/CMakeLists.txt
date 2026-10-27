@@ -1,10 +1,13 @@
 # Embed with add_subdirectory(src/markdown); no Folia root configuration needed.
+if(NOT TARGET folia_tree_sitter_runtime)
+    add_subdirectory(../../third_party/tree-sitter ${CMAKE_CURRENT_BINARY_DIR}/tree-sitter)
+endif()
 add_library(folia_tree_sitter_html STATIC
-    ../../third_party/tree-sitter/runtime/lib.c
     ../../third_party/tree-sitter/grammars/html_parser.c
     ../../third_party/tree-sitter/grammars/html_scanner.c)
 target_include_directories(folia_tree_sitter_html PRIVATE
     ../../third_party/tree-sitter/include ../../third_party/tree-sitter/runtime)
+target_link_libraries(folia_tree_sitter_html PRIVATE folia_tree_sitter_runtime)
 set_target_properties(folia_tree_sitter_html PROPERTIES C_STANDARD 11 C_STANDARD_REQUIRED ON)
 if(MSVC)
     target_compile_options(folia_tree_sitter_html PRIVATE /wd4244 /wd4996)
