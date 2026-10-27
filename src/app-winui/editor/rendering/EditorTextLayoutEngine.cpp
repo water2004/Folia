@@ -143,6 +143,7 @@ namespace winrt::Folia
         DisplayInlineText SliceDisplay(DisplayInlineText const& source, UINT32 start, UINT32 end)
         {
             DisplayInlineText result;
+            result.mathBrackets = source.mathBrackets;
             result.pendingMermaid = source.pendingMermaid;
             const auto sourceLength = static_cast<UINT32>(folia::utf16_len(source.text));
             start = (std::min)(start, sourceLength);

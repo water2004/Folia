@@ -193,6 +193,8 @@ namespace winrt::Folia
         {
             target.mathPreviews.push_back(std::move(preview));
         }
+        for (auto& math : source.mathSources) target.mathSources.push_back(std::move(math));
+        for (auto& bracket : source.mathBrackets) target.mathBrackets.push_back(std::move(bracket));
         for (auto& overlay : source.imageOverlays)
         {
             overlay.displayStart += offset;
@@ -246,6 +248,11 @@ namespace winrt::Folia
             return;
         }
         auto content = *semantic.content_range;
+        if (item.kind == folia::InlineRenderItem::Kind::Math) {
+            auto offset = content.start - item.source_span.source_range.start;
+            display.mathSources.push_back({semantic.source_text.substr(offset, content.length()),
+                {item.source_span.container_id, content}, {}});
+        }
         auto append = [&](folia::SourceRange range, bool marker, SyntaxIcon icon = SyntaxIcon::None) {
             auto offset = range.start - item.source_span.source_range.start;
             auto firstRange = display.ranges.size();

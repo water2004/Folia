@@ -177,6 +177,7 @@ namespace winrt::Folia
 {
     struct TreeSitterHighlighter::State
     {
+        folia::math::editor::SyntaxSession math;
         struct ParserDeleter
         {
             void operator()(TSParser* parser) const { ts_parser_delete(parser); }
@@ -219,6 +220,11 @@ namespace winrt::Folia
 
     TreeSitterHighlighter::TreeSitterHighlighter() : state(std::make_unique<State>()) {}
     TreeSitterHighlighter::~TreeSitterHighlighter() = default;
+
+    folia::math::editor::SyntaxAnalysis const& TreeSitterHighlighter::AnalyzeMath(std::u32string_view source)
+    {
+        return state->math.Update(source);
+    }
 
     std::vector<SyntaxHighlightRange> TreeSitterHighlighter::Highlight(std::string_view language, std::string_view source)
     {

@@ -551,7 +551,8 @@ namespace winrt::Folia
                 textLayoutEngine,
                 inlineImages,
                 mathJax,
-                svgNormalizer);
+                svgNormalizer,
+                treeSitter);
             if (prepared.table)
             {
                 for (auto const& span : block.special().table_cell_spans)
@@ -575,6 +576,7 @@ namespace winrt::Folia
             contentWidth,
             requestEmbedded,
             highPriority);
+        HighlightMathSources(prepared.display, caret, treeSitter);
         ApplyMermaidPresentation(
             prepared.display,
             block,

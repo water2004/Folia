@@ -177,6 +177,9 @@
     <ClInclude Include="editor\rendering\EditorDocumentRenderPass.h" />
     <ClInclude Include="editor\rendering\EditorRenderResources.h" />
     <ClInclude Include="editor\rendering\EditorPopupShadow.h" />
+    <ClInclude Include="editor\rendering\EditorMathSyntax.h" />
+    <ClInclude Include="editor\rendering\EditorCaretAnimation.h" />
+    <ClInclude Include="editor\interaction\EditorAnimationController.h" />
     <ClInclude Include="media\EditorGifDecoder.h" />
     <ClInclude Include="editor\rendering\EditorRenderCache.h" />
     <ClInclude Include="editor\rendering\EditorImageCache.h" />
@@ -633,6 +636,7 @@
     <ClCompile Include="editor\rendering\EditorInlineImageRenderer.cpp" />
     <ClCompile Include="editor\rendering\EditorTableBlockRenderer.cpp" />
     <ClCompile Include="editor\interaction\EditorFrameScheduler.cpp" />
+    <ClCompile Include="editor\interaction\EditorAnimationController.cpp" />
     <ClCompile Include="editor\interaction\EditorSelectionDrag.cpp" />
     <ClCompile Include="editor\interaction\EditorScrollController.cpp" />
     <ClCompile Include="editor\interaction\EditorTextInputController.cpp" />
@@ -679,6 +683,21 @@
     <ClCompile Include="media\TreeSitterHighlighter.cpp">
       <AdditionalIncludeDirectories>..\..\third_party\tree-sitter\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="..\math\editor\syntax.ixx">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ObjectFileName>$(IntDir)math_editor_syntax_module.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\math\editor\syntax.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <AdditionalIncludeDirectories>..\..\third_party\tree-sitter\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ObjectFileName>$(IntDir)math_editor_syntax.obj</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="..\math\editor\tree-sitter\src\parser.c">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <CompileAs>CompileAsC</CompileAs>
+      <AdditionalIncludeDirectories>..\..\third_party\tree-sitter\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ObjectFileName>$(IntDir)math_editor_parser.obj</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\third_party\tree-sitter\runtime\lib.c">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <CompileAs>CompileAsC</CompileAs>
@@ -707,6 +726,8 @@
     <ClCompile Include="MainWindow.Documents.cpp" />
     <ClCompile Include="MainWindow.Tabs.cpp" />
     <ClCompile Include="editor\rendering\EditorPopupShadow.cpp" />
+    <ClCompile Include="editor\rendering\EditorMathSyntax.cpp" />
+    <ClCompile Include="editor\rendering\EditorCaretAnimation.cpp" />
     <ClCompile Include="MainWindow.Folders.cpp" />
     <ClCompile Include="MainWindow.Shortcuts.cpp" />
     <ClCompile Include="MainWindow.Settings.cpp" />

@@ -22,7 +22,8 @@ namespace winrt::Folia
         EditorTextLayoutEngine& textLayoutEngine,
         EditorInlineImageRenderer& inlineImageRenderer,
         MathJaxRenderer& mathJax,
-        SvgNormalizer& svgNormalizer)
+        SvgNormalizer& svgNormalizer,
+        TreeSitterHighlighter& treeSitter)
     {
         auto const& special = block.special();
         auto modeledTable = special.row_count > 0 && special.column_count > 0 && !special.table_cells.empty();
@@ -61,6 +62,7 @@ namespace winrt::Folia
                     AppendGeneratedText(display, U"\u200B", {sourceSpan.container_id, sourceSpan.source_range.start, folia::TextAffinity::Downstream}, folia::InlineStyle::plain());
                     display.displayToSource.push_back({sourceSpan.container_id, sourceSpan.source_range.end, folia::TextAffinity::Downstream});
                 }
+                HighlightMathSources(display, caret, treeSitter);
                 auto wide = ToWide(display.text);
                 auto layout = textLayoutEngine.Create(wide, resources.textFormat.Get(), EditorTableCellContentWidth(tableWidth, table.columnCount));
                 auto cellTextHeight = styleSheet.body.lineHeight;

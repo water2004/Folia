@@ -62,6 +62,7 @@ namespace winrt::Folia::implementation
         SetDocumentCommandsVisible(!enabled);
         if (enabled)
         {
+            animationController.Focus(false);
             HideFindBar();
             if (!settingsView)
             {

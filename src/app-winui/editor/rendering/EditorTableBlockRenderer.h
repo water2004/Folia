@@ -54,7 +54,8 @@ namespace winrt::Folia
             EditorTextLayoutEngine& textLayoutEngine,
             EditorInlineImageRenderer& inlineImageRenderer,
             MathJaxRenderer& mathJax,
-            SvgNormalizer& svgNormalizer);
+            SvgNormalizer& svgNormalizer,
+            TreeSitterHighlighter& treeSitter);
 
         static void Paint(
             folia::RenderBlock const& block,

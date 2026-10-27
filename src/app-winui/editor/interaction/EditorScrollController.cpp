@@ -12,19 +12,13 @@ namespace winrt::Folia
         EditorSurfaceRenderer& value,
         winrt::Microsoft::UI::Xaml::Controls::Primitives::ScrollBar const& bar,
         winrt::Microsoft::UI::Xaml::Controls::ColumnDefinition const& valueColumn,
-        HWND windowHandle,
-        std::function<void()> renderCallback)
+        std::function<void()> requestFrameCallback)
     {
         Detach();
         renderer = &value;
         scrollBar = bar;
         column = valueColumn;
-        render = std::move(renderCallback);
-        frameScheduler.Attach(
-            scrollBar.DispatcherQueue(),
-            value.FrameLatencyWaitableObject(),
-            windowHandle,
-            [this](float elapsedSeconds) { return OnFrame(elapsedSeconds); });
+        requestFrame = std::move(requestFrameCallback);
         valueChangedToken = scrollBar.ValueChanged([this](auto const&, winrt::Microsoft::UI::Xaml::Controls::Primitives::RangeBaseValueChangedEventArgs const& args)
         {
             if (synchronizing || !renderer) return;
@@ -55,14 +49,13 @@ namespace winrt::Folia
     void EditorScrollController::Detach()
     {
         Stop();
-        frameScheduler.Detach();
         if (attached && scrollBar) scrollBar.ValueChanged(valueChangedToken);
         if (attached && scrollBar) scrollBar.Scroll(scrollToken);
         attached = false;
         renderer = nullptr;
         scrollBar = nullptr;
         column = nullptr;
-        render = {};
+        requestFrame = {};
     }
 
     void EditorScrollController::Sync()
@@ -148,7 +141,7 @@ namespace winrt::Folia
 
     void EditorScrollController::Start()
     {
-        frameScheduler.Start();
+        if (requestFrame) requestFrame();
     }
 
     void EditorScrollController::Stop()
@@ -157,10 +150,9 @@ namespace winrt::Folia
         selectionAutoScrollVelocity = 0.0f;
         updateSelectionDuringAutoScroll = {};
         if (renderer) renderer->SetScrollOffset(renderer->ScrollOffset());
-        frameScheduler.Stop();
     }
 
-    bool EditorScrollController::OnFrame(float elapsedSeconds)
+    bool EditorScrollController::AdvanceFrame(float elapsedSeconds)
     {
         if (!renderer) return false;
         auto active = false;
@@ -185,7 +177,6 @@ namespace winrt::Folia
             active = renderer->AdvanceScrollAnimation(
                 (std::clamp)(elapsedSeconds, 0.0f, 0.5f));
         }
-        if (render) render();
         if (!active)
         {
             selectionAutoScrollVelocity = 0.0f;

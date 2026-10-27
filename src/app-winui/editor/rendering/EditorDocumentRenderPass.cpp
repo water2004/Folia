@@ -8,6 +8,7 @@ namespace winrt::Folia
         EditorRenderResources& valueResources,
         EditorStyleSheet const& valueStyleSheet,
         EditorInteractionMap& valueInteractionMap,
+        EditorCaretAnimation& valueCaretAnimation,
         std::vector<D2D1_RECT_F>& valueNonInteractiveRegions,
         EditorInlineImageRenderer& valueInlineImages,
         EditorDocumentPainter& valueDocumentPainter,
@@ -17,6 +18,7 @@ namespace winrt::Folia
         : resources(valueResources),
           styleSheet(valueStyleSheet),
           interactionMap(valueInteractionMap),
+          caretAnimation(valueCaretAnimation),
           nonInteractiveRegions(valueNonInteractiveRegions),
           inlineImages(valueInlineImages),
           documentPainter(valueDocumentPainter),
@@ -263,14 +265,19 @@ namespace winrt::Folia
             draggedTableAction,
             tableDropIndex);
         if (!printMode) DrawSnippetPlaceholders(frame.snippetPlaceholders);
-        if (!printMode && selection.is_caret())
+        if (!printMode)
         {
-            if (auto rect = interactionMap.CaretBounds(caret, styleSheet.body.lineHeight))
+            auto rect = selection.is_caret() ? interactionMap.CaretBounds(caret, styleSheet.body.lineHeight) : std::nullopt;
+            auto visual = caretAnimation.Sample(rect, caret, scrollOffset, EditorCaretAnimation::Now(), frame.renderModel.revision);
+            if (visual.opacity > 0) {
+                resources.caretBrush->SetOpacity(visual.opacity);
                 resources.d2dContext->DrawLine(
-                    D2D1::Point2F(rect->left, rect->top),
-                    D2D1::Point2F(rect->left, rect->bottom),
+                    D2D1::Point2F(visual.bounds.left, visual.bounds.top),
+                    D2D1::Point2F(visual.bounds.left, visual.bounds.bottom),
                     resources.caretBrush.Get(),
-                    1.5f);
+                    styleSheet.editor.caret_width);
+                resources.caretBrush->SetOpacity(1);
+            }
         }
         // Paint after every document block: the preview never enters geometry,
         // line-breaking, selection mapping or table-row height calculation.

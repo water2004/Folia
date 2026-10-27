@@ -65,6 +65,19 @@ namespace winrt::Folia
             bool strikethrough = false;
             D2D1_COLOR_F foreground{0, 0, 0, 1};
         };
+        struct MathSource
+        {
+            std::u32string tex;
+            folia::TextSpan span;
+            // Block projections can include indentation/fences in source.
+            // Inline math is linear and leaves this projection empty.
+            std::vector<std::size_t> toSource;
+        };
+        struct MathBracket
+        {
+            folia::TextSpan span;
+            bool matched = false;
+        };
 
         struct ImageOverlay
         {
@@ -120,6 +133,8 @@ namespace winrt::Folia
         std::vector<InlineStyleRange> ranges;
         std::vector<MathOverlay> mathOverlays;
         std::vector<MathPreview> mathPreviews;
+        std::vector<MathSource> mathSources;
+        std::vector<MathBracket> mathBrackets;
         std::vector<ImageOverlay> imageOverlays;
         std::vector<MermaidOverlay> mermaidOverlays;
         std::vector<MermaidPreview> mermaidPreviews;
@@ -165,6 +180,7 @@ namespace winrt::Folia
     void ApplyIndentInlineObjects(IDWriteTextLayout* layout, std::vector<DisplayInlineText::IndentOverlay> const& overlays);
     void ApplyTaskCheckboxInlineObjects(IDWriteTextLayout* layout, std::vector<DisplayInlineText::TaskCheckboxOverlay> const& overlays);
     DisplayInlineText BuildMathPreviewText(DisplayInlineText::MathPreview const& preview);
+    void HighlightMathSources(DisplayInlineText& display, folia::TextPosition caret, TreeSitterHighlighter& highlighter);
     DisplayInlineText BuildDisplayInlineText(
         std::vector<folia::InlineRenderItem> const& items,
         folia::TextPosition caret,

@@ -48,6 +48,7 @@ namespace winrt::Folia
         ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> accentBrush;
         ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> previewBackgroundBrush, previewBorderBrush;
         EditorPopupShadow popupShadow;
+        ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> mathBracketBrush;
         EditorSyntaxIcons syntaxIcons;
         ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> codeBrush;
         ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> mathDecorationBrush;

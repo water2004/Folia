@@ -413,7 +413,8 @@ namespace winrt::Folia::implementation
     {
         UpdateTheme();
         editorRenderer.Initialize(EditorSurface());
-        scrollController.Attach(editorRenderer, EditorScrollBar(), EditorScrollBarColumn(), WindowHandle(), [this] { RenderEditorSurface(); });
+        scrollController.Attach(editorRenderer, EditorScrollBar(), EditorScrollBarColumn(), [this] { animationController.RequestFrame(); });
+        animationController.Attach(editorRenderer, scrollController, DispatcherQueue(), WindowHandle(), [this] { RenderEditorSurface(); });
         editorRenderer.SetInvalidateCallback([this] { RenderEditorSurface(); });
         RenderEditorSurface();
         EditorSurface().Focus(Microsoft::UI::Xaml::FocusState::Programmatic);
@@ -438,9 +439,11 @@ namespace winrt::Folia::implementation
         try
         {
             auto snippetPlaceholders = keyboardController.SnippetPlaceholders();
+            animationController.PrepareRender();
             auto frame = editorSession().RenderFrame();
             frame.snippetPlaceholders = snippetPlaceholders;
             editorRenderer.Render(frame);
+            animationController.Rendered();
             if (latexCompletionController.Active()) latexCompletionController.UpdatePosition();
             sidebarController.SyncViewport();
             codeLanguageController.Refresh();

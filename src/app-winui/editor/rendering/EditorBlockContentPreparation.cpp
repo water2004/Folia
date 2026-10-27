@@ -11,6 +11,10 @@ namespace winrt::Folia
         void AppendMathBlockSource(DisplayInlineText& display, folia::RenderBlock const& block)
         {
             auto const& special = block.special();
+            auto span = block.content_span;
+            if (!special.content_to_source.empty())
+                span.source_range = {special.content_to_source.front(), special.content_to_source.back()};
+            display.mathSources.push_back({special.tex, span, special.content_to_source});
             auto source = std::u32string_view{special.raw_source};
             auto append = [&](folia::SourceRange range, SyntaxIcon icon, bool marker) {
                 auto before = display.ranges.size();

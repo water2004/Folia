@@ -3,6 +3,7 @@
 #include "editor/session/EditorSession.h"
 #include "editor/rendering/EditorSurfaceRenderer.h"
 #include "editor/interaction/EditorScrollController.h"
+#include "editor/interaction/EditorAnimationController.h"
 #include "editor/interaction/EditorTextInputController.h"
 #include "editor/interaction/EditorPointerController.h"
 #include "editor/interaction/EditorKeyboardController.h"
@@ -96,6 +97,7 @@ namespace winrt::Folia::implementation
         winrt::Folia::FolderExplorerController folderExplorer;
         winrt::Folia::EditorSurfaceRenderer editorRenderer;
         winrt::Folia::EditorScrollController scrollController;
+        winrt::Folia::EditorAnimationController animationController;
         winrt::Folia::EditorTextInputController textInputController;
         winrt::Folia::EditorPointerController pointerController;
         winrt::Folia::EditorKeyboardController keyboardController;

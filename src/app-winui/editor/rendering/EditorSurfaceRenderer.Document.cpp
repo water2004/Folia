@@ -182,6 +182,7 @@ namespace winrt::Folia
             resources,
             styleSheet,
             interactionMap,
+            caretAnimation,
             nonInteractiveRegions,
             inlineImages,
             documentPainter,

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "editor/rendering/EditorSurfaceRenderer.h"
-#include "editor/interaction/EditorFrameScheduler.h"
 
 namespace winrt::Folia
 {
@@ -12,8 +11,7 @@ namespace winrt::Folia
             EditorSurfaceRenderer& renderer,
             winrt::Microsoft::UI::Xaml::Controls::Primitives::ScrollBar const& scrollBar,
             winrt::Microsoft::UI::Xaml::Controls::ColumnDefinition const& column,
-            HWND windowHandle,
-            std::function<void()> render);
+            std::function<void()> requestFrame);
         void Detach();
         void Sync();
         void SetWidth(float value);
@@ -22,18 +20,17 @@ namespace winrt::Folia
         void BeginSelectionAutoScroll(float velocityPixelsPerSecond, std::function<void()> updateSelection);
         void EndSelectionAutoScroll();
         void Stop();
+        bool AdvanceFrame(float elapsedSeconds);
 
     private:
         void Start();
-        bool OnFrame(float elapsedSeconds);
 
         EditorSurfaceRenderer* renderer = nullptr;
         winrt::Microsoft::UI::Xaml::Controls::Primitives::ScrollBar scrollBar{ nullptr };
         winrt::Microsoft::UI::Xaml::Controls::ColumnDefinition column{ nullptr };
-        std::function<void()> render;
+        std::function<void()> requestFrame;
         winrt::event_token valueChangedToken{};
         winrt::event_token scrollToken{};
-        EditorFrameScheduler frameScheduler;
         bool attached = false;
         bool synchronizing = false;
         bool scrollBarDragging = false;

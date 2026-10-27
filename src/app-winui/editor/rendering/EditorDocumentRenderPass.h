@@ -10,6 +10,7 @@ import folia.platform.editor_interaction;
 #include "editor/rendering/EditorPreparedDocument.h"
 #include "editor/rendering/EditorRenderResources.h"
 #include "editor/rendering/EditorStyleSheet.h"
+#include "editor/rendering/EditorCaretAnimation.h"
 #include "editor/session/EditorRenderFrame.h"
 
 namespace winrt::Folia
@@ -25,6 +26,7 @@ namespace winrt::Folia
             EditorRenderResources& resources,
             EditorStyleSheet const& styleSheet,
             EditorInteractionMap& interactionMap,
+            EditorCaretAnimation& caretAnimation,
             std::vector<D2D1_RECT_F>& nonInteractiveRegions,
             EditorInlineImageRenderer& inlineImages,
             EditorDocumentPainter& documentPainter,
@@ -57,6 +59,7 @@ namespace winrt::Folia
         EditorRenderResources& resources;
         EditorStyleSheet const& styleSheet;
         EditorInteractionMap& interactionMap;
+        EditorCaretAnimation& caretAnimation;
         std::vector<D2D1_RECT_F>& nonInteractiveRegions;
         EditorInlineImageRenderer& inlineImages;
         EditorDocumentPainter& documentPainter;

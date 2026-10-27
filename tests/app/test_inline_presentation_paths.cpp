@@ -5,6 +5,7 @@
 #include "editor/rendering/EditorDocumentRenderPass.h"
 #include "editor/rendering/EditorSurfaceRenderer.h"
 #include "editor/rendering/EditorContentGeometry.h"
+import folia.markdown.instrumentation;
 
 namespace {
     using namespace boost::ut;
@@ -19,8 +20,12 @@ namespace {
         SvgNormalizer normalizer;
         TreeSitterHighlighter syntax;
         EditorInteractionMap interaction;
+        EditorCaretAnimation caretAnimation;
         std::vector<D2D1_RECT_F> mathRects;
         std::vector<D2D1_COLOR_F> mathColors;
+        std::size_t mathSourceCount = 0;
+        std::vector<DisplayInlineText::MathBracket> mathBrackets;
+        std::vector<InlineStyleRange> mathSyntax;
         ::Microsoft::WRL::ComPtr<ID2D1Bitmap1> target;
         float width = EditorDocumentContentWidth(600, sheet.horizontalPadding);
 
@@ -35,12 +40,13 @@ namespace {
 
         std::vector<std::uint32_t> Paint(EditorSession& session,
             std::span<const winrt::Folia::detail::EditorSearchHighlight> highlights = {}, bool paintSvg = true,
-            bool showSelection = false) {
+            bool showSelection = false, bool paintMatchingBrackets = true) {
             auto frame = session.RenderFrame();
             if (frame.materializeBlocks) frame.materializeBlocks(0, frame.renderModel.blocks.size());
             frame.searchHighlights = highlights;
             auto selection = showSelection ? frame.selection : folia::TextSelection{};
             interaction = {}; mathRects.clear(); mathColors.clear();
+            mathSourceCount = 0; mathBrackets.clear(); mathSyntax.clear();
             std::vector<D2D1_RECT_F> nonInteractive;
             EditorTextLayoutEngine engine(resources, sheet);
             EditorSvgPainter svg(resources, cache);
@@ -51,6 +57,16 @@ namespace {
                 painter, math, mermaid, normalizer, syntax, selection.active, width, true, true, false, 0, 0);
             EditorPreparedDocument document;
             for (auto const& block : frame.renderModel.blocks) document.blocks.push_back(preparer.Prepare(block, true, true));
+            auto collectSyntax = [&](auto const& display) {
+                mathSourceCount += display.mathSources.size();
+                mathBrackets.insert(mathBrackets.end(), display.mathBrackets.begin(), display.mathBrackets.end());
+                if (!display.mathSources.empty()) for (auto const& range : display.ranges)
+                    if (range.syntax != SyntaxHighlightKind::None) mathSyntax.push_back(range);
+            };
+            for (auto const& block : document.blocks) {
+                collectSyntax(block.display);
+                if (block.table) for (auto const& display : block.table->displays) collectSyntax(display);
+            }
             math.WaitForIdle();
             std::vector<EditorBlockGeometryIndex::Entry> geometry;
             for (std::size_t i = 0; i < document.blocks.size(); ++i) {
@@ -58,6 +74,10 @@ namespace {
                 geometry.push_back({0, document.blocks[i].height, 8});
             }
             document.geometry.Reset(std::move(geometry), 20);
+            if (!paintMatchingBrackets) for (auto& block : document.blocks) {
+                block.display.mathBrackets.clear();
+                if (block.table) for (auto& display : block.table->displays) display.mathBrackets.clear();
+            }
             std::vector<std::uint64_t> visibleIds;
             for (auto const& block : document.blocks) {
                 for (auto const& overlay : block.display.mathOverlays) visibleIds.push_back(overlay.fragment.renderId);
@@ -66,7 +86,7 @@ namespace {
             }
             math.SetVisibleSvgIds(visibleIds);
             math.WaitForIdle();
-            EditorDocumentRenderPass pass(resources, sheet, interaction, nonInteractive, images, painter,
+            EditorDocumentRenderPass pass(resources, sheet, interaction, caretAnimation, nonInteractive, images, painter,
                 [&](auto const& fragment, auto origin, auto color, float scale) {
                     mathRects.push_back({origin.x, origin.y, origin.x + fragment.width * scale, origin.y + fragment.height * scale});
                     mathColors.push_back(color);
@@ -118,6 +138,129 @@ namespace {
     };
 
     suite inline_presentation_paths = [] {
+        "math editing highlights CST source and matching brackets across content containers"_test = [] {
+            int caseIndex = 0;
+            for (auto source : {L"😀 $\\frac{α}{中}$", L"# $\\frac{a}{b}$", L"> $\\frac{a}{b}$",
+                    L"- $\\frac{a}{b}$", L"- [ ] $\\frac{a}{b}$", L"> [!NOTE]\n> $\\frac{a}{b}$",
+                    L"| math |\n| --- |\n| $\\frac{a}{b}$ |", L"ref[^n]\n\n[^n]: $\\frac{a}{b}$",
+                    L"$$\n\\frac{a}{b}\n$$", L"$\\frac{a$"}) {
+                EditorSession session;
+                session.SetText(source);
+                auto frame = session.RenderFrame();
+                if (frame.materializeBlocks) frame.materializeBlocks(0, frame.renderModel.blocks.size());
+                std::optional<folia::TextPosition> caret;
+                auto inspect = [&](auto const& items) {
+                    for (auto const& item : items) if (item.kind == folia::InlineRenderItem::Kind::Math) {
+                        if (auto content = item.special().semantic().content_range)
+                            caret = folia::TextPosition{item.source_span.container_id, content->start + 6, folia::TextAffinity::Downstream};
+                    }
+                };
+                auto visit = [&](auto&& self, folia::RenderBlock const& block) -> void {
+                    inspect(block.inline_items);
+                    for (auto const& cell : block.special().table_cells) inspect(cell);
+                    if (block.kind == folia::RenderBlockKind::Math) {
+                        auto const& positions = block.special().content_to_source;
+                        caret = folia::TextPosition{block.id, positions.empty() ? block.content_span.source_range.start + 6 : positions.at(6),
+                            folia::TextAffinity::Downstream};
+                    }
+                    for (auto const& child : block.child_blocks) self(self, child);
+                };
+                for (auto const& block : frame.renderModel.blocks) visit(visit, block);
+                expect(caret.has_value()) << "CST math source in context " << caseIndex;
+                if (!caret) { ++caseIndex; continue; }
+                session.SetSelection(folia::TextSelection::caret(*caret));
+                auto before = session.TextUtf8();
+                NativeInlineFrame native;
+                auto pixels = native.Paint(session, {}, true, true);
+                expect(native.mathSourceCount == 1_u) << "math source in context " << caseIndex;
+                expect(std::ranges::any_of(native.mathSyntax, [](auto const& range) { return range.syntax == SyntaxHighlightKind::Function; }));
+                expect(!native.mathBrackets.empty()) << "brackets in context " << caseIndex;
+                bool incomplete = caseIndex == 9;
+                expect(native.mathBrackets.size() == (incomplete ? std::size_t{1} : std::size_t{2}));
+                for (auto const& bracket : native.mathBrackets) expect(bracket.matched == !incomplete);
+                expect(session.TextUtf8() == before);
+                if (caseIndex == 0) native.Save(std::filesystem::path(__FILE__).parent_path().parent_path().parent_path()
+                    / "build/tests/math-editor-source.png", pixels);
+                ++caseIndex;
+            }
+        };
+
+        "math editing never highlights escaped dollar text as a formula"_test = [] {
+            EditorSession session;
+            session.SetText(L"literal \\$ and \\frac{a}{b}");
+            NativeInlineFrame native;
+            native.Paint(session);
+            expect(native.mathSourceCount == 0_u);
+            expect(native.mathBrackets.empty());
+        };
+
+        "math editing highlighting follows source transactions and exact undo redo"_test = [] {
+            EditorSession session;
+            session.SetText(L"before $\\frac{a}{b}$ after");
+            auto frame = session.RenderFrame();
+            if (frame.materializeBlocks) frame.materializeBlocks(0, frame.renderModel.blocks.size());
+            auto const& items = frame.renderModel.blocks.front().inline_items;
+            auto math = std::ranges::find(items, folia::InlineRenderItem::Kind::Math, &folia::InlineRenderItem::kind);
+            expect(math != items.end());
+            if (math == items.end()) return;
+            auto content = math->special().semantic().content_range;
+            expect(content.has_value());
+            if (!content) return;
+            session.SetSelection(folia::TextSelection::caret({math->source_span.container_id, content->start + 6, folia::TextAffinity::Downstream}));
+            auto original = session.TextUtf8();
+            auto selection = session.Selection();
+            NativeInlineFrame native;
+            auto verify = [&] {
+                native.Paint(session, {}, true, true);
+                auto counters = folia::read_core_operation_counters();
+                expect(counters.full_document_parses == 0_u);
+                expect(counters.full_document_serializations == 0_u);
+                expect(native.mathSourceCount == 1_u);
+                expect(!native.mathSyntax.empty());
+            };
+            folia::reset_core_operation_counters();
+            expect(session.ExecuteCommand(folia::Command::InsertText(U"1+\\alpha")));
+            verify();
+            auto edited = session.TextUtf8();
+            auto editedSelection = session.Selection();
+            folia::reset_core_operation_counters();
+            expect(session.ExecuteCommand(folia::Command{folia::CommandKind::Undo}));
+            verify();
+            expect(session.TextUtf8() == original);
+            expect(session.Selection() == selection);
+            folia::reset_core_operation_counters();
+            expect(session.ExecuteCommand(folia::Command{folia::CommandKind::Redo}));
+            verify();
+            expect(session.TextUtf8() == edited);
+            expect(session.Selection() == editedSelection);
+        };
+
+        "math bracket boxes stay subtle and use their own theme colors"_test = [] {
+            for (auto theme : {folia::Theme::Light, folia::Theme::Dark}) {
+                EditorSession session;
+                session.SetText(L"$\\frac{a}{b}$\n");
+                auto frame = session.RenderFrame();
+                auto owner = frame.renderModel.blocks.front().id;
+                session.SetSelection(folia::TextSelection::caret({owner, 6, folia::TextAffinity::Downstream}));
+                NativeInlineFrame native(theme);
+                auto plain = native.Paint(session, {}, true, true, false);
+                auto marked = native.Paint(session, {}, true, true);
+                expect(native.mathBrackets.size() == 2_u);
+                std::size_t changed = 0;
+                int maximumDelta = 0;
+                for (std::size_t i = 0; i < plain.size(); ++i) {
+                    changed += plain[i] != marked[i];
+                    for (auto shift : {0, 8, 16}) maximumDelta = (std::max)(maximumDelta,
+                        std::abs(static_cast<int>((plain[i] >> shift) & 255) - static_cast<int>((marked[i] >> shift) & 255)));
+                }
+                expect(changed > 5_u);
+                expect(maximumDelta <= (theme == folia::Theme::Light ? 75 : 130))
+                    << "matching brackets must not borrow the selection fill or bright accent border";
+                auto directory = std::filesystem::path(__FILE__).parent_path().parent_path().parent_path() / "build/tests";
+                native.Save(directory / (theme == folia::Theme::Light ? "math-brackets-light.png" : "math-brackets-dark.png"), marked);
+            }
+        };
+
         "code background contains terminal empty rows through enter undo and redo"_test = [] {
             int caseIndex = 0;
             for (auto source : {L"```cpp\n1111111\n111111\n```\n", L"```cpp\n\n```\n",

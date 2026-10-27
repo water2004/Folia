@@ -75,6 +75,10 @@ namespace winrt::Folia::implementation
 
     void MainWindow::RegisterWindowHandlers()
     {
+        Activated([this](auto const&, Microsoft::UI::Xaml::WindowActivatedEventArgs const& args) {
+            animationController.Focus(args.WindowActivationState() != Microsoft::UI::Xaml::WindowActivationState::Deactivated
+                && EditorSurface().FocusState() != Microsoft::UI::Xaml::FocusState::Unfocused && !settingsMode);
+        });
         closingHandler.Attach(AppWindow(),
             [this](auto const&, Microsoft::UI::Windowing::AppWindowClosingEventArgs const& args)
             {
@@ -90,6 +94,7 @@ namespace winrt::Folia::implementation
         Closed([this](auto const&, auto const&)
         {
             windowClosed = true;
+            animationController.Detach();
             closingHandler.Reset();
             if (latexCommandCatalog) latexCommandCatalog->Flush();
             if (settingsView) settingsView->Detach();
@@ -289,11 +294,13 @@ namespace winrt::Folia::implementation
 
         EditorSurface().GotFocus([this](auto const&, auto const&)
         {
+            animationController.Focus(true);
             textInputController.FocusEnter();
         });
 
         EditorSurface().LostFocus([this](auto const&, auto const&)
         {
+            animationController.Focus(false);
             pointerController.CancelPointerInteraction();
             textInputController.FocusLeave();
         });

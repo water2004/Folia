@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "EditorDocumentPainter.h"
 #include "EditorTextLayoutEngine.h"
+#include "EditorMathSyntax.h"
 
 import folia.markdown.callout;
 import folia.markdown.utf;
@@ -12,6 +13,7 @@ namespace winrt::Folia
     {
         if (!layout) return;
         DrawInlinePresentationBackgrounds(resources, styleSheet, layout, origin, display.ranges);
+        PaintMathBrackets(resources, styleSheet, layout, origin, display, mapping);
         DrawSyntaxMarkers(layout, origin, display);
         DrawSelection(layout, origin, mapping);
         DrawSearchHighlights(layout, origin, mapping);

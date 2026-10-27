@@ -12,6 +12,7 @@ import folia.platform.editor_scroll_state;
 #include "editor/rendering/EditorMathPreparation.h"
 #include "editor/rendering/EditorRenderCache.h"
 #include "editor/rendering/EditorRenderResources.h"
+#include "editor/rendering/EditorCaretAnimation.h"
 #include "export/EditorPdfExportTypes.h"
 
 namespace winrt::Folia
@@ -85,6 +86,9 @@ namespace winrt::Folia
         float MaximumScrollOffset() const;
         float ViewportHeight() const;
         HANDLE FrameLatencyWaitableObject() const;
+        void FocusCaret(bool focused) { caretAnimation.Focus(focused); }
+        void ConfigureCaret(bool animations, double blinkHalfPeriod) { caretAnimation.Configure(styleSheet.editor, animations, blinkHalfPeriod); }
+        EditorCaretFrame const& CaretAnimationFrame() const { return caretAnimation.Frame(); }
         bool ScrollToPosition(folia::TextPosition position, EditorScrollAlignment alignment = EditorScrollAlignment::Nearest);
 
     private:
@@ -126,6 +130,7 @@ namespace winrt::Folia
         std::uint64_t themeRevision = 1;
         EditorStyleSheet styleSheet = CreateEditorStyleSheet(themeProfile);
         EditorInteractionMap interactionMap;
+        EditorCaretAnimation caretAnimation;
         std::vector<D2D1_RECT_F> nonInteractiveRegions;
         std::optional<D2D1_RECT_F> inlineMathPreviewBounds;
         std::unique_ptr<EditorPreparedDocument> preparedDocument;

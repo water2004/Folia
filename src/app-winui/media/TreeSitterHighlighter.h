@@ -1,4 +1,5 @@
 #pragma once
+import folia.math.editor.syntax;
 
 namespace winrt::Folia
 {
@@ -33,6 +34,7 @@ namespace winrt::Folia
         TreeSitterHighlighter& operator=(TreeSitterHighlighter const&) = delete;
 
         std::vector<SyntaxHighlightRange> Highlight(std::string_view language, std::string_view source);
+        folia::math::editor::SyntaxAnalysis const& AnalyzeMath(std::u32string_view source);
         void Clear();
 
     private:

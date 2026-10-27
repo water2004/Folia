@@ -51,6 +51,7 @@ namespace winrt::Folia
         previewBackgroundBrush = nullptr;
         previewBorderBrush = nullptr;
         popupShadow.Reset();
+        mathBracketBrush.Reset();
         syntaxIcons.Reset();
         codeBrush = nullptr;
         mathDecorationBrush = nullptr;
@@ -253,6 +254,7 @@ namespace winrt::Folia
             auto border = styleSheet.previewBorderColor;
             winrt::check_hresult(d2dContext->CreateSolidColorBrush(background, previewBackgroundBrush.GetAddressOf()));
             winrt::check_hresult(d2dContext->CreateSolidColorBrush(border, previewBorderBrush.GetAddressOf()));
+            winrt::check_hresult(d2dContext->CreateSolidColorBrush(styleSheet.accentColor, mathBracketBrush.GetAddressOf()));
             winrt::check_hresult(d2dContext->CreateSolidColorBrush(styleSheet.mutedColor, mutedBrush.GetAddressOf()));
             winrt::check_hresult(d2dContext->CreateSolidColorBrush(styleSheet.lineNumberColor, lineNumberBrush.GetAddressOf()));
             winrt::check_hresult(d2dContext->CreateSolidColorBrush(styleSheet.lineNumberBackgroundColor, lineNumberBackgroundBrush.GetAddressOf()));
