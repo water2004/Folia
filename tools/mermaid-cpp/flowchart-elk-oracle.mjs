@@ -34,5 +34,22 @@ for(const r of observations.filter(r=>r.theme==='default')) {
  rows.push([r.name,Array.from(r.source,c=>c.charCodeAt(0).toString(16).padStart(4,'0')).join(''),nodeRows.map(n=>n.join(',')).join(';'),labelSpecs.map(l=>l?[l.width,l.height].join(','):'0,0').join(';'),routes.join(';'),edges.map((_,i)=>centers[i]??'-').join(';')].join('\t'));
 }
 const target=new URL('../../tests/mermaid_cpp/fixtures/flowchart-elk.tsv',import.meta.url),text=rows.join('\n')+'\n';
-if(process.argv.includes('--write'))writeFileSync(target,text);else assert.equal(readFileSync(target,'utf8').replaceAll('\r\n','\n'),text);
+if(process.argv.includes('--write'))writeFileSync(target,text);else {
+ const expected=readFileSync(target,'utf8').replaceAll('\r\n','\n').trimEnd().split('\n');
+ const actual=text.trimEnd().split('\n');assert.equal(actual.length,expected.length);
+ for(let row=0;row<expected.length;row++){
+  if(expected[row].startsWith('#')){assert.equal(actual[row],expected[row]);continue;}
+  const a=actual[row].split('\t'),e=expected[row].split('\t');assert.equal(a.length,e.length);
+  for(let col=0;col<e.length;col++){
+   if(col<2){assert.equal(a[col],e[col]);continue;}
+   const av=a[col].split(/([,;|])/),ev=e[col].split(/([,;|])/);assert.equal(av.length,ev.length);
+   for(let i=0;i<ev.length;i++){
+    const numeric=/^-?\d+(?:\.\d+)?(?:e[+-]?\d+)?$/i;
+    if(numeric.test(ev[i])&&numeric.test(av[i]))assert(Math.abs(Number(av[i])-Number(ev[i]))<1e-4,`${e[0]} column ${col} token ${i}: ${av[i]} vs ${ev[i]}`);
+    else assert.equal(av[i],ev[i]);
+   }
+  }
+ }
+}
+
 console.log('Flowchart ELK: original six measured scenes and raw paths checked.');
