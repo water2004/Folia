@@ -2,14 +2,17 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-10-28，0.5.3已发布）
+## 当前 checkpoint（2026-10-28，修复0.5.3标签拖动回归）
 
-- **0.5.3已正式发布**：版本/标签35e56265，master与v0.5.3已推送。现有CI40577471717/job122447644967全部成功（Release构建、真实startup/close、MSI、校验和、发布）。Release：https://github.com/water2004/Folia/releases/tag/v0.5.3 。MSI为53,722,497字节，已下载至build/releases/0.5.3并验证SHA256为2ca50713200c8f5f5769c35b172ff5dbfac07b15fe2e686500a9c9625a889a35，与发布附件一致。当前请求已完成；无待续构建/发布步骤，不移动标签。
-- 本地提交：06fa7fb2重载、8d746851数学浮层、3409c654容错TeX语法、a53e526a主题、314f3e6b高亮/光标、344895cb会话转移、a28e5209源码历史、c42a924d原生标签跨窗口。已随0.5.3推送。
-- 本轮五项全部实现：磁盘变更重载遮罩；数学高亮/括号；原字号长公式浮层/柔和阴影；平滑光标/渐变闪烁；标签拖出独立窗口/跨窗口移入。
-- 最终全通过：core **764/500069**（tab-source-history-core-all.log），platform **84/4249**（tab-source-history-platform.log），controller **134/18718**（tab-transfer-app-final-all.log），真实WinUI **19/875**（tab-transfer-complete-visual.log）。日志均 build/tag-layout/。
-- Debug构建 tab-input-focus-build.log 成功，候选 build/app-winui/bin/x64/Debug/Folia.exe。真实进程激活 tab-transfer-complete-activation.log 通过（Unicode/相对路径、同进程4窗口、显式独立进程、全部exit0）；startup正常关闭 tab-startup-final.log 3次、最终修改后 tab-input-focus-startup.log 1次均通过。没有手工鼠标拖动验证；Release/MSI已由本次CI验证。
-- 无活跃agents、构建、采样句柄。不开agents/CUA，不关用户窗口，native串行最多4workers；测试只清理自己的进程。
+- 用户报告两个空窗口合并崩溃、合并后切标签闪窗、拉出空文档。本轮仅授权修复，版本保持0.5.3，不重新发布/移动既有标签；不开agents/CUA、不关用户窗口、native串行≤4。
+- 新证据推翻此前“同TabViewItem迁移/NewWindowId可靠”的结论：实际DLL标记源码693f472aeaf89c6dff66256ee6fcd453e5d553b8的TabView.h/.cpp中，TabTearOutRequested.NewWindowId仅默认初始化从未赋值；TabViewListView缓存原parent且跨窗不刷新。SDK还在普通点击预建并Show/Hide窗口（官方issue10155）。源码证据build/tag-layout/TabView-installed.{cpp,h}、TabViewListView-installed.cpp、TabViewItem-installed.cpp。
+- 已完成修复：TabItemsSource改为稳定boxed文档id，TabItemTemplate在每个窗口创建本地控件，不跨XamlRoot搬UI；原session/controller/history/cache仍原样转移。用args.Items查当前owner，每次gesture在DocumentTab记weak host、原move-loop的ExitedMoveSize清理，单页原窗口拖动也覆盖。预建窗口DWM cloak、不进switchers/noactivate，实际Transfer后才恢复展示。
+- 初次测试的新代码startup崩溃已定向定位并修正：InputNonClientPointerSource与AppWindow一样不支持弱引用，auto_revoker会崩；改RAII强source/token订阅。tab-data-subscription-startup.log真实startup/close通过。不是用户原崩溃根因，不混淆。
+- 已验：Debug最终构建tab-selection-boundary-build.log通过；完整visual **25项946断言**（tab-regression-final-visual.log、对应-stdout.log），3次真实startup/close全exit0（tab-regression-final-startup.log），真实多窗口激活/Unicode/相对路径/独立进程全过（tab-regression-final-activation.log）。包含未加载目标、空页合并/正常关闭源窗、同gesture反复合并拆出、click-only cloak/switchers、原会话/history/viewport、duplicate拒绝。
+- 选中标签原生排序另有可复现失败：SelectionChanged→ActivateDocument→RefreshDocumentTabs反向修改集合，顺序无法一致（tab-selected-reorder-before.log超时）。已分离SelectDocumentTab（仅选择）与模型结构变化后的RefreshDocumentTabs；定向after 1项4断言通过，再跑上述全套成功。旧直接Transfer空页/未加载target本来也过，不能把它当原生协议已覆盖。
+- 本轮修复和测试已完成，代码提交22bea8fe（本地，未推送）。Release/MSI成功（tab-regression-msi.log），内置真实startup/close exit0；本地候选 build/installer/bin/Folia-0.5.3-x64.msi，53,689,716字节，SHA256 d3c7eee4ab017cd17073db71a201a9f65ef25d3422e5a8d65766cc4d37ae1fb6。未安装、未替换线上Release，版本保持0.5.3。无活跃agents/build句柄；未做真实鼠标输入。当前无剩余实现/构建步骤；未来收到新问题从本checkpoint接续，不重做已完成广泛测试。
+- 用户真实安装版10:46崩溃记录0xc000027b、WER8000ffff；转储C:/Users/think book/AppData/Local/CrashDumps/Folia.exe.52828.dmp。缺stowed异常指针内存，未证明具体异常调用；不冒称确定根因。
+- 0.5.3已正式发布且不改标签：35e56265，CI40577471717/job122447644967成功，Release https://github.com/water2004/Folia/releases/tag/v0.5.3 ，MSI53,722,497字节，SHA256 2ca50713200c8f5f5769c35b172ff5dbfac07b15fe2e686500a9c9625a889a35。历史全套基线core764/500069、platform84/4249、controller134/18718、visual19/875。
 
 ## 本轮实现与已解决问题
 
@@ -17,8 +20,8 @@
 - 数学浮层与正文共享CreateFlow/PositionMath/PaintMath，按窗口可用宽度原字号自然换行，**不缩放、不内部滚动**。明确SVG intrinsic/paint尺寸契约修复片段重叠；单个vector mask/shadow effect，7主题mathPreview提供柔和阴影。用户原式与锁定MathJax4.1.3完全一致（native-3/source-3.svg）。
 - 独立folia::math_editor：共享Tree-sitter runtime、容错增量TeX语法，UTF32 API/UTF8 tree/RAII；仅词法/括号/left-right/环境，不复制严格MML parser或宏求值，不加载字体。UI只用CST数学source span和SourceDisplayIndex转UTF16，无dollar扫描/第二坐标。9容器、Unicode、不完整TeX、编辑撤销零全文操作已验；原生6/14839、TexScanner对照1/36、生成可复现通过。外层未闭合dollar未单独覆盖。
 - 括号保留用户指定**淡背景+细边框**，不改下划线/选区色/蓝色强调；主题editor字段，明暗像素测试已验。光标共享EditorFrameScheduler；静止只用单次blink timer，移动/fade持续帧，滚动直接跟随offset，真实selection/IME不变，尊重系统动画。
-- 跨窗口现行设计见 docs/workspace-windows.md。同一session/controller/TabViewItem移动，保留dirty/history/selection/viewport/math cache。Presentation/RebindPresentation只换窗口callbacks，不能重置savedContentState/reloadState；process唯一session id，同路径不同会话拒绝。TransferTab按值持shared_ptr，不引用即将erase的map元素。
-- Native tear-out按args.NewWindowId找目标，WinUI负责拖动结束后空源窗口关闭，不提前Close。AppInstance异步重定向支持普通启动同进程多窗口；标准PropertySet按值带绝对路径，key隔离exe完整路径。App::Current经自实现IXamlMetadataProvider（Application为composable base，不能get_self<IApplication>）。
+- 跨窗口现行设计见 docs/workspace-windows.md。同一session/controller/稳定数据item移动，UI控件留在各自窗口，保留dirty/history/selection/viewport/math cache。Presentation/RebindPresentation只换窗口callbacks，不能重置savedContentState/reloadState；process唯一session id，同路径不同会话拒绝。TransferTab按值持shared_ptr，不引用即将erase的map元素。
+- 历史结论已被实际SDK源码推翻，不能按args.NewWindowId找目标；按gesture host跟随数据item，WinUI负责拖动结束后空源窗口关闭，不提前Close。AppInstance异步重定向支持普通启动同进程多窗口；标准PropertySet按值带绝对路径，key隔离exe完整路径。App::Current经自实现IXamlMetadataProvider（Application为composable base，不能get_self<IApplication>）。
 - 真关闭异常：晚到PointerExited裸this访问已释放surface，0xc0000005。统一WindowEvent弱owner门控、分发期间持强owner、Closed后丢弃，renderer/frame同样受生命周期约束；证据tab-close-{focused,stack-focused}/run-1。不在pointer controller堆释放补丁，不能冒称旧0.5.1CI已证明同根因。
 - 源码Undo/Redo行id漂移：过粗的历史块投影丢未变行，minimal_source_replacement只更新真实变化范围。保持块事务、不加源码快照/旧行缓存；10轮exact selection/line id与零全文操作通过。
 - CoreText重绑后若surface仍聚焦且HWND foreground，显式恢复context，不能等待不会重发的GotFocus。500段长文转移后pump200ms验证viewport。
