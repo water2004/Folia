@@ -75,7 +75,7 @@ namespace winrt::Folia::implementation {
         if (settingsMode) SetSettingsMode(false);
         auto previous = workspaceDocuments.Active();
         if (previous == document) {
-            RefreshDocumentTabs();
+            SelectDocumentTab();
             if (!document->loaded) LoadWorkspaceDocument(document);
             return;
         }
@@ -114,7 +114,7 @@ namespace winrt::Folia::implementation {
         activeSearchMatch.reset();
         UpdateSourceModeUi();
         UpdateDocumentInfo();
-        RefreshDocumentTabs();
+        SelectDocumentTab();
         RenderEditorSurface();
         if (document->viewportPosition) {
             editorRenderer.ScrollToPosition(*document->viewportPosition, winrt::Folia::EditorScrollAlignment::Start);
@@ -133,6 +133,7 @@ namespace winrt::Folia::implementation {
         textInputController.FocusLeave();
         auto document = workspaceDocuments.New();
         ActivateDocument(document->id);
+        RefreshDocumentTabs();
         EditorSurface().Focus(FocusState::Programmatic);
     }
 
@@ -153,6 +154,7 @@ namespace winrt::Folia::implementation {
             auto previous = workspaceDocuments.Active();
             auto result = workspaceDocuments.Open(std::move(path), mode);
             ActivateDocument(result.document->id);
+            RefreshDocumentTabs();
             if (result.replaced) {
                 if (previous->id == *result.replaced) previous->controller.Detach();
                 // The old preview's last shared owner releases its session/cache.

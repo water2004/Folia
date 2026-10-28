@@ -3,6 +3,7 @@
 #include "../support/DocumentControllerFixture.h"
 #include "App.xaml.h"
 #include "MainWindow.xaml.h"
+#include <dwmapi.h>
 
 import folia.markdown.instrumentation;
 
@@ -15,7 +16,27 @@ namespace winrt::Folia::implementation {
         }
         static auto& Documents(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->workspaceDocuments; }
         static auto Tabs(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->DocumentTabs(); }
+        static auto Items(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->tabSource; }
         static auto Binding(Microsoft::UI::Xaml::Window const& window, std::uint64_t id) { return Impl(window)->tabItems.at(id); }
+        static auto View(Microsoft::UI::Xaml::Window const& window, std::uint64_t id) {
+            window.Content().as<Microsoft::UI::Xaml::FrameworkElement>().UpdateLayout();
+            return Tabs(window).ContainerFromItem(Binding(window, id)->item).as<Microsoft::UI::Xaml::Controls::TabViewItem>();
+        }
+        static auto Begin(Microsoft::UI::Xaml::Window const& window, std::uint64_t id) {
+            return Impl(window)->BeginTabTearOut(Binding(window, id))->get_strong().as<winrt::Folia::MainWindow>().as<Microsoft::UI::Xaml::Window>();
+        }
+        static bool Complete(Microsoft::UI::Xaml::Window const& window, Windows::Foundation::IInspectable const& item) {
+            return Impl(window)->CompleteTabTearOut(Impl(window)->FindTransferTab(item));
+        }
+        static bool AllowDrop(Microsoft::UI::Xaml::Window const& window, Windows::Foundation::IInspectable const& item) {
+            return Impl(window)->PrepareExternalTab(item);
+        }
+        static void End(Microsoft::UI::Xaml::Window const& window) { Impl(window)->EndTabDrag(); }
+        static DWORD Cloaked(Microsoft::UI::Xaml::Window const& window) {
+            DWORD value = 0;
+            winrt::check_hresult(::DwmGetWindowAttribute(Impl(window)->WindowHandle(), DWMWA_CLOAKED, &value, sizeof(value)));
+            return value;
+        }
         static void New(Microsoft::UI::Xaml::Window const& window) { Impl(window)->NewDocument(); }
         static void Edit(Microsoft::UI::Xaml::Window const& window, std::u32string_view text) {
             if (!Impl(window)->ExecuteEditorCommand(folia::Command::InsertText(std::u32string{text}))) throw std::runtime_error("test edit failed");
@@ -28,6 +49,11 @@ namespace winrt::Folia::implementation {
             return Impl(target)->TransferTab(Binding(source, id), index);
         }
         static void Close(Microsoft::UI::Xaml::Window const& window) { Impl(window)->closeApproved = true; window.Close(); }
+        static void RequestNativeClose(Microsoft::UI::Xaml::Window const& window) {
+            window.AppWindow().Hide();
+            ::PostMessageW(Impl(window)->WindowHandle(), WM_CLOSE, 0, 0);
+        }
+        static bool Closed(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->windowClosed; }
         static void Render(Microsoft::UI::Xaml::Window const& window) { Impl(window)->RenderEditorSurface(); }
         static void Open(Microsoft::UI::Xaml::Window const& window, std::filesystem::path path) {
             Impl(window)->OpenWorkspaceFile(std::move(path), winrt::Folia::WorkspaceOpenMode::Keep);
@@ -55,6 +81,99 @@ namespace {
     };
     auto App() { return winrt::Folia::implementation::App::Current(); }
     suite tab_transfer_tests = [] {
+        "native tab gesture retains its host across merge and repeated tear-out using the stable data item"_test = [] {
+            OwnedWindow source(App()->CreateMainWindow()), other(App()->CreateMainWindow());
+            auto document = Access::Documents(source.window).Active();
+            Access::Edit(source.window, U"same document");
+            auto item = Access::Binding(source.window, document->id)->item;
+            auto firstView = Access::View(source.window, document->id);
+            Access::New(source.window);
+            auto pending = Access::Begin(source.window, document->id);
+            expect((Access::Cloaked(pending) & DWM_CLOAKED_APP) != 0_u);
+            expect(!pending.AppWindow().IsShownInSwitchers());
+            expect(Access::Complete(source.window, item));
+            OwnedWindow target(pending);
+            expect(Access::Documents(target.window).Active() == document);
+            expect(Access::Binding(target.window, document->id)->item == item);
+            expect(Access::View(target.window, document->id) != firstView);
+            expect(Access::View(target.window, document->id).XamlRoot() == target.window.Content().as<FrameworkElement>().XamlRoot());
+            expect(Access::Cloaked(target.window) == 0_u && target.window.AppWindow().IsShownInSwitchers());
+            for (int i = 0; i < 3; ++i) {
+                expect(Access::AllowDrop(other.window, item));
+                expect(Access::Transfer(target.window, document->id, other.window, 0));
+                // WinUI continues the same gesture on the new owner. Its
+                // original UIElement and NewWindowId=0 are not document identity.
+                expect(Access::Complete(other.window, item));
+                expect(Access::Documents(target.window).Active() == document);
+                expect(document->session.TextUtf8() == "same document");
+            }
+            Access::End(source.window);
+            expect(!Access::Complete(target.window, item));
+            Access::Edit(target.window, U" continues");
+            expect(document->session.TextUtf8() == "same document continues");
+        };
+        "click-only tab window preparation stays cloaked until the unused host closes"_test = [] {
+            OwnedWindow source(App()->CreateMainWindow());
+            auto document = Access::Documents(source.window).Active();
+            Access::New(source.window);
+            for (int i = 0; i < 4; ++i) {
+                auto pending = Access::Begin(source.window, document->id);
+                auto id = pending.AppWindow().Id();
+                pending.AppWindow().Show(false);
+                expect((Access::Cloaked(pending) & DWM_CLOAKED_APP) != 0_u);
+                expect(!pending.AppWindow().IsShownInSwitchers());
+                Access::End(source.window);
+                Access::RequestNativeClose(pending);
+                Pump([&] { return Access::Closed(pending); });
+                expect(App()->FindMainWindow(id) == nullptr);
+                expect(Access::Documents(source.window).Find(document->id) == document);
+            }
+        };
+        "single-tab native merge can tear back into its original window before release"_test = [] {
+            OwnedWindow source(App()->CreateMainWindow()), target(App()->CreateMainWindow());
+            auto document = Access::Documents(source.window).Active();
+            auto item = Access::Binding(source.window, document->id)->item;
+            expect(Access::AllowDrop(target.window, item));
+            expect(Access::Transfer(source.window, document->id, target.window, 0));
+            expect(Access::Complete(target.window, item));
+            expect(Access::Documents(source.window).Active() == document);
+            expect(Access::Documents(source.window).Items().size() == 1_u);
+            Access::End(source.window);
+        };
+        "empty tabs merge before the receiving window is loaded"_test = [] {
+            OwnedWindow source(App()->CreateMainWindow());
+            auto document = Access::Documents(source.window).Active();
+            auto original = Access::View(source.window, document->id);
+            auto receiving = Access::TearOutWindow(source.window);
+            expect(!receiving.Content().as<FrameworkElement>().IsLoaded());
+            expect(Access::Transfer(source.window, document->id, receiving, 0));
+            OwnedWindow target(receiving);
+            expect(Access::Documents(target.window).Active() == document);
+            expect(Access::View(target.window, document->id) != original);
+            expect(Access::Documents(target.window).Items().size() == 1_u);
+            Access::Edit(target.window, U"original empty document");
+            expect(document->session.TextUtf8() == "original empty document");
+        };
+        "two untouched empty windows merge and close their emptied source"_test = [] {
+            OwnedWindow source(App()->CreateMainWindow()), target(App()->CreateMainWindow());
+            auto document = Access::Documents(source.window).Active();
+            auto existing = Access::Documents(target.window).Active();
+            expect(Access::Transfer(source.window, document->id, target.window, 1));
+            Access::RequestNativeClose(source.window);
+            Pump([&] { return Access::Closed(source.window); });
+            source.window = nullptr;
+            for (int i = 0; i < 6; ++i) {
+                Access::Tabs(target.window).SelectedItem(Access::Binding(target.window, existing->id)->item);
+                expect(Access::Documents(target.window).Active() == existing);
+                Access::Tabs(target.window).SelectedItem(Access::Binding(target.window, document->id)->item);
+                expect(Access::Documents(target.window).Active() == document);
+            }
+            auto receiving = Access::TearOutWindow(target.window);
+            expect(Access::Transfer(target.window, document->id, receiving, 0));
+            OwnedWindow detached(receiving);
+            Access::Edit(detached.window, U"moved empty document");
+            expect(document->session.TextUtf8() == "moved empty document");
+        };
         "closed window notifications cannot access detached or destroyed controllers"_test = [] {
             OwnedWindow owned(App()->CreateMainWindow());
             std::size_t calls = 0;
@@ -69,7 +188,7 @@ namespace {
             notification(nullptr, nullptr);
             expect(calls == 1_u);
         };
-        "tabs tear into a native window and retain dirty source undo selection and original tab container"_test = [] {
+        "tabs tear into a native window and retain dirty source undo selection and window-local tab containers"_test = [] {
             OwnedWindow source(App()->CreateMainWindow());
             auto document = Access::Documents(source.window).Active();
             Access::Edit(source.window, U"**原文** $x+1$\n");
@@ -78,7 +197,7 @@ namespace {
             auto before = document->session.TextUtf8();
             auto selection = document->session.Selection();
             auto state = document->session.ContentState();
-            auto originalTab = Access::Binding(source.window, document->id)->view;
+            auto originalTab = Access::View(source.window, document->id);
             Access::New(source.window);
             OwnedWindow target(Access::TearOutWindow(source.window));
             expect(Access::Tabs(source.window).CanTearOutTabs() && Access::Tabs(target.window).CanTearOutTabs());
@@ -88,7 +207,7 @@ namespace {
             expect(Access::Documents(source.window).Items().size() == 1_u);
             expect(Access::Documents(target.window).Items().size() == 1_u);
             expect(Access::Documents(target.window).Active().get() == document.get());
-            expect(Access::Binding(target.window, document->id)->view == originalTab);
+            expect(Access::View(target.window, document->id) != originalTab);
             expect(Access::Binding(target.window, document->id)->owner.get().get() == Access::Impl(target.window));
             expect(document->session.TextUtf8() == before && document->session.Selection() == selection);
             expect(document->session.ContentState() == state && document->controller.IsModified() && document->session.IsSourceMode());
@@ -138,12 +257,28 @@ namespace {
             OwnedWindow source(App()->CreateMainWindow());
             auto first = Access::Documents(source.window).Active();
             Access::New(source.window); Access::New(source.window);
-            auto tabs = Access::Tabs(source.window).TabItems();
+            auto tabs = Access::Items(source.window);
             auto view = tabs.GetAt(0);
             tabs.RemoveAt(0); tabs.Append(view);
             Pump([&] { return Access::Documents(source.window).Items().back() == first; });
             expect(Access::Documents(source.window).Items().back() == first);
-            expect(Access::Tabs(source.window).TabItems().Size() == 3_u);
+            expect(tabs.Size() == 3_u);
+        };
+        "native reorder of the selected tab does not reenter the observable collection notification"_test = [] {
+            OwnedWindow source(App()->CreateMainWindow());
+            auto first = Access::Documents(source.window).Active();
+            Access::New(source.window); Access::New(source.window);
+            auto item = Access::Binding(source.window, first->id)->item;
+            auto tabs = Access::Items(source.window);
+            Access::Tabs(source.window).SelectedItem(item);
+            expect(Access::Documents(source.window).Active() == first);
+            tabs.RemoveAt(0);
+            tabs.Append(item);
+            Access::Tabs(source.window).SelectedItem(item);
+            Pump([&] { return Access::Documents(source.window).Items().back() == first; });
+            expect(Access::Documents(source.window).Active() == first);
+            expect(Access::Documents(source.window).Items().back() == first);
+            expect(tabs.Size() == 3_u);
         };
         "cross-window tabs reject duplicate file owners and preserve both edited sessions"_test = [] {
             TestDirectory directory;

@@ -14,6 +14,7 @@ namespace winrt::Folia::implementation
         void OnLaunched(Microsoft::UI::Xaml::LaunchActivatedEventArgs const&);
         Microsoft::UI::Xaml::Window CreateMainWindow(winrt::hstring const& path = {});
         MainWindow* FindMainWindow(Microsoft::UI::WindowId id) const;
+        MainWindow* FindDocumentWindow(std::uint64_t id) const;
 
     private:
         winrt::fire_and_forget LaunchAsync();

@@ -2,18 +2,18 @@
 import std;
 #include "App.xaml.h"
 #include "MainWindow.xaml.h"
-#include <winrt/Microsoft.UI.Content.h>
+#include <dwmapi.h>
 
 namespace winrt::Folia::implementation {
     using namespace Microsoft::UI::Xaml;
     using namespace Microsoft::UI::Xaml::Controls;
 
     void MainWindow::SynchronizeTabOrder() {
-        auto items = DocumentTabs().TabItems();
+        auto items = tabSource;
         if (updatingTabs || items.Size() != workspaceDocuments.Items().size()) return;
         std::vector<std::uint64_t> order;
         for (auto item : items) {
-            auto id = winrt::unbox_value<std::uint64_t>(item.as<TabViewItem>().Tag());
+            auto id = winrt::unbox_value<std::uint64_t>(item);
             if (!workspaceDocuments.Find(id) || std::ranges::find(order, id) != order.end()) return;
             order.push_back(id);
         }
@@ -33,7 +33,7 @@ namespace winrt::Folia::implementation {
         if (!tab || closePending || closingDocument || relocatingFiles || windowClosed) return false;
         auto source = tab->owner.get();
         if (!source || source.get() == this || source->windowClosed || source->closePending || source->closingDocument || source->relocatingFiles) return false;
-        auto id = winrt::unbox_value<std::uint64_t>(tab->view.Tag());
+        auto id = winrt::unbox_value<std::uint64_t>(tab->item);
         auto document = source->workspaceDocuments.Find(id);
         return document && !workspaceDocuments.Find(id)
             && (document->path.empty() || !workspaceDocuments.Find(document->path));
@@ -41,7 +41,7 @@ namespace winrt::Folia::implementation {
     bool MainWindow::TransferTab(std::shared_ptr<DocumentTab> tab, std::size_t index) {
         if (!CanAcceptTab(tab)) return false;
         auto source = tab->owner.get();
-        auto id = winrt::unbox_value<std::uint64_t>(tab->view.Tag());
+        auto id = winrt::unbox_value<std::uint64_t>(tab->item);
         auto document = source->workspaceDocuments.Find(id);
         source->SynchronizeTabOrder(); SynchronizeTabOrder();
         tabItems.reserve(tabItems.size() + 1);
@@ -62,14 +62,14 @@ namespace winrt::Folia::implementation {
             }
             source->workspaceDocuments.TransferTo(id, workspaceDocuments, index);
             std::uint32_t at = 0;
-            if (source->DocumentTabs().TabItems().IndexOf(tab->view, at)) source->DocumentTabs().TabItems().RemoveAt(at);
+            if (source->tabSource.IndexOf(tab->item, at)) source->tabSource.RemoveAt(at);
             source->tabItems.erase(id);
             tab->owner = get_weak();
+            // XAML containers retain their TabView parent and XamlRoot. Only
+            // move the stable data item; the target template owns a fresh view.
             tabItems.emplace(id, tab);
-            tab->view.Style(Root().Resources().Lookup(winrt::box_value(L"WorkspaceTabStyle")).as<Style>());
-            tab->view.BorderBrush(Root().Resources().Lookup(winrt::box_value(L"FoliaShellAccentBrush")).as<Media::Brush>());
-            auto items = DocumentTabs().TabItems();
-            items.InsertAt(static_cast<std::uint32_t>((std::min)(index, std::size_t{items.Size()})), tab->view);
+            auto items = tabSource;
+            items.InsertAt(static_cast<std::uint32_t>((std::min)(index, std::size_t{items.Size()})), tab->item);
             document->themeRevision = 0;
             ActivateDocument(id);
             if (transferPlaceholder && *transferPlaceholder != id) {
@@ -80,6 +80,7 @@ namespace winrt::Folia::implementation {
             }
         }
         source->RefreshDocumentTabs(); RefreshDocumentTabs();
+        RevealTabWindow();
         return true;
     }
     MainWindow* MainWindow::CreateTabWindow() {
@@ -87,40 +88,80 @@ namespace winrt::Folia::implementation {
         auto window = app->CreateMainWindow();
         auto target = winrt::get_self<MainWindow>(window.as<winrt::Folia::MainWindow>());
         target->transferPlaceholder = target->workspaceDocuments.Active()->id;
+        target->preparedTabWindow = true;
+        target->tabWindowStyle = ::GetWindowLongPtrW(target->WindowHandle(), GWL_EXSTYLE);
+        ::SetWindowLongPtrW(target->WindowHandle(), GWL_EXSTYLE,
+            target->tabWindowStyle | WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW);
+        target->AppWindow().IsShownInSwitchers(false);
+        BOOL hidden = TRUE;
+        winrt::check_hresult(::DwmSetWindowAttribute(target->WindowHandle(), DWMWA_CLOAK, &hidden, sizeof(hidden)));
         return target;
+    }
+    void MainWindow::RevealTabWindow() {
+        if (!preparedTabWindow) return;
+        ::SetWindowLongPtrW(WindowHandle(), GWL_EXSTYLE, tabWindowStyle);
+        AppWindow().IsShownInSwitchers(true);
+        BOOL hidden = FALSE;
+        winrt::check_hresult(::DwmSetWindowAttribute(WindowHandle(), DWMWA_CLOAK, &hidden, sizeof(hidden)));
+        preparedTabWindow = false;
+    }
+    std::shared_ptr<MainWindow::DocumentTab> MainWindow::FindTransferTab(Windows::Foundation::IInspectable const& item) {
+        auto id = winrt::unbox_value<std::uint64_t>(item);
+        if (auto owner = App::Current()->FindDocumentWindow(id))
+            if (auto found = owner->tabItems.find(id); found != owner->tabItems.end() && found->second->item == item) return found->second;
+        return {};
+    }
+    MainWindow* MainWindow::BeginTabTearOut(std::shared_ptr<DocumentTab> const& tab) {
+        EndTabDrag();
+        auto target = CreateTabWindow();
+        draggingTab = tab;
+        tab->tearOutWindow = target->get_weak();
+        return target;
+    }
+    bool MainWindow::CompleteTabTearOut(std::shared_ptr<DocumentTab> const& tab) {
+        if (!tab) return false;
+        if (auto target = tab->tearOutWindow.get()) return target->TransferTab(tab, 0);
+        return false;
+    }
+    void MainWindow::EndTabDrag() {
+        if (draggingTab) draggingTab->tearOutWindow = {};
+        draggingTab.reset();
+    }
+    bool MainWindow::PrepareExternalTab(Windows::Foundation::IInspectable const& item) {
+        auto tab = FindTransferTab(item);
+        if (tab && !tab->tearOutWindow.get()) {
+            // A one-tab drag moves its existing window and raises no
+            // TabTearOutWindowRequested event.
+            if (auto source = tab->owner.get()) {
+                source->draggingTab = tab;
+                tab->tearOutWindow = source;
+            }
+        }
+        return CanAcceptTab(tab);
     }
     void MainWindow::RegisterTabTransferHandlers() {
         DocumentTabs().CanTearOutTabs(true);
+        tabDragEnded.Attach(Microsoft::UI::Input::InputNonClientPointerSource::GetForWindowId(AppWindow().Id()),
+            WindowEvent([this](auto const&, auto const&) { EndTabDrag(); }));
         DocumentTabs().TabItemsChanged(WindowEvent([this](auto const&, auto const&) { QueueTabOrderSync(); }));
         DocumentTabs().TabTearOutWindowRequested(WindowEvent([this](auto const&, auto const& args) {
-            args.NewWindowId(CreateTabWindow()->AppWindow().Id());
+            auto items = args.Items();
+            if (items.size() == 1)
+                if (auto tab = FindTransferTab(items[0])) args.NewWindowId(BeginTabTearOut(tab)->AppWindow().Id());
         }));
         DocumentTabs().TabTearOutRequested(WindowEvent([this](auto const&, auto const& args) {
-            if (auto target = App::Current()->FindMainWindow(args.NewWindowId()))
-                for (auto const& item : args.Tabs()) {
-                    auto id = winrt::unbox_value<std::uint64_t>(item.template as<TabViewItem>().Tag());
-                    if (auto found = tabItems.find(id); found != tabItems.end()) target->TransferTab(found->second, 0);
-                }
+            // The shipped SDK never fills args.NewWindowId(). The gesture's
+            // host follows the data item even after it merges into another view.
+            auto items = args.Items();
+            if (items.size() == 1) CompleteTabTearOut(FindTransferTab(items[0]));
         }));
-        auto binding = [](winrt::com_array<UIElement> const& tabs) -> std::shared_ptr<DocumentTab> {
-            if (tabs.size() != 1) return {};
-            auto view = tabs[0].as<TabViewItem>();
-            auto id = winrt::unbox_value<std::uint64_t>(view.Tag());
-            // TabView owns the parent chain while moving the same tab container.
-            auto parent = Media::VisualTreeHelper::GetParent(view);
-            while (parent && !parent.try_as<TabView>()) parent = Media::VisualTreeHelper::GetParent(parent);
-            if (!parent) return {};
-            auto root = parent.as<TabView>().XamlRoot();
-            auto app = App::Current();
-            if (auto owner = app->FindMainWindow(root.ContentIslandEnvironment().AppWindowId()))
-                if (auto found = owner->tabItems.find(id); found != owner->tabItems.end() && found->second->view == view) return found->second;
-            return {};
-        };
-        DocumentTabs().ExternalTornOutTabsDropping(WindowEvent([this, binding](auto const&, auto const& args) {
-            args.AllowDrop(CanAcceptTab(binding(args.Tabs())));
+        DocumentTabs().ExternalTornOutTabsDropping(WindowEvent([this](auto const&, auto const& args) {
+            auto items = args.Items();
+            args.AllowDrop(items.size() == 1 && PrepareExternalTab(items[0]));
         }));
-        DocumentTabs().ExternalTornOutTabsDropped(WindowEvent([this, binding](auto const&, auto const& args) {
-            TransferTab(binding(args.Tabs()), static_cast<std::size_t>((std::max)(0, args.DropIndex())));
+        DocumentTabs().ExternalTornOutTabsDropped(WindowEvent([this](auto const&, auto const& args) {
+            auto items = args.Items();
+            if (items.size() == 1) TransferTab(FindTransferTab(items[0]), static_cast<std::size_t>((std::max)(0, args.DropIndex())));
         }));
     }
 }

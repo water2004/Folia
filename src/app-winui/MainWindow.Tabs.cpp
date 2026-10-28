@@ -13,8 +13,10 @@ namespace winrt::Folia::implementation {
         auto document = workspaceDocuments.Find(id);
         auto found = tabItems.find(id);
         if (!document || found == tabItems.end()) return;
-        auto tab = found->second->view;
-        auto header = tab.Header().as<StackPanel>();
+        auto tab = DocumentTabs().ContainerFromItem(found->second->item).try_as<TabViewItem>();
+        if (!tab) return;
+        auto header = tab.Header().try_as<StackPanel>();
+        if (!header) return;
         auto title = header.Children().GetAt(1).as<TextBlock>();
         auto dirty = header.Children().GetAt(2).as<TextBlock>();
         auto name = document->path.empty() ? Localize(L"UntitledMarkdown") : winrt::hstring(document->path.filename().c_str());
@@ -36,63 +38,82 @@ namespace winrt::Folia::implementation {
         if (updatingTabs || windowClosed) return;
         updatingTabs = true;
         struct Reset { bool& value; ~Reset() { value = false; } } reset{updatingTabs};
-        auto items = DocumentTabs().TabItems();
+        auto items = tabSource;
         for (std::uint32_t index = items.Size(); index > 0; --index) {
-            auto tab = items.GetAt(index - 1).as<TabViewItem>();
-            auto id = winrt::unbox_value<std::uint64_t>(tab.Tag());
+            auto id = winrt::unbox_value<std::uint64_t>(items.GetAt(index - 1));
             if (!workspaceDocuments.Find(id)) { items.RemoveAt(index - 1); tabItems.erase(id); }
         }
         std::uint32_t index = 0;
         for (auto const& document : workspaceDocuments.Items()) {
             auto found = tabItems.find(document->id);
-            TabViewItem tab{nullptr};
             if (found == tabItems.end()) {
                 auto binding = std::make_shared<DocumentTab>();
                 binding->owner = get_weak();
-                tab = TabViewItem();
-                binding->view = tab;
-                tab.Style(Root().Resources().Lookup(winrt::box_value(L"WorkspaceTabStyle")).as<Style>());
-                tab.BorderBrush(Root().Resources().Lookup(winrt::box_value(L"FoliaShellAccentBrush")).as<Media::Brush>());
-                tab.Tag(winrt::box_value(document->id));
-                tab.Loaded([weak = std::weak_ptr{binding}](auto const&, auto const&) {
-                    if (auto current = weak.lock()) if (auto window = current->owner.get(); window && !window->windowClosed) window->EnsureSelectedTabVisible();
-                });
-                StackPanel header;
-                header.Orientation(Orientation::Horizontal);
-                header.Spacing(8);
-                TextBlock title;
-                title.FontSize(14);
-                title.VerticalAlignment(VerticalAlignment::Center);
-                title.MaxWidth(210);
-                title.TextTrimming(TextTrimming::CharacterEllipsis);
-                TextBlock dirty;
-                dirty.Text(L"●");
-                dirty.FontSize(8);
-                dirty.VerticalAlignment(VerticalAlignment::Center);
-                header.Children().Append(winrt::Folia::MakeWorkspaceIcon(winrt::Folia::WorkspaceIcon::Document));
-                header.Children().Append(title);
-                header.Children().Append(dirty);
-                tab.Header(header);
-                tab.DoubleTapped([weak = std::weak_ptr{binding}, id = document->id](auto const&, auto const&) {
-                    if (auto current = weak.lock())
-                        if (auto window = current->owner.get(); window && !window->windowClosed && window->workspaceDocuments.Keep(id)) window->UpdateDocumentTab(id);
-                });
-                tab.Tapped([weak = std::weak_ptr{binding}, id = document->id](auto const&, auto const&) {
-                    if (auto current = weak.lock())
-                        if (auto window = current->owner.get(); window && !window->windowClosed && window->settingsMode && window->IsActiveDocument(id)) window->SetSettingsMode(false);
-                });
-                items.InsertAt(index, tab);
-                tabItems.emplace(document->id, std::move(binding));
+                binding->item = winrt::box_value(document->id);
+                tabItems.emplace(document->id, binding);
+                items.InsertAt(index, binding->item);
             } else {
-                tab = found->second->view;
+                auto item = found->second->item;
                 std::uint32_t at = 0;
-                if (items.IndexOf(tab, at) && at != index) { items.RemoveAt(at); items.InsertAt(index, tab); }
+                if (items.IndexOf(item, at) && at != index) { items.RemoveAt(at); items.InsertAt(index, item); }
             }
             UpdateDocumentTab(document->id);
             ++index;
         }
-        if (auto active = tabItems.find(workspaceDocuments.Active()->id); active != tabItems.end()) DocumentTabs().SelectedItem(active->second->view);
+        SelectDocumentTab();
         UpdateChromeMetrics();
+        EnsureSelectedTabVisible();
+    }
+
+    void MainWindow::SelectDocumentTab() {
+        auto active = tabItems.find(workspaceDocuments.Active()->id);
+        if (active != tabItems.end() && DocumentTabs().SelectedItem() != active->second->item)
+            DocumentTabs().SelectedItem(active->second->item);
+        EnsureSelectedTabVisible();
+    }
+
+    void MainWindow::DocumentTabLoaded(Windows::Foundation::IInspectable const& sender, RoutedEventArgs const&) {
+        if (windowClosed) return;
+        UpdateDocumentTab(winrt::unbox_value<std::uint64_t>(sender.as<TabViewItem>().DataContext()));
+        EnsureSelectedTabVisible();
+    }
+    void MainWindow::DocumentTabPrepared(FrameworkElement const& sender, DataContextChangedEventArgs const&) {
+        if (windowClosed) return;
+        auto tab = sender.as<TabViewItem>();
+        if (!tab.DataContext()) return;
+        auto id = winrt::unbox_value<std::uint64_t>(tab.DataContext());
+        auto found = tabItems.find(id);
+        if (found == tabItems.end()) return;
+        tab.Tag(found->second->item);
+        if (!tab.Header().try_as<StackPanel>()) {
+            tab.Style(Root().Resources().Lookup(winrt::box_value(L"WorkspaceTabStyle")).as<Style>());
+            tab.BorderBrush(Root().Resources().Lookup(winrt::box_value(L"FoliaShellAccentBrush")).as<Media::Brush>());
+            StackPanel header;
+            header.Orientation(Orientation::Horizontal);
+            header.Spacing(8);
+            TextBlock title;
+            title.FontSize(14);
+            title.VerticalAlignment(VerticalAlignment::Center);
+            title.MaxWidth(210);
+            title.TextTrimming(TextTrimming::CharacterEllipsis);
+            TextBlock dirty;
+            dirty.Text(L"●");
+            dirty.FontSize(8);
+            dirty.VerticalAlignment(VerticalAlignment::Center);
+            header.Children().Append(winrt::Folia::MakeWorkspaceIcon(winrt::Folia::WorkspaceIcon::Document));
+            header.Children().Append(title);
+            header.Children().Append(dirty);
+            tab.Header(header);
+            tab.DoubleTapped(WindowEvent([this](auto const& sender, auto const&) {
+                auto id = winrt::unbox_value<std::uint64_t>(sender.template as<TabViewItem>().DataContext());
+                if (workspaceDocuments.Keep(id)) UpdateDocumentTab(id);
+            }));
+            tab.Tapped(WindowEvent([this](auto const& sender, auto const&) {
+                auto id = winrt::unbox_value<std::uint64_t>(sender.template as<TabViewItem>().DataContext());
+                if (settingsMode && IsActiveDocument(id)) SetSettingsMode(false);
+            }));
+        }
+        UpdateDocumentTab(id);
         EnsureSelectedTabVisible();
     }
 
@@ -145,13 +166,14 @@ namespace winrt::Folia::implementation {
             OutlinePaneButton().IsChecked(outlineOpen);
             SidebarToggleButton().IsChecked(outlineOpen);
         }));
+        DocumentTabs().TabItemsSource(tabSource);
         DocumentTabs().SelectionChanged(WindowEvent([this](auto const&, auto const&) {
             if (updatingTabs || windowClosed) return;
-            if (auto tab = DocumentTabs().SelectedItem().try_as<TabViewItem>()) ActivateDocument(winrt::unbox_value<std::uint64_t>(tab.Tag()));
+            if (auto item = DocumentTabs().SelectedItem()) ActivateDocument(winrt::unbox_value<std::uint64_t>(item));
         }));
         DocumentTabs().AddTabButtonClick(WindowEvent([this](auto const&, auto const&) { NewDocument(); }));
         DocumentTabs().TabCloseRequested(WindowEvent([this](auto const&, TabViewTabCloseRequestedEventArgs const& args) {
-            CloseDocumentAsync(winrt::unbox_value<std::uint64_t>(args.Tab().Tag()));
+            CloseDocumentAsync(winrt::unbox_value<std::uint64_t>(args.Item()));
         }));
         RegisterTabTransferHandlers();
         DocumentTabs().SizeChanged(WindowEvent([this](auto const&, auto const&) {
@@ -187,7 +209,7 @@ namespace winrt::Folia::implementation {
             if (auto window = weak.get()) {
                 window->selectedTabVisibilityPending = false;
                 if (window->windowClosed) return;
-                if (auto selected = window->DocumentTabs().SelectedItem().try_as<TabViewItem>(); selected && selected.IsLoaded()) {
+                if (auto selected = window->DocumentTabs().ContainerFromItem(window->DocumentTabs().SelectedItem()).try_as<TabViewItem>(); selected && selected.IsLoaded()) {
                     BringIntoViewOptions options;
                     options.AnimationDesired(false);
                     selected.StartBringIntoView(options);

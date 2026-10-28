@@ -97,6 +97,8 @@ namespace winrt::Folia::implementation
         Closed(WindowEvent([this](auto const&, auto const&)
         {
             windowClosed = true;
+            tabDragEnded.Reset();
+            EndTabDrag();
             animationController.Detach();
             closingHandler.Reset();
             if (latexCommandCatalog) latexCommandCatalog->Flush();

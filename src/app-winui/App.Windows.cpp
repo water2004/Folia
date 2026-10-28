@@ -34,4 +34,11 @@ namespace winrt::Folia::implementation {
                 return winrt::get_self<MainWindow>(item.window.as<winrt::Folia::MainWindow>());
         return nullptr;
     }
+    MainWindow* App::FindDocumentWindow(std::uint64_t id) const {
+        for (auto const& item : windows) {
+            auto owner = winrt::get_self<MainWindow>(item.window.as<winrt::Folia::MainWindow>());
+            if (!owner->windowClosed && owner->workspaceDocuments.Find(id)) return owner;
+        }
+        return nullptr;
+    }
 }

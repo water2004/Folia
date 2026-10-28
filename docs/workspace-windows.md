@@ -2,7 +2,7 @@
 
 Folia uses WinUI 3's native `TabView` tear-out events. A tab can move into a new
 window or into another Folia window, retaining its original document session,
-tab container, unsaved state, selection, undo history and reading position.
+data item, unsaved state, selection, undo history and reading position.
 Single-click preview tabs and edit/double-click pinning continue to apply.
 
 Normal launches create a new window in the existing process for that executable
@@ -23,10 +23,14 @@ process; startup tests use it so they never redirect into a user's running app.
 | `MainWindow.TabTransfer.cpp` | Native tear-out events, container ownership and tab ordering. |
 | `EditorDocumentController::Presentation` | Bind a session's UI callbacks to its current window. |
 
-Transfer moves the same `WorkspaceDocument` and `TabViewItem`. It does not reopen
+Transfer moves the same `WorkspaceDocument` and boxed document-id item. It does not reopen
 the file, serialize its contents or reset its saved-content baseline. The shared
 editor surface switches sessions using the existing presentation suspension and
 resumption flow. Scroll restoration uses a source position and viewport inset.
+Each window's `TabItemTemplate` creates its own `TabViewItem`, header and tooltip.
+XAML containers never cross window roots: WinUI caches their parent TabView.
+Native drag events are resolved by their stable `Items` data, not the original
+`Tabs` container, which can belong to a window the tab has already left.
 The native drag loop closes an emptied source window after the gesture ends.
 An implicit empty document keeps the source window valid until then; returning a
 tab removes that placeholder. An independently opened empty tab is retained.
@@ -34,12 +38,27 @@ tab removes that placeholder. An independently opened empty tab is retained.
 The target rejects a different session for a file already open in that window.
 Neither session's unsaved edits or history are discarded to resolve a duplicate.
 `TabItemsChanged` updates model order because native tear-out mode does not raise
-the older drag-completed events. `NewWindowId` identifies the receiving window
-even when a single gesture merges and tears the tab out again.
+the older drag-completed events. Selecting a document only updates selection;
+collection reconciliation belongs to document creation, opening, closing and
+transfer. It must not run inside a native reorder's collection notification.
+A gesture explicitly retains its receiving
+window on the data item until the originating move loop ends. This also covers
+merging and tearing out again before releasing the pointer, and a single-tab
+drag that uses its existing window without requesting a new one.
+
+The shipped WinUI source leaves `TabTearOutRequested.NewWindowId` at zero, so it
+cannot identify the target. It also requests and briefly shows a preparatory
+window on an ordinary tab click. Preparatory windows are DWM-cloaked, excluded
+from switchers and marked nonactivating. Only a completed session transfer
+restores their normal presentation; an unused host closes with the native loop.
+These are event-protocol details of the pinned SDK, not alternate document paths.
+The corresponding SDK sources are
+[TabView](https://github.com/microsoft/microsoft-ui-xaml/blob/693f472aeaf89c6dff66256ee6fcd453e5d553b8/controls/dev/TabView/TabView.cpp)
+and [TabViewListView](https://github.com/microsoft/microsoft-ui-xaml/blob/693f472aeaf89c6dff66256ee6fcd453e5d553b8/controls/dev/TabView/TabViewListView.cpp).
 
 Child XAML controls can deliver final notifications after their window closes.
 `MainWindow::WindowEvent` locks the weak window owner during delivery and skips
-closed owners. Tab-container callbacks instead follow their movable weak owner.
+closed owners. Tab-container callbacks remain local to their creating window.
 Renderer invalidation and animation callbacks also acquire their window weakly.
 CoreText focus follows window activation and is restored when a new document
 context inherits an already-focused editor surface.
@@ -59,5 +78,7 @@ Run controller and visual test builds sequentially: they reuse the production
 PCH's compiler PDB. The activation test creates its own candidate directory with
 unchanged executable/resource-map names and cleans up only its own processes and
 links. Window tests exercise the production transfer path, including exact
-source/history restoration, placeholders, duplicates and a long document's
-viewport anchor. They do not inject desktop mouse input.
+source/history restoration, placeholders, duplicates, empty sessions, unloaded
+targets, click-only preparation, repeated merge/tear-out in one gesture and a
+long document's viewport anchor. They also assert fresh XAML roots and the DWM
+cloak/switcher contract. They do not inject desktop mouse input.

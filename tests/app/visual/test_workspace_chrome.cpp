@@ -76,8 +76,8 @@ namespace {
         "workspace chrome renders the real window with one complete divider and one outline toggle"_test = [] { try {
             ChromeWindow f;
             auto tabs = f.Find<TabView>(L"DocumentTabs");
-            expect(tabs.TabItems().Size() == 1_u);
-            auto tab = tabs.TabItems().GetAt(0).as<TabViewItem>();
+            expect(tabs.TabItemsSource().as<winrt::Windows::Foundation::Collections::IVectorView<winrt::Windows::Foundation::IInspectable>>().Size() == 1_u);
+            auto tab = tabs.ContainerFromIndex(0).as<TabViewItem>();
             auto bounds = tab.TransformToVisual(f.root).TransformBounds({0, 0, static_cast<float>(tab.ActualWidth()), static_cast<float>(tab.ActualHeight())});
             expect(bounds.Y >= 0.f);
             expect(bounds.Y + bounds.Height <= 48.f);
@@ -137,7 +137,7 @@ namespace {
         "workspace chrome keeps text at native scale and layout buttons beside the captions"_test = [] {
             ChromeWindow f;
             auto tabs = f.Find<TabView>(L"DocumentTabs");
-            auto selected = tabs.SelectedItem().as<TabViewItem>();
+            auto selected = tabs.ContainerFromItem(tabs.SelectedItem()).as<TabViewItem>();
             auto header = selected.Header().as<StackPanel>();
             auto title = header.Children().GetAt(1).as<TextBlock>();
             expect(title.FontSize() >= 14.);
@@ -171,16 +171,16 @@ namespace {
             auto tabs = f.Find<TabView>(L"DocumentTabs");
             auto add = Descendant(tabs, L"AddButton").as<Button>();
             for (int i = 0; i < 6; ++i) {
-                const auto previous = tabs.TabItems().Size();
+                const auto previous = tabs.TabItemsSource().as<winrt::Windows::Foundation::Collections::IVectorView<winrt::Windows::Foundation::IInspectable>>().Size();
                 Invoke(add);
-                Pump([&] { return tabs.TabItems().Size() == previous + 1; });
+                Pump([&] { return tabs.TabItemsSource().as<winrt::Windows::Foundation::Collections::IVectorView<winrt::Windows::Foundation::IInspectable>>().Size() == previous + 1; });
             }
             f.root.UpdateLayout();
-            auto selected = tabs.SelectedItem().as<TabViewItem>();
+            auto selected = tabs.ContainerFromItem(tabs.SelectedItem()).as<TabViewItem>();
             Pump([&] { return Descendant(selected, L"CloseButton") != nullptr; });
             auto close = Descendant(selected, L"CloseButton").as<Button>();
             Invoke(close);
-            Pump([&] { return tabs.TabItems().Size() == 6; });
+            Pump([&] { return tabs.TabItemsSource().as<winrt::Windows::Foundation::Collections::IVectorView<winrt::Windows::Foundation::IInspectable>>().Size() == 6; });
             const auto dpi = f.root.XamlRoot().RasterizationScale();
             f.window.AppWindow().Resize({static_cast<int>(680 * dpi), static_cast<int>(600 * dpi)});
             Pump([&] { return f.root.ActualWidth() < 700; });
@@ -206,7 +206,7 @@ namespace {
             }
             auto settle = std::chrono::steady_clock::now() + std::chrono::milliseconds(400);
             Pump([&] { return std::chrono::steady_clock::now() >= settle; });
-            auto active = tabs.SelectedItem().as<TabViewItem>();
+            auto active = tabs.ContainerFromItem(tabs.SelectedItem()).as<TabViewItem>();
             expect(active.IsSelected());
             for (auto name : {L"ScrollDecreaseButton", L"ScrollIncreaseButton"}) {
                 auto arrow = Descendant(tabs, name).as<Primitives::RepeatButton>();
@@ -236,14 +236,14 @@ namespace {
             Automation::Peers::RepeatButtonAutomationPeer backwardPeer(backward);
             backwardPeer.GetPattern(Automation::Peers::PatternInterface::Invoke).as<Automation::Provider::IInvokeProvider>().Invoke();
             Pump([&] { return viewer.HorizontalOffset() < previousOffset; });
-            expect(static_cast<bool>(tabs.SelectedItem() == active));
-            while (tabs.TabItems().Size() > 1) {
-                auto previous = tabs.TabItems().Size();
+            expect(static_cast<bool>(tabs.ContainerFromItem(tabs.SelectedItem()) == active));
+            while (tabs.TabItemsSource().as<winrt::Windows::Foundation::Collections::IVectorView<winrt::Windows::Foundation::IInspectable>>().Size() > 1) {
+                auto previous = tabs.TabItemsSource().as<winrt::Windows::Foundation::Collections::IVectorView<winrt::Windows::Foundation::IInspectable>>().Size();
                 f.root.UpdateLayout();
-                auto current = tabs.SelectedItem().as<TabViewItem>();
+                auto current = tabs.ContainerFromItem(tabs.SelectedItem()).as<TabViewItem>();
                 Pump([&] { return Descendant(current, L"CloseButton") != nullptr; });
                 Invoke(Descendant(current, L"CloseButton").as<Button>());
-                Pump([&] { return tabs.TabItems().Size() < previous; });
+                Pump([&] { return tabs.TabItemsSource().as<winrt::Windows::Foundation::Collections::IVectorView<winrt::Windows::Foundation::IInspectable>>().Size() < previous; });
             }
         } catch (winrt::hresult_error const& error) { throw std::runtime_error(winrt::to_string(error.message()) + " HRESULT " + std::to_string(error.code().value)); } };
 

@@ -27,6 +27,10 @@ namespace winrt::Folia::implementation
     {
         MainWindow();
         explicit MainWindow(winrt::hstring const& initialDocumentPath);
+        void DocumentTabLoaded(Windows::Foundation::IInspectable const& sender,
+            Microsoft::UI::Xaml::RoutedEventArgs const& args);
+        void DocumentTabPrepared(Microsoft::UI::Xaml::FrameworkElement const& sender,
+            Microsoft::UI::Xaml::DataContextChangedEventArgs const& args);
 
     private:
         // Child XAML controls may deliver final notifications after Closed.
@@ -37,9 +41,11 @@ namespace winrt::Folia::implementation
             };
         }
         friend struct WorkspaceWindowTestAccess;
+        friend struct App;
         struct DocumentTab {
-            Microsoft::UI::Xaml::Controls::TabViewItem view{nullptr};
+            Windows::Foundation::IInspectable item{nullptr};
             winrt::weak_ref<MainWindow> owner;
+            winrt::weak_ref<MainWindow> tearOutWindow;
         };
         void RegisterTabTransferHandlers();
         MainWindow* CreateTabWindow();
@@ -47,6 +53,12 @@ namespace winrt::Folia::implementation
         void QueueTabOrderSync();
         bool CanAcceptTab(std::shared_ptr<DocumentTab> const& tab) const;
         bool TransferTab(std::shared_ptr<DocumentTab> tab, std::size_t index);
+        std::shared_ptr<DocumentTab> FindTransferTab(Windows::Foundation::IInspectable const& item);
+        MainWindow* BeginTabTearOut(std::shared_ptr<DocumentTab> const& tab);
+        bool CompleteTabTearOut(std::shared_ptr<DocumentTab> const& tab);
+        bool PrepareExternalTab(Windows::Foundation::IInspectable const& item);
+        void EndTabDrag();
+        void RevealTabWindow();
         void AttachControllers();
         void AttachDocumentController(std::shared_ptr<winrt::Folia::WorkspaceDocument> const& document);
         winrt::Folia::EditorSession& editorSession() noexcept;
@@ -61,6 +73,7 @@ namespace winrt::Folia::implementation
         Windows::Foundation::IAsyncOperation<winrt::hstring> ApplyExplorerActionAsync(winrt::Folia::WorkspaceFileAction action);
         void RegisterWorkspaceHandlers();
         void RefreshDocumentTabs();
+        void SelectDocumentTab();
         void UpdateDocumentTab(std::uint64_t id);
         void UpdateWorkspaceLayout();
         void UpdateChromeMetrics();
@@ -142,6 +155,12 @@ namespace winrt::Folia::implementation
         bool windowClosed = false;
         std::uint64_t workspaceThemeRevision = 1;
         std::unordered_map<std::uint64_t, std::shared_ptr<DocumentTab>> tabItems;
+        Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> tabSource =
+            winrt::single_threaded_observable_vector<Windows::Foundation::IInspectable>();
+        std::shared_ptr<DocumentTab> draggingTab;
+        winrt::Folia::detail::TabDragCompletionSubscription tabDragEnded;
+        bool preparedTabWindow = false;
+        LONG_PTR tabWindowStyle = 0;
         std::optional<std::uint64_t> transferPlaceholder;
         bool tabOrderSyncPending = false;
         std::vector<winrt::Microsoft::UI::Xaml::Input::KeyboardAccelerator> applicationShortcuts;
