@@ -1,0 +1,5 @@
+{
+  "class-elk-shared.patch": "f51d38cb2ad473ae6542099d38254529938e2820802eddc520f487b1f9a004ad",
+  "class-elk.patch": "fb33479c23476cf1da5010d5a35da5106c29a280c6bd7660934d7202153b0c18",
+  "native-entry.patch": "e417f2e1654dd3f1676dc0e5e1c7b05f1557afac31965738c39eef0b53590585"
+}

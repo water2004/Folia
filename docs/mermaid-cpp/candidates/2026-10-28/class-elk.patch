@@ -1,0 +1,295 @@
+diff --git a/third_party/mermaid-cpp/src/class_elk.ixx b/third_party/mermaid-cpp/src/class_elk.ixx
+new file mode 100644
+index 00000000..620e2154
+--- /dev/null
++++ b/third_party/mermaid-cpp/src/class_elk.ixx
+@@ -0,0 +1,20 @@
++// Measured Class default ELK adapter, Mermaid 12.2.0. MIT, ../LICENSE.
++export module folia.mermaid.class_elk;
++import std;
++export import folia.mermaid.class_svg;
++export import folia.mermaid.flowchart_elk;
++export namespace folia::mermaid {
++struct ClassElkTerminals { std::optional<FlowchartPoint> start,end; };
++struct ClassElkScene : FlowchartScene { std::vector<ClassElkTerminals> terminals; };
++// Uses the existing Class node-box measurements and graph assembly. Relations
++// and measurements include note attachments in their graph edge order.
++std::expected<ClassElkScene,std::string> layout_measured_elk_class(
++    const FlowchartInput&,std::span<const FlowchartNodeBox>,
++    std::span<const ClassRelation>,std::span<const ClassEdgeMeasurements>,
++    const FlowchartMeasurements&);
++// After the shared endpoint clipper, before marker shortening. Raw endpoints
++// preserve the original ELK port positions for terminal labels to follow.
++void finish_class_elk_scene(ClassElkScene&,const FlowchartInput&,
++    std::span<const ClassEdgeMeasurements>,
++    std::span<const std::pair<FlowchartPoint,FlowchartPoint>> raw_endpoints);
++}
+diff --git a/third_party/mermaid-cpp/src/class_elk.cpp b/third_party/mermaid-cpp/src/class_elk.cpp
+new file mode 100644
+index 00000000..133460d5
+--- /dev/null
++++ b/third_party/mermaid-cpp/src/class_elk.cpp
+@@ -0,0 +1,87 @@
++module folia.mermaid.class_elk;
++import std;
++namespace folia::mermaid {
++std::expected<ClassElkScene,std::string> layout_measured_elk_class(
++    const FlowchartInput& graph,std::span<const FlowchartNodeBox> boxes,
++    std::span<const ClassRelation> relations,std::span<const ClassEdgeMeasurements> measured,
++    const FlowchartMeasurements& groups) {
++    if(relations.size()!=graph.edges.size()||measured.size()!=relations.size())
++        return std::unexpected("Class ELK needs measured relationships in graph edge order");
++    std::vector<FlowchartEdgeLabelSize> centers;std::vector<ElkEndLabel> terminals;
++    for(std::size_t i=0;i<relations.size();++i){
++        const auto& edge=relations[i];const auto& sizes=measured[i];centers.push_back({sizes.label.width,sizes.label.height});
++        const auto add=[&](bool head,const std::u16string& text,const ClassTextBox& size,ClassMarker marker){
++            if(text.empty()||text==u"none")return;
++            const double padding=marker==ClassMarker::none?0:6;
++            terminals.push_back({2*i+static_cast<std::size_t>(head),i,head,size.width+2*padding,size.height+2*padding});
++        };
++        add(false,edge.start_label,sizes.start,edge.start);add(true,edge.end_label,sizes.end,edge.end);
++    }
++    auto placed=layout_measured_elk_scene(graph,boxes,centers,groups,terminals);
++    if(!placed)return std::unexpected(placed.error());
++    ClassElkScene scene;static_cast<FlowchartScene&>(scene)=std::move(static_cast<FlowchartScene&>(*placed));scene.terminals.resize(relations.size());
++    for(const auto& label:placed->end_labels){const FlowchartPoint center{label.x+label.width/2,label.y+label.height/2};
++        if(label.id%2)scene.terminals[label.original_edge].end=center;else scene.terminals[label.original_edge].start=center;
++    }
++    return scene;
++}
++namespace {
++struct Box {double x1,y1,x2,y2;};
++Box label_box(FlowchartPoint p,double w,double h){return {p.x-w/2,p.y-h/2,p.x+w/2,p.y+h/2};}
++bool overlaps(Box a,Box b){return a.x1<b.x2&&b.x1<a.x2&&a.y1<b.y2&&b.y1<a.y2;}
++bool segment_hits(FlowchartPoint a,FlowchartPoint b,Box box){
++ double t0=0,t1=1;const double dx=b.x-a.x,dy=b.y-a.y;
++ for(const auto [p,q]:{std::pair{-dx,a.x-box.x1},std::pair{dx,box.x2-a.x},std::pair{-dy,a.y-box.y1},std::pair{dy,box.y2-a.y}}){
++  if(p==0){if(q<0)return false;}else if(p<0)t0=std::max(t0,q/p);else t1=std::min(t1,q/p);
++ }return t0<t1;
++}
++}
++void finish_class_elk_scene(ClassElkScene& scene,const FlowchartInput& graph,
++ std::span<const ClassEdgeMeasurements> measured,
++ std::span<const std::pair<FlowchartPoint,FlowchartPoint>> raw_endpoints){
++ auto& edges=scene.layout.edges;
++ for(std::size_t i=0;i<edges.size();++i){if(edges[i].points.empty())continue;
++  for(bool head:{false,true}){auto& p=head?scene.terminals[i].end:scene.terminals[i].start;if(!p)continue;
++   const auto now=head?edges[i].points.back():edges[i].points.front(),old=head?raw_endpoints[i].second:raw_endpoints[i].first;
++   p->x+=now.x-old.x;p->y+=now.y-old.y;
++  }
++ }
++ std::vector<Box> node_boxes,center_boxes;std::vector<std::pair<FlowchartPoint,FlowchartPoint>> frames;
++ for(std::size_t i=0;i<scene.layout.nodes.size();++i){const auto& n=scene.layout.nodes[i];const auto b=label_box({n.x,n.y},n.width,n.height);
++  if(!graph.nodes[i].group)node_boxes.push_back(b);else {frames.push_back({{b.x1,b.y1},{b.x2,b.y1}});frames.push_back({{b.x2,b.y1},{b.x2,b.y2}});frames.push_back({{b.x2,b.y2},{b.x1,b.y2}});frames.push_back({{b.x1,b.y2},{b.x1,b.y1}});}
++ }
++ for(std::size_t i=0;i<edges.size();++i)if(edges[i].label&&!graph.edges[i].label.empty()&&measured[i].label.width&&measured[i].label.height)center_boxes.push_back(label_box(*edges[i].label,measured[i].label.width,measured[i].label.height));
++ const auto blocked=[&](Box box,std::size_t edge,bool head,std::size_t segment){
++  for(auto b:node_boxes)if(overlaps(box,b))return true;for(auto b:center_boxes)if(overlaps(box,b))return true;
++  for(auto [a,b]:frames)if(segment_hits(a,b,box))return true;
++  for(std::size_t j=0;j<edges.size();++j){const auto& points=edges[j].points;
++   for(std::size_t p=0;p+1<points.size();++p)if(!(j==edge&&p==segment)&&segment_hits(points[p],points[p+1],box))return true;
++   for(bool other_head:{false,true}){if(j==edge&&head==other_head)continue;const auto& other=other_head?scene.terminals[j].end:scene.terminals[j].start;const auto& size=other_head?measured[j].end:measured[j].start;if(other&&overlaps(box,label_box(*other,size.width,size.height)))return true;}
++  }return false;
++ };
++ // Original putTerminalLabelsOnTheirSide. ClassDB supplies startRight/endLeft.
++ for(std::size_t i=0;i<edges.size();++i)for(bool head:{false,true}){
++  auto& center=head?scene.terminals[i].end:scene.terminals[i].start;const auto& size=head?measured[i].end:measured[i].start;
++  const auto& points=edges[i].points;if(!center||points.size()<2)continue;const auto segment=head?points.size()-2:0;
++  const auto from=points[segment],to=points[segment+1];const double length=std::hypot(to.x-from.x,to.y-from.y);if(!length)continue;
++  const FlowchartPoint normal{-(to.y-from.y)/length,(to.x-from.x)/length};const double offset=(center->x-from.x)*normal.x+(center->y-from.y)*normal.y;
++  if(offset==0||(offset>0)==!head)continue;
++  const FlowchartPoint mirrored{center->x-2*offset*normal.x,center->y-2*offset*normal.y};
++  if(!blocked(label_box(mirrored,size.width,size.height),i,head,segment))center=mirrored;
++ }
++ // Original separateOppositeEdgeLabels, after terminal collision decisions.
++ std::map<std::pair<std::u16string,std::u16string>,std::vector<std::size_t>> pairs;
++ for(std::size_t i=0;i<edges.size();++i)if(edges[i].label&&!graph.edges[i].label.empty()&&measured[i].label.width){auto a=graph.edges[i].start,b=graph.edges[i].end;if(a>b)std::swap(a,b);pairs[{a,b}].push_back(i);}
++ for(const auto& [key,pair]:pairs)if(pair.size()==2){const auto i=pair[0],j=pair[1];auto& a=*edges[i].label;auto& b=*edges[j].label;
++  if(std::abs(a.y-b.y)>std::max(measured[i].label.height,measured[j].label.height))continue;
++  const double delta=b.x-a.x,deficit=(measured[i].label.width+measured[j].label.width)/2+4-std::abs(delta);if(deficit<=0)continue;
++  const double sign=delta<0?-1:1;a.x-=sign*deficit/2;b.x+=sign*deficit/2;
++ }
++ scene.min_x=scene.min_y=std::numeric_limits<double>::infinity();scene.max_x=scene.max_y=-scene.min_x;
++ const auto include=[&](Box b){scene.min_x=std::min(scene.min_x,b.x1);scene.min_y=std::min(scene.min_y,b.y1);scene.max_x=std::max(scene.max_x,b.x2);scene.max_y=std::max(scene.max_y,b.y2);};
++ for(const auto& n:scene.layout.nodes)include(label_box({n.x,n.y},n.width,n.height));
++ for(std::size_t i=0;i<edges.size();++i){for(auto p:edges[i].points)include(label_box(p,0,0));if(edges[i].label)include(label_box(*edges[i].label,measured[i].label.width,measured[i].label.height));
++  if(scene.terminals[i].start)include(label_box(*scene.terminals[i].start,measured[i].start.width,measured[i].start.height));if(scene.terminals[i].end)include(label_box(*scene.terminals[i].end,measured[i].end.width,measured[i].end.height));
++ }
++}
++}
+diff --git a/tests/mermaid_cpp/class_elk.cpp b/tests/mermaid_cpp/class_elk.cpp
+new file mode 100644
+index 00000000..31ae00f0
+--- /dev/null
++++ b/tests/mermaid_cpp/class_elk.cpp
+@@ -0,0 +1,38 @@
++#include "support/folia_test.hpp"
++import folia.mermaid.class_elk;
++namespace {
++using namespace boost::ut;using namespace folia::mermaid;
++std::vector<std::string_view> fields(std::string_view s,char delimiter){std::vector<std::string_view> out;for(;;){const auto p=s.find(delimiter);out.push_back(s.substr(0,p));if(p==s.npos)break;s.remove_prefix(p+1);}return out;}
++double value(std::string_view s){double v{};std::from_chars(s.data(),s.data()+s.size(),v);return v;}
++std::u16string ascii(std::string_view s){return {s.begin(),s.end()};}
++std::u16string decode(std::string_view s){std::u16string out;for(std::size_t i=0;i<s.size();i+=4){unsigned n{};std::from_chars(s.data()+i,s.data()+i+4,n,16);out.push_back(static_cast<char16_t>(n));}return out;}
++void near(double actual,double expected,std::string_view context){expect(std::abs(actual-expected)<1e-4)<<context<<actual<<expected;}
++void point(FlowchartPoint actual,std::string_view expected,std::string_view context){const auto xy=fields(expected,',');near(actual.x,value(xy[0]),context);near(actual.y,value(xy[1]),context);}
++suite class_elk=[] {
++ "mermaid_class_elk_five_original_measured_scenes"_test=[] {
++  const auto override=std::getenv("FOLIA_MERMAID_FIXTURES");std::ifstream file{std::filesystem::path{override?override:FOLIA_MERMAID_FIXTURE_DIR}/"class-elk.tsv"};expect(fatal(file.is_open()));
++  std::string line;std::size_t count=0;
++  while(std::getline(file,line)){
++   if(!line.empty()&&line.back()=='\r')line.pop_back();if(line.empty()||line[0]=='#')continue;
++   const auto row=fields(line,'\t');expect(fatal(row.size()==7_u));auto session=ConfigSession::create();expect(fatal(session.has_value()));
++   const auto doc=prepare_class(decode(row[1]),*session);expect(fatal(doc.has_value()))<<row[0];FlowchartInput graph;graph.direction=doc->direction;
++   for(const auto& n:doc->namespaces)graph.nodes.push_back({.id=n.id,.label=n.label,.parent=n.parent,.group=true,.padding=16});
++   for(const auto& n:doc->classes)graph.nodes.push_back({.id=n.id,.parent=n.parent});
++   for(const auto& e:doc->relations)graph.edges.push_back({.start=e.from,.end=e.to,.label=e.title});
++   std::vector<FlowchartNodeBox> boxes(graph.nodes.size());FlowchartMeasurements groups;groups.nodes.resize(boxes.size());
++   const auto nodeRows=fields(row[2],';');
++   for(auto item:nodeRows){const auto n=fields(item,',');const auto node=std::ranges::find(graph.nodes,ascii(n[0]),&FlowchartNode::id);expect(fatal(node!=graph.nodes.end()));const auto i=node-graph.nodes.begin();boxes[i]={value(n[3]),value(n[4])};groups.nodes[i].width=value(n[5]);groups.nodes[i].height=value(n[6]);}
++   std::vector<ClassEdgeMeasurements> edges;
++   for(auto item:fields(row[3],';')){const auto n=fields(item,',');ClassEdgeMeasurements m;m.label.width=value(n[0]);m.label.height=value(n[1]);m.start.width=value(n[2]);m.start.height=value(n[3]);m.end.width=value(n[4]);m.end.height=value(n[5]);edges.push_back(m);}
++   const auto scene=layout_measured_elk_class(graph,boxes,doc->relations,edges,groups);expect(fatal(scene.has_value()))<<row[0]<<(scene?"":scene.error());
++   for(auto item:nodeRows){const auto n=fields(item,',');const auto node=std::ranges::find(scene->layout.nodes,ascii(n[0]),&FlowchartPlacedNode::id);expect(fatal(node!=scene->layout.nodes.end()));near(node->x,value(n[7]),row[0]);near(node->y,value(n[8]),row[0]);near(node->width,value(n[9]),row[0]);near(node->height,value(n[10]),row[0]);}
++   const auto routes=fields(row[4],';'),centers=fields(row[5],';'),terminals=fields(row[6],';');expect(fatal(routes.size()==scene->layout.edges.size()));
++   for(std::size_t i=0;i<routes.size();++i){const auto points=fields(routes[i],'|');const auto& edge=scene->layout.edges[i];expect(fatal(points.size()==edge.points.size()))<<row[0]<<i;
++    for(std::size_t p=0;p<points.size();++p)point(edge.points[p],points[p],row[0]);
++    if(centers[i]!="-"){expect(fatal(edge.label.has_value()));point(*edge.label,centers[i],row[0]);}
++    for(const auto head:{false,true}){const auto& actual=head?scene->terminals[i].end:scene->terminals[i].start;const auto expected=terminals[2*i+head];expect(actual.has_value()==(expected!="-"));if(expected!="-"){expect(fatal(actual.has_value()));point(*actual,expected,row[0]);}}
++   }++count;
++  }expect(count==5_u);
++ };
++};
++}
+diff --git a/tests/mermaid_cpp/fixtures/class-elk.tsv b/tests/mermaid_cpp/fixtures/class-elk.tsv
+new file mode 100644
+index 00000000..c535609e
+--- /dev/null
++++ b/tests/mermaid_cpp/fixtures/class-elk.tsv
+@@ -0,0 +1,6 @@
++# Class ELK measured input: name,source hex,nodes(id,parent,group,width,height,labelwidth,labelheight,x,y,paintwidth,paintheight),label sizes(center/start/end),routes,center label centers,terminal label centers.
++elk-members-default	0063006c006100730073004400690061006700720061006d000a0063006c00610073007300200044006f00630075006d0065006e00740020007b000a002b007400690074006c006500200053007400720069006e0067000a002b00730061007600650028002900200062006f006f006c000a007d000a0044006f00630075006d0065006e00740020002d002d003e002000530074006f007200650020003a002000730061007600650073	Document,-,0,160.5078125,144,0,0,92.25390625,84,160.5078125,144;Store,-,0,64.90625,84,0,0,92.25390625,302.00000000000006,64.90625,84	41.796875,24,0,0,0,0	92.25390625,156|92.25390625,260	92.15234375,208	-;-
++elk-inheritance-default	0063006c006100730073004400690061006700720061006d000a00420061007300650020003c007c002d002d0020005200650061006400650072000a00420061007300650020003c007c002d002d0020005700720069007400650072000a0052006500610064006500720020002d002d003e00200057007200690074006500720020003a002000730065006e00640073	Base,-,0,62.25,84,0,0,80.6875,54,62.25,84;Reader,-,0,78.25,84,0,0,51.125,178,78.25,84;Writer,-,0,69.9375,84,0,0,80.6875,366,69.9375,84	0,0,0,0,0,0;0,0,0,0,0,0;42.703125,24,0,0,0,0	73.64583333333334,96|73.64583333333334,116|51.125,116|51.125,136;87.72916666666667,96|87.72916666666667,116|110.25,116|110.25,178|110.25,272|110.25,304|89.01041666666667,304|89.01041666666667,324;51.125,220|51.125,304|72.36458333333334,304|72.36458333333334,324	-;-;50.9765625,272	-;-;-;-;-;-
++elk-multiplicity-default	0063006c006100730073004400690061006700720061006d000a0064006900720065006300740069006f006e0020004c0052000a004c00690062007200610072007900200022003100220020006f002d002d00200022002a002200200042006f006f006b0020003a00200063006f006e007400610069006e0073	Library,-,0,78.25,84,0,0,51.125,54,78.25,84;Book,-,0,64,84,0,0,292.25,54,64,84	59.59375,24,6.125,16.5,4.28125,16.5	90.25,54|260.25,54	182.171875,53.5	103.3125,73.25;254.109375,67.25
++elk-feedback-default	0063006c006100730073004400690061006700720061006d000a0064006900720065006300740069006f006e0020004c0052000a00520065006100640065007200200022003100220020002d002d003e00200022002a0022002000530074006f007200650020003a0020007700720069007400650073000a00530074006f0072006500200022003100220020002d002d003e002000220031002200200052006500610064006500720020003a0020007200650066007200650073006800650073	Reader,-,0,78.25,84,0,0,51.125,54,78.25,84;Store,-,0,64.90625,84,0,0,311.8125,54,64.90625,84	41.78125,24,6.125,16.5,4.28125,16.5;66.703125,24,6.125,16.5,6.125,16.5	90.25,43.333333333333336|132.375,43.333333333333336|132.375,31.5|239.078125,31.5|239.078125,43.333333333333336|279.359375,43.333333333333336;279.359375,64.66666666666666|239.078125,64.66666666666666|239.078125,76.5|132.375,76.5|132.375,64.66666666666666|90.25,64.66666666666666	185.7265625,31;185.7265625,76	97.3125,56.58333333333333;267.21875,62.58333333333333;272.296875,77.91666666666666;103.3125,83.91666666666666
++elk-namespace-default	0063006c006100730073004400690061006700720061006d000a006e0061006d00650073007000610063006500200049006e0070007500740020007b000a0063006c0061007300730020005200650061006400650072000a0063006c00610073007300200053006f0075007200630065000a007d000a006e0061006d0065007300700061006300650020004f007500740070007500740020007b000a0063006c0061007300730020005700720069007400650072000a007d000a0053006f00750072006300650020002d002d003e00200052006500610064006500720020003a002000720065006100640073000a00520065006100640065007200200022003100220020002d002d003e00200022002a002200200057007200690074006500720020003a002000730065006e00640073	Input,-,1,35.59375,24,35.59375,24,75.125,169.5,126.25,315;Output,-,1,48.03125,24,48.03125,24,75.125,564.8499908447266,117.9375,189.89999389648438;Reader,Input,0,78.25,84,0,0,75.125,261,78.25,84;Source,Input,0,78.25,84,0,0,75.125,105,78.25,84;Writer,Output,0,69.9375,84,0,0,75.125,593.7999877929689,69.9375,84	40.03125,24,0,0,0,0;42.703125,24,6.125,16.5,4.28125,16.5	75.125,147|75.125,219;75.125,303|75.125,355.9|75.125,459.9|75.125,551.8	74.640625,183;74.9765625,407.9	-;-;81.5875,313.65;86.665625,535.15
+diff --git a/tools/mermaid-cpp/class-elk-cases.mjs b/tools/mermaid-cpp/class-elk-cases.mjs
+new file mode 100644
+index 00000000..a7d8e7f2
+--- /dev/null
++++ b/tools/mermaid-cpp/class-elk-cases.mjs
+@@ -0,0 +1,7 @@
++export const cases=[
++ ['elk-members','classDiagram\nclass Document {\n+title String\n+save() bool\n}\nDocument --> Store : saves'],
++ ['elk-inheritance','classDiagram\nBase <|-- Reader\nBase <|-- Writer\nReader --> Writer : sends'],
++ ['elk-multiplicity','classDiagram\ndirection LR\nLibrary "1" o-- "*" Book : contains'],
++ ['elk-feedback','classDiagram\ndirection LR\nReader "1" --> "*" Store : writes\nStore "1" --> "1" Reader : refreshes'],
++ ['elk-namespace','classDiagram\nnamespace Input {\nclass Reader\nclass Source\n}\nnamespace Output {\nclass Writer\n}\nSource --> Reader : reads\nReader "1" --> "*" Writer : sends'],
++];
+diff --git a/tools/mermaid-cpp/class-elk-oracle.mjs b/tools/mermaid-cpp/class-elk-oracle.mjs
+new file mode 100644
+index 00000000..35be3e62
+--- /dev/null
++++ b/tools/mermaid-cpp/class-elk-oracle.mjs
+@@ -0,0 +1,59 @@
++import {readFileSync,writeFileSync,realpathSync} from 'node:fs';
++import {createRequire,stripTypeScriptTypes} from 'node:module';
++import vm from 'node:vm';
++import {createHash} from 'node:crypto';
++import path from 'node:path';
++import assert from 'node:assert/strict';
++const require=createRequire(realpathSync(new URL('./oracle/node_modules/mermaid/package.json',import.meta.url)));
++const lock=JSON.parse(readFileSync(new URL('../../docs/mermaid-cpp/source-lock.json',import.meta.url)));
++const base=path.dirname(require.resolve('elkjs/package.json'));
++for(const f of lock.elkCycle.files)assert.equal(createHash('sha256').update(readFileSync(path.join(base,f.path))).digest('hex'),f.sha256);
++const ELK=require('elkjs/lib/elk.bundled.js'),elk=new ELK();
++const adapterMap=JSON.parse(readFileSync('tools/mermaid-cpp/oracle/node_modules/mermaid/'+lock.elkAdapter.map));
++for(const f of lock.elkAdapter.files){const i=adapterMap.sources.findIndex(s=>s.endsWith(f.source));assert.equal(createHash('sha256').update(adapterMap.sourcesContent[i]).digest('hex'),f.sha256);}
++const adapterSource=adapterMap.sourcesContent[adapterMap.sources.findIndex(s=>s.endsWith('/render.ts'))];
++const js=stripTypeScriptTypes(adapterSource);
++function originalFunction(name){const start=js.indexOf('function '+name+'(');assert(start>=0,name);const begin=js.indexOf('{',start);let depth=1,end=begin+1;for(;depth;end++){if(js[end]==='{')depth++;else if(js[end]==='}')depth--;}return js.slice(start,end);}
++const originalHelpers=['segmentHitsBox','terminalLabelObstacles','placedTerminalLabels','slideTerminalLabelsOffFrames','putTerminalLabelsOnTheirSide','separateOppositeEdgeLabels'].map(originalFunction).join('\n');
++const original=vm.runInNewContext(`(()=>{const TERMINAL_LABEL_FRAME_CLEARANCE=2,OPPOSITE_LABEL_MIN_GAP=4;
++ const boxesOverlap=(a,b)=>a.x1<b.x2&&b.x1<a.x2&&a.y1<b.y2&&b.y1<a.y2;
++ const labelBox=(center,size)=>({x1:center.x-size.width/2,y1:center.y-size.height/2,x2:center.x+size.width/2,y2:center.y+size.height/2});
++ ${originalHelpers};return (edges,nodes)=>{slideTerminalLabelsOffFrames(edges,nodes);putTerminalLabelsOnTheirSide(edges,nodes);separateOppositeEdgeLabels(edges);};})()`);
++const observations=JSON.parse(readFileSync('build/mermaid-cpp/class-elk-browser/original.json'));
++const rows=['# Class ELK measured input: name,source hex,nodes(id,parent,group,width,height,labelwidth,labelheight,x,y,paintwidth,paintheight),label sizes(center/start/end),routes,center label centers,terminal label centers.'];
++for(const r of observations.filter(r=>r.theme==='default')){
++ const dir=/direction (\w+)/.exec(r.source)?.[1]??'TB';
++ const options={'elk.algorithm':'layered','elk.hierarchyHandling':'INCLUDE_CHILDREN','elk.direction':{LR:'RIGHT',RL:'LEFT',TB:'DOWN',BT:'UP'}[dir],
++ 'spacing.baseValue':40,'elk.layered.cycleBreaking.strategy':'DEPTH_FIRST','elk.layered.nodePlacement.strategy':'BRANDES_KOEPF','elk.layered.nodePlacement.bk.fixedAlignment':'BALANCED',
++ 'elk.layered.considerModelOrder.strategy':'NODES_AND_EDGES','elk.layered.unnecessaryBendpoints':true,'elk.spacing.portsSurrounding':'[top=12,left=12,bottom=12,right=12]'};
++ const root={id:'root',layoutOptions:options,children:[],edges:[]};const all=new Map(),parents=new Map();let parent=null;
++ for(const line of r.source.split('\n')){if(line.startsWith('namespace '))parent=/namespace (\w+)/.exec(line)[1];else if(line==='}')parent=null;else if(parent&&line.startsWith('class '))parents.set(/class (\w+)/.exec(line)[1],parent);}
++ const nodeRows=[];
++ for(const group of r.clusters){const m=r.measured.groups.find(n=>n.id.endsWith('-'+group.id));assert(m);const node={id:group.id,children:[],labels:[{text:group.id,width:m.width,height:Math.max(0,m.height-2)}],layoutOptions:{...options,'elk.layered.considerModelOrder.strategy':'NONE','spacing.baseValue':24,'spacing.nodeNode':50,'elk.spacing.edgeEdge':20,'elk.layered.spacing.edgeNodeBetweenLayers':30,'elk.padding':'[top=24,left=24,bottom=24,right=24]','nodeLabels.placement':'[H_CENTER V_TOP, INSIDE]','nodeSize.constraints':'[MINIMUM_SIZE,NODE_LABELS]','nodeSize.minimum':`(${m.width+16},0)`}};all.set(node.id,node);root.children.push(node);nodeRows.push([node.id,'-',1,m.width,m.height,m.width,m.height,group.x+group.width/2,group.y+group.height/2,group.width,group.height]);}
++ for(const n of r.nodes){const node={id:n.id,width:n.width,height:n.height};all.set(node.id,node);(parents.has(n.id)?all.get(parents.get(n.id)):root).children.push(node);nodeRows.push([n.id,parents.get(n.id)??'-',0,n.width,n.height,0,0,n.x+n.width/2,n.y+n.height/2,n.width,n.height]);}
++ const relations=r.source.split('\n').filter(l=>l.includes('--')).map(line=>{const m=/^(\w+)(?: "([^"]*)")?\s+([.<|*o-]+>?)\s+(?:"([^"]*)"\s+)?(\w+)(?: : (.*))?$/.exec(line);assert(m,line);return {from:m[1],start:m[2],arrow:m[3],end:m[4],to:m[5],title:m[6]};});
++ let c=0,t=0;const labelRows=[];
++ root.edges=relations.map((e,i)=>{const center=e.title?r.measured.centers[c++]:{width:0,height:0},start=e.start?r.measured.terminals[t++]:{width:0,height:0},end=e.end?r.measured.terminals[t++]:{width:0,height:0};labelRows.push([center.width,center.height,start.width,start.height,end.width,end.height]);const labels=[];
++  if(e.title)labels.push({id:'c'+i,text:e.title,...center,layoutOptions:{'edgeLabels.inline':true,'edgeLabels.placement':'CENTER'}});
++  for(const [head,text,size,marker]of [[false,e.start,start,!e.arrow.startsWith('-')],[true,e.end,end,!e.arrow.endsWith('-')]])if(text)labels.push({id:'t'+(2*i+Number(head)),text,width:size.width+(marker?12:0),height:size.height+(marker?12:0),layoutOptions:{'edgeLabels.placement':head?'HEAD':'TAIL'}});
++  return {id:'e'+i,sources:[e.from],targets:[e.to],labels};
++ });
++ const result=await elk.layout(root),origins=new Map([['root',[0,0]]]),outEdges=[];
++ const walk=(n,x,y)=>{for(const child of n.children??[]){origins.set(child.id,[x+child.x,y+child.y]);walk(child,x+child.x,y+child.y);}for(const edge of n.edges??[])outEdges.push([edge,n.id]);};walk(result,0,0);
++ for(const n of r.nodes){const p=origins.get(n.id);assert(Math.abs(p[0]-n.x)<1e-4,`${r.name}/${n.id} x ${p[0]} / ${n.x}`);assert(Math.abs(p[1]-n.y)<1e-4,`${r.name}/${n.id} y ${p[1]} / ${n.y}`);}
++ const routes=[],centers=[],terminals=[];
++ for(const [e,owner]of outEdges){const i=+e.id.slice(1),o=origins.get(e.container??owner),p=v=>[v.x+o[0],v.y+o[1]].join(',');const s=e.sections[0];routes[i]=[s.startPoint,...s.bendPoints??[],s.endPoint].map(p).join('|');
++  for(const l of e.labels??[]){const center=[l.x+o[0]+l.width/2,l.y+o[1]+l.height/2].join(',');if(l.id[0]==='c')centers[i]=center;else terminals[+l.id.slice(1)]=center;}
++ }
++ const paintedEdges=relations.map((e,i)=>({start:e.from,end:e.to,label:e.title,width:labelRows[i][0],height:labelRows[i][1],x:centers[i]?+centers[i].split(',')[0]:undefined,y:centers[i]?+centers[i].split(',')[1]:undefined,
++  points:routes[i].split('|').map(p=>{const [x,y]=p.split(',').map(Number);return {x,y};}),terminalLabelCenters:{},terminalLabelSizes:{}}));
++ for(let i=0;i<relations.length;i++)for(const head of [false,true])if(terminals[2*i+Number(head)]){const [x,y]=terminals[2*i+Number(head)].split(',').map(Number),key=head?'endLeft':'startRight',l=labelRows[i];paintedEdges[i].terminalLabelCenters[key]={x,y};paintedEdges[i].terminalLabelSizes[key]={width:l[head?4:2],height:l[head?5:3]};}
++ original(paintedEdges,nodeRows.map(n=>({x:n[7],y:n[8],width:n[9],height:n[10],isGroup:!!n[2]})));
++ const finalTerminals=paintedEdges.flatMap(e=>['startRight','endLeft'].map(k=>e.terminalLabelCenters[k]?[e.terminalLabelCenters[k].x,e.terminalLabelCenters[k].y].join(','):'-'));
++ const observed=[...r.svg.matchAll(/class="edgeTerminals" transform="translate\(([^)]+)\)"/g)].map(m=>m[1].split(',').map(Number));
++ finalTerminals.filter(p=>p!=='-').forEach((p,i)=>p.split(',').map(Number).forEach((v,d)=>assert(Math.abs(v-observed[i][d])<1e-4,`${r.name} final terminal ${i}/${d}: ${v}/${observed[i][d]}`)));
++ rows.push([r.name,Array.from(r.source,c=>c.charCodeAt(0).toString(16).padStart(4,'0')).join(''),nodeRows.map(n=>n.join(',')).join(';'),labelRows.map(n=>n.join(',')).join(';'),routes.join(';'),relations.map((_,i)=>centers[i]??'-').join(';'),relations.flatMap((_,i)=>[terminals[2*i]??'-',terminals[2*i+1]??'-']).join(';'),finalTerminals.join(';'),paintedEdges.map(e=>e.x===undefined?'-':[e.x,e.y].join(',')).join(';')].join('\t'));
++}
++const fixture=new URL('../../tests/mermaid_cpp/fixtures/class-elk.tsv',import.meta.url),expected=rows.join('\n')+'\n';
++if(process.argv.includes('--write'))writeFileSync(fixture,expected);else assert.equal(readFileSync(fixture,'utf8').replaceAll('\r\n','\n'),expected);
++console.log('Class ELK: five original measured scenes and terminal labels checked.');
+diff --git a/tools/mermaid-cpp/class-elk-browser-probe.mjs b/tools/mermaid-cpp/class-elk-browser-probe.mjs
+new file mode 100644
+index 00000000..eec3b9e8
+--- /dev/null
++++ b/tools/mermaid-cpp/class-elk-browser-probe.mjs
+@@ -0,0 +1,36 @@
++// Source-matched Class geometry, measured in an isolated browser.
++import assert from 'node:assert/strict';
++import {mkdirSync,readFileSync,writeFileSync} from 'node:fs';
++import {resolve} from 'node:path';
++import {pathToFileURL} from 'node:url';
++import {chromium} from './oracle/node_modules/playwright-core/index.mjs';
++import {cases} from './class-elk-cases.mjs';
++process.argv.push('--library');
++const {inspectClass}=await import('./class-browser-probe.mjs');
++process.argv.pop();
++import {createHash} from 'node:crypto';
++const lock=JSON.parse(readFileSync('docs/mermaid-cpp/source-lock.json'));
++const map=JSON.parse(readFileSync('tools/mermaid-cpp/oracle/node_modules/mermaid/'+lock.elkAdapter.map));
++for(const f of lock.elkAdapter.files){const i=map.sources.findIndex(s=>s.endsWith(f.source));assert(i>=0);assert.equal(createHash('sha256').update(map.sourcesContent[i]).digest('hex'),f.sha256);}
++ const directory=resolve(process.argv[2]??'build/mermaid-cpp/class-elk-browser');mkdirSync(directory,{recursive:true});
++ const url=pathToFileURL(resolve('tools/mermaid-cpp/oracle/node_modules/mermaid/dist/mermaid.esm.mjs')).href;
++ const html=`<!doctype html><body><script type="module">
++ const {default:mermaid}=await import(${JSON.stringify(url)});const inspect=${inspectClass.toString()};
++ try{const rows=[];for(const [name,source] of ${JSON.stringify(cases)}) for(const theme of ['default','dark']) {
++ mermaid.initialize({startOnLoad:false,theme,look:'classic',layout:'elk',fontFamily:'Arial'});
++ const {svg}=await mermaid.render('class'+rows.length,source);const host=document.createElement('div');host.innerHTML=svg;document.body.append(host);
++ const root=host.querySelector('svg');
++ const size=g=>{const f=g.querySelector('foreignObject');return f?{width:+f.getAttribute('width'),height:+f.getAttribute('height')}:{width:0,height:0};};
++ const measured={centers:[...root.querySelectorAll('g.edgeLabels > g.edgeLabel')].map(size),terminals:[...root.querySelectorAll('g.edgeLabels > g.edgeTerminals')].map(size),groups:[...root.querySelectorAll('g.cluster')].map(g=>({id:g.id,...size(g.querySelector('.cluster-label'))}))};
++ rows.push({measured,name:name+'-'+theme,source,theme,svg,...inspect()});host.remove();}
++ document.body.innerHTML='<pre id="result"></pre>';document.querySelector('pre').textContent=JSON.stringify(rows);
++ }catch(e){document.body.innerHTML='<pre id="error"></pre>';document.querySelector('pre').textContent=e.stack;}</script>`;
++ const file=resolve(directory,'probe.html');writeFileSync(file,html);
++ const browser=await chromium.launch({executablePath:process.env.FOLIA_BROWSER??'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true,args:['--allow-file-access-from-files']});
++ let rows;
++ try { const page=await browser.newPage();await page.goto(pathToFileURL(file).href);
++ await page.waitForSelector('pre#result,pre#error',{timeout:60000});assert.equal(await page.locator('#error').count(),0,await page.locator('pre').textContent());
++ rows=JSON.parse(await page.locator('#result').textContent()); } finally {await browser.close();}
++ assert.equal(rows.length,cases.length*2);writeFileSync(resolve(directory,'original.json'),JSON.stringify(rows,null,2));
++ for(const row of rows)writeFileSync(resolve(directory,row.name+'.svg'),row.svg);
++ console.log(`Measured ${rows.length} original Class SVGs in ${directory}`);
