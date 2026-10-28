@@ -49,8 +49,17 @@ drag that uses its existing window without requesting a new one.
 The shipped WinUI source leaves `TabTearOutRequested.NewWindowId` at zero, so it
 cannot identify the target. It also requests and briefly shows a preparatory
 window on an ordinary tab click. Preparatory windows are DWM-cloaked, excluded
-from switchers and marked nonactivating. Only a completed session transfer
+from switchers and marked nonactivating. The SDK's explicit `SetWindowPos` can
+activate even such a window: a preparation-scoped, UI-thread-local CBT guard
+vetoes activation and focus only for that HWND (including its child focus).
+It is removed on transfer or close. No window procedure or input loop is replaced.
+Only a completed session transfer
 restores their normal presentation; an unused host closes with the native loop.
+External merges reject hidden/preparatory hosts and use the actual `TabListView`
+bounds, matching the native within-strip drag test. The SDK's broader admission
+region includes the add button and otherwise permits a merge immediately followed
+by a tear-out at the same pointer position. Transfer completes the receiving
+layout before returning to that move loop.
 These are event-protocol details of the pinned SDK, not alternate document paths.
 The corresponding SDK sources are
 [TabView](https://github.com/microsoft/microsoft-ui-xaml/blob/693f472aeaf89c6dff66256ee6fcd453e5d553b8/controls/dev/TabView/TabView.cpp)
@@ -81,4 +90,6 @@ links. Window tests exercise the production transfer path, including exact
 source/history restoration, placeholders, duplicates, empty sessions, unloaded
 targets, click-only preparation, repeated merge/tear-out in one gesture and a
 long document's viewport anchor. They also assert fresh XAML roots and the DWM
-cloak/switcher contract. They do not inject desktop mouse input.
+cloak/switcher and activation contracts. Tests use real HWNDs and XAML layout,
+but do not inject desktop mouse input. End-to-end pointer interaction needs a
+separate manual check; direct protocol tests do not establish that result.

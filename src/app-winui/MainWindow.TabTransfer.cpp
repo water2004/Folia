@@ -3,6 +3,7 @@ import std;
 #include "App.xaml.h"
 #include "MainWindow.xaml.h"
 #include <dwmapi.h>
+#include <winrt/Microsoft.UI.Content.h>
 
 namespace winrt::Folia::implementation {
     using namespace Microsoft::UI::Xaml;
@@ -80,6 +81,9 @@ namespace winrt::Folia::implementation {
             }
         }
         source->RefreshDocumentTabs(); RefreshDocumentTabs();
+        // The native move loop resumes immediately after this callback. Its
+        // next bounds check must use the receiving strip's completed layout.
+        DocumentTabs().UpdateLayout();
         RevealTabWindow();
         return true;
     }
@@ -89,6 +93,7 @@ namespace winrt::Folia::implementation {
         auto target = winrt::get_self<MainWindow>(window.as<winrt::Folia::MainWindow>());
         target->transferPlaceholder = target->workspaceDocuments.Active()->id;
         target->preparedTabWindow = true;
+        target->preparedTabActivation.Attach(target->WindowHandle());
         target->tabWindowStyle = ::GetWindowLongPtrW(target->WindowHandle(), GWL_EXSTYLE);
         ::SetWindowLongPtrW(target->WindowHandle(), GWL_EXSTYLE,
             target->tabWindowStyle | WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW);
@@ -99,6 +104,7 @@ namespace winrt::Folia::implementation {
     }
     void MainWindow::RevealTabWindow() {
         if (!preparedTabWindow) return;
+        preparedTabActivation.Reset();
         ::SetWindowLongPtrW(WindowHandle(), GWL_EXSTYLE, tabWindowStyle);
         AppWindow().IsShownInSwitchers(true);
         BOOL hidden = FALSE;
@@ -129,7 +135,10 @@ namespace winrt::Folia::implementation {
     }
     bool MainWindow::PrepareExternalTab(Windows::Foundation::IInspectable const& item) {
         auto tab = FindTransferTab(item);
-        if (tab && !tab->tearOutWindow.get()) {
+        // WinUI enumerates loaded TabViews, including hidden/preparation hosts.
+        // Such windows are not user-visible drop destinations.
+        if (preparedTabWindow || !AppWindow().IsVisible() || !CanAcceptTab(tab)) return false;
+        if (!tab->tearOutWindow.get()) {
             // A one-tab drag moves its existing window and raises no
             // TabTearOutWindowRequested event.
             if (auto source = tab->owner.get()) {
@@ -137,7 +146,20 @@ namespace winrt::Folia::implementation {
                 tab->tearOutWindow = source;
             }
         }
-        return CanAcceptTab(tab);
+        return true;
+    }
+    bool MainWindow::ContainsTabDragPoint(Windows::Graphics::PointInt32 point) {
+        auto tabs = DocumentTabs();
+        auto list = tabs.as<IControlProtected>().GetTemplateChild(L"TabListView").try_as<FrameworkElement>();
+        if (!list || !list.IsLoaded() || list.ActualWidth() <= 0 || list.ActualHeight() <= 0) return false;
+        // Use precisely the element and coordinate system used by WinUI's
+        // DragTabWithinTabView. PopulateTabViewList also includes AddButton;
+        // accepting that extra region can cause an immediate tear-out again.
+        auto bounds = list.TransformToVisual(nullptr).TransformBounds({0, 0,
+            static_cast<float>(list.ActualWidth()), static_cast<float>(list.ActualHeight())});
+        auto local = list.XamlRoot().CoordinateConverter().ConvertScreenToLocal(point);
+        return local.X >= bounds.X && local.X <= bounds.X + bounds.Width
+            && local.Y >= bounds.Y && local.Y <= bounds.Y + bounds.Height;
     }
     void MainWindow::RegisterTabTransferHandlers() {
         DocumentTabs().CanTearOutTabs(true);
@@ -157,7 +179,9 @@ namespace winrt::Folia::implementation {
         }));
         DocumentTabs().ExternalTornOutTabsDropping(WindowEvent([this](auto const&, auto const& args) {
             auto items = args.Items();
-            args.AllowDrop(items.size() == 1 && PrepareExternalTab(items[0]));
+            POINT point{};
+            args.AllowDrop(items.size() == 1 && ::GetCursorPos(&point)
+                && ContainsTabDragPoint({point.x, point.y}) && PrepareExternalTab(items[0]));
         }));
         DocumentTabs().ExternalTornOutTabsDropped(WindowEvent([this](auto const&, auto const& args) {
             auto items = args.Items();

@@ -57,6 +57,7 @@ namespace winrt::Folia::implementation
         MainWindow* BeginTabTearOut(std::shared_ptr<DocumentTab> const& tab);
         bool CompleteTabTearOut(std::shared_ptr<DocumentTab> const& tab);
         bool PrepareExternalTab(Windows::Foundation::IInspectable const& item);
+        bool ContainsTabDragPoint(Windows::Graphics::PointInt32 point);
         void EndTabDrag();
         void RevealTabWindow();
         void AttachControllers();
@@ -160,6 +161,7 @@ namespace winrt::Folia::implementation
         std::shared_ptr<DocumentTab> draggingTab;
         winrt::Folia::detail::TabDragCompletionSubscription tabDragEnded;
         bool preparedTabWindow = false;
+        winrt::Folia::detail::PreparedTabActivation preparedTabActivation;
         LONG_PTR tabWindowStyle = 0;
         std::optional<std::uint64_t> transferPlaceholder;
         bool tabOrderSyncPending = false;

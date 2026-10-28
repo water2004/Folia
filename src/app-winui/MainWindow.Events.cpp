@@ -98,6 +98,7 @@ namespace winrt::Folia::implementation
         {
             windowClosed = true;
             tabDragEnded.Reset();
+            preparedTabActivation.Reset();
             EndTabDrag();
             animationController.Detach();
             closingHandler.Reset();

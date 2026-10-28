@@ -4,6 +4,7 @@
 #include "App.xaml.h"
 #include "MainWindow.xaml.h"
 #include <dwmapi.h>
+#include <winrt/Microsoft.UI.Content.h>
 
 import folia.markdown.instrumentation;
 
@@ -16,6 +17,10 @@ namespace winrt::Folia::implementation {
         }
         static auto& Documents(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->workspaceDocuments; }
         static auto Tabs(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->DocumentTabs(); }
+        static auto Handle(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->WindowHandle(); }
+        static bool ContainsDragPoint(Microsoft::UI::Xaml::Window const& window, Windows::Graphics::PointInt32 point) {
+            return Impl(window)->ContainsTabDragPoint(point);
+        }
         static auto Items(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->tabSource; }
         static auto Binding(Microsoft::UI::Xaml::Window const& window, std::uint64_t id) { return Impl(window)->tabItems.at(id); }
         static auto View(Microsoft::UI::Xaml::Window const& window, std::uint64_t id) {
@@ -81,6 +86,77 @@ namespace {
     };
     auto App() { return winrt::Folia::implementation::App::Current(); }
     suite tab_transfer_tests = [] {
+        "hidden and preparation-only tab windows cannot receive an external merge"_test = [] {
+            OwnedWindow source(App()->CreateMainWindow()), target(App()->CreateMainWindow());
+            auto document = Access::Documents(source.window).Active();
+            auto item = Access::Binding(source.window, document->id)->item;
+            target.window.AppWindow().Hide();
+            expect(!Access::AllowDrop(target.window, item));
+            target.window.Activate();
+            expect(Access::AllowDrop(target.window, item));
+            Access::End(source.window);
+            auto pending = Access::TearOutWindow(source.window);
+            pending.AppWindow().Show(false);
+            expect(!Access::AllowDrop(pending, item));
+            expect(Access::Documents(source.window).Active() == document);
+            Access::Close(pending);
+        };
+        "tab merge hit region agrees with native reorder region after layout and overflow"_test = [] {
+            OwnedWindow source(App()->CreateMainWindow()), target(App()->CreateMainWindow());
+            auto check = [&] {
+                auto tabs = Access::Tabs(target.window);
+                target.window.Content().as<FrameworkElement>().UpdateLayout();
+                auto list = tabs.as<Controls::IControlProtected>().GetTemplateChild(L"TabListView").as<FrameworkElement>();
+                auto bounds = list.TransformToVisual(nullptr).TransformBounds({0, 0,
+                    static_cast<float>(list.ActualWidth()), static_cast<float>(list.ActualHeight())});
+                auto screen = [&](float x, float y) {
+                    return list.XamlRoot().CoordinateConverter().ConvertLocalToScreen(winrt::Windows::Foundation::Point{x, y});
+                };
+                auto middleY = bounds.Y + bounds.Height / 2;
+                expect(Access::ContainsDragPoint(target.window, screen(bounds.X + bounds.Width / 2, middleY)));
+                expect(!Access::ContainsDragPoint(target.window, screen(bounds.X - 3, middleY)));
+                expect(!Access::ContainsDragPoint(target.window, screen(bounds.X + bounds.Width + 3, middleY)));
+                expect(!Access::ContainsDragPoint(target.window, screen(bounds.X + 3, bounds.Y - 3)));
+                expect(!Access::ContainsDragPoint(target.window, screen(bounds.X + 3, bounds.Y + bounds.Height + 3)));
+            };
+            check();
+            auto id = Access::Documents(source.window).Active()->id;
+            expect(Access::Transfer(source.window, id, target.window, 0));
+            check();
+            for (int i = 0; i < 10; ++i) Access::New(target.window);
+            target.window.AppWindow().Resize({720, 600});
+            check();
+            target.window.AppWindow().Resize({1200, 800});
+            check();
+        };
+        "native tab preparatory show must not deactivate the document window"_test = [] {
+            OwnedWindow source(App()->CreateMainWindow());
+            Access::New(source.window);
+            auto document = Access::Documents(source.window).Active();
+            source.window.Activate();
+            auto sourceHandle = Access::Handle(source.window);
+            expect(::GetActiveWindow() == sourceHandle);
+            auto pending = Access::Begin(source.window, document->id);
+            std::size_t deactivated = 0;
+            auto token = source.window.Activated([&](auto const&, WindowActivatedEventArgs const& args) {
+                if (args.WindowActivationState() == WindowActivationState::Deactivated) ++deactivated;
+            });
+            RECT bounds{};
+            ::GetWindowRect(sourceHandle, &bounds);
+            // Reproduce the SDK call, including its lack of SWP_NOACTIVATE.
+            // Show(false) did not exercise the window activation regression.
+            expect(::SetWindowPos(Access::Handle(pending), sourceHandle, bounds.left, bounds.top,
+                bounds.right - bounds.left, bounds.bottom - bounds.top, SWP_SHOWWINDOW) != FALSE);
+            RECT placed{};
+            expect(::GetWindowRect(Access::Handle(pending), &placed) != FALSE);
+            expect(placed.left == bounds.left && placed.top == bounds.top);
+            expect(::GetActiveWindow() == sourceHandle);
+            pending.AppWindow().Hide();
+            expect(deactivated == 0_u);
+            source.window.Activated(token);
+            Access::End(source.window);
+            Access::Close(pending);
+        };
         "native tab gesture retains its host across merge and repeated tear-out using the stable data item"_test = [] {
             OwnedWindow source(App()->CreateMainWindow()), other(App()->CreateMainWindow());
             auto document = Access::Documents(source.window).Active();
@@ -98,6 +174,7 @@ namespace {
             expect(Access::View(target.window, document->id) != firstView);
             expect(Access::View(target.window, document->id).XamlRoot() == target.window.Content().as<FrameworkElement>().XamlRoot());
             expect(Access::Cloaked(target.window) == 0_u && target.window.AppWindow().IsShownInSwitchers());
+            expect(::GetActiveWindow() == Access::Handle(target.window));
             for (int i = 0; i < 3; ++i) {
                 expect(Access::AllowDrop(other.window, item));
                 expect(Access::Transfer(target.window, document->id, other.window, 0));

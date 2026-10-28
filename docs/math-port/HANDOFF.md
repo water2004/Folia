@@ -2,7 +2,16 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-10-28，修复0.5.3标签拖动回归）
+## 当前 checkpoint（2026-10-28，追查合并后的阴影闪烁/意外拆出）
+
+- 新反馈推翻“cloak已解决点击闪烁”的验收：按实际SDK SetWindowPos(SWP_SHOWWINDOW)测试稳定发生源窗失活；上轮Show(false)测试遗漏激活。before日志tab-activation-before.log。EnableWindow(false)仍未阻止失活，已撤回该尝试。
+- 本轮修复：PreparedTabActivation UI线程局部CBT guard只在预备HWND上否决activate/focus，真正Transfer/Closed后RAII移除；保留WinUI拖动协议。另查SDK PopulateTabViewList包含AddButton，而DragTabWithinTabView只接受TabListView，边缘位置可刚合并又拆出；外部合并用同一list坐标边界、拒绝hidden/prepared窗口、转移后同步完成target layout。
+- 验证：Debug成功tab-activation-guard-build.log；标签15项156断言通过tab-activation-final-transfer.log（含恢复正常窗口激活）；额外窗口定位/SetWindowPos成功返回检查1项6断言通过tab-activation-placement-check.log。完整visual的文件树6/95、chrome6/696通过；语言弹窗首次等待超时，定向重跑1/28通过tab-change-language-picker-check.log。
+- Release/MSI成功tab-activation-msi.log，真实startup/close exit0。当前候选build/installer/bin/Folia-0.5.3-x64.msi，53,669,236字节，SHA256 e7076cebc04557585357faf964dc2aa0caee7dce40ab9c6e8e5c7bb051430271；邻接sha256已更新。未安装/推送/替换线上Release，版本保持0.5.3。
+- 用户指出鼠标坐标模拟未命中并反对这种测试，已删除该测试/helper/临时运行脚本。超时不作为产品故障证据，**不再自动移动鼠标**；真实鼠标手势仍需人工复测，不声称已验收。不开agents/CUA、不关用户窗口，native串行≤4。
+- 停止点：实现、测试及本交接一同本地提交（见HEAD）；无活跃agents/构建/测试句柄。下一步是候选人工拖动复测或按用户新反馈接续，不重跑已完成广泛检查。
+
+## 上一轮已完成基线（历史，不替代当前checkpoint）
 
 - 用户报告两个空窗口合并崩溃、合并后切标签闪窗、拉出空文档。本轮仅授权修复，版本保持0.5.3，不重新发布/移动既有标签；不开agents/CUA、不关用户窗口、native串行≤4。
 - 新证据推翻此前“同TabViewItem迁移/NewWindowId可靠”的结论：实际DLL标记源码693f472aeaf89c6dff66256ee6fcd453e5d553b8的TabView.h/.cpp中，TabTearOutRequested.NewWindowId仅默认初始化从未赋值；TabViewListView缓存原parent且跨窗不刷新。SDK还在普通点击预建并Show/Hide窗口（官方issue10155）。源码证据build/tag-layout/TabView-installed.{cpp,h}、TabViewListView-installed.cpp、TabViewItem-installed.cpp。
@@ -10,7 +19,7 @@
 - 初次测试的新代码startup崩溃已定向定位并修正：InputNonClientPointerSource与AppWindow一样不支持弱引用，auto_revoker会崩；改RAII强source/token订阅。tab-data-subscription-startup.log真实startup/close通过。不是用户原崩溃根因，不混淆。
 - 已验：Debug最终构建tab-selection-boundary-build.log通过；完整visual **25项946断言**（tab-regression-final-visual.log、对应-stdout.log），3次真实startup/close全exit0（tab-regression-final-startup.log），真实多窗口激活/Unicode/相对路径/独立进程全过（tab-regression-final-activation.log）。包含未加载目标、空页合并/正常关闭源窗、同gesture反复合并拆出、click-only cloak/switchers、原会话/history/viewport、duplicate拒绝。
 - 选中标签原生排序另有可复现失败：SelectionChanged→ActivateDocument→RefreshDocumentTabs反向修改集合，顺序无法一致（tab-selected-reorder-before.log超时）。已分离SelectDocumentTab（仅选择）与模型结构变化后的RefreshDocumentTabs；定向after 1项4断言通过，再跑上述全套成功。旧直接Transfer空页/未加载target本来也过，不能把它当原生协议已覆盖。
-- 本轮修复和测试已完成，代码提交22bea8fe（本地，未推送）。Release/MSI成功（tab-regression-msi.log），内置真实startup/close exit0；本地候选 build/installer/bin/Folia-0.5.3-x64.msi，53,689,716字节，SHA256 d3c7eee4ab017cd17073db71a201a9f65ef25d3422e5a8d65766cc4d37ae1fb6。未安装、未替换线上Release，版本保持0.5.3。无活跃agents/build句柄；未做真实鼠标输入。当前无剩余实现/构建步骤；未来收到新问题从本checkpoint接续，不重做已完成广泛测试。
+- 上轮代码22bea8fe及交接b0c4dccf仅本地提交。其MSI已被当前checkpoint候选替换，旧产物大小/散列不再用于交付。
 - 用户真实安装版10:46崩溃记录0xc000027b、WER8000ffff；转储C:/Users/think book/AppData/Local/CrashDumps/Folia.exe.52828.dmp。缺stowed异常指针内存，未证明具体异常调用；不冒称确定根因。
 - 0.5.3已正式发布且不改标签：35e56265，CI40577471717/job122447644967成功，Release https://github.com/water2004/Folia/releases/tag/v0.5.3 ，MSI53,722,497字节，SHA256 2ca50713200c8f5f5769c35b172ff5dbfac07b15fe2e686500a9c9625a889a35。历史全套基线core764/500069、platform84/4249、controller134/18718、visual19/875。
 
