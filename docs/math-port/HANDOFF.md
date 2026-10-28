@@ -2,7 +2,13 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-10-28，追查合并后的阴影闪烁/意外拆出）
+## 当前 checkpoint（2026-10-28，发布0.5.4）
+
+- 用户确认“ok了”并授权推送、构建、发布0.5.4。版本入口（CMake、MSI默认、RC、manifest、设置页、README）统一0.5.4；release-notes/v0.5.4.md已准备。只做版本/发布资料更新，沿用下列已完成的功能验证。
+- 发布沿用.github/workflows/release.yml：master提交后推v0.5.4，CI构建self-contained MSI、真实startup/close检查、SHA256、GitHub Release。既有0.5.3标签不移动。
+- 本提交后下一步推送master及v0.5.4，监看CI及下载校验正式产物，完成后在此更新run/commit/散列。当前无agent/构建句柄；不开agents/CUA、不自动移动鼠标、不关用户窗口，native串行≤4。
+
+## 已完成的标签修复基线（9815cfcb，历史）
 
 - 新反馈推翻“cloak已解决点击闪烁”的验收：按实际SDK SetWindowPos(SWP_SHOWWINDOW)测试稳定发生源窗失活；上轮Show(false)测试遗漏激活。before日志tab-activation-before.log。EnableWindow(false)仍未阻止失活，已撤回该尝试。
 - 本轮修复：PreparedTabActivation UI线程局部CBT guard只在预备HWND上否决activate/focus，真正Transfer/Closed后RAII移除；保留WinUI拖动协议。另查SDK PopulateTabViewList包含AddButton，而DragTabWithinTabView只接受TabListView，边缘位置可刚合并又拆出；外部合并用同一list坐标边界、拒绝hidden/prepared窗口、转移后同步完成target layout。
