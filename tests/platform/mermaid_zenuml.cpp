@@ -5,7 +5,8 @@ namespace {
 using namespace boost::ut;using namespace folia::platform;using namespace folia::mermaid;
 suite mermaid_zenuml=[] {
  "mermaid_zenuml_measured_svg"_test=[] {
-  MermaidMeasurer measurer;auto family=measurer.resolve_family(u"Helvetica, Verdana, serif");expect(fatal(family.has_value()));
+  // Chromium maps the CSS Helvetica alias to Arial on Windows.
+  MermaidMeasurer measurer;auto family=measurer.resolve_family(u"Arial, Verdana, serif");expect(fatal(family.has_value()));
   ZenSvgMeasure measure=[&](std::u16string_view text,double size,bool bold){auto m=measurer.measure(text,{*family,static_cast<float>(size),bold?600u:400u});if(!m)throw std::runtime_error(m.error());return m->advance;};
   const std::vector<std::pair<std::string,std::u16string>> cases={{"async",u"zenuml\ntitle Demo\nAlice->John: Hello John, how are you?\nJohn->Alice: Great!\nAlice->John: See you later!"},
 {"participants",u"zenuml\ntitle Participants\n@Actor A as Alice\n@Database B as Store\nA->B: Save\nB->A: Saved"},
