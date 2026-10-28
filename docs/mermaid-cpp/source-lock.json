@@ -2308,5 +2308,63 @@
         "sha256": "aada44a96405afe9883a9f65ddf5e98b58df096102eaf88fd5245d5a9e8e687f"
       }
     ]
+  },
+  "stateBundle": {
+    "files": [
+      {
+        "path": "../../../../../node_modules/.pnpm/roughjs@4.6.6_patch_hash=3543d47108cb41b68ec6a671c0e1f9d0cfe2ce524fea5b0992511ae84c3c6b64/node_modules/roughjs/bundled/rough.esm.js",
+        "sourceMap": "chunk-AWAWVJFC.mjs.map",
+        "sha256": "e921535f216ebc93d422489d614da955b5286812220b3149fc70978f4cb5bd45"
+      },
+      {
+        "path": "src/rendering-util/rendering-elements/shapes/stateEnd.ts",
+        "sourceMap": "chunk-VFTINRM2.mjs.map",
+        "sha256": "28d7ddcd8bd8ded85429b53b6fa58900ad035a7e8aa27a02d58340c4680c1439"
+      },
+      {
+        "path": "src/rendering-util/rendering-elements/shapes/stateStart.ts",
+        "sourceMap": "chunk-VFTINRM2.mjs.map",
+        "sha256": "25db4c27ca41c1b89f809cb939a62b1fa9b9e4560978fdee604951b866f5c87d"
+      },
+      {
+        "path": "src/diagrams/state/parser/stateDiagram.jison",
+        "sourceMap": "stateDiagram-v2-MYRXERYP.mjs.map",
+        "sha256": "5d4e6bf04ed6daa180306bf3523ff2d78dffdf18665345fc5f19902ba6b12c57"
+      },
+      {
+        "path": "src/diagrams/state/stateCommon.ts",
+        "sourceMap": "stateDiagram-v2-MYRXERYP.mjs.map",
+        "sha256": "7d1ac37f60fa0113b028682d1058244ce301204fee9054dc47fd3b474cba854f"
+      },
+      {
+        "path": "src/diagrams/state/dataFetcher.ts",
+        "sourceMap": "stateDiagram-v2-MYRXERYP.mjs.map",
+        "sha256": "03a1dfa682ca80a7b7742ccd8bdfca6613210a217f378ac362a44f43847d7116"
+      },
+      {
+        "path": "src/diagrams/state/stateRenderer-v3-unified.ts",
+        "sourceMap": "stateDiagram-v2-MYRXERYP.mjs.map",
+        "sha256": "ceaf69b19b171bdfae0f36b8a3f80cfb0ebc023cca7a391dc332eacd777859a6"
+      },
+      {
+        "path": "src/diagrams/state/stateDb.ts",
+        "sourceMap": "stateDiagram-v2-MYRXERYP.mjs.map",
+        "sha256": "12a61b830057fd1fbb126fb64e6deab7cf8fb9883f4241487e47ed0bd8aa5bc5"
+      },
+      {
+        "path": "src/diagrams/state/styles.js",
+        "sourceMap": "stateDiagram-v2-MYRXERYP.mjs.map",
+        "sha256": "8693d018b78ed437cd3d41bca5a789b7fda6517031621035c0c5d4fbd49725cf"
+      },
+      {
+        "path": "src/diagrams/state/stateDiagram-v2.ts",
+        "sourceMap": "stateDiagram-v2-MYRXERYP.mjs.map",
+        "sha256": "a9a7d7dfeb638cff2739e8cc5a1028868cb948b5ba3acf97aaf665f1b9a850b5"
+      },
+      {
+        "path": "src/diagrams/state/parser/stateDiagram.jison",
+        "sha256": "72568f98201c5ba59dca96842d1805d5a9908c5965d0609ab27f192929285d4d"
+      }
+    ]
   }
 }

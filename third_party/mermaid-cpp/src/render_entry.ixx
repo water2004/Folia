@@ -19,6 +19,7 @@ export import folia.mermaid.git_graph_svg;
 export import folia.mermaid.block_svg;
 export import folia.mermaid.kanban_svg;
 export import folia.mermaid.c4_svg;
+export import folia.mermaid.state_svg;
 export import folia.mermaid.mindmap_svg;
 export import folia.mermaid.architecture_svg;
 
@@ -27,7 +28,7 @@ struct PacketRenderInput { PacketLayout layout; PacketSvgTheme theme; };
 struct PieRenderInput { PieDocument document; PieSvgTheme theme; PieSvgConfig config; };
 struct NativeDiagram {
     PreparedDiagram prepared;
-    std::variant<PacketRenderInput, PieRenderInput, FlowchartRenderInput, SequenceRenderInput, ClassRenderInput, QuadrantRenderInput, RadarRenderInput, XYRenderInput, SankeyRenderInput, TreemapRenderInput, JourneyRenderInput, TimelineRenderInput, GanttRenderInput, GitGraphRenderInput, BlockRenderInput, KanbanRenderInput, C4RenderInput, MindmapRenderInput, ArchitectureRenderInput> content;
+    std::variant<PacketRenderInput, PieRenderInput, FlowchartRenderInput, SequenceRenderInput, ClassRenderInput, QuadrantRenderInput, RadarRenderInput, XYRenderInput, SankeyRenderInput, TreemapRenderInput, JourneyRenderInput, TimelineRenderInput, GanttRenderInput, GitGraphRenderInput, BlockRenderInput, KanbanRenderInput, C4RenderInput, StateRenderInput, MindmapRenderInput, ArchitectureRenderInput> content;
 };
 struct DiagramSvg { std::string svg; double width{}, height{}; };
 
@@ -61,5 +62,6 @@ std::expected<DiagramSvg, std::string> render_native_diagram(
     const BlockMeasure& block_measure = {},
     const KanbanMeasure& kanban_measure = {},
     const C4Measurements& c4_measurements = {},
-    const ArchitectureMeasurements& architecture_measurements = {});
+    const ArchitectureMeasurements& architecture_measurements = {},
+    const StateMeasure& state_measure = {});
 }
