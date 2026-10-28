@@ -43,12 +43,12 @@ struct Painter {
    double sender=from;if(depth[a]&&!self)sender+=from<to?depth[a]*7:(depth[a]-2)*7;
    if(s.kind==ZenKind::creation){py[b]=c.top;double y=c.top+20,edge=to+(to<sender?pw[b]/2:-pw[b]/2),begin=sender+(sender<to?1:0);std::string labelContent=esc(label);if(label.size()>2&&label.front()==u'\u00ab'&&label!=u"\u00abcreate\u00bb")labelContent="<tspan>\xc2\xab</tspan><tspan dx=\"4\">"+esc(std::u16string_view(label).substr(1,label.size()-2))+"</tspan><tspan dx=\"4\">\xc2\xbb</tspan>";
     creations+="<g class=\"creation\">"+line(begin,y,edge,y,"message-line"," stroke-dasharray=\"6,4\"")+open_arrow(edge,y,to<sender,"arrow-head arrow-open")+"<text"+attr("x",(begin+edge)/2+(to<sender?3.5:-3))+attr("y",y-3)+" text-anchor=\"middle\" class=\"message-label\">"+labelContent+"</text>"+text(std::min(begin,edge)-4,y-3,seq,"seq-number","end")+"</g>";
-    occurrences+=rect(to-6,c.top+39,13,std::max(c.height-38,24.0)-2,"occurrence");
+    occurrences+=rect(to-6,c.top+39,13,std::max(c.height-38,24.0)-2,"occurrence",1);
    }else{
     double y=c.top+(self?30:16)-.5,offset=depth[b]*7;
     if(self){double x=from+(depth[a]?depth[a]*7:0);selfs+="<g class=\"message self-call\"><svg"+attr("x",x+1)+attr("y",c.top+14)+" width=\"30\" height=\"24\"><path d=\"M0,2 L26,2 Q28,2 28,4 L28,13 Q28,15 26,15 L14,15\" fill=\"none\" stroke=\"#000\" stroke-width=\"2\"/><g transform=\"translate(7, 10)\"><svg height=\"10\" width=\"7\" viewBox=\"0 0 7 9\"><g transform=\"scale(-1, 1) translate(-7, 0)\"><path d=\"M1 1.25 L6.15 4.5 L1 7.75 Z\" stroke=\"#000\" stroke-linecap=\"round\" fill=\"#000\" stroke-width=\"2\"/></g></svg></g></svg>"+text(x+6,c.top+12,label,"message-label")+text(x-3,c.top+12,seq,"seq-number","end")+"</g>";extra=std::max(extra,std::floor(measure(label,16,false)+.5)-(layout.positions.back()-to)-layout.widths.back()/2);
     }else{double end=to;if(s.kind==ZenKind::sync)end+=sender<to?-7+offset:7+offset;bool right=sender<end;double x1=sender+(right?1:0),x2=end+(right?0:1);messages+="<g class=\"message\">"+line(x1,y-.5,x2,y-.5,"message-line")+arrow(x2,y-.5,!right,s.kind==ZenKind::async)+text((sender+end)/2+(right?-3.5:3.5)+.5,y-3.5,label,"message-label","middle")+text(std::min(x1,x2)-4,y-3.5,seq,"seq-number","end")+"</g>";}
-    if(s.kind==ZenKind::sync){double h=c.height-(self?30:16)+2,x=to-7+offset;occurrences+=rect(x+1,y-.5,13,h-2,"occurrence");if(!s.assignment.empty()&&!self)ret(to-6+offset,sender+(depth[a]?2:2),y-1.5+h-2,s.assignment,seq+u"."+number(s.children.size()+1),false);}
+    if(s.kind==ZenKind::sync){double h=c.height-(self?30:16)+2,x=to-7+offset;occurrences+=rect(x+1,y-.5,13,h-2,"occurrence",1);if(!s.assignment.empty()&&!self)ret(to-6+offset,sender+(depth[a]?2:2),y-1.5+h-2,s.assignment,seq+u"."+number(s.children.size()+1),false);}
    }
    if(s.kind==ZenKind::sync||s.kind==ZenKind::creation){++depth[b];walk(s.children,seq+u".",0,nesting);--depth[b];}
   }

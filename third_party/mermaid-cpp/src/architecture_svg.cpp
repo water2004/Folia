@@ -6,7 +6,7 @@ import std;
 namespace folia::mermaid {
 namespace {
 std::string num(double x){auto value=format_number(x);if(!value)throw std::runtime_error("Invalid Architecture coordinate");return *value;}
-std::string xml(std::u16string_view text){const auto value=escape_svg_text(text,u"Architecture SVG");if(!value)throw std::runtime_error(value.error());std::string result;for(const auto c:*value)if(c=='"')result+="&quot;";else result+=c;return result;}
+std::string xml(std::u16string_view text){const auto value=escape_svg_text(text,u"Architecture SVG");if(!value)throw std::runtime_error("Invalid Architecture SVG text");std::string result;for(const auto c:*value)if(c=='"')result+="&quot;";else result+=c;return result;}
 const ConfigValue& field(const ConfigValue& v,std::u16string_view key){const auto* value=v.find(key);if(!value)throw std::runtime_error("Missing Architecture configuration");return *value;}
 double numeric(const ConfigValue& v){if(v.kind==ConfigKind::number)return v.number;const std::string s(v.string.begin(),v.string.end());double value=0;const auto result=std::from_chars(s.data(),s.data()+s.size(),value);if(result.ec!=std::errc{})throw std::runtime_error("Invalid Architecture numeric style");return value;}
 struct Point {double x=0,y=0;};
