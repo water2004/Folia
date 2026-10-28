@@ -340,6 +340,20 @@ jobs:
             Tee-Object -FilePath build/mermaid-cpp/build.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
+      - name: Check bounded ZenUML native candidate
+        run: |
+          node tools/mermaid-cpp/prepare-zenuml-oracle.mjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/zenuml-oracle.mjs build/mermaid-cpp/zenuml-browser
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & "$env:FOLIA_MERMAID_BINARY_DIR/FoliaMermaidTests.exe" "*zenuml*"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $env:FOLIA_MERMAID_SVG_OUTPUT = "$pwd/build/mermaid-cpp/pie-svg"
+          & "$env:FOLIA_MERMAID_BINARY_DIR/FoliaMermaidPlatformTests.exe" "*zenuml*"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/compare-zenuml-svg.mjs build/mermaid-cpp/zenuml-browser/original.json build/mermaid-cpp/pie-svg
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
       - name: Measure original Flowchart SVGs in a real browser
         run: |
           node tools/mermaid-cpp/flowchart-browser-probe.mjs
@@ -480,6 +494,8 @@ jobs:
             build/mermaid-cpp/architecture-browser/*.json
             build/mermaid-cpp/architecture-browser/*.tsv
             build/mermaid-cpp/architecture-browser/*.svg
+            build/mermaid-cpp/zenuml-browser/*.json
+            build/mermaid-cpp/zenuml-browser/*.svg
             build/mermaid-cpp/state-browser/*.json
             build/mermaid-cpp/state-browser/*.svg
             build/mermaid-cpp/gantt-browser/*.json

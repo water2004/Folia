@@ -140,6 +140,7 @@ if(WIN32 AND MSVC)
         "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_block.cpp"
         "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_kanban.cpp"
         "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_state.cpp"
+        "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_zenuml.cpp"
         "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_c4.cpp"
         "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_elk_flowchart.cpp"
         "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_architecture.cpp")
