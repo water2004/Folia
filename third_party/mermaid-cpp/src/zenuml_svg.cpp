@@ -6,7 +6,7 @@ namespace folia::mermaid {
 namespace {
 #include "zenuml_assets.inc"
 std::string num(double v){auto n=format_number(v);if(!n)throw std::runtime_error("Invalid ZenUML geometry");return *n;}
-std::string esc(std::u16string_view s){auto e=escape_svg_text(s,u"ZenUML text");if(!e)throw std::runtime_error(e.error());return *e;}
+std::string esc(std::u16string_view s){auto e=escape_svg_text(s,u"ZenUML text");if(!e)throw std::runtime_error("Invalid ZenUML SVG text");return *e;}
 std::string attr(std::string_view key,double n){return " "+std::string(key)+"=\""+num(n)+"\"";}
 std::string rect(double x,double y,double w,double h,std::string_view cls,double radius=0){return "<rect"+attr("x",x)+attr("y",y)+attr("width",w)+attr("height",h)+attr("rx",radius)+" class=\""+std::string(cls)+"\"/>";}
 std::string text(double x,double y,std::u16string_view label,std::string_view cls,std::string_view anchor="start",bool central=false,double opacity=1){return "<text"+(opacity==1?std::string{}:attr("opacity",opacity))+attr("x",x)+attr("y",y)+" text-anchor=\""+std::string(anchor)+"\" class=\""+std::string(cls)+"\""+(central?" dominant-baseline=\"central\"":"")+">"+esc(label)+"</text>";}
