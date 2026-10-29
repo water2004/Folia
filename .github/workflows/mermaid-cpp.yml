@@ -461,6 +461,22 @@ jobs:
           node tools/mermaid-cpp/compare-text-probe.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
+      - name: Collect bounded candidate SVG failures independently
+        if: ${{ !cancelled() }}
+        run: |
+          $failed = @()
+          foreach ($family in @('zenuml', 'state', 'architecture', 'c4')) {
+            $original = "build/mermaid-cpp/$family-browser/original.json"
+            if (!(Test-Path $original)) {
+              Write-Output "${family}: original observations unavailable after earlier failure"
+              $failed += $family
+              continue
+            }
+            node "tools/mermaid-cpp/compare-$family-svg.mjs" $original build/mermaid-cpp/pie-svg
+            if ($LASTEXITCODE -ne 0) { $failed += $family }
+          }
+          if ($failed.Count) { throw "Candidate SVG failures: $($failed -join ', ')" }
+
       - name: Upload text measurement evidence
         if: always()
         uses: actions/upload-artifact@v4
