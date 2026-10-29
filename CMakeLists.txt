@@ -660,6 +660,7 @@ list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/parsing/test_inline_cst_ownersh
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/parsing/test_deep_block_ownership\\.cpp$")
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/parsing/test_serializer_deep\\.cpp$")
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/parsing/test_md4c_reference\\.cpp$")
+list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/mermaid_cpp/")
 target_sources(FoliaTests PRIVATE
     ${FOLIA_TEST_SRC})
 target_include_directories(FoliaTests PRIVATE
@@ -1073,3 +1074,6 @@ if(WIN32 AND MSVC)
         endif()
     endforeach()
 endif()
+
+# Official Mermaid C++ dependency and its isolated native test target.
+add_subdirectory(tools/mermaid-cpp)

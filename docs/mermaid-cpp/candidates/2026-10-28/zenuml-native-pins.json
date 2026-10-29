@@ -1,0 +1,121 @@
+{
+  "package": "@zenuml/core",
+  "version": "3.49.2",
+  "gitHead": "213c239587ffa1f3dbb54d8b64468c3038ced55d",
+  "files": [
+    {
+      "path": "src/g4/sequenceParser.g4",
+      "sha256": "9e7624e377f5e08ace461a099e91d90e92ac795f59fd716552c7a5a630cc6c54"
+    },
+    {
+      "path": "src/g4/sequenceLexer.g4",
+      "sha256": "9bf0cc267143cce32641831d0a6ca8ee5dbb5de995e2e713f9521f7a06ee2ece"
+    },
+    {
+      "path": "src/parser/OrderedParticipants.ts",
+      "sha256": "89fbf2843ef588ca8176674c2a7dcabef4b817ad057cd471650e1ec760475103"
+    },
+    {
+      "path": "src/parser/MessageCollector.ts",
+      "sha256": "a623bc872acda2702ad60e2034cc1d04704b8fbd264cedb9c8bf37629cfd7498"
+    },
+    {
+      "path": "src/positioning/Coordinates.ts",
+      "sha256": "c41c425ff4297c1fcac1a3ee70c03f5678ce71ac4bc5d95b1cc5234564b67884"
+    },
+    {
+      "path": "src/positioning/david/DavidEisenstat.ts",
+      "sha256": "ef0bfafeaf443898f006c2f2986aafca6fbc96f849781a900d377b01058e1c49"
+    },
+    {
+      "path": "src/positioning/WidthProviderFunc.ts",
+      "sha256": "489b25ddd03c05823122a7c33c28282f9c98783827cffd7d3ba882029c1dcd19"
+    },
+    {
+      "path": "src/positioning/VerticalCoordinates.ts",
+      "sha256": "cc69c673bb4eed114855a617dd4f3ab02c14f1b2d3d49026faac0c528338f1b5"
+    },
+    {
+      "path": "src/positioning/vertical/vm/BlockVM.ts",
+      "sha256": "61a1390b7470f9a3534df0be05fae1f0d6b15cbebcbdff10f5147f5f311ed39f"
+    },
+    {
+      "path": "src/positioning/vertical/vm/SyncMessageStatementVM.ts",
+      "sha256": "f64fca6b441bc66b8b60c878428acb7909bd93d5cf916344e91fed4a3513aabf"
+    },
+    {
+      "path": "src/positioning/vertical/vm/ReturnStatementVM.ts",
+      "sha256": "8a3e5a05907e2392aaaf9bf0f12c52eb0dd84bedb5c2f28a2d5406937605361f"
+    },
+    {
+      "path": "src/positioning/vertical/vm/CreationStatementVM.ts",
+      "sha256": "9211b8587b893b43929c615cee1d2f8ca0fcdce415cd179833c8cf52fc0273a1"
+    },
+    {
+      "path": "src/positioning/vertical/vm/FragmentAltVM.ts",
+      "sha256": "c6fe3813323b2a555e0022fea81cbd6c7b6ce71309f4c7dad162f1f6fb4d1a6a"
+    },
+    {
+      "path": "src/positioning/vertical/vm/FragmentSingleBlockVM.ts",
+      "sha256": "e2b50373cc1d6a706275e3dd86bf7010e3af449d50ff1e3bd669c9d2f11c8643"
+    },
+    {
+      "path": "src/svg/renderToSvg.ts",
+      "sha256": "5563a02c96212f97a5d0446aa54bec2f947afb092ea25a62d404737606eee156"
+    },
+    {
+      "path": "src/svg/buildGeometry.ts",
+      "sha256": "f73a916895b5972c3a97b5be22fe281f94d9d8bce6ba78a8c0b3f48f994dd127"
+    },
+    {
+      "path": "src/svg/buildParticipantGeometry.ts",
+      "sha256": "b12d82e9423658693b6bdd1d4189b69a1e67d44af755d14450b13559d5de8022"
+    },
+    {
+      "path": "src/svg/buildStatementGeometry.ts",
+      "sha256": "30afc8cf61570f959140dd6508e044b7d115ef3920030846909af64de9717524"
+    },
+    {
+      "path": "src/svg/buildFragmentGeometry.ts",
+      "sha256": "7d681b394563ecee28ad55ed4c5674e576f63f6f2e4c12c8d39555587ee1a54e"
+    },
+    {
+      "path": "src/svg/svgConstants.ts",
+      "sha256": "de6f20bee9f0a8bcd828329f5ec7797881ed29cca5c16d2a5912847a844daec2"
+    },
+    {
+      "path": "src/svg/components/message.ts",
+      "sha256": "1de2823789560677c5b81017e1c2adfa68ba34897f2bdabdc852265279827c85"
+    },
+    {
+      "path": "src/svg/components/participant.ts",
+      "sha256": "67f32c0aadef4b0da557935ae2595159663fdb56f212860e0a99d95a4039479e"
+    },
+    {
+      "path": "src/svg/components/return.ts",
+      "sha256": "05f5a2406579a60250c11baf96b228a4049808698ae79ab771bc540d5b3b346a"
+    },
+    {
+      "path": "src/svg/components/creation.ts",
+      "sha256": "a1c688b5ee4337547bd58cf4f52ee203ec9d76188a9aaf3ae7f088498782ab07"
+    },
+    {
+      "path": "src/svg/components/fragment.ts",
+      "sha256": "73c805092b4107fb966b2c7eed66b30d86f35ba1a188f62c5ecc957138859508"
+    },
+    {
+      "path": "src/svg/components/lifeline.ts",
+      "sha256": "c98f3d9105b0fd148cb424a43d92ec086131cfd96c3cd3a28dd7ea91c5f031f8"
+    },
+    {
+      "path": "src/assets/actor.svg?raw",
+      "sha256": "85b03bc941f1aa8c71d0891e81b0196314fc57cb6f994bc7fc6208d32ba342c5",
+      "sourceMap": "package/dist/zenuml.esm.mjs.map"
+    },
+    {
+      "path": "src/assets/database.svg?raw",
+      "sha256": "399cd1f770c08413221ff3561206c87964ce22ef24b2691c2458575a249eda93",
+      "sourceMap": "package/dist/zenuml.esm.mjs.map"
+    }
+  ]
+}
