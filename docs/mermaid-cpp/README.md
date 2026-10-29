@@ -55,3 +55,7 @@
 保留 Mermaid/MIT、ELK/EPL-2.0、D3 ISC/BSD、Cytoscape、RoughJS 和 ZenUML 等实际来源的许可证及 source-lock。生成物与恢复包留在忽略目录。源码准备脚本不代表产品依赖 JavaScript。
 
 本 PR 只提交原生重构与验证成果，不自动合并、不发布、不切换生产依赖。
+
+## 基线更新
+
+开发分支已变基到上游 master `38231c6a`（Folia 0.5.4）。Mermaid 实现保持不变；构建跟随上游采用 `tests/support/windows_console_runtime.cpp`。上述绿色记录属于变基前基线，新基线以最新 PR 检查为准。

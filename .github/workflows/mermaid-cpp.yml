@@ -22,7 +22,7 @@ on:
       - src/platform/**
       - tools/mathjax-bundle/package*.json
       - tests/platform/mermaid_measurement.cpp
-      - tools/test-support/windows_console_runtime.cpp
+      - tests/support/windows_console_runtime.cpp
   pull_request:
     paths:
       - .github/workflows/mermaid-cpp.yml
@@ -40,7 +40,7 @@ on:
       - src/platform/**
       - tools/mathjax-bundle/package*.json
       - tests/platform/mermaid_measurement.cpp
-      - tools/test-support/windows_console_runtime.cpp
+      - tests/support/windows_console_runtime.cpp
   workflow_dispatch:
 
 permissions:

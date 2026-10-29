@@ -75,7 +75,7 @@ endif()
 
 if(WIN32 AND MSVC AND NOT TARGET folia_console_test_runtime)
     add_library(folia_console_test_runtime OBJECT
-        "${FOLIA_MERMAID_REPO_ROOT}/tools/test-support/windows_console_runtime.cpp")
+        "${FOLIA_MERMAID_REPO_ROOT}/tests/support/windows_console_runtime.cpp")
     target_compile_features(folia_console_test_runtime PRIVATE cxx_std_23)
     set_target_properties(folia_console_test_runtime PROPERTIES
         CXX_MODULE_STD OFF

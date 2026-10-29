@@ -9,5 +9,7 @@
 - `candidates/2026-10-28` 保存未接入补丁；Class fixture 已为九列，原函数提取器已支持 generator。先验证补丁基线再应用，禁止盲目按顺序套用。
 - 没有正在执行的智能体任务；后续重新登记 owner 与实际构建句柄，避免重复工作。
 - 上游 PR #1 保持开放，不自动合并。本轮仅更新代码、说明和分支整理。
-- fork 保留 main 与唯一开发分支 feat/mermaid-cpp-port。后者为现有上游 PR 来源，承担 dev 角色；不要删除或改名导致 PR 关闭。
+- fork 保留 master 与唯一开发分支 feat/mermaid-cpp-port。后者为现有上游 PR 来源，承担 dev 角色；不要删除或改名导致 PR 关闭。
 - 功能通过必要验证即提交；只因相关改动、实际回归或明确新需求重新验证，不重开已验收工作。
+
+- 当前开发基线：上游 master `38231c6a`（Folia 0.5.4）。开发分支已重放 283 个提交；唯一文本冲突为 CMake 测试筛选，保留双方规则。测试运行时统一引用 tests/support/windows_console_runtime.cpp。旧绿色结果仅代表旧基线，新基线待 CI 验证。
