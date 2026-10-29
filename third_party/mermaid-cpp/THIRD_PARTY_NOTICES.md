@@ -1,60 +1,32 @@
-# Third-party notices
+# Third-Party Notices (`mermaid-cpp`)
 
-## Eclipse Layout Kernel / elkjs 0.9.3
+`third_party/mermaid-cpp` ports behaviors and layout algorithms from the pinned upstream Mermaid 12.2.0 release (`1fb7869866dd619168d840291c9c54b4f129758b`) and its algorithm dependencies into native C++23 modules. Exact upstream versions and source file hashes are recorded in [`docs/mermaid-cpp/source-lock.json`](../../docs/mermaid-cpp/source-lock.json).
 
-`src/elk_cycle.cpp`, `src/elk_layering.cpp`, `src/elk_long_edges.cpp` and their
-module interfaces port the original ELK DepthFirstCycleBreaker, flat
-NetworkSimplexLayerer and LongEdgeSplitter. `src/elk_order.{ixx,cpp}` ports the
-flat east/west PortListSorter, BarycenterHeuristic, port-rank distributors and
-LayerSweepCrossingMinimizer controller from the same worker.
-Flat BK placement, point ports, orthogonal routing, shared random state and
-long-edge restoration modules follow the same worker.
-These files are licensed under
-EPL-2.0, not the Mermaid MIT license. The full license is in `ELK-LICENSE`.
-Original source: https://github.com/kieler/elkjs, package `elkjs` 0.9.3,
-`lib/elk-worker.js`. Exact package/source hashes are recorded under `elkCycle`
-in `docs/mermaid-cpp/source-lock.json`. This algorithm slice is not yet a
-complete ELK layout engine or the public Class/State render path.
+---
 
-Quadrant parsing, fixed-canvas geometry and SVG output follow the pinned
-Mermaid quadrant-chart sources under the MIT license reproduced in `LICENSE`.
-Radar parsing, polar geometry and its closed Catmull-Rom curves follow the
-pinned Mermaid Radar sources under the same license; source hashes are locked.
+## 1. Mermaid (`mermaid-js/mermaid` 12.2.0)
 
-Flowchart display-line adaptation follows Mermaid 12.2.0's labelHelper,
-createText, createLabel, nonMarkdownToHTML and decodeEntities. Their original
-source hashes are recorded in docs/mermaid-cpp/source-lock.json; the Mermaid
-MIT license is reproduced in LICENSE. Native line measurement and wrapping use
-DirectWrite, without an HTML or JavaScript runtime.
+Parser, configuration, theme derivation, diagram database models, layout adapters, and SVG painters derived from `mermaid-js/mermaid` are covered by the MIT License in [`LICENSE`](LICENSE) (Copyright (c) 2014–2022 Knut Sveidqvist).
 
-Mermaid-derived code is covered by the MIT license in `LICENSE`.
-Flowchart's classic node geometry follows the pinned Mermaid rendering-elements
-shapes and line/polygon intersection functions.
+---
 
-## D3 Shape 3.2.0 and D3 Path 3.1.0
+## 2. Eclipse Layout Kernel (`elkjs` 0.9.3)
 
-Pie geometry specializes the unpadded, square-cornered paths used by Mermaid
-from d3-shape (`pie.js`, `arc.js`, `math.js`, `path.js`) and d3-path (`path.js`).
-Flowchart's spline writer follows d3-shape `src/curve/basis.js`.
-Source hashes and versions are recorded in `docs/mermaid-cpp/source-lock.json`.
-The complete ISC notice is also preserved in `src/pie_geometry.cpp`.
+The native ELK layered and compound layout modules (`src/elk_*.{ixx,cpp}`) are derived from `elkjs` 0.9.3 (`lib/elk-worker.js`, https://github.com/kieler/elkjs). These files are covered by the **Eclipse Public License 2.0 (EPL-2.0)**; see [`ELK-LICENSE`](ELK-LICENSE) for the full license text.
 
-XY scales and numeric ticks follow d3-scale 4.0.2, d3-array 3.2.4 and
-d3-interpolate 3.0.1. XY line paths use d3-shape linear interpolation.
-Treemap hierarchy summation, stable sorting, squarify, rounding and padding
-follow d3-hierarchy 3.1.2; the bounded value formatter follows d3-format 3.1.0.
-Both carry Copyright 2010-2021 Mike Bostock and the ISC notice below.
-Gantt time intervals/ticks follow d3-time 3.1.0 (Copyright 2010-2022
-Mike Bostock), and its axis/time formatting follow d3-axis 3.0.0 and
-d3-time-format 4.1.0 (Copyright 2010-2021 Mike Bostock), under the same ISC notice.
-Their source-map contents are hash-pinned alongside the Mermaid sources.
+---
 
-Copyright 2010-2021 Mike Bostock (d3-scale, d3-interpolate)
+## 3. D3 Modules (`d3-shape`, `d3-path`, `d3-scale`, `d3-array`, `d3-interpolate`, `d3-hierarchy`, `d3-format`, `d3-time`, `d3-axis`, `d3-time-format`)
 
+- Pie sector and arc geometry (`src/pie_geometry.{ixx,cpp}`) and Flowchart basis curves follow `d3-shape` 3.2.0 and `d3-path` 3.1.0.
+- XY chart scales and ticks (`src/xy.{ixx,cpp}`) follow `d3-scale` 4.0.2, `d3-array` 3.2.4, and `d3-interpolate` 3.0.1.
+- Treemap squarify layout and value formatting (`src/treemap.{ixx,cpp}`) follow `d3-hierarchy` 3.1.2 and `d3-format` 3.1.0.
+- Gantt time intervals, ticks, and axis formatting (`src/gantt_svg.{ixx,cpp}`) follow `d3-time` 3.1.0, `d3-axis` 3.0.0, and `d3-time-format` 4.1.0.
+
+```text
+Copyright 2010-2021 Mike Bostock (d3-scale, d3-interpolate, d3-hierarchy, d3-format, d3-axis, d3-time-format)
+Copyright 2010-2022 Mike Bostock (d3-shape, d3-time)
 Copyright 2010-2023 Mike Bostock (d3-array)
-
-Copyright 2010-2022 Mike Bostock (d3-shape)
-
 Copyright 2015-2022 Mike Bostock (d3-path)
 
 Permission to use, copy, modify, and/or distribute this software for any
@@ -68,14 +40,21 @@ SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER
 RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
 NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE
 USE OR PERFORMANCE OF THIS SOFTWARE.
+```
 
-## Langium 4.4.0
+---
 
-The Packet quoted-string conversion follows Langium's `ValueConverter`
-(`packages/langium/src/parser/value-converter.ts`). The JavaScript package is
-used only by the independent test oracle; it is not a runtime dependency of
-the native library.
+## 4. `d3-sankey` 0.12.3
 
+Sankey node alignment, iterative relaxation/collision layout, and link positioning (`src/sankey.{ixx,cpp}`) follow `d3-sankey` 0.12.3 under the BSD-3-Clause License; see [`D3-SANKEY-LICENSE`](D3-SANKEY-LICENSE).
+
+---
+
+## 5. Langium 4.4.0
+
+Quoted-string value conversion in the Packet/Pie lexer follows Langium's `ValueConverter` (`packages/langium/src/parser/value-converter.ts`) under the MIT License:
+
+```text
 Copyright 2021 TypeFox GmbH
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
@@ -92,50 +71,53 @@ BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR P
 NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+```
 
-## Dagre graph layout
+---
 
-The native rank pipeline follows dagre-d3-es 7.0.14's Dagre and Graphlib
-algorithms, including DFS cycle removal, nesting constraints, feasible-tree
-construction, network simplex, edge normalization, compound crossing reduction
-and Brandes-Kopf coordinate assignment. Its MIT notices are reproduced in
-`DAGRE-LICENSE`; the original source hashes are in
-`docs/mermaid-cpp/source-lock.json`. Dagre's JavaScript package is test-only.
+## 6. Dagre (`dagre-d3-es` 7.0.14)
 
-## Khroma color primitives
+The native Dagre ranking, ordering, compound nesting, and Brandes-Koepf coordinate assignment pipeline (`src/dagre_rank.{ixx,cpp}`, `src/dagre_order.inc`, `src/dagre_position.inc`) follows `dagre-d3-es` 7.0.14 under the MIT License; see [`DAGRE-LICENSE`](DAGRE-LICENSE).
 
-The native theme color operations and generated named-color table are derived
-from Khroma 2.1.0 by Fabio Spampinato, under the MIT license reproduced in
-`KHROMA-LICENSE`. Source and distribution hashes are recorded in
-`docs/mermaid-cpp/source-lock.json`. Khroma is an oracle-only Node dependency;
-the shipped native library contains no JavaScript runtime.
+---
 
-## es-toolkit compatibility merge
+## 7. Khroma 2.1.0
 
-The native cleanAndMerge operation follows es-toolkit 1.45.1's compatibility
-merge, pinned to the dependency embedded in the official Mermaid 12.2.0 bundle.
-The MIT notice, including the OpenJS/Lodash compatibility attribution, is
-reproduced in `ES-TOOLKIT-LICENSE`. The package and transitive helper sources are
-hash-locked in `docs/mermaid-cpp/source-lock.json` and used only by the oracle.
+Theme color manipulation primitives and the named-color table (`src/theme_color.{ixx,cpp}`) are derived from Khroma 2.1.0 by Fabio Spampinato under the MIT License; see [`KHROMA-LICENSE`](KHROMA-LICENSE).
 
-## d3-sankey 0.12.3
+---
 
-Sankey node alignment, six-round relaxation/collision layout and link positioning
-follow d3-sankey 0.12.3. Its BSD-3-Clause notice is reproduced in
-`D3-SANKEY-LICENSE`; source-map contents are hash-pinned in source-lock.json.
-The JavaScript implementation is used only by the test oracle.
+## 8. `es-toolkit` 1.45.1
 
-## Day.js 1.11.21
+Configuration `cleanAndMerge` compatibility merge semantics (`src/config_clean_merge.{ixx,cpp}`) follow `es-toolkit` 1.45.1 under the MIT License; see [`ES-TOOLKIT-LICENSE`](ES-TOOLKIT-LICENSE).
 
-Gantt's bounded civil-date parsing and duration/dependency calculations follow
-Day.js core and its customParseFormat, advancedFormat, isoWeek and duration
-plugins embedded in the pinned Mermaid release. The MIT notice is reproduced
-in `DAYJS-LICENSE`; source-map contents are recorded in source-lock.json.
+---
 
-## Mindmap CoSE tree layout
+## 9. `js-yaml` 4.1.0
 
-Mindmap's native flat-tree layout follows cytoscape-cose-bilkent 4.1.0,
-cose-base 1.0.3 and layout-base 1.0.2. Their original MIT notices are reproduced
-in `COSE-LICENSE`. The source-locked original oracle uses Cytoscape 3.34.0,
-matching the Mermaid lockfile. This does not implement Architecture's distinct
-fCoSE/compound layout dependency.
+Frontmatter YAML schema resolution and scalar coercion rules (`src/frontmatter.{ixx,cpp}`, `src/config_yaml.cpp`) follow `js-yaml` 4.1.0 under the MIT License; see [`JS-YAML-LICENSE`](JS-YAML-LICENSE).
+
+---
+
+## 10. Day.js 1.11.21
+
+Gantt civil-date parsing, ISO week calculation, and duration arithmetic (`src/gantt.{ixx,cpp}`) follow Day.js 1.11.21 and its `customParseFormat`, `advancedFormat`, `isoWeek`, and `duration` plugins under the MIT License; see [`DAYJS-LICENSE`](DAYJS-LICENSE).
+
+---
+
+## 11. Cytoscape, CoSE-Bilkent, and fCoSE
+
+- Mindmap tree force-directed layout (`src/cose_tree.{ixx,cpp}`) follows `cytoscape-cose-bilkent` 4.1.0, `cose-base` 1.0.3, `layout-base` 1.0.2, and `cytoscape` 3.34.0 under the MIT License; see [`COSE-LICENSE`](COSE-LICENSE) and [`CYTOSCAPE-LICENSE`](CYTOSCAPE-LICENSE).
+- Architecture constrained force-directed layout (`src/architecture_constraints.{ixx,cpp}`, `src/architecture.{ixx,cpp}`) follows `cytoscape-fcose` 2.2.0, `cose-base` 2.2.0, and `layout-base` 2.0.1 under the MIT License; see [`FCOSE-LICENSE`](FCOSE-LICENSE).
+
+---
+
+## 12. RoughJS 4.6.6
+
+Hand-drawn/rough path helpers referenced by upstream Mermaid rendering utilities are covered by the MIT License in [`ROUGHJS-LICENSE`](ROUGHJS-LICENSE).
+
+---
+
+## 13. ZenUML (`@zenuml/core` 3.49.2)
+
+ZenUML sequence parsing, horizontal constraint solving, recursive block positioning, and SVG rendering (`src/zenuml.{ixx,cpp}`, `src/zenuml_svg.{ixx,cpp}`, `src/zenuml_assets.inc`) follow `@zenuml/core` 3.49.2 under the MIT License (Copyright (c) 2022 Peng Xiao); see [`ZENUML-LICENSE`](ZENUML-LICENSE).

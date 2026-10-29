@@ -1,49 +1,20 @@
-# Historical Rust Mermaid backend checkpoint
+# 历史归档：早期 Rust Mermaid Direct2D 后端探索记录
 
-## Current direction (2026-10-21)
+## 状态说明（2026-10）
 
-The current request is to build Folia's C++ Mermaid dependency from the official
-mermaid-js/mermaid JS/TS sources, not to port mermaid-rs-renderer or resume this
-Rust Direct2D experiment. See `../mermaid-cpp/README.md` for the new source pin,
-dependency boundary and verification. The historical work below remains
-preserved; its local checks do not establish acceptance of the C++ replacement.
+Folia 的 Mermaid 渲染重构已切换为基于官方 `mermaid-js/mermaid` 12.2.0 的 **C++23 原生实现方案**，最新架构说明、图族进展与交接文档见 [`../mermaid-cpp/README.md`](../mermaid-cpp/README.md) 与 [`../mermaid-cpp/HANDOFF.md`](../mermaid-cpp/HANDOFF.md)。
 
-## Historical pause (2026-10-12)
+本目录（`docs/mermaid-native/`）下的文档仅作为早期在 `mermaid-rs-renderer` 基础上探索中间场景图（`DiagramScene`）与 Direct2D 渲染时的历史设计与验证归档保留，不再继续推进。
 
-Paused by the user on 2026-10-12: record progress, leave Mermaid aside, finish
-native MathJax first. No Mermaid agent is assigned further work. Future Mermaid
-delegation uses Luna, with Root-owned architecture, responsibilities and gates.
+---
 
-Useful completed pieces:
+## 早期探索归档摘要（截至 2026-10-12 暂停时）
 
-- Original parser/layout retained; upstream version pinned and 23 diagram
-  families inventoried. Original observations exist as comparison references.
-- Immutable DiagramScene/SceneBuilder, ordered portable geometry/paint/group/
-  clip/text/image/resource types and partial typed compiler leaf helpers.
-- Native Direct2D scene consumer with real primitive/resource handling and
-  eleven local WARP tests. These do not accept complete Mermaid diagrams.
-- Last relevant accepted extraction: 8b7a0a3, shared dimensions/viewBox logic
-  moved unchanged into scene/compile/dimensions.rs. Root verified the entire
-  extraction/surrounding render source, portable build and twelve existing
-  renderer unit tests. See evidence/m5a-dimensions-acceptance.md.
-
-Actual remaining main route:
-
-1. Complete Layout -> DiagramScene family lowering and explicit shared text
-   resolution, preserving original painter order, placement, styles and options.
-2. Add the SVG consumer of that same finished scene. Public SVG entry points
-   currently still call the original Layout -> render_svg path.
-3. Independently accept complete Mermaid input through SVG and native D2D,
-   then integrate the accepted native path in Folia. Folia is not wired yet.
-
-Root previously expanded the work into unnecessary tiny-skia CPU raster,
-sampling/pipeline/shader/blitter ports. Those packets are not prerequisites
-for D2D. Do not resume that frontier. See work-scope-review.md and the scope
-correction at the top of architecture.md; historical later prerequisites are
-superseded. Existing files remain preserved pending cleanup.
-
-Pending working-tree artifacts at pause: m3j3-constructor-source-contract.md
-schema correction, m3j3-constructor-source-freeze.md, the blitter-constructor
-fixture/observer/oracle and its Rust reference project. They are Source-only
-candidate observations, not accepted Native blitter work or integration gates.
-Preserve them; they are outside the prioritized MathJax edits.
+- **已完成的探索内容**：
+  - 梳理了上游 23 个图族清单并建立了初始采样参考；
+  - 定义了不可变的 `DiagramScene` / `SceneBuilder` 及几何、画刷、分组、裁剪、文本等中间表示类型；
+  - 验证了 Direct2D 基础图元消费端与 11 个本地 WARP 测试用例；
+  - 提取了共享尺寸与 `viewBox` 计算逻辑（`scene/compile/dimensions.rs`，commit `8b7a0a3`，见 `evidence/m5a-dimensions-acceptance.md`）。
+- **暂停时的遗留边界**：
+  - 各图族从 `Layout` 到 `DiagramScene` 的降级转换（lowering）及通用 SVG 消费端尚未接通；
+  - 早期拆分的 `tiny-skia` CPU 光栅化、采样与混合管线（`m3b` ~ `m3j`）属于多余的范围扩张，已在 `work-scope-review.md` 中归档停用。

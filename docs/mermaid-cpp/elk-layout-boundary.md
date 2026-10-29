@@ -1,176 +1,66 @@
-# ELK layered layout boundary
+# ELK、CoSE/fCoSE 与外部图族布局边界说明
 
-The pinned Mermaid commit `1fb7869866dd619168d840291c9c54b4f129758b`
-uses `elkjs` 0.9.3. Its npm package contains the readable GWT-generated
-`lib/elk-worker.js`, including the original Eclipse ELK layered processors.
-The package is EPL-2.0; the derived native cycle-selection and layering files retain that
-license separately from Mermaid's MIT adapter. See `ELK-LICENSE` and the
-`elkCycle` source-lock entry. No JavaScript engine is part of the native library.
+本文档说明 `mermaid-cpp` 中复杂图布局算法（ELK 分层与复合图、Cytoscape CoSE/fCoSE 力导向布局、ZenUML 序列布局）的上游基准版本、默认配置契约与 C++ 模块划分。
 
-## Consumers and default options
+---
 
-`packages/mermaid/src/diagrams/class/classRenderer-v3-unified.ts` and
-`packages/mermaid/src/diagrams/state/stateRenderer-v3-unified.ts` both obtain
-the configured layout through `getRegisteredLayoutAlgorithm(layout)`, then
-call the common renderer with measured nodes, edges, labels and groups.
-The global default layout is ELK; State also declares ELK in its own defaults.
-Class's already implemented explicit Dagre route does not satisfy this default.
+## 一、ELK 分层与复合图布局（`elkjs` 0.9.3）
 
-`packages/mermaid/src/rendering-util/layout-algorithms/elk/render.ts` defines
-the actual adapter contract. Its default preset is:
+### 1. 上游基准与许可证
+- 锁定的 Mermaid `1fb7869866dd619168d840291c9c54b4f129758b` 使用 `elkjs` **0.9.3**（`lib/elk-worker.js`，由 Eclipse Layout Kernel 的 Java 实现经 GWT 编译生成）。
+- ELK 相关原生模块遵循 **EPL-2.0** 许可证（见 `third_party/mermaid-cpp/ELK-LICENSE` 及 `THIRD_PARTY_NOTICES.md`），对应上游源码哈希记录于 `docs/mermaid-cpp/source-lock.json`。
 
-| Setting | Value |
+### 2. Mermaid 侧的 ELK 适配器预设契约
+Mermaid 的 `packages/mermaid/src/rendering-util/layout-algorithms/elk/render.ts` 定义了 `layout: elk` 的默认参数预设：
+
+| 配置项 | 默认值 |
 | --- | --- |
-| Algorithm for `layout: elk` | `elk.layered` |
-| Layering | `NETWORK_SIMPLEX` |
-| Root and container node placement | `BRANDES_KOEPF` |
-| Brandes-Koepf alignment | `BALANCED` |
-| Cycle breaking | `DEPTH_FIRST` |
-| Root hierarchy handling | `INCLUDE_CHILDREN` |
-| Root spacing base | 40 |
-| Port surrounding margin | 12 on every side |
+| 布局算法（`layout: elk`） | `elk.layered` |
+| 层级分配（Layering） | `NETWORK_SIMPLEX` |
+| 根图与容器节点放置（Node placement） | `BRANDES_KOEPF` |
+| Brandes-Koepf 对齐方式 | `BALANCED` |
+| 去环策略（Cycle breaking） | `DEPTH_FIRST` |
+| 根图层级处理（Hierarchy handling） | `INCLUDE_CHILDREN` |
+| 根图基础间距（Root spacing base） | `40` |
+| 端口四周外边距（Port surrounding margin） | 每侧 `12` |
 
-The named `legacy` preset instead uses `GREEDY` cycle breaking and `NONE`
-alignment. `modelOrder` and `depthFirst` select network-simplex root placement.
-These names must not be conflated with the default preset. Explicit relevant
-`config.elk` values override presets; the original adapter also sets model-order,
-edge-merging and edge-routing options. The graph's actual direction replaces
-the root's initial `DOWN`. Container padding, title constraints and measured
-label boxes remain part of the adapter, not a reason to modify the algorithm.
+- 当配置指定命名预设时：`legacy` 使用 `GREEDY` 去环与 `NONE` 对齐；`modelOrder` 与 `depthFirst` 将根节点放置策略切换为 `NETWORK_SIMPLEX`。显式传入的 `config.elk` 键值优先于预设值。
+- 图的实际方向（`TB`/`BT`/`LR`/`RL`）覆盖根节点的默认 `DOWN` 方向；复合分组内边距、子图标题约束以及实测标签包围盒由适配器在进入 ELK 管线前组装。
 
-The whole ELK algorithm catalogue, experimental option-sweep hooks and
-unrelated layout algorithms are not prerequisites for the initial Class/State
-layered package. Required source configuration remains a separate acceptance
-gate and must not silently select Dagre.
+### 3. C++ 原生 ELK 模块划分
+`third_party/mermaid-cpp/src/` 下按 ELK Layered 管线的实际处理阶段拆分为以下模块：
 
-## Native processor delivered here
+1. **去环与分层**：
+   - `folia.mermaid.elk_cycle`：实现 `DepthFirstCycleBreaker`，按模型顺序与入度遍历节点并生成反馈边翻转计划（自环不参与去环）。
+   - `folia.mermaid.elk_layering`：实现 `NetworkSimplexLayerer`，基于紧树（tight tree）与割值交换（cut/slack exchange）计算节点层级并执行连通分量平衡。
+   - `folia.mermaid.elk_long_edges`：实现 `LongEdgeSplitter`，对跨层边插入虚拟节点（dummy nodes）并拆分边段。
+2. **交叉最小化与端口排序**：
+   - `folia.mermaid.elk_order`、`elk_order_constraints`、`elk_model_order`：实现 `PortListSorter`、重心启发式（`BarycenterHeuristic`）及 `LayerSweepCrossingMinimizer` 正反向交替扫描。
+   - `folia.mermaid.elk_north_south`、`elk_north_south_layout`：处理南北向（North/South）端口虚拟节点准备、布局单元排序约束与坐标还原。
+3. **坐标放置、正交路由与边还原**：
+   - `folia.mermaid.elk_placement`：实现 Brandes-Koepf 四方向平衡坐标分配。
+   - `folia.mermaid.elk_ports`、`elk_labels`、`elk_end_labels`：处理隐式点端口、边中心标签与边起止端点标签（HEAD/TAIL）的尺寸与位置。
+   - `folia.mermaid.elk_routing`、`elk_restore`：执行正交边路由（共享上游 `java.util.Random` 确定性随机状态），并在路由完成后合并长边分段、还原翻转边方向。
+4. **复合图（Compound Graph）与图族适配**：
+   - `folia.mermaid.elk_compound_graph`、`elk_compound_ports`、`elk_compound_layout`、`elk_compound_restore`、`elk_direction`、`elk_boundary_layers`、`elk_boundary_layout`：处理跨层级边、外部端口、子图方向变换、复合图递归几何拼装与子图间距。
+   - `folia.mermaid.flowchart_elk`：将实测后的 Flowchart 节点、子图与边接入复合 ELK 管线（已贯通公共入口并通过 6 个基准案例验证；Class 图的 ELK 适配见 `candidates/2026-10-28/class-elk*.patch`）。
 
-`folia.mermaid.elk_cycle` ports the feedback-edge selection in the original
-`DepthFirstCycleBreaker` (`$dfs_3` / `$process_57` in the locked worker).
-Its input retains node order, each node's port order and each port's outgoing
-edge order. It visits nodes with no incoming edges first, then remaining nodes
-in model order; self-loops do not participate. Feedback edges are collected
-without mutating adjacency during traversal, preserving their reversal order.
+---
 
-`tools/mermaid-cpp/elk-cycle-oracle.mjs` loads the entire unchanged original
-worker, constructs its real `LGraph`, `LNode`, `LPort` and `LEdge` objects, and
-executes the original processor. A wrapper records calls to its original edge
-reversal method. The seven cases cover a class chain/cycle, a state-style entry
-into a cycle, port ordering, parallel return edges, disconnected components and
-self-loops, plus the empty graph. The native test compares exact edge indices
-and order with these observations. This is processor evidence, not measured
-layout or SVG evidence.
+## 二、CoSE 与 fCoSE 力导向布局（Mindmap 与 Architecture）
 
-The native selection function deliberately returns a reversal plan. The later
-layered graph adapter must apply ELK's original reversal semantics: swap ports,
-adapt collector ports, swap head/tail edge-label placement, toggle the reversed
-property and reverse bend points. The original pipeline restores reversed edges
-after routing. This slice is not connected to `render_entry` and does not make
-ELK a supported public render path.
+Mindmap 与 Architecture 分别依赖不同代际的 Cytoscape CoSE 布局库，二者在 `third_party/mermaid-cpp/src/` 中保持独立实现：
 
-## Flat network-simplex layering
+| 使用图族 | 上游算法包版本 | C++ 原生模块 | 核心特征 |
+| --- | --- | --- | --- |
+| **Mindmap** | `cytoscape-cose-bilkent` 4.1.0、`cose-base` 1.0.3、`layout-base` 1.0.2、`cytoscape` 3.34.0（MIT） | `cose_tree.{ixx,cpp}`、`mindmap.{ixx,cpp}`、`mindmap_svg.{ixx,cpp}` | 以 `quality: 'proof'` 运行平面树力导向布局。验证时分为“注入相同测量尺寸验证布局算子”与“使用 DirectWrite 实测字宽验证最终 SVG 绘制”两层。 |
+| **Architecture** | `cytoscape-fcose` 2.2.0、`cose-base` 2.2.0、`layout-base` 2.0.1（MIT） | `architecture.{ixx,cpp}`、`architecture_constraints.{ixx,cpp}`、`architecture_measurement.{ixx,cpp}`、`architecture_svg.{ixx,cpp}` | 包含固定随机种子、分组相关的理想边长/弹性系数、对齐与相对位置约束求解，以及两次布局传递（two-pass fCoSE）。 |
 
-`folia.mermaid.elk_layering` ports `NetworkSimplexLayerer` (`$process_68` /
-`$initialize_4`) and its `NetworkSimplex` helpers from the same locked worker.
-It applies the cycle reversal plan for ordinary ports and retains component
-traversal/order, minimum shortness weight one, unit edge delta, the default
-thoroughness-derived iteration limit, tight trees, cut/slack exchange,
-normalization and previous-component balancing. The original subtree detach
-optimization is retained. The worker oracle records 11 exact rank observations;
-this remains an internal flat-graph phase without compound handling or explicit
-layer constraints, not an ELK renderer.
+---
 
-## Next algorithm boundary
+## 三、ZenUML 外部图族集成（`@zenuml/core` 3.49.2）
 
-`folia.mermaid.elk_long_edges` now retains the original layered node order,
-ordinary-port reversal and adjacency in a stable-index working graph, then
-inserts the original LongEdgeSplitter dummy nodes and segments. Five exact
-worker observations cover adjacent/long/parallel/reversed edges and port order.
-This initial flat graph excludes compound and label dummy processing.
-
-Continue on this same graph with LayerSweepCrossingMinimizer/BarycenterHeuristic
-and required port ordering.
-Compound groups and the measured family adapter
-still follow those phases. The existing Dagre algorithm is not a substitute.
-
-The flat pipeline also includes Brandes-Koepf balanced placement, implicit
-point-port preparation and orthogonal routing. The order/routing interfaces
-share the original java.util.Random state; a continuous original-worker oracle
-checks both state and coordinates across the phases. Long-edge joining and
-feedback-edge restoration recover original edge paths after routing without
-adding the optional unnecessary bend points.
-
-Compound-graph processors, measured label geometry and the common-renderer
-adapter remain necessary. Their absence is an implementation gap, not a missing
-source/package blocker; the original worker is available and hash locked.
-
-## Other retained families: source availability
-
-This bounded source inventory establishes where the other independent original
-algorithms can be obtained. It does not claim their native implementation or
-extend their required feature lists.
-
-| Consumer | Locally available original implementation | License |
-| --- | --- | --- |
-| Mindmap | `cytoscape-cose-bilkent` 4.1.0, `cose-base` 1.0.3, `layout-base` 1.0.2 | MIT |
-| Architecture | `cytoscape-fcose` 2.2.0, `cose-base` 2.2.0, `layout-base` 2.0.1 | MIT |
-
-These installed packages include their `src` files under the oracle's pnpm
-directory. Mindmap's pinned `mindmapRenderer.ts` selects `cose-bilkent` as its
-fallback. MindmapDB also selects it when the user has not explicitly configured
-a layout; oracle setup must preserve that user-defined configuration distinction.
-`rendering-util/layout-algorithms/cose-bilkent/cytoscape-setup.ts`
-passes measured node dimensions and runs the original layout with `quality:
-'proof'`, no animation and no style engine. Architecture's
-`architectureRenderer.ts` calls fCoSE directly, also with `quality: 'proof'`,
-and supplies seeded randomization, group-dependent edge lengths/elasticity and
-alignment/relative-placement constraints. The different CoSE dependency
-generations and these constraints must remain distinct.
-
-Before establishing their layout oracles, resolve the known dependency-version
-difference: the installed oracle has Cytoscape 3.34.4, while the pinned Mermaid
-repository's pnpm lock resolves Cytoscape 3.34.0. This observation does not
-invalidate unrelated accepted renderers. The next package should pin the
-consumer's original adapter and necessary force-layout sources together, then
-observe one representative measured diagram through each original pipeline.
-
-### ZenUML package evidence
-
-The pinned Mermaid lock resolves `@zenuml/core` 3.49.2. The exact public npm
-archive is `https://registry.npmjs.org/@zenuml/core/-/core-3.49.2.tgz`.
-Its registry SHA-512 integrity was verified on download:
-
-```text
-sha512-qeQMapuE0XETML2mRw2MIIrMCjcZBhRDSwW10//q8XQ+VyExzkAn39VCBwxIbbPdTBt6gJnaBBixF9A4hsIxcA==
-```
-
-The package license is MIT, copyright 2022 Peng Xiao. The distribution's
-`dist/zenuml.esm.mjs.map` supplies all 457 `sourcesContent` entries, including
-the generated `sequenceLexer.js` / `sequenceParser.js`, parser adapters,
-`Coordinates`, `VerticalCoordinates`, `buildGeometry` and `renderToSvg`.
-That source map has SHA-256:
-
-```text
-c090e83b377121186edaa097c6e402562f72a9a694319c7a57cf3d06b4eba061
-```
-
-Local static evidence is in ignored `build/mermaid-cpp/elk-boundary/`:
-`zenuml-package-metadata.json`, `zenuml-core-3.49.2.tgz`, and
-`zenuml-package/package/{LICENSE,package.json,dist/zenuml.esm.mjs.map}`.
-No downloaded ZenUML code was executed for this inventory.
-
-The registry reports git head `213c239587ffa1f3dbb54d8b64468c3038ced55d`
-at `mermaid-js/zenuml-core`; that commit's `package.json` identifies itself as
-4.0.0, whereas the verified archive identifies itself as 3.49.2. Use the exact
-archive and embedded source content as the initial reference rather than
-assuming the reported repository head is source-identical.
-
-Mermaid's `packages/mermaid-zenuml/src/zenumlRenderer.ts` removes the `zenuml`
-prefix and calls `renderToSvg(code)`, then adopts its dimensions, viewBox and
-inner SVG. The package's implementation runs parse, its own coordinate engines,
-geometry construction and SVG composition; `WidthProviderOnCanvas` supplies
-text measurements. The next native boundary is therefore the exact grammar /
-generated parser and coordinate engine with a real native measurement adapter.
-First lock the required parser/runtime and positioning sources from this
-distribution and capture a representative call/return/fragment oracle. Porting
-the entire surrounding React/DOM product is not required by this call path.
+- **上游版本与校验**：Mermaid 12.2.0 锁定 `@zenuml/core` **3.49.2**（MIT 许可证，Copyright 2022 Peng Xiao）。官方 npm 归档 `core-3.49.2.tgz` 的 SHA-512 为：
+  `sha512-qeQMapuE0XETML2mRw2MIIrMCjcZBhRDSwW10//q8XQ+VyExzkAn39VCBwxIbbPdTBt6gJnaBBixF9A4hsIxcA==`
+  其内置 `dist/zenuml.esm.mjs.map`（SHA-256：`c090e83b377121186edaa097c6e402562f72a9a694319c7a57cf3d06b4eba061`）包含全部 457 个上游源文件（含词法/语法分析器、横向坐标约束求解 `Coordinates`、纵向递归布局 `VerticalCoordinates`、`buildGeometry` 与 SVG 模板）。
+- **C++ 原生实现**：`third_party/mermaid-cpp/src/zenuml.{ixx,cpp}`、`zenuml_svg.{ixx,cpp}` 与 `zenuml_assets.inc` 原生实现了语法解析、横向参与者间距约束求解、纵向消息/嵌套块递归布局及 SVG 输出，由平台层通过 `ZenSvgMeasure` 注入 DirectWrite 实测字宽。
