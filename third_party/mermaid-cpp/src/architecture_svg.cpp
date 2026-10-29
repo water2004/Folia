@@ -74,7 +74,7 @@ std::expected<ArchitectureSvg,std::string> render_architecture_svg(const Archite
             else {
                 if(!source.title.empty()){const Point p{size/2,size};svg+=text(measured.services[i],input,p,false,true);text_bounds(bounds,measured.services[i],{n.x+p.x,n.y+p.y},false,true,measured);}
                 if(!source.icon.empty())svg+=icon(source.icon,size);
-                else if(!source.icon_text.empty()){svg+=icon(u"blank",size);auto paint=input;paint.text_color=u"#fff";const auto& label=measured.icon_text[i];const Point p{size/2,(size-label.height)/2+measured.svg_ascent-label.baseline};auto icon_label=text(label,paint,p,false,false);const auto marker=icon_label.find("architecture-label");icon_label.replace(marker,18,"architecture-icon-text");svg+=icon_label;}
+                else if(!source.icon_text.empty()){svg+=icon(u"blank",size);auto paint=input;paint.text_color=u"#fff";const auto& label=measured.icon_text[i];const Point p{1,(size-label.height)/2+measured.svg_ascent-label.baseline};auto icon_label=text(label,paint,p,true,false);const auto marker=icon_label.find("architecture-label");icon_label.replace(marker,18,"architecture-icon-text");svg+=icon_label;}
                 else svg+="<path class=\"node-bkg\" fill=\"none\" stroke=\""+xml(input.group_color)+"\" stroke-width=\""+num(input.group_width)+"\" stroke-dasharray=\"8\" d=\"M0,"+num(size)+" V5 Q0,0 5,0 H"+num(size-5)+" Q"+num(size)+",0 "+num(size)+",5 V"+num(size)+" Z\"/>";
             }
             svg+="</g>";

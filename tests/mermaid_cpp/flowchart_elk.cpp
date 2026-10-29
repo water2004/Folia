@@ -12,7 +12,7 @@ suite flowchart_elk=[] {
   const auto override=std::getenv("FOLIA_MERMAID_FIXTURES");std::ifstream file{std::filesystem::path{override?override:FOLIA_MERMAID_FIXTURE_DIR}/"flowchart-elk.tsv"};expect(fatal(file.is_open()));
   std::string line;std::size_t count=0;
   while(std::getline(file,line)){if(!line.empty()&&line.back()=='\r')line.pop_back();if(line.empty()||line[0]=='#')continue;
-   const auto row=fields(line,'\t');expect(fatal(row.size()==6_u));auto session=ConfigSession::create();expect(fatal(session.has_value()));
+   const auto row=fields(line,'\t');expect(fatal(row.size()==6_u));auto session=ConfigSession::create();expect(fatal(session.has_value()));ConfigValue site;site.kind=ConfigKind::mapping;site.mapping.emplace(u"theme",ConfigValue{.kind=ConfigKind::string,.string=u"default"});expect(fatal(session->save_initialize_config(site).has_value()));expect(fatal(session->set_site_config(site).has_value()));
    const auto graph=prepare_flowchart(decode(row[1]),*session);expect(fatal(graph.has_value()))<<row[0];
    std::vector<FlowchartNodeBox> boxes(graph->nodes.size());std::vector<FlowchartEdgeLabelSize> labels;FlowchartMeasurements measured;measured.nodes.resize(boxes.size());
    const auto nodeRows=fields(row[2],';');

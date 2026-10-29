@@ -38,7 +38,8 @@ suite host_contract = [] {
         expect(default_class.status == 1_i);
         expect(default_class.text.find("ELK") != std::string::npos);
         auto default_flow = render("flowchart TD\nA-->B");
-        expect(default_flow.status == 1_i);
+        expect(default_flow.status == 0_i) << default_flow.text;
+        expect(default_flow.width > 0 && default_flow.height > 0);
         auto explicit_flow = render("---\nconfig:\n  layout: dagre\n---\nflowchart TD\nA-->B");
         expect(explicit_flow.status == 0_i) << explicit_flow.text;
         auto explicit_class = render("---\nconfig:\n  layout: dagre\n---\nclassDiagram\nclass Document");
