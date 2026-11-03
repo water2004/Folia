@@ -2,12 +2,12 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-11-04，窗口退出已修复，Base URL收尾验证中）
+## 当前 checkpoint（2026-11-04，窗口退出与Base URL已完成）
 
-- 用户要求AI配置只填Base URL，且明确**不要旧配置处理**。未提交改动已将CompletionConfig/JSON/UI改baseUrl，ResolveCompletionEndpoint统一补协议suffix，裸host默认/v1，保留自定义路径/query、去末尾斜杠；未加完整端点模式/迁移。参考本地Fairy ResolveModelEndpoint的base规则，无Fairy依赖。新测试test_completion_http覆盖三协议路径/loopback；尚未运行验证。
+- 用户要求AI配置只填Base URL，且明确**不要旧配置处理**。已将CompletionConfig/JSON/UI改baseUrl，ResolveCompletionEndpoint统一补协议suffix，裸host默认/v1，保留自定义路径/query、去末尾斜杠；未加完整端点模式/迁移。参考本地Fairy ResolveModelEndpoint的base规则，无Fairy依赖。正式test_completion_http覆盖三协议路径/loopback，全部通过，无真实模型请求。
 - 用户指出窗口已关却仍占文件。进程12368为标准Debug，非侵入cdb证据build/folia-closed-process-stacks.log：主线程GetMessage等待、多个FrameScheduler线程；实际枚举9个不可见DWMCLOAK_APP=1的WinUIDesktopWin32WindowClass，为拖出预备窗口残留。已对其发正常WM_CLOSE并确认退出，未强杀。首轮Base构建因exe占用失败；释放后completion-base-url-build-retry.log成功。
 - 已建立prepared window到source的弱所有权关系；源窗口Closed清理未使用host，Reveal清除归属，其他正常/已拉出窗口保留；App注册表清空后撤销激活注册并Exit。原测试before日志稳定6断言失败（3个hidden host未关）；修复后build/window-lifecycle-tests.log真实WinUI窗口/页签26项949断言全过，含跨owner隔离及已拉出文档保留。build/window-lifecycle-build.log标准Debug成功；window-lifecycle-startup.log正式程序2轮正常退出code0，window-lifecycle-activation.log多窗口/独立实例/激活/正常退出全过。
-- Base URL/controller build/completion-base-url-tests.log共17项1175断言通过（HTTP5/41、layout2/1056、controller10/78）；设置UI回归正在跑exec session41825，日志build/completion-base-url-settings-tests.log。下步看结果，整理Base URL与生命周期为小批本地提交。无agent；不自动鼠标、不用CUA，编译≤4。
+- Base URL/controller build/completion-base-url-tests.log共17项1175断言通过（HTTP5/41、layout2/1056、controller10/78）；设置UI回归build/completion-base-url-settings-tests.log共5项149断言全过。合计48项2273断言及真实启动/激活退出验证。生命周期独立本地提交77f2b46c，Base URL及本checkpoint同批本地提交（见HEAD）。标准Debug已更新，无运行Folia/build/test/agent；不自动鼠标、不用CUA，编译≤4。下步按用户反馈继续，无剩余本轮必做项，不重开已验结论。
 - 仍0.5.5，未推送/安装/发布；之前蓝条简化提交453524e8已完成，用户允许1–2帧差，不能重开复杂同步。临时候选build/candidates/tab-presentation仍因自动审查拒绝递归删除保留ignored，不再重试绕过。
 
 ## 页签帧协调简化实现（453524e8，历史）

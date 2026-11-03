@@ -327,7 +327,8 @@
   <data name="AICompletionDescription" xml:space="preserve"><value>Predict text while typing. Tab accepts all; Ctrl+Right accepts the next word; Esc dismisses.</value></data>
   <data name="AICompletionEnabled" xml:space="preserve"><value>Send nearby document text for predictions</value></data>
   <data name="AIProtocol" xml:space="preserve"><value>API protocol</value></data>
-  <data name="AIEndpoint" xml:space="preserve"><value>Full API endpoint URL</value></data>
+  <data name="AIBaseUrl" xml:space="preserve"><value>Service base URL</value></data>
+  <data name="AIBaseUrlDescription" xml:space="preserve"><value>For example, https://api.example.com/v1. The request path is added for the selected protocol.</value></data>
   <data name="AIModel" xml:space="preserve"><value>Model</value></data>
   <data name="AIKey" xml:space="preserve"><value>API key (Windows Credential Manager)</value></data>
   <data name="AIKeyUnchanged" xml:space="preserve"><value>Leave empty to keep the saved key</value></data>

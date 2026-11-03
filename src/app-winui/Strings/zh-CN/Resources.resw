@@ -327,7 +327,8 @@
   <data name="AICompletionDescription" xml:space="preserve"><value>输入停顿后预测文本。Tab 接受整段，Ctrl+→ 接受下一词，Esc 取消。</value></data>
   <data name="AICompletionEnabled" xml:space="preserve"><value>启用预测并向服务发送附近文档文本</value></data>
   <data name="AIProtocol" xml:space="preserve"><value>接口协议</value></data>
-  <data name="AIEndpoint" xml:space="preserve"><value>完整接口地址</value></data>
+  <data name="AIBaseUrl" xml:space="preserve"><value>服务基础地址（Base URL）</value></data>
+  <data name="AIBaseUrlDescription" xml:space="preserve"><value>例如 https://api.example.com/v1。会根据所选协议自动补全请求路径。</value></data>
   <data name="AIModel" xml:space="preserve"><value>模型</value></data>
   <data name="AIKey" xml:space="preserve"><value>API Key（Windows 凭据管理器）</value></data>
   <data name="AIKeyUnchanged" xml:space="preserve"><value>留空保留已保存的密钥</value></data>

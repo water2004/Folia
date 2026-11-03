@@ -84,7 +84,7 @@ suite settings_style_tests = [] {
                     auto expected = root.Resources().Lookup(winrt::box_value(L"FoliaShellMutedForegroundBrush")).as<Media::SolidColorBrush>();
                     expect(description.Foreground().as<Media::SolidColorBrush>().Color() == expected.Color()) << "description theme brush";
                 }
-                auto endpoint = Field<TextBox>(panel, winrt::Folia::Localize(L"AIEndpoint"));
+                auto endpoint = Field<TextBox>(panel, winrt::Folia::Localize(L"AIBaseUrl"));
                 auto key = Field<PasswordBox>(panel, winrt::Folia::Localize(L"AIKey"));
                 expect(endpoint != nullptr && key != nullptr);
                 if (endpoint && key) {

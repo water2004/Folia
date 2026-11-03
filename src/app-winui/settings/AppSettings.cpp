@@ -41,7 +41,7 @@ namespace winrt::Folia
             if (schemaVersion >= 5.0) {
                 auto completion = root.GetNamedObject(L"completion");
                 settings.completion.enabled = completion.GetNamedBoolean(L"enabled", false);
-                settings.completion.endpoint = winrt::to_string(completion.GetNamedString(L"endpoint", L""));
+                settings.completion.baseUrl = winrt::to_string(completion.GetNamedString(L"baseUrl", L""));
                 settings.completion.model = winrt::to_string(completion.GetNamedString(L"model", L""));
                 settings.completion.protocol = static_cast<int>(completion.GetNamedNumber(L"protocol", 0));
                 if (settings.completion.enabled && !ValidateCompletionConfig(settings.completion).empty())
@@ -79,7 +79,7 @@ namespace winrt::Folia
             root.Insert(L"schemaVersion", Windows::Data::Json::JsonValue::CreateNumberValue(5));
             Windows::Data::Json::JsonObject completion;
             completion.Insert(L"enabled", Windows::Data::Json::JsonValue::CreateBooleanValue(settings.completion.enabled));
-            completion.Insert(L"endpoint", Windows::Data::Json::JsonValue::CreateStringValue(winrt::to_hstring(settings.completion.endpoint)));
+            completion.Insert(L"baseUrl", Windows::Data::Json::JsonValue::CreateStringValue(winrt::to_hstring(settings.completion.baseUrl)));
             completion.Insert(L"model", Windows::Data::Json::JsonValue::CreateStringValue(winrt::to_hstring(settings.completion.model)));
             completion.Insert(L"protocol", Windows::Data::Json::JsonValue::CreateNumberValue(settings.completion.protocol));
             root.Insert(L"completion", completion);

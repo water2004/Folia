@@ -6,8 +6,11 @@ Folia builds, configures and runs independently. Reused protocol adapter source
 is vendored with its license and source revision; no Fairy installation, process,
 configuration, key store or absolute source path is a dependency.
 
-The user configures a provider, endpoint, model and key in Folia. Completion is
-opt-in. Keys use the Windows credential store, separate from portable settings.
+The user configures a protocol, base URL, model and key in Folia. The transport
+adds `/chat/completions`, `/responses` or `/messages` to that base path; a host-only
+base uses `/v1`. Trailing slashes are normalized and query parameters are retained.
+The settings field is `completion.baseUrl`; there is no legacy endpoint migration.
+Completion is opt-in. Keys use the Windows credential store, separate from portable settings.
 Only bounded context from the active document is sent to the configured service.
 
 Tab accepts the current proposal, Ctrl+Right accepts its next word, and Escape

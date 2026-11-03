@@ -21,10 +21,11 @@ Microsoft::UI::Xaml::UIElement SettingsView::BuildCompletionPage() {
     protocol.Style(ResourceStyle(L"SettingsComboBoxStyle"));
     for (auto label : {L"OpenAI Chat Completions", L"OpenAI Responses", L"Anthropic Messages"}) protocol.Items().Append(box_value(label));
     protocol.SelectedIndex(appliedSettings_.completion.protocol); service.Children().Append(protocol);
-    TextBox endpoint; endpoint.Header(box_value(Localize(L"AIEndpoint")));
-    endpoint.Style(ResourceStyle(L"SettingsTextBoxStyle"));
-    endpoint.PlaceholderText(L"https://api.example.com/v1/chat/completions");
-    endpoint.Text(winrt::to_hstring(appliedSettings_.completion.endpoint)); service.Children().Append(endpoint);
+    TextBox baseUrl; baseUrl.Header(box_value(Localize(L"AIBaseUrl")));
+    baseUrl.Style(ResourceStyle(L"SettingsTextBoxStyle"));
+    baseUrl.PlaceholderText(L"https://api.example.com/v1");
+    baseUrl.Text(winrt::to_hstring(appliedSettings_.completion.baseUrl)); service.Children().Append(baseUrl);
+    service.Children().Append(Hint(Localize(L"AIBaseUrlDescription")));
     TextBox model; model.Header(box_value(Localize(L"AIModel")));
     model.Style(ResourceStyle(L"SettingsTextBoxStyle"));
     model.Text(winrt::to_hstring(appliedSettings_.completion.model)); service.Children().Append(model);
@@ -40,10 +41,10 @@ Microsoft::UI::Xaml::UIElement SettingsView::BuildCompletionPage() {
     status.Style(ResourceStyle(L"SettingsHintTextStyle"));
     Button save; save.Content(box_value(Localize(L"Save")));
     save.Style(ResourceStyle(L"SettingsPrimaryButtonStyle"));
-    save.Click([weak = weak_from_this(), enabled, protocol, endpoint, model, key, clearKey, status](auto const&, auto const&) {
+    save.Click([weak = weak_from_this(), enabled, protocol, baseUrl, model, key, clearKey, status](auto const&, auto const&) {
         auto self = weak.lock(); if (!self || self->detached_ || !self->applySettings_) return;
         auto proposed = self->appliedSettings_;
-        proposed.completion = {enabled.IsOn(), winrt::to_string(endpoint.Text()), winrt::to_string(model.Text()), protocol.SelectedIndex()};
+        proposed.completion = {enabled.IsOn(), winrt::to_string(baseUrl.Text()), winrt::to_string(model.Text()), protocol.SelectedIndex()};
         if (proposed.completion.enabled) if (auto error = ValidateCompletionConfig(proposed.completion); !error.empty()) {
             SetStatus(status, winrt::to_hstring(error), true); return;
         }

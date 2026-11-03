@@ -27,7 +27,7 @@ struct Fixture {
         auto owner = session.RenderModel().blocks.front().source_span.container_id;
         session.SetSelection(folia::TextSelection::caret({owner, 3}));
         controller = std::make_shared<InlineCompletionController>(session,
-            CompletionConfig{true, "https://fixture.invalid/complete", "fixture", 0},
+            CompletionConfig{true, "https://fixture.invalid/v1", "fixture", 0},
             winrt::Microsoft::UI::Dispatching::DispatcherQueue::GetForCurrentThread(),
             [this](auto const& command) { return Execute(command); }, [] {},
             [this](auto const& value) { error = value; },

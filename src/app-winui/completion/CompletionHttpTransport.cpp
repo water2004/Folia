@@ -76,7 +76,7 @@ CompletionResult RequestCompletionHttp(CompletionConfig const& config, folia::co
     auto validation = ValidateCompletionConfig(config);
     if (!validation.empty()) throw std::runtime_error(validation);
     if (stop.stop_requested()) return {};
-    auto endpoint = wide(config.endpoint);
+    auto endpoint = wide(ResolveCompletionEndpoint(config));
     URL_COMPONENTS url{sizeof(URL_COMPONENTS)};
     url.dwHostNameLength = url.dwUrlPathLength = url.dwExtraInfoLength = static_cast<DWORD>(-1);
     check(WinHttpCrackUrl(endpoint.c_str(), static_cast<DWORD>(endpoint.size()), 0, &url));

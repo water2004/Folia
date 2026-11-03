@@ -9,21 +9,37 @@ namespace {
 constexpr wchar_t CredentialName[] = L"Folia/InlineCompletion/APIKey";
 
 }
-std::string ValidateCompletionConfig(CompletionConfig const& config) {
-    if (config.model.empty() || config.model.size() > 256) return "Choose a completion model (up to 256 bytes).";
-    if (config.endpoint.size() > 2048 || config.endpoint.find_first_of("\r\n") != std::string::npos) return "Invalid completion endpoint.";
-    if (config.protocol < 0 || config.protocol > 2) return "Unsupported completion protocol.";
-    auto endpoint = winrt::to_hstring(config.endpoint);
+std::string ResolveCompletionEndpoint(CompletionConfig const& config) {
+    constexpr std::array<std::string_view, 3> paths{"/chat/completions", "/responses", "/messages"};
+    if (config.protocol < 0 || config.protocol >= paths.size()) throw std::invalid_argument("Unsupported completion protocol.");
+    if (config.baseUrl.size() > 2048 || config.baseUrl.find_first_of("\r\n") != std::string::npos)
+        throw std::invalid_argument("Invalid completion base URL.");
+    auto baseUrl = winrt::to_hstring(config.baseUrl);
     URL_COMPONENTS url{sizeof(URL_COMPONENTS)};
     url.dwHostNameLength = url.dwUserNameLength = url.dwPasswordLength = static_cast<DWORD>(-1);
-    if (!WinHttpCrackUrl(endpoint.c_str(), endpoint.size(), 0, &url)
-        || url.dwUserNameLength || url.dwPasswordLength || config.endpoint.find('#') != std::string::npos)
-        return "Invalid completion endpoint.";
+    if (!WinHttpCrackUrl(baseUrl.c_str(), baseUrl.size(), 0, &url) || !url.dwHostNameLength
+        || url.dwUserNameLength || url.dwPasswordLength || config.baseUrl.find('#') != std::string::npos)
+        throw std::invalid_argument("Invalid completion base URL.");
     auto host = std::wstring(url.lpszHostName, url.dwHostNameLength);
     std::ranges::transform(host, host.begin(), [](wchar_t c) { return std::towlower(c); });
     if (url.nScheme != INTERNET_SCHEME_HTTPS && !(url.nScheme == INTERNET_SCHEME_HTTP
         && (host == L"localhost" || host == L"127.0.0.1" || host == L"[::1]" || host == L"::1")))
-        return "Use HTTPS or a local HTTP endpoint.";
+        throw std::invalid_argument("Use HTTPS or a local HTTP base URL.");
+    auto queryAt = config.baseUrl.find('?');
+    auto path = config.baseUrl.substr(0, queryAt);
+    auto query = queryAt == std::string::npos ? std::string{} : config.baseUrl.substr(queryAt);
+    while (path.ends_with('/')) path.pop_back();
+    if (path.find('/', path.find("://") + 3) == std::string::npos) path += "/v1";
+    path += paths[config.protocol];
+    path += query;
+    if (path.size() > 2048) throw std::invalid_argument("Completion base URL is too long.");
+    return path;
+}
+std::string ValidateCompletionConfig(CompletionConfig const& config) {
+    if (config.model.empty() || config.model.size() > 256) return "Choose a completion model (up to 256 bytes).";
+    try { (void)ResolveCompletionEndpoint(config); }
+    catch (std::exception const& error) { return error.what(); }
+    catch (winrt::hresult_error const&) { return "Invalid completion base URL."; }
     return {};
 }
 std::wstring LoadCompletionKey() {
