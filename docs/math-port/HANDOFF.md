@@ -2,7 +2,13 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-11-03，核对mathbf希腊字母）
+## 当前 checkpoint（2026-11-03，发布0.5.5）
+
+- 用户授权patch版本+1、推送并发布Release，目标0.5.5。六处版本入口已统一，release-notes/v0.5.5.md描述嵌套数学修复、括号编辑、UTF8界面；沿用下列已完成的Debug/core/controller验证。
+- 沿用.github/workflows/release.yml，推master与新v0.5.5后监看CI构建/启动关闭/发布，下载正式MSI及sha256校验。不移动既有标签，不自动安装。
+- 当前下一步：提交版本更新并推送master/v0.5.5，再记录run/发布commit/正式产物散列。无agent/本地build句柄；不开agents/CUA、不动用户鼠标/窗口，native串行≤4。
+
+## 核对mathbf希腊字母（89affb85，已完成）
 
 - 用户怀疑mathbf{mu}未加粗是移植遗漏。已核对锁定MathJax4.1.3 ParseMethods.ts:113 lcGreek：mathStyle(char)||italic，不继承env.font；ucGreek才先用env.font。native parse_methods.cpp:88逐项一致，MathFont映射也一致。**无生产代码遗漏，不改上游语义**。
 - 实际MathJax/NewCM与当前build/core/FoliaNativeMath.dll对照6式：mu、mathbf{mu}、mathbfit{mu}均1D707；boldsymbol{mu}=1D741；mathbf{m}=1D426；mathbf{Gamma}=1D6AA。六式SVG glyph path全部一致。证据build/tag-layout/greek-font-check/{source.json,source-*.svg,native-*.svg,source.cjs,compare.py}。初次桥接未传cancel按接口返回status1，补有效Cancellation后全部通过，无进程异常。
