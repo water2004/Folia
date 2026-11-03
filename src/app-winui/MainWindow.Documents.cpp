@@ -79,6 +79,7 @@ namespace winrt::Folia::implementation {
             if (!document->loaded) LoadWorkspaceDocument(document);
             return;
         }
+        auto frameUpdate = editorRenderer.UpdateWithXaml();
         // CoreText leaves the old session before the active owner changes.
         // A final IME commit can therefore still pin the old preview.
         textInputController.Detach();

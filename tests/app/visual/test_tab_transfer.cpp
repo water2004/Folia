@@ -8,6 +8,16 @@
 
 import folia.markdown.instrumentation;
 
+namespace winrt::Folia {
+    struct EditorRendererTestAccess {
+        static UINT PresentCount(EditorSurfaceRenderer const& renderer) {
+            UINT count{};
+            winrt::check_hresult(renderer.resources.swapChain->GetLastPresentCount(&count));
+            return count;
+        }
+    };
+}
+
 namespace winrt::Folia::implementation {
     // Inspect ownership and call the same transfer used by WinUI's native events.
     // Tests close only their own newly created windows, without a save dialog.
@@ -96,7 +106,46 @@ namespace {
         ~OwnedWindow() { if (window) Access::Close(window); }
     };
     auto App() { return winrt::Folia::implementation::App::Current(); }
+    FrameworkElement TabPart(DependencyObject const& element, std::wstring_view name) {
+        if (auto value = element.try_as<FrameworkElement>(); value && value.Name() == name) return value;
+        for (int i = 0; i < Media::VisualTreeHelper::GetChildrenCount(element); ++i)
+            if (auto value = TabPart(Media::VisualTreeHelper::GetChild(element, i), name)) return value;
+        return nullptr;
+    }
     suite tab_transfer_tests = [] {
+        "tab activation coalesces intermediate drawing until the shell frame"_test = [] {
+            OwnedWindow source(App()->CreateMainWindow());
+            Access::Edit(source.window, U"first");
+            auto first = Access::Documents(source.window).Active();
+            Access::New(source.window);
+            Access::Edit(source.window, U"second document");
+            auto second = Access::Documents(source.window).Active();
+            auto tabs = Access::Tabs(source.window);
+            auto root = source.window.Content().as<FrameworkElement>(); root.UpdateLayout();
+            auto count = root.FindName(L"CharacterCountText").as<Controls::TextBlock>();
+            auto& renderer = Access::Renderer(source.window);
+            auto presentCount = [&] { return winrt::Folia::EditorRendererTestAccess::PresentCount(renderer); };
+            auto before = presentCount();
+            std::vector<double> opacityDuringPresentation;
+            auto token = count.RegisterPropertyChangedCallback(Controls::TextBlock::TextProperty(), [&](auto const&, auto const&) {
+                auto tab = tabs.ContainerFromItem(tabs.SelectedItem()).as<Controls::TabViewItem>();
+                opacityDuringPresentation.push_back(TabPart(tab, L"SelectionIndicator").Opacity());
+            });
+            for (auto document : {first, second, first, second}) tabs.SelectedItem(Access::Binding(source.window, document->id)->item);
+            count.UnregisterPropertyChangedCallback(Controls::TextBlock::TextProperty(), token);
+            expect(presentCount() == before) << "switching must not submit intermediate document buffers";
+            expect(Access::Documents(source.window).Active() == second);
+            expect(opacityDuringPresentation.size() == 4_u);
+            for (auto opacity : opacityDuringPresentation) expect(opacity == 1.) << "blue indicator during document update";
+            std::optional<UINT> presentedWithShell;
+            auto rendered = Media::CompositionTarget::Rendered(winrt::auto_revoke, [&](auto const&, auto const&) {
+                if (!presentedWithShell) presentedWithShell = presentCount();
+            });
+            root.InvalidateArrange();
+            Pump([&] { return presentedWithShell.has_value(); });
+            rendered.revoke();
+            expect(*presentedWithShell == before + 1) << "one final buffer is submitted after the shell frame";
+        };
         "tab modified indicator uses the Unicode codepoint independently of the build codepage"_test = [] {
             OwnedWindow owned(App()->CreateMainWindow());
             auto id = Access::Documents(owned.window).Active()->id;

@@ -2,7 +2,15 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-11-04，页签选中高亮修复已完成）
+## 当前 checkpoint（2026-11-04，页签帧协调简化实现已完成）
+
+- 新证据：用户明确上一轮没有解决底部小蓝条延迟。已只读核实运行进程21972为Debug/Folia.exe，02:01:53启动，WorkspaceChrome.xbf为01:58:39新构建，不能归因于旧安装版本。上一轮修复了真实状态名错误，但只验Opacity/状态机，不证明屏幕呈现时序；不再宣称已解决用户反馈。
+- 新验收边界：用户明确允许一两帧正常差异，要求干净实现；不追求0帧。桌面同帧采样已证实旧路径正文约20ms、蓝条53ms（before-atomic日志），简化Rendered版本多为同帧，偶有一帧差，符合新边界。上一轮0差异断言不再适用。
+- 当前只留FrameUpdate RAII合并ActivateDocument中间绘制，Rendered一次性提交最终缓冲；关闭撤销订阅，正常滚动Present(0,0)/帧调度不变。**已移除**实验的CommitAsync/serial/CallbackState重命名、额外脚本参数和145行GDI像素测试（诊断日志留ignored build）。正式测试用DXGI PresentCount，验连续4次切页无中间提交、shell完成仅一次最终提交、选择/蓝条状态同步；产品改动49行，没有新线程/计时器/文档队列。
+- 验证完成：标准Debug build/tab-presentation-simple-build.log成功；窗口/页签24项935断言tab-presentation-simple-tests.log，调度3项52断言tab-presentation-simple-frame-tests.log全过，合计27项987断言。调度ready-signal中位8.32ms仅为诊断，不当实际显示FPS。未改CST、文档事务、公式/AI策略。辅助脚本已清理；ignored临时候选build/candidates/tab-presentation仍在，自动审批拒绝递归删除，理由仅blocked by policy，未重试绕过。
+- 停止点：本批实现/正式测试/本交接一同本地提交（见HEAD），标准Debug已更新，结束时无agent/build/test/Folia进程。版本仍0.5.5，未MSI/安装/推送/发布；后续按用户反馈继续，不重开0帧追逐或旧滚动问题。用户授权可关闭Folia用于构建（未保存提示保留），其余仍不开agents/CUA、不自动鼠标，native串行≤4。
+
+## 页签模板状态名修复（818f3b5c，历史；不代表蓝条时序问题已解决）
 
 - 用户报告内容已切换、页签高亮后出现。已核对当前安装SDK Microsoft.WindowsAppSDK.WinUI.2.2.1的generic.xaml：TabViewItem原生CommonStates是PointerOverSelected/PressedSelected，WorkspaceChrome误写成SelectedPointerOver/SelectedPressed，悬停/按下选中无法匹配，后续状态变化才显示。FolderExplorer的TreeViewItem有同一错误，一并仅改状态名；brush key仍为BackgroundSelectedPointerOver/BackgroundSelectedPressed，不能跟着换名。未改文档激活/调度/拖动协议。
 - 修复前真实WinUI测试build/tab-highlight-before.log稳定8次状态匹配失败；修复后build/tab-highlight-final-tests.log页签/窗口迁移16项165断言、chrome7项762断言全过，包含重复原生选择、选中/旧选中indicator同步值，以及Selected/PointerOverSelected/PressedSelected与未选中状态的即时setters。文件树build/tab-highlight-tree-tests.log 6项98断言通过；合计29项1025断言。最终Debug build/tab-highlight-verified-build.log成功。未模拟鼠标；实际物理点击体验未另行人工复测。

@@ -8,6 +8,7 @@ namespace winrt::Folia
 
     EditorSurfaceRenderer::~EditorSurfaceRenderer()
     {
+        if (xamlPresentation.value) Microsoft::UI::Xaml::Media::CompositionTarget::Rendered(xamlPresentation);
         renderCache.Detach();
         mathJax.SetCompletionCallback({});
         svgNormalizer.SetCompletionCallback({});
@@ -228,6 +229,34 @@ namespace winrt::Folia
         auto ended = resources.d2dContext->EndDraw();
         if (ended == D2DERR_RECREATE_TARGET) { caretAnimation.Reset(); resources.ResetTargets(); return; }
         if (FAILED(ended)) { caretAnimation.Reset(); return; }
+        presentPending = true;
+        if (frameUpdateDepth == 0 && !xamlPresentation.value) PresentPendingFrame();
+    }
+
+    EditorSurfaceRenderer::FrameUpdate::FrameUpdate(EditorSurfaceRenderer& renderer) : renderer_(renderer)
+    {
+        if (!renderer_.xamlPresentation.value)
+        {
+            renderer_.xamlPresentation = Microsoft::UI::Xaml::Media::CompositionTarget::Rendered(
+                [owner = &renderer](auto const&, auto const&)
+                {
+                    auto& renderer = *owner;
+                    if (renderer.frameUpdateDepth != 0) return;
+                    auto token = std::exchange(renderer.xamlPresentation, {});
+                    Microsoft::UI::Xaml::Media::CompositionTarget::Rendered(token);
+                    renderer.PresentPendingFrame();
+                });
+        }
+        ++renderer_.frameUpdateDepth;
+    }
+
+    EditorSurfaceRenderer::FrameUpdate::~FrameUpdate() { --renderer_.frameUpdateDepth; }
+
+    EditorSurfaceRenderer::FrameUpdate EditorSurfaceRenderer::UpdateWithXaml() { return FrameUpdate{*this}; }
+
+    void EditorSurfaceRenderer::PresentPendingFrame()
+    {
+        if (!std::exchange(presentPending, false) || !resources.Ready()) return;
         auto presented = resources.swapChain->Present(0, 0);
         if (presented == DXGI_ERROR_DEVICE_REMOVED || presented == DXGI_ERROR_DEVICE_RESET) {
             caretAnimation.Reset();

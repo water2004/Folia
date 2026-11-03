@@ -41,6 +41,20 @@ namespace winrt::Folia
         void InitializeForPdf();
         void Resize(winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel const& panel, double width, double height);
         void Render(detail::EditorRenderFrame const& frame);
+        // A document transition may draw several layouts to restore its
+        // viewport. Submit its final buffer after the shell frame has rendered.
+        class FrameUpdate
+        {
+        public:
+            ~FrameUpdate();
+            FrameUpdate(FrameUpdate const&) = delete;
+            FrameUpdate& operator=(FrameUpdate const&) = delete;
+        private:
+            friend struct EditorSurfaceRenderer;
+            explicit FrameUpdate(EditorSurfaceRenderer& renderer);
+            EditorSurfaceRenderer& renderer_;
+        };
+        [[nodiscard]] FrameUpdate UpdateWithXaml();
         EditorPdfExportProgress ExportPdfStep(
             std::filesystem::path const& path,
             std::wstring const& title,
@@ -93,6 +107,7 @@ namespace winrt::Folia
 
     private:
         struct PdfExportState;
+        friend struct EditorRendererTestAccess;
 
         void DrawDocument(
             detail::EditorRenderFrame const& frame,
@@ -102,6 +117,7 @@ namespace winrt::Folia
         std::function<void()> EmbeddedCompletionCallback();
 
         void Invalidate();
+        void PresentPendingFrame();
 
         struct InvalidationState
         {
@@ -144,6 +160,9 @@ namespace winrt::Folia
         float totalDocumentHeight = 0.0f;
         bool resizing = false;
         bool rendering = false;
+        std::uint32_t frameUpdateDepth = 0;
+        bool presentPending = false;
+        winrt::event_token xamlPresentation{};
         bool printMode = false;
         std::stop_token mathPreparationStop;
         bool exporting = false;
