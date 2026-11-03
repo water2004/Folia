@@ -82,6 +82,7 @@ namespace winrt::Folia::implementation {
         // CoreText leaves the old session before the active owner changes.
         // A final IME commit can therefore still pin the old preview.
         textInputController.Detach();
+        inlineCompletion.reset();
         pointerController.Detach();
         latexCompletionController.Detach();
         codeLanguageController.Detach();

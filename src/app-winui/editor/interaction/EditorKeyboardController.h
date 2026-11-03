@@ -39,6 +39,7 @@ namespace winrt::Folia
             std::u32string_view source);
         void ResetCaretGoal();
         void CancelSnippetSession();
+        bool HasSnippetSession() const { return snippetSession_.Active(); }
         std::vector<folia::platform::editor::EditorSnippetPlaceholder> SnippetPlaceholders();
 
     private:

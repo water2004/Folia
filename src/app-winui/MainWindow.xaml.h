@@ -12,6 +12,7 @@
 #include "editor/interaction/EditorDocumentController.h"
 #include "editor/interaction/EditorSidebarController.h"
 #include "settings/AppSettings.h"
+#include "completion/InlineCompletionController.h"
 #include "settings/SettingsView.h"
 #include "settings/LatexCommandCatalog.h"
 #include "theme/ThemeCatalog.h"
@@ -112,6 +113,8 @@ namespace winrt::Folia::implementation
         void ReplaceAllSearchMatches();
         folia::SearchOptions CurrentSearchOptions();
         bool ExecuteEditorCommand(folia::Command const& command);
+        void ConfigureInlineCompletion();
+        bool HandleInlineCompletionKey(winrt::Windows::System::VirtualKey);
         void ShowFootnoteFlyout(
             folia::platform::editor::EditorVisualFootnoteHit const& hit,
             winrt::Windows::Foundation::Point position);
@@ -138,6 +141,7 @@ namespace winrt::Folia::implementation
         winrt::Folia::EditorSidebarController sidebarController;
         winrt::Microsoft::UI::Xaml::Controls::Flyout footnoteFlyout{ nullptr };
         winrt::Folia::AppSettings appSettings;
+        std::shared_ptr<winrt::Folia::InlineCompletionController> inlineCompletion;
         std::shared_ptr<winrt::Folia::ThemeCatalog> themeCatalog = std::make_shared<winrt::Folia::ThemeCatalog>();
         std::shared_ptr<winrt::Folia::LatexCommandCatalog> latexCommandCatalog =
             std::make_shared<winrt::Folia::LatexCommandCatalog>();

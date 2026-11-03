@@ -12,6 +12,7 @@ import folia.core.source_editor;
 import folia.core.theme;
 import folia.platform.editor_shortcuts;
 import folia.math.editor.syntax;
+import folia.completion;
 
 namespace winrt::Folia
 {
@@ -119,6 +120,7 @@ namespace winrt::Folia
             std::size_t offset,
             folia::TextAffinity affinity = folia::TextAffinity::Downstream) const;
         std::optional<std::u32string> EditableSource(folia::NodeId id) const;
+        std::optional<folia::completion::Context> CaptureCompletionContext() const;
         std::optional<EditorDocumentInteraction> InteractionAt(folia::TextPosition position) const;
         folia::TextSelection Selection() const;
         folia::InlineStyle ActiveInlineStyle() const;

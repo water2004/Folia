@@ -40,6 +40,7 @@ namespace winrt::Folia
         std::optional<EditorFootnoteControlKind> footnoteControl;
         SyntaxIcon icon = SyntaxIcon::None;
         SyntaxIconPlacement iconPlacement = SyntaxIconPlacement::Inline;
+        bool completion = false;
     };
 
     struct DisplayInlineText
@@ -154,6 +155,7 @@ namespace winrt::Folia
     folia::TextPosition InlineItemsEndPosition(std::vector<folia::InlineRenderItem> const& items, folia::TextPosition fallback);
     bool IsMermaidLanguage(std::optional<std::string> const& language);
     void MergeDisplayText(DisplayInlineText& target, DisplayInlineText source);
+    void InsertCompletionPreview(DisplayInlineText&, folia::TextPosition, std::u32string_view);
     void AppendSourceText(DisplayInlineText& display, std::u32string_view sourceText, folia::TextSpan sourceSpan, folia::InlineStyle style, bool marker);
     void AppendProjectedSourceText(
         DisplayInlineText& display,

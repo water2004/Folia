@@ -31,6 +31,7 @@ namespace winrt::Folia
     private:
         void Build();
         winrt::Microsoft::UI::Xaml::UIElement BuildGeneralPage();
+        winrt::Microsoft::UI::Xaml::UIElement BuildCompletionPage();
         winrt::Microsoft::UI::Xaml::UIElement BuildShortcutsPage();
         winrt::Microsoft::UI::Xaml::UIElement BuildLatexPage();
         winrt::Microsoft::UI::Xaml::UIElement BuildThemesPage();
@@ -79,6 +80,7 @@ namespace winrt::Folia
         ApplySettings applySettings_;
         winrt::Microsoft::UI::Xaml::Controls::NavigationView navigation_;
         winrt::Microsoft::UI::Xaml::UIElement generalPage_{ nullptr };
+        winrt::Microsoft::UI::Xaml::UIElement completionPage_{ nullptr };
         winrt::Microsoft::UI::Xaml::UIElement shortcutsPage_{ nullptr };
         winrt::Microsoft::UI::Xaml::UIElement latexPage_{ nullptr };
         winrt::Microsoft::UI::Xaml::UIElement themesPage_{ nullptr };

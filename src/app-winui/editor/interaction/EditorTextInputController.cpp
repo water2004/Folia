@@ -73,6 +73,7 @@ namespace winrt::Folia
         context_ = nullptr;
         surface_ = nullptr;
         executeCommand_ = {};
+        compositionChanged_ = {};
         render_ = {};
         windowHandle_ = {};
         session_ = nullptr;
@@ -300,8 +301,8 @@ namespace winrt::Folia
 
     void EditorTextInputController::RegisterHandlers()
     {
-        compositionStartedToken_ = context_.CompositionStarted([this](auto const&, auto const&) { composing_ = true; });
-        compositionCompletedToken_ = context_.CompositionCompleted([this](auto const&, auto const&) { composing_ = false; });
+        compositionStartedToken_ = context_.CompositionStarted([this](auto const&, auto const&) { composing_ = true; if (compositionChanged_) compositionChanged_(true); });
+        compositionCompletedToken_ = context_.CompositionCompleted([this](auto const&, auto const&) { composing_ = false; if (compositionChanged_) compositionChanged_(false); });
         textRequestedToken_ = context_.TextRequested([this](auto const&, winrt::Windows::UI::Text::Core::CoreTextTextRequestedEventArgs const& args)
         {
             if (!session_) return;

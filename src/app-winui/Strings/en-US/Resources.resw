@@ -324,4 +324,15 @@
   <data name="CopyingFile" xml:space="preserve"><value>Copying {0}…</value></data>
   <data name="MovingFile" xml:space="preserve"><value>Moving {0}…</value></data>
   <data name="CreatingFile" xml:space="preserve"><value>Creating {0}…</value></data>
+  <data name="AICompletion" xml:space="preserve"><value>AI completion</value></data>
+  <data name="AICompletionDescription" xml:space="preserve"><value>Predict text while typing. Tab accepts all; Ctrl+Right accepts the next word; Esc dismisses.</value></data>
+  <data name="AICompletionEnabled" xml:space="preserve"><value>Send nearby document text for predictions</value></data>
+  <data name="AIProtocol" xml:space="preserve"><value>API protocol</value></data>
+  <data name="AIEndpoint" xml:space="preserve"><value>Full API endpoint URL</value></data>
+  <data name="AIModel" xml:space="preserve"><value>Model</value></data>
+  <data name="AIKey" xml:space="preserve"><value>API key (Windows Credential Manager)</value></data>
+  <data name="AIKeyUnchanged" xml:space="preserve"><value>Leave empty to keep the saved key</value></data>
+  <data name="AIClearKey" xml:space="preserve"><value>Remove saved key</value></data>
+  <data name="AICompletionBudget" xml:space="preserve"><value>Each request reads at most 7 KiB of UTF-8 document context; output is limited to 128 tokens. No whole-file upload, automatic retry or disk suggestion cache. Provider billing varies by model.</value></data>
+  <data name="SettingsSaved" xml:space="preserve"><value>Settings saved.</value></data>
 </root>

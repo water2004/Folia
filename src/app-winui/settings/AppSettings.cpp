@@ -35,9 +35,18 @@ namespace winrt::Folia
             auto root = Windows::Data::Json::JsonObject::Parse(winrt::to_hstring(ReadUtf8(path)));
             auto schemaVersion = root.GetNamedNumber(L"schemaVersion");
             if (schemaVersion != 1.0 && schemaVersion != 2.0
-                && schemaVersion != 3.0 && schemaVersion != 4.0)
+                && schemaVersion != 3.0 && schemaVersion != 4.0 && schemaVersion != 5.0)
                 throw std::runtime_error("unsupported settings schema version");
             AppSettings settings;
+            if (schemaVersion >= 5.0) {
+                auto completion = root.GetNamedObject(L"completion");
+                settings.completion.enabled = completion.GetNamedBoolean(L"enabled", false);
+                settings.completion.endpoint = winrt::to_string(completion.GetNamedString(L"endpoint", L""));
+                settings.completion.model = winrt::to_string(completion.GetNamedString(L"model", L""));
+                settings.completion.protocol = static_cast<int>(completion.GetNamedNumber(L"protocol", 0));
+                if (settings.completion.enabled && !ValidateCompletionConfig(settings.completion).empty())
+                    throw std::runtime_error("invalid completion configuration");
+            }
             if (schemaVersion >= 4.0)
                 settings.latexSuggestionsEnabled = root.GetNamedBoolean(L"latexSuggestionsEnabled", true);
             settings.themeId = winrt::to_string(root.GetNamedString(L"themeId"));
@@ -67,7 +76,13 @@ namespace winrt::Folia
             auto directory = AssetsDirectory();
             std::filesystem::create_directories(directory);
             Windows::Data::Json::JsonObject root;
-            root.Insert(L"schemaVersion", Windows::Data::Json::JsonValue::CreateNumberValue(4));
+            root.Insert(L"schemaVersion", Windows::Data::Json::JsonValue::CreateNumberValue(5));
+            Windows::Data::Json::JsonObject completion;
+            completion.Insert(L"enabled", Windows::Data::Json::JsonValue::CreateBooleanValue(settings.completion.enabled));
+            completion.Insert(L"endpoint", Windows::Data::Json::JsonValue::CreateStringValue(winrt::to_hstring(settings.completion.endpoint)));
+            completion.Insert(L"model", Windows::Data::Json::JsonValue::CreateStringValue(winrt::to_hstring(settings.completion.model)));
+            completion.Insert(L"protocol", Windows::Data::Json::JsonValue::CreateNumberValue(settings.completion.protocol));
+            root.Insert(L"completion", completion);
             root.Insert(L"latexSuggestionsEnabled", Windows::Data::Json::JsonValue::CreateBooleanValue(settings.latexSuggestionsEnabled));
             root.Insert(L"themeId", Windows::Data::Json::JsonValue::CreateStringValue(winrt::to_hstring(settings.themeId)));
             root.Insert(L"languageId", Windows::Data::Json::JsonValue::CreateStringValue(winrt::to_hstring(settings.languageId)));

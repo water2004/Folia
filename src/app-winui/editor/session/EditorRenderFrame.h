@@ -7,6 +7,11 @@ import folia.platform.editor_snippet_session;
 
 namespace winrt::Folia::detail
 {
+    struct EditorCompletionPreview {
+        folia::TextPosition position;
+        std::u32string_view text;
+        std::uint64_t generation = 0;
+    };
     struct EditorSearchHighlight
     {
         folia::TextSpan span;
@@ -22,5 +27,6 @@ namespace winrt::Folia::detail
         std::function<void(std::size_t, std::size_t)> materializeBlocks;
         std::function<void(std::size_t, std::size_t)> releaseBlocksOutside;
         std::span<const folia::platform::editor::EditorSnippetPlaceholder> snippetPlaceholders;
+        std::optional<EditorCompletionPreview> completion;
     };
 }

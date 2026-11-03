@@ -556,6 +556,15 @@ namespace winrt::Folia
                 if (range.style.italic) fontStyle = DWRITE_FONT_STYLE_ITALIC;
                 layout->SetFontStyle(fontStyle, textRange);
             }
+            if (range.completion)
+            {
+                layout->SetFontWeight(DWRITE_FONT_WEIGHT_NORMAL, textRange);
+                layout->SetFontStyle(DWRITE_FONT_STYLE_NORMAL, textRange);
+                layout->SetStrikethrough(FALSE, textRange);
+                layout->SetUnderline(FALSE, textRange);
+                if (resources.mutedBrush) layout->SetDrawingEffect(resources.mutedBrush.Get(), textRange);
+                continue;
+            }
             if (range.marker)
             {
                 auto size = BaseFontSize(range.style, styleSheet);

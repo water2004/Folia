@@ -552,7 +552,8 @@ namespace winrt::Folia
                 inlineImages,
                 mathJax,
                 svgNormalizer,
-                treeSitter);
+                treeSitter,
+                frame.completion);
             if (prepared.table)
             {
                 for (auto const& span : block.special().table_cell_spans)
@@ -621,6 +622,7 @@ namespace winrt::Folia
             }
         }
         documentPainter.ApplyNestedCodeHighlights(prepared.display, block);
+        if (frame.completion) InsertCompletionPreview(prepared.display, frame.completion->position, frame.completion->text);
         prepared.pendingMermaid = prepared.display.pendingMermaid;
         prepared.pendingMath = prepared.display.pendingMath;
         auto format = textLayoutEngine.FormatFor(

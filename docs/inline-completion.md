@@ -52,7 +52,7 @@ and Unicode expansion. These byte caps are not a model-specific token estimate.
 
 Requests debounce for 450 ms, start at least 1.5 s apart, and use a 15 s total
 network deadline. Errors do not retry automatically. Local LRU holds at most
-32 entries / 256 KiB of payload. Local caches have entry/byte bounds and live only in memory.
+32 entries / 256 KiB of payload, only in memory.
 Cancellation, document changes, focus loss and tab/window changes retire request
 generations. Late results cannot overwrite the current proposal. Network waits
 and thread joins do not run on the UI thread.

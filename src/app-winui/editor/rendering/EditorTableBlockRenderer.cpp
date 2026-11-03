@@ -23,7 +23,8 @@ namespace winrt::Folia
         EditorInlineImageRenderer& inlineImageRenderer,
         MathJaxRenderer& mathJax,
         SvgNormalizer& svgNormalizer,
-        TreeSitterHighlighter& treeSitter)
+        TreeSitterHighlighter& treeSitter,
+        std::optional<detail::EditorCompletionPreview> completion)
     {
         auto const& special = block.special();
         auto modeledTable = special.row_count > 0 && special.column_count > 0 && !special.table_cells.empty();
@@ -63,6 +64,7 @@ namespace winrt::Folia
                     display.displayToSource.push_back({sourceSpan.container_id, sourceSpan.source_range.end, folia::TextAffinity::Downstream});
                 }
                 HighlightMathSources(display, caret, treeSitter);
+                if (completion) InsertCompletionPreview(display, completion->position, completion->text);
                 auto wide = ToWide(display.text);
                 auto layout = textLayoutEngine.Create(wide, resources.textFormat.Get(), EditorTableCellContentWidth(tableWidth, table.columnCount));
                 auto cellTextHeight = styleSheet.body.lineHeight;

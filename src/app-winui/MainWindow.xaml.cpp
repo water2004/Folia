@@ -266,11 +266,13 @@ namespace winrt::Folia::implementation
         if (windowClosed || settingsMode || workspaceDocuments.Active()->opening || documentController().IsLoading()) return false;
         keyboardController.ResetCaretGoal();
         auto oldRevision = editorSession().Revision();
+        auto beforeSelection = editorSession().Selection();
         if (!editorSession().ExecuteCommand(command))
         {
             return false;
         }
 
+        if (inlineCompletion) inlineCompletion->Edited(beforeSelection, command);
         if (editorSession().Revision() != oldRevision) UpdateDocumentInfo();
         sidebarController.Refresh();
         if (editorSession().Revision() != oldRevision
@@ -450,6 +452,7 @@ namespace winrt::Folia::implementation
             animationController.PrepareRender();
             auto frame = editorSession().RenderFrame();
             frame.snippetPlaceholders = snippetPlaceholders;
+            if (inlineCompletion) { inlineCompletion->Validate(); inlineCompletion->Decorate(frame); }
             editorRenderer.Render(frame);
             animationController.Rendered();
             if (latexCompletionController.Active()) latexCompletionController.UpdatePosition();

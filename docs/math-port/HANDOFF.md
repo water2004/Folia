@@ -2,15 +2,15 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-11-04，AI输入预测）
+## 当前 checkpoint（2026-11-04，AI输入预测已完成本地候选）
 
-- 用户先不管0.5.5流水线，做Copilot式预测补全；Folia完全独立，设置独立配置完整地址/协议/模型/API Key。不开agents/CUA、不自动鼠标/不关用户窗口，native串行≤4；没有模型联网、MSI或新发布。
-- 已vendor MIT providers（Fairy ef60077797ddadc82ee934d2e9d80ce05cf67830）及nlohmann/json3.12.0，许可证/来源/hash在third_party各自目录，已验证所有锁定协议源码hash。只取源码，无Fairy工程/运行/配置/凭据依赖。3协议及SSE fixtures通过。
-- 已接入src/completion portable预算/稳定prefix/LRU/proposal；应用controller停顿450ms、请求间隔≥1.5s、单worker最新请求、代际拒旧/输入前缀复用；WinHTTP真正async callback/15s deadline，句柄关闭通知保活buffers，无UI等待/网络join，key存Windows凭据。同步WinHTTP跨线程close方案已替换，不恢复。
-- 灰字参与原DirectWrite flow（表格/嵌套/源码共用），主题muted色、不进CST/save/选区/打印。Tab全段、Ctrl+Right按ICU词/Unicode序列、Esc取消；原Paste事务接受并Undo；弹出补全/snippet优先。IME组合期间不请求、完成后防抖。上下文从source views读取，先限额再编码，4KiB prefix+1KiB suffix+2KiB preceding、128输出token/512码点、32项/256KiB内存LRU；长段落起点按256码点分段移动，帮助服务cache但不保证命中。详见docs/inline-completion.md。
-- 已验：build/completion-core-final-2.log 11测试63断言（10MiB/Unicode限额、稳定prefix、LRU、3协议SSE）；build/completion-app-regression.log完整controller153测试19873断言通过，含异步loopback HTTP/取消/错误、旧请求排除、词接受/typed-through/Undo、16容器×明暗实际layout/主题brush/映射/缓存失效、原有数学/滚动等回归。
-- 之后小改：source view加入邻近3行上下文、设置页延迟创建/重置，增加原context本地缓存复用及源码/反向选区测试。当前串行最终构建+定向测试exec session20421，日志build/completion-final-build.log、build/completion-final-tests.log；等待并检查结果后才提交应用层。所有功能仍为本地候选，没有真实模型质量/延迟验证。
-- vendor批次已提交1c5617af。portable模块11/63断言已通过，准备第二批提交；最终Debug构建build/completion-final-build.log成功，最终定向应用14测试250断言build/completion-final-tests.log全部通过。真实startup/close检查正在执行，build/completion-startup.log；此后提交WinUI批次与最终停止点。不要跟进旧流水线或主动发布/安装。
+- 用户先不管0.5.5流水线，做Copilot式预测补全。Folia完全独立；设置→AI输入预测配置完整地址/协议/模型/API Key，默认关闭。不开agents/CUA、不自动鼠标/不关用户窗口，native串行≤4。没有真实模型联网、MSI、推送或新发布；版本仍0.5.5。
+- 来源：MIT providers（Fairy ef60077797ddadc82ee934d2e9d80ce05cf67830）与nlohmann/json3.12.0均vendor，license/source-lock/sha256齐全，27协议源码hash核对；gitattributes锁定LF。无Fairy工程/运行/配置/凭据依赖。vendor已提交1c5617af，portable预算/缓存/fixtures提交09415f8c。
+- 架构与使用：docs/inline-completion.md。src/completion只管有界上下文/prompt/LRU/proposal；WinUI独立controller/设置/WinHTTP async/凭据管理器。后台单worker+最新pending、防抖450ms、请求间隔≥1.5s、15s deadline、过期结果丢弃、无自动重试/无UI网络等待或join。同步WinHTTP跨线程close方案已替换，不恢复。
+- 成本：读取block/line source views先限额再编码，4KiB prefix+1KiB suffix+2KiB preceding，默认128输出token/512码点；32项/256KiB内存LRU。10MiB文档不全文复制/序列化/上传。长段落前缀起点按256码点分段移动，帮助服务cache但不保证命中。按词接受/匹配输入沿用余下建议；CST语义配对或结构编辑改变位置/后继源码则作废重算。
+- 灰字共用DirectWrite flow，正文/标题/引用/列表/任务/表格/代码/空文档/源码通用；主题muted色、原字号换行、无Markdown样式。所有建议字符及换行布局装饰均非Source（GeneratedPreview单独分类，caret仍在建议前）；不进CST/save/selection/print。Tab整段、Ctrl+Right按ICU词且不拆emoji/组合字符、Esc取消，原补全弹窗/snippet优先；接受走原Paste可逆事务，IME期间不请求。
+- 验证：build/completion-core-final-2.log 11测试63断言（10MiB/Unicode预算、稳定prefix、LRU、3协议SSE）；build/completion-app-regression.log完整controller153测试19873断言通过。最终增量Debug build/completion-final-review-build.log成功，15测试1145断言build/completion-final-review-tests.log全部通过，覆盖async loopback HTTP/取消/错误、旧请求拒绝、缓存/typed-through/语义配对失效、Unicode词/Undo、明暗16容器实际layout/brush/caret/缓存失效/非Source映射、源码邻近行/反向选区/零全文操作。真实启动关闭build/completion-startup.log exit0；最终同项复查build/completion-final-startup.log。
+- 停止点：应用批次与本checkpoint为当前HEAD；无agent/构建/测试在运行。后续按用户需求配置实际模型验证内容质量/延迟，或构建MSI；不冒称已有真实服务验证，不擅自跟进旧流水线/发布/安装。
 
 ## 0.5.5发布（用户暂不跟进流水线）
 

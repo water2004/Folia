@@ -70,4 +70,3 @@ suite completion_tests = [] {
     };
 };
 }
-

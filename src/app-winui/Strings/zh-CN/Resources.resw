@@ -324,4 +324,15 @@
   <data name="CopyingFile" xml:space="preserve"><value>正在复制 {0}…</value></data>
   <data name="MovingFile" xml:space="preserve"><value>正在移动 {0}…</value></data>
   <data name="CreatingFile" xml:space="preserve"><value>正在创建 {0}…</value></data>
+  <data name="AICompletion" xml:space="preserve"><value>AI 输入预测</value></data>
+  <data name="AICompletionDescription" xml:space="preserve"><value>输入停顿后预测文本。Tab 接受整段，Ctrl+→ 接受下一词，Esc 取消。</value></data>
+  <data name="AICompletionEnabled" xml:space="preserve"><value>启用预测并向服务发送附近文档文本</value></data>
+  <data name="AIProtocol" xml:space="preserve"><value>接口协议</value></data>
+  <data name="AIEndpoint" xml:space="preserve"><value>完整接口地址</value></data>
+  <data name="AIModel" xml:space="preserve"><value>模型</value></data>
+  <data name="AIKey" xml:space="preserve"><value>API Key（Windows 凭据管理器）</value></data>
+  <data name="AIKeyUnchanged" xml:space="preserve"><value>留空保留已保存的密钥</value></data>
+  <data name="AIClearKey" xml:space="preserve"><value>删除已保存的密钥</value></data>
+  <data name="AICompletionBudget" xml:space="preserve"><value>每次最多读取 7 KiB 的 UTF-8 文档上下文，输出限制为 128 token。不上传全文、不自动重试，建议只缓存在内存中。实际费用取决于模型。</value></data>
+  <data name="SettingsSaved" xml:space="preserve"><value>设置已保存。</value></data>
 </root>

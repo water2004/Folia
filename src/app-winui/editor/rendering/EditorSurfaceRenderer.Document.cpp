@@ -18,9 +18,11 @@ import folia.core.render_model;
 namespace winrt::Folia
 {
     void EditorSurfaceRenderer::DrawDocument(
-        detail::EditorRenderFrame const& frame,
+        detail::EditorRenderFrame const& sourceFrame,
         std::optional<float> sourceTopOverride)
     {
+        auto frame = sourceFrame;
+        if (printMode) frame.completion.reset();
         if (!mathModelRevision || *mathModelRevision != frame.renderModel.revision)
         {
             std::vector<std::uint64_t> owners;

@@ -26,6 +26,8 @@ namespace winrt::Folia
         void Detach();
         void FocusEnter();
         void FocusLeave();
+        bool IsComposing() const { return composing_; }
+        void SetCompositionChanged(std::function<void(bool)> callback) { compositionChanged_ = std::move(callback); }
         void NotifyTextChanged();
         void NotifySelectionChanged();
         void BeginHardwareKey();
@@ -55,6 +57,7 @@ namespace winrt::Folia
         winrt::event_token compositionStartedToken_{};
         winrt::event_token compositionCompletedToken_{};
         bool composing_ = false;
+        std::function<void(bool)> compositionChanged_;
         std::size_t knownLength_ = 0;
         std::uint64_t knownRevision_ = 0;
         folia::NodeId activeContainer_{};

@@ -11,6 +11,7 @@ export namespace folia::platform::editor
     {
         Source,
         Generated,
+        GeneratedPreview,
         BoundaryDecoration,
     };
 
@@ -83,6 +84,11 @@ export namespace folia::platform::editor
             if (point.source_offset < sourcePosition.source_offset) continue;
             if (point.source_offset > sourcePosition.source_offset)
                 return exactGeneratedAffinity.value_or(exactSource.value_or(index));
+
+            // An unaccepted insertion occupies display space at the caret but
+            // owns no source characters. Keep the caret before that run.
+            if (point.kind == EditorDisplayPositionKind::GeneratedPreview
+                && point.affinity == sourcePosition.affinity) return index;
 
             if (point.kind == EditorDisplayPositionKind::Source)
             {

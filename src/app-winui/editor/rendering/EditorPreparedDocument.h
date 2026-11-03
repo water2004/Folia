@@ -89,6 +89,7 @@ namespace winrt::Folia
         };
 
         std::uint64_t modelRevision = 0;
+        std::uint64_t completionGeneration = 0;
         folia::TextSelection selection{};
         float documentWidth = 0.0f;
         float totalHeight = 0.0f;

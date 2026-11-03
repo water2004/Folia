@@ -33,6 +33,7 @@ namespace winrt::Folia::implementation
         auto latexSuggestionsChanged =
             appSettings.latexSuggestionsEnabled != settings.latexSuggestionsEnabled;
         appSettings = settings;
+        ConfigureInlineCompletion();
         if (shortcutsChanged) {
             keyboardController.SetShortcuts(appSettings.shortcutBindings);
             RegisterApplicationShortcuts();
@@ -57,6 +58,7 @@ namespace winrt::Folia::implementation
         }
 
         settingsMode = enabled;
+        if (inlineCompletion) inlineCompletion->SetFocused(false);
         latexCompletionController.Cancel();
         SettingsButton().IsChecked(enabled);
         SetDocumentCommandsVisible(!enabled);

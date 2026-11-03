@@ -68,6 +68,13 @@ namespace winrt::Folia
             frame.renderModel.changed_block_indices,
             previousActiveBlock,
             activeBlock);
+        auto completionGeneration = frame.completion ? frame.completion->generation : 0;
+        auto completionChanged = preparedDocument && preparedDocument->completionGeneration != completionGeneration;
+        if (completionChanged && !invalidationPlan.rebuildAll) {
+            for (auto index : {previousActiveBlock, activeBlock})
+                if (index && std::ranges::find(invalidationPlan.invalidatedBlocks, *index) == invalidationPlan.invalidatedBlocks.end())
+                    invalidationPlan.invalidatedBlocks.push_back(*index);
+        }
 
         if (invalidationPlan.rebuildAll)
         {
@@ -104,7 +111,7 @@ namespace winrt::Folia
                     if (candidate.sourceMode != source.source_mode
                         || candidate.presentationKey != source.presentation_key) continue;
                     if (!source.source_mode
-                        && invalidationPlan.activePositionChanged
+                        && (invalidationPlan.activePositionChanged || completionChanged)
                         && (owns(candidate, previous->selection.active.container_id)
                             || owns(candidate, selection.active.container_id))) continue;
                     preparedDocument->blocks[index] = std::move(candidate);
@@ -164,6 +171,7 @@ namespace winrt::Folia
                 preparedDocument->totalHeight = preparedDocument->geometry.TotalHeight();
         }
         preparedDocument->selection = selection;
+        preparedDocument->completionGeneration = completionGeneration;
     }
 
     void EditorPreparedDocumentCache::EnsureGeometry()

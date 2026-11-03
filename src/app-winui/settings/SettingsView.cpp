@@ -52,6 +52,7 @@ namespace winrt::Folia
         navigation_.MenuItems().Append(general);
         navigation_.MenuItems().Append(shortcuts);
         navigation_.MenuItems().Append(latex);
+        navigation_.MenuItems().Append(NavigationItem(Localize(L"AICompletion"), L"completion", L"\xE8D4"));
         navigation_.MenuItems().Append(themes);
         navigation_.MenuItems().Append(licenses);
         navigation_.MenuItems().Append(about);
@@ -75,6 +76,7 @@ namespace winrt::Folia
     void SettingsView::Navigate(hstring const& page)
     {
         if (page == L"themes") navigation_.Content(themesPage_);
+        else if (page == L"completion") { completionPage_ = BuildCompletionPage(); navigation_.Content(completionPage_); }
         else if (page == L"latex")
         {
             navigation_.Content(latexPage_);
@@ -108,6 +110,9 @@ namespace winrt::Folia
         RefreshLatexCommandList();
         RefreshThemeList();
         SetGeneralStatus({});
+        if (completionPage_ && navigation_.Content() == completionPage_) {
+            completionPage_ = BuildCompletionPage(); navigation_.Content(completionPage_);
+        }
     }
 
     void SettingsView::SetSystemVariant(folia::Theme variant)

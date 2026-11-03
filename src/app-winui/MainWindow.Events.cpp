@@ -44,6 +44,7 @@ namespace winrt::Folia::implementation
                     container, replacement, snippet);
             });
         latexCompletionController.SetEnabled(appSettings.latexSuggestionsEnabled);
+        ConfigureInlineCompletion();
         auto languagePicker = Root().Resources().Lookup(winrt::box_value(L"CodeLanguagePickerTemplate"))
             .as<Microsoft::UI::Xaml::DataTemplate>().LoadContent().as<Microsoft::UI::Xaml::Controls::Grid>();
         CodeLanguageFlyout().Content(languagePicker);
@@ -70,6 +71,7 @@ namespace winrt::Folia::implementation
                 keyboardController.ResetCaretGoal();
                 keyboardController.CancelSnippetSession();
                 latexCompletionController.Cancel();
+                if (inlineCompletion) inlineCompletion->Cancel();
             });
     }
 
@@ -81,6 +83,7 @@ namespace winrt::Folia::implementation
             animationController.Focus(editing);
             if (editing) textInputController.FocusEnter();
             else textInputController.FocusLeave();
+            if (inlineCompletion) inlineCompletion->SetFocused(editing);
         }));
         closingHandler.Attach(AppWindow(),
             [this](auto const&, Microsoft::UI::Windowing::AppWindowClosingEventArgs const& args)
@@ -97,6 +100,7 @@ namespace winrt::Folia::implementation
         Closed(WindowEvent([this](auto const&, auto const&)
         {
             windowClosed = true;
+            inlineCompletion.reset();
             tabDragEnded.Reset();
             preparedTabActivation.Reset();
             EndTabDrag();
@@ -191,6 +195,7 @@ namespace winrt::Folia::implementation
                 args.Handled(true);
                 return;
             }
+            if (HandleInlineCompletionKey(args.Key())) { args.Handled(true); return; }
             auto handled = keyboardController.Key(args.Key());
             if (handled) latexCompletionController.Refresh();
             args.Handled(handled);
@@ -221,6 +226,7 @@ namespace winrt::Folia::implementation
                 args.Handled(true);
                 return;
             }
+            if (HandleInlineCompletionKey(winrt::Windows::System::VirtualKey::Escape)) { args.Handled(true); return; }
             if (FindReplaceBar().Visibility() != Microsoft::UI::Xaml::Visibility::Visible) return;
             HideFindBar();
             args.Handled(true);
@@ -302,6 +308,7 @@ namespace winrt::Folia::implementation
         {
             animationController.Focus(true);
             textInputController.FocusEnter();
+            if (inlineCompletion) inlineCompletion->SetFocused(true);
         }));
 
         EditorSurface().LostFocus(WindowEvent([this](auto const&, auto const&)
@@ -309,6 +316,7 @@ namespace winrt::Folia::implementation
             animationController.Focus(false);
             pointerController.CancelPointerInteraction();
             textInputController.FocusLeave();
+            if (inlineCompletion) inlineCompletion->SetFocused(false);
         }));
 
         EditorSurface().DoubleTapped(WindowEvent([this](auto const&, Microsoft::UI::Xaml::Input::DoubleTappedRoutedEventArgs const& args)

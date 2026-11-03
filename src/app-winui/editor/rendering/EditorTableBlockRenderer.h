@@ -10,6 +10,7 @@ import folia.platform.editor_interaction;
 #include "editor/rendering/EditorTextLayoutEngine.h"
 #include "media/MathJaxRenderer.h"
 #include "media/SvgNormalizer.h"
+#include "editor/session/EditorRenderFrame.h"
 
 namespace folia
 {
@@ -55,7 +56,8 @@ namespace winrt::Folia
             EditorInlineImageRenderer& inlineImageRenderer,
             MathJaxRenderer& mathJax,
             SvgNormalizer& svgNormalizer,
-            TreeSitterHighlighter& treeSitter);
+            TreeSitterHighlighter& treeSitter,
+            std::optional<detail::EditorCompletionPreview> completion = {});
 
         static void Paint(
             folia::RenderBlock const& block,
