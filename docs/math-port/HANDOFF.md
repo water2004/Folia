@@ -2,7 +2,15 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-11-03，嵌套块公式与源码编码）
+## 当前 checkpoint（2026-11-03，数学括号编辑）
+
+- 用户要求基于匹配的补全/成对删除，参考VSCode，不能无脑插()。新增math_editor.SyntaxSession.PlanBracketEdit，复用容错TeX tokens/pairs，支持()[]{}、已有closer复用/越过、注释/转义排除、选区包裹与left/right。删任一已匹配括号去两端保内容。
+- Command.typed_input区分直接输入与paste/snippet；Keyboard/CoreText接入（组合输入不干预，CoreText单字符删除回归语义Backspace/Delete）。EditorSession只通过CST/BlockSource定位数学内容，按content_to_source映射编辑；通用document_replace_text以一次原生块内源码事务记录前后选区，无全文重建。空内容不能走document_insert_text（会补分隔换行，且拒绝空replacement）；已用直接edit_inline/edit_block_source修正。
+- 验证完成：最终Debug math-pairs-input-build.log成功；括号4项188断言通过math-bracket-fixed-tests.log；core全套math-pairs-core.log成功；应用controller全套math-pairs-app.log成功（含组合输入生命周期、原有数学/片段/滚动/撤销等回归）。首轮空内容3失败已由literal transaction修正，不复用会补换行/拒绝空替换的typing接口。
+- 停止点：实现、测试和本交接一起本地提交（见HEAD），无运行agent/build/test句柄。没有安装/MSI/版本变更；后续按用户新反馈/打包请求接续。当前数学输入规则用于语义化公式编辑；源码视图继续其原有直接源码输入流程，未声称在源码视图启用括号规则。
+- 继续遵守不开agents/CUA、不自动动鼠标、不关用户窗口、native串行≤4。
+
+## 嵌套块公式与源码编码（e73fa69b，已完成）
 
 - 用户报告引用块公式缺高亮/图标、光标错误及异机标题栏dirty点乱码，要求排查所有容器。共同根因：render_builder.append_flow_block把MathBlock降为只有TeX的InlineRenderItem，丢失raw_source/source_markers/content_to_source；现flow item共享原RenderBlockSpecial，调用同一BuildMathBlockText并MergeDisplayText，无按引用/列表等特判，无第二坐标/重复解析。代码块和CST行内数学已有完整独立投影，未改它们职责。
 - WinUI项目增/utf-8；原CharacterSet=Unicode只影响API，不能保证UTF8源字面量的解码。包括关于页链接末尾↗、标题栏●等所有CPP字面量；URL本身ASCII正确。真实控件dirty.Text U+25CF、关于链接文字U+2197和NavigateUri合计1项6断言通过ui-unicode-final.log。测试run.ps1剥/TP源文件尾时也会误删随后/utf-8，已显式补齐，避免测试与产品编码不一致。

@@ -175,6 +175,16 @@ public:
         return transaction;
     }
 
+    bool execute_document_replace_text(TextSpan range, std::u32string_view text, TextSelection after) {
+        auto before = rendered_selection_.value();
+        auto transaction = document_replace_text(document_, before, range, text, after);
+        if (!transaction) return false;
+        transaction->selection_before = before;
+        transaction->selection_after = after;
+        apply_document_transaction_(*transaction);
+        return true;
+    }
+
     std::optional<DocumentTransaction> execute_document_replace_matches(
         std::span<const RenderedSearchMatch> matches) {
         auto transaction = document_replace_rendered_matches(

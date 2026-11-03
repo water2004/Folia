@@ -93,7 +93,9 @@ namespace winrt::Folia
         {
             start = (std::min)(start, session_->TextInputAcpOffset(selection.anchor));
         }
-        if (!executeCommand_(folia::Command::InsertText(text))) return false;
+        auto command = folia::Command::InsertText(text);
+        command.typed_input = true;
+        if (!executeCommand_(command)) return false;
         if (textInput_) textInput_->RecordCharacterTextUpdate(start, std::move(text));
         return true;
     }

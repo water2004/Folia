@@ -52,6 +52,9 @@ namespace winrt::Folia
         winrt::event_token layoutRequestedToken_{};
         winrt::event_token selectionUpdatingToken_{};
         winrt::event_token textUpdatingToken_{};
+        winrt::event_token compositionStartedToken_{};
+        winrt::event_token compositionCompletedToken_{};
+        bool composing_ = false;
         std::size_t knownLength_ = 0;
         std::uint64_t knownRevision_ = 0;
         folia::NodeId activeContainer_{};

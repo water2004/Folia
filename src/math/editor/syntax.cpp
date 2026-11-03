@@ -167,4 +167,59 @@ namespace folia::math::editor {
         for (auto range : unmatched) consider(range, std::nullopt);
         return best;
     }
+    std::optional<BracketEdit> SyntaxSession::PlanBracketEdit(std::u32string_view source,
+        std::size_t anchor, std::size_t active, BracketAction action, char32_t typed) {
+        if (anchor > source.size() || active > source.size()) return std::nullopt;
+        auto start = (std::min)(anchor, active), end = (std::max)(anchor, active);
+        auto const& analysis = Update(source);
+        auto prefix = [&](SourceRange range, std::u32string_view command) {
+            for (auto const& token : analysis.tokens)
+                if (token.kind == TokenKind::Command && token.range.end == range.start
+                    && source.substr(token.range.start, token.range.end - token.range.start) == command)
+                    return token.range.start;
+            return range.start;
+        };
+        if (action != BracketAction::Type && start == end) {
+            auto at = action == BracketAction::Backspace && start ? start - 1 : start;
+            if (action == BracketAction::Backspace && !start) return std::nullopt;
+            for (auto const& pair : analysis.pairs) {
+                // Environment names are not bracket characters.
+                if (pair.open.end - pair.open.start != 1 || pair.close.end - pair.close.start != 1) continue;
+                auto open = SourceRange{prefix(pair.open, U"\\left"), pair.open.end};
+                auto close = SourceRange{prefix(pair.close, U"\\right"), pair.close.end};
+                if (at != pair.open.start && at != pair.close.start && at != open.start && at != close.start) continue;
+                auto caret = at == pair.open.start || at == open.start ? open.start : close.start - (open.end - open.start);
+                return BracketEdit{{{open, {}}, {close, {}}}, caret, caret};
+            }
+            return std::nullopt;
+        }
+        if (action != BracketAction::Type) return std::nullopt;
+        if (start == end)
+            for (auto const& pair : analysis.pairs)
+                if (prefix(pair.close, U"\\right") == start && pair.close.end == pair.close.start + 1
+                    && source[pair.close.start] == typed)
+                    return BracketEdit{{}, pair.close.end, pair.close.end};
+        char32_t closing = typed == U'(' ? U')' : typed == U'[' ? U']' : typed == U'{' ? U'}' : 0;
+        if (!closing) return std::nullopt;
+        // Like editor language configurations, do not close in front of an
+        // identifier. Matched existing closers below are reused instead.
+        if (start == end && start < source.size()
+            && source[start] != U' ' && source[start] != U'\t' && source[start] != U'\n'
+            && std::u32string_view{U")]}=,+-*/;:"}.find(source[start]) == std::u32string_view::npos)
+            return std::nullopt;
+        auto left = prefix({start, start}, U"\\left") != start;
+        std::u32string candidate{source};
+        candidate.insert(start, 1, typed);
+        auto const& next = Update(candidate);
+        auto delimiter = std::ranges::any_of(next.tokens, [&](auto const& token) {
+            return token.kind == TokenKind::Delimiter && token.range.start == start && token.range.end == start + 1;
+        });
+        if (!delimiter) return std::nullopt; // comment or escaped command
+        if (start == end && std::ranges::any_of(next.pairs, [&](auto const& pair) { return pair.open.start == start; }))
+            return std::nullopt; // typing this opener already repairs an existing pair
+        auto close = left ? std::u32string{U"\\right"} : std::u32string{};
+        close.push_back(closing);
+        return BracketEdit{{{{start, start}, std::u32string(1, typed)}, {{end, end}, close}},
+            anchor + 1, active + 1};
+    }
 }

@@ -30,6 +30,7 @@ enum class CommandKind {
 struct Command {
     CommandKind kind = CommandKind::InsertText;
     std::u32string text{};                 // InsertText / Paste / Extension payload
+    bool typed_input = false;             // Direct typing, not paste or snippet expansion
     bool extend_selection = false;         // Move*
     std::uint8_t level = 0;               // SetHeading
     std::optional<std::u32string> lang;    // InsertCodeBlock / SetCodeBlockLanguage

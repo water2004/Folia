@@ -9,6 +9,21 @@ block-local TeX as UTF-32; result ranges use the same Unicode scalar offsets.
 UTF-8 byte coordinates remain inside the Tree-sitter adapter. `MatchAt` reads
 the current analysis without parsing again.
 
+`PlanBracketEdit` returns source edits and a directed selection for typed
+parentheses, square brackets and braces. It uses recovered delimiter pairs,
+reuses existing closers, skips matched closing delimiters and excludes comments
+and escaped commands. Scalable parentheses preserve `\left`/`\right`.
+Deleting either matched bracket removes both delimiters while retaining their
+contents. The host maps these TeX offsets back through the Markdown CST and
+applies one reversible block-local source transaction. Literal paste/snippets
+and active IME composition do not run the typing rules.
+
+Interaction reference: VS Code's
+[typing operations](https://github.com/microsoft/vscode/blob/main/src/vs/editor/common/cursor/cursorTypeEditOperations.ts)
+and [delete operations](https://github.com/microsoft/vscode/blob/main/src/vs/editor/common/cursor/cursorDeleteOperations.ts).
+Folia resolves pairs from its TeX syntax analysis and removes any matched bracket
+pair on deletion, including existing source, as required by its math editor.
+
 The editing grammar preserves incomplete input and classifies source tokens,
 groups, sized delimiters and environments. It follows MathJax's control-word
 and control-symbol boundaries, checked against `TexScanner` in tests. It does

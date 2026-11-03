@@ -18,6 +18,12 @@ export namespace folia::math::editor {
         friend bool operator==(BracketPair const&, BracketPair const&) = default;
     };
     struct BracketMatch { SourceRange at; std::optional<SourceRange> mate; };
+    enum class BracketAction { Type, Backspace, Delete };
+    struct BracketSourceEdit { SourceRange range; std::u32string text; };
+    struct BracketEdit {
+        std::vector<BracketSourceEdit> edits;
+        std::size_t anchor = 0, active = 0;
+    };
     struct SyntaxAnalysis {
         std::vector<SyntaxToken> tokens;
         std::vector<BracketPair> pairs;
@@ -34,6 +40,8 @@ export namespace folia::math::editor {
         SyntaxSession(SyntaxSession const&) = delete;
         SyntaxSession& operator=(SyntaxSession const&) = delete;
         SyntaxAnalysis const& Update(std::u32string_view source);
+        std::optional<BracketEdit> PlanBracketEdit(std::u32string_view source,
+            std::size_t anchor, std::size_t active, BracketAction action, char32_t typed = 0);
         std::size_t ParseCount() const noexcept;
     private:
         struct State;

@@ -300,6 +300,8 @@ namespace winrt::Folia
 
     void EditorTextInputController::RegisterHandlers()
     {
+        compositionStartedToken_ = context_.CompositionStarted([this](auto const&, auto const&) { composing_ = true; });
+        compositionCompletedToken_ = context_.CompositionCompleted([this](auto const&, auto const&) { composing_ = false; });
         textRequestedToken_ = context_.TextRequested([this](auto const&, winrt::Windows::UI::Text::Core::CoreTextTextRequestedEventArgs const& args)
         {
             if (!session_) return;
@@ -464,8 +466,14 @@ namespace winrt::Folia
                     session_->TextInputPositionFromAcp(activeContainer_, (std::min)(end, length)));
             }
             auto command = folia::Command::InsertText(incoming);
+            command.typed_input = !composing_ && start == end && incoming.size() == 1;
             if (isIncomingNewline) command.kind = folia::CommandKind::InsertNewline;
             else if (incoming.empty()) command.kind = folia::CommandKind::DeleteSelection;
+            if (!composing_ && incoming.empty() && selection.is_caret() && end == start + 1) {
+                if (end == activeAcp) command.kind = folia::CommandKind::DeleteBackward;
+                else if (start == activeAcp) command.kind = folia::CommandKind::DeleteForward;
+                if (command.kind != folia::CommandKind::DeleteSelection) session_->SetSelection(selection);
+            }
             updating_ = true;
             bool executed = false;
             try
@@ -542,6 +550,11 @@ namespace winrt::Folia
     void EditorTextInputController::RevokeHandlers()
     {
         if (!context_) return;
+        if (compositionStartedToken_.value) context_.CompositionStarted(compositionStartedToken_);
+        if (compositionCompletedToken_.value) context_.CompositionCompleted(compositionCompletedToken_);
+        compositionStartedToken_ = {};
+        compositionCompletedToken_ = {};
+        composing_ = false;
         if (textRequestedToken_.value) context_.TextRequested(textRequestedToken_);
         if (selectionRequestedToken_.value) context_.SelectionRequested(selectionRequestedToken_);
         if (layoutRequestedToken_.value) context_.LayoutRequested(layoutRequestedToken_);

@@ -11,6 +11,7 @@ import folia.core.latex_completion;
 import folia.core.source_editor;
 import folia.core.theme;
 import folia.platform.editor_shortcuts;
+import folia.math.editor.syntax;
 
 namespace winrt::Folia
 {
@@ -152,6 +153,7 @@ namespace winrt::Folia
         void MaterializeRenderBlocks(std::size_t begin, std::size_t end);
         void ReleaseRenderBlocksOutside(std::size_t begin, std::size_t end);
         void RefreshCharacterCount();
+        bool TryMathBracketEdit(folia::Command const& command);
         std::optional<std::u32string_view> TextInputSourceView(folia::NodeId containerId) const;
         void RebuildSearchHighlights();
         bool CommitRenderedSearchReplacement(std::span<const folia::RenderedSearchMatch> matches);
@@ -164,6 +166,7 @@ namespace winrt::Folia
         bool encodingExplicit_ = false;
         uint64_t revision_ = 0;
         std::unique_ptr<detail::EditorSessionCore> core_;
+        std::unique_ptr<folia::math::editor::SyntaxSession> bracketSyntax_;
     };
 
 }

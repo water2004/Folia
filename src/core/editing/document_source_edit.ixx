@@ -157,6 +157,26 @@ inline std::optional<DocumentTransaction> document_insert_text(EditorDocument& d
         DocumentTransactionReason::InsertText);
 }
 
+// Literal block-local source replacement with an explicit resulting selection.
+// Unlike typing, this does not apply input rules or insert fence separators.
+inline std::optional<DocumentTransaction> document_replace_text(
+    EditorDocument& document, TextSelection before, TextSpan range,
+    std::u32string_view replacement, TextSelection after) {
+    auto block = find_document_block(document, range.container_id);
+    if (!block) return std::nullopt;
+    auto revision = document.revision;
+    document_edit_detail::NodeAllocator allocator(document);
+    auto edit = editable_raw_block_source(*block)
+        ? document_edit_detail::edit_block_source(document, *block, range.source_range, std::u32string{replacement}, allocator)
+        : document_edit_detail::edit_inline(document, range.container_id, range.source_range, std::u32string{replacement}, allocator);
+    if (!edit) return std::nullopt;
+    std::vector<DocumentOperation> operations;
+    document_edit_detail::append_source_operation(operations, std::move(*edit));
+    ++document.revision;
+    return make_recorded_document_transaction(std::move(operations), before, after,
+        revision, document.revision, DocumentTransactionReason::Replace);
+}
+
 inline std::optional<DocumentTransaction> document_enter(EditorDocument& document, const TextSelection& selection) {
     const auto revision_before = document.revision;
     auto& after = document;
