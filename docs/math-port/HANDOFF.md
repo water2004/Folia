@@ -2,11 +2,18 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-10-28，发布0.5.4）
+## 当前 checkpoint（2026-11-03，嵌套块公式与源码编码）
+
+- 用户报告引用块公式缺高亮/图标、光标错误及异机标题栏dirty点乱码，要求排查所有容器。共同根因：render_builder.append_flow_block把MathBlock降为只有TeX的InlineRenderItem，丢失raw_source/source_markers/content_to_source；现flow item共享原RenderBlockSpecial，调用同一BuildMathBlockText并MergeDisplayText，无按引用/列表等特判，无第二坐标/重复解析。代码块和CST行内数学已有完整独立投影，未改它们职责。
+- WinUI项目增/utf-8；原CharacterSet=Unicode只影响API，不能保证UTF8源字面量的解码。包括关于页链接末尾↗、标题栏●等所有CPP字面量；URL本身ASCII正确。真实控件dirty.Text U+25CF、关于链接文字U+2197和NavigateUri合计1项6断言通过ui-unicode-final.log。测试run.ps1剥/TP源文件尾时也会误删随后/utf-8，已显式补齐，避免测试与产品编码不一致。
+- 最终Debug成功nested-math-final-build.log；最终core全套nested-math-final-core.log成功；29项3064断言nested-math-final-app.log成功，含引用/列表/提示块真实renderer hit-test、展开/输入/Undo，及9类嵌套/空/不完整数学源码/图标/highlight/逐字符映射与零全文操作。原行内呈现9项316断言通过nested-math-inline-regression.log。共享pointer放在稀有semantic payload里，普通marker不扩大。
+- 停止点：源码、回归测试和本交接一同本地提交（见HEAD）；无运行agents/build/test句柄，未构建MSI/安装/发布新版本。后续按用户新反馈/打包请求接续；不自动移动鼠标/不开agents/CUA、不关用户窗口，构建串行≤4。
+
+## 0.5.4发布结果（历史）
 
 - 用户确认“ok了”并授权推送、构建、发布0.5.4。版本入口（CMake、MSI默认、RC、manifest、设置页、README）统一0.5.4；release-notes/v0.5.4.md已准备。只做版本/发布资料更新，沿用下列已完成的功能验证。
 - 发布沿用.github/workflows/release.yml：master提交后推v0.5.4，CI构建self-contained MSI、真实startup/close检查、SHA256、GitHub Release。既有0.5.3标签不移动。
-- 本提交后下一步推送master及v0.5.4，监看CI及下载校验正式产物，完成后在此更新run/commit/散列。当前无agent/构建句柄；不开agents/CUA、不自动移动鼠标、不关用户窗口，native串行≤4。
+- 已发布：38231c6a4b62513bd7b234fc565f2279b1b91303，CI40629886020成功；2026-11-03通过GitHub API核实Release与MSI/sha256存在。正式MSI53,693,825字节，API digest sha256:23ac23ba4c95f1d59758d0e8c69a1ee8bf72876b947f6b70d2e599a09d30952b；本轮未重新下载MSI。不改既有标签。
 
 ## 已完成的标签修复基线（9815cfcb，历史）
 

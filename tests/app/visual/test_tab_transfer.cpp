@@ -18,6 +18,17 @@ namespace winrt::Folia::implementation {
         static auto& Documents(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->workspaceDocuments; }
         static auto Tabs(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->DocumentTabs(); }
         static auto Handle(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->WindowHandle(); }
+        static auto About(Microsoft::UI::Xaml::Window const& window) {
+            auto impl = Impl(window);
+            impl->SetSettingsMode(true);
+            auto nav = impl->settingsView->Root();
+            for (auto item : nav.MenuItems()) {
+                auto entry = item.as<Microsoft::UI::Xaml::Controls::NavigationViewItem>();
+                if (winrt::unbox_value<winrt::hstring>(entry.Tag()) == L"about") nav.SelectedItem(entry);
+            }
+            window.Content().as<Microsoft::UI::Xaml::FrameworkElement>().UpdateLayout();
+            return nav;
+        }
         static bool ContainsDragPoint(Microsoft::UI::Xaml::Window const& window, Windows::Graphics::PointInt32 point) {
             return Impl(window)->ContainsTabDragPoint(point);
         }
@@ -86,6 +97,27 @@ namespace {
     };
     auto App() { return winrt::Folia::implementation::App::Current(); }
     suite tab_transfer_tests = [] {
+        "tab modified indicator uses the Unicode codepoint independently of the build codepage"_test = [] {
+            OwnedWindow owned(App()->CreateMainWindow());
+            auto id = Access::Documents(owned.window).Active()->id;
+            Access::Edit(owned.window, U"x");
+            auto header = Access::View(owned.window, id).Header().as<Controls::StackPanel>();
+            auto dirty = header.Children().GetAt(2).as<Controls::TextBlock>();
+            expect(dirty.Visibility() == Visibility::Visible);
+            expect(dirty.Text().size() == 1_u);
+            if (!dirty.Text().empty()) expect(static_cast<unsigned>(dirty.Text()[0]) == 0x25cf);
+            auto about = Access::About(owned.window);
+            auto findLink = [&](auto& self, DependencyObject const& node) -> Controls::HyperlinkButton {
+                if (auto link = node.try_as<Controls::HyperlinkButton>()) return link;
+                for (int i = 0; i < Media::VisualTreeHelper::GetChildrenCount(node); ++i)
+                    if (auto link = self(self, Media::VisualTreeHelper::GetChild(node, i))) return link;
+                return nullptr;
+            };
+            auto link = findLink(findLink, about);
+            expect(fatal(bool(link)));
+            expect(winrt::unbox_value<winrt::hstring>(link.Content()) == L"water2004/Folia  \u2197");
+            expect(link.NavigateUri().AbsoluteUri() == L"https://github.com/water2004/Folia");
+        };
         "hidden and preparation-only tab windows cannot receive an external merge"_test = [] {
             OwnedWindow source(App()->CreateMainWindow()), target(App()->CreateMainWindow());
             auto document = Access::Documents(source.window).Active();

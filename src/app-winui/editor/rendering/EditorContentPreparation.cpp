@@ -439,6 +439,21 @@ namespace winrt::Folia
             }
             if (item.kind == folia::InlineRenderItem::Kind::Math)
             {
+                if (item.special().semantic().block_source) {
+                    folia::RenderBlock block;
+                    block.kind = folia::RenderBlockKind::Math;
+                    block.id = item.source_span.container_id;
+                    block.source_span = item.source_span;
+                    block.payload = item.special().semantic().block_source;
+                    auto const& offsets = block.special().content_to_source;
+                    block.content_span = {block.id, offsets.empty()
+                        ? folia::SourceRange{0, block.special().tex.size()}
+                        : folia::SourceRange{offsets.front(), offsets.back()}};
+                    MergeDisplayText(display, BuildMathBlockText(block, caret, mathJax,
+                        svgNormalizer, svgColor, fontSize, containerWidth,
+                        svgSupported, requestMath, highPriority));
+                    continue;
+                }
                 if (!svgSupported)
                 {
                     AppendInlineSource(display, item);

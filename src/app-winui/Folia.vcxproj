@@ -96,7 +96,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)..\platform;$(ProjectDir)..\math\include;$(FoliaIcuRoot)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level4</WarningLevel>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalOptions>%(AdditionalOptions) /bigobj</AdditionalOptions>
+      <AdditionalOptions>%(AdditionalOptions) /bigobj /utf-8</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>$(FoliaNativeMathImportLibrary);$(FoliaIcuRoot)lib64\icuin.lib;$(FoliaIcuRoot)lib64\icuuc.lib;$(FoliaIcuRoot)lib64\icudt.lib;d2d1.lib;dxguid.lib;d3d11.lib;dwrite.lib;dxgi.lib;windowscodecs.lib;dwmapi.lib;shlwapi.lib;winspool.lib;%(AdditionalDependencies)</AdditionalDependencies>

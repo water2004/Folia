@@ -70,6 +70,9 @@ $flags = $baseline -replace '/reference\s+"[^"]+"', ''
 $flags = $flags -replace '/(?:sourceDependencies|scanDependencies)\s+"[^"]+"', ''
 $flags = $flags -replace '/Fo"[^"]+"', ''
 $flags = $flags -replace '/TP\s+.*$', ''
+# MSBuild can write /utf-8 after /TP in its tlog. Keep the production encoding
+# explicit after removing the source-file tail, including non-ASCII UI tests.
+$flags += ' /utf-8'
 $flags += ' /I"{0}"' -f (Join-Path $root 'tests')
 
 function Compile([string]$Name, [string]$Source, [string]$Extra = '', [switch]$NoPch) {

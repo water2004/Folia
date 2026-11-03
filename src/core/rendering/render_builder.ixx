@@ -602,10 +602,8 @@ struct Builder {
                 InlineRenderItem item;
                 item.kind = InlineRenderItem::Kind::Math;
                 item.id = block.id;
-                item.source_span = {block.id, {
-                    block_source_offset_for_content(block.block_source, 0),
-                    block_source_offset_for_content(block.block_source, math.size())}};
-                item.ensure_special().ensure_semantic().source_text = math;
+                item.source_span = {block.id, {0, block.block_source.source().size()}};
+                item.ensure_special().ensure_semantic().block_source = rendered.payload;
                 item.text = math;
                 item.ensure_special().display = MathDisplayMode::Block;
                 item.ensure_special().math_delim = block.atomic_special().math_delim;

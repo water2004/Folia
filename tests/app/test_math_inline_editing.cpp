@@ -115,10 +115,15 @@ namespace
     {
         auto frame = session.RenderFrame();
         if (frame.materializeBlocks) frame.materializeBlocks(0, frame.renderModel.blocks.size());
+        auto findBlock = [&](auto& self, folia::RenderBlock const& block) -> std::optional<folia::TextSpan> {
+            if (block.kind == folia::RenderBlockKind::Math) return block.content_span;
+            for (auto const& child : block.child_blocks)
+                if (auto found = self(self, child)) return found;
+            return std::nullopt;
+        };
         for (auto const& block : frame.renderModel.blocks)
         {
-            if (blockMath && block.kind == folia::RenderBlockKind::Math)
-                return block.content_span;
+            if (blockMath) if (auto found = findBlock(findBlock, block)) return found;
             for (auto const& item : block.inline_items)
                 if (!blockMath && item.kind == folia::InlineRenderItem::Kind::Math)
                     return item.source_span;
@@ -256,6 +261,13 @@ namespace
 
     suite math_inline_editing_tests = []
     {
+        "math nested block caret hit test source expansion and undo share standalone behavior"_test = [] {
+            for (auto source : {
+                L"Introduction.\n\n> before\n>\n> $$\n> \\frac{x+1}{y+2}\n> $$\n",
+                L"Introduction.\n\n- before\n\n  $$\n  \\frac{x+1}{y+2}\n  $$\n",
+                L"Introduction.\n\n> [!NOTE]\n> $$\n> \\frac{x+1}{y+2}\n> $$\n"})
+                CheckMathGesture(source, true);
+        };
         "math floating preview placement stays in viewport and clear of its editing line"_test = [] {
             for (auto viewport : {D2D1::SizeF(180, 90), D2D1::SizeF(320, 160), D2D1::SizeF(540, 720)})
             for (float width : {20.f, 200.f, 2000.f}) for (float height : {18.f, 100.f, 2000.f})
