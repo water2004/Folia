@@ -1,0 +1,6 @@
+add_library(folia_completion STATIC)
+add_library(folia::completion ALIAS folia_completion)
+target_compile_features(folia_completion PUBLIC cxx_std_23)
+set_target_properties(folia_completion PROPERTIES CXX_MODULE_STD ON)
+target_sources(folia_completion PUBLIC FILE_SET CXX_MODULES FILES completion.ixx)
+target_sources(folia_completion PRIVATE completion.cpp)

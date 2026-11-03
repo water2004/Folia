@@ -10,7 +10,7 @@
 - 灰字参与原DirectWrite flow（表格/嵌套/源码共用），主题muted色、不进CST/save/选区/打印。Tab全段、Ctrl+Right按ICU词/Unicode序列、Esc取消；原Paste事务接受并Undo；弹出补全/snippet优先。IME组合期间不请求、完成后防抖。上下文从source views读取，先限额再编码，4KiB prefix+1KiB suffix+2KiB preceding、128输出token/512码点、32项/256KiB内存LRU；长段落起点按256码点分段移动，帮助服务cache但不保证命中。详见docs/inline-completion.md。
 - 已验：build/completion-core-final-2.log 11测试63断言（10MiB/Unicode限额、稳定prefix、LRU、3协议SSE）；build/completion-app-regression.log完整controller153测试19873断言通过，含异步loopback HTTP/取消/错误、旧请求排除、词接受/typed-through/Undo、16容器×明暗实际layout/主题brush/映射/缓存失效、原有数学/滚动等回归。
 - 之后小改：source view加入邻近3行上下文、设置页延迟创建/重置，增加原context本地缓存复用及源码/反向选区测试。当前串行最终构建+定向测试exec session20421，日志build/completion-final-build.log、build/completion-final-tests.log；等待并检查结果后才提交应用层。所有功能仍为本地候选，没有真实模型质量/延迟验证。
-- 下一步：确认最终check，按vendor/portable/WinUI三个reviewable批次提交，更新本checkpoint准确commit与停止点；不要跟进旧流水线或主动发布/安装。
+- vendor批次已提交1c5617af。portable模块11/63断言已通过，准备第二批提交；最终Debug构建build/completion-final-build.log成功，最终定向应用14测试250断言build/completion-final-tests.log全部通过。真实startup/close检查正在执行，build/completion-startup.log；此后提交WinUI批次与最终停止点。不要跟进旧流水线或主动发布/安装。
 
 ## 0.5.5发布（用户暂不跟进流水线）
 
