@@ -40,6 +40,10 @@ Add-Line
 Add-Line 'This file is generated from the dependency versions locked in this repository.'
 Add-Line 'Folia itself is licensed separately under the MIT License in LICENSE.'
 Add-Line
+Add-LicenseFile 'Model protocol adapters (Fairy source, ef60077797ddadc82ee934d2e9d80ce05cf67830) — MIT' `
+    (Join-Path $Root 'third_party\model-providers\LICENSE')
+Add-LicenseFile 'nlohmann/json 3.12.0 — MIT' `
+    (Join-Path $Root 'third_party\nlohmann-json\LICENSE.MIT')
 
 Add-LicenseFile 'Boost.UT (test dependency) — Boost Software License 1.0' `
     (Join-Path $Root 'third_party\ut\LICENSE.md')

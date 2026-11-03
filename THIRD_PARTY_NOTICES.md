@@ -46,3 +46,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+# Inline completion
+
+- Model protocol adapters: MIT, Fairy contributors, vendored at
+  `ef60077797ddadc82ee934d2e9d80ce05cf67830`. Source and license are in
+  `third_party/model-providers`; Folia has no Fairy installation or runtime dependency.
+- nlohmann/json 3.12.0: MIT. Source, license and hash are in
+  `third_party/nlohmann-json`.

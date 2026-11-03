@@ -2,11 +2,21 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-11-03，发布0.5.5）
+## 当前 checkpoint（2026-11-04，AI输入预测）
+
+- 用户先不管0.5.5流水线，做Copilot式预测补全；Folia完全独立，设置独立配置完整地址/协议/模型/API Key。不开agents/CUA、不自动鼠标/不关用户窗口，native串行≤4；没有模型联网、MSI或新发布。
+- 已vendor MIT providers（Fairy ef60077797ddadc82ee934d2e9d80ce05cf67830）及nlohmann/json3.12.0，许可证/来源/hash在third_party各自目录，已验证所有锁定协议源码hash。只取源码，无Fairy工程/运行/配置/凭据依赖。3协议及SSE fixtures通过。
+- 已接入src/completion portable预算/稳定prefix/LRU/proposal；应用controller停顿450ms、请求间隔≥1.5s、单worker最新请求、代际拒旧/输入前缀复用；WinHTTP真正async callback/15s deadline，句柄关闭通知保活buffers，无UI等待/网络join，key存Windows凭据。同步WinHTTP跨线程close方案已替换，不恢复。
+- 灰字参与原DirectWrite flow（表格/嵌套/源码共用），主题muted色、不进CST/save/选区/打印。Tab全段、Ctrl+Right按ICU词/Unicode序列、Esc取消；原Paste事务接受并Undo；弹出补全/snippet优先。IME组合期间不请求、完成后防抖。上下文从source views读取，先限额再编码，4KiB prefix+1KiB suffix+2KiB preceding、128输出token/512码点、32项/256KiB内存LRU；长段落起点按256码点分段移动，帮助服务cache但不保证命中。详见docs/inline-completion.md。
+- 已验：build/completion-core-final-2.log 11测试63断言（10MiB/Unicode限额、稳定prefix、LRU、3协议SSE）；build/completion-app-regression.log完整controller153测试19873断言通过，含异步loopback HTTP/取消/错误、旧请求排除、词接受/typed-through/Undo、16容器×明暗实际layout/主题brush/映射/缓存失效、原有数学/滚动等回归。
+- 之后小改：source view加入邻近3行上下文、设置页延迟创建/重置，增加原context本地缓存复用及源码/反向选区测试。当前串行最终构建+定向测试exec session20421，日志build/completion-final-build.log、build/completion-final-tests.log；等待并检查结果后才提交应用层。所有功能仍为本地候选，没有真实模型质量/延迟验证。
+- 下一步：确认最终check，按vendor/portable/WinUI三个reviewable批次提交，更新本checkpoint准确commit与停止点；不要跟进旧流水线或主动发布/安装。
+
+## 0.5.5发布（用户暂不跟进流水线）
 
 - 用户授权patch版本+1、推送并发布Release，目标0.5.5。六处版本入口已统一，release-notes/v0.5.5.md描述嵌套数学修复、括号编辑、UTF8界面；沿用下列已完成的Debug/core/controller验证。
 - 沿用.github/workflows/release.yml，推master与新v0.5.5后监看CI构建/启动关闭/发布，下载正式MSI及sha256校验。不移动既有标签，不自动安装。
-- 当前下一步：提交版本更新并推送master/v0.5.5，再记录run/发布commit/正式产物散列。无agent/本地build句柄；不开agents/CUA、不动用户鼠标/窗口，native串行≤4。
+- master/v0.5.5已推送，发布commit023c6cc4446a5f2039c32d4afc52600efe5dfa73；CI41665272925/job126018787207进行中。下一步等CI发布成功，下载正式MSI及sha256核对后更新此处并提交交接。无agent/本地build句柄；不开agents/CUA、不动用户鼠标/窗口，native串行≤4。
 
 ## 核对mathbf希腊字母（89affb85，已完成）
 

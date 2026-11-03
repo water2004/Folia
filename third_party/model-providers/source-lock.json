@@ -1,0 +1,115 @@
+{
+  "license": "MIT",
+  "files": [
+    {
+      "path": "providers/JsonParsing.cpp",
+      "sha256": "ac0adb03d53a2856def3b88c5f5f16a9ecbcb3bab2b5cce8d2e40e1a840f5436"
+    },
+    {
+      "path": "providers/JsonParsing.h",
+      "sha256": "2f5fe02c300e78de77bd5e03c9ff586d454cca964adcd5774a0ed30b7a5497c9"
+    },
+    {
+      "path": "providers/ModelAdapter.cpp",
+      "sha256": "5881b0097c307aa3b2280e4baba6bc60ecfebb103af9084d3e9a27f92be79c7a"
+    },
+    {
+      "path": "providers/ModelAdapter.h",
+      "sha256": "06995e93144f628d852d383c5036ab1e331c74993c586ded9579ac74a61f5cf4"
+    },
+    {
+      "path": "providers/ModelCodec.cpp",
+      "sha256": "fbb071251bd12d777f00f5f11b7bf233d445fda3f8f89ed0043756152635446d"
+    },
+    {
+      "path": "providers/ModelCodec.h",
+      "sha256": "0d2e4294f4f243b0c7e471cfedeba3a749efc382422c072ee23dc323ba601434"
+    },
+    {
+      "path": "providers/ModelTypes.cpp",
+      "sha256": "f0bee1653788a9d618e9fbae8ab30067b4fe486d25d68c06b0c006122929b69d"
+    },
+    {
+      "path": "providers/ModelTypes.h",
+      "sha256": "6236864b4748f811abb8c05375466d78de19990bfddadab2c86e1c8fbe49fb1e"
+    },
+    {
+      "path": "providers/ModelValidation.cpp",
+      "sha256": "3ee2ea687a326cb08bb455e1a013a633e53f95e5dbff58dc35f16de9a24c9069"
+    },
+    {
+      "path": "providers/ModelValidation.h",
+      "sha256": "67d5ec3f7337468c406ad5a0be99e1cbbd228ba43384650f6e72d626d9dc4a88"
+    },
+    {
+      "path": "providers/SseParser.cpp",
+      "sha256": "b9fea3012adb500b1c1420e852de90207e73aeb6fd4ea8f939e27b3e22f7a448"
+    },
+    {
+      "path": "providers/SseParser.h",
+      "sha256": "21d2e2d00b3872ac4997be33064d62e9a013f998f7909beb89b71234b3feae20"
+    },
+    {
+      "path": "providers/StreamResponse.cpp",
+      "sha256": "88fc84008599ea4833dd609bc9a2a045ce293b5ec3c2809f899c1ab8714aae25"
+    },
+    {
+      "path": "providers/StreamResponse.h",
+      "sha256": "f0346ae9e70a06f4936d2d7fe5840d71efb197330c1cdba8d299cc8ff636967b"
+    },
+    {
+      "path": "providers/adapters/Adapters.h",
+      "sha256": "20086539d0f97fb5767d5ae87f1e8778f424e151f60df8809565ce5ccb1a54bf"
+    },
+    {
+      "path": "providers/adapters/anthropic/Internal.h",
+      "sha256": "2c9a054f70ce2241360be8ebf85dbd3fa3b98080f25097c1056289323962138b"
+    },
+    {
+      "path": "providers/adapters/anthropic/Request.cpp",
+      "sha256": "b0ced57aedafe7c987f69f81c4465d7ce9c95ebf40969569fea04674a1ee93c6"
+    },
+    {
+      "path": "providers/adapters/anthropic/Response.cpp",
+      "sha256": "673a302b68214007d065834ab38f3124d3062cc9135765222ba48f3e6675d990"
+    },
+    {
+      "path": "providers/adapters/anthropic/StreamDecoder.cpp",
+      "sha256": "96d407050fbc3e12fdb4be7429373e542a09844b251905431d6a07746f4acd1e"
+    },
+    {
+      "path": "providers/adapters/chat_completions/Internal.h",
+      "sha256": "7c07e09edb1dcaa023a99b8f188ed47294d1d87506a7ac9037b197022be31f04"
+    },
+    {
+      "path": "providers/adapters/chat_completions/Request.cpp",
+      "sha256": "b0fee3c4c8fc7f4d59e658627977d101b0eb1042a3d0b691a506d9b5477ecc46"
+    },
+    {
+      "path": "providers/adapters/chat_completions/Response.cpp",
+      "sha256": "76b0b40c9dfc245127a414cba9caeb1e9ee7bed62da0695bb02c227582bb8e86"
+    },
+    {
+      "path": "providers/adapters/chat_completions/StreamDecoder.cpp",
+      "sha256": "5cf38ac6454c4130aa7c3ae61f9986a25fd32179a11fd565c4b87afb25081044"
+    },
+    {
+      "path": "providers/adapters/responses/Internal.h",
+      "sha256": "a4639dce3da04a21efbef95a22428d06523e8658cf5f63f2ecb9328e214fc2d2"
+    },
+    {
+      "path": "providers/adapters/responses/Request.cpp",
+      "sha256": "5307c549245d7abb3b8a6844d376ee1dee27534a3af737af0543e5cd8a73e0b9"
+    },
+    {
+      "path": "providers/adapters/responses/Response.cpp",
+      "sha256": "aebcb1573c4b76bb30ce134d290cdaf16aa169f1e01fa11673011808b3ca0af5"
+    },
+    {
+      "path": "providers/adapters/responses/StreamDecoder.cpp",
+      "sha256": "0cae0bcac15e25ade9c53cf2bbd06844bb8ce1511f2800d8211ff5a4ecabf169"
+    }
+  ],
+  "source": "Fairy src/providers",
+  "revision": "ef60077797ddadc82ee934d2e9d80ce05cf67830"
+}
