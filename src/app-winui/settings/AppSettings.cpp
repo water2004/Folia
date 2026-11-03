@@ -44,8 +44,13 @@ namespace winrt::Folia
                 settings.completion.baseUrl = winrt::to_string(completion.GetNamedString(L"baseUrl", L""));
                 settings.completion.model = winrt::to_string(completion.GetNamedString(L"model", L""));
                 settings.completion.protocol = static_cast<int>(completion.GetNamedNumber(L"protocol", 0));
-                if (settings.completion.enabled && !ValidateCompletionConfig(settings.completion).empty())
-                    throw std::runtime_error("invalid completion configuration");
+                settings.completion.reasoningEffort = winrt::to_string(completion.GetNamedString(L"reasoningEffort", L""));
+                settings.completion.eagerness = static_cast<folia::completion::Eagerness>(static_cast<int>(completion.GetNamedNumber(L"eagerness", 1)));
+                settings.completion.contextKB = static_cast<std::uint32_t>(completion.GetNamedNumber(L"contextKB", 7));
+                settings.completion.outputTokens = static_cast<std::uint32_t>(completion.GetNamedNumber(L"outputTokens", 128));
+                if (settings.completion.enabled)
+                    if (auto error = ValidateCompletionConfig(settings.completion); !error.empty())
+                        throw std::runtime_error(error);
             }
             if (schemaVersion >= 4.0)
                 settings.latexSuggestionsEnabled = root.GetNamedBoolean(L"latexSuggestionsEnabled", true);
@@ -82,6 +87,10 @@ namespace winrt::Folia
             completion.Insert(L"baseUrl", Windows::Data::Json::JsonValue::CreateStringValue(winrt::to_hstring(settings.completion.baseUrl)));
             completion.Insert(L"model", Windows::Data::Json::JsonValue::CreateStringValue(winrt::to_hstring(settings.completion.model)));
             completion.Insert(L"protocol", Windows::Data::Json::JsonValue::CreateNumberValue(settings.completion.protocol));
+            completion.Insert(L"reasoningEffort", Windows::Data::Json::JsonValue::CreateStringValue(winrt::to_hstring(settings.completion.reasoningEffort)));
+            completion.Insert(L"eagerness", Windows::Data::Json::JsonValue::CreateNumberValue(static_cast<int>(settings.completion.eagerness)));
+            completion.Insert(L"contextKB", Windows::Data::Json::JsonValue::CreateNumberValue(settings.completion.contextKB));
+            completion.Insert(L"outputTokens", Windows::Data::Json::JsonValue::CreateNumberValue(settings.completion.outputTokens));
             root.Insert(L"completion", completion);
             root.Insert(L"latexSuggestionsEnabled", Windows::Data::Json::JsonValue::CreateBooleanValue(settings.latexSuggestionsEnabled));
             root.Insert(L"themeId", Windows::Data::Json::JsonValue::CreateStringValue(winrt::to_hstring(settings.themeId)));

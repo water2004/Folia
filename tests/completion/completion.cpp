@@ -20,9 +20,8 @@ suite completion_tests = [] {
     "completion budgets bound encoded Unicode and untrusted custom limits"_test = [] {
         std::u32string source(10000, U'\U0001f642');
         auto c = folia::completion::capture(source, 5000, {}, {(std::numeric_limits<std::size_t>::max)(), (std::numeric_limits<std::size_t>::max)(), (std::numeric_limits<std::size_t>::max)(), (std::numeric_limits<std::uint32_t>::max)()});
-        expect(c.prefix.size() > 3072_u && c.prefix.size() <= 4096_u);
-        expect(c.suffix.size() == 1024_u);
-        expect(folia::completion::make_prompt(c, {.output_tokens = (std::numeric_limits<std::uint32_t>::max)()}).output_tokens == 256_u);
+        expect(!c.prefix.empty() && c.prefix.size() + c.suffix.size() + c.preceding.size() <= folia::completion::max_context_bytes);
+        expect(folia::completion::make_prompt(c, {.output_tokens = (std::numeric_limits<std::uint32_t>::max)()}).output_tokens == folia::completion::max_output_tokens);
         expect(c.prefix.substr(0, 4) == std::string("\xf0\x9f\x99\x82"));
         expect(source.size() == 10000_u);
     };
@@ -36,6 +35,26 @@ suite completion_tests = [] {
         expect(after.prefix.back() == 'y');
         auto first = folia::completion::make_prompt(before), second = folia::completion::make_prompt(after);
         expect(first.instructions == second.instructions); expect(first.context == second.context);
+    };
+    "completion configurable budgets stay bounded for a ten megabyte document"_test = [] {
+        std::u32string source(10 * 1024 * 1024, U'x');
+        std::array<std::u32string_view, 1> preceding{source};
+        for (std::size_t bytes : {1000, 7000, 64000}) {
+            auto budget = folia::completion::make_budget(bytes, 2048);
+            auto context = folia::completion::capture(source, source.size()/2, preceding, budget);
+            expect(context.prefix.size() + context.suffix.size() + context.preceding.size() <= bytes);
+            expect(context.prefix.size() <= budget.prefix_bytes && context.suffix.size() <= budget.suffix_bytes);
+            expect(folia::completion::make_prompt(context, budget).output_tokens == 2048_u);
+        }
+    };
+    "completion eagerness changes stable instructions without changing context or output budget"_test = [] {
+        folia::completion::Context context{{}, "abc", "suffix"};
+        auto conservative = folia::completion::make_prompt(context, {}, folia::completion::Eagerness::Conservative);
+        auto balanced = folia::completion::make_prompt(context);
+        auto proactive = folia::completion::make_prompt(context, {}, folia::completion::Eagerness::Proactive);
+        expect(conservative.instructions != balanced.instructions && balanced.instructions != proactive.instructions);
+        expect(conservative.context == proactive.context && conservative.cursor == proactive.cursor);
+        expect(conservative.output_tokens == proactive.output_tokens && proactive.output_tokens == 128_u);
     };
     "completion proposal consumes typed and accepted prefixes without regeneration"_test = [] {
         folia::completion::Proposal proposal;

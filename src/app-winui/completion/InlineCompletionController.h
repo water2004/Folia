@@ -3,12 +3,13 @@
 #include "editor/session/EditorSession.h"
 
 namespace winrt::Folia {
+enum class CompletionState { Idle, Requesting, Ready, Empty, BudgetExhausted, Failed };
 class InlineCompletionController : public std::enable_shared_from_this<InlineCompletionController> {
 public:
     using Execute = std::function<bool(folia::Command const&)>;
     InlineCompletionController(EditorSession&, CompletionConfig,
         Microsoft::UI::Dispatching::DispatcherQueue, Execute, std::function<void()> render,
-        std::function<void(std::string const&)> status, CompletionService::Transport transport = {});
+        std::function<void(CompletionState, std::string const&)> status, CompletionService::Transport transport = {});
     ~InlineCompletionController();
     void Edited(folia::TextSelection before, folia::Command const&);
     void Validate();
@@ -21,14 +22,17 @@ public:
 private:
     void Schedule();
     void Request();
+    void SetState(CompletionState, std::string const& error = {});
     EditorSession& session_;
     CompletionConfig config_;
+    folia::completion::Budget budget_;
     Microsoft::UI::Dispatching::DispatcherQueue queue_;
     Microsoft::UI::Dispatching::DispatcherQueueTimer timer_{nullptr};
     std::unique_ptr<CompletionService> service_;
     Execute execute_;
     std::function<void()> render_;
-    std::function<void(std::string const&)> status_;
+    std::function<void(CompletionState, std::string const&)> status_;
+    CompletionState state_ = CompletionState::Idle;
     folia::completion::Proposal proposal_;
     folia::completion::Cache cache_;
     std::string proposalSuffix_;

@@ -333,7 +333,27 @@
   <data name="AIKey" xml:space="preserve"><value>API key (Windows Credential Manager)</value></data>
   <data name="AIKeyUnchanged" xml:space="preserve"><value>Leave empty to keep the saved key</value></data>
   <data name="AIClearKey" xml:space="preserve"><value>Remove saved key</value></data>
-  <data name="AICompletionBudget" xml:space="preserve"><value>Each request reads at most 7 KiB of UTF-8 document context; output is limited to 128 tokens. No whole-file upload, automatic retry or disk suggestion cache. Provider billing varies by model.</value></data>
+  <data name="AICompletionBudget" xml:space="preserve"><value>Choose the context and output limits per request. Only nearby UTF-8 document text is sent. No automatic retry or disk suggestion cache. Output tokens may include reasoning; costs and supported reasoning levels depend on the service and model.</value></data>
+  <data name="AIEagerness" xml:space="preserve"><value>Suggestion frequency</value></data>
+  <data name="AIEagernessConservative" xml:space="preserve"><value>Conservative</value></data>
+  <data name="AIEagernessBalanced" xml:space="preserve"><value>Balanced</value></data>
+  <data name="AIEagernessProactive" xml:space="preserve"><value>Proactive</value></data>
+  <data name="AIEagernessDescription" xml:space="preserve"><value>Controls how readily the prompt asks for a suggestion, independently of model reasoning. Proactive mode tries a short continuation even when several phrasings are possible; useful suggestions are not guaranteed.</value></data>
+  <data name="AIReasoning" xml:space="preserve"><value>Reasoning effort</value></data>
+  <data name="AIReasoningDefault" xml:space="preserve"><value>Service default</value></data>
+  <data name="AIReasoningDescription" xml:space="preserve"><value>Fetch the levels advertised by the selected upstream model. No preset levels are supplied. Service default sends no effort parameter.</value></data>
+  <data name="AIFetchReasoning" xml:space="preserve"><value>Fetch</value></data>
+  <data name="AIFetchReasoningBusy" xml:space="preserve"><value>Fetching…</value></data>
+  <data name="AINoReasoningMetadata" xml:space="preserve"><value>The upstream model did not advertise usable reasoning levels.</value></data>
+  <data name="AIReasoningFetched" xml:space="preserve"><value>Fetched {0} available levels.</value></data>
+  <data name="AIContextKB" xml:space="preserve"><value>Context size (KB, 1–64)</value></data>
+  <data name="AIOutputTokens" xml:space="preserve"><value>Maximum output tokens (16–4096)</value></data>
+  <data name="AIBudgetInvalid" xml:space="preserve"><value>Enter whole numbers: 1–64 KB of context and 16–4096 output tokens.</value></data>
+  <data name="AIRequesting" xml:space="preserve"><value>AI: generating…</value></data>
+  <data name="AIReady" xml:space="preserve"><value>AI: Tab to accept</value></data>
+  <data name="AINoSuggestion" xml:space="preserve"><value>AI: no suggestion</value></data>
+  <data name="AIBudgetExhausted" xml:space="preserve"><value>AI: output limit reached</value></data>
+  <data name="AIRequestFailed" xml:space="preserve"><value>AI: request failed</value></data>
   <data name="SettingsSaved" xml:space="preserve"><value>Settings saved.</value></data>
   <data name="AIService" xml:space="preserve"><value>Service</value></data>
   <data name="AICredentials" xml:space="preserve"><value>Credentials</value></data>

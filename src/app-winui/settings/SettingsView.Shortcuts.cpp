@@ -131,7 +131,7 @@ namespace winrt::Folia
         action.VerticalAlignment(VerticalAlignment::Center);
         row.Children().Append(action);
 
-        ComboBox scope;
+        auto scope = settings_ui::Choice();
         scope.Items().Append(box_value(Localize(L"ShortcutScopeGlobal")));
         scope.Items().Append(box_value(Localize(L"ShortcutScopeCode")));
         scope.Items().Append(box_value(Localize(L"ShortcutScopeMath")));
@@ -404,7 +404,7 @@ namespace winrt::Folia
         assignment.ColumnSpacing(10);
         assignment.ColumnDefinitions().Append(ColumnDefinition{});
         assignment.ColumnDefinitions().Append(ColumnDefinition{});
-        ComboBox scope;
+        auto scope = settings_ui::Choice();
         scope.Header(box_value(Localize(L"ShortcutScope")));
         scope.Items().Append(box_value(Localize(L"ShortcutScopeGlobal")));
         scope.Items().Append(box_value(Localize(L"ShortcutScopeCode")));

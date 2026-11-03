@@ -1,6 +1,11 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:primitives="using:Microsoft.UI.Xaml.Controls.Primitives">
+    <Style x:Key="FoliaCompletionProgressStyle" TargetType="ProgressRing">
+        <Setter Property="Width" Value="20"/><Setter Property="Height" Value="20"/>
+        <Setter Property="Foreground" Value="{ThemeResource FoliaShellAccentBrush}"/>
+        <Setter Property="IsTabStop" Value="False"/>
+    </Style>
     <Style x:Key="WorkspacePaneToggleStyle" TargetType="ToggleButton">
         <Setter Property="UseSystemFocusVisuals" Value="True"/>
         <Setter Property="Template"><Setter.Value>

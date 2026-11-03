@@ -3,6 +3,7 @@
 #include "completion/InlineCompletionController.h"
 #include "editor/rendering/EditorContentPreparation.h"
 import folia.markdown.instrumentation;
+import folia.markdown.block_source;
 
 namespace {
 using namespace boost::ut;
@@ -21,7 +22,9 @@ struct Fixture {
     std::shared_ptr<InlineCompletionController> controller;
     std::atomic<int> requests = 0;
     std::string error;
-    Fixture(std::u32string proposal = U" hello world", bool source = false) {
+    std::vector<CompletionState> states;
+    ~Fixture() { controller.reset(); }
+    Fixture(std::u32string proposal = U" hello world", bool source = false, CompletionService::Transport transport = {}) {
         session.SetText(L"abc");
         if (source) session.EnterSourceMode();
         auto owner = session.RenderModel().blocks.front().source_span.container_id;
@@ -30,9 +33,9 @@ struct Fixture {
             CompletionConfig{true, "https://fixture.invalid/v1", "fixture", 0},
             winrt::Microsoft::UI::Dispatching::DispatcherQueue::GetForCurrentThread(),
             [this](auto const& command) { return Execute(command); }, [] {},
-            [this](auto const& value) { error = value; },
-            [this, proposal = std::move(proposal)](auto const&, auto const&, auto stop) {
-                ++requests; return CompletionResult{proposal};
+            [this](CompletionState state, auto const& value) { states.push_back(state); if (state == CompletionState::Failed) error = value; },
+            [this, proposal = std::move(proposal), transport = std::move(transport)](auto const& config, auto const& prompt, auto stop) {
+                ++requests; return transport ? transport(config, prompt, stop) : CompletionResult{proposal};
             });
         controller->SetFocused(true);
     }
@@ -49,6 +52,36 @@ struct Fixture {
     bool Wait() { return Pump([&] { return controller->Active() || !error.empty(); }); }
 };
 suite inline_completion_tests = [] {
+    "completion activity distinguishes suggestions empty output failures and token limits"_test = [] {
+        for (auto terminal : {CompletionState::Ready, CompletionState::Empty, CompletionState::Failed, CompletionState::BudgetExhausted}) {
+            Fixture f({}, false, [terminal](auto const&, auto const&, auto) {
+                CompletionResult result;
+                if (terminal == CompletionState::Ready) result.text = U"next";
+                if (terminal == CompletionState::Failed) result.error = "fixture failure";
+                result.truncated = terminal == CompletionState::BudgetExhausted;
+                return result;
+            });
+            f.Type(U"x");
+            expect(Pump([&] { return !f.states.empty() && f.states.back() == terminal; }));
+            expect(std::ranges::find(f.states, CompletionState::Requesting) != f.states.end());
+            expect(f.controller->Active() == (terminal == CompletionState::Ready));
+            expect(f.requests.load() == 1_i);
+            f.controller->SetFocused(false); expect(f.states.back() == CompletionState::Idle);
+        }
+    };
+    "completion cancellation stops activity and late responses cannot restore it"_test = [] {
+        std::atomic<bool> cancelled = false;
+        Fixture f({}, false, [&](auto const&, auto const&, std::stop_token stop) {
+            std::mutex mutex; std::unique_lock lock(mutex); std::condition_variable_any wake;
+            wake.wait(lock, stop, [] { return false; }); cancelled = true;
+            return CompletionResult{U"obsolete"};
+        });
+        f.Type(U"x"); expect(Pump([&] { return f.requests.load() == 1; }));
+        expect(!f.states.empty() && f.states.back() == CompletionState::Requesting);
+        f.controller->SetFocused(false); expect(f.states.back() == CompletionState::Idle);
+        expect(Pump([&] { return cancelled.load(); }));
+        expect(!f.controller->Active()); expect(f.states.back() == CompletionState::Idle);
+    };
     "completion worker replaces obsolete requests without delivering cancelled results"_test = [] {
         struct Shared {
             std::atomic<int> started = 0, active = 0, maximum = 0;
@@ -137,6 +170,30 @@ suite inline_completion_tests = [] {
         expect(f.session.TextUtf8().find("one\nsecond") != std::string::npos);
         expect(f.Execute({.kind = folia::CommandKind::Undo}));
         expect(f.session.TextUtf8() == original); expect(f.session.Selection() == selection);
+    };
+    "inline completion leaves an editable code body after accepting an opening fence"_test = [] {
+        Fixture f(U"\n\n```markdown\n"); f.Type(U"s"); expect(f.Wait());
+        auto original = f.session.TextUtf8(); auto before = f.session.Selection();
+        expect(f.controller->Accept(false)); f.controller->Cancel();
+        auto accepted = f.session.TextUtf8(); auto after = f.session.Selection();
+        auto frame = f.session.RenderFrame();
+        if (frame.materializeBlocks) frame.materializeBlocks(0, frame.renderModel.blocks.size());
+        auto const& block = frame.renderModel.blocks.back();
+        expect(block.kind == folia::RenderBlockKind::Code);
+        expect(after.active.container_id == block.source_span.container_id);
+        expect(block.special().language == std::optional<std::string>{"markdown"});
+        expect(block.special().code_text.empty());
+        expect(after.active.source_offset == block.content_span.source_range.end);
+        f.Type(U"x"); f.controller->Cancel();
+        auto typed = f.session.RenderFrame();
+        if (typed.materializeBlocks) typed.materializeBlocks(0, typed.renderModel.blocks.size());
+        expect(typed.renderModel.blocks.back().special().language == std::optional<std::string>{"markdown"});
+        expect(typed.renderModel.blocks.back().special().code_text == U"x");
+        expect(f.session.TextUtf8().find("```markdown\nx") != std::string::npos);
+        expect(f.Execute({.kind = folia::CommandKind::Undo}));
+        expect(f.session.TextUtf8() == accepted); expect(f.session.Selection() == after);
+        expect(f.Execute({.kind = folia::CommandKind::Undo}));
+        expect(f.session.TextUtf8() == original); expect(f.session.Selection() == before);
     };
     "inline completion accepts Unicode words without splitting emoji or combining sequences"_test = [] {
         Fixture f(U" 世界 👩‍💻 e\u0301"); f.Type(U"x"); expect(f.Wait());

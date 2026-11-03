@@ -2,6 +2,8 @@ export module folia.completion;
 import std;
 
 export namespace folia::completion {
+inline constexpr std::size_t max_context_bytes = 64000;
+inline constexpr std::uint32_t max_output_tokens = 4096;
 // Limits include UTF-8 encoding expansion. No caller needs to copy a document.
 struct Budget {
     std::size_t prefix_bytes = 4096;
@@ -18,9 +20,11 @@ struct Prompt {
     std::string instructions, context, cursor;
     std::uint32_t output_tokens = 128;
 };
+enum class Eagerness { Conservative, Balanced, Proactive };
+Budget make_budget(std::size_t context_bytes, std::uint32_t output_tokens);
 Context capture(std::u32string_view source, std::size_t caret,
     std::span<std::u32string_view const> preceding = {}, Budget budget = {});
-Prompt make_prompt(Context const&, Budget budget = {});
+Prompt make_prompt(Context const&, Budget budget = {}, Eagerness eagerness = Eagerness::Balanced);
 std::u32string sanitize(std::u32string_view proposal, Context const&, Budget budget = {});
 
 // Cache contents are document-derived and deliberately never persisted.

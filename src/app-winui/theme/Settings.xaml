@@ -78,6 +78,11 @@
         <Setter Property="FontSize" Value="{ThemeResource FoliaUiFontSize}"/>
         <Setter Property="HorizontalAlignment" Value="Stretch"/>
     </Style>
+    <Style x:Key="SettingsSecondaryButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+        <Setter Property="FontFamily" Value="{ThemeResource FoliaUiFontFamily}"/>
+        <Setter Property="FontSize" Value="{ThemeResource FoliaUiFontSize}"/>
+        <Setter Property="VerticalAlignment" Value="Bottom"/>
+    </Style>
     <Style x:Key="SettingsPrimaryButtonStyle" TargetType="Button" BasedOn="{StaticResource AccentButtonStyle}">
         <Setter Property="HorizontalAlignment" Value="Left"/>
     </Style>

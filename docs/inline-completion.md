@@ -13,6 +13,28 @@ The settings field is `completion.baseUrl`; there is no legacy endpoint migratio
 Completion is opt-in. Keys use the Windows credential store, separate from portable settings.
 Only bounded context from the active document is sent to the configured service.
 
+Settings expose context size (1–64 KB, 1000 UTF-8 bytes per KB), maximum output
+tokens (16–4096), suggestion frequency and reasoning effort. Defaults are 7 KB,
+128 tokens, Balanced frequency and service-default effort. Conservative,
+Balanced and Proactive select stable instruction variants; they do not change
+the model's reasoning parameter or guarantee a suggestion. Clicking Fetch reads
+`GET /models` under the configured base path and selects that model's
+`effort.supported_levels` metadata. No reasoning levels are preset or guessed;
+an existing saved choice remains visible until refreshed. Only upstream choices
+supported by the protocol adapter are offered. Missing metadata leaves service
+default, which omits the effort parameter. Fetching is asynchronous, bounded and
+cancelled on model/base/protocol changes or page removal; stale results are ignored.
+The metadata schema is documented by the [upstream Models API](https://api-docs.deepseek.com/api/list-models/).
+
+Budget fields are ordinary integer text inputs. Closed setting choices do not
+use the mouse wheel to change selection; the page keeps scrolling. Open lists
+retain native scrolling and keyboard selection.
+
+The status bar runs a native progress ring only during a request. Completion,
+an empty suggestion, token-limit exhaustion and request errors have distinct
+states. Cancellation, focus loss and document changes stop that indicator;
+late responses cannot restore it. Empty token-limited responses are not cached.
+
 Tab accepts the current proposal, Ctrl+Right accepts its next word, and Escape
 dismisses it. Existing completion lists and snippet tab stops retain priority.
 Partial acceptance and matching typed prefixes consume the existing proposal;
@@ -48,8 +70,10 @@ In long paragraphs the prefix start advances in 256-codepoint chunks; nearby
 keystrokes append to a stable prefix while staying inside the byte budget. This
 helps provider caching where supported, without promising cache hits.
 
-Defaults: 4 KiB prefix + 1 KiB suffix + 2 KiB preceding blocks (UTF-8 bytes),
-128 output tokens, 512 proposal codepoints, at most four lines. Document views
+The context budget is divided roughly 4:1:2 between prefix, suffix and preceding
+blocks. Defaults are 7 KB of UTF-8 context and 128 output tokens; suggestions
+remain limited to 512 codepoints and four lines. Output tokens may include
+model reasoning, so an exhausted limit need not produce insertable text. Document views
 are bounded before copying/encoding. The 10 MiB case exercises start/middle/end
 and Unicode expansion. These byte caps are not a model-specific token estimate.
 
@@ -59,6 +83,11 @@ network deadline. Errors do not retry automatically. Local LRU holds at most
 Cancellation, document changes, focus loss and tab/window changes retire request
 generations. Late results cannot overwrite the current proposal. Network waits
 and thread joins do not run on the UI thread.
+
+Accepted Markdown uses the ordinary semantic paste transaction. Empty code
+blocks expose a body caret below their generated language header. When a fence
+at EOF has no opening line break, the first body insertion creates that source
+boundary in the same reversible edit; typing never extends the language name.
 
 ## Verification
 

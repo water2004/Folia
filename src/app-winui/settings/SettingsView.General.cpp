@@ -23,6 +23,7 @@ namespace winrt::Folia
         auto languageHeading = settings_ui::SectionHeading(Localize(L"Language"));
         languageSection.Children().Append(languageHeading);
         languageCombo_.Header(box_value(Localize(L"ApplicationLanguage")));
+        languageCombo_ = settings_ui::Choice();
         languageCombo_.Style(settings_ui::ResourceStyle(L"SettingsComboBoxStyle"));
         languageCombo_.Items().Append(box_value(Localize(L"FollowWindowsLanguage")));
         languageCombo_.Items().Append(box_value(Localize(L"EnglishLanguage")));

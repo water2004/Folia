@@ -7,6 +7,16 @@ namespace winrt::Folia::settings_ui
     namespace Xaml = Microsoft::UI::Xaml;
     namespace Controls = Microsoft::UI::Xaml::Controls;
 
+    struct ChoiceBox : Controls::ComboBoxT<ChoiceBox>
+    {
+        void OnPointerWheelChanged(Xaml::Input::PointerRoutedEventArgs const& args)
+        {
+            // Closed choices leave the wheel to the page's ScrollViewer.
+            if (IsDropDownOpen()) Controls::ComboBoxT<ChoiceBox>::OnPointerWheelChanged(args);
+        }
+    };
+    inline Controls::ComboBox Choice() { return winrt::make<ChoiceBox>().as<Controls::ComboBox>(); }
+
     inline constexpr std::array<std::string_view, 3> LanguageIds{
         "system", "en-US", "zh-CN"};
 

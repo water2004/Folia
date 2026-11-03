@@ -1,19 +1,41 @@
 # Settings
 
-Settings is a full-window WinUI mode rather than a modal dialog. While it is active, the checked Settings command remains highlighted, document commands are hidden, and the document outline is replaced by General, Shortcuts, LaTeX Commands, Themes, Licenses, and About navigation. Press the checked Settings command again to return to the document without rebuilding the editor session. Settings pages use one page-level scroll surface; lists open focused dialogs for editing instead of embedding a second scrolling form.
+Settings is a full-window WinUI mode, opened directly from the application menu.
+Use native Back or an unhandled Escape to return to the document. Pages share
+theme typography and form styles. Long shortcut, LaTeX and license lists use
+native virtualization; ordinary forms use one page scroll surface. Closed choices
+leave the wheel to the page, and numeric AI budgets use plain integer inputs.
 
 ## Math rendering
 
-`Render mathematical formulas` owns the QuickJS MathJax service lifecycle. A persisted disabled setting leaves the service unstarted. Disabling it while the application is running cancels queued work, interrupts active QuickJS execution, joins the worker, releases its runtime, clears rendered math caches, and displays the Markdown math source. Enabling it creates a fresh worker and formulas are rendered on demand.
+Formulas use native `folia::math`; there is no formula-rendering switch or
+QuickJS runtime. LaTeX command suggestions have an independent setting.
+
+## AI input prediction
+
+The AI page configures an independent base URL, protocol, model and Windows-stored
+API key. It also exposes context size in KB, output tokens, prompt eagerness and
+reasoning effort. Reasoning choices are fetched on demand from upstream model
+metadata, without preset levels. See [inline completion](inline-completion.md)
+for request budgets, status indicators, cancellation, caching and acceptance.
 
 ## Persistence
 
-Settings use schema version 4 and are saved atomically to `Assets/settings.json`:
+Settings use schema version 5 and are saved atomically to `Assets/settings.json`:
 
 ```json
 {
-  "schemaVersion": 4,
-  "mathRenderingEnabled": true,
+  "schemaVersion": 5,
+  "completion": {
+    "enabled": false,
+    "baseUrl": "",
+    "model": "",
+    "protocol": 0,
+    "reasoningEffort": "",
+    "eagerness": 1,
+    "contextKB": 7,
+    "outputTokens": 128
+  },
   "latexSuggestionsEnabled": true,
   "themeId": "system",
   "languageId": "system",
@@ -21,7 +43,12 @@ Settings use schema version 4 and are saved atomically to `Assets/settings.json`
 }
 ```
 
-An invalid or unavailable file falls back to safe defaults and reports a diagnostic. MathJax, LaTeX suggestions, language, and shortcut changes save immediately. A language override takes effect on the next launch; `system`, `en-US`, and `zh-CN` are supported by compiled WinUI resource files. Theme selection alone is staged: it updates only the preview until the Theme page's `Apply` button is pressed. Leaving Settings without applying discards the pending theme selection. The preview uses the profile's actual typography, code, quote, and color values. An active custom theme cannot be removed until a different theme has been applied, preventing a dangling persisted ID.
+An invalid or unavailable file uses defaults and reports a diagnostic. AI changes
+are applied with Save; credentials never enter the JSON file. LaTeX suggestions,
+language and shortcut changes save immediately. A language override takes effect
+on the next launch (`system`, `en-US`, `zh-CN`). Theme selection stays in preview
+until Apply is pressed; leaving without applying discards that preview. An active
+custom theme cannot be removed until a different theme has been applied.
 
 ## Shortcuts and insertion actions
 

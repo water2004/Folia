@@ -31,6 +31,7 @@ namespace winrt::Folia
         auto header = settings_ui::PageHeader(Localize(L"Licenses"), Localize(L"LicensesDescription"));
         page.Children().Append(header);
 
+        licenseSelector_ = settings_ui::Choice();
         licenseSelector_.Header(box_value(Localize(L"LicenseDocument")));
         licenseSelector_.Style(settings_ui::ResourceStyle(L"SettingsComboBoxStyle"));
         licenseSelector_.Items().Append(box_value(Localize(L"FoliaLicense")));

@@ -113,6 +113,7 @@ namespace winrt::Folia::implementation
         folia::SearchOptions CurrentSearchOptions();
         bool ExecuteEditorCommand(folia::Command const& command);
         void ConfigureInlineCompletion();
+        void UpdateCompletionStatus(winrt::Folia::CompletionState, std::string const& error = {});
         bool HandleInlineCompletionKey(winrt::Windows::System::VirtualKey);
         void ShowFootnoteFlyout(
             folia::platform::editor::EditorVisualFootnoteHit const& hit,

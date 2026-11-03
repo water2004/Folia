@@ -820,7 +820,7 @@
     <ClCompile Include="..\..\third_party\model-providers\providers\ModelValidation.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_providers_ModelValidation.obj</ObjectFileName></ClCompile>
     <ClCompile Include="..\..\third_party\model-providers\providers\SseParser.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_providers_SseParser.obj</ObjectFileName></ClCompile>
     <ClCompile Include="..\..\third_party\model-providers\providers\StreamResponse.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_providers_StreamResponse.obj</ObjectFileName></ClCompile>
-    <ClCompile Include="completion\CompletionService.cpp" />
+    <ClCompile Include="completion\CompletionService.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
     <ClCompile Include="completion\CompletionHttpTransport.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
     <ClCompile Include="completion\InlineCompletionController.cpp" />
     <ClCompile Include="MainWindow.Completion.cpp" />

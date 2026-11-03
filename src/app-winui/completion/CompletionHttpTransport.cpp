@@ -69,14 +69,14 @@ struct RequestOwner {
     std::shared_ptr<AsyncRequest> state;
     ~RequestOwner() { state->Close(); }
 };
-}
-CompletionResult RequestCompletionHttp(CompletionConfig const& config, folia::completion::Prompt const& prompt,
-    std::stop_token stop, std::wstring key) {
+bool ReadHttp(CompletionConfig const& config, std::string const& urlText, wchar_t const* method,
+    std::string body, std::stop_token stop, std::wstring key,
+    std::function<void(bool, std::string_view)> const& consume) {
     using namespace fairy::providers;
     auto validation = ValidateCompletionConfig(config);
     if (!validation.empty()) throw std::runtime_error(validation);
-    if (stop.stop_requested()) return {};
-    auto endpoint = wide(ResolveCompletionEndpoint(config));
+    if (stop.stop_requested()) return false;
+    auto endpoint = wide(urlText);
     URL_COMPONENTS url{sizeof(URL_COMPONENTS)};
     url.dwHostNameLength = url.dwUrlPathLength = url.dwExtraInfoLength = static_cast<DWORD>(-1);
     check(WinHttpCrackUrl(endpoint.c_str(), static_cast<DWORD>(endpoint.size()), 0, &url));
@@ -88,7 +88,7 @@ CompletionResult RequestCompletionHttp(CompletionConfig const& config, folia::co
     check(connection.value != nullptr);
     auto path = std::wstring(url.lpszUrlPath, url.dwUrlPathLength);
     path.append(url.lpszExtraInfo, url.dwExtraInfoLength);
-    HttpHandle pending{WinHttpOpenRequest(connection.value, L"POST", path.c_str(), nullptr,
+    HttpHandle pending{WinHttpOpenRequest(connection.value, method, path.c_str(), nullptr,
         WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, url.nScheme == INTERNET_SCHEME_HTTPS ? WINHTTP_FLAG_SECURE : 0)};
     check(pending.value != nullptr);
     auto state = std::make_shared<AsyncRequest>();
@@ -102,17 +102,12 @@ CompletionResult RequestCompletionHttp(CompletionConfig const& config, folia::co
     state->handle = std::exchange(pending.value, nullptr);
     RequestOwner owner{state};
     std::stop_callback cancel(stop, [state] { state->Close(); });
-    ModelRequest model; model.model = config.model; model.maxOutputTokens = prompt.output_tokens; model.stream = true;
-    auto add = [&](MessageRole role, std::string const& text) {
-        Message message; message.role = role; message.content.push_back({ContentKind::Text, text}); model.messages.push_back(std::move(message));
-    };
-    add(MessageRole::System, prompt.instructions); add(MessageRole::User, prompt.context); add(MessageRole::User, prompt.cursor);
     auto protocol = static_cast<ApiProtocol>(config.protocol);
-    state->body = BuildRequest(protocol, model).dump();
-    if (state->body.size() > 48 * 1024) throw std::runtime_error("Completion request exceeds limit");
+    state->body = std::move(body);
+    if (state->body.size() > 512 * 1024) throw std::runtime_error("Completion request exceeds limit");
     auto headers = BuildHeaders(protocol, winrt::to_string(key));
     SecureZeroMemory(key.data(), key.size() * sizeof(wchar_t));
-    std::wstring headerText = L"Content-Type: application/json\r\nAccept: text/event-stream\r\n";
+    std::wstring headerText = L"Content-Type: application/json\r\nAccept: application/json, text/event-stream\r\n";
     for (auto const& [name, value] : headers) headerText += wide(name + ": " + value + "\r\n");
     DWORD redirect = WINHTTP_OPTION_REDIRECT_POLICY_NEVER;
     state->Begin([&](auto handle) { return WinHttpSetOption(handle, WINHTTP_OPTION_REDIRECT_POLICY, &redirect, sizeof(redirect)); });
@@ -131,21 +126,72 @@ CompletionResult RequestCompletionHttp(CompletionConfig const& config, folia::co
     state->Begin([&](auto handle) { return WinHttpQueryHeaders(handle, WINHTTP_QUERY_CONTENT_TYPE,
         WINHTTP_HEADER_NAME_BY_INDEX, contentType, &size, WINHTTP_NO_HEADER_INDEX); });
     bool streaming = std::wstring_view(contentType).find(L"text/event-stream") != std::wstring_view::npos;
-    StreamResponse decoder(protocol); std::string response; std::size_t received = 0;
+    std::size_t received = 0;
     while (!stop.stop_requested()) {
         state->Begin([&](auto handle) { return WinHttpReadData(handle, state->buffer.data(), static_cast<DWORD>(state->buffer.size()), nullptr); });
         auto count = state->Wait(WINHTTP_CALLBACK_STATUS_READ_COMPLETE, deadline, stop);
         if (!count) break;
-        if ((received += count) > 128 * 1024) throw std::runtime_error("Completion response exceeds limit");
-        if (streaming) (void)decoder.Feed({state->buffer.data(), count});
-        else response.append(state->buffer.data(), count);
+        if ((received += count) > 1024 * 1024) throw std::runtime_error("Completion response exceeds limit");
+        consume(streaming, {state->buffer.data(), count});
     }
+    return streaming;
+}
+}
+CompletionResult RequestCompletionHttp(CompletionConfig const& config, folia::completion::Prompt const& prompt,
+    std::stop_token stop, std::wstring key) {
+    using namespace fairy::providers;
+    ModelRequest model; model.model = config.model; model.maxOutputTokens = prompt.output_tokens; model.stream = true;
+    model.reasoning.effort = config.reasoningEffort;
+    auto add = [&](MessageRole role, std::string const& text) {
+        Message message; message.role = role; message.content.push_back({ContentKind::Text, text}); model.messages.push_back(std::move(message));
+    };
+    add(MessageRole::System, prompt.instructions); add(MessageRole::User, prompt.context); add(MessageRole::User, prompt.cursor);
+    auto protocol = static_cast<ApiProtocol>(config.protocol);
+    StreamResponse decoder(protocol); std::string response;
+    auto streaming = ReadHttp(config, ResolveCompletionEndpoint(config), L"POST", BuildRequest(protocol, model).dump(), stop,
+        std::move(key), [&](bool streaming, std::string_view chunk) {
+            if (streaming) (void)decoder.Feed(chunk); else response.append(chunk);
+        });
     if (stop.stop_requested()) return {};
     auto result = streaming ? decoder.Finish() : ParseResponse(protocol, Json::parse(response));
     CompletionResult output;
     for (auto const& part : result.message.content) if (part.kind == ContentKind::Text) output.text += folia::utf8_to_cps(part.text);
     output.inputTokens = result.usage.inputTokens; output.outputTokens = result.usage.outputTokens;
     output.cachedInputTokens = result.usage.cachedInputTokens;
+    output.truncated = result.finish == FinishReason::Truncated;
     return output;
+}
+std::vector<std::string> ParseCompletionReasoningEfforts(std::string_view json, std::string_view model) {
+    if (json.size() > 1024 * 1024) throw std::runtime_error("Model metadata exceeds limit.");
+    auto root = fairy::providers::Json::parse(json);
+    auto found = root.find("data");
+    if (found == root.end() || !found->is_array()) throw std::runtime_error("Invalid model metadata response.");
+    for (auto const& item : *found) {
+        if (!item.is_object() || item.value("id", std::string{}) != model) continue;
+        auto effort = item.find("effort");
+        if (effort == item.end()) return {};
+        if (!effort->is_object()) throw std::runtime_error("Invalid reasoning metadata.");
+        auto levels = effort->find("supported_levels");
+        if (levels == effort->end()) return {};
+        if (!levels->is_array() || levels->size() > 32) throw std::runtime_error("Invalid reasoning levels.");
+        std::vector<std::string> result;
+        for (auto const& level : *levels) {
+            if (!level.is_string()) throw std::runtime_error("Invalid reasoning level.");
+            auto name = level.get<std::string>();
+            if (name.empty() || name.size() > 32 || !std::ranges::all_of(name, [](unsigned char c) {
+                return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_' || c == '-';
+            })) throw std::runtime_error("Invalid reasoning level.");
+            if (std::ranges::find(result, name) == result.end()) result.push_back(std::move(name));
+        }
+        return result;
+    }
+    throw std::runtime_error("Configured model was not found in the upstream model list.");
+}
+std::vector<std::string> FetchCompletionReasoningEfforts(CompletionConfig const& config, std::stop_token stop, std::wstring key) {
+    std::string response;
+    ReadHttp(config, ResolveCompletionModelsEndpoint(config), L"GET", {}, stop, std::move(key),
+        [&](bool, std::string_view chunk) { response.append(chunk); });
+    if (stop.stop_requested()) return {};
+    return ParseCompletionReasoningEfforts(response, config.model);
 }
 }

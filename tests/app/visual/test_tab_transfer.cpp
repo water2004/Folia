@@ -80,6 +80,9 @@ namespace winrt::Folia::implementation {
             ::PostMessageW(Impl(window)->WindowHandle(), WM_CLOSE, 0, 0);
         }
         static bool Closed(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->windowClosed; }
+        static void CompletionStatus(Microsoft::UI::Xaml::Window const& window, winrt::Folia::CompletionState state) {
+            Impl(window)->UpdateCompletionStatus(state);
+        }
         static void Render(Microsoft::UI::Xaml::Window const& window) { Impl(window)->RenderEditorSurface(); }
         static void Open(Microsoft::UI::Xaml::Window const& window, std::filesystem::path path) {
             Impl(window)->OpenWorkspaceFile(std::move(path), winrt::Folia::WorkspaceOpenMode::Keep);
@@ -113,6 +116,21 @@ namespace {
         return nullptr;
     }
     suite tab_transfer_tests = [] {
+        "completion status uses the native ring only while a request is running"_test = [] {
+            OwnedWindow owned(App()->CreateMainWindow());
+            auto root = owned.window.Content().as<FrameworkElement>();
+            auto ring = root.FindName(L"CompletionProgressRing").as<Controls::ProgressRing>();
+            auto panel = root.FindName(L"CompletionStatusPanel").as<Controls::StackPanel>();
+            auto text = root.FindName(L"CompletionStatusText").as<Controls::TextBlock>();
+            using winrt::Folia::CompletionState;
+            for (auto state : {CompletionState::Requesting, CompletionState::Ready, CompletionState::Requesting,
+                CompletionState::Empty, CompletionState::BudgetExhausted, CompletionState::Failed, CompletionState::Idle}) {
+                Access::CompletionStatus(owned.window, state);
+                expect(ring.IsActive() == (state == CompletionState::Requesting));
+                expect(panel.Visibility() == (state == CompletionState::Idle ? Visibility::Collapsed : Visibility::Visible));
+                expect(!text.Text().empty());
+            }
+        };
         "closing a source window releases its unused tab preparation windows"_test = [] {
             OwnedWindow source(App()->CreateMainWindow());
             OwnedWindow other(App()->CreateMainWindow());

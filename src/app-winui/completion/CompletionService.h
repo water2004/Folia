@@ -7,15 +7,20 @@ struct CompletionConfig {
     bool enabled = false;
     std::string baseUrl, model;
     int protocol = 0; // Chat Completions, Responses, Anthropic Messages
+    std::string reasoningEffort;
+    folia::completion::Eagerness eagerness = folia::completion::Eagerness::Balanced;
+    std::uint32_t contextKB = 7, outputTokens = 128;
     bool operator==(CompletionConfig const&) const = default;
 };
 struct CompletionResult {
     std::u32string text;
     std::string error;
     std::optional<std::uint64_t> inputTokens, outputTokens, cachedInputTokens;
+    bool truncated = false;
 };
 // Resolve the protocol path against the configured service base URL.
 std::string ResolveCompletionEndpoint(CompletionConfig const&);
+std::string ResolveCompletionModelsEndpoint(CompletionConfig const&);
 std::string ValidateCompletionConfig(CompletionConfig const&);
 std::wstring LoadCompletionKey();
 void StoreCompletionKey(std::wstring_view key);

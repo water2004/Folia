@@ -120,7 +120,7 @@ namespace winrt::Folia
             std::size_t offset,
             folia::TextAffinity affinity = folia::TextAffinity::Downstream) const;
         std::optional<std::u32string> EditableSource(folia::NodeId id) const;
-        std::optional<folia::completion::Context> CaptureCompletionContext() const;
+        std::optional<folia::completion::Context> CaptureCompletionContext(folia::completion::Budget budget = {}) const;
         std::optional<EditorDocumentInteraction> InteractionAt(folia::TextPosition position) const;
         folia::TextSelection Selection() const;
         folia::InlineStyle ActiveInlineStyle() const;

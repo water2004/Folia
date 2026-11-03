@@ -394,16 +394,23 @@
             Background="{ThemeResource FoliaShellLayerBrush}"
             BorderBrush="{ThemeResource FoliaShellBorderBrush}"
             BorderThickness="0,1,0,0"
-            ColumnDefinitions="*,Auto,Auto,Auto">
+            ColumnDefinitions="*,Auto,Auto,Auto,Auto">
             <TextBlock
                 x:Name="StatusText"
                 VerticalAlignment="Center"
                 Foreground="{ThemeResource FoliaShellMutedForegroundBrush}"
                 Text="Ready"
                 TextTrimming="CharacterEllipsis"/>
+            <StackPanel x:Name="CompletionStatusPanel" Grid.Column="1" Orientation="Horizontal"
+                        Spacing="6" Margin="12,0" VerticalAlignment="Center" Visibility="Collapsed">
+                <ProgressRing x:Name="CompletionProgressRing" Style="{StaticResource FoliaCompletionProgressStyle}"
+                              IsActive="False" Visibility="Collapsed"/>
+                <TextBlock x:Name="CompletionStatusText" MaxWidth="200" TextTrimming="CharacterEllipsis"
+                           VerticalAlignment="Center" Foreground="{ThemeResource FoliaShellMutedForegroundBrush}"/>
+            </StackPanel>
             <ProgressBar
                 x:Name="OperationProgressBar"
-                Grid.Column="1"
+                Grid.Column="2"
                 Width="160"
                 Margin="12,0"
                 VerticalAlignment="Center"
@@ -415,7 +422,7 @@
                 Visibility="Collapsed"/>
             <Button
                 x:Name="CancelOperationButton"
-                Grid.Column="2"
+                Grid.Column="3"
                 Width="16"
                 Height="16"
                 MinWidth="16"
@@ -437,7 +444,7 @@
                     Foreground="White"
                     Glyph="&#xE711;"/>
             </Button>
-            <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="14">
+            <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="14">
                 <TextBlock
                     x:Name="DocumentNameText"
                     MaxWidth="320"

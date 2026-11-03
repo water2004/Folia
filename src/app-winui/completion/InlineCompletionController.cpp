@@ -23,14 +23,22 @@ std::size_t nextWord(std::u32string_view text) {
 }
 InlineCompletionController::InlineCompletionController(EditorSession& session, CompletionConfig config,
     Microsoft::UI::Dispatching::DispatcherQueue queue, Execute execute, std::function<void()> render,
-    std::function<void(std::string const&)> status, CompletionService::Transport transport)
+    std::function<void(CompletionState, std::string const&)> status, CompletionService::Transport transport)
     : session_(session), config_(std::move(config)), queue_(queue), execute_(std::move(execute)),
       render_(std::move(render)), status_(std::move(status)) {
     position_ = session.Selection().active; content_ = session.ContentState();
     // Disabled completion has no worker, timer or cached document text.
-    if (config_.enabled) service_ = std::make_unique<CompletionService>(std::move(transport));
+    if (config_.enabled && ValidateCompletionConfig(config_).empty()) {
+        budget_ = folia::completion::make_budget(config_.contextKB * 1000, config_.outputTokens);
+        service_ = std::make_unique<CompletionService>(std::move(transport));
+    }
 }
 InlineCompletionController::~InlineCompletionController() { Cancel(); }
+void InlineCompletionController::SetState(CompletionState state, std::string const& error) {
+    if (state_ == state && error.empty()) return;
+    state_ = state;
+    status_(state, error);
+}
 void InlineCompletionController::Cancel() {
     ++generation_;
     if (timer_) timer_.Stop();
@@ -38,6 +46,7 @@ void InlineCompletionController::Cancel() {
     proposal_.clear();
     proposalSuffix_.clear();
     position_ = session_.Selection().active; content_ = session_.ContentState();
+    SetState(CompletionState::Idle);
 }
 void InlineCompletionController::SetFocused(bool value) {
     focused_ = value;
@@ -66,10 +75,11 @@ void InlineCompletionController::Edited(folia::TextSelection before, folia::Comm
     if (proposal_.at(after.active.container_id.v, after.active.source_offset)) {
         // Typing may have applied semantic pairing/structure edits as well.
         // Retain a typed-through proposal only when its following source agrees.
-        auto context = session_.CaptureCompletionContext();
+        auto context = session_.CaptureCompletionContext(budget_);
         if (context && context->suffix == proposalSuffix_) return;
     }
     proposal_.clear(); proposalSuffix_.clear();
+    SetState(CompletionState::Idle);
     if (typed || command.kind == folia::CommandKind::DeleteBackward || command.kind == folia::CommandKind::DeleteForward) Schedule();
 }
 void InlineCompletionController::Schedule() {
@@ -85,15 +95,17 @@ void InlineCompletionController::Request() {
     auto beforeValidation = generation_;
     Validate();
     if (beforeValidation != generation_ || !focused_ || composing_ || !service_) return;
-    auto context = session_.CaptureCompletionContext();
+    auto context = session_.CaptureCompletionContext(budget_);
     if (!context) return;
     if (auto cached = cache_.get(*context)) {
         proposalSuffix_ = context->suffix;
-        proposal_.set(position_.container_id.v, position_.source_offset, std::move(*cached)); render_(); return;
+        proposal_.set(position_.container_id.v, position_.source_offset, std::move(*cached));
+        SetState(Active() ? CompletionState::Ready : CompletionState::Empty); render_(); return;
     }
     auto generation = ++generation_;
     nextRequest_ = std::chrono::steady_clock::now() + std::chrono::milliseconds(1500);
-    auto prompt = folia::completion::make_prompt(*context);
+    auto prompt = folia::completion::make_prompt(*context, budget_, config_.eagerness);
+    SetState(CompletionState::Requesting);
     service_->Submit(config_, std::move(prompt), [weak = weak_from_this(), queue = queue_, generation, context = std::move(*context)](CompletionResult result) mutable {
         queue.TryEnqueue([weak, generation, context = std::move(context), result = std::move(result)]() mutable {
             auto self = weak.lock(); if (!self) return;
@@ -101,12 +113,15 @@ void InlineCompletionController::Request() {
             if (generation != self->generation_ || !self->focused_) return;
             if (!result.error.empty()) {
                 self->nextRequest_ = std::chrono::steady_clock::now() + std::chrono::seconds(10);
-                self->status_(result.error); return;
+                self->SetState(CompletionState::Failed, result.error); return;
             }
-            auto text = folia::completion::sanitize(result.text, context);
+            auto text = folia::completion::sanitize(result.text, context, self->budget_);
             self->proposalSuffix_ = context.suffix;
-            self->cache_.put(std::move(context), text);
+            // A token-limited empty response is not a reusable decision to abstain.
+            if (!result.truncated || !text.empty()) self->cache_.put(std::move(context), text);
             self->proposal_.set(self->position_.container_id.v, self->position_.source_offset, std::move(text));
+            self->SetState(self->Active() ? CompletionState::Ready
+                : result.truncated ? CompletionState::BudgetExhausted : CompletionState::Empty);
             self->render_();
         });
     });
@@ -125,8 +140,9 @@ bool InlineCompletionController::Accept(bool word) {
     accepting_ = false;
     position_ = session_.Selection().active; content_ = session_.ContentState();
     if (accepted) {
-        if (auto context = session_.CaptureCompletionContext()) proposalSuffix_ = context->suffix;
+        if (auto context = session_.CaptureCompletionContext(budget_)) proposalSuffix_ = context->suffix;
         proposal_.set(position_.container_id.v, position_.source_offset, std::move(remaining));
+        if (Active()) SetState(CompletionState::Ready);
         if (!Active()) Schedule();
     }
     render_(); return accepted;

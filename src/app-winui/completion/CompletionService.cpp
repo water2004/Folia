@@ -1,3 +1,4 @@
+#include "providers/ModelValidation.h"
 #include "pch.h"
 #include "completion/CompletionService.h"
 #include <wincred.h>
@@ -9,9 +10,7 @@ namespace {
 constexpr wchar_t CredentialName[] = L"Folia/InlineCompletion/APIKey";
 
 }
-std::string ResolveCompletionEndpoint(CompletionConfig const& config) {
-    constexpr std::array<std::string_view, 3> paths{"/chat/completions", "/responses", "/messages"};
-    if (config.protocol < 0 || config.protocol >= paths.size()) throw std::invalid_argument("Unsupported completion protocol.");
+static std::string ResolveCompletionUrl(CompletionConfig const& config, std::string_view suffix) {
     if (config.baseUrl.size() > 2048 || config.baseUrl.find_first_of("\r\n") != std::string::npos)
         throw std::invalid_argument("Invalid completion base URL.");
     auto baseUrl = winrt::to_hstring(config.baseUrl);
@@ -30,16 +29,32 @@ std::string ResolveCompletionEndpoint(CompletionConfig const& config) {
     auto query = queryAt == std::string::npos ? std::string{} : config.baseUrl.substr(queryAt);
     while (path.ends_with('/')) path.pop_back();
     if (path.find('/', path.find("://") + 3) == std::string::npos) path += "/v1";
-    path += paths[config.protocol];
+    path += suffix;
     path += query;
     if (path.size() > 2048) throw std::invalid_argument("Completion base URL is too long.");
     return path;
 }
+std::string ResolveCompletionEndpoint(CompletionConfig const& config) {
+    constexpr std::array<std::string_view, 3> paths{"/chat/completions", "/responses", "/messages"};
+    if (config.protocol < 0 || config.protocol >= paths.size()) throw std::invalid_argument("Unsupported completion protocol.");
+    return ResolveCompletionUrl(config, paths[config.protocol]);
+}
+std::string ResolveCompletionModelsEndpoint(CompletionConfig const& config) {
+    return ResolveCompletionUrl(config, "/models");
+}
 std::string ValidateCompletionConfig(CompletionConfig const& config) {
-    if (config.model.empty() || config.model.size() > 256) return "Choose a completion model (up to 256 bytes).";
+    if (config.model.empty() || config.model.size() > 128 || config.model.find_first_of("\r\n") != std::string::npos)
+        return "Choose a completion model (up to 128 bytes, without line breaks).";
     try { (void)ResolveCompletionEndpoint(config); }
     catch (std::exception const& error) { return error.what(); }
     catch (winrt::hresult_error const&) { return "Invalid completion base URL."; }
+    if (!fairy::providers::SupportsReasoningOptions(static_cast<fairy::providers::ApiProtocol>(config.protocol), {config.reasoningEffort}))
+        return "Reasoning effort is unsupported for the selected protocol.";
+    if (config.eagerness < folia::completion::Eagerness::Conservative || config.eagerness > folia::completion::Eagerness::Proactive)
+        return "Invalid completion eagerness.";
+    if (config.contextKB < 1 || config.contextKB > folia::completion::max_context_bytes / 1000
+        || config.outputTokens < 16 || config.outputTokens > folia::completion::max_output_tokens)
+        return "Completion context must be 1–64 KB and output must be 16–4096 tokens.";
     return {};
 }
 std::wstring LoadCompletionKey() {

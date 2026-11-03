@@ -3,7 +3,7 @@
 import folia.markdown.document_text;
 
 namespace winrt::Folia {
-std::optional<folia::completion::Context> EditorSession::CaptureCompletionContext() const {
+std::optional<folia::completion::Context> EditorSession::CaptureCompletionContext(folia::completion::Budget budget) const {
     auto selection = Selection();
     if (selection.anchor != selection.active) return {};
     if (auto editor = core_->editor.source_editor()) {
@@ -13,7 +13,7 @@ std::optional<folia::completion::Context> EditorSession::CaptureCompletionContex
         std::vector<std::u32string_view> preceding;
         auto index = static_cast<std::size_t>(found - lines.begin());
         for (auto i = index > 3 ? index - 3 : 0; i < index; ++i) preceding.push_back(lines[i].text);
-        return folia::completion::capture(found->text, selection.active.source_offset, preceding);
+        return folia::completion::capture(found->text, selection.active.source_offset, preceding, budget);
     }
     auto source = TextInputSourceView(selection.active.container_id);
     if (!source) return {};
@@ -26,6 +26,6 @@ std::optional<folia::completion::Context> EditorSession::CaptureCompletionContex
         for (auto index = end > 3 ? end - 3 : 0; index < end; ++index)
             if (auto text = TextInputSourceView(document.cached_editable_order[index])) preceding.push_back(*text);
     }
-    return folia::completion::capture(*source, selection.active.source_offset, preceding);
+    return folia::completion::capture(*source, selection.active.source_offset, preceding, budget);
 }
 }
