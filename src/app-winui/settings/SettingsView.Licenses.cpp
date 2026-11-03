@@ -8,7 +8,6 @@ namespace winrt::Folia
 {
     using namespace Microsoft::UI::Xaml;
     using namespace Microsoft::UI::Xaml::Controls;
-    using settings_ui::Card;
     using settings_ui::FileUri;
     using settings_ui::PageHeading;
     using settings_ui::PagePanel;
@@ -18,25 +17,22 @@ namespace winrt::Folia
     UIElement SettingsView::BuildLicensesPage()
     {
         Grid page;
-        page.Margin(Thickness{24, 18, 24, 24});
-        page.RowSpacing(12);
-        for (auto index = 0; index < 5; ++index)
+        page.Style(settings_ui::ResourceStyle(L"SettingsGridPageStyle"));
+
+        for (auto index = 0; index < 4; ++index)
         {
             RowDefinition row;
-            row.Height(index == 3
+            row.Height(index == 2
                 ? GridLengthHelper::FromValueAndType(1, GridUnitType::Star)
                 : GridLengthHelper::Auto());
             page.RowDefinitions().Append(row);
         }
 
-        auto heading = PageHeading(Localize(L"Licenses"));
-        Grid::SetRow(heading, 0);
-        page.Children().Append(heading);
-        auto description = Text(Localize(L"LicensesDescription"));
-        Grid::SetRow(description, 1);
-        page.Children().Append(description);
+        auto header = settings_ui::PageHeader(Localize(L"Licenses"), Localize(L"LicensesDescription"));
+        page.Children().Append(header);
 
         licenseSelector_.Header(box_value(Localize(L"LicenseDocument")));
+        licenseSelector_.Style(settings_ui::ResourceStyle(L"SettingsComboBoxStyle"));
         licenseSelector_.Items().Append(box_value(Localize(L"FoliaLicense")));
         licenseSelector_.Items().Append(box_value(Localize(L"ThirdPartyNotices")));
         licenseSelector_.SelectedIndex(0);
@@ -44,25 +40,11 @@ namespace winrt::Folia
         {
             LoadSelectedLicense();
         });
-        Grid::SetRow(licenseSelector_, 2);
+        Grid::SetRow(licenseSelector_, 1);
         page.Children().Append(licenseSelector_);
 
-        auto itemTemplate = Markup::XamlReader::Load(LR"(
-            <DataTemplate xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
-                <TextBlock Text="{Binding}" TextWrapping="Wrap" FontFamily="Consolas"
-                    FontSize="14" MinHeight="20" Padding="4,0,4,0"/>
-            </DataTemplate>)").as<DataTemplate>();
-        auto itemContainerStyle = Markup::XamlReader::Load(LR"(
-            <Style xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                TargetType="ListViewItem">
-                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                <Setter Property="Padding" Value="0"/>
-                <Setter Property="MinHeight" Value="20"/>
-                <Setter Property="IsTabStop" Value="False"/>
-            </Style>)").as<Style>();
-
-        licenseList_.ItemTemplate(itemTemplate);
-        licenseList_.ItemContainerStyle(itemContainerStyle);
+        licenseList_.ItemTemplate(Application::Current().Resources().Lookup(box_value(L"SettingsLicenseLineTemplate")).as<DataTemplate>());
+        licenseList_.ItemContainerStyle(settings_ui::ResourceStyle(L"SettingsLicenseLineStyle"));
         licenseList_.SelectionMode(ListViewSelectionMode::None);
         licenseList_.IsItemClickEnabled(false);
         licenseList_.CanDragItems(false);
@@ -75,11 +57,10 @@ namespace winrt::Folia
         ScrollViewer::SetVerticalScrollMode(licenseList_, ScrollMode::Enabled);
         ScrollViewer::SetVerticalScrollBarVisibility(licenseList_, ScrollBarVisibility::Auto);
 
-        auto licenseCard = Card(licenseList_);
-        Grid::SetRow(licenseCard, 3);
-        page.Children().Append(licenseCard);
+        Grid::SetRow(licenseList_, 2);
+        page.Children().Append(licenseList_);
         licenseStatus_.TextWrapping(TextWrapping::Wrap);
-        Grid::SetRow(licenseStatus_, 4);
+        Grid::SetRow(licenseStatus_, 3);
         page.Children().Append(licenseStatus_);
         return page;
     }
@@ -108,14 +89,14 @@ namespace winrt::Folia
 
         StackPanel copy;
         copy.Spacing(8);
-        auto name = Text(Localize(L"AppName"), 30);
-        name.FontWeight(winrt::Windows::UI::Text::FontWeights::SemiBold());
+        auto name = Text(Localize(L"AppName"));
+        name.Style(settings_ui::ResourceStyle(L"SettingsAppNameStyle"));
         copy.Children().Append(name);
         copy.Children().Append(Text(LocalizeFormat(L"Version", {L"0.5.5"})));
-        copy.Children().Append(Text(Localize(L"AppDescription")));
+        copy.Children().Append(settings_ui::Hint(Localize(L"AppDescription")));
         Grid::SetColumn(copy, 1);
         identity.Children().Append(copy);
-        panel.Children().Append(Card(identity));
+        panel.Children().Append(identity);
 
         Grid openSource;
         openSource.ColumnSpacing(16);
@@ -129,11 +110,9 @@ namespace winrt::Folia
 
         StackPanel openSourceCopy;
         openSourceCopy.Spacing(5);
-        auto openSourceHeading = Text(Localize(L"OpenSourceProject"), 18);
-        openSourceHeading.FontWeight(
-            winrt::Windows::UI::Text::FontWeights::SemiBold());
+        auto openSourceHeading = settings_ui::SectionHeading(Localize(L"OpenSourceProject"));
         openSourceCopy.Children().Append(openSourceHeading);
-        openSourceCopy.Children().Append(Text(Localize(L"OpenSourceDescription")));
+        openSourceCopy.Children().Append(settings_ui::Hint(Localize(L"OpenSourceDescription")));
         openSource.Children().Append(openSourceCopy);
 
         HyperlinkButton repository;
@@ -143,19 +122,16 @@ namespace winrt::Folia
         repository.VerticalAlignment(VerticalAlignment::Center);
         Grid::SetColumn(repository, 1);
         openSource.Children().Append(repository);
-        panel.Children().Append(Card(openSource));
+        panel.Children().Append(openSource);
 
         StackPanel technology;
         technology.Spacing(8);
-        auto heading = Text(Localize(L"BuiltForWindows"), 18);
-        heading.FontWeight(winrt::Windows::UI::Text::FontWeights::SemiBold());
+        auto heading = settings_ui::SectionHeading(Localize(L"BuiltForWindows"));
         technology.Children().Append(heading);
-        technology.Children().Append(Text(Localize(L"TechnologyDescription")));
-        panel.Children().Append(Card(technology));
+        technology.Children().Append(settings_ui::Hint(Localize(L"TechnologyDescription")));
+        panel.Children().Append(technology);
 
-        ScrollViewer scroller;
-        scroller.Content(panel);
-        return scroller;
+        return settings_ui::PageScroll(panel);
     }
 
     void SettingsView::LoadSelectedLicense()

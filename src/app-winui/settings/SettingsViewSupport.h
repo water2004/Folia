@@ -29,31 +29,77 @@ namespace winrt::Folia::settings_ui
         return Xaml::Media::FontFamily(winrt::to_hstring(family));
     }
 
-    inline Controls::TextBlock Text(winrt::hstring const& value, double size = 14.0)
+    inline Xaml::Style ResourceStyle(wchar_t const* key)
+    {
+        return Xaml::Application::Current().Resources().Lookup(winrt::box_value(key)).as<Xaml::Style>();
+    }
+
+    inline double Metric(wchar_t const* key)
+    {
+        return winrt::unbox_value<double>(Xaml::Application::Current().Resources().Lookup(winrt::box_value(key)));
+    }
+
+    inline Controls::TextBlock Text(winrt::hstring const& value, double size = 0.0)
     {
         Controls::TextBlock text;
         text.Text(value);
-        text.FontSize(size);
-        text.TextWrapping(Xaml::TextWrapping::Wrap);
+        text.Style(ResourceStyle(L"SettingsBodyTextStyle"));
+        if (size > 0.0) text.FontSize(size);
+        return text;
+    }
+
+    inline Controls::TextBlock Hint(winrt::hstring const& value)
+    {
+        auto text = Text(value);
+        text.Style(ResourceStyle(L"SettingsHintTextStyle"));
+        return text;
+    }
+
+    inline Controls::TextBlock SectionHeading(winrt::hstring const& value)
+    {
+        auto text = Text(value);
+        text.Style(ResourceStyle(L"SettingsSectionHeadingStyle"));
         return text;
     }
 
     inline Controls::TextBlock PageHeading(winrt::hstring const& value)
     {
-        auto text = Text(value, 24.0);
-        text.FontWeight(winrt::Windows::UI::Text::FontWeights::SemiBold());
+        auto text = Text(value);
+        text.Style(ResourceStyle(L"SettingsPageHeadingStyle"));
         return text;
     }
 
-    inline Controls::Border Card(Xaml::UIElement const& child)
+    inline Controls::StackPanel SectionPanel()
     {
-        Controls::Border border;
-        border.Padding(Xaml::Thickness{16, 14, 16, 14});
-        border.CornerRadius(Xaml::CornerRadius{8});
-        border.BorderThickness(Xaml::Thickness{1});
-        border.BorderBrush(Brush({128, 128, 128, 72}));
-        border.Child(child);
-        return border;
+        Controls::StackPanel panel;
+        panel.Style(ResourceStyle(L"SettingsSectionPanelStyle"));
+        return panel;
+    }
+
+    inline Controls::StackPanel PageHeader(winrt::hstring const& title, winrt::hstring const& description = {})
+    {
+        Controls::StackPanel header;
+        header.Style(ResourceStyle(L"SettingsPageHeaderStyle"));
+        header.Children().Append(PageHeading(title));
+        if (!description.empty()) header.Children().Append(Hint(description));
+        return header;
+    }
+
+    inline Controls::ScrollViewer PageScroll(Xaml::UIElement const& page)
+    {
+        Controls::ScrollViewer scroll;
+        scroll.Style(ResourceStyle(L"SettingsPageScrollStyle"));
+        scroll.Content(page);
+        return scroll;
+    }
+
+    inline void SetStatus(Controls::TextBlock const& text, winrt::hstring const& message, bool error)
+    {
+        text.Style(ResourceStyle(L"SettingsHintTextStyle"));
+        text.ClearValue(Controls::TextBlock::ForegroundProperty());
+        text.Text(message);
+        if (error) text.Foreground(Xaml::Application::Current().Resources().Lookup(
+            winrt::box_value(L"SystemFillColorCriticalBrush")).as<Xaml::Media::Brush>());
     }
 
     inline winrt::Windows::Foundation::Uri FileUri(std::filesystem::path path)
@@ -108,8 +154,7 @@ namespace winrt::Folia::settings_ui
     inline Controls::StackPanel PagePanel()
     {
         Controls::StackPanel panel;
-        panel.Spacing(16);
-        panel.Margin(Xaml::Thickness{24, 18, 24, 24});
+        panel.Style(ResourceStyle(L"SettingsPageStyle"));
         return panel;
     }
 }

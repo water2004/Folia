@@ -50,19 +50,12 @@ namespace winrt::Folia
 
         StackPanel identity;
         identity.Spacing(4);
-        auto trigger = Text(Trigger(command), 16);
-        trigger.FontFamily(Media::FontFamily(L"Cascadia Mono"));
-        trigger.FontWeight(winrt::Windows::UI::Text::FontWeights::SemiBold());
-        trigger.Foreground(Brush({60, 130, 246, 255}));
+        auto trigger = Text(Trigger(command));
+        trigger.Style(settings_ui::ResourceStyle(L"SettingsCodeLabelStyle"));
         identity.Children().Append(trigger);
         Border source;
-        source.HorizontalAlignment(HorizontalAlignment::Left);
-        source.Padding(Thickness{7, 2, 7, 2});
-        source.CornerRadius(CornerRadius{9});
-        source.Background(Brush(command.built_in
-            ? folia::Color{90, 120, 150, 36}
-            : folia::Color{60, 160, 100, 42}));
-        source.Child(Text(Localize(command.built_in ? L"BuiltIn" : L"Custom"), 11));
+        source.Style(settings_ui::ResourceStyle(L"SettingsBadgeStyle"));
+        source.Child(settings_ui::Hint(Localize(command.built_in ? L"BuiltIn" : L"Custom")));
         identity.Children().Append(source);
         row.Children().Append(identity);
 
@@ -71,16 +64,16 @@ namespace winrt::Folia
         auto description = Text(Description(command), 14);
         description.FontWeight(winrt::Windows::UI::Text::FontWeights::SemiBold());
         detail.Children().Append(description);
-        detail.Children().Append(Text(recentScore > 0.01
+        detail.Children().Append(settings_ui::Hint(recentScore > 0.01
             ? LocalizeFormat(L"LatexRecentScore", {
                 winrt::to_hstring(std::format("{:.1f}", recentScore))})
-            : Localize(L"LatexNotRecentlyUsed"), 11));
+            : Localize(L"LatexNotRecentlyUsed")));
         Grid::SetColumn(detail, 1);
         row.Children().Append(detail);
 
         auto snippetLiteral = folia::encode_snippet_literal(command.snippet);
-        auto snippet = Text(winrt::to_hstring(folia::cps_to_utf8(snippetLiteral)), 12);
-        snippet.FontFamily(Media::FontFamily(L"Cascadia Mono"));
+        auto snippet = Text(winrt::to_hstring(folia::cps_to_utf8(snippetLiteral)));
+        snippet.Style(settings_ui::ResourceStyle(L"SettingsCodeTextStyle"));
         snippet.TextTrimming(TextTrimming::CharacterEllipsis);
         snippet.MaxLines(1);
         snippet.VerticalAlignment(VerticalAlignment::Center);
@@ -118,8 +111,7 @@ namespace winrt::Folia
         }
 
         Border separator;
-        separator.BorderThickness(Thickness{0, 0, 0, 1});
-        separator.BorderBrush(Brush({128, 128, 128, 40}));
+        separator.Style(settings_ui::ResourceStyle(L"SettingsListSeparatorStyle"));
         separator.Child(row);
         return separator;
     }

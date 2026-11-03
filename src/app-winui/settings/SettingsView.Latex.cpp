@@ -11,7 +11,6 @@ namespace winrt::Folia
     using namespace Microsoft::UI::Xaml;
     using namespace Microsoft::UI::Xaml::Controls;
     using settings_ui::Brush;
-    using settings_ui::Card;
     using settings_ui::PageHeading;
     using settings_ui::Text;
 
@@ -19,10 +18,7 @@ namespace winrt::Folia
     {
         StackPanel page = settings_ui::PagePanel();
 
-        auto heading = PageHeading(Localize(L"LatexCommands"));
-        page.Children().Append(heading);
-        auto description = Text(Localize(L"LatexCommandsDescription"));
-        page.Children().Append(description);
+        page.Children().Append(settings_ui::PageHeader(Localize(L"LatexCommands"), Localize(L"LatexCommandsDescription")));
 
         Grid overview;
         overview.ColumnDefinitions().Append(ColumnDefinition{});
@@ -42,7 +38,7 @@ namespace winrt::Folia
             ApplyLatexSetting();
         });
         togglePanel.Children().Append(latexSuggestionsToggle_);
-        togglePanel.Children().Append(Text(Localize(L"LatexRankingDescription"), 12));
+        togglePanel.Children().Append(settings_ui::Hint(Localize(L"LatexRankingDescription")));
         overview.Children().Append(togglePanel);
         Button overviewMenu;
         FontIcon overviewIcon;
@@ -60,16 +56,14 @@ namespace winrt::Folia
         overviewMenu.Flyout(overviewFlyout);
         Grid::SetColumn(overviewMenu, 1);
         overview.Children().Append(overviewMenu);
-        auto overviewCard = Card(overview);
-        page.Children().Append(overviewCard);
+        page.Children().Append(overview);
 
         Grid listHeader;
         listHeader.ColumnDefinitions().Append(ColumnDefinition{});
         ColumnDefinition addColumn;
         addColumn.Width(GridLengthHelper::Auto());
         listHeader.ColumnDefinitions().Append(addColumn);
-        auto listTitle = Text(Localize(L"LatexCommandList"), 18);
-        listTitle.FontWeight(winrt::Windows::UI::Text::FontWeights::SemiBold());
+        auto listTitle = settings_ui::SectionHeading(Localize(L"LatexCommandList"));
         listTitle.VerticalAlignment(VerticalAlignment::Center);
         listHeader.Children().Append(listTitle);
         Button addCommand;
@@ -89,13 +83,7 @@ namespace winrt::Folia
         page.Children().Append(latexStatus_);
         RefreshLatexCommandList();
 
-        ScrollViewer scroll;
-        scroll.HorizontalScrollMode(ScrollMode::Disabled);
-        scroll.HorizontalScrollBarVisibility(ScrollBarVisibility::Disabled);
-        scroll.VerticalScrollMode(ScrollMode::Enabled);
-        scroll.VerticalScrollBarVisibility(ScrollBarVisibility::Auto);
-        scroll.Content(page);
-        return scroll;
+        return settings_ui::PageScroll(page);
     }
 
     void SettingsView::RefreshLatexCommandList()
@@ -147,7 +135,7 @@ namespace winrt::Folia
         StackPanel fields;
         fields.Spacing(10);
         fields.MinWidth(560);
-        fields.Children().Append(Text(Localize(L"LatexTemplateHelp"), 12));
+        fields.Children().Append(settings_ui::Hint(Localize(L"LatexTemplateHelp")));
         TextBox trigger;
         trigger.Header(box_value(Localize(L"LatexCommand")));
         trigger.PlaceholderText(L"begin{matrix}");
@@ -172,7 +160,7 @@ namespace winrt::Folia
         fields.Children().Append(description);
         TextBlock error;
         error.TextWrapping(TextWrapping::Wrap);
-        error.Foreground(Brush({196, 43, 28, 255}));
+        settings_ui::SetStatus(error, {}, true);
         fields.Children().Append(error);
         dialog.Content(fields);
 
@@ -255,8 +243,7 @@ namespace winrt::Folia
 
     void SettingsView::SetLatexStatus(hstring const& message, bool error)
     {
-        latexStatus_.Text(message);
-        latexStatus_.Foreground(error ? Brush({196, 43, 28, 255}) : nullptr);
+        settings_ui::SetStatus(latexStatus_, message, error);
     }
 
     void SettingsView::ApplyLatexSetting()

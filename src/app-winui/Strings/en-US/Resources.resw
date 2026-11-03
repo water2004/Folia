@@ -334,4 +334,6 @@
   <data name="AIClearKey" xml:space="preserve"><value>Remove saved key</value></data>
   <data name="AICompletionBudget" xml:space="preserve"><value>Each request reads at most 7 KiB of UTF-8 document context; output is limited to 128 tokens. No whole-file upload, automatic retry or disk suggestion cache. Provider billing varies by model.</value></data>
   <data name="SettingsSaved" xml:space="preserve"><value>Settings saved.</value></data>
+  <data name="AIService" xml:space="preserve"><value>Service</value></data>
+  <data name="AICredentials" xml:space="preserve"><value>Credentials</value></data>
 </root>

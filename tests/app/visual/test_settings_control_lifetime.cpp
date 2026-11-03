@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "support/folia_test.hpp"
-#include <winrt/Microsoft.UI.Xaml.Hosting.h>
 #include "settings/SettingsView.h"
 
 using namespace boost::ut;
@@ -47,7 +46,8 @@ namespace
         {
           try
           {
-            Hosting::WindowsXamlManager xaml{Hosting::WindowsXamlManager::InitializeForCurrentThread()};
+            // Settings uses the application's shared theme dictionary; exercise
+            // control lifetime under the production XAML application bootstrap.
             auto themes = std::make_shared<ThemeCatalog>();
             auto latex = std::make_shared<LatexCommandCatalog>();
             AppSettings settings;

@@ -237,6 +237,7 @@
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml" />
     <Page Include="MainWindow.xaml" />
+    <Page Include="theme\Settings.xaml" />
     <Page Include="workspace\FolderExplorer.xaml"><SubType>Designer</SubType></Page>
     <Page Include="workspace\WorkspaceChrome.xaml" />
   </ItemGroup>

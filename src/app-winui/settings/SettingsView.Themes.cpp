@@ -15,33 +15,33 @@ namespace winrt::Folia
     UIElement SettingsView::BuildThemesPage()
     {
         Grid page;
-        page.Margin(Thickness{24, 18, 24, 24});
-        page.ColumnSpacing(20);
+        page.Style(settings_ui::ResourceStyle(L"SettingsGridPageStyle"));
+        page.ColumnSpacing(settings_ui::Metric(L"SettingsSectionGap"));
+        page.RowSpacing(0);
+        for (int i = 0; i < 2; ++i) {
+            RowDefinition row; row.Height(GridLengthHelper::Auto()); page.RowDefinitions().Append(row);
+        }
         ColumnDefinition listColumn;
-        listColumn.Width(GridLengthHelper::FromPixels(280));
+        listColumn.Width(GridLengthHelper::FromPixels(settings_ui::Metric(L"SettingsThemeListWidth")));
         ColumnDefinition previewColumn;
         previewColumn.Width(GridLengthHelper::FromValueAndType(1, GridUnitType::Star));
         page.ColumnDefinitions().Append(listColumn);
         page.ColumnDefinitions().Append(previewColumn);
 
         Grid listPanel;
-        listPanel.RowSpacing(12);
-        for (auto index = 0; index < 5; ++index)
+        listPanel.Style(settings_ui::ResourceStyle(L"SettingsSectionGridStyle"));
+        for (auto index = 0; index < 4; ++index)
         {
             RowDefinition row;
-            row.Height(index == 2
+            row.Height(index == 1
                 ? GridLengthHelper::FromValueAndType(1, GridUnitType::Star)
                 : GridLengthHelper::Auto());
             listPanel.RowDefinitions().Append(row);
         }
-        auto heading = PageHeading(Localize(L"Themes"));
-        Grid::SetRow(heading, 0);
-        listPanel.Children().Append(heading);
-        auto description = Text(Localize(L"ThemesDescription"));
-        Grid::SetRow(description, 1);
-        listPanel.Children().Append(description);
+        auto header = settings_ui::PageHeader(Localize(L"Themes"), Localize(L"ThemesDescription"));
+        listPanel.Children().Append(header);
         themeList_.SelectionMode(ListViewSelectionMode::Single);
-        themeList_.MinHeight(220);
+        themeList_.Style(settings_ui::ResourceStyle(L"SettingsThemeListStyle"));
         themeList_.SelectionChanged([this](auto const&, SelectionChangedEventArgs const&)
         {
             auto index = themeList_.SelectedIndex();
@@ -50,7 +50,7 @@ namespace winrt::Folia
             settings_.themeId = themeIds_[static_cast<std::size_t>(index)];
             UpdateThemePreview();
         });
-        Grid::SetRow(themeList_, 2);
+        Grid::SetRow(themeList_, 1);
         listPanel.Children().Append(themeList_);
 
         StackPanel buttons;
@@ -58,9 +58,7 @@ namespace winrt::Folia
         buttons.Spacing(8);
         applyThemeButton_.Content(box_value(Localize(L"Apply")));
         applyThemeButton_.Click([this](auto const&, auto const&) { ApplyPendingTheme(); });
-        if (auto accentStyle = Application::Current().Resources().TryLookup(
-            box_value(L"AccentButtonStyle")).try_as<Style>())
-            applyThemeButton_.Style(accentStyle);
+        applyThemeButton_.Style(settings_ui::ResourceStyle(L"SettingsPrimaryButtonStyle"));
         Button importButton;
         importButton.Content(box_value(Localize(L"Import")));
         importButton.Click([this](auto const&, auto const&) { ImportThemeAsync(); });
@@ -69,10 +67,10 @@ namespace winrt::Folia
         buttons.Children().Append(applyThemeButton_);
         buttons.Children().Append(importButton);
         buttons.Children().Append(removeThemeButton_);
-        Grid::SetRow(buttons, 3);
+        Grid::SetRow(buttons, 2);
         listPanel.Children().Append(buttons);
         themeStatus_.TextWrapping(TextWrapping::Wrap);
-        Grid::SetRow(themeStatus_, 4);
+        Grid::SetRow(themeStatus_, 3);
         listPanel.Children().Append(themeStatus_);
         Grid::SetColumn(listPanel, 0);
         page.Children().Append(listPanel);
@@ -81,8 +79,25 @@ namespace winrt::Folia
         themePreview_.BorderThickness(Thickness{1});
         Grid::SetColumn(themePreview_, 1);
         page.Children().Append(themePreview_);
+        page.SizeChanged([preview = winrt::make_weak(themePreview_),
+            breakpoint = settings_ui::Metric(L"SettingsWidePageWidth"),
+            listWidth = settings_ui::Metric(L"SettingsThemeListWidth"),
+            gap = settings_ui::Metric(L"SettingsSectionGap")](auto const& sender, SizeChangedEventArgs const& args) {
+            auto border = preview.get(); if (!border) return;
+            auto grid = sender.template as<Grid>();
+            bool stacked = args.NewSize().Width < breakpoint;
+            auto row = stacked ? 1 : 0;
+            if (Grid::GetRow(border) == row) return;
+            grid.ColumnDefinitions().GetAt(0).Width(stacked
+                ? GridLengthHelper::FromValueAndType(1, GridUnitType::Star) : GridLengthHelper::FromPixels(listWidth));
+            grid.ColumnDefinitions().GetAt(1).Width(stacked ? GridLengthHelper::FromPixels(0)
+                : GridLengthHelper::FromValueAndType(1, GridUnitType::Star));
+            Grid::SetRow(border, row); Grid::SetColumn(border, stacked ? 0 : 1);
+            grid.RowSpacing(stacked ? gap : 0);
+            grid.ColumnSpacing(stacked ? 0 : gap);
+        });
         RefreshThemeList();
-        return page;
+        return settings_ui::PageScroll(page);
     }
 
     void SettingsView::RefreshThemeList()
@@ -99,7 +114,7 @@ namespace winrt::Folia
             content.Spacing(2);
             auto title = Text(name);
             title.FontWeight(winrt::Windows::UI::Text::FontWeights::SemiBold());
-            auto subtitle = Text(detail, 12);
+            auto subtitle = settings_ui::Hint(detail);
             subtitle.Opacity(0.7);
             content.Children().Append(title);
             content.Children().Append(subtitle);
@@ -205,8 +220,7 @@ namespace winrt::Folia
 
     void SettingsView::SetThemeStatus(hstring const& message, bool error)
     {
-        themeStatus_.Text(message);
-        themeStatus_.Foreground(error ? Brush({196, 43, 28, 255}) : nullptr);
+        settings_ui::SetStatus(themeStatus_, message, error);
     }
 
     fire_and_forget SettingsView::ImportThemeAsync()

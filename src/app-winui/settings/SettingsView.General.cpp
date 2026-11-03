@@ -8,7 +8,6 @@ namespace winrt::Folia
     using namespace Microsoft::UI::Xaml;
     using namespace Microsoft::UI::Xaml::Controls;
     using settings_ui::Brush;
-    using settings_ui::Card;
     using settings_ui::LanguageIds;
     using settings_ui::LanguageIndex;
     using settings_ui::PageHeading;
@@ -18,15 +17,13 @@ namespace winrt::Folia
     UIElement SettingsView::BuildGeneralPage()
     {
         auto panel = PagePanel();
-        panel.Children().Append(PageHeading(Localize(L"General")));
-        panel.Children().Append(Text(Localize(L"GeneralDescription")));
+        panel.Children().Append(settings_ui::PageHeader(Localize(L"General"), Localize(L"GeneralDescription")));
 
-        StackPanel languageCard;
-        languageCard.Spacing(8);
-        auto languageHeading = Text(Localize(L"Language"), 18);
-        languageHeading.FontWeight(winrt::Windows::UI::Text::FontWeights::SemiBold());
-        languageCard.Children().Append(languageHeading);
+        auto languageSection = settings_ui::SectionPanel();
+        auto languageHeading = settings_ui::SectionHeading(Localize(L"Language"));
+        languageSection.Children().Append(languageHeading);
         languageCombo_.Header(box_value(Localize(L"ApplicationLanguage")));
+        languageCombo_.Style(settings_ui::ResourceStyle(L"SettingsComboBoxStyle"));
         languageCombo_.Items().Append(box_value(Localize(L"FollowWindowsLanguage")));
         languageCombo_.Items().Append(box_value(Localize(L"EnglishLanguage")));
         languageCombo_.Items().Append(box_value(Localize(L"SimplifiedChineseLanguage")));
@@ -39,21 +36,18 @@ namespace winrt::Folia
             settings_.languageId = LanguageIds[static_cast<std::size_t>(index)];
             ApplyLanguageSetting();
         });
-        languageCard.Children().Append(languageCombo_);
-        languageCard.Children().Append(Text(Localize(L"LanguageRestartDescription")));
-        panel.Children().Append(Card(languageCard));
+        languageSection.Children().Append(languageCombo_);
+        languageSection.Children().Append(settings_ui::Hint(Localize(L"LanguageRestartDescription")));
+        panel.Children().Append(languageSection);
 
         generalStatus_.TextWrapping(TextWrapping::Wrap);
         panel.Children().Append(generalStatus_);
-        ScrollViewer scroller;
-        scroller.Content(panel);
-        return scroller;
+        return settings_ui::PageScroll(panel);
     }
 
     void SettingsView::SetGeneralStatus(hstring const& message, bool error)
     {
-        generalStatus_.Text(message);
-        generalStatus_.Foreground(error ? Brush({196, 43, 28, 255}) : nullptr);
+        settings_ui::SetStatus(generalStatus_, message, error);
     }
 
     void SettingsView::ApplyLanguageSetting()

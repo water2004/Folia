@@ -26,18 +26,14 @@ namespace winrt::Folia
     {
         StackPanel page = settings_ui::PagePanel();
 
-        auto heading = PageHeading(Localize(L"Shortcuts"));
-        page.Children().Append(heading);
-        auto description = Text(Localize(L"ShortcutsDescription"));
-        page.Children().Append(description);
+        page.Children().Append(settings_ui::PageHeader(Localize(L"Shortcuts"), Localize(L"ShortcutsDescription")));
 
         Grid listHeader;
         listHeader.ColumnDefinitions().Append(ColumnDefinition{});
         ColumnDefinition addColumn;
         addColumn.Width(GridLengthHelper::Auto());
         listHeader.ColumnDefinitions().Append(addColumn);
-        auto listTitle = Text(Localize(L"ShortcutBindings"), 18);
-        listTitle.FontWeight(winrt::Windows::UI::Text::FontWeights::SemiBold());
+        auto listTitle = settings_ui::SectionHeading(Localize(L"ShortcutBindings"));
         listTitle.VerticalAlignment(VerticalAlignment::Center);
         listHeader.Children().Append(listTitle);
         Button addAction;
@@ -63,7 +59,7 @@ namespace winrt::Folia
         tableHeader.ColumnDefinitions().Append(operationsColumn);
         auto appendHeader = [&](hstring const& label, int column)
         {
-            auto text = Text(label, 12);
+            auto text = settings_ui::Hint(label);
             text.FontWeight(winrt::Windows::UI::Text::FontWeights::SemiBold());
             Grid::SetColumn(text, column);
             tableHeader.Children().Append(text);
@@ -81,19 +77,12 @@ namespace winrt::Folia
         page.Children().Append(shortcutStatus_);
         RefreshShortcutList();
 
-        ScrollViewer scroll;
-        scroll.HorizontalScrollMode(ScrollMode::Disabled);
-        scroll.HorizontalScrollBarVisibility(ScrollBarVisibility::Disabled);
-        scroll.VerticalScrollMode(ScrollMode::Enabled);
-        scroll.VerticalScrollBarVisibility(ScrollBarVisibility::Auto);
-        scroll.Content(page);
-        return scroll;
+        return settings_ui::PageScroll(page);
     }
 
     void SettingsView::SetShortcutStatus(hstring const& message, bool error)
     {
-        shortcutStatus_.Text(message);
-        shortcutStatus_.Foreground(error ? Brush({196, 43, 28, 255}) : nullptr);
+        settings_ui::SetStatus(shortcutStatus_, message, error);
     }
 
     void SettingsView::RefreshShortcutList()
@@ -192,8 +181,7 @@ namespace winrt::Folia
             row.Children().Append(more);
 
             Border separator;
-            separator.BorderThickness(Thickness{0, 0, 0, 1});
-            separator.BorderBrush(Brush({128, 128, 128, 40}));
+            separator.Style(settings_ui::ResourceStyle(L"SettingsListSeparatorStyle"));
             separator.Child(row);
             shortcutList_.Children().Append(separator);
         }
@@ -363,7 +351,7 @@ namespace winrt::Folia
         StackPanel fields;
         fields.Spacing(10);
         fields.MinWidth(560);
-        fields.Children().Append(Text(Localize(L"SnippetPlaceholderDescription"), 12));
+        fields.Children().Append(settings_ui::Hint(Localize(L"SnippetPlaceholderDescription")));
         TextBox name;
         name.Header(box_value(Localize(L"ActionName")));
         name.PlaceholderText(Localize(L"ActionNameExample"));
@@ -446,7 +434,7 @@ namespace winrt::Folia
 
         TextBlock error;
         error.TextWrapping(TextWrapping::Wrap);
-        error.Foreground(Brush({196, 43, 28, 255}));
+        settings_ui::SetStatus(error, {}, true);
         fields.Children().Append(error);
         dialog.Content(fields);
 

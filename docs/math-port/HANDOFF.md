@@ -2,12 +2,20 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-11-04，设置导航修复已完成）
+## 当前 checkpoint（2026-11-04，设置样式统一已完成）
+
+- 用户要求统一设置页，尤其移除AI页整张表单大框。现删除Card包装，AI改无外框启用说明/服务/凭据/操作区；全部7页统一标题/说明、分节间距、输入/主按钮/状态与滚动规则。版本仍0.5.5，无MSI/推送/发布，不动设置schema、编辑器、CST和AI请求策略。
+- 共享WinUI主题字典theme/Settings.xaml由App.xaml合并，绑定现有FoliaShell*/FoliaUi*主题颜色/字体，构造前使用Native资源别名；各页去掉硬编码灰/蓝/红brush。许可证列表继续虚拟化；主题预览窄窗口上下排列。SettingsViewSupport仅消费字典并生成语义控件。
+- 验证：最终Debug build/settings-styles-final.log成功；完整生产WinUI应用宿主中3项97断言build/settings-styles-final-tests.log全过（7页标题、AI明暗/1120、720宽对齐/无框/主题色、控件生命周期、3轮返回导航）。Native PNG build/tests/settings-styles/{light,dark}-{1120,720}.png，已目视检查内容区。截图须渲染完整root，单独host缺祖先背景会呈灰；NavigationView选中指示使用Composition位移，RTB可能保留其原位置，不据此改原生控件。
+- SettingsView现明确依赖应用共享主题字典，其lifetime测试移至tests/app/visual，使用正式App初始化；不在简化controller host注入补偿资源。真实启动/关闭复查build/settings-styles-startup.log。当前无运行agents/native build/test；不开agents/CUA、不自动鼠标、不关用户窗口，native串行≤4。
+- 停止点：实现/共享资源/测试/本checkpoint同批提交（当前HEAD），后续按用户实际体验或明确MSI请求继续；不擅自跟进旧流水线/发布/安装。已完成导航基线df7c3c87、AI基线4a27c813见下文。
+
+## 设置导航修复基线（df7c3c87，历史）
 
 - 已完成用户要求：Folia菜单用直接“设置”入口替换“查看”，设置页原生NavigationView Back可返回正文；重复点击设置为幂等打开。根因是旧页隐藏Back、只剩View→Settings toggle。移除旧View子菜单/重复pane菜单/同步和无用toggle方法，标题栏文件/大纲按钮保留。版本仍0.5.5，无MSI/推送/发布。
 - CloseSettings为必需callback，应用传弱MainWindow，SettingsView.Detach撤销Back订阅。Esc走Root未处理的KeyDown返回正文，先让下拉框/弹窗/快捷键录入处理，不用优先抢占的全局Esc accelerator。未修改CST、历史、文档内容。
 - Debug成功build/settings-navigation-final-build.log。真实WinUI Automation菜单/Back反复3轮（含AI页、重复打开、正文/状态栏/原标签恢复）1测试24断言build/settings-navigation-tests-3.log；settings lifetime1测试11断言build/settings-navigation-lifetime.log；标题栏pane/窄窗口1测试26断言build/settings-navigation-panes.log，全部通过。测试按原生Closed事件等菜单完成关闭再打开，不模拟鼠标。
-- 停止点：实现/测试/本checkpoint同批提交（当前HEAD）。无运行agent/build/test；不开agents/CUA、不关用户窗口，native串行≤4。下步按用户反馈或明确MSI请求继续，不跟进旧流水线/擅自发布安装。AI已完成功能见下方4a27c813基线。
+- 停止点：实现/测试/本checkpoint同批提交df7c3c87。该批结束时无运行agent/build/test；不开agents/CUA、不关用户窗口，native串行≤4。下步按用户反馈或明确MSI请求继续，不跟进旧流水线/擅自发布安装。AI已完成功能见下方4a27c813基线。
 
 ## AI输入预测基线（4a27c813，历史）
 
