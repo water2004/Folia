@@ -32,7 +32,6 @@ namespace winrt::Folia::implementation {
                 FileTree().Visibility(Microsoft::UI::Xaml::Visibility::Visible);
                 ExplorerEmptyState().Visibility(Microsoft::UI::Xaml::Visibility::Collapsed);
                 explorerOpen = true;
-                ExplorerToggleButton().IsChecked(true);
                 UpdateWorkspaceLayout();
             }
         } catch (winrt::hresult_error const& error) { SetStatus(LocalizeFormat(L"StatusFolderFailed", {error.message()})); }

@@ -96,7 +96,6 @@ namespace winrt::Folia::implementation
         void UpdateTheme();
         void ApplyShellTheme();
         folia::Theme CurrentThemeVariant();
-        void ToggleSettingsMode();
         void SetSettingsMode(bool enabled);
         void SetDocumentCommandsVisible(bool visible);
         std::optional<winrt::hstring> ApplySettings(winrt::Folia::AppSettings const& settings);

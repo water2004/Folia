@@ -44,23 +44,16 @@ namespace winrt::Folia::implementation
         return std::nullopt;
     }
 
-    void MainWindow::ToggleSettingsMode()
-    {
-        SetSettingsMode(!settingsMode);
-    }
-
     void MainWindow::SetSettingsMode(bool enabled)
     {
         if (settingsMode == enabled)
         {
-            SettingsButton().IsChecked(enabled);
             return;
         }
 
         settingsMode = enabled;
         if (inlineCompletion) inlineCompletion->SetFocused(false);
         latexCompletionController.Cancel();
-        SettingsButton().IsChecked(enabled);
         SetDocumentCommandsVisible(!enabled);
         if (enabled)
         {
@@ -74,7 +67,10 @@ namespace winrt::Folia::implementation
                     latexCommandCatalog,
                     CurrentThemeVariant(),
                     WindowHandle(),
-                    [this](winrt::Folia::AppSettings const& changed) { return ApplySettings(changed); });
+                    [this](winrt::Folia::AppSettings const& changed) { return ApplySettings(changed); },
+                    [weak = get_weak()] {
+                        if (auto window = weak.get(); window && !window->windowClosed) window->SetSettingsMode(false);
+                    });
                 SettingsViewHost().Children().Append(settingsView->Root());
             }
             else

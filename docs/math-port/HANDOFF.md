@@ -2,7 +2,14 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-11-04，AI输入预测已完成本地候选）
+## 当前 checkpoint（2026-11-04，设置导航修复已完成）
+
+- 已完成用户要求：Folia菜单用直接“设置”入口替换“查看”，设置页原生NavigationView Back可返回正文；重复点击设置为幂等打开。根因是旧页隐藏Back、只剩View→Settings toggle。移除旧View子菜单/重复pane菜单/同步和无用toggle方法，标题栏文件/大纲按钮保留。版本仍0.5.5，无MSI/推送/发布。
+- CloseSettings为必需callback，应用传弱MainWindow，SettingsView.Detach撤销Back订阅。Esc走Root未处理的KeyDown返回正文，先让下拉框/弹窗/快捷键录入处理，不用优先抢占的全局Esc accelerator。未修改CST、历史、文档内容。
+- Debug成功build/settings-navigation-final-build.log。真实WinUI Automation菜单/Back反复3轮（含AI页、重复打开、正文/状态栏/原标签恢复）1测试24断言build/settings-navigation-tests-3.log；settings lifetime1测试11断言build/settings-navigation-lifetime.log；标题栏pane/窄窗口1测试26断言build/settings-navigation-panes.log，全部通过。测试按原生Closed事件等菜单完成关闭再打开，不模拟鼠标。
+- 停止点：实现/测试/本checkpoint同批提交（当前HEAD）。无运行agent/build/test；不开agents/CUA、不关用户窗口，native串行≤4。下步按用户反馈或明确MSI请求继续，不跟进旧流水线/擅自发布安装。AI已完成功能见下方4a27c813基线。
+
+## AI输入预测基线（4a27c813，历史）
 
 - 用户先不管0.5.5流水线，做Copilot式预测补全。Folia完全独立；设置→AI输入预测配置完整地址/协议/模型/API Key，默认关闭。不开agents/CUA、不自动鼠标/不关用户窗口，native串行≤4。没有真实模型联网、MSI、推送或新发布；版本仍0.5.5。
 - 来源：MIT providers（Fairy ef60077797ddadc82ee934d2e9d80ce05cf67830）与nlohmann/json3.12.0均vendor，license/source-lock/sha256齐全，27协议源码hash核对；gitattributes锁定LF。无Fairy工程/运行/配置/凭据依赖。vendor已提交1c5617af，portable预算/缓存/fixtures提交09415f8c。
@@ -10,7 +17,7 @@
 - 成本：读取block/line source views先限额再编码，4KiB prefix+1KiB suffix+2KiB preceding，默认128输出token/512码点；32项/256KiB内存LRU。10MiB文档不全文复制/序列化/上传。长段落前缀起点按256码点分段移动，帮助服务cache但不保证命中。按词接受/匹配输入沿用余下建议；CST语义配对或结构编辑改变位置/后继源码则作废重算。
 - 灰字共用DirectWrite flow，正文/标题/引用/列表/任务/表格/代码/空文档/源码通用；主题muted色、原字号换行、无Markdown样式。所有建议字符及换行布局装饰均非Source（GeneratedPreview单独分类，caret仍在建议前）；不进CST/save/selection/print。Tab整段、Ctrl+Right按ICU词且不拆emoji/组合字符、Esc取消，原补全弹窗/snippet优先；接受走原Paste可逆事务，IME期间不请求。
 - 验证：build/completion-core-final-2.log 11测试63断言（10MiB/Unicode预算、稳定prefix、LRU、3协议SSE）；build/completion-app-regression.log完整controller153测试19873断言通过。最终增量Debug build/completion-final-review-build.log成功，15测试1145断言build/completion-final-review-tests.log全部通过，覆盖async loopback HTTP/取消/错误、旧请求拒绝、缓存/typed-through/语义配对失效、Unicode词/Undo、明暗16容器实际layout/brush/caret/缓存失效/非Source映射、源码邻近行/反向选区/零全文操作。真实启动关闭build/completion-startup.log exit0；最终同项复查build/completion-final-startup.log。
-- 停止点：应用批次与本checkpoint为当前HEAD；无agent/构建/测试在运行。后续按用户需求配置实际模型验证内容质量/延迟，或构建MSI；不冒称已有真实服务验证，不擅自跟进旧流水线/发布/安装。
+- 停止点：应用批次为4a27c813；该批次验证结束时无agent/构建/测试在运行。后续按用户需求配置实际模型验证内容质量/延迟，或构建MSI；不冒称已有真实服务验证，不擅自跟进旧流水线/发布/安装。
 
 ## 0.5.5发布（用户暂不跟进流水线）
 

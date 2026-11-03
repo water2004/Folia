@@ -144,12 +144,6 @@ namespace winrt::Folia::implementation
             menu.ShowAt(EncodingButton());
         }));
 
-        SidebarToggleButton().Click(WindowEvent([this](auto const&, auto const&)
-        {
-            outlineOpen = SidebarToggleButton().IsChecked();
-            UpdateWorkspaceLayout();
-        }));
-
         Root().Loaded(WindowEvent([this](auto const&, auto const&) { UpdateChromeMetrics(); }));
         Root().SizeChanged(WindowEvent([this](auto const&, auto const&) { UpdateChromeMetrics(); }));
 
@@ -232,6 +226,14 @@ namespace winrt::Folia::implementation
             args.Handled(true);
         });
         Root().KeyboardAccelerators().Append(escapeAccelerator);
+        // Let child controls consume Escape first (dialogs, dropdowns, shortcut
+        // capture). Only an unhandled key returns from the settings workspace.
+        Root().KeyDown(WindowEvent([this](auto const&, Microsoft::UI::Xaml::Input::KeyRoutedEventArgs const& args) {
+            if (settingsMode && !args.Handled() && args.Key() == winrt::Windows::System::VirtualKey::Escape) {
+                SetSettingsMode(false);
+                args.Handled(true);
+            }
+        }));
 
         FindQueryBox().TextChanged(WindowEvent([this](auto const&, auto const&) { RefreshSearch(true); }));
         FindRegexButton().Click(WindowEvent([this](auto const&, auto const&) { RefreshSearch(true); }));

@@ -94,7 +94,6 @@ namespace winrt::Folia::implementation
         FileMenu().Text(Localize(L"FileMenu"));
         MainMenuLabel().Text(Localize(L"AppName"));
         EditMenu().Text(Localize(L"EditMenu"));
-        ViewMenu().Text(Localize(L"ViewMenu"));
         FormatMenu().Text(Localize(L"FormatMenu"));
         NewButton().Text(Localize(L"NewDocument"));
         OpenFolderButton().Text(Localize(L"OpenFolder"));
@@ -110,13 +109,10 @@ namespace winrt::Folia::implementation
         EditPasteButton().Text(Localize(L"Paste"));
         FindButton().Text(Localize(L"Find"));
         ReplaceButton().Text(Localize(L"Replace"));
-        ExplorerToggleButton().Text(Localize(L"Files"));
         DocumentLoadingText().Text(Localize(L"PreparingDocument"));
         tooltip(ExplorerPaneButton(), L"Files");
         tooltip(OutlinePaneButton(), L"ToggleOutline");
 
-        SidebarToggleButton().Text(Localize(L"Outline"));
-        tooltip(SidebarToggleButton(), L"ToggleOutline");
         OpenButton().Text(Localize(L"Open"));
         tooltip(OpenButton(), L"OpenTooltip");
         ReloadButton().Text(Localize(L"Reload"));

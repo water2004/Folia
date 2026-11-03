@@ -110,11 +110,7 @@
                                     <MenuFlyoutItem x:Name="FormatDocumentButton" Text="Format document"/>
                                 </MenuFlyoutSubItem>
                             </MenuFlyoutSubItem>
-                            <MenuFlyoutSubItem x:Name="ViewMenu" Text="View">
-                                <ToggleMenuFlyoutItem x:Name="ExplorerToggleButton" Text="Files" IsChecked="True"/>
-                                <ToggleMenuFlyoutItem x:Name="SidebarToggleButton" Text="Outline" IsChecked="True"/>
-                                <ToggleMenuFlyoutItem x:Name="SettingsButton" Text="Settings"/>
-                            </MenuFlyoutSubItem>
+                            <MenuFlyoutItem x:Name="SettingsButton" Text="Settings"/>
                         </MenuFlyout>
                     </Button.Flyout>
                 </Button>

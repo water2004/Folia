@@ -159,12 +159,10 @@ namespace winrt::Folia::implementation {
         DocumentWorkspace().PaneClosing(WindowEvent([this](auto const&, auto const&) {
             explorerOpen = false;
             ExplorerPaneButton().IsChecked(explorerOpen);
-            ExplorerToggleButton().IsChecked(explorerOpen);
         }));
         OutlineSplitView().PaneClosing(WindowEvent([this](auto const&, auto const&) {
             outlineOpen = false;
             OutlinePaneButton().IsChecked(outlineOpen);
-            SidebarToggleButton().IsChecked(outlineOpen);
         }));
         DocumentTabs().TabItemsSource(tabSource);
         DocumentTabs().SelectionChanged(WindowEvent([this](auto const&, auto const&) {
@@ -179,10 +177,6 @@ namespace winrt::Folia::implementation {
         DocumentTabs().SizeChanged(WindowEvent([this](auto const&, auto const&) {
             UpdateChromeMetrics();
             EnsureSelectedTabVisible();
-        }));
-        ExplorerToggleButton().Click(WindowEvent([this](auto const&, auto const&) {
-            explorerOpen = ExplorerToggleButton().IsChecked();
-            UpdateWorkspaceLayout();
         }));
         folderExplorer.Attach(FileTree(), [weak = get_weak()](auto path, bool keep) {
             if (auto window = weak.get()) window->OpenWorkspaceFile(std::move(path), keep ? winrt::Folia::WorkspaceOpenMode::Keep : winrt::Folia::WorkspaceOpenMode::Preview);
@@ -233,7 +227,5 @@ namespace winrt::Folia::implementation {
         OutlineSplitView().IsPaneOpen(outlineOpen);
         ExplorerPaneButton().IsChecked(explorerOpen);
         OutlinePaneButton().IsChecked(outlineOpen);
-        ExplorerToggleButton().IsChecked(explorerOpen);
-        SidebarToggleButton().IsChecked(outlineOpen);
     }
 }

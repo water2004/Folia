@@ -16,7 +16,8 @@ namespace winrt::Folia
         std::shared_ptr<LatexCommandCatalog> latexCatalog,
         folia::Theme systemVariant,
         HWND owner,
-        ApplySettings applySettings)
+        ApplySettings applySettings,
+        CloseSettings closeSettings)
         : settings_(std::move(settings)),
           appliedSettings_(settings_),
           catalog_(std::move(catalog)),
@@ -26,14 +27,18 @@ namespace winrt::Folia
           applySettings_(std::move(applySettings))
     {
         shortcutModel_.Reset(settings_.shortcutBindings);
-        Build();
+        Build(std::move(closeSettings));
     }
 
-    void SettingsView::Build()
+    void SettingsView::Build(CloseSettings closeSettings)
     {
         navigation_.AlwaysShowHeader(false);
         navigation_.CompactPaneLength(48);
-        navigation_.IsBackButtonVisible(NavigationViewBackButtonVisible::Collapsed);
+        navigation_.IsBackButtonVisible(NavigationViewBackButtonVisible::Visible);
+        navigation_.IsBackEnabled(true);
+        backRequested_ = navigation_.BackRequested([close = std::move(closeSettings)](auto const&, auto const&) {
+            close();
+        });
         navigation_.IsPaneOpen(true);
         navigation_.IsPaneToggleButtonVisible(false);
         navigation_.IsSettingsVisible(false);
@@ -124,6 +129,7 @@ namespace winrt::Folia
 
     void SettingsView::Detach()
     {
+        if (backRequested_.value) { navigation_.BackRequested(backRequested_); backRequested_ = {}; }
         detached_ = true;
         applySettings_ = {};
         owner_ = nullptr;

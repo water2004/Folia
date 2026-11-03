@@ -52,7 +52,7 @@ namespace
             auto latex = std::make_shared<LatexCommandCatalog>();
             AppSettings settings;
             auto view = std::make_shared<SettingsView>(settings, themes, latex, folia::Theme::Light,
-                nullptr, [](auto const&) -> std::optional<winrt::hstring> { return std::nullopt; });
+                nullptr, [](auto const&) -> std::optional<winrt::hstring> { return std::nullopt; }, [] {});
             struct DetachView
             {
                 std::shared_ptr<SettingsView> const& view;

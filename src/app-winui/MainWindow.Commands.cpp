@@ -55,7 +55,7 @@ namespace winrt::Folia::implementation
 
         SettingsButton().Click(WindowEvent([this](auto const&, auto const&)
         {
-            ToggleSettingsMode();
+            SetSettingsMode(true);
         }));
 
         BoldButton().Click(WindowEvent([this](auto const&, auto const&)

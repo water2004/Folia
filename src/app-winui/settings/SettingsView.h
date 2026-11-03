@@ -13,6 +13,7 @@ namespace winrt::Folia
     {
     public:
         using ApplySettings = std::function<std::optional<winrt::hstring>(AppSettings const&)>;
+        using CloseSettings = std::function<void()>;
 
         SettingsView(
             AppSettings settings,
@@ -20,7 +21,8 @@ namespace winrt::Folia
             std::shared_ptr<LatexCommandCatalog> latexCatalog,
             folia::Theme systemVariant,
             HWND owner,
-            ApplySettings applySettings);
+            ApplySettings applySettings,
+            CloseSettings closeSettings);
 
         winrt::Microsoft::UI::Xaml::Controls::NavigationView Root() const { return navigation_; }
         void Reset(AppSettings settings, folia::Theme systemVariant);
@@ -29,7 +31,7 @@ namespace winrt::Folia
         void Detach();
 
     private:
-        void Build();
+        void Build(CloseSettings closeSettings);
         winrt::Microsoft::UI::Xaml::UIElement BuildGeneralPage();
         winrt::Microsoft::UI::Xaml::UIElement BuildCompletionPage();
         winrt::Microsoft::UI::Xaml::UIElement BuildShortcutsPage();
@@ -79,6 +81,7 @@ namespace winrt::Folia
         HWND owner_ = nullptr;
         ApplySettings applySettings_;
         winrt::Microsoft::UI::Xaml::Controls::NavigationView navigation_;
+        winrt::event_token backRequested_{};
         winrt::Microsoft::UI::Xaml::UIElement generalPage_{ nullptr };
         winrt::Microsoft::UI::Xaml::UIElement completionPage_{ nullptr };
         winrt::Microsoft::UI::Xaml::UIElement shortcutsPage_{ nullptr };
