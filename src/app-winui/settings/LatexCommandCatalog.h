@@ -14,6 +14,7 @@ namespace winrt::Folia
         std::vector<folia::LatexCommandDefinition> const& Commands() const { return state_.Commands(); }
         std::vector<folia::LatexCommandDefinition> const& CustomCommands() const { return state_.CustomCommands(); }
         std::vector<winrt::hstring> const& Diagnostics() const { return diagnostics_; }
+        std::uint64_t Revision() const { return revision_; }
 
         std::optional<winrt::hstring> AddCustom(
             std::u32string trigger,
@@ -45,6 +46,7 @@ namespace winrt::Folia
         folia::LatexCommandCatalogState state_;
         std::vector<winrt::hstring> diagnostics_;
         std::size_t usageChangesSinceFlush_ = 0;
+        std::uint64_t revision_ = 0;
         bool dirty_ = false;
     };
 }

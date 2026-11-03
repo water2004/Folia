@@ -92,6 +92,21 @@
         <Setter Property="BorderThickness" Value="0,0,0,1"/>
         <Setter Property="BorderBrush" Value="{ThemeResource FoliaShellBorderBrush}"/>
     </Style>
+    <Style x:Key="SettingsListRowStyle" TargetType="ListViewItem">
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="IsTabStop" Value="False"/>
+    </Style>
+    <ItemsPanelTemplate x:Key="SettingsListItemsPanel">
+        <ItemsStackPanel CacheLength="0.5"/>
+    </ItemsPanelTemplate>
+    <DataTemplate x:Key="SettingsListRowTemplate">
+        <ContentPresenter HorizontalContentAlignment="Stretch"/>
+    </DataTemplate>
+    <Style x:Key="SettingsListHeaderStyle" TargetType="StackPanel" BasedOn="{StaticResource SettingsSectionPanelStyle}">
+        <Setter Property="Spacing" Value="24"/>
+        <Setter Property="Margin" Value="0,0,0,24"/>
+    </Style>
     <Style x:Key="SettingsCodeTextStyle" TargetType="TextBlock" BasedOn="{StaticResource SettingsHintTextStyle}">
         <Setter Property="FontFamily" Value="{ThemeResource FoliaMonoFontFamily}"/>
     </Style>

@@ -24,19 +24,12 @@ namespace
         } while (std::chrono::steady_clock::now() < deadline);
     }
 
-    ComboBox FindScope(UIElement const& element)
+    ComboBox FindScope(DependencyObject const& element)
     {
         if (auto combo = element.try_as<ComboBox>())
             return Grid::GetColumn(combo) == 1 ? combo : nullptr;
-        if (auto panel = element.try_as<Panel>())
-            for (auto const& child : panel.Children())
-                if (auto found = FindScope(child)) return found;
-        if (auto content = element.try_as<ContentControl>())
-            if (auto child = content.Content().try_as<UIElement>()) return FindScope(child);
-        if (auto scroll = element.try_as<ScrollViewer>())
-            if (auto child = scroll.Content().try_as<UIElement>()) return FindScope(child);
-        if (auto border = element.try_as<Border>())
-            if (auto child = border.Child()) return FindScope(child);
+        for (int i = 0; i < Media::VisualTreeHelper::GetChildrenCount(element); ++i)
+            if (auto found = FindScope(Media::VisualTreeHelper::GetChild(element, i))) return found;
         return nullptr;
     }
 
@@ -53,11 +46,16 @@ namespace
             AppSettings settings;
             auto view = std::make_shared<SettingsView>(settings, themes, latex, folia::Theme::Light,
                 nullptr, [](auto const&) -> std::optional<winrt::hstring> { return std::nullopt; }, [] {});
+            Window window;
+            window.Content(view->Root());
+            window.AppWindow().Resize({1120, 900});
+            window.Activate();
             struct DetachView
             {
                 std::shared_ptr<SettingsView> const& view;
-                ~DetachView() { view->Detach(); }
-            } detach{view};
+                Window window;
+                ~DetachView() { view->Detach(); window.Close(); }
+            } detach{view, window};
             auto navigation = view->Root();
             for (auto const& item : navigation.MenuItems())
             {
@@ -69,6 +67,7 @@ namespace
                 }
             }
             SettleSettingsControls();
+            navigation.UpdateLayout();
             auto content = navigation.Content().try_as<UIElement>();
             expect(static_cast<bool>(content)) << "settings navigation must expose content";
             if (!content) return;
@@ -80,8 +79,16 @@ namespace
                 expect(scope.Items().Size() == 3_u) << "scope must offer global, code and math";
                 expect(Grid::GetColumn(scope) == 1_i) << "scope must occupy shortcuts column 1";
                 auto oldScope = winrt::make_weak(scope);
-                scope = nullptr; // Only the old visual tree and its handler can retain it.
                 view->Reset(settings, folia::Theme::Light);
+                navigation.UpdateLayout();
+                expect(FindScope(content) == scope) << "unchanged reset must reuse realized rows";
+                scope = nullptr; // Only the old visual tree and its handler can retain it.
+                settings.shortcutBindings.front().gesture.reset();
+                settings.shortcutBindings.front().scope = iteration == 0
+                    ? folia::platform::editor::EditorShortcutScope::Math
+                    : folia::platform::editor::EditorShortcutScope::Code;
+                view->Reset(settings, folia::Theme::Light);
+                navigation.UpdateLayout();
                 SettleSettingsControls();
                 expect(!oldScope.get()) << "replaced scope retained after reset " << iteration;
                 expect(static_cast<bool>(FindScope(content))) << "reset must replace the scope control";

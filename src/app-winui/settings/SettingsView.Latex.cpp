@@ -76,31 +76,33 @@ namespace winrt::Folia
         listHeader.Children().Append(addCommand);
         page.Children().Append(listHeader);
 
-        latexCommandList_.Spacing(0);
-        page.Children().Append(latexCommandList_);
-
-        latexStatus_.TextWrapping(TextWrapping::Wrap);
-        page.Children().Append(latexStatus_);
-        RefreshLatexCommandList();
-
-        return settings_ui::PageScroll(page);
+        latexRows_ = latexCommandList_.ContainerContentChanging(winrt::auto_revoke,
+            [this](auto const&, ContainerContentChangingEventArgs const& args)
+            {
+                auto container = args.ItemContainer();
+                auto presenter = container.ContentTemplateRoot().as<ContentPresenter>();
+                if (args.InRecycleQueue()) { presenter.Content(nullptr); return; }
+                auto const& commands = latexCatalog_->Commands();
+                auto index = static_cast<std::size_t>(args.ItemIndex());
+                if (index >= commands.size()) return;
+                auto const& command = commands[index];
+                presenter.Content(BuildLatexCommandSettingsRow(command, latexCatalog_->RecentScore(command.id),
+                    [this](std::string id) { ShowLatexCommandEditorAsync(std::move(id)); },
+                    [this](std::string id) { RemoveLatexCommand(std::move(id)); }));
+                args.Handled(true);
+            });
+        return settings_ui::ListPage(page, latexCommandList_, latexStatus_);
     }
 
     void SettingsView::RefreshLatexCommandList()
     {
-        if (!latexCatalog_ || !latexCommandList_) return;
-        latexCommandList_.Children().Clear();
-        for (auto const& command : latexCatalog_->Commands())
-        {
-            latexCommandList_.Children().Append(BuildLatexCommandSettingsRow(
-                command,
-                latexCatalog_->RecentScore(command.id),
-                [this](std::string id)
-                {
-                    ShowLatexCommandEditorAsync(std::move(id));
-                },
-                [this](std::string id) { RemoveLatexCommand(std::move(id)); }));
-        }
+        if (!latexCatalog_ || displayedLatexRevision_ == latexCatalog_->Revision()) return;
+        displayedLatexRevision_ = latexCatalog_->Revision();
+        std::vector<Windows::Foundation::IInspectable> items;
+        auto count = latexCatalog_->Commands().size();
+        items.reserve(count);
+        for (std::uint32_t index = 0; index < count; ++index) items.push_back(box_value(index));
+        latexCommandList_.ItemsSource(winrt::single_threaded_observable_vector<Windows::Foundation::IInspectable>(std::move(items)));
     }
 
     fire_and_forget SettingsView::ShowLatexCommandEditorAsync(

@@ -41,6 +41,7 @@ namespace winrt::Folia
     std::optional<hstring> LatexCommandCatalog::ResetUsage()
     {
         state_.ResetUsage();
+        ++revision_;
         usageChangesSinceFlush_ = 0;
         dirty_ = true;
         return SaveUserState();
@@ -57,6 +58,7 @@ namespace winrt::Folia
     void LatexCommandCatalog::RecordUsage(std::string_view id)
     {
         if (!state_.RecordUsage(id, NowSeconds())) return;
+        ++revision_;
         dirty_ = true;
         if (++usageChangesSinceFlush_ >= 8) SaveUserState();
     }
@@ -86,6 +88,7 @@ namespace winrt::Folia
         folia::LatexCatalogMutationResult const& result)
     {
         if (!result.ok()) return MutationError(result.error);
+        ++revision_;
         dirty_ = true;
         return SaveUserState();
     }

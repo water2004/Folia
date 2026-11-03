@@ -63,8 +63,6 @@ namespace winrt::Folia
         navigation_.MenuItems().Append(about);
 
         generalPage_ = BuildGeneralPage();
-        shortcutsPage_ = BuildShortcutsPage();
-        latexPage_ = BuildLatexPage();
         themesPage_ = BuildThemesPage();
         licensesPage_ = BuildLicensesPage();
         aboutPage_ = BuildAboutPage();
@@ -80,15 +78,18 @@ namespace winrt::Folia
 
     void SettingsView::Navigate(hstring const& page)
     {
+        if (page != L"shortcuts") CancelShortcutCapture();
         if (page == L"themes") navigation_.Content(themesPage_);
         else if (page == L"completion") { completionPage_ = BuildCompletionPage(); navigation_.Content(completionPage_); }
         else if (page == L"latex")
         {
+            if (!latexPage_) latexPage_ = BuildLatexPage();
             navigation_.Content(latexPage_);
             RefreshLatexCommandList();
         }
         else if (page == L"shortcuts")
         {
+            if (!shortcutsPage_) shortcutsPage_ = BuildShortcutsPage();
             navigation_.Content(shortcutsPage_);
             RefreshShortcutList();
         }
@@ -103,6 +104,7 @@ namespace winrt::Folia
 
     void SettingsView::Reset(AppSettings settings, folia::Theme systemVariant)
     {
+        CancelShortcutCapture();
         settings_ = std::move(settings);
         appliedSettings_ = settings_;
         shortcutModel_.Reset(settings_.shortcutBindings);
@@ -111,8 +113,8 @@ namespace winrt::Folia
         latexSuggestionsToggle_.IsOn(settings_.latexSuggestionsEnabled);
         languageCombo_.SelectedIndex(LanguageIndex(settings_.languageId));
         refreshing_ = false;
-        RefreshShortcutList();
-        RefreshLatexCommandList();
+        if (shortcutsPage_) RefreshShortcutList();
+        if (latexPage_) RefreshLatexCommandList();
         RefreshThemeList();
         SetGeneralStatus({});
         if (completionPage_ && navigation_.Content() == completionPage_) {
@@ -131,6 +133,8 @@ namespace winrt::Folia
     {
         if (backRequested_.value) { navigation_.BackRequested(backRequested_); backRequested_ = {}; }
         detached_ = true;
+        shortcutRows_.revoke();
+        latexRows_.revoke();
         applySettings_ = {};
         owner_ = nullptr;
     }

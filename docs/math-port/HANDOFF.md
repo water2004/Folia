@@ -2,7 +2,15 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-11-04，设置样式统一已完成）
+## 当前 checkpoint（2026-11-04，设置列表卡顿修复已完成）
+
+- 用户报告快捷键/LaTeX设置页卡顿。根因：StackPanel+外层ScrollViewer一次创建全部56/266行，Build/Navigate/Reset反复销毁重建；旧Debug同尺寸切页快捷键185–192ms、LaTeX123–127ms，后者1342个TextBlock。未涉及编辑器/CST/数学渲染/AI策略；版本仍0.5.5，未MSI/安装/推送/发布。
+- 现两页惰性构建，有限高度原生ListView独占滚动，ItemsStackPanel CacheLength=0.5，ContainerContentChanging只生成视口附近行，回收时清模板ContentPresenter；数据不变保留source/控件。快捷键按Bindings比较，LaTeX目录/usage变更Revision失效。去掉全行Button强持有，录入仅弱引用当前Button；离页/回收取消录入，冲突/保存失败恢复模型值。
+- 最终Debug build/settings-lists-verified-build.log成功；真实WinUI设置全套5项149断言build/settings-lists-final-tests.log全过（生命周期、回收/不变复用、usage失效、scope冲突/持久化失败回滚、录入取消、导航/全7页样式）。最终截图增量2项50断言build/settings-lists-layout-final.log全过；PNG build/tests/settings-lists/{shortcuts,latex}-{1120,720}.png已目视检查。相同物理窗口最终首入约57/13ms，重入约6/5ms，初始仅8/4行；测量build/settings-lists-timing.log，旧值另存settings-lists-timing-before.log，数值有运行波动，不做机器相关耗时断言。
+- 测试必须等真实行Loaded且已布局，不能只数模板容器；不能设置ItemContainer.Content替代数据（会出现有容器无行），须用共享DataTemplate的ContentPresenter。WinUI允许保留焦点/anchor项，只验其余回收释放和总量有界。PNG需原生动画完成及不透明根背景，勿据RTB过渡灰块修改产品。
+- 停止点：本批实现/测试/交接同批本地提交（见HEAD）；无运行agents/build/test。不开agents/CUA、不自动鼠标/不关用户窗口，native串行≤4。后续按用户实际反馈或明确MSI请求继续；当前系统安装版尚未替换，不跟进旧流水线。先前样式8aabdf9c、导航df7c3c87、AI4a27c813基线见下文。
+
+## 设置样式统一（8aabdf9c，历史）
 
 - 用户要求统一设置页，尤其移除AI页整张表单大框。现删除Card包装，AI改无外框启用说明/服务/凭据/操作区；全部7页统一标题/说明、分节间距、输入/主按钮/状态与滚动规则。版本仍0.5.5，无MSI/推送/发布，不动设置schema、编辑器、CST和AI请求策略。
 - 共享WinUI主题字典theme/Settings.xaml由App.xaml合并，绑定现有FoliaShell*/FoliaUi*主题颜色/字体，构造前使用Native资源别名；各页去掉硬编码灰/蓝/红brush。许可证列表继续虚拟化；主题预览窄窗口上下排列。SettingsViewSupport仅消费字典并生成语义控件。

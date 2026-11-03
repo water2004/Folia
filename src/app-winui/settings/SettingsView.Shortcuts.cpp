@@ -70,14 +70,26 @@ namespace winrt::Folia
         appendHeader(Localize(L"ShortcutOperations"), 3);
         page.Children().Append(tableHeader);
 
-        shortcutList_.Spacing(0);
-        page.Children().Append(shortcutList_);
-
-        shortcutStatus_.TextWrapping(TextWrapping::Wrap);
-        page.Children().Append(shortcutStatus_);
-        RefreshShortcutList();
-
-        return settings_ui::PageScroll(page);
+        shortcutRows_ = shortcutList_.ContainerContentChanging(winrt::auto_revoke,
+            [this](auto const&, ContainerContentChangingEventArgs const& args)
+            {
+                auto container = args.ItemContainer();
+                auto presenter = container.ContentTemplateRoot().as<ContentPresenter>();
+                if (args.InRecycleQueue())
+                {
+                    // A capture belongs to a realized control, never to a new
+                    // item which later occupies its recycled container.
+                    if (capturingShortcut_ && container.Tag()
+                        && *capturingShortcut_ == unbox_value<std::uint32_t>(container.Tag()))
+                        CancelShortcutCapture();
+                    presenter.Content(nullptr);
+                    return;
+                }
+                container.Tag(box_value(static_cast<std::uint32_t>(args.ItemIndex())));
+                presenter.Content(BuildShortcutRow(static_cast<std::size_t>(args.ItemIndex())));
+                args.Handled(true);
+            });
+        return settings_ui::ListPage(page, shortcutList_, shortcutStatus_);
     }
 
     void SettingsView::SetShortcutStatus(hstring const& message, bool error)
@@ -87,133 +99,151 @@ namespace winrt::Folia
 
     void SettingsView::RefreshShortcutList()
     {
-        refreshing_ = true;
-        struct ResetRefreshing { bool& value; ~ResetRefreshing() { value = false; } } reset{refreshing_};
-        capturingShortcut_.reset();
-        shortcutButtons_.clear();
-        shortcutList_.Children().Clear();
         auto const& bindings = shortcutModel_.Bindings();
-        shortcutButtons_.reserve(bindings.size());
-
-        for (std::size_t index = 0; index < bindings.size(); ++index)
-        {
-            auto const& binding = bindings[index];
-            Grid row;
-            row.Padding(Thickness{4, 4, 4, 4});
-            row.ColumnSpacing(12);
-            for (auto width : {2.0, 1.0, 1.2})
-            {
-                ColumnDefinition column;
-                column.Width(GridLengthHelper::FromValueAndType(width, GridUnitType::Star));
-                row.ColumnDefinitions().Append(column);
-            }
-            ColumnDefinition operationsColumn;
-            operationsColumn.Width(GridLengthHelper::Auto());
-            row.ColumnDefinitions().Append(operationsColumn);
-
-            auto action = Text(ShortcutActionLabel(binding));
-            action.VerticalAlignment(VerticalAlignment::Center);
-            row.Children().Append(action);
-
-            ComboBox scope;
-            scope.Items().Append(box_value(Localize(L"ShortcutScopeGlobal")));
-            scope.Items().Append(box_value(Localize(L"ShortcutScopeCode")));
-            scope.Items().Append(box_value(Localize(L"ShortcutScopeMath")));
-            scope.SelectedIndex(ShortcutScopeIndex(binding.scope));
-            scope.SelectionChanged([this, index](auto const& sender, auto const&)
-            {
-                if (!refreshing_) ChangeShortcutScope(index, sender.template as<ComboBox>().SelectedIndex());
-            });
-            Grid::SetColumn(scope, 1);
-            row.Children().Append(scope);
-
-            Button capture;
-            capture.HorizontalAlignment(HorizontalAlignment::Stretch);
-            capture.HorizontalContentAlignment(HorizontalAlignment::Center);
-            capture.Content(box_value(ShortcutGestureLabel(binding.gesture)));
-            capture.Click([this, index](auto const&, auto const&) { BeginShortcutCapture(index); });
-            capture.KeyDown([this, index](
-                auto const&, Input::KeyRoutedEventArgs const& args)
-            {
-                CaptureShortcut(index, args);
-            });
-            Grid::SetColumn(capture, 2);
-            row.Children().Append(capture);
-            shortcutButtons_.push_back(capture);
-
-            Button more;
-            FontIcon moreIcon;
-            moreIcon.Glyph(L"\xE712");
-            more.Content(moreIcon);
-            more.Padding(Thickness{8, 4, 8, 4});
-            more.HorizontalAlignment(HorizontalAlignment::Right);
-            more.VerticalAlignment(VerticalAlignment::Center);
-            ToolTipService::SetToolTip(more, box_value(Localize(L"MoreActions")));
-            MenuFlyout menu;
-            MenuFlyoutItem clear;
-            clear.Text(Localize(L"Clear"));
-            clear.Click([this, index](auto const&, auto const&) { ClearShortcut(index); });
-            menu.Items().Append(clear);
-            if (binding.action_kind
-                == folia::platform::editor::EditorShortcutActionKind::InsertSnippet)
-            {
-                MenuFlyoutItem edit;
-                edit.Text(Localize(L"Edit"));
-                edit.Click([this, index](auto const&, auto const&)
-                {
-                    ShowSnippetEditorAsync(index);
-                });
-                menu.Items().Append(edit);
-                MenuFlyoutItem remove;
-                remove.Text(Localize(L"Remove"));
-                remove.Click([this, index](auto const&, auto const&) { RemoveSnippet(index); });
-                menu.Items().Append(remove);
-            }
-            else
-            {
-                MenuFlyoutItem resetDefault;
-                resetDefault.Text(Localize(L"ResetDefault"));
-                resetDefault.Click([this, index](auto const&, auto const&) { ResetShortcut(index); });
-                menu.Items().Append(resetDefault);
-            }
-            more.Flyout(menu);
-            Grid::SetColumn(more, 3);
-            row.Children().Append(more);
-
-            Border separator;
-            separator.Style(settings_ui::ResourceStyle(L"SettingsListSeparatorStyle"));
-            separator.Child(row);
-            shortcutList_.Children().Append(separator);
-        }
+        if (shortcutList_.ItemsSource() && displayedShortcuts_ == bindings) return;
+        capturingShortcut_.reset();
+        captureButton_ = {};
+        displayedShortcuts_ = bindings;
+        std::vector<Windows::Foundation::IInspectable> items;
+        items.reserve(bindings.size());
+        for (std::uint32_t index = 0; index < bindings.size(); ++index) items.push_back(box_value(index));
+        shortcutList_.ItemsSource(winrt::single_threaded_observable_vector<Windows::Foundation::IInspectable>(std::move(items)));
     }
 
-    void SettingsView::BeginShortcutCapture(std::size_t index)
+    FrameworkElement SettingsView::BuildShortcutRow(std::size_t index)
+    {
+        if (index >= shortcutModel_.Bindings().size()) return nullptr;
+        auto const& binding = shortcutModel_.Bindings()[index];
+        Grid row;
+        row.Padding(Thickness{4, 4, 4, 4});
+        row.ColumnSpacing(12);
+        for (auto width : {2.0, 1.0, 1.2})
+        {
+            ColumnDefinition column;
+            column.Width(GridLengthHelper::FromValueAndType(width, GridUnitType::Star));
+            row.ColumnDefinitions().Append(column);
+        }
+        ColumnDefinition operationsColumn;
+        operationsColumn.Width(GridLengthHelper::Auto());
+        row.ColumnDefinitions().Append(operationsColumn);
+
+        auto action = Text(ShortcutActionLabel(binding));
+        action.VerticalAlignment(VerticalAlignment::Center);
+        row.Children().Append(action);
+
+        ComboBox scope;
+        scope.Items().Append(box_value(Localize(L"ShortcutScopeGlobal")));
+        scope.Items().Append(box_value(Localize(L"ShortcutScopeCode")));
+        scope.Items().Append(box_value(Localize(L"ShortcutScopeMath")));
+        scope.SelectedIndex(ShortcutScopeIndex(binding.scope));
+        scope.SelectionChanged([this, index](auto const& sender, auto const&)
+        {
+            if (refreshing_ || detached_) return;
+            auto combo = sender.template as<ComboBox>();
+            ChangeShortcutScope(index, combo.SelectedIndex());
+            // Conflicts or failed persistence restore the model. Reflect that
+            // value even when no data changed and the list was not rebuilt.
+            auto previous = std::exchange(refreshing_, true);
+            if (index < shortcutModel_.Bindings().size())
+                combo.SelectedIndex(ShortcutScopeIndex(shortcutModel_.Bindings()[index].scope));
+            refreshing_ = previous;
+        });
+        Grid::SetColumn(scope, 1);
+        row.Children().Append(scope);
+
+        Button capture;
+        capture.HorizontalAlignment(HorizontalAlignment::Stretch);
+        capture.HorizontalContentAlignment(HorizontalAlignment::Center);
+        capture.Content(box_value(ShortcutGestureLabel(binding.gesture)));
+        capture.Click([this, index](auto const& sender, auto const&) { BeginShortcutCapture(index, sender.template as<Button>()); });
+        capture.KeyDown([this, index](
+            auto const& sender, Input::KeyRoutedEventArgs const& args)
+        {
+            CaptureShortcut(index, sender.template as<Button>(), args);
+        });
+        Grid::SetColumn(capture, 2);
+        row.Children().Append(capture);
+
+        Button more;
+        FontIcon moreIcon;
+        moreIcon.Glyph(L"\xE712");
+        more.Content(moreIcon);
+        more.Padding(Thickness{8, 4, 8, 4});
+        more.HorizontalAlignment(HorizontalAlignment::Right);
+        more.VerticalAlignment(VerticalAlignment::Center);
+        ToolTipService::SetToolTip(more, box_value(Localize(L"MoreActions")));
+        MenuFlyout menu;
+        MenuFlyoutItem clear;
+        clear.Text(Localize(L"Clear"));
+        clear.Click([this, index](auto const&, auto const&) { ClearShortcut(index); });
+        menu.Items().Append(clear);
+        if (binding.action_kind
+            == folia::platform::editor::EditorShortcutActionKind::InsertSnippet)
+        {
+            MenuFlyoutItem edit;
+            edit.Text(Localize(L"Edit"));
+            edit.Click([this, index](auto const&, auto const&)
+            {
+                ShowSnippetEditorAsync(index);
+            });
+            menu.Items().Append(edit);
+            MenuFlyoutItem remove;
+            remove.Text(Localize(L"Remove"));
+            remove.Click([this, index](auto const&, auto const&) { RemoveSnippet(index); });
+            menu.Items().Append(remove);
+        }
+        else
+        {
+            MenuFlyoutItem resetDefault;
+            resetDefault.Text(Localize(L"ResetDefault"));
+            resetDefault.Click([this, index](auto const&, auto const&) { ResetShortcut(index); });
+            menu.Items().Append(resetDefault);
+        }
+        more.Flyout(menu);
+        Grid::SetColumn(more, 3);
+        row.Children().Append(more);
+
+        Border separator;
+        separator.Style(settings_ui::ResourceStyle(L"SettingsListSeparatorStyle"));
+        separator.Child(row);
+        return separator;
+    }
+
+    void SettingsView::CancelShortcutCapture()
+    {
+        if (capturingShortcut_) SetShortcutStatus({});
+        if (capturingShortcut_ && *capturingShortcut_ < shortcutModel_.Bindings().size())
+            if (auto button = captureButton_.get()) button.Content(box_value(
+                ShortcutGestureLabel(shortcutModel_.Bindings()[*capturingShortcut_].gesture)));
+        capturingShortcut_.reset();
+        captureButton_ = {};
+    }
+
+    void SettingsView::BeginShortcutCapture(std::size_t index, Button const& button)
     {
         auto const& bindings = shortcutModel_.Bindings();
-        if (index >= shortcutButtons_.size() || index >= bindings.size()) return;
-        if (capturingShortcut_ && *capturingShortcut_ < shortcutButtons_.size())
-            shortcutButtons_[*capturingShortcut_].Content(box_value(
-                ShortcutGestureLabel(bindings[*capturingShortcut_].gesture)));
+        if (index >= bindings.size()) return;
+        if (detached_) return;
+        CancelShortcutCapture();
         capturingShortcut_ = index;
-        shortcutButtons_[index].Content(box_value(Localize(L"PressShortcut")));
-        shortcutButtons_[index].Focus(FocusState::Programmatic);
+        captureButton_ = winrt::make_weak(button);
+        button.Content(box_value(Localize(L"PressShortcut")));
+        button.Focus(FocusState::Programmatic);
         SetShortcutStatus(Localize(L"ShortcutCaptureHint"));
     }
 
     void SettingsView::CaptureShortcut(
         std::size_t index,
+        Button const& button,
         Input::KeyRoutedEventArgs const& args)
     {
         auto const& bindings = shortcutModel_.Bindings();
-        if (!capturingShortcut_ || *capturingShortcut_ != index || index >= bindings.size())
+        if (detached_ || !capturingShortcut_ || *capturingShortcut_ != index || index >= bindings.size())
             return;
         auto captured = settings_ui::CaptureShortcutGesture(args);
         if (captured.disposition == ShortcutCaptureDisposition::Cancel)
         {
-            capturingShortcut_.reset();
-            shortcutButtons_[index].Content(box_value(
-                ShortcutGestureLabel(bindings[index].gesture)));
-            SetShortcutStatus({});
+            CancelShortcutCapture();
             args.Handled(true);
             return;
         }
@@ -227,6 +257,7 @@ namespace winrt::Folia
         {
             capturingShortcut_.reset();
             if (ApplyShortcutSettings()) RefreshShortcutList();
+            button.Content(box_value(ShortcutGestureLabel(shortcutModel_.Bindings()[index].gesture)));
         }
         args.Handled(true);
     }

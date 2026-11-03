@@ -53,9 +53,12 @@ namespace winrt::Folia
         void SetShortcutStatus(winrt::hstring const& message, bool error = false);
         void SetLatexStatus(winrt::hstring const& message, bool error = false);
         void RefreshShortcutList();
-        void BeginShortcutCapture(std::size_t index);
+        void CancelShortcutCapture();
+        winrt::Microsoft::UI::Xaml::FrameworkElement BuildShortcutRow(std::size_t index);
+        void BeginShortcutCapture(std::size_t index, winrt::Microsoft::UI::Xaml::Controls::Button const& button);
         void CaptureShortcut(
             std::size_t index,
+            winrt::Microsoft::UI::Xaml::Controls::Button const& button,
             winrt::Microsoft::UI::Xaml::Input::KeyRoutedEventArgs const& args);
         void ClearShortcut(std::size_t index);
         void ResetShortcut(std::size_t index);
@@ -102,11 +105,15 @@ namespace winrt::Folia
         winrt::Microsoft::UI::Xaml::Controls::Button removeThemeButton_;
         winrt::Microsoft::UI::Xaml::Controls::TextBlock generalStatus_;
         winrt::Microsoft::UI::Xaml::Controls::TextBlock themeStatus_;
-        winrt::Microsoft::UI::Xaml::Controls::StackPanel shortcutList_;
+        winrt::Microsoft::UI::Xaml::Controls::ListView shortcutList_;
         winrt::Microsoft::UI::Xaml::Controls::TextBlock shortcutStatus_;
-        winrt::Microsoft::UI::Xaml::Controls::StackPanel latexCommandList_;
+        winrt::Microsoft::UI::Xaml::Controls::ListView latexCommandList_;
         winrt::Microsoft::UI::Xaml::Controls::TextBlock latexStatus_;
-        std::vector<winrt::Microsoft::UI::Xaml::Controls::Button> shortcutButtons_;
+        winrt::Microsoft::UI::Xaml::Controls::ListViewBase::ContainerContentChanging_revoker shortcutRows_;
+        winrt::Microsoft::UI::Xaml::Controls::ListViewBase::ContainerContentChanging_revoker latexRows_;
+        std::vector<folia::platform::editor::EditorShortcutBinding> displayedShortcuts_;
+        std::optional<std::uint64_t> displayedLatexRevision_;
+        winrt::weak_ref<winrt::Microsoft::UI::Xaml::Controls::Button> captureButton_;
         folia::platform::editor::ShortcutSettingsModel shortcutModel_;
         std::vector<std::string> themeIds_;
         std::int32_t loadedLicenseIndex_ = -1;

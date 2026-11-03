@@ -93,6 +93,38 @@ namespace winrt::Folia::settings_ui
         return scroll;
     }
 
+    // The list owns scrolling and receives a finite viewport. Wrapping it in a
+    // StackPanel/ScrollViewer would measure every row and defeat virtualization.
+    inline Xaml::UIElement ListPage(Controls::StackPanel const& header,
+        Controls::ListView const& list, Controls::TextBlock const& status)
+    {
+        header.Style(ResourceStyle(L"SettingsListHeaderStyle"));
+        list.Header(header);
+        list.ItemTemplate(Xaml::Application::Current().Resources().Lookup(
+            winrt::box_value(L"SettingsListRowTemplate")).as<Xaml::DataTemplate>());
+        list.ItemsPanel(Xaml::Application::Current().Resources().Lookup(
+            winrt::box_value(L"SettingsListItemsPanel")).as<Controls::ItemsPanelTemplate>());
+        list.ItemContainerStyle(ResourceStyle(L"SettingsListRowStyle"));
+        list.SelectionMode(Controls::ListViewSelectionMode::None);
+        list.IsItemClickEnabled(false);
+        Controls::ScrollViewer::SetHorizontalScrollMode(list, Controls::ScrollMode::Disabled);
+        Controls::ScrollViewer::SetHorizontalScrollBarVisibility(list, Controls::ScrollBarVisibility::Disabled);
+        Controls::ScrollViewer::SetVerticalScrollBarVisibility(list, Controls::ScrollBarVisibility::Auto);
+        Xaml::Controls::Grid page;
+        page.Style(ResourceStyle(L"SettingsGridPageStyle"));
+        Xaml::Controls::RowDefinition content;
+        content.Height(Xaml::GridLengthHelper::FromValueAndType(1, Xaml::GridUnitType::Star));
+        page.RowDefinitions().Append(content);
+        Xaml::Controls::RowDefinition footer;
+        footer.Height(Xaml::GridLengthHelper::Auto());
+        page.RowDefinitions().Append(footer);
+        page.Children().Append(list);
+        Xaml::Controls::Grid::SetRow(status, 1);
+        status.TextWrapping(Xaml::TextWrapping::Wrap);
+        page.Children().Append(status);
+        return page;
+    }
+
     inline void SetStatus(Controls::TextBlock const& text, winrt::hstring const& message, bool error)
     {
         text.Style(ResourceStyle(L"SettingsHintTextStyle"));
