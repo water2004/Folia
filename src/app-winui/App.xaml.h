@@ -19,9 +19,11 @@ namespace winrt::Folia::implementation
     private:
         winrt::fire_and_forget LaunchAsync();
         void OpenWorkspaceWindows(winrt::Folia::WorkspaceLaunchRequest const& request);
+        void OnWindowClosed(Microsoft::UI::WindowId id);
         Microsoft::Windows::AppLifecycle::AppInstance activationInstance{nullptr};
         Microsoft::Windows::AppLifecycle::AppInstance::Activated_revoker activationSubscription;
         struct WindowEntry { Microsoft::UI::WindowId id; Microsoft::UI::Xaml::Window window; };
         std::vector<WindowEntry> windows;
+        bool closingPreparedWindows = false;
     };
 }

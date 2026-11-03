@@ -164,6 +164,7 @@ namespace winrt::Folia::implementation
         std::shared_ptr<DocumentTab> draggingTab;
         winrt::Folia::detail::TabDragCompletionSubscription tabDragEnded;
         bool preparedTabWindow = false;
+        winrt::weak_ref<MainWindow> preparedTabOwner;
         winrt::Folia::detail::PreparedTabActivation preparedTabActivation;
         LONG_PTR tabWindowStyle = 0;
         std::optional<std::uint64_t> transferPlaceholder;

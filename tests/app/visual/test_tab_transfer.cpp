@@ -113,6 +113,46 @@ namespace {
         return nullptr;
     }
     suite tab_transfer_tests = [] {
+        "closing a source window releases its unused tab preparation windows"_test = [] {
+            OwnedWindow source(App()->CreateMainWindow());
+            OwnedWindow other(App()->CreateMainWindow());
+            auto otherPrepared = Access::TearOutWindow(other.window);
+            std::vector<Window> prepared;
+            std::vector<winrt::Microsoft::UI::WindowId> ids;
+            for (int i = 0; i < 3; ++i) {
+                auto window = Access::TearOutWindow(source.window);
+                ids.push_back(window.AppWindow().Id());
+                prepared.push_back(window);
+            }
+            Access::RequestNativeClose(source.window);
+            Pump([&] { return Access::Closed(source.window); });
+            for (std::size_t i = 0; i < prepared.size(); ++i) {
+                expect(Access::Closed(prepared[i])) << "unused hidden window must close with its owner";
+                expect(App()->FindMainWindow(ids[i]) == nullptr);
+                if (!Access::Closed(prepared[i])) Access::Close(prepared[i]);
+            }
+            expect(!Access::Closed(other.window));
+            expect(!Access::Closed(otherPrepared)) << "another source still owns its prepared window";
+            Access::Close(other.window);
+            expect(Access::Closed(otherPrepared));
+            if (!Access::Closed(otherPrepared)) Access::Close(otherPrepared);
+        };
+        "a revealed tab window survives closing its original source"_test = [] {
+            OwnedWindow source(App()->CreateMainWindow());
+            auto document = Access::Documents(source.window).Active();
+            Access::Edit(source.window, U"detached document");
+            Access::New(source.window);
+            auto receiving = Access::TearOutWindow(source.window);
+            expect(Access::Transfer(source.window, document->id, receiving, 0));
+            OwnedWindow target(receiving);
+            auto id = target.window.AppWindow().Id();
+            Access::RequestNativeClose(source.window);
+            Pump([&] { return Access::Closed(source.window); });
+            expect(!Access::Closed(target.window));
+            expect(App()->FindMainWindow(id) != nullptr);
+            expect(Access::Documents(target.window).Active() == document);
+            expect(document->session.TextUtf8() == "detached document");
+        };
         "tab activation coalesces intermediate drawing until the shell frame"_test = [] {
             OwnedWindow source(App()->CreateMainWindow());
             Access::Edit(source.window, U"first");

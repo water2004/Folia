@@ -93,6 +93,7 @@ namespace winrt::Folia::implementation {
         auto target = winrt::get_self<MainWindow>(window.as<winrt::Folia::MainWindow>());
         target->transferPlaceholder = target->workspaceDocuments.Active()->id;
         target->preparedTabWindow = true;
+        target->preparedTabOwner = get_weak();
         target->preparedTabActivation.Attach(target->WindowHandle());
         target->tabWindowStyle = ::GetWindowLongPtrW(target->WindowHandle(), GWL_EXSTYLE);
         ::SetWindowLongPtrW(target->WindowHandle(), GWL_EXSTYLE,
@@ -110,6 +111,7 @@ namespace winrt::Folia::implementation {
         BOOL hidden = FALSE;
         winrt::check_hresult(::DwmSetWindowAttribute(WindowHandle(), DWMWA_CLOAK, &hidden, sizeof(hidden)));
         preparedTabWindow = false;
+        preparedTabOwner = {};
     }
     std::shared_ptr<MainWindow::DocumentTab> MainWindow::FindTransferTab(Windows::Foundation::IInspectable const& item) {
         auto id = winrt::unbox_value<std::uint64_t>(item);
