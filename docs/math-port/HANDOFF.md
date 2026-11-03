@@ -4,6 +4,7 @@
 
 ## 当前 checkpoint（2026-11-04，窗口退出与Base URL已完成）
 
+- 后续用户报告Debug不补全、状态提示无效补全设置；用户重启后已自行恢复。读取当前Debug/Assets/settings.json（不输出密钥）enabled/baseUrl/model/protocol有效，凭据存在；复用生产obj作一次性native诊断，LoadAppSettings/Validate均通过，以固定短句实际RequestCompletionHttp返回6字符/1124ms（build/completion-config-diagnostic.log），未读取文档。Debug无需MSI。未复现重启前状态，不能宣称已定位该次根因；不加兼容或猜测性改动。临时诊断源码/脚本/exe/obj/pdb删除被自动审批拒绝（仅blocked by policy），留ignored build目录，未重试绕过；日志保留。下步仅按用户再次复现的新证据跟进。
 - 用户要求AI配置只填Base URL，且明确**不要旧配置处理**。已将CompletionConfig/JSON/UI改baseUrl，ResolveCompletionEndpoint统一补协议suffix，裸host默认/v1，保留自定义路径/query、去末尾斜杠；未加完整端点模式/迁移。参考本地Fairy ResolveModelEndpoint的base规则，无Fairy依赖。正式test_completion_http覆盖三协议路径/loopback，全部通过，无真实模型请求。
 - 用户指出窗口已关却仍占文件。进程12368为标准Debug，非侵入cdb证据build/folia-closed-process-stacks.log：主线程GetMessage等待、多个FrameScheduler线程；实际枚举9个不可见DWMCLOAK_APP=1的WinUIDesktopWin32WindowClass，为拖出预备窗口残留。已对其发正常WM_CLOSE并确认退出，未强杀。首轮Base构建因exe占用失败；释放后completion-base-url-build-retry.log成功。
 - 已建立prepared window到source的弱所有权关系；源窗口Closed清理未使用host，Reveal清除归属，其他正常/已拉出窗口保留；App注册表清空后撤销激活注册并Exit。原测试before日志稳定6断言失败（3个hidden host未关）；修复后build/window-lifecycle-tests.log真实WinUI窗口/页签26项949断言全过，含跨owner隔离及已拉出文档保留。build/window-lifecycle-build.log标准Debug成功；window-lifecycle-startup.log正式程序2轮正常退出code0，window-lifecycle-activation.log多窗口/独立实例/激活/正常退出全过。
