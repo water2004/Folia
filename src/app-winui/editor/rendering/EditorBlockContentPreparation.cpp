@@ -52,7 +52,7 @@ namespace winrt::Folia
             U"\u200B\n",
             {block.id, contentStart, folia::TextAffinity::Downstream},
             folia::InlineStyle::plain(),
-            EditorDisplayPositionKind::Generated);
+            EditorDisplayPositionKind::BoundaryDecoration);
         const auto codeDisplayStart = static_cast<std::uint32_t>(
             folia::utf16_len(display.text));
         // An indented code block has no user-visible delimiter. Its leading
@@ -96,7 +96,7 @@ namespace winrt::Folia
         const auto endpoint = special.content_to_source.empty()
             ? code.size()
             : special.content_to_source[(std::min)(code.size(), special.content_to_source.size() - 1)];
-        if (display.text.empty())
+        if (code.empty())
         {
             AppendGeneratedText(
                 display,

@@ -60,24 +60,14 @@ inline std::optional<TextPosition> record_source_insert(
     EditorDocument& document,
     NodeId owner_id,
     std::size_t offset,
-    std::u32string source,
+    std::u32string_view source,
     document_edit_detail::NodeAllocator& allocator,
     std::vector<DocumentOperation>& operations) {
-    auto* block = find_block(document.root, owner_id);
-    if (!block) return std::nullopt;
-    const auto length = document_edit_detail::local_position_length(*block);
-    if (!length) return std::nullopt;
-    offset = (std::min)(offset, *length);
-    auto edit = document_edit_detail::edit_block_source(
-        document,
-        owner_id,
-        {offset, offset},
-        std::move(source),
-        allocator);
-    if (!edit) return std::nullopt;
-    const auto inserted = edit->forward.replacement.size();
-    document_edit_detail::append_source_operation(operations, std::move(*edit));
-    return TextPosition{owner_id, offset + inserted, TextAffinity::Downstream};
+    auto inserted = document_edit_detail::insert_text(
+        document, {owner_id, offset, TextAffinity::Downstream}, source, allocator);
+    if (!inserted || !inserted->source_edit) return std::nullopt;
+    document_edit_detail::append_source_operation(operations, std::move(*inserted->source_edit));
+    return TextPosition{owner_id, inserted->offset, inserted->affinity};
 }
 
 inline NodeId last_sewable_owner(const BlockNode& block) {

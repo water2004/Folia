@@ -2,7 +2,17 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-11-04，窗口退出与Base URL已完成）
+## 当前 checkpoint（2026-11-04，完善AI补全后发布0.6.0）
+
+- 用户已授权**验证后推送并沿既有CI/CD发布0.6.0**；还未改版本/推送/tag。仍不agents/CUA/自动鼠标，native尽量串行≤4；可正常关闭Folia用于构建，保留未保存提示。git fetch已完成，origin/master到HEAD有11个本地AI/设置/页签提交待一并推送；工作树本轮起始干净。
+- 围栏补全光标最终实现：通用insert_text根据FencedCode CST complete_opening补正文物理换行，paste复用同一路径并借用string_view；空代码正文有Source锚点；header归现有BoundaryDecoration，AddBlockLines排除纯装饰行（含terminal Source边界以保留真正空正文）。**已撤销实验Chrome/MarkerRole::Control等新类型，无引用/列表特判**。普通/closed/tilde/quote/list双affinity测试build/completion-fence-decoration-tests.log42断言全过，临时friend/dump已移除。core completion-decoration-core-tests.log765项500165断言及platform completion-decoration-platform-tests.log85项4256全过；portable completion-portable-tests.log13项74通过。待分出核心修复本地提交（仍未提交）。test_inline_presentation_paths/最终startup还需跑。
+- 新配置已实现默认7 KB（1000bytes/KB）/128 output tokens，范围1–64 KB/16–4096；三档prompt主动程度独立于reasoning effort；状态Requesting native ring/Ready/Empty/BudgetExhausted/Failed，取消/离开取消，generation拒绝旧结果，限额空不缓存。**用户明确额度用尽只保留短提示，不加说明**。之前Controller/HTTP/layout23项1263断言、WinUI33项1226断言、真实几何通过；截图build/tests/settings-styles/{light-1120,dark-720}.png已目视。旧NumberBox Style键不存在导致AI页崩溃已修好；现在用户滚轮误触要求进一步改普通TextBox整数输入，已替换并删NumberBoxStyle，Save from_chars校验。
+- 最新要求推理选项**点击获取读上游、不预设**已写未验证：ResolveCompletionModelsEndpoint；CompletionHttpTransport ReadHttp复用异步WinHTTP GET/POST，ParseCompletionReasoningEfforts按data[].id匹配读取effort.supported_levels，缺字段为空/缺model报错，保序去重/有界；UI仅服务默认+已保存值，Fetch后台有界可取消GET，不发生成请求测试档位，模型/URL/协议变化及Unloaded取消，弱UI/generation忽略旧结果。按现有vendor协议校验过滤不支持参数值，不猜型号。官方schema https://api-docs.deepseek.com/api/list-models/（none不在thinking levels中）；无Fairy依赖。原CompletionReasoningEfforts预设函数已删除。
+- 滚轮方案已写并Debug编译成功：SettingsViewSupport.h内SDK原生composable ComboBoxT的ChoiceBox覆盖OnPointerWheelChanged，关闭不委托base/让ScrollViewer处理，展开base；全设置页选项用Choice()。**无需IDL/新控件模板**。预算普通TextBox；无事后复原值补丁。构建build/completion-model-metadata-build-retry.log成功；此前错误SetStatus缺bool已修。meta GET目前只fixtures验证，不调用真实上游。HTTP测试Server已提取tests/app/support/CompletionHttpServer.h供UI/HTTP共享，UIfixture Key在保存前清空，绝不能写用户凭据。
+- **当前运行**：exec25363等旧已结束，唯一native测试**exec18777（build/completion-model-metadata-http-tests.log）**，SourceFilter test_completion_http / *completion*。新UI metadata save测试已改TextBox/真实loopback GET且初始不预设，尚未编译；需要补取消/metadata缺失测试、轮选择控件验证（不自动鼠标）、重跑全相关UI/排版/真实启动。必要时修ChoiceBox runtime行为。新的API/滚轮上线前不能发布。docs/inline-completion.md仍写协议预设说明需改；docs/SETTINGS.md明显过时有QuickJS/旧schema/旧返回逻辑，需更新本轮相关段。
+- 发布入口.github/workflows/release.yml：v*.*.* push，tagged commit必须在origin/master，release-notes/v0.6.0.md必需，CI构建self-contained MSI+checksum并publish。版本需同步CMakeLists.txt/build_msi.ps1/README.md/Package.appxmanifest/Folia.rc（数字和字符串）/SettingsView.Licenses.cpp About；rg已查到这些0.5.5入口。要监测流水线完成/发布资产再结束；GitHub插件无发布/tag能力，可用git/gh按仓库既有流程。旧候选/一次诊断文件清理被自动审批拒绝，留ignored build，不绕过。
+
+## 窗口退出与Base URL（已完成，历史）
 
 - 后续用户报告Debug不补全、状态提示无效补全设置；用户重启后已自行恢复。读取当前Debug/Assets/settings.json（不输出密钥）enabled/baseUrl/model/protocol有效，凭据存在；复用生产obj作一次性native诊断，LoadAppSettings/Validate均通过，以固定短句实际RequestCompletionHttp返回6字符/1124ms（build/completion-config-diagnostic.log），未读取文档。Debug无需MSI。未复现重启前状态，不能宣称已定位该次根因；不加兼容或猜测性改动。临时诊断源码/脚本/exe/obj/pdb删除被自动审批拒绝（仅blocked by policy），留ignored build目录，未重试绕过；日志保留。下步仅按用户再次复现的新证据跟进。
 - 用户要求AI配置只填Base URL，且明确**不要旧配置处理**。已将CompletionConfig/JSON/UI改baseUrl，ResolveCompletionEndpoint统一补协议suffix，裸host默认/v1，保留自定义路径/query、去末尾斜杠；未加完整端点模式/迁移。参考本地Fairy ResolveModelEndpoint的base规则，无Fairy依赖。正式test_completion_http覆盖三协议路径/loopback，全部通过，无真实模型请求。

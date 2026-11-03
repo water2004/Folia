@@ -88,6 +88,25 @@ namespace
 
 suite editor_interaction_tests = [] {
 
+"generated control rows do not become editable caret lines"_test = [] {
+    auto owner = NodeId{510};
+    EditorInteractionMap interaction;
+    interaction.blocks.push_back(EditorVisualBlock{
+        .rect = D2D1_RECT_F{0, 0, 400, 100}, .textOrigin = D2D1_POINT_2F{0, 0},
+        .textWidth = 400, .sourceSpan = {owner, {10, 10}}, .text = U"\u200B\n\u200B",
+        .displayToSource = {{owner, 10, TextAffinity::Downstream, EditorDisplayPositionKind::BoundaryDecoration},
+            {owner, 10, TextAffinity::Downstream, EditorDisplayPositionKind::BoundaryDecoration},
+            {owner, 10, TextAffinity::Downstream, EditorDisplayPositionKind::Source},
+            {owner, 10, TextAffinity::Downstream, EditorDisplayPositionKind::Source}},
+        .layout = MakeLayout(L"\u200B\n\u200B"),
+    });
+    interaction.AddBlockLines(0); expect(interaction.lines.size() == 1_u);
+    for (auto affinity : {TextAffinity::Upstream, TextAffinity::Downstream}) {
+        auto caret = interaction.CaretBounds({owner, 10, affinity}, 24);
+        expect(caret.has_value()); if (caret) expect(caret->top > 0.f);
+    }
+};
+
 "directwrite block geometry keeps source coordinates authoritative"_test = [] {
     constexpr auto length = std::size_t{10};
     const auto owner = NodeId{501};

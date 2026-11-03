@@ -19,6 +19,30 @@ namespace
 }
 
 suite code_language_tests = [] {
+    "empty code body caret stays below its generated language header"_test = [] {
+        using namespace winrt::Microsoft::UI::Xaml;
+        auto xaml = Hosting::WindowsXamlManager::InitializeForCurrentThread();
+        for (auto source : {L"```markdown", L"```markdown\n", L"```markdown\n```", L"~~~rust",
+            L"> ```markdown", L"- ```markdown"}) {
+            Controls::SwapChainPanel panel;
+            EditorSession session; session.SetText(source);
+            auto owner = session.Selection().active.container_id;
+            EditorSurfaceRenderer renderer; renderer.Initialize(panel); renderer.Resize(panel, 900, 600);
+            renderer.Render(session.RenderFrame());
+            auto raw = renderer.RawBlockFor(owner); expect(raw.has_value());
+            for (auto affinity : {folia::TextAffinity::Upstream, folia::TextAffinity::Downstream}) {
+                auto position = session.Selection().active; position.affinity = affinity;
+                auto caret = renderer.CaretBounds(position); expect(caret.has_value());
+                if (raw && caret) {
+                    expect(caret->top + .5f >= raw->headerRect.bottom) << winrt::to_string(std::wstring_view{source})
+                        << " affinity=" << static_cast<int>(affinity) << " caret top=" << caret->top << " header bottom=" << raw->headerRect.bottom;
+                    expect(caret->bottom <= raw->rect.bottom + .5f) << winrt::to_string(std::wstring_view{source})
+                        << " caret bottom=" << caret->bottom << " block bottom=" << raw->rect.bottom;
+                }
+            }
+        }
+        xaml.Close();
+    };
     "code_language_control_refresh_and_detach_never_commit_a_draft"_test = [] {
         using namespace winrt::Microsoft::UI::Xaml;
         using namespace winrt::Microsoft::UI::Xaml::Controls;

@@ -161,7 +161,16 @@ namespace folia::platform::editor
             line.displayEnd = visibleEnd;
             line.wrapContinuation = lineIndex > 0 && previousNewlineLength == 0;
             line.rect = D2D1::RectF(block.textOrigin.x, lineTop, block.textOrigin.x + block.textWidth, lineTop + metric.height);
-            lines.push_back(line);
+            auto first = (std::min)(static_cast<std::size_t>(textPosition), block.displayToSource.size());
+            auto end = (std::min)(static_cast<std::size_t>(visibleEnd) + 1, block.displayToSource.size());
+            // Generated prefixes, padding and control rows do not own source
+            // lines. Include the terminal boundary so empty source rows remain
+            // editable even when they have no visible glyphs.
+            auto decorationOnly = first < end && std::all_of(block.displayToSource.begin() + first,
+                block.displayToSource.begin() + end, [](auto const& point) {
+                    return point.kind == EditorDisplayPositionKind::BoundaryDecoration;
+                });
+            if (!decorationOnly) lines.push_back(line);
             textPosition = lineEnd;
             lineTop += metric.height;
             previousNewlineLength = metric.newlineLength;

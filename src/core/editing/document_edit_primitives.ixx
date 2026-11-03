@@ -295,6 +295,15 @@ inline std::optional<InsertResult> insert_text(
         ? block_source_clamp_editable_offset(block->block_source, position.source_offset)
         : (std::min)(position.source_offset, length);
     auto replacement = std::u32string(text);
+    std::size_t content_start = offset;
+    if (raw_source && block->block_source.tree().kind == BlockSourceKind::FencedCode
+        && !block->block_source.tree().complete_opening) {
+        // A fence parsed at EOF has an editable empty body but no physical
+        // separator yet. Materialize that boundary before inserting body text.
+        auto separator = block_source_line_ending(block->block_source);
+        content_start += separator.size();
+        replacement.insert(0, separator);
+    }
     if (raw_source
         && block->block_source.tree().complete_closing
         && block->block_source.tree().content.empty()) {
@@ -311,7 +320,7 @@ inline std::optional<InsertResult> insert_text(
         std::move(replacement),
         allocator);
     if (!applied) return std::nullopt;
-    return InsertResult{offset + text.size(), TextAffinity::Downstream, std::move(applied)};
+    return InsertResult{content_start + text.size(), TextAffinity::Downstream, std::move(applied)};
 }
 
 inline std::optional<std::size_t> editable_length(const EditorDocument& document, NodeId id) {

@@ -33,6 +33,34 @@ using namespace boost::ut;
 
 suite editor_paste_tests = [] {
 
+"empty_fenced_code_body_insertion_preserves_the_info_string_and_undo"_test = [] {
+    for (auto initial : {"```markdown", "```markdown\n", "```markdown\n```", "~~~rust"}) {
+        for (bool paste : {false, true}) {
+            Editor editor(initial);
+            auto const& code = editor.document().root.children.front();
+            auto id = code.id;
+            auto language = code.block_source.tree().language;
+            auto start = block_source_editable_range(code.block_source).start;
+            auto before = TextSelection::caret({id, start}); editor.set_selection(before);
+            reset_core_operation_counters();
+            auto changed = paste ? editor.execute_document_paste_text(before, U"x\U0001F642").has_value()
+                                 : editor.execute_document_insert_text(before, U"x\U0001F642").has_value();
+            expect(changed);
+            auto counts = read_core_operation_counters();
+            expect(counts.full_document_parses == 0_u && counts.full_document_serializations == 0_u);
+            auto const* edited = find_document_block(editor.document(), id);
+            expect(edited != nullptr); if (!edited) continue;
+            expect(edited->block_source.tree().language == language);
+            expect(block_source_content(edited->block_source) == U"x\U0001F642");
+            auto after = editor.selection();
+            expect(after.active.source_offset == block_source_editable_range(edited->block_source).end);
+            expect(editor.undo()); expect(editor.markdown_utf8() == initial); expect(editor.selection() == before);
+            expect(editor.redo()); expect(editor.selection() == after);
+            expect(validate_document(editor.document()).empty());
+        }
+    }
+};
+
 "paste_composes_recorded_source_operations_without_a_final_tree_diff"_test = [] {
     Editor editor("ab");
     const auto before_selection = caret(first_text(editor), 1);
