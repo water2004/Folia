@@ -102,6 +102,12 @@ namespace {
             f.host.Width(248);
             f.tree.SelectedNode(f.Find(L"正常.md"));
             f.root.UpdateLayout();
+            auto selected = f.tree.ContainerFromNode(f.tree.SelectedNode()).as<TreeViewItem>();
+            // TreeViewItem shares SelectorItem's native state names, unlike
+            // the theme brush keys (BackgroundSelectedPointerOver, etc.).
+            for (auto state : {L"Selected", L"PointerOverSelected", L"PressedSelected"})
+                expect(VisualStateManager::GoToState(selected, state, false)) << winrt::to_string(state);
+            VisualStateManager::GoToState(selected, L"Selected", false);
             Media::Imaging::RenderTargetBitmap bitmap;
             Await(bitmap.RenderAsync(f.host));
             auto pixels = Await(bitmap.GetPixelsAsync());

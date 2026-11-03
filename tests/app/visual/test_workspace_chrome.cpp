@@ -73,6 +73,42 @@ namespace {
     };
 
     suite workspace_chrome_tests = [] {
+        "workspace tab highlights cover native selected hover and pressed states immediately"_test = [] {
+            ChromeWindow f;
+            auto tabs = f.Find<TabView>(L"DocumentTabs");
+            auto firstItem = tabs.SelectedItem();
+            Invoke(Descendant(tabs, L"AddButton").as<Button>());
+            Pump([&] { return tabs.SelectedItem() != firstItem; });
+            auto secondItem = tabs.SelectedItem();
+            f.root.UpdateLayout();
+            auto first = tabs.ContainerFromItem(firstItem).as<TabViewItem>();
+            auto second = tabs.ContainerFromItem(secondItem).as<TabViewItem>();
+            for (auto item : {firstItem, secondItem, firstItem, secondItem}) {
+                tabs.SelectedItem(item);
+                auto selected = tabs.ContainerFromItem(item).as<TabViewItem>();
+                auto other = selected == first ? second : first;
+                expect(selected.IsSelected());
+                expect(!other.IsSelected());
+                expect(Descendant(selected, L"SelectionIndicator").Opacity() == 1.) << "native selection highlights synchronously";
+                expect(Descendant(other, L"SelectionIndicator").Opacity() == 0.) << "old highlight is removed synchronously";
+                // These are the exact CommonStates in the installed WinUI
+                // TabViewItem template. No input simulation, timer, layout or
+                // dispatcher turn may be needed to apply the indicator setter.
+                for (auto state : {L"Selected", L"PointerOverSelected", L"PressedSelected"}) {
+                    expect(VisualStateManager::GoToState(selected, state, false)) << winrt::to_string(state);
+                    expect(Descendant(selected, L"SelectionIndicator").Opacity() == 1.) << winrt::to_string(state);
+                }
+                for (auto state : {L"Normal", L"PointerOver", L"Pressed"}) {
+                    expect(VisualStateManager::GoToState(other, state, false));
+                    expect(Descendant(other, L"SelectionIndicator").Opacity() == 0.);
+                }
+            }
+            // Leave the fixture's original tab as the only document.
+            tabs.SelectedItem(secondItem);
+            Invoke(Descendant(second, L"CloseButton").as<Button>());
+            Pump([&] { return tabs.ContainerFromItem(secondItem) == nullptr; });
+            expect(tabs.SelectedItem() == firstItem);
+        };
         "workspace chrome renders the real window with one complete divider and one outline toggle"_test = [] { try {
             ChromeWindow f;
             auto tabs = f.Find<TabView>(L"DocumentTabs");

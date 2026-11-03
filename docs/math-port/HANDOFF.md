@@ -2,7 +2,13 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-11-04，设置列表卡顿修复已完成）
+## 当前 checkpoint（2026-11-04，页签选中高亮修复已完成）
+
+- 用户报告内容已切换、页签高亮后出现。已核对当前安装SDK Microsoft.WindowsAppSDK.WinUI.2.2.1的generic.xaml：TabViewItem原生CommonStates是PointerOverSelected/PressedSelected，WorkspaceChrome误写成SelectedPointerOver/SelectedPressed，悬停/按下选中无法匹配，后续状态变化才显示。FolderExplorer的TreeViewItem有同一错误，一并仅改状态名；brush key仍为BackgroundSelectedPointerOver/BackgroundSelectedPressed，不能跟着换名。未改文档激活/调度/拖动协议。
+- 修复前真实WinUI测试build/tab-highlight-before.log稳定8次状态匹配失败；修复后build/tab-highlight-final-tests.log页签/窗口迁移16项165断言、chrome7项762断言全过，包含重复原生选择、选中/旧选中indicator同步值，以及Selected/PointerOverSelected/PressedSelected与未选中状态的即时setters。文件树build/tab-highlight-tree-tests.log 6项98断言通过；合计29项1025断言。最终Debug build/tab-highlight-verified-build.log成功。未模拟鼠标；实际物理点击体验未另行人工复测。
+- 停止点：本批模板/测试/交接同批本地提交（见HEAD），工作结束无运行agents/build/test。版本仍0.5.5，未MSI/安装/推送/发布；系统安装版未替换。不开agents/CUA、不自动鼠标/不关用户窗口，native串行≤4。后续按用户反馈或明确打包要求继续，不跟进旧流水线；设置列表修复93b70db1见下方历史基线。
+
+## 设置列表卡顿修复（93b70db1，历史）
 
 - 用户报告快捷键/LaTeX设置页卡顿。根因：StackPanel+外层ScrollViewer一次创建全部56/266行，Build/Navigate/Reset反复销毁重建；旧Debug同尺寸切页快捷键185–192ms、LaTeX123–127ms，后者1342个TextBlock。未涉及编辑器/CST/数学渲染/AI策略；版本仍0.5.5，未MSI/安装/推送/发布。
 - 现两页惰性构建，有限高度原生ListView独占滚动，ItemsStackPanel CacheLength=0.5，ContainerContentChanging只生成视口附近行，回收时清模板ContentPresenter；数据不变保留source/控件。快捷键按Bindings比较，LaTeX目录/usage变更Revision失效。去掉全行Button强持有，录入仅弱引用当前Button；离页/回收取消录入，冲突/保存失败恢复模型值。

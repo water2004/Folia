@@ -48,10 +48,10 @@
                                             <VisualState x:Name="Selected"><VisualState.Setters>
                                                 <Setter Target="ContentPresenterGrid.Background" Value="{ThemeResource TreeViewItemBackgroundSelected}"/>
                                             </VisualState.Setters></VisualState>
-                                            <VisualState x:Name="SelectedPointerOver"><VisualState.Setters>
+                                            <VisualState x:Name="PointerOverSelected"><VisualState.Setters>
                                                 <Setter Target="ContentPresenterGrid.Background" Value="{ThemeResource TreeViewItemBackgroundSelectedPointerOver}"/>
                                             </VisualState.Setters></VisualState>
-                                            <VisualState x:Name="SelectedPressed"><VisualState.Setters>
+                                            <VisualState x:Name="PressedSelected"><VisualState.Setters>
                                                 <Setter Target="ContentPresenterGrid.Background" Value="{ThemeResource TreeViewItemBackgroundSelectedPressed}"/>
                                             </VisualState.Setters></VisualState>
                                             <VisualState x:Name="Disabled"><VisualState.Setters>

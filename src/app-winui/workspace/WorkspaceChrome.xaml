@@ -131,11 +131,13 @@
                                     <Setter Target="TabContainer.Background" Value="{ThemeResource SubtleFillColorSecondaryBrush}"/>
                                     <Setter Target="SelectionIndicator.Opacity" Value="1"/>
                                 </VisualState.Setters></VisualState>
-                                <VisualState x:Name="SelectedPointerOver"><VisualState.Setters>
+                                <!-- CommonStates names are TabViewItem's native
+                                     contract, including the modifier order. -->
+                                <VisualState x:Name="PointerOverSelected"><VisualState.Setters>
                                     <Setter Target="TabContainer.Background" Value="{ThemeResource SubtleFillColorTertiaryBrush}"/>
                                     <Setter Target="SelectionIndicator.Opacity" Value="1"/>
                                 </VisualState.Setters></VisualState>
-                                <VisualState x:Name="SelectedPressed"><VisualState.Setters>
+                                <VisualState x:Name="PressedSelected"><VisualState.Setters>
                                     <Setter Target="TabContainer.Background" Value="{ThemeResource SubtleFillColorTertiaryBrush}"/>
                                     <Setter Target="SelectionIndicator.Opacity" Value="1"/>
                                 </VisualState.Setters></VisualState>
