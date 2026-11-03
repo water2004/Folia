@@ -2,7 +2,13 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-11-03，数学括号编辑）
+## 当前 checkpoint（2026-11-03，核对mathbf希腊字母）
+
+- 用户怀疑mathbf{mu}未加粗是移植遗漏。已核对锁定MathJax4.1.3 ParseMethods.ts:113 lcGreek：mathStyle(char)||italic，不继承env.font；ucGreek才先用env.font。native parse_methods.cpp:88逐项一致，MathFont映射也一致。**无生产代码遗漏，不改上游语义**。
+- 实际MathJax/NewCM与当前build/core/FoliaNativeMath.dll对照6式：mu、mathbf{mu}、mathbfit{mu}均1D707；boldsymbol{mu}=1D741；mathbf{m}=1D426；mathbf{Gamma}=1D6AA。六式SVG glyph path全部一致。证据build/tag-layout/greek-font-check/{source.json,source-*.svg,native-*.svg,source.cjs,compare.py}。初次桥接未传cancel按接口返回status1，补有效Cancellation后全部通过，无进程异常。
+- 用户应使用boldsymbol{mu}得到粗斜体mu；当前仅核对记录，无构建/安装/版本/发布变更，无活跃句柄。后续按用户新要求接续；不用自动鼠标/agents/CUA。
+
+## 数学括号编辑（b5c342c9，已完成）
 
 - 用户要求基于匹配的补全/成对删除，参考VSCode，不能无脑插()。新增math_editor.SyntaxSession.PlanBracketEdit，复用容错TeX tokens/pairs，支持()[]{}、已有closer复用/越过、注释/转义排除、选区包裹与left/right。删任一已匹配括号去两端保内容。
 - Command.typed_input区分直接输入与paste/snippet；Keyboard/CoreText接入（组合输入不干预，CoreText单字符删除回归语义Backspace/Delete）。EditorSession只通过CST/BlockSource定位数学内容，按content_to_source映射编辑；通用document_replace_text以一次原生块内源码事务记录前后选区，无全文重建。空内容不能走document_insert_text（会补分隔换行，且拒绝空replacement）；已用直接edit_inline/edit_block_source修正。
