@@ -97,6 +97,7 @@ function Get-PayloadRecords {
             }
             else {
                 if ($relative -ieq 'settings.json' -or $relative -ieq 'settings.json.tmp') { return }
+                if ($relative -ieq 'latex/commands.user.json' -or $relative -ieq 'latex/commands.user.json.tmp') { return }
                 if ($relative.StartsWith('themes/custom/', [System.StringComparison]::OrdinalIgnoreCase)) { return }
                 # Match the application deployment rules: math uses the native
                 # renderer and its embedded fonts. Keep third-party notices.
@@ -134,14 +135,15 @@ function Write-Component {
     $Writer.WriteAttributeString('Guid', $Record.ComponentGuid)
     $Writer.WriteAttributeString('Bitness', 'always64')
 
-    if ($Record.Kind -eq 'Asset' -and $Record.Directory -ieq 'themes' -and
-        [System.IO.Path]::GetExtension($Record.Name) -ieq '.json') {
-        # Built-in themes are application resources, not user configuration.
+    if ($Record.Kind -eq 'Asset' -and (
+        ($Record.Directory -ieq 'themes' -and [System.IO.Path]::GetExtension($Record.Name) -ieq '.json') -or
+        $Record.Relative -ieq 'latex/commands.json')) {
+        # Built-in themes and command catalogs are application resources.
         # Remove exactly this packaged file before InstallFiles, including on
         # repair, so MSI's unversioned-file preservation cannot retain schema 1.
         # Imported themes and settings are excluded from the payload entirely.
         $Writer.WriteStartElement('RemoveFile')
-        $Writer.WriteAttributeString('Id', (Get-StableId -Prefix 'ReplaceTheme' -Value $Record.Relative))
+        $Writer.WriteAttributeString('Id', (Get-StableId -Prefix 'ReplaceBuiltIn' -Value $Record.Relative))
         $Writer.WriteAttributeString('Name', $Record.Name)
         $Writer.WriteAttributeString('On', 'install')
         $Writer.WriteEndElement()
