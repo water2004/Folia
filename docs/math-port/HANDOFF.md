@@ -8,8 +8,8 @@
 - 原266项目录扩大为1769项：锁定MathJax4.1.3原生注册表对应1567个命令/别名、70环境，tools/latex-completion/{registry,methods,environments,templates}.json明确职责；generate.py输出静态Assets/latex/commands.json，运行时不构造数学引擎。tools/math-port/tex-package-conformance.cjs只导出registry metadata，不再写UI目录；既有native fixture未改变。
 - 查询改partial_sort索引，仅复制最终候选；UI最多32项、视口仍8行。Python生成一致性及7项单测已过。既有补全Undo/Redo实测20失败：先SetSelection临时选区且参数选择在事务外；现通用ReplaceSourceText命令带TextSpan/after selection，复用document_replace_text一次事务，Keyboard不再先改选区。build/latex-completion-app-accepted.log **4项27216断言+loading5项22**全部通过，含全部1769 snippet/精确查询/参数导航、10容器历史、3嵌套多行环境、70环境与代表性宏包实际native SVG。empheq只支持left/right选项、indentalign需要l/c/r参数，模板按源码修正，无引擎改动。
 - 标准Debug成功build/latex-completion-debug-final.log。core-final **768项500632**、platform **88项4275**、popup **4项62+loading5项22**、settings虚拟化 **2项50**全过。原生registry-focused真实执行1项**9607断言**（build/latex-completion-registry-accepted.log；UT颜色码需去除才能统计，不要再误判全skip）。70环境实际SVG无错误，未改native引擎。
-- tools/Generate-WixPayload精确替换内置commands.json且排除commands.user，isolated安装/同版本升级/repair全过build/latex-completion-installer.log，自定义命令/usage/settings/custom theme字节保留。当前exec **57449**依次跑brackets/inline completion/startup2轮，日志build/latex-completion-{brackets,inline,startup}.log；下一步等结果，再Release MSI预检、master/tag按release.yml发布并校验正式资产。
-- 目录/生成/CI数据检查批已本地提交**f93995aa**，编辑事务/查询批接着提交；版本/installer尚未提交，git status为准，无agents/CUA。不要重复已验Enter广泛审计；app全套有既有60秒总时限，应按受影响SourceFilter分组。
+- tools/Generate-WixPayload精确替换内置commands.json且排除commands.user，isolated安装/同版本升级/repair全过build/latex-completion-installer.log，自定义命令/usage/settings/custom theme字节保留。brackets **5项1304**、inline completion **13项127**（各另有loading5项22）全过；真实startup两轮正常关闭exit0，日志build/latex-completion-{brackets,inline,startup}.log。
+- 目录/生成/CI数据检查批**f93995aa**，编辑事务/查询批**012ef4b4**，installer批**6e41e539**均已本地提交；版本批待提交。正在build/folia-061-msi.log做Release/MSI预检（exec句柄见最新工具输出），之后提交版本、推master/v0.6.1、按release.yml等待发布并下载核对正式MSI/hash/version。已fetch远端master无新增提交，v0.6.1不存在，无agents/CUA。不再重复已过测试。
 
 ## 公式块Enter修复已完成（历史基线）
 
