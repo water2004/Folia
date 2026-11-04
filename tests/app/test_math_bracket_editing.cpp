@@ -92,7 +92,10 @@ suite math_bracket_editing = [] {
             {L"{x}", 1, U'[', U"{[x}", 2}, {L"{}", 1, U'(', U"{()}", 2},
             {L"\\", 1, U'(', U"\\(", 2}, {L"% hello", 7, U'(', U"% hello(", 8},
             {L"\\left", 5, U'(', U"\\left(\\right)", 6},
-            {L"\\left(\\right)", 6, U')', U"\\left(\\right)", 13}}) {
+            {L"\\left(\\right)", 6, U')', U"\\left(\\right)", 13},
+            {L"\\left(\\right)", 6, U'{', U"\\left({}\\right)", 7},
+            {L"\\left(\\right )", 6, U'{', U"\\left({}\\right )", 7},
+            {L"\\left\\langle\\right\\rangle", 12, U'{', U"\\left\\langle{}\\right\\rangle", 13}}) {
             EditorSession session;
             session.SetText(winrt::hstring(L"$$\n" + t.tex + L"\n$$\n"));
             auto span = Formula(session);

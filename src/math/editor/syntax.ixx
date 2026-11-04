@@ -17,6 +17,11 @@ export namespace folia::math::editor {
         SourceRange open, close;
         friend bool operator==(BracketPair const&, BracketPair const&) = default;
     };
+    struct BracketBoundary {
+        SourceRange glyph, source;
+        bool opening = false, scalable = false;
+        friend bool operator==(BracketBoundary const&, BracketBoundary const&) = default;
+    };
     struct BracketMatch { SourceRange at; std::optional<SourceRange> mate; };
     enum class BracketAction { Type, Backspace, Delete };
     struct BracketSourceEdit { SourceRange range; std::u32string text; };
@@ -27,6 +32,7 @@ export namespace folia::math::editor {
     struct SyntaxAnalysis {
         std::vector<SyntaxToken> tokens;
         std::vector<BracketPair> pairs;
+        std::vector<BracketBoundary> brackets;
         std::vector<SourceRange> unmatched;
         bool hasErrors = false;
         std::optional<BracketMatch> MatchAt(std::size_t caret) const;

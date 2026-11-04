@@ -11,6 +11,31 @@ namespace {
         });
     }
     suite editor_math_syntax = [] {
+        "nested bracket input recognizes the parsed outer closing syntax"_test = [] {
+            SyntaxSession parser;
+            for (auto raw : {U"\\left(\\right)", U"\\left[\\right]", U"\\left\\langle\\right\\rangle",
+                U"\\left(\\right )", U"\\bigl(\\bigr)", U"\\begin{matrix}\\end{matrix}"})
+            for (auto pair : {U"{}", U"()", U"[]"}) {
+                std::u32string source{raw};
+                auto at = source.find(U"\\right");
+                if (at == source.npos) at = source.find(U"\\bigr");
+                if (at == source.npos) at = source.find(U"\\end");
+                auto edit = parser.PlanBracketEdit(source, at, at, BracketAction::Type, pair[0]);
+                expect(fatal(edit.has_value())) << "outer=" << std::string(source.begin(), source.end()) << " typed=" << static_cast<char>(pair[0]);
+                auto actual = source;
+                for (auto it = edit->edits.rbegin(); it != edit->edits.rend(); ++it)
+                    actual.replace(it->range.start, it->range.end - it->range.start, it->text);
+                auto expected = source; expected.insert(at, pair);
+                expect(bool(actual == expected));
+                expect(edit->active == at + 1);
+                auto deletion = parser.PlanBracketEdit(actual, at + 1, at + 1, BracketAction::Backspace);
+                expect(fatal(deletion.has_value()));
+                for (auto it = deletion->edits.rbegin(); it != deletion->edits.rend(); ++it)
+                    actual.replace(it->range.start, it->range.end - it->range.start, it->text);
+                expect(bool(actual == source));
+            }
+            expect(!parser.PlanBracketEdit(U"\\left(\\right)", 12, 12, BracketAction::Type, U'{'));
+        };
         "math editing syntax classifies commands groups numbers and text"_test = [] {
             SyntaxSession parser;
             std::u32string source = U"\\frac{a_1+2}{\\sqrt{x}}+\\text{mass}";
@@ -99,6 +124,7 @@ namespace {
                 auto const& expected = fresh.Update(source);
                 expect(actual.tokens == expected.tokens) << "tokens at edit " << edit;
                 expect(actual.pairs == expected.pairs) << "pairs at edit " << edit;
+                expect(actual.brackets == expected.brackets) << "bracket boundaries at edit " << edit;
                 expect(actual.unmatched == expected.unmatched) << "unmatched at edit " << edit;
                 expect(actual.hasErrors == expected.hasErrors) << "recovery at edit " << edit;
                 for (auto const& token : actual.tokens)

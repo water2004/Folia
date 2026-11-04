@@ -51,7 +51,7 @@ namespace folia::math::editor {
             return ts_node_child_by_field_name(node, name, static_cast<std::uint32_t>(std::char_traits<char>::length(name)));
         }
         bool Present(TSNode node) { return !ts_node_is_null(node) && !ts_node_is_missing(node); }
-        struct Delimiter { SourceRange range; int family; bool open; std::string_view name{}; };
+        struct Delimiter { SourceRange range; int family; bool open; std::string_view name{}; SourceRange syntax; bool scalable = false; };
         std::optional<std::pair<int, bool>> PlainDelimiter(std::string_view type) {
             if (type == "{") return {{0, true}};
             if (type == "}") return {{0, false}};
@@ -75,18 +75,18 @@ namespace folia::math::editor {
                 if (type == "left_delimiter" || type == "right_delimiter") {
                     auto symbol = Field(node, "delimiter");
                     auto range = source.Range(Present(symbol) ? symbol : node);
-                    delimiters.push_back({range, 3, type == "left_delimiter"});
+                    delimiters.push_back({range, 3, type == "left_delimiter", {}, source.Range(node), true});
                 }
                 if (type == "begin" || type == "end") {
                     auto name = Field(node, "name");
                     if (Present(name)) delimiters.push_back({source.Range(node), 4, type == "begin",
-                        std::string_view(source.utf8).substr(ts_node_start_byte(name), ts_node_end_byte(name) - ts_node_start_byte(name))});
+                        std::string_view(source.utf8).substr(ts_node_start_byte(name), ts_node_end_byte(name) - ts_node_start_byte(name)), source.Range(node)});
                 }
                 if (type == "sized_delimiter") {
                     auto symbol = Field(node, "delimiter");
                     if (Present(symbol) && ts_node_child_count(symbol))
                         if (auto shape = PlainDelimiter(ts_node_type(ts_node_child(symbol, 0))))
-                            delimiters.push_back({source.Range(symbol), shape->first, shape->second});
+                            delimiters.push_back({source.Range(symbol), shape->first, shape->second, {}, source.Range(node)});
                 }
                 if (count == 0) {
                     auto range = source.Range(node);
@@ -99,7 +99,7 @@ namespace folia::math::editor {
                     else if (PlainDelimiter(type) || delimiter) kind = TokenKind::Delimiter;
                     result.tokens.push_back({range, kind});
                     if (!delimiter) if (auto shape = PlainDelimiter(type))
-                        delimiters.push_back({range, shape->first, shape->second});
+                        delimiters.push_back({range, shape->first, shape->second, {}, range});
                     continue;
                 }
                 for (std::uint32_t i = count; i > 0; --i) {
@@ -115,6 +115,7 @@ namespace folia::math::editor {
             std::ranges::sort(delimiters, {}, [](auto const& item) { return item.range.start; });
             std::vector<Delimiter> open;
             for (auto const& token : delimiters) {
+                result.brackets.push_back({token.range, token.syntax, token.open, token.scalable});
                 if (token.open) open.push_back(token);
                 else if (!open.empty() && open.back().family == token.family && open.back().name == token.name) {
                     result.pairs.push_back({open.back().range, token.range}); open.pop_back();
@@ -172,12 +173,9 @@ namespace folia::math::editor {
         if (anchor > source.size() || active > source.size()) return std::nullopt;
         auto start = (std::min)(anchor, active), end = (std::max)(anchor, active);
         auto const& analysis = Update(source);
-        auto prefix = [&](SourceRange range, std::u32string_view command) {
-            for (auto const& token : analysis.tokens)
-                if (token.kind == TokenKind::Command && token.range.end == range.start
-                    && source.substr(token.range.start, token.range.end - token.range.start) == command)
-                    return token.range.start;
-            return range.start;
+        auto syntax = [&](SourceRange range) {
+            auto boundary = std::ranges::find(analysis.brackets, range, &BracketBoundary::glyph);
+            return boundary == analysis.brackets.end() ? range : boundary->source;
         };
         if (action != BracketAction::Type && start == end) {
             auto at = action == BracketAction::Backspace && start ? start - 1 : start;
@@ -185,8 +183,8 @@ namespace folia::math::editor {
             for (auto const& pair : analysis.pairs) {
                 // Environment names are not bracket characters.
                 if (pair.open.end - pair.open.start != 1 || pair.close.end - pair.close.start != 1) continue;
-                auto open = SourceRange{prefix(pair.open, U"\\left"), pair.open.end};
-                auto close = SourceRange{prefix(pair.close, U"\\right"), pair.close.end};
+                auto open = syntax(pair.open);
+                auto close = syntax(pair.close);
                 if (at != pair.open.start && at != pair.close.start && at != open.start && at != close.start) continue;
                 auto caret = at == pair.open.start || at == open.start ? open.start : close.start - (open.end - open.start);
                 return BracketEdit{{{open, {}}, {close, {}}}, caret, caret};
@@ -196,18 +194,23 @@ namespace folia::math::editor {
         if (action != BracketAction::Type) return std::nullopt;
         if (start == end)
             for (auto const& pair : analysis.pairs)
-                if (prefix(pair.close, U"\\right") == start && pair.close.end == pair.close.start + 1
+                if (syntax(pair.close).start == start && pair.close.end == pair.close.start + 1
                     && source[pair.close.start] == typed)
                     return BracketEdit{{}, pair.close.end, pair.close.end};
         char32_t closing = typed == U'(' ? U')' : typed == U'[' ? U']' : typed == U'{' ? U'}' : 0;
         if (!closing) return std::nullopt;
         // Like editor language configurations, do not close in front of an
         // identifier. Matched existing closers below are reused instead.
-        if (start == end && start < source.size()
+        const auto closingBoundary = std::ranges::find_if(analysis.brackets, [&](auto const& boundary) {
+            return !boundary.opening && boundary.source.start == start;
+        });
+        const auto beforeClosingBoundary = closingBoundary != analysis.brackets.end();
+        const auto outerClose = beforeClosingBoundary
+            ? std::optional{*closingBoundary} : std::nullopt;
+        if (start == end && !beforeClosingBoundary && start < source.size()
             && source[start] != U' ' && source[start] != U'\t' && source[start] != U'\n'
             && std::u32string_view{U")]}=,+-*/;:"}.find(source[start]) == std::u32string_view::npos)
             return std::nullopt;
-        auto left = prefix({start, start}, U"\\left") != start;
         std::u32string candidate{source};
         candidate.insert(start, 1, typed);
         auto const& next = Update(candidate);
@@ -215,9 +218,21 @@ namespace folia::math::editor {
             return token.kind == TokenKind::Delimiter && token.range.start == start && token.range.end == start + 1;
         });
         if (!delimiter) return std::nullopt; // comment or escaped command
-        if (start == end && std::ranges::any_of(next.pairs, [&](auto const& pair) { return pair.open.start == start; }))
+        auto boundary = std::ranges::find_if(next.brackets, [&](auto const& item) { return item.glyph == SourceRange{start, start + 1}; });
+        if (boundary != next.brackets.end() && !boundary->opening) return std::nullopt;
+        if (start == end && std::ranges::any_of(next.pairs, [&](auto const& pair) {
+            if (pair.open.start != start) return false;
+            // Recovery of an incomplete inner group can temporarily classify
+            // an outer modifier's glyph as a plain closer. Its parsed owner
+            // before typing still owns that glyph; an inner opener cannot
+            // reuse it as its own closing character.
+            const auto ownedOuter = outerClose && (outerClose->source != outerClose->glyph
+                || outerClose->glyph.end - outerClose->glyph.start > 1);
+            return !ownedOuter || (boundary != next.brackets.end() && boundary->scalable)
+                || pair.close.start < outerClose->source.start + 1 || pair.close.end > outerClose->source.end + 1;
+        }))
             return std::nullopt; // typing this opener already repairs an existing pair
-        auto close = left ? std::u32string{U"\\right"} : std::u32string{};
+        auto close = boundary != next.brackets.end() && boundary->scalable ? std::u32string{U"\\right"} : std::u32string{};
         close.push_back(closing);
         return BracketEdit{{{{start, start}, std::u32string(1, typed)}, {{end, end}, close}},
             anchor + 1, active + 1};
