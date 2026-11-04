@@ -2,7 +2,20 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-11-04，数学补全与0.6.1进行中）
+## 当前 checkpoint（2026-11-04，AI编辑提案/Tab优先级/长预览光标/窗口空白拖动）
+
+- 最新用户要求：AI不应仅插入，需可复用/替换光标后的括号等后缀；消除Tab与TeX/片段/括号冲突；长ghost换行光标错位；切页后拖标题空白误把标签拖出。另要求提高上游cache命中：稳定上文/下文放prompt前，活跃编辑片段/要求放最后，固定区间不逐字滑窗，需连续输入/移光标/局部改动前缀稳定测试；不承诺服务端命中比例。不开agents/CUA/鼠标模拟，native串行≤4；不改已发布tag，不擅自发布下一版。
+- 已读AGENTS与当前模型。准备采用VSCode InlineCompletionItem的range+insertText思想：有界oldText/newText编辑提案，精确匹配当前位置后缀，原生一次事务；diff只用于预览/部分接受，不允许模型提供未经校验的偏移，也不传全文。尚未实现/改代码，协议/preview细节待完成。参考API https://code.visualstudio.com/api/references/vscode-api#InlineCompletionItem；已浏览官方inlineCompletionsModel.ts，range edits/undo stops/suppressInSnippetMode与suggest冲突控制。
+- 光标已修：InsertCompletionPreview正确标GeneratedPreview并DisplayPositionForSource返回起点，但LineIndexFor只按sourceSpans选affinity first/last，ghost换行每行同一offset，Downstream选末行再clamp。已对GeneratedPreview锚点按canonical display边界选视觉行，软换行保持插入点前缘；不改Source/BoundaryDecoration的既有语义。新真实DirectWrite正文/表格×两affinity×空/普通/硬换行12组合，before8失败；最终**build/inline-edit-caret-accepted.log完整Windows89项4371断言通过**。App完整build尚未跑（之后同本轮其他修复一并），不宣称实际desktop体验已复测。
+- Tab顺序目前MainWindow.Events: latex.HandleKey→HandleInlineCompletionKey→keyboard.Key；AI只检查HasSnippetSession但TeX弹窗仍会抢Tab，SnippetSession只$0也可能一直占。需定义统一上下文优先级/过期处理，按成熟方案只让一个建议拥有Tab，实际测试不能依赖桌面按键。
+- 标题拖动：SDK源码build/tag-layout/{TabView,TabView-main}.cpp（官方main与锁定版本相关逻辑相同），GetTabAtPoint(2080)只用TabRect无clip；EnteringMoveSize(1682)在非tab点early-return不清m_isInTabTearOutLoop，Exited2036才清。有上次click残留/裁切命中两种待证假设，**尚未定位，不能宣称修复**。考虑按真实可见tab按下限定SDK撕出手势，需验证native事件生命周期；不要直接在TearOutRequested拒绝NewWindowId（SDK会消费空ID）。试验性Lifecycle.h三事件订阅已撤回，git diff该文件应为空。tests/app/visual/test_tab_transfer.cpp有friend入口，无输入注入。
+- 无本地build/test/agent活跃。release下载exec66988已完成，正式资产核对见下。下一步先完成portable AI Edit{oldText,newText}精确后缀匹配/有界diff与Prompt稳定段，再接一次事务（普通Markdown接受仍需semantic paste，不可用literal ReplaceSourceText取代结构粘贴）、preview和Tab统一选择；随后标题拖动、完整Debug与窄分组测试。AI协议尚未改，计划JSON响应要复用nlohmann而非手写JSON；fixture响应需同步，不加旧raw文本兼容分支。
+
+## 0.6.1已发布（完成基线）
+
+- master/tag发布commit **3d13b5d5b152159dc632c9363daef721b104bada**均已推送；CI **41772307089成功**，Release https://github.com/water2004/Folia/releases/tag/v0.6.1。正式MSI **53870364 bytes / ProductVersion0.6.1**，SHA256 **0f0e0cd0dbfbe33045579fb6099f3d23a81980d1ba1f5f5a7c989b16861bfeff**，同时匹配sidecar与GitHub digest。build/releases/v0.6.1/verification.json记实测结果；未安装。本地build/folia-061-msi.log也成功（Release真实startup正常退出，WiX既有ICE61 warning/0error）。不再跟进旧CI，不移动tag。
+
+## 数学补全与0.6.1开发验证（历史）
 
 - 用户要求补齐数学补全，完成后推送发布0.6.1；此前Enter两批本地提交d2dde9c7/c1e583e4一并发布。六处版本与release-notes已改0.6.1，尚未推送/tag。不开agents/CUA/鼠标模拟，native串行≤4。
 - 原266项目录扩大为1769项：锁定MathJax4.1.3原生注册表对应1567个命令/别名、70环境，tools/latex-completion/{registry,methods,environments,templates}.json明确职责；generate.py输出静态Assets/latex/commands.json，运行时不构造数学引擎。tools/math-port/tex-package-conformance.cjs只导出registry metadata，不再写UI目录；既有native fixture未改变。

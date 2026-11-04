@@ -88,6 +88,43 @@ namespace
 
 suite editor_interaction_tests = [] {
 
+"wrapped generated suggestions keep the caret at their original insertion boundary"_test = [] {
+    for (auto prefix : {std::wstring{L"abc"}, std::wstring{L""}, std::wstring{L"a\n"}})
+    for (auto affinity : {TextAffinity::Upstream, TextAffinity::Downstream})
+    for (bool table : {false, true}) {
+        auto owner = NodeId{709};
+        const std::wstring ghost = L" a very long suggestion\nwith multiple lines that wrap";
+        auto layout = MakeLayout(prefix + ghost + L"z", 90);
+        auto mapping = IdentityMapping(owner, prefix.size());
+        mapping.pop_back();
+        for (std::size_t i = 0; i < ghost.size(); ++i)
+            mapping.push_back({owner, prefix.size(), affinity, EditorDisplayPositionKind::GeneratedPreview});
+        mapping.push_back({owner, prefix.size(), TextAffinity::Downstream});
+        mapping.push_back({owner, prefix.size() + 1, TextAffinity::Downstream});
+        EditorInteractionMap interaction;
+        interaction.blocks.push_back(EditorVisualBlock{
+            .rect = {0, 0, 90, 300}, .textOrigin = {0, 0}, .textWidth = 90,
+            .sourceSpan = {owner, {0, prefix.size() + 1}},
+            .displayToSource = mapping, .layout = layout});
+        if (table) {
+            EditorVisualTable cells;
+            EditorVisualTableCell cell;
+            cell.sourceSpan = {owner, {0, prefix.size() + 1}};
+            cell.rect = {0, 0, 90, 300}; cell.displayToSource = mapping; cell.layout = layout;
+            cells.cells.push_back(std::move(cell));
+            interaction.tables.push_back(std::move(cells));
+            interaction.AddTableCellLines(0, 0, 0);
+        } else interaction.AddBlockLines(0);
+        auto caret = interaction.CaretBounds({owner, prefix.size(), affinity}, 24);
+        expect(fatal(caret.has_value()));
+        auto baseline = MakeLayout(prefix + L"z", 90);
+        float x{}, y{}; DWRITE_HIT_TEST_METRICS hit{};
+        expect(SUCCEEDED(baseline->HitTestTextPosition(static_cast<UINT32>(prefix.size()), FALSE, &x, &y, &hit)));
+        expect(std::abs(caret->top - y) < 0.1f);
+        expect(std::abs(caret->left - x) < 0.1f);
+    }
+};
+
 "generated control rows do not become editable caret lines"_test = [] {
     auto owner = NodeId{510};
     EditorInteractionMap interaction;

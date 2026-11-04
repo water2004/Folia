@@ -241,14 +241,32 @@ namespace folia::platform::editor
     {
         std::optional<std::size_t> first;
         std::optional<std::size_t> last;
+        EditorDisplayMapping const* currentMapping = nullptr;
+        std::size_t displayPosition = 0;
+        bool previewAnchor = false;
         for (std::size_t index = 0; index < lines.size(); ++index)
         {
-            if (!Contains(lines[index], position)) continue;
+            auto const& line = lines[index];
+            if (!Contains(line, position) || line.blockIndex >= blocks.size()) continue;
+            auto mapping = &blocks[line.blockIndex].displayToSource;
+            if (line.tableIndex < tables.size() && line.cellIndex < tables[line.tableIndex].cells.size())
+                mapping = &tables[line.tableIndex].cells[line.cellIndex].displayToSource;
+            if (mapping != currentMapping) {
+                currentMapping = mapping;
+                displayPosition = DisplayPositionForSource(*mapping, position);
+                previewAnchor = displayPosition < mapping->size()
+                    && (*mapping)[displayPosition].kind == EditorDisplayPositionKind::GeneratedPreview;
+            }
+            // Generated text can span many lines at one source offset. Its
+            // canonical display boundary, rather than those repeated source
+            // ranges, determines the line that owns the caret.
+            if (previewAnchor
+                && (displayPosition < line.displayStart || displayPosition > line.displayEnd)) continue;
             if (!first) first = index;
             last = index;
         }
         if (!first) return std::nullopt;
-        return position.affinity == folia::TextAffinity::Upstream ? first : last;
+        return previewAnchor || position.affinity == folia::TextAffinity::Upstream ? first : last;
     }
 
     std::optional<D2D1_RECT_F> EditorInteractionMap::CaretRectOnLine(
@@ -278,11 +296,13 @@ namespace folia::platform::editor
         }
         if (!layout) return D2D1::RectF(line.rect.left, line.rect.top, line.rect.left + 2.0f, line.rect.bottom);
         auto displayPos = DisplayPositionForSource(*mapping, position);
+        const auto previewAnchor = displayPos < mapping->size()
+            && (*mapping)[displayPos].kind == EditorDisplayPositionKind::GeneratedPreview;
         displayPos = (std::clamp)(displayPos, static_cast<std::size_t>(line.displayStart), static_cast<std::size_t>(line.displayEnd));
         UINT32 hitPos = static_cast<UINT32>(displayPos);
         BOOL trailing = FALSE;
         if (displayPos == line.displayEnd
-            && position.affinity == folia::TextAffinity::Upstream
+            && (previewAnchor || position.affinity == folia::TextAffinity::Upstream)
             && displayPos > line.displayStart) { --hitPos; trailing = TRUE; }
         FLOAT x = 0.0f, y = 0.0f;
         DWRITE_HIT_TEST_METRICS metrics{};
