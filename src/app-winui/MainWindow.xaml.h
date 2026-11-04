@@ -59,6 +59,9 @@ namespace winrt::Folia::implementation
         bool CompleteTabTearOut(std::shared_ptr<DocumentTab> const& tab);
         bool PrepareExternalTab(Windows::Foundation::IInspectable const& item);
         bool ContainsTabDragPoint(Windows::Graphics::PointInt32 point);
+        void BeginTabPointerGesture(Windows::Graphics::PointInt32 point);
+        void EndTabPointerGesture();
+        void RestoreIdleTabTransfer();
         void EndTabDrag();
         void RevealTabWindow();
         void AttachControllers();
@@ -154,6 +157,7 @@ namespace winrt::Folia::implementation
         bool closingDocument = false;
         bool relocatingFiles = false;
         bool selectedTabVisibilityPending = false;
+        bool tabPointerDown = false, tabMoveInProgress = false;
         bool updatingTabs = false;
         bool explorerOpen = false;
         bool outlineOpen = false;

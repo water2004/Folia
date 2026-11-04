@@ -51,23 +51,37 @@ namespace winrt::Folia::detail {
         using Source = winrt::Microsoft::UI::Input::InputNonClientPointerSource;
         using Handler = winrt::Windows::Foundation::TypedEventHandler<Source,
             winrt::Microsoft::UI::Input::ExitedMoveSizeEventArgs>;
+        using EnteredHandler = winrt::Windows::Foundation::TypedEventHandler<Source,
+            winrt::Microsoft::UI::Input::EnteredMoveSizeEventArgs>;
+        using PointerHandler = winrt::Windows::Foundation::TypedEventHandler<Source,
+            winrt::Microsoft::UI::Input::NonClientPointerEventArgs>;
         TabDragCompletionSubscription() = default;
         TabDragCompletionSubscription(TabDragCompletionSubscription const&) = delete;
         TabDragCompletionSubscription& operator=(TabDragCompletionSubscription const&) = delete;
         ~TabDragCompletionSubscription() { Reset(); }
-        void Attach(Source source, Handler const& handler) {
+        void Attach(Source source, Handler const& handler, EnteredHandler const& entered,
+            PointerHandler const& pressed, PointerHandler const& released) {
             Reset();
             token_ = source.ExitedMoveSize(handler);
+            entered_ = source.EnteredMoveSize(entered);
+            pressed_ = source.PointerPressed(pressed);
+            released_ = source.PointerReleased(released);
             source_ = std::move(source);
         }
         void Reset() noexcept {
-            if (source_) source_.ExitedMoveSize(token_);
+            if (source_) {
+                source_.ExitedMoveSize(token_);
+                source_.EnteredMoveSize(entered_);
+                source_.PointerPressed(pressed_);
+                source_.PointerReleased(released_);
+            }
             source_ = nullptr;
             token_ = {};
         }
     private:
         Source source_{nullptr};
         winrt::event_token token_{};
+        winrt::event_token entered_{}, pressed_{}, released_{};
     };
 
     // AppWindow does not expose IWeakReferenceSource. Own its event subscription

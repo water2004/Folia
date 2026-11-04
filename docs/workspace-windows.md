@@ -61,6 +61,14 @@ region includes the add button and otherwise permits a merge immediately followe
 by a tear-out at the same pointer position. Transfer completes the receiving
 layout before returning to that move loop.
 These are event-protocol details of the pinned SDK, not alternate document paths.
+Native non-client pointer presses additionally establish the gesture's owner.
+Only an actual visible tab hit, respecting XAML scrolling and clipping, enables
+the native tear-out callbacks for that gesture. Pressing the caption/footer
+temporarily removes those callbacks for the whole move loop, so a previous tab
+selection cannot turn a later window drag into a tab drag. Idle eligibility is
+restored after the native move ends, preserving external drop destinations;
+queued restoration cannot re-arm a newer pointer gesture. No mouse input or
+window procedure is synthesized or replaced.
 The corresponding SDK sources are
 [TabView](https://github.com/microsoft/microsoft-ui-xaml/blob/693f472aeaf89c6dff66256ee6fcd453e5d553b8/controls/dev/TabView/TabView.cpp)
 and [TabViewListView](https://github.com/microsoft/microsoft-ui-xaml/blob/693f472aeaf89c6dff66256ee6fcd453e5d553b8/controls/dev/TabView/TabViewListView.cpp).

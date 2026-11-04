@@ -163,10 +163,54 @@ namespace winrt::Folia::implementation {
         return local.X >= bounds.X && local.X <= bounds.X + bounds.Width
             && local.Y >= bounds.Y && local.Y <= bounds.Y + bounds.Height;
     }
+    void MainWindow::BeginTabPointerGesture(Windows::Graphics::PointInt32 point) {
+        if (tabPointerDown || tabMoveInProgress) return;
+        tabPointerDown = true;
+        EndTabDrag();
+        bool onVisibleTab = false;
+        auto tabs = DocumentTabs();
+        if (ContainsTabDragPoint(point)) {
+            const auto local = tabs.XamlRoot().CoordinateConverter().ConvertScreenToLocal(point);
+            // XAML hit testing observes scrolling and clipping; hidden tab
+            // containers can have bounds over the footer but own no gesture.
+            for (auto const& element : Media::VisualTreeHelper::FindElementsInHostCoordinates(local, tabs)) {
+                if (auto tab = element.try_as<TabViewItem>(); tab && tab.IsLoaded()) {
+                    onVisibleTab = true;
+                    break;
+                }
+            }
+        }
+        // The native TabView move loop must only participate in a gesture
+        // that actually started on a visible tab. Caption movement remains
+        // ordinary window movement, including after a previous tab click.
+        tabs.CanTearOutTabs(onVisibleTab);
+    }
+    void MainWindow::RestoreIdleTabTransfer() {
+        DispatcherQueue().TryEnqueue([weak = get_weak()] {
+            if (auto window = weak.get(); window && !window->windowClosed
+                && !window->tabPointerDown && !window->tabMoveInProgress)
+                window->DocumentTabs().CanTearOutTabs(true);
+        });
+    }
+    void MainWindow::EndTabPointerGesture() {
+        tabPointerDown = false;
+        if (!tabMoveInProgress) RestoreIdleTabTransfer();
+    }
     void MainWindow::RegisterTabTransferHandlers() {
         DocumentTabs().CanTearOutTabs(true);
         tabDragEnded.Attach(Microsoft::UI::Input::InputNonClientPointerSource::GetForWindowId(AppWindow().Id()),
-            WindowEvent([this](auto const&, auto const&) { EndTabDrag(); }));
+            WindowEvent([this](auto const&, auto const&) {
+                tabMoveInProgress = false;
+                EndTabDrag(); EndTabPointerGesture();
+            }),
+            WindowEvent([this](auto const&, auto const&) { tabMoveInProgress = true; }),
+            WindowEvent([this](auto const&, auto const&) {
+                POINT point{};
+                if (::GetCursorPos(&point)) BeginTabPointerGesture({point.x, point.y});
+            }),
+            WindowEvent([this](auto const&, auto const&) {
+                if (!(::GetAsyncKeyState(VK_LBUTTON) & 0x8000)) EndTabPointerGesture();
+            }));
         DocumentTabs().TabItemsChanged(WindowEvent([this](auto const&, auto const&) { QueueTabOrderSync(); }));
         DocumentTabs().TabTearOutWindowRequested(WindowEvent([this](auto const&, auto const& args) {
             auto items = args.Items();

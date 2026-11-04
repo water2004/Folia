@@ -42,6 +42,9 @@ namespace winrt::Folia::implementation {
         static bool ContainsDragPoint(Microsoft::UI::Xaml::Window const& window, Windows::Graphics::PointInt32 point) {
             return Impl(window)->ContainsTabDragPoint(point);
         }
+        static void PointerBegin(Microsoft::UI::Xaml::Window const& window, Windows::Graphics::PointInt32 point) { Impl(window)->BeginTabPointerGesture(point); }
+        static void PointerEnd(Microsoft::UI::Xaml::Window const& window) { Impl(window)->EndTabPointerGesture(); }
+        static void Moving(Microsoft::UI::Xaml::Window const& window, bool value) { Impl(window)->tabMoveInProgress = value; }
         static auto Items(Microsoft::UI::Xaml::Window const& window) { return Impl(window)->tabSource; }
         static auto Binding(Microsoft::UI::Xaml::Window const& window, std::uint64_t id) { return Impl(window)->tabItems.at(id); }
         static auto View(Microsoft::UI::Xaml::Window const& window, std::uint64_t id) {
@@ -116,6 +119,55 @@ namespace {
         return nullptr;
     }
     suite tab_transfer_tests = [] {
+        "caption gestures after tab selection cannot enter the native tab tear out loop"_test = [] {
+            OwnedWindow source(App()->CreateMainWindow());
+            for (int i = 0; i < 10; ++i) Access::New(source.window);
+            auto tabs = Access::Tabs(source.window);
+            auto root = source.window.Content().as<FrameworkElement>();
+            auto settle = [](std::chrono::milliseconds duration) {
+                const auto end = std::chrono::steady_clock::now() + duration;
+                Pump([&] { return std::chrono::steady_clock::now() >= end; });
+            };
+            auto screenCenter = [&](FrameworkElement const& element) {
+                root.UpdateLayout();
+                const auto bounds = element.TransformToVisual(nullptr).TransformBounds({0, 0,
+                    static_cast<float>(element.ActualWidth()), static_cast<float>(element.ActualHeight())});
+                return root.XamlRoot().CoordinateConverter().ConvertLocalToScreen({bounds.X + bounds.Width / 2, bounds.Y + bounds.Height / 2});
+            };
+            for (auto index : {0u, 10u, 2u, 9u}) {
+                tabs.SelectedItem(Access::Items(source.window).GetAt(index));
+                Pump([&] { return tabs.ContainerFromItem(tabs.SelectedItem()) != nullptr; });
+                // Allow the native bring-into-view operation to finish layout.
+                settle(std::chrono::milliseconds(80));
+                auto active = Access::Documents(source.window).Active()->id;
+                const auto tab = Access::View(source.window, active);
+                Access::PointerBegin(source.window, screenCenter(tab));
+                expect(tabs.CanTearOutTabs());
+                Access::PointerEnd(source.window);
+                Pump([&] { return tabs.CanTearOutTabs(); }); expect(tabs.CanTearOutTabs());
+                const auto caption = screenCenter(root.FindName(L"TitleDragArea").as<FrameworkElement>());
+                Access::PointerBegin(source.window, caption);
+                expect(!tabs.CanTearOutTabs());
+                Access::Moving(source.window, true);
+                Access::PointerEnd(source.window);
+                settle(std::chrono::milliseconds(20));
+                expect(!tabs.CanTearOutTabs()) << "release must not reattach native tab callbacks during caption movement";
+                Access::Moving(source.window, false);
+                Access::PointerEnd(source.window);
+                Pump([&] { return tabs.CanTearOutTabs(); }); expect(tabs.CanTearOutTabs());
+                expect(Access::Documents(source.window).Active()->id == active);
+                expect(Access::Documents(source.window).Items().size() == 11_u);
+                // A queued idle callback from a previous gesture cannot arm a
+                // new caption gesture that started before it was delivered.
+                Access::PointerBegin(source.window, caption);
+                Access::PointerEnd(source.window);
+                Access::PointerBegin(source.window, caption);
+                settle(std::chrono::milliseconds(20));
+                expect(!tabs.CanTearOutTabs());
+                Access::PointerEnd(source.window);
+                Pump([&] { return tabs.CanTearOutTabs(); }); expect(tabs.CanTearOutTabs());
+            }
+        };
         "completion status uses the native ring only while a request is running"_test = [] {
             OwnedWindow owned(App()->CreateMainWindow());
             auto root = owned.window.Content().as<FrameworkElement>();
