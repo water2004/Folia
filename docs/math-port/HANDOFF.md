@@ -2,7 +2,13 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-11-04，多窗口IME与引用公式已修复验收）
+## 当前 checkpoint（2026-11-04，发布0.6.3）
+
+- 用户授权发布**0.6.3**，沿用既有CI/CD与英文release notes偏好。六处版本已统一，release-notes/v0.6.3.md全英文ASCII；master比远端领先6项修复/记录提交，fetch无新远端提交，v0.6.3不存在。既有功能验收见下段，不重复广泛测试。
+- 本地MSI预检**build/folia-063-msi.log**成功：setup、Release、自包含MSI、真实启动/正常关闭exit0；MSI ProductVersion0.6.3、EXE0.6.3.0/0.6.3已实查；仅既有WiX同版本升级ICE61 warning，0error。生成目录检查和Python7项已过，无运行native句柄。
+- 下一步：提交版本/英文说明→推master与新v0.6.3触发现有release.yml→等成功→下载正式MSI/sidecar核对版本/SHA256/GitHub digest/英文body→更新本记录提交推master。不安装，不移动旧tag。不开agents/CUA/OS输入注入，native串行≤4。
+
+## 多窗口IME与引用公式验收（已完成，历史）
 
 - 用户两项请求均已完成代码/正式测试：窗口A→B→A后输入法不可切换；引用空$$正文光标偏到引用竖线。分批本地提交 **6c514ffc**（输入焦点）与 **3ef97d92**（数学源码几何），本checkpoint随最后文档提交。版本仍0.6.2，本轮未推送/新发布/MSI/安装，不移动旧tag。不开agents/CUA/OS输入注入，native串行≤4。
 - IME责任边界：FocusEnter只允许本UI线程GetActiveWindow所属且surface有XAML焦点；注册/撤销CoreText.FocusRemoved清focused_；MainWindow激活用weak排到WinUI焦点转移完成后，重查active HWND/当前编辑控件/设置状态，失活立即Leave；InitializeTextInput同条件。无强制中英/布局模式、无每键重建context、无焦点抢占重试循环。原后台迟到Enter能改变前台实际TSF document，before2断言失败，修后正式4项58通过。
