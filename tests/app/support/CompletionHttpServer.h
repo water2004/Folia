@@ -7,7 +7,8 @@ struct Server {
     std::thread thread;
     std::string baseUrl, request;
     std::atomic<bool> received = false;
-    Server(std::string body, int status = 200, bool hold = false, std::string contentType = "text/event-stream") {
+    Server(std::string body, int status = 200, bool hold = false, std::string contentType = "text/event-stream",
+        std::chrono::milliseconds fragmentDelay = {}, std::size_t fragmentBytes = 37) {
         WSADATA data{};
         if (WSAStartup(MAKEWORD(2, 2), &data)) throw std::runtime_error("test socket init");
         listener = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -15,7 +16,7 @@ struct Server {
         if (bind(listener, reinterpret_cast<sockaddr*>(&address), sizeof(address)) || listen(listener, 1)) throw std::runtime_error("test socket bind");
         int length = sizeof(address); getsockname(listener, reinterpret_cast<sockaddr*>(&address), &length);
         baseUrl = "http://127.0.0.1:" + std::to_string(ntohs(address.sin_port));
-        thread = std::thread([this, body = std::move(body), status, hold, contentType = std::move(contentType)] {
+        thread = std::thread([this, body = std::move(body), status, hold, contentType = std::move(contentType), fragmentDelay, fragmentBytes] {
             auto socket = accept(listener, nullptr, nullptr); client = socket;
             if (socket == INVALID_SOCKET) return;
             int timeout = 2000;
@@ -34,11 +35,21 @@ struct Server {
                 }
             }
             received = true;
-            auto response = "HTTP/1.1 " + std::to_string(status) + " OK\r\nContent-Type: " + contentType + "\r\nContent-Length: "
-                + std::to_string(hold ? 10000 : body.size()) + "\r\nConnection: close\r\n\r\n" + body;
-            for (std::size_t at = 0; at < response.size();) {
-                auto sent = send(socket, response.data() + at, static_cast<int>((std::min)(std::size_t{37}, response.size() - at)), 0);
-                if (sent <= 0) break; at += sent;
+            const auto headers = "HTTP/1.1 " + std::to_string(status) + " OK\r\nContent-Type: " + contentType + "\r\nContent-Length: "
+                + std::to_string(hold ? 10000 : body.size()) + "\r\nConnection: close\r\n\r\n";
+            auto sendAll = [&](std::string_view bytes) {
+                while (!bytes.empty()) {
+                    auto sent = send(socket, bytes.data(), static_cast<int>(bytes.size()), 0);
+                    if (sent <= 0) return false;
+                    bytes.remove_prefix(sent);
+                }
+                return true;
+            };
+            if (sendAll(headers)) for (std::size_t at = 0; at < body.size();) {
+                auto count = (std::min)(fragmentBytes, body.size() - at);
+                if (!sendAll(std::string_view(body).substr(at, count))) break;
+                at += count;
+                if (fragmentDelay.count() && at < body.size()) std::this_thread::sleep_for(fragmentDelay);
             }
             if (hold) (void)recv(socket, buffer.data(), 1, 0);
             if (client.exchange(INVALID_SOCKET) == socket) closesocket(socket);

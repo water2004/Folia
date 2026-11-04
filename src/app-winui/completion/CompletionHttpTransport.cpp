@@ -35,6 +35,11 @@ struct AsyncRequest {
             case WINHTTP_CALLBACK_STATUS_HEADERS_AVAILABLE:
             case WINHTTP_CALLBACK_STATUS_READ_COMPLETE:
                 state->status = status; state->bytes = length; break;
+            case WINHTTP_CALLBACK_STATUS_DATA_AVAILABLE:
+                state->status = status;
+                if (length == sizeof(DWORD)) state->bytes = *static_cast<DWORD*>(info);
+                else state->error = ERROR_INVALID_DATA;
+                break;
             case WINHTTP_CALLBACK_STATUS_REQUEST_ERROR:
                 if (length >= sizeof(WINHTTP_ASYNC_RESULT)) state->error = static_cast<WINHTTP_ASYNC_RESULT*>(info)->dwError;
                 else state->error = ERROR_INVALID_DATA;
@@ -57,9 +62,9 @@ struct AsyncRequest {
         if (!handle) throw std::runtime_error("Completion cancelled");
         check(operation(handle));
     }
-    DWORD Wait(DWORD expected, std::chrono::steady_clock::time_point deadline, std::stop_token stop) {
+    DWORD Wait(DWORD expected, std::chrono::milliseconds inactivity, std::stop_token stop) {
         std::unique_lock lock(mutex);
-        if (!wake.wait_until(lock, deadline, [&] { return status == expected || error || closing; }))
+        if (!wake.wait_for(lock, inactivity, [&] { return status == expected || error || closing; }))
             throw std::runtime_error("Completion timed out");
         if (stop.stop_requested() || closing || error) throw std::runtime_error("Completion connection ended (" + std::to_string(error) + ")");
         return bytes;
@@ -71,7 +76,8 @@ struct RequestOwner {
 };
 bool ReadHttp(CompletionConfig const& config, std::string const& urlText, wchar_t const* method,
     std::string body, std::stop_token stop, std::wstring key,
-    std::function<void(bool, std::string_view)> const& consume) {
+    std::function<bool(bool, std::string_view)> const& consume,
+    std::chrono::milliseconds inactivity = std::chrono::seconds(15)) {
     using namespace fairy::providers;
     auto validation = ValidateCompletionConfig(config);
     if (!validation.empty()) throw std::runtime_error(validation);
@@ -83,7 +89,9 @@ bool ReadHttp(CompletionConfig const& config, std::string const& urlText, wchar_
     HttpHandle session{WinHttpOpen(L"Folia inline completion", WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY,
         WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, WINHTTP_FLAG_ASYNC)};
     check(session.value != nullptr);
-    check(WinHttpSetTimeouts(session.value, 4000, 4000, 8000, 8000));
+    if (inactivity.count() <= 0 || inactivity.count() > (std::numeric_limits<int>::max)())
+        throw std::invalid_argument("Invalid completion inactivity timeout.");
+    check(WinHttpSetTimeouts(session.value, 4000, 4000, 8000, static_cast<int>(inactivity.count())));
     HttpHandle connection{WinHttpConnect(session.value, std::wstring(url.lpszHostName, url.dwHostNameLength).c_str(), url.nPort, 0)};
     check(connection.value != nullptr);
     auto path = std::wstring(url.lpszUrlPath, url.dwUrlPathLength);
@@ -111,13 +119,12 @@ bool ReadHttp(CompletionConfig const& config, std::string const& urlText, wchar_
     for (auto const& [name, value] : headers) headerText += wide(name + ": " + value + "\r\n");
     DWORD redirect = WINHTTP_OPTION_REDIRECT_POLICY_NEVER;
     state->Begin([&](auto handle) { return WinHttpSetOption(handle, WINHTTP_OPTION_REDIRECT_POLICY, &redirect, sizeof(redirect)); });
-    auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(15);
     state->Begin([&](auto handle) { return WinHttpSendRequest(handle, headerText.c_str(), static_cast<DWORD>(headerText.size()),
         state->body.data(), static_cast<DWORD>(state->body.size()), static_cast<DWORD>(state->body.size()), context); });
-    state->Wait(WINHTTP_CALLBACK_STATUS_SENDREQUEST_COMPLETE, deadline, stop);
+    state->Wait(WINHTTP_CALLBACK_STATUS_SENDREQUEST_COMPLETE, inactivity, stop);
     SecureZeroMemory(headerText.data(), headerText.size() * sizeof(wchar_t));
     state->Begin([&](auto handle) { return WinHttpReceiveResponse(handle, nullptr); });
-    state->Wait(WINHTTP_CALLBACK_STATUS_HEADERS_AVAILABLE, deadline, stop);
+    state->Wait(WINHTTP_CALLBACK_STATUS_HEADERS_AVAILABLE, inactivity, stop);
     DWORD status = 0, size = sizeof(status);
     state->Begin([&](auto handle) { return WinHttpQueryHeaders(handle, WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER,
         WINHTTP_HEADER_NAME_BY_INDEX, &status, &size, WINHTTP_NO_HEADER_INDEX); });
@@ -128,17 +135,20 @@ bool ReadHttp(CompletionConfig const& config, std::string const& urlText, wchar_
     bool streaming = std::wstring_view(contentType).find(L"text/event-stream") != std::wstring_view::npos;
     std::size_t received = 0;
     while (!stop.stop_requested()) {
-        state->Begin([&](auto handle) { return WinHttpReadData(handle, state->buffer.data(), static_cast<DWORD>(state->buffer.size()), nullptr); });
-        auto count = state->Wait(WINHTTP_CALLBACK_STATUS_READ_COMPLETE, deadline, stop);
+        state->Begin([&](auto handle) { return WinHttpQueryDataAvailable(handle, nullptr); });
+        const auto available = state->Wait(WINHTTP_CALLBACK_STATUS_DATA_AVAILABLE, inactivity, stop);
+        state->Begin([&](auto handle) { return WinHttpReadData(handle, state->buffer.data(),
+            (std::min)((std::max)(available, DWORD{1}), static_cast<DWORD>(state->buffer.size())), nullptr); });
+        auto count = state->Wait(WINHTTP_CALLBACK_STATUS_READ_COMPLETE, inactivity, stop);
         if (!count) break;
         if ((received += count) > 1024 * 1024) throw std::runtime_error("Completion response exceeds limit");
-        consume(streaming, {state->buffer.data(), count});
+        if (consume(streaming, {state->buffer.data(), count})) break;
     }
     return streaming;
 }
 }
 CompletionResult RequestCompletionHttp(CompletionConfig const& config, folia::completion::Prompt const& prompt,
-    std::stop_token stop, std::wstring key) {
+    std::stop_token stop, std::wstring key, std::chrono::milliseconds inactivityTimeout) {
     using namespace fairy::providers;
     ModelRequest model; model.model = config.model; model.maxOutputTokens = prompt.output_tokens; model.stream = true;
     model.reasoning.effort = config.reasoningEffort;
@@ -150,8 +160,9 @@ CompletionResult RequestCompletionHttp(CompletionConfig const& config, folia::co
     StreamResponse decoder(protocol); std::string response;
     auto streaming = ReadHttp(config, ResolveCompletionEndpoint(config), L"POST", BuildRequest(protocol, model).dump(), stop,
         std::move(key), [&](bool streaming, std::string_view chunk) {
-            if (streaming) (void)decoder.Feed(chunk); else response.append(chunk);
-        });
+            if (streaming) { (void)decoder.Feed(chunk); return decoder.Complete(); }
+            response.append(chunk); return false;
+        }, inactivityTimeout);
     if (stop.stop_requested()) return {};
     auto result = streaming ? decoder.Finish() : ParseResponse(protocol, Json::parse(response));
     CompletionResult output;
@@ -190,7 +201,7 @@ std::vector<std::string> ParseCompletionReasoningEfforts(std::string_view json, 
 std::vector<std::string> FetchCompletionReasoningEfforts(CompletionConfig const& config, std::stop_token stop, std::wstring key) {
     std::string response;
     ReadHttp(config, ResolveCompletionModelsEndpoint(config), L"GET", {}, stop, std::move(key),
-        [&](bool, std::string_view chunk) { response.append(chunk); });
+        [&](bool, std::string_view chunk) { response.append(chunk); return false; });
     if (stop.stop_requested()) return {};
     return ParseCompletionReasoningEfforts(response, config.model);
 }

@@ -11,6 +11,30 @@ std::string const response = R"(data: {"choices":[{"index":0,"delta":{"content":
     R"(data: {"choices":[{"index":0,"delta":{},"finish_reason":"stop"}]})" "\n\n"
     "data: [DONE]\n\n";
 suite completion_http_tests = [] {
+    "completion timeout counts inactivity rather than total stream duration"_test = [] {
+        const auto inactivity = std::chrono::milliseconds(400);
+        std::string reasoning;
+        for (int i = 0; i < 10; ++i)
+            reasoning += R"(data: {"choices":[{"index":0,"delta":{"reasoning_content":"thinking"},"finish_reason":null}]})" "\n\n";
+        Server server(reasoning + response, 200, false, "text/event-stream", std::chrono::milliseconds(60), 60);
+        const auto begin = std::chrono::steady_clock::now();
+        auto result = RequestCompletionHttp({true, server.baseUrl, "fixture", 0}, folia::completion::make_prompt({}), {}, L"fixture-key", inactivity);
+        expect(bool(result.text == U" hello"));
+        expect(std::chrono::steady_clock::now() - begin > inactivity * 2);
+    };
+    "completion terminal event completes without waiting for the connection to close"_test = [] {
+        Server server(response, 200, true);
+        const auto begin = std::chrono::steady_clock::now();
+        auto result = RequestCompletionHttp({true, server.baseUrl, "fixture", 0}, folia::completion::make_prompt({}), {}, L"fixture-key", std::chrono::milliseconds(400));
+        expect(bool(result.text == U" hello"));
+        expect(std::chrono::steady_clock::now() - begin < std::chrono::seconds(1));
+    };
+    "completion connection still times out when no response data arrives"_test = [] {
+        Server server({}, 200, true);
+        const auto begin = std::chrono::steady_clock::now();
+        expect(throws([&] { (void)RequestCompletionHttp({true, server.baseUrl, "fixture", 0}, folia::completion::make_prompt({}), {}, L"fixture-key", std::chrono::milliseconds(200)); }));
+        expect(std::chrono::steady_clock::now() - begin < std::chrono::seconds(1));
+    };
     "completion reasoning metadata comes from the selected upstream model in declared order"_test = [] {
         auto levels = ParseCompletionReasoningEfforts(R"({"data":[{"id":"other","effort":{"supported_levels":["medium"]}},
             {"id":"fixture","effort":{"supported_levels":["low","max","low"]}}]})", "fixture");
