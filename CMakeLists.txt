@@ -636,7 +636,7 @@ set(BOOST_UT_ENABLE_INSTALL OFF CACHE BOOL "Do not install vendored Boost.UT" FO
 add_subdirectory(third_party/ut EXCLUDE_FROM_ALL)
 
 enable_testing()
-add_executable(FoliaCompletionTests tests/main.cpp tests/completion/completion.cpp tests/completion/protocol.cpp)
+add_executable(FoliaCompletionTests tests/main.cpp tests/completion/completion.cpp tests/completion/edit.cpp tests/completion/protocol.cpp)
 target_compile_features(FoliaCompletionTests PRIVATE cxx_std_23)
 set_target_properties(FoliaCompletionTests PROPERTIES CXX_MODULE_STD ON)
 target_include_directories(FoliaCompletionTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)

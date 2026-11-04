@@ -58,34 +58,36 @@ suite completion_tests = [] {
     };
     "completion proposal consumes typed and accepted prefixes without regeneration"_test = [] {
         folia::completion::Proposal proposal;
-        proposal.set(9, 2, U" hello 世界");
+        proposal.set(9, 2, {{}, U" hello 世界"});
         expect(proposal.consume(9, 2, U" hello"));
         expect(proposal.at(9, 8));
         expect(proposal.text() == U" 世界");
         expect(!proposal.consume(10, 8, U" "));
         expect(proposal.text().empty());
-        proposal.set(9, 2, U"abc");
+        proposal.set(9, 2, {{}, U"abc"});
         expect(!proposal.consume(9, 2, U"abx"));
         expect(proposal.text().empty());
     };
     "completion cache is bounded LRU and clears document-derived text"_test = [] {
         folia::completion::Cache cache(64, 2);
         folia::completion::Context a{{}, "a", {}}, b{{}, "b", {}}, c{{}, "c", {}};
-        cache.put(a, U"one"); cache.put(b, U"two");
+        cache.put(a, {{}, U"one"}); cache.put(b, {{}, U"two"});
         expect(cache.get(a).has_value());
-        cache.put(c, U"three");
+        cache.put(c, {{}, U"three"});
         expect(!cache.get(b));
-        expect(cache.get(a).value() == U"one");
-        cache.put(c, std::u32string(40, U'x'));
+        expect(cache.get(a).value().after == U"one");
+        cache.put(c, {{}, std::u32string(40, U'x')});
         expect(cache.bytes() <= 64_u);
         expect(cache.size() <= 2_u);
         cache.clear();
         expect(cache.bytes() == 0_u); expect(cache.size() == 0_u);
     };
     "completion output has hard character and line limits"_test = [] {
-        auto output = folia::completion::sanitize(std::u32string(9999, U'a'), {});
-        expect(output.size() == 512_u);
-        expect(folia::completion::sanitize(U"a\nb\nc\nd\ne", {}) == U"a\nb\nc\nd");
+        auto response = [](std::u32string text) { return U"{\"oldText\":\"\",\"newText\":\"" + text + U"\"}"; };
+        expect(folia::completion::decode_edit_response(response(std::u32string(512, U'a')), {}).has_value());
+        expect(!folia::completion::decode_edit_response(response(std::u32string(513, U'a')), {}));
+        expect(folia::completion::decode_edit_response(response(U"a\\nb\\nc\\nd"), {}).has_value());
+        expect(!folia::completion::decode_edit_response(response(U"a\\nb\\nc\\nd\\ne"), {}));
     };
 };
 }
