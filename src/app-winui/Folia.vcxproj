@@ -804,6 +804,7 @@
   <ItemGroup>
     <ClCompile Include="..\completion\completion.ixx"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
     <ClCompile Include="..\completion\completion.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
+    <ClCompile Include="..\completion\edit.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
     <ClCompile Include="..\..\third_party\model-providers\providers\adapters\anthropic\Request.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_anthropic_Request.obj</ObjectFileName></ClCompile>
     <ClCompile Include="..\..\third_party\model-providers\providers\adapters\anthropic\Response.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_anthropic_Response.obj</ObjectFileName></ClCompile>
     <ClCompile Include="..\..\third_party\model-providers\providers\adapters\anthropic\StreamDecoder.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_anthropic_StreamDecoder.obj</ObjectFileName></ClCompile>

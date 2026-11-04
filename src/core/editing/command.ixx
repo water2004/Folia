@@ -50,6 +50,7 @@ struct Command {
     std::u32string callout_kind;           // ToggleCallout
     std::u32string ext_name;               // Extension
     std::optional<ReplaceTextTarget> replacement; // Explicit block-local replacement
+    std::optional<TextSpan> paste_range;  // Semantic Markdown paste without changing selection first
 
     static Command InsertText(std::u32string t) { Command c; c.kind = CommandKind::InsertText; c.text = std::move(t); return c; }
     static Command MoveLeft(bool ext)  { Command c; c.kind = CommandKind::MoveLeft;  c.extend_selection = ext; return c; }

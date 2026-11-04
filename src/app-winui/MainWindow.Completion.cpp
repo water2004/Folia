@@ -9,7 +9,9 @@ void MainWindow::ConfigureInlineCompletion() {
     if (!appSettings.completion.enabled) return;
     inlineCompletion = std::make_shared<winrt::Folia::InlineCompletionController>(editorSession(), appSettings.completion,
         DispatcherQueue(), [this](auto const& command) { return ExecuteEditorCommand(command); },
-        [this] { RenderEditorSurface(); }, [this](auto state, std::string const& text) { UpdateCompletionStatus(state, text); });
+        [this] { RenderEditorSurface(); }, [this](auto state, std::string const& text) { UpdateCompletionStatus(state, text); },
+        winrt::Folia::CompletionService::Transport{},
+        [this] { return latexCompletionController.Active() || keyboardController.HasSnippetSession(); });
     inlineCompletion->SetFocused(EditorSurface().FocusState() != Microsoft::UI::Xaml::FocusState::Unfocused && !settingsMode);
     textInputController.SetCompositionChanged([this](bool composing) {
         if (inlineCompletion) { inlineCompletion->CompositionChanged(composing); RenderEditorSurface(); }
@@ -34,14 +36,21 @@ void MainWindow::UpdateCompletionStatus(winrt::Folia::CompletionState state, std
     Microsoft::UI::Xaml::Controls::ToolTipService::SetToolTip(CompletionStatusPanel(),
         winrt::box_value(error.empty() ? text : winrt::to_hstring(error)));
 }
-bool MainWindow::HandleInlineCompletionKey(Windows::System::VirtualKey key) {
-    using Windows::System::VirtualKey;
-    if (!inlineCompletion || !inlineCompletion->Active() || textInputController.IsComposing()) return false;
-    auto down = [](VirtualKey key) { return (static_cast<unsigned>(Microsoft::UI::Input::InputKeyboardSource::GetKeyStateForCurrentThread(key)) & 1) != 0; };
-    if (down(VirtualKey::Menu) || down(VirtualKey::Shift)) return false;
-    if (key == VirtualKey::Escape) { inlineCompletion->Cancel(); RenderEditorSurface(); return true; }
-    if (key == VirtualKey::Tab && !down(VirtualKey::Control) && !keyboardController.HasSnippetSession()) return inlineCompletion->Accept(false);
-    if (key == VirtualKey::Right && down(VirtualKey::Control)) return inlineCompletion->Accept(true);
+bool MainWindow::HandleCompletionKey(folia::platform::editor::EditorKeyGesture gesture) {
+    using namespace folia::platform::editor;
+    auto owner = CompletionKeyOwner(gesture, {textInputController.IsComposing(), latexCompletionController.Active(),
+        keyboardController.HasSnippetSession(), inlineCompletion && inlineCompletion->Active()});
+    if (owner == EditorCompletionKeyOwner::Latex)
+        return latexCompletionController.HandleKey(static_cast<Windows::System::VirtualKey>(gesture.key));
+    if (owner == EditorCompletionKeyOwner::Snippet) {
+        latexCompletionController.Cancel();
+        if (gesture.key == EditorKey::Escape) { keyboardController.CancelSnippetSession(); RenderEditorSurface(); return true; }
+        return keyboardController.Key(gesture);
+    }
+    if (owner == EditorCompletionKeyOwner::Inline) {
+        if (gesture.key == EditorKey::Escape) { inlineCompletion->Cancel(); RenderEditorSurface(); return true; }
+        return inlineCompletion->Accept(gesture.key == EditorKey::Right);
+    }
     return false;
 }
 }

@@ -560,7 +560,7 @@ namespace winrt::Folia
             {
                 layout->SetFontWeight(DWRITE_FONT_WEIGHT_NORMAL, textRange);
                 layout->SetFontStyle(DWRITE_FONT_STYLE_NORMAL, textRange);
-                layout->SetStrikethrough(FALSE, textRange);
+                layout->SetStrikethrough(range.style.strikethrough, textRange);
                 layout->SetUnderline(FALSE, textRange);
                 if (resources.mutedBrush) layout->SetDrawingEffect(resources.mutedBrush.Get(), textRange);
                 continue;

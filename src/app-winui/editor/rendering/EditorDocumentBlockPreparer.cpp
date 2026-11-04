@@ -622,7 +622,7 @@ namespace winrt::Folia
             }
         }
         documentPainter.ApplyNestedCodeHighlights(prepared.display, block);
-        if (frame.completion) InsertCompletionPreview(prepared.display, frame.completion->position, frame.completion->text);
+        if (frame.completion) InsertCompletionPreview(prepared.display, frame.completion->position, frame.completion->text, frame.completion->before);
         prepared.pendingMermaid = prepared.display.pendingMermaid;
         prepared.pendingMath = prepared.display.pendingMath;
         auto format = textLayoutEngine.FormatFor(

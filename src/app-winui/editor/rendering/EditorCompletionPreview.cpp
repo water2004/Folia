@@ -1,9 +1,11 @@
 #include "pch.h"
 #include "editor/rendering/EditorContentPreparation.h"
 import folia.markdown.utf;
+import folia.completion;
 
 namespace winrt::Folia {
-void InsertCompletionPreview(DisplayInlineText& display, folia::TextPosition caret, std::u32string_view text) {
+namespace {
+void InsertGeneratedPreview(DisplayInlineText& display, folia::TextPosition caret, std::u32string_view text) {
     if (text.empty()) return;
     auto found = std::ranges::find_if(display.displayToSource, [&](auto const& point) {
         return point.container_id == caret.container_id && point.source_offset == caret.source_offset
@@ -38,5 +40,24 @@ void InsertCompletionPreview(DisplayInlineText& display, folia::TextPosition car
     display.text.insert(codepoint, text);
     EditorDisplayMapping mappings(count, {caret, EditorDisplayPositionKind::GeneratedPreview});
     display.displayToSource.insert(found, mappings.begin(), mappings.end());
+}
+}
+void InsertCompletionPreview(DisplayInlineText& display, folia::TextPosition caret,
+    std::u32string_view text, std::u32string_view before) {
+    const auto changes = folia::completion::diff({std::u32string{before}, std::u32string{text}});
+    for (auto it = changes.rbegin(); it != changes.rend(); ++it) {
+        auto start = caret; start.source_offset += it->before_begin;
+        auto end = caret; end.source_offset += it->before_end;
+        if (it->before_begin != it->before_end) {
+            const auto first = DisplayPositionForSource(display.displayToSource, start);
+            const auto last = DisplayPositionForSource(display.displayToSource, end);
+            if (last > first) {
+                InlineStyleRange deleted{static_cast<UINT32>(first), static_cast<UINT32>(last - first), folia::InlineStyle::plain()};
+                deleted.style.strikethrough = true; deleted.completion = true;
+                display.ranges.push_back(deleted);
+            }
+        }
+        InsertGeneratedPreview(display, start, text.substr(it->after_begin, it->after_end - it->after_begin));
+    }
 }
 }

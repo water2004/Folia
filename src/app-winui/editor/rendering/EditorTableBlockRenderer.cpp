@@ -64,7 +64,7 @@ namespace winrt::Folia
                     display.displayToSource.push_back({sourceSpan.container_id, sourceSpan.source_range.end, folia::TextAffinity::Downstream});
                 }
                 HighlightMathSources(display, caret, treeSitter);
-                if (completion) InsertCompletionPreview(display, completion->position, completion->text);
+                if (completion) InsertCompletionPreview(display, completion->position, completion->text, completion->before);
                 auto wide = ToWide(display.text);
                 auto layout = textLayoutEngine.Create(wide, resources.textFormat.Get(), EditorTableCellContentWidth(tableWidth, table.columnCount));
                 auto cellTextHeight = styleSheet.body.lineHeight;

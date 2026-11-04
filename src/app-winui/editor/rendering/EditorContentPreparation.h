@@ -155,7 +155,7 @@ namespace winrt::Folia
     EditorDisplayPosition InlineItemsEndPosition(std::vector<folia::InlineRenderItem> const& items, folia::TextPosition fallback);
     bool IsMermaidLanguage(std::optional<std::string> const& language);
     void MergeDisplayText(DisplayInlineText& target, DisplayInlineText source);
-    void InsertCompletionPreview(DisplayInlineText&, folia::TextPosition, std::u32string_view);
+    void InsertCompletionPreview(DisplayInlineText&, folia::TextPosition, std::u32string_view, std::u32string_view before = {});
     void AppendSourceText(DisplayInlineText& display, std::u32string_view sourceText, folia::TextSpan sourceSpan, folia::InlineStyle style, bool marker);
     void AppendProjectedSourceText(
         DisplayInlineText& display,

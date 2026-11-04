@@ -83,6 +83,23 @@ export namespace folia::platform::editor
         bool operator==(EditorKeyGesture const&) const = default;
     };
 
+    enum class EditorCompletionKeyOwner { None, Latex, Snippet, Inline };
+    struct EditorCompletionKeyState {
+        bool composing = false, latex = false, snippet = false, inline_edit = false;
+    };
+    inline EditorCompletionKeyOwner CompletionKeyOwner(EditorKeyGesture key, EditorCompletionKeyState state) {
+        if (state.composing || key.alt) return EditorCompletionKeyOwner::None;
+        if (!key.control && !key.shift && state.latex
+            && (key.key == EditorKey::Tab || key.key == EditorKey::Enter || key.key == EditorKey::Escape
+                || key.key == EditorKey::Up || key.key == EditorKey::Down)) return EditorCompletionKeyOwner::Latex;
+        if (!key.control && state.snippet && (key.key == EditorKey::Tab || (!key.shift && key.key == EditorKey::Escape)))
+            return EditorCompletionKeyOwner::Snippet;
+        if (state.inline_edit && !state.latex && !state.snippet && !key.shift
+            && ((!key.control && (key.key == EditorKey::Tab || key.key == EditorKey::Escape))
+                || (key.control && key.key == EditorKey::Right))) return EditorCompletionKeyOwner::Inline;
+        return EditorCompletionKeyOwner::None;
+    }
+
     enum class EditorInputActionKind
     {
         None,

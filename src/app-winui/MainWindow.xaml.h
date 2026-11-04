@@ -117,7 +117,7 @@ namespace winrt::Folia::implementation
         bool ExecuteEditorCommand(folia::Command const& command);
         void ConfigureInlineCompletion();
         void UpdateCompletionStatus(winrt::Folia::CompletionState, std::string const& error = {});
-        bool HandleInlineCompletionKey(winrt::Windows::System::VirtualKey);
+        bool HandleCompletionKey(folia::platform::editor::EditorKeyGesture);
         void ShowFootnoteFlyout(
             folia::platform::editor::EditorVisualFootnoteHit const& hit,
             winrt::Windows::Foundation::Point position);

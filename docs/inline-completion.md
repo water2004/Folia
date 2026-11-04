@@ -37,6 +37,10 @@ late responses cannot restore it. Empty token-limited responses are not cached.
 
 Tab accepts the current proposal, Ctrl+Right accepts its next word, and Escape
 dismisses it. Existing completion lists and snippet tab stops retain priority.
+One deterministic key policy assigns each gesture to the TeX list, snippet or
+AI proposal, taking modifiers and IME composition into account. Shift+Tab never
+accepts a TeX item. A snippet releases Tab as soon as it reaches its final `$0`.
+While a local list or snippet is active, AI requests and results are suppressed.
 Partial acceptance and matching typed prefixes consume the existing proposal;
 they do not issue a request per word. New proposals follow ordinary idle typing.
 Partial acceptance uses ICU word segmentation, including Chinese words, emoji
@@ -59,6 +63,29 @@ sequences and combining marks.
 - Acceptance: existing source/tree editing transaction, with exact undo/redo.
   Display offsets never become a second selection coordinate.
 
+## Edit proposals
+
+The model returns a JSON object with `oldText` and `newText`. `oldText` is an
+exact prefix of the following block-local source, at most 128 Unicode scalars;
+an empty string denotes insertion. `newText` replaces that text. The response
+contains no document offsets. Invalid text, bounds or schema are rejected, and
+an empty edit denotes abstention. Generated text is bounded to 512 scalars and
+four lines; it is never silently truncated into a different edit.
+
+A bounded diff identifies the existing characters to reuse, including paired
+brackets between newly supplied arguments. The preview shows only insertions
+as gray text; reused characters retain their source mapping, and removed text
+is gray with a strikethrough. Nothing changes in the document until acceptance.
+Word acceptance divides the same edit and accounts for consumed existing text,
+so later acceptance does not duplicate delimiters.
+
+The editor supplies the range to the existing semantic Markdown paste command
+without first changing selection. Expected source and document generation are
+checked before acceptance. Replacement, block structure changes and the caret
+are recorded in one transaction. The source view uses its source-patch history.
+Thus Markdown fences still create blocks and undo restores the original caret,
+not a temporary replacement selection.
+
 ## Cost and lifetime
 
 Use a small bounded prefix/suffix window and preceding block context, gathered
@@ -66,25 +93,33 @@ from block-local source without a full-document serialization. Stable instructio
 and stable context precede changing cursor text. Do not include timestamps or
 request IDs in prompts. The transport preserves provider usage, including cache counts only when supplied
 by that provider. Local context hits reuse proposals without a provider request.
-In long paragraphs the prefix start advances in 256-codepoint chunks; nearby
-keystrokes append to a stable prefix while staying inside the byte budget. This
-helps provider caching where supported, without promising cache hits.
+Stable preceding/following blocks and the stable portions of the current block
+are placed before the changing editing region in the request. The current line
+stays in that final region; long lines and bounded prefix starts use fixed
+256-codepoint anchors instead of sliding on every keystroke. Moving the caret
+or replacing text within a short line therefore preserves the entire stable
+context message. This helps provider caching where supported, without promising
+cache hits or a particular server-side ratio.
 
-The context budget is divided roughly 4:1:2 between prefix, suffix and preceding
-blocks. Defaults are 7 KB of UTF-8 context and 128 output tokens; suggestions
+The context budget is divided roughly 4:1:1:1 between prefix, nearby suffix,
+preceding blocks and following blocks. Defaults are 7 KB of UTF-8 context and 128 output tokens; suggestions
 remain limited to 512 codepoints and four lines. Output tokens may include
 model reasoning, so an exhausted limit need not produce insertable text. Document views
 are bounded before copying/encoding. The 10 MiB case exercises start/middle/end
 and Unicode expansion. These byte caps are not a model-specific token estimate.
 
-Requests debounce for 450 ms, start at least 1.5 s apart, and use a 15 s total
-network deadline. Errors do not retry automatically. Local LRU holds at most
+Requests debounce for 450 ms and start at least 1.5 s apart. Network reads use
+a 15 s inactivity timeout; each new chunk, including reasoning or heartbeat
+data, starts a fresh wait. There is no total generation deadline. Reads consume
+available data promptly, and a protocol terminal event completes the request
+without waiting for connection closure. Errors do not retry automatically. Local LRU holds at most
 32 entries / 256 KiB of payload, only in memory.
 Cancellation, document changes, focus loss and tab/window changes retire request
 generations. Late results cannot overwrite the current proposal. Network waits
 and thread joins do not run on the UI thread.
 
-Accepted Markdown uses the ordinary semantic paste transaction. Empty code
+Accepted Markdown uses the ordinary semantic paste transaction with an explicit
+replacement range. Empty code
 blocks expose a body caret below their generated language header. When a fence
 at EOF has no opening line break, the first body insertion creates that source
 boundary in the same reversible edit; typing never extends the language name.
@@ -102,5 +137,9 @@ Live model quality and latency require a user-configured service and are reporte
 separately from fixture results.
 
 Context reference: [GitHub Copilot input processing](https://docs.github.com/en/copilot/responsible-use/inline-suggestions).
+
+Edit reference: [VS Code inline completion ranges](https://code.visualstudio.com/api/references/vscode-api#InlineCompletionItem).
+
+Streaming reference: [WinHTTP available-data reads](https://learn.microsoft.com/en-us/windows/win32/api/winhttp/nf-winhttp-winhttpquerydataavailable).
 
 Interaction reference: [VS Code inline suggestions](https://code.visualstudio.com/docs/editing/ai-powered-suggestions).

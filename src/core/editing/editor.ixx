@@ -194,9 +194,20 @@ public:
         return transaction;
     }
 
-    std::optional<DocumentTransaction> execute_document_paste_text(TextSelection selection, std::u32string_view text) {
-        auto transaction = document_paste_text(document_, selection, text);
+    std::optional<DocumentTransaction> execute_document_paste_text(TextSelection selection, std::u32string_view text,
+        std::optional<TextSpan> range = {}) {
+        if (text.empty() && !range) return std::nullopt;
+        const auto before = selection;
+        if (range) {
+            auto length = document_edit_detail::editable_length(document_, range->container_id);
+            if (!length || !range->source_range.valid_for(*length)) return std::nullopt;
+            selection = {{range->container_id, range->source_range.start, TextAffinity::Downstream},
+                         {range->container_id, range->source_range.end, TextAffinity::Upstream}};
+        }
+        auto transaction = text.empty() ? document_delete_selection(document_, selection)
+            : document_paste_text(document_, selection, text);
         if (!transaction) return std::nullopt;
+        transaction->selection_before = before;
         apply_document_transaction_(*transaction);
         return transaction;
     }
@@ -543,7 +554,7 @@ public:
         }
         if (cmd.kind == CommandKind::InsertText || cmd.kind == CommandKind::Paste) {
             const auto changed = cmd.kind == CommandKind::Paste
-                ? execute_document_paste_text(rendered_selection_.value(), cmd.text).has_value()
+                ? execute_document_paste_text(rendered_selection_.value(), cmd.text, cmd.paste_range).has_value()
                 : execute_document_insert_text(rendered_selection_.value(), cmd.text).has_value();
             return changed;
         }
@@ -644,7 +655,16 @@ private:
         bool handled=false;
         switch (command.kind) {
             case CommandKind::InsertText:
-            case CommandKind::Paste: handled=source.insert_text(command.text);break;
+                handled=source.insert_text(command.text);break;
+            case CommandKind::Paste: {
+                if (!command.paste_range) { handled=source.insert_text(command.text);break; }
+                const auto& span = *command.paste_range;
+                const auto line = std::ranges::find(source.lines(), span.container_id, &SourceLine::id);
+                if (line == source.lines().end() || !span.source_range.valid_for(line->text.size())) return false;
+                handled = source.replace({line->source_start + span.source_range.start,
+                    line->source_start + span.source_range.end}, command.text);
+                break;
+            }
             case CommandKind::InsertNewline:
             case CommandKind::InsertSoftBreak: handled=source.insert_newline();break;
             case CommandKind::DeleteBackward: handled=source.delete_backward();break;

@@ -4,10 +4,17 @@
 #include "editor/rendering/EditorContentPreparation.h"
 import folia.markdown.instrumentation;
 import folia.markdown.block_source;
+import folia.markdown.utf;
 
 namespace {
 using namespace boost::ut;
 using namespace winrt::Folia;
+std::u32string Reply(std::u32string_view text, std::u32string_view old = {}) {
+    winrt::Windows::Data::Json::JsonObject json;
+    json.Insert(L"oldText", winrt::Windows::Data::Json::JsonValue::CreateStringValue(winrt::to_hstring(folia::cps_to_utf8(old))));
+    json.Insert(L"newText", winrt::Windows::Data::Json::JsonValue::CreateStringValue(winrt::to_hstring(folia::cps_to_utf8(text))));
+    return folia::utf8_to_cps(winrt::to_string(json.Stringify()));
+}
 bool Pump(std::function<bool()> done, std::chrono::milliseconds timeout = std::chrono::seconds(3)) {
     auto end = std::chrono::steady_clock::now() + timeout;
     while (!done() && std::chrono::steady_clock::now() < end) {
@@ -23,8 +30,9 @@ struct Fixture {
     std::atomic<int> requests = 0;
     std::string error;
     std::vector<CompletionState> states;
+    bool suppressed = false;
     ~Fixture() { controller.reset(); }
-    Fixture(std::u32string proposal = U" hello world", bool source = false, CompletionService::Transport transport = {}) {
+    Fixture(std::u32string proposal = U" hello world", bool source = false, CompletionService::Transport transport = {}, std::u32string old = {}) {
         session.SetText(L"abc");
         if (source) session.EnterSourceMode();
         auto owner = session.RenderModel().blocks.front().source_span.container_id;
@@ -34,9 +42,9 @@ struct Fixture {
             winrt::Microsoft::UI::Dispatching::DispatcherQueue::GetForCurrentThread(),
             [this](auto const& command) { return Execute(command); }, [] {},
             [this](CompletionState state, auto const& value) { states.push_back(state); if (state == CompletionState::Failed) error = value; },
-            [this, proposal = std::move(proposal), transport = std::move(transport)](auto const& config, auto const& prompt, auto stop) {
-                ++requests; return transport ? transport(config, prompt, stop) : CompletionResult{proposal};
-            });
+            [this, proposal = std::move(proposal), old = std::move(old), transport = std::move(transport)](auto const& config, auto const& prompt, auto stop) {
+                ++requests; return transport ? transport(config, prompt, stop) : CompletionResult{Reply(proposal, old)};
+            }, [this] { return suppressed; });
         controller->SetFocused(true);
     }
     bool Execute(folia::Command const& command) {
@@ -52,11 +60,81 @@ struct Fixture {
     bool Wait() { return Pump([&] { return controller->Active() || !error.empty(); }); }
 };
 suite inline_completion_tests = [] {
+    "AI edits reuse existing delimiters and preserve exact source and caret through undo"_test = [] {
+        for (auto markdown : {L"abc OLD rest", L"$abc OLD rest$", L"$$\nabc OLD rest\n$$", L"```rust\nabc OLD rest\n```"}) {
+            Fixture f(U"new", false, {}, U"OLD");
+            f.session.SetText(markdown);
+            auto owner = f.session.Selection().active.container_id;
+            auto text = *f.session.EditableSource(owner);
+            const auto at = text.find(U"OLD"); expect(fatal(at != text.npos));
+            f.session.SetSelection(folia::TextSelection::caret({owner, at})); f.controller->Cancel();
+            f.Type(U"x"); expect(f.Wait());
+            const auto original = f.session.TextUtf8(); const auto before = f.session.Selection();
+            folia::reset_core_operation_counters();
+            expect(f.controller->Accept(false)); f.controller->Cancel();
+            auto after = f.session.Selection();
+            expect(after.active.source_offset == before.active.source_offset + 3);
+            expect(f.Execute({.kind = folia::CommandKind::Undo}));
+            expect(f.session.Selection() == before);
+            expect(f.Execute({.kind = folia::CommandKind::Redo}));
+            expect(f.session.Selection() == after);
+            auto counts = folia::read_core_operation_counters();
+            expect(counts.full_document_parses == 0_u && counts.full_document_serializations == 0_u);
+            expect(f.session.TextUtf8().find("new") != std::string::npos);
+            expect(f.session.TextUtf8().find("OLD") == std::string::npos);
+            expect(f.Execute({.kind = folia::CommandKind::Undo}));
+            expect(f.session.TextUtf8() == original);
+        }
+        Fixture f(U"a}{b}", false, {}, U"}{}"); f.session.SetText(L"$\\frac{}{}$");
+        auto owner = f.session.Selection().active.container_id;
+        f.session.SetSelection(folia::TextSelection::caret({owner, 7})); f.controller->Cancel();
+        f.Type(U"x"); expect(f.Wait());
+        expect(f.controller->Accept(true)); expect(f.controller->Active());
+        expect(f.controller->Accept(false)); f.controller->Cancel();
+        expect(f.session.TextUtf8().find("\\frac{xa}{b}") != std::string::npos);
+    };
+    "source mode AI replacement and deletion keep the original caret in history"_test = [] {
+        for (auto replacement : {U"new", U""}) {
+            Fixture f(replacement, true, {}, U"OLD");
+            f.session.SetText(L"abc OLD rest"); f.session.EnterSourceMode();
+            auto owner = f.session.Selection().active.container_id;
+            f.session.SetSelection(folia::TextSelection::caret({owner, 4})); f.controller->Cancel();
+            f.Type(U"x"); expect(f.Wait());
+            auto original = f.session.TextUtf8(); auto before = f.session.Selection();
+            expect(f.controller->Accept(false)); f.controller->Cancel();
+            auto accepted = f.session.TextUtf8(); expect(accepted.find("OLD") == std::string::npos);
+            expect(f.Execute({.kind = folia::CommandKind::Undo}));
+            expect(f.session.TextUtf8() == original); expect(f.session.Selection() == before);
+            expect(f.Execute({.kind = folia::CommandKind::Redo})); expect(f.session.TextUtf8() == accepted);
+        }
+    };
+    "local completions suppress AI requests and retire a previously visible proposal"_test = [] {
+        Fixture f;
+        f.suppressed = true; f.Type(U"x");
+        expect(!Pump([&] { return f.requests.load() != 0; }, std::chrono::milliseconds(600)));
+        f.suppressed = false; f.Type(U"y"); expect(f.Wait());
+        f.suppressed = true; expect(!f.controller->Active()); expect(!f.controller->Accept(false));
+        f.controller->Validate(); f.suppressed = false; expect(!f.controller->Active());
+    };
+    "diff preview inserts only new text and marks replaced source without modifying it"_test = [] {
+        folia::NodeId owner{7}; DisplayInlineText display;
+        AppendSourceText(display, U"abc}{}", {owner, {0, 6}}, folia::InlineStyle::plain(), false);
+        display.displayToSource.push_back({owner, 6, folia::TextAffinity::Downstream});
+        InsertCompletionPreview(display, {owner, 3}, U"a}{b}", U"}{}");
+        expect(bool(display.text == U"abca}{b}"));
+        expect(std::ranges::count_if(display.ranges, [](auto const& r) { return r.completion; }) == 2);
+        DisplayInlineText changed;
+        AppendSourceText(changed, U"OLD", {owner, {0, 3}}, folia::InlineStyle::plain(), false);
+        changed.displayToSource.push_back({owner, 3, folia::TextAffinity::Downstream});
+        InsertCompletionPreview(changed, {owner, 0}, U"new", U"OLD");
+        expect(bool(changed.text == U"newOLD"));
+        expect(std::ranges::any_of(changed.ranges, [](auto const& r) { return r.completion && r.style.strikethrough; }));
+    };
     "completion activity distinguishes suggestions empty output failures and token limits"_test = [] {
         for (auto terminal : {CompletionState::Ready, CompletionState::Empty, CompletionState::Failed, CompletionState::BudgetExhausted}) {
             Fixture f({}, false, [terminal](auto const&, auto const&, auto) {
                 CompletionResult result;
-                if (terminal == CompletionState::Ready) result.text = U"next";
+                if (terminal == CompletionState::Ready) result.text = Reply(U"next");
                 if (terminal == CompletionState::Failed) result.error = "fixture failure";
                 result.truncated = terminal == CompletionState::BudgetExhausted;
                 return result;
@@ -74,7 +152,7 @@ suite inline_completion_tests = [] {
         Fixture f({}, false, [&](auto const&, auto const&, std::stop_token stop) {
             std::mutex mutex; std::unique_lock lock(mutex); std::condition_variable_any wake;
             wake.wait(lock, stop, [] { return false; }); cancelled = true;
-            return CompletionResult{U"obsolete"};
+            return CompletionResult{Reply(U"obsolete")};
         });
         f.Type(U"x"); expect(Pump([&] { return f.requests.load() == 1; }));
         expect(!f.states.empty() && f.states.back() == CompletionState::Requesting);
@@ -223,6 +301,7 @@ suite inline_completion_tests = [] {
         auto context = session.CaptureCompletionContext();
         auto counts = folia::read_core_operation_counters();
         expect(context.has_value());
+        if (context) expect(context->following.find("nested") != std::string::npos);
         expect(counts.full_document_parses == 0_u && counts.full_document_serializations == 0_u);
         auto position = session.Selection().active, anchor = position;
         anchor.source_offset = 3; session.SetSelection(anchor, position);
@@ -236,6 +315,10 @@ suite inline_completion_tests = [] {
             expect(sourceContext->preceding.find("first") != std::string::npos);
             expect(sourceContext->preceding.find("second") != std::string::npos);
         }
+        auto firstOwner = source.RenderModel().blocks.front().source_span.container_id;
+        source.SetSelection(folia::TextSelection::caret({firstOwner, 2}));
+        auto following = source.CaptureCompletionContext(); expect(following.has_value());
+        if (following) expect(following->following.find("second") != std::string::npos && following->following.find("third") != std::string::npos);
     };
 };
 }

@@ -102,9 +102,11 @@ namespace winrt::Folia
 
     bool EditorKeyboardController::Key(winrt::Windows::System::VirtualKey key)
     {
-        if (!session_ || !renderer_ || !executeCommand_) return false;
-        if (textInput_) textInput_->BeginHardwareKey();
-        pendingHighSurrogate_.reset();
+        return Key(Gesture(key));
+    }
+
+    folia::platform::editor::EditorKeyGesture EditorKeyboardController::Gesture(winrt::Windows::System::VirtualKey key)
+    {
         auto ctrl = KeyDown(winrt::Windows::System::VirtualKey::Control)
             || KeyDown(winrt::Windows::System::VirtualKey::LeftControl)
             || KeyDown(winrt::Windows::System::VirtualKey::RightControl);
@@ -114,13 +116,20 @@ namespace winrt::Folia
         auto alt = KeyDown(winrt::Windows::System::VirtualKey::Menu)
             || KeyDown(winrt::Windows::System::VirtualKey::LeftMenu)
             || KeyDown(winrt::Windows::System::VirtualKey::RightMenu);
-        auto gesture = folia::platform::editor::EditorKeyGesture{
+        return folia::platform::editor::EditorKeyGesture{
             .key = static_cast<folia::platform::editor::EditorKey>(
                 static_cast<std::uint32_t>(key)),
             .control = ctrl,
             .shift = shift,
             .alt = alt,
         };
+    }
+
+    bool EditorKeyboardController::Key(folia::platform::editor::EditorKeyGesture gesture)
+    {
+        if (!session_ || !renderer_ || !executeCommand_) return false;
+        if (textInput_) textInput_->BeginHardwareKey();
+        pendingHighSurrogate_.reset();
         if (auto shortcut = folia::platform::editor::resolve_editor_shortcut(
             shortcuts_, gesture, session_->ShortcutScope()))
             return DispatchShortcut(shortcuts_[*shortcut]);
@@ -266,7 +275,7 @@ namespace winrt::Folia
         return true;
     }
 
-    bool EditorKeyboardController::KeyDown(winrt::Windows::System::VirtualKey key) const
+    bool EditorKeyboardController::KeyDown(winrt::Windows::System::VirtualKey key)
     {
         auto state = winrt::Microsoft::UI::Input::InputKeyboardSource::GetKeyStateForCurrentThread(key);
         return (static_cast<std::uint32_t>(state) & 0x1u) != 0;

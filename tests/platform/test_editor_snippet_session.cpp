@@ -27,6 +27,19 @@ namespace
 
 suite editor_snippet_session_tests = [] {
 
+"final snippet stops release Tab immediately instead of retaining an empty session"_test = [] {
+    EditorSnippetSession session;
+    auto symbol = parse_snippet_template(U"\\alpha$0");
+    expect(session.Start(NodeId{90}, 5, symbol.tab_stops) == Caret(NodeId{90}, 11));
+    expect(!session.Active());
+    expect(!session.Navigate(Caret(NodeId{90}, 11), false).Handled());
+    auto argument = parse_snippet_template(U"\\sqrt{$1}$0");
+    auto first = session.Start(NodeId{90}, 0, argument.tab_stops);
+    expect(session.Active());
+    auto final = session.Navigate(*first, false);
+    expect(final.Handled()); expect(!session.Active());
+};
+
 "snippet session starts at the first ordered stop and walks forward"_test = [] {
     auto parsed = parse_snippet_template(U"\\frac{$1}{$2}$0");
     EditorSnippetSession session;
@@ -40,7 +53,7 @@ suite editor_snippet_session_tests = [] {
     expect(final.kind == SnippetNavigationKind::Move);
     expect(final.selection == Caret(NodeId{41}, 19));
     auto completed = session.Navigate(Caret(NodeId{41}, 19), false);
-    expect(completed.kind == SnippetNavigationKind::Complete);
+    expect(completed.kind == SnippetNavigationKind::NotHandled);
     expect(!session.Active());
 };
 

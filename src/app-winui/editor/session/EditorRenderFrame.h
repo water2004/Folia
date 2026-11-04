@@ -11,6 +11,7 @@ namespace winrt::Folia::detail
         folia::TextPosition position;
         std::u32string_view text;
         std::uint64_t generation = 0;
+        std::u32string_view before;
     };
     struct EditorSearchHighlight
     {

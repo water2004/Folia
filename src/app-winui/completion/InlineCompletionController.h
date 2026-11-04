@@ -9,7 +9,8 @@ public:
     using Execute = std::function<bool(folia::Command const&)>;
     InlineCompletionController(EditorSession&, CompletionConfig,
         Microsoft::UI::Dispatching::DispatcherQueue, Execute, std::function<void()> render,
-        std::function<void(CompletionState, std::string const&)> status, CompletionService::Transport transport = {});
+        std::function<void(CompletionState, std::string const&)> status, CompletionService::Transport transport = {},
+        std::function<bool()> suppressed = {});
     ~InlineCompletionController();
     void Edited(folia::TextSelection before, folia::Command const&);
     void Validate();
@@ -17,7 +18,7 @@ public:
     void SetFocused(bool);
     void CompositionChanged(bool);
     bool Accept(bool word);
-    bool Active() const { return !proposal_.text().empty(); }
+    bool Active() const { return proposal_.active() && (!suppressed_ || !suppressed_()); }
     void Decorate(detail::EditorRenderFrame&) const;
 private:
     void Schedule();
@@ -32,6 +33,7 @@ private:
     Execute execute_;
     std::function<void()> render_;
     std::function<void(CompletionState, std::string const&)> status_;
+    std::function<bool()> suppressed_;
     CompletionState state_ = CompletionState::Idle;
     folia::completion::Proposal proposal_;
     folia::completion::Cache cache_;

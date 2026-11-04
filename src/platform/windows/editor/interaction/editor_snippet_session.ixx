@@ -50,7 +50,9 @@ public:
                 },
             });
         }
-        return SelectionAtCurrent();
+        auto selection = SelectionAtCurrent();
+        if (state_->stops[state_->current].tab_index == 0) Cancel();
+        return selection;
     }
 
     SnippetNavigationResult Navigate(
@@ -75,7 +77,9 @@ public:
             }
             ++state.current;
         }
-        return {SnippetNavigationKind::Move, SelectionAtCurrent()};
+        auto target = SelectionAtCurrent();
+        if (state.stops[state.current].tab_index == 0) Cancel();
+        return {SnippetNavigationKind::Move, target};
     }
 
     std::vector<EditorSnippetPlaceholder> Placeholders(

@@ -23,9 +23,10 @@ std::size_t nextWord(std::u32string_view text) {
 }
 InlineCompletionController::InlineCompletionController(EditorSession& session, CompletionConfig config,
     Microsoft::UI::Dispatching::DispatcherQueue queue, Execute execute, std::function<void()> render,
-    std::function<void(CompletionState, std::string const&)> status, CompletionService::Transport transport)
+    std::function<void(CompletionState, std::string const&)> status, CompletionService::Transport transport,
+    std::function<bool()> suppressed)
     : session_(session), config_(std::move(config)), queue_(queue), execute_(std::move(execute)),
-      render_(std::move(render)), status_(std::move(status)) {
+      render_(std::move(render)), status_(std::move(status)), suppressed_(std::move(suppressed)) {
     position_ = session.Selection().active; content_ = session.ContentState();
     // Disabled completion has no worker, timer or cached document text.
     if (config_.enabled && ValidateCompletionConfig(config_).empty()) {
@@ -59,6 +60,7 @@ void InlineCompletionController::CompositionChanged(bool value) {
 }
 void InlineCompletionController::Validate() {
     if (accepting_) return;
+    if (suppressed_ && suppressed_()) { Cancel(); return; }
     auto selection = session_.Selection();
     if (selection.active != position_ || selection.anchor != selection.active || content_ != session_.ContentState()) Cancel();
 }
@@ -70,6 +72,12 @@ void InlineCompletionController::Edited(folia::TextSelection before, folia::Comm
     auto after = session_.Selection();
     bool typed = command.typed_input && command.kind == folia::CommandKind::InsertText
         && before.anchor == before.active;
+    if (typed && proposal_.at(before.active.container_id.v, before.active.source_offset)
+        && proposal_.text().starts_with(command.text)) {
+        const auto consumed = folia::completion::prefix_edit(proposal_.edit(), command.text.size());
+        const auto reused = folia::cps_to_utf8(consumed.before);
+        if (proposalSuffix_.starts_with(reused)) proposalSuffix_.erase(0, reused.size());
+    }
     if (!(typed && proposal_.consume(before.active.container_id.v, before.active.source_offset, command.text))) proposal_.clear();
     position_ = after.active; content_ = session_.ContentState();
     if (proposal_.at(after.active.container_id.v, after.active.source_offset)) {
@@ -115,11 +123,16 @@ void InlineCompletionController::Request() {
                 self->nextRequest_ = std::chrono::steady_clock::now() + std::chrono::seconds(10);
                 self->SetState(CompletionState::Failed, result.error); return;
             }
-            auto text = folia::completion::sanitize(result.text, context, self->budget_);
+            auto edit = folia::completion::decode_edit_response(result.text, context, self->budget_);
+            if (!edit) {
+                self->SetState(result.truncated ? CompletionState::BudgetExhausted : CompletionState::Failed,
+                    result.truncated ? "" : "Invalid completion edit.");
+                return;
+            }
             self->proposalSuffix_ = context.suffix;
             // A token-limited empty response is not a reusable decision to abstain.
-            if (!result.truncated || !text.empty()) self->cache_.put(std::move(context), text);
-            self->proposal_.set(self->position_.container_id.v, self->position_.source_offset, std::move(text));
+            if (!result.truncated || !edit->empty()) self->cache_.put(std::move(context), *edit);
+            self->proposal_.set(self->position_.container_id.v, self->position_.source_offset, std::move(*edit));
             self->SetState(self->Active() ? CompletionState::Ready
                 : result.truncated ? CompletionState::BudgetExhausted : CompletionState::Empty);
             self->render_();
@@ -131,23 +144,30 @@ bool InlineCompletionController::Accept(bool word) {
     if (!Active()) return false;
     auto text = proposal_.text();
     auto count = word ? nextWord(text) : text.size();
-    auto insertion = std::u32string(text.substr(0, count));
-    auto remaining = std::u32string(text.substr(count));
+    auto edit = folia::completion::prefix_edit(proposal_.edit(), count);
+    folia::completion::Edit remaining{
+        proposal_.edit().before.substr(edit.before.size()), std::u32string(text.substr(count))};
+    const auto at = position_;
     Cancel(); accepting_ = true;
-    auto command = folia::Command{folia::CommandKind::Paste}; command.text = insertion;
+    auto command = folia::Command{.kind = folia::CommandKind::Paste, .text = std::move(edit.after),
+        .paste_range = folia::TextSpan{at.container_id, {at.source_offset, at.source_offset + edit.before.size()}}};
     bool accepted = false;
     try { accepted = execute_(command); } catch (...) { accepting_ = false; throw; }
     accepting_ = false;
     position_ = session_.Selection().active; content_ = session_.ContentState();
     if (accepted) {
-        if (auto context = session_.CaptureCompletionContext(budget_)) proposalSuffix_ = context->suffix;
-        proposal_.set(position_.container_id.v, position_.source_offset, std::move(remaining));
+        if (auto context = session_.CaptureCompletionContext(budget_)) {
+            proposalSuffix_ = context->suffix;
+            if (context->suffix.starts_with(folia::cps_to_utf8(remaining.before)))
+                proposal_.set(position_.container_id.v, position_.source_offset, std::move(remaining));
+        }
         if (Active()) SetState(CompletionState::Ready);
         if (!Active()) Schedule();
     }
     render_(); return accepted;
 }
 void InlineCompletionController::Decorate(detail::EditorRenderFrame& frame) const {
-    if (Active()) frame.completion = detail::EditorCompletionPreview{position_, proposal_.text(), generation_ + proposal_.generation()};
+    if (Active()) frame.completion = detail::EditorCompletionPreview{
+        position_, proposal_.text(), generation_ + proposal_.generation(), proposal_.edit().before};
 }
 }

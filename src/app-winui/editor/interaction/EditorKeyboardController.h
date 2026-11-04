@@ -32,6 +32,8 @@ namespace winrt::Folia
         void SetShortcuts(std::vector<folia::platform::editor::EditorShortcutBinding> shortcuts);
         bool Character(char16_t character);
         bool Key(winrt::Windows::System::VirtualKey key);
+        bool Key(folia::platform::editor::EditorKeyGesture gesture);
+        static folia::platform::editor::EditorKeyGesture Gesture(winrt::Windows::System::VirtualKey key);
         bool InsertNewline();
         bool InsertSnippetReplacing(
             folia::NodeId container,
@@ -50,7 +52,7 @@ namespace winrt::Folia
             std::optional<std::u32string> selectedText = std::nullopt);
         bool MoveSnippetTabStop(bool backward);
         bool MoveCaretVerticalStep(bool down, bool extend);
-        bool KeyDown(winrt::Windows::System::VirtualKey key) const;
+        static bool KeyDown(winrt::Windows::System::VirtualKey key);
 
         EditorSession* session_ = nullptr;
         EditorSurfaceRenderer* renderer_ = nullptr;

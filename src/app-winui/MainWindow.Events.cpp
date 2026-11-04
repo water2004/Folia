@@ -184,13 +184,9 @@ namespace winrt::Folia::implementation
 
         EditorSurface().KeyDown(WindowEvent([this](auto const&, Microsoft::UI::Xaml::Input::KeyRoutedEventArgs const& args)
         {
-            if (latexCompletionController.HandleKey(args.Key()))
-            {
-                args.Handled(true);
-                return;
-            }
-            if (HandleInlineCompletionKey(args.Key())) { args.Handled(true); return; }
-            auto handled = keyboardController.Key(args.Key());
+            auto gesture = keyboardController.Gesture(args.Key());
+            if (HandleCompletionKey(gesture)) { args.Handled(true); return; }
+            auto handled = keyboardController.Key(gesture);
             if (handled) latexCompletionController.Refresh();
             args.Handled(handled);
         }));
@@ -199,7 +195,7 @@ namespace winrt::Folia::implementation
         enterAccelerator.Key(winrt::Windows::System::VirtualKey::Enter);
         enterAccelerator.Invoked([this](auto const&, Microsoft::UI::Xaml::Input::KeyboardAcceleratorInvokedEventArgs const& args)
         {
-            if (latexCompletionController.AcceptSelected())
+            if (HandleCompletionKey(keyboardController.Gesture(winrt::Windows::System::VirtualKey::Enter)))
             {
                 args.Handled(true);
                 return;
@@ -214,13 +210,7 @@ namespace winrt::Folia::implementation
         escapeAccelerator.Key(winrt::Windows::System::VirtualKey::Escape);
         escapeAccelerator.Invoked([this](auto const&, auto const& args)
         {
-            if (latexCompletionController.Active())
-            {
-                latexCompletionController.Cancel();
-                args.Handled(true);
-                return;
-            }
-            if (HandleInlineCompletionKey(winrt::Windows::System::VirtualKey::Escape)) { args.Handled(true); return; }
+            if (HandleCompletionKey(keyboardController.Gesture(winrt::Windows::System::VirtualKey::Escape))) { args.Handled(true); return; }
             if (FindReplaceBar().Visibility() != Microsoft::UI::Xaml::Visibility::Visible) return;
             HideFindBar();
             args.Handled(true);
