@@ -152,7 +152,7 @@ namespace winrt::Folia
     D2D1_COLOR_F InlineForeground(folia::InlineStyle const& style, D2D1_COLOR_F fallback);
     std::optional<MermaidSvg> NormalizeMermaidSvg(MermaidSvg const& source, SvgNormalizer& normalizer, bool allowQueue);
     std::u32string InlineText(std::vector<folia::InlineRenderItem> const& items);
-    folia::TextPosition InlineItemsEndPosition(std::vector<folia::InlineRenderItem> const& items, folia::TextPosition fallback);
+    EditorDisplayPosition InlineItemsEndPosition(std::vector<folia::InlineRenderItem> const& items, folia::TextPosition fallback);
     bool IsMermaidLanguage(std::optional<std::string> const& language);
     void MergeDisplayText(DisplayInlineText& target, DisplayInlineText source);
     void InsertCompletionPreview(DisplayInlineText&, folia::TextPosition, std::u32string_view);
@@ -186,7 +186,7 @@ namespace winrt::Folia
     DisplayInlineText BuildDisplayInlineText(
         std::vector<folia::InlineRenderItem> const& items,
         folia::TextPosition caret,
-        folia::TextPosition sourceEnd,
+        EditorDisplayPosition sourceEnd,
         MathJaxRenderer& mathJax,
         SvgNormalizer& svgNormalizer,
         D2D1_COLOR_F svgColor,

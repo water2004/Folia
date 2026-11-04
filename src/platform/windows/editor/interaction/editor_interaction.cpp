@@ -36,12 +36,20 @@ namespace folia::platform::editor
             if (end < start) std::swap(start, end);
 
             std::vector<folia::TextSpan> spans;
-            auto add = [&](folia::TextPosition position, bool allowNewContainer)
+            auto add = [&](EditorDisplayPosition position, bool allowNewContainer)
             {
                 auto found = std::find_if(spans.begin(), spans.end(), [&](auto const& span)
                 {
                     return span.container_id == position.container_id;
                 });
+                if (position.kind == EditorDisplayPositionKind::BoundaryDecoration) {
+                    // A suffix can carry the preceding text's final source
+                    // boundary, but cannot create a source row or pull its
+                    // start backwards into decoration owned by another line.
+                    if (found != spans.end() && position.affinity == folia::TextAffinity::Upstream)
+                        found->source_range.end = (std::max)(found->source_range.end, position.source_offset);
+                    return;
+                }
                 if (found == spans.end())
                 {
                     if (allowNewContainer)
@@ -62,7 +70,10 @@ namespace folia::platform::editor
                 // mapping at end is a caret boundary: it may extend an existing
                 // container, but must not pull the next block onto this line.
                 for (auto index = start; index < end; ++index) add(mapping[index], true);
-                add(mapping[end], false);
+                // A terminal source boundary can own an empty editable row
+                // after a generated prefix, but cannot extend a text line
+                // to the next source container.
+                add(mapping[end], spans.empty());
             }
             if (spans.empty()) spans.push_back(fallback);
             return spans;

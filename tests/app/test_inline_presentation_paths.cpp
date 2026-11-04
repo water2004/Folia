@@ -138,6 +138,36 @@ namespace {
     };
 
     suite inline_presentation_paths = [] {
+        "new display math body keeps its caret row through bracket and letter input"_test = [] {
+            for (auto prefix : {U"", U"> ", U"- ", U"- [ ] ", U"> - [ ] "}) {
+                EditorSession session; session.SetText(L"");
+                auto type = [&](char32_t c) {
+                    auto command = folia::Command::InsertText(std::u32string(1, c));
+                    command.typed_input = true;
+                    expect(fatal(session.ExecuteCommand(command)));
+                };
+                for (auto c : std::u32string_view{prefix}) type(c);
+                type(U'$'); type(U'$');
+                expect(fatal(session.ExecuteCommand({.kind = folia::CommandKind::InsertNewline})));
+                NativeInlineFrame native;
+                native.Paint(session, {}, true, true);
+                auto initial = native.interaction.CaretBounds(session.Selection().active, native.sheet.body.lineHeight);
+                expect(fatal(initial.has_value()));
+                for (auto c : U"([{x") {
+                    if (!c) break;
+                    type(c);
+                    native.Paint(session, {}, true, true);
+                    auto caret = native.interaction.CaretBounds(session.Selection().active, native.sheet.body.lineHeight);
+                    expect(fatal(caret.has_value()));
+                    expect(std::abs(caret->top - initial->top) < .5f)
+                        << "new math input moved to a different body line prefix="
+                        << static_cast<unsigned>(prefix[0]) << " input=" << static_cast<unsigned>(c)
+                        << " initial=" << initial->top << " actual=" << caret->top;
+                }
+                expect(session.EditableSource(session.Selection().active.container_id)
+                    == std::optional<std::u32string>{U"$$\n([{x}])\n$$"});
+            }
+        };
         "math editing highlights CST source and matching brackets across content containers"_test = [] {
             int caseIndex = 0;
             for (auto source : {L"😀 $\\frac{α}{中}$", L"# $\\frac{a}{b}$", L"> $\\frac{a}{b}$",
@@ -284,7 +314,10 @@ namespace {
                     auto pixels = native.Paint(session, {}, true, true);
                     auto caret = native.interaction.CaretBounds(session.Selection().active, native.sheet.body.lineHeight);
                     auto raw = native.interaction.RawBlockFor(owner);
-                    expect(caret.has_value() && raw.has_value());
+                    expect(caret.has_value() && raw.has_value()) << "code case=" << caseIndex
+                        << " caret=" << caret.has_value() << " raw=" << raw.has_value()
+                        << " owner=" << owner.v << " selection=" << session.Selection().active.container_id.v
+                        << " offset=" << session.Selection().active.source_offset;
                     auto stillInCode = session.Selection().active.container_id == owner;
                     if (caret && raw) {
                         if (stillInCode) expect(caret->top >= raw->rect.top && caret->bottom <= raw->rect.bottom + .5f)

@@ -107,19 +107,26 @@ namespace winrt::Folia
         return (start > 0 && offset == start - 1) || (end < (std::numeric_limits<std::size_t>::max)() && offset == end + 1);
     }
 
-    folia::TextPosition InlineItemsEndPosition(std::vector<folia::InlineRenderItem> const& items, folia::TextPosition fallback)
+    EditorDisplayPosition InlineItemsEndPosition(std::vector<folia::InlineRenderItem> const& items, folia::TextPosition fallback)
     {
-        auto result = fallback;
+        EditorDisplayPosition result{fallback};
         for (auto const& item : items)
         {
             if (item.source_span.container_id.v != 0)
             {
-                auto generatedPrefix = item.kind == folia::InlineRenderItem::Kind::Marker
+                auto generatedBoundary = item.kind == folia::InlineRenderItem::Kind::Marker
                     && item.source_span.source_range.empty();
+                auto affinity = generatedBoundary
+                    ? item.special().generated_boundary_affinity.value_or(folia::TextAffinity::Downstream)
+                    : folia::TextAffinity::Upstream;
                 result = {
                     item.source_span.container_id,
                     item.source_span.source_range.end,
-                    generatedPrefix ? folia::TextAffinity::Downstream : folia::TextAffinity::Upstream,
+                    affinity,
+                    // A suffix remains decoration. A prefix ends at the
+                    // source boundary of its possibly empty editable body.
+                    generatedBoundary && affinity == folia::TextAffinity::Upstream
+                        ? EditorDisplayPositionKind::BoundaryDecoration : EditorDisplayPositionKind::Source,
                 };
             }
         }
@@ -381,7 +388,7 @@ namespace winrt::Folia
     DisplayInlineText BuildDisplayInlineText(
         std::vector<folia::InlineRenderItem> const& items,
         folia::TextPosition caret,
-        folia::TextPosition sourceEnd,
+        EditorDisplayPosition sourceEnd,
         MathJaxRenderer& mathJax,
         SvgNormalizer& svgNormalizer,
         D2D1_COLOR_F svgColor,
@@ -604,7 +611,15 @@ namespace winrt::Folia
             else
             {
                 auto rangeStart = display.ranges.size();
-                AppendDisplayText(display, InlineText(item), item.source_span, item.style, item.kind == folia::InlineRenderItem::Kind::Marker);
+                auto text = InlineText(item);
+                // An explicit empty editable text item owns a source row even
+                // without glyphs. Indentation and padding never supply it.
+                if (item.kind == folia::InlineRenderItem::Kind::Text && text.empty())
+                    AppendGeneratedText(display, U"\u200B",
+                        {item.source_span.container_id, item.source_span.source_range.start, folia::TextAffinity::Downstream},
+                        item.style, EditorDisplayPositionKind::Source);
+                else
+                    AppendDisplayText(display, text, item.source_span, item.style, item.kind == folia::InlineRenderItem::Kind::Marker);
                 auto syntax = SourceSyntax(item.source_syntax);
                 for (auto rangeIndex = rangeStart; rangeIndex < display.ranges.size(); ++rangeIndex)
                 {
@@ -613,7 +628,8 @@ namespace winrt::Folia
                 }
             }
         }
-        if (!display.text.empty() && display.text.back() == U'\n') AppendGeneratedText(display, U"\u200B", sourceEnd, folia::InlineStyle::plain());
+        if (!display.text.empty() && display.text.back() == U'\n')
+            AppendGeneratedText(display, U"\u200B", sourceEnd, folia::InlineStyle::plain(), sourceEnd.kind);
         display.displayToSource.push_back(sourceEnd);
         return display;
     }

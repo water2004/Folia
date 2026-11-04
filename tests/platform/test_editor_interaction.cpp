@@ -107,6 +107,66 @@ suite editor_interaction_tests = [] {
     }
 };
 
+"decorative padding cannot extend an empty source row into later lines"_test = [] {
+    auto owner = NodeId{511};
+    EditorInteractionMap interaction;
+    interaction.blocks.push_back(EditorVisualBlock{
+        .rect = D2D1_RECT_F{0, 0, 400, 140}, .textOrigin = D2D1_POINT_2F{0, 0},
+        .textWidth = 400, .sourceSpan = {owner, {0, 6}}, .text = U"$\n\n$\n\uFFFC",
+        .displayToSource = {{owner, 0, TextAffinity::Downstream},
+            {owner, 2, TextAffinity::Downstream}, {owner, 3, TextAffinity::Downstream},
+            {owner, 4, TextAffinity::Downstream},
+            {owner, 3, TextAffinity::Upstream, EditorDisplayPositionKind::BoundaryDecoration},
+            {owner, 3, TextAffinity::Upstream, EditorDisplayPositionKind::BoundaryDecoration},
+            {owner, 3, TextAffinity::Upstream, EditorDisplayPositionKind::BoundaryDecoration}},
+        .layout = MakeLayout(L"$\n\n$\n\uFFFC"),
+    });
+    interaction.AddBlockLines(0);
+    expect(fatal(interaction.lines.size() == 3_u));
+    expect(interaction.lines[1].sourceSpans == std::vector<TextSpan>{{owner, {3, 3}}});
+    expect(interaction.lines[2].sourceSpans == std::vector<TextSpan>{{owner, {4, 4}}});
+    for (auto affinity : {TextAffinity::Upstream, TextAffinity::Downstream}) {
+        auto caret = interaction.CaretBounds({owner, 3, affinity}, 24);
+        expect(fatal(caret.has_value()));
+        expect(std::abs(caret->top - interaction.lines[1].rect.top) < .5f);
+    }
+};
+
+"an empty source boundary after indentation remains editable"_test = [] {
+    auto owner = NodeId{512};
+    EditorInteractionMap interaction;
+    interaction.blocks.push_back(EditorVisualBlock{
+        .rect = D2D1_RECT_F{0, 0, 400, 40}, .textOrigin = D2D1_POINT_2F{0, 0},
+        .textWidth = 400, .sourceSpan = {NodeId{513}, {0, 0}}, .text = U"  ",
+        .displayToSource = {{owner, 0, TextAffinity::Downstream, EditorDisplayPositionKind::BoundaryDecoration},
+            {owner, 0, TextAffinity::Downstream, EditorDisplayPositionKind::BoundaryDecoration},
+            {owner, 0, TextAffinity::Downstream}},
+        .layout = MakeLayout(L"  "),
+    });
+    interaction.AddBlockLines(0);
+    expect(fatal(interaction.lines.size() == 1_u));
+    expect(interaction.lines.front().sourceSpans == std::vector<TextSpan>{{owner, {0, 0}}});
+    expect(interaction.CaretBounds({owner, 0, TextAffinity::Downstream}, 24).has_value());
+};
+
+"suffix decoration retains the final caret boundary of preceding text"_test = [] {
+    auto owner = NodeId{514};
+    EditorInteractionMap interaction;
+    interaction.blocks.push_back(EditorVisualBlock{
+        .rect = D2D1_RECT_F{0, 0, 400, 80}, .textOrigin = D2D1_POINT_2F{0, 0},
+        .textWidth = 400, .sourceSpan = {owner, {10, 11}}, .text = U"a\n\uFFFC",
+        .displayToSource = {{owner, 10, TextAffinity::Downstream},
+            {owner, 11, TextAffinity::Upstream, EditorDisplayPositionKind::BoundaryDecoration},
+            {owner, 11, TextAffinity::Upstream, EditorDisplayPositionKind::BoundaryDecoration},
+            {owner, 11, TextAffinity::Upstream, EditorDisplayPositionKind::BoundaryDecoration}},
+        .layout = MakeLayout(L"a\n\uFFFC"),
+    });
+    interaction.AddBlockLines(0);
+    expect(fatal(interaction.lines.size() == 1_u));
+    expect(interaction.lines.front().sourceSpans == std::vector<TextSpan>{{owner, {10, 11}}});
+    expect(interaction.CaretBounds({owner, 11, TextAffinity::Downstream}, 24).has_value());
+};
+
 "directwrite block geometry keeps source coordinates authoritative"_test = [] {
     constexpr auto length = std::size_t{10};
     const auto owner = NodeId{501};

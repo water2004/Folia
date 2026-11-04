@@ -2,7 +2,16 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-11-04，0.6.0发布完成）
+## 当前 checkpoint（2026-11-04，公式块Enter修复已完成）
+
+- 用户反馈$$→Enter→括号与字母行为不同，根因创建$$\n$$没有正文行。**已从创建语义修正为opening\n\nclosing**（Dollar/Bracket/fenced math/code/tilde及菜单插入），光标直接位于真实空行；普通输入仅在CST确实缺正文边界时补分隔，已有空行不追加。源码与CST仍一套位置，所有输入/撤销走既有TextEdit事务。
+- 源码批已本地提交 **d2dde9c7**：payload_shell保留BlockSourceKind（空storage记录grammar，不复制正文）修复重做后误按FencedCode解析；Task续行不计checkbox，编辑元数据与SerializerVisitor共用markdown.container_source.list_continuation_prefix，Writer消费policy.nonempty_prefix。3任务marker×4raw块及18容器/数学定界符组合覆盖精确保存重载、Undo/Redo、括号与Unicode输入，正常编辑零全文parse/serialize。
+- 呈现批与本记录同批提交（见HEAD）：InlineItemsEndPosition/BuildDisplayInlineText保留EditorDisplayPosition.kind/affinity，prefix末端承载空Source边界、suffix不生成可编辑留白行；SpansFromMapping保留真实行尾而不让装饰拉回source范围；显式空Text有Source ZWSP锚点。DrawFlowDecorations直接消费DirectWrite实际锚点行几何计算代码语言栏命中框，移除预设行高推测。无数学/quote/list特判、新坐标、临时dump或鼠标模拟。
+- 最终验证均在build：**math-empty-body-core-accepted.log 767项500621断言**，**math-empty-body-platform-final.log 88项4275断言**，**math-empty-body-inline-final-accepted.log 38项1902断言**（AI/格式/实际Math caret/代码空行），**math-empty-body-brackets-accepted.log 数学5项1304断言+loading5项22**，**math-empty-body-code-final.log code7项106断言+loading5项22**，全部通过。**math-empty-body-renderer-build.log 标准Debug成功**；**math-empty-body-startup.log 两轮真实启动/正常关闭exit0**。未重复广泛上游数学审计。
+- 验证界限：全量controller合跑math-empty-body-app-final.log触发既有60秒总时限（滚动性能阶段），不称全集通过；随后按受影响文件分组保持原时限全部通过。最终通过日志以上一行所列为准；旧failed/diagnostic日志留ignored build，不代表待办。
+- **无运行agent/build/test句柄，无本轮待完成功能项**。Debug已更新；版本仍0.6.0，**本轮未MSI/安装/推送/发布**。下一步按用户反馈或打包要求继续，不因压缩重复已完成测试/审计。不开agents/CUA/自动鼠标，native串行≤4；允许正常关闭用于构建但保留未保存提示。旧ignored清理被审批拒绝，不重试绕过。
+
+## 0.6.0发布完成（历史）
 
 - **master与v0.6.0均已推送并发布**：[Release](https://github.com/water2004/Folia/releases/tag/v0.6.0)，发布commit **819bc1f617572df3f795c5c3afe28a8b39a63203**。既有CI **41719399300 / job126207857479** 全部成功，包含自包含MSI构建、真实启动/正常退出、SHA256与公开发布。全部此前AI/设置/页签本地提交都已包含。最后只提交/推送本交接结果，不移动tag。
 - 正式资产已下载至**build/releases/v0.6.0/**，只读核实MSI ProductVersion **0.6.0**、53862094 bytes，SHA256 **d363588eb9ca552df8fece48808186b058b059600ece85aa3a276508da514dda**，同时匹配随附.sha256和GitHub asset digest；verification.json记录结果。未安装。此前本地预检build/folia-060-msi.log也成功，Release EXE0.6.0.0/0.6.0，startup exit0；WiX ICE61是既有AllowSameVersionUpgrades警告，0 errors。不要混淆本地预检与正式CI产物的hash。

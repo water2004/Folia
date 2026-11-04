@@ -429,12 +429,13 @@ namespace winrt::Folia
             }
             return first ? std::optional{std::pair{*first, last}} : std::nullopt;
         };
-        auto contentLeftFor = [&](folia::RenderBlock const& nested, std::pair<std::size_t, std::size_t> range, std::size_t indentColumns) -> std::optional<float>
+        auto contentAnchorFor = [&](folia::RenderBlock const& nested, std::pair<std::size_t, std::size_t> range, std::size_t indentColumns) -> std::optional<D2D1_RECT_F>
         {
             std::optional<std::size_t> anchorStart;
+            auto owner = nested.flow_anchor_owner_id.v != 0 ? nested.flow_anchor_owner_id : nested.id;
             for (std::size_t index = 0; index < displayLimit; ++index)
             {
-                if (display.displayToSource[index].container_id == nested.flow_anchor_owner_id)
+                if (display.displayToSource[index].container_id == owner)
                 {
                     if (std::ranges::any_of(display.blockSpacingOverlays, [&](auto const& space) {
                             return index >= space.displayStart
@@ -450,7 +451,8 @@ namespace winrt::Folia
             FLOAT lineY = 0.0f;
             DWRITE_HIT_TEST_METRICS hit{};
             if (FAILED(layout->HitTestTextPosition(static_cast<UINT32>(contentColumn), FALSE, &x, &lineY, &hit))) return std::nullopt;
-            return origin.x + x;
+            return D2D1::RectF(origin.x + x, origin.y + lineY,
+                origin.x + x + hit.width, origin.y + lineY + hit.height);
         };
         auto accumulateRange = [&](std::pair<std::size_t, std::size_t> range, float& top, float& bottom)
         {
@@ -516,15 +518,13 @@ namespace winrt::Folia
                     const auto standaloneRaw = root
                         && (nested.kind == folia::RenderBlockKind::Code
                             || nested.kind == folia::RenderBlockKind::Math);
-                    auto contentLeft = standaloneRaw
-                        ? std::optional<float>{origin.x - nested.block_style.padding_left}
-                        : contentLeftFor(nested, *range, indentColumns);
+                    auto contentAnchor = contentAnchorFor(nested, *range, indentColumns);
                     float top = (std::numeric_limits<float>::max)();
                     float bottom = (std::numeric_limits<float>::lowest)();
-                    if (contentLeft && accumulateRange(*range, top, bottom))
+                    if (contentAnchor && accumulateRange(*range, top, bottom))
                     {
-                        auto left = standaloneRaw ? *contentLeft
-                            : (std::clamp)(*contentLeft, origin.x, documentRight);
+                        auto left = standaloneRaw ? origin.x - nested.block_style.padding_left
+                            : (std::clamp)(contentAnchor->left, origin.x, documentRight);
                         if (standaloneRaw)
                         {
                             top -= nested.block_style.padding_top;
@@ -564,9 +564,10 @@ namespace winrt::Folia
                         }
                         if (rawBlock)
                         {
-                            auto headerTop = rect.top + nested.block_style.padding_top;
-                            auto headerBottom = (std::min)(
-                                rect.bottom, headerTop + styleSheet.code.lineHeight);
+                            // The generated header shares the text layout's
+                            // actual row, including nested-flow font metrics.
+                            auto headerTop = contentAnchor->top;
+                            auto headerBottom = (std::min)(rect.bottom, contentAnchor->bottom);
                             float labelWidth = 0;
                             {
                                 auto label = winrt::to_hstring(
