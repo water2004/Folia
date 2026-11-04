@@ -78,12 +78,24 @@ namespace winrt::Folia::implementation
     void MainWindow::RegisterWindowHandlers()
     {
         Activated(WindowEvent([this](auto const&, Microsoft::UI::Xaml::WindowActivatedEventArgs const& args) {
-            auto editing = args.WindowActivationState() != Microsoft::UI::Xaml::WindowActivationState::Deactivated
-                && EditorSurface().FocusState() != Microsoft::UI::Xaml::FocusState::Unfocused && !settingsMode;
-            animationController.Focus(editing);
-            if (editing) textInputController.FocusEnter();
-            else textInputController.FocusLeave();
-            if (inlineCompletion) inlineCompletion->SetFocused(editing);
+            // Restore the input context after WinUI has finished transferring
+            // native window focus. XAML focus can remain on the editor without
+            // raising GotFocus again when a window is reactivated.
+            if (args.WindowActivationState() != Microsoft::UI::Xaml::WindowActivationState::Deactivated) {
+                DispatcherQueue().TryEnqueue([weak = get_weak()] {
+                    auto window = weak.get();
+                    if (!window || window->windowClosed || ::GetActiveWindow() != window->WindowHandle()) return;
+                    auto editing = window->EditorSurface().FocusState() != Microsoft::UI::Xaml::FocusState::Unfocused && !window->settingsMode;
+                    window->animationController.Focus(editing);
+                    if (editing) window->textInputController.FocusEnter();
+                    else window->textInputController.FocusLeave();
+                    if (window->inlineCompletion) window->inlineCompletion->SetFocused(editing);
+                });
+                return;
+            }
+            animationController.Focus(false);
+            textInputController.FocusLeave();
+            if (inlineCompletion) inlineCompletion->SetFocused(false);
         }));
         closingHandler.Attach(AppWindow(),
             [this](auto const&, Microsoft::UI::Windowing::AppWindowClosingEventArgs const& args)

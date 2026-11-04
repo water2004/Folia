@@ -254,7 +254,7 @@ namespace winrt::Folia::implementation
         // Rebinding a document can keep XAML focus on the same surface, so no
         // new GotFocus event is guaranteed for its new CoreText edit context.
         if (EditorSurface().FocusState() != Microsoft::UI::Xaml::FocusState::Unfocused
-            && ::GetForegroundWindow() == WindowHandle()) textInputController.FocusEnter();
+            && ::GetActiveWindow() == WindowHandle()) textInputController.FocusEnter();
     }
 
     bool MainWindow::ExecuteEditorCommand(folia::Command const& command)

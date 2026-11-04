@@ -11,6 +11,24 @@ were relative to the launching process. Different installed/candidate executable
 locations remain independent. `--new-instance` explicitly starts an isolated
 process; startup tests use it so they never redirect into a user's running app.
 
+## Text input focus
+
+Each editor owns its CoreText edit context, while windows share the UI thread's
+text services. XAML focus can remain on an inactive window's editor. A focus-enter
+notification therefore checks both the editor surface and the thread's active
+HWND before activating that context. System `FocusRemoved` notifications clear
+the recorded ownership so a later focus-enter can reestablish it.
+
+Window activation restores text input after WinUI finishes its focus transfer,
+using a weak window reference and rechecking the current active HWND and focused
+control. Deactivation leaves the context immediately. A queued callback cannot
+restore an old window or take focus from a settings text box. No keyboard-layout
+or Chinese/English conversion mode is forced, and contexts are not recreated per key.
+
+Native window tests check the actual TSF document focus across window switches,
+late notifications and text-box focus. They do not inject keyboard input or
+substitute for manually checking Shift conversion with an installed IME.
+
 ## Responsibilities
 
 | Source | Responsibility |

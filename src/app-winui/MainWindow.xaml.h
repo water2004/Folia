@@ -43,6 +43,7 @@ namespace winrt::Folia::implementation
         }
         friend struct WorkspaceWindowTestAccess;
         friend struct CompletionWindowTestAccess;
+        friend struct TextInputWindowTestAccess;
         friend struct App;
         struct DocumentTab {
             Windows::Foundation::IInspectable item{nullptr};

@@ -94,6 +94,10 @@ namespace winrt::Folia
 
     void EditorTextInputController::FocusEnter()
     {
+        // XAML can retain focus in another window on this UI thread. Its
+        // notification must never switch the foreground editor's TSF context.
+        if (!surface_ || !windowHandle_ || ::GetActiveWindow() != windowHandle_()
+            || surface_.FocusState() == Microsoft::UI::Xaml::FocusState::Unfocused) return;
         if (!context_ || focused_) return;
         SynchronizeTextStore();
         focused_ = true;
@@ -301,6 +305,9 @@ namespace winrt::Folia
 
     void EditorTextInputController::RegisterHandlers()
     {
+        focusRemovedToken_ = context_.FocusRemoved([this](auto const&, auto const&) {
+            focused_ = false;
+        });
         compositionStartedToken_ = context_.CompositionStarted([this](auto const&, auto const&) { composing_ = true; if (compositionChanged_) compositionChanged_(true); });
         compositionCompletedToken_ = context_.CompositionCompleted([this](auto const&, auto const&) { composing_ = false; if (compositionChanged_) compositionChanged_(false); });
         textRequestedToken_ = context_.TextRequested([this](auto const&, winrt::Windows::UI::Text::Core::CoreTextTextRequestedEventArgs const& args)
@@ -553,8 +560,10 @@ namespace winrt::Folia
         if (!context_) return;
         if (compositionStartedToken_.value) context_.CompositionStarted(compositionStartedToken_);
         if (compositionCompletedToken_.value) context_.CompositionCompleted(compositionCompletedToken_);
+        if (focusRemovedToken_.value) context_.FocusRemoved(focusRemovedToken_);
         compositionStartedToken_ = {};
         compositionCompletedToken_ = {};
+        focusRemovedToken_ = {};
         composing_ = false;
         if (textRequestedToken_.value) context_.TextRequested(textRequestedToken_);
         if (selectionRequestedToken_.value) context_.SelectionRequested(selectionRequestedToken_);

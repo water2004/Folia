@@ -36,6 +36,7 @@ namespace winrt::Folia
         void RecordCharacterTextUpdate(std::size_t start, std::u32string text);
 
     private:
+        friend struct EditorTextInputTestAccess;
         winrt::Windows::UI::Text::Core::CoreTextRange CurrentSelection() const;
         void QueueSynchronization();
         void SynchronizeTextStore();
@@ -56,6 +57,7 @@ namespace winrt::Folia
         winrt::event_token textUpdatingToken_{};
         winrt::event_token compositionStartedToken_{};
         winrt::event_token compositionCompletedToken_{};
+        winrt::event_token focusRemovedToken_{};
         bool composing_ = false;
         std::function<void(bool)> compositionChanged_;
         std::size_t knownLength_ = 0;
