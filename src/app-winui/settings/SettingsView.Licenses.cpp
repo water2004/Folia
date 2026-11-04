@@ -93,7 +93,7 @@ namespace winrt::Folia
         auto name = Text(Localize(L"AppName"));
         name.Style(settings_ui::ResourceStyle(L"SettingsAppNameStyle"));
         copy.Children().Append(name);
-        copy.Children().Append(Text(LocalizeFormat(L"Version", {L"0.6.1"})));
+        copy.Children().Append(Text(LocalizeFormat(L"Version", {L"0.6.2"})));
         copy.Children().Append(settings_ui::Hint(Localize(L"AppDescription")));
         Grid::SetColumn(copy, 1);
         identity.Children().Append(copy);

@@ -2,7 +2,13 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-11-04，AI编辑/缓存/Tab/光标/窗口拖动/嵌套括号/流式超时）
+## 当前 checkpoint（2026-11-04，发布0.6.2）
+
+- 用户授权推送发布**0.6.2**，明确Release notes必须英文。六处版本已更新，release-notes/v0.6.2.md已写英文并验证ASCII；generated catalog检查及7项Python测试通过；远端master未新增提交，v0.6.2 tag/release均不存在。
+- 本轮功能与正式测试已完成，详见下一历史基线，不重复测试。本地MSI预检**build/folia-062-msi.log**成功：setup、Release、自包含MSI、真实启动正常退出exit0；MSI ProductVersion0.6.2、EXE0.6.2.0/0.6.2已实查。WiX仅既有AllowSameVersionUpgrades ICE61 warning，0error。无运行native句柄；串行≤4，不开agents/CUA/鼠标模拟。
+- 下一步：提交版本及英文notes→推master并创建推v0.6.2触发既有.github/workflows/release.yml→等待CI发布→下载正式MSI核对ProductVersion/SHA256/sidecar/GitHub digest/英文body→记录结果提交handoff。无安装请求，不安装。已有GitHub connector不能触发本项目tag流程，使用git与公开REST查询；本机无gh CLI，不需要新增安装。
+
+## AI编辑与流式请求验收基线（已完成，历史）
 
 - 本轮功能均已实现：AI以有界 `oldText/newText` 编辑提案复用/替换后缀，diff预览与一次Paste范围事务、部分接受/撤销；统一TeX→snippet→AI键盘归属，$0释放Tab；修复长ghost光标行归属；仅可见标签按下允许SDK撕出，标题空白手势禁止；稳定前后文放active区域之前；解析器括号边界支持 `\left({}\right)` 内层补全/删除；HTTP按15秒无数据计时，可用数据及时读取，协议终止立即完成。
 - 本轮已分批本地提交：**d0cb0614** ghost光标；**ae9fb608** Edit/JSON/diff/cache；**34a4a25e** 三协议终止；**2e717403** HTTP无活动超时；**2778f5db** 嵌套括号；**2e755061** 有界前后文；**b876ebc6** 窗口手势；**fc048c7a** 编辑事务/预览/统一按键。本checkpoint随最后文档提交保存。版本仍0.6.1，未推送/新发布/MSI/安装，不移动旧tag。不开agents/CUA/鼠标模拟，native串行≤4。
