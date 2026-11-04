@@ -2,11 +2,18 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-11-04，发布0.6.2）
+## 当前 checkpoint（2026-11-04，补全交互与设置布局已完成）
 
-- 用户授权推送发布**0.6.2**，明确Release notes必须英文。六处版本已更新，release-notes/v0.6.2.md已写英文并验证ASCII；generated catalog检查及7项Python测试通过；远端master未新增提交，v0.6.2 tag/release均不存在。
-- 本轮功能与正式测试已完成，详见下一历史基线，不重复测试。本地MSI预检**build/folia-062-msi.log**成功：setup、Release、自包含MSI、真实启动正常退出exit0；MSI ProductVersion0.6.2、EXE0.6.2.0/0.6.2已实查。WiX仅既有AllowSameVersionUpgrades ICE61 warning，0error。无运行native句柄；串行≤4，不开agents/CUA/鼠标模拟。
-- 下一步：提交版本及英文notes→推master并创建推v0.6.2触发既有.github/workflows/release.yml→等待CI发布→下载正式MSI核对ProductVersion/SHA256/sidecar/GitHub digest/英文body→记录结果提交handoff。无安装请求，不安装。已有GitHub connector不能触发本项目tag流程，使用git与公开REST查询；本机无gh CLI，不需要新增安装。
+- 用户反馈取代0.6.2的“TeX/snippet抑制AI”结论。本地提交**b172e699**：移除屏蔽，可见AI拥有Tab/CtrlRight/Esc；TeX保留arrows/Enter，无AI时Tab回TeX/snippet，ShiftTab回snippet。AI接受关闭过期TeX列表；hint中英同步实际职责。选区替换输入也安排AI（正式snippet测试原requests0已修），同offset异affinity用is_caret。当前参数插入保留导航，跨参数范围改写结束旧snippet。无新坐标/全文parse/serialize路径。
+- 本地提交**7435fa86**修复7个设置页宽窗口偏右：页面MaxWidth+Stretch居中是根因。共享PageViewport factory加载主题DataTemplate，native ContentPresenter.Content承载页面，左起列上限1008含margin，移除页面自身960上限；列表仍有限视口。不要恢复曾试过的NavigationView.ContentTemplate普通Binding（UIElement缺对应DataContext使页面空白），已撤掉。测试使用嵌套native viewport避免Windows工作区1602宽度限制；before 7页1800/2400均偏移，after **settings-width-accepted.log 1项84全过**。
+- 最终Debug **settings-width-debug-final.log**成功。正式回归：**completion-interaction-platform-final.log 92项4511**；**interaction-final-test_*.log**中completion_interaction6/82、settings_styles3/78、settings_lists2/50、settings_control_lifetime1/13、settings_navigation1/24、inline_completion17/223、latex_completion4/27216（controller各另loading5/22）全部通过。**interaction-final-startup.log**两轮真实启动/正常关闭exit0。原生PNG build/tests/settings-styles/{light-1120,dark-720}.png已目视检查。无需重复已过广泛测试。
+- 验证边界：新补全测试使用真实MainWindow/TeX popup/生产按键路由与fixture transport，含inline/display/quote、Enter/Tab/CtrlRight/Esc、snippet、精确undo与零全文操作；无真实模型/用户key调用，无物理鼠标注入。不开agents/CUA，native串行≤4。
+- **停止点**：本轮代码/测试/文档已分批本地提交；本checkpoint随最后文档提交。工作区应干净，无运行native/test/agent句柄。Debug已更新；版本仍0.6.2，本轮未推送/新发布/MSI/安装，不移动旧tag。下一步按用户体验反馈或明确发布要求继续。0.6.2正式发布核对已完成，见下段，不再跟进旧CI。
+
+## 0.6.2已发布（完成基线）
+
+- master/tag **a11031e1521f8ef73c01c7492d4fc094cea4c75b**，CI **41807522121 success**；https://github.com/water2004/Folia/releases/tag/v0.6.2 。发布说明全英文，归一CRLF后与release-notes/v0.6.2.md精确匹配。正式MSI下载build/releases/v0.6.2/，ProductVersion **0.6.2**、**53907228 bytes**、SHA256 **b17724d0063cbcf80472e6d65ef7d43c31488420f2ab4bc008ce1756157c7268**，匹配sidecar与GitHub digest，verification.json记录。未安装，不移动tag。
+- 本地MSI预检build/folia-062-msi.log成功，Release真实启动/正常关闭exit0；本地MSI53907215 bytes与正式CI不同构建，不混hash。仅既有WiX AllowSameVersionUpgrades ICE61 warning、0error。
 
 ## AI编辑与流式请求验收基线（已完成，历史）
 
