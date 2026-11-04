@@ -30,7 +30,6 @@ struct Fixture {
     std::atomic<int> requests = 0;
     std::string error;
     std::vector<CompletionState> states;
-    bool suppressed = false;
     ~Fixture() { controller.reset(); }
     Fixture(std::u32string proposal = U" hello world", bool source = false, CompletionService::Transport transport = {}, std::u32string old = {}) {
         session.SetText(L"abc");
@@ -44,7 +43,7 @@ struct Fixture {
             [this](CompletionState state, auto const& value) { states.push_back(state); if (state == CompletionState::Failed) error = value; },
             [this, proposal = std::move(proposal), old = std::move(old), transport = std::move(transport)](auto const& config, auto const& prompt, auto stop) {
                 ++requests; return transport ? transport(config, prompt, stop) : CompletionResult{Reply(proposal, old)};
-            }, [this] { return suppressed; });
+            });
         controller->SetFocused(true);
     }
     bool Execute(folia::Command const& command) {
@@ -60,6 +59,18 @@ struct Fixture {
     bool Wait() { return Pump([&] { return controller->Active() || !error.empty(); }); }
 };
 suite inline_completion_tests = [] {
+    "typing over a selection schedules AI and collapsed affinities remain a caret"_test = [] {
+        for (bool selected : {false, true}) {
+            Fixture f;
+            auto owner = f.session.Selection().active.container_id;
+            f.session.SetSelection({{owner, selected ? 1u : 2u, folia::TextAffinity::Downstream},
+                {owner, 2, folia::TextAffinity::Upstream}});
+            f.controller->Cancel();
+            if (!selected) expect(f.session.CaptureCompletionContext().has_value());
+            f.Type(U"x"); expect(f.Wait()); expect(f.requests.load() == 1);
+            expect(f.controller->Accept(false));
+        }
+    };
     "AI edits reuse existing delimiters and preserve exact source and caret through undo"_test = [] {
         for (auto markdown : {L"abc OLD rest", L"$abc OLD rest$", L"$$\nabc OLD rest\n$$", L"```rust\nabc OLD rest\n```"}) {
             Fixture f(U"new", false, {}, U"OLD");
@@ -107,14 +118,6 @@ suite inline_completion_tests = [] {
             expect(f.session.TextUtf8() == original); expect(f.session.Selection() == before);
             expect(f.Execute({.kind = folia::CommandKind::Redo})); expect(f.session.TextUtf8() == accepted);
         }
-    };
-    "local completions suppress AI requests and retire a previously visible proposal"_test = [] {
-        Fixture f;
-        f.suppressed = true; f.Type(U"x");
-        expect(!Pump([&] { return f.requests.load() != 0; }, std::chrono::milliseconds(600)));
-        f.suppressed = false; f.Type(U"y"); expect(f.Wait());
-        f.suppressed = true; expect(!f.controller->Active()); expect(!f.controller->Accept(false));
-        f.controller->Validate(); f.suppressed = false; expect(!f.controller->Active());
     };
     "diff preview inserts only new text and marks replaced source without modifying it"_test = [] {
         folia::NodeId owner{7}; DisplayInlineText display;

@@ -42,6 +42,7 @@ namespace winrt::Folia::implementation
             };
         }
         friend struct WorkspaceWindowTestAccess;
+        friend struct CompletionWindowTestAccess;
         friend struct App;
         struct DocumentTab {
             Windows::Foundation::IInspectable item{nullptr};
@@ -115,7 +116,7 @@ namespace winrt::Folia::implementation
         void ReplaceAllSearchMatches();
         folia::SearchOptions CurrentSearchOptions();
         bool ExecuteEditorCommand(folia::Command const& command);
-        void ConfigureInlineCompletion();
+        void ConfigureInlineCompletion(winrt::Folia::CompletionService::Transport transport = {});
         void UpdateCompletionStatus(winrt::Folia::CompletionState, std::string const& error = {});
         bool HandleCompletionKey(folia::platform::editor::EditorKeyGesture);
         void ShowFootnoteFlyout(

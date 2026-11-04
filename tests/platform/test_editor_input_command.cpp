@@ -8,7 +8,7 @@ using namespace folia::platform::editor;
 
 suite editor_input_command_tests = [] {
 
-"completion keys have one owner and respect modifiers composition and local suggestions"_test = [] {
+"visible AI edits remain accessible alongside command lists and snippet stops"_test = [] {
     using Owner = EditorCompletionKeyOwner;
     for (bool composing : {false, true})
     for (bool latex : {false, true})
@@ -16,16 +16,19 @@ suite editor_input_command_tests = [] {
     for (bool ai : {false, true}) {
         EditorCompletionKeyState state{composing, latex, snippet, ai};
         auto tab = CompletionKeyOwner({.key = EditorKey::Tab}, state);
-        auto expected = composing ? Owner::None : latex ? Owner::Latex : snippet ? Owner::Snippet : ai ? Owner::Inline : Owner::None;
+        auto expected = composing ? Owner::None : ai ? Owner::Inline : latex ? Owner::Latex : snippet ? Owner::Snippet : Owner::None;
         expect(tab == expected);
         expect(CompletionKeyOwner({.key = EditorKey::Tab, .control = true}, state) == Owner::None);
         expect(CompletionKeyOwner({.key = EditorKey::Tab, .shift = true}, state)
             == (!composing && snippet ? Owner::Snippet : Owner::None));
         expect(CompletionKeyOwner({.key = EditorKey::Tab, .alt = true}, state) == Owner::None);
         expect(CompletionKeyOwner({.key = EditorKey::Right, .control = true}, state)
-            == (!composing && !latex && !snippet && ai ? Owner::Inline : Owner::None));
+            == (!composing && ai ? Owner::Inline : Owner::None));
         expect(CompletionKeyOwner({.key = EditorKey::Enter}, state)
             == (!composing && latex ? Owner::Latex : Owner::None));
+        expect(CompletionKeyOwner({.key = EditorKey::Down}, state)
+            == (!composing && latex ? Owner::Latex : Owner::None));
+        expect(CompletionKeyOwner({.key = EditorKey::Escape}, state) == expected);
     }
 };
 

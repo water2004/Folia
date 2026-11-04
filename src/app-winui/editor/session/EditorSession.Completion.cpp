@@ -5,7 +5,7 @@ import folia.markdown.document_text;
 namespace winrt::Folia {
 std::optional<folia::completion::Context> EditorSession::CaptureCompletionContext(folia::completion::Budget budget) const {
     auto selection = Selection();
-    if (selection.anchor != selection.active) return {};
+    if (!selection.is_caret()) return {};
     if (auto editor = core_->editor.source_editor()) {
         auto const& lines = editor->lines();
         auto found = std::ranges::find(lines, selection.active.container_id, &folia::SourceLine::id);

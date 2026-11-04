@@ -27,6 +27,22 @@ namespace
 
 suite editor_snippet_session_tests = [] {
 
+"bounded edits keep snippet stops only inside their active argument"_test = [] {
+    auto parsed = parse_snippet_template(U"a${1:x}b${2:y}c$0");
+    EditorSnippetSession session;
+    const auto owner = NodeId{93};
+    auto first = session.Start(owner, 0, parsed.tab_stops);
+    session.PrepareEdit({owner, {1, 2}}, *first);
+    expect(session.Active());
+    expect(session.Navigate(Caret(owner, 4), false).selection == Selected(owner, 5, 6));
+    for (auto span : {TextSpan{owner, {0, 2}}, TextSpan{owner, {1, 4}},
+        TextSpan{NodeId{94}, {1, 2}}, TextSpan{owner, {2, 1}}}) {
+        first = session.Start(owner, 0, parsed.tab_stops);
+        session.PrepareEdit(span, *first);
+        expect(!session.Active());
+    }
+};
+
 "final snippet stops release Tab immediately instead of retaining an empty session"_test = [] {
     EditorSnippetSession session;
     auto symbol = parse_snippet_template(U"\\alpha$0");

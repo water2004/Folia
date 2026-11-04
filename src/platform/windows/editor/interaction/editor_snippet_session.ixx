@@ -111,6 +111,19 @@ public:
     void Cancel() { state_.reset(); }
     bool Active() const { return state_.has_value(); }
 
+    // Edits inside the current stop can rebase following stops through the
+    // resulting selection. Edits crossing its boundary invalidate that plan.
+    void PrepareEdit(folia::TextSpan span, folia::TextSelection const& selection) {
+        if (!state_) return;
+        if (span.container_id != state_->container
+            || selection.anchor.container_id != state_->container
+            || selection.active.container_id != state_->container) { Cancel(); return; }
+        RebaseCurrent(selection);
+        auto current = state_->stops[state_->current].range;
+        if (span.source_range.start < current.start || span.source_range.end > current.end
+            || span.source_range.start > span.source_range.end) Cancel();
+    }
+
 private:
     struct Stop {
         std::size_t tab_index = 0;

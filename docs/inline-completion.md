@@ -35,12 +35,22 @@ an empty suggestion, token-limit exhaustion and request errors have distinct
 states. Cancellation, focus loss and document changes stop that indicator;
 late responses cannot restore it. Empty token-limited responses are not cached.
 
-Tab accepts the current proposal, Ctrl+Right accepts its next word, and Escape
-dismisses it. Existing completion lists and snippet tab stops retain priority.
+Tab accepts the visible AI proposal, Ctrl+Right accepts its next word, and Escape
+dismisses it. Automatic TeX lists and snippet sessions do not block AI requests,
+delivery or preview. When both suggestions are visible, arrows navigate the TeX
+list and Enter inserts its selected command; Tab and Ctrl+Right accept AI.
+Without an AI proposal, Tab accepts the TeX candidate or advances a snippet.
+Shift+Tab retains backward snippet navigation. Escape dismisses AI first, then
+the TeX list, then the snippet session on subsequent presses.
 One deterministic key policy assigns each gesture to the TeX list, snippet or
 AI proposal, taking modifiers and IME composition into account. Shift+Tab never
 accepts a TeX item. A snippet releases Tab as soon as it reaches its final `$0`.
-While a local list or snippet is active, AI requests and results are suppressed.
+The TeX list's hint follows the visible proposal, so its acceptance instructions
+match the action Tab will perform. Accepting AI closes the old command list;
+accepting a TeX command cancels obsolete AI results through the ordinary edit flow.
+Typing over selected text, including a snippet argument, schedules predictions
+just like typing at a caret. An AI edit confined to the active argument retains
+snippet navigation; an edit crossing that argument retires the outdated tab stops.
 Partial acceptance and matching typed prefixes consume the existing proposal;
 they do not issue a request per word. New proposals follow ordinary idle typing.
 Partial acceptance uses ICU word segmentation, including Chinese words, emoji

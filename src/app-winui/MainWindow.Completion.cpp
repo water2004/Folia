@@ -3,15 +3,17 @@
 #include "localization/Localization.h"
 
 namespace winrt::Folia::implementation {
-void MainWindow::ConfigureInlineCompletion() {
+void MainWindow::ConfigureInlineCompletion(winrt::Folia::CompletionService::Transport transport) {
     inlineCompletion.reset();
     UpdateCompletionStatus(winrt::Folia::CompletionState::Idle);
     if (!appSettings.completion.enabled) return;
     inlineCompletion = std::make_shared<winrt::Folia::InlineCompletionController>(editorSession(), appSettings.completion,
-        DispatcherQueue(), [this](auto const& command) { return ExecuteEditorCommand(command); },
+        DispatcherQueue(), [this](auto const& command) {
+            if (command.paste_range) keyboardController.PrepareSourceEdit(*command.paste_range);
+            return ExecuteEditorCommand(command);
+        },
         [this] { RenderEditorSurface(); }, [this](auto state, std::string const& text) { UpdateCompletionStatus(state, text); },
-        winrt::Folia::CompletionService::Transport{},
-        [this] { return latexCompletionController.Active() || keyboardController.HasSnippetSession(); });
+        std::move(transport));
     inlineCompletion->SetFocused(EditorSurface().FocusState() != Microsoft::UI::Xaml::FocusState::Unfocused && !settingsMode);
     textInputController.SetCompositionChanged([this](bool composing) {
         if (inlineCompletion) { inlineCompletion->CompositionChanged(composing); RenderEditorSurface(); }
@@ -21,6 +23,8 @@ void MainWindow::UpdateCompletionStatus(winrt::Folia::CompletionState state, std
     if (windowClosed) return;
     using winrt::Folia::CompletionState;
     using Microsoft::UI::Xaml::Visibility;
+    LatexSuggestionHint().Text(Localize(state == CompletionState::Ready
+        ? L"LatexSuggestionHintWithAI" : L"LatexSuggestionHint"));
     auto busy = state == CompletionState::Requesting;
     CompletionProgressRing().IsActive(busy);
     CompletionProgressRing().Visibility(busy ? Visibility::Visible : Visibility::Collapsed);
@@ -49,6 +53,9 @@ bool MainWindow::HandleCompletionKey(folia::platform::editor::EditorKeyGesture g
     }
     if (owner == EditorCompletionKeyOwner::Inline) {
         if (gesture.key == EditorKey::Escape) { inlineCompletion->Cancel(); RenderEditorSurface(); return true; }
+        // The command list's replacement range becomes stale after accepting
+        // an AI edit. Dismiss that list, while keeping word acceptance available.
+        latexCompletionController.Cancel();
         return inlineCompletion->Accept(gesture.key == EditorKey::Right);
     }
     return false;

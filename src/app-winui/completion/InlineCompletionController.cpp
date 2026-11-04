@@ -23,10 +23,9 @@ std::size_t nextWord(std::u32string_view text) {
 }
 InlineCompletionController::InlineCompletionController(EditorSession& session, CompletionConfig config,
     Microsoft::UI::Dispatching::DispatcherQueue queue, Execute execute, std::function<void()> render,
-    std::function<void(CompletionState, std::string const&)> status, CompletionService::Transport transport,
-    std::function<bool()> suppressed)
+    std::function<void(CompletionState, std::string const&)> status, CompletionService::Transport transport)
     : session_(session), config_(std::move(config)), queue_(queue), execute_(std::move(execute)),
-      render_(std::move(render)), status_(std::move(status)), suppressed_(std::move(suppressed)) {
+      render_(std::move(render)), status_(std::move(status)) {
     position_ = session.Selection().active; content_ = session.ContentState();
     // Disabled completion has no worker, timer or cached document text.
     if (config_.enabled && ValidateCompletionConfig(config_).empty()) {
@@ -60,9 +59,8 @@ void InlineCompletionController::CompositionChanged(bool value) {
 }
 void InlineCompletionController::Validate() {
     if (accepting_) return;
-    if (suppressed_ && suppressed_()) { Cancel(); return; }
     auto selection = session_.Selection();
-    if (selection.active != position_ || selection.anchor != selection.active || content_ != session_.ContentState()) Cancel();
+    if (selection.active != position_ || !selection.is_caret() || content_ != session_.ContentState()) Cancel();
 }
 void InlineCompletionController::Edited(folia::TextSelection before, folia::Command const& command) {
     if (accepting_) return;
@@ -70,15 +68,15 @@ void InlineCompletionController::Edited(folia::TextSelection before, folia::Comm
     if (service_) service_->Cancel();
     if (timer_) timer_.Stop();
     auto after = session_.Selection();
-    bool typed = command.typed_input && command.kind == folia::CommandKind::InsertText
-        && before.anchor == before.active;
-    if (typed && proposal_.at(before.active.container_id.v, before.active.source_offset)
+    bool typed = command.typed_input && command.kind == folia::CommandKind::InsertText;
+    const auto continuing = typed && before.is_caret();
+    if (continuing && proposal_.at(before.active.container_id.v, before.active.source_offset)
         && proposal_.text().starts_with(command.text)) {
         const auto consumed = folia::completion::prefix_edit(proposal_.edit(), command.text.size());
         const auto reused = folia::cps_to_utf8(consumed.before);
         if (proposalSuffix_.starts_with(reused)) proposalSuffix_.erase(0, reused.size());
     }
-    if (!(typed && proposal_.consume(before.active.container_id.v, before.active.source_offset, command.text))) proposal_.clear();
+    if (!(continuing && proposal_.consume(before.active.container_id.v, before.active.source_offset, command.text))) proposal_.clear();
     position_ = after.active; content_ = session_.ContentState();
     if (proposal_.at(after.active.container_id.v, after.active.source_offset)) {
         // Typing may have applied semantic pairing/structure edits as well.

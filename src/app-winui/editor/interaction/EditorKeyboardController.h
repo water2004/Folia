@@ -41,6 +41,7 @@ namespace winrt::Folia
             std::u32string_view source);
         void ResetCaretGoal();
         void CancelSnippetSession();
+        void PrepareSourceEdit(folia::TextSpan span);
         bool HasSnippetSession() const { return snippetSession_.Active(); }
         std::vector<folia::platform::editor::EditorSnippetPlaceholder> SnippetPlaceholders();
 

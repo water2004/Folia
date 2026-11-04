@@ -89,14 +89,16 @@ export namespace folia::platform::editor
     };
     inline EditorCompletionKeyOwner CompletionKeyOwner(EditorKeyGesture key, EditorCompletionKeyState state) {
         if (state.composing || key.alt) return EditorCompletionKeyOwner::None;
+        // Visible ghost text owns acceptance. An automatically opened command
+        // list or an active snippet must not make the displayed AI edit unusable.
+        if (state.inline_edit && !key.shift
+            && ((!key.control && (key.key == EditorKey::Tab || key.key == EditorKey::Escape))
+                || (key.control && key.key == EditorKey::Right))) return EditorCompletionKeyOwner::Inline;
         if (!key.control && !key.shift && state.latex
             && (key.key == EditorKey::Tab || key.key == EditorKey::Enter || key.key == EditorKey::Escape
                 || key.key == EditorKey::Up || key.key == EditorKey::Down)) return EditorCompletionKeyOwner::Latex;
         if (!key.control && state.snippet && (key.key == EditorKey::Tab || (!key.shift && key.key == EditorKey::Escape)))
             return EditorCompletionKeyOwner::Snippet;
-        if (state.inline_edit && !state.latex && !state.snippet && !key.shift
-            && ((!key.control && (key.key == EditorKey::Tab || key.key == EditorKey::Escape))
-                || (key.control && key.key == EditorKey::Right))) return EditorCompletionKeyOwner::Inline;
         return EditorCompletionKeyOwner::None;
     }
 

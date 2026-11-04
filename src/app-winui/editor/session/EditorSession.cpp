@@ -326,7 +326,7 @@ namespace winrt::Folia
     {
         if (core_->editor.source_editor()) return std::nullopt;
         auto selection = core_->editor.selection();
-        if (selection.anchor != selection.active) return std::nullopt;
+        if (!selection.is_caret()) return std::nullopt;
         if (folia::document_content_context_at(core_->editor.document(), selection.active)
             != folia::DocumentContentContext::Math)
             return std::nullopt;

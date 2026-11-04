@@ -101,6 +101,11 @@ namespace winrt::Folia
         snippetSession_.Cancel();
     }
 
+    void EditorKeyboardController::PrepareSourceEdit(folia::TextSpan span)
+    {
+        if (session_) snippetSession_.PrepareEdit(span, session_->Selection());
+    }
+
     std::vector<folia::platform::editor::EditorSnippetPlaceholder>
     EditorKeyboardController::SnippetPlaceholders()
     {
