@@ -20,6 +20,8 @@ suite completion_edit_tests = [] {
         expect(fatal(newline.has_value())); expect(newline->after.ends_with(U'\n'));
         auto unicode = decode_edit_response(UR"({"oldText":"","newText":"\ud83d\ude42e\u0301"})", {});
         expect(fatal(unicode.has_value())); expect(bool(unicode->after == U"\U0001f642e\u0301"));
+        auto windowsLines = decode_edit_response(UR"({"oldText":"","newText":"a\r\nb\rc"})", {});
+        expect(fatal(windowsLines.has_value())); expect(bool(windowsLines->after == U"a\nb\nc"));
     };
     "diff keeps reused brackets as source and separates inserted arguments"_test = [] {
         Edit edit{U"}{}", U"a}{b}"};
@@ -72,6 +74,20 @@ suite completion_edit_tests = [] {
             expect(make_prompt(capture(source, at)).context == first.context);
         source.replace(source.find(U"edit"), 4, U"EDIT");
         expect(make_prompt(capture(source, caret)).context == first.context);
+    };
+    "fixed following blocks share the existing context budget and remain ahead of local edits"_test = [] {
+        std::u32string huge(10 * 1024 * 1024, U'\U0001f642');
+        std::array<std::u32string_view, 2> upper{huge, U"stable upper"}, lower{U"stable lower", huge};
+        auto budget = make_budget(7000, 128);
+        auto first = capture(U"abc", 1, upper, budget, lower);
+        auto next = capture(U"aXYZbc", 4, upper, budget, lower);
+        expect(!first.following.empty());
+        expect(first.following.starts_with("stable lower\n\n"));
+        expect(first.preceding.size() <= budget.preceding_bytes && first.following.size() <= budget.following_bytes);
+        expect(first.prefix.size() + first.suffix.size() + first.preceding.size() + first.following.size() <= 7000_u);
+        expect(make_prompt(first).context == make_prompt(next).context);
+        auto changedLower = lower; changedLower[0] = U"updated lower";
+        expect(make_prompt(capture(U"abc", 1, upper, budget, changedLower)).context != make_prompt(first).context);
     };
 };
 }

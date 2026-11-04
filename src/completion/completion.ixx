@@ -8,14 +8,16 @@ inline constexpr std::uint32_t max_output_tokens = 4096;
 struct Budget {
     std::size_t prefix_bytes = 4096;
     std::size_t suffix_bytes = 1024;
-    std::size_t preceding_bytes = 2048;
+    std::size_t preceding_bytes = 1024;
     std::uint32_t output_tokens = 128;
     std::size_t proposal_characters = 512;
+    std::size_t following_bytes = 1024;
 };
 struct Context {
     std::string preceding, prefix, suffix;
     std::size_t active_prefix_byte = 0;
-    std::size_t active_suffix_bytes = 0;
+    std::size_t active_suffix_bytes = std::string::npos;
+    std::string following;
     bool operator==(Context const&) const = default;
 };
 struct Prompt {
@@ -25,7 +27,8 @@ struct Prompt {
 enum class Eagerness { Conservative, Balanced, Proactive };
 Budget make_budget(std::size_t context_bytes, std::uint32_t output_tokens);
 Context capture(std::u32string_view source, std::size_t caret,
-    std::span<std::u32string_view const> preceding = {}, Budget budget = {});
+    std::span<std::u32string_view const> preceding = {}, Budget budget = {},
+    std::span<std::u32string_view const> following = {});
 Prompt make_prompt(Context const&, Budget budget = {}, Eagerness eagerness = Eagerness::Balanced);
 
 // Expected text is an exact prefix of the bounded following source. Models

@@ -52,7 +52,15 @@ std::optional<Edit> decode_edit_response(std::u32string_view response, Context c
         || !json.contains("newText") || !json["newText"].is_string()) return {};
     const auto old = json["oldText"].get<std::string>();
     if (!context.suffix.starts_with(old)) return {};
-    Edit result{scalars(old), scalars(json["newText"].get<std::string>())};
+    Edit result{scalars(old), {}};
+    const auto generated = scalars(json["newText"].get<std::string>());
+    for (std::size_t i = 0; i < generated.size(); ++i) {
+        if (generated[i] != U'\r') result.after += generated[i];
+        else {
+            result.after += U'\n';
+            if (i + 1 < generated.size() && generated[i + 1] == U'\n') ++i;
+        }
+    }
     if (result.before.size() > 128 || result.after.size() > std::min(budget.proposal_characters, std::size_t{512})) return {};
     unsigned lines = 1;
     for (auto c : result.after) {
