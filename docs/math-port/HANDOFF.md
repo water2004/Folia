@@ -2,14 +2,16 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-11-04，AI编辑提案/Tab优先级/长预览光标/窗口空白拖动）
+## 当前 checkpoint（2026-11-04，AI编辑/缓存/Tab/光标/窗口拖动/嵌套括号/流式超时）
 
-- 最新用户要求：AI不应仅插入，需可复用/替换光标后的括号等后缀；消除Tab与TeX/片段/括号冲突；长ghost换行光标错位；切页后拖标题空白误把标签拖出。另要求提高上游cache命中：稳定上文/下文放prompt前，活跃编辑片段/要求放最后，固定区间不逐字滑窗，需连续输入/移光标/局部改动前缀稳定测试；不承诺服务端命中比例。不开agents/CUA/鼠标模拟，native串行≤4；不改已发布tag，不擅自发布下一版。
-- 已读AGENTS与当前模型。准备采用VSCode InlineCompletionItem的range+insertText思想：有界oldText/newText编辑提案，精确匹配当前位置后缀，原生一次事务；diff只用于预览/部分接受，不允许模型提供未经校验的偏移，也不传全文。尚未实现/改代码，协议/preview细节待完成。参考API https://code.visualstudio.com/api/references/vscode-api#InlineCompletionItem；已浏览官方inlineCompletionsModel.ts，range edits/undo stops/suppressInSnippetMode与suggest冲突控制。
-- 光标已修：InsertCompletionPreview正确标GeneratedPreview并DisplayPositionForSource返回起点，但LineIndexFor只按sourceSpans选affinity first/last，ghost换行每行同一offset，Downstream选末行再clamp。已对GeneratedPreview锚点按canonical display边界选视觉行，软换行保持插入点前缘；不改Source/BoundaryDecoration的既有语义。新真实DirectWrite正文/表格×两affinity×空/普通/硬换行12组合，before8失败；最终**build/inline-edit-caret-accepted.log完整Windows89项4371断言通过**。App完整build尚未跑（之后同本轮其他修复一并），不宣称实际desktop体验已复测。
-- Tab顺序目前MainWindow.Events: latex.HandleKey→HandleInlineCompletionKey→keyboard.Key；AI只检查HasSnippetSession但TeX弹窗仍会抢Tab，SnippetSession只$0也可能一直占。需定义统一上下文优先级/过期处理，按成熟方案只让一个建议拥有Tab，实际测试不能依赖桌面按键。
-- 标题拖动：SDK源码build/tag-layout/{TabView,TabView-main}.cpp（官方main与锁定版本相关逻辑相同），GetTabAtPoint(2080)只用TabRect无clip；EnteringMoveSize(1682)在非tab点early-return不清m_isInTabTearOutLoop，Exited2036才清。有上次click残留/裁切命中两种待证假设，**尚未定位，不能宣称修复**。考虑按真实可见tab按下限定SDK撕出手势，需验证native事件生命周期；不要直接在TearOutRequested拒绝NewWindowId（SDK会消费空ID）。试验性Lifecycle.h三事件订阅已撤回，git diff该文件应为空。tests/app/visual/test_tab_transfer.cpp有friend入口，无输入注入。
-- 无本地build/test/agent活跃。release下载exec66988已完成，正式资产核对见下。下一步先完成portable AI Edit{oldText,newText}精确后缀匹配/有界diff与Prompt稳定段，再接一次事务（普通Markdown接受仍需semantic paste，不可用literal ReplaceSourceText取代结构粘贴）、preview和Tab统一选择；随后标题拖动、完整Debug与窄分组测试。AI协议尚未改，计划JSON响应要复用nlohmann而非手写JSON；fixture响应需同步，不加旧raw文本兼容分支。
+- 本轮功能均已实现：AI以有界 `oldText/newText` 编辑提案复用/替换后缀，diff预览与一次Paste范围事务、部分接受/撤销；统一TeX→snippet→AI键盘归属，$0释放Tab；修复长ghost光标行归属；仅可见标签按下允许SDK撕出，标题空白手势禁止；稳定前后文放active区域之前；解析器括号边界支持 `\left({}\right)` 内层补全/删除；HTTP按15秒无数据计时，可用数据及时读取，协议终止立即完成。
+- 本轮已分批本地提交：**d0cb0614** ghost光标；**ae9fb608** Edit/JSON/diff/cache；**34a4a25e** 三协议终止；**2e717403** HTTP无活动超时；**2778f5db** 嵌套括号；**2e755061** 有界前后文；**b876ebc6** 窗口手势；**fc048c7a** 编辑事务/预览/统一按键。本checkpoint随最后文档提交保存。版本仍0.6.1，未推送/新发布/MSI/安装，不移动旧tag。不开agents/CUA/鼠标模拟，native串行≤4。
+- 接口/边界：core Paste新增可选block-local范围，保留原selection_before、语义结构粘贴和一次事务；不临时SetSelection，不增加全文parse/serialize或第二坐标。diff仅显示层，复用字仍Source，删除字muted划线。TeX/snippet活跃时抑制AI请求/交付/接受。capture仅取附近3个前/后owner或SourceLine，4:1:1:1总预算不增加，当前块固定行/256字符锚点；仅声明prompt稳定，不承诺真实服务端cache ratio。
+- math syntax增加BracketBoundary，由Tree-sitter恢复节点提供glyph/whole syntax，删除raw前缀扫描；外层闭合边界不能被恢复中的内层借用。**inline-edit-math-syntax-accepted.log 7项15330**过；app新3例亦过。不重开已验数学宏包审计。
+- 正式验收：**inline-edit-core.log 768项500632**、**inline-edit-platform.log 91项4473**过。最新portable **inline-edit-completion-final-tests.log 18项3722**过（含新CRLF生成文本归一和有界行查找）。最终分组 **inline-edit-final-test_*.log**：inline_completion17/221、HTTP14/96、layout2/1056、latex4/27216、math_bracket5/1331、control_lifetime4/62（controller各另loading5/22）；visual tab_transfer21/244、workspace_chrome7/762全部过。Debug **inline-edit-accepted-build.log**成功，**inline-edit-startup.log**两轮正常关闭exit0。
+- 最后两个cpp变更也已验收：**inline-edit-current-build.log** 增量Debug成功；**inline-edit-current-test_inline_completion.log 17项221**、**inline-edit-current-test_completion_http.log 14项96**（各另loading5/22）全过；**inline-edit-current-startup.log** 两轮正常启动/关闭exit0。vendor source-lock全部**27项hash**匹配。无运行build/test/agent句柄，无真实API调用/凭据改动。
+- 验证限制：无物理鼠标拖动或真实服务端cache采样；窗口测试走生产gesture入口/真实XAML几何/SDK状态，未注入输入。HTTP全loopback，包括持续reasoning超过短idle、DONE后保持连接、无响应超时；WinHTTP官方依据 https://learn.microsoft.com/en-us/windows/win32/api/winhttp/nf-winhttp-winhttpquerydataavailable 。docs/inline-completion.md与workspace-windows.md已更新。
+- **停止点/下一步**：本轮请求已完成，Debug已更新，全部代码/正式测试/文档已分批提交；以用户实际体验反馈或新的发布要求为下一步，不重复已过测试，不追旧流水线。本轮未做物理拖动人工复测，保留该验证限制。既有ignored诊断目录因清理审批拒绝保留，不重试。
 
 ## 0.6.1已发布（完成基线）
 
