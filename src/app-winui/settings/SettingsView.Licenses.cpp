@@ -63,7 +63,7 @@ namespace winrt::Folia
         licenseStatus_.TextWrapping(TextWrapping::Wrap);
         Grid::SetRow(licenseStatus_, 3);
         page.Children().Append(licenseStatus_);
-        return page;
+        return settings_ui::PageViewport(page);
     }
 
     UIElement SettingsView::BuildAboutPage()

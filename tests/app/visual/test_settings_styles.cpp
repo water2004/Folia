@@ -156,7 +156,7 @@ suite settings_style_tests = [] {
                 window.AppWindow().Resize({static_cast<int>(width * scale), static_cast<int>(900 * scale)});
                 Pump([&] { return std::abs(root.ActualWidth() - width) < 20.; }); root.UpdateLayout();
                 auto scroll = navigation.Content().as<ScrollViewer>();
-                auto panel = scroll.Content().as<StackPanel>();
+                auto panel = First<StackPanel>(scroll.Content().as<UIElement>());
                 for (auto child : panel.Children()) expect(!child.try_as<Border>()) << "AI sections must not use a page-sized frame";
                 auto description = Description(panel, winrt::Folia::Localize(L"AICompletionDescription"));
                 expect(description != nullptr);

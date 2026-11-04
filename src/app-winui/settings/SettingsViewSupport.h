@@ -95,11 +95,20 @@ namespace winrt::Folia::settings_ui
         return header;
     }
 
+    inline Controls::Grid PageViewport(Xaml::UIElement const& page)
+    {
+        auto viewport = Xaml::Application::Current().Resources().Lookup(
+            winrt::box_value(L"SettingsPageViewportTemplate")).as<Xaml::DataTemplate>()
+            .LoadContent().as<Controls::Grid>();
+        viewport.FindName(L"PageContent").as<Controls::ContentPresenter>().Content(page);
+        return viewport;
+    }
+
     inline Controls::ScrollViewer PageScroll(Xaml::UIElement const& page)
     {
         Controls::ScrollViewer scroll;
         scroll.Style(ResourceStyle(L"SettingsPageScrollStyle"));
-        scroll.Content(page);
+        scroll.Content(PageViewport(page));
         return scroll;
     }
 
@@ -132,7 +141,7 @@ namespace winrt::Folia::settings_ui
         Xaml::Controls::Grid::SetRow(status, 1);
         status.TextWrapping(Xaml::TextWrapping::Wrap);
         page.Children().Append(status);
-        return page;
+        return PageViewport(page);
     }
 
     inline void SetStatus(Controls::TextBlock const& text, winrt::hstring const& message, bool error)
