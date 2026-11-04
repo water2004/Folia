@@ -33,6 +33,31 @@ std::optional<LatexCompletionQuery> Query(
 
 suite latex_completion_tests = [] {
 
+"large command catalogs retain stable bounded ranking without copying every match"_test = [] {
+    std::vector<LatexCommandDefinition> catalog;
+    for (std::size_t i = 0; i < 1800; ++i) {
+        auto suffix = std::to_string(i);
+        catalog.push_back(Command(suffix, U"command" + std::u32string(suffix.begin(), suffix.end()),
+            std::u32string(256, U'x') + U"$0"));
+    }
+    std::unordered_map<std::string, LatexCommandUsage> usage;
+    record_latex_command_usage(usage["1799"], 1000);
+    auto query = Query(catalog, U"\\command", 8, usage, 1000, 32);
+    expect(fatal(query.has_value()));
+    expect(query->candidates.size() == 32_u);
+    expect(query->candidates.front().command.id == "1799");
+    expect(query->candidates[1].command.id == "0");
+    expect(query->candidates.back().command.id == "30");
+    query = Query(catalog, U"\\command1", 9, usage, 1000, 1);
+    expect(fatal(query.has_value()));
+    expect(query->candidates.size() == 1_u);
+    expect(query->candidates.front().command.id == "1");
+    expect(query->candidates.front().exact_match);
+    query = Query(catalog, U"\\command", 8, usage, 1000, 0);
+    expect(fatal(query.has_value()));
+    expect(query->candidates.empty());
+};
+
 "each registered prefix owns exactly one template"_test = [] {
     auto shortMatrix = Command(
         "matrix.short", U"matrix", U"\\begin{matrix}\n$1\n\\end{matrix}$0");

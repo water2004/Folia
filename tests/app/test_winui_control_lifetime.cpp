@@ -81,6 +81,22 @@ namespace
 
     suite winui_control_lifetime_tests = []
     {
+        "latex popup exposes bounded extra candidates through normal keyboard navigation"_test = []
+        {
+            CompletionFixture fixture;
+            fixture.Query(L"$\\$", 2);
+            expect(fixture.controller.Active());
+            expect(fatal(fixture.list.Items().Size() == 32_u));
+            auto query = fixture.catalog->QueryAt(U"$\\$", 2, 32);
+            expect(fatal(query.has_value()));
+            for (int i = 0; i < 31; ++i)
+                expect(fixture.controller.HandleKey(winrt::Windows::System::VirtualKey::Down));
+            expect(fixture.list.SelectedIndex() == 31_i);
+            fixture.controller.AcceptSelected();
+            expect(bool(fixture.accepted == query->candidates.back().command.snippet));
+            expect(fixture.closedBeforeInsert);
+        };
+
         "latex popup refresh reuses live visual trees and updates narrowed candidates"_test = []
         {
             CompletionFixture fixture;

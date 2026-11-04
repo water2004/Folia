@@ -61,20 +61,27 @@ namespace winrt::Folia
         folia::SourceRange replacement,
         std::u32string_view source)
     {
-        if (!session_ || replacement.start > replacement.end) return false;
+        if (!session_ || !executeCommand_ || session_->IsSourceMode()
+            || replacement.start > replacement.end) return false;
         auto selection = session_->Selection();
         if (selection.active.container_id != container
             || selection.anchor.container_id != container)
             return false;
         auto editable = session_->EditableSource(container);
         if (!editable || !replacement.valid_for(editable->size())) return false;
-        auto start = folia::TextPosition{
-            container, replacement.start, folia::TextAffinity::Downstream};
-        auto end = folia::TextPosition{
-            container, replacement.end, folia::TextAffinity::Upstream};
-        session_->SetSelection(start, end);
+        auto parsed = folia::parse_snippet_template(source);
+        folia::platform::editor::EditorSnippetSession next;
+        auto after = next.Start(container, replacement.start, parsed.tab_stops);
+        if (!after) after = folia::TextSelection::caret({container,
+            replacement.start + parsed.text.size(), folia::TextAffinity::Downstream});
+        if (!executeCommand_({.kind = folia::CommandKind::ReplaceSourceText,
+            .text = std::move(parsed.text),
+            .replacement = folia::ReplaceTextTarget{{container, replacement}, *after}}))
+            return false;
+        snippetSession_ = std::move(next);
         if (textInput_) textInput_->NotifySelectionChanged();
-        return InsertSnippet(source, std::u32string{});
+        if (render_) render_();
+        return true;
     }
 
     bool EditorKeyboardController::MoveSnippetTabStop(bool backward)

@@ -424,6 +424,10 @@ public:
         if (cmd.kind == CommandKind::Undo) return undo();
         if (cmd.kind == CommandKind::Redo) return redo();
         if (source_view_) return execute_source_command_(cmd);
+        if (cmd.kind == CommandKind::ReplaceSourceText) {
+            return cmd.replacement && execute_document_replace_text(
+                cmd.replacement->range, cmd.text, cmd.replacement->selection_after);
+        }
         if (cmd.kind == CommandKind::MoveLeft || cmd.kind == CommandKind::MoveRight
             || cmd.kind == CommandKind::MoveUp || cmd.kind == CommandKind::MoveDown
             || cmd.kind == CommandKind::MoveLineStart || cmd.kind == CommandKind::MoveLineEnd

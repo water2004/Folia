@@ -81,7 +81,7 @@ namespace winrt::Folia
             Cancel();
             return;
         }
-        auto query = catalog_->QueryAt(input->source, input->caret);
+        auto query = catalog_->QueryAt(input->source, input->caret, 32);
         if (!query)
         {
             Cancel();

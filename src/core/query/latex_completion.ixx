@@ -145,8 +145,9 @@ inline std::optional<LatexCompletionQuery> query_latex_commands_at(
     }
     if (!slash) return std::nullopt;
 
-    std::vector<LatexCompletionCandidate> result;
-    result.reserve((std::min)(catalog.size(), limit));
+    struct Match { std::size_t index; double score; bool exact; };
+    std::vector<Match> matches;
+    matches.reserve((std::min)(catalog.size(), limit));
     std::vector<std::u32string_view> matching_triggers;
     for (std::size_t index = 0; index < catalog.size(); ++index) {
         auto const& command = catalog[index];
@@ -158,12 +159,7 @@ inline std::optional<LatexCompletionQuery> query_latex_commands_at(
         auto score = found_usage == usage.end()
             ? 0.0
             : decayed_latex_usage_score(found_usage->second, now_epoch_seconds);
-        result.push_back({
-            .command = command,
-            .recent_score = score,
-            .exact_match = trigger == prefix,
-            .catalog_order = index,
-        });
+        matches.push_back({index, score, trigger == prefix});
     }
 
     auto replacement_end = caret;
@@ -184,12 +180,18 @@ inline std::optional<LatexCompletionQuery> query_latex_commands_at(
         ++matched_length;
     }
 
-    std::ranges::stable_sort(result, [](auto const& left, auto const& right) {
-        if (left.exact_match != right.exact_match) return left.exact_match > right.exact_match;
-        if (left.recent_score != right.recent_score) return left.recent_score > right.recent_score;
-        return left.catalog_order < right.catalog_order;
+    const auto count = (std::min)(matches.size(), limit);
+    std::partial_sort(matches.begin(), matches.begin() + count, matches.end(), [](auto const& left, auto const& right) {
+        if (left.exact != right.exact) return left.exact > right.exact;
+        if (left.score != right.score) return left.score > right.score;
+        return left.index < right.index;
     });
-    if (result.size() > limit) result.resize(limit);
+    std::vector<LatexCompletionCandidate> result;
+    result.reserve(count);
+    for (std::size_t i = 0; i < count; ++i) {
+        auto const& match = matches[i];
+        result.push_back({catalog[match.index], match.score, match.exact, match.index});
+    }
     return LatexCompletionQuery{
         .replacement = {*slash, replacement_end},
         .prefix = std::u32string{prefix},

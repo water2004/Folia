@@ -2,7 +2,16 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-11-04，公式块Enter修复已完成）
+## 当前 checkpoint（2026-11-04，数学补全与0.6.1进行中）
+
+- 用户要求补齐数学补全，完成后推送发布0.6.1；此前Enter两批本地提交d2dde9c7/c1e583e4一并发布。六处版本与release-notes已改0.6.1，尚未推送/tag。不开agents/CUA/鼠标模拟，native串行≤4。
+- 原266项目录扩大为1769项：锁定MathJax4.1.3原生注册表对应1567个命令/别名、70环境，tools/latex-completion/{registry,methods,environments,templates}.json明确职责；generate.py输出静态Assets/latex/commands.json，运行时不构造数学引擎。tools/math-port/tex-package-conformance.cjs只导出registry metadata，不再写UI目录；既有native fixture未改变。
+- 查询改partial_sort索引，仅复制最终候选；UI最多32项、视口仍8行。Python生成一致性及7项单测已过。既有补全Undo/Redo实测20失败：先SetSelection临时选区且参数选择在事务外；现通用ReplaceSourceText命令带TextSpan/after selection，复用document_replace_text一次事务，Keyboard不再先改选区。build/latex-completion-app-accepted.log **4项27216断言+loading5项22**全部通过，含全部1769 snippet/精确查询/参数导航、10容器历史、3嵌套多行环境、70环境与代表性宏包实际native SVG。empheq只支持left/right选项、indentalign需要l/c/r参数，模板按源码修正，无引擎改动。
+- 标准Debug成功build/latex-completion-debug-final.log。core-final **768项500632**、platform **88项4275**、popup **4项62+loading5项22**、settings虚拟化 **2项50**全过。原生registry-focused真实执行1项**9607断言**（build/latex-completion-registry-accepted.log；UT颜色码需去除才能统计，不要再误判全skip）。70环境实际SVG无错误，未改native引擎。
+- tools/Generate-WixPayload精确替换内置commands.json且排除commands.user，isolated安装/同版本升级/repair全过build/latex-completion-installer.log，自定义命令/usage/settings/custom theme字节保留。当前exec **57449**依次跑brackets/inline completion/startup2轮，日志build/latex-completion-{brackets,inline,startup}.log；下一步等结果，再Release MSI预检、master/tag按release.yml发布并校验正式资产。
+- 目录/生成/CI数据检查批已本地提交**f93995aa**，编辑事务/查询批接着提交；版本/installer尚未提交，git status为准，无agents/CUA。不要重复已验Enter广泛审计；app全套有既有60秒总时限，应按受影响SourceFilter分组。
+
+## 公式块Enter修复已完成（历史基线）
 
 - 用户反馈$$→Enter→括号与字母行为不同，根因创建$$\n$$没有正文行。**已从创建语义修正为opening\n\nclosing**（Dollar/Bracket/fenced math/code/tilde及菜单插入），光标直接位于真实空行；普通输入仅在CST确实缺正文边界时补分隔，已有空行不追加。源码与CST仍一套位置，所有输入/撤销走既有TextEdit事务。
 - 源码批已本地提交 **d2dde9c7**：payload_shell保留BlockSourceKind（空storage记录grammar，不复制正文）修复重做后误按FencedCode解析；Task续行不计checkbox，编辑元数据与SerializerVisitor共用markdown.container_source.list_continuation_prefix，Writer消费policy.nonempty_prefix。3任务marker×4raw块及18容器/数学定界符组合覆盖精确保存重载、Undo/Redo、括号与Unicode输入，正常编辑零全文parse/serialize。

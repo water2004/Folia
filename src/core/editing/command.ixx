@@ -4,6 +4,7 @@
 export module folia.core.command;
 import std;
 import folia.markdown.dialect;
+import folia.markdown.text_edit;
 
 export namespace folia {
 
@@ -24,7 +25,12 @@ enum class CommandKind {
     SetTableColumnAlignment, NormalizeTable,
     InsertTableRowAt, InsertTableColumnAt, MoveTableRowTo, MoveTableColumnTo,
     ToggleCallout, ExtensionCmd,
-    Undo, Redo, Cut, Copy, Paste,
+    Undo, Redo, Cut, Copy, Paste, ReplaceSourceText,
+};
+
+struct ReplaceTextTarget {
+    TextSpan range;
+    TextSelection selection_after;
 };
 
 struct Command {
@@ -43,6 +49,7 @@ struct Command {
     std::optional<std::u32string> title;    // InsertLink
     std::u32string callout_kind;           // ToggleCallout
     std::u32string ext_name;               // Extension
+    std::optional<ReplaceTextTarget> replacement; // Explicit block-local replacement
 
     static Command InsertText(std::u32string t) { Command c; c.kind = CommandKind::InsertText; c.text = std::move(t); return c; }
     static Command MoveLeft(bool ext)  { Command c; c.kind = CommandKind::MoveLeft;  c.extend_selection = ext; return c; }
