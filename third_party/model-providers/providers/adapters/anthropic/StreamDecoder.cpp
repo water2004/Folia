@@ -180,6 +180,7 @@ class AnthropicDecoder final : public IResponseDecoder {
             Bad();
         return out;
     }
+    bool Complete() const noexcept override { return messageStopped_; }
     ModelResult Finish() override {
         if (finished_ || !started_ || !sawMessageDelta_ || !messageStopped_ ||
             stopped_.size() != blocks_.size() || stopReason_.empty())

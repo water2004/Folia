@@ -7,6 +7,7 @@ class IResponseDecoder {
   public:
     virtual ~IResponseDecoder() = default;
     virtual std::vector<StreamEvent> OnEvent(SseEvent const& event) = 0;
+    virtual bool Complete() const noexcept = 0;
     // Missing terminal events or incomplete tool arguments fail closed.
     virtual ModelResult Finish() = 0;
 };

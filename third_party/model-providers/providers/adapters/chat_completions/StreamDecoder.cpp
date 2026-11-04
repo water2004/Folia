@@ -195,6 +195,7 @@ class ChatDecoder final : public IResponseDecoder {
         }
         return out;
     }
+    bool Complete() const noexcept override { return sawDone_; }
     ModelResult Finish() override {
         if (failed_ || !sawDone_ || !sawFinish_ || !sawChoice_)
             Invalid();

@@ -15,7 +15,9 @@
     },
     {
       "path": "providers/ModelAdapter.h",
-      "sha256": "06995e93144f628d852d383c5036ab1e331c74993c586ded9579ac74a61f5cf4"
+      "sha256": "6a9feb289730f6a18f14bd3d02bf4ee03652673256f4ca6a5135e1c1b476f027",
+      "upstream_sha256": "06995e93144f628d852d383c5036ab1e331c74993c586ded9579ac74a61f5cf4",
+      "local_change": "Expose parsed stream termination so the client need not wait for connection EOF."
     },
     {
       "path": "providers/ModelCodec.cpp",
@@ -55,7 +57,9 @@
     },
     {
       "path": "providers/StreamResponse.h",
-      "sha256": "f0346ae9e70a06f4936d2d7fe5840d71efb197330c1cdba8d299cc8ff636967b"
+      "sha256": "ddef62d38b554915f373d8497311b228ec9a3dc8607dc37a2e7e3d2693d4a1b4",
+      "upstream_sha256": "f0346ae9e70a06f4936d2d7fe5840d71efb197330c1cdba8d299cc8ff636967b",
+      "local_change": "Expose parsed stream termination so the client need not wait for connection EOF."
     },
     {
       "path": "providers/adapters/Adapters.h",
@@ -75,7 +79,9 @@
     },
     {
       "path": "providers/adapters/anthropic/StreamDecoder.cpp",
-      "sha256": "96d407050fbc3e12fdb4be7429373e542a09844b251905431d6a07746f4acd1e"
+      "sha256": "7f462fa9d66407eb86f5d8d07bc2f6d429f8fa474a115f765496b9ac93f95fed",
+      "upstream_sha256": "96d407050fbc3e12fdb4be7429373e542a09844b251905431d6a07746f4acd1e",
+      "local_change": "Expose parsed stream termination so the client need not wait for connection EOF."
     },
     {
       "path": "providers/adapters/chat_completions/Internal.h",
@@ -91,7 +97,9 @@
     },
     {
       "path": "providers/adapters/chat_completions/StreamDecoder.cpp",
-      "sha256": "5cf38ac6454c4130aa7c3ae61f9986a25fd32179a11fd565c4b87afb25081044"
+      "sha256": "444c5e0673f54dcb4644fb19689a6b0a8a0585c8a0224a2386d1279726730d7f",
+      "upstream_sha256": "5cf38ac6454c4130aa7c3ae61f9986a25fd32179a11fd565c4b87afb25081044",
+      "local_change": "Expose parsed stream termination so the client need not wait for connection EOF."
     },
     {
       "path": "providers/adapters/responses/Internal.h",
@@ -107,7 +115,9 @@
     },
     {
       "path": "providers/adapters/responses/StreamDecoder.cpp",
-      "sha256": "0cae0bcac15e25ade9c53cf2bbd06844bb8ce1511f2800d8211ff5a4ecabf169"
+      "sha256": "9d3413255a99e9dc5dcad0911039e232716964213cd5281916cd3413d1dfdaac",
+      "upstream_sha256": "0cae0bcac15e25ade9c53cf2bbd06844bb8ce1511f2800d8211ff5a4ecabf169",
+      "local_change": "Expose parsed stream termination so the client need not wait for connection EOF."
     }
   ],
   "source": "Fairy src/providers",

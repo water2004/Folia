@@ -13,6 +13,7 @@ class StreamResponse final {
 
     [[nodiscard]] std::vector<StreamEvent> Feed(std::string_view bytes);
     [[nodiscard]] ModelResult Finish();
+    [[nodiscard]] bool Complete() const noexcept { return decoder_->Complete(); }
 
   private:
     SseParser parser_;

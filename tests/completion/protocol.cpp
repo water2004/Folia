@@ -28,7 +28,9 @@ suite completion_protocol_tests = [] {
             R"(data: {"choices":[],"usage":{"prompt_tokens":50,"completion_tokens":2,"total_tokens":52,"prompt_tokens_details":{"cached_tokens":32}}})" "\n\n"
             "data: [DONE]\n\n";
         StreamResponse decoder(ApiProtocol::ChatCompletions);
+        expect(!decoder.Complete());
         for (auto c : stream) (void)decoder.Feed(std::string_view(&c, 1));
+        expect(decoder.Complete());
         auto result = decoder.Finish();
         expect(text(result) == " 世界"); expect(result.usage.cachedInputTokens.value() == 32_u);
         expect(result.usage.inputTokens.value() == 50_u);
@@ -39,7 +41,9 @@ data: {"type":"response.completed","response":{"id":"r","status":"completed","ou
 
 )";
         StreamResponse decoder(ApiProtocol::Responses);
+        expect(!decoder.Complete());
         for (std::size_t start = 0; start < stream.size(); start += 7) (void)decoder.Feed(std::string_view(stream).substr(start, 7));
+        expect(decoder.Complete());
         auto result = decoder.Finish(); expect(text(result) == " next");
         expect(!result.usage.cachedInputTokens.has_value());
     };
@@ -58,7 +62,9 @@ data: {"type":"message_stop"}
 
 )";
         StreamResponse decoder(ApiProtocol::AnthropicMessages);
+        expect(!decoder.Complete());
         (void)decoder.Feed(stream);
+        expect(decoder.Complete());
         auto result = decoder.Finish(); expect(text(result) == " hello");
         expect(result.usage.outputTokens.value() == 1_u);
     };

@@ -414,6 +414,7 @@ class Decoder final : public IResponseDecoder {
                                 ProtocolFailure::InvalidStreamField);
         }
     }
+    bool Complete() const noexcept override { return terminal_; }
     ModelResult Finish() override {
         if (!terminal_)
             throw ProtocolError("Responses stream ended before a terminal event.",
