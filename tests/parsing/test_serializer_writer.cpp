@@ -23,6 +23,7 @@ suite serializer_event_writer_tests = [] {
         SerializerPrefixPolicy item;
         item.rule = SerializerPrefixRule::ListItem;
         item.marker = U"- ";
+        item.nonempty_prefix = U"  ";
         writer.begin_prefix_scope(NodeId{2}, item_source, item);
         writer.syntax_anchor({NodeId{2}, ContainerAnchorPart::Start, 0});
         writer.source_span(NodeId{1}, source);

@@ -128,7 +128,7 @@ inline std::optional<RawBlockOpening> recognize_raw_block_opening(
         auto closing = std::u32string(source.substr(0, indent))
             + std::u32string(fence->count, fence->marker);
         RawBlockOpening opening;
-        opening.source = fence->exact + U"\n" + closing;
+        opening.source = fence->exact + U"\n\n" + closing;
         if (info == "math" && dialect.math.fenced_math) {
             opening.block_kind = BlockKind::MathBlock;
             opening.source_kind = BlockSourceKind::FencedMath;
@@ -146,13 +146,13 @@ inline std::optional<RawBlockOpening> recognize_raw_block_opening(
     if (marker == U"$$" && dialect.math.block_dollar) {
         opening.source_kind = BlockSourceKind::DollarMath;
         opening.math_delimiter = MathDelimiter::BlockDollar;
-        opening.source = exact + U"\n" + std::u32string(source.substr(0, indent)) + U"$$";
+        opening.source = exact + U"\n\n" + std::u32string(source.substr(0, indent)) + U"$$";
         return opening;
     }
     if (marker == U"\\[" && dialect.math.block_bracket) {
         opening.source_kind = BlockSourceKind::BracketMath;
         opening.math_delimiter = MathDelimiter::BlockBracket;
-        opening.source = exact + U"\n" + std::u32string(source.substr(0, indent)) + U"\\]";
+        opening.source = exact + U"\n\n" + std::u32string(source.substr(0, indent)) + U"\\]";
         return opening;
     }
     return std::nullopt;

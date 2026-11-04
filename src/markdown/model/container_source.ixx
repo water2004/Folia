@@ -29,4 +29,15 @@ struct ContainerSource {
     bool operator==(const ContainerSource&) const = default;
 };
 
+// Consume an already recognized item marker. A task checkbox belongs to the
+// first body line and does not add columns to the list continuation prefix.
+inline std::u32string list_continuation_prefix(std::u32string_view marker, bool task_item) {
+    if (task_item) marker = marker.substr(0, marker.find(U'['));
+    std::size_t columns = 0;
+    for (auto cp : marker) columns += cp == U'\t' ? 4 - columns % 4 : 1;
+    if (marker.empty()) columns = 2;
+    else if (marker.back() != U' ' && marker.back() != U'\t') ++columns;
+    return std::u32string(columns, U' ');
+}
+
 }

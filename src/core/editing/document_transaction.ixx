@@ -75,6 +75,11 @@ inline BlockNode payload_shell(const BlockNode& source) {
     shell.payload = source.payload
         ? std::make_unique<BlockNodeSpecial>(*source.payload)
         : nullptr;
+    // Source text is replayed by TextEdits, but the grammar must survive a
+    // paragraph-to-raw-block transition before those edits are applied.
+    if (source.block_source.storage) {
+        shell.block_source.tree().kind = source.block_source.tree().kind;
+    }
     return shell;
 }
 

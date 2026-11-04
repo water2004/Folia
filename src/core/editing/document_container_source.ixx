@@ -38,12 +38,8 @@ inline std::vector<ContainerSourceSnapshot> snapshot_ancestors(
 inline std::u32string canonical_prefix(const BlockNode& container) {
     if (container.kind == BlockKind::BlockQuote || container.kind == BlockKind::Callout) return U"> ";
     if (container.kind != BlockKind::ListItem && container.kind != BlockKind::TaskListItem) return {};
-    const auto& marker = container.item_special().marker;
-    std::size_t columns = 0;
-    for (const auto cp : marker) columns += cp == U'\t' ? 4 - columns % 4 : 1;
-    if (marker.empty()) columns = 2;
-    else if (marker.back() != U' ' && marker.back() != U'\t') ++columns;
-    return std::u32string(columns, U' ');
+    return list_continuation_prefix(container.item_special().marker,
+        container.kind == BlockKind::TaskListItem);
 }
 
 inline bool source_anchor_deleted(const TextEdit& edit, std::size_t offset) {

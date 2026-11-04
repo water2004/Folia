@@ -269,7 +269,7 @@ inline std::u32string choose_serializer_prefix(
         if (explicit_record->role == ContainerPrefixRole::ItemOpening) {
             return facts.empty || facts.all_space_or_tab
                 ? std::u32string{}
-                : std::u32string(policy.marker.size(), U' ');
+                : policy.nonempty_prefix;
         }
         return explicit_record->text;
     }
@@ -283,7 +283,7 @@ inline std::u32string choose_serializer_prefix(
             if (first_line) return policy.marker;
             return facts.empty || facts.all_space_or_tab
                 ? std::u32string{}
-                : std::u32string(policy.marker.size(), U' ');
+                : policy.nonempty_prefix;
         case SerializerPrefixRule::FixedLines:
             if (first_line && !policy.fixed_prefix_on_first_line) return {};
             if (facts.empty) {

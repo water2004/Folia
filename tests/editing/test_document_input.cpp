@@ -209,7 +209,7 @@ suite document_input_tests = [] {
     if (!entered) return;
     expect(fatal(bool(entered->after.root.children.front().kind == BlockKind::CodeBlock)));
     auto const& code = entered->after.root.children.front();
-    expect(fatal(bool(code.block_source.source() == U"```cpp\n```")));
+    expect(fatal(bool(code.block_source.source() == U"```cpp\n\n```")));
     expect(fatal(bool(code.block_source.tree().language == std::optional<std::string>{"cpp"})));
     expect(fatal(bool(code.block_source.tree().complete_opening)));
     expect(fatal(bool(code.block_source.tree().complete_closing)));
@@ -222,13 +222,13 @@ suite document_input_tests = [] {
     expect(fatal(bool(second_enter.has_value())));
     if (!second_enter) return;
     expect(fatal(bool(second_enter->after.root.children.size() == 2u)));
-    expect(fatal(bool(second_enter->after.root.children.front().block_source.source() == U"```cpp\n```")));
+    expect(fatal(bool(second_enter->after.root.children.front().block_source.source() == U"```cpp\n\n```")));
     expect(fatal(bool(second_enter->after.root.children.back().kind == BlockKind::Paragraph)));
     expect(fatal(bool(second_enter->selection_after.active.container_id
         == second_enter->after.root.children.back().id)));
     expect(fatal(bool(second_enter->selection_after.active.source_offset == 0u)));
     const auto serialized_after_exit = serialize_markdown(second_enter->after);
-    expect(fatal(bool(serialized_after_exit == "```cpp\n```\n\n")))
+    expect(fatal(bool(serialized_after_exit == "```cpp\n\n```\n\n")))
         << "serialized=" << serialized_after_exit;
     expect_document_valid(second_enter->after);
 };

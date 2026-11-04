@@ -306,11 +306,14 @@ inline std::optional<InsertResult> insert_text(
     }
     if (raw_source
         && block->block_source.tree().complete_closing
-        && block->block_source.tree().content.empty()) {
-        // Complete empty raw blocks visually own one editable content line,
-        // even though their lossless source has only the opening line ending.
-        // Materializing text must create a distinct separator before the
-        // hidden closing marker so the marker cannot become part of content.
+        && block->block_source.tree().content.empty()
+        && std::ranges::any_of(block->block_source.tree().tokens, [offset](const auto& token) {
+            return token.kind == BlockSourceTokenKind::ClosingMarker
+                && token.source_range.start == offset;
+        })) {
+        // A compact fence read from source may have no body line at all.
+        // Only that missing boundary needs a separator; newly created blocks
+        // already contain a real empty line, which must remain a single line.
         replacement += block_source_line_ending(block->block_source);
     }
     auto applied = edit_block_source(

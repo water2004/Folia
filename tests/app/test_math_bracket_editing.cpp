@@ -28,6 +28,62 @@ folia::Command Type(char32_t c) {
     command.typed_input = true; return command;
 }
 suite math_bracket_editing = [] {
+    "math Enter creates the body before ordinary typing and bracket pairing"_test = [] {
+        for (auto prefix : {U"", U"> ", U"- ", U"- [ ] ", U"12. [x] ", U"> - [ ] "})
+        for (auto opening : {U"$$", U"\\[", U"```math"}) {
+            EditorSession session; session.SetText(L"");
+            for (auto c : std::u32string_view{prefix}) expect(fatal(session.ExecuteCommand(Type(c))));
+            for (auto c : std::u32string_view{opening}) expect(fatal(session.ExecuteCommand(Type(c))));
+            folia::reset_core_operation_counters();
+            expect(fatal(session.ExecuteCommand({.kind = folia::CommandKind::InsertNewline})));
+            auto caret = session.Selection().active;
+            const auto closing = std::u32string_view{opening} == U"$$" ? U"$$"
+                : std::u32string_view{opening} == U"\\[" ? U"\\]" : U"```";
+            const auto head = std::u32string{opening} + U"\n";
+            const auto tail = U"\n" + std::u32string{closing};
+            const auto blank = head + tail;
+            const auto original = session.Selection();
+            expect(session.EditableSource(caret.container_id) == std::optional{blank});
+            expect(caret.source_offset == head.size());
+            for (auto pair : {U"()", U"[]", U"{}"}) {
+                expect(fatal(session.ExecuteCommand(Type(pair[0]))));
+                expect(session.EditableSource(caret.container_id) == std::optional{head + pair + tail});
+                expect(session.Selection().active.source_offset == head.size() + 1);
+                expect(fatal(session.ExecuteCommand(Type(U'x'))));
+                expect(session.EditableSource(caret.container_id)
+                    == std::optional{head + pair[0] + U"x" + pair[1] + tail});
+                expect(session.Selection().active.source_offset == head.size() + 2);
+                expect(fatal(session.ExecuteCommand({.kind = folia::CommandKind::Undo})));
+                expect(fatal(session.ExecuteCommand({.kind = folia::CommandKind::DeleteBackward})));
+                expect(session.EditableSource(caret.container_id) == std::optional{blank});
+                expect(session.Selection() == original);
+                expect(fatal(session.ExecuteCommand({.kind = folia::CommandKind::Undo})));
+                expect(fatal(session.ExecuteCommand({.kind = folia::CommandKind::Undo})));
+                expect(session.EditableSource(caret.container_id) == std::optional{blank});
+                expect(session.Selection() == original);
+            }
+            expect(fatal(session.ExecuteCommand(Type(U'x'))));
+            expect(session.EditableSource(caret.container_id) == std::optional{head + U"x" + tail});
+            expect(session.Selection().active.source_offset == head.size() + 1);
+            expect(fatal(session.ExecuteCommand({.kind = folia::CommandKind::Undo})));
+            expect(fatal(session.ExecuteCommand({.kind = folia::CommandKind::Redo})));
+            expect(session.EditableSource(caret.container_id) == std::optional{head + U"x" + tail});
+            auto counts = folia::read_core_operation_counters();
+            expect(counts.full_document_parses == 0_u && counts.full_document_serializations == 0_u);
+            EditorSession reloaded;
+            auto saved = session.TextUtf8();
+            reloaded.SetText(winrt::to_hstring(saved));
+            auto frame = reloaded.RenderFrame();
+            if (frame.materializeBlocks) frame.materializeBlocks(0, frame.renderModel.blocks.size());
+            std::optional<folia::TextSpan> span;
+            for (auto const& block : frame.renderModel.blocks) if (auto found = Formula(block)) span = found;
+            expect(span.has_value()) << "reload prefix=" << folia::cps_to_utf8(prefix)
+                << " opening=" << folia::cps_to_utf8(opening) << " saved=" << saved;
+            if (span) expect(reloaded.EditableSource(span->container_id) == std::optional{head + U"x" + tail})
+                << "reload prefix=" << folia::cps_to_utf8(prefix) << " opening=" << folia::cps_to_utf8(opening)
+                << " actual=" << folia::cps_to_utf8(*reloaded.EditableSource(span->container_id)) << " saved=" << saved;
+        }
+    };
     "math bracket typing uses syntax matching comments escapes and scalable delimiters"_test = [] {
         struct Case { std::wstring tex; std::size_t caret; char32_t typed; std::u32string expected; std::size_t after; };
         for (auto const& t : {

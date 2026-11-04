@@ -198,6 +198,7 @@ private:
     void enter_list_item(BlockNode const& item, std::u32string marker) {
         SerializerPrefixPolicy policy;
         policy.rule = SerializerPrefixRule::ListItem;
+        policy.nonempty_prefix = list_continuation_prefix(marker, item.kind == BlockKind::TaskListItem);
         policy.marker = std::move(marker);
         writer_.begin_prefix_scope(item.id, item.container_source(), std::move(policy));
         writer_.syntax_anchor({item.id, ContainerAnchorPart::Start, 0});

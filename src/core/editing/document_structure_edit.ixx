@@ -430,7 +430,7 @@ inline std::optional<DocumentTransaction> document_toggle_task_checkbox(EditorDo
 inline BlockNode make_code_block(std::optional<std::string> language = std::nullopt) {
     BlockNode block;
     block.kind = BlockKind::CodeBlock;
-    auto source = U"```" + (language ? utf8_to_cps(*language) : std::u32string{}) + U"\n```";
+    auto source = U"```" + (language ? utf8_to_cps(*language) : std::u32string{}) + U"\n\n```";
     block.block_source = make_block_source(std::move(source), BlockSourceKind::FencedCode);
     return block;
 }
@@ -438,7 +438,7 @@ inline BlockNode make_math_block() {
     BlockNode block;
     block.kind = BlockKind::MathBlock;
     block.ensure_atomic_special().math_delim = MathDelimiter::BlockDollar;
-    block.block_source = make_block_source(U"$$\n$$", BlockSourceKind::DollarMath);
+    block.block_source = make_block_source(U"$$\n\n$$", BlockSourceKind::DollarMath);
     return block;
 }
 inline BlockNode make_toc_block() { BlockNode block; block.kind = BlockKind::Toc; return block; }
