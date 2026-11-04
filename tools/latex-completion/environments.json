@@ -1,0 +1,172 @@
+{
+  "array": {
+    "arguments": "{${1:cc}}",
+    "body": "$2",
+    "description": "LatexDescriptionEnvironmentGeneric",
+    "ids": {
+      "short": "environment.array",
+      "begin": "environment.array.begin"
+    }
+  },
+  "subarray": {
+    "arguments": "{${1:c}}",
+    "body": "$2"
+  },
+  "crampedsubarray": {
+    "arguments": "{${1:c}}",
+    "body": "$2"
+  },
+  "alignat": {
+    "arguments": "{${1:2}}",
+    "body": "$2 &= $3 & $4 &= $5"
+  },
+  "alignat*": {
+    "arguments": "{${1:2}}",
+    "body": "$2 &= $3 & $4 &= $5"
+  },
+  "alignedat": {
+    "arguments": "{${1:2}}",
+    "body": "$2 &= $3 & $4 &= $5"
+  },
+  "xalignat": {
+    "arguments": "{${1:2}}",
+    "body": "$2 &= $3 & $4 &= $5"
+  },
+  "xalignat*": {
+    "arguments": "{${1:2}}",
+    "body": "$2 &= $3 & $4 &= $5"
+  },
+  "xxalignat": {
+    "arguments": "{${1:2}}",
+    "body": "$2 &= $3 & $4 &= $5"
+  },
+  "numcases": {
+    "arguments": "{${1:f(x)=}}",
+    "body": "$2 & $3 \\\\\n$4 & $5"
+  },
+  "subnumcases": {
+    "arguments": "{${1:f(x)=}}",
+    "body": "$2 & $3 \\\\\n$4 & $5"
+  },
+  "empheq": {
+    "arguments": "[${1:left=\\empheqlbrace}]{${2:align}}",
+    "body": "$3 &= $4"
+  },
+  "spreadlines": {
+    "arguments": "{${1:1em}}",
+    "body": "\\begin{aligned}\n$2 &= $3\n\\end{aligned}"
+  },
+  "prooftree": {
+    "body": "\\AxiomC{${1:A}}\n\\UnaryInfC{${2:B}}"
+  },
+  "CD": {
+    "body": "$1 @>{${2:f}}>> $3 \\\\\n@V{${4:g}}VV @VV{${5:h}}V \\\\\n$6 @>>{${7:k}}> $8"
+  },
+  "indentalign": {
+    "arguments": "{${1:c}}",
+    "body": "$2"
+  },
+  "darray": {
+    "arguments": "{${1:cc}}",
+    "body": "$2 & $3"
+  },
+  "matrix": {
+    "arguments": "",
+    "body": "$1",
+    "description": "LatexDescriptionMatrix",
+    "ids": {
+      "short": "environment.matrix",
+      "begin": "environment.matrix.begin"
+    }
+  },
+  "pmatrix": {
+    "arguments": "",
+    "body": "$1",
+    "description": "LatexDescriptionPmatrix",
+    "ids": {
+      "short": "environment.pmatrix",
+      "begin": "environment.pmatrix.begin"
+    }
+  },
+  "bmatrix": {
+    "arguments": "",
+    "body": "$1",
+    "description": "LatexDescriptionMatrix",
+    "ids": {
+      "short": "environment.bmatrix",
+      "begin": "environment.bmatrix.begin"
+    }
+  },
+  "Bmatrix": {
+    "arguments": "",
+    "body": "$1",
+    "description": "LatexDescriptionMatrix",
+    "ids": {
+      "short": "environment.Bmatrix",
+      "begin": "environment.Bmatrix.begin"
+    }
+  },
+  "vmatrix": {
+    "arguments": "",
+    "body": "$1",
+    "description": "LatexDescriptionMatrix",
+    "ids": {
+      "short": "environment.vmatrix",
+      "begin": "environment.vmatrix.begin"
+    }
+  },
+  "Vmatrix": {
+    "arguments": "",
+    "body": "$1",
+    "description": "LatexDescriptionMatrix",
+    "ids": {
+      "short": "environment.Vmatrix",
+      "begin": "environment.Vmatrix.begin"
+    }
+  },
+  "cases": {
+    "arguments": "",
+    "body": "$1 & $2 \\\\\n$3 & $4",
+    "description": "LatexDescriptionCases",
+    "ids": {
+      "short": "environment.cases",
+      "begin": "environment.cases.begin"
+    }
+  },
+  "aligned": {
+    "arguments": "",
+    "body": "$1 &= $2 \\\\\n$3 &= $4",
+    "description": "LatexDescriptionAligned",
+    "ids": {
+      "short": "environment.aligned",
+      "begin": "environment.aligned.begin"
+    }
+  },
+  "equation": {
+    "arguments": "",
+    "body": "$1",
+    "description": "LatexDescriptionEnvironmentGeneric",
+    "ids": {
+      "short": "environment.equation",
+      "begin": "environment.equation.begin"
+    }
+  },
+  "gathered": {
+    "arguments": "",
+    "body": "$1 \\\\\n$2",
+    "description": "LatexDescriptionEnvironmentGeneric",
+    "ids": {
+      "short": "environment.gathered",
+      "begin": "environment.gathered.begin"
+    }
+  },
+  "split": {
+    "arguments": "",
+    "body": "$1 &= $2 \\\\\n$3 &= $4",
+    "description": "LatexDescriptionEnvironmentGeneric",
+    "ids": {
+      "short": "environment.split",
+      "begin": "environment.split.begin"
+    }
+  }
+}

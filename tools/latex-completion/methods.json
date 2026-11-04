@@ -1,0 +1,304 @@
+{
+  "": 0,
+  "Aboxed": 1,
+  "Accent": {
+    "arguments": 1,
+    "category": "accent"
+  },
+  "AllowBreak": 0,
+  "ArrowBetweenLines": 0,
+  "Axiom": 1,
+  "AxiomF": 1,
+  "BBox": 1,
+  "Bar": 0,
+  "BeginEnd": {
+    "template": "\\COMMAND{${1:aligned}}$0"
+  },
+  "Boldsymbol": 1,
+  "BraKet": 2,
+  "Braket": 1,
+  "Break": 0,
+  "BreakAlign": 0,
+  "BuildRel": {
+    "template": "\\buildrel{$1}\\over{$2}$0"
+  },
+  "CFrac": 2,
+  "Cancel": 1,
+  "CancelTo": 2,
+  "CenterColon": 0,
+  "CenterOver": 0,
+  "ChangeBold": {
+    "template": "\\mathversion{${1:bold}}$0"
+  },
+  "Char": {
+    "template": "\\char\"${1:03B1}$0"
+  },
+  "ChooseFont": 1,
+  "Color": {
+    "template": "\\color{${1:red}}{$2}$0"
+  },
+  "ColorBox": 2,
+  "Commutator": 2,
+  "Cr": 0,
+  "CrLaTeX": 0,
+  "Cramped": 1,
+  "Data": 2,
+  "DeclarePairedDelimiter": {
+    "template": "\\COMMAND{${1:\\mydelim}}{${2:\\lvert}}{${3:\\rvert}}$0"
+  },
+  "DeclarePairedDelimiterX": {
+    "template": "\\COMMAND{${1:\\mydelim}}[${2:2}]{${3:\\lvert}}{${4:\\rvert}}{${5:#1,#2}}$0"
+  },
+  "DeclarePairedDelimiterXPP": {
+    "template": "\\COMMAND{${1:\\mydelim}}[${2:2}]{$3}{${4:\\lvert}}{${5:\\rvert}}{$6}{${7:#1,#2}}$0"
+  },
+  "DefineColor": {
+    "template": "\\definecolor{${1:mycolor}}{${2:RGB}}{${3:255,0,0}}$0"
+  },
+  "Derivative": {
+    "arguments": 2,
+    "category": "operator"
+  },
+  "DiagonalMatrix": {
+    "template": "\\COMMAND{${1:1,2,3}}$0"
+  },
+  "DiffD": 0,
+  "Differential": {
+    "arguments": 1,
+    "category": "operator"
+  },
+  "DiscretionaryTimes": 0,
+  "Dots": 0,
+  "EmpheqDelim": 1,
+  "EmpheqMO": 0,
+  "Enclose": 2,
+  "Eval": 1,
+  "Expectation": 1,
+  "Expression": {
+    "arguments": 1,
+    "category": "operator"
+  },
+  "FBox": 1,
+  "FCenter": 0,
+  "FColorBox": 3,
+  "FlushSpaceAbove": 0,
+  "FlushSpaceBelow": 0,
+  "FrameBox": 1,
+  "Genfrac": 2,
+  "HBox": 1,
+  "HFill": 0,
+  "HLine": 0,
+  "HandleDeclareOp": {
+    "template": "\\DeclareMathOperator{${1:\\myop}}{${2:op}}$0"
+  },
+  "HandleLabel": 1,
+  "HandleNoTag": 0,
+  "HandleOperatorName": 1,
+  "HandleRef": 1,
+  "HandleShove": 1,
+  "HandleTag": 1,
+  "Href": 2,
+  "Hsize": {
+    "template": "\\hsize{${1:10em}}$0"
+  },
+  "Hskip": {
+    "template": "\\COMMAND{${1:1em}}$0"
+  },
+  "Id": 2,
+  "IdentityMatrix": {
+    "template": "\\COMMAND{${1:2}}$0"
+  },
+  "Inference": 1,
+  "InferenceF": 1,
+  "KetBra": 2,
+  "Label": 1,
+  "Lap": 1,
+  "LeftRight": {
+    "template": "\\COMMAND${1:)}$0"
+  },
+  "Let": {
+    "template": "\\let${1:\\mycmd}=${2:\\alpha}$0"
+  },
+  "Limits": 0,
+  "Linebreak": 0,
+  "Machine": {
+    "template": "\\COMMAND{${1:H2O}}$0"
+  },
+  "MacroDef": {
+    "template": "\\def${1:\\mycmd}#1{${2:#1}}$0"
+  },
+  "MacroWithTemplate": {
+    "template": "\\COMMAND\\lim_{$1}\\max_{$2}$0"
+  },
+  "MakeAboxedCommand": {
+    "template": "\\COMMAND{${1:\\mybox}}{${2:\\boxed}}$0"
+  },
+  "MakeBig": {
+    "template": "\\COMMAND${1:(}$0"
+  },
+  "MakeBox": 1,
+  "MathChoice": 4,
+  "MathFont": 1,
+  "MathLap": 1,
+  "MathMBox": 1,
+  "MathMakeBox": 1,
+  "Mathtip": 2,
+  "Matrix": 1,
+  "MatrixElement": 3,
+  "MatrixQuantity": 1,
+  "MmlToken": {
+    "template": "\\mmlToken{${1:mi}}{${2:x}}$0"
+  },
+  "MoveLeftRight": {
+    "template": "\\COMMAND{${1:1em}}{$2}$0"
+  },
+  "MoveRoot": {
+    "template": "\\COMMAND{${1:2}}$0"
+  },
+  "MtLap": 1,
+  "MultiIntegral": 0,
+  "NArrow": 2,
+  "NamedFn": {
+    "arguments": 0,
+    "category": "operator"
+  },
+  "NamedOp": {
+    "arguments": 0,
+    "category": "operator"
+  },
+  "NewColumnType": {
+    "template": "\\newcolumntype{${1:C}}{${2:c}}$0"
+  },
+  "NewCommand": {
+    "template": "\\COMMAND{${1:\\mycmd}}[${2:1}]{${3:#1}}$0"
+  },
+  "NewEnvironment": {
+    "template": "\\COMMAND{${1:myenv}}{$2}{$3}$0"
+  },
+  "NewExtArrow": {
+    "template": "\\Newextarrow{${1:\\myarrow}}{${2:5,5}}{${3:0x2192}}$0"
+  },
+  "NewTagForm": {
+    "template": "\\COMMAND{${1:mytag}}{${2:(}}{${3:)}}$0"
+  },
+  "NiceFrac": 2,
+  "Nonscript": 0,
+  "Not": 1,
+  "OperatorApplication": {
+    "arguments": 1,
+    "category": "operator"
+  },
+  "Over": {
+    "template": "{${1:a}\\COMMAND ${2:b}}$0"
+  },
+  "Overset": 2,
+  "Overunderset": 3,
+  "ParBox": {
+    "template": "\\parbox{${1:10em}}{${2:text}}$0"
+  },
+  "PauliMatrix": {
+    "template": "\\COMMAND{${1:1}}$0"
+  },
+  "Phantom": 1,
+  "Prescript": 3,
+  "Qqtext": 1,
+  "Quantity": {
+    "template": "\\COMMAND{$1}$0"
+  },
+  "RaiseLower": {
+    "template": "\\COMMAND{${1:1ex}}{$2}$0"
+  },
+  "RawUnicode": {
+    "template": "\\U{${1:03B1}}$0"
+  },
+  "Relation": 0,
+  "Root": {
+    "template": "\\root{${1:3}}\\of{$2}$0"
+  },
+  "RootAtTop": 0,
+  "Rule": {
+    "template": "\\COMMAND{${1:1em}}{${2:1ex}}{${3:0pt}}$0"
+  },
+  "SetFont": {
+    "template": "{\\COMMAND $1}$0"
+  },
+  "SetLine": 0,
+  "SetOptions": {
+    "template": "\\COMMAND{${1:option}}{${2:value}}$0"
+  },
+  "SetSize": {
+    "template": "{\\COMMAND $1}$0"
+  },
+  "SetStyle": {
+    "template": "{\\COMMAND $1}$0"
+  },
+  "ShortVDotsWithin": 1,
+  "SideSet": 3,
+  "Smash": 1,
+  "Spacer": 0,
+  "SplitFrac": 2,
+  "StarMacro": 1,
+  "Strut": 0,
+  "Style": 2,
+  "TableColor": {
+    "template": "\\COMMAND{${1:red}}$0"
+  },
+  "TeXAtom": 1,
+  "TextColor": 2,
+  "Tilde": 0,
+  "Toggle": {
+    "template": "\\toggle{$1}{$2}\\endtoggle$0"
+  },
+  "UnderOver": {
+    "arguments": 1,
+    "category": "accent"
+  },
+  "UnderOverBracket": {
+    "arguments": 1,
+    "category": "accent"
+  },
+  "Underset": 2,
+  "Unicode": {
+    "template": "\\unicode{${1:x03B1}}$0"
+  },
+  "Unit": 1,
+  "UnitFrac": 2,
+  "UseTagForm": 1,
+  "VBox": 1,
+  "VDotsWithin": 1,
+  "VectorBold": 1,
+  "VectorOperator": {
+    "arguments": 1,
+    "category": "operator"
+  },
+  "Verb": {
+    "template": "\\verb|${1:text}|$0"
+  },
+  "Vnabla": 0,
+  "XMathStrut": {
+    "template": "\\xmathstrut{${1:0.2}}$0"
+  },
+  "XMatrix": {
+    "template": "\\COMMAND{${1:a}}{${2:2}}{${3:2}}$0"
+  },
+  "begingroup": 1,
+  "endgroup": 0,
+  "global": 0,
+  "minCDarrowheight": {
+    "template": "\\COMMAND{${1:2em}}$0"
+  },
+  "minCDarrowwidth": {
+    "template": "\\COMMAND{${1:2em}}$0"
+  },
+  "reset": 0,
+  "rule": {
+    "template": "\\COMMAND{${1:1em}}{${2:1pt}}$0"
+  },
+  "sandbox": 1,
+  "Class": 2,
+  "Insert": 0,
+  "xArrow": {
+    "template": "\\COMMAND[$2]{$1}$0",
+    "category": "operator"
+  }
+}

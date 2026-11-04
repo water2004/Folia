@@ -52,25 +52,6 @@ const BaseMethods = load('input/tex/base/BaseMethods.js').default;
 const ParseMethods = load('input/tex/ParseMethods.js').default;
 const before = new TeX({packages: scope.profile.tex_packages});
 const missing = Object.keys(aliases).filter(name => !before.configuration.handlers.get('macro').contains(name));
-const catalogPath = 'src/app-winui/Assets/latex/commands.json';
-let catalogText = fs.readFileSync(path.join(root, catalogPath), 'utf8');
-const catalog = JSON.parse(catalogText);
-const additions = [];
-for (const name of missing) {
-  if (catalog.commands.some(command => command.trigger === name)) continue;
-  const count = aliases[name][2] || 0;
-  const command = {id: 'texvc.' + name, trigger: name,
-    snippet: '\\' + name + (count ? '{$1}' : '') + '$0',
-    description: 'LatexDescriptionSymbolGeneric', category: 'symbol'};
-  catalog.commands.push(command);
-  additions.push('    ' + JSON.stringify(command));
-}
-if (additions.length) {
-  catalogText = catalogText.replace(/\n  \]\s*}\s*$/, ',\n' + additions.join(',\n') + '\n  ]\n}\n');
-  write(catalogPath, catalogText);
-}
-assert.equal(new Set(catalog.commands.map(command => command.id)).size, catalog.commands.length);
-assert.equal(new Set(catalog.commands.map(command => command.trigger)).size, catalog.commands.length);
 new CommandMap('mediawiki-texvc-macros', aliases, BaseMethods);
 new DelimiterMap('mediawiki-texvc-delimiters', ParseMethods.delimiter,
                  {'\\lang': '\u27E8', '\\rang': '\u27E9'});
@@ -80,6 +61,7 @@ const profile = [...scope.profile.tex_packages, 'mediawiki-texvc'];
 const input = new TeX({packages: profile});
 assert.ok(input.configuration.handlers.get('delimiter').contains('\\lang'), 'angle delimiter registered');
 const registrations = [];
+const completionEntries = new Map();
 const maps = new Set();
 for (const kind of ['macro', 'delimiter', 'environment', 'character']) {
   const handler = input.configuration.handlers.get(kind);
@@ -90,6 +72,12 @@ for (const kind of ['macro', 'delimiter', 'environment', 'character']) {
       const owner = handler.applicable(name)?.name || '';
       registrations.push(`{HandlerKind::${kind}, ${q(map.name)}, ${q(name)}, ${q(owner)}, ` +
         `${typeof value.char === 'string'}, ${q(value.char || '')}},`);
+      if (kind !== 'character' && owner === map.name) {
+        const args = (value.args || []).map(arg =>
+          arg === null || ['string', 'number', 'boolean'].includes(typeof arg) ? arg : null);
+        completionEntries.set(`${kind}:${name}`, {kind, name, map: owner,
+          symbol: value.char || '', method: value.func?.name || '', args});
+      }
     }
   }
 }
@@ -99,6 +87,16 @@ const registryHeader = `// Generated upstream MathJax 4.1.3 registry; do not han
   `inline constexpr SourceRegistration sourceRegistrations[] = {\n${registrations.join('\n')}\n};\n` +
   `inline constexpr std::u16string_view sourcePackages[] = {${profile.map(q).join(', ')}};\n`;
 write('tests/math/fixtures/tex_package_registry_source.hpp', registryHeader);
+const registryHash = crypto.createHash('sha256').update(registryHeader).digest('hex');
+write('tools/latex-completion/registry.json',
+  '{\n  "mathjaxVersion": "4.1.3",\n  "registrySha256": ' + JSON.stringify(registryHash) +
+  ',\n  "entries": [\n' + [...completionEntries.values()]
+    .sort((a,b) => {
+      const left = `${a.kind}:${a.name}`, right = `${b.kind}:${b.name}`;
+      return left < right ? -1 : left > right ? 1 : 0;
+    })
+    .map(entry => '    ' + JSON.stringify(entry)).join(',\n') + '\n  ]\n}\n');
+if (process.argv.includes('--registry-only')) process.exit(0);
 
 const {mathjax} = load('mathjax.js');
 const {SVG} = load('output/svg.js');

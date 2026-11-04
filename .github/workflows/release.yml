@@ -99,6 +99,14 @@ jobs:
           "version=$version" >> $env:GITHUB_OUTPUT
           "notes=$notes" >> $env:GITHUB_OUTPUT
 
+      - name: Check generated math completion catalog
+        shell: pwsh
+        run: |
+          python tools/latex-completion/generate.py --check
+          if ($LASTEXITCODE -ne 0) { throw 'Generated math completion catalog is stale.' }
+          python -m unittest discover -s tests/query -p test_latex_catalog.py
+          if ($LASTEXITCODE -ne 0) { throw 'Math completion catalog checks failed.' }
+
       - name: Build self-contained MSI
         id: build
         continue-on-error: true
