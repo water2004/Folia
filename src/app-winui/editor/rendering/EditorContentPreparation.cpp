@@ -458,7 +458,8 @@ namespace winrt::Folia
                         : folia::SourceRange{offsets.front(), offsets.back()}};
                     MergeDisplayText(display, BuildMathBlockText(block, caret, mathJax,
                         svgNormalizer, svgColor, fontSize, containerWidth,
-                        svgSupported, requestMath, highPriority));
+                        svgSupported, requestMath, highPriority,
+                        item.special().semantic().continuation_indent_columns));
                     continue;
                 }
                 if (!svgSupported)

@@ -76,6 +76,7 @@ export namespace folia::platform::editor
         std::optional<std::size_t> lastInContainer;
         std::optional<std::size_t> exactSource;
         std::optional<std::size_t> exactGeneratedAffinity;
+        std::optional<std::size_t> firstGreater;
         for (std::size_t index = 0; index < mapping.size(); ++index)
         {
             auto const& point = mapping[index];
@@ -83,7 +84,13 @@ export namespace folia::platform::editor
             lastInContainer = index;
             if (point.source_offset < sourcePosition.source_offset) continue;
             if (point.source_offset > sourcePosition.source_offset)
-                return exactGeneratedAffinity.value_or(exactSource.value_or(index));
+            {
+                // Layout-only spacing can precede a source block while being
+                // anchored at its content boundary, after the opening marker.
+                // Look for exact source positions before using that fallback.
+                if (!firstGreater) firstGreater = index;
+                continue;
+            }
 
             // An unaccepted insertion occupies display space at the caret but
             // owns no source characters. Keep the caret before that run.
@@ -116,6 +123,6 @@ export namespace folia::platform::editor
                 }
             }
         }
-        return exactGeneratedAffinity.value_or(exactSource.value_or(lastInContainer.value_or(0)));
+        return exactGeneratedAffinity.value_or(exactSource.value_or(firstGreater.value_or(lastInContainer.value_or(0))));
     }
 }

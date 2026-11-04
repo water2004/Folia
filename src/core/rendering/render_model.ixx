@@ -241,6 +241,8 @@ struct RenderBlockSpecial;
 struct InlineRenderSemanticPayload {
     // Flattened block flow shares its child block's lossless source projection.
     std::shared_ptr<RenderBlockSpecial> block_source;
+    // Container indentation for subsequent rows of a flattened source block.
+    std::size_t continuation_indent_columns = 0;
     std::u32string source_text;          // exact source spelling for this span
     std::optional<SourceRange> content_range; // CST content excluding source delimiters
     SyntaxMarker opening_marker = SyntaxMarker::None;

@@ -11,6 +11,20 @@ using namespace folia::platform::editor;
 
 suite display_mapping_tests = [] {
 
+"leading layout spacing cannot hide exact positions earlier in the same source block"_test = [] {
+    const auto owner = NodeId{99};
+    EditorDisplayMapping mapping{
+        {owner, 3, TextAffinity::Downstream, EditorDisplayPositionKind::BoundaryDecoration},
+        {owner, 3, TextAffinity::Downstream, EditorDisplayPositionKind::BoundaryDecoration},
+        {owner, 0, TextAffinity::Downstream}, {owner, 1, TextAffinity::Downstream},
+        {owner, 2, TextAffinity::Downstream}, {owner, 3, TextAffinity::Downstream},
+        {owner, 4, TextAffinity::Downstream},
+    };
+    for (auto affinity : {TextAffinity::Upstream, TextAffinity::Downstream})
+        for (std::size_t i = 0; i <= 4; ++i)
+            expect(DisplayPositionForSource(mapping, {owner, i, affinity}) == i + 2);
+};
+
 "hidden format source offsets map to their visible boundary"_test = [] {
     const auto owner = NodeId{50};
     // **ab** tail: every delimiter remains in the block-local source.

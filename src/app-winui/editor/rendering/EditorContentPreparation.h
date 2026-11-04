@@ -206,5 +206,6 @@ namespace winrt::Folia
         float containerWidth,
         bool svgSupported,
         bool requestMath,
-        bool highPriority);
+        bool highPriority,
+        std::size_t continuationIndentColumns = 0);
 }

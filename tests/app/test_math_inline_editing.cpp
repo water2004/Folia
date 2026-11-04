@@ -261,6 +261,65 @@ namespace
 
     suite math_inline_editing_tests = []
     {
+        "empty nested math source rows keep their container content column before and after input"_test = [] {
+            for (auto source : {L"$$\n\n$$", L"> anchor\n>\n> $$\n>\n> $$", L"> > anchor\n> >\n> > $$\n> >\n> > $$",
+                L"- lead\n\n  anchor\n\n  $$\n  \n  $$", L"- [ ] lead\n\n  anchor\n\n  $$\n  \n  $$",
+                L"[^n]: lead\n\n    anchor\n\n    $$\n    \n    $$", L"> [!NOTE]\n> anchor\n>\n> $$\n>\n> $$"}) {
+                MathDragFixture fixture(source);
+                auto formula = FindFormula(fixture.session, true);
+                expect(fatal(formula.has_value()));
+                const auto owner = formula->container_id;
+                auto position = folia::TextPosition{owner, formula->source_range.start, folia::TextAffinity::Downstream};
+                fixture.session.SetSelection(position, position);
+                fixture.renderer.Render(fixture.session.RenderFrame());
+                auto opening = fixture.renderer.CaretBounds({owner, 0, folia::TextAffinity::Downstream});
+                auto body = fixture.renderer.CaretBounds(position);
+                expect(fatal(opening.has_value() && body.has_value()));
+                std::optional<float> contentColumn;
+                auto frame = fixture.session.RenderFrame();
+                if (frame.materializeBlocks) frame.materializeBlocks(0, frame.renderModel.blocks.size());
+                auto findAnchor = [&](auto& self, folia::RenderBlock const& block) -> void {
+                    if (fixture.session.EditableSource(block.id) == std::optional<std::u32string>{U"anchor"})
+                        if (auto caret = fixture.renderer.CaretBounds({block.id, 0, folia::TextAffinity::Downstream}))
+                            contentColumn = caret->left;
+                    for (auto const& child : block.child_blocks) self(self, child);
+                };
+                for (auto const& block : frame.renderModel.blocks) findAnchor(findAnchor, block);
+                if (contentColumn) expect(std::abs(body->left - *contentColumn) < .5f)
+                    << "math stays in its parent content column" << winrt::to_string(source)
+                    << "caret" << body->left << "parent" << *contentColumn;
+                expect(std::abs(body->left - opening->left) < .5f) << "empty math content column";
+                expect(body->top > opening->top) << "body owns its separate row";
+                auto upstream = position; upstream.affinity = folia::TextAffinity::Upstream;
+                auto upstreamBody = fixture.renderer.CaretBounds(upstream);
+                expect(upstreamBody.has_value() && std::abs(upstreamBody->left - body->left) < .5f);
+                expect(upstreamBody.has_value() && std::abs(upstreamBody->top - body->top) < .5f);
+                auto hit = fixture.renderer.HitTest(body->left + 1, (body->top + body->bottom) / 2);
+                expect(hit.has_value() && hit->container_id == owner && hit->source_offset == position.source_offset);
+                const auto before = fixture.session.TextUtf8();
+                expect(fixture.session.ExecuteCommand(folia::Command::InsertText(U"x")));
+                fixture.renderer.Render(fixture.session.RenderFrame());
+                body = fixture.renderer.CaretBounds(position);
+                expect(body.has_value() && std::abs(body->left - opening->left) < .5f) << "populated math content column";
+                expect(fixture.session.ExecuteCommand({.kind = folia::CommandKind::Undo}));
+                expect(fixture.session.TextUtf8() == before);
+                fixture.renderer.Render(fixture.session.RenderFrame());
+                body = fixture.renderer.CaretBounds(position);
+                expect(body.has_value() && std::abs(body->left - opening->left) < .5f) << "undo restores empty content column";
+                expect(fixture.session.ExecuteCommand({.kind = folia::CommandKind::InsertNewline}));
+                fixture.renderer.Render(fixture.session.RenderFrame());
+                body = fixture.renderer.CaretBounds(fixture.session.Selection().active);
+                expect(body.has_value());
+                // Enter at the end can create a following paragraph. Its
+                // column belongs to that parent, not to the math frame padding.
+                if (fixture.session.Selection().active.container_id == owner)
+                    expect(body.has_value() && std::abs(body->left - opening->left) < .5f);
+                else if (contentColumn)
+                    expect(body.has_value() && std::abs(body->left - *contentColumn) < .5f);
+                expect(fixture.session.ExecuteCommand({.kind = folia::CommandKind::Undo}));
+                expect(fixture.session.TextUtf8() == before);
+            }
+        };
         "math nested block caret hit test source expansion and undo share standalone behavior"_test = [] {
             for (auto source : {
                 L"Introduction.\n\n> before\n>\n> $$\n> \\frac{x+1}{y+2}\n> $$\n",

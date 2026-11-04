@@ -8,7 +8,8 @@ namespace winrt::Folia
 {
     namespace
     {
-        void AppendMathBlockSource(DisplayInlineText& display, folia::RenderBlock const& block)
+        void AppendMathBlockSource(DisplayInlineText& display, folia::RenderBlock const& block,
+            std::size_t continuationIndentColumns)
         {
             auto const& special = block.special();
             auto span = block.content_span;
@@ -16,13 +17,22 @@ namespace winrt::Folia
                 span.source_range = {special.content_to_source.front(), special.content_to_source.back()};
             display.mathSources.push_back({special.tex, span, special.content_to_source});
             auto source = std::u32string_view{special.raw_source};
+            const auto indent = std::u32string(continuationIndentColumns, U' ');
             auto append = [&](folia::SourceRange range, SyntaxIcon icon, bool marker) {
-                auto before = display.ranges.size();
-                AppendSourceText(display, source.substr(range.start, range.length()),
-                    {block.id, range}, {}, marker);
-                if (display.ranges.size() > before) {
-                    display.ranges.back().icon = icon;
-                    display.ranges.back().iconPlacement = SyntaxIconPlacement::Block;
+                while (range.start < range.end) {
+                    auto newline = source.find(U'\n', range.start);
+                    auto end = newline == source.npos ? range.end : (std::min)(range.end, newline + 1);
+                    auto before = display.ranges.size();
+                    AppendSourceText(display, source.substr(range.start, end - range.start),
+                        {block.id, {range.start, end}}, {}, marker);
+                    if (display.ranges.size() > before) {
+                        display.ranges.back().icon = icon;
+                        display.ranges.back().iconPlacement = SyntaxIconPlacement::Block;
+                    }
+                    if (end > range.start && source[end - 1] == U'\n' && end < source.size() && !indent.empty())
+                        AppendGeneratedText(display, indent, {block.id, end, folia::TextAffinity::Downstream},
+                            {}, EditorDisplayPositionKind::BoundaryDecoration);
+                    range.start = end;
                 }
             };
             std::size_t cursor = 0;
@@ -119,7 +129,8 @@ namespace winrt::Folia
         float containerWidth,
         bool svgSupported,
         bool /*requestMath*/,
-        bool highPriority)
+        bool highPriority,
+        std::size_t continuationIndentColumns)
     {
         DisplayInlineText display;
         auto const& special = block.special();
@@ -130,7 +141,7 @@ namespace winrt::Folia
             const auto endpoint = editing ? special.raw_source.size() : special.content_to_source.empty()
                 ? special.tex.size()
                 : special.content_to_source.back();
-            if (editing) AppendMathBlockSource(display, block);
+            if (editing) AppendMathBlockSource(display, block, continuationIndentColumns);
             else AppendProjectedSourceText(
                 display,
                 special.tex,
@@ -159,7 +170,7 @@ namespace winrt::Folia
         display.pendingMath = !math;
         if (editing)
         {
-            AppendMathBlockSource(display, block);
+            AppendMathBlockSource(display, block, continuationIndentColumns);
             // The preview is rendered below this editable source as its own
             // non-interactive visual block. It must never enter the source
             // display mapping or become a caret target.

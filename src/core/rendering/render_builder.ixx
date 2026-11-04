@@ -604,6 +604,7 @@ struct Builder {
                 item.id = block.id;
                 item.source_span = {block.id, {0, block.block_source.source().size()}};
                 item.ensure_special().ensure_semantic().block_source = rendered.payload;
+                item.ensure_special().ensure_semantic().continuation_indent_columns = context.indent_columns;
                 item.text = math;
                 item.ensure_special().display = MathDisplayMode::Block;
                 item.ensure_special().math_delim = block.atomic_special().math_delim;
