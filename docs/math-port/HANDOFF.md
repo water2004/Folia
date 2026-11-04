@@ -2,7 +2,16 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-11-04，补全交互与设置布局已完成）
+## 当前 checkpoint（2026-11-04，多窗口IME与引用公式已修复验收）
+
+- 用户两项请求均已完成代码/正式测试：窗口A→B→A后输入法不可切换；引用空$$正文光标偏到引用竖线。分批本地提交 **6c514ffc**（输入焦点）与 **3ef97d92**（数学源码几何），本checkpoint随最后文档提交。版本仍0.6.2，本轮未推送/新发布/MSI/安装，不移动旧tag。不开agents/CUA/OS输入注入，native串行≤4。
+- IME责任边界：FocusEnter只允许本UI线程GetActiveWindow所属且surface有XAML焦点；注册/撤销CoreText.FocusRemoved清focused_；MainWindow激活用weak排到WinUI焦点转移完成后，重查active HWND/当前编辑控件/设置状态，失活立即Leave；InitializeTextInput同条件。无强制中英/布局模式、无每键重建context、无焦点抢占重试循环。原后台迟到Enter能改变前台实际TSF document，before2断言失败，修后正式4项58通过。
+- IME验证限制：只是慢速激活来回旧版也能过；测试通过ITfThreadMgr.GetFocus比较真实系统文档身份，覆盖迟到通知、12次只激活窗口、快速排队、原生TextBox不被抢回。**未发送Shift，不能声称完整手动复现/验证用户输入法转换体验**。不要重试peer.NotifyFocusEnter等FocusRemoved（正常peer切换不发该事件）。不要用GetForegroundWindow代替thread-active HWND（隐藏启动/进程未全局前台是另一语义，曾使测试GetFocus空，UT fatal后已聚焦修正，不是产品CRT崩溃）。依据见docs/workspace-windows.md与官方GetActiveWindow/FocusRemoved文档。
+- 数学责任边界：core Math flow item携带typed continuation_indent_columns；UI按该布局元数据为raw source续行追加BoundaryDecoration，不修改source、不识别Markdown容器。DisplayPositionForSource保留firstGreater fallback后继续找精确Source，避免先行layout spacing的较大offset遮掉开头定界符；保留既有prefix/suffix/preview/affinity语义，不泛改LineIndexFor过滤。原quote/nested/list/callout父内容列4断言失败；最终root/quote/nested/list/task/footnote/callout、双affinity、hit-test、输入/Undo/Enter均过。列表比较同层续段的逻辑列，不用bullet字形advance代表缩进；root math end处Enter新建后续段落是既有结构语义，不强迫它匹配math frame padding。
+- 最终**quote-empty-math-debug.log Debug成功**；**focus-quote-core.log 768项500632**、**quote-empty-math-platform.log 93项4521**全过。**focus-quote-test_*.log**：math_inline_editing8/735、math_bracket_editing5/1331、inline_presentation_paths10/419、completion_layout2/1056（各另loading5/22）；visual text_input_focus4/58、tab_transfer21/244、completion_interaction6/82全过。**focus-quote-startup.log**两轮真实启动/正常关闭exit0。无需重复已过广泛测试。
+- **停止点/下一步**：Debug已更新，全部代码/测试/文档已分批本地提交，工作区应干净，无运行build/test/agent句柄。后续按用户实际Shift体验或新的发布要求继续；不重开旧宏包/布局审计，不跟进已完成0.6.2流水线。无真实模型/key使用，0.6.2正式资产核对见下方基线。
+
+## 补全交互与设置布局验收（已完成，历史）
 
 - 用户反馈取代0.6.2的“TeX/snippet抑制AI”结论。本地提交**b172e699**：移除屏蔽，可见AI拥有Tab/CtrlRight/Esc；TeX保留arrows/Enter，无AI时Tab回TeX/snippet，ShiftTab回snippet。AI接受关闭过期TeX列表；hint中英同步实际职责。选区替换输入也安排AI（正式snippet测试原requests0已修），同offset异affinity用is_caret。当前参数插入保留导航，跨参数范围改写结束旧snippet。无新坐标/全文parse/serialize路径。
 - 本地提交**7435fa86**修复7个设置页宽窗口偏右：页面MaxWidth+Stretch居中是根因。共享PageViewport factory加载主题DataTemplate，native ContentPresenter.Content承载页面，左起列上限1008含margin，移除页面自身960上限；列表仍有限视口。不要恢复曾试过的NavigationView.ContentTemplate普通Binding（UIElement缺对应DataContext使页面空白），已撤掉。测试使用嵌套native viewport避免Windows工作区1602宽度限制；before 7页1800/2400均偏移，after **settings-width-accepted.log 1项84全过**。
