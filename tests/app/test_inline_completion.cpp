@@ -56,6 +56,32 @@ struct Fixture {
     bool Wait() { return Pump([&] { return controller->Active() || !error.empty(); }); }
 };
 suite inline_completion_tests = [] {
+    "completion acceptance continues a typed display fence and keeps following prose outside math"_test = [] {
+        for (auto prefix : {L"", L"> ", L"- "}) {
+            Fixture f(U"\n\\widehat{Q}_{zz}=\n\\begin{pmatrix}\nq_{11}&0\\\\\n0&q_{00}\n\\end{pmatrix}\n$$\n\nFollowing paragraph.");
+            f.session.SetText(winrt::hstring{std::wstring{prefix} + L"seed"});
+            auto owner = f.session.Selection().active.container_id;
+            f.session.SetSelection({{owner, 0}, {owner, 4}});
+            f.Type(U"$$"); expect(f.Wait());
+            auto before = f.session.TextUtf8(); auto selection = f.session.Selection();
+            folia::reset_core_operation_counters();
+            expect(f.controller->Accept(false)); f.controller->Cancel();
+            auto counts = folia::read_core_operation_counters();
+            expect(counts.full_document_parses == 0_u && counts.full_document_serializations == 0_u);
+            auto saved = f.session.TextUtf8();
+            auto model = f.session.RenderModel();
+            auto selected = f.session.Selection();
+            expect(*f.session.EditableSource(selected.active.container_id) == U"Following paragraph.");
+            EditorSession reloaded; reloaded.SetText(winrt::to_hstring(saved));
+            expect(reloaded.RenderModel().blocks.size() == model.blocks.size());
+            for (std::size_t i = 0; i < model.blocks.size(); ++i)
+                expect(reloaded.RenderModel().blocks[i].kind == model.blocks[i].kind);
+            expect(f.Execute({.kind = folia::CommandKind::Undo}));
+            expect(f.session.TextUtf8() == before && f.session.Selection() == selection);
+            expect(f.Execute({.kind = folia::CommandKind::Redo}));
+            expect(f.session.TextUtf8() == saved && f.session.Selection() == selected);
+        }
+    };
     "completion context preserves nearby source beyond three neighbors and exact source-mode line breaks"_test = [] {
         for (bool sourceMode : {false, true}) {
             Fixture f;

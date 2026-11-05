@@ -2,14 +2,14 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-11-06，局部续写引导已更新并部署）
+## 当前 checkpoint（2026-11-06，接受补全的块结构错位已修复）
 
-- 用户新截图：`$$`后未换行、以`\]`闭合并继续长篇推导；这推翻旧样例足够覆盖实际编辑位置的判断。旧36例只用临时512输出token、偏重操作格式，**不能当语义正确率**。本轮只改运行时`src/app-winui/Assets/completion.json`及开发文档；无产品C++/编辑架构改动，不开agents/CUA，版本仍0.6.3。
-- 通用引导：延续光标处已开始的具体结构与排版；起始行之后写正文，缺闭合才补同形闭合；完成最小有用单元就停止，输出预算是上限；检查与两侧源码拼接，避免重开已有语法。用通用fence示例体现首换行/闭合/停止，**不逐符号加规则、不强制标记Markdown/code/TeX、不在客户端修补模型文本**。
-- 实际DS/Responses/none按用户真实**4096输出token/7KB**验证。最终`build/completion-native-boundary-accepted.jsonl`：10构造例×2，20/20格式有效、0截断、12326 input+369 output。前5类走`EditorSession::SetText/SetSelection/CaptureCompletionContext`真实采集；开头未Enter、前文另一种定界符、已有闭合、两种fence，最终首换行/同形闭合/不重复闭合/不继续后文检查通过，摘要`build/completion-native-boundary-verification.json`。另外行内/下标/双参数/代码/中文控制例；短续写可只填首参数，**不承诺所有内容语义或未来模型输出正确，已有正文时仍见额外空行**。候选曾重复已有命令，最终未见；不把格式有效当所有语义正确。未发送用户文档/输出key/改用户settings。
-- 部署：repo、Debug/Release Assets、`%LOCALAPPDATA%/Folia/Assets/completion.json`四份SHA256相同（d013e654…da1f9c2），已直接更新本机内置默认；customPrompt=false已核实。默认进程内缓存，**须用户保存后退出重开才生效**；未强关当前窗口。无热加载/每键IO/编译内prompt。源码配置+开发说明+本记录本地小提交，未推送/安装/新MSI/发布。
-- 停止点：无运行build/API/agent/CUA句柄。ignored评估源`build/completion-config-evaluation.cpp`，实际预算来自config；显式JSON路径可直接重放不重新编译。exe `build/tests/winui/Debug/controller/FoliaConfigEvaluation.exe` **CWD必须build/app-winui/bin/x64/Debug**，输入`build/completion-evaluation-cases.json`；结果记录实际request及splice source。构建脚本`build/run-completion-native-boundaries.ps1`已成功（log同名candidate）；中途仅临时driver SetText类型编译错误已修，无产品异常退出。不要重跑宽泛测试。
-- 下一步：用户重开体验，或按明确打包要求重新MSI。现有`build/installer/bin/Folia-0.6.3-x64.msi`仍是上一轮51.4MiB产物（源码115c1ee8，`build/folia-063-runtime-completion-msi.log`），**尚不含本轮新JSON**，不要拿它覆盖已部署新配置。保留0.6.3，后续不自行安装/推送/查已完成CI。
+- 最新用户问题：接受`$$`后多行公式+后续正文，保存源码正确而当前视图把公式当Markdown、后文当公式。**根因是document_paste先独立解析新增文字，忽略已有owner开头，把新增闭合符当开头**；是接收编辑的结构问题，不能继续只调prompt。本轮修复源码/正式测试/文档，本地提交，版本0.6.3，不开agents/CUA，不推送/发布/安装。
+- 修复边界：`document_paste.ixx`对段落中的多行结构接续先用owner完整源码+插入文本进行局部识别，精确可往返且有结构转换才复用source edit与block reparse；不扫描`$$`特判。`document_block_reparse.ixx`明确SingleBlock与Fragment的命令范围，结构粘贴可产生多个兄弟块，普通字符输入仍单块。已加载raw块粘贴闭合+正文也走局部fragment重分。仍同一source/tree事务、container+source offset、无全文parse/serialize/新坐标/AI专用修补。
+- 验收：`build/completion-structure-core-accepted.log` **14项262断言**（paste过滤，其余跳过），涵盖typed dollar/backtick/tilde接续、loaded math闭合、源码/块类型/选区/保存重载/Undo/Redo/零全文操作。`build/completion-structure-controller.log` **21项314断言+loading5/22**，包含真实controller Accept：root/quote/list，后文owner源码、重载RenderModel kinds、精确撤销重做以及既有补全交互全组。无真实API调用。本轮SourceFilter曾误带.cpp导致无匹配，已用`*inline_completion*`正式重跑成功，不是程序崩溃。
+- 已运行setup（`build/completion-structure-setup.log`），Debug成功（`build/completion-structure-debug.log`），exe **build/app-winui/bin/x64/Debug/Folia.exe**。编译≤4，native串行，无运行build/test/API/agent句柄。**已安装Release尚无本次C++修复；未重打MSI**。下一步按用户试用或明确MSI要求打包，不重复广泛数学/启动/核心审计。
+- 上一轮prompt改动已提交**397851b6**，JSON仍运行时配置；repo/Debug/Release Assets及`%LOCALAPPDATA%/Folia/Assets/completion.json`同步过，进程缓存须退出重开。引导最小局部结构/当前定界符/首换行/停止，不强制模式、不逐符号修补。其真实DS最后20构造例见`build/completion-native-boundary-accepted.jsonl`与`verification.json`，只证明样例，不证明所有语义；旧“只拼字符串”评估没覆盖实际Accept，已由本轮controller测试补上。不要把旧API评估当结构接入验收。
+- 现有**build/installer/bin/Folia-0.6.3-x64.msi**仍旧51.4MiB（115c1ee8，`build/folia-063-runtime-completion-msi.log`），既不含本轮C++修复，也未包含397851b6新JSON。后续若用户要MSI，应按既有脚本重建0.6.3；不要直接拿旧包交付。无需再查看已完成发布CI。
 
 ## 补全协议/上下文系统性修复完成（历史基线）
 

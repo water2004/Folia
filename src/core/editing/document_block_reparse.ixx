@@ -191,11 +191,14 @@ inline BlockNode exact_paragraph(
 // paragraph is reconsidered only for multiline code/math candidates or for a
 // cheap '<...>' HTML candidate, so ordinary character input remains a
 // one-node inline CST reparse.
+enum class BlockReparseScope { SingleBlock, Fragment };
+
 inline std::optional<RecordedBlockEdit> reparse_edited_direct_block(
     EditorDocument& document,
     TextPosition position,
     NodeAllocator& allocator,
-    const AppliedSourceEdit* source_edit = nullptr) {
+    const AppliedSourceEdit* source_edit = nullptr,
+    BlockReparseScope scope = BlockReparseScope::SingleBlock) {
     auto* current = find_document_block(document, position.container_id);
     if (!current) return std::nullopt;
 
@@ -228,9 +231,9 @@ inline std::optional<RecordedBlockEdit> reparse_edited_direct_block(
 
     auto target = block_reparse_detail::target_candidate(parsed, position.source_offset);
     // A character edit may reclassify one direct block, but it is not an
-    // implicit multi-block split command. Enter remains the operation that
-    // creates sibling block boundaries.
-    const auto exact = parsed.blocks.size() == 1
+    // implicit multi-block split command. Structural paste can explicitly
+    // replace the owner with a fragment containing sibling blocks.
+    const auto exact = (scope == BlockReparseScope::Fragment || parsed.blocks.size() == 1)
         && serialize_markdown_fragment(parsed.blocks) == source;
     if (!exact || !target) {
         if (!is_raw) return std::nullopt;

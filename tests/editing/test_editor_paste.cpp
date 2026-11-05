@@ -33,6 +33,60 @@ using namespace boost::ut;
 
 suite editor_paste_tests = [] {
 
+"paste_continues_existing_fences_in_the_owner_source"_test = [] {
+    for (auto opening : {U"$$", U"```tex", U"~~~text"}) {
+        Editor editor("");
+        auto id = first_text(editor).id;
+        auto initial = TextSelection::caret({id, 0});
+        expect(editor.execute_document_insert_text(initial, opening).has_value());
+        auto before = editor.markdown_utf8();
+        auto selection = editor.selection();
+        auto close = opening == std::u32string_view{U"$$"} ? U"$$"
+            : opening == std::u32string_view{U"```tex"} ? U"```" : U"~~~";
+        std::u32string body = U"\n\\widehat{Q}_{zz}=\n\\begin{pmatrix}\na & 0\\\\\n0 & b\n\\end{pmatrix}\n";
+        auto addition = body + close + U"\n\nFollowing paragraph.";
+        reset_core_operation_counters();
+        expect(fatal(editor.execute_document_paste_text(selection, addition).has_value()));
+        auto counts = read_core_operation_counters();
+        expect(counts.full_document_parses == 0_u && counts.full_document_serializations == 0_u);
+        auto const& blocks = editor.document().root.children;
+        expect(fatal(blocks.size() == 2_u));
+        expect(blocks.front().kind == (opening == std::u32string_view{U"$$"} ? BlockKind::MathBlock : BlockKind::CodeBlock));
+        expect(blocks.back().kind == BlockKind::Paragraph);
+        expect(blocks.back().inline_content.source == U"Following paragraph.");
+        auto saved = editor.markdown_utf8();
+        expect(saved == before + cps_to_utf8(addition));
+        Editor reloaded(saved);
+        expect(reloaded.document().root.children.front().kind == blocks.front().kind);
+        auto after = editor.selection();
+        expect(after.active.container_id == blocks.back().id);
+        expect(after.active.source_offset == std::u32string_view{U"Following paragraph."}.size());
+        expect(editor.undo()); expect(editor.markdown_utf8() == before); expect(editor.selection() == selection);
+        expect(editor.redo()); expect(editor.markdown_utf8() == saved); expect(editor.selection() == after);
+        expect(validate_document(editor.document()).empty());
+    }
+};
+
+"paste_closes_a_loaded_math_block_before_following_prose"_test = [] {
+    Editor editor("$$\nx");
+    auto const& block = editor.document().root.children.front();
+    auto selection = TextSelection::caret({block.id, block_source_editable_range(block.block_source).end});
+    editor.set_selection(selection);
+    reset_core_operation_counters();
+    expect(fatal(editor.execute_document_paste_text(selection, U"+y\n$$\n\nAfter.").has_value()));
+    auto counts = read_core_operation_counters();
+    expect(counts.full_document_parses == 0_u && counts.full_document_serializations == 0_u);
+    auto const& blocks = editor.document().root.children;
+    expect(fatal(blocks.size() == 2_u));
+    expect(blocks.front().kind == BlockKind::MathBlock);
+    expect(block_source_content(blocks.front().block_source) == U"x+y");
+    expect(blocks.back().inline_content.source == U"After.");
+    auto saved = editor.markdown_utf8(); auto after = editor.selection();
+    expect(saved == "$$\nx+y\n$$\n\nAfter.");
+    expect(editor.undo()); expect(editor.markdown_utf8() == "$$\nx"); expect(editor.selection() == selection);
+    expect(editor.redo()); expect(editor.markdown_utf8() == saved); expect(editor.selection() == after);
+};
+
 "empty_fenced_code_body_insertion_preserves_the_info_string_and_undo"_test = [] {
     for (auto initial : {"```markdown", "```markdown\n", "```markdown\n```", "~~~rust"}) {
         for (bool paste : {false, true}) {

@@ -7,6 +7,8 @@ import folia.markdown.document;
 import folia.core.document_ids;
 import folia.core.document_edit_support;
 import folia.core.document_source_edit;
+import folia.core.document_block_reparse;
+import folia.markdown.serializer;
 import folia.markdown.document_text;
 import folia.markdown.container_source;
 import folia.core.document_container_source;
@@ -637,7 +639,32 @@ inline std::optional<DocumentTransaction> document_paste_text(
     auto* anchor = find_block(working.root, current.active.container_id);
     if (!anchor) return std::nullopt;
     std::optional<TextPosition> target;
-    if (anchor->kind == BlockKind::CodeBlock
+    // Recognize a continued structure with its existing owner source, before
+    // interpreting the clipboard as a standalone fragment. An opening boundary
+    // can already be present on the left of the insertion point.
+    bool continues_structure = false;
+    if (anchor->kind == BlockKind::Paragraph && normalized.find(U'\n') != normalized.npos) {
+        auto combined = anchor->inline_content.source;
+        combined.insert(current.active.source_offset, normalized);
+        auto parsed = parse_block_fragment(combined, working.dialect);
+        continues_structure = document_edit_detail::block_reparse_detail::contains_structural_reclassification(parsed.blocks)
+            && serialize_markdown_fragment(parsed.blocks) == combined;
+    }
+    if (continues_structure) {
+        target = document_paste_detail::record_source_insert(
+            working, current.active.container_id, current.active.source_offset,
+            normalized, allocator, operations);
+        if (target) {
+            auto structure = document_edit_detail::reparse_edited_direct_block(
+                working, *target, allocator, nullptr,
+                document_edit_detail::BlockReparseScope::Fragment);
+            if (!structure) return std::nullopt;
+            target = structure->target;
+            operations.insert(operations.end(),
+                std::make_move_iterator(structure->operations.begin()),
+                std::make_move_iterator(structure->operations.end()));
+        }
+    } else if (anchor->kind == BlockKind::CodeBlock
         || anchor->kind == BlockKind::MathBlock
         || anchor->kind == BlockKind::TableCell) {
         target = document_paste_detail::paste_literal(
@@ -646,6 +673,16 @@ inline std::optional<DocumentTransaction> document_paste_text(
             std::move(normalized),
             allocator,
             operations);
+        if (target) {
+            if (auto structure = document_edit_detail::reparse_edited_direct_block(
+                    working, *target, allocator, nullptr,
+                    document_edit_detail::BlockReparseScope::Fragment)) {
+                target = structure->target;
+                operations.insert(operations.end(),
+                    std::make_move_iterator(structure->operations.begin()),
+                    std::make_move_iterator(structure->operations.end()));
+            }
+        }
     } else {
         auto parsed = parse_block_fragment(normalized, working.dialect);
         if (parsed.blocks.empty()) {

@@ -150,6 +150,13 @@ are recorded in one transaction. The source view uses its source-patch history.
 Thus Markdown fences still create blocks and undo restores the original caret,
 not a temporary replacement selection.
 
+Structural paste recognizes continued fences using the destination owner's
+source together with the inserted text. Parsing the inserted text alone would
+misread a closing fence as an opener when its opening fence is already in the
+document. The affected owner becomes a locally parsed fragment, with source
+and tree edits recorded in the same transaction. Existing raw blocks likewise
+split when a pasted closing boundary is followed by ordinary document content.
+
 ## Prompt configuration
 
 The instruction text, frequency policies and optional examples are runtime data
