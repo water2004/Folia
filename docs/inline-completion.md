@@ -113,6 +113,12 @@ do not already occur in the captured document. Empty output is abstention;
 an empty marked region is a deletion. Missing framing or out-of-budget output
 is rejected, not interpreted through a second response format.
 
+Instructions describe an inline editor operation, rather than asking for a
+completed standalone document. The model should extend the thought and structure
+already open at the caret, retain needed right-hand text, and emit no presentation
+wrappers. These are source completion rules shared by all content; they do not
+classify the editing language or prescribe particular syntax delimiters.
+
 TeX backslashes, indentation and leading newlines are literal payload. Only
 outer framing whitespace is ignored; payload CRLF/CR is normalized to LF.
 The client obtains expected source from its captured window and trims any

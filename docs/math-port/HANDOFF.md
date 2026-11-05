@@ -2,11 +2,13 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-11-05，补全修复MSI已重建）
+## 当前 checkpoint（2026-11-05，真实补全提示词对照后正在构建MSI）
 
-- 用户要求重新构建MSI且不做多余测试，已成功构建**Release self-contained 0.6.3**，包含源码基线**c421df12**的补全协议/上下文修复。产物**build/installer/bin/Folia-0.6.3-x64.msi**，脚本报告**51.4 MiB / 0 errors**；日志**build/folia-063-completion-contract-msi.log**。仅既有同版本升级ICE61 warning，未改升级策略。
-- 本次build_msi.ps1 -Version 0.6.3 -SkipDependencySetup -SkipStartupTest，**未运行测试或启动检查**；依赖此前本会话已setup，编译≤4，native串行，无agents/CUA。未安装/推送/发布，不查看已完成0.6.3发布。
-- **停止点/下一步**：exec19552已成功退出，无本任务运行构建/测试句柄。MSI已替换同名旧产物，交接记录小批本地提交（见HEAD）；按用户实际反馈或明确安装/发布要求继续，不自行安装/改版本。功能既有验收见下历史，不重复。
+- 用户授权构造片段调用DS API调提示词，并最新要求完成后直接MSI，不做多余测试。已复用生产RequestCompletionHttp+make_prompt/decoder读取凭据，仅发送构造片段，无真实文档、密钥输出或用户配置改写。安装版配置deepseek-flash/Responses/none；初轮Debug配置low单独记录，不混结果。无provider特判、无新协议/编辑架构、无agents/CUA/输入注入。
+- 采用较短通用prompt：明确编辑器光标处续写、延续已打开结构、完整区域替换与原有右文本、禁止为展示答案另包装；不分类Markdown/code/TeX，不列举`$`或特定符号规则。不改原文顺序、cache anchor、编辑协议/接受/Undo。复杂解释、额外输入包装、分段draft及few-shot试验均未接入。
+- Debug成功 **build/completion-prompt-debug.log**。最终生产prompt真实调用10样例×3=30（none，每次输出上限临时512 token，不改用户4096设置），**29 framed / 0 truncated / 0额外\[**，5568 input+461 output tokens，**build/completion-prompt-live-final.{log,txt}**。**已向用户明确残留：仍有丢弃右文本/重复$，一条回复异常格式；提示词只是改善，不宣称彻底修复或所有建议语义正确**。不自动修补或吞掉错误回复。用户要求不再追加测试，未运行core/app回归/启动检查。
+- 评估临时源码/脚本均ignored build/completion-prompt-*与build/run-completion-prompt-*，控制台链接既有windows_console_runtime；无设置/key改动。前轮none v1..v6及low-initial为候选原始结果，**不将候选8项结果当最终验收**。
+- **当前停止点/下一步**：本批prompt+开发说明+交接小批本地提交后，以build_msi.ps1 -Version 0.6.3 -SkipDependencySetup -SkipStartupTest构建Release/MSI（≤4/native串行），日志 **build/folia-063-completion-prompt-msi.log**。不安装/推送/发布，不查看已完成CI。此前同名MSI含c421df12，**本轮产物尚需等待构建成功才可交付**。无API/测试运行句柄，构建句柄见最新工具结果。
 
 ## 补全协议/上下文系统性修复完成（历史基线）
 
