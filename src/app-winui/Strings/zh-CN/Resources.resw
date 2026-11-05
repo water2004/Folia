@@ -342,11 +342,7 @@
   <data name="AIEagernessDescription" xml:space="preserve"><value>通过提示词控制是否主动建议，与模型推理力度独立。积极档会在存在多种写法时尝试简短续写，但不保证每次都有建议。</value></data>
   <data name="AIReasoning" xml:space="preserve"><value>推理力度</value></data>
   <data name="AIReasoningDefault" xml:space="preserve"><value>服务默认</value></data>
-  <data name="AIReasoningDescription" xml:space="preserve"><value>点击获取，读取上游当前模型声明的档位，不预设选项。服务默认不发送力度参数。</value></data>
-  <data name="AIFetchReasoning" xml:space="preserve"><value>获取</value></data>
-  <data name="AIFetchReasoningBusy" xml:space="preserve"><value>获取中…</value></data>
-  <data name="AINoReasoningMetadata" xml:space="preserve"><value>上游当前模型未提供可用的推理档位。</value></data>
-  <data name="AIReasoningFetched" xml:space="preserve"><value>已获取 {0} 个可用档位。</value></data>
+  <data name="AIReasoningDescription" xml:space="preserve"><value>获取模型后，按所选模型与协议显示上游声明的思考档位，不预设选项。服务默认不发送力度参数。</value></data>
   <data name="AIContextKB" xml:space="preserve"><value>上下文大小（KB，1–64）</value></data>
   <data name="AIOutputTokens" xml:space="preserve"><value>最大输出 token（16–4096）</value></data>
   <data name="AIBudgetInvalid" xml:space="preserve"><value>请输入整数：上下文为 1–64 KB，输出为 16–4096 token。</value></data>
@@ -358,4 +354,9 @@
   <data name="SettingsSaved" xml:space="preserve"><value>设置已保存。</value></data>
   <data name="AIService" xml:space="preserve"><value>服务</value></data>
   <data name="AICredentials" xml:space="preserve"><value>凭据</value></data>
+  <data name="AIModelPlaceholder" xml:space="preserve"><value>获取后选择模型</value></data>
+  <data name="AIFetchModels" xml:space="preserve"><value>获取模型</value></data>
+  <data name="AIFetchModelsBusy" xml:space="preserve"><value>获取中…</value></data>
+  <data name="AINoModels" xml:space="preserve"><value>上游未返回可用模型。</value></data>
+  <data name="AIModelsFetched" xml:space="preserve"><value>已获取 {0} 个模型，请从下拉列表选择。</value></data>
 </root>

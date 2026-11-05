@@ -21,6 +21,7 @@ struct CompletionResult {
 // Resolve the protocol path against the configured service base URL.
 std::string ResolveCompletionEndpoint(CompletionConfig const&);
 std::string ResolveCompletionModelsEndpoint(CompletionConfig const&);
+std::string ValidateCompletionService(CompletionConfig const&);
 std::string ValidateCompletionConfig(CompletionConfig const&);
 std::wstring LoadCompletionKey();
 void StoreCompletionKey(std::wstring_view key);

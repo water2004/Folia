@@ -45,11 +45,105 @@ Button Action(DependencyObject const& parent, winrt::hstring const& label) {
     return nullptr;
 }
 void InvokeAction(Button const& button) {
-    Automation::Peers::ButtonAutomationPeer peer(button);
+    auto peer = Automation::Peers::FrameworkElementAutomationPeer::CreatePeerForElement(button);
     peer.GetPattern(Automation::Peers::PatternInterface::Invoke).as<Automation::Provider::IInvokeProvider>().Invoke();
 }
+void FetchModels(Button const& button, completion_tests::Server& server) {
+    auto previous = server.receivedRequests.load();
+    button.StartBringIntoView();
+    Pump([&] { button.UpdateLayout(); return button.ActualWidth() > 0; });
+    bool ready = false;
+    button.DispatcherQueue().TryEnqueue([&] { ready = true; });
+    Pump([&] { return ready; });
+    bool clicked = false;
+    auto click = button.Click(winrt::auto_revoke, [&](auto const&, auto const&) { clicked = true; });
+    InvokeAction(button);
+    try { Pump([&] { return clicked; }); }
+    catch (std::exception const&) { throw std::runtime_error("Model fetch did not receive its native Button.Click event."); }
+    try { Pump([&] { return server.receivedRequests.load() > previous; }); }
+    catch (std::exception const&) { throw std::runtime_error("Model fetch " + std::to_string(previous + 1)
+        + " did not reach the local HTTP fixture; enabled=" + std::to_string(button.IsEnabled())
+        + ", label=" + winrt::to_string(winrt::unbox_value<winrt::hstring>(button.Content()))
+        + ", status=" + winrt::to_string(button.Parent().as<Grid>().Parent().as<StackPanel>().Children().GetAt(
+            button.Parent().as<Grid>().Parent().as<StackPanel>().Children().Size() - 1).as<TextBlock>().Text())); }
+    try { Pump([&] { return button.IsEnabled(); }); }
+    catch (std::exception const&) { throw std::runtime_error("Model fetch did not return its UI completion."); }
+}
+struct CompletionPage {
+    Window window;
+    Grid root;
+    std::shared_ptr<winrt::Folia::SettingsView> view;
+    FrameworkElement page{nullptr};
+    CompletionPage(std::string base, std::string model = {}, std::string effort = {}) {
+        winrt::Folia::AppSettings initial;
+        initial.completion = {true, std::move(base), std::move(model), 0, std::move(effort)};
+        view = std::make_shared<winrt::Folia::SettingsView>(initial,
+            std::make_shared<winrt::Folia::ThemeCatalog>(), std::make_shared<winrt::Folia::LatexCommandCatalog>(),
+            folia::Theme::Light, nullptr, [](auto const&) -> std::optional<winrt::hstring> { return {}; }, [] {});
+        window.Content(root); root.Children().Append(view->Root()); window.AppWindow().Resize({1120, 900}); window.Activate();
+        Pump([&] { return root.IsLoaded() && root.ActualWidth() > 100; });
+        for (auto entry : view->Root().MenuItems())
+            if (winrt::unbox_value<winrt::hstring>(entry.as<NavigationViewItem>().Tag()) == L"completion") view->Root().SelectedItem(entry);
+        root.UpdateLayout(); page = view->Root().Content().as<FrameworkElement>();
+        Pump([&] { root.UpdateLayout(); return First<TextBlock>(page).ActualWidth() > 0; });
+        Field<PasswordBox>(page, winrt::Folia::Localize(L"AIKey")).Password(L"fixture-key");
+    }
+    ~CompletionPage() { view->Detach(); window.Close(); }
+};
 suite settings_style_tests = [] {
-    "completion metadata requests retire when settings model changes"_test = [] {
+    "model refresh preserves an available saved choice and never switches to an unavailable replacement"_test = [] {
+        completion_tests::Server server(R"({"data":[{"id":"fixture","effort":{"supported_levels":["low","high"]}},{"id":"other"}]})",
+            200, false, "application/json", {}, 37, {R"({"data":[{"id":"other"}]})"});
+        CompletionPage fixture(server.baseUrl, "fixture", "high");
+        auto model = Field<ComboBox>(fixture.page, winrt::Folia::Localize(L"AIModel"));
+        auto reasoning = Field<ComboBox>(fixture.page, winrt::Folia::Localize(L"AIReasoning"));
+        auto fetch = Action(fixture.page, winrt::Folia::Localize(L"AIFetchModels"));
+        expect(model.Items().Size() == 1_u && model.SelectedIndex() == 0_i);
+        FetchModels(fetch, server);
+        expect(model.Items().Size() == 2_u && model.SelectedIndex() == 0_i);
+        expect(winrt::unbox_value<winrt::hstring>(reasoning.SelectedItem().as<ComboBoxItem>().Tag()) == L"high");
+        FetchModels(fetch, server);
+        auto service = fetch.Parent().as<Grid>().Parent().as<StackPanel>();
+        auto fetchStatus = service.Children().GetAt(service.Children().Size() - 1).as<TextBlock>();
+        expect(model.Items().Size() == 1_u && model.SelectedIndex() == -1_i) << winrt::to_string(fetchStatus.Text());
+        expect(reasoning.Items().Size() == 1_u && reasoning.SelectedIndex() == 0_i);
+    };
+    "model discovery empty and failed responses remain selectable only by explicit available choices"_test = [] {
+        for (auto status : {200, 503}) {
+            completion_tests::Server server(R"({"data":[]})", status, false, "application/json");
+            CompletionPage fixture(server.baseUrl);
+            auto model = Field<ComboBox>(fixture.page, winrt::Folia::Localize(L"AIModel"));
+            auto fetch = Action(fixture.page, winrt::Folia::Localize(L"AIFetchModels"));
+            FetchModels(fetch, server);
+            expect(server.received.load()); expect(model.Items().Size() == 0_u);
+            expect(model.SelectedIndex() == -1_i);
+            expect(Field<ComboBox>(fixture.page, winrt::Folia::Localize(L"AIReasoning")).Items().Size() == 1_u);
+        }
+    };
+    "leaving completion settings cancels pending model discovery"_test = [] {
+        completion_tests::Server server({}, 200, true, "application/json");
+        CompletionPage fixture(server.baseUrl);
+        auto fetch = Action(fixture.page, winrt::Folia::Localize(L"AIFetchModels"));
+        InvokeAction(fetch); Pump([&] { return server.received.load(); });
+        expect(!fetch.IsEnabled());
+        fixture.view->Root().SelectedItem(fixture.view->Root().MenuItems().GetAt(0));
+        Pump([&] { return server.client.load() == INVALID_SOCKET; });
+        expect(fetch.IsEnabled());
+    };
+    "actual credential edits cancel pending model discovery"_test = [] {
+        for (bool clear : {false, true}) {
+            completion_tests::Server server({}, 200, true, "application/json");
+            CompletionPage fixture(server.baseUrl);
+            auto fetch = Action(fixture.page, winrt::Folia::Localize(L"AIFetchModels"));
+            InvokeAction(fetch); Pump([&] { return server.received.load(); });
+            expect(!fetch.IsEnabled());
+            if (clear) First<CheckBox>(fixture.page).IsChecked(true);
+            else Field<PasswordBox>(fixture.page, winrt::Folia::Localize(L"AIKey")).Password(L"changed-fixture-key");
+            Pump([&] { return server.client.load() == INVALID_SOCKET; });
+            expect(fetch.IsEnabled());
+        }
+    };
+    "completion metadata requests retire when settings service changes"_test = [] {
         completion_tests::Server server({}, 200, true, "application/json");
         Window window; Grid root; window.Content(root);
         winrt::Folia::AppSettings initial; initial.completion.baseUrl = server.baseUrl; initial.completion.model = "fixture";
@@ -64,15 +158,15 @@ suite settings_style_tests = [] {
             if (winrt::unbox_value<winrt::hstring>(entry.as<NavigationViewItem>().Tag()) == L"completion") navigation.SelectedItem(entry);
         root.UpdateLayout(); auto page = navigation.Content().as<FrameworkElement>();
         Field<PasswordBox>(page, winrt::Folia::Localize(L"AIKey")).Password(L"fixture-key");
-        auto fetch = Action(page, winrt::Folia::Localize(L"AIFetchReasoning")); InvokeAction(fetch);
+        auto fetch = Action(page, winrt::Folia::Localize(L"AIFetchModels")); InvokeAction(fetch);
         Pump([&] { return server.received.load(); }); expect(!fetch.IsEnabled());
-        Field<TextBox>(page, winrt::Folia::Localize(L"AIModel")).Text(L"another-model");
+        Field<TextBox>(page, winrt::Folia::Localize(L"AIBaseUrl")).Text(L"https://another.example/v1");
         Pump([&] { return fetch.IsEnabled(); });
         Pump([&] { return server.client.load() == INVALID_SOCKET; });
         expect(Field<ComboBox>(page, winrt::Folia::Localize(L"AIReasoning")).Items().Size() == 1_u);
     };
     "completion settings save independent budgets eagerness and protocol reasoning choices"_test = [] {
-        completion_tests::Server server(R"({"data":[{"id":"fixture","effort":{"supported_levels":["low","high","max"]}}]})", 200, false, "application/json");
+        completion_tests::Server server(R"({"data":[{"id":"fixture","name":"Fixture Model","effort":{"supported_levels":["low","high","max"]}},{"id":"plain"}]})", 200, false, "application/json");
         Window window; Grid root; window.Content(root);
         std::optional<winrt::Folia::AppSettings> applied;
         winrt::Folia::AppSettings initial;
@@ -98,8 +192,14 @@ suite settings_style_tests = [] {
         expect(reasoning.Items().Size() == 1_u) << "there must be no preset reasoning levels";
         protocol.SelectedIndex(2); expect(reasoning.SelectedIndex() == 0_i); expect(reasoning.Items().Size() == 1_u);
         auto key = Field<PasswordBox>(page, winrt::Folia::Localize(L"AIKey")); key.Password(L"fixture-key");
-        auto fetch = Action(page, winrt::Folia::Localize(L"AIFetchReasoning")); expect(fetch != nullptr);
-        InvokeAction(fetch); Pump([&] { return reasoning.Items().Size() == 4; });
+        auto fetch = Action(page, winrt::Folia::Localize(L"AIFetchModels")); expect(fetch != nullptr);
+        FetchModels(fetch, server);
+        auto model = Field<ComboBox>(page, winrt::Folia::Localize(L"AIModel"));
+        expect(!model.IsEditable()); expect(model.Items().Size() == 2_u);
+        expect(model.SelectedIndex() == -1_i) << "fetch must not silently select a new model";
+        model.SelectedIndex(0); expect(reasoning.Items().Size() == 4_u);
+        model.SelectedIndex(1); expect(reasoning.Items().Size() == 1_u);
+        model.SelectedIndex(0); expect(reasoning.Items().Size() == 4_u);
         expect(fetch.IsEnabled()); expect(server.request.starts_with("GET /v1/models HTTP/1.1\r\n"));
         reasoning.SelectedIndex(2); // high from the upstream fixture
         key.Password(L""); // Do not persist fixture credentials when applying settings.
@@ -109,10 +209,12 @@ suite settings_style_tests = [] {
         Pump([&] { return applied.has_value(); });
         expect(applied->completion.contextKB == 16_u && applied->completion.outputTokens == 512_u);
         expect(applied->completion.reasoningEffort == "high");
+        expect(applied->completion.model == "fixture") << "save uses model ID, not its display name";
         expect(applied->completion.eagerness == folia::completion::Eagerness::Proactive);
         view->Reset(*applied, folia::Theme::Light);
         root.UpdateLayout(); page = navigation.Content().as<FrameworkElement>();
         expect(Field<TextBox>(page, winrt::Folia::Localize(L"AIContextKB")).Text() == L"16");
+        expect(Field<ComboBox>(page, winrt::Folia::Localize(L"AIModel")).SelectedIndex() == 0_i);
     };
     "settings pages share typography and render AI forms without enclosing borders"_test = [] {
         Window window; Grid root; window.Content(root); window.Title(L"Folia settings style test");

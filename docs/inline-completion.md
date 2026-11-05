@@ -9,6 +9,10 @@ configuration, key store or absolute source path is a dependency.
 The user configures a protocol, base URL, model and key in Folia. The transport
 adds `/chat/completions`, `/responses` or `/messages` to that base path; a host-only
 base uses `/v1`. Trailing slashes are normalized and query parameters are retained.
+The official DeepSeek host resolves its documented service mounts by protocol:
+`/chat/completions`, `/responses` and `/anthropic/v1/messages`. Its shared model
+discovery endpoint is `/models`, authenticated with Bearer credentials for every
+generation protocol. Custom gateways keep their explicit path and protocol headers.
 The settings field is `completion.baseUrl`; there is no legacy endpoint migration.
 Completion is opt-in. Keys use the Windows credential store, separate from portable settings.
 Only bounded context from the active document is sent to the configured service.
@@ -17,14 +21,33 @@ Settings expose context size (1–64 KB, 1000 UTF-8 bytes per KB), maximum outpu
 tokens (16–4096), suggestion frequency and reasoning effort. Defaults are 7 KB,
 128 tokens, Balanced frequency and service-default effort. Conservative,
 Balanced and Proactive select stable instruction variants; they do not change
-the model's reasoning parameter or guarantee a suggestion. Clicking Fetch reads
-`GET /models` under the configured base path and selects that model's
-`effort.supported_levels` metadata. No reasoning levels are preset or guessed;
-an existing saved choice remains visible until refreshed. Only upstream choices
-supported by the protocol adapter are offered. Missing metadata leaves service
-default, which omits the effort parameter. Fetching is asynchronous, bounded and
-cancelled on model/base/protocol changes or page removal; stale results are ignored.
-The metadata schema is documented by the [upstream Models API](https://api-docs.deepseek.com/api/list-models/).
+the model's reasoning parameter or guarantee a suggestion.
+
+The model field is a non-editable dropdown. **Fetch models** asynchronously reads
+`GET /models` at the configured service base, without requiring a model selection
+or sending document content. One fetch populates both the model list and each
+model's declared reasoning capabilities. Selecting a model uses its ID (not its
+display name), and updates reasoning choices locally without another request.
+A saved model/effort remains usable before refreshing. Refresh preserves choices
+that still exist; it never silently chooses a different model. Empty lists and
+errors are shown without inventing model IDs or reasoning levels.
+
+DeepSeek's `effort.supported_levels` preserves the upstream order. Native
+Anthropic Messages model discovery uses `capabilities.effort` support declarations.
+Only explicitly supported levels that the wire adapter can encode are offered;
+missing metadata leaves service default, which omits the effort parameter.
+Generation encodes the selection as `reasoning_effort` for Chat Completions,
+`reasoning.effort` for Responses and `output_config.effort` for Messages.
+There is no preset list and no extra model inference request to detect capabilities.
+
+Discovery is bounded to 1 MB per page, 16 pages and 4096 unique model IDs;
+`has_more`/`last_id` pagination uses an encoded `after_id` cursor and rejects loops.
+Changing the base/protocol clears stale choices and cancels discovery; credential
+changes or page removal also cancel pending work. Late results are ignored.
+See the [DeepSeek Models API](https://api-docs.deepseek.com/api/list-models/),
+[thinking parameter formats](https://api-docs.deepseek.com/guides/thinking_mode/),
+[Messages mount](https://api-docs.deepseek.com/api/create-message/), and
+[Anthropic model capabilities](https://platform.claude.com/docs/en/api/models/list).
 
 Budget fields are ordinary integer text inputs. Closed setting choices do not
 use the mouse wheel to change selection; the page keeps scrolling. Open lists

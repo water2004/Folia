@@ -2,11 +2,18 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-11-04，发布0.6.3）
+## 当前 checkpoint（2026-11-05，AI模型发现已完成）
 
-- 用户授权发布**0.6.3**，沿用既有CI/CD与英文release notes偏好。六处版本已统一，release-notes/v0.6.3.md全英文ASCII；master比远端领先6项修复/记录提交，fetch无新远端提交，v0.6.3不存在。既有功能验收见下段，不重复广泛测试。
-- 本地MSI预检**build/folia-063-msi.log**成功：setup、Release、自包含MSI、真实启动/正常关闭exit0；MSI ProductVersion0.6.3、EXE0.6.3.0/0.6.3已实查；仅既有WiX同版本升级ICE61 warning，0error。生成目录检查和Python7项已过，无运行native句柄。
-- 下一步：提交版本/英文说明→推master与新v0.6.3触发现有release.yml→等成功→下载正式MSI/sidecar核对版本/SHA256/GitHub digest/英文body→更新本记录提交推master。不安装，不移动旧tag。不开agents/CUA/OS输入注入，native串行≤4。
+- 用户确认0.6.3已发布且不要查看流水线；不再查看旧CI。当前新任务已实现/验收：DeepSeek协议地址与模型/思考元数据修正；模型改“获取模型”+原生下拉，模型切换本地更新档位。版本仍0.6.3，Debug已更新，本轮未推送/发布/MSI/安装。不开agents/CUA/OS输入注入，native串行≤4。
+- 责任边界：现有三协议字段本来正确（reasoning_effort / reasoning.effort / output_config.effort），新增精确正式测试；官方DeepSeek已知mount按协议解析generation，metadata共享root/models+Bearer；其他gateway保留显式base/原认证，不猜路径。模型列表统一CompletionModel/Page解析DeepSeek effort.supported_levels及native Anthropic capabilities.effort，无硬编码候选；16页/4096唯一ID上限、cursor编码/去重。未改vendor、CST、编辑坐标或请求预算。
+- 设置只保存model ID，已有model/effort可刷新前使用，刷新保留仍存在的选择；移除旧独立FetchReasoning接口/按钮，统一一次获取。服务改变清选项，离页/实际凭据变更取消，弱交付+generation挡过期。正式测试发现WinUI延后PasswordChanged会在值不变时取消下一请求；现比较active credential snapshot，仅实际不同才取消，完成/取消清快照；不新增持久凭据副本。重复刷新/真实key edit与clear均已验。
+- 验收：setup成功；标准Debug与最后credential增量构建成功（**model-discovery-{accepted,credential}-build.log**）。**model-discovery-http-tests.log 19项211断言**（另loading5/22），**model-discovery-full-only-stdout.log 7项105断言**，**model-discovery-width-wheel.log 2项90断言**全过；UI真实宿主沿用run.ps1的production rsp/runtime，后续只增量编译该测试cpp重链。**model-discovery-startup.log**两次真实启动/正常关闭exit0。原生light1120/dark720截图已目视，XML中英文key集合一致，无新增重复项。无真实模型请求/用户key改动。
+- 测试诊断限制：UIA需等实际布局与dispatcher turn后调用生产Button.Click；不要用未Loaded/offscreen控件状态猜产品错误。一次重链后的全组进程60s无输出被测试runner停止；同一二进制fresh focused刷新5/5、凭据4/4及全组7/105（约4.8s）通过，正式startup也正常；未定位该单次runner等待，不宣称复现了产品挂起。不重复已过宽泛数学/编辑测试。
+- **停止点/下一步**：本批代码、正式测试、docs和本checkpoint一同本地提交（见HEAD）；无运行native/build/test/agent句柄。用户可使用标准Debug测试获取模型。后续按用户反馈或明确发布要求继续；不查看已完成发布、不移动tag，不自行安装。
+
+## 0.6.3发布（用户确认完成，历史）
+
+- 用户确认发布已完成且不要再查看；版本commit **aceafbb507557d7d32d8d136c84bbe546138fae9**、annotated v0.6.3已推远端。英文notes与本地Release/MSI预检成功；不声称本轮另查正式CI资产，不移动tag、不安装。
 
 ## 多窗口IME与引用公式验收（已完成，历史）
 

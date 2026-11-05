@@ -1,5 +1,6 @@
 #include "providers/ModelAdapter.h"
 #include "providers/StreamResponse.h"
+#include "providers/ModelValidation.h"
 #include "pch.h"
 #include "completion/CompletionHttpTransport.h"
 #include <winhttp.h>
@@ -79,7 +80,7 @@ bool ReadHttp(CompletionConfig const& config, std::string const& urlText, wchar_
     std::function<bool(bool, std::string_view)> const& consume,
     std::chrono::milliseconds inactivity = std::chrono::seconds(15)) {
     using namespace fairy::providers;
-    auto validation = ValidateCompletionConfig(config);
+    auto validation = std::wstring_view(method) == L"GET" ? ValidateCompletionService(config) : ValidateCompletionConfig(config);
     if (!validation.empty()) throw std::runtime_error(validation);
     if (stop.stop_requested()) return false;
     auto endpoint = wide(urlText);
@@ -172,37 +173,91 @@ CompletionResult RequestCompletionHttp(CompletionConfig const& config, folia::co
     output.truncated = result.finish == FinishReason::Truncated;
     return output;
 }
-std::vector<std::string> ParseCompletionReasoningEfforts(std::string_view json, std::string_view model) {
+CompletionModelPage ParseCompletionModels(std::string_view json, int protocol) {
     if (json.size() > 1024 * 1024) throw std::runtime_error("Model metadata exceeds limit.");
     auto root = fairy::providers::Json::parse(json);
     auto found = root.find("data");
-    if (found == root.end() || !found->is_array()) throw std::runtime_error("Invalid model metadata response.");
+    if (found == root.end() || !found->is_array() || found->size() > 4096) throw std::runtime_error("Invalid model metadata response.");
+    CompletionModelPage page;
+    auto addLevel = [&](CompletionModel& model, std::string name) {
+        if (name.empty() || name.size() > 32 || !std::ranges::all_of(name, [](unsigned char c) {
+            return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_' || c == '-';
+        })) throw std::runtime_error("Invalid reasoning level.");
+        if (fairy::providers::SupportsReasoningOptions(static_cast<fairy::providers::ApiProtocol>(protocol), {name})
+            && std::ranges::find(model.reasoningEfforts, name) == model.reasoningEfforts.end())
+            model.reasoningEfforts.push_back(std::move(name));
+    };
     for (auto const& item : *found) {
-        if (!item.is_object() || item.value("id", std::string{}) != model) continue;
+        if (!item.is_object()) throw std::runtime_error("Invalid model metadata.");
+        CompletionModel model;
+        model.id = item.value("id", std::string{});
+        if (model.id.empty() || model.id.size() > 128 || model.id.find_first_of("\r\n\0", 0, 3) != std::string::npos)
+            throw std::runtime_error("Invalid model identifier.");
+        model.name = item.value("display_name", item.value("name", model.id));
+        if (model.name.size() > 256 || model.name.find_first_of("\r\n\0", 0, 3) != std::string::npos)
+            throw std::runtime_error("Invalid model display name.");
         auto effort = item.find("effort");
-        if (effort == item.end()) return {};
-        if (!effort->is_object()) throw std::runtime_error("Invalid reasoning metadata.");
-        auto levels = effort->find("supported_levels");
-        if (levels == effort->end()) return {};
-        if (!levels->is_array() || levels->size() > 32) throw std::runtime_error("Invalid reasoning levels.");
-        std::vector<std::string> result;
-        for (auto const& level : *levels) {
-            if (!level.is_string()) throw std::runtime_error("Invalid reasoning level.");
-            auto name = level.get<std::string>();
-            if (name.empty() || name.size() > 32 || !std::ranges::all_of(name, [](unsigned char c) {
-                return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_' || c == '-';
-            })) throw std::runtime_error("Invalid reasoning level.");
-            if (std::ranges::find(result, name) == result.end()) result.push_back(std::move(name));
+        if (effort != item.end()) {
+            if (!effort->is_object()) throw std::runtime_error("Invalid reasoning metadata.");
+            auto levels = effort->find("supported_levels");
+            if (levels != effort->end()) {
+                if (!levels->is_array() || levels->size() > 32) throw std::runtime_error("Invalid reasoning levels.");
+                for (auto const& level : *levels) {
+                    if (!level.is_string()) throw std::runtime_error("Invalid reasoning level.");
+                    addLevel(model, level.get<std::string>());
+                }
+            }
+        } else if (protocol == 2 && item.contains("capabilities") && !item["capabilities"].is_null()) {
+            auto const& capabilities = item.at("capabilities");
+            auto declared = capabilities.find("effort");
+            if (declared != capabilities.end() && !declared->is_null()) {
+                if (!declared->is_object() || declared->size() > 33) throw std::runtime_error("Invalid reasoning capabilities.");
+                if (declared->value("supported", false))
+                    for (auto const& [name, value] : declared->items())
+                        if (name != "supported" && value.is_object() && value.value("supported", false)) addLevel(model, name);
+            }
         }
-        return result;
+        if (std::ranges::find(page.models, model.id, &CompletionModel::id) == page.models.end()) page.models.push_back(std::move(model));
     }
-    throw std::runtime_error("Configured model was not found in the upstream model list.");
+    if (root.value("has_more", false)) {
+        page.next = root.value("last_id", std::string{});
+        if (page.models.empty() || page.next.empty() || page.next.size() > 128) throw std::runtime_error("Invalid model pagination.");
+    }
+    return page;
 }
-std::vector<std::string> FetchCompletionReasoningEfforts(CompletionConfig const& config, std::stop_token stop, std::wstring key) {
-    std::string response;
-    ReadHttp(config, ResolveCompletionModelsEndpoint(config), L"GET", {}, stop, std::move(key),
-        [&](bool, std::string_view chunk) { response.append(chunk); return false; });
-    if (stop.stop_requested()) return {};
-    return ParseCompletionReasoningEfforts(response, config.model);
+std::vector<CompletionModel> FetchCompletionModels(CompletionConfig const& config, std::stop_token stop, std::wstring key) {
+    auto endpoint = ResolveCompletionModelsEndpoint(config);
+    // DeepSeek exposes the shared Models API with Bearer authentication even
+    // when generation uses Anthropic Messages. Keep native Messages auth for
+    // other services and gateways.
+    auto metadataConfig = config;
+    auto hostEnd = endpoint.find('/', endpoint.find("://") + 3);
+    auto authority = endpoint.substr(0, hostEnd);
+    std::ranges::transform(authority, authority.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+    if (authority == "https://api.deepseek.com" || authority == "https://api.deepseek.com:443") metadataConfig.protocol = 0;
+    std::vector<CompletionModel> models;
+    std::vector<std::string> cursors;
+    auto url = endpoint;
+    for (int count = 0; count < 16; ++count) {
+        std::string response;
+        ReadHttp(metadataConfig, url, L"GET", {}, stop, key,
+            [&](bool, std::string_view chunk) { response.append(chunk); return false; });
+        if (stop.stop_requested()) return {};
+        auto page = ParseCompletionModels(response, config.protocol);
+        for (auto& model : page.models)
+            if (std::ranges::find(models, model.id, &CompletionModel::id) == models.end()) models.push_back(std::move(model));
+        if (models.size() > 4096) throw std::runtime_error("Model list exceeds limit.");
+        if (page.next.empty()) return models;
+        if (std::ranges::find(cursors, page.next) != cursors.end()) throw std::runtime_error("Repeated model pagination cursor.");
+        cursors.push_back(page.next);
+        std::string encoded;
+        constexpr char hex[] = "0123456789ABCDEF";
+        for (unsigned char c : page.next) {
+            if (std::isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') encoded += c;
+            else { encoded += '%'; encoded += hex[c >> 4]; encoded += hex[c & 15]; }
+        }
+        url = endpoint + (endpoint.find('?') == std::string::npos ? "?" : "&") + "after_id=" + encoded;
+    }
+    throw std::runtime_error("Too many model metadata pages.");
 }
 }

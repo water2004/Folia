@@ -15,7 +15,8 @@ static std::string ResolveCompletionUrl(CompletionConfig const& config, std::str
         throw std::invalid_argument("Invalid completion base URL.");
     auto baseUrl = winrt::to_hstring(config.baseUrl);
     URL_COMPONENTS url{sizeof(URL_COMPONENTS)};
-    url.dwHostNameLength = url.dwUserNameLength = url.dwPasswordLength = static_cast<DWORD>(-1);
+    url.dwHostNameLength = url.dwUserNameLength = url.dwPasswordLength = url.dwUrlPathLength
+        = url.dwExtraInfoLength = static_cast<DWORD>(-1);
     if (!WinHttpCrackUrl(baseUrl.c_str(), baseUrl.size(), 0, &url) || !url.dwHostNameLength
         || url.dwUserNameLength || url.dwPasswordLength || config.baseUrl.find('#') != std::string::npos)
         throw std::invalid_argument("Invalid completion base URL.");
@@ -28,7 +29,17 @@ static std::string ResolveCompletionUrl(CompletionConfig const& config, std::str
     auto path = config.baseUrl.substr(0, queryAt);
     auto query = queryAt == std::string::npos ? std::string{} : config.baseUrl.substr(queryAt);
     while (path.ends_with('/')) path.pop_back();
-    if (path.find('/', path.find("://") + 3) == std::string::npos) path += "/v1";
+    auto mount = std::wstring(url.lpszUrlPath, url.dwUrlPathLength);
+    while (mount.ends_with('/')) mount.pop_back();
+    if (host == L"api.deepseek.com" && (mount.empty() || mount == L"/v1"
+        || mount == L"/anthropic" || mount == L"/anthropic/v1")) {
+        // These are documented mounts of the same official service. Discovery
+        // is shared at /models; generation mounts differ by wire protocol.
+        // Explicit paths on any other host (including gateways) stay intact.
+        auto authorityEnd = path.find('/', path.find("://") + 3);
+        path = path.substr(0, authorityEnd);
+        if (suffix == "/messages") path += "/anthropic/v1";
+    } else if (path.find('/', path.find("://") + 3) == std::string::npos) path += "/v1";
     path += suffix;
     path += query;
     if (path.size() > 2048) throw std::invalid_argument("Completion base URL is too long.");
@@ -42,12 +53,16 @@ std::string ResolveCompletionEndpoint(CompletionConfig const& config) {
 std::string ResolveCompletionModelsEndpoint(CompletionConfig const& config) {
     return ResolveCompletionUrl(config, "/models");
 }
-std::string ValidateCompletionConfig(CompletionConfig const& config) {
-    if (config.model.empty() || config.model.size() > 128 || config.model.find_first_of("\r\n") != std::string::npos)
-        return "Choose a completion model (up to 128 bytes, without line breaks).";
+std::string ValidateCompletionService(CompletionConfig const& config) {
     try { (void)ResolveCompletionEndpoint(config); }
     catch (std::exception const& error) { return error.what(); }
     catch (winrt::hresult_error const&) { return "Invalid completion base URL."; }
+    return {};
+}
+std::string ValidateCompletionConfig(CompletionConfig const& config) {
+    if (auto error = ValidateCompletionService(config); !error.empty()) return error;
+    if (config.model.empty() || config.model.size() > 128 || config.model.find_first_of("\r\n") != std::string::npos)
+        return "Choose a completion model (up to 128 bytes, without line breaks).";
     if (!fairy::providers::SupportsReasoningOptions(static_cast<fairy::providers::ApiProtocol>(config.protocol), {config.reasoningEffort}))
         return "Reasoning effort is unsupported for the selected protocol.";
     if (config.eagerness < folia::completion::Eagerness::Conservative || config.eagerness > folia::completion::Eagerness::Proactive)

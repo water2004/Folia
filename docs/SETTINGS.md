@@ -19,8 +19,9 @@ QuickJS runtime. LaTeX command suggestions have an independent setting.
 
 The AI page configures an independent base URL, protocol, model and Windows-stored
 API key. It also exposes context size in KB, output tokens, prompt eagerness and
-reasoning effort. Reasoning choices are fetched on demand from upstream model
-metadata, without preset levels. See [inline completion](inline-completion.md)
+reasoning effort. Fetch models populates a model dropdown and the selected model's
+reasoning choices from upstream metadata, without preset levels or manually typed
+model IDs. Discovery follows the selected service and protocol. See [inline completion](inline-completion.md)
 for request budgets, status indicators, cancellation, caching and acceptance.
 
 ## Persistence
