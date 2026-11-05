@@ -24,19 +24,21 @@ struct WheelEvent : winrt::implements<WheelEvent, Input::IPointerRoutedEventArgs
 };
 suite settings_wheel_tests = [] {
     "closed settings choices preserve selection and leave wheel routing to the page"_test = [] {
-        Window window; Controls::Grid root; window.Content(root);
-        struct Close { Window window; ~Close() { window.Close(); } } close{window};
-        auto choice = winrt::Folia::settings_ui::Choice();
-        for (auto item : {L"first", L"second", L"third"}) choice.Items().Append(winrt::box_value(item));
-        choice.SelectedIndex(1); root.Children().Append(choice); window.Activate();
-        Pump([&] { return choice.IsLoaded(); });
-        expect(choice.Focus(FocusState::Programmatic)); expect(!choice.IsDropDownOpen());
-        auto event = winrt::make_self<WheelEvent>();
-        auto args = event.as<Input::PointerRoutedEventArgs>();
-        auto overrides = choice.as<Controls::IControlOverrides>();
-        for (int i = 0; i < 3; ++i) overrides.OnPointerWheelChanged(args);
-        expect(choice.SelectedIndex() == 1_i); expect(!event->handled); expect(event->reads == 0_i);
-        choice.SelectedIndex(2); expect(choice.SelectedIndex() == 2_i);
+        for (bool editable : {false, true}) {
+            Window window; Controls::Grid root; window.Content(root);
+            struct Close { Window window; ~Close() { window.Close(); } } close{window};
+            auto choice = winrt::Folia::settings_ui::Choice(); choice.IsEditable(editable);
+            for (auto item : {L"first", L"second", L"third"}) choice.Items().Append(winrt::box_value(item));
+            choice.SelectedIndex(1); root.Children().Append(choice); window.Activate();
+            Pump([&] { return choice.IsLoaded(); });
+            expect(choice.Focus(FocusState::Programmatic)); expect(!choice.IsDropDownOpen());
+            auto event = winrt::make_self<WheelEvent>();
+            auto args = event.as<Input::PointerRoutedEventArgs>();
+            auto overrides = choice.as<Controls::IControlOverrides>();
+            for (int i = 0; i < 3; ++i) overrides.OnPointerWheelChanged(args);
+            expect(choice.SelectedIndex() == 1_i); expect(!event->handled); expect(event->reads == 0_i);
+            choice.SelectedIndex(2); expect(choice.SelectedIndex() == 2_i);
+        }
     };
 };
 }

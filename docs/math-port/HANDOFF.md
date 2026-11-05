@@ -2,14 +2,14 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-11-05，AI模型发现已完成）
+## 当前 checkpoint（2026-11-05，标准协议与手填配置完成）
 
-- 用户确认0.6.3已发布且不要查看流水线；不再查看旧CI。当前新任务已实现/验收：DeepSeek协议地址与模型/思考元数据修正；模型改“获取模型”+原生下拉，模型切换本地更新档位。版本仍0.6.3，Debug已更新，本轮未推送/发布/MSI/安装。不开agents/CUA/OS输入注入，native串行≤4。
-- 责任边界：现有三协议字段本来正确（reasoning_effort / reasoning.effort / output_config.effort），新增精确正式测试；官方DeepSeek已知mount按协议解析generation，metadata共享root/models+Bearer；其他gateway保留显式base/原认证，不猜路径。模型列表统一CompletionModel/Page解析DeepSeek effort.supported_levels及native Anthropic capabilities.effort，无硬编码候选；16页/4096唯一ID上限、cursor编码/去重。未改vendor、CST、编辑坐标或请求预算。
-- 设置只保存model ID，已有model/effort可刷新前使用，刷新保留仍存在的选择；移除旧独立FetchReasoning接口/按钮，统一一次获取。服务改变清选项，离页/实际凭据变更取消，弱交付+generation挡过期。正式测试发现WinUI延后PasswordChanged会在值不变时取消下一请求；现比较active credential snapshot，仅实际不同才取消，完成/取消清快照；不新增持久凭据副本。重复刷新/真实key edit与clear均已验。
-- 验收：setup成功；标准Debug与最后credential增量构建成功（**model-discovery-{accepted,credential}-build.log**）。**model-discovery-http-tests.log 19项211断言**（另loading5/22），**model-discovery-full-only-stdout.log 7项105断言**，**model-discovery-width-wheel.log 2项90断言**全过；UI真实宿主沿用run.ps1的production rsp/runtime，后续只增量编译该测试cpp重链。**model-discovery-startup.log**两次真实启动/正常关闭exit0。原生light1120/dark720截图已目视，XML中英文key集合一致，无新增重复项。无真实模型请求/用户key改动。
-- 测试诊断限制：UIA需等实际布局与dispatcher turn后调用生产Button.Click；不要用未Loaded/offscreen控件状态猜产品错误。一次重链后的全组进程60s无输出被测试runner停止；同一二进制fresh focused刷新5/5、凭据4/4及全组7/105（约4.8s）通过，正式startup也正常；未定位该单次runner等待，不宣称复现了产品挂起。不重复已过宽泛数学/编辑测试。
-- **停止点/下一步**：本批代码、正式测试、docs和本checkpoint一同本地提交（见HEAD）；无运行native/build/test/agent句柄。用户可使用标准Debug测试获取模型。后续按用户反馈或明确发布要求继续；不查看已完成发布、不移动tag，不自行安装。
+- 用户最新要求已完成：删除DeepSeek域名/路径/认证特判，按所选API协议+Base URL获取模型；模型及思考档位均可下拉或手填。候选只来自上游标准能力，缺失时明确提示可手填，不猜模型名/不预设档位。此要求取代5cbdfd6f的provider适配。用户确认0.6.3发布完成且不查看CI；当前仍0.6.3，本轮只本地提交，不推送/发布/MSI/安装。不开agents/CUA/OS输入注入，native串行≤4。
+- 网络边界：三个协议统一Base URL + suffix，保留显式路径/query，各自标准认证，无host remap/fallback请求。OpenAI Models只基本ID信息，无标准档位字段，忽略私有effort.supported_levels；Messages读取capabilities.effort显式supported及标准分页。模型GET无需预先选模型/生成预算。生产completion/settings已rg无DeepSeek/supported_levels。
+- 输入边界：两个原生ComboBox IsEditable，模型显示ID/name仅tooltip；Text就是保存值。思考手填不加入上游候选，空值/服务默认不发参数。候选更新和模型切换保留显式effort，刷新保留手填model/effort即使列表遗漏。只在用户手填未匹配项时SelectedIndex=-1再设Text，避免WinUI retemplate把它覆盖成默认项；实际内部TextBox→Save/清空已验。vendor ModelValidation移除固定力度枚举，只验32字符ASCII token，三协议依然用各自标准字段，具体值交服务判断；source-lock保留upstream hash并记录局部变更。原credential snapshot/弱交付/取消语义保留。
+- 正式验收全过：setup/Debug与最终**standard-manual-selection-build.log**成功；**standard-manual-http.log 19项225断言**（另loading5/22），正式run.ps1 **standard-manual-ui-verified.log 8项125断言**，**standard-manual-width-wheel.log 2项96断言**（含可编辑/不可编辑closed wheel），**standard-manual-startup.log**两次真实启动/正常关闭exit0。明暗720/1120原生PNG已检查；27项vendor hashes匹配、中英资源key集合一致。无真实上游请求/用户key修改，不重复不相关数学/编辑广泛测试。
+- 测试记录：临时增量脚本曾在125断言全过/result文件0后因Process.ExitCode读取方式返回失败；正式run.ps1缓存Handle并Refresh已复核exit0，不是产品崩溃。临时脚本也已修成同样方式，但不替代正式验收日志。UI测试只通过原生属性/automation peer/生产Click，未注入OS输入。
+- **停止点/下一步**：本批源码、正式测试、docs与本checkpoint一起本地提交（见HEAD）；Debug已更新，无运行native/build/test/agent句柄。后续按用户体验或明确发布要求继续；不再查看已完成发布，不移动tag。标准依据见docs/inline-completion.md的OpenAI/Anthropic官方模型schema链接。
 
 ## 0.6.3发布（用户确认完成，历史）
 

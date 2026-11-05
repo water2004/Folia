@@ -37,7 +37,9 @@
     },
     {
       "path": "providers/ModelValidation.cpp",
-      "sha256": "3ee2ea687a326cb08bb455e1a013a633e53f95e5dbff58dc35f16de9a24c9069"
+      "sha256": "b8012f048192386e2ce1ac2f72bfd8981ac7949941b6a71b920e7fde49b9d6ee",
+      "upstream_sha256": "3ee2ea687a326cb08bb455e1a013a633e53f95e5dbff58dc35f16de9a24c9069",
+      "local_change": "Validate effort token syntax without a model/provider vocabulary; explicitly entered and advertised values pass through the selected protocol field."
     },
     {
       "path": "providers/ModelValidation.h",

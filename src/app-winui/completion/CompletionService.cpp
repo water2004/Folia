@@ -15,8 +15,7 @@ static std::string ResolveCompletionUrl(CompletionConfig const& config, std::str
         throw std::invalid_argument("Invalid completion base URL.");
     auto baseUrl = winrt::to_hstring(config.baseUrl);
     URL_COMPONENTS url{sizeof(URL_COMPONENTS)};
-    url.dwHostNameLength = url.dwUserNameLength = url.dwPasswordLength = url.dwUrlPathLength
-        = url.dwExtraInfoLength = static_cast<DWORD>(-1);
+    url.dwHostNameLength = url.dwUserNameLength = url.dwPasswordLength = static_cast<DWORD>(-1);
     if (!WinHttpCrackUrl(baseUrl.c_str(), baseUrl.size(), 0, &url) || !url.dwHostNameLength
         || url.dwUserNameLength || url.dwPasswordLength || config.baseUrl.find('#') != std::string::npos)
         throw std::invalid_argument("Invalid completion base URL.");
@@ -29,17 +28,7 @@ static std::string ResolveCompletionUrl(CompletionConfig const& config, std::str
     auto path = config.baseUrl.substr(0, queryAt);
     auto query = queryAt == std::string::npos ? std::string{} : config.baseUrl.substr(queryAt);
     while (path.ends_with('/')) path.pop_back();
-    auto mount = std::wstring(url.lpszUrlPath, url.dwUrlPathLength);
-    while (mount.ends_with('/')) mount.pop_back();
-    if (host == L"api.deepseek.com" && (mount.empty() || mount == L"/v1"
-        || mount == L"/anthropic" || mount == L"/anthropic/v1")) {
-        // These are documented mounts of the same official service. Discovery
-        // is shared at /models; generation mounts differ by wire protocol.
-        // Explicit paths on any other host (including gateways) stay intact.
-        auto authorityEnd = path.find('/', path.find("://") + 3);
-        path = path.substr(0, authorityEnd);
-        if (suffix == "/messages") path += "/anthropic/v1";
-    } else if (path.find('/', path.find("://") + 3) == std::string::npos) path += "/v1";
+    if (path.find('/', path.find("://") + 3) == std::string::npos) path += "/v1";
     path += suffix;
     path += query;
     if (path.size() > 2048) throw std::invalid_argument("Completion base URL is too long.");

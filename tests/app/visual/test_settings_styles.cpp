@@ -74,9 +74,9 @@ struct CompletionPage {
     Grid root;
     std::shared_ptr<winrt::Folia::SettingsView> view;
     FrameworkElement page{nullptr};
-    CompletionPage(std::string base, std::string model = {}, std::string effort = {}) {
+    CompletionPage(std::string base, std::string model = {}, std::string effort = {}, int protocol = 0) {
         winrt::Folia::AppSettings initial;
-        initial.completion = {true, std::move(base), std::move(model), 0, std::move(effort)};
+        initial.completion = {true, std::move(base), std::move(model), protocol, std::move(effort)};
         view = std::make_shared<winrt::Folia::SettingsView>(initial,
             std::make_shared<winrt::Folia::ThemeCatalog>(), std::make_shared<winrt::Folia::LatexCommandCatalog>(),
             folia::Theme::Light, nullptr, [](auto const&) -> std::optional<winrt::hstring> { return {}; }, [] {});
@@ -91,10 +91,22 @@ struct CompletionPage {
     ~CompletionPage() { view->Detach(); window.Close(); }
 };
 suite settings_style_tests = [] {
-    "model refresh preserves an available saved choice and never switches to an unavailable replacement"_test = [] {
-        completion_tests::Server server(R"({"data":[{"id":"fixture","effort":{"supported_levels":["low","high"]}},{"id":"other"}]})",
+    "models without advertised capabilities show an explicit message without inventing list entries"_test = [] {
+        for (int protocol : {0, 1, 2}) {
+            completion_tests::Server server(R"({"data":[{"id":"reasoning-high-model"}]})", 200, false, "application/json");
+            CompletionPage fixture(server.baseUrl, "reasoning-high-model", "high", protocol);
+            auto reasoning = Field<ComboBox>(fixture.page, winrt::Folia::Localize(L"AIReasoning"));
+            expect(reasoning.Items().Size() == 1_u);
+            FetchModels(Action(fixture.page, winrt::Folia::Localize(L"AIFetchModels")), server);
+            expect(reasoning.Items().Size() == 1_u && reasoning.Text() == L"high") << "effort=" << winrt::to_string(reasoning.Text());
+            expect(reasoning.IsEditable());
+            expect(Description(fixture.page, winrt::Folia::Localize(L"AIReasoningMissingMetadata")) != nullptr);
+        }
+    };
+    "model refresh preserves selected and manually entered model IDs"_test = [] {
+        completion_tests::Server server(R"({"data":[{"id":"fixture","capabilities":{"effort":{"supported":true,"low":{"supported":true},"high":{"supported":true}}}},{"id":"other"}]})",
             200, false, "application/json", {}, 37, {R"({"data":[{"id":"other"}]})"});
-        CompletionPage fixture(server.baseUrl, "fixture", "high");
+        CompletionPage fixture(server.baseUrl, "fixture", "high", 2);
         auto model = Field<ComboBox>(fixture.page, winrt::Folia::Localize(L"AIModel"));
         auto reasoning = Field<ComboBox>(fixture.page, winrt::Folia::Localize(L"AIReasoning"));
         auto fetch = Action(fixture.page, winrt::Folia::Localize(L"AIFetchModels"));
@@ -106,7 +118,9 @@ suite settings_style_tests = [] {
         auto service = fetch.Parent().as<Grid>().Parent().as<StackPanel>();
         auto fetchStatus = service.Children().GetAt(service.Children().Size() - 1).as<TextBlock>();
         expect(model.Items().Size() == 1_u && model.SelectedIndex() == -1_i) << winrt::to_string(fetchStatus.Text());
-        expect(reasoning.Items().Size() == 1_u && reasoning.SelectedIndex() == 0_i);
+        expect(model.Text() == L"fixture") << "model=" << winrt::to_string(model.Text());
+        expect(Description(fixture.page, winrt::Folia::Localize(L"AIReasoningMissingMetadata")) != nullptr);
+        expect(reasoning.Items().Size() == 1_u && reasoning.Text() == L"high") << "effort=" << winrt::to_string(reasoning.Text());
     };
     "model discovery empty and failed responses remain selectable only by explicit available choices"_test = [] {
         for (auto status : {200, 503}) {
@@ -166,7 +180,7 @@ suite settings_style_tests = [] {
         expect(Field<ComboBox>(page, winrt::Folia::Localize(L"AIReasoning")).Items().Size() == 1_u);
     };
     "completion settings save independent budgets eagerness and protocol reasoning choices"_test = [] {
-        completion_tests::Server server(R"({"data":[{"id":"fixture","name":"Fixture Model","effort":{"supported_levels":["low","high","max"]}},{"id":"plain"}]})", 200, false, "application/json");
+        completion_tests::Server server(R"({"data":[{"id":"fixture","capabilities":{"effort":{"supported":true,"low":{"supported":true},"high":{"supported":true},"max":{"supported":true}}},"display_name":"Fixture Model"},{"id":"plain"}]})", 200, false, "application/json");
         Window window; Grid root; window.Content(root);
         std::optional<winrt::Folia::AppSettings> applied;
         winrt::Folia::AppSettings initial;
@@ -195,26 +209,48 @@ suite settings_style_tests = [] {
         auto fetch = Action(page, winrt::Folia::Localize(L"AIFetchModels")); expect(fetch != nullptr);
         FetchModels(fetch, server);
         auto model = Field<ComboBox>(page, winrt::Folia::Localize(L"AIModel"));
-        expect(!model.IsEditable()); expect(model.Items().Size() == 2_u);
+        expect(model.IsEditable()); expect(model.Items().Size() == 2_u);
         expect(model.SelectedIndex() == -1_i) << "fetch must not silently select a new model";
         model.SelectedIndex(0); expect(reasoning.Items().Size() == 4_u);
         model.SelectedIndex(1); expect(reasoning.Items().Size() == 1_u);
-        model.SelectedIndex(0); expect(reasoning.Items().Size() == 4_u);
+        expect(Description(page, winrt::Folia::Localize(L"AIReasoningMissingMetadata")) != nullptr);
+        model.Text(L"fixture"); expect(reasoning.Items().Size() == 4_u);
         expect(fetch.IsEnabled()); expect(server.request.starts_with("GET /v1/models HTTP/1.1\r\n"));
-        reasoning.SelectedIndex(2); // high from the upstream fixture
+        for (auto entry : reasoning.Items())
+            if (winrt::unbox_value<winrt::hstring>(entry.as<ComboBoxItem>().Tag()) == L"high") reasoning.SelectedItem(entry);
         key.Password(L""); // Do not persist fixture credentials when applying settings.
         eagerness.SelectedIndex(2); context.Text(L"16"); output.Text(L"512");
         auto save = Action(page, winrt::Folia::Localize(L"Save")); expect(save != nullptr);
         InvokeAction(save);
         Pump([&] { return applied.has_value(); });
         expect(applied->completion.contextKB == 16_u && applied->completion.outputTokens == 512_u);
-        expect(applied->completion.reasoningEffort == "high");
+        expect(applied->completion.reasoningEffort == "high") << "saved effort=" << applied->completion.reasoningEffort;
         expect(applied->completion.model == "fixture") << "save uses model ID, not its display name";
         expect(applied->completion.eagerness == folia::completion::Eagerness::Proactive);
         view->Reset(*applied, folia::Theme::Light);
         root.UpdateLayout(); page = navigation.Content().as<FrameworkElement>();
         expect(Field<TextBox>(page, winrt::Folia::Localize(L"AIContextKB")).Text() == L"16");
         expect(Field<ComboBox>(page, winrt::Folia::Localize(L"AIModel")).SelectedIndex() == 0_i);
+        model = Field<ComboBox>(page, winrt::Folia::Localize(L"AIModel"));
+        model.StartBringIntoView();
+        Pump([&] { root.UpdateLayout(); return First<TextBox>(model) != nullptr; });
+        First<TextBox>(model).Text(L"custom-model-not-in-list"); applied.reset();
+        expect(model.Text() == L"custom-model-not-in-list");
+        InvokeAction(Action(page, winrt::Folia::Localize(L"Save")));
+        Pump([&] { return applied.has_value(); });
+        expect(applied->completion.model == "custom-model-not-in-list");
+        expect(applied->completion.reasoningEffort == "high") << "saved effort=" << applied->completion.reasoningEffort;
+        reasoning = Field<ComboBox>(page, winrt::Folia::Localize(L"AIReasoning"));
+        reasoning.StartBringIntoView();
+        Pump([&] { root.UpdateLayout(); return First<TextBox>(reasoning) != nullptr; });
+        First<TextBox>(reasoning).Text(L"custom_effort-2"); applied.reset();
+        InvokeAction(Action(page, winrt::Folia::Localize(L"Save")));
+        Pump([&] { return applied.has_value(); });
+        expect(applied->completion.reasoningEffort == "custom_effort-2");
+        First<TextBox>(reasoning).Text(L""); applied.reset();
+        InvokeAction(Action(page, winrt::Folia::Localize(L"Save")));
+        Pump([&] { return applied.has_value(); });
+        expect(applied->completion.reasoningEffort.empty());
     };
     "settings pages share typography and render AI forms without enclosing borders"_test = [] {
         Window window; Grid root; window.Content(root); window.Title(L"Folia settings style test");

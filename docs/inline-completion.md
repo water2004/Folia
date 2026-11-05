@@ -9,10 +9,8 @@ configuration, key store or absolute source path is a dependency.
 The user configures a protocol, base URL, model and key in Folia. The transport
 adds `/chat/completions`, `/responses` or `/messages` to that base path; a host-only
 base uses `/v1`. Trailing slashes are normalized and query parameters are retained.
-The official DeepSeek host resolves its documented service mounts by protocol:
-`/chat/completions`, `/responses` and `/anthropic/v1/messages`. Its shared model
-discovery endpoint is `/models`, authenticated with Bearer credentials for every
-generation protocol. Custom gateways keep their explicit path and protocol headers.
+Path resolution and authentication depend only on the selected API protocol
+and configured base URL. No provider domains or mounts are remapped.
 The settings field is `completion.baseUrl`; there is no legacy endpoint migration.
 Completion is opt-in. Keys use the Windows credential store, separate from portable settings.
 Only bounded context from the active document is sent to the configured service.
@@ -23,31 +21,40 @@ tokens (16–4096), suggestion frequency and reasoning effort. Defaults are 7 KB
 Balanced and Proactive select stable instruction variants; they do not change
 the model's reasoning parameter or guarantee a suggestion.
 
-The model field is a non-editable dropdown. **Fetch models** asynchronously reads
-`GET /models` at the configured service base, without requiring a model selection
-or sending document content. One fetch populates both the model list and each
-model's declared reasoning capabilities. Selecting a model uses its ID (not its
-display name), and updates reasoning choices locally without another request.
-A saved model/effort remains usable before refreshing. Refresh preserves choices
-that still exist; it never silently chooses a different model. Empty lists and
-errors are shown without inventing model IDs or reasoning levels.
+The model field is an editable native dropdown: users can fetch and select a
+model or type an ID directly, including IDs absent from the list. **Fetch models**
+reads `GET /models` under the configured base URL without a prior model selection
+and without document content. Chat Completions and Responses use Bearer headers;
+Messages uses the protocol's API-key/version headers. Custom base paths and query
+parameters are retained for every host. No generation requests detect capabilities.
 
-DeepSeek's `effort.supported_levels` preserves the upstream order. Native
-Anthropic Messages model discovery uses `capabilities.effort` support declarations.
-Only explicitly supported levels that the wire adapter can encode are offered;
-missing metadata leaves service default, which omits the effort parameter.
-Generation encodes the selection as `reasoning_effort` for Chat Completions,
-`reasoning.effort` for Responses and `output_config.effort` for Messages.
-There is no preset list and no extra model inference request to detect capabilities.
+The reasoning field is also an editable native dropdown. Advertised capability
+values are suggestions, not an input restriction: the user may type a value when
+metadata is missing or incomplete. Typed values are not inserted into the fetched
+candidate list. Model IDs and effort values saved by the user remain editable,
+and a refresh preserves the current inputs even when absent from returned metadata.
 
-Discovery is bounded to 1 MB per page, 16 pages and 4096 unique model IDs;
-`has_more`/`last_id` pagination uses an encoded `after_id` cursor and rejects loops.
-Changing the base/protocol clears stale choices and cancels discovery; credential
-changes or page removal also cancel pending work. Late results are ignored.
-See the [DeepSeek Models API](https://api-docs.deepseek.com/api/list-models/),
-[thinking parameter formats](https://api-docs.deepseek.com/guides/thinking_mode/),
-[Messages mount](https://api-docs.deepseek.com/api/create-message/), and
-[Anthropic model capabilities](https://platform.claude.com/docs/en/api/models/list).
+The OpenAI Models schema supplies model IDs but no reasoning-level discovery
+field. Messages reads the standard `capabilities.effort` object: both the feature
+and each offered level must explicitly declare support. Private
+`effort.supported_levels` fields are not consumed. No model-name rules, provider
+tables, or preset effort lists populate the picker. Missing capabilities show an
+explicit message inviting manual entry; they are not reported as model-level
+lack of support. Manual effort values use the selected protocol's standard field:
+`reasoning_effort`, `reasoning.effort`, or `output_config.effort`. The adapter checks
+only token syntax (up to 32 ASCII letters, digits, underscores or hyphens), leaving
+the vocabulary to the service. Blank or the service-default item omits the field.
+
+Selecting a model updates capabilities locally. Refresh preserves its text,
+including manually entered IDs, without selecting a different model. Discovery
+is bounded to 1 MB per page, 16 pages and 4096 unique model IDs. Messages follows
+its standard `has_more`/`last_id` pagination using encoded `after_id` cursors and
+rejects repeated cursors. OpenAI's standard Models response is a single list.
+Changing the base/protocol clears stale choices; leaving the page or actually
+changing credentials cancels pending work and late results are ignored.
+
+See the [OpenAI Models schema](https://developers.openai.com/api/reference/resources/models/methods/list)
+and [Anthropic Models schema](https://platform.claude.com/docs/en/api/models/list).
 
 Budget fields are ordinary integer text inputs. Closed setting choices do not
 use the mouse wheel to change selection; the page keeps scrolling. Open lists

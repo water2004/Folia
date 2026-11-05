@@ -10,9 +10,11 @@ namespace fairy::providers {
 namespace {
 constexpr std::size_t MaxReasoningBytes = 1024u * 1024u;
 bool ValidEffort(std::string_view effort) {
-    static constexpr std::string_view valid[] = {"",       "none", "minimal", "low",
-                                                 "medium", "high", "xhigh",   "max"};
-    return std::find(std::begin(valid), std::end(valid), effort) != std::end(valid);
+    // Effort values are supplied by model metadata or explicitly by the user.
+    // The service validates its vocabulary; the adapter validates the token.
+    return effort.size() <= 32 && std::all_of(effort.begin(), effort.end(), [](unsigned char c) {
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_' || c == '-';
+    });
 }
 bool Identifier(std::string const& name) {
     return !name.empty() && name.size() <= 64 &&
@@ -49,8 +51,7 @@ bool SupportsReasoningOptions(ApiProtocol protocol, ReasoningOptions const& opti
     case ApiProtocol::Responses:
         return true;
     case ApiProtocol::AnthropicMessages:
-        return options.effort.empty() || options.effort == "low" || options.effort == "medium" ||
-               options.effort == "high" || options.effort == "xhigh" || options.effort == "max";
+        return true;
     }
     return false;
 }

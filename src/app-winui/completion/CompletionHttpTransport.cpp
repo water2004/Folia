@@ -193,21 +193,12 @@ CompletionModelPage ParseCompletionModels(std::string_view json, int protocol) {
         model.id = item.value("id", std::string{});
         if (model.id.empty() || model.id.size() > 128 || model.id.find_first_of("\r\n\0", 0, 3) != std::string::npos)
             throw std::runtime_error("Invalid model identifier.");
-        model.name = item.value("display_name", item.value("name", model.id));
+        model.name = protocol == 2 ? item.value("display_name", model.id) : model.id;
         if (model.name.size() > 256 || model.name.find_first_of("\r\n\0", 0, 3) != std::string::npos)
             throw std::runtime_error("Invalid model display name.");
-        auto effort = item.find("effort");
-        if (effort != item.end()) {
-            if (!effort->is_object()) throw std::runtime_error("Invalid reasoning metadata.");
-            auto levels = effort->find("supported_levels");
-            if (levels != effort->end()) {
-                if (!levels->is_array() || levels->size() > 32) throw std::runtime_error("Invalid reasoning levels.");
-                for (auto const& level : *levels) {
-                    if (!level.is_string()) throw std::runtime_error("Invalid reasoning level.");
-                    addLevel(model, level.get<std::string>());
-                }
-            }
-        } else if (protocol == 2 && item.contains("capabilities") && !item["capabilities"].is_null()) {
+        // The OpenAI Models schema does not declare reasoning capabilities.
+        // Read the Messages capability schema only for its own protocol.
+        if (protocol == 2 && item.contains("capabilities") && !item["capabilities"].is_null()) {
             auto const& capabilities = item.at("capabilities");
             auto declared = capabilities.find("effort");
             if (declared != capabilities.end() && !declared->is_null()) {
@@ -219,7 +210,7 @@ CompletionModelPage ParseCompletionModels(std::string_view json, int protocol) {
         }
         if (std::ranges::find(page.models, model.id, &CompletionModel::id) == page.models.end()) page.models.push_back(std::move(model));
     }
-    if (root.value("has_more", false)) {
+    if (protocol == 2 && root.value("has_more", false)) {
         page.next = root.value("last_id", std::string{});
         if (page.models.empty() || page.next.empty() || page.next.size() > 128) throw std::runtime_error("Invalid model pagination.");
     }
@@ -227,20 +218,12 @@ CompletionModelPage ParseCompletionModels(std::string_view json, int protocol) {
 }
 std::vector<CompletionModel> FetchCompletionModels(CompletionConfig const& config, std::stop_token stop, std::wstring key) {
     auto endpoint = ResolveCompletionModelsEndpoint(config);
-    // DeepSeek exposes the shared Models API with Bearer authentication even
-    // when generation uses Anthropic Messages. Keep native Messages auth for
-    // other services and gateways.
-    auto metadataConfig = config;
-    auto hostEnd = endpoint.find('/', endpoint.find("://") + 3);
-    auto authority = endpoint.substr(0, hostEnd);
-    std::ranges::transform(authority, authority.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-    if (authority == "https://api.deepseek.com" || authority == "https://api.deepseek.com:443") metadataConfig.protocol = 0;
     std::vector<CompletionModel> models;
     std::vector<std::string> cursors;
     auto url = endpoint;
     for (int count = 0; count < 16; ++count) {
         std::string response;
-        ReadHttp(metadataConfig, url, L"GET", {}, stop, key,
+        ReadHttp(config, url, L"GET", {}, stop, key,
             [&](bool, std::string_view chunk) { response.append(chunk); return false; });
         if (stop.stop_requested()) return {};
         auto page = ParseCompletionModels(response, config.protocol);

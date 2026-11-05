@@ -35,15 +35,16 @@ suite completion_http_tests = [] {
         expect(throws([&] { (void)RequestCompletionHttp({true, server.baseUrl, "fixture", 0}, folia::completion::make_prompt({}), {}, L"fixture-key", std::chrono::milliseconds(200)); }));
         expect(std::chrono::steady_clock::now() - begin < std::chrono::seconds(1));
     };
-    "completion reasoning metadata comes from the selected upstream model in declared order"_test = [] {
-        auto page = ParseCompletionModels(R"({"data":[{"id":"other","effort":{"supported_levels":["medium"]}},
-            {"id":"fixture","name":"Fixture model","effort":{"supported_levels":["low","max","low"]}}]})", 0);
-        expect(page.models.size() == 2_u);
-        expect(page.models[1].reasoningEfforts == std::vector<std::string>{"low", "max"});
-        expect(page.models[1].name == "Fixture model");
-        expect(ParseCompletionModels(R"({"data":[{"id":"fixture"}]})", 0).models[0].reasoningEfforts.empty());
-        expect(ParseCompletionModels(R"({"data":[]})", 0).models.empty());
-        expect(throws([] { (void)ParseCompletionModels(R"({"data":[{"id":"fixture","effort":{"supported_levels":[42]}}]})", 0); }));
+    "OpenAI model discovery never infers reasoning capabilities from IDs or private fields"_test = [] {
+        for (int protocol : {0, 1}) {
+            auto page = ParseCompletionModels(R"({"data":[{"id":"reasoning-high-model","owned_by":"fixture",
+                "effort":{"supported_levels":["low","high"]},"capabilities":{"effort":{"supported":true,"high":{"supported":true}}}}]})", protocol);
+            expect(page.models.size() == 1_u);
+            expect(page.models[0].id == "reasoning-high-model");
+            expect(page.models[0].reasoningEfforts.empty());
+            expect(ParseCompletionModels(R"({"data":[{"id":"fixture"}]})", protocol).models[0].reasoningEfforts.empty());
+            expect(ParseCompletionModels(R"({"data":[]})", protocol).models.empty());
+        }
     };
     "completion model discovery does not require a selected model or valid generation budgets"_test = [] {
         for (int protocol = 0; protocol < 3; ++protocol) {
@@ -52,30 +53,24 @@ suite completion_http_tests = [] {
             config.outputTokens = 0;
             auto models = FetchCompletionModels(config, {}, L"fixture-key");
             expect(models.size() == 1_u);
-            expect(models[0].reasoningEfforts == std::vector<std::string>{"low", "high", "max"});
+            expect(models[0].reasoningEfforts.empty());
             expect(server.request.starts_with("GET /gateway/v2/models?rev=1%2F2 HTTP/1.1\r\n"));
             expect(server.request.find("Before cursor") == std::string::npos);
             expect(server.request.find(protocol == 2 ? "x-api-key: fixture-key" : "Authorization: Bearer fixture-key") != std::string::npos);
         }
     };
-    "completion metadata resolves DeepSeek protocol mounts without changing gateway prefixes"_test = [] {
-        for (auto base : {"https://api.deepseek.com", "https://API.DEEPSEEK.COM/v1/", "https://api.deepseek.com/anthropic",
-            "https://api.deepseek.com/anthropic/v1/", "https://api.deepseek.com:443/anthropic/"})
-            for (int protocol = 0; protocol < 3; ++protocol) {
-                auto url = ResolveCompletionModelsEndpoint({true, base, "", protocol});
-                expect(url.ends_with("/models")); expect(url.find("/anthropic") == std::string::npos);
-                expect(url.find("/v1") == std::string::npos);
-                constexpr std::array<std::string_view, 3> paths{"/chat/completions", "/responses", "/anthropic/v1/messages"};
-                expect(ResolveCompletionEndpoint({true, base, "", protocol}).ends_with(paths[protocol]));
-            }
-        expect(ResolveCompletionModelsEndpoint({true, "https://api.deepseek.com/anthropic?rev=2", "", 2})
-            == "https://api.deepseek.com/models?rev=2");
-        expect(ResolveCompletionModelsEndpoint({true, "https://gateway.example/anthropic/v1", "", 2})
-            == "https://gateway.example/anthropic/v1/models");
-        expect(ResolveCompletionModelsEndpoint({true, "https://api.deepseek.com.example/anthropic", "", 2})
-            == "https://api.deepseek.com.example/anthropic/models");
+    "completion paths depend on protocol and explicit base only for every hostname"_test = [] {
+        for (auto host : {"https://api.deepseek.com", "https://api.example.com", "https://API.DEEPSEEK.COM:443"})
+            for (auto prefix : {"", "/v1", "/anthropic", "/anthropic/v1"})
+                for (int protocol = 0; protocol < 3; ++protocol) {
+                    auto base = std::string(host) + prefix + "/?rev=2";
+                    auto resolvedBase = std::string(host) + (std::string_view(prefix).empty() ? "/v1" : prefix);
+                    expect(ResolveCompletionModelsEndpoint({true, base, "", protocol}) == resolvedBase + "/models?rev=2");
+                    constexpr std::array<std::string_view, 3> paths{"/chat/completions", "/responses", "/messages"};
+                    expect(ResolveCompletionEndpoint({true, base, "", protocol}) == resolvedBase + std::string(paths[protocol]) + "?rev=2");
+                }
     };
-    "completion Anthropic discovery reads capability levels rather than assuming DeepSeek metadata"_test = [] {
+    "Anthropic model discovery reads only explicitly supported capabilities"_test = [] {
         auto page = ParseCompletionModels(R"({"data":[{"id":"fixture","display_name":"Fixture Claude","capabilities":{
             "effort":{"supported":true,"low":{"supported":true},"medium":{"supported":false},"max":{"supported":true}}}}],
             "has_more":true,"last_id":"model/a+b"})", 2);
@@ -99,7 +94,7 @@ suite completion_http_tests = [] {
     };
     "completion discovery follows declared pagination with encoded cursors and stable model identities"_test = [] {
         Server server(R"({"data":[{"id":"first"}],"has_more":true,"last_id":"model/a+b"})", 200, false,
-            "application/json", {}, 37, {R"({"data":[{"id":"first"},{"id":"second","effort":{"supported_levels":["high"]}}],"has_more":false})"});
+            "application/json", {}, 37, {R"({"data":[{"id":"first"},{"id":"second","capabilities":{"effort":{"supported":true,"high":{"supported":true}}}}],"has_more":false})"});
         auto models = FetchCompletionModels({true, server.baseUrl + "/v1?rev=2", "", 2}, {}, L"fixture-key");
         expect(models.size() == 2_u); expect(models[0].id == "first" && models[1].id == "second");
         expect(models[1].reasoningEfforts == std::vector<std::string>{"high"});
@@ -110,7 +105,7 @@ suite completion_http_tests = [] {
     "completion discovery rejects repeated pagination instead of looping"_test = [] {
         const auto page = R"({"data":[{"id":"a"}],"has_more":true,"last_id":"same"})";
         Server server(page, 200, false, "application/json", {}, 37, {page});
-        expect(throws([&] { (void)FetchCompletionModels({true, server.baseUrl, "", 0}, {}, L"fixture-key"); }));
+        expect(throws([&] { (void)FetchCompletionModels({true, server.baseUrl, "", 2}, {}, L"fixture-key"); }));
         expect(server.requests.size() == 2_u);
     };
     "completion validates protocol reasoning choices and configurable request budgets"_test = [] {
@@ -125,20 +120,21 @@ suite completion_http_tests = [] {
             }
         }
         CompletionConfig config{true, "https://service.example", "fixture", 2};
-        config.reasoningEffort = "none"; expect(!ValidateCompletionConfig(config).empty());
+        config.reasoningEffort = "custom_effort-2"; expect(ValidateCompletionConfig(config).empty());
+        config.reasoningEffort = "bad value"; expect(!ValidateCompletionConfig(config).empty());
         config.reasoningEffort = ""; config.contextKB = 65; expect(!ValidateCompletionConfig(config).empty());
         config.contextKB = 7; config.outputTokens = 4097; expect(!ValidateCompletionConfig(config).empty());
     };
     "completion transport forwards reasoning effort and output limits for each protocol"_test = [] {
         for (int protocol = 0; protocol < 3; ++protocol) {
             Server server({}, 503);
-            CompletionConfig config{true, server.baseUrl, "fixture", protocol}; config.reasoningEffort = "high"; config.outputTokens = 512;
+            CompletionConfig config{true, server.baseUrl, "fixture", protocol}; config.reasoningEffort = "custom_effort-2"; config.outputTokens = 512;
             bool failed = false;
             try { (void)RequestCompletionHttp(config, folia::completion::make_prompt({}, folia::completion::make_budget(16000, 512)), {}, L""); }
             catch (std::exception const&) { failed = true; }
             expect(failed);
-            auto field = protocol == 0 ? "\"reasoning_effort\":\"high\""
-                : protocol == 1 ? "\"reasoning\":{\"effort\":\"high\"}" : "\"output_config\":{\"effort\":\"high\"}";
+            auto field = protocol == 0 ? "\"reasoning_effort\":\"custom_effort-2\""
+                : protocol == 1 ? "\"reasoning\":{\"effort\":\"custom_effort-2\"}" : "\"output_config\":{\"effort\":\"custom_effort-2\"}";
             expect(server.request.find(field) != std::string::npos);
             expect((server.request.find("\"reasoning_effort\"") != std::string::npos) == (protocol == 0));
             expect((server.request.find("\"output_config\"") != std::string::npos) == (protocol == 2));

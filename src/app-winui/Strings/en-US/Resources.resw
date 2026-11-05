@@ -342,7 +342,7 @@
   <data name="AIEagernessDescription" xml:space="preserve"><value>Controls how readily the prompt asks for a suggestion, independently of model reasoning. Proactive mode tries a short continuation even when several phrasings are possible; useful suggestions are not guaranteed.</value></data>
   <data name="AIReasoning" xml:space="preserve"><value>Reasoning effort</value></data>
   <data name="AIReasoningDefault" xml:space="preserve"><value>Service default</value></data>
-  <data name="AIReasoningDescription" xml:space="preserve"><value>Fetching models also loads the reasoning levels advertised for the selected model and protocol. Service default sends no effort parameter.</value></data>
+  <data name="AIReasoningDescription" xml:space="preserve"><value>Select an advertised reasoning level or enter one manually. Blank or service default sends no effort parameter.</value></data>
   <data name="AIContextKB" xml:space="preserve"><value>Context size (KB, 1–64)</value></data>
   <data name="AIOutputTokens" xml:space="preserve"><value>Maximum output tokens (16–4096)</value></data>
   <data name="AIBudgetInvalid" xml:space="preserve"><value>Enter whole numbers: 1–64 KB of context and 16–4096 output tokens.</value></data>
@@ -354,9 +354,11 @@
   <data name="SettingsSaved" xml:space="preserve"><value>Settings saved.</value></data>
   <data name="AIService" xml:space="preserve"><value>Service</value></data>
   <data name="AICredentials" xml:space="preserve"><value>Credentials</value></data>
-  <data name="AIModelPlaceholder" xml:space="preserve"><value>Fetch models, then choose one</value></data>
+  <data name="AIModelPlaceholder" xml:space="preserve"><value>Select or enter a model ID</value></data>
   <data name="AIFetchModels" xml:space="preserve"><value>Fetch models</value></data>
   <data name="AIFetchModelsBusy" xml:space="preserve"><value>Fetching…</value></data>
-  <data name="AINoModels" xml:space="preserve"><value>The service returned no available models.</value></data>
-  <data name="AIModelsFetched" xml:space="preserve"><value>Fetched {0} models. Choose one from the list.</value></data>
+  <data name="AINoModels" xml:space="preserve"><value>The service returned no models. You can enter a model ID.</value></data>
+  <data name="AIModelsFetched" xml:space="preserve"><value>Fetched {0} models. Select one or enter a model ID.</value></data>
+  <data name="AIReasoningSelectModel" xml:space="preserve"><value>Fetch models for advertised reasoning levels, or enter a value manually. Blank or service default sends no effort parameter.</value></data>
+  <data name="AIReasoningMissingMetadata" xml:space="preserve"><value>The service did not provide usable reasoning-level information. You can enter a value manually; blank or service default sends no effort parameter.</value></data>
 </root>
