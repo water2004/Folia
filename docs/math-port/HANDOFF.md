@@ -2,7 +2,14 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-11-05，标准协议与手填配置完成）
+## 当前 checkpoint（2026-11-05，MSI构建完成）
+
+- 用户要求只构建MSI，不做额外测试；已完成**Release self-contained 0.6.3**，产物**build/installer/bin/Folia-0.6.3-x64.msi**，脚本报告**51.4 MiB / 0 errors**。日志**build/folia-063-standard-manual-msi.log**。仅既有WiX同版本升级ICE61 warning，保留既有升级策略。未安装/推送/发布，不查看已完成0.6.3 CI。
+- 构建脚本新增显式-SkipStartupTest，默认/CI启动检查保留；本次build_msi.ps1 -Version 0.6.3 -SkipDependencySetup -SkipStartupTest，依赖此前本会话已setup。**本轮未运行测试或启动检查**，编译≤4，native串行，无agents/CUA。功能源码基线05421ecd既有验收见下，不重复。
+- **停止点/下一步**：构建成功，exec75088已完成，无运行构建/测试句柄。脚本与本记录小批本地提交（见HEAD），MSI留ignored build目录。后续按用户安装或发布要求继续，不自行安装、不改版本。
+
+## 标准协议与手填配置完成（历史基线）
+
 
 - 用户最新要求已完成：删除DeepSeek域名/路径/认证特判，按所选API协议+Base URL获取模型；模型及思考档位均可下拉或手填。候选只来自上游标准能力，缺失时明确提示可手填，不猜模型名/不预设档位。此要求取代5cbdfd6f的provider适配。用户确认0.6.3发布完成且不查看CI；当前仍0.6.3，本轮只本地提交，不推送/发布/MSI/安装。不开agents/CUA/OS输入注入，native串行≤4。
 - 网络边界：三个协议统一Base URL + suffix，保留显式路径/query，各自标准认证，无host remap/fallback请求。OpenAI Models只基本ID信息，无标准档位字段，忽略私有effort.supported_levels；Messages读取capabilities.effort显式supported及标准分页。模型GET无需预先选模型/生成预算。生产completion/settings已rg无DeepSeek/supported_levels。
