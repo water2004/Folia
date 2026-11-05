@@ -1,3 +1,4 @@
+#include "support/completion_prompt.hpp"
 #include "support/folia_test.hpp"
 import folia.completion;
 
@@ -5,31 +6,69 @@ namespace {
 using namespace boost::ut;
 using namespace folia::completion;
 suite completion_edit_tests = [] {
+    "runtime prompt settings expand only instruction parameters and frame configured exchanges"_test = [] {
+        auto settings = completion_tests::PromptSettings();
+        settings.instructions = "Return ${edit_start} through ${edit_end}. ${policy} Limit ${max_characters}.";
+        settings.policies[1] = "literal ${edit_end}";
+        settings.region_name = "edit";
+        settings.before_edit.clear(); settings.after_edit.clear();
+        settings.examples = {{"he", "lo", " world", "<insert>l</insert>"}, {"call(", ")", ";", "<insert>value</insert>"}};
+        Context context{{}, "<edit>$x_", "}$"};
+        auto prompt = make_prompt(context, settings);
+        expect(prompt.edit_start != "<edit>");
+        expect(prompt.instructions.contains(prompt.edit_start) && prompt.instructions.contains(prompt.edit_end));
+        expect(prompt.instructions.contains("literal ${edit_end}"));
+        expect(prompt.cursor.starts_with(context.prefix));
+        expect(prompt.examples.size() == 2_u);
+        expect(prompt.examples[1].first == settings.document_prefix + "call(" + prompt.edit_start + ")" + prompt.edit_end + ";");
+        expect(prompt.examples[1].second == "<insert>value</insert>");
+        settings.instructions += " ${unknown}";
+        expect(validate_prompt_settings(settings).has_value());
+        expect(throws([&] { (void)make_prompt(context, settings); }));
+        expect(validate_prompt_settings({}).has_value());
+    };
     "model replies contain literal replacement text and no model-owned source range"_test = [] {
         Context context{{}, "\\frac{", "}{}"};
-        auto edit = decode_edit_response(U"<edit>a}{b}</edit>", context);
+        auto edit = decode_edit_response(U"<replace>a}{b}</replace>", context);
         expect(fatal(edit.has_value()));
         expect(bool(edit->before == U"}{")); expect(bool(edit->after == U"a}{b"));
         expect(!decode_edit_response(U"unframed text", {}));
-        expect(!decode_edit_response(U"<edit>unfinished", {}));
+        expect(!decode_edit_response(U"<replace>unfinished", {}));
         expect(!decode_edit_response(UR"({"oldText":"","newText":"x"})", {}));
         expect(decode_edit_response(U"", {})->empty());
-        expect(decode_edit_response(U"<edit></edit>", {})->empty());
-        auto deletion = decode_edit_response(U"<edit></edit>", Context{{}, "", "OLD"});
+        expect(decode_edit_response(U"<insert></insert>", {})->empty());
+        expect(!decode_edit_response(U"<edit>old reply</edit>", {}));
+        auto deletion = decode_edit_response(U"<replace></replace>", Context{{}, "", "OLD"});
         expect(deletion && deletion->before == U"OLD" && deletion->after.empty());
-        auto newline = decode_edit_response(U"<edit>\n\n```rust\n</edit>", {});
+        auto newline = decode_edit_response(U"<replace>\n\n```rust\n</replace>", {});
         expect(fatal(newline.has_value())); expect(newline->after.starts_with(U"\n\n"));
-        auto tex = decode_edit_response(UR"(<edit>{n}+\frac{1}{\sqrt{2}}</edit>)", {});
+        auto tex = decode_edit_response(UR"(<replace>{n}+\frac{1}{\sqrt{2}}</replace>)", {});
         expect(tex && tex->after == UR"({n}+\frac{1}{\sqrt{2}})");
-        auto windowsLines = decode_edit_response(U"<edit>a\r\nb\rc</edit>", {});
+        auto windowsLines = decode_edit_response(U"<replace>a\r\nb\rc</replace>", {});
         expect(windowsLines && windowsLines->after == U"a\nb\nc");
-        auto unicode = decode_edit_response(U"<edit>🙂é</edit>", {});
+        auto unicode = decode_edit_response(U"<replace>🙂é</replace>", {});
         expect(unicode && unicode->after == U"🙂é");
+    };
+    "insert operations never consume the marked right source while replace operations are explicit"_test = [] {
+        Context context{{}, "$a_", "}$"};
+        auto insert = decode_edit_response(U"<insert>{n+1</insert>", context);
+        expect(fatal(insert.has_value()));
+        expect(insert->before.empty()); expect(bool(insert->after == U"{n+1"));
+        auto replace = decode_edit_response(U"<replace>{n+1}$</replace>", context);
+        expect(bool(replace && replace->before.empty() && replace->after == insert->after));
+        auto emptyInsert = decode_edit_response(U"<insert></insert>", context);
+        expect(emptyInsert && emptyInsert->empty());
+        auto emptyReplace = decode_edit_response(U"<replace></replace>", context);
+        expect(emptyReplace && emptyReplace->before == U"}$" && emptyReplace->after.empty());
+        auto literal = decode_edit_response(U"<insert><replace>literal</replace></insert>", context);
+        expect(literal && literal->after == U"<replace>literal</replace>");
+        expect(!decode_edit_response(U"<insert>x</replace>", context));
+        expect(!decode_edit_response(U"<edit>insert\nx</edit>", context));
     };
     "the editable window is local Unicode source and copied right context stays outside the edit"_test = [] {
         Context c{{}, "x_", "} outside the editable region\nnext line"};
         expect(editable_suffix(c).size() <= editable_tail_characters);
-        auto edit = decode_edit_response(U"<edit>{n} outside the editable region</edit>",
+        auto edit = decode_edit_response(U"<replace>{n} outside the editable region</replace>",
             Context{{}, "x_", "} outside the editable region\nnext line"});
         expect(edit && edit->before.empty() && edit->after == U"{n");
         Context huge{{}, "", std::string(1024, 'x')};
@@ -37,14 +76,16 @@ suite completion_edit_tests = [] {
     };
     "prompt presents exact chronological document text without forcing a language"_test = [] {
         Context c{"earlier\n\n", "line one\nabc_", "} right\nnext", 9, 7, "\n\nafter"};
-        auto p = make_prompt(c);
-        expect(p.context + p.cursor == "Document:\n" + c.preceding + c.prefix + p.edit_start + "} right" + p.edit_end + "\nnext" + c.following);
+        auto p = completion_tests::MakePrompt(c);
+        auto const& settings = completion_tests::PromptSettings();
+        expect(p.context + p.cursor == settings.document_prefix + c.preceding + c.prefix + settings.before_edit
+            + p.edit_start + "} right" + p.edit_end + settings.after_edit + "\nnext" + c.following);
         expect(p.instructions.find("oldText") == p.instructions.npos);
         expect(p.instructions.find("JSON") == p.instructions.npos);
         expect(p.instructions.find("Markdown") == p.instructions.npos && p.instructions.find("TeX") == p.instructions.npos);
-        auto collision = c; collision.prefix += "<edit></edit>";
-        auto framed = make_prompt(collision);
-        expect(framed.edit_start != "<edit>" && framed.edit_end != "</edit>");
+        auto collision = c; collision.prefix += p.edit_start + p.edit_end;
+        auto framed = completion_tests::MakePrompt(collision);
+        expect(framed.edit_start != p.edit_start && framed.edit_end != p.edit_end);
     };
     "literal replies preserve arbitrary Unicode right context without advancing over copied text"_test = [] {
         std::mt19937 random(20261105);
@@ -56,9 +97,12 @@ suite completion_edit_tests = [] {
             std::size_t end = 0;
             while (end < suffix.size() && end < editable_tail_characters && suffix[end] != U'\n') ++end;
             auto context = capture(suffix, 0);
-            auto edit = decode_edit_response(U"<edit>" + inserted + suffix.substr(0, end) + U"</edit>", context);
+            auto edit = decode_edit_response(U"<replace>" + inserted + suffix.substr(0, end) + U"</replace>", context);
             expect(fatal(edit.has_value()));
             expect(edit->before.empty()); expect(bool(edit->after == inserted));
+            auto insertion = decode_edit_response(U"<insert>" + inserted + U"</insert>", context);
+            expect(fatal(insertion.has_value()));
+            expect(insertion->before.empty()); expect(bool(insertion->after == inserted));
         }
     };
     "diff keeps reused brackets as source and separates inserted arguments"_test = [] {
@@ -100,18 +144,18 @@ suite completion_edit_tests = [] {
     "stable surrounding context precedes the changing editing region"_test = [] {
         std::u32string source = U"unchanged upper line\nedit here\nunchanged lower line\nmore context";
         auto caret = source.find(U"here");
-        auto first = make_prompt(capture(source, caret));
+        auto first = completion_tests::MakePrompt(capture(source, caret));
         for (std::size_t count = 0; count < 25; ++count) {
             source.insert(caret, U"x"); ++caret;
-            auto prompt = make_prompt(capture(source, caret));
+            auto prompt = completion_tests::MakePrompt(capture(source, caret));
             expect(prompt.instructions == first.instructions);
             expect(prompt.context == first.context);
             expect(prompt.cursor != first.cursor);
         }
         for (auto at = source.find(U"edit"); at < source.find(U"\nunchanged lower"); ++at)
-            expect(make_prompt(capture(source, at)).context == first.context);
+            expect(completion_tests::MakePrompt(capture(source, at)).context == first.context);
         source.replace(source.find(U"edit"), 4, U"EDIT");
-        expect(make_prompt(capture(source, caret)).context == first.context);
+        expect(completion_tests::MakePrompt(capture(source, caret)).context == first.context);
     };
     "fixed following blocks share the existing context budget and remain ahead of local edits"_test = [] {
         std::u32string huge(10 * 1024 * 1024, U'\U0001f642');
@@ -123,9 +167,9 @@ suite completion_edit_tests = [] {
         expect(first.following.starts_with("\n\nstable lower"));
         expect(first.preceding.size() <= budget.preceding_bytes && first.following.size() <= budget.following_bytes);
         expect(first.prefix.size() + first.suffix.size() + first.preceding.size() + first.following.size() <= 7000_u);
-        expect(make_prompt(first).context == make_prompt(next).context);
+        expect(completion_tests::MakePrompt(first).context == completion_tests::MakePrompt(next).context);
         auto changedLower = lower; changedLower[0] = U"updated lower";
-        expect(make_prompt(capture(U"abc", 1, upper, budget, changedLower)).cursor != make_prompt(first).cursor);
+        expect(completion_tests::MakePrompt(capture(U"abc", 1, upper, budget, changedLower)).cursor != completion_tests::MakePrompt(first).cursor);
     };
 };
 }

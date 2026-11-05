@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "settings/AppSettings.h"
 #include "settings/ShortcutSettingsSerialization.h"
+#include "settings/CompletionPromptSettings.h"
 #include "localization/Localization.h"
 #include "storage/AssetPaths.h"
 
@@ -48,6 +49,11 @@ namespace winrt::Folia
                 settings.completion.eagerness = static_cast<folia::completion::Eagerness>(static_cast<int>(completion.GetNamedNumber(L"eagerness", 1)));
                 settings.completion.contextKB = static_cast<std::uint32_t>(completion.GetNamedNumber(L"contextKB", 7));
                 settings.completion.outputTokens = static_cast<std::uint32_t>(completion.GetNamedNumber(L"outputTokens", 128));
+                try {
+                    if (completion.HasKey(L"prompt"))
+                        settings.completion.prompt = ParseCompletionPromptSettings(completion.GetNamedObject(L"prompt"));
+                } catch (winrt::hresult_error const& error) { settings.completion.promptError = winrt::to_string(error.message()); }
+                catch (std::exception const& error) { settings.completion.promptError = error.what(); }
                 if (settings.completion.enabled)
                     if (auto error = ValidateCompletionConfig(settings.completion); !error.empty())
                         throw std::runtime_error(error);
@@ -78,6 +84,7 @@ namespace winrt::Folia
     {
         try
         {
+            if (!settings.completion.promptError.empty()) throw std::invalid_argument(settings.completion.promptError);
             auto directory = AssetsDirectory();
             std::filesystem::create_directories(directory);
             Windows::Data::Json::JsonObject root;
@@ -91,6 +98,8 @@ namespace winrt::Folia
             completion.Insert(L"eagerness", Windows::Data::Json::JsonValue::CreateNumberValue(static_cast<int>(settings.completion.eagerness)));
             completion.Insert(L"contextKB", Windows::Data::Json::JsonValue::CreateNumberValue(settings.completion.contextKB));
             completion.Insert(L"outputTokens", Windows::Data::Json::JsonValue::CreateNumberValue(settings.completion.outputTokens));
+            if (settings.completion.prompt)
+                completion.Insert(L"prompt", SerializeCompletionPromptSettings(*settings.completion.prompt));
             root.Insert(L"completion", completion);
             root.Insert(L"latexSuggestionsEnabled", Windows::Data::Json::JsonValue::CreateBooleanValue(settings.latexSuggestionsEnabled));
             root.Insert(L"themeId", Windows::Data::Json::JsonValue::CreateStringValue(winrt::to_hstring(settings.themeId)));

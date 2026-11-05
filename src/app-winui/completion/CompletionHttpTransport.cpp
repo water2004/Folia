@@ -156,7 +156,11 @@ CompletionResult RequestCompletionHttp(CompletionConfig const& config, folia::co
     auto add = [&](MessageRole role, std::string const& text) {
         Message message; message.role = role; message.content.push_back({ContentKind::Text, text}); model.messages.push_back(std::move(message));
     };
-    add(MessageRole::System, prompt.instructions); add(MessageRole::User, prompt.context + prompt.cursor);
+    add(MessageRole::System, prompt.instructions);
+    for (auto const& [source, response] : prompt.examples) {
+        add(MessageRole::User, source); add(MessageRole::Assistant, response);
+    }
+    add(MessageRole::User, prompt.context + prompt.cursor);
     auto protocol = static_cast<ApiProtocol>(config.protocol);
     StreamResponse decoder(protocol); std::string response;
     auto streaming = ReadHttp(config, ResolveCompletionEndpoint(config), L"POST", BuildRequest(protocol, model).dump(), stop,

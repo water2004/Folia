@@ -106,12 +106,20 @@ sequences and combining marks.
 ## Edit proposals
 
 The client marks a short editable tail at the caret (up to 32 Unicode scalars,
-ending at the current source line). The model returns only the new literal text
-inside the same boundary markers, without JSON, document offsets, an echoed
-old-text field, or syntax-specific rules. Marker spellings are chosen so they
-do not already occur in the captured document. Empty output is abstention;
-an empty marked region is a deletion. Missing framing or out-of-budget output
-is rejected, not interpreted through a second response format.
+ending at the current source line). These input markers identify existing text
+to the right of the caret; their spellings do not occur in the captured document.
+The reply explicitly selects one operation:
+
+- `<insert>literal source</insert>` inserts new text without consuming any right
+  context. Ordinary continuations do not have to repeat existing closing text.
+- `<replace>literal source</replace>` replaces the marked tail, retaining any
+  existing characters that should remain. This supports changing or passing
+  through existing text as part of one proposal.
+
+Empty output is abstention. An empty insert leaves the source unchanged; an empty
+replace deletes the marked tail. Missing framing, other operations and
+out-of-budget output are rejected. There is no JSON or previous reply-format
+fallback, model-owned document offset, or guessed operation.
 
 Instructions describe an inline editor operation, rather than asking for a
 completed standalone document. The model should extend the thought and structure
@@ -121,9 +129,10 @@ classify the editing language or prescribe particular syntax delimiters.
 
 TeX backslashes, indentation and leading newlines are literal payload. Only
 outer framing whitespace is ignored; payload CRLF/CR is normalized to LF.
-The client obtains expected source from its captured window and trims any
-copied common suffix out of the edit, keeping the caret before untouched right
-context. Generated text is limited to 512 Unicode scalars without a separate
+For replacement operations, the client obtains expected source from its captured
+window and trims copied common suffixes out of the edit, keeping the caret before
+untouched right context. Insert operations never infer an overlap or delete
+existing text. Generated text is limited to 512 Unicode scalars without a separate
 four-line restriction. The model is not told whether the document is Markdown,
 code, or TeX; it receives available source and infers its environment.
 
@@ -140,6 +149,38 @@ checked before acceptance. Replacement, block structure changes and the caret
 are recorded in one transaction. The source view uses its source-patch history.
 Thus Markdown fences still create blocks and undo restores the original caret,
 not a temporary replacement selection.
+
+## Prompt configuration
+
+The instruction text, frequency policies and optional examples are runtime data
+in [Assets/completion.json](../src/app-winui/Assets/completion.json), not compiled
+strings. `completion.prompt` in the user's `settings.json` can contain a custom
+object with the same shape. An absent override uses the packaged file; saving
+unrelated settings does not copy the defaults into user settings, so built-in
+updates continue to apply. Explicit custom prompts are preserved on save and
+upgrade. Restart Folia after manually editing configuration files.
+
+`instructions` supports `${edit_start}`, `${edit_end}`, `${policy}` and
+`${max_characters}`. Expansion is nonrecursive and never processes document
+source. `policies` contains `conservative`, `balanced` and `proactive` text.
+`documentPrefix` labels the source. Each optional example supplies `before`,
+`editable`, `after` and the complete operation `response`; examples become
+ordinary user/assistant exchanges before the current document. Their order and
+contents stay fixed between requests, preserving the shared prompt prefix.
+
+`regionName` names the input range marker (up to 24 ASCII letters, digits or
+underscores, starting with a letter); its spelling is adjusted if it occurs in document content.
+`beforeEdit` and `afterEdit` separate the source before the cursor, the existing
+right-hand region, and the remaining source. They allow source fragments to be
+labeled clearly without inserting editing metadata into an unfinished source
+construct. These labels describe source positions, not Markdown/code/math modes.
+
+Configuration is read with a size bound during settings/controller preparation,
+not during scrolling or each request. Missing or invalid prompt configuration
+reports an AI configuration error without resetting unrelated settings or
+falling back to compiled instructions. The portable completion module only
+validates and expands the explicitly supplied configuration; filesystem and JSON
+loading belong to application settings.
 
 ## Cost and lifetime
 

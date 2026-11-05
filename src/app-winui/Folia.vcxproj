@@ -154,6 +154,7 @@
     <ClInclude Include="storage\ClipboardImageStore.h" />
     <ClInclude Include="localization\Localization.h" />
     <ClInclude Include="settings\AppSettings.h" />
+    <ClInclude Include="settings\CompletionPromptSettings.h" />
     <ClInclude Include="settings\ShortcutSettingsSerialization.h" />
     <ClInclude Include="settings\SettingsView.h" />
     <ClInclude Include="settings\SettingsViewSupport.h" />
@@ -582,6 +583,7 @@
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="settings\AppSettings.cpp" />
+    <ClCompile Include="settings\CompletionPromptSettings.cpp" />
     <ClCompile Include="settings\ShortcutSettingsSerialization.cpp" />
     <ClCompile Include="settings\LatexCommandCatalog.cpp" />
     <ClCompile Include="settings\LatexCommandSettingsComponents.cpp" />
@@ -774,6 +776,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Assets\latex\commands.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Assets\completion.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Assets\mathjax\LICENSE-MathJax.txt">

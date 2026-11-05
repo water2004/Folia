@@ -2,6 +2,7 @@
 #include "completion/InlineCompletionController.h"
 #include <unicode/ubrk.h>
 #include "editor/rendering/EditorContentPreparation.h"
+#include "settings/CompletionPromptSettings.h"
 import folia.markdown.utf;
 
 namespace winrt::Folia {
@@ -29,6 +30,13 @@ InlineCompletionController::InlineCompletionController(EditorSession& session, C
     position_ = session.Selection().active; content_ = session.ContentState();
     // Disabled completion has no worker, timer or cached document text.
     if (config_.enabled && ValidateCompletionConfig(config_).empty()) {
+        try {
+            if (config_.promptError.empty()) {
+                if (!config_.prompt) config_.prompt = LoadCompletionPromptSettings();
+                if (auto error = folia::completion::validate_prompt_settings(*config_.prompt)) config_.promptError = *error;
+            }
+        } catch (std::exception const& error) { config_.promptError = error.what(); }
+        catch (winrt::hresult_error const& error) { config_.promptError = winrt::to_string(error.message()); }
         budget_ = folia::completion::make_budget(config_.contextKB * 1000, config_.outputTokens);
         service_ = std::make_unique<CompletionService>(std::move(transport));
     }
@@ -101,6 +109,7 @@ void InlineCompletionController::Request() {
     auto beforeValidation = generation_;
     Validate();
     if (beforeValidation != generation_ || !focused_ || composing_ || !service_) return;
+    if (!config_.promptError.empty()) { SetState(CompletionState::Failed, config_.promptError); return; }
     auto context = session_.CaptureCompletionContext(budget_);
     if (!context) return;
     if (auto cached = cache_.get(*context)) {
@@ -110,7 +119,11 @@ void InlineCompletionController::Request() {
     }
     auto generation = ++generation_;
     nextRequest_ = std::chrono::steady_clock::now() + std::chrono::milliseconds(1500);
-    auto prompt = folia::completion::make_prompt(*context, budget_, config_.eagerness);
+    folia::completion::Prompt prompt;
+    try {
+        prompt = folia::completion::make_prompt(*context, *config_.prompt, budget_, config_.eagerness);
+    } catch (std::exception const& error) { SetState(CompletionState::Failed, error.what()); return; }
+    catch (winrt::hresult_error const& error) { SetState(CompletionState::Failed, winrt::to_string(error.message())); return; }
     SetState(CompletionState::Requesting);
     service_->Submit(config_, std::move(prompt), [weak = weak_from_this(), queue = queue_, generation, context = std::move(*context)](CompletionResult result) mutable {
         queue.TryEnqueue([weak, generation, context = std::move(context), result = std::move(result)]() mutable {

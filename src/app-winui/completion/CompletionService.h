@@ -10,6 +10,8 @@ struct CompletionConfig {
     std::string reasoningEffort;
     folia::completion::Eagerness eagerness = folia::completion::Eagerness::Balanced;
     std::uint32_t contextKB = 7, outputTokens = 128;
+    std::optional<folia::completion::PromptSettings> prompt;
+    std::string promptError;
     bool operator==(CompletionConfig const&) const = default;
 };
 struct CompletionResult {

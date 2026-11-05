@@ -44,15 +44,22 @@ struct Alignment {
 std::optional<Edit> decode_edit_response(std::u32string_view response, Context const& context, Budget budget) {
     if (response.empty()) return Edit{};
     if (response.size() > 8192) return {};
-    auto markers = edit_markers(context);
-    auto start = scalars(markers.start), end = scalars(markers.end);
     auto whitespace = [](char32_t c) { return c == U' ' || c == U'\t' || c == U'\r' || c == U'\n'; };
     while (!response.empty() && whitespace(response.front())) response.remove_prefix(1);
     while (!response.empty() && whitespace(response.back())) response.remove_suffix(1);
     if (response.empty()) return Edit{};
-    if (!response.starts_with(start) || !response.ends_with(end) || response.size() < start.size() + end.size()) return {};
-    Edit result{scalars(editable_suffix(context)), {}};
-    const auto generated = response.substr(start.size(), response.size() - start.size() - end.size());
+    Edit result;
+    std::u32string_view generated;
+    constexpr std::u32string_view insertStart = U"<insert>", insertEnd = U"</insert>";
+    constexpr std::u32string_view replaceStart = U"<replace>", replaceEnd = U"</replace>";
+    if (response.size() >= insertStart.size() + insertEnd.size()
+        && response.starts_with(insertStart) && response.ends_with(insertEnd))
+        generated = response.substr(insertStart.size(), response.size() - insertStart.size() - insertEnd.size());
+    else if (response.size() >= replaceStart.size() + replaceEnd.size()
+        && response.starts_with(replaceStart) && response.ends_with(replaceEnd)) {
+        generated = response.substr(replaceStart.size(), response.size() - replaceStart.size() - replaceEnd.size());
+        result.before = scalars(editable_suffix(context));
+    } else return {};
     for (std::size_t i = 0; i < generated.size(); ++i) {
         if (generated[i] != U'\r') result.after += generated[i];
         else {

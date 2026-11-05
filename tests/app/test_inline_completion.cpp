@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "support/CompletionPromptSettings.h"
 #include "support/folia_test.hpp"
 #include "completion/InlineCompletionController.h"
 #include "support/CompletionReply.h"
@@ -228,7 +229,7 @@ suite inline_completion_tests = [] {
             --shared->active; return CompletionResult{config.model == "old" ? U"obsolete" : U"current"};
         });
         std::atomic<int> oldDeliveries = 0, newDeliveries = 0;
-        auto prompt = folia::completion::make_prompt({});
+        auto prompt = completion_tests::MakePrompt({});
         service.Submit({true, {}, "old", 0}, prompt, [&](auto) { ++oldDeliveries; });
         expect(Pump([&] { return shared->started.load() == 1; }));
         service.Submit({true, {}, "new", 0}, prompt, [&](auto result) {

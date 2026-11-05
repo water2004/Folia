@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "support/CompletionPromptSettings.h"
 #include "support/folia_test.hpp"
 #include "completion/CompletionHttpTransport.h"
 #include "support/CompletionHttpServer.h"
@@ -12,20 +13,30 @@ std::string const response = R"(data: {"choices":[{"index":0,"delta":{"content":
     "data: [DONE]\n\n";
 suite completion_http_tests = [] {
     "all protocols send one chronological document message with exact literal source"_test = [] {
-        auto prompt = folia::completion::make_prompt({"nearby context\n\n", "x_", "} next\nmore"});
+        auto settings = LoadCompletionPromptSettings();
+        settings.examples = {{"call(", ")", ";", "<insert>value</insert>"}};
+        auto prompt = folia::completion::make_prompt({"nearby context\n\n", "x_", "} next\nmore"}, settings);
         for (int protocol = 0; protocol < 3; ++protocol) {
             Server server({}, 503);
             expect(throws([&] { (void)RequestCompletionHttp({true, server.baseUrl, "fixture", protocol}, prompt, {}, L"fixture-key"); }));
             auto body = server.request.substr(server.request.find("\r\n\r\n") + 4);
             auto json = winrt::Windows::Data::Json::JsonObject::Parse(winrt::to_hstring(body));
             auto messages = json.GetNamedArray(protocol == 1 ? L"input" : L"messages");
-            expect(messages.Size() == static_cast<unsigned>(protocol == 2 ? 1 : 2));
+            expect(messages.Size() == static_cast<unsigned>((protocol == 2 ? 1 : 2) + prompt.examples.size() * 2));
             auto user = messages.GetObjectAt(messages.Size() - 1);
             expect(user.GetNamedString(L"role") == L"user");
             auto content = user.GetNamedValue(L"content");
             auto text = content.ValueType() == winrt::Windows::Data::Json::JsonValueType::String
                 ? content.GetString() : content.GetArray().GetObjectAt(0).GetNamedString(L"text");
             expect(winrt::to_string(text) == prompt.context + prompt.cursor);
+            auto sampleAt = protocol == 2 ? 0u : 1u;
+            expect(messages.GetObjectAt(sampleAt).GetNamedString(L"role") == L"user");
+            auto sampleReply = messages.GetObjectAt(sampleAt + 1);
+            expect(sampleReply.GetNamedString(L"role") == L"assistant");
+            auto replyContent = sampleReply.GetNamedValue(L"content");
+            auto replyText = replyContent.ValueType() == winrt::Windows::Data::Json::JsonValueType::String
+                ? replyContent.GetString() : replyContent.GetArray().GetObjectAt(0).GetNamedString(L"text");
+            expect(winrt::to_string(replyText) == prompt.examples[0].second);
         }
     };
     "completion timeout counts inactivity rather than total stream duration"_test = [] {
@@ -35,21 +46,21 @@ suite completion_http_tests = [] {
             reasoning += R"(data: {"choices":[{"index":0,"delta":{"reasoning_content":"thinking"},"finish_reason":null}]})" "\n\n";
         Server server(reasoning + response, 200, false, "text/event-stream", std::chrono::milliseconds(60), 60);
         const auto begin = std::chrono::steady_clock::now();
-        auto result = RequestCompletionHttp({true, server.baseUrl, "fixture", 0}, folia::completion::make_prompt({}), {}, L"fixture-key", inactivity);
+        auto result = RequestCompletionHttp({true, server.baseUrl, "fixture", 0}, completion_tests::MakePrompt({}), {}, L"fixture-key", inactivity);
         expect(bool(result.text == U" hello"));
         expect(std::chrono::steady_clock::now() - begin > inactivity * 2);
     };
     "completion terminal event completes without waiting for the connection to close"_test = [] {
         Server server(response, 200, true);
         const auto begin = std::chrono::steady_clock::now();
-        auto result = RequestCompletionHttp({true, server.baseUrl, "fixture", 0}, folia::completion::make_prompt({}), {}, L"fixture-key", std::chrono::milliseconds(400));
+        auto result = RequestCompletionHttp({true, server.baseUrl, "fixture", 0}, completion_tests::MakePrompt({}), {}, L"fixture-key", std::chrono::milliseconds(400));
         expect(bool(result.text == U" hello"));
         expect(std::chrono::steady_clock::now() - begin < std::chrono::seconds(1));
     };
     "completion connection still times out when no response data arrives"_test = [] {
         Server server({}, 200, true);
         const auto begin = std::chrono::steady_clock::now();
-        expect(throws([&] { (void)RequestCompletionHttp({true, server.baseUrl, "fixture", 0}, folia::completion::make_prompt({}), {}, L"fixture-key", std::chrono::milliseconds(200)); }));
+        expect(throws([&] { (void)RequestCompletionHttp({true, server.baseUrl, "fixture", 0}, completion_tests::MakePrompt({}), {}, L"fixture-key", std::chrono::milliseconds(200)); }));
         expect(std::chrono::steady_clock::now() - begin < std::chrono::seconds(1));
     };
     "OpenAI model discovery never infers reasoning capabilities from IDs or private fields"_test = [] {
@@ -147,7 +158,7 @@ suite completion_http_tests = [] {
             Server server({}, 503);
             CompletionConfig config{true, server.baseUrl, "fixture", protocol}; config.reasoningEffort = "custom_effort-2"; config.outputTokens = 512;
             bool failed = false;
-            try { (void)RequestCompletionHttp(config, folia::completion::make_prompt({}, folia::completion::make_budget(16000, 512)), {}, L""); }
+            try { (void)RequestCompletionHttp(config, completion_tests::MakePrompt({}, folia::completion::make_budget(16000, 512)), {}, L""); }
             catch (std::exception const&) { failed = true; }
             expect(failed);
             auto field = protocol == 0 ? "\"reasoning_effort\":\"custom_effort-2\""
@@ -162,7 +173,7 @@ suite completion_http_tests = [] {
         for (int protocol = 0; protocol < 3; ++protocol) {
             Server server({}, 503);
             expect(throws([&] { (void)RequestCompletionHttp({true, server.baseUrl, "fixture", protocol},
-                folia::completion::make_prompt({}), {}, L"fixture-key"); }));
+                completion_tests::MakePrompt({}), {}, L"fixture-key"); }));
             for (auto field : {"\"reasoning_effort\"", "\"reasoning\"", "\"output_config\"", "\"thinking\""})
                 expect(server.request.find(field) == std::string::npos);
         }
@@ -170,7 +181,7 @@ suite completion_http_tests = [] {
     "completion transport preserves token-limit termination"_test = [] {
         auto limited = response; limited.replace(limited.find("stop"), 4, "length");
         Server server(limited);
-        auto result = RequestCompletionHttp({true, server.baseUrl, "fixture", 0}, folia::completion::make_prompt({}), {}, L"");
+        auto result = RequestCompletionHttp({true, server.baseUrl, "fixture", 0}, completion_tests::MakePrompt({}), {}, L"");
         expect(result.truncated); expect(result.text == U" hello");
     };
     "completion base URL derives protocol paths and preserves base prefixes and queries"_test = [] {
@@ -193,7 +204,7 @@ suite completion_http_tests = [] {
     "completion HTTP parses fragmented loopback response with bounded body"_test = [] {
         Server server(response);
         auto result = std::async(std::launch::async, [&] {
-            return RequestCompletionHttp({true, server.baseUrl, "fixture", 0}, folia::completion::make_prompt({}), {}, L"fixture-key");
+            return RequestCompletionHttp({true, server.baseUrl, "fixture", 0}, completion_tests::MakePrompt({}), {}, L"fixture-key");
         });
         expect(result.wait_for(std::chrono::seconds(5)) == std::future_status::ready);
         expect(result.get().text == U" hello");
@@ -208,7 +219,7 @@ suite completion_http_tests = [] {
             Server server({}, 503);
             bool failed = false;
             try { (void)RequestCompletionHttp({true, server.baseUrl + "/gateway/v2/?rev=1%2F2", "fixture", protocol},
-                folia::completion::make_prompt({}), {}, L""); }
+                completion_tests::MakePrompt({}), {}, L""); }
             catch (std::exception const& error) { failed = std::string(error.what()).find("503") != std::string::npos; }
             expect(failed);
             expect(server.request.starts_with("POST /gateway/v2" + paths[protocol] + "?rev=1%2F2 HTTP/1.1\r\n"));
@@ -217,7 +228,7 @@ suite completion_http_tests = [] {
     "completion HTTP async cancellation completes before receive timeout"_test = [] {
         Server server({}, 200, true); std::stop_source stop;
         auto result = std::async(std::launch::async, [&] {
-            try { (void)RequestCompletionHttp({true, server.baseUrl, "fixture", 0}, folia::completion::make_prompt({}), stop.get_token(), L""); }
+            try { (void)RequestCompletionHttp({true, server.baseUrl, "fixture", 0}, completion_tests::MakePrompt({}), stop.get_token(), L""); }
             catch (std::exception const&) {} return true;
         });
         auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(3);
@@ -229,7 +240,7 @@ suite completion_http_tests = [] {
     "completion HTTP surfaces service errors without accepting a suggestion"_test = [] {
         Server server({}, 503);
         bool failed = false;
-        try { (void)RequestCompletionHttp({true, server.baseUrl, "fixture", 0}, folia::completion::make_prompt({}), {}, L""); }
+        try { (void)RequestCompletionHttp({true, server.baseUrl, "fixture", 0}, completion_tests::MakePrompt({}), {}, L""); }
         catch (std::exception const& error) { failed = std::string(error.what()).find("503") != std::string::npos; }
         expect(failed);
         expect(!ValidateCompletionConfig({true, "http://localhost:80@remote.example/", "fixture", 0}).empty());

@@ -201,7 +201,10 @@ Microsoft::UI::Xaml::UIElement SettingsView::BuildCompletionPage() {
     save.Click([weak = weak_from_this(), enabled, protocol, baseUrl, model, reasoning, eagerness, contextKB, outputTokens, key, clearKey, status](auto const&, auto const&) {
         auto self = weak.lock(); if (!self || self->detached_ || !self->applySettings_) return;
         auto proposed = self->appliedSettings_;
-        proposed.completion = {enabled.IsOn(), winrt::to_string(baseUrl.Text()), winrt::to_string(model.Text()), protocol.SelectedIndex()};
+        proposed.completion.enabled = enabled.IsOn();
+        proposed.completion.baseUrl = winrt::to_string(baseUrl.Text());
+        proposed.completion.model = winrt::to_string(model.Text());
+        proposed.completion.protocol = protocol.SelectedIndex();
         proposed.completion.reasoningEffort = SelectedValue(reasoning);
         proposed.completion.eagerness = static_cast<folia::completion::Eagerness>(eagerness.SelectedIndex());
         std::uint32_t context{}, output{};

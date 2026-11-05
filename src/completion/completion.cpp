@@ -110,40 +110,76 @@ std::string_view editable_suffix(Context const& c) {
     }
     return std::string_view(c.suffix).substr(0, at);
 }
-EditMarkers edit_markers(Context const& c) {
-    std::string start = "<edit>", end = "</edit>";
+EditMarkers edit_markers(Context const& c, PromptSettings const& settings) {
+    std::string start = "<" + settings.region_name + ">", end = "</" + settings.region_name + ">";
     auto contains = [&](std::string const& marker) {
         return c.preceding.contains(marker) || c.prefix.contains(marker) || c.suffix.contains(marker) || c.following.contains(marker);
     };
     while (contains(start) || contains(end)) { start.insert(start.size() - 1, "_"); end.insert(end.size() - 1, "_"); }
     return {std::move(start), std::move(end)};
 }
-Prompt make_prompt(Context const& c, Budget budget, Eagerness eagerness) {
+namespace {
+std::string expand_instructions(std::string_view text, std::string_view start, std::string_view end,
+    std::string_view policy, std::string_view characters) {
+    std::string out;
+    while (!text.empty()) {
+        auto begin = text.find("${");
+        if (begin == text.npos) { out += text; break; }
+        out += text.substr(0, begin);
+        text.remove_prefix(begin + 2);
+        auto close = text.find('}');
+        if (close == text.npos) throw std::invalid_argument("Unclosed completion prompt parameter.");
+        auto name = text.substr(0, close);
+        if (name == "edit_start") out += start;
+        else if (name == "edit_end") out += end;
+        else if (name == "policy") out += policy;
+        else if (name == "max_characters") out += characters;
+        else throw std::invalid_argument("Unknown completion prompt parameter.");
+        text.remove_prefix(close + 1);
+    }
+    return out;
+}
+}
+std::optional<std::string> validate_prompt_settings(PromptSettings const& settings) {
+    if (settings.instructions.empty() || settings.instructions.size() > 16384 || settings.document_prefix.size() > 1024
+        || settings.before_edit.size() > 1024 || settings.after_edit.size() > 1024)
+        return "Completion prompt settings are empty or exceed their size limit.";
+    auto letter = [](char c) { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); };
+    if (settings.region_name.empty() || settings.region_name.size() > 24 || !letter(settings.region_name.front())
+        || !std::ranges::all_of(settings.region_name, [&](char c) { return letter(c) || (c >= '0' && c <= '9') || c == '_'; }))
+        return "Completion prompt regionName must be an ASCII tag name (1-24 characters).";
+    for (auto const& policy : settings.policies)
+        if (policy.empty() || policy.size() > 1024) return "Completion prompt policies are empty or exceed their size limit.";
+    std::size_t exampleBytes = 0;
+    if (settings.examples.size() > 4) return "Completion prompt has too many examples.";
+    for (auto const& example : settings.examples)
+        exampleBytes += example.before.size() + example.editable.size() + example.after.size() + example.response.size();
+    if (exampleBytes > 4096) return "Completion prompt examples exceed their size limit.";
+    if (!settings.instructions.contains("${edit_start}") || !settings.instructions.contains("${edit_end}"))
+        return "Completion prompt must contain edit_start and edit_end parameters.";
+    try { (void)expand_instructions(settings.instructions, "<edit>", "</edit>", "", "512"); }
+    catch (std::invalid_argument const& error) { return error.what(); }
+    return {};
+}
+Prompt make_prompt(Context const& c, PromptSettings const& settings, Budget budget, Eagerness eagerness) {
+    if (auto error = validate_prompt_settings(settings)) throw std::invalid_argument(*error);
     const auto activePrefix = std::min(c.active_prefix_byte, c.prefix.size());
     const auto activeSuffix = editable_suffix(c).size();
-    auto [start, end] = edit_markers(c);
-    std::string policy;
-    switch (eagerness) {
-    case Eagerness::Conservative:
-        policy = "Suggest only when the intended continuation is clear."; break;
-    case Eagerness::Balanced:
-        policy = "Prefer a short, useful continuation consistent with the surrounding document."; break;
-    case Eagerness::Proactive:
-        policy = "Offer a plausible short continuation even when several phrasings are possible."; break;
-    default: throw std::invalid_argument("Invalid completion eagerness.");
-    }
-    return {
-        "You are an inline autocomplete engine. The user is editing source text, not asking you a question. "
-        "Continue at the start of the marked region. Your entire reply must start with " + start + " and end with " + end +
-        "; the content between them replaces the existing marked text. "
-        "Include the existing marked text after your continuation unless it needs to change. All text outside the markers remains unchanged. "
-        "Continue what is already being written; do not repeat its beginning, reopen its current structure, or wrap your answer for presentation. "
-        "Infer the syntax and language from the actual source. Include the whitespace needed when the replacement is inserted directly into that source. "
-        "Suggest only a short next step, at most 512 characters. Return no text if there is no useful edit. " + policy,
-        "Document:\n" + c.preceding + c.prefix.substr(0, activePrefix),
-        c.prefix.substr(activePrefix) + start + c.suffix.substr(0, activeSuffix) + end
-            + c.suffix.substr(activeSuffix) + c.following,
+    auto [start, end] = edit_markers(c, settings);
+    auto level = static_cast<std::size_t>(eagerness);
+    if (level >= settings.policies.size()) throw std::invalid_argument("Invalid completion eagerness.");
+    Prompt prompt{
+        expand_instructions(settings.instructions, start, end, settings.policies[level],
+            std::to_string(std::min(budget.proposal_characters, std::size_t{512}))),
+        settings.document_prefix + c.preceding + c.prefix.substr(0, activePrefix),
+        c.prefix.substr(activePrefix) + settings.before_edit + start + c.suffix.substr(0, activeSuffix) + end
+            + settings.after_edit + c.suffix.substr(activeSuffix) + c.following,
         std::clamp(budget.output_tokens, std::uint32_t{16}, max_output_tokens), start, end };
+    for (auto const& example : settings.examples)
+        prompt.examples.emplace_back(settings.document_prefix + example.before + settings.before_edit + start + example.editable + end
+            + settings.after_edit + example.after,
+            example.response);
+    return prompt;
 }
 Cache::Cache(std::size_t max_bytes, std::size_t max_entries)
     : max_bytes_(max_bytes), max_entries_(max_entries) {}

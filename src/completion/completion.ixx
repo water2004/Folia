@@ -25,17 +25,31 @@ struct Prompt {
     std::string instructions, context, cursor;
     std::uint32_t output_tokens = 128;
     std::string edit_start, edit_end;
+    std::vector<std::pair<std::string, std::string>> examples;
 };
 enum class Eagerness { Conservative, Balanced, Proactive };
+struct PromptSettings {
+    struct Example {
+        std::string before, editable, after, response;
+        bool operator==(Example const&) const = default;
+    };
+    std::string instructions;
+    std::array<std::string, 3> policies;
+    std::string document_prefix;
+    std::vector<Example> examples;
+    std::string region_name, before_edit, after_edit;
+    bool operator==(PromptSettings const&) const = default;
+};
+std::optional<std::string> validate_prompt_settings(PromptSettings const&);
 Budget make_budget(std::size_t context_bytes, std::uint32_t output_tokens);
 Context capture(std::u32string_view source, std::size_t caret,
     std::span<std::u32string_view const> preceding = {}, Budget budget = {},
     std::span<std::u32string_view const> following = {}, std::string_view separator = "\n\n");
-Prompt make_prompt(Context const&, Budget budget = {}, Eagerness eagerness = Eagerness::Balanced);
+Prompt make_prompt(Context const&, PromptSettings const&, Budget budget = {}, Eagerness eagerness = Eagerness::Balanced);
 // The client owns the replacement range. The model returns only its new text.
 std::string_view editable_suffix(Context const&);
 struct EditMarkers { std::string start, end; };
-EditMarkers edit_markers(Context const&);
+EditMarkers edit_markers(Context const&, PromptSettings const&);
 
 // Expected text comes from the captured source, never from the model.
 struct Edit {
