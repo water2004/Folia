@@ -3794,6 +3794,7 @@ inline ParsedBlockFragment parse_block_fragment(
     MarkdownDialect dialect = default_dialect(),
     std::function<std::optional<InlineLinkDef>(const std::string&)> references_before={},
     std::function<std::optional<InlineLinkDef>(const std::string&)> references_after={}) {
+    record_block_fragment_parse();
     ParseInput input{0, cps_to_utf8(source), std::move(dialect)};
     input.references_before=std::move(references_before);
     input.references_after=std::move(references_after);

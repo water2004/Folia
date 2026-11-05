@@ -6,6 +6,7 @@ export namespace folia {
 
 struct CoreOperationCounters {
     std::uint64_t full_document_parses = 0;
+    std::uint64_t block_fragment_parses = 0;
     std::uint64_t full_document_serializations = 0;
     std::uint64_t full_tree_transaction_diffs = 0;
     std::uint64_t full_document_symbol_derivations = 0;
@@ -23,6 +24,7 @@ inline thread_local CoreOperationCounters core_operation_counters;
 inline void reset_core_operation_counters() { core_operation_counters = {}; }
 inline CoreOperationCounters read_core_operation_counters() { return core_operation_counters; }
 inline void record_full_document_parse() { ++core_operation_counters.full_document_parses; }
+inline void record_block_fragment_parse() { ++core_operation_counters.block_fragment_parses; }
 inline void record_full_document_serialization() { ++core_operation_counters.full_document_serializations; }
 inline void record_full_tree_transaction_diff() { ++core_operation_counters.full_tree_transaction_diffs; }
 inline void record_full_document_symbol_derivation() {

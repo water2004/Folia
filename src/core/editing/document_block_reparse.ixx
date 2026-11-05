@@ -171,20 +171,6 @@ inline void assign_fresh_ids(
     }
 }
 
-inline BlockNode exact_paragraph(
-    std::u32string source,
-    NodeId id,
-    std::optional<std::u32string> separator_before,
-    const EditorDocument& owner,
-    NodeAllocator& allocator) {
-    BlockNode paragraph;
-    paragraph.id = id;
-    paragraph.kind = BlockKind::Paragraph;
-    paragraph.inline_content = make_inline(std::move(source), owner, allocator);
-    paragraph.separator_before = std::move(separator_before);
-    return paragraph;
-}
-
 } // namespace block_reparse_detail
 
 // Reclassify an edited block when its source changes structural meaning. A
@@ -193,35 +179,32 @@ inline BlockNode exact_paragraph(
 // one-node inline CST reparse.
 enum class BlockReparseScope { SingleBlock, Fragment };
 
-inline std::optional<RecordedBlockEdit> reparse_edited_direct_block(
-    EditorDocument& document,
-    TextPosition position,
-    NodeAllocator& allocator,
-    const AppliedSourceEdit* source_edit = nullptr,
-    BlockReparseScope scope = BlockReparseScope::SingleBlock) {
-    auto* current = find_document_block(document, position.container_id);
-    if (!current) return std::nullopt;
+// Parser-local ids belong to this plan until application. Planning neither
+// mutates the document nor allocates document ids; application never reparses
+// the Markdown fragment.
+struct BlockReparsePlan {
+    NodeId owner{};
+    BlockVec blocks;
+    NodeId target_parser_id{};
+    std::size_t target_offset = 0;
+};
 
-    const auto is_raw = current->kind == BlockKind::CodeBlock
-        || current->kind == BlockKind::MathBlock;
-    const auto is_multiline_paragraph = current->kind == BlockKind::Paragraph
-        && current->inline_content.source.find(U'\n') != std::u32string::npos;
-    const auto is_html_paragraph = current->kind == BlockKind::Paragraph
-        && current->inline_content.source.starts_with(U"<")
-        && current->inline_content.source.find(U'>') != std::u32string::npos;
+inline std::optional<BlockReparsePlan> plan_block_reparse(
+    const EditorDocument& document,
+    const BlockNode& current,
+    std::u32string_view source,
+    std::size_t target_offset,
+    BlockReparseScope scope) {
+
+    const auto is_raw = current.kind == BlockKind::CodeBlock
+        || current.kind == BlockKind::MathBlock;
+    const auto is_multiline_paragraph = current.kind == BlockKind::Paragraph
+        && source.find(U'\n') != std::u32string::npos;
+    const auto is_html_paragraph = current.kind == BlockKind::Paragraph
+        && source.starts_with(U"<") && source.find(U'>') != std::u32string::npos;
     if (!is_raw && !is_multiline_paragraph && !is_html_paragraph) return std::nullopt;
-    if (is_raw && source_edit
-        && !block_reparse_detail::edit_touches_raw_structure(*current, *source_edit)) {
-        return std::nullopt;
-    }
-    auto path = document_block_path(document, position.container_id);
-    if (!path || path->empty()) return std::nullopt;
-
-    const auto source = is_raw
-        ? current->block_source.source()
-        : current->inline_content.source;
     auto parsed = parse_block_fragment(source, document.dialect);
-    if (is_raw && block_reparse_detail::same_raw_projection(*current, parsed.blocks)) {
+    if (is_raw && block_reparse_detail::same_raw_projection(current, parsed.blocks)) {
         return std::nullopt;
     }
     if (!is_raw
@@ -229,7 +212,7 @@ inline std::optional<RecordedBlockEdit> reparse_edited_direct_block(
         return std::nullopt;
     }
 
-    auto target = block_reparse_detail::target_candidate(parsed, position.source_offset);
+    auto target = block_reparse_detail::target_candidate(parsed, target_offset);
     // A character edit may reclassify one direct block, but it is not an
     // implicit multi-block split command. Structural paste can explicitly
     // replace the owner with a fragment containing sibling blocks.
@@ -239,31 +222,54 @@ inline std::optional<RecordedBlockEdit> reparse_edited_direct_block(
         if (!is_raw) return std::nullopt;
         parsed.blocks.clear();
         parsed.source_ranges.clear();
-        parsed.blocks.push_back(block_reparse_detail::exact_paragraph(
-            source,
-            current->id,
-            current->separator_before,
-            document,
-            allocator));
+        BlockNode paragraph;
+        paragraph.kind = BlockKind::Paragraph;
+        paragraph.inline_content.source = source;
+        parsed.blocks.push_back(std::move(paragraph));
         target = block_reparse_detail::TargetCandidate{
-            current->id,
-            (std::min)(position.source_offset, source.size()),
+            {},
+            (std::min)(target_offset, source.size()),
             0,
             source.size(),
         };
-    } else {
-        parsed.blocks.front().separator_before = current->separator_before;
-        for (auto& block : parsed.blocks) {
-            std::vector<std::pair<NodeId, NodeId>> remapped_ids;
-            block_reparse_detail::assign_fresh_ids(
-                block,
-                target->parser_id,
-                current->id,
-                document,
-                allocator,
-                remapped_ids);
-        }
     }
+    parsed.blocks.front().separator_before = current.separator_before;
+    return BlockReparsePlan{current.id, std::move(parsed.blocks), target->parser_id, target->local_offset};
+}
+
+inline std::optional<BlockReparsePlan> plan_edited_direct_block(
+    const EditorDocument& document, TextPosition position,
+    BlockReparseScope scope = BlockReparseScope::SingleBlock,
+    const AppliedSourceEdit* source_edit = nullptr) {
+    const auto* current = find_document_block(document, position.container_id);
+    if (!current) return std::nullopt;
+    const auto* raw = editable_raw_block_source(*current);
+    if (raw && source_edit
+        && !block_reparse_detail::edit_touches_raw_structure(*current, *source_edit)) return std::nullopt;
+    const auto* inlines = editable_inline_document(*current);
+    if (!raw && !inlines) return std::nullopt;
+    return plan_block_reparse(document, *current, raw ? *raw : inlines->source,
+        position.source_offset, scope);
+}
+
+// A paste may continue a structure begun in an inline owner. Keep the parsed
+// result for application rather than treating recognition as a boolean probe.
+inline std::optional<BlockReparsePlan> plan_block_source_insertion(
+    const EditorDocument& document, TextPosition position, std::u32string_view text) {
+    const auto* current = find_document_block(document, position.container_id);
+    if (!current || current->kind != BlockKind::Paragraph || text.find(U'\n') == text.npos)
+        return std::nullopt;
+    auto source = current->inline_content.source;
+    if (position.source_offset > source.size()) return std::nullopt;
+    source.insert(position.source_offset, text);
+    return plan_block_reparse(document, *current, source,
+        position.source_offset + text.size(), BlockReparseScope::Fragment);
+}
+
+inline std::optional<RecordedBlockEdit> apply_block_reparse_plan(
+    EditorDocument& document, BlockReparsePlan plan, NodeAllocator& allocator) {
+    auto path = document_block_path(document, plan.owner);
+    if (!path || path->empty() || plan.blocks.empty()) return std::nullopt;
 
     auto parent_path = *path;
     const auto index = parent_path.back();
@@ -271,11 +277,16 @@ inline std::optional<RecordedBlockEdit> reparse_edited_direct_block(
     auto* parent = block_at_path(document.root, parent_path);
     if (!parent || index >= parent->children.size()) return std::nullopt;
     const auto parent_id = parent->id;
+    for (auto& block : plan.blocks) {
+        std::vector<std::pair<NodeId, NodeId>> remapped_ids;
+        block_reparse_detail::assign_fresh_ids(block, plan.target_parser_id,
+            plan.owner, document, allocator, remapped_ids);
+    }
 
     RecordedBlockEdit result;
     result.target = {
-        current->id,
-        target->local_offset,
+        plan.owner,
+        plan.target_offset,
         TextAffinity::Downstream,
     };
 
@@ -284,15 +295,15 @@ inline std::optional<RecordedBlockEdit> reparse_edited_direct_block(
     remove.parent_id = parent_id;
     remove.index = index;
     remove.before = parent->children[index];
-        document_container_source::append_container_tree_operation(document, result.operations, std::move(remove));
+    document_container_source::append_container_tree_operation(document, result.operations, std::move(remove));
     parent->children.erase(parent->children.begin() + static_cast<std::ptrdiff_t>(index));
 
     for (std::size_t replacement_index = 0;
-         replacement_index < parsed.blocks.size();
+         replacement_index < plan.blocks.size();
          ++replacement_index) {
         parent = find_block(document.root, parent_id);
         if (!parent) return std::nullopt;
-        auto replacement = std::move(parsed.blocks[replacement_index]);
+        auto replacement = std::move(plan.blocks[replacement_index]);
         DocumentTreeEdit insert;
         insert.kind = DocumentTreeEditKind::Insert;
         insert.parent_id = parent_id;
@@ -304,6 +315,14 @@ inline std::optional<RecordedBlockEdit> reparse_edited_direct_block(
         }
     }
     return result;
+}
+
+inline std::optional<RecordedBlockEdit> reparse_edited_direct_block(
+    EditorDocument& document, TextPosition position, NodeAllocator& allocator,
+    const AppliedSourceEdit* source_edit = nullptr) {
+    auto plan = plan_edited_direct_block(document, position, BlockReparseScope::SingleBlock, source_edit);
+    if (!plan) return std::nullopt;
+    return apply_block_reparse_plan(document, std::move(*plan), allocator);
 }
 
 } // namespace folia::document_edit_detail

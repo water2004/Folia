@@ -12,6 +12,7 @@ import folia.core.command;
 import folia.markdown.dialect;
 import folia.markdown.document;
 import folia.core.document_edit;
+import folia.core.document_block_reparse;
 import folia.core.document_ids;
 import folia.markdown.document_text;
 import folia.core.editor;
@@ -33,6 +34,27 @@ using namespace boost::ut;
 
 suite editor_paste_tests = [] {
 
+"paste_structure_planning_leaves_source_ids_and_selection_unchanged"_test = [] {
+    Editor editor("");
+    auto id = first_text(editor).id;
+    expect(editor.execute_document_insert_text(TextSelection::caret({id, 0}), U"$$").has_value());
+    auto selection = editor.selection();
+    const auto& document = editor.document();
+    auto revision = document.revision;
+    auto next_id = document.next_node_id;
+    reset_core_operation_counters();
+    auto plan = document_edit_detail::plan_block_source_insertion(
+        document, selection.active, U"\nx+y\n$$\n\nAfter.");
+    expect(fatal(plan.has_value()));
+    auto counts = read_core_operation_counters();
+    expect(counts.block_fragment_parses == 1_u);
+    expect(counts.full_document_parses == 0_u && counts.full_document_serializations == 0_u);
+    expect(document.revision == revision && document.next_node_id == next_id);
+    expect(editor.selection() == selection);
+    expect(first_text(editor).inline_content.source == U"$$");
+    expect(plan->blocks.size() == 2_u);
+};
+
 "paste_continues_existing_fences_in_the_owner_source"_test = [] {
     for (auto opening : {U"$$", U"```tex", U"~~~text"}) {
         Editor editor("");
@@ -48,6 +70,7 @@ suite editor_paste_tests = [] {
         reset_core_operation_counters();
         expect(fatal(editor.execute_document_paste_text(selection, addition).has_value()));
         auto counts = read_core_operation_counters();
+        expect(counts.block_fragment_parses == 1_u);
         expect(counts.full_document_parses == 0_u && counts.full_document_serializations == 0_u);
         auto const& blocks = editor.document().root.children;
         expect(fatal(blocks.size() == 2_u));
@@ -75,6 +98,7 @@ suite editor_paste_tests = [] {
     reset_core_operation_counters();
     expect(fatal(editor.execute_document_paste_text(selection, U"+y\n$$\n\nAfter.").has_value()));
     auto counts = read_core_operation_counters();
+    expect(counts.block_fragment_parses == 1_u);
     expect(counts.full_document_parses == 0_u && counts.full_document_serializations == 0_u);
     auto const& blocks = editor.document().root.children;
     expect(fatal(blocks.size() == 2_u));

@@ -156,6 +156,10 @@ misread a closing fence as an opener when its opening fence is already in the
 document. The affected owner becomes a locally parsed fragment, with source
 and tree edits recorded in the same transaction. Existing raw blocks likewise
 split when a pasted closing boundary is followed by ordinary document content.
+The local structure module prepares a plan containing the parsed blocks and
+caret mapping without changing source, selection or document ids. Applying that
+plan allocates ids and records tree edits without parsing the fragment again;
+paste uses one application path for both continued inline owners and raw blocks.
 
 ## Prompt configuration
 

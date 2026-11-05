@@ -2,14 +2,14 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-11-06，接受补全的块结构错位已修复）
+## 当前 checkpoint（2026-11-06，局部结构编辑计划重构完成）
 
-- 最新用户问题：接受`$$`后多行公式+后续正文，保存源码正确而当前视图把公式当Markdown、后文当公式。**根因是document_paste先独立解析新增文字，忽略已有owner开头，把新增闭合符当开头**；是接收编辑的结构问题，不能继续只调prompt。本轮修复源码/正式测试/文档，本地提交，版本0.6.3，不开agents/CUA，不推送/发布/安装。
-- 修复边界：`document_paste.ixx`对段落中的多行结构接续先用owner完整源码+插入文本进行局部识别，精确可往返且有结构转换才复用source edit与block reparse；不扫描`$$`特判。`document_block_reparse.ixx`明确SingleBlock与Fragment的命令范围，结构粘贴可产生多个兄弟块，普通字符输入仍单块。已加载raw块粘贴闭合+正文也走局部fragment重分。仍同一source/tree事务、container+source offset、无全文parse/serialize/新坐标/AI专用修补。
-- 验收：`build/completion-structure-core-accepted.log` **14项262断言**（paste过滤，其余跳过），涵盖typed dollar/backtick/tilde接续、loaded math闭合、源码/块类型/选区/保存重载/Undo/Redo/零全文操作。`build/completion-structure-controller.log` **21项314断言+loading5/22**，包含真实controller Accept：root/quote/list，后文owner源码、重载RenderModel kinds、精确撤销重做以及既有补全交互全组。无真实API调用。本轮SourceFilter曾误带.cpp导致无匹配，已用`*inline_completion*`正式重跑成功，不是程序崩溃。
-- 已运行setup（`build/completion-structure-setup.log`），Debug成功（`build/completion-structure-debug.log`），exe **build/app-winui/bin/x64/Debug/Folia.exe**。编译≤4，native串行，无运行build/test/API/agent句柄。**已安装Release尚无本次C++修复；未重打MSI**。下一步按用户试用或明确MSI要求打包，不重复广泛数学/启动/核心审计。
-- 上一轮prompt改动已提交**397851b6**，JSON仍运行时配置；repo/Debug/Release Assets及`%LOCALAPPDATA%/Folia/Assets/completion.json`同步过，进程缓存须退出重开。引导最小局部结构/当前定界符/首换行/停止，不强制模式、不逐符号修补。其真实DS最后20构造例见`build/completion-native-boundary-accepted.jsonl`与`verification.json`，只证明样例，不证明所有语义；旧“只拼字符串”评估没覆盖实际Accept，已由本轮controller测试补上。不要把旧API评估当结构接入验收。
-- 现有**build/installer/bin/Folia-0.6.3-x64.msi**仍旧51.4MiB（115c1ee8，`build/folia-063-runtime-completion-msi.log`），既不含本轮C++修复，也未包含397851b6新JSON。后续若用户要MSI，应按既有脚本重建0.6.3；不要直接拿旧包交付。无需再查看已完成发布CI。
+- 用户要求整理d8b1961e维护性问题，已完成：`document_block_reparse.ixx`将只读规划与事务应用拆开。`BlockReparsePlan`持有解析后blocks及parser-local光标映射；规划不改文档/ID/选区；应用才分配文档ID、统一记录树编辑，不重解析Markdown。普通字符输入复用同一规划/应用，SingleBlock与Fragment是命令语义范围，不是旧新兼容路径。
+- `document_paste.ixx`移除boolean预解析/serialize检查、内部namespace访问、重复结构事务追加。接续段落保留预先解析的plan，raw块先做既有source插入再规划，最终同一应用入口。结构判断/局部往返验证只在结构模块，仍block-local source/CST+source/tree单事务，无全文parse/serialize、第二坐标或AI字符特判。源码批与此记录本地提交，版本0.6.3，未推送/发布/安装/MSI。
+- 验收均通过：`build/completion-plan-core.log` **15项274断言**（paste过滤），增加只读规划不改source/IDs/selection及`block_fragment_parses == 1`；计数器在markdown instrumentation/parse_block_fragment，用于实际解析次数约束。`completion-plan-reclass.log` **3/27**、`projection.log` **1/212**、`incomplete.log` **1/28**（后二日志同completion-plan-前缀），验证共享普通输入路径。`build/completion-plan-controller.log` **21/314+loading5/22**，root/quote/list实际AI Accept、重载渲染类型与精确Undo/Redo沿用上轮正式测试。本轮未调用API/模拟鼠标/重跑广泛数学或全部核心。
+- setup成功`build/completion-plan-setup.log`，Debug成功`build/completion-plan-debug.log`，exe **build/app-winui/bin/x64/Debug/Folia.exe**。编译≤4/native串行，无运行本任务build/test/agent/CUA句柄。**已安装Release尚未包含d8b1961e及本次重构**，下一步按用户试用或明确MSI要求打包，不能把Debug成功当安装已更新。
+- 已修问题背景：d8b1961e解决接受`$$`后的补全时仅解析新增文字、把闭合符错当开头吞掉后文。接续现以owner完整源码识别，loaded raw闭合+正文也可拆兄弟块；前次core14/262与controller21/314见`completion-structure-*`，本轮以上更新日志优先，勿重复旧调查。
+- prompt独立运行时配置，397851b6已同步repo/Debug/Release Assets及`%LOCALAPPDATA%/Folia/Assets/completion.json`，修改后进程须重开。真实API历史样例不是结构接受验收，不能代替本轮controller测试。现有**build/installer/bin/Folia-0.6.3-x64.msi**仍旧51.4MiB（115c1ee8，`build/folia-063-runtime-completion-msi.log`），没有新JSON/结构修复/重构，用户要MSI时必须重新构建0.6.3。不查看已完成发布CI。
 
 ## 补全协议/上下文系统性修复完成（历史基线）
 
