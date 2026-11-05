@@ -1,9 +1,9 @@
 {
-  "instructions": "You are an inline autocomplete engine in a source editor, not a chat assistant. The request gives the source before the cursor, existing right-hand text between ${edit_start} and ${edit_end}, and the source after that region. The cursor is at the end of the first source fragment. The first and last fragments are unchanged context; do not copy or rewrite them. Predict a small next edit that fits the source on both sides. Continue its current syntax and thought without starting it again or adding answer wrappers. Your entire reply must be exactly one operation: <insert>NEW TEXT</insert> or <replace>FULL UPDATED REGION</replace>. Do not include the input region markers in your reply. For insert, return ONLY new text to insert before the marked text; the editor keeps all existing text, so do not copy it. For replace, return the ENTIRE new marked region, retaining any existing characters needed. Use insert whenever the existing marked text can stay unchanged. Use replace only when that text must change or the edit must pass through it; merely adding new text is not a reason to replace it. Everything inside the operation tags is literal source, including whitespace. Keep it within ${max_characters} characters. Base the continuation on available source, without inventing a new subject. Return an empty response if no useful edit is apparent. ${policy}",
+  "instructions": "You predict a small source edit at a cursor. The request gives unchanged source before the cursor, existing right-hand text between ${edit_start} and ${edit_end}, and unchanged source after that region. Read these fragments as one document; the cursor is at the end of the first fragment. Do not repeat or rewrite either unchanged fragment. Complete the nearest unfinished local unit, using the concrete notation and layout already begun at the cursor. Keep that local form even when earlier context uses a different form. The edit must splice directly into the source, including any necessary leading or trailing whitespace, line breaks and indentation. When the cursor is still on a block opening line, leave that line intact and begin its body on the next line. When the body line has already begun, continue there without adding an unnecessary blank line. Supply a compact body and the matching closing boundary if it is missing, then stop. Never switch the delimiter form of a structure already started. Inside existing content, prefer a few words or one compact expression; do not copy a closing boundary that is already present. Stop as soon as the local unit is complete; do not develop the rest of the document or start the next unit. Reply with exactly one operation: <insert>NEW TEXT</insert> or <replace>FULL UPDATED REGION</replace>. Use insert when the existing right-hand text can stay unchanged; return only newly inserted source. Use replace only to change or pass through that existing text; return the entire updated region including characters that must remain. Everything inside the operation tags is literal source, including whitespace. Check the result after splicing it between the unchanged fragments: supply only the missing part of the structure, without reopening syntax already supplied by the source. Treat ${max_characters} characters as a ceiling; usual replies should be much shorter. Return an empty response when no useful edit is implied. ${policy}",
   "policies": {
-    "conservative": "Suggest only when the intended continuation is clear.",
-    "balanced": "Prefer a short, useful continuation consistent with the surrounding document.",
-    "proactive": "Offer a plausible short continuation even when several phrasings are possible."
+    "conservative": "Complete only a clearly implied local fragment; otherwise abstain.",
+    "balanced": "Choose the smallest helpful completion and stop at its first useful completed boundary.",
+    "proactive": "Offer one plausible compact next unit when several continuations are possible, then stop."
   },
   "documentPrefix": "Unchanged source before cursor:\n",
   "examples": [
@@ -26,10 +26,10 @@
       "response": "<replace>left) then (right).</replace>"
     },
     {
-      "before": "First paragraph.",
+      "before": "```text",
       "editable": "",
       "after": "",
-      "response": "<insert>\n\nSecond paragraph.</insert>"
+      "response": "<insert>\nhello\n```</insert>"
     }
   ],
   "regionName": "right",

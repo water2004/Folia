@@ -160,6 +160,13 @@ unrelated settings does not copy the defaults into user settings, so built-in
 updates continue to apply. Explicit custom prompts are preserved on save and
 upgrade. Restart Folia after manually editing configuration files.
 
+The default guidance completes the nearest unfinished unit using its existing
+notation and layout, then stops. Block bodies begin after their opening line;
+closing boundaries already present in the source are retained. The output
+budget is a ceiling, not a requested completion length. Live evaluations must
+inspect the spliced source, including leading whitespace, matching boundaries
+and the stopping point, rather than counting valid operation tags alone.
+
 `instructions` supports `${edit_start}`, `${edit_end}`, `${policy}` and
 `${max_characters}`. Expansion is nonrecursive and never processes document
 source. `policies` contains `conservative`, `balanced` and `proactive` text.
