@@ -2,14 +2,14 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-11-06，运行时提示词及编辑协议完成）
+## 当前 checkpoint（2026-11-06，运行时提示词改动MSI已构建）
 
-- 源码本地提交 **115c1ee8**；Debug已更新、版本仍0.6.3，未推送/安装/发布。用户最新要求**先不急MSI**：已有同名MSI为e75ab912旧代码，**不含本轮配置化，后续须重建才交付**。无本任务运行构建/测试/API句柄，无agents/CUA/输入注入，编译≤4/native串行。
+- 用户最新要求MSI，已完成**Release self-contained 0.6.3**，包含源码**115c1ee8**的运行时配置/插入替换改动。产物**build/installer/bin/Folia-0.6.3-x64.msi**（51.4MiB/0 errors，130 program+39 asset文件），日志**build/folia-063-runtime-completion-msi.log**。带SkipDependencySetup/SkipStartupTest，**本轮未运行额外测试/启动检查**；仅既有同版本ICE61 warning。旧同名产物已替换，未安装/推送/发布。exec8973已退出，无本任务运行句柄/agents/CUA；编译≤4/native串行。
 - 默认**src/app-winui/Assets/completion.json**（Debug已部署同一文件）；正文/三策略/4通用示例/regionName及左右分隔文字全为运行时数据。用户可在settings.json→**completion.prompt**放同形覆盖；未自定义不固化默认，UI保存保留覆盖，内置默认随升级更新。默认lazy缓存一次，**改文件需退出重开，无每键/滚动/切标签IO、无热加载/编译内prompt兜底**。加载/序列化在settings/CompletionPromptSettings，portable模块只校验/构造请求。
 - 唯一响应为**<insert>raw</insert> / <replace>raw</replace>**。insert不消耗右源，replace用客户端同线32-scalar范围并trim共同尾，仍是同一Edit/diff/Paste/部分接受/Undo；空回复abstain、空insert无修改、空replace删除。**拒绝旧<edit>/JSON回复，不猜操作/补字符/猜终点**。当前输入分片为不变前文/已有右文本/不变后文，marker根名right可配置并避碰；**不给模型Markdown/code/TeX分类**，不改CST/坐标/历史架构。
 - 验收通过：**completion-config-reviewed-debug.log**最终增量编译；**completion-config-ready-portable.log 23项5550断言**；**ready-settings.log 2项10+loading5/22**；**ready-controller.log 20项280+loading5/22**；**ready-http.log 聚焦1项21**（其余跳过）。上述短名日志均在build/且以completion-config-开头。配置读写/坏文件/参数、三协议消息、Unicode性质、零全文操作、插入/替换/删除/部分接受/精确Undo均有对应检查；未重跑宽泛数学/编辑/startup/MSI。
 - 真实DS验证 **build/completion-config-ready-live.jsonl / .log**：18构造样例×2，**36/36操作格式合法，0截断**，17618 input+372 output tokens。实际decoder结果中行内/行间公式、下标及多项下标、双参数分式、代码、中文、首换行正确衔接既有源码，未再额外加\[。仅测配置的deepseek-flash/Responses/none，临时512output token；未发送用户文档/修改用户设置/输出key。**这是构造样例结果，不承诺未来所有模型/所有语义或实际cache比例**；其它协议只有本地消息检查。旧内联输入即便框架合法仍错误的记录保留为对照，别拿旧结果冒充当前验收。
-- **下一步**：按用户实际反馈或明确MSI要求继续，不重复已过广泛审计/重开CST范围限制或自动修补模型文本。若需MSI保持0.6.3，沿用授权的SkipDependencySetup/SkipStartupTest，不自行安装/推送/查旧CI。评估工具均ignored：**build/completion-config-evaluation.cpp**、**build/run-completion-config-final.ps1**、**build/completion-evaluation-cases.json**；exe为build/tests/winui/Debug/controller/FoliaConfigEvaluation.exe，**必须CWD=build/app-winui/bin/x64/Debug**。它显式读取repo JSON，后续改JSON可直接重跑无需编译；不要直接重放缺少新字段的旧候选JSON。开发说明在docs/inline-completion.md，本顶部为唯一当前记录。
+- **下一步**：按用户实际反馈或明确MSI要求继续，不重复已过广泛审计/重开CST范围限制或自动修补模型文本。MSI已按授权构建并交付路径，后续不自行安装/推送/查旧CI；版本保持0.6.3直到用户明确要求更改。评估工具均ignored：**build/completion-config-evaluation.cpp**、**build/run-completion-config-final.ps1**、**build/completion-evaluation-cases.json**；exe为build/tests/winui/Debug/controller/FoliaConfigEvaluation.exe，**必须CWD=build/app-winui/bin/x64/Debug**。它显式读取repo JSON，后续改JSON可直接重跑无需编译；不要直接重放缺少新字段的旧候选JSON。开发说明在docs/inline-completion.md，本顶部为唯一当前记录。
 
 ## 补全协议/上下文系统性修复完成（历史基线）
 
