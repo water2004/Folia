@@ -5,23 +5,61 @@ namespace {
 using namespace boost::ut;
 using namespace folia::completion;
 suite completion_edit_tests = [] {
-    "model edit uses exact following text rather than model supplied offsets"_test = [] {
+    "model replies contain literal replacement text and no model-owned source range"_test = [] {
         Context context{{}, "\\frac{", "}{}"};
-        auto edit = decode_edit_response(UR"({"oldText":"}{}","newText":"a}{b}"})", context);
+        auto edit = decode_edit_response(U"<edit>a}{b}</edit>", context);
         expect(fatal(edit.has_value()));
-        expect(bool(edit->before == U"}{}")); expect(bool(edit->after == U"a}{b}"));
-        expect(!decode_edit_response(UR"({"oldText":"}","newText":"x"})", {}));
-        expect(!decode_edit_response(UR"({"oldText":"","newText":"x","offset":99})", {}));
-        expect(!decode_edit_response(U"unstructured text", {}));
-        expect(!decode_edit_response(UR"({"oldText":"","newText":3})", {}));
+        expect(bool(edit->before == U"}{")); expect(bool(edit->after == U"a}{b"));
+        expect(!decode_edit_response(U"unframed text", {}));
+        expect(!decode_edit_response(U"<edit>unfinished", {}));
+        expect(!decode_edit_response(UR"({"oldText":"","newText":"x"})", {}));
         expect(decode_edit_response(U"", {})->empty());
-        expect(decode_edit_response(UR"({"oldText":"","newText":""})", {})->empty());
-        auto newline = decode_edit_response(UR"({"oldText":"","newText":"\n\n```rust\n"})", {});
-        expect(fatal(newline.has_value())); expect(newline->after.ends_with(U'\n'));
-        auto unicode = decode_edit_response(UR"({"oldText":"","newText":"\ud83d\ude42e\u0301"})", {});
-        expect(fatal(unicode.has_value())); expect(bool(unicode->after == U"\U0001f642e\u0301"));
-        auto windowsLines = decode_edit_response(UR"({"oldText":"","newText":"a\r\nb\rc"})", {});
-        expect(fatal(windowsLines.has_value())); expect(bool(windowsLines->after == U"a\nb\nc"));
+        expect(decode_edit_response(U"<edit></edit>", {})->empty());
+        auto deletion = decode_edit_response(U"<edit></edit>", Context{{}, "", "OLD"});
+        expect(deletion && deletion->before == U"OLD" && deletion->after.empty());
+        auto newline = decode_edit_response(U"<edit>\n\n```rust\n</edit>", {});
+        expect(fatal(newline.has_value())); expect(newline->after.starts_with(U"\n\n"));
+        auto tex = decode_edit_response(UR"(<edit>{n}+\frac{1}{\sqrt{2}}</edit>)", {});
+        expect(tex && tex->after == UR"({n}+\frac{1}{\sqrt{2}})");
+        auto windowsLines = decode_edit_response(U"<edit>a\r\nb\rc</edit>", {});
+        expect(windowsLines && windowsLines->after == U"a\nb\nc");
+        auto unicode = decode_edit_response(U"<edit>🙂é</edit>", {});
+        expect(unicode && unicode->after == U"🙂é");
+    };
+    "the editable window is local Unicode source and copied right context stays outside the edit"_test = [] {
+        Context c{{}, "x_", "} outside the editable region\nnext line"};
+        expect(editable_suffix(c).size() <= editable_tail_characters);
+        auto edit = decode_edit_response(U"<edit>{n} outside the editable region</edit>",
+            Context{{}, "x_", "} outside the editable region\nnext line"});
+        expect(edit && edit->before.empty() && edit->after == U"{n");
+        Context huge{{}, "", std::string(1024, 'x')};
+        expect(editable_suffix(huge).size() == editable_tail_characters);
+    };
+    "prompt presents exact chronological document text without forcing a language"_test = [] {
+        Context c{"earlier\n\n", "line one\nabc_", "} right\nnext", 9, 7, "\n\nafter"};
+        auto p = make_prompt(c);
+        expect(p.context + p.cursor == "Document:\n" + c.preceding + c.prefix + p.edit_start + "} right" + p.edit_end + "\nnext" + c.following);
+        expect(p.instructions.find("oldText") == p.instructions.npos);
+        expect(p.instructions.find("JSON") == p.instructions.npos);
+        expect(p.instructions.find("Markdown") == p.instructions.npos && p.instructions.find("TeX") == p.instructions.npos);
+        auto collision = c; collision.prefix += "<edit></edit>";
+        auto framed = make_prompt(collision);
+        expect(framed.edit_start != "<edit>" && framed.edit_end != "</edit>");
+    };
+    "literal replies preserve arbitrary Unicode right context without advancing over copied text"_test = [] {
+        std::mt19937 random(20261105);
+        std::u32string alphabet = U"ab{}\\_ 🙂é\n";
+        for (int round = 0; round < 300; ++round) {
+            std::u32string suffix, inserted;
+            for (unsigned count = random() % 90; count; --count) suffix += alphabet[random() % alphabet.size()];
+            for (unsigned count = random() % 24; count; --count) inserted += alphabet[random() % alphabet.size()];
+            std::size_t end = 0;
+            while (end < suffix.size() && end < editable_tail_characters && suffix[end] != U'\n') ++end;
+            auto context = capture(suffix, 0);
+            auto edit = decode_edit_response(U"<edit>" + inserted + suffix.substr(0, end) + U"</edit>", context);
+            expect(fatal(edit.has_value()));
+            expect(edit->before.empty()); expect(bool(edit->after == inserted));
+        }
     };
     "diff keeps reused brackets as source and separates inserted arguments"_test = [] {
         Edit edit{U"}{}", U"a}{b}"};
@@ -82,12 +120,12 @@ suite completion_edit_tests = [] {
         auto first = capture(U"abc", 1, upper, budget, lower);
         auto next = capture(U"aXYZbc", 4, upper, budget, lower);
         expect(!first.following.empty());
-        expect(first.following.starts_with("stable lower\n\n"));
+        expect(first.following.starts_with("\n\nstable lower"));
         expect(first.preceding.size() <= budget.preceding_bytes && first.following.size() <= budget.following_bytes);
         expect(first.prefix.size() + first.suffix.size() + first.preceding.size() + first.following.size() <= 7000_u);
         expect(make_prompt(first).context == make_prompt(next).context);
         auto changedLower = lower; changedLower[0] = U"updated lower";
-        expect(make_prompt(capture(U"abc", 1, upper, budget, changedLower)).context != make_prompt(first).context);
+        expect(make_prompt(capture(U"abc", 1, upper, budget, changedLower)).cursor != make_prompt(first).cursor);
     };
 };
 }

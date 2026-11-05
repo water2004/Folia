@@ -105,12 +105,21 @@ sequences and combining marks.
 
 ## Edit proposals
 
-The model returns a JSON object with `oldText` and `newText`. `oldText` is an
-exact prefix of the following block-local source, at most 128 Unicode scalars;
-an empty string denotes insertion. `newText` replaces that text. The response
-contains no document offsets. Invalid text, bounds or schema are rejected, and
-an empty edit denotes abstention. Generated text is bounded to 512 scalars and
-four lines; it is never silently truncated into a different edit.
+The client marks a short editable tail at the caret (up to 32 Unicode scalars,
+ending at the current source line). The model returns only the new literal text
+inside the same boundary markers, without JSON, document offsets, an echoed
+old-text field, or syntax-specific rules. Marker spellings are chosen so they
+do not already occur in the captured document. Empty output is abstention;
+an empty marked region is a deletion. Missing framing or out-of-budget output
+is rejected, not interpreted through a second response format.
+
+TeX backslashes, indentation and leading newlines are literal payload. Only
+outer framing whitespace is ignored; payload CRLF/CR is normalized to LF.
+The client obtains expected source from its captured window and trims any
+copied common suffix out of the edit, keeping the caret before untouched right
+context. Generated text is limited to 512 Unicode scalars without a separate
+four-line restriction. The model is not told whether the document is Markdown,
+code, or TeX; it receives available source and infers its environment.
 
 A bounded diff identifies the existing characters to reuse, including paired
 brackets between newly supplied arguments. The preview shows only insertions
@@ -133,17 +142,22 @@ from block-local source without a full-document serialization. Stable instructio
 and stable context precede changing cursor text. Do not include timestamps or
 request IDs in prompts. The transport preserves provider usage, including cache counts only when supplied
 by that provider. Local context hits reuse proposals without a provider request.
-Stable preceding/following blocks and the stable portions of the current block
-are placed before the changing editing region in the request. The current line
-stays in that final region; long lines and bounded prefix starts use fixed
-256-codepoint anchors instead of sliding on every keystroke. Moving the caret
-or replacing text within a short line therefore preserves the entire stable
-context message. This helps provider caching where supported, without promising
-cache hits or a particular server-side ratio.
+Document context is presented in reading order in one user message: preceding
+source, current prefix, marked editable tail, protected suffix, following source.
+The system instructions and unchanged preceding text remain ahead of the active
+region. Long lines and prefix starts retain fixed 256-codepoint anchors rather
+than shifting on every keystroke. Following text is kept after the active region
+for coherent context; it is not reordered solely to lengthen a cache prefix.
+This preserves useful prefix reuse without promising a provider cache ratio.
+
+Neighbor collection consumes the byte budget instead of stopping after three
+owners/lines. Source-mode lines use single line breaks; block-local source uses
+block separators. It uses the maintained editable index and views, with bounded
+work, no full document traversal, parse or serialization.
 
 The context budget is divided roughly 4:1:1:1 between prefix, nearby suffix,
 preceding blocks and following blocks. Defaults are 7 KB of UTF-8 context and 128 output tokens; suggestions
-remain limited to 512 codepoints and four lines. Output tokens may include
+remain limited to 512 codepoints. Output tokens may include
 model reasoning, so an exhausted limit need not produce insertable text. Document views
 are bounded before copying/encoding. The 10 MiB case exercises start/middle/end
 and Unicode expansion. These byte caps are not a model-specific token estimate.

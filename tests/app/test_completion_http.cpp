@@ -11,6 +11,23 @@ std::string const response = R"(data: {"choices":[{"index":0,"delta":{"content":
     R"(data: {"choices":[{"index":0,"delta":{},"finish_reason":"stop"}]})" "\n\n"
     "data: [DONE]\n\n";
 suite completion_http_tests = [] {
+    "all protocols send one chronological document message with exact literal source"_test = [] {
+        auto prompt = folia::completion::make_prompt({"nearby context\n\n", "x_", "} next\nmore"});
+        for (int protocol = 0; protocol < 3; ++protocol) {
+            Server server({}, 503);
+            expect(throws([&] { (void)RequestCompletionHttp({true, server.baseUrl, "fixture", protocol}, prompt, {}, L"fixture-key"); }));
+            auto body = server.request.substr(server.request.find("\r\n\r\n") + 4);
+            auto json = winrt::Windows::Data::Json::JsonObject::Parse(winrt::to_hstring(body));
+            auto messages = json.GetNamedArray(protocol == 1 ? L"input" : L"messages");
+            expect(messages.Size() == static_cast<unsigned>(protocol == 2 ? 1 : 2));
+            auto user = messages.GetObjectAt(messages.Size() - 1);
+            expect(user.GetNamedString(L"role") == L"user");
+            auto content = user.GetNamedValue(L"content");
+            auto text = content.ValueType() == winrt::Windows::Data::Json::JsonValueType::String
+                ? content.GetString() : content.GetArray().GetObjectAt(0).GetNamedString(L"text");
+            expect(winrt::to_string(text) == prompt.context + prompt.cursor);
+        }
+    };
     "completion timeout counts inactivity rather than total stream duration"_test = [] {
         const auto inactivity = std::chrono::milliseconds(400);
         std::string reasoning;

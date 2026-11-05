@@ -1,11 +1,9 @@
-module;
-#include <nlohmann/json.hpp>
 module folia.completion;
 import std;
 
 namespace folia::completion {
 namespace {
-// JSON has already validated Unicode. Keep conversion local to the protocol
+// The HTTP codec has already validated Unicode. Keep conversion local to the protocol
 // boundary; proposal ranges and matching consistently count Unicode scalars.
 std::u32string scalars(std::string_view text) {
     std::u32string out;
@@ -46,14 +44,15 @@ struct Alignment {
 std::optional<Edit> decode_edit_response(std::u32string_view response, Context const& context, Budget budget) {
     if (response.empty()) return Edit{};
     if (response.size() > 8192) return {};
-    auto json = nlohmann::json::parse(response.begin(), response.end(), nullptr, false);
-    if (json.is_discarded() || !json.is_object() || json.size() != 2
-        || !json.contains("oldText") || !json["oldText"].is_string()
-        || !json.contains("newText") || !json["newText"].is_string()) return {};
-    const auto old = json["oldText"].get<std::string>();
-    if (!context.suffix.starts_with(old)) return {};
-    Edit result{scalars(old), {}};
-    const auto generated = scalars(json["newText"].get<std::string>());
+    auto markers = edit_markers(context);
+    auto start = scalars(markers.start), end = scalars(markers.end);
+    auto whitespace = [](char32_t c) { return c == U' ' || c == U'\t' || c == U'\r' || c == U'\n'; };
+    while (!response.empty() && whitespace(response.front())) response.remove_prefix(1);
+    while (!response.empty() && whitespace(response.back())) response.remove_suffix(1);
+    if (response.empty()) return Edit{};
+    if (!response.starts_with(start) || !response.ends_with(end) || response.size() < start.size() + end.size()) return {};
+    Edit result{scalars(editable_suffix(context)), {}};
+    const auto generated = response.substr(start.size(), response.size() - start.size() - end.size());
     for (std::size_t i = 0; i < generated.size(); ++i) {
         if (generated[i] != U'\r') result.after += generated[i];
         else {
@@ -62,9 +61,12 @@ std::optional<Edit> decode_edit_response(std::u32string_view response, Context c
         }
     }
     if (result.before.size() > 128 || result.after.size() > std::min(budget.proposal_characters, std::size_t{512})) return {};
-    unsigned lines = 1;
     for (auto c : result.after) {
-        if ((c < 32 && c != U'\n' && c != U'\t') || (c == U'\n' && ++lines > 4)) return {};
+        if (c < 32 && c != U'\n' && c != U'\t') return {};
+    }
+    // Copied trailing source stays outside the transaction and caret advance.
+    while (!result.before.empty() && !result.after.empty() && result.before.back() == result.after.back()) {
+        result.before.pop_back(); result.after.pop_back();
     }
     return result;
 }

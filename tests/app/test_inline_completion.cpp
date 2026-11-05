@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "support/folia_test.hpp"
 #include "completion/InlineCompletionController.h"
+#include "support/CompletionReply.h"
 #include "editor/rendering/EditorContentPreparation.h"
 import folia.markdown.instrumentation;
 import folia.markdown.block_source;
@@ -9,12 +10,7 @@ import folia.markdown.utf;
 namespace {
 using namespace boost::ut;
 using namespace winrt::Folia;
-std::u32string Reply(std::u32string_view text, std::u32string_view old = {}) {
-    winrt::Windows::Data::Json::JsonObject json;
-    json.Insert(L"oldText", winrt::Windows::Data::Json::JsonValue::CreateStringValue(winrt::to_hstring(folia::cps_to_utf8(old))));
-    json.Insert(L"newText", winrt::Windows::Data::Json::JsonValue::CreateStringValue(winrt::to_hstring(folia::cps_to_utf8(text))));
-    return folia::utf8_to_cps(winrt::to_string(json.Stringify()));
-}
+using completion_tests::Reply;
 bool Pump(std::function<bool()> done, std::chrono::milliseconds timeout = std::chrono::seconds(3)) {
     auto end = std::chrono::steady_clock::now() + timeout;
     while (!done() && std::chrono::steady_clock::now() < end) {
@@ -42,7 +38,7 @@ struct Fixture {
             [this](auto const& command) { return Execute(command); }, [] {},
             [this](CompletionState state, auto const& value) { states.push_back(state); if (state == CompletionState::Failed) error = value; },
             [this, proposal = std::move(proposal), old = std::move(old), transport = std::move(transport)](auto const& config, auto const& prompt, auto stop) {
-                ++requests; return transport ? transport(config, prompt, stop) : CompletionResult{Reply(proposal, old)};
+                ++requests; return transport ? transport(config, prompt, stop) : CompletionResult{Reply(prompt, proposal, old)};
             });
         controller->SetFocused(true);
     }
@@ -59,6 +55,58 @@ struct Fixture {
     bool Wait() { return Pump([&] { return controller->Active() || !error.empty(); }); }
 };
 suite inline_completion_tests = [] {
+    "completion context preserves nearby source beyond three neighbors and exact source-mode line breaks"_test = [] {
+        for (bool sourceMode : {false, true}) {
+            Fixture f;
+            f.session.SetText(sourceMode ? L"nearby intent\none\ntwo\nthree\nfour\nx_\nafter"
+                : L"nearby intent\n\none\n\ntwo\n\nthree\n\nfour\n\nx_\n\nafter");
+            if (sourceMode) f.session.EnterSourceMode();
+            auto model = f.session.RenderModel();
+            auto owner = model.blocks[model.blocks.size() - 2].source_span.container_id;
+            f.session.SetSelection(folia::TextSelection::caret({owner, 2}));
+            folia::reset_core_operation_counters();
+            auto c = f.session.CaptureCompletionContext(); expect(fatal(c.has_value()));
+            expect(c->preceding.find("nearby intent") != std::string::npos);
+            expect(c->prefix == "x_");
+            if (sourceMode) expect(c->preceding == "nearby intent\none\ntwo\nthree\nfour\n");
+            auto counts = folia::read_core_operation_counters();
+            expect(counts.full_document_parses == 0_u && counts.full_document_serializations == 0_u);
+        }
+    };
+    "literal completion replies preserve leading newlines and source suffixes through undo"_test = [] {
+        for (bool sourceMode : {false, true}) {
+            Fixture f(U"\nnext paragraph", sourceMode);
+            f.Type(U"x"); expect(f.Wait());
+            auto before = f.session.TextUtf8(); auto selection = f.session.Selection();
+            expect(f.controller->Accept(false)); f.controller->Cancel();
+            expect(f.session.TextUtf8().find("abcx\n") != std::string::npos);
+            expect(f.Execute({.kind = folia::CommandKind::Undo}));
+            expect(f.session.TextUtf8() == before && f.session.Selection() == selection);
+        }
+    };
+    "literal TeX completion inserts its whole argument and keeps existing closing source"_test = [] {
+        struct Case { wchar_t const* text; bool source; };
+        for (auto example : {Case{L"$a$", false}, Case{L"$$\na\n$$", false}, Case{L"> $a$", false}, Case{L"$a$", true}}) {
+            Fixture f(U"{n}"); f.session.SetText(example.text);
+            if (example.source) f.session.EnterSourceMode();
+            auto owner = f.session.Selection().active.container_id;
+            auto source = *f.session.EditableSource(owner);
+            auto at = source.find(U'a'); expect(fatal(at != source.npos));
+            f.session.SetSelection(folia::TextSelection::caret({owner, at + 1})); f.controller->Cancel();
+            f.Type(U"_"); expect(f.Wait());
+            auto before = f.session.TextUtf8(); auto selection = f.session.Selection();
+            folia::reset_core_operation_counters();
+            expect(f.controller->Accept(false)); f.controller->Cancel();
+            auto counts = folia::read_core_operation_counters();
+            expect(counts.full_document_parses == 0_u && counts.full_document_serializations == 0_u);
+            expect(f.session.TextUtf8().find("a_{n}") != std::string::npos);
+            folia::reset_core_operation_counters();
+            expect(f.Execute({.kind = folia::CommandKind::Undo}));
+            counts = folia::read_core_operation_counters();
+            expect(counts.full_document_parses == 0_u && counts.full_document_serializations == 0_u);
+            expect(f.session.TextUtf8() == before && f.session.Selection() == selection);
+        }
+    };
     "typing over a selection schedules AI and collapsed affinities remain a caret"_test = [] {
         for (bool selected : {false, true}) {
             Fixture f;
@@ -135,9 +183,9 @@ suite inline_completion_tests = [] {
     };
     "completion activity distinguishes suggestions empty output failures and token limits"_test = [] {
         for (auto terminal : {CompletionState::Ready, CompletionState::Empty, CompletionState::Failed, CompletionState::BudgetExhausted}) {
-            Fixture f({}, false, [terminal](auto const&, auto const&, auto) {
+            Fixture f({}, false, [terminal](auto const&, auto const& prompt, auto) {
                 CompletionResult result;
-                if (terminal == CompletionState::Ready) result.text = Reply(U"next");
+                if (terminal == CompletionState::Ready) result.text = Reply(prompt, U"next");
                 if (terminal == CompletionState::Failed) result.error = "fixture failure";
                 result.truncated = terminal == CompletionState::BudgetExhausted;
                 return result;
@@ -152,10 +200,10 @@ suite inline_completion_tests = [] {
     };
     "completion cancellation stops activity and late responses cannot restore it"_test = [] {
         std::atomic<bool> cancelled = false;
-        Fixture f({}, false, [&](auto const&, auto const&, std::stop_token stop) {
+        Fixture f({}, false, [&](auto const&, auto const& prompt, std::stop_token stop) {
             std::mutex mutex; std::unique_lock lock(mutex); std::condition_variable_any wake;
             wake.wait(lock, stop, [] { return false; }); cancelled = true;
-            return CompletionResult{Reply(U"obsolete")};
+            return CompletionResult{Reply(prompt, U"obsolete")};
         });
         f.Type(U"x"); expect(Pump([&] { return f.requests.load() == 1; }));
         expect(!f.states.empty() && f.states.back() == CompletionState::Requesting);

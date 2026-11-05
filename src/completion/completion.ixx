@@ -4,6 +4,7 @@ import std;
 export namespace folia::completion {
 inline constexpr std::size_t max_context_bytes = 64000;
 inline constexpr std::uint32_t max_output_tokens = 4096;
+inline constexpr std::size_t editable_tail_characters = 32;
 // Limits include UTF-8 encoding expansion. No caller needs to copy a document.
 struct Budget {
     std::size_t prefix_bytes = 4096;
@@ -23,16 +24,20 @@ struct Context {
 struct Prompt {
     std::string instructions, context, cursor;
     std::uint32_t output_tokens = 128;
+    std::string edit_start, edit_end;
 };
 enum class Eagerness { Conservative, Balanced, Proactive };
 Budget make_budget(std::size_t context_bytes, std::uint32_t output_tokens);
 Context capture(std::u32string_view source, std::size_t caret,
     std::span<std::u32string_view const> preceding = {}, Budget budget = {},
-    std::span<std::u32string_view const> following = {});
+    std::span<std::u32string_view const> following = {}, std::string_view separator = "\n\n");
 Prompt make_prompt(Context const&, Budget budget = {}, Eagerness eagerness = Eagerness::Balanced);
+// The client owns the replacement range. The model returns only its new text.
+std::string_view editable_suffix(Context const&);
+struct EditMarkers { std::string start, end; };
+EditMarkers edit_markers(Context const&);
 
-// Expected text is an exact prefix of the bounded following source. Models
-// return text, never document offsets. The editor supplies the source position.
+// Expected text comes from the captured source, never from the model.
 struct Edit {
     std::u32string before, after;
     bool empty() const { return before == after; }

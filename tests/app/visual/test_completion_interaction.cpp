@@ -3,6 +3,7 @@
 #include "../support/DocumentControllerFixture.h"
 #include "App.xaml.h"
 #include "MainWindow.xaml.h"
+#include "../support/CompletionReply.h"
 
 import folia.markdown.utf;
 import folia.markdown.instrumentation;
@@ -51,20 +52,15 @@ namespace {
     using namespace folia::platform::editor;
     using Access = winrt::Folia::implementation::CompletionWindowTestAccess;
 
-    std::u32string Reply(std::u32string_view text, std::u32string_view old = {}) {
-        winrt::Windows::Data::Json::JsonObject json;
-        json.Insert(L"oldText", winrt::Windows::Data::Json::JsonValue::CreateStringValue(winrt::to_hstring(folia::cps_to_utf8(old))));
-        json.Insert(L"newText", winrt::Windows::Data::Json::JsonValue::CreateStringValue(winrt::to_hstring(folia::cps_to_utf8(text))));
-        return folia::utf8_to_cps(winrt::to_string(json.Stringify()));
-    }
+    using completion_tests::Reply;
     struct CompletionWindow {
         Window window = winrt::Folia::implementation::App::Current()->CreateMainWindow();
         std::shared_ptr<std::atomic<int>> requests = std::make_shared<std::atomic<int>>(0);
         explicit CompletionWindow(std::u32string text = U"ac{a}{b}", std::u32string old = {}) {
             window.Activate();
             Pump([&] { return window.Content().as<FrameworkElement>().IsLoaded(); });
-            Access::Configure(window, [count = requests, reply = Reply(text, old)](auto const&, auto const&, auto) {
-                ++*count; return CompletionResult{reply};
+            Access::Configure(window, [count = requests, text = std::move(text), old = std::move(old)](auto const&, auto const& prompt, auto) {
+                ++*count; return CompletionResult{Reply(prompt, text, old)};
             });
         }
         ~CompletionWindow() { Access::Close(window); }

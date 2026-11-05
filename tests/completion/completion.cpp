@@ -82,12 +82,12 @@ suite completion_tests = [] {
         cache.clear();
         expect(cache.bytes() == 0_u); expect(cache.size() == 0_u);
     };
-    "completion output has hard character and line limits"_test = [] {
-        auto response = [](std::u32string text) { return U"{\"oldText\":\"\",\"newText\":\"" + text + U"\"}"; };
+    "completion output is bounded without restricting document line structure"_test = [] {
+        auto response = [](std::u32string text) { return U"<edit>" + text + U"</edit>"; };
         expect(folia::completion::decode_edit_response(response(std::u32string(512, U'a')), {}).has_value());
         expect(!folia::completion::decode_edit_response(response(std::u32string(513, U'a')), {}));
-        expect(folia::completion::decode_edit_response(response(U"a\\nb\\nc\\nd"), {}).has_value());
-        expect(!folia::completion::decode_edit_response(response(U"a\\nb\\nc\\nd\\ne"), {}));
+        expect(folia::completion::decode_edit_response(response(U"a\nb\nc\nd"), {}).has_value());
+        expect(folia::completion::decode_edit_response(response(U"a\nb\nc\nd\ne"), {}).has_value());
     };
 };
 }
