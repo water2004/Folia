@@ -2,14 +2,21 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-11-05，补全协议/上下文系统性修复完成）
+## 当前 checkpoint（2026-11-05，补全修复MSI已重建）
 
-- 用户反馈近处上文无效、首换行/公式参数异常、关思考后invalid edit，要求系统性修正，**不逐例加prompt规则且不标记Markdown/代码/TeX，由模型推断**。已按此完成。版本仍0.6.3，Debug已更新；本轮未MSI/安装/推送/发布，不查看已完成发布，不开agents/CUA/OS输入注入，native串行≤4。
+- 用户要求重新构建MSI且不做多余测试，已成功构建**Release self-contained 0.6.3**，包含源码基线**c421df12**的补全协议/上下文修复。产物**build/installer/bin/Folia-0.6.3-x64.msi**，脚本报告**51.4 MiB / 0 errors**；日志**build/folia-063-completion-contract-msi.log**。仅既有同版本升级ICE61 warning，未改升级策略。
+- 本次build_msi.ps1 -Version 0.6.3 -SkipDependencySetup -SkipStartupTest，**未运行测试或启动检查**；依赖此前本会话已setup，编译≤4，native串行，无agents/CUA。未安装/推送/发布，不查看已完成0.6.3发布。
+- **停止点/下一步**：exec19552已成功退出，无本任务运行构建/测试句柄。MSI已替换同名旧产物，交接记录小批本地提交（见HEAD）；按用户实际反馈或明确安装/发布要求继续，不自行安装/改版本。功能既有验收见下历史，不重复。
+
+## 补全协议/上下文系统性修复完成（历史基线）
+
+
+- 用户反馈近处上文无效、首换行/公式参数异常、关思考后invalid edit，要求系统性修正，**不逐例加prompt规则且不标记Markdown/代码/TeX，由模型推断**。已按此完成并提交c421df12，版本0.6.3，Debug已更新；后续MSI状态以顶部checkpoint为准。不开agents/CUA/OS输入注入，native串行≤4。
 - 代码根因与最终边界：旧oldText/newText JSON迫使模型精确复述源尾并转义TeX，严格schema拒绝；prompt把下文放到当前正文前且分两条user消息；邻近只取3 owner/line，Source行被拼成双换行，输出硬限4行。现由客户端定义同线32-scalar源尾，模型只回同一marker包裹的原文，**无JSON/old echo/模型坐标/旧格式fallback**。空响应abstain，空frame删除，边界名不出现在输入源中；原文首换行、TeX反斜杠保留，仅CRLF/CR→LF，字符限512、无4行限。客户端trim公共尾使复制右源不进事务/不推caret；沿用diff预览、word接受、既有Paste源/树单事务，不加语法修补。
 - 上下文按阅读顺序在单一user消息连续呈现，稳定之前文本仍在活跃区之前，右文本不再仅为cache移到前面。无环境类型标签；根据实际可用源码由模型判断。邻近按预算可超过3行/块，Source模式真实单换行，复用cached editable order与views，工作量有界，无全文parse/serialize。completion模块已移除无用JSON include path。
 - 验收全过：**completion-contract-portable-final.log 21项4629断言**（含300次Unicode右源/caret性质）；**completion-contract-controller-final.log 20项280**、**completion-contract-http.log 20项237**（三协议单user消息原文顺序）、**completion-contract-interaction.log 6项82**、**completion-contract-layout.log 2项1056**（controller/HTTP/layout各另loading5/22）。**completion-contract-debug.log**成功，**completion-contract-startup.log**两次真实启动/正常关闭exit0。测试覆盖raw TeX/首换行/5行/empty/delete/frame collision、超3邻近/Source换行、公式参数/源尾复用/部分接受/精确Undo和零全文操作。
 - 验证限制：**未调用真实上游模型/修改用户key，不宣称已验证实际模型预测质量或cache ratio**。Tex测试首轮2次fullserialize来自测试自身TextUtf8比对，现已隔离计数区间，产品接受/Undo均0，不当作架构回归重查。
-- **停止点/下一步**：本批实现、正式测试、docs与本记录一同本地提交（见HEAD），工作区应干净，无运行构建/测试/agent句柄。下一步依用户实际模型反馈或明确打包要求。现有**build/installer/bin/Folia-0.6.3-x64.msi**仅含旧基线05421ecd，不包含本轮修复；其构建记录build/folia-063-standard-manual-msi.log，勿误称新MSI已更新。
+- **历史基线**：实现及测试提交c421df12；当时未重打MSI，现有同名MSI已由顶部构建checkpoint更新，不再使用旧包说明。
 
 ## 标准协议与手填配置完成（历史基线）
 
