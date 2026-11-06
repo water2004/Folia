@@ -3,6 +3,7 @@ export module folia.mermaid.venn_svg;
 import std;
 export import folia.mermaid.venn;
 export import folia.mermaid.frontend;
+export import folia.mermaid.svg_text_measure;
 
 export namespace folia::mermaid {
 struct VennTheme {
@@ -19,5 +20,6 @@ struct VennRenderInput {
 };
 struct VennSvg { std::string svg; double width, height; };
 std::expected<VennRenderInput, std::string> prepare_venn_render(const PreparedDiagram&);
-std::expected<VennSvg, std::string> render_venn_svg(const VennRenderInput&);
+std::expected<VennSvg, std::string> render_venn_svg(
+    const VennRenderInput&, const SvgFamilyTextMeasure& = {});
 }

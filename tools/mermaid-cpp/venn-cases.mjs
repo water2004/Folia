@@ -10,6 +10,9 @@ export const cases = [
     + '    useDebugLayout: true\n    useMaxWidth: false\n---\nvenn-beta\nset A[One]\n'
     + '  text first[First item]\n  text second[Second item]\nset B[Two]\n'
     + 'union A,B[Both]\ntext B,A item[Shared item]\nstyle item color:#ee6655'],
+  ['wrapped-text', 'venn-beta\nset A[Items]\n'
+    + '  text first[The shared records in this category have several detailed labels]\n'
+    + '  text second[Another multiline group of records]\n  text third[Finish]\n  text fourth[Archive]'],
   ['disjoint', 'venn-beta\nset A: 14\nset B: 8\nset C: 5'],
   ['four', 'venn-beta\nset A: 12\nset B: 11\nset C: 9\nset D: 8\nunion A,B,C,D[Shared]'],
   ['four-mds', 'venn-beta\nset A: 15\nset B: 12\nset C: 11\nset D: 9\n'

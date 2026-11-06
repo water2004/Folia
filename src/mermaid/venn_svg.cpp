@@ -107,8 +107,48 @@ std::u16string text_color(View base, bool dark) {
         return std::u16string(base);
     }
 }
+void draw_cell_label(std::string& svg, View label, View fill, View family, double size,
+    double x, double y, double width, double height, const SvgFamilyTextMeasure& measure) {
+    constexpr View whitespace = u" \t\n\r\f";
+    constexpr SvgFamilyTextOptions options{.width=SvgTextWidth::advance, .pair_kerning=true};
+    std::vector<std::u16string> lines;
+    std::u16string line;
+    auto measure_line = [&](View text) {
+        auto box = measure(text, family, size, 400, options);
+        if (!box) throw std::runtime_error(box.error());
+        return *box;
+    };
+    for (auto start = label.find_first_not_of(whitespace); start != View::npos;) {
+        const auto end = label.find_first_of(whitespace, start);
+        const auto word = label.substr(start, end - start);
+        auto candidate = line;
+        if (!candidate.empty()) candidate += u' ';
+        candidate += word;
+        if (!line.empty() && measure_line(candidate).width > width) {
+            lines.push_back(std::move(line));
+            line = word;
+        } else {
+            line = std::move(candidate);
+        }
+        start = end == View::npos ? end : label.find_first_not_of(whitespace, end);
+    }
+    if (line.empty()) return;
+    lines.push_back(std::move(line));
+    const auto metrics = measure_line(lines.front());
+    const auto line_height = metrics.line_height > 0 ? std::round(metrics.line_height) : metrics.height;
+    const auto line_baseline = metrics.line_height > 0 ? std::round(metrics.line_baseline) : metrics.baseline;
+    auto baseline = y + (height - static_cast<double>(lines.size()) * line_height) / 2 + line_baseline;
+    const auto cx = attr("x", x + width / 2);
+    svg += "<text class=\"venn-text-node\" text-anchor=\"middle\"" + attr("fill", fill) +
+        " data-venn-cell=\"" + number(x) + " " + number(y) + " " + number(width) + " " + number(height) + "\">";
+    for (const auto& display : lines) {
+        svg += "<tspan" + cx + attr("y", baseline) + ">" + xml(display) + "</tspan>";
+        baseline += line_height;
+    }
+    svg += "</text>";
+}
 void draw_text_nodes(std::string& svg, const VennRenderInput& input, double scale,
-    const std::vector<VennRegion>& regions) {
+    const std::vector<VennRegion>& regions, const SvgFamilyTextMeasure& measure) {
     const auto& texts = input.document.texts;
     if (texts.empty()) return;
     using TextGroup = std::pair<VennSets, std::vector<const VennTextNode*>>;
@@ -156,14 +196,11 @@ void draw_text_nodes(std::string& svg, const VennRenderInput& input, double scal
                     " stroke-dasharray=\"" + number(4 * scale) + " " + number(3 * scale) + "\"/>";
             }
             const auto* node = nodes[i];
-            svg += "<foreignObject class=\"venn-text-node-fo\" overflow=\"visible\"" +
-                attr("x", cell_x + cell_width * 0.05) + attr("y", cell_y + cell_height * 0.05) +
-                attr("width", cell_width * 0.9) + attr("height", cell_height * 0.9) +
-                "><span xmlns=\"http://www.w3.org/1999/xhtml\" class=\"venn-text-node\""
-                " style=\"display:flex;width:100%;height:100%;white-space:normal;align-items:center;"
-                "justify-content:center;text-align:center;overflow-wrap:normal;word-break:normal;color:" +
-                xml(style(style_for(input.document, {node->id}), u"color", input.theme.intersection_text), true) +
-                "\">" + xml(node->label.empty() ? node->id : node->label) + "</span></foreignObject>";
+            if (!measure) throw std::runtime_error("Venn text nodes need measured font metrics");
+            draw_cell_label(svg, node->label.empty() ? View(node->id) : View(node->label),
+                style(style_for(input.document, {node->id}), u"color", input.theme.intersection_text),
+                input.theme.font_family, 40 * scale, cell_x + cell_width * 0.05,
+                cell_y + cell_height * 0.05, cell_width * 0.9, cell_height * 0.9, measure);
         }
         svg += "</g>";
     }
@@ -220,7 +257,8 @@ std::expected<VennRenderInput, std::string> prepare_venn_render(const PreparedDi
     return input;
 }
 
-std::expected<VennSvg, std::string> render_venn_svg(const VennRenderInput& input) {
+std::expected<VennSvg, std::string> render_venn_svg(
+    const VennRenderInput& input, const SvgFamilyTextMeasure& measure) {
     const auto& document = input.document;
     const auto& theme = input.theme;
     const auto scale = input.width / 1600;
@@ -315,7 +353,7 @@ std::expected<VennSvg, std::string> render_venn_svg(const VennRenderInput& input
                 attr("font-size", 48 * scale) + attr("fill", style(paint, u"color", label_paint)) +
                 "><tspan dy=\"0.35em\"" + x + y + ">" + xml(label) + "</tspan></text></g>";
         }
-        draw_text_nodes(svg, input, scale, layout);
+        draw_text_nodes(svg, input, scale, layout, measure);
         svg += "</g></svg>";
         return VennSvg{std::move(svg), input.width, input.height};
     } catch (const std::runtime_error& error) {

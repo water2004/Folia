@@ -8,6 +8,8 @@ struct SvgTextMetrics {
     double height{};
     double baseline{};
     double middle_offset{};
+    double line_height{};
+    double line_baseline{};
 };
 
 // Measures text in the current diagram's resolved font family.

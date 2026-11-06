@@ -665,8 +665,8 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
         auto metrics = measurer.svg_font_metrics(font);
         if (!metrics) return std::unexpected(metrics.error());
         return SvgTextMetrics{options.width == SvgTextWidth::advance ? bounds->advance : bounds->bounds_width,
-            metrics->height, metrics->baseline,
-            metrics->middle_offset};
+            metrics->height, metrics->baseline, metrics->middle_offset,
+            bounds->line_height, bounds->baseline};
     };
     SvgTextMeasure svg_text_measure = [&](std::u16string_view text, double size, unsigned weight)
         -> std::expected<SvgTextMetrics, std::string> {
@@ -684,7 +684,8 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
     SvgFamilyTextMeasure svg_family_measure;
     if (std::holds_alternative<UsecaseRenderInput>(input->content) ||
         std::holds_alternative<EventmodelingRenderInput>(input->content) ||
-        std::holds_alternative<SwimlaneRenderInput>(input->content)) {
+        std::holds_alternative<SwimlaneRenderInput>(input->content) ||
+        std::holds_alternative<VennRenderInput>(input->content)) {
         svg_family_measure = [&](std::u16string_view text, std::u16string_view family,
                                     double size, unsigned weight, const SvgFamilyTextOptions& options)
             -> std::expected<SvgTextMetrics, std::string> {

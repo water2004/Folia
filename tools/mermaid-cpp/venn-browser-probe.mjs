@@ -44,10 +44,40 @@ export function inspectVenn(root = document) {
     label: label(region.querySelector('text')),
   }));
   const title = svg.querySelector('.venn-title');
-  const textNodes = [...svg.querySelectorAll('.venn-text-node-fo')].map(element => ({
-    box: box(element), text: element.textContent, color: getComputedStyle(element.firstChild).color,
-    size: getComputedStyle(element.firstChild).fontSize,
-  }));
+  const textNodes = [...svg.querySelectorAll('.venn-text-node-fo, text.venn-text-node')].map(element => {
+    const portable = element.tagName === 'text';
+    const display = portable ? element : element.firstChild;
+    const css = getComputedStyle(display);
+    let cell, lines;
+    if (portable) {
+      const [x, y, width, height] = element.dataset.vennCell.split(' ').map(Number);
+      const p = new DOMPoint(x, y).matrixTransform(matrix(element));
+      cell = [p.x, p.y, width, height];
+      lines = [...element.children].map(span => ({text: span.textContent, box: box(span)}));
+    } else {
+      cell = box(element);
+      const inverse = svg.getScreenCTM().inverse();
+      const text = display.firstChild;
+      const rows = [];
+      for (let i = 0; text && i < text.length; ++i) {
+        const range = document.createRange();
+        range.setStart(text, i);
+        range.setEnd(text, i + 1);
+        const rect = range.getBoundingClientRect();
+        if (!rect.width && !rect.height) continue;
+        let row = rows.find(r => Math.abs(r.top - rect.top) < .01);
+        if (!row) rows.push(row = {text: '', left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom});
+        row.text += text.data[i];
+        if (/\S/u.test(text.data[i])) row.right = Math.max(row.right, rect.right);
+      }
+      lines = rows.map(row => {
+        const top = new DOMPoint(row.left, row.top).matrixTransform(inverse);
+        const bottom = new DOMPoint(row.right, row.bottom).matrixTransform(inverse);
+        return {text: row.text.trim(), box: [top.x, top.y, bottom.x - top.x, bottom.y - top.y]};
+      });
+    }
+    return {cell, lines, color: portable ? css.fill : css.color, size: css.fontSize, family: css.fontFamily};
+  });
   const debug = [...svg.querySelectorAll('.venn-text-debug-circle, .venn-text-debug-cell')].map(box);
   return {
     view: [view.x, view.y, view.width, view.height], regions, textNodes, debug,
