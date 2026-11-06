@@ -32,6 +32,11 @@ export import folia.mermaid.cynefin_svg;
 export import folia.mermaid.venn_svg;
 export import folia.mermaid.railroad_svg;
 export import folia.mermaid.error_svg;
+export import folia.mermaid.agentflow_svg;
+export import folia.mermaid.swimlane_svg;
+export import folia.mermaid.eventmodeling_svg;
+export import folia.mermaid.wardley_svg;
+export import folia.mermaid.usecase_svg;
 export import folia.mermaid.svg_text_measure;
 
 export namespace folia::mermaid {
@@ -45,7 +50,9 @@ struct NativeDiagram {
         GitGraphRenderInput, BlockRenderInput, KanbanRenderInput, C4RenderInput, StateRenderInput,
         MindmapRenderInput, ArchitectureRenderInput, ZenRenderInput, ErRenderInput,
         RequirementRenderInput, InfoRenderInput, TreeViewRenderInput, IshikawaRenderInput,
-        CynefinRenderInput, VennRenderInput, RailroadRenderInput, ErrorRenderInput> content;
+        CynefinRenderInput, VennRenderInput, RailroadRenderInput, ErrorRenderInput,
+        AgentflowRenderInput, SwimlaneRenderInput, EventmodelingRenderInput,
+        WardleyRenderInput, UsecaseRenderInput> content;
 };
 struct DiagramSvg { std::string svg; double width{}, height{}; };
 
@@ -84,5 +91,6 @@ std::expected<DiagramSvg, std::string> render_native_diagram(
     const ZenSvgMeasure& zenuml_measure = {},
     const ErSvgMeasure& er_measure = {},
     const RequirementSvgMeasure& requirement_measure = {},
-    const SvgTextMeasure& svg_text_measure = {});
+    const SvgTextMeasure& svg_text_measure = {},
+    const SvgFamilyTextMeasure& svg_family_measure = {});
 }

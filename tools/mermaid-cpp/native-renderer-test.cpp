@@ -35,7 +35,13 @@ suite host_contract = [] {
             "requirementDiagram\nrequirement req1 {\nid: R1\ntext: Save\nrisk: high\nverifyMethod: test\n}",
             "info showInfo", "treeView-beta\nsrc/\n  main.cpp",
             "ishikawa-beta\nProblem\nCause A", "cynefin-beta\nclear\n  \"Best practice\"",
-            "venn-beta\nset A\nset B\nunion A,B[Both]"}) {
+            "venn-beta\nset A\nset B\nunion A,B[Both]",
+            "railroad-beta\ndigit = terminal('0');",
+            "agentflow-beta TB\nRead[\"Read\"] --> Write[\"Write\"]",
+            "swimlane-beta LR\nsubgraph Work\nRead --> Write\nend",
+            "eventmodeling\ntf 01 ui Cart.UI\ntf 02 cmd AddItem ->> 01",
+            "wardley-beta\ncomponent Service [0.8, 0.55]",
+            "usecase-beta\nactor User\nUser --> Login"}) {
             auto result = render(source);
             expect(result.status == 0_i) << result.text;
             expect(result.width > 0 && result.height > 0);

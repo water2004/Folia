@@ -368,6 +368,10 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/flowchart-browser-probe.mjs --neo
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/flowchart-browser-probe.mjs --hand-drawn
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/flowchart-browser-probe.mjs --curves
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/flowchart-elk-oracle.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/sequence-browser-probe.mjs
@@ -382,8 +386,12 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/er-browser-probe.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          foreach ($family in @('info', 'tree-view', 'ishikawa', 'cynefin', 'venn', 'railroad', 'error')) {
+          foreach ($family in @('info', 'tree-view', 'ishikawa', 'cynefin', 'venn', 'railroad', 'error', 'swimlane', 'wardley', 'usecase')) {
             node "tools/mermaid-cpp/${family}-browser-probe.mjs"
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+          foreach ($family in @('agentflow', 'eventmodeling')) {
+            node "tools/mermaid-cpp/${family}-oracle.mjs"
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           }
           node tools/mermaid-cpp/quadrant-browser-probe.mjs
@@ -435,6 +443,10 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/compare-flowchart-svg.mjs build/mermaid-cpp/neo-flowchart-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/compare-flowchart-svg.mjs build/mermaid-cpp/hand-drawn-flowchart-browser/original.json build/mermaid-cpp/pie-svg
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/compare-flowchart-svg.mjs build/mermaid-cpp/curve-flowchart-browser/original.json build/mermaid-cpp/pie-svg
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/compare-sequence-svg.mjs build/mermaid-cpp/sequence-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/compare-class-svg.mjs build/mermaid-cpp/class-browser/original.json build/mermaid-cpp/pie-svg
@@ -445,7 +457,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/compare-er-svg.mjs build/mermaid-cpp/er-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          foreach ($family in @('info', 'tree-view', 'ishikawa', 'cynefin', 'venn', 'railroad', 'error')) {
+          foreach ($family in @('info', 'tree-view', 'ishikawa', 'cynefin', 'venn', 'railroad', 'error', 'agentflow', 'swimlane', 'eventmodeling', 'wardley', 'usecase')) {
             node "tools/mermaid-cpp/compare-${family}-svg.mjs" "build/mermaid-cpp/${family}-browser/original.json" build/mermaid-cpp/pie-svg
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           }
@@ -524,6 +536,10 @@ jobs:
             build/mermaid-cpp/elk-flowchart-browser/*.svg
             build/mermaid-cpp/neo-flowchart-browser/*.json
             build/mermaid-cpp/neo-flowchart-browser/*.svg
+            build/mermaid-cpp/hand-drawn-flowchart-browser/*.json
+            build/mermaid-cpp/hand-drawn-flowchart-browser/*.svg
+            build/mermaid-cpp/curve-flowchart-browser/*.json
+            build/mermaid-cpp/curve-flowchart-browser/*.svg
             build/mermaid-cpp/flowchart-browser/*.svg
             build/mermaid-cpp/sequence-browser/*.json
             build/mermaid-cpp/sequence-browser/*.svg
@@ -547,6 +563,16 @@ jobs:
             build/mermaid-cpp/venn-browser/*.svg
             build/mermaid-cpp/railroad-browser/*.json
             build/mermaid-cpp/railroad-browser/*.svg
+            build/mermaid-cpp/agentflow-browser/*.json
+            build/mermaid-cpp/agentflow-browser/*.svg
+            build/mermaid-cpp/swimlane-browser/*.json
+            build/mermaid-cpp/swimlane-browser/*.svg
+            build/mermaid-cpp/eventmodeling-browser/*.json
+            build/mermaid-cpp/eventmodeling-browser/*.svg
+            build/mermaid-cpp/wardley-browser/*.json
+            build/mermaid-cpp/wardley-browser/*.svg
+            build/mermaid-cpp/usecase-browser/*.json
+            build/mermaid-cpp/usecase-browser/*.svg
             build/mermaid-cpp/error-browser/*.json
             build/mermaid-cpp/error-browser/*.svg
             build/mermaid-cpp/quadrant-browser/*.json

@@ -126,6 +126,31 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
     try {
         const auto& effective=prepared->effective_config;
         const auto& theme=member(effective,u"themeVariables");
+        if (prepared->type == u"agentflow") {
+            auto input = prepare_agentflow_render(*prepared);
+            if (!input) return std::unexpected(input.error());
+            return NativeDiagram{std::move(*prepared), std::move(*input)};
+        }
+        if (prepared->type == u"swimlane") {
+            auto input = prepare_swimlane_render(*prepared);
+            if (!input) return std::unexpected(input.error());
+            return NativeDiagram{std::move(*prepared), std::move(*input)};
+        }
+        if (prepared->type == u"eventmodeling") {
+            auto input = prepare_eventmodeling_render(*prepared);
+            if (!input) return std::unexpected(input.error());
+            return NativeDiagram{std::move(*prepared), std::move(*input)};
+        }
+        if (prepared->type == u"wardley") {
+            auto input = prepare_wardley_render(*prepared);
+            if (!input) return std::unexpected(input.error());
+            return NativeDiagram{std::move(*prepared), std::move(*input)};
+        }
+        if (prepared->type == u"usecase") {
+            auto input = prepare_usecase_render(*prepared);
+            if (!input) return std::unexpected(input.error());
+            return NativeDiagram{std::move(*prepared), std::move(*input)};
+        }
         if (prepared->type == u"error") {
             auto input = prepare_error_render(*prepared);
             return NativeDiagram{std::move(*prepared), std::move(input)};
@@ -522,12 +547,33 @@ std::expected<DiagramSvg, std::string> render_native_diagram(
     const KanbanMeasure& kanban_measure, const C4Measurements& c4_measurements,
     const ArchitectureMeasurements& architecture_measurements, const StateMeasure& state_measure,
     const ZenSvgMeasure& zenuml_measure, const ErSvgMeasure& er_measure,
-    const RequirementSvgMeasure& requirement_measure, const SvgTextMeasure& svg_text_measure) {
+    const RequirementSvgMeasure& requirement_measure, const SvgTextMeasure& svg_text_measure,
+    const SvgFamilyTextMeasure& svg_family_measure) {
     return std::visit([&](const auto& content)->std::expected<DiagramSvg,std::string> {
         if constexpr(std::is_same_v<std::decay_t<decltype(content)>,ArchitectureRenderInput>) {
             auto result=render_architecture_svg(content,architecture_measurements);
             if(!result)return std::unexpected(result.error());
             return DiagramSvg{std::move(result->svg),result->width,result->height};
+        } else if constexpr (std::is_same_v<std::decay_t<decltype(content)>, AgentflowRenderInput>) {
+            auto result = render_agentflow_svg(content, svg_text_measure);
+            if (!result) return std::unexpected(result.error());
+            return DiagramSvg{std::move(result->svg), result->width, result->height};
+        } else if constexpr (std::is_same_v<std::decay_t<decltype(content)>, SwimlaneRenderInput>) {
+            auto result = render_swimlane_svg(content, svg_text_measure);
+            if (!result) return std::unexpected(result.error());
+            return DiagramSvg{std::move(result->svg), result->width, result->height};
+        } else if constexpr (std::is_same_v<std::decay_t<decltype(content)>, EventmodelingRenderInput>) {
+            auto result = render_eventmodeling_svg(content, svg_family_measure);
+            if (!result) return std::unexpected(result.error());
+            return DiagramSvg{std::move(result->svg), result->width, result->height};
+        } else if constexpr (std::is_same_v<std::decay_t<decltype(content)>, WardleyRenderInput>) {
+            auto result = render_wardley_svg(content, svg_text_measure);
+            if (!result) return std::unexpected(result.error());
+            return DiagramSvg{std::move(result->svg), result->width, result->height};
+        } else if constexpr (std::is_same_v<std::decay_t<decltype(content)>, UsecaseRenderInput>) {
+            auto result = render_usecase_svg(content, svg_family_measure);
+            if (!result) return std::unexpected(result.error());
+            return DiagramSvg{std::move(result->svg), result->width, result->height};
         } else if constexpr (std::is_same_v<std::decay_t<decltype(content)>, ErrorRenderInput>) {
             auto result = render_error_svg(content);
             if (!result) return std::unexpected(result.error());

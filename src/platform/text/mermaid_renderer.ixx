@@ -648,11 +648,25 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
                 vertical->height,vertical->baseline};
         };
     }
-    SvgTextMeasure svg_text_measure = [&](std::u16string_view text, double size, unsigned weight)
+    const auto measure_svg_line = [&](std::u16string_view text, std::u16string_view family,
+                                      double size, unsigned weight, bool use_advance = false,
+                                      bool pair_kerning = false)
         -> std::expected<SvgTextMetrics, std::string> {
         if (!std::isfinite(size) || size <= 0 || size > std::numeric_limits<float>::max()) {
             return std::unexpected("Invalid Mermaid SVG font size");
         }
+        const MermaidFont font{.family = std::u16string{family}, .size = static_cast<float>(size),
+            .weight = weight, .pair_kerning = pair_kerning};
+        auto bounds = measurer.measure(text, font, false, {}, true);
+        if (!bounds) return std::unexpected(bounds.error());
+        auto metrics = measurer.svg_font_metrics(font);
+        if (!metrics) return std::unexpected(metrics.error());
+        return SvgTextMetrics{use_advance ? bounds->advance : bounds->bounds_width,
+            metrics->height, metrics->baseline,
+            metrics->middle_offset};
+    };
+    SvgTextMeasure svg_text_measure = [&](std::u16string_view text, double size, unsigned weight)
+        -> std::expected<SvgTextMetrics, std::string> {
         std::u16string display;
         // Railroad's getBBox runs before Mermaid restores protected entities.
         if (!std::holds_alternative<RailroadRenderInput>(input->content)) {
@@ -661,18 +675,39 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             display = std::move(*label);
             text = display;
         }
-        const MermaidFont font{std::u16string{*font_family}, static_cast<float>(size), weight};
-        auto bounds = measurer.measure(text, font, false, {}, true);
-        if (!bounds) return std::unexpected(bounds.error());
-        auto metrics = measurer.svg_font_metrics(font);
-        if (!metrics) return std::unexpected(metrics.error());
-        return SvgTextMetrics{bounds->bounds_width, metrics->height, metrics->baseline,
-            metrics->middle_offset};
+        return measure_svg_line(text, *font_family, size, weight);
     };
+    std::map<std::u16string, std::u16string, std::less<>> resolved_families;
+    SvgFamilyTextMeasure svg_family_measure;
+    const bool usecase_html = std::holds_alternative<UsecaseRenderInput>(input->content);
+    const bool eventmodeling = std::holds_alternative<EventmodelingRenderInput>(input->content);
+    if (usecase_html || eventmodeling) {
+        svg_family_measure = [&](std::u16string_view text, std::u16string_view family,
+                                    double size, unsigned weight)
+            -> std::expected<SvgTextMetrics, std::string> {
+            auto resolved = resolved_families.find(family);
+            if (resolved == resolved_families.end()) {
+                std::u16string candidates{family};
+                constexpr std::u16string_view generic = u"sans-serif";
+                if (family.ends_with(generic)) {
+                    wchar_t locale[LOCALE_NAME_MAX_LENGTH]{};
+                    if (GetUserDefaultLocaleName(locale, LOCALE_NAME_MAX_LENGTH) &&
+                        std::wstring_view{locale} == L"zh-CN") {
+                        candidates.resize(candidates.size() - generic.size());
+                        candidates += u"Microsoft YaHei, Arial";
+                    }
+                }
+                auto installed = measurer.resolve_family(candidates);
+                if (!installed) return std::unexpected(installed.error());
+                resolved = resolved_families.emplace(family, std::move(*installed)).first;
+            }
+            return measure_svg_line(text, resolved->second, size, weight, usecase_html, eventmodeling);
+        };
+    }
     return render_native_diagram(*input, widths, flowchart_measurements, sequence_measurements,
         class_measurements, xy_measurements, sankey_measurements, treemap_measure, journey_measure,
         timeline_measure, gantt_measure, git_graph_measure, mindmap_measurements, block_measure,
         kanban_measure, c4_measurements, architecture_measurements, state_measure, zenuml_measure,
-        er_measure, requirement_measure, svg_text_measure);
+        er_measure, requirement_measure, svg_text_measure, svg_family_measure);
 }
 }
