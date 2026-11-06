@@ -21,10 +21,12 @@ bool valid_box(const FlowchartTextBox& b) {
 }
 std::string point(FlowchartPoint p) {return number(p.x)+","+number(p.y);}
 #include "flowchart_shapes.inc"
+#include "flowchart_lined_document.inc"
 
 FlowchartPoint intersect(const FlowchartPlacedNode& n,std::u16string_view shape,FlowchartPoint p,bool neo=false) {
     if(shape==u"stadium") return polygon_intersection(n,stadium_points(n.width,n.height),p);
     if(shape==u"subroutine") return polygon_intersection(n,subroutine_points(n.width,n.height),p);
+    if(shape==u"lin-doc") return polygon_intersection(n,lined_document_points(n.width,n.height,neo),p);
     if(classic_polygon(shape)) return polygon_intersection(n,classic_polygon_points(shape,n.width,n.height,neo),p);
     const double dx=p.x-n.x,dy=p.y-n.y;
     double factor;
@@ -161,6 +163,7 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
             else if(n.shape==u"circle") {const double diameter=std::hypot(b.width,h)+(theme.neo?32:n.padding);box={diameter,diameter};}
             else if(n.shape==u"stadium") box=stadium_box(w,h,theme.neo?40:n.padding,theme.neo?24:n.padding);
             else if(n.shape==u"subroutine") box={w+16+(theme.neo?28:n.padding),h+(theme.neo?12:n.padding)};
+            else if(n.shape==u"lin-doc") {const double px=theme.neo?16:n.padding,py=theme.neo?12:n.padding;box={(w+2*px)*1.1,(h+2*py)*(theme.neo?1.5:1.25)};}
             else if(n.shape==u"cylinder") {const double padding=theme.neo?24:n.padding;const double width=w+padding;box={width,h+padding+3*cylinder_radius_y(width)};}
             else if(n.shape==u"doublecircle") {const double diameter=std::hypot(b.width,h)+(theme.neo?56:2*n.padding+10);box={diameter,diameter};}
             else if(classic_polygon(n.shape)) {
@@ -373,11 +376,18 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
                     polygon_path(source.shape==u"stadium"?stadium_points(n.width,n.height):subroutine_points(n.width,n.height));
                 svg+="<path class=\"label-container\" d=\""+path+"\""+paint+"/>";
             }
+            else if(source.shape==u"lin-doc") svg+="<path class=\"label-container\" d=\""+lined_document_path(n.width,n.height,theme.neo)+"\""+paint+"/>";
             else if(classic_polygon(source.shape)) svg+="<path class=\"label-container\" d=\""+
                 polygon_path(classic_polygon_points(source.shape,n.width,n.height,theme.neo))+"\""+paint+"/>";
             else svg+="<rect class=\"label-container\" x=\""+number(-n.width/2)+"\" y=\""+number(-n.height/2)+"\" width=\""+number(n.width)+"\" height=\""+number(n.height)+"\" rx=\""+number(source.shape==u"roundedRect"?theme.radius:0)+"\""+paint+"/>";
             auto label_offset=theme.hand_drawn?rough_nodes[i].label_offset:FlowchartPoint{source.shape==u"odd"?n.height/8:0,0};
             if(source.shape==u"cylinder") label_offset.y=source.padding/1.5;
+            if(source.shape==u"lin-doc") {
+                const double w=n.width/1.1,h=n.height/(theme.neo?1.5:1.25),amplitude=theme.neo?h/4:h/8;
+                const double label_width=std::max(measured.nodes[i].width,theme.minimum_label_width);
+                label_offset={source.padding+w*0.025-w/2+label_width/2,
+                    -h/2+source.padding-amplitude+measured.nodes[i].height/2};
+            }
             svg+=text(source.label,label_offset,measured.nodes[i],"nodeLabel",node_paints[i])+"</g>";
         }
         if(!graph.title.empty()) svg+="<text class=\"flowchartTitleText\" text-anchor=\"middle\" font-size=\"18\" fill=\""+
