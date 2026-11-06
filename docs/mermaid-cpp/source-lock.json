@@ -5,6 +5,298 @@
   "license": "MIT",
   "files": [
     {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/forkJoin.ts",
+      "sha256": "33e396d359160b980630ae9b1cfcaf6d33a8ac0057bdf2a86d83c27d039750f0"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/usecase/usecaseTypes.ts",
+      "sha256": "7aa6ba81fa5b62a15fbff6ce3266448f3cf07575f1137dd1e2646ede12533be3"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/usecase/usecaseRenderer.ts",
+      "sha256": "685d73769417b27fea7149f8710828c5f0edac757eca73bbc9d9774a7e4ea8bb"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/usecase/usecaseDiagram.ts",
+      "sha256": "f983d3e5660da2bc1cbd7fb7dfd97dea7622f210b1c16f3b467aef40d5c19564"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/usecase/usecaseDb.ts",
+      "sha256": "01b147d1d36c1844e0ff3d572ff94b548dd12c8544a03b52db784f0ba951e324"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/usecase/usecaseAst.ts",
+      "sha256": "401c572e58b311a075d31e7c480bb383e2a82fdb45ebd4bba008079e207b1c69"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/usecase/styles.ts",
+      "sha256": "f59e061a502db8907ab4c9fc7dba720cf200b49190c587409353b67788fdf708"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/usecase/parser/usecaseModelBuilder.ts",
+      "sha256": "021ef7de05e158d28975d7d5f89f770ec3724a97e66d5f2cddc2c497ae5ad32e"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/usecase/parser/usecase.parser.ts",
+      "sha256": "b63e3003a824e2178a9a9b0ec8db23879661b9ae9ef95fe2b786acd5dfd55f04"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/usecase/parser/usecaseJson.ts",
+      "sha256": "65862cf1bad1aec6e23c4e89421e3c12c79ebacad4b8d53f4878fb215e2cef69"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/usecase/parser/usecase.visitor.ts",
+      "sha256": "1bbd75780900fd93bb320657adda9f1e62a805753f1dcb2a9f8ed382428250ef"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/usecase/parser/usecase.lexer.ts",
+      "sha256": "83a491258504391f752d81a4f16efe95d630ffa971413cb8bac76ce75b17d951"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/usecase/parser/usecase.tokens.ts",
+      "sha256": "b3077a311b706bcb0618112241a0dd2584a4b39a178cfd4c16632ea28ca05b79"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/usecase/parser/usecase.chevrotain.ts",
+      "sha256": "2004566be7ee4f6567e647e802182f972705d33b85abb574285ea02489d8c94f"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/agentflow/types.ts",
+      "sha256": "e22cbc8a67de5b5a6d422b5ce0db0a69d0e92498e7b9e7fd2cf8d44b7fa82f08"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/agentflow/transformData.ts",
+      "sha256": "af9d67b5d513218a31350fa4cd209fa57bcb1fc5cc854c9993da3fd0529ac51b"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/agentflow/styles.ts",
+      "sha256": "0846f6971df6662cb8b941aeed91edfef11c4ef9dbe62582f3b5434d5b086ce8"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/agentflow/shapes.ts",
+      "sha256": "b9cf5934f896725da470d5493cc54c8e3750d195a9b890ba7a560677d90bbc54"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/agentflow/renderer.ts",
+      "sha256": "53ad5e8814575dd7a0cc2abc8c3000f400c931ada2d7752b44e86a54701f029f"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/agentflow/agentflowDb.ts",
+      "sha256": "dac0e049a8add766e3430a770863dd92054c4b7907555f117c66ef247aaff279"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/agentflow/colorSlots.ts",
+      "sha256": "722bd3dd0dd726cc954690bce67675a921dd8e1f0f0977a9713d444308c01ff4"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/agentflow/diagnostics.ts",
+      "sha256": "6d0fcbb7a836006a741c0d9782c95850196012a1e8876883faa32c7c5c8ddb9f"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/agentflow/diagram.ts",
+      "sha256": "ef0afae561345fa69412e6181635992e45e7e2c939dca7b6d1279e0717774926"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/agentflow/parser/agentflowParser.ts",
+      "sha256": "f3da18456e72197b108285941632596dfae757c8a447b726dbdaa76c2dae78dd"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/roundedRectPath.ts",
+      "sha256": "f5f3b3cb0355ee768d0656a456cc1d5f2c8d4b965e4ccb9e5e120b23f67ec33c"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/linedWaveEdgedRect.ts",
+      "sha256": "278507124b1ab681568baf6d96476522d7d808c14ccd300d818231586aae0071"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/swimlanes/index.ts",
+      "sha256": "6b56fe9441195dc10a8bf2dcba3630ef6e65f68546ac08684a72fec237fb321e"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/swimlanes/layoutCore.ts",
+      "sha256": "630d0a0d1fa2ab74fcb4c9bef5c2ede7349b2a7a54e0fa3c1c54c87a445e4802"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/swimlanes/pipeline.ts",
+      "sha256": "09771f7acc6b6e53523b79dc1c02f248dc32b979371dd259aef5463078bfac3a"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/swimlanes/helpers.ts",
+      "sha256": "0a2b67a6e6b1534d0464bb23215a3538894ae99ad35256e74c9151dfc06546d8"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/swimlanes/edgeLabelNodes.ts",
+      "sha256": "5864611bd8e7aec2bd002c22d61332968eebb14b246bb180aae3567a60db4f1c"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/swimlanes/phase0.helpers.ts",
+      "sha256": "1653def5c3e882e117a6195b9a11a9d826f64a7f070646e5063358646f1dd540"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/swimlanes/phase1.cycles.ts",
+      "sha256": "8d116f2982068fc2f17b4c7cebd8da888e99bdcb07f8205a866183e3b6e307da"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/swimlanes/phase2.options.ts",
+      "sha256": "82e7e5d41008f0753c450f8634eaaa2639531a11d8561e7a2f24f28a8e733f4c"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/swimlanes/phase2.laneAwareCompact.ts",
+      "sha256": "bdb52a9527ef0cc7838777a82bb14c599512c7e0416e28393dad89df5ff05293"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/swimlanes/phase2.longestPath.ts",
+      "sha256": "4c0807bd5951f42ee8d83a9adf9abbbf2d54a98614d4121a0eb37dbda4558c60"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/swimlanes/phase2.gravity.ts",
+      "sha256": "6f679386ef0b3a2ad09cf439c1ecb9a0f210e5d608b0e6bba6da81c1672c5a6f"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/swimlanes/phase2.dummies.ts",
+      "sha256": "cda576d11a92b2f5d1d5b79258335c13602789be089875ad653d3322cd1cda9b"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/swimlanes/phase2.crossOptimization.ts",
+      "sha256": "76cbaad69ebb9622545c01abd0a6b1d684f13a02d5cef95f5caa4d93e0b74133"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/swimlanes/phase3.ordering.ts",
+      "sha256": "f1bf906f3597b91f7782dcfc66686830c89e8ff40728eeabe0bdbc3cd1b6c638"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/swimlanes/phase4.coordinates.ts",
+      "sha256": "97ee67eefd1e35a6b263b2930a0fc1a4de2f8cc2572f0a5864b96ba85fe78a9d"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/swimlanes/laneOrdering.ts",
+      "sha256": "313a1ea9fdf8bacb1bcd0c5f29ca80bff9bf0d912a6148a59c7709bdaf5d7c10"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/swimlanes/direction/lrTransform.ts",
+      "sha256": "1ed8c9ffe8af570bbdba3cc7081d9c9df09be624be3d8d8c07d7d548927dd16c"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/swimlanes/orthogonalRouter/router.ts",
+      "sha256": "16316716e88c8a684e80f07fb82dbd459bb2215678652dadb27513948c496692"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/swimlanes/direction/geometry.ts",
+      "sha256": "6b5e5c37c046b6dcf78d078ebd0ece0faf16243a5261514fd783632ffc2e2a2b"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/swimlanes/direction/endpointClip.ts",
+      "sha256": "25ffa385a072a867e210155c1a403447c4b10dbcfaaee14a97b74d692a43eca5"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/swimlanes/direction/labelAnchoring.ts",
+      "sha256": "67fe854a502db9fcf6b1471eb8c19ddc54066bb4387af7986b8fc76e09c87099"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/swimlanes/postProcessing.ts",
+      "sha256": "80f72721643fcce3f6e19cdd0c29ea2db4d3bc61f94c4c822920cf8a6d085105"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/swimlanes/direction/portSwap.ts",
+      "sha256": "c8369b220c1d2bd240f57c502ae17b3799dbfd182708c9e8d4bc28f955874597"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/swimlanes/direction/sharedTrackNudging.ts",
+      "sha256": "37ea7a8d5b40c5cfd067bc07301b5c0e3476c9f204dfd6abc399a6c7889467ce"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/swimlanes/direction/materializedGeometry.ts",
+      "sha256": "1c43a145e6d4f6f9cf1b6709ab035f8c50bd6f50393d7b3591525472aa0e51c6"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/swimlanes/direction/detourSimplification.ts",
+      "sha256": "dc71adbb110ce9d5cd7b3cfe3a21b8ce71c21c05bbc6abc012981070dda2baf0"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/swimlanes/direction/siblingSharedFaceRouting.ts",
+      "sha256": "335276ad8fed3d002a022d2976518c0bd0a12dd2c59c60e923a2de0e409e3c58"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/swimlanes/direction/terminalStub.ts",
+      "sha256": "5b59a8f4123355bfe79d76df5f7f06015dbc447d939d157eb7c0bed2185e9202"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/swimlanes/__tests__/direction.materializedGeometry.spec.ts",
+      "sha256": "1e8febf1fd6a8a8e3c11ef77044e7df0e5ff20ab51b9bb1a0dfbc56df2610220"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/swimlanes/swimlanesDiagram.ts",
+      "sha256": "5f6e25dd43c5b7e1b6c6e1342bd8bc2552538815752110723ffab489eac45bc6"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/swimlanes/styles.ts",
+      "sha256": "385c35e102169c38f9f127a003011ed6899a5b3b27f6e9068317d2aebf57bf7c"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/clusters/swimlane.js",
+      "sha256": "1ba14cae5e891ada60567473c16d521bb10b807b32fc4fc21a25238dd4337c25"
+    },
+    {
+      "path": "packages/parser/src/language/wardley/wardley.langium",
+      "sha256": "8c8ce9a0df6eefa14aa32a7c2c9c8515933ff67ed703b5400d5f31ea0bff11d5"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/wardley/wardleyDb.ts",
+      "sha256": "ab7729eb1385c6907573bd844d62b828e818c64543888069826d4778174d1b11"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/wardley/wardleyBuilder.ts",
+      "sha256": "abacba59af3a5b331dd66a8b21a6b8c5f797bc045b3bcfe909e9aa56d545b433"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/wardley/wardleyParser.ts",
+      "sha256": "05972b64593d2fb294a26166022c496bbe99eb534ae70baf8d0874e8dfc27a25"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/wardley/wardleyRenderer.ts",
+      "sha256": "d2103480bcb5b59daa280e6eef2224513ec2e40d9dc485c61518578ac0dc2302"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/wardley/styles.ts",
+      "sha256": "6b7d1b3167b2da267d3460d1f1c910e6f084de4cb2304daa4c5fe42c89d51ae9"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/eventmodeling/db.ts",
+      "sha256": "a180da7cec110c0c5647ec464a1826e60af11eb7bc99b6de0bf0747b57f81c0f"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/eventmodeling/parser.ts",
+      "sha256": "246b09a223531795f347a6957ba072ba5f423b2c8186c31ef908c0b27f2b68cf"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/eventmodeling/renderer.ts",
+      "sha256": "651e0f70497d303f659f7838480f120554f5c3d24f8fa6eb65066eddd97d273f"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/eventmodeling/styles.js",
+      "sha256": "2c517dd00c0efcb4381d2a86c4c9903c89a0898e64b09cae53d5944ed1c3a43a"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/eventmodeling/types.ts",
+      "sha256": "cc272f190c54b651cc4ac0680b1e323966de873ee98cee11e77580467406cfaf"
+    },
+    {
+      "path": "packages/parser/src/language/eventmodeling/event-modeling.langium",
+      "sha256": "9432c3c986e2d2135fbdedbc5b4cf7fe22b9c893e10b4d23cc63332f776bbba4"
+    },
+    {
+      "path": "packages/parser/src/language/eventmodeling/event-modeling-validator.ts",
+      "sha256": "d431b824b7ee2c90ca0fb906b87e2fcc687c63e1477092774c2c7406ba160cab"
+    },
+    {
+      "path": "packages/parser/src/language/eventmodeling/module.ts",
+      "sha256": "8658b7360364bfd410faff59abbda7f78daabc5f80578385569d78f4339d6f69"
+    },
+    {
+      "path": "packages/parser/src/language/eventmodeling/tokenBuilder.ts",
+      "sha256": "9b24da716069629eb75df652789eaaf2b5a236dffa7a0f483405596c5d4515f3"
+    },
+    {
       "path": "packages/mermaid/src/rendering-util/insertLookDefs.ts",
       "sha256": "55bb1d46c232a7f2935d34976a6c1e6cfa7b874b7ae0ba4ac601761cfc660569"
     },
