@@ -5,7 +5,8 @@
 ## 当前 checkpoint（2026-11-06，拆分行间公式与 AI 换行触发）
 
 - 用户复现顺序：在一块 `\[ … \]` 中途加入 `\]`，再到后半段前的空行补 `\[`。块内 CST 已识别提前结束，但旧块树仍把后半段当作不可编辑的错误尾部。现在通过局部片段重解析拆分；独立开符可使用相邻段落中已有的闭符还原公式。操作保留源文、引用前缀和撤销事务，无全文重解析。
-- 正常换行现在触发 AI 调度，Tab 接受失败也不会变成缩进。核心全量 774 项、WinUI 7 项 127 断言通过（包含两种模式和模拟服务），Debug 已构建。日志 `build/edit-split-math-{core,debug,winui}-final.log`，无运行句柄。下一步如需安装版，从当前提交构建；本轮未重打 MSI。
+- 正常换行现在触发 AI 调度，Tab 接受失败也不会变成缩进。核心全量 774 项、WinUI 7 项 127 断言通过（包含两种模式和模拟服务），Debug 已构建。日志 `build/edit-split-math-{core,debug,winui}-final.log`。
+- 已从 `c354bd8f` 构建 `build/installer/bin/Folia-0.6.4-x64.msi`，MSI 和 EXE 均为 0.6.4，53903346 字节，SHA-256 `3874f14cf140b69f60fdf9a872ddaae0ac7fdf6e7fcb9f77daae07ae6720cbed`。日志 `build/folia-064-split-math-msi.log`，按要求跳过启动和额外测试。无运行句柄，安装包可供本地使用，未更新公开发布资产。
 
 ## Responses 显式缓存断点（历史）
 
