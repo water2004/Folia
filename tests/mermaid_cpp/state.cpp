@@ -5,6 +5,19 @@ namespace {
 using namespace boost::ut;using namespace folia::mermaid;
 #include "theme_fixture.hpp"
 suite state=[] {
+ "mermaid_state_fork_join_and_class_styles_are_materialized"_test=[] {
+  auto parsed=parse_state_document(u"stateDiagram-v2\nclassDef hot fill:#c00,color:#fff,stroke:#333;\nA:::hot --> B\nclass B hot\nstate fork <<fork>>\nstate join [[join]]");
+  expect(fatal(parsed.has_value()))<<(parsed?"":parsed.error());if(!parsed)return;
+  const auto a=std::ranges::find(parsed->document.nodes,u"A",&FlowchartNode::id);
+  const auto b=std::ranges::find(parsed->document.nodes,u"B",&FlowchartNode::id);
+  const auto fork=std::ranges::find(parsed->document.nodes,u"fork",&FlowchartNode::id);
+  const auto join=std::ranges::find(parsed->document.nodes,u"join",&FlowchartNode::id);
+  expect(a!=parsed->document.nodes.end());expect(b!=parsed->document.nodes.end());
+  if(a!=parsed->document.nodes.end()){expect(a->classes==u"hot");expect(!a->compiled_styles.empty());}
+  if(b!=parsed->document.nodes.end()){expect(b->classes==u"hot");expect(!b->compiled_styles.empty());}
+  expect(fork!=parsed->document.nodes.end());if(fork!=parsed->document.nodes.end())expect(fork->shape==u"fork");
+  expect(join!=parsed->document.nodes.end());if(join!=parsed->document.nodes.end())expect(join->shape==u"join");
+ };
  "mermaid_state_annotations_and_concurrent_regions_parse_without_losing_source_semantics"_test=[] {
   auto parsed=parse_state_document(u"stateDiagram-v2\nstate Active {\nA --> B\n--\nC --> D\n}\nnote left of A : inline note\nnote right of D\nblock note\nsecond line\nend note");
   expect(fatal(parsed.has_value()))<<(parsed?"":parsed.error());if(!parsed)return;
@@ -46,7 +59,7 @@ suite state=[] {
    auto session=ConfigSession::create();expect(fatal(session.has_value()));auto site=json(decode(columns[2]));expect(fatal(session->save_initialize_config(site).has_value()));expect(fatal(session->set_site_config(site).has_value()));auto actual=prepare_state(decode(columns[1]),*session);auto expected=json(decode(columns[3]));if(expected.kind==ConfigKind::null){expect(!actual)<<columns[0];continue;}expect(fatal(actual.has_value()))<<columns[0]<<(actual?"":actual.error());const auto& d=actual->document;expect(bool(d.direction==field(expected,u"direction").string));const auto& nodes=field(expected,u"nodes").sequence;expect(fatal(d.nodes.size()==nodes.size()));
    for(std::size_t i=0;i<nodes.size();++i){const auto& a=d.nodes[i];const auto& e=nodes[i];expect(bool(a.id==field(e,u"id").string));expect(bool(a.label==field(e,u"label").string));expect(bool(a.shape==field(e,u"shape").string));expect(bool(a.parent==field(e,u"parent").string));expect(a.group==field(e,u"group").boolean);expect(bool(a.direction==field(e,u"direction").string));const auto& styles=field(e,u"styles").sequence;expect(fatal(a.styles.size()==styles.size()));for(std::size_t j=0;j<styles.size();++j)expect(bool(a.styles[j]==styles[j].string));}
    const auto& edges=field(expected,u"edges").sequence;expect(fatal(d.edges.size()==edges.size()));for(std::size_t i=0;i<edges.size();++i){const auto& a=d.edges[i];const auto& e=edges[i];expect(bool(a.start==field(e,u"start").string));expect(bool(a.end==field(e,u"end").string));expect(bool(a.label==field(e,u"label").string));}const auto& annotations=field(expected,u"annotations").sequence;expect(fatal(actual->annotations.size()==annotations.size()));for(std::size_t i=0;i<annotations.size();++i){expect(bool(actual->annotations[i].state==field(annotations[i],u"state").string));expect(bool(actual->annotations[i].text==field(annotations[i],u"text").string));expect(bool(actual->annotations[i].position==field(annotations[i],u"position").string));}expect(!render_state_svg(*actual,{}));
-  }expect(count==15_u);
+  }expect(count==19_u);
  };
 };
 }

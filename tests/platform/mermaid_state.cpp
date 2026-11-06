@@ -14,6 +14,10 @@ suite mermaid_state=[] {
             {"composite",u"stateDiagram-v2\n[*] --> Ready\nstate Ready {\n[*] --> Waiting\nWaiting --> Working: run\nWorking --> [*]\n}\nReady --> Done"},
             {"nested",u"stateDiagram-v2\nstate Outer {\nstate Inner {\nA --> B\n}\nInner --> C\n}"},
             {"styles",u"stateDiagram-v2\nIdle --> Busy\nstyle Idle fill:#ffeecc,stroke:#884400,color:#112233"},
+            {"style-classes",u"stateDiagram-v2\nclassDef hot fill:#c00,color:#fff,stroke:#333,stroke-width:2px\nA:::hot --> B:::hot\nB --> C\nclass C hot"},
+            {"fork-join",u"stateDiagram-v2\nstate Fork <<fork>>\nstate Join [[join]]\n[*] --> Fork\nFork --> A\nFork --> B\nA --> Join\nB --> Join\nJoin --> [*]"},
+            {"fork-join-lr",u"stateDiagram-v2\ndirection LR\nstate Fork <<fork>>\nstate Join <<join>>\nA --> Fork\nFork --> B\nB --> Join\nJoin --> C"},
+            {"floating-note",u"stateDiagram-v2\nA --> B\nnote \"unattached text\" as Floating"},
             {"configured",u"---\ntitle: State lifecycle\nconfig:\n  state:\n    nodeSpacing: 65\n    rankSpacing: 70\n---\nstateDiagram-v2\nA --> B: continue"}
             ,{"inline-notes",u"stateDiagram-v2\nA --> B\nnote left of A : left annotation\nnote right of B : right annotation"}
             ,{"block-note",u"stateDiagram-v2\nA --> B\nnote right of B\nA multi-line\nstate annotation\nend note"}

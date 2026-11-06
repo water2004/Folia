@@ -5,6 +5,7 @@ import folia.mermaid.svg_text;
 import folia.mermaid.rough_rectangle;
 namespace folia::mermaid {
 namespace {
+std::u16string trim(std::u16string_view value){auto first=value.find_first_not_of(u" \t\r\n");return first==value.npos?u"":std::u16string(value.substr(first,value.find_last_not_of(u" \t\r\n")-first+1));}
 const ConfigValue& member(const ConfigValue& v,std::u16string_view key){auto p=v.find(key);if(!p)throw std::runtime_error("Missing State configuration");return *p;}
 std::u16string text(const ConfigValue& v){if(v.kind!=ConfigKind::string)throw std::runtime_error("Expected State style");return v.string;}
 double numeric(const ConfigValue& v){if(v.kind==ConfigKind::number)return v.number;auto s=text(v);std::string raw(s.begin(),s.end());double n=0;auto p=std::from_chars(raw.data(),raw.data()+raw.size(),n);if(p.ec!=std::errc{})throw std::runtime_error("Invalid State dimension");return n;}
@@ -17,7 +18,15 @@ std::string curve(std::span<const FlowchartPoint> p){if(p.empty())return{};std::
 // The original roughjs zero-roughness circle uses a 36-step Catmull-Rom
 // spline and a closing duplicate sample, including its small closing overshoot.
 std::string end_circle(double radius){std::vector<FlowchartPoint> p;for(int i=-1;i<=36;++i){auto a=i*std::numbers::pi/18;p.push_back({radius*std::cos(a),radius*std::sin(a)});}p.push_back({radius,0});p.push_back({radius*std::cos(std::numbers::pi/18),radius*std::sin(std::numbers::pi/18)});std::string out="M"+point(p[1]);for(std::size_t i=1;i+2<p.size();++i)out+="C"+point({p[i].x+(p[i+1].x-p[i-1].x)/6,p[i].y+(p[i+1].y-p[i-1].y)/6})+" "+point({p[i+1].x-(p[i+2].x-p[i].x)/6,p[i+1].y-(p[i+2].y-p[i].y)/6})+" "+point(p[i+1]);return out;}
-std::u16string paint(const FlowchartNode& node,std::u16string_view key,std::u16string fallback){for(const auto& style:node.styles){auto colon=style.find(u':');if(colon!=style.npos&&std::u16string_view(style).substr(0,colon)==key)return style.substr(colon+1);}return fallback;}
+std::u16string paint(const FlowchartNode& node,std::u16string_view key,std::u16string fallback){
+ for(const auto* styles:{&node.styles,&node.compiled_styles})for(auto it=styles->rbegin();it!=styles->rend();++it){
+  const auto style=std::u16string_view(*it);
+  const auto colon=style.find(u':');
+  if(colon!=style.npos&&trim(style.substr(0,colon))==key)return trim(style.substr(colon+1));
+ }
+ return fallback;
+}
+bool fork_join(std::u16string_view shape){return shape==u"fork"||shape==u"join";}
 void add_annotations(FlowchartInput& graph,std::span<const StateAnnotation> annotations,double note_padding){
  for(std::size_t i=0;i<annotations.size();++i){
   const auto& annotation=annotations[i];
@@ -93,6 +102,7 @@ std::expected<StateRenderInput,std::string> prepare_state(
         theme.edge_text = text(member(variables, u"textColor"));
         theme.edge_background = text(member(variables, u"edgeLabelBackground"));
         theme.line = text(member(variables, u"transitionColor"));
+        theme.fork_join = text(member(variables, u"lineColor"));
         theme.special = text(member(variables, u"specialStateColor"));
         theme.composite_title = text(member(variables, u"compositeTitleBackground"));
         theme.composite = color(u"compositeBackground", u"background");
@@ -136,7 +146,7 @@ std::expected<StateSvg,std::string> render_state_svg(const StateRenderInput& in,
  std::vector<FlowchartEdgeLabelSize> edge_boxes;
  for(auto& node:graph.nodes){
   const bool terminal=node.shape==u"stateStart"||node.shape==u"stateEnd";
-  auto box=terminal?FlowchartTextBox{}:label(node.label,node.group,node.shape==u"note");
+  auto box=terminal||fork_join(node.shape)?FlowchartTextBox{}:label(node.label,node.group,node.shape==u"note");
   labels.nodes.push_back(box);
   if(terminal){
    const auto width=node.shape==u"stateEnd"?14+7*(1-std::cos(std::numbers::pi/18))/8:14;
@@ -145,6 +155,11 @@ std::expected<StateSvg,std::string> render_state_svg(const StateRenderInput& in,
    boxes.push_back({std::max(in.minimum_width,box.width)+2*node.padding,box.height+2*node.padding});
   }else if(node.shape==u"divider"){
    boxes.push_back({2,2});
+  }else if(fork_join(node.shape)){
+   const auto parent=std::ranges::find(graph.nodes,node.parent,&FlowchartNode::id);
+   const auto direction=parent==graph.nodes.end()?graph.direction:parent->direction;
+   const bool horizontal=direction==u"LR"||direction==u"RL";
+   boxes.push_back(horizontal?FlowchartNodeBox{10,70}:FlowchartNodeBox{70,10});
   }else{
    boxes.push_back({node.group?box.width:std::max(in.minimum_width,box.width)+16,
                     node.group?box.height:box.height+16});
@@ -153,7 +168,14 @@ std::expected<StateSvg,std::string> render_state_svg(const StateRenderInput& in,
  }
  for(const auto& edge:graph.edges){auto b=label(edge.label);labels.edges.push_back(b);edge_boxes.push_back({b.width,b.height});}
  FlowchartSvgTheme layout_theme;layout_theme.font_family=t.font_family;layout_theme.font_size=t.font_size;layout_theme.padding=8;layout_theme.group_title_top=0;layout_theme.group_title_bottom=0;auto scene=layout_measured_flowchart(graph,boxes,edge_boxes,labels,layout_theme);if(!scene)return std::unexpected(scene.error());
- std::string body;auto rect=[&](double x,double y,double w,double h,double radius,std::u16string_view fill,std::u16string_view stroke){return "<rect x=\""+num(x)+"\" y=\""+num(y)+"\" width=\""+num(w)+"\" height=\""+num(h)+"\" rx=\""+num(radius)+"\" ry=\""+num(radius)+"\" fill=\""+xml(fill)+"\" stroke=\""+xml(stroke)+"\" stroke-width=\"1\"/>";};
+ std::string body;auto rect=[&](double x,double y,double w,double h,double radius,std::u16string_view fill,std::u16string_view stroke,const FlowchartNode* source=nullptr){
+  std::string style=" stroke-width=\"1\"";
+  if(source){
+   style=" stroke-width=\""+xml(paint(*source,u"stroke-width",u"1"))+"\"";
+   for(const auto key:{u"stroke-dasharray",u"opacity"})if(auto value=paint(*source,key,u"");!value.empty())style+=" "+xml(key)+"=\""+xml(value)+"\"";
+  }
+  return "<rect x=\""+num(x)+"\" y=\""+num(y)+"\" width=\""+num(w)+"\" height=\""+num(h)+"\" rx=\""+num(radius)+"\" ry=\""+num(radius)+"\" fill=\""+xml(fill)+"\" stroke=\""+xml(stroke)+"\""+style+"/>";
+ };
  auto draw_label=[&](const FlowchartTextBox& box,double x,double y,std::u16string_view color,std::string_view css){if(box.lines.empty())return std::string{};std::string out="<text class=\""+std::string(css)+"\" data-html-label=\"true\" fill=\""+xml(color)+"\">";for(std::size_t i=0;i<box.lines.size();++i)out+="<tspan x=\""+num(x)+"\" y=\""+num(y+box.baseline+i*box.line_step)+"\" text-anchor=\"middle\">"+xml(box.lines[i])+"</tspan>";return out+"</text>";};
  for(std::size_t i=0;i<graph.nodes.size();++i){
   const auto& source=i<d.nodes.size()?d.nodes[i]:graph.nodes[i];
@@ -228,9 +250,14 @@ std::expected<StateSvg,std::string> render_state_svg(const StateRenderInput& in,
   }else if(source.shape==u"divider"){
    body+="<path class=\"state-divider\" d=\"M"+num(node.x-node.width/2)+","+num(node.y)+
        " L"+num(node.x+node.width/2)+","+num(node.y)+"\" stroke=\""+xml(t.border)+"\"/>";
+  }else if(fork_join(source.shape)){
+   const auto paths=rough_rectangle_paths(node.x-node.width/2,node.y-node.height/2,node.width,node.height);
+   body+="<g class=\"state-fork-join\"><path d=\""+paths.fill_path+"\" fill=\""+xml(t.fork_join)+
+       "\" stroke=\"none\" stroke-width=\"0\"/><path d=\""+paths.stroke_path+
+       "\" fill=\"none\" stroke=\""+xml(t.fork_join)+"\" stroke-width=\"1.3\" stroke-dasharray=\"0 0\"/></g>";
   }else{
    body+=rect(node.x-node.width/2,node.y-node.height/2,node.width,node.height,5,
-       paint(source,u"fill",t.fill),paint(source,u"stroke",t.border));
+       paint(source,u"fill",t.fill),paint(source,u"stroke",t.border),&source);
    body+=draw_label(labels.nodes[i],node.x,node.y-labels.nodes[i].height/2,
        paint(source,u"color",t.text),"node-label");
   }

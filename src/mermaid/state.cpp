@@ -3,9 +3,17 @@ import std;
 namespace folia::mermaid {
 namespace {
 std::u16string trim(std::u16string_view s){auto a=s.find_first_not_of(u" \t\r\n");return a==s.npos?u"":std::u16string(s.substr(a,s.find_last_not_of(u" \t\r\n")-a+1));}
+std::size_t description_separator(std::u16string_view value){
+ auto colon=value.find(u':');
+ while(colon!=value.npos&&value.substr(colon).starts_with(u":::"))colon=value.find(u':',colon+3);
+ return colon;
+}
 struct Parser {
  FlowchartInput document;std::vector<std::u16string> parents;std::vector<StateAnnotation> annotations;std::size_t divider_count=0;std::map<std::u16string,std::size_t,std::less<>> region_start,region_count;std::map<std::u16string,std::u16string,std::less<>> region_direction,region_scope;
- std::size_t node(std::u16string id,bool start=true){const auto scope=parents.empty()?std::u16string{}:region_scope[parents.back()];if(id==u"[*]")id=(scope.empty()?u"root":scope)+std::u16string(start?u"_start":u"_end");if(id.empty()||id.find_first_of(u" \t\n")!=id.npos)throw std::runtime_error("Expected State identifier");auto it=std::ranges::find(document.nodes,id,&FlowchartNode::id);if(it!=document.nodes.end())return static_cast<std::size_t>(it-document.nodes.begin());FlowchartNode n;n.id=id;n.label=id;n.shape=u"rect";n.padding=8;n.label_type=u"markdown";n.parent=scope;document.nodes.push_back(std::move(n));return document.nodes.size()-1;}
+ std::map<std::u16string,std::vector<std::u16string>,std::less<>> class_defs;
+ std::vector<std::pair<std::vector<std::u16string>,std::u16string>> class_assignments;
+ static std::vector<std::u16string> split(std::u16string_view s,char16_t delimiter){std::vector<std::u16string> out;for(std::size_t p=0;p<=s.size();){auto e=s.find(delimiter,p);if(e==s.npos)e=s.size();auto item=trim(s.substr(p,e-p));if(!item.empty()){if(item.back()==u';')item=trim(std::u16string_view(item).substr(0,item.size()-1));if(!item.empty())out.push_back(std::move(item));}if(e==s.size())break;p=e+1;}return out;}
+ std::size_t node(std::u16string id,bool start=true){const auto scope=parents.empty()?std::u16string{}:region_scope[parents.back()];if(id==u"[*]")id=(scope.empty()?u"root":scope)+std::u16string(start?u"_start":u"_end");std::u16string css_class;auto sep=id.find(u":::");if(sep!=id.npos){css_class=trim(std::u16string_view(id).substr(sep+3));id=trim(std::u16string_view(id).substr(0,sep));}if(id.empty()||id.find_first_of(u" \t\n")!=id.npos)throw std::runtime_error("Expected State identifier");auto it=std::ranges::find(document.nodes,id,&FlowchartNode::id);if(it!=document.nodes.end()){if(!css_class.empty()){if(!it->classes.empty())it->classes+=u" ";it->classes+=css_class;}return static_cast<std::size_t>(it-document.nodes.begin());}FlowchartNode n;n.id=id;n.label=id;n.shape=u"rect";n.padding=8;n.label_type=u"markdown";n.parent=scope;n.classes=css_class;document.nodes.push_back(std::move(n));return document.nodes.size()-1;}
  std::size_t endpoint(std::u16string id,bool start){const bool terminal=id==u"[*]";auto i=node(std::move(id),start);if(terminal)document.nodes[i].shape=start?u"stateStart":u"stateEnd";return i;}
  void region(std::u16string_view parent){
   const std::u16string key(parent);const auto scope=region_scope[key];
@@ -27,14 +35,29 @@ struct Parser {
  }
  void line(std::u16string value,bool trailing_separator=false){value=trim(value);if(value.empty()||value.starts_with(u"%%"))return;if(value==u"}"){if(parents.empty())throw std::runtime_error("Unexpected State composite end");const auto parent=parents.back();if(region_count[parent]&&region_start[parent]<document.nodes.size())region(parent);if(region_count[parent])document.nodes[node(parent)].direction=u"TB";parents.pop_back();return;}
   if(value==u"--"){if(parents.empty())throw std::runtime_error("Concurrent region separator requires a composite state");const auto parent=parents.back();if(trailing_separator){FlowchartNode divider;const auto number=std::to_string(++divider_count);divider.id=u"divider-id-"+std::u16string(number.begin(),number.end());divider.shape=u"divider";divider.parent=parent;divider.padding=8;document.nodes.push_back(std::move(divider));return;}region(parent);document.nodes[node(parent)].direction=u"TB";const auto region_number=std::to_string(region_count[parent]+1);region_scope[parent]=parent+u"----region-"+std::u16string(region_number.begin(),region_number.end());return;}
-  if(value.starts_with(u"note ")){auto left=value.find(u" left of "),right=value.find(u" right of ");auto marker=left!=value.npos?left:right;if(marker==value.npos)throw std::runtime_error("Unsupported floating State note");const auto width=left!=value.npos?std::u16string_view(u" left of ").size():std::u16string_view(u" right of ").size();auto start=marker+width;auto colon=value.find(u':',start);if(colon==value.npos)throw std::runtime_error("Expected inline State note text");auto state=trim(std::u16string_view(value).substr(start,colon-start));auto text=trim(std::u16string_view(value).substr(colon+1));if(state.empty()||text.empty())throw std::runtime_error("State note requires a state and text");node(state);annotations.push_back({state,text,left!=value.npos?u"left":u"right"});return;}
+  if(value.starts_with(u"note ")){
+   auto rest=trim(std::u16string_view(value).substr(5));
+   if(rest.starts_with(u"\"")){
+    const auto end=rest.find(u'"',1);
+    if(end==rest.npos||end==1)throw std::runtime_error("Expected quoted floating State note text");
+    const auto alias=trim(std::u16string_view(rest).substr(end+1));
+    if(!alias.starts_with(u"as "))throw std::runtime_error("Expected floating State note alias");
+    const auto id=trim(std::u16string_view(alias).substr(3));
+    if(id.empty()||id.find_first_of(u" \t\r\n")!=id.npos)throw std::runtime_error("Expected floating State note identifier");
+    // Upstream accepts this production without adding a state or annotation.
+    return;
+   }
+   auto left=value.find(u" left of "),right=value.find(u" right of ");auto marker=left!=value.npos?left:right;if(marker==value.npos)throw std::runtime_error("Expected State note position");const auto width=left!=value.npos?std::u16string_view(u" left of ").size():std::u16string_view(u" right of ").size();auto start=marker+width;auto colon=value.find(u':',start);if(colon==value.npos)throw std::runtime_error("Expected inline State note text");auto state=trim(std::u16string_view(value).substr(start,colon-start));auto text=trim(std::u16string_view(value).substr(colon+1));if(state.empty()||text.empty())throw std::runtime_error("State note requires a state and text");node(state);annotations.push_back({state,text,left!=value.npos?u"left":u"right"});return;
+  }
   if(value.starts_with(u"direction ")){auto dir=trim(std::u16string_view(value).substr(10));if(dir!=u"TB"&&dir!=u"BT"&&dir!=u"LR"&&dir!=u"RL")throw std::runtime_error("Invalid State direction");if(parents.empty())document.direction=dir;else{document.nodes[node(parents.back())].direction=dir;region_direction[parents.back()]=dir;}return;}
+  if(value.starts_with(u"classDef ")){auto rest=std::u16string_view(value).substr(9);auto space=rest.find_first_of(u" \t");if(space==rest.npos)throw std::runtime_error("Expected State classDef styles");auto name=trim(rest.substr(0,space));auto declarations=split(trim(rest.substr(space+1)),u',');if(name.empty())throw std::runtime_error("Expected State class name");auto& styles=class_defs[name];styles.append_range(std::move(declarations));return;}
+  if(value.starts_with(u"class ")){auto rest=std::u16string_view(value).substr(6);auto space=rest.find_first_of(u" \t");if(space==rest.npos)throw std::runtime_error("Expected State class assignment");auto ids=split(rest.substr(0,space),u',');auto name=trim(rest.substr(space+1));if(ids.empty()||name.empty())throw std::runtime_error("Expected State class assignment");class_assignments.emplace_back(std::move(ids),std::move(name));return;}
   for(auto key:{u"accTitle:",u"accDescr:"})if(value.starts_with(key)){auto label=trim(std::u16string_view(value).substr(std::u16string_view(key).size()));if(key==std::u16string_view(u"accTitle:"))document.acc_title=label;else document.acc_description=label;return;}
-  if(value.starts_with(u"style ")){auto space=value.find(u' ',6);if(space==value.npos)throw std::runtime_error("Expected State style");auto ids=value.substr(6,space-6);auto styles=value.substr(space+1);std::vector<std::u16string> declarations;for(std::size_t p=0;p<styles.size();){auto end=styles.find(u',',p);if(end==styles.npos)end=styles.size();declarations.push_back(trim(std::u16string_view(styles).substr(p,end-p)));p=end+1;}for(std::size_t p=0;p<ids.size();){auto end=ids.find(u',',p);if(end==ids.npos)end=ids.size();document.nodes[node(trim(std::u16string_view(ids).substr(p,end-p)))].styles=declarations;p=end+1;}return;}
-  auto arrow=value.find(u"-->");if(arrow!=value.npos){auto left=trim(std::u16string_view(value).substr(0,arrow));auto rest=std::u16string_view(value).substr(arrow+3);auto colon=rest.find(u':');auto right=trim(rest.substr(0,colon));auto a=endpoint(left,true),b=endpoint(right,false);FlowchartEdge edge;auto id=std::to_string(document.edges.size());edge.id=u"edge"+std::u16string(id.begin(),id.end());edge.start=document.nodes[a].id;edge.end=document.nodes[b].id;edge.label=colon==rest.npos?u"":trim(rest.substr(colon+1));edge.label_type=u"markdown";edge.arrow_end=u"arrow_barb";edge.type=u"arrow_barb";edge.curve=u"basis";document.edges.push_back(std::move(edge));return;}
-  bool group=value.ends_with(u"{");if(group)value=trim(std::u16string_view(value).substr(0,value.size()-1));if(value.starts_with(u"state "))value=trim(std::u16string_view(value).substr(6));std::u16string id,label;
-  if(value.starts_with(u"\"")){auto end=value.find(u'"',1);if(end==value.npos)throw std::runtime_error("Unclosed State label");label=value.substr(1,end-1);auto rest=trim(std::u16string_view(value).substr(end+1));if(!rest.starts_with(u"as "))throw std::runtime_error("Expected State alias");id=trim(std::u16string_view(rest).substr(3));}else{auto colon=value.find(u':');id=trim(std::u16string_view(value).substr(0,colon));if(colon!=value.npos)label=trim(std::u16string_view(value).substr(colon+1));}
-  auto i=node(id);auto& n=document.nodes[i];if(!label.empty())n.label=label;if(group){n.group=true;n.shape=u"roundedWithTitle";n.direction=u"TB";parents.push_back(id);region_start[id]=document.nodes.size();region_count[id]=0;region_scope[id]=id;}
+  if(value.starts_with(u"style ")){auto space=value.find(u' ',6);if(space==value.npos)throw std::runtime_error("Expected State style");auto ids=value.substr(6,space-6);auto declarations=split(std::u16string_view(value).substr(space+1),u',');for(const auto& id:split(ids,u','))document.nodes[node(id)].styles=declarations;return;}
+  auto arrow=value.find(u"-->");if(arrow!=value.npos){auto left=trim(std::u16string_view(value).substr(0,arrow));auto rest=std::u16string_view(value).substr(arrow+3);auto colon=description_separator(rest);auto right=trim(rest.substr(0,colon));auto a=endpoint(left,true),b=endpoint(right,false);FlowchartEdge edge;auto id=std::to_string(document.edges.size());edge.id=u"edge"+std::u16string(id.begin(),id.end());edge.start=document.nodes[a].id;edge.end=document.nodes[b].id;edge.label=colon==rest.npos?u"":trim(rest.substr(colon+1));edge.label_type=u"markdown";edge.arrow_end=u"arrow_barb";edge.type=u"arrow_barb";edge.curve=u"basis";document.edges.push_back(std::move(edge));return;}
+  bool group=value.ends_with(u"{");if(group)value=trim(std::u16string_view(value).substr(0,value.size()-1));if(value.starts_with(u"state "))value=trim(std::u16string_view(value).substr(6));std::u16string special_shape;for(auto [marker,shape]:{std::pair<std::u16string_view,std::u16string_view>{u" <<fork>>",u"fork"},{u" <<join>>",u"join"},{u" <<choice>>",u"choice"},{u" [[fork]]",u"fork"},{u" [[join]]",u"join"},{u" [[choice]]",u"choice"}}){if(value.ends_with(marker)){special_shape=shape;value=trim(std::u16string_view(value).substr(0,value.size()-marker.size()));break;}}std::u16string id,label,css_class;
+  if(value.starts_with(u"\"")){auto end=value.find(u'"',1);if(end==value.npos)throw std::runtime_error("Unclosed State label");label=value.substr(1,end-1);auto rest=trim(std::u16string_view(value).substr(end+1));if(!rest.starts_with(u"as "))throw std::runtime_error("Expected State alias");id=trim(std::u16string_view(rest).substr(3));}else{auto colon=description_separator(value);id=trim(std::u16string_view(value).substr(0,colon));if(colon!=value.npos)label=trim(std::u16string_view(value).substr(colon+1));}auto sep=id.find(u":::");if(sep!=id.npos){css_class=trim(std::u16string_view(id).substr(sep+3));id=trim(std::u16string_view(id).substr(0,sep));}
+  auto i=node(id);auto& n=document.nodes[i];if(!label.empty())n.label=label;if(!special_shape.empty())n.shape=special_shape;if(!css_class.empty())n.classes=css_class;if(group){n.group=true;n.shape=u"roundedWithTitle";n.direction=u"TB";parents.push_back(id);region_start[id]=document.nodes.size();region_count[id]=0;region_scope[id]=id;}
  }
  void parse(std::u16string_view source){
   const auto header_end=source.find(u'\n');
@@ -62,7 +85,7 @@ struct Parser {
      break;
     }
    }
-   if(value.starts_with(u"note ")&&value.find(u':')==value.npos){
+   if(value.starts_with(u"note ")&&!trim(std::u16string_view(value).substr(5)).starts_with(u"\"")&&value.find(u':')==value.npos){
     const auto left=value.find(u" left of ");
     const auto right=value.find(u" right of ");
     const auto marker=left!=value.npos?left:right;
@@ -94,6 +117,8 @@ struct Parser {
    line(std::move(statement),trailing_separator);
   }
   if(!parents.empty())throw std::runtime_error("Unclosed State composite");
+  for(const auto& [ids,name]:class_assignments)for(const auto& id:ids){auto& n=document.nodes[node(id)];if(!n.classes.empty())n.classes+=u" ";n.classes+=name;}
+  for(auto& n:document.nodes)for(const auto& name:split(n.classes,u' '))if(auto found=class_defs.find(name);found!=class_defs.end())n.compiled_styles.append_range(found->second);
   std::map<std::u16string,std::vector<std::size_t>,std::less<>> children;
   for(std::size_t i=0;i<document.nodes.size();++i)children[document.nodes[i].parent].push_back(i);
   std::vector<FlowchartNode> ordered;ordered.reserve(document.nodes.size());
