@@ -5,6 +5,10 @@
   "license": "MIT",
   "files": [
     {
+      "path": "packages/mermaid/src/diagrams/agentflow/parser/agentflow.jison",
+      "sha256": "8bb23d09c1dcdf4a3d3139c4ba29b8a823d726b755c69067010a74cb621fd2a6"
+    },
+    {
       "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/person.ts",
       "sha256": "5f66584f62282841a2de4582d14f2ad109f9e1175e36c25ef3e4f606a2fc2a1a"
     },

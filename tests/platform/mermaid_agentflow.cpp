@@ -26,7 +26,9 @@ suite mermaid_agentflow = [] {
                             u"checks[\"Checks\"]\n      policy[\"Policy\"]\n    end\n    "
                             u"approval[\"Approval\"]\n  end\n  connector queue[\"Work queue\"]\n  "
                             u"finish[\"Complete\"]\n  start --> intake --> policy --> approval "
-                            u"--> finish\n"}};
+                            u"--> finish\n"},
+            {"shape-fallback", u"agentflow-beta TB\n  a[\"Alpha\"]\n  a@{ shape: triangle }\n"
+                               u"  b[\"Beta\"]@{ shape: circle }\n  a --> b\n"}};
         for (auto theme : {u"default", u"dark"}) {
             auto session = ConfigSession::create();
             expect(fatal(session.has_value()));
