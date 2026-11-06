@@ -6,13 +6,14 @@
 
 ## 一、当前基线状态（Current Baseline）
 
-- **开发分支**：`feat/mermaid-cpp-port`（对应上游 PR `water2004/Folia#1`，基于上游 `master` `38231c6a` Folia 0.5.4）。
-- **最近验证通过提交**：`c128acc9e4e89856e34ac0ae620df6271e8d8793`（Windows `standalone`/`integrated` × `Debug`/`Release` 四配置 CI 全绿，运行记录：`40820458232` / `40820482671`）。
+- PR #1 已合并到 GitHub `master`（`39e6bdcd`）。本地把 C++ 库迁至 `src/mermaid` 并提供 `folia::mermaid`。根构建显式开启 `FOLIA_BUILD_MERMAID` 时生成独立目标，WinUI 继续使用 Rust。
+- 迁移前 CI 基线 `c128acc9` 的 Windows `standalone`/`integrated` × `Debug`/`Release` 四配置通过，运行记录为 `40820458232` / `40820482671`。
 - **公共渲染入口已打通的 20 个图族**：
   `Packet`、`Pie`、`Flowchart`（Dagre + 默认 ELK）、`Sequence`、`Class`（显式 Dagre）、`Quadrant`、`Radar`、`XY`、`Sankey`、`Treemap`、`Journey`、`Timeline`、`Gantt`、`Git graph`、`Mindmap`、`Block`、`Kanban`、`C4`、`Architecture`、`State`（classic/Dagre）。
 - **已完成但尚未接入公共入口的模块**：
-  `ZenUML`（`third_party/mermaid-cpp/src/zenuml.{ixx,cpp}` 与 `zenuml_svg.{ixx,cpp}` 已通过独立单元测试与平台 SVG 对照）。
-- **当前运行句柄**：无正在运行的后台构建或子智能体任务。
+  `ZenUML`（`src/mermaid/zenuml.{ixx,cpp}` 与 `zenuml_svg.{ixx,cpp}` 已通过独立单元测试与平台 SVG 对照）。
+- **本次迁移验证**：本地 Windows Debug 独立构建通过核心、DirectWrite 平台和 DLL 宿主三套 CTest（`build/mermaid-relocation-final.log`）。根工程默认及显式开启配置均通过，确认 `folia_platform` 没有链接 Mermaid。候选补丁通过 `git apply --check`。Windows 构建固定 YAML 补丁为 LF，并拆分了超出 MSVC 单字面量限制的 ZenUML SVG 字符串。
+- **下一步**：继续收尾下列图族任务。WinUI 切换留待单独安排。无运行句柄。
 
 ---
 
@@ -21,11 +22,11 @@
 当需要把一个新图族或新布局接入公共渲染入口时，完整的数据流经以下 5 个层次：
 
 1. **前端识别与会话配置**
-   - 文件：`third_party/mermaid-cpp/src/frontend.{ixx,cpp}`、`diagram_registry.{ixx,cpp}`
+   - 文件：`src/mermaid/frontend.{ixx,cpp}`、`diagram_registry.{ixx,cpp}`
    - 函数：`prepare_diagram(source, session, limits)`
    - 作用：清理文本、提取 YAML frontmatter 与 `%%{init}%%` 指令，调用 `DiagramRegistry::detect` 识别图族 ID（如 `u"flowchart-v2"`、`u"classDiagram"`、`u"er"`、`u"zenuml"`），并生成合并后的 `effective_config` 与 `themeVariables`。
 2. **核心渲染准备与分发入口（平台无关）**
-   - 文件：`third_party/mermaid-cpp/src/render_entry.{ixx,cpp}`
+   - 文件：`src/mermaid/render_entry.{ixx,cpp}`
    - 结构体：`NativeDiagram`（内部 `std::variant<...>` 持有各图族的 `*RenderInput`）
    - 函数 1：`prepare_native_diagram(source, session, limits)` —— 根据 `prepared->type` 调用对应图族的解析器，提取主题与配置，返回 `NativeDiagram`。
    - 函数 2：`render_native_diagram(input, ...各图族测量参数...)` —— 使用 `std::visit` 分发到对应图族的 `render_<family>_svg`，返回 `DiagramSvg{svg, width, height}`。
@@ -45,8 +46,8 @@
    - 函数：`FoliaNativeMermaidRender` / `FoliaNativeMermaidFree`（每次请求独立初始化 `default` 或 `dark` 的 `ConfigSession`）。
 
 > ⚠️ **CMake 自动源文件收集警告**：
-> `tools/mermaid-cpp/CMakeLists.txt` 对 `third_party/mermaid-cpp/src/*.{ixx,cpp}` 和 `tests/mermaid_cpp/*.cpp` 使用了 `file(GLOB_RECURSE ...)`，而 `tests/platform/*.cpp` 则是在 `tools/mermaid-cpp/CMakeLists.txt` 的 `FoliaMermaidPlatformTests` 目标中**显式逐个列出**的。
-> - 往 `third_party/mermaid-cpp/src/` 或 `tests/mermaid_cpp/` 添加文件会**立即参与编译**，切勿放入半成品文件。
+> `src/mermaid/CMakeLists.txt` 自动收集库源码，`tools/mermaid-cpp/CMakeLists.txt` 自动收集 `tests/mermaid_cpp/*.cpp`，并在 `FoliaMermaidPlatformTests` 目标中显式列出平台测试。
+> - 往 `src/mermaid/` 或 `tests/mermaid_cpp/` 添加文件会**立即参与编译**，切勿放入半成品文件。
 > - 往 `tests/platform/` 添加新平台测试文件时，**必须同步将其路径加入 `tools/mermaid-cpp/CMakeLists.txt` 的 `FoliaMermaidPlatformTests` 源文件列表中**。
 
 ---
@@ -57,14 +58,14 @@
 
 - **目标**：将已实现的 `folia.mermaid.zenuml_svg` 接入 `frontend`、`render_entry` 与 `mermaid_renderer.ixx`，使 `zenuml` 成为可通过公共入口和 DLL 渲染的第 21 个图族。
 - **已有基础与参考补丁**：
-  - 核心与 SVG 实现已存在：`third_party/mermaid-cpp/src/zenuml.{ixx,cpp}`、`zenuml_svg.{ixx,cpp}`
+  - 核心与 SVG 实现已存在：`src/mermaid/zenuml.{ixx,cpp}`、`zenuml_svg.{ixx,cpp}`
   - 独立测试已存在：`tests/mermaid_cpp/zenuml.cpp`、`tests/platform/mermaid_zenuml.cpp`
   - 候选补丁草案：`docs/mermaid-cpp/candidates/2026-10-28/zenuml-public.patch`
   - 候选源码锁补充：`docs/mermaid-cpp/candidates/2026-10-28/zenuml-native-pins.json`
 - **允许修改的文件**：
-  - `third_party/mermaid-cpp/src/frontend.cpp`
-  - `third_party/mermaid-cpp/src/render_entry.ixx`
-  - `third_party/mermaid-cpp/src/render_entry.cpp`
+  - `src/mermaid/frontend.cpp`
+  - `src/mermaid/render_entry.ixx`
+  - `src/mermaid/render_entry.cpp`
   - `src/platform/text/mermaid_measurer.ixx`
   - `src/platform/text/mermaid_renderer.ixx`
   - `tests/mermaid_cpp/render_entry.cpp`
@@ -93,12 +94,12 @@
 - **已有基础与参考补丁**：
   - 共享场景提取补丁：`docs/mermaid-cpp/candidates/2026-10-28/class-elk-shared.patch`
   - Class ELK 算子、后处理与测试补丁：`docs/mermaid-cpp/candidates/2026-10-28/class-elk.patch`
-  - 已有的 Class 节点测量与绘制实现：`third_party/mermaid-cpp/src/class_svg.{ixx,cpp}`
+  - 已有的 Class 节点测量与绘制实现：`src/mermaid/class_svg.{ixx,cpp}`
 - **允许修改的文件**：
-  - `third_party/mermaid-cpp/src/flowchart_elk.{ixx,cpp}`
-  - `third_party/mermaid-cpp/src/class_elk.{ixx,cpp}`（新增）
-  - `third_party/mermaid-cpp/src/class_svg.{ixx,cpp}`
-  - `third_party/mermaid-cpp/src/render_entry.cpp`
+  - `src/mermaid/flowchart_elk.{ixx,cpp}`
+  - `src/mermaid/class_elk.{ixx,cpp}`（新增）
+  - `src/mermaid/class_svg.{ixx,cpp}`
+  - `src/mermaid/render_entry.cpp`
   - `tests/mermaid_cpp/class_elk.cpp`（新增）
   - `tests/mermaid_cpp/fixtures/class-elk.tsv`（新增）
   - `tests/platform/mermaid_class_elk.cpp`（新增，或扩展现有平台测试）
@@ -118,9 +119,9 @@
      - 运行 `node tools/mermaid-cpp/class-elk-browser-probe.mjs` 生成 `build/mermaid-cpp/class-elk-browser/original.json`，再运行 `node tools/mermaid-cpp/class-elk-oracle.mjs` 校验 9 列 `class-elk.tsv`。
      - 编译并运行 `FoliaMermaidTests.exe "*class_elk*"`，确认 `layout_measured_elk_class` 与 `finish_class_elk_scene` 加上 `flowchart_elk_paint.inc` 中的端点裁剪后，所有节点、边路径、中心标签及起止端点标签（`startRight` / `endLeft`）坐标与 `class-elk.tsv` 在 `1e-4` 精度内一致。
   3. **在 `class_svg.{ixx,cpp}` 与 `render_entry.cpp` 接入 ELK 绘制路径**：
-     - 在 `ClassSvgConfig`（`third_party/mermaid-cpp/src/class_svg.ixx`）中增加 `bool elk_layout = false;`。
-     - 在 `third_party/mermaid-cpp/src/render_entry.cpp` 的 `u"classDiagram"` 分支中，将原本仅允许 `u"dagre"` 的检查放宽为允许 `u"dagre"` 或 `u"elk"`，并将 `c.elk_layout = (layout == u"elk");` 写入 `ClassSvgConfig`。
-     - 在 `third_party/mermaid-cpp/src/class_svg.cpp` 的 `render_class_svg` 中：当 `config.elk_layout` 为 `true` 时，调用 `layout_measured_elk_class` 获取 `ClassElkScene`，对每条边保存裁剪前的原始端口坐标 `raw_endpoints`，执行与 Flowchart ELK 相同的矩形边界裁剪（`clip_elk_node_endpoints` / `elk_remove_short_marker_segment`），调用 `finish_class_elk_scene` 更新端点标签位置，最后使用 `rounded_elk_path`（圆角正交折线）替代 Dagre 的 `curveBasis` 输出边路径，并渲染对应的 `class="edgeTerminals"` 端点标签组。
+     - 在 `ClassSvgConfig`（`src/mermaid/class_svg.ixx`）中增加 `bool elk_layout = false;`。
+     - 在 `src/mermaid/render_entry.cpp` 的 `u"classDiagram"` 分支中，将原本仅允许 `u"dagre"` 的检查放宽为允许 `u"dagre"` 或 `u"elk"`，并将 `c.elk_layout = (layout == u"elk");` 写入 `ClassSvgConfig`。
+     - 在 `src/mermaid/class_svg.cpp` 的 `render_class_svg` 中：当 `config.elk_layout` 为 `true` 时，调用 `layout_measured_elk_class` 获取 `ClassElkScene`，对每条边保存裁剪前的原始端口坐标 `raw_endpoints`，执行与 Flowchart ELK 相同的矩形边界裁剪（`clip_elk_node_endpoints` / `elk_remove_short_marker_segment`），调用 `finish_class_elk_scene` 更新端点标签位置，最后使用 `rounded_elk_path`（圆角正交折线）替代 Dagre 的 `curveBasis` 输出边路径，并渲染对应的 `class="edgeTerminals"` 端点标签组。
   4. **验证双主题 10 张 SVG 并清理补丁**：
      - 确认 `compare-class-svg.mjs` 对 `class-elk-browser/original.json`（5 案例 × default/dark = 10 张 SVG）和既有 Dagre Class 案例全部通过，且 Flowchart ELK 测试不回归。
      - 从 `docs/mermaid-cpp/candidates/2026-10-28/` 移除已合入的 `class-elk*.patch`。
@@ -138,11 +139,11 @@
   - SVG 对照脚本：`tools/mermaid-cpp/compare-er-svg.mjs`
   - 上游源码哈希锁：`docs/mermaid-cpp/source-lock.json` 中的 `er` 条目（锁定 `erParser.ts`、`erDb.ts`、`erRenderer-unified.ts`、`erMarkers.ts`、`styles.ts` 及 `node_entities.ts`）
 - **需要新增或修改的文件**：
-  - 新增：`third_party/mermaid-cpp/src/er.ixx`、`third_party/mermaid-cpp/src/er.cpp`
-  - 新增：`third_party/mermaid-cpp/src/er_svg.ixx`、`third_party/mermaid-cpp/src/er_svg.cpp`
+  - 新增：`src/mermaid/er.ixx`、`src/mermaid/er.cpp`
+  - 新增：`src/mermaid/er_svg.ixx`、`src/mermaid/er_svg.cpp`
   - 新增：`tests/mermaid_cpp/er.cpp`
   - 新增：`tests/platform/mermaid_er.cpp`（需同步加入 `tools/mermaid-cpp/CMakeLists.txt` 的 `FoliaMermaidPlatformTests` 列表）
-  - 接线修改：`third_party/mermaid-cpp/src/render_entry.{ixx,cpp}`、`src/platform/text/mermaid_renderer.ixx`、`.github/workflows/mermaid-cpp.yml`
+  - 接线修改：`src/mermaid/render_entry.{ixx,cpp}`、`src/platform/text/mermaid_renderer.ixx`、`.github/workflows/mermaid-cpp.yml`
 - **精确执行步骤**：
   1. **实现解析器与数据模型（`er.{ixx,cpp}`）**：
      - 对照 `tools/mermaid-cpp/er-oracle.mjs` 与 `tests/mermaid_cpp/fixtures/er.tsv` 的列格式，实现 `erDiagram` 语法解析：
@@ -203,8 +204,8 @@ node tools/mermaid-cpp/zenuml-browser-probe.mjs build/mermaid-cpp/zenuml-browser
 node tools/mermaid-cpp/compare-zenuml-svg.mjs build/mermaid-cpp/zenuml-browser/original.json build/mermaid-cpp/pie-svg
 
 # 6. 运行主工程核心测试与 Windows 编辑器回归测试
-cmd /c build_test.bat 2>&1
-cmd /c build_platform_test.bat 2>&1
+cmd /c tests\run_core.bat 2>&1
+cmd /c tests\platform\run.bat 2>&1
 ```
 
 ---
@@ -212,5 +213,5 @@ cmd /c build_platform_test.bat 2>&1
 ## 五、智能体工作准则（Agent Guardrails）
 
 1. **真实测量与原版算法**：所有需要文本尺寸的布局必须通过平台层传入真实 DirectWrite 测量结果，严禁使用“字符数 × 固定系数”估算字宽，严禁针对特定测试案例硬编码坐标偏移或调大比较容差（几何容差固定为 `1.5`，ELK 算子容差为 `1e-4`）。
-2. **模块与平台隔离**：`third_party/mermaid-cpp/src/` 下的模块必须保持纯标准 C++23（使用 `import std;`），不得包含任何 Windows / DirectWrite / WinRT 头文件；平台相关代码一律放在 `src/platform/text/`。
+2. **模块与平台隔离**：`src/mermaid/` 下的模块必须保持纯标准 C++23（使用 `import std;`），不得包含任何 Windows / DirectWrite / WinRT 头文件；平台相关代码一律放在 `src/platform/text/`。
 3. **小步提交与原位更新交接**：每完成一个独立任务包并通过验证，立即提交代码，并直接在本文件顶部更新“当前基线状态”和对应任务的完成情况，不要在文档末尾堆叠历史流水账。

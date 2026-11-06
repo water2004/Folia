@@ -45,6 +45,7 @@ endif()
 
 
 option(FOLIA_BUILD_WINUI "Build the WinUI 3 C++/WinRT application shell" OFF)
+option(FOLIA_BUILD_MERMAID "Build the native Mermaid library and its dedicated tests" OFF)
 
 if(FOLIA_BUILD_WINUI)
     message(FATAL_ERROR "The WinUI 3 shell is built with MSBuild at src/app-winui/Folia.vcxproj so XAML/IDL/C++WinRT generation runs through the Windows App SDK targets. Keep CMake for folia_core, folia_platform, and tests.")
@@ -594,6 +595,7 @@ if(WIN32)
 
     file(GLOB_RECURSE FOLIA_PLATFORM_MODULE CONFIGURE_DEPENDS
         ${CMAKE_CURRENT_SOURCE_DIR}/src/platform/*.ixx)
+    list(FILTER FOLIA_PLATFORM_MODULE EXCLUDE REGEX "/src/platform/text/mermaid_[^/]+\\.ixx$")
     file(GLOB_RECURSE FOLIA_PLATFORM_SRC CONFIGURE_DEPENDS
         ${CMAKE_CURRENT_SOURCE_DIR}/src/platform/*.cpp)
 
@@ -895,6 +897,7 @@ if(TARGET folia_platform)
         CXX_SCAN_FOR_MODULES ON)
     file(GLOB_RECURSE FOLIA_PLATFORM_TEST_SRC CONFIGURE_DEPENDS
         ${CMAKE_CURRENT_SOURCE_DIR}/tests/platform/*.cpp)
+    list(FILTER FOLIA_PLATFORM_TEST_SRC EXCLUDE REGEX "/tests/platform/mermaid_[^/]+\\.cpp$")
     target_sources(FoliaWindowsEditorTests PRIVATE
         ${FOLIA_PLATFORM_TEST_SRC})
     target_include_directories(FoliaWindowsEditorTests PRIVATE
@@ -1084,5 +1087,6 @@ if(WIN32 AND MSVC)
     endforeach()
 endif()
 
-# Official Mermaid C++ dependency and its isolated native test target.
-add_subdirectory(tools/mermaid-cpp)
+if(FOLIA_BUILD_MERMAID)
+    add_subdirectory(tools/mermaid-cpp)
+endif()

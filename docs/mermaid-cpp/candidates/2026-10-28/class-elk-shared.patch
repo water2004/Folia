@@ -1,5 +1,5 @@
---- a/third_party/mermaid-cpp/src/flowchart_elk.ixx
-+++ b/third_party/mermaid-cpp/src/flowchart_elk.ixx
+--- a/src/mermaid/flowchart_elk.ixx
++++ b/src/mermaid/flowchart_elk.ixx
 @@ -2,8 +2,19 @@
  export module folia.mermaid.flowchart_elk;
  import std;
@@ -20,8 +20,8 @@
  // Routes retain ELK port anchors. The shared shape painter performs the
  // original endpoint clipping, marker shortening and rounded path emission.
  std::expected<FlowchartScene,std::string> layout_measured_elk_flowchart(
---- a/third_party/mermaid-cpp/src/flowchart_elk.cpp
-+++ b/third_party/mermaid-cpp/src/flowchart_elk.cpp
+--- a/src/mermaid/flowchart_elk.cpp
++++ b/src/mermaid/flowchart_elk.cpp
 @@ -16,13 +16,13 @@
      o.edge_label_spacing=2.4;o.ports.port_spacing=12;o.ports.port_label_spacing_vertical=1.2;return o;
  }

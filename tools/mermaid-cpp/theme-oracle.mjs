@@ -127,7 +127,7 @@ for(const paint of paints) for(const [op,arg] of operations) {
 }
 writeOrCheck('tests/mermaid_cpp/fixtures/theme-colors.tsv',
   '# Khroma 2.1.0: operation/UTF-16 JSON color/argument (U=absent)/typed result\n'+colorRows.join('\n')+'\n');
-writeOrCheck('third_party/mermaid-cpp/src/theme_color_names.inc',
+writeOrCheck('src/mermaid/theme_color_names.inc',
   '// Generated from hash-locked Khroma 2.1.0 src/color/keyword.ts. MIT.\n'+
   'constexpr std::pair<std::string_view, std::string_view> color_names[] = {\n'+
   keywords.map(([k,v])=>`    {"${k}", "${v}"},`).join('\n')+'\n};\n');

@@ -77,7 +77,7 @@ for(const name of ['default','dark']) {
     '// Ordered assignments preserve constructor/update behavior; do not edit by hand.',
     `void Theme::construct_${name}() {\n`+methods.find(n=>n.kind==='constructor').value.body.body.map(n=>statement(n)).join('')+'}',
     `void Theme::update_${name}() {\n`+methods.find(n=>n.key.name==='updateColors').value.body.body.map(n=>statement(n)).join('')+'}', ''].join('\n');
-  const file=path.join(root,`third_party/mermaid-cpp/src/theme_${name}.inc`);
+  const file=path.join(root,`src/mermaid/theme_${name}.inc`);
   if(process.argv.includes('--write')) writeFileSync(file,generated);
   else assert.equal(readFileSync(file,'utf8').replaceAll('\r\n','\n'),generated,file);
 }

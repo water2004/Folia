@@ -1,5 +1,5 @@
---- a/third_party/mermaid-cpp/src/render_entry.ixx
-+++ b/third_party/mermaid-cpp/src/render_entry.ixx
+--- a/src/mermaid/render_entry.ixx
++++ b/src/mermaid/render_entry.ixx
 @@ -20,6 +20,7 @@
  export import folia.mermaid.kanban_svg;
  export import folia.mermaid.c4_svg;
@@ -25,8 +25,8 @@
 +    const StateMeasure& state_measure = {},
 +    const ZenSvgMeasure& zenuml_measure = {});
  }
---- a/third_party/mermaid-cpp/src/render_entry.cpp
-+++ b/third_party/mermaid-cpp/src/render_entry.cpp
+--- a/src/mermaid/render_entry.cpp
++++ b/src/mermaid/render_entry.cpp
 @@ -127,6 +127,11 @@
      try {
          const auto& effective=prepared->effective_config;
@@ -84,8 +84,8 @@
 +    return render_native_diagram(*input,widths,flowchart_measurements,sequence_measurements,class_measurements,xy_measurements,sankey_measurements,treemap_measure,journey_measure,timeline_measure,gantt_measure,git_graph_measure,mindmap_measurements,block_measure,kanban_measure,c4_measurements,architecture_measurements,state_measure,zenuml_measure);
  }
  }
---- a/third_party/mermaid-cpp/src/frontend.cpp
-+++ b/third_party/mermaid-cpp/src/frontend.cpp
+--- a/src/mermaid/frontend.cpp
++++ b/src/mermaid/frontend.cpp
 @@ -37,6 +37,12 @@
          DiagramRegistry registry{{.source_units = limits.source_units, .config = limits.config}};
          if (auto registered = registry.add_builtin_diagrams(); !registered)

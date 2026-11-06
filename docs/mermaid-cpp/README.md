@@ -1,8 +1,8 @@
 # Mermaid C++ 原生渲染模块说明与协作指南
 
-本目录记录 Folia 的 Mermaid C++23 原生重构工程。该项目以官方 [`mermaid-js/mermaid`](https://github.com/mermaid-js/mermaid) **12.2.0**（commit `1fb7869866dd619168d840291c9c54b4f129758b`）为基准，在 `third_party/mermaid-cpp/` 与 `src/platform/text/` 下使用 C++23 modules 原生实现语法解析、布局计算、DirectWrite 文本测量与 SVG 渲染，用于替换现有的 `mermaid-rs-renderer` 依赖。各组件对应的上游源码版本与哈希记录在 [`source-lock.json`](source-lock.json) 中。
+本目录记录 Folia 的 Mermaid C++23 原生重构工程。该项目以官方 [`mermaid-js/mermaid`](https://github.com/mermaid-js/mermaid) **12.2.0**（commit `1fb7869866dd619168d840291c9c54b4f129758b`）为基准，在 `src/mermaid/` 与 `src/platform/text/` 下使用 C++23 modules 原生实现语法解析、布局计算、DirectWrite 文本测量与 SVG 渲染，用于替换现有的 `mermaid-rs-renderer` 依赖。各组件对应的上游源码版本与哈希记录在 [`source-lock.json`](source-lock.json) 中。
 
-当前工程处于阶段性交付状态：公共配置前端、DirectWrite 测量桥接、动态库 C ABI 以及 **20 个图族**的公共渲染入口均已贯通并通过 CI 验证；剩余图族收尾及 WinUI 宿主切换正在推进中（Folia 桌面端当前仍使用原有 Rust 渲染链路）。
+当前工程处于阶段性交付状态。公共配置前端、DirectWrite 测量桥接、动态库 C ABI 和 **20 个图族**的公共渲染入口已通过迁移分支的 CI 验证。C++ 库提供 `folia::mermaid` CMake 目标，桌面端仍使用原有 Rust 渲染链路。
 
 ---
 
@@ -25,7 +25,7 @@
 | 时间与序列图表 | **Gantt**、**Git graph**、**Journey**、**Timeline** | Gantt 日期解析、时长依赖排程（`dayjs`）与时间轴刻度（`d3-time`）；Git graph 分支车道、提交/合并/cherry-pick 符号与标签布局；Journey 任务评分与角色轨迹；Timeline 横向/纵向事件时间轴。 |
 
 ### 3. ZenUML 独立模块（待接入公共入口）
-- `third_party/mermaid-cpp/src/zenuml.{ixx,cpp}` 与 `zenuml_svg.{ixx,cpp}` 已完成语法解析、横向约束求解、递归纵向 Block 布局与 SVG 输出，5 个基准案例在 Windows 四配置下均已通过原生测试与浏览器 SVG 对照，仅剩 `render_entry` 公共入口接线与字体别名映射收尾。
+- `src/mermaid/zenuml.{ixx,cpp}` 与 `zenuml_svg.{ixx,cpp}` 已完成语法解析、横向约束求解、递归纵向 Block 布局与 SVG 输出，5 个基准案例在 Windows 四配置下均已通过原生测试与浏览器 SVG 对照，仅剩 `render_entry` 公共入口接线与字体别名映射收尾。
 
 ### 4. 平台文本测量与动态库接口（`src/platform/text/` / `tools/mermaid-cpp/`）
 - **DirectWrite 文本测量（`mermaid_measurer.ixx`）**：在 Windows 平台解析 CSS `font-family` 候选列表，提供单行 advance/ink bounds 测量、按 Unicode 断行机会的文本折行以及 SVG 字体 ascent/descent 度量。
@@ -47,15 +47,15 @@
 | **4. 其余图族与特性补齐** | Requirement 图等尚未开始；State 注释/并发分隔及部分存量图族次要语法分支待补齐 | 对照 Folia 实际支持的图族范围，优先实现 Requirement 图的原生解析、布局与 SVG 输出，并按需补齐存量图族的常见语法分支。 |
 | **5. WinUI 宿主集成与依赖切换** | 独立候选分支已完成早期编译与初步预览验证 | 将最新 `FoliaNativeMermaid` 接入 WinUI 应用预览、编辑刷新、亮暗主题切换与 PDF 导出链路，完成桌面端实机验证后移除 `mermaid-rs-renderer` 依赖。 |
 
-> **候选补丁说明**：[`candidates/2026-10-28/`](candidates/2026-10-28/README.md) 目录保存了尚未接入主编译树的 **Class ELK** 与 **ZenUML 公共入口** 补丁。由于 `tools/mermaid-cpp/CMakeLists.txt` 对 `third_party/mermaid-cpp/src/*.{ixx,cpp}` 和 `tests/mermaid_cpp/*.cpp` 使用了 `GLOB_RECURSE` 自动收集源文件，请在确认共享接口与模块实现配套完整后再将新源文件放入上述目录。
+> **候选补丁说明**：[`candidates/2026-10-28/`](candidates/2026-10-28/README.md) 保存 **Class ELK** 与 **ZenUML 公共入口** 补丁。库和测试的 CMake 文件分别自动收集 `src/mermaid` 和 `tests/mermaid_cpp` 的源文件。请先确认共享接口与模块实现配套完整，再加入新源文件。
 
 ---
 
 ## 三、目录结构与构建说明
 
 ### 1. 目录结构
-- `third_party/mermaid-cpp/src/`：C++23 平台无关核心模块（`.ixx` 模块接口与 `.cpp` 实现）。
-- `third_party/mermaid-cpp/THIRD_PARTY_NOTICES.md`：第三方算法与上游源码许可证声明。
+- `src/mermaid/`：C++23 平台无关核心模块（`.ixx` 模块接口与 `.cpp` 实现）。
+- `src/mermaid/THIRD_PARTY_NOTICES.md`：第三方算法与上游源码许可证声明。
 - `src/platform/text/`：Windows DirectWrite 文本测量（`mermaid_measurer.ixx`）、平台渲染桥接（`mermaid_renderer.ixx`）与宿主会话封装（`mermaid_host.ixx`）。
 - `tests/mermaid_cpp/`：核心解析与布局单元测试（`FoliaMermaidTests`）及 TSV 基准数据（`fixtures/`）。
 - `tests/platform/`：DirectWrite 平台测量与各图族 SVG 生成测试（`FoliaMermaidPlatformTests`）。
@@ -65,8 +65,9 @@
 
 ### 2. 本地构建与测试命令
 - **运行主工程测试**：
-  - 核心测试：`cmd /c build_test.bat`
-  - Windows 编辑器测试：`cmd /c build_platform_test.bat`
+  - 核心测试：`cmd /c tests\run_core.bat`
+  - Windows 编辑器测试：`cmd /c tests\platform\run.bat`
+- 从仓库根目录配置时，使用 `-DFOLIA_BUILD_MERMAID=ON` 生成独立 Mermaid 库和测试目标。该选项默认关闭。
 - **独立构建并运行 Mermaid 测试（Windows + VS + Ninja）**：
   ```powershell
   cmake -S tools/mermaid-cpp -B build/mermaid-cpp -G Ninja -DCMAKE_BUILD_TYPE=Release
@@ -85,7 +86,7 @@
 ## 四、多人远程协作分工建议
 
 1. **共享接线文件（建议由集成负责人统一维护）**
-   - 涉及文件：`third_party/mermaid-cpp/src/render_entry.{ixx,cpp}`、`third_party/mermaid-cpp/src/frontend.cpp`、`src/platform/text/mermaid_renderer.ixx`、`tools/mermaid-cpp/CMakeLists.txt`、`.github/workflows/mermaid-cpp.yml`、`docs/mermaid-cpp/source-lock.json`。
+   - 涉及文件：`src/mermaid/render_entry.{ixx,cpp}`、`src/mermaid/frontend.cpp`、`src/platform/text/mermaid_renderer.ixx`、`tools/mermaid-cpp/CMakeLists.txt`、`.github/workflows/mermaid-cpp.yml`、`docs/mermaid-cpp/source-lock.json`。
    - 多人并行开发时，各图族负责人可在各自模块内完成解析、布局与 `render_<family>_svg` 接口，并提交最小入口补丁由集成负责人合入，避免多人同时修改 `render_entry` 产生冲突。
 2. **独立功能包认领（可并行推进）**
    - **ZenUML 公共入口收尾**：基于 `candidates/2026-10-28/zenuml-public.patch` 完成探测器注册、字体别名解析与入口测试。

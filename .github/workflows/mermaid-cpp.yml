@@ -12,7 +12,7 @@ on:
       - docs/mermaid-cpp/**
       - .gitattributes
       - .gitmodules
-      - third_party/mermaid-cpp/**
+      - src/mermaid/**
       - third_party/ut
       - tests/mermaid_cpp/**
       - tests/main.cpp
@@ -30,7 +30,7 @@ on:
       - docs/mermaid-cpp/**
       - .gitattributes
       - .gitmodules
-      - third_party/mermaid-cpp/**
+      - src/mermaid/**
       - third_party/ut
       - tests/mermaid_cpp/**
       - tests/main.cpp
@@ -324,9 +324,11 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           $source = if ('${{ matrix.scope }}' -eq 'integrated') { '.' } else { 'tools/mermaid-cpp' }
           $binary = if ('${{ matrix.scope }}' -eq 'integrated') { 'build/mermaid-cpp/tools/mermaid-cpp' } else { 'build/mermaid-cpp' }
+          $options = @()
+          if ('${{ matrix.scope }}' -eq 'integrated') { $options += '-DFOLIA_BUILD_MERMAID=ON' }
           "FOLIA_MERMAID_BINARY_DIR=$binary" >> $env:GITHUB_ENV
           cmake -Wno-dev -G Ninja -S $source -B build/mermaid-cpp `
-            -DCMAKE_BUILD_TYPE=${{ matrix.configuration }} 2>&1 |
+            -DCMAKE_BUILD_TYPE=${{ matrix.configuration }} @options 2>&1 |
             Tee-Object -FilePath build/mermaid-cpp/configure.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 

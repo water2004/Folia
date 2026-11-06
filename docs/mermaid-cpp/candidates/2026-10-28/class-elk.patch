@@ -1,8 +1,8 @@
-diff --git a/third_party/mermaid-cpp/src/class_elk.ixx b/third_party/mermaid-cpp/src/class_elk.ixx
+diff --git a/src/mermaid/class_elk.ixx b/src/mermaid/class_elk.ixx
 new file mode 100644
 index 00000000..620e2154
 --- /dev/null
-+++ b/third_party/mermaid-cpp/src/class_elk.ixx
++++ b/src/mermaid/class_elk.ixx
 @@ -0,0 +1,20 @@
 +// Measured Class default ELK adapter, Mermaid 12.2.0. MIT, ../LICENSE.
 +export module folia.mermaid.class_elk;
@@ -24,11 +24,11 @@ index 00000000..620e2154
 +    std::span<const ClassEdgeMeasurements>,
 +    std::span<const std::pair<FlowchartPoint,FlowchartPoint>> raw_endpoints);
 +}
-diff --git a/third_party/mermaid-cpp/src/class_elk.cpp b/third_party/mermaid-cpp/src/class_elk.cpp
+diff --git a/src/mermaid/class_elk.cpp b/src/mermaid/class_elk.cpp
 new file mode 100644
 index 00000000..133460d5
 --- /dev/null
-+++ b/third_party/mermaid-cpp/src/class_elk.cpp
++++ b/src/mermaid/class_elk.cpp
 @@ -0,0 +1,87 @@
 +module folia.mermaid.class_elk;
 +import std;
