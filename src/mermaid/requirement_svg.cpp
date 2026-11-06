@@ -64,11 +64,18 @@ FlowchartPoint intersect(const FlowchartPlacedNode& node,std::u16string_view,Flo
 }
 #include "flowchart_elk_paint.inc"
 
+struct FieldLine {
+    FlowchartLabelLine runs;
+    RequirementTextMetrics metrics;
+};
 struct Field {
     std::u16string text;
+    std::vector<FieldLine> lines;
+    std::vector<FlowchartLabelLine> html_wrapped_source;
+    FlowchartLabelFont font;
     RequirementTextMetrics metrics;
-    double width=0,height=0,offset=0;
-    bool bold=false;
+    double width=0,height=0,offset=0,line_step=0;
+    bool center_rows=false;
 };
 struct NodePaint {
     std::vector<Field> fields;
@@ -101,6 +108,192 @@ std::u16string field_text(std::u16string_view prefix,std::u16string_view value) 
     if(value.empty()) return {};
     return std::u16string(prefix)+std::u16string(value);
 }
+RequirementTextMetrics measure_line(const RequirementSvgMeasure& measure,
+    std::u16string_view text,const FlowchartLabelFont& font,bool svg,
+    std::span<const RequirementTextRun> runs={}) {
+    auto metrics=measure(text,font.family,font.size,font.weight,font.italic,runs,svg);
+    if(!metrics) throw std::runtime_error(metrics.error());
+    if(!finite_metrics(*metrics)) throw std::runtime_error("Requirement text measurement is invalid");
+    return *metrics;
+}
+unsigned run_weight(const FlowchartLabelFont& font,bool strong,bool svg) {
+    if(!strong) return font.weight;
+    if(svg) return std::max(font.weight,700u);
+    return font.weight<350?400u:font.weight<550?700u:900u;
+}
+RequirementTextMetrics measure_runs(const RequirementSvgMeasure& measure,
+    const FlowchartLabelLine& runs,const FlowchartLabelFont& font,bool svg) {
+    std::u16string text;
+    std::vector<RequirementTextRun> styles;
+    for(const auto& run:runs) {
+        styles.push_back({text.size(),run.text.size(),run_weight(font,run.strong,svg),
+            font.italic||run.emphasis});
+        text+=run.text;
+    }
+    return measure_line(measure,text,font,svg,styles);
+}
+// createText uses HTML tokens as literal SVG words. Keep explicit breaks
+// separate, and encode tag brackets before the shared inline parser runs.
+std::u16string label_source(std::u16string_view text,bool html) {
+    std::u16string source;
+    for(std::size_t i=0;i<text.size();) {
+        const auto tail=text.substr(i);
+        const bool starts_tag=tail.size()>1&&tail.front()==u'<'&&
+            (tail[1]==u'/'||(tail[1]>=u'a'&&tail[1]<=u'z')||(tail[1]>=u'A'&&tail[1]<=u'Z'));
+        if(starts_tag&&!html) {
+            const auto end=tail.find(u'>');
+            if(end!=tail.npos) {
+                auto tag=tail.substr(1,end-1);
+                auto name=trim(tag);
+                if(name.ends_with(u"/")) name=trim(name.substr(0,name.size()-1));
+                if(name.size()==2&&(name[0]==u'b'||name[0]==u'B')&&
+                    (name[1]==u'r'||name[1]==u'R')) {
+                    if(source.empty()||source.back()!=u'\n') source+=u'\n';
+                } else {
+                    source+=u" &lt;";
+                    source+=tag;
+                    source+=u"&gt; ";
+                }
+                i+=end+1;
+                continue;
+            }
+        }
+        if(tail.front()==u'<'&&!starts_tag) source+=u"&lt;";
+        else source+=tail.front();
+        ++i;
+    }
+    return source;
+}
+void append_run(FlowchartLabelLine& line,std::u16string_view text,const FlowchartLabelRun& style) {
+    if(text.empty()) return;
+    if(line.empty()||line.back().strong!=style.strong||line.back().emphasis!=style.emphasis)
+        line.push_back({{},style.strong,style.emphasis});
+    line.back().text+=text;
+}
+double wrapping_limit(const RequirementSvgMeasure& measure,std::u16string_view raw,
+    const FlowchartLabelFont& font) {
+    struct Dimensions {double width=0,height=0,line_height=0;};
+    auto dimensions=[&](const FlowchartLabelFont& selected) {
+        Dimensions result;
+        std::size_t start=0;
+        auto include=[&](std::u16string_view line) {
+            const auto metrics=measure_line(measure,line.empty()?u"\u200b":line,selected,true);
+            result.width=std::max(result.width,std::round(metrics.bounds_width));
+            result.height+=std::round(metrics.svg_height);
+            result.line_height=std::max(result.line_height,std::round(metrics.svg_height));
+        };
+        for(auto i=raw.find(u'<');i!=raw.npos;i=raw.find(u'<',i+1)) {
+            const auto end=raw.find(u'>',i+1);
+            if(end==raw.npos) break;
+            auto tag=trim(raw.substr(i+1,end-i-1));
+            if(tag.starts_with(u"/")) tag.remove_prefix(1);
+            if(tag.ends_with(u"/")) tag=trim(tag.substr(0,tag.size()-1));
+            if(tag.size()!=2||(tag[0]!=u'b'&&tag[0]!=u'B')||
+                (tag[1]!=u'r'&&tag[1]!=u'R')) continue;
+            include(raw.substr(start,i-start));
+            start=end+1;
+            i=end;
+        }
+        include(raw.substr(start));
+        return result;
+    };
+    auto fallback=font;
+    fallback.family=u"sans-serif";
+    const auto generic=dimensions(fallback);
+    const auto preferred=dimensions(font);
+    const bool use_generic=generic.width>preferred.width&&generic.height>preferred.height&&
+        generic.line_height>preferred.line_height;
+    return (use_generic?generic.width:preferred.width)+50;
+}
+std::vector<FieldLine> wrap_runs(const RequirementSvgMeasure& measure,FlowchartLabelLine runs,
+    const FlowchartLabelFont& font,bool svg,double limit) {
+    auto natural=measure_runs(measure,runs,font,svg);
+    if(natural.advance<=limit) return {{std::move(runs),natural}};
+    struct Word {FlowchartLabelLine runs; bool preceded=false; FlowchartLabelRun space_style;};
+    std::vector<Word> words(1);
+    for(const auto& run:runs) for(const auto ch:run.text) {
+        if(ch==u' ') {
+            if(!words.back().runs.empty()) words.emplace_back();
+            words.back().preceded=true;
+            words.back().space_style={u"",run.strong,run.emphasis};
+        } else append_run(words.back().runs,std::u16string_view(&ch,1),run);
+    }
+    std::vector<FieldLine> result;
+    FlowchartLabelLine line;
+    auto flush=[&] {
+        if(line.empty()) return;
+        auto metrics=measure_runs(measure,line,font,svg);
+        result.push_back({std::move(line),metrics});
+        line.clear();
+    };
+    for(const auto& word:words) {
+        if(word.runs.empty()) continue;
+        auto candidate=line;
+        if(!candidate.empty()&&word.preceded) append_run(candidate,u" ",word.space_style);
+        for(const auto& run:word.runs) append_run(candidate,run.text,run);
+        if(!line.empty()&&measure_runs(measure,candidate,font,svg).advance>limit) {
+            flush();
+            candidate=word.runs;
+        }
+        if(svg&&measure_runs(measure,candidate,font,svg).advance>limit) {
+            // A single overlong SVG word is split by measured character spans.
+            for(const auto& run:candidate) for(std::size_t start=0;start<run.text.size();) {
+                const auto first=run.text[start];
+                const auto count=first>=0xd800&&first<=0xdbff&&start+1<run.text.size()?2u:1u;
+                const auto scalar=std::u16string_view(run.text).substr(start,count);
+                auto attempt=line;
+                append_run(attempt,scalar,run);
+                if(!line.empty()&&measure_runs(measure,attempt,font,svg).advance>limit) {
+                    flush();
+                    append_run(line,scalar,run);
+                } else line=std::move(attempt);
+                start+=count;
+            }
+        } else line=std::move(candidate);
+    }
+    flush();
+    return result;
+}
+Field measure_field(const RequirementSvgMeasure& measure,std::u16string text,
+    FlowchartLabelFont font,const FlowchartLabelFont& base_font,bool html,bool center_rows,
+    bool rich) {
+    Field result;
+    result.text=std::move(text);
+    result.font=std::move(font);
+    result.center_rows=html&&center_rows;
+    const auto& base=result.font;
+    result.line_step=base.size*(html?1.5:1.1);
+    result.metrics=measure_line(measure,result.text,base,!html);
+    if(!rich) {
+        result.width=html?result.metrics.advance:result.metrics.bounds_width;
+        result.height=html?result.line_step:result.metrics.svg_height;
+        result.lines.push_back({{{result.text,false,false}},result.metrics});
+        return result;
+    }
+    auto normalized=label_source(result.text,html);
+    auto parsed=html?flowchart_label_runs(normalized,u"markdown"):
+        flowchart_svg_label_runs(normalized,u"markdown");
+    if(!parsed) throw std::runtime_error(parsed.error());
+    // requirementBox computes the generous cap from the original unformatted
+    // input at the base font before createText applies label styles.
+    const auto limit=wrapping_limit(measure,result.text,base_font);
+    if(html) result.html_wrapped_source=*parsed;
+    bool wrapped=false;
+    for(auto& line:*parsed) {
+        auto parts=wrap_runs(measure,std::move(line),base,!html,limit);
+        wrapped=wrapped||parts.size()>1;
+        for(auto& part:parts) {
+            result.width=std::max(result.width,html?part.metrics.advance:part.metrics.bounds_width);
+            result.lines.push_back(std::move(part));
+        }
+    }
+    if(html&&wrapped) result.width=std::max(result.width,limit);
+    else result.html_wrapped_source.clear();
+    const auto line_count=std::max<std::size_t>(1,result.lines.size());
+    result.height=html?result.line_step*line_count:
+        result.metrics.svg_height+result.line_step*(line_count-1);
+    return result;
+}
 std::string paint_attr(const NodePaint& paint,std::u16string_view key,std::string_view attribute,
     std::string_view fallback) {
     const auto style=paint.styles.find(key);
@@ -108,15 +301,36 @@ std::string paint_attr(const NodePaint& paint,std::u16string_view key,std::strin
 }
 std::string paint_text(const Field& field,FlowchartPoint at,std::string_view color,
     bool html,std::string_view background={}) {
-    const auto weight=field.bold?"700":"400";
+    const auto weight=std::to_string(field.font.weight);
+    const auto font_style=field.font.italic?"italic":"normal";
     if(html) {
-        std::string style="display:table-cell;white-space:nowrap;line-height:1.5;font-weight:"+
-            std::string(weight)+";color:"+std::string(color);
+        const bool wrapped=!field.html_wrapped_source.empty();
+        std::string style=std::string(wrapped?"display:table;white-space:break-spaces":"display:table-cell;white-space:nowrap")+
+            ";line-height:1.5;font-weight:"+
+            weight+";color:"+std::string(color)+
+            ";font-size:"+num(field.font.size)+"px;font-style:"+font_style+
+            ";text-align:"+(field.center_rows?"center":"left");
+        if(field.lines.size()>1) style+=";width:"+num(field.width)+"px";
         if(!background.empty()) style+=";background-color:"+std::string(background);
+        auto html_style=attr("style",style);
+        html_style.pop_back();
+        html_style+=";font-family:"+xml(field.font.family)+"\"";
+        std::string content;
+        const auto count=wrapped?field.html_wrapped_source.size():field.lines.size();
+        for(std::size_t i=0;i<count;++i) {
+            if(i) content+="<br/>";
+            for(const auto& run:wrapped?field.html_wrapped_source[i]:field.lines[i].runs) {
+                if(run.strong) content+="<strong>";
+                if(run.emphasis) content+="<em>";
+                content+=xml(run.text);
+                if(run.emphasis) content+="</em>";
+                if(run.strong) content+="</strong>";
+            }
+        }
         return "<foreignObject"+attr("x",num(at.x))+attr("y",num(at.y))+
             attr("width",num(field.width))+attr("height",num(field.height))+
-            "><div xmlns=\"http://www.w3.org/1999/xhtml\""+attr("style",style)+
-            "><span>"+xml(field.text)+"</span></div></foreignObject>";
+            "><div xmlns=\"http://www.w3.org/1999/xhtml\""+html_style+
+            "><span>"+content+"</span></div></foreignObject>";
     }
     std::string out;
     if(!background.empty()) {
@@ -125,8 +339,20 @@ std::string paint_text(const Field& field,FlowchartPoint at,std::string_view col
             attr("width",num(field.width+2*pad))+attr("height",num(field.height+2*pad))+
             attr("fill",background)+"/>";
     }
-    return out+"<text"+attr("x",num(at.x))+attr("y",num(at.y+field.metrics.svg_baseline))+
-        attr("font-weight",weight)+attr("fill",color)+">"+xml(field.text)+"</text>";
+    out+="<text"+attr("x",num(at.x))+attr("y",num(at.y+field.metrics.svg_baseline))+
+        attr("font-family",field.font.family)+attr("font-size",num(field.font.size))+
+        attr("font-weight",weight)+attr("font-style",font_style)+attr("fill",color)+">";
+    for(std::size_t i=0;i<field.lines.size();++i) {
+        out+="<tspan"+attr("x",num(at.x))+
+            attr("y",num(at.y+field.metrics.svg_baseline+i*field.line_step))+">";
+        for(const auto& run:field.lines[i].runs) {
+            out+="<tspan"+attr("font-weight",std::to_string(run_weight(field.font,run.strong,true)))+
+                attr("font-style",field.font.italic||run.emphasis?"italic":"normal")+
+                ">"+xml(run.text)+"</tspan>";
+        }
+        out+="</tspan>";
+    }
+    return out+"</text>";
 }
 }
 
@@ -152,14 +378,8 @@ std::expected<RequirementSvg,std::string> render_requirement_svg(
         paints.reserve(node_count);
         std::vector<FlowchartNodeBox> boxes;
         boxes.reserve(node_count);
-        const auto measure_text=[&](std::u16string text,bool bold=false) {
-            auto metrics=measure(text,theme.font_size,bold);
-            if(!metrics) throw std::runtime_error(metrics.error());
-            if(!finite_metrics(*metrics)) throw std::runtime_error("Requirement text measurement is invalid");
-            const auto width=config.html_labels?metrics->advance:metrics->bounds_width;
-            const auto height=config.html_labels?theme.font_size*1.5:metrics->svg_height;
-            return Field{std::move(text),*metrics,width,height,0,bold};
-        };
+        const FlowchartLabelFont base_font{theme.font_family,theme.font_size};
+        const FlowchartSvgTheme label_theme{.font_family=theme.font_family,.font_size=theme.font_size};
         const auto add_node=[&](const auto& node,std::u16string type,std::initializer_list<std::u16string> body) {
             NodePaint paint;
             for(const auto& name:node.classes) paint.classes+=u" "+name;
@@ -170,18 +390,23 @@ std::expected<RequirementSvg,std::string> render_requirement_svg(
             }
             double offset=0;
             Bounds unplaced;
-            const auto add_field=[&](std::u16string text,bool bold=false) {
+            auto font=flowchart_label_font({},node.css_styles,label_theme);
+            if(!font) throw std::runtime_error(font.error());
+            const auto add_field=[&](std::u16string text,bool bold=false,bool heading=false,bool rich=true) {
                 if(text.empty()) return;
-                auto field=measure_text(std::move(text),bold);
+                auto field_font=*font;
+                if(bold) field_font.weight=std::max(field_font.weight,700u);
+                auto field=measure_field(measure,std::move(text),std::move(field_font),base_font,
+                    config.html_labels,heading||!elk,rich);
                 const auto line_height=field.height+(config.html_labels?0:6);
                 field.offset=offset-line_height/2;
-                const double glyph_top=config.html_labels?0:theme.font_size-field.metrics.svg_baseline;
+                const double glyph_top=config.html_labels?0:field.font.size-field.metrics.svg_baseline;
                 unplaced.include(-field.width/2,field.offset+glyph_top,field.width,field.height);
                 offset+=line_height;
                 paint.fields.push_back(std::move(field));
             };
-            add_field(u"<<"+type+u">>");
-            add_field(node.name,true);
+            add_field(u"<<"+type+u">>",false,true,false);
+            add_field(node.name,true,true);
             offset+=theme.gap;
             paint.divider=offset;
             for(auto value=body.begin();value!=body.end();++value) {
@@ -208,7 +433,8 @@ std::expected<RequirementSvg,std::string> render_requirement_svg(
         const double edge_padding=config.html_labels?0:svg_edge_label_padding;
         for(std::size_t i=0;i<doc.relationships.size();++i) {
             const auto& relation=doc.relationships[i];
-            auto label=measure_text(u"<<"+relation.type+u">>");
+            auto label=measure_field(measure,u"<<"+relation.type+u">>",base_font,base_font,
+                config.html_labels,true,false);
             const auto edge_id=std::to_string(i);
             graph.edges.push_back({.id=relation.source+u"-"+relation.target+u"-"+
                 std::u16string(edge_id.begin(),edge_id.end()),.start=relation.source,.end=relation.target,
@@ -283,7 +509,7 @@ std::expected<RequirementSvg,std::string> render_requirement_svg(
             const auto text_color=color==paint.styles.end()?theme.text:xml(color->second);
             for(std::size_t j=0;j<paint.fields.size();++j) {
                 const auto& field=paint.fields[j];
-                const double glyph_top=config.html_labels?0:theme.font_size-field.metrics.svg_baseline;
+                const double glyph_top=config.html_labels?0:field.font.size-field.metrics.svg_baseline;
                 const FlowchartPoint at{j<2?-field.width/2:-w/2+theme.padding/2,
                     field.offset-h/2+theme.padding+glyph_top};
                 bounds.include(x+at.x,y+at.y,field.width,field.height);
@@ -299,7 +525,7 @@ std::expected<RequirementSvg,std::string> render_requirement_svg(
         if(!std::isfinite(bounds.left)) bounds.include(0,0);
         std::string title;
         if(!doc.title.empty()) {
-            const auto label=measure_text(doc.title);
+            const auto label=measure_field(measure,doc.title,base_font,base_font,false,true,false);
             const auto x=(bounds.left+bounds.right)/2,y=-config.title_top_margin;
             bounds.include(x-label.metrics.bounds_width/2,y-label.metrics.svg_baseline,
                 label.metrics.bounds_width,label.metrics.svg_height);

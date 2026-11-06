@@ -616,15 +616,31 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
         };
     }
     RequirementSvgMeasure requirement_measure;
-    if(auto requirement=std::get_if<RequirementRenderInput>(&input->content)) {
-        requirement_measure=[requirement,&measurer](std::u16string_view text,double size,bool bold)
+    std::map<std::u16string,std::u16string,std::less<>> requirement_fonts;
+    if(std::holds_alternative<RequirementRenderInput>(input->content)) {
+        requirement_measure=[&](std::u16string_view text,std::u16string_view family,double size,
+            unsigned weight,bool italic,std::span<const RequirementTextRun> runs,bool svg_bounds)
             -> std::expected<RequirementTextMetrics,std::string> {
             if(!std::isfinite(size) || size<=0 || size>std::numeric_limits<float>::max())
                 return std::unexpected("Invalid Requirement font size");
-            auto label=diagram_display_text(text);
-            if(!label)return std::unexpected(label.error());
-            const MermaidFont font{requirement->theme.font_family,static_cast<float>(size),bold?700u:400u};
-            auto metrics=measurer.measure(*label,font,false,{},!requirement->config.html_labels);
+            auto resolved=requirement_fonts.find(family);
+            if(resolved==requirement_fonts.end()) {
+                auto candidates=family;
+                if(family==u"sans-serif") {
+                    wchar_t locale[LOCALE_NAME_MAX_LENGTH]{};
+                    if(GetUserDefaultLocaleName(locale,LOCALE_NAME_MAX_LENGTH)&&
+                        std::wstring_view{locale}==L"zh-CN") candidates=u"Microsoft YaHei, Arial";
+                }
+                auto installed=measurer.resolve_family(candidates);
+                if(!installed)return std::unexpected(installed.error());
+                resolved=requirement_fonts.emplace(family,std::move(*installed)).first;
+            }
+            const MermaidFont font{.family=resolved->second,.size=static_cast<float>(size),
+                .weight=weight,.italic=italic,.pair_kerning=svg_bounds&&runs.empty()};
+            std::vector<MermaidTextStyle> styles;
+            styles.reserve(runs.size());
+            for(const auto& run:runs)styles.push_back({run.offset,run.length,run.weight,run.italic});
+            auto metrics=measurer.measure(text,font,!runs.empty(),styles,svg_bounds);
             if(!metrics)return std::unexpected(metrics.error());
             auto vertical=measurer.svg_font_metrics(font);
             if(!vertical)return std::unexpected(vertical.error());

@@ -8,8 +8,14 @@ struct RequirementTextMetrics {
     // SVG font ascent and ascent/descent box. HTML labels use their CSS line box.
     double advance=0, ink_width=0, bounds_width=0, svg_height=0, svg_baseline=0;
 };
+struct RequirementTextRun {
+    std::size_t offset{}, length{};
+    unsigned weight = 400;
+    bool italic = false;
+};
 using RequirementSvgMeasure = std::function<std::expected<RequirementTextMetrics,std::string>(
-    std::u16string_view,double,bool)>;
+    std::u16string_view text, std::u16string_view family, double size, unsigned weight,
+    bool italic, std::span<const RequirementTextRun> runs, bool svg_bounds)>;
 struct RequirementSvgTheme {
     std::u16string font_family=u"Arial";
     double font_size=16, padding=20, gap=20, stroke_width=1.3;

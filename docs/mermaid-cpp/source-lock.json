@@ -5,6 +5,10 @@
   "license": "MIT",
   "files": [
     {
+      "path": "packages/mermaid/src/rendering-util/splitText.ts",
+      "sha256": "4dc8f19c041b568d3b5987c9363455c1a7c3cc8322b0ea35771283361539df99"
+    },
+    {
       "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/forkJoin.ts",
       "sha256": "33e396d359160b980630ae9b1cfcaf6d33a8ac0057bdf2a86d83c27d039750f0"
     },

@@ -3,7 +3,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { chromium } from './oracle/node_modules/playwright-core/index.mjs';
-import { cases } from './requirement-cases.mjs';
+import { cases, richCases } from './requirement-cases.mjs';
 
 // Observe rendered nodes, routes, labels and the final viewport in SVG space.
 // Geometry is transformed out of nested SVG groups before it is recorded.
@@ -32,8 +32,20 @@ export function inspectRequirement() {
     box:box(e),path:e.getAttribute('d'),startMarker:e.hasAttribute('marker-start'),endMarker:e.hasAttribute('marker-end')}));
   const labels = [...svg.querySelectorAll('text,foreignObject')].filter(e=>!e.closest('defs')).map(e=>{
     let text, rect, font;
+    const runs=[];
+    const inspectRuns=root=>{
+      const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+      let node;
+      while(node=walker.nextNode()) {
+        const {fontWeight:weight,fontStyle:style}=getComputedStyle(node.parentElement);
+        const last=runs.at(-1);
+        if(last?.weight===weight&&last?.style===style)last.text+=node.textContent;
+        else runs.push({text:node.textContent,weight,style});
+      }
+    };
     if(e.tagName==='foreignObject'){
       const span=e.querySelector('span')??e.firstElementChild;
+      inspectRuns(span);
       const walker=document.createTreeWalker(span,NodeFilter.SHOW_TEXT),rects=[];let n;
       while(n=walker.nextNode()){if(!n.textContent.trim())continue;const range=document.createRange();range.selectNodeContents(n);rects.push(...range.getClientRects());}
       if(!rects.length)return null;
@@ -41,10 +53,12 @@ export function inspectRequirement() {
       const a=new DOMPoint(x,y).matrixTransform(inverse),b=new DOMPoint(right,bottom).matrixTransform(inverse);
       rect={x:a.x,y:a.y,width:b.x-a.x,height:b.y-a.y};text=span.textContent.trim().replace(/\s+/g,' ');font=getComputedStyle(span);
     } else {
+      inspectRuns(e);
       text=e.textContent.trim().replace(/\s+/g,' ');rect=box(e);font=getComputedStyle(e);
     }
     return text?{text,box:rect,font:{family:font.fontFamily,size:font.fontSize,weight:font.fontWeight,
-      color:e.tagName==='foreignObject'?font.color:font.fill}}:null;
+      color:e.tagName==='foreignObject'?font.color:font.fill},
+      runs:runs.map(run=>({...run,text:run.text.trim().replace(/\s+/g,' ')})).filter(run=>run.text)}:null;
   }).filter(Boolean);
   const sort=(a,b)=>a.box.y-b.box.y||a.box.x-b.box.x;
   nodes.sort(sort);edges.sort(sort);labels.sort(sort);
@@ -55,7 +69,7 @@ if(!process.argv.includes('--library')) {
   const directory=resolve(process.argv[2]??'build/mermaid-cpp/requirement-browser');
   mkdirSync(directory,{recursive:true});
   const url=pathToFileURL(resolve('tools/mermaid-cpp/oracle/node_modules/mermaid/dist/mermaid.esm.mjs')).href;
-  const successes=[...cases.filter(c=>c[2]===null),[
+  const successes=[...cases.filter(c=>c[2]===null),...richCases,[
     'svg-labels-title',
     '---\ntitle: Main\nconfig:\n  htmlLabels: false\n---\nrequirementDiagram\nrequirement R {\nverifyMethod: test\n}\nelement E {\ntype: module\n}\nR - verifies -> E\n',
   ]];

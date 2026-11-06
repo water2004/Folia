@@ -3,6 +3,7 @@ module;
 #define NOMINMAX
 #endif
 #include <dwrite.h>
+#include <dwrite_1.h>
 #include <wrl/client.h>
 
 export module folia.platform.mermaid_measurer;
@@ -16,6 +17,7 @@ struct MermaidFont {
     float size = 17;
     unsigned weight = 400;
     bool italic = false;
+    bool pair_kerning = false;
 };
 struct MermaidTextMetrics {
     double advance{};
@@ -216,6 +218,12 @@ public:
         if (FAILED(factory->CreateTextLayout(text.data(), static_cast<UINT32>(text.size()),
             format.Get(), extent, extent, &layout)))
             return std::unexpected("DirectWrite layout creation failed");
+        if (font.pair_kerning) {
+            ComPtr<IDWriteTextLayout1> kerned;
+            const DWRITE_TEXT_RANGE range{0, static_cast<UINT32>(text.size())};
+            if (FAILED(layout.As(&kerned)) || FAILED(kerned->SetPairKerning(TRUE, range)))
+                return std::unexpected("DirectWrite pair kerning configuration failed");
+        }
         if(!styles.empty() && (!preserve_spaces||!apply_styles(layout.Get(),styles,text.size())))
             return std::unexpected("Invalid DirectWrite styled text ranges");
         DWRITE_TEXT_METRICS metrics{};

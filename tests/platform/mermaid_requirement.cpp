@@ -16,6 +16,9 @@ suite mermaid_requirement = [] {
             {"direction-title-access",u"requirementDiagram\ndirection LR\naccTitle: Requirements\naccDescr: A compact model\nrequirement R {\nid: reqr\ntext: \"Keep < 2s\"\nrisk: low\nverifyMethod: inspection\n}\n"},
             {"classes-style",u"requirementDiagram\nrequirement R:::critical {\nid: R1\ntext: Important\nrisk: high\nverifyMethod: test\n}\nelement E {\ntype: api\ndocRef: spec\n}\nclassDef critical fill:#ffeeee,stroke:#cc0000\nstyle E fill:#eeeeff,stroke:#0000cc\nR - satisfies -> E\n"},
             {"comment-quoted",u"requirementDiagram\n# top comment\nrequirement \"Long requirement name\" {\nid: \"RQ 1\"\ntext: \"Text with spaces and: colon\"\nrisk: medium\nverifyMethod: demonstration\n}\n%% comment\n"},
+            {"rich-labels",u"requirementDiagram\nrequirement Access {\nid: R1\ntext: \"A **signed** request <b>must</b><br/>stay _private_ for permitted clients\"\nrisk: high\nverifyMethod: test\n}\nelement UI {\ntype: \"Approved **client**\"\n}\nAccess - verifies -> UI\n"},
+            {"rich-svg-labels",u"---\nconfig:\n  htmlLabels: false\n---\nrequirementDiagram\nrequirement Access {\nid: R1\ntext: \"A **signed** request <b>must</b><br/>stay _private_ for permitted clients\"\nrisk: high\nverifyMethod: test\n}\nelement UI {\ntype: \"Approved **client**\"\n}\nAccess - verifies -> UI\n"},
+            {"label-wrapping",u"requirementDiagram\nrequirement Stable {\ntext: \"Keep the system stable with recoverable errors and monitor delayed operations\"\n}\nstyle Stable font-size:24px,color:#335577\n"},
             {"svg-labels-title",u"---\ntitle: Main\nconfig:\n  htmlLabels: false\n---\nrequirementDiagram\nrequirement R {\nverifyMethod: test\n}\nelement E {\ntype: module\n}\nR - verifies -> E\n"},
         };
         for(const auto theme:{u"default",u"dark"}) for(const bool elk:{false,true}) {

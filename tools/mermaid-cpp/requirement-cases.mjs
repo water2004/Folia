@@ -10,3 +10,10 @@ export const cases = [
   ['unknown-relation', 'requirementDiagram\nA - unknown -> B\n', 'syntax error'],
   ['invalid-direction', 'requirementDiagram\ndirection XX\n', 'syntax error'],
 ];
+
+const richSource = 'requirementDiagram\nrequirement Access {\nid: R1\ntext: "A **signed** request <b>must</b><br/>stay _private_ for permitted clients"\nrisk: high\nverifyMethod: test\n}\nelement UI {\ntype: "Approved **client**"\n}\nAccess - verifies -> UI\n';
+export const richCases = [
+  ['rich-labels', richSource],
+  ['rich-svg-labels', '---\nconfig:\n  htmlLabels: false\n---\n' + richSource],
+  ['label-wrapping', 'requirementDiagram\nrequirement Stable {\ntext: "Keep the system stable with recoverable errors and monitor delayed operations"\n}\nstyle Stable font-size:24px,color:#335577\n'],
+];

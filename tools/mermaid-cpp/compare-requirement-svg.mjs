@@ -41,6 +41,7 @@ try {
     assert.equal(actual.labels.length,original.labels.length,`${prefix}.labels.length`);
     for(let i=0;i<original.labels.length;++i){const a=actual.labels[i],e=original.labels[i],p=`${prefix}.labels.${i}`;
       compare(a.text,e.text,`${p}.text`);compare(a.box,e.box,`${p}.box`,1.5);compare(a.font,e.font,`${p}.font`);
+      if(prefix.startsWith('rich-'))compare(a.runs,e.runs,`${p}.runs`);
     }
   }
   await browser.close();
