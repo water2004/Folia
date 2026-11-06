@@ -396,8 +396,16 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
             const auto& config=member(effective,u"flowchart");
             const auto look=text(member(effective,u"look"));
             style.neo = look == u"neo";
-            if (look != u"classic" && !style.neo)
-                return std::unexpected("Native Flowchart SVG requires classic or neo look");
+            style.hand_drawn = look == u"handDrawn";
+            if (look != u"classic" && !style.neo && !style.hand_drawn)
+                return std::unexpected("Unknown native Flowchart look");
+            if (style.hand_drawn) {
+                if (const auto* seed = effective.find(u"handDrawnSeed");
+                    seed && seed->kind == ConfigKind::number && std::isfinite(seed->number)) {
+                    const double wrapped = std::fmod(std::trunc(seed->number), 4294967296.0);
+                    style.hand_drawn_seed = static_cast<std::uint32_t>(wrapped < 0 ? wrapped + 4294967296.0 : wrapped);
+                }
+            }
             if (style.neo) {
                 const auto copy_string = [&](std::u16string_view key, std::string& destination) {
                     if (const auto* value = theme.find(key); value && value->kind == ConfigKind::string)

@@ -5,6 +5,7 @@ import folia.mermaid.number;
 import folia.mermaid.theme_color;
 import folia.mermaid.flowchart_graph;
 import folia.mermaid.flowchart_elk;
+import folia.mermaid.rough_polygon;
 
 namespace folia::mermaid {
 namespace {
@@ -117,6 +118,7 @@ FlowchartPoint label_midpoint(std::span<const FlowchartPoint> points) {
 }
 #include "flowchart_clusters.inc"
 #include "flowchart_neo.inc"
+#include "flowchart_rough.inc"
 
 }
 
@@ -160,6 +162,8 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
         }
         std::vector<FlowchartNodeBox> boxes;std::vector<FlowchartEdgeLabelSize> labels;
         std::vector<FlowchartPaint> node_paints,edge_paints;
+        std::vector<RoughFlowchartNode> rough_nodes;
+        if(theme.hand_drawn) rough_nodes.resize(graph.nodes.size());
         std::unordered_map<std::u16string,std::size_t> ids;
         const auto height=[](const FlowchartTextBox& b){return b.height;};
         for(std::size_t i=0;i<graph.nodes.size();++i) {
@@ -188,6 +192,11 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
                 else box={w+2*padding+extra,height};
             }
             else return std::unexpected("Flowchart SVG shape is not implemented yet");
+            if(theme.hand_drawn && !n.group) {
+                rough_nodes[i]=rough_flowchart_node(n.shape,box,node_paints[i],theme);
+                if(const auto& bounds=rough_nodes[i].drawing.bounds)
+                    box={bounds->width(),bounds->height()};
+            }
             boxes.push_back(box);ids.emplace(n.id,i);
         }
         for(std::size_t i=0;i<graph.edges.size();++i) {
@@ -217,6 +226,49 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
             scene=layout_prepared(graph,prepared->graph,boxes,labels,measured,theme);
         }
         const auto* layout=&scene.layout;
+        const auto edge_path=[&](std::size_t i,double* length=nullptr) {
+            const auto& e=graph.edges[i];auto points=layout->edges[i].points;
+            if(e.arrow_start==u"arrow_point") shorten(points.front(),points[1],4);
+            if(e.arrow_end==u"arrow_point") shorten(points.back(),points[points.size()-2],4);
+            return use_elk?rounded_elk_path(points,5,length):curve_path(points,e.curve==u"linear",length);
+        };
+        std::vector<RoughPolygonResult> rough_edges;
+        if(theme.hand_drawn) {
+            rough_edges.resize(graph.edges.size());
+            scene.min_x=scene.min_y=std::numeric_limits<double>::infinity();
+            scene.max_x=scene.max_y=-std::numeric_limits<double>::infinity();
+            const auto include=[&](const RoughBounds& bounds,double x=0,double y=0) {
+                scene.min_x=std::min(scene.min_x,x+bounds.left);
+                scene.min_y=std::min(scene.min_y,y+bounds.top);
+                scene.max_x=std::max(scene.max_x,x+bounds.right);
+                scene.max_y=std::max(scene.max_y,y+bounds.bottom);
+            };
+            for(std::size_t i=0;i<graph.nodes.size();++i) {
+                const auto& n=layout->nodes[i];
+                auto& rough=rough_nodes[i];
+                if(graph.nodes[i].group) {
+                    const auto x=n.x-n.width/2,y=n.y-n.height/2;
+                    rough.drawing=sketch_svg_path(rough_rounded_rect(x,y,n.width,n.height,0),
+                        {.seed=theme.hand_drawn_seed});
+                    if(rough.drawing.bounds) include(*rough.drawing.bounds);
+                } else if(rough.drawing.bounds) {
+                    include(*rough.drawing.bounds,n.x+rough.offset.x,n.y+rough.offset.y);
+                }
+                for(const auto& layer:rough.overlays) if(layer.drawing.bounds)
+                    include(*layer.drawing.bounds,n.x+layer.offset.x,n.y+layer.offset.y);
+            }
+            for(std::size_t i=0;i<graph.edges.size();++i) {
+                const auto& e=layout->edges[i];
+                if(!e.points.empty()) {
+                    rough_edges[i]=sketch_svg_path(edge_path(i),
+                        {.seed=theme.hand_drawn_seed,.roughness=.3,.fill=RoughFill::none});
+                    if(const auto& bounds=rough_edges[i].bounds) include(*bounds);
+                }
+                if(e.label) include({-labels[i].width/2,-labels[i].height/2,
+                    labels[i].width/2,labels[i].height/2},e.label->x,e.label->y);
+            }
+            if(!std::isfinite(scene.min_x)) return std::unexpected("Flowchart hand-drawn graph has no painted content");
+        }
         const double wrapper_offset=use_elk?0:theme.padding;
         // insertTitle centers over the graph before setupViewPortForSVG expands
         // its bounds. This group is translated by padding, so compensate the
@@ -231,7 +283,9 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
             scene.max_y=std::max(scene.max_y,title_y+title.height-title.baseline);
         }
         FlowchartSvg output;output.width=scene.max_x-scene.min_x+2*theme.padding;output.height=scene.max_y-scene.min_y+2*theme.padding;
-        std::string svg="<svg xmlns=\"http://www.w3.org/2000/svg\" class=\"flowchart\" width=\""+number(output.width)+
+        std::string svg="<svg xmlns=\"http://www.w3.org/2000/svg\" class=\"flowchart\"";
+        if(theme.hand_drawn) svg+=" fill=\""+theme.title_color+"\"";
+        svg+=" width=\""+number(output.width)+
             "\" height=\""+number(output.height)+"\" viewBox=\""+number(scene.min_x+(use_elk?-theme.padding:0))+" "+number(scene.min_y+(use_elk?-theme.padding:0))+" "+number(output.width)+" "+number(output.height)+"\">";
         for(auto [tag,value]:{std::pair{"title",std::u16string_view(graph.acc_title)},{"desc",std::u16string_view(graph.acc_description)}})
             if(!value.empty()) svg+="<"+std::string(tag)+">"+xml(value)+"</"+tag+">";
@@ -283,7 +337,9 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
         std::stable_sort(groups.begin(),groups.end(),[&](auto a,auto b){return depth(a)<depth(b);});
         for(auto i:groups) {
             const auto& n=layout->nodes[i];const auto& source=graph.nodes[i];
-            svg+="<g class=\"cluster\" data-node=\""+xml(n.id)+"\"><rect x=\""+number(n.x-n.width/2)+
+            svg+="<g class=\"cluster\" data-node=\""+xml(n.id)+"\">";
+            if(theme.hand_drawn) svg+=rough_flowchart_shape(rough_nodes[i].drawing,node_paints[i],theme.cluster_fill,theme.cluster_border,"3");
+            else svg+="<rect x=\""+number(n.x-n.width/2)+
                 "\" y=\""+number(n.y-n.height/2)+"\" width=\""+number(n.width)+"\" height=\""+number(n.height)+
                 "\""+node_paints[i].attributes(theme.cluster_fill,theme.neo?border:theme.cluster_border)+shadow.attribute()+"/>";
             svg+=text(source.label,{n.x,n.y-n.height/2+theme.group_title_top+height(measured.nodes[i])/2},
@@ -294,14 +350,12 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
         for(bool loops:{false,true}) for(std::size_t i=0;i<graph.edges.size();++i)
             if((graph.edges[i].start==graph.edges[i].end)==loops && !layout->edges[i].points.empty()) edge_order.push_back(i);
         for(auto i:edge_order) {
-            const auto& e=graph.edges[i];auto points=layout->edges[i].points;
-            if(e.arrow_start==u"arrow_point") shorten(points.front(),points[1],4);
-            if(e.arrow_end==u"arrow_point") shorten(points.back(),points[points.size()-2],4);
+            const auto& e=graph.edges[i];
             double path_length=0;
             auto length=theme.neo?&path_length:nullptr;
-            const auto path=use_elk?rounded_elk_path(points,5,length):curve_path(points,e.curve==u"linear",length);
+            const auto path=theme.hand_drawn?rough_edges[i].stroke_path:edge_path(i,length);
             const auto dash=theme.neo?neo_edge_dash(e,path_length):e.stroke==u"dotted"?"2":"0";
-            svg+="<path class=\"flowchart-link\" data-edge=\""+xml(e.id)+"\" d=\""+path+"\""+
+            svg+="<path class=\"flowchart-link"+std::string(theme.hand_drawn?" transition":"")+"\" data-edge=\""+xml(e.id)+"\" d=\""+path+"\""+
                 edge_paints[i].attributes("none",theme.line,e.stroke==u"thick"?"3.5":e.stroke==u"invisible"?"0":stroke_width,dash);
             const auto prefix=edge_paints[i].marker_stroke.empty()?std::string("flow"):"flow-"+std::to_string(i);
             if(auto name=marker_name(e.arrow_start);!name.empty()) svg+=" marker-start=\"url(#"+prefix+"-"+std::string(name)+"-start)\"";
@@ -316,10 +370,23 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
         for(std::size_t i=0;i<graph.nodes.size();++i) {
             const auto& n=layout->nodes[i];const auto& source=graph.nodes[i];
             if(source.group) continue;
-            svg+="<g class=\"node\" data-node=\""+xml(n.id)+"\" transform=\"translate("+number(n.x)+","+number(n.y)+")\">";
+            svg+="<g class=\""+std::string(theme.hand_drawn?"rough-node":"node")+"\" data-node=\""+xml(n.id)+"\"";
+            if(theme.hand_drawn) svg+=" data-look=\"handDrawn\"";
+            svg+=" transform=\"translate("+number(n.x)+","+number(n.y)+")\">";
             const auto paint=node_paints[i].attributes(theme.fill,border,stroke_width)+
                 (source.shape!=u"doublecircle"?shadow.attribute():"");
-            if(source.shape==u"circle") svg+="<circle class=\"label-container\" r=\""+number(n.width/2)+"\""+paint+"/>";
+            if(theme.hand_drawn) {
+                const auto& rough=rough_nodes[i];
+                const bool rings=source.shape==u"doublecircle";
+                if(rings) svg+="<g class=\"label-container\">";
+                svg+=rough_flowchart_shape(rough.drawing,node_paints[i],theme.fill,
+                    theme.border,"1.5",rough.offset,rough.stroke_width,rings?"":"label-container");
+                for(const auto& layer:rough.overlays)
+                    svg+=rough_flowchart_shape(layer.drawing,node_paints[i],theme.fill,
+                        theme.border,"1.5",layer.offset,layer.stroke_width,"");
+                if(rings) svg+="</g>";
+            }
+            else if(source.shape==u"circle") svg+="<circle class=\"label-container\" r=\""+number(n.width/2)+"\""+paint+"/>";
             else if(source.shape==u"doublecircle") svg+="<g class=\"label-container\""+paint+"><circle r=\""+number(n.width/2)+"\""+shadow.attribute()+"/><circle r=\""+number(n.width/2-(theme.neo?12:5))+"\""+shadow.attribute()+"/></g>";
             else if(source.shape==u"diamond") svg+="<polygon class=\"label-container\" points=\"0,"+number(-n.height/2)+" "+number(n.width/2)+",0 0,"+number(n.height/2)+" "+number(-n.width/2)+",0\""+(theme.neo?" transform=\"translate(0.5,0)\"":"")+paint+"/>";
             else if(source.shape==u"stadium" || source.shape==u"subroutine" || source.shape==u"cylinder") {
@@ -330,7 +397,9 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
             else if(classic_polygon(source.shape)) svg+="<path class=\"label-container\" d=\""+
                 polygon_path(classic_polygon_points(source.shape,n.width,n.height,theme.neo))+"\""+paint+"/>";
             else svg+="<rect class=\"label-container\" x=\""+number(-n.width/2)+"\" y=\""+number(-n.height/2)+"\" width=\""+number(n.width)+"\" height=\""+number(n.height)+"\" rx=\""+number(source.shape==u"roundedRect"?theme.radius:0)+"\""+paint+"/>";
-            svg+=text(source.label,{source.shape==u"odd"?n.height/8:0,source.shape==u"cylinder"?source.padding/1.5:0},measured.nodes[i],"nodeLabel",node_paints[i])+"</g>";
+            auto label_offset=theme.hand_drawn?rough_nodes[i].label_offset:FlowchartPoint{source.shape==u"odd"?n.height/8:0,0};
+            if(source.shape==u"cylinder") label_offset.y=source.padding/1.5;
+            svg+=text(source.label,label_offset,measured.nodes[i],"nodeLabel",node_paints[i])+"</g>";
         }
         if(!graph.title.empty()) svg+="<text class=\"flowchartTitleText\" text-anchor=\"middle\" font-size=\"18\" fill=\""+
             theme.title_color+"\" x=\""+number(title_x)+"\" y=\""+number(title_y)+"\">"+xml(graph.title)+"</text>";

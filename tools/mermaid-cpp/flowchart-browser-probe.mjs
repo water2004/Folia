@@ -10,9 +10,10 @@ for(const file of lock.files) assert.equal(createHash('sha256').update(readFileS
 for(const file of lock.flowchartCurve.files) assert.equal(createHash('sha256').update(readFileSync('tools/mermaid-cpp/oracle/node_modules/d3-shape/'+file.path)).digest('hex'),file.sha256,file.path);
 const elkAdapter=process.argv.includes('--elk');
 const neo=process.argv.includes('--neo');
+const handDrawn=process.argv.includes('--hand-drawn');
 if(elkAdapter){const bundle=JSON.parse(readFileSync('tools/mermaid-cpp/oracle/node_modules/mermaid/'+lock.elkAdapter.map));for(const file of lock.elkAdapter.files){const i=bundle.sources.findIndex(s=>s.endsWith(file.source));assert(i>=0,file.source);assert.equal(createHash('sha256').update(bundle.sourcesContent[i]).digest('hex'),file.sha256,file.source);}}
 const outputArgument=process.argv.slice(2).find(arg=>!arg.startsWith('--'));
-const directory=resolve(outputArgument??(neo?'build/mermaid-cpp/neo-flowchart-browser':elkAdapter?'build/mermaid-cpp/elk-flowchart-browser':'build/mermaid-cpp/flowchart-browser'));
+const directory=resolve(outputArgument??(handDrawn?'build/mermaid-cpp/hand-drawn-flowchart-browser':neo?'build/mermaid-cpp/neo-flowchart-browser':elkAdapter?'build/mermaid-cpp/elk-flowchart-browser':'build/mermaid-cpp/flowchart-browser'));
 mkdirSync(directory,{recursive:true});
 const dagreCases=[
   ["shapes-metadata", "flowchart LR\nA@{shape: rect, label: Read}\nB@{shape: cyl, label: Store}\nA named@--> B\nB --> C@{shape: terminal, label: Done}\nnamed@{curve: linear}"],
@@ -83,7 +84,12 @@ const neoCases=[
   ['neo-colors','flowchart LR\nA[Read]:::input --> B[Write]\nclassDef input fill:#ddeeff,stroke:#226688,color:#112233,stroke-width:2px\nlinkStyle 0 stroke:#885522,stroke-width:3px'],
   ['neo-elk-chain','flowchart LR\nA[Read] --> B(Check) --> C([Done])'],
 ];
-const cases=neo?neoCases:elkAdapter?(await import('./elk-flowchart-cases.mjs')).cases:dagreCases;
+const handDrawnCases=[
+  ['hand-drawn-shapes','flowchart LR\nA[Read] -->|next| B{Ready?}\nB --> C(Save)'],
+  ['hand-drawn-markers','flowchart TD\nA[Read] o--o B[Check]\nB x--x C[Save]\nC <--> D[Done]'],
+  ['hand-drawn-extra','flowchart LR\nA((Circle))\nB([Terminal])\nC[[Routine]]\nD[(Store)]\nE(((Double)))\nF{{Hex}}\nG[Read] --> H[Write]'],
+];
+const cases=handDrawn?handDrawnCases:neo?neoCases:elkAdapter?(await import('./elk-flowchart-cases.mjs')).cases:dagreCases;
 const url=pathToFileURL(resolve('tools/mermaid-cpp/oracle/node_modules/mermaid/dist/mermaid.esm.mjs')).href;
 assert.equal(JSON.parse(readFileSync('tools/mermaid-cpp/oracle/node_modules/mermaid/package.json')).version,'12.2.0');
 const html=`<!doctype html><meta charset="utf-8"><body><script type="module">
@@ -93,7 +99,7 @@ const result=[];
 for(const [name,body,title] of ${JSON.stringify(cases)}) {
  const source=title?'---\\ntitle: '+JSON.stringify(title)+'\\n---\\n'+body:body;
  for(const theme of ['default','dark']) {
-  mermaid.initialize({startOnLoad:false,theme,look:${JSON.stringify(neo?'neo':'classic')},layout:name.startsWith('neo-elk-')?'elk':${JSON.stringify(elkAdapter?'elk':'dagre')},fontFamily:'Arial',themeVariables:{fontFamily:'Arial'},htmlLabels:!name.startsWith('svg-label-'),flowchart:{htmlLabels:!name.startsWith('svg-label-')}});
+  mermaid.initialize({startOnLoad:false,theme,look:${JSON.stringify(handDrawn?'handDrawn':neo?'neo':'classic')},handDrawnSeed:9,layout:name.startsWith('neo-elk-')?'elk':${JSON.stringify(elkAdapter?'elk':'dagre')},fontFamily:'Arial',themeVariables:{fontFamily:'Arial'},htmlLabels:!name.startsWith('svg-label-'),flowchart:{htmlLabels:!name.startsWith('svg-label-')}});
   const {svg}=await mermaid.render('probe'+result.length,source);
   const host=document.createElement('div');host.innerHTML=svg;document.body.append(host);
   const root=host.querySelector('svg');
@@ -148,20 +154,25 @@ for(const [name,body,title] of ${JSON.stringify(cases)}) {
     title:name.startsWith('group-font')?paintedCenter(label):position(label,lb.x+lb.width/2,lb.y+lb.height/2),fill:getComputedStyle(shape).fill,stroke:strokePaint(shape),
     lines:displayLines(label),characters:styledCharacters(label),thickness:getComputedStyle(shape).strokeWidth,dash:getComputedStyle(shape).strokeDasharray,color:label.querySelector('text')?getComputedStyle(label.querySelector('text')).fill:getComputedStyle(label.querySelector('span')??label).color,font:fontStyle(label)};
   });
-  const nodes=[...host.querySelectorAll('g.node')].map(n=>{
-   const shape=n.querySelector('.label-container');const b=shape.getBBox();const label=n.querySelector('.label');
+  const nodes=[...host.querySelectorAll('g.node,g.rough-node')].map(n=>{
+   const rough=n.matches('.rough-node');
+   const shape=n.querySelector('.label-container')??n.firstElementChild;const b=shape.getBBox();const label=n.querySelector('.label');
    const lb=label.getBBox();
-   const paths=shape.matches('path,polygon,circle')?[shape]:[...shape.querySelectorAll('path,circle')];
+   const paths=rough?[...n.querySelectorAll('path')]:shape.matches('path,polygon,circle')?[shape]:[...shape.querySelectorAll('path,circle')];
    const outline=name.startsWith('shapes-')?paths.flatMap(p=>Array.from({length:201},(_,i)=>{
     const a=p.getPointAtLength(p.getTotalLength()*i/200);return position(p,a.x,a.y);
    })):[];
    const fillShape=paths.find(p=>getComputedStyle(p).fill!=='none')??shape;
-   const strokeShape=paths.find(p=>getComputedStyle(p).stroke!=='none')??shape;
+   const strokeShape=rough?(paths.at(-1)??shape):(paths.find(p=>getComputedStyle(p).stroke!=='none')??shape);
+   const sketchPaths=rough?paths.map(p=>({
+    length:p.getTotalLength(),stroke:strokePaint(p),width:getComputedStyle(p).strokeWidth,
+    samples:Array.from({length:37},(_,i)=>{const q=p.getPointAtLength(p.getTotalLength()*i/36);return position(p,q.x,q.y);}),
+   })):null;
    return {id:n.id,...position(n),transform:n.getAttribute('transform'),width:b.width,height:b.height,label:label.textContent,labelWidth:lb.width,labelHeight:lb.height,
     labelCenter:position(label,lb.x+lb.width/2,lb.y+lb.height/2),lines:displayLines(label),characters:styledCharacters(label),outline,
     fill:getComputedStyle(fillShape).fill,stroke:strokePaint(strokeShape),
     filter:getComputedStyle(shape).filter!=='none'||paths.some(p=>getComputedStyle(p).filter!=='none'),
-    thickness:getComputedStyle(strokeShape).strokeWidth,dash:getComputedStyle(strokeShape).strokeDasharray,color:label.querySelector('text')?getComputedStyle(label.querySelector('text')).fill:getComputedStyle(label.querySelector('span')??label).color,font:fontStyle(label)};
+    thickness:getComputedStyle(strokeShape).strokeWidth,dash:getComputedStyle(strokeShape).strokeDasharray,color:label.querySelector('text')?getComputedStyle(label.querySelector('text')).fill:getComputedStyle(label.querySelector('span')??label).color,font:fontStyle(label),sketchPaths};
   });
   const edges=[...host.querySelectorAll('.flowchart-link')].map(p=>{
     const marker=side=>{

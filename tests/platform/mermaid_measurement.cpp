@@ -266,6 +266,33 @@ suite mermaid_measurement = [] {
             }
         }
     };
+    "mermaid_flowchart_hand_drawn_measured_source_to_svg"_test=[] {
+        auto session=ConfigSession::create();
+        expect(fatal(session.has_value()));
+        const std::pair<std::string_view,std::u16string_view> cases[]={
+            {"hand-drawn-shapes",u"flowchart LR\nA[Read] -->|next| B{Ready?}\nB --> C(Save)"},
+            {"hand-drawn-markers",u"flowchart TD\nA[Read] o--o B[Check]\nB x--x C[Save]\nC <--> D[Done]"},
+            {"hand-drawn-extra",u"flowchart LR\nA((Circle))\nB([Terminal])\nC[[Routine]]\nD[(Store)]\nE(((Double)))\nF{{Hex}}\nG[Read] --> H[Write]"},
+        };
+        for(const auto theme:{u"default",u"dark"}) for(const auto& sample:cases) {
+            const auto name = sample.first;
+            const auto body = sample.second;
+            auto source=std::u16string(u"---\nconfig:\n  theme: ")+theme+
+                u"\n  look: handDrawn\n  handDrawnSeed: 9\n  layout: dagre\n"
+                u"  fontFamily: Arial\n  themeVariables: {fontFamily: Arial}\n---\n";
+            source+=body;
+            const auto svg=render_mermaid(source,*session);
+            expect(svg.has_value())<<name<<(svg?"":svg.error());
+            if(!svg) continue;
+            expect(svg->svg.find("class=\"rough-node\"")!=std::string::npos);
+            if(auto directory=std::getenv("FOLIA_MERMAID_SVG_OUTPUT")) {
+                std::filesystem::create_directories(directory);
+                const auto suffix=theme==std::u16string_view(u"dark")?"dark":"default";
+                std::ofstream out(std::filesystem::path(directory)/("flowchart-"+std::string(name)+"-"+suffix+".svg"),std::ios::binary);
+                out<<svg->svg;expect(out.good());
+            }
+        }
+    };
     "mermaid_source_to_svg_resolves_fonts_and_measures_display_text"_test=[] {
         MermaidMeasurer measurer;
         auto family=measurer.resolve_family(u"'Folia Missing Family 792743', Arial, sans-serif");

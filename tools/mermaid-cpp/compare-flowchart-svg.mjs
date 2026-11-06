@@ -41,19 +41,25 @@ try {
      title:{x:lb.x+lb.width/2,y:lb.y+lb.height/2},fill:getComputedStyle(shape).fill,stroke:strokePaint(shape),
      lines:[...label.children].map(n=>n.textContent.trimEnd()),characters:styledCharacters(label),thickness:getComputedStyle(shape).strokeWidth,dash:getComputedStyle(shape).strokeDasharray,color:getComputedStyle(label).fill,font:fontStyle(label)};
    });
-   const nodes=[...svg.querySelectorAll('g.node')].map(n=>{
+   const nodes=[...svg.querySelectorAll('g.node,g.rough-node')].map(n=>{
+    const rough=n.matches('.rough-node');
     const shape=n.querySelector('.label-container'),b=shape.getBBox(),text=n.querySelector('text'),t=text.getBBox();
     const local=n.getScreenCTM().inverse().multiply(shape.getScreenCTM());
     const corner=new DOMPoint(b.x,b.y).matrixTransform(local);
-    const paths=shape.matches('path,polygon,circle')?[shape]:[...shape.querySelectorAll('path,circle')];
+    const paths=rough?[...n.querySelectorAll('path')]:shape.matches('path,polygon,circle')?[shape]:[...shape.querySelectorAll('path,circle')];
+    const strokeShape=rough?(paths.at(-1)??shape):shape;
+    const sketchPaths=rough?paths.map(p=>({
+     length:p.getTotalLength(),stroke:strokePaint(p),width:getComputedStyle(p).strokeWidth,
+     samples:Array.from({length:37},(_,i)=>{const q=p.getPointAtLength(p.getTotalLength()*i/36);return position(p,q.x,q.y);}),
+    })):null;
     const outline=paths.flatMap(p=>Array.from({length:201},(_,i)=>{
      const a=p.getPointAtLength(p.getTotalLength()*i/200);return position(p,a.x,a.y);
     }));
     return {transform:n.getAttribute('transform'),width:b.width,height:b.height,label:text.textContent,
      labelCenter:position(text,t.x+t.width/2,t.y+t.height/2),lines:[...text.children].map(n=>n.textContent.trimEnd()),characters:styledCharacters(text),outline,
-     fill:getComputedStyle(shape).fill,stroke:strokePaint(shape),
+     fill:getComputedStyle(shape).fill,stroke:strokePaint(strokeShape),
      filter:getComputedStyle(shape).filter!=='none'||paths.some(p=>getComputedStyle(p).filter!=='none'),
-     thickness:getComputedStyle(shape).strokeWidth,dash:getComputedStyle(shape).strokeDasharray,color:getComputedStyle(text).fill,font:fontStyle(text),
+     thickness:getComputedStyle(strokeShape).strokeWidth,dash:getComputedStyle(strokeShape).strokeDasharray,color:getComputedStyle(text).fill,font:fontStyle(text),sketchPaths,
      contained:t.x>=corner.x-1&&t.y>=corner.y-1&&t.x+t.width<=corner.x+b.width+1&&t.y+t.height<=corner.y+b.height+1};
    });
    const edges=[...svg.querySelectorAll('.flowchart-link')].map(p=>{
@@ -83,6 +89,8 @@ try {
   assert(b.x+offset[0]>=v.x-1 && b.y+offset[1]>=v.y-1 &&
     b.x+b.width+offset[0]<=v.x+v.width+1 && b.y+b.height+offset[1]<=v.y+v.height+1,`${row.name}: clipped SVG content`);
   assert.equal(!!actual.diagramTitle,!!row.diagramTitle,`${row.name} diagram title`);
+  if(row.name.startsWith('hand-drawn-')) for(const key of ['x','y','width','height'])
+   near(actual.view[key],row.view[key],`${row.name} view ${key}`);
   if(row.diagramTitle) {
    for(const key of ['text','fill','size']) assert.equal(actual.diagramTitle[key],row.diagramTitle[key],`${row.name} title ${key}`);
    for(const key of ['x','y','width','height']) near(actual.diagramTitle[key],row.diagramTitle[key],`${row.name} title ${key}`);
@@ -102,6 +110,18 @@ try {
    assert.deepEqual(a.font,e.font,`${row.name} label font`);
    assert.deepEqual(a.characters,e.characters,`${row.name} styled characters`);
    for(const key of ['fill','stroke','thickness','dash','color']) assert.equal(a[key],e[key],`${row.name} node ${a.label} ${key}`);
+   if(e.sketchPaths) {
+    near(a.labelCenter.x,e.labelCenter.x,`${row.name} ${a.label} text x`);
+    near(a.labelCenter.y,e.labelCenter.y,`${row.name} ${a.label} text y`);
+    assert.equal(a.sketchPaths?.length,e.sketchPaths.length,`${row.name} path count`);
+    for(let j=0;j<e.sketchPaths.length;++j) {
+     const p=a.sketchPaths[j],q=e.sketchPaths[j];
+     near(p.length,q.length,`${row.name} ${a.label} sketch path length`);
+     for(const key of ['stroke','width']) assert.equal(p[key],q[key],`${row.name} ${a.label} sketch path ${key}`);
+     for(let k=0;k<q.samples.length;++k) for(const axis of ['x','y'])
+      near(p.samples[k][axis],q.samples[k][axis],`${row.name} ${a.label} sketch sample ${axis}`);
+    }
+   }
    if(row.name.startsWith('neo-')) assert.equal(a.filter,e.filter,`${row.name} node ${a.label} shadow`);
    if(e.outline.length) {
     near(a.labelCenter.x,e.labelCenter.x,`${row.name} label center x`,2);
@@ -127,9 +147,10 @@ try {
    assert.deepEqual(a.lines,e.lines,`${row.name} edge lines`);
    near(a.width,e.width,`${row.name} label width`);near(a.height,e.height,`${row.name} label height`);
   }
+  const edgeTolerance=row.name.startsWith('hand-drawn-')?1.5:3;
   for(let i=0;i<actual.edges.length;++i) {
    const a=actual.edges[i],e=row.edges.find(n=>n.id.endsWith("-"+a.id));
-   assert(e,`${row.name}: missing edge ${a.id}`);near(a.length,e.length,`${row.name} edge ${i} length`,3);
+   assert(e,`${row.name}: missing edge ${a.id}`);near(a.length,e.length,`${row.name} edge ${i} length`,edgeTolerance);
    assert.equal(a.stroke,e.stroke,`${row.name} edge paint`);
    if(row.name.startsWith('neo-') && a.dash!=='none' && e.dash!=='none') {
     const parts=s=>s.split(',').map(s=>parseFloat(s));
@@ -146,7 +167,7 @@ try {
     for(let j=0;j<e[side].points.length;++j) for(const axis of ['x','y'])
      near(a[side].points[j][axis],e[side].points[j][axis],`${row.name} ${side} marker outline`,0.01);
    }
-   for(let j=0;j<a.points.length;++j) {near(a.points[j].x+offset[0],e.points[j].x,`${row.name} edge ${i} x`,3);near(a.points[j].y+offset[1],e.points[j].y,`${row.name} edge ${i} y`,3);}
+   for(let j=0;j<a.points.length;++j) {near(a.points[j].x+offset[0],e.points[j].x,`${row.name} edge ${i} x`,edgeTolerance);near(a.points[j].y+offset[1],e.points[j].y,`${row.name} edge ${i} y`,edgeTolerance);}
   }
   assert.equal(actual.clusters.length,row.clusters.length,`${row.name}: groups`);
   for(const a of actual.clusters) {

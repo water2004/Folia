@@ -123,7 +123,7 @@ suite render_entry = [] {
     "mermaid_render_entry_errors_are_isolated"_test=[] {
         auto session=ConfigSession::create(); expect(fatal(session.has_value()));
         expect(!prepare_native_diagram(
-            u"---\nconfig: {look: handDrawn}\n---\nflowchart TD\nA-->B", *session));
+            u"---\nconfig: {layout: cose-bilkent}\n---\nflowchart TD\nA-->B", *session));
         expect(!prepare_native_diagram(u"pie\n\"unfinished",*session));
         expect(!prepare_native_diagram(u"pie\ntitle <b>HTML</b>",*session));
         auto result=prepare_native_diagram(u"pie\n\"Tea\":1",*session); expect(fatal(result.has_value()));

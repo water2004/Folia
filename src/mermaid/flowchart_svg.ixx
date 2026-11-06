@@ -17,6 +17,8 @@ struct FlowchartSvgTheme {
     bool neo=false,use_gradient=false,dark_shadow=false;
     std::string gradient_start,gradient_stop,drop_shadow;
     double node_stroke_width=1;
+    bool hand_drawn=false;
+    std::uint32_t hand_drawn_seed=0;
 };
 struct FlowchartLabelFont {
     std::u16string family;
