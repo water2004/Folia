@@ -1029,6 +1029,50 @@
       "sha256": "bc63b16d067e4dd1c429e9cf249f4d73260819696de122dff0ce16b12db321c1"
     },
     {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/waveEdgedRectangle.ts",
+      "sha256": "a066fcfd862375723fe98133162d819cea4e0aac0973a4e604328a9554e2ee18"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/multiWaveEdgedRectangle.ts",
+      "sha256": "00e8977d7d816b058514f49c4462693ba94f0136a6bdb8956d30bb0cc0e15f25"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/taggedWaveEdgedRectangle.ts",
+      "sha256": "a353ea047525965d80c1a88ace34202220330a8d86d43f3104cdb81845866c1e"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/waveRectangle.ts",
+      "sha256": "1c8b359205a52e0e40a93bdddc9157aa52443a53184b0c3553c43b0462f7ef31"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/halfRoundedRectangle.ts",
+      "sha256": "3bf05dece425a5dd6fc0068270799821cb053abdd5381cfefc22f55267e28b97"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/curvedTrapezoid.ts",
+      "sha256": "e862aea5b76ccf498de0ea7cf5632ff139b348c5c6b8248fff1d7308202faa31"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/tiltedCylinder.ts",
+      "sha256": "f1db4931703ad635574d6e74f791f0e53afe0057db5191041290331ea3b73a1a"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/linedCylinder.ts",
+      "sha256": "4119a7da7bfab12258249838ab623e90b78cb3dafe1d0763aaf7ec14144fa152"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/curlyBraceLeft.ts",
+      "sha256": "15474b80ba0a458d368b9d11ca73e83469f9cd326228dfdf186ccfd8938bd4b9"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/curlyBraceRight.ts",
+      "sha256": "8624f15cef09e91f40b6886645f43f1d85253f2fbc76b03f138da9b72a24d684"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/curlyBraces.ts",
+      "sha256": "5fc286eac7c5fae29acb602e0cc8dafda2bff8985b32b621a4974a5a2e45bc2c"
+    },
+    {
       "path": "packages/mermaid/src/rendering-util/rendering-elements/edges.js",
       "sha256": "8fee7300ea0bffd008f5d2c12a05e85f5ea8bc22a9855d4d2e2b6c0e6c92a33a"
     },

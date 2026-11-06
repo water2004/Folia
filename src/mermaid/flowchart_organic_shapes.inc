@@ -163,6 +163,6 @@ FlowchartLocalShape measure_organic_shape(std::u16string_view shape, double widt
     const auto half = "A" + number(head) + "," + number(head) + " 0 1 0 ";
     result.contours.push_back({"M" + point({-head, cy}) + half + point({head, cy}) +
         half + point({-head, cy}) + "Z"});
-    result.clip_outline = person_outline(measured.box.width, measured.box.height);
+    result.attachment = person_outline(measured.box.width, measured.box.height);
     return result;
 }

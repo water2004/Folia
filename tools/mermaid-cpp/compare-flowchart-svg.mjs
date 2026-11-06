@@ -7,6 +7,8 @@ const reference=resolve(process.argv[2]);const output=resolve(process.argv[3]);
 const rows=JSON.parse(readFileSync(reference));
 const browser=await chromium.launch({executablePath:process.env.FOLIA_BROWSER??'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',headless:true});
 const near=(a,b,label,tolerance=1.5)=>assert(Number.isFinite(a)&&Number.isFinite(b)&&Math.abs(a-b)<=tolerance,`${label}: ${a} != ${b}`);
+// SVG treats an all-zero dash list as a solid stroke.
+const dashPaint=value=>/^(?:0(?:px)?)(?:[,\s]+0(?:px)?)*$/.test(value)?'none':value;
 const translate=s=>s.slice(s.indexOf('(')+1,s.indexOf(')')).trim().split(/[ ,]+/).map(Number);
 const report=[];
 try {
@@ -54,8 +56,10 @@ try {
     const geometry=extraShapes?'path,polygon,circle,rect,ellipse,line,polyline':'path,polygon,circle';
     const paths=rough?[...n.querySelectorAll('path')]:shape.matches(geometry)?[shape]:[...shape.querySelectorAll(geometry)];
     const strokeShape=rough?(paths.at(-1)??shape):shape;
+    const fillShape=paths.find(p=>getComputedStyle(p).fill!=='none')??shape;
     const sketchPaths=rough?paths.map(p=>({
      length:p.getTotalLength(),stroke:strokePaint(p),width:getComputedStyle(p).strokeWidth,
+     fill:getComputedStyle(p).fill,opacity:getComputedStyle(p).strokeOpacity,
      samples:Array.from({length:37},(_,i)=>{const q=p.getPointAtLength(p.getTotalLength()*i/36);return position(p,q.x,q.y);}),
     })):null;
     const outline=paths.flatMap(p=>Array.from({length:extraShapes?1001:201},(_,i)=>{
@@ -63,7 +67,8 @@ try {
     }));
     return {transform:n.getAttribute('transform'),width:b.width,height:b.height,label:text.textContent,
      labelCenter:position(text,t.x+t.width/2,t.y+t.height/2),lines:[...text.children].map(n=>n.textContent.trimEnd()),characters:styledCharacters(text),outline,
-     fill:getComputedStyle(shape).fill,stroke:strokePaint(strokeShape),
+     fill:getComputedStyle(rough?fillShape:shape).fill,stroke:strokePaint(strokeShape),
+     invisibleStrokes:paths.filter(p=>getComputedStyle(p).strokeOpacity==='0').length,
      filter:getComputedStyle(shape).filter!=='none'||paths.some(p=>getComputedStyle(p).filter!=='none'),
      thickness:getComputedStyle(strokeShape).strokeWidth,dash:getComputedStyle(strokeShape).strokeDasharray,color:getComputedStyle(text).fill,font:fontStyle(text),sketchPaths,
      contained:t.x>=corner.x-1&&t.y>=corner.y-1&&t.x+t.width<=corner.x+b.width+1&&t.y+t.height<=corner.y+b.height+1};
@@ -89,7 +94,7 @@ try {
    return {offset:outer.getAttribute('transform'),nodes,edges,labels,clusters,diagramTitle,
     bounds:{x:bounds.x,y:bounds.y,width:bounds.width,height:bounds.height},
     view:{x:view.x,y:view.y,width:view.width,height:view.height}};
-  },row.name.startsWith('extra-shapes-'));
+  },row.name.startsWith('extra-shapes-')||row.name.startsWith('neo-document-'));
   const offset=translate(actual.offset);assert.equal(actual.nodes.length,row.nodes.length,row.name);
   const b=actual.bounds,v=actual.view;
   assert(b.x+offset[0]>=v.x-1 && b.y+offset[1]>=v.y-1 &&
@@ -115,7 +120,9 @@ try {
    for(let axis=0;axis<2;++axis) near(p[axis]+offset[axis],q[axis],`${row.name} ${i} axis ${axis}`);
    assert.deepEqual(a.font,e.font,`${row.name} label font`);
    assert.deepEqual(a.characters,e.characters,`${row.name} styled characters`);
-   for(const key of ['fill','stroke','thickness','dash','color']) assert.equal(a[key],e[key],`${row.name} node ${a.label} ${key}`);
+   if(row.name.includes('-document-')) assert.equal(a.invisibleStrokes,e.invisibleStrokes,`${row.name} invisible strokes`);
+   for(const key of ['fill','stroke','thickness','color']) assert.equal(a[key],e[key],`${row.name} node ${a.label} ${key}`);
+   assert.equal(dashPaint(a.dash),dashPaint(e.dash),`${row.name} node ${a.label} dash`);
    if(e.sketchPaths) {
     near(a.labelCenter.x,e.labelCenter.x,`${row.name} ${a.label} text x`);
     near(a.labelCenter.y,e.labelCenter.y,`${row.name} ${a.label} text y`);
@@ -124,13 +131,15 @@ try {
      const p=a.sketchPaths[j],q=e.sketchPaths[j];
      near(p.length,q.length,`${row.name} ${a.label} sketch path length`);
      for(const key of ['stroke','width']) assert.equal(p[key],q[key],`${row.name} ${a.label} sketch path ${key}`);
+     if(row.name.includes('-document-')) for(const key of ['fill','opacity'])
+      assert.equal(p[key],q[key],`${row.name} ${a.label} sketch path ${key}`);
      for(let k=0;k<q.samples.length;++k) for(const axis of ['x','y'])
       near(p.samples[k][axis],q.samples[k][axis],`${row.name} ${a.label} sketch sample ${axis}`);
     }
    }
    if(row.name.startsWith('neo-')) assert.equal(a.filter,e.filter,`${row.name} node ${a.label} shadow`);
    if(e.outline.length) {
-    const tolerance=row.name.startsWith('extra-shapes-')?1.5:2;
+    const tolerance=row.name.startsWith('extra-shapes-')||row.name.startsWith('neo-document-')?1.5:2;
     near(a.labelCenter.x,e.labelCenter.x,`${row.name} label center x`,tolerance);
     near(a.labelCenter.y,e.labelCenter.y,`${row.name} label center y`,tolerance);
     assert(a.outline.length,`${row.name}: missing shape outline`);
@@ -154,7 +163,7 @@ try {
    assert.deepEqual(a.lines,e.lines,`${row.name} edge lines`);
    near(a.width,e.width,`${row.name} label width`);near(a.height,e.height,`${row.name} label height`);
   }
-  const edgeTolerance=/^(hand-drawn|curve|extra-shapes)-/.test(row.name)?1.5:3;
+  const edgeTolerance=/^(hand-drawn|curve|extra-shapes|neo-document)-/.test(row.name)?1.5:3;
   for(let i=0;i<actual.edges.length;++i) {
    const a=actual.edges[i],e=row.edges.find(n=>n.id.endsWith("-"+a.id));
    assert(e,`${row.name}: missing edge ${a.id}`);near(a.length,e.length,`${row.name} edge ${i} length`,edgeTolerance);

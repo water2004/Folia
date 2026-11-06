@@ -20,12 +20,17 @@ std::u16string_view flowchart_classic_shape(std::u16string_view shape) {
         {u"manual-input",u"sl-rect"},{u"sloped-rectangle",u"sl-rect"},
         {u"lined-rectangle",u"lin-rect"},{u"lined-process",u"lin-rect"},{u"lin-proc",u"lin-rect"},{u"shaded-process",u"lin-rect"},
         {u"div-proc",u"div-rect"},{u"divided-rectangle",u"div-rect"},{u"divided-process",u"div-rect"},
-        {u"internal-storage",u"win-pane"},{u"window-pane",u"win-pane"},{u"lined-document",u"lin-doc"}})
+        {u"internal-storage",u"win-pane"},{u"window-pane",u"win-pane"},{u"lined-document",u"lin-doc"},
+        {u"document",u"doc"},{u"documents",u"docs"},{u"st-doc",u"docs"},{u"stacked-document",u"docs"},
+        {u"tagged-document",u"tag-doc"},{u"paper-tape",u"flag"},{u"half-rounded-rectangle",u"delay"},
+        {u"das",u"h-cyl"},{u"horizontal-cylinder",u"h-cyl"},{u"disk",u"lin-cyl"},{u"lined-cylinder",u"lin-cyl"},
+        {u"curved-trapezoid",u"curv-trap"},{u"display",u"curv-trap"},{u"comment",u"brace"},{u"brace-l",u"brace"}})
         if(shape==name)return handler;
     for(const auto name:{u"squareRect",u"roundedRect",u"stadium",u"subroutine",u"cylinder",u"circle",u"diamond",
         u"hexagon",u"lean_right",u"lean_left",u"trapezoid",u"inv_trapezoid",u"doublecircle",u"odd",
         u"notch-rect",u"tri",u"flip-tri",u"notch-pent",u"sl-rect",u"lin-rect",u"div-rect",u"win-pane",u"lin-doc",
-        u"person",u"cloud"})
+        u"person",u"cloud",u"doc",u"docs",u"tag-doc",u"flag",u"delay",u"h-cyl",u"lin-cyl",u"curv-trap",
+        u"brace",u"brace-r",u"braces"})
         if(shape==name)return name;
     return {};
 }

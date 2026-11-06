@@ -4,11 +4,40 @@ struct RoughFlowchartLayer {
     RoughPolygonResult drawing;
     FlowchartPoint offset{};
     std::string_view stroke_width;
+    bool solid_fill = false;
+    bool invisible_stroke = false;
 };
 struct RoughFlowchartNode : RoughFlowchartLayer {
     std::vector<RoughFlowchartLayer> overlays;
     FlowchartPoint label_offset{};
+    bool grouped = false;
 };
+
+RoughFlowchartNode rough_flowchart_contours(FlowchartLocalShape& shape,
+    const FlowchartPaint& paint,const FlowchartSvgTheme& theme) {
+    const auto fill=paint.get(u"fill",theme.fill);
+    const auto stroke=paint.get(u"stroke",theme.border);
+    RoughFlowchartNode result;
+    result.grouped=shape.contours.size()>1&&std::ranges::all_of(shape.contours,&FlowchartContour::measured);
+    std::optional<RoughBounds> measured,painted;
+    for(std::size_t i=0;i<shape.contours.size();++i) {
+        const auto& contour=shape.contours[i];
+        const auto mode=fill=="none"||fill=="transparent"?RoughFill::none:contour.sketch_fill;
+        auto drawing=sketch_svg_path(contour.path,{.seed=theme.hand_drawn_seed,.fill=mode,.stroke=stroke!="none"});
+        if(drawing.bounds) {
+            if(contour.measured) include_outline_bounds(measured,*drawing.bounds,contour.translation);
+            if(!contour.invisible_stroke||!drawing.fill_path.empty())
+                include_outline_bounds(painted,*drawing.bounds,contour.translation);
+        }
+        RoughFlowchartLayer layer{std::move(drawing),contour.translation,{},
+                                  mode==RoughFill::solid,contour.invisible_stroke};
+        if(i==0) static_cast<RoughFlowchartLayer&>(result)=std::move(layer);
+        else result.overlays.push_back(std::move(layer));
+    }
+    if(measured) shape.box={measured->width(),measured->height()};
+    if(painted) shape.paint_bounds=*painted;
+    return result;
+}
 
 std::string rough_rounded_rect(double x,double y,double width,double height,double radius) {
     const auto corner=" A"+number(radius)+" "+number(radius)+" 0 0 1 ";
@@ -135,16 +164,22 @@ std::string rough_stroke_dash(const FlowchartPaint& paint) {
 
 std::string rough_flowchart_shape(const RoughPolygonResult& paths,const FlowchartPaint& paint,
     std::string_view fill,std::string_view stroke,std::string_view hatch_width,FlowchartPoint offset={},
-    std::string_view stroke_width={},std::string_view css="label-container") {
+    std::string_view stroke_width={},std::string_view css="label-container",
+    bool solid_fill=false,bool invisible_stroke=false) {
     auto width=stroke_width.empty()?paint.get(u"stroke-width","1.3"):std::string(stroke_width);
     if(width.ends_with("px")) width.resize(width.size()-2);
     std::string out="<g";
     if(!css.empty()) out+=" class=\""+std::string(css)+"\"";
     if(offset.x!=0||offset.y!=0) out+=" transform=\"translate("+point(offset)+")\"";
     out+=">";
-    if(!paths.fill_path.empty()) out+="<path d=\""+paths.fill_path+"\" fill=\"none\" stroke=\""+
-        paint.get(u"fill",fill)+"\" stroke-width=\""+std::string(hatch_width)+"\" stroke-dasharray=\"0 0\"/>";
+    if(!paths.fill_path.empty()) {
+        out+="<path d=\""+paths.fill_path+"\"";
+        if(solid_fill) out+=" fill=\""+paint.get(u"fill",fill)+"\" stroke=\"none\" stroke-width=\"0\"/>";
+        else out+=" fill=\"none\" stroke=\""+paint.get(u"fill",fill)+"\" stroke-width=\""+
+            std::string(hatch_width)+"\" stroke-dasharray=\"0 0\"/>";
+    }
     if(!paths.stroke_path.empty()) out+="<path d=\""+paths.stroke_path+"\" fill=\"none\" stroke=\""+
-        paint.get(u"stroke",stroke)+"\" stroke-width=\""+width+"\" stroke-dasharray=\""+rough_stroke_dash(paint)+"\"/>";
+        paint.get(u"stroke",stroke)+"\" stroke-width=\""+width+"\" stroke-dasharray=\""+rough_stroke_dash(paint)+"\""+
+        (invisible_stroke?" stroke-opacity=\"0\"":"")+"/>";
     return out+"</g>";
 }

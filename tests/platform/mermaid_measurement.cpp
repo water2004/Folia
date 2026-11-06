@@ -7,6 +7,29 @@ namespace {
 using namespace boost::ut;
 using namespace folia::platform;
 using namespace folia::mermaid;
+
+auto flowchart_document_cases(std::string_view prefix,
+    std::span<const std::pair<std::string_view,std::u16string_view>> base) {
+    const std::pair<std::string_view,std::u16string_view> documents[]={
+        {"documents",u"flowchart TB\nA@{shape: document, label: Document} --> "
+            u"B@{shape: stacked-document, label: \"Stacked documents\"} --> "
+            u"C@{shape: tagged-document, label: Tagged} --> D@{shape: paper-tape, label: Tape}"},
+        {"curved",u"flowchart LR\nA@{shape: half-rounded-rectangle, label: Delay} --> "
+            u"B@{shape: das, label: \"Horizontal storage\"} --> C@{shape: disk, label: Disk} --> "
+            u"D@{shape: display, label: Display}"},
+        {"comments",u"flowchart BT\nA@{shape: comment, label: \"Left comment\"} --> "
+            u"B@{shape: brace-r, label: Right} --> C@{shape: braces, label: \"Both sides\"}"},
+        {"mixed",u"flowchart RL\nA@{shape: doc, label: \"Long document label\"} --> "
+            u"B@{shape: delay, label: \"Wait<br/>for response\"} --> C@{shape: flag, label: Paper} --> "
+            u"D@{shape: braces, label: \"Comment<br/>on both sides\"}"},
+    };
+    std::vector<std::pair<std::string,std::u16string_view>> cases;
+    for(const auto& [name,source]:base) cases.emplace_back(name,source);
+    for(const auto& [name,source]:documents)
+        cases.emplace_back(std::string(prefix)+"-document-"+std::string(name),source);
+    return cases;
+}
+
 suite mermaid_measurement = [] {
     "mermaid_class_source_to_measured_svg"_test = [] {
         const std::vector<std::pair<std::string,std::u16string>> cases={
@@ -246,7 +269,7 @@ suite mermaid_measurement = [] {
             {"neo-colors",u"flowchart LR\nA[Read]:::input --> B[Write]\nclassDef input fill:#ddeeff,stroke:#226688,color:#112233,stroke-width:2px\nlinkStyle 0 stroke:#885522,stroke-width:3px"},
             {"neo-elk-chain",u"flowchart LR\nA[Read] --> B(Check) --> C([Done])"},
         };
-        for(const auto theme:{u"default",u"dark"}) for(const auto& sample:cases) {
+        for(const auto theme:{u"default",u"dark"}) for(const auto& sample:flowchart_document_cases("neo",cases)) {
             const auto name = sample.first;
             const auto body = sample.second;
             auto source=std::u16string(u"---\nconfig:\n  theme: ")+theme+
@@ -276,7 +299,7 @@ suite mermaid_measurement = [] {
             {"hand-drawn-elk-chain",u"flowchart LR\nA[Read] --> B(Check) --> C[Done]"},
             {"hand-drawn-cluster",u"flowchart TD\nsubgraph g[Review]\nA[Read] --> B[Check]\nend\ng --> C[Done]"},
         };
-        for(const auto theme:{u"default",u"dark"}) for(const auto& sample:cases) {
+        for(const auto theme:{u"default",u"dark"}) for(const auto& sample:flowchart_document_cases("hand-drawn",cases)) {
             const auto name = sample.first;
             const auto body = sample.second;
             auto source=std::u16string(u"---\nconfig:\n  theme: ")+theme+
@@ -347,7 +370,7 @@ suite mermaid_measurement = [] {
             {"extra-shapes-organic-wide",u"%%{init: {\"flowchart\": {\"minNodeWidth\": 300, \"wrappingWidth\": 320}}}%%\n"
                 u"flowchart RL\nA@{shape: person, label: Specialist} --> B@{shape: cloud, label: Network}"},
         };
-        for(const auto theme:{u"default",u"dark"}) for(const auto& sample:cases) {
+        for(const auto theme:{u"default",u"dark"}) for(const auto& sample:flowchart_document_cases("extra-shapes",cases)) {
             const auto name=sample.first;
             const auto body=sample.second;
             auto source=std::u16string(u"---\nconfig:\n  theme: ")+theme+

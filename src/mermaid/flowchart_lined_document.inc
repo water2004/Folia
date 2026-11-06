@@ -6,13 +6,7 @@ std::vector<FlowchartPoint> lined_document_points(double width, double height, b
     const double x1 = -w / 2 - w * 0.05, x2 = w / 2 + w * 0.05;
     const double y1 = -final_height / 2, y2 = final_height / 2;
     std::vector<FlowchartPoint> points{{x1, y1}, {x1, y2}};
-    const double delta_x = x2 - x1, cycle_length = delta_x / 0.8;
-    const double frequency = 2 * std::numbers::pi / cycle_length, wave_y = final_height / 2;
-    for (int i = 0; i <= 50; ++i) {
-        const double t = static_cast<double>(i) / 50;
-        const double x = x1 + t * delta_x;
-        points.push_back({x, wave_y + amplitude * std::sin(frequency * (x - x1))});
-    }
+    append_flowchart_sine_wave(points, {x1, y2}, {x2, y2}, amplitude, 0.8);
     points.push_back({x2, y1});
     points.push_back({x1, y1});
     points.push_back({-w / 2, y1});

@@ -104,6 +104,14 @@ const extraShapeCases=[
   ['extra-shapes-organic-styles','%%{init: {"flowchart": {"minNodeWidth": 0, "wrappingWidth": 90, "padding": 22}}}%%\nflowchart BT\nA@{shape: person, label: "Build<br/>operator"} --> B@{shape: cloud, label: "Cloud with a wrapped label"}\nclass A,B organic\nclassDef organic fill:#e1eee2,stroke:#335544,stroke-width:2px\nstyle B stroke:#442211'],
   ['extra-shapes-organic-wide','%%{init: {"flowchart": {"minNodeWidth": 300, "wrappingWidth": 320}}}%%\nflowchart RL\nA@{shape: person, label: Specialist} --> B@{shape: cloud, label: Network}'],
 ];
+const documentCases=[
+  ['documents','flowchart TB\nA@{shape: document, label: Document} --> B@{shape: stacked-document, label: "Stacked documents"} --> C@{shape: tagged-document, label: Tagged} --> D@{shape: paper-tape, label: Tape}'],
+  ['curved','flowchart LR\nA@{shape: half-rounded-rectangle, label: Delay} --> B@{shape: das, label: "Horizontal storage"} --> C@{shape: disk, label: Disk} --> D@{shape: display, label: Display}'],
+  ['comments','flowchart BT\nA@{shape: comment, label: "Left comment"} --> B@{shape: brace-r, label: Right} --> C@{shape: braces, label: "Both sides"}'],
+  ['mixed','flowchart RL\nA@{shape: doc, label: "Long document label"} --> B@{shape: delay, label: "Wait<br/>for response"} --> C@{shape: flag, label: Paper} --> D@{shape: braces, label: "Comment<br/>on both sides"}'],
+];
+for(const [prefix,target] of [['extra-shapes',extraShapeCases],['neo',neoCases],['hand-drawn',handDrawnCases]])
+  target.push(...documentCases.map(([name,source])=>[prefix+'-document-'+name,source]));
 const cases=extraShapes?extraShapeCases:curves?curveCases:handDrawn?handDrawnCases:neo?neoCases:elkAdapter?(await import('./elk-flowchart-cases.mjs')).cases:dagreCases;
 const url=pathToFileURL(resolve('tools/mermaid-cpp/oracle/node_modules/mermaid/dist/mermaid.esm.mjs')).href;
 assert.equal(JSON.parse(readFileSync('tools/mermaid-cpp/oracle/node_modules/mermaid/package.json')).version,'12.2.0');
@@ -180,20 +188,23 @@ for(const [name,body,title] of ${JSON.stringify(cases)}) {
    const lb=label.getBBox();
    const geometry=name.startsWith('extra-shapes-')?'path,polygon,circle,rect,ellipse,line,polyline':'path,polygon,circle';
    const paths=rough?[...n.querySelectorAll('path')]:shape.matches(geometry)?[shape]:[...shape.querySelectorAll(geometry)];
-   const outline=(name.startsWith('shapes-')||name.startsWith('extra-shapes-'))?paths.flatMap(p=>Array.from({length:name.startsWith('extra-shapes-')?1001:201},(_,i)=>{
-    const a=p.getPointAtLength(p.getTotalLength()*i/(name.startsWith('extra-shapes-')?1000:200));return position(p,a.x,a.y);
+   const detailedOutline=name.startsWith('extra-shapes-')||name.startsWith('neo-document-');
+   const outline=(name.startsWith('shapes-')||detailedOutline)?paths.flatMap(p=>Array.from({length:detailedOutline?1001:201},(_,i)=>{
+    const a=p.getPointAtLength(p.getTotalLength()*i/(detailedOutline?1000:200));return position(p,a.x,a.y);
    })):[];
    const fillShape=paths.find(p=>getComputedStyle(p).fill!=='none')??shape;
    const strokeShape=rough?(paths.at(-1)??shape):(paths.find(p=>getComputedStyle(p).stroke!=='none')??shape);
    const sketchPaths=rough?paths.map(p=>({
     length:p.getTotalLength(),stroke:strokePaint(p),width:getComputedStyle(p).strokeWidth,
+    fill:getComputedStyle(p).fill,opacity:getComputedStyle(p).strokeOpacity,
     samples:Array.from({length:37},(_,i)=>{const q=p.getPointAtLength(p.getTotalLength()*i/36);return position(p,q.x,q.y);}),
    })):null;
    return {id:n.id,...position(n),transform:n.getAttribute('transform'),width:b.width,height:b.height,label:label.textContent,labelWidth:lb.width,labelHeight:lb.height,
     labelCenter:position(label,lb.x+lb.width/2,lb.y+lb.height/2),lines:displayLines(label),characters:styledCharacters(label),outline,
     fill:getComputedStyle(fillShape).fill,stroke:strokePaint(strokeShape),
     filter:getComputedStyle(shape).filter!=='none'||paths.some(p=>getComputedStyle(p).filter!=='none'),
-    thickness:getComputedStyle(strokeShape).strokeWidth,dash:getComputedStyle(strokeShape).strokeDasharray,color:label.querySelector('text')?getComputedStyle(label.querySelector('text')).fill:getComputedStyle(label.querySelector('span')??label).color,font:fontStyle(label),sketchPaths};
+    thickness:getComputedStyle(strokeShape).strokeWidth,dash:getComputedStyle(strokeShape).strokeDasharray,color:label.querySelector('text')?getComputedStyle(label.querySelector('text')).fill:getComputedStyle(label.querySelector('span')??label).color,font:fontStyle(label),sketchPaths,
+    invisibleStrokes:paths.filter(p=>getComputedStyle(p).strokeOpacity==='0').length};
   });
   const edges=[...host.querySelectorAll('.flowchart-link')].map(p=>{
     const marker=side=>{
