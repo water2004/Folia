@@ -2,46 +2,8 @@ name: Mermaid C++
 
 on:
   push:
-    branches:
-      - master
-      - 'codex/mermaid-cpp-*'
-      - feat/mermaid-cpp-port
-    paths:
-      - .github/workflows/mermaid-cpp.yml
-      - CMakeLists.txt
-      - docs/mermaid-cpp/**
-      - .gitattributes
-      - .gitmodules
-      - src/mermaid/**
-      - third_party/ut
-      - tests/mermaid_cpp/**
-      - tests/main.cpp
-      - tests/support/**
-      - tools/mermaid-cpp/**
-      - src/core/**
-      - src/platform/**
-      - tools/mathjax-bundle/package*.json
-      - tests/platform/mermaid_measurement.cpp
-      - tests/support/windows_console_runtime.cpp
-  pull_request:
-    paths:
-      - .github/workflows/mermaid-cpp.yml
-      - CMakeLists.txt
-      - docs/mermaid-cpp/**
-      - .gitattributes
-      - .gitmodules
-      - src/mermaid/**
-      - third_party/ut
-      - tests/mermaid_cpp/**
-      - tests/main.cpp
-      - tests/support/**
-      - tools/mermaid-cpp/**
-      - src/core/**
-      - src/platform/**
-      - tools/mathjax-bundle/package*.json
-      - tests/platform/mermaid_measurement.cpp
-      - tests/support/windows_console_runtime.cpp
-  workflow_dispatch:
+    tags:
+      - "v*.*.*"
 
 permissions:
   contents: read
