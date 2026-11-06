@@ -2,7 +2,7 @@
 
 本目录记录 Folia 的 Mermaid C++23 原生重构工程。该项目以官方 [`mermaid-js/mermaid`](https://github.com/mermaid-js/mermaid) **12.2.0**（commit `1fb7869866dd619168d840291c9c54b4f129758b`）为基准，在 `src/mermaid/` 与 `src/platform/text/` 下使用 C++23 modules 原生实现语法解析、布局计算、DirectWrite 文本测量与 SVG 渲染，用于替换现有的 `mermaid-rs-renderer` 依赖。各组件对应的上游源码版本与哈希记录在 [`source-lock.json`](source-lock.json) 中。
 
-原生公共入口覆盖锁定版本的 34 个图族，各有实际 SVG 与浏览器基准对照。Railroad 的四种语法视为同一图族；显式 `error` 是内部诊断图。语法、布局和外观覆盖以各图族的基准测试为准。C++ 库提供 `folia::mermaid` CMake 目标，桌面端仍使用原有 Rust 渲染链路。
+原生公共入口覆盖锁定版本的 34 个图族，各有原生 SVG 与上游渲染结果的对照。Packet 和 Pie 的对照在 jsdom 中运行，其余图族按各自的测试脚本运行。Railroad 的四种语法视为同一图族；显式 `error` 是内部诊断图。语法、布局和外观覆盖以各图族的基准测试为准。C++ 库提供 `folia::mermaid` CMake 目标，桌面端仍使用原有 Rust 渲染链路。
 
 ---
 
@@ -28,7 +28,7 @@
 - `src/mermaid/zenuml.{ixx,cpp}` 与 `zenuml_svg.{ixx,cpp}` 负责语法解析、横向约束、纵向布局和 SVG 输出。公共入口、Windows 文本测量和 DLL 调用均已接通，5 个基准案例通过浏览器 SVG 对照。
 
 ### 4. Requirement 公共入口
-- `requirementDiagram` 的 classic 外观支持默认 ELK 和显式 Dagre。共 32 张浏览器 SVG 对照覆盖亮暗主题、节点和关系、HTML 与 SVG 标签、标题及标记。标签目前支持纯文本，富文本换行和任意 CSS 字体样式仍待补齐。
+- `requirementDiagram` 的 classic 外观支持默认 ELK 和显式 Dagre。共 44 张浏览器 SVG 对照覆盖亮暗主题、节点和关系、HTML 与 SVG 标签、标题及标记。已验证强调、显式换行和实测的样式换行；任意 HTML/CSS 不在此覆盖范围内。
 
 ### 5. ER 公共入口
 - `erDiagram` 的 classic 外观支持默认 ELK 和显式 Dagre。8 个案例的 32 张浏览器 SVG 覆盖亮暗主题、别名、属性和键、关系基数、非识别关系与方向。另有 2 个无效语法的解析对照。RoughJS 零粗糙度笔画的随机控制点按等价线段验证。
@@ -63,7 +63,7 @@
 | 工作包 | 当前状态 | 下一步工作与完成标准 |
 | --- | --- | --- |
 | **4. 图族兼容性** | 34 个图族通过基础 SVG 对照；各自语法、外观和主题覆盖程度不同。 | 继续补充复杂标签、外观组合、曲线和需要额外注册资源的图形。浏览器回调依赖另行设计宿主边界。 |
-| **5. WinUI 宿主集成与依赖切换** | 本轮保留现有 Rust 路径，等待单独安排 | 将最新 `FoliaNativeMermaid` 接入 WinUI 应用预览、编辑刷新、亮暗主题切换与 PDF 导出链路，完成桌面端实机验证后移除 `mermaid-rs-renderer` 依赖。 |
+| **5. WinUI 宿主集成与依赖切换** | Astra 已在隔离工作区生成接入补丁。默认 State ELK 和 SVG 标签保留是切换前置条件。 | 在同一宿主验证应用预览、编辑刷新、亮暗主题和 PDF 导出。补丁路径和当前验收进度见 [交接](HANDOFF.md)。 |
 
 ---
 
