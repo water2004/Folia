@@ -14,7 +14,20 @@ suite mermaid_git_graph=[] {
             {"parallel",u"%%{init: {\"gitGraph\":{\"parallelCommits\":true}}}%%\ngitGraph\ncommit id: \"A\"\nbranch feature\ncommit id: \"B\"\ncheckout main\ncommit id: \"C\"\nmerge feature id: \"M\""},
             {"configured",u"%%{init: {\"gitGraph\":{\"mainBranchName\":\"trunk\",\"mainBranchOrder\":2,\"rotateCommitLabel\":false}}}%%\ngitGraph\ncommit id: \"A\"\nbranch feature order: 1\ncommit id: \"B\"\ncheckout trunk\ncommit id: \"C\""},
             {"cherry",u"gitGraph\ncommit id: \"A\"\nbranch feature\ncommit id: \"B\"\ncheckout main\ncommit id: \"C\"\ncherry-pick id: \"B\""},
-            {"cherry-merge",u"gitGraph\ncommit id: \"A\"\nbranch feature\ncommit id: \"B\"\ncheckout main\ncommit id: \"C\"\nmerge feature id: \"M\"\nbranch release\ncommit id: \"R\"\ncheckout feature\ncherry-pick id: \"M\" parent: \"C\" tag: \"backport\""}
+            {"cherry-merge",u"gitGraph\ncommit id: \"A\"\nbranch feature\ncommit id: \"B\"\ncheckout main\ncommit id: \"C\"\nmerge feature id: \"M\"\nbranch release\ncommit id: \"R\"\ncheckout feature\ncherry-pick id: \"M\" parent: \"C\" tag: \"backport\""},
+            {"official-example",uR"(gitGraph:
+    commit "Ashish"
+    branch newbranch
+    checkout newbranch
+    commit id:"1111"
+    commit tag:"test"
+    checkout main
+    commit type: HIGHLIGHT
+    commit
+    merge newbranch
+    commit
+    branch b2
+    commit)"}
         };
         for(const auto theme:{u"default",u"dark"}) {
             auto session=ConfigSession::create();expect(fatal(session.has_value()));ConfigValue site;site.kind=ConfigKind::mapping;
