@@ -5,6 +5,24 @@ using namespace boost::ut;
 using namespace folia::platform;
 using namespace folia::mermaid;
 suite mermaid_elk_flowchart=[] {
+    "mermaid_elk_flowchart_keyword_selects_elk_over_configured_layout"_test=[] {
+        auto session = ConfigSession::create();
+        expect(fatal(session.has_value()));
+        ConfigValue site{.kind = ConfigKind::mapping};
+        site.mapping.emplace(u"theme", ConfigValue{.kind = ConfigKind::string, .string = u"default"});
+        expect(fatal(session->save_initialize_config(site).has_value()));
+        expect(fatal(session->set_site_config(site).has_value()));
+
+        const auto graph = u" LR\nA[Read] --> B[Write]\nB --> C[Done]";
+        auto explicit_elk = render_mermaid(
+            std::u16string(u"---\nconfig: {layout: dagre, look: classic}\n---\nflowchart-elk") + graph, *session);
+        auto configured_elk = render_mermaid(
+            std::u16string(u"---\nconfig: {layout: elk, look: classic}\n---\nflowchart") + graph, *session);
+        expect(fatal(explicit_elk.has_value())) << (explicit_elk ? "" : explicit_elk.error());
+        expect(fatal(configured_elk.has_value())) << (configured_elk ? "" : configured_elk.error());
+        expect(explicit_elk->svg == configured_elk->svg);
+    };
+
     "mermaid_elk_flowchart_source_to_measured_svg"_test=[] {
         const std::vector<std::pair<std::string,std::u16string>> cases={
             {"elk-flat-right",u"flowchart LR\nA[Read] -->|next| B[Write]\nA --> C[Check]\nC --> B"},

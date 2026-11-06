@@ -5,6 +5,78 @@
   "license": "MIT",
   "files": [
     {
+      "path": "packages/mermaid/src/diagrams/error/errorDiagram.ts",
+      "sha256": "26f2f39bbb93f5766f065d7c8cff6b6bc7163025c9cf518faa6b5d3d5e13e60a"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/error/errorRenderer.ts",
+      "sha256": "7f19e481312159d6e6e74f4d570df154aa5d21687059125f3db2cb4ec5e52cf6"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/railroad/railroadRenderer.ts",
+      "sha256": "af7e6ab81ed962f8dd3e170e5e98a4bb5682ed2aeb2f87c2856405fe38b82c11"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/railroad/styles.ts",
+      "sha256": "67e6d23275153453310099d9b1444208dfcfcd03f282a8fd741eae3d0af3b321"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/railroad/railroadTypes.ts",
+      "sha256": "aeec31ffd2e50c7ca726c0a03516ad9c0a5dc49a72ad8580f104fae5819bb00e"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/railroad/railroadDb.ts",
+      "sha256": "e3be13100d4e7b996def16b4e41eb9f5676059f287e7ce33aa5a168dc40eb307"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/railroad/parser/railroadParser.ts",
+      "sha256": "2e55bfeb1c541fc5c2b30bac3b55f79a0f465b81aa4af8fd85d2043f87ab8599"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/railroad/parser/abnfParser.ts",
+      "sha256": "28f795c47be9d9e0e2c61fd3a96c3710d1639013b2f66725ebbeb7ce8c29fcaf"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/railroad/parser/ebnfParser.ts",
+      "sha256": "2c05ac63eda4ebec9ddb93cd3a4bf1136494b5ca22b4be8bbe911c9b581a5033"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/railroad/parser/pegParser.ts",
+      "sha256": "405354273b866c889495d72c6be660f33b52de89acf58ae8026ee9826023769f"
+    },
+    {
+      "path": "packages/parser/src/language/railroad/railroad.langium",
+      "sha256": "6a9a9a1793b98c3dbc04d922867681a1663cd1d14d70f29098fb3dda018f625e"
+    },
+    {
+      "path": "packages/parser/src/language/railroad/valueConverter.ts",
+      "sha256": "5c7c6453aa62f6692614d87aee20cfabeb0418326faed24ae72d1be77edeef6e"
+    },
+    {
+      "path": "packages/parser/src/language/railroad-abnf/railroad-abnf.langium",
+      "sha256": "2b4a3993ba3df8e43e7719437f40ba5c36d03a229f671441bcb2771136017b41"
+    },
+    {
+      "path": "packages/parser/src/language/railroad-abnf/valueConverter.ts",
+      "sha256": "c66263d2c97fbc12d93d91b98ad221158cc1c4f8676c291077cbc7f4890a6e3b"
+    },
+    {
+      "path": "packages/parser/src/language/railroad-ebnf/railroad-ebnf.langium",
+      "sha256": "9cf1a6d19bbe0452a79f87480775e418dbff6664eb95cc32d270c6acdd02f221"
+    },
+    {
+      "path": "packages/parser/src/language/railroad-ebnf/valueConverter.ts",
+      "sha256": "1047d625be31a7dd1eb4cd8f42b4df8ab0b02303fbf82c3d81876d9d243d2d4d"
+    },
+    {
+      "path": "packages/parser/src/language/railroad-peg/railroad-peg.langium",
+      "sha256": "90494f697158eddd41b2a60c42cb96a40b5f9d665392bcc4efe489b529e178cb"
+    },
+    {
+      "path": "packages/parser/src/language/railroad-peg/valueConverter.ts",
+      "sha256": "f7edc75c5e4c34919f1dd5e1b8f5e45d74754c278535f2ba352f81e545b434ab"
+    },
+    {
       "path": "packages/mermaid/src/diagrams/venn/parser/venn.jison",
       "sha256": "63b984882e29432bfcbb99083043d3118c103834a531199a962ef399ebee437f"
     },

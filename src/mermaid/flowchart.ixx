@@ -36,6 +36,10 @@ struct FlowchartLimits {
     FrontendLimits frontend;
     std::size_t nodes = 10000, edges = 500, subgraph_depth = 64;
 };
+// Shared Flowchart grammar also serves the explicit ELK and Swimlane variants.
+std::expected<FlowchartInput, std::string> parse_flowchart(
+    const PreparedDiagram&, FlowchartLimits limits = {});
+
 // Shared preparation -> common classic Flowchart grammar -> FlowDB layout
 // input. No coordinates, text measurement, SVG, or renderer registration yet.
 // Supports classic shapes, text/quoted labels, link chains/groups, subgraphs,

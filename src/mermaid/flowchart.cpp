@@ -453,7 +453,7 @@ class Parser {
     }
 public:
     Parser(View source_, FlowchartLimits limits_) : source(source_), limits(std::move(limits_)) {}
-    FlowchartInput run(PreparedDiagram& prepared) {
+    FlowchartInput run(const PreparedDiagram& prepared) {
         const auto* cfg = prepared.effective_config.find(u"flowchart");
         auto numeric = [&](View key, double fallback) {
             const auto* value = cfg ? cfg->find(key) : nullptr;
@@ -474,7 +474,8 @@ public:
         }
         while (pos < source.size() && (space(source[pos]) || source[pos] == u'\n')) ++pos;
         const auto header = word();
-        if (header != u"graph" && header != u"flowchart") fail("Unsupported Flowchart header");
+        if (header != u"graph" && header != u"flowchart" && header != u"flowchart-elk" &&
+            header != u"swimlane-beta") fail("Unsupported Flowchart header");
         horizontal();
         if (!end_statement()) result.direction = word();
         if (result.direction == u"TD") result.direction = u"TB";
@@ -482,21 +483,25 @@ public:
         separator(); Text unused;
         block(0,unused); layout_input();
         result.title = prepared.title.value_or(Text{});
-        result.effective_config = std::move(prepared.effective_config);
+        result.effective_config = prepared.effective_config;
         return std::move(result);
     }
 };
+}
+std::expected<FlowchartInput,std::string> parse_flowchart(
+    const PreparedDiagram& prepared, FlowchartLimits limits) {
+    if (prepared.type != u"flowchart-v2" && prepared.type != u"flowchart" &&
+        prepared.type != u"flowchart-elk" && prepared.type != u"swimlane")
+        return std::unexpected("Expected a supported Flowchart diagram");
+    try {
+        Parser parser{prepared.code.cleaned,std::move(limits)};
+        return parser.run(prepared);
+    } catch (const std::exception& error) { return std::unexpected(std::string{error.what()}); }
 }
 std::expected<FlowchartInput,std::string> prepare_flowchart(
     std::u16string_view source, const ConfigSession& session, FlowchartLimits limits) {
     auto prepared = prepare_diagram(source,session,limits.frontend);
     if (!prepared) return std::unexpected(prepared.error());
-    if (prepared->type != u"flowchart-v2" && prepared->type != u"flowchart")
-        return std::unexpected("Expected a supported Flowchart diagram");
-    try {
-        // Keep prepared source storage in place, including short-string storage.
-        Parser parser{prepared->code.cleaned,std::move(limits)};
-        return parser.run(*prepared);
-    } catch (const std::exception& error) { return std::unexpected(std::string{error.what()}); }
+    return parse_flowchart(*prepared,std::move(limits));
 }
 }

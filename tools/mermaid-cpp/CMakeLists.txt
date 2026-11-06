@@ -104,6 +104,8 @@ if(WIN32 AND MSVC)
         "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_ishikawa.cpp"
         "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_cynefin.cpp"
         "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_venn.cpp"
+        "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_railroad.cpp"
+        "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_error.cpp"
         "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_elk_flowchart.cpp"
         "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_architecture.cpp")
     set_target_properties(FoliaMermaidPlatformTests PROPERTIES CXX_MODULE_STD ON)

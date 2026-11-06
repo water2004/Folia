@@ -127,6 +127,16 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
     try {
         const auto& effective=prepared->effective_config;
         const auto& theme=member(effective,u"themeVariables");
+        if (prepared->type == u"error") {
+            auto input = prepare_error_render(*prepared);
+            return NativeDiagram{std::move(*prepared), std::move(input)};
+        }
+        if (prepared->type == u"railroad" || prepared->type == u"railroadEbnf" ||
+            prepared->type == u"railroadAbnf" || prepared->type == u"railroadPeg") {
+            auto input = prepare_railroad_render(*prepared);
+            if (!input) return std::unexpected(input.error());
+            return NativeDiagram{std::move(*prepared), std::move(*input)};
+        }
         if (prepared->type == u"info") {
             auto input = prepare_info_render(*prepared);
             if (!input) return std::unexpected(input.error());
@@ -378,8 +388,9 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
                 t.rect_fill=narrow(fill->string);
             return NativeDiagram{std::move(*prepared),SequenceRenderInput{std::move(*document),std::move(t),c}};
         }
-        if(prepared->type==u"flowchart" || prepared->type==u"flowchart-v2") {
-            auto graph=prepare_flowchart(source,session,FlowchartLimits{.frontend=limits});
+        if(prepared->type==u"flowchart" || prepared->type==u"flowchart-v2" ||
+            prepared->type==u"flowchart-elk") {
+            auto graph=parse_flowchart(*prepared,FlowchartLimits{.frontend=limits});
             if(!graph) return std::unexpected(graph.error());
             plain_metadata(graph->title);
             FlowchartSvgTheme style;
@@ -494,6 +505,16 @@ std::expected<DiagramSvg, std::string> render_native_diagram(
             auto result=render_architecture_svg(content,architecture_measurements);
             if(!result)return std::unexpected(result.error());
             return DiagramSvg{std::move(result->svg),result->width,result->height};
+        } else if constexpr (std::is_same_v<std::decay_t<decltype(content)>, ErrorRenderInput>) {
+            auto result = render_error_svg(content);
+            if (!result) return std::unexpected(result.error());
+            return DiagramSvg{std::move(result->svg), result->width, result->height};
+        } else if constexpr (std::is_same_v<std::decay_t<decltype(content)>, RailroadRenderInput>) {
+            auto result = render_railroad_svg(content, svg_text_measure);
+            if (!result) return std::unexpected(result.error());
+            try { decode_svg_text(result->svg); }
+            catch (const std::runtime_error& error) { return std::unexpected(error.what()); }
+            return DiagramSvg{std::move(result->svg), result->width, result->height};
         } else if constexpr (std::is_same_v<std::decay_t<decltype(content)>, InfoRenderInput>) {
             auto result = render_info_svg(content);
             if (!result) return std::unexpected(error_text(result.error().message));

@@ -30,6 +30,8 @@ export import folia.mermaid.tree_view_svg;
 export import folia.mermaid.ishikawa_svg;
 export import folia.mermaid.cynefin_svg;
 export import folia.mermaid.venn_svg;
+export import folia.mermaid.railroad_svg;
+export import folia.mermaid.error_svg;
 export import folia.mermaid.svg_text_measure;
 
 export namespace folia::mermaid {
@@ -43,7 +45,7 @@ struct NativeDiagram {
         GitGraphRenderInput, BlockRenderInput, KanbanRenderInput, C4RenderInput, StateRenderInput,
         MindmapRenderInput, ArchitectureRenderInput, ZenRenderInput, ErRenderInput,
         RequirementRenderInput, InfoRenderInput, TreeViewRenderInput, IshikawaRenderInput,
-        CynefinRenderInput, VennRenderInput> content;
+        CynefinRenderInput, VennRenderInput, RailroadRenderInput, ErrorRenderInput> content;
 };
 struct DiagramSvg { std::string svg; double width{}, height{}; };
 

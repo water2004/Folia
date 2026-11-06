@@ -637,10 +637,16 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
         if (!std::isfinite(size) || size <= 0 || size > std::numeric_limits<float>::max()) {
             return std::unexpected("Invalid Mermaid SVG font size");
         }
-        auto label = diagram_display_text(text);
-        if (!label) return std::unexpected(label.error());
+        std::u16string display;
+        // Railroad's getBBox runs before Mermaid restores protected entities.
+        if (!std::holds_alternative<RailroadRenderInput>(input->content)) {
+            auto label = diagram_display_text(text);
+            if (!label) return std::unexpected(label.error());
+            display = std::move(*label);
+            text = display;
+        }
         const MermaidFont font{std::u16string{*font_family}, static_cast<float>(size), weight};
-        auto bounds = measurer.measure(*label, font, false, {}, true);
+        auto bounds = measurer.measure(text, font, false, {}, true);
         if (!bounds) return std::unexpected(bounds.error());
         auto metrics = measurer.svg_font_metrics(font);
         if (!metrics) return std::unexpected(metrics.error());

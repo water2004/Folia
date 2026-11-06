@@ -380,7 +380,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/er-browser-probe.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          foreach ($family in @('info', 'tree-view', 'ishikawa', 'cynefin', 'venn')) {
+          foreach ($family in @('info', 'tree-view', 'ishikawa', 'cynefin', 'venn', 'railroad', 'error')) {
             node "tools/mermaid-cpp/${family}-browser-probe.mjs"
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           }
@@ -441,7 +441,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/compare-er-svg.mjs build/mermaid-cpp/er-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          foreach ($family in @('info', 'tree-view', 'ishikawa', 'cynefin', 'venn')) {
+          foreach ($family in @('info', 'tree-view', 'ishikawa', 'cynefin', 'venn', 'railroad', 'error')) {
             node "tools/mermaid-cpp/compare-${family}-svg.mjs" "build/mermaid-cpp/${family}-browser/original.json" build/mermaid-cpp/pie-svg
             if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           }
@@ -539,6 +539,10 @@ jobs:
             build/mermaid-cpp/cynefin-browser/*.svg
             build/mermaid-cpp/venn-browser/*.json
             build/mermaid-cpp/venn-browser/*.svg
+            build/mermaid-cpp/railroad-browser/*.json
+            build/mermaid-cpp/railroad-browser/*.svg
+            build/mermaid-cpp/error-browser/*.json
+            build/mermaid-cpp/error-browser/*.svg
             build/mermaid-cpp/quadrant-browser/*.json
             build/mermaid-cpp/quadrant-browser/*.svg
             build/mermaid-cpp/mindmap-browser/*.json
