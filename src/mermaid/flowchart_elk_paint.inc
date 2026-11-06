@@ -1,28 +1,65 @@
 // Mermaid rendering-elements/edges.js generateRoundedPath. MIT, ../LICENSE.
 // Included in flowchart_svg's private namespace; ELK supplies the clipped route.
-std::string rounded_elk_path(std::span<const FlowchartPoint> points,double radius=5) {
+// Accumulate the actual path length needed by Neo's absolute SVG dash gaps.
+FlowchartPoint edge_path_mix(FlowchartPoint a,FlowchartPoint b,double wa,double wb,double divisor) {
+    return {(wa*a.x+wb*b.x)/divisor,(wa*a.y+wb*b.y)/divisor};
+}
+double edge_path_distance(FlowchartPoint a,FlowchartPoint b) {return std::hypot(b.x-a.x,b.y-a.y);}
+
+// The Neo dash gaps are in absolute SVG units, measured on the painted path.
+double edge_path_cubic_length(FlowchartPoint a,FlowchartPoint b,FlowchartPoint c,FlowchartPoint d,int depth=0) {
+    const double chord=edge_path_distance(a,d),polygon=edge_path_distance(a,b)+edge_path_distance(b,c)+edge_path_distance(c,d);
+    if(polygon-chord<.001 || depth==10) return (chord+polygon)/2;
+    const auto ab=edge_path_mix(a,b,1,1,2),bc=edge_path_mix(b,c,1,1,2),cd=edge_path_mix(c,d,1,1,2);
+    const auto left=edge_path_mix(ab,bc,1,1,2),right=edge_path_mix(bc,cd,1,1,2),mid=edge_path_mix(left,right,1,1,2);
+    return edge_path_cubic_length(a,ab,left,mid,depth+1)+edge_path_cubic_length(mid,right,cd,d,depth+1);
+}
+struct EdgePath {
+    std::string svg;
+    FlowchartPoint last;
+    double* length;
+    EdgePath(FlowchartPoint start,double* length):svg("M"+point(start)),last(start),length(length) {}
+    void line(FlowchartPoint end) {
+        svg+="L"+point(end);
+        if(length) *length+=edge_path_distance(last,end);
+        last=end;
+    }
+    void cubic(FlowchartPoint a,FlowchartPoint b,FlowchartPoint end) {
+        svg+="C"+point(a)+" "+point(b)+" "+point(end);
+        if(length) *length+=edge_path_cubic_length(last,a,b,end);
+        last=end;
+    }
+    void quadratic(FlowchartPoint control,FlowchartPoint end) {
+        svg+="Q"+point(control)+" "+point(end);
+        if(length) *length+=edge_path_cubic_length(last,edge_path_mix(last,control,1,2,3),edge_path_mix(control,end,2,1,3),end);
+        last=end;
+    }
+};
+std::string rounded_elk_path(std::span<const FlowchartPoint> points,double radius=5,double* length=nullptr) {
     if(points.size()<2)return {};
-    std::string path="M"+point(points.front());
+    EdgePath path(points.front(),length);
     constexpr double epsilon=1e-5;
     for(std::size_t i=1;i+1<points.size();++i) {
         const auto a=points[i-1],b=points[i],c=points[i+1];
         const double dx1=b.x-a.x,dy1=b.y-a.y,dx2=c.x-b.x,dy2=c.y-b.y;
         const double len1=std::hypot(dx1,dy1),len2=std::hypot(dx2,dy2);
-        if(len1<epsilon||len2<epsilon){path+="L"+point(b);continue;}
+        if(len1<epsilon||len2<epsilon){path.line(b);continue;}
         const double nx1=dx1/len1,ny1=dy1/len1,nx2=dx2/len2,ny2=dy2/len2;
         const double angle=std::acos(std::clamp(nx1*nx2+ny1*ny2,-1.0,1.0));
-        if(angle<epsilon||std::abs(std::numbers::pi-angle)<epsilon){path+="L"+point(b);continue;}
+        if(angle<epsilon||std::abs(std::numbers::pi-angle)<epsilon){path.line(b);continue;}
         const double cut=std::min({radius/std::sin(angle/2),len1/2,len2/2});
-        path+="L"+point({b.x-nx1*cut,b.y-ny1*cut});
-        path+="Q"+point(b)+" "+point({b.x+nx2*cut,b.y+ny2*cut});
+        path.line({b.x-nx1*cut,b.y-ny1*cut});
+        path.quadratic(b,{b.x+nx2*cut,b.y+ny2*cut});
     }
-    return path+"L"+point(points.back());
+    path.line(points.back());
+    return std::move(path.svg);
 }
 
 // geometry.ts outlineAttachPoint: preserve the orthogonal departure axis when
 // ELK's bounding-box port lies outside a diamond or a circular outline.
+template<class Outline>
 std::optional<FlowchartPoint> elk_outline_attachment(const FlowchartPlacedNode& node,
-    std::u16string_view shape,FlowchartPoint port,FlowchartPoint next) {
+    std::u16string_view shape,FlowchartPoint port,FlowchartPoint next,const Outline& outline) {
     const double dx=next.x-port.x,dy=next.y-port.y;
     if((dx==0&&dy==0)||(std::abs(dx)>1e-6&&std::abs(dy)>1e-6))return {};
     const bool horizontal=std::abs(dx)>std::abs(dy);
@@ -30,7 +67,7 @@ std::optional<FlowchartPoint> elk_outline_attachment(const FlowchartPlacedNode& 
     const auto inside=[&](FlowchartPoint p) {
         const auto distance=std::hypot(p.x-node.x,p.y-node.y);
         if(distance==0)return true;
-        const auto crossing=intersect(node,shape,p);
+        const auto crossing=outline(node,shape,p);
         return distance<=std::hypot(crossing.x-node.x,crossing.y-node.y)+1e-9;
     };
     double inner=horizontal?node.x:node.y,outer=horizontal?port.x:port.y;
@@ -42,9 +79,16 @@ std::optional<FlowchartPoint> elk_outline_attachment(const FlowchartPlacedNode& 
 
 // render.ts cutter2/sanitizeElkEdgePoints for ordinary node endpoints. Container
 // endpoints are handled by the layout adapter's frame clipping boundary.
+struct ClassicElkOutline {
+    FlowchartPoint operator()(const FlowchartPlacedNode& node,std::u16string_view shape,FlowchartPoint p) const {
+        return intersect(node,shape,p);
+    }
+};
+
+template<class Outline=ClassicElkOutline>
 void clip_elk_node_endpoints(std::vector<FlowchartPoint>& points,
     const FlowchartPlacedNode& start,const FlowchartPlacedNode& end,
-    std::u16string_view start_shape,std::u16string_view end_shape) {
+    std::u16string_view start_shape,std::u16string_view end_shape,Outline outline={}) {
     points.insert(points.begin(),{start.x,start.y});points.push_back({end.x,end.y});
     const auto outside=[](const FlowchartPlacedNode& n,FlowchartPoint p) {
         return std::abs(p.x-n.x)>=n.width/2||std::abs(p.y-n.y)>=n.height/2;
@@ -52,11 +96,11 @@ void clip_elk_node_endpoints(std::vector<FlowchartPoint>& points,
     const auto replacement=[&](const FlowchartPlacedNode& n,std::u16string_view shape,std::size_t i,int step) {
         const auto next=static_cast<std::ptrdiff_t>(i)+step;
         if(next>=0&&next<static_cast<std::ptrdiff_t>(points.size()))
-            if(auto attached=elk_outline_attachment(n,shape,points[i],points[static_cast<std::size_t>(next)]))return *attached;
+            if(auto attached=elk_outline_attachment(n,shape,points[i],points[static_cast<std::size_t>(next)],outline))return *attached;
         auto p=points[i];const double dx=p.x-n.x,dy=p.y-n.y,length=std::hypot(dx,dy);
         if(length>0&&(std::abs(std::abs(dx)-n.width/2)<1||std::abs(std::abs(dy)-n.height/2)<1))
             p={n.x+dx/length*(length+10),n.y+dy/length*(length+10)};
-        return intersect(n,shape,p);
+        return outline(n,shape,p);
     };
     const auto replace=[&](FlowchartPoint p,bool first) {
         const auto old=first?points.front():points.back();

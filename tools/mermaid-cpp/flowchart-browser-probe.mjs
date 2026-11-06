@@ -9,9 +9,10 @@ const lock=JSON.parse(readFileSync('docs/mermaid-cpp/source-lock.json'));
 for(const file of lock.files) assert.equal(createHash('sha256').update(readFileSync('.reference/mermaid-js/'+file.path)).digest('hex'),file.sha256,file.path);
 for(const file of lock.flowchartCurve.files) assert.equal(createHash('sha256').update(readFileSync('tools/mermaid-cpp/oracle/node_modules/d3-shape/'+file.path)).digest('hex'),file.sha256,file.path);
 const elkAdapter=process.argv.includes('--elk');
+const neo=process.argv.includes('--neo');
 if(elkAdapter){const bundle=JSON.parse(readFileSync('tools/mermaid-cpp/oracle/node_modules/mermaid/'+lock.elkAdapter.map));for(const file of lock.elkAdapter.files){const i=bundle.sources.findIndex(s=>s.endsWith(file.source));assert(i>=0,file.source);assert.equal(createHash('sha256').update(bundle.sourcesContent[i]).digest('hex'),file.sha256,file.source);}}
-const outputArgument=process.argv.slice(2).find(arg=>arg!=='--elk');
-const directory=resolve(outputArgument??(elkAdapter?'build/mermaid-cpp/elk-flowchart-browser':'build/mermaid-cpp/flowchart-browser'));
+const outputArgument=process.argv.slice(2).find(arg=>!arg.startsWith('--'));
+const directory=resolve(outputArgument??(neo?'build/mermaid-cpp/neo-flowchart-browser':elkAdapter?'build/mermaid-cpp/elk-flowchart-browser':'build/mermaid-cpp/flowchart-browser'));
 mkdirSync(directory,{recursive:true});
 const dagreCases=[
   ["shapes-metadata", "flowchart LR\nA@{shape: rect, label: Read}\nB@{shape: cyl, label: Store}\nA named@--> B\nB --> C@{shape: terminal, label: Done}\nnamed@{curve: linear}"],
@@ -76,7 +77,13 @@ const dagreCases=[
   ['group-margins','%%{init: {"flowchart": {"subGraphTitleMargin": {"top": 6, "bottom": 4}}}}%%\nflowchart LR\nsubgraph g[Group title]\ndirection TB\nA[Read]-->|next|B[Write]\nend\ng-->|done|C[Exit]'],
   ['unicode','flowchart LR\nA[中文] --> B[Café 😀]'],
 ];
-const cases=elkAdapter?(await import('./elk-flowchart-cases.mjs')).cases:dagreCases;
+const neoCases=[
+  ['neo-shapes','flowchart LR\nA[Rect]\nB(Round)\nC{Decision}\nD((Circle))\nE(((Double)))\nF([Terminal])\nG[[Routine]]\nH[(Store)]'],
+  ['neo-edges','flowchart TD\nA[Read] --> B[Check]\nB <--> C(Done)\nC o--o D[Close]\nD x--x E[Exit]\nE -.-> F[Review]'],
+  ['neo-colors','flowchart LR\nA[Read]:::input --> B[Write]\nclassDef input fill:#ddeeff,stroke:#226688,color:#112233,stroke-width:2px\nlinkStyle 0 stroke:#885522,stroke-width:3px'],
+  ['neo-elk-chain','flowchart LR\nA[Read] --> B(Check) --> C([Done])'],
+];
+const cases=neo?neoCases:elkAdapter?(await import('./elk-flowchart-cases.mjs')).cases:dagreCases;
 const url=pathToFileURL(resolve('tools/mermaid-cpp/oracle/node_modules/mermaid/dist/mermaid.esm.mjs')).href;
 assert.equal(JSON.parse(readFileSync('tools/mermaid-cpp/oracle/node_modules/mermaid/package.json')).version,'12.2.0');
 const html=`<!doctype html><meta charset="utf-8"><body><script type="module">
@@ -86,10 +93,16 @@ const result=[];
 for(const [name,body,title] of ${JSON.stringify(cases)}) {
  const source=title?'---\\ntitle: '+JSON.stringify(title)+'\\n---\\n'+body:body;
  for(const theme of ['default','dark']) {
-  mermaid.initialize({startOnLoad:false,theme,look:'classic',layout:${JSON.stringify(elkAdapter?'elk':'dagre')},fontFamily:'Arial',themeVariables:{fontFamily:'Arial'},htmlLabels:!name.startsWith('svg-label-'),flowchart:{htmlLabels:!name.startsWith('svg-label-')}});
+  mermaid.initialize({startOnLoad:false,theme,look:${JSON.stringify(neo?'neo':'classic')},layout:name.startsWith('neo-elk-')?'elk':${JSON.stringify(elkAdapter?'elk':'dagre')},fontFamily:'Arial',themeVariables:{fontFamily:'Arial'},htmlLabels:!name.startsWith('svg-label-'),flowchart:{htmlLabels:!name.startsWith('svg-label-')}});
   const {svg}=await mermaid.render('probe'+result.length,source);
   const host=document.createElement('div');host.innerHTML=svg;document.body.append(host);
   const root=host.querySelector('svg');
+  const strokePaint=shape=>{
+   const stroke=getComputedStyle(shape).stroke;
+   if(!stroke.startsWith('url(')) return stroke;
+   const id=stroke.match(/#([^"')]+)/)?.[1],gradient=id&&root.querySelector('[id="'+id+'"]');
+   return gradient?JSON.stringify([...gradient.querySelectorAll('stop')].map(s=>[s.getAttribute('offset'),getComputedStyle(s).stopColor,getComputedStyle(s).stopOpacity])):stroke;
+  };
   const position=(element,x=0,y=0)=>{
    const p=new DOMPoint(x,y).matrixTransform(root.getScreenCTM().inverse().multiply(element.getScreenCTM()));
    return {x:p.x,y:p.y};
@@ -132,7 +145,7 @@ for(const [name,body,title] of ${JSON.stringify(cases)}) {
   const clusters=[...host.querySelectorAll('g.cluster')].map(n=>{
    const shape=n.querySelector('rect'),b=shape.getBBox(),label=n.querySelector('.cluster-label'),lb=label.getBBox();
    return {id:n.id,...position(shape,b.x+b.width/2,b.y+b.height/2),width:b.width,height:b.height,label:label.textContent,
-    title:name.startsWith('group-font')?paintedCenter(label):position(label,lb.x+lb.width/2,lb.y+lb.height/2),fill:getComputedStyle(shape).fill,stroke:getComputedStyle(shape).stroke,
+    title:name.startsWith('group-font')?paintedCenter(label):position(label,lb.x+lb.width/2,lb.y+lb.height/2),fill:getComputedStyle(shape).fill,stroke:strokePaint(shape),
     lines:displayLines(label),characters:styledCharacters(label),thickness:getComputedStyle(shape).strokeWidth,dash:getComputedStyle(shape).strokeDasharray,color:label.querySelector('text')?getComputedStyle(label.querySelector('text')).fill:getComputedStyle(label.querySelector('span')??label).color,font:fontStyle(label)};
   });
   const nodes=[...host.querySelectorAll('g.node')].map(n=>{
@@ -146,14 +159,15 @@ for(const [name,body,title] of ${JSON.stringify(cases)}) {
    const strokeShape=paths.find(p=>getComputedStyle(p).stroke!=='none')??shape;
    return {id:n.id,...position(n),transform:n.getAttribute('transform'),width:b.width,height:b.height,label:label.textContent,labelWidth:lb.width,labelHeight:lb.height,
     labelCenter:position(label,lb.x+lb.width/2,lb.y+lb.height/2),lines:displayLines(label),characters:styledCharacters(label),outline,
-    fill:getComputedStyle(fillShape).fill,stroke:getComputedStyle(strokeShape).stroke,
+    fill:getComputedStyle(fillShape).fill,stroke:strokePaint(strokeShape),
+    filter:getComputedStyle(shape).filter!=='none'||paths.some(p=>getComputedStyle(p).filter!=='none'),
     thickness:getComputedStyle(strokeShape).strokeWidth,dash:getComputedStyle(strokeShape).strokeDasharray,color:label.querySelector('text')?getComputedStyle(label.querySelector('text')).fill:getComputedStyle(label.querySelector('span')??label).color,font:fontStyle(label)};
   });
   const edges=[...host.querySelectorAll('.flowchart-link')].map(p=>{
     const marker=side=>{
      const ref=p.getAttribute('marker-'+side);if(!ref) return null;
      const m=root.querySelector('[id="'+ref.slice(ref.lastIndexOf('#')+1,-1)+'"]');
-     const shape=m.querySelector('path,circle'),style=getComputedStyle(shape);
+     const shape=m.querySelector('path,circle,polygon'),style=getComputedStyle(shape);
      return {attributes:Object.fromEntries(['viewBox','refX','refY','markerUnits','markerWidth','markerHeight','orient'].map(key=>[key,m.getAttribute(key)])),
       fill:style.fill,stroke:style.stroke,width:style.strokeWidth,dash:style.strokeDasharray,
       points:Array.from({length:21},(_,i)=>{const a=shape.getPointAtLength(shape.getTotalLength()*i/20);return {x:a.x,y:a.y};})};
@@ -187,5 +201,5 @@ try {
  assert.equal(rows.length,cases.length*2);
 } finally {await instance.close();}
 writeFileSync(resolve(directory,'original.json'),JSON.stringify(rows,null,2));
-for(const row of rows) {assert(row.nodes.length>1);assert(row.edges.length>0);writeFileSync(resolve(directory,row.name+'.svg'),row.svg);}
+for(const row of rows) {assert(row.nodes.length>1);if(row.name!=='neo-shapes-'+row.theme) assert(row.edges.length>0);writeFileSync(resolve(directory,row.name+'.svg'),row.svg);}
 console.log(`Measured ${rows.length} official Flowchart SVGs in ${directory}`);

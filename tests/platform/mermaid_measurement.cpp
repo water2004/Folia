@@ -237,6 +237,35 @@ suite mermaid_measurement = [] {
         const auto recovered=render_mermaid(prefix+u"flowchart TD\nA-->B",*session);
         expect(recovered.has_value())<<"request after errors"<<(recovered?"":recovered.error());
     };
+    "mermaid_flowchart_neo_measured_source_to_svg"_test=[] {
+        auto session=ConfigSession::create();
+        expect(fatal(session.has_value()));
+        const std::pair<std::string_view,std::u16string_view> cases[]={
+            {"neo-shapes",u"flowchart LR\nA[Rect]\nB(Round)\nC{Decision}\nD((Circle))\nE(((Double)))\nF([Terminal])\nG[[Routine]]\nH[(Store)]"},
+            {"neo-edges",u"flowchart TD\nA[Read] --> B[Check]\nB <--> C(Done)\nC o--o D[Close]\nD x--x E[Exit]\nE -.-> F[Review]"},
+            {"neo-colors",u"flowchart LR\nA[Read]:::input --> B[Write]\nclassDef input fill:#ddeeff,stroke:#226688,color:#112233,stroke-width:2px\nlinkStyle 0 stroke:#885522,stroke-width:3px"},
+            {"neo-elk-chain",u"flowchart LR\nA[Read] --> B(Check) --> C([Done])"},
+        };
+        for(const auto theme:{u"default",u"dark"}) for(const auto& sample:cases) {
+            const auto name = sample.first;
+            const auto body = sample.second;
+            auto source=std::u16string(u"---\nconfig:\n  theme: ")+theme+
+                u"\n  look: neo\n  layout: "+(name.starts_with("neo-elk-")?u"elk":u"dagre")+
+                u"\n  fontFamily: Arial\n  themeVariables: {fontFamily: Arial}\n---\n";
+            source+=body;
+            const auto svg=render_mermaid(source,*session);
+            expect(svg.has_value())<<name<<(svg?"":svg.error());
+            if(!svg) continue;
+            expect(svg->width>0 && svg->height>0);
+            expect(svg->svg.find("flow-drop-shadow")!=std::string::npos);
+            if(auto directory=std::getenv("FOLIA_MERMAID_SVG_OUTPUT")) {
+                std::filesystem::create_directories(directory);
+                const auto suffix=theme==std::u16string_view(u"dark")?"dark":"default";
+                std::ofstream out(std::filesystem::path(directory)/("flowchart-"+std::string(name)+"-"+suffix+".svg"),std::ios::binary);
+                out<<svg->svg;expect(out.good());
+            }
+        }
+    };
     "mermaid_source_to_svg_resolves_fonts_and_measures_display_text"_test=[] {
         MermaidMeasurer measurer;
         auto family=measurer.resolve_family(u"'Folia Missing Family 792743', Arial, sans-serif");

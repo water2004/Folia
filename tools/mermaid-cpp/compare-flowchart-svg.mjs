@@ -16,6 +16,12 @@ try {
   await page.setContent(svg);
   const actual=await page.evaluate(()=>{
    const svg=document.querySelector('svg'),outer=svg.querySelector('g[font-family]');
+   const strokePaint=shape=>{
+    const stroke=getComputedStyle(shape).stroke;
+    if(!stroke.startsWith('url(')) return stroke;
+    const id=stroke.match(/#([^"')]+)/)?.[1],gradient=id&&svg.querySelector('[id="'+id+'"]');
+    return gradient?JSON.stringify([...gradient.querySelectorAll('stop')].map(s=>[s.getAttribute('offset'),getComputedStyle(s).stopColor,getComputedStyle(s).stopOpacity])):stroke;
+   };
    const position=(element,x,y)=>{
     const p=new DOMPoint(x,y).matrixTransform(svg.getScreenCTM().inverse().multiply(element.getScreenCTM()));
     return {x:p.x,y:p.y};
@@ -32,7 +38,7 @@ try {
    const clusters=[...svg.querySelectorAll('g.cluster')].map(n=>{
     const shape=n.querySelector('rect'),b=shape.getBBox(),label=n.querySelector('text'),lb=label.getBBox();
     return {id:n.dataset.node,x:b.x+b.width/2,y:b.y+b.height/2,width:b.width,height:b.height,label:label.textContent,
-     title:{x:lb.x+lb.width/2,y:lb.y+lb.height/2},fill:getComputedStyle(shape).fill,stroke:getComputedStyle(shape).stroke,
+     title:{x:lb.x+lb.width/2,y:lb.y+lb.height/2},fill:getComputedStyle(shape).fill,stroke:strokePaint(shape),
      lines:[...label.children].map(n=>n.textContent.trimEnd()),characters:styledCharacters(label),thickness:getComputedStyle(shape).strokeWidth,dash:getComputedStyle(shape).strokeDasharray,color:getComputedStyle(label).fill,font:fontStyle(label)};
    });
    const nodes=[...svg.querySelectorAll('g.node')].map(n=>{
@@ -45,7 +51,8 @@ try {
     }));
     return {transform:n.getAttribute('transform'),width:b.width,height:b.height,label:text.textContent,
      labelCenter:position(text,t.x+t.width/2,t.y+t.height/2),lines:[...text.children].map(n=>n.textContent.trimEnd()),characters:styledCharacters(text),outline,
-     fill:getComputedStyle(shape).fill,stroke:getComputedStyle(shape).stroke,
+     fill:getComputedStyle(shape).fill,stroke:strokePaint(shape),
+     filter:getComputedStyle(shape).filter!=='none'||paths.some(p=>getComputedStyle(p).filter!=='none'),
      thickness:getComputedStyle(shape).strokeWidth,dash:getComputedStyle(shape).strokeDasharray,color:getComputedStyle(text).fill,font:fontStyle(text),
      contained:t.x>=corner.x-1&&t.y>=corner.y-1&&t.x+t.width<=corner.x+b.width+1&&t.y+t.height<=corner.y+b.height+1};
    });
@@ -53,7 +60,7 @@ try {
     const marker=side=>{
      const ref=p.getAttribute('marker-'+side);if(!ref) return null;
      const m=svg.querySelector('[id="'+ref.slice(ref.lastIndexOf('#')+1,-1)+'"]');
-     const shape=m.querySelector('path,circle'),style=getComputedStyle(shape);
+     const shape=m.querySelector('path,circle,polygon'),style=getComputedStyle(shape);
      return {attributes:Object.fromEntries(['viewBox','refX','refY','markerUnits','markerWidth','markerHeight','orient'].map(key=>[key,m.getAttribute(key)])),
       fill:style.fill,stroke:style.stroke,width:style.strokeWidth,dash:style.strokeDasharray,
       points:Array.from({length:21},(_,i)=>{const a=shape.getPointAtLength(shape.getTotalLength()*i/20);return {x:a.x,y:a.y};})};
@@ -95,6 +102,7 @@ try {
    assert.deepEqual(a.font,e.font,`${row.name} label font`);
    assert.deepEqual(a.characters,e.characters,`${row.name} styled characters`);
    for(const key of ['fill','stroke','thickness','dash','color']) assert.equal(a[key],e[key],`${row.name} node ${a.label} ${key}`);
+   if(row.name.startsWith('neo-')) assert.equal(a.filter,e.filter,`${row.name} node ${a.label} shadow`);
    if(e.outline.length) {
     near(a.labelCenter.x,e.labelCenter.x,`${row.name} label center x`,2);
     near(a.labelCenter.y,e.labelCenter.y,`${row.name} label center y`,2);
@@ -123,7 +131,13 @@ try {
    const a=actual.edges[i],e=row.edges.find(n=>n.id.endsWith("-"+a.id));
    assert(e,`${row.name}: missing edge ${a.id}`);near(a.length,e.length,`${row.name} edge ${i} length`,3);
    assert.equal(a.stroke,e.stroke,`${row.name} edge paint`);
-   assert.equal(a.dash,e.dash,`${row.name} edge dash`);assert.equal(a.thickness,e.thickness,`${row.name} edge thickness`);
+   if(row.name.startsWith('neo-') && a.dash!=='none' && e.dash!=='none') {
+    const parts=s=>s.split(',').map(s=>parseFloat(s));
+    const actual=parts(a.dash),expected=parts(e.dash);
+    assert.equal(actual.length,expected.length,`${row.name} edge dash count`);
+    actual.forEach((value,i)=>near(value,expected[i],`${row.name} edge dash ${i}`));
+   } else assert.equal(a.dash,e.dash,`${row.name} edge dash`);
+   assert.equal(a.thickness,e.thickness,`${row.name} edge thickness`);
    for(const side of ['start','end']) {
     assert.equal(!!a[side],!!e[side],`${row.name} ${a.id} ${side} marker`);
     if(!e[side]) continue;

@@ -1,5 +1,6 @@
 module folia.mermaid.flowchart_label;
 import std;
+import folia.mermaid.html_named_reference;
 
 namespace folia::mermaid {
 namespace {
@@ -18,10 +19,8 @@ std::u16string decode_entity(std::u16string_view name) {
         if(cp<0x10000) return std::u16string(1,static_cast<char16_t>(cp));
         cp-=0x10000;return {static_cast<char16_t>(0xd800+(cp>>10)),static_cast<char16_t>(0xdc00+(cp&1023))};
     }
-    for(auto [key,value]:{std::pair{u"quot",u"\""},{u"amp",u"&"},{u"apos",u"'"},
-        {u"lt",u"<"},{u"gt",u">"},{u"nbsp",u"\u00a0"},{u"copy",u"\u00a9"},{u"reg",u"\u00ae"}})
-        if(name==key) return value;
-    throw std::runtime_error("Unsupported named Flowchart entity; use its decimal code point");
+    if (auto named = mermaid_html_named_reference(name)) return std::move(*named);
+    return u"&" + std::u16string{name} + u";";
 }
 }
 static std::expected<std::vector<FlowchartLabelLine>,std::string> label_runs(

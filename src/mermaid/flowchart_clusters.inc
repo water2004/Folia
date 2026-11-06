@@ -40,11 +40,11 @@ std::vector<FlowchartPoint> cut_at_cluster(std::span<const FlowchartPoint> point
 void finish_edge(FlowchartPlacedEdge& edge,const FlowchartEdge& source,
     const FlowchartPlacedNode& start,const FlowchartPlacedNode& end,
     std::u16string_view start_shape,std::u16string_view end_shape,bool intersect_shapes,
-    const FlowchartPlacedNode* from_cluster,const FlowchartPlacedNode* to_cluster) {
+    const FlowchartPlacedNode* from_cluster,const FlowchartPlacedNode* to_cluster,bool neo) {
     const auto original=edge.points;
     if(intersect_shapes) {
-        edge.points.front()=intersect(start,start_shape,edge.points[1]);
-        edge.points.back()=intersect(end,end_shape,edge.points[edge.points.size()-2]);
+        edge.points.front()=intersect(start,start_shape,edge.points[1],neo);
+        edge.points.back()=intersect(end,end_shape,edge.points[edge.points.size()-2],neo);
     }
     // The original toCluster branch deliberately starts from the Dagre path.
     if(to_cluster) edge.points=cut_at_cluster(original,*to_cluster);
@@ -162,7 +162,7 @@ FlowchartScene layout_prepared(const FlowchartInput& source,FlowchartPreparedGra
         const auto b=ids.at(e.loop_segment==1?original.end:e.data.end);
         finish_edge(edge,original,placed->nodes[a],placed->nodes[b],graph.nodes[a].data.shape,graph.nodes[b].data.shape,
             !children[a]&&!children[b],e.from_cluster.empty()?nullptr:&placed->nodes[ids.at(e.from_cluster)],
-            e.to_cluster.empty()?nullptr:&placed->nodes[ids.at(e.to_cluster)]);
+            e.to_cluster.empty()?nullptr:&placed->nodes[ids.at(e.to_cluster)],theme.neo);
     }
     scene.min_x=scene.min_y=std::numeric_limits<double>::infinity();
     scene.max_x=scene.max_y=-std::numeric_limits<double>::infinity();

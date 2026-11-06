@@ -14,6 +14,9 @@ struct FlowchartSvgTheme {
     std::string cluster_fill="#ffffde",cluster_border="#aaaa33",cluster_text="#333333";
     bool html_label_spacing=true;
     std::string fill="#ECECFF",border="#9370DB",text="#333333",line="#333333",label_background="#e8e8e8";
+    bool neo=false,use_gradient=false,dark_shadow=false;
+    std::string gradient_start,gradient_stop,drop_shadow;
+    double node_stroke_width=1;
 };
 struct FlowchartLabelFont {
     std::u16string family;

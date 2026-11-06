@@ -6,12 +6,12 @@ double stadium_width_loss(double height) {
     return height*(1-std::cos(stadium_arc_step/2));
 }
 
-FlowchartNodeBox stadium_box(double label_width,double label_height,double padding) {
-    const double height=label_height+padding;
+FlowchartNodeBox stadium_box(double label_width,double label_height,double padding_x,double padding_y) {
+    const double height=label_height+padding_y;
     const double inscribed=height*std::cos(stadium_arc_step/2);
     const double cap=std::sqrt(std::max(0.0,inscribed*inscribed-label_height*label_height));
-    const double width=std::max({label_width+height/4+padding,
-        1.5*height+(height-inscribed),label_width+padding+height-cap});
+    const double width=std::max({label_width+height/4+padding_x,
+        1.5*height+(height-inscribed),label_width+padding_x+height-cap});
     // updateNodeBounds reads the sampled path, whose arcs miss the x extrema.
     return {width-stadium_width_loss(height),height};
 }
@@ -44,11 +44,14 @@ bool classic_polygon(std::u16string_view shape) {
 
 // Center the original points after insertPolygonShape/rectLeftInvArrow's
 // translation. Width is the painted bounds, including slants and the notch.
-std::vector<FlowchartPoint> classic_polygon_points(std::u16string_view shape,double width,double height) {
+std::vector<FlowchartPoint> classic_polygon_points(std::u16string_view shape,double width,double height,bool neo=false) {
     const double left=-width/2,right=width/2,top=-height/2,bottom=height/2;
     const double slant=height/2;
-    if(shape==u"hexagon") return {{left+height/4,bottom},{right-height/4,bottom},
-        {right,0},{right-height/4,top},{left+height/4,top},{left,0}};
+    if(shape==u"hexagon") {
+        const double corner=height/(neo?3.5:4);
+        return {{left+corner,bottom},{right-corner,bottom},
+            {right,0},{right-corner,top},{left+corner,top},{left,0}};
+    }
     if(shape==u"lean_right") return {{left,bottom},{right-slant,bottom},{right,top},{left+slant,top}};
     if(shape==u"lean_left") return {{left+slant,bottom},{right,bottom},{right-slant,top},{left,top}};
     if(shape==u"trapezoid") return {{left,bottom},{right,bottom},{right-slant,top},{left+slant,top}};

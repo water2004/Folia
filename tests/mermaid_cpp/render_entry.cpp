@@ -15,6 +15,13 @@ std::string compact(std::string text) {
     std::erase_if(text,[](char c){ return c==' '||c=='\t'||c=='\r'||c=='\n'; }); return text;
 }
 suite render_entry = [] {
+    "mermaid_render_entry_resolves_named_html_references"_test = [] {
+        auto display = diagram_display_text(encode_diagram_source(
+            u"#alpha; #NotEqualTilde; #Afr; #unrecognizedMermaidName;"));
+        expect(fatal(display.has_value()));
+        expect(bool(*display == u"\u03b1 \u2242\u0338 \U0001d504 &unrecognizedMermaidName;\n"));
+    };
+
     "mermaid_render_entry_matches_original_family_configuration"_test=[] {
         const auto override=std::getenv("FOLIA_MERMAID_FIXTURES");
         std::ifstream input{std::filesystem::path{override?override:FOLIA_MERMAID_FIXTURE_DIR}/"render-entry.tsv"};
@@ -115,7 +122,8 @@ suite render_entry = [] {
     };
     "mermaid_render_entry_errors_are_isolated"_test=[] {
         auto session=ConfigSession::create(); expect(fatal(session.has_value()));
-        expect(!prepare_native_diagram(u"flowchart TD\nA-->B",*session));
+        expect(!prepare_native_diagram(
+            u"---\nconfig: {look: handDrawn}\n---\nflowchart TD\nA-->B", *session));
         expect(!prepare_native_diagram(u"pie\n\"unfinished",*session));
         expect(!prepare_native_diagram(u"pie\ntitle <b>HTML</b>",*session));
         auto result=prepare_native_diagram(u"pie\n\"Tea\":1",*session); expect(fatal(result.has_value()));

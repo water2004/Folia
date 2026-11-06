@@ -5,6 +5,10 @@
   "license": "MIT",
   "files": [
     {
+      "path": "packages/mermaid/src/rendering-util/insertLookDefs.ts",
+      "sha256": "55bb1d46c232a7f2935d34976a6c1e6cfa7b874b7ae0ba4ac601761cfc660569"
+    },
+    {
       "path": "packages/mermaid/src/diagrams/error/errorDiagram.ts",
       "sha256": "26f2f39bbb93f5766f065d7c8cff6b6bc7163025c9cf518faa6b5d3d5e13e60a"
     },

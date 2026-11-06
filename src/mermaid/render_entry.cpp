@@ -2,6 +2,7 @@ module folia.mermaid.render_entry;
 import std;
 import folia.mermaid.svg_text;
 import folia.mermaid.number;
+import folia.mermaid.html_named_reference;
 
 namespace folia::mermaid {
 namespace {
@@ -67,10 +68,8 @@ std::u16string entity(std::u16string_view name) {
         cp-=0x10000;
         return {static_cast<char16_t>(0xd800+(cp>>10)),static_cast<char16_t>(0xdc00+(cp&1023))};
     }
-    for (auto [key,value] : {std::pair{u"quot",u"\""}, {u"amp",u"&"}, {u"apos",u"'"},
-        {u"lt",u"<"}, {u"gt",u">"}, {u"nbsp",u"\u00a0"}, {u"copy",u"\u00a9"}, {u"reg",u"\u00ae"}})
-        if (name==key) return value;
-    throw std::runtime_error("Unsupported named diagram entity; use its decimal code point");
+    if (auto named = mermaid_html_named_reference(name)) return std::move(*named);
+    return u"&" + std::u16string{name} + u";";
 }
 // Only generated text-node content is decoded. Styles, colors and attributes
 // must never be interpreted as Mermaid source escapes.
@@ -396,7 +395,23 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
             FlowchartSvgTheme style;
             const auto& config=member(effective,u"flowchart");
             const auto look=text(member(effective,u"look"));
-            if(look!=u"classic") return std::unexpected("Native Flowchart SVG currently requires classic look");
+            style.neo = look == u"neo";
+            if (look != u"classic" && !style.neo)
+                return std::unexpected("Native Flowchart SVG requires classic or neo look");
+            if (style.neo) {
+                const auto copy_string = [&](std::u16string_view key, std::string& destination) {
+                    if (const auto* value = theme.find(key); value && value->kind == ConfigKind::string)
+                        destination = narrow(value->string);
+                };
+                copy_string(u"gradientStart", style.gradient_start);
+                copy_string(u"gradientStop", style.gradient_stop);
+                copy_string(u"dropShadow", style.drop_shadow);
+                if (const auto* value = theme.find(u"useGradient"); value && value->kind == ConfigKind::boolean)
+                    style.use_gradient = value->boolean;
+                if (const auto* value = theme.find(u"strokeWidth"); value && value->kind != ConfigKind::null)
+                    style.node_stroke_width = size(*value);
+                style.dark_shadow = text(member(effective, u"theme")).contains(u"dark");
+            }
             const auto layout=text(member(effective,u"layout"));
             if(layout!=u"dagre"&&layout!=u"elk") return std::unexpected("Native Flowchart requires Dagre or ELK layout");
             style.font_family=text(member(theme,u"fontFamily"));style.font_size=size(member(theme,u"fontSize"));
