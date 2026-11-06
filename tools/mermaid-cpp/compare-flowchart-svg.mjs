@@ -36,10 +36,15 @@ try {
     return chars;
    };
    const clusters=[...svg.querySelectorAll('g.cluster')].map(n=>{
-    const shape=n.querySelector('rect'),b=shape.getBBox(),label=n.querySelector('text'),lb=label.getBBox();
-    return {id:n.dataset.node,x:b.x+b.width/2,y:b.y+b.height/2,width:b.width,height:b.height,label:label.textContent,
-     title:{x:lb.x+lb.width/2,y:lb.y+lb.height/2},fill:getComputedStyle(shape).fill,stroke:strokePaint(shape),
-     lines:[...label.children].map(n=>n.textContent.trimEnd()),characters:styledCharacters(label),thickness:getComputedStyle(shape).strokeWidth,dash:getComputedStyle(shape).strokeDasharray,color:getComputedStyle(label).fill,font:fontStyle(label)};
+    const shape=n.querySelector(':scope > rect')??n.firstElementChild,b=shape.getBBox(),label=n.querySelector('text'),lb=label.getBBox();
+    const paths=[...shape.querySelectorAll('path')],outline=paths.at(-1)??shape;
+    const sketchPaths=paths.length?paths.map(p=>({
+     length:p.getTotalLength(),stroke:strokePaint(p),width:getComputedStyle(p).strokeWidth,
+     samples:Array.from({length:37},(_,i)=>{const q=p.getPointAtLength(p.getTotalLength()*i/36);return position(p,q.x,q.y);}),
+    })):null;
+    return {id:n.dataset.node,...position(shape,b.x+b.width/2,b.y+b.height/2),width:b.width,height:b.height,label:label.textContent,
+     title:position(label,lb.x+lb.width/2,lb.y+lb.height/2),fill:getComputedStyle(shape).fill,stroke:strokePaint(outline),
+     lines:[...label.children].map(n=>n.textContent.trimEnd()),characters:styledCharacters(label),thickness:getComputedStyle(outline).strokeWidth,dash:getComputedStyle(outline).strokeDasharray,color:getComputedStyle(label).fill,font:fontStyle(label),sketchPaths};
    });
    const nodes=[...svg.querySelectorAll('g.node,g.rough-node')].map(n=>{
     const rough=n.matches('.rough-node');
@@ -147,7 +152,7 @@ try {
    assert.deepEqual(a.lines,e.lines,`${row.name} edge lines`);
    near(a.width,e.width,`${row.name} label width`);near(a.height,e.height,`${row.name} label height`);
   }
-  const edgeTolerance=row.name.startsWith('hand-drawn-')?1.5:3;
+  const edgeTolerance=row.name.startsWith('hand-drawn-')||row.name.startsWith('curve-')?1.5:3;
   for(let i=0;i<actual.edges.length;++i) {
    const a=actual.edges[i],e=row.edges.find(n=>n.id.endsWith("-"+a.id));
    assert(e,`${row.name}: missing edge ${a.id}`);near(a.length,e.length,`${row.name} edge ${i} length`,edgeTolerance);
@@ -175,11 +180,21 @@ try {
    assert.equal(a.label,e.label,row.name+' group title');
    assert.deepEqual(a.characters,e.characters,row.name+' styled group characters');
    assert.deepEqual(a.lines,e.lines,row.name+' group title lines');
-   near(a.x+offset[0],e.x,row.name+' group x');near(a.y+offset[1],e.y,row.name+' group y');
+   near(a.x,e.x,row.name+' group x');near(a.y,e.y,row.name+' group y');
    near(a.width,e.width,row.name+' group width');near(a.height,e.height,row.name+' group height');
-   near(a.title.x+offset[0],e.title.x,row.name+' title x');near(a.title.y+offset[1],e.title.y,row.name+' title y',2);
+   near(a.title.x,e.title.x,row.name+' title x');near(a.title.y,e.title.y,row.name+' title y',e.sketchPaths?1.5:2);
    assert.deepEqual(a.font,e.font,`${row.name} label font`);
    for(const key of ['fill','stroke','thickness','dash','color']) assert.equal(a[key],e[key],`${row.name} group ${a.label} ${key}`);
+   if(e.sketchPaths) {
+    assert.equal(a.sketchPaths?.length,e.sketchPaths.length,`${row.name} cluster path count`);
+    for(let j=0;j<e.sketchPaths.length;++j) {
+     const p=a.sketchPaths[j],q=e.sketchPaths[j];
+     near(p.length,q.length,`${row.name} cluster sketch path length`);
+     for(const key of ['stroke','width']) assert.equal(p[key],q[key],`${row.name} cluster sketch path ${key}`);
+     for(let k=0;k<q.samples.length;++k) for(const axis of ['x','y'])
+      near(p.samples[k][axis],q.samples[k][axis],`${row.name} cluster sketch sample ${axis}`);
+    }
+   }
   }
   report.push({name:row.name,nodes:actual.nodes.length,edges:actual.edges.length,groups:actual.clusters.length});
  }

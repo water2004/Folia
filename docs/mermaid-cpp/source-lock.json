@@ -2169,6 +2169,38 @@
     "version": "3.2.0",
     "files": [
       {
+        "path": "src/curve/linear.js",
+        "sha256": "e377d1440cd2547ad2e38050898e2cd765eb9d248cc5702f287763353ac43b87"
+      },
+      {
+        "path": "src/curve/cardinal.js",
+        "sha256": "0e9893ab95b71f4cfe52ddfdaa55de4997c1944774f6906c2fc5ea9f1421dffa"
+      },
+      {
+        "path": "src/curve/catmullRom.js",
+        "sha256": "ce34a4dea067b85dd7d7e3c374dbeceb6424a0f31e7f2964943c6a8371c7a9cc"
+      },
+      {
+        "path": "src/curve/monotone.js",
+        "sha256": "6f6fe0f729d096814f8282128d4caf6337de0b13e2ea5cedc1c528223c64056c"
+      },
+      {
+        "path": "src/curve/natural.js",
+        "sha256": "be8d0d5fa2627d733b2950ea88ec42c4bd5fc70ff64a8858bde68a51d6f27e62"
+      },
+      {
+        "path": "src/curve/step.js",
+        "sha256": "ca0436ff3c69e55272927ef94c9f909280496f492e9649ffd4f4fded0c977c7b"
+      },
+      {
+        "path": "src/curve/bump.js",
+        "sha256": "5c0b6fde8f33ec58e2017389a91be8eea9d071ec3698886419d8cb72b2461764"
+      },
+      {
+        "path": "src/math.js",
+        "sha256": "876190a6d1250f781fa8ca8a1bd0fba1a3db718fe2355c5a69b034aac6caf490"
+      },
+      {
         "path": "src/curve/basis.js",
         "sha256": "2b75b71399e8d92d021e28bb2b4f7d6c41e3d2dff89f69c877ea7f664698086b"
       },

@@ -20,9 +20,6 @@ bool valid_box(const FlowchartTextBox& b) {
     return std::isfinite(b.width)&&std::isfinite(b.height)&&std::isfinite(b.baseline)&&b.width>=0&&b.height>=0&&b.baseline>=0&&b.baseline<=b.height;
 }
 std::string point(FlowchartPoint p) {return number(p.x)+","+number(p.y);}
-FlowchartPoint mix(FlowchartPoint a,FlowchartPoint b,double wa,double wb,double divisor) {
-    return {(wa*a.x+wb*b.x)/divisor,(wa*a.y+wb*b.y)/divisor};
-}
 #include "flowchart_shapes.inc"
 
 FlowchartPoint intersect(const FlowchartPlacedNode& n,std::u16string_view shape,FlowchartPoint p,bool neo=false) {
@@ -49,27 +46,11 @@ FlowchartPoint intersect(const FlowchartPlacedNode& n,std::u16string_view shape,
 }
 #include "flowchart_elk_paint.inc"
 
-// D3 3.2.0 curveBasis with its original endpoint handling; no JS runtime.
-std::string curve_path(std::span<const FlowchartPoint> points,bool linear,double* length=nullptr) {
-    if(points.empty()) return {};
-    EdgePath path(points.front(),length);
-    if(linear || points.size()<3) {
-        for(std::size_t i=1;i<points.size();++i) path.line(points[i]);
-        return std::move(path.svg);
-    }
-    path.line(mix(points[0],points[1],5,1,6));
-    const auto segment=[&](FlowchartPoint a,FlowchartPoint b,FlowchartPoint c) {
-        path.cubic(mix(a,b,2,1,3),mix(a,b,1,2,3),{(a.x+4*b.x+c.x)/6,(a.y+4*b.y+c.y)/6});
-    };
-    for(std::size_t i=2;i<points.size();++i) segment(points[i-2],points[i-1],points[i]);
-    segment(points[points.size()-2],points.back(),points.back());
-    path.line(points.back());
-    return std::move(path.svg);
-}
 void shorten(FlowchartPoint& p,FlowchartPoint neighbor,double amount) {
     const auto dx=neighbor.x-p.x,dy=neighbor.y-p.y,length=std::hypot(dx,dy);
     if(length>0) {p.x+=amount*dx/length;p.y+=amount*dy/length;}
 }
+#include "flowchart_curves.inc"
 std::string_view marker_name(std::u16string_view arrow) {
     if(arrow==u"none") return {};
     if(arrow==u"arrow_point") return "point";
@@ -116,9 +97,9 @@ FlowchartPoint label_midpoint(std::span<const FlowchartPoint> points) {
     }
     return points.back();
 }
+#include "flowchart_rough.inc"
 #include "flowchart_clusters.inc"
 #include "flowchart_neo.inc"
-#include "flowchart_rough.inc"
 
 }
 
@@ -203,7 +184,6 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
             const auto& e=graph.edges[i];const auto& b=measured.edges[i];
             if(!valid_box(b)) return std::unexpected("Invalid measured Flowchart edge label");
             edge_paints.push_back(compile_paint(e.compiled_styles,e.styles));
-            if(e.curve!=u"basis" && e.curve!=u"linear" && !e.curve.empty()) return std::unexpected("Flowchart SVG curve is not implemented yet");
             for(auto arrow:{e.arrow_start,e.arrow_end}) marker_name(arrow);
             labels.push_back(e.label.empty()?FlowchartEdgeLabelSize{}:FlowchartEdgeLabelSize{b.width,height(b)});
         }
@@ -217,20 +197,19 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
                 if(graph.nodes[a].group||graph.nodes[b].group)
                     return std::unexpected("ELK Flowchart group endpoints require frame clipping");
                 clip_elk_node_endpoints(points,scene.layout.nodes[a],scene.layout.nodes[b],graph.nodes[a].shape,graph.nodes[b].shape,
-                    [&](const auto& node,auto shape,auto point) {return intersect(node,shape,point,theme.neo);});
+                    [&](const auto& node,auto shape,auto point) {return intersect(node,shape,point,theme.neo);},theme.hand_drawn);
                 if(edge.arrow_end==u"arrow_point")elk_remove_short_marker_segment(points,scene.layout.nodes[b],false);
                 if(edge.arrow_start==u"arrow_point")elk_remove_short_marker_segment(points,scene.layout.nodes[a],true);
             }
         }else {
             auto prepared=prepare_flowchart_graph(graph);if(!prepared)return std::unexpected(prepared.error());
-            scene=layout_prepared(graph,prepared->graph,boxes,labels,measured,theme);
+            scene=layout_prepared(graph,prepared->graph,boxes,labels,measured,theme,nullptr,
+                theme.hand_drawn?&rough_nodes:nullptr);
         }
         const auto* layout=&scene.layout;
         const auto edge_path=[&](std::size_t i,double* length=nullptr) {
-            const auto& e=graph.edges[i];auto points=layout->edges[i].points;
-            if(e.arrow_start==u"arrow_point") shorten(points.front(),points[1],4);
-            if(e.arrow_end==u"arrow_point") shorten(points.back(),points[points.size()-2],4);
-            return use_elk?rounded_elk_path(points,5,length):curve_path(points,e.curve==u"linear",length);
+            const auto& e=graph.edges[i];
+            return flowchart_edge_path(layout->edges[i].points,use_elk?u"rounded":std::u16string_view(e.curve),e,length);
         };
         std::vector<RoughPolygonResult> rough_edges;
         if(theme.hand_drawn) {
@@ -247,10 +226,8 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
                 const auto& n=layout->nodes[i];
                 auto& rough=rough_nodes[i];
                 if(graph.nodes[i].group) {
-                    const auto x=n.x-n.width/2,y=n.y-n.height/2;
-                    rough.drawing=sketch_svg_path(rough_rounded_rect(x,y,n.width,n.height,0),
-                        {.seed=theme.hand_drawn_seed});
-                    if(rough.drawing.bounds) include(*rough.drawing.bounds);
+                    if(use_elk) rough.drawing=rough_cluster_frame(n,theme);
+                    if(rough.drawing.bounds) include(*rough.drawing.bounds,rough.offset.x,rough.offset.y);
                 } else if(rough.drawing.bounds) {
                     include(*rough.drawing.bounds,n.x+rough.offset.x,n.y+rough.offset.y);
                 }
@@ -338,11 +315,13 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
         for(auto i:groups) {
             const auto& n=layout->nodes[i];const auto& source=graph.nodes[i];
             svg+="<g class=\"cluster\" data-node=\""+xml(n.id)+"\">";
-            if(theme.hand_drawn) svg+=rough_flowchart_shape(rough_nodes[i].drawing,node_paints[i],theme.cluster_fill,theme.cluster_border,"3");
+            if(theme.hand_drawn) svg+=rough_flowchart_shape(rough_nodes[i].drawing,node_paints[i],
+                theme.cluster_fill,theme.cluster_border,"3",rough_nodes[i].offset);
             else svg+="<rect x=\""+number(n.x-n.width/2)+
                 "\" y=\""+number(n.y-n.height/2)+"\" width=\""+number(n.width)+"\" height=\""+number(n.height)+
                 "\""+node_paints[i].attributes(theme.cluster_fill,theme.neo?border:theme.cluster_border)+shadow.attribute()+"/>";
-            svg+=text(source.label,{n.x,n.y-n.height/2+theme.group_title_top+height(measured.nodes[i])/2},
+            const auto rough_title_offset=theme.hand_drawn?rough_nodes[i].label_offset.y:0;
+            svg+=text(source.label,{n.x,n.y-n.height/2+rough_title_offset+theme.group_title_top+height(measured.nodes[i])/2},
                 measured.nodes[i],"cluster-label",node_paints[i])+"</g>";
         }
         // Original getEdgesToRender paints ordinary edges first, merged loops last.

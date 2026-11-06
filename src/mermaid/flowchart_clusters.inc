@@ -54,10 +54,7 @@ void finish_edge(FlowchartPlacedEdge& edge,const FlowchartEdge& source,
         std::reverse(edge.points.begin(),edge.points.end());
     }
     if(edge.points.size()<2) throw std::runtime_error("Flowchart group edge has no visible path");
-    auto shortened=edge.points;
-    if(source.arrow_start==u"arrow_point") shorten(shortened.front(),shortened[1],4);
-    if(source.arrow_end==u"arrow_point") shorten(shortened.back(),shortened[shortened.size()-2],4);
-    const auto path=curve_path(shortened,source.curve==u"linear");
+    const auto path=flowchart_edge_path(edge.points,source.curve,source);
     if(edge.label && (from_cluster||to_cluster||!label_coordinate_in_path(edge.points[edge.points.size()/2],path))) {
         const auto before=label_midpoint(original),after=label_midpoint(edge.points);
         edge.label->x+=after.x-before.x;edge.label->y+=after.y-before.y;
@@ -67,7 +64,7 @@ void finish_edge(FlowchartPlacedEdge& edge,const FlowchartEdge& source,
 FlowchartScene layout_prepared(const FlowchartInput& source,FlowchartPreparedGraph graph,
     std::span<const FlowchartNodeBox> boxes,std::span<const FlowchartEdgeLabelSize> labels,
     FlowchartMeasurements& measured,const FlowchartSvgTheme& theme,
-    const FlowchartPreparedNode* parent=nullptr) {
+    const FlowchartPreparedNode* parent=nullptr,std::vector<RoughFlowchartNode>* rough_nodes=nullptr) {
     if(parent) {
         for(auto& n:graph.nodes) if(n.data.parent.empty()) n.data.parent=parent->data.id;
         auto container=*parent;container.subgraph.reset();container.data.parent.clear();
@@ -84,7 +81,7 @@ FlowchartScene layout_prepared(const FlowchartInput& source,FlowchartPreparedGra
         if(n.subgraph) {
             auto nested=graph.subgraphs[*n.subgraph];
             nested.node_spacing=graph.node_spacing;nested.rank_spacing=graph.rank_spacing+25;
-            children[i]=layout_prepared(source,std::move(nested),boxes,labels,measured,theme,&n);
+            children[i]=layout_prepared(source,std::move(nested),boxes,labels,measured,theme,&n,rough_nodes);
             const auto& child=*children[i];
             layout_boxes.push_back({child.max_x-child.min_x,child.max_y-child.min_y});
         } else layout_boxes.push_back(n.source_index?boxes[*n.source_index]:FlowchartNodeBox{0.1,0.1});
@@ -119,6 +116,18 @@ FlowchartScene layout_prepared(const FlowchartInput& source,FlowchartPreparedGra
             const double width=std::max(n.width,title_width);
             scene.diff=(n.width<=title_width?(width-n.width)/2:0)-prepared.data.padding;
             n.width=width;
+            if(rough_nodes) {
+                // Insert the frame in the local graph before measuring the
+                // enclosing scene. A translated hatch would round a different
+                // set of scanlines, and parent Dagre needs the painted size.
+                auto& rough=(*rough_nodes)[*prepared.source_index];
+                rough.drawing=rough_cluster_frame(n,theme);
+                if(const auto& b=rough.drawing.bounds) {
+                    rough.label_offset.y=(b->height()-n.height)/2;
+                    n.width=b->width();
+                    n.height=b->height();
+                }
+            }
         }
         if(prepared.source_index && !children[i]) result.nodes[*prepared.source_index]=n;
         if(children[i]) {
@@ -126,6 +135,10 @@ FlowchartScene layout_prepared(const FlowchartInput& source,FlowchartPreparedGra
             const double x=n.x+child.diff-n.width/2,y=n.y-n.height/2-8;
             for(std::size_t j=0;j<child.layout.nodes.size();++j) if(!child.layout.nodes[j].id.empty()) {
                 auto node=child.layout.nodes[j];node.x+=x;node.y+=y;result.nodes[j]=std::move(node);
+                if(rough_nodes&&source.nodes[j].group) {
+                    auto& offset=(*rough_nodes)[j].offset;
+                    offset.x+=x;offset.y+=y;
+                }
             }
             for(std::size_t j=0;j<child.layout.edges.size();++j) if(!child.layout.edges[j].points.empty()) {
                 auto edge=child.layout.edges[j];
@@ -170,7 +183,18 @@ FlowchartScene layout_prepared(const FlowchartInput& source,FlowchartPreparedGra
         scene.min_x=std::min(scene.min_x,x-width/2);scene.max_x=std::max(scene.max_x,x+width/2);
         scene.min_y=std::min(scene.min_y,y-height/2);scene.max_y=std::max(scene.max_y,y+height/2);
     };
-    for(const auto& n:result.nodes) if(!n.id.empty()) include(n.x,n.y,n.width,n.height);
+    for(std::size_t i=0;i<result.nodes.size();++i) {
+        const auto& n=result.nodes[i];
+        if(n.id.empty()) continue;
+        if(rough_nodes&&(*rough_nodes)[i].drawing.bounds) {
+            const auto& rough=(*rough_nodes)[i];
+            const auto& b=*rough.drawing.bounds;
+            const auto x=rough.offset.x+(source.nodes[i].group?0:n.x);
+            const auto y=rough.offset.y+(source.nodes[i].group?0:n.y);
+            include(x+b.left,y+b.top);
+            include(x+b.right,y+b.bottom);
+        } else include(n.x,n.y,n.width,n.height);
+    }
     for(std::size_t i=0;i<result.edges.size();++i) {
         const auto& e=result.edges[i];
         for(auto p:e.points) include(p.x,p.y);

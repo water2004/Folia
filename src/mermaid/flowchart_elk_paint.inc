@@ -59,10 +59,22 @@ std::string rounded_elk_path(std::span<const FlowchartPoint> points,double radiu
 // ELK's bounding-box port lies outside a diamond or a circular outline.
 template<class Outline>
 std::optional<FlowchartPoint> elk_outline_attachment(const FlowchartPlacedNode& node,
-    std::u16string_view shape,FlowchartPoint port,FlowchartPoint next,const Outline& outline) {
+    std::u16string_view shape,FlowchartPoint port,FlowchartPoint next,const Outline& outline,
+    bool exact_rectangles=false) {
     const double dx=next.x-port.x,dy=next.y-port.y;
     if((dx==0&&dy==0)||(std::abs(dx)>1e-6&&std::abs(dy)>1e-6))return {};
     const bool horizontal=std::abs(dx)>std::abs(dy);
+    // The hand-drawn rectangle's intersection still uses the measured
+    // rectangular bounds. Resolve that axis analytically to avoid leaving a
+    // microscopic bisection segment that consumes extra RoughJS random draws.
+    if(exact_rectangles&&(shape==u"squareRect"||shape==u"roundedRect")) {
+        const auto left=node.x-node.width/2,right=node.x+node.width/2;
+        const auto top=node.y-node.height/2,bottom=node.y+node.height/2;
+        if(horizontal&&port.y>=top&&port.y<=bottom)
+            return FlowchartPoint{std::clamp(port.x,left,right),port.y};
+        if(!horizontal&&port.x>=left&&port.x<=right)
+            return FlowchartPoint{port.x,std::clamp(port.y,top,bottom)};
+    }
     const auto along=[&](double t){return horizontal?FlowchartPoint{t,port.y}:FlowchartPoint{port.x,t};};
     const auto inside=[&](FlowchartPoint p) {
         const auto distance=std::hypot(p.x-node.x,p.y-node.y);
@@ -88,7 +100,7 @@ struct ClassicElkOutline {
 template<class Outline=ClassicElkOutline>
 void clip_elk_node_endpoints(std::vector<FlowchartPoint>& points,
     const FlowchartPlacedNode& start,const FlowchartPlacedNode& end,
-    std::u16string_view start_shape,std::u16string_view end_shape,Outline outline={}) {
+    std::u16string_view start_shape,std::u16string_view end_shape,Outline outline={},bool exact_rectangles=false) {
     points.insert(points.begin(),{start.x,start.y});points.push_back({end.x,end.y});
     const auto outside=[](const FlowchartPlacedNode& n,FlowchartPoint p) {
         return std::abs(p.x-n.x)>=n.width/2||std::abs(p.y-n.y)>=n.height/2;
@@ -96,7 +108,7 @@ void clip_elk_node_endpoints(std::vector<FlowchartPoint>& points,
     const auto replacement=[&](const FlowchartPlacedNode& n,std::u16string_view shape,std::size_t i,int step) {
         const auto next=static_cast<std::ptrdiff_t>(i)+step;
         if(next>=0&&next<static_cast<std::ptrdiff_t>(points.size()))
-            if(auto attached=elk_outline_attachment(n,shape,points[i],points[static_cast<std::size_t>(next)],outline))return *attached;
+            if(auto attached=elk_outline_attachment(n,shape,points[i],points[static_cast<std::size_t>(next)],outline,exact_rectangles))return *attached;
         auto p=points[i];const double dx=p.x-n.x,dy=p.y-n.y,length=std::hypot(dx,dy);
         if(length>0&&(std::abs(std::abs(dx)-n.width/2)<1||std::abs(std::abs(dy)-n.height/2)<1))
             p={n.x+dx/length*(length+10),n.y+dy/length*(length+10)};

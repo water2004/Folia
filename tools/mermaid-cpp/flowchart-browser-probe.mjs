@@ -11,9 +11,10 @@ for(const file of lock.flowchartCurve.files) assert.equal(createHash('sha256').u
 const elkAdapter=process.argv.includes('--elk');
 const neo=process.argv.includes('--neo');
 const handDrawn=process.argv.includes('--hand-drawn');
+const curves=process.argv.includes('--curves');
 if(elkAdapter){const bundle=JSON.parse(readFileSync('tools/mermaid-cpp/oracle/node_modules/mermaid/'+lock.elkAdapter.map));for(const file of lock.elkAdapter.files){const i=bundle.sources.findIndex(s=>s.endsWith(file.source));assert(i>=0,file.source);assert.equal(createHash('sha256').update(bundle.sourcesContent[i]).digest('hex'),file.sha256,file.source);}}
 const outputArgument=process.argv.slice(2).find(arg=>!arg.startsWith('--'));
-const directory=resolve(outputArgument??(handDrawn?'build/mermaid-cpp/hand-drawn-flowchart-browser':neo?'build/mermaid-cpp/neo-flowchart-browser':elkAdapter?'build/mermaid-cpp/elk-flowchart-browser':'build/mermaid-cpp/flowchart-browser'));
+const directory=resolve(outputArgument??(curves?'build/mermaid-cpp/curve-flowchart-browser':handDrawn?'build/mermaid-cpp/hand-drawn-flowchart-browser':neo?'build/mermaid-cpp/neo-flowchart-browser':elkAdapter?'build/mermaid-cpp/elk-flowchart-browser':'build/mermaid-cpp/flowchart-browser'));
 mkdirSync(directory,{recursive:true});
 const dagreCases=[
   ["shapes-metadata", "flowchart LR\nA@{shape: rect, label: Read}\nB@{shape: cyl, label: Store}\nA named@--> B\nB --> C@{shape: terminal, label: Done}\nnamed@{curve: linear}"],
@@ -88,8 +89,13 @@ const handDrawnCases=[
   ['hand-drawn-shapes','flowchart LR\nA[Read] -->|next| B{Ready?}\nB --> C(Save)'],
   ['hand-drawn-markers','flowchart TD\nA[Read] o--o B[Check]\nB x--x C[Save]\nC <--> D[Done]'],
   ['hand-drawn-extra','flowchart LR\nA((Circle))\nB([Terminal])\nC[[Routine]]\nD[(Store)]\nE(((Double)))\nF{{Hex}}\nG[Read] --> H[Write]'],
+  ['hand-drawn-elk-chain','flowchart LR\nA[Read] --> B(Check) --> C[Done]'],
+  ['hand-drawn-cluster','flowchart TD\nsubgraph g[Review]\nA[Read] --> B[Check]\nend\ng --> C[Done]'],
 ];
-const cases=handDrawn?handDrawnCases:neo?neoCases:elkAdapter?(await import('./elk-flowchart-cases.mjs')).cases:dagreCases;
+const curveCases=['cardinal','bumpX','bumpY','catmullRom','monotoneX','monotoneY','natural','step','stepAfter','stepBefore','rounded']
+  .map(curve=>['curve-'+curve,'%%{init: {"flowchart": {"curve": "'+curve+'"}}}%%\nflowchart TD\nA[Read] --> B[Validate]\nA --> C[Save]\nB --> D[Finish]\nC --> D']);
+curveCases.push(['curve-edge-overrides','flowchart TD\nA[Read] branch@--> B[Validate]\nA --> C[Save]\nB --> D[Finish]\nC --> D\nbranch@{curve: stepBefore}\nlinkStyle 1 interpolate natural']);
+const cases=curves?curveCases:handDrawn?handDrawnCases:neo?neoCases:elkAdapter?(await import('./elk-flowchart-cases.mjs')).cases:dagreCases;
 const url=pathToFileURL(resolve('tools/mermaid-cpp/oracle/node_modules/mermaid/dist/mermaid.esm.mjs')).href;
 assert.equal(JSON.parse(readFileSync('tools/mermaid-cpp/oracle/node_modules/mermaid/package.json')).version,'12.2.0');
 const html=`<!doctype html><meta charset="utf-8"><body><script type="module">
@@ -99,7 +105,7 @@ const result=[];
 for(const [name,body,title] of ${JSON.stringify(cases)}) {
  const source=title?'---\\ntitle: '+JSON.stringify(title)+'\\n---\\n'+body:body;
  for(const theme of ['default','dark']) {
-  mermaid.initialize({startOnLoad:false,theme,look:${JSON.stringify(handDrawn?'handDrawn':neo?'neo':'classic')},handDrawnSeed:9,layout:name.startsWith('neo-elk-')?'elk':${JSON.stringify(elkAdapter?'elk':'dagre')},fontFamily:'Arial',themeVariables:{fontFamily:'Arial'},htmlLabels:!name.startsWith('svg-label-'),flowchart:{htmlLabels:!name.startsWith('svg-label-')}});
+  mermaid.initialize({startOnLoad:false,theme,look:${JSON.stringify(handDrawn?'handDrawn':neo?'neo':'classic')},handDrawnSeed:9,layout:name.startsWith('neo-elk-')||name.startsWith('hand-drawn-elk-')?'elk':${JSON.stringify(elkAdapter?'elk':'dagre')},fontFamily:'Arial',themeVariables:{fontFamily:'Arial'},htmlLabels:!name.startsWith('svg-label-'),flowchart:{htmlLabels:!name.startsWith('svg-label-')}});
   const {svg}=await mermaid.render('probe'+result.length,source);
   const host=document.createElement('div');host.innerHTML=svg;document.body.append(host);
   const root=host.querySelector('svg');
@@ -149,10 +155,15 @@ for(const [name,body,title] of ${JSON.stringify(cases)}) {
    return new DOMPoint((left+right)/2,(top+bottom)/2).matrixTransform(root.getScreenCTM().inverse()).toJSON();
   };
   const clusters=[...host.querySelectorAll('g.cluster')].map(n=>{
-   const shape=n.querySelector('rect'),b=shape.getBBox(),label=n.querySelector('.cluster-label'),lb=label.getBBox();
+   const shape=n.querySelector(':scope > rect')??n.firstElementChild,b=shape.getBBox(),label=n.querySelector('.cluster-label'),lb=label.getBBox();
+   const paths=[...shape.querySelectorAll('path')],outline=paths.at(-1)??shape;
+   const sketchPaths=paths.length?paths.map(p=>({
+    length:p.getTotalLength(),stroke:strokePaint(p),width:getComputedStyle(p).strokeWidth,
+    samples:Array.from({length:37},(_,i)=>{const q=p.getPointAtLength(p.getTotalLength()*i/36);return position(p,q.x,q.y);}),
+   })):null;
    return {id:n.id,...position(shape,b.x+b.width/2,b.y+b.height/2),width:b.width,height:b.height,label:label.textContent,
-    title:name.startsWith('group-font')?paintedCenter(label):position(label,lb.x+lb.width/2,lb.y+lb.height/2),fill:getComputedStyle(shape).fill,stroke:strokePaint(shape),
-    lines:displayLines(label),characters:styledCharacters(label),thickness:getComputedStyle(shape).strokeWidth,dash:getComputedStyle(shape).strokeDasharray,color:label.querySelector('text')?getComputedStyle(label.querySelector('text')).fill:getComputedStyle(label.querySelector('span')??label).color,font:fontStyle(label)};
+    title:name.startsWith('group-font')?paintedCenter(label):position(label,lb.x+lb.width/2,lb.y+lb.height/2),fill:getComputedStyle(shape).fill,stroke:strokePaint(outline),
+    lines:displayLines(label),characters:styledCharacters(label),thickness:getComputedStyle(outline).strokeWidth,dash:getComputedStyle(outline).strokeDasharray,color:label.querySelector('text')?getComputedStyle(label.querySelector('text')).fill:getComputedStyle(label.querySelector('span')??label).color,font:fontStyle(label),sketchPaths};
   });
   const nodes=[...host.querySelectorAll('g.node,g.rough-node')].map(n=>{
    const rough=n.matches('.rough-node');

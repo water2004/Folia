@@ -18,6 +18,11 @@ std::string rough_rounded_rect(double x,double y,double width,double height,doub
         point({x,y+height-radius})+"V"+number(y+radius)+corner+point({x+radius,y})+"Z";
 }
 
+RoughPolygonResult rough_cluster_frame(const FlowchartPlacedNode& n,const FlowchartSvgTheme& theme) {
+    return sketch_svg_path(rough_rounded_rect(n.x-n.width/2,n.y-n.height/2,n.width,n.height,0),
+        {.seed=theme.hand_drawn_seed});
+}
+
 RoughFlowchartNode rough_flowchart_node(std::u16string_view shape, FlowchartNodeBox box,
     const FlowchartPaint& paint,const FlowchartSvgTheme& theme) {
     const auto fill=paint.get(u"fill",theme.fill);
