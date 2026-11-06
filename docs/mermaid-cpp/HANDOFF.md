@@ -4,9 +4,10 @@
 
 - 2026-11-07：34/34 个图族均已通过基础 SVG 对照。Railroad 四种语法算一个图族，显式 `error` 和 `flowchart-elk` 不另计。该数字衡量图族覆盖，单个图族的语法、外观、布局组合仍在补齐。WinUI 宿主切换另行验收。
 - 已提交 11 种主题（`8f3c9962`）、Railroad/Error/ELK 别名（`ba77b050`）、Block 多方向箭头（`0bf7c4ba`）、Venn 多集合与手绘（`5218ace0`、`fea69ba4`）、Flowchart Neo 和 HTML 字符引用（`daeb2dcd`）、Flowchart 手绘（`8dd5ce06`、`132290c8`）以及会话初始化字体优先级（`20784f03`）。本地通过 Railroad 16、Error 2、Block 20、Venn 32、Flowchart Neo 8、手绘 Dagre 6 和 classic Dagre 118 / ELK 12 张 SVG 对照。
-- 公共入口、DirectWrite 测量、DLL 与 CI 基础覆盖已提交 `4af512ff`。实测 SVG：Event Modeling 14；Use Case 20（含 ELK、Dagre、JSON、Neo）；Agentflow 8（含精确文档波浪轮廓和标签）；Wardley 12；Swimlane 8（路由另有 119 组差分，后处理按原有阶段拆分）；State 32；Requirement 44（富文本、换行和样式）；Flowchart 手绘 10 与新增曲线 24，经典和 Neo 对照仍通过。
-- `build/mermaid-relocation` 的核心、DirectWrite 平台、DLL 三套 CTest 已通过一次（`build/mermaid-complete-ctest.log`，142 秒）；应用扩展后的复验会话 `14515`，日志 `build/mermaid-complete-ctest-final.log`。编译最多四路，日志 `build/mermaid-complete-build.log`，原生 SVG 为 `build/mermaid-complete-svg`。本地验证，尚未推送 CI。
-- 当前未提交扩展：`swimlane_port` 核对新增的 RL/BT 与自定义样式、多行标签（14 张），修了 `foreignObject` 继承文字颜色后待重新构建。`swimlane_layout` 在 `build/candidates/usecase-handdrawn/` 准备 Use Case 手绘，已写入对照脚本/测试，暂不提交。下一步等 CTest 退出后统一构建，复验扩展后独立提交。Agentflow 的诊断覆盖、Flowchart 额外节点与图标、需注册的外部资源等仍需单独核对。
+- 公共入口、DirectWrite 测量、DLL 与 CI 基础覆盖已提交 `4af512ff`。实测 SVG：Event Modeling 14；Use Case 30（新增富 HTML/SVG 标签，`80ecdaf1`）；Agentflow 8；Wardley 12；Swimlane 14（反向泳道、Georgia、多行，`71649ee1`；路由另有 119 组差分）；State 32；Requirement 44；Flowchart 手绘 10、曲线 24、额外节点 12。HTML 标签使用实测 advance，SVG 使用字形边界，共用族无关的测量接口。
+- `build/mermaid-relocation` 两次全量 CTest 的核心、DirectWrite、DLL 都通过，最近 153 秒，见 `build/mermaid-complete-ctest-final.log`。此后增量构建和上述定向对照已通过。编译最多四路，日志 `build/mermaid-complete-build.log`，原生 SVG `build/mermaid-complete-svg`。尚未推送 CI。
+- Flowchart 53 种上游登记形状已有 25 种原生实现。人物/云形及共用局部几何（测量盒、可见范围、轮廓、裁剪数据）已提交 `2764169f`；最新对照文件 `build/mermaid-cpp/extra-shapes-flowchart-browser/original.json`。`swimlane_router` 的另外 11 种文档/圆弧/括注已通过 24 张隔离对照，正在从 `build/candidates/flowchart-doc-shapes/` 接入公共绘制，暂由该代理独占 Flowchart 共享文件。
+- 其余候选位于 `build/candidates/flowchart-storage/`（`wardley_port`）、`flowchart-symbols/`（`agentflow_port`）。下一步先构建文档组并复验完整 SVG，再接入候选，保持同一布局/裁剪/绘制路径。`venn_complete` 另查已实现形状的手绘；`railroad_parser` 负责 Agentflow 可观察诊断。未验证的外部资源注册等仍不计入完成。
 
 ## 上一轮验证
 
