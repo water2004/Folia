@@ -5,12 +5,28 @@ namespace {
 using namespace boost::ut;using namespace folia::mermaid;
 #include "theme_fixture.hpp"
 suite state=[] {
- "state_annotations_and_concurrent_regions_parse_without_losing_source_semantics"_test=[] {
+ "mermaid_state_annotations_and_concurrent_regions_parse_without_losing_source_semantics"_test=[] {
   auto parsed=parse_state_document(u"stateDiagram-v2\nstate Active {\nA --> B\n--\nC --> D\n}\nnote left of A : inline note\nnote right of D\nblock note\nsecond line\nend note");
   expect(fatal(parsed.has_value()))<<(parsed?"":parsed.error());if(!parsed)return;
   expect(parsed->annotations.size()==2_u);expect(bool(parsed->annotations[0].state==u"A"));expect(bool(parsed->annotations[0].position==u"left"));expect(bool(parsed->annotations[0].text==u"inline note"));expect(bool(parsed->annotations[1].state==u"D"));expect(bool(parsed->annotations[1].position==u"right"));expect(bool(parsed->annotations[1].text==u"block note\nsecond line"));
   auto divider=std::ranges::find(parsed->document.nodes,u"divider",&FlowchartNode::shape);expect(divider!=parsed->document.nodes.end());if(divider!=parsed->document.nodes.end()){expect(bool(divider->id==u"divider-id-1"));expect(bool(divider->parent==u"Active"));}
-  expect(!parse_state_document(u"stateDiagram-v2\nnote right of Missing : text"));expect(!parse_state_document(u"stateDiagram-v2\nnote right of Missing\ntext"));expect(!parse_state_document(u"stateDiagram-v2\n--"));
+  const auto inline_note_declares_state=parse_state_document(
+      u"stateDiagram-v2\nnote right of Missing : text");
+  expect(fatal(inline_note_declares_state.has_value()))
+      << "Mermaid 12.2 permits an inline note to declare its referenced state";
+  if(inline_note_declares_state){
+   expect(std::ranges::any_of(inline_note_declares_state->document.nodes,
+       [](const auto& node){return node.id==u"Missing";}))
+       << "inline note target should be materialized as a state";
+   expect(inline_note_declares_state->annotations.size()==1_u)
+       << "inline note should produce one annotation";
+  }
+  const auto unclosed_note=parse_state_document(
+      u"stateDiagram-v2\nnote right of Missing\ntext");
+  expect(!unclosed_note) << "block note without end note must be rejected";
+  const auto separator_outside_group=parse_state_document(u"stateDiagram-v2\n--");
+  expect(!separator_outside_group)
+      << "concurrent separator outside a composite must be rejected";
  };
  "mermaid_state_concurrent_initial_states_are_scoped_per_partition"_test=[] {
   auto parsed=parse_state_document(u"stateDiagram-v2\nstate Active {\n[*] --> A\n--\n[*] --> B\n}");
