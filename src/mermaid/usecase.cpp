@@ -358,7 +358,8 @@ struct Parser {
                 document.direction = input == u"TD" ? u"TB" : Text(input);
                 return;
             }
-            if (consume(input, u"accTitle:")) {
+            if (keyword(input, u"accTitle")) {
+                if (!consume(input, u":")) fail("Expected Use Case accessibility title");
                 document.acc_title = input;
                 return;
             }
@@ -458,17 +459,17 @@ struct Parser {
             if (node_index.contains(edge.id) && !edge.id.starts_with(u"edge-"))
                 fail("Duplicate Use Case declaration and edge id");
         }
+        std::size_t note_sequence = 0;
         for (auto& note : notes) {
             const auto target = node_index.find(note.target);
             if (target == node_index.end() || document.nodes[target->second].kind == UsecaseNodeKind::boundary)
                 fail("Unknown Use Case note target");
-            const auto sequence = std::to_string(document.nodes.size());
+            const auto sequence = std::to_string(note_sequence++);
             const auto id = u"note-" + Text(sequence.begin(), sequence.end());
-            auto parent = document.nodes[target->second].parent;
-            document.nodes.push_back({.id = id, .label = std::move(note.label.text), .parent = std::move(parent),
+            document.nodes.push_back({.id = id, .label = std::move(note.label.text),
                 .note_target = note.target, .kind = UsecaseNodeKind::note, .shape = UsecaseShape::rectangle,
                 .markdown = note.label.markdown});
-            document.edges.push_back({.id = id + u"-connector", .from = note.target, .to = id,
+            document.edges.push_back({.id = id + u"-edge", .from = id, .to = note.target,
                 .kind = UsecaseRelationship::note, .arrow = UsecaseArrow::none});
         }
     }

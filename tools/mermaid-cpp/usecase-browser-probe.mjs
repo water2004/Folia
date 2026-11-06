@@ -10,14 +10,15 @@ export function inspectUsecase(){
  const svg=document.querySelector('svg'),v=svg.viewBox.baseVal,inv=svg.getScreenCTM().inverse();
  const box=e=>{const b=e.getBBox(),m=inv.multiply(e.getScreenCTM()),p=[[b.x,b.y],[b.x+b.width,b.y],[b.x,b.y+b.height],[b.x+b.width,b.y+b.height]].map(([x,y])=>({x:m.a*x+m.c*y+m.e,y:m.b*x+m.d*y+m.f})),xs=p.map(a=>a.x),ys=p.map(a=>a.y);return{x:Math.min(...xs),y:Math.min(...ys),width:Math.max(...xs)-Math.min(...xs),height:Math.max(...ys)-Math.min(...ys)};};
  const labels=[...svg.querySelectorAll('text,foreignObject')].filter(e=>e.textContent.trim()).map(e=>{
-   const style=getComputedStyle(e.querySelector('.nodeLabel,.edgeLabel')??e);
-   return {text:e.textContent.trim().replace(/\s+/g,' '),box:box(e),size:style.fontSize,
+   const label=e.querySelector('span')??e,style=getComputedStyle(label);
+   return {text:(label.innerText??e.textContent).trim().replace(/\s+/g,' '),box:box(e),size:style.fontSize,
      fill:e.tagName==='text'?style.fill:style.color};
  });
- const nodes=[...svg.querySelectorAll('g.node')].map(e=>({id:e.id,box:box(e),shape:e.querySelector('ellipse,rect,path')?.tagName}));
+ const nodes=[...svg.querySelectorAll('g.node')].map(e=>({id:e.getAttribute('data-usecase-id'),box:box(e),shape:e.querySelector('ellipse,rect,path')?.tagName}));
+ const boundaries=[...svg.querySelectorAll('g.system-boundary')].map(e=>({id:e.getAttribute('data-usecase-id'),box:box(e),parts:[...e.querySelectorAll('rect')].map(box)}));
  const marker=ref=>{const id=(ref||'').match(/#([^)]*)/)?.[1];if(!id)return null;const m=svg.querySelector(`#${CSS.escape(id)}`);if(!m)return null;const s=m.querySelector('path,circle');return{width:+m.getAttribute('markerWidth'),height:+m.getAttribute('markerHeight'),refX:+m.getAttribute('refX'),refY:+m.getAttribute('refY'),shape:s?.tagName,d:s?.getAttribute('d')||'',r:s?.getAttribute('r')||''};};
  const edges=[...svg.querySelectorAll('path[data-et="edge"]')].map(e=>({d:e.getAttribute('d'),stroke:getComputedStyle(e).stroke,dash:getComputedStyle(e).strokeDasharray,markerStart:marker(e.getAttribute('marker-start')),markerEnd:marker(e.getAttribute('marker-end'))}));
- return{view:{x:v.x,y:v.y,width:v.width,height:v.height},labels,nodes,edges};
+ return{view:{x:v.x,y:v.y,width:v.width,height:v.height},labels,nodes,boundaries,edges};
 }
 if (import.meta.main) {
  const dir=resolve(process.argv[2]??'build/mermaid-cpp/usecase-browser');mkdirSync(dir,{recursive:true});const url=pathToFileURL(resolve('tools/mermaid-cpp/oracle/node_modules/mermaid/dist/mermaid.esm.mjs')).href;
