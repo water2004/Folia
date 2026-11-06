@@ -210,8 +210,9 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
             return NativeDiagram{std::move(*prepared),std::move(*input)};
         }
         if(prepared->type==u"classDiagram" || prepared->type==u"class") {
-            if(text(member(effective,u"layout"))!=u"dagre" || text(member(effective,u"look"))!=u"classic")
-                return std::unexpected("Native Class SVG currently requires explicit Dagre layout and classic look; ELK is not yet ported");
+            const auto layout=text(member(effective,u"layout"));
+            if((layout!=u"dagre" && layout!=u"elk") || text(member(effective,u"look"))!=u"classic")
+                return std::unexpected("Native Class SVG requires Dagre or ELK layout and classic look");
             auto doc=prepare_class(source,session,ClassLimits{.frontend=limits});
             if(!doc) return std::unexpected(doc.error());
             metadata(*doc,*prepared);
@@ -236,6 +237,7 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
                 }
             }
             ClassSvgConfig c;
+            c.elk_layout=layout==u"elk";
             if(auto html=effective.find(u"htmlLabels");html&&html->kind!=ConfigKind::null) c.html_labels=boolean(*html);
             if(auto value=state.find(u"titleTopMargin")) c.title_top_margin=number(*value);
             if(auto value=cfg.find(u"padding")) c.padding=c.note_padding=c.group_padding=number(*value);

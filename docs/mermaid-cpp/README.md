@@ -19,7 +19,7 @@
 | 类别 | 已贯通图族 | 核心实现说明 |
 | --- | --- | --- |
 | 流程图与状态图 | **Flowchart**、**State** | Flowchart 支持经典节点几何、递归复合子图（subgraph）、`style`/`classDef` 样式优先级、HTML/Markdown 标签断行及边箭头标记，已同时打通 Dagre 路线与默认 ELK 分层/复合图路线；State 已打通 classic/Dagre 下的基础状态、别名、转换标签、方向与复合状态。 |
-| 交互与面向对象 | **Sequence**、**Class** | Sequence 支持参与者、消息箭头、激活框、生命周期创建/销毁、注释及 `loop`/`alt`/`opt`/`par` 等嵌套控制块；Class 支持类成员、可见性/静态/抽象修饰符、关系箭头、命名空间、注释、棒棒糖接口（lollipop）及自环（当前走显式 Dagre 路线，默认 ELK 路线收尾中）。 |
+| 交互与面向对象 | **Sequence**、**Class** | Sequence 支持参与者、消息箭头、激活框、生命周期、注释和嵌套控制块。Class 支持显式 Dagre 和默认 ELK，覆盖类成员、关系箭头、命名空间和多重性标签。 |
 | 架构与层级图 | **Mindmap**、**Architecture**、**C4**、**Block**、**Kanban** | Mindmap 采用 `cose-bilkent` 力导向树布局；Architecture 采用 `fCoSE` 约束与双阶段布局，输出服务图标、分组框与有向边；C4 覆盖 Context/Container 等边界框与关系网格；Block 支持列跨度与嵌套网格；Kanban 支持分列卡片与元数据标签。 |
 | 数据与统计图表 | **Packet**、**Pie**、**Quadrant**、**Radar**、**XY**、**Sankey**、**Treemap** | Packet 位域网格；Pie 扇区几何（`d3-shape`/`d3-path`）与图例排布；Quadrant 四象限坐标；Radar 极坐标与闭合 Catmull-Rom 样条；XY 柱状/折线图与线性/分带坐标轴（`d3-scale`）；Sankey 流量节点松弛与渐变连线（`d3-sankey`）；Treemap 层级面积切分（`d3-hierarchy` squarify）。 |
 | 时间与序列图表 | **Gantt**、**Git graph**、**Journey**、**Timeline** | Gantt 日期解析、时长依赖排程（`dayjs`）与时间轴刻度（`d3-time`）；Git graph 分支车道、提交/合并/cherry-pick 符号与标签布局；Journey 任务评分与角色轨迹；Timeline 横向/纵向事件时间轴。 |
@@ -41,12 +41,9 @@
 
 | 工作包 | 当前状态 | 下一步工作与完成标准 |
 | --- | --- | --- |
-| **2. Class 默认 ELK 路线** | 5 个案例（双主题 10 张 SVG）的浏览器采样与 9 列 `class-elk.tsv` 已就绪；候选补丁见 `candidates/2026-10-28/class-elk*.patch` | 应用 `class-elk-shared.patch` 与 `class-elk.patch`，复用 `flowchart_elk` 的共享测量场景接口，完成端点标签（cardinality/role）避让后处理，并在 `class_svg.cpp` 与 `render_entry.cpp` 接入 `layout: elk` 路径，通过 10 张 SVG 对照。 |
 | **3. ER 图（`erDiagram`）** | 8 个成功案例、2 个语法错误案例的 Oracle（`er-oracle.mjs`）与双主题 16 张浏览器基准 SVG（`er-browser-probe.mjs`）已就绪 | 新增 `er.{ixx,cpp}` 与 `er_svg.{ixx,cpp}`，实现实体/属性/主键外键/基数关系解析、Dagre 布局适配、关系端点标记（crow's foot）绘制及公共入口接线，通过 `compare-er-svg.mjs` 16 张 SVG 对照。 |
 | **4. 其余图族与特性补齐** | Requirement 图等尚未开始；State 注释/并发分隔及部分存量图族次要语法分支待补齐 | 对照 Folia 实际支持的图族范围，优先实现 Requirement 图的原生解析、布局与 SVG 输出，并按需补齐存量图族的常见语法分支。 |
 | **5. WinUI 宿主集成与依赖切换** | 独立候选分支已完成早期编译与初步预览验证 | 将最新 `FoliaNativeMermaid` 接入 WinUI 应用预览、编辑刷新、亮暗主题切换与 PDF 导出链路，完成桌面端实机验证后移除 `mermaid-rs-renderer` 依赖。 |
-
-> **候选补丁说明**：[`candidates/2026-10-28/`](candidates/2026-10-28/README.md) 保存 **Class ELK** 补丁。库和测试的 CMake 文件分别自动收集 `src/mermaid` 和 `tests/mermaid_cpp` 的源文件。请先确认共享接口与模块实现配套完整，再加入新源文件。
 
 ---
 

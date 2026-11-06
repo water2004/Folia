@@ -4,6 +4,7 @@ import folia.mermaid.number;
 import folia.mermaid.svg_text;
 import folia.mermaid.flowchart_graph;
 import folia.mermaid.flowchart_svg;
+import folia.mermaid.class_elk;
 import folia.mermaid.theme_color;
 
 namespace folia::mermaid {
@@ -129,6 +130,13 @@ FlowchartPoint terminal(std::vector<FlowchartPoint> points,bool start) {
     const double angle=std::atan2(first.y-center.y,first.x-center.x);
     return {std::sin(angle)*15+(first.x+center.x)/2,-std::cos(angle)*15+(first.y+center.y)/2};
 }
+// Class nodes, notes and namespace frames are rectangular in ELK mode.
+FlowchartPoint intersect(const FlowchartPlacedNode& n,std::u16string_view,FlowchartPoint p) {
+    const double dx=p.x-n.x,dy=p.y-n.y;
+    const double scale=1/std::max(std::abs(dx)/(n.width/2),std::abs(dy)/(n.height/2));
+    return {n.x+dx*scale,n.y+dy*scale};
+}
+#include "flowchart_elk_paint.inc"
 }
 std::expected<ClassTextStyle,std::string> class_text_style(const ClassNode& node,const ClassSvgTheme& theme,unsigned weight,bool italic) {
     try {
@@ -189,9 +197,30 @@ std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& inp
             labels.push_back({edge_measurements[i].label.width,edge_measurements[i].label.height});
         }
         FlowchartLayout logical;
+        std::optional<ClassElkScene> elk_scene;
         std::vector<std::vector<FlowchartPoint>> label_paths(graph.edges.size());
         double graph_min_x=0,graph_min_y=0,graph_max_x=0,graph_max_y=0;
-        if(group_count) {
+        if(config.elk_layout) {
+            group_measurements.nodes.resize(graph.nodes.size());
+            auto scene=layout_measured_elk_class(graph,sizes,relations,edge_measurements,group_measurements);
+            if(!scene)return std::unexpected(scene.error());
+            elk_scene=std::move(*scene);
+            std::unordered_map<std::u16string,std::size_t> ids;
+            for(std::size_t i=0;i<graph.nodes.size();++i)ids.emplace(graph.nodes[i].id,i);
+            std::vector<std::pair<FlowchartPoint,FlowchartPoint>> raw_endpoints;
+            raw_endpoints.reserve(graph.edges.size());
+            for(std::size_t i=0;i<graph.edges.size();++i) {
+                auto& points=elk_scene->layout.edges[i].points;
+                if(points.size()<2)return std::unexpected("Class ELK relation needs a routed path");
+                raw_endpoints.push_back({points.front(),points.back()});
+                const auto& edge=graph.edges[i];
+                clip_elk_node_endpoints(points,elk_scene->layout.nodes[ids.at(edge.start)],elk_scene->layout.nodes[ids.at(edge.end)],u"rect",u"rect");
+            }
+            finish_class_elk_scene(*elk_scene,graph,edge_measurements,raw_endpoints);
+            logical=elk_scene->layout;
+            graph_min_x=elk_scene->min_x;graph_min_y=elk_scene->min_y;
+            graph_max_x=elk_scene->max_x;graph_max_y=elk_scene->max_y;
+        } else if(group_count) {
             group_measurements.nodes.resize(graph.nodes.size());
             FlowchartSvgTheme group_theme;
             group_theme.group_title_top=config.group_title_top;group_theme.group_title_bottom=config.group_title_bottom;
@@ -247,7 +276,8 @@ std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& inp
         const auto* placed=&logical;
         // insertTitle uses the pre-title graph bounds; setupViewPortForSVG then
         // includes the SVG text bounds before adding its fixed eight-unit pad.
-        const double title_x=(graph_min_x+graph_max_x)/2+8,title_y=-config.title_top_margin;
+        const double paint_offset=config.elk_layout?0.0:8.0;
+        const double title_x=(graph_min_x+graph_max_x)/2+paint_offset,title_y=-config.title_top_margin;
         double min_x=graph_min_x+8,min_y=graph_min_y+8,max_x=graph_max_x+8,max_y=graph_max_y+8;
         if(!doc.title.empty()) {
             const auto& t=measured.title;
@@ -259,7 +289,7 @@ std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& inp
         // Keep the CSS viewport from rounding below the precise viewBox and
         // shrinking font rasterization at the intrinsic display size.
         std::string svg="<svg xmlns=\"http://www.w3.org/2000/svg\" width=\""+num(std::ceil(result.width))+"\" height=\""+num(std::ceil(result.height))+
-            "\" viewBox=\""+num(min_x-8)+" "+num(min_y-8)+" "+num(result.width)+" "+num(result.height)+"\" font-family=\""+xml(theme.font_family)+"\">";
+            "\" viewBox=\""+num(min_x-(config.elk_layout?16:8))+" "+num(min_y-(config.elk_layout?16:8))+" "+num(result.width)+" "+num(result.height)+"\" font-family=\""+xml(theme.font_family)+"\">";
         for(auto [tag,value]:{std::pair{"title",doc.acc_title},{"desc",doc.acc_description}})
             if(!value.empty()) svg+="<"+std::string(tag)+">"+xml(value)+"</"+tag+">";
         svg+=markers(theme);
@@ -277,17 +307,17 @@ std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& inp
         std::stable_sort(groups.begin(),groups.end(),[&](auto a,auto b){return depth(a)<depth(b);});
         for(auto i:groups) {
             const auto& n=placed->nodes[i];const auto& m=measured.namespaces[i];
-            const double x=n.x+8-n.width/2,y=n.y+8-n.height/2;
+            const double x=n.x+paint_offset-n.width/2,y=n.y+paint_offset-n.height/2;
             svg+="<g class=\"cluster\" data-namespace=\""+xml(doc.namespaces[i].id)+"\"><rect x=\""+num(x)+"\" y=\""+num(y)+
                 "\" width=\""+num(n.width)+"\" height=\""+num(n.height)+"\" fill=\""+theme.cluster_fill+"\" stroke=\""+theme.cluster_border+"\" stroke-width=\"1\"/>";
-            svg+="<g class=\"cluster-label\">"+text(m,n.x+8-m.width/2,y+config.group_title_top,group_theme)+"</g></g>";
+            svg+="<g class=\"cluster-label\">"+text(m,n.x+paint_offset-m.width/2,y+config.group_title_top,group_theme)+"</g></g>";
         }
         for(std::size_t i=0;i<relations.size();++i) {
             const auto& e=relations[i];auto points=placed->edges[i].points;
-            for(auto& p:points) {p.x+=8;p.y+=8;}
+            for(auto& p:points) {p.x+=paint_offset;p.y+=paint_offset;}
             if(points.size()<2) return std::unexpected("Class relation needs a routed path");
             shorten(points.front(),points[1],e.start);shorten(points.back(),points[points.size()-2],e.end);
-            const auto path=curve(points);
+            const auto path=config.elk_layout?rounded_elk_path(points):curve(points);
             // insertEdge returns the original compact route unless its literal
             // rounded-coordinate lookup selects the clipped path. Symmetric
             // rectangle clipping retains the self-loop main-label midpoint.
@@ -302,14 +332,22 @@ std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& inp
         for(std::size_t i=0;i<relations.size();++i) {
             const auto& m=edge_measurements[i];const auto& route=placed->edges[i];
             if(route.label&&!m.label.text.empty()) {
-                const auto x=route.label->x+8-m.label.width/2,y=route.label->y+8-m.label.height/2;
+                const auto x=route.label->x+paint_offset-m.label.width/2,y=route.label->y+paint_offset-m.label.height/2;
                 svg+="<rect x=\""+num(x)+"\" y=\""+num(y)+"\" width=\""+num(m.label.width)+"\" height=\""+num(m.label.height)+"\" fill=\""+theme.label_background+"\"/>";
                 svg+=text(m.label,x,y,theme);
             }
             for(bool start:{true,false}) {
                 const auto& t=start?m.start:m.end;if(t.text.empty()) continue;
-                const auto p=terminal(label_paths[i],start);
-                svg+=text(t,p.x+8-t.width/2,p.y+8-t.height/2,theme,400,{},11);
+                if(config.elk_layout&&elk_scene) {
+                    const auto& center=start?elk_scene->terminals[i].start:elk_scene->terminals[i].end;
+                    if(!center)continue;
+                    svg+="<g class=\"edgeTerminals\" transform=\"translate("+num(center->x+paint_offset)+","+num(center->y+paint_offset)+")\">";
+                    svg+=text(t,-t.width/2,-t.height/2,theme,400,{},11);
+                    svg+="</g>";
+                } else {
+                    const auto p=terminal(label_paths[i],start);
+                    svg+=text(t,p.x+paint_offset-t.width/2,p.y+paint_offset-t.height/2,theme,400,{},11);
+                }
             }
         }
         svg+="</g>";
@@ -317,14 +355,14 @@ std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& inp
             const auto& n=doc.classes[i];const auto& m=measured.nodes[i];const auto& b=boxes[i];const auto& position=placed->nodes[group_count+i];
             const auto paint=compile_paint({},n.styles);
             auto node_theme=theme;node_theme.text=paint.get(u"color",theme.text);
-            const auto p=config.padding,x=position.x+8-b.width/2,y=position.y+8-b.height/2;
+            const auto p=config.padding,x=position.x+paint_offset-b.width/2,y=position.y+paint_offset-b.height/2;
             svg+="<g class=\"node\" data-class-id=\""+xml(n.id)+"\"><rect class=\"outer-path\" x=\""+num(x)+"\" y=\""+num(y)+
                 "\" width=\""+num(b.width)+"\" height=\""+num(b.height)+"\""+paint.attributes(theme.fill,theme.border,num(theme.stroke_width))+"/>";
             const auto group=[&](std::string_view kind,const std::string& content){svg+="<g class=\"text "+std::string(kind)+"-group\">"+content+"</g>";};
             const bool hidden_empty=m.members.empty()&&m.methods.empty()&&config.hide_empty_members;
             const auto top=[&](const ClassTextBox& t){return (hidden_empty?y+p:y+2*p-text_half_line(t))-(config.html_labels?0:4);};
-            group("annotation",text(m.annotation,position.x+8-m.annotation.width/2,top(m.annotation),node_theme));
-            group("label",text(m.label,position.x+8-m.label.width/2,top(m.label)+m.annotation.height,node_theme,700));
+            group("annotation",text(m.annotation,position.x+paint_offset-m.annotation.width/2,top(m.annotation),node_theme));
+            group("label",text(m.label,position.x+paint_offset-m.label.width/2,top(m.label)+m.annotation.height,node_theme,700));
             std::string content;double row_y=b.header+2*p;
             for(std::size_t j=0;j<m.members.size();++j) {content+=text(m.members[j],x+p,top(m.members[j])+row_y,node_theme,400,n.members[j].classifier);row_y+=m.members[j].height+(config.html_labels?0:3);}
             group("members",content);content.clear();row_y=b.header+std::max(b.member_height,p/2)+4*p;
@@ -343,7 +381,7 @@ std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& inp
         for(std::size_t i=0;i<doc.notes.size();++i) {
             const auto& m=measured.notes[i];const auto& position=placed->nodes[group_count+doc.classes.size()+i];
             const auto w=m.width+2*config.note_padding,h=m.height+2*config.note_padding;
-            const auto x=position.x+8-w/2,y=position.y+8-h/2;
+            const auto x=position.x+paint_offset-w/2,y=position.y+paint_offset-h/2;
             svg+="<g class=\"node\" data-class-id=\""+xml(doc.notes[i].id)+"\"><rect class=\"outer-path\" x=\""+num(x)+"\" y=\""+num(y)+
                 "\" width=\""+num(w)+"\" height=\""+num(h)+"\" fill=\""+theme.note_fill+"\" stroke=\""+theme.note_border+"\" stroke-width=\""+num(theme.stroke_width)+"\"/>";
             svg+="<g class=\"noteLabel\">";double row_y=y+config.note_padding;
@@ -353,7 +391,7 @@ std::expected<ClassSvg,std::string> render_class_svg(const ClassRenderInput& inp
         for(std::size_t i=0;i<doc.interfaces.size();++i) {
             const auto& label=measured.interfaces[i];
             const auto& position=placed->nodes[group_count+doc.classes.size()+doc.notes.size()+i];
-            const auto x=position.x+8-label.width/2,y=position.y+8-label.height/2;
+            const auto x=position.x+paint_offset-label.width/2,y=position.y+paint_offset-label.height/2;
             svg+="<g class=\"node\" data-class-id=\""+xml(doc.interfaces[i].id)+"\"><rect class=\"outer-path\" x=\""+num(x)+"\" y=\""+num(y)+
                 "\" width=\""+num(label.width)+"\" height=\""+num(label.height)+"\" fill=\""+theme.fill+"\" stroke=\""+theme.border+"\" stroke-width=\""+num(theme.stroke_width)+"\" opacity=\"0\"/>";
             svg+="<g class=\"text interface-group\">"+text(label,x,y,theme)+"</g></g>";

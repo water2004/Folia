@@ -52,6 +52,7 @@ struct ClassSvgConfig {
     double padding = 12, note_padding = 6, node_spacing = 50, rank_spacing = 50, title_top_margin = 25;
     bool hide_empty_members = false;
     bool html_labels = true;
+    bool elk_layout = false;
     double group_padding = 16, group_title_top = 0, group_title_bottom = 0;
 };
 struct ClassRenderInput { ClassInput document; ClassSvgTheme theme; ClassSvgConfig config; };

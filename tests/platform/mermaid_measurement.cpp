@@ -62,10 +62,6 @@ suite mermaid_measurement = [] {
                     output<<svg->svg;expect(output.good());
                 }
             }
-            ConfigValue elk=site;elk.mapping.at(u"layout").string=u"elk";
-            expect(fatal(session->save_initialize_config(elk).has_value()));
-            expect(fatal(session->set_site_config(elk).has_value()));
-            expect(!render_mermaid(u"classDiagram\nclass Document",*session));
         }
     };
 
