@@ -24,13 +24,18 @@ std::u16string_view flowchart_classic_shape(std::u16string_view shape) {
         {u"document",u"doc"},{u"documents",u"docs"},{u"st-doc",u"docs"},{u"stacked-document",u"docs"},
         {u"tagged-document",u"tag-doc"},{u"paper-tape",u"flag"},{u"half-rounded-rectangle",u"delay"},
         {u"das",u"h-cyl"},{u"horizontal-cylinder",u"h-cyl"},{u"disk",u"lin-cyl"},{u"lined-cylinder",u"lin-cyl"},
-        {u"curved-trapezoid",u"curv-trap"},{u"display",u"curv-trap"},{u"comment",u"brace"},{u"brace-l",u"brace"}})
+        {u"curved-trapezoid",u"curv-trap"},{u"display",u"curv-trap"},{u"comment",u"brace"},{u"brace-l",u"brace"},
+        {u"data-store",u"datastore"},{u"directory",u"folder"},
+        {u"procs",u"st-rect"},{u"processes",u"st-rect"},{u"stacked-rectangle",u"st-rect"},
+        {u"stored-data",u"bow-rect"},{u"bow-tie-rectangle",u"bow-rect"},
+        {u"tagged-rectangle",u"tag-rect"},{u"tag-proc",u"tag-rect"},{u"tagged-process",u"tag-rect"}})
         if(shape==name)return handler;
     for(const auto name:{u"squareRect",u"roundedRect",u"stadium",u"subroutine",u"cylinder",u"circle",u"diamond",
         u"hexagon",u"lean_right",u"lean_left",u"trapezoid",u"inv_trapezoid",u"doublecircle",u"odd",
         u"notch-rect",u"tri",u"flip-tri",u"notch-pent",u"sl-rect",u"lin-rect",u"div-rect",u"win-pane",u"lin-doc",
         u"person",u"cloud",u"doc",u"docs",u"tag-doc",u"flag",u"delay",u"h-cyl",u"lin-cyl",u"curv-trap",
-        u"brace",u"brace-r",u"braces"})
+        u"brace",u"brace-r",u"braces",u"datastore",u"folder",u"bucket",u"console",u"browser",
+        u"st-rect",u"tag-rect",u"bow-rect"})
         if(shape==name)return name;
     return {};
 }

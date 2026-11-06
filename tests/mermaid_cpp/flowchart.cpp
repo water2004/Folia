@@ -61,6 +61,19 @@ suite flowchart = [] {
         }
         expect(count == 35_u);
     };
+    "mermaid_flowchart_storage_shape_aliases"_test = [] {
+        constexpr std::pair<std::u16string_view,std::u16string_view> cases[]{
+            {u"data-store",u"datastore"},{u"directory",u"folder"},{u"bucket",u"bucket"},
+            {u"console",u"console"},{u"browser",u"browser"},{u"procs",u"st-rect"},
+            {u"processes",u"st-rect"},{u"stacked-rectangle",u"st-rect"},
+            {u"tagged-rectangle",u"tag-rect"},{u"tag-proc",u"tag-rect"},
+            {u"tagged-process",u"tag-rect"},{u"stored-data",u"bow-rect"},{u"bow-tie-rectangle",u"bow-rect"},
+        };
+        for(const auto& [alias,shape]:cases) {
+            expect(bool(flowchart_classic_shape(alias)==shape));
+            expect(bool(flowchart_classic_shape(shape)==shape));
+        }
+    };
     "mermaid_flowchart_request_isolation_limits_and_explicit_stage_errors"_test = [] {
         auto session = ConfigSession::create(); expect(fatal(session.has_value()));
         // Folia supplies an explicit light/dark theme. The untouched upstream

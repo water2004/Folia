@@ -5,6 +5,38 @@
   "license": "MIT",
   "files": [
     {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/datastore.ts",
+      "sha256": "1dea0890baf3224edae444f0b3ccba38adf0ba0cd159ebc690cee93c927d0342"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/folder.ts",
+      "sha256": "e723358e0679596d044e2c2d091c2c851208333971a59bbafc3b3ce198a6b067"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/bucket.ts",
+      "sha256": "03dea7108b0be03e62c6308c489afdf565a05d5fe85359c3481f15af81b67ab1"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/console.ts",
+      "sha256": "6085564dfc3c64d01c36946af748e5835baeeb96eca82cee7a90f9325003322c"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/browser.ts",
+      "sha256": "2738638a3f11d40a863292f135b62ed2b0ca9a226906b255bc6a6db7fb6dc4d2"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/multiRect.ts",
+      "sha256": "6dc3dd90525b5846c30df6996697a4234380498ba698548c1dc3c087d512f479"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/taggedRect.ts",
+      "sha256": "05a91ab258498e343d4318e80c0ddfcc76c3df25681abb6b67035b764da2fceb"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/bowTieRect.ts",
+      "sha256": "e803a5f2f04452d40d9e7abb1fbf97b00a2179de5f24d28d4c85caab5e4057ab"
+    },
+    {
       "path": "packages/mermaid/src/rendering-util/layout-algorithms/elk/find-common-ancestor.ts",
       "sha256": "00583c57efa5354f56a6915f3a7edc75b3c70754b33bd20daf63c5a13cbd6556"
     },

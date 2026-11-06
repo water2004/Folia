@@ -5,6 +5,39 @@ using namespace boost::ut;
 using namespace folia::platform;
 using namespace folia::mermaid;
 suite mermaid_elk_flowchart=[] {
+    "mermaid_flowchart_storage_shapes_measured_svg"_test=[] {
+        constexpr std::u16string_view shapes[]{u"datastore",u"folder",u"bucket",u"console",u"browser",
+            u"st-rect",u"tag-rect",u"bow-rect"};
+        for(const std::u16string_view theme:{u"default",u"dark"}) {
+            auto session=ConfigSession::create();
+            expect(fatal(session.has_value()));
+            ConfigValue site{.kind=ConfigKind::mapping};
+            site.mapping.emplace(u"theme",ConfigValue{.kind=ConfigKind::string,.string=std::u16string(theme)});
+            expect(fatal(session->save_initialize_config(site).has_value()));
+            expect(fatal(session->set_site_config(site).has_value()));
+            for(const std::u16string_view layout:{u"dagre",u"elk"}) for(const auto shape:shapes)
+                for(const bool multiline:{false,true}) {
+                    auto source=std::u16string(u"---\nconfig:\n  look: classic\n  layout: ")+
+                        std::u16string(layout)+u"\n  fontFamily: Arial\n  themeVariables: {fontFamily: Arial}\n"
+                        u"  htmlLabels: true\n---\nflowchart "+(multiline?u"TB":u"LR")+
+                        u"\nL((Input)) --> N@{shape: "+std::u16string(shape)+u", label: \"Storage"+
+                        (multiline?u"<br/>second line":u"")+u"\"} --> R((Output))";
+                    auto svg=render_mermaid(source,*session);
+                    expect(svg.has_value())<<(svg?"":svg.error());
+                    if(!svg) continue;
+                    expect(svg->width>0&&svg->height>0);
+                    if(auto directory=std::getenv("FOLIA_MERMAID_SVG_OUTPUT")) {
+                        std::filesystem::create_directories(directory);
+                        const auto name=std::string("flowchart-extra-shapes-storage-")+
+                            std::string(layout.begin(),layout.end())+"-"+std::string(shape.begin(),shape.end())+
+                            (multiline?"-multiline-":"-short-")+std::string(theme.begin(),theme.end())+".svg";
+                        std::ofstream out(std::filesystem::path(directory)/name,std::ios::binary);
+                        out<<svg->svg;
+                        expect(out.good());
+                    }
+                }
+        }
+    };
     "mermaid_elk_flowchart_keyword_selects_elk_over_configured_layout"_test=[] {
         auto session = ConfigSession::create();
         expect(fatal(session.has_value()));

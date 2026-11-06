@@ -113,6 +113,7 @@ FlowchartPoint label_midpoint(std::span<const FlowchartPoint> points) {
     return points.back();
 }
 #include "flowchart_rough.inc"
+#include "flowchart_storage_shapes.inc"
 #include "flowchart_clusters.inc"
 #include "flowchart_neo.inc"
 
@@ -214,6 +215,13 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
                     rough_nodes[i]=rough_flowchart_contours(local,node_paints[i],theme);
                 box=local.box;
             }
+            else if(storage_flowchart_shape(n.shape)) {
+                auto& local=local_shapes[i].emplace(measure_storage_flowchart_shape(
+                    n.shape,w,h,n.padding,theme.neo));
+                if(theme.hand_drawn) rough_nodes[i]=measure_rough_storage_shape(n.shape,local,node_paints[i],theme);
+                else if(local.flat_rough_paths) measure_storage_flat_paths(local,node_paints[i],theme);
+                box=local.box;
+            }
             else if(n.shape==u"cylinder") {const double padding=theme.neo?24:n.padding;const double width=w+padding;box={width,h+padding+3*cylinder_radius_y(width)};}
             else if(n.shape==u"doublecircle") {const double diameter=std::hypot(b.width,h)+(theme.neo?56:2*n.padding+10);box={diameter,diameter};}
             else if(classic_polygon(n.shape)) {
@@ -226,7 +234,7 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
                 else box={w+2*padding+extra,height};
             }
             else return std::unexpected("Flowchart SVG shape is not implemented yet");
-            if(theme.hand_drawn && !n.group && !document_flowchart_shape(n.shape)) {
+            if(theme.hand_drawn && !n.group && !document_flowchart_shape(n.shape) && !storage_flowchart_shape(n.shape)) {
                 rough_nodes[i]=rough_flowchart_node(n.shape,box,node_paints[i],theme);
                 if(const auto& bounds=rough_nodes[i].drawing.bounds)
                     box={bounds->width(),bounds->height()};
@@ -424,6 +432,8 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
                 for(const auto& layer:rough.overlays)
                     svg+=rough_flowchart_shape(layer.drawing,node_paints[i],theme.fill,
                         theme.border,"1.5",layer.offset,layer.stroke_width,"",layer.solid_fill,layer.invisible_stroke);
+                if(storage_flowchart_shape(source.shape))
+                    svg+=paint_storage_decorations(*local_shapes[i],theme.border,false);
                 if(grouped) svg+="</g>";
             }
             else if(source.shape==u"circle") svg+="<circle class=\"label-container\" r=\""+number(n.width/2)+"\""+paint+"/>";
@@ -436,7 +446,7 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
             }
             else if(source.shape==u"lin-doc") svg+="<path class=\"label-container\" d=\""+lined_document_path(n.width,n.height,theme.neo)+"\""+paint+"/>";
             else if(local_shapes[i]) svg+=paint_local_shape(*local_shapes[i],node_paints[i],theme.fill,
-                border,stroke_width,shadow.attribute(),theme.hand_drawn_seed);
+                border,stroke_width,shadow.attribute(),theme.hand_drawn_seed,theme.border);
             else if(classic_polygon(source.shape)) svg+="<path class=\"label-container\" d=\""+
                 polygon_path(classic_polygon_points(source.shape,n.width,n.height,theme.neo))+"\""+paint+"/>";
             else svg+="<rect class=\"label-container\" x=\""+number(-n.width/2)+"\" y=\""+number(-n.height/2)+"\" width=\""+number(n.width)+"\" height=\""+number(n.height)+"\" rx=\""+number(source.shape==u"roundedRect"?theme.radius:0)+"\""+paint+"/>";

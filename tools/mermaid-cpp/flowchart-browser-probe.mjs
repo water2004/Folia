@@ -13,9 +13,10 @@ const neo=process.argv.includes('--neo');
 const handDrawn=process.argv.includes('--hand-drawn');
 const curves=process.argv.includes('--curves');
 const extraShapes=process.argv.includes('--extra-shapes');
+const storageShapes=process.argv.includes('--storage');
 if(elkAdapter){const bundle=JSON.parse(readFileSync('tools/mermaid-cpp/oracle/node_modules/mermaid/'+lock.elkAdapter.map));for(const file of lock.elkAdapter.files){const i=bundle.sources.findIndex(s=>s.endsWith(file.source));assert(i>=0,file.source);assert.equal(createHash('sha256').update(bundle.sourcesContent[i]).digest('hex'),file.sha256,file.source);}}
 const outputArgument=process.argv.slice(2).find(arg=>!arg.startsWith('--'));
-const directory=resolve(outputArgument??(extraShapes?'build/mermaid-cpp/extra-shapes-flowchart-browser':curves?'build/mermaid-cpp/curve-flowchart-browser':handDrawn?'build/mermaid-cpp/hand-drawn-flowchart-browser':neo?'build/mermaid-cpp/neo-flowchart-browser':elkAdapter?'build/mermaid-cpp/elk-flowchart-browser':'build/mermaid-cpp/flowchart-browser'));
+const directory=resolve(outputArgument??(storageShapes?'build/mermaid-cpp/storage-flowchart-browser':extraShapes?'build/mermaid-cpp/extra-shapes-flowchart-browser':curves?'build/mermaid-cpp/curve-flowchart-browser':handDrawn?'build/mermaid-cpp/hand-drawn-flowchart-browser':neo?'build/mermaid-cpp/neo-flowchart-browser':elkAdapter?'build/mermaid-cpp/elk-flowchart-browser':'build/mermaid-cpp/flowchart-browser'));
 mkdirSync(directory,{recursive:true});
 const dagreCases=[
   ["shapes-metadata", "flowchart LR\nA@{shape: rect, label: Read}\nB@{shape: cyl, label: Store}\nA named@--> B\nB --> C@{shape: terminal, label: Done}\nnamed@{curve: linear}"],
@@ -116,7 +117,11 @@ const documentCases=[
 ];
 for(const [prefix,target] of [['extra-shapes',extraShapeCases],['neo',neoCases],['hand-drawn',handDrawnCases]])
   target.push(...documentCases.map(([name,source])=>[prefix+'-document-'+name,source]));
-const cases=extraShapes?extraShapeCases:curves?curveCases:handDrawn?handDrawnCases:neo?neoCases:elkAdapter?(await import('./elk-flowchart-cases.mjs')).cases:dagreCases;
+const storageCases=['dagre','elk'].flatMap(layout=>
+ ['datastore','folder','bucket','console','browser','st-rect','tag-rect','bow-rect'].flatMap(shape=>
+  ['short','multiline'].map(label=>[`extra-shapes-storage-${layout}-${shape}-${label}`,
+   `flowchart ${label==='short'?'LR':'TB'}\nL((Input)) --> N@{shape: ${shape}, label: "Storage${label==='short'?'':'<br/>second line'}"} --> R((Output))`])));
+const cases=storageShapes?storageCases:extraShapes?extraShapeCases:curves?curveCases:handDrawn?handDrawnCases:neo?neoCases:elkAdapter?(await import('./elk-flowchart-cases.mjs')).cases:dagreCases;
 const url=pathToFileURL(resolve('tools/mermaid-cpp/oracle/node_modules/mermaid/dist/mermaid.esm.mjs')).href;
 assert.equal(JSON.parse(readFileSync('tools/mermaid-cpp/oracle/node_modules/mermaid/package.json')).version,'12.2.0');
 const html=`<!doctype html><meta charset="utf-8"><body><script type="module">
@@ -126,7 +131,7 @@ const result=[];
 for(const [name,body,title] of ${JSON.stringify(cases)}) {
  const source=title?'---\\ntitle: '+JSON.stringify(title)+'\\n---\\n'+body:body;
  for(const theme of ['default','dark']) {
-  mermaid.initialize({startOnLoad:false,theme,look:${JSON.stringify(handDrawn?'handDrawn':neo?'neo':'classic')},handDrawnSeed:9,layout:name.startsWith('neo-elk-')||name.startsWith('hand-drawn-elk-')?'elk':${JSON.stringify(elkAdapter?'elk':'dagre')},fontFamily:'Arial',themeVariables:{fontFamily:'Arial'},htmlLabels:!name.startsWith('svg-label-'),flowchart:{htmlLabels:!name.startsWith('svg-label-')}});
+  mermaid.initialize({startOnLoad:false,theme,look:${JSON.stringify(handDrawn?'handDrawn':neo?'neo':'classic')},handDrawnSeed:9,layout:name.startsWith('neo-elk-')||name.startsWith('hand-drawn-elk-')||name.startsWith('extra-shapes-storage-elk-')?'elk':${JSON.stringify(elkAdapter?'elk':'dagre')},fontFamily:'Arial',themeVariables:{fontFamily:'Arial'},htmlLabels:!name.startsWith('svg-label-'),flowchart:{htmlLabels:!name.startsWith('svg-label-')}});
   const {svg}=await mermaid.render('probe'+result.length,source);
   const host=document.createElement('div');host.innerHTML=svg;document.body.append(host);
   const root=host.querySelector('svg');

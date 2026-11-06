@@ -50,7 +50,7 @@ try {
    });
    const nodes=[...svg.querySelectorAll('g.node,g.rough-node')].map(n=>{
     const rough=n.matches('.rough-node');
-    const shape=n.querySelector('.label-container'),b=shape.getBBox(),text=n.querySelector('text'),t=text.getBBox();
+    const shape=n.querySelector('.label-container'),b=shape.getBBox(),text=n.querySelector('text.nodeLabel'),t=text.getBBox();
     const local=n.getScreenCTM().inverse().multiply(shape.getScreenCTM());
     const corner=new DOMPoint(b.x,b.y).matrixTransform(local);
     const geometry=extraShapes?'path,polygon,circle,rect,ellipse,line,polyline':'path,polygon,circle';
