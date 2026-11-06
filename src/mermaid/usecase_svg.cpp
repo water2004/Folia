@@ -5,6 +5,7 @@ import folia.mermaid.number;
 import folia.mermaid.svg_text;
 import folia.mermaid.flowchart_elk;
 import folia.mermaid.theme_color;
+import folia.mermaid.rough_polygon;
 
 namespace folia::mermaid {
 namespace {
@@ -113,6 +114,31 @@ std::string shape_paint(std::string_view fill, std::string_view stroke, double w
 
 struct NodePaint { std::string_view fill, border; };
 
+void include_rough(std::optional<RoughBounds>& bounds, const std::optional<RoughBounds>& drawing) {
+    if (!drawing) return;
+    if (!bounds) bounds = drawing;
+    else {
+        bounds->left = std::min(bounds->left, drawing->left);
+        bounds->top = std::min(bounds->top, drawing->top);
+        bounds->right = std::max(bounds->right, drawing->right);
+        bounds->bottom = std::max(bounds->bottom, drawing->bottom);
+    }
+}
+
+std::string paint_rough(const RoughPolygonResult& drawing, NodePaint paint, std::string_view style = {},
+                        double stroke_width = 1.3) {
+    std::string svg = "<g class=\"label-container\"" + std::string(style) + ">";
+    if (!drawing.fill_path.empty()) {
+        svg += "<path d=\"" + drawing.fill_path + "\"" + shape_paint("none", paint.fill, 1.5) +
+            " stroke-dasharray=\"0 0\"/>";
+    }
+    if (!drawing.stroke_path.empty()) {
+        svg += "<path d=\"" + drawing.stroke_path + "\"" + shape_paint("none", paint.border, stroke_width) +
+            " stroke-dasharray=\"0 0\"/>";
+    }
+    return svg + "</g>";
+}
+
 NodePaint palette_paint(const UsecaseRenderTheme& theme, NodePaint paint, std::size_t index, bool enabled) {
     if (enabled && !theme.palette_border.empty()) {
         index %= theme.palette_border.size();
@@ -123,25 +149,35 @@ NodePaint palette_paint(const UsecaseRenderTheme& theme, NodePaint paint, std::s
 }
 
 std::string paint_actor(const UsecaseNode& node, NodePaint paint,
-    double center, std::string_view style, std::string_view shadow, double path_width) {
+    double center, std::string_view style, std::string_view shadow, double path_width,
+    const RoughPolygonOptions* rough = nullptr) {
     const auto fill = node.actor == UsecaseActor::hollow ? "none" : paint.fill;
     std::string svg = "<g class=\"usecase-actor-glyph\" transform=\"translate(0," + n(center) + ")\"" +
         shape_paint(fill, paint.border, 2) + std::string(style) + ">";
     if (node.actor == UsecaseActor::icon) {
-        svg += "<rect x=\"-26\" y=\"-28\" width=\"52\" height=\"52\" rx=\"4\"" +
-            std::string(shadow) + "/>"
-            "<svg x=\"-21\" y=\"-23\" width=\"42\" height=\"42\" viewBox=\"0 0 80 80\" aria-hidden=\"true\">"
+        if (rough) svg += paint_rough(sketch_rectangle(-26, -28, 52, 52, *rough), paint);
+        else svg += "<rect x=\"-26\" y=\"-28\" width=\"52\" height=\"52\" rx=\"4\"" +
+            std::string(shadow) + "/>";
+        svg += "<svg x=\"-21\" y=\"-23\" width=\"42\" height=\"42\" viewBox=\"0 0 80 80\" aria-hidden=\"true\">"
             "<rect width=\"80\" height=\"80\" fill=\"#087ebf\" stroke=\"none\"/>"
             "<text transform=\"translate(21.16,64.67)\" fill=\"#fff\" stroke=\"none\" "
             "font-family=\"ArialMT, Arial\" font-size=\"67.75\">?</text></svg>";
     } else {
-        if (node.actor == UsecaseActor::hollow)
-            svg += "<circle cy=\"-23\" r=\"9\"" + std::string(shadow) + "/>";
         const auto glyph = node.actor == UsecaseActor::normal ? stick_figure :
             node.actor == UsecaseActor::hollow ? hollow_figure : awesome_figure;
-        svg += "<path d=\"" + std::string(glyph) + "\"";
-        if (path_width > 0) svg += " stroke-width=\"" + n(path_width) + "\"";
-        svg += "/>";
+        if (rough) {
+            auto options = *rough;
+            if (node.actor == UsecaseActor::hollow) options.fill = RoughFill::none;
+            svg += paint_rough(sketch_svg_path(glyph, options), paint);
+            if (node.actor == UsecaseActor::hollow)
+                svg += paint_rough(sketch_ellipse({0, -23}, 18, 18, options), paint);
+        } else {
+            if (node.actor == UsecaseActor::hollow)
+                svg += "<circle cy=\"-23\" r=\"9\"" + std::string(shadow) + "/>";
+            svg += "<path d=\"" + std::string(glyph) + "\"";
+            if (path_width > 0) svg += " stroke-width=\"" + n(path_width) + "\"";
+            svg += "/>";
+        }
     }
     if (node.business) {
         const bool hollow = node.actor == UsecaseActor::hollow;
@@ -220,11 +256,14 @@ void paint_label(std::string& svg, const Label& label, FlowchartPoint center,
 struct JsonTable {
     struct Row { Label key, value; double height; };
     std::vector<Row> rows;
+    std::vector<RoughPolygonResult> rough_cells;
+    std::optional<RoughBounds> rough_bounds;
     double inner_width = 0, inner_height = 0, key_width = 0;
 };
 
 std::expected<JsonTable, std::string> measure_json(const UsecaseNode& node,
-    const Label& title, const UsecaseRenderTheme& theme, const UsecaseTextMeasure& measure) {
+    const Label& title, const UsecaseRenderTheme& theme, const UsecaseTextMeasure& measure,
+    const RoughPolygonOptions* rough) {
     JsonTable table;
     double value_width = 0;
     table.inner_height = title.height + 8;
@@ -241,6 +280,27 @@ std::expected<JsonTable, std::string> measure_json(const UsecaseNode& node,
     }
     table.key_width += 16;
     table.inner_width = std::max(title.width + 16, table.key_width + value_width + 16);
+    if (rough) {
+        const double left = -table.inner_width / 2, top = -table.inner_height / 2;
+        const double title_height = title.height + 8;
+        const auto add_cell = [&](double x, double y, double width, double height, double offset = 0) {
+            table.rough_cells.push_back(sketch_rectangle(x, y, width, height, *rough));
+            auto bounds = table.rough_cells.back().bounds;
+            if (bounds) {
+                bounds->top += offset;
+                bounds->bottom += offset;
+            }
+            include_rough(table.rough_bounds, bounds);
+        };
+        add_cell(left - 1, top - 1, table.inner_width + 2, table.inner_height + 2);
+        add_cell(left, top, table.inner_width, title_height);
+        double y = top + title_height;
+        for (const auto& row : table.rows) {
+            add_cell(left + table.key_width, 0, table.inner_width - table.key_width, row.height, y);
+            add_cell(left, 0, table.key_width, row.height, y);
+            y += row.height;
+        }
+    }
     return table;
 }
 
@@ -249,7 +309,12 @@ void paint_json(std::string& svg, const Label& title, const JsonTable& table,
     const double left = -table.inner_width / 2, top = -table.inner_height / 2;
     const double title_height = title.height + 8, value_width = table.inner_width - table.key_width;
     const auto paint = shape_paint(theme.background, theme.node_border, 1) + std::string(style);
+    std::size_t cell = 0;
     const auto rect = [&](double x, double y, double width, double height) {
+        if (!table.rough_cells.empty()) {
+            svg += paint_rough(table.rough_cells[cell++], {theme.background, theme.rough_border}, style);
+            return;
+        }
         svg += "<rect x=\"" + n(x) + "\" y=\"" + n(y) + "\" width=\"" + n(width) +
             "\" height=\"" + n(height) + "\"" + paint + std::string(shadow) + "/>";
     };
@@ -261,10 +326,12 @@ void paint_json(std::string& svg, const Label& title, const JsonTable& table,
     text(title, 0, top + title_height / 2);
     double y = top + title_height;
     for (const auto& row : table.rows) {
-        rect(left, y, table.key_width, row.height);
-        rect(left + table.key_width, y, value_width, row.height);
-        text(row.key, left + table.key_width / 2, y + row.height / 2);
-        text(row.value, left + table.key_width + value_width / 2, y + row.height / 2);
+        svg += "<g transform=\"translate(0," + n(y) + ")\">";
+        rect(left + table.key_width, 0, value_width, row.height);
+        rect(left, 0, table.key_width, row.height);
+        text(row.key, left + table.key_width / 2, row.height / 2);
+        text(row.value, left + table.key_width + value_width / 2, row.height / 2);
+        svg += "</g>";
         y += row.height;
     }
 }
@@ -419,9 +486,9 @@ std::string paint_style(const UsecaseDocument& document,
     return out + "\"";
 }
 
-void paint_boundary(std::string& svg, const FlowchartPlacedNode& box, const Label& label,
+std::optional<RoughBounds> paint_boundary(std::string& svg, const FlowchartPlacedNode& box, const Label& label,
     const UsecaseNode& node, const UsecaseRenderInput& input, std::size_t slot, std::string_view style,
-    std::string_view shadow) {
+    std::string_view shadow, const RoughPolygonOptions* rough) {
     const bool package = node.shape == UsecaseShape::package;
     const double width = std::max(box.width, label.width + 20);
     const double tab_height = package ? label.height + 10 : 0;
@@ -431,7 +498,14 @@ void paint_boundary(std::string& svg, const FlowchartPlacedNode& box, const Labe
     const auto& theme = input.theme;
     const auto colors = palette_paint(theme, {theme.boundary_fill, theme.boundary_border}, slot, true);
     const auto paint = shape_paint(colors.fill, colors.border, 1);
+    std::optional<RoughBounds> bounds;
     const auto rect = [&](double y, double w, double h, std::string_view name) {
+        if (rough) {
+            const auto drawing = sketch_rectangle(left, y, w, h, *rough);
+            include_rough(bounds, drawing.bounds);
+            svg += "<g class=\"" + std::string(name) + "\">" + paint_rough(drawing, colors, style, 1) + "</g>";
+            return;
+        }
         svg += "<rect class=\"" + std::string(name) + "\" x=\"" + n(left) +
             "\" y=\"" + n(y) + "\" width=\"" + n(w) + "\" height=\"" + n(h) +
             "\"" + paint + std::string(style) + std::string(shadow) + "/>";
@@ -443,6 +517,7 @@ void paint_boundary(std::string& svg, const FlowchartPlacedNode& box, const Labe
         package ? top + tab_height / 2 : top + input.group_title_top + label.height / 2},
         theme.diagram_font_size, theme.font_family, theme.boundary_text, "nodeLabel");
     svg += "</g>";
+    return bounds;
 }
 
 }
@@ -488,6 +563,7 @@ std::expected<UsecaseRenderInput, std::string> prepare_usecase_render(const Prep
     const auto theme_name = string(member(config, u"theme"), {});
     out.dark = config_truthy(member(vars, u"darkMode"));
     theme.drop_shadow = color(vars, u"dropShadow", {});
+    theme.rough_border = color(vars, u"nodeBorder", theme.node_border);
     if (theme_name == u"redux-color" || theme_name == u"redux-dark-color") {
         theme.palette_fill = palette(member(vars, u"bkgColorArray"));
         theme.palette_border = palette(member(vars, u"borderColorArray"));
@@ -500,6 +576,10 @@ std::expected<UsecaseRenderInput, std::string> prepare_usecase_render(const Prep
     out.wrapping_width = number(member(usecase, u"wrappingWidth"), 120);
     out.elk = string(member(config, u"layout"), u"elk") == u"elk";
     out.neo = string(member(config, u"look"), u"classic") == u"neo";
+    out.hand_drawn = string(member(config, u"look"), u"classic") == u"handDrawn";
+    const double seed = number(member(config, u"handDrawnSeed"), 0);
+    if (seed >= 0 && seed <= std::numeric_limits<std::uint32_t>::max())
+        out.hand_drawn_seed = static_cast<std::uint32_t>(seed);
     const auto& use_max_width = member(usecase, u"useMaxWidth");
     out.use_max_width = use_max_width.kind == ConfigKind::null || config_truthy(use_max_width);
     const auto& margins = member(member(config, u"flowchart"), u"subGraphTitleMargin");
@@ -513,6 +593,8 @@ std::expected<UsecaseSvg, std::string> render_usecase_svg(
     if (!measure) return std::unexpected("Use Case rendering requires platform text measurement");
     try {
         const auto& theme = input.theme;
+        const RoughPolygonOptions rough{.seed = input.hand_drawn_seed};
+        const auto rough_options = input.hand_drawn ? &rough : nullptr;
         FlowchartSvgTheme neo_theme;
         neo_theme.drop_shadow = theme.drop_shadow;
         neo_theme.dark_shadow = input.dark;
@@ -522,7 +604,8 @@ std::expected<UsecaseSvg, std::string> render_usecase_svg(
         graph.direction = input.document.direction;
         graph.node_spacing = input.node_spacing;
         graph.rank_spacing = input.rank_spacing;
-        std::vector<FlowchartNodeBox> boxes;
+        std::vector<FlowchartNodeBox> boxes, nominal_boxes;
+        std::vector<RoughPolygonResult> rough_nodes;
         std::vector<FlowchartEdgeLabelSize> edge_sizes;
         std::vector<Label> labels, stereotypes, edge_labels;
         std::vector<JsonTable> json_tables;
@@ -564,7 +647,7 @@ std::expected<UsecaseSvg, std::string> render_usecase_svg(
                 (stereotype->height > 0 && (actor || node->business) ? 2 : 0);
             JsonTable table;
             if (json) {
-                auto measured_table = measure_json(*node, *label, theme, measure);
+                auto measured_table = measure_json(*node, *label, theme, measure, rough_options);
                 if (!measured_table) return std::unexpected(measured_table.error());
                 table = std::move(*measured_table);
                 boxes.push_back({table.inner_width + 2, table.inner_height + 2});
@@ -577,6 +660,18 @@ std::expected<UsecaseSvg, std::string> render_usecase_svg(
                 boxes.push_back({text_width + padding_x, text_height + padding_y});
             } else {
                 boxes.push_back({text_width + 20, text_height + 40});
+            }
+            nominal_boxes.push_back(boxes.back());
+            auto& drawing = rough_nodes.emplace_back();
+            if (json && table.rough_bounds) {
+                drawing.bounds = table.rough_bounds;
+                boxes.back() = {drawing.bounds->width(), drawing.bounds->height()};
+            }
+            if (input.hand_drawn && (note || usecase)) {
+                auto& box = boxes.back();
+                drawing = elliptical(*node) ? sketch_ellipse({0, 0}, box.width, box.height, rough) :
+                    sketch_rectangle(-box.width / 2, -box.height / 2, box.width, box.height, rough);
+                if (drawing.bounds) box = {drawing.bounds->width(), drawing.bounds->height()};
             }
             measured.nodes.push_back({.width = label->width, .height = label->height,
                 .lines = label->lines});
@@ -640,11 +735,20 @@ std::expected<UsecaseSvg, std::string> render_usecase_svg(
             top = std::min(top, y - height / 2);
             bottom = std::max(bottom, y + height / 2);
         };
+        const auto include_drawing = [&](const RoughBounds& bounds, double x = 0, double y = 0) {
+            include_box(x + (bounds.left + bounds.right) / 2,
+                y + (bounds.top + bounds.bottom) / 2, bounds.width(), bounds.height());
+        };
         for (std::size_t i = 0; i < layout.nodes.size(); ++i) {
             const auto& box = layout.nodes[i];
             const auto& node = *nodes[i];
             double width = box.width, height = box.height;
+            if (rough_nodes[i].bounds) {
+                include_drawing(*rough_nodes[i].bounds, box.x, box.y);
+                continue;
+            }
             if (node.kind == UsecaseNodeKind::boundary) {
+                if (input.hand_drawn) continue;
                 width = std::max(width, labels[i].width + 20);
                 if (node.shape == UsecaseShape::package) height = std::max(height, labels[i].height + 50);
             }
@@ -652,40 +756,23 @@ std::expected<UsecaseSvg, std::string> render_usecase_svg(
         }
         for (std::size_t i = 0; i < layout.edges.size(); ++i) {
             const auto& edge = layout.edges[i];
-            for (auto p : edge.points) include_box(p.x, p.y, 0, 0);
+            if (!input.hand_drawn)
+                for (auto p : edge.points) include_box(p.x, p.y, 0, 0);
             if (edge.label) include_box(edge.label->x, edge.label->y, edge_labels[i].width, edge_labels[i].height);
         }
-        if (left > right) left = top = right = bottom = 0;
-        std::string diagram_title;
-        if (!input.document.title.empty()) {
-            const auto metrics = measure(input.document.title, theme.font_family, theme.diagram_font_size, 400);
-            if (!metrics) return std::unexpected(metrics.error());
-            const double center = (left + right) / 2;
-            include_box(center, metrics->height / 2 - metrics->baseline, metrics->width, metrics->height);
-            diagram_title = "<text class=\"usecaseDiagramTitleText\" text-anchor=\"middle\" x=\"" +
-                n(center) + "\" y=\"0\" fill=\"" + theme.boundary_text + "\" font-family=\"" +
-                attribute(theme.font_family) + "\" font-size=\"" + n(theme.diagram_font_size) +
-                "\">" + esc(input.document.title) + "</text>";
-        }
-        UsecaseSvg result;
-        result.width = right - left + 2 * padding;
-        result.height = bottom - top + 2 * padding;
-        std::string svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"" +
-            n(left - padding) + " " + n(top - padding) + " " + n(result.width) + " " +
-            n(result.height) + "\" aria-roledescription=\"usecase\"";
-        if (input.use_max_width) svg += " width=\"100%\" style=\"max-width:" + n(result.width) + "px\"";
-        else svg += " width=\"" + n(result.width) + "\" height=\"" + n(result.height) + "\"";
-        svg += ">";
+        std::string svg;
         if (!input.document.acc_title.empty()) svg += "<title>" + esc(input.document.acc_title) + "</title>";
         if (!input.document.acc_description.empty()) svg += "<desc>" + esc(input.document.acc_description) + "</desc>";
         svg += marker_definitions(theme, input.neo);
         svg += neo_look_definitions(neo_theme, shadow);
         svg += "<g class=\"clusters\">";
         std::size_t boundary_slot = 0;
-        for (std::size_t i = 0; i < layout.nodes.size(); ++i)
-            if (nodes[i]->kind == UsecaseNodeKind::boundary)
-                paint_boundary(svg, layout.nodes[i], labels[i], *nodes[i], input, boundary_slot++,
-                    paint_style(input.document, nodes[i]->classes, nodes[i]->styles), shadow_attribute);
+        for (std::size_t i = 0; i < layout.nodes.size(); ++i) {
+            if (nodes[i]->kind != UsecaseNodeKind::boundary) continue;
+            const auto bounds = paint_boundary(svg, layout.nodes[i], labels[i], *nodes[i], input, boundary_slot++,
+                paint_style(input.document, nodes[i]->classes, nodes[i]->styles), shadow_attribute, rough_options);
+            if (bounds) include_drawing(*bounds);
+        }
         svg += "</g><g class=\"edgePaths\">";
         for (std::size_t i = 0; i < layout.edges.size(); ++i) {
             auto points = layout.edges[i].points;
@@ -696,10 +783,14 @@ std::expected<UsecaseSvg, std::string> render_usecase_svg(
                 clip_elk_node_endpoints(points, layout.nodes[a], layout.nodes[b],
                     elliptical(*nodes[a]) ? u"ellipse" : u"rect", elliptical(*nodes[b]) ? u"ellipse" : u"rect");
             } else {
-                if (elliptical(*nodes[a]))
-                    points.front() = ellipse_intersect(layout.nodes[a], points[1]);
-                if (elliptical(*nodes[b]))
-                    points.back() = ellipse_intersect(layout.nodes[b], points[points.size() - 2]);
+                const auto clip = [&](std::size_t index, FlowchartPoint toward) {
+                    auto node = layout.nodes[index];
+                    node.width = nominal_boxes[index].width;
+                    node.height = nominal_boxes[index].height;
+                    return ellipse_intersect(node, toward);
+                };
+                if (elliptical(*nodes[a])) points.front() = clip(a, points[1]);
+                if (elliptical(*nodes[b])) points.back() = clip(b, points[points.size() - 2]);
             }
             if (points.size() < 2) continue;
             const auto markers = edge_markers(edge);
@@ -711,9 +802,15 @@ std::expected<UsecaseSvg, std::string> render_usecase_svg(
             const bool note = edge.kind == UsecaseRelationship::note;
             const bool dashed = include || extend || note;
             double length = 0;
-            const auto path = input.elk ? rounded_elk_path(points, 5, &length) : basis(points, &length);
+            auto path = input.elk ? rounded_elk_path(points, 5, &length) : basis(points, &length);
+            if (input.hand_drawn) {
+                auto drawing = sketch_svg_path(path,
+                    {.seed = input.hand_drawn_seed, .roughness = .3, .fill = RoughFill::none});
+                if (drawing.bounds) include_drawing(*drawing.bounds);
+                path = std::move(drawing.stroke_path);
+            }
             svg += "<path data-et=\"edge\" data-usecase-id=\"" + attribute(edge.id) +
-                "\" class=\"relationship\" data-look=\"" + (input.neo ? "neo" : "classic") +
+                "\" class=\"relationship\" data-look=\"" + (input.neo ? "neo" : input.hand_drawn ? "handDrawn" : "classic") +
                 "\" fill=\"none\" stroke=\"" +
                 (include ? theme.include_line : extend ? theme.extend_line : theme.line) +
                 "\" d=\"" + path + "\"";
@@ -748,7 +845,8 @@ std::expected<UsecaseSvg, std::string> render_usecase_svg(
             const auto style = paint_style(input.document, node.classes, node.styles);
             const std::string_view node_kind = actor ? "actor" : note ? "note" :
                 node.kind == UsecaseNodeKind::json ? "json" : "usecase";
-            svg += "<g class=\"node\" data-usecase-kind=\"" + std::string(node_kind) +
+            svg += "<g class=\"" + std::string(input.hand_drawn ? "rough-node" : "node") +
+                "\" data-usecase-kind=\"" + std::string(node_kind) +
                 "\" data-usecase-id=\"" + attribute(nodes[i]->id) +
                 "\" transform=\"translate(" + n(box.x) + "," + n(box.y) + ")\">";
             if (node.kind == UsecaseNodeKind::json) {
@@ -758,9 +856,10 @@ std::expected<UsecaseSvg, std::string> render_usecase_svg(
                 svg += "<rect x=\"" + n(-box.width / 2) + "\" y=\"" + n(-box.height / 2) +
                     "\" width=\"" + n(box.width) + "\" height=\"" + n(box.height) +
                     "\" opacity=\"0\" aria-hidden=\"true\"/>";
-                const auto paint = palette_paint(theme, {theme.actor_fill, theme.actor_border}, i, input.rotate_colors);
+                const auto paint = input.hand_drawn ? NodePaint{theme.background, theme.rough_border} :
+                    palette_paint(theme, {theme.actor_fill, theme.actor_border}, i, input.rotate_colors);
                 svg += paint_actor(node, paint, figure_top + actor_figure_height / 2, style,
-                    shadow_attribute, input.neo ? theme.neo_actor_path_width : 0);
+                    shadow_attribute, input.neo ? theme.neo_actor_path_width : 0, rough_options);
                 const double top = figure_top + actor_figure_height + actor_label_gap;
                 paint_label(svg, stereotype, {0, top + stereotype.height / 2}, theme.actor_font_size,
                     theme.actor_font_family, theme.actor_text, "usecase-stereotype", {}, theme.actor_weight);
@@ -772,8 +871,14 @@ std::expected<UsecaseSvg, std::string> render_usecase_svg(
                     {note ? theme.note_fill : theme.node_fill, note ? theme.note_border : theme.node_border},
                     i, input.rotate_colors && !note && (!input.neo || elliptical(node)));
                 const auto paint = shape_paint(colors.fill, colors.border, note ? 1 : 2) + style;
+                if (input.hand_drawn) {
+                    svg += paint_rough(rough_nodes[i],
+                        note ? NodePaint{theme.note_fill, theme.note_border} :
+                               NodePaint{theme.background, theme.rough_border}, style);
+                }
                 if (elliptical(node)) {
-                    svg += "<ellipse rx=\"" + n(-x) + "\" ry=\"" + n(-y) + "\"" + paint + "/>";
+                    if (!input.hand_drawn)
+                        svg += "<ellipse rx=\"" + n(-x) + "\" ry=\"" + n(-y) + "\"" + paint + "/>";
                     if (node.business) {
                         const double start = std::max(label.width, stereotype.width) / 2 + 2;
                         const double end = -x - 2;
@@ -784,10 +889,10 @@ std::expected<UsecaseSvg, std::string> render_usecase_svg(
                             "L" + n(end) + "," + n(-at(end)) + "\"" +
                             shape_paint("none", colors.border, 2) + "/>";
                     }
-                } else if (note) {
+                } else if (note && !input.hand_drawn) {
                     svg += "<path d=\"M" + n(x) + "," + n(y) + "H" + n(-x) + "V" +
                         n(-y) + "H" + n(x) + "Z\"" + paint + shadow_attribute + "/>";
-                } else {
+                } else if (!input.hand_drawn) {
                     svg += "<rect x=\"" + n(x) + "\" y=\"" + n(y) + "\" width=\"" +
                         n(box.width) + "\" height=\"" + n(box.height) + "\"" + paint + shadow_attribute + "/>";
                 }
@@ -801,7 +906,27 @@ std::expected<UsecaseSvg, std::string> render_usecase_svg(
             }
             svg += "</g>";
         }
-        result.svg = svg + "</g>" + diagram_title + "</svg>";
+        svg += "</g>";
+        if (left > right) left = top = right = bottom = 0;
+        if (!input.document.title.empty()) {
+            const auto metrics = measure(input.document.title, theme.font_family, theme.diagram_font_size, 400);
+            if (!metrics) return std::unexpected(metrics.error());
+            const double center = (left + right) / 2;
+            include_box(center, metrics->height / 2 - metrics->baseline, metrics->width, metrics->height);
+            svg += "<text class=\"usecaseDiagramTitleText\" text-anchor=\"middle\" x=\"" +
+                n(center) + "\" y=\"0\" fill=\"" + theme.boundary_text + "\" font-family=\"" +
+                attribute(theme.font_family) + "\" font-size=\"" + n(theme.diagram_font_size) +
+                "\">" + esc(input.document.title) + "</text>";
+        }
+        UsecaseSvg result;
+        result.width = right - left + 2 * padding;
+        result.height = bottom - top + 2 * padding;
+        result.svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"" +
+            n(left - padding) + " " + n(top - padding) + " " + n(result.width) + " " +
+            n(result.height) + "\" aria-roledescription=\"usecase\"";
+        if (input.use_max_width) result.svg += " width=\"100%\" style=\"max-width:" + n(result.width) + "px\"";
+        else result.svg += " width=\"" + n(result.width) + "\" height=\"" + n(result.height) + "\"";
+        result.svg += ">" + svg + "</svg>";
         return result;
     } catch (const std::exception& error) {
         return std::unexpected(error.what());

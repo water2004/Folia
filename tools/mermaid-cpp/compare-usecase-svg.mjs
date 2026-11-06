@@ -33,6 +33,10 @@ function items(actual, expected, key, compare) {
   assert.equal(actual.length, expected.length, `${key}.count`);
   expected.forEach((item, i) => compare(actual[i], item, `${key}.${i}`));
 }
+function roughPath(actual, expected, key) {
+  assert.deepEqual(actual.paint, expected.paint, `${key}.paint`);
+  path(actual.d, expected.d, key);
+}
 
 const browser = await chromium.launch({ executablePath: edge, headless: true });
 let compared = 0;
@@ -58,6 +62,7 @@ try {
       assert.equal(a.shape, e.shape, `${key}.shape`);
       box(a.box, e.box, key);
       assert.deepEqual(a.paint, e.paint, `${key}.paint`);
+      items(a.paths, e.paths, `${key}.paths`, roughPath);
     });
     items(actual.boundaries, expected.boundaries, `${name}.boundaries`, (a, e, key) => {
       assert.equal(a.id, e.id, `${key}.id`);
@@ -65,6 +70,7 @@ try {
       items(a.parts, e.parts, `${key}.parts`, (part, reference, partKey) => {
         box(part.box, reference.box, partKey);
         assert.deepEqual(part.paint, reference.paint, `${partKey}.paint`);
+        items(part.paths, reference.paths, `${partKey}.paths`, roughPath);
       });
     });
     items(actual.edges, expected.edges, `${name}.edges`, (a, e, key) => {

@@ -16,13 +16,19 @@ export function inspectUsecase(){
  });
  const paint=e=>{const style=getComputedStyle(e);return {fill:style.fill,stroke:style.stroke,
    strokeWidth:style.strokeWidth,shadow:style.filter!=='none'};};
- const nodes=[...svg.querySelectorAll('g.node')].map(e=>{
+ const roughPaths=e=>[...e.querySelectorAll('path')].map(path=>({d:path.getAttribute('d'),paint:paint(path)}));
+ const nodes=[...svg.querySelectorAll('g.node,g.rough-node')].map(e=>{
    const kind=e.getAttribute('data-usecase-kind');
-   const shapes=kind==='actor'?[...e.querySelectorAll('.usecase-actor-glyph > path:not(.usecase-business-marker), .usecase-actor-glyph > circle, .usecase-actor-glyph > rect')]:
+   const rough=e.classList.contains('rough-node');
+   const shapes=rough?[]:kind==='actor'?[...e.querySelectorAll('.usecase-actor-glyph > path:not(.usecase-business-marker), .usecase-actor-glyph > circle, .usecase-actor-glyph > rect')]:
      kind==='note'?[]:[e.querySelector(':scope > ellipse, :scope > rect')].filter(Boolean);
-   return {id:e.getAttribute('data-usecase-id'),box:box(e),shape:e.querySelector('ellipse,rect,path')?.tagName,paint:shapes.map(paint)};
+   return {id:e.getAttribute('data-usecase-id'),box:box(e),shape:e.querySelector('ellipse,rect,path')?.tagName,
+     paint:shapes.map(paint),paths:rough?roughPaths(e):[]};
  });
- const boundaries=[...svg.querySelectorAll('g.system-boundary')].map(e=>({id:e.getAttribute('data-usecase-id'),box:box(e),parts:[...e.querySelectorAll('rect')].map(rect=>({box:box(rect),paint:paint(rect)}))}));
+ const boundaries=[...svg.querySelectorAll('g.system-boundary')].map(e=>({id:e.getAttribute('data-usecase-id'),box:box(e),
+   parts:[...e.querySelectorAll(':scope > .boundary-tab, :scope > .boundary-body')].map(shape=>({
+     box:box(shape),paint:shape.tagName==='rect'?paint(shape):null,paths:roughPaths(shape),
+   }))}));
  const marker=ref=>{const id=(ref||'').match(/#([^)]*)/)?.[1];if(!id)return null;const m=svg.querySelector(`#${CSS.escape(id)}`);if(!m)return null;const s=m.querySelector('path,circle,polygon');return{width:+m.getAttribute('markerWidth'),height:+m.getAttribute('markerHeight'),refX:+m.getAttribute('refX'),refY:+m.getAttribute('refY'),shape:s?.tagName,d:s?.getAttribute('d')||s?.getAttribute('points')||'',r:s?.getAttribute('r')||''};};
  const edges=[...svg.querySelectorAll('path[data-et="edge"]')].map(e=>({d:e.getAttribute('d'),stroke:getComputedStyle(e).stroke,dash:getComputedStyle(e).strokeDasharray,markerStart:marker(e.getAttribute('marker-start')),markerEnd:marker(e.getAttribute('marker-end'))}));
  return{view:{x:v.x,y:v.y,width:v.width,height:v.height},labels,nodes,boundaries,edges};

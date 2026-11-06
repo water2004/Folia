@@ -1,4 +1,4 @@
-// Mermaid 12.2.0 usecase measured-Dagre SVG projection.
+// Mermaid 12.2.0 Use Case SVG rendering with measured Dagre and ELK layouts.
 export module folia.mermaid.usecase_svg;
 import std;
 export import folia.mermaid.usecase;
@@ -15,6 +15,7 @@ struct UsecaseRenderTheme {
     std::string boundary_fill = "#ffffde", boundary_border = "#aaaa33", boundary_text = "#333333";
     std::string note_fill = "#fff5ad", note_border = "#aaaa33", note_text = "#333333";
     std::string drop_shadow;
+    std::string rough_border = "#9370DB";
     std::vector<std::string> palette_fill, palette_border;
     unsigned actor_weight = 400, usecase_weight = 400;
     double diagram_font_size = 16, neo_actor_path_width = 1;
@@ -24,7 +25,8 @@ struct UsecaseRenderInput {
     UsecaseRenderTheme theme;
     double node_spacing=50,rank_spacing=50,diagram_padding=20,min_node_width=120, wrapping_width=120;
     double group_title_top = 0, group_title_bottom = 0;
-    bool elk = true, neo = false, use_max_width = true, dark = false, rotate_colors = false;
+    bool elk = true, neo = false, hand_drawn = false, use_max_width = true, dark = false, rotate_colors = false;
+    std::uint32_t hand_drawn_seed = 0;
 };
 struct UsecaseSvg { std::string svg; double width=0,height=0; };
 using UsecaseTextMeasure = std::function<std::expected<SvgTextMetrics, std::string>(
