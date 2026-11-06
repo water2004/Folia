@@ -28,6 +28,12 @@ std::expected<ElkCompoundLayoutResult,std::string> elk_layout_compound(
     if(vertical){for(auto& l:input.center_labels)std::swap(l.width,l.height);for(auto& l:input.end_labels)std::swap(l.width,l.height);}
     if(input.nodes.size()!=input.hierarchy.nodes.size())return std::unexpected("ELK compound layout requires measured original nodes");
     auto prepared=elk_prepare_compound_graph(input.hierarchy);if(!prepared)return std::unexpected(prepared.error());auto& topology=*prepared;
+    // Only a port with a child-scope dummy has an imported position.
+    // CompoundGraphPreprocessor gives all real ports dummies when a child
+    // graph has external ports. Otherwise the parent assigns its own ports.
+    std::vector<bool> imported_ports(topology.ports.size());
+    for(const auto& node:topology.nodes)if(node.boundary_port)
+        imported_ports[*node.boundary_port]=true;
     const auto graph_options=[&](std::size_t graph) {
         auto selected=options;
         if(const auto parent=topology.graphs[graph].parent_node) {
@@ -82,6 +88,14 @@ std::expected<ElkCompoundLayoutResult,std::string> elk_layout_compound(
             else {const auto& measured=input.nodes[*topology.nodes[n].original];node.width=measured.width;node.height=measured.height;}
         }
         elk_split_long_edges(g);elk_assign_flat_port_sides(g);
+        // CompoundGraphPreprocessor fixes the side of linked parent ports
+        // to match their dummies. A group port used only in the child has
+        // no parent-layer edges from which PortSideProcessor can infer this.
+        for(const auto p:local.ports) {
+            const auto& port=topology.ports[p];
+            if(imported_ports[p]||topology.nodes[port.node].boundary)
+                g.ports[local_port[p]].side=port.side;
+        }
         if(const auto sorted=elk_sort_flat_ports(g);!sorted)return std::unexpected(sorted.error());
         if(options.consider_model_order)elk_sort_input_model(g);
     }
@@ -109,13 +123,16 @@ std::expected<ElkCompoundLayoutResult,std::string> elk_layout_compound(
             auto& node=g.nodes[local_node[n]];port_options[local_node[n]].center_alignment=input.nodes[*topology.nodes[n].original].center_ports;
             if(const auto nested=topology.nodes[n].nested_graph) {
                 const auto& content=geometry.graphs[*nested];node.width=content.width+content.padding_left+content.padding_right;
-                node.height=content.height+content.padding_top+content.padding_bottom;node.fixed_port_positions=true;
+                node.height=content.height+content.padding_top+content.padding_bottom;
+                node.fixed_port_positions=std::ranges::any_of(topology.nodes[n].ports,[&](auto p){return imported_ports[p];});
                 const auto original_node=*topology.nodes[n].original;
                 if(vertical&&original_node<input.group_boxes.size()&&input.group_boxes[original_node].title) {
                     const auto overhang=std::max(0.0,(input.group_boxes[original_node].title->width-node.height)/2);
                     node.margin_top=std::max(node.margin_top,overhang);node.margin_bottom=std::max(node.margin_bottom,overhang);
                 }
-                for(const auto p:topology.nodes[n].ports){auto& port=g.ports[local_port[p]];port.x=geometry.port_positions[p].x;port.y=geometry.port_positions[p].y;}
+                for(const auto p:topology.nodes[n].ports)if(imported_ports[p]){
+                    auto& port=g.ports[local_port[p]];port.x=geometry.port_positions[p].x;port.y=geometry.port_positions[p].y;
+                }
             }
         }
         if(const auto placed=elk_place_flat_point_ports(g,port_options);!placed)return std::unexpected(placed.error());

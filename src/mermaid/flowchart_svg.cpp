@@ -257,12 +257,10 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
             for(std::size_t i=0;i<graph.edges.size();++i) {
                 auto& points=scene.layout.edges[i].points;const auto& edge=graph.edges[i];
                 const auto a=ids.at(edge.start),b=ids.at(edge.end);
-                if(graph.nodes[a].group||graph.nodes[b].group)
-                    return std::unexpected("ELK Flowchart group endpoints require frame clipping");
                 clip_elk_node_endpoints(points,scene.layout.nodes[a],scene.layout.nodes[b],graph.nodes[a].shape,graph.nodes[b].shape,
                     [&](const auto& node,auto shape,auto point) {
                         return intersect(node,shape,point,theme.neo,find_local_shape(local_shapes,ids.at(node.id)));
-                    },theme.hand_drawn);
+                    },theme.hand_drawn,graph.nodes[a].group,graph.nodes[b].group);
                 if(edge.arrow_end==u"arrow_point")elk_remove_short_marker_segment(points,scene.layout.nodes[b],false);
                 if(edge.arrow_start==u"arrow_point")elk_remove_short_marker_segment(points,scene.layout.nodes[a],true);
             }

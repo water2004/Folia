@@ -89,8 +89,41 @@ std::optional<FlowchartPoint> elk_outline_attachment(const FlowchartPlacedNode& 
     return along(inner);
 }
 
-// render.ts cutter2/sanitizeElkEdgePoints for ordinary node endpoints. Container
-// endpoints are handled by the layout adapter's frame clipping boundary.
+// Mermaid 12.2.0 ELK sanitizeElkEdgePoints: preserve an existing frame
+// anchor, or clip the actual route where it leaves a tightened frame.
+bool clip_elk_group_endpoint(std::vector<FlowchartPoint>& points,
+    const FlowchartPlacedNode& node,bool first) {
+    if(points.size()<2)return false;
+    const auto at=[&](std::size_t i){return first?i:points.size()-1-i;};
+    const auto on_border=[&](FlowchartPoint p) {
+        constexpr double tolerance=.5;
+        const auto x=std::abs(p.x-node.x),y=std::abs(p.y-node.y);
+        const auto w=node.width/2,h=node.height/2;
+        return (std::abs(x-w)<=tolerance&&y<=h+tolerance)||
+               (std::abs(y-h)<=tolerance&&x<=w+tolerance);
+    };
+    const auto replace_prefix=[&](std::size_t count,FlowchartPoint crossing) {
+        if(first){points.erase(points.begin(),points.begin()+count);points.insert(points.begin(),crossing);}
+        else{points.resize(points.size()-count);points.push_back(crossing);}
+    };
+    const auto raw=points[at(1)];
+    // The ordinary endpoint pass prepends/appends one synthetic node centre.
+    if(on_border(raw)){replace_prefix(2,raw);return true;}
+    for(std::size_t i=2;i<points.size();++i){
+        const auto out=points[at(i)],in=points[at(i-1)];
+        if(std::abs(out.x-node.x)<node.width/2&&std::abs(out.y-node.y)<node.height/2)continue;
+        // An already exterior raw anchor is handled by ordinary intersection.
+        if(std::abs(in.x-node.x)>=node.width/2||std::abs(in.y-node.y)>=node.height/2)return false;
+        const auto dx=out.x-in.x,dy=out.y-in.y;
+        const auto inf=std::numeric_limits<double>::infinity();
+        const auto tx=dx==0?inf:(node.x+std::copysign(node.width/2,dx)-in.x)/dx;
+        const auto ty=dy==0?inf:(node.y+std::copysign(node.height/2,dy)-in.y)/dy;
+        const auto t=std::min(tx,ty);
+        replace_prefix(i,{in.x+t*dx,in.y+t*dy});
+        return true;
+    }
+    return false;
+}
 struct ClassicElkOutline {
     FlowchartPoint operator()(const FlowchartPlacedNode& node,std::u16string_view shape,FlowchartPoint p) const {
         return intersect(node,shape,p);
@@ -100,8 +133,11 @@ struct ClassicElkOutline {
 template<class Outline=ClassicElkOutline>
 void clip_elk_node_endpoints(std::vector<FlowchartPoint>& points,
     const FlowchartPlacedNode& start,const FlowchartPlacedNode& end,
-    std::u16string_view start_shape,std::u16string_view end_shape,Outline outline={},bool exact_rectangles=false) {
+    std::u16string_view start_shape,std::u16string_view end_shape,Outline outline={},bool exact_rectangles=false,
+    bool start_group=false,bool end_group=false) {
     points.insert(points.begin(),{start.x,start.y});points.push_back({end.x,end.y});
+    const bool skip_start=start_group&&clip_elk_group_endpoint(points,start,true);
+    const bool skip_end=end_group&&clip_elk_group_endpoint(points,end,false);
     const auto outside=[](const FlowchartPlacedNode& n,FlowchartPoint p) {
         constexpr double rounding_slack=1e-9;
         return std::abs(p.x-n.x)+rounding_slack>=n.width/2||
@@ -122,11 +158,14 @@ void clip_elk_node_endpoints(std::vector<FlowchartPoint>& points,
             if(first)points.erase(points.begin());else points.pop_back();
         }else if(first)points.front()=p;else points.back()=p;
     };
-    for(std::size_t i=0;i<points.size();++i)if(outside(start,points[i])){replace(replacement(start,start_shape,i,1),true);break;}
-    std::size_t last=points.size()-2;
-    for(std::size_t i=points.size();i-->0;)if(outside(end,points[i])){last=i;break;}
-    replace(replacement(end,end_shape,last,-1),false);
-    if(points.size()>1&&std::hypot(points.back().x-points[points.size()-2].x,points.back().y-points[points.size()-2].y)<2)points.pop_back();
+    if(!skip_start)for(std::size_t i=0;i<points.size();++i)
+        if(outside(start,points[i])){replace(replacement(start,start_shape,i,1),true);break;}
+    if(!skip_end){
+        std::size_t last=points.size()-2;
+        for(std::size_t i=points.size();i-->0;)if(outside(end,points[i])){last=i;break;}
+        replace(replacement(end,end_shape,last,-1),false);
+    }
+    if(!skip_end&&points.size()>1&&std::hypot(points.back().x-points[points.size()-2].x,points.back().y-points[points.size()-2].y)<2)points.pop_back();
     std::vector<FlowchartPoint> deduped;
     for(std::size_t i=0;i<points.size();++i)
         if(i==0||std::abs(points[i].x-points[i-1].x)>1e-6||std::abs(points[i].y-points[i-1].y)>1e-6)deduped.push_back(points[i]);
