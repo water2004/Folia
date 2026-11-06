@@ -14,10 +14,14 @@ function expression(n) {
     case 'Identifier':
       if(n.name==='i') return 'Value(i)';
       if(Object.hasOwn(constants,n.name)) return `Value(${str(constants[n.name])})`;
+      if(['multiplier','primaryColor','secondaryColor','tertiaryColor','fill'].includes(n.name)) return n.name;
       throw Error('Unexpected identifier '+n.name);
     case 'MemberExpression': {
       const key=n.computed?expression(n.property):`Value(${str(n.property.name)})`;
-      return n.object.type==='ThisExpression'?`get(${key})`:`property(${expression(n.object)}, ${key})`;
+      if(n.object.type==='ThisExpression') return `get(${key})`;
+      if(n.computed) return `indexed(${expression(n.object)}, ${key})`;
+      if(n.property.name==='length') return `length(${expression(n.object)})`;
+      return `property(${expression(n.object)}, ${key})`;
     }
     case 'ChainExpression': return expression(n.expression);
     case 'LogicalExpression': {
@@ -26,10 +30,11 @@ function expression(n) {
     }
     case 'ConditionalExpression': return `(truthy(${expression(n.test)}) ? ${expression(n.consequent)} : ${expression(n.alternate)})`;
     case 'BinaryExpression': {
-      const op={'+':'add','-':'subtract','*':'multiply','!==':'different'}[n.operator]; assert(op,n.operator);
+      const op={'+':'add','-':'subtract','*':'multiply','%':'modulo','!==':'different','===':'equal'}[n.operator]; assert(op,n.operator);
       return `${op}(${expression(n.left)}, ${expression(n.right)})`;
     }
     case 'UnaryExpression': assert(['+','-'].includes(n.operator)); return `${n.operator==='-'?'negate':'numeric'}(${expression(n.argument)})`;
+    case 'ArrayExpression': return 'sequence({'+n.elements.map(expression).join(', ')+'})';
     case 'ObjectExpression': return 'object({'+n.properties.map(p=>{
       assert.equal(p.type,'Property'); assert(!p.computed && !p.method);
       return `{${str(p.key.name??p.key.value)}, ${expression(p.value)}}`;
@@ -44,9 +49,25 @@ function expression(n) {
 function statement(n, indent='    ') {
   const block=body=>body.map(s=>statement(s,indent+'    ')).join('');
   switch(n.type) {
+    case 'VariableDeclaration': {
+      assert.equal(n.kind,'const');
+      assert.equal(n.declarations.length,1);
+      const {id,init}=n.declarations[0];
+      return indent+`const auto ${id.name} = ${expression(init)};\n`;
+    }
     case 'ExpressionStatement': {
       const e=n.expression;
       if(e.type==='CallExpression') {
+        if(e.callee.object.type==='Identifier' && e.callee.property.name==='forEach') {
+          assert.equal(e.callee.object.name,'journeyFills');
+          assert.equal(e.arguments.length,1);
+          const [fn]=e.arguments;
+          assert.equal(fn.type,'ArrowFunctionExpression');
+          assert.deepEqual(fn.params.map(p=>p.name),['fill','i']);
+          return indent+'for (int i = 0; i < number(length(journeyFills)); ++i) {\n'+
+            indent+'    const auto fill = indexed(journeyFills, Value(i));\n'+
+            block(fn.body.body)+indent+'}\n';
+        }
         assert.equal(e.callee.object.type,'ThisExpression'); assert.equal(e.callee.property.name,'updateColors');
         return indent+'update();\n';
       }
@@ -68,17 +89,18 @@ function statement(n, indent='    ') {
     default: throw Error('Unexpected statement '+n.type);
   }
 }
-for(const name of ['default','dark']) {
+for(const name of ['default','dark','base','forest','neutral','neo','neo-dark','redux','redux-dark','redux-color','redux-dark-color']) {
+  const identifier=name.replaceAll('-','_');
   const source=src(`themes/theme-${name}.js`);
   const ast=parse(source,{ecmaVersion:2022,sourceType:'module'});
   const cls=ast.body.find(n=>n.type==='ClassDeclaration'); assert(cls);
   const methods=cls.body.body;
   const generated=['// Generated from pinned official Mermaid 12.2.0 by generate-themes.mjs. MIT.',
     '// Ordered assignments preserve constructor/update behavior; do not edit by hand.',
-    `void Theme::construct_${name}() {\n`+methods.find(n=>n.kind==='constructor').value.body.body.map(n=>statement(n)).join('')+'}',
-    `void Theme::update_${name}() {\n`+methods.find(n=>n.key.name==='updateColors').value.body.body.map(n=>statement(n)).join('')+'}', ''].join('\n');
-  const file=path.join(root,`src/mermaid/theme_${name}.inc`);
+    `void Theme::construct_${identifier}() {\n`+methods.find(n=>n.kind==='constructor').value.body.body.map(n=>statement(n)).join('')+'}',
+    `void Theme::update_${identifier}() {\n`+methods.find(n=>n.key.name==='updateColors').value.body.body.map(n=>statement(n)).join('')+'}', ''].join('\n');
+  const file=path.join(root,`src/mermaid/theme_${identifier}.inc`);
   if(process.argv.includes('--write')) writeFileSync(file,generated);
   else assert.equal(readFileSync(file,'utf8').replaceAll('\r\n','\n'),generated,file);
 }
-console.log('Pinned default/dark C++ assignment generation verified');
+console.log('Pinned theme C++ assignment generation verified');

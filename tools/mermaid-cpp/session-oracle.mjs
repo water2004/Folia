@@ -86,9 +86,10 @@ for(let i=0;i<24;i++) {
   }
   add(steps);
 }
+for(const theme of ['forest','base','neutral','neo','neo-dark','redux','redux-dark','redux-color','redux-dark-color'])
+  add([op('site',{theme}),op('add',{theme,themeVariables:{primaryColor:'#123'}})]);
+for(const type of ['flowchart-v2','venn']) add([op('scope',type)]);
 // Terminal native restrictions retain the actual original result, not invented errors.
-for(const theme of ['forest','base','neutral','neo']) add([op('site',{theme})],'unported-theme');
-add([op('scope','flowchart-v2')],'unported-theme');
 add([op('site',{theme:'dark',themeVariables:null})],'theme-overrides-mapping');
 add([op('site',{custom:{a:{b:{c:1}}}})],'deep-shared-container');
 add([op('site',{custom:[{x:1}]})],'object-array-identity');

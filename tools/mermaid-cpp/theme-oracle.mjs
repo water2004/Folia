@@ -33,15 +33,18 @@ const helpers=vm.runInNewContext('"use strict";\n'+withoutImports(src('themes/th
   '\n({mkBorder,applyOverride})', observedColor);
 const erConstants=vm.runInNewContext('"use strict";\n'+src('themes/erDiagram-oldHardcodedValues.ts').replace(/^export /gm,'')+
   '\n({oldAttributeBackgroundColorOdd,oldAttributeBackgroundColorEven})');
-const sourceThemes=Object.fromEntries(['default','dark'].map(name=>[name,vm.runInNewContext('"use strict";\n'+
+const names=[...new Set(['default','dark',...Object.keys(themes)])];
+const sourceThemes=Object.fromEntries(names.map(name=>[name,vm.runInNewContext('"use strict";\n'+
   withoutImports(src(`themes/theme-${name}.js`)).replace(/^export /gm,'')+'\ngetThemeVariables',
   {...observedColor,...helpers,...erConstants})]));
 const themeRows = [];
 let seed = 0x573812;
 const random = () => (seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0);
 const randomHex = () => '#' + (random() & 0xffffff).toString(16).padStart(6, '0');
-for (const name of ['default', 'dark']) {
+for (const name of names) {
   const baseline = clean(themes[name].getThemeVariables({}));
+  const legacy=name==='default'||name==='dark';
+  const beforeTheme=seed;
   const cases = [undefined, {}, null, false, 3, 'dark', [], {darkMode:true}, {darkMode:false},
     {THEME_COLOR_LIMIT:0}, {THEME_COLOR_LIMIT:1}, {THEME_COLOR_LIMIT:4}, {THEME_COLOR_LIMIT:12},
     {THEME_COLOR_LIMIT:13}, {THEME_COLOR_LIMIT:-1}, {THEME_COLOR_LIMIT:2.5},
@@ -53,17 +56,32 @@ for (const name of ['default', 'dark']) {
   const colors = ['#123','#1234','#123456','#12345678','RED','transparent','rebeccapurple',
     'rgb(12, 40, 90)','rgba(10%, 20%, 30%, 0.4)','hsl(-30, 40%, 50%)','hsla(.5turn 40% 50% / 25%)',
     'hsl(1e2rad, 30%, 80%)','var(--color)','currentColor','not-a-color','',null,false,0,{},[]];
-  for (const key of ['primaryColor','mainBkg','secondaryColor','tertiaryColor','background','primaryTextColor','labelTextColor','cScale0','git0']) {
-    for (const value of colors) cases.push({[key]:value});
+  if(legacy) {
+    for (const key of ['primaryColor','mainBkg','secondaryColor','tertiaryColor','background','primaryTextColor','labelTextColor','cScale0','git0']) {
+      for (const value of colors) cases.push({[key]:value});
+    }
+    for (const key of ['pie1','pie12','venn1','flowContainerStroke','stateBkg','rowOdd','scaleLabelColor','gitInv0'])
+      for (const value of [null,false,0,'','#abc']) cases.push({[key]:value});
+    for (const key of ['xyChart','radar','cynefin','wardley','packet'])
+      for (const value of [null,false,0,'',[],{unknown:1}]) cases.push({[key]:value});
+    for (let i=0;i<48;i++) cases.push({primaryColor:randomHex(),mainBkg:randomHex(),secondaryColor:randomHex(),
+      labelTextColor:randomHex(),darkMode:!!(i%2),cScale0:randomHex(),xyChart:{titleColor:randomHex()}});
+    // One sweep over every resulting property tests final override restoration.
+    for (const key of Object.keys(baseline)) cases.push({[key]:baseline[key]});
+  } else {
+    cases.push({primaryColor:'rgba(10%, 20%, 30%, 0.4)',secondaryColor:'#abc',mainBkg:'#345678'},
+      {primaryColor:'invalid color'}, {nodeBorder:'#123'}, {nodeBorder:'#123',useGradient:true},
+      {primaryTextColor:'#123',labelTextColor:'#234',cScale0:'#345',git0:'#456',gitDarkMode:true},
+      {secondBkg:'calculated',lineColor:'#567',titleColor:'#678',textColor:'#789'});
+    if(name.endsWith('-color')) cases.push(
+      {borderColorArray:['red','blue']}, {borderColorArray:[]}, {borderColorArray:null},
+      {borderColorArray:'abc'}, {borderColorArray:{length:2,0:'red',1:'blue'}},
+      {bkgColorArray:['green']}, {bkgColorArray:null},
+      {venn1:'#123',venn2:'',venn3:null,fillType0:'#456',pie1:'#789'});
+    for(let i=0;i<5;i++) cases.push({primaryColor:randomHex(),mainBkg:randomHex(),secondaryColor:randomHex(),
+      labelTextColor:randomHex(),darkMode:!!(i%2),cScale0:randomHex(),xyChart:{titleColor:randomHex()}});
+    seed=beforeTheme;
   }
-  for (const key of ['pie1','pie12','venn1','flowContainerStroke','stateBkg','rowOdd','scaleLabelColor','gitInv0'])
-    for (const value of [null,false,0,'','#abc']) cases.push({[key]:value});
-  for (const key of ['xyChart','radar','cynefin','wardley','packet'])
-    for (const value of [null,false,0,'',[],{unknown:1}]) cases.push({[key]:value});
-  for (let i=0;i<48;i++) cases.push({primaryColor:randomHex(),mainBkg:randomHex(),secondaryColor:randomHex(),
-    labelTextColor:randomHex(),darkMode:!!(i%2),cScale0:randomHex(),xyChart:{titleColor:randomHex()}});
-  // One sweep over every resulting property tests final override restoration.
-  for (const key of Object.keys(baseline)) cases.push({[key]:baseline[key]});
   themeRows.push([name,'baseline',encode({}),encode(baseline),'-'].join('\t'));
   for (let i=0;i<cases.length;i++) {
     const input=cases[i];

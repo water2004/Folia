@@ -44,13 +44,45 @@ Value add(const Value& a,const Value& b) {
 }
 Value subtract(const Value& a,const Value& b) { return number(a)-number(b); }
 Value multiply(const Value& a,const Value& b) { return number(a)*number(b); }
-Value different(const Value& a,const Value& b) {
-    return !a.data || !b.data || a.data->kind!=b.data->kind ||
-        a.data->kind!=ConfigKind::string || a.data->string!=b.data->string;
+Value modulo(const Value& a,const Value& b) { return std::fmod(number(a),number(b)); }
+Value equal(const Value& a,const Value& b) {
+    return a.data && b.data && a.data->kind==ConfigKind::string &&
+        b.data->kind==ConfigKind::string && a.data->string==b.data->string;
 }
+Value different(const Value& a,const Value& b) { return !truthy(equal(a,b)); }
 Value property(const Value& object,const Value& key) {
     if(!object.data) return {};
     const auto value=object.data->find(text(key)); return value?Value(*value):Value{};
+}
+Value length(const Value& value) {
+    if(!value.data || value.data->kind==ConfigKind::null)
+        throw std::runtime_error("Cannot read theme length from null or undefined");
+    if(value.data->kind==ConfigKind::sequence) return static_cast<double>(value.data->sequence.size());
+    if(value.data->kind==ConfigKind::string) return static_cast<double>(value.data->string.size());
+    return property(value,u"length");
+}
+Value indexed(const Value& value,const Value& key) {
+    if(!value.data || value.data->kind==ConfigKind::null)
+        throw std::runtime_error("Cannot index a null or undefined theme value");
+    const auto index=number(key);
+    if(value.data->kind==ConfigKind::sequence || value.data->kind==ConfigKind::string) {
+        if(!std::isfinite(index) || index<0 || std::trunc(index)!=index ||
+           index>=number(length(value))) return {};
+        const auto position=static_cast<std::size_t>(index);
+        if(value.data->kind==ConfigKind::sequence) return value.data->sequence[position];
+        return value.data->string.substr(position,1);
+    }
+    if(value.data->kind==ConfigKind::mapping) {
+        if(std::isnan(index)) return property(value,u"NaN");
+        if(const auto string=config_to_string(*key.data)) return property(value,*string);
+    }
+    return {};
+}
+Value sequence(std::initializer_list<Value> items) {
+    ConfigValue result;
+    result.kind=ConfigKind::sequence;
+    for(const auto& item:items) result.sequence.push_back(item.data.value_or(ConfigValue{}));
+    return result;
 }
 Value object(std::initializer_list<std::pair<std::u16string,Value>> items) {
     auto result=config_detail::map();
@@ -73,7 +105,8 @@ Value mkBorder(const Value& color,const Value& darkMode) {
     return theme_detail::color_adjust(text(color),{{'s',-40},{'l',truthy(darkMode)?10:-10}});
 }
 struct Theme {
-    MermaidTheme name;
+    using Method=void (Theme::*)();
+    Method update_colors;
     ConfigValue values=config_detail::map();
     config_detail::Budget budget;
     // Cumulative intermediate assignments are bounded as well as final output.
@@ -96,15 +129,67 @@ struct Theme {
     void update_default();
     void construct_dark();
     void update_dark();
-    void update() { if(name==MermaidTheme::default_theme) update_default(); else update_dark(); }
+    void construct_base();
+    void update_base();
+    void construct_forest();
+    void update_forest();
+    void construct_neutral();
+    void update_neutral();
+    void construct_neo();
+    void update_neo();
+    void construct_neo_dark();
+    void update_neo_dark();
+    void construct_redux();
+    void update_redux();
+    void construct_redux_dark();
+    void update_redux_dark();
+    void construct_redux_color();
+    void update_redux_color();
+    void construct_redux_dark_color();
+    void update_redux_dark_color();
+    void update() { (this->*update_colors)(); }
 };
 #include "theme_default.inc"
 #include "theme_dark.inc"
+#include "theme_base.inc"
+#include "theme_forest.inc"
+#include "theme_neutral.inc"
+#include "theme_neo.inc"
+#include "theme_neo_dark.inc"
+#include "theme_redux.inc"
+#include "theme_redux_dark.inc"
+#include "theme_redux_color.inc"
+#include "theme_redux_dark_color.inc"
+
+struct NamedTheme {
+    std::u16string_view name;
+    MermaidTheme id;
+    Theme::Method construct;
+    Theme::Method update;
+};
+constexpr NamedTheme named_themes[]={
+    {u"default",MermaidTheme::default_theme,&Theme::construct_default,&Theme::update_default},
+    {u"dark",MermaidTheme::dark,&Theme::construct_dark,&Theme::update_dark},
+    {u"base",MermaidTheme::base,&Theme::construct_base,&Theme::update_base},
+    {u"forest",MermaidTheme::forest,&Theme::construct_forest,&Theme::update_forest},
+    {u"neutral",MermaidTheme::neutral,&Theme::construct_neutral,&Theme::update_neutral},
+    {u"neo",MermaidTheme::neo,&Theme::construct_neo,&Theme::update_neo},
+    {u"neo-dark",MermaidTheme::neo_dark,&Theme::construct_neo_dark,&Theme::update_neo_dark},
+    {u"redux",MermaidTheme::redux,&Theme::construct_redux,&Theme::update_redux},
+    {u"redux-dark",MermaidTheme::redux_dark,&Theme::construct_redux_dark,&Theme::update_redux_dark},
+    {u"redux-color",MermaidTheme::redux_color,&Theme::construct_redux_color,&Theme::update_redux_color},
+    {u"redux-dark-color",MermaidTheme::redux_dark_color,&Theme::construct_redux_dark_color,&Theme::update_redux_dark_color},
+};
+}
+std::optional<MermaidTheme> find_mermaid_theme(std::u16string_view name) {
+    for(const auto& entry:named_themes) if(entry.name==name) return entry.id;
+    return {};
 }
 std::expected<ConfigValue,std::string> derive_theme_variables(MermaidTheme name,const ConfigValue* overrides,ConfigLimits limits) {
     try {
-        if(name!=MermaidTheme::default_theme && name!=MermaidTheme::dark) throw std::runtime_error("Unsupported native theme");
-        Theme theme{name,config_detail::map(),{limits},{limits}};
+        const auto entry=std::ranges::find(named_themes,name,&NamedTheme::id);
+        if(entry==std::end(named_themes)) throw std::runtime_error("Unsupported native theme");
+        Theme theme{entry->update,config_detail::map(),{limits},{limits}};
         if(overrides) {
             theme.budget.inspect(*overrides);
             if(overrides->kind!=ConfigKind::mapping) throw std::runtime_error("Theme overrides must be a mapping");
@@ -115,13 +200,13 @@ std::expected<ConfigValue,std::string> derive_theme_variables(MermaidTheme name,
                     throw std::runtime_error("Theme color limit must be an integer from 0 through 12");
             }
         }
+        (theme.*entry->construct)();
         if(name==MermaidTheme::default_theme) {
-            theme.construct_default();
             // Official default calculate clears only exact 'calculated' values.
             std::erase_if(theme.values.mapping,[](const auto& entry) {
                 return entry.second.kind==ConfigKind::string && entry.second.string==u"calculated";
             });
-        } else theme.construct_dark();
+        }
         if(overrides) for(const auto& [key,value]:overrides->mapping) theme.set(key,value);
         theme.update();
         if(overrides) for(const auto& [key,value]:overrides->mapping) {
@@ -132,6 +217,9 @@ std::expected<ConfigValue,std::string> derive_theme_variables(MermaidTheme name,
                 theme.set(key,generated);
             } else theme.set(key,value);
         }
+        // The base theme's neo stroke gradient otherwise covers an explicit border.
+        if(name==MermaidTheme::base && overrides && overrides->find(u"nodeBorder") &&
+           !overrides->find(u"useGradient")) theme.set(u"useGradient",false);
         theme.budget.output(theme.values);
         return std::move(theme.values);
     } catch(const std::exception& error) { return std::unexpected(error.what()); }

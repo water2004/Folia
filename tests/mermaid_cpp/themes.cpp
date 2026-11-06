@@ -7,7 +7,7 @@ using namespace boost::ut;
 using namespace folia::mermaid;
 #include "theme_fixture.hpp"
 suite themes = [] {
-    "mermaid_default_dark_themes_match_official_derivation"_test = [] {
+    "mermaid_named_themes_match_official_derivation"_test = [] {
         const auto directory=std::getenv("FOLIA_MERMAID_FIXTURES");
         std::ifstream input{std::filesystem::path{directory?directory:FOLIA_MERMAID_FIXTURE_DIR}/"themes.tsv"};
         expect(fatal(input.is_open()));
@@ -21,8 +21,9 @@ suite themes = [] {
             expect(fatal(fields.size()==5_u));
             auto overrides=fields[2]=="U"?ConfigValue{}:json(decode(fields[2]));
             const auto before=snapshot(overrides);
-            const auto name=fields[0]=="default"?MermaidTheme::default_theme:MermaidTheme::dark;
-            const auto result=derive_theme_variables(name,fields[2]=="U"?nullptr:&overrides);
+            const auto name=find_mermaid_theme(std::u16string(fields[0].begin(),fields[0].end()));
+            expect(fatal(name.has_value()));
+            const auto result=derive_theme_variables(*name,fields[2]=="U"?nullptr:&overrides);
             expect(snapshot(overrides)==before) << fields[0] << fields[1] << "input mutated";
             if(fields[3].starts_with('E') || fields[4]!="-") {
                 expect(!result) << fields[0] << fields[1] << "expected rejection";
@@ -48,7 +49,8 @@ suite themes = [] {
             }
             ++count;
         }
-        expect(count==1218_u);
+        expect(count==1585_u);
+        expect(baselines.size()==11_u);
     };
     "mermaid_themes_own_values_and_bound_input_output_work"_test = [] {
         auto overrides=json(uR"({"xyChart":{"titleColor":"#abc","extra":{"a":[1]}}})");

@@ -112,7 +112,7 @@ suite config_session = [] {
             }
             ++count;
         }
-        expect(count == 640_u); expect(baselines == 1_u);
+        expect(count == 655_u); expect(baselines == 1_u);
     };
     "mermaid_config_session_owned_results_and_isolated_instances"_test = [] {
         auto a = ConfigSession::create(), b = ConfigSession::create();
@@ -141,8 +141,6 @@ suite config_session = [] {
         expect(session->add_directive(json(uR"({"fontFamily":"Arial"})")).has_value());
         const auto before = state(*session, defaults);
         expect(!session->add_directive(json(uR"({"theme":"dark"})")));
-        expect(state(*session, defaults) == before);
-        expect(!session->set_site_config(json(uR"({"theme":"forest"})")));
         expect(state(*session, defaults) == before);
         expect(!session->set_config(json(uR"({"theme":"dark","themeVariables":{"primaryColor":"bad-color"}})")));
         expect(state(*session, defaults) == before);

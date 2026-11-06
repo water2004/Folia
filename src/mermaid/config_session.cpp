@@ -4,7 +4,6 @@ import folia.mermaid.config_support;
 import folia.mermaid.config_merge;
 import folia.mermaid.config_sanitize;
 import folia.mermaid.config_appearance;
-import folia.mermaid.config_data;
 import folia.mermaid.theme;
 
 namespace folia::mermaid {
@@ -54,10 +53,7 @@ std::optional<MermaidTheme> native_theme(const ConfigValue* value) {
     if (!value || !config_truthy(*value)) return {};
     auto name = config_to_string(*value);
     if (!name) throw std::runtime_error(name.error());
-    if (!known_theme(*name)) return {};
-    if (*name == u"default") return MermaidTheme::default_theme;
-    if (*name == u"dark") return MermaidTheme::dark;
-    throw std::runtime_error("Session theme derivation is not yet ported for this name");
+    return find_mermaid_theme(*name);
 }
 bool equal_theme(const ConfigValue* a, const ConfigValue* b) {
     if (!a || !b) return a == b;

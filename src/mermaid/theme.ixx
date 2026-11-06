@@ -1,10 +1,14 @@
-// Official Mermaid 12.2.0 default/dark theme-variable derivation.
+// Official Mermaid 12.2.0 theme-variable derivation.
 export module folia.mermaid.theme;
 import std;
 export import folia.mermaid.config_limits;
 
 export namespace folia::mermaid {
-enum class MermaidTheme { default_theme, dark };
+enum class MermaidTheme {
+    default_theme, dark, base, forest, neutral, neo, neo_dark, redux,
+    redux_dark, redux_color, redux_dark_color
+};
+std::optional<MermaidTheme> find_mermaid_theme(std::u16string_view name);
 // Pure owned result, no session singleton. Overrides must be a mapping; nullptr
 // means omitted. Undefined derived fields are omitted, matching JSON output.
 // Preserves unknown data keys and shallow-merges generated object variables.
