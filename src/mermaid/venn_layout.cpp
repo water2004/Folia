@@ -8,6 +8,8 @@ constexpr double epsilon = 1e-10;
 using Vector = std::vector<double>;
 using Indices = std::vector<std::size_t>;
 
+constexpr int max_iterations = 500;
+
 // The simplex and bisection routines follow the patched fmin 0.0.4
 // implementation shipped in @upsetjs/venn.js 2.0.0.
 Vector minimize(const auto& loss, Vector initial, double error, double tolerance) {
@@ -29,7 +31,7 @@ Vector minimize(const auto& loss, Vector initial, double error, double tolerance
         for (std::size_t i = 0; i < n; ++i) out[i] = wx * x[i] + wy * y[i];
         return evaluate(std::move(out));
     };
-    for (int iteration = 0; iteration < 500; ++iteration) {
+    for (int iteration = 0; iteration < max_iterations; ++iteration) {
         sort();
         double difference = 0;
         for (std::size_t i = 0; i < n; ++i)
@@ -129,7 +131,7 @@ Intersection intersect(const std::vector<VennCircle>& circles) {
         if (std::ranges::any_of(circles, [&](const auto& outer) {
             return distance(circle.center, outer.center) > std::abs(circle.radius - outer.radius);
         })) return {};
-        return {pi * circle.radius * circle.radius, {{circle, {}, {}, true}}};
+        return {circle.radius * circle.radius * pi, {{circle, {}, {}, true}}};
     }
     center.x /= static_cast<double>(vertices.size());
     center.y /= static_cast<double>(vertices.size());
@@ -172,6 +174,150 @@ Intersection intersect(const std::vector<VennCircle>& circles) {
 }
 
 struct Constraint { Indices members; double size; };
+
+struct GradientPoint {
+    Vector x, gradient;
+    double loss = 0;
+};
+
+double dot(const Vector& a, const Vector& b) {
+    return std::inner_product(a.begin(), a.end(), b.begin(), 0.0);
+}
+
+// Strong Wolfe line search and Polak–Ribière update from the bundled fmin.
+double wolfe_search(const auto& objective, const Vector& direction,
+    const GradientPoint& current, GradientPoint& next, double step) {
+    constexpr double c1 = 1e-6, c2 = 0.1;
+    const auto loss = current.loss;
+    const auto slope = dot(current.gradient, direction);
+    auto evaluate = [&](double at) {
+        for (std::size_t i = 0; i < direction.size(); ++i)
+            next.x[i] = current.x[i] + at * direction[i];
+        next.loss = objective(next.x, next.gradient);
+        return dot(next.gradient, direction);
+    };
+    auto zoom = [&](double lo, double hi, double lo_loss) {
+        for (int i = 0; i < 16; ++i) {
+            const auto mid = (lo + hi) / 2;
+            const auto derivative = evaluate(mid);
+            if (next.loss > loss + c1 * mid * slope || next.loss >= lo_loss) {
+                hi = mid;
+            } else {
+                if (std::abs(derivative) <= -c2 * slope) return mid;
+                if (derivative * (hi - lo) >= 0) hi = lo;
+                lo = mid;
+                lo_loss = next.loss;
+            }
+        }
+        return 0.0;
+    };
+    auto previous_step = 0.0, previous_loss = loss;
+    if (step == 0) step = 1;
+    for (int i = 0; i < 10; ++i) {
+        const auto derivative = evaluate(step);
+        if (next.loss > loss + c1 * step * slope || (i > 0 && next.loss >= previous_loss))
+            return zoom(previous_step, step, previous_loss);
+        if (std::abs(derivative) <= -c2 * slope) return step;
+        if (derivative >= 0) return zoom(step, previous_step, next.loss);
+        previous_loss = next.loss;
+        previous_step = step;
+        step *= 2;
+    }
+    return step;
+}
+
+GradientPoint conjugate_gradient(const auto& objective, Vector initial) {
+    const auto n = initial.size();
+    GradientPoint current{std::move(initial), Vector(n)};
+    GradientPoint next{Vector(n), Vector(n)};
+    current.loss = objective(current.x, current.gradient);
+    Vector direction(n), difference(n);
+    auto reset_direction = [&] {
+        for (std::size_t i = 0; i < n; ++i) direction[i] = -current.gradient[i];
+    };
+    reset_direction();
+    auto step = 1.0;
+    for (int i = 0; i < max_iterations; ++i) {
+        step = wolfe_search(objective, direction, current, next, step);
+        if (step == 0) {
+            reset_direction();
+        } else {
+            for (std::size_t j = 0; j < n; ++j)
+                difference[j] = next.gradient[j] - current.gradient[j];
+            const auto beta = std::max(0.0,
+                dot(difference, next.gradient) / dot(current.gradient, current.gradient));
+            for (std::size_t j = 0; j < n; ++j)
+                direction[j] = beta * direction[j] - next.gradient[j];
+            std::swap(current, next);
+        }
+        if (std::sqrt(dot(current.gradient, current.gradient)) <= 1e-5) break;
+    }
+    return current;
+}
+
+std::vector<VennCircle> constrained_layout(const std::vector<VennCircle>& circles,
+    const Vector& sizes, const std::vector<Constraint>& pairs) {
+    const auto n = circles.size();
+    std::vector distances(n, Vector(n));
+    std::vector constraints(n, Vector(n));
+    for (const auto& pair : pairs) {
+        const auto a = pair.members[0], b = pair.members[1];
+        distances[a][b] = distances[b][a] =
+            overlap_distance(circles[a].radius, circles[b].radius, pair.size);
+        const auto constraint = pair.size + epsilon >= std::min(sizes[a], sizes[b]) ? 1
+            : pair.size <= epsilon ? -1 : 0;
+        constraints[a][b] = constraints[b][a] = constraint;
+    }
+    Vector row_norms;
+    for (const auto& row : distances) row_norms.push_back(std::sqrt(dot(row, row)));
+    const auto norm = std::sqrt(dot(row_norms, row_norms)) / static_cast<double>(n);
+    if (norm == 0) return circles;
+    for (auto& row : distances)
+        for (auto& distance : row) distance /= norm;
+
+    auto objective = [&](const Vector& x, Vector& gradient) {
+        std::ranges::fill(gradient, 0.0);
+        double loss = 0;
+        for (std::size_t i = 0; i < n; ++i) {
+            for (std::size_t j = i + 1; j < n; ++j) {
+                const auto dx = x[2*j] - x[2*i], dy = x[2*j+1] - x[2*i+1];
+                const auto squared = dx * dx + dy * dy;
+                const auto separation = std::sqrt(squared);
+                const auto required = distances[i][j], constraint = constraints[i][j];
+                if ((constraint > 0 && separation <= required) ||
+                    (constraint < 0 && separation >= required)) continue;
+                const auto delta = squared - required * required;
+                loss += 2 * delta * delta;
+                gradient[2*i] -= 4 * delta * dx;
+                gradient[2*i+1] -= 4 * delta * dy;
+                gradient[2*j] += 4 * delta * dx;
+                gradient[2*j+1] += 4 * delta * dy;
+            }
+        }
+        return loss;
+    };
+    // Venn.js uses ten Math.random restarts. A local seed makes the native
+    // render and independent text layout reproducible.
+    std::uint32_t random_state = 1;
+    GradientPoint best;
+    best.loss = std::numeric_limits<double>::infinity();
+    for (int i = 0; i < 10; ++i) {
+        Vector initial(2 * n);
+        for (auto& value : initial) {
+            random_state = random_state * 1664525u + 1013904223u;
+            value = static_cast<double>(random_state) / 4294967296.0;
+        }
+        auto candidate = conjugate_gradient(objective, std::move(initial));
+        if (candidate.loss < best.loss) best = std::move(candidate);
+    }
+    auto result = circles;
+    if (!best.x.empty()) {
+        for (std::size_t i = 0; i < n; ++i)
+            result[i].center = {best.x[2*i] * norm, best.x[2*i+1] * norm};
+    }
+    return result;
+}
+
 std::vector<VennCircle> select_circles(const std::vector<VennCircle>& circles, const Indices& ids) {
     std::vector<VennCircle> result;
     for (const auto id : ids) result.push_back(circles[id]);
@@ -236,6 +382,11 @@ void position_circles(std::vector<VennCircle>& circles, const Vector& sizes,
         }
         circle.center = best;
         positioned[id] = true;
+    }
+    if (circles.size() + areas.size() >= 8) {
+        auto constrained = constrained_layout(circles, sizes, pairs);
+        if (area_loss(constrained, areas) + 1e-8 < area_loss(circles, areas))
+            circles = std::move(constrained);
     }
     Vector initial;
     for (const auto& circle : circles) {
@@ -344,6 +495,7 @@ Indices normalize(std::vector<VennCircle>& circles, double width, double height,
         if (i % 3 == 0) overall = bounds(circles, ids);
     }
     overall = bounds(circles, ids);
+    if (overall.width() == 0 || overall.height() == 0) return ids;
     width -= 2 * padding;
     height -= 2 * padding;
     const auto scale = std::min(width / overall.width(), height / overall.height());
@@ -392,28 +544,27 @@ VennPoint label_center(const std::vector<VennCircle>& inside, const std::vector<
 }
 
 std::expected<std::vector<VennRegion>, std::string> layout_venn(
-    const VennDiagram& diagram, double width, double height, double padding) {
+    const VennDiagram& diagram, double width, double height, double padding, bool include_zero_sets) {
     if (padding < 0 || width <= 2 * padding || height <= 2 * padding)
         return std::unexpected("Invalid Venn canvas or padding");
     std::vector<VennArea> visible;
     std::map<std::u16string, std::size_t, std::less<>> lookup;
-    std::set<std::u16string> zero;
+    std::map<std::u16string, double, std::less<>> all_sizes;
     Vector sizes;
     std::vector<VennCircle> circles;
     for (const auto& area : diagram.areas) {
         if (area.sets.size() != 1) continue;
-        if (area.size == 0) { zero.insert(area.sets[0]); continue; }
+        all_sizes.insert_or_assign(area.sets[0], area.size);
+        if (area.size == 0 && !include_zero_sets) continue;
         if (!lookup.try_emplace(area.sets[0], circles.size()).second)
             return std::unexpected("Duplicate Venn set");
         sizes.push_back(area.size);
         circles.push_back({{1e10, 1e10}, std::sqrt(area.size / pi)});
     }
     if (circles.empty()) return std::vector<VennRegion>{};
-    if (circles.size() > 3) return std::unexpected("Venn layout supports up to three nonempty sets");
 
     std::set<VennSets> explicit_areas;
     for (const auto& area : diagram.areas) {
-        if (std::ranges::any_of(area.sets, [&](const auto& id) { return zero.contains(id); })) continue;
         if (!explicit_areas.insert(area.sets).second)
             return std::unexpected("Duplicate Venn region");
         visible.push_back(area);
@@ -424,13 +575,23 @@ std::expected<std::vector<VennRegion>, std::string> layout_venn(
             for (std::size_t j = i + 1; j < area.sets.size(); ++j) {
                 VennSets pair{area.sets[i], area.sets[j]};
                 if (!explicit_areas.insert(pair).second) continue;
-                auto a = lookup.find(pair[0]), b = lookup.find(pair[1]);
-                if (a == lookup.end() || b == lookup.end()) return std::unexpected("Unknown Venn set");
-                synthetic.push_back({std::move(pair), std::min(sizes[a->second], sizes[b->second]) / 4, {}});
+                auto a = all_sizes.find(pair[0]), b = all_sizes.find(pair[1]);
+                if (a == all_sizes.end() || b == all_sizes.end()) return std::unexpected("Unknown Venn set");
+                synthetic.push_back({std::move(pair), std::min(a->second, b->second) / 4, {}});
             }
         }
     }
     visible.insert(visible.end(), synthetic.begin(), synthetic.end());
+    // The renderer synthesizes pairs before the VennDiagram chart removes
+    // zero-sized sets. Standalone layout retains them for additional text.
+    if (!include_zero_sets) {
+        std::erase_if(visible, [&](const auto& area) {
+            return std::ranges::any_of(area.sets, [&](const auto& id) {
+                auto size = all_sizes.find(id);
+                return size != all_sizes.end() && size->second == 0;
+            });
+        });
+    }
     std::vector<Constraint> areas, pairs;
     auto indices = [&](const VennSets& sets) -> std::optional<Indices> {
         Indices result;

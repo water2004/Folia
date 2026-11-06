@@ -14,5 +14,5 @@ struct VennRegion {
     std::vector<VennArc> arcs;
 };
 std::expected<std::vector<VennRegion>, std::string> layout_venn(
-    const VennDiagram&, double width, double height, double padding);
+    const VennDiagram&, double width, double height, double padding, bool include_zero_sets = false);
 }

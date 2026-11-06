@@ -37,12 +37,28 @@ suite mermaid_venn = [] {
         expect((*regions)[5].arcs.size() == 2_u);
         expect((*regions)[6].arcs.size() == 2_u);
     };
-    "mermaid_venn_rejects_more_than_three_nonempty_sets"_test = [] {
-        auto result = parse_venn(u"venn-beta\nset A\nset B\nset C\nset D");
+    "mermaid_venn_four_set_union_and_synthetic_pairs"_test = [] {
+        auto result = parse_venn(u"venn-beta\nset A: 12\nset B: 11\nset C: 9\nset D: 8\nunion A,B,C,D[Shared]");
         expect(fatal(result.has_value()));
         auto regions = layout_venn(*result, 800, 450, 15);
-        expect(fatal(!regions.has_value()));
-        expect(static_cast<bool>(regions.error() == "Venn layout supports up to three nonempty sets"));
+        expect(fatal(regions.has_value()));
+        expect(regions->size() == 11_u);
+        expect((*regions)[4].circles.size() == 4_u);
+        // The asymmetric pair areas leave the shared four-way region empty.
+        expect((*regions)[4].arcs.empty());
+        expect((*regions)[4].label.y == -1000.0);
+    };
+    "mermaid_venn_zero_set_preserves_pairs_between_nonempty_sets"_test = [] {
+        auto result = parse_venn(u"venn-beta\nset A: 12\nset B: 0\nset C: 9\nunion A,B,C");
+        expect(fatal(result.has_value()));
+        auto chart = layout_venn(*result, 800, 450, 15);
+        expect(fatal(chart.has_value()));
+        expect(fatal(chart->size() == 3_u));
+        expect(static_cast<bool>(chart->back().data.sets == VennSets{u"A", u"C"}));
+        expect(chart->back().arcs.size() == 2_u);
+        auto text = layout_venn(*result, 800, 450, 15, true);
+        expect(fatal(text.has_value()));
+        expect(text->size() == 7_u);
     };
 };
 }
