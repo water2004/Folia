@@ -16,6 +16,10 @@ target_sources(folia_mermaid PUBLIC
     BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}"
     FILES ${FOLIA_MERMAID_MODULES})
 target_sources(folia_mermaid PRIVATE ${FOLIA_MERMAID_SOURCES})
+if(MSVC)
+    # Optimized theme code exceeds the standard COFF object section limit.
+    set_source_files_properties(theme.cpp PROPERTIES COMPILE_OPTIONS /bigobj)
+endif()
 
 # Grammar only: schema resolution is owned by folia.mermaid.frontmatter.
 # Keep this native dependency pinned independently of the JS test oracle.
