@@ -335,6 +335,17 @@ suite mermaid_measurement = [] {
                 u"C --> D\nD --> E@{shape: manual-input, label: Input}"},
             {"extra-shapes-compartments",u"flowchart LR\nA@{shape: lin-proc, label: Process} --> "
                 u"B@{shape: divided-process, label: Divide} --> C@{shape: internal-storage, label: Store}"},
+            {"extra-shapes-organic-lr",u"flowchart LR\nA@{shape: person, label: Reader} --> "
+                u"B@{shape: cloud, label: Cloud Storage} --> C@{shape: person, label: Reviewer}"},
+            {"extra-shapes-organic-tb",u"flowchart TB\nA@{shape: person, label: Customer} --> "
+                u"B@{shape: cloud, label: Public cloud}\nA --> C@{shape: person, label: Support}\n"
+                u"B --> D@{shape: cloud, label: Private cloud}\nC --> D"},
+            {"extra-shapes-organic-styles",u"%%{init: {\"flowchart\": {\"minNodeWidth\": 0, \"wrappingWidth\": 90, "
+                u"\"padding\": 22}}}%%\nflowchart BT\nA@{shape: person, label: \"Build<br/>operator\"} --> "
+                u"B@{shape: cloud, label: \"Cloud with a wrapped label\"}\nclass A,B organic\n"
+                u"classDef organic fill:#e1eee2,stroke:#335544,stroke-width:2px\nstyle B stroke:#442211"},
+            {"extra-shapes-organic-wide",u"%%{init: {\"flowchart\": {\"minNodeWidth\": 300, \"wrappingWidth\": 320}}}%%\n"
+                u"flowchart RL\nA@{shape: person, label: Specialist} --> B@{shape: cloud, label: Network}"},
         };
         for(const auto theme:{u"default",u"dark"}) for(const auto& sample:cases) {
             const auto name=sample.first;

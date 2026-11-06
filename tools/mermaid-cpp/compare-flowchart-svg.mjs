@@ -51,7 +51,8 @@ try {
     const shape=n.querySelector('.label-container'),b=shape.getBBox(),text=n.querySelector('text'),t=text.getBBox();
     const local=n.getScreenCTM().inverse().multiply(shape.getScreenCTM());
     const corner=new DOMPoint(b.x,b.y).matrixTransform(local);
-    const paths=rough?[...n.querySelectorAll('path')]:shape.matches('path,polygon,circle')?[shape]:[...shape.querySelectorAll('path,circle')];
+    const geometry=extraShapes?'path,polygon,circle,rect,ellipse,line,polyline':'path,polygon,circle';
+    const paths=rough?[...n.querySelectorAll('path')]:shape.matches(geometry)?[shape]:[...shape.querySelectorAll(geometry)];
     const strokeShape=rough?(paths.at(-1)??shape):shape;
     const sketchPaths=rough?paths.map(p=>({
      length:p.getTotalLength(),stroke:strokePaint(p),width:getComputedStyle(p).strokeWidth,

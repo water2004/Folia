@@ -24,7 +24,8 @@ std::u16string_view flowchart_classic_shape(std::u16string_view shape) {
         if(shape==name)return handler;
     for(const auto name:{u"squareRect",u"roundedRect",u"stadium",u"subroutine",u"cylinder",u"circle",u"diamond",
         u"hexagon",u"lean_right",u"lean_left",u"trapezoid",u"inv_trapezoid",u"doublecircle",u"odd",
-        u"notch-rect",u"tri",u"flip-tri",u"notch-pent",u"sl-rect",u"lin-rect",u"div-rect",u"win-pane",u"lin-doc"})
+        u"notch-rect",u"tri",u"flip-tri",u"notch-pent",u"sl-rect",u"lin-rect",u"div-rect",u"win-pane",u"lin-doc",
+        u"person",u"cloud"})
         if(shape==name)return name;
     return {};
 }

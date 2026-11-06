@@ -1,4 +1,4 @@
-// Plain-label Flowchart SVG adapter, Mermaid 12.2.0. MIT, ../LICENSE.
+// Measured Flowchart SVG adapter, Mermaid 12.2.0. MIT, ../LICENSE.
 export module folia.mermaid.flowchart_svg;
 import std;
 export import folia.mermaid.dagre_rank;
@@ -63,14 +63,8 @@ struct FlowchartScene {
 std::expected<FlowchartScene,std::string> layout_measured_flowchart(
     const FlowchartInput&,std::span<const FlowchartNodeBox>,
     std::span<const FlowchartEdgeLabelSize>,const FlowchartMeasurements&,const FlowchartSvgTheme&);
-// Measured SVG stage: recursive plain-title groups; square/rounded/diamond/circle,
-// stadium/subroutine/cylinder, double-circle and classic polygon nodes;
-// quoted/entity plain labels with explicit/measured wrapped lines,
-// basis/linear paths, plain/point/circle/cross arrow ends and
-// normal/thick/dotted/invisible edges and merged self loops. Class/direct fill,
-// stroke, text color, line width and dashes retain the original precedence.
-// Unsupported
-// adapters fail explicitly. Group titles use the same real measurement boundary.
+// Paints the measured Dagre or ELK scene. Node geometry owns its layout box,
+// visible contours and attachment rules; label runs carry their measured font.
 std::expected<FlowchartSvg,std::string> render_flowchart_svg(
     const FlowchartRenderInput&,const FlowchartMeasurements&);
 }

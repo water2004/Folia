@@ -99,6 +99,10 @@ curveCases.push(['curve-edge-overrides','flowchart TD\nA[Read] branch@--> B[Vali
 const extraShapeCases=[
   ['extra-shapes-polygons','flowchart TD\nA@{shape: card, label: Card} --> B@{shape: extract, label: Extract}\nA --> C@{shape: manual-file, label: File}\nB --> D@{shape: loop-limit, label: Limit}\nC --> D\nD --> E@{shape: manual-input, label: Input}'],
   ['extra-shapes-compartments','flowchart LR\nA@{shape: lin-proc, label: Process} --> B@{shape: divided-process, label: Divide} --> C@{shape: internal-storage, label: Store}'],
+  ['extra-shapes-organic-lr','flowchart LR\nA@{shape: person, label: Reader} --> B@{shape: cloud, label: Cloud Storage} --> C@{shape: person, label: Reviewer}'],
+  ['extra-shapes-organic-tb','flowchart TB\nA@{shape: person, label: Customer} --> B@{shape: cloud, label: Public cloud}\nA --> C@{shape: person, label: Support}\nB --> D@{shape: cloud, label: Private cloud}\nC --> D'],
+  ['extra-shapes-organic-styles','%%{init: {"flowchart": {"minNodeWidth": 0, "wrappingWidth": 90, "padding": 22}}}%%\nflowchart BT\nA@{shape: person, label: "Build<br/>operator"} --> B@{shape: cloud, label: "Cloud with a wrapped label"}\nclass A,B organic\nclassDef organic fill:#e1eee2,stroke:#335544,stroke-width:2px\nstyle B stroke:#442211'],
+  ['extra-shapes-organic-wide','%%{init: {"flowchart": {"minNodeWidth": 300, "wrappingWidth": 320}}}%%\nflowchart RL\nA@{shape: person, label: Specialist} --> B@{shape: cloud, label: Network}'],
 ];
 const cases=extraShapes?extraShapeCases:curves?curveCases:handDrawn?handDrawnCases:neo?neoCases:elkAdapter?(await import('./elk-flowchart-cases.mjs')).cases:dagreCases;
 const url=pathToFileURL(resolve('tools/mermaid-cpp/oracle/node_modules/mermaid/dist/mermaid.esm.mjs')).href;
@@ -174,7 +178,8 @@ for(const [name,body,title] of ${JSON.stringify(cases)}) {
    const rough=n.matches('.rough-node');
    const shape=n.querySelector('.label-container')??n.firstElementChild;const b=shape.getBBox();const label=n.querySelector('.label');
    const lb=label.getBBox();
-   const paths=rough?[...n.querySelectorAll('path')]:shape.matches('path,polygon,circle')?[shape]:[...shape.querySelectorAll('path,circle')];
+   const geometry=name.startsWith('extra-shapes-')?'path,polygon,circle,rect,ellipse,line,polyline':'path,polygon,circle';
+   const paths=rough?[...n.querySelectorAll('path')]:shape.matches(geometry)?[shape]:[...shape.querySelectorAll(geometry)];
    const outline=(name.startsWith('shapes-')||name.startsWith('extra-shapes-'))?paths.flatMap(p=>Array.from({length:name.startsWith('extra-shapes-')?1001:201},(_,i)=>{
     const a=p.getPointAtLength(p.getTotalLength()*i/(name.startsWith('extra-shapes-')?1000:200));return position(p,a.x,a.y);
    })):[];

@@ -41,11 +41,11 @@ void finish_edge(FlowchartPlacedEdge& edge,const FlowchartEdge& source,
     const FlowchartPlacedNode& start,const FlowchartPlacedNode& end,
     std::u16string_view start_shape,std::u16string_view end_shape,bool intersect_shapes,
     const FlowchartPlacedNode* from_cluster,const FlowchartPlacedNode* to_cluster,bool neo,
-    const FlowchartNodeBox* start_outline,const FlowchartNodeBox* end_outline) {
+    const FlowchartLocalShape* start_shape_geometry,const FlowchartLocalShape* end_shape_geometry) {
     const auto original=edge.points;
     if(intersect_shapes) {
-        edge.points.front()=intersect(start,start_shape,edge.points[1],neo,start_outline);
-        edge.points.back()=intersect(end,end_shape,edge.points[edge.points.size()-2],neo,end_outline);
+        edge.points.front()=intersect(start,start_shape,edge.points[1],neo,start_shape_geometry);
+        edge.points.back()=intersect(end,end_shape,edge.points[edge.points.size()-2],neo,end_shape_geometry);
     }
     // The original toCluster branch deliberately starts from the Dagre path.
     if(to_cluster) edge.points=cut_at_cluster(original,*to_cluster);
@@ -65,7 +65,8 @@ void finish_edge(FlowchartPlacedEdge& edge,const FlowchartEdge& source,
 FlowchartScene layout_prepared(const FlowchartInput& source,FlowchartPreparedGraph graph,
     std::span<const FlowchartNodeBox> boxes,std::span<const FlowchartEdgeLabelSize> labels,
     FlowchartMeasurements& measured,const FlowchartSvgTheme& theme,
-    const FlowchartPreparedNode* parent=nullptr,std::vector<RoughFlowchartNode>* rough_nodes=nullptr) {
+    const FlowchartPreparedNode* parent=nullptr,std::vector<RoughFlowchartNode>* rough_nodes=nullptr,
+    FlowchartLocalShapes local_shapes={}) {
     if(parent) {
         for(auto& n:graph.nodes) if(n.data.parent.empty()) n.data.parent=parent->data.id;
         auto container=*parent;container.subgraph.reset();container.data.parent.clear();
@@ -82,7 +83,7 @@ FlowchartScene layout_prepared(const FlowchartInput& source,FlowchartPreparedGra
         if(n.subgraph) {
             auto nested=graph.subgraphs[*n.subgraph];
             nested.node_spacing=graph.node_spacing;nested.rank_spacing=graph.rank_spacing+25;
-            children[i]=layout_prepared(source,std::move(nested),boxes,labels,measured,theme,&n,rough_nodes);
+            children[i]=layout_prepared(source,std::move(nested),boxes,labels,measured,theme,&n,rough_nodes,local_shapes);
             const auto& child=*children[i];
             layout_boxes.push_back({child.max_x-child.min_x,child.max_y-child.min_y});
         } else layout_boxes.push_back(n.source_index?boxes[*n.source_index]:FlowchartNodeBox{0.1,0.1});
@@ -174,13 +175,13 @@ FlowchartScene layout_prepared(const FlowchartInput& source,FlowchartPreparedGra
         const auto& original=source.edges[e.source_index];
         const auto a=ids.at(e.loop_segment==1?original.start:e.data.start);
         const auto b=ids.at(e.loop_segment==1?original.end:e.data.end);
-        const auto outline=[&](std::size_t i) -> const FlowchartNodeBox* {
+        const auto local_shape=[&](std::size_t i) -> const FlowchartLocalShape* {
             const auto index=graph.nodes[i].source_index;
-            return rough_nodes&&index?(*rough_nodes)[*index].outline_box():nullptr;
+            return index?find_local_shape(local_shapes,*index):nullptr;
         };
         finish_edge(edge,original,placed->nodes[a],placed->nodes[b],graph.nodes[a].data.shape,graph.nodes[b].data.shape,
             !children[a]&&!children[b],e.from_cluster.empty()?nullptr:&placed->nodes[ids.at(e.from_cluster)],
-            e.to_cluster.empty()?nullptr:&placed->nodes[ids.at(e.to_cluster)],theme.neo,outline(a),outline(b));
+            e.to_cluster.empty()?nullptr:&placed->nodes[ids.at(e.to_cluster)],theme.neo,local_shape(a),local_shape(b));
     }
     scene.min_x=scene.min_y=std::numeric_limits<double>::infinity();
     scene.max_x=scene.max_y=-std::numeric_limits<double>::infinity();
@@ -198,6 +199,10 @@ FlowchartScene layout_prepared(const FlowchartInput& source,FlowchartPreparedGra
             const auto y=rough.offset.y+(source.nodes[i].group?0:n.y);
             include(x+b.left,y+b.top);
             include(x+b.right,y+b.bottom);
+        } else if(const auto* shape=find_local_shape(local_shapes,i)) {
+            const auto& bounds=shape->paint_bounds;
+            include(n.x+bounds.left,n.y+bounds.top);
+            include(n.x+bounds.right,n.y+bounds.bottom);
         } else include(n.x,n.y,n.width,n.height);
     }
     for(std::size_t i=0;i<result.edges.size();++i) {

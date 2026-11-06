@@ -8,8 +8,6 @@ struct RoughFlowchartLayer {
 struct RoughFlowchartNode : RoughFlowchartLayer {
     std::vector<RoughFlowchartLayer> overlays;
     FlowchartPoint label_offset{};
-    std::optional<FlowchartNodeBox> nominal_outline;
-    const FlowchartNodeBox* outline_box() const {return nominal_outline?&*nominal_outline:nullptr;}
 };
 
 std::string rough_rounded_rect(double x,double y,double width,double height,double radius) {

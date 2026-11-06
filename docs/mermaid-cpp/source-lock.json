@@ -5,6 +5,10 @@
   "license": "MIT",
   "files": [
     {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/person.ts",
+      "sha256": "5f66584f62282841a2de4582d14f2ad109f9e1175e36c25ef3e4f606a2fc2a1a"
+    },
+    {
       "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes.ts",
       "sha256": "078b5361f95a53dbec0ca768772ca21a5afb0997f0757a6aa0af0dd1e6112782"
     },
