@@ -1,6 +1,7 @@
 // Mermaid 12.2.0 Usecase grammar and model projection. MIT; see THIRD_PARTY_NOTICES.md.
 module folia.mermaid.usecase;
 import std;
+import folia.mermaid.number;
 
 namespace folia::mermaid {
 namespace {
@@ -257,6 +258,150 @@ std::vector<Text> styles(View input) {
     return out;
 }
 
+struct JsonValue {
+    enum class Kind { scalar, object, array } kind = Kind::scalar;
+    Text scalar;
+    std::vector<Text> keys;
+    std::vector<JsonValue> values;
+};
+
+bool digit(char16_t ch) { return ch >= u'0' && ch <= u'9'; }
+
+char16_t json_hex(char16_t ch) {
+    if (digit(ch)) return ch - u'0';
+    if (ch >= u'a' && ch <= u'f') return ch - u'a' + 10;
+    if (ch >= u'A' && ch <= u'F') return ch - u'A' + 10;
+    fail("Invalid Use Case JSON escape");
+}
+
+Text json_string(View& input) {
+    if (!input.starts_with(u'"')) fail("Expected Use Case JSON string");
+    input.remove_prefix(1);
+    Text result;
+    while (!input.empty()) {
+        const auto ch = input.front();
+        input.remove_prefix(1);
+        if (ch == u'"') {
+            input = trim(input);
+            return result;
+        }
+        if (ch < 32) fail("Invalid control character in Use Case JSON");
+        if (ch != u'\\') {
+            result += ch;
+            continue;
+        }
+        if (input.empty()) break;
+        const auto escape = input.front();
+        input.remove_prefix(1);
+        switch (escape) {
+        case u'"': case u'\\': case u'/': result += escape; break;
+        case u'b': result += u'\b'; break;
+        case u'f': result += u'\f'; break;
+        case u'n': result += u'\n'; break;
+        case u'r': result += u'\r'; break;
+        case u't': result += u'\t'; break;
+        case u'u': {
+            if (input.size() < 4) fail("Incomplete Use Case JSON escape");
+            char16_t code = 0;
+            for (auto unit : input.substr(0, 4)) code = static_cast<char16_t>(code * 16 + json_hex(unit));
+            result += code;
+            input.remove_prefix(4);
+            break;
+        }
+        default: fail("Invalid Use Case JSON escape");
+        }
+    }
+    fail("Unclosed Use Case JSON string");
+}
+
+Text json_number(View& input) {
+    std::size_t pos = input.starts_with(u'-') ? 1 : 0;
+    const auto digits = [&] {
+        const auto first = pos;
+        while (pos < input.size() && digit(input[pos])) ++pos;
+        if (pos == first) fail("Invalid Use Case JSON number");
+    };
+    if (pos < input.size() && input[pos] == u'0') ++pos;
+    else digits();
+    if (pos < input.size() && input[pos] == u'.') {
+        ++pos;
+        digits();
+    }
+    if (pos < input.size() && (input[pos] == u'e' || input[pos] == u'E')) {
+        ++pos;
+        if (pos < input.size() && (input[pos] == u'+' || input[pos] == u'-')) ++pos;
+        digits();
+    }
+    const auto token = input.substr(0, pos);
+    input = trim(input.substr(pos));
+    const std::string ascii(token.begin(), token.end());
+    double value = 0;
+    const auto [end, error] = std::from_chars(ascii.data(), ascii.data() + ascii.size(), value);
+    if (error == std::errc::result_out_of_range) {
+        const auto exponent = ascii.find_first_of("eE");
+        if (exponent != std::string::npos && ascii[exponent + 1] == '-') return u"0";
+        return token.starts_with(u'-') ? u"-Infinity" : u"Infinity";
+    }
+    if (error != std::errc{} || end != ascii.data() + ascii.size()) fail("Invalid Use Case JSON number");
+    const auto normalized = format_number(value);
+    if (!normalized) fail("Invalid Use Case JSON number");
+    return {normalized->begin(), normalized->end()};
+}
+
+JsonValue json_value(View& input, std::size_t depth = 0) {
+    if (depth == 128) fail("Use Case JSON nesting limit exceeded");
+    if (input.starts_with(u'"')) return {.scalar = json_string(input)};
+    for (const auto scalar : {u"true", u"false", u"null"})
+        if (consume(input, scalar)) return {.scalar = Text(scalar)};
+    if (input.starts_with(u'-') || (!input.empty() && digit(input.front())))
+        return {.scalar = json_number(input)};
+    JsonValue value;
+    const bool object = consume(input, u"{");
+    if (!object && !consume(input, u"[")) fail("Expected Use Case JSON value");
+    const View closing = object ? u"}" : u"]";
+    value.kind = object ? JsonValue::Kind::object : JsonValue::Kind::array;
+    if (consume(input, closing)) return value;
+    do {
+        Text key;
+        if (object) {
+            key = json_string(input);
+            if (!consume(input, u":")) fail("Expected Use Case JSON key separator");
+        }
+        auto child = json_value(input, depth + 1);
+        if (object) {
+            const auto previous = std::ranges::find(value.keys, key);
+            if (previous != value.keys.end()) {
+                value.values[previous - value.keys.begin()] = std::move(child);
+                continue;
+            }
+            value.keys.push_back(std::move(key));
+        }
+        value.values.push_back(std::move(child));
+    } while (consume(input, u","));
+    if (!consume(input, closing)) fail("Unclosed Use Case JSON collection");
+    return value;
+}
+
+void flatten_json(const JsonValue& value, const Text& key, std::vector<UsecaseNode::JsonRow>& rows) {
+    using Kind = JsonValue::Kind;
+    if (value.kind == Kind::scalar) rows.push_back({key, value.scalar});
+    else if (value.values.empty()) rows.push_back({key, value.kind == Kind::object ? u"{}" : u"[]"});
+    else if (value.kind == Kind::object) {
+        for (std::size_t i = 0; i < value.keys.size(); ++i)
+            flatten_json(value.values[i], key.empty() ? value.keys[i] : key + u"." + value.keys[i], rows);
+    } else if (std::ranges::all_of(value.values, [](const JsonValue& item) {
+        return item.kind == Kind::scalar;
+    })) {
+        for (std::size_t i = 0; i < value.values.size(); ++i)
+            rows.push_back({i ? Text{} : key, value.values[i].scalar});
+    } else {
+        for (std::size_t i = 0; i < value.values.size(); ++i) {
+            const auto index = std::to_string(i);
+            flatten_json(value.values[i], key + u"[" + Text(index.begin(), index.end()) + u"]", rows);
+        }
+    }
+}
+
 struct Parser {
     UsecaseDocument document;
     std::map<Text, std::size_t, std::less<>> node_index, edge_index;
@@ -378,6 +523,19 @@ struct Parser {
                 notes.push_back({std::move(target), std::move(label)});
                 return;
             }
+            if (keyword(input, u"json")) {
+                Text id(take_id(input));
+                if (!consume(input, u"@") || !input.starts_with(u'{'))
+                    fail("Expected Use Case JSON object");
+                auto value = json_value(input);
+                Endpoint item{.node = {.id = id, .label = id, .kind = UsecaseNodeKind::json,
+                    .shape = UsecaseShape::rectangle}, .explicit_declaration = true};
+                if (consume(input, u":::")) item.node.classes = take_ids(input);
+                if (!input.empty()) fail("Unexpected text after Use Case JSON");
+                flatten_json(value, {}, item.node.json_rows);
+                remember(std::move(item), true);
+                return;
+            }
             if (keyword(input, u"classDef")) {
                 auto ids = take_ids(input);
                 const auto values = styles(input);
@@ -399,7 +557,7 @@ struct Parser {
         }
         const bool actor = keyword(input, u"actor");
         auto item = endpoint(input, actor ? UsecaseNodeKind::actor : UsecaseNodeKind::usecase);
-        if (actor && input.starts_with(u',')) {
+        if (actor && consume(input, u",")) {
             remember(std::move(item), true);
             do remember(endpoint(input, UsecaseNodeKind::actor), true); while (consume(input, u","));
             if (!input.empty()) fail("Unexpected text after Use Case actor list");
@@ -456,13 +614,18 @@ struct Parser {
                 fail("Use Case dependency requires two use cases");
             if (edge.kind == UsecaseRelationship::generalization && from != to)
                 fail("Use Case generalization requires like endpoints");
+            if ((from == UsecaseNodeKind::json || to == UsecaseNodeKind::json) &&
+                (edge.kind != UsecaseRelationship::association ||
+                 (edge.arrow != UsecaseArrow::none && edge.arrow != UsecaseArrow::point)))
+                fail("Use Case JSON supports only solid point and markerless associations");
             if (node_index.contains(edge.id) && !edge.id.starts_with(u"edge-"))
                 fail("Duplicate Use Case declaration and edge id");
         }
         std::size_t note_sequence = 0;
         for (auto& note : notes) {
             const auto target = node_index.find(note.target);
-            if (target == node_index.end() || document.nodes[target->second].kind == UsecaseNodeKind::boundary)
+            if (target == node_index.end() || (document.nodes[target->second].kind != UsecaseNodeKind::actor &&
+                                              document.nodes[target->second].kind != UsecaseNodeKind::usecase))
                 fail("Unknown Use Case note target");
             const auto sequence = std::to_string(note_sequence++);
             const auto id = u"note-" + Text(sequence.begin(), sequence.end());
@@ -477,9 +640,18 @@ struct Parser {
 
 std::size_t statement_end(View source, std::size_t start) {
     std::size_t braces = 0;
+    const auto prefix = trim(source.substr(start));
+    const bool json = prefix.starts_with(u"json ") || prefix.starts_with(u"json\t");
     for (auto i = start; i < source.size(); ++i) {
         const auto ch = source[i];
         if (ch == u'"' || ch == u'\'') {
+            if (json && braces && ch == u'"') {
+                while (++i < source.size() && source[i] != u'"') {
+                    if (source[i] == u'\\' && i + 1 < source.size()) ++i;
+                    else if (source[i] == u'\n' || source[i] == u'\r') fail("Unclosed Use Case JSON string");
+                }
+                continue;
+            }
             if (source.substr(i).starts_with(u"\"`")) {
                 const auto end = source.find(u"`\"", i + 2);
                 if (end == View::npos) fail("Unclosed Use Case Markdown label");
@@ -492,7 +664,8 @@ std::size_t statement_end(View source, std::size_t start) {
                 continue;
             }
         }
-        if (ch == u'{' && (braces || (i > start && source[i - 1] == u'@') ||
+        if (ch == u'{' && (braces || (json && trim(source.substr(start, i - start)).ends_with(u'@')) ||
+                           (i > start && source[i - 1] == u'@') ||
                            trim(source.substr(start, i - start)) == u"accDescr")) ++braces;
         if (ch == u'}' && braces) --braces;
         if (ch == u'\n' && !braces) return i;

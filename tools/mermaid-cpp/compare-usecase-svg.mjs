@@ -57,15 +57,20 @@ try {
       assert.equal(a.id, e.id, `${key}.id`);
       assert.equal(a.shape, e.shape, `${key}.shape`);
       box(a.box, e.box, key);
+      assert.deepEqual(a.paint, e.paint, `${key}.paint`);
     });
     items(actual.boundaries, expected.boundaries, `${name}.boundaries`, (a, e, key) => {
       assert.equal(a.id, e.id, `${key}.id`);
       box(a.box, e.box, key);
-      items(a.parts, e.parts, `${key}.parts`, box);
+      items(a.parts, e.parts, `${key}.parts`, (part, reference, partKey) => {
+        box(part.box, reference.box, partKey);
+        assert.deepEqual(part.paint, reference.paint, `${partKey}.paint`);
+      });
     });
     items(actual.edges, expected.edges, `${name}.edges`, (a, e, key) => {
       assert.equal(a.stroke, e.stroke, `${key}.stroke`);
-      assert.equal(a.dash, e.dash, `${key}.dash`);
+      items(a.dash.match(numbers)?.map(Number) ?? [], e.dash.match(numbers)?.map(Number) ?? [],
+        `${key}.dash`, numeric);
       path(a.d, e.d, key);
       for (const side of ['markerStart', 'markerEnd']) {
         assert.equal(!!a[side], !!e[side], `${key}.${side}`);

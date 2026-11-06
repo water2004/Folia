@@ -14,15 +14,17 @@ struct UsecaseRenderTheme {
     std::string include_line = "#333333", extend_line = "#333333";
     std::string boundary_fill = "#ffffde", boundary_border = "#aaaa33", boundary_text = "#333333";
     std::string note_fill = "#fff5ad", note_border = "#aaaa33", note_text = "#333333";
+    std::string drop_shadow;
+    std::vector<std::string> palette_fill, palette_border;
     unsigned actor_weight = 400, usecase_weight = 400;
-    double diagram_font_size = 16;
+    double diagram_font_size = 16, neo_actor_path_width = 1;
 };
 struct UsecaseRenderInput {
     UsecaseDocument document;
     UsecaseRenderTheme theme;
     double node_spacing=50,rank_spacing=50,diagram_padding=20,min_node_width=120, wrapping_width=120;
     double group_title_top = 0, group_title_bottom = 0;
-    bool elk = true, neo = false, use_max_width = true;
+    bool elk = true, neo = false, use_max_width = true, dark = false, rotate_colors = false;
 };
 struct UsecaseSvg { std::string svg; double width=0,height=0; };
 using UsecaseTextMeasure = std::function<std::expected<SvgTextMetrics, std::string>(
