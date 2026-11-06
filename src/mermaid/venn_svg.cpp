@@ -2,6 +2,7 @@ module folia.mermaid.venn_svg;
 import std;
 import folia.mermaid.venn_layout;
 import folia.mermaid.number;
+import folia.mermaid.rough_hachure;
 import folia.mermaid.svg_text;
 import folia.mermaid.theme_color;
 
@@ -64,6 +65,40 @@ std::string region_path(const VennRegion& region) {
         path += " A " + r + " " + r + " 0 " + (arc.large ? "1" : "0") + " 1 " + point(arc.end);
     }
     return path;
+}
+std::vector<RoughArc> region_rough_arcs(const VennRegion& region) {
+    auto point = [](VennPoint p) { return RoughPoint{p.x, p.y}; };
+    if (region.arcs.size() == 1) {
+        const auto& circle = region.arcs.front().circle;
+        const auto r = circle.radius;
+        const RoughPoint left{circle.center.x - r, circle.center.y};
+        const RoughPoint right{left.x + 2 * r, left.y};
+        return {{left, right, r, true, false}, {right, {right.x - 2 * r, right.y}, r, true, false}};
+    }
+    std::vector<RoughArc> arcs;
+    if (!region.arcs.empty()) {
+        auto start = point(region.arcs.front().start);
+        for (const auto& arc : region.arcs) {
+            const auto end = point(arc.end);
+            arcs.push_back({start, end, arc.circle.radius, arc.large, true});
+            start = end;
+        }
+    }
+    return arcs;
+}
+void draw_hatch(std::string& svg, std::string_view path, View color, double transparency) {
+    svg += "<path d=\"" + std::string(path) + "\"" +
+        attr("stroke", theme_detail::color_adjust(color, {{'a', -transparency}})) +
+        " stroke-width=\"2\" fill=\"none\"/>";
+}
+std::string hand_drawn_stroke_width(View width, double fallback) {
+    if (width.empty()) return attr("stroke-width", fallback);
+    if (width.starts_with(u"+")) width.remove_prefix(1);
+    const std::string ascii(width.begin(), width.end());
+    double parsed;
+    const auto result = std::from_chars(ascii.data(), ascii.data() + ascii.size(), parsed);
+    if (result.ec == std::errc{} && std::isfinite(parsed) && parsed >= 0) return attr("stroke-width", parsed);
+    return {};
 }
 std::u16string text_color(View base, bool dark) {
     try {
@@ -141,10 +176,13 @@ std::expected<VennRenderInput, std::string> prepare_venn_render(const PreparedDi
     if (!document) return std::unexpected(document.error());
     if (document->title.empty() && prepared.title) document->title = *prepared.title;
     const auto& config = prepared.effective_config;
-    if (config_string(config, u"look") == u"handDrawn") {
-        return std::unexpected("Venn hand-drawn look is unsupported");
-    }
     VennRenderInput input;
+    input.hand_drawn = config_string(config, u"look") == u"handDrawn";
+    if (const auto seed = config.find(u"handDrawnSeed");
+        seed && seed->kind == ConfigKind::number && std::isfinite(seed->number)) {
+        const auto wrapped = std::fmod(std::trunc(seed->number), 4294967296.0);
+        input.hand_drawn_seed = static_cast<std::uint32_t>(wrapped < 0 ? wrapped + 4294967296.0 : wrapped);
+    }
     input.document = std::move(*document);
     if (const auto cfg = config.find(u"venn")) {
         for (const auto& [key, target] : {
@@ -169,6 +207,7 @@ std::expected<VennRenderInput, std::string> prepare_venn_render(const PreparedDi
         theme.intersection_text = config_string(*vars, u"vennSetTextColor",
             config_string(*vars, u"primaryTextColor", config_string(*vars, u"textColor")));
         theme.title = config_string(*vars, u"vennTitleTextColor", config_string(*vars, u"titleColor"));
+        theme.root_fill = config_string(*vars, u"textColor");
         for (char16_t digit = u'1'; digit <= u'8'; ++digit) {
             auto color = config_string(*vars, std::u16string(u"venn") + digit);
             if (!color.empty()) theme.palette.push_back(std::move(color));
@@ -190,9 +229,20 @@ std::expected<VennSvg, std::string> render_venn_svg(const VennRenderInput& input
     const auto height = input.height - title_height;
     auto regions = layout_venn(document, input.width, height, 15);
     if (!regions) return std::unexpected(regions.error());
+    const auto has_zero_set = std::ranges::any_of(document.areas, [](const auto& area) {
+        return area.sets.size() == 1 && area.size == 0;
+    });
+    std::optional<std::vector<VennRegion>> alternate_layout;
+    if ((input.hand_drawn || !document.texts.empty()) && (input.padding != 15 || has_zero_set)) {
+        auto layout = layout_venn(document, input.width, height, input.padding, true);
+        if (!layout) return std::unexpected(layout.error());
+        alternate_layout = std::move(*layout);
+    }
+    const auto& layout = alternate_layout ? *alternate_layout : *regions;
     try {
         std::string svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 " +
             number(input.width) + " " + number(input.height) + "\"" + attr("font-family", theme.font_family);
+        if (!theme.root_fill.empty()) svg += attr("fill", theme.root_fill);
         if (input.use_max_width)
             svg += " width=\"100%\" style=\"max-width: " + number(input.width) + "px;\"";
         else svg += attr("width", input.width) + attr("height", input.height);
@@ -217,24 +267,46 @@ std::expected<VennSvg, std::string> render_venn_svg(const VennRenderInput& input
             const auto classes = singleton ? "venn-circle venn-set-" + std::to_string(circle_index % 8)
                                            : std::string("venn-intersection");
             svg += "<g class=\"venn-area " + classes + "\"" + attr("data-venn-sets", key) + ">";
-            svg += "<path d=\"" + region_path(region) + "\"";
             auto label_paint = theme.intersection_text;
             if (singleton) {
                 const auto palette = theme.palette.empty() ? View(theme.primary)
                     : View(theme.palette[circle_index % theme.palette.size()]);
                 const auto fill = style(paint, u"fill", palette);
+                const auto stroke = style(paint, u"stroke", fill);
                 const auto stroke_width = style(paint, u"stroke-width");
-                svg += attr("fill", fill) + attr("fill-opacity", style(paint, u"fill-opacity", u"0.1")) +
-                    attr("stroke", style(paint, u"stroke", fill)) + " stroke-opacity=\"0.95\"";
-                svg += stroke_width.empty() ? attr("stroke-width", 5 * scale) : attr("stroke-width", stroke_width);
+                if (input.hand_drawn) {
+                    const auto area = std::ranges::find_if(layout, [&](const auto& r) { return r.data.sets == sets; });
+                    const auto& circle = area->circles.front();
+                    const auto diameter = 2 * circle.radius;
+                    auto paths = rough_ellipse_hachure({circle.center.x, circle.center.y}, diameter, diameter,
+                        -41 + static_cast<double>(circle_index) * 60, input.hand_drawn_seed);
+                    svg += "<g>";
+                    draw_hatch(svg, paths.fill_path, fill, 0.7);
+                    if (stroke != u"none")
+                        svg += "<path d=\"" + paths.stroke_path + "\"" + attr("stroke", stroke) +
+                            hand_drawn_stroke_width(stroke_width, 5 * scale) + " fill=\"none\"/>";
+                    svg += "</g>";
+                } else {
+                    svg += "<path d=\"" + region_path(region) + "\"" + attr("fill", fill) +
+                        attr("fill-opacity", style(paint, u"fill-opacity", u"0.1")) +
+                        attr("stroke", stroke) + " stroke-opacity=\"0.95\"";
+                    svg += stroke_width.empty() ? attr("stroke-width", 5 * scale) : attr("stroke-width", stroke_width);
+                    svg += "/>";
+                }
                 label_paint = text_color(fill, theme.dark);
                 ++circle_index;
             } else {
                 auto fill = style(paint, u"fill");
-                svg += attr("fill", fill.empty() ? u"transparent" : fill) +
-                    attr("fill-opacity", fill.empty() ? 0 : 1);
+                if (input.hand_drawn && !fill.empty()) {
+                    svg += "<g>";
+                    draw_hatch(svg, rough_arc_cross_hatch(region_rough_arcs(region), input.hand_drawn_seed), fill, 0.3);
+                    svg += "</g>";
+                } else {
+                    svg += "<path d=\"" + region_path(region) + "\"";
+                    if (!input.hand_drawn) svg += attr("fill", fill.empty() ? u"transparent" : fill);
+                    svg += attr("fill-opacity", fill.empty() ? 0 : 1) + "/>";
+                }
             }
-            svg += "/>";
             const auto x = attr("x", std::floor(region.label.x)), y = attr("y", std::floor(region.label.y));
             const View label = region.data.label.empty() && singleton ? View(sets.front()) : View(region.data.label);
             // Mermaid invokes Venn.js on a detached SVG, where its wrapping
@@ -244,13 +316,7 @@ std::expected<VennSvg, std::string> render_venn_svg(const VennRenderInput& input
                 attr("font-size", 48 * scale) + attr("fill", style(paint, u"color", label_paint)) +
                 "><tspan dy=\"0.35em\"" + x + y + ">" + xml(label) + "</tspan></text></g>";
         }
-        if (!document.texts.empty() && input.padding != 15) {
-            auto text_layout = layout_venn(document, input.width, height, input.padding);
-            if (!text_layout) return std::unexpected(text_layout.error());
-            draw_text_nodes(svg, input, scale, *text_layout);
-        } else {
-            draw_text_nodes(svg, input, scale, *regions);
-        }
+        draw_text_nodes(svg, input, scale, layout);
         svg += "</g></svg>";
         return VennSvg{std::move(svg), input.width, input.height};
     } catch (const std::runtime_error& error) {

@@ -21,8 +21,21 @@ suite mermaid_venn = [] {
                 u"  text first[First item]\n  text second[Second item]\nset B[Two]\n"
                 u"union A,B[Both]\ntext B,A item[Shared item]\nstyle item color:#ee6655"},
             {"disjoint", u"venn-beta\nset A: 14\nset B: 8\nset C: 5"},
+            {"four", u"venn-beta\nset A: 12\nset B: 11\nset C: 9\nset D: 8\nunion A,B,C,D[Shared]"},
+            {"four-mds", u"venn-beta\nset A: 15\nset B: 12\nset C: 11\nset D: 9\n"
+                u"union A,B: 7\nunion A,C: 5\nunion A,D: 4\nunion B,C: 1\nunion B,D: 2\nunion C,D: 3"},
+            {"five-disjoint", u"venn-beta\nset A: 15\nset B: 13\nset C: 10\nset D: 8\nset E: 6"},
+            {"contained", u"venn-beta\nset A: 18\nset B: 9\nset C: 9\nunion A,B: 9\nunion A,C: 9\nunion B,C: 9"},
+            {"empty-set", u"venn-beta\nset A: 12\nset B: 0\nset C: 9\nunion A,B,C\ntext B item[Zero]"},
+            {"hand-drawn", u"---\nconfig:\n  look: handDrawn\n  handDrawnSeed: 1\n---\n"
+                u"venn-beta\ntitle Sketch\nset A[Alpha]\nset B[Beta]\nunion A,B[Both]"},
+            {"hand-drawn-styled", u"---\nconfig:\n  look: handDrawn\n  handDrawnSeed: 9\n"
+                u"  venn:\n    padding: 23\n---\nvenn-beta\nset A\n  text first[First]\nset B\n"
+                u"union A,B[Both]\nstyle A fill:#ff6b6b,stroke:#704040,stroke-width:\"4px\"\n"
+                u"style B fill:#4ecdc4\nstyle A,B fill:#ffe66d"},
         };
-        for (const auto theme : {u"default", u"dark"}) {
+        for (const auto& [theme, suffix] : {std::pair{u"default", "default"}, {u"dark", "dark"},
+            {u"redux-color", "redux-color"}, {u"redux-dark-color", "redux-dark-color"}}) {
             auto session = ConfigSession::create();
             expect(fatal(session.has_value()));
             ConfigValue site{.kind=ConfigKind::mapping};
@@ -33,6 +46,7 @@ suite mermaid_venn = [] {
             expect(fatal(session->save_initialize_config(site).has_value()));
             expect(fatal(session->set_site_config(site).has_value()));
             for (const auto& [name, source] : cases) {
+                if (std::u16string_view(theme).starts_with(u"redux") && name != "styled") continue;
                 auto result = render_mermaid(source, *session);
                 expect(result.has_value()) << name << (result ? "" : result.error());
                 if (!result) continue;
@@ -40,7 +54,6 @@ suite mermaid_venn = [] {
                 expect(result->height == (name == "text" ? 420.0 : 450.0));
                 if (auto directory = std::getenv("FOLIA_MERMAID_SVG_OUTPUT")) {
                     std::filesystem::create_directories(directory);
-                    const auto suffix = theme == std::u16string_view(u"dark") ? "dark" : "default";
                     std::ofstream output(std::filesystem::path(directory) /
                         ("venn-" + name + "-" + suffix + ".svg"), std::ios::binary);
                     output << result->svg;

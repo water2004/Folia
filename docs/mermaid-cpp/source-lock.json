@@ -2603,6 +2603,30 @@
       }
     ]
   },
+  "roughHachure": {
+    "package": "roughjs",
+    "version": "4.6.6",
+    "bundle": {
+      "path": "../../../../../node_modules/.pnpm/roughjs@4.6.6_patch_hash=3543d47108cb41b68ec6a671c0e1f9d0cfe2ce524fea5b0992511ae84c3c6b64/node_modules/roughjs/bundled/rough.esm.js",
+      "sourceMap": "chunk-AWAWVJFC.mjs.map",
+      "sha256": "e921535f216ebc93d422489d614da955b5286812220b3149fc70978f4cb5bd45"
+    },
+    "files": [
+      {"path": "bin/generator.js", "sha256": "1de29118bfee391c75c3bbf1601fde1d734d506202495b0309782ce1c65720f5"},
+      {"path": "bin/renderer.js", "sha256": "51966b08ec58bea880cc6895ae17f4d7d72006b4d65a87aefb31867ce31ca8fe"},
+      {"path": "bin/svg.js", "sha256": "cb31a0a466b4ae7768351cae2cc9ca70d8f63b320e53c43f143cc88994d457fc"},
+      {"path": "bin/math.js", "sha256": "edc4fa1aeddfe0bbc8841853373727722d290a7e5f09cfbcd8d2b81e9949c0ec"},
+      {"path": "bin/fillers/scan-line-hachure.js", "sha256": "fb81b8eeccea1f677148887cfa7ddf47c720d783b8433d2eb4a1fe7d5cac37bc"},
+      {"path": "bin/fillers/hachure-filler.js", "sha256": "ad724f7df79a34d491e9718f30fa781241f05ad75400845a196c96d2d21fcc70"},
+      {"path": "bin/fillers/hatch-filler.js", "sha256": "e66b8fee33b634fb87ffff83aed30fb6044fd45eeea052256671e6200427a9a3"}
+    ],
+    "dependencies": [
+      {"package": "hachure-fill", "version": "0.5.2", "path": "bin/hachure.js", "sha256": "4d3058129a1e2b37496a8efa5e29bbd480a0242871a5a651b19779e1da3f1032"},
+      {"package": "path-data-parser", "version": "0.1.0", "path": "src/normalize.ts", "sha256": "59d4519dd3d007577905608f38917856354076a625ad8332efb1068c22ba5dc2"},
+      {"package": "points-on-curve", "version": "0.2.0", "path": "src/index.ts", "sha256": "eb494439d7322be3624e1f6ef090c5a56b95714ad89f35a61a4d79b16b3a07b2"},
+      {"package": "points-on-path", "version": "0.2.1", "path": "src/index.ts", "sha256": "8e9161333a8b3bc7484c91bd332416a28f8611cb933bdd0e38dead36c95b155d"}
+    ]
+  },
   "vennLayout": {
     "package": "@upsetjs/venn.js",
     "version": "2.0.0",

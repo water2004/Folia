@@ -24,23 +24,25 @@ export function inspectVenn(root = document) {
       baseline: css.dominantBaseline,
     };
   };
-  const regions = [...svg.querySelectorAll('.venn-area')].map(region => {
-    const path = region.querySelector('path');
+  const pathInfo = path => {
     const css = getComputedStyle(path);
     const length = path.getTotalLength();
     const transform = matrix(path);
-    const samples = Array.from({length: 128}, (_, i) => {
+    const samples = Array.from({length: length ? 128 : 0}, (_, i) => {
       const p = path.getPointAtLength(length * i / 128).matrixTransform(transform);
       return [p.x, p.y];
     });
     return {
-      sets: region.getAttribute('data-venn-sets'), classes: region.getAttribute('class'),
       box: box(path), length, samples,
       fill: css.fill, fillOpacity: css.fillOpacity, stroke: css.stroke,
       strokeWidth: css.strokeWidth, strokeOpacity: css.strokeOpacity,
-      label: label(region.querySelector('text')),
     };
-  });
+  };
+  const regions = [...svg.querySelectorAll('.venn-area')].map(region => ({
+    sets: region.getAttribute('data-venn-sets'), classes: region.getAttribute('class'),
+    paths: [...region.querySelectorAll('path')].map(pathInfo),
+    label: label(region.querySelector('text')),
+  }));
   const title = svg.querySelector('.venn-title');
   const textNodes = [...svg.querySelectorAll('.venn-text-node-fo')].map(element => ({
     box: box(element), text: element.textContent, color: getComputedStyle(element.firstChild).color,
@@ -58,7 +60,7 @@ export const edge = process.env.FOLIA_BROWSER
   ?? 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe';
 
 function verifyLayout(mermaidFile) {
-  const {vennLayout: lock} = JSON.parse(readFileSync('docs/mermaid-cpp/source-lock.json', 'utf8'));
+  const {vennLayout: lock, stateBundle} = JSON.parse(readFileSync('docs/mermaid-cpp/source-lock.json', 'utf8'));
   const fromMermaid = createRequire(realpathSync(mermaidFile));
   // This package has no package.json export and its require export targets an
   // absent file. Search Node's module directories from Mermaid's real path.
@@ -72,6 +74,10 @@ function verifyLayout(mermaidFile) {
     const bytes = readFileSync(resolve(dirname(packageFile), path));
     assert.equal(createHash('sha256').update(bytes).digest('hex'), sha256, path);
   }
+  const {path, sourceMap, sha256} = stateBundle.files.find(file => file.path.endsWith('/rough.esm.js'));
+  const map = JSON.parse(readFileSync(resolve(dirname(mermaidFile), 'chunks/mermaid.esm', sourceMap), 'utf8'));
+  const source = map.sourcesContent[map.sources.indexOf(path)];
+  assert.equal(createHash('sha256').update(source).digest('hex'), sha256, path);
 }
 
 if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url) {
@@ -97,10 +103,32 @@ if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.m
     await page.evaluate('globalThis.inspectVenn = ' + inspectVenn.toString());
     rows = await page.evaluate(async ({cases, invalid}) => {
       const rows = [];
-      for (const theme of ['default', 'dark']) {
+      for (const theme of ['default', 'dark', 'redux-color', 'redux-dark-color']) {
         mermaid.initialize({startOnLoad: false, fontFamily: 'Arial', look: 'classic', theme});
         for (const [name, source] of cases) {
-          const {svg} = await mermaid.render('venn' + rows.length, source);
+          if (theme.startsWith('redux') && name !== 'styled') continue;
+          const random = Math.random;
+          const sets = name === 'four' || name === 'four-mds' ? 4 : name === 'five-disjoint' ? 5 : 0;
+          let count = 0;
+          let state = 1;
+          if (sets) {
+            Math.random = () => {
+              // Venn.js uses 10 starts of two coordinates per set, and
+              // Mermaid calls the optimizer twice. Replay the native stream.
+              if (count++ % (20 * sets) === 0) state = 1;
+              state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+              return state / 4294967296;
+            };
+          }
+          let svg;
+          try {
+            ({svg} = await mermaid.render('venn' + rows.length, source));
+          } finally {
+            Math.random = random;
+          }
+          if (sets && count !== 40 * sets) {
+            throw new Error('Unexpected Venn layout random draw count for ' + name + ': ' + count);
+          }
           const host = document.createElement('div');
           host.innerHTML = svg;
           document.body.append(host);
@@ -116,7 +144,7 @@ if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.m
   } finally {
     await browser.close();
   }
-  assert.equal(rows.length, cases.length * 2);
+  assert.equal(rows.length, cases.length * 2 + 2);
   writeFileSync(resolve(directory, 'original.json'), JSON.stringify(rows, null, 2));
   for (const row of rows) writeFileSync(resolve(directory, row.name + '.svg'), row.svg);
   console.log('Captured ' + rows.length + ' Mermaid 12.2.0 Venn SVGs in ' + directory);

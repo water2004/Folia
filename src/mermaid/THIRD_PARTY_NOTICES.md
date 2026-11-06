@@ -114,7 +114,10 @@ Gantt civil-date parsing, ISO week calculation, and duration arithmetic (`src/ga
 
 ## 12. RoughJS 4.6.6
 
-Hand-drawn/rough path helpers referenced by upstream Mermaid rendering utilities are covered by the MIT License in [`ROUGHJS-LICENSE`](ROUGHJS-LICENSE).
+Hand-drawn path helpers follow RoughJS 4.6.6. The ellipse and hatch primitives
+(`rough_hachure.{ixx,cpp}`) also follow the bundled `hachure-fill` 0.5.2,
+`path-data-parser` 0.1.0, `points-on-curve` 0.2.0, and `points-on-path` 0.2.1.
+All are covered by the MIT License in [`ROUGHJS-LICENSE`](ROUGHJS-LICENSE).
 
 ---
 
