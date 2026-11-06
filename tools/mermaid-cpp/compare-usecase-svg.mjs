@@ -46,6 +46,14 @@ try {
   for (const { svg, name, ...expected } of original) {
     if (!svg) continue;
     const native = readFileSync(resolve(nativeDirectory, `usecase-${name}.svg`), 'utf8');
+    assert(!native.includes('<foreignObject'), `${name}: labels must survive SVG normalization`);
+    if (expected.labels.some(label => label.glyphBox === undefined)) {
+      const glyphBoxes = await page.evaluate((source) => {
+        document.body.innerHTML = source;
+        return inspectUsecase().labels.map(label => label.glyphBox);
+      }, svg);
+      expected.labels.forEach((label, i) => { label.glyphBox = glyphBoxes[i]; });
+    }
     const actual = await page.evaluate((source) => {
       document.body.innerHTML = source;
       return inspectUsecase();
@@ -56,8 +64,13 @@ try {
       assert.equal(a.size, e.size, `${key}.size`);
       assert.equal(a.fill, e.fill, `${key}.fill`);
       box(a.box, e.box, key);
+      if (e.glyphBox) {
+        assert(a.glyphBox, `${key}: missing painted glyph box`);
+        box(a.glyphBox, e.glyphBox, `${key}.glyphBox`);
+      }
       if (name.startsWith('rich-')) {
-        assert.equal(a.tag, e.tag, `${key}.tag`);
+        assert.equal(a.tag, 'text', `${key}.tag`);
+        assert.equal(a.portable, e.tag === 'foreignObject', `${key}.layout mode`);
         assert.deepEqual(a.runs, e.runs, `${key}.runs`);
       }
     });

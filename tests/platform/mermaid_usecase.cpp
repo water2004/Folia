@@ -21,7 +21,9 @@ suite mermaid_usecase=[] {
    {"rich-svg-labels",u"---\nconfig:\n  htmlLabels: false\n---\nusecase-beta\nactor Clerk(\"`*Clerk* good`\")\nA(\"`**Approve**\n_payment_`\")\nB(\"**Literal**\")\nClerk -- \"`opens **form**`\" --> A\nA --> B\nnote for A \"`**Pending** review`\"\n"}
   };
   for(const auto theme:{u"default",u"dark"}) {auto session=ConfigSession::create();expect(fatal(session.has_value()));ConfigValue site;site.kind=ConfigKind::mapping;for(auto [key,value]:{std::pair{u"theme",theme},std::pair{u"fontFamily",u"Arial"},std::pair{u"look",u"classic"},std::pair{u"layout",u"dagre"}})site.mapping.emplace(key,ConfigValue{.kind=ConfigKind::string,.string=value});expect(fatal(session->save_initialize_config(site).has_value()));expect(fatal(session->set_site_config(site).has_value()));
-   for(const auto& [name,source]:cases){auto result=render_mermaid(source,*session);expect(result.has_value())<<name<<(result?"":result.error());if(!result)continue;expect(result->width>0&&result->height>0);if(auto directory=std::getenv("FOLIA_MERMAID_SVG_OUTPUT")){std::filesystem::create_directories(directory);auto suffix=theme==std::u16string_view(u"dark")?"dark":"default";std::ofstream output(std::filesystem::path(directory)/("usecase-"+name+"-"+suffix+".svg"),std::ios::binary);output<<result->svg;expect(output.good());}}
+   for(const auto& [name,source]:cases){auto result=render_mermaid(source,*session);expect(result.has_value())<<name<<(result?"":result.error());if(!result)continue;expect(result->width>0&&result->height>0);
+    expect(result->svg.contains("<text") && !result->svg.contains("<foreignObject"));
+    if(auto directory=std::getenv("FOLIA_MERMAID_SVG_OUTPUT")){std::filesystem::create_directories(directory);auto suffix=theme==std::u16string_view(u"dark")?"dark":"default";std::ofstream output(std::filesystem::path(directory)/("usecase-"+name+"-"+suffix+".svg"),std::ios::binary);output<<result->svg;expect(output.good());}}
    expect(!render_mermaid(u"usecase-beta\njson Record @{ \"a\": [1,] }\n",*session));
   }
  };

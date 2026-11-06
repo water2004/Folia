@@ -87,7 +87,8 @@ struct Label {
     std::vector<std::u16string> lines;
     std::vector<FlowchartLabelLine> runs;
     std::u16string family;
-    double size = 0, width = 0, height = 0, baseline = 0, line_step = 0, glyph_width = 0, glyph_top = 0;
+    double size = 0, width = 0, height = 0, baseline = 0, line_step = 0;
+    double glyph_width = 0, glyph_top = 0, font_height = 0;
     unsigned weight = 400;
     bool html = true;
 };
@@ -289,6 +290,7 @@ std::expected<Label, std::string> measure_label(const UsecaseTextMeasure& measur
     // by the platform and rounded to the browser's 1/64 px layout grid.
     out.glyph_width = out.width;
     out.glyph_top = size - out.baseline;
+    out.font_height = glyph_height;
     out.width = std::max(minimum_width, std::round(out.width * 64) / 64 + 2 * padding);
     out.height = html ? out.lines.size() * out.line_step :
         glyph_height + (out.lines.size() - 1) * out.line_step + 2 * padding;
@@ -330,25 +332,30 @@ void paint_label(std::string& svg, const Label& label, FlowchartPoint center,
         svg += "</text>";
         return;
     }
-    svg += "<foreignObject x=\"" + n(center.x - label.width / 2) +
-        "\" y=\"" + n(center.y - label.height / 2) + "\" width=\"" + n(label.width) +
-        "\" height=\"" + n(label.height) + "\"><div xmlns=\"http://www.w3.org/1999/xhtml\""
-        " style=\"text-align:center;white-space:nowrap;line-height:1.5;font-family:" +
-        attribute(family) + ";font-size:" + n(size) + "px;font-weight:" + std::to_string(weight) +
-        ";color:" + std::string(color);
-    if (!background.empty()) svg += ";background-color:" + std::string(background);
-    svg += "\"><span class=\"" + std::string(css_class) + "\">";
-    for (std::size_t i = 0; i < label.runs.size(); ++i) {
-        if (i) svg += "<br/>";
-        for (const auto& run : label.runs[i]) {
-            if (run.strong) svg += "<strong>";
-            if (run.emphasis) svg += "<em>";
-            svg += esc(run.text);
-            if (run.emphasis) svg += "</em>";
-            if (run.strong) svg += "</strong>";
-        }
+    const auto top = center.y - label.height / 2;
+    const auto left = center.x - label.width / 2;
+    const auto baseline = top + label.baseline + (label.line_step - label.font_height) / 2;
+    if (!background.empty()) {
+        svg += "<rect class=\"background\" x=\"" + n(left) + "\" y=\"" + n(top) +
+            "\" width=\"" + n(label.width) + "\" height=\"" + n(label.height) +
+            "\" fill=\"" + std::string(background) + "\"/>";
     }
-    svg += "</span></div></foreignObject>";
+    svg += "<text xml:space=\"preserve\" class=\"" + std::string(css_class) +
+        "\" font-family=\"" + attribute(family) + "\" font-size=\"" + n(size) +
+        "\" font-weight=\"" + std::to_string(weight) + "\" fill=\"" + std::string(color) +
+        "\" text-anchor=\"middle\" data-label-box=\"" + n(left) + " " + n(top) + " " +
+        n(label.width) + " " + n(label.height) + "\">";
+    const auto strong = weight < 350 ? 400u : weight < 550 ? 700u : 900u;
+    for (std::size_t i = 0; i < label.runs.size(); ++i) {
+        svg += "<tspan x=\"" + n(center.x) + "\" y=\"" + n(baseline + i * label.line_step) + "\">";
+        for (const auto& run : label.runs[i]) {
+            svg += "<tspan font-weight=\"" + std::to_string(run.strong ? strong : weight) +
+                "\" font-style=\"" + std::string(run.emphasis ? "italic" : "normal") + "\">" +
+                esc(run.text) + "</tspan>";
+        }
+        svg += "</tspan>";
+    }
+    svg += "</text>";
 }
 
 struct JsonTable {

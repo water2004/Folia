@@ -8,7 +8,7 @@ export const edge=process.env.FOLIA_BROWSER??'C:/Program Files (x86)/Microsoft/E
 
 export function inspectUsecase(){
  const svg=document.querySelector('svg'),v=svg.viewBox.baseVal,inv=svg.getScreenCTM().inverse();
- const box=e=>{const b=e.getBBox(),m=inv.multiply(e.getScreenCTM()),p=[[b.x,b.y],[b.x+b.width,b.y],[b.x,b.y+b.height],[b.x+b.width,b.y+b.height]].map(([x,y])=>({x:m.a*x+m.c*y+m.e,y:m.b*x+m.d*y+m.f})),xs=p.map(a=>a.x),ys=p.map(a=>a.y);return{x:Math.min(...xs),y:Math.min(...ys),width:Math.max(...xs)-Math.min(...xs),height:Math.max(...ys)-Math.min(...ys)};};
+ const box=(e,b=e.getBBox())=>{const m=inv.multiply(e.getScreenCTM()),p=[[b.x,b.y],[b.x+b.width,b.y],[b.x,b.y+b.height],[b.x+b.width,b.y+b.height]].map(([x,y])=>({x:m.a*x+m.c*y+m.e,y:m.b*x+m.d*y+m.f})),xs=p.map(a=>a.x),ys=p.map(a=>a.y);return{x:Math.min(...xs),y:Math.min(...ys),width:Math.max(...xs)-Math.min(...xs),height:Math.max(...ys)-Math.min(...ys)};};
  const labels=[...svg.querySelectorAll('text,foreignObject')].filter(e=>e.textContent.trim()).map(e=>{
    const label=e.querySelector('span')??e,style=getComputedStyle(label);
    const runs=[];
@@ -20,8 +20,37 @@ export function inspectUsecase(){
      if(last?.weight===weight&&last?.slant===slant) last.text+=node.textContent;
      else runs.push({text:node.textContent,weight,slant});
    }
-   return {text:(label.innerText??e.textContent).trim().replace(/\s+/g,' '),box:box(e),size:style.fontSize,
-     fill:e.tagName==='text'?style.fill:style.color,tag:e.tagName,
+   const measured=e.getAttribute('data-label-box');
+   const [x,y,width,height]=measured?.split(' ').map(Number)??[];
+   const text=measured?[...e.children].map(line=>line.textContent).join(' '):label.innerText??e.textContent;
+   const glyphRects=[];
+   if(e.tagName==='foreignObject') {
+     const walker=document.createTreeWalker(label,NodeFilter.SHOW_TEXT);
+     let node;
+     while(node=walker.nextNode()) {
+       if(!node.textContent.trim())continue;
+       const range=document.createRange();range.selectNodeContents(node);
+       for(const r of range.getClientRects()) {
+         const a=new DOMPoint(r.x,r.y).matrixTransform(inv),b=new DOMPoint(r.right,r.bottom).matrixTransform(inv);
+         glyphRects.push({x:a.x,y:a.y,width:b.x-a.x,height:b.y-a.y});
+       }
+     }
+   } else if(measured) {
+     for(const line of e.children) {
+       const chars=line.getNumberOfChars();
+       if(!chars)continue;
+       const b=line.getBBox(),x=line.getStartPositionOfChar(0).x;
+       glyphRects.push(box(line,{x,y:b.y,width:line.getEndPositionOfChar(chars-1).x-x,height:b.height}));
+     }
+   }
+   let glyphBox=null;
+   if(glyphRects.length) {
+     const x=Math.min(...glyphRects.map(r=>r.x)),y=Math.min(...glyphRects.map(r=>r.y));
+     glyphBox={x,y,width:Math.max(...glyphRects.map(r=>r.x+r.width))-x,
+       height:Math.max(...glyphRects.map(r=>r.y+r.height))-y};
+   }
+   return {text:text.trim().replace(/\s+/g,' '),box:measured?box(e,{x,y,width,height}):box(e),size:style.fontSize,
+     fill:e.tagName==='text'?style.fill:style.color,tag:e.tagName,portable:!!measured,glyphBox,
      runs:runs.map(run=>({...run,text:run.text.trim().replace(/\s+/g,' ')})).filter(run=>run.text)};
  });
  const paint=e=>{const style=getComputedStyle(e);return {fill:style.fill,stroke:style.stroke,
