@@ -380,6 +380,10 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/er-browser-probe.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          foreach ($family in @('info', 'tree-view', 'ishikawa', 'cynefin', 'venn')) {
+            node "tools/mermaid-cpp/${family}-browser-probe.mjs"
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
           node tools/mermaid-cpp/quadrant-browser-probe.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/mindmap-browser-probe.mjs
@@ -437,6 +441,10 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/compare-er-svg.mjs build/mermaid-cpp/er-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          foreach ($family in @('info', 'tree-view', 'ishikawa', 'cynefin', 'venn')) {
+            node "tools/mermaid-cpp/compare-${family}-svg.mjs" "build/mermaid-cpp/${family}-browser/original.json" build/mermaid-cpp/pie-svg
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
           node tools/mermaid-cpp/compare-quadrant-svg.mjs build/mermaid-cpp/quadrant-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/compare-mindmap-svg.mjs build/mermaid-cpp/mindmap-browser/shapes.json build/mermaid-cpp/pie-svg
@@ -521,6 +529,16 @@ jobs:
             build/mermaid-cpp/requirement-browser/*.svg
             build/mermaid-cpp/er-browser/*.json
             build/mermaid-cpp/er-browser/*.svg
+            build/mermaid-cpp/info-browser/*.json
+            build/mermaid-cpp/info-browser/*.svg
+            build/mermaid-cpp/tree-view-browser/*.json
+            build/mermaid-cpp/tree-view-browser/*.svg
+            build/mermaid-cpp/ishikawa-browser/*.json
+            build/mermaid-cpp/ishikawa-browser/*.svg
+            build/mermaid-cpp/cynefin-browser/*.json
+            build/mermaid-cpp/cynefin-browser/*.svg
+            build/mermaid-cpp/venn-browser/*.json
+            build/mermaid-cpp/venn-browser/*.svg
             build/mermaid-cpp/quadrant-browser/*.json
             build/mermaid-cpp/quadrant-browser/*.svg
             build/mermaid-cpp/mindmap-browser/*.json

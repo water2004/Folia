@@ -99,6 +99,11 @@ if(WIN32 AND MSVC)
         "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_class_elk.cpp"
         "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_er.cpp"
         "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_requirement.cpp"
+        "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_info.cpp"
+        "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_tree_view.cpp"
+        "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_ishikawa.cpp"
+        "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_cynefin.cpp"
+        "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_venn.cpp"
         "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_elk_flowchart.cpp"
         "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_architecture.cpp")
     set_target_properties(FoliaMermaidPlatformTests PROPERTIES CXX_MODULE_STD ON)

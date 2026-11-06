@@ -5,6 +5,122 @@
   "license": "MIT",
   "files": [
     {
+      "path": "packages/mermaid/src/diagrams/venn/parser/venn.jison",
+      "sha256": "63b984882e29432bfcbb99083043d3118c103834a531199a962ef399ebee437f"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/venn/vennDB.ts",
+      "sha256": "7a9ad9c379974d330545a0f55034d1747406f3c08aed50a4cfaefb954cdd478a"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/venn/vennRenderer.ts",
+      "sha256": "0b3c2506945c6efc16f28413f53e9c028aeafe05b90966d8e17f1ed43a0dd56d"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/venn/vennTypes.ts",
+      "sha256": "0f818f86072e8fe52e695b4d57423e498685919f85baa038535f8a1041e8e6e9"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/venn/styles.ts",
+      "sha256": "3ffbe0fd9a7e12d00920d849517a744a84cce28cdc7341811d12fc3c7f533c02"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/treeView/boxDrawingPreprocessor.ts",
+      "sha256": "cd7c54a23e845621de87813152b7d3cc7097e0371b4cf6b3e1f15ee871f4ed2b"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/treeView/db.ts",
+      "sha256": "b26f2ed39ff572b5de20969d8d3aad45b23782d1c8159d472b4fd3f97e028214"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/treeView/icons.ts",
+      "sha256": "1e7c69822b88f07783717b49b69db4af38ba925a027498da3b4d14534834de6a"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/treeView/parser.ts",
+      "sha256": "1f6459e4d8a6925f6350ff80de96be062f0f0975e36268d85c09994aa738c609"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/treeView/renderer.ts",
+      "sha256": "dd30254a9d43c7213d8062be3f07f3628dbd95c821a5e2edd9f9c65fb10539d0"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/treeView/styles.ts",
+      "sha256": "1b831916c99ffd5aeff9665c7c7f78ade8a51c9c89c51d81b809890cc398b63a"
+    },
+    {
+      "path": "packages/parser/src/language/treeView/treeView.langium",
+      "sha256": "05e6901b3931203420e45d754bb521a69623445f168c1124205c2b35a110e92b"
+    },
+    {
+      "path": "packages/parser/src/language/treeView/tokenBuilder.ts",
+      "sha256": "c422c5df4141cacb1eb28ed552d57da183c897cfb2a44617a9243b776c72763b"
+    },
+    {
+      "path": "packages/parser/src/language/treeView/valueConverter.ts",
+      "sha256": "fddddb34d256698a6c2b25bbff416c5dc949ddc9eac8f935a9a80ad02123d0cf"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/cynefin/cynefinBoundaries.ts",
+      "sha256": "1b1081452e450e2539d4f54810b668696ef9b9b59a3cebac7470f4008d72a6b5"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/cynefin/cynefinDb.ts",
+      "sha256": "92363b9b8db48986cc06a8daf78732c1b274c65233613b0d4ae25f6b2f9fbe03"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/cynefin/cynefinParser.ts",
+      "sha256": "6a7777457e6b66fd0832f3215f809b42575af494dbf1d496badf9a13fbe04afe"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/cynefin/cynefinRenderer.ts",
+      "sha256": "db5e792e5268b420cf42e2399b219a3049af9060fd36ec222ada0cb302a0610b"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/cynefin/styles.ts",
+      "sha256": "f36148e048c8a91e84c142d29ae8cf5ec5c1efb8054278674a5e4fba7a4941b7"
+    },
+    {
+      "path": "packages/parser/src/language/cynefin/cynefin.langium",
+      "sha256": "e39c321b5a98b7160270c4275d4dfc309769478fca6e8f93fa67973431b66881"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/ishikawa/ishikawaRenderer.ts",
+      "sha256": "4ce750782e4a75601a35667c0383eb5b06e691cc77f22fc8e91114d94abd134a"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/ishikawa/parser/ishikawa.jison",
+      "sha256": "d830768515552cb082bf94743930808b478800ae3491565fc6d00d35f66460d9"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/ishikawa/ishikawaDb.ts",
+      "sha256": "b51081b9adadd1f042a950c415b1544b6ddf94f848dabe03d09a81a586e4c39a"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/ishikawa/ishikawaTypes.ts",
+      "sha256": "3c0dad55b038887a5794a67d17c9f471f33c1d3617ee7b6cbe7b3ba2b7cdd33e"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/ishikawa/ishikawaStyles.ts",
+      "sha256": "2b2589e02c8631d5374f15245ad53eb36f7c197143369c7ca31f60618e3612a6"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/info/infoDb.ts",
+      "sha256": "41387f4dea243d0f3722ca80a9c3159d5e9e975c2b984f3a559f0261250f68d1"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/info/infoParser.ts",
+      "sha256": "0cb74d28bc58dcddb33177ae7be84405106e3dde4ae66d5ee912c72b56f0e25b"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/info/infoRenderer.ts",
+      "sha256": "b35435c97354e3a4a7855a269473543080a05a35434a72890e8fc01d07810d0f"
+    },
+    {
+      "path": "packages/parser/src/language/info/info.langium",
+      "sha256": "d83494b9b7efe43d7d6af6f29336e7ee87652bac136f7ed785ef7575ac1ca543"
+    },
+    {
       "path": "packages/mermaid/src/styles.ts",
       "sha256": "dd53a582b0c2411e16beeb37f51664968f278b08b97f63fc8808cbc8381f73fb"
     },
@@ -2408,6 +2524,40 @@
       {
         "path": "src/diagrams/state/parser/stateDiagram.jison",
         "sha256": "72568f98201c5ba59dca96842d1805d5a9908c5965d0609ab27f192929285d4d"
+      }
+    ]
+  },
+  "vennLayout": {
+    "package": "@upsetjs/venn.js",
+    "version": "2.0.0",
+    "commit": "350c835aab4a92a7570963c28f725cf9f6e5f258",
+    "optimizer": {
+      "package": "fmin",
+      "version": "0.0.4",
+      "commit": "6b155c9f4a6ecf73ea5d71666da8e5dcd418b18b",
+      "source": "Patched version bundled in build/venn.esm.js",
+      "licenseSha256": "e4503e78185bff178d3ee91835f082d05771da1b3a2d795f17e03a40251bab77"
+    },
+    "files": [
+      {
+        "path": "LICENSE",
+        "sha256": "6a3508febf2cfccfee96597394543a6154a4bb0b1f91f28404be42c09e9fcb54"
+      },
+      {
+        "path": "build/venn.esm.js",
+        "sha256": "47e73982c0cf8a4e692c57a06656fc928aeced63267d9a1e6f48122c4127da30"
+      },
+      {
+        "path": "src/layout.js",
+        "sha256": "42d5acdbafd01de614b7b7ec99161be710a550ecdd4a8e5f01873c6804bbee49"
+      },
+      {
+        "path": "src/diagram.js",
+        "sha256": "4184098f26683c849180e83a5f0617fa8f39bc08e0aa819eb479efa06dc5a7af"
+      },
+      {
+        "path": "src/circleintersection.js",
+        "sha256": "821c42c116f5f411204bad897c3ae8d15b1770e5d05d700ea552cbf83fdef241"
       }
     ]
   },

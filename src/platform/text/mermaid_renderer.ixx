@@ -20,13 +20,14 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
     auto input=prepare_native_diagram(source,session,limits);
     if(!input) return std::unexpected(input.error());
     MermaidMeasurer measurer;
-    auto font=std::visit([&](auto& content) -> std::expected<void,std::string> {
+    auto font_family=std::visit([&](auto& content)
+        -> std::expected<std::u16string_view,std::string> {
         auto resolved=measurer.resolve_family(content.theme.font_family);
         if(!resolved) return std::unexpected(resolved.error());
         content.theme.font_family=std::move(*resolved);
-        return {};
+        return std::u16string_view{content.theme.font_family};
     },input->content);
-    if(!font) return std::unexpected(font.error());
+    if(!font_family) return std::unexpected(font_family.error());
     PieMeasurements widths;
     if(auto pie=std::get_if<PieRenderInput>(&input->content)) {
         auto measure=[&](std::u16string_view text,double size) -> std::expected<double,std::string> {
@@ -631,6 +632,25 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
                 vertical->height,vertical->baseline};
         };
     }
-    return render_native_diagram(*input,widths,flowchart_measurements,sequence_measurements,class_measurements,xy_measurements,sankey_measurements,treemap_measure,journey_measure,timeline_measure,gantt_measure,git_graph_measure,mindmap_measurements,block_measure,kanban_measure,c4_measurements,architecture_measurements,state_measure,zenuml_measure,er_measure,requirement_measure);
+    SvgTextMeasure svg_text_measure = [&](std::u16string_view text, double size, unsigned weight)
+        -> std::expected<SvgTextMetrics, std::string> {
+        if (!std::isfinite(size) || size <= 0 || size > std::numeric_limits<float>::max()) {
+            return std::unexpected("Invalid Mermaid SVG font size");
+        }
+        auto label = diagram_display_text(text);
+        if (!label) return std::unexpected(label.error());
+        const MermaidFont font{std::u16string{*font_family}, static_cast<float>(size), weight};
+        auto bounds = measurer.measure(*label, font, false, {}, true);
+        if (!bounds) return std::unexpected(bounds.error());
+        auto metrics = measurer.svg_font_metrics(font);
+        if (!metrics) return std::unexpected(metrics.error());
+        return SvgTextMetrics{bounds->bounds_width, metrics->height, metrics->baseline,
+            metrics->middle_offset};
+    };
+    return render_native_diagram(*input, widths, flowchart_measurements, sequence_measurements,
+        class_measurements, xy_measurements, sankey_measurements, treemap_measure, journey_measure,
+        timeline_measure, gantt_measure, git_graph_measure, mindmap_measurements, block_measure,
+        kanban_measure, c4_measurements, architecture_measurements, state_measure, zenuml_measure,
+        er_measure, requirement_measure, svg_text_measure);
 }
 }

@@ -32,9 +32,13 @@ suite host_contract = [] {
         for (auto source : {"packet\n0-7: \"Header\"", "sequenceDiagram\nA->>B: Save",
             "quadrantChart\nEditor: [0.2, 0.7]", "radar-beta\naxis A,B,C\ncurve current{1,2,3}",
             "erDiagram\nCUSTOMER ||--o{ ORDER : places",
-            "requirementDiagram\nrequirement req1 {\nid: R1\ntext: Save\nrisk: high\nverifyMethod: test\n}"}) {
+            "requirementDiagram\nrequirement req1 {\nid: R1\ntext: Save\nrisk: high\nverifyMethod: test\n}",
+            "info showInfo", "treeView-beta\nsrc/\n  main.cpp",
+            "ishikawa-beta\nProblem\nCause A", "cynefin-beta\nclear\n  \"Best practice\"",
+            "venn-beta\nset A\nset B\nunion A,B[Both]"}) {
             auto result = render(source);
             expect(result.status == 0_i) << result.text;
+            expect(result.width > 0 && result.height > 0);
         }
         auto default_class = render("classDiagram\nclass Document");
         expect(default_class.status == 0_i) << default_class.text;

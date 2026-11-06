@@ -31,8 +31,6 @@ std::expected<folia::mermaid::DiagramSvg, std::string> render_mermaid_utf8(
     ConfigValue site{.kind=ConfigKind::mapping};
     site.mapping.emplace(u"theme", ConfigValue{.kind=ConfigKind::string,.string=dark?u"dark":u"default"});
     site.mapping.emplace(u"look", ConfigValue{.kind=ConfigKind::string,.string=u"classic"});
-    // Class/Flowchart must not silently use Dagre while their required default
-    // ELK route is under construction.
     auto saved = session->save_initialize_config(site);
     if (!saved) return std::unexpected(saved.error());
     auto configured = session->set_site_config(site);

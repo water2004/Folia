@@ -25,13 +25,25 @@ export import folia.mermaid.er_svg;
 export import folia.mermaid.requirement_svg;
 export import folia.mermaid.mindmap_svg;
 export import folia.mermaid.architecture_svg;
+export import folia.mermaid.info_svg;
+export import folia.mermaid.tree_view_svg;
+export import folia.mermaid.ishikawa_svg;
+export import folia.mermaid.cynefin_svg;
+export import folia.mermaid.venn_svg;
+export import folia.mermaid.svg_text_measure;
 
 export namespace folia::mermaid {
 struct PacketRenderInput { PacketLayout layout; PacketSvgTheme theme; };
 struct PieRenderInput { PieDocument document; PieSvgTheme theme; PieSvgConfig config; };
 struct NativeDiagram {
     PreparedDiagram prepared;
-    std::variant<PacketRenderInput, PieRenderInput, FlowchartRenderInput, SequenceRenderInput, ClassRenderInput, QuadrantRenderInput, RadarRenderInput, XYRenderInput, SankeyRenderInput, TreemapRenderInput, JourneyRenderInput, TimelineRenderInput, GanttRenderInput, GitGraphRenderInput, BlockRenderInput, KanbanRenderInput, C4RenderInput, StateRenderInput, MindmapRenderInput, ArchitectureRenderInput, ZenRenderInput, ErRenderInput, RequirementRenderInput> content;
+    std::variant<PacketRenderInput, PieRenderInput, FlowchartRenderInput, SequenceRenderInput,
+        ClassRenderInput, QuadrantRenderInput, RadarRenderInput, XYRenderInput, SankeyRenderInput,
+        TreemapRenderInput, JourneyRenderInput, TimelineRenderInput, GanttRenderInput,
+        GitGraphRenderInput, BlockRenderInput, KanbanRenderInput, C4RenderInput, StateRenderInput,
+        MindmapRenderInput, ArchitectureRenderInput, ZenRenderInput, ErRenderInput,
+        RequirementRenderInput, InfoRenderInput, TreeViewRenderInput, IshikawaRenderInput,
+        CynefinRenderInput, VennRenderInput> content;
 };
 struct DiagramSvg { std::string svg; double width{}, height{}; };
 
@@ -69,5 +81,6 @@ std::expected<DiagramSvg, std::string> render_native_diagram(
     const StateMeasure& state_measure = {},
     const ZenSvgMeasure& zenuml_measure = {},
     const ErSvgMeasure& er_measure = {},
-    const RequirementSvgMeasure& requirement_measure = {});
+    const RequirementSvgMeasure& requirement_measure = {},
+    const SvgTextMeasure& svg_text_measure = {});
 }

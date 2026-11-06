@@ -127,6 +127,31 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
     try {
         const auto& effective=prepared->effective_config;
         const auto& theme=member(effective,u"themeVariables");
+        if (prepared->type == u"info") {
+            auto input = prepare_info_render(*prepared);
+            if (!input) return std::unexpected(input.error());
+            return NativeDiagram{std::move(*prepared), std::move(*input)};
+        }
+        if (prepared->type == u"treeView") {
+            auto input = prepare_tree_view_render(*prepared);
+            if (!input) return std::unexpected(input.error());
+            return NativeDiagram{std::move(*prepared), std::move(*input)};
+        }
+        if (prepared->type == u"ishikawa") {
+            auto input = prepare_ishikawa_render(*prepared);
+            if (!input) return std::unexpected(input.error());
+            return NativeDiagram{std::move(*prepared), std::move(*input)};
+        }
+        if (prepared->type == u"cynefin") {
+            auto input = prepare_cynefin_render(*prepared);
+            if (!input) return std::unexpected(input.error());
+            return NativeDiagram{std::move(*prepared), std::move(*input)};
+        }
+        if (prepared->type == u"venn") {
+            auto input = prepare_venn_render(*prepared);
+            if (!input) return std::unexpected(input.error());
+            return NativeDiagram{std::move(*prepared), std::move(*input)};
+        }
         if(prepared->type==u"zenuml") {
             auto document=parse_zenuml(prepared->code.cleaned);
             if(!document)return std::unexpected(document.error());
@@ -451,12 +476,44 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
     } catch(const std::runtime_error& e) { return std::unexpected(e.what()); }
 }
 
-std::expected<DiagramSvg,std::string> render_native_diagram(const NativeDiagram& input,const PieMeasurements& widths,const FlowchartMeasurements& flowchart_measurements,const SequenceMeasurements& sequence_measurements,const ClassMeasurements& class_measurements,const XYMeasurements& xy_measurements,const SankeyMeasurements& sankey_measurements,const TreemapMeasure& treemap_measure,const JourneyMeasure& journey_measure,const TimelineMeasure& timeline_measure,const GanttMeasure& gantt_measure,const GitGraphMeasure& git_graph_measure,const MindmapMeasurements& mindmap_measurements,const BlockMeasure& block_measure,const KanbanMeasure& kanban_measure,const C4Measurements& c4_measurements,const ArchitectureMeasurements& architecture_measurements,const StateMeasure& state_measure,const ZenSvgMeasure& zenuml_measure,const ErSvgMeasure& er_measure,const RequirementSvgMeasure& requirement_measure) {
+std::expected<DiagramSvg, std::string> render_native_diagram(
+    const NativeDiagram& input, const PieMeasurements& widths,
+    const FlowchartMeasurements& flowchart_measurements,
+    const SequenceMeasurements& sequence_measurements,
+    const ClassMeasurements& class_measurements, const XYMeasurements& xy_measurements,
+    const SankeyMeasurements& sankey_measurements, const TreemapMeasure& treemap_measure,
+    const JourneyMeasure& journey_measure, const TimelineMeasure& timeline_measure,
+    const GanttMeasure& gantt_measure, const GitGraphMeasure& git_graph_measure,
+    const MindmapMeasurements& mindmap_measurements, const BlockMeasure& block_measure,
+    const KanbanMeasure& kanban_measure, const C4Measurements& c4_measurements,
+    const ArchitectureMeasurements& architecture_measurements, const StateMeasure& state_measure,
+    const ZenSvgMeasure& zenuml_measure, const ErSvgMeasure& er_measure,
+    const RequirementSvgMeasure& requirement_measure, const SvgTextMeasure& svg_text_measure) {
     return std::visit([&](const auto& content)->std::expected<DiagramSvg,std::string> {
         if constexpr(std::is_same_v<std::decay_t<decltype(content)>,ArchitectureRenderInput>) {
             auto result=render_architecture_svg(content,architecture_measurements);
             if(!result)return std::unexpected(result.error());
             return DiagramSvg{std::move(result->svg),result->width,result->height};
+        } else if constexpr (std::is_same_v<std::decay_t<decltype(content)>, InfoRenderInput>) {
+            auto result = render_info_svg(content);
+            if (!result) return std::unexpected(error_text(result.error().message));
+            return DiagramSvg{std::move(result->svg), result->width, result->height};
+        } else if constexpr (std::is_same_v<std::decay_t<decltype(content)>, TreeViewRenderInput>) {
+            auto result = render_tree_view_svg(content, svg_text_measure);
+            if (!result) return std::unexpected(result.error());
+            return DiagramSvg{std::move(result->svg), result->width, result->height};
+        } else if constexpr (std::is_same_v<std::decay_t<decltype(content)>, IshikawaRenderInput>) {
+            auto result = render_ishikawa_svg(content, svg_text_measure);
+            if (!result) return std::unexpected(result.error());
+            return DiagramSvg{std::move(result->svg), result->width, result->height};
+        } else if constexpr (std::is_same_v<std::decay_t<decltype(content)>, CynefinRenderInput>) {
+            auto result = render_cynefin_svg(content, svg_text_measure);
+            if (!result) return std::unexpected(result.error());
+            return DiagramSvg{std::move(result->svg), result->width, result->height};
+        } else if constexpr (std::is_same_v<std::decay_t<decltype(content)>, VennRenderInput>) {
+            auto result = render_venn_svg(content);
+            if (!result) return std::unexpected(result.error());
+            return DiagramSvg{std::move(result->svg), result->width, result->height};
         } else if constexpr(std::is_same_v<std::decay_t<decltype(content)>,MindmapRenderInput>) {
             auto result=render_mindmap_svg(content,mindmap_measurements);
             if(!result)return std::unexpected(result.error());
