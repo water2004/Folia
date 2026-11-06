@@ -81,7 +81,7 @@ void label_svg(std::string& out, std::span<const std::u16string> lines,
     const double first = y - (static_cast<double>(lines.size()) - 1) * line_step / 2 +
         metrics.baseline - line_height / 2;
     out += "<text class=\"" + std::string(css_class) + "\" x=\"" + n(x) +
-        "\" y=\"" + n(first) + "\" text-anchor=\"middle\">";
+        "\" y=\"" + n(first) + "\" text-anchor=\"middle\" stroke=\"none\">";
     for (std::size_t i = 0; i < lines.size(); ++i)
         out += "<tspan x=\"" + n(x) + "\" dy=\"" +
             (i ? n(line_step) : "0") + "\">" + xml(lines[i]) + "</tspan>";
@@ -111,7 +111,7 @@ void edge_label_svg(std::string& out, std::span<const std::u16string> lines,
                     std::string_view background, unsigned font_weight, bool italic) {
     out += "<g class=\"edgeLabel swimlane-edge-label\"><rect class=\"edge-label-background\" x=\"" +
         n(x - width / 2) + "\" y=\"" + n(y - height / 2) + "\" width=\"" + n(width) +
-        "\" height=\"" + n(height) + "\" fill=\"" +
+        "\" height=\"" + n(height) + "\" stroke=\"none\" fill=\"" +
         xml_attribute_value(background) + "\"/>";
     text_label_box(out, lines, metrics, x, y, width, height, family, font_size,
         color, font_weight, italic);

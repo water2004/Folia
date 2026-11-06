@@ -48,6 +48,7 @@ try {
       compare(a.fontFamily, e.fontFamily, `${path}.fontFamily`);
       compare(a.color, e.color, `${path}.color`);
       compare(a.fontWeight, e.fontWeight, `${path}.fontWeight`);
+      compare(a.stroke, e.stroke, `${path}.stroke`);
     }
     for (const key of ['lanes', 'nodes'])
       compare(actual[key], original[key], `${original.name}.${key}`, 1.5);

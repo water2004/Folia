@@ -72,11 +72,16 @@ export function inspectSwimlane() {
     labels: [...svg.querySelectorAll('.nodeLabel, .cluster-label, .edgeLabel')].map((element) => {
       const styleTarget = element.querySelector('.nodeLabel') ?? element;
       const style = getComputedStyle(styleTarget);
+      const textElement = element.querySelector('text.label-text');
+      const paintTarget = textElement ?? styleTarget;
+      const paint = getComputedStyle(paintTarget);
+      const stroke = textElement ? paint.stroke :
+        (Number.parseFloat(paint.webkitTextStrokeWidth) > 0 ? paint.webkitTextStrokeColor : 'none');
       return { text: element.textContent.trim().replace(/\s+/g, ' '),
         class: element.getAttribute('class'), box: box(element),
         glyphBox: glyphBox(element),
         fontSize: style.fontSize, fontFamily: style.fontFamily,
-        color: style.color, fontWeight: style.fontWeight };
+        color: style.color, fontWeight: style.fontWeight, stroke };
     }),
     lanes: [...svg.querySelectorAll('.cluster')].map((element) => {
       const shape = element.querySelector('rect.swimlane-title, rect') ?? element;
