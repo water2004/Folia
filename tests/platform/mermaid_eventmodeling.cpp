@@ -34,6 +34,8 @@ suite mermaid_eventmodeling = [] {
                 expect(fatal(result.has_value())) << name << (result ? "" : result.error());
                 if (!result) continue;
                 expect(result->width > 0 && result->height > 0);
+                expect(result->svg.find("<foreignObject") == std::string::npos);
+                expect(result->svg.find("<g class=\"em-label\"") != std::string::npos);
                 if (auto dir = std::getenv("FOLIA_MERMAID_SVG_OUTPUT")) {
                     std::filesystem::create_directories(dir);
                     auto theme_name = std::u16string_view(theme) == u"dark" ? "dark" : "default";

@@ -176,37 +176,72 @@ std::u16string safe_html_text(View text) {
     return html;
 }
 
-std::string label_markup(View text) {
-    constexpr View tokens[] = {
-        code_tag, u"<br>", u"<br/>",
-        u"&lt;", u"&gt;", u"&amp;", u"&nbsp;"
+struct LabelRun {
+    std::u16string text;
+    double scale = 1, shift = 0;
+    bool bold{}, italic{}, monospace{}, underline{}, strike{}, highlight{};
+};
+
+struct LabelLine {
+    std::vector<LabelRun> runs;
+    bool payload{};
+};
+
+std::vector<LabelLine> label_lines(View text) {
+    std::vector<LabelLine> lines(1);
+    std::vector<std::u16string> tags;
+    LabelRun run;
+    const auto flush = [&] {
+        if (!run.text.empty()) lines.back().runs.push_back(std::move(run));
+        run = {};
     };
-    std::string output;
-    for (std::size_t i = 0; i < text.size();) {
-        const auto tail = text.substr(i);
-        if (auto tag = html_tag(tail); tag && tag->size == tag->name.size() + (tag->closing ? 3 : 2) &&
-            std::ranges::find(inline_tags, tag->name) != std::end(inline_tags)) {
-            const auto markup = tail.substr(0, tag->size);
-            output.append(markup.begin(), markup.end());
-            i += tag->size;
-            continue;
+    const auto restyle = [&] {
+        for (const auto& name : tags) {
+            if (name == u"b" || name == u"strong") run.bold = true;
+            else if (name == u"em" || name == u"i") run.italic = true;
+            else if (name == u"code" || name == u"kbd" || name == u"samp") run.monospace = true;
+            else if (name == u"small") run.scale *= 5.0 / 6;
+            else if (name == u"sup" || name == u"sub") {
+                run.shift += (name == u"sup" ? -1 : 1) * run.scale / 3;
+                run.scale *= 5.0 / 6;
+            } else if (name == u"u") run.underline = true;
+            else if (name == u"s" || name == u"strike") run.strike = true;
+            else if (name == u"mark") run.highlight = true;
         }
-        const auto token = std::ranges::find_if(tokens, [&](View candidate) {
-            return tail.starts_with(candidate);
-        });
-        if (token != std::end(tokens)) {
-            if (token->starts_with(u"<br")) output += "<br/>";
-            else if (*token == u"&nbsp;") output += "&#160;";
-            else output.append(token->begin(), token->end());
-            i += token->size();
+    };
+    while (!text.empty()) {
+        if (const auto length = break_size(text)) {
+            flush();
+            lines.push_back({{}, lines.back().payload});
+            restyle();
+            text.remove_prefix(length);
+        } else if (const auto tag = html_tag(text)) {
+            flush();
+            if (text.starts_with(code_tag)) lines.back().payload = true;
+            if (!tag->closing) tags.push_back(tag->name);
+            else if (!tags.empty()) tags.pop_back();
+            restyle();
+            text.remove_prefix(tag->size);
         } else {
-            auto end = text.find_first_of(u"<&", i + 1);
-            if (end == View::npos) end = text.size();
-            output += escape(text.substr(i, end - i));
-            i = end;
+            constexpr std::pair<View, char16_t> entities[] = {
+                {u"&amp;", u'&'}, {u"&lt;", u'<'}, {u"&gt;", u'>'}, {u"&nbsp;", u'\u00a0'},
+            };
+            const auto entity = std::ranges::find_if(entities, [&](const auto& item) {
+                return text.starts_with(item.first);
+            });
+            if (entity != std::end(entities)) {
+                run.text += entity->second;
+                text.remove_prefix(entity->first.size());
+            } else {
+                run.text += text.front();
+                text.remove_prefix(1);
+            }
         }
     }
-    return output;
+    flush();
+    // A trailing HTML <br> does not create a final line box.
+    while (lines.size() > 1 && lines.back().runs.empty()) lines.pop_back();
+    return lines;
 }
 
 SvgTextMetrics measure_text(const EventmodelingTextMeasure& measure, View text, View font) {
@@ -439,7 +474,100 @@ std::string write_lanes(const Layout& scene, const EventmodelingTheme& theme,
     return svg;
 }
 
-std::string write_boxes(const Layout& scene, const EventmodelingTheme& theme, Bounds& bounds) {
+std::string write_label(View content, const EventmodelingTheme& theme,
+                        const EventmodelingTextMeasure& measure, double x, double y,
+                        double width, double height) {
+    const auto lines = label_lines(content);
+    const auto metrics = [&](View text, View font, double size, unsigned weight) {
+        auto result = measure(text, font, size, weight, {.width = SvgTextWidth::advance});
+        if (!result) throw std::runtime_error(result.error());
+        return *result;
+    };
+    constexpr View code_font = u"Consolas, monospace";
+    struct LineMetrics {
+        double ascent{}, descent{};
+        std::vector<SvgTextMetrics> runs;
+    };
+    const auto heading = metrics(u"M", theme.font_family, text_size, 700);
+    const auto ascent = [](const auto& metrics) {
+        return metrics.line_height > 0 ? std::round(metrics.line_baseline) : metrics.baseline;
+    };
+    const auto height_of = [](const auto& metrics) {
+        return metrics.line_height > 0 ? std::round(metrics.line_height) : metrics.height;
+    };
+    std::vector<LineMetrics> layout;
+    double content_height = 0;
+    for (const auto& line : lines) {
+        auto& measured = layout.emplace_back();
+        const auto family = line.payload ? code_font : View(theme.font_family);
+        if (!line.payload || line.runs.empty()) {
+            const auto base = line.payload ? metrics(u"M", code_font, text_size, 400) : heading;
+            measured.ascent = ascent(base);
+            measured.descent = height_of(base) - measured.ascent;
+        }
+        for (const auto& run : line.runs) {
+            const auto span = metrics(run.text, run.monospace ? code_font : family,
+                text_size * run.scale, run.bold ? 700 : 400);
+            const auto run_ascent = ascent(span) - text_size * run.shift;
+            const auto run_descent = height_of(span) - run_ascent;
+            if (line.payload && measured.runs.empty()) {
+                measured.ascent = run_ascent;
+                measured.descent = run_descent;
+            } else {
+                measured.ascent = std::max(measured.ascent, run_ascent);
+                measured.descent = std::max(measured.descent, run_descent);
+            }
+            measured.runs.push_back(span);
+        }
+        content_height += measured.ascent + measured.descent;
+    }
+    double top = y + (height - content_height) / 2;
+    std::string svg = "<g class=\"em-label\"" + attribute("data-x", x) + attribute("data-y", y) +
+        attribute("data-width", width) + attribute("data-height", height) + " fill=\"#000000\">";
+    for (std::size_t j = 0; j < lines.size(); ++j) {
+        const auto& line = lines[j];
+        const auto& measured = layout[j];
+        const auto family = line.payload ? code_font : View(theme.font_family);
+        const auto baseline = top + measured.ascent;
+        const auto center = x + width / 2;
+        if (std::ranges::any_of(line.runs, &LabelRun::highlight)) {
+            const auto& spans = measured.runs;
+            const auto line_width = std::accumulate(spans.begin(), spans.end(), 0.0,
+                [](double sum, const auto& span) { return sum + span.width; });
+            auto left = line.payload ? x : center - line_width / 2;
+            for (std::size_t i = 0; i < line.runs.size(); ++i) {
+                if (line.runs[i].highlight) {
+                    const auto& span = spans[i];
+                    svg += "<rect class=\"em-highlight\" fill=\"yellow\"" + attribute("x", left) +
+                        attribute("y", baseline + text_size * line.runs[i].shift - span.baseline) +
+                        attribute("width", span.width) + attribute("height", span.height) + "/>";
+                }
+                left += spans[i].width;
+            }
+        }
+        if (!line.runs.empty()) {
+            svg += "<text xml:space=\"preserve\"" + attribute("x", line.payload ? x : center) +
+                attribute("y", baseline) + attribute("font-family", family) +
+                (line.payload ? "" : " text-anchor=\"middle\"") + ">";
+            for (const auto& run : line.runs) {
+                svg += "<tspan" + attribute("y", baseline + text_size * run.shift);
+                if (run.monospace && !line.payload) svg += attribute("font-family", code_font);
+                if (run.bold) svg += " font-weight=\"700\"";
+                if (run.italic) svg += " font-style=\"italic\"";
+                if (run.scale != 1) svg += attribute("font-size", text_size * run.scale);
+                if (run.underline || run.strike) svg += attribute("text-decoration",
+                    run.underline && run.strike ? "underline line-through" : run.underline ? "underline" : "line-through");
+                svg += ">" + escape(run.text) + "</tspan>";
+            }
+            svg += "</text>";
+        }
+        top += measured.ascent + measured.descent;
+    }
+    return svg + "</g>";
+}
+
+std::string write_boxes(const Layout& scene, const EventmodelingTheme& theme,
+                        const EventmodelingTextMeasure& measure, Bounds& bounds) {
     std::string svg;
     for (const auto& box : scene.boxes) {
         const auto y = scene.lanes.at(box.lane_index).y + lane_padding;
@@ -449,12 +577,8 @@ std::string write_boxes(const Layout& scene, const EventmodelingTheme& theme, Bo
         svg += "<g class=\"em-box\"><rect rx=\"3\"" + attribute("x", box.x) + attribute("y", y) +
             attribute("width", box.width) + attribute("height", box.height) +
             attribute("stroke", theme.strokes[kind]) + attribute("fill", theme.fills[kind]) +
-            "/><foreignObject" + attribute("x", box.x + box_padding) + attribute("y", y + 10) +
-            attribute("width", box.width - 2 * box_padding) +
-            attribute("height", box.height - 2 * box_padding) +
-            "><div xmlns=\"http://www.w3.org/1999/xhtml\" style=\"display:table;height:100%;width:100%\">"
-            "<span style=\"display:table-cell;text-align:center;vertical-align:middle\">" +
-            label_markup(box.content) + "</span></div></foreignObject></g>";
+            "/>" + write_label(box.content, theme, measure, box.x + box_padding, y + 10,
+                box.width - 2 * box_padding, box.height - 2 * box_padding) + "</g>";
     }
     return svg;
 }
@@ -517,7 +641,7 @@ std::expected<EventmodelingSvg, std::string> render_eventmodeling_svg(
         const auto scene = layout(input.document, measure);
         Bounds bounds;
         auto children = write_lanes(scene, input.theme, measure, bounds);
-        children += write_boxes(scene, input.theme, bounds);
+        children += write_boxes(scene, input.theme, measure, bounds);
         children += write_relations(scene, input.theme);
         const auto width = bounds.right + 2 * input.padding;
         const auto height = bounds.bottom + 2 * input.padding;
