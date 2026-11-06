@@ -48,5 +48,15 @@ suite host_contract = [] {
         expect(invalid.status == 1_i && invalid.width == 0 && invalid.height == 0);
         expect(render("pie\n\"Valid\": 1").status == 0_i);
     };
+    "mermaid_host_renders_zenuml_through_the_public_entry"_test = [] {
+        const auto source = "zenuml\n@Actor A as Alice\n@Database B as Store\nA->B: Save";
+        const auto first = render(source);
+        expect(first.status == 0_i) << first.text;
+        expect(first.width > 0 && first.height > 0);
+        expect(first.text.find("Alice") != std::string::npos);
+        expect(first.text.find("Store") != std::string::npos);
+        expect(render("zenuml\nA.method() {\n").status == 1_i);
+        expect(render(source).text == first.text);
+    };
 };
 }

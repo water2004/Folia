@@ -83,18 +83,14 @@ suite render_entry = [] {
                 }
                 widths.title_width=100;
             }
-            std::visit([&](const auto& content) {
-                if constexpr(!std::is_same_v<std::decay_t<decltype(content)>,SankeyRenderInput> &&
-                    !std::is_same_v<std::decay_t<decltype(content)>,MindmapRenderInput>) {
-                const auto& doc=[&]() -> const auto& {
-                    if constexpr(std::is_same_v<std::decay_t<decltype(content)>,PacketRenderInput>) return content.layout.document;
-                    else return content.document;
-                }();
+            auto expect_metadata=[&](const auto& doc) {
                 expect(bool(doc.title==field(observed,u"title").string))<<fields[0];
                 expect(bool(doc.acc_title==field(observed,u"accTitle").string));
                 expect(bool(doc.acc_description==field(observed,u"accDescription").string));
-                }
-            },native->content);
+            };
+            if(auto packet=std::get_if<PacketRenderInput>(&native->content))
+                expect_metadata(packet->layout.document);
+            else expect_metadata(std::get<PieRenderInput>(native->content).document);
             auto svg=render_native_diagram(*native,widths);
             expect(svg.has_value())<<fields[0]<<(svg?"":svg.error());
             expect(fatal(svg.has_value()));

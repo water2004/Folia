@@ -2,7 +2,7 @@
 
 本目录记录 Folia 的 Mermaid C++23 原生重构工程。该项目以官方 [`mermaid-js/mermaid`](https://github.com/mermaid-js/mermaid) **12.2.0**（commit `1fb7869866dd619168d840291c9c54b4f129758b`）为基准，在 `src/mermaid/` 与 `src/platform/text/` 下使用 C++23 modules 原生实现语法解析、布局计算、DirectWrite 文本测量与 SVG 渲染，用于替换现有的 `mermaid-rs-renderer` 依赖。各组件对应的上游源码版本与哈希记录在 [`source-lock.json`](source-lock.json) 中。
 
-当前工程处于阶段性交付状态。公共配置前端、DirectWrite 测量桥接、动态库 C ABI 和 **20 个图族**的公共渲染入口已通过迁移分支的 CI 验证。C++ 库提供 `folia::mermaid` CMake 目标，桌面端仍使用原有 Rust 渲染链路。
+当前工程处于阶段性交付状态。公共配置前端、DirectWrite 测量桥接和动态库 C ABI 已通过验证。原有 20 个图族的公共入口通过了迁移分支 CI，ZenUML 公共入口随后通过本地原生测试和浏览器对照。C++ 库提供 `folia::mermaid` CMake 目标，桌面端仍使用原有 Rust 渲染链路。
 
 ---
 
@@ -24,8 +24,8 @@
 | 数据与统计图表 | **Packet**、**Pie**、**Quadrant**、**Radar**、**XY**、**Sankey**、**Treemap** | Packet 位域网格；Pie 扇区几何（`d3-shape`/`d3-path`）与图例排布；Quadrant 四象限坐标；Radar 极坐标与闭合 Catmull-Rom 样条；XY 柱状/折线图与线性/分带坐标轴（`d3-scale`）；Sankey 流量节点松弛与渐变连线（`d3-sankey`）；Treemap 层级面积切分（`d3-hierarchy` squarify）。 |
 | 时间与序列图表 | **Gantt**、**Git graph**、**Journey**、**Timeline** | Gantt 日期解析、时长依赖排程（`dayjs`）与时间轴刻度（`d3-time`）；Git graph 分支车道、提交/合并/cherry-pick 符号与标签布局；Journey 任务评分与角色轨迹；Timeline 横向/纵向事件时间轴。 |
 
-### 3. ZenUML 独立模块（待接入公共入口）
-- `src/mermaid/zenuml.{ixx,cpp}` 与 `zenuml_svg.{ixx,cpp}` 已完成语法解析、横向约束求解、递归纵向 Block 布局与 SVG 输出，5 个基准案例在 Windows 四配置下均已通过原生测试与浏览器 SVG 对照，仅剩 `render_entry` 公共入口接线与字体别名映射收尾。
+### 3. ZenUML 公共入口
+- `src/mermaid/zenuml.{ixx,cpp}` 与 `zenuml_svg.{ixx,cpp}` 负责语法解析、横向约束、纵向布局和 SVG 输出。公共入口、Windows 文本测量和 DLL 调用均已接通，5 个基准案例通过浏览器 SVG 对照。
 
 ### 4. 平台文本测量与动态库接口（`src/platform/text/` / `tools/mermaid-cpp/`）
 - **DirectWrite 文本测量（`mermaid_measurer.ixx`）**：在 Windows 平台解析 CSS `font-family` 候选列表，提供单行 advance/ink bounds 测量、按 Unicode 断行机会的文本折行以及 SVG 字体 ascent/descent 度量。
@@ -41,13 +41,12 @@
 
 | 工作包 | 当前状态 | 下一步工作与完成标准 |
 | --- | --- | --- |
-| **1. ZenUML 公共入口接入** | `zenuml` / `zenuml_svg` 核心与平台测试已通过；入口草案见 `candidates/2026-10-28/zenuml-public.patch` | 在 `frontend.cpp` 注册 `zenuml` 探测器，接入 `render_entry` 与 `mermaid_renderer.ixx`；处理 Windows 下 `Helvetica` 到 `Arial` 的字体映射；通过 5 个基准案例的公共入口渲染与请求隔离测试。 |
 | **2. Class 默认 ELK 路线** | 5 个案例（双主题 10 张 SVG）的浏览器采样与 9 列 `class-elk.tsv` 已就绪；候选补丁见 `candidates/2026-10-28/class-elk*.patch` | 应用 `class-elk-shared.patch` 与 `class-elk.patch`，复用 `flowchart_elk` 的共享测量场景接口，完成端点标签（cardinality/role）避让后处理，并在 `class_svg.cpp` 与 `render_entry.cpp` 接入 `layout: elk` 路径，通过 10 张 SVG 对照。 |
 | **3. ER 图（`erDiagram`）** | 8 个成功案例、2 个语法错误案例的 Oracle（`er-oracle.mjs`）与双主题 16 张浏览器基准 SVG（`er-browser-probe.mjs`）已就绪 | 新增 `er.{ixx,cpp}` 与 `er_svg.{ixx,cpp}`，实现实体/属性/主键外键/基数关系解析、Dagre 布局适配、关系端点标记（crow's foot）绘制及公共入口接线，通过 `compare-er-svg.mjs` 16 张 SVG 对照。 |
 | **4. 其余图族与特性补齐** | Requirement 图等尚未开始；State 注释/并发分隔及部分存量图族次要语法分支待补齐 | 对照 Folia 实际支持的图族范围，优先实现 Requirement 图的原生解析、布局与 SVG 输出，并按需补齐存量图族的常见语法分支。 |
 | **5. WinUI 宿主集成与依赖切换** | 独立候选分支已完成早期编译与初步预览验证 | 将最新 `FoliaNativeMermaid` 接入 WinUI 应用预览、编辑刷新、亮暗主题切换与 PDF 导出链路，完成桌面端实机验证后移除 `mermaid-rs-renderer` 依赖。 |
 
-> **候选补丁说明**：[`candidates/2026-10-28/`](candidates/2026-10-28/README.md) 保存 **Class ELK** 与 **ZenUML 公共入口** 补丁。库和测试的 CMake 文件分别自动收集 `src/mermaid` 和 `tests/mermaid_cpp` 的源文件。请先确认共享接口与模块实现配套完整，再加入新源文件。
+> **候选补丁说明**：[`candidates/2026-10-28/`](candidates/2026-10-28/README.md) 保存 **Class ELK** 补丁。库和测试的 CMake 文件分别自动收集 `src/mermaid` 和 `tests/mermaid_cpp` 的源文件。请先确认共享接口与模块实现配套完整，再加入新源文件。
 
 ---
 

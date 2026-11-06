@@ -581,6 +581,14 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             auto cy=cy_label(edge.title,16);if(!cy)return std::unexpected(cy.error());architecture_measurements.cy_labels.edges.push_back(*cy);
         }
     }
+    ZenSvgMeasure zenuml_measure;
+    if(auto zenuml=std::get_if<ZenRenderInput>(&input->content)) {
+        zenuml_measure=[zenuml,&measurer](std::u16string_view text,double size,bool bold) {
+            auto measured=measurer.measure(text,{zenuml->theme.font_family,static_cast<float>(size),bold?600u:400u});
+            if(!measured)throw std::runtime_error(measured.error());
+            return measured->advance;
+        };
+    }
     StateMeasure state_measure;
     if(auto state=std::get_if<StateRenderInput>(&input->content)) {
         state_measure=[state,&measurer](std::u16string_view text,double size)->std::expected<StateTextBox,std::string> {
@@ -590,6 +598,6 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             return StateTextBox{box->advance,box->bounds_width,metrics->height,metrics->baseline,box->line_height};
         };
     }
-    return render_native_diagram(*input,widths,flowchart_measurements,sequence_measurements,class_measurements,xy_measurements,sankey_measurements,treemap_measure,journey_measure,timeline_measure,gantt_measure,git_graph_measure,mindmap_measurements,block_measure,kanban_measure,c4_measurements,architecture_measurements,state_measure);
+    return render_native_diagram(*input,widths,flowchart_measurements,sequence_measurements,class_measurements,xy_measurements,sankey_measurements,treemap_measure,journey_measure,timeline_measure,gantt_measure,git_graph_measure,mindmap_measurements,block_measure,kanban_measure,c4_measurements,architecture_measurements,state_measure,zenuml_measure);
 }
 }

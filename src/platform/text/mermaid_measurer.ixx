@@ -156,7 +156,7 @@ public:
             candidate=candidate.substr(first,candidate.find_last_not_of(u" \t\r\n")-first+1);
             auto lower=candidate;
             for(auto& c:lower) if(c>=u'A' && c<=u'Z') c+=u'a'-u'A';
-            if(lower==u"sans-serif") candidate=u"Arial";
+            if(lower==u"sans-serif" || lower==u"helvetica") candidate=u"Arial";
             else if(lower==u"serif") candidate=u"Times New Roman";
             else if(lower==u"monospace") candidate=u"Courier New";
             else if(lower==u"system-ui") candidate=u"Segoe UI";

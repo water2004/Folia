@@ -1,5 +1,4 @@
 {
   "class-elk-shared.patch": "7b5e5b654cb1950e57414611384f8140b1685aa3643bb190c7453a23229fea1f",
-  "class-elk.patch": "d2e09790ec35e2c4223ac19e043227fd96174427c4b5ea7bddebc4aaac6edee8",
-  "zenuml-public.patch": "bf93438dc961951e0c6ec70af1003edc2057f43e0fa91a1fc4314600f857b3c1"
+  "class-elk.patch": "d2e09790ec35e2c4223ac19e043227fd96174427c4b5ea7bddebc4aaac6edee8"
 }

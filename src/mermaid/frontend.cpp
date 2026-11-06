@@ -37,6 +37,12 @@ std::expected<PreparedDiagram, std::string> prepare_diagram(
         DiagramRegistry registry{{.source_units = limits.source_units, .config = limits.config}};
         if (auto registered = registry.add_builtin_diagrams(); !registered)
             return std::unexpected(registered.error());
+        // Folia's explicit ZenUML extension uses the pinned external detector.
+        auto extension=registry.add_detector(u"zenuml",[](std::u16string_view value,ConfigValue&)->std::expected<bool,std::u16string> {
+            const auto start=value.find_first_not_of(u" \t\r\n");
+            return start!=value.npos && value.substr(start).starts_with(u"zenuml");
+        });
+        if(!extension)return std::unexpected(extension.error());
         const auto normalized = cleanup_text(source);
         auto front = extract_front_matter(normalized, limits.yaml);
         if (!front) return std::unexpected(front.error());
