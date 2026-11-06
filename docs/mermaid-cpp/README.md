@@ -18,7 +18,7 @@
 
 | 类别 | 已贯通图族 | 核心实现说明 |
 | --- | --- | --- |
-| 流程图与状态图 | **Flowchart**、**State** | Flowchart 支持经典节点几何、递归复合子图（subgraph）、`style`/`classDef` 样式优先级、HTML/Markdown 标签断行及边箭头标记，已同时打通 Dagre 与默认 ELK。State 的 classic/Dagre 路径支持复合状态、侧边注释和并发分区，各分区拥有独立的入口与出口。 |
+| 流程图与状态图 | **Flowchart**、**State** | Flowchart 支持经典节点几何、递归复合子图（subgraph）、`style`/`classDef` 样式优先级、HTML/Markdown 标签断行及边箭头标记，已同时打通 Dagre 与默认 ELK。State 支持默认 ELK 和显式 Dagre，覆盖复合状态、侧边注释、并发分区和循环。 |
 | 交互与面向对象 | **Sequence**、**Class** | Sequence 支持参与者、消息箭头、激活框、生命周期、注释和嵌套控制块。Class 支持显式 Dagre 和默认 ELK，覆盖类成员、关系箭头、命名空间和多重性标签。 |
 | 架构与层级图 | **Mindmap**、**Architecture**、**C4**、**Block**、**Kanban** | Mindmap 采用 `cose-bilkent` 力导向树布局；Architecture 采用 `fCoSE` 约束与双阶段布局，输出服务图标、分组框与有向边；C4 覆盖 Context/Container 等边界框与关系网格；Block 支持列跨度与嵌套网格；Kanban 支持分列卡片与元数据标签。 |
 | 数据与统计图表 | **Packet**、**Pie**、**Quadrant**、**Radar**、**XY**、**Sankey**、**Treemap** | Packet 位域网格；Pie 扇区几何（`d3-shape`/`d3-path`）与图例排布；Quadrant 四象限坐标；Radar 极坐标与闭合 Catmull-Rom 样条；XY 柱状/折线图与线性/分带坐标轴（`d3-scale`）；Sankey 流量节点松弛与渐变连线（`d3-sankey`）；Treemap 层级面积切分（`d3-hierarchy` squarify）。 |
@@ -63,7 +63,7 @@
 | 工作包 | 当前状态 | 下一步工作与完成标准 |
 | --- | --- | --- |
 | **4. 图族兼容性** | 34 个图族通过基础 SVG 对照；各自语法、外观和主题覆盖程度不同。 | 继续补充复杂标签、外观组合、曲线和需要额外注册资源的图形。浏览器回调依赖另行设计宿主边界。 |
-| **5. WinUI 宿主集成与依赖切换** | Astra 已在隔离工作区生成接入补丁。默认 State ELK 和 SVG 标签保留是切换前置条件。 | 在同一宿主验证应用预览、编辑刷新、亮暗主题和 PDF 导出。补丁路径和当前验收进度见 [交接](HANDOFF.md)。 |
+| **5. WinUI 宿主集成与依赖切换** | Astra 已在隔离工作区生成接入补丁。默认 State ELK 及 SVG 视口和标签保留检查已通过。 | 在同一宿主验证应用预览、编辑刷新、亮暗主题和 PDF 导出。补丁路径和当前验收进度见 [交接](HANDOFF.md)。 |
 
 ---
 
