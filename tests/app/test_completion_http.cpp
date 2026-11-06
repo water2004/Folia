@@ -34,6 +34,10 @@ suite completion_http_tests = [] {
             auto sampleReply = messages.GetObjectAt(sampleAt + 1);
             expect(sampleReply.GetNamedString(L"role") == L"assistant");
             auto replyContent = sampleReply.GetNamedValue(L"content");
+            if (protocol == 1) {
+                expect(replyContent.ValueType() == winrt::Windows::Data::Json::JsonValueType::String);
+                expect(content.GetArray().GetObjectAt(0).GetNamedString(L"type") == L"input_text");
+            }
             auto replyText = replyContent.ValueType() == winrt::Windows::Data::Json::JsonValueType::String
                 ? replyContent.GetString() : replyContent.GetArray().GetObjectAt(0).GetNamedString(L"text");
             expect(winrt::to_string(replyText) == prompt.examples[0].second);
@@ -245,6 +249,20 @@ suite completion_http_tests = [] {
         expect(failed);
         expect(!ValidateCompletionConfig({true, "http://localhost:80@remote.example/", "fixture", 0}).empty());
         expect(!ValidateCompletionConfig({true, "http://remote.example/", "fixture", 0}).empty());
+    };
+    "completion HTTP reports structured error details without echoing the response message"_test = [] {
+        for (auto const& [body, expected] : std::array<std::pair<std::string, std::string>, 3>{
+            std::pair{R"({"error":{"type":"invalid_request_error","code":"invalid_value","param":"input[2].content[0].type","message":"private fixture text"}})",
+                " (type: invalid_request_error, code: invalid_value, param: input[2].content[0].type)"},
+            std::pair{R"({"error":{"code":null,"param":"invalid field","message":"private fixture text"}})", ""},
+            std::pair{std::string(8193, ' '), ""},
+        }) {
+            Server server(body, 400, false, "application/json");
+            std::string error;
+            try { (void)RequestCompletionHttp({true, server.baseUrl, "fixture", 1}, completion_tests::MakePrompt({}), {}, L"fixture-key"); }
+            catch (std::exception const& failure) { error = failure.what(); }
+            expect(error == "Completion service returned HTTP 400" + expected);
+        }
     };
 };
 }

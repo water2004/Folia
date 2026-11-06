@@ -109,7 +109,9 @@
     },
     {
       "path": "providers/adapters/responses/Request.cpp",
-      "sha256": "5307c549245d7abb3b8a6844d376ee1dee27534a3af737af0543e5cd8a73e0b9"
+      "sha256": "261e68fc5a8f13439e0a9ace0ceb6126f5afa844bc783315adc931ee6bbcc343",
+      "upstream_sha256": "5307c549245d7abb3b8a6844d376ee1dee27534a3af737af0543e5cd8a73e0b9",
+      "local_change": "Encode text-only assistant history using the Responses plain-text message form."
     },
     {
       "path": "providers/adapters/responses/Response.cpp",

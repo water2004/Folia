@@ -29,7 +29,14 @@ Json BuildResponsesRequest(ModelRequest const& request) {
         auto role = message.role == MessageRole::System      ? "system"
                     : message.role == MessageRole::Assistant ? "assistant"
                                                              : "user";
-        input.push_back({{"type", "message"}, {"role", role}, {"content", InputContent(message)}});
+        // The plain-text message form accepts assistant history without
+        // labeling it as user input or fabricating a provider output item.
+        if (message.role == MessageRole::Assistant &&
+            std::ranges::all_of(message.content, [](auto const& part) { return part.kind == ContentKind::Text; })) {
+            input.push_back({{"type", "message"}, {"role", role}, {"content", PlainText(message)}});
+        } else {
+            input.push_back({{"type", "message"}, {"role", role}, {"content", InputContent(message)}});
+        }
         if (message.role == MessageRole::Assistant)
             for (auto const& call : message.toolCalls) {
                 if (call.id.empty() || call.name.empty())

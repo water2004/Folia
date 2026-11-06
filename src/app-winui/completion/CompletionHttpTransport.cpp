@@ -75,6 +75,47 @@ struct RequestOwner {
     std::shared_ptr<AsyncRequest> state;
     ~RequestOwner() { state->Close(); }
 };
+std::string HttpErrorDetails(std::string_view body) {
+    auto json = fairy::providers::Json::parse(body, nullptr, false);
+    if (!json.is_object()) return {};
+    auto error = json.find("error");
+    if (error == json.end() || !error->is_object()) return {};
+    // Only show short identifiers. A service's free-form message can echo
+    // credentials or document text from the request.
+    std::string details;
+    for (auto field : {"type", "code", "param"}) {
+        auto value = error->find(field);
+        if (value == error->end() || !value->is_string()) continue;
+        auto const& identifier = value->get_ref<std::string const&>();
+        if (identifier.empty() || identifier.size() > 80 || !std::ranges::all_of(identifier, [](char c) {
+            return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')
+                || c == '_' || c == '-' || c == '.' || c == '[' || c == ']';
+        })) continue;
+        details += details.empty() ? " (" : ", ";
+        details += std::string(field) + ": " + identifier;
+    }
+    if (!details.empty()) details += ')';
+    return details;
+}
+std::string ReadHttpErrorDetails(AsyncRequest& state, std::chrono::milliseconds timeout, std::stop_token stop) {
+    constexpr std::size_t maxBytes = 8192;
+    const auto deadline = std::chrono::steady_clock::now() + (std::min)(timeout, std::chrono::milliseconds(1000));
+    std::string body;
+    try {
+        while (!stop.stop_requested() && body.size() <= maxBytes) {
+            auto remaining = std::chrono::ceil<std::chrono::milliseconds>(deadline - std::chrono::steady_clock::now());
+            if (remaining.count() <= 0) break;
+            auto capacity = (std::min)(state.buffer.size(), maxBytes + 1 - body.size());
+            state.Begin([&](auto handle) { return WinHttpReadData(handle, state.buffer.data(), static_cast<DWORD>(capacity), nullptr); });
+            auto count = state.Wait(WINHTTP_CALLBACK_STATUS_READ_COMPLETE, remaining, stop);
+            if (!count) return HttpErrorDetails(body);
+            body.append(state.buffer.data(), count);
+        }
+    } catch (std::runtime_error const&) {
+        // Keep the original HTTP status when an error body is unavailable.
+    }
+    return {};
+}
 bool ReadHttp(CompletionConfig const& config, std::string const& urlText, wchar_t const* method,
     std::string body, std::stop_token stop, std::wstring key,
     std::function<bool(bool, std::string_view)> const& consume,
@@ -129,7 +170,10 @@ bool ReadHttp(CompletionConfig const& config, std::string const& urlText, wchar_
     DWORD status = 0, size = sizeof(status);
     state->Begin([&](auto handle) { return WinHttpQueryHeaders(handle, WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER,
         WINHTTP_HEADER_NAME_BY_INDEX, &status, &size, WINHTTP_NO_HEADER_INDEX); });
-    if (status != 200) throw std::runtime_error("Completion service returned HTTP " + std::to_string(status));
+    if (status != 200) {
+        auto details = status >= 400 ? ReadHttpErrorDetails(*state, inactivity, stop) : std::string{};
+        throw std::runtime_error("Completion service returned HTTP " + std::to_string(status) + details);
+    }
     wchar_t contentType[256]{}; size = sizeof(contentType);
     state->Begin([&](auto handle) { return WinHttpQueryHeaders(handle, WINHTTP_QUERY_CONTENT_TYPE,
         WINHTTP_HEADER_NAME_BY_INDEX, contentType, &size, WINHTTP_NO_HEADER_INDEX); });
