@@ -23,7 +23,8 @@ function Add-LicenseFile([string]$Title, [string]$Path) {
     Add-Line $Title
     Add-Line ('=' * 78)
     Add-Line
-    Add-Line ([IO.File]::ReadAllText($Path).TrimEnd())
+    $Text = [IO.File]::ReadAllText($Path).TrimEnd() -replace '(?m)[ \t]+(?=\r?$)', ''
+    Add-Line $Text
     Add-Line
 }
 
@@ -53,10 +54,12 @@ Add-LicenseFile 'Fluent UI System Icons — Microsoft, MIT License (82ecf7cbdb43
     (Join-Path $Root 'third_party\fluentui-system-icons\LICENSE')
 Add-LicenseFile 'ICU4C 78.3 — Unicode License V3' `
     (Join-Path $Root 'build\dependencies\icu-78.3\root\LICENSE')
-Add-LicenseFile 'QuickJS — MIT License' `
-    (Join-Path $Root 'src\app-winui\third_party\quickjs\LICENSE')
 Add-LicenseFile 'MathJax 4.1.3, mediawiki-texvc 2.7.9 aliases, and NewCM, bbm, bboldx, dsfont fonts — Apache License 2.0' `
-    (Join-Path $Root 'src\app-winui\Assets\mathjax\LICENSE-MathJax.txt')
+    (Join-Path $Root 'src\math\LICENSE-MathJax.txt')
+Add-LicenseFile 'mhchemparser 4.2.1 — Apache License 2.0' `
+    (Join-Path $Root 'src\math\dependencies\mhchem_parser\LICENSE-mhchemparser.txt')
+Add-LicenseFile 'MathJax Unicode support data' `
+    (Join-Path $Root 'src\math\util\LICENSE-Unicode.txt')
 Add-LicenseFile 'Native SVG normalizer wrapper — MIT License' `
     (Join-Path $Root 'src\app-winui\third_party\usvg-normalizer\LICENSE-MIT')
 Add-LicenseFile 'Tree-sitter Unicode support data' `
@@ -100,27 +103,6 @@ foreach ($Package in @($PackageConfig.packages.package | Sort-Object id, version
         Add-LicenseFile `
             "NuGet package: $($Package.id) $($Package.version) — $($LicenseFile.Name)" `
             $LicenseFile.FullName
-    }
-}
-
-$NpmDirectory = Join-Path $Root 'tools\mathjax-bundle'
-$NpmLockPath = Join-Path $NpmDirectory 'package-lock.json'
-if (Test-Path -LiteralPath $NpmLockPath) {
-    if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
-        throw 'Node.js is required to enumerate npm dependency licenses.'
-    }
-    $NpmEntries = & node (Join-Path $Root 'tools\list-npm-packages.cjs') $NpmLockPath
-    if ($LASTEXITCODE -ne 0) { throw "npm dependency enumeration failed with exit code $LASTEXITCODE" }
-    foreach ($Entry in @($NpmEntries | Sort-Object)) {
-        $Fields = $Entry -split "`t", 2
-        $PackagePath = $Fields[0]
-        $PackageVersion = if ($Fields.Count -gt 1) { $Fields[1] } else { '' }
-        $PackageDirectory = Join-Path $NpmDirectory ($PackagePath -replace '/', '\')
-        foreach ($LicenseFile in @(Find-LicenseFiles $PackageDirectory)) {
-            Add-LicenseFile `
-                "npm package: $($PackagePath -replace '^node_modules/', '') $PackageVersion — $($LicenseFile.Name)" `
-                $LicenseFile.FullName
-        }
     }
 }
 

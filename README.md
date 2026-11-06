@@ -129,8 +129,8 @@ powershell -ExecutionPolicy Bypass -File .\tools\math-port\winui-math-worker-pro
 ```
 
 This checks the built application objects and deployed math DLL without
-rebuilding the application with different deployment settings. The MSI excludes
-the worker probe and obsolete QuickJS math/font scripts.
+rebuilding the application with different deployment settings. The worker probe
+stays in the build directory.
 
 All generated files stay below `build/`. Application binaries are written to
 `build/app-winui/bin/<platform>/<configuration>/`; builds do not write into

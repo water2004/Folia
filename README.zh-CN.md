@@ -113,7 +113,7 @@ powershell -ExecutionPolicy Bypass -File .\tools\math-port\winui-math-worker-pro
 ```
 
 该检查使用已有应用对象和已部署的数学 DLL，不改变应用的部署构建参数。
-MSI 不包含 worker 测试程序和旧 QuickJS 数学、字体脚本。
+worker 测试程序留在构建目录。
 
 所有生成文件都位于 `build/`。应用输出位于
 `build/app-winui/bin/<platform>/<configuration>/`，构建不会向源码树写入文件。

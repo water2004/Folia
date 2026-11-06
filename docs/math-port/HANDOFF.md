@@ -2,6 +2,8 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
+- 2026-11-07：旧 QuickJS 源码、应用脚本和旧打包工具已移除。`tools/mathjax-bundle/` 的 `entry.cjs` 和锁文件继续作为原生数学构建及对照工具的固定输入。Release 启动、WiX 清单和锁定对照配置加载已验证。
+
 ## 当前 checkpoint（2026-11-06，拆分行间公式与 AI 换行触发）
 
 - 用户复现顺序：在一块 `\[ … \]` 中途加入 `\]`，再到后半段前的空行补 `\[`。块内 CST 已识别提前结束，但旧块树仍把后半段当作不可编辑的错误尾部。现在通过局部片段重解析拆分；独立开符可使用相邻段落中已有的闭符还原公式。操作保留源文、引用前缀和撤销事务，无全文重解析。

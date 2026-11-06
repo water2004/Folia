@@ -12,8 +12,8 @@ pages retain a finite height and their own scrolling surface.
 
 ## Math rendering
 
-Formulas use native `folia::math`; there is no formula-rendering switch or
-QuickJS runtime. LaTeX command suggestions have an independent setting.
+Formulas use native `folia::math` and render automatically.
+LaTeX command suggestions have an independent setting.
 
 ## AI input prediction
 

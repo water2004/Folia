@@ -783,9 +783,6 @@
     <None Include="Assets\completion.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Assets\mathjax\LICENSE-MathJax.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="third_party\usvg-normalizer\Cargo.toml" />
     <None Include="third_party\usvg-normalizer\Cargo.lock" />
     <None Include="third_party\usvg-normalizer\src\lib.rs" />
@@ -840,7 +837,7 @@
   <Target Name="CopyConfiguredFoliaAssets" AfterTargets="Build" Condition="'$(FoliaAssetsDirectory)'!='' and '$(FoliaDeployAssets)'=='true'">
     <ItemGroup>
       <FoliaDeployableAsset Include="$(ProjectDir)Assets\**\*"
-        Exclude="$(ProjectDir)Assets\settings.json;$(ProjectDir)Assets\themes\custom\**\*;$(ProjectDir)Assets\mathjax\mathjax-quickjs.js;$(ProjectDir)Assets\mathjax\font\**\*.js" />
+        Exclude="$(ProjectDir)Assets\settings.json;$(ProjectDir)Assets\themes\custom\**\*" />
     </ItemGroup>
     <Copy
       SourceFiles="@(FoliaDeployableAsset)"

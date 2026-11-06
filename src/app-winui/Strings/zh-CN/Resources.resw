@@ -133,7 +133,7 @@
   <data name="OpenSourceDescription" xml:space="preserve"><value>欢迎查看源码、反馈问题，并一起打磨专注而原生的 Markdown 编辑体验。</value></data>
   <data name="LicenseSummary" xml:space="preserve"><value>MIT 许可证 · 每份构建均附带完整第三方许可清单</value></data>
   <data name="BuiltForWindows" xml:space="preserve"><value>为 Windows 而生</value></data>
-  <data name="TechnologyDescription" xml:space="preserve"><value>WinUI 3 外壳 · C++23 文档引擎 · DirectWrite/Direct2D 渲染 · QuickJS MathJax 集成</value></data>
+  <data name="TechnologyDescription" xml:space="preserve"><value>WinUI 3 外壳 · C++23 文档引擎 · DirectWrite/Direct2D 渲染 · 原生数学公式和 Mermaid</value></data>
   <data name="FollowWindowsTheme" xml:space="preserve"><value>跟随 Windows</value></data>
   <data name="AutomaticThemeDescription" xml:space="preserve"><value>自动切换浅色、深色和高对比度</value></data>
   <data name="BuiltIn" xml:space="preserve"><value>内置</value></data>
