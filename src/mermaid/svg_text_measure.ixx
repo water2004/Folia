@@ -13,4 +13,6 @@ struct SvgTextMetrics {
 // Measures text in the current diagram's resolved font family.
 using SvgTextMeasure = std::function<std::expected<SvgTextMetrics, std::string>(
     std::u16string_view text, double font_size, unsigned font_weight)>;
+using SvgFamilyTextMeasure = std::function<std::expected<SvgTextMetrics, std::string>(
+    std::u16string_view text, std::u16string_view family, double font_size, unsigned font_weight)>;
 }
