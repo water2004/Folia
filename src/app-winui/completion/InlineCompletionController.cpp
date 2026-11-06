@@ -94,7 +94,10 @@ void InlineCompletionController::Edited(folia::TextSelection before, folia::Comm
     }
     proposal_.clear(); proposalSuffix_.clear();
     SetState(CompletionState::Idle);
-    if (typed || command.kind == folia::CommandKind::DeleteBackward || command.kind == folia::CommandKind::DeleteForward) Schedule();
+    if (typed || command.kind == folia::CommandKind::InsertNewline
+        || command.kind == folia::CommandKind::InsertSoftBreak
+        || command.kind == folia::CommandKind::DeleteBackward
+        || command.kind == folia::CommandKind::DeleteForward) Schedule();
 }
 void InlineCompletionController::Schedule() {
     if (!focused_ || composing_ || !service_ || !config_.enabled || !ValidateCompletionConfig(config_).empty()) return;

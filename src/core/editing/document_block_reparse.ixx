@@ -9,6 +9,7 @@ import folia.markdown.block_tree;
 import folia.markdown.document;
 import folia.core.document_container_source;
 import folia.core.document_edit_support;
+import folia.core.document_input_syntax;
 import folia.markdown.document_text;
 import folia.markdown.ids;
 import folia.markdown.parser;
@@ -53,6 +54,12 @@ inline bool same_raw_projection(const BlockNode& current, const BlockVec& parsed
     if (candidate.kind == BlockKind::MathBlock
         && candidate.atomic_special().math_delim != current.atomic_special().math_delim) return false;
     return true;
+}
+
+inline bool has_source_after_raw_closer(const BlockNode& block) {
+    const auto& tree = block.block_source.tree();
+    return tree.complete_closing && !tree.tokens.empty()
+        && tree.tokens.back().kind == BlockSourceTokenKind::Error;
 }
 
 inline bool range_overlaps(SourceRange left, SourceRange right) {
@@ -187,6 +194,7 @@ struct BlockReparsePlan {
     BlockVec blocks;
     NodeId target_parser_id{};
     std::size_t target_offset = 0;
+    std::size_t replaced_siblings = 1;
 };
 
 inline std::optional<BlockReparsePlan> plan_block_reparse(
@@ -237,6 +245,39 @@ inline std::optional<BlockReparsePlan> plan_block_reparse(
     return BlockReparsePlan{current.id, std::move(parsed.blocks), target->parser_id, target->local_offset};
 }
 
+// An opener inserted on its own paragraph can claim the adjacent paragraph
+// when that source already supplies its closer. Keep the lookahead local:
+// starting a new formula above unrelated text still leaves it untouched.
+inline std::optional<BlockReparsePlan> plan_adjacent_display_math(
+    const EditorDocument& document, const BlockNode& current,
+    std::u32string_view source, std::size_t target_offset) {
+    const auto delimiter = document_input_rules::detail::recognize_display_math_opening(source, document.dialect);
+    if (!delimiter) return std::nullopt;
+    auto path = document_block_path(document, current.id);
+    if (!path || path->empty()) return std::nullopt;
+    const auto index = path->back();
+    path->pop_back();
+    const auto* parent = block_at_path(document.root, *path);
+    if (!parent || index + 1 >= parent->children.size()) return std::nullopt;
+    const auto& following = parent->children[index + 1];
+    if (following.kind != BlockKind::Paragraph || following.inline_content.source.empty()) return std::nullopt;
+
+    auto projection = serialize_markdown_fragment_projection(parent->children, index, index + 2);
+    const auto& before = current.inline_content.source;
+    if (projection.blocks.size() != 2 || projection.blocks.front().begin != 0
+        || projection.blocks.front().end != before.size() || !projection.text.starts_with(before)) return std::nullopt;
+    projection.text.replace(0, before.size(), source);
+    // Only commit when the parser finds a matching closer and consumes both
+    // siblings losslessly as one math block.
+    auto plan = plan_block_reparse(document, current, projection.text, target_offset, BlockReparseScope::SingleBlock);
+    if (!plan || plan->blocks.front().kind != BlockKind::MathBlock
+        || plan->blocks.front().atomic_special().math_delim != *delimiter
+        || !plan->blocks.front().block_source.tree().complete_closing) return std::nullopt;
+    plan->replaced_siblings = 2;
+    plan->target_offset = block_source_clamp_editable_offset(plan->blocks.front().block_source, plan->target_offset);
+    return plan;
+}
+
 inline std::optional<BlockReparsePlan> plan_edited_direct_block(
     const EditorDocument& document, TextPosition position,
     BlockReparseScope scope = BlockReparseScope::SingleBlock,
@@ -244,10 +285,22 @@ inline std::optional<BlockReparsePlan> plan_edited_direct_block(
     const auto* current = find_document_block(document, position.container_id);
     if (!current) return std::nullopt;
     const auto* raw = editable_raw_block_source(*current);
-    if (raw && source_edit
-        && !block_reparse_detail::edit_touches_raw_structure(*current, *source_edit)) return std::nullopt;
+    if (raw) {
+        // A closer inside an existing raw block ends the block at that point.
+        // The raw lexer preserves the suffix as an error token; the block
+        // parser must now give that source its own editable owners.
+        if (block_reparse_detail::has_source_after_raw_closer(*current)) {
+            scope = BlockReparseScope::Fragment;
+        } else if (source_edit && !block_reparse_detail::edit_touches_raw_structure(*current, *source_edit)) {
+            return std::nullopt;
+        }
+    }
     const auto* inlines = editable_inline_document(*current);
     if (!raw && !inlines) return std::nullopt;
+    if (current->kind == BlockKind::Paragraph) {
+        if (auto adjacent = plan_adjacent_display_math(document, *current, inlines->source, position.source_offset))
+            return adjacent;
+    }
     return plan_block_reparse(document, *current, raw ? *raw : inlines->source,
         position.source_offset, scope);
 }
@@ -257,8 +310,11 @@ inline std::optional<BlockReparsePlan> plan_edited_direct_block(
 inline std::optional<BlockReparsePlan> plan_block_source_insertion(
     const EditorDocument& document, TextPosition position, std::u32string_view text) {
     const auto* current = find_document_block(document, position.container_id);
-    if (!current || current->kind != BlockKind::Paragraph || text.find(U'\n') == text.npos)
-        return std::nullopt;
+    if (!current || current->kind != BlockKind::Paragraph) return std::nullopt;
+    if (text.find(U'\n') == text.npos) {
+        if (position.source_offset != 0 || !current->inline_content.source.empty()) return std::nullopt;
+        return plan_adjacent_display_math(document, *current, text, text.size());
+    }
     auto source = current->inline_content.source;
     if (position.source_offset > source.size()) return std::nullopt;
     source.insert(position.source_offset, text);
@@ -275,8 +331,14 @@ inline std::optional<RecordedBlockEdit> apply_block_reparse_plan(
     const auto index = parent_path.back();
     parent_path.pop_back();
     auto* parent = block_at_path(document.root, parent_path);
-    if (!parent || index >= parent->children.size()) return std::nullopt;
+    if (!parent || index >= parent->children.size()
+        || plan.replaced_siblings > parent->children.size() - index) return std::nullopt;
     const auto parent_id = parent->id;
+    const auto prefix_owners = document_container_source::snapshot_ancestors(document, plan.owner);
+    std::optional<SerializedMarkdownProjection> previous_source;
+    if (!prefix_owners.empty()) {
+        previous_source = serialize_markdown_fragment_projection(parent->children, index, index + plan.replaced_siblings);
+    }
     for (auto& block : plan.blocks) {
         std::vector<std::pair<NodeId, NodeId>> remapped_ids;
         block_reparse_detail::assign_fresh_ids(block, plan.target_parser_id,
@@ -290,13 +352,15 @@ inline std::optional<RecordedBlockEdit> apply_block_reparse_plan(
         TextAffinity::Downstream,
     };
 
-    DocumentTreeEdit remove;
-    remove.kind = DocumentTreeEditKind::Remove;
-    remove.parent_id = parent_id;
-    remove.index = index;
-    remove.before = parent->children[index];
-    document_container_source::append_container_tree_operation(document, result.operations, std::move(remove));
-    parent->children.erase(parent->children.begin() + static_cast<std::ptrdiff_t>(index));
+    for (auto i = index + plan.replaced_siblings; i > index; --i) {
+        DocumentTreeEdit remove;
+        remove.kind = DocumentTreeEditKind::Remove;
+        remove.parent_id = parent_id;
+        remove.index = i - 1;
+        remove.before = parent->children[i - 1];
+        document_container_source::append_container_tree_operation(document, result.operations, std::move(remove));
+        parent->children.erase(parent->children.begin() + static_cast<std::ptrdiff_t>(i - 1));
+    }
 
     for (std::size_t replacement_index = 0;
          replacement_index < plan.blocks.size();
@@ -313,6 +377,13 @@ inline std::optional<RecordedBlockEdit> apply_block_reparse_plan(
         if (!insert_block(*parent, index + replacement_index, std::move(replacement))) {
             return std::nullopt;
         }
+    }
+    if (previous_source) {
+        auto next_source = serialize_markdown_fragment_projection(parent->children, index, index + plan.blocks.size());
+        auto prefix_edits = document_container_source::rebind_fragment_anchors(
+            document, prefix_owners, *previous_source, next_source);
+        result.operations.insert(result.operations.end(), std::make_move_iterator(prefix_edits.begin()),
+            std::make_move_iterator(prefix_edits.end()));
     }
     return result;
 }

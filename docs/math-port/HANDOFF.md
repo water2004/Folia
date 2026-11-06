@@ -2,7 +2,12 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-11-06，Responses 显式缓存断点）
+## 当前 checkpoint（2026-11-06，拆分行间公式与 AI 换行触发）
+
+- 用户复现顺序：在一块 `\[ … \]` 中途加入 `\]`，再到后半段前的空行补 `\[`。块内 CST 已识别提前结束，但旧块树仍把后半段当作不可编辑的错误尾部。现在通过局部片段重解析拆分；独立开符可使用相邻段落中已有的闭符还原公式。操作保留源文、引用前缀和撤销事务，无全文重解析。
+- 正常换行现在触发 AI 调度，Tab 接受失败也不会变成缩进。核心全量 774 项、WinUI 7 项 127 断言通过（包含两种模式和模拟服务），Debug 已构建。日志 `build/edit-split-math-{core,debug,winui}-final.log`，无运行句柄。下一步如需安装版，从当前提交构建；本轮未重打 MSI。
+
+## Responses 显式缓存断点（历史）
 
 - 用户要求添加显式断点，按协议实现且无服务商特判。补全设置新增 Responses 可见的「显式提示缓存」，`completion.explicitPromptCache` 默认 `false`，变更 Base URL 时清除。开启后将既有稳定上下文和光标片段作为同一条 user 消息的两个 `input_text`，仅稳定块标 `prompt_cache_breakpoint`，使用 `prompt_cache_options.mode=explicit`。空稳定块不标记，服务决定 token 门槛。未扩大上下文预算。
 - Debug 构建通过，最终回环 HTTP 22 项 287 断言及加载 5 项 22 断言通过，WinUI 设置 10 项 136 断言通过。日志 `build/completion-explicit-cache-debug-final.log`、`build/completion-explicit-cache-http-final.log`、`build/completion-explicit-cache-ui.log`。实际线上读写缓存未测。

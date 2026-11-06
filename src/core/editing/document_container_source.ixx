@@ -8,6 +8,7 @@ import folia.markdown.block_tree;
 import folia.markdown.container_source;
 import folia.markdown.document;
 import folia.markdown.document_text;
+import folia.markdown.serializer;
 import folia.core.document_transaction;
 import folia.markdown.text_edit;
 
@@ -233,6 +234,74 @@ inline std::vector<DocumentTreeEdit> transfer_split_anchors(
         update.kind = DocumentTreeEditKind::UpdatePayload;
         update.before = document_transaction_detail::payload_shell(*container);
         container->ensure_container_source() = next;
+        update.after = document_transaction_detail::payload_shell(*container);
+        updates.push_back(std::move(update));
+    }
+    return updates;
+}
+
+// A lossless fragment reparse changes owners but leaves the physical lines
+// in place. Carry the recorded container prefixes onto the new owner of each
+// line, including blank lines that move between a body and a separator.
+inline std::vector<DocumentTreeEdit> rebind_fragment_anchors(
+    EditorDocument& document, const std::vector<ContainerSourceSnapshot>& snapshots,
+    const SerializedMarkdownProjection& before, const SerializedMarkdownProjection& after) {
+    if (before.text != after.text || before.blocks.empty() || after.blocks.empty()) return {};
+    auto new_anchor = [&](std::size_t offset) -> std::optional<ContainerPrefixAnchor> {
+        for (const auto& map : after.source_maps) {
+            const auto at = std::ranges::lower_bound(map.source_to_serialized, offset);
+            if (at != map.source_to_serialized.end() && *at == offset)
+                return ContainerPrefixAnchor{map.container_id, ContainerAnchorPart::Source,
+                    static_cast<std::size_t>(at - map.source_to_serialized.begin())};
+        }
+        for (std::size_t i = 0; i < after.blocks.size(); ++i) {
+            const auto& block = after.blocks[i];
+            if (i && offset >= after.blocks[i - 1].end && offset <= block.begin)
+                return ContainerPrefixAnchor{block.owner, ContainerAnchorPart::Separator, offset - after.blocks[i - 1].end};
+            if (offset == block.begin) return ContainerPrefixAnchor{block.owner, ContainerAnchorPart::Start, 0};
+            if (offset == block.end) return ContainerPrefixAnchor{block.owner, ContainerAnchorPart::End, 0};
+        }
+        return std::nullopt;
+    };
+    std::vector<DocumentTreeEdit> updates;
+    for (const auto& snapshot : snapshots) {
+        auto* container = find_block(document.root, snapshot.container_id);
+        if (!container) continue;
+        ContainerSource next;
+        next.lines.reserve(snapshot.source.lines.size());
+        for (auto line : snapshot.source.lines) {
+            auto& anchor = line.anchor;
+            const auto block = std::ranges::find(before.blocks, anchor.owner_id, &SerializedBlockRange::owner);
+            if (block == before.blocks.end()) {
+                next.lines.push_back(std::move(line));
+                continue;
+            }
+            std::optional<std::size_t> offset;
+            switch (anchor.part) {
+                case ContainerAnchorPart::Source:
+                    offset = serialized_offset_for_source_position(before, {anchor.owner_id, anchor.offset});
+                    break;
+                case ContainerAnchorPart::Start: offset = block->begin; break;
+                case ContainerAnchorPart::End: offset = block->end; break;
+                case ContainerAnchorPart::Separator:
+                    if (block == before.blocks.begin()) {
+                        anchor.owner_id = after.blocks.front().owner;
+                        next.lines.push_back(std::move(line));
+                        continue;
+                    }
+                    offset = std::prev(block)->end + anchor.offset;
+                    break;
+            }
+            if (auto replacement = offset ? new_anchor(*offset) : std::nullopt) {
+                anchor = *replacement;
+                next.lines.push_back(std::move(line));
+            }
+        }
+        if (next == container->container_source()) continue;
+        DocumentTreeEdit update;
+        update.kind = DocumentTreeEditKind::UpdatePayload;
+        update.before = document_transaction_detail::payload_shell(*container);
+        container->ensure_container_source() = std::move(next);
         update.after = document_transaction_detail::payload_shell(*container);
         updates.push_back(std::move(update));
     }

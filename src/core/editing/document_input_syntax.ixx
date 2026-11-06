@@ -119,6 +119,17 @@ inline std::optional<FenceMatch> recognize_fence(std::u32string_view source) {
     return FenceMatch{marker, count, std::move(info), std::u32string(source)};
 }
 
+inline std::optional<MathDelimiter> recognize_display_math_opening(
+    std::u32string_view source, const MarkdownDialect& dialect) {
+    const auto indent = leading_spaces(source);
+    if (indent > 3) return std::nullopt;
+    source.remove_prefix(indent);
+    const auto dollar = dialect.math.block_dollar && source.starts_with(U"$$");
+    const auto bracket = dialect.math.block_bracket && source.starts_with(U"\\[");
+    if ((!dollar && !bracket) || !std::ranges::all_of(source.substr(2), horizontal_space)) return std::nullopt;
+    return dollar ? MathDelimiter::BlockDollar : MathDelimiter::BlockBracket;
+}
+
 inline std::optional<RawBlockOpening> recognize_raw_block_opening(
     std::u32string_view source,
     const MarkdownDialect& dialect) {
@@ -137,25 +148,13 @@ inline std::optional<RawBlockOpening> recognize_raw_block_opening(
         return opening;
     }
 
-    const auto indent = leading_spaces(source);
-    if (indent > 3) return std::nullopt;
-    const auto exact = std::u32string(source);
-    const auto marker = trim_horizontal(source.substr(indent));
-    RawBlockOpening opening;
-    opening.block_kind = BlockKind::MathBlock;
-    if (marker == U"$$" && dialect.math.block_dollar) {
-        opening.source_kind = BlockSourceKind::DollarMath;
-        opening.math_delimiter = MathDelimiter::BlockDollar;
-        opening.source = exact + U"\n\n" + std::u32string(source.substr(0, indent)) + U"$$";
-        return opening;
-    }
-    if (marker == U"\\[" && dialect.math.block_bracket) {
-        opening.source_kind = BlockSourceKind::BracketMath;
-        opening.math_delimiter = MathDelimiter::BlockBracket;
-        opening.source = exact + U"\n\n" + std::u32string(source.substr(0, indent)) + U"\\]";
-        return opening;
-    }
-    return std::nullopt;
+    const auto delimiter = recognize_display_math_opening(source, dialect);
+    if (!delimiter) return std::nullopt;
+    const auto dollar = *delimiter == MathDelimiter::BlockDollar;
+    return RawBlockOpening{BlockKind::MathBlock,
+        dollar ? BlockSourceKind::DollarMath : BlockSourceKind::BracketMath, *delimiter,
+        std::u32string(source) + U"\n\n" + std::u32string(source.substr(0, leading_spaces(source)))
+            + (dollar ? U"$$" : U"\\]")};
 }
 
 } // namespace folia::document_input_rules::detail

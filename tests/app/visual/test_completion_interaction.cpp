@@ -34,6 +34,9 @@ namespace winrt::Folia::implementation {
         static bool Key(Microsoft::UI::Xaml::Window const& window, folia::platform::editor::EditorKeyGesture key) {
             return Impl(window)->HandleCompletionKey(key);
         }
+        static bool DispatchKey(Microsoft::UI::Xaml::Window const& window, folia::platform::editor::EditorKeyGesture key) {
+            return Key(window, key) || Keyboard(window).Key(key);
+        }
         static void Render(Microsoft::UI::Xaml::Window const& window) { Impl(window)->RenderEditorSurface(); }
         static bool Execute(Microsoft::UI::Xaml::Window const& window, folia::Command command) {
             return Impl(window)->ExecuteEditorCommand(command);
@@ -101,6 +104,68 @@ namespace {
     };
 
     suite completion_interaction = [] {
+        "blank line before an orphan math body accepts typing paste and Tab after Enter"_test = [] {
+            for (bool sourceMode : {false, true}) {
+                CompletionWindow f(U"\\[");
+                f.Session().SetText(L"earlier\n\nFor \\(xx\\):\n\\[\na\n\n\n\n\n\\widehat{Q}_{yy}\n= y\n\\]\n\nend\n");
+                if (sourceMode) expect(fatal(f.Session().EnterSourceMode()));
+                auto opening = f.Session().RenderModel().blocks | std::views::transform([&](auto const& block) {
+                    return block.source_span.container_id;
+                });
+                const auto raw = std::ranges::find_if(opening, [&](auto owner) {
+                    auto source = f.Session().EditableSource(owner);
+                    return source && (sourceMode ? *source == U"a" : source->starts_with(U"\\[\na\n"));
+                });
+                expect(fatal(raw != opening.end()));
+                if (sourceMode) {
+                    const auto owner = *std::next(raw);
+                    f.Session().SetSelection(folia::TextSelection::caret({owner, 0}));
+                } else f.Session().SetSelection(folia::TextSelection::caret({*raw, 5}));
+                expect(fatal(Access::Keyboard(f.window).Character(u'\\')));
+                expect(fatal(Access::Keyboard(f.window).Character(u']')));
+                const auto original = f.Session().TextUtf8();
+                expect(original.find("a\n\\]\n\n\n\n\\widehat") != std::string::npos);
+                const auto at = original.find("\n\\widehat");
+                expect(fatal(at != std::string::npos));
+                const auto model = f.Session().RenderModel();
+                const auto following = std::ranges::find_if(model.blocks, [&](auto const& block) {
+                    auto source = f.Session().EditableSource(block.source_span.container_id);
+                    return source && source->starts_with(U"\\widehat{Q}_{yy}");
+                });
+                expect(fatal(following != model.blocks.end() && following != model.blocks.begin()));
+                const auto blank = std::prev(following)->source_span.container_id;
+                const auto blankSource = f.Session().EditableSource(blank);
+                expect(fatal(blankSource && blankSource->empty()));
+                f.Session().SetSelection(folia::TextSelection::caret({blank, 0}));
+                Access::AI(f.window)->Cancel();
+                Access::Render(f.window);
+
+                expect(fatal(Access::Keyboard(f.window).Character(u'x')));
+                auto typed = original; typed.insert(at, "x");
+                expect(f.Session().TextUtf8() == typed);
+                expect(fatal(Access::Execute(f.window, {.kind = folia::CommandKind::Undo})));
+                expect(f.Session().TextUtf8() == original);
+
+                expect(fatal(Access::Execute(f.window, {.kind = folia::CommandKind::Paste, .text = U"\\["})));
+                auto pasted = original; pasted.insert(at, "\\[");
+                expect(f.Session().TextUtf8() == pasted);
+                expect(fatal(Access::Execute(f.window, {.kind = folia::CommandKind::Undo})));
+                expect(f.Session().TextUtf8() == original);
+
+                expect(fatal(Access::DispatchKey(f.window, {.key = EditorKey::Enter})));
+                auto afterEnter = original; afterEnter.insert(at, "\n");
+                expect(f.Session().TextUtf8() == afterEnter);
+                auto requests = f.requests->load();
+                f.Ready();
+                expect(f.requests->load() == requests + 1);
+                expect(fatal(Access::DispatchKey(f.window, {.key = EditorKey::Tab})));
+                auto accepted = afterEnter; accepted.insert(at + 1, "\\[");
+                expect(f.Session().TextUtf8() == accepted);
+                expect(fatal(Access::Execute(f.window, {.kind = folia::CommandKind::Undo})));
+                expect(f.Session().TextUtf8() == afterEnter);
+            }
+        };
+
         "automatic TeX lists allow AI requests preview and Tab acceptance in math containers"_test = [] {
             for (auto markdown : {L"$\\f$", L"$$\n\\f\n$$", L"> $\\f$"}) {
                 CompletionWindow f; f.Begin(markdown);

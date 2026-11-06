@@ -42,6 +42,7 @@ void MainWindow::UpdateCompletionStatus(winrt::Folia::CompletionState state, std
 }
 bool MainWindow::HandleCompletionKey(folia::platform::editor::EditorKeyGesture gesture) {
     using namespace folia::platform::editor;
+    if (inlineCompletion && inlineCompletion->Active()) inlineCompletion->Validate();
     auto owner = CompletionKeyOwner(gesture, {textInputController.IsComposing(), latexCompletionController.Active(),
         keyboardController.HasSnippetSession(), inlineCompletion && inlineCompletion->Active()});
     if (owner == EditorCompletionKeyOwner::Latex)
@@ -56,7 +57,8 @@ bool MainWindow::HandleCompletionKey(folia::platform::editor::EditorKeyGesture g
         // The command list's replacement range becomes stale after accepting
         // an AI edit. Dismiss that list, while keeping word acceptance available.
         latexCompletionController.Cancel();
-        return inlineCompletion->Accept(gesture.key == EditorKey::Right);
+        inlineCompletion->Accept(gesture.key == EditorKey::Right);
+        return true; // A rejected completion must not turn into a tab insertion.
     }
     return false;
 }
