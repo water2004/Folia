@@ -559,7 +559,7 @@ std::expected<DiagramSvg, std::string> render_native_diagram(
             if (!result) return std::unexpected(result.error());
             return DiagramSvg{std::move(result->svg), result->width, result->height};
         } else if constexpr (std::is_same_v<std::decay_t<decltype(content)>, SwimlaneRenderInput>) {
-            auto result = render_swimlane_svg(content, svg_text_measure);
+            auto result = render_swimlane_svg(content, svg_family_measure);
             if (!result) return std::unexpected(result.error());
             return DiagramSvg{std::move(result->svg), result->width, result->height};
         } else if constexpr (std::is_same_v<std::decay_t<decltype(content)>, EventmodelingRenderInput>) {

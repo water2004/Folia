@@ -42,6 +42,9 @@ try {
       compare(a.text, e.text, `${path}.text`);
       compare(a.box, e.box, `${path}.box`, 1.5);
       compare(a.fontSize, e.fontSize, `${path}.fontSize`);
+      compare(a.fontFamily, e.fontFamily, `${path}.fontFamily`);
+      compare(a.color, e.color, `${path}.color`);
+      compare(a.fontWeight, e.fontWeight, `${path}.fontWeight`);
     }
     for (const key of ['lanes', 'nodes'])
       compare(actual[key], original[key], `${original.name}.${key}`, 1.5);
@@ -49,7 +52,13 @@ try {
     for (let index = 0; index < actual.edges.length; ++index) {
       const a = actual.edges[index], e = original.edges[index], path = `${original.name}.edges[${index}]`;
       assert.equal(a.stroke, e.stroke, `${path}.stroke`);
-      const aCommands = a.d.match(/[A-Za-z]/g) ?? [], eCommands = e.d.match(/[A-Za-z]/g) ?? [];
+      compare(a.strokeWidth, e.strokeWidth, `${path}.strokeWidth`);
+      const canonicalDash = (value) => value === 'none' || value === '0' || value === '0px'
+        ? 'solid' : value;
+      compare(canonicalDash(a.dasharray), canonicalDash(e.dasharray), `${path}.dasharray`);
+      compare(a.markerFill, e.markerFill, `${path}.markerFill`);
+      const aCommands = a.d.match(/[MmZzLlHhVvCcSsQqTtAa]/g) ?? [];
+      const eCommands = e.d.match(/[MmZzLlHhVvCcSsQqTtAa]/g) ?? [];
       assert.deepEqual(aCommands, eCommands, `${path}.commands`);
       const numbers = (value) => (value.match(/-?(?:\d+\.?\d*|\.\d+)(?:e[-+]?\d+)?/gi) ?? []).map(Number);
       compare(numbers(a.d), numbers(e.d), `${path}.geometry`, 1.5);

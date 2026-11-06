@@ -22,5 +22,5 @@ struct SwimlaneRenderInput { FlowchartInput document; SwimlaneSvgTheme theme; };
 struct SwimlaneSvg { std::string svg; double width = 0, height = 0; };
 std::expected<SwimlaneRenderInput, std::string> prepare_swimlane_render(const PreparedDiagram&);
 std::expected<SwimlaneSvg, std::string> render_swimlane_svg(
-    const SwimlaneRenderInput&, const SvgTextMeasure&);
+    const SwimlaneRenderInput&, const SvgFamilyTextMeasure&);
 }

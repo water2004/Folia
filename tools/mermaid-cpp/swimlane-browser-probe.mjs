@@ -26,11 +26,14 @@ export function inspectSwimlane() {
   };
   return {
     view: { x: view.x, y: view.y, width: view.width, height: view.height },
-    labels: [...svg.querySelectorAll('.nodeLabel, .cluster-label, .edgeLabel')].map((element) => ({
-      text: element.textContent.trim().replace(/\s+/g, ' '),
-      class: element.getAttribute('class'), box: box(element),
-      fontSize: getComputedStyle(element).fontSize,
-    })),
+    labels: [...svg.querySelectorAll('.nodeLabel, .cluster-label, .edgeLabel')].map((element) => {
+      const styleTarget = element.querySelector('.nodeLabel') ?? element;
+      const style = getComputedStyle(styleTarget);
+      return { text: element.textContent.trim().replace(/\s+/g, ' '),
+        class: element.getAttribute('class'), box: box(element),
+        fontSize: style.fontSize, fontFamily: style.fontFamily,
+        color: style.color, fontWeight: style.fontWeight };
+    }),
     lanes: [...svg.querySelectorAll('.cluster')].map((element) => {
       const shape = element.querySelector('rect.swimlane-title, rect') ?? element;
       const style = getComputedStyle(shape);
@@ -42,9 +45,15 @@ export function inspectSwimlane() {
       stroke: getComputedStyle(element.querySelector('rect, circle, ellipse, polygon, path') ?? element).stroke,
       strokeWidth: getComputedStyle(element.querySelector('rect, circle, ellipse, polygon, path') ?? element).strokeWidth,
     })),
-    edges: [...svg.querySelectorAll('.edgePath path, path.flowchart-link')].map((element) => ({
-      d: element.getAttribute('d'), stroke: getComputedStyle(element).stroke,
-    })),
+    edges: [...svg.querySelectorAll('.edgePath path, path.flowchart-link')].map((element) => {
+      const style = getComputedStyle(element);
+      const marker = element.getAttribute('marker-end') ?? element.getAttribute('markerEnd');
+      const markerId = marker?.match(/#([^\)]+)/)?.[1];
+      const markerShape = markerId ? svg.querySelector(`#${CSS.escape(markerId)} path`) : null;
+      return { d: element.getAttribute('d'), stroke: style.stroke,
+        strokeWidth: style.strokeWidth, dasharray: style.strokeDasharray,
+        markerFill: markerShape ? getComputedStyle(markerShape).fill : null };
+    }),
   };
 }
 

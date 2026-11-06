@@ -12,6 +12,9 @@ constexpr std::array cases{
     SwimlaneCase{"decisions-tb", u"swimlane-beta TB\nsubgraph Customer\nRequest\nDecision{Complete?}\nend\nsubgraph Operations\nCheck\nReject\nend\nsubgraph Result\nDone\nend\nRequest --> Decision\nDecision -- yes --> Check --> Done\nDecision -- no --> Reject\n"},
     SwimlaneCase{"unassigned-default-lane", u"swimlane-beta LR\nsubgraph Assigned\nInLane\nend\nOutside --> InLane --> AlsoOutside\n"},
     SwimlaneCase{"edge-labels", u"swimlane-beta LR\nsubgraph First\nA[Begin]\nend\nsubgraph Second\nB[Work]\nend\nA -- routed --> B\n"},
+    SwimlaneCase{"reverse-rl", u"swimlane-beta RL\nsubgraph East\nReview\nApprove\nend\nsubgraph West\nStart\nend\nStart --> Review --> Approve\n"},
+    SwimlaneCase{"reverse-bt", u"swimlane-beta BT\nsubgraph Upper\nTop\nMiddle\nend\nsubgraph Lower\nReply\nFinish\nend\nTop --> Middle --> Reply --> Finish\n"},
+    SwimlaneCase{"styles-multiline", u"swimlane-beta LR\nsubgraph Draft\nA[First line<br/>Second line]\nB{Pass?}\nend\nsubgraph Review\nC[Approved]\nend\nA --> B\nB -- yes --> C\nclassDef accent fill:#ff99cc,stroke:#003366,stroke-width:5px,color:#111111,font-weight:bold,font-size:18px,font-family:Georgia\nclass A accent\nstyle B fill:#fff2cc,stroke:#cc6600,stroke-width:3px,color:#222222\nlinkStyle 0 stroke:#ff6600,stroke-width:5px\n"},
 };
 
 suite mermaid_swimlane_platform = [] {
@@ -31,6 +34,16 @@ suite mermaid_swimlane_platform = [] {
                 if (!rendered) continue;
                 expect(rendered->width > 0 && rendered->height > 0) << test_case.name;
                 expect(rendered->svg.find("swimlane-diagram") != std::string::npos) << test_case.name;
+                if (test_case.name == "styles-multiline") {
+                    expect(rendered->svg.find("#ff99cc") != std::string::npos);
+                    expect(rendered->svg.find("#003366") != std::string::npos);
+                    expect(rendered->svg.find("#ff6600") != std::string::npos);
+                    expect(rendered->svg.find("Second line") != std::string::npos);
+                    expect(rendered->svg.find("font-weight:700") != std::string::npos);
+                    expect(rendered->svg.find("font-family:Georgia") != std::string::npos);
+                }
+                if (test_case.name == "reverse-rl" || test_case.name == "reverse-bt")
+                    expect(rendered->svg.find("rotate(-90)") == std::string::npos) << test_case.name;
                 if (auto directory = std::getenv("FOLIA_MERMAID_SVG_OUTPUT")) {
                     std::filesystem::create_directories(directory);
                     std::string output_name(test_case.name);

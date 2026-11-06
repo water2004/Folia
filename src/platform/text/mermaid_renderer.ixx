@@ -683,7 +683,8 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
     std::map<std::u16string, std::u16string, std::less<>> resolved_families;
     SvgFamilyTextMeasure svg_family_measure;
     if (std::holds_alternative<UsecaseRenderInput>(input->content) ||
-        std::holds_alternative<EventmodelingRenderInput>(input->content)) {
+        std::holds_alternative<EventmodelingRenderInput>(input->content) ||
+        std::holds_alternative<SwimlaneRenderInput>(input->content)) {
         svg_family_measure = [&](std::u16string_view text, std::u16string_view family,
                                     double size, unsigned weight, const SvgFamilyTextOptions& options)
             -> std::expected<SvgTextMetrics, std::string> {
