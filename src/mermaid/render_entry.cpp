@@ -132,6 +132,43 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
             if(!document)return std::unexpected(document.error());
             return NativeDiagram{std::move(*prepared),ZenRenderInput{std::move(*document),{}}};
         }
+        if(prepared->type==u"requirement") {
+            const auto layout=text(member(effective,u"layout"));
+            if((layout!=u"dagre" && layout!=u"elk") || text(member(effective,u"look"))!=u"classic")
+                return std::unexpected("Native Requirement SVG requires Dagre or ELK layout and classic look");
+            auto document=parse_requirement(prepared->code.cleaned);
+            if(!document)return std::unexpected(document.error());
+            metadata(*document,*prepared);
+            RequirementRenderInput input;
+            input.document=std::move(*document);
+            auto& config=input.config;
+            config.layout=layout;
+            if(const auto* state=effective.find(u"state")) {
+                if(const auto* value=state->find(u"nodeSpacing");value&&value->kind!=ConfigKind::null)
+                    config.node_spacing=number(*value);
+                if(const auto* value=state->find(u"rankSpacing");value&&value->kind!=ConfigKind::null)
+                    config.rank_spacing=number(*value);
+                if(const auto* value=state->find(u"titleTopMargin");value&&value->kind!=ConfigKind::null)
+                    config.title_top_margin=number(*value);
+                if(const auto* value=state->find(u"useMaxWidth");value&&value->kind!=ConfigKind::null)
+                    config.use_max_width=boolean(*value);
+            }
+            if(auto html=effective.find(u"htmlLabels");html&&html->kind!=ConfigKind::null)
+                config.html_labels=boolean(*html);
+            auto& paint=input.theme;
+            paint.font_family=text(member(effective,u"fontFamily"));
+            paint.font_size=size(member(theme,u"fontSize"));
+            for(auto [key,value]:{std::pair{u"mainBkg",&paint.fill},{u"nodeBorder",&paint.border},
+                {u"textColor",&paint.text},{u"lineColor",&paint.line},
+                {u"edgeLabelBackground",&paint.label_background},{u"textColor",&paint.title_color}})
+                *value=narrow(text(member(theme,key)));
+            for(auto [key,value]:{std::pair{u"nodeTextColor",&paint.text},
+                {u"relationColor",&paint.line},{u"requirementEdgeLabelBackground",&paint.label_background},
+                {u"relationLabelColor",&paint.relation_label}})
+                if(const auto* override=theme.find(key);override&&override->kind==ConfigKind::string&&!override->string.empty())
+                    *value=narrow(override->string);
+            return NativeDiagram{std::move(*prepared),std::move(input)};
+        }
         if(prepared->type==u"architecture") {
             auto input=prepare_architecture_render(source,session,limits);
             if(!input)return std::unexpected(input.error());
@@ -409,7 +446,7 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
     } catch(const std::runtime_error& e) { return std::unexpected(e.what()); }
 }
 
-std::expected<DiagramSvg,std::string> render_native_diagram(const NativeDiagram& input,const PieMeasurements& widths,const FlowchartMeasurements& flowchart_measurements,const SequenceMeasurements& sequence_measurements,const ClassMeasurements& class_measurements,const XYMeasurements& xy_measurements,const SankeyMeasurements& sankey_measurements,const TreemapMeasure& treemap_measure,const JourneyMeasure& journey_measure,const TimelineMeasure& timeline_measure,const GanttMeasure& gantt_measure,const GitGraphMeasure& git_graph_measure,const MindmapMeasurements& mindmap_measurements,const BlockMeasure& block_measure,const KanbanMeasure& kanban_measure,const C4Measurements& c4_measurements,const ArchitectureMeasurements& architecture_measurements,const StateMeasure& state_measure,const ZenSvgMeasure& zenuml_measure) {
+std::expected<DiagramSvg,std::string> render_native_diagram(const NativeDiagram& input,const PieMeasurements& widths,const FlowchartMeasurements& flowchart_measurements,const SequenceMeasurements& sequence_measurements,const ClassMeasurements& class_measurements,const XYMeasurements& xy_measurements,const SankeyMeasurements& sankey_measurements,const TreemapMeasure& treemap_measure,const JourneyMeasure& journey_measure,const TimelineMeasure& timeline_measure,const GanttMeasure& gantt_measure,const GitGraphMeasure& git_graph_measure,const MindmapMeasurements& mindmap_measurements,const BlockMeasure& block_measure,const KanbanMeasure& kanban_measure,const C4Measurements& c4_measurements,const ArchitectureMeasurements& architecture_measurements,const StateMeasure& state_measure,const ZenSvgMeasure& zenuml_measure,const RequirementSvgMeasure& requirement_measure) {
     return std::visit([&](const auto& content)->std::expected<DiagramSvg,std::string> {
         if constexpr(std::is_same_v<std::decay_t<decltype(content)>,ArchitectureRenderInput>) {
             auto result=render_architecture_svg(content,architecture_measurements);
@@ -421,6 +458,10 @@ std::expected<DiagramSvg,std::string> render_native_diagram(const NativeDiagram&
             return DiagramSvg{std::move(result->svg),result->width,result->height};
         } else if constexpr(std::is_same_v<std::decay_t<decltype(content)>,ZenRenderInput>) {
             auto result=render_zenuml_svg(content.document,zenuml_measure);
+            if(!result)return std::unexpected(result.error());
+            return DiagramSvg{std::move(result->svg),result->width,result->height};
+        } else if constexpr(std::is_same_v<std::decay_t<decltype(content)>,RequirementRenderInput>) {
+            auto result=render_requirement_svg(content,requirement_measure);
             if(!result)return std::unexpected(result.error());
             return DiagramSvg{std::move(result->svg),result->width,result->height};
         } else if constexpr(std::is_same_v<std::decay_t<decltype(content)>,StateRenderInput>) {

@@ -27,11 +27,14 @@
 ### 3. ZenUML 公共入口
 - `src/mermaid/zenuml.{ixx,cpp}` 与 `zenuml_svg.{ixx,cpp}` 负责语法解析、横向约束、纵向布局和 SVG 输出。公共入口、Windows 文本测量和 DLL 调用均已接通，5 个基准案例通过浏览器 SVG 对照。
 
-### 4. 平台文本测量与动态库接口（`src/platform/text/` / `tools/mermaid-cpp/`）
+### 4. Requirement 公共入口
+- `requirementDiagram` 的 classic 外观支持默认 ELK 和显式 Dagre。共 32 张浏览器 SVG 对照覆盖亮暗主题、节点和关系、HTML 与 SVG 标签、标题及标记。标签目前支持纯文本，富文本换行和任意 CSS 字体样式仍待补齐。
+
+### 5. 平台文本测量与动态库接口（`src/platform/text/` / `tools/mermaid-cpp/`）
 - **DirectWrite 文本测量（`mermaid_measurer.ixx`）**：在 Windows 平台解析 CSS `font-family` 候选列表，提供单行 advance/ink bounds 测量、按 Unicode 断行机会的文本折行以及 SVG 字体 ascent/descent 度量。
 - **C ABI 导出（`native-renderer.h` / `mermaid_host.ixx`）**：`FoliaNativeMermaid.dll` 导出 `FoliaNativeMermaidRender` 与 `FoliaNativeMermaidFree`，接收 UTF-8 源码与亮/暗主题参数，返回由 DLL 分配的 UTF-8 SVG 字符串（或错误文本）及宽高尺寸。
 
-### 5. 当前验证基线
+### 6. 当前验证基线
 - 代码分支已变基至上游 `master` `38231c6a`（Folia 0.5.4），GitHub Actions 工作流 [`.github/workflows/mermaid-cpp.yml`](../../.github/workflows/mermaid-cpp.yml) 在 Windows `standalone` / `integrated` × `Debug` / `Release` 四种配置下全部通过（上游 PR 检查见 [Actions Run #40820458232](https://github.com/water2004/Folia/actions/runs/40820458232)，Fork 仓库检查见 [Actions Run #40820482671](https://github.com/zhao0349/Folia/actions/runs/40820482671)）。
 - 自动化验证覆盖：核心模块测试（`FoliaMermaidTests`）、DirectWrite 平台与 DLL 宿主测试（`FoliaMermaidPlatformTests`、`FoliaMermaidHostTests`）、主工程回归测试（`FoliaTests`、`FoliaWindowsEditorTests`）、同机 DirectWrite 与 Chromium 文本测量对照，以及各图族与官方 Mermaid 浏览器输出的 SVG 对照（实测几何容差 `1.5`，ELK 算子坐标容差 `1e-4`）。
 
@@ -42,7 +45,7 @@
 | 工作包 | 当前状态 | 下一步工作与完成标准 |
 | --- | --- | --- |
 | **3. ER 图（`erDiagram`）** | 8 个成功案例、2 个语法错误案例的 Oracle（`er-oracle.mjs`）与双主题 16 张浏览器基准 SVG（`er-browser-probe.mjs`）已就绪 | 新增 `er.{ixx,cpp}` 与 `er_svg.{ixx,cpp}`，实现实体/属性/主键外键/基数关系解析、Dagre 布局适配、关系端点标记（crow's foot）绘制及公共入口接线，通过 `compare-er-svg.mjs` 16 张 SVG 对照。 |
-| **4. 其余图族与特性补齐** | Requirement 图等尚未开始；State 注释/并发分隔及部分存量图族次要语法分支待补齐 | 对照 Folia 实际支持的图族范围，优先实现 Requirement 图的原生解析、布局与 SVG 输出，并按需补齐存量图族的常见语法分支。 |
+| **4. 存量图族兼容性** | State 注释和并发分区已有实现，正在完成浏览器对照。 | 逐项验证现有图族的布局、外观和未覆盖语法。 |
 | **5. WinUI 宿主集成与依赖切换** | 独立候选分支已完成早期编译与初步预览验证 | 将最新 `FoliaNativeMermaid` 接入 WinUI 应用预览、编辑刷新、亮暗主题切换与 PDF 导出链路，完成桌面端实机验证后移除 `mermaid-rs-renderer` 依赖。 |
 
 ---
