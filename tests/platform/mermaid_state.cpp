@@ -15,6 +15,10 @@ suite mermaid_state=[] {
             {"nested",u"stateDiagram-v2\nstate Outer {\nstate Inner {\nA --> B\n}\nInner --> C\n}"},
             {"styles",u"stateDiagram-v2\nIdle --> Busy\nstyle Idle fill:#ffeecc,stroke:#884400,color:#112233"},
             {"configured",u"---\ntitle: State lifecycle\nconfig:\n  state:\n    nodeSpacing: 65\n    rankSpacing: 70\n---\nstateDiagram-v2\nA --> B: continue"}
+            ,{"inline-notes",u"stateDiagram-v2\nA --> B\nnote left of A : left annotation\nnote right of B : right annotation"}
+            ,{"block-note",u"stateDiagram-v2\nA --> B\nnote right of B\nA multi-line\nstate annotation\nend note"}
+            ,{"concurrent-regions",u"stateDiagram-v2\nstate Active {\nA --> B\n--\nC --> D\n--\nE --> F\n}"}
+            ,{"concurrent-initial-states",u"stateDiagram-v2\nstate Active {\n[*] --> A\n--\n[*] --> B\n}"}
         };
         for(const auto theme:{u"default",u"dark"}) {
             auto session=ConfigSession::create();expect(fatal(session.has_value()));ConfigValue site;site.kind=ConfigKind::mapping;

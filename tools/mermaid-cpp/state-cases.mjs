@@ -7,6 +7,11 @@ export const cases=[
  ['nested','stateDiagram-v2\nstate Outer {\nstate Inner {\nA --> B\n}\nInner --> C\n}'],
  ['styles','stateDiagram-v2\nIdle --> Busy\nstyle Idle fill:#ffeecc,stroke:#884400,color:#112233'],
  ['configured','---\ntitle: State lifecycle\nconfig:\n  state:\n    nodeSpacing: 65\n    rankSpacing: 70\n---\nstateDiagram-v2\nA --> B: continue'],
+ ['inline-notes','stateDiagram-v2\nA --> B\nnote left of A : left annotation\nnote right of B : right annotation'],
+ ['block-note','stateDiagram-v2\nA --> B\nnote right of B\nA multi-line\nstate annotation\nend note'],
+ ['concurrent-regions','stateDiagram-v2\nstate Active {\nA --> B\n--\nC --> D\n--\nE --> F\n}'],
+ ['concurrent-initial-states','stateDiagram-v2\nstate Active {\n[*] --> A\n--\n[*] --> B\n}'],
+ ['concurrent-trailing-divider','stateDiagram-v2\nstate Active {\nA --> B\n--\n}',false,false],
  ['unclosed','stateDiagram-v2\nstate Outer {\nA --> B',null],
  ['missing-target','stateDiagram-v2\nA -->',null]
 ];
