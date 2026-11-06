@@ -1,6 +1,6 @@
 # Mermaid C++ 原生渲染模块说明与协作指南
 
-本目录记录 Folia 的 Mermaid C++23 原生重构工程。该项目以官方 [`mermaid-js/mermaid`](https://github.com/mermaid-js/mermaid) **12.2.0**（commit `1fb7869866dd619168d840291c9c54b4f129758b`）为基准，在 `src/mermaid/` 与 `src/platform/text/` 下使用 C++23 modules 原生实现语法解析、布局计算、DirectWrite 文本测量与 SVG 渲染，用于替换现有的 `mermaid-rs-renderer` 依赖。各组件对应的上游源码版本与哈希记录在 [`source-lock.json`](source-lock.json) 中。
+本目录记录 Folia 的 Mermaid C++23 原生渲染模块。该项目以官方 [`mermaid-js/mermaid`](https://github.com/mermaid-js/mermaid) **12.2.0**（commit `1fb7869866dd619168d840291c9c54b4f129758b`）为基准，在 `src/mermaid/` 与 `src/platform/text/` 下实现语法解析、布局计算、DirectWrite 文本测量与 SVG 渲染。各组件对应的上游源码版本与哈希记录在 [`source-lock.json`](source-lock.json) 中。
 
 原生公共入口覆盖锁定版本的 34 个图族，各有原生 SVG 与上游渲染结果的对照。Packet 和 Pie 的对照在 jsdom 中运行，其余图族按各自的测试脚本运行。Railroad 的四种语法视为同一图族；显式 `error` 是内部诊断图。语法、布局和外观覆盖以各图族的基准测试为准。C++ 库提供 `folia::mermaid` CMake 目标，Folia 0.7.0 的桌面端使用原生 Mermaid，生成的 SVG 继续由 usvg 规范化供 Direct2D 与 PDF 使用。
 

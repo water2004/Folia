@@ -74,4 +74,4 @@ Local source acceptance is 41/246, with 205 sources still required, including
 maction/MathChoice/mfenced/factory, TeX packages, fonts, Common layout and SVG.
 These five semantic classes do not establish output geometry or production
 readiness. Math and the newly requested Mermaid native backend objectives both
-remain active; docs/mermaid-native/architecture.md records the additional goal.
+remain active at this checkpoint. The earlier Mermaid work is recorded in Git history.

@@ -1,8 +1,0 @@
-[package]
-name = "folia-mermaid-c4-style-reference"
-version = "0.1.0"
-edition = "2024"
-
-[dependencies]
-mermaid_pinned = { package = "mermaid-rs-renderer", path = "../../../.reference/mermaid-registry/mermaid-rs-renderer-0.3.1", default-features = false }
-serde_json = "=1.0.150"

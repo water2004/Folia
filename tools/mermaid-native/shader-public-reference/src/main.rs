@@ -1,7 +1,0 @@
-// Transport only; original public factories and original Shader methods supply results.
-use serde::{Deserialize,Serialize};use std::io::{self,Read};
-static WARNINGS:std::sync::Mutex<Vec<String>>=std::sync::Mutex::new(Vec::new());struct Observer;static OBSERVER:Observer=Observer;
-impl log::Log for Observer{fn enabled(&self,m:&log::Metadata)->bool{m.level()<=log::Level::Warn}fn log(&self,r:&log::Record){if self.enabled(r.metadata()){WARNINGS.lock().unwrap().push(r.args().to_string());}}fn flush(&self){}}
-#[derive(Serialize,Deserialize)]struct Input{kind:u8,stops:Vec<[u32;5]>,color:[u32;4],geometry:[u32;6],spread:u8,transform:[u32;6],pattern:(u32,u32,u8,u32),image:Vec<u8>,transforms:Vec<[u32;6]>,opacities:Vec<u32>,color_space:u8,prefix:usize,sentinel:bool,force:bool}
-#[derive(Serialize)]struct Case{input:Input,result:serde_json::Value,warnings:Vec<String>}
-fn main(){log::set_logger(&OBSERVER).unwrap();log::set_max_level(log::LevelFilter::Warn);std::panic::set_hook(Box::new(|_|{}));let mut s=String::new();io::stdin().read_to_string(&mut s).unwrap();let out:Vec<_>=serde_json::from_str::<Vec<Input>>(&s).unwrap().into_iter().map(|input|{let i=&input;let result=serde_json::to_value(tiny_skia::folia_public_shader(i.kind,&i.stops,i.color,i.geometry,i.spread,i.transform,i.pattern,&i.image,&i.transforms,&i.opacities,i.color_space,i.prefix,i.sentinel,i.force)).unwrap();let warnings=std::mem::take(&mut*WARNINGS.lock().unwrap());Case{input,result,warnings}}).collect();println!("{}",serde_json::to_string(&out).unwrap());}

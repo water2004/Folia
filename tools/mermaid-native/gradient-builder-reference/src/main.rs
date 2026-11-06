@@ -1,7 +1,0 @@
-// Root observer transport; only original tiny-skia is linked.
-use serde::{Deserialize,Serialize};use std::io::{self,Read};
-static WARNINGS:std::sync::Mutex<Vec<String>>=std::sync::Mutex::new(Vec::new());struct Observer;static OBSERVER:Observer=Observer;
-impl log::Log for Observer{fn enabled(&self,m:&log::Metadata)->bool{m.level()<=log::Level::Warn}fn log(&self,r:&log::Record){if self.enabled(r.metadata()){WARNINGS.lock().unwrap().push(r.args().to_string());}}fn flush(&self){}}
-#[derive(Deserialize,Serialize)]struct Input{stops:Vec<[u32;5]>,spread:u8,transform:[u32;6],points_to_unit:[u32;6],opacity:Vec<u32>,color_space:u8,radial:Option<([u32;2],Vec<u8>)>,prefix:usize,sentinel:bool,force:bool}
-#[derive(Serialize)]struct Output{input:Input,result:Option<(String,Vec<String>,Vec<Vec<u32>>)>,warnings:Vec<String>}
-fn main(){log::set_logger(&OBSERVER).unwrap();log::set_max_level(log::LevelFilter::Warn);std::panic::set_hook(Box::new(|_|{}));let mut text=String::new();io::stdin().read_to_string(&mut text).unwrap();let inputs:Vec<Input>=serde_json::from_str(&text).unwrap();let out:Vec<_>=inputs.into_iter().map(|input|{let result=tiny_skia::folia_gradient_builder(&input.stops,input.spread,input.transform,input.points_to_unit,&input.opacity,input.color_space,input.radial.clone(),input.prefix,input.sentinel,input.force);let warnings=std::mem::take(&mut*WARNINGS.lock().unwrap());Output{input,result,warnings}}).collect();println!("{}",serde_json::to_string(&out).unwrap());}
