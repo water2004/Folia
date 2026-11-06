@@ -94,19 +94,29 @@ struct CompletionPage {
     }
     ~CompletionPage() { view->Detach(); window.Close(); }
 };
+DropDownButton ChoiceButton(TextBox const& field) {
+    return First<DropDownButton>(field.Parent().as<Grid>());
+}
+MenuFlyout ReasoningOptions(FrameworkElement const& page) {
+    return ChoiceButton(Field<TextBox>(page, winrt::Folia::Localize(L"AIReasoning"))).Flyout().as<MenuFlyout>();
+}
+ListView ModelOptions(TextBox const& field) {
+    return ChoiceButton(field).Flyout().as<Flyout>().Content().as<ListView>();
+}
 suite settings_style_tests = [] {
     "manual reasoning effort survives moving focus away and saves"_test = [] {
         CompletionPage fixture("https://fixture.invalid/v1", "fixture", {}, 1);
-        auto reasoning = Field<ComboBox>(fixture.page, winrt::Folia::Localize(L"AIReasoning"));
+        auto reasoning = Field<TextBox>(fixture.page, winrt::Folia::Localize(L"AIReasoning"));
+        auto model = Field<TextBox>(fixture.page, winrt::Folia::Localize(L"AIModel"));
         auto next = Field<TextBox>(fixture.page, winrt::Folia::Localize(L"AIBaseUrl"));
         auto key = Field<PasswordBox>(fixture.page, winrt::Folia::Localize(L"AIKey"));
         key.Password(L"");
         reasoning.StartBringIntoView();
-        Pump([&] { fixture.root.UpdateLayout(); return First<TextBox>(reasoning) != nullptr; });
-        auto entry = First<TextBox>(reasoning);
-        expect(entry.Focus(FocusState::Programmatic));
-        Pump([&] { return Input::FocusManager::GetFocusedElement(entry.XamlRoot()) == entry; });
-        entry.Text(L"none");
+        expect(!reasoning.AcceptsReturn() && !model.AcceptsReturn());
+        expect(model.Focus(FocusState::Programmatic));
+        model.Text(L"manually-entered-model");
+        expect(reasoning.Focus(FocusState::Programmatic));
+        reasoning.Text(L"none");
         expect(next.Focus(FocusState::Programmatic));
         bool focusSettled = false;
         next.DispatcherQueue().TryEnqueue([&] { focusSettled = true; });
@@ -114,21 +124,21 @@ suite settings_style_tests = [] {
         catch (std::runtime_error const&) { throw std::runtime_error("Settings focus dispatcher did not settle"); }
         expect(Input::FocusManager::GetFocusedElement(next.XamlRoot()) == next);
         expect(reasoning.Text() == L"none") << winrt::to_string(reasoning.Text());
-        expect(entry.Text() == L"none") << winrt::to_string(entry.Text());
         InvokeAction(Action(fixture.page, winrt::Folia::Localize(L"Save")));
         try { Pump([&] { return fixture.applied.has_value(); }); }
         catch (std::runtime_error const&) { throw std::runtime_error("Manual reasoning effort was not applied by Save"); }
         expect(fixture.applied->completion.reasoningEffort == "none");
+        expect(fixture.applied->completion.model == "manually-entered-model");
     };
     "models without advertised capabilities show an explicit message without inventing list entries"_test = [] {
         for (int protocol : {0, 1, 2}) {
             completion_tests::Server server(R"({"data":[{"id":"reasoning-high-model"}]})", 200, false, "application/json");
             CompletionPage fixture(server.baseUrl, "reasoning-high-model", "high", protocol);
-            auto reasoning = Field<ComboBox>(fixture.page, winrt::Folia::Localize(L"AIReasoning"));
-            expect(reasoning.Items().Size() == 1_u);
+            auto reasoning = Field<TextBox>(fixture.page, winrt::Folia::Localize(L"AIReasoning"));
+            expect(ReasoningOptions(fixture.page).Items().Size() == 1_u);
             FetchModels(Action(fixture.page, winrt::Folia::Localize(L"AIFetchModels")), server);
-            expect(reasoning.Items().Size() == 1_u && reasoning.Text() == L"high") << "effort=" << winrt::to_string(reasoning.Text());
-            expect(reasoning.IsEditable());
+            expect(ReasoningOptions(fixture.page).Items().Size() == 1_u && reasoning.Text() == L"high") << "effort=" << winrt::to_string(reasoning.Text());
+            expect(!reasoning.IsReadOnly());
             expect(Description(fixture.page, winrt::Folia::Localize(L"AIReasoningMissingMetadata")) != nullptr);
         }
     };
@@ -136,31 +146,32 @@ suite settings_style_tests = [] {
         completion_tests::Server server(R"({"data":[{"id":"fixture","capabilities":{"effort":{"supported":true,"low":{"supported":true},"high":{"supported":true}}}},{"id":"other"}]})",
             200, false, "application/json", {}, 37, {R"({"data":[{"id":"other"}]})"});
         CompletionPage fixture(server.baseUrl, "fixture", "high", 2);
-        auto model = Field<ComboBox>(fixture.page, winrt::Folia::Localize(L"AIModel"));
-        auto reasoning = Field<ComboBox>(fixture.page, winrt::Folia::Localize(L"AIReasoning"));
+        auto model = Field<TextBox>(fixture.page, winrt::Folia::Localize(L"AIModel"));
+        auto reasoning = Field<TextBox>(fixture.page, winrt::Folia::Localize(L"AIReasoning"));
         auto fetch = Action(fixture.page, winrt::Folia::Localize(L"AIFetchModels"));
-        expect(model.Items().Size() == 1_u && model.SelectedIndex() == 0_i);
+        auto choices = ModelOptions(model);
+        expect(!ChoiceButton(model).IsEnabled() && model.Text() == L"fixture");
         FetchModels(fetch, server);
-        expect(model.Items().Size() == 2_u && model.SelectedIndex() == 0_i);
-        expect(winrt::unbox_value<winrt::hstring>(reasoning.SelectedItem().as<ComboBoxItem>().Tag()) == L"high");
+        expect(choices.Items().Size() == 2_u && model.Text() == L"fixture");
+        expect(ReasoningOptions(fixture.page).Items().Size() == 3_u && reasoning.Text() == L"high");
         FetchModels(fetch, server);
         auto service = fetch.Parent().as<Grid>().Parent().as<StackPanel>();
         auto fetchStatus = service.Children().GetAt(service.Children().Size() - 1).as<TextBlock>();
-        expect(model.Items().Size() == 1_u && model.SelectedIndex() == -1_i) << winrt::to_string(fetchStatus.Text());
+        expect(choices.Items().Size() == 1_u && choices.SelectedIndex() == -1_i) << winrt::to_string(fetchStatus.Text());
         expect(model.Text() == L"fixture") << "model=" << winrt::to_string(model.Text());
         expect(Description(fixture.page, winrt::Folia::Localize(L"AIReasoningMissingMetadata")) != nullptr);
-        expect(reasoning.Items().Size() == 1_u && reasoning.Text() == L"high") << "effort=" << winrt::to_string(reasoning.Text());
+        expect(ReasoningOptions(fixture.page).Items().Size() == 1_u && reasoning.Text() == L"high") << "effort=" << winrt::to_string(reasoning.Text());
     };
     "model discovery empty and failed responses remain selectable only by explicit available choices"_test = [] {
         for (auto status : {200, 503}) {
             completion_tests::Server server(R"({"data":[]})", status, false, "application/json");
             CompletionPage fixture(server.baseUrl);
-            auto model = Field<ComboBox>(fixture.page, winrt::Folia::Localize(L"AIModel"));
+            auto model = Field<TextBox>(fixture.page, winrt::Folia::Localize(L"AIModel"));
             auto fetch = Action(fixture.page, winrt::Folia::Localize(L"AIFetchModels"));
             FetchModels(fetch, server);
-            expect(server.received.load()); expect(model.Items().Size() == 0_u);
-            expect(model.SelectedIndex() == -1_i);
-            expect(Field<ComboBox>(fixture.page, winrt::Folia::Localize(L"AIReasoning")).Items().Size() == 1_u);
+            expect(server.received.load()); expect(ModelOptions(model).Items().Size() == 0_u);
+            expect(!ChoiceButton(model).IsEnabled() && model.Text().empty());
+            expect(ReasoningOptions(fixture.page).Items().Size() == 1_u);
         }
     };
     "leaving completion settings cancels pending model discovery"_test = [] {
@@ -206,7 +217,7 @@ suite settings_style_tests = [] {
         Field<TextBox>(page, winrt::Folia::Localize(L"AIBaseUrl")).Text(L"https://another.example/v1");
         Pump([&] { return fetch.IsEnabled(); });
         Pump([&] { return server.client.load() == INVALID_SOCKET; });
-        expect(Field<ComboBox>(page, winrt::Folia::Localize(L"AIReasoning")).Items().Size() == 1_u);
+        expect(ReasoningOptions(page).Items().Size() == 1_u);
     };
     "completion settings save independent budgets eagerness and protocol reasoning choices"_test = [] {
         completion_tests::Server server(R"({"data":[{"id":"fixture","capabilities":{"effort":{"supported":true,"low":{"supported":true},"high":{"supported":true},"max":{"supported":true}}},"display_name":"Fixture Model"},{"id":"plain"}]})", 200, false, "application/json");
@@ -225,28 +236,41 @@ suite settings_style_tests = [] {
             if (winrt::unbox_value<winrt::hstring>(entry.as<NavigationViewItem>().Tag()) == L"completion") navigation.SelectedItem(entry);
         root.UpdateLayout(); auto page = navigation.Content().as<FrameworkElement>();
         auto protocol = Field<ComboBox>(page, winrt::Folia::Localize(L"AIProtocol"));
-        auto reasoning = Field<ComboBox>(page, winrt::Folia::Localize(L"AIReasoning"));
+        auto reasoning = Field<TextBox>(page, winrt::Folia::Localize(L"AIReasoning"));
         auto eagerness = Field<ComboBox>(page, winrt::Folia::Localize(L"AIEagerness"));
         auto context = Field<TextBox>(page, winrt::Folia::Localize(L"AIContextKB"));
         auto output = Field<TextBox>(page, winrt::Folia::Localize(L"AIOutputTokens"));
         expect(protocol != nullptr && reasoning != nullptr && eagerness != nullptr && context != nullptr && output != nullptr);
         expect(context.Text() == L"7" && output.Text() == L"128");
         expect(eagerness.SelectedIndex() == 1_i);
-        expect(reasoning.Items().Size() == 1_u) << "there must be no preset reasoning levels";
-        protocol.SelectedIndex(2); expect(reasoning.SelectedIndex() == 0_i); expect(reasoning.Items().Size() == 1_u);
+        auto options = ReasoningOptions(page);
+        expect(options.Items().Size() == 1_u) << "there must be no preset reasoning levels";
+        protocol.SelectedIndex(2); expect(reasoning.Text().empty()); expect(options.Items().Size() == 1_u);
         auto key = Field<PasswordBox>(page, winrt::Folia::Localize(L"AIKey")); key.Password(L"fixture-key");
         auto fetch = Action(page, winrt::Folia::Localize(L"AIFetchModels")); expect(fetch != nullptr);
         FetchModels(fetch, server);
-        auto model = Field<ComboBox>(page, winrt::Folia::Localize(L"AIModel"));
-        expect(model.IsEditable()); expect(model.Items().Size() == 2_u);
-        expect(model.SelectedIndex() == -1_i) << "fetch must not silently select a new model";
-        model.SelectedIndex(0); expect(reasoning.Items().Size() == 4_u);
-        model.SelectedIndex(1); expect(reasoning.Items().Size() == 1_u);
+        auto model = Field<TextBox>(page, winrt::Folia::Localize(L"AIModel"));
+        auto choices = ModelOptions(model);
+        expect(!model.IsReadOnly()); expect(choices.Items().Size() == 2_u);
+        expect(model.Text().empty()) << "fetch must not silently select a new model";
+        choices.SelectedIndex(0); Pump([&] { return options.Items().Size() == 4; });
+        expect(model.Text() == L"fixture");
+        choices.SelectedIndex(1); Pump([&] { return options.Items().Size() == 1; });
+        expect(model.Text() == L"plain");
         expect(Description(page, winrt::Folia::Localize(L"AIReasoningMissingMetadata")) != nullptr);
-        model.Text(L"fixture"); expect(reasoning.Items().Size() == 4_u);
+        model.Text(L"fixture"); Pump([&] { return options.Items().Size() == 4; });
         expect(fetch.IsEnabled()); expect(server.request.starts_with("GET /v1/models HTTP/1.1\r\n"));
-        for (auto entry : reasoning.Items())
-            if (winrt::unbox_value<winrt::hstring>(entry.as<ComboBoxItem>().Tag()) == L"high") reasoning.SelectedItem(entry);
+        options.ShowAt(ChoiceButton(reasoning));
+        for (auto entry : options.Items()) {
+            auto item = entry.as<MenuFlyoutItem>();
+            if (item.Text() == L"high") {
+                Automation::Peers::MenuFlyoutItemAutomationPeer peer(item);
+                peer.GetPattern(Automation::Peers::PatternInterface::Invoke)
+                    .as<Automation::Provider::IInvokeProvider>().Invoke();
+                break;
+            }
+        }
+        Pump([&] { return reasoning.Text() == L"high"; });
         key.Password(L""); // Do not persist fixture credentials when applying settings.
         eagerness.SelectedIndex(2); context.Text(L"16"); output.Text(L"512");
         auto save = Action(page, winrt::Folia::Localize(L"Save")); expect(save != nullptr);
@@ -259,24 +283,20 @@ suite settings_style_tests = [] {
         view->Reset(*applied, folia::Theme::Light);
         root.UpdateLayout(); page = navigation.Content().as<FrameworkElement>();
         expect(Field<TextBox>(page, winrt::Folia::Localize(L"AIContextKB")).Text() == L"16");
-        expect(Field<ComboBox>(page, winrt::Folia::Localize(L"AIModel")).SelectedIndex() == 0_i);
-        model = Field<ComboBox>(page, winrt::Folia::Localize(L"AIModel"));
-        model.StartBringIntoView();
-        Pump([&] { root.UpdateLayout(); return First<TextBox>(model) != nullptr; });
-        First<TextBox>(model).Text(L"custom-model-not-in-list"); applied.reset();
+        model = Field<TextBox>(page, winrt::Folia::Localize(L"AIModel"));
+        expect(model.Text() == L"fixture");
+        model.Text(L"custom-model-not-in-list"); applied.reset();
         expect(model.Text() == L"custom-model-not-in-list");
         InvokeAction(Action(page, winrt::Folia::Localize(L"Save")));
         Pump([&] { return applied.has_value(); });
         expect(applied->completion.model == "custom-model-not-in-list");
         expect(applied->completion.reasoningEffort == "high") << "saved effort=" << applied->completion.reasoningEffort;
-        reasoning = Field<ComboBox>(page, winrt::Folia::Localize(L"AIReasoning"));
-        reasoning.StartBringIntoView();
-        Pump([&] { root.UpdateLayout(); return First<TextBox>(reasoning) != nullptr; });
-        First<TextBox>(reasoning).Text(L"custom_effort-2"); applied.reset();
+        reasoning = Field<TextBox>(page, winrt::Folia::Localize(L"AIReasoning"));
+        reasoning.Text(L"custom_effort-2"); applied.reset();
         InvokeAction(Action(page, winrt::Folia::Localize(L"Save")));
         Pump([&] { return applied.has_value(); });
         expect(applied->completion.reasoningEffort == "custom_effort-2");
-        First<TextBox>(reasoning).Text(L""); applied.reset();
+        reasoning.Text(L""); applied.reset();
         InvokeAction(Action(page, winrt::Folia::Localize(L"Save")));
         Pump([&] { return applied.has_value(); });
         expect(applied->completion.reasoningEffort.empty());

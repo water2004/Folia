@@ -342,6 +342,8 @@
   <data name="AIEagernessDescription" xml:space="preserve"><value>Controls how readily the prompt asks for a suggestion, independently of model reasoning. Proactive mode tries a short continuation even when several phrasings are possible; useful suggestions are not guaranteed.</value></data>
   <data name="AIReasoning" xml:space="preserve"><value>Reasoning effort</value></data>
   <data name="AIReasoningDefault" xml:space="preserve"><value>Service default</value></data>
+  <data name="AIReasoningChoices" xml:space="preserve"><value>Choose level</value></data>
+  <data name="AIModelChoices" xml:space="preserve"><value>Choose model</value></data>
   <data name="AIReasoningDescription" xml:space="preserve"><value>Select an advertised reasoning level or enter one manually. Blank or service default sends no effort parameter.</value></data>
   <data name="AIContextKB" xml:space="preserve"><value>Context size (KB, 1–64)</value></data>
   <data name="AIOutputTokens" xml:space="preserve"><value>Maximum output tokens (16–4096)</value></data>

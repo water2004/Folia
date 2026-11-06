@@ -17,39 +17,29 @@ struct ModelQuery {
     ~ModelQuery() { stop.request_stop(); }
     void Cancel() { stop.request_stop(); stop = {}; activePassword.reset(); ++generation; }
 };
-std::string SelectedValue(ComboBox const& box) {
-    if (auto selected = box.SelectedItem().try_as<ComboBoxItem>(); selected
-        && (!box.IsEditable() || box.Text() == winrt::unbox_value<winrt::hstring>(selected.Content())))
-        return winrt::to_string(winrt::unbox_value<winrt::hstring>(selected.Tag()));
-    return box.IsEditable() ? winrt::to_string(box.Text()) : std::string{};
-}
-void SetModelChoices(ComboBox const& box, std::vector<CompletionModel> const& models, std::string const& selected) {
-    box.Items().Clear();
+void SetModelChoices(ListView const& list, DropDownButton const& button, std::span<const CompletionModel> models) {
+    auto items = winrt::single_threaded_observable_vector<winrt::Windows::Foundation::IInspectable>();
     for (auto const& model : models) {
-        ComboBoxItem item; item.Tag(winrt::box_value(winrt::to_hstring(model.id)));
-        auto label = model.name.empty() || model.name == model.id ? model.id : model.name + " (" + model.id + ")";
-        item.Content(winrt::box_value(winrt::to_hstring(model.id)));
-        ToolTipService::SetToolTip(item, winrt::box_value(winrt::to_hstring(label)));
-        box.Items().Append(item);
-        if (model.id == selected) box.SelectedItem(item);
+        items.Append(winrt::box_value(winrt::to_hstring(model.id)));
     }
-    box.Text(winrt::to_hstring(selected)); // Keep manually entered IDs across refreshes too.
+    list.ItemsSource(items);
+    button.IsEnabled(!models.empty());
 }
-void SetReasoningChoices(ComboBox const& box, TextBlock const& hint, std::vector<std::string> const& levels,
-    std::string const& selected, bool hasModel) {
-    box.Items().Clear();
-    ComboBoxItem fallback; fallback.Tag(winrt::box_value(L""));
-    fallback.Content(winrt::box_value(Localize(L"AIReasoningDefault"))); box.Items().Append(fallback);
-    box.SelectedIndex(0);
-    bool matched = selected.empty();
+void SetReasoningChoices(MenuFlyout const& menu, TextBox const& field, TextBlock const& hint,
+    std::span<const std::string> levels, bool hasModel) {
+    menu.Items().Clear();
+    auto add = [&](winrt::hstring label, winrt::hstring value) {
+        MenuFlyoutItem item;
+        item.Text(label);
+        item.Click([weak = winrt::make_weak(field), value = std::move(value)](auto const&, auto const&) {
+            if (auto input = weak.get()) input.Text(value);
+        });
+        menu.Items().Append(item);
+    };
+    add(Localize(L"AIReasoningDefault"), {});
     for (auto const& level : levels) {
-        ComboBoxItem item; item.Tag(winrt::box_value(winrt::to_hstring(level)));
-        item.Content(winrt::box_value(winrt::to_hstring(level))); box.Items().Append(item);
-        if (level == selected) { box.SelectedItem(item); matched = true; }
-    }
-    if (!matched) {
-        box.SelectedIndex(-1);
-        box.Text(winrt::to_hstring(selected));
+        auto label = winrt::to_hstring(level);
+        add(label, label);
     }
     hint.Text(Localize(!hasModel ? L"AIReasoningSelectModel" : levels.empty() ? L"AIReasoningMissingMetadata" : L"AIReasoningDescription"));
 }
@@ -103,30 +93,57 @@ Microsoft::UI::Xaml::UIElement SettingsView::BuildCompletionPage() {
     baseUrl.PlaceholderText(L"https://api.example.com/v1");
     baseUrl.Text(winrt::to_hstring(appliedSettings_.completion.baseUrl)); service.Children().Append(baseUrl);
     service.Children().Append(Hint(Localize(L"AIBaseUrlDescription")));
-    auto model = Choice(); model.Header(box_value(Localize(L"AIModel")));
-    model.IsEditable(true);
-    model.Style(ResourceStyle(L"SettingsComboBoxStyle")); model.PlaceholderText(Localize(L"AIModelPlaceholder"));
-    if (!appliedSettings_.completion.model.empty()) SetModelChoices(model,
-        {{appliedSettings_.completion.model, appliedSettings_.completion.model, {}}}, appliedSettings_.completion.model);
+    TextBox model;
+    model.Header(box_value(Localize(L"AIModel")));
+    model.Style(ResourceStyle(L"SettingsTextBoxStyle"));
+    model.PlaceholderText(Localize(L"AIModelPlaceholder"));
+    model.Text(winrt::to_hstring(appliedSettings_.completion.model));
+    DropDownButton modelOptions;
+    modelOptions.Content(box_value(Localize(L"AIModelChoices")));
+    modelOptions.VerticalAlignment(VerticalAlignment::Bottom);
+    modelOptions.IsEnabled(false);
+    Flyout modelMenu;
+    ListView modelList;
+    modelList.MaxHeight(Metric(L"SettingsModelPickerMaxHeight"));
+    modelList.Width(Metric(L"SettingsModelPickerWidth"));
+    modelList.SingleSelectionFollowsFocus(false);
+    modelMenu.Content(modelList);
+    modelOptions.Flyout(modelMenu);
+    modelList.SelectionChanged([field = winrt::make_weak(model), menu = winrt::make_weak(modelMenu)](auto const& sender, auto const&) {
+        auto list = sender.template as<ListView>();
+        if (auto selected = list.SelectedItem()) {
+            if (auto input = field.get()) input.Text(winrt::unbox_value<winrt::hstring>(selected));
+            list.SelectedIndex(-1);
+            if (auto flyout = menu.get()) flyout.Hide();
+        }
+    });
     Button fetch; fetch.Content(box_value(Localize(L"AIFetchModels")));
     fetch.Style(ResourceStyle(L"SettingsSecondaryButtonStyle")); fetch.VerticalAlignment(VerticalAlignment::Bottom);
     Grid modelRow; modelRow.ColumnSpacing(Metric(L"SettingsSectionGap") / 2);
-    ColumnDefinition fieldColumn, actionColumn; actionColumn.Width(GridLengthHelper::Auto());
-    modelRow.ColumnDefinitions().Append(fieldColumn); modelRow.ColumnDefinitions().Append(actionColumn);
-    Grid::SetColumn(fetch, 1); modelRow.Children().Append(model); modelRow.Children().Append(fetch);
+    ColumnDefinition fieldColumn, modelChoicesColumn, actionColumn;
+    modelChoicesColumn.Width(GridLengthHelper::Auto()); actionColumn.Width(GridLengthHelper::Auto());
+    modelRow.ColumnDefinitions().Append(fieldColumn); modelRow.ColumnDefinitions().Append(modelChoicesColumn);
+    modelRow.ColumnDefinitions().Append(actionColumn);
+    Grid::SetColumn(modelOptions, 1); Grid::SetColumn(fetch, 2);
+    modelRow.Children().Append(model); modelRow.Children().Append(modelOptions); modelRow.Children().Append(fetch);
     service.Children().Append(modelRow);
-    auto reasoning = Choice(); reasoning.Header(box_value(Localize(L"AIReasoning")));
-    reasoning.IsEditable(true);
-    reasoning.TextSubmitted([](ComboBox const& box, ComboBoxTextSubmittedEventArgs const& args) {
-        // Commit custom text independently of the advertised items.
-        args.Handled(true);
-        box.SelectedIndex(-1);
-        box.Text(args.Text());
-    });
-    reasoning.Style(ResourceStyle(L"SettingsComboBoxStyle"));
+    TextBox reasoning;
+    reasoning.Header(box_value(Localize(L"AIReasoning")));
+    reasoning.Style(ResourceStyle(L"SettingsTextBoxStyle"));
+    reasoning.PlaceholderText(Localize(L"AIReasoningDefault"));
+    reasoning.Text(winrt::to_hstring(appliedSettings_.completion.reasoningEffort));
+    DropDownButton reasoningOptions;
+    reasoningOptions.Content(box_value(Localize(L"AIReasoningChoices")));
+    reasoningOptions.VerticalAlignment(VerticalAlignment::Bottom);
+    MenuFlyout reasoningMenu;
+    reasoningOptions.Flyout(reasoningMenu);
     auto reasoningHint = Hint(L"");
-    SetReasoningChoices(reasoning, reasoningHint, {}, appliedSettings_.completion.reasoningEffort, false);
-    service.Children().Append(reasoning);
+    SetReasoningChoices(reasoningMenu, reasoning, reasoningHint, {}, false);
+    Grid reasoningRow; reasoningRow.ColumnSpacing(Metric(L"SettingsSectionGap") / 2);
+    ColumnDefinition effortColumn, choicesColumn; choicesColumn.Width(GridLengthHelper::Auto());
+    reasoningRow.ColumnDefinitions().Append(effortColumn); reasoningRow.ColumnDefinitions().Append(choicesColumn);
+    Grid::SetColumn(reasoningOptions, 1); reasoningRow.Children().Append(reasoning); reasoningRow.Children().Append(reasoningOptions);
+    service.Children().Append(reasoningRow);
     service.Children().Append(reasoningHint);
     TextBlock fetchStatus; fetchStatus.Style(ResourceStyle(L"SettingsHintTextStyle")); service.Children().Append(fetchStatus);
     panel.Children().Append(service);
@@ -138,14 +155,24 @@ Microsoft::UI::Xaml::UIElement SettingsView::BuildCompletionPage() {
     CheckBox clearKey; clearKey.Content(box_value(Localize(L"AIClearKey"))); credentials.Children().Append(clearKey);
     panel.Children().Append(credentials);
     auto query = std::make_shared<ModelQuery>();
+    modelList.ContainerContentChanging([query](auto const&, ContainerContentChangingEventArgs const& args) {
+        if (args.InRecycleQueue()) return;
+        const auto index = static_cast<std::size_t>(args.ItemIndex());
+        if (index >= query->models.size()) return;
+        auto const& entry = query->models[index];
+        auto label = entry.name.empty() || entry.name == entry.id ? entry.id : entry.name + " (" + entry.id + ")";
+        ToolTipService::SetToolTip(args.ItemContainer(), winrt::box_value(winrt::to_hstring(label)));
+    });
     auto cancelQuery = [query, weakFetch = winrt::make_weak(fetch), weakStatus = winrt::make_weak(fetchStatus)] {
         query->Cancel();
         if (auto button = weakFetch.get()) { button.IsEnabled(true); button.Content(box_value(Localize(L"AIFetchModels"))); }
         if (auto text = weakStatus.get()) SetStatus(text, {}, false);
     };
-    auto resetQuery = [query, model, reasoning, reasoningHint, cancelQuery] {
-        cancelQuery(); query->models.clear(); query->fetched = false; model.Items().Clear(); model.Text(L"");
-        SetReasoningChoices(reasoning, reasoningHint, {}, {}, false);
+    auto resetQuery = [query, model, modelList, modelOptions, reasoning, reasoningMenu, reasoningHint, cancelQuery] {
+        cancelQuery(); query->models.clear(); query->fetched = false;
+        SetModelChoices(modelList, modelOptions, {}); model.Text(L"");
+        reasoning.Text(L"");
+        SetReasoningChoices(reasoningMenu, reasoning, reasoningHint, {}, false);
     };
     baseUrl.TextChanged([resetQuery](auto const&, auto const&) { resetQuery(); });
     protocol.SelectionChanged([resetQuery](auto const&, auto const&) { resetQuery(); });
@@ -159,18 +186,22 @@ Microsoft::UI::Xaml::UIElement SettingsView::BuildCompletionPage() {
     };
     clearKey.Checked(clearChanged); clearKey.Unchecked(clearChanged);
     panel.Unloaded([cancelQuery](auto const&, auto const&) { cancelQuery(); });
-    model.RegisterPropertyChangedCallback(ComboBox::TextProperty(),
-        [query, weakReasoning = winrt::make_weak(reasoning), weakHint = winrt::make_weak(reasoningHint)](auto const& sender, auto const&) {
+    auto updateReasoningOptions = [weakReasoning = winrt::make_weak(reasoning), weakMenu = winrt::make_weak(reasoningMenu),
+        weakHint = winrt::make_weak(reasoningHint)](ModelQuery const& state, std::string const& id) {
         auto hint = weakHint.get();
-        if (auto box = weakReasoning.get(); box && hint) {
-            auto id = winrt::to_string(sender.template as<ComboBox>().Text());
-            auto found = std::ranges::find(query->models, id, &CompletionModel::id);
-            auto effort = SelectedValue(box);
-            SetReasoningChoices(box, hint, found == query->models.end() ? std::vector<std::string>{} : found->reasoningEfforts, effort, query->fetched && !id.empty());
-        }
+        auto field = weakReasoning.get();
+        auto menu = weakMenu.get();
+        if (!field || !menu || !hint) return;
+        auto found = std::ranges::find(state.models, id, &CompletionModel::id);
+        auto levels = found == state.models.end() ? std::span<const std::string>{} : std::span{found->reasoningEfforts};
+        SetReasoningChoices(menu, field, hint, levels, state.fetched && !id.empty());
+    };
+    model.TextChanged([query, updateReasoningOptions](auto const& sender, auto const&) {
+        updateReasoningOptions(*query, winrt::to_string(sender.template as<TextBox>().Text()));
     });
     fetch.Click([weak = weak_from_this(), query, baseUrl, model, protocol, key, clearKey,
-        weakFetch = winrt::make_weak(fetch), weakReasoning = winrt::make_weak(reasoning), weakHint = winrt::make_weak(reasoningHint), weakStatus = winrt::make_weak(fetchStatus)](auto const&, auto const&) {
+        weakFetch = winrt::make_weak(fetch), weakStatus = winrt::make_weak(fetchStatus),
+        weakList = winrt::make_weak(modelList), weakOptions = winrt::make_weak(modelOptions), updateReasoningOptions](auto const&, auto const&) {
         auto self = weak.lock(); if (!self || self->detached_) return;
         CompletionConfig config{true, winrt::to_string(baseUrl.Text()), {}, protocol.SelectedIndex()};
         if (auto error = ValidateCompletionService(config); !error.empty()) {
@@ -182,20 +213,18 @@ Microsoft::UI::Xaml::UIElement SettingsView::BuildCompletionPage() {
         query->activePassword = password; query->activeClearKey = clearKey.IsChecked().GetBoolean();
         ReadModelChoices(config, std::wstring(password.c_str(), password.size()), password.empty() && !clearKey.IsChecked().GetBoolean(),
             query->stop.get_token(), Microsoft::UI::Dispatching::DispatcherQueue::GetForCurrentThread(),
-            [weak, weakQuery = std::weak_ptr(query), generation, weakModel = winrt::make_weak(model), weakFetch, weakReasoning, weakHint, weakStatus](auto models, auto error) mutable {
+            [weak, weakQuery = std::weak_ptr(query), generation, weakModel = winrt::make_weak(model),
+                weakFetch, weakStatus, weakList, weakOptions, updateReasoningOptions](auto models, auto error) mutable {
                 auto self = weak.lock(); auto state = weakQuery.lock();
                 if (!self || self->detached_ || !state || state->generation != generation) return;
                 state->activePassword.reset();
-                auto button = weakFetch.get(); auto box = weakReasoning.get(); auto text = weakStatus.get(); auto picker = weakModel.get();
-                auto hint = weakHint.get();
-                if (!button || !box || !text || !picker || !hint) return;
+                auto button = weakFetch.get(); auto text = weakStatus.get(); auto picker = weakModel.get();
+                auto list = weakList.get(); auto options = weakOptions.get();
+                if (!button || !text || !picker || !list || !options) return;
                 button.IsEnabled(true); button.Content(box_value(Localize(L"AIFetchModels")));
                 if (!error.empty()) { SetStatus(text, winrt::to_hstring(error), true); return; }
-                auto previousModel = winrt::to_string(picker.Text()); auto previousEffort = SelectedValue(box);
-                state->models = std::move(models); state->fetched = true; SetModelChoices(picker, state->models, previousModel);
-                if (auto found = std::ranges::find(state->models, winrt::to_string(picker.Text()), &CompletionModel::id); found != state->models.end())
-                    SetReasoningChoices(box, hint, found->reasoningEfforts, previousEffort, true);
-                else SetReasoningChoices(box, hint, {}, previousEffort, !picker.Text().empty());
+                state->models = std::move(models); state->fetched = true; SetModelChoices(list, options, state->models);
+                updateReasoningOptions(*state, winrt::to_string(picker.Text()));
                 SetStatus(text, state->models.empty() ? Localize(L"AINoModels")
                     : LocalizeFormat(L"AIModelsFetched", {winrt::to_hstring(state->models.size())}), false);
             });
@@ -211,7 +240,7 @@ Microsoft::UI::Xaml::UIElement SettingsView::BuildCompletionPage() {
         proposed.completion.baseUrl = winrt::to_string(baseUrl.Text());
         proposed.completion.model = winrt::to_string(model.Text());
         proposed.completion.protocol = protocol.SelectedIndex();
-        proposed.completion.reasoningEffort = SelectedValue(reasoning);
+        proposed.completion.reasoningEffort = winrt::to_string(reasoning.Text());
         proposed.completion.eagerness = static_cast<folia::completion::Eagerness>(eagerness.SelectedIndex());
         std::uint32_t context{}, output{};
         auto parse = [](winrt::hstring const& text, std::uint32_t& number) {

@@ -21,18 +21,17 @@ tokens (16–4096), suggestion frequency and reasoning effort. Defaults are 7 KB
 Balanced and Proactive select stable instruction variants; they do not change
 the model's reasoning parameter or guarantee a suggestion.
 
-The model field is an editable native dropdown: users can fetch and select a
-model or type an ID directly, including IDs absent from the list. **Fetch models**
+The model field is a text box with a separate model picker. Users can fetch and
+select a model or type an ID directly, including IDs absent from the list. **Fetch models**
 reads `GET /models` under the configured base URL without a prior model selection
 and without document content. Chat Completions and Responses use Bearer headers;
 Messages uses the protocol's API-key/version headers. Custom base paths and query
 parameters are retained for every host. No generation requests detect capabilities.
 
-The reasoning field is also an editable native dropdown. Advertised capability
-values are suggestions, not an input restriction: the user may type a value when
-metadata is missing or incomplete. Typed values are not inserted into the fetched
-candidate list. Model IDs and effort values saved by the user remain editable,
-and a refresh preserves the current inputs even when absent from returned metadata.
+The reasoning field is a text box with a separate menu for advertised levels and
+the service default. Choosing a level fills the field, and choosing the default
+clears it. A model refresh updates the menu while preserving the text. Users can
+enter any supported effort value when metadata is missing or incomplete.
 
 The OpenAI Models schema supplies model IDs but no reasoning-level discovery
 field. Messages reads the standard `capabilities.effort` object: both the feature

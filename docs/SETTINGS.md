@@ -19,7 +19,7 @@ QuickJS runtime. LaTeX command suggestions have an independent setting.
 
 The AI page configures an independent base URL, protocol, model and Windows-stored
 API key. It also exposes context size in KB, output tokens, prompt eagerness and
-reasoning effort. Fetch models populates an editable dropdown; users can also
+reasoning effort. Fetch models populates the model picker, and users can also
 type a model ID directly. Reasoning candidates come only from capabilities advertised
 by the selected protocol; absent capabilities show an explicit message, with no
 preset or inferred levels. The effort field also accepts a manually entered value

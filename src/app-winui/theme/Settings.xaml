@@ -13,6 +13,8 @@
     <x:Double x:Key="SettingsSectionGap">24</x:Double>
     <x:Double x:Key="SettingsWidePageWidth">720</x:Double>
     <x:Double x:Key="SettingsThemeListWidth">260</x:Double>
+    <x:Double x:Key="SettingsModelPickerWidth">320</x:Double>
+    <x:Double x:Key="SettingsModelPickerMaxHeight">320</x:Double>
     <!-- Cap the content column, not the stretched page itself: a stretched
          element with MaxWidth is centered inside a wider layout slot. -->
     <DataTemplate x:Key="SettingsPageViewportTemplate">

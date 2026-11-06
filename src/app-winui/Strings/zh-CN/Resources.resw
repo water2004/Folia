@@ -342,6 +342,8 @@
   <data name="AIEagernessDescription" xml:space="preserve"><value>通过提示词控制是否主动建议，与模型推理力度独立。积极档会在存在多种写法时尝试简短续写，但不保证每次都有建议。</value></data>
   <data name="AIReasoning" xml:space="preserve"><value>推理力度</value></data>
   <data name="AIReasoningDefault" xml:space="preserve"><value>服务默认</value></data>
+  <data name="AIReasoningChoices" xml:space="preserve"><value>选择档位</value></data>
+  <data name="AIModelChoices" xml:space="preserve"><value>选择模型</value></data>
   <data name="AIReasoningDescription" xml:space="preserve"><value>可选择上游声明的思考档位，也可手动填写。留空或选择服务默认时不发送力度参数。</value></data>
   <data name="AIContextKB" xml:space="preserve"><value>上下文大小（KB，1–64）</value></data>
   <data name="AIOutputTokens" xml:space="preserve"><value>最大输出 token（16–4096）</value></data>
