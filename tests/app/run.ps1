@@ -12,12 +12,19 @@ $ErrorActionPreference = 'Stop'
 $root = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 $objects = Join-Path $root "build/app-winui/obj/x64/$Configuration"
 $app = Join-Path $root "build/app-winui/bin/x64/$Configuration"
+$appLocalRuntime = Test-Path -LiteralPath (Join-Path $app 'Microsoft.UI.Xaml.dll') -PathType Leaf
 $hostName = if ($Visual) { 'window' } else { 'controller' }
+$hostName += $(if ($appLocalRuntime) { '-app-local' } else { '-framework' })
 $scratch = Join-Path $root "build/tests/winui/$Configuration/$hostName"
 New-Item -ItemType Directory -Force -Path $scratch | Out-Null
-# The SVG normalizer resolves its DLL relative to the executable, not the
-# working directory. Keep the test host's math pipeline identical to the app.
-Copy-Item -LiteralPath (Join-Path $app 'folia_svg_normalizer.dll') -Destination $scratch -Force
+# DLL lookup is executable-relative. Keep self-contained and framework hosts
+# in different directories so stale app-local WinUI DLLs cannot change modes.
+if ($appLocalRuntime) {
+    Get-ChildItem -LiteralPath $app -File -Filter '*.dll' | Copy-Item -Destination $scratch -Force
+} else {
+    Copy-Item -LiteralPath (Join-Path $app 'folia_svg_normalizer.dll') -Destination $scratch -Force
+    Copy-Item -LiteralPath (Join-Path $app 'FoliaNativeMermaid.dll') -Destination $scratch -Force
+}
 # The visual host uses the real Application bootstrap. Controller tests keep
 # their minimal WindowsXamlManager host, with no application XAML/PRI files.
 if ($Visual) {
@@ -117,7 +124,7 @@ $executable = Join-Path $scratch $(if ($Visual) { 'Folia.exe' } else { 'FoliaWin
 $linkResponse = Join-Path $scratch 'link.rsp'
 $linkFlags = if ($Configuration -eq 'Debug') { '/DEBUG' } else { '/LTCG' }
 $manifestFlags = '/MANIFEST:NO'
-if ($Visual) {
+if ($Visual -or $appLocalRuntime) {
     # Reuse the application's merged manifest, including PerMonitorV2 and
     # runtime dependencies. A DPI-unaware visual host is bitmap-scaled by
     # Windows and cannot validate production text or layout.

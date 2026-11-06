@@ -50,17 +50,17 @@ $NativeBuildDirectory = if ($Configuration -eq 'Debug') {
 
 $ConfigureCommand = 'call "' + $VsDevCmd + '" -arch=x64 -host_arch=x64 && cmake -S "' +
     $Root + '" -B "' + $NativeBuildDirectory + '" -G Ninja -DCMAKE_BUILD_TYPE=' +
-    $Configuration
+    $Configuration + ' -DFOLIA_BUILD_MERMAID=ON'
 & $env:ComSpec /d /s /c $ConfigureCommand
 if ($LASTEXITCODE -ne 0) {
-    throw "FoliaNativeMath CMake configure failed with exit code $LASTEXITCODE"
+    throw "Native renderer CMake configure failed with exit code $LASTEXITCODE"
 }
 
 $NativeBuildCommand = 'call "' + $VsDevCmd + '" -arch=x64 -host_arch=x64 && cmake --build "' +
-    $NativeBuildDirectory + '" --parallel 4 --target FoliaNativeMath'
+    $NativeBuildDirectory + '" --parallel 4 --target FoliaNativeMath FoliaNativeMermaid'
 & $env:ComSpec /d /s /c $NativeBuildCommand
 if ($LASTEXITCODE -ne 0) {
-    throw "FoliaNativeMath build failed with exit code $LASTEXITCODE"
+    throw "Native renderer build failed with exit code $LASTEXITCODE"
 }
 
 $Properties = @(

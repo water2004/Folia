@@ -150,7 +150,6 @@ namespace winrt::Folia
     std::wstring ToWide(std::u32string_view text);
     std::string SvgColor(D2D1_COLOR_F color);
     D2D1_COLOR_F InlineForeground(folia::InlineStyle const& style, D2D1_COLOR_F fallback);
-    std::optional<MermaidSvg> NormalizeMermaidSvg(MermaidSvg const& source, SvgNormalizer& normalizer, bool allowQueue);
     std::u32string InlineText(std::vector<folia::InlineRenderItem> const& items);
     EditorDisplayPosition InlineItemsEndPosition(std::vector<folia::InlineRenderItem> const& items, folia::TextPosition fallback);
     bool IsMermaidLanguage(std::optional<std::string> const& language);

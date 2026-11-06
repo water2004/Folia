@@ -87,6 +87,8 @@
     <FoliaNativeMathBuildDir Condition="'$(FoliaNativeMathBuildDir)'=='' and '$(Configuration)'=='Release'">$(ProjectDir)..\..\build\core-release\</FoliaNativeMathBuildDir>
     <FoliaNativeMathImportLibrary>$(FoliaNativeMathBuildDir)FoliaNativeMath.lib</FoliaNativeMathImportLibrary>
     <FoliaNativeMathRuntime>$(FoliaNativeMathBuildDir)FoliaNativeMath.dll</FoliaNativeMathRuntime>
+    <FoliaNativeMermaidBuildDir Condition="'$(FoliaNativeMermaidBuildDir)'==''">$(FoliaNativeMathBuildDir)tools\mermaid-cpp\</FoliaNativeMermaidBuildDir>
+    <FoliaNativeMermaidRuntime>$(FoliaNativeMermaidBuildDir)FoliaNativeMermaid.dll</FoliaNativeMermaidRuntime>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
@@ -863,6 +865,13 @@
     <Import Project="packages\Microsoft.Windows.SDK.BuildTools.10.0.28000.2270\build\Microsoft.Windows.SDK.BuildTools.targets" Condition="Exists('packages\Microsoft.Windows.SDK.BuildTools.10.0.28000.2270\build\Microsoft.Windows.SDK.BuildTools.targets')" />
     <Import Project="packages\Microsoft.Windows.ImplementationLibrary.1.0.260126.7\build\native\Microsoft.Windows.ImplementationLibrary.targets" Condition="Exists('packages\Microsoft.Windows.ImplementationLibrary.1.0.260126.7\build\native\Microsoft.Windows.ImplementationLibrary.targets')" />
   </ImportGroup>
+  <Target Name="CopyNativeMermaidRuntime" AfterTargets="Build">
+    <Copy SourceFiles="$(FoliaNativeMermaidRuntime)" DestinationFiles="$(OutDir)FoliaNativeMermaid.dll" SkipUnchangedFiles="true" />
+    <ItemGroup>
+      <FoliaNativeMermaidNotices Include="$(FoliaNativeMermaidBuildDir)Mermaid-Licenses\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(FoliaNativeMermaidNotices)" DestinationFolder="$(OutDir)Mermaid-Licenses\" SkipUnchangedFiles="true" />
+  </Target>
   <Target Name="CopyNativeMathRuntime" AfterTargets="Build">
     <Copy SourceFiles="$(FoliaNativeMathRuntime)" DestinationFiles="$(OutDir)FoliaNativeMath.dll" SkipUnchangedFiles="true" />
   </Target>
@@ -886,6 +895,7 @@
     <Error Condition="!Exists('packages\Microsoft.WindowsAppSDK.WinUI.2.2.1\metadata\Microsoft.UI.Xaml.winmd')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.WindowsAppSDK.WinUI.2.2.1\metadata\Microsoft.UI.Xaml.winmd'))" />
     <Error Condition="!Exists('$(FoliaBuildRoot)..\dependencies\usvg-normalizer\release\folia_svg_normalizer.dll')" Text="Missing native SVG normalizer. Run setup.ps1 before building Folia." />
     <Error Condition="!Exists('$(FoliaNativeMathImportLibrary)')" Text="Missing FoliaNativeMath import library at $(FoliaNativeMathImportLibrary). Run build_app.ps1 to configure and build the native math DLL." />
+    <Error Condition="!Exists('$(FoliaNativeMermaidRuntime)')" Text="Missing FoliaNativeMermaid runtime DLL at $(FoliaNativeMermaidRuntime). Run build_app.ps1 to configure and build the native Mermaid DLL." />
     <Error Condition="!Exists('$(FoliaNativeMathRuntime)')" Text="Missing FoliaNativeMath runtime DLL at $(FoliaNativeMathRuntime). Run build_app.ps1 to configure and build the native math DLL." />
     <Error Condition="!Exists('$(FoliaIcuRoot)include\unicode\ucsdet.h')" Text="Missing ICU headers. Run setup.ps1 before building Folia." />
     <Error Condition="!Exists('$(FoliaIcuRoot)lib64\icuin.lib')" Text="Missing ICU libraries. Run setup.ps1 before building Folia." />

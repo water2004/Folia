@@ -174,7 +174,7 @@ namespace winrt::Folia
             float fontSize = 0.0f;
         };
 
-        State() : runtimeLease(AcquireSharedRuntime()), worker([this] { Run(); }) {}
+        State() : runtimeLease(AcquireSharedRuntime()) {}
 
         ~State()
         {
@@ -283,6 +283,10 @@ namespace winrt::Folia
         key.append(reinterpret_cast<char const*>(&fontSize), sizeof(fontSize));
         if (auto found = state->cache.find(key); found != state->cache.end()) return found->second;
         if (!allowQueue) return std::nullopt;
+        // Synchronous preparation (including Mermaid) needs only the shared
+        // runtime lease. Create a queue worker only for actual async use.
+        if (!state->worker.joinable())
+            state->worker = std::thread([state = state.get()] { state->Run(); });
         auto change = state->requestQueue.Enqueue(
             State::Request{key, std::string(source), fontSize},
             highPriority

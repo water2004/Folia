@@ -1,5 +1,8 @@
 #include "pch.h"
 #include "media/MermaidRenderer.h"
+#include "media/SvgNormalizer.h"
+#include "../../../tools/mermaid-cpp/native-renderer.h"
+#include <cmath>
 
 namespace
 {
@@ -17,28 +20,20 @@ namespace
     public:
         Runtime()
         {
-            module = LoadLibraryExW((ModuleDirectory() + L"folia_svg_normalizer.dll").c_str(), nullptr, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
+            module = LoadLibraryExW((ModuleDirectory() + L"FoliaNativeMermaid.dll").c_str(), nullptr, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
             if (!module)
             {
                 error = "Native Mermaid library could not be loaded";
                 return;
             }
-            create = reinterpret_cast<Create>(GetProcAddress(module, "folia_svg_normalizer_create"));
-            destroy = reinterpret_cast<Destroy>(GetProcAddress(module, "folia_svg_normalizer_destroy"));
-            render = reinterpret_cast<Render>(GetProcAddress(module, "folia_mermaid_render"));
-            freeBuffer = reinterpret_cast<FreeBuffer>(GetProcAddress(module, "folia_svg_buffer_destroy"));
-            if (!create || !destroy || !render || !freeBuffer)
-            {
+            render = reinterpret_cast<Render>(GetProcAddress(module, "FoliaNativeMermaidRender"));
+            freeBuffer = reinterpret_cast<FreeBuffer>(GetProcAddress(module, "FoliaNativeMermaidFree"));
+            if (!render || !freeBuffer)
                 error = "Native Mermaid library has an incompatible ABI";
-                return;
-            }
-            context = create();
-            if (!context) error = "Native Mermaid renderer could not initialize";
         }
 
         ~Runtime()
         {
-            if (context && destroy) destroy(context);
             if (module) FreeLibrary(module);
         }
 
@@ -54,7 +49,6 @@ namespace
             std::uint8_t* output = nullptr;
             std::size_t outputLength = 0;
             auto status = render(
-                context,
                 reinterpret_cast<std::uint8_t const*>(source.data()),
                 source.size(),
                 dark,
@@ -62,26 +56,56 @@ namespace
                 &outputLength,
                 &result.width,
                 &result.height);
+            auto release = [this](std::uint8_t* bytes) { if (bytes) freeBuffer(bytes); };
+            std::unique_ptr<std::uint8_t, decltype(release)> ownedOutput(output, release);
             std::string value;
             if (output && outputLength > 0) value.assign(reinterpret_cast<char const*>(output), outputLength);
-            if (output) freeBuffer(output, outputLength);
-            if (status == 0) result.svg = std::move(value);
-            else result.error = value.empty() ? "Native Mermaid rendering failed" : std::move(value);
+            if (status != 0)
+            {
+                result.error = value.empty() ? "Native Mermaid rendering failed" : std::move(value);
+                return result;
+            }
+            if (!std::isfinite(result.width) || !std::isfinite(result.height)
+                || result.width <= 0.0f || result.height <= 0.0f)
+            {
+                result.error = "Native Mermaid returned an invalid viewport";
+                return result;
+            }
+            // usvg silently omits HTML subtrees. Require the native painter's
+            // portable SVG labels instead of publishing an incomplete diagram.
+            if (value.find("<foreignObject") != std::string::npos)
+            {
+                result.error = "Native Mermaid output contains unsupported HTML labels";
+                return result;
+            }
+            // The ABI owns intrinsic size. A numeric outer viewport also handles
+            // Info's percentage-only SVG without changing the inner viewBox or
+            // any measured coordinates. Nested SVG resolves percentages here.
+            auto width = std::to_string(result.width);
+            auto height = std::to_string(result.height);
+            value = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"" + width
+                + "\" height=\"" + height + "\" viewBox=\"0 0 " + width + " " + height
+                + "\">" + value + "</svg>";
+            // Direct2D's SVG subset needs text/CSS converted to paths. Reuse
+            // the independent SVG normalizer on this worker before publishing
+            // a complete result; preview and PDF share the same ready state.
+            auto normalized = normalizer.NormalizeNow(value, 16.0f);
+            if (normalized)
+            {
+                result.svg = *normalized.svg;
+            }
+            else result.error = normalized.error.empty() ? "Mermaid SVG normalization failed" : std::move(normalized.error);
             return result;
         }
 
     private:
-        using Create = void* (*)();
-        using Destroy = void (*)(void*);
-        using Render = std::int32_t (*)(void*, std::uint8_t const*, std::size_t, bool, std::uint8_t**, std::size_t*, float*, float*);
-        using FreeBuffer = void (*)(std::uint8_t*, std::size_t);
+        using Render = decltype(&FoliaNativeMermaidRender);
+        using FreeBuffer = decltype(&FoliaNativeMermaidFree);
 
         HMODULE module = nullptr;
-        void* context = nullptr;
-        Create create = nullptr;
-        Destroy destroy = nullptr;
         Render render = nullptr;
         FreeBuffer freeBuffer = nullptr;
+        winrt::Folia::SvgNormalizer normalizer;
         std::string error;
     };
 }
@@ -129,9 +153,9 @@ namespace winrt::Folia
                 std::function<void()> callback;
                 {
                     std::scoped_lock lock(mutex);
-                    queued.erase(request.key);
                     if (request.generation == generation)
                     {
+                        queued.erase(request.key);
                         Store(request.key, std::move(result));
                         if (!stopping) callback = completion;
                     }
@@ -170,7 +194,6 @@ namespace winrt::Folia
         std::mutex mutex;
         std::condition_variable wake;
         bool stopping = false;
-        std::thread worker;
         std::deque<Request> pending;
         std::unordered_set<std::string> queued;
         std::unordered_map<std::string, MermaidSvg> cache;
@@ -179,6 +202,8 @@ namespace winrt::Folia
         std::uint64_t nextId = 1;
         std::uint64_t generation = 0;
         std::function<void()> completion;
+        // Start only after every queue/cache member has been initialized.
+        std::thread worker;
     };
 
     MermaidRenderer::MermaidRenderer() : state(std::make_unique<State>()) {}

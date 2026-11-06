@@ -42,24 +42,6 @@ namespace winrt::Folia
         return result;
     }
 
-    std::optional<MermaidSvg> NormalizeMermaidSvg(MermaidSvg const& source, SvgNormalizer& normalizer, bool allowQueue)
-    {
-        auto normalized = normalizer.GetOrQueue(source.svg, 16.0f, allowQueue);
-        if (!normalized) return std::nullopt;
-        MermaidSvg result = source;
-        if (static_cast<bool>(*normalized))
-        {
-            result.renderId = normalized->id;
-            result.svg = *normalized->svg;
-        }
-        else
-        {
-            result.svg.clear();
-            result.error = normalized->error;
-        }
-        return result;
-    }
-
     bool IsMermaidLanguage(std::optional<std::string> const& language)
     {
         if (!language) return false;

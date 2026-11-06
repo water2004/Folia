@@ -5,7 +5,6 @@ use std::ptr;
 use std::sync::{Arc, Mutex};
 
 use base64::Engine as _;
-use mermaid_rs_renderer::{RenderOptions, Theme, render_with_options};
 
 const MAX_EMBEDDED_SVG_BYTES: usize = 1024 * 1024;
 const MAX_EMBEDDED_SVG_IMAGES: usize = 64;
@@ -328,77 +327,6 @@ pub extern "C" fn folia_svg_normalize(
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn folia_mermaid_render(
-    normalizer: *mut Normalizer,
-    input: *const u8,
-    input_len: usize,
-    dark: bool,
-    output: *mut *mut u8,
-    output_len: *mut usize,
-    width: *mut f32,
-    height: *mut f32,
-) -> i32 {
-    if normalizer.is_null()
-        || input.is_null()
-        || output.is_null()
-        || output_len.is_null()
-        || width.is_null()
-        || height.is_null()
-    {
-        return -1;
-    }
-    unsafe {
-        *output = ptr::null_mut();
-        *output_len = 0;
-        *width = 0.0;
-        *height = 0.0;
-    }
-    catch_unwind(AssertUnwindSafe(|| {
-        let source = unsafe { std::slice::from_raw_parts(input, input_len) };
-        let source = match std::str::from_utf8(source) {
-            Ok(value) => value,
-            Err(error) => {
-                write_output(error.to_string(), output, output_len);
-                return 1;
-            }
-        };
-        let mut render_options = RenderOptions::default();
-        if dark {
-            render_options.theme = Theme::dark();
-        }
-        let rendered = match render_with_options(source, render_options) {
-            Ok(value) => value,
-            Err(error) => {
-                write_output(error.to_string(), output, output_len);
-                return 1;
-            }
-        };
-        let normalizer = unsafe { &mut *normalizer };
-        let options = normalizer.options(rendered.as_bytes(), 16.0);
-        match usvg::Tree::from_data(rendered.as_bytes(), &options) {
-            Ok(tree) => {
-                let size = tree.size();
-                unsafe {
-                    *width = size.width();
-                    *height = size.height();
-                }
-                write_output(
-                    tree.to_string(&usvg::WriteOptions::default()),
-                    output,
-                    output_len,
-                );
-                0
-            }
-            Err(error) => {
-                write_output(error.to_string(), output, output_len);
-                1
-            }
-        }
-    }))
-    .unwrap_or(2)
-}
-
-#[unsafe(no_mangle)]
 pub extern "C" fn folia_svg_buffer_destroy(data: *mut u8, len: usize) {
     if data.is_null() {
         return;
@@ -425,35 +353,6 @@ mod tests {
             source.as_ptr(),
             source.len(),
             16.0,
-            &mut output,
-            &mut output_len,
-            &mut width,
-            &mut height,
-        );
-        let value = if output.is_null() {
-            String::new()
-        } else {
-            let bytes = unsafe { std::slice::from_raw_parts(output, output_len) };
-            let value = String::from_utf8_lossy(bytes).into_owned();
-            folia_svg_buffer_destroy(output, output_len);
-            value
-        };
-        folia_svg_normalizer_destroy(normalizer);
-        (status, value, width, height)
-    }
-
-    fn render_mermaid(source: &[u8], dark: bool) -> (i32, String, f32, f32) {
-        let normalizer = folia_svg_normalizer_create();
-        assert!(!normalizer.is_null());
-        let mut output = ptr::null_mut();
-        let mut output_len = 0;
-        let mut width = 0.0;
-        let mut height = 0.0;
-        let status = folia_mermaid_render(
-            normalizer,
-            source.as_ptr(),
-            source.len(),
-            dark,
             &mut output,
             &mut output_len,
             &mut width,
@@ -587,13 +486,4 @@ mod tests {
         );
     }
 
-    #[test]
-    fn mermaid_render_returns_normalized_svg_with_dimensions() {
-        let (status, output, width, height) =
-            render_mermaid(b"flowchart TD\n  A[Start] --> B[Finish]", false);
-        assert_eq!(status, 0, "{output}");
-        assert!(output.contains("<svg"));
-        assert!(width.is_finite() && width > 0.0);
-        assert!(height.is_finite() && height > 0.0);
-    }
 }
