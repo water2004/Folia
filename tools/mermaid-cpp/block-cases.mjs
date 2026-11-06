@@ -6,6 +6,8 @@ export const cases=[
  ['links','block-beta\ncolumns 2\na["Start"] b["Finish"]\na -- "next" --> b'],
  ['shapes','block-beta\ncolumns 3\na("Round") b{"Choice"} c["Rect"]'],
  ['arrow','block-beta\ncolumns 3\na<["Go"]>(right):2 b["Target"]'],
+ ['arrow-directions','block-beta\ncolumns 2\na<["Left"]>(left) b<["Up"]>(up)\nc<["Down"]>(down) d<["Both"]>(up,down)'],
+ ['arrow-axes','block-beta\ncolumns 2\na<["Horizontal"]>(x) b<["Vertical"]>(y)\nc<["Four way"]>(x,y)'],
  ['styles','block-beta\ncolumns 2\na["Accent"] b["Plain"]\nclassDef accent fill:#ffeecc,stroke:#aa4400,color:#663300\nclass a accent\nstyle b fill:#ddeeff,stroke:#335577'],
  ['incomplete-node','block-beta\na["Incomplete"',null],
  ['missing-end','block-beta\nblock:group\na["A"]',null],

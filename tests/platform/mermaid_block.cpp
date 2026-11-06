@@ -14,6 +14,8 @@ suite mermaid_block=[] {
             {"links",u"block-beta\ncolumns 2\na[\"Start\"] b[\"Finish\"]\na -- \"next\" --> b"},
             {"shapes",u"block-beta\ncolumns 3\na(\"Round\") b{\"Choice\"} c[\"Rect\"]"},
             {"arrow",u"block-beta\ncolumns 3\na<[\"Go\"]>(right):2 b[\"Target\"]"},
+            {"arrow-directions",u"block-beta\ncolumns 2\na<[\"Left\"]>(left) b<[\"Up\"]>(up)\nc<[\"Down\"]>(down) d<[\"Both\"]>(up,down)"},
+            {"arrow-axes",u"block-beta\ncolumns 2\na<[\"Horizontal\"]>(x) b<[\"Vertical\"]>(y)\nc<[\"Four way\"]>(x,y)"},
             {"styles",u"block-beta\ncolumns 2\na[\"Accent\"] b[\"Plain\"]\nclassDef accent fill:#ffeecc,stroke:#aa4400,color:#663300\nclass a accent\nstyle b fill:#ddeeff,stroke:#335577"}
         };
         for(const auto theme:{u"default",u"dark"}) {
