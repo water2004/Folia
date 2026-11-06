@@ -326,6 +326,34 @@ suite mermaid_measurement = [] {
                 u"B --> D[Finish]\nC --> D\nbranch@{curve: stepBefore}\nlinkStyle 1 interpolate natural");
         }
     };
+    "mermaid_flowchart_extra_shapes_measured_source_to_svg"_test=[] {
+        auto session=ConfigSession::create();
+        expect(fatal(session.has_value()));
+        const std::pair<std::string_view,std::u16string_view> cases[]={
+            {"extra-shapes-polygons",u"flowchart TD\nA@{shape: card, label: Card} --> B@{shape: extract, label: Extract}\n"
+                u"A --> C@{shape: manual-file, label: File}\nB --> D@{shape: loop-limit, label: Limit}\n"
+                u"C --> D\nD --> E@{shape: manual-input, label: Input}"},
+            {"extra-shapes-compartments",u"flowchart LR\nA@{shape: lin-proc, label: Process} --> "
+                u"B@{shape: divided-process, label: Divide} --> C@{shape: internal-storage, label: Store}"},
+        };
+        for(const auto theme:{u"default",u"dark"}) for(const auto& sample:cases) {
+            const auto name=sample.first;
+            const auto body=sample.second;
+            auto source=std::u16string(u"---\nconfig:\n  theme: ")+theme+
+                u"\n  look: classic\n  layout: dagre\n"
+                u"  fontFamily: Arial\n  themeVariables: {fontFamily: Arial}\n---\n";
+            source+=body;
+            const auto svg=render_mermaid(source,*session);
+            expect(svg.has_value())<<name<<(svg?"":svg.error());
+            if(!svg) continue;
+            if(auto directory=std::getenv("FOLIA_MERMAID_SVG_OUTPUT")) {
+                std::filesystem::create_directories(directory);
+                const auto suffix=theme==std::u16string_view(u"dark")?"dark":"default";
+                std::ofstream out(std::filesystem::path(directory)/("flowchart-"+std::string(name)+"-"+suffix+".svg"),std::ios::binary);
+                out<<svg->svg;expect(out.good());
+            }
+        }
+    };
     "mermaid_source_to_svg_resolves_fonts_and_measures_display_text"_test=[] {
         MermaidMeasurer measurer;
         auto family=measurer.resolve_family(u"'Folia Missing Family 792743', Arial, sans-serif");

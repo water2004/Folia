@@ -13,10 +13,18 @@ std::u16string_view flowchart_classic_shape(std::u16string_view shape) {
         {u"lean-l",u"lean_left"},{u"lean-left",u"lean_left"},{u"out-in",u"lean_left"},
         {u"trap-b",u"trapezoid"},{u"priority",u"trapezoid"},{u"trapezoid-bottom",u"trapezoid"},
         {u"trap-t",u"inv_trapezoid"},{u"manual",u"inv_trapezoid"},{u"trapezoid-top",u"inv_trapezoid"},{u"inv-trapezoid",u"inv_trapezoid"},
-        {u"dbl-circ",u"doublecircle"},{u"double-circle",u"doublecircle"}})
+        {u"dbl-circ",u"doublecircle"},{u"double-circle",u"doublecircle"},
+        {u"card",u"notch-rect"},{u"notched-rectangle",u"notch-rect"},
+        {u"extract",u"tri"},{u"triangle",u"tri"},{u"manual-file",u"flip-tri"},{u"flipped-triangle",u"flip-tri"},
+        {u"loop-limit",u"notch-pent"},{u"notched-pentagon",u"notch-pent"},
+        {u"manual-input",u"sl-rect"},{u"sloped-rectangle",u"sl-rect"},
+        {u"lined-rectangle",u"lin-rect"},{u"lined-process",u"lin-rect"},{u"lin-proc",u"lin-rect"},{u"shaded-process",u"lin-rect"},
+        {u"div-proc",u"div-rect"},{u"divided-rectangle",u"div-rect"},{u"divided-process",u"div-rect"},
+        {u"internal-storage",u"win-pane"},{u"window-pane",u"win-pane"},{u"lined-document",u"lin-doc"}})
         if(shape==name)return handler;
     for(const auto name:{u"squareRect",u"roundedRect",u"stadium",u"subroutine",u"cylinder",u"circle",u"diamond",
-        u"hexagon",u"lean_right",u"lean_left",u"trapezoid",u"inv_trapezoid",u"doublecircle",u"odd"})
+        u"hexagon",u"lean_right",u"lean_left",u"trapezoid",u"inv_trapezoid",u"doublecircle",u"odd",
+        u"notch-rect",u"tri",u"flip-tri",u"notch-pent",u"sl-rect",u"lin-rect",u"div-rect",u"win-pane",u"lin-doc"})
         if(shape==name)return name;
     return {};
 }

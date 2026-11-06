@@ -372,6 +372,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/flowchart-browser-probe.mjs --curves
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/flowchart-browser-probe.mjs --extra-shapes
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/flowchart-elk-oracle.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/sequence-browser-probe.mjs
@@ -446,6 +448,8 @@ jobs:
           node tools/mermaid-cpp/compare-flowchart-svg.mjs build/mermaid-cpp/hand-drawn-flowchart-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/compare-flowchart-svg.mjs build/mermaid-cpp/curve-flowchart-browser/original.json build/mermaid-cpp/pie-svg
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/compare-flowchart-svg.mjs build/mermaid-cpp/extra-shapes-flowchart-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/compare-sequence-svg.mjs build/mermaid-cpp/sequence-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -540,6 +544,8 @@ jobs:
             build/mermaid-cpp/hand-drawn-flowchart-browser/*.svg
             build/mermaid-cpp/curve-flowchart-browser/*.json
             build/mermaid-cpp/curve-flowchart-browser/*.svg
+            build/mermaid-cpp/extra-shapes-flowchart-browser/*.json
+            build/mermaid-cpp/extra-shapes-flowchart-browser/*.svg
             build/mermaid-cpp/flowchart-browser/*.svg
             build/mermaid-cpp/sequence-browser/*.json
             build/mermaid-cpp/sequence-browser/*.svg

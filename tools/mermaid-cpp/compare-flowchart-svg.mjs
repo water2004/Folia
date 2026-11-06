@@ -14,7 +14,7 @@ try {
  for(const row of rows) {
   const svg=readFileSync(resolve(output,'flowchart-'+row.name+'.svg'),'utf8');
   await page.setContent(svg);
-  const actual=await page.evaluate(()=>{
+  const actual=await page.evaluate(extraShapes=>{
    const svg=document.querySelector('svg'),outer=svg.querySelector('g[font-family]');
    const strokePaint=shape=>{
     const stroke=getComputedStyle(shape).stroke;
@@ -57,8 +57,8 @@ try {
      length:p.getTotalLength(),stroke:strokePaint(p),width:getComputedStyle(p).strokeWidth,
      samples:Array.from({length:37},(_,i)=>{const q=p.getPointAtLength(p.getTotalLength()*i/36);return position(p,q.x,q.y);}),
     })):null;
-    const outline=paths.flatMap(p=>Array.from({length:201},(_,i)=>{
-     const a=p.getPointAtLength(p.getTotalLength()*i/200);return position(p,a.x,a.y);
+    const outline=paths.flatMap(p=>Array.from({length:extraShapes?1001:201},(_,i)=>{
+     const a=p.getPointAtLength(p.getTotalLength()*i/(extraShapes?1000:200));return position(p,a.x,a.y);
     }));
     return {transform:n.getAttribute('transform'),width:b.width,height:b.height,label:text.textContent,
      labelCenter:position(text,t.x+t.width/2,t.y+t.height/2),lines:[...text.children].map(n=>n.textContent.trimEnd()),characters:styledCharacters(text),outline,
@@ -88,13 +88,13 @@ try {
    return {offset:outer.getAttribute('transform'),nodes,edges,labels,clusters,diagramTitle,
     bounds:{x:bounds.x,y:bounds.y,width:bounds.width,height:bounds.height},
     view:{x:view.x,y:view.y,width:view.width,height:view.height}};
-  });
+  },row.name.startsWith('extra-shapes-'));
   const offset=translate(actual.offset);assert.equal(actual.nodes.length,row.nodes.length,row.name);
   const b=actual.bounds,v=actual.view;
   assert(b.x+offset[0]>=v.x-1 && b.y+offset[1]>=v.y-1 &&
     b.x+b.width+offset[0]<=v.x+v.width+1 && b.y+b.height+offset[1]<=v.y+v.height+1,`${row.name}: clipped SVG content`);
   assert.equal(!!actual.diagramTitle,!!row.diagramTitle,`${row.name} diagram title`);
-  if(row.name.startsWith('hand-drawn-')) for(const key of ['x','y','width','height'])
+  if(/^(hand-drawn|extra-shapes)-/.test(row.name)) for(const key of ['x','y','width','height'])
    near(actual.view[key],row.view[key],`${row.name} view ${key}`);
   if(row.diagramTitle) {
    for(const key of ['text','fill','size']) assert.equal(actual.diagramTitle[key],row.diagramTitle[key],`${row.name} title ${key}`);
@@ -129,12 +129,13 @@ try {
    }
    if(row.name.startsWith('neo-')) assert.equal(a.filter,e.filter,`${row.name} node ${a.label} shadow`);
    if(e.outline.length) {
-    near(a.labelCenter.x,e.labelCenter.x,`${row.name} label center x`,2);
-    near(a.labelCenter.y,e.labelCenter.y,`${row.name} label center y`,2);
+    const tolerance=row.name.startsWith('extra-shapes-')?1.5:2;
+    near(a.labelCenter.x,e.labelCenter.x,`${row.name} label center x`,tolerance);
+    near(a.labelCenter.y,e.labelCenter.y,`${row.name} label center y`,tolerance);
     assert(a.outline.length,`${row.name}: missing shape outline`);
     for(const [from,to] of [[a.outline,e.outline],[e.outline,a.outline]]) for(const p of from) {
      const distance=Math.min(...to.map(q=>Math.hypot(p.x-q.x,p.y-q.y)));
-     near(distance,0,`${row.name} ${a.label} outline`,2);
+     near(distance,0,`${row.name} ${a.label} outline`,tolerance);
     }
    }
   }
@@ -152,7 +153,7 @@ try {
    assert.deepEqual(a.lines,e.lines,`${row.name} edge lines`);
    near(a.width,e.width,`${row.name} label width`);near(a.height,e.height,`${row.name} label height`);
   }
-  const edgeTolerance=row.name.startsWith('hand-drawn-')||row.name.startsWith('curve-')?1.5:3;
+  const edgeTolerance=/^(hand-drawn|curve|extra-shapes)-/.test(row.name)?1.5:3;
   for(let i=0;i<actual.edges.length;++i) {
    const a=actual.edges[i],e=row.edges.find(n=>n.id.endsWith("-"+a.id));
    assert(e,`${row.name}: missing edge ${a.id}`);near(a.length,e.length,`${row.name} edge ${i} length`,edgeTolerance);

@@ -8,6 +8,8 @@ struct RoughFlowchartLayer {
 struct RoughFlowchartNode : RoughFlowchartLayer {
     std::vector<RoughFlowchartLayer> overlays;
     FlowchartPoint label_offset{};
+    std::optional<FlowchartNodeBox> nominal_outline;
+    const FlowchartNodeBox* outline_box() const {return nominal_outline?&*nominal_outline:nullptr;}
 };
 
 std::string rough_rounded_rect(double x,double y,double width,double height,double radius) {
@@ -71,6 +73,35 @@ RoughFlowchartNode rough_flowchart_node(std::u16string_view shape, FlowchartNode
     }
     if(shape==u"stadium") return {{sketch_svg_path(
         polygon_path(stadium_points(box.width,box.height)),options)}};
+    if(extra_flowchart_shape(shape)) {
+        const auto w=box.width,h=box.height;
+        if(shape==u"lin-rect"||shape==u"div-rect") {
+            const auto l=-w/2,r=w/2,t=-h/2,b=h/2;
+            std::array<RoughPoint,7> points;
+            if(shape==u"lin-rect") {
+                const auto x=l+8;
+                points={{{x,t},{r,t},{r,b},{l,b},{l,t},{x,t},{x,b}}};
+            } else {
+                const auto y=-h/3;
+                points={{{l,y},{r,y},{r,b},{l,b},{l,t},{r,t},{r,y}}};
+            }
+            return {{sketch_polygon(points,options)}};
+        }
+        if(shape==u"win-pane") {
+            const auto l=-w/2-5,r=w/2-5,t=-h/2-5,b=h/2-5;
+            const auto path="M"+point({l,t})+"L"+point({r,t})+"L"+point({r,b})+
+                "L"+point({l,b})+"L"+point({l,t})+"M"+point({l,t+10})+"L"+point({r,t+10})+
+                "M"+point({l+10,t})+"L"+point({l+10,b});
+            return {{sketch_svg_path(path,options),{5,5}}};
+        }
+        auto points=extra_shape_outline(shape,w,h);
+        FlowchartPoint offset;
+        if(shape==u"notch-rect"||shape==u"tri"||shape==u"flip-tri") offset={-w/2,h/2};
+        else if(shape==u"sl-rect") offset={0,h/6};
+        if(shape==u"notch-rect") points.push_back(points.front());
+        for(auto& p:points) {p.x-=offset.x;p.y-=offset.y;}
+        return {{sketch_svg_path(polygon_path(points),options),offset}};
+    }
     if(shape==u"odd") {
         const auto notch=box.height/4,w=box.width-notch;
         const std::array points{FlowchartPoint{-w/2-notch,y},FlowchartPoint{-w/2,0},

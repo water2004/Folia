@@ -40,11 +40,12 @@ std::vector<FlowchartPoint> cut_at_cluster(std::span<const FlowchartPoint> point
 void finish_edge(FlowchartPlacedEdge& edge,const FlowchartEdge& source,
     const FlowchartPlacedNode& start,const FlowchartPlacedNode& end,
     std::u16string_view start_shape,std::u16string_view end_shape,bool intersect_shapes,
-    const FlowchartPlacedNode* from_cluster,const FlowchartPlacedNode* to_cluster,bool neo) {
+    const FlowchartPlacedNode* from_cluster,const FlowchartPlacedNode* to_cluster,bool neo,
+    const FlowchartNodeBox* start_outline,const FlowchartNodeBox* end_outline) {
     const auto original=edge.points;
     if(intersect_shapes) {
-        edge.points.front()=intersect(start,start_shape,edge.points[1],neo);
-        edge.points.back()=intersect(end,end_shape,edge.points[edge.points.size()-2],neo);
+        edge.points.front()=intersect(start,start_shape,edge.points[1],neo,start_outline);
+        edge.points.back()=intersect(end,end_shape,edge.points[edge.points.size()-2],neo,end_outline);
     }
     // The original toCluster branch deliberately starts from the Dagre path.
     if(to_cluster) edge.points=cut_at_cluster(original,*to_cluster);
@@ -173,9 +174,13 @@ FlowchartScene layout_prepared(const FlowchartInput& source,FlowchartPreparedGra
         const auto& original=source.edges[e.source_index];
         const auto a=ids.at(e.loop_segment==1?original.start:e.data.start);
         const auto b=ids.at(e.loop_segment==1?original.end:e.data.end);
+        const auto outline=[&](std::size_t i) -> const FlowchartNodeBox* {
+            const auto index=graph.nodes[i].source_index;
+            return rough_nodes&&index?(*rough_nodes)[*index].outline_box():nullptr;
+        };
         finish_edge(edge,original,placed->nodes[a],placed->nodes[b],graph.nodes[a].data.shape,graph.nodes[b].data.shape,
             !children[a]&&!children[b],e.from_cluster.empty()?nullptr:&placed->nodes[ids.at(e.from_cluster)],
-            e.to_cluster.empty()?nullptr:&placed->nodes[ids.at(e.to_cluster)],theme.neo);
+            e.to_cluster.empty()?nullptr:&placed->nodes[ids.at(e.to_cluster)],theme.neo,outline(a),outline(b));
     }
     scene.min_x=scene.min_y=std::numeric_limits<double>::infinity();
     scene.max_x=scene.max_y=-std::numeric_limits<double>::infinity();

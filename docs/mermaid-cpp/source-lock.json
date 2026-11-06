@@ -5,6 +5,42 @@
   "license": "MIT",
   "files": [
     {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes.ts",
+      "sha256": "078b5361f95a53dbec0ca768772ca21a5afb0997f0757a6aa0af0dd1e6112782"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/card.ts",
+      "sha256": "0f448c9d3d86dc7fef6405cdacfe11c4e2529ab9a424b1bac9dbade57241b1ad"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/triangle.ts",
+      "sha256": "42146cd8a1c12e8ec3f11f15d202a40fe0782bafa77f5be64763d4a6fa236119"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/flippedTriangle.ts",
+      "sha256": "368493403b28064be24c890cf79b3298421bb3fef7ad6e852a5dfd3d2500f0e9"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/trapezoidalPentagon.ts",
+      "sha256": "ba16df91609a7244cde50bf45cf0472280e6fb15e2a840c65312a65d82700a2e"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/slopedRect.ts",
+      "sha256": "287161d09db9e2013525a1ceaf07fd16c1622dfd0454643bdfe19e248ee96954"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/shadedProcess.ts",
+      "sha256": "8ab0becd75cc417e56daa2bf0153baf2485d7a7f2101175406da85a17b3fb415"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/dividedRect.ts",
+      "sha256": "b350380a57e5cc5b845ef9252080977d14876d69c3292292fa52e50655e963bd"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/windowPane.ts",
+      "sha256": "dfd52c16842b98420c64d9e094ef55094530aa1016833dae1cb5d950bfa2606d"
+    },
+    {
       "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/usecaseActor.ts",
       "sha256": "c11b71787542d8619d131d9687e5b61d3896492993f75e6ba5eee4fecd05edbb"
     },
