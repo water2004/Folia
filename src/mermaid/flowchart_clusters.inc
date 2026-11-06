@@ -75,14 +75,14 @@ void measure_flowchart_paint_bounds(FlowchartScene& scene,const FlowchartInput& 
     for(std::size_t i=0;i<result.nodes.size();++i) {
         const auto& n=result.nodes[i];
         if(n.id.empty()) continue;
-        if(rough_nodes&&(*rough_nodes)[i].drawing.bounds) {
-            const auto& rough=(*rough_nodes)[i];
-            const auto& b=*rough.drawing.bounds;
-            const auto x=rough.offset.x+(source.nodes[i].group?0:n.x);
-            const auto y=rough.offset.y+(source.nodes[i].group?0:n.y);
-            include(x+b.left,y+b.top);
-            include(x+b.right,y+b.bottom);
-        } else if(const auto* shape=find_local_shape(local_shapes,i)) {
+        if(rough_nodes) if(const auto bounds=rough_flowchart_bounds((*rough_nodes)[i])) {
+            const auto x=source.nodes[i].group?0:n.x;
+            const auto y=source.nodes[i].group?0:n.y;
+            include(x+bounds->left,y+bounds->top);
+            include(x+bounds->right,y+bounds->bottom);
+            continue;
+        }
+        if(const auto* shape=find_local_shape(local_shapes,i)) {
             const auto& bounds=shape->paint_bounds;
             include(n.x+bounds.left,n.y+bounds.top);
             include(n.x+bounds.right,n.y+bounds.bottom);

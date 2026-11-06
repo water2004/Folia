@@ -91,6 +91,9 @@ const handDrawnCases=[
   ['hand-drawn-markers','flowchart TD\nA[Read] o--o B[Check]\nB x--x C[Save]\nC <--> D[Done]'],
   ['hand-drawn-extra','flowchart LR\nA((Circle))\nB([Terminal])\nC[[Routine]]\nD[(Store)]\nE(((Double)))\nF{{Hex}}\nG[Read] --> H[Write]'],
   ['hand-drawn-elk-chain','flowchart LR\nA[Read] --> B(Check) --> C[Done]'],
+  ['hand-drawn-label-only','flowchart TB\nA@{shape: doc, label: "Cloud box"}\nstyle A fill:none,stroke:none'],
+  ['hand-drawn-elk-label-only','flowchart TB\nA@{shape: doc, label: "Cloud box"}\nstyle A fill:none,stroke:none'],
+  ['hand-drawn-document-brace-bounds','flowchart TB\nA@{shape: brace, label: "Cloud box"}'],
   ['hand-drawn-cluster','flowchart TD\nsubgraph g[Review]\nA[Read] --> B[Check]\nend\ng --> C[Done]'],
 ];
 const curveCases=['cardinal','bumpX','bumpY','catmullRom','monotoneX','monotoneY','natural','step','stepAfter','stepBefore','rounded']
@@ -103,6 +106,7 @@ const extraShapeCases=[
   ['extra-shapes-organic-tb','flowchart TB\nA@{shape: person, label: Customer} --> B@{shape: cloud, label: Public cloud}\nA --> C@{shape: person, label: Support}\nB --> D@{shape: cloud, label: Private cloud}\nC --> D'],
   ['extra-shapes-organic-styles','%%{init: {"flowchart": {"minNodeWidth": 0, "wrappingWidth": 90, "padding": 22}}}%%\nflowchart BT\nA@{shape: person, label: "Build<br/>operator"} --> B@{shape: cloud, label: "Cloud with a wrapped label"}\nclass A,B organic\nclassDef organic fill:#e1eee2,stroke:#335544,stroke-width:2px\nstyle B stroke:#442211'],
   ['extra-shapes-organic-wide','%%{init: {"flowchart": {"minNodeWidth": 300, "wrappingWidth": 320}}}%%\nflowchart RL\nA@{shape: person, label: Specialist} --> B@{shape: cloud, label: Network}'],
+  ['extra-shapes-dashed-document','flowchart LR\nA@{shape: doc, label: Document} --> B[Next]\nclassDef painted fill:#ff000080,stroke:#123456,stroke-width:4px,stroke-dasharray:3 2\nclass A painted'],
 ];
 const documentCases=[
   ['documents','flowchart TB\nA@{shape: document, label: Document} --> B@{shape: stacked-document, label: "Stacked documents"} --> C@{shape: tagged-document, label: Tagged} --> D@{shape: paper-tape, label: Tape}'],
@@ -201,6 +205,8 @@ for(const [name,body,title] of ${JSON.stringify(cases)}) {
    })):null;
    return {id:n.id,...position(n),transform:n.getAttribute('transform'),width:b.width,height:b.height,label:label.textContent,labelWidth:lb.width,labelHeight:lb.height,
     labelCenter:position(label,lb.x+lb.width/2,lb.y+lb.height/2),lines:displayLines(label),characters:styledCharacters(label),outline,
+    dashSegments:paths.filter(p=>getComputedStyle(p).strokeDasharray.split(/[, ]+/).some(v=>parseFloat(v)>0))
+      .map(p=>[getComputedStyle(p).strokeDasharray,(p.getAttribute('d')?.match(/[Mm]/g)??[]).length]),
     fill:getComputedStyle(fillShape).fill,stroke:strokePaint(strokeShape),
     filter:getComputedStyle(shape).filter!=='none'||paths.some(p=>getComputedStyle(p).filter!=='none'),
     thickness:getComputedStyle(strokeShape).strokeWidth,dash:getComputedStyle(strokeShape).strokeDasharray,color:label.querySelector('text')?getComputedStyle(label.querySelector('text')).fill:getComputedStyle(label.querySelector('span')??label).color,font:fontStyle(label),sketchPaths,

@@ -25,6 +25,7 @@ struct FlowchartLocalShape {
     // The empty attachment clips against the layout box.
     std::variant<std::monostate, std::vector<FlowchartPoint>, FlowchartCylinderAttachment> attachment;
     FlowchartShadowPaint shadow = FlowchartShadowPaint::contour;
+    bool flat_rough_paths = false;
 };
 
 void include_outline_bounds(std::optional<RoughBounds>& bounds, RoughBounds box,
@@ -45,32 +46,48 @@ const FlowchartLocalShape* find_local_shape(FlowchartLocalShapes shapes, std::si
 }
 
 std::string paint_local_shape(const FlowchartLocalShape& shape, const FlowchartPaint& paint,
-    std::string_view fill, std::string_view stroke, std::string_view width, std::string_view shadow) {
-    const bool grouped = shape.contours.size() != 1;
+    std::string_view fill, std::string_view stroke, std::string_view width, std::string_view shadow,
+    std::uint32_t rough_seed) {
+    const bool grouped = shape.contours.size() != 1 || shape.flat_rough_paths;
     std::string svg = grouped ? "<g class=\"label-container\"" +
         paint.attributes(fill, stroke, width) +
         (shape.shadow == FlowchartShadowPaint::group ? std::string(shadow) : std::string{}) +
         ">" : std::string{};
     for (const auto& contour : shape.contours) {
-        svg += "<path";
-        if (!grouped) svg += " class=\"label-container\"";
-        svg += " d=\"" + contour.path + "\"";
-        if (contour.translation.x != 0 || contour.translation.y != 0)
-            svg += " transform=\"translate(" + point(contour.translation) + ")\"";
-        if (contour.invisible_stroke) svg += " stroke-opacity=\"0\"";
-        if (contour.paint == FlowchartContourPaint::shape) {
-            svg += paint.attributes(fill, stroke, width);
-        } else if (contour.paint == FlowchartContourPaint::fill) {
-            svg += " fill=\"" + paint.get(u"fill", fill) + "\" stroke=\"none\"";
+        const auto append = [&](std::string_view path, std::string_view dash = "none") {
+            svg += "<path";
+            if (!grouped) svg += " class=\"label-container\"";
+            svg += " d=\"";
+            svg += path;
+            svg += '"';
+            if (contour.translation.x != 0 || contour.translation.y != 0)
+                svg += " transform=\"translate(" + point(contour.translation) + ")\"";
+            if (contour.invisible_stroke) svg += " stroke-opacity=\"0\"";
+            if (contour.paint == FlowchartContourPaint::shape) {
+                svg += paint.attributes(fill, stroke, width, dash);
+            } else if (contour.paint == FlowchartContourPaint::fill) {
+                svg += " fill=\"" + paint.get(u"fill", fill) + "\" stroke=\"none\"";
+            } else {
+                svg += " fill=\"none\" stroke=\"" + paint.get(u"stroke", stroke) +
+                    "\" stroke-width=\"" + paint.get(u"stroke-width", width) +
+                    "\" stroke-dasharray=\"" + paint.get(u"stroke-dasharray", dash) + "\"";
+            }
+            if (shape.shadow == FlowchartShadowPaint::contour ||
+                (!grouped && shape.shadow == FlowchartShadowPaint::group))
+                svg += shadow;
+            svg += "/>";
+        };
+        if (shape.flat_rough_paths) {
+            // Mermaid applies node CSS to both RoughJS paths. The outline has
+            // separate subpaths, so dash phase resets at every segment.
+            const auto paths = sketch_svg_path(contour.path, {.seed = rough_seed, .roughness = 0,
+                .fill = paint.get(u"fill", fill) == "none" ? RoughFill::none : RoughFill::solid,
+                .stroke = paint.get(u"stroke", stroke) != "none"});
+            if (!paths.fill_path.empty()) append(paths.fill_path);
+            if (!paths.stroke_path.empty()) append(paths.stroke_path, "0 0");
         } else {
-            svg += " fill=\"none\" stroke=\"" + paint.get(u"stroke", stroke) +
-                "\" stroke-width=\"" + paint.get(u"stroke-width", width) +
-                "\" stroke-dasharray=\"" + paint.get(u"stroke-dasharray", "none") + "\"";
+            append(contour.path);
         }
-        if (shape.shadow == FlowchartShadowPaint::contour ||
-            (!grouped && shape.shadow == FlowchartShadowPaint::group))
-            svg += shadow;
-        svg += "/>";
     }
     if (grouped) svg += "</g>";
     return svg;

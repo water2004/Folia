@@ -297,6 +297,9 @@ suite mermaid_measurement = [] {
             {"hand-drawn-markers",u"flowchart TD\nA[Read] o--o B[Check]\nB x--x C[Save]\nC <--> D[Done]"},
             {"hand-drawn-extra",u"flowchart LR\nA((Circle))\nB([Terminal])\nC[[Routine]]\nD[(Store)]\nE(((Double)))\nF{{Hex}}\nG[Read] --> H[Write]"},
             {"hand-drawn-elk-chain",u"flowchart LR\nA[Read] --> B(Check) --> C[Done]"},
+            {"hand-drawn-label-only",u"flowchart TB\nA@{shape: doc, label: \"Cloud box\"}\nstyle A fill:none,stroke:none"},
+            {"hand-drawn-elk-label-only",u"flowchart TB\nA@{shape: doc, label: \"Cloud box\"}\nstyle A fill:none,stroke:none"},
+            {"hand-drawn-document-brace-bounds",u"flowchart TB\nA@{shape: brace, label: \"Cloud box\"}"},
             {"hand-drawn-cluster",u"flowchart TD\nsubgraph g[Review]\nA[Read] --> B[Check]\nend\ng --> C[Done]"},
         };
         for(const auto theme:{u"default",u"dark"}) for(const auto& sample:flowchart_document_cases("hand-drawn",cases)) {
@@ -311,7 +314,14 @@ suite mermaid_measurement = [] {
             const auto svg=render_mermaid(source,*session);
             expect(svg.has_value())<<name<<(svg?"":svg.error());
             if(!svg) continue;
-            expect(svg->svg.find("class=\"rough-node\"")!=std::string::npos);
+            const auto rough_node=svg->svg.find("class=\"rough-node\"");
+            expect(rough_node!=std::string::npos);
+            if(name.ends_with("-label-only")) {
+                expect(svg->svg.find("Cloud box",rough_node)!=std::string::npos);
+                expect(svg->svg.find("<path",rough_node)==std::string::npos);
+                expect(svg->width==136.0);
+                expect(svg->height==40.0);
+            }
             if(auto directory=std::getenv("FOLIA_MERMAID_SVG_OUTPUT")) {
                 std::filesystem::create_directories(directory);
                 const auto suffix=theme==std::u16string_view(u"dark")?"dark":"default";
@@ -369,12 +379,14 @@ suite mermaid_measurement = [] {
                 u"classDef organic fill:#e1eee2,stroke:#335544,stroke-width:2px\nstyle B stroke:#442211"},
             {"extra-shapes-organic-wide",u"%%{init: {\"flowchart\": {\"minNodeWidth\": 300, \"wrappingWidth\": 320}}}%%\n"
                 u"flowchart RL\nA@{shape: person, label: Specialist} --> B@{shape: cloud, label: Network}"},
+            {"extra-shapes-dashed-document",u"flowchart LR\nA@{shape: doc, label: Document} --> B[Next]\n"
+                u"classDef painted fill:#ff000080,stroke:#123456,stroke-width:4px,stroke-dasharray:3 2\nclass A painted"},
         };
         for(const auto theme:{u"default",u"dark"}) for(const auto& sample:flowchart_document_cases("extra-shapes",cases)) {
             const auto name=sample.first;
             const auto body=sample.second;
             auto source=std::u16string(u"---\nconfig:\n  theme: ")+theme+
-                u"\n  look: classic\n  layout: dagre\n"
+                u"\n  look: classic\n  layout: dagre\n  handDrawnSeed: 9\n"
                 u"  fontFamily: Arial\n  themeVariables: {fontFamily: Arial}\n---\n";
             source+=body;
             const auto svg=render_mermaid(source,*session);

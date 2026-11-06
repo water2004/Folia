@@ -225,11 +225,13 @@ FlowchartLocalShape measure_document_flowchart_shape(std::u16string_view shape,
     double label_width, double label_height, double padding, bool neo, bool hand_drawn) {
     FlowchartLocalShape result{};
     result.attachment = std::vector<FlowchartPoint>{};
-    if (shape == u"doc" || shape == u"docs" || shape == u"tag-doc" || shape == u"flag")
+    if (shape == u"doc" || shape == u"docs" || shape == u"tag-doc" || shape == u"flag") {
         wave_shape(result, shape, label_width, label_height, padding, neo);
-    else if (shape == u"delay" || shape == u"curv-trap")
+        result.flat_rough_paths = !hand_drawn;
+    } else if (shape == u"delay" || shape == u"curv-trap") {
         curved_cap_shape(result, shape, label_width, label_height, padding, neo);
-    else if (shape == u"h-cyl" || shape == u"lin-cyl")
+        result.flat_rough_paths = !hand_drawn;
+    } else if (shape == u"h-cyl" || shape == u"lin-cyl")
         cylinder_outline_shape(result, shape, label_width, label_height, padding, neo, hand_drawn);
     else
         brace_outline_shape(result, shape, label_width, label_height, padding, neo);
@@ -237,7 +239,7 @@ FlowchartLocalShape measure_document_flowchart_shape(std::u16string_view shape,
         result.box = {result.paint_bounds.width(), result.paint_bounds.height()};
     if (shape == u"flag" || shape == u"brace" || shape == u"brace-r" || shape == u"braces")
         result.shadow = FlowchartShadowPaint::none;
-    else if (result.contours.size() > 1)
+    else if (result.contours.size() > 1 || result.flat_rough_paths)
         result.shadow = FlowchartShadowPaint::group;
     return result;
 }

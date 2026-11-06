@@ -11,7 +11,16 @@ struct RoughFlowchartNode : RoughFlowchartLayer {
     std::vector<RoughFlowchartLayer> overlays;
     FlowchartPoint label_offset{};
     bool grouped = false;
+    std::optional<RoughBounds> label_only_bounds;
 };
+
+std::optional<RoughBounds> rough_flowchart_bounds(const RoughFlowchartNode& node) {
+    auto bounds=node.label_only_bounds;
+    if(node.drawing.bounds) include_outline_bounds(bounds,*node.drawing.bounds,node.offset);
+    for(const auto& overlay:node.overlays) if(overlay.drawing.bounds)
+        include_outline_bounds(bounds,*overlay.drawing.bounds,overlay.offset);
+    return bounds;
+}
 
 RoughFlowchartNode rough_flowchart_contours(FlowchartLocalShape& shape,
     const FlowchartPaint& paint,const FlowchartSvgTheme& theme) {
@@ -57,6 +66,7 @@ RoughFlowchartNode rough_flowchart_node(std::u16string_view shape, FlowchartNode
     const auto fill=paint.get(u"fill",theme.fill);
     const auto stroke=paint.get(u"stroke",theme.border);
     RoughPolygonOptions options{.seed=theme.hand_drawn_seed,.stroke=stroke!="none"};
+    if(fill=="none"||fill=="transparent") options.fill=RoughFill::none;
     const auto x=-box.width/2,y=-box.height/2;
     if(shape==u"squareRect"||(shape==u"roundedRect"&&theme.radius==0))
         return {{sketch_rectangle(x,y,box.width,box.height,options)}};
@@ -77,7 +87,6 @@ RoughFlowchartNode rough_flowchart_node(std::u16string_view shape, FlowchartNode
         }
         return node;
     }
-    if(fill=="none"||fill=="transparent") options.fill=RoughFill::none;
     if(shape==u"roundedRect") return {{sketch_svg_path(
         rough_rounded_rect(x,y,box.width,box.height,theme.radius),options)}};
     if(shape==u"cylinder") {

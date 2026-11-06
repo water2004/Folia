@@ -67,6 +67,8 @@ try {
     }));
     return {transform:n.getAttribute('transform'),width:b.width,height:b.height,label:text.textContent,
      labelCenter:position(text,t.x+t.width/2,t.y+t.height/2),lines:[...text.children].map(n=>n.textContent.trimEnd()),characters:styledCharacters(text),outline,
+     dashSegments:paths.filter(p=>getComputedStyle(p).strokeDasharray.split(/[, ]+/).some(v=>parseFloat(v)>0))
+       .map(p=>[getComputedStyle(p).strokeDasharray,(p.getAttribute('d')?.match(/[Mm]/g)??[]).length]),
      fill:getComputedStyle(rough?fillShape:shape).fill,stroke:strokePaint(strokeShape),
      invisibleStrokes:paths.filter(p=>getComputedStyle(p).strokeOpacity==='0').length,
      filter:getComputedStyle(shape).filter!=='none'||paths.some(p=>getComputedStyle(p).filter!=='none'),
@@ -110,7 +112,9 @@ try {
   for(let i=0;i<actual.nodes.length;++i) {
    const a=actual.nodes[i],e=row.nodes.find(n=>n.label===a.label),p=translate(a.transform);
    assert(e,`${row.name}: missing node ${a.label}`);const q=[e.x,e.y];
-   assert.equal(a.label,e.label,row.name);assert(a.contained,`${row.name}: clipped label ${a.label}`);
+   assert.equal(a.label,e.label,row.name);
+   if(e.sketchPaths?.length===0) assert.equal(a.sketchPaths?.length,0,`${row.name}: shape painted for a label-only node`);
+   else assert(a.contained,`${row.name}: clipped label ${a.label}`);
    if((row.name.startsWith('labels-')||row.name.startsWith('fonts-')||row.name.startsWith('rich-'))) {
     assert.deepEqual(a.lines,e.lines,`${row.name}: displayed lines`);
     near(a.labelCenter.x,e.labelCenter.x,`${row.name} label center x`,2);
@@ -123,6 +127,8 @@ try {
    if(row.name.includes('-document-')) assert.equal(a.invisibleStrokes,e.invisibleStrokes,`${row.name} invisible strokes`);
    for(const key of ['fill','stroke','thickness','color']) assert.equal(a[key],e[key],`${row.name} node ${a.label} ${key}`);
    assert.equal(dashPaint(a.dash),dashPaint(e.dash),`${row.name} node ${a.label} dash`);
+   if(row.name.startsWith('extra-shapes-dashed-'))
+    assert.deepEqual(a.dashSegments,e.dashSegments,`${row.name} node ${a.label} dash phase resets`);
    if(e.sketchPaths) {
     near(a.labelCenter.x,e.labelCenter.x,`${row.name} ${a.label} text x`);
     near(a.labelCenter.y,e.labelCenter.y,`${row.name} ${a.label} text y`);
