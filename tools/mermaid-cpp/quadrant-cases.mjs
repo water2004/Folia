@@ -1,0 +1,16 @@
+export const cases = [
+ ['empty','quadrantChart'],
+ ['labels','quadrantChart\ntitle Work priorities\nx-axis Low effort --> High effort\ny-axis Low impact --> High impact\nquadrant-1 Plan\nquadrant-2 Do\nquadrant-3 Delegate\nquadrant-4 Avoid'],
+ ['points','quadrantChart\ntitle Work priorities\nx-axis Low effort --> High effort\ny-axis Low impact --> High impact\nquadrant-1 Plan\nquadrant-2 Do\nquadrant-3 Delegate\nquadrant-4 Avoid\nEditor: [0.25, 0.75]\nStorage: [0.75, 0.25]\nBoundary: [1, 0]\nCenter: [0.5, 0.5]'],
+ ['one-axis','quadrantChart\nx-axis Effort -->\ny-axis Impact\nquadrant-1 Improve\nquadrant-3 Maintain'],
+ ['configured','%%{init: {"quadrantChart": {"chartWidth": 640, "chartHeight": 420, "xAxisPosition": "bottom", "yAxisPosition": "right", "quadrantPadding": 12, "titleFontSize": 24, "pointRadius": 7, "quadrantInternalBorderStrokeWidth": 2, "quadrantExternalBorderStrokeWidth": 4}}}%%\nquadrantChart\ntitle Configured\nx-axis Low --> High\ny-axis Less --> More\nquadrant-2 Review'],
+ ['styles','quadrantChart\nclassDef highlight radius:8,color:#ff8800,stroke-color:#112233,stroke-width:2px\nFirst:::highlight: [0.2, 0.8]\nSecond:::highlight: [0.7, 0.3] radius:4,color:#00aa88\nclassDef highlight radius:9,color:#ffaa00,stroke-color:#223344,stroke-width:3px'],
+ ['unicode','quadrantChart\ntitle 项目评估\nx-axis 简单 --> 复杂\ny-axis 低 --> 高\nquadrant-1 "计划 😀"\nquadrant-2 "`保持 *原文*`"\n"文档 编辑器": [0.25, 0.75]'],
+ ['metadata','---\ntitle: Frontmatter title\n---\nquadrantChart\naccTitle: Priorities\naccDescr {\nWork planning\nwith four groups\n}\nItem: [0, 1]'],
+ ['entities','quadrantChart\nx-axis Editor #38; viewer --> Storage\nquadrant-1 "Save #60;document#62;"\n"Revision #35;1": [0.25, 0.75]'],
+ ['separators','quadrantChart; x-axis Low --> High; quadrant-1 First; A: [0.2, 0.7]\n%% Comment\nB: [0.8, 0.3]'],
+ ['bad-coordinate','quadrantChart\nPoint: [1.5, 0.5]',null],
+ ['unfinished-point','quadrantChart\nPoint: [0.5,',null],
+ ['bad-style','quadrantChart\nPoint: [0.5, 0.5] color:red',null],
+ ['unknown-style','quadrantChart\nclassDef bright opacity:1',null],
+];
