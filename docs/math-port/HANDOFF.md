@@ -5,7 +5,8 @@
 ## 当前 checkpoint（2026-11-06，Responses 显式缓存断点）
 
 - 用户要求添加显式断点，按协议实现且无服务商特判。补全设置新增 Responses 可见的「显式提示缓存」，`completion.explicitPromptCache` 默认 `false`，变更 Base URL 时清除。开启后将既有稳定上下文和光标片段作为同一条 user 消息的两个 `input_text`，仅稳定块标 `prompt_cache_breakpoint`，使用 `prompt_cache_options.mode=explicit`。空稳定块不标记，服务决定 token 门槛。未扩大上下文预算。
-- Debug 构建通过，最终回环 HTTP 22 项 287 断言及加载 5 项 22 断言通过，WinUI 设置 10 项 136 断言通过。日志 `build/completion-explicit-cache-debug-final.log`、`build/completion-explicit-cache-http-final.log`、`build/completion-explicit-cache-ui.log`。实际线上读写缓存未测，本轮未重建 MSI，无运行构建或测试句柄。下一步按用户试用反馈继续。
+- Debug 构建通过，最终回环 HTTP 22 项 287 断言及加载 5 项 22 断言通过，WinUI 设置 10 项 136 断言通过。日志 `build/completion-explicit-cache-debug-final.log`、`build/completion-explicit-cache-http-final.log`、`build/completion-explicit-cache-ui.log`。实际线上读写缓存未测。
+- 按用户要求从 `3a2ec389` 重建本地 `build/installer/bin/Folia-0.6.4-x64.msi`，MSI 和 EXE 均核实为 0.6.4，53,907,442 字节，SHA-256 `152b8249a8ae8c2f034c1156d9b87ea7df9ac1f96b922b4aff0d2f7dda144be0`。日志 `build/folia-064-explicit-cache-msi.log`，跳过额外测试与启动检查，WiX 只有既有同版本升级警告。无运行构建或测试句柄，未更新公开发布资产。
 
 ## Responses 与推理力度输入（历史）
 
