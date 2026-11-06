@@ -13,6 +13,9 @@ export const cases = [
   ['wrapped-text', 'venn-beta\nset A[Items]\n'
     + '  text first[The shared records in this category have several detailed labels]\n'
     + '  text second[Another multiline group of records]\n  text third[Finish]\n  text fourth[Archive]'],
+  ['wrapped-cjk', '---\nconfig:\n  themeVariables: {fontFamily: Microsoft YaHei}\n---\n'
+    + 'venn-beta\nset A[Items]\n  text first[甲乙丙丁戊己庚辛壬癸甲乙丙丁戊己庚辛壬癸]\n'
+    + '  text second[UnbreakableLatinTokenWithoutSpacesOrPunctuation]\n  text third[Finish]\n  text fourth[Archive]'],
   ['disjoint', 'venn-beta\nset A: 14\nset B: 8\nset C: 5'],
   ['four', 'venn-beta\nset A: 12\nset B: 11\nset C: 9\nset D: 8\nunion A,B,C,D[Shared]'],
   ['four-mds', 'venn-beta\nset A: 15\nset B: 12\nset C: 11\nset D: 9\n'

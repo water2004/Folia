@@ -664,9 +664,15 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
         if (!bounds) return std::unexpected(bounds.error());
         auto metrics = measurer.svg_font_metrics(font);
         if (!metrics) return std::unexpected(metrics.error());
-        return SvgTextMetrics{options.width == SvgTextWidth::advance ? bounds->advance : bounds->bounds_width,
+        SvgTextMetrics result{options.width == SvgTextWidth::advance ? bounds->advance : bounds->bounds_width,
             metrics->height, metrics->baseline, metrics->middle_offset,
             bounds->line_height, bounds->baseline};
+        if (options.wrap_width > 0) {
+            auto lines = measurer.wrap(text, font, options.wrap_width, styles, false);
+            if (!lines) return std::unexpected(lines.error());
+            result.wrapped_lines = std::move(*lines);
+        }
+        return result;
     };
     SvgTextMeasure svg_text_measure = [&](std::u16string_view text, double size, unsigned weight)
         -> std::expected<SvgTextMetrics, std::string> {

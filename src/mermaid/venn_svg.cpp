@@ -110,31 +110,34 @@ std::u16string text_color(View base, bool dark) {
 void draw_cell_label(std::string& svg, View label, View fill, View family, double size,
     double x, double y, double width, double height, const SvgFamilyTextMeasure& measure) {
     constexpr View whitespace = u" \t\n\r\f";
-    constexpr SvgFamilyTextOptions options{.width=SvgTextWidth::advance, .pair_kerning=true};
-    std::vector<std::u16string> lines;
-    std::u16string line;
-    auto measure_line = [&](View text) {
-        auto box = measure(text, family, size, 400, options);
-        if (!box) throw std::runtime_error(box.error());
-        return *box;
-    };
+    std::u16string collapsed;
     for (auto start = label.find_first_not_of(whitespace); start != View::npos;) {
         const auto end = label.find_first_of(whitespace, start);
-        const auto word = label.substr(start, end - start);
-        auto candidate = line;
-        if (!candidate.empty()) candidate += u' ';
-        candidate += word;
-        if (!line.empty() && measure_line(candidate).width > width) {
-            lines.push_back(std::move(line));
-            line = word;
-        } else {
-            line = std::move(candidate);
-        }
+        if (!collapsed.empty()) collapsed += u' ';
+        collapsed += label.substr(start, end - start);
         start = end == View::npos ? end : label.find_first_not_of(whitespace, end);
     }
-    if (line.empty()) return;
-    lines.push_back(std::move(line));
-    const auto metrics = measure_line(lines.front());
+    if (collapsed.empty()) return;
+
+    auto measured = measure(collapsed, family, size, 400, {
+        .width=SvgTextWidth::advance, .pair_kerning=true,
+        .wrap_width=width});
+    if (!measured) throw std::runtime_error(measured.error());
+    auto lines = std::move(measured->wrapped_lines);
+    if (lines.empty()) throw std::runtime_error("Venn text wrap did not return any lines");
+    for (auto& line : lines) {
+        // DirectWrite preserves the source whitespace. CSS white-space: normal
+        // discards collapsed spaces at the start and end of a wrapped line.
+        const auto start = line.find_first_not_of(whitespace);
+        if (start == View::npos) line.clear();
+        else line = line.substr(start, line.find_last_not_of(whitespace) - start + 1);
+    }
+    if (lines.size() > 1) {
+        measured = measure(lines.front(), family, size, 400, {
+            .width=SvgTextWidth::advance, .pair_kerning=true});
+        if (!measured) throw std::runtime_error(measured.error());
+    }
+    const auto metrics = *measured;
     const auto line_height = metrics.line_height > 0 ? std::round(metrics.line_height) : metrics.height;
     const auto line_baseline = metrics.line_height > 0 ? std::round(metrics.line_baseline) : metrics.baseline;
     auto baseline = y + (height - static_cast<double>(lines.size()) * line_height) / 2 + line_baseline;

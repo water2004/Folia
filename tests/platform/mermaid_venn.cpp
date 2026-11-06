@@ -23,6 +23,9 @@ suite mermaid_venn = [] {
             {"wrapped-text", u"venn-beta\nset A[Items]\n"
                 u"  text first[The shared records in this category have several detailed labels]\n"
                 u"  text second[Another multiline group of records]\n  text third[Finish]\n  text fourth[Archive]"},
+            {"wrapped-cjk", u"---\nconfig:\n  themeVariables: {fontFamily: Microsoft YaHei}\n---\n"
+                u"venn-beta\nset A[Items]\n  text first[甲乙丙丁戊己庚辛壬癸甲乙丙丁戊己庚辛壬癸]\n"
+                u"  text second[UnbreakableLatinTokenWithoutSpacesOrPunctuation]\n  text third[Finish]\n  text fourth[Archive]"},
             {"disjoint", u"venn-beta\nset A: 14\nset B: 8\nset C: 5"},
             {"four", u"venn-beta\nset A: 12\nset B: 11\nset C: 9\nset D: 8\nunion A,B,C,D[Shared]"},
             {"four-mds", u"venn-beta\nset A: 15\nset B: 12\nset C: 11\nset D: 9\n"
@@ -60,7 +63,7 @@ suite mermaid_venn = [] {
                 expect(result->width == (name == "text" ? 640.0 : 800.0));
                 expect(result->height == (name == "text" ? 420.0 : 450.0));
                 expect(result->svg.find("<foreignObject") == std::string::npos);
-                if (name == "text" || name == "wrapped-text" || name == "empty-set" || name == "hand-drawn-styled")
+                if (name == "text" || name == "wrapped-text" || name == "wrapped-cjk" || name == "empty-set" || name == "hand-drawn-styled")
                     expect(result->svg.find("<text class=\"venn-text-node\"") != std::string::npos);
                 if (auto directory = std::getenv("FOLIA_MERMAID_SVG_OUTPUT")) {
                     std::filesystem::create_directories(directory);

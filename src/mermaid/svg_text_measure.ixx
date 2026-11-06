@@ -10,6 +10,7 @@ struct SvgTextMetrics {
     double middle_offset{};
     double line_height{};
     double line_baseline{};
+    std::vector<std::u16string> wrapped_lines;
 };
 
 // Measures text in the current diagram's resolved font family.
@@ -25,6 +26,7 @@ struct SvgFamilyTextOptions {
     SvgTextWidth width = SvgTextWidth::bounds;
     std::span<const SvgTextRunStyle> styles;
     bool pair_kerning = false;
+    double wrap_width{};
 };
 using SvgFamilyTextMeasure = std::function<std::expected<SvgTextMetrics, std::string>(
     std::u16string_view text, std::u16string_view family, double font_size, unsigned font_weight,
