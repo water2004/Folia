@@ -598,6 +598,22 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             return StateTextBox{box->advance,box->bounds_width,metrics->height,metrics->baseline,box->line_height};
         };
     }
+    ErSvgMeasure er_measure;
+    if(auto er=std::get_if<ErRenderInput>(&input->content)) {
+        er_measure=[er,&measurer](std::u16string_view text,double size,bool bold)
+            -> std::expected<ErTextMetrics,std::string> {
+            if(!std::isfinite(size) || size<=0 || size>std::numeric_limits<float>::max())
+                return std::unexpected("Invalid ER font size");
+            auto label=diagram_display_text(text);
+            if(!label)return std::unexpected(label.error());
+            const MermaidFont font{er->theme.font_family,static_cast<float>(size),bold?700u:400u};
+            auto metrics=measurer.measure(*label,font,false,{},true);
+            if(!metrics)return std::unexpected(metrics.error());
+            auto vertical=measurer.svg_font_metrics(font);
+            if(!vertical)return std::unexpected(vertical.error());
+            return ErTextMetrics{metrics->advance,metrics->bounds_width,vertical->height,vertical->baseline};
+        };
+    }
     RequirementSvgMeasure requirement_measure;
     if(auto requirement=std::get_if<RequirementRenderInput>(&input->content)) {
         requirement_measure=[requirement,&measurer](std::u16string_view text,double size,bool bold)
@@ -615,6 +631,6 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
                 vertical->height,vertical->baseline};
         };
     }
-    return render_native_diagram(*input,widths,flowchart_measurements,sequence_measurements,class_measurements,xy_measurements,sankey_measurements,treemap_measure,journey_measure,timeline_measure,gantt_measure,git_graph_measure,mindmap_measurements,block_measure,kanban_measure,c4_measurements,architecture_measurements,state_measure,zenuml_measure,requirement_measure);
+    return render_native_diagram(*input,widths,flowchart_measurements,sequence_measurements,class_measurements,xy_measurements,sankey_measurements,treemap_measure,journey_measure,timeline_measure,gantt_measure,git_graph_measure,mindmap_measurements,block_measure,kanban_measure,c4_measurements,architecture_measurements,state_measure,zenuml_measure,er_measure,requirement_measure);
 }
 }

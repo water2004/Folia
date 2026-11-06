@@ -31,6 +31,7 @@ suite host_contract = [] {
     "mermaid_host_family_defaults_and_errors"_test = [] {
         for (auto source : {"packet\n0-7: \"Header\"", "sequenceDiagram\nA->>B: Save",
             "quadrantChart\nEditor: [0.2, 0.7]", "radar-beta\naxis A,B,C\ncurve current{1,2,3}",
+            "erDiagram\nCUSTOMER ||--o{ ORDER : places",
             "requirementDiagram\nrequirement req1 {\nid: R1\ntext: Save\nrisk: high\nverifyMethod: test\n}"}) {
             auto result = render(source);
             expect(result.status == 0_i) << result.text;

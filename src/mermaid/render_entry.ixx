@@ -21,6 +21,7 @@ export import folia.mermaid.kanban_svg;
 export import folia.mermaid.c4_svg;
 export import folia.mermaid.state_svg;
 export import folia.mermaid.zenuml_svg;
+export import folia.mermaid.er_svg;
 export import folia.mermaid.requirement_svg;
 export import folia.mermaid.mindmap_svg;
 export import folia.mermaid.architecture_svg;
@@ -30,7 +31,7 @@ struct PacketRenderInput { PacketLayout layout; PacketSvgTheme theme; };
 struct PieRenderInput { PieDocument document; PieSvgTheme theme; PieSvgConfig config; };
 struct NativeDiagram {
     PreparedDiagram prepared;
-    std::variant<PacketRenderInput, PieRenderInput, FlowchartRenderInput, SequenceRenderInput, ClassRenderInput, QuadrantRenderInput, RadarRenderInput, XYRenderInput, SankeyRenderInput, TreemapRenderInput, JourneyRenderInput, TimelineRenderInput, GanttRenderInput, GitGraphRenderInput, BlockRenderInput, KanbanRenderInput, C4RenderInput, StateRenderInput, MindmapRenderInput, ArchitectureRenderInput, ZenRenderInput, RequirementRenderInput> content;
+    std::variant<PacketRenderInput, PieRenderInput, FlowchartRenderInput, SequenceRenderInput, ClassRenderInput, QuadrantRenderInput, RadarRenderInput, XYRenderInput, SankeyRenderInput, TreemapRenderInput, JourneyRenderInput, TimelineRenderInput, GanttRenderInput, GitGraphRenderInput, BlockRenderInput, KanbanRenderInput, C4RenderInput, StateRenderInput, MindmapRenderInput, ArchitectureRenderInput, ZenRenderInput, ErRenderInput, RequirementRenderInput> content;
 };
 struct DiagramSvg { std::string svg; double width{}, height{}; };
 
@@ -67,5 +68,6 @@ std::expected<DiagramSvg, std::string> render_native_diagram(
     const ArchitectureMeasurements& architecture_measurements = {},
     const StateMeasure& state_measure = {},
     const ZenSvgMeasure& zenuml_measure = {},
+    const ErSvgMeasure& er_measure = {},
     const RequirementSvgMeasure& requirement_measure = {});
 }

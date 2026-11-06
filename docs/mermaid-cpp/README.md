@@ -2,7 +2,7 @@
 
 本目录记录 Folia 的 Mermaid C++23 原生重构工程。该项目以官方 [`mermaid-js/mermaid`](https://github.com/mermaid-js/mermaid) **12.2.0**（commit `1fb7869866dd619168d840291c9c54b4f129758b`）为基准，在 `src/mermaid/` 与 `src/platform/text/` 下使用 C++23 modules 原生实现语法解析、布局计算、DirectWrite 文本测量与 SVG 渲染，用于替换现有的 `mermaid-rs-renderer` 依赖。各组件对应的上游源码版本与哈希记录在 [`source-lock.json`](source-lock.json) 中。
 
-当前工程处于阶段性交付状态。公共配置前端、DirectWrite 测量桥接和动态库 C ABI 已通过验证。原有 20 个图族的公共入口通过了迁移分支 CI，ZenUML 公共入口随后通过本地原生测试和浏览器对照。C++ 库提供 `folia::mermaid` CMake 目标，桌面端仍使用原有 Rust 渲染链路。
+当前原生公共入口可渲染 Rust 路径支持的 23 个图族，具体语法和外观覆盖以各图族的基准测试为准。原有 20 个图族通过迁移分支 CI，新增的 ZenUML、ER 和 Requirement 已通过本地原生测试和浏览器对照。C++ 库提供 `folia::mermaid` CMake 目标，桌面端仍使用原有 Rust 渲染链路。
 
 ---
 
@@ -30,11 +30,14 @@
 ### 4. Requirement 公共入口
 - `requirementDiagram` 的 classic 外观支持默认 ELK 和显式 Dagre。共 32 张浏览器 SVG 对照覆盖亮暗主题、节点和关系、HTML 与 SVG 标签、标题及标记。标签目前支持纯文本，富文本换行和任意 CSS 字体样式仍待补齐。
 
-### 5. 平台文本测量与动态库接口（`src/platform/text/` / `tools/mermaid-cpp/`）
+### 5. ER 公共入口
+- `erDiagram` 的 classic 外观支持默认 ELK 和显式 Dagre。8 个案例的 32 张浏览器 SVG 覆盖亮暗主题、别名、属性和键、关系基数、非识别关系与方向。另有 2 个无效语法的解析对照。RoughJS 零粗糙度笔画的随机控制点按等价线段验证。
+
+### 6. 平台文本测量与动态库接口（`src/platform/text/` / `tools/mermaid-cpp/`）
 - **DirectWrite 文本测量（`mermaid_measurer.ixx`）**：在 Windows 平台解析 CSS `font-family` 候选列表，提供单行 advance/ink bounds 测量、按 Unicode 断行机会的文本折行以及 SVG 字体 ascent/descent 度量。
 - **C ABI 导出（`native-renderer.h` / `mermaid_host.ixx`）**：`FoliaNativeMermaid.dll` 导出 `FoliaNativeMermaidRender` 与 `FoliaNativeMermaidFree`，接收 UTF-8 源码与亮/暗主题参数，返回由 DLL 分配的 UTF-8 SVG 字符串（或错误文本）及宽高尺寸。
 
-### 6. 当前验证基线
+### 7. 当前验证基线
 - 代码分支已变基至上游 `master` `38231c6a`（Folia 0.5.4），GitHub Actions 工作流 [`.github/workflows/mermaid-cpp.yml`](../../.github/workflows/mermaid-cpp.yml) 在 Windows `standalone` / `integrated` × `Debug` / `Release` 四种配置下全部通过（上游 PR 检查见 [Actions Run #40820458232](https://github.com/water2004/Folia/actions/runs/40820458232)，Fork 仓库检查见 [Actions Run #40820482671](https://github.com/zhao0349/Folia/actions/runs/40820482671)）。
 - 自动化验证覆盖：核心模块测试（`FoliaMermaidTests`）、DirectWrite 平台与 DLL 宿主测试（`FoliaMermaidPlatformTests`、`FoliaMermaidHostTests`）、主工程回归测试（`FoliaTests`、`FoliaWindowsEditorTests`）、同机 DirectWrite 与 Chromium 文本测量对照，以及各图族与官方 Mermaid 浏览器输出的 SVG 对照（实测几何容差 `1.5`，ELK 算子坐标容差 `1e-4`）。
 
@@ -44,7 +47,6 @@
 
 | 工作包 | 当前状态 | 下一步工作与完成标准 |
 | --- | --- | --- |
-| **3. ER 图（`erDiagram`）** | 8 个成功案例、2 个语法错误案例的 Oracle（`er-oracle.mjs`）与双主题 16 张浏览器基准 SVG（`er-browser-probe.mjs`）已就绪 | 新增 `er.{ixx,cpp}` 与 `er_svg.{ixx,cpp}`，实现实体/属性/主键外键/基数关系解析、Dagre 布局适配、关系端点标记（crow's foot）绘制及公共入口接线，通过 `compare-er-svg.mjs` 16 张 SVG 对照。 |
 | **4. 存量图族兼容性** | State 注释和并发分区已有实现，正在完成浏览器对照。 | 逐项验证现有图族的布局、外观和未覆盖语法。 |
 | **5. WinUI 宿主集成与依赖切换** | 独立候选分支已完成早期编译与初步预览验证 | 将最新 `FoliaNativeMermaid` 接入 WinUI 应用预览、编辑刷新、亮暗主题切换与 PDF 导出链路，完成桌面端实机验证后移除 `mermaid-rs-renderer` 依赖。 |
 

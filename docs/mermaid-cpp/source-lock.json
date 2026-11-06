@@ -5,6 +5,14 @@
   "license": "MIT",
   "files": [
     {
+      "path": "packages/mermaid/src/styles.ts",
+      "sha256": "dd53a582b0c2411e16beeb37f51664968f278b08b97f63fc8808cbc8381f73fb"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/labelTransform.ts",
+      "sha256": "3474e36fa12c4c2502a2c1f2ab50a5bd415f65db0e7a40a1e8d904f8e631cbf4"
+    },
+    {
       "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/erBox.ts",
       "sha256": "0d997770c4333f168a5fdb9e95a557b712ec1d4ffd3776e2a3ec5d809e449cd4"
     },
