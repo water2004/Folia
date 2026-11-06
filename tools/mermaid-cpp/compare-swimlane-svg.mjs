@@ -31,7 +31,9 @@ try {
     let file = resolve(nativeDirectory, `swimlane-${original.name}.svg`);
     if (!existsSync(file) && original.name.endsWith('-default'))
       file = resolve(nativeDirectory, `swimlane-${original.name.slice(0, -8)}.svg`);
-    await page.setContent(readFileSync(file, 'utf8'));
+    const nativeSvg = readFileSync(file, 'utf8');
+    assert(!nativeSvg.includes('<foreignObject'), `${original.name}: native SVG contains foreignObject`);
+    await page.setContent(nativeSvg);
     const actual = await page.evaluate(inspectSwimlane);
     compare(actual.view, original.view, `${original.name}.view`, 1.5);
     assert.equal(actual.labels.length, original.labels.length, `${original.name}.labels.length`);
@@ -48,6 +50,8 @@ try {
     }
     for (const key of ['lanes', 'nodes'])
       compare(actual[key], original[key], `${original.name}.${key}`, 1.5);
+    compare(actual.edgeLabelBackgrounds, original.edgeLabelBackgrounds,
+      `${original.name}.edgeLabelBackgrounds`);
     assert.equal(actual.edges.length, original.edges.length, `${original.name}.edges.length`);
     for (let index = 0; index < actual.edges.length; ++index) {
       const a = actual.edges[index], e = original.edges[index], path = `${original.name}.edges[${index}]`;

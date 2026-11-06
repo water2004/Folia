@@ -34,6 +34,8 @@ suite mermaid_swimlane_platform = [] {
                 if (!rendered) continue;
                 expect(rendered->width > 0 && rendered->height > 0) << test_case.name;
                 expect(rendered->svg.find("swimlane-diagram") != std::string::npos) << test_case.name;
+                expect(rendered->svg.find("<foreignObject") == std::string::npos) << test_case.name;
+                expect(rendered->svg.find("<text") != std::string::npos) << test_case.name;
                 if (test_case.name == "styles-multiline") {
                     expect(rendered->svg.find("#ff99cc") != std::string::npos);
                     expect(rendered->svg.find("#003366") != std::string::npos);
@@ -42,6 +44,8 @@ suite mermaid_swimlane_platform = [] {
                     expect(rendered->svg.find("font-weight:700") != std::string::npos);
                     expect(rendered->svg.find("font-family:Georgia") != std::string::npos);
                 }
+                if (test_case.name == "edge-labels" || test_case.name == "styles-multiline")
+                    expect(rendered->svg.find("edge-label-background") != std::string::npos) << test_case.name;
                 if (test_case.name == "reverse-rl" || test_case.name == "reverse-bt")
                     expect(rendered->svg.find("rotate(-90)") == std::string::npos) << test_case.name;
                 if (auto directory = std::getenv("FOLIA_MERMAID_SVG_OUTPUT")) {

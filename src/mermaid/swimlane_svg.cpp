@@ -43,6 +43,15 @@ std::string xml_attribute(std::u16string_view value) {
     }
     return escaped;
 }
+std::string xml_attribute_value(std::string_view value) {
+    std::string escaped;
+    escaped.reserve(value.size());
+    for (const char character : value) {
+        if (character == '"') escaped += "&quot;";
+        else escaped.push_back(character);
+    }
+    return escaped;
+}
 std::expected<SvgTextMetrics, std::string> measure_lines(
     std::span<const std::u16string> lines, const SvgFamilyTextMeasure& measure,
     std::u16string_view family, double font_size, unsigned weight, bool italic) {
@@ -67,8 +76,10 @@ void label_svg(std::string& out, std::span<const std::u16string> lines,
                const SvgTextMetrics& metrics, double x, double y,
                double font_size, std::string_view css_class) {
     const double line_step = font_size * 1.5;
+    const double line_height = lines.empty() ? metrics.height :
+        metrics.height / static_cast<double>(lines.size());
     const double first = y - (static_cast<double>(lines.size()) - 1) * line_step / 2 +
-        metrics.baseline - metrics.middle_offset;
+        metrics.baseline - line_height / 2;
     out += "<text class=\"" + std::string(css_class) + "\" x=\"" + n(x) +
         "\" y=\"" + n(first) + "\" text-anchor=\"middle\">";
     for (std::size_t i = 0; i < lines.size(); ++i)
@@ -76,27 +87,35 @@ void label_svg(std::string& out, std::span<const std::u16string> lines,
             (i ? n(line_step) : "0") + "\">" + xml(lines[i]) + "</tspan>";
     out += "</text>";
 }
-void foreign_label(std::string& out, std::span<const std::u16string> lines,
-                   double x, double y, double width, double height,
-                   std::u16string_view family, double font_size,
-                   std::string_view color, std::string_view css_class,
-                   bool table_cell = false, unsigned font_weight = 400,
-                   bool italic = false) {
+void text_label_box(std::string& out, std::span<const std::u16string> lines,
+                    const SvgTextMetrics& metrics, double x, double y,
+                    double width, double height, std::u16string_view family,
+                    double font_size, std::string_view color,
+                    unsigned font_weight, bool italic) {
     const double left = x - width / 2;
     const double top = y - height / 2;
-    out += "<foreignObject class=\"" + std::string(css_class) + "\" style=\"color:" +
-        std::string(color) + ";font-size:" + n(font_size) + "px;font-weight:" +
-        std::to_string(font_weight) + ";font-style:" + (italic ? "italic" : "normal") +
-        "\" x=\"" + n(left) +
+    out += "<g class=\"nodeLabel\" style=\"color:" + xml_attribute_value(color) +
+        ";fill:" + xml_attribute_value(color) + ";font-family:" + xml_attribute(family) +
+        ";font-size:" + n(font_size) + "px;font-weight:" +
+        std::to_string(font_weight) + ";font-style:" +
+        (italic ? "italic" : "normal") + "\"><rect x=\"" + n(left) +
         "\" y=\"" + n(top) + "\" width=\"" + n(width) + "\" height=\"" +
-        n(height) + "\"><div xmlns=\"http://www.w3.org/1999/xhtml\" style=\"display:" +
-        std::string(table_cell ? "table-cell" : "table") + ";white-space:nowrap;line-height:1.5;max-width:" +
-        n(width) + "px;text-align:center;width:" + n(width) + "px;color:" +
-        std::string(color) + ";font-family:" + xml_attribute(family) + ";font-size:" +
-        n(font_size) + "px;font-weight:" + std::to_string(font_weight) +
-        ";font-style:" + (italic ? "italic" : "normal") + "\"><span class=\"nodeLabel\">";
-    for (const auto& line : lines) out += "<p style=\"margin:0\">" + xml(line) + "</p>";
-    out += "</span></div></foreignObject>";
+        n(height) + "\" fill=\"none\" stroke=\"none\"/>";
+    label_svg(out, lines, metrics, x, y, font_size, "label-text");
+    out += "</g>";
+}
+void edge_label_svg(std::string& out, std::span<const std::u16string> lines,
+                    const SvgTextMetrics& metrics, double x, double y,
+                    double width, double height, std::u16string_view family,
+                    double font_size, std::string_view color,
+                    std::string_view background, unsigned font_weight, bool italic) {
+    out += "<g class=\"edgeLabel swimlane-edge-label\"><rect class=\"edge-label-background\" x=\"" +
+        n(x - width / 2) + "\" y=\"" + n(y - height / 2) + "\" width=\"" + n(width) +
+        "\" height=\"" + n(height) + "\" fill=\"" +
+        xml_attribute_value(background) + "\"/>";
+    text_label_box(out, lines, metrics, x, y, width, height, family, font_size,
+        color, font_weight, italic);
+    out += "</g>";
 }
 std::u16string trim(std::u16string_view value) {
     const auto first = value.find_first_not_of(u" \t\r\n");
@@ -325,7 +344,7 @@ std::expected<SwimlaneSvg, std::string> render_swimlane_svg(
             xml(input.theme.font_family) + "\";font-size:" + n(input.theme.font_size) + "px;fill:" +
             input.theme.text + "}.swimlane-label{fill:" + input.theme.lane_text +
             "}.swimlane-node{stroke-width:" + n(input.theme.stroke_width) +
-            "}.edgeLabel div{background-color:" + input.theme.edge_label_background + "}</style>";
+            "}</style>";
         svg += "<defs><marker id=\"swimlane-arrow\" viewBox=\"0 0 10 10\" refX=\"9\" refY=\"5\" markerWidth=\"6\" markerHeight=\"6\" orient=\"auto-start-reverse\"><path d=\"M 0 0 L 10 5 L 0 10 z\" fill=\"" + input.theme.arrowhead + "\"/></marker></defs>";
         svg += "<g class=\"swimlane-diagram\" font-family=\"" +
             xml_attribute(input.theme.font_family) + "\">";
@@ -356,10 +375,12 @@ std::expected<SwimlaneSvg, std::string> render_swimlane_svg(
                     ? (source->label.empty() ? source->id : source->label)
                     : std::u16string{}};
                 double width = 0;
+                SvgTextMetrics title_metrics;
                 if (source) {
                     auto metrics = measure_lines(title, measure, lane_font_family, lane_font_size,
                         lane_font_weight, lane_italic);
                     if (!metrics) return std::unexpected(metrics.error());
+                    title_metrics = *metrics;
                     width = metrics->width;
                 }
                 const double title_height = default_lane ? 0 : 24;
@@ -372,9 +393,9 @@ std::expected<SwimlaneSvg, std::string> render_swimlane_svg(
                     svg += "<g class=\"cluster-label swimlane-label\" transform=\"translate(" +
                         n(center_x) + "," + n(placed.y) + ") rotate(-90) translate(" +
                         n(-width / 2) + "," + n(-title_height / 2) + ")\">";
-                    foreign_label(svg, title, width / 2, title_height / 2, width, title_height,
-                        lane_font_family, lane_font_size, lane_text,
-                        "swimlane-label-content", true, lane_font_weight, lane_italic);
+                    text_label_box(svg, title, title_metrics, width / 2, title_height / 2,
+                        width, title_height, lane_font_family, lane_font_size, lane_text,
+                        lane_font_weight, lane_italic);
                     svg += "</g>";
                 } else {
                     svg += "<g class=\"cluster-label swimlane-label\">";
@@ -386,9 +407,9 @@ std::expected<SwimlaneSvg, std::string> render_swimlane_svg(
                     const double title_x = default_lane ? title_box.x : placed.x;
                     const double title_y = default_lane ? title_box.y :
                         placed.y - placed.height / 2 + title_height / 2;
-                    foreign_label(svg, title, title_x, title_y, width, title_height,
-                        lane_font_family, lane_font_size, lane_text,
-                        "swimlane-label-content", true, lane_font_weight, lane_italic);
+                    text_label_box(svg, title, title_metrics, title_x, title_y,
+                        width, title_height, lane_font_family, lane_font_size, lane_text,
+                        lane_font_weight, lane_italic);
                     svg += "</g>";
                 }
             }
@@ -425,10 +446,10 @@ std::expected<SwimlaneSvg, std::string> render_swimlane_svg(
             if (source_edge.arrow_end != u"none") svg += " marker-end=\"url(#" + marker_id + ")\"";
             svg += "/>";
             if (edge.label && i < edge_lines.size() && !edge_lines[i].empty())
-                foreign_label(svg, edge_lines[i], edge.label->x, edge.label->y,
+                edge_label_svg(svg, edge_lines[i], edge_metrics[i], edge.label->x, edge.label->y,
                     edge_metrics[i].width, edge_sizes[i].height,
                     paint.get(u"font-family", input.theme.font_family),
-                    edge_font_sizes[i], label_color, "edgeLabel swimlane-edge-label", false,
+                    edge_font_sizes[i], label_color, input.theme.edge_label_background,
                     edge_font_weights[i], paint.italic());
             svg += "</g>";
         }
@@ -455,10 +476,12 @@ std::expected<SwimlaneSvg, std::string> render_swimlane_svg(
                     n(placed.width) + "\" height=\"" + n(placed.height) + "\" rx=\"5\"" +
                     shape_style + "/>";
             }
-            foreign_label(svg, node_lines[i], placed.x, placed.y, 120,
+            svg += "<g class=\"swimlane-node-label\">";
+            text_label_box(svg, node_lines[i], node_metrics[i], placed.x, placed.y, 120,
                 node_font_sizes[i] * 1.5 * static_cast<double>(node_lines[i].size()),
                 paint.get(u"font-family", input.theme.font_family), node_font_sizes[i], label_color,
-                "swimlane-node-label", false, node_font_weights[i], paint.italic());
+                node_font_weights[i], paint.italic());
+            svg += "</g>";
             svg += "</g>";
         }
         svg += "</g></svg>";

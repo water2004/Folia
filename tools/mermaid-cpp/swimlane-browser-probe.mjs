@@ -54,6 +54,12 @@ export function inspectSwimlane() {
         strokeWidth: style.strokeWidth, dasharray: style.strokeDasharray,
         markerFill: markerShape ? getComputedStyle(markerShape).fill : null };
     }),
+    edgeLabelBackgrounds: [...svg.querySelectorAll('.edgeLabel')].map((element) => {
+      const rect = element.querySelector('rect.edge-label-background');
+      const paragraph = element.querySelector('foreignObject p');
+      return rect ? getComputedStyle(rect).fill :
+        (paragraph ? getComputedStyle(paragraph).backgroundColor : 'none');
+    }),
   };
 }
 
