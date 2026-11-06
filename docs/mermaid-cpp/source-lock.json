@@ -5,6 +5,34 @@
   "license": "MIT",
   "files": [
     {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/usecaseActor.ts",
+      "sha256": "c11b71787542d8619d131d9687e5b61d3896492993f75e6ba5eee4fecd05edbb"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/usecaseActorAwesome.ts",
+      "sha256": "79afec5f744dcd0540ae4ab2dd3312c7efafb217cc6d6f71f2b8b657718d7163"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/usecaseActorHollow.ts",
+      "sha256": "a7a00c5c6cfb3fa8f916e1edfd665d03422421aa8a12d422afbabae18ada8188"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/usecaseActorIcon.ts",
+      "sha256": "6c0e9fbe5d70d845945fd08434d516763e72bac8445ea5b1e9c9926ff1925a9e"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/usecaseBusiness.ts",
+      "sha256": "e38f02ba5546111a4240a39408fdf7561067c1b50dfb25ccc1da7b772e78aece"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/usecaseEllipse.ts",
+      "sha256": "85859c4be021e7367b613d9c854df5b45f7d430741869219b88df5ce75a80d98"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/usecaseJsonTable.ts",
+      "sha256": "c0c36af716ce97886b4db2fd98ec606ccf0ceb908572d6e517c67f1f1d79ee02"
+    },
+    {
       "path": "packages/mermaid/src/rendering-util/splitText.ts",
       "sha256": "4dc8f19c041b568d3b5987c9363455c1a7c3cc8322b0ea35771283361539df99"
     },
