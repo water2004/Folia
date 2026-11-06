@@ -2,7 +2,12 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-11-06，局部结构编辑计划重构完成）
+## 当前 checkpoint（2026-11-06，准备发布 0.6.4）
+
+- 0.6.4 包含自 0.6.3 起的模型列表与手动配置、运行时补全提示词、接续公式和代码块的局部解析修复。版本元数据和英文说明 `release-notes/v0.6.4.md` 随发布提交。LaTeX 目录一致性检查和 7 项目录测试已通过。
+- 发布由 `v0.6.4` 标签触发既有 `.github/workflows/release.yml`，由 CI 构建 x64 MSI、执行启动验证、生成 SHA-256 并发布 GitHub Release。以该标签的 CI 及 Release 页面确认结果。
+
+## 局部结构编辑计划重构完成（发布前验证，历史）
 
 - 用户要求整理d8b1961e维护性问题，已完成：`document_block_reparse.ixx`将只读规划与事务应用拆开。`BlockReparsePlan`持有解析后blocks及parser-local光标映射；规划不改文档/ID/选区；应用才分配文档ID、统一记录树编辑，不重解析Markdown。普通字符输入复用同一规划/应用，SingleBlock与Fragment是命令语义范围，不是旧新兼容路径。
 - `document_paste.ixx`移除boolean预解析/serialize检查、内部namespace访问、重复结构事务追加。接续段落保留预先解析的plan，raw块先做既有source插入再规划，最终同一应用入口。结构判断/局部往返验证只在结构模块，仍block-local source/CST+source/tree单事务，无全文parse/serialize、第二坐标或AI字符特判。源码批与此记录本地提交，版本0.6.3，未推送/发布/安装/MSI。
