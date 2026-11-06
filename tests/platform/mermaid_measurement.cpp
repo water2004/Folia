@@ -402,13 +402,13 @@ suite mermaid_measurement = [] {
     };
     "mermaid_source_to_svg_resolves_fonts_and_measures_display_text"_test=[] {
         MermaidMeasurer measurer;
-        auto family=measurer.resolve_family(u"'Folia Missing Family 792743', Arial, sans-serif");
+        auto family=measurer.resolve_family(u"'Folia Missing Family 792743', arial, sans-serif");
         expect(fatal(family.has_value())); expect(bool(*family==u"Arial"));
         expect(!measurer.resolve_family(u"'Folia Missing Family 792743'"));
         auto session=ConfigSession::create(); expect(fatal(session.has_value()));
         for(const auto theme:{u"default",u"dark"}) {
             auto source=std::u16string(u"---\ntitle: Drinks\nconfig:\n  theme: ")+theme+
-                u"\n  themeVariables:\n    fontFamily: Arial\n  pie:\n    legendPosition: bottom\n    donutHole: 0.5\n---\npie showData\n\"#quot;Tea#quot; #9733;\":3\n\"Coffee\":2";
+                u"\n  themeVariables:\n    fontFamily: arial\n  pie:\n    legendPosition: bottom\n    donutHole: 0.5\n---\npie showData\n\"#quot;Tea#quot; #9733;\":3\n\"Coffee\":2";
             auto svg=render_mermaid(source,*session);
             expect(svg.has_value())<<(svg?"":svg.error());
             expect(fatal(svg.has_value()));

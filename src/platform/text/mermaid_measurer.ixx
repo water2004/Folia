@@ -166,7 +166,24 @@ public:
             UINT32 index{}; BOOL exists{};
             if(FAILED(fonts->FindFamilyName(family.c_str(),&index,&exists)))
                 return std::unexpected("DirectWrite family lookup failed");
-            if(exists) return candidate;
+            if (!exists) continue;
+            ComPtr<IDWriteFontFamily> installed;
+            ComPtr<IDWriteLocalizedStrings> names;
+            if (FAILED(fonts->GetFontFamily(index, &installed)) ||
+                FAILED(installed->GetFamilyNames(&names)))
+                return std::unexpected("DirectWrite family name lookup failed");
+            UINT32 name_index{};
+            BOOL has_english_name{};
+            if (FAILED(names->FindLocaleName(L"en-us", &name_index, &has_english_name)))
+                return std::unexpected("DirectWrite font family locale lookup failed");
+            if (!has_english_name) name_index = 0;
+            UINT32 length{};
+            if (FAILED(names->GetStringLength(name_index, &length)))
+                return std::unexpected("DirectWrite family name length lookup failed");
+            std::wstring installed_name(static_cast<std::size_t>(length) + 1, L'\0');
+            if (FAILED(names->GetString(name_index, installed_name.data(), length + 1)))
+                return std::unexpected("DirectWrite family name lookup failed");
+            return std::u16string(installed_name.begin(), installed_name.begin() + length);
         }
         return std::unexpected("No configured Mermaid font is installed");
     }
