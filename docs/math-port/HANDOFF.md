@@ -2,7 +2,12 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-11-06，Responses 与推理力度输入）
+## 当前 checkpoint（2026-11-06，Responses 显式缓存断点）
+
+- 用户要求添加显式断点，按协议实现且无服务商特判。补全设置新增 Responses 可见的「显式提示缓存」，`completion.explicitPromptCache` 默认 `false`，变更 Base URL 时清除。开启后将既有稳定上下文和光标片段作为同一条 user 消息的两个 `input_text`，仅稳定块标 `prompt_cache_breakpoint`，使用 `prompt_cache_options.mode=explicit`。空稳定块不标记，服务决定 token 门槛。未扩大上下文预算。
+- Debug 构建通过，最终回环 HTTP 22 项 287 断言及加载 5 项 22 断言通过，WinUI 设置 10 项 136 断言通过。日志 `build/completion-explicit-cache-debug-final.log`、`build/completion-explicit-cache-http-final.log`、`build/completion-explicit-cache-ui.log`。实际线上读写缓存未测，本轮未重建 MSI，无运行构建或测试句柄。下一步按用户试用反馈继续。
+
+## Responses 与推理力度输入（历史）
 
 - 0.6.4 生产补全代码无 DeepSeek 域名或模型名分流。Responses 现在用标准纯文本消息表示补全示例的助手回复，见 `f149e0e6`。WinHTTP 保留短错误码、类型和参数名，错误响应正文最多读取 8 KiB、等待至多一秒。截图中的 OpenAI 400 尚无上游错误详情或真实 OpenAI 复测，不能确认实际拒绝原因。
 - 用户复报手填 `none` 后按 Enter 变空，模型字段使用同类控件。`11dda853` 将两个可编辑 ComboBox 换成单行 TextBox 加独立选择菜单，保存只读取 TextBox；按 Enter 不再走 ComboBox 的提交逻辑。模型列表使用有界 ListView。刷新候选不改手填值；OpenAI `GET /models` 无推理档位字段，继续只读取上游公开能力，力度留空走服务默认。

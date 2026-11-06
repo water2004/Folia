@@ -12,6 +12,7 @@ struct CompletionConfig {
     std::uint32_t contextKB = 7, outputTokens = 128;
     std::optional<folia::completion::PromptSettings> prompt;
     std::string promptError;
+    bool explicitPromptCache = false;
     bool operator==(CompletionConfig const&) const = default;
 };
 struct CompletionResult {
@@ -25,6 +26,7 @@ std::string ResolveCompletionEndpoint(CompletionConfig const&);
 std::string ResolveCompletionModelsEndpoint(CompletionConfig const&);
 std::string ValidateCompletionService(CompletionConfig const&);
 std::string ValidateCompletionConfig(CompletionConfig const&);
+bool SupportsExplicitCompletionCache(int protocol) noexcept;
 std::wstring LoadCompletionKey();
 void StoreCompletionKey(std::wstring_view key);
 class CompletionService {

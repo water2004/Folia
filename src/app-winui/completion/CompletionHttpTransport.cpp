@@ -204,10 +204,24 @@ CompletionResult RequestCompletionHttp(CompletionConfig const& config, folia::co
     for (auto const& [source, response] : prompt.examples) {
         add(MessageRole::User, source); add(MessageRole::Assistant, response);
     }
-    add(MessageRole::User, prompt.context + prompt.cursor);
     auto protocol = static_cast<ApiProtocol>(config.protocol);
+    const auto explicitCache = config.explicitPromptCache && SupportsExplicitCompletionCache(config.protocol);
+    const auto hasBreakpoint = explicitCache && !prompt.context.empty();
+    if (hasBreakpoint) {
+        add(MessageRole::User, prompt.context);
+        model.messages.back().content.push_back({ContentKind::Text, prompt.cursor});
+    } else {
+        add(MessageRole::User, prompt.context + prompt.cursor);
+    }
+    auto request = BuildRequest(protocol, model);
+    if (hasBreakpoint) {
+        // The Responses adapter maps user content parts in order. Mark only
+        // the stable part of the document message assembled above.
+        request.at("input").back().at("content").front()["prompt_cache_breakpoint"] = {{"mode", "explicit"}};
+    }
+    if (explicitCache) request["prompt_cache_options"] = {{"mode", "explicit"}};
     StreamResponse decoder(protocol); std::string response;
-    auto streaming = ReadHttp(config, ResolveCompletionEndpoint(config), L"POST", BuildRequest(protocol, model).dump(), stop,
+    auto streaming = ReadHttp(config, ResolveCompletionEndpoint(config), L"POST", request.dump(), stop,
         std::move(key), [&](bool streaming, std::string_view chunk) {
             if (streaming) { (void)decoder.Feed(chunk); return decoder.Complete(); }
             response.append(chunk); return false;

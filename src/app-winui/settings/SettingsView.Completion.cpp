@@ -145,6 +145,18 @@ Microsoft::UI::Xaml::UIElement SettingsView::BuildCompletionPage() {
     Grid::SetColumn(reasoningOptions, 1); reasoningRow.Children().Append(reasoning); reasoningRow.Children().Append(reasoningOptions);
     service.Children().Append(reasoningRow);
     service.Children().Append(reasoningHint);
+    ToggleSwitch cacheBreakpoints;
+    cacheBreakpoints.Header(box_value(Localize(L"AIExplicitCache")));
+    cacheBreakpoints.IsOn(appliedSettings_.completion.explicitPromptCache);
+    auto cacheHint = Hint(Localize(L"AIExplicitCacheDescription"));
+    auto updateCacheVisibility = [cacheBreakpoints, cacheHint](int selectedProtocol) {
+        auto visibility = SupportsExplicitCompletionCache(selectedProtocol) ? Visibility::Visible : Visibility::Collapsed;
+        cacheBreakpoints.Visibility(visibility);
+        cacheHint.Visibility(visibility);
+    };
+    updateCacheVisibility(protocol.SelectedIndex());
+    service.Children().Append(cacheBreakpoints);
+    service.Children().Append(cacheHint);
     TextBlock fetchStatus; fetchStatus.Style(ResourceStyle(L"SettingsHintTextStyle")); service.Children().Append(fetchStatus);
     panel.Children().Append(service);
     auto credentials = SectionPanel();
@@ -174,8 +186,14 @@ Microsoft::UI::Xaml::UIElement SettingsView::BuildCompletionPage() {
         reasoning.Text(L"");
         SetReasoningChoices(reasoningMenu, reasoning, reasoningHint, {}, false);
     };
-    baseUrl.TextChanged([resetQuery](auto const&, auto const&) { resetQuery(); });
-    protocol.SelectionChanged([resetQuery](auto const&, auto const&) { resetQuery(); });
+    baseUrl.TextChanged([resetQuery, cacheBreakpoints](auto const&, auto const&) {
+        resetQuery();
+        cacheBreakpoints.IsOn(false);
+    });
+    protocol.SelectionChanged([resetQuery, updateCacheVisibility](auto const& sender, auto const&) {
+        resetQuery();
+        updateCacheVisibility(sender.template as<ComboBox>().SelectedIndex());
+    });
     key.PasswordChanged([query, cancelQuery](auto const& sender, auto const&) {
         // WinUI can deliver PasswordChanged after the property assignment.
         // Retire only a request whose actual credential snapshot has changed.
@@ -233,7 +251,7 @@ Microsoft::UI::Xaml::UIElement SettingsView::BuildCompletionPage() {
     status.Style(ResourceStyle(L"SettingsHintTextStyle"));
     Button save; save.Content(box_value(Localize(L"Save")));
     save.Style(ResourceStyle(L"SettingsPrimaryButtonStyle"));
-    save.Click([weak = weak_from_this(), enabled, protocol, baseUrl, model, reasoning, eagerness, contextKB, outputTokens, key, clearKey, status](auto const&, auto const&) {
+    save.Click([weak = weak_from_this(), enabled, protocol, baseUrl, model, reasoning, cacheBreakpoints, eagerness, contextKB, outputTokens, key, clearKey, status](auto const&, auto const&) {
         auto self = weak.lock(); if (!self || self->detached_ || !self->applySettings_) return;
         auto proposed = self->appliedSettings_;
         proposed.completion.enabled = enabled.IsOn();
@@ -241,6 +259,7 @@ Microsoft::UI::Xaml::UIElement SettingsView::BuildCompletionPage() {
         proposed.completion.model = winrt::to_string(model.Text());
         proposed.completion.protocol = protocol.SelectedIndex();
         proposed.completion.reasoningEffort = winrt::to_string(reasoning.Text());
+        proposed.completion.explicitPromptCache = SupportsExplicitCompletionCache(proposed.completion.protocol) && cacheBreakpoints.IsOn();
         proposed.completion.eagerness = static_cast<folia::completion::Eagerness>(eagerness.SelectedIndex());
         std::uint32_t context{}, output{};
         auto parse = [](winrt::hstring const& text, std::uint32_t& number) {

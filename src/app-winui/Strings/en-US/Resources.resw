@@ -363,4 +363,6 @@
   <data name="AIModelsFetched" xml:space="preserve"><value>Fetched {0} models. Select one or enter a model ID.</value></data>
   <data name="AIReasoningSelectModel" xml:space="preserve"><value>Fetch models for advertised reasoning levels, or enter a value manually. Blank or service default sends no effort parameter.</value></data>
   <data name="AIReasoningMissingMetadata" xml:space="preserve"><value>The service did not provide usable reasoning-level information. You can enter a value manually; blank or service default sends no effort parameter.</value></data>
+  <data name="AIExplicitCache" xml:space="preserve"><value>Explicit prompt caching</value></data>
+  <data name="AIExplicitCacheDescription" xml:space="preserve"><value>Enable only if your service and model support explicit cache breakpoints. Folia marks the end of the reusable context. The service determines cache eligibility and charges.</value></data>
 </root>

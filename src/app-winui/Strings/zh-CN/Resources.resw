@@ -363,4 +363,6 @@
   <data name="AIModelsFetched" xml:space="preserve"><value>已获取 {0} 个模型。可下拉选择或自行填写。</value></data>
   <data name="AIReasoningSelectModel" xml:space="preserve"><value>可获取模型以读取上游声明的思考档位，也可手动填写。留空或选择服务默认时不发送力度参数。</value></data>
   <data name="AIReasoningMissingMetadata" xml:space="preserve"><value>上游未提供可用的思考档位信息，可手动填写。留空或选择服务默认时不发送力度参数。</value></data>
+  <data name="AIExplicitCache" xml:space="preserve"><value>显式提示缓存</value></data>
+  <data name="AIExplicitCacheDescription" xml:space="preserve"><value>仅在服务和模型支持显式缓存断点时开启。Folia 在稳定上下文末尾标记断点，是否写入或命中缓存及相关费用由服务决定。</value></data>
 </root>

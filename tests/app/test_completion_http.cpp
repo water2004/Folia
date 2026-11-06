@@ -21,6 +21,7 @@ suite completion_http_tests = [] {
             expect(throws([&] { (void)RequestCompletionHttp({true, server.baseUrl, "fixture", protocol}, prompt, {}, L"fixture-key"); }));
             auto body = server.request.substr(server.request.find("\r\n\r\n") + 4);
             auto json = winrt::Windows::Data::Json::JsonObject::Parse(winrt::to_hstring(body));
+            expect(!json.HasKey(L"prompt_cache_options") && !body.contains("prompt_cache_breakpoint"));
             auto messages = json.GetNamedArray(protocol == 1 ? L"input" : L"messages");
             expect(messages.Size() == static_cast<unsigned>((protocol == 2 ? 1 : 2) + prompt.examples.size() * 2));
             auto user = messages.GetObjectAt(messages.Size() - 1);
@@ -42,6 +43,57 @@ suite completion_http_tests = [] {
                 ? replyContent.GetString() : replyContent.GetArray().GetObjectAt(0).GetNamedString(L"text");
             expect(winrt::to_string(replyText) == prompt.examples[0].second);
         }
+    };
+    "explicit Responses cache marks stable context and preserves changing source in the same message"_test = [] {
+        using winrt::Windows::Data::Json::JsonObject;
+        auto captureRequest = [](folia::completion::Prompt const& prompt, int protocol) {
+            Server server({}, 503);
+            CompletionConfig config{true, server.baseUrl, "fixture", protocol};
+            config.explicitPromptCache = true;
+            expect(throws([&] { (void)RequestCompletionHttp(config, prompt, {}, L"fixture-key"); }));
+            return server.request.substr(server.request.find("\r\n\r\n") + 4);
+        };
+        const auto before = U"Fixed earlier context.\n\nFirst line stays fixed.\n";
+        auto promptFor = [&](std::u32string_view active) {
+            auto source = std::u32string(before) + std::u32string(active) + U" next";
+            return completion_tests::MakePrompt(folia::completion::capture(source, source.size() - 5, {}));
+        };
+        auto first = promptFor(U"x_");
+        auto second = promptFor(U"x_{n");
+        auto firstRequest = JsonObject::Parse(winrt::to_hstring(captureRequest(first, 1)));
+        auto secondRequest = JsonObject::Parse(winrt::to_hstring(captureRequest(second, 1)));
+        auto firstInput = firstRequest.GetNamedArray(L"input");
+        auto secondInput = secondRequest.GetNamedArray(L"input");
+        expect(firstInput.Size() == first.examples.size() * 2 + 2);
+        expect(secondInput.Size() == firstInput.Size());
+        for (unsigned index = 0; index + 1 < firstInput.Size(); ++index)
+            expect(bool(firstInput.GetObjectAt(index).Stringify() == secondInput.GetObjectAt(index).Stringify()));
+        auto parts = [](JsonObject const& request) {
+            expect(request.GetNamedObject(L"prompt_cache_options").GetNamedString(L"mode") == L"explicit");
+            auto input = request.GetNamedArray(L"input");
+            auto user = input.GetObjectAt(input.Size() - 1);
+            expect(user.GetNamedString(L"role") == L"user");
+            auto content = user.GetNamedArray(L"content");
+            expect(content.Size() == 2_u);
+            return content;
+        };
+        auto a = parts(firstRequest);
+        auto b = parts(secondRequest);
+        expect(bool(a.GetObjectAt(0).Stringify() == b.GetObjectAt(0).Stringify()));
+        expect(a.GetObjectAt(0).GetNamedObject(L"prompt_cache_breakpoint").GetNamedString(L"mode") == L"explicit");
+        expect(a.GetObjectAt(0).GetNamedString(L"type") == L"input_text");
+        expect(winrt::to_string(a.GetObjectAt(0).GetNamedString(L"text")) == first.context);
+        expect(winrt::to_string(a.GetObjectAt(1).GetNamedString(L"text")) == first.cursor);
+        expect(winrt::to_string(b.GetObjectAt(1).GetNamedString(L"text")) == second.cursor);
+        expect(first.cursor != second.cursor);
+        expect(!a.GetObjectAt(1).HasKey(L"prompt_cache_breakpoint"));
+        for (int protocol : {0, 2}) {
+            auto other = captureRequest(first, protocol);
+            expect(!other.contains("prompt_cache_options") && !other.contains("prompt_cache_breakpoint"));
+        }
+        first.context.clear();
+        auto withoutStableContext = captureRequest(first, 1);
+        expect(withoutStableContext.contains("prompt_cache_options") && !withoutStableContext.contains("prompt_cache_breakpoint"));
     };
     "completion timeout counts inactivity rather than total stream duration"_test = [] {
         const auto inactivity = std::chrono::milliseconds(400);

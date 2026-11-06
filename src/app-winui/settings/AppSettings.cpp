@@ -49,6 +49,7 @@ namespace winrt::Folia
                 settings.completion.eagerness = static_cast<folia::completion::Eagerness>(static_cast<int>(completion.GetNamedNumber(L"eagerness", 1)));
                 settings.completion.contextKB = static_cast<std::uint32_t>(completion.GetNamedNumber(L"contextKB", 7));
                 settings.completion.outputTokens = static_cast<std::uint32_t>(completion.GetNamedNumber(L"outputTokens", 128));
+                settings.completion.explicitPromptCache = completion.GetNamedBoolean(L"explicitPromptCache", false);
                 try {
                     if (completion.HasKey(L"prompt"))
                         settings.completion.prompt = ParseCompletionPromptSettings(completion.GetNamedObject(L"prompt"));
@@ -98,6 +99,7 @@ namespace winrt::Folia
             completion.Insert(L"eagerness", Windows::Data::Json::JsonValue::CreateNumberValue(static_cast<int>(settings.completion.eagerness)));
             completion.Insert(L"contextKB", Windows::Data::Json::JsonValue::CreateNumberValue(settings.completion.contextKB));
             completion.Insert(L"outputTokens", Windows::Data::Json::JsonValue::CreateNumberValue(settings.completion.outputTokens));
+            completion.Insert(L"explicitPromptCache", Windows::Data::Json::JsonValue::CreateBooleanValue(settings.completion.explicitPromptCache));
             if (settings.completion.prompt)
                 completion.Insert(L"prompt", SerializeCompletionPromptSettings(*settings.completion.prompt));
             root.Insert(L"completion", completion);

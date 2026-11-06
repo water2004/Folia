@@ -104,6 +104,24 @@ ListView ModelOptions(TextBox const& field) {
     return ChoiceButton(field).Flyout().as<Flyout>().Content().as<ListView>();
 }
 suite settings_style_tests = [] {
+    "explicit prompt cache is opt-in and available only for Responses"_test = [] {
+        CompletionPage fixture("https://fixture.invalid/v1", "fixture", {}, 1);
+        auto cache = Field<ToggleSwitch>(fixture.page, winrt::Folia::Localize(L"AIExplicitCache"));
+        auto protocol = Field<ComboBox>(fixture.page, winrt::Folia::Localize(L"AIProtocol"));
+        expect(cache.Visibility() == Visibility::Visible && !cache.IsOn());
+        cache.IsOn(true);
+        Field<PasswordBox>(fixture.page, winrt::Folia::Localize(L"AIKey")).Password(L"");
+        InvokeAction(Action(fixture.page, winrt::Folia::Localize(L"Save")));
+        Pump([&] { return fixture.applied.has_value(); });
+        expect(fixture.applied->completion.explicitPromptCache);
+        protocol.SelectedIndex(0);
+        expect(cache.Visibility() == Visibility::Collapsed);
+        protocol.SelectedIndex(1);
+        auto base = Field<TextBox>(fixture.page, winrt::Folia::Localize(L"AIBaseUrl"));
+        base.Text(L"https://other.invalid/v1");
+        Pump([&] { return !cache.IsOn(); });
+        expect(cache.Visibility() == Visibility::Visible);
+    };
     "manual reasoning effort survives moving focus away and saves"_test = [] {
         CompletionPage fixture("https://fixture.invalid/v1", "fixture", {}, 1);
         auto reasoning = Field<TextBox>(fixture.page, winrt::Folia::Localize(L"AIReasoning"));

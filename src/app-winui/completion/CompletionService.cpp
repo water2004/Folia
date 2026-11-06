@@ -61,6 +61,9 @@ std::string ValidateCompletionConfig(CompletionConfig const& config) {
         return "Completion context must be 1–64 KB and output must be 16–4096 tokens.";
     return {};
 }
+bool SupportsExplicitCompletionCache(int protocol) noexcept {
+    return protocol == static_cast<int>(fairy::providers::ApiProtocol::Responses);
+}
 std::wstring LoadCompletionKey() {
     PCREDENTIALW credential = nullptr;
     if (!CredReadW(CredentialName, CRED_TYPE_GENERIC, 0, &credential)) {

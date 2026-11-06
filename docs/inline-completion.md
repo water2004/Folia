@@ -214,6 +214,16 @@ than shifting on every keystroke. Following text is kept after the active region
 for coherent context; it is not reordered solely to lengthen a cache prefix.
 This preserves useful prefix reuse without promising a provider cache ratio.
 
+For a Responses service and model that support explicit breakpoints, enable
+**Explicit prompt caching** in the completion settings and save. The setting
+defaults to off. Folia keeps the document in a single user message and sends
+stable context and the cursor fragment as separate text parts. It places one
+explicit breakpoint after stable context and uses explicit-only mode so the
+changing fragment does not request a cache write. The service applies its own
+token threshold and billing. Changing the base URL clears the opt-in. Other
+protocols continue to send the ordinary message format. See the
+[Responses cache rules](https://developers.openai.com/api/docs/guides/prompt-caching).
+
 Neighbor collection consumes the byte budget instead of stopping after three
 owners/lines. Source-mode lines use single line breaks; block-local source uses
 block separators. It uses the maintained editable index and views, with bounded
