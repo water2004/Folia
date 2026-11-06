@@ -199,10 +199,9 @@ std::expected<VennRenderInput, std::string> prepare_venn_render(const PreparedDi
             input.debug = entry->boolean;
     }
     input.theme.font_family = config_string(config, u"fontFamily", u"Arial");
-    if (const auto variables = prepared.config.find(u"themeVariables"))
-        input.theme.font_family = config_string(*variables, u"fontFamily", input.theme.font_family);
     if (const auto vars = config.find(u"themeVariables")) {
         auto& theme = input.theme;
+        theme.font_family = config_string(*vars, u"fontFamily", theme.font_family);
         theme.primary = config_string(*vars, u"primaryColor");
         theme.intersection_text = config_string(*vars, u"vennSetTextColor",
             config_string(*vars, u"primaryTextColor", config_string(*vars, u"textColor")));

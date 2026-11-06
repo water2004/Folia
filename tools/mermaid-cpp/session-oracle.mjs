@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
-import { root, lock, src, strip, withoutImports, defaults, themes, assign,
+import { root, lock, src, strip, withoutImports, extract, defaults, themes, assign,
   diagramKey, sanitizeDirective, hex, snapshot } from './config-reference.mjs';
 
 const clean = value => JSON.parse(JSON.stringify(value));
@@ -16,11 +16,15 @@ for(const [section,value] of Object.entries(defaults)) {
   for(const [key,item] of Object.entries(value)) if(typeof item==='function') callbacks.push([section,key]);
 }
 assert.equal(callbacks.length,25);
-const program = strip(withoutImports(src('config.ts'))) + '\n({setSiteConfig,updateSiteConfig,saveConfigFromInitialize,setConfig,addDirective,reset,setDiagramConfigScope,getConfig,getSiteConfig,getUserDefinedConfig})';
+const initialize = strip(extract(src('mermaidAPI.ts'), 'function initialize(', '\nconst getDiagramFromText'));
+const program = strip(withoutImports(src('config.ts'))) +
+  '\nconst configApi = {defaultConfig, saveConfigFromInitialize, setSiteConfig, getSiteConfig};\n' + initialize +
+  '\n({initialize,setSiteConfig,updateSiteConfig,saveConfigFromInitialize,setConfig,addDirective,reset,setDiagramConfigScope,getConfig,getSiteConfig,getUserDefinedConfig})';
 function session() {
   const warnings=[];
   const api=vm.runInNewContext(program, {config:clone(defaults),theme:themes,assignWithDepth:assign,
-    getDiagramConfigKey:diagramKey,sanitizeDirective,log:{debug(){},warn(message){warnings.push(message);}}});
+    getDiagramConfigKey:diagramKey,sanitizeDirective,setLogLevel(){},addDiagrams(){},
+    log:{debug(){},warn(message){warnings.push(message);}}});
   return {api,warnings};
 }
 // Lossless recursive delta against the separately checked full default snapshot.
@@ -97,6 +101,20 @@ add([op('site',{secure:'theme'})],'secure-string-list');
 add([op('site',[])],'mapping-input');
 for(const [section,key] of callbacks)
   add([op('site',{[section]:{[key]:{custom:1}}})],'unported-default-callback');
+// The raw config.ts APIs do not propagate a root font. The API initialize
+// wrapper does so before saving its options or selecting a derived theme.
+add([op('initialize',{}),op('scope','venn'),op('reset')]);
+for(const options of [{fontFamily:'Courier New'}, {theme:'default',fontFamily:'Arial'},
+  {theme:'dark',fontFamily:'Arial',themeVariables:{fontFamily:'Georgia'}},
+  {theme:'dark',fontFamily:'Arial',themeVariables:{fontFamily:''}},
+  {theme:'forest',fontFamily:'',themeVariables:{fontFamily:'Georgia'}},
+  {theme:'unknown',fontFamily:'Arial'}, {theme:'null',fontFamily:'Arial'},
+  {theme:'redux-color',fontFamily:'Arial',themeVariables:{primaryColor:'#123'}},
+  {venn:{theme:'redux-dark-color'},fontFamily:'Arial'}]) {
+  add([op('initialize',options),op('scope','venn'),
+    op('set',{theme:'default',fontFamily:'Georgia'}),op('add',{theme:'dark',fontFamily:'Times New Roman'}),
+    op('reset'),op('scope','venn')]);
+}
 
 const rows=[], values=[], ids=new Map();
 const intern=value=>{
@@ -111,7 +129,7 @@ for(let i=0;i<scenarios.length;i++) {
     let output;
     try {
       const arg=step.arg===undefined?undefined:clean(step.arg);
-      const methods={site:'setSiteConfig',update:'updateSiteConfig',save:'saveConfigFromInitialize',set:'setConfig',add:'addDirective',reset:'reset',scope:'setDiagramConfigScope',get:'getConfig'};
+      const methods={initialize:'initialize',site:'setSiteConfig',update:'updateSiteConfig',save:'saveConfigFromInitialize',set:'setConfig',add:'addDirective',reset:'reset',scope:'setDiagramConfigScope',get:'getConfig'};
       api[methods[step.op]](arg);
       output=[delta(clean(api.getSiteConfig()),baseline),delta(clean(api.getConfig()),baseline),snapshot(clean(api.getUserDefinedConfig()))].map(intern).join('|')+'|'+warnings.length;
     } catch(error) {

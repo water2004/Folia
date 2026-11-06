@@ -29,6 +29,9 @@ public:
 
     std::expected<void, std::string> set_site_config(const ConfigValue& config);
     std::expected<void, std::string> update_site_config(const ConfigValue& config);
+    // mermaidAPI.initialize saves the supplied overrides after propagating
+    // the legacy root font, before deriving the selected theme.
+    std::expected<void, std::string> initialize(const ConfigValue& config);
     std::expected<void, std::string> save_initialize_config(const ConfigValue& config);
     std::expected<void, std::string> set_config(const ConfigValue& config);
     std::expected<void, std::string> add_directive(const ConfigValue& config);
@@ -39,7 +42,7 @@ public:
         std::optional<std::u16string_view> diagram_type = {});
 private:
     explicit ConfigSession(ConfigSessionLimits limits) : limits_(limits) {}
-    enum class Operation { site, update, save, set, add, reset, scope };
+    enum class Operation { site, update, initialize, save, set, add, reset, scope };
     std::expected<void, std::string> apply(Operation operation, const ConfigValue* input,
         std::optional<std::u16string_view> scope = {});
     void inspect_state() const;

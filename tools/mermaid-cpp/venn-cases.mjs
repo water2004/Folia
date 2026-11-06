@@ -23,5 +23,10 @@ export const cases = [
     + '  venn:\n    padding: 23\n---\nvenn-beta\nset A\n  text first[First]\nset B\n'
     + 'union A,B[Both]\nstyle A fill:#ff6b6b,stroke:#704040,stroke-width:"4px"\n'
     + 'style B fill:#4ecdc4\nstyle A,B fill:#ffe66d'],
+  ['font-directive', '---\nconfig:\n  fontFamily: Courier New\n---\n'
+    + 'venn-beta\ntitle Serif test\nset A[Alpha]\nset B[Beta]\nunion A,B[Both]'],
+  ['font-precedence', '---\nconfig:\n  fontFamily: Courier New\n'
+    + '  themeVariables:\n    fontFamily: Georgia\n---\n'
+    + 'venn-beta\ntitle Serif test\nset A[Alpha]\nset B[Beta]\nunion A,B[Both]'],
 ];
 export const invalid = ['venn-beta\nset A\nunion A,B', 'venn-beta\nset A\nunion A'];

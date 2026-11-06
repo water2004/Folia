@@ -31,9 +31,7 @@ std::expected<folia::mermaid::DiagramSvg, std::string> render_mermaid_utf8(
     ConfigValue site{.kind=ConfigKind::mapping};
     site.mapping.emplace(u"theme", ConfigValue{.kind=ConfigKind::string,.string=dark?u"dark":u"default"});
     site.mapping.emplace(u"look", ConfigValue{.kind=ConfigKind::string,.string=u"classic"});
-    auto saved = session->save_initialize_config(site);
-    if (!saved) return std::unexpected(saved.error());
-    auto configured = session->set_site_config(site);
+    auto configured = session->initialize(site);
     if (!configured) return std::unexpected(configured.error());
     return render_mermaid(text, *session);
 }

@@ -39,6 +39,7 @@ std::string state(const ConfigSession& session, const ConfigValue& baseline) {
 std::expected<void, std::string> run(ConfigSession& session, const ConfigValue& step) {
     const auto& name = field(step, u"op").string;
     const auto arg = step.find(u"arg");
+    if (name == u"initialize") return session.initialize(*arg);
     if (name == u"site") return session.set_site_config(*arg);
     if (name == u"update") return session.update_site_config(*arg);
     if (name == u"save") return session.save_initialize_config(*arg);
@@ -112,7 +113,7 @@ suite config_session = [] {
             }
             ++count;
         }
-        expect(count == 655_u); expect(baselines == 1_u);
+        expect(count == 712_u); expect(baselines == 1_u);
     };
     "mermaid_config_session_owned_results_and_isolated_instances"_test = [] {
         auto a = ConfigSession::create(), b = ConfigSession::create();
@@ -143,6 +144,8 @@ suite config_session = [] {
         expect(!session->add_directive(json(uR"({"theme":"dark"})")));
         expect(state(*session, defaults) == before);
         expect(!session->set_config(json(uR"({"theme":"dark","themeVariables":{"primaryColor":"bad-color"}})")));
+        expect(state(*session, defaults) == before);
+        expect(!session->initialize(json(uR"({"theme":"dark","fontFamily":"Arial","themeVariables":{"primaryColor":"bad-color"}})")));
         expect(state(*session, defaults) == before);
         expect(!session->set_site_config(json(uR"({"secure":[1]})")));
         expect(state(*session, defaults) == before);

@@ -33,6 +33,11 @@ suite mermaid_venn = [] {
                 u"  venn:\n    padding: 23\n---\nvenn-beta\nset A\n  text first[First]\nset B\n"
                 u"union A,B[Both]\nstyle A fill:#ff6b6b,stroke:#704040,stroke-width:\"4px\"\n"
                 u"style B fill:#4ecdc4\nstyle A,B fill:#ffe66d"},
+            {"font-directive", u"---\nconfig:\n  fontFamily: Courier New\n---\n"
+                u"venn-beta\ntitle Serif test\nset A[Alpha]\nset B[Beta]\nunion A,B[Both]"},
+            {"font-precedence", u"---\nconfig:\n  fontFamily: Courier New\n"
+                u"  themeVariables:\n    fontFamily: Georgia\n---\n"
+                u"venn-beta\ntitle Serif test\nset A[Alpha]\nset B[Beta]\nunion A,B[Both]"},
         };
         for (const auto& [theme, suffix] : {std::pair{u"default", "default"}, {u"dark", "dark"},
             {u"redux-color", "redux-color"}, {u"redux-dark-color", "redux-dark-color"}}) {
@@ -43,8 +48,7 @@ suite mermaid_venn = [] {
                 {u"look", u"classic"}}) {
                 site.mapping.emplace(key, ConfigValue{.kind=ConfigKind::string, .string=value});
             }
-            expect(fatal(session->save_initialize_config(site).has_value()));
-            expect(fatal(session->set_site_config(site).has_value()));
+            expect(fatal(session->initialize(site).has_value()));
             for (const auto& [name, source] : cases) {
                 if (std::u16string_view(theme).starts_with(u"redux") && name != "styled") continue;
                 auto result = render_mermaid(source, *session);
@@ -62,6 +66,16 @@ suite mermaid_venn = [] {
             }
             expect(!render_mermaid(u"venn-beta\nset A\nunion A,B", *session));
         }
+    };
+    "mermaid_venn_bare_theme_owns_its_default_font"_test = [] {
+        auto session = ConfigSession::create();
+        expect(fatal(session.has_value()));
+        expect(fatal(session->initialize(ConfigValue{.kind=ConfigKind::mapping}).has_value()));
+        auto prepared = prepare_native_diagram(u"venn-beta\nset A\nset B\nunion A,B", *session);
+        expect(fatal(prepared.has_value()));
+        const auto* venn = std::get_if<VennRenderInput>(&prepared->content);
+        expect(fatal(venn != nullptr));
+        expect(venn->theme.font_family == std::u16string{u"\"Recursive Variable\", arial, sans-serif"});
     };
 };
 }

@@ -157,17 +157,51 @@ std::expected<void, std::string> ConfigSession::apply(Operation operation, const
             for (const auto key : {u"lazyLoadedDiagrams", u"loadExternalDiagramsAtStartup"})
                 if (const auto value = next.current_.find(key); value && config_truthy(*value)) next.warned_ = true;
         };
+        const auto set_site = [&](const ConfigValue& options, const ConfigValue& defaults) {
+            next.site_ = merge(copy(defaults), options);
+            next.delta_ = copy(options);
+            if (const auto theme = native_theme(options.find(u"theme")))
+                derive(next.site_, *theme, options.find(u"themeVariables"));
+            recompute(next.site_, next.directives_);
+        };
         switch (operation) {
         case Operation::save:
             next.initialize_ = copy(*input);
             break;
         case Operation::site:
-            next.site_ = merge(copy(default_session_config()), *input);
-            next.delta_ = copy(*input);
-            if (const auto theme = native_theme(input->find(u"theme")))
-                derive(next.site_, *theme, input->find(u"themeVariables"));
-            recompute(next.site_, next.directives_);
+            set_site(*input, default_session_config());
             break;
+        case Operation::initialize: {
+            auto options = copy(*input);
+            const auto font = options.find(u"fontFamily");
+            const auto variables = options.find(u"themeVariables");
+            const auto theme_font = variables ? variables->find(u"fontFamily") : nullptr;
+            if (font && config_truthy(*font) && (!theme_font || !config_truthy(*theme_font))) {
+                auto inherited = variables && config_truthy(*variables) ? *variables : map();
+                if (inherited.kind != ConfigKind::mapping)
+                    throw std::runtime_error("Initialize font propagation needs mapping themeVariables");
+                inherited.mapping.insert_or_assign(u"fontFamily", *font);
+                options.mapping.insert_or_assign(u"themeVariables", std::move(inherited));
+            }
+            next.initialize_ = copy(options);
+
+            const auto defaults = default_session_config();
+            auto theme = native_theme(options.find(u"theme"));
+            if (!theme) {
+                const auto fallback = defaults.find(u"theme");
+                theme = native_theme(fallback);
+                if (!theme) throw std::runtime_error("Initialize fallback theme is unavailable");
+                if (const auto selected = options.find(u"theme"); selected &&
+                    selected->kind != ConfigKind::null &&
+                    !(selected->kind == ConfigKind::string && selected->string == u"null"))
+                    options.mapping.insert_or_assign(u"theme", *fallback);
+            }
+            // mermaidAPI derives the initial palette before config.ts applies
+            // site options. A scoped switch still derives from the saved input.
+            derive(options, *theme, options.find(u"themeVariables"));
+            set_site(options, defaults);
+            break;
+        }
         case Operation::update:
             next.site_ = merge(next.site_, *input);
             next.delta_ = merge(next.delta_, *input);
@@ -211,6 +245,7 @@ std::expected<void, std::string> ConfigSession::apply(Operation operation, const
 }
 std::expected<void, std::string> ConfigSession::set_site_config(const ConfigValue& config) { return apply(Operation::site, &config); }
 std::expected<void, std::string> ConfigSession::update_site_config(const ConfigValue& config) { return apply(Operation::update, &config); }
+std::expected<void, std::string> ConfigSession::initialize(const ConfigValue& config) { return apply(Operation::initialize, &config); }
 std::expected<void, std::string> ConfigSession::save_initialize_config(const ConfigValue& config) { return apply(Operation::save, &config); }
 std::expected<void, std::string> ConfigSession::set_config(const ConfigValue& config) { return apply(Operation::set, &config); }
 std::expected<void, std::string> ConfigSession::add_directive(const ConfigValue& config) { return apply(Operation::add, &config); }
