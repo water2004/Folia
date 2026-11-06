@@ -2,13 +2,21 @@
 
 ## 当前检查点
 
+- 2026-11-07：34/34 个图族均已通过基础 SVG 对照。Railroad 四种语法算一个图族，显式 `error` 和 `flowchart-elk` 不另计。该数字衡量图族覆盖，单个图族的语法、外观、布局组合仍在补齐。WinUI 宿主切换另行验收。
+- 已提交 11 种主题（`8f3c9962`）、Railroad/Error/ELK 别名（`ba77b050`）、Block 多方向箭头（`0bf7c4ba`）、Venn 多集合与手绘（`5218ace0`、`fea69ba4`）、Flowchart Neo 和 HTML 字符引用（`daeb2dcd`）、Flowchart 手绘（`8dd5ce06`、`132290c8`）以及会话初始化字体优先级（`20784f03`）。本地通过 Railroad 16、Error 2、Block 20、Venn 32、Flowchart Neo 8、手绘 Dagre 6 和 classic Dagre 118 / ELK 12 张 SVG 对照。
+- 公共入口、DirectWrite 测量、DLL 与 CI 基础覆盖已提交 `4af512ff`。实测 SVG：Event Modeling 14；Use Case 20（含 ELK、Dagre、JSON、Neo）；Agentflow 8（含精确文档波浪轮廓和标签）；Wardley 12；Swimlane 8（路由另有 119 组差分，后处理按原有阶段拆分）；State 32；Requirement 44（富文本、换行和样式）；Flowchart 手绘 10 与新增曲线 24，经典和 Neo 对照仍通过。
+- `build/mermaid-relocation` 的核心、DirectWrite 平台、DLL 三套 CTest 已通过一次（`build/mermaid-complete-ctest.log`，142 秒）；应用扩展后的复验会话 `14515`，日志 `build/mermaid-complete-ctest-final.log`。编译最多四路，日志 `build/mermaid-complete-build.log`，原生 SVG 为 `build/mermaid-complete-svg`。本地验证，尚未推送 CI。
+- 当前未提交扩展：`swimlane_port` 核对新增的 RL/BT 与自定义样式、多行标签（14 张），修了 `foreignObject` 继承文字颜色后待重新构建。`swimlane_layout` 在 `build/candidates/usecase-handdrawn/` 准备 Use Case 手绘，已写入对照脚本/测试，暂不提交。下一步等 CTest 退出后统一构建，复验扩展后独立提交。Agentflow 的诊断覆盖、Flowchart 额外节点与图标、需注册的外部资源等仍需单独核对。
+
+## 上一轮验证
+
 - 2026-11-06。本地从 `4d71b92c` 继续推进，`folia::mermaid` 公共入口现有 28 个图族。根工程默认关闭 `FOLIA_BUILD_MERMAID`，WinUI 继续使用 Rust。切换需单独安排。
 - 本地已提交 ZenUML 公共入口 `00a56ea2`、Class 默认 ELK `80445c35`、Requirement 解析与渲染 `acca239c` / `82a18683`、ER 解析与渲染 `a24ef49e` / `02e66776`。
 - 以锁定的 Mermaid 12.2.0 浏览器输出为基准，ZenUML 5 张、Class ELK 10 张、Class Dagre 66 张、Flowchart ELK 12 张、ER 32 张和 Requirement 32 张通过。ER 和 Requirement 的样例均覆盖默认 ELK、显式 Dagre 和两套主题。Requirement 标签已覆盖纯文本，富文本排版和自定义 CSS 字体样式仍缺。
 - State 的侧边注释与并发分区已提交（`ae58933a`、`c4c671a5`），解析 oracle 通过 13 个成功案例与 2 个语法错误；亮暗主题 24 张 SVG 对照通过。
 - 第二批五个图族均已通过亮暗主题对照，共 46 张 SVG。Info 6 张、Tree View 12 张、Ishikawa 8 张、Cynefin 8 张、Venn 12 张。各图族独立提交，共用公共入口。Tree View、Ishikawa 和 Cynefin 共用 SVG 文本测量。
 - 最终本地 Windows Debug 构建在 `build/mermaid-relocation`，最多四路。核心、DirectWrite 平台和 DLL 三套 CTest 通过，日志为 `build/mermaid-next-ctest-final.log`。基准产物在 `build/mermaid-cpp/*-browser`，原生 SVG 在 `build/mermaid-next-svg`。新增对照已写入 CI，验收结果为本地实测。
-- 后续边界见 [图族覆盖](README.md)。Venn 使用亮暗主题且最多三个非空集合，`redux-color` 尚待公共主题层移植。WinUI 接入留待单独安排。
+- 后续边界见 [图族覆盖](README.md)。WinUI 接入留待单独安排。
 
 ## 边界
 

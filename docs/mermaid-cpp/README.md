@@ -2,7 +2,7 @@
 
 本目录记录 Folia 的 Mermaid C++23 原生重构工程。该项目以官方 [`mermaid-js/mermaid`](https://github.com/mermaid-js/mermaid) **12.2.0**（commit `1fb7869866dd619168d840291c9c54b4f129758b`）为基准，在 `src/mermaid/` 与 `src/platform/text/` 下使用 C++23 modules 原生实现语法解析、布局计算、DirectWrite 文本测量与 SVG 渲染，用于替换现有的 `mermaid-rs-renderer` 依赖。各组件对应的上游源码版本与哈希记录在 [`source-lock.json`](source-lock.json) 中。
 
-当前原生公共入口支持 28 个图族，语法、布局和外观覆盖以各图族的基准测试为准。C++ 库提供 `folia::mermaid` CMake 目标，桌面端仍使用原有 Rust 渲染链路。
+原生公共入口覆盖锁定版本的 34 个图族，各有实际 SVG 与浏览器基准对照。Railroad 的四种语法视为同一图族；显式 `error` 是内部诊断图。语法、布局和外观覆盖以各图族的基准测试为准。C++ 库提供 `folia::mermaid` CMake 目标，桌面端仍使用原有 Rust 渲染链路。
 
 ---
 
@@ -10,7 +10,7 @@
 
 ### 1. 公共前端与配置会话（`frontend` / `config_*` / `diagram_registry`）
 - **源码预处理**：统一处理换行符与控制字符、提取前置 YAML frontmatter、解析并剥离 `%%{init: ...}%%` 指令、按阶段清理注释。
-- **配置合并与主题计算**：通过 `yaml-cpp`（附带 JSON 转义补丁）与 `es-toolkit` 兼容合并语义归并配置树；基于 Khroma 颜色算法派生 `default` 与 `dark` 两套主题变量；通过 `ConfigSession` 提供请求级配置隔离。
+- **配置合并与主题计算**：通过 `yaml-cpp`（附带 JSON 转义补丁）与 `es-toolkit` 兼容合并语义归并配置树；基于 Khroma 颜色算法派生 11 种内置主题变量；通过 `ConfigSession` 提供请求级配置隔离。
 - **图族识别与统一入口**：`DiagramRegistry` 按上游探测器优先级识别图族，由 `folia.mermaid.render_entry` 统一提供 `prepare_native_diagram`（解析与配置提取）和 `render_native_diagram`（注入测量结果并生成 SVG）。
 
 ### 2. 已接入公共渲染入口的 20 个图族
@@ -39,7 +39,14 @@
 - **Tree View** 支持缩进与框线目录树、带引号的名称、描述、高亮和内置文件/文件夹图标。
 - **Ishikawa** 支持多级原因、长标签换行与实测视口。经典外观的亮暗主题已通过浏览器对照。
 - **Cynefin** 支持领域、分界、标签、徽章和过渡，浏览器对照使用固定随机种子。
-- **Venn** 支持最多三个非空集合、交叠、标题和标签。classic 外观及 `default` / `dark` 通过对照。默认裸会话依上游选用 `redux-color`，原生公共主题层目前尚未移植该主题；DLL 请求会显式选择亮暗主题。
+- **Venn** 支持多集合布局、交叠、标题和标签，以及有种子的手绘轮廓和填充。已对照 28 张 SVG，含四集合交叠和五集合分离。DLL 请求显式选择亮暗主题。
+- **Railroad** 的 IR、EBNF、ABNF 和 PEG 语法共用原生语法树及测量布局，16 张 SVG 对照通过。
+- **Agentflow** 复用 Flowchart 几何和 ELK，另提供自己的语法、嵌套流程、节点类型与主题色。
+- **Swimlane** 按泳道组织节点和标题，布局与正交路由分离，路由后处理沿用上游的阶段顺序。
+- **Event Modeling** 支持命名空间、帧、关系、注释和结构化数据块，使用各元素实际字体度量。
+- **Wardley** 支持演化阶段、锚点、组件和管线、关系、策略标记、加速器和标注。
+- **Use Case** 支持用例、参与者、系统边界、分组、注释和关系，支持默认 ELK 与显式 Dagre。
+- **显式错误图** 使用上游诊断 SVG 图形。普通语法失败通过原生入口的错误结果报告。
 
 ### 7. 平台文本测量与动态库接口（`src/platform/text/` / `tools/mermaid-cpp/`）
 - **DirectWrite 文本测量（`mermaid_measurer.ixx`）**：在 Windows 平台解析 CSS `font-family` 候选列表，提供单行 advance/ink bounds 测量、按 Unicode 断行机会的文本折行以及 SVG 字体 ascent/descent 度量。
@@ -55,7 +62,7 @@
 
 | 工作包 | 当前状态 | 下一步工作与完成标准 |
 | --- | --- | --- |
-| **4. 图族兼容性** | State 注释和并发分区已通过 24 张 SVG 对照。 | 继续验证未覆盖的语法、外观和主题。 |
+| **4. 图族兼容性** | 34 个图族通过基础 SVG 对照；各自语法、外观和主题覆盖程度不同。 | 继续补充复杂标签、外观组合、曲线和需要额外注册资源的图形。浏览器回调依赖另行设计宿主边界。 |
 | **5. WinUI 宿主集成与依赖切换** | 本轮保留现有 Rust 路径，等待单独安排 | 将最新 `FoliaNativeMermaid` 接入 WinUI 应用预览、编辑刷新、亮暗主题切换与 PDF 导出链路，完成桌面端实机验证后移除 `mermaid-rs-renderer` 依赖。 |
 
 ---
