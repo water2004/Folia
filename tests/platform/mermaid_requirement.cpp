@@ -35,6 +35,7 @@ suite mermaid_requirement = [] {
                 expect(result.has_value())<<name<<(result?"":result.error());
                 if(!result)continue;
                 expect(result->width>0&&result->height>0);
+                expect(result->svg.contains("<text") && !result->svg.contains("<foreignObject"));
                 if(auto directory=std::getenv("FOLIA_MERMAID_SVG_OUTPUT")) {
                     std::filesystem::create_directories(directory);
                     const auto suffix=theme==std::u16string_view(u"dark")?"dark":"default";

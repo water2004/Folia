@@ -55,6 +55,19 @@ export function inspectRequirement() {
     } else {
       inspectRuns(e);
       text=e.textContent.trim().replace(/\s+/g,' ');rect=box(e);font=getComputedStyle(e);
+      if(e.hasAttribute('data-html-label')) {
+        // HTML Range reports typographic advance. SVG getBBox additionally
+        // encloses glyph overhang, so use the painted character positions here.
+        const lines=[...e.children].filter(line=>line.getNumberOfChars());
+        const extents=lines.flatMap(line=>[
+          line.getStartPositionOfChar(0).x,
+          line.getEndPositionOfChar(line.getNumberOfChars()-1).x,
+        ]);
+        if(extents.length) {
+          const b=e.getBBox(),x=Math.min(...extents);
+          rect=box(e,{x,y:b.y,width:Math.max(...extents)-x,height:b.height});
+        }
+      }
     }
     return text?{text,box:rect,font:{family:font.fontFamily,size:font.fontSize,weight:font.fontWeight,
       color:e.tagName==='foreignObject'?font.color:font.fill},

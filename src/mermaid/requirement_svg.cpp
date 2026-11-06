@@ -71,7 +71,6 @@ struct FieldLine {
 struct Field {
     std::u16string text;
     std::vector<FieldLine> lines;
-    std::vector<FlowchartLabelLine> html_wrapped_source;
     FlowchartLabelFont font;
     RequirementTextMetrics metrics;
     double width=0,height=0,offset=0,line_step=0;
@@ -220,9 +219,12 @@ std::vector<FieldLine> wrap_runs(const RequirementSvgMeasure& measure,FlowchartL
     }
     std::vector<FieldLine> result;
     FlowchartLabelLine line;
-    auto flush=[&] {
+    auto flush=[&](const FlowchartLabelRun* trailing_space=nullptr) {
         if(line.empty()) return;
         auto metrics=measure_runs(measure,line,font,svg);
+        // The HTML label uses break-spaces and keeps the wrapping space on the
+        // preceding line. Its measured wrapping width still excludes that space.
+        if(trailing_space) append_run(line,u" ",*trailing_space);
         result.push_back({std::move(line),metrics});
         line.clear();
     };
@@ -232,7 +234,7 @@ std::vector<FieldLine> wrap_runs(const RequirementSvgMeasure& measure,FlowchartL
         if(!candidate.empty()&&word.preceded) append_run(candidate,u" ",word.space_style);
         for(const auto& run:word.runs) append_run(candidate,run.text,run);
         if(!line.empty()&&measure_runs(measure,candidate,font,svg).advance>limit) {
-            flush();
+            flush(!svg&&word.preceded?&word.space_style:nullptr);
             candidate=word.runs;
         }
         if(svg&&measure_runs(measure,candidate,font,svg).advance>limit) {
@@ -277,7 +279,6 @@ Field measure_field(const RequirementSvgMeasure& measure,std::u16string text,
     // requirementBox computes the generous cap from the original unformatted
     // input at the base font before createText applies label styles.
     const auto limit=wrapping_limit(measure,result.text,base_font);
-    if(html) result.html_wrapped_source=*parsed;
     bool wrapped=false;
     for(auto& line:*parsed) {
         auto parts=wrap_runs(measure,std::move(line),base,!html,limit);
@@ -288,7 +289,6 @@ Field measure_field(const RequirementSvgMeasure& measure,std::u16string text,
         }
     }
     if(html&&wrapped) result.width=std::max(result.width,limit);
-    else result.html_wrapped_source.clear();
     const auto line_count=std::max<std::size_t>(1,result.lines.size());
     result.height=html?result.line_step*line_count:
         result.metrics.svg_height+result.line_step*(line_count-1);
@@ -303,50 +303,24 @@ std::string paint_text(const Field& field,FlowchartPoint at,std::string_view col
     bool html,std::string_view background={}) {
     const auto weight=std::to_string(field.font.weight);
     const auto font_style=field.font.italic?"italic":"normal";
-    if(html) {
-        const bool wrapped=!field.html_wrapped_source.empty();
-        std::string style=std::string(wrapped?"display:table;white-space:break-spaces":"display:table-cell;white-space:nowrap")+
-            ";line-height:1.5;font-weight:"+
-            weight+";color:"+std::string(color)+
-            ";font-size:"+num(field.font.size)+"px;font-style:"+font_style+
-            ";text-align:"+(field.center_rows?"center":"left");
-        if(field.lines.size()>1) style+=";width:"+num(field.width)+"px";
-        if(!background.empty()) style+=";background-color:"+std::string(background);
-        auto html_style=attr("style",style);
-        html_style.pop_back();
-        html_style+=";font-family:"+xml(field.font.family)+"\"";
-        std::string content;
-        const auto count=wrapped?field.html_wrapped_source.size():field.lines.size();
-        for(std::size_t i=0;i<count;++i) {
-            if(i) content+="<br/>";
-            for(const auto& run:wrapped?field.html_wrapped_source[i]:field.lines[i].runs) {
-                if(run.strong) content+="<strong>";
-                if(run.emphasis) content+="<em>";
-                content+=xml(run.text);
-                if(run.emphasis) content+="</em>";
-                if(run.strong) content+="</strong>";
-            }
-        }
-        return "<foreignObject"+attr("x",num(at.x))+attr("y",num(at.y))+
-            attr("width",num(field.width))+attr("height",num(field.height))+
-            "><div xmlns=\"http://www.w3.org/1999/xhtml\""+html_style+
-            "><span>"+content+"</span></div></foreignObject>";
-    }
     std::string out;
     if(!background.empty()) {
-        const auto pad=svg_edge_label_padding;
+        const auto pad=html?0:svg_edge_label_padding;
         out="<rect class=\"background\""+attr("x",num(at.x-pad))+attr("y",num(at.y-pad))+
             attr("width",num(field.width+2*pad))+attr("height",num(field.height+2*pad))+
             attr("fill",background)+"/>";
     }
-    out+="<text"+attr("x",num(at.x))+attr("y",num(at.y+field.metrics.svg_baseline))+
+    const auto x=at.x+(field.center_rows?field.width/2:0);
+    const auto baseline=at.y+field.metrics.svg_baseline+
+        (html?(field.line_step-field.metrics.svg_height)/2:0);
+    out+="<text xml:space=\"preserve\""+attr("x",num(x))+attr("y",num(baseline))+
         attr("font-family",field.font.family)+attr("font-size",num(field.font.size))+
-        attr("font-weight",weight)+attr("font-style",font_style)+attr("fill",color)+">";
+        attr("font-weight",weight)+attr("font-style",font_style)+attr("fill",color)+
+        (field.center_rows?" text-anchor=\"middle\"":"")+(html?" data-html-label=\"true\"":"")+">";
     for(std::size_t i=0;i<field.lines.size();++i) {
-        out+="<tspan"+attr("x",num(at.x))+
-            attr("y",num(at.y+field.metrics.svg_baseline+i*field.line_step))+">";
+        out+="<tspan"+attr("x",num(x))+attr("y",num(baseline+i*field.line_step))+">";
         for(const auto& run:field.lines[i].runs) {
-            out+="<tspan"+attr("font-weight",std::to_string(run_weight(field.font,run.strong,true)))+
+            out+="<tspan"+attr("font-weight",std::to_string(run_weight(field.font,run.strong,!html)))+
                 attr("font-style",field.font.italic||run.emphasis?"italic":"normal")+
                 ">"+xml(run.text)+"</tspan>";
         }

@@ -21,7 +21,9 @@ function pathGeometry(actual,expected,path){
 try {
   const page=await browser.newPage();
   for(const original of originals){
-    await page.setContent(readFileSync(resolve(process.argv[3],`requirement-${original.name}.svg`),'utf8'));
+    const native=readFileSync(resolve(process.argv[3],`requirement-${original.name}.svg`),'utf8');
+    assert(!native.includes('<foreignObject'),`${original.name}: labels must survive SVG normalization`);
+    await page.setContent(native);
     const actual=await page.evaluate(inspectRequirement),prefix=original.name;
     compare(actual.view,original.view,`${prefix}.view`,1.5);
     for(const key of ['nodes','edges']){
