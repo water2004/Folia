@@ -24,6 +24,49 @@ export function inspectSwimlane() {
     return { x: Math.min(...xs), y: Math.min(...ys),
       width: Math.max(...xs) - Math.min(...xs), height: Math.max(...ys) - Math.min(...ys) };
   };
+  const glyphBox = (element) => {
+    const label = element.matches('.nodeLabel') ? element :
+      (element.querySelector('.nodeLabel') ?? element);
+    const text = label.querySelector('text.label-text');
+    const rects = [];
+    const mapRect = (target, bounds) => {
+      const matrix = inverse.multiply(target.getScreenCTM());
+      const points = [[bounds.x, bounds.y], [bounds.x + bounds.width, bounds.y],
+        [bounds.x, bounds.y + bounds.height], [bounds.x + bounds.width, bounds.y + bounds.height]]
+        .map(([x, y]) => ({ x: matrix.a * x + matrix.c * y + matrix.e,
+          y: matrix.b * x + matrix.d * y + matrix.f }));
+      const xs = points.map((point) => point.x), ys = points.map((point) => point.y);
+      rects.push({ x: Math.min(...xs), y: Math.min(...ys),
+        width: Math.max(...xs) - Math.min(...xs), height: Math.max(...ys) - Math.min(...ys) });
+    };
+    if (text) {
+      for (const line of text.querySelectorAll('tspan')) {
+        if (!line.textContent) continue;
+        mapRect(line, line.getBBox());
+      }
+    } else {
+      const walker = document.createTreeWalker(label, NodeFilter.SHOW_TEXT);
+      while (walker.nextNode()) {
+        if (!walker.currentNode.textContent.trim()) continue;
+        const range = document.createRange();
+        range.selectNodeContents(walker.currentNode);
+        for (const bounds of range.getClientRects()) {
+          const matrix = inverse;
+          const points = [[bounds.left, bounds.top], [bounds.right, bounds.top],
+            [bounds.left, bounds.bottom], [bounds.right, bounds.bottom]]
+            .map(([x, y]) => new DOMPoint(x, y).matrixTransform(matrix));
+          const xs = points.map((point) => point.x), ys = points.map((point) => point.y);
+          rects.push({ x: Math.min(...xs), y: Math.min(...ys),
+            width: Math.max(...xs) - Math.min(...xs), height: Math.max(...ys) - Math.min(...ys) });
+        }
+      }
+    }
+    if (!rects.length) return null;
+    const x = Math.min(...rects.map((rect) => rect.x));
+    const y = Math.min(...rects.map((rect) => rect.y));
+    return { x, y, width: Math.max(...rects.map((rect) => rect.x + rect.width)) - x,
+      height: Math.max(...rects.map((rect) => rect.y + rect.height)) - y };
+  };
   return {
     view: { x: view.x, y: view.y, width: view.width, height: view.height },
     labels: [...svg.querySelectorAll('.nodeLabel, .cluster-label, .edgeLabel')].map((element) => {
@@ -31,6 +74,7 @@ export function inspectSwimlane() {
       const style = getComputedStyle(styleTarget);
       return { text: element.textContent.trim().replace(/\s+/g, ' '),
         class: element.getAttribute('class'), box: box(element),
+        glyphBox: glyphBox(element),
         fontSize: style.fontSize, fontFamily: style.fontFamily,
         color: style.color, fontWeight: style.fontWeight };
     }),

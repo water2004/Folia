@@ -43,6 +43,7 @@ try {
       const a = actualLabels[index], e = originalLabels[index], path = `${original.name}.labels[${index}]`;
       compare(a.text, e.text, `${path}.text`);
       compare(a.box, e.box, `${path}.box`, 1.5);
+      compare(a.glyphBox, e.glyphBox, `${path}.glyphBox`, 1.5);
       compare(a.fontSize, e.fontSize, `${path}.fontSize`);
       compare(a.fontFamily, e.fontFamily, `${path}.fontFamily`);
       compare(a.color, e.color, `${path}.color`);
