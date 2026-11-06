@@ -2,7 +2,13 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-11-06，0.6.4 已发布）
+## 当前 checkpoint（2026-11-06，Responses 与推理力度输入）
+
+- 0.6.4 生产补全代码无 DeepSeek 域名或模型名分流。Responses 现在用标准纯文本消息表示补全示例的助手回复，见 `f149e0e6`。WinHTTP 保留短错误码、类型和参数名，错误响应正文最多读取 8 KiB、等待至多一秒。截图中的 OpenAI 400 尚无上游错误详情或真实 OpenAI 复测，不能确认实际拒绝原因。
+- OpenAI `GET /models` 无推理档位字段。继续只读取上游公开能力信息。手填推理力度时用 WinUI `TextSubmitted` 明确保留文本，显示选项来自上游，留空走服务默认。
+- Debug 已构建。HTTP 本地回环 21 项 251 断言及加载 5 项 22 断言通过，日志 `build/completion-responses-http.log`。WinUI 设置 9 项 131 断言通过，日志 `build/tests/winui/Debug/window/reasoning-focus-all-stdout.log`，覆盖手填、焦点切换与保存。测试通过 WinUI 焦点 API，未重现用户的物理输入序列。无运行构建或测试句柄。修复在本地提交，已发布的 0.6.4 MSI 不含本轮改动。
+
+## 0.6.4 已发布（历史）
 
 - 0.6.4 包含自 0.6.3 起的模型列表与手动配置、运行时补全提示词、接续公式和代码块的局部解析修复。版本元数据和英文说明 `release-notes/v0.6.4.md` 随发布提交。LaTeX 目录一致性检查和 7 项目录测试已通过。
 - `v0.6.4` 指向 `527ec902caa1d7a29e0dc5f9d7612088f8864d2f`，已与 master 推送。Actions [42180268451](https://github.com/water2004/Folia/actions/runs/42180268451) 因账户账单锁定未启动构建。按用户确认，沿用该标签，用 `build_msi.ps1 -Version 0.6.4` 本地构建并发布 [Folia v0.6.4](https://github.com/water2004/Folia/releases/tag/v0.6.4)。发布 ID `436215960`。

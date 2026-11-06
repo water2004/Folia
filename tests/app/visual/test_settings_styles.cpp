@@ -74,12 +74,16 @@ struct CompletionPage {
     Grid root;
     std::shared_ptr<winrt::Folia::SettingsView> view;
     FrameworkElement page{nullptr};
+    std::optional<winrt::Folia::AppSettings> applied;
     CompletionPage(std::string base, std::string model = {}, std::string effort = {}, int protocol = 0) {
         winrt::Folia::AppSettings initial;
         initial.completion = {true, std::move(base), std::move(model), protocol, std::move(effort)};
         view = std::make_shared<winrt::Folia::SettingsView>(initial,
             std::make_shared<winrt::Folia::ThemeCatalog>(), std::make_shared<winrt::Folia::LatexCommandCatalog>(),
-            folia::Theme::Light, nullptr, [](auto const&) -> std::optional<winrt::hstring> { return {}; }, [] {});
+            folia::Theme::Light, nullptr, [this](auto const& settings) -> std::optional<winrt::hstring> {
+                applied = settings;
+                return {};
+            }, [] {});
         window.Content(root); root.Children().Append(view->Root()); window.AppWindow().Resize({1120, 900}); window.Activate();
         Pump([&] { return root.IsLoaded() && root.ActualWidth() > 100; });
         for (auto entry : view->Root().MenuItems())
@@ -91,6 +95,31 @@ struct CompletionPage {
     ~CompletionPage() { view->Detach(); window.Close(); }
 };
 suite settings_style_tests = [] {
+    "manual reasoning effort survives moving focus away and saves"_test = [] {
+        CompletionPage fixture("https://fixture.invalid/v1", "fixture", {}, 1);
+        auto reasoning = Field<ComboBox>(fixture.page, winrt::Folia::Localize(L"AIReasoning"));
+        auto next = Field<TextBox>(fixture.page, winrt::Folia::Localize(L"AIBaseUrl"));
+        auto key = Field<PasswordBox>(fixture.page, winrt::Folia::Localize(L"AIKey"));
+        key.Password(L"");
+        reasoning.StartBringIntoView();
+        Pump([&] { fixture.root.UpdateLayout(); return First<TextBox>(reasoning) != nullptr; });
+        auto entry = First<TextBox>(reasoning);
+        expect(entry.Focus(FocusState::Programmatic));
+        Pump([&] { return Input::FocusManager::GetFocusedElement(entry.XamlRoot()) == entry; });
+        entry.Text(L"none");
+        expect(next.Focus(FocusState::Programmatic));
+        bool focusSettled = false;
+        next.DispatcherQueue().TryEnqueue([&] { focusSettled = true; });
+        try { Pump([&] { return focusSettled; }); }
+        catch (std::runtime_error const&) { throw std::runtime_error("Settings focus dispatcher did not settle"); }
+        expect(Input::FocusManager::GetFocusedElement(next.XamlRoot()) == next);
+        expect(reasoning.Text() == L"none") << winrt::to_string(reasoning.Text());
+        expect(entry.Text() == L"none") << winrt::to_string(entry.Text());
+        InvokeAction(Action(fixture.page, winrt::Folia::Localize(L"Save")));
+        try { Pump([&] { return fixture.applied.has_value(); }); }
+        catch (std::runtime_error const&) { throw std::runtime_error("Manual reasoning effort was not applied by Save"); }
+        expect(fixture.applied->completion.reasoningEffort == "none");
+    };
     "models without advertised capabilities show an explicit message without inventing list entries"_test = [] {
         for (int protocol : {0, 1, 2}) {
             completion_tests::Server server(R"({"data":[{"id":"reasoning-high-model"}]})", 200, false, "application/json");

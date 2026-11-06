@@ -117,6 +117,12 @@ Microsoft::UI::Xaml::UIElement SettingsView::BuildCompletionPage() {
     service.Children().Append(modelRow);
     auto reasoning = Choice(); reasoning.Header(box_value(Localize(L"AIReasoning")));
     reasoning.IsEditable(true);
+    reasoning.TextSubmitted([](ComboBox const& box, ComboBoxTextSubmittedEventArgs const& args) {
+        // Commit custom text independently of the advertised items.
+        args.Handled(true);
+        box.SelectedIndex(-1);
+        box.Text(args.Text());
+    });
     reasoning.Style(ResourceStyle(L"SettingsComboBoxStyle"));
     auto reasoningHint = Hint(L"");
     SetReasoningChoices(reasoning, reasoningHint, {}, appliedSettings_.completion.reasoningEffort, false);
