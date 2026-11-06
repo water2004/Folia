@@ -4,7 +4,7 @@ import std;
 export import folia.mermaid.frontend;
 
 export namespace folia::mermaid {
-enum class UsecaseNodeKind { actor, usecase, boundary, note };
+enum class UsecaseNodeKind { actor, usecase, boundary, note, json };
 enum class UsecaseShape { ellipse, rectangle, package };
 enum class UsecaseActor { normal, hollow, awesome, icon };
 struct UsecaseNode {
@@ -14,6 +14,8 @@ struct UsecaseNode {
     UsecaseActor actor = UsecaseActor::normal;
     bool markdown = false, business = false;
     std::vector<std::u16string> classes, styles;
+    struct JsonRow { std::u16string key, value; };
+    std::vector<JsonRow> json_rows;
 };
 enum class UsecaseRelationship { association, include, extend, generalization, note };
 enum class UsecaseArrow { none, point, circle, cross };
