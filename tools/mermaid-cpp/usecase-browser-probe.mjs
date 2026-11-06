@@ -11,8 +11,18 @@ export function inspectUsecase(){
  const box=e=>{const b=e.getBBox(),m=inv.multiply(e.getScreenCTM()),p=[[b.x,b.y],[b.x+b.width,b.y],[b.x,b.y+b.height],[b.x+b.width,b.y+b.height]].map(([x,y])=>({x:m.a*x+m.c*y+m.e,y:m.b*x+m.d*y+m.f})),xs=p.map(a=>a.x),ys=p.map(a=>a.y);return{x:Math.min(...xs),y:Math.min(...ys),width:Math.max(...xs)-Math.min(...xs),height:Math.max(...ys)-Math.min(...ys)};};
  const labels=[...svg.querySelectorAll('text,foreignObject')].filter(e=>e.textContent.trim()).map(e=>{
    const label=e.querySelector('span')??e,style=getComputedStyle(label);
+   const runs=[];
+   const walker=document.createTreeWalker(label,NodeFilter.SHOW_TEXT);
+   let node;
+   while(node=walker.nextNode()) {
+     const {fontWeight:weight,fontStyle:slant}=getComputedStyle(node.parentElement);
+     const last=runs.at(-1);
+     if(last?.weight===weight&&last?.slant===slant) last.text+=node.textContent;
+     else runs.push({text:node.textContent,weight,slant});
+   }
    return {text:(label.innerText??e.textContent).trim().replace(/\s+/g,' '),box:box(e),size:style.fontSize,
-     fill:e.tagName==='text'?style.fill:style.color};
+     fill:e.tagName==='text'?style.fill:style.color,tag:e.tagName,
+     runs:runs.map(run=>({...run,text:run.text.trim().replace(/\s+/g,' ')})).filter(run=>run.text)};
  });
  const paint=e=>{const style=getComputedStyle(e);return {fill:style.fill,stroke:style.stroke,
    strokeWidth:style.strokeWidth,shadow:style.filter!=='none'};};

@@ -8,7 +8,7 @@ export namespace folia::mermaid {
 struct UsecaseRenderTheme {
     std::u16string font_family = u"Arial", actor_font_family = u"Arial", usecase_font_family = u"Arial";
     double font_size = 12, actor_font_size = 14;
-    std::string text = "#333333", actor_text = "#333333", line = "#333333";
+    std::string text = "#333333", actor_text = "#333333", svg_text = "#333333", line = "#333333";
     std::string background = "#ffffff", node_fill = "#ECECFF", node_border = "#9370DB";
     std::string actor_fill = "#ffffff", actor_border = "#333333", label_background = "#ffffff";
     std::string include_line = "#333333", extend_line = "#333333";
@@ -26,11 +26,11 @@ struct UsecaseRenderInput {
     double node_spacing=50,rank_spacing=50,diagram_padding=20,min_node_width=120, wrapping_width=120;
     double group_title_top = 0, group_title_bottom = 0;
     bool elk = true, neo = false, hand_drawn = false, use_max_width = true, dark = false, rotate_colors = false;
+    bool html_labels = true;
     std::uint32_t hand_drawn_seed = 0;
 };
 struct UsecaseSvg { std::string svg; double width=0,height=0; };
-using UsecaseTextMeasure = std::function<std::expected<SvgTextMetrics, std::string>(
-    std::u16string_view, std::u16string_view, double, unsigned)>;
+using UsecaseTextMeasure = SvgFamilyTextMeasure;
 std::expected<UsecaseRenderInput,std::string> prepare_usecase_render(const PreparedDiagram&);
 std::expected<UsecaseSvg,std::string> render_usecase_svg(const UsecaseRenderInput&,const UsecaseTextMeasure&);
 }

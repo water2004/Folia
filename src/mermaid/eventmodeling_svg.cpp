@@ -210,7 +210,7 @@ std::string label_markup(View text) {
 }
 
 SvgTextMetrics measure_text(const EventmodelingTextMeasure& measure, View text, View font) {
-    auto result = measure(text, font, text_size, 700);
+    auto result = measure(text, font, text_size, 700, {.pair_kerning = true});
     if (!result) throw std::runtime_error(result.error());
     return *result;
 }

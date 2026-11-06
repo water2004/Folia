@@ -56,6 +56,10 @@ try {
       assert.equal(a.size, e.size, `${key}.size`);
       assert.equal(a.fill, e.fill, `${key}.fill`);
       box(a.box, e.box, key);
+      if (name.startsWith('rich-')) {
+        assert.equal(a.tag, e.tag, `${key}.tag`);
+        assert.deepEqual(a.runs, e.runs, `${key}.runs`);
+      }
     });
     items(actual.nodes, expected.nodes, `${name}.nodes`, (a, e, key) => {
       assert.equal(a.id, e.id, `${key}.id`);

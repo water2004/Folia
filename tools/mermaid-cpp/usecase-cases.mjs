@@ -1,3 +1,4 @@
+const richSource='usecase-beta\nactor Clerk("`*Clerk* good`")\nA("`**Approve**\n_payment_`")\nB("**Literal**")\nClerk -- "`opens **form**`" --> A\nA --> B\nnote for A "`**Pending** review`"\n';
 export const cases=[
  ['basic','usecase-beta\nactor User\nactor Admin\nUser --> Login\nLogin ..> : include Verify\n'],
  ['quoted','usecase-beta\ndirection TB\nactor "Customer Service"\n"Customer Service" --> "Sign In"\n'],
@@ -12,6 +13,8 @@ export const cases=[
  ['rough-basic','---\nconfig:\n  look: handDrawn\n  handDrawnSeed: 7\n---\nusecase-beta\nactor User\nactor Admin\nUser --> Login\nLogin ..> : include Verify\n'],
  ['rough-boundary','---\nconfig:\n  look: handDrawn\n  handDrawnSeed: 7\n---\nusecase-beta\nactor Customer\nsystemBoundary sb[Checkout] @{ type: package }\nCheckout(Place order)\nend\nCustomer --> Checkout\nnote for Checkout additional requirements\n'],
  ['rough-json-elk','---\nconfig:\n  layout: elk\n  look: handDrawn\n  handDrawnSeed: 7\n---\nusecase-beta\nactor User\njson Record @{ "z": "last", "a": [1, true] }\nUser --> Record\n'],
+ ['rich-labels',richSource],
+ ['rich-svg-labels','---\nconfig:\n  htmlLabels: false\n---\n'+richSource],
  ['invalid-header','Usecase\nA',true],
  ['invalid-empty','usecase-beta\nnot a statement',true],
  ['invalid-json','usecase-beta\njson Record @{ "a": [1,] }\n',true]

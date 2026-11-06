@@ -649,19 +649,22 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
         };
     }
     const auto measure_svg_line = [&](std::u16string_view text, std::u16string_view family,
-                                      double size, unsigned weight, bool use_advance = false,
-                                      bool pair_kerning = false)
+                                      double size, unsigned weight, const SvgFamilyTextOptions& options = {})
         -> std::expected<SvgTextMetrics, std::string> {
         if (!std::isfinite(size) || size <= 0 || size > std::numeric_limits<float>::max()) {
             return std::unexpected("Invalid Mermaid SVG font size");
         }
         const MermaidFont font{.family = std::u16string{family}, .size = static_cast<float>(size),
-            .weight = weight, .pair_kerning = pair_kerning};
-        auto bounds = measurer.measure(text, font, false, {}, true);
+            .weight = weight, .pair_kerning = options.pair_kerning};
+        std::vector<MermaidTextStyle> styles;
+        styles.reserve(options.styles.size());
+        for(const auto& run:options.styles) styles.push_back({run.offset,run.length,run.weight,run.italic});
+        auto bounds = measurer.measure(text, font, !styles.empty(), styles,
+            options.width == SvgTextWidth::bounds);
         if (!bounds) return std::unexpected(bounds.error());
         auto metrics = measurer.svg_font_metrics(font);
         if (!metrics) return std::unexpected(metrics.error());
-        return SvgTextMetrics{use_advance ? bounds->advance : bounds->bounds_width,
+        return SvgTextMetrics{options.width == SvgTextWidth::advance ? bounds->advance : bounds->bounds_width,
             metrics->height, metrics->baseline,
             metrics->middle_offset};
     };
@@ -679,11 +682,10 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
     };
     std::map<std::u16string, std::u16string, std::less<>> resolved_families;
     SvgFamilyTextMeasure svg_family_measure;
-    const bool usecase_html = std::holds_alternative<UsecaseRenderInput>(input->content);
-    const bool eventmodeling = std::holds_alternative<EventmodelingRenderInput>(input->content);
-    if (usecase_html || eventmodeling) {
+    if (std::holds_alternative<UsecaseRenderInput>(input->content) ||
+        std::holds_alternative<EventmodelingRenderInput>(input->content)) {
         svg_family_measure = [&](std::u16string_view text, std::u16string_view family,
-                                    double size, unsigned weight)
+                                    double size, unsigned weight, const SvgFamilyTextOptions& options)
             -> std::expected<SvgTextMetrics, std::string> {
             auto resolved = resolved_families.find(family);
             if (resolved == resolved_families.end()) {
@@ -701,7 +703,7 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
                 if (!installed) return std::unexpected(installed.error());
                 resolved = resolved_families.emplace(family, std::move(*installed)).first;
             }
-            return measure_svg_line(text, resolved->second, size, weight, usecase_html, eventmodeling);
+            return measure_svg_line(text, resolved->second, size, weight, options);
         };
     }
     return render_native_diagram(*input, widths, flowchart_measurements, sequence_measurements,

@@ -28,8 +28,7 @@ struct EventmodelingSvg {
     double width{}, height{};
 };
 
-using EventmodelingTextMeasure = std::function<std::expected<SvgTextMetrics, std::string>(
-    std::u16string_view text, std::u16string_view family, double size, unsigned weight)>;
+using EventmodelingTextMeasure = SvgFamilyTextMeasure;
 
 std::expected<EventmodelingRenderInput, std::string> prepare_eventmodeling_render(const PreparedDiagram&);
 std::expected<EventmodelingSvg, std::string> render_eventmodeling_svg(

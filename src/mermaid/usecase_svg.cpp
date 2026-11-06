@@ -85,8 +85,13 @@ unsigned font_weight(const ConfigValue& value) {
 
 struct Label {
     std::vector<std::u16string> lines;
-    double width = 0, height = 0;
+    std::vector<FlowchartLabelLine> runs;
+    std::u16string family;
+    double size = 0, width = 0, height = 0, baseline = 0, line_step = 0, glyph_width = 0, glyph_top = 0;
+    unsigned weight = 400;
+    bool html = true;
 };
+enum class SvgLabelPosition { centered, centered_bounds, start, edge };
 
 constexpr double edge_font_size = 10;
 constexpr double dagre_margin = 8;
@@ -195,49 +200,136 @@ std::string paint_actor(const UsecaseNode& node, NodePaint paint,
 
 std::expected<Label, std::string> measure_label(const UsecaseTextMeasure& measure,
     std::u16string_view text, std::u16string_view family, double size, double minimum_width = 0,
-    double padding = 0, bool markdown = false, unsigned weight = 400, double wrapping = 0) {
+    double padding = 0, bool markdown = false, unsigned weight = 400, double wrapping = 0,
+    bool html = true) {
     if (text.empty()) return Label{};
-    auto lines = flowchart_label_lines(text, markdown ? u"markdown" : u"text");
-    if (!lines) return std::unexpected(lines.error());
-    Label out;
-    for (const auto& line : *lines) {
-        auto width = measure(line, family, size, weight);
-        if (!width) return std::unexpected(width.error());
-        if (wrapping > 0 && width->width > wrapping && line.find(u' ') != std::u16string::npos) {
-            std::u16string current;
-            auto rest = std::u16string_view(line);
-            while (!rest.empty()) {
-                const auto next = rest.find(u' ');
-                const auto token = rest.substr(0, next);
-                auto candidate = current.empty() ? std::u16string(token) :
-                    current + u" " + std::u16string(token);
-                auto bounds = measure(candidate, family, size, weight);
-                if (!bounds) return std::unexpected(bounds.error());
-                if (!current.empty() && bounds->width > wrapping) {
-                    out.lines.push_back(std::move(current));
-                    current = token;
-                } else current = std::move(candidate);
-                if (next == std::u16string_view::npos) break;
-                rest.remove_prefix(next + 1);
-            }
-            out.lines.push_back(std::move(current));
-            out.width = std::max(out.width, wrapping);
-        } else {
-            out.lines.push_back(line);
-            out.width = std::max(out.width, width->width);
+    std::u16string encoded;
+    if (!markdown) {
+        for (const auto ch : text) {
+            if (ch == u'<') encoded += u"&lt;";
+            else if (ch == u'>') encoded += u"&gt;";
+            else encoded += ch;
         }
+        text = encoded;
+    }
+    auto lines = html ? flowchart_label_runs(text, markdown ? u"markdown" : u"text") :
+        flowchart_svg_label_runs(text, markdown ? u"markdown" : u"text");
+    if (!lines) return std::unexpected(lines.error());
+    Label out{.family = std::u16string(family), .size = size, .line_step = size * (html ? 1.5 : 1.1),
+        .weight = weight, .html = html};
+    double glyph_height = 0;
+    for (const auto& runs : *lines) {
+        std::u16string line;
+        std::vector<SvgTextRunStyle> styles;
+        for (const auto& run : runs) {
+            const auto strong = html ? (weight < 350 ? 400u : weight < 550 ? 700u : 900u) : 700u;
+            styles.push_back({line.size(), run.text.size(), run.strong ? strong : html ? weight : 400u,
+                run.emphasis});
+            line += run.text;
+        }
+        auto measure_slice = [&](std::size_t begin, std::size_t end) {
+            std::vector<SvgTextRunStyle> sliced;
+            for (const auto& run : styles) {
+                const auto start = std::max(run.offset, begin);
+                const auto stop = std::min(run.offset + run.length, end);
+                if (start < stop)
+                    sliced.push_back({start - begin, stop - start, run.weight, run.italic});
+            }
+            const bool styled = std::ranges::any_of(sliced, [&](const auto& run) {
+                return run.weight != weight || run.italic;
+            });
+            return measure(std::u16string_view(line).substr(begin, end - begin), family, size, weight,
+                {.width = html ? SvgTextWidth::advance : SvgTextWidth::bounds,
+                 .styles = styled ? std::span<const SvgTextRunStyle>(sliced) : std::span<const SvgTextRunStyle>{}});
+        };
+        auto append_line = [&](std::size_t begin, std::size_t end, const SvgTextMetrics& metrics) {
+            FlowchartLabelLine display;
+            for (std::size_t i = 0; i < runs.size(); ++i) {
+                const auto& run = styles[i];
+                const auto start = std::max(run.offset, begin);
+                const auto stop = std::min(run.offset + run.length, end);
+                if (start < stop)
+                    display.push_back({line.substr(start, stop - start), runs[i].strong, runs[i].emphasis});
+            }
+            out.lines.push_back(line.substr(begin, end - begin));
+            out.runs.push_back(std::move(display));
+            out.width = std::max(out.width, metrics.width);
+            glyph_height = std::max(glyph_height, metrics.height);
+            out.baseline = std::max(out.baseline, metrics.baseline);
+        };
+        auto natural = measure_slice(0, line.size());
+        if (!natural) return std::unexpected(natural.error());
+        if (wrapping <= 0 || natural->width <= wrapping || line.find(u' ') == line.npos) {
+            append_line(0, line.size(), *natural);
+            continue;
+        }
+        auto begin = std::size_t{0};
+        auto previous = line.find(u' ');
+        for (auto end = line.find(u' ', previous + 1);; end = line.find(u' ', end + 1)) {
+            if (end == line.npos) end = line.size();
+            auto candidate = measure_slice(begin, end);
+            if (!candidate) return std::unexpected(candidate.error());
+            if (candidate->width > wrapping) {
+                auto fitting = measure_slice(begin, previous);
+                if (!fitting) return std::unexpected(fitting.error());
+                append_line(begin, previous, *fitting);
+                begin = previous + 1;
+            }
+            previous = end;
+            if (end == line.size()) {
+                auto last = measure_slice(begin, end);
+                if (!last) return std::unexpected(last.error());
+                append_line(begin, end, *last);
+                break;
+            }
+        }
+        if (html) out.width = std::max(out.width, wrapping);
     }
     // The HTML label's height follows its 1.5 line-height. Width is measured
     // by the platform and rounded to the browser's 1/64 px layout grid.
+    out.glyph_width = out.width;
+    out.glyph_top = size - out.baseline;
     out.width = std::max(minimum_width, std::round(out.width * 64) / 64 + 2 * padding);
-    out.height = static_cast<double>(out.lines.size()) * size * 1.5;
+    out.height = html ? out.lines.size() * out.line_step :
+        glyph_height + (out.lines.size() - 1) * out.line_step + 2 * padding;
     return out;
 }
 
 void paint_label(std::string& svg, const Label& label, FlowchartPoint center,
-                 double size, std::u16string_view family, std::string_view color,
-                 std::string_view css_class, std::string_view background = {}, unsigned weight = 400) {
+                 std::string_view color, std::string_view css_class, std::string_view background = {},
+                 SvgLabelPosition position = SvgLabelPosition::centered, const Label* svg_background = nullptr) {
     if (label.lines.empty()) return;
+    const auto size = label.size;
+    const auto weight = label.weight;
+    const auto& family = label.family;
+    if (!label.html) {
+        const bool edge = position == SvgLabelPosition::edge;
+        const bool center_bounds = position == SvgLabelPosition::centered_bounds;
+        const auto x = center.x - (center_bounds ? label.glyph_width / 2 :
+            position == SvgLabelPosition::centered ? label.width / 2 : 0);
+        const auto top = center.y - label.height / 2;
+        const auto baseline = top + (edge ? label.baseline : size - (center_bounds ? label.glyph_top : 0));
+        if (svg_background) {
+            const auto y = baseline - size + svg_background->size - svg_background->baseline - 2;
+            svg += "<rect class=\"background\" x=\"" + n(x - svg_background->width / 2) +
+                "\" y=\"" + n(y) + "\" width=\"" + n(svg_background->width) +
+                "\" height=\"" + n(svg_background->height) + "\" fill=\"" + std::string(background) + "\"/>";
+        }
+        svg += "<text class=\"" + std::string(css_class) + "\" font-family=\"" + attribute(family) +
+            "\" font-size=\"" + n(size) + "\" font-weight=\"" + std::to_string(weight) +
+            "\" fill=\"" + std::string(color) + "\"" + (edge ? " text-anchor=\"middle\"" : "") + ">";
+        for (std::size_t i = 0; i < label.runs.size(); ++i) {
+            svg += "<tspan x=\"" + n(x) + "\" y=\"" + n(baseline + i * label.line_step) + "\">";
+            for (const auto& run : label.runs[i]) {
+                svg += "<tspan font-weight=\"" + std::to_string(run.strong ? 700u : 400u) +
+                    "\" font-style=\"" + std::string(run.emphasis ? "italic" : "normal") + "\">" +
+                    esc(run.text) + "</tspan>";
+            }
+            svg += "</tspan>";
+        }
+        svg += "</text>";
+        return;
+    }
     svg += "<foreignObject x=\"" + n(center.x - label.width / 2) +
         "\" y=\"" + n(center.y - label.height / 2) + "\" width=\"" + n(label.width) +
         "\" height=\"" + n(label.height) + "\"><div xmlns=\"http://www.w3.org/1999/xhtml\""
@@ -246,9 +338,15 @@ void paint_label(std::string& svg, const Label& label, FlowchartPoint center,
         ";color:" + std::string(color);
     if (!background.empty()) svg += ";background-color:" + std::string(background);
     svg += "\"><span class=\"" + std::string(css_class) + "\">";
-    for (std::size_t i = 0; i < label.lines.size(); ++i) {
+    for (std::size_t i = 0; i < label.runs.size(); ++i) {
         if (i) svg += "<br/>";
-        svg += esc(label.lines[i]);
+        for (const auto& run : label.runs[i]) {
+            if (run.strong) svg += "<strong>";
+            if (run.emphasis) svg += "<em>";
+            svg += esc(run.text);
+            if (run.emphasis) svg += "</em>";
+            if (run.strong) svg += "</strong>";
+        }
     }
     svg += "</span></div></foreignObject>";
 }
@@ -263,14 +361,14 @@ struct JsonTable {
 
 std::expected<JsonTable, std::string> measure_json(const UsecaseNode& node,
     const Label& title, const UsecaseRenderTheme& theme, const UsecaseTextMeasure& measure,
-    const RoughPolygonOptions* rough) {
+    const RoughPolygonOptions* rough, bool html) {
     JsonTable table;
     double value_width = 0;
     table.inner_height = title.height + 8;
     for (const auto& row : node.json_rows) {
-        auto key = measure_label(measure, row.key, theme.font_family, theme.diagram_font_size, 0, 0, false, 400, 120);
+        auto key = measure_label(measure, row.key, theme.font_family, theme.diagram_font_size, 0, 0, false, 400, 120, html);
         if (!key) return std::unexpected(key.error());
-        auto value = measure_label(measure, row.value, theme.font_family, theme.diagram_font_size, 0, 0, false, 400, 120);
+        auto value = measure_label(measure, row.value, theme.font_family, theme.diagram_font_size, 0, 0, false, 400, 120, html);
         if (!value) return std::unexpected(value.error());
         const double height = std::max(key->height, value->height) + 8;
         table.key_width = std::max(table.key_width, key->width);
@@ -319,7 +417,7 @@ void paint_json(std::string& svg, const Label& title, const JsonTable& table,
             "\" height=\"" + n(height) + "\"" + paint + std::string(shadow) + "/>";
     };
     const auto text = [&](const Label& label, double x, double y) {
-        paint_label(svg, label, {x, y}, theme.diagram_font_size, theme.font_family, theme.text, "nodeLabel");
+        paint_label(svg, label, {x, y}, theme.text, "nodeLabel", {}, SvgLabelPosition::centered_bounds);
     };
     rect(left - 1, top - 1, table.inner_width + 2, table.inner_height + 2);
     rect(left, top, table.inner_width, title_height);
@@ -515,7 +613,7 @@ std::optional<RoughBounds> paint_boundary(std::string& svg, const FlowchartPlace
     rect(top + tab_height, width, height - tab_height, "boundary-body");
     paint_label(svg, label, {package ? left + tab_width / 2 : box.x,
         package ? top + tab_height / 2 : top + input.group_title_top + label.height / 2},
-        theme.diagram_font_size, theme.font_family, theme.boundary_text, "nodeLabel");
+        theme.boundary_text, "nodeLabel");
     svg += "</g>";
     return bounds;
 }
@@ -542,6 +640,7 @@ std::expected<UsecaseRenderInput, std::string> prepare_usecase_render(const Prep
     theme.actor_weight = font_weight(member(usecase, u"actorFontWeight"));
     theme.usecase_weight = font_weight(member(usecase, u"usecaseFontWeight"));
     theme.text = color(vars, u"primaryTextColor", "#333333");
+    theme.svg_text = color(vars, u"textColor", "#333333");
     theme.actor_text = color(vars, u"actorTextColor", theme.text);
     theme.line = color(vars, u"lineColor", "#333333");
     theme.background = color(vars, u"mainBkg", "#ffffff");
@@ -574,6 +673,10 @@ std::expected<UsecaseRenderInput, std::string> prepare_usecase_render(const Prep
     out.diagram_padding = number(member(usecase, u"diagramPadding"), 20);
     out.min_node_width = number(member(usecase, u"minNodeWidth"), 120);
     out.wrapping_width = number(member(usecase, u"wrappingWidth"), 120);
+    const auto& html = member(config, u"htmlLabels");
+    const auto& legacy_html = member(member(config, u"flowchart"), u"htmlLabels");
+    out.html_labels = html.kind != ConfigKind::null ? config_truthy(html) :
+        legacy_html.kind == ConfigKind::null || config_truthy(legacy_html);
     out.elk = string(member(config, u"layout"), u"elk") == u"elk";
     out.neo = string(member(config, u"look"), u"classic") == u"neo";
     out.hand_drawn = string(member(config, u"look"), u"classic") == u"handDrawn";
@@ -607,7 +710,7 @@ std::expected<UsecaseSvg, std::string> render_usecase_svg(
         std::vector<FlowchartNodeBox> boxes, nominal_boxes;
         std::vector<RoughPolygonResult> rough_nodes;
         std::vector<FlowchartEdgeLabelSize> edge_sizes;
-        std::vector<Label> labels, stereotypes, edge_labels;
+        std::vector<Label> labels, stereotypes, edge_labels, edge_backgrounds;
         std::vector<JsonTable> json_tables;
         FlowchartMeasurements measured;
         std::unordered_map<std::u16string, std::size_t> node_index;
@@ -625,17 +728,34 @@ std::expected<UsecaseSvg, std::string> render_usecase_svg(
             const bool note = node->kind == UsecaseNodeKind::note;
             const bool json = node->kind == UsecaseNodeKind::json;
             const bool group = node->kind == UsecaseNodeKind::boundary;
+            const bool usecase_font = usecase && (input.html_labels || node->business);
             const auto& family = actor ? theme.actor_font_family :
-                usecase ? theme.usecase_font_family : theme.font_family;
+                usecase_font ? theme.usecase_font_family : theme.font_family;
             const double size = actor ? theme.actor_font_size :
-                usecase ? theme.font_size : theme.diagram_font_size;
-            const auto weight = actor ? theme.actor_weight : usecase ? theme.usecase_weight : 400u;
+                usecase_font ? theme.font_size : theme.diagram_font_size;
+            const auto weight = actor ? theme.actor_weight : usecase_font ? theme.usecase_weight : 400u;
             auto label = measure_label(measure, node->label, family, size,
-                usecase || json ? input.min_node_width : 0, 0, node->markdown, weight, input.wrapping_width);
+                usecase || json || note ? input.min_node_width : 0, 0, node->markdown, weight,
+                input.wrapping_width, input.html_labels);
             if (!label) return std::unexpected(label.error());
+            if (!input.html_labels && (actor || (elliptical(*node) && node->business))) {
+                // labelHelper measures before the actor/business caption class
+                // changes the SVG font. The already measured caption retains
+                // its width, height and origin when that class is applied.
+                auto before_class = measure_label(measure, node->label, theme.font_family,
+                    theme.diagram_font_size, usecase ? input.min_node_width : 0,
+                    0, node->markdown, 400, input.wrapping_width, false);
+                if (!before_class) return std::unexpected(before_class.error());
+                label->width = before_class->width;
+                label->height = before_class->height;
+                label->glyph_width = before_class->glyph_width;
+                label->glyph_top = before_class->glyph_top;
+                label->runs = std::move(before_class->runs);
+                label->lines = std::move(before_class->lines);
+            }
             auto stereotype = measure_label(measure,
                 node->stereotype.empty() ? std::u16string{} : u"«" + node->stereotype + u"»",
-                family, size, 0, 0, false, weight, input.wrapping_width);
+                family, size, 0, 0, false, weight, input.wrapping_width, input.html_labels);
             if (!stereotype) return std::unexpected(stereotype.error());
             node_index.emplace(node->id, graph.nodes.size());
             graph.nodes.push_back({.id = node->id, .label = node->label,
@@ -647,7 +767,7 @@ std::expected<UsecaseSvg, std::string> render_usecase_svg(
                 (stereotype->height > 0 && (actor || node->business) ? 2 : 0);
             JsonTable table;
             if (json) {
-                auto measured_table = measure_json(*node, *label, theme, measure, rough_options);
+                auto measured_table = measure_json(*node, *label, theme, measure, rough_options, input.html_labels);
                 if (!measured_table) return std::unexpected(measured_table.error());
                 table = std::move(*measured_table);
                 boxes.push_back({table.inner_width + 2, table.inner_height + 2});
@@ -683,12 +803,23 @@ std::expected<UsecaseSvg, std::string> render_usecase_svg(
             const auto text = relationship_label(edge);
             graph.edges.push_back({.id = edge.id, .start = edge.from, .end = edge.to, .label = text,
                 .min_length = edge.min_length});
-            auto label = measure_label(measure, text, theme.font_family, edge_font_size, 0, 2,
-                edge.markdown, 400, 200);
+            auto label = measure_label(measure, text, theme.font_family, edge_font_size, 0,
+                input.html_labels ? 2 : 0, edge.markdown, 400, 200, input.html_labels);
             if (!label) return std::unexpected(label.error());
-            edge_sizes.push_back({label->width, label->height});
-            measured.edges.push_back({.width = label->width, .height = label->height,
+            // createText sizes the SVG background before the edge group CSS
+            // sets the visible text to the smaller relationship font.
+            Label background;
+            if (!input.html_labels && !text.empty()) {
+                auto large = measure_label(measure, text, theme.font_family, theme.diagram_font_size,
+                    0, 2, edge.markdown, 400, 200, false);
+                if (!large) return std::unexpected(large.error());
+                background = std::move(*large);
+            }
+            const auto& box = input.html_labels ? *label : background;
+            edge_sizes.push_back({box.width, box.height});
+            measured.edges.push_back({.width = box.width, .height = box.height,
                 .lines = label->lines});
+            edge_backgrounds.push_back(std::move(background));
             edge_labels.push_back(std::move(*label));
         }
         FlowchartLayout layout;
@@ -753,12 +884,23 @@ std::expected<UsecaseSvg, std::string> render_usecase_svg(
                 if (node.shape == UsecaseShape::package) height = std::max(height, labels[i].height + 50);
             }
             include_box(box.x, box.y, width, height);
+            if (!input.html_labels && node.kind == UsecaseNodeKind::usecase && !node.business)
+                include_box(box.x + labels[i].glyph_width / 2, box.y, labels[i].glyph_width, labels[i].height);
         }
         for (std::size_t i = 0; i < layout.edges.size(); ++i) {
             const auto& edge = layout.edges[i];
             if (!input.hand_drawn)
                 for (auto p : edge.points) include_box(p.x, p.y, 0, 0);
-            if (edge.label) include_box(edge.label->x, edge.label->y, edge_labels[i].width, edge_labels[i].height);
+            if (edge.label) {
+                const auto& label = edge_labels[i];
+                if (input.html_labels) include_box(edge.label->x, edge.label->y, label.width, label.height);
+                else {
+                    const auto& background = edge_backgrounds[i];
+                    const auto top = edge.label->y - label.height / 2 + label.baseline - label.size +
+                        background.size - background.baseline - 2;
+                    include_box(edge.label->x, top + background.height / 2, background.width, background.height);
+                }
+            }
         }
         std::string svg;
         if (!input.document.acc_title.empty()) svg += "<title>" + esc(input.document.acc_title) + "</title>";
@@ -830,8 +972,9 @@ std::expected<UsecaseSvg, std::string> render_usecase_svg(
         svg += "</g><g class=\"edgeLabels\">";
         for (std::size_t i = 0; i < layout.edges.size(); ++i) {
             const auto& edge = layout.edges[i];
-            if (edge.label) paint_label(svg, edge_labels[i], *edge.label, edge_font_size,
-                theme.font_family, theme.text, "edgeLabel", theme.label_background);
+            if (edge.label) paint_label(svg, edge_labels[i], *edge.label,
+                theme.text, "edgeLabel", theme.label_background, SvgLabelPosition::edge,
+                input.html_labels ? nullptr : &edge_backgrounds[i]);
         }
         svg += "</g><g class=\"nodes\">";
         for (std::size_t i = 0; i < layout.nodes.size(); ++i) {
@@ -861,10 +1004,10 @@ std::expected<UsecaseSvg, std::string> render_usecase_svg(
                 svg += paint_actor(node, paint, figure_top + actor_figure_height / 2, style,
                     shadow_attribute, input.neo ? theme.neo_actor_path_width : 0, rough_options);
                 const double top = figure_top + actor_figure_height + actor_label_gap;
-                paint_label(svg, stereotype, {0, top + stereotype.height / 2}, theme.actor_font_size,
-                    theme.actor_font_family, theme.actor_text, "usecase-stereotype", {}, theme.actor_weight);
+                paint_label(svg, stereotype, {0, top + stereotype.height / 2},
+                    theme.actor_text, "usecase-stereotype", {}, SvgLabelPosition::centered_bounds);
                 paint_label(svg, label, {0, top + (stereotype.height > 0 ? stereotype.height + 2 : 0) + label.height / 2},
-                    theme.actor_font_size, theme.actor_font_family, theme.actor_text, "nodeLabel", {}, theme.actor_weight);
+                    theme.actor_text, "nodeLabel", {}, SvgLabelPosition::centered_bounds);
             } else {
                 const double x = -box.width / 2, y = -box.height / 2;
                 const auto colors = palette_paint(theme,
@@ -897,19 +1040,20 @@ std::expected<UsecaseSvg, std::string> render_usecase_svg(
                         n(box.width) + "\" height=\"" + n(box.height) + "\"" + paint + shadow_attribute + "/>";
                 }
                 const double gap = stereotype.height > 0 && node.business ? 2 : 0;
-                const auto& family = note ? theme.font_family : theme.usecase_font_family;
-                const double font = note ? theme.diagram_font_size : theme.font_size;
-                paint_label(svg, stereotype, {0, -(label.height + gap) / 2}, font,
-                    family, theme.text, "usecase-stereotype", {}, theme.usecase_weight);
-                paint_label(svg, label, {0, (stereotype.height + gap) / 2}, font,
-                    family, note ? theme.note_text : theme.text, "nodeLabel", {}, theme.usecase_weight);
+                paint_label(svg, stereotype, {0, -(label.height + gap) / 2},
+                    theme.text, "usecase-stereotype", {}, SvgLabelPosition::centered_bounds);
+                const auto& color = input.html_labels ? (note ? theme.note_text : theme.text) :
+                    note ? theme.note_fill : node.business ? theme.text : theme.svg_text;
+                paint_label(svg, label, {0, (stereotype.height + gap) / 2}, color, "nodeLabel", {},
+                    note || node.business ? SvgLabelPosition::centered_bounds : SvgLabelPosition::start);
             }
             svg += "</g>";
         }
         svg += "</g>";
         if (left > right) left = top = right = bottom = 0;
         if (!input.document.title.empty()) {
-            const auto metrics = measure(input.document.title, theme.font_family, theme.diagram_font_size, 400);
+            const auto metrics = measure(input.document.title, theme.font_family, theme.diagram_font_size,
+                400, {.width = SvgTextWidth::advance});
             if (!metrics) return std::unexpected(metrics.error());
             const double center = (left + right) / 2;
             include_box(center, metrics->height / 2 - metrics->baseline, metrics->width, metrics->height);
