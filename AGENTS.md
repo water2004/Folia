@@ -1,5 +1,23 @@
 # Repository instructions
 
+## Mermaid C++ 迁移指南（Agent 执行规范）
+
+在参与 Mermaid C++23 原生渲染模块（`third_party/mermaid-cpp/`、`src/platform/text/`、`tools/mermaid-cpp/`）的开发或恢复上下文时，必须首先执行以下步骤：
+
+1. **必读入口文档**：
+   - 开始编码或规划前，先完整阅读 [`docs/mermaid-cpp/HANDOFF.md`](docs/mermaid-cpp/HANDOFF.md) 与 [`docs/mermaid-cpp/README.md`](docs/mermaid-cpp/README.md)。
+   - `docs/mermaid-cpp/HANDOFF.md` 顶部记录了当前已验证的基准 commit、已接入公共入口的 20 个图族清单，以及待收尾任务（**Task A：ZenUML 公共入口**、**Task B：Class 默认 ELK 布局**、**Task C：ER 图原生实现**、**Task D：Requirement 图等补齐**、**Task E：WinUI 宿主切换**）的分步执行指令与允许修改的文件范围。
+2. **模块与平台边界（硬约束）**：
+   - **核心层（平台无关）**：`third_party/mermaid-cpp/src/` 下的所有模块（`.ixx` / `.cpp`）统一使用 C++23 modules 与 `import std;`，严禁包含任何 Windows、WinRT、Direct2D 或 DirectWrite 头文件。
+   - **平台测量与桥接层（Windows）**：字体解析与文本测量位于 `src/platform/text/mermaid_measurer.ixx`，平台渲染桥接位于 `src/platform/text/mermaid_renderer.ixx`，DLL 会话封装位于 `src/platform/text/mermaid_host.ixx`。
+   - **CMake 源文件收集规则**：`tools/mermaid-cpp/CMakeLists.txt` 对 `third_party/mermaid-cpp/src/*.{ixx,cpp}` 和 `tests/mermaid_cpp/*.cpp` 使用 `GLOB_RECURSE` 自动收集（放入即参与编译，切勿留存未完成文件）；而 `tests/platform/*.cpp` 则在 `FoliaMermaidPlatformTests` 目标中**显式逐个列出**（新增平台测试文件时必须同步写入该列表）。
+3. **算法还原与文本测量纪律**：
+   - 行为基准固定为官方 `mermaid-js/mermaid` **12.2.0**（commit `1fb7869866dd619168d840291c9c54b4f129758b`），新增上游依赖文件时需将源码 SHA-256 记入 `docs/mermaid-cpp/source-lock.json` 并核对 `third_party/mermaid-cpp/THIRD_PARTY_NOTICES.md`。
+   - 凡涉及文本宽高的布局必须使用平台层传入的 DirectWrite 实测数据（注意调用 `MermaidMeasurer::measure` 前须先通过 `resolve_family` 将 CSS 字体族列表解析为单个已安装字体名）。严禁使用“字符数 × 固定系数”估算字宽、按测试样例硬编码坐标或放宽几何比较容差（SVG 实测几何容差固定为 `1.5`，ELK 算子坐标容差固定为 `1e-4`）。
+4. **并行分工与交接更新**：
+   - 共享接线文件（`render_entry.{ixx,cpp}`、`frontend.cpp`、`mermaid_renderer.ixx`、`tools/mermaid-cpp/CMakeLists.txt`、`.github/workflows/mermaid-cpp.yml`）在多人/多智能体并行时由集成负责人统一合入；独立图族负责人仅修改所属图族的源码、测试与 fixture。
+   - 每完成一个任务包并通过对应 `FoliaMermaidTests` / `FoliaMermaidPlatformTests` 及浏览器 SVG 对照后，立即小批提交，并原位更新 `docs/mermaid-cpp/HANDOFF.md` 顶部的基线状态与任务进度（不追加历史流水账）。
+
 ## Math migration continuity
 
 When working on the native MathJax migration, read `docs/math-port/HANDOFF.md`

@@ -1,0 +1,63 @@
+--- a/third_party/mermaid-cpp/src/flowchart_elk.ixx
++++ b/third_party/mermaid-cpp/src/flowchart_elk.ixx
+@@ -2,8 +2,19 @@
+ export module folia.mermaid.flowchart_elk;
+ import std;
+ export import folia.mermaid.flowchart_svg;
++export import folia.mermaid.elk_layout;
+ 
+ export namespace folia::mermaid {
++struct ElkMeasuredScene : FlowchartScene {
++    std::vector<ElkLabelPosition> end_labels;
++};
++// Shared measured default adapter for Flowchart and Class. End label sizes
++// already include the original marker clearance reserved by the consumer.
++std::expected<ElkMeasuredScene,std::string> layout_measured_elk_scene(
++    const FlowchartInput&,std::span<const FlowchartNodeBox>,
++    std::span<const FlowchartEdgeLabelSize>,const FlowchartMeasurements&,
++    std::span<const ElkEndLabel>);
++
+ // Routes retain ELK port anchors. The shared shape painter performs the
+ // original endpoint clipping, marker shortening and rounded path emission.
+ std::expected<FlowchartScene,std::string> layout_measured_elk_flowchart(
+--- a/third_party/mermaid-cpp/src/flowchart_elk.cpp
++++ b/third_party/mermaid-cpp/src/flowchart_elk.cpp
+@@ -16,13 +16,13 @@
+     o.edge_label_spacing=2.4;o.ports.port_spacing=12;o.ports.port_label_spacing_vertical=1.2;return o;
+ }
+ }
+-std::expected<FlowchartScene,std::string> layout_measured_elk_flowchart(
++std::expected<ElkMeasuredScene,std::string> layout_measured_elk_scene(
+     const FlowchartInput& source,std::span<const FlowchartNodeBox> boxes,
+-    std::span<const FlowchartEdgeLabelSize> labels,const FlowchartMeasurements& measured,const FlowchartSvgTheme&) {
++    std::span<const FlowchartEdgeLabelSize> labels,const FlowchartMeasurements& measured,std::span<const ElkEndLabel> end_labels) {
+     if(boxes.size()!=source.nodes.size()||labels.size()!=source.edges.size()||measured.nodes.size()!=boxes.size())
+         return std::unexpected("ELK Flowchart needs measured nodes and labels in input order");
+     try {
+-        ElkCompoundLayoutInput input;const auto options=root_options(source.direction);input.hierarchy.direction=options.direction;
++        ElkCompoundLayoutInput input;input.end_labels.assign(end_labels.begin(),end_labels.end());const auto options=root_options(source.direction);input.hierarchy.direction=options.direction;
+         std::unordered_map<std::u16string,std::size_t> ids;
+         for(std::size_t i=0;i<source.nodes.size();++i)ids.emplace(source.nodes[i].id,i);
+         input.group_boxes.resize(boxes.size());input.group_options.resize(boxes.size());
+@@ -43,7 +43,7 @@
+             if(!e.label.empty())input.center_labels.push_back({i,i,labels[i].width,labels[i].height});
+         }
+         auto placed=elk_layout_compound(input,options);if(!placed)return std::unexpected(placed.error());
+-        FlowchartScene scene;auto& layout=scene.layout;layout.width=placed->width;layout.height=placed->height;
++        ElkMeasuredScene scene;scene.end_labels=placed->end_labels;auto& layout=scene.layout;layout.width=placed->width;layout.height=placed->height;
+         layout.nodes.resize(boxes.size());layout.edges.resize(labels.size());
+         for(std::size_t i=0;i<boxes.size();++i) {
+             const auto& b=placed->nodes[i];layout.nodes[i]={source.nodes[i].id,b.x+b.width/2,b.y+b.height/2,b.width,b.height};
+@@ -86,5 +86,11 @@
+         return scene;
+     }catch(const std::exception& e){return std::unexpected(e.what());}
+ }
++std::expected<FlowchartScene,std::string> layout_measured_elk_flowchart(
++    const FlowchartInput& source,std::span<const FlowchartNodeBox> boxes,
++    std::span<const FlowchartEdgeLabelSize> labels,const FlowchartMeasurements& measured,const FlowchartSvgTheme&) {
++    auto scene=layout_measured_elk_scene(source,boxes,labels,measured,{});
++    if(!scene)return std::unexpected(scene.error());
++    return std::move(static_cast<FlowchartScene&>(*scene));
+ }
+-
++}

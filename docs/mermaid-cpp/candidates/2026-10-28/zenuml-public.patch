@@ -1,0 +1,101 @@
+--- a/third_party/mermaid-cpp/src/render_entry.ixx
++++ b/third_party/mermaid-cpp/src/render_entry.ixx
+@@ -20,6 +20,7 @@
+ export import folia.mermaid.kanban_svg;
+ export import folia.mermaid.c4_svg;
+ export import folia.mermaid.state_svg;
++export import folia.mermaid.zenuml_svg;
+ export import folia.mermaid.mindmap_svg;
+ export import folia.mermaid.architecture_svg;
+ 
+@@ -28,7 +29,7 @@
+ struct PieRenderInput { PieDocument document; PieSvgTheme theme; PieSvgConfig config; };
+ struct NativeDiagram {
+     PreparedDiagram prepared;
+-    std::variant<PacketRenderInput, PieRenderInput, FlowchartRenderInput, SequenceRenderInput, ClassRenderInput, QuadrantRenderInput, RadarRenderInput, XYRenderInput, SankeyRenderInput, TreemapRenderInput, JourneyRenderInput, TimelineRenderInput, GanttRenderInput, GitGraphRenderInput, BlockRenderInput, KanbanRenderInput, C4RenderInput, StateRenderInput, MindmapRenderInput, ArchitectureRenderInput> content;
++    std::variant<PacketRenderInput, PieRenderInput, FlowchartRenderInput, SequenceRenderInput, ClassRenderInput, QuadrantRenderInput, RadarRenderInput, XYRenderInput, SankeyRenderInput, TreemapRenderInput, JourneyRenderInput, TimelineRenderInput, GanttRenderInput, GitGraphRenderInput, BlockRenderInput, KanbanRenderInput, C4RenderInput, StateRenderInput, MindmapRenderInput, ArchitectureRenderInput, ZenRenderInput> content;
+ };
+ struct DiagramSvg { std::string svg; double width{}, height{}; };
+ 
+@@ -63,5 +64,6 @@
+     const KanbanMeasure& kanban_measure = {},
+     const C4Measurements& c4_measurements = {},
+     const ArchitectureMeasurements& architecture_measurements = {},
+-    const StateMeasure& state_measure = {});
++    const StateMeasure& state_measure = {},
++    const ZenSvgMeasure& zenuml_measure = {});
+ }
+--- a/third_party/mermaid-cpp/src/render_entry.cpp
++++ b/third_party/mermaid-cpp/src/render_entry.cpp
+@@ -127,6 +127,11 @@
+     try {
+         const auto& effective=prepared->effective_config;
+         const auto& theme=member(effective,u"themeVariables");
++        if(prepared->type==u"zenuml") {
++            auto document=parse_zenuml(prepared->code.cleaned);
++            if(!document)return std::unexpected(document.error());
++            return NativeDiagram{std::move(*prepared),ZenRenderInput{std::move(*document),{}}};
++        }
+         if(prepared->type==u"architecture") {
+             auto input=prepare_architecture_render(source,session,limits);
+             if(!input)return std::unexpected(input.error());
+@@ -402,7 +407,7 @@
+     } catch(const std::runtime_error& e) { return std::unexpected(e.what()); }
+ }
+ 
+-std::expected<DiagramSvg,std::string> render_native_diagram(const NativeDiagram& input,const PieMeasurements& widths,const FlowchartMeasurements& flowchart_measurements,const SequenceMeasurements& sequence_measurements,const ClassMeasurements& class_measurements,const XYMeasurements& xy_measurements,const SankeyMeasurements& sankey_measurements,const TreemapMeasure& treemap_measure,const JourneyMeasure& journey_measure,const TimelineMeasure& timeline_measure,const GanttMeasure& gantt_measure,const GitGraphMeasure& git_graph_measure,const MindmapMeasurements& mindmap_measurements,const BlockMeasure& block_measure,const KanbanMeasure& kanban_measure,const C4Measurements& c4_measurements,const ArchitectureMeasurements& architecture_measurements,const StateMeasure& state_measure) {
++std::expected<DiagramSvg,std::string> render_native_diagram(const NativeDiagram& input,const PieMeasurements& widths,const FlowchartMeasurements& flowchart_measurements,const SequenceMeasurements& sequence_measurements,const ClassMeasurements& class_measurements,const XYMeasurements& xy_measurements,const SankeyMeasurements& sankey_measurements,const TreemapMeasure& treemap_measure,const JourneyMeasure& journey_measure,const TimelineMeasure& timeline_measure,const GanttMeasure& gantt_measure,const GitGraphMeasure& git_graph_measure,const MindmapMeasurements& mindmap_measurements,const BlockMeasure& block_measure,const KanbanMeasure& kanban_measure,const C4Measurements& c4_measurements,const ArchitectureMeasurements& architecture_measurements,const StateMeasure& state_measure,const ZenSvgMeasure& zenuml_measure) {
+     return std::visit([&](const auto& content)->std::expected<DiagramSvg,std::string> {
+         if constexpr(std::is_same_v<std::decay_t<decltype(content)>,ArchitectureRenderInput>) {
+             auto result=render_architecture_svg(content,architecture_measurements);
+@@ -410,6 +415,10 @@
+             return DiagramSvg{std::move(result->svg),result->width,result->height};
+         } else if constexpr(std::is_same_v<std::decay_t<decltype(content)>,MindmapRenderInput>) {
+             auto result=render_mindmap_svg(content,mindmap_measurements);
++            if(!result)return std::unexpected(result.error());
++            return DiagramSvg{std::move(result->svg),result->width,result->height};
++        } else if constexpr(std::is_same_v<std::decay_t<decltype(content)>,ZenRenderInput>) {
++            auto result=render_zenuml_svg(content.document,zenuml_measure);
+             if(!result)return std::unexpected(result.error());
+             return DiagramSvg{std::move(result->svg),result->width,result->height};
+         } else if constexpr(std::is_same_v<std::decay_t<decltype(content)>,StateRenderInput>) {
+--- a/src/platform/text/mermaid_renderer.ixx
++++ b/src/platform/text/mermaid_renderer.ixx
+@@ -581,6 +581,14 @@
+             auto cy=cy_label(edge.title,16);if(!cy)return std::unexpected(cy.error());architecture_measurements.cy_labels.edges.push_back(*cy);
+         }
+     }
++    ZenSvgMeasure zenuml_measure;
++    if(auto zenuml=std::get_if<ZenRenderInput>(&input->content)) {
++        zenuml_measure=[zenuml,&measurer](std::u16string_view text,double size,bool bold) {
++            auto measured=measurer.measure(text,{zenuml->theme.font_family,static_cast<float>(size),bold?600u:400u});
++            if(!measured)throw std::runtime_error(measured.error());
++            return measured->advance;
++        };
++    }
+     StateMeasure state_measure;
+     if(auto state=std::get_if<StateRenderInput>(&input->content)) {
+         state_measure=[state,&measurer](std::u16string_view text,double size)->std::expected<StateTextBox,std::string> {
+@@ -590,6 +598,6 @@
+             return StateTextBox{box->advance,box->bounds_width,metrics->height,metrics->baseline,box->line_height};
+         };
+     }
+-    return render_native_diagram(*input,widths,flowchart_measurements,sequence_measurements,class_measurements,xy_measurements,sankey_measurements,treemap_measure,journey_measure,timeline_measure,gantt_measure,git_graph_measure,mindmap_measurements,block_measure,kanban_measure,c4_measurements,architecture_measurements,state_measure);
++    return render_native_diagram(*input,widths,flowchart_measurements,sequence_measurements,class_measurements,xy_measurements,sankey_measurements,treemap_measure,journey_measure,timeline_measure,gantt_measure,git_graph_measure,mindmap_measurements,block_measure,kanban_measure,c4_measurements,architecture_measurements,state_measure,zenuml_measure);
+ }
+ }
+--- a/third_party/mermaid-cpp/src/frontend.cpp
++++ b/third_party/mermaid-cpp/src/frontend.cpp
+@@ -37,6 +37,12 @@
+         DiagramRegistry registry{{.source_units = limits.source_units, .config = limits.config}};
+         if (auto registered = registry.add_builtin_diagrams(); !registered)
+             return std::unexpected(registered.error());
++        // Folia's explicit ZenUML extension uses the pinned external detector.
++        auto extension=registry.add_detector(u"zenuml",[](std::u16string_view value,ConfigValue&)->std::expected<bool,std::u16string> {
++            const auto start=value.find_first_not_of(u" \t\r\n");
++            return start!=value.npos && value.substr(start).starts_with(u"zenuml");
++        });
++        if(!extension)return std::unexpected(extension.error());
+         const auto normalized = cleanup_text(source);
+         auto front = extract_front_matter(normalized, limits.yaml);
+         if (!front) return std::unexpected(front.error());

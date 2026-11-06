@@ -1,0 +1,8 @@
+# ELK 0.9.3 DepthFirstCycleBreaker; name, node count, port owners, port endpoints, reversal order.
+empty	0	-	-	-
+class-chain	3	0,1,2	0:1,1:2	-
+class-cycle	3	0,1,2	0:1,1:2,2:0	2
+state-source-before-cycle	4	0,1,2,3	0:1,1:2,2:0,3:1	0
+port-order	3	0,0,1,2	1:3,0:2,2:3,3:2,2:0	3,4
+parallel-feedback	2	0,1	0:1,1:0,1:0	1,2
+self-and-disconnected	5	0,1,2,3,4	0:0,0:1,1:0,2:3,3:2	2,4

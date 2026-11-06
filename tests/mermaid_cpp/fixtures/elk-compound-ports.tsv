@@ -1,0 +1,11 @@
+# ELK compound port geometry; name,direction,outgoing,border,minimum width,height,side/inner side/constraint/size/port anchor/content size/offset/pre-export position/exported port/final dummy position.
+direction-0-0	0	0	5	0	0	4,2,0,0,0,0,0,100,60,2,-3,20,30,-5,67,-31,30
+direction-0-1	0	1	5	0	0	2,4,1,0,0,0,0,100,60,2,-3,20,30,153,67,127,30
+direction-1-0	1	0	5	0	0	2,4,1,0,0,0,0,100,60,2,-3,20,30,153,67,127,30
+direction-1-1	1	1	5	0	0	4,2,0,0,0,0,0,100,60,2,-3,20,30,-5,67,-31,30
+direction-2-0	2	0	5	0	0	1,3,2,0,0,0,0,100,60,2,-3,20,30,46,-5,20,-42
+direction-2-1	2	1	5	0	0	3,1,3,0,0,0,0,100,60,2,-3,20,30,46,129,20,92
+direction-3-0	3	0	5	0	0	3,1,3,0,0,0,0,100,60,2,-3,20,30,46,129,20,92
+direction-3-1	3	1	5	0	0	1,3,2,0,0,0,0,100,60,2,-3,20,30,46,-5,20,-42
+title-min-width	0	1	10	220	0	2,4,1,0,0,0,0,172,60,38,-3,92,30,230,67,168,30
+title-min-height	2	1	10	220	180	3,1,3,0,0,0,0,172,116,38,-3,20,86,82,190,20,153
