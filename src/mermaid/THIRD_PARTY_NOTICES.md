@@ -121,3 +121,12 @@ Hand-drawn/rough path helpers referenced by upstream Mermaid rendering utilities
 ## 13. ZenUML (`@zenuml/core` 3.49.2)
 
 ZenUML sequence parsing, horizontal constraint solving, recursive block positioning, and SVG rendering (`src/zenuml.{ixx,cpp}`, `src/zenuml_svg.{ixx,cpp}`, `src/zenuml_assets.inc`) follow `@zenuml/core` 3.49.2 under the MIT License (Copyright (c) 2022 Peng Xiao); see [`ZENUML-LICENSE`](ZENUML-LICENSE).
+
+---
+
+## 14. `@upsetjs/venn.js` 2.0.0 and `fmin` 0.0.4
+
+Venn circle layout and intersection geometry (`venn_layout.{ixx,cpp}`) follow
+`@upsetjs/venn.js` 2.0.0 under the MIT License. The optimizer follows the
+patched `fmin` 0.0.4 bundled in that release, under the BSD 3-Clause License.
+See [`VENN-JS-LICENSE`](VENN-JS-LICENSE) and [`FMIN-LICENSE`](FMIN-LICENSE).
