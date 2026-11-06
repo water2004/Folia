@@ -2,10 +2,12 @@
 
 恢复/压缩后实际读本文，只复查新变化。数学入口：[架构](architecture.md)、[所有权约束](native-raii-architecture.md)、[文件图](native-raii-files.json)、[验收](native-raii-acceptance.md)。ignored 候选用 `rg --no-ignore`。
 
-## 当前 checkpoint（2026-11-06，准备发布 0.6.4）
+## 当前 checkpoint（2026-11-06，0.6.4 已发布）
 
 - 0.6.4 包含自 0.6.3 起的模型列表与手动配置、运行时补全提示词、接续公式和代码块的局部解析修复。版本元数据和英文说明 `release-notes/v0.6.4.md` 随发布提交。LaTeX 目录一致性检查和 7 项目录测试已通过。
-- 发布由 `v0.6.4` 标签触发既有 `.github/workflows/release.yml`，由 CI 构建 x64 MSI、执行启动验证、生成 SHA-256 并发布 GitHub Release。以该标签的 CI 及 Release 页面确认结果。
+- `v0.6.4` 指向 `527ec902caa1d7a29e0dc5f9d7612088f8864d2f`，已与 master 推送。Actions [42180268451](https://github.com/water2004/Folia/actions/runs/42180268451) 因账户账单锁定未启动构建。按用户确认，沿用该标签，用 `build_msi.ps1 -Version 0.6.4` 本地构建并发布 [Folia v0.6.4](https://github.com/water2004/Folia/releases/tag/v0.6.4)。发布 ID `436215960`。
+- x64 MSI 为 `build/installer/bin/Folia-0.6.4-x64.msi`，53,936,114 字节。MSI 与 EXE 版本均为 0.6.4，真实启动及正常关闭通过，WiX 只有既有同版本升级警告。SHA-256 `8e89e3a784f8b3ecd3f093e206a612756ba4429eb8e5765ee2be1c3eec84a1b4` 已与 GitHub 公开资产 digest 和校验文件核对。日志 `build/folia-064-msi.log`，发布核验 `build/folia-064-release-verification.json`。
+- 发布工作已结束，无运行构建或上传句柄。保留现有标签和发布资产，等下一项用户请求。
 
 ## 局部结构编辑计划重构完成（发布前验证，历史）
 
