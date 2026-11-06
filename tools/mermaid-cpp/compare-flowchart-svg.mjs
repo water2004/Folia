@@ -100,7 +100,7 @@ try {
   assert(b.x+offset[0]>=v.x-1 && b.y+offset[1]>=v.y-1 &&
     b.x+b.width+offset[0]<=v.x+v.width+1 && b.y+b.height+offset[1]<=v.y+v.height+1,`${row.name}: clipped SVG content`);
   assert.equal(!!actual.diagramTitle,!!row.diagramTitle,`${row.name} diagram title`);
-  if(/^(hand-drawn|extra-shapes)-/.test(row.name)) for(const key of ['x','y','width','height'])
+  if(/^(hand-drawn|extra-shapes|elk-painted)-/.test(row.name)) for(const key of ['x','y','width','height'])
    near(actual.view[key],row.view[key],`${row.name} view ${key}`);
   if(row.diagramTitle) {
    for(const key of ['text','fill','size']) assert.equal(actual.diagramTitle[key],row.diagramTitle[key],`${row.name} title ${key}`);
@@ -163,7 +163,7 @@ try {
    assert.deepEqual(a.lines,e.lines,`${row.name} edge lines`);
    near(a.width,e.width,`${row.name} label width`);near(a.height,e.height,`${row.name} label height`);
   }
-  const edgeTolerance=/^(hand-drawn|curve|extra-shapes|neo-document)-/.test(row.name)?1.5:3;
+  const edgeTolerance=/^(hand-drawn|curve|extra-shapes|neo-document|elk-painted)-/.test(row.name)?1.5:3;
   for(let i=0;i<actual.edges.length;++i) {
    const a=actual.edges[i],e=row.edges.find(n=>n.id.endsWith("-"+a.id));
    assert(e,`${row.name}: missing edge ${a.id}`);near(a.length,e.length,`${row.name} edge ${i} length`,edgeTolerance);

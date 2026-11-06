@@ -62,6 +62,40 @@ void finish_edge(FlowchartPlacedEdge& edge,const FlowchartEdge& source,
     }
 }
 
+void measure_flowchart_paint_bounds(FlowchartScene& scene,const FlowchartInput& source,
+    std::span<const FlowchartEdgeLabelSize> labels,FlowchartLocalShapes local_shapes,
+    const std::vector<RoughFlowchartNode>* rough_nodes=nullptr) {
+    const auto& result=scene.layout;
+    scene.min_x=scene.min_y=std::numeric_limits<double>::infinity();
+    scene.max_x=scene.max_y=-std::numeric_limits<double>::infinity();
+    const auto include=[&](double x,double y,double width=0,double height=0) {
+        scene.min_x=std::min(scene.min_x,x-width/2);scene.max_x=std::max(scene.max_x,x+width/2);
+        scene.min_y=std::min(scene.min_y,y-height/2);scene.max_y=std::max(scene.max_y,y+height/2);
+    };
+    for(std::size_t i=0;i<result.nodes.size();++i) {
+        const auto& n=result.nodes[i];
+        if(n.id.empty()) continue;
+        if(rough_nodes&&(*rough_nodes)[i].drawing.bounds) {
+            const auto& rough=(*rough_nodes)[i];
+            const auto& b=*rough.drawing.bounds;
+            const auto x=rough.offset.x+(source.nodes[i].group?0:n.x);
+            const auto y=rough.offset.y+(source.nodes[i].group?0:n.y);
+            include(x+b.left,y+b.top);
+            include(x+b.right,y+b.bottom);
+        } else if(const auto* shape=find_local_shape(local_shapes,i)) {
+            const auto& bounds=shape->paint_bounds;
+            include(n.x+bounds.left,n.y+bounds.top);
+            include(n.x+bounds.right,n.y+bounds.bottom);
+        } else include(n.x,n.y,n.width,n.height);
+    }
+    for(std::size_t i=0;i<result.edges.size();++i) {
+        const auto& e=result.edges[i];
+        for(auto p:e.points) include(p.x,p.y);
+        if(e.label) include(e.label->x,e.label->y,labels[i].width,labels[i].height);
+    }
+    if(!std::isfinite(scene.min_x)) throw std::runtime_error("Flowchart graph has no painted content");
+}
+
 FlowchartScene layout_prepared(const FlowchartInput& source,FlowchartPreparedGraph graph,
     std::span<const FlowchartNodeBox> boxes,std::span<const FlowchartEdgeLabelSize> labels,
     FlowchartMeasurements& measured,const FlowchartSvgTheme& theme,
@@ -183,33 +217,6 @@ FlowchartScene layout_prepared(const FlowchartInput& source,FlowchartPreparedGra
             !children[a]&&!children[b],e.from_cluster.empty()?nullptr:&placed->nodes[ids.at(e.from_cluster)],
             e.to_cluster.empty()?nullptr:&placed->nodes[ids.at(e.to_cluster)],theme.neo,local_shape(a),local_shape(b));
     }
-    scene.min_x=scene.min_y=std::numeric_limits<double>::infinity();
-    scene.max_x=scene.max_y=-std::numeric_limits<double>::infinity();
-    const auto include=[&](double x,double y,double width=0,double height=0) {
-        scene.min_x=std::min(scene.min_x,x-width/2);scene.max_x=std::max(scene.max_x,x+width/2);
-        scene.min_y=std::min(scene.min_y,y-height/2);scene.max_y=std::max(scene.max_y,y+height/2);
-    };
-    for(std::size_t i=0;i<result.nodes.size();++i) {
-        const auto& n=result.nodes[i];
-        if(n.id.empty()) continue;
-        if(rough_nodes&&(*rough_nodes)[i].drawing.bounds) {
-            const auto& rough=(*rough_nodes)[i];
-            const auto& b=*rough.drawing.bounds;
-            const auto x=rough.offset.x+(source.nodes[i].group?0:n.x);
-            const auto y=rough.offset.y+(source.nodes[i].group?0:n.y);
-            include(x+b.left,y+b.top);
-            include(x+b.right,y+b.bottom);
-        } else if(const auto* shape=find_local_shape(local_shapes,i)) {
-            const auto& bounds=shape->paint_bounds;
-            include(n.x+bounds.left,n.y+bounds.top);
-            include(n.x+bounds.right,n.y+bounds.bottom);
-        } else include(n.x,n.y,n.width,n.height);
-    }
-    for(std::size_t i=0;i<result.edges.size();++i) {
-        const auto& e=result.edges[i];
-        for(auto p:e.points) include(p.x,p.y);
-        if(e.label) include(e.label->x,e.label->y,labels[i].width,labels[i].height);
-    }
-    if(!std::isfinite(scene.min_x)) throw std::runtime_error("Flowchart graph has no painted content");
+    measure_flowchart_paint_bounds(scene,source,labels,local_shapes,rough_nodes);
     return scene;
 }

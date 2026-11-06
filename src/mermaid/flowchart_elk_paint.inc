@@ -103,7 +103,9 @@ void clip_elk_node_endpoints(std::vector<FlowchartPoint>& points,
     std::u16string_view start_shape,std::u16string_view end_shape,Outline outline={},bool exact_rectangles=false) {
     points.insert(points.begin(),{start.x,start.y});points.push_back({end.x,end.y});
     const auto outside=[](const FlowchartPlacedNode& n,FlowchartPoint p) {
-        return std::abs(p.x-n.x)>=n.width/2||std::abs(p.y-n.y)>=n.height/2;
+        constexpr double rounding_slack=1e-9;
+        return std::abs(p.x-n.x)+rounding_slack>=n.width/2||
+            std::abs(p.y-n.y)+rounding_slack>=n.height/2;
     };
     const auto replacement=[&](const FlowchartPlacedNode& n,std::u16string_view shape,std::size_t i,int step) {
         const auto next=static_cast<std::ptrdiff_t>(i)+step;

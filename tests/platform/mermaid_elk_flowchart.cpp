@@ -31,6 +31,9 @@ suite mermaid_elk_flowchart=[] {
             {"elk-flat-up",u"flowchart BT\nA[Read] --> B[Write]\nB --> C[Done]"},
             {"elk-group-right",u"flowchart LR\nsubgraph g[Processing]\nA[Read] --> B[Write]\nend\nB --> C[Done]"},
             {"elk-groups-down",u"flowchart TD\nsubgraph a[Input]\nA[Read] --> B[Check]\nend\nsubgraph b[Output]\nC[Write] --> D[Done]\nend\nB -->|save| C"},
+            {"elk-painted-cloud",u"flowchart TB\nA@{shape: cloud, label: \"Cloud box\"}"},
+            {"elk-painted-document-routes",u"flowchart TB\nA[Before] --- B@{shape: doc, label: Document}\nB --- C[Left]\nB --- D[Right]"},
+            {"elk-painted-cloud-routes",u"flowchart TB\nA[Before] --- B@{shape: cloud, label: Cloud}\nB --- C[Left]\nB --- D[Right]"},
         };
         for(const auto theme:{u"default",u"dark"})for(const auto& sample:cases) {
             const auto& name=sample.first;const auto& body=sample.second;

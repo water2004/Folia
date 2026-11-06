@@ -241,6 +241,7 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
                 if(edge.arrow_end==u"arrow_point")elk_remove_short_marker_segment(points,scene.layout.nodes[b],false);
                 if(edge.arrow_start==u"arrow_point")elk_remove_short_marker_segment(points,scene.layout.nodes[a],true);
             }
+            if(!theme.hand_drawn) measure_flowchart_paint_bounds(scene,graph,labels,local_shapes);
         }else {
             auto prepared=prepare_flowchart_graph(graph);if(!prepared)return std::unexpected(prepared.error());
             scene=layout_prepared(graph,prepared->graph,boxes,labels,measured,theme,nullptr,

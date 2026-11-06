@@ -244,5 +244,5 @@ try {
  assert.equal(rows.length,cases.length*2);
 } finally {await instance.close();}
 writeFileSync(resolve(directory,'original.json'),JSON.stringify(rows,null,2));
-for(const row of rows) {assert(row.nodes.length>1);if(row.name!=='neo-shapes-'+row.theme) assert(row.edges.length>0);writeFileSync(resolve(directory,row.name+'.svg'),row.svg);}
+for(const row of rows) {assert(row.nodes.length>0);if(row.nodes.length>1&&row.name!=='neo-shapes-'+row.theme) assert(row.edges.length>0);writeFileSync(resolve(directory,row.name+'.svg'),row.svg);}
 console.log(`Measured ${rows.length} official Flowchart SVGs in ${directory}`);
