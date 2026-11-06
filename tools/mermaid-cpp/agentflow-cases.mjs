@@ -5,6 +5,8 @@ export const cases=[
  ['nested-flow','agentflow-beta LR\n  start["Receive request"]\n  flow review["Review"]\n    intake["Intake"]\n    flow checks["Checks"]\n      policy["Policy"]\n    end\n    approval["Approval"]\n  end\n  connector queue["Work queue"]\n  finish["Complete"]\n  start --> intake --> policy --> approval --> finish\n'],
  ['frame-endpoints','agentflow-beta LR\nflow F["Frame"]\n A --> B\nend\n X --> F --> Y'],
  ['frame-descendant-crossing','---\nconfig:\n  elk:\n    lineHops: false\n---\nagentflow-beta LR\nflow F["Frame"]\n A --> B\nend\n X --> F --> Y\n Z --> A'],
+ ['frame-crossing-default-hop','agentflow-beta LR\nflow F["Frame"]\n A --> B\nend\n X --> F --> Y\n Z --> A'],
+ ['frame-crossing-gap','---\nconfig:\n  elk:\n    lineHops: gap\n---\nagentflow-beta LR\nflow F["Frame"]\n A --> B\nend\n X --> F --> Y\n Z --> A'],
  ['frame-inside-outside','agentflow-beta LR\nflow F["Frame"]\n A --> F\nend\n X --> F'],
  ['shape-fallback','agentflow-beta TB\n  a["Alpha"]\n  a@{ shape: triangle }\n  b["Beta"]@{ shape: circle }\n  a --> b\n'],
 ];

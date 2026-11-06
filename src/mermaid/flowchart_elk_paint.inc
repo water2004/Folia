@@ -35,26 +35,35 @@ struct EdgePath {
         last=end;
     }
 };
+struct RoundedElkCorner {
+    FlowchartPoint entry,exit;
+    double cut;
+};
+std::optional<RoundedElkCorner> rounded_elk_corner(
+    FlowchartPoint a,FlowchartPoint b,FlowchartPoint c,double radius) {
+    constexpr double epsilon=1e-5;
+    const double dx1=b.x-a.x,dy1=b.y-a.y,dx2=c.x-b.x,dy2=c.y-b.y;
+    const double len1=std::hypot(dx1,dy1),len2=std::hypot(dx2,dy2);
+    if(len1<epsilon||len2<epsilon)return {};
+    const double nx1=dx1/len1,ny1=dy1/len1,nx2=dx2/len2,ny2=dy2/len2;
+    const double angle=std::acos(std::clamp(nx1*nx2+ny1*ny2,-1.0,1.0));
+    if(angle<epsilon||std::abs(std::numbers::pi-angle)<epsilon)return {};
+    const double cut=std::min({radius/std::sin(angle/2),len1/2,len2/2});
+    return RoundedElkCorner{{b.x-nx1*cut,b.y-ny1*cut},{b.x+nx2*cut,b.y+ny2*cut},cut};
+}
 std::string rounded_elk_path(std::span<const FlowchartPoint> points,double radius=5,double* length=nullptr) {
     if(points.size()<2)return {};
     EdgePath path(points.front(),length);
-    constexpr double epsilon=1e-5;
     for(std::size_t i=1;i+1<points.size();++i) {
-        const auto a=points[i-1],b=points[i],c=points[i+1];
-        const double dx1=b.x-a.x,dy1=b.y-a.y,dx2=c.x-b.x,dy2=c.y-b.y;
-        const double len1=std::hypot(dx1,dy1),len2=std::hypot(dx2,dy2);
-        if(len1<epsilon||len2<epsilon){path.line(b);continue;}
-        const double nx1=dx1/len1,ny1=dy1/len1,nx2=dx2/len2,ny2=dy2/len2;
-        const double angle=std::acos(std::clamp(nx1*nx2+ny1*ny2,-1.0,1.0));
-        if(angle<epsilon||std::abs(std::numbers::pi-angle)<epsilon){path.line(b);continue;}
-        const double cut=std::min({radius/std::sin(angle/2),len1/2,len2/2});
-        path.line({b.x-nx1*cut,b.y-ny1*cut});
-        path.quadratic(b,{b.x+nx2*cut,b.y+ny2*cut});
+        const auto b=points[i];
+        if(const auto corner=rounded_elk_corner(points[i-1],b,points[i+1],radius)) {
+            path.line(corner->entry);
+            path.quadratic(b,corner->exit);
+        } else path.line(b);
     }
     path.line(points.back());
     return std::move(path.svg);
 }
-
 // geometry.ts outlineAttachPoint: preserve the orthogonal departure axis when
 // ELK's bounding-box port lies outside a diamond or a circular outline.
 template<class Outline>

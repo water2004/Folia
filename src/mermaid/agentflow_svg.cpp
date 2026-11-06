@@ -47,6 +47,11 @@ std::expected<AgentflowRenderInput, std::string> prepare_agentflow_render(const 
     out.theme.wrapping_width = numeric(member(cfg, u"wrappingWidth"), 120);
     const auto look = str(member(cfg, u"look"), str(member(p.effective_config, u"look"), u"neo"));
     out.theme.neo = look == u"neo";
+    const auto& hops = member(member(p.effective_config, u"elk"), u"lineHops");
+    if (hops.kind == ConfigKind::boolean && !hops.boolean)
+        out.theme.elk_line_hops = FlowchartElkLineHops::off;
+    else if (hops.kind == ConfigKind::string && hops.string == u"gap")
+        out.theme.elk_line_hops = FlowchartElkLineHops::gap;
     return out;
 }
 std::expected<AgentflowSvg, std::string> render_agentflow_svg(const AgentflowRenderInput &in,
@@ -69,6 +74,7 @@ std::expected<AgentflowSvg, std::string> render_agentflow_svg(const AgentflowRen
         graph.theme.text = in.theme.text;
         graph.theme.line = in.theme.line;
         graph.theme.neo = in.theme.neo;
+        graph.theme.elk_line_hops = in.theme.elk_line_hops;
         FlowchartMeasurements measured;
         const auto line_height = std::max(in.theme.font_size * 1.5, 1.0);
         for (const auto &c : in.document.containers) {

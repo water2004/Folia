@@ -12,6 +12,7 @@ struct AgentflowSvgTheme {
     std::vector<std::string> border_colors, bkg_colors;
     double font_size = 16, diagram_padding = 8, min_node_width = 120, wrapping_width = 120;
     bool neo = true;
+    FlowchartElkLineHops elk_line_hops = FlowchartElkLineHops::arc;
 };
 struct AgentflowRenderInput {
     AgentflowDocument document;

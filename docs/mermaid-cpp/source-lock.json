@@ -5,6 +5,14 @@
   "license": "MIT",
   "files": [
     {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/elk/lineHops.ts",
+      "sha256": "e7ddc534ca4b6b2410224edf9ac66c450987b61f321952f4238aaf468b28f828"
+    },
+    {
+      "path": "packages/mermaid/src/rendering-util/rendering-elements/lineJump.ts",
+      "sha256": "1cf15c2ce0fdaf523f8afab9a1e9c0433828074511a8fa4b18360b4abbe12b8e"
+    },
+    {
       "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/datastore.ts",
       "sha256": "1dea0890baf3224edae444f0b3ccba38adf0ba0cd159ebc690cee93c927d0342"
     },
@@ -2958,6 +2966,20 @@
       {
         "source": "src/rendering-util/layout-algorithms/elk/find-common-ancestor.ts",
         "sha256": "00583c57efa5354f56a6915f3a7edc75b3c70754b33bd20daf63c5a13cbd6556"
+      },
+      {
+        "source": "src/rendering-util/layout-algorithms/elk/lineHops.ts",
+        "sha256": "e7ddc534ca4b6b2410224edf9ac66c450987b61f321952f4238aaf468b28f828"
+      }
+    ]
+  },
+  "edgeLineJumps": {
+    "package": "mermaid@12.2.0",
+    "map": "dist/chunks/mermaid.esm/chunk-UETRLHRR.mjs.map",
+    "files": [
+      {
+        "source": "src/rendering-util/rendering-elements/lineJump.ts",
+        "sha256": "1cf15c2ce0fdaf523f8afab9a1e9c0433828074511a8fa4b18360b4abbe12b8e"
       }
     ]
   },

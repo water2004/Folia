@@ -60,6 +60,7 @@ FlowchartPoint intersect(const FlowchartPlacedNode& n,std::u16string_view shape,
     return result;
 }
 #include "flowchart_elk_paint.inc"
+#include "flowchart_elk_line_hops.inc"
 
 void shorten(FlowchartPoint& p,FlowchartPoint neighbor,double amount) {
     const auto dx=neighbor.x-p.x,dy=neighbor.y-p.y,length=std::hypot(dx,dy);
@@ -279,8 +280,14 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
                 theme.hand_drawn?&rough_nodes:nullptr,local_shapes);
         }
         const auto* layout=&scene.layout;
+        const auto hopped=use_elk&&theme.elk_line_hops!=FlowchartElkLineHops::off?
+            paint_elk_line_hops(layout->edges,graph.edges,theme.elk_line_hops):std::vector<ElkHopRoute>{};
         const auto edge_path=[&](std::size_t i,double* length=nullptr) {
             const auto& e=graph.edges[i];
+            if(!hopped.empty()&&!hopped[i].path.empty()) {
+                if(length)*length+=hopped[i].length;
+                return hopped[i].path;
+            }
             return flowchart_edge_path(layout->edges[i].points,use_elk?u"rounded":std::u16string_view(e.curve),e,length);
         };
         std::vector<RoughPolygonResult> rough_edges;

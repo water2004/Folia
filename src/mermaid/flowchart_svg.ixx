@@ -5,6 +5,7 @@ export import folia.mermaid.dagre_rank;
 export import folia.mermaid.flowchart_label;
 
 export namespace folia::mermaid {
+enum class FlowchartElkLineHops { off,arc,gap };
 struct FlowchartSvgTheme {
     std::u16string font_family=u"Arial";
     double font_size=16,minimum_label_width=120,wrapping_width=120,padding=8,radius=5;
@@ -19,6 +20,7 @@ struct FlowchartSvgTheme {
     double node_stroke_width=1;
     bool hand_drawn=false;
     std::uint32_t hand_drawn_seed=0;
+    FlowchartElkLineHops elk_line_hops=FlowchartElkLineHops::off;
 };
 struct FlowchartLabelFont {
     std::u16string family;
