@@ -79,8 +79,18 @@ try {
     compare(actual.view,original.view,original.name+'.view',tolerance);
     for(const key of ['elements','labels','backgrounds','markers']) {
       assert.equal(actual[key].length,original[key].length,original.name+'.'+key+'.length');
+      const unmatchedLabels=key==='labels'?[...actual.labels]:[];
       for(let i=0;i<original[key].length;++i) {
-        const a=actual[key][i],e=original[key][i],path=original.name+'.'+key+'.'+i;
+        const e=original[key][i],path=original.name+'.'+key+'.'+i;
+        let a=actual[key][i];
+        if(key==='labels') {
+          // HTML ranges and SVG text boxes can round equal coordinates
+          // differently. Match repeated text by position before comparing it.
+          const index=unmatchedLabels.findIndex(l=>l.text===e.text&&
+            Math.abs(l.box.x-e.box.x)<=tolerance&&Math.abs(l.box.y-e.box.y)<=tolerance);
+          assert(index>=0,`${path}: missing ${JSON.stringify(e.text)} at ${e.box.x}, ${e.box.y}`);
+          [a]=unmatchedLabels.splice(index,1);
+        }
         if(key==='markers') {
           const {contents:actualContents,...actualAttributes}=a;
           const {contents:originalContents,...originalAttributes}=e;

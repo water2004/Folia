@@ -47,7 +47,7 @@ Box centered(FlowchartPoint p, double width, double height) {
 
 struct Label {
     std::u16string text;
-    double width=0,height=0,baseline=0;
+    double width=0,height=0,baseline=0,font_height=0;
 };
 
 Label measure_label(const ErSvgMeasure& measure,std::u16string_view text,double size,bool html) {
@@ -57,7 +57,7 @@ Label measure_label(const ErSvgMeasure& measure,std::u16string_view text,double 
     for(double value:{result->advance,result->width,result->height,result->baseline})
         if(!std::isfinite(value)||value<0) throw std::runtime_error("Invalid ER text measurement");
     return {std::u16string(text),html?result->advance:result->width,
-        html?size*1.5:result->height,result->baseline};
+        html?size*1.5:result->height,result->baseline,result->height};
 }
 
 std::u16string joined_keys(std::span<const std::u16string> keys) {
@@ -161,22 +161,19 @@ struct Paint {
         bool middle,std::string_view css_class,bool edge=false) {
         if(value.text.empty()) return;
         body+="<g class=\""+std::string(css_class)+"\">";
-        if(html) {
+        if(html && edge) {
             const auto left=middle?x-value.width/2:x;
-            body+="<foreignObject x=\""+number(left)+"\" y=\""+number(y)+
-                "\" width=\""+number(value.width)+"\" height=\""+number(value.height)+
-                "\"><div xmlns=\"http://www.w3.org/1999/xhtml\"";
-            if(edge) body+=" class=\"labelBkg\"";
-            body+=" style=\"display:table-cell;white-space:nowrap;line-height:1.5;"+
-                std::string(middle?"text-align:center;":"text-align:start;")+
-                "font-family:"+family+";font-size:"+number(size)+"px;color:"+attr(theme.text);
-            if(edge) body+=";background-color:"+attr(theme.label_background);
-            body+="\"><span class=\""+std::string(edge?"edgeLabel":"nodeLabel")+"\"";
-            if(edge) body+=" style=\"background-color:"+attr(theme.edge_background)+"\"";
-            body+="><p style=\"margin:0\">"+xml(value.text)+"</p></span></div></foreignObject>";
-        } else {
-            text(value.text,x,y+size,size,middle,edge?theme.title_color:theme.text);
+            const auto bounds=" x=\""+number(left)+"\" y=\""+number(y)+
+                "\" width=\""+number(value.width)+"\" height=\""+number(value.height)+"\"";
+            body+="<rect class=\"er-label-background labelBkg\""+bounds+
+                " fill=\""+attr(theme.label_background)+"\"/>";
+            body+="<rect class=\"er-label-background\""+bounds+
+                " fill=\""+attr(theme.edge_background)+"\"/>";
         }
+        // Use the same measured font box inside the HTML line height. CSS
+        // assigns the leading above the baseline to whole pixels for this box.
+        const auto baseline=html?value.baseline+std::floor((value.height-value.font_height)/2):size;
+        text(value.text,x,y+baseline,size,middle,edge&&!html?theme.title_color:theme.text);
         body+="</g>";
     }
 

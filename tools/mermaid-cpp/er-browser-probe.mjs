@@ -68,7 +68,7 @@ export function inspectEr() {
   const backgrounds = [...svg.querySelectorAll('foreignObject div.labelBkg,foreignObject span.edgeLabel,rect.er-label-background')]
     .map(e=>{
       const s=getComputedStyle(e);
-      if(e.tagName==='rect') return {part:'rect',box:box(e),color:s.fill};
+      if(e.tagName==='rect') return {part:e.classList.contains('labelBkg')?'div':'span',box:box(e),color:s.fill};
       return {part:e.tagName.toLowerCase(),box:clientBox(e.getBoundingClientRect()),color:s.backgroundColor};
     });
   const markers = [...svg.querySelectorAll('defs marker')].map(e=>{
