@@ -15,14 +15,18 @@ ElkFlatLayoutOptions group_options() {
     ElkFlatLayoutOptions o;o.placement={50,12,20,12,1.2,6};o.routing={24,30,12};o.padding=24;
     o.edge_label_spacing=2.4;o.ports.port_spacing=12;o.ports.port_label_spacing_vertical=1.2;return o;
 }
+double group_title_floor(const FlowchartNode& node,const FlowchartTextBox& label) {
+    // The note and divider frames do not paint a title. ELK may still
+    // reserve the measured note label's vertical strip.
+    return node.shape==u"noteGroup"||node.shape==u"divider"?0:label.width+node.padding;
 }
-std::expected<ElkMeasuredScene,std::string> layout_measured_elk_scene(
+std::expected<ElkMeasuredScene,std::string> layout_scope(
     const FlowchartInput& source,std::span<const FlowchartNodeBox> boxes,
-    std::span<const FlowchartEdgeLabelSize> labels,const FlowchartMeasurements& measured,std::span<const ElkEndLabel> end_labels) {
+    std::span<const FlowchartEdgeLabelSize> labels,const FlowchartMeasurements& measured,std::span<const ElkEndLabel> end_labels, const ElkFlatLayoutOptions& options) {
     if(boxes.size()!=source.nodes.size()||labels.size()!=source.edges.size()||measured.nodes.size()!=boxes.size())
         return std::unexpected("ELK Flowchart needs measured nodes and labels in input order");
     try {
-        ElkCompoundLayoutInput input;input.end_labels.assign(end_labels.begin(),end_labels.end());const auto options=root_options(source.direction);input.hierarchy.direction=options.direction;
+        ElkCompoundLayoutInput input;input.end_labels.assign(end_labels.begin(),end_labels.end());input.hierarchy.direction=options.direction;
         std::unordered_map<std::u16string,std::size_t> ids;
         for(std::size_t i=0;i<source.nodes.size();++i)ids.emplace(source.nodes[i].id,i);
         input.group_boxes.resize(boxes.size());input.group_options.resize(boxes.size());
@@ -32,9 +36,12 @@ std::expected<ElkMeasuredScene,std::string> layout_measured_elk_scene(
             if(!node.parent.empty()){n.parent=ids.at(node.parent);children[*n.parent].push_back(i);}
             input.hierarchy.nodes.push_back(n);
             if(node.group) {
-                input.nodes.push_back({measured.nodes[i].width+node.padding,0});
+                input.nodes.push_back({group_title_floor(node,measured.nodes[i]),0});
                 input.group_boxes[i].padding={24,24,24,24};
-                input.group_boxes[i].title=ElkGroupTitle{measured.nodes[i].width,std::max(0.0,measured.nodes[i].height-2)};
+                if(node.shape!=u"divider"||measured.nodes[i].height>0) {
+                    const auto width=node.shape==u"noteGroup"?0:measured.nodes[i].width;
+                    input.group_boxes[i].title=ElkGroupTitle{width,std::max(0.0,measured.nodes[i].height-2)};
+                }
                 input.group_options[i]=group_options();
             } else input.nodes.push_back({boxes[i].width,boxes[i].height});
         }
@@ -73,7 +80,7 @@ std::expected<ElkMeasuredScene,std::string> layout_measured_elk_scene(
             }
             auto& frame=layout.nodes[group];const double ox=frame.x-frame.width/2,oy=frame.y-frame.height/2;
             left=std::max(ox,left-24);right=std::min(ox+frame.width,right+24);bottom=std::min(oy+frame.height,bottom+24);
-            double width=right-left;const double floor=measured.nodes[group].width+source.nodes[group].padding;
+            double width=right-left;const double floor=group_title_floor(source.nodes[group],measured.nodes[group]);
             if(width<floor){left-=(floor-width)/2;width=floor;left=std::max(ox,std::min(left,ox+frame.width-width));width=std::min(width,frame.width);}
             if(width>0&&bottom>oy){frame.x=left+width/2;frame.y=(oy+bottom)/2;frame.width=width;frame.height=bottom-oy;}
         };
@@ -85,6 +92,22 @@ std::expected<ElkMeasuredScene,std::string> layout_measured_elk_scene(
         if(!std::isfinite(scene.min_x))return std::unexpected("Flowchart graph has no painted content");
         return scene;
     }catch(const std::exception& e){return std::unexpected(e.what());}
+}
+} // namespace
+
+std::expected<ElkMeasuredScene,std::string> layout_measured_elk_scene(
+    const FlowchartInput& source,std::span<const FlowchartNodeBox> boxes,
+    std::span<const FlowchartEdgeLabelSize> labels,const FlowchartMeasurements& measured,
+    std::span<const ElkEndLabel> end_labels) {
+    return layout_scope(source,boxes,labels,measured,end_labels,root_options(source.direction));
+}
+
+std::expected<ElkMeasuredScene,std::string> layout_measured_elk_subgraph(
+    const FlowchartInput& source,std::span<const FlowchartNodeBox> boxes,
+    std::span<const FlowchartEdgeLabelSize> labels,const FlowchartMeasurements& measured) {
+    auto options=group_options();
+    options.direction=root_options(source.direction).direction;
+    return layout_scope(source,boxes,labels,measured,{},options);
 }
 std::expected<FlowchartScene,std::string> layout_measured_elk_flowchart(
     const FlowchartInput& source,std::span<const FlowchartNodeBox> boxes,

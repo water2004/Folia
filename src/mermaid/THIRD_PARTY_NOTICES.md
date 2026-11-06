@@ -13,6 +13,7 @@ Parser, configuration, theme derivation, diagram database models, layout adapter
 ## 2. Eclipse Layout Kernel (`elkjs` 0.9.3)
 
 The native ELK layered and compound layout modules (`src/elk_*.{ixx,cpp}`) are derived from `elkjs` 0.9.3 (`lib/elk-worker.js`, https://github.com/kieler/elkjs). These files are covered by the **Eclipse Public License 2.0 (EPL-2.0)**; see [`ELK-LICENSE`](ELK-LICENSE) for the full license text.
+The connected-component row packing in `state_elk_scopes.inc` is also derived from elkjs 0.9.3 and covered by EPL-2.0.
 
 ---
 

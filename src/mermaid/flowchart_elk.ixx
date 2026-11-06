@@ -15,6 +15,10 @@ std::expected<ElkMeasuredScene,std::string> layout_measured_elk_scene(
     std::span<const FlowchartEdgeLabelSize>,const FlowchartMeasurements&,
     std::span<const ElkEndLabel>);
 
+// A directed subgraph solved as its own ELK layout scope.
+std::expected<ElkMeasuredScene,std::string> layout_measured_elk_subgraph(
+    const FlowchartInput&,std::span<const FlowchartNodeBox>,
+    std::span<const FlowchartEdgeLabelSize>,const FlowchartMeasurements&);
 // Routes retain ELK port anchors. The shared shape painter performs the
 // original endpoint clipping, marker shortening and rounded path emission.
 std::expected<FlowchartScene,std::string> layout_measured_elk_flowchart(

@@ -5,6 +5,10 @@
   "license": "MIT",
   "files": [
     {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/elk/find-common-ancestor.ts",
+      "sha256": "00583c57efa5354f56a6915f3a7edc75b3c70754b33bd20daf63c5a13cbd6556"
+    },
+    {
       "path": "packages/mermaid/src/diagrams/agentflow/parser/agentflow.jison",
       "sha256": "8bb23d09c1dcdf4a3d3139c4ba29b8a823d726b755c69067010a74cb621fd2a6"
     },
@@ -2354,7 +2358,7 @@
       }
     ],
     "version": "0.9.3",
-    "boundary": "DepthFirstCycleBreaker, flat NetworkSimplexLayerer, LongEdgeSplitter and flat east/west PortListSorter/BarycenterHeuristic/LayerSweepCrossingMinimizer and flat BKNodePlacer alignment/compaction/coordinate selection and flat OrthogonalEdgeRouter"
+    "boundary": "DepthFirstCycleBreaker, flat NetworkSimplexLayerer, LongEdgeSplitter and flat east/west PortListSorter/BarycenterHeuristic/LayerSweepCrossingMinimizer and flat BKNodePlacer alignment/compaction/coordinate selection and flat OrthogonalEdgeRouter and State connected-component row packing"
   },
   "xyScales": {
     "boundary": "Linear/band scales, numeric ticks, number interpolation and linear line paths used by XY",
@@ -2918,6 +2922,10 @@
       {
         "source": "src/rendering-util/layout-algorithms/elk/geometry.ts",
         "sha256": "7847e5ee741a54d92542479e2d8f9aade17b549607e95514ba954248f3613517"
+      },
+      {
+        "source": "src/rendering-util/layout-algorithms/elk/find-common-ancestor.ts",
+        "sha256": "00583c57efa5354f56a6915f3a7edc75b3c70754b33bd20daf63c5a13cbd6556"
       }
     ]
   },

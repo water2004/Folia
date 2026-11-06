@@ -3,6 +3,7 @@ import std;
 import folia.mermaid.number;
 import folia.mermaid.svg_text;
 import folia.mermaid.rough_rectangle;
+import folia.mermaid.flowchart_elk;
 namespace folia::mermaid {
 namespace {
 std::u16string trim(std::u16string_view value){auto first=value.find_first_not_of(u" \t\r\n");return first==value.npos?u"":std::u16string(value.substr(first,value.find_last_not_of(u" \t\r\n")-first+1));}
@@ -27,7 +28,7 @@ std::u16string paint(const FlowchartNode& node,std::u16string_view key,std::u16s
  return fallback;
 }
 bool fork_join(std::u16string_view shape){return shape==u"fork"||shape==u"join";}
-void add_annotations(FlowchartInput& graph,std::span<const StateAnnotation> annotations,double note_padding){
+void add_annotations(FlowchartInput& graph,std::span<const StateAnnotation> annotations,double note_padding,bool elk){
  for(std::size_t i=0;i<annotations.size();++i){
   const auto& annotation=annotations[i];
   if(std::ranges::find(graph.nodes,annotation.state,&FlowchartNode::id)==graph.nodes.end())
@@ -36,6 +37,7 @@ void add_annotations(FlowchartInput& graph,std::span<const StateAnnotation> anno
   const std::u16string suffix(text_id.begin(),text_id.end());
   FlowchartNode group;group.id=annotation.state+u"----parent-"+suffix;
   group.shape=u"noteGroup";group.group=true;group.padding=16;
+  if(elk)group.label=annotation.text;
   FlowchartNode note;note.id=annotation.state+u"----note-"+suffix;
   note.label=annotation.text;note.shape=u"note";note.padding=note_padding;
   note.parent=group.id;note.label_type=u"markdown";
@@ -47,6 +49,60 @@ void add_annotations(FlowchartInput& graph,std::span<const StateAnnotation> anno
   edge.stroke=u"dotted";edge.curve=u"linear";graph.edges.push_back(std::move(edge));
  }
 }
+
+FlowchartPoint intersect(const FlowchartPlacedNode& node,std::u16string_view shape,FlowchartPoint p) {
+ const auto dx=p.x-node.x,dy=p.y-node.y;
+ const auto distance=std::hypot(dx,dy);
+ if(distance==0)return {node.x,node.y};
+ const auto factor=shape==u"circle"?7/distance:
+  1/std::max(std::abs(dx)/(node.width/2),std::abs(dy)/(node.height/2));
+ return {node.x+dx*factor,node.y+dy*factor};
+}
+#include "flowchart_elk_paint.inc"
+#include "state_elk_terminals.inc"
+#include "state_elk_scopes.inc"
+
+std::expected<FlowchartScene,std::string> layout_state_elk(const FlowchartInput& graph,
+ std::span<const FlowchartNodeBox> boxes,std::span<const FlowchartEdgeLabelSize> edge_boxes,
+ const FlowchartMeasurements& labels) {
+ std::unordered_map<std::u16string,std::size_t> by_id;
+ for(std::size_t i=0;i<graph.nodes.size();++i)by_id.emplace(graph.nodes[i].id,i);
+ auto result=layout_state_elk_scopes(graph,boxes,edge_boxes,labels,by_id);
+ if(!result)return std::unexpected(result.error());
+ auto& layout=result->layout;
+ std::vector<bool> aligned(layout.nodes.size());
+ const auto align=[&](std::size_t i,FlowchartPoint anchor) {
+  auto& n=layout.nodes[i];
+  const bool along_width=std::abs(std::abs(anchor.y-n.y)-n.height/2)<=.5;
+  if(aligned[i]||(along_width?n.width:n.height)>=24)return;
+  aligned[i]=true;
+  auto& coordinate=along_width?n.x:n.y;
+  const auto desired=along_width?anchor.x:anchor.y;
+  if(std::abs(desired-coordinate)>=.01)coordinate=desired;
+ };
+ for(std::size_t i=0;i<graph.edges.size();++i){
+  auto& points=layout.edges[i].points;
+  if(points.size()<2)continue;
+  const auto& e=graph.edges[i];
+  const auto a=by_id.at(e.start),b=by_id.at(e.end);
+  align(a,points.front());align(b,points.back());
+  clip_elk_node_endpoints(points,layout.nodes[a],layout.nodes[b],graph.nodes[a].shape,graph.nodes[b].shape);
+ }
+ straighten_state_elk_terminals(layout.edges,edge_boxes);
+ result->min_x=result->min_y=std::numeric_limits<double>::infinity();
+ result->max_x=result->max_y=-result->min_x;
+ const auto include=[&](double x,double y,double w=0,double h=0){
+  result->min_x=std::min(result->min_x,x-w/2);result->max_x=std::max(result->max_x,x+w/2);
+  result->min_y=std::min(result->min_y,y-h/2);result->max_y=std::max(result->max_y,y+h/2);
+ };
+ for(const auto& node:layout.nodes)include(node.x,node.y,node.width,node.height);
+ for(std::size_t i=0;i<layout.edges.size();++i){
+  const auto& edge=layout.edges[i];
+  for(const auto p:edge.points)include(p.x,p.y);
+  if(edge.label)include(edge.label->x,edge.label->y,edge_boxes[i].width,edge_boxes[i].height);
+ }
+ return std::move(static_cast<FlowchartScene&>(*result));
+}
 }
 std::expected<StateRenderInput,std::string> prepare_state(
     std::u16string_view source, const ConfigSession& session) {
@@ -57,9 +113,10 @@ std::expected<StateRenderInput,std::string> prepare_state(
     if (!parsed) return std::unexpected(parsed.error());
 
     try {
+        const auto layout=text(member(prepared->effective_config,u"layout"));
         if (text(member(prepared->effective_config, u"look")) != u"classic" ||
-            text(member(prepared->effective_config, u"layout")) != u"dagre") {
-            return std::unexpected("State native renderer currently requires classic Dagre");
+            (layout != u"dagre" && layout != u"elk")) {
+            return std::unexpected("State native renderer requires classic Dagre or ELK");
         }
 
         StateRenderInput result;
@@ -139,14 +196,17 @@ std::expected<StateSvg,std::string> render_state_svg(const StateRenderInput& in,
   for(const auto& item:box.lines)box.width=std::max(box.width,metric(item,t.font_size).advance);
   return box;
  };
+ const auto* layout_config=d.effective_config.find(u"layout");
+ const bool elk=layout_config&&layout_config->kind==ConfigKind::string&&layout_config->string==u"elk";
  auto graph=d;
- add_annotations(graph,in.annotations,in.note_node_padding);
+ add_annotations(graph,in.annotations,in.note_node_padding,elk);
  FlowchartMeasurements labels;
  std::vector<FlowchartNodeBox> boxes;
  std::vector<FlowchartEdgeLabelSize> edge_boxes;
  for(auto& node:graph.nodes){
   const bool terminal=node.shape==u"stateStart"||node.shape==u"stateEnd";
-  auto box=terminal||fork_join(node.shape)?FlowchartTextBox{}:label(node.label,node.group,node.shape==u"note");
+  const bool note_label=node.shape==u"note"||node.shape==u"noteGroup";
+  auto box=terminal||fork_join(node.shape)?FlowchartTextBox{}:label(node.label,node.group&&!note_label,note_label);
   labels.nodes.push_back(box);
   if(terminal){
    const auto width=node.shape==u"stateEnd"?14+7*(1-std::cos(std::numbers::pi/18))/8:14;
@@ -167,7 +227,10 @@ std::expected<StateSvg,std::string> render_state_svg(const StateRenderInput& in,
   }
  }
  for(const auto& edge:graph.edges){auto b=label(edge.label);labels.edges.push_back(b);edge_boxes.push_back({b.width,b.height});}
- FlowchartSvgTheme layout_theme;layout_theme.font_family=t.font_family;layout_theme.font_size=t.font_size;layout_theme.padding=8;layout_theme.group_title_top=0;layout_theme.group_title_bottom=0;auto scene=layout_measured_flowchart(graph,boxes,edge_boxes,labels,layout_theme);if(!scene)return std::unexpected(scene.error());
+ FlowchartSvgTheme layout_theme;layout_theme.font_family=t.font_family;layout_theme.font_size=t.font_size;layout_theme.padding=8;layout_theme.group_title_top=0;layout_theme.group_title_bottom=0;
+ auto scene=elk?layout_state_elk(graph,boxes,edge_boxes,labels):
+  layout_measured_flowchart(graph,boxes,edge_boxes,labels,layout_theme);
+ if(!scene)return std::unexpected(scene.error());
  std::string body;auto rect=[&](double x,double y,double w,double h,double radius,std::u16string_view fill,std::u16string_view stroke,const FlowchartNode* source=nullptr){
   std::string style=" stroke-width=\"1\"";
   if(source){
@@ -208,7 +271,7 @@ std::expected<StateSvg,std::string> render_state_svg(const StateRenderInput& in,
   const auto& edge=scene->layout.edges[i];
   const bool note_edge=i>=d.edges.size();
   body+="<path class=\"state-edge"+std::string(note_edge?" note-edge":"")+
-      "\" d=\""+curve(edge.points)+"\" fill=\"none\" stroke=\""+xml(t.line)+
+      "\" d=\""+(elk?rounded_elk_path(edge.points):curve(edge.points))+"\" fill=\"none\" stroke=\""+xml(t.line)+
       "\" stroke-width=\"1\" stroke-dasharray=\""+
       std::string(note_edge?"5":"0")+"\""+
       (note_edge?"":" marker-end=\"url(#state-barb)\"")+"/>";
@@ -263,6 +326,24 @@ std::expected<StateSvg,std::string> render_state_svg(const StateRenderInput& in,
   }
   body+="</g>";
  }
- double min_y=scene->min_y,max_y=scene->max_y;double min_x=scene->min_x,max_x=scene->max_x;if(!d.title.empty()){auto m=metric(d.title,18);auto y=-in.title_margin-8;body+="<text class=\"state-title\" x=\""+num((scene->min_x+scene->max_x)/2)+"\" y=\""+num(y)+"\" font-size=\"18\" text-anchor=\"middle\" fill=\""+xml(t.edge_text)+"\">"+xml(d.title)+"</text>";min_y=std::min(min_y,y-m.baseline);min_x=std::min(min_x,(scene->min_x+scene->max_x-m.width)/2);max_x=std::max(max_x,(scene->min_x+scene->max_x+m.width)/2);}const double height=max_y-min_y+16,width=max_x-min_x+16;return StateSvg{"<svg xmlns=\"http://www.w3.org/2000/svg\" width=\""+num(width)+"\" height=\""+num(height)+"\" viewBox=\""+num(min_x)+" "+num(min_y)+" "+num(width)+" "+num(height)+"\" font-family=\""+xml(t.font_family)+"\" font-size=\""+num(t.font_size)+"\"><defs><marker id=\"state-barb\" refX=\"19\" refY=\"7\" markerWidth=\"20\" markerHeight=\"14\" markerUnits=\"userSpaceOnUse\" orient=\"auto\"><path d=\"M 19,7 L9,13 L14,7 L9,1 Z\" fill=\""+xml(t.line)+"\"/></marker></defs>"+"<g transform=\"translate(8,8)\">"+body+"</g></svg>",width,height};
+ double min_y=scene->min_y,max_y=scene->max_y;
+ double min_x=scene->min_x,max_x=scene->max_x;
+ constexpr double margin=8;
+ if(!d.title.empty()){
+  const auto m=metric(d.title,18);
+  const auto x=(scene->min_x+scene->max_x)/2,y=-in.title_margin-(elk?0:margin);
+  body+="<text class=\"state-title\" x=\""+num(x)+"\" y=\""+num(y)+
+   "\" font-size=\"18\" text-anchor=\"middle\" fill=\""+xml(t.edge_text)+"\">"+xml(d.title)+"</text>";
+  min_y=std::min(min_y,y-m.baseline);
+  min_x=std::min(min_x,x-m.width/2);max_x=std::max(max_x,x+m.width/2);
+ }
+ const auto height=max_y-min_y+2*margin,width=max_x-min_x+2*margin;
+ const auto view_x=min_x-(elk?margin:0),view_y=min_y-(elk?margin:0);
+ const std::string outer=elk?"<g>":"<g transform=\"translate(8,8)\">";
+ return StateSvg{"<svg xmlns=\"http://www.w3.org/2000/svg\" width=\""+num(width)+"\" height=\""+num(height)+
+  "\" viewBox=\""+num(view_x)+" "+num(view_y)+" "+num(width)+" "+num(height)+
+  "\" font-family=\""+xml(t.font_family)+"\" font-size=\""+num(t.font_size)+
+  "\"><defs><marker id=\"state-barb\" refX=\"19\" refY=\"7\" markerWidth=\"20\" markerHeight=\"14\" markerUnits=\"userSpaceOnUse\" orient=\"auto\"><path d=\"M 19,7 L9,13 L14,7 L9,1 Z\" fill=\""+
+  xml(t.line)+"\"/></marker></defs>"+outer+body+"</g></svg>",width,height};
  }catch(const std::runtime_error& e){return std::unexpected(e.what());}}
 }

@@ -7,6 +7,7 @@ using namespace folia::mermaid;
 suite mermaid_state=[] {
     "mermaid_state_source_to_measured_svg"_test=[] {
         const std::vector<std::pair<std::string,std::u16string>> cases={
+            {"default",u"stateDiagram\n[*] --> Idle\nIdle --> Running\nRunning --> [*]"},
             {"basic",u"stateDiagram-v2\n[*] --> Idle\nIdle --> Running\nRunning --> [*]"},
             {"aliases",u"stateDiagram-v2\nstate \"Waiting for input\" as Waiting\nWaiting --> Done"},
             {"labels",u"stateDiagram-v2\nIdle --> Active: begin\nActive --> Idle: stop"},
@@ -24,13 +25,16 @@ suite mermaid_state=[] {
             ,{"concurrent-regions",u"stateDiagram-v2\nstate Active {\nA --> B\n--\nC --> D\n--\nE --> F\n}"}
             ,{"concurrent-initial-states",u"stateDiagram-v2\nstate Active {\n[*] --> A\n--\n[*] --> B\n}"}
         };
-        for(const auto theme:{u"default",u"dark"}) {
+        for(const bool elk:{false,true})for(const auto theme:{u"default",u"dark"}) {
             auto session=ConfigSession::create();expect(fatal(session.has_value()));ConfigValue site;site.kind=ConfigKind::mapping;
-            for(auto [key,value]:{std::pair{u"theme",theme},{u"fontFamily",u"Arial"},{u"look",u"classic"},{u"layout",u"dagre"}})site.mapping.emplace(key,ConfigValue{.kind=ConfigKind::string,.string=value});
+            for(auto [key,value]:{std::pair{u"theme",theme},{u"fontFamily",u"Arial"},{u"look",u"classic"}})site.mapping.emplace(key,ConfigValue{.kind=ConfigKind::string,.string=value});
+            if(!elk)site.mapping.emplace(u"layout",ConfigValue{.kind=ConfigKind::string,.string=u"dagre"});
             ConfigValue variables;variables.kind=ConfigKind::mapping;variables.mapping.emplace(u"fontFamily",ConfigValue{.kind=ConfigKind::string,.string=u"Arial"});site.mapping.emplace(u"themeVariables",std::move(variables));
             expect(fatal(session->save_initialize_config(site).has_value()));expect(fatal(session->set_site_config(site).has_value()));
-            for(const auto& [name,source]:cases){auto result=render_mermaid(source,*session);expect(result.has_value())<<name<<(result?"":result.error());if(!result)continue;expect(result->width>0&&result->height>0);
-                if(auto directory=std::getenv("FOLIA_MERMAID_SVG_OUTPUT")){std::filesystem::create_directories(directory);const auto suffix=theme==std::u16string_view(u"dark")?"dark":"default";std::ofstream output(std::filesystem::path(directory)/("state-"+name+"-"+suffix+".svg"),std::ios::binary);output<<result->svg;expect(output.good());}
+            for(const auto& [name,source]:cases){
+                if(!elk&&name=="default")continue;
+                auto result=render_mermaid(source,*session);expect(result.has_value())<<name<<(result?"":result.error());if(!result)continue;expect(result->width>0&&result->height>0);
+                if(auto directory=std::getenv("FOLIA_MERMAID_SVG_OUTPUT")){std::filesystem::create_directories(directory);const auto suffix=theme==std::u16string_view(u"dark")?"dark":"default";std::ofstream output(std::filesystem::path(directory)/(std::string(elk?"state-elk-":"state-")+name+"-"+suffix+".svg"),std::ios::binary);output<<result->svg;expect(output.good());}
             }
         }
     };

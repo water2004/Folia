@@ -412,6 +412,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/state-browser-probe.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/state-browser-probe.mjs --elk
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/gantt-browser-probe.mjs
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/timeline-browser-probe.mjs
@@ -480,6 +482,8 @@ jobs:
           node tools/mermaid-cpp/compare-architecture-svg.mjs build/mermaid-cpp/architecture-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/compare-state-svg.mjs build/mermaid-cpp/state-browser/original.json build/mermaid-cpp/pie-svg
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node tools/mermaid-cpp/compare-state-svg.mjs build/mermaid-cpp/state-elk-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/compare-gantt-svg.mjs build/mermaid-cpp/gantt-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -600,6 +604,8 @@ jobs:
             build/mermaid-cpp/zenuml-browser/*.svg
             build/mermaid-cpp/state-browser/*.json
             build/mermaid-cpp/state-browser/*.svg
+            build/mermaid-cpp/state-elk-browser/*.json
+            build/mermaid-cpp/state-elk-browser/*.svg
             build/mermaid-cpp/gantt-browser/*.json
             build/mermaid-cpp/gantt-browser/*.svg
             build/mermaid-cpp/timeline-browser/*.json

@@ -19,3 +19,11 @@ export const cases=[
  ['unclosed','stateDiagram-v2\nstate Outer {\nA --> B',null],
  ['missing-target','stateDiagram-v2\nA -->',null]
 ];
+
+export const elkCases=[
+ ['elk-default','stateDiagram\n[*] --> Idle\nIdle --> Running\nRunning --> [*]'],
+ ...cases.filter(([name])=>['basic','aliases','labels','left-right','composite','nested',
+  'styles','style-classes','fork-join','fork-join-lr','floating-note','configured','inline-notes',
+  'block-note','concurrent-regions','concurrent-initial-states'].includes(name))
+  .map(([name,source])=>['elk-'+name,source]),
+];
