@@ -106,22 +106,25 @@ inline void reconcile_nodes(
     std::u32string_view before_source,
     std::u32string_view after_source,
     const TextEdit& edit) {
-    std::vector<bool> claimed(after_nodes.size(), false);
+    using Key = std::tuple<std::size_t, std::size_t, InlineCstKind, ParseStatus>;
+    std::map<Key, std::vector<InlineCstNode*>> candidates;
+    // Ranges and syntax determine identity, never matching text at another
+    // location. Reverse insertion retains the original first-unclaimed order
+    // even when error/incomplete nodes share a range.
+    for (auto index = after_nodes.size(); index > 0; --index) {
+        auto& node = after_nodes[index - 1];
+        candidates[{node.range.start, node.range.end, node.kind, node.status}].push_back(&node);
+    }
     for (const auto& before : before_nodes) {
         const auto expected = translated_untouched_range(before.range, edit);
         if (!expected) continue;
-        for (std::size_t index = 0; index < after_nodes.size(); ++index) {
-            auto& after = after_nodes[index];
-            if (claimed[index] || after.kind != before.kind || after.status != before.status
-                || after.range != *expected
-                || !same_source_slice(before_source, before.range, after_source, after.range)) {
-                continue;
-            }
-            claimed[index] = true;
-            after.id = before.id;
-            reconcile_nodes(before.children, after.children, before_source, after_source, edit);
-            break;
-        }
+        auto found = candidates.find({expected->start, expected->end, before.kind, before.status});
+        if (found == candidates.end() || found->second.empty()
+            || !same_source_slice(before_source, before.range, after_source, *expected)) continue;
+        auto& after = *found->second.back();
+        found->second.pop_back();
+        after.id = before.id;
+        reconcile_nodes(before.children, after.children, before_source, after_source, edit);
     }
 }
 

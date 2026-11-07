@@ -351,6 +351,67 @@ suite inline_cst_tests = [] {
     expect(is_lossless(document.source));
 };
 
+
+"indexed inline identity reconciliation preserves scalar matching semantics"_test = [] {
+    auto scalar = [&](auto const& self, InlineCstNodes const& before, InlineCstNodes& after,
+        std::u32string_view oldSource, std::u32string_view newSource, TextEdit const& edit) -> void {
+        std::vector<bool> claimed(after.size());
+        for (auto const& old : before) {
+            auto range = inline_source_edit_detail::translated_untouched_range(old.range, edit);
+            if (!range) continue;
+            for (std::size_t i = 0; i < after.size(); ++i) {
+                auto& node = after[i];
+                if (claimed[i] || node.kind != old.kind || node.status != old.status || node.range != *range
+                    || !inline_source_edit_detail::same_source_slice(oldSource, old.range, newSource, node.range)) continue;
+                node.id = old.id; claimed[i] = true;
+                self(self, old.children, node.children, oldSource, newSource, edit);
+                break;
+            }
+        }
+    };
+    std::vector<std::u32string> sources{U"a***b***c\nleft **middle** right", U"[title](<url>) and $x_{1}$",
+        U"**abc", U"a\\**b* &amp; `code`", U"*a* _a_ ~~abc~~\r\nend", U"![alt](url) [title]("};
+    std::mt19937 random(274913);
+    for (int trial = 0; trial < 300; ++trial) {
+        auto const& source = sources[random() % sources.size()];
+        InlineDocument document{source, {}};
+        auto context = test_context(); context.next_id = NodeId{100};
+        reparse_inline_document(document, context);
+        auto before = document.tree;
+        auto start = random() % (source.size() + 1);
+        auto end = (std::min)(source.size(), start + random() % 5);
+        std::vector<std::u32string> replacements{U"x", U"", U"**", U"\n", U"$", U"\U0001f642"};
+        TextEdit edit{NodeId{7}, {start, end}, replacements[random() % replacements.size()]};
+        context.next_id = NodeId{10000};
+        auto applied = apply_inline_source_edit(NodeId{7}, document, edit, context);
+        auto expected = parse_inline(document.source, context);
+        scalar(scalar, before.nodes, expected.nodes, source, document.source, edit);
+        expect(std::ranges::equal(inline_source_edit_detail::node_identities(document.tree.nodes),
+            inline_source_edit_detail::node_identities(expected.nodes)));
+        expect(bool(flatten_tokens(document.tree, document.source) == document.source));
+        apply_inline_source_edit(NodeId{7}, document, applied.inverse, context);
+        expect(bool(document.source == source));
+        expect(bool(flatten_tokens(document.tree, document.source) == source));
+    }
+};
+
+"source edit reconciles a long paragraph without changing untouched identities"_test = [] {
+    InlineDocument document;
+    for (int line = 0; line < 20000; ++line) document.source += U"alpha **beta** gamma\n";
+    auto source = document.source;
+    auto context = test_context(); context.next_id = NodeId{100};
+    reparse_inline_document(document, context);
+    auto finalId = document.tree.nodes.back().id;
+    context.next_id = NodeId{1000000};
+    auto applied = apply_inline_source_edit(NodeId{7}, document, {NodeId{7}, {3, 3}, U"X"}, context);
+    expect(document.tree.nodes.back().id == finalId);
+    expect(document.source.size() == source.size() + 1);
+    expect(bool(flatten_tokens(document.tree, document.source) == document.source));
+    apply_inline_source_edit(NodeId{7}, document, applied.inverse, context);
+    expect(bool(document.source == source));
+    expect(document.tree.nodes.back().id == finalId);
+};
+
 "source edit rejects the wrong owner"_test = [] {
     InlineDocument document{U"abc", {}};
     reparse_inline_document(document, test_context());
