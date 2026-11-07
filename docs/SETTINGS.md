@@ -5,10 +5,12 @@ Use native Back or an unhandled Escape to return to the document. Pages share
 theme typography and form styles. Long shortcut, LaTeX and license lists use
 native virtualization; ordinary forms use one page scroll surface. Closed choices
 leave the wheel to the page, and numeric AI budgets use plain integer inputs.
-All pages share a left-anchored content column whose width is capped in the
-shared page viewport template. Wider windows add space to its right; page
-roots do not center themselves with independent maximum widths. Virtualized
-pages retain a finite height and their own scrolling surface.
+All pages share a centered content column capped by the page viewport template.
+Form pages scroll across the full page width. Shortcut and LaTeX lists also keep
+their native scrollbars at the page edge, with centered headers and rows inside
+the same content width. The lists retain a finite height and virtualize their
+rows. On wide theme pages, the theme list and preview fill the available height;
+narrow pages stack the preview below the list and scroll vertically.
 
 ## Math rendering
 

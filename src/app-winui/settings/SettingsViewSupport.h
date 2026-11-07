@@ -118,7 +118,7 @@ namespace winrt::Folia::settings_ui
         Controls::ListView const& list, Controls::TextBlock const& status)
     {
         header.Style(ResourceStyle(L"SettingsListHeaderStyle"));
-        list.Header(header);
+        list.Header(PageViewport(header));
         list.ItemTemplate(Xaml::Application::Current().Resources().Lookup(
             winrt::box_value(L"SettingsListRowTemplate")).as<Xaml::DataTemplate>());
         list.ItemsPanel(Xaml::Application::Current().Resources().Lookup(
@@ -130,7 +130,6 @@ namespace winrt::Folia::settings_ui
         Controls::ScrollViewer::SetHorizontalScrollBarVisibility(list, Controls::ScrollBarVisibility::Disabled);
         Controls::ScrollViewer::SetVerticalScrollBarVisibility(list, Controls::ScrollBarVisibility::Auto);
         Xaml::Controls::Grid page;
-        page.Style(ResourceStyle(L"SettingsGridPageStyle"));
         Xaml::Controls::RowDefinition content;
         content.Height(Xaml::GridLengthHelper::FromValueAndType(1, Xaml::GridUnitType::Star));
         page.RowDefinitions().Append(content);
@@ -140,8 +139,11 @@ namespace winrt::Folia::settings_ui
         page.Children().Append(list);
         Xaml::Controls::Grid::SetRow(status, 1);
         status.TextWrapping(Xaml::TextWrapping::Wrap);
+        status.Margin(Xaml::Thickness{24, 0, 24, 0});
+        status.MaxWidth(Metric(L"SettingsContentWidth"));
+        status.HorizontalAlignment(Xaml::HorizontalAlignment::Stretch);
         page.Children().Append(status);
-        return PageViewport(page);
+        return page;
     }
 
     inline void SetStatus(Controls::TextBlock const& text, winrt::hstring const& message, bool error)

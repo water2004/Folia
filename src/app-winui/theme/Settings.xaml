@@ -15,14 +15,14 @@
     <x:Double x:Key="SettingsThemeListWidth">260</x:Double>
     <x:Double x:Key="SettingsModelPickerWidth">320</x:Double>
     <x:Double x:Key="SettingsModelPickerMaxHeight">320</x:Double>
-    <!-- Cap the content column, not the stretched page itself: a stretched
-         element with MaxWidth is centered inside a wider layout slot. -->
+    <x:Double x:Key="SettingsPageWidth">1008</x:Double>
+    <x:Double x:Key="SettingsContentWidth">960</x:Double>
+    <!-- Scrollers occupy the page. Their content shares a centered column. -->
     <DataTemplate x:Key="SettingsPageViewportTemplate">
         <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" MaxWidth="1008"/>
-            </Grid.ColumnDefinitions>
             <ContentPresenter x:Name="PageContent"
+                              MaxWidth="{StaticResource SettingsPageWidth}"
+                              HorizontalAlignment="Stretch"
                               HorizontalContentAlignment="Stretch"
                               VerticalContentAlignment="Stretch"/>
         </Grid>
@@ -104,6 +104,7 @@
         <Setter Property="VerticalScrollMode" Value="Enabled"/>
         <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        <Setter Property="VerticalContentAlignment" Value="Stretch"/>
     </Style>
     <Style x:Key="SettingsListSeparatorStyle" TargetType="Border">
         <Setter Property="BorderThickness" Value="0,0,0,1"/>
@@ -118,11 +119,12 @@
         <ItemsStackPanel CacheLength="0.5"/>
     </ItemsPanelTemplate>
     <DataTemplate x:Key="SettingsListRowTemplate">
-        <ContentPresenter HorizontalContentAlignment="Stretch"/>
+        <ContentPresenter MaxWidth="{StaticResource SettingsContentWidth}" Margin="24,0"
+                          HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"/>
     </DataTemplate>
     <Style x:Key="SettingsListHeaderStyle" TargetType="StackPanel" BasedOn="{StaticResource SettingsSectionPanelStyle}">
         <Setter Property="Spacing" Value="24"/>
-        <Setter Property="Margin" Value="0,0,0,24"/>
+        <Setter Property="Margin" Value="24"/>
     </Style>
     <Style x:Key="SettingsCodeTextStyle" TargetType="TextBlock" BasedOn="{StaticResource SettingsHintTextStyle}">
         <Setter Property="FontFamily" Value="{ThemeResource FoliaMonoFontFamily}"/>
@@ -137,6 +139,6 @@
         <Setter Property="Background" Value="{ThemeResource FoliaShellLayerBrush}"/>
     </Style>
     <Style x:Key="SettingsThemeListStyle" TargetType="ListView">
-        <Setter Property="MinHeight" Value="220"/><Setter Property="MaxHeight" Value="280"/>
+        <Setter Property="MinHeight" Value="220"/>
     </Style>
 </ResourceDictionary>

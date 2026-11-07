@@ -19,7 +19,10 @@ namespace winrt::Folia
         page.ColumnSpacing(settings_ui::Metric(L"SettingsSectionGap"));
         page.RowSpacing(0);
         for (int i = 0; i < 2; ++i) {
-            RowDefinition row; row.Height(GridLengthHelper::Auto()); page.RowDefinitions().Append(row);
+            RowDefinition row;
+            row.Height(i == 0 ? GridLengthHelper::FromValueAndType(1, GridUnitType::Star)
+                : GridLengthHelper::Auto());
+            page.RowDefinitions().Append(row);
         }
         ColumnDefinition listColumn;
         listColumn.Width(GridLengthHelper::FromPixels(settings_ui::Metric(L"SettingsThemeListWidth")));
@@ -88,6 +91,8 @@ namespace winrt::Folia
             bool stacked = args.NewSize().Width < breakpoint;
             auto row = stacked ? 1 : 0;
             if (Grid::GetRow(border) == row) return;
+            grid.RowDefinitions().GetAt(0).Height(stacked ? GridLengthHelper::Auto()
+                : GridLengthHelper::FromValueAndType(1, GridUnitType::Star));
             grid.ColumnDefinitions().GetAt(0).Width(stacked
                 ? GridLengthHelper::FromValueAndType(1, GridUnitType::Star) : GridLengthHelper::FromPixels(listWidth));
             grid.ColumnDefinitions().GetAt(1).Width(stacked ? GridLengthHelper::FromPixels(0)
