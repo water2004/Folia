@@ -10,8 +10,10 @@
 - 根因：EditorContentPreparation 每次追加都 utf16_len(已累积文本)，导致长段落平方增长；EditorDisplayMapping 每 UTF16 单元 32 字节且布局/interaction 复制。已改公共追加取构建中 mapping.size，平台 mapping 用常量/线性区间存储、保持值语义与同一 source 坐标；CreateFlow 无缩进不再复制整个 display，连续普通文字合并相同 style ranges，控件边界保留。
 - 同轮：纯文本序列化复用同一 visitor/planner，但不生成坐标映射；投影仍有完整映射，转出时 move 避免再复制。加载主题先于 Open，未变化不再重建 render model。原始 bytes 解码后释放。
 - 进度改为 Blocks/Inlines/Indexes 真实阶段（长段落物理行及行内扫描均可进度/取消），未知工作量显示 indeterminate。数学遍历不能在 WaitForIdle 前完成；首次显示通知返回后才撤进度。中央提示绑定实际状态。没有按有无公式分流或更改块树编辑职责。
-- 验证：`build/large-document-core-accepted.log` **777 项/500849 断言全过**，包含纯文本/投影相等、阶段单调/长段落取消、source span 精确性。`build/large-document-platform-final.log` 整套平台测试全过，包含随机映射对照 3000 步/逾千万断言；其后补 mapping move/contains_kind，待重验。自建10MB已走通，但后续又合并 render text runs、去掉叶文本复制，需最终重测，不沿用中间836MB/761MB结果。
-- 当前构建：`build/large-document-debug-accepted.log`，运行 session **31596**；完成后跑 test_large_document_loading、document_loading/reload、inline_presentation_paths/completion_layout，再验证最终平台。编译≤4，无 agents/CUA。正按 serializer、mapping、render runs、load progress 分批本地提交；基线 bb8337d2。未构建新 MSI、未安装或推送。结束前替换运行状态与最终数字。
+- 验证：`build/large-document-core-accepted.log` **777 项/500849 断言全过**；最终 `large-document-platform-accepted.log` **95 项/9099568 断言全过**，包括 move、区间访问、scalar query 对照。Debug 最终 `large-document-ui-build.log` 成功。native 大段落正式测试含 loading **7项55断言**过：Debug约16秒，投影752ms、DWrite1058ms，进程工作集624MB/峰651MB（测试宿主，非安装版实测）。最终 interval 查询/owner 收集按 run 做，避免首屏为同一 owner 扫描千万次。
+- 应用回归已过：document_reload5/61、inline_presentation_paths10/419（各另loading5/26）；completion_layout2/1056重跑过，首次未标记断言有2次失败，现基准先等两个块排版完成以消除2ms帧预算敏感性，此fixture微调尚未复测。真实窗口10MB用例按用户先交付Release的新安排暂缓，未保留未验证的窗口测试源码，不宣称实际UI已验收。
+- **用户新决定**：DirectWrite 整段布局后面再优化，现在先构建 Release 供本人测试。暂停进一步性能改造/额外回归，构建 `build_msi.ps1 -Version 0.7.0 -SkipDependencySetup`（含既有启动/正常关闭检查），日志 `build/folia-070-large-document-msi.log`，句柄见最新工具；完成后核对 MSI 版本/hash 并交付。不要打开用户原文件，不要自行发布 GitHub Release 或安装。编译≤4，无 agents/CUA。
+- text-only serializer 已提交 **f7daeda4**；其余按 mapping、render runs、load progress 小批本地提交。基线 bb8337d2；未推送。结束前用最终 MSI 状态替换此构建记录。
 
 ## 拆分行间公式与 AI 换行触发（2026-11-06，历史）
 

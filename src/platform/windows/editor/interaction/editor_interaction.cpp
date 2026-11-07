@@ -69,7 +69,11 @@ namespace folia::platform::editor
                 // [start, end) contains the glyphs on this visual line. The
                 // mapping at end is a caret boundary: it may extend an existing
                 // container, but must not pull the next block onto this line.
-                for (auto index = start; index < end; ++index) add(mapping[index], true);
+                mapping.for_each_run(start, end, [&](auto, auto, auto first, auto last) {
+                    add(first, true);
+                    add(last, true);
+                    return true;
+                });
                 // A terminal source boundary can own an empty editable row
                 // after a generated prefix, but cannot extend a text line
                 // to the next source container.

@@ -9,7 +9,107 @@ using namespace boost::ut;
 using namespace folia;
 using namespace folia::platform::editor;
 
+namespace {
+std::size_t ScalarDisplayPosition(std::vector<EditorDisplayPosition> const& mapping, TextPosition source) {
+    std::optional<std::size_t> last, exactSource, generated, greater;
+    for (std::size_t i = 0; i < mapping.size(); ++i) {
+        auto point = mapping[i];
+        if (point.container_id != source.container_id) continue;
+        last = i;
+        if (point.source_offset < source.source_offset) continue;
+        if (point.source_offset > source.source_offset) { if (!greater) greater = i; continue; }
+        if (point.kind == EditorDisplayPositionKind::GeneratedPreview && point.affinity == source.affinity) return i;
+        if (point.kind == EditorDisplayPositionKind::Source) {
+            if (point.affinity == source.affinity) return i;
+            if (!exactSource) exactSource = i;
+        } else if (point.affinity == source.affinity) {
+            if (point.kind == EditorDisplayPositionKind::BoundaryDecoration && source.affinity == TextAffinity::Downstream)
+                generated = (std::min)(i + 1, mapping.size() - 1);
+            else if (!generated) generated = i;
+        }
+    }
+    return generated.value_or(exactSource.value_or(greater.value_or(last.value_or(0))));
+}
+}
+
 suite display_mapping_tests = [] {
+
+"display mapping compresses long source runs and copies by runs"_test = [] {
+    EditorDisplayMapping mapping;
+    for (std::size_t i = 0; i != 10 * 1024 * 1024; ++i)
+        mapping.push_back({NodeId{1}, i, TextAffinity::Downstream});
+    expect(mapping.storage_bytes() < 256_u);
+    auto copy = mapping;
+    expect(copy.storage_bytes() < 256_u);
+    mapping.resize(12);
+    expect(copy.size() == 10485760_u);
+    expect(mapping.back().source_offset == 11_u);
+    expect(copy.back().source_offset == 10485759_u);
+    auto moved = std::move(mapping);
+    expect(mapping.empty());
+    expect(moved.size() == 12_u);
+};
+
+"display mapping range mutations match uncompressed positions"_test = [] {
+    std::vector<EditorDisplayPosition> expected;
+    EditorDisplayMapping actual;
+    std::uint64_t random = 19;
+    auto next = [&] { random = random * 6364136223846793005ULL + 1; return random >> 32; };
+    auto point = [&] {
+        return EditorDisplayPosition{NodeId{next() % 3 + 1}, next() % 20,
+            next() % 2 ? TextAffinity::Downstream : TextAffinity::Upstream,
+            static_cast<EditorDisplayPositionKind>(next() % 4)};
+    };
+    for (int step = 0; step != 3000; ++step) {
+        auto at = next() % (expected.size() + 1);
+        auto count = next() % 5;
+        auto value = point();
+        switch (next() % 4) {
+        case 0:
+            actual.insert(actual.begin() + at, count, value);
+            expected.insert(expected.begin() + at, count, value);
+            break;
+        case 1: {
+            auto end = (std::min)(expected.size(), at + count);
+            actual.erase(actual.begin() + at, actual.begin() + end);
+            expected.erase(expected.begin() + at, expected.begin() + end);
+            break;
+        }
+        case 2:
+            actual.push_back(value); expected.push_back(value); break;
+        case 3: {
+            auto end = (std::min)(expected.size(), at + count);
+            auto saved = std::vector<EditorDisplayPosition>(expected.begin() + at, expected.begin() + end);
+            actual.insert(actual.begin() + at, actual.begin() + at, actual.begin() + end);
+            expected.insert(expected.begin() + at, saved.begin(), saved.end());
+            break;
+        }
+        }
+        expect(fatal(actual.size() == expected.size()));
+        std::size_t i = 0;
+        for (auto value : actual) {
+            expect(static_cast<TextPosition>(value) == static_cast<TextPosition>(expected[i]));
+            expect(value.kind == expected[i].kind);
+            expect(actual[i].source_offset == expected[i].source_offset);
+            ++i;
+        }
+        if (step % 10 == 0) {
+            auto query = static_cast<TextPosition>(point());
+            expect(DisplayPositionForSource(actual, query) == ScalarDisplayPosition(expected, query));
+            auto begin = next() % (expected.size() + 1);
+            auto end = (std::min)(expected.size(), begin + 20);
+            auto cursor = begin;
+            actual.for_each_run(begin, end, [&](auto first, auto last, auto a, auto b) {
+                expect(first == cursor);
+                expect(static_cast<TextPosition>(a) == static_cast<TextPosition>(expected[first]));
+                expect(static_cast<TextPosition>(b) == static_cast<TextPosition>(expected[last - 1]));
+                cursor = last;
+                return true;
+            });
+            expect(cursor == end);
+        }
+    }
+};
 
 "leading layout spacing cannot hide exact positions earlier in the same source block"_test = [] {
     const auto owner = NodeId{99};

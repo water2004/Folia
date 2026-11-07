@@ -20,14 +20,13 @@ namespace
     EditorDisplayMapping IdentityMapping(NodeId owner, std::size_t length)
     {
         EditorDisplayMapping mapping;
-        mapping.reserve(length + 1);
         for (std::size_t offset = 0; offset <= length; ++offset)
         {
-            mapping.emplace_back(
+            mapping.push_back({
                 owner,
                 offset,
                 TextAffinity::Downstream,
-                EditorDisplayPositionKind::Source);
+                EditorDisplayPositionKind::Source});
         }
         return mapping;
     }
