@@ -9,8 +9,9 @@ All pages share a centered content column capped by the page viewport template.
 Form pages scroll across the full page width. Shortcut and LaTeX lists also keep
 their native scrollbars at the page edge, with centered headers and rows inside
 the same content width. The lists retain a finite height and virtualize their
-rows. On wide theme pages, the theme list and preview fill the available height;
-narrow pages stack the preview below the list and scroll vertically.
+rows. The theme page reserves automatic-height rows for its heading and actions.
+The theme list and preview share the remaining finite height and scroll inside
+their own viewports. Narrow pages stack these viewports vertically.
 
 ## Math rendering
 

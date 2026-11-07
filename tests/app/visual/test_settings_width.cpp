@@ -77,10 +77,27 @@ namespace {
                     root.UpdateLayout();
                     auto page = navigation.Content().as<FrameworkElement>();
                     auto list = First<ListView>(page);
-                    const auto height = list.ActualHeight();
+                    const auto listHeight = list.ActualHeight();
                     root.Height(1000);
                     root.UpdateLayout();
-                    expect(list.ActualHeight() > height + 250.) << "theme list follows the viewport height";
+                    expect(list.ActualHeight() > listHeight + 250.) << "theme list follows the viewport height";
+                    auto button = First<Button>(page);
+                    expect(fatal(button != nullptr));
+                    for (const auto width : {1800, 720, 1800}) {
+                        root.Width(width);
+                        for (const auto height : {700, 480, 360, 700}) {
+                            root.Height(height);
+                            root.UpdateLayout();
+                            for (auto const& action : button.Parent().as<StackPanel>().Children()) {
+                                auto control = action.as<Button>();
+                                const auto bounds = control.TransformToVisual(page).TransformBounds({0, 0,
+                                    static_cast<float>(control.ActualWidth()), static_cast<float>(control.ActualHeight())});
+                                expect(bounds.X >= 0 && bounds.X + bounds.Width <= page.ActualWidth() + 1.);
+                                expect(bounds.Y >= 0 && bounds.Y + bounds.Height <= page.ActualHeight() + 1.)
+                                    << "theme actions leave the viewport at " << width << 'x' << height;
+                            }
+                        }
+                    }
                 }
                 // Save native rendering for the pages with distinct scroll layouts.
                 if (name == "general" || name == "themes" || name == "shortcuts" || name == "latex") {

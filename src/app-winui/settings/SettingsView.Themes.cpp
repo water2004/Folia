@@ -16,33 +16,27 @@ namespace winrt::Folia
     {
         Grid page;
         page.Style(settings_ui::ResourceStyle(L"SettingsGridPageStyle"));
-        page.ColumnSpacing(settings_ui::Metric(L"SettingsSectionGap"));
-        page.RowSpacing(0);
-        for (int i = 0; i < 2; ++i) {
+        for (int i = 0; i < 4; ++i) {
             RowDefinition row;
-            row.Height(i == 0 ? GridLengthHelper::FromValueAndType(1, GridUnitType::Star)
+            row.Height(i == 1 ? GridLengthHelper::FromValueAndType(1, GridUnitType::Star)
                 : GridLengthHelper::Auto());
             page.RowDefinitions().Append(row);
         }
+        page.Children().Append(settings_ui::PageHeader(Localize(L"Themes"), Localize(L"ThemesDescription")));
+
+        Grid content;
+        content.ColumnSpacing(settings_ui::Metric(L"SettingsSectionGap"));
+        RowDefinition listRow, previewRow;
+        listRow.Height(GridLengthHelper::FromValueAndType(1, GridUnitType::Star));
+        previewRow.Height(GridLengthHelper::Auto());
+        content.RowDefinitions().Append(listRow);
+        content.RowDefinitions().Append(previewRow);
         ColumnDefinition listColumn;
         listColumn.Width(GridLengthHelper::FromPixels(settings_ui::Metric(L"SettingsThemeListWidth")));
         ColumnDefinition previewColumn;
         previewColumn.Width(GridLengthHelper::FromValueAndType(1, GridUnitType::Star));
-        page.ColumnDefinitions().Append(listColumn);
-        page.ColumnDefinitions().Append(previewColumn);
-
-        Grid listPanel;
-        listPanel.Style(settings_ui::ResourceStyle(L"SettingsSectionGridStyle"));
-        for (auto index = 0; index < 4; ++index)
-        {
-            RowDefinition row;
-            row.Height(index == 1
-                ? GridLengthHelper::FromValueAndType(1, GridUnitType::Star)
-                : GridLengthHelper::Auto());
-            listPanel.RowDefinitions().Append(row);
-        }
-        auto header = settings_ui::PageHeader(Localize(L"Themes"), Localize(L"ThemesDescription"));
-        listPanel.Children().Append(header);
+        content.ColumnDefinitions().Append(listColumn);
+        content.ColumnDefinitions().Append(previewColumn);
         themeList_.SelectionMode(ListViewSelectionMode::Single);
         themeList_.Style(settings_ui::ResourceStyle(L"SettingsThemeListStyle"));
         themeList_.SelectionChanged([this](auto const&, SelectionChangedEventArgs const&)
@@ -53,8 +47,7 @@ namespace winrt::Folia
             settings_.themeId = themeIds_[static_cast<std::size_t>(index)];
             UpdateThemePreview();
         });
-        Grid::SetRow(themeList_, 1);
-        listPanel.Children().Append(themeList_);
+        content.Children().Append(themeList_);
 
         StackPanel buttons;
         buttons.Orientation(Orientation::Horizontal);
@@ -71,38 +64,42 @@ namespace winrt::Folia
         buttons.Children().Append(importButton);
         buttons.Children().Append(removeThemeButton_);
         Grid::SetRow(buttons, 2);
-        listPanel.Children().Append(buttons);
+        page.Children().Append(buttons);
         themeStatus_.TextWrapping(TextWrapping::Wrap);
         Grid::SetRow(themeStatus_, 3);
-        listPanel.Children().Append(themeStatus_);
-        Grid::SetColumn(listPanel, 0);
-        page.Children().Append(listPanel);
+        page.Children().Append(themeStatus_);
 
         themePreview_.CornerRadius(CornerRadius{10});
         themePreview_.BorderThickness(Thickness{1});
-        Grid::SetColumn(themePreview_, 1);
-        page.Children().Append(themePreview_);
-        page.SizeChanged([preview = winrt::make_weak(themePreview_),
+        ScrollViewer preview;
+        preview.Style(settings_ui::ResourceStyle(L"SettingsPageScrollStyle"));
+        preview.VerticalContentAlignment(VerticalAlignment::Top);
+        preview.Content(themePreview_);
+        Grid::SetColumn(preview, 1);
+        content.Children().Append(preview);
+        content.SizeChanged([preview = winrt::make_weak(preview),
             breakpoint = settings_ui::Metric(L"SettingsWidePageWidth"),
             listWidth = settings_ui::Metric(L"SettingsThemeListWidth"),
             gap = settings_ui::Metric(L"SettingsSectionGap")](auto const& sender, SizeChangedEventArgs const& args) {
-            auto border = preview.get(); if (!border) return;
+            auto scroll = preview.get(); if (!scroll) return;
             auto grid = sender.template as<Grid>();
             bool stacked = args.NewSize().Width < breakpoint;
             auto row = stacked ? 1 : 0;
-            if (Grid::GetRow(border) == row) return;
-            grid.RowDefinitions().GetAt(0).Height(stacked ? GridLengthHelper::Auto()
-                : GridLengthHelper::FromValueAndType(1, GridUnitType::Star));
+            if (Grid::GetRow(scroll) == row) return;
+            grid.RowDefinitions().GetAt(1).Height(stacked
+                ? GridLengthHelper::FromValueAndType(1, GridUnitType::Star) : GridLengthHelper::Auto());
             grid.ColumnDefinitions().GetAt(0).Width(stacked
                 ? GridLengthHelper::FromValueAndType(1, GridUnitType::Star) : GridLengthHelper::FromPixels(listWidth));
             grid.ColumnDefinitions().GetAt(1).Width(stacked ? GridLengthHelper::FromPixels(0)
                 : GridLengthHelper::FromValueAndType(1, GridUnitType::Star));
-            Grid::SetRow(border, row); Grid::SetColumn(border, stacked ? 0 : 1);
+            Grid::SetRow(scroll, row); Grid::SetColumn(scroll, stacked ? 0 : 1);
             grid.RowSpacing(stacked ? gap : 0);
             grid.ColumnSpacing(stacked ? 0 : gap);
         });
+        Grid::SetRow(content, 1);
+        page.Children().Append(content);
         RefreshThemeList();
-        return settings_ui::PageScroll(page);
+        return settings_ui::PageViewport(page);
     }
 
     void SettingsView::RefreshThemeList()

@@ -139,6 +139,8 @@
         <Setter Property="Background" Value="{ThemeResource FoliaShellLayerBrush}"/>
     </Style>
     <Style x:Key="SettingsThemeListStyle" TargetType="ListView">
-        <Setter Property="MinHeight" Value="220"/>
+        <Setter Property="ScrollViewer.HorizontalScrollMode" Value="Disabled"/>
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+        <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
     </Style>
 </ResourceDictionary>
