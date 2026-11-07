@@ -21,11 +21,12 @@
       this package's fixed per-user scope. Both are known false positives.
     -->
     <SuppressIces>$(SuppressIces);ICE03;ICE91</SuppressIces>
-    <DefineConstants>$(DefineConstants);ProductVersion=$(FoliaProductVersion);LicenseRtf=$(FoliaLicenseRtf);ProductIcon=$(FoliaProductIcon)</DefineConstants>
+    <DefineConstants>$(DefineConstants);ProductVersion=$(FoliaProductVersion);LicenseRtf=$(FoliaLicenseRtf);ProductIcon=$(FoliaProductIcon);InstallerActionsDll=$(FoliaInstallerActionsDll)</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="WixToolset.UI.wixext" Version="4.0.6" />
+    <PackageReference Include="WixToolset.Util.wixext" Version="4.0.6" />
     <Compile Include="$(FoliaGeneratedPayload)" Link="GeneratedPayload.wxs" />
   </ItemGroup>
 

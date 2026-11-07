@@ -112,10 +112,15 @@ powershell -ExecutionPolicy Bypass -File .\build_msi.ps1 -Version 0.7.0
 The installer creates a self-contained Windows App SDK build, so the target
 machine does not need a separately installed Windows App SDK runtime. The MSI
 is written to `build/installer/bin/Folia-<version>-x64.msi`. It installs the
-application below `%LOCALAPPDATA%\Programs\Folia` and the configurable Assets
-tree below `%LOCALAPPDATA%\Folia\Assets`. Uninstall removes MSI-owned built-in
-resources but preserves `settings.json` and `themes/custom/`. The installer
-registers Folia as an available handler for `.md` and `.markdown`; Windows still
+application in a directory selected in the setup wizard, defaulting to
+`%LOCALAPPDATA%\Programs\Folia`. Upgrades remember that directory. Unattended
+installations can set `INSTALLFOLDER="D:\Apps\Folia"`. The configurable Assets
+tree is installed below `%LOCALAPPDATA%\Folia\Assets`. Uninstall removes MSI-owned built-in
+resources but preserves `settings.json` and `themes/custom/`. The uninstall
+wizard offers an unchecked option to also remove all Folia user resources, settings,
+custom themes, commands and the saved AI API key. Silent uninstallations can
+request the same cleanup with `FOLIAREMOVEUSERDATA=1`. Upgrades retain user data.
+The installer registers Folia as an available handler for `.md` and `.markdown`; Windows still
 leaves the default-app choice to the user.
 
 For installer builds, `build_app.ps1` receives the compile-time Assets token

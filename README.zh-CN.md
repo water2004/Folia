@@ -96,10 +96,14 @@ powershell -ExecutionPolicy Bypass -File .\build_msi.ps1 -Version 0.5.3
 
 安装器会生成自包含 Windows App SDK 的 Release 应用，因此目标电脑无需另行
 安装 Windows App SDK Runtime。MSI 输出到
-`build/installer/bin/Folia-<version>-x64.msi`；程序安装在
-`%LOCALAPPDATA%\Programs\Folia`，可配置的 Assets 树安装在
+`build/installer/bin/Folia-<version>-x64.msi`；安装向导可以选择程序目录，默认是
+`%LOCALAPPDATA%\Programs\Folia`，升级会记住此目录。静默安装也可传入
+`INSTALLFOLDER="D:\Apps\Folia"`。可配置的 Assets 树安装在
 `%LOCALAPPDATA%\Folia\Assets`。卸载会移除 MSI 管理的内置资源，但保留
-`settings.json` 和 `themes/custom/`。安装器会把折笺注册为 `.md` 和
+`settings.json` 和 `themes/custom/`。卸载向导提供默认不勾选的完整清理选项，
+勾选后会删除用户资源、设置、自定义主题、命令以及保存的 AI API Key。
+静默卸载可传入 `FOLIAREMOVEUSERDATA=1`；升级会保留用户数据。
+安装器会把折笺注册为 `.md` 和
 `.markdown` 的可选打开程序；是否设为默认应用仍由用户在 Windows 中决定。
 
 安装包构建会通过编译参数把 Assets 根目录设为

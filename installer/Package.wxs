@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
-     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui"
+     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
   <Package Name="Folia"
            Manufacturer="water2004"
            Version="$(var.ProductVersion)"
@@ -12,6 +13,27 @@
     <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
     <MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer version of Folia is already installed." />
 
+    <Property Id="INSTALLFOLDER" Secure="yes" />
+    <Property Id="FOLIAPREVIOUSINSTALLDIR">
+      <RegistrySearch Id="PreviousInstallDirectory" Root="HKCU" Bitness="always64"
+                      Key="Software\water2004\Folia\Installer" Name="InstallDirectory" Type="raw" />
+    </Property>
+    <SetProperty Id="INSTALLFOLDER" Value="[FOLIAPREVIOUSINSTALLDIR]" After="AppSearch"
+                 Condition="NOT INSTALLFOLDER AND FOLIAPREVIOUSINSTALLDIR" />
+    <SetProperty Id="ARPINSTALLLOCATION" Value="[INSTALLFOLDER]" After="CostFinalize" Sequence="execute" />
+    <Property Id="FOLIAREMOVEUSERDATA" Secure="yes" />
+    <Property Id="FOLIAUSERDATADIR" Value="%LOCALAPPDATA%\Folia" />
+    <Binary Id="FoliaInstallerActions" SourceFile="$(var.InstallerActionsDll)" />
+    <CustomAction Id="FoliaRemoveCompletionCredential" BinaryRef="FoliaInstallerActions"
+                  DllEntry="RemoveCompletionCredential" Execute="commit" Impersonate="yes" Return="check" />
+    <SetProperty Id="FoliaRemoveCompletionCredential" Value="Folia/InlineCompletion/APIKey"
+                 Before="FoliaRemoveCompletionCredential" Sequence="execute"
+                 Condition="FOLIAREMOVEUSERDATA = 1 AND REMOVE~=&quot;ALL&quot; AND NOT UPGRADINGPRODUCTCODE" />
+    <InstallExecuteSequence>
+      <Custom Action="FoliaRemoveCompletionCredential" After="InstallInitialize"
+              Condition="FOLIAREMOVEUSERDATA = 1 AND REMOVE~=&quot;ALL&quot; AND NOT UPGRADINGPRODUCTCODE" />
+    </InstallExecuteSequence>
+
     <StandardDirectory Id="LocalAppDataFolder">
       <Directory Id="LOCALPROGRAMS" Name="Programs">
         <Component Id="LocalProgramsCleanupComponent" Guid="86CB1882-B330-49D7-964B-E4C5858EFA9B" Bitness="always64">
@@ -22,6 +44,8 @@
           <Component Id="InstallFolderCleanupComponent" Guid="DBAF6E84-02A9-4F03-967B-5F57CDA33652" Bitness="always64">
             <RemoveFolder Id="RemoveInstallFolder" On="uninstall" />
             <RegistryValue Root="HKCU" Key="Software\water2004\Folia\Installer" Name="InstallFolder" Type="integer" Value="1" KeyPath="yes" />
+            <RegistryValue Root="HKCU" Key="Software\water2004\Folia\Installer" Name="InstallDirectory"
+                           Type="string" Value="[INSTALLFOLDER]" />
           </Component>
           <Component Id="MarkdownFileAssociationComponent" Guid="15007EF1-9604-4FF6-BD0A-B793E1AF7D9D" Bitness="always64">
             <!-- Default Apps registration: advertises Folia without silently taking ownership. -->
@@ -68,6 +92,8 @@
       </Directory>
       <Directory Id="FOLIADATADIR" Name="Folia">
         <Component Id="DataFolderCleanupComponent" Guid="A21E1701-41CE-4D84-9503-D13948007431" Bitness="always64">
+          <util:RemoveFolderEx Id="RemoveUserData" Property="FOLIAUSERDATADIR" On="uninstall"
+                               Condition="FOLIAREMOVEUSERDATA = 1 AND REMOVE~=&quot;ALL&quot; AND NOT UPGRADINGPRODUCTCODE" />
           <RemoveFolder Id="RemoveDataFolder" On="uninstall" />
           <RegistryValue Root="HKCU" Key="Software\water2004\Folia\Installer" Name="DataFolder" Type="integer" Value="1" KeyPath="yes" />
         </Component>
@@ -115,7 +141,30 @@
     <Property Id="ARPPRODUCTICON" Value="FoliaProductIcon" />
     <Property Id="ARPCONTACT" Value="water2004" />
 
-    <ui:WixUI Id="WixUI_Minimal" />
+    <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
+    <UI>
+      <Dialog Id="FoliaRemoveOptionsDlg" Width="370" Height="270" Title="Folia Setup">
+        <Control Id="Title" Type="Text" X="20" Y="20" Width="330" Height="20"
+                 Text="{\WixUI_Font_Bigger}Remove Folia" />
+        <Control Id="Description" Type="Text" X="20" Y="65" Width="330" Height="36"
+                 Text="Choose whether to keep your Folia data for a future installation." />
+        <Control Id="RemoveUserData" Type="CheckBox" X="20" Y="115" Width="330" Height="32"
+                 Property="FOLIAREMOVEUSERDATA" CheckBoxValue="1"
+                 Text="Also delete settings, resources, custom themes, commands and the saved AI API key." />
+        <Control Id="Remove" Type="PushButton" X="212" Y="243" Width="80" Height="17"
+                 Default="yes" Text="Remove">
+          <Publish Event="EndDialog" Value="Return" />
+        </Control>
+        <Control Id="Cancel" Type="PushButton" X="295" Y="243" Width="56" Height="17"
+                 Cancel="yes" Text="Cancel">
+          <Publish Event="EndDialog" Value="Exit" />
+        </Control>
+      </Dialog>
+    </UI>
+    <InstallUISequence>
+      <Show Dialog="FoliaRemoveOptionsDlg" Before="ProgressDlg"
+            Condition="Installed AND REMOVE~=&quot;ALL&quot; AND NOT UPGRADINGPRODUCTCODE" />
+    </InstallUISequence>
     <WixVariable Id="WixUILicenseRtf" Value="$(var.LicenseRtf)" />
   </Package>
 </Wix>

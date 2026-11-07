@@ -67,6 +67,9 @@ if (-not $SkipStartupTest) {
 & $PayloadGenerator -ProgramRoot $ProgramRoot -AssetsRoot $AssetsRoot -OutputPath $GeneratedPayload
 if ($LASTEXITCODE -ne 0) { throw "WiX payload generation failed with exit code $LASTEXITCODE" }
 
+& (Join-Path $Root 'tools/build-installer-actions.ps1')
+if ($LASTEXITCODE -ne 0) { throw 'Installer custom action build failed.' }
+
 New-Item -ItemType Directory -Force -Path $InstallerOutput, $InstallerIntermediate | Out-Null
 $dotnetArguments = @(
     'build', $InstallerProject,
@@ -78,6 +81,7 @@ $dotnetArguments = @(
     "-p:FoliaInstallerIntermediatePath=$InstallerIntermediate\",
     "-p:FoliaLicenseRtf=$LicenseRtf",
     "-p:FoliaProductIcon=$ProductIcon"
+    "-p:FoliaInstallerActionsDll=$(Join-Path $InstallerBuildRoot 'native/FoliaInstallerActions.dll')"
 )
 & dotnet @dotnetArguments
 if ($LASTEXITCODE -ne 0) { throw "WiX build failed with exit code $LASTEXITCODE" }
