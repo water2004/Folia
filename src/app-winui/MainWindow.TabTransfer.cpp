@@ -164,7 +164,7 @@ namespace winrt::Folia::implementation {
             && local.Y >= bounds.Y && local.Y <= bounds.Y + bounds.Height;
     }
     void MainWindow::BeginTabPointerGesture(Windows::Graphics::PointInt32 point) {
-        if (tabPointerDown || tabMoveInProgress) return;
+        if (tabMoveInProgress) return;
         tabPointerDown = true;
         EndTabDrag();
         bool onVisibleTab = false;
@@ -197,8 +197,12 @@ namespace winrt::Folia::implementation {
         if (!tabMoveInProgress) RestoreIdleTabTransfer();
     }
     void MainWindow::RegisterTabTransferHandlers() {
-        DocumentTabs().CanTearOutTabs(true);
         tabDragEnded.Attach(Microsoft::UI::Input::InputNonClientPointerSource::GetForWindowId(AppWindow().Id()),
+            WindowEvent([this](auto const&, auto const& args) {
+                // A tab click can finish as client input without a non-client
+                // release. Resolve every move from its own native start point.
+                BeginTabPointerGesture(args.PointerScreenPoint());
+            }),
             WindowEvent([this](auto const&, auto const&) {
                 tabMoveInProgress = false;
                 EndTabDrag(); EndTabPointerGesture();
@@ -211,6 +215,8 @@ namespace winrt::Folia::implementation {
             WindowEvent([this](auto const&, auto const&) {
                 if (!(::GetAsyncKeyState(VK_LBUTTON) & 0x8000)) EndTabPointerGesture();
             }));
+        // Register the origin check before TabView attaches its move callbacks.
+        DocumentTabs().CanTearOutTabs(true);
         DocumentTabs().TabItemsChanged(WindowEvent([this](auto const&, auto const&) { QueueTabOrderSync(); }));
         DocumentTabs().TabTearOutWindowRequested(WindowEvent([this](auto const&, auto const& args) {
             auto items = args.Items();

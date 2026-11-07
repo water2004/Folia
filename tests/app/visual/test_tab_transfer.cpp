@@ -119,6 +119,34 @@ namespace {
         return nullptr;
     }
     suite tab_transfer_tests = [] {
+        "caption move after selecting another tab rechecks a click without a nonclient release"_test = [] {
+            OwnedWindow source(App()->CreateMainWindow());
+            const auto a = Access::Documents(source.window).Active();
+            Access::New(source.window);
+            const auto b = Access::Documents(source.window).Active();
+            auto tabs = Access::Tabs(source.window);
+            auto root = source.window.Content().as<FrameworkElement>();
+            const auto point = [&](FrameworkElement const& element) {
+                root.UpdateLayout();
+                auto bounds = element.TransformToVisual(nullptr).TransformBounds({0, 0,
+                    static_cast<float>(element.ActualWidth()), static_cast<float>(element.ActualHeight())});
+                return root.XamlRoot().CoordinateConverter().ConvertLocalToScreen(
+                    {bounds.X + bounds.Width / 2, bounds.Y + bounds.Height / 2});
+            };
+            for (const auto& document : {a, b, a, b}) {
+                Access::PointerBegin(source.window, point(Access::View(source.window, document->id)));
+                tabs.SelectedItem(Access::Binding(source.window, document->id)->item);
+                expect(Access::Documents(source.window).Active() == document);
+                expect(tabs.CanTearOutTabs());
+                // Selection can route the release to XAML instead. A new native
+                // move must use its own pointer origin even without PointerEnd.
+                Access::PointerBegin(source.window, point(root.FindName(L"TitleDragArea").as<FrameworkElement>()));
+                expect(!tabs.CanTearOutTabs()) << "a previous tab press cannot own a later caption move";
+                expect(Access::Documents(source.window).Items().size() == 2_u);
+                Access::PointerEnd(source.window);
+                Pump([&] { return tabs.CanTearOutTabs(); });
+            }
+        };
         "caption gestures after tab selection cannot enter the native tab tear out loop"_test = [] {
             OwnedWindow source(App()->CreateMainWindow());
             for (int i = 0; i < 10; ++i) Access::New(source.window);

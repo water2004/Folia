@@ -87,6 +87,9 @@ selection cannot turn a later window drag into a tab drag. Idle eligibility is
 restored after the native move ends, preserving external drop destinations;
 queued restoration cannot re-arm a newer pointer gesture. No mouse input or
 window procedure is synthesized or replaced.
+Every native move entry rechecks its own pointer origin before TabView handles
+the move. A tab-selection click can finish through XAML without delivering a
+non-client release, so its recorded press cannot suppress a later origin check.
 The corresponding SDK sources are
 [TabView](https://github.com/microsoft/microsoft-ui-xaml/blob/693f472aeaf89c6dff66256ee6fcd453e5d553b8/controls/dev/TabView/TabView.cpp)
 and [TabViewListView](https://github.com/microsoft/microsoft-ui-xaml/blob/693f472aeaf89c6dff66256ee6fcd453e5d553b8/controls/dev/TabView/TabViewListView.cpp).
