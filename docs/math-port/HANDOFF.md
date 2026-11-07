@@ -12,8 +12,8 @@
 - 进度改为 Blocks/Inlines/Indexes 真实阶段（长段落物理行及行内扫描均可进度/取消），未知工作量显示 indeterminate。数学遍历不能在 WaitForIdle 前完成；首次显示通知返回后才撤进度。中央提示绑定实际状态。没有按有无公式分流或更改块树编辑职责。
 - 验证：`build/large-document-core-accepted.log` **777 项/500849 断言全过**；最终 `large-document-platform-accepted.log` **95 项/9099568 断言全过**，包括 move、区间访问、scalar query 对照。Debug 最终 `large-document-ui-build.log` 成功。native 大段落正式测试含 loading **7项55断言**过：Debug约16秒，投影752ms、DWrite1058ms，进程工作集624MB/峰651MB（测试宿主，非安装版实测）。最终 interval 查询/owner 收集按 run 做，避免首屏为同一 owner 扫描千万次。
 - 应用回归已过：document_reload5/61、inline_presentation_paths10/419（各另loading5/26）；completion_layout2/1056重跑过，首次未标记断言有2次失败，现基准先等两个块排版完成以消除2ms帧预算敏感性，此fixture微调尚未复测。真实窗口10MB用例按用户先交付Release的新安排暂缓，未保留未验证的窗口测试源码，不宣称实际UI已验收。
-- **用户新决定**：DirectWrite 整段布局后面再优化，现在先构建 Release 供本人测试。暂停进一步性能改造/额外回归，构建 `build_msi.ps1 -Version 0.7.0 -SkipDependencySetup`（含既有启动/正常关闭检查），日志 `build/folia-070-large-document-msi.log`，句柄见最新工具；完成后核对 MSI 版本/hash 并交付。不要打开用户原文件，不要自行发布 GitHub Release 或安装。编译≤4，无 agents/CUA。
-- 已提交 text-only serializer **f7daeda4**、mapping **488e2296**、render runs **05934a01**；load progress/公共追加路径与本 checkpoint 同批提交。基线 bb8337d2；未推送。MSI 构建 session **37242**；结束前用最终 MSI 状态替换此构建记录。
+- **用户新决定/当前交付**：DirectWrite 整段布局后面再优化，先给本人测试 Release。已从 **08fe83ce** 构建 `build/installer/bin/Folia-0.7.0-x64.msi`，**55630024 字节**，MSI/EXE 均核实 **0.7.0**，真实启动/正常关闭 exit0。SHA256 **204fd6a29e76a57f4cac5260dc744a8d4a883543a20ce0a2c2df7c51e82c4597**，邻接 `.sha256` 已同步；记录 `build/folia-070-large-document-verification.json`，构建日志 `build/folia-070-large-document-msi.log`。只有既有同版本升级 ICE61 警告。
+- 已提交 text-only serializer **f7daeda4**、mapping **488e2296**、render runs **05934a01**、load progress/公共追加 **08fe83ce**。本 checkpoint 另行提交；**未安装、未推送、未发布 GitHub Release**。无活跃构建/测试/agent/CUA 句柄；编译始终≤4。停止点为交付上述 MSI 等用户手测反馈；以后若继续性能任务，先确认真实窗口大段落打开/交互，再处理 DirectWrite 大段布局，不重复已过核心/平台审计。不要读取/打开用户原文件，除非其后明确授权。
 
 ## 拆分行间公式与 AI 换行触发（2026-11-06，历史）
 
