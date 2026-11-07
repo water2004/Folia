@@ -470,6 +470,9 @@
     <ClCompile Include="..\markdown\model\inline_cst.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\markdown\parsing\inline_reparse.ixx">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\markdown\model\inline_document.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>

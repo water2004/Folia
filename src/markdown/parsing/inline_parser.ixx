@@ -2374,6 +2374,7 @@ struct Parser {
 
 inline InlineCstTree parse_inline(std::u32string_view source, const InlineParseContext& ctx) {
     record_inline_reparse();
+    record_inline_scanned_characters(source.size());
     inline_parser_detail::Parser parser{source, ctx};
     return parser.parse_all();
 }

@@ -12,6 +12,7 @@ export import folia.markdown.selection;
 export import folia.markdown.inline_document;
 export import folia.markdown.inline_cst;
 export import folia.markdown.inline_parser;
+export import folia.markdown.inline_reparse;
 export import folia.markdown.dialect;
 export import folia.markdown.diagnostics;
 export import folia.markdown.metadata;

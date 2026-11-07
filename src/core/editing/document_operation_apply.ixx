@@ -143,10 +143,14 @@ inline bool apply_text_edit(
         auto candidate=*owner;
         const auto allocation_before=document.next_node_id;
         auto context=document_inline_parse_context(document,[&document]{return allocate_document_node_id(document);});
-        apply_inline_source_edit(edit.container_id, candidate, edit, context);
+        auto applied = apply_inline_source_edit(edit.container_id, candidate, edit, context);
         if (operation.inline_identities) {
-            const auto& identities=forward ? operation.inline_identities->after : operation.inline_identities->before;
-            if (!inline_source_edit_detail::restore_identities(candidate.tree.nodes,identities)) {
+            auto const& patch = *operation.inline_identities;
+            const auto& identities=forward ? patch.after : patch.before;
+            auto restored = patch.preserved
+                ? applied.inline_identities && applied.inline_identities->preserved
+                : inline_source_edit_detail::restore_identities(candidate.tree.nodes,identities);
+            if (!restored) {
                 document.next_node_id=allocation_before;
                 return false;
             }

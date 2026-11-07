@@ -5,6 +5,7 @@ import folia.markdown.ids;
 import folia.markdown.inline_cst;
 import folia.markdown.inline_document;
 import folia.markdown.inline_parser;
+import folia.markdown.inline_reparse;
 import folia.markdown.text_edit;
 
 export namespace folia {
@@ -212,6 +213,13 @@ inline AppliedSourceEdit apply_inline_source_edit(
         throw std::out_of_range("TextEdit range is outside InlineDocument::source");
     }
 
+    if (auto window = plan_inline_reparse(document, edit, parse_context)) {
+        auto removed = document.source.substr(edit.range.start, edit.range.length());
+        apply_text_edit(document.source, edit);
+        apply_inline_reparse(document, std::move(*window));
+        TextEdit inverse{owner_id, {edit.range.start, edit.range.start + edit.replacement.size()}, std::move(removed)};
+        return AppliedSourceEdit{edit, std::move(inverse), InlineIdentityPatch{{}, {}, true}};
+    }
     const auto before_source = document.source;
     const auto before_tree = document.tree;
     const auto removed = before_source.substr(edit.range.start, edit.range.length());

@@ -44,6 +44,7 @@ target_sources(folia_markdown PUBLIC FILE_SET CXX_MODULES FILES
     parsing/html_cst.ixx
     parsing/image_block_promotion.ixx
     parsing/inline_parser.ixx
+    parsing/inline_reparse.ixx
     parsing/link_label.ixx
     parsing/markdown_html.ixx
     parsing/parser.ixx

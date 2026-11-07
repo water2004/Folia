@@ -69,6 +69,9 @@ struct TextEdit {
 struct InlineIdentityPatch {
     std::vector<NodeId> before;
     std::vector<NodeId> after;
+    // A verified lexical edit changes no structural identity. Its history
+    // needs no owner-wide identity arrays, including on replay.
+    bool preserved = false;
 };
 
 struct AppliedSourceEdit {

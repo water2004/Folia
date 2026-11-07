@@ -398,28 +398,52 @@ suite editor_history_tests = [] {
     expect(fatal(bool(link.symbols().links.front().href == "a")));
 };
 
-"node_ids_are_document_owned_monotonic_and_normal_edits_never_scan_the_tree"_test = [] {
+"node_ids_are_document_owned_and_lexical_edits_reuse_identities_without_tree_scans"_test = [] {
     Editor editor("abc");
     const auto parsed_cursor = editor.document().next_node_id;
     expect(fatal(bool(parsed_cursor > 0u)));
 
+    const auto literal_id = first_text(editor).inline_content.tree.nodes.front().id;
     editor.set_selection(caret(first_text(editor), 1));
     reset_core_operation_counters();
     expect(fatal(editor.execute_command(Command::InsertText(U"X"))));
     const auto edited_cursor = editor.document().next_node_id;
-    expect(fatal(bool(edited_cursor > parsed_cursor)));
+    expect(fatal(bool(edited_cursor == parsed_cursor)));
     expect(fatal(bool(read_core_operation_counters().full_document_block_index_scans == 0u)));
 
     reset_core_operation_counters();
     expect(fatal(editor.undo()));
     const auto undone_cursor = editor.document().next_node_id;
-    expect(fatal(bool(undone_cursor > edited_cursor)));
+    expect(fatal(bool(undone_cursor == edited_cursor)));
     expect(fatal(bool(read_core_operation_counters().full_document_block_index_scans == 0u)));
 
     reset_core_operation_counters();
     expect(fatal(editor.redo()));
-    expect(fatal(bool(editor.document().next_node_id > undone_cursor)));
+    expect(fatal(bool(editor.document().next_node_id == undone_cursor)));
+    expect(fatal(bool(first_text(editor).inline_content.tree.nodes.front().id == literal_id)));
     expect(fatal(bool(read_core_operation_counters().full_document_block_index_scans == 0u)));
+    expect(fatal(editor.execute_command(Command{.kind = CommandKind::InsertNewline})));
+    expect(fatal(bool(editor.document().next_node_id > undone_cursor)));
+};
+
+
+"long paragraph literal edits avoid owner-wide parsing and identity history"_test = [] {
+    std::string source;
+    for (int i = 0; i < 10000; ++i) source += "Sample paragraph with words.\n";
+    Editor editor(source);
+    editor.set_selection(caret(first_text(editor), 3));
+    auto verify = [&](auto action) {
+        reset_core_operation_counters();
+        expect(fatal(action()));
+        auto counters = read_core_operation_counters();
+        expect(counters.inline_reparses == 1_u);
+        expect(counters.inline_scanned_characters < 128_u);
+        expect(counters.full_document_parses == 0_u);
+        expect(counters.full_document_serializations == 0_u);
+    };
+    verify([&] { return editor.execute_command(Command::InsertText(U"X")); });
+    verify([&] { return editor.undo(); });
+    verify([&] { return editor.redo(); });
 };
 
 "large_document_text_edits_use_the_validated_block_path_index"_test = [] {

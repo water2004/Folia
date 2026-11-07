@@ -383,13 +383,17 @@ suite inline_cst_tests = [] {
         std::vector<std::u32string> replacements{U"x", U"", U"**", U"\n", U"$", U"\U0001f642"};
         TextEdit edit{NodeId{7}, {start, end}, replacements[random() % replacements.size()]};
         context.next_id = NodeId{10000};
-        auto applied = apply_inline_source_edit(NodeId{7}, document, edit, context);
-        auto expected = parse_inline(document.source, context);
+        auto removed = document.source.substr(edit.range.start, edit.range.length());
+        apply_text_edit(document.source, edit);
+        document.tree = parse_inline(document.source, context);
+        auto expected = document.tree;
+        inline_source_edit_detail::reconcile_nodes(before.nodes, document.tree.nodes, source, document.source, edit);
         scalar(scalar, before.nodes, expected.nodes, source, document.source, edit);
         expect(std::ranges::equal(inline_source_edit_detail::node_identities(document.tree.nodes),
             inline_source_edit_detail::node_identities(expected.nodes)));
         expect(bool(flatten_tokens(document.tree, document.source) == document.source));
-        apply_inline_source_edit(NodeId{7}, document, applied.inverse, context);
+        apply_inline_source_edit(NodeId{7}, document,
+            {NodeId{7}, {edit.range.start, edit.range.start + edit.replacement.size()}, removed}, context);
         expect(bool(document.source == source));
         expect(bool(flatten_tokens(document.tree, document.source) == source));
     }

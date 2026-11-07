@@ -17,6 +17,7 @@ struct CoreOperationCounters {
     std::uint64_t incremental_document_block_index_repairs = 0;
     std::uint64_t full_document_text_projections = 0;
     std::uint64_t inline_reparses = 0;
+    std::uint64_t inline_scanned_characters = 0;
 };
 
 inline thread_local CoreOperationCounters core_operation_counters;
@@ -47,5 +48,8 @@ inline void record_full_document_text_projection() {
     ++core_operation_counters.full_document_text_projections;
 }
 inline void record_inline_reparse() { ++core_operation_counters.inline_reparses; }
+inline void record_inline_scanned_characters(std::size_t count) {
+    core_operation_counters.inline_scanned_characters += count;
+}
 
 } // namespace folia

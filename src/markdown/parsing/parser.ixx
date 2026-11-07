@@ -149,7 +149,8 @@ public:
     };
 
     const ParseInput* input;
-    std::u32string cps;          // text as codepoints (this is the index space)
+    std::u32string owned_source; // UTF-8 input is decoded once; editor fragments already own Unicode source.
+    std::u32string_view cps;
     std::size_t pos = 0;
     std::uint64_t node_counter = 1;
     std::vector<Diagnostic> diagnostics;
@@ -163,10 +164,10 @@ public:
     std::unordered_map<std::uint64_t, Completion> completions;
     std::unordered_map<std::string, LinkDefinition> link_definitions;
 
-    explicit Parser(const ParseInput* in) : input(in) {
-        cps = utf8_to_cps(in->text);
+    explicit Parser(const ParseInput* in) : input(in), owned_source(utf8_to_cps(in->text)), cps(owned_source) {
         // Definitions are collected by the sole block dispatch before inline finalization.
     }
+    Parser(const ParseInput* in, std::u32string_view source) : input(in), cps(source) {}
     Parser(Parser const&) = delete;
     Parser& operator=(Parser const&) = delete;
     Parser(Parser&&) = delete;
@@ -618,7 +619,8 @@ public:
 
 
 // Sole block dispatch loop. Source discovery precedes final inline CSTs.
-std::vector<BlockNode> parse_blocks(std::function<bool(const std::u32string&)> stop=nullptr) {
+std::vector<BlockNode> parse_blocks(std::function<bool(const std::u32string&)> stop=nullptr,
+    std::function<bool(const BlockVec&)> accept_discovered = {}) {
     if (!active_container_frames.empty()) throw std::logic_error("block session already active");
     BlockNode root; root.kind=BlockKind::Document;
     push_container_frame(std::move(root),DocumentFrameState{},{0,0},{0,0});
@@ -684,6 +686,12 @@ std::vector<BlockNode> parse_blocks(std::function<bool(const std::u32string&)> s
     }
     while (active_container_frames.size()>1) close_innermost_frame();
     auto& completed=container_frames[active_container_frames.back()].node;
+    // Structure planning can discard an unchanged discovery result before
+    // constructing inline CSTs. No unfinished tree escapes this parser.
+    if (accept_discovered && !accept_discovered(completed.children)) {
+        active_container_frames.clear();
+        return {};
+    }
     finalize_inline_owners(completed);
     bind_completed_prefixes(completed);
     active_container_frames.clear();
@@ -1430,11 +1438,10 @@ std::optional<BlockNode> try_parse_raw_html_block(const LeafLine& first) {
 
 
 
-    // Physical-source table interruption preflight uses these overloads,
-    // which still examines the root physical line while the frame engine is
-    // being migrated. The table leaf itself uses LeafLineText above.
+    // Physical-source interruption preflight uses a read-only root line view.
+    // The table leaf uses LeafLineText above.
     std::vector<std::pair<std::size_t, std::size_t>> table_cell_segments(
-        const std::u32string& line) const {
+        std::u32string_view line) const {
         std::vector<std::pair<std::size_t, std::size_t>> segments;
         auto first = line.find_first_not_of(U" \t");
         std::size_t start = first != std::u32string::npos && line[first] == U'|' ? first + 1 : 0;
@@ -1449,7 +1456,7 @@ std::optional<BlockNode> try_parse_raw_html_block(const LeafLine& first) {
         return segments;
     }
 
-    std::optional<std::vector<TableAlignment>> parse_table_separator(const std::u32string& line) const {
+    std::optional<std::vector<TableAlignment>> parse_table_separator(std::u32string_view line) const {
         const auto segments = table_cell_segments(line);
         if (segments.empty()) return std::nullopt;
         std::vector<TableAlignment> alignments;
@@ -3812,18 +3819,24 @@ inline ParseOutput parse_text(
     return parse(ParseInput(rev, text, d, std::move(progress)));
 }
 
-inline ParsedBlockFragment parse_block_fragment(
+inline std::optional<ParsedBlockFragment> plan_block_fragment(
     std::u32string_view source,
-    MarkdownDialect dialect = default_dialect(),
+    MarkdownDialect dialect,
+    std::function<bool(const BlockVec&)> accept_discovered,
     std::function<std::optional<InlineLinkDef>(const std::string&)> references_before={},
     std::function<std::optional<InlineLinkDef>(const std::string&)> references_after={}) {
     record_block_fragment_parse();
-    ParseInput input{0, cps_to_utf8(source), std::move(dialect)};
+    ParseInput input{0, {}, std::move(dialect)};
     input.references_before=std::move(references_before);
     input.references_after=std::move(references_after);
-    detail::Parser parser(&input);
+    detail::Parser parser(&input, source);
     ParsedBlockFragment result;
-    result.blocks = parser.parse_blocks(nullptr);
+    bool accepted = false;
+    result.blocks = parser.parse_blocks(nullptr, [&](auto const& blocks) {
+        accepted = accept_discovered(blocks);
+        return accepted;
+    });
+    if (!accepted) return std::nullopt;
     result.source_ranges.reserve(parser.source_ranges.size());
     for (const auto& range : parser.source_ranges) {
         result.source_ranges.push_back({
@@ -3833,6 +3846,15 @@ inline ParsedBlockFragment parse_block_fragment(
         });
     }
     return result;
+}
+
+inline ParsedBlockFragment parse_block_fragment(
+    std::u32string_view source,
+    MarkdownDialect dialect = default_dialect(),
+    std::function<std::optional<InlineLinkDef>(const std::string&)> references_before={},
+    std::function<std::optional<InlineLinkDef>(const std::string&)> references_after={}) {
+    return std::move(*plan_block_fragment(source, std::move(dialect),
+        [](auto const&) { return true; }, std::move(references_before), std::move(references_after)));
 }
 
 } // namespace folia

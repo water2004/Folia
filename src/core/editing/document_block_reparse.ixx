@@ -211,14 +211,12 @@ inline std::optional<BlockReparsePlan> plan_block_reparse(
     const auto is_html_paragraph = current.kind == BlockKind::Paragraph
         && source.starts_with(U"<") && source.find(U'>') != std::u32string::npos;
     if (!is_raw && !is_multiline_paragraph && !is_html_paragraph) return std::nullopt;
-    auto parsed = parse_block_fragment(source, document.dialect);
-    if (is_raw && block_reparse_detail::same_raw_projection(current, parsed.blocks)) {
-        return std::nullopt;
-    }
-    if (!is_raw
-        && !block_reparse_detail::contains_structural_reclassification(parsed.blocks)) {
-        return std::nullopt;
-    }
+    auto planned = plan_block_fragment(source, document.dialect, [&](auto const& blocks) {
+        return is_raw ? !block_reparse_detail::same_raw_projection(current, blocks)
+            : block_reparse_detail::contains_structural_reclassification(blocks);
+    });
+    if (!planned) return std::nullopt;
+    auto parsed = std::move(*planned);
 
     auto target = block_reparse_detail::target_candidate(parsed, target_offset);
     // A character edit may reclassify one direct block, but it is not an
