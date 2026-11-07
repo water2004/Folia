@@ -1086,7 +1086,28 @@ struct Builder {
             }
         };
         attach_source(attach_source, output);
-        return output;
+        // Presentation runs need not mirror every CST leaf. Join only linear,
+        // contiguous source spans with the same style; collapsed entities,
+        // controls and marker ownership retain their individual projections.
+        std::vector<InlineRenderItem> runs;
+        for (auto& item : output) {
+            if (!runs.empty()) {
+                auto& previous = runs.back();
+                if (previous.kind == InlineRenderItem::Kind::Text && item.kind == previous.kind
+                    && !previous.payload && !item.payload && previous.style == item.style
+                    && previous.source_syntax == item.source_syntax
+                    && previous.source_span.container_id == item.source_span.container_id
+                    && previous.source_span.source_range.end == item.source_span.source_range.start
+                    && previous.text.size() == previous.source_span.source_range.length()
+                    && item.text.size() == item.source_span.source_range.length()) {
+                    previous.text.append(item.text);
+                    previous.source_span.source_range.end = item.source_span.source_range.end;
+                    continue;
+                }
+            }
+            runs.push_back(std::move(item));
+        }
+        return runs;
     }
 
     RenderBlock build_block(const BlockNode& b) {

@@ -28,6 +28,20 @@ using namespace boost::ut;
 
 suite render_scalar_projection_tests = [] {
 
+"adjacent linear source text shares one presentation run without merging entities"_test = [] {
+    auto plain = build_model("first\nsecond\nthird");
+    auto const& runs = plain.blocks.front().inline_items;
+    expect(runs.size() == 1_u);
+    expect(runs.front().source_span.source_range.start == 0_u);
+    expect(runs.front().source_span.source_range.end == 18_u);
+    expect(runs.front().text.size() == 18_u);
+    auto entity = build_model("a&amp;b");
+    auto const& expanded = entity.blocks.front().inline_items;
+    expect(expanded.size() == 3_u);
+    expect(bool(expanded[1].text == U"&"));
+    expect(expanded[1].source_span.source_range.length() == 5_u);
+};
+
 "inline_code_display_normalizes_newlines_and_keeps_source_spans"_test = [] {
     struct Case {
         std::string source;

@@ -246,13 +246,13 @@ suite render_incremental_tests = [] {
     expect(fatal(bool((m.blocks[0].child_blocks.size()) == (1u))));
     if (!m.blocks[0].child_blocks.empty()) {
         auto const& items = m.blocks[0].child_blocks[0].inline_items;
-        expect(fatal(bool((items.size()) == (3u))));
-        if (items.size() >= 3) {
-            expect(fatal(bool((items[0].source_span.source_range.start) == (0u))));
-            expect(fatal(bool((items[1].source_span.source_range.start) == (10u))));
-            expect(fatal(bool((items[1].source_span.source_range.end) == (11u))));
-            expect(fatal(bool(items[2].source_span.source_range.start >= items[1].source_span.source_range.end)));
-        }
+        expect(fatal(items.size() == 1_u));
+        expect(items[0].source_span.source_range.start == 0_u);
+        expect(items[0].source_span.source_range.end == 22_u);
+        expect(items[0].text.size() == 22_u);
+        // Joining presentation runs does not collapse the source newline or
+        // shift the second physical line's block-local source offset.
+        expect(bool(items[0].text.substr(11) == U"second line"));
     }
 };
 

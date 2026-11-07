@@ -134,6 +134,7 @@ struct InlineStyle {
     std::optional<std::uint8_t> heading_level;
     std::shared_ptr<const InlinePresentationStyle> presentation;
     static InlineStyle plain() { return {}; }
+    friend bool operator==(InlineStyle const&, InlineStyle const&) = default;
 };
 
 struct MarkerStyle {
