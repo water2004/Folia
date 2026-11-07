@@ -374,7 +374,7 @@
                   <Border x:Name="DocumentLoadingOverlay" Canvas.ZIndex="30" Visibility="Collapsed" Background="{ThemeResource FoliaShellBackgroundBrush}">
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="16">
                         <ProgressRing IsActive="True" Width="24" Height="24"/>
-                        <TextBlock x:Name="DocumentLoadingText" Text="Preparing document…"/>
+                        <TextBlock x:Name="DocumentLoadingText" Text="{Binding Text, ElementName=StatusText}" TextWrapping="Wrap" TextAlignment="Center" Margin="24,0"/>
                     </StackPanel>
                   </Border>
                 </Grid>

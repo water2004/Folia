@@ -85,7 +85,7 @@ namespace winrt::Folia
                 result->math.BeginBlock(source.id.v);
                 block(block, source, width);
                 result->math.EndBlock();
-                if (progress) progress(index + 1, count);
+                if (progress) progress(index, count);
             }
             if (frame.releaseBlocksOutside) frame.releaseBlocksOutside(end, end);
             // Model materialization remains bounded independently of the
@@ -94,6 +94,7 @@ namespace winrt::Folia
         batch.Submit();
         result->math.WaitForIdle(stop);
         if (stop.stop_requested()) throw winrt::hresult_canceled();
+        if (progress) progress(count, count);
         return result;
     }
 

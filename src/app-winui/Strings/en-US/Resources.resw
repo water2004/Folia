@@ -79,6 +79,9 @@
   <data name="StatusOpenCancelled" xml:space="preserve"><value>Open cancelled</value></data>
   <data name="StatusReadingFile" xml:space="preserve"><value>Reading {0}…</value></data>
   <data name="StatusParsingFile" xml:space="preserve"><value>Parsing {0}…</value></data>
+  <data name="StatusParsingInline" xml:space="preserve"><value>Parsing inline syntax in {0}…</value></data>
+  <data name="StatusIndexingDocument" xml:space="preserve"><value>Preparing document data for {0}…</value></data>
+  <data name="StatusBuildingRenderModel" xml:space="preserve"><value>Preparing document display for {0}…</value></data>
   <data name="StatusPreparingMath" xml:space="preserve"><value>Preparing math and layout for {0}…</value></data>
   <data name="StatusOpenedFile" xml:space="preserve"><value>Opened {0}</value></data>
   <data name="StatusReloadedFile" xml:space="preserve"><value>Reloaded {0}</value></data>

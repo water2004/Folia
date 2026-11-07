@@ -4,6 +4,7 @@
 #include "storage/DocumentEncodingService.h"
 
 import folia.core.editor;
+import folia.markdown.parser;
 import folia.core.command;
 import folia.core.render_model;
 import folia.core.search;
@@ -69,7 +70,7 @@ namespace winrt::Folia
 
     struct EditorSession
     {
-        using LoadProgress = std::function<void(std::size_t consumed, std::size_t total)>;
+        using LoadProgress = folia::ParseProgressCallback;
 
         EditorSession();
         ~EditorSession();

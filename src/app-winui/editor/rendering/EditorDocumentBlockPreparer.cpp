@@ -746,8 +746,8 @@ namespace winrt::Folia
         for (auto const& preview : prepared.mermaidPreviews)
             previewHeight += preview.height + 24.0f;
         prepared.height = prepared.textHeight + previewHeight + paddingTop + paddingBottom;
-        for (auto const& position : prepared.display.displayToSource)
-            addOwner(position.container_id);
+        prepared.display.displayToSource.for_each_run(0, prepared.display.displayToSource.size(),
+            [&](auto, auto, auto first, auto) { addOwner(first.container_id); return true; });
         prepared.valid = true;
         mathJax.EndBlock();
         return prepared;

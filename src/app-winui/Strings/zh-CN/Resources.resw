@@ -79,6 +79,9 @@
   <data name="StatusOpenCancelled" xml:space="preserve"><value>已取消打开</value></data>
   <data name="StatusReadingFile" xml:space="preserve"><value>正在读取 {0}…</value></data>
   <data name="StatusParsingFile" xml:space="preserve"><value>正在解析 {0}…</value></data>
+  <data name="StatusParsingInline" xml:space="preserve"><value>正在解析 {0} 的行内语法…</value></data>
+  <data name="StatusIndexingDocument" xml:space="preserve"><value>正在准备 {0} 的文档数据…</value></data>
+  <data name="StatusBuildingRenderModel" xml:space="preserve"><value>正在准备 {0} 的文档显示…</value></data>
   <data name="StatusPreparingMath" xml:space="preserve"><value>正在准备 {0} 的公式与布局…</value></data>
   <data name="StatusOpenedFile" xml:space="preserve"><value>已打开 {0}</value></data>
   <data name="StatusReloadedFile" xml:space="preserve"><value>已重新加载 {0}</value></data>

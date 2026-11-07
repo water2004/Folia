@@ -412,11 +412,13 @@ namespace winrt::Folia
             return layout;
         };
 
-        const auto base = display;
-        const auto baseText = ToWide(base.text);
-        auto indents = FindLogicalIndents(base, baseText);
+        if (!display.displayToSource.contains_kind(EditorDisplayPositionKind::BoundaryDecoration))
+            return build(display);
+        const auto baseText = ToWide(display.text);
+        auto indents = FindLogicalIndents(display, baseText);
         if (indents.empty()) return build(display);
 
+        const auto base = display;
         auto initial = build(base);
         if (!initial) return initial;
         for (auto& indent : indents)

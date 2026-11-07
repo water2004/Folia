@@ -23,32 +23,55 @@ using namespace boost::ut;
 
 suite parser_block_tests = [] {
 
-"top_level_parse_progress_is_monotonic_and_reaches_source_end"_test = [] {
+"parse progress reports structure inline syntax and indexes separately"_test = [] {
     const std::string source =
         "# heading\n\n"
         "> quote\n"
         "> - nested\n\n"
         "paragraph\n";
-    std::vector<std::pair<std::size_t, std::size_t>> reports;
+    std::vector<ParseProgress> reports;
     const auto parsed = parse_text(
         1,
         source,
         default_dialect(),
-        [&](std::size_t consumed, std::size_t total) {
-            reports.emplace_back(consumed, total);
+        [&](ParseProgress progress) {
+            reports.push_back(progress);
         });
 
     expect(fatal(!reports.empty()));
     const auto expectedTotal = utf8_to_cps(source).size();
     std::size_t previous = 0;
-    for (auto [consumed, total] : reports) {
-        expect(total == expectedTotal);
-        expect(consumed >= previous);
-        expect(consumed <= total);
-        previous = consumed;
+    auto phase = ParsePhase::Blocks;
+    bool inlines = false;
+    for (auto report : reports) {
+        expect(report.phase >= phase);
+        if (report.phase != phase) previous = 0;
+        phase = report.phase;
+        if (phase == ParsePhase::Blocks) expect(report.total == expectedTotal);
+        if (phase == ParsePhase::Inlines) inlines = true;
+        expect(report.completed >= previous);
+        expect(report.completed <= report.total);
+        previous = report.completed;
     }
-    expect(previous == expectedTotal);
+    expect(inlines);
+    expect(phase == ParsePhase::Indexes);
     expect(serialize_markdown(parsed.document) == source);
+};
+
+"parse progress can cancel within a long paragraph before its block is complete"_test = [] {
+    struct Cancelled {};
+    std::string source;
+    while (source.size() < 65536) source += "ordinary repeated paragraph content\n";
+    for (auto phase : {ParsePhase::Blocks, ParsePhase::Inlines}) {
+        bool stopped = false;
+        try {
+            parse_text(1, source, default_dialect(), [&](ParseProgress progress) {
+                if (progress.phase == phase && progress.completed > 0 && progress.completed < progress.total)
+                    throw Cancelled{};
+            });
+        } catch (Cancelled const&) { stopped = true; }
+        expect(stopped);
+    }
 };
 
 "block_kind_payload_copies_with_value_semantics"_test = [] {

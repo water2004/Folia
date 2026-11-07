@@ -44,6 +44,8 @@ struct InlineParseContext {
     NodeId next_id{1};
     std::function<NodeId()> allocate_id;
     std::function<std::optional<InlineLinkDef>(const std::string&)> resolve_link_label;
+    // Optional load-time observation/cancellation, not editor state.
+    std::function<void(std::size_t)> report_progress;
 };
 
 struct InlineDocument {

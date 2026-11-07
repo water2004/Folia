@@ -41,6 +41,7 @@ struct Parser {
     InlineParseContext ctx;
     std::uint64_t counter;
     bool suppress_bare_autolinks = false;
+    std::size_t next_progress = 8192;
 
     explicit Parser(std::u32string_view s, const InlineParseContext& c)
         : src(s), limit(s.size()), ctx(c), counter(c.next_id.v) {}
@@ -50,7 +51,13 @@ struct Parser {
     bool eof() const { return pos >= limit; }
     char32_t peek(std::size_t k = 0) const { return pos + k < limit ? src[pos + k] : char32_t{0}; }
     char32_t ch(std::size_t i) const { return i < limit ? src[i] : char32_t{0}; }
-    void advance(std::size_t n = 1) { pos = (std::min)(pos + n, limit); }
+    void advance(std::size_t n = 1) {
+        pos = (std::min)(pos + n, limit);
+        if (ctx.report_progress && pos >= next_progress) {
+            ctx.report_progress(pos);
+            next_progress = pos + 8192;
+        }
+    }
 
     static bool is_line_ending(char32_t value) {
         return value == U'\r' || value == U'\n';

@@ -34,6 +34,7 @@ namespace
         std::atomic_size_t wrongThread{0};
         bool finished = false;
         bool changed = false;
+        bool progressVisible = false;
         bool timerStarted = false;
         winrt::hstring status;
         std::filesystem::path path;
@@ -71,9 +72,10 @@ namespace
                 [this](bool active, std::optional<double>, bool)
                 {
                     CheckThread();
+                    progressVisible = active;
                     if (!active) finished = true;
                 },
-                [this] { CheckThread(); changed = true; }, {}, {}, {}});
+                [this] { CheckThread(); expect(progressVisible); changed = true; }, {}, {}, {}});
         }
 
         ~LoadingFixture()

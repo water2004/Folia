@@ -133,9 +133,11 @@ namespace winrt::Folia
         return result;
     }
 
-    void AppendDisplayText(DisplayInlineText& display, std::u32string const& text, folia::TextSpan sourceSpan, folia::InlineStyle style, bool marker)
+    void AppendDisplayText(DisplayInlineText& display, std::u32string_view text, folia::TextSpan sourceSpan, folia::InlineStyle style, bool marker)
     {
-        auto start = static_cast<UINT32>(folia::utf16_len(display.text));
+        // During construction there is one mapping per UTF-16 unit. The final
+        // caret endpoint is appended only when the complete display is returned.
+        auto start = static_cast<UINT32>(display.displayToSource.size());
         display.text += text;
         auto length = static_cast<UINT32>(folia::utf16_len(text));
         for (std::size_t index = 0; index < text.size(); ++index)
@@ -169,7 +171,7 @@ namespace winrt::Folia
         folia::InlineStyle style,
         EditorDisplayPositionKind kind)
     {
-        auto start = static_cast<UINT32>(folia::utf16_len(display.text));
+        auto start = static_cast<UINT32>(display.displayToSource.size());
         display.text += text;
         auto length = folia::utf16_len(text);
         display.displayToSource.insert(
@@ -181,7 +183,7 @@ namespace winrt::Folia
 
     void MergeDisplayText(DisplayInlineText& target, DisplayInlineText source)
     {
-        auto offset = static_cast<UINT32>(folia::utf16_len(target.text));
+        auto offset = static_cast<UINT32>(target.displayToSource.size());
         auto characterCount = folia::utf16_len(source.text);
         target.text += source.text;
         if (source.displayToSource.size() > characterCount) source.displayToSource.resize(characterCount);
@@ -243,7 +245,7 @@ namespace winrt::Folia
     void AppendSourceText(DisplayInlineText& display, std::u32string_view sourceText, folia::TextSpan sourceSpan, folia::InlineStyle style, bool marker)
     {
         auto length = (std::min)(sourceSpan.source_range.length(), sourceText.size());
-        AppendDisplayText(display, std::u32string(sourceText.substr(0, length)), sourceSpan, style, marker);
+        AppendDisplayText(display, sourceText.substr(0, length), sourceSpan, style, marker);
     }
 
     static void AppendInlineSource(DisplayInlineText& display, folia::InlineRenderItem const& item)
@@ -279,7 +281,7 @@ namespace winrt::Folia
         std::vector<std::size_t> const& sourceOffsets,
         folia::InlineStyle style)
     {
-        auto start = static_cast<UINT32>(folia::utf16_len(display.text));
+        auto start = static_cast<UINT32>(display.displayToSource.size());
         display.text.append(text);
         for (std::size_t index = 0; index < text.size(); ++index)
         {
@@ -305,7 +307,7 @@ namespace winrt::Folia
 
     void AppendMathPlaceholder(DisplayInlineText& display, std::size_t count, folia::TextPosition sourcePosition)
     {
-        auto start = static_cast<UINT32>(folia::utf16_len(display.text));
+        auto start = static_cast<UINT32>(display.displayToSource.size());
         display.text.append(count, U'\u2007');
         display.displayToSource.insert(
             display.displayToSource.end(),
@@ -341,7 +343,7 @@ namespace winrt::Folia
                 // own line even when the remaining width is sufficient.
                 AppendGeneratedText(display, U"\u200B", {sourceSpan.container_id, mappedOffset, folia::TextAffinity::Downstream}, style);
             }
-            auto start = static_cast<UINT32>(folia::utf16_len(display.text));
+            auto start = static_cast<UINT32>(display.displayToSource.size());
             display.text.push_back(U'\uFFFC');
             display.displayToSource.push_back({
                 sourceSpan.container_id,
@@ -430,7 +432,7 @@ namespace winrt::Folia
                 if (CaretTouchesSpan(caret, item.source_span)) AppendInlineSource(display, item);
                 else
                 {
-                    auto displayStart = static_cast<std::uint32_t>(folia::utf16_len(display.text));
+                    auto displayStart = static_cast<std::uint32_t>(display.displayToSource.size());
                     AppendGeneratedText(display, U"\uFFFC", {item.source_span.container_id, item.source_span.source_range.start, folia::TextAffinity::Downstream}, item.style);
                     display.imageOverlays.push_back(DisplayInlineText::ImageOverlay{
                         displayStart,
@@ -508,7 +510,7 @@ namespace winrt::Folia
             }
             if (item.kind == folia::InlineRenderItem::Kind::FootnoteReference)
             {
-                auto displayStart = static_cast<std::uint32_t>(folia::utf16_len(display.text));
+                auto displayStart = static_cast<std::uint32_t>(display.displayToSource.size());
                 auto ordinal = item.special().display_text.empty()
                     ? folia::utf8_to_cps(item.special().semantic().footnote_label)
                     : item.special().display_text;
@@ -555,7 +557,7 @@ namespace winrt::Folia
                             item.style,
                             EditorDisplayPositionKind::BoundaryDecoration);
                     }
-                    auto displayStart = static_cast<std::uint32_t>(folia::utf16_len(display.text));
+                    auto displayStart = static_cast<std::uint32_t>(display.displayToSource.size());
                     AppendGeneratedText(
                         display,
                         U"\uFFFC",
@@ -577,7 +579,7 @@ namespace winrt::Folia
                 }
                 auto const& markerText = item.special().display_text.empty()
                     ? item.text : item.special().display_text;
-                auto displayStart = static_cast<std::uint32_t>(folia::utf16_len(display.text));
+                auto displayStart = static_cast<std::uint32_t>(display.displayToSource.size());
                 AppendGeneratedText(
                     display,
                     markerText,
@@ -612,7 +614,8 @@ namespace winrt::Folia
             else
             {
                 auto rangeStart = display.ranges.size();
-                auto text = InlineText(item);
+                auto const& text = item.kind == folia::InlineRenderItem::Kind::Marker
+                    && !item.special().display_text.empty() ? item.special().display_text : item.text;
                 // An explicit empty editable text item owns a source row even
                 // without glyphs. Indentation and padding never supply it.
                 if (item.kind == folia::InlineRenderItem::Kind::Text && text.empty())
@@ -631,6 +634,24 @@ namespace winrt::Folia
         }
         if (!display.text.empty() && display.text.back() == U'\n')
             AppendGeneratedText(display, U"\u200B", sourceEnd, folia::InlineStyle::plain(), sourceEnd.kind);
+        // CST boundaries do not need duplicate DirectWrite style runs. Keep
+        // controls distinct, and merge only adjacent text with equal styling.
+        std::vector<InlineStyleRange> ranges;
+        for (auto& range : display.ranges) {
+            if (!ranges.empty()) {
+                auto& previous = ranges.back();
+                if (!previous.marker && !range.marker
+                    && previous.icon == SyntaxIcon::None && range.icon == SyntaxIcon::None
+                    && !previous.footnoteControl && !range.footnoteControl
+                    && previous.completion == range.completion && previous.syntax == range.syntax
+                    && previous.style == range.style && previous.start + previous.length == range.start) {
+                    previous.length += range.length;
+                    continue;
+                }
+            }
+            ranges.push_back(std::move(range));
+        }
+        display.ranges = std::move(ranges);
         display.displayToSource.push_back(sourceEnd);
         return display;
     }

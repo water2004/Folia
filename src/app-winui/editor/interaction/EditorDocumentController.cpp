@@ -420,6 +420,9 @@ namespace winrt::Folia
         std::exception_ptr loadFailure;
         std::optional<EditorSession> loaded;
         folia::platform::reload::DocumentContentFingerprint loadedFingerprint;
+        auto loadTheme = state->renderer->Theme();
+        auto loadThemeRevision = state->renderer->CaptureMathPreparationContext().themeRevision;
+        auto fileName = file.Name();
         co_await winrt::resume_background();
         try
         {
@@ -428,7 +431,9 @@ namespace winrt::Folia
                 requestedEncoding
                     ? std::optional<std::string_view>{ *requestedEncoding }
                     : std::nullopt);
+            std::vector<std::uint8_t>{}.swap(bytes);
             loaded.emplace();
+            loaded->SetTheme(loadTheme);
             loaded->Open(
                 file,
                 winrt::to_hstring(decoded.utf8),
@@ -439,27 +444,37 @@ namespace winrt::Folia
                 loadTicket,
                 loadStop,
                 dispatcher,
+                fileName,
                 reportedPercent,
                 progressActive](
-                std::size_t consumed,
-                std::size_t total)
+                folia::ParseProgress progress)
             {
                 if (loadStop.stop_requested()) throw winrt::hresult_canceled();
                 if (!progressActive->load()) return;
-                auto percent = total == 0
-                    ? std::size_t{100}
-                    : (std::min)(std::size_t{100}, consumed * 100 / total);
+                auto percent = progress.total == 0 ? std::size_t{0}
+                    : (std::min)(std::size_t{100}, progress.completed * 100 / progress.total);
+                auto report = static_cast<std::size_t>(progress.phase) * 101 + percent;
                 auto previous = reportedPercent->load();
-                while (percent > previous
-                    && !reportedPercent->compare_exchange_weak(previous, percent)) {}
-                if (percent <= previous) return;
-                dispatcher.TryEnqueue([state, generation, loadTicket, percent, progressActive]
+                while (report > previous
+                    && !reportedPercent->compare_exchange_weak(previous, report)) {}
+                if (report <= previous) return;
+                dispatcher.TryEnqueue([state, generation, loadTicket, percent, progress, progressActive, fileName]
                 {
                     if (!progressActive->load()
                         || !Active(state, generation)
                         || state->loadSerial.load() != loadTicket
                         || !state->setProgress) return;
-                    state->setProgress(true, static_cast<double>(percent) / 100.0, true);
+                    if (state->setStatus) {
+                        auto key = L"StatusParsingFile";
+                        switch (progress.phase) {
+                        case folia::ParsePhase::Inlines: key = L"StatusParsingInline"; break;
+                        case folia::ParsePhase::Indexes: key = L"StatusIndexingDocument"; break;
+                        default: break;
+                        }
+                        state->setStatus(LocalizeFormat(key, {fileName}));
+                    }
+                    state->setProgress(true, progress.total
+                        ? std::optional{static_cast<double>(percent) / 100.0} : std::nullopt, true);
                 });
             }, requestedEncoding.has_value());
             // Compare subsequent edits with the loaded editor representation,
@@ -507,20 +522,24 @@ namespace winrt::Folia
             co_await winrt::resume_background();
             try
             {
-                loaded->SetTheme(context.theme);
+                if (context.themeRevision != loadThemeRevision) {
+                    loaded->SetTheme(context.theme);
+                    loadThemeRevision = context.themeRevision;
+                }
                 preparation = EditorSurfaceRenderer::PrepareMath(
                     loaded->RenderFrame(), context, loadStop,
                     [state, generation, loadTicket, dispatcher, mathProgressActive, mathPercent]
                     (std::size_t completed, std::size_t total)
                     {
-                        auto percent = total == 0 ? std::size_t{100}
+                        auto percent = total == 0 ? std::size_t{0}
                             : (std::min)(std::size_t{100}, completed * 100 / total);
                         if (mathPercent->exchange(percent) == percent) return;
-                        dispatcher.TryEnqueue([state, generation, loadTicket, mathProgressActive, percent]
+                        dispatcher.TryEnqueue([state, generation, loadTicket, mathProgressActive, percent, total]
                         {
                             if (!mathProgressActive->load() || !Active(state, generation)
                                 || state->loadSerial.load() != loadTicket || !state->setProgress) return;
-                            state->setProgress(true, static_cast<double>(percent) / 100.0, true);
+                            state->setProgress(true, total
+                                ? std::optional{static_cast<double>(percent) / 100.0} : std::nullopt, true);
                         });
                     });
             }
@@ -543,6 +562,8 @@ namespace winrt::Folia
         }
         auto versionAfterParse = folia::platform::reload::query_watched_file_version(
             std::filesystem::path(file.Path().c_str()));
+        if (state->setStatus) state->setStatus(LocalizeFormat(L"StatusBuildingRenderModel", {file.Name()}));
+        if (state->setProgress) state->setProgress(true, std::nullopt, true);
         *state->session = std::move(*loaded);
         ++state->documentSerial;
         state->savedContentState = state->session->ContentState();
@@ -558,9 +579,9 @@ namespace winrt::Folia
         // UI notifications synchronously query IsLoading and may render the
         // replacement document. Publish the completed state before notifying.
         loadingGuard.Complete();
-        if (state->setProgress) state->setProgress(false, std::nullopt, false);
         if (state->textInput) state->textInput->NotifyTextChanged();
         if (state->documentChanged) state->documentChanged();
+        if (state->setProgress) state->setProgress(false, std::nullopt, false);
         if (state->setExternalChange) state->setExternalChange(false, false);
         StartWatching(state, generation);
         if (versionAfterParse != readVersion) QueueReloadCheck(state, generation);

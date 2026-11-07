@@ -32,18 +32,23 @@ suite completion_layout_tests = [] {
                 frame.selection, 180, 1, 0, 0, 0, false);
             (void)pass.Prepare();
         };
-        prepare(); auto baseline = document->blocks.front().height;
+        prepare();
+        // The viewport preparation pass can yield after its first block.
+        // Establish the untouched block's cache before comparing its identity.
+        for (int frameIndex = 0; frameIndex < 8 && !document->blocks.back().layout; ++frameIndex) prepare();
+        expect(fatal(document->blocks.back().layout != nullptr));
+        auto baseline = document->blocks.front().height;
         auto untouched = document->blocks.back().layout.Get();
         frame.completion = winrt::Folia::detail::EditorCompletionPreview{frame.selection.active,
             U" generated text that must wrap to several lines at this narrow width", 1};
-        prepare(); expect(document->blocks.front().height > baseline);
-        expect(document->blocks.back().layout.Get() == untouched);
+        prepare(); expect(document->blocks.front().height > baseline) << "generated content increases height";
+        expect(document->blocks.back().layout.Get() == untouched) << "unaffected layout reused after suggestion";
         frame.completion = winrt::Folia::detail::EditorCompletionPreview{frame.selection.active, U" hi", 2};
         prepare(); expect(document->blocks.front().display.text.find(U"generated") == std::u32string::npos);
         frame.completion.reset(); prepare();
-        expect(document->blocks.front().height == baseline);
+        expect(document->blocks.front().height == baseline) << "original height restored";
         expect(std::ranges::none_of(document->blocks.front().display.ranges, [](auto const& range) { return range.completion; }));
-        expect(document->blocks.back().layout.Get() == untouched);
+        expect(document->blocks.back().layout.Get() == untouched) << "unaffected layout reused after dismissal";
     };
     "completion layout shares native flow and theme brush across editable containers"_test = [] {
         for (auto theme : {folia::Theme::Light, folia::Theme::Dark}) {

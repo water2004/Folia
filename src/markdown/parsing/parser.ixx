@@ -52,7 +52,13 @@ import folia.markdown.text_edit;
 
 export namespace folia {
 
-using ParseProgressCallback = std::function<void(std::size_t consumed, std::size_t total)>;
+enum class ParsePhase { Blocks, Inlines, Indexes };
+struct ParseProgress {
+    ParsePhase phase;
+    std::size_t completed;
+    std::size_t total; // zero means work whose extent is not yet known
+};
+using ParseProgressCallback = std::function<void(ParseProgress)>;
 
 struct ParseInput {
     std::uint64_t revision = 1;
@@ -417,7 +423,7 @@ public:
         pos = (pos + n > cps.size()) ? cps.size() : pos + n;
     }
     void report_progress() const {
-        if (input->progress) input->progress((std::min)(pos, cps.size()), cps.size());
+        if (input->progress) input->progress({ParsePhase::Blocks, (std::min)(pos, cps.size()), cps.size()});
     }
     char32_t ch_at(std::size_t i) const { return (i < cps.size()) ? cps[i] : 0; }
     void skip_ws_inline() { while (peek1() == ' ' || peek1() == '\t') advance(); }
@@ -1991,15 +1997,30 @@ std::optional<BlockNode> try_parse_raw_html_block(const LeafLine& first) {
     // Load-time finalization only: block/source discovery and definition
     // registration finish before the sole inline CST parse for each owner.
     void finalize_inline_owners(BlockNode& root) {
+        std::size_t total = 0;
+        walk_blocks(root,[&](BlockNode& block) {
+            if (auto* document=editable_inline_document(block)) total += document->source.size();
+        });
+        std::size_t completed = 0;
+        if (input->progress) input->progress({ParsePhase::Inlines, 0, total});
         walk_blocks(root,[&](BlockNode& block) {
             auto* document=editable_inline_document(block);
             if (!document) return;
-            reparse_inline_document(*document,inline_parse_context());
+            auto context = inline_parse_context();
+            auto source_size = document->source.size();
+            std::size_t observed = 0;
+            if (input->progress) context.report_progress = [&](std::size_t offset) {
+                observed = (std::max)(observed, (std::min)(offset, source_size));
+                input->progress({ParsePhase::Inlines, completed + observed, total});
+            };
+            reparse_inline_document(*document,context);
             if (block.kind==BlockKind::Heading) {
                 block.ensure_text_special().slug=generate_slug(
                     cps_to_utf8(trim_cps_(inline_visible_text(*document))),{});
             }
+            completed += document->source.size();
             if (block.kind==BlockKind::Paragraph) promote_image_paragraph(block);
+            if (input->progress) input->progress({ParsePhase::Inlines, completed, total});
         });
     }
 
@@ -3641,6 +3662,7 @@ inline void Parser::accept_leaf_line(LeafLine const& offered) {
     pos=source_end;
     ++engine_physical_line;
     leaf_line_cache.pop_front(); // Preserve non-mutating future lookahead offers.
+    report_progress();
 }
 
 inline void Parser::accept_leaf_prefix(LeafLine const& offered,std::size_t content_end) {
@@ -3742,6 +3764,7 @@ inline ParseOutput parse(const ParseInput& input) {
     record_full_document_parse();
     detail::Parser p(&input);
     auto blocks = p.parse_blocks(nullptr);
+    if (input.progress) input.progress({ParsePhase::Indexes, 0, 0});
     EditorDocument doc;
     doc.root.id = NodeId(p.node_counter++);
     doc.next_node_id = p.node_counter;
