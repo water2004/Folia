@@ -8,6 +8,26 @@ using namespace folia::serializer_detail;
 using namespace boost::ut;
 
 suite serializer_event_writer_tests = [] {
+    "text only emission preserves prefixes without building coordinate maps"_test = [] {
+        std::u32string source = U"first\nsecond\r\n\U0001f600";
+        ContainerSource prefixes;
+        SerializerEventWriter writer;
+        SerializerPrefixPolicy quote;
+        quote.rule = SerializerPrefixRule::BlockQuote;
+        writer.begin_prefix_scope(NodeId{2}, prefixes, quote);
+        writer.source_span(NodeId{1}, source);
+        writer.end_prefix_scope(NodeId{2});
+        SerializerPlanArena arena;
+        SerializerLinePlanner planner(writer, arena);
+        auto lines = planner.build();
+        auto projected = emit_serializer_lines(arena, lines, writer.events());
+        auto text = emit_serializer_lines(arena, lines, writer.events(), false);
+        expect(bool(text.text == projected.text));
+        expect(!projected.source_maps.empty());
+        expect(text.source_maps.empty());
+        expect(text.syntax_anchors.empty());
+    };
+
     "nested_prefix_eol_keeps_source_anchor_on_body_suffix"_test = [] {
         std::u32string source = U"body";
         ContainerSource outer_source;

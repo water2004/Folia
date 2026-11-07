@@ -337,7 +337,7 @@ public:
         map.source_to_serialized[source_offset] = output_offset;
         map.mapped[source_offset] = true;
     }
-    std::span<const SerializerOwnerMap> maps() const noexcept { return maps_; }
+    std::span<SerializerOwnerMap> maps() noexcept { return maps_; }
 private:
     SerializerOwnerMap& ensure_atomic(NodeId owner) {
         const auto found = indices_.find(owner.v);
@@ -1043,7 +1043,8 @@ struct SerializerEmission {
 inline SerializerEmission emit_serializer_lines(
     SerializerPlanArena const& plan,
     std::span<const SerializerLineRecordId> output_lines,
-    std::span<const SerializerEvent> events) {
+    std::span<const SerializerEvent> events,
+    bool source_mappings = true) {
     SerializerEmission result;
     SerializerOwnerMapIndex owner_maps;
     struct PendingRope { SerializerRopeId id; };
@@ -1069,11 +1070,11 @@ inline SerializerEmission emit_serializer_lines(
                 continue;
             }
             if (node.kind == SerializerRopeKind::SyntaxAnchor) {
-                result.syntax_anchors.push_back({node.anchor, result.text.size()});
+                if (source_mappings) result.syntax_anchors.push_back({node.anchor, result.text.size()});
                 continue;
             }
             if (node.kind == SerializerRopeKind::AtomicMapBoundary) {
-                owner_maps.atomic_boundary(node.map_owner, node.map_end_boundary, result.text.size());
+                if (source_mappings) owner_maps.atomic_boundary(node.map_owner, node.map_end_boundary, result.text.size());
                 continue;
             }
             if (node.event >= events.size()) continue;
@@ -1088,7 +1089,7 @@ inline SerializerEmission emit_serializer_lines(
 
             const auto begin = (std::min)(node.text_begin, event.source->size());
             const auto end = (std::clamp)(node.text_end, begin, event.source->size());
-            if (event.map_rule == SerializerMapRule::AtomicEndpoints) {
+            if (!source_mappings || event.map_rule == SerializerMapRule::AtomicEndpoints) {
                 result.text.append(*event.source, begin, end - begin);
             } else {
                 for (std::size_t source_offset = begin; source_offset <= end; ++source_offset) {
@@ -1107,8 +1108,8 @@ inline SerializerEmission emit_serializer_lines(
         emit_rope(line.ending);
     }
     result.source_maps.reserve(owner_maps.maps().size());
-    for (const auto& map : owner_maps.maps()) {
-        result.source_maps.push_back({map.owner, map.source_to_serialized});
+    for (auto& map : owner_maps.maps()) {
+        result.source_maps.push_back({map.owner, std::move(map.source_to_serialized)});
     }
     return result;
 }

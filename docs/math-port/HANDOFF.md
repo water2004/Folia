@@ -4,7 +4,16 @@
 
 - 2026-11-07：旧 QuickJS 源码、应用脚本和旧打包工具已移除。`tools/mathjax-bundle/` 的 `entry.cjs` 和锁文件继续作为原生数学构建及对照工具的固定输入。Release 启动、WiX 清单和锁定对照配置加载已验证。
 
-## 当前 checkpoint（2026-11-06，拆分行间公式与 AI 换行触发）
+## 当前 checkpoint（2026-11-08，10 MB 连续段落加载）
+
+- 用户文件 `C:/Users/think book/Downloads/sample-10mb.md` 仅查元数据（10485760 字节），未读取内容或用 Folia 打开。用户提供内容为无空行重复英文，已用相同结构自建测试；原文件继续不要打开。
+- 根因：EditorContentPreparation 每次追加都 utf16_len(已累积文本)，导致长段落平方增长；EditorDisplayMapping 每 UTF16 单元 32 字节且布局/interaction 复制。已改公共追加取构建中 mapping.size，平台 mapping 用常量/线性区间存储、保持值语义与同一 source 坐标；CreateFlow 无缩进不再复制整个 display，连续普通文字合并相同 style ranges，控件边界保留。
+- 同轮：纯文本序列化复用同一 visitor/planner，但不生成坐标映射；投影仍有完整映射，转出时 move 避免再复制。加载主题先于 Open，未变化不再重建 render model。原始 bytes 解码后释放。
+- 进度改为 Blocks/Inlines/Indexes 真实阶段（长段落物理行及行内扫描均可进度/取消），未知工作量显示 indeterminate。数学遍历不能在 WaitForIdle 前完成；首次显示通知返回后才撤进度。中央提示绑定实际状态。没有按有无公式分流或更改块树编辑职责。
+- 验证：`build/large-document-core-accepted.log` **777 项/500849 断言全过**，包含纯文本/投影相等、阶段单调/长段落取消、source span 精确性。`build/large-document-platform-final.log` 整套平台测试全过，包含随机映射对照 3000 步/逾千万断言；其后补 mapping move/contains_kind，待重验。自建10MB已走通，但后续又合并 render text runs、去掉叶文本复制，需最终重测，不沿用中间836MB/761MB结果。
+- 当前构建：`build/large-document-debug-accepted.log`，运行 session **31596**；完成后跑 test_large_document_loading、document_loading/reload、inline_presentation_paths/completion_layout，再验证最终平台。编译≤4，无 agents/CUA。正按 serializer、mapping、render runs、load progress 分批本地提交；基线 bb8337d2。未构建新 MSI、未安装或推送。结束前替换运行状态与最终数字。
+
+## 拆分行间公式与 AI 换行触发（2026-11-06，历史）
 
 - 用户复现顺序：在一块 `\[ … \]` 中途加入 `\]`，再到后半段前的空行补 `\[`。块内 CST 已识别提前结束，但旧块树仍把后半段当作不可编辑的错误尾部。现在通过局部片段重解析拆分；独立开符可使用相邻段落中已有的闭符还原公式。操作保留源文、引用前缀和撤销事务，无全文重解析。
 - 正常换行现在触发 AI 调度，Tab 接受失败也不会变成缩进。核心全量 774 项、WinUI 7 项 127 断言通过（包含两种模式和模拟服务），Debug 已构建。日志 `build/edit-split-math-{core,debug,winui}-final.log`。

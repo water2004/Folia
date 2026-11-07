@@ -105,7 +105,8 @@ inline SerializedMarkdownProjection to_public_projection(
 // Serialize an already-structured Markdown fragment without treating it as a
 // complete-document save. Clipboard copy and local block reparse use this path.
 inline std::u32string serialize_markdown_fragment(BlockVec const& blocks) {
-    auto emission = serializer_detail::serialize_blocks(blocks);
+    auto emission = serializer_detail::serialize_blocks(blocks, 0,
+        (std::numeric_limits<std::size_t>::max)(), false);
     return std::move(emission.text);
 }
 
@@ -130,7 +131,7 @@ inline SerializedMarkdownProjection serialize_markdown_projection(
 }
 
 inline std::u32string serialize_markdown_cps(EditorDocument const& document) {
-    return serialize_markdown_projection(document).text;
+    return serializer_detail::serialize_document(document, false).text;
 }
 
 inline std::string serialize_markdown(EditorDocument const& document) {

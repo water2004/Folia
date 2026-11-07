@@ -675,13 +675,13 @@ private:
 };
 
 inline SerializerEmission serialize_blocks(BlockVec const& blocks, std::size_t begin=0,
-    std::size_t end=(std::numeric_limits<std::size_t>::max)()) {
+    std::size_t end=(std::numeric_limits<std::size_t>::max)(), bool source_mappings=true) {
     SerializerActionVisitor visitor;
     visitor.serialize(blocks,begin,end);
     SerializerPlanArena arena;
     SerializerLinePlanner planner(visitor.writer(), arena);
     const auto output_lines = planner.build();
-    auto result=emit_serializer_lines(arena, output_lines, visitor.writer().events());
+    auto result=emit_serializer_lines(arena, output_lines, visitor.writer().events(), source_mappings);
     std::unordered_map<std::uint64_t,SerializerBlockRange> ranges;
     for (const auto& range:planner.block_ranges()) ranges.emplace(range.owner.v,range);
     end=(std::min)(end,blocks.size());
@@ -703,9 +703,10 @@ inline void append_document_ending(SerializerEmission& result,const EditorDocume
     }
 }
 
-inline SerializerEmission serialize_document(EditorDocument const& document) {
+inline SerializerEmission serialize_document(EditorDocument const& document, bool source_mappings=true) {
     record_full_document_serialization();
-    auto result = serialize_blocks(document.root.children);
+    auto result = serialize_blocks(document.root.children, 0,
+        (std::numeric_limits<std::size_t>::max)(), source_mappings);
     append_document_ending(result,document);
     return result;
 }
