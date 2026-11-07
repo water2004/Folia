@@ -33,6 +33,7 @@ suite incremental_inline_tests = [] {
     "incremental inline edits agree with complete parsing through temporary syntax"_test = [] {
         std::vector<std::u32string> sources{
             U"alpha beta gamma\nnext **bold** line", U"alpha beta gamma",
+            U"**alpha *beta gamma* delta** ~~epsilon zeta~~",
             U"[missing] [known] [name](url) ![alt](url)", U"before <span unfinished after",
             U"word *a\nb* and **unclosed", U"text &amp; \\*more* $x$",
             U"x www.example.org y\nlast line", U"\U0001f642中文 e\u0301 words\r\nnext",
@@ -62,6 +63,47 @@ suite incremental_inline_tests = [] {
             expect(fatal(bool(document.source == source))) << trial;
             expect(fatal(SameSyntax(document.tree.nodes, original.nodes))) << trial;
             expect(fatal(SameTokens(document.tree, original))) << trial;
+        }
+    };
+
+    "incremental inline edits retain nested presentation wrappers and exact delimiter ranges"_test = [] {
+        for (auto const& delimiters : {std::pair{U"**", U"**"}, std::pair{U"_", U"_"},
+            std::pair{U"~~", U"~~"}, std::pair{U"**a *", U"* z**"}}) {
+            InlineDocument document;
+            document.source = delimiters.first;
+            auto begin = document.source.size();
+            while (document.source.size() < 1024 * 1024) document.source += U"ordinary words ";
+            document.source += U"last";
+            document.source += delimiters.second;
+            document.source += U" after [link](url) $x$";
+            auto originalSource = document.source;
+            InlineParseContext context;
+            reparse_inline_document(document, context);
+            expect(fatal(!document.tree.nodes.empty()
+                && document.tree.nodes.front().status == ParseStatus::Complete
+                && !document.tree.nodes.front().children.empty()));
+            auto originalTree = document.tree;
+            auto identities = inline_source_edit_detail::node_identities(document.tree.nodes);
+            reset_core_operation_counters();
+            auto applied = apply_inline_source_edit(NodeId{7}, document,
+                {NodeId{7}, {begin + 3, begin + 4}, U"XY"}, context);
+            auto counters = read_core_operation_counters();
+            expect(counters.inline_reparses == 1_u);
+            expect(counters.inline_scanned_characters < 128_u);
+            expect(fatal(applied.inline_identities && applied.inline_identities->preserved));
+            expect(std::ranges::equal(inline_source_edit_detail::node_identities(document.tree.nodes), identities));
+            auto reference = parse_inline(document.source, context);
+            expect(SameSyntax(document.tree.nodes, reference.nodes));
+            expect(SameTokens(document.tree, reference));
+            // The saved tree shares delimiter metadata; editing must detach it.
+            auto originalReference = parse_inline(originalSource, context);
+            expect(SameSyntax(originalTree.nodes, originalReference.nodes));
+            auto inverse = apply_inline_source_edit(NodeId{7}, document, applied.inverse, context);
+            expect(fatal(inverse.inline_identities && inverse.inline_identities->preserved));
+            expect(bool(document.source == originalSource));
+            expect(SameSyntax(document.tree.nodes, originalTree.nodes));
+            expect(SameTokens(document.tree, originalTree));
+            expect(std::ranges::equal(inline_source_edit_detail::node_identities(document.tree.nodes), identities));
         }
     };
 

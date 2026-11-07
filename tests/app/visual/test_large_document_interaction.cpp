@@ -15,6 +15,9 @@ struct EditorRendererTestAccess {
         auto const& block = renderer.preparedDocument->blocks.front();
         return std::tuple{block.layout.Get(), block.layoutLines.get(), block.paintPlan.get()};
     }
+    static auto const& Display(EditorSurfaceRenderer& renderer) {
+        return renderer.preparedDocument->blocks.front().display.text;
+    }
     static void CheckVisibleGlyphs(EditorSurfaceRenderer& renderer) {
         auto const& block = renderer.preparedDocument->blocks.front();
         folia::platform::editor::EditorTextPaintStatistics stats;
@@ -132,6 +135,33 @@ suite large_document_interaction_tests = [] {
             select(0); renderer.Render(session.RenderFrame());
             expect(EditorRendererTestAccess::Layout(renderer).Get() != expanded.Get());
         }
+    };
+
+    "nested literal edits refresh the rendered owner while retaining semantic identity"_test = [] {
+        winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel panel;
+        EditorSession session;
+        session.SetText(L"left **styled middle** right");
+        auto caret = session.Selection().active;
+        caret.source_offset = 16;
+        session.SetSelection(folia::TextSelection::caret(caret));
+        EditorSurfaceRenderer renderer;
+        renderer.Initialize(panel);
+        renderer.Resize(panel, 1280, 800);
+        renderer.Render(session.RenderFrame());
+        auto before = EditorRendererTestAccess::Display(renderer);
+        folia::reset_core_operation_counters();
+        expect(session.ExecuteCommand(folia::Command::InsertText(U"X")));
+        renderer.Render(session.RenderFrame());
+        expect(bool(EditorRendererTestAccess::Display(renderer).find(U"miXddle") != std::u32string::npos));
+        expect(session.ExecuteCommand(folia::Command{folia::CommandKind::Undo}));
+        renderer.Render(session.RenderFrame());
+        expect(bool(EditorRendererTestAccess::Display(renderer) == before));
+        expect(session.Selection() == folia::TextSelection::caret(caret));
+        auto counters = folia::read_core_operation_counters();
+        expect(counters.inline_reparses == 2_u);
+        expect(counters.inline_scanned_characters < 256_u);
+        expect(counters.full_document_parses == 0_u);
+        expect(counters.full_document_serializations == 0_u);
     };
 
     "one megabyte paragraph reuses layout through scrolling caret and selection"_test = [] { CheckLongParagraph(1024 * 1024); };

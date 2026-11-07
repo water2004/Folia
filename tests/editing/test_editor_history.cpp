@@ -427,6 +427,46 @@ suite editor_history_tests = [] {
 };
 
 
+"incremental inline nested edits keep source selection and history exact in block containers"_test = [] {
+    for (auto source : {"**alpha *beta gamma* omega**", "# **alpha *beta gamma* omega**",
+        "> **alpha *beta gamma* omega**", "- **alpha *beta gamma* omega**",
+        "- [ ] **alpha *beta gamma* omega**", "| **alpha *beta gamma* omega** |\n| --- |",
+        "> [!NOTE]\n> **alpha *beta gamma* omega**", "[^note]: **alpha *beta gamma* omega**"}) {
+        Editor editor(source);
+        auto saved = editor.markdown_utf8();
+        const BlockNode* owner = nullptr;
+        walk_blocks(editor.document().root, [&](auto const& node) {
+            if (node.inline_content.source.find(U"gamma") != std::u32string::npos) owner = &node;
+        });
+        expect(fatal(owner != nullptr));
+        auto originalSource = owner->inline_content.source;
+        auto before = caret(*owner, originalSource.find(U"gamma") + 2);
+        auto expected = originalSource;
+        expected.insert(before.active.source_offset, U"X");
+        editor.set_selection(before);
+        auto verify = [&](auto action) {
+            reset_core_operation_counters();
+            expect(fatal(action()));
+            auto counters = read_core_operation_counters();
+            expect(counters.inline_reparses == 1_u);
+            expect(counters.inline_scanned_characters < 128_u);
+            expect(counters.full_document_parses == 0_u);
+            expect(counters.full_document_serializations == 0_u);
+        };
+        verify([&] { return editor.execute_command(Command::InsertText(U"X")); });
+        auto after = editor.selection();
+        expect(after.active.source_offset == before.active.source_offset + 1);
+        expect(bool(find_document_block(editor.document(), before.active.container_id)->inline_content.source == expected));
+        verify([&] { return editor.undo(); });
+        expect(editor.selection() == before);
+        expect(bool(find_document_block(editor.document(), before.active.container_id)->inline_content.source == originalSource));
+        expect(editor.markdown_utf8() == saved);
+        verify([&] { return editor.redo(); });
+        expect(editor.selection() == after);
+        expect(bool(find_document_block(editor.document(), before.active.container_id)->inline_content.source == expected));
+    }
+};
+
 "long paragraph literal edits avoid owner-wide parsing and identity history"_test = [] {
     std::string source;
     for (int i = 0; i < 10000; ++i) source += "Sample paragraph with words.\n";

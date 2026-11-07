@@ -320,7 +320,7 @@ suite inline_cst_tests = [] {
     expect(flatten_tokens(document.tree, document.source) == document.source);
 };
 
-"source edit reparses one document and reconciles untouched ids"_test = [] {
+"source edit preserves complete formatting wrappers and untouched identities"_test = [] {
     InlineDocument document{U"left **middle** right", {}};
     auto initial = test_context();
     initial.next_id = NodeId{100};
@@ -329,7 +329,8 @@ suite inline_cst_tests = [] {
     if (document.tree.nodes.size() != 3) return;
 
     const auto left_id = document.tree.nodes.front().id;
-    const auto edited_id = document.tree.nodes[1].id;
+    const auto styled_id = document.tree.nodes[1].id;
+    const auto literal_id = document.tree.nodes[1].children.front().id;
     const auto right_id = document.tree.nodes.back().id;
     std::uint64_t allocated = 10000;
     auto reparsing = test_context();
@@ -341,10 +342,14 @@ suite inline_cst_tests = [] {
     expect(document.tree.nodes.size() == 3_u);
     if (document.tree.nodes.size() == 3) {
         expect(document.tree.nodes.front().id == left_id);
-        expect(document.tree.nodes[1].id != edited_id);
+        expect(document.tree.nodes[1].id == styled_id);
+        expect(document.tree.nodes[1].children.front().id == literal_id);
         expect(document.tree.nodes.back().id == right_id);
         expect(document.tree.nodes.back().range == SourceRange{16, 22});
     }
+    // Editing a literal descendant does not create a new formatting construct.
+    expect(allocated == 10000_u);
+    expect(applied.inline_identities && applied.inline_identities->preserved);
     expect(applied.inverse.container_id == NodeId{7});
     expect(applied.inverse.range == SourceRange{8, 9});
     expect(applied.inverse.replacement.empty());

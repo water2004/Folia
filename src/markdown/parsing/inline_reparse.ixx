@@ -14,7 +14,7 @@ export namespace folia {
 struct InlineReparseWindow {
     SourceRange before;
     SourceRange after;
-    std::size_t root = 0;
+    std::vector<std::size_t> path;
     std::size_t first_token = 0;
     std::size_t last_token = 0;
     std::ptrdiff_t delta = 0;
@@ -24,6 +24,36 @@ struct InlineReparseWindow {
 namespace inline_reparse_detail {
 inline bool literal_token(InlineToken token) {
     return token.kind() == TokenKind::Text || token.kind() == TokenKind::Whitespace;
+}
+
+// These CST wrappers derive presentation from their kind, not from their
+// descendant text. Links, images, HTML and extensions can derive attributes or
+// semantics from that text, so their dependency scope includes the wrapper.
+inline bool independent_descendants(InlineCstNode const& node) {
+    using K = InlineCstKind;
+    return node.status == ParseStatus::Complete && node.delimited
+        && node.delimiter_ranges().closing
+        && (node.kind == K::Emphasis || node.kind == K::Strong || node.kind == K::Strikethrough);
+}
+
+inline std::vector<std::size_t> literal_path(InlineDocument const& document, SourceRange range) {
+    std::vector<std::size_t> path;
+    auto nodes = &document.tree.nodes;
+    while (!nodes->empty()) {
+        auto found = std::ranges::upper_bound(*nodes, range.start, {},
+            [](auto const& node) { return node.range.end; });
+        if (found == nodes->end()) {
+            if (range.start != document.source.size()) return {};
+            found = nodes->end() - 1;
+        }
+        if (found->status != ParseStatus::Complete || range.start < found->range.start
+            || range.end > found->range.end) return {};
+        path.push_back(static_cast<std::size_t>(found - nodes->begin()));
+        if (found->kind == InlineCstKind::Text && found->children.empty()) return path;
+        if (!independent_descendants(*found)) return {};
+        nodes = &found->children;
+    }
+    return {};
 }
 
 inline std::size_t shifted(std::size_t offset, std::ptrdiff_t delta) {
@@ -57,29 +87,25 @@ inline void shift_subtree(InlineCstNode& root, std::size_t boundary, std::ptrdif
 inline std::optional<InlineReparseWindow> plan_inline_reparse(
     InlineDocument const& document, TextEdit const& edit, InlineParseContext const& context) {
     if (!edit.range.valid_for(document.source.size()) || document.tree.nodes.empty()) return {};
-    auto const& roots = document.tree.nodes;
-    auto found = std::ranges::upper_bound(roots, edit.range.start, {},
-        [](auto const& node) { return node.range.end; });
-    if (found == roots.end()) {
-        if (edit.range.start != document.source.size()) return {};
-        found = roots.end() - 1;
-    }
-    auto const& root = *found;
-    if (root.kind != InlineCstKind::Text || root.status != ParseStatus::Complete
-        || !root.children.empty() || edit.range.start < root.range.start || edit.range.end > root.range.end) return {};
+    auto path = inline_reparse_detail::literal_path(document, edit.range);
+    if (path.empty()) return {};
+    auto nodes = &document.tree.nodes;
+    InlineCstNode const* leaf = nullptr;
+    for (auto index : path) { leaf = &(*nodes)[index]; nodes = &leaf->children; }
+    auto const& literal = *leaf;
     // Preserve literal characters adjacent to other grammar nodes. Their
     // unchanged flanking classes guarantee that a remote delimiter cannot
     // change interpretation because of this edit.
-    if ((edit.range.start == root.range.start && root.range.start != 0)
-        || (edit.range.end == root.range.end && root.range.end != document.source.size())) return {};
+    if ((edit.range.start == literal.range.start && literal.range.start != 0)
+        || (edit.range.end == literal.range.end && literal.range.end != document.source.size())) return {};
 
     auto const& tokens = document.tree.tokens;
-    auto first = std::ranges::upper_bound(tokens, root.range.start, {}, &InlineToken::end);
-    auto last = std::ranges::lower_bound(tokens, root.range.end, {}, &InlineToken::end);
-    if (first == tokens.end() || last == tokens.end() || last->end() != root.range.end) return {};
+    auto first = std::ranges::upper_bound(tokens, literal.range.start, {}, &InlineToken::end);
+    auto last = std::ranges::lower_bound(tokens, literal.range.end, {}, &InlineToken::end);
+    if (first == tokens.end() || last == tokens.end() || last->end() != literal.range.end) return {};
     ++last;
     auto first_start = first == tokens.begin() ? 0 : (first - 1)->end();
-    if (first_start != root.range.start || !std::all_of(first, last, inline_reparse_detail::literal_token)) return {};
+    if (first_start != literal.range.start || !std::all_of(first, last, inline_reparse_detail::literal_token)) return {};
 
     auto begin = std::upper_bound(first, last, edit.range.start,
         [](std::size_t offset, InlineToken token) { return offset < token.end(); });
@@ -106,21 +132,38 @@ inline std::optional<InlineReparseWindow> plan_inline_reparse(
         || !std::ranges::all_of(parsed.tokens, inline_reparse_detail::literal_token)) return {};
     InlineReparseWindow result{
         {window_start, window_end}, {window_start, window_start + text.size()},
-        static_cast<std::size_t>(found - roots.begin()), static_cast<std::size_t>(begin - tokens.begin()),
+        std::move(path), static_cast<std::size_t>(begin - tokens.begin()),
         static_cast<std::size_t>(end - tokens.begin()), text_edit_delta(edit), std::move(parsed.tokens)};
     for (auto& token : result.tokens) token = {token.kind(), window_start + token.end()};
     return result;
 }
 
 // Source has already been edited by the editor. Reuse all structural identities;
-// only the re-lexed token window and the following source ranges change.
+// only the token window, ancestor bounds and subsequent source ranges change.
 inline void apply_inline_reparse(InlineDocument& document, InlineReparseWindow window) {
     auto& tree = document.tree;
-    auto boundary = tree.nodes[window.root].range.end;
-    tree.nodes[window.root].range.end = inline_reparse_detail::shifted(boundary, window.delta);
+    auto nodes = &tree.nodes;
     std::vector<InlineCstNode*> pending;
-    for (auto index = window.root + 1; index < tree.nodes.size(); ++index)
-        inline_reparse_detail::shift_subtree(tree.nodes[index], boundary, window.delta, pending);
+    for (auto index : window.path) {
+        auto& node = (*nodes)[index];
+        auto boundary = node.range.end;
+        node.range.end = inline_reparse_detail::shifted(boundary, window.delta);
+        for (auto sibling = index + 1; sibling < nodes->size(); ++sibling)
+            inline_reparse_detail::shift_subtree((*nodes)[sibling], boundary, window.delta, pending);
+        if (node.delimited && window.delta) {
+            // The ancestor's opening delimiter is unchanged. The content and
+            // full ranges grow, and its closing delimiter moves with the edit.
+            node.delimited = std::make_shared<DelimitedRanges>(*node.delimited);
+            auto& ranges = *node.delimited;
+            ranges.full.end = inline_reparse_detail::shifted(ranges.full.end, window.delta);
+            ranges.content.end = inline_reparse_detail::shifted(ranges.content.end, window.delta);
+            if (ranges.closing) {
+                ranges.closing->start = inline_reparse_detail::shifted(ranges.closing->start, window.delta);
+                ranges.closing->end = inline_reparse_detail::shifted(ranges.closing->end, window.delta);
+            }
+        }
+        nodes = &node.children;
+    }
     auto& tokens = tree.tokens;
     auto insert = tokens.erase(tokens.begin() + window.first_token, tokens.begin() + window.last_token);
     tokens.insert(insert, window.tokens.begin(), window.tokens.end());
