@@ -223,4 +223,36 @@ suite display_mapping_tests = [] {
     expect(range->second == 2u);
 };
 
+
+"selection intervals agree with scalar selection across owners and mapping kinds"_test = [] {
+    std::mt19937 random(98172);
+    auto less = [](TextPosition a, TextPosition b) {
+        return a.container_id.v < b.container_id.v
+            || (a.container_id == b.container_id && a.source_offset < b.source_offset);
+    };
+    for (int trial = 0; trial < 250; ++trial) {
+        EditorDisplayMapping mapping;
+        for (std::size_t run = 0; run < 20; ++run) {
+            auto owner = NodeId{1 + random() % 4};
+            auto offset = random() % 100;
+            auto linear = random() % 2 != 0;
+            auto kind = static_cast<EditorDisplayPositionKind>(random() % 4);
+            auto affinity = random() % 2 ? TextAffinity::Upstream : TextAffinity::Downstream;
+            for (std::size_t i = 0, length = 1 + random() % 30; i < length; ++i)
+                mapping.push_back({owner, offset + (linear ? i : 0), affinity, kind});
+        }
+        TextPosition start{NodeId{1 + random() % 4}, random() % 130};
+        TextPosition end{NodeId{1 + random() % 4}, random() % 130};
+        if (less(end, start)) std::swap(start, end);
+        auto actual = DisplayRangesForSourceSelection(mapping, start, end, less);
+        std::vector<std::pair<std::size_t, std::size_t>> expected;
+        for (std::size_t i = 0; i + 1 < mapping.size(); ++i) {
+            if (less(mapping[i], start) || !less(mapping[i], end)) continue;
+            if (!expected.empty() && expected.back().second == i) expected.back().second = i + 1;
+            else expected.emplace_back(i, i + 1);
+        }
+        expect(std::ranges::equal(actual, expected));
+    }
+};
+
 }; // suite display_mapping_tests

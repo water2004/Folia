@@ -526,6 +526,7 @@ namespace winrt::Folia
         EditorPreparedDocument::Block prepared;
         InitializeMetadata(prepared, block);
         InitializeContentMetadata(prepared, block);
+        prepared.caretPresentation = CaretPresentationState(block, caret);
         prepared.embeddedRequested = requestEmbedded;
         prepared.embeddedGeneration = embeddedGeneration;
         prepared.remoteImageGeneration = remoteImageGeneration;
@@ -740,6 +741,9 @@ namespace winrt::Folia
             textLayoutEngine.LineHeightFor(
                 prepared.code || prepared.sourceMode,
                 prepared.display.ranges));
+        prepared.layoutLines = folia::platform::editor::BuildEditorTextLines(
+            prepared.layout.Get(), prepared.display.displayToSource, block.source_span, contentWidth);
+        prepared.paintPlan = folia::platform::editor::EditorTextPaintPlan::Prepare(prepared.layout.Get());
         auto previewHeight = 0.0f;
         for (auto const& preview : prepared.mathPreviews)
             if (!preview.floating) previewHeight += preview.Height() + 24.0f;

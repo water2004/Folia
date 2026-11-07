@@ -385,6 +385,12 @@
     <ClCompile Include="..\platform\windows\editor\layout\editor_display_mapping.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\platform\windows\editor\rendering\editor_text_paint.ixx">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\platform\windows\editor\rendering\editor_text_paint.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\platform\windows\editor\rendering\editor_svg_drawing.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
@@ -622,6 +628,7 @@
     <ClCompile Include="editor\rendering\EditorDocumentBlockPreparer.cpp" />
     <ClCompile Include="editor\rendering\EditorEmbeddedContentUpdater.cpp" />
     <ClCompile Include="editor\rendering\EditorDocumentPainter.cpp" />
+    <ClCompile Include="editor\rendering\EditorCaretPresentation.cpp" />
       <ClCompile Include="editor\rendering\EditorDocumentPreparationPass.cpp" />
       <ClCompile Include="editor\rendering\EditorViewportMaterializer.cpp" />
       <ClCompile Include="editor\rendering\EditorPreparedDocumentCache.cpp" />

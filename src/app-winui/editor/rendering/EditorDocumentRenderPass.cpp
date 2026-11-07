@@ -80,7 +80,8 @@ namespace winrt::Folia
                 interactionMap.blocks.push_back(visual);
                 EditorVisualLine line;
                 line.blockIndex = interactionMap.blocks.size() - 1;
-                line.sourceSpans = {block.source_span};
+                line.sourceSpans = std::make_shared<const std::vector<folia::TextSpan>>(
+                    std::initializer_list<folia::TextSpan>{block.source_span});
                 line.rect = visual.rect;
                 interactionMap.lines.push_back(line);
                 continue;
@@ -139,7 +140,7 @@ namespace winrt::Folia
                 resources.d2dContext->FillRectangle(rect, resources.panelBrush.Get());
             documentPainter.DrawFlowDecorations(prepared.layout.Get(), origin, block, prepared.display);
             documentPainter.DrawInlineText(prepared.layout.Get(), origin, prepared.display, prepared.display.displayToSource,
-                prepared.code ? resources.codeBrush.Get() : resources.textBrush.Get());
+                prepared.code ? resources.codeBrush.Get() : resources.textBrush.Get(), prepared.paintPlan, prepared.layoutLines);
             documentPainter.DrawTaskCheckboxes(
                 prepared.layout.Get(), origin, prepared.display.taskCheckboxOverlays);
             documentPainter.RegisterFootnotes(
@@ -251,9 +252,9 @@ namespace winrt::Folia
             visual.textWidth = contentWidth;
             visual.sourceSpan = block.source_span;
             visual.documentY = documentY;
-            visual.text = prepared.display.text;
             visual.displayToSource = prepared.display.displayToSource;
             visual.layout = prepared.layout;
+            visual.layoutLines = prepared.layoutLines;
             interactionMap.blocks.push_back(std::move(visual));
             interactionMap.AddBlockLines(interactionMap.blocks.size() - 1);
         }

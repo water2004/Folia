@@ -81,14 +81,14 @@ namespace winrt::Folia
         {
             // A line ending exactly at the reading edge has already scrolled
             // away. Pointer hit testing deliberately has different edge rules.
-            if (line.sourceSpans.empty() || line.rect.bottom <= styleSheet.verticalPadding + 0.1f
+            if (line.SourceSpans().empty() || line.rect.bottom <= styleSheet.verticalPadding + 0.1f
                 || line.rect.top >= resources.surfaceHeightDip) continue;
             if (!first || line.rect.top < first->rect.top
                 || (line.rect.top == first->rect.top && line.rect.left < first->rect.left)) first = &line;
         }
         if (first)
         {
-            auto const& span = first->sourceSpans.front();
+            auto const& span = first->SourceSpans().front();
             return folia::TextPosition{span.container_id, span.source_range.start, folia::TextAffinity::Downstream};
         }
         return interactionMap.HitTest(0.0f, styleSheet.verticalPadding);

@@ -11,11 +11,11 @@ namespace folia::platform::editor
     {
         folia::TextSpan const* SourceSpanFor(EditorVisualLine const& line, folia::NodeId containerId)
         {
-            auto found = std::find_if(line.sourceSpans.begin(), line.sourceSpans.end(), [&](auto const& span)
+            auto found = std::find_if(line.SourceSpans().begin(), line.SourceSpans().end(), [&](auto const& span)
             {
                 return span.container_id == containerId;
             });
-            return found == line.sourceSpans.end() ? nullptr : &*found;
+            return found == line.SourceSpans().end() ? nullptr : &*found;
         }
 
         bool Contains(EditorVisualLine const& line, folia::TextPosition position)
@@ -88,10 +88,10 @@ namespace folia::platform::editor
             EditorDisplayMapping const& mapping,
             std::size_t displayPosition)
         {
-            if (line.sourceSpans.empty()) return std::nullopt;
+            if (line.SourceSpans().empty()) return std::nullopt;
             if (mapping.empty())
             {
-                auto const& span = line.sourceSpans.front();
+                auto const& span = line.SourceSpans().front();
                 return folia::TextPosition{span.container_id, span.source_range.start, folia::TextAffinity::Downstream};
             }
 
@@ -110,12 +110,12 @@ namespace folia::platform::editor
             if (auto direct = resolve(displayPosition)) return direct;
             if (displayPosition >= last)
             {
-                auto const& span = line.sourceSpans.back();
+                auto const& span = line.SourceSpans().back();
                 return folia::TextPosition{span.container_id, span.source_range.end, folia::TextAffinity::Upstream};
             }
             if (displayPosition <= first)
             {
-                auto const& span = line.sourceSpans.front();
+                auto const& span = line.SourceSpans().front();
                 return folia::TextPosition{span.container_id, span.source_range.start, folia::TextAffinity::Downstream};
             }
 
@@ -124,7 +124,7 @@ namespace folia::platform::editor
             for (auto index = displayPosition + 1; index <= last; ++index)
                 if (auto after = resolve(index)) return after;
 
-            auto const& span = line.sourceSpans.front();
+            auto const& span = line.SourceSpans().front();
             return folia::TextPosition{span.container_id, span.source_range.start, folia::TextAffinity::Downstream};
         }
     }
@@ -152,91 +152,83 @@ namespace folia::platform::editor
             : std::optional<EditorVisualRawBlock>{*found};
     }
 
-    void EditorInteractionMap::AddBlockLines(std::size_t blockIndex)
+    EditorLayoutLines BuildEditorTextLines(IDWriteTextLayout* layout, EditorDisplayMapping const& mapping,
+        folia::TextSpan sourceSpan, float width)
     {
-        if (blockIndex >= blocks.size()) return;
-        auto const& block = blocks[blockIndex];
-        if (!block.layout || block.displayToSource.empty()) return;
+        auto result = std::make_shared<std::vector<EditorVisualLine>>();
+        if (!layout || mapping.empty()) return result;
         UINT32 lineCount = 0;
-        if (block.layout->GetLineMetrics(nullptr, 0, &lineCount) != E_NOT_SUFFICIENT_BUFFER || lineCount == 0) return;
+        if (layout->GetLineMetrics(nullptr, 0, &lineCount) != E_NOT_SUFFICIENT_BUFFER || lineCount == 0) return result;
         std::vector<DWRITE_LINE_METRICS> metrics(lineCount);
-        if (FAILED(block.layout->GetLineMetrics(metrics.data(), lineCount, &lineCount))) return;
+        if (FAILED(layout->GetLineMetrics(metrics.data(), lineCount, &lineCount))) return result;
+        result->reserve(lineCount);
         UINT32 textPosition = 0;
         UINT32 previousNewlineLength = 0;
-        float lineTop = block.textOrigin.y;
+        float lineTop = 0;
         for (UINT32 lineIndex = 0; lineIndex < lineCount; ++lineIndex)
         {
             auto const& metric = metrics[lineIndex];
             auto lineEnd = textPosition + metric.length;
             auto visibleEnd = lineEnd >= metric.newlineLength ? lineEnd - metric.newlineLength : lineEnd;
             EditorVisualLine line;
-            line.blockIndex = blockIndex;
-            line.sourceSpans = SpansFromMapping(block.displayToSource, textPosition, visibleEnd, block.sourceSpan);
+            line.sourceSpans = std::make_shared<const std::vector<folia::TextSpan>>(
+                SpansFromMapping(mapping, textPosition, visibleEnd, sourceSpan));
             line.displayStart = textPosition;
             line.displayEnd = visibleEnd;
             line.wrapContinuation = lineIndex > 0 && previousNewlineLength == 0;
-            line.rect = D2D1::RectF(block.textOrigin.x, lineTop, block.textOrigin.x + block.textWidth, lineTop + metric.height);
-            auto first = (std::min)(static_cast<std::size_t>(textPosition), block.displayToSource.size());
-            auto end = (std::min)(static_cast<std::size_t>(visibleEnd) + 1, block.displayToSource.size());
+            line.rect = D2D1::RectF(0, lineTop, width, lineTop + metric.height);
+            auto first = (std::min)(static_cast<std::size_t>(textPosition), mapping.size());
+            auto end = (std::min)(static_cast<std::size_t>(visibleEnd) + 1, mapping.size());
             // Generated prefixes, padding and control rows do not own source
             // lines. Include the terminal boundary so empty source rows remain
             // editable even when they have no visible glyphs.
-            auto decorationOnly = first < end && std::all_of(block.displayToSource.begin() + first,
-                block.displayToSource.begin() + end, [](auto const& point) {
+            auto decorationOnly = first < end && std::all_of(mapping.begin() + first,
+                mapping.begin() + end, [](auto const& point) {
                     return point.kind == EditorDisplayPositionKind::BoundaryDecoration;
                 });
-            if (!decorationOnly) lines.push_back(line);
+            if (!decorationOnly) result->push_back(std::move(line));
             textPosition = lineEnd;
             lineTop += metric.height;
             previousNewlineLength = metric.newlineLength;
+        }
+        return result;
+    }
+
+    void EditorInteractionMap::AddBlockLines(std::size_t blockIndex)
+    {
+        if (blockIndex >= blocks.size()) return;
+        auto& block = blocks[blockIndex];
+        if (!block.layoutLines)
+            block.layoutLines = BuildEditorTextLines(block.layout.Get(), block.displayToSource, block.sourceSpan, block.textWidth);
+        for (auto line : *block.layoutLines) {
+            line.blockIndex = blockIndex;
+            line.rect.left += block.textOrigin.x; line.rect.right += block.textOrigin.x;
+            line.rect.top += block.textOrigin.y; line.rect.bottom += block.textOrigin.y;
+            lines.push_back(std::move(line));
         }
     }
 
     void EditorInteractionMap::AddTableCellLines(std::size_t blockIndex, std::size_t tableIndex, std::size_t cellIndex)
     {
         if (blockIndex >= blocks.size() || tableIndex >= tables.size() || cellIndex >= tables[tableIndex].cells.size()) return;
-        auto const& cell = tables[tableIndex].cells[cellIndex];
+        auto& cell = tables[tableIndex].cells[cellIndex];
         auto before = lines.size();
-        if (cell.layout && !cell.displayToSource.empty())
-        {
-            UINT32 lineCount = 0;
-            if (cell.layout->GetLineMetrics(nullptr, 0, &lineCount) == E_NOT_SUFFICIENT_BUFFER && lineCount > 0)
-            {
-                std::vector<DWRITE_LINE_METRICS> metrics(lineCount);
-                if (SUCCEEDED(cell.layout->GetLineMetrics(metrics.data(), lineCount, &lineCount)))
-                {
-                    UINT32 textPosition = 0;
-                    UINT32 previousNewlineLength = 0;
-                    float lineTop = cell.textOrigin.y;
-                    for (UINT32 lineIndex = 0; lineIndex < lineCount; ++lineIndex)
-                    {
-                        auto const& metric = metrics[lineIndex];
-                        auto lineEnd = textPosition + metric.length;
-                        auto visibleEnd = lineEnd >= metric.newlineLength ? lineEnd - metric.newlineLength : lineEnd;
-                        EditorVisualLine line;
-                        line.blockIndex = blockIndex;
-                        line.tableIndex = tableIndex;
-                        line.cellIndex = cellIndex;
-                        line.sourceSpans = SpansFromMapping(cell.displayToSource, textPosition, visibleEnd, cell.sourceSpan);
-                        line.displayStart = textPosition;
-                        line.displayEnd = visibleEnd;
-                        line.wrapContinuation = lineIndex > 0 && previousNewlineLength == 0;
-                        line.rect = D2D1::RectF(cell.rect.left, lineTop, cell.rect.right, lineTop + metric.height);
-                        lines.push_back(line);
-                        textPosition = lineEnd;
-                        lineTop += metric.height;
-                        previousNewlineLength = metric.newlineLength;
-                    }
-                }
-            }
+        if (!cell.layoutLines)
+            cell.layoutLines = BuildEditorTextLines(cell.layout.Get(), cell.displayToSource, cell.sourceSpan, cell.textWidth);
+        for (auto line : *cell.layoutLines) {
+            line.blockIndex = blockIndex; line.tableIndex = tableIndex; line.cellIndex = cellIndex;
+            line.rect.left = cell.rect.left; line.rect.right = cell.rect.right;
+            line.rect.top += cell.textOrigin.y; line.rect.bottom += cell.textOrigin.y;
+            lines.push_back(std::move(line));
         }
         if (lines.size() != before) return;
         EditorVisualLine line;
         line.blockIndex = blockIndex;
         line.tableIndex = tableIndex;
         line.cellIndex = cellIndex;
-        line.sourceSpans = {cell.sourceSpan};
-        line.displayEnd = static_cast<std::uint32_t>(cell.text.size());
+        line.sourceSpans = std::make_shared<const std::vector<folia::TextSpan>>(
+            std::initializer_list<folia::TextSpan>{cell.sourceSpan});
+        line.displayEnd = static_cast<std::uint32_t>(cell.displayToSource.empty() ? 0 : cell.displayToSource.size() - 1);
         line.rect = cell.rect;
         lines.push_back(line);
     }
@@ -440,10 +432,10 @@ namespace folia::platform::editor
             if (distance == 0.0f) break;
         }
         auto const& line = lines[best];
-        if (line.blockIndex >= blocks.size() || line.sourceSpans.empty()) return std::nullopt;
+        if (line.blockIndex >= blocks.size() || line.SourceSpans().empty()) return std::nullopt;
         auto const& block = blocks[line.blockIndex];
-        auto const& firstSpan = line.sourceSpans.front();
-        auto const& lastSpan = line.sourceSpans.back();
+        auto const& firstSpan = line.SourceSpans().front();
+        auto const& lastSpan = line.SourceSpans().back();
         auto start = folia::TextPosition{firstSpan.container_id, firstSpan.source_range.start, folia::TextAffinity::Downstream};
         auto end = folia::TextPosition{lastSpan.container_id, lastSpan.source_range.end, folia::TextAffinity::Upstream};
         if (block.thematicBreak) return y < (block.rect.top + block.rect.bottom) * 0.5f ? start : end;
@@ -648,15 +640,15 @@ namespace folia::platform::editor
             x = rect ? rect->left : lines[*current].rect.left;
             goalX = x;
         }
-        if (lines.front().sourceSpans.empty() || lines.back().sourceSpans.empty()) return std::nullopt;
+        if (lines.front().SourceSpans().empty() || lines.back().SourceSpans().empty()) return std::nullopt;
         if (!down && *current == 0)
         {
-            auto const& span = lines.front().sourceSpans.front();
+            auto const& span = lines.front().SourceSpans().front();
             return folia::TextPosition{span.container_id, span.source_range.start, folia::TextAffinity::Downstream};
         }
         if (down && *current + 1 >= lines.size())
         {
-            auto const& span = lines.back().sourceSpans.back();
+            auto const& span = lines.back().SourceSpans().back();
             return folia::TextPosition{span.container_id, span.source_range.end, folia::TextAffinity::Upstream};
         }
         auto targetIndex = down ? *current + 1 : *current - 1;
@@ -678,8 +670,8 @@ namespace folia::platform::editor
             }
         }
         auto const& target = lines[targetIndex];
-        if (target.sourceSpans.empty()) return std::nullopt;
-        auto const& firstTargetSpan = target.sourceSpans.front();
+        if (target.SourceSpans().empty()) return std::nullopt;
+        auto const& firstTargetSpan = target.SourceSpans().front();
         auto targetPosition = folia::TextPosition{firstTargetSpan.container_id, firstTargetSpan.source_range.start, folia::TextAffinity::Downstream};
         auto const& block = blocks[target.blockIndex];
         IDWriteTextLayout* layout = block.layout.Get();

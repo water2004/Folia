@@ -9,15 +9,30 @@ import folia.markdown.utf;
 namespace winrt::Folia
 {
     void EditorDocumentPainter::DrawInlineText(IDWriteTextLayout* layout, D2D1_POINT_2F origin,
-        DisplayInlineText const& display, EditorDisplayMapping const& mapping, ID2D1Brush* textBrush)
+        DisplayInlineText const& display, EditorDisplayMapping const& mapping, ID2D1Brush* textBrush,
+        std::shared_ptr<const folia::platform::editor::EditorTextPaintPlan> const& paintPlan,
+        folia::platform::editor::EditorLayoutLines const& lines)
     {
         if (!layout) return;
+        auto infinity = std::numeric_limits<float>::infinity();
+        auto viewport = printMode ? D2D1::RectF(-infinity, -infinity, infinity, infinity)
+            : D2D1::RectF(0, 0, resources.surfaceWidthDip, resources.surfaceHeightDip);
+        std::pair<std::size_t, std::size_t> visible{0, mapping.empty() ? 0 : mapping.size() - 1};
+        if (lines && !lines->empty()) {
+            auto first = std::ranges::lower_bound(*lines, viewport.top - origin.y, {},
+                [](auto const& line) { return line.rect.bottom; });
+            auto last = std::ranges::upper_bound(*lines, viewport.bottom - origin.y, {},
+                [](auto const& line) { return line.rect.top; });
+            visible = first < last ? std::pair<std::size_t, std::size_t>{first->displayStart, (last - 1)->displayEnd}
+                : std::pair<std::size_t, std::size_t>{0, 0};
+        }
         DrawInlinePresentationBackgrounds(resources, styleSheet, layout, origin, display.ranges);
         PaintMathBrackets(resources, styleSheet, layout, origin, display, mapping);
         DrawSyntaxMarkers(layout, origin, display);
-        DrawSelection(layout, origin, mapping);
-        DrawSearchHighlights(layout, origin, mapping);
-        resources.d2dContext->DrawTextLayout(origin, layout, textBrush, D2D1_DRAW_TEXT_OPTIONS_CLIP);
+        DrawSelection(layout, origin, mapping, visible);
+        DrawSearchHighlights(layout, origin, mapping, visible);
+        winrt::check_bool(static_cast<bool>(paintPlan));
+        winrt::check_hresult(paintPlan->Draw(resources.d2dContext.Get(), origin, textBrush, viewport));
     }
 
     std::vector<EditorDocumentPainter::PositionedMath> EditorDocumentPainter::PaintMath(
@@ -109,12 +124,6 @@ namespace winrt::Folia
         if (leftOrder == editableIndex.end()) return false;
         if (rightOrder == editableIndex.end()) return true;
         return leftOrder->second < rightOrder->second;
-    }
-
-    bool EditorDocumentPainter::Selected(folia::TextPosition position) const
-    {
-        if (selection.is_caret()) return false;
-        return !PositionLess(position, selectionStart) && PositionLess(position, selectionEnd);
     }
 
     void EditorDocumentPainter::DrawTaskCheckboxes(
@@ -288,18 +297,18 @@ namespace winrt::Folia
     void EditorDocumentPainter::DrawSelection(
         IDWriteTextLayout* layout,
         D2D1_POINT_2F origin,
-        EditorDisplayMapping const& mapping)
+        EditorDisplayMapping const& mapping, std::pair<std::size_t, std::size_t> visible)
     {
         if (!layout || selection.is_caret() || mapping.empty()) return;
-        std::size_t index = 0;
-        while (index + 1 < mapping.size())
+        auto ranges = folia::platform::editor::DisplayRangesForSourceSelection(mapping, selectionStart, selectionEnd,
+            [&](auto a, auto b) { return PositionLess(a, b); });
+        for (auto [start, end] : ranges)
         {
-            while (index + 1 < mapping.size() && !Selected(mapping[index])) ++index;
-            auto start = index;
-            while (index + 1 < mapping.size() && Selected(mapping[index])) ++index;
-            if (index <= start) continue;
+            start = (std::max)(start, visible.first);
+            end = (std::min)(end, visible.second);
+            if (start >= end) continue;
             UINT32 count = 0;
-            auto length = static_cast<UINT32>(index - start);
+            auto length = static_cast<UINT32>(end - start);
             if (layout->HitTestTextRange(static_cast<UINT32>(start), length, origin.x, origin.y, nullptr, 0, &count) != E_NOT_SUFFICIENT_BUFFER || count == 0) continue;
             std::vector<DWRITE_HIT_TEST_METRICS> metrics(count);
             if (FAILED(layout->HitTestTextRange(static_cast<UINT32>(start), length, origin.x, origin.y, metrics.data(), count, &count))) continue;
@@ -316,26 +325,24 @@ namespace winrt::Folia
     void EditorDocumentPainter::DrawSearchHighlights(
         IDWriteTextLayout* layout,
         D2D1_POINT_2F origin,
-        EditorDisplayMapping const& mapping)
+        EditorDisplayMapping const& mapping, std::pair<std::size_t, std::size_t> visible)
     {
         if (!layout || mapping.empty() || searchHighlights.empty()) return;
         for (auto const& highlight : searchHighlights)
         {
             auto const& span = highlight.span;
             if (span.source_range.empty()) continue;
-            std::size_t index = 0;
-            while (index + 1 < mapping.size())
+            auto ranges = folia::platform::editor::DisplayRangesForSourceSelection(mapping,
+                {span.container_id, span.source_range.start, folia::TextAffinity::Downstream},
+                {span.container_id, span.source_range.end, folia::TextAffinity::Upstream},
+                [&](auto a, auto b) { return PositionLess(a, b); });
+            for (auto [start, end] : ranges)
             {
-                while (index + 1 < mapping.size()
-                    && !(mapping[index].container_id == span.container_id
-                        && span.source_range.contains(mapping[index].source_offset))) ++index;
-                auto const start = index;
-                while (index + 1 < mapping.size()
-                    && mapping[index].container_id == span.container_id
-                    && span.source_range.contains(mapping[index].source_offset)) ++index;
-                if (index <= start) continue;
+                start = (std::max)(start, visible.first);
+                end = (std::min)(end, visible.second);
+                if (start >= end) continue;
                 UINT32 count = 0;
-                auto const length = static_cast<UINT32>(index - start);
+                auto const length = static_cast<UINT32>(end - start);
                 if (layout->HitTestTextRange(
                         static_cast<UINT32>(start), length, origin.x, origin.y,
                         nullptr, 0, &count) != E_NOT_SUFFICIENT_BUFFER || count == 0) continue;
@@ -408,7 +415,7 @@ namespace winrt::Folia
         DisplayInlineText const& display)
     {
         if (!layout || display.displayToSource.empty()) return;
-        auto displayLimit = (std::min)(display.displayToSource.size(), folia::utf16_len(display.text));
+        auto displayLimit = display.displayToSource.size() - 1;
         auto displayRange = [&](folia::RenderBlock const& nested) -> std::optional<std::pair<std::size_t, std::size_t>>
         {
             std::unordered_set<std::uint64_t> owners;

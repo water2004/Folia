@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "editor/rendering/EditorContentPreparation.h"
+#include "editor/rendering/EditorCaretPresentation.h"
 
 import folia.core.render_model;
 import folia.core.source_style;
@@ -92,19 +93,6 @@ namespace winrt::Folia
             }
         }
         return result;
-    }
-
-    bool CaretTouchesSpan(folia::TextPosition caret, folia::TextSpan const& span)
-    {
-        if (caret.container_id != span.container_id) return false;
-        auto start = span.source_range.start;
-        auto end = span.source_range.end;
-        auto offset = caret.source_offset;
-        if (start <= offset && offset <= end)
-        {
-            return true;
-        }
-        return (start > 0 && offset == start - 1) || (end < (std::numeric_limits<std::size_t>::max)() && offset == end + 1);
     }
 
     EditorDisplayPosition InlineItemsEndPosition(std::vector<folia::InlineRenderItem> const& items, folia::TextPosition fallback)
@@ -401,35 +389,20 @@ namespace winrt::Folia
         bool highPriority)
     {
         DisplayInlineText display;
-        auto inside = [&](folia::TextSpan span) {
-            return caret.container_id == span.container_id
-                && caret.source_offset >= span.source_range.start
-                && caret.source_offset <= span.source_range.end;
-        };
         for (std::size_t index = 0; index < items.size(); ++index)
         {
             auto const& item = items[index];
-            if (item.kind == folia::InlineRenderItem::Kind::Marker)
-            {
-                auto const& payload = item.special();
-                if (payload.marker_construct)
-                {
-                    auto span = folia::TextSpan{item.source_span.container_id, *payload.marker_construct};
-                    if (payload.visibility == folia::MarkerVisibility::WhenCaretInsideNode && !inside(span)) continue;
-                }
-                if (payload.visibility == folia::MarkerVisibility::HiddenButEditable) continue;
-                if (payload.marker_role == folia::MarkerRole::Heading
-                    && caret.container_id != item.source_span.container_id) continue;
-            }
+            auto presentation = ResolveInlinePresentation(item, caret);
+            if (presentation == EditorInlinePresentation::Hidden) continue;
             if (item.kind == folia::InlineRenderItem::Kind::Link)
             {
-                if (CaretTouchesSpan(caret, item.source_span)) AppendInlineSource(display, item);
+                if (presentation == EditorInlinePresentation::Source) AppendInlineSource(display, item);
                 else MergeDisplayText(display, BuildDisplayInlineText(item.special().semantic().children, caret, {item.source_span.container_id, item.source_span.source_range.end, folia::TextAffinity::Downstream}, mathJax, svgNormalizer, svgColor, fontSize, containerWidth, svgSupported, requestMath, highPriority));
                 continue;
             }
             if (item.kind == folia::InlineRenderItem::Kind::Image)
             {
-                if (CaretTouchesSpan(caret, item.source_span)) AppendInlineSource(display, item);
+                if (presentation == EditorInlinePresentation::Source) AppendInlineSource(display, item);
                 else
                 {
                     auto displayStart = static_cast<std::uint32_t>(display.displayToSource.size());
@@ -470,7 +443,7 @@ namespace winrt::Folia
                     continue;
                 }
                 auto displayMath = item.special().display == folia::MathDisplayMode::Block;
-                auto editing = CaretTouchesSpan(caret, item.source_span);
+                auto editing = presentation == EditorInlinePresentation::Source;
                 auto purpose = editing ? MathRenderPurpose::Preview : MathRenderPurpose::Document;
                 auto tex = folia::cps_to_utf8(item.text);
                 auto foreground = InlineForeground(item.style, svgColor);

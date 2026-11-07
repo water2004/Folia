@@ -8,9 +8,28 @@ export module folia.platform.editor_interaction;
 import std;
 import folia.markdown.text_edit;
 export import folia.platform.editor_display_mapping;
+export import folia.platform.editor_text_paint;
 
 export namespace folia::platform::editor
 {
+    struct EditorVisualLine
+    {
+        std::size_t blockIndex = 0;
+        std::size_t tableIndex = (std::numeric_limits<std::size_t>::max)();
+        std::size_t cellIndex = (std::numeric_limits<std::size_t>::max)();
+        std::shared_ptr<const std::vector<folia::TextSpan>> sourceSpans;
+        std::span<const folia::TextSpan> SourceSpans() const {
+            return sourceSpans ? std::span<const folia::TextSpan>{*sourceSpans} : std::span<const folia::TextSpan>{};
+        }
+        std::uint32_t displayStart = 0;
+        std::uint32_t displayEnd = 0;
+        bool wrapContinuation = false;
+        D2D1_RECT_F rect{};
+    };
+
+    using EditorLayoutLines = std::shared_ptr<const std::vector<EditorVisualLine>>;
+    EditorLayoutLines BuildEditorTextLines(IDWriteTextLayout*, EditorDisplayMapping const&, folia::TextSpan, float width);
+
     struct EditorVisualBlock
     {
         D2D1_RECT_F rect{};
@@ -18,22 +37,11 @@ export namespace folia::platform::editor
         float textWidth = 0.0f;
         folia::TextSpan sourceSpan;
         float documentY = 0.0f;
-        std::u32string text;
         EditorDisplayMapping displayToSource;
         ::Microsoft::WRL::ComPtr<IDWriteTextLayout> layout;
+        EditorLayoutLines layoutLines;
+        std::shared_ptr<const EditorTextPaintPlan> paintPlan;
         bool thematicBreak = false;
-    };
-
-    struct EditorVisualLine
-    {
-        std::size_t blockIndex = 0;
-        std::size_t tableIndex = (std::numeric_limits<std::size_t>::max)();
-        std::size_t cellIndex = (std::numeric_limits<std::size_t>::max)();
-        std::vector<folia::TextSpan> sourceSpans;
-        std::uint32_t displayStart = 0;
-        std::uint32_t displayEnd = 0;
-        bool wrapContinuation = false;
-        D2D1_RECT_F rect{};
     };
 
     struct EditorVisualTableCell
@@ -45,9 +53,10 @@ export namespace folia::platform::editor
         folia::TextSpan sourceSpan;
         std::size_t row = 0;
         std::size_t column = 0;
-        std::u32string text;
         EditorDisplayMapping displayToSource;
         ::Microsoft::WRL::ComPtr<IDWriteTextLayout> layout;
+        EditorLayoutLines layoutLines;
+        std::shared_ptr<const EditorTextPaintPlan> paintPlan;
     };
 
     struct EditorVisualTable

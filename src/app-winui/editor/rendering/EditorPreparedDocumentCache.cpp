@@ -56,6 +56,17 @@ namespace winrt::Folia
         }
         auto sourceMode = !frame.renderModel.blocks.empty()
             && frame.renderModel.blocks.front().source_mode;
+        auto layoutAffectedByCaret = [&](std::optional<std::size_t> index) -> std::optional<std::size_t> {
+            if (!index || !preparedDocument || cache.active == selection.active) return {};
+            if (*index >= frame.renderModel.blocks.size() || *index >= preparedDocument->blocks.size()) return index;
+            auto const& prepared = preparedDocument->blocks[*index];
+            if (!prepared.valid) return index;
+            if (!frame.renderModel.blocks[*index].materialized && frame.materializeBlocks)
+                frame.materializeBlocks(*index, *index + 1);
+            auto const& source = frame.renderModel.blocks[*index];
+            if (!source.materialized || prepared.caretPresentation != CaretPresentationState(source, selection.active)) return index;
+            return {};
+        };
         auto invalidationPlan = BuildEditorPreparationInvalidationPlan(
             cache,
             frame.renderModel.blocks.size(),
@@ -66,8 +77,8 @@ namespace winrt::Folia
             frame.renderModel.incremental_update,
             sourceMode,
             frame.renderModel.changed_block_indices,
-            previousActiveBlock,
-            activeBlock);
+            layoutAffectedByCaret(previousActiveBlock),
+            layoutAffectedByCaret(activeBlock));
         auto completionGeneration = frame.completion ? frame.completion->generation : 0;
         auto completionChanged = preparedDocument && preparedDocument->completionGeneration != completionGeneration;
         if (completionChanged && !invalidationPlan.rebuildAll) {
@@ -110,10 +121,11 @@ namespace winrt::Folia
                     auto& candidate = previous->blocks[found->second];
                     if (candidate.sourceMode != source.source_mode
                         || candidate.presentationKey != source.presentation_key) continue;
-                    if (!source.source_mode
-                        && (invalidationPlan.activePositionChanged || completionChanged)
-                        && (owns(candidate, previous->selection.active.container_id)
-                            || owns(candidate, selection.active.container_id))) continue;
+                    auto activeOwner = owns(candidate, previous->selection.active.container_id)
+                        || owns(candidate, selection.active.container_id);
+                    if (!source.source_mode && activeOwner && (completionChanged
+                        || (invalidationPlan.activePositionChanged
+                            && (!source.materialized || candidate.caretPresentation != CaretPresentationState(source, selection.active))))) continue;
                     preparedDocument->blocks[index] = std::move(candidate);
                     if (preparedDocument->blocks[index].valid
                         && source.kind != folia::RenderBlockKind::ThematicBreak)

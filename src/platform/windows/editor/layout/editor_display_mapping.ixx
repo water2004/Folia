@@ -261,6 +261,32 @@ export namespace folia::platform::editor
         }
     };
 
+    // Map an ordered source selection to its displayed intervals. Source order
+    // across owners is supplied by the document, not inferred from NodeIds.
+    template<class Less>
+    std::vector<std::pair<std::size_t, std::size_t>> DisplayRangesForSourceSelection(
+        EditorDisplayMapping const& mapping, folia::TextPosition start, folia::TextPosition end, Less&& less)
+    {
+        std::vector<std::pair<std::size_t, std::size_t>> ranges;
+        auto count = mapping.empty() ? 0 : mapping.size() - 1;
+        mapping.for_each_run(0, count, [&](auto begin, auto limit, auto first, auto last) {
+            if (less(last, start) || !less(first, end)) return true;
+            if (first.source_offset != last.source_offset) {
+                auto runBegin = begin;
+                if (first.container_id == start.container_id && start.source_offset > first.source_offset)
+                    begin += start.source_offset - first.source_offset;
+                if (first.container_id == end.container_id && end.source_offset <= last.source_offset)
+                    limit = runBegin + end.source_offset - first.source_offset;
+            }
+            if (begin < limit) {
+                if (!ranges.empty() && ranges.back().second == begin) ranges.back().second = limit;
+                else ranges.emplace_back(begin, limit);
+            }
+            return true;
+        });
+        return ranges;
+    }
+
     inline std::optional<std::pair<std::size_t, std::size_t>>
     SourceDisplayRangeForContainer(
         EditorDisplayMapping const& mapping,

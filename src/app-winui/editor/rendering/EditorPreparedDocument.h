@@ -3,6 +3,7 @@
 import folia.platform.editor_geometry;
 
 #include "editor/rendering/EditorContentPreparation.h"
+#include "editor/rendering/EditorCaretPresentation.h"
 #include "editor/rendering/EditorMathPreview.h"
 #include "editor/rendering/EditorInlineImageRenderer.h"
 #include "editor/rendering/EditorTableBlockRenderer.h"
@@ -35,7 +36,10 @@ namespace winrt::Folia
         struct Block
         {
             DisplayInlineText display;
+            EditorCaretPresentationState caretPresentation;
             ::Microsoft::WRL::ComPtr<IDWriteTextLayout> layout;
+            folia::platform::editor::EditorLayoutLines layoutLines;
+            std::shared_ptr<const folia::platform::editor::EditorTextPaintPlan> paintPlan;
             std::vector<EditorInlineImageRenderer::ImageDraw> images;
             std::vector<MathPreview> mathPreviews;
             std::vector<MermaidDraw> mermaids;

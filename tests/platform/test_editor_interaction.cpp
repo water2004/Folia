@@ -1,6 +1,6 @@
 #include <d2d1.h>
 #include <dwrite.h>
-#include <wrl/client.h>
+#include <wrl.h>
 #include "support/folia_test.hpp"
 
 import folia.markdown.ids;
@@ -129,8 +129,7 @@ suite editor_interaction_tests = [] {
     EditorInteractionMap interaction;
     interaction.blocks.push_back(EditorVisualBlock{
         .rect = D2D1_RECT_F{0, 0, 400, 100}, .textOrigin = D2D1_POINT_2F{0, 0},
-        .textWidth = 400, .sourceSpan = {owner, {10, 10}}, .text = U"\u200B\n\u200B",
-        .displayToSource = {{owner, 10, TextAffinity::Downstream, EditorDisplayPositionKind::BoundaryDecoration},
+        .textWidth = 400, .sourceSpan = {owner, {10, 10}}, .displayToSource = {{owner, 10, TextAffinity::Downstream, EditorDisplayPositionKind::BoundaryDecoration},
             {owner, 10, TextAffinity::Downstream, EditorDisplayPositionKind::BoundaryDecoration},
             {owner, 10, TextAffinity::Downstream, EditorDisplayPositionKind::Source},
             {owner, 10, TextAffinity::Downstream, EditorDisplayPositionKind::Source}},
@@ -148,8 +147,7 @@ suite editor_interaction_tests = [] {
     EditorInteractionMap interaction;
     interaction.blocks.push_back(EditorVisualBlock{
         .rect = D2D1_RECT_F{0, 0, 400, 140}, .textOrigin = D2D1_POINT_2F{0, 0},
-        .textWidth = 400, .sourceSpan = {owner, {0, 6}}, .text = U"$\n\n$\n\uFFFC",
-        .displayToSource = {{owner, 0, TextAffinity::Downstream},
+        .textWidth = 400, .sourceSpan = {owner, {0, 6}}, .displayToSource = {{owner, 0, TextAffinity::Downstream},
             {owner, 2, TextAffinity::Downstream}, {owner, 3, TextAffinity::Downstream},
             {owner, 4, TextAffinity::Downstream},
             {owner, 3, TextAffinity::Upstream, EditorDisplayPositionKind::BoundaryDecoration},
@@ -159,8 +157,8 @@ suite editor_interaction_tests = [] {
     });
     interaction.AddBlockLines(0);
     expect(fatal(interaction.lines.size() == 3_u));
-    expect(interaction.lines[1].sourceSpans == std::vector<TextSpan>{{owner, {3, 3}}});
-    expect(interaction.lines[2].sourceSpans == std::vector<TextSpan>{{owner, {4, 4}}});
+    expect(std::ranges::equal(interaction.lines[1].SourceSpans(), std::vector<TextSpan>{{owner, {3, 3}}}));
+    expect(std::ranges::equal(interaction.lines[2].SourceSpans(), std::vector<TextSpan>{{owner, {4, 4}}}));
     for (auto affinity : {TextAffinity::Upstream, TextAffinity::Downstream}) {
         auto caret = interaction.CaretBounds({owner, 3, affinity}, 24);
         expect(fatal(caret.has_value()));
@@ -173,15 +171,14 @@ suite editor_interaction_tests = [] {
     EditorInteractionMap interaction;
     interaction.blocks.push_back(EditorVisualBlock{
         .rect = D2D1_RECT_F{0, 0, 400, 40}, .textOrigin = D2D1_POINT_2F{0, 0},
-        .textWidth = 400, .sourceSpan = {NodeId{513}, {0, 0}}, .text = U"  ",
-        .displayToSource = {{owner, 0, TextAffinity::Downstream, EditorDisplayPositionKind::BoundaryDecoration},
+        .textWidth = 400, .sourceSpan = {NodeId{513}, {0, 0}}, .displayToSource = {{owner, 0, TextAffinity::Downstream, EditorDisplayPositionKind::BoundaryDecoration},
             {owner, 0, TextAffinity::Downstream, EditorDisplayPositionKind::BoundaryDecoration},
             {owner, 0, TextAffinity::Downstream}},
         .layout = MakeLayout(L"  "),
     });
     interaction.AddBlockLines(0);
     expect(fatal(interaction.lines.size() == 1_u));
-    expect(interaction.lines.front().sourceSpans == std::vector<TextSpan>{{owner, {0, 0}}});
+    expect(std::ranges::equal(interaction.lines.front().SourceSpans(), std::vector<TextSpan>{{owner, {0, 0}}}));
     expect(interaction.CaretBounds({owner, 0, TextAffinity::Downstream}, 24).has_value());
 };
 
@@ -190,8 +187,7 @@ suite editor_interaction_tests = [] {
     EditorInteractionMap interaction;
     interaction.blocks.push_back(EditorVisualBlock{
         .rect = D2D1_RECT_F{0, 0, 400, 80}, .textOrigin = D2D1_POINT_2F{0, 0},
-        .textWidth = 400, .sourceSpan = {owner, {10, 11}}, .text = U"a\n\uFFFC",
-        .displayToSource = {{owner, 10, TextAffinity::Downstream},
+        .textWidth = 400, .sourceSpan = {owner, {10, 11}}, .displayToSource = {{owner, 10, TextAffinity::Downstream},
             {owner, 11, TextAffinity::Upstream, EditorDisplayPositionKind::BoundaryDecoration},
             {owner, 11, TextAffinity::Upstream, EditorDisplayPositionKind::BoundaryDecoration},
             {owner, 11, TextAffinity::Upstream, EditorDisplayPositionKind::BoundaryDecoration}},
@@ -199,7 +195,7 @@ suite editor_interaction_tests = [] {
     });
     interaction.AddBlockLines(0);
     expect(fatal(interaction.lines.size() == 1_u));
-    expect(interaction.lines.front().sourceSpans == std::vector<TextSpan>{{owner, {10, 11}}});
+    expect(std::ranges::equal(interaction.lines.front().SourceSpans(), std::vector<TextSpan>{{owner, {10, 11}}}));
     expect(interaction.CaretBounds({owner, 11, TextAffinity::Downstream}, 24).has_value());
 };
 
@@ -213,15 +209,14 @@ suite editor_interaction_tests = [] {
         .textWidth = 400.0f,
         .sourceSpan = {owner, {0, length}},
         .documentY = 20.0f,
-        .text = U"alpha beta",
         .displayToSource = IdentityMapping(owner, length),
         .layout = MakeLayout(L"alpha beta"),
     });
 
     interaction.AddBlockLines(0);
     expect(interaction.lines.size() == 1_u);
-    expect(interaction.lines.front().sourceSpans.size() == 1_u);
-    expect(interaction.lines.front().sourceSpans.front() == TextSpan{owner, {0, length}});
+    expect(interaction.lines.front().SourceSpans().size() == 1_u);
+    expect(interaction.lines.front().SourceSpans().front() == TextSpan{owner, {0, length}});
 
     auto start = interaction.CaretBounds({owner, 0, TextAffinity::Downstream}, 24.0f);
     auto middle = interaction.CaretBounds({owner, 5, TextAffinity::Downstream}, 24.0f);
@@ -253,7 +248,6 @@ suite editor_interaction_tests = [] {
         .textWidth = 300.0f,
         .sourceSpan = {owner, {0, length}},
         .documentY = 40.0f,
-        .text = U"alpha\nbeta",
         .displayToSource = IdentityMapping(owner, length),
         .layout = MakeLayout(L"alpha\nbeta", 300.0f),
     });
@@ -295,7 +289,6 @@ suite editor_interaction_tests = [] {
         .textOrigin = D2D1_POINT_2F{30.0f, 40.0f},
         .textWidth = 380.0f,
         .sourceSpan = {owner, {0, length}},
-        .text = U"alpha beta",
         .displayToSource = IdentityMapping(owner, length),
         .layout = MakeLayout(L"alpha beta", 380.0f),
     });
@@ -414,6 +407,51 @@ suite editor_interaction_tests = [] {
     interaction.Clear();
     expect(!interaction.RawBlockFor(codeOwner).has_value());
     expect(!interaction.RawBlockFor(mathOwner).has_value());
+};
+
+
+"cached line allocation agrees with native glyph baselines far into a paragraph"_test = [] {
+    struct Baselines final : Microsoft::WRL::RuntimeClass<
+        Microsoft::WRL::RuntimeClassFlags<Microsoft::WRL::ClassicCom>, IDWriteTextRenderer> {
+        std::vector<std::pair<UINT32, float>> values;
+        HRESULT STDMETHODCALLTYPE IsPixelSnappingDisabled(void*, BOOL* disabled) override {
+            *disabled = TRUE; return S_OK;
+        }
+        HRESULT STDMETHODCALLTYPE GetCurrentTransform(void*, DWRITE_MATRIX* transform) override {
+            *transform = {1, 0, 0, 1, 0, 0}; return S_OK;
+        }
+        HRESULT STDMETHODCALLTYPE GetPixelsPerDip(void*, FLOAT* pixels) override { *pixels = 1; return S_OK; }
+        HRESULT STDMETHODCALLTYPE DrawGlyphRun(void*, FLOAT, FLOAT baseline, DWRITE_MEASURING_MODE,
+            DWRITE_GLYPH_RUN const*, DWRITE_GLYPH_RUN_DESCRIPTION const* description, IUnknown*) override {
+            if (description) values.emplace_back(description->textPosition, baseline); return S_OK;
+        }
+        HRESULT STDMETHODCALLTYPE DrawUnderline(void*, FLOAT, FLOAT, DWRITE_UNDERLINE const*, IUnknown*) override { return S_OK; }
+        HRESULT STDMETHODCALLTYPE DrawStrikethrough(void*, FLOAT, FLOAT, DWRITE_STRIKETHROUGH const*, IUnknown*) override { return S_OK; }
+        HRESULT STDMETHODCALLTYPE DrawInlineObject(void*, FLOAT, FLOAT, IDWriteInlineObject*, BOOL, BOOL, IUnknown*) override { return E_NOTIMPL; }
+    };
+    std::wstring text;
+    for (int i = 0; i < 10000; ++i) text += L"sample line\n";
+    auto layout = MakeLayout(text);
+    expect(fatal(SUCCEEDED(layout->SetLineSpacing(DWRITE_LINE_SPACING_METHOD_UNIFORM, 23.4f, 18.1f))));
+    auto mapping = IdentityMapping(NodeId{701}, text.size());
+    auto lines = BuildEditorTextLines(layout.Get(), mapping, {NodeId{701}, {0, text.size()}}, 400);
+    expect(fatal(lines && lines->size() == 10001));
+    std::vector<DWRITE_LINE_METRICS> metrics(lines->size());
+    UINT32 count = 0;
+    expect(fatal(SUCCEEDED(layout->GetLineMetrics(metrics.data(), static_cast<UINT32>(metrics.size()), &count))));
+    auto renderer = Microsoft::WRL::Make<Baselines>();
+    expect(fatal(SUCCEEDED(layout->Draw(nullptr, renderer.Get(), 0, 0))));
+    expect(fatal(!renderer->values.empty()));
+    for (auto index : {std::size_t{1}, std::size_t{5000}, std::size_t{9999}}) {
+        auto const& line = (*lines)[index];
+        auto native = std::ranges::find(renderer->values, line.displayStart,
+            &std::pair<UINT32, float>::first);
+        expect(fatal(native != renderer->values.end()));
+        expect(std::abs(line.rect.top + metrics[index].baseline - native->second) < 0.01f)
+            << index << " cached baseline " << line.rect.top + metrics[index].baseline
+            << " native " << native->second;
+        expect(std::abs(line.rect.bottom - line.rect.top - metrics[index].height) < 0.01f);
+    }
 };
 
 }; // suite editor_interaction_tests

@@ -102,7 +102,7 @@ suite completion_layout_tests = [] {
                         for (std::size_t index = 0; index < prepared.table->displays.size(); ++index) {
                             auto display = prepared.table->displays[index];
                             auto const& cell = prepared.table->visual.cells[index];
-                            display.text = cell.text; display.displayToSource = cell.displayToSource;
+                            display.displayToSource = cell.displayToSource;
                             inspect(display, cell.layout.Get());
                         }
                     } else inspect(prepared.display, prepared.layout.Get());

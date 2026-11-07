@@ -4,7 +4,18 @@
 
 - 2026-11-07：旧 QuickJS 源码、应用脚本和旧打包工具已移除。`tools/mathjax-bundle/` 的 `entry.cjs` 和锁文件继续作为原生数学构建及对照工具的固定输入。Release 启动、WiX 清单和锁定对照配置加载已验证。
 
-## 当前 checkpoint（2026-11-08，10 MB 连续段落加载）
+## 当前 checkpoint（2026-11-08，语义增量编辑与排版仍在进行）
+
+- 用户要求解决10MB单段落交互卡顿，并让TextEdit→CST损伤→排版损伤贯通。普通编辑局部解析，重排传播到稳定边界复用后缀；不拆权威段落、不加第二选区坐标。原sample-10mb.md禁止读取/打开，只用生成fixture；不开agents/CUA/OS输入，编译≤4。本轮无新MSI/安装/推送要求。
+- Git **75eb49ab** 已修reconcile_nodes平方循环，**a5578a10** 已提交局部词法CST窗口、精简identity历史、条件block discovery。核心全量 **784项532111断言**通过（build/incremental-inline-core-accepted.log）；5000随机窗口/inverse与完整解析对照通过。普通1MB修改分析<128字符，保留NodeId且history不再存整owner ID数组。块发现仍扫描整个owner，但拒绝重分类时不再构建冗余CST；后续优化必须依据canonical依赖证明，不能字符前缀特判。
+- 未提交渲染批已通过平台全量 **98项9100291断言**（large-interaction-platform-accepted.log）：统一caret presentation resolver/cache state；共享immutable line/sourceSpans；删除visual.text副本；selection/search压缩mapping+可见行；native editor_text_paint按真实字体glyph ink过滤屏外绘制，保持原DWrite shaping/effects/decorations/inline/PDF。36组合精确像素、250次scalar selection对照通过。仍遍历native全部glyph callbacks与长段行metadata，非完整增量布局。
+- 最新Debug应用 **incremental-inline-debug.log**成功；真实visual **3项62断言**通过（incremental-inline-visual.log），输入/Undo解析总<256字符、仅2次owner CST更新，滚动/光标/选区0解析且保持cache identity，0全文parse/serialize。Debug1MB输入615ms/Undo165ms/编辑帧207ms，10MB6077/1809/2165ms；不能当Release性能。旧Release10MB阅读9ms、输入1331ms/编辑帧980ms，来自局部CST前版本。
+- 曾误加DrawFlowDecorations child_blocks.empty早退，漏root code/math；已移除且Debug inline_presentation_paths10/419+loading5/26通过（large-interaction-inline-regression.log）。**Release尚缺此修正及a557，不可交付**。新版Debug completion_layout **2项1057断言**（另loading5/26）、inline presentation **10/419**（另loading5/26）已通过，日志incremental-inline-{completion-layout,presentation}.log；局部CST之后未重跑Release。
+- 当前无运行build/test/agent句柄。未使用的editor_text_analysis原型已删除，不提交死代码。远行native baseline验证已通过16断言（incremental-layout-line-geometry.log）：line top+line metric.baseline与DrawGlyphRun baseline在1/5000/9999行一致；先前失败是错误地拿glyph/caret box top当line allocation top，未改生产或放宽比较。原生长段float行高累加存在精度损失，片段重排需统一几何；不能靠平移旧tail假设与整段native字节像素一致。
+- 下一步：①提交已验渲染批（与a557核心批分开）。②确立可复用布局片段边界，保留native shaping/bidi/换行依赖。③实现共享片段布局供绘制/命中/光标/选区共同消费；DWrite本身没有改字符串接口，需原生分析证明影响范围闭合，复杂bidi/shaping不能盲切子串。④正式1/10MB编辑/Undo与Release回归后再报告。不要停在滚动优化，不宣称局部重排已完成。
+- 已查Microsoft官方IDWriteTextLayout::Draw、IDWriteTextRenderer、Direct2D+DirectWrite；clip不减native遍历，Release真实Visual宿主可用，console XAML Release不可用。没有下载/引入外部排版实现，不克隆巨大sample仓库；当前没有布局片段引擎文件，设计仍需native实验，别当已实现。主模块边界、Unicode源坐标、lossless CST和事务要求以AGENTS为准。
+
+## 10 MB 连续段落加载（上一轮已交付，历史）
 
 - 用户文件 `C:/Users/think book/Downloads/sample-10mb.md` 仅查元数据（10485760 字节），未读取内容或用 Folia 打开。用户提供内容为无空行重复英文，已用相同结构自建测试；原文件继续不要打开。
 - 根因：EditorContentPreparation 每次追加都 utf16_len(已累积文本)，导致长段落平方增长；EditorDisplayMapping 每 UTF16 单元 32 字节且布局/interaction 复制。已改公共追加取构建中 mapping.size，平台 mapping 用常量/线性区间存储、保持值语义与同一 source 坐标；CreateFlow 无缩进不再复制整个 display，连续普通文字合并相同 style ranges，控件边界保留。

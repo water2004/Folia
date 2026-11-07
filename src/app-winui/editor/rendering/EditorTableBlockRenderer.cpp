@@ -110,10 +110,12 @@ namespace winrt::Folia
                 cell.sourceSpan = sourceSpan;
                 cell.row = row;
                 cell.column = column;
-                cell.text = std::move(display.text);
-                cell.displayToSource = std::move(display.displayToSource);
+                cell.displayToSource = display.displayToSource;
                 cell.textHeight = cellTextHeight + previewHeight;
                 cell.layout = std::move(layout);
+                cell.layoutLines = folia::platform::editor::BuildEditorTextLines(
+                    cell.layout.Get(), cell.displayToSource, sourceSpan, EditorTableCellContentWidth(tableWidth, table.columnCount));
+                cell.paintPlan = folia::platform::editor::EditorTextPaintPlan::Prepare(cell.layout.Get());
                 prepared.pendingMath = prepared.pendingMath || display.pendingMath;
                 prepared.displays.push_back(std::move(display));
                 prepared.imageDraws.push_back(std::move(images));
@@ -187,7 +189,7 @@ namespace winrt::Folia
             auto const& display = prepared.displays[cellIndex];
             if (cell.layout)
             {
-                documentPainter.DrawInlineText(cell.layout.Get(), cell.textOrigin, display, cell.displayToSource, resources.textBrush.Get());
+                documentPainter.DrawInlineText(cell.layout.Get(), cell.textOrigin, display, cell.displayToSource, resources.textBrush.Get(), cell.paintPlan, cell.layoutLines);
                 for (auto const& overlay : display.footnoteOverlays)
                 {
                     UINT32 count = 0;

@@ -46,11 +46,11 @@ namespace winrt::Folia
         void DrawSelection(
             IDWriteTextLayout* layout,
             D2D1_POINT_2F origin,
-            EditorDisplayMapping const& mapping);
+            EditorDisplayMapping const& mapping, std::pair<std::size_t, std::size_t> visible);
         void DrawSearchHighlights(
             IDWriteTextLayout* layout,
             D2D1_POINT_2F origin,
-            EditorDisplayMapping const& mapping);
+            EditorDisplayMapping const& mapping, std::pair<std::size_t, std::size_t> visible);
         void ApplyNestedCodeHighlights(
             DisplayInlineText& display,
             folia::RenderBlock const& parent);
@@ -64,7 +64,9 @@ namespace winrt::Folia
             D2D1_POINT_2F origin,
             DisplayInlineText const& display);
         void DrawInlineText(IDWriteTextLayout* layout, D2D1_POINT_2F origin,
-            DisplayInlineText const& display, EditorDisplayMapping const& mapping, ID2D1Brush* textBrush);
+            DisplayInlineText const& display, EditorDisplayMapping const& mapping, ID2D1Brush* textBrush,
+            std::shared_ptr<const folia::platform::editor::EditorTextPaintPlan> const& paintPlan,
+            folia::platform::editor::EditorLayoutLines const& lines);
 
         static std::vector<PositionedMath> PaintMath(IDWriteTextLayout* layout,
             D2D1_POINT_2F origin, std::vector<DisplayInlineText::MathOverlay> const& overlays, float width,
@@ -78,7 +80,6 @@ namespace winrt::Folia
 
     private:
         bool PositionLess(folia::TextPosition left, folia::TextPosition right) const;
-        bool Selected(folia::TextPosition position) const;
 
         EditorRenderResources& resources;
         EditorStyleSheet const& styleSheet;
