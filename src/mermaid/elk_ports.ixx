@@ -13,6 +13,9 @@ struct ElkPointPortOptions {
 // PortSideProcessor for ordinary non-compound ports. Run after reversal and
 // before sorting/crossing; fixed-position long-edge dummy ports keep their side.
 void elk_assign_flat_port_sides(ElkLayeredGraph& graph);
+// Insert long-edge dummies for fixed east/west ports inverted by cycle breaking.
+// Run after long-edge splitting and assigning the compound boundary port sides.
+void elk_prepare_inverted_ports(ElkLayeredGraph& graph);
 // Fixed measured nodes, no separate node/port labels or size constraints.
 // Run after crossing order; preserve node.ports clockwise order. Ordinary
 // implicit ports are zero-size points, so local position equals their anchor.

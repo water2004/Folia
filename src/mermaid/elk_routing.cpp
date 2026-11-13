@@ -233,11 +233,28 @@ struct RoutingGap {
             }
         }
     }
-    std::size_t run(std::span<const std::size_t> source_layer,double start,ElkOrthogonalRoutes& result) {
-        for(const auto n:source_layer)for(const auto p:g.nodes[n].ports)for(const auto e:g.ports[p].outgoing) {
-            const auto& edge=g.edges[e];const auto& source=g.ports[edge.source_port];const auto& target=g.ports[edge.target_port];
-            Segment segment;segment.edge=e;segment.incoming={y[source.node]+source.y};segment.outgoing={y[target.node]+target.y};extent(segment);segments.push_back(std::move(segment));
-        }
+    std::size_t run(std::span<const std::size_t> left,std::span<const std::size_t> right,
+        double start,ElkOrthogonalRoutes& result) {
+        const auto collect = [&](std::span<const std::size_t> layer, ElkPortSide side) {
+            for (const auto n : layer) for (const auto p : g.nodes[n].ports) {
+                if (g.ports[p].side != side) continue;
+                for (const auto e : g.ports[p].outgoing) {
+                    Segment segment{.edge=e};
+                    const auto& edge = g.edges[e];
+                    for (const auto endpoint : {edge.source_port, edge.target_port}) {
+                        const auto& port = g.ports[endpoint];
+                        auto& coordinates = port.side == ElkPortSide::east ? segment.incoming : segment.outgoing;
+                        coordinates.push_back(y[port.node] + port.y);
+                    }
+                    std::ranges::sort(segment.incoming);
+                    std::ranges::sort(segment.outgoing);
+                    extent(segment);
+                    segments.push_back(std::move(segment));
+                }
+            }
+        };
+        collect(left, ElkPortSide::east);
+        collect(right, ElkPortSide::west);
         double minimum=std::numeric_limits<double>::max();
         for(bool incoming:{true,false}) {
             std::vector<double> coordinates;
@@ -280,8 +297,12 @@ std::expected<ElkOrthogonalRoutes,std::string> elk_route_flat_edges(const ElkLay
     for(const auto& p:g.ports)if(p.incoming.size()+p.outgoing.size()>1)return std::unexpected("ELK flat routing requires one edge per port");
     for(const auto& e:g.edges) {
         const auto& s=g.ports[e.source_port];const auto& t=g.ports[e.target_port];
-        if(s.side!=ElkPortSide::east||t.side!=ElkPortSide::west||g.nodes[t.node].layer!=g.nodes[s.node].layer+1)
-            return std::unexpected("ELK flat routing requires adjacent east/west edges");
+        const auto left = g.nodes[s.node].layer, right = g.nodes[t.node].layer;
+        const bool forward = right == left + 1 && s.side == ElkPortSide::east && t.side == ElkPortSide::west;
+        const bool in_layer = left == right && s.node != t.node && s.side == t.side
+            && (s.side == ElkPortSide::east || s.side == ElkPortSide::west);
+        if (!forward && !in_layer)
+            return std::unexpected("ELK routing requires preprocessed adjacent or same-side in-layer edges");
     }
     ElkOrthogonalRoutes result;result.node_x.resize(g.nodes.size());result.bends.resize(g.edges.size());
     for(const auto& layer:g.layers) {
@@ -289,7 +310,11 @@ std::expected<ElkOrthogonalRoutes,std::string> elk_route_flat_edges(const ElkLay
         for(const auto n:layer)width=std::max(width,g.nodes[n].width+margins[n].left+margins[n].right);
         result.layer_width.push_back(width);
     }
-    result.gap_slots.push_back(0);
+    const auto initial_slots = g.layers.empty() ? 0
+        : RoutingGap(g,y,spacing,random).run({},g.layers.front(),0,result);
+    result.gap_slots.push_back(initial_slots);
+    if (initial_slots > 0)
+        result.width = (initial_slots - 1) * spacing.edge_edge_between_layers + spacing.edge_node_between_layers;
     for(std::size_t l=0;l<g.layers.size();++l) {
         const auto& layer=g.layers[l];double left=0,right=0;
         for(const auto n:layer){left=std::max(left,margins[n].left);right=std::max(right,margins[n].right);}
@@ -307,7 +332,9 @@ std::expected<ElkOrthogonalRoutes,std::string> elk_route_flat_edges(const ElkLay
             return std::ranges::all_of(g.layers[layer_index],[&](auto n){return g.nodes[n].kind==ElkLayerNodeKind::external_port;});
         };
         const bool ordinary_gap=l+1<g.layers.size()&&!external(l)&&!external(l+1);
-        const auto slots=RoutingGap(g,y,spacing,random).run(layer,result.width+spacing.edge_node_between_layers,result);
+        const auto next = l+1<g.layers.size() ? std::span<const std::size_t>{g.layers[l+1]}
+            : std::span<const std::size_t>{};
+        const auto slots=RoutingGap(g,y,spacing,random).run(layer,next,result.width+spacing.edge_node_between_layers,result);
         result.gap_slots.push_back(slots);
         if(slots>0) {
             auto width=(slots-1)*spacing.edge_edge_between_layers+spacing.edge_node_between_layers;

@@ -5,6 +5,10 @@
   "license": "MIT",
   "files": [
     {
+      "path": "packages/mermaid/src/rendering-util/layout-algorithms/elk/subgraphFeedbackEdges.ts",
+      "sha256": "b2924ce5c1c619ff902e0eeed1a79fa7e725c5e800c707d23cda22ad6a2304cc"
+    },
+    {
       "path": "packages/mermaid/src/rendering-util/layout-algorithms/elk/lineHops.ts",
       "sha256": "e7ddc534ca4b6b2410224edf9ac66c450987b61f321952f4238aaf468b28f828"
     },

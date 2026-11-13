@@ -9,4 +9,5 @@ export const cases=[
  ['elk-painted-cloud','flowchart TB\nA@{shape: cloud, label: "Cloud box"}'],
  ['elk-painted-document-routes','flowchart TB\nA[Before] --- B@{shape: doc, label: Document}\nB --- C[Left]\nB --- D[Right]'],
  ['elk-painted-cloud-routes','flowchart TB\nA[Before] --- B@{shape: cloud, label: Cloud}\nB --- C[Left]\nB --- D[Right]'],
+ ['elk-painted-group-feedback','flowchart TB\nsubgraph client[Client]\nA[Send] --> B[Show]\nend\nsubgraph service[Service]\nC[Receive] --> D[Reply]\nend\nA -->|request| C\nD -. "response" .-> B'],
 ];

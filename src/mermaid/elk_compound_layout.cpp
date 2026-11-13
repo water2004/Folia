@@ -96,6 +96,7 @@ std::expected<ElkCompoundLayoutResult,std::string> elk_layout_compound(
             if(imported_ports[p]||topology.nodes[port.node].boundary)
                 g.ports[local_port[p]].side=port.side;
         }
+        elk_prepare_inverted_ports(g);
         if(const auto sorted=elk_sort_flat_ports(g);!sorted)return std::unexpected(sorted.error());
         if(options.consider_model_order)elk_sort_input_model(g);
     }

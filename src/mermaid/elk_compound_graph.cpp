@@ -95,19 +95,56 @@ struct Builder {
         }
         return exported;
     }
+    void import_edges() {
+        // ElkGraphImporter visits containing graphs breadth-first. Cross-scope
+        // edges therefore create endpoint ports before edges local to a child.
+        std::vector<std::size_t> depth(result.graphs.size()), breadth{0};
+        const auto outer = [&](std::size_t graph) {
+            return result.nodes[*result.graphs[graph].parent_node].graph;
+        };
+        for (std::size_t i = 0; i < breadth.size(); ++i) {
+            const auto graph = breadth[i];
+            for (const auto node : result.graphs[graph].nodes) {
+                if (const auto child = result.nodes[node].nested_graph) {
+                    depth[*child] = depth[graph] + 1;
+                    breadth.push_back(*child);
+                }
+            }
+        }
+        if (breadth.size() != result.graphs.size())
+            throw std::logic_error("ELK compound group hierarchy has a cycle");
+        std::vector<std::vector<std::size_t>> contained(result.graphs.size());
+        for (std::size_t e = 0; e < input.edges.size(); ++e) {
+            const auto [source, target] = input.edges[e];
+            if (source >= result.nodes.size() || target >= result.nodes.size())
+                throw std::logic_error("ELK compound edge has no node");
+            auto from = result.nodes[source].graph, to = result.nodes[target].graph;
+            while (depth[from] > depth[to]) from = outer(from);
+            while (depth[to] > depth[from]) to = outer(to);
+            while (from != to) { from = outer(from); to = outer(to); }
+            contained[from].push_back(e);
+        }
+        original_source.resize(input.edges.size());
+        original_target.resize(input.edges.size());
+        for (const auto graph : breadth) for (const auto e : contained[graph]) {
+            const auto [source, target] = input.edges[e];
+            const auto from = result.nodes[source].graph, to = result.nodes[target].graph;
+            const auto s = port(source, elk_make_compound_port_dummy(result.graphs[from].direction, true, 0).side);
+            const auto t = port(target, elk_make_compound_port_dummy(result.graphs[to].direction, false, 0).side);
+            original_source[e] = s;
+            original_target[e] = t;
+            outgoing[s].push_back(e);
+            incoming[t].push_back(e);
+            if (from == to) segment(from, e, s, t);
+        }
+    }
     ElkCompoundGraph run() {
         result.graphs.push_back({.direction=input.direction});result.nodes.resize(input.nodes.size());result.edges.resize(input.edges.size());
         for(std::size_t n=0;n<input.nodes.size();++n){result.nodes[n].original=n;if(input.nodes[n].group){result.nodes[n].nested_graph=result.graphs.size();result.graphs.push_back({.parent_node=n,.direction=input.nodes[n].direction});}}
         for(std::size_t n=0;n<input.nodes.size();++n){const auto p=input.nodes[n].parent;
             if(p&&(*p>=input.nodes.size()||!result.nodes[*p].nested_graph))throw std::logic_error("ELK compound node has no parent group");
             const auto g=p?*result.nodes[*p].nested_graph:0;result.nodes[n].graph=g;result.graphs[g].nodes.push_back(n);}
-        for(std::size_t e=0;e<input.edges.size();++e){const auto& edge=input.edges[e];
-            if(edge.source>=input.nodes.size()||edge.target>=input.nodes.size())throw std::logic_error("ELK compound edge has no node");
-            const auto s=port(edge.source,elk_make_compound_port_dummy(result.graphs[result.nodes[edge.source].graph].direction,true,0).side);
-            const auto t=port(edge.target,elk_make_compound_port_dummy(result.graphs[result.nodes[edge.target].graph].direction,false,0).side);
-            original_source.push_back(s);original_target.push_back(t);outgoing[s].push_back(e);incoming[t].push_back(e);
-            if(result.nodes[edge.source].graph==result.nodes[edge.target].graph)segment(result.nodes[edge.source].graph,e,s,t);
-        }
+        import_edges();
         transform(0);
         for(std::size_t p=0;p<port_dummy.size();++p)if(port_dummy[p])result.ports[p].side=result.nodes[*port_dummy[p]].boundary->side;
         for(std::size_t e=0;e<result.edges.size();++e) {

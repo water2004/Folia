@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: EPL-2.0
-// Port of PortSideProcessor and the fixed-node, label-free east/west branch
+// Port of PortSideProcessor, InvertedPortProcessor and the fixed-node, label-free east/west branch
 // of NodeLabelAndSizeCalculator / PortPlacementCalculator in ELK 0.9.3.
 module folia.mermaid.elk_ports;
 import std;
@@ -10,6 +10,54 @@ void elk_assign_flat_port_sides(ElkLayeredGraph& graph) {
         auto& port=graph.ports[p];
         if(!node.fixed_port_positions||port.side==ElkPortSide::undefined)
             port.side=port.incoming.size()<port.outgoing.size()?ElkPortSide::east:ElkPortSide::west;
+    }
+}
+
+void elk_prepare_inverted_ports(ElkLayeredGraph& graph) {
+    // ELK InvertedPortProcessor inserts an E/W dummy in the node's own layer.
+    // The in-layer segment reaches the original port through the outer gap.
+    for (std::size_t layer = 0; layer < graph.layers.size(); ++layer) {
+        std::vector<std::size_t> dummies;
+        for (const auto n : graph.layers[layer]) {
+            if (graph.nodes[n].kind != ElkLayerNodeKind::normal) continue;
+            const auto ports = graph.nodes[n].ports;
+            for (const auto side : {ElkPortSide::east, ElkPortSide::west}) {
+                for (const auto p : ports) {
+                    if (graph.ports[p].side != side) continue;
+                    const bool inverted_input = side == ElkPortSide::east;
+                    const auto edges = inverted_input ? graph.ports[p].incoming : graph.ports[p].outgoing;
+                    for (const auto e : edges) {
+                        auto segment = graph.edges[e];
+                        const auto source = segment.source_port;
+                        const auto target = segment.target_port;
+                        const auto source_node = graph.ports[source].node;
+                        const auto target_node = graph.ports[target].node;
+                        if (source_node == target_node) continue;
+                        const auto dummy = graph.nodes.size();
+                        const auto input = graph.ports.size();
+                        const auto output = input + 1;
+                        const auto next = graph.edges.size();
+                        const auto& from = graph.nodes[source_node];
+                        const auto& to = graph.nodes[target_node];
+                        graph.nodes.push_back({.kind=ElkLayerNodeKind::long_edge, .layer=layer,
+                            .ports={input,output}, .fixed_port_positions=true, .origin_edge=e,
+                            .long_edge_source=from.long_edge_source.value_or(source),
+                            .long_edge_target=to.long_edge_target.value_or(target),
+                            .long_edge_has_label=from.kind==ElkLayerNodeKind::label || to.kind==ElkLayerNodeKind::label
+                                || from.long_edge_has_label || to.long_edge_has_label});
+                        graph.ports.push_back({.node=dummy, .side=ElkPortSide::west, .incoming={e}});
+                        graph.ports.push_back({.node=dummy, .side=ElkPortSide::east, .outgoing={next}});
+                        auto& incoming = graph.ports[target].incoming;
+                        *std::ranges::find(incoming, e) = next;
+                        graph.edges[e].target_port = input;
+                        segment.source_port = output;
+                        graph.edges.push_back(segment);
+                        dummies.push_back(dummy);
+                    }
+                }
+            }
+        }
+        graph.layers[layer].insert(graph.layers[layer].end(), dummies.begin(), dummies.end());
     }
 }
 std::expected<void,std::string> elk_place_flat_point_ports(

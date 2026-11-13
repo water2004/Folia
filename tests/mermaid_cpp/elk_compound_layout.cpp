@@ -46,7 +46,7 @@ suite elk_compound_layout=[] {
                 for(std::size_t p=0;p<bends.size();++p)point(route.bends[p],bends[p],name);}
             ++count;
         }
-        expect(count==5_u);
+        expect(count==7_u);
     };
 };
 }

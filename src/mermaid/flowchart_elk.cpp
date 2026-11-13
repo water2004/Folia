@@ -20,6 +20,56 @@ double group_title_floor(const FlowchartNode& node,const FlowchartTextBox& label
     // reserve the measured note label's vertical strip.
     return node.shape==u"noteGroup"||node.shape==u"divider"?0:label.width+node.padding;
 }
+
+// Mermaid 12.2.0 subgraphFeedbackEdges.ts. Find feedback edges between
+// direct children of each common subgraph in edge declaration order.
+std::vector<bool> subgraph_feedback_edges(const ElkCompoundInput& input) {
+    struct ProjectedEdge {
+        std::size_t original, source, target;
+        bool collapsed;
+    };
+    const auto root = input.nodes.size();
+    const auto parent = [&](std::size_t node) { return input.nodes[node].parent.value_or(root); };
+    std::vector<std::size_t> depths(root + 1);
+    for (std::size_t n = 0; n < root; ++n)
+        for (auto p = n; p != root; p = parent(p)) ++depths[n];
+
+    std::map<std::size_t, std::vector<ProjectedEdge>> levels;
+    for (std::size_t i = 0; i < input.edges.size(); ++i) {
+        const auto [source, target] = input.edges[i];
+        auto from = source, to = target;
+        while (depths[from] > depths[to]) from = parent(from);
+        while (depths[to] > depths[from]) to = parent(to);
+        if (from == to) continue;
+        while (parent(from) != parent(to)) {
+            from = parent(from);
+            to = parent(to);
+        }
+        levels[parent(from)].push_back({i, from, to, from != source || to != target});
+    }
+
+    std::vector<bool> flags(input.edges.size());
+    for (const auto& [level, edges] : levels) {
+        ElkCycleGraph graph;
+        std::unordered_map<std::size_t, std::size_t> order;
+        const auto port = [&](std::size_t node) {
+            const auto index = order.try_emplace(node, order.size()).first->second;
+            graph.ports.push_back({index});
+            return graph.ports.size() - 1;
+        };
+        for (const auto& edge : edges) {
+            const auto source = port(edge.source);
+            const auto target = port(edge.target);
+            graph.edges.push_back({source, target});
+        }
+        graph.node_count = order.size();
+        const auto reversed = elk_depth_first_feedback_edges(graph);
+        if (!reversed) throw std::logic_error(reversed.error());
+        for (const auto i : *reversed) flags[edges[i].original] = edges[i].collapsed;
+    }
+    return flags;
+}
+
 std::expected<ElkMeasuredScene,std::string> layout_scope(
     const FlowchartInput& source,std::span<const FlowchartNodeBox> boxes,
     std::span<const FlowchartEdgeLabelSize> labels,const FlowchartMeasurements& measured,std::span<const ElkEndLabel> end_labels, const ElkFlatLayoutOptions& options) {
@@ -49,6 +99,17 @@ std::expected<ElkMeasuredScene,std::string> layout_scope(
             const auto& e=source.edges[i];input.hierarchy.edges.push_back({ids.at(e.start),ids.at(e.end)});
             if(!e.label.empty())input.center_labels.push_back({i,i,labels[i].width,labels[i].height});
         }
+        const auto* config = source.effective_config.find(u"elk");
+        const auto* orient = config ? config->find(u"orientFeedbackEdges") : nullptr;
+        const auto reversed = orient && orient->kind == ConfigKind::boolean && !orient->boolean
+            ? std::vector<bool>(input.hierarchy.edges.size()) : subgraph_feedback_edges(input.hierarchy);
+        for (std::size_t i = 0; i < reversed.size(); ++i)
+            if (reversed[i]) std::swap(input.hierarchy.edges[i].source, input.hierarchy.edges[i].target);
+        for (auto& label : input.end_labels) {
+            if (label.original_edge >= reversed.size())
+                return std::unexpected("ELK end label has no edge");
+            if (reversed[label.original_edge]) label.head = !label.head;
+        }
         auto placed=elk_layout_compound(input,options);if(!placed)return std::unexpected(placed.error());
         ElkMeasuredScene scene;scene.end_labels=placed->end_labels;auto& layout=scene.layout;layout.width=placed->width;layout.height=placed->height;
         layout.nodes.resize(boxes.size());layout.edges.resize(labels.size());
@@ -58,6 +119,7 @@ std::expected<ElkMeasuredScene,std::string> layout_scope(
         for(const auto& route:placed->routes) {
             auto& points=layout.edges[route.original_edge].points;points.push_back({route.start.x,route.start.y});
             for(auto p:route.bends)points.push_back({p.x,p.y});points.push_back({route.end.x,route.end.y});
+            if (reversed[route.original_edge]) std::ranges::reverse(points);
         }
         for(const auto& l:placed->center_labels)layout.edges[l.original_edge].label=FlowchartPoint{l.x+l.width/2,l.y+l.height/2};
         // Original evenGroupFrames: deepest first; retain the unmodified absolute
@@ -74,7 +136,8 @@ std::expected<ElkMeasuredScene,std::string> layout_scope(
             const auto include=[&](double x,double y){left=std::min(left,x);right=std::max(right,x);bottom=std::max(bottom,y);};
             for(auto child:children[group]){const auto& b=layout.nodes[child];include(b.x-b.width/2,b.y-b.height/2);include(b.x+b.width/2,b.y+b.height/2);}
             for(std::size_t i=0;i<input.hierarchy.edges.size();++i) {
-                const auto& edge=input.hierarchy.edges[i];const auto& points=layout.edges[i].points;
+                auto edge=input.hierarchy.edges[i];const auto& points=layout.edges[i].points;
+                if (reversed[i]) std::swap(edge.source, edge.target);
                 if(descendant(edge.source,group)&&descendant(edge.target,group))for(auto p:points)include(p.x,p.y);
                 else {if(edge.source==group)include(points.front().x,points.front().y);if(edge.target==group)include(points.back().x,points.back().y);}
             }

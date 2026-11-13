@@ -67,6 +67,7 @@ suite mermaid_elk_flowchart=[] {
             {"elk-painted-cloud",u"flowchart TB\nA@{shape: cloud, label: \"Cloud box\"}"},
             {"elk-painted-document-routes",u"flowchart TB\nA[Before] --- B@{shape: doc, label: Document}\nB --- C[Left]\nB --- D[Right]"},
             {"elk-painted-cloud-routes",u"flowchart TB\nA[Before] --- B@{shape: cloud, label: Cloud}\nB --- C[Left]\nB --- D[Right]"},
+            {"elk-painted-group-feedback",u"flowchart TB\nsubgraph client[Client]\nA[Send] --> B[Show]\nend\nsubgraph service[Service]\nC[Receive] --> D[Reply]\nend\nA -->|request| C\nD -. \"response\" .-> B"},
         };
         for(const auto theme:{u"default",u"dark"})for(const auto& sample:cases) {
             const auto& name=sample.first;const auto& body=sample.second;

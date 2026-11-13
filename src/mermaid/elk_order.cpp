@@ -16,9 +16,11 @@ std::expected<void, std::string> supported(const ElkLayeredGraph& g,const ElkNor
     }
     for (const auto& e : g.edges) {
         const auto& s = g.ports[e.source_port]; const auto& t = g.ports[e.target_port];
-        if (s.side != ElkPortSide::east || t.side != ElkPortSide::west ||
-            g.nodes[t.node].layer != g.nodes[s.node].layer + 1)
-            return std::unexpected("ELK flat ordering requires adjacent forward edges");
+        const auto left = g.nodes[s.node].layer, right = g.nodes[t.node].layer;
+        const bool forward = right == left + 1 && s.side == ElkPortSide::east && t.side == ElkPortSide::west;
+        const bool in_layer = left == right && s.node != t.node && s.side == t.side;
+        if (!forward && !in_layer)
+            return std::unexpected("ELK ordering requires preprocessed adjacent or same-side in-layer edges");
     }
     return {};
 }
@@ -74,13 +76,39 @@ struct Ordering {
     void distribute(std::size_t n, ElkPortSide side) {
         auto& node = g.nodes[n];
         if (node.fixed_port_positions || node.fixed_port_order) return;
+        std::vector<std::pair<std::size_t, std::size_t>> in_layer;
+        double minimum = 0, maximum = 0;
         for (const auto p : node.ports) if (g.ports[p].side == side) {
             const auto& port = g.ports[p];
+            const auto edge = !port.outgoing.empty() ? std::optional{port.outgoing.front()}
+                : !port.incoming.empty() ? std::optional{port.incoming.front()} : std::nullopt;
+            if (!edge) continue;
+            const auto other = g.ports[port.outgoing.empty() ? g.edges[*edge].source_port : g.edges[*edge].target_port].node;
+            if (g.nodes[other].layer == node.layer) {
+                in_layer.emplace_back(p, other);
+                continue;
+            }
             double sum = 0;
             for (const auto e : port.outgoing) sum += ranks[g.edges[e].target_port];
             for (const auto e : port.incoming) sum -= ranks[g.edges[e].source_port];
             const auto degree = port.outgoing.size() + port.incoming.size();
-            if (degree) port_barycenters[p] = sum / degree;
+            port_barycenters[p] = sum / degree;
+            minimum = std::min(minimum, port_barycenters[p]);
+            maximum = std::max(maximum, port_barycenters[p]);
+        }
+        if (!in_layer.empty()) {
+            const auto& layer = g.layers[node.layer];
+            const auto position = [&](std::size_t id) {
+                return double(std::ranges::find(layer, id) - layer.begin() + 1);
+            };
+            const double own = position(n);
+            for (const auto [p, other] : in_layer) {
+                const double neighbor = position(other);
+                const double distance = double(layer.size() + 1) - neighbor;
+                port_barycenters[p] = side == ElkPortSide::east
+                    ? (neighbor < own ? minimum - neighbor : maximum + distance)
+                    : (neighbor < own ? maximum + neighbor : minimum - distance);
+            }
         }
         if(north_south)for(const auto& dummy:north_south->dummies)if(dummy.origin_node==n) {
             const auto& layer=g.layers[g.nodes[n].layer];
@@ -131,7 +159,15 @@ struct Ordering {
             if(visited[n])return;visited[n]=true;barycenters[n].reset();
             for(const auto p:g.nodes[n].ports)for(const auto e:forward?g.ports[p].incoming:g.ports[p].outgoing) {
                 const auto fixed=forward?g.edges[e].source_port:g.edges[e].target_port;
-                weights[n]+=ranks[fixed];++degrees[n];
+                const auto neighbor = g.ports[fixed].node;
+                if (g.nodes[neighbor].layer == current) {
+                    self(self, neighbor);
+                    weights[n] += weights[neighbor];
+                    degrees[n] += degrees[neighbor];
+                } else {
+                    weights[n] += ranks[fixed];
+                    ++degrees[n];
+                }
             }
             if(north_south&&n<north_south->barycenter_associates.size())for(const auto associate:north_south->barycenter_associates[n]) {
                 if(g.nodes[associate].layer!=g.nodes[n].layer)continue;
@@ -172,26 +208,40 @@ struct Ordering {
     }
 
     std::size_t crossings() const {
-        // CrossingsCounter's binary indexed tree for the adjacent E/W case:
-        // clockwise port lists mean west ports run bottom-to-top on each node.
-        std::vector<std::size_t> positions(g.ports.size());
+        // ELK CrossingsCounter visits the ports around each routing gap
+        // counterclockwise. A chord crosses any open chord ending before it.
+        std::vector<std::size_t> positions(g.ports.size(), g.ports.size());
         std::size_t total = 0;
-        for (std::size_t l = 0; l + 1 < g.layers.size(); ++l) {
-            std::size_t size = 0;
-            for (const auto n : g.layers[l + 1]) for (const auto p : g.nodes[n].ports | std::views::reverse)
-                if (g.ports[p].side == ElkPortSide::west) positions[p] = size++;
-            std::vector<std::size_t> tree(size + 1);
-            std::size_t seen = 0;
-            for (const auto n : g.layers[l]) for (const auto p : g.nodes[n].ports) {
-                for (const auto e : g.ports[p].outgoing) {
-                    auto index = positions[g.edges[e].target_port] + 1;
-                    std::size_t before = 0;
-                    for (auto i = index; i; i -= i & -i) before += tree[i];
-                    total += seen - before;
-                    for (auto i = index; i < tree.size(); i += i & -i) ++tree[i];
-                    ++seen;
+        std::vector<std::size_t> ports, tree;
+        for (std::size_t gap = 0; gap <= g.layers.size(); ++gap) {
+            ports.clear();
+            if (gap > 0) for (const auto n : g.layers[gap - 1]) for (const auto p : g.nodes[n].ports)
+                if (g.ports[p].side == ElkPortSide::east) ports.push_back(p);
+            if (gap < g.layers.size()) for (const auto n : g.layers[gap] | std::views::reverse)
+                for (const auto p : g.nodes[n].ports)
+                    if (g.ports[p].side == ElkPortSide::west) ports.push_back(p);
+            for (std::size_t i = 0; i < ports.size(); ++i) positions[ports[i]] = i;
+            tree.assign(ports.size() + 1, 0);
+            const auto update = [&](std::size_t index, bool add) {
+                for (auto i = index + 1; i < tree.size(); i += i & (std::size_t{0} - i))
+                    if (add) ++tree[i]; else --tree[i];
+            };
+            for (std::size_t i = 0; i < ports.size(); ++i) {
+                const auto p = ports[i];
+                const auto& port = g.ports[p];
+                if (port.incoming.empty() && port.outgoing.empty()) continue;
+                const auto peer = port.incoming.empty() ? g.edges[port.outgoing.front()].target_port
+                    : g.edges[port.incoming.front()].source_port;
+                const auto end = positions[peer];
+                if (end >= ports.size()) continue;
+                if (end < i) {
+                    update(i, false);
+                } else {
+                    for (auto j = end; j; j &= j - 1) total += tree[j];
+                    update(end, true);
                 }
             }
+            for (const auto p : ports) positions[p] = g.ports.size();
         }
         if(north_south)for(const auto& layer:g.layers)total+=elk_count_north_south_crossings(g,*north_south,layer);
         return total;

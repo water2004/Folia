@@ -15,10 +15,14 @@ struct Neighborhood {
             for (std::size_t i = 0; i < layer.size(); ++i) index[layer[i]] = i;
         for (std::size_t n = 0; n < g.nodes.size(); ++n) {
             for (const auto p : g.nodes[n].ports) {
-                for (const auto e : g.ports[p].incoming)
-                    left[n].push_back({g.ports[g.edges[e].source_port].node, e});
-                for (const auto e : g.ports[p].outgoing)
-                    right[n].push_back({g.ports[g.edges[e].target_port].node, e});
+                for (const auto e : g.ports[p].incoming) {
+                    const auto other = g.ports[g.edges[e].source_port].node;
+                    if (g.nodes[other].layer != g.nodes[n].layer) left[n].push_back({other, e});
+                }
+                for (const auto e : g.ports[p].outgoing) {
+                    const auto other = g.ports[g.edges[e].target_port].node;
+                    if (g.nodes[other].layer != g.nodes[n].layer) right[n].push_back({other, e});
+                }
             }
             const auto less = [&](const Neighbor& a, const Neighbor& b) { return index[a.node] < index[b.node]; };
             std::stable_sort(left[n].begin(), left[n].end(), less);
@@ -326,8 +330,11 @@ bool ordered(const ElkLayeredGraph& g, const std::vector<double>& y) {
 std::expected<ElkBlockAlignment, std::string> elk_align_flat_blocks(const ElkLayeredGraph& g) {
     for (const auto& edge : g.edges) {
         const auto& source = g.ports[edge.source_port]; const auto& target = g.ports[edge.target_port];
-        if (source.side != ElkPortSide::east || target.side != ElkPortSide::west ||
-            g.nodes[target.node].layer != g.nodes[source.node].layer + 1)
+        const auto left = g.nodes[source.node].layer, right = g.nodes[target.node].layer;
+        if (right == left && source.node != target.node && source.side == target.side
+            && (source.side == ElkPortSide::east || source.side == ElkPortSide::west))
+            continue;
+        if (source.side != ElkPortSide::east || target.side != ElkPortSide::west || right != left + 1)
             return std::unexpected("ELK block alignment requires adjacent east/west edges");
     }
     const Neighborhood ni(g);
