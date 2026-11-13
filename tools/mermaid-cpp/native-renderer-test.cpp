@@ -15,7 +15,7 @@ Result render(std::string_view source, bool dark = false) {
     return result;
 }
 suite host_contract = [] {
-    "mermaid_host_recovers_markdown_copy_with_compound_feedback_edges"_test = [] {
+    "mermaid_host_requires_mermaid_source_for_compound_feedback_edges"_test = [] {
         constexpr auto escaped = R"(flowchart TB\
 &#x20; subgraph client[客户端]\
 &#x20;   A["请求\<br/>数据"] --> B[显示]\
@@ -35,13 +35,12 @@ suite host_contract = [] {
   A -->|发送| C
   D -. "返回" .-> B)";
         for (bool dark : {false, true}) {
-            const auto expected = render(clean, dark);
-            const auto recovered = render(escaped, dark);
-            expect(fatal(expected.status == 0_i)) << expected.text;
-            expect(fatal(recovered.status == 0_i)) << recovered.text;
-            expect(recovered.text == expected.text);
-            expect(recovered.width > 0 && recovered.height > 0);
-            expect(recovered.text.find("返回") != std::string::npos);
+            const auto diagram = render(clean, dark);
+            const auto invalid = render(escaped, dark);
+            expect(diagram.status == 0_i) << diagram.text;
+            expect(diagram.width > 0 && diagram.height > 0);
+            expect(diagram.text.find("返回") != std::string::npos);
+            expect(invalid.status == 1_i && invalid.width == 0 && invalid.height == 0);
         }
         const auto unoriented = render(std::string{
             "---\nconfig:\n  elk:\n    orientFeedbackEdges: false\n---\n"} + clean);

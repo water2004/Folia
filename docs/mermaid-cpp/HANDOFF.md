@@ -2,7 +2,7 @@
 
 ## 当前检查点
 
-- 2026-11-13：Mermaid 渲染入口在原文解析失败后识别整段 Markdown 复制转义（行尾反斜杠、行首 `&#x20;` 及 `\<`），解包后复用原解析器并保留原始源码。Kavora 原文和清理版在默认 ELK 下亮暗主题 SVG 逐字节一致，Release DLL 与 usvg 验证通过。Mermaid 核心、平台及 DLL 三套测试通过，WinUI Release 已构建至 `build/app-winui/bin/x64/Release`。样例和日志在 `build/mermaid-kavora/`。
+- 2026-11-13：已移除 Mermaid 渲染入口的 Markdown 复制转义恢复。带转义的 Kavora 输入与 Mermaid 12.2.0 一样报语法错误，标准 Mermaid 版在默认 ELK 下正常渲染。核心、平台、DLL 三套测试和 20 张 Flowchart SVG 对照通过。可运行样例为 `build/mermaid-kavora/Kavora-ELK.md`。
 
 - 2026-11-13：ELK 复合流程图支持跨子图反馈边。默认按 Mermaid 12.2.0 的子图投影确定反馈边，布局完成后恢复原箭头与端点标签方向。原生 ELK 在 `orientFeedbackEdges: false` 下也能路由固定端口造成的同层边。按上游顺序导入边及端口后，7 个 ELK 复合布局算例（412 断言）和 20 张 Flowchart SVG 对照通过。Class ELK、State ELK、Agentflow、ER、Requirement 的浏览器对照也通过。验收见 `build/mermaid-kavora/`。
 

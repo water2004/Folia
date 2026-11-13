@@ -9,51 +9,6 @@ import std;
 import folia.mermaid.directive_lexer;
 
 namespace folia::mermaid {
-
-std::optional<std::u16string> unwrap_markdown_diagram(std::u16string_view source) {
-    constexpr auto space = std::u16string_view{u"&#x20;"};
-    const auto first_break = source.find_first_of(u"\r\n");
-    if (first_break == source.npos || !source.substr(0, first_break).ends_with(u'\\')
-        || source.find(space, first_break) == source.npos)
-        return std::nullopt;
-
-    std::u16string result;
-    result.reserve(source.size());
-    bool escaped_indent = false;
-    for (std::size_t cursor = 0; cursor < source.size();) {
-        const auto end = source.find_first_of(u"\r\n", cursor);
-        auto line = source.substr(cursor, end == source.npos ? end : end - cursor);
-        cursor = end == source.npos ? source.size() : end + 1;
-        if (end != source.npos && source[end] == u'\r' && cursor < source.size() && source[cursor] == u'\n')
-            ++cursor;
-
-        if (end != source.npos && cursor < source.size() && !line.ends_with(u'\\'))
-            return std::nullopt;
-        if (end != source.npos && line.ends_with(u'\\')) line.remove_suffix(1);
-        while (line.starts_with(space)) {
-            escaped_indent = true;
-            result += u' ';
-            line.remove_prefix(space.size());
-        }
-        for (std::size_t i = 0; i < line.size(); ++i) {
-            // Consume pairs together so an escaped literal backslash cannot
-            // also be treated as a prefix on a following angle bracket.
-            if (line[i] == u'\\' && i + 1 < line.size()) {
-                const auto next = line[i + 1];
-                if (next == u'\\') {
-                    result += line[i++];
-                } else if (next == u'<') {
-                    ++i;
-                }
-            }
-            result += line[i];
-        }
-        if (end != source.npos) result += u'\n';
-    }
-    if (!escaped_indent) return std::nullopt;
-    return result;
-}
-
 namespace {
 
 using detail::is_word;
