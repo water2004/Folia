@@ -15,6 +15,46 @@ Result render(std::string_view source, bool dark = false) {
     return result;
 }
 suite host_contract = [] {
+    "mermaid_host_recovers_markdown_copy_with_compound_feedback_edges"_test = [] {
+        constexpr auto escaped = R"(flowchart TB\
+&#x20; subgraph client[客户端]\
+&#x20;   A["请求\<br/>数据"] --> B[显示]\
+&#x20; end\
+&#x20; subgraph service[服务端]\
+&#x20;   C --> D\
+&#x20; end\
+&#x20; A -->|发送| C\
+&#x20; D -. "返回" .-> B)";
+        constexpr auto clean = R"(flowchart TB
+  subgraph client[客户端]
+    A["请求<br/>数据"] --> B[显示]
+  end
+  subgraph service[服务端]
+    C --> D
+  end
+  A -->|发送| C
+  D -. "返回" .-> B)";
+        for (bool dark : {false, true}) {
+            const auto expected = render(clean, dark);
+            const auto recovered = render(escaped, dark);
+            expect(fatal(expected.status == 0_i)) << expected.text;
+            expect(fatal(recovered.status == 0_i)) << recovered.text;
+            expect(recovered.text == expected.text);
+            expect(recovered.width > 0 && recovered.height > 0);
+            expect(recovered.text.find("返回") != std::string::npos);
+        }
+        const auto unoriented = render(std::string{
+            "---\nconfig:\n  elk:\n    orientFeedbackEdges: false\n---\n"} + clean);
+        expect(unoriented.status == 0_i) << unoriented.text;
+        expect(unoriented.width > 0 && unoriented.height > 0);
+        expect(unoriented.text != render(clean).text);
+        expect(render("flowchart TB\\\nA --> B").status == 1_i);
+        expect(render("flowchart TB\\\n&#x20; subgraph unfinished").status == 1_i);
+        const auto literal = render(R"(flowchart TB
+A["&#x20; C:\work"] --> B)");
+        expect(literal.status == 0_i) << literal.text;
+        expect(literal.text.find(R"(C:\work)") != std::string::npos);
+    };
     "mermaid_host_utf8_theme_and_request_isolation"_test = [] {
         const auto source = "pie\n\"文档 😀\": 3\n\"Other\": 1";
         auto light = render(source), dark = render(source, true);

@@ -35,6 +35,12 @@ match_front_matter(std::u16string_view text);
 // lexical tag matches. NOT an HTML parser, sanitizer, or XML encoder.
 [[nodiscard]] std::u16string cleanup_text(std::u16string_view text);
 
+// Decode one layer of Markdown copy escaping when the diagram has both
+// explicit line breaks and entity-escaped indentation. The caller validates
+// the recovered source with the normal diagram parser.
+[[nodiscard]] std::optional<std::u16string>
+unwrap_markdown_diagram(std::u16string_view source);
+
 // utils.ts removeDirectives: remove directiveRegex matches, including unclosed
 // matches. No config interpretation or comment removal. Extract configuration
 // before this step; this function alone is not a complete Mermaid frontend.

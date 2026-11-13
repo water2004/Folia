@@ -3,6 +3,7 @@ import std;
 import folia.mermaid.svg_text;
 import folia.mermaid.number;
 import folia.mermaid.html_named_reference;
+import folia.mermaid.source_text;
 
 namespace folia::mermaid {
 namespace {
@@ -119,7 +120,7 @@ std::expected<std::u16string,std::string> diagram_display_text(std::u16string_vi
     } catch(const std::runtime_error& e) { return std::unexpected(e.what()); }
 }
 
-std::expected<NativeDiagram,std::string> prepare_native_diagram(
+static std::expected<NativeDiagram,std::string> parse_native_diagram(
     std::u16string_view source,const ConfigSession& session,FrontendLimits limits) {
     auto prepared=prepare_diagram(source,session,limits);
     if (!prepared) return std::unexpected(prepared.error());
@@ -531,6 +532,20 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
         t.section_size=size(member(theme,u"pieSectionTextSize")); t.legend_size=size(member(theme,u"pieLegendTextSize"));
         return NativeDiagram{std::move(*prepared),PieRenderInput{std::move(*document),std::move(t),std::move(c)}};
     } catch(const std::runtime_error& e) { return std::unexpected(e.what()); }
+}
+
+std::expected<NativeDiagram,std::string> prepare_native_diagram(
+    std::u16string_view source,const ConfigSession& session,FrontendLimits limits) {
+    auto result = parse_native_diagram(source,session,limits);
+    if (result || source.size() > limits.source_units) return result;
+    if (auto unwrapped = unwrap_markdown_diagram(source)) {
+        auto recovered = parse_native_diagram(*unwrapped,session,limits);
+        if (recovered) {
+            recovered->prepared.code.raw = source;
+            return recovered;
+        }
+    }
+    return result;
 }
 
 std::expected<DiagramSvg, std::string> render_native_diagram(
