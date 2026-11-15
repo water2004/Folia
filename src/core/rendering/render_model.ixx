@@ -2,6 +2,7 @@
 // No HtmlRenderBlock / HtmlInlineRenderItem variants (acceptance gate).
 export module folia.core.render_model;
 import std;
+import folia.core.document_transaction;
 import folia.core.types;
 import folia.markdown.ids;
 import folia.markdown.dialect;
@@ -433,6 +434,7 @@ struct RenderModelUpdate {
     bool structural_locality_known = true;
     std::vector<NodeId> changed_owners;
     std::vector<NodeId> structural_anchors;
+    std::vector<DocumentTreeDelta> tree_deltas;
 };
 
 struct RenderModel {

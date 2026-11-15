@@ -1,8 +1,8 @@
 // folia.markdown.outline — Outline + hierarchy projection from cached heading symbols.
 export module folia.markdown.outline;
 import std;
-import folia.markdown.selection;
 import folia.markdown.ids;
+import folia.markdown.selection;
 import folia.markdown.instrumentation;
 import folia.markdown.slug;
 import folia.markdown.symbols;

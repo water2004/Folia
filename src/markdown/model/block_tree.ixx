@@ -9,6 +9,19 @@ export namespace folia {
 
 using BlockPath = std::vector<std::size_t>;
 
+inline NodeId first_editable_subtree_owner(BlockNode const& node) {
+    if (is_editable_block_owner(node.kind)) return node.id;
+    for (auto const& child : node.children)
+        if (auto id = first_editable_subtree_owner(child); id.v != 0) return id;
+    return {};
+}
+
+inline NodeId last_editable_subtree_owner(BlockNode const& node) {
+    for (auto child = node.children.rbegin(); child != node.children.rend(); ++child)
+        if (auto id = last_editable_subtree_owner(*child); id.v != 0) return id;
+    return is_editable_block_owner(node.kind) ? node.id : NodeId{};
+}
+
 inline BlockNode* block_at_path(BlockNode& root, const BlockPath& path) {
     auto* node = &root;
     for (const auto index : path) {

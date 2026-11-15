@@ -91,6 +91,7 @@ namespace winrt::Folia
             update.structural = change->structural;
             update.structural_locality_known = change->structural_locality_known;
             update.structural_anchors = change->structural_anchors;
+            update.tree_deltas = change->tree_deltas;
             std::unordered_set<std::uint64_t> owners;
             for (auto const& operation : change->text_operations)
             {

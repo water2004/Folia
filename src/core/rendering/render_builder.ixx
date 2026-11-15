@@ -2,6 +2,7 @@
 // from the authoritative block tree and each node's lossless inline source.
 export module folia.core.render_builder;
 import std;
+import folia.core.document_transaction;
 import folia.core.theme;
 import folia.core.types;
 import folia.markdown.ids;
@@ -1601,6 +1602,7 @@ inline RenderModel finish_render_model(
     m.editable_index = doc.cached_editable_index;
     m.editable_top_level.reserve(m.editable_order.size());
     for (auto owner : m.editable_order) {
+        record_render_navigation_entry_update();
         if (auto top_level = document_top_level_block_id(doc, owner)) {
             m.editable_top_level.emplace(owner.v, *top_level);
         }
@@ -1720,6 +1722,245 @@ inline void release_render_model_blocks_outside(
     }
 }
 
+namespace render_fragment_update_detail {
+
+struct Splice {
+    std::size_t old_begin = 0;
+    std::size_t old_end = 0;
+    std::size_t new_begin = 0;
+    std::size_t new_end = 0;
+};
+
+struct Repair {
+    std::vector<RenderFragment> fragments;
+    std::vector<Splice> splices;
+};
+
+inline bool same_semantic_payload(DocumentTreeDelta const& delta) {
+    if (!delta.before_payload || !delta.after_payload || delta.source_payload_changed) return false;
+    render_key_detail::Hasher before;
+    render_key_detail::Hasher after;
+    render_key_detail::append_metadata(before, *delta.before_payload);
+    render_key_detail::append_metadata(after, *delta.after_payload);
+    return before.value == after.value;
+}
+
+inline std::optional<Repair> repair_plan(
+    EditorDocument const& document, RenderModel const& previous,
+    RenderModelUpdate const& update) {
+    if (update.tree_deltas.empty() || previous.fragments.empty()
+        || previous.fragments.size() != previous.blocks.size()) return std::nullopt;
+    struct Root {
+        NodeId id{};
+        std::size_t begin = 0;
+        std::size_t end = 0;
+        std::size_t dirty_begin = 0;
+        std::size_t dirty_end = 0;
+        bool affected = false;
+        std::vector<BlockPath> insertions;
+    };
+    std::vector<Root> roots;
+    std::unordered_map<std::uint64_t, std::size_t> root_index;
+    for (std::size_t index = 0; index < previous.fragments.size(); ++index) {
+        auto const& fragment = previous.fragments[index];
+        if (roots.empty() || roots.back().id != fragment.source_root) {
+            if (root_index.contains(fragment.source_root.v)) return std::nullopt;
+            root_index.emplace(fragment.source_root.v, roots.size());
+            roots.push_back({fragment.source_root, index, index + 1, previous.fragments.size(), 0});
+        } else roots.back().end = index + 1;
+        if (fragment.first_leaf_id.v == 0 || fragment.last_leaf_id.v == 0) return std::nullopt;
+    }
+    std::unordered_set<std::uint64_t> replaced_roots;
+    for (auto const& delta : update.tree_deltas)
+        if (delta.kind == DocumentTreeEditKind::Insert || delta.kind == DocumentTreeEditKind::Remove)
+            replaced_roots.insert(delta.root_id.v);
+    auto mark = [&](Root& root, std::size_t begin, std::size_t end) {
+        root.affected = true;
+        root.dirty_begin = (std::min)(root.dirty_begin, begin);
+        root.dirty_end = (std::max)(root.dirty_end, end);
+    };
+    for (auto const& delta : update.tree_deltas) {
+        if (delta.kind == DocumentTreeEditKind::UpdatePayload) {
+            if (!same_semantic_payload(delta)) return std::nullopt;
+            continue;
+        }
+        // Renumbering and moving between ancestry contexts have a wider real
+        // presentation dependency. They use the general structural planner.
+        if (delta.kind == DocumentTreeEditKind::Move) return std::nullopt;
+        auto parent_path = cached_document_block_path(document, delta.parent_id);
+        if (!parent_path || parent_path->empty()) return std::nullopt;
+        auto const* parent = block_at_path(document.root, *parent_path);
+        if (!parent || parent->id != delta.parent_id || parent->children.empty()
+            || !is_fragment_flow_container(parent->kind)
+            || ((parent->kind == BlockKind::List || parent->kind == BlockKind::TaskList)
+                && parent->list_special().ordered)) return std::nullopt;
+        auto const* ancestor = &document.root;
+        for (auto index : *parent_path) {
+            ancestor = &ancestor->children[index];
+            if (replaced_roots.contains(ancestor->id.v)) return std::nullopt;
+        }
+        auto root_id = document.root.children[parent_path->front()].id;
+        auto found_root = root_index.find(root_id.v);
+        if (found_root == root_index.end()) return std::nullopt;
+        auto& root = roots[found_root->second];
+        root.affected = true;
+        if (delta.kind == DocumentTreeEditKind::Insert) {
+            auto path = cached_document_block_path(document, delta.root_id);
+            if (!path || path->size() != parent_path->size() + 1
+                || !std::equal(parent_path->begin(), parent_path->end(), path->begin())) return std::nullopt;
+            auto const* node = block_at_path(document.root, *path);
+            if (!node || node->id != delta.root_id || delta.first_owner.v == 0 || delta.last_owner.v == 0)
+                return std::nullopt;
+            path->erase(path->begin());
+            root.insertions.push_back(std::move(*path));
+        } else {
+            if (document.cached_block_locators.contains(delta.root_id.v)) return std::nullopt;
+            auto first = previous.editable_fragment_index.find(delta.first_owner.v);
+            auto last = previous.editable_fragment_index.find(delta.last_owner.v);
+            if (first == previous.editable_fragment_index.end() || last == previous.editable_fragment_index.end()
+                || first->second < root.begin || last->second >= root.end || first->second > last->second)
+                return std::nullopt;
+            // Include neighbors for closure changes and local underflow merges.
+            mark(root, first->second > root.begin ? first->second - 1 : root.begin,
+                (std::min)(root.end, last->second + 2));
+        }
+    }
+    for (auto owner : update.changed_owners) {
+        auto found = previous.editable_fragment_index.find(owner.v);
+        if (found == previous.editable_fragment_index.end()) continue;
+        auto index = found->second;
+        if (index >= previous.fragments.size()) return std::nullopt;
+        auto& root = roots[root_index.at(previous.fragments[index].source_root.v)];
+        mark(root, index, index + 1);
+    }
+    auto repaired = previous.fragments;
+    for (auto& root : roots) {
+        if (!root.affected) continue;
+        for (auto index = root.begin; index < root.end; ++index) {
+            auto& fragment = repaired[index];
+            auto first = render_fragment_detail::leaf_path(document, root.id, fragment.first_leaf_id);
+            auto last = render_fragment_detail::leaf_path(document, root.id, fragment.last_leaf_id);
+            if (!first || !last) {
+                mark(root, index > root.begin ? index - 1 : root.begin, (std::min)(root.end, index + 2));
+                continue;
+            }
+            if (*first > *last) return std::nullopt;
+            fragment.first_leaf = std::move(*first);
+            fragment.last_leaf = std::move(*last);
+        }
+        for (auto const& insertion : root.insertions) {
+            auto index = root.begin;
+            for (auto candidate = root.begin; candidate < root.end; ++candidate) {
+                // Missing endpoints already lie in the dirty splice; skip
+                // their stale paths while locating an inserted subtree.
+                if (!document.cached_block_locators.contains(repaired[candidate].first_leaf_id.v)) continue;
+                if (repaired[candidate].first_leaf > insertion) break;
+                index = candidate;
+            }
+            mark(root, index, index + 1);
+        }
+    }
+    Repair result;
+    result.fragments.reserve(previous.fragments.size() + update.tree_deltas.size());
+    auto append_unchanged = [&](std::size_t begin, std::size_t end) {
+        for (auto index = begin; index < end; ++index) {
+            auto& fragment = repaired[index];
+            if (fragment.first && fragment.last) {
+                fragment.first_leaf.clear();
+                fragment.last_leaf.clear();
+            }
+            result.fragments.push_back(std::move(fragment));
+        }
+    };
+    for (auto const& root : roots) {
+        if (root.dirty_begin >= root.dirty_end) {
+            append_unchanged(root.begin, root.end);
+            continue;
+        }
+        auto path = cached_document_block_path(document, root.id);
+        if (!path || path->size() != 1) return std::nullopt;
+        auto const* source = block_at_path(document.root, *path);
+        if (!source || source->id != root.id) return std::nullopt;
+        auto first = root.dirty_begin == root.begin
+            ? std::optional{render_fragment_detail::edge_leaf_path(*source, false)}
+            : render_fragment_detail::adjacent_leaf_path(*source, repaired[root.dirty_begin - 1].last_leaf, true);
+        auto last = root.dirty_end == root.end
+            ? std::optional{render_fragment_detail::edge_leaf_path(*source, true)}
+            : render_fragment_detail::adjacent_leaf_path(*source, repaired[root.dirty_end].first_leaf, false);
+        if (!first || !last || *first > *last) return std::nullopt;
+        auto context_key = render_key_detail::context_key;
+        auto replacement = render_fragment_detail::plan_interval(*source, context_key,
+            {*first, *last}, {}, true);
+        if (replacement.empty()) return std::nullopt;
+        append_unchanged(root.begin, root.dirty_begin);
+        auto begin = result.fragments.size();
+        result.fragments.insert(result.fragments.end(), std::make_move_iterator(replacement.begin()),
+            std::make_move_iterator(replacement.end()));
+        result.splices.push_back({root.dirty_begin, root.dirty_end, begin, result.fragments.size()});
+        append_unchanged(root.dirty_end, root.end);
+    }
+    return result;
+}
+
+inline std::optional<std::pair<std::size_t, std::size_t>> owner_interval(
+    RenderFragment const& fragment, std::unordered_map<std::uint64_t, std::size_t> const& index) {
+    if (fragment.first_owner.v == 0 || fragment.last_owner.v == 0) return std::nullopt;
+    auto first = index.find(fragment.first_owner.v);
+    auto last = index.find(fragment.last_owner.v);
+    if (first == index.end() || last == index.end() || first->second > last->second) return std::nullopt;
+    return std::pair{first->second, last->second + 1};
+}
+
+// Apply the same splice to derived navigation. Rank entries after a middle
+// insertion still move with the existing contiguous owner order, but an edit
+// near the tail never copies or rehashes unrelated preceding owners.
+inline void repair_navigation(EditorDocument const& document, RenderModel& previous,
+    Repair const& plan, std::unordered_map<std::uint64_t, std::size_t> const& previous_by_id) {
+    auto first_changed_owner = previous.editable_order.size();
+    for (auto const& splice : plan.splices) {
+        for (auto index = splice.old_begin; index < splice.old_end; ++index) {
+            auto interval = owner_interval(previous.fragments[index], previous.editable_index);
+            if (!interval) continue;
+            first_changed_owner = (std::min)(first_changed_owner, interval->first);
+            for (auto ordinal = interval->first; ordinal < interval->second; ++ordinal) {
+                auto owner = previous.editable_order[ordinal];
+                previous.editable_fragment_index.erase(owner.v);
+                if (!document.cached_editable_index.contains(owner.v)) {
+                    previous.editable_index.erase(owner.v);
+                    previous.editable_top_level.erase(owner.v);
+                }
+            }
+        }
+    }
+    for (std::size_t index = 0; index < plan.fragments.size(); ++index) {
+        auto const& fragment = plan.fragments[index];
+        auto old = previous_by_id.find(fragment.id.v);
+        auto dirty = std::ranges::any_of(plan.splices, [&](auto const& splice) {
+            return index >= splice.new_begin && index < splice.new_end;
+        });
+        if (!dirty && old != previous_by_id.end() && old->second == index) continue;
+        auto interval = owner_interval(fragment, document.cached_editable_index);
+        if (!interval) continue;
+        if (dirty) first_changed_owner = (std::min)(first_changed_owner, interval->first);
+        for (auto ordinal = interval->first; ordinal < interval->second; ++ordinal) {
+            auto owner = document.cached_editable_order[ordinal];
+            previous.editable_fragment_index[owner.v] = index;
+            previous.editable_top_level[owner.v] = fragment.source_root;
+            record_render_navigation_entry_update();
+        }
+    }
+    first_changed_owner = (std::min)(first_changed_owner, document.cached_editable_order.size());
+    previous.editable_order.resize(document.cached_editable_order.size());
+    std::copy(document.cached_editable_order.begin() + static_cast<std::ptrdiff_t>(first_changed_owner),
+        document.cached_editable_order.end(), previous.editable_order.begin() + static_cast<std::ptrdiff_t>(first_changed_owner));
+    for (auto ordinal = first_changed_owner; ordinal < previous.editable_order.size(); ++ordinal) {
+        previous.editable_index[previous.editable_order[ordinal].v] = ordinal;
+        record_render_navigation_entry_update();
+    }
+}
+
+} // namespace render_fragment_update_detail
+
 inline RenderModel build_render_model_incremental(
     const EditorDocument& doc,
     const Outline& outline,
@@ -1791,12 +2032,19 @@ inline RenderModel build_render_model_incremental(
     // Structural operations reconcile physical identities. Hash only bounded
     // fragments, never the entire list as a single subtree. Unchanged visual
     // objects (including their exact measured geometry in the host) survive.
-    auto fragments = plan_render_fragments(doc, render_key_detail::context_key, previous.fragments);
+    auto repair = trusted_structural_locality
+        ? render_fragment_update_detail::repair_plan(doc, previous, update)
+        : std::nullopt;
     std::unordered_map<std::uint64_t, std::size_t> previous_by_id;
     previous_by_id.reserve(previous.blocks.size());
     for (std::size_t index = 0; index < previous.blocks.size(); ++index)
         previous_by_id.emplace(previous.blocks[index].id.v, index);
-    auto new_owner_index = index_render_fragment_owners(doc, fragments);
+    if (repair)
+        render_fragment_update_detail::repair_navigation(doc, previous, *repair, previous_by_id);
+    auto fragments = repair ? std::move(repair->fragments)
+        : plan_render_fragments(doc, render_key_detail::context_key, previous.fragments);
+    auto new_owner_index = repair ? std::move(previous.editable_fragment_index)
+        : index_render_fragment_owners(doc, fragments);
     std::unordered_set<std::size_t> dirty_sources;
     auto mark_source = [&](NodeId owner) {
         auto found = new_owner_index.find(owner.v);
@@ -1814,7 +2062,8 @@ inline RenderModel build_render_model_incremental(
     bool same_slots = fragments.size() == previous.fragments.size();
     for (std::size_t index = 0; index < fragments.size(); ++index) {
         auto const& fragment = fragments[index];
-        if (same_slots && fragment.id != previous.fragments[index].id) same_slots = false;
+        if (same_slots && (fragment.id != previous.fragments[index].id
+            || fragment.source_root != previous.fragments[index].source_root)) same_slots = false;
         auto found = previous_by_id.find(fragment.id.v);
         if (trusted_structural_locality && !changed_roots.contains(fragment.source_root.v)
             && found != previous_by_id.end() && !previous.blocks[found->second].source_mode) {
@@ -1850,7 +2099,12 @@ inline RenderModel build_render_model_incremental(
             ++rebuilt;
         }
     }
-    auto model = finish_render_model(doc, outline, std::move(blocks));
+    std::optional<std::tuple<std::vector<NodeId>,
+        std::unordered_map<std::uint64_t, std::size_t>,
+        std::unordered_map<std::uint64_t, NodeId>>> navigation;
+    if (repair) navigation.emplace(std::move(previous.editable_order),
+        std::move(previous.editable_index), std::move(previous.editable_top_level));
+    auto model = finish_render_model(doc, outline, std::move(blocks), std::move(navigation));
     model.editable_fragment_index = std::move(new_owner_index);
     model.fragments = std::move(fragments);
     model.document_dependency_key = dependency_key;

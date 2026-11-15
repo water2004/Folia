@@ -38,6 +38,33 @@ std::string list_source(std::size_t count, std::string const& prefix = "- ") {
     for (std::size_t i = 0; i < count; ++i) result += prefix + "item **bold** and text\n";
     return result;
 }
+
+RenderModelUpdate fragment_update(EditorDocumentChange const& change) {
+    RenderModelUpdate update;
+    update.structural = change.structural;
+    update.structural_locality_known = change.structural_locality_known;
+    update.structural_anchors = change.structural_anchors;
+    update.tree_deltas = change.tree_deltas;
+    for (auto const& operation : change.text_operations)
+        update.changed_owners.push_back((change.forward ? operation.forward : operation.inverse).container_id);
+    return update;
+}
+
+void expect_fragment_navigation(Editor const& editor, RenderModel const& model) {
+    expect(model.editable_order == editor.document().cached_editable_order);
+    expect(model.editable_index == editor.document().cached_editable_index);
+    expect(model.editable_fragment_index == index_render_fragment_owners(editor.document(), model.fragments));
+    for (auto const& fragment : model.fragments)
+        expect(fragment.leaf_count <= render_fragment_leaf_limit);
+    Builder reference(default_theme_profile());
+    configure_render_dependencies(reference, editor.symbols());
+    std::u32string actual;
+    for (std::size_t index = 0; index < model.blocks.size(); ++index) {
+        if (index) actual += U'\n';
+        actual += flow_spelling(model.blocks[index]);
+    }
+    expect(actual == flow_spelling(reference.build_block(editor.document().root.children.front())));
+}
 }
 
 suite render_fragment_tests = [] {
@@ -46,6 +73,7 @@ suite render_fragment_tests = [] {
             list_source(193),
             list_source(193, "98. "),
             list_source(193, "- [x] "),
+            list_source(193, "- item\n\n- "),
             std::string{"- parent\n"} + list_source(193, "  - ") + "- tail\n",
             std::string{"> [!NOTE]\n"} + list_source(193, "> - "),
             list_source(193, "> > - "),
@@ -179,6 +207,7 @@ suite render_fragment_tests = [] {
             update.structural = change->structural;
             update.structural_locality_known = change->structural_locality_known;
             update.structural_anchors = change->structural_anchors;
+            update.tree_deltas = change->tree_deltas;
             for (auto const& operation : change->text_operations)
                 update.changed_owners.push_back((change->forward ? operation.forward : operation.inverse).container_id);
             reset_core_operation_counters();
@@ -188,6 +217,7 @@ suite render_fragment_tests = [] {
             expect(model.rebuilt_block_count <= 3u);
             expect(counters.render_source_nodes_hashed <= 6u * render_fragment_leaf_limit + 3u);
             expect(counters.render_source_characters_hashed < 12000u);
+            expect(counters.render_fragment_nodes_planned < 512u);
             for (std::size_t i = 0; i < suffix_ids.size(); ++i) {
                 auto found = std::ranges::find(model.blocks, suffix_ids[i], &RenderBlock::id);
                 expect(fatal(found != model.blocks.end()));
@@ -203,6 +233,68 @@ suite render_fragment_tests = [] {
         apply_change();
     };
 
+    "tail_fragment_splices_bound_planning_and_navigation_for_nested_lists_and_history"_test = [] {
+        for (auto const& source : std::vector<std::string>{
+            list_source(4097),
+            list_source(4097, "> - "),
+            std::string{"- parent\n"} + list_source(4097, "  - "),
+        }) {
+            Editor editor(source);
+            auto model = build_render_model(editor.document(), editor.outline(), editor.symbols(), default_theme_profile());
+            auto tail = editor.document().cached_editable_order.back();
+            auto const* leaf = find_document_block(editor.document(), tail);
+            expect(fatal(leaf != nullptr));
+            editor.set_selection(TextSelection::caret({tail, leaf->inline_content.source.size(), TextAffinity::Downstream}));
+            auto project = [&] {
+                auto change = editor.take_last_document_change();
+                expect(fatal(change.has_value()));
+                auto update = fragment_update(*change);
+                reset_core_operation_counters();
+                model = build_render_model_incremental(editor.document(), editor.outline(), editor.symbols(),
+                    default_theme_profile(), std::move(model), update);
+                auto work = read_core_operation_counters();
+                expect(work.render_fragment_nodes_planned < 512u);
+                expect(work.render_navigation_entries_updated < 512u);
+                expect(work.render_source_nodes_hashed < 512u);
+                expect(work.full_document_block_index_scans == 0u);
+                expect(model.rebuilt_block_count <= 3u);
+                expect_fragment_navigation(editor, model);
+            };
+            expect(fatal(editor.execute_command(Command{.kind = CommandKind::InsertNewline})));
+            project();
+            expect(fatal(editor.undo()));
+            project();
+            expect(fatal(editor.redo()));
+            project();
+        }
+    };
+
+    "local_fragment_splices_balance_repeated_insertions_and_merge_underflow"_test = [] {
+        Editor editor(list_source(257));
+        auto model = build_render_model(editor.document(), editor.outline(), editor.symbols(), default_theme_profile());
+        auto original_count = model.fragments.size();
+        auto owner = editor.document().cached_editable_order[128];
+        auto project = [&] {
+            auto change = editor.take_last_document_change();
+            expect(fatal(change.has_value()));
+            model = build_render_model_incremental(editor.document(), editor.outline(), editor.symbols(),
+                default_theme_profile(), std::move(model), fragment_update(*change));
+        };
+        for (std::size_t index = 0; index < 80; ++index) {
+            editor.set_selection(TextSelection::caret({owner, 4, TextAffinity::Downstream}));
+            expect(fatal(editor.execute_command(Command{.kind = CommandKind::InsertNewline})));
+            project();
+        }
+        expect(model.fragments.size() <= original_count + 3u);
+        expect_fragment_navigation(editor, model);
+        for (std::size_t index = 0; index < 80; ++index) {
+            expect(fatal(editor.undo()));
+            project();
+        }
+        expect(model.fragments.size() <= original_count + 1u);
+        expect_fragment_navigation(editor, model);
+    };
+
     "fragment_decorations_continue_only_at_cut_container_edges"_test = [] {
         auto parsed = parse_text(1, std::string{"> [!WARNING]\n"} + list_source(130, "> - "));
         auto model = build_render_model(parsed.document, parsed.outline, parsed.symbols, default_theme_profile());
@@ -213,5 +305,31 @@ suite render_fragment_tests = [] {
         expect(model.blocks[1].flow_continues_after);
         expect(model.blocks.back().flow_continues_before);
         expect(!model.blocks.back().flow_continues_after);
+    };
+
+    "fragment_identity_reuse_requires_reconciling_changed_semantic_roots"_test = [] {
+        auto parsed = parse_text(1, list_source(130));
+        auto model = build_render_model(parsed.document, parsed.outline, parsed.symbols, default_theme_profile());
+        std::vector<NodeId> identities;
+        for (auto const& fragment : model.fragments) identities.push_back(fragment.id);
+        auto previous_root = parsed.document.root.children.front().id;
+        BlockNode quote;
+        quote.id = NodeId{parsed.document.next_node_id++};
+        quote.kind = BlockKind::BlockQuote;
+        quote.children.push_back(std::move(parsed.document.root.children.front()));
+        parsed.document.root.children.front() = std::move(quote);
+        rebuild_document_block_index(parsed.document);
+        ++parsed.document.revision;
+        RenderModelUpdate update;
+        update.structural = true;
+        update.structural_locality_known = false;
+        model = build_render_model_incremental(parsed.document, parsed.outline, parsed.symbols,
+            default_theme_profile(), std::move(model), update);
+        expect(fatal(model.fragments.size() == identities.size()));
+        for (std::size_t index = 0; index < identities.size(); ++index) {
+            expect(model.fragments[index].id == identities[index]);
+            expect(model.fragments[index].source_root != previous_root);
+        }
+        expect(!model.incremental_update);
     };
 };
