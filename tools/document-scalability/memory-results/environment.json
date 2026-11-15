@@ -1,0 +1,139 @@
+{
+  "started_at_utc": "2026-11-15T16:14:16.857021+00:00",
+  "completed_at_utc": "2026-11-15T16:15:46.313402+00:00",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+  "available_cpu_count": 9,
+  "baseline_commit": "8675074f3fcf55ba7e724641c4a0317ef6c97f22",
+  "current_local_commit": "bb208031a8af460528c783f20b3abe9b249ee61e",
+  "current_tree": "894acaa50d27ccce782db7c5040cd52fbe92fb3d",
+  "benchmark_sha256": "0bbb741756536847d5355d0175d2c9464ddec13b27bf7df6a25a118c63a12800",
+  "baseline_executable_sha256": "1b272b0fed61abfb070ed047f77c298092df6d1470e40bc10c1ee145a7097c76",
+  "current_executable_sha256": "95505326b19c2a2445e6f2396e1cddaafe16ca105374e3756d415f9ef3f7e5cb",
+  "build_type": "Release",
+  "compile_flags": "-stdlib=libc++ -O3 -DNDEBUG -std=c++23",
+  "compiler": "Debian Clang 21.1.8 (14)",
+  "libcxx_headers": "21.1.8-14",
+  "libcxx_shared_runtime": "23.1.5-2",
+  "cmake": "4.3.4",
+  "ninja": "1.13.2",
+  "input": {
+    "supplied_name": "markdown_stress_10MB_math.md",
+    "supplied_bytes": 10485760,
+    "content_committed": false,
+    "old_list_attachment_opened": false,
+    "full_content_printed": false,
+    "inspection_sample_bytes": 8192
+  },
+  "directwrite_measured": false,
+  "math_engine_measured": false,
+  "method": "Identical benchmark source and compiler options. The frozen baseline executable links unmodified production modules at baseline_commit; the current executable is the standalone CMake FoliaMemoryProfile target. Each sample is a fresh process, without concurrent compilation/tests or CPU affinity pinning. Three alternating supplied-input pairs; one pair for each synthetic control. Timings are steady_clock; RSS/VmHWM use /proc/self/status; allocated_bytes is glibc mallinfo2 uordblks+hblkhd, including allocator overhead. No allocator trimming. The maximum observed peak_rss_kib over the process is used for high-water summaries. The unique-formula control was repeated twice more in alternating order after a noisy first source-entry observation; all three control samples are retained.",
+  "materialized_units_note": "This is the virtual render model sparse resident-index count. Eager source projections do not populate that index; their zero value does not mean no text/render objects are resident.",
+  "runs": [
+    {
+      "revision": "baseline",
+      "case": "supplied",
+      "repeat": 1,
+      "file": "baseline-supplied-1.jsonl",
+      "process_seconds": 11.999816
+    },
+    {
+      "revision": "current",
+      "case": "supplied",
+      "repeat": 1,
+      "file": "current-supplied-1.jsonl",
+      "process_seconds": 6.921978
+    },
+    {
+      "revision": "current",
+      "case": "supplied",
+      "repeat": 2,
+      "file": "current-supplied-2.jsonl",
+      "process_seconds": 6.567559
+    },
+    {
+      "revision": "baseline",
+      "case": "supplied",
+      "repeat": 2,
+      "file": "baseline-supplied-2.jsonl",
+      "process_seconds": 9.60558
+    },
+    {
+      "revision": "baseline",
+      "case": "supplied",
+      "repeat": 3,
+      "file": "baseline-supplied-3.jsonl",
+      "process_seconds": 8.931753
+    },
+    {
+      "revision": "current",
+      "case": "supplied",
+      "repeat": 3,
+      "file": "current-supplied-3.jsonl",
+      "process_seconds": 6.907192
+    },
+    {
+      "revision": "baseline",
+      "case": "synthetic-1mib",
+      "repeat": 1,
+      "file": "baseline-synthetic-1mib-1.jsonl",
+      "process_seconds": 1.0312
+    },
+    {
+      "revision": "current",
+      "case": "synthetic-1mib",
+      "repeat": 1,
+      "file": "current-synthetic-1mib-1.jsonl",
+      "process_seconds": 0.610822
+    },
+    {
+      "revision": "baseline",
+      "case": "unique-1mib",
+      "repeat": 1,
+      "file": "baseline-unique-1mib-1.jsonl",
+      "process_seconds": 0.732174
+    },
+    {
+      "revision": "current",
+      "case": "unique-1mib",
+      "repeat": 1,
+      "file": "current-unique-1mib-1.jsonl",
+      "process_seconds": 0.769356
+    },
+    {
+      "revision": "current",
+      "case": "unique-1mib",
+      "repeat": 2,
+      "file": "current-unique-1mib-2.jsonl",
+      "process_seconds": 1.337336
+    },
+    {
+      "revision": "baseline",
+      "case": "unique-1mib",
+      "repeat": 2,
+      "file": "baseline-unique-1mib-2.jsonl",
+      "process_seconds": 1.338059
+    },
+    {
+      "revision": "baseline",
+      "case": "unique-1mib",
+      "repeat": 3,
+      "file": "baseline-unique-1mib-3.jsonl",
+      "process_seconds": 1.013206
+    },
+    {
+      "revision": "current",
+      "case": "unique-1mib",
+      "repeat": 3,
+      "file": "current-unique-1mib-3.jsonl",
+      "process_seconds": 0.761204
+    }
+  ],
+  "baseline_core_source_sha256": "1259e5d2ba3d5054694def04452e2f444262da85534b4e82451d6354365fe043",
+  "current_core_source_sha256": "75179f3b08deb264f32d20c48425b67d543d506f5f2194f262f85caa19283d36",
+  "source_fingerprint_method": "SHA256 over src/core and src/markdown .ixx/.cpp files sorted by relative POSIX path components; path UTF-8, NUL, bytes, NUL for each file.",
+  "published_code_commit": "6c086f8b59fb885e4f46f60e2353b29b59de6bf5",
+  "published_code_tree": "894acaa50d27ccce782db7c5040cd52fbe92fb3d",
+  "master_merged": "168426058a0135889ea7a9bd8807c7efc87be3e5",
+  "revision_mapping": "The connector-published code commit and local build commit have identical Git trees; their commit metadata differs. Master was merged without changing source files."
+}

@@ -1,0 +1,947 @@
+{
+  "memory_units": "bytes and KiB as named; divide bytes by 1048576 for MiB",
+  "cases": {
+    "supplied": {
+      "baseline": {
+        "samples": 3,
+        "input_bytes": 10485760,
+        "census": {
+          "phase": "census",
+          "block_count": 242275,
+          "raw_block_count": 34608,
+          "raw_content_offsets": 5235696,
+          "raw_offset_storage_bytes": 41885568,
+          "inline_nodes": 207665,
+          "inline_semantic_payloads": 79109,
+          "inline_semantic_object_bytes": 22150520,
+          "sizeof_block_node": 168,
+          "sizeof_render_block": 328
+        },
+        "process_peak_rss_kib_median": 1432996,
+        "process_seconds_median": 9.60558,
+        "phases": {
+          "parse": {
+            "milliseconds": {
+              "median": 1576.16,
+              "min": 1475.86,
+              "max": 2618.87
+            },
+            "allocated_bytes_median": 332901232,
+            "rss_kib_median": 400252,
+            "peak_rss_kib_median": 518992,
+            "full_parses_max": 1,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 1
+          },
+          "virtual_projection": {
+            "milliseconds": {
+              "median": 295.829,
+              "min": 270.644,
+              "max": 331.276
+            },
+            "allocated_bytes_median": 424880688,
+            "rss_kib_median": 453004,
+            "peak_rss_kib_median": 518992,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0,
+            "render_units": 118663
+          },
+          "projection_sweep": {
+            "milliseconds": {
+              "median": 405.94,
+              "min": 395.125,
+              "max": 445.271
+            },
+            "allocated_bytes_median": 424906848,
+            "rss_kib_median": 453068,
+            "peak_rss_kib_median": 518992,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0,
+            "render_units": 118663
+          },
+          "edit_undo_projection_first": {
+            "milliseconds": {
+              "median": 0.058098,
+              "min": 0.054502,
+              "max": 0.074582
+            },
+            "allocated_bytes_median": 425438464,
+            "rss_kib_median": 453132,
+            "peak_rss_kib_median": 518992,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0,
+            "render_units": 118663
+          },
+          "edit_undo_projection_middle": {
+            "milliseconds": {
+              "median": 0.031397,
+              "min": 0.030326,
+              "max": 0.041493
+            },
+            "allocated_bytes_median": 425441328,
+            "rss_kib_median": 453136,
+            "peak_rss_kib_median": 518992,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0,
+            "render_units": 118663
+          },
+          "edit_undo_projection_last": {
+            "milliseconds": {
+              "median": 0.017606,
+              "min": 0.01329,
+              "max": 0.02023
+            },
+            "allocated_bytes_median": 425437024,
+            "rss_kib_median": 453136,
+            "peak_rss_kib_median": 518992,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0,
+            "render_units": 118663
+          },
+          "enter_source_mode": {
+            "milliseconds": {
+              "median": 3932,
+              "min": 3747.55,
+              "max": 5129.47
+            },
+            "allocated_bytes_median": 676623776,
+            "rss_kib_median": 688952,
+            "peak_rss_kib_median": 1096884,
+            "full_parses_max": 0,
+            "full_serializations_max": 1,
+            "full_index_scans_max": 0
+          },
+          "source_projection": {
+            "milliseconds": {
+              "median": 2060.58,
+              "min": 1752.24,
+              "max": 2150.2
+            },
+            "allocated_bytes_median": 1509297120,
+            "rss_kib_median": 1432996,
+            "peak_rss_kib_median": 1432996,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0,
+            "render_units": 390592
+          },
+          "exit_source_mode": {
+            "milliseconds": {
+              "median": 187.909,
+              "min": 185.615,
+              "max": 196.991
+            },
+            "allocated_bytes_median": 333513744,
+            "rss_kib_median": 1190152,
+            "peak_rss_kib_median": 1432868,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0
+          },
+          "close": {
+            "milliseconds": {
+              "median": 226.902,
+              "min": 216.942,
+              "max": 384.587
+            },
+            "allocated_bytes_median": 693776,
+            "rss_kib_median": 1170680,
+            "peak_rss_kib_median": 1432868,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0
+          }
+        }
+      },
+      "current": {
+        "samples": 3,
+        "input_bytes": 10485760,
+        "census": {
+          "phase": "census",
+          "block_count": 242275,
+          "raw_block_count": 34608,
+          "raw_content_offsets": 5235696,
+          "raw_offset_storage_bytes": 0,
+          "inline_nodes": 207665,
+          "inline_semantic_payloads": 5,
+          "inline_semantic_object_bytes": 1400,
+          "sizeof_block_node": 168,
+          "sizeof_render_block": 328
+        },
+        "process_peak_rss_kib_median": 1031012,
+        "process_seconds_median": 6.907192,
+        "phases": {
+          "parse": {
+            "milliseconds": {
+              "median": 1533.22,
+              "min": 1485.66,
+              "max": 1631.41
+            },
+            "allocated_bytes_median": 266928992,
+            "rss_kib_median": 298648,
+            "peak_rss_kib_median": 400524,
+            "full_parses_max": 1,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 1
+          },
+          "virtual_projection": {
+            "milliseconds": {
+              "median": 222.673,
+              "min": 217.443,
+              "max": 227.34
+            },
+            "allocated_bytes_median": 358563088,
+            "rss_kib_median": 352756,
+            "peak_rss_kib_median": 400524,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0,
+            "render_units": 118663
+          },
+          "projection_sweep": {
+            "milliseconds": {
+              "median": 380.101,
+              "min": 361.398,
+              "max": 525.74
+            },
+            "allocated_bytes_median": 358587952,
+            "rss_kib_median": 352848,
+            "peak_rss_kib_median": 400524,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0,
+            "render_units": 118663
+          },
+          "edit_undo_projection_first": {
+            "milliseconds": {
+              "median": 0.060852,
+              "min": 0.056245,
+              "max": 0.143315
+            },
+            "allocated_bytes_median": 359119888,
+            "rss_kib_median": 353780,
+            "peak_rss_kib_median": 400524,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0,
+            "render_units": 118663
+          },
+          "edit_undo_projection_middle": {
+            "milliseconds": {
+              "median": 0.034672,
+              "min": 0.029013,
+              "max": 0.060891
+            },
+            "allocated_bytes_median": 359121808,
+            "rss_kib_median": 353784,
+            "peak_rss_kib_median": 400524,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0,
+            "render_units": 118663
+          },
+          "edit_undo_projection_last": {
+            "milliseconds": {
+              "median": 0.012068,
+              "min": 0.011868,
+              "max": 0.014853
+            },
+            "allocated_bytes_median": 359117728,
+            "rss_kib_median": 353784,
+            "peak_rss_kib_median": 400524,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0,
+            "render_units": 118663
+          },
+          "enter_source_mode": {
+            "milliseconds": {
+              "median": 3077.22,
+              "min": 2800.82,
+              "max": 3112.49
+            },
+            "allocated_bytes_median": 545430192,
+            "rss_kib_median": 598112,
+            "peak_rss_kib_median": 1031012,
+            "full_parses_max": 0,
+            "full_serializations_max": 1,
+            "full_index_scans_max": 0
+          },
+          "source_projection": {
+            "milliseconds": {
+              "median": 930.239,
+              "min": 831.496,
+              "max": 949.896
+            },
+            "allocated_bytes_median": 975655056,
+            "rss_kib_median": 910960,
+            "peak_rss_kib_median": 1031012,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0,
+            "render_units": 390592
+          },
+          "exit_source_mode": {
+            "milliseconds": {
+              "median": 63.0729,
+              "min": 61.1238,
+              "max": 68.3846
+            },
+            "allocated_bytes_median": 267534688,
+            "rss_kib_median": 668116,
+            "peak_rss_kib_median": 1031012,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0
+          },
+          "close": {
+            "milliseconds": {
+              "median": 238.774,
+              "min": 233.535,
+              "max": 278.555
+            },
+            "allocated_bytes_median": 679568,
+            "rss_kib_median": 648644,
+            "peak_rss_kib_median": 1031012,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0
+          }
+        }
+      }
+    },
+    "synthetic-1mib": {
+      "baseline": {
+        "samples": 1,
+        "input_bytes": 1048995,
+        "census": {
+          "phase": "census",
+          "block_count": 43178,
+          "raw_block_count": 3084,
+          "raw_content_offsets": 314568,
+          "raw_offset_storage_bytes": 2516544,
+          "inline_nodes": 37008,
+          "inline_semantic_payloads": 15420,
+          "inline_semantic_object_bytes": 4317600,
+          "sizeof_block_node": 168,
+          "sizeof_render_block": 328
+        },
+        "process_peak_rss_kib_median": 163544,
+        "process_seconds_median": 1.0312,
+        "phases": {
+          "parse": {
+            "milliseconds": {
+              "median": 164.79,
+              "min": 164.79,
+              "max": 164.79
+            },
+            "allocated_bytes_median": 42745264,
+            "rss_kib_median": 55644,
+            "peak_rss_kib_median": 74584,
+            "full_parses_max": 1,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 1
+          },
+          "virtual_projection": {
+            "milliseconds": {
+              "median": 31.6565,
+              "min": 31.6565,
+              "max": 31.6565
+            },
+            "allocated_bytes_median": 52882048,
+            "rss_kib_median": 58372,
+            "peak_rss_kib_median": 74584,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0,
+            "render_units": 10795
+          },
+          "projection_sweep": {
+            "milliseconds": {
+              "median": 59.8516,
+              "min": 59.8516,
+              "max": 59.8516
+            },
+            "allocated_bytes_median": 52918384,
+            "rss_kib_median": 58432,
+            "peak_rss_kib_median": 74584,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0,
+            "render_units": 10795
+          },
+          "edit_undo_projection_first": {
+            "milliseconds": {
+              "median": 0.050887,
+              "min": 0.050887,
+              "max": 0.050887
+            },
+            "allocated_bytes_median": 52986448,
+            "rss_kib_median": 58616,
+            "peak_rss_kib_median": 74584,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0,
+            "render_units": 10795
+          },
+          "edit_undo_projection_middle": {
+            "milliseconds": {
+              "median": 0.012469,
+              "min": 0.012469,
+              "max": 0.012469
+            },
+            "allocated_bytes_median": 52987568,
+            "rss_kib_median": 58616,
+            "peak_rss_kib_median": 74584,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0,
+            "render_units": 10795
+          },
+          "edit_undo_projection_last": {
+            "milliseconds": {
+              "median": 0.010306,
+              "min": 0.010306,
+              "max": 0.010306
+            },
+            "allocated_bytes_median": 52986240,
+            "rss_kib_median": 58616,
+            "peak_rss_kib_median": 74584,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0,
+            "render_units": 10795
+          },
+          "enter_source_mode": {
+            "milliseconds": {
+              "median": 587.039,
+              "min": 587.039,
+              "max": 587.039
+            },
+            "allocated_bytes_median": 80148528,
+            "rss_kib_median": 94356,
+            "peak_rss_kib_median": 157808,
+            "full_parses_max": 0,
+            "full_serializations_max": 1,
+            "full_index_scans_max": 0
+          },
+          "source_projection": {
+            "milliseconds": {
+              "median": 60.0684,
+              "min": 60.0684,
+              "max": 60.0684
+            },
+            "allocated_bytes_median": 169478272,
+            "rss_kib_median": 163544,
+            "peak_rss_kib_median": 163544,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0,
+            "render_units": 41635
+          },
+          "exit_source_mode": {
+            "milliseconds": {
+              "median": 17.5913,
+              "min": 17.5913,
+              "max": 17.5913
+            },
+            "allocated_bytes_median": 42868208,
+            "rss_kib_median": 163544,
+            "peak_rss_kib_median": 163544,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0
+          },
+          "close": {
+            "milliseconds": {
+              "median": 29.0714,
+              "min": 29.0714,
+              "max": 29.0714
+            },
+            "allocated_bytes_median": 162096,
+            "rss_kib_median": 161772,
+            "peak_rss_kib_median": 163468,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0
+          }
+        }
+      },
+      "current": {
+        "samples": 1,
+        "input_bytes": 1048995,
+        "census": {
+          "phase": "census",
+          "block_count": 43178,
+          "raw_block_count": 3084,
+          "raw_content_offsets": 314568,
+          "raw_offset_storage_bytes": 0,
+          "inline_nodes": 37008,
+          "inline_semantic_payloads": 0,
+          "inline_semantic_object_bytes": 0,
+          "sizeof_block_node": 168,
+          "sizeof_render_block": 328
+        },
+        "process_peak_rss_kib_median": 146760,
+        "process_seconds_median": 0.610822,
+        "phases": {
+          "parse": {
+            "milliseconds": {
+              "median": 166.332,
+              "min": 166.332,
+              "max": 166.332
+            },
+            "allocated_bytes_median": 35432768,
+            "rss_kib_median": 48552,
+            "peak_rss_kib_median": 65992,
+            "full_parses_max": 1,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 1
+          },
+          "virtual_projection": {
+            "milliseconds": {
+              "median": 31.8631,
+              "min": 31.8631,
+              "max": 31.8631
+            },
+            "allocated_bytes_median": 45504240,
+            "rss_kib_median": 50560,
+            "peak_rss_kib_median": 65992,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0,
+            "render_units": 10795
+          },
+          "projection_sweep": {
+            "milliseconds": {
+              "median": 58.193,
+              "min": 58.193,
+              "max": 58.193
+            },
+            "allocated_bytes_median": 45539200,
+            "rss_kib_median": 50628,
+            "peak_rss_kib_median": 65992,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0,
+            "render_units": 10795
+          },
+          "edit_undo_projection_first": {
+            "milliseconds": {
+              "median": 0.049895,
+              "min": 0.049895,
+              "max": 0.049895
+            },
+            "allocated_bytes_median": 45607264,
+            "rss_kib_median": 50756,
+            "peak_rss_kib_median": 65992,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0,
+            "render_units": 10795
+          },
+          "edit_undo_projection_middle": {
+            "milliseconds": {
+              "median": 0.025638,
+              "min": 0.025638,
+              "max": 0.025638
+            },
+            "allocated_bytes_median": 45607936,
+            "rss_kib_median": 50756,
+            "peak_rss_kib_median": 65992,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0,
+            "render_units": 10795
+          },
+          "edit_undo_projection_last": {
+            "milliseconds": {
+              "median": 0.022314,
+              "min": 0.022314,
+              "max": 0.022314
+            },
+            "allocated_bytes_median": 45607008,
+            "rss_kib_median": 50756,
+            "peak_rss_kib_median": 65992,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0,
+            "render_units": 10795
+          },
+          "enter_source_mode": {
+            "milliseconds": {
+              "median": 254.973,
+              "min": 254.973,
+              "max": 254.973
+            },
+            "allocated_bytes_median": 67134656,
+            "rss_kib_median": 86764,
+            "peak_rss_kib_median": 146760,
+            "full_parses_max": 0,
+            "full_serializations_max": 1,
+            "full_index_scans_max": 0
+          },
+          "source_projection": {
+            "milliseconds": {
+              "median": 30.3026,
+              "min": 30.3026,
+              "max": 30.3026
+            },
+            "allocated_bytes_median": 114661488,
+            "rss_kib_median": 109776,
+            "peak_rss_kib_median": 146760,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0,
+            "render_units": 41635
+          },
+          "exit_source_mode": {
+            "milliseconds": {
+              "median": 4.95556,
+              "min": 4.95556,
+              "max": 4.95556
+            },
+            "allocated_bytes_median": 35555168,
+            "rss_kib_median": 109776,
+            "peak_rss_kib_median": 146760,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0
+          },
+          "close": {
+            "milliseconds": {
+              "median": 22.7985,
+              "min": 22.7985,
+              "max": 22.7985
+            },
+            "allocated_bytes_median": 159200,
+            "rss_kib_median": 108004,
+            "peak_rss_kib_median": 146760,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0
+          }
+        }
+      }
+    },
+    "unique-1mib": {
+      "baseline": {
+        "samples": 3,
+        "input_bytes": 1049244,
+        "census": {
+          "phase": "census",
+          "block_count": 43299,
+          "raw_block_count": 4479,
+          "raw_content_offsets": 327739,
+          "raw_offset_storage_bytes": 2621912,
+          "inline_nodes": 35832,
+          "inline_semantic_payloads": 14930,
+          "inline_semantic_object_bytes": 4180400,
+          "sizeof_block_node": 168,
+          "sizeof_render_block": 328
+        },
+        "process_peak_rss_kib_median": 172792,
+        "process_seconds_median": 1.013206,
+        "phases": {
+          "parse": {
+            "milliseconds": {
+              "median": 182.339,
+              "min": 146.903,
+              "max": 230.616
+            },
+            "allocated_bytes_median": 43566224,
+            "rss_kib_median": 56484,
+            "peak_rss_kib_median": 75228,
+            "full_parses_max": 1,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 1
+          },
+          "virtual_projection": {
+            "milliseconds": {
+              "median": 32.5274,
+              "min": 31.3098,
+              "max": 50.9418
+            },
+            "allocated_bytes_median": 54321296,
+            "rss_kib_median": 60060,
+            "peak_rss_kib_median": 75228,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0,
+            "render_units": 11945
+          },
+          "projection_sweep": {
+            "milliseconds": {
+              "median": 60.999,
+              "min": 60.6407,
+              "max": 61.4906
+            },
+            "allocated_bytes_median": 54355072,
+            "rss_kib_median": 60124,
+            "peak_rss_kib_median": 75228,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0,
+            "render_units": 11945
+          },
+          "edit_undo_projection_first": {
+            "milliseconds": {
+              "median": 0.045809,
+              "min": 0.042504,
+              "max": 0.071428
+            },
+            "allocated_bytes_median": 54423136,
+            "rss_kib_median": 60188,
+            "peak_rss_kib_median": 75228,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0,
+            "render_units": 11945
+          },
+          "edit_undo_projection_middle": {
+            "milliseconds": {
+              "median": 0.032999,
+              "min": 0.02651,
+              "max": 0.034161
+            },
+            "allocated_bytes_median": 54427616,
+            "rss_kib_median": 60188,
+            "peak_rss_kib_median": 75228,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0,
+            "render_units": 11945
+          },
+          "edit_undo_projection_last": {
+            "milliseconds": {
+              "median": 0.011708,
+              "min": 0.011327,
+              "max": 0.012749
+            },
+            "allocated_bytes_median": 54423232,
+            "rss_kib_median": 60188,
+            "peak_rss_kib_median": 75228,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0,
+            "render_units": 11945
+          },
+          "enter_source_mode": {
+            "milliseconds": {
+              "median": 538.378,
+              "min": 318.003,
+              "max": 708.445
+            },
+            "allocated_bytes_median": 81209040,
+            "rss_kib_median": 99628,
+            "peak_rss_kib_median": 159876,
+            "full_parses_max": 0,
+            "full_serializations_max": 1,
+            "full_index_scans_max": 0
+          },
+          "source_projection": {
+            "milliseconds": {
+              "median": 67.5693,
+              "min": 60.8259,
+              "max": 127.733
+            },
+            "allocated_bytes_median": 177531280,
+            "rss_kib_median": 172768,
+            "peak_rss_kib_median": 172768,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0,
+            "render_units": 46284
+          },
+          "exit_source_mode": {
+            "milliseconds": {
+              "median": 21.7207,
+              "min": 15.7939,
+              "max": 24.378
+            },
+            "allocated_bytes_median": 43688432,
+            "rss_kib_median": 172792,
+            "peak_rss_kib_median": 172792,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0
+          },
+          "close": {
+            "milliseconds": {
+              "median": 23.6188,
+              "min": 23.415,
+              "max": 37.36
+            },
+            "allocated_bytes_median": 162880,
+            "rss_kib_median": 170832,
+            "peak_rss_kib_median": 172700,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0
+          }
+        }
+      },
+      "current": {
+        "samples": 3,
+        "input_bytes": 1049244,
+        "census": {
+          "phase": "census",
+          "block_count": 43299,
+          "raw_block_count": 4479,
+          "raw_content_offsets": 327739,
+          "raw_offset_storage_bytes": 0,
+          "inline_nodes": 35832,
+          "inline_semantic_payloads": 0,
+          "inline_semantic_object_bytes": 0,
+          "sizeof_block_node": 168,
+          "sizeof_render_block": 328
+        },
+        "process_peak_rss_kib_median": 149424,
+        "process_seconds_median": 0.769356,
+        "phases": {
+          "parse": {
+            "milliseconds": {
+              "median": 165.902,
+              "min": 160.53,
+              "max": 498.18
+            },
+            "allocated_bytes_median": 36351536,
+            "rss_kib_median": 49468,
+            "peak_rss_kib_median": 66816,
+            "full_parses_max": 1,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 1
+          },
+          "virtual_projection": {
+            "milliseconds": {
+              "median": 27.7553,
+              "min": 21.2111,
+              "max": 36.7937
+            },
+            "allocated_bytes_median": 47035696,
+            "rss_kib_median": 51256,
+            "peak_rss_kib_median": 66816,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0,
+            "render_units": 11945
+          },
+          "projection_sweep": {
+            "milliseconds": {
+              "median": 53.1584,
+              "min": 47.6101,
+              "max": 59.1015
+            },
+            "allocated_bytes_median": 47065520,
+            "rss_kib_median": 51336,
+            "peak_rss_kib_median": 66816,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0,
+            "render_units": 11945
+          },
+          "edit_undo_projection_first": {
+            "milliseconds": {
+              "median": 0.048924,
+              "min": 0.044997,
+              "max": 0.060981
+            },
+            "allocated_bytes_median": 47134064,
+            "rss_kib_median": 51440,
+            "peak_rss_kib_median": 66816,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0,
+            "render_units": 11945
+          },
+          "edit_undo_projection_middle": {
+            "milliseconds": {
+              "median": 0.028743,
+              "min": 0.021793,
+              "max": 0.029695
+            },
+            "allocated_bytes_median": 47138656,
+            "rss_kib_median": 51444,
+            "peak_rss_kib_median": 66816,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0,
+            "render_units": 11945
+          },
+          "edit_undo_projection_last": {
+            "milliseconds": {
+              "median": 0.010256,
+              "min": 0.009684,
+              "max": 0.019309
+            },
+            "allocated_bytes_median": 47133712,
+            "rss_kib_median": 51444,
+            "peak_rss_kib_median": 66816,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0,
+            "render_units": 11945
+          },
+          "enter_source_mode": {
+            "milliseconds": {
+              "median": 432.396,
+              "min": 419.472,
+              "max": 606.01
+            },
+            "allocated_bytes_median": 68234000,
+            "rss_kib_median": 91048,
+            "peak_rss_kib_median": 149424,
+            "full_parses_max": 0,
+            "full_serializations_max": 1,
+            "full_index_scans_max": 0
+          },
+          "source_projection": {
+            "milliseconds": {
+              "median": 31.9153,
+              "min": 31.1481,
+              "max": 42.9081
+            },
+            "allocated_bytes_median": 118662272,
+            "rss_kib_median": 115060,
+            "peak_rss_kib_median": 149424,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0,
+            "render_units": 46284
+          },
+          "exit_source_mode": {
+            "milliseconds": {
+              "median": 6.05982,
+              "min": 5.95094,
+              "max": 6.32285
+            },
+            "allocated_bytes_median": 36469264,
+            "rss_kib_median": 115060,
+            "peak_rss_kib_median": 149424,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0
+          },
+          "close": {
+            "milliseconds": {
+              "median": 26.1721,
+              "min": 24.8598,
+              "max": 34.9261
+            },
+            "allocated_bytes_median": 155264,
+            "rss_kib_median": 113100,
+            "peak_rss_kib_median": 149424,
+            "full_parses_max": 0,
+            "full_serializations_max": 0,
+            "full_index_scans_max": 0
+          }
+        }
+      }
+    }
+  }
+}
