@@ -25,6 +25,13 @@ std::string edge_path(Point a,Point b) {
 }
 std::string label(const FlowchartTextBox& box,const FlowchartSvgTheme& theme,std::u16string_view color) {
     const auto font=box.font.value_or(FlowchartLabelFont{theme.font_family,theme.font_size});
+    if(box.math_label) {
+        const std::string paint(color.begin(),color.end());
+        auto result=render_math_label_svg(*box.math_label,-box.math_label->width/2,-box.math_label->height/2,
+            {font.family,paint,"mindmap-label"});
+        if(!result) throw std::runtime_error(result.error());
+        return std::move(*result);
+    }
     std::string svg="<text class=\"mindmap-label\" xml:space=\"preserve\" text-anchor=\"middle\" font-family=\""+xml(font.family)+"\" font-size=\""+num(font.size)+"\" fill=\""+xml(color)+"\">";
     for(std::size_t i=0;i<box.lines.size();++i) {
         svg+="<tspan x=\"0\" y=\""+num(-box.height/2+box.baseline+i*box.line_step)+"\">";

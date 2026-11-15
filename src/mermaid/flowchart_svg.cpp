@@ -351,6 +351,14 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
                 marker_definitions(theme.line,"flow-"+std::to_string(i),xml(edge_paints[i].marker_stroke));
         svg+="<g font-family=\""+xml(theme.font_family)+"\" font-size=\""+number(theme.font_size)+"\" transform=\"translate("+number(wrapper_offset)+","+number(wrapper_offset)+")\">";
         const auto text=[&](std::u16string_view,FlowchartPoint center,const FlowchartTextBox& b,std::string_view css,const FlowchartPaint& paint) {
+            if(b.math_label) {
+                const auto& font=b.paint_font?b.paint_font:b.font;
+                const auto color=paint.get(u"color",css=="cluster-label"?theme.cluster_text:theme.text);
+                auto label=render_math_label_svg(*b.math_label,center.x-b.width/2,
+                    center.y-b.height/2,{font?font->family:theme.font_family,color,css,b.width});
+                if(!label) throw std::runtime_error(label.error());
+                return std::move(*label);
+            }
             // createLabel's unbounded HTML group box keeps each line left aligned.
             const bool left=css=="cluster-label" && theme.html_label_spacing && !b.centered_group;
             if(left) center.x-=b.width/2;

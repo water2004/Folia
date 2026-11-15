@@ -13,6 +13,7 @@ struct AgentflowSvgTheme {
     double font_size = 16, diagram_padding = 8, min_node_width = 120, wrapping_width = 120;
     bool neo = true;
     FlowchartElkLineHops elk_line_hops = FlowchartElkLineHops::arc;
+    bool html_labels = true;
 };
 struct AgentflowRenderInput {
     AgentflowDocument document;
@@ -24,5 +25,5 @@ struct AgentflowSvg {
 };
 std::expected<AgentflowRenderInput, std::string> prepare_agentflow_render(const PreparedDiagram &);
 std::expected<AgentflowSvg, std::string> render_agentflow_svg(const AgentflowRenderInput &,
-                                                              const SvgTextMeasure &);
+    const SvgTextMeasure &, const MathLabelMeasure & = {});
 } // namespace folia::mermaid

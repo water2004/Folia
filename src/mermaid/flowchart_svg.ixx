@@ -3,6 +3,7 @@ export module folia.mermaid.flowchart_svg;
 import std;
 export import folia.mermaid.dagre_rank;
 export import folia.mermaid.flowchart_label;
+export import folia.mermaid.math_label;
 
 export namespace folia::mermaid {
 enum class FlowchartElkLineHops { off,arc,gap };
@@ -45,6 +46,8 @@ struct FlowchartTextBox {
     // Direct cluster font styles apply after its HTML container was measured.
     std::optional<FlowchartLabelFont> paint_font;
     double paint_baseline=0,paint_line_step=0;
+    // Layout copies share the immutable formula drawing data.
+    std::shared_ptr<const MathLabel> math_label;
 };
 struct FlowchartMeasurements {
     std::vector<FlowchartTextBox> nodes,edges;

@@ -42,6 +42,12 @@ std::string paint(std::string_view value) {
     // Configured theme paints use the same checked XML boundary as labels.
     return xml(std::u16string{value.begin(),value.end()});
 }
+std::string math_text(const SequenceTextBox& box,const SequenceSvgTheme& theme,
+    double left,double top,std::string_view color,std::string_view css) {
+    auto result=render_math_label_svg(*box.math_label,left,top,{theme.font_family,color,css});
+    if(!result) throw std::runtime_error(result.error());
+    return std::move(*result);
+}
 bool dotted(SequenceKind kind) {
     return kind == SequenceKind::dotted || kind == SequenceKind::dotted_open || kind == SequenceKind::bidirectional_dotted || kind == SequenceKind::dotted_cross || kind == SequenceKind::dotted_point;
 }
@@ -56,6 +62,30 @@ double participant_height(std::u16string_view type,double width,double height,do
     if(type==u"database") return width/3+label_height;
     return height;
 }
+double participant_translation(std::u16string_view type,bool footer) {
+    return type==u"boundary"?21:type==u"entity"?(footer?22:6):0;
+}
+// Symbol actors put their labels below the body. A math label occupies its
+// measured box there, rather than sharing the old single text-line center.
+std::optional<double> symbol_label_top(std::u16string_view type,double width,
+    bool footer,double padding) {
+    const auto gap=padding/2;
+    if(type==u"actor") return 60+gap;
+    if(type==u"boundary") return 34+gap;
+    if(type==u"control") return 54+gap;
+    if(type==u"entity") return (footer?10:25)+22+gap;
+    if(type==u"database") {
+        const auto cylinder=width/3;
+        return cylinder+(cylinder/2)/(2.5+cylinder/50)+gap;
+    }
+    return std::nullopt;
+}
+double math_participant_height(std::u16string_view type,double width,double height,
+    const SequenceSvgConfig& config,bool footer) {
+    if(const auto top=symbol_label_top(type,width,footer,config.wrap_padding))
+        return *top+participant_translation(type,footer)+height;
+    return height+2*config.wrap_padding;
+}
 // The classic svgDraw actor routines mutate height after drawing the header.
 // Footers use that height for labels while retaining each shape's own geometry.
 std::string participant_svg(const SequenceActor& actor,const SequenceTextBox& label,
@@ -66,7 +96,7 @@ std::string participant_svg(const SequenceActor& actor,const SequenceTextBox& la
         entity=type==u"entity",database=type==u"database",queue=type==u"queue",collections=type==u"collections";
     const auto height=footer?participant_height(type,width,c.height,c.label_box_height):c.height;
     const auto center=x+width/2;
-    const auto translate=boundary?21:entity?(footer?22:6):0;
+    const auto translate=participant_translation(type,footer);
     const auto cls=std::string(human||boundary||control?"actor-man ":"actor ")+(footer?"actor-bottom":"actor-top");
     std::string svg="<g class=\""+cls+"\" name=\""+xml(actor.id)+"\" transform=\"translate(0,"+num(translate)+")\" fill=\""+
         paint(t.actor_fill)+"\" stroke=\""+paint(t.actor_border)+"\" stroke-width=\""+(human||boundary||control?"2":"1")+"\">";
@@ -110,7 +140,11 @@ std::string participant_svg(const SequenceActor& actor,const SequenceTextBox& la
         rect(x,y,false);
         if(collections) {rect(x-6,y+6,true);label_x-=6;label_y+=6;}
     }
-    for(std::size_t j=0;j<label.lines.size();++j)
+    if(label.math_label) {
+        if(const auto top=symbol_label_top(type,width,footer,c.wrap_padding))
+            label_y=y+*top+label.math_label->height/2;
+        svg+=math_text(label,t,label_x-label.math_label->width/2,label_y-label.math_label->height/2,t.actor_text,"actor");
+    } else for(std::size_t j=0;j<label.lines.size();++j)
         svg+="<text class=\"actor\" x=\""+num(label_x)+"\" y=\""+num(label_y+t.font_size*(static_cast<double>(j)-(label.lines.size()-1)/2.0))+
             "\" text-anchor=\"middle\" dominant-baseline=\"central\" alignment-baseline=\"central\" fill=\""+paint(t.actor_text)+"\" stroke=\"none\" stroke-width=\"1\""+font+">"+xml(label.lines[j])+"</text>";
     return svg+"</g>";
@@ -146,9 +180,11 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
                 return std::unexpected("Unsupported Sequence participant type");
             if(!std::isfinite(box.width)||box.width<0||!std::isfinite(box.height)||box.height<0)
                 return std::unexpected("Invalid Sequence actor measurement");
-            ids.emplace(a.id,i); actors[i].width=a.wrap?c.width:std::max(c.width,box.width+2*c.wrap_padding);
+            ids.emplace(a.id,i); actors[i].width=a.wrap&&!box.math_label?c.width:std::max(c.width,box.width+2*c.wrap_padding);
             actors[i].visible=!c.hide_unused || std::ranges::any_of(doc.messages,[&](const auto& m){return m.from==a.id||m.to==a.id;});
-            if(a.wrap) c.height=std::max(c.height,box.height);
+            if(box.math_label)
+                c.height=std::max(c.height,math_participant_height(a.type,actors[i].width,box.height,c,false));
+            else if(a.wrap) c.height=std::max(c.height,box.height);
         }
         for(std::size_t i=0;i<doc.messages.size();++i) {
             const auto& m=doc.messages[i]; const auto& box=measured.messages[i];
@@ -307,8 +343,14 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
                     width=std::abs(a.x+a.width/2-b.x-b.width/2)+c.actor_margin;
                     x=std::min(a.x+a.width/2,b.x+b.width/2)-c.actor_margin/2;
                 }
-                notes[i]={x,width};
                 if(m.wrap) box=wrap(m.message,width-2*c.wrap_padding,t.note_font_weight);
+                if(box.math_label) {
+                    const auto expanded=std::max(width,box.width+2*c.note_margin);
+                    if(m.placement==0) x-=expanded-width;
+                    else if(m.placement!=1) x-=(expanded-width)/2;
+                    width=expanded;
+                }
+                notes[i]={x,width};
                 for(auto& loop:loops) {
                     loop.from=std::min(loop.from,x);loop.to=std::max(loop.to,x+width);
                     loop.width=std::max(loop.width,std::abs(loop.from-loop.to))-c.label_box_width;
@@ -317,7 +359,7 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
                 const auto [start,stop]=endpoints(m);
                 const auto bounded=std::abs(start-stop)+2*c.wrap_padding;
                 if(m.wrap) box=wrap(m.message,std::max(bounded,c.width));
-                const auto width=std::max({m.wrap?0:box.width+2*c.wrap_padding,bounded,c.width});
+                const auto width=std::max({m.wrap&&!box.math_label?0:box.width+2*c.wrap_padding,bounded,c.width});
                 for(auto& loop:loops) {
                     if(start==stop) {
                         loop.from=std::min({loop.from,a.x-width/2,a.x-a.width/2});
@@ -358,7 +400,7 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
             }
             if(sequence_region_end(m.type)||m.type==SequenceKind::rect_end) {
                 if(regions.empty()) return std::unexpected("Sequence region end has no start");
-                const auto r=regions.back();regions.pop_back();
+                auto r=regions.back();regions.pop_back();
                 if(!std::isfinite(r.left)||!std::isfinite(r.right)) return std::unexpected("Sequence region needs rendered content");
                 if(m.type==SequenceKind::rect_end) {
                     const auto& fill=doc.messages[r.message].message;
@@ -368,6 +410,16 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
                         "\" height=\""+num(r.bottom-r.top)+"\" fill=\""+(fill.empty()?paint(t.rect_fill):xml(fill))+"\"/>"+region_backgrounds;
                     y=r.bottom;bottom=std::max(bottom,y);
                     continue;
+                }
+                auto label_width=messages[r.message].math_label?messages[r.message].width:0;
+                for(const auto& section:r.sections)
+                    if(messages[section.message].math_label)
+                        label_width=std::max(label_width,messages[section.message].width);
+                if(label_width>0) {
+                    const auto center=(r.left+r.right)/2;
+                    const auto half=std::max((r.right-r.left)/2,label_width/2+c.box_margin);
+                    r.left=center-half;r.right=center+half;
+                    insert(r.left,r.top,r.right,r.bottom);
                 }
                 auto line=[&](double x1,double y1,double x2,double y2,bool section=false) {
                     signals+="<line class=\"loopLine\" x1=\""+num(x1)+"\" y1=\""+num(y1)+"\" x2=\""+num(x2)+"\" y2=\""+num(y2)+
@@ -392,9 +444,18 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
                     for(std::size_t j=0;j<label.lines.size();++j)
                         text(cls,label.lines[j].empty()?u"\u200b":std::u16string_view{label.lines[j]},x,ty+j*label.line_height,false);
                 };
-                label_lines("loopText",messages[r.message],center+c.label_box_width/2,r.top+c.box_margin+c.box_text_margin);
-                for(const auto& s:r.sections) if(!messages[s.message].display.empty())
-                    label_lines("sectionTitle",messages[s.message],center,s.y+c.box_margin+c.box_text_margin);
+                const auto& title=messages[r.message];
+                if(title.math_label)
+                    signals+=math_text(title,t,std::floor(center-title.math_label->width/2+0.5),
+                        std::floor(r.top+0.5),t.loop_text,"loopText");
+                else label_lines("loopText",title,center+c.label_box_width/2,r.top+c.box_margin+c.box_text_margin);
+                for(const auto& s:r.sections) if(!messages[s.message].display.empty()) {
+                    const auto& section=messages[s.message];
+                    if(section.math_label)
+                        signals+=math_text(section,t,std::floor(center-section.math_label->width/2+0.5),
+                            std::floor(s.y-section.math_label->height+0.5),t.loop_text,"sectionTitle");
+                    else label_lines("sectionTitle",section,center,s.y+c.box_margin+c.box_text_margin);
+                }
                 y=r.bottom;bottom=std::max(bottom,y);
                 continue;
             }
@@ -426,7 +487,10 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
                 const auto tx=std::floor((c.note_align==u"left"?x+c.note_margin:c.note_align==u"right"?x+width-c.note_margin:x+width/2)+0.5);
                 auto note="<rect class=\"note\" x=\""+num(x)+"\" y=\""+num(y)+"\" width=\""+num(width)+"\" height=\""+num(h)+
                     "\" fill=\""+paint(t.note_fill)+"\" stroke=\""+paint(t.note_border)+"\"/>";
-                for(std::size_t j=0;j<box.lines.size();++j)
+                if(box.math_label)
+                    note+=math_text(box,t,std::floor(x+width/2-box.math_label->width/2+0.5),
+                        std::floor(y+h/2-box.math_label->height/2+0.5),t.note_text,"noteText");
+                else for(std::size_t j=0;j<box.lines.size();++j)
                     note+="<text class=\"noteText\" x=\""+num(tx)+"\" y=\""+num(std::floor(y+c.note_margin/2+j*box.line_height+0.5))+"\" text-anchor=\""+anchor+
                     "\" dominant-baseline=\"middle\" alignment-baseline=\"middle\" dy=\"1em\" fill=\""+paint(t.note_text)+"\""+note_font+">"+xml(box.lines[j].empty()?u"\u200b":std::u16string_view{box.lines[j]})+"</text>";
                 backgrounds.push_back(std::move(note));
@@ -441,7 +505,9 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
             const auto text_y=std::floor(y+10+c.wrap_padding/2+0.5);
             // Original boundMessage: one measured line, then the remaining
             // text offset and the family-specific self-loop/box margin.
-            y+=10+box.line_height;
+            // boundMessage adds a separate first-line ascent only for SVG text;
+            // the mathematical HTML box already contains its entire height.
+            y+=10+(box.math_label?0:box.line_height);
             auto offset=box.height-10;
             if(!self||!c.right_angles) offset+=c.box_margin;
             const auto line_y=y+offset;
@@ -482,7 +548,12 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
             const bool left_align=c.message_align==u"left"||c.message_align==u"start",right_align=c.message_align==u"right"||c.message_align==u"end";
             const auto message_x=left_align?std::min(start,stop)+c.wrap_padding:right_align?std::max(start,stop)-c.wrap_padding:(start+stop)/2;
             const std::string message_anchor=left_align?"start":right_align?"end":"middle";
-            for(std::size_t j=0;j<box.lines.size();++j)
+            if(box.math_label) {
+                const auto left=std::floor((start+stop)/2-box.math_label->width/2+0.5);
+                const auto top=std::floor(line_y-box.math_label->height+0.5);
+                insert(left,top,left+box.math_label->width,top+box.math_label->height);
+                signals+=math_text(box,t,left,top,t.signal_text,"messageText");
+            } else for(std::size_t j=0;j<box.lines.size();++j)
                 signals+="<text class=\"messageText\" x=\""+num(std::floor(message_x+0.5))+"\" y=\""+num(text_y+j*box.line_height)+
                 "\" text-anchor=\""+message_anchor+"\" dominant-baseline=\"middle\" alignment-baseline=\"middle\" dy=\"1em\" fill=\""+paint(t.signal_text)+"\""+font+">"+xml(box.lines[j].empty()?u"\u200b":std::u16string_view{box.lines[j]})+"</text>";
             const auto cls=dotted(m.type)?"messageLine1":"messageLine0";
@@ -510,8 +581,15 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
         }
         const auto footer_y=y+2*c.box_margin;
         double footer_height=0;
+        const auto actor_height=[&](std::size_t index,bool footer) {
+            const auto& type=doc.actors[index].type;
+            auto height=participant_height(type,actors[index].width,c.height,c.label_box_height);
+            if(const auto& box=measured.actors[index];box.math_label)
+                height=std::max(height,math_participant_height(type,actors[index].width,box.height,c,footer));
+            return height;
+        };
         for(std::size_t i=0;i<actors.size();++i) if(actors[i].visible)
-            footer_height=std::max(footer_height,participant_height(doc.actors[i].type,actors[i].width,c.height,c.label_box_height));
+            footer_height=std::max(footer_height,actor_height(i,true));
         if(c.mirror_actors) bottom=std::max(bottom,footer_y+footer_height+c.box_margin);
         std::string group_backgrounds;
         // drawBox lowers each complete group behind the diagram, in reverse order.
@@ -521,7 +599,10 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
             std::string layer="<rect class=\"rect\" x=\""+num(g.x-2*c.box_margin)+"\" y=\""+num(-c.box_margin/2)+
                 "\" width=\""+num(g.width+4*c.box_margin)+"\" height=\""+num((c.mirror_actors?footer_y+footer_height+c.box_margin:y)+1.5*c.box_margin)+
                 "\" fill=\""+xml(doc.boxes[i].fill)+"\" stroke=\""+paint(t.actor_border)+"\"/>";
-            if(!g.label.display.empty()) for(std::size_t j=0;j<g.label.lines.size();++j)
+            if(!g.label.display.empty()&&g.label.math_label)
+                layer+=math_text(g.label,t,g.x+g.width/2-g.label.math_label->width/2,
+                    c.box_text_margin+(group_text_height-g.label.math_label->height)/2,t.title_text,"text");
+            else if(!g.label.display.empty()) for(std::size_t j=0;j<g.label.lines.size();++j)
                 layer+="<text class=\"text\" x=\""+num(g.x+g.width/2)+"\" y=\""+
                     num(c.box_text_margin+group_text_height/2+t.font_size*(static_cast<double>(j)-(g.label.lines.size()-1)/2.0))+
                     "\" text-anchor=\"middle\" dominant-baseline=\"central\" alignment-baseline=\"central\" fill=\""+paint(t.title_text)+"\""+font+">"+xml(g.label.lines[j])+"</text>";
@@ -543,9 +624,11 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
             const auto& a=actors[i];const auto center=a.x+a.width/2;
             if(!a.visible) continue;
             const auto& type=doc.actors[i].type;
-            const auto start=type==u"actor"||type==u"boundary"?80:type==u"control"||type==u"entity"?75:
+            auto start=type==u"actor"||type==u"boundary"?80:type==u"control"||type==u"entity"?75:
                 type==u"database"?c.height+2*c.box_text_margin:c.height;
-            svg+="<line class=\"actor-line\" x1=\""+num(center)+"\" x2=\""+num(center)+"\" y1=\""+num(a.start_y+start)+"\" y2=\""+num(c.mirror_actors?a.stop_y.value_or(footer_y):a.stop_y?*a.stop_y+participant_height(type,a.width,c.height,c.label_box_height)/2:2000)+"\" stroke=\""+paint(t.actor_line)+"\" fill=\""+paint(t.actor_fill)+"\" stroke-width=\"2\"/>";
+            if(const auto& box=measured.actors[i];box.math_label&&symbol_label_top(type,a.width,false,c.wrap_padding))
+                start=std::max(start,math_participant_height(type,a.width,box.height,c,false)+c.box_text_margin);
+            svg+="<line class=\"actor-line\" x1=\""+num(center)+"\" x2=\""+num(center)+"\" y1=\""+num(a.start_y+start)+"\" y2=\""+num(c.mirror_actors?a.stop_y.value_or(footer_y):a.stop_y?*a.stop_y+actor_height(i,false)/2:2000)+"\" stroke=\""+paint(t.actor_line)+"\" fill=\""+paint(t.actor_fill)+"\" stroke-width=\"2\"/>";
             svg+=participant_svg(doc.actors[i],measured.actors[i],t,c,a.x,a.width,a.start_y,false,actor_font);
             if(c.mirror_actors) svg+=participant_svg(doc.actors[i],measured.actors[i],t,c,a.x,a.width,a.stop_y.value_or(footer_y),true,actor_font);
         }

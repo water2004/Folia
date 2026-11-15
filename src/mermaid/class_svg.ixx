@@ -5,6 +5,7 @@ import std;
 export import folia.mermaid.class_diagram;
 export import folia.mermaid.dagre_rank;
 export import folia.mermaid.flowchart_label;
+export import folia.mermaid.math_label;
 
 export namespace folia::mermaid {
 struct ClassTextStyle {
@@ -24,6 +25,8 @@ struct ClassTextBox {
     std::optional<ClassTextStyle> paint_font;
     std::vector<double> paint_baselines;
     bool svg_label = false;
+    // Layout copies share the immutable formula drawing data.
+    std::shared_ptr<const MathLabel> math_label;
 };
 struct ClassNodeMeasurements {
     ClassTextBox label, annotation;

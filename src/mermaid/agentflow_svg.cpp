@@ -45,6 +45,8 @@ std::expected<AgentflowRenderInput, std::string> prepare_agentflow_render(const 
     out.theme.diagram_padding = numeric(member(cfg, u"diagramPadding"), 8);
     out.theme.min_node_width = numeric(member(cfg, u"minNodeWidth"), 120);
     out.theme.wrapping_width = numeric(member(cfg, u"wrappingWidth"), 120);
+    const auto& html = member(p.effective_config, u"htmlLabels");
+    out.theme.html_labels = html.kind == ConfigKind::null || config_truthy(html);
     const auto look = str(member(cfg, u"look"), str(member(p.effective_config, u"look"), u"neo"));
     out.theme.neo = look == u"neo";
     const auto& hops = member(member(p.effective_config, u"elk"), u"lineHops");
@@ -55,7 +57,7 @@ std::expected<AgentflowRenderInput, std::string> prepare_agentflow_render(const 
     return out;
 }
 std::expected<AgentflowSvg, std::string> render_agentflow_svg(const AgentflowRenderInput &in,
-                                                              const SvgTextMeasure &measure) {
+    const SvgTextMeasure &measure, const MathLabelMeasure &math_measure) {
     try {
         if (!measure)
             return std::unexpected("Agentflow rendering requires platform text measurement");
@@ -77,6 +79,27 @@ std::expected<AgentflowSvg, std::string> render_agentflow_svg(const AgentflowRen
         graph.theme.elk_line_hops = in.theme.elk_line_hops;
         FlowchartMeasurements measured;
         const auto line_height = std::max(in.theme.font_size * 1.5, 1.0);
+        const auto label = [&](std::u16string_view text) -> std::expected<FlowchartTextBox, std::string> {
+            if (in.theme.html_labels && math_measure) {
+                auto rich = math_measure(text, in.theme.font_family, in.theme.font_size, 400, false);
+                if (!rich) return std::unexpected(rich.error());
+                if (*rich) {
+                    FlowchartTextBox box;
+                    box.width = (**rich).width;
+                    box.height = (**rich).height;
+                    box.math_label = std::make_shared<const MathLabel>(std::move(**rich));
+                    return box;
+                }
+            }
+            auto metrics = measure(text, in.theme.font_size, 400);
+            if (!metrics) return std::unexpected(metrics.error());
+            FlowchartTextBox box;
+            box.width = metrics->width;
+            box.height = std::max(metrics->height, line_height);
+            box.baseline = metrics->baseline + (box.height - metrics->height) / 2;
+            box.lines = {std::u16string{text}};
+            return box;
+        };
         for (const auto &c : in.document.containers) {
             FlowchartNode group;
             group.id = c.id;
@@ -86,15 +109,9 @@ std::expected<AgentflowSvg, std::string> render_agentflow_svg(const AgentflowRen
             group.group = true;
             group.padding = 8;
             graph.document.nodes.push_back(std::move(group));
-            auto m = measure(c.label, in.theme.font_size, 400);
-            if (!m)
-                return std::unexpected(m.error());
-            FlowchartTextBox b;
-            b.width = m->width;
-            b.height = std::max(m->height, line_height);
-            b.baseline = m->baseline + (b.height - m->height) / 2;
-            b.lines = {c.label};
-            measured.nodes.push_back(std::move(b));
+            auto box = label(c.label);
+            if (!box) return std::unexpected(box.error());
+            measured.nodes.push_back(std::move(*box));
         }
         for (const auto &n : in.document.nodes) {
             FlowchartNode node;
@@ -128,15 +145,9 @@ std::expected<AgentflowSvg, std::string> render_agentflow_svg(const AgentflowRen
                 }
             }
             graph.document.nodes.push_back(std::move(node));
-            auto m = measure(n.label, in.theme.font_size, 400);
-            if (!m)
-                return std::unexpected(m.error());
-            FlowchartTextBox b;
-            b.width = m->width;
-            b.height = std::max(m->height, line_height);
-            b.baseline = m->baseline + (b.height - m->height) / 2;
-            b.lines = {n.label};
-            measured.nodes.push_back(std::move(b));
+            auto box = label(n.label);
+            if (!box) return std::unexpected(box.error());
+            measured.nodes.push_back(std::move(*box));
         }
         for (const auto &e : in.document.edges) {
             FlowchartEdge edge;
@@ -149,13 +160,9 @@ std::expected<AgentflowSvg, std::string> render_agentflow_svg(const AgentflowRen
             graph.document.edges.push_back(std::move(edge));
             FlowchartTextBox b;
             if (!e.label.empty()) {
-                auto m = measure(e.label, in.theme.font_size, 400);
-                if (!m)
-                    return std::unexpected(m.error());
-                b.width = m->width;
-                b.height = std::max(m->height, line_height);
-                b.baseline = m->baseline + (b.height - m->height) / 2;
-                b.lines = {e.label};
+                auto box = label(e.label);
+                if (!box) return std::unexpected(box.error());
+                b = std::move(*box);
             }
             measured.edges.push_back(std::move(b));
         }

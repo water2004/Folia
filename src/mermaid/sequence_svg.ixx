@@ -2,6 +2,7 @@
 export module folia.mermaid.sequence_svg;
 import std;
 export import folia.mermaid.sequence;
+export import folia.mermaid.math_label;
 
 export namespace folia::mermaid {
 struct SequenceSvgTheme {
@@ -31,6 +32,8 @@ struct SequenceTextBox {
     std::u16string display;
     std::vector<std::u16string> lines;
     double line_height = 0;
+    // Layout copies share the immutable formula drawing data.
+    std::shared_ptr<const MathLabel> math_label;
 };
 struct SequenceMeasurements {
     std::vector<SequenceTextBox> actors, messages, boxes;
