@@ -2,6 +2,7 @@
 export module folia.mermaid.usecase_svg;
 import std;
 export import folia.mermaid.usecase;
+export import folia.mermaid.math_label;
 import folia.mermaid.dagre_rank;
 import folia.mermaid.svg_text_measure;
 export namespace folia::mermaid {
@@ -32,5 +33,6 @@ struct UsecaseRenderInput {
 struct UsecaseSvg { std::string svg; double width=0,height=0; };
 using UsecaseTextMeasure = SvgFamilyTextMeasure;
 std::expected<UsecaseRenderInput,std::string> prepare_usecase_render(const PreparedDiagram&);
-std::expected<UsecaseSvg,std::string> render_usecase_svg(const UsecaseRenderInput&,const UsecaseTextMeasure&);
+std::expected<UsecaseSvg,std::string> render_usecase_svg(
+    const UsecaseRenderInput&, const UsecaseTextMeasure&, const MathLabelMeasure& = {});
 }

@@ -75,6 +75,7 @@ struct Field {
     RequirementTextMetrics metrics;
     double width=0,height=0,offset=0,line_step=0;
     bool center_rows=false;
+    std::optional<MathLabel> math_label;
 };
 struct NodePaint {
     std::vector<Field> fields;
@@ -258,13 +259,22 @@ std::vector<FieldLine> wrap_runs(const RequirementSvgMeasure& measure,FlowchartL
 }
 Field measure_field(const RequirementSvgMeasure& measure,std::u16string text,
     FlowchartLabelFont font,const FlowchartLabelFont& base_font,bool html,bool center_rows,
-    bool rich) {
+    bool rich,const MathLabelMeasure& math_measure={}) {
     Field result;
     result.text=std::move(text);
     result.font=std::move(font);
     result.center_rows=html&&center_rows;
     const auto& base=result.font;
     result.line_step=base.size*(html?1.5:1.1);
+    if(html && rich && math_measure) {
+        auto label=math_measure(result.text,base.family,base.size,base.weight,base.italic);
+        if(!label) throw std::runtime_error(label.error());
+        if(*label) {
+            result.width=(**label).width;result.height=(**label).height;
+            result.math_label=std::move(**label);
+            return result;
+        }
+    }
     result.metrics=measure_line(measure,result.text,base,!html);
     if(!rich) {
         result.width=html?result.metrics.advance:result.metrics.bounds_width;
@@ -310,6 +320,12 @@ std::string paint_text(const Field& field,FlowchartPoint at,std::string_view col
             attr("width",num(field.width+2*pad))+attr("height",num(field.height+2*pad))+
             attr("fill",background)+"/>";
     }
+    if(field.math_label) {
+        auto svg=render_math_label_svg(*field.math_label,at.x,at.y,
+            {field.font.family,color,"requirement-math-label"});
+        if(!svg) throw std::runtime_error(svg.error());
+        return out+*svg;
+    }
     const auto x=at.x+(field.center_rows?field.width/2:0);
     const auto baseline=at.y+field.metrics.svg_baseline+
         (html?(field.line_step-field.metrics.svg_height)/2:0);
@@ -331,7 +347,8 @@ std::string paint_text(const Field& field,FlowchartPoint at,std::string_view col
 }
 
 std::expected<RequirementSvg,std::string> render_requirement_svg(
-    const RequirementRenderInput& input,const RequirementSvgMeasure& measure) {
+    const RequirementRenderInput& input,const RequirementSvgMeasure& measure,
+    const MathLabelMeasure& math_measure) {
     if(!measure) return std::unexpected("Requirement rendering requires real text measurements");
     const bool elk=input.config.layout==u"elk";
     if(!elk&&input.config.layout!=u"dagre")
@@ -371,7 +388,7 @@ std::expected<RequirementSvg,std::string> render_requirement_svg(
                 auto field_font=*font;
                 if(bold) field_font.weight=std::max(field_font.weight,700u);
                 auto field=measure_field(measure,std::move(text),std::move(field_font),base_font,
-                    config.html_labels,heading||!elk,rich);
+                    config.html_labels,heading||!elk,rich,math_measure);
                 const auto line_height=field.height+(config.html_labels?0:6);
                 field.offset=offset-line_height/2;
                 const double glyph_top=config.html_labels?0:field.font.size-field.metrics.svg_baseline;

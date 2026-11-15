@@ -48,10 +48,21 @@ Box centered(FlowchartPoint p, double width, double height) {
 struct Label {
     std::u16string text;
     double width=0,height=0,baseline=0,font_height=0;
+    std::optional<MathLabel> math_label;
 };
 
-Label measure_label(const ErSvgMeasure& measure,std::u16string_view text,double size,bool html) {
+Label measure_label(const ErSvgMeasure& measure,std::u16string_view text,double size,bool html,
+    const MathLabelMeasure& math_measure={},std::u16string_view family={}) {
     if(text.empty()) return {};
+    if(html && math_measure) {
+        auto rich=math_measure(text,family,size,400,false);
+        if(!rich) throw std::runtime_error(rich.error());
+        if(*rich) {
+            Label label{.text=std::u16string{text},.width=(**rich).width,.height=(**rich).height};
+            label.math_label=std::move(**rich);
+            return label;
+        }
+    }
     auto result=measure(text,size,false);
     if(!result) throw std::runtime_error(result.error());
     for(double value:{result->advance,result->width,result->height,result->baseline})
@@ -81,9 +92,10 @@ struct EntityBox {
 };
 
 EntityBox measure_entity(const ErEntity& entity,const ErSvgMeasure& measure,double font_size,
-    double padding,double text_padding,double minimum_width,bool html,bool raw_html) {
+    double padding,double text_padding,double minimum_width,bool html,bool raw_html,
+    const MathLabelMeasure& math_measure,std::u16string_view family) {
     EntityBox box;
-    box.title=measure_label(measure,entity.alias.empty()?entity.name:entity.alias,font_size,html);
+    box.title=measure_label(measure,entity.alias.empty()?entity.name:entity.alias,font_size,html,math_measure,family);
     if(entity.attributes.empty()) {
         box.width=std::max(minimum_width,box.title.width+2*padding);
         box.height=box.title.height+3*padding;
@@ -102,7 +114,7 @@ EntityBox measure_entity(const ErEntity& entity,const ErSvgMeasure& measure,doub
             attribute.type,attribute.name,keys,attribute.comment};
         for(std::size_t i=0;i<text.size();++i) {
             auto& label=row.cells[i];
-            label=measure_label(measure,text[i],font_size,html);
+            label=measure_label(measure,text[i],font_size,html,math_measure,family);
             box.columns[i]=std::max(box.columns[i],label.width+padding);
             row.height=std::max(row.height,label.height);
             widest_label=std::max(widest_label,label.width);
@@ -169,6 +181,13 @@ struct Paint {
                 " fill=\""+attr(theme.label_background)+"\"/>";
             body+="<rect class=\"er-label-background\""+bounds+
                 " fill=\""+attr(theme.edge_background)+"\"/>";
+        }
+        if(value.math_label) {
+            auto svg=render_math_label_svg(*value.math_label,middle?x-value.width/2:x,y,
+                {theme.font_family,theme.text,"er-math-label"});
+            if(!svg) throw std::runtime_error(svg.error());
+            body+=*svg+"</g>";
+            return;
         }
         // Use the same measured font box inside the HTML line height. CSS
         // assigns the leading above the baseline to whole pixels for this box.
@@ -285,7 +304,8 @@ std::expected<ErRenderInput,std::string> prepare_er_render(
     return out;
 }
 
-std::expected<ErSvg,std::string> render_er_svg(const ErRenderInput& render_input,const ErSvgMeasure& measure) {
+std::expected<ErSvg,std::string> render_er_svg(const ErRenderInput& render_input,const ErSvgMeasure& measure,
+    const MathLabelMeasure& math_measure) {
     try {
         if(!measure) return std::unexpected("ER renderer requires a text measurement callback");
         const auto& input=render_input.document;
@@ -317,7 +337,7 @@ std::expected<ErSvg,std::string> render_er_svg(const ErRenderInput& render_input
         std::vector<FlowchartNodeBox> node_sizes;
         for(const auto& entity:input.entities) {
             auto box=measure_entity(entity,measure,theme.font_size,padding,text_padding,
-                minimum_width,node_html,raw_html);
+                minimum_width,node_html,raw_html,math_measure,theme.font_family);
             graph.nodes.push_back({.id=entity.id,.shape=u"squareRect"});
             node_sizes.push_back({box.width,box.height});
             entities.push_back(std::move(box));
@@ -330,7 +350,7 @@ std::expected<ErSvg,std::string> render_er_svg(const ErRenderInput& render_input
             graph.edges.push_back({.id=u"er-edge-"+std::u16string(id.begin(),id.end()),
                 .start=relationship.entity_a,.end=relationship.entity_b,.label=relationship.label,
                 .type=u"arrow_open",.arrow_start=u"none",.arrow_end=u"none"});
-            auto label=measure_label(measure,relationship.label,label_size,edge_html);
+            auto label=measure_label(measure,relationship.label,label_size,edge_html,math_measure,theme.font_family);
             label_sizes.push_back({label.width,label.height+(edge_html || label.text.empty()?0:2)});
             labels.push_back(std::move(label));
         }

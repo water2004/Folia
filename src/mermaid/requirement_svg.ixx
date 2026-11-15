@@ -2,6 +2,7 @@
 export module folia.mermaid.requirement_svg;
 import std;
 export import folia.mermaid.requirement;
+export import folia.mermaid.math_label;
 
 export namespace folia::mermaid {
 struct RequirementTextMetrics {
@@ -35,5 +36,5 @@ struct RequirementRenderInput {
 };
 struct RequirementSvg { std::string svg; double width=0, height=0; };
 std::expected<RequirementSvg,std::string> render_requirement_svg(
-    const RequirementRenderInput&,const RequirementSvgMeasure&);
+    const RequirementRenderInput&,const RequirementSvgMeasure&,const MathLabelMeasure& = {});
 }

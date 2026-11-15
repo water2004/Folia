@@ -2,6 +2,7 @@
 export module folia.mermaid.er_svg;
 import std;
 export import folia.mermaid.er;
+export import folia.mermaid.math_label;
 
 export namespace folia::mermaid {
 struct ErTextMetrics {
@@ -24,5 +25,5 @@ std::expected<ErRenderInput,std::string> prepare_er_render(
 // Builds the classic Dagre ER scene from platform measured text and paints the
 // entity rows, relationship paths, crow's-foot cardinalities and labels.
 std::expected<ErSvg,std::string> render_er_svg(
-    const ErRenderInput&, const ErSvgMeasure&);
+    const ErRenderInput&, const ErSvgMeasure&, const MathLabelMeasure& = {});
 }
