@@ -316,6 +316,11 @@ inline std::optional<DocumentTransaction> document_insert_image(EditorDocument& 
 }
 
 inline std::optional<DocumentTransaction> document_insert_soft_break(EditorDocument& document, const TextSelection& selection) {
+    const auto* block = selection.anchor.container_id == selection.active.container_id
+        ? find_document_block(document, selection.active.container_id) : nullptr;
+    if (block && block->kind == BlockKind::TableCell) {
+        return document_insert_text(document, selection, U"<br>");
+    }
     return document_insert_text(document, selection, U"\n");
 }
 
