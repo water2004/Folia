@@ -1,7 +1,7 @@
 #pragma once
 
 import folia.platform.editor_scroll_state;
-import folia.platform.editor_viewport_plan;
+import folia.core.viewport_plan;
 
 #include "editor/rendering/EditorDocumentBlockPreparer.h"
 #include "editor/rendering/EditorPreparedDocument.h"
@@ -28,12 +28,22 @@ namespace winrt::Folia
             detail::EditorRenderFrame const& frame,
             EditorRenderResources& resources,
             EditorDocumentBlockPreparer& blockPreparer,
+            EditorInlineImageRenderer& inlineImages,
             folia::platform::editor::EditorScrollState& scrollState,
             std::unique_ptr<EditorPreparedDocument>& preparedDocument);
 
         EditorViewportMaterializationResult Materialize(
             float scrollOffset,
             bool printMode);
+
+        // A source scroll anchor may move to a different fragment after an
+        // edit. Resolve that one fragment before choosing the new viewport.
+        bool EnsurePrepared(std::size_t index, bool requestEmbedded, bool highPriority);
+
+        // A raw block's editing preview follows its whole semantic flow. Only
+        // that active source fragment is needed when the remote tail is visible.
+        bool MaterializeTrailingPreview(float scrollOffset, bool printMode,
+            std::uint64_t embeddedGeneration);
 
     private:
         bool RequestEmbeddedAt(
@@ -44,8 +54,9 @@ namespace winrt::Folia
         detail::EditorRenderFrame const& frame;
         EditorRenderResources& resources;
         EditorDocumentBlockPreparer& blockPreparer;
+        EditorInlineImageRenderer& inlineImages;
         folia::platform::editor::EditorScrollState& scrollState;
         std::unique_ptr<EditorPreparedDocument>& preparedDocument;
-        static constexpr folia::platform::editor::EditorViewportPolicy viewportPolicy{};
+        static constexpr folia::EditorViewportPolicy viewportPolicy{};
     };
 }

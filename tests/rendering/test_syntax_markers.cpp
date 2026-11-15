@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include "support/folia_test.hpp"
+import folia.markdown.ids;
 import folia.markdown.parser;
 import folia.markdown.inline_parser;
 import folia.markdown.inline_cst;

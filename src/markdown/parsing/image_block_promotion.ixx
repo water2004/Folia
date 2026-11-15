@@ -3,9 +3,11 @@
 export module folia.markdown.image_block_promotion;
 import std;
 import folia.markdown.ast;
+import folia.markdown.ids;
 import folia.markdown.html_cst;
 import folia.markdown.image_dimension;
 import folia.markdown.inline_cst;
+import folia.markdown.inline_document;
 import folia.markdown.utf;
 
 export namespace folia {

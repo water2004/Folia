@@ -3,6 +3,7 @@
 #include <string>
 
 #include "support/folia_test.hpp"
+import folia.markdown.selection;
 import folia.core.source_editor;
 import folia.core.source_render;
 import folia.core.source_style;

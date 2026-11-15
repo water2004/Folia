@@ -1,6 +1,8 @@
 // Reversible block split, join, exit, removal, and pruning operations.
 export module folia.core.document_block_edit;
 import std;
+import folia.markdown.ids;
+import folia.markdown.selection;
 import folia.markdown.ast;
 import folia.markdown.block_source;
 import folia.markdown.block_tree;
@@ -40,7 +42,7 @@ inline std::optional<RecordedBlockEdit> split_direct(
     NodeId id,
     std::size_t offset,
     NodeAllocator& allocator) {
-    auto path = block_path(document.root, id);
+    auto path = document_block_path(document, id);
     if (!path || path->empty()) return std::nullopt;
     auto parent_path = *path;
     const auto index = parent_path.back();
@@ -158,7 +160,7 @@ inline std::optional<RecordedBlockEdit> join_parent_inline_owner(
     EditorDocument& document,
     NodeId child_id,
     NodeAllocator& allocator) {
-    auto path = block_path(document.root, child_id);
+    auto path = document_block_path(document, child_id);
     if (!path || path->size() < 2 || path->back() != 0) return std::nullopt;
     auto parent_path = *path;
     parent_path.pop_back();
@@ -234,7 +236,7 @@ inline std::optional<RecordedBlockEdit> exit_empty_indented_code(
     EditorDocument& document,
     TextPosition position,
     NodeAllocator& allocator) {
-    auto path = block_path(document.root, position.container_id);
+    auto path = document_block_path(document, position.container_id);
     if (!path || path->empty()) return std::nullopt;
     auto* block = block_at_path(document.root, *path);
     if (!block || block->kind != BlockKind::CodeBlock || !block->atomic_special().code_indented) return std::nullopt;
@@ -336,7 +338,7 @@ inline std::optional<RecordedBlockEdit> exit_complete_raw_block_at_end(
     EditorDocument& document,
     TextPosition position,
     NodeAllocator& allocator) {
-    auto path = block_path(document.root, position.container_id);
+    auto path = document_block_path(document, position.container_id);
     if (!path || path->empty()) return std::nullopt;
     auto* block = block_at_path(document.root, *path);
     if (!block || (block->kind != BlockKind::CodeBlock
@@ -392,7 +394,7 @@ inline std::optional<RecordedBlockEdit> exit_empty_flow_container(
     EditorDocument& document,
     TextPosition position,
     NodeAllocator& allocator) {
-    auto path = block_path(document.root, position.container_id);
+    auto path = document_block_path(document, position.container_id);
     if (!path || path->empty()) return std::nullopt;
     auto* selected = block_at_path(document.root, *path);
     if (!selected || selected->kind != BlockKind::Paragraph || !selected->inline_content.source.empty()) return std::nullopt;
@@ -509,7 +511,7 @@ inline std::optional<RecordedBlockEdit> join_adjacent(
     NodeId id,
     bool backward,
     NodeAllocator& allocator) {
-    auto path = block_path(document.root, id);
+    auto path = document_block_path(document, id);
     if (!path || path->empty()) return std::nullopt;
     auto parent_path = *path;
     const auto index = parent_path.back();
@@ -611,7 +613,7 @@ inline std::optional<RecordedBlockEdit> remove_direct_block(
     EditorDocument& document,
     NodeId id,
     NodeAllocator& allocator) {
-    auto path = block_path(document.root, id);
+    auto path = document_block_path(document, id);
     if (!path || path->empty()) return std::nullopt;
     auto parent_path = *path;
     const auto index = parent_path.back();
@@ -680,7 +682,7 @@ inline std::optional<RecordedBlockEdit> unwrap_math_marker(
     EditorDocument& document, const TextSelection& selection, bool backward,
     NodeAllocator& allocator) {
     if (selection.anchor.container_id != selection.active.container_id) return std::nullopt;
-    auto path = block_path(document.root, selection.active.container_id);
+    auto path = document_block_path(document, selection.active.container_id);
     if (!path || path->empty()) return std::nullopt;
     auto* block = block_at_path(document.root, *path);
     if (!block || block->kind != BlockKind::MathBlock) return std::nullopt;
@@ -734,7 +736,7 @@ inline bool remove_node_recorded(
     EditorDocument& document,
     NodeId id,
     std::vector<DocumentOperation>& operations) {
-    auto path = block_path(document.root, id);
+    auto path = document_block_path(document, id);
     if (!path || path->empty()) return false;
     auto parent_path = *path;
     const auto index = parent_path.back();

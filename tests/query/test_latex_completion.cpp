@@ -1,6 +1,7 @@
 #include "support/folia_test.hpp"
 
 import folia.core.latex_completion;
+import folia.markdown.text_edit;
 
 using namespace boost::ut;
 using namespace folia;

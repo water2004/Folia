@@ -2,6 +2,7 @@
 // serializer facade imports this module and exposes only the established API.
 export module folia.markdown.serializer_visitor;
 import std;
+import folia.markdown.dialect;
 import folia.markdown.ast;
 import folia.markdown.block_tree;
 import folia.markdown.container_source;

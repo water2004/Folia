@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "support/folia_test.hpp"
+import folia.markdown.dialect;
 import folia.markdown.ast;
 import folia.markdown.block_source;
 import folia.markdown.parser;

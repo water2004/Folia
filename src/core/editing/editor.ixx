@@ -35,6 +35,7 @@ export namespace folia {
 
 struct EditorDocumentChange {
     std::vector<DocumentTextOperation> text_operations;
+    std::vector<DocumentTreeDelta> tree_deltas;
     std::vector<NodeId> structural_anchors;
     std::vector<NodeId> moved_roots;
     bool structural = false;
@@ -66,6 +67,7 @@ inline EditorDocumentChange summarize_document_change(
         } else if (const auto* tree_operation=std::get_if<DocumentTreeEdit>(&operation)) {
             change.structural = true;
             const auto& tree = *tree_operation;
+            change.tree_deltas.push_back(summarize_tree_delta(tree, forward));
             if (tree.kind == DocumentTreeEditKind::Move) {
                 change.structural_anchors.push_back(tree.parent_id);
                 change.structural_anchors.push_back(tree.other_parent_id);
@@ -91,6 +93,7 @@ inline EditorDocumentChange summarize_document_change(
         }
     }
     std::ranges::sort(change.structural_anchors, {}, &NodeId::v);
+    if (!forward) std::ranges::reverse(change.tree_deltas);
     change.structural_anchors.erase(
         std::unique(change.structural_anchors.begin(), change.structural_anchors.end()),
         change.structural_anchors.end());

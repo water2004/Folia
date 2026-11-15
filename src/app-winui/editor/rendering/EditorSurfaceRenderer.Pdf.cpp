@@ -71,9 +71,15 @@ namespace winrt::Folia
             resources.EnsureFrameResources(styleSheet);
             auto context = CaptureMathPreparationContext();
             context.surfaceWidth = PdfContentWidth;
-            auto preparedMath = PrepareMath(frame, context, mathPreparationStop, {});
+            auto preparationFrame = frame;
+            preparationFrame.selection = {};
+            preparationFrame.completion.reset();
+            auto preparedMath = PrepareMath(preparationFrame, context, mathPreparationStop, {});
             mathJax = std::move(preparedMath->math);
             mathJax.SetPreparationStopToken(mathPreparationStop);
+            pdfExportState->prepared = std::move(preparedMath->document);
+            if (pdfExportState->prepared)
+                pdfExportState->totalHeight = pdfExportState->prepared->totalHeight;
         }
         auto state = pdfExportState;
         exporting = true;
@@ -173,12 +179,31 @@ namespace winrt::Folia
             if (state->extents.size() != preparedDocument->geometry.Size())
             {
                 state->extents.resize(preparedDocument->geometry.Size());
-                for (std::size_t index = 0; index < preparedDocument->geometry.Size(); ++index)
+                for (std::size_t index = preparedDocument->geometry.Size(); index > 0;)
                 {
+                    --index;
                     auto placement = preparedDocument->geometry.At(index);
-                    state->extents[index] = {placement.top, placement.bottom};
+                    auto following = frame.renderModel.blocks[index].fragment_continues
+                        && index + 1 < state->extents.size()
+                        ? state->extents[index + 1].following_fragments + 1 : 0;
+                    state->extents[index] = {placement.top, placement.bottom, following};
                 }
             }
+            auto synchronizeExtent = [&](std::size_t index)
+            {
+                auto update = [&](std::size_t current)
+                {
+                    auto placement = preparedDocument->geometry.At(current);
+                    state->extents[current].top = placement.top;
+                    state->extents[current].bottom = placement.bottom;
+                };
+                update(index);
+                // Embedded content may change a visible fragment's height.
+                // Its semantic block end can be many pages away, and must use
+                // the same exact geometry when deciding whether a block fits.
+                auto last = index + state->extents[index].following_fragments;
+                if (last != index) update(last);
+            };
 
             auto updateEstimatedTotal = [&]
             {
@@ -218,7 +243,7 @@ namespace winrt::Folia
             {
                 auto placement = preparedDocument->geometry.At(windowEnd);
                 if (placement.top > pageLimit) break;
-                state->extents[windowEnd] = {placement.top, placement.bottom};
+                synchronizeExtent(windowEnd);
                 auto const& block = preparedDocument->blocks[windowEnd];
                 if (!block.valid)
                 {
@@ -237,8 +262,7 @@ namespace winrt::Folia
             // at the previous complete block.
             if (windowEnd < preparedDocument->geometry.Size())
             {
-                auto placement = preparedDocument->geometry.At(windowEnd);
-                state->extents[windowEnd] = {placement.top, placement.bottom};
+                synchronizeExtent(windowEnd);
             }
 
             if (!pendingBlocks.empty())

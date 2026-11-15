@@ -1,0 +1,830 @@
+{
+  "1": {
+    "baseline": {
+      "metadata": {
+        "phase": "metadata",
+        "requested_mib": 1,
+        "source_bytes": 1048607,
+        "rounds": 3,
+        "directwrite_measured": false,
+        "synthetic_input": true
+      },
+      "phases": {
+        "parse/all": {
+          "median_ms": 323.281,
+          "max_ms": 323.281,
+          "rss_kib": 50352,
+          "peak_rss_kib": 64388
+        },
+        "virtual_projection/all": {
+          "median_ms": 3.28008,
+          "max_ms": 3.28008,
+          "rss_kib": 50508,
+          "peak_rss_kib": 64388
+        },
+        "viewport_projection/first": {
+          "median_ms": 71.7411,
+          "max_ms": 71.7411,
+          "rss_kib": 71872,
+          "peak_rss_kib": 71872
+        },
+        "select/first": {
+          "median_ms": 0.000651,
+          "max_ms": 0.000862,
+          "rss_kib": 122240,
+          "peak_rss_kib": 122240
+        },
+        "insert/first": {
+          "median_ms": 0.025769,
+          "max_ms": 0.034061,
+          "rss_kib": 122240,
+          "peak_rss_kib": 122240
+        },
+        "insert_projection/first": {
+          "median_ms": 71.5886,
+          "max_ms": 154.599,
+          "rss_kib": 122240,
+          "peak_rss_kib": 122240
+        },
+        "undo/first": {
+          "median_ms": 0.023215,
+          "max_ms": 0.023415,
+          "rss_kib": 122240,
+          "peak_rss_kib": 122240
+        },
+        "undo_projection/first": {
+          "median_ms": 64.5944,
+          "max_ms": 76.0887,
+          "rss_kib": 122240,
+          "peak_rss_kib": 122240
+        },
+        "enter/first": {
+          "median_ms": 2.16805,
+          "max_ms": 2.16805,
+          "rss_kib": 122240,
+          "peak_rss_kib": 122240
+        },
+        "enter_projection/first": {
+          "median_ms": 65.3916,
+          "max_ms": 65.3916,
+          "rss_kib": 122240,
+          "peak_rss_kib": 122240
+        },
+        "enter_undo/first": {
+          "median_ms": 3.26795,
+          "max_ms": 3.26795,
+          "rss_kib": 122240,
+          "peak_rss_kib": 122240
+        },
+        "enter_undo_projection/first": {
+          "median_ms": 62.502,
+          "max_ms": 62.502,
+          "rss_kib": 122240,
+          "peak_rss_kib": 122240
+        },
+        "viewport_projection/middle": {
+          "median_ms": 0.000761,
+          "max_ms": 0.000761,
+          "rss_kib": 122240,
+          "peak_rss_kib": 122240
+        },
+        "select/middle": {
+          "median_ms": 0.000892,
+          "max_ms": 0.001051,
+          "rss_kib": 131168,
+          "peak_rss_kib": 131168
+        },
+        "insert/middle": {
+          "median_ms": 0.256155,
+          "max_ms": 0.278659,
+          "rss_kib": 131168,
+          "peak_rss_kib": 131168
+        },
+        "insert_projection/middle": {
+          "median_ms": 65.995,
+          "max_ms": 149.451,
+          "rss_kib": 131168,
+          "peak_rss_kib": 131168
+        },
+        "undo/middle": {
+          "median_ms": 0.025017,
+          "max_ms": 0.050296,
+          "rss_kib": 131168,
+          "peak_rss_kib": 131168
+        },
+        "undo_projection/middle": {
+          "median_ms": 52.213,
+          "max_ms": 63.2105,
+          "rss_kib": 131168,
+          "peak_rss_kib": 131168
+        },
+        "enter/middle": {
+          "median_ms": 1.60819,
+          "max_ms": 1.60819,
+          "rss_kib": 131168,
+          "peak_rss_kib": 131168
+        },
+        "enter_projection/middle": {
+          "median_ms": 57.3926,
+          "max_ms": 57.3926,
+          "rss_kib": 131168,
+          "peak_rss_kib": 131168
+        },
+        "enter_undo/middle": {
+          "median_ms": 4.90878,
+          "max_ms": 4.90878,
+          "rss_kib": 131168,
+          "peak_rss_kib": 131168
+        },
+        "enter_undo_projection/middle": {
+          "median_ms": 58.1518,
+          "max_ms": 58.1518,
+          "rss_kib": 131168,
+          "peak_rss_kib": 131168
+        },
+        "viewport_projection/last": {
+          "median_ms": 0.001021,
+          "max_ms": 0.001021,
+          "rss_kib": 131168,
+          "peak_rss_kib": 131168
+        },
+        "select/last": {
+          "median_ms": 0.000812,
+          "max_ms": 0.001152,
+          "rss_kib": 131168,
+          "peak_rss_kib": 131168
+        },
+        "insert/last": {
+          "median_ms": 0.399009,
+          "max_ms": 0.468194,
+          "rss_kib": 131168,
+          "peak_rss_kib": 131168
+        },
+        "insert_projection/last": {
+          "median_ms": 52.109,
+          "max_ms": 54.2117,
+          "rss_kib": 131168,
+          "peak_rss_kib": 131168
+        },
+        "undo/last": {
+          "median_ms": 0.023195,
+          "max_ms": 0.023816,
+          "rss_kib": 131168,
+          "peak_rss_kib": 131168
+        },
+        "undo_projection/last": {
+          "median_ms": 52.071,
+          "max_ms": 52.3237,
+          "rss_kib": 131168,
+          "peak_rss_kib": 131168
+        },
+        "enter/last": {
+          "median_ms": 1.56654,
+          "max_ms": 1.56654,
+          "rss_kib": 131168,
+          "peak_rss_kib": 131168
+        },
+        "enter_projection/last": {
+          "median_ms": 57.6273,
+          "max_ms": 57.6273,
+          "rss_kib": 131168,
+          "peak_rss_kib": 131168
+        },
+        "enter_undo/last": {
+          "median_ms": 2.03195,
+          "max_ms": 2.03195,
+          "rss_kib": 131168,
+          "peak_rss_kib": 131168
+        },
+        "enter_undo_projection/last": {
+          "median_ms": 56.7583,
+          "max_ms": 56.7583,
+          "rss_kib": 131168,
+          "peak_rss_kib": 131168
+        }
+      },
+      "max_rss_kib": 131168,
+      "peak_rss_kib": 131168
+    },
+    "current": {
+      "metadata": {
+        "phase": "metadata",
+        "requested_mib": 1,
+        "source_bytes": 1048607,
+        "rounds": 3,
+        "directwrite_measured": false,
+        "synthetic_input": true
+      },
+      "phases": {
+        "parse/all": {
+          "median_ms": 158.769,
+          "max_ms": 158.769,
+          "rss_kib": 50316,
+          "peak_rss_kib": 64344
+        },
+        "virtual_projection/all": {
+          "median_ms": 8.74536,
+          "max_ms": 8.74536,
+          "rss_kib": 50460,
+          "peak_rss_kib": 64344
+        },
+        "viewport_projection/first": {
+          "median_ms": 4.10733,
+          "max_ms": 4.10733,
+          "rss_kib": 52148,
+          "peak_rss_kib": 64344
+        },
+        "select/first": {
+          "median_ms": 0.00018,
+          "max_ms": 0.000852,
+          "rss_kib": 52212,
+          "peak_rss_kib": 64344
+        },
+        "insert/first": {
+          "median_ms": 0.002985,
+          "max_ms": 0.027441,
+          "rss_kib": 52212,
+          "peak_rss_kib": 64344
+        },
+        "insert_projection/first": {
+          "median_ms": 0.108192,
+          "max_ms": 0.163165,
+          "rss_kib": 52212,
+          "peak_rss_kib": 64344
+        },
+        "undo/first": {
+          "median_ms": 0.001943,
+          "max_ms": 0.00664,
+          "rss_kib": 52212,
+          "peak_rss_kib": 64344
+        },
+        "undo_projection/first": {
+          "median_ms": 0.108753,
+          "max_ms": 0.109074,
+          "rss_kib": 52212,
+          "peak_rss_kib": 64344
+        },
+        "enter/first": {
+          "median_ms": 0.720112,
+          "max_ms": 0.720112,
+          "rss_kib": 52212,
+          "peak_rss_kib": 64344
+        },
+        "enter_projection/first": {
+          "median_ms": 9.38804,
+          "max_ms": 9.38804,
+          "rss_kib": 52212,
+          "peak_rss_kib": 64344
+        },
+        "enter_undo/first": {
+          "median_ms": 0.885761,
+          "max_ms": 0.885761,
+          "rss_kib": 52212,
+          "peak_rss_kib": 64344
+        },
+        "enter_undo_projection/first": {
+          "median_ms": 8.37977,
+          "max_ms": 8.37977,
+          "rss_kib": 52212,
+          "peak_rss_kib": 64344
+        },
+        "viewport_projection/middle": {
+          "median_ms": 4.48741,
+          "max_ms": 4.48741,
+          "rss_kib": 52224,
+          "peak_rss_kib": 64344
+        },
+        "select/middle": {
+          "median_ms": 0.000201,
+          "max_ms": 0.000491,
+          "rss_kib": 52224,
+          "peak_rss_kib": 64344
+        },
+        "insert/middle": {
+          "median_ms": 0.002313,
+          "max_ms": 0.017055,
+          "rss_kib": 52224,
+          "peak_rss_kib": 64344
+        },
+        "insert_projection/middle": {
+          "median_ms": 0.120882,
+          "max_ms": 0.12699,
+          "rss_kib": 52224,
+          "peak_rss_kib": 64344
+        },
+        "undo/middle": {
+          "median_ms": 0.001973,
+          "max_ms": 0.004427,
+          "rss_kib": 52224,
+          "peak_rss_kib": 64344
+        },
+        "undo_projection/middle": {
+          "median_ms": 0.107862,
+          "max_ms": 0.107993,
+          "rss_kib": 52224,
+          "peak_rss_kib": 64344
+        },
+        "enter/middle": {
+          "median_ms": 0.311939,
+          "max_ms": 0.311939,
+          "rss_kib": 52224,
+          "peak_rss_kib": 64344
+        },
+        "enter_projection/middle": {
+          "median_ms": 9.99516,
+          "max_ms": 9.99516,
+          "rss_kib": 52256,
+          "peak_rss_kib": 64344
+        },
+        "enter_undo/middle": {
+          "median_ms": 0.411829,
+          "max_ms": 0.411829,
+          "rss_kib": 52256,
+          "peak_rss_kib": 64344
+        },
+        "enter_undo_projection/middle": {
+          "median_ms": 8.14188,
+          "max_ms": 8.14188,
+          "rss_kib": 52268,
+          "peak_rss_kib": 64344
+        },
+        "viewport_projection/last": {
+          "median_ms": 1.93731,
+          "max_ms": 1.93731,
+          "rss_kib": 52268,
+          "peak_rss_kib": 64344
+        },
+        "select/last": {
+          "median_ms": 0.00021,
+          "max_ms": 0.000381,
+          "rss_kib": 52268,
+          "peak_rss_kib": 64344
+        },
+        "insert/last": {
+          "median_ms": 0.003896,
+          "max_ms": 0.017396,
+          "rss_kib": 52268,
+          "peak_rss_kib": 64344
+        },
+        "insert_projection/last": {
+          "median_ms": 0.078448,
+          "max_ms": 0.082374,
+          "rss_kib": 52268,
+          "peak_rss_kib": 64344
+        },
+        "undo/last": {
+          "median_ms": 0.001642,
+          "max_ms": 0.003956,
+          "rss_kib": 52268,
+          "peak_rss_kib": 64344
+        },
+        "undo_projection/last": {
+          "median_ms": 0.077627,
+          "max_ms": 0.09962,
+          "rss_kib": 52268,
+          "peak_rss_kib": 64344
+        },
+        "enter/last": {
+          "median_ms": 0.020751,
+          "max_ms": 0.020751,
+          "rss_kib": 52268,
+          "peak_rss_kib": 64344
+        },
+        "enter_projection/last": {
+          "median_ms": 9.28947,
+          "max_ms": 9.28947,
+          "rss_kib": 52276,
+          "peak_rss_kib": 64344
+        },
+        "enter_undo/last": {
+          "median_ms": 0.224398,
+          "max_ms": 0.224398,
+          "rss_kib": 52276,
+          "peak_rss_kib": 64344
+        },
+        "enter_undo_projection/last": {
+          "median_ms": 8.46868,
+          "max_ms": 8.46868,
+          "rss_kib": 52276,
+          "peak_rss_kib": 64344
+        }
+      },
+      "max_rss_kib": 52276,
+      "peak_rss_kib": 64344
+    }
+  },
+  "10": {
+    "baseline": {
+      "metadata": {
+        "phase": "metadata",
+        "requested_mib": 10,
+        "source_bytes": 10485775,
+        "rounds": 3,
+        "directwrite_measured": false,
+        "synthetic_input": true
+      },
+      "phases": {
+        "parse/all": {
+          "median_ms": 3096.72,
+          "max_ms": 3096.72,
+          "rss_kib": 381072,
+          "peak_rss_kib": 592236
+        },
+        "virtual_projection/all": {
+          "median_ms": 112.531,
+          "max_ms": 112.531,
+          "rss_kib": 381292,
+          "peak_rss_kib": 592236
+        },
+        "viewport_projection/first": {
+          "median_ms": 918.745,
+          "max_ms": 918.745,
+          "rss_kib": 649456,
+          "peak_rss_kib": 713156
+        },
+        "select/first": {
+          "median_ms": 0.000831,
+          "max_ms": 0.001242,
+          "rss_kib": 871680,
+          "peak_rss_kib": 1066716
+        },
+        "insert/first": {
+          "median_ms": 0.0266,
+          "max_ms": 0.026981,
+          "rss_kib": 871680,
+          "peak_rss_kib": 1066716
+        },
+        "insert_projection/first": {
+          "median_ms": 651.403,
+          "max_ms": 1590.57,
+          "rss_kib": 871680,
+          "peak_rss_kib": 1066716
+        },
+        "undo/first": {
+          "median_ms": 0.025077,
+          "max_ms": 0.026961,
+          "rss_kib": 871680,
+          "peak_rss_kib": 1066716
+        },
+        "undo_projection/first": {
+          "median_ms": 635.308,
+          "max_ms": 643.782,
+          "rss_kib": 871680,
+          "peak_rss_kib": 1066716
+        },
+        "enter/first": {
+          "median_ms": 24.6812,
+          "max_ms": 24.6812,
+          "rss_kib": 871680,
+          "peak_rss_kib": 1066716
+        },
+        "enter_projection/first": {
+          "median_ms": 831.558,
+          "max_ms": 831.558,
+          "rss_kib": 876284,
+          "peak_rss_kib": 1066716
+        },
+        "enter_undo/first": {
+          "median_ms": 52.6543,
+          "max_ms": 52.6543,
+          "rss_kib": 876288,
+          "peak_rss_kib": 1066716
+        },
+        "enter_undo_projection/first": {
+          "median_ms": 733.616,
+          "max_ms": 733.616,
+          "rss_kib": 877892,
+          "peak_rss_kib": 1071320
+        },
+        "viewport_projection/middle": {
+          "median_ms": 0.001232,
+          "max_ms": 0.001232,
+          "rss_kib": 877896,
+          "peak_rss_kib": 1071320
+        },
+        "select/middle": {
+          "median_ms": 0.001022,
+          "max_ms": 0.001052,
+          "rss_kib": 877912,
+          "peak_rss_kib": 1072956
+        },
+        "insert/middle": {
+          "median_ms": 2.40836,
+          "max_ms": 5.32894,
+          "rss_kib": 877912,
+          "peak_rss_kib": 1072956
+        },
+        "insert_projection/middle": {
+          "median_ms": 642.517,
+          "max_ms": 703.463,
+          "rss_kib": 877912,
+          "peak_rss_kib": 1072956
+        },
+        "undo/middle": {
+          "median_ms": 0.026801,
+          "max_ms": 0.030435,
+          "rss_kib": 877912,
+          "peak_rss_kib": 1072956
+        },
+        "undo_projection/middle": {
+          "median_ms": 622.639,
+          "max_ms": 655.996,
+          "rss_kib": 877912,
+          "peak_rss_kib": 1072956
+        },
+        "enter/middle": {
+          "median_ms": 21.9806,
+          "max_ms": 21.9806,
+          "rss_kib": 877912,
+          "peak_rss_kib": 1072956
+        },
+        "enter_projection/middle": {
+          "median_ms": 732.96,
+          "max_ms": 732.96,
+          "rss_kib": 877912,
+          "peak_rss_kib": 1072956
+        },
+        "enter_undo/middle": {
+          "median_ms": 31.9727,
+          "max_ms": 31.9727,
+          "rss_kib": 877912,
+          "peak_rss_kib": 1072956
+        },
+        "enter_undo_projection/middle": {
+          "median_ms": 744.469,
+          "max_ms": 744.469,
+          "rss_kib": 877912,
+          "peak_rss_kib": 1072956
+        },
+        "viewport_projection/last": {
+          "median_ms": 0.001121,
+          "max_ms": 0.001121,
+          "rss_kib": 877912,
+          "peak_rss_kib": 1072956
+        },
+        "select/last": {
+          "median_ms": 0.001121,
+          "max_ms": 0.001132,
+          "rss_kib": 877912,
+          "peak_rss_kib": 1072956
+        },
+        "insert/last": {
+          "median_ms": 3.91932,
+          "max_ms": 3.9628,
+          "rss_kib": 877912,
+          "peak_rss_kib": 1072956
+        },
+        "insert_projection/last": {
+          "median_ms": 639.194,
+          "max_ms": 642.752,
+          "rss_kib": 877912,
+          "peak_rss_kib": 1072956
+        },
+        "undo/last": {
+          "median_ms": 0.024828,
+          "max_ms": 0.150255,
+          "rss_kib": 877912,
+          "peak_rss_kib": 1072956
+        },
+        "undo_projection/last": {
+          "median_ms": 656.448,
+          "max_ms": 751.55,
+          "rss_kib": 877912,
+          "peak_rss_kib": 1072956
+        },
+        "enter/last": {
+          "median_ms": 34.0512,
+          "max_ms": 34.0512,
+          "rss_kib": 877912,
+          "peak_rss_kib": 1072956
+        },
+        "enter_projection/last": {
+          "median_ms": 752.249,
+          "max_ms": 752.249,
+          "rss_kib": 877912,
+          "peak_rss_kib": 1072956
+        },
+        "enter_undo/last": {
+          "median_ms": 15.4311,
+          "max_ms": 15.4311,
+          "rss_kib": 877912,
+          "peak_rss_kib": 1072956
+        },
+        "enter_undo_projection/last": {
+          "median_ms": 879.495,
+          "max_ms": 879.495,
+          "rss_kib": 877912,
+          "peak_rss_kib": 1072956
+        }
+      },
+      "max_rss_kib": 877912,
+      "peak_rss_kib": 1072956
+    },
+    "current": {
+      "metadata": {
+        "phase": "metadata",
+        "requested_mib": 10,
+        "source_bytes": 10485775,
+        "rounds": 3,
+        "directwrite_measured": false,
+        "synthetic_input": true
+      },
+      "phases": {
+        "parse/all": {
+          "median_ms": 1889.68,
+          "max_ms": 1889.68,
+          "rss_kib": 380956,
+          "peak_rss_kib": 592268
+        },
+        "virtual_projection/all": {
+          "median_ms": 176.501,
+          "max_ms": 176.501,
+          "rss_kib": 381172,
+          "peak_rss_kib": 592268
+        },
+        "viewport_projection/first": {
+          "median_ms": 4.13843,
+          "max_ms": 4.13843,
+          "rss_kib": 383084,
+          "peak_rss_kib": 592268
+        },
+        "select/first": {
+          "median_ms": 0.0002,
+          "max_ms": 0.000531,
+          "rss_kib": 383148,
+          "peak_rss_kib": 592268
+        },
+        "insert/first": {
+          "median_ms": 0.002874,
+          "max_ms": 0.029454,
+          "rss_kib": 383148,
+          "peak_rss_kib": 592268
+        },
+        "insert_projection/first": {
+          "median_ms": 0.133911,
+          "max_ms": 0.150316,
+          "rss_kib": 383148,
+          "peak_rss_kib": 592268
+        },
+        "undo/first": {
+          "median_ms": 0.002724,
+          "max_ms": 0.00682,
+          "rss_kib": 383148,
+          "peak_rss_kib": 592268
+        },
+        "undo_projection/first": {
+          "median_ms": 0.110937,
+          "max_ms": 0.112639,
+          "rss_kib": 383148,
+          "peak_rss_kib": 592268
+        },
+        "enter/first": {
+          "median_ms": 9.50031,
+          "max_ms": 9.50031,
+          "rss_kib": 383148,
+          "peak_rss_kib": 592268
+        },
+        "enter_projection/first": {
+          "median_ms": 172.344,
+          "max_ms": 172.344,
+          "rss_kib": 390996,
+          "peak_rss_kib": 592268
+        },
+        "enter_undo/first": {
+          "median_ms": 11.3063,
+          "max_ms": 11.3063,
+          "rss_kib": 391000,
+          "peak_rss_kib": 592268
+        },
+        "enter_undo_projection/first": {
+          "median_ms": 171.007,
+          "max_ms": 171.007,
+          "rss_kib": 391000,
+          "peak_rss_kib": 592268
+        },
+        "viewport_projection/middle": {
+          "median_ms": 9.00615,
+          "max_ms": 9.00615,
+          "rss_kib": 391000,
+          "peak_rss_kib": 592268
+        },
+        "select/middle": {
+          "median_ms": 0.00025,
+          "max_ms": 0.000411,
+          "rss_kib": 391000,
+          "peak_rss_kib": 592268
+        },
+        "insert/middle": {
+          "median_ms": 0.003795,
+          "max_ms": 0.04687,
+          "rss_kib": 391000,
+          "peak_rss_kib": 592268
+        },
+        "insert_projection/middle": {
+          "median_ms": 0.109885,
+          "max_ms": 0.137407,
+          "rss_kib": 391000,
+          "peak_rss_kib": 592268
+        },
+        "undo/middle": {
+          "median_ms": 0.002303,
+          "max_ms": 0.005798,
+          "rss_kib": 391000,
+          "peak_rss_kib": 592268
+        },
+        "undo_projection/middle": {
+          "median_ms": 0.107392,
+          "max_ms": 0.110896,
+          "rss_kib": 391000,
+          "peak_rss_kib": 592268
+        },
+        "enter/middle": {
+          "median_ms": 4.39425,
+          "max_ms": 4.39425,
+          "rss_kib": 391000,
+          "peak_rss_kib": 592268
+        },
+        "enter_projection/middle": {
+          "median_ms": 159.743,
+          "max_ms": 159.743,
+          "rss_kib": 391060,
+          "peak_rss_kib": 592268
+        },
+        "enter_undo/middle": {
+          "median_ms": 5.45149,
+          "max_ms": 5.45149,
+          "rss_kib": 391060,
+          "peak_rss_kib": 592268
+        },
+        "enter_undo_projection/middle": {
+          "median_ms": 157.629,
+          "max_ms": 157.629,
+          "rss_kib": 391060,
+          "peak_rss_kib": 592268
+        },
+        "viewport_projection/last": {
+          "median_ms": 5.20441,
+          "max_ms": 5.20441,
+          "rss_kib": 391060,
+          "peak_rss_kib": 592268
+        },
+        "select/last": {
+          "median_ms": 0.00021,
+          "max_ms": 0.000631,
+          "rss_kib": 391060,
+          "peak_rss_kib": 592268
+        },
+        "insert/last": {
+          "median_ms": 0.002894,
+          "max_ms": 0.023054,
+          "rss_kib": 391060,
+          "peak_rss_kib": 592268
+        },
+        "insert_projection/last": {
+          "median_ms": 0.103295,
+          "max_ms": 0.114783,
+          "rss_kib": 391060,
+          "peak_rss_kib": 592268
+        },
+        "undo/last": {
+          "median_ms": 0.001833,
+          "max_ms": 0.005137,
+          "rss_kib": 391060,
+          "peak_rss_kib": 592268
+        },
+        "undo_projection/last": {
+          "median_ms": 0.104627,
+          "max_ms": 0.121342,
+          "rss_kib": 391060,
+          "peak_rss_kib": 592268
+        },
+        "enter/last": {
+          "median_ms": 0.024837,
+          "max_ms": 0.024837,
+          "rss_kib": 391060,
+          "peak_rss_kib": 592268
+        },
+        "enter_projection/last": {
+          "median_ms": 176.085,
+          "max_ms": 176.085,
+          "rss_kib": 391064,
+          "peak_rss_kib": 592268
+        },
+        "enter_undo/last": {
+          "median_ms": 1.32485,
+          "max_ms": 1.32485,
+          "rss_kib": 391064,
+          "peak_rss_kib": 592268
+        },
+        "enter_undo_projection/last": {
+          "median_ms": 179.185,
+          "max_ms": 179.185,
+          "rss_kib": 391064,
+          "peak_rss_kib": 592268
+        }
+      },
+      "max_rss_kib": 391064,
+      "peak_rss_kib": 592268
+    }
+  }
+}

@@ -1,4 +1,5 @@
 #include "support/folia_test.hpp"
+import folia.core.render_model;
 import folia.core.theme;
 import folia.markdown.parser;
 import folia.core.render_builder;

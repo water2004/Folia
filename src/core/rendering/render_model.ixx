@@ -2,6 +2,7 @@
 // No HtmlRenderBlock / HtmlInlineRenderItem variants (acceptance gate).
 export module folia.core.render_model;
 import std;
+import folia.core.document_transaction;
 import folia.core.types;
 import folia.markdown.ids;
 import folia.markdown.dialect;
@@ -14,6 +15,7 @@ import folia.markdown.selection;
 import folia.markdown.text_edit;
 import folia.core.source_style;
 import folia.markdown.block_source;
+import folia.markdown.block_tree;
 export import folia.core.syntax_marker;
 
 export namespace folia {
@@ -277,15 +279,8 @@ struct InlineRenderPayload {
     // keep it behind a second payload so marker allocations stay compact.
     std::shared_ptr<InlineRenderSemanticPayload> semantic_payload;
 
-    InlineRenderSemanticPayload const& semantic() const {
-        static const InlineRenderSemanticPayload empty{};
-        return semantic_payload ? *semantic_payload : empty;
-    }
-
-    InlineRenderSemanticPayload& ensure_semantic() {
-        if (!semantic_payload) semantic_payload = std::make_shared<InlineRenderSemanticPayload>();
-        return *semantic_payload;
-    }
+    InlineRenderSemanticPayload const& semantic() const;
+    InlineRenderSemanticPayload& ensure_semantic();
 };
 
 struct InlineRenderItem {
@@ -377,6 +372,10 @@ struct RenderBlock {
     // offscreen content.  A materialized entry owns the derived inline render
     // projection; the authoritative block tree remains the source of truth.
     bool materialized = true;
+    // Physical slices of one semantic flow share boundary decoration and gaps.
+    bool fragment_continues = false;
+    bool flow_continues_before = false;
+    bool flow_continues_after = false;
     // Fingerprint of the authoritative block-tree inputs used to build this
     // projection. It permits block-local render-model rebuilding.
     std::uint64_t source_key = 0;
@@ -423,11 +422,32 @@ struct RenderModelUpdate {
     bool structural_locality_known = true;
     std::vector<NodeId> changed_owners;
     std::vector<NodeId> structural_anchors;
+    std::vector<DocumentTreeDelta> tree_deltas;
+};
+
+struct RenderFragment {
+    NodeId id{};              // stable physical identity, never a text coordinate
+    NodeId source_root{};     // unchanged semantic top-level block
+    BlockPath first_leaf;     // inclusive, relative to source_root
+    BlockPath last_leaf;      // inclusive, relative to source_root
+    NodeId first_leaf_id{};
+    NodeId last_leaf_id{};
+    NodeId first_owner{};
+    NodeId last_owner{};
+    bool first = true;
+    bool last = true;
+    std::uint64_t structure_key = 0;
+    std::size_t leaf_count = 0;
+
+    bool operator==(RenderFragment const&) const = default;
 };
 
 struct RenderModel {
     std::uint64_t revision = 1;
     std::vector<RenderBlock> blocks;
+    std::vector<RenderFragment> fragments;
+    // Physical lookup; editable_top_level below remains a semantic relationship.
+    std::unordered_map<std::uint64_t, std::size_t> editable_fragment_index;
     bool virtualized = false;
     // Only populated for virtualized rich-text models.  Tracking the sparse
     // working set avoids scanning every block when the viewport moves.

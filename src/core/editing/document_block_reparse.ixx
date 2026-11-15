@@ -3,6 +3,7 @@
 // fragment only; it never serializes or reparses the complete document.
 export module folia.core.document_block_reparse;
 import std;
+import folia.markdown.selection;
 import folia.markdown.ast;
 import folia.markdown.block_source;
 import folia.markdown.block_tree;

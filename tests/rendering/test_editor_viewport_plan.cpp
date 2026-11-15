@@ -1,19 +1,19 @@
 #include "support/folia_test.hpp"
 
-import folia.platform.editor_geometry;
-import folia.platform.editor_viewport_plan;
+import folia.core.block_geometry;
+import folia.core.viewport_plan;
 
 using namespace boost::ut;
-using namespace folia::platform::editor;
+using namespace folia;
 
 namespace
 {
-    EditorBlockGeometryIndex UniformGeometry(std::size_t count, float height)
+    BlockGeometryIndex UniformGeometry(std::size_t count, float height)
     {
-        std::vector<EditorBlockGeometryIndex::Entry> entries(
+        std::vector<BlockGeometryIndex::Entry> entries(
             count,
-            EditorBlockGeometryIndex::Entry{0.0f, height, 0.0f});
-        EditorBlockGeometryIndex geometry;
+            BlockGeometryIndex::Entry{0.0f, height, 0.0f});
+        BlockGeometryIndex geometry;
         geometry.Reset(std::move(entries), 0.0f);
         return geometry;
     }
@@ -73,7 +73,7 @@ suite editor_viewport_plan_tests = [] {
 };
 
 "viewport ranges remain safe for empty and invalid extents"_test = [] {
-    EditorBlockGeometryIndex empty;
+    BlockGeometryIndex empty;
     empty.Reset({}, 12.0f);
     auto plan = BuildEditorViewportPlan(
         empty,

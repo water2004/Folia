@@ -2,6 +2,7 @@
 
 #include "editor/rendering/EditorRenderResources.h"
 #include "editor/rendering/EditorStyleSheet.h"
+#include "editor/rendering/EditorFlowLayoutContext.h"
 
 namespace winrt::Folia
 {
@@ -31,9 +32,13 @@ namespace winrt::Folia
             float width,
             std::function<void(IDWriteTextLayout*, DisplayInlineText const&)> const& configure) const;
         IDWriteTextFormat* FormatFor(bool code, std::vector<InlineStyleRange> const& ranges) const;
+        EditorFlowTextFormat FormatKindFor(bool code, std::vector<InlineStyleRange> const& ranges) const;
+        IDWriteTextFormat* FormatFor(EditorFlowTextFormat format) const;
         float LineHeightFor(bool code, std::vector<InlineStyleRange> const& ranges) const;
+        float LineHeightFor(EditorFlowTextFormat format) const;
         void ApplyStyles(IDWriteTextLayout* layout, std::vector<InlineStyleRange> const& ranges) const;
-        float MeasureHeight(IDWriteTextLayout* layout, float fallbackHeight) const;
+        float MeasureHeight(IDWriteTextLayout* layout, float fallbackHeight,
+            bool enforceMinimum = true) const;
 
     private:
         EditorRenderResources& resources;

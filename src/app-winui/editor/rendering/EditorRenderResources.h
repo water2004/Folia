@@ -18,6 +18,9 @@ namespace winrt::Folia
 
         void Initialize(winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel const& panel, EditorStyleSheet const& styleSheet);
         void InitializeOffscreen(EditorStyleSheet const& styleSheet, float widthDip, float heightDip);
+        // Background measurement uses the production fonts and DirectWrite
+        // without creating a D3D device, swap chain, brushes or paint target.
+        void InitializeTextMeasurement(EditorStyleSheet const& styleSheet, float widthDip, float heightDip);
         EditorResizeResult Resize(winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel const& panel, double width, double height);
         void RebuildTextFormats(EditorStyleSheet const& styleSheet);
         void ResetBrushes();

@@ -81,6 +81,7 @@ inline void rebuild_document_block_index(EditorDocument& document) {
     document.cached_editable_index.clear();
     auto visit = [&](const BlockNode& block, NodeId parent_id, std::size_t child_index) {
         document.cached_block_locators[block.id.v] = {parent_id, child_index};
+        if (block.has_container_source()) block.container_source().prepare_owner_lookup();
         if (block.kind != BlockKind::Document && is_editable_block_owner(block.kind)) {
             document.cached_editable_index.emplace(
                 block.id.v,

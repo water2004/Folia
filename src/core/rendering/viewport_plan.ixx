@@ -1,9 +1,9 @@
-// folia.platform.editor_viewport_plan — deterministic viewport work bands.
-export module folia.platform.editor_viewport_plan;
+// folia.core.viewport_plan — deterministic viewport work bands.
+export module folia.core.viewport_plan;
 import std;
-import folia.platform.editor_geometry;
+import folia.core.block_geometry;
 
-export namespace folia::platform::editor
+export namespace folia
 {
     struct EditorIndexRange
     {
@@ -113,7 +113,7 @@ export namespace folia::platform::editor
     }
 
     inline EditorIndexRange EditorBlocksIntersecting(
-        EditorBlockGeometryIndex const& geometry,
+        BlockGeometryIndex const& geometry,
         float documentTop,
         float documentBottom)
     {
@@ -129,7 +129,7 @@ export namespace folia::platform::editor
     }
 
     inline EditorViewportPlan BuildEditorViewportPlan(
-        EditorBlockGeometryIndex const& geometry,
+        BlockGeometryIndex const& geometry,
         float scrollOffset,
         float viewportHeight,
         bool printMode,

@@ -5,6 +5,7 @@
 // state or a second authoritative selection coordinate.
 export module folia.markdown.document_text;
 import std;
+import folia.markdown.selection;
 import folia.markdown.ast;
 import folia.markdown.block_source;
 import folia.markdown.block_tree;

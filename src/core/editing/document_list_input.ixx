@@ -1,6 +1,8 @@
 // Structural list input rules: task upgrade, Enter, exit, split, and outdent.
 export module folia.core.document_list_input;
 import std;
+import folia.markdown.document_text;
+import folia.markdown.selection;
 import folia.markdown.ast;
 import folia.markdown.block_tree;
 import folia.markdown.document;
@@ -50,7 +52,7 @@ struct DirectListContext {
 };
 
 inline std::optional<DirectListContext> direct_list_context(const EditorDocument& document, NodeId id) {
-    auto path = block_path(document.root, id);
+    auto path = document_block_path(document, id);
     if (!path || path->size() < 3) return std::nullopt;
     auto item_path = *path;
     const auto child_index = item_path.back();
@@ -208,7 +210,7 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> exit_empty_list_it
     document_edit_detail::NodeAllocator& allocator) {
     auto context = direct_list_context(document, position.container_id);
     if (!context) return std::nullopt;
-    auto* leaf = find_block(document.root, position.container_id);
+    auto* leaf = find_document_block(document, position.container_id);
     auto* list = block_at_path(document.root, context->list_path);
     if (!leaf || leaf->kind != BlockKind::Paragraph || !leaf->inline_content.source.empty()
         || !list || context->item_index >= list->children.size()) return std::nullopt;
@@ -415,9 +417,13 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> split_list_item(
     insert_item(std::move(next), context->item_index + 1);
     if (offset == 0) result.target = {position.container_id, 0, TextAffinity::Downstream};
 
-    auto* current_item = find_block(document.root, item_id);
-    auto* next_item = find_block(document.root, next_id);
-    if (!current_item || !next_item || first_moved_child > current_item->children.size()) return std::nullopt;
+    // Insertion can reallocate the child vector, but the list itself and the
+    // two adjacent indexes are stable. Do not search the entire document for
+    // the freshly inserted identities before its locator transaction commits.
+    auto* current_item = &list->children[context->item_index];
+    auto* next_item = &list->children[context->item_index + 1];
+    if (current_item->id != item_id || next_item->id != next_id
+        || first_moved_child > current_item->children.size()) return std::nullopt;
     std::size_t target_index = initial_next_children;
     while (first_moved_child < current_item->children.size()) {
         DocumentTreeEdit move;
@@ -474,7 +480,7 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> outdent_nested_lis
         document_container_source::append_container_tree_operation(document, result.operations, std::move(move));
 
     if (auto* current = find_block(document.root, nested_list_id); current && current->children.empty()) {
-        auto location = block_path(document.root, nested_list_id);
+        auto location = document_block_path(document, nested_list_id);
         auto* owner = find_parent_block(document.root, nested_list_id);
         if (!location || !owner || location->empty()) return std::nullopt;
         const auto index = location->back();

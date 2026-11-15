@@ -1,0 +1,213 @@
+diff --git a/src/core/editing/document_block_edit.ixx b/src/core/editing/document_block_edit.ixx
+index 08be4e0c..c029ebcb 100644
+--- a/src/core/editing/document_block_edit.ixx
++++ b/src/core/editing/document_block_edit.ixx
+@@ -3,0 +4,2 @@ import std;
++import folia.markdown.ids;
++import folia.markdown.selection;
+diff --git a/src/core/editing/document_block_input.ixx b/src/core/editing/document_block_input.ixx
+index 7109f7eb..f0d4683c 100644
+--- a/src/core/editing/document_block_input.ixx
++++ b/src/core/editing/document_block_input.ixx
+@@ -3,0 +4 @@ import std;
++import folia.markdown.selection;
+diff --git a/src/core/editing/document_block_reparse.ixx b/src/core/editing/document_block_reparse.ixx
+index 25eeb8af..8c237698 100644
+--- a/src/core/editing/document_block_reparse.ixx
++++ b/src/core/editing/document_block_reparse.ixx
+@@ -5,0 +6 @@ import std;
++import folia.markdown.selection;
+diff --git a/src/core/editing/document_copy.ixx b/src/core/editing/document_copy.ixx
+index 99a78b7d..b4de1e7b 100644
+--- a/src/core/editing/document_copy.ixx
++++ b/src/core/editing/document_copy.ixx
+@@ -3,0 +4,3 @@ import std;
++import folia.markdown.dialect;
++import folia.markdown.ids;
++import folia.markdown.inline_document;
+diff --git a/src/core/editing/document_edit_primitives.ixx b/src/core/editing/document_edit_primitives.ixx
+index 1bfcb920..91eb29ca 100644
+--- a/src/core/editing/document_edit_primitives.ixx
++++ b/src/core/editing/document_edit_primitives.ixx
+@@ -4,0 +5 @@ import std;
++import folia.markdown.selection;
+diff --git a/src/core/editing/document_footnotes.ixx b/src/core/editing/document_footnotes.ixx
+index 22ac4e17..70b1b49f 100644
+--- a/src/core/editing/document_footnotes.ixx
++++ b/src/core/editing/document_footnotes.ixx
+@@ -5,0 +6 @@ import std;
++import folia.markdown.selection;
+diff --git a/src/core/editing/document_format.ixx b/src/core/editing/document_format.ixx
+index 28b0a661..9097d2e2 100644
+--- a/src/core/editing/document_format.ixx
++++ b/src/core/editing/document_format.ixx
+@@ -8,0 +9 @@ import std;
++import folia.markdown.text_edit;
+diff --git a/src/core/editing/document_inline_format.ixx b/src/core/editing/document_inline_format.ixx
+index cb5f71e7..346eb894 100644
+--- a/src/core/editing/document_inline_format.ixx
++++ b/src/core/editing/document_inline_format.ixx
+@@ -7,0 +8,2 @@ import std;
++import folia.markdown.ids;
++import folia.markdown.selection;
+diff --git a/src/core/editing/document_input_rules.ixx b/src/core/editing/document_input_rules.ixx
+index 62bb7769..b8a5ea5f 100644
+--- a/src/core/editing/document_input_rules.ixx
++++ b/src/core/editing/document_input_rules.ixx
+@@ -4,0 +5 @@ import std;
++import folia.markdown.selection;
+diff --git a/src/core/editing/document_list_input.ixx b/src/core/editing/document_list_input.ixx
+index 5fa5601c..6eedfdfd 100644
+--- a/src/core/editing/document_list_input.ixx
++++ b/src/core/editing/document_list_input.ixx
+@@ -3,0 +4,2 @@ import std;
++import folia.markdown.document_text;
++import folia.markdown.selection;
+diff --git a/src/core/editing/document_paste.ixx b/src/core/editing/document_paste.ixx
+index 66a5a22d..254ca68b 100644
+--- a/src/core/editing/document_paste.ixx
++++ b/src/core/editing/document_paste.ixx
+@@ -3,0 +4,3 @@ import std;
++import folia.markdown.dialect;
++import folia.markdown.ids;
++import folia.markdown.selection;
+diff --git a/src/core/editing/document_source_edit.ixx b/src/core/editing/document_source_edit.ixx
+index 1121d475..e0d4f0b6 100644
+--- a/src/core/editing/document_source_edit.ixx
++++ b/src/core/editing/document_source_edit.ixx
+@@ -2,0 +3,3 @@ import std;
++import folia.markdown.block_source;
++import folia.markdown.ids;
++import folia.markdown.selection;
+diff --git a/src/core/editing/document_structure_edit.ixx b/src/core/editing/document_structure_edit.ixx
+index e5eea653..265bea61 100644
+--- a/src/core/editing/document_structure_edit.ixx
++++ b/src/core/editing/document_structure_edit.ixx
+@@ -2,0 +3,2 @@ import std;
++import folia.markdown.dialect;
++import folia.markdown.selection;
+diff --git a/src/core/editing/document_transaction.ixx b/src/core/editing/document_transaction.ixx
+index 377730de..a959e10a 100644
+--- a/src/core/editing/document_transaction.ixx
++++ b/src/core/editing/document_transaction.ixx
+@@ -6,0 +7 @@ import std;
++import folia.markdown.ids;
+diff --git a/src/core/query/document_content_context.ixx b/src/core/query/document_content_context.ixx
+index d05ff9ac..8fadc345 100644
+--- a/src/core/query/document_content_context.ixx
++++ b/src/core/query/document_content_context.ixx
+@@ -3,0 +4,2 @@ import std;
++import folia.markdown.ast;
++import folia.markdown.selection;
+diff --git a/src/core/query/search.ixx b/src/core/query/search.ixx
+index 0657858f..6f42b1ca 100644
+--- a/src/core/query/search.ixx
++++ b/src/core/query/search.ixx
+@@ -8,0 +9 @@ import std;
++import folia.core.theme;
+diff --git a/src/core/rendering/block_layout.ixx b/src/core/rendering/block_layout.ixx
+index efb3510a..37167b05 100644
+--- a/src/core/rendering/block_layout.ixx
++++ b/src/core/rendering/block_layout.ixx
+@@ -4,0 +5 @@ import std;
++import folia.markdown.dialect;
+diff --git a/src/core/rendering/hit_test.ixx b/src/core/rendering/hit_test.ixx
+index 8bbd7ee3..9e0e67bb 100644
+--- a/src/core/rendering/hit_test.ixx
++++ b/src/core/rendering/hit_test.ixx
+@@ -3,0 +4 @@ import std;
++import folia.core.render_model;
+diff --git a/src/core/rendering/render_builder.ixx b/src/core/rendering/render_builder.ixx
+index e5269bd2..6e3eada3 100644
+--- a/src/core/rendering/render_builder.ixx
++++ b/src/core/rendering/render_builder.ixx
+@@ -4,0 +5 @@ import std;
++import folia.core.theme;
+diff --git a/src/core/rendering/render_model.ixx b/src/core/rendering/render_model.ixx
+index e7d81810..c8ed7135 100644
+--- a/src/core/rendering/render_model.ixx
++++ b/src/core/rendering/render_model.ixx
+@@ -280,9 +280,2 @@ struct InlineRenderPayload {
+-    InlineRenderSemanticPayload const& semantic() const {
+-        static const InlineRenderSemanticPayload empty{};
+-        return semantic_payload ? *semantic_payload : empty;
+-    }
+-
+-    InlineRenderSemanticPayload& ensure_semantic() {
+-        if (!semantic_payload) semantic_payload = std::make_shared<InlineRenderSemanticPayload>();
+-        return *semantic_payload;
+-    }
++    InlineRenderSemanticPayload const& semantic() const;
++    InlineRenderSemanticPayload& ensure_semantic();
+@@ -316,0 +310,10 @@ struct InlineRenderItem {
++inline InlineRenderSemanticPayload const& InlineRenderPayload::semantic() const {
++    static const InlineRenderSemanticPayload empty{};
++    return semantic_payload ? *semantic_payload : empty;
++}
++
++inline InlineRenderSemanticPayload& InlineRenderPayload::ensure_semantic() {
++    if (!semantic_payload) semantic_payload = std::make_shared<InlineRenderSemanticPayload>();
++    return *semantic_payload;
++}
++
+diff --git a/src/core/source/source_render.ixx b/src/core/source/source_render.ixx
+index a0f7c238..41783483 100644
+--- a/src/core/source/source_render.ixx
++++ b/src/core/source/source_render.ixx
+@@ -3,0 +4 @@ import std;
++import folia.markdown.ids;
+diff --git a/src/core/support/export.ixx b/src/core/support/export.ixx
+index 6076193b..3d76af8b 100644
+--- a/src/core/support/export.ixx
++++ b/src/core/support/export.ixx
+@@ -6,0 +7,2 @@ import std;
++import folia.markdown.inline_document;
++import folia.markdown.inline_cst;
+diff --git a/src/markdown/parsing/gfm_autolink.ixx b/src/markdown/parsing/gfm_autolink.ixx
+index 5d9e9727..d94d71b5 100644
+--- a/src/markdown/parsing/gfm_autolink.ixx
++++ b/src/markdown/parsing/gfm_autolink.ixx
+@@ -17 +17 @@ struct GfmAutolinkMatch {
+-export std::optional<GfmAutolinkMatch> scan_gfm_autolink(
++std::optional<GfmAutolinkMatch> scan_gfm_autolink(
+diff --git a/src/markdown/parsing/image_block_promotion.ixx b/src/markdown/parsing/image_block_promotion.ixx
+index 20f54f93..e9f94e01 100644
+--- a/src/markdown/parsing/image_block_promotion.ixx
++++ b/src/markdown/parsing/image_block_promotion.ixx
+@@ -4,0 +5,2 @@ import std;
++import folia.markdown.ids;
++import folia.markdown.inline_document;
+diff --git a/src/markdown/parsing/inline_parser.ixx b/src/markdown/parsing/inline_parser.ixx
+index 2c4af3f6..9d6c05dd 100644
+--- a/src/markdown/parsing/inline_parser.ixx
++++ b/src/markdown/parsing/inline_parser.ixx
+@@ -19,0 +20 @@ import std;
++import folia.markdown.text_edit;
+@@ -1128 +1129,2 @@ struct Parser {
+-    auto resolve_reference_label(std::u32string_view raw) const {
++    auto resolve_reference_label(std::u32string_view raw) const
++        -> decltype(ctx.resolve_link_label(std::declval<const std::string&>())) {
+diff --git a/src/markdown/parsing/serializer.ixx b/src/markdown/parsing/serializer.ixx
+index cd79f3de..badb0444 100644
+--- a/src/markdown/parsing/serializer.ixx
++++ b/src/markdown/parsing/serializer.ixx
+@@ -5,0 +6 @@ import std;
++import folia.markdown.selection;
+diff --git a/src/markdown/parsing/serializer_visitor.ixx b/src/markdown/parsing/serializer_visitor.ixx
+index fa1049dc..a582c63f 100644
+--- a/src/markdown/parsing/serializer_visitor.ixx
++++ b/src/markdown/parsing/serializer_visitor.ixx
+@@ -4,0 +5 @@ import std;
++import folia.markdown.dialect;
+diff --git a/src/markdown/query/document_text.ixx b/src/markdown/query/document_text.ixx
+index 326ac85c..5bc4c067 100644
+--- a/src/markdown/query/document_text.ixx
++++ b/src/markdown/query/document_text.ixx
+@@ -7,0 +8 @@ import std;
++import folia.markdown.selection;
+diff --git a/src/markdown/query/outline.ixx b/src/markdown/query/outline.ixx
+index 5856fbde..c91d8f04 100644
+--- a/src/markdown/query/outline.ixx
++++ b/src/markdown/query/outline.ixx
+@@ -3,0 +4 @@ import std;
++import folia.markdown.selection;

@@ -5,6 +5,8 @@
 #include <vector>
 
 #include "support/folia_test.hpp"
+import folia.markdown.html_cst;
+import folia.markdown.selection;
 import folia.markdown.parser;
 import folia.markdown.ast;
 import folia.markdown.block_source;

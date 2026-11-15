@@ -196,56 +196,68 @@ namespace winrt::Folia
                 });
             }
             auto previewTop = origin.y + prepared.textHeight;
-            for (auto const& preview : prepared.mathPreviews)
+            auto paintPreviews = [&](auto const& mathPreviews, auto const& mermaidPreviews,
+                                     bool suppressTrailing)
             {
-                if (preview.floating) { floatingPreview = &preview; continue; }
-                auto nonInteractiveTop = previewTop;
-                previewTop += 8.0f;
-                auto previewRect = D2D1::RectF(
-                    documentLeft + paddingLeft,
-                    previewTop,
-                    documentLeft + paddingLeft + contentWidth,
-                    previewTop + preview.Height() + 16.0f);
-                resources.d2dContext->FillRectangle(previewRect, resources.nestedQuoteBrush.Get());
-                auto previewOrigin = D2D1::Point2F(
-                    previewRect.left + (contentWidth - preview.Width()) * .5f, previewRect.top + 8.0f);
-                PaintMathPreviewContent(preview, previewOrigin, resources, styleSheet, drawMath, drawMathFallback);
-                nonInteractiveRegions.push_back(D2D1::RectF(
-                    previewRect.left,
-                    nonInteractiveTop,
-                    previewRect.right,
-                    previewRect.bottom));
-                previewTop = previewRect.bottom;
-            }
-            for (auto const& preview : prepared.mermaidPreviews)
-            {
-                auto nonInteractiveTop = previewTop;
-                previewTop += 8.0f;
-                auto previewRect = D2D1::RectF(
-                    documentLeft + paddingLeft,
-                    previewTop,
-                    documentLeft + paddingLeft + contentWidth,
-                    previewTop + preview.height + 16.0f);
-                resources.d2dContext->FillRectangle(
-                    previewRect,
-                    resources.nestedQuoteBrush.Get());
-                auto previewOrigin = D2D1::Point2F(
-                    previewRect.left
-                        + (previewRect.right - previewRect.left
-                            - preview.width) * 0.5f,
-                    previewRect.top + 8.0f);
-                drawMermaid(
-                    preview.svg,
-                    preview.width,
-                    preview.height,
-                    previewOrigin);
-                nonInteractiveRegions.push_back(D2D1::RectF(
-                    previewRect.left,
-                    nonInteractiveTop,
-                    previewRect.right,
-                    previewRect.bottom));
-                previewTop = previewRect.bottom;
-            }
+                for (auto const& preview : mathPreviews)
+                {
+                    if (preview.floating) { floatingPreview = &preview; continue; }
+                    if (suppressTrailing) continue;
+                    auto nonInteractiveTop = previewTop;
+                    previewTop += 8.0f;
+                    auto previewRect = D2D1::RectF(
+                        documentLeft + paddingLeft,
+                        previewTop,
+                        documentLeft + paddingLeft + contentWidth,
+                        previewTop + preview.Height() + 16.0f);
+                    resources.d2dContext->FillRectangle(previewRect, resources.nestedQuoteBrush.Get());
+                    auto previewOrigin = D2D1::Point2F(
+                        previewRect.left + (contentWidth - preview.Width()) * .5f, previewRect.top + 8.0f);
+                    PaintMathPreviewContent(preview, previewOrigin, resources, styleSheet, drawMath, drawMathFallback);
+                    nonInteractiveRegions.push_back(D2D1::RectF(
+                        previewRect.left,
+                        nonInteractiveTop,
+                        previewRect.right,
+                        previewRect.bottom));
+                    previewTop = previewRect.bottom;
+                }
+                for (auto const& preview : mermaidPreviews)
+                {
+                    if (suppressTrailing) continue;
+                    auto nonInteractiveTop = previewTop;
+                    previewTop += 8.0f;
+                    auto previewRect = D2D1::RectF(
+                        documentLeft + paddingLeft,
+                        previewTop,
+                        documentLeft + paddingLeft + contentWidth,
+                        previewTop + preview.height + 16.0f);
+                    resources.d2dContext->FillRectangle(
+                        previewRect,
+                        resources.nestedQuoteBrush.Get());
+                    auto previewOrigin = D2D1::Point2F(
+                        previewRect.left
+                            + (previewRect.right - previewRect.left
+                                - preview.width) * 0.5f,
+                        previewRect.top + 8.0f);
+                    drawMermaid(
+                        preview.svg,
+                        preview.width,
+                        preview.height,
+                        previewOrigin);
+                    nonInteractiveRegions.push_back(D2D1::RectF(
+                        previewRect.left,
+                        nonInteractiveTop,
+                        previewRect.right,
+                        previewRect.bottom));
+                    previewTop = previewRect.bottom;
+                }
+            };
+            auto const* trailing = !printMode && preparedDocument.trailingPreview
+                ? &*preparedDocument.trailingPreview : nullptr;
+            paintPreviews(prepared.mathPreviews, prepared.mermaidPreviews,
+                trailing && trailing->sourceIndex == blockIndex);
+            if (trailing && trailing->targetIndex == blockIndex && trailing->resident)
+                paintPreviews(trailing->mathPreviews, trailing->mermaidPreviews, false);
             EditorVisualBlock visual;
             visual.rect = rect;
             visual.textOrigin = origin;

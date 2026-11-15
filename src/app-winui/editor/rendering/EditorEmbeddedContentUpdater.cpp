@@ -3,8 +3,8 @@
 
 namespace winrt::Folia
 {
-    using folia::platform::editor::BuildEditorPrioritizedTraversal;
-    using folia::platform::editor::BuildEditorViewportPlan;
+    using folia::BuildEditorPrioritizedTraversal;
+    using folia::BuildEditorViewportPlan;
 
     EditorEmbeddedContentUpdater::EditorEmbeddedContentUpdater(
         detail::EditorRenderFrame const& valueFrame,
@@ -81,13 +81,22 @@ namespace winrt::Folia
                 return false;
             }
             auto previousHeight = prepared.height;
-            prepared = blockPreparer.Prepare(block, true, highPriority);
+            // Compact geometry can outlive the source projection. A retained
+            // visual block does not imply that its render fragment is resident.
+            if (!block.materialized && frame.materializeBlocks)
+                frame.materializeBlocks(index, index + 1);
+            auto previousIntrinsic = prepared.intrinsicFlow;
+            auto flowContext = prepared.hasFlowContext
+                ? std::optional{prepared.appliedFlow} : std::nullopt;
+            prepared = blockPreparer.Prepare(block, true, highPriority, flowContext);
+            if (flowContext && prepared.intrinsicFlow != previousIntrinsic)
+                preparedDocument->flowContextsChanged = true;
             ++refreshes;
             preparedDocument->layoutBlocks.insert(index);
             preparedDocument->embeddedBlocks.insert(index);
             if (prepared.height != previousHeight)
             {
-                preparedDocument->geometry.UpdateHeight(index, prepared.height);
+                preparedDocument->geometry.UpdateHeight(index, preparedDocument->GeometryHeight(index));
                 geometryChanged = true;
             }
             return true;
@@ -130,18 +139,25 @@ namespace winrt::Folia
             auto& prepared = preparedDocument->blocks[index];
             auto imageSources = EditorDocumentBlockPreparer::ImageSources(prepared);
             auto previousHeight = prepared.height;
-            prepared = blockPreparer.Prepare(block, false, false);
+            if (!block.materialized && frame.materializeBlocks)
+                frame.materializeBlocks(index, index + 1);
+            auto previousIntrinsic = prepared.intrinsicFlow;
+            auto flowContext = prepared.hasFlowContext
+                ? std::optional{prepared.appliedFlow} : std::nullopt;
+            prepared = blockPreparer.Prepare(block, false, false, flowContext);
+            if (flowContext && prepared.intrinsicFlow != previousIntrinsic)
+                preparedDocument->flowContextsChanged = true;
             preparedDocument->layoutBlocks.insert(index);
             preparedDocument->embeddedBlocks.erase(index);
             for (auto const& source : imageSources) inlineImages.ReleaseGif(source);
             if (prepared.height != previousHeight)
             {
-                preparedDocument->geometry.UpdateHeight(index, prepared.height);
+                preparedDocument->geometry.UpdateHeight(index, preparedDocument->GeometryHeight(index));
                 geometryChanged = true;
             }
         }
         if (geometryChanged)
             preparedDocument->totalHeight = preparedDocument->geometry.TotalHeight();
-        return workRemaining;
+        return workRemaining || preparedDocument->flowContextsChanged;
     }
 }

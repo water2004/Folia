@@ -1,4 +1,6 @@
 #pragma once
+import folia.markdown.inline_document;
+import folia.markdown.inline_cst;
 
 namespace {
 

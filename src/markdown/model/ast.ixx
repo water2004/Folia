@@ -391,6 +391,7 @@ public:
         if (!special.supplemental->source_prefixes) {
             special.supplemental->source_prefixes = std::make_unique<ContainerSource>();
         }
+        special.supplemental->source_prefixes->invalidate_owner_lookup();
         return *special.supplemental->source_prefixes;
     }
     bool has_container_source() const {

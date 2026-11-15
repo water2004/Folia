@@ -2,6 +2,7 @@
 // every rect/origin (single screen-coordinate system, HANDOFF invariant #1).
 export module folia.core.block_layout;
 import std;
+import folia.markdown.dialect;
 import folia.core.types;
 import folia.markdown.ids;
 import folia.core.render_model;

@@ -3,6 +3,7 @@
 // projection types while exposing only finalized text and source maps.
 export module folia.markdown.serializer;
 import std;
+import folia.markdown.selection;
 import folia.markdown.ast;
 import folia.markdown.document;
 import folia.markdown.ids;

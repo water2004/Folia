@@ -4,7 +4,7 @@
 
 namespace winrt::Folia
 {
-    using folia::platform::editor::BuildEditorViewportPlan;
+    using folia::BuildEditorViewportPlan;
 
     EditorPreparedDocumentRetention::EditorPreparedDocumentRetention(
         detail::EditorRenderFrame const& valueFrame,

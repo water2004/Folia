@@ -23,7 +23,7 @@ inline std::vector<ContainerSourceSnapshot> snapshot_ancestors(
     const EditorDocument& document,
     NodeId descendant_id) {
     std::vector<ContainerSourceSnapshot> snapshots;
-    const auto path = block_path(document.root, descendant_id);
+    const auto path = document_block_path(document, descendant_id);
     if (!path) return snapshots;
     const auto* node = &document.root;
     for (std::size_t depth = 0; depth < path->size(); ++depth) {
@@ -56,6 +56,17 @@ inline std::optional<std::size_t> translate_anchor(const TextEdit& edit, std::si
         return offset - removed + inserted;
     }
     return std::nullopt;
+}
+
+inline bool source_anchors_change(const ContainerSource& source, const TextEdit& edit) {
+    if (edit.replacement.find_first_of(U"\r\n") != std::u32string::npos) return true;
+    bool changed = false;
+    source.visit_owner(edit.container_id, [&](const ContainerLinePrefix& line) {
+        if (line.anchor.part != ContainerAnchorPart::Source) return;
+        const auto offset = translate_anchor(edit, line.anchor.offset);
+        changed = changed || !offset || *offset != line.anchor.offset;
+    });
+    return changed;
 }
 
 inline ContainerSource transform_source_anchors(
@@ -109,11 +120,12 @@ inline std::vector<DocumentTreeEdit> apply_source_edit_to_ancestors(
     EditorDocument& document,
     const TextEdit& edit) {
     std::vector<DocumentTreeEdit> updates;
-    auto path = block_path(document.root, edit.container_id);
+    auto path = document_block_path(document, edit.container_id);
     if (!path) return updates;
     auto* node = &document.root;
     for (std::size_t depth = 0; depth < path->size(); ++depth) {
-        if (node->has_container_source()) {
+        if (node->has_container_source()
+            && source_anchors_change(node->container_source(), edit)) {
             const auto transformed = transform_source_anchors(
                 node->container_source(), *node, edit);
             if (!(transformed == node->container_source())) {
@@ -140,7 +152,7 @@ inline std::vector<DocumentTreeEdit> rebind_source_anchors(
     NodeId to_owner,
     std::size_t to_offset) {
     std::vector<DocumentTreeEdit> updates;
-    const auto path = block_path(document.root, descendant_id);
+    const auto path = document_block_path(document, descendant_id);
     if (!path) return updates;
     auto* node = &document.root;
     for (std::size_t depth = 0; depth <= path->size(); ++depth) {

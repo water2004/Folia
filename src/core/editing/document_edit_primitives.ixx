@@ -2,6 +2,7 @@
 export module folia.core.document_edit_primitives;
 export import folia.core.document_transaction;
 import std;
+import folia.markdown.selection;
 import folia.markdown.ast;
 import folia.markdown.block_source;
 import folia.markdown.block_tree;

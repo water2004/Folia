@@ -192,6 +192,7 @@
     <ClInclude Include="editor\rendering\EditorSvgPainter.h" />
     <ClInclude Include="editor\rendering\EditorSyntaxIcons.h" />
     <ClInclude Include="editor\rendering\EditorTextLayoutEngine.h" />
+    <ClInclude Include="editor\rendering\EditorFlowLayoutContext.h" />
     <ClInclude Include="editor\interaction\EditorTableInteraction.h" />
     <ClInclude Include="editor\rendering\EditorInlineImageRenderer.h" />
     <ClInclude Include="editor\rendering\EditorEmbeddedDraw.h" />
@@ -380,7 +381,10 @@
     <ClCompile Include="..\core\query\latex_command_catalog.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\platform\windows\editor\geometry\editor_geometry.ixx">
+    <ClCompile Include="..\core\rendering\block_geometry.ixx">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\core\rendering\render_fragments.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\platform\windows\editor\layout\editor_display_mapping.ixx">
@@ -398,10 +402,10 @@
     <ClCompile Include="..\platform\windows\editor\layout\editor_block_spacing.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\platform\windows\editor\layout\editor_preparation_plan.ixx">
+    <ClCompile Include="..\core\rendering\preparation_plan.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\platform\windows\editor\layout\editor_viewport_plan.ixx">
+    <ClCompile Include="..\core\rendering\viewport_plan.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\platform\windows\editor\layout\editor_priority_work_queue.ixx">
@@ -541,6 +545,9 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\core\rendering\render_model.ixx">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\core\rendering\render_model.cpp">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\core\source\source_style.ixx">

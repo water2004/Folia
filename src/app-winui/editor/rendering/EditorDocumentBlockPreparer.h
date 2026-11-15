@@ -18,8 +18,8 @@ import folia.markdown.text_edit;
 
 namespace winrt::Folia
 {
-    // Builds one prepared block at a time. The object is stack-owned by a
-    // document preparation pass so its syntax cache never outlives a frame.
+    // Builds one prepared block at a time. A background pass can visit the
+    // entire document, so its syntax cache retains only the latest context.
     class EditorDocumentBlockPreparer final
     {
     public:
@@ -49,11 +49,11 @@ namespace winrt::Folia
         void InitializeContentMetadata(
             EditorPreparedDocument::Block& prepared,
             folia::RenderBlock const& block) const;
-        float EstimateHeight(folia::RenderBlock const& block);
         EditorPreparedDocument::Block Prepare(
             folia::RenderBlock const& block,
             bool requestEmbedded,
-            bool highPriority);
+            bool highPriority,
+            std::optional<EditorFlowLayoutContext> flowContext = {});
 
         static std::vector<std::string> ImageSources(
             EditorPreparedDocument::Block const& prepared);
@@ -87,6 +87,8 @@ namespace winrt::Folia
         bool darkTheme = false;
         std::uint64_t embeddedGeneration = 0;
         std::uint64_t remoteImageGeneration = 0;
-        std::unordered_map<void const*, std::vector<SyntaxHighlightRange>> sourceCodeHighlights;
+        std::shared_ptr<const std::u32string> sourceCodeContext;
+        std::string sourceCodeLanguage;
+        std::vector<SyntaxHighlightRange> sourceCodeHighlights;
     };
 }

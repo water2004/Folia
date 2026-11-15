@@ -17,6 +17,7 @@
 // crosses a block boundary. Soft/hard breaks are within-node '\n'.
 export module folia.markdown.inline_parser;
 import std;
+import folia.markdown.text_edit;
 import folia.markdown.ids;
 import folia.markdown.dialect;
 import folia.markdown.image_dimension;
@@ -1125,7 +1126,8 @@ struct Parser {
         return normalize_markdown_link_label(raw);
     }
 
-    auto resolve_reference_label(std::u32string_view raw) const {
+    auto resolve_reference_label(std::u32string_view raw) const
+        -> decltype(ctx.resolve_link_label(std::declval<const std::string&>())) {
         using Result = decltype(ctx.resolve_link_label(std::declval<const std::string&>()));
         if (!ctx.resolve_link_label || raw.empty() || raw.size() > 999) return Result{};
         return ctx.resolve_link_label(normalized_reference_label(raw));

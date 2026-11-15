@@ -81,17 +81,20 @@
     <ClCompile Include="..\core\model\ast.ixx">
       <Filter>Core Modules\Model</Filter>
     </ClCompile>
-    <ClCompile Include="..\platform\windows\editor\geometry\editor_geometry.ixx">
-      <Filter>Platform Modules\Windows Editor</Filter>
+    <ClCompile Include="..\core\rendering\render_fragments.ixx">
+      <Filter>Core Modules\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\core\rendering\block_geometry.ixx">
+      <Filter>Core Modules\Rendering</Filter>
     </ClCompile>
     <ClCompile Include="..\platform\windows\editor\layout\editor_display_mapping.ixx">
       <Filter>Platform Modules\Windows Editor</Filter>
     </ClCompile>
-    <ClCompile Include="..\platform\windows\editor\layout\editor_preparation_plan.ixx">
-      <Filter>Platform Modules\Windows Editor</Filter>
+    <ClCompile Include="..\core\rendering\preparation_plan.ixx">
+      <Filter>Core Modules\Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="..\platform\windows\editor\layout\editor_viewport_plan.ixx">
-      <Filter>Platform Modules\Windows Editor</Filter>
+    <ClCompile Include="..\core\rendering\viewport_plan.ixx">
+      <Filter>Core Modules\Rendering</Filter>
     </ClCompile>
     <ClCompile Include="..\platform\windows\editor\layout\editor_priority_work_queue.ixx">
       <Filter>Platform Modules\Windows Editor</Filter>
@@ -301,6 +304,9 @@
       <Filter>Core Modules\Rendering</Filter>
     </ClCompile>
     <ClCompile Include="..\core\rendering\render_model.ixx">
+      <Filter>Core Modules\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\core\rendering\render_model.cpp">
       <Filter>Core Modules\Rendering</Filter>
     </ClCompile>
     <ClCompile Include="..\core\source\source_style.ixx">
@@ -633,6 +639,9 @@
       <Filter>Editor\Rendering</Filter>
     </ClInclude>
     <ClInclude Include="editor\rendering\EditorTextLayoutEngine.h">
+      <Filter>Editor\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="editor\rendering\EditorFlowLayoutContext.h">
       <Filter>Editor\Rendering</Filter>
     </ClInclude>
     <ClInclude Include="editor\interaction\EditorTableInteraction.h">

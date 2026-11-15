@@ -1,5 +1,7 @@
 export module folia.core.document_structure_edit;
 import std;
+import folia.markdown.dialect;
+import folia.markdown.selection;
 import folia.markdown.ast;
 import folia.markdown.block_source;
 import folia.markdown.block_tree;

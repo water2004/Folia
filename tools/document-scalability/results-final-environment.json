@@ -1,0 +1,59 @@
+{
+  "recorded_at_utc": "2026-11-15T14:02:14.681068+00:00",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+  "available_cpu_count": 9,
+  "mem_total_kib": 10206472,
+  "baseline_commit": "5861fff47b5697c65949ba41cd3f4edd5256ef45",
+  "baseline_patch": "baseline-clang.patch",
+  "current_revision": "925d24af98bd477d49de060cb0109f205e2401ec",
+  "compiler": "Debian clang 21.1.8 (14)",
+  "libcxx_headers": "21.1.8-14",
+  "libcxx_shared_runtime": "23.1.5-2 (Debian package dependency)",
+  "cmake": "4.3.4",
+  "ninja": "1.13.2",
+  "build_type": "Release",
+  "compile_flags": "-stdlib=libc++ -O3 -DNDEBUG -std=c++23",
+  "extra_standard_libraries": "-lc++abi",
+  "input": "generated repetitions of - Sample markdown list item for parser and upload testing. plus newline",
+  "attachments_read": false,
+  "directwrite_measured": false,
+  "method": "Each executable starts in a new process; sizes 1 and 10 MiB; baseline then current at each size; 3 insert/undo repetitions per first/middle/last location; structural split/undo once per location. Both executables use the identical benchmark source. Agent compilers/tests were paused throughout. Timings use steady_clock. RSS and high-water RSS are /proc/self/status VmRSS/VmHWM in KiB. Startup phases are single observations; repeated edit phases use median in results-final-summary.json. No CPU affinity pinning.",
+  "current_core_source_tree_sha256": "955a31f4105b563e8ab452c40aeaeeabfed3f32abaf102a481d85c5b8de7f167",
+  "source_fingerprint_method": "SHA256 of src/core and src/markdown .ixx/.cpp sorted by relative POSIX path components; for each: path UTF-8, NUL, file bytes, NUL.",
+  "benchmark_sha256": "344d1b71aa48614c599b95742ad8db6757f1b777709de342e7dc4e5a1f98e7ab",
+  "baseline_clang_patch_sha256": "d94b8bc49ea1e29ee20a90be23aff500b6c3c949a9eee413e34fe5a90c0e5349",
+  "series": "final",
+  "current_delta_description": "streaming initial fragment planning; normalized transaction deltas and local structural reconciliation; source-root reuse validation; semantic print-page boundaries",
+  "boost_ut_commit": "6f4a7ed0b06b7203d643808bf6c7228b1af2dae9",
+  "verification": "The previous complete core runner passed 821 tests/539461 assertions. The final initial-planner/source-root/print changes compiled successfully and passed focused fragment (15 tests/31933 assertions) and print (9 tests/33813 assertions) runs; these focused sets overlap. Native Windows tests have not run because GitHub rejected job startup due to the account billing lock.",
+  "runs": [
+    {
+      "label": "baseline",
+      "requested_mib": 1,
+      "file": "results-baseline-final-1mib.jsonl",
+      "process_seconds": 2.0560546100000465
+    },
+    {
+      "label": "current",
+      "requested_mib": 1,
+      "file": "results-current-final-1mib.jsonl",
+      "process_seconds": 0.22134673600021415
+    },
+    {
+      "label": "baseline",
+      "requested_mib": 10,
+      "file": "results-baseline-final.jsonl",
+      "process_seconds": 22.62803222299999
+    },
+    {
+      "label": "current",
+      "requested_mib": 10,
+      "file": "results-current-final.jsonl",
+      "process_seconds": 2.4113675610001337
+    }
+  ],
+  "completed_at_utc": "2026-11-15T14:02:42.050406+00:00",
+  "local_build_revision": "1a8d04473d0d5e1b29f6e2ed62354ac1d1ce418e",
+  "revision_mapping": "The local build core/markdown source fingerprint matches its Git archive. The integration owner verified that the connector-published remote commit has the identical Git tree; commit ids differ because the connector recreates commit metadata."
+}

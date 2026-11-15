@@ -2,6 +2,7 @@
 #include <string>
 
 #include "support/folia_test.hpp"
+import folia.markdown.diagnostics;
 import folia.markdown.parser;
 import folia.markdown.ast;
 import folia.markdown.inline_cst;

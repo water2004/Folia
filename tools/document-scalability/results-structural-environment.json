@@ -1,0 +1,57 @@
+{
+  "recorded_at_utc": "2026-11-15T13:53:24.617267+00:00",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+  "available_cpu_count": 9,
+  "mem_total_kib": 10206472,
+  "baseline_commit": "5861fff47b5697c65949ba41cd3f4edd5256ef45",
+  "baseline_patch": "baseline-clang.patch",
+  "current_revision": "architecture working tree after local structural reconciliation; before subsequent print-boundary/native-only integration",
+  "compiler": "Debian clang 21.1.8 (14)",
+  "libcxx_headers": "21.1.8-14",
+  "libcxx_shared_runtime": "23.1.5-2 (Debian package dependency)",
+  "cmake": "4.3.4",
+  "ninja": "1.13.2",
+  "build_type": "Release",
+  "compile_flags": "-stdlib=libc++ -O3 -DNDEBUG -std=c++23",
+  "extra_standard_libraries": "-lc++abi",
+  "input": "generated repetitions of - Sample markdown list item for parser and upload testing. plus newline",
+  "attachments_read": false,
+  "directwrite_measured": false,
+  "method": "Each executable starts in a new process; sizes 1 and 10 MiB; baseline then current at each size; 3 insert/undo repetitions per first/middle/last location; structural split/undo once per location. Both executables were rebuilt from the identical benchmark source for this series. All agent compilers/tests were paused during measurement. Timings use steady_clock. RSS and high-water RSS are /proc/self/status VmRSS/VmHWM in KiB. Startup phases are single observations; repeated edit phases use median in results-structural-summary.json. No CPU affinity pinning.",
+  "current_core_source_tree_sha256": "cb1b5d38db243919ffdc8eb176c6300c09c34104411b70f64b4dcfa85c4adde2",
+  "source_fingerprint_method": "SHA256 of src/core and src/markdown .ixx/.cpp sorted by relative POSIX path components; for each: path UTF-8, NUL, file bytes, NUL.",
+  "benchmark_sha256": "344d1b71aa48614c599b95742ad8db6757f1b777709de342e7dc4e5a1f98e7ab",
+  "baseline_clang_patch_sha256": "d94b8bc49ea1e29ee20a90be23aff500b6c3c949a9eee413e34fe5a90c0e5349",
+  "series": "structural",
+  "current_base_commit": "58b60ce0c036a12e3f20fdd8ef55909349465566",
+  "current_delta_description": "normalized transaction tree deltas; local fragment reconciliation and navigation suffix updates; no whole-list replanning for a local Enter",
+  "boost_ut_commit": "6f4a7ed0b06b7203d643808bf6c7228b1af2dae9",
+  "runs": [
+    {
+      "label": "baseline",
+      "requested_mib": 1,
+      "file": "results-baseline-structural-1mib.jsonl",
+      "process_seconds": 1.9922228020000148
+    },
+    {
+      "label": "current",
+      "requested_mib": 1,
+      "file": "results-current-structural-1mib.jsonl",
+      "process_seconds": 0.2027438790000815
+    },
+    {
+      "label": "baseline",
+      "requested_mib": 10,
+      "file": "results-baseline-structural.jsonl",
+      "process_seconds": 22.282031562000157
+    },
+    {
+      "label": "current",
+      "requested_mib": 10,
+      "file": "results-current-structural.jsonl",
+      "process_seconds": 2.5558802830000786
+    }
+  ],
+  "completed_at_utc": "2026-11-15T13:53:51.660370+00:00"
+}

@@ -6,6 +6,7 @@
 import folia.core.render_model;
 
 #include "editor/rendering/EditorContentPreparation.h"
+#include "editor/rendering/EditorContentGeometry.h"
 #include "editor/rendering/EditorDocumentBlockPreparer.h"
 #include "editor/rendering/EditorDocumentPainter.h"
 #include "editor/rendering/EditorDocumentPreparationPass.h"
@@ -34,27 +35,13 @@ namespace winrt::Folia
         interactionMap.Clear();
         nonInteractiveRegions.clear();
         inlineMathPreviewBounds.reset();
-        auto padding = (std::min)(styleSheet.horizontalPadding, (std::max)(12.0f, resources.surfaceWidthDip * 0.06f));
-        auto sourceDocument = !frame.renderModel.blocks.empty()
-            && frame.renderModel.blocks.front().source_mode;
-        auto sourceLineCount = sourceDocument
-            ? (std::max)(std::uint32_t{1}, frame.renderModel.blocks.back().source_line_number)
-            : std::uint32_t{0};
-        auto sourceLineDigits = sourceDocument
-            ? std::to_wstring(sourceLineCount).size()
-            : std::size_t{0};
-        auto desiredSourceGutterWidth = sourceDocument
-            ? (std::max)(24.0f, styleSheet.code.size * 0.64f * static_cast<float>(sourceLineDigits) + 12.0f)
-            : 0.0f;
-        auto availableSourceGutterWidth = (std::max)(
-            0.0f,
-            resources.surfaceWidthDip - padding - 14.0f - 80.0f - 8.0f);
-        auto sourceGutterWidth = (std::min)(desiredSourceGutterWidth, availableSourceGutterWidth);
-        if (sourceGutterWidth < 20.0f) sourceGutterWidth = 0.0f;
-        auto sourceGutterLeft = 4.0f;
-        auto documentLeft = sourceGutterWidth > 0.0f ? sourceGutterWidth + 8.0f : padding;
-        auto documentRight = (std::max)(documentLeft + 1.0f, resources.surfaceWidthDip - padding - 14.0f);
-        auto documentWidth = documentRight - documentLeft;
+        auto metrics = EditorDocumentLayoutMetrics(frame.renderModel, resources.surfaceWidthDip,
+            styleSheet.horizontalPadding, styleSheet.code.size);
+        auto sourceGutterWidth = metrics.sourceGutterWidth;
+        auto sourceGutterLeft = metrics.sourceGutterLeft;
+        auto documentLeft = metrics.left;
+        auto documentRight = metrics.right;
+        auto documentWidth = metrics.width;
         // Printed pages use document coordinates directly.  In particular,
         // the final page may start below the editor viewport's maximum scroll
         // offset when less than one page remains, so it must not be clamped as

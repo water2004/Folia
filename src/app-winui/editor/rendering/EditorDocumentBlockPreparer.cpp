@@ -254,91 +254,6 @@ namespace winrt::Folia
         CollectRenderOwners(block, owners, prepared.owners);
     }
 
-    float EditorDocumentBlockPreparer::EstimateHeight(folia::RenderBlock const& block)
-    {
-        auto const& special = block.special();
-        auto flowContainer = !block.inline_items.empty()
-            && (block.kind == folia::RenderBlockKind::Quote
-                || block.kind == folia::RenderBlockKind::Callout);
-        auto paddingTop = flowContainer ? 0.0f : block.block_style.padding_top;
-        auto paddingBottom = flowContainer ? 0.0f : block.block_style.padding_bottom;
-        auto contentWidth = EditorBlockContentWidth(block, documentWidth);
-        if (block.kind == folia::RenderBlockKind::ThematicBreak) return 40.0f;
-        if (block.kind == folia::RenderBlockKind::Blank)
-            return styleSheet.body.lineHeight + paddingTop + paddingBottom;
-        if (block.source_code)
-            return styleSheet.code.lineHeight + paddingTop + paddingBottom;
-        if (block.kind == folia::RenderBlockKind::Code
-            || block.kind == folia::RenderBlockKind::Frontmatter
-            || block.kind == folia::RenderBlockKind::Unsupported)
-        {
-            auto lines = (std::max)(std::size_t{1}, special.line_count);
-            if (special.line_count == 0)
-            {
-                auto const& source = special.code_text.empty() ? special.raw_source : special.code_text;
-                lines = 1 + static_cast<std::size_t>(std::ranges::count(source, U'\n'));
-            }
-            return static_cast<float>(lines) * styleSheet.code.lineHeight
-                + styleSheet.code.lineHeight
-                + paddingTop + paddingBottom;
-        }
-        if (block.kind == folia::RenderBlockKind::Math)
-            return styleSheet.body.lineHeight * 2.0f + paddingTop + paddingBottom;
-        if (block.kind == folia::RenderBlockKind::Table)
-            return static_cast<float>((std::max)(
-                std::size_t{1},
-                special.row_count != 0
-                    ? special.row_count
-                    : static_cast<std::size_t>(block.estimated_line_breaks)))
-                * (styleSheet.body.lineHeight + 16.0f) + paddingTop + paddingBottom;
-        if (block.kind == folia::RenderBlockKind::Image)
-        {
-            auto requestedWidth = ResolveImageDimension(special.image_width, contentWidth);
-            auto requestedHeight = ResolveImageDimension(special.image_height);
-            auto width = requestedWidth.value_or(0.0f);
-            auto height = requestedHeight.value_or(0.0f);
-            if ((width <= 0.0f || height <= 0.0f) && !special.src.empty())
-            {
-                if (auto dimensions = renderCache.images.ProbeImageDimensions(
-                        resources, frame.baseDirectory, special.src))
-                {
-                    width = requestedWidth.value_or(dimensions->width);
-                    height = requestedHeight.value_or(dimensions->height);
-                    if (requestedWidth && !requestedHeight)
-                        height = dimensions->height * width / dimensions->width;
-                    if (!requestedWidth && requestedHeight)
-                        width = dimensions->width * height / dimensions->height;
-                }
-            }
-            if (width <= 0.0f) width = contentWidth * 0.5f;
-            if (height <= 0.0f) height = styleSheet.body.lineHeight;
-            auto scale = (std::min)(1.0f, (std::min)(
-                (std::max)(48.0f, contentWidth * 0.75f) / width,
-                240.0f / height));
-            auto caption = special.alt.empty() ? 0.0f : styleSheet.body.lineHeight + 4.0f;
-            return (std::max)(styleSheet.body.lineHeight, height * scale)
-                + caption + paddingTop + paddingBottom;
-        }
-
-        auto level = block.text_heading_level;
-        auto font = level == 0 ? styleSheet.body
-            : level <= 1 ? styleSheet.heading1
-            : level == 2 ? styleSheet.heading2
-            : styleSheet.heading3;
-        for (auto const& source : special.inline_image_sources)
-            renderCache.images.ProbeImageDimensions(resources, frame.baseDirectory, source);
-        auto averageAdvance = (std::max)(1.0f, font.size * 0.72f);
-        auto charactersPerLine = (std::max)(
-            std::size_t{1},
-            static_cast<std::size_t>(contentWidth / averageAdvance));
-        auto wrappedLines = (static_cast<std::size_t>(block.estimated_characters)
-            + charactersPerLine - 1) / charactersPerLine;
-        auto lines = (std::max)(
-            std::size_t{1} + static_cast<std::size_t>(block.estimated_line_breaks),
-            (std::max)(std::size_t{1}, wrappedLines));
-        return static_cast<float>(lines) * font.lineHeight + paddingTop + paddingBottom;
-    }
-
     DisplayInlineText EditorDocumentBlockPreparer::BuildDisplay(
         folia::RenderBlock const& block,
         float width,
@@ -520,7 +435,8 @@ namespace winrt::Folia
     EditorPreparedDocument::Block EditorDocumentBlockPreparer::Prepare(
         folia::RenderBlock const& block,
         bool requestEmbedded,
-        bool highPriority)
+        bool highPriority,
+        std::optional<EditorFlowLayoutContext> flowContext)
     {
         mathJax.BeginBlock(block.id.v);
         EditorPreparedDocument::Block prepared;
@@ -562,6 +478,7 @@ namespace winrt::Folia
                 prepared.pendingImage = prepared.table->pendingImage;
                 prepared.pendingMath = prepared.table->pendingMath;
                 prepared.height = prepared.table->height;
+                prepared.geometryMeasured = true;
                 prepared.valid = true;
                 mathJax.EndBlock();
                 return prepared;
@@ -573,6 +490,7 @@ namespace winrt::Folia
         auto paddingTop = flowContainer ? 0.0f : block.block_style.padding_top;
         auto paddingBottom = flowContainer ? 0.0f : block.block_style.padding_bottom;
         auto contentWidth = EditorBlockContentWidth(block, documentWidth);
+        prepared.textTop = paddingTop;
         prepared.display = BuildDisplay(
             block,
             contentWidth,
@@ -588,22 +506,27 @@ namespace winrt::Folia
             && block.special().language
             && !prepared.display.text.empty())
         {
-            auto const* contextKey = block.source_code_context
-                ? static_cast<void const*>(block.source_code_context.get())
-                : static_cast<void const*>(&block);
-            auto [found, inserted] = sourceCodeHighlights.try_emplace(contextKey);
-            if (inserted)
+            auto const& language = *block.special().language;
+            if (!block.source_code_context
+                || sourceCodeContext != block.source_code_context
+                || sourceCodeLanguage != language)
             {
+                // Adjacent source lines share their complete lexical context,
+                // but a whole-document preparation must not retain every code
+                // block's tokens. Keep an owning key to avoid pointer reuse and
+                // release the previous range storage before parsing the next.
+                sourceCodeContext.reset();
+                sourceCodeHighlights = std::vector<SyntaxHighlightRange>{};
                 auto const& context = block.source_code_context
                     ? *block.source_code_context
                     : prepared.display.text;
-                found->second = treeSitter.Highlight(
-                    *block.special().language,
-                    folia::cps_to_utf8(context));
+                sourceCodeHighlights = treeSitter.Highlight(language, folia::cps_to_utf8(context));
+                sourceCodeLanguage = language;
+                sourceCodeContext = block.source_code_context;
             }
             auto lineStart = block.source_code_context ? block.source_code_context_offset : 0;
             auto lineEnd = lineStart + prepared.display.text.size();
-            for (auto const& highlight : found->second)
+            for (auto const& highlight : sourceCodeHighlights)
             {
                 auto highlightStart = static_cast<std::size_t>(highlight.start);
                 auto highlightEnd = highlightStart + static_cast<std::size_t>(highlight.length);
@@ -626,15 +549,18 @@ namespace winrt::Folia
         if (frame.completion) InsertCompletionPreview(prepared.display, frame.completion->position, frame.completion->text, frame.completion->before);
         prepared.pendingMermaid = prepared.display.pendingMermaid;
         prepared.pendingMath = prepared.display.pendingMath;
-        auto format = textLayoutEngine.FormatFor(
-            prepared.code || prepared.sourceMode,
-            prepared.display.ranges);
+        prepared.hasFlowContext = true;
+        prepared.intrinsicFlow.format = textLayoutEngine.FormatKindFor(
+            prepared.code || prepared.sourceMode, prepared.display.ranges);
+        prepared.appliedFlow = flowContext.value_or(prepared.intrinsicFlow);
+        auto format = textLayoutEngine.FormatFor(prepared.appliedFlow.format);
         prepared.layout = textLayoutEngine.CreateFlow(
             prepared.display,
             format,
             contentWidth,
             [&](IDWriteTextLayout* candidate, DisplayInlineText const& candidateDisplay)
             {
+                if (!candidate) return;
                 prepared.images = inlineImages.Resolve(
                     candidate,
                     candidateDisplay.imageOverlays,
@@ -694,7 +620,17 @@ namespace winrt::Folia
                         advance,
                     });
                 }
+                DWRITE_LINE_SPACING_METHOD method{};
+                FLOAT spacing = 0.0f, baseline = 0.0f;
+                if (SUCCEEDED(candidate->GetLineSpacing(&method, &spacing, &baseline)))
+                    prepared.intrinsicFlow.naturalLineSpacing =
+                        prepared.intrinsicFlow.naturalLineSpacing
+                        || method == DWRITE_LINE_SPACING_METHOD_DEFAULT;
+                if (flowContext && flowContext->naturalLineSpacing)
+                    candidate->SetLineSpacing(DWRITE_LINE_SPACING_METHOD_DEFAULT, 0.0f, 0.0f);
             });
+        prepared.appliedFlow.naturalLineSpacing = prepared.intrinsicFlow.naturalLineSpacing
+            || (flowContext && flowContext->naturalLineSpacing);
         if (prepared.layout && !block.source_mode && block.block_style.text_alignment)
         {
             auto alignment = DWRITE_TEXT_ALIGNMENT_LEADING;
@@ -738,9 +674,8 @@ namespace winrt::Folia
         }
         prepared.textHeight = textLayoutEngine.MeasureHeight(
             prepared.layout.Get(),
-            textLayoutEngine.LineHeightFor(
-                prepared.code || prepared.sourceMode,
-                prepared.display.ranges));
+            textLayoutEngine.LineHeightFor(prepared.appliedFlow.format),
+            !prepared.appliedFlow.fragmented);
         prepared.layoutLines = folia::platform::editor::BuildEditorTextLines(
             prepared.layout.Get(), prepared.display.displayToSource, block.source_span, contentWidth);
         prepared.paintPlan = folia::platform::editor::EditorTextPaintPlan::Prepare(prepared.layout.Get());
@@ -749,7 +684,9 @@ namespace winrt::Folia
             if (!preview.floating) previewHeight += preview.Height() + 24.0f;
         for (auto const& preview : prepared.mermaidPreviews)
             previewHeight += preview.height + 24.0f;
+        prepared.previewHeight = previewHeight;
         prepared.height = prepared.textHeight + previewHeight + paddingTop + paddingBottom;
+        prepared.geometryMeasured = true;
         prepared.display.displayToSource.for_each_run(0, prepared.display.displayToSource.size(),
             [&](auto, auto, auto first, auto) { addOwner(first.container_id); return true; });
         prepared.valid = true;

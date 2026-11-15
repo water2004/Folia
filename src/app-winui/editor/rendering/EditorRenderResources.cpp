@@ -197,6 +197,22 @@ namespace winrt::Folia
         surfaceHeight = static_cast<std::uint32_t>(std::ceil(surfaceHeightDip));
     }
 
+    void EditorRenderResources::InitializeTextMeasurement(
+        EditorStyleSheet const& styleSheet,
+        float widthDip,
+        float heightDip)
+    {
+        winrt::check_hresult(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED,
+            __uuidof(IDWriteFactory), reinterpret_cast<IUnknown**>(dwriteFactory.GetAddressOf())));
+        if (FAILED(CoCreateInstance(CLSID_WICImagingFactory2, nullptr, CLSCTX_INPROC_SERVER,
+                IID_PPV_ARGS(wicFactory.GetAddressOf()))))
+            CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER,
+                IID_PPV_ARGS(wicFactory.GetAddressOf()));
+        surfaceWidthDip = (std::max)(1.0f, widthDip);
+        surfaceHeightDip = (std::max)(1.0f, heightDip);
+        RebuildTextFormats(styleSheet);
+    }
+
     EditorResizeResult EditorRenderResources::Resize(winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel const& panel, double width, double height)
     {
         if (!swapChain || !std::isfinite(width) || !std::isfinite(height) || width <= 0.0 || height <= 0.0) return {};

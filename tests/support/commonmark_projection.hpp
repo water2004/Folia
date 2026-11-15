@@ -1,5 +1,6 @@
 #pragma once
 import folia.markdown.markdown_html;
+import folia.markdown.html_entities;
 
 // Semantic HTML-shaped projection for the official CommonMark conformance
 // tests. This consumes Folia's parsed tree and lossless inline CST; it is not
@@ -28,7 +29,7 @@ struct Node;
 struct Child {
     std::string text;
     std::unique_ptr<Node> node;
-    Child(std::string value) : text(std::move(value)) {}
+    Child(std::string value);
     Child(Node value);
     ~Child();
     Child(Child&&) noexcept;
@@ -44,6 +45,7 @@ struct Node {
     std::string html_prefix;
     std::string html_suffix;
 };
+inline Child::Child(std::string value) : text(std::move(value)) {}
 inline Child::Child(Node value) : node(std::make_unique<Node>(std::move(value))) {}
 inline Child::~Child() = default;
 inline Child::Child(Child&&) noexcept = default;
