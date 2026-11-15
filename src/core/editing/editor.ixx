@@ -426,11 +426,17 @@ public:
     }
 
     bool replace_source(SourceRange range,std::u32string replacement) {
-        return source_view_ && source_view_->editor.replace(range,std::move(replacement)) && commit_source_patch_();
+        if (!source_view_) return false;
+        const auto revision = source_view_->editor.revision();
+        if (!source_view_->editor.replace(range,std::move(replacement))) return false;
+        return source_view_->editor.revision() == revision || commit_source_patch_();
     }
 
     bool replace_all_source(std::span<const SourceReplacement> replacements) {
-        return source_view_ && source_view_->editor.replace_all(replacements) && commit_source_patch_();
+        if (!source_view_) return false;
+        const auto revision = source_view_->editor.revision();
+        if (!source_view_->editor.replace_all(replacements)) return false;
+        return source_view_->editor.revision() == revision || commit_source_patch_();
     }
 
     bool execute_command(const Command& cmd) {
@@ -593,6 +599,12 @@ public:
     std::optional<Command> handle_input(const EditorInputEvent& ev) {
         using K = EditorInputEvent::Kind;
         using TK = KeyCode;
+        if (ev.kind == K::ClipboardPaste) {
+            Command command;
+            command.kind = CommandKind::Paste;
+            command.text = ev.paste_payload;
+            return command;
+        }
         if (ev.kind == K::TextInput) {
             if (ev.text_input.kind == TextInputEvent::Kind::InsertText && !ev.text_input.text.empty()) {
                 return Command::InsertText(ev.text_input.text);
@@ -607,7 +619,7 @@ public:
                         char32_t c = ev.key.ch;
                         if (c == 'b' || c == 'B') { Command c2; c2.kind = CommandKind::ToggleStrong; return c2; }
                         if (c == 'i' || c == 'I') { Command c2; c2.kind = CommandKind::ToggleEmphasis; return c2; }
-                        if (c == 'z' || c == 'Z') { Command c2; c2.kind = CommandKind::Undo; return c2; }
+                        if (c == 'z' || c == 'Z') { Command c2; c2.kind = ext ? CommandKind::Redo : CommandKind::Undo; return c2; }
                         if (c == 'y' || c == 'Y') { Command c2; c2.kind = CommandKind::Redo; return c2; }
                         if (c == 'c' || c == 'C') { Command c2; c2.kind = CommandKind::Copy; return c2; }
                         if (c == 'x' || c == 'X') { Command c2; c2.kind = CommandKind::Cut; return c2; }
@@ -621,12 +633,18 @@ public:
                 case TK::Right: return Command::MoveRight(ext);
                 case TK::Up:    return Command::MoveUp(ext);
                 case TK::Down:  return Command::MoveDown(ext);
-                case TK::Home:  { Command c; c.kind = CommandKind::MoveLineStart; c.extend_selection = ext; return c; }
-                case TK::End:   { Command c; c.kind = CommandKind::MoveLineEnd;   c.extend_selection = ext; return c; }
+                case TK::Home:  { Command c; c.kind = ev.key.modifiers.ctrl ? CommandKind::MoveDocumentStart : CommandKind::MoveLineStart; c.extend_selection = ext; return c; }
+                case TK::End:   { Command c; c.kind = ev.key.modifiers.ctrl ? CommandKind::MoveDocumentEnd : CommandKind::MoveLineEnd; c.extend_selection = ext; return c; }
                 case TK::Backspace: { Command c; c.kind = CommandKind::DeleteBackward; return c; }
                 case TK::Delete:    { Command c; c.kind = CommandKind::DeleteForward;  return c; }
-                case TK::Enter:     { Command c; c.kind = CommandKind::InsertNewline;  return c; }
-                case TK::Tab:       { return Command::InsertText(U"\t"); }
+                case TK::Enter:     { Command c; c.kind = ext ? CommandKind::InsertSoftBreak : CommandKind::InsertNewline; return c; }
+                case TK::Tab: {
+                    Command c;
+                    if (ext) c.kind = CommandKind::OutdentListItem;
+                    else if (source_view_) c.kind = CommandKind::IndentListItem;
+                    else return Command::InsertText(U"\t");
+                    return c;
+                }
                 default: break;
             }
         }
@@ -655,6 +673,7 @@ private:
 
     bool execute_source_command_(const Command& command) {
         auto& source=source_view_->editor;
+        const auto revision = source.revision();
         bool handled=false;
         switch (command.kind) {
             case CommandKind::InsertText:
@@ -666,6 +685,33 @@ private:
                 if (line == source.lines().end() || !span.source_range.valid_for(line->text.size())) return false;
                 handled = source.replace({line->source_start + span.source_range.start,
                     line->source_start + span.source_range.end}, command.text);
+                break;
+            }
+            case CommandKind::ReplaceSourceText: {
+                if (!command.replacement) return false;
+                const auto& replacement = *command.replacement;
+                const auto line = std::ranges::find(source.lines(), replacement.range.container_id, &SourceLine::id);
+                if (line == source.lines().end() || !replacement.range.source_range.valid_for(line->text.size())) return false;
+                const SourceRange range{line->source_start + replacement.range.source_range.start,
+                    line->source_start + replacement.range.source_range.end};
+                const auto delta = static_cast<std::ptrdiff_t>(command.text.size()) - static_cast<std::ptrdiff_t>(range.length());
+                auto project = [&](TextPosition position) -> std::optional<std::size_t> {
+                    const auto selected_line = std::ranges::find(source.lines(), position.container_id, &SourceLine::id);
+                    if (selected_line == source.lines().end()) return std::nullopt;
+                    const auto line_length = selected_line->id == line->id
+                        ? line->text.size() - replacement.range.source_range.length() + command.text.size()
+                        : selected_line->text.size();
+                    if (position.source_offset > line_length) return std::nullopt;
+                    auto start = static_cast<std::ptrdiff_t>(selected_line->source_start);
+                    if (selected_line->id != line->id && selected_line->source_start >= range.end) start += delta;
+                    if (start < 0) return std::nullopt;
+                    return static_cast<std::size_t>(start) + position.source_offset;
+                };
+                auto anchor = project(replacement.selection_after.anchor);
+                auto active = project(replacement.selection_after.active);
+                if (!anchor || !active) return false;
+                handled = source.replace_with_selection(range, command.text,
+                    {*anchor, *active, replacement.selection_after.anchor.affinity, replacement.selection_after.active.affinity});
                 break;
             }
             case CommandKind::InsertNewline:
@@ -682,13 +728,15 @@ private:
             case CommandKind::SelectAll: source.select_all();return true;
             case CommandKind::MoveLeft: source.move_left(command.extend_selection);return true;
             case CommandKind::MoveRight: source.move_right(command.extend_selection);return true;
+            case CommandKind::MoveUp: source.move_up(command.extend_selection);return true;
+            case CommandKind::MoveDown: source.move_down(command.extend_selection);return true;
             case CommandKind::MoveLineStart: source.move_line_start(command.extend_selection);return true;
             case CommandKind::MoveLineEnd: source.move_line_end(command.extend_selection);return true;
             case CommandKind::MoveDocumentStart: source.move_document_start(command.extend_selection);return true;
             case CommandKind::MoveDocumentEnd: source.move_document_end(command.extend_selection);return true;
-            default:return false;
+            default: return false;
         }
-        return handled && commit_source_patch_();
+        return handled && (source.revision() == revision || commit_source_patch_());
     }
 
     bool commit_source_patch_() {
@@ -893,6 +941,10 @@ private:
     }
 
     void apply_document_transaction_(const DocumentTransaction& transaction) {
+        if (transaction.revision_before == transaction.revision_after) {
+            rendered_selection_.value() = transaction.selection_after;
+            return;
+        }
         document_history_.push(transaction);
         rendered_selection_.value() = transaction.selection_after;
         last_document_change_ = summarize_document_change(
