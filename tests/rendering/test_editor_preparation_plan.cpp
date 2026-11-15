@@ -1,10 +1,12 @@
 #include "support/folia_test.hpp"
 
 import folia.markdown.text_edit;
-import folia.platform.editor_preparation_plan;
+import folia.markdown.ids;
+import folia.markdown.selection;
+import folia.core.preparation_plan;
 
 using namespace boost::ut;
-using namespace folia::platform::editor;
+using namespace folia;
 
 namespace
 {

@@ -68,7 +68,7 @@ namespace {
                 if (block.table) for (auto const& display : block.table->displays) collectSyntax(display);
             }
             math.WaitForIdle();
-            std::vector<EditorBlockGeometryIndex::Entry> geometry;
+            std::vector<BlockGeometryIndex::Entry> geometry;
             for (std::size_t i = 0; i < document.blocks.size(); ++i) {
                 document.blocks[i] = preparer.Prepare(frame.renderModel.blocks[i], true, true);
                 geometry.push_back({0, document.blocks[i].height, 8});

@@ -6,7 +6,7 @@ namespace winrt::Folia
     EditorSvgPainter::EditorSvgPainter(EditorRenderResources& resources, EditorRenderCache& cache)
         : resources(resources), cache(cache)
     {
-        resources.d2dContext.As(&context);
+        if (resources.d2dContext) resources.d2dContext.As(&context);
     }
 
     bool EditorSvgPainter::Supported() const noexcept

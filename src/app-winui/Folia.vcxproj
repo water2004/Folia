@@ -380,10 +380,10 @@
     <ClCompile Include="..\core\query\latex_command_catalog.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\core\rendering\render_fragments.ixx">
+    <ClCompile Include="..\core\rendering\block_geometry.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\platform\windows\editor\geometry\editor_geometry.ixx">
+    <ClCompile Include="..\core\rendering\render_fragments.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\platform\windows\editor\layout\editor_display_mapping.ixx">
@@ -401,10 +401,10 @@
     <ClCompile Include="..\platform\windows\editor\layout\editor_block_spacing.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\platform\windows\editor\layout\editor_preparation_plan.ixx">
+    <ClCompile Include="..\core\rendering\preparation_plan.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\platform\windows\editor\layout\editor_viewport_plan.ixx">
+    <ClCompile Include="..\core\rendering\viewport_plan.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\platform\windows\editor\layout\editor_priority_work_queue.ixx">

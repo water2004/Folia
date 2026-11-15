@@ -2,7 +2,7 @@
 
 import folia.markdown.text_edit;
 import folia.platform.editor_scroll_state;
-import folia.platform.editor_viewport_plan;
+import folia.core.viewport_plan;
 
 #include "editor/rendering/EditorDocumentBlockPreparer.h"
 #include "editor/rendering/EditorEmbeddedContentUpdater.h"
@@ -19,7 +19,7 @@ namespace winrt::Folia
     struct EditorDocumentPreparationResult
     {
         float scrollOffset = 0.0f;
-        folia::platform::editor::EditorIndexRange visible;
+        folia::EditorIndexRange visible;
         bool invalidateRequested = false;
     };
 
@@ -48,10 +48,12 @@ namespace winrt::Folia
         EditorDocumentPreparationResult Prepare();
 
     private:
+        detail::EditorRenderFrame const& frame;
         EditorPreparedDocumentCache cache;
         EditorViewportMaterializer viewportMaterializer;
         EditorEmbeddedContentUpdater embeddedContentUpdater;
         EditorPreparedDocumentRetention retention;
+        folia::platform::editor::EditorScrollState& scrollState;
         EditorRenderResources& resources;
         std::unique_ptr<EditorPreparedDocument>& preparedDocument;
         folia::TextSelection selection;
@@ -62,6 +64,6 @@ namespace winrt::Folia
         float scrollOffset = 0.0f;
         bool printMode = false;
         bool invalidateRequested = false;
-        static constexpr folia::platform::editor::EditorViewportPolicy viewportPolicy{};
+        static constexpr folia::EditorViewportPolicy viewportPolicy{};
     };
 }

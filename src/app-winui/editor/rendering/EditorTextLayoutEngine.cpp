@@ -627,7 +627,7 @@ namespace winrt::Folia
                     requiresDefaultLineSpacing = requiresDefaultLineSpacing
                         || fontSize > BaseLineHeight(range.style, styleSheet);
                 }
-                if (presentation->foreground)
+                if (presentation->foreground && resources.d2dContext)
                 {
                     ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> brush;
                     if (SUCCEEDED(resources.d2dContext->CreateSolidColorBrush(

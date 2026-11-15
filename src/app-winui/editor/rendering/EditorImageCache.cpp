@@ -40,7 +40,8 @@ namespace winrt::Folia
     std::optional<ImageDimensions> EditorImageCache::ProbeImageDimensions(
         EditorRenderResources const& resources,
         std::wstring const& baseDirectory,
-        std::string_view source)
+        std::string_view source,
+        bool requestRemote)
     {
         auto key = RasterImageKey(baseDirectory, source);
         if (!key) return std::nullopt;
@@ -71,7 +72,8 @@ namespace winrt::Folia
                     if (!dimensions) dimensions = ProbeWicDimensions(resources.wicFactory.Get(), *content.bytes);
                 }
             }
-            if (!dimensions) sources.Request(std::move(remoteSource), ImageFetchKind::Dimensions);
+            if (!dimensions && requestRemote)
+                sources.Request(std::move(remoteSource), ImageFetchKind::Dimensions);
         }
         else
         {

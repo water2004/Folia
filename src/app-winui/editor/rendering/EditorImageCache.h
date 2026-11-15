@@ -30,7 +30,8 @@ namespace winrt::Folia
         void ClearDeviceResources();
         bool HasPendingImages() const;
         std::uint64_t ResourceGeneration() const;
-        std::optional<ImageDimensions> ProbeImageDimensions(EditorRenderResources const&, std::wstring const&, std::string_view);
+        std::optional<ImageDimensions> ProbeImageDimensions(
+            EditorRenderResources const&, std::wstring const&, std::string_view, bool requestRemote = true);
         SvgSource LoadSvgSource(std::wstring const&, std::string_view, bool loadContent = true);
         std::optional<RasterImage> LoadRasterImage(EditorRenderResources const&, std::wstring const&, std::string_view);
         void ReleaseGifImage(std::wstring const&, std::string_view);

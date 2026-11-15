@@ -74,6 +74,9 @@ namespace winrt::Folia
             auto preparedMath = PrepareMath(frame, context, mathPreparationStop, {});
             mathJax = std::move(preparedMath->math);
             mathJax.SetPreparationStopToken(mathPreparationStop);
+            pdfExportState->prepared = std::move(preparedMath->document);
+            if (pdfExportState->prepared)
+                pdfExportState->totalHeight = pdfExportState->prepared->totalHeight;
         }
         auto state = pdfExportState;
         exporting = true;

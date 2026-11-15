@@ -562,6 +562,7 @@ namespace winrt::Folia
                 prepared.pendingImage = prepared.table->pendingImage;
                 prepared.pendingMath = prepared.table->pendingMath;
                 prepared.height = prepared.table->height;
+                prepared.geometryMeasured = true;
                 prepared.valid = true;
                 mathJax.EndBlock();
                 return prepared;
@@ -573,6 +574,7 @@ namespace winrt::Folia
         auto paddingTop = flowContainer ? 0.0f : block.block_style.padding_top;
         auto paddingBottom = flowContainer ? 0.0f : block.block_style.padding_bottom;
         auto contentWidth = EditorBlockContentWidth(block, documentWidth);
+        prepared.textTop = paddingTop;
         prepared.display = BuildDisplay(
             block,
             contentWidth,
@@ -750,6 +752,7 @@ namespace winrt::Folia
         for (auto const& preview : prepared.mermaidPreviews)
             previewHeight += preview.height + 24.0f;
         prepared.height = prepared.textHeight + previewHeight + paddingTop + paddingBottom;
+        prepared.geometryMeasured = true;
         prepared.display.displayToSource.for_each_run(0, prepared.display.displayToSource.size(),
             [&](auto, auto, auto first, auto) { addOwner(first.container_id); return true; });
         prepared.valid = true;

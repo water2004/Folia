@@ -3,8 +3,8 @@
 
 namespace winrt::Folia
 {
-    using folia::platform::editor::BuildEditorPrioritizedTraversal;
-    using folia::platform::editor::BuildEditorViewportPlan;
+    using folia::BuildEditorPrioritizedTraversal;
+    using folia::BuildEditorViewportPlan;
 
     EditorEmbeddedContentUpdater::EditorEmbeddedContentUpdater(
         detail::EditorRenderFrame const& valueFrame,
@@ -81,6 +81,10 @@ namespace winrt::Folia
                 return false;
             }
             auto previousHeight = prepared.height;
+            // Compact geometry can outlive the source projection. A retained
+            // visual block does not imply that its render fragment is resident.
+            if (!block.materialized && frame.materializeBlocks)
+                frame.materializeBlocks(index, index + 1);
             prepared = blockPreparer.Prepare(block, true, highPriority);
             ++refreshes;
             preparedDocument->layoutBlocks.insert(index);
@@ -130,6 +134,8 @@ namespace winrt::Folia
             auto& prepared = preparedDocument->blocks[index];
             auto imageSources = EditorDocumentBlockPreparer::ImageSources(prepared);
             auto previousHeight = prepared.height;
+            if (!block.materialized && frame.materializeBlocks)
+                frame.materializeBlocks(index, index + 1);
             prepared = blockPreparer.Prepare(block, false, false);
             preparedDocument->layoutBlocks.insert(index);
             preparedDocument->embeddedBlocks.erase(index);

@@ -1,6 +1,6 @@
 #pragma once
 
-import folia.platform.editor_geometry;
+import folia.core.block_geometry;
 
 #include "editor/rendering/EditorContentPreparation.h"
 #include "editor/rendering/EditorCaretPresentation.h"
@@ -10,7 +10,7 @@ import folia.platform.editor_geometry;
 
 namespace winrt::Folia
 {
-    using folia::platform::editor::EditorBlockGeometryIndex;
+    using folia::BlockGeometryIndex;
 
     struct EditorPreparedDocument
     {
@@ -46,6 +46,7 @@ namespace winrt::Folia
             std::vector<MermaidPreview> mermaidPreviews;
             std::optional<EditorTableBlockRenderer::PreparedTable> table;
             std::vector<folia::NodeId> owners;
+            float textTop = 0.0f;
             float textHeight = 0.0f;
             float height = 0.0f;
             folia::NodeId sourceId{};
@@ -59,6 +60,10 @@ namespace winrt::Folia
             bool pendingImage = false;
             bool pendingMermaid = false;
             bool pendingMath = false;
+            // Geometry survives eviction; valid only describes resident visual
+            // content. A measured fragment must not fall back to estimated
+            // character widths when it scrolls out of the working set.
+            bool geometryMeasured = false;
             bool valid = false;
             std::uint64_t embeddedGeneration = 0;
             std::uint64_t remoteImageGeneration = 0;
@@ -78,6 +83,7 @@ namespace winrt::Folia
                 auto retainedContainsImage = containsImage;
                 auto retainedPendingImage = pendingImage;
                 auto retainedContainsMermaid = containsMermaid;
+                auto retainedGeometryMeasured = geometryMeasured;
                 *this = {};
                 height = measuredHeight;
                 sourceId = retainedSourceId;
@@ -89,6 +95,7 @@ namespace winrt::Folia
                 containsImage = retainedContainsImage;
                 pendingImage = retainedPendingImage;
                 containsMermaid = retainedContainsMermaid;
+                geometryMeasured = retainedGeometryMeasured;
             }
         };
 
@@ -99,7 +106,7 @@ namespace winrt::Folia
         float totalHeight = 0.0f;
         std::uint64_t themeRevision = 0;
         std::vector<Block> blocks;
-        EditorBlockGeometryIndex geometry;
+        BlockGeometryIndex geometry;
         std::unordered_map<std::uint64_t, std::size_t> ownerBlockIndex;
         std::unordered_set<std::size_t> embeddedBlocks;
         std::unordered_set<std::size_t> layoutBlocks;

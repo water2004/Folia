@@ -3,8 +3,8 @@
 
 namespace winrt::Folia
 {
-    using folia::platform::editor::BuildEditorViewportPlan;
-    using folia::platform::editor::EditorViewportMoved;
+    using folia::BuildEditorViewportPlan;
+    using folia::EditorViewportMoved;
 
     EditorViewportMaterializer::EditorViewportMaterializer(
         detail::EditorRenderFrame const& valueFrame,
@@ -31,6 +31,31 @@ namespace winrt::Folia
             && screenTop > -viewportPolicy.embeddedBefore;
     }
 
+    bool EditorViewportMaterializer::EnsurePrepared(
+        std::size_t index, bool requestEmbedded, bool highPriority)
+    {
+        if (index >= frame.renderModel.blocks.size()) return false;
+        if (!frame.renderModel.blocks[index].materialized && frame.materializeBlocks)
+            frame.materializeBlocks(index, index + 1);
+        auto const& block = frame.renderModel.blocks[index];
+        auto& prepared = preparedDocument->blocks[index];
+        if (block.kind == folia::RenderBlockKind::ThematicBreak || prepared.valid) return false;
+        auto previousHeight = prepared.height;
+        prepared = blockPreparer.Prepare(block, requestEmbedded, highPriority);
+        preparedDocument->layoutBlocks.insert(index);
+        if (prepared.embeddedRequested
+            && (prepared.containsMath || prepared.containsImage || prepared.containsMermaid))
+            preparedDocument->embeddedBlocks.insert(index);
+        else
+            preparedDocument->embeddedBlocks.erase(index);
+        for (auto owner : prepared.owners)
+            preparedDocument->ownerBlockIndex[owner.v] = index;
+        if (prepared.height == previousHeight) return false;
+        preparedDocument->geometry.UpdateHeight(index, prepared.height);
+        preparedDocument->totalHeight = preparedDocument->geometry.TotalHeight();
+        return true;
+    }
+
     EditorViewportMaterializationResult EditorViewportMaterializer::Materialize(
         float scrollOffset,
         bool printMode)
@@ -54,28 +79,11 @@ namespace winrt::Folia
         {
             auto placement = preparedDocument->geometry.At(index);
             auto const& block = frame.renderModel.blocks[index];
-            auto& prepared = preparedDocument->blocks[index];
-            if (block.kind == folia::RenderBlockKind::ThematicBreak || prepared.valid) return;
-            auto previousHeight = prepared.height;
-            prepared = blockPreparer.Prepare(
-                block,
+            if (block.kind == folia::RenderBlockKind::ThematicBreak
+                || preparedDocument->blocks[index].valid) return;
+            geometryChanged = EnsurePrepared(index,
                 RequestEmbeddedAt(placement.top, scrollOffset, printMode),
-                highPriority);
-            preparedDocument->layoutBlocks.insert(index);
-            if (prepared.embeddedRequested
-                && (prepared.containsMath
-                    || prepared.containsImage
-                    || prepared.containsMermaid))
-                preparedDocument->embeddedBlocks.insert(index);
-            else
-                preparedDocument->embeddedBlocks.erase(index);
-            for (auto owner : prepared.owners)
-                preparedDocument->ownerBlockIndex[owner.v] = index;
-            if (prepared.height != previousHeight)
-            {
-                preparedDocument->geometry.UpdateHeight(index, prepared.height);
-                geometryChanged = true;
-            }
+                highPriority) || geometryChanged;
             ++preparedThisFrame;
         };
         auto withinBudget = [&]

@@ -1,12 +1,12 @@
 #include "support/folia_test.hpp"
 
-import folia.platform.editor_geometry;
+import folia.core.block_geometry;
 
 using namespace boost::ut;
 
 namespace
 {
-    using Geometry = folia::platform::editor::EditorBlockGeometryIndex;
+    using Geometry = folia::BlockGeometryIndex;
 
     Geometry::Placement NaivePlacement(
         std::vector<Geometry::Entry> const& entries,
@@ -160,6 +160,34 @@ suite block_geometry_tests = [] {
     expect(geometry.FirstIntersecting(0.0f) == 0_u);
     expect(geometry.At(0).top == 0.0_f);
     expect(geometry.At(0).bottom == 0.0_f);
+};
+
+"large geometry retains subpixel edits without cumulative drift"_test = [] {
+    constexpr std::size_t count = 180000;
+    Geometry geometry;
+    geometry.Reset(std::vector<Geometry::Entry>(count, {0.0f, 24.0f, 0.0f}), 12.0f);
+    const double initial = 24.0 * count + 24.0;
+    expect(geometry.PreciseTotalHeight() == initial);
+    // Each delta is smaller than a float ULP at the document's total height.
+    for (std::size_t index = 0; index < 1024; ++index)
+        geometry.UpdateHeight(index, 24.125f);
+    expect(geometry.PreciseTotalHeight() == initial + 128.0);
+    for (std::size_t index = 0; index < 1024; ++index)
+        geometry.UpdateHeight(index, 24.0f);
+    expect(geometry.PreciseTotalHeight() == initial);
+    expect(geometry.FirstIntersecting(12.0f + 24.0f * 179999.0f) == 179998_u);
+};
+
+"geometry lower bound handles zero extents and trailing gaps"_test = [] {
+    Geometry geometry;
+    geometry.Reset({{0, 0, 0}, {0, 10, 5}, {2, 0, 0}, {0, 20, 0}}, 0);
+    expect(geometry.FirstIntersecting(0) == 0_u);
+    expect(geometry.FirstIntersecting(1) == 1_u);
+    expect(geometry.FirstIntersecting(10) == 1_u);
+    expect(geometry.FirstIntersecting(11) == 2_u);
+    expect(geometry.FirstIntersecting(17) == 2_u);
+    expect(geometry.FirstIntersecting(18) == 3_u);
+    expect(geometry.FirstIntersecting(38) == 4_u);
 };
 
 };

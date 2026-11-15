@@ -69,7 +69,7 @@ namespace winrt::Folia
                 ? std::optional(ImageDimensions{draw.svg->width, draw.svg->height})
                 : draw.image
                     ? std::optional(ImageDimensions{draw.image->width, draw.image->height})
-                    : cache.images.ProbeImageDimensions(resources, baseDirectory, overlay.source);
+                    : cache.images.ProbeImageDimensions(resources, baseDirectory, overlay.source, loadContent);
             auto requestedWidth = ResolveImageDimension(overlay.width, availableWidth);
             // Percentage heights require a definite containing-block height.
             // Editor text flow has no such height, matching HTML's automatic

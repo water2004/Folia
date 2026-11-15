@@ -28,11 +28,16 @@ namespace winrt::Folia
             folia::TextSelection selection,
             float documentWidth,
             std::uint64_t themeRevision);
-        void EnsureGeometry();
+        void EnsureGeometry(
+            std::stop_token stop = {},
+            std::function<void(std::size_t, std::size_t)> progress = {});
 
     private:
         std::optional<std::size_t> FindOwnerBlock(folia::NodeId owner) const;
-        void InitializeGeometry();
+        void MeasureGeometry(std::size_t index);
+        void InitializeGeometry(
+            std::stop_token stop,
+            std::function<void(std::size_t, std::size_t)> const& progress);
 
         detail::EditorRenderFrame const& frame;
         EditorStyleSheet const& styleSheet;

@@ -1,7 +1,7 @@
 #pragma once
 
 import folia.platform.editor_scroll_state;
-import folia.platform.editor_viewport_plan;
+import folia.core.viewport_plan;
 
 #include "editor/rendering/EditorDocumentBlockPreparer.h"
 #include "editor/rendering/EditorPreparedDocument.h"
@@ -35,6 +35,10 @@ namespace winrt::Folia
             float scrollOffset,
             bool printMode);
 
+        // A source scroll anchor may move to a different fragment after an
+        // edit. Resolve that one fragment before choosing the new viewport.
+        bool EnsurePrepared(std::size_t index, bool requestEmbedded, bool highPriority);
+
     private:
         bool RequestEmbeddedAt(
             float documentTop,
@@ -46,6 +50,6 @@ namespace winrt::Folia
         EditorDocumentBlockPreparer& blockPreparer;
         folia::platform::editor::EditorScrollState& scrollState;
         std::unique_ptr<EditorPreparedDocument>& preparedDocument;
-        static constexpr folia::platform::editor::EditorViewportPolicy viewportPolicy{};
+        static constexpr folia::EditorViewportPolicy viewportPolicy{};
     };
 }

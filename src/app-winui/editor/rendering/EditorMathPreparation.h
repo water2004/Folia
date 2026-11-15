@@ -2,6 +2,7 @@
 
 #include "media/MathJaxRenderer.h"
 #include "editor/session/EditorRenderFrame.h"
+#include "editor/rendering/EditorPreparedDocument.h"
 
 namespace winrt::Folia
 {
@@ -12,14 +13,16 @@ namespace winrt::Folia
         float surfaceWidth = 1.0f;
         float surfaceHeight = 1.0f;
         bool ready = false;
+        bool svgSupported = true;
     };
 
-    // Only completed immutable math results leave background preparation.
-    // Ordinary text layout and visual resources remain viewport-local.
+    // Completed math results and compact measured geometry leave background
+    // preparation. No text layouts, paint plans or GPU resources cross threads.
     struct EditorMathPreparation
     {
         EditorMathPreparationContext context;
         MathJaxRenderer math;
         std::size_t formulaCount = 0;
+        std::unique_ptr<EditorPreparedDocument> document;
     };
 }

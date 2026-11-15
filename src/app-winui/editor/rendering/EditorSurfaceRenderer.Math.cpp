@@ -5,12 +5,16 @@ import folia.markdown.utf;
 #include "editor/rendering/EditorSurfaceRenderer.h"
 #include "editor/rendering/EditorContentGeometry.h"
 #include "editor/rendering/EditorContentPreparation.h"
+#include "editor/rendering/EditorPreparedDocumentCache.h"
 
 namespace winrt::Folia
 {
     EditorMathPreparationContext EditorSurfaceRenderer::CaptureMathPreparationContext() const
     {
-        return {themeProfile, themeRevision, resources.surfaceWidthDip, resources.surfaceHeightDip, resources.Ready()};
+        ::Microsoft::WRL::ComPtr<ID2D1DeviceContext5> svgContext;
+        if (resources.d2dContext) resources.d2dContext.As(&svgContext);
+        return {themeProfile, themeRevision, resources.surfaceWidthDip, resources.surfaceHeightDip,
+            resources.Ready(), static_cast<bool>(svgContext)};
     }
 
     bool EditorSurfaceRenderer::MatchesMathPreparationContext(EditorMathPreparationContext const& context) const
@@ -27,7 +31,9 @@ namespace winrt::Folia
         auto result = std::make_unique<EditorMathPreparation>();
         result->context = context;
         auto sheet = CreateEditorStyleSheet(context.theme);
-        auto width = EditorDocumentContentWidth(context.surfaceWidth, sheet.horizontalPadding);
+        auto metrics = EditorDocumentLayoutMetrics(frame.renderModel, context.surfaceWidth,
+            sheet.horizontalPadding, sheet.code.size);
+        auto width = metrics.width;
         auto batch = result->math.BeginBatch();
         auto formula = [&](std::u32string_view tex, bool display, float available, D2D1_COLOR_F foreground)
         {
@@ -73,7 +79,7 @@ namespace winrt::Folia
         };
         auto count = frame.renderModel.blocks.size();
         constexpr std::size_t blockBatchSize = 16;
-        if (progress) progress(0, count);
+        if (progress) progress(0, count * 2);
         for (std::size_t begin = 0; begin < count; begin += blockBatchSize)
         {
             if (stop.stop_requested()) throw winrt::hresult_canceled();
@@ -85,7 +91,7 @@ namespace winrt::Folia
                 result->math.BeginBlock(source.id.v);
                 block(block, source, width);
                 result->math.EndBlock();
-                if (progress) progress(index, count);
+                if (progress) progress(index, count * 2);
             }
             if (frame.releaseBlocksOutside) frame.releaseBlocksOutside(end, end);
             // Model materialization remains bounded independently of the
@@ -94,7 +100,43 @@ namespace winrt::Folia
         batch.Submit();
         result->math.WaitForIdle(stop);
         if (stop.stop_requested()) throw winrt::hresult_canceled();
-        if (progress) progress(count, count);
+        // Prepare compact, exact text geometry on the loader's background
+        // thread. The UI's first frame never has to shape the entire document,
+        // and no long-lived glyph/paint/display objects accompany publication.
+        struct MeasurementApartment
+        {
+            HRESULT status = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+            MeasurementApartment()
+            {
+                if (FAILED(status) && status != RPC_E_CHANGED_MODE) winrt::check_hresult(status);
+            }
+            ~MeasurementApartment() { if (SUCCEEDED(status)) CoUninitialize(); }
+        } apartment;
+        EditorRenderResources measurementResources;
+        measurementResources.InitializeTextMeasurement(sheet, context.surfaceWidth, context.surfaceHeight);
+        EditorRenderCache measurementCache;
+        EditorTextLayoutEngine engine(measurementResources, sheet);
+        EditorSvgPainter svg(measurementResources, measurementCache);
+        SvgNormalizer normalizer;
+        TreeSitterHighlighter syntax;
+        MermaidRenderer diagrams;
+        EditorInteractionMap interaction;
+        EditorInlineImageRenderer images(measurementResources, measurementCache, sheet,
+            normalizer, svg, frame.baseDirectory, false);
+        EditorDocumentPainter painter(measurementResources, sheet, interaction, syntax, {},
+            false, metrics.right, frame.selection, {}, frame.renderModel.editable_index);
+        EditorDocumentBlockPreparer preparer(frame, measurementResources, measurementCache,
+            sheet, engine, images, painter, result->math, diagrams, normalizer, syntax,
+            frame.selection.active, width, context.svgSupported, context.svgSupported,
+            context.theme.variant != folia::Theme::Light, 0, 0);
+        EditorPreparedDocumentCache cache(frame, sheet, images, preparer, result->document);
+        cache.Reconcile(frame.selection, width, context.themeRevision);
+        cache.EnsureGeometry(stop, [&](std::size_t completed, std::size_t)
+        {
+            if (progress) progress(count + completed, count * 2);
+        });
+        if (stop.stop_requested()) throw winrt::hresult_canceled();
+        if (progress) progress(count * 2, count * 2);
         return result;
     }
 
@@ -104,7 +146,10 @@ namespace winrt::Folia
             throw std::logic_error("Math preparation context changed before publication");
         ResetDocumentCaches();
         mathJax = std::move(preparation->math);
-        // The existing viewport path creates ordinary block layout on demand.
+        preparedDocument = std::move(preparation->document);
+        if (preparedDocument) totalDocumentHeight = preparedDocument->totalHeight;
+        // The viewport path only creates visible visual resources from the
+        // already measured geometry; reflow after edits remains fragment-local.
         AttachMathCompletion();
     }
 

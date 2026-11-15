@@ -1,13 +1,13 @@
 #include "pch.h"
 #include "editor/rendering/EditorPreparedDocumentCache.h"
 
-import folia.platform.editor_preparation_plan;
+import folia.core.preparation_plan;
 
 namespace winrt::Folia
 {
-    using folia::platform::editor::BuildEditorPreparationInvalidationPlan;
-    using folia::platform::editor::EditorBlockGeometryIndex;
-    using folia::platform::editor::EditorPreparationCacheView;
+    using folia::BuildEditorPreparationInvalidationPlan;
+    using folia::BlockGeometryIndex;
+    using folia::EditorPreparationCacheView;
 
     EditorPreparedDocumentCache::EditorPreparedDocumentCache(
         detail::EditorRenderFrame const& valueFrame,
@@ -140,9 +140,6 @@ namespace winrt::Folia
                 auto const& source = frame.renderModel.blocks[index];
                 auto& prepared = preparedDocument->blocks[index];
                 auto imageSources = EditorDocumentBlockPreparer::ImageSources(prepared);
-                auto previousHeight = prepared.height > 0.0f
-                    ? prepared.height
-                    : blockPreparer.EstimateHeight(source);
                 for (auto owner : prepared.owners)
                 {
                     auto found = preparedDocument->ownerBlockIndex.find(owner.v);
@@ -151,23 +148,14 @@ namespace winrt::Folia
                         preparedDocument->ownerBlockIndex.erase(found);
                 }
                 prepared = {};
-                blockPreparer.InitializeMetadata(prepared, source);
-                if (source.kind == folia::RenderBlockKind::ThematicBreak)
-                {
-                    prepared.height = 40.0f;
-                    prepared.valid = true;
-                }
-                else
-                {
-                    prepared.height = previousHeight;
-                }
+                MeasureGeometry(index);
                 if (preparedDocument->geometry.Initialized())
                 {
                     preparedDocument->geometry.Update(index, {
                         source.block_style.margin_top,
                         prepared.height,
                         source.block_style.margin_bottom
-                            + (source.source_mode ? 0.0f : styleSheet.blockGap),
+                            + (source.source_mode || source.fragment_continues ? 0.0f : styleSheet.blockGap),
                     });
                 }
                 for (auto owner : prepared.owners)
@@ -186,33 +174,61 @@ namespace winrt::Folia
         preparedDocument->completionGeneration = completionGeneration;
     }
 
-    void EditorPreparedDocumentCache::EnsureGeometry()
+    void EditorPreparedDocumentCache::EnsureGeometry(
+        std::stop_token stop,
+        std::function<void(std::size_t, std::size_t)> progress)
     {
-        if (!preparedDocument->geometry.Initialized()) InitializeGeometry();
+        if (!preparedDocument->geometry.Initialized()) InitializeGeometry(stop, progress);
     }
 
-    void EditorPreparedDocumentCache::InitializeGeometry()
+    void EditorPreparedDocumentCache::MeasureGeometry(std::size_t index)
+    {
+        // Measurement and retention are different operations. Use the same
+        // DirectWrite preparation path as painting, then immediately drop its
+        // display map, glyph/line data and paint plan. Only one fragment needs
+        // to be resident while the exact height index is populated.
+        if (!frame.renderModel.blocks[index].materialized && frame.materializeBlocks)
+            frame.materializeBlocks(index, index + 1);
+        auto const& source = frame.renderModel.blocks[index];
+        auto& prepared = preparedDocument->blocks[index];
+        if (source.kind == folia::RenderBlockKind::ThematicBreak)
+        {
+            blockPreparer.InitializeMetadata(prepared, source);
+            prepared.height = 40.0f;
+            prepared.geometryMeasured = true;
+            prepared.valid = true;
+        }
+        else
+        {
+            // Remote/embedded resources keep their existing asynchronous
+            // policy. This measures their current presentation and never
+            // starts screenfuls of offscreen network or render requests.
+            prepared = blockPreparer.Prepare(source, false, false);
+            auto imageSources = EditorDocumentBlockPreparer::ImageSources(prepared);
+            prepared.ReleaseVisualContent();
+            for (auto const& imageSource : imageSources) inlineImages.ReleaseGif(imageSource);
+        }
+        preparedDocument->layoutBlocks.erase(index);
+        preparedDocument->embeddedBlocks.erase(index);
+        if (frame.releaseBlocksOutside) frame.releaseBlocksOutside(index + 1, index + 1);
+    }
+
+    void EditorPreparedDocumentCache::InitializeGeometry(
+        std::stop_token stop,
+        std::function<void(std::size_t, std::size_t)> const& progress)
     {
         preparedDocument->ownerBlockIndex.clear();
         preparedDocument->embeddedBlocks.clear();
-        std::vector<EditorBlockGeometryIndex::Entry> entries;
+        std::vector<BlockGeometryIndex::Entry> entries;
         entries.reserve(frame.renderModel.blocks.size());
+        if (progress) progress(0, frame.renderModel.blocks.size());
         for (std::size_t index = 0; index < frame.renderModel.blocks.size(); ++index)
         {
+            if (stop.stop_requested()) throw winrt::hresult_canceled();
             auto const& block = frame.renderModel.blocks[index];
             auto& prepared = preparedDocument->blocks[index];
-            if (block.kind == folia::RenderBlockKind::ThematicBreak)
-            {
-                prepared = {};
-                blockPreparer.InitializeMetadata(prepared, block);
-                prepared.height = 40.0f;
-                prepared.valid = true;
-            }
-            else if (!prepared.valid && prepared.height <= 0.0f)
-            {
-                blockPreparer.InitializeMetadata(prepared, block);
-                prepared.height = blockPreparer.EstimateHeight(block);
-            }
+            if (!prepared.geometryMeasured)
+                MeasureGeometry(index);
             else if (prepared.sourceId.v == 0)
             {
                 blockPreparer.InitializeMetadata(prepared, block);
@@ -221,7 +237,7 @@ namespace winrt::Folia
                 block.block_style.margin_top,
                 prepared.height,
                 block.block_style.margin_bottom
-                    + (block.source_mode ? 0.0f : styleSheet.blockGap),
+                    + (block.source_mode || block.fragment_continues ? 0.0f : styleSheet.blockGap),
             });
             if (prepared.embeddedRequested
                 && (prepared.containsMath
@@ -230,17 +246,24 @@ namespace winrt::Folia
                 preparedDocument->embeddedBlocks.insert(index);
             for (auto owner : prepared.owners)
                 preparedDocument->ownerBlockIndex[owner.v] = index;
+            if (progress) progress(index + 1, frame.renderModel.blocks.size());
         }
-        std::unordered_map<std::uint64_t, std::size_t> topLevelBlockIndex;
-        topLevelBlockIndex.reserve(frame.renderModel.blocks.size());
-        for (std::size_t index = 0; index < frame.renderModel.blocks.size(); ++index)
-            topLevelBlockIndex[frame.renderModel.blocks[index].id.v] = index;
-        preparedDocument->ownerBlockIndex.reserve(frame.renderModel.editable_top_level.size());
-        for (auto const& [owner, topLevel] : frame.renderModel.editable_top_level)
+        if (!frame.renderModel.editable_fragment_index.empty())
         {
-            auto found = topLevelBlockIndex.find(topLevel.v);
-            if (found == topLevelBlockIndex.end() || found->second >= entries.size()) continue;
-            preparedDocument->ownerBlockIndex[owner] = found->second;
+            for (auto const& [owner, index] : frame.renderModel.editable_fragment_index)
+                preparedDocument->ownerBlockIndex[owner] = index;
+        }
+        else
+        {
+            // Source-mode rows already are physical layout units and do not
+            // carry Markdown semantic-fragment descriptors.
+            std::unordered_map<std::uint64_t, std::size_t> blockIndex;
+            blockIndex.reserve(frame.renderModel.blocks.size());
+            for (std::size_t index = 0; index < frame.renderModel.blocks.size(); ++index)
+                blockIndex[frame.renderModel.blocks[index].id.v] = index;
+            for (auto const& [owner, block] : frame.renderModel.editable_top_level)
+                if (auto found = blockIndex.find(block.v); found != blockIndex.end())
+                    preparedDocument->ownerBlockIndex[owner] = found->second;
         }
         preparedDocument->geometry.Reset(std::move(entries), styleSheet.verticalPadding);
         preparedDocument->totalHeight = preparedDocument->geometry.TotalHeight();

@@ -1,6 +1,6 @@
 #pragma once
 
-import folia.platform.editor_viewport_plan;
+import folia.core.viewport_plan;
 
 #include "editor/rendering/EditorDocumentBlockPreparer.h"
 #include "editor/rendering/EditorInlineImageRenderer.h"
@@ -36,6 +36,6 @@ namespace winrt::Folia
         EditorInlineImageRenderer& inlineImages;
         EditorDocumentBlockPreparer& blockPreparer;
         std::unique_ptr<EditorPreparedDocument>& preparedDocument;
-        static constexpr folia::platform::editor::EditorViewportPolicy viewportPolicy{};
+        static constexpr folia::EditorViewportPolicy viewportPolicy{};
     };
 }
