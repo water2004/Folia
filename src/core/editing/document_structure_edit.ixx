@@ -21,6 +21,7 @@ import folia.core.document_edit_support;
 import folia.core.document_input_rules;
 import folia.core.document_list_input;
 import folia.core.document_source_edit;
+import folia.core.document_copy;
 
 export namespace folia {
 
@@ -552,14 +553,79 @@ inline BlockNode make_table_block(EditorDocument& document, std::size_t rows, st
 }
 
 inline std::optional<DocumentTransaction> document_insert_atomic_block(EditorDocument& document, const TextSelection& selection, BlockNode block) {
-    if (!selection.is_caret()) return std::nullopt;
     const auto revision_before = document.revision;
     auto& after = document;
+    auto current = selection;
+    std::vector<DocumentOperation> operations;
+    document_edit_detail::MutationRollback rollback(after, operations, revision_before);
+    if (!selection.is_caret()) {
+        if ((block.kind == BlockKind::CodeBlock || block.kind == BlockKind::MathBlock)
+            && block.block_source.tree().content.empty()) {
+            const auto selected = document_selected_markdown(after, selection);
+            if (!selected) return std::nullopt;
+            // Fences must survive the selected literal source, including a
+            // closing fence pasted from another code example.
+            if (block.kind == BlockKind::CodeBlock || selected->find(U"$$") != std::u32string::npos) {
+                std::size_t fence_length = 3;
+                std::size_t run = 0;
+                for (auto cp : *selected) {
+                    run = cp == U'`' ? run + 1 : 0;
+                    fence_length = (std::max)(fence_length, run + 1);
+                }
+                const auto fence = std::u32string(fence_length, U'`');
+                const auto language = block.kind == BlockKind::MathBlock ? U"math"
+                    : utf8_to_cps(block.block_source.tree().language.value_or(""));
+                const auto kind = block.kind == BlockKind::MathBlock
+                    ? BlockSourceKind::FencedMath : BlockSourceKind::FencedCode;
+                block.block_source = make_block_source(
+                    fence + language + U"\n" + *selected + U"\n" + fence, kind);
+                if (block.kind == BlockKind::MathBlock) {
+                    block.ensure_atomic_special().math_delim = MathDelimiter::FencedMath;
+                }
+            } else {
+                block.block_source = make_block_source(
+                    U"$$\n" + *selected + U"\n$$", BlockSourceKind::DollarMath);
+                block.ensure_atomic_special().math_delim = MathDelimiter::BlockDollar;
+            }
+        }
+        auto deleted = document_delete_selection(after, current);
+        if (!deleted) return std::nullopt;
+        current = deleted->selection_after;
+        operations.insert(operations.end(),
+            std::make_move_iterator(deleted->operations.begin()),
+            std::make_move_iterator(deleted->operations.end()));
+    }
     document_edit_detail::NodeAllocator allocator(after);
     reserve_document_node_ids(after, block);
     document_edit_detail::assign_missing_ids(block, after, allocator);
-    auto path = block_path(after.root, selection.active.container_id);
+    auto path = document_block_path(after, current.active.container_id);
     if (!path || path->empty()) return std::nullopt;
+    // A table row may contain only cells. Block insertion from a cell belongs
+    // to the table's flow parent, never beside the cell inside its row.
+    for (auto depth = path->size(); depth > 0; --depth) {
+        BlockPath candidate(path->begin(), path->begin() + static_cast<std::ptrdiff_t>(depth));
+        const auto* ancestor = block_at_path(after.root, candidate);
+        if (ancestor && ancestor->kind == BlockKind::Table) {
+            *path = std::move(candidate);
+            break;
+        }
+    }
+    auto* selected_block = block_at_path(after.root, *path);
+    if (!selected_block) return std::nullopt;
+    const auto replacement_in_text = !selection.is_caret()
+        && document_edit_detail::text_block(selected_block->kind);
+    const auto source_offset = replacement_in_text
+        ? (std::min)(current.active.source_offset, selected_block->inline_content.source.size())
+        : 0;
+    if (replacement_in_text && source_offset > 0
+        && source_offset < selected_block->inline_content.source.size()) {
+        auto split = document_edit_detail::split_direct(
+            after, selected_block->id, source_offset, allocator);
+        if (!split) return std::nullopt;
+        operations.insert(operations.end(),
+            std::make_move_iterator(split->operations.begin()),
+            std::make_move_iterator(split->operations.end()));
+    }
     auto parent_path = *path;
     const auto index = parent_path.back();
     parent_path.pop_back();
@@ -576,11 +642,13 @@ inline std::optional<DocumentTransaction> document_insert_atomic_block(EditorDoc
             TextAffinity::Downstream,
         };
     }
-    std::vector<DocumentOperation> operations;
-    document_edit_detail::MutationRollback rollback(after, operations, revision_before);
-    const auto replace_empty_paragraph = parent->children[index].kind == BlockKind::Paragraph
-        && parent->children[index].inline_content.source.empty();
-    if (replace_empty_paragraph) {
+    const auto& existing = parent->children[index];
+    const auto replace_empty = ((existing.kind == BlockKind::Paragraph || replacement_in_text)
+            && existing.inline_content.source.empty())
+        || (!selection.is_caret()
+            && (existing.kind == BlockKind::CodeBlock || existing.kind == BlockKind::MathBlock)
+            && existing.block_source.tree().content.empty());
+    if (replace_empty) {
         const auto preserved_id = parent->children[index].id;
         block.id = preserved_id;
         if (inserted_target.container_id == inserted_id) {
@@ -602,15 +670,16 @@ inline std::optional<DocumentTransaction> document_insert_atomic_block(EditorDoc
         operations.emplace_back(std::move(insert));
         if (!insert_block(*parent, index, std::move(block))) return std::nullopt;
     } else {
+        const auto insert_index = replacement_in_text && source_offset == 0 ? index : index + 1;
         DocumentTreeEdit insert;
         insert.kind = DocumentTreeEditKind::Insert;
         insert.parent_id = parent->id;
-        insert.index = index + 1;
+        insert.index = insert_index;
         insert.after = block;
         operations.emplace_back(std::move(insert));
-        if (!insert_block(*parent, index + 1, std::move(block))) return std::nullopt;
+        if (!insert_block(*parent, insert_index, std::move(block))) return std::nullopt;
     }
-    ++after.revision;
+    after.revision = revision_before + 1;
     rollback.commit();
     return make_recorded_document_transaction(
         std::move(operations),
@@ -796,6 +865,22 @@ inline std::optional<DocumentTransaction> document_edit_table(
         operations.emplace_back(std::move(insert));
         return insert_block(*owner, index, std::move(node));
     };
+    auto insert_row = [&](std::size_t index) {
+        auto row = make_row();
+        if (index == 0 && header_rows > 0) {
+            auto* current = find_block(after.root, table_id);
+            if (!current || current->children.empty()) return false;
+            auto& old_header = current->children.front();
+            DocumentTreeEdit update;
+            update.kind = DocumentTreeEditKind::UpdatePayload;
+            update.before = document_transaction_detail::payload_shell(old_header);
+            old_header.ensure_table_special().table_header_row = false;
+            update.after = document_transaction_detail::payload_shell(old_header);
+            operations.emplace_back(std::move(update));
+            row.ensure_table_special().table_header_row = true;
+        }
+        return insert_node(table_id, index, std::move(row));
+    };
     auto remove_node = [&](NodeId parent_id, std::size_t index) {
         auto* owner = find_block(after.root, parent_id);
         if (!owner || index >= owner->children.size()) return false;
@@ -850,14 +935,14 @@ inline std::optional<DocumentTransaction> document_edit_table(
             break;
         }
         case DocumentTableEdit::InsertRowAbove:
-            if (!insert_node(table_id, row_index, make_row())) return std::nullopt;
+            if (!insert_row(row_index)) return std::nullopt;
             break;
         case DocumentTableEdit::InsertRowBelow:
-            if (!insert_node(table_id, row_index + 1, make_row())) return std::nullopt;
+            if (!insert_row(row_index + 1)) return std::nullopt;
             break;
         case DocumentTableEdit::InsertRowAt: {
             const auto index = (std::min)(argument, table->children.size());
-            if (!insert_node(table_id, index, make_row())) return std::nullopt;
+            if (!insert_row(index)) return std::nullopt;
             break;
         }
         case DocumentTableEdit::DeleteRow:
