@@ -13,22 +13,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$programLanguageLookup = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::OrdinalIgnoreCase)
-foreach ($language in $ProgramLanguages) {
-    [void]$programLanguageLookup.Add($language)
-}
-
-function Test-CultureDirectory {
-    param([Parameter(Mandatory = $true)][string]$Name)
-
-    try {
-        [void][System.Globalization.CultureInfo]::GetCultureInfo($Name)
-        return $true
-    }
-    catch {
-        return $false
-    }
-}
+. (Join-Path $PSScriptRoot 'Get-DeploymentFiles.ps1')
 
 function Get-StableId {
     param(
@@ -73,50 +58,16 @@ function Get-StableGuid {
 }
 
 function Get-PayloadRecords {
-    param(
-        [Parameter(Mandatory = $true)][string]$Root,
-        [Parameter(Mandatory = $true)][string]$Kind
-    )
+    param([string]$Root, [string]$Kind)
 
-    $resolvedRoot = [System.IO.Path]::GetFullPath($Root)
-    $rootPrefix = $resolvedRoot.TrimEnd('\', '/') + [System.IO.Path]::DirectorySeparatorChar
-    $assetPrefix = [System.IO.Path]::Combine($resolvedRoot, 'Assets') + [System.IO.Path]::DirectorySeparatorChar
-    $buildOnlyExtensions = @('.exp', '.ilk', '.iobj', '.ipdb', '.lib', '.pdb')
-
-    return @(
-        Get-ChildItem -LiteralPath $resolvedRoot -Recurse -File | ForEach-Object {
-            $relative = $_.FullName.Substring($rootPrefix.Length).Replace('\', '/')
-
-            if ($Kind -eq 'Program') {
-                if ($_.FullName.StartsWith($assetPrefix, [System.StringComparison]::OrdinalIgnoreCase)) { return }
-                if ($buildOnlyExtensions -contains $_.Extension.ToLowerInvariant()) { return }
-                if ($relative -in @('FoliaMathWorkerProbe.exe', 'FoliaMathLayoutProbe.exe')) { return }
-                $topDirectory = $relative.Split('/')[0]
-                if ($relative.Contains('/') -and (Test-CultureDirectory -Name $topDirectory) -and
-                    -not $programLanguageLookup.Contains($topDirectory)) { return }
-            }
-            else {
-                if ($relative -ieq 'settings.json' -or $relative -ieq 'settings.json.tmp') { return }
-                if ($relative -ieq 'latex/commands.user.json' -or $relative -ieq 'latex/commands.user.json.tmp') { return }
-                if ($relative.StartsWith('themes/custom/', [System.StringComparison]::OrdinalIgnoreCase)) { return }
-            }
-
-            $directory = [System.IO.Path]::GetDirectoryName($relative)
-            if ($null -eq $directory) { $directory = '' }
-            $directory = $directory.Replace('\', '/')
-
-            [pscustomobject]@{
-                Kind = $Kind
-                Source = $_.FullName
-                Relative = $relative
-                Directory = $directory
-                Name = $_.Name
-                ComponentId = Get-StableId -Prefix "Cmp$Kind" -Value "$Kind/$relative"
-                ComponentGuid = Get-StableGuid -Value "$Kind/$relative"
-                FileId = Get-StableId -Prefix "File$Kind" -Value "$Kind/$relative"
-            }
-        }
-    ) | Sort-Object Relative
+    Get-DeploymentFiles -Root $Root -Kind $Kind -Languages $ProgramLanguages | ForEach-Object {
+        $identity = "$Kind/$($_.Relative)"
+        $_ | Add-Member -NotePropertyMembers @{
+            ComponentId = Get-StableId -Prefix "Cmp$Kind" -Value $identity
+            ComponentGuid = Get-StableGuid -Value $identity
+            FileId = Get-StableId -Prefix "File$Kind" -Value $identity
+        } -PassThru
+    }
 }
 
 function Write-Component {

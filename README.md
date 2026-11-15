@@ -106,7 +106,7 @@ powershell -ExecutionPolicy Bypass -File .\build_app.ps1 -Configuration Release 
 Build the per-user x64 MSI with:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\build_msi.ps1 -Version 0.7.0
+powershell -ExecutionPolicy Bypass -File .\build_msi.ps1 -Version 0.7.1
 ```
 
 The installer creates a self-contained Windows App SDK build, so the target
@@ -126,6 +126,16 @@ leaves the default-app choice to the user.
 For installer builds, `build_app.ps1` receives the compile-time Assets token
 `{LocalAppData}\Folia\Assets`; it is resolved for the current user at runtime.
 Normal developer builds continue to use their existing Assets location.
+
+Build the self-contained x64 portable ZIP with:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\build_portable.ps1 -Version 0.7.1
+```
+
+Extract `build/portable/Folia-<version>-x64-portable.zip` to a writable folder and
+run `Folia.exe`. The application stores its editable settings and themes in
+`Assets` beside the executable. AI API keys use Windows Credential Manager.
 
 To check the native math worker in the existing self-contained MSI payload:
 

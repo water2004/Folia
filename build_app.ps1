@@ -10,6 +10,8 @@ param(
 
     [switch]$SelfContained,
 
+    [switch]$Portable,
+
     [switch]$SkipAssetsDeployment,
 
     [switch]$Clean
@@ -40,6 +42,15 @@ if (-not (Test-Path -LiteralPath $MSBuild -PathType Leaf)) {
 $VsDevCmd = Join-Path ($Installation | Select-Object -First 1) 'Common7\Tools\VsDevCmd.bat'
 if (-not (Test-Path -LiteralPath $VsDevCmd -PathType Leaf)) {
     throw "Visual C++ environment script was not found: $VsDevCmd"
+}
+
+if ($Portable) {
+    if ($Configuration -ne 'Release' -or $AssetsDirectory) {
+        throw 'Portable builds require Release and use an Assets directory next to Folia.exe.'
+    }
+    $AssetsDirectory = '{ExecutableDirectory}/Assets'
+    $SelfContained = $true
+    $SkipAssetsDeployment = $true
 }
 
 $NativeBuildDirectory = if ($Configuration -eq 'Debug') {
@@ -80,6 +91,9 @@ if ($SelfContained) {
 if ($SkipAssetsDeployment) {
     $Properties += '/p:FoliaDeployAssets=false'
 }
+if ($Portable) {
+    $Properties += '/p:FoliaPortable=true'
+}
 
 if ($Clean) {
     & $MSBuild $Project /nologo /m:4 /v:minimal /t:Clean @Properties
@@ -94,4 +108,22 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 $Output = Join-Path $Root "build\app-winui\bin\$Platform\$Configuration"
+if ($Portable) {
+    $Output = Join-Path $Root "build\app-winui\bin\portable\$Platform\$Configuration"
+}
+if ($SelfContained -and $Configuration -eq 'Release') {
+    # The Windows App SDK and ICU DLLs also need the app-local release CRT.
+    $RedistCommand = 'call "' + $VsDevCmd + '" -arch=x64 -host_arch=x64 >nul && set VCToolsRedistDir'
+    $RedistSetting = & $env:ComSpec /d /s /c $RedistCommand | Select-String '^VCToolsRedistDir=(.+)$'
+    if ($LASTEXITCODE -ne 0 -or -not $RedistSetting) {
+        throw 'Could not locate the Visual C++ redistributable directory.'
+    }
+    $RedistRoot = $RedistSetting.Matches[0].Groups[1].Value
+    $CrtDirectory = @(Get-ChildItem -LiteralPath (Join-Path $RedistRoot $Platform) -Directory -Filter 'Microsoft.VC*.CRT')
+    if ($CrtDirectory.Count -ne 1) {
+        throw 'Could not identify the release Visual C++ runtime directory.'
+    }
+    Get-ChildItem -LiteralPath $CrtDirectory[0].FullName -File -Filter '*.dll' |
+        Copy-Item -Destination $Output -Force
+}
 Write-Host "Folia $Configuration build: $Output"

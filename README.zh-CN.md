@@ -91,7 +91,7 @@ powershell -ExecutionPolicy Bypass -File .\build_app.ps1 -Configuration Release 
 构建当前用户安装的 x64 MSI：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\build_msi.ps1 -Version 0.5.3
+powershell -ExecutionPolicy Bypass -File .\build_msi.ps1 -Version 0.7.1
 ```
 
 安装器会生成自包含 Windows App SDK 的 Release 应用，因此目标电脑无需另行
@@ -109,6 +109,16 @@ powershell -ExecutionPolicy Bypass -File .\build_msi.ps1 -Version 0.5.3
 安装包构建会通过编译参数把 Assets 根目录设为
 `{LocalAppData}\Folia\Assets`，程序启动时再针对当前用户解析该占位符；普通
 开发构建仍沿用原有 Assets 位置。
+
+构建自包含的 x64 便携 ZIP：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\build_portable.ps1 -Version 0.7.1
+```
+
+将 `build/portable/Folia-<version>-x64-portable.zip` 解压到可写目录后，
+直接运行 `Folia.exe`。应用设置和自定义主题存放在程序旁的 `Assets`，
+AI API Key 由 Windows 凭据管理器保存。
 
 检查刚生成的自包含 MSI 应用中的原生数学 worker：
 

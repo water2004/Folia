@@ -3,7 +3,8 @@
   <PropertyGroup>
     <FoliaBuildRoot>$(MSBuildThisFileDirectory)..\..\build\app-winui\</FoliaBuildRoot>
     <BaseIntermediateOutputPath>$(FoliaBuildRoot)obj\</BaseIntermediateOutputPath>
-    <MSBuildProjectExtensionsPath>$(BaseIntermediateOutputPath)$(Platform)\$(Configuration)\</MSBuildProjectExtensionsPath>
+    <FoliaPortablePath Condition="'$(FoliaPortable)'=='true'">portable\</FoliaPortablePath>
+    <MSBuildProjectExtensionsPath>$(BaseIntermediateOutputPath)$(FoliaPortablePath)$(Platform)\$(Configuration)\</MSBuildProjectExtensionsPath>
     <WindowsAppSDKSelfContained Condition="'$(FoliaSelfContained)'=='true'">true</WindowsAppSDKSelfContained>
   </PropertyGroup>
   <Import Project="packages\Microsoft.Windows.SDK.BuildTools.10.0.28000.2270\build\Microsoft.Windows.SDK.BuildTools.props" Condition="Exists('packages\Microsoft.Windows.SDK.BuildTools.10.0.28000.2270\build\Microsoft.Windows.SDK.BuildTools.props')" />
@@ -79,8 +80,8 @@
     <FoliaIcuRoot>$(FoliaBuildRoot)..\dependencies\icu-78.3\root\</FoliaIcuRoot>
   </PropertyGroup>
   <PropertyGroup>
-    <OutDir>$(FoliaBuildRoot)bin\$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>$(FoliaBuildRoot)obj\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(FoliaBuildRoot)bin\$(FoliaPortablePath)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(FoliaBuildRoot)obj\$(FoliaPortablePath)$(Platform)\$(Configuration)\</IntDir>
     <GeneratedFilesDir>$(IntDir)Generated Files\</GeneratedFilesDir>
     <FoliaResolvedAssetsDirectory Condition="'$(FoliaAssetsDirectory)'!=''">$([System.Environment]::ExpandEnvironmentVariables('$(FoliaAssetsDirectory)'))</FoliaResolvedAssetsDirectory>
     <FoliaNativeMathBuildDir Condition="'$(FoliaNativeMathBuildDir)'=='' and '$(Configuration)'=='Debug'">$(ProjectDir)..\..\build\core\</FoliaNativeMathBuildDir>

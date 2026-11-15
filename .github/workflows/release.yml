@@ -20,7 +20,7 @@ concurrency:
 
 jobs:
   windows-msi:
-    name: Build and publish Windows MSI
+    name: Build and publish Windows packages
     runs-on: windows-2025
 
     steps:
@@ -98,6 +98,7 @@ jobs:
           "tag=$tag" >> $env:GITHUB_OUTPUT
           "version=$version" >> $env:GITHUB_OUTPUT
           "notes=$notes" >> $env:GITHUB_OUTPUT
+          "portable=$(Test-Path -LiteralPath build_portable.ps1 -PathType Leaf)" >> $env:GITHUB_OUTPUT
 
       - name: Check generated math completion catalog
         shell: pwsh
@@ -107,16 +108,20 @@ jobs:
           python -m unittest discover -s tests/query -p test_latex_catalog.py
           if ($LASTEXITCODE -ne 0) { throw 'Math completion catalog checks failed.' }
 
-      - name: Build self-contained MSI
+      - name: Build self-contained MSI and portable ZIP
         id: build
         continue-on-error: true
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          ./build_msi.ps1 -Version '${{ steps.release.outputs.version }}' *>&1 |
-            Tee-Object -FilePath release-build.log
+          & {
+            ./build_msi.ps1 -Version '${{ steps.release.outputs.version }}'
+            if ('${{ steps.release.outputs.portable }}' -eq 'True') {
+              ./build_portable.ps1 -Version '${{ steps.release.outputs.version }}' -SkipDependencySetup
+            }
+          } *>&1 | Tee-Object -FilePath release-build.log
 
-      - name: Report MSI build failure
+      - name: Report package build failure
         if: steps.build.outcome == 'failure'
         shell: pwsh
         run: |
@@ -125,15 +130,15 @@ jobs:
             $diagnostic = (Get-Content -LiteralPath release-build.log -Tail 80) -join "`n"
           }
 
-          "## MSI build failure" >> $env:GITHUB_STEP_SUMMARY
+          "## Windows package build failure" >> $env:GITHUB_STEP_SUMMARY
           "" >> $env:GITHUB_STEP_SUMMARY
           '```text' >> $env:GITHUB_STEP_SUMMARY
           $diagnostic >> $env:GITHUB_STEP_SUMMARY
           '```' >> $env:GITHUB_STEP_SUMMARY
 
           $annotation = $diagnostic.Replace('%', '%25').Replace("`r", '%0D').Replace("`n", '%0A')
-          Write-Output "::error title=MSI build failure::$annotation"
-          throw 'The self-contained MSI build failed; see the job summary.'
+          Write-Output "::error title=Windows package build failure::$annotation"
+          throw 'The Windows package build failed; see the job summary.'
 
       - name: Preserve failed build diagnostics
         if: failure() && steps.build.outcome == 'failure'
@@ -144,27 +149,31 @@ jobs:
           path: |
             release-build.log
             build/tests/startup-msi/
+            build/tests/startup-portable/
             build/app-winui/bin/x64/Release/Folia.exe
             build/app-winui/bin/x64/Release/Folia.pdb
+            build/app-winui/bin/portable/x64/Release/Folia.exe
+            build/app-winui/bin/portable/x64/Release/Folia.pdb
 
-      - name: Create SHA-256 checksum
+      - name: Create SHA-256 checksums
         id: assets
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
           $version = '${{ steps.release.outputs.version }}'
           $msi = "build/installer/bin/Folia-$version-x64.msi"
-          if (-not (Test-Path -LiteralPath $msi -PathType Leaf)) {
-            throw "Missing release asset: $msi"
+          $packages = @($msi)
+          if ('${{ steps.release.outputs.portable }}' -eq 'True') {
+            $portable = "build/portable/Folia-$version-x64-portable.zip"
+            $packages += $portable
+            "portable=$portable" >> $env:GITHUB_OUTPUT
           }
-
-          $item = Get-Item -LiteralPath $msi
-          $hash = (Get-FileHash -LiteralPath $msi -Algorithm SHA256).Hash.ToLowerInvariant()
-          $checksum = "$msi.sha256"
-          "$hash  $($item.Name)" | Set-Content -LiteralPath $checksum -Encoding ascii
-
+          foreach ($package in $packages) {
+            $item = Get-Item -LiteralPath $package
+            $hash = (Get-FileHash -LiteralPath $package -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$hash  $($item.Name)" | Set-Content -LiteralPath "$package.sha256" -Encoding ascii
+          }
           "msi=$msi" >> $env:GITHUB_OUTPUT
-          "checksum=$checksum" >> $env:GITHUB_OUTPUT
 
       - name: Publish GitHub Release
         shell: pwsh
@@ -176,17 +185,19 @@ jobs:
           $title = "Folia $tag"
           $notes = '${{ steps.release.outputs.notes }}'
           $msi = '${{ steps.assets.outputs.msi }}'
-          $checksum = '${{ steps.assets.outputs.checksum }}'
+          $portable = '${{ steps.assets.outputs.portable }}'
+          $assets = @($msi, "$msi.sha256")
+          if ($portable) { $assets += @($portable, "$portable.sha256") }
 
           gh release view $tag *> $null
           if ($LASTEXITCODE -eq 0) {
             gh release edit $tag --title $title --notes-file $notes --latest
             if ($LASTEXITCODE -ne 0) { throw "Failed to update release $tag." }
-            gh release upload $tag $msi $checksum --clobber
+            gh release upload $tag @assets --clobber
             if ($LASTEXITCODE -ne 0) { throw "Failed to upload release assets for $tag." }
           }
           else {
-            gh release create $tag $msi $checksum `
+            gh release create $tag @assets `
               --title $title `
               --notes-file $notes `
               --verify-tag `

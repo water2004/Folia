@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [ValidatePattern('^\d+\.\d+\.\d+$')]
-    [string]$Version = '0.7.0',
+    [string]$Version = '0.7.1',
 
     [ValidateSet('x64')]
     [string]$Platform = 'x64',
@@ -54,12 +54,13 @@ if ($Clean) { $appBuildArguments.Clean = $true }
 & (Join-Path $Root 'build_app.ps1') @appBuildArguments
 if ($LASTEXITCODE -ne 0) { throw "Folia application build failed with exit code $LASTEXITCODE" }
 
-if (-not (Test-Path -LiteralPath (Join-Path $ProgramRoot 'Folia.exe') -PathType Leaf)) {
-    throw "Folia executable was not produced under $ProgramRoot"
+$Executable = Get-Item -LiteralPath (Join-Path $ProgramRoot 'Folia.exe')
+if ($Executable.VersionInfo.ProductVersion -ne $Version) {
+    throw "Folia.exe has product version $($Executable.VersionInfo.ProductVersion), expected $Version."
 }
 
 if (-not $SkipStartupTest) {
-    & (Join-Path $Root 'tests\app\test_startup.ps1') -Executable (Join-Path $ProgramRoot 'Folia.exe') `
+    & (Join-Path $Root 'tests\app\test_startup.ps1') -Executable $Executable.FullName `
         -ReportDirectory (Join-Path $BuildRoot 'tests\startup-msi')
     if ($LASTEXITCODE -ne 0) { throw 'Folia startup and normal-close test failed.' }
 }

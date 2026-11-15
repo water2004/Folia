@@ -7,6 +7,15 @@
 
 namespace
 {
+    std::filesystem::path ExecutableDirectory()
+    {
+        std::wstring executable(32768, L'\0');
+        auto const length = GetModuleFileNameW(nullptr, executable.data(), static_cast<DWORD>(executable.size()));
+        if (length == 0 || length >= executable.size()) winrt::throw_last_error();
+        executable.resize(length);
+        return std::filesystem::path(executable).parent_path();
+    }
+
     std::wstring ExpandKnownFolderTokens(std::wstring configured)
     {
         constexpr std::wstring_view token = L"{LocalAppData}";
@@ -40,6 +49,9 @@ namespace winrt::Folia
         static auto const directory = []
         {
             std::wstring configured = FOLIA_ASSETS_DIRECTORY;
+            constexpr std::wstring_view executablePrefix = L"{ExecutableDirectory}/";
+            if (configured.starts_with(executablePrefix))
+                return ExecutableDirectory() / configured.substr(executablePrefix.size());
             if (!configured.empty()) return ExpandEnvironment(configured);
             return std::filesystem::current_path() / L"Assets";
         }();

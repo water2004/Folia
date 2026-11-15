@@ -2,11 +2,13 @@
 param(
     [Parameter(Mandatory = $true)][string]$Executable,
     [string]$ReportDirectory = (Join-Path $PSScriptRoot '../../build/tests/startup'),
-    [ValidateRange(1, 5)][int]$Runs = 1
+    [ValidateRange(1, 5)][int]$Runs = 1,
+    [string]$WorkingDirectory
 )
 
 $ErrorActionPreference = 'Stop'
 $exe = (Resolve-Path -LiteralPath $Executable).Path
+$workingDir = if ($WorkingDirectory) { (Resolve-Path -LiteralPath $WorkingDirectory).Path } else { Split-Path -Parent $exe }
 New-Item -ItemType Directory -Force -Path $ReportDirectory | Out-Null
 $report = (Resolve-Path -LiteralPath $ReportDirectory).Path
 
@@ -110,11 +112,11 @@ public static class FoliaStartupTest {
   using(var file=new FileStream(path,FileMode.Create,FileAccess.Write,FileShare.Read))
    MiniDumpWriteDump(child.process,child.pid,file.SafeFileHandle.DangerousGetHandle(),0x1000,IntPtr.Zero,IntPtr.Zero,IntPtr.Zero);
  }
- public static FoliaStartupResult Run(string exe,string directory) {
+ public static FoliaStartupResult Run(string exe,string directory,string workingDirectory) {
   var result=new FoliaStartupResult(); var log=new StringBuilder();
   var startup=new StartupInfo(); startup.cb=(uint)Marshal.SizeOf(typeof(StartupInfo)); startup.flags=1; startup.show=0;
   ProcessInfo child;
-  if(!CreateProcessW(exe,new StringBuilder("\""+exe+"\" --new-instance"),IntPtr.Zero,IntPtr.Zero,false,2,IntPtr.Zero,Path.GetDirectoryName(exe),ref startup,out child))
+  if(!CreateProcessW(exe,new StringBuilder("\""+exe+"\" --new-instance"),IntPtr.Zero,IntPtr.Zero,false,2,IntPtr.Zero,workingDirectory,ref startup,out child))
    throw new Exception("CreateProcess: "+Marshal.GetLastWin32Error());
   result.ProcessId=child.pid;
   var deadline=DateTime.UtcNow.AddSeconds(20); DateTime readyAt=DateTime.MaxValue; bool exited=false;
@@ -175,7 +177,7 @@ public static class FoliaStartupTest {
 for ($run = 1; $run -le $Runs; ++$run) {
     $directory = Join-Path $report "run-$run"
     New-Item -ItemType Directory -Force -Path $directory | Out-Null
-    $result = [FoliaStartupTest]::Run($exe, $directory)
+    $result = [FoliaStartupTest]::Run($exe, $directory, $workingDir)
     $result | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $directory 'result.json') -Encoding utf8
     Write-Output $result.Log
     if (-not $result.Success) { throw "Folia startup/close test failed: $($result.Fault). See $directory" }
