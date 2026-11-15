@@ -553,6 +553,9 @@
     <ClCompile Include="..\core\source\source_editor.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\core\source\source_commands.ixx">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\core\source\source_patch.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>

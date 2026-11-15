@@ -27,6 +27,7 @@ import folia.markdown.parser;
 import folia.markdown.serializer;
 import folia.core.search;
 import folia.core.source_editor;
+import folia.core.source_commands;
 import folia.core.source_patch;
 import folia.core.source_projection;
 import folia.core.source_patch_adapter;
@@ -734,7 +735,12 @@ private:
             case CommandKind::MoveLineEnd: source.move_line_end(command.extend_selection);return true;
             case CommandKind::MoveDocumentStart: source.move_document_start(command.extend_selection);return true;
             case CommandKind::MoveDocumentEnd: source.move_document_end(command.extend_selection);return true;
-            default: return false;
+            default:
+                if (command.kind == CommandKind::CreateFootnoteDefinition
+                    && find_footnote_definition(symbols_, command.footnote_label)) return false;
+                handled = execute_source_markup_command(source, command, dialect_,
+                    command.kind == CommandKind::InsertFootnote ? next_footnote_label(symbols_) : std::string{});
+                break;
         }
         return handled && (source.revision() == revision || commit_source_patch_());
     }
