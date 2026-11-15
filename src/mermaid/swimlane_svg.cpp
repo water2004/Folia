@@ -18,6 +18,19 @@ double number(const ConfigValue& value, double fallback) {
     return value.kind == ConfigKind::number && std::isfinite(value.number) && value.number > 0
         ? value.number : fallback;
 }
+bool html_labels(const ConfigValue& value) {
+    if (value.kind == ConfigKind::null) return false;
+    if (value.kind == ConfigKind::boolean) return value.boolean;
+    if (value.kind == ConfigKind::number) return value.number != 0;
+    if (value.kind != ConfigKind::string) return true;
+    auto text = std::u16string_view{value.string};
+    constexpr std::u16string_view whitespace = u" \t\r\n\f\v";
+    while (!text.empty() && whitespace.contains(text.front())) text.remove_prefix(1);
+    while (!text.empty() && whitespace.contains(text.back())) text.remove_suffix(1);
+    std::u16string folded{text};
+    for (auto& c : folded) if (c >= u'A' && c <= u'Z') c += u'a' - u'A';
+    return folded != u"false" && folded != u"null" && folded != u"0";
+}
 std::string narrow(std::u16string_view value) {
     auto encoded = escape_svg_text(value, u"Swimlane theme value");
     if (!encoded) throw std::runtime_error("Invalid Swimlane theme value");
@@ -91,7 +104,7 @@ void text_label_box(std::string& out, std::span<const std::u16string> lines,
                     const SvgTextMetrics& metrics, double x, double y,
                     double width, double height, std::u16string_view family,
                     double font_size, std::string_view color,
-                    unsigned font_weight, bool italic) {
+                    unsigned font_weight, bool italic, const MathLabel* math = nullptr) {
     const double left = x - width / 2;
     const double top = y - height / 2;
     out += "<g class=\"nodeLabel\" style=\"color:" + xml_attribute_value(color) +
@@ -101,20 +114,25 @@ void text_label_box(std::string& out, std::span<const std::u16string> lines,
         (italic ? "italic" : "normal") + "\"><rect x=\"" + n(left) +
         "\" y=\"" + n(top) + "\" width=\"" + n(width) + "\" height=\"" +
         n(height) + "\" fill=\"none\" stroke=\"none\"/>";
-    label_svg(out, lines, metrics, x, y, font_size, "label-text");
+    if (math) {
+        auto svg = render_math_label_svg(*math, left, top, {family, color, "label-text", width});
+        if (!svg) throw std::runtime_error(svg.error());
+        out += *svg;
+    } else label_svg(out, lines, metrics, x, y, font_size, "label-text");
     out += "</g>";
 }
 void edge_label_svg(std::string& out, std::span<const std::u16string> lines,
                     const SvgTextMetrics& metrics, double x, double y,
                     double width, double height, std::u16string_view family,
                     double font_size, std::string_view color,
-                    std::string_view background, unsigned font_weight, bool italic) {
+                    std::string_view background, unsigned font_weight, bool italic,
+                    const MathLabel* math = nullptr) {
     out += "<g class=\"edgeLabel swimlane-edge-label\"><rect class=\"edge-label-background\" x=\"" +
         n(x - width / 2) + "\" y=\"" + n(y - height / 2) + "\" width=\"" + n(width) +
         "\" height=\"" + n(height) + "\" stroke=\"none\" fill=\"" +
         xml_attribute_value(background) + "\"/>";
     text_label_box(out, lines, metrics, x, y, width, height, family, font_size,
-        color, font_weight, italic);
+        color, font_weight, italic, math);
     out += "</g>";
 }
 std::u16string trim(std::u16string_view value) {
@@ -233,6 +251,13 @@ std::expected<SwimlaneRenderInput, std::string> prepare_swimlane_render(
 
     SwimlaneRenderInput result;
     result.document = std::move(*graph);
+    const auto& global_html = member(prepared.effective_config, u"htmlLabels");
+    const auto& flow_html = member(member(prepared.effective_config, u"flowchart"), u"htmlLabels");
+    result.nodes_html_labels = global_html.kind != ConfigKind::null ? html_labels(global_html) :
+        flow_html.kind != ConfigKind::null ? html_labels(flow_html) : true;
+    // The upstream lane shape deliberately evaluates the legacy Flowchart
+    // setting directly; its null default is false, independently of nodes.
+    result.lane_html_labels = html_labels(flow_html);
     const auto& variables = member(prepared.effective_config, u"themeVariables");
     result.theme.font_family = string(member(prepared.effective_config, u"fontFamily"), u"Arial");
     result.theme.font_size = number(member(variables, u"fontSize"), 16);
@@ -252,12 +277,15 @@ std::expected<SwimlaneRenderInput, std::string> prepare_swimlane_render(
 }
 
 std::expected<SwimlaneSvg, std::string> render_swimlane_svg(
-    const SwimlaneRenderInput& input, const SvgFamilyTextMeasure& measure) {
+    const SwimlaneRenderInput& input, const SvgFamilyTextMeasure& measure,
+    const MathLabelMeasure& math_measure) {
     if (!measure) return std::unexpected("Swimlane rendering requires platform text measurement");
     try {
         const auto& graph = input.document;
         std::vector<std::vector<std::u16string>> node_lines(graph.nodes.size());
         std::vector<SvgTextMetrics> node_metrics(graph.nodes.size());
+        std::vector<std::optional<MathLabel>> node_math(graph.nodes.size());
+        std::vector<std::optional<FlowchartNodeBox>> title_sizes(graph.nodes.size());
         std::vector<FlowchartNodeBox> node_boxes(graph.nodes.size());
         std::vector<SwimlanePaint> node_paints;
         std::vector<double> node_font_sizes(graph.nodes.size(), input.theme.font_size);
@@ -266,21 +294,35 @@ std::expected<SwimlaneSvg, std::string> render_swimlane_svg(
         for (std::size_t i = 0; i < graph.nodes.size(); ++i) {
             const auto& node = graph.nodes[i];
             node_paints.push_back(compile_style(node.compiled_styles, node.styles));
-            if (node.group) continue;
-            auto lines = flowchart_label_lines(node.label, node.label_type);
-            if (!lines) return std::unexpected(lines.error());
-            node_lines[i] = std::move(*lines);
             const auto& paint = node_paints.back();
             node_font_sizes[i] = paint.dimension(u"font-size", input.theme.font_size);
             node_font_weights[i] = paint.weight();
             const auto family = paint.get(u"font-family", input.theme.font_family);
-            auto metrics = measure_lines(node_lines[i], measure, family, node_font_sizes[i],
-                node_font_weights[i], paint.italic());
-            if (!metrics) return std::unexpected(metrics.error());
-            node_metrics[i] = *metrics;
-            const double label_width = std::max(120.0, metrics->width);
+            if ((node.group ? input.lane_html_labels : input.nodes_html_labels) && math_measure) {
+                const auto& value = node.group && node.label.empty() ? node.id : node.label;
+                auto label = math_measure(value, family, node_font_sizes[i], node_font_weights[i], paint.italic());
+                if (!label) return std::unexpected(label.error());
+                node_math[i] = std::move(*label);
+            }
+            if (node.group) {
+                if (node_math[i]) title_sizes[i] = FlowchartNodeBox{node_math[i]->width, node_math[i]->height};
+                continue;
+            }
+            if (node_math[i]) {
+                node_metrics[i].width = node_math[i]->width;
+                node_metrics[i].height = node_math[i]->height;
+            } else {
+                auto lines = flowchart_label_lines(node.label, node.label_type);
+                if (!lines) return std::unexpected(lines.error());
+                node_lines[i] = std::move(*lines);
+                auto metrics = measure_lines(node_lines[i], measure, family, node_font_sizes[i],
+                    node_font_weights[i], paint.italic());
+                if (!metrics) return std::unexpected(metrics.error());
+                node_metrics[i] = *metrics;
+            }
+            const double label_width = std::max(120.0, node_metrics[i].width);
             const double line_height = node_font_sizes[i] * 1.5;
-            const double label_height = std::max(line_height,
+            const double label_height = node_math[i] ? node_math[i]->height : std::max(line_height,
                 line_height * static_cast<double>(node_lines[i].size()));
             if (node.shape == u"diamond") {
                 const double side = label_width + label_height + 30.0;
@@ -292,6 +334,7 @@ std::expected<SwimlaneSvg, std::string> render_swimlane_svg(
         }
         std::vector<std::vector<std::u16string>> edge_lines(graph.edges.size());
         std::vector<SvgTextMetrics> edge_metrics(graph.edges.size());
+        std::vector<std::optional<MathLabel>> edge_math(graph.edges.size());
         std::vector<FlowchartEdgeLabelSize> edge_sizes(graph.edges.size());
         std::vector<SwimlanePaint> edge_paints;
         std::vector<double> edge_font_sizes(graph.edges.size(), input.theme.font_size);
@@ -301,21 +344,32 @@ std::expected<SwimlaneSvg, std::string> render_swimlane_svg(
             const auto& edge = graph.edges[i];
             edge_paints.push_back(compile_style(edge.compiled_styles, edge.styles));
             if (edge.label.empty()) continue;
-            auto lines = flowchart_label_lines(edge.label, edge.label_type);
-            if (!lines) return std::unexpected(lines.error());
-            edge_lines[i] = std::move(*lines);
             const auto& paint = edge_paints.back();
             edge_font_sizes[i] = paint.dimension(u"font-size", input.theme.font_size);
             edge_font_weights[i] = paint.weight();
             const auto family = paint.get(u"font-family", input.theme.font_family);
-            auto metrics = measure_lines(edge_lines[i], measure, family, edge_font_sizes[i],
-                edge_font_weights[i], paint.italic());
-            if (!metrics) return std::unexpected(metrics.error());
-            edge_metrics[i] = *metrics;
-            edge_sizes[i] = {metrics->width,
-                edge_font_sizes[i] * 1.5 * static_cast<double>(edge_lines[i].size())};
+            if (input.nodes_html_labels && math_measure) {
+                auto label = math_measure(edge.label, family, edge_font_sizes[i], edge_font_weights[i], paint.italic());
+                if (!label) return std::unexpected(label.error());
+                edge_math[i] = std::move(*label);
+            }
+            if (edge_math[i]) {
+                edge_metrics[i].width = edge_math[i]->width;
+                edge_metrics[i].height = edge_math[i]->height;
+                edge_sizes[i] = {edge_math[i]->width, edge_math[i]->height};
+            } else {
+                auto lines = flowchart_label_lines(edge.label, edge.label_type);
+                if (!lines) return std::unexpected(lines.error());
+                edge_lines[i] = std::move(*lines);
+                auto metrics = measure_lines(edge_lines[i], measure, family, edge_font_sizes[i],
+                    edge_font_weights[i], paint.italic());
+                if (!metrics) return std::unexpected(metrics.error());
+                edge_metrics[i] = *metrics;
+                edge_sizes[i] = {metrics->width,
+                    edge_font_sizes[i] * 1.5 * static_cast<double>(edge_lines[i].size())};
+            }
         }
-        auto layout = layout_swimlanes(graph, node_boxes, edge_sizes);
+        auto layout = layout_swimlanes(graph, node_boxes, edge_sizes, title_sizes);
         if (!layout) return std::unexpected(layout.error());
         if (layout->nodes.size() < graph.nodes.size() || layout->edges.size() != graph.edges.size())
             return std::unexpected("Swimlane layout returned inconsistent graph geometry");
@@ -332,6 +386,12 @@ std::expected<SwimlaneSvg, std::string> render_swimlane_svg(
             include(node.x - node.width / 2, node.y - node.height / 2, node.width, node.height);
         for (const auto& edge : layout->edges) for (const auto& point : edge.points)
             include(point.x - 6, point.y - 6, 12, 12);
+        for (std::size_t i = 0; i < edge_math.size(); ++i)
+            if (edge_math[i] && layout->edges[i].label) {
+                const auto& p = *layout->edges[i].label;
+                include(p.x - edge_sizes[i].width / 2, p.y - edge_sizes[i].height / 2,
+                    edge_sizes[i].width, edge_sizes[i].height);
+            }
         if (!(right > left && bottom > top)) return std::unexpected("Swimlane layout produced an empty canvas");
 
         std::string svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"" +
@@ -376,26 +436,31 @@ std::expected<SwimlaneSvg, std::string> render_swimlane_svg(
                     : std::u16string{}};
                 double width = 0;
                 SvgTextMetrics title_metrics;
-                if (source) {
+                const auto* title_math = source && node_math[i] ? &*node_math[i] : nullptr;
+                if (title_math) {
+                    width = title_math->width;
+                    title_metrics.width = width;
+                    title_metrics.height = title_math->height;
+                } else if (source) {
                     auto metrics = measure_lines(title, measure, lane_font_family, lane_font_size,
                         lane_font_weight, lane_italic);
                     if (!metrics) return std::unexpected(metrics.error());
                     title_metrics = *metrics;
                     width = metrics->width;
                 }
-                const double title_height = default_lane ? 0 : 24;
+                const double title_height = title_math ? title_math->height : default_lane ? 0 : 24;
                 if (graph.direction == u"LR") {
                     // Mermaid's empty synthetic default-lane label has a zero
                     // measured box and is anchored 4px from the lane edge; a
                     // visible lane title is centered in its 32px band.
-                    const double center_x = placed.x - placed.width / 2 +
+                    const double center_x = title_math ? title_box.x : placed.x - placed.width / 2 +
                         (default_lane ? 4.0 : 16.0);
                     svg += "<g class=\"cluster-label swimlane-label\" transform=\"translate(" +
                         n(center_x) + "," + n(placed.y) + ") rotate(-90) translate(" +
                         n(-width / 2) + "," + n(-title_height / 2) + ")\">";
                     text_label_box(svg, title, title_metrics, width / 2, title_height / 2,
                         width, title_height, lane_font_family, lane_font_size, lane_text,
-                        lane_font_weight, lane_italic);
+                        lane_font_weight, lane_italic, title_math);
                     svg += "</g>";
                 } else {
                     svg += "<g class=\"cluster-label swimlane-label\">";
@@ -409,7 +474,7 @@ std::expected<SwimlaneSvg, std::string> render_swimlane_svg(
                         placed.y - placed.height / 2 + title_height / 2;
                     text_label_box(svg, title, title_metrics, title_x, title_y,
                         width, title_height, lane_font_family, lane_font_size, lane_text,
-                        lane_font_weight, lane_italic);
+                        lane_font_weight, lane_italic, title_math);
                     svg += "</g>";
                 }
             }
@@ -445,12 +510,12 @@ std::expected<SwimlaneSvg, std::string> render_swimlane_svg(
                 ";stroke-dasharray:" + dash + ";fill:none\"";
             if (source_edge.arrow_end != u"none") svg += " marker-end=\"url(#" + marker_id + ")\"";
             svg += "/>";
-            if (edge.label && i < edge_lines.size() && !edge_lines[i].empty())
+            if (edge.label && i < edge_lines.size() && (!edge_lines[i].empty() || edge_math[i]))
                 edge_label_svg(svg, edge_lines[i], edge_metrics[i], edge.label->x, edge.label->y,
                     edge_metrics[i].width, edge_sizes[i].height,
                     paint.get(u"font-family", input.theme.font_family),
                     edge_font_sizes[i], label_color, input.theme.edge_label_background,
-                    edge_font_weights[i], paint.italic());
+                    edge_font_weights[i], paint.italic(), edge_math[i] ? &*edge_math[i] : nullptr);
             svg += "</g>";
         }
         for (std::size_t i = 0; i < graph.nodes.size(); ++i) {
@@ -477,10 +542,11 @@ std::expected<SwimlaneSvg, std::string> render_swimlane_svg(
                     shape_style + "/>";
             }
             svg += "<g class=\"swimlane-node-label\">";
-            text_label_box(svg, node_lines[i], node_metrics[i], placed.x, placed.y, 120,
-                node_font_sizes[i] * 1.5 * static_cast<double>(node_lines[i].size()),
+            text_label_box(svg, node_lines[i], node_metrics[i], placed.x, placed.y,
+                node_math[i] ? std::max(120.0, node_math[i]->width) : 120,
+                node_math[i] ? node_math[i]->height : node_font_sizes[i] * 1.5 * static_cast<double>(node_lines[i].size()),
                 paint.get(u"font-family", input.theme.font_family), node_font_sizes[i], label_color,
-                node_font_weights[i], paint.italic());
+                node_font_weights[i], paint.italic(), node_math[i] ? &*node_math[i] : nullptr);
             svg += "</g>";
             svg += "</g>";
         }

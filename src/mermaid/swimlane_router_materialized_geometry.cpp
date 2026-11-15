@@ -944,9 +944,9 @@ void adjust_swimlane_title_bands(std::span<SwimlaneRoutingNode> nodes,
             if (left ? mode != u"LR" : mode == u"LR" || mode == u"RL" || mode == u"BT")
                 continue;
             const auto& title = *node.title_box;
-            if (title.width <= 0 || title.height <= 0 ||
-                (left ? title.height < title.width : title.width < title.height))
-                continue;
+            // Direction determines the header side. A measured formula can
+            // be taller than its lane is long, so aspect ratio is not a side.
+            if (title.width <= 0 || title.height <= 0) continue;
             lanes.push_back(i);
         }
         double shift = 0;

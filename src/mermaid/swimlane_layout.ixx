@@ -16,8 +16,11 @@ struct SwimlaneLayout {
 
 // Non-group nodes require measured shape boxes. Edge label boxes are supplied
 // in source edge order and can be zero for edges without labels.
+// Optional title measurements are indexed by input node; only groups may have
+// a title. An empty span preserves the original fixed-band layout.
 std::expected<SwimlaneLayout, std::string> layout_swimlanes(
     const FlowchartInput& input, std::span<const FlowchartNodeBox> nodes,
-    std::span<const FlowchartEdgeLabelSize> labels);
+    std::span<const FlowchartEdgeLabelSize> labels,
+    std::span<const std::optional<FlowchartNodeBox>> titles = {});
 
 }
