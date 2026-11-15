@@ -2,33 +2,8 @@ name: Document scalability
 
 on:
   push:
-    branches: [architecture/bounded-document-layout, master]
-    paths:
-      - '.github/workflows/document-scalability.yml'
-      - 'src/core/**'
-      - 'src/markdown/**'
-      - 'src/platform/**'
-      - 'src/app-winui/**'
-      - 'tests/**'
-      - 'tools/document-scalability/**'
-      - 'tools/markdown-conformance/**'
-      - 'CMakeLists.txt'
-      - 'build_app.ps1'
-      - 'setup.ps1'
-  pull_request:
-    paths:
-      - '.github/workflows/document-scalability.yml'
-      - 'src/core/**'
-      - 'src/markdown/**'
-      - 'src/platform/**'
-      - 'src/app-winui/**'
-      - 'tests/**'
-      - 'tools/document-scalability/**'
-      - 'tools/markdown-conformance/**'
-      - 'CMakeLists.txt'
-      - 'build_app.ps1'
-      - 'setup.ps1'
-  workflow_dispatch:
+    tags:
+      - "v*.*.*"
 
 permissions:
   contents: read

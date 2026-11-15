@@ -59,7 +59,7 @@ namespace {
             source += "item ";
             source += std::to_string(index);
             source += " with **bold** and a wrapping phrase, 中文, e\xCC\x81 and 😀.\n";
-            if (loose) source += '\n';
+            if (loose && index + 1 < count) source += '\n';
         }
         return source;
     }
@@ -418,6 +418,10 @@ namespace {
             auto beforeOffset = fixture.scroll.Offset();
             auto screenY = SourceDocumentTop(fixture, anchor) - beforeOffset;
             expect(std::abs(screenY + 3.0f) < 0.25f);
+            for (int retry = 0; retry < 3; ++retry)
+                PrepareFrame(fixture, frame);
+            expect(fixture.scroll.Offset() == beforeOffset)
+                << "an unchanged layout shifted the viewport";
 
             session.SetSelection(folia::TextSelection::caret({first, 0, folia::TextAffinity::Downstream}));
             std::u32string prefix;

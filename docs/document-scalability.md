@@ -196,10 +196,11 @@ Windows gate 位于
 资源驻留、滚动锚点、owner 索引、共享行距和编辑预览测试。原生 10 MiB
 用例会输出 working set/private bytes，并检查测量后没有 layout 常驻。
 
-**平台验证限制：** GitHub Actions run
+Windows 本地使用 MSVC 19.50 和自包含 WinUI x64 Release 验证。
+完整核心回归通过 824 项，DirectWrite 布局回归覆盖上述 13 项。
+滚动锚点在换行前后采用相同的 DirectWrite 命中测试坐标，并检查
+连续重绘时的滚动位置。
+
+该 workflow 由版本标签触发。此前的 GitHub Actions 运行
 [`43720698863`](https://github.com/water2004/Folia/actions/runs/43720698863)
-的三个 job 均在任何步骤开始前失败；GitHub annotation 原文为
-“The job was not started because your account is locked due to a billing issue.”
-因此本次不把 Windows 构建、DirectWrite 回归、IME 或原生内存数字报告为
-已验证，也不将 Linux RSS 当作 WinUI 工作集。账单限制解除后可以在本分支
-重新执行该 workflow。
+因账户账单锁定未能启动。Windows 验证结果来自本地运行。
