@@ -7,6 +7,7 @@ import folia.markdown.inline_document;
 import folia.markdown.inline_parser;
 import folia.markdown.inline_reparse;
 import folia.markdown.text_edit;
+import folia.markdown.utf;
 
 export namespace folia {
 
@@ -179,7 +180,7 @@ inline std::optional<SourceRange> inline_backward_delete_range(
             return hard_break;
         }
     }
-    return SourceRange{offset - 1, offset};
+    return SourceRange{prev_grapheme_boundary_char(document.source, offset), offset};
 }
 
 inline std::optional<SourceRange> inline_forward_delete_range(
@@ -198,7 +199,7 @@ inline std::optional<SourceRange> inline_forward_delete_range(
             return hard_break;
         }
     }
-    return SourceRange{offset, offset + 1};
+    return SourceRange{offset, next_grapheme_boundary_char(document.source, offset)};
 }
 
 inline AppliedSourceEdit apply_inline_source_edit(

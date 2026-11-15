@@ -853,7 +853,8 @@ inline std::optional<TextSelection> document_move_selection(const EditorDocument
             auto const& mapping = active_block->block_source.tree().content_to_source;
             auto current = std::ranges::lower_bound(mapping, target.source_offset);
             if (current != mapping.end() && *current == target.source_offset && current != mapping.begin()) {
-                target.source_offset = *std::prev(current);
+                const auto offset = static_cast<std::size_t>(current - mapping.begin());
+                target.source_offset = mapping[prev_grapheme_boundary_char(active_block->block_source.tree().content, offset)];
             } else if (target.source_offset > range->start) {
                 target.source_offset = range->start;
             } else if (*index > 0) {
@@ -861,7 +862,8 @@ inline std::optional<TextSelection> document_move_selection(const EditorDocument
                 target = {order[*index - 1], previous->end, TextAffinity::Upstream};
             }
         }
-        else if (target.source_offset > range->start) --target.source_offset;
+        else if (target.source_offset > range->start)
+            target.source_offset = (std::max)(range->start, prev_grapheme_boundary_char(*text, target.source_offset));
         else if (*index > 0) {
             auto previous = range_at(*index - 1); if (!previous) return std::nullopt;
             target = {order[*index - 1], previous->end, TextAffinity::Upstream};
@@ -872,7 +874,8 @@ inline std::optional<TextSelection> document_move_selection(const EditorDocument
             auto current = std::ranges::lower_bound(mapping, target.source_offset);
             if (current != mapping.end() && *current == target.source_offset
                 && std::next(current) != mapping.end()) {
-                target.source_offset = *std::next(current);
+                const auto offset = static_cast<std::size_t>(current - mapping.begin());
+                target.source_offset = mapping[next_grapheme_boundary_char(active_block->block_source.tree().content, offset)];
             } else if (target.source_offset < range->end) {
                 target.source_offset = range->end;
             } else if (*index + 1 < order.size()) {
@@ -880,7 +883,8 @@ inline std::optional<TextSelection> document_move_selection(const EditorDocument
                 target = {order[*index + 1], next->start, TextAffinity::Downstream};
             }
         }
-        else if (target.source_offset < range->end) ++target.source_offset;
+        else if (target.source_offset < range->end)
+            target.source_offset = (std::min)(range->end, next_grapheme_boundary_char(*text, target.source_offset));
         else if (*index + 1 < order.size()) {
             auto next = range_at(*index + 1); if (!next) return std::nullopt;
             target = {order[*index + 1], next->start, TextAffinity::Downstream};
@@ -918,6 +922,14 @@ inline std::optional<TextSelection> document_move_selection(const EditorDocument
                 const auto next_end = next_break == std::u32string::npos ? navigation_text.size() : next_break;
                 destination = next_start + (std::min)(column, next_end - next_start);
             }
+        }
+        // A line column may land inside a combining/emoji cluster on the new
+        // line. Keep the same source coordinate unit while snapping to a
+        // reachable grapheme boundary before mapping raw content back.
+        if (destination > 0 && destination < navigation_text.size()) {
+            const auto before_cluster = prev_grapheme_boundary_char(navigation_text, destination);
+            if (next_grapheme_boundary_char(navigation_text, before_cluster) != destination)
+                destination = before_cluster;
         }
         target.source_offset = raw_mapping
             ? (*raw_mapping)[(std::min)(destination, raw_mapping->size() - 1)]

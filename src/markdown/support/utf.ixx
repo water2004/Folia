@@ -74,98 +74,133 @@ inline std::pair<std::size_t, std::size_t> utf16_slice_bounds(std::u32string_vie
 }
 
 // ---------------------------------------------------------------------------
-// Grapheme cluster helpers — a lightweight cluster approximator.
-// We approximate grapheme cluster boundaries using:
-//   * CR+LF / other line breaks form a single cluster
-//   * Extend/variation-selector codepoints attach to the previous base cp
-//   * Regional indicator pairs (flag emoji) form a single cluster
-//   * ZWJ concatenates adjacent clusters
-// This is not the full UAX#29 algorithm but covers the spec's test cases
-// (CJK, ASCII, BMP, surrogate pairs via cps, emoji ZWJ family).
+// Extended grapheme clusters use the repository's pinned Unicode 15.1 data
+// and UAX #29 revision 43 rules GB3–GB999. Offsets remain Unicode scalars;
+// only caret/delete boundaries change. No normalization or source rewriting.
 // ---------------------------------------------------------------------------
 
 inline bool is_cp_white(std::uint32_t c) {
-    // ASCII whitespace + NBSP? Match Rust char::is_whitespace sufficient set.
     return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == 0x00A0 || c == 0x2028 || c == 0x2029;
 }
 
-// Classification helpers used by grapheme iteration.
-inline bool is_regional_indicator(char32_t c) { return c >= 0x1F1E6 && c <= 0x1F1FF; }
-inline bool is_extend_class(char32_t c) {
-    // U+0300–U+036F combining diacritics + variation selectors + emoji modifiers.
-    return (c >= 0x0300 && c <= 0x036F) || c == 0x200D /* ZWJ */
-        || (c >= 0xFE00 && c <= 0xFE0F) || c == 0xFE0F
-        || (c >= 0x1F3FB && c <= 0x1F3FF) /* skin-tone */
-        || (c >= 0xE0020 && c <= 0xE007F);
+namespace grapheme_detail {
+
+enum class Break { Other, CR, LF, Control, Extend, ZWJ, Regional_Indicator, Prepend, SpacingMark, L, V, T, LV, LVT };
+enum class Indic { None, Consonant, Extend, Linker };
+template<class Property> struct PropertyRange { char32_t first; char32_t last; Property value; };
+#include "grapheme_properties.inc"
+
+template<class Property, std::size_t N>
+inline Property lookup(PropertyRange<Property> const (&ranges)[N], char32_t cp, Property fallback) {
+    const auto next = std::lower_bound(std::begin(ranges), std::end(ranges), cp,
+        [](auto const& range, char32_t value) { return range.last < value; });
+    return next != std::end(ranges) && next->first <= cp ? next->value : fallback;
 }
 
-// count_graphemes over a cps view.
+inline Break property(char32_t cp) {
+    if (cp <= 0x7f) {
+        if (cp == U'\r') return Break::CR;
+        if (cp == U'\n') return Break::LF;
+        return cp < 0x20 || cp == 0x7f ? Break::Control : Break::Other;
+    }
+    // Hangul syllables alternate LV/LVT arithmetically; avoid hundreds of
+    // singleton ranges in the generated property table.
+    if (cp >= 0xac00 && cp <= 0xd7a3)
+        return (cp - 0xac00) % 28 == 0 ? Break::LV : Break::LVT;
+    return lookup(break_ranges, cp, Break::Other);
+}
+
+inline Indic indic_property(char32_t cp) {
+    return cp < 0x300 ? Indic::None : lookup(indic_ranges, cp, Indic::None);
+}
+
+inline bool pictographic(char32_t cp) {
+    return cp >= 0xa9 && unicode_property_detail::contains(pictographic_ranges, cp);
+}
+
+inline bool regional_indicator(char32_t cp) { return cp >= 0x1f1e6 && cp <= 0x1f1ff; }
+inline bool control(Break value) { return value == Break::Control || value == Break::CR || value == Break::LF; }
+
+inline bool boundary(std::u32string_view text, std::size_t index,
+    std::optional<std::size_t> preceding_regional_count = std::nullopt) {
+    if (index == 0 || index >= text.size()) return true; // GB1/GB2
+    const auto left = property(text[index - 1]);
+    const auto right = property(text[index]);
+    if (left == Break::CR && right == Break::LF) return false; // GB3
+    if (control(left) || control(right)) return true; // GB4/GB5
+    if (left == Break::L && (right == Break::L || right == Break::V
+        || right == Break::LV || right == Break::LVT)) return false; // GB6
+    if ((left == Break::LV || left == Break::V) && (right == Break::V || right == Break::T)) return false; // GB7
+    if ((left == Break::LVT || left == Break::T) && right == Break::T) return false; // GB8
+    if (right == Break::Extend || right == Break::ZWJ) return false; // GB9
+    if (right == Break::SpacingMark || left == Break::Prepend) return false; // GB9a/GB9b
+    if (indic_property(text[index]) == Indic::Consonant) {
+        auto cursor = index;
+        bool linker = false;
+        while (cursor != 0) {
+            const auto value = indic_property(text[cursor - 1]);
+            if (value == Indic::Linker) linker = true;
+            else if (value != Indic::Extend) break;
+            --cursor;
+        }
+        if (linker && cursor != 0 && indic_property(text[cursor - 1]) == Indic::Consonant) return false; // GB9c
+    }
+    if (left == Break::ZWJ && pictographic(text[index])) {
+        auto cursor = index - 1;
+        while (cursor != 0 && property(text[cursor - 1]) == Break::Extend) --cursor;
+        if (cursor != 0 && pictographic(text[cursor - 1])) return false; // GB11
+    }
+    if (left == Break::Regional_Indicator && right == Break::Regional_Indicator) {
+        auto count = preceding_regional_count.value_or(0);
+        if (!preceding_regional_count) {
+            auto cursor = index;
+            while (cursor != 0 && regional_indicator(text[cursor - 1])) { --cursor; ++count; }
+        }
+        return count % 2 == 0; // GB12/GB13
+    }
+    return true; // GB999
+}
+
+} // namespace grapheme_detail
+
+inline bool is_regional_indicator(char32_t c) { return grapheme_detail::regional_indicator(c); }
+inline bool is_extend_class(char32_t c) {
+    const auto value = grapheme_detail::property(c);
+    return value == grapheme_detail::Break::Extend || value == grapheme_detail::Break::ZWJ;
+}
+
+inline bool is_grapheme_boundary_char(std::u32string_view cps, std::size_t char_index) {
+    return grapheme_detail::boundary(cps, char_index);
+}
+
 inline std::size_t count_graphemes(std::u32string_view cps) {
     if (cps.empty()) return 0;
-    std::size_t n = 1;
-    bool last_was_ri = false;
-    for (std::size_t i = 1; i < cps.size(); ++i) {
-        char32_t prev = cps[i - 1];
-        char32_t cur = cps[i];
-        // CR+LF
-        if (prev == '\r' && cur == '\n') { continue; }
-        // Extend attaches
-        if (is_extend_class(cur)) { continue; }
-        // ZWJ already produces attach through is_extend_class.
-        // Regional indicator second of a pair
-        if (is_regional_indicator(prev) && is_regional_indicator(cur) && last_was_ri) {
-            continue; // pair collapsed
-        }
-        last_was_ri = is_regional_indicator(cur);
-        ++n;
+    std::size_t count = 1;
+    std::size_t regional_count = is_regional_indicator(cps.front()) ? 1 : 0;
+    for (std::size_t index = 1; index < cps.size(); ++index) {
+        if (grapheme_detail::boundary(cps, index, regional_count)) ++count;
+        regional_count = is_regional_indicator(cps[index]) ? regional_count + 1 : 0;
     }
-    return n;
+    return count;
 }
 
-// Find char index of the start of the grapheme cluster whose content *precedes*
-// `char_index`. Returns 0 if at the very start.
+// Find the preceding/following boundary even when an externally restored
+// scalar offset is inside a cluster. A leading combining sequence never
+// absorbs the following base character; regional indicators pair from the
+// beginning of their contiguous run.
 inline std::size_t prev_grapheme_boundary_char(std::u32string_view cps, std::size_t char_index) {
-    if (char_index == 0 || cps.empty()) return 0;
-    if (char_index > cps.size()) char_index = cps.size();
-    // Walk backwards until we find a non-extend, non (RI continuation), non ZWJ predecessor.
-    std::size_t i = char_index;
-    while (i > 0) {
-        char32_t cur = cps[i - 1];
-        --i;
-        if (i == 0) { return 0; }
-        char32_t before = cps[i - 1];
-        if (is_extend_class(cur)) continue;             // cur is part of cluster with `before`
-        if (cur == '\n' && before == '\r') continue;     // CR+LF cluster with further base
-        if (is_regional_indicator(cur) && is_regional_indicator(before)) continue;
-        // cur is a cluster base; the boundary is at i.
-        break;
-    }
-    return i;
+    auto cursor = (std::min)(char_index, cps.size());
+    if (cursor == 0) return 0;
+    --cursor;
+    while (cursor != 0 && !grapheme_detail::boundary(cps, cursor)) --cursor;
+    return cursor;
 }
 
-// Find char index just after the grapheme cluster that begins at or contains
-// `char_index`. Pair with prev for caret stepping semantics.
 inline std::size_t next_grapheme_boundary_char(std::u32string_view cps, std::size_t char_index) {
-    if (char_index >= cps.size() || cps.empty()) return cps.size();
-    std::size_t i = char_index;
-    // If we land on an extend cp, advance to a base first.
-    while (i < cps.size() && is_extend_class(cps[i])) ++i;
-    if (i >= cps.size()) return cps.size();
-    // base at i, advance one.
-    const auto base = cps[i];
-    ++i;
-    // Unicode grapheme rule GB3: CR × LF. A physical CRLF terminator is one
-    // caret/delete unit, matching the reverse-boundary implementation above.
-    if (base == U'\r' && i < cps.size() && cps[i] == U'\n') ++i;
-    // consume trailing extends / ZWJ clusters.
-    while (i < cps.size()) {
-        char32_t cur = cps[i];
-        if (is_extend_class(cur)) { ++i; continue; }
-        // Regional indicator pair after an RI base
-        if (is_regional_indicator(cps[i - 1]) && is_regional_indicator(cur)) { ++i; continue; }
-        break;
-    }
-    return i;
+    if (char_index >= cps.size()) return cps.size();
+    auto cursor = char_index + 1;
+    while (cursor < cps.size() && !grapheme_detail::boundary(cps, cursor)) ++cursor;
+    return cursor;
 }
 
 // ---------------------------------------------------------------------------
