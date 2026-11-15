@@ -101,7 +101,7 @@ suite document_structure_tests = [] {
     expect(fatal(bool(cell_paste.has_value())));
     if (cell_paste) {
         const auto& cell = cell_paste->after.root.children.front().children.front().children.front();
-        expect(fatal(bool(cell.inline_content.source == U"x<br>y")));
+        expect(fatal(bool(cell.inline_content.source == U"  x<br>y  ")));
         expect_document_valid(cell_paste->after);
     }
 };

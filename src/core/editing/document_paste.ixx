@@ -11,6 +11,7 @@ import folia.core.document_ids;
 import folia.core.document_edit_support;
 import folia.core.document_source_edit;
 import folia.core.document_block_reparse;
+import folia.core.document_input_rules;
 import folia.markdown.document_text;
 import folia.markdown.container_source;
 import folia.core.document_container_source;
@@ -187,17 +188,18 @@ inline std::optional<std::u32string> whole_pasted_link_destination(const BlockVe
 inline void split_soft_lines_for_atx_heading(
     BlockVec& blocks,
     const BlockNode& anchor,
-    const MarkdownDialect& dialect) {
+    const MarkdownDialect& dialect,
+    std::u32string_view clipboard_source) {
     if (!atx_heading(anchor) || blocks.size() != 1
         || blocks.front().kind != BlockKind::Paragraph) return;
     auto& first = blocks.front().inline_content;
     auto& source = first.source;
-    const auto newline = source.find(U'\n');
+    const auto newline = clipboard_source.find(U'\n');
     if (newline == std::u32string::npos) return;
     auto trailing = blocks.front();
-    trailing.inline_content.source = source.substr(newline + 1);
+    trailing.inline_content.source = clipboard_source.substr(newline + 1);
     trailing.separator_before.reset();
-    source.erase(newline);
+    source = clipboard_source.substr(0, newline);
 
     // These are temporary clipboard blocks, so their parser-local ids are
     // replaced before insertion.  The CST must still be rebuilt immediately:
@@ -385,21 +387,15 @@ inline std::optional<TextPosition> paste_literal(
     std::vector<DocumentOperation>& operations) {
     auto* block = find_block(document.root, position.container_id);
     if (!block) return std::nullopt;
-    if (block->kind == BlockKind::TableCell) {
-        std::size_t first = 0;
-        std::size_t last = normalized.size();
-        auto whitespace = [](char32_t value) {
-            return value == U' ' || value == U'\t' || value == U'\n';
-        };
-        while (first < last && whitespace(normalized[first])) ++first;
-        while (last > first && whitespace(normalized[last - 1])) --last;
-        normalized = normalized.substr(first, last - first);
-        std::u32string cell_source;
-        for (const auto value : normalized) {
-            if (value == U'\n') cell_source += U"<br>";
-            else cell_source.push_back(value);
-        }
-        normalized = std::move(cell_source);
+    if (document_edit_detail::atomic_block(block->kind)) {
+        auto paragraph = document_input_rules::ensure_atomic_boundary_paragraph(document, position, allocator);
+        if (!paragraph) return std::nullopt;
+        position = paragraph->target;
+        operations.insert(operations.end(),
+            std::make_move_iterator(paragraph->operations.begin()),
+            std::make_move_iterator(paragraph->operations.end()));
+        block = find_document_block(document, position.container_id);
+        if (!block) return std::nullopt;
     }
     return record_source_insert(
         document,
@@ -414,11 +410,12 @@ inline std::optional<TextPosition> paste_parsed_blocks(
     EditorDocument& document,
     TextPosition position,
     BlockVec blocks,
+    std::u32string_view clipboard_source,
     document_edit_detail::NodeAllocator& allocator,
     std::vector<DocumentOperation>& operations) {
     auto* anchor = find_block(document.root, position.container_id);
     if (!anchor) return std::nullopt;
-    split_soft_lines_for_atx_heading(blocks, *anchor, document.dialect);
+    split_soft_lines_for_atx_heading(blocks, *anchor, document.dialect, clipboard_source);
 
     if (const auto* inline_document = editable_inline_document(*anchor);
         inline_document
@@ -445,7 +442,8 @@ inline std::optional<TextPosition> paste_parsed_blocks(
             document,
             anchor->id,
             position.source_offset,
-            blocks.front().inline_content.source,
+            atx_heading(*anchor) ? std::u32string_view(blocks.front().inline_content.source)
+                : clipboard_source,
             allocator,
             operations);
     }
@@ -641,15 +639,18 @@ inline std::optional<DocumentTransaction> document_paste_text(
     auto* anchor = find_block(working.root, current.active.container_id);
     if (!anchor) return std::nullopt;
     std::optional<TextPosition> target;
-    auto structure = document_edit_detail::plan_block_source_insertion(
-        working, current.active, normalized);
+    const auto* anchor_inline = editable_inline_document(*anchor);
+    const auto html_text = anchor_inline && anchor_inline->syntax_mode == InlineSyntaxMode::HtmlText;
+    auto structure = html_text ? std::optional<document_edit_detail::BlockReparsePlan>{}
+        : document_edit_detail::plan_block_source_insertion(working, current.active, normalized);
     const auto literal = anchor->kind == BlockKind::CodeBlock
         || anchor->kind == BlockKind::MathBlock
-        || anchor->kind == BlockKind::TableCell;
+        || anchor->kind == BlockKind::TableCell
+        || html_text;
     if (structure || literal) {
         target = document_paste_detail::paste_literal(
             working, current.active, std::move(normalized), allocator, operations);
-        if (target && !structure) {
+        if (target && !structure && !html_text) {
             structure = document_edit_detail::plan_edited_direct_block(
                 working, *target, document_edit_detail::BlockReparseScope::Fragment);
         }
@@ -667,6 +668,7 @@ inline std::optional<DocumentTransaction> document_paste_text(
                 working,
                 current.active,
                 std::move(parsed.blocks),
+                normalized,
                 allocator,
                 operations);
         }
