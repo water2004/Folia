@@ -739,7 +739,9 @@ inline std::optional<SourceRange> block_source_backward_delete_range(
     if (current == mapping.end() || *current != offset || current == mapping.begin()) {
         return std::nullopt;
     }
-    return SourceRange{*std::prev(current), *current};
+    const auto content_offset = static_cast<std::size_t>(current - mapping.begin());
+    const auto previous = prev_grapheme_boundary_char(document.tree().content, content_offset);
+    return SourceRange{mapping[previous], *current};
 }
 
 inline std::optional<SourceRange> block_source_forward_delete_range(
@@ -752,7 +754,9 @@ inline std::optional<SourceRange> block_source_forward_delete_range(
     if (current == mapping.end() || *current != offset || std::next(current) == mapping.end()) {
         return std::nullopt;
     }
-    return SourceRange{*current, *std::next(current)};
+    const auto content_offset = static_cast<std::size_t>(current - mapping.begin());
+    const auto next = next_grapheme_boundary_char(document.tree().content, content_offset);
+    return SourceRange{*current, mapping[next]};
 }
 
 inline std::optional<SourceRange> block_source_trailing_line_break(

@@ -315,6 +315,9 @@
     <ClCompile Include="..\core\source\source_editor.ixx">
       <Filter>Core Modules\Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\core\source\source_commands.ixx">
+      <Filter>Core Modules\Source</Filter>
+    </ClCompile>
     <ClCompile Include="..\core\source\source_patch.ixx">
       <Filter>Core Modules\Source</Filter>
     </ClCompile>

@@ -1923,6 +1923,29 @@ struct Parser {
         return value;
     }
 
+    static std::u32string decode_html_attribute(std::u32string_view raw) {
+        std::u32string decoded;
+        for (std::size_t cursor = 0; cursor < raw.size();) {
+            if (raw[cursor] == U'&') {
+                auto end = cursor + 1;
+                while (end < raw.size() && end - cursor <= 35
+                    && raw[end] != U';' && raw[end] != U'&'
+                    && raw[end] != U'\r' && raw[end] != U'\n') ++end;
+                if (end < raw.size() && raw[end] == U';') {
+                    if (auto value = decode_html_character_reference(raw.substr(cursor, end - cursor + 1))) {
+                        decoded += *value;
+                        cursor = end + 1;
+                        continue;
+                    }
+                }
+            }
+            // HTML attribute values have character references, not Markdown
+            // backslash escapes. Decode once; retain the original CST source.
+            decoded += raw[cursor++];
+        }
+        return decoded;
+    }
+
     std::optional<HtmlTag> html_tag_at(std::size_t at, std::size_t parse_limit) const {
         const auto scanned = scan_markdown_html_tag(src, at, parse_limit);
         if (!scanned) return std::nullopt;
@@ -1938,7 +1961,7 @@ struct Parser {
             std::string value;
             if (attribute_range.value) {
                 const auto& range = *attribute_range.value;
-                value = cps_to_utf8(src.substr(range.start, range.length()));
+                value = cps_to_utf8(decode_html_attribute(src.substr(range.start, range.length())));
             }
             // Event handlers never enter derived presentation state.  Safe
             // CSS declarations are filtered later by the HTML presentation

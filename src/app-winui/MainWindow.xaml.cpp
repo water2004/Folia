@@ -209,12 +209,12 @@ namespace winrt::Folia::implementation
     {
         auto source = editorSession().IsSourceMode();
         SourceModeButton().IsChecked(source);
-        BoldButton().IsEnabled(!source);
-        ItalicButton().IsEnabled(!source);
-        StrikeButton().IsEnabled(!source);
-        InlineCodeButton().IsEnabled(!source);
-        BlocksButton().IsEnabled(!source);
-        InsertButton().IsEnabled(!source);
+        BoldButton().IsEnabled(true);
+        ItalicButton().IsEnabled(true);
+        StrikeButton().IsEnabled(true);
+        InlineCodeButton().IsEnabled(true);
+        BlocksButton().IsEnabled(true);
+        InsertButton().IsEnabled(true);
     }
 
     void MainWindow::ToggleSourceMode()

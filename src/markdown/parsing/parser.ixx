@@ -1888,7 +1888,12 @@ std::optional<BlockNode> try_parse_raw_html_block(const LeafLine& first) {
         parent.block_dispatch_started=true;
         auto* range=source_range_for(block.id);
         if (!range) throw std::logic_error("completed block has no physical source range");
-        if (!parent.node.children.empty() && parent.preceding_child_end) {
+        // A titleless callout's header is physical source but is not a child.
+        // Its first body still owns the exact header ending and any blank
+        // separators. A synthetic empty body can precede that boundary.
+        const bool follows_callout_header=parent.node.kind==BlockKind::Callout
+            && parent.preceding_child_end && *parent.preceding_child_end<=range->source_range.start;
+        if (parent.preceding_child_end && (!parent.node.children.empty() || follows_callout_header)) {
             const auto gap=parser_source_detail::PhysicalSourceRange{*parent.preceding_child_end,range->source_range.start};
             std::u32string spelling;
             std::size_t offset=0;
@@ -1916,8 +1921,8 @@ std::optional<BlockNode> try_parse_raw_html_block(const LeafLine& first) {
                 }
             }
             const bool header_to_first_body=parent.node.kind==BlockKind::Callout
-                && parent.node.children.size()==1
-                && parent.node.children.front().kind==BlockKind::CalloutTitle;
+                && (parent.node.children.empty() || (parent.node.children.size()==1
+                    && parent.node.children.front().kind==BlockKind::CalloutTitle));
             // The Callout header already emits this boundary. An explicit empty
             // sibling gap would suppress separators after later title splits.
             if (!header_to_first_body || !spelling.empty())

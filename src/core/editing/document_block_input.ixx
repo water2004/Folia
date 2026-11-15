@@ -12,10 +12,220 @@ import folia.core.document_edit_support;
 import folia.markdown.ids;
 import folia.markdown.inline_document;
 import folia.markdown.text_edit;
+import folia.markdown.parser;
+import folia.markdown.serializer;
 import folia.core.document_input_syntax;
 import folia.core.document_list_input;
 
 export namespace folia::document_input_rules::detail {
+
+// Atomic owners expose the two sides of one object, not editable characters.
+// A caret on either side must still be a place where a flow paragraph can be
+// created. Keep this shared by Enter, typing and paste so those commands do
+// not invent different ways to escape an image, divider or other object.
+inline std::optional<document_edit_detail::RecordedBlockEdit> insert_atomic_boundary_paragraph(
+    EditorDocument& document,
+    TextPosition position,
+    document_edit_detail::NodeAllocator& allocator) {
+    const auto path = document_block_path(document, position.container_id);
+    if (!path || path->empty()) return std::nullopt;
+    auto parent_path = *path;
+    const auto index = parent_path.back();
+    parent_path.pop_back();
+    auto* parent = block_at_path(document.root, parent_path);
+    if (!parent || index >= parent->children.size()
+        || !document_edit_detail::atomic_block(parent->children[index].kind)) {
+        return std::nullopt;
+    }
+
+    auto syntax_mode = InlineSyntaxMode::Markdown;
+    const auto* context = &document.root;
+    for (const auto child_index : parent_path) {
+        context = &context->children[child_index];
+        if (context->kind == BlockKind::HtmlContainer || context->has_html_source()
+            || context->has_html_element_provenance()) {
+            syntax_mode = InlineSyntaxMode::HtmlText;
+        }
+    }
+    auto paragraph = document_edit_detail::empty_paragraph(allocator, document, syntax_mode);
+    document_edit_detail::RecordedBlockEdit result;
+    result.target = {paragraph.id, 0, TextAffinity::Downstream};
+    const auto insert_index = index + (position.source_offset == 0 ? 0u : 1u);
+    DocumentTreeEdit insert;
+    insert.kind = DocumentTreeEditKind::Insert;
+    insert.parent_id = parent->id;
+    insert.index = insert_index;
+    insert.after = paragraph;
+    result.operations.emplace_back(std::move(insert));
+    if (!insert_block(*parent, insert_index, std::move(paragraph))) return std::nullopt;
+    parent_path.push_back(insert_index);
+    cache_document_block_path(document, parent_path);
+    return result;
+}
+
+// Confirm a completed Markdown line on Enter. Spaced dividers share their
+// initial spelling with eager list input ("- " / "* "), including nested
+// prefixes such as "- - ". Recover only those first-child prefixes that are
+// on this same line, and unwrap exactly the matching item chain.
+inline std::optional<document_edit_detail::RecordedBlockEdit> activate_thematic_break(
+    EditorDocument& document,
+    TextPosition position,
+    document_edit_detail::NodeAllocator& allocator) {
+    const auto* selected = find_document_block(document, position.container_id);
+    if (!selected || selected->kind != BlockKind::Paragraph
+        || selected->inline_content.syntax_mode != InlineSyntaxMode::Markdown
+        || position.source_offset != selected->inline_content.source.size()) {
+        return std::nullopt;
+    }
+    if (selected->inline_content.source.find_first_not_of(U" \t-*_")
+        != std::u32string::npos) return std::nullopt;
+
+    auto candidate = selected->inline_content.source;
+    std::optional<std::u32string> marker;
+    std::size_t matching_prefixes = 0;
+    if (recognize_thematic_break(candidate)) marker = candidate;
+    auto descendant = selected->id;
+    for (std::size_t prefixes = 1;; ++prefixes) {
+        const auto* child = find_document_block(document, descendant);
+        if (!child || (child->separator_before
+                && child->separator_before->find_first_of(U"\r\n") != std::u32string::npos)) {
+            break;
+        }
+        const auto context = direct_list_context(document, descendant);
+        if (!context || context->child_index != 0) break;
+        const auto* list = block_at_path(document.root, context->list_path);
+        if (!list || list->list_special().ordered
+            || context->item_index >= list->children.size()) break;
+        const auto& item = list->children[context->item_index];
+        if (item.kind != BlockKind::ListItem || item.children.size() != 1) break;
+        // This item has one child and every already traversed nested list has
+        // one item, so the temporary fragment contains exactly the selected
+        // leaf and its prefix chain. The serializer owns physical prefix and
+        // empty marker-line provenance; concatenating ItemSpecial::marker
+        // alone would incorrectly turn "-\n  --" into a divider.
+        auto wrapper = list_shell_from(*list, list->id);
+        wrapper.children.push_back(item);
+        BlockVec fragment;
+        fragment.push_back(std::move(wrapper));
+        candidate = serialize_markdown_fragment(fragment);
+        if (candidate.find_first_of(U"\r\n") != std::u32string::npos) break;
+        if (recognize_thematic_break(candidate)) {
+            marker = candidate;
+            matching_prefixes = prefixes;
+        }
+        if (list->children.size() != 1) break;
+        descendant = list->id;
+    }
+    if (!marker) return std::nullopt;
+
+    document_edit_detail::RecordedBlockEdit result;
+    document_edit_detail::MutationRollback rollback(document, result.operations, document.revision);
+    for (std::size_t index = 0; index < matching_prefixes; ++index) {
+        const auto context = direct_list_context(document, position.container_id);
+        if (!context || context->list_path.empty()) return std::nullopt;
+        auto moved_path = context->list_path;
+        moved_path.back() += context->item_index > 0 ? 1u : 0u;
+        auto unwrapped = remove_top_level_list_prefix(document, *context, position, allocator);
+        if (!unwrapped) return std::nullopt;
+        result.operations.insert(result.operations.end(),
+            std::make_move_iterator(unwrapped->operations.begin()),
+            std::make_move_iterator(unwrapped->operations.end()));
+        cache_document_block_path(document, moved_path);
+    }
+
+    auto* block = find_document_block(document, position.container_id);
+    if (!block || block->kind != BlockKind::Paragraph) return std::nullopt;
+    auto source_edit = document_edit_detail::edit_inline(document, block->id,
+        {0, block->inline_content.source.size()}, {}, allocator);
+    if (!source_edit) return std::nullopt;
+    document_edit_detail::append_source_operation(result.operations, std::move(*source_edit));
+    block = find_document_block(document, position.container_id);
+    if (!block) return std::nullopt;
+    DocumentTreeEdit update;
+    update.kind = DocumentTreeEditKind::UpdatePayload;
+    update.before = document_transaction_detail::payload_shell(*block);
+    block->kind = BlockKind::ThematicBreak;
+    block->ensure_text_special().opening_marker = std::move(*marker);
+    update.after = document_transaction_detail::payload_shell(*block);
+    result.operations.emplace_back(std::move(update));
+
+    auto following = insert_atomic_boundary_paragraph(document,
+        {position.container_id, 1, TextAffinity::Downstream}, allocator);
+    if (!following) return std::nullopt;
+    result.target = following->target;
+    result.operations.insert(result.operations.end(),
+        std::make_move_iterator(following->operations.begin()),
+        std::make_move_iterator(following->operations.end()));
+    rollback.commit();
+    return result;
+}
+
+inline std::optional<document_edit_detail::RecordedBlockEdit> activate_setext_heading(
+    EditorDocument& document,
+    TextPosition position,
+    document_edit_detail::NodeAllocator& allocator) {
+    auto* block = find_document_block(document, position.container_id);
+    if (!block || block->kind != BlockKind::Paragraph
+        || block->inline_content.syntax_mode != InlineSyntaxMode::Markdown
+        || position.source_offset != block->inline_content.source.size()
+        || !has_setext_underline(block->inline_content.source)) {
+        return std::nullopt;
+    }
+
+    // The parser decides whether the preceding lines are valid heading
+    // content, including indentation, escapes and other block interruptions.
+    // Recognition is bounded to this owner's source and keeps the parser's
+    // exact marker spellings instead of rebuilding a canonical ATX heading.
+    auto parsed = plan_block_fragment(block->inline_content.source, document.dialect,
+        [](const BlockVec& blocks) {
+            return blocks.size() == 1 && blocks.front().kind == BlockKind::Heading;
+        });
+    if (!parsed || parsed->blocks.size() != 1) return std::nullopt;
+    const auto& heading = parsed->blocks.front();
+    const auto syntax = heading.text_special();
+    const auto& content = heading.inline_content.source;
+    if (syntax.opening_marker + content + syntax.closing_marker != block->inline_content.source) {
+        return std::nullopt;
+    }
+
+    document_edit_detail::RecordedBlockEdit result;
+    document_edit_detail::MutationRollback rollback(document, result.operations, document.revision);
+    const auto content_start = syntax.opening_marker.size();
+    const auto content_end = content_start + content.size();
+    auto closing = document_edit_detail::edit_inline(document, block->id,
+        {content_end, block->inline_content.source.size()}, {}, allocator);
+    if (!closing) return std::nullopt;
+    document_edit_detail::append_source_operation(result.operations, std::move(*closing));
+    if (content_start != 0) {
+        auto opening = document_edit_detail::edit_inline(document, position.container_id,
+            {0, content_start}, {}, allocator);
+        if (!opening) return std::nullopt;
+        document_edit_detail::append_source_operation(result.operations, std::move(*opening));
+    }
+    block = find_document_block(document, position.container_id);
+    if (!block) return std::nullopt;
+    DocumentTreeEdit update;
+    update.kind = DocumentTreeEditKind::UpdatePayload;
+    update.before = document_transaction_detail::payload_shell(*block);
+    block->kind = BlockKind::Heading;
+    block->ensure_text_special() = syntax;
+    update.after = document_transaction_detail::payload_shell(*block);
+    result.operations.emplace_back(std::move(update));
+
+    const auto at_end = TextPosition{block->id, content.size(), TextAffinity::Downstream};
+    auto following = split_list_item(document, at_end, allocator);
+    if (!following) {
+        following = document_edit_detail::split_direct(document, at_end.container_id,
+            at_end.source_offset, allocator);
+    }
+    if (!following) return std::nullopt;
+    result.target = following->target;
+    result.operations.insert(result.operations.end(),
+        std::make_move_iterator(following->operations.begin()),
+        std::make_move_iterator(following->operations.end()));
+    rollback.commit();
+    return result;
+}
 
 inline void record_list_item_boundary(
     EditorDocument& document,
@@ -226,6 +436,7 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> open_raw_block(
     if (!path || path->empty()) return std::nullopt;
     auto* block = block_at_path(document.root, *path);
     if (!block || block->kind != BlockKind::Paragraph
+        || block->inline_content.syntax_mode != InlineSyntaxMode::Markdown
         || position.source_offset != block->inline_content.source.size()) return std::nullopt;
     auto opening = recognize_raw_block_opening(block->inline_content.source, document.dialect);
     if (!opening) return std::nullopt;
@@ -251,6 +462,7 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> open_raw_block(
     BlockNode replacement;
     replacement.id = block->id;
     replacement.kind = opening->block_kind;
+    replacement.separator_before = block->separator_before;
     replacement.ensure_atomic_special().math_delim = opening->math_delimiter;
     replacement.block_source.tree().kind = opening->source_kind;
     *block = std::move(replacement);

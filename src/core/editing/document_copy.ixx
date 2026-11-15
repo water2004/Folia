@@ -85,24 +85,32 @@ inline SourceRange selected_range(
     return {(std::min)(start, length), (std::min)(end, length)};
 }
 
+inline std::optional<std::u32string> selected_owner_source(
+    const BlockNode& owner, SourceRange range) {
+    const auto text = editable_block_text_view(owner);
+    if (!text || !range.valid_for(text->size())) return std::nullopt;
+    if (range.empty()) return std::u32string{};
+    if (!editable_inline_document(owner) && !editable_raw_block_source(owner)) {
+        // Atomic text projection uses U+FFFC for navigation. Clipboard data
+        // must carry the object's actual Markdown, never that placeholder.
+        BlockVec fragment;
+        fragment.push_back(owner);
+        fragment.front().separator_before.reset();
+        return serialize_markdown_fragment(fragment);
+    }
+    return std::u32string(text->substr(range.start, range.length()));
+}
+
 inline std::optional<std::pair<std::size_t, std::size_t>> descendant_fragment_span(
     const BlockNode& block,
     const OrderedSelection& selection) {
-    std::optional<std::pair<std::size_t, std::size_t>> span;
-    const auto self = selection.document
-        ? document_editable_order_position(*selection.document, block.id)
-        : std::nullopt;
-    if (self) span = {*self, *self};
-    for (const auto& child : block.children) {
-        auto child_span = descendant_fragment_span(child, selection);
-        if (!child_span) continue;
-        if (!span) span = child_span;
-        else {
-            span->first = (std::min)(span->first, child_span->first);
-            span->second = (std::max)(span->second, child_span->second);
-        }
-    }
-    return span;
+    if (!selection.document) return std::nullopt;
+    const auto first = document_editable_order_position(
+        *selection.document, first_editable_subtree_owner(block));
+    const auto last = document_editable_order_position(
+        *selection.document, last_editable_subtree_owner(block));
+    if (!first || !last) return std::nullopt;
+    return std::pair{*first, *last};
 }
 
 inline bool intersects_selection(
@@ -164,22 +172,44 @@ inline void truncate_owner(
 inline std::optional<BlockNode> slice_block(
     const BlockNode& block,
     const OrderedSelection& selection,
-    std::uint64_t& next_copy_id) {
+    std::uint64_t& next_copy_id,
+    std::unordered_set<std::uint64_t>& boundary_placeholders) {
     const auto span = descendant_fragment_span(block, selection);
     if (!span || !intersects_selection(*span, selection)) return std::nullopt;
 
-    BlockNode copy = block;
-    copy.children.clear();
+    // Clone only this node before visiting selected children. Deep-copying a
+    // container and clearing its children first duplicates an entire large
+    // list even when the selection contains only two of its leaves.
+    BlockNode copy;
+    copy.id = block.id;
+    copy.kind = block.kind;
+    copy.inline_content = block.inline_content;
+    copy.block_source = block.block_source;
+    copy.separator_before = block.separator_before;
+    copy.payload = block.payload ? std::make_unique<BlockNodeSpecial>(*block.payload) : nullptr;
     bool has_selected_owner = false;
     const auto self = selection.document
         ? document_editable_order_position(*selection.document, block.id)
         : std::nullopt;
     if (self && *self >= selection.start_index && *self <= selection.end_index) {
         const auto range = selected_range(selection, *self);
-        if (!range.empty()) {
+        const auto text = owner_text(selection, *self);
+        if (!text) return std::nullopt;
+        const auto endpoint = *self == selection.start_index || *self == selection.end_index;
+        if (range.empty() && endpoint) {
+            // The interval still crosses this owner's following/preceding
+            // boundary. Keep a source-empty placeholder, not the unselected
+            // image/fence/heading syntax, so copying only a newline works.
+            copy = BlockNode{};
+            copy.id = block.id;
+            copy.kind = BlockKind::Paragraph;
+            copy.separator_before = block.separator_before;
+            if (block.kind != BlockKind::Paragraph || !text->empty()) {
+                boundary_placeholders.insert(block.id.v);
+            }
             has_selected_owner = true;
-            const auto text = owner_text(selection, *self);
-            if (!text) return std::nullopt;
+        } else if (!range.empty() || text->empty()) {
+            has_selected_owner = true;
             truncate_owner(
                 copy,
                 range,
@@ -190,13 +220,21 @@ inline std::optional<BlockNode> slice_block(
     }
 
     for (const auto& child : block.children) {
-        if (auto selected = slice_block(child, selection, next_copy_id)) {
+        if (auto selected = slice_block(child, selection, next_copy_id, boundary_placeholders)) {
             copy.children.push_back(std::move(*selected));
         }
     }
 
     if (!has_selected_owner && copy.children.empty()) return std::nullopt;
     return copy;
+}
+
+inline std::optional<BlockNode> slice_block(
+    const BlockNode& block,
+    const OrderedSelection& selection,
+    std::uint64_t& next_copy_id) {
+    std::unordered_set<std::uint64_t> boundary_placeholders;
+    return slice_block(block, selection, next_copy_id, boundary_placeholders);
 }
 
 } // namespace document_copy_detail
@@ -213,10 +251,9 @@ inline std::optional<std::u32string> document_selected_markdown(
         const auto range = document_copy_detail::selected_range(
             *ordered,
             ordered->start_index);
-        const auto text = document_copy_detail::owner_text(
-            *ordered, ordered->start_index);
-        if (!text) return std::nullopt;
-        return std::u32string{text->substr(range.start, range.length())};
+        const auto* owner = find_document_block(document, ordered->start.container_id);
+        return owner ? document_copy_detail::selected_owner_source(*owner, range)
+            : std::nullopt;
     }
 
     // Any range that crosses a table is an ordinary row-major text range, not
@@ -239,13 +276,10 @@ inline std::optional<std::u32string> document_selected_markdown(
                     ? U'\t' : U'\n');
             }
             auto const* owner = find_document_block(document, slice.container_id);
-            auto source = owner ? editable_block_text_view(*owner) : std::nullopt;
-            if (!source || !slice.source_range.valid_for(source->size())) {
-                return std::nullopt;
-            }
-            result.append(source->substr(
-                slice.source_range.start,
-                slice.source_range.length()));
+            auto source = owner ? document_copy_detail::selected_owner_source(
+                *owner, slice.source_range) : std::nullopt;
+            if (!source) return std::nullopt;
+            result += *source;
         }
         return result;
     }
@@ -253,11 +287,13 @@ inline std::optional<std::u32string> document_selected_markdown(
     BlockVec selected;
     selected.reserve(document.root.children.size());
     auto next_copy_id = document.next_node_id;
+    std::unordered_set<std::uint64_t> boundary_placeholders;
     for (const auto& block : document.root.children) {
         if (auto copy = document_copy_detail::slice_block(
                 block,
                 *ordered,
-                next_copy_id)) {
+                next_copy_id,
+                boundary_placeholders)) {
             selected.push_back(std::move(*copy));
         }
     }
@@ -267,7 +303,17 @@ inline std::optional<std::u32string> document_selected_markdown(
     // fragment serializer choose an unambiguous block separator for every
     // selected top-level sibling instead of accidentally turning the next
     // paragraph into a lazy list continuation.
-    for (auto& block : selected) block.separator_before.reset();
+    for (std::size_t index = 0; index < selected.size(); ++index) {
+        auto& block = selected[index];
+        const auto original_separator = block.separator_before;
+        block.separator_before.reset();
+        if (index > 0 && boundary_placeholders.contains(selected[index - 1].id.v)) {
+            // An emptied boundary node was not originally a blank paragraph.
+            // Its following separator must not shrink to the blank-paragraph
+            // default solely because the selected content is empty.
+            block.separator_before = original_separator.value_or(U"\n\n");
+        }
+    }
     return serialize_markdown_fragment(selected);
 }
 

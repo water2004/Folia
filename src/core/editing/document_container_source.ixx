@@ -326,43 +326,44 @@ inline std::unordered_set<std::uint64_t> subtree_ids(const BlockNode& root) {
     return ids;
 }
 
-inline std::vector<NodeId> ancestor_ids(const BlockNode& root, NodeId id) {
-    std::vector<NodeId> ids;
-    const auto path = block_path(root, id);
-    if (!path) return ids;
-    const auto* node = &root;
-    ids.push_back(node->id);
-    for (const auto index : *path) {
-        if (index >= node->children.size()) break;
-        node = &node->children[index];
-        ids.push_back(node->id);
-    }
-    return ids;
-}
-
 inline std::vector<DocumentTreeEdit> update_move_remove_prefixes(
     EditorDocument& document,
-    const DocumentTreeEdit& edit) {
+    const DocumentTreeEdit& edit,
+    const BlockPath& old_parent_path,
+    const std::optional<BlockPath>& new_parent_path,
+    const BlockNode* moved) {
     if (edit.kind != DocumentTreeEditKind::Move
         && edit.kind != DocumentTreeEditKind::Remove) return {};
-    const BlockNode* moved = edit.kind == DocumentTreeEditKind::Remove
-        ? &edit.before
-        : find_block(document.root, edit.moved_id);
-    if (!moved) return {};
+    if (edit.kind == DocumentTreeEditKind::Remove) moved = &edit.before;
+    if (!moved || (edit.kind == DocumentTreeEditKind::Move && !new_parent_path)) return {};
+    std::vector<NodeId> new_ids;
+    if (new_parent_path) {
+        const auto* node = &document.root;
+        new_ids.push_back(node->id);
+        for (const auto index : *new_parent_path) {
+            if (index >= node->children.size()) return {};
+            node = &node->children[index];
+            new_ids.push_back(node->id);
+        }
+        if (node->id != edit.other_parent_id) return {};
+    }
+    std::vector<BlockNode*> containers;
+    auto* ancestor = &document.root;
+    for (std::size_t depth = 0; depth <= old_parent_path.size(); ++depth) {
+        if (ancestor->has_container_source()
+            && std::ranges::find(new_ids, ancestor->id) == new_ids.end()) {
+            containers.push_back(ancestor);
+        }
+        if (depth == old_parent_path.size()) break;
+        if (old_parent_path[depth] >= ancestor->children.size()) return {};
+        ancestor = &ancestor->children[old_parent_path[depth]];
+    }
+    if (ancestor->id != edit.parent_id || containers.empty()) return {};
+    // Most item moves leave all existing prefix scopes intact. Only inspect
+    // the moved subtree when a source-only ancestor actually owns provenance.
     const auto owners = subtree_ids(*moved);
-    const auto old_ids = ancestor_ids(document.root, edit.parent_id);
-    const auto new_ids = edit.kind == DocumentTreeEditKind::Move
-        ? ancestor_ids(document.root, edit.other_parent_id)
-        : std::vector<NodeId>{};
-    const auto is_in = [](const std::vector<NodeId>& ids, NodeId id) {
-        return std::ranges::find(ids, id) != ids.end();
-    };
     std::vector<DocumentTreeEdit> updates;
-
-    for (const auto id : old_ids) {
-        if (edit.kind == DocumentTreeEditKind::Move && is_in(new_ids, id)) continue;
-        auto* container = find_block(document.root, id);
-        if (!container || !container->has_container_source()) continue;
+    for (auto* container : containers) {
         auto next = container->container_source();
         std::erase_if(next.lines, [&](const auto& line) {
             return owners.contains(line.anchor.owner_id.v);
@@ -379,11 +380,58 @@ inline std::vector<DocumentTreeEdit> update_move_remove_prefixes(
     return updates;
 }
 
+inline std::vector<DocumentTreeEdit> update_move_remove_prefixes(
+    EditorDocument& document,
+    const DocumentTreeEdit& edit) {
+    if (edit.kind != DocumentTreeEditKind::Move
+        && edit.kind != DocumentTreeEditKind::Remove) return {};
+    // Callers can run between several tree mutations, before their
+    // transaction updates locators. Use a validated cached location when it
+    // is still valid, otherwise retain their existing tree lookup without
+    // repairing any derived document index in the middle of the operation.
+    const auto locate = [&](NodeId id) -> std::optional<BlockPath> {
+        if (auto cached = cached_document_block_path(document, id)) {
+            const auto* block = block_at_path(document.root, *cached);
+            if (block && block->id == id) return cached;
+        }
+        return block_path(document.root, id);
+    };
+    const auto old_parent = locate(edit.parent_id);
+    if (!old_parent) return {};
+    const auto new_parent = edit.kind == DocumentTreeEditKind::Move
+        ? locate(edit.other_parent_id) : std::nullopt;
+    const BlockNode* moved = &edit.before;
+    if (edit.kind == DocumentTreeEditKind::Move) {
+        if (!new_parent) return {};
+        const auto* parent = block_at_path(document.root, *new_parent);
+        moved = parent && edit.other_index < parent->children.size()
+            ? &parent->children[edit.other_index] : nullptr;
+        if (!moved || moved->id != edit.moved_id) moved = find_block(document.root, edit.moved_id);
+    }
+    return update_move_remove_prefixes(document, edit, *old_parent, new_parent, moved);
+}
+
 inline void append_container_tree_operation(
     EditorDocument& document,
     std::vector<DocumentOperation>& operations,
     DocumentTreeEdit edit) {
     auto metadata = update_move_remove_prefixes(document, edit);
+    operations.emplace_back(std::move(edit));
+    for (auto& update : metadata) operations.emplace_back(std::move(update));
+}
+
+// Structural commands already know the parent paths and moved destination.
+// Reuse those locations before the transaction repairs its derived index,
+// rather than searching the entire document for newly inserted identities.
+inline void append_container_tree_operation(
+    EditorDocument& document,
+    std::vector<DocumentOperation>& operations,
+    DocumentTreeEdit edit,
+    const BlockPath& old_parent_path,
+    const std::optional<BlockPath>& new_parent_path = std::nullopt,
+    const BlockNode* moved = nullptr) {
+    auto metadata = update_move_remove_prefixes(
+        document, edit, old_parent_path, new_parent_path, moved);
     operations.emplace_back(std::move(edit));
     for (auto& update : metadata) operations.emplace_back(std::move(update));
 }

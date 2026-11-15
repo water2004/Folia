@@ -281,6 +281,35 @@ struct InsertResult {
     TextAffinity affinity = TextAffinity::Downstream;
     std::optional<DocumentSourceEdit> source_edit;
 };
+
+inline std::u32string table_cell_input_source(
+    std::u32string_view source, std::size_t offset, std::u32string_view input) {
+    std::size_t backslashes = 0;
+    for (auto cursor = (std::min)(offset, source.size()); cursor > 0 && source[cursor - 1] == U'\\'; --cursor)
+        ++backslashes;
+    std::u32string result;
+    result.reserve(input.size());
+    for (std::size_t index = 0; index < input.size(); ++index) {
+        const auto value = input[index];
+        if (value == U'\r' || value == U'\n') {
+            if (value == U'\r' && index + 1 < input.size() && input[index + 1] == U'\n') ++index;
+            result += U"<br>";
+            backslashes = 0;
+            continue;
+        }
+        if (value == U'|' && backslashes % 2 == 0) result += U'\\';
+        result += value;
+        backslashes = value == U'\\' ? backslashes + 1 : 0;
+    }
+    // Inserting a backslash immediately before an existing escaped pipe must
+    // not turn that pipe into a table delimiter by changing escape parity.
+    auto suffix = (std::min)(offset, source.size());
+    while (suffix < source.size() && source[suffix] == U'\\') { ++suffix; ++backslashes; }
+    if (suffix < source.size() && source[suffix] == U'|' && backslashes % 2 == 0)
+        result += U'\\';
+    return result;
+}
+
 inline std::optional<InsertResult> insert_text(
     EditorDocument& document,
     TextPosition position,
@@ -295,7 +324,10 @@ inline std::optional<InsertResult> insert_text(
     const auto offset = raw_source
         ? block_source_clamp_editable_offset(block->block_source, position.source_offset)
         : (std::min)(position.source_offset, length);
-    auto replacement = std::u32string(text);
+    auto replacement = block->kind == BlockKind::TableCell && inline_document
+            && inline_document->syntax_mode != InlineSyntaxMode::HtmlText
+        ? table_cell_input_source(inline_document->source, offset, text) : std::u32string(text);
+    const auto inserted_length = replacement.size();
     std::size_t content_start = offset;
     if (raw_source && block->block_source.tree().kind == BlockSourceKind::FencedCode
         && !block->block_source.tree().complete_opening) {
@@ -324,7 +356,7 @@ inline std::optional<InsertResult> insert_text(
         std::move(replacement),
         allocator);
     if (!applied) return std::nullopt;
-    return InsertResult{content_start + text.size(), TextAffinity::Downstream, std::move(applied)};
+    return InsertResult{content_start + inserted_length, TextAffinity::Downstream, std::move(applied)};
 }
 
 inline std::optional<std::size_t> editable_length(const EditorDocument& document, NodeId id) {

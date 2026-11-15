@@ -253,6 +253,7 @@ public:
         selection.anchor = (std::min)(selection.anchor, source_.size());
         selection.active = (std::min)(selection.active, source_.size());
         selection_ = selection;
+        preferred_column_.reset();
     }
 
     std::u32string selected_text() const {
@@ -270,6 +271,18 @@ public:
         return replace_with_selection_(range, std::move(replacement), SourceSelection::caret(target));
     }
 
+    bool replace_with_selection(
+        SourceRange range, std::u32string replacement, SourceSelection selection_after) {
+        return replace_with_selection_(range, std::move(replacement), selection_after);
+    }
+
+    std::u32string preferred_line_ending() const {
+        const auto line = physical_line_index_for_offset_(selection_.ordered_range().start);
+        if (lines_[line].has_line_ending()) return lines_[line].line_ending;
+        if (line != 0) return lines_[line - 1].line_ending;
+        return U"\n";
+    }
+
     bool replace_document(std::u32string replacement, SourceSelection selection_after) {
         selection_after.anchor = (std::min)(selection_after.anchor, replacement.size());
         selection_after.active = (std::min)(selection_after.active, replacement.size());
@@ -280,28 +293,12 @@ public:
     }
 
     bool replace_all(std::span<const SourceReplacement> replacements) {
-        if (replacements.empty()) return false;
-        auto ordered = std::vector<SourceReplacement>(replacements.begin(), replacements.end());
-        std::ranges::sort(ordered, [](auto const& left, auto const& right) {
-            if (left.range.start != right.range.start) return left.range.start < right.range.start;
-            return left.range.end < right.range.end;
-        });
-        for (std::size_t index = 0; index < ordered.size(); ++index) {
-            if (!ordered[index].range.valid_for(source_.size())) return false;
-            if (index > 0 && ordered[index].range.start < ordered[index - 1].range.end) return false;
-        }
-        SourcePatch patch;
-        patch.selection_before=selection_;
-        patch.selection_after=SourceSelection::caret(ordered.front().range.start+ordered.front().replacement.size());
-        for (auto i=ordered.size();i>0;--i) {
-            const auto& edit=ordered[i-1];
-            auto removed=source_.substr(edit.range.start,edit.range.length());
-            if (removed!=edit.replacement)
-                patch.edits.push_back({edit.range,edit.replacement,std::move(removed)});
-        }
-        if (patch.edits.empty() || !apply_(patch,true)) return false;
-        pending_patch_=std::move(patch);
-        return true;
+        return replace_all_(replacements, std::nullopt);
+    }
+
+    bool replace_all_with_selection(
+        std::span<const SourceReplacement> replacements, SourceSelection selection_after) {
+        return replace_all_(replacements, selection_after);
     }
 
     bool indent() {
@@ -314,10 +311,50 @@ public:
     }
 
 private:
+    bool replace_all_(
+        std::span<const SourceReplacement> replacements, std::optional<SourceSelection> selection_after) {
+        if (replacements.empty()) return false;
+        auto ordered = std::vector<SourceReplacement>(replacements.begin(), replacements.end());
+        std::ranges::sort(ordered, [](auto const& left, auto const& right) {
+            if (left.range.start != right.range.start) return left.range.start < right.range.start;
+            return left.range.end < right.range.end;
+        });
+        for (std::size_t index = 0; index < ordered.size(); ++index) {
+            if (!ordered[index].range.valid_for(source_.size())) return false;
+            if (index > 0 && (ordered[index].range.start < ordered[index - 1].range.end
+                || ordered[index].range.start == ordered[index - 1].range.start)) return false;
+        }
+        SourcePatch patch;
+        patch.selection_before=selection_;
+        patch.selection_after=selection_after.value_or(
+            SourceSelection::caret(ordered.front().range.start+ordered.front().replacement.size()));
+        for (auto i=ordered.size();i>0;--i) {
+            const auto& edit=ordered[i-1];
+            auto removed=source_.substr(edit.range.start,edit.range.length());
+            if (removed!=edit.replacement)
+                patch.edits.push_back({edit.range,edit.replacement,std::move(removed)});
+        }
+        if (patch.edits.empty()) {
+            if (patch.selection_after.anchor > source_.size() || patch.selection_after.active > source_.size()
+                || selection_ == patch.selection_after) return false;
+            set_selection(patch.selection_after);
+            return true;
+        }
+        if (!apply_(patch,true)) return false;
+        pending_patch_=std::move(patch);
+        return true;
+    }
+
     bool replace_with_selection_(SourceRange range, std::u32string replacement, SourceSelection selection_after) {
         if (!range.valid_for(source_.size())) return false;
+        const auto next_size = source_.size() - range.length() + replacement.size();
+        if (selection_after.anchor > next_size || selection_after.active > next_size) return false;
         auto removed=source_.substr(range.start,range.length());
-        if (removed==replacement) return false;
+        if (removed==replacement) {
+            if (selection_ == selection_after) return false;
+            set_selection(selection_after);
+            return true;
+        }
         SourcePatch patch{{SourceTextPatch{range,std::move(replacement),std::move(removed)}},selection_,selection_after};
         if (!apply_(patch,true)) return false;
         pending_patch_=std::move(patch);
@@ -327,7 +364,7 @@ private:
 public:
 
     bool insert_text(std::u32string_view text) { return replace_selection(std::u32string{text}); }
-    bool insert_newline() { return replace_selection(U"\n"); }
+    bool insert_newline() { return replace_selection(preferred_line_ending()); }
 
     bool delete_backward() {
         if (!selection_.is_caret()) return replace_selection({});
@@ -341,7 +378,7 @@ public:
         return replace({selection_.active, next_grapheme_boundary_char(source_, selection_.active)}, {});
     }
 
-    void select_all() { selection_ = {0, source_.size(), TextAffinity::Downstream, TextAffinity::Upstream}; }
+    void select_all() { set_selection({0, source_.size(), TextAffinity::Downstream, TextAffinity::Upstream}); }
     void move_left(bool extend = false) {
         if (!extend && !selection_.is_caret()) { move_to_(selection_.ordered_range().start, false); return; }
         move_to_(prev_grapheme_boundary_char(source_, selection_.active), extend);
@@ -352,6 +389,8 @@ public:
     }
     void move_document_start(bool extend = false) { move_to_(0, extend); }
     void move_document_end(bool extend = false) { move_to_(source_.size(), extend); }
+    void move_up(bool extend = false) { move_vertical_(false, extend); }
+    void move_down(bool extend = false) { move_vertical_(true, extend); }
 
     void move_line_start(bool extend = false) {
         auto const* line = line_for_offset_(selection_.active);
@@ -403,8 +442,10 @@ private:
     std::uint64_t revision_ = 1;
     std::uint64_t next_line_id_ = 0xf000000000000001ull;
     SourceLineChange last_line_change_{};
+    std::optional<std::size_t> preferred_column_;
 
     void move_to_(std::size_t offset, bool extend) {
+        preferred_column_.reset();
         offset = (std::min)(offset, source_.size());
         if (extend) {
             selection_.active = offset;
@@ -412,6 +453,33 @@ private:
         } else {
             selection_ = SourceSelection::caret(offset);
         }
+    }
+
+    void move_vertical_(bool forward, bool extend) {
+        const auto* current = line_for_offset_(selection_.active);
+        if (!current) return;
+        const auto index = static_cast<std::size_t>(current - lines_.data());
+        const auto column = selection_.active < current->source_start ? 0
+            : (std::min)(selection_.active - current->source_start, current->text.size());
+        const auto goal = preferred_column_.value_or(column);
+        std::size_t target = forward ? source_.size() : 0;
+        if ((forward && index + 1 < lines_.size()) || (!forward && index != 0)) {
+            const auto& line = lines_[forward ? index + 1 : index - 1];
+            auto offset = (std::min)(goal, line.text.size());
+            if (offset != 0 && offset < line.text.size()) {
+                const auto before = prev_grapheme_boundary_char(line.text, offset);
+                if (next_grapheme_boundary_char(line.text, before) > offset) offset = before;
+            }
+            target = line.source_start + offset;
+        }
+        move_to_(target, extend);
+        preferred_column_ = goal;
+    }
+
+    std::size_t physical_line_index_for_offset_(std::size_t offset) const {
+        const auto next = std::upper_bound(lines_.begin(), lines_.end(), offset,
+            [](std::size_t value, SourceLine const& line) { return value < line.source_start; });
+        return next == lines_.begin() ? 0 : static_cast<std::size_t>(next - lines_.begin() - 1);
     }
 
     SourceLine const* line_for_offset_(std::size_t offset) const {
@@ -449,9 +517,13 @@ private:
                 replacement += line.text;
                 continue;
             }
-            std::size_t remove = 0;
-            while (remove < line.text.size() && remove < 4 && line.text[remove] == U' ') ++remove;
-            if (remove == 0 && !line.text.empty() && line.text.front() == U'\t') remove = 1;
+            std::size_t remove = 0, columns = 0;
+            while (remove < line.text.size() && columns < 4) {
+                if (line.text[remove] == U' ') ++columns;
+                else if (line.text[remove] == U'\t') columns += 4 - columns % 4;
+                else break;
+                ++remove;
+            }
             changed[index] = remove;
             replacement.append(line.text, remove);
         }
@@ -493,11 +565,18 @@ private:
             end=static_cast<std::size_t>(static_cast<std::ptrdiff_t>(end)+delta);
             delta=-delta;
         }
-        const auto first_line=line_index_for_offset_(start);
-        const auto last_line=line_index_for_offset_(end);
+        // Caret projection intentionally moves an offset inside CRLF to a
+        // visible boundary. Repair must instead begin in the physical line
+        // whose terminator is being edited, including a preceding CR that an
+        // insertion at the next line's start can join into CRLF.
+        auto first_line=physical_line_index_for_offset_(start);
+        if (first_line != 0 && start == lines_[first_line].source_start
+            && start != 0 && source_[start - 1] == U'\r') --first_line;
+        const auto last_line=physical_line_index_for_offset_(end);
         auto old_lines=std::move(lines_);
         if (!apply_source_patch(source_,patch,forward)) std::terminate();
         selection_=forward ? patch.selection_after : patch.selection_before;
+        preferred_column_.reset();
         ++revision_;
         rebuild_lines_after_edit_(std::move(old_lines),first_line,last_line,delta);
         return true;

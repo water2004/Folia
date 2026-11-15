@@ -9,18 +9,27 @@ import folia.markdown.document;
 import folia.core.document_edit_support;
 import folia.markdown.ids;
 import folia.markdown.text_edit;
+import folia.markdown.inline_document;
 import folia.core.document_input_syntax;
 import folia.core.document_list_input;
 import folia.core.document_block_input;
 
 export namespace folia::document_input_rules {
 
+inline std::optional<document_edit_detail::RecordedBlockEdit> ensure_atomic_boundary_paragraph(
+    EditorDocument& document,
+    TextPosition position,
+    document_edit_detail::NodeAllocator& allocator) {
+    return detail::insert_atomic_boundary_paragraph(document, position, allocator);
+}
+
 inline std::optional<document_edit_detail::RecordedBlockEdit> apply_after_text_insert(
     EditorDocument& document,
     TextPosition& target,
     document_edit_detail::NodeAllocator& allocator) {
     auto* block = find_document_block(document, target.container_id);
-    if (!block || block->kind != BlockKind::Paragraph) return std::nullopt;
+    if (!block || block->kind != BlockKind::Paragraph
+        || block->inline_content.syntax_mode != InlineSyntaxMode::Markdown) return std::nullopt;
     if (auto task = detail::upgrade_task_item(document, target, allocator, *block)) {
         target = task->target;
         return task;
@@ -36,6 +45,15 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> handle_enter(
     EditorDocument& document,
     TextPosition position,
     document_edit_detail::NodeAllocator& allocator) {
+    if (auto paragraph = ensure_atomic_boundary_paragraph(document, position, allocator)) {
+        return paragraph;
+    }
+    if (auto thematic = detail::activate_thematic_break(document, position, allocator)) {
+        return thematic;
+    }
+    if (auto heading = detail::activate_setext_heading(document, position, allocator)) {
+        return heading;
+    }
     if (auto opened = detail::open_raw_block(document, position, allocator)) {
         return opened;
     }

@@ -14,22 +14,85 @@ import folia.markdown.utf;
 
 export namespace folia {
 
-// Formatting for newly inserted image source; existing inline source is saved verbatim.
-inline std::u32string serialize_image_source(std::u32string_view destination, std::u32string_view alt = {}) {
-    std::u32string result = U"![";
-    for (auto c : alt) {
-        if (c == U'\\' || c == U'[' || c == U']') result += U'\\';
-        result += c;
-    }
-    result += U"](<";
+// Formatting is used only for newly inserted syntax. Existing inline source
+// remains character-exact, including its original destination/title spelling.
+inline std::u32string serialize_link_destination(std::u32string_view destination, bool force_angle = false) {
+    const auto angle = force_angle || destination.find_first_of(U" \t\r\n()<>\\") != std::u32string_view::npos;
+    std::u32string result = angle ? U"<" : U"";
     for (auto c : destination) {
         if (c == U'\n') { result += U"%0A"; continue; }
         if (c == U'\r') { result += U"%0D"; continue; }
-        if (c == U'\\' || c == U'<' || c == U'>') result += U'\\';
+        if (c == U'\t') { result += U"%09"; continue; }
+        if (c == U'\\' || c == U'<' || c == U'>' || c == U'|') result += U'\\';
         result += c;
     }
-    result += U">)";
+    if (angle) result += U'>';
     return result;
+}
+
+inline std::u32string serialize_link_label(std::u32string_view label) {
+    // A label may itself contain Markdown formatting and balanced brackets.
+    // Escape only unmatched brackets; retain existing source escapes verbatim.
+    std::vector<std::size_t> openings;
+    std::vector<bool> escape(label.size(), false);
+    for (std::size_t index = 0; index < label.size(); ++index) {
+        if (label[index] == U'\\' && index + 1 < label.size()) { ++index; continue; }
+        if (label[index] == U'|') escape[index] = true;
+        if (label[index] == U'[') openings.push_back(index);
+        else if (label[index] == U']') {
+            if (openings.empty()) escape[index] = true;
+            else openings.pop_back();
+        }
+    }
+    for (auto index : openings) escape[index] = true;
+    std::u32string result;
+    for (std::size_t index = 0; index < label.size(); ++index) {
+        if (escape[index]) result += U'\\';
+        result += label[index];
+    }
+    // A trailing escape must not consume the generated closing bracket.
+    std::size_t trailing = 0;
+    for (auto index = label.size(); index > 0 && label[index - 1] == U'\\'; --index) ++trailing;
+    if (trailing % 2 != 0) result += U'\\';
+    return result;
+}
+
+inline std::u32string serialize_link_source(std::u32string_view destination,
+    std::u32string_view label, const std::optional<std::u32string>& title = {}) {
+    auto result = U"[" + serialize_link_label(label) + U"](" + serialize_link_destination(destination);
+    if (title) {
+        result += U" \"";
+        for (auto c : *title) {
+            if (c == U'\\' || c == U'\"') result += U'\\';
+            result += c;
+        }
+        result += U'\"';
+    }
+    result += U')';
+    return result;
+}
+
+inline std::u32string serialize_image_source(std::u32string_view destination,
+    std::u32string_view alt = {}, bool force_angle_destination = true) {
+    std::u32string result = U"![";
+    for (auto c : alt) {
+        if (c == U'\\' || c == U'[' || c == U']' || c == U'|') result += U'\\';
+        result += c;
+    }
+    result += U"](" + serialize_link_destination(destination, force_angle_destination) + U")";
+    return result;
+}
+
+inline std::u32string serialize_html_link_source(std::u32string_view destination,
+    std::u32string_view label_source, const std::optional<std::u32string>& title = {}) {
+    auto result = U"<a href=\"" + serializer_detail::serializer_html_escape_attribute(destination) + U"\"";
+    if (title) result += U" title=\"" + serializer_detail::serializer_html_escape_attribute(*title) + U"\"";
+    return result + U">" + std::u32string(label_source) + U"</a>";
+}
+
+inline std::u32string serialize_html_image_source(std::u32string_view destination, std::u32string_view alt) {
+    return U"<img src=\"" + serializer_detail::serializer_html_escape_attribute(destination)
+        + U"\" alt=\"" + serializer_detail::serializer_html_escape_attribute(alt) + U"\">";
 }
 
 struct SerializedSourceMap {

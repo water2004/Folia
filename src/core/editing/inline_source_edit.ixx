@@ -7,6 +7,7 @@ import folia.markdown.inline_document;
 import folia.markdown.inline_parser;
 import folia.markdown.inline_reparse;
 import folia.markdown.text_edit;
+import folia.markdown.utf;
 
 export namespace folia {
 
@@ -72,6 +73,22 @@ inline std::optional<SourceRange> adjacent_explicit_break_lexeme(
         if (adjacent && source.substr(start, marker.size()) == marker) {
             return SourceRange{start, end};
         }
+    }
+    return std::nullopt;
+}
+
+inline std::optional<SourceRange> adjacent_table_pipe_escape(
+    std::u32string_view source, std::size_t offset, bool backward) {
+    if (source.size() < 2) return std::nullopt;
+    const auto first = offset > 2 ? offset - 2 : 0;
+    const auto last = (std::min)(offset, source.size() - 2);
+    for (auto start = first; start <= last; ++start) {
+        const auto end = start + 2;
+        const auto adjacent = backward ? start < offset && offset <= end : start <= offset && offset < end;
+        if (!adjacent || source[start] != U'\\' || source[start + 1] != U'|') continue;
+        auto preceding = start;
+        while (preceding != 0 && source[preceding - 1] == U'\\') --preceding;
+        if ((start - preceding) % 2 == 0) return SourceRange{start, end};
     }
     return std::nullopt;
 }
@@ -174,12 +191,16 @@ inline std::optional<SourceRange> inline_backward_delete_range(
         return hard_break;
     }
     if (explicit_break_lexemes_are_semantic) {
+        if (document.syntax_mode == InlineSyntaxMode::TableCell) {
+            if (auto pipe = inline_source_edit_detail::adjacent_table_pipe_escape(document.source, offset, true))
+                return pipe;
+        }
         if (auto hard_break = inline_source_edit_detail::adjacent_explicit_break_lexeme(
                 document.source, offset, true)) {
             return hard_break;
         }
     }
-    return SourceRange{offset - 1, offset};
+    return SourceRange{prev_grapheme_boundary_char(document.source, offset), offset};
 }
 
 inline std::optional<SourceRange> inline_forward_delete_range(
@@ -193,12 +214,16 @@ inline std::optional<SourceRange> inline_forward_delete_range(
         return hard_break;
     }
     if (explicit_break_lexemes_are_semantic) {
+        if (document.syntax_mode == InlineSyntaxMode::TableCell) {
+            if (auto pipe = inline_source_edit_detail::adjacent_table_pipe_escape(document.source, offset, false))
+                return pipe;
+        }
         if (auto hard_break = inline_source_edit_detail::adjacent_explicit_break_lexeme(
                 document.source, offset, false)) {
             return hard_break;
         }
     }
-    return SourceRange{offset, offset + 1};
+    return SourceRange{offset, next_grapheme_boundary_char(document.source, offset)};
 }
 
 inline AppliedSourceEdit apply_inline_source_edit(

@@ -506,6 +506,89 @@ inline std::optional<RecordedBlockEdit> exit_empty_flow_container(
     return result;
 }
 
+inline std::optional<RecordedBlockEdit> join_next_list_item(
+    EditorDocument& document,
+    NodeId id,
+    NodeAllocator& allocator) {
+    auto path = document_block_path(document, id);
+    if (!path || path->size() < 3) return std::nullopt;
+    auto item_path = *path;
+    const auto child_index = item_path.back();
+    item_path.pop_back();
+    auto* item = block_at_path(document.root, item_path);
+    if (!item || (item->kind != BlockKind::ListItem && item->kind != BlockKind::TaskListItem)
+        || child_index + 1 != item->children.size() || !text_block(item->children.back().kind)) {
+        return std::nullopt;
+    }
+    auto list_path = item_path;
+    const auto item_index = list_path.back();
+    list_path.pop_back();
+    auto* list = block_at_path(document.root, list_path);
+    if (!list || (list->kind != BlockKind::List && list->kind != BlockKind::TaskList)
+        || item_index + 1 >= list->children.size()) return std::nullopt;
+    auto& next = list->children[item_index + 1];
+    if ((next.kind != BlockKind::ListItem && next.kind != BlockKind::TaskListItem)
+        || next.children.empty() || !text_block(next.children.front().kind)) return std::nullopt;
+
+    const auto list_id = list->id;
+    const auto item_id = item->id;
+    const auto next_id = next.id;
+    const auto removed_owner = next.children.front().id;
+    const auto offset = item->children.back().inline_content.source.size();
+    auto source = next.children.front().inline_content.source;
+    RecordedBlockEdit result;
+    result.target = {id, offset, TextAffinity::Downstream};
+    if (!source.empty()) {
+        auto edited = edit_inline(document, id, {offset, offset}, std::move(source), allocator);
+        if (!edited) return std::nullopt;
+        append_source_operation(result.operations, std::move(*edited));
+    }
+    auto prefix_updates = document_container_source::rebind_source_anchors(
+        document, id, removed_owner, 0, id, offset);
+    for (auto& update : prefix_updates) result.operations.emplace_back(std::move(update));
+    auto next_item_path = list_path;
+    next_item_path.push_back(item_index + 1);
+    auto* next_item = block_at_path(document.root, next_item_path);
+    if (!next_item || next_item->children.empty()) return std::nullopt;
+    DocumentTreeEdit remove_text;
+    remove_text.kind = DocumentTreeEditKind::Remove;
+    remove_text.parent_id = next_id;
+    remove_text.index = 0;
+    remove_text.before = next_item->children.front();
+    document_container_source::append_container_tree_operation(
+        document, result.operations, std::move(remove_text), next_item_path);
+    next_item->children.erase(next_item->children.begin());
+    for (;;) {
+        item = block_at_path(document.root, item_path);
+        next_item = block_at_path(document.root, next_item_path);
+        if (!item || !next_item) return std::nullopt;
+        if (next_item->children.empty()) break;
+        DocumentTreeEdit move;
+        move.kind = DocumentTreeEditKind::Move;
+        move.parent_id = next_id;
+        move.index = 0;
+        move.other_parent_id = item_id;
+        move.other_index = item->children.size();
+        move.moved_id = next_item->children.front().id;
+        auto moved = remove_block(*next_item, 0);
+        if (!moved || !insert_block(*item, move.other_index, std::move(*moved))) return std::nullopt;
+        const auto target_index = move.other_index;
+        document_container_source::append_container_tree_operation(document, result.operations,
+            std::move(move), next_item_path, item_path, &item->children[target_index]);
+    }
+    list = block_at_path(document.root, list_path);
+    if (!list || item_index + 1 >= list->children.size()) return std::nullopt;
+    DocumentTreeEdit remove_item;
+    remove_item.kind = DocumentTreeEditKind::Remove;
+    remove_item.parent_id = list_id;
+    remove_item.index = item_index + 1;
+    remove_item.before = list->children[remove_item.index];
+    document_container_source::append_container_tree_operation(
+        document, result.operations, std::move(remove_item), list_path);
+    list->children.erase(list->children.begin() + static_cast<std::ptrdiff_t>(item_index + 1));
+    return result;
+}
+
 inline std::optional<RecordedBlockEdit> join_adjacent(
     EditorDocument& document,
     NodeId id,
@@ -537,14 +620,15 @@ inline std::optional<RecordedBlockEdit> join_adjacent(
         auto prefix_updates = document_container_source::rebind_source_anchors(
             document, owner, removed_owner, 0, owner, offset);
         for (auto& update : prefix_updates) result.operations.emplace_back(std::move(update));
-        parent = find_block(document.root, parent_id);
+        parent = block_at_path(document.root, parent_path);
         if (!parent || index >= parent->children.size()) return std::nullopt;
         DocumentTreeEdit remove;
         remove.kind = DocumentTreeEditKind::Remove;
         remove.parent_id = parent_id;
         remove.index = index;
         remove.before = parent->children[index];
-        document_container_source::append_container_tree_operation(document, result.operations, std::move(remove));
+        document_container_source::append_container_tree_operation(
+            document, result.operations, std::move(remove), parent_path);
         parent->children.erase(parent->children.begin() + static_cast<std::ptrdiff_t>(index));
         result.target = TextPosition{
             owner,
@@ -561,7 +645,8 @@ inline std::optional<RecordedBlockEdit> join_adjacent(
             remove.parent_id = parent_id;
             remove.index = index;
             remove.before = current;
-            document_container_source::append_container_tree_operation(document, result.operations, std::move(remove));
+            document_container_source::append_container_tree_operation(
+            document, result.operations, std::move(remove), parent_path);
             parent->children.erase(parent->children.begin() + static_cast<std::ptrdiff_t>(index));
             return result;
         }
@@ -580,14 +665,15 @@ inline std::optional<RecordedBlockEdit> join_adjacent(
         auto prefix_updates = document_container_source::rebind_source_anchors(
             document, owner, removed_owner, 0, owner, offset);
         for (auto& update : prefix_updates) result.operations.emplace_back(std::move(update));
-        parent = find_block(document.root, parent_id);
+        parent = block_at_path(document.root, parent_path);
         if (!parent || index + 1 >= parent->children.size()) return std::nullopt;
         DocumentTreeEdit remove;
         remove.kind = DocumentTreeEditKind::Remove;
         remove.parent_id = parent_id;
         remove.index = index + 1;
         remove.before = parent->children[index + 1];
-        document_container_source::append_container_tree_operation(document, result.operations, std::move(remove));
+        document_container_source::append_container_tree_operation(
+            document, result.operations, std::move(remove), parent_path);
         parent->children.erase(parent->children.begin() + static_cast<std::ptrdiff_t>(index + 1));
         result.target = TextPosition{owner, offset, TextAffinity::Downstream};
         return result;
@@ -601,11 +687,33 @@ inline std::optional<RecordedBlockEdit> join_adjacent(
             remove.parent_id = parent_id;
             remove.index = index;
             remove.before = current;
-            document_container_source::append_container_tree_operation(document, result.operations, std::move(remove));
+            document_container_source::append_container_tree_operation(
+            document, result.operations, std::move(remove), parent_path);
             parent->children.erase(parent->children.begin() + static_cast<std::ptrdiff_t>(index));
             return result;
         }
     }
+    // A nonempty text owner cannot merge with an image or divider. Deleting
+    // its adjacent boundary removes the atomic neighbor while leaving the
+    // text owner and its caret intact. Empty paragraphs above retain their
+    // existing behavior: remove the paragraph and enter the neighboring block.
+    if ((backward && index > 0 && atomic_block(parent->children[index - 1].kind))
+        || (!backward && index + 1 < parent->children.size()
+            && atomic_block(parent->children[index + 1].kind))) {
+        const auto neighbor_index = backward ? index - 1 : index + 1;
+        result.target = {current.id, backward ? 0 : current.inline_content.source.size(),
+            backward ? TextAffinity::Downstream : TextAffinity::Upstream};
+        DocumentTreeEdit remove;
+        remove.kind = DocumentTreeEditKind::Remove;
+        remove.parent_id = parent_id;
+        remove.index = neighbor_index;
+        remove.before = parent->children[neighbor_index];
+        document_container_source::append_container_tree_operation(
+            document, result.operations, std::move(remove), parent_path);
+        parent->children.erase(parent->children.begin() + static_cast<std::ptrdiff_t>(neighbor_index));
+        return result;
+    }
+    if (!backward) return join_next_list_item(document, id, allocator);
     return std::nullopt;
 }
 
