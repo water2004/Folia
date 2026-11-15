@@ -14,7 +14,7 @@ struct GfmAutolinkMatch {
 
 // Recognizes a GFM bare link beginning exactly at start. Offsets count UTF-32
 // source characters. The source remains authoritative and is never changed.
-export std::optional<GfmAutolinkMatch> scan_gfm_autolink(
+std::optional<GfmAutolinkMatch> scan_gfm_autolink(
     std::u32string_view source, std::size_t start, std::size_t limit,
     std::size_t scope_start = 0);
 }

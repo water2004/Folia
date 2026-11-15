@@ -277,15 +277,8 @@ struct InlineRenderPayload {
     // keep it behind a second payload so marker allocations stay compact.
     std::shared_ptr<InlineRenderSemanticPayload> semantic_payload;
 
-    InlineRenderSemanticPayload const& semantic() const {
-        static const InlineRenderSemanticPayload empty{};
-        return semantic_payload ? *semantic_payload : empty;
-    }
-
-    InlineRenderSemanticPayload& ensure_semantic() {
-        if (!semantic_payload) semantic_payload = std::make_shared<InlineRenderSemanticPayload>();
-        return *semantic_payload;
-    }
+    InlineRenderSemanticPayload const& semantic() const;
+    InlineRenderSemanticPayload& ensure_semantic();
 };
 
 struct InlineRenderItem {
@@ -313,6 +306,16 @@ struct InlineRenderItem {
         return i;
     }
 };
+
+inline InlineRenderSemanticPayload const& InlineRenderPayload::semantic() const {
+    static const InlineRenderSemanticPayload empty{};
+    return semantic_payload ? *semantic_payload : empty;
+}
+
+inline InlineRenderSemanticPayload& InlineRenderPayload::ensure_semantic() {
+    if (!semantic_payload) semantic_payload = std::make_shared<InlineRenderSemanticPayload>();
+    return *semantic_payload;
+}
 
 enum class RenderBlockKind {
     Text, Blank, Quote, Code, Math, Table, Image, ThematicBreak, Toc, Callout, Frontmatter, Footnote, Unsupported, Extension,

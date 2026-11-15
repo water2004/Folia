@@ -1,4 +1,6 @@
 #include "support/folia_test.hpp"
+import folia.markdown.selection;
+import folia.markdown.text_edit;
 import folia.core.editor;
 import folia.core.command;
 import folia.markdown.document;

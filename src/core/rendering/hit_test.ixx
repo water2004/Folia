@@ -1,6 +1,7 @@
 // folia.core.hit_test — hit_test_layout_tree.
 export module folia.core.hit_test;
 import std;
+import folia.core.render_model;
 import folia.core.types;
 import folia.markdown.ids;
 import folia.core.layout_tree;

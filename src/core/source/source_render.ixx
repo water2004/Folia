@@ -1,6 +1,7 @@
 // folia.core.source_render — exact-character render projection for source mode.
 export module folia.core.source_render;
 import std;
+import folia.markdown.ids;
 import folia.core.source_editor;
 import folia.core.source_style;
 import folia.core.render_model;

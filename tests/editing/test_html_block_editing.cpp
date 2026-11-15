@@ -3,6 +3,7 @@
 #include <string_view>
 
 #include "support/folia_test.hpp"
+import folia.markdown.text_edit;
 import folia.markdown.ast;
 import folia.markdown.ids;
 import folia.markdown.block_tree;

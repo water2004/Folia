@@ -3,6 +3,7 @@
 // consulted when resolving references and definitions.
 export module folia.core.document_footnotes;
 import std;
+import folia.markdown.selection;
 import folia.markdown.ast;
 import folia.markdown.block_source;
 import folia.markdown.block_tree;

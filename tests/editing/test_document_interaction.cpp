@@ -2,6 +2,7 @@
 #include <string_view>
 
 #include "support/folia_test.hpp"
+import folia.markdown.selection;
 import folia.markdown.ast;
 import folia.markdown.block_tree;
 import folia.core.document_interaction;

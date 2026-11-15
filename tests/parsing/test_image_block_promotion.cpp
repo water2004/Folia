@@ -4,6 +4,8 @@
 #include <string_view>
 
 #include "support/folia_test.hpp"
+import folia.markdown.inline_document;
+import folia.markdown.ids;
 
 import folia.markdown.ast;
 import folia.markdown.document;
@@ -41,6 +43,7 @@ EditorDocument document_with(BlockNode block, std::u32string trailing_line_endin
     EditorDocument document;
     document.root.children.push_back(std::move(block));
     document.trailing_line_ending = std::move(trailing_line_ending);
+    rebuild_document_block_index(document);
     return document;
 }
 

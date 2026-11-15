@@ -4,6 +4,7 @@
 // snapshots.
 export module folia.core.document_transaction;
 import std;
+import folia.markdown.ids;
 import folia.markdown.ast;
 import folia.markdown.block_source;
 import folia.markdown.document;

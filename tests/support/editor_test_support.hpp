@@ -1,4 +1,7 @@
 #pragma once
+import folia.markdown.document;
+import folia.markdown.ids;
+import folia.markdown.selection;
 
 namespace {
 

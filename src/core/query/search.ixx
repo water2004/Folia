@@ -6,6 +6,7 @@
 // Unicode regular-expression matcher.
 export module folia.core.search;
 import std;
+import folia.core.theme;
 import folia.markdown.ast;
 import folia.markdown.block_source;
 import folia.markdown.block_tree;

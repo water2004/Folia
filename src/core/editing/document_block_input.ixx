@@ -1,6 +1,7 @@
 // Non-list block input rules: marker activation, raw blocks, and container unwrapping.
 export module folia.core.document_block_input;
 import std;
+import folia.markdown.selection;
 import folia.markdown.ast;
 import folia.markdown.container_source;
 import folia.markdown.block_source;

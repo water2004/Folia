@@ -9,6 +9,11 @@
 #include <vector>
 
 #include "support/folia_test.hpp"
+import folia.core.layout_tree;
+import folia.core.types;
+import folia.markdown.dialect;
+import folia.markdown.inline_cst;
+import folia.markdown.text_edit;
 import folia.markdown.parser;
 import folia.core.document_edit;
 import folia.markdown.document;

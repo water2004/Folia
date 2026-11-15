@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "support/folia_test.hpp"
+import folia.markdown.text_edit;
 import folia.markdown.inline_cst;
 import folia.markdown.inline_document;
 import folia.markdown.inline_parser;

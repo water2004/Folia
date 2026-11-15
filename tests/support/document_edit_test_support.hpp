@@ -1,4 +1,8 @@
 #pragma once
+import folia.markdown.block_tree;
+import folia.markdown.dialect;
+import folia.markdown.inline_document;
+import folia.markdown.selection;
 
 namespace {
 

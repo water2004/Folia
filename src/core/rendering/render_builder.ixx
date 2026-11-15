@@ -2,6 +2,7 @@
 // from the authoritative block tree and each node's lossless inline source.
 export module folia.core.render_builder;
 import std;
+import folia.core.theme;
 import folia.core.types;
 import folia.markdown.ids;
 import folia.markdown.dialect;

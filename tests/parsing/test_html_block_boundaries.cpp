@@ -5,6 +5,10 @@
 #include <vector>
 
 #include "support/folia_test.hpp"
+import folia.markdown.dialect;
+import folia.markdown.inline_document;
+import folia.markdown.selection;
+import folia.markdown.text_edit;
 import folia.markdown.ast;
 import folia.core.editor;
 import folia.markdown.inline_cst;

@@ -5,6 +5,8 @@
 // opening/closing spelling, and applies one source TextEdit.
 export module folia.core.document_inline_format;
 import std;
+import folia.markdown.ids;
+import folia.markdown.selection;
 import folia.markdown.document;
 import folia.core.document_edit_primitives;
 import folia.core.document_edit_validation;

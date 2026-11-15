@@ -1,6 +1,8 @@
 // Reversible block split, join, exit, removal, and pruning operations.
 export module folia.core.document_block_edit;
 import std;
+import folia.markdown.ids;
+import folia.markdown.selection;
 import folia.markdown.ast;
 import folia.markdown.block_source;
 import folia.markdown.block_tree;

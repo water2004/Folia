@@ -3,6 +3,7 @@
 #include <string>
 
 #include "support/folia_test.hpp"
+import folia.markdown.text_edit;
 import folia.markdown.ast;
 import folia.markdown.dialect;
 import folia.markdown.inline_document;

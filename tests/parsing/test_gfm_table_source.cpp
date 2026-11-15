@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "support/folia_test.hpp"
+import folia.markdown.ids;
 
 import folia.markdown.ast;
 import folia.markdown.document;

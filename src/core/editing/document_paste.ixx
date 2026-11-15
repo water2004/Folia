@@ -1,6 +1,9 @@
 // folia.core.document_paste — semantic Markdown parsing and block-tree splicing.
 export module folia.core.document_paste;
 import std;
+import folia.markdown.dialect;
+import folia.markdown.ids;
+import folia.markdown.selection;
 import folia.markdown.ast;
 import folia.markdown.block_tree;
 import folia.markdown.document;

@@ -4,6 +4,8 @@
 // (module name avoids the `export` keyword: `folia.core.exporter`.)
 export module folia.core.exporter;
 import std;
+import folia.markdown.inline_document;
+import folia.markdown.inline_cst;
 import folia.markdown.ast;
 import folia.markdown.image_dimension;
 import folia.markdown.block_source;

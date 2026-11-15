@@ -1,4 +1,9 @@
 #pragma once
+import folia.core.theme;
+import folia.markdown.ids;
+import folia.markdown.inline_document;
+import folia.markdown.outline;
+import folia.markdown.document_symbols;
 
 static RenderModel build_model(const std::string& src) {
     auto out = parse_text(1, src);

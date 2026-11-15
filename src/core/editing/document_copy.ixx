@@ -1,6 +1,9 @@
 // folia.core.document_copy — lossless Markdown extraction from a structural selection.
 export module folia.core.document_copy;
 import std;
+import folia.markdown.dialect;
+import folia.markdown.ids;
+import folia.markdown.inline_document;
 import folia.markdown.ast;
 import folia.markdown.block_source;
 import folia.markdown.block_tree;

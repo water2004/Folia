@@ -1,6 +1,8 @@
 // Structural list input rules: task upgrade, Enter, exit, split, and outdent.
 export module folia.core.document_list_input;
 import std;
+import folia.markdown.document_text;
+import folia.markdown.selection;
 import folia.markdown.ast;
 import folia.markdown.block_tree;
 import folia.markdown.document;

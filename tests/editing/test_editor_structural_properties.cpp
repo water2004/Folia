@@ -4,6 +4,8 @@
 #include <vector>
 
 #include "support/folia_test.hpp"
+import folia.markdown.ast;
+import folia.markdown.selection;
 import folia.markdown.document;
 import folia.markdown.block_tree;
 import folia.core.document_edit;

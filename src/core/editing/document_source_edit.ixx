@@ -1,5 +1,8 @@
 export module folia.core.document_source_edit;
 import std;
+import folia.markdown.block_source;
+import folia.markdown.ids;
+import folia.markdown.selection;
 import folia.markdown.ast;
 import folia.markdown.block_tree;
 import folia.markdown.document;

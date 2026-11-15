@@ -2,6 +2,7 @@
 // Recognition and tree transformations live in narrowly scoped helper modules.
 export module folia.core.document_input_rules;
 import std;
+import folia.markdown.selection;
 import folia.markdown.ast;
 import folia.markdown.block_tree;
 import folia.markdown.document;

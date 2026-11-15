@@ -1,6 +1,8 @@
 // folia.core.document_content_context — semantic editor scope at one source position.
 export module folia.core.document_content_context;
 import std;
+import folia.markdown.ast;
+import folia.markdown.selection;
 import folia.markdown.document;
 import folia.markdown.inline_cst;
 import folia.markdown.inline_document;

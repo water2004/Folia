@@ -6,6 +6,7 @@
 // source payload verbatim.
 export module folia.core.document_format;
 import std;
+import folia.markdown.text_edit;
 import folia.markdown.ast;
 import folia.markdown.block_tree;
 import folia.markdown.dialect;
