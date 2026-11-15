@@ -5,6 +5,30 @@
   "license": "MIT",
   "files": [
     {
+      "path": "packages/mermaid/src/diagrams/kanban/kanbanRenderer.ts",
+      "sha256": "2902d13a6e03398dc2bd8c889d150e3dfcc3576143994689a86ea0f8457f7a36"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/state/stateRenderer-v3-unified.ts",
+      "sha256": "ceaf69b19b171bdfae0f36b8a3f80cfb0ebc023cca7a391dc332eacd777859a6"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/er/erRenderer-unified.ts",
+      "sha256": "e41c45a44665ca346aa22e9e427e584932edacdaaa8e9f0265dd8d7275a81371"
+    },
+    {
+      "path": "packages/mermaid/src/docs/config/math.md",
+      "sha256": "8e7a46f468bd6e0fc2c1f3b83150d4ef5625721a1f4ebee943627fbaf84fab50"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/state/dataFetcher.ts",
+      "sha256": "03a1dfa682ca80a7b7742ccd8bdfca6613210a217f378ac362a44f43847d7116"
+    },
+    {
+      "path": "packages/mermaid/src/diagrams/block/renderHelpers.ts",
+      "sha256": "50ce641d6eb07580e7728d823e1b44e2a8d941a64cca536ff935fe432de6f47b"
+    },
+    {
       "path": "packages/mermaid/src/rendering-util/layout-algorithms/elk/subgraphFeedbackEdges.ts",
       "sha256": "b2924ce5c1c619ff902e0eeed1a79fa7e725c5e800c707d23cda22ad6a2304cc"
     },

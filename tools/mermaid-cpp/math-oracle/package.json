@@ -1,0 +1,11 @@
+{
+  "name": "folia-mermaid-math-oracle",
+  "private": true,
+  "type": "module",
+  "description": "Independent official Mermaid 13 MathJax and PNG oracle; never part of Folia's runtime",
+  "dependencies": {
+    "@mermaid-js/plugin-math": "13.0.0-alpha.3",
+    "mermaid": "13.0.0-alpha.3",
+    "sharp": "0.35.5"
+  }
+}
