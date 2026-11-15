@@ -92,5 +92,6 @@ std::expected<DiagramSvg, std::string> render_native_diagram(
     const ErSvgMeasure& er_measure = {},
     const RequirementSvgMeasure& requirement_measure = {},
     const SvgTextMeasure& svg_text_measure = {},
-    const SvgFamilyTextMeasure& svg_family_measure = {});
+    const SvgFamilyTextMeasure& svg_family_measure = {},
+    const MathLabelMeasure& math_measure = {});
 }

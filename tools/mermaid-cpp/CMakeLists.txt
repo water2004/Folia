@@ -66,7 +66,51 @@ if(WIN32 AND MSVC)
 endif()
 add_test(NAME FoliaMermaidTests COMMAND FoliaMermaidTests)
 
+# Integrated builds already own the Math DLL. Standalone builds can consume
+# that same binary without rebuilding or statically duplicating its font data.
+set(FOLIA_NATIVE_MATH_RUNTIME "" CACHE FILEPATH "Existing FoliaNativeMath shared library for a standalone Mermaid build")
+set(FOLIA_NATIVE_MATH_IMPORT_LIBRARY "" CACHE FILEPATH "FoliaNativeMath import library (standalone Windows builds)")
+if(NOT TARGET FoliaNativeMath AND FOLIA_NATIVE_MATH_RUNTIME)
+    add_library(FoliaNativeMath SHARED IMPORTED)
+    set_target_properties(FoliaNativeMath PROPERTIES
+        IMPORTED_LOCATION "${FOLIA_NATIVE_MATH_RUNTIME}"
+        INTERFACE_INCLUDE_DIRECTORIES "${FOLIA_MERMAID_REPO_ROOT}/src/math/include")
+    if(WIN32)
+        if(NOT FOLIA_NATIVE_MATH_IMPORT_LIBRARY)
+            message(FATAL_ERROR "Set FOLIA_NATIVE_MATH_IMPORT_LIBRARY to the import library beside FOLIA_NATIVE_MATH_RUNTIME.")
+        endif()
+        set_target_properties(FoliaNativeMath PROPERTIES
+            IMPORTED_IMPLIB "${FOLIA_NATIVE_MATH_IMPORT_LIBRARY}")
+    endif()
+endif()
+if(TARGET FoliaNativeMath)
+    add_library(folia_mermaid_math STATIC)
+    set_target_properties(folia_mermaid_math PROPERTIES CXX_MODULE_STD ON)
+    target_sources(folia_mermaid_math PUBLIC FILE_SET CXX_MODULES
+        BASE_DIRS "${FOLIA_MERMAID_REPO_ROOT}/src/platform/text" FILES
+        "${FOLIA_MERMAID_REPO_ROOT}/src/platform/text/mermaid_math.ixx")
+    target_link_libraries(folia_mermaid_math PUBLIC folia::mermaid PRIVATE FoliaNativeMath)
+    add_executable(FoliaMermaidMathTests
+        "${FOLIA_MERMAID_REPO_ROOT}/tests/main.cpp"
+        "${FOLIA_MERMAID_REPO_ROOT}/tests/mermaid_math/native_math.cpp")
+    set_target_properties(FoliaMermaidMathTests PROPERTIES CXX_MODULE_STD ON)
+    target_include_directories(FoliaMermaidMathTests PRIVATE "${FOLIA_MERMAID_REPO_ROOT}/tests")
+    target_link_libraries(FoliaMermaidMathTests PRIVATE folia_mermaid_math Boost::ut_module)
+    if(WIN32 AND MSVC)
+        target_link_libraries(FoliaMermaidMathTests PRIVATE folia_console_test_runtime)
+        add_custom_command(TARGET FoliaMermaidMathTests POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "$<TARGET_FILE:FoliaNativeMath>" "$<TARGET_FILE_DIR:FoliaMermaidMathTests>"
+            VERBATIM)
+    endif()
+    add_test(NAME FoliaMermaidMathTests COMMAND FoliaMermaidMathTests)
+endif()
+
 if(WIN32 AND MSVC)
+    if(NOT TARGET folia_mermaid_math)
+        message(FATAL_ERROR
+            "Native Mermaid math requires FoliaNativeMath. Build from the repository root with FOLIA_BUILD_MERMAID=ON, or set FOLIA_NATIVE_MATH_RUNTIME and FOLIA_NATIVE_MATH_IMPORT_LIBRARY to an existing Math DLL build.")
+    endif()
     add_library(folia_mermaid_measurement STATIC)
     set_target_properties(folia_mermaid_measurement PROPERTIES CXX_MODULE_STD ON)
     target_sources(folia_mermaid_measurement PUBLIC FILE_SET CXX_MODULES
@@ -75,11 +119,15 @@ if(WIN32 AND MSVC)
         "${FOLIA_MERMAID_REPO_ROOT}/src/platform/text/mermaid_renderer.ixx"
         "${FOLIA_MERMAID_REPO_ROOT}/src/platform/text/mermaid_host.ixx"
         "${FOLIA_MERMAID_REPO_ROOT}/src/platform/text/mermaid_pie.ixx")
-    target_link_libraries(folia_mermaid_measurement PUBLIC folia::mermaid PRIVATE dwrite user32)
+    target_link_libraries(folia_mermaid_measurement PUBLIC folia::mermaid PRIVATE folia_mermaid_math dwrite user32)
     add_executable(FoliaMermaidTextProbe native-text-probe.cpp)
     set_target_properties(FoliaMermaidTextProbe PROPERTIES CXX_MODULE_STD ON)
     target_link_libraries(FoliaMermaidTextProbe PRIVATE
         folia_mermaid_measurement folia_console_test_runtime)
+    add_custom_command(TARGET FoliaMermaidTextProbe POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "$<TARGET_FILE:FoliaNativeMath>" "$<TARGET_FILE_DIR:FoliaMermaidTextProbe>"
+        VERBATIM)
     add_executable(FoliaMermaidPlatformTests
         "${FOLIA_MERMAID_REPO_ROOT}/tests/main.cpp"
         "${FOLIA_MERMAID_REPO_ROOT}/tests/platform/mermaid_measurement.cpp"
@@ -117,6 +165,10 @@ if(WIN32 AND MSVC)
     target_include_directories(FoliaMermaidPlatformTests PRIVATE "${FOLIA_MERMAID_REPO_ROOT}/tests")
     target_link_libraries(FoliaMermaidPlatformTests PRIVATE
         folia_mermaid_measurement Boost::ut_module folia_console_test_runtime)
+    add_custom_command(TARGET FoliaMermaidPlatformTests POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "$<TARGET_FILE:FoliaNativeMath>" "$<TARGET_FILE_DIR:FoliaMermaidPlatformTests>"
+        VERBATIM)
     add_test(NAME FoliaMermaidPlatformTests COMMAND FoliaMermaidPlatformTests)
     add_library(FoliaNativeMermaid SHARED native-renderer.cpp)
     set_target_properties(FoliaNativeMermaid PROPERTIES CXX_MODULE_STD ON)
@@ -126,6 +178,8 @@ if(WIN32 AND MSVC)
         "${FOLIA_MERMAID_REPO_ROOT}/src/mermaid/*LICENSE*")
     get_target_property(FOLIA_MERMAID_YAML_SOURCE_DIR yaml-cpp SOURCE_DIR)
     add_custom_command(TARGET FoliaNativeMermaid POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "$<TARGET_FILE:FoliaNativeMath>" "$<TARGET_FILE_DIR:FoliaNativeMermaid>"
         COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:FoliaNativeMermaid>/Mermaid-Licenses"
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             ${FOLIA_MERMAID_LICENSES}

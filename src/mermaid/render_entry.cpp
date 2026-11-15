@@ -546,18 +546,18 @@ std::expected<DiagramSvg, std::string> render_native_diagram(
     const ArchitectureMeasurements& architecture_measurements, const StateMeasure& state_measure,
     const ZenSvgMeasure& zenuml_measure, const ErSvgMeasure& er_measure,
     const RequirementSvgMeasure& requirement_measure, const SvgTextMeasure& svg_text_measure,
-    const SvgFamilyTextMeasure& svg_family_measure) {
+    const SvgFamilyTextMeasure& svg_family_measure, const MathLabelMeasure& math_measure) {
     return std::visit([&](const auto& content)->std::expected<DiagramSvg,std::string> {
         if constexpr(std::is_same_v<std::decay_t<decltype(content)>,ArchitectureRenderInput>) {
             auto result=render_architecture_svg(content,architecture_measurements);
             if(!result)return std::unexpected(result.error());
             return DiagramSvg{std::move(result->svg),result->width,result->height};
         } else if constexpr (std::is_same_v<std::decay_t<decltype(content)>, AgentflowRenderInput>) {
-            auto result = render_agentflow_svg(content, svg_text_measure);
+            auto result = render_agentflow_svg(content, svg_text_measure, math_measure);
             if (!result) return std::unexpected(result.error());
             return DiagramSvg{std::move(result->svg), result->width, result->height};
         } else if constexpr (std::is_same_v<std::decay_t<decltype(content)>, SwimlaneRenderInput>) {
-            auto result = render_swimlane_svg(content, svg_family_measure);
+            auto result = render_swimlane_svg(content, svg_family_measure, math_measure);
             if (!result) return std::unexpected(result.error());
             return DiagramSvg{std::move(result->svg), result->width, result->height};
         } else if constexpr (std::is_same_v<std::decay_t<decltype(content)>, EventmodelingRenderInput>) {
@@ -569,7 +569,7 @@ std::expected<DiagramSvg, std::string> render_native_diagram(
             if (!result) return std::unexpected(result.error());
             return DiagramSvg{std::move(result->svg), result->width, result->height};
         } else if constexpr (std::is_same_v<std::decay_t<decltype(content)>, UsecaseRenderInput>) {
-            auto result = render_usecase_svg(content, svg_family_measure);
+            auto result = render_usecase_svg(content, svg_family_measure, math_measure);
             if (!result) return std::unexpected(result.error());
             return DiagramSvg{std::move(result->svg), result->width, result->height};
         } else if constexpr (std::is_same_v<std::decay_t<decltype(content)>, ErrorRenderInput>) {
@@ -611,15 +611,15 @@ std::expected<DiagramSvg, std::string> render_native_diagram(
             if(!result)return std::unexpected(result.error());
             return DiagramSvg{std::move(result->svg),result->width,result->height};
         } else if constexpr(std::is_same_v<std::decay_t<decltype(content)>,ErRenderInput>) {
-            auto result=render_er_svg(content,er_measure);
+            auto result=render_er_svg(content,er_measure,math_measure);
             if(!result)return std::unexpected(result.error());
             return DiagramSvg{std::move(result->svg),result->width,result->height};
         } else if constexpr(std::is_same_v<std::decay_t<decltype(content)>,RequirementRenderInput>) {
-            auto result=render_requirement_svg(content,requirement_measure);
+            auto result=render_requirement_svg(content,requirement_measure,math_measure);
             if(!result)return std::unexpected(result.error());
             return DiagramSvg{std::move(result->svg),result->width,result->height};
         } else if constexpr(std::is_same_v<std::decay_t<decltype(content)>,StateRenderInput>) {
-            auto result=render_state_svg(content,state_measure);
+            auto result=render_state_svg(content,state_measure,math_measure);
             if(!result)return std::unexpected(result.error());
             return DiagramSvg{std::move(result->svg),result->width,result->height};
         } else if constexpr(std::is_same_v<std::decay_t<decltype(content)>,C4RenderInput>) {
@@ -631,7 +631,7 @@ std::expected<DiagramSvg, std::string> render_native_diagram(
             if(!result)return std::unexpected(result.error());
             return DiagramSvg{std::move(result->svg),result->width,result->height};
         } else if constexpr(std::is_same_v<std::decay_t<decltype(content)>,BlockRenderInput>) {
-            auto result=render_block_svg(content,block_measure);
+            auto result=render_block_svg(content,block_measure,math_measure);
             if(!result)return std::unexpected(result.error());
             return DiagramSvg{std::move(result->svg),result->width,result->height};
         } else if constexpr(std::is_same_v<std::decay_t<decltype(content)>,GitGraphRenderInput>) {

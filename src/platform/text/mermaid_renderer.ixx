@@ -7,6 +7,8 @@ module;
 export module folia.platform.mermaid_renderer;
 import std;
 import folia.platform.mermaid_measurer;
+import folia.platform.mermaid_math;
+import folia.mermaid.math_label;
 export import folia.mermaid.render_entry;
 
 export namespace folia::platform {
@@ -20,6 +22,26 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
     auto input=prepare_native_diagram(source,session,limits);
     if(!input) return std::unexpected(input.error());
     MermaidMeasurer measurer;
+    MermaidMathRenderer math_renderer;
+    const MathLabelRender render_math=[&](std::u16string_view tex,double size) {
+        return math_renderer.render(tex,size);
+    };
+    auto measure_math=[&](std::u16string_view text,const MermaidFont& font,
+        double line_height,MathLabelParsePolicy policy)->std::expected<MathLabel,std::string> {
+        const MathLabelOptions options{.font_size=font.size,.line_height=line_height,
+            .font_weight=font.weight,.font_italic=font.italic,.parse_policy=policy};
+        auto display=diagram_display_text(text);
+        if(!display)return std::unexpected(display.error());
+        return measure_math_label(*display,options,[&](std::u16string_view value,unsigned weight,bool italic)
+            ->std::expected<MathLabelTextMetrics,std::string> {
+            auto styled=font;styled.weight=weight;styled.italic=italic;
+            auto metrics=measurer.measure(value,styled,true);
+            if(!metrics)return std::unexpected(metrics.error());
+            // HTML flex items occupy their advance box. Glyph overhang must
+            // not add spacing before the next formula or move row centering.
+            return MathLabelTextMetrics{metrics->advance,metrics->line_height,metrics->baseline};
+        },render_math);
+    };
     auto font_family=std::visit([&](auto& content)
         -> std::expected<std::u16string_view,std::string> {
         auto resolved=measurer.resolve_family(content.theme.font_family);
@@ -50,7 +72,7 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
         if(!title) return std::unexpected(title.error());
         widths.title_width=*title;
     }
-    auto measure_label=[&measurer](const FlowchartSvgTheme& label_theme,const ConfigValue& effective_config,const auto& source,double wrapping_width,bool group=false)->std::expected<FlowchartTextBox,std::string> {
+    auto measure_label=[&measurer,&measure_math](const FlowchartSvgTheme& label_theme,const ConfigValue& effective_config,const auto& source,double wrapping_width,bool group=false)->std::expected<FlowchartTextBox,std::string> {
             const auto& text=source.label;
             const bool svg_label=!label_theme.html_label_spacing;
             const auto* auto_wrap=effective_config.find(u"markdownAutoWrap");
@@ -68,6 +90,39 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             if(!std::isfinite(size)||size<=0||size>std::numeric_limits<float>::max())
                 return std::unexpected("Invalid Mermaid font size");
             const MermaidFont font{label_font->family,static_cast<float>(size),label_font->weight,label_font->italic};
+            auto finish_label=[&](FlowchartTextBox box)->std::expected<FlowchartTextBox,std::string> {
+                if(group && !svg_label && !source.styles.empty()) {
+                    auto paint=flowchart_label_font(source.compiled_styles,source.styles,label_theme);
+                    if(!paint)return std::unexpected(paint.error());
+                    auto family=measurer.resolve_family(paint->family);
+                    if(!family)return std::unexpected(family.error());
+                    paint->family=std::move(*family);
+                    const MermaidFont font{paint->family,static_cast<float>(paint->size),paint->weight,paint->italic};
+                    auto metrics=measurer.measure(u"M",font);if(!metrics)return std::unexpected(metrics.error());
+                    box.paint_font=*paint;box.paint_line_step=paint->size*1.5;
+                    box.paint_baseline=metrics->baseline+(box.paint_line_step-metrics->line_height)/2;
+                    if(box.math_label && (paint->family!=label_font->family || paint->size!=label_font->size ||
+                        paint->weight!=label_font->weight || paint->italic!=label_font->italic)) {
+                        // Cluster direct styles are applied after sizing upstream.
+                        // Keep the layout box and replace its sole paint payload.
+                        auto label=measure_math(text,font,paint->size*1.5,MathLabelParsePolicy::create_text);
+                        if(!label)return std::unexpected(label.error());
+                        box.math_label=std::make_shared<const MathLabel>(std::move(*label));
+                    }
+                }
+                return box;
+            };
+            // Detect TeX before ordinary label escapes or Markdown can consume
+            // commands such as \nabla or underscores in subscripts.
+            if(!svg_label && has_math_label(text)) {
+                auto label=measure_math(text,font,size*1.5,MathLabelParsePolicy::create_text);
+                if(!label)return std::unexpected(label.error());
+                FlowchartTextBox box;
+                box.width=label->width;box.height=label->height;box.line_step=size*1.5;
+                box.font=*label_font;box.centered_group=group && source.label_type==u"markdown";
+                box.math_label=std::make_shared<const MathLabel>(std::move(*label));
+                return finish_label(std::move(box));
+            }
             auto lines=svg_label?flowchart_svg_label_runs(text,source.label_type):flowchart_label_runs(text,source.label_type);
             if(!lines) return std::unexpected(lines.error());
             // markdownToHTML preserves spaces as NBSP when auto wrapping is off.
@@ -124,18 +179,7 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
                 box.height=metrics->height+box.line_step*(box.lines.size()-1);
             }
             if(text.empty()) box.baseline=0;
-            if(group && !svg_label && !source.styles.empty()) {
-                auto paint=flowchart_label_font(source.compiled_styles,source.styles,label_theme);
-                if(!paint)return std::unexpected(paint.error());
-                auto family=measurer.resolve_family(paint->family);
-                if(!family)return std::unexpected(family.error());
-                paint->family=std::move(*family);
-                const MermaidFont font{paint->family,static_cast<float>(paint->size),paint->weight,paint->italic};
-                auto metrics=measurer.measure(u"M",font);if(!metrics)return std::unexpected(metrics.error());
-                box.paint_font=*paint;box.paint_line_step=paint->size*1.5;
-                box.paint_baseline=metrics->baseline+(box.paint_line_step-metrics->line_height)/2;
-            }
-            return box;
+            return finish_label(std::move(box));
         };
     FlowchartMeasurements flowchart_measurements;
     if(auto flow=std::get_if<FlowchartRenderInput>(&input->content)) {
@@ -154,7 +198,7 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
         for(const auto& node:flow->document.nodes) {
             auto box=measure(node,node.group?std::numeric_limits<double>::infinity():flow->theme.wrapping_width,node.group);
             if(!box) return std::unexpected(box.error());
-            flowchart_measurements.nodes.push_back(*box);
+            flowchart_measurements.nodes.push_back(std::move(*box));
         }
         for(const auto& edge:flow->document.edges) {
             // createText uses its 200px default for edge labels; group titles
@@ -167,7 +211,7 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
                 // createText's edge background is the glyph box plus two units per side.
                 box->width+=4;box->height+=4;box->baseline=metrics->baseline+2;
             }
-            flowchart_measurements.edges.push_back(*box);
+            flowchart_measurements.edges.push_back(std::move(*box));
         }
     }
     MindmapMeasurements mindmap_measurements;
@@ -187,8 +231,17 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
     SequenceMeasurements sequence_measurements;
     if(auto seq=std::get_if<SequenceRenderInput>(&input->content)) {
         if(seq->theme.font_size>std::numeric_limits<float>::max()) return std::unexpected("Invalid Sequence font size");
-        auto measure_font=[&,seq](std::u16string_view text,unsigned weight)->std::expected<SequenceTextBox,std::string> {
+        auto measure_font=[&,seq](std::u16string_view text,unsigned weight,bool mathematical=true)->std::expected<SequenceTextBox,std::string> {
             const MermaidFont font{seq->theme.font_family,static_cast<float>(seq->theme.font_size),weight};
+            if(mathematical && has_math_label(text)) {
+                auto metrics=measurer.measure(u"M",font);if(!metrics)return std::unexpected(metrics.error());
+                auto label=measure_math(text,font,metrics->line_height,MathLabelParsePolicy::sequence);
+                if(!label)return std::unexpected(label.error());
+                SequenceTextBox box{.width=label->width,.height=label->height,
+                    .display=std::u16string{text},.line_height=metrics->line_height};
+                box.math_label=std::make_shared<const MathLabel>(std::move(*label));
+                return box;
+            }
             auto height=measurer.svg_font_height(font);if(!height)return std::unexpected(height.error());
             const MermaidFont fallback{u"Arial",font.size,font.weight};
             auto fallback_height=measurer.svg_font_height(fallback);if(!fallback_height)return std::unexpected(fallback_height.error());
@@ -229,7 +282,7 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
         auto wrap=[measure_font](std::u16string_view text,double max_width,unsigned weight)->std::expected<SequenceTextBox,std::string> {
             const auto measure=[&](std::u16string_view value){return measure_font(value,weight);};
             auto initial=measure(text);if(!initial) return initial;
-            if(initial->lines.size()>1 || text.empty()) return initial;
+            if(initial->math_label || initial->lines.size()>1 || text.empty()) return initial;
             // Original utils.wrapLabel/breakString: rounded SVG widths, a
             // space measured with each word, and code-point hyphenation.
             std::vector<std::u16string> lines;
@@ -266,21 +319,21 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
         for(const auto& group:seq->document.boxes) {
             auto box=measure_font(group.name,seq->theme.message_font_weight);
             if(!box) return std::unexpected(box.error());
-            sequence_measurements.boxes.push_back(*box);
+            sequence_measurements.boxes.push_back(std::move(*box));
         }
         for(const auto& actor:seq->document.actors) {
             auto box=actor.wrap?wrap(actor.description,seq->config.width-2*seq->config.wrap_padding,seq->theme.actor_font_weight):measure_font(actor.description,seq->theme.actor_font_weight);
             if(!box) return std::unexpected(box.error());
-            sequence_measurements.actors.push_back(*box);
+            sequence_measurements.actors.push_back(std::move(*box));
         }
-        if(auto title=measure_font(seq->document.title,seq->theme.font_weight);!title) return std::unexpected(title.error());
+        if(auto title=measure_font(seq->document.title,seq->theme.font_weight,false);!title) return std::unexpected(title.error());
         for(const auto& message:seq->document.messages) {
             const bool bracket=sequence_region_start(message.type)||sequence_region_section(message.type);
             const auto text=bracket&&!message.message.empty()?u"["+message.message+u"]":message.message;
             const auto weight=message.type==SequenceKind::note?seq->theme.note_font_weight:seq->theme.message_font_weight;
             auto box=message.wrap&&!bracket?wrap(text,seq->config.width-2*seq->config.wrap_padding,weight):measure_font(text,weight);
             if(!box) return std::unexpected(box.error());
-            sequence_measurements.messages.push_back(*box);
+            sequence_measurements.messages.push_back(std::move(*box));
         }
     }
     ClassMeasurements class_measurements;
@@ -295,14 +348,25 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             class_measurements.title={cls->document.title,title->bounds_width,metrics->height,metrics->baseline};
         }
         auto measure=[&](std::u16string_view source,unsigned weight=400,bool italic=false,double size=0,bool markdown=true,
-            double wrapping_width=std::numeric_limits<double>::infinity())->std::expected<ClassTextBox,std::string> {
+            double wrapping_width=std::numeric_limits<double>::infinity(),bool class_node=false)->std::expected<ClassTextBox,std::string> {
             auto display=diagram_display_text(source);if(!display) return std::unexpected(display.error());
             if(display->empty()) return ClassTextBox{};
             if(size==0) size=theme.font_size;
-            const bool svg_label=!cls->config.html_labels;
+            // Class shapeUtil explicitly selects the mathematical HTML path
+            // for class rows even when the graph uses SVG text labels.
+            const bool mathematical=(class_node||cls->config.html_labels) && has_math_label(source);
+            const bool svg_label=!cls->config.html_labels && !mathematical;
             // SVG createText puts an explicit normal/italic style on each run,
             // overriding the classifier's inherited italic presentation.
             const MermaidFont font{theme.font_family,static_cast<float>(size),weight,italic&&!svg_label};
+            if(mathematical) {
+                auto label=measure_math(source,font,size*1.5,MathLabelParsePolicy::create_text);
+                if(!label)return std::unexpected(label.error());
+                ClassTextBox box{.text=std::u16string{source},.width=label->width,.height=label->height};
+                box.line_step=label->lines.empty()?size*1.5:label->lines.front().height;
+                box.math_label=std::make_shared<const MathLabel>(std::move(*label));
+                return box;
+            }
             auto lines=flowchart_label_runs(*display,markdown?u"markdown":u"text");
             if(!lines) return std::unexpected(lines.error());
             ClassTextBox box;box.line_step=size*(svg_label?1.1:1.5);box.svg_label=svg_label;
@@ -369,12 +433,21 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
         for(const auto& node:cls->document.classes) {
             ClassNodeMeasurements m;
             const bool styled=cls->config.html_labels&&std::ranges::any_of(node.styles,[](const auto& style){return style.find(u"font-")!=style.npos;});
+            const auto measure_node=[&](std::u16string_view source,unsigned weight=400,bool italic=false) {
+                return measure(source,weight,italic,0,true,std::numeric_limits<double>::infinity(),true);
+            };
             auto apply_paint=[&](ClassTextBox& box,unsigned weight,bool italic)->std::expected<void,std::string> {
                 if(!styled||box.text.empty()) return {};
                 auto style=class_text_style(node,theme,weight,italic);if(!style)return std::unexpected(style.error());
                 auto family=measurer.resolve_family(style->family);if(!family)return std::unexpected(family.error());
                 style->family=std::move(*family);
                 const MermaidFont font{style->family,static_cast<float>(style->size),style->weight,style->italic};
+                if(box.math_label) {
+                    auto label=measure_math(box.text,font,style->size*1.5,MathLabelParsePolicy::create_text);
+                    if(!label)return std::unexpected(label.error());
+                    box.math_label=std::make_shared<const MathLabel>(std::move(*label));box.paint_font=std::move(*style);
+                    return {};
+                }
                 auto strut=measurer.svg_font_metrics(font);if(!strut)return std::unexpected(strut.error());
                 for(std::size_t i=0;i<box.lines.size();++i) {
                     double above=strut->baseline+(style->size*1.5-strut->height)/2;
@@ -388,17 +461,17 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
                 }
                 box.paint_font=std::move(*style);return {};
             };
-            auto label=measure(node.label+(node.type.empty()?std::u16string{}:u"&lt;"+node.type+u"&gt;"),700);
+            auto label=measure_node(node.label+(node.type.empty()?std::u16string{}:u"&lt;"+node.type+u"&gt;"),700);
             if(!label) return std::unexpected(label.error());m.label=std::move(*label);
             if(auto painted=apply_paint(m.label,700,false);!painted)return std::unexpected(painted.error());
             if(!node.annotations.empty()) {
-                auto annotation=measure(u"\u00ab"+node.annotations.front()+u"\u00bb");
+                auto annotation=measure_node(u"\u00ab"+node.annotations.front()+u"\u00bb");
                 if(!annotation) return std::unexpected(annotation.error());m.annotation=std::move(*annotation);
                 if(auto painted=apply_paint(m.annotation,400,false);!painted)return std::unexpected(painted.error());
             }
             for(auto [members,output]:{std::pair{&node.members,&m.members},{&node.methods,&m.methods}})
                 for(const auto& member:*members) {
-                    auto box=measure(member.text,400,member.classifier==u"*");
+                    auto box=measure_node(member.text,400,member.classifier==u"*");
                     if(!box) return std::unexpected(box.error());
                     if(auto painted=apply_paint(*box,400,member.classifier==u"*");!painted)return std::unexpected(painted.error());
                     output->push_back(std::move(*box));
@@ -687,37 +760,56 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
         return measure_svg_line(text, *font_family, size, weight);
     };
     std::map<std::u16string, std::u16string, std::less<>> resolved_families;
-    SvgFamilyTextMeasure svg_family_measure;
-    if (std::holds_alternative<UsecaseRenderInput>(input->content) ||
+    const bool family_svg_labels=std::holds_alternative<UsecaseRenderInput>(input->content) ||
         std::holds_alternative<EventmodelingRenderInput>(input->content) ||
         std::holds_alternative<SwimlaneRenderInput>(input->content) ||
-        std::holds_alternative<VennRenderInput>(input->content)) {
+        std::holds_alternative<VennRenderInput>(input->content);
+    const auto resolve_label_family=[&](std::u16string_view family)
+        ->std::expected<std::u16string_view,std::string> {
+        auto resolved=resolved_families.find(family);
+        if(resolved!=resolved_families.end())return resolved->second;
+        std::u16string candidates{family};
+        constexpr std::u16string_view generic=u"sans-serif";
+        if(family_svg_labels && family.ends_with(generic)) {
+            wchar_t locale[LOCALE_NAME_MAX_LENGTH]{};
+            if(GetUserDefaultLocaleName(locale,LOCALE_NAME_MAX_LENGTH) &&
+                std::wstring_view{locale}==L"zh-CN") {
+                candidates.resize(candidates.size()-generic.size());
+                candidates+=u"Microsoft YaHei, Arial";
+            }
+        }
+        auto installed=measurer.resolve_family(candidates);
+        if(!installed)return std::unexpected(installed.error());
+        return resolved_families.emplace(family,std::move(*installed)).first->second;
+    };
+    SvgFamilyTextMeasure svg_family_measure;
+    if (family_svg_labels) {
         svg_family_measure = [&](std::u16string_view text, std::u16string_view family,
                                     double size, unsigned weight, const SvgFamilyTextOptions& options)
             -> std::expected<SvgTextMetrics, std::string> {
-            auto resolved = resolved_families.find(family);
-            if (resolved == resolved_families.end()) {
-                std::u16string candidates{family};
-                constexpr std::u16string_view generic = u"sans-serif";
-                if (family.ends_with(generic)) {
-                    wchar_t locale[LOCALE_NAME_MAX_LENGTH]{};
-                    if (GetUserDefaultLocaleName(locale, LOCALE_NAME_MAX_LENGTH) &&
-                        std::wstring_view{locale} == L"zh-CN") {
-                        candidates.resize(candidates.size() - generic.size());
-                        candidates += u"Microsoft YaHei, Arial";
-                    }
-                }
-                auto installed = measurer.resolve_family(candidates);
-                if (!installed) return std::unexpected(installed.error());
-                resolved = resolved_families.emplace(family, std::move(*installed)).first;
-            }
-            return measure_svg_line(text, resolved->second, size, weight, options);
+            auto resolved=resolve_label_family(family);
+            if(!resolved)return std::unexpected(resolved.error());
+            return measure_svg_line(text,*resolved,size,weight,options);
         };
     }
+    // Families that measure their own rows and shapes request a complete
+    // typed label before their plain text wrapping and geometry calculations.
+    const MathLabelMeasure math_measure=[&](std::u16string_view text,std::u16string_view family,
+        double size,unsigned weight,bool italic)->std::expected<std::optional<MathLabel>,std::string> {
+        if(!has_math_label(text))return std::optional<MathLabel>{};
+        if(!std::isfinite(size)||size<=0||size>std::numeric_limits<float>::max())
+            return std::unexpected("Invalid Mermaid math label font size");
+        auto resolved=resolve_label_family(family);
+        if(!resolved)return std::unexpected(resolved.error());
+        const MermaidFont font{std::u16string{*resolved},static_cast<float>(size),weight,italic};
+        auto label=measure_math(text,font,size*1.5,MathLabelParsePolicy::create_text);
+        if(!label)return std::unexpected(label.error());
+        return std::optional<MathLabel>{std::move(*label)};
+    };
     return render_native_diagram(*input, widths, flowchart_measurements, sequence_measurements,
         class_measurements, xy_measurements, sankey_measurements, treemap_measure, journey_measure,
         timeline_measure, gantt_measure, git_graph_measure, mindmap_measurements, block_measure,
         kanban_measure, c4_measurements, architecture_measurements, state_measure, zenuml_measure,
-        er_measure, requirement_measure, svg_text_measure, svg_family_measure);
+        er_measure, requirement_measure, svg_text_measure, svg_family_measure, math_measure);
 }
 }
