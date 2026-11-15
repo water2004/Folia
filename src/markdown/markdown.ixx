@@ -8,6 +8,7 @@ export import folia.markdown.ast;
 export import folia.markdown.block_tree;
 export import folia.markdown.ids;
 export import folia.markdown.text_edit;
+export import folia.markdown.source_offset_map;
 export import folia.markdown.selection;
 export import folia.markdown.inline_document;
 export import folia.markdown.inline_cst;

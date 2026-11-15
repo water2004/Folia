@@ -15,6 +15,7 @@ import folia.markdown.selection;
 import folia.markdown.text_edit;
 import folia.core.source_style;
 import folia.markdown.block_source;
+import folia.markdown.source_offset_map;
 import folia.markdown.block_tree;
 export import folia.core.syntax_marker;
 
@@ -321,7 +322,7 @@ struct RenderBlockSpecial {
     std::vector<SourceMarker> source_markers;
     // CodeBlock
     std::u32string raw_source;
-    std::vector<std::size_t> content_to_source;
+    SourceOffsetMap content_to_source;
     std::optional<std::string> language;
     std::u32string code_text;
     std::vector<GeneratedCodeIndentation> generated_code_indentation;

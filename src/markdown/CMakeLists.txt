@@ -35,6 +35,7 @@ target_sources(folia_markdown PUBLIC FILE_SET CXX_MODULES FILES
     model/inline_document.ixx
     model/metadata.ixx
     model/selection.ixx
+    model/source_offset_map.ixx
     model/symbols.ixx
     model/text_edit.ixx
     parsing/block_line_recognizer.ixx

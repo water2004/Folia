@@ -921,7 +921,7 @@ inline std::optional<TextSelection> document_move_selection(const EditorDocument
     else if (movement == DocumentMove::Left) {
         if (editable_raw_block_source(*active_block)) {
             auto const& mapping = active_block->block_source.tree().content_to_source;
-            auto current = std::ranges::lower_bound(mapping, target.source_offset);
+            auto current = mapping.lower_bound(target.source_offset);
             if (current != mapping.end() && *current == target.source_offset && current != mapping.begin()) {
                 const auto offset = static_cast<std::size_t>(current - mapping.begin());
                 target.source_offset = mapping[prev_grapheme_boundary_char(active_block->block_source.tree().content, offset)];
@@ -941,7 +941,7 @@ inline std::optional<TextSelection> document_move_selection(const EditorDocument
     } else if (movement == DocumentMove::Right) {
         if (editable_raw_block_source(*active_block)) {
             auto const& mapping = active_block->block_source.tree().content_to_source;
-            auto current = std::ranges::lower_bound(mapping, target.source_offset);
+            auto current = mapping.lower_bound(target.source_offset);
             if (current != mapping.end() && *current == target.source_offset
                 && std::next(current) != mapping.end()) {
                 const auto offset = static_cast<std::size_t>(current - mapping.begin());
@@ -967,10 +967,10 @@ inline std::optional<TextSelection> document_move_selection(const EditorDocument
             : nullptr;
         if (raw_mapping) {
             navigation_text = active_block->block_source.tree().content;
-            auto mapped = std::ranges::lower_bound(*raw_mapping, target.source_offset);
+            auto mapped = raw_mapping->lower_bound(target.source_offset);
             navigation_offset = mapped == raw_mapping->end()
                 ? navigation_text.size()
-                : static_cast<std::size_t>(std::distance(raw_mapping->begin(), mapped));
+                : static_cast<std::size_t>(mapped - raw_mapping->begin());
         }
         const auto before = navigation_offset == 0 ? std::u32string::npos : navigation_text.rfind(U'\n', navigation_offset - 1);
         const auto line_start = before == std::u32string::npos ? 0 : before + 1;

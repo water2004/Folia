@@ -26,6 +26,7 @@ import folia.markdown.symbols;
 import folia.markdown.ast;
 import folia.markdown.container_source;
 import folia.markdown.block_source;
+import folia.markdown.source_offset_map;
 import folia.markdown.block_tree;
 import folia.markdown.block_line_recognizer;
 import folia.markdown.callout;
@@ -3228,13 +3229,11 @@ std::optional<BlockNode> try_parse_link_definition(const LeafLine& first) {
         const auto begin = lines[first].start;
         const auto end = lines[last].break_end;
         std::u32string content = tree.content.substr(begin, end - begin);
-        std::vector<std::size_t> mapping(
-            tree.content_to_source.begin() + begin,
-            tree.content_to_source.begin() + end);
-        mapping.push_back(tree.content_to_source[end]);
+        auto mapping = tree.content_to_source.slice(begin, end + 1);
         std::vector<SourceRange> ranges;
-        for (std::size_t index = 0; index < content.size(); ++index) {
-            const auto source_offset = mapping[index];
+        auto mapped_offset = mapping.begin();
+        for (std::size_t index = 0; index < content.size(); ++index, ++mapped_offset) {
+            const auto source_offset = *mapped_offset;
             if (!ranges.empty() && ranges.back().end == source_offset) ranges.back().end = source_offset + 1;
             else ranges.push_back({source_offset, source_offset + 1});
         }
@@ -3260,13 +3259,13 @@ std::optional<BlockNode> try_parse_link_definition(const LeafLine& first) {
         if (tree.content_ranges.empty() || tree.content_to_source.size() != tree.content.size() + 1) return;
 
         std::u32string content;
-        std::vector<std::size_t> content_to_source;
+        SourceOffsetMap content_to_source;
         std::vector<SourceRange> content_ranges;
         content.reserve(tree.content.size());
-        content_to_source.reserve(tree.content_to_source.size());
         bool line_start = true;
         std::size_t line_indent = 0;
-        for (std::size_t index = 0; index < tree.content.size(); ++index) {
+        auto mapped_offset = tree.content_to_source.begin();
+        for (std::size_t index = 0; index < tree.content.size(); ++index, ++mapped_offset) {
             const auto ch = tree.content[index];
             if (line_start && ch == U' ' && line_indent < opening_indent) {
                 ++line_indent;
@@ -3276,7 +3275,7 @@ std::optional<BlockNode> try_parse_link_definition(const LeafLine& first) {
                 line_start = false;
                 line_indent = 0;
             }
-            const auto source_offset = tree.content_to_source[index];
+            const auto source_offset = *mapped_offset;
             content.push_back(ch);
             content_to_source.push_back(source_offset);
             if (!content_ranges.empty() && content_ranges.back().end == source_offset) {

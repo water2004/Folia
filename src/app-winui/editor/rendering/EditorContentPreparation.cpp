@@ -266,16 +266,16 @@ namespace winrt::Folia
         DisplayInlineText& display,
         std::u32string_view text,
         folia::NodeId owner,
-        std::vector<std::size_t> const& sourceOffsets,
+        folia::SourceOffsetMap const& sourceOffsets,
         folia::InlineStyle style)
     {
         auto start = static_cast<UINT32>(display.displayToSource.size());
         display.text.append(text);
+        auto source = sourceOffsets.begin();
         for (std::size_t index = 0; index < text.size(); ++index)
         {
-            auto offset = sourceOffsets.empty()
-                ? index
-                : sourceOffsets[(std::min)(index, sourceOffsets.size() - 1)];
+            auto offset = sourceOffsets.empty() ? index : *source;
+            if (!sourceOffsets.empty() && index + 1 < sourceOffsets.size()) ++source;
             auto mapping = EditorDisplayPosition{
                 {owner, offset, folia::TextAffinity::Downstream},
                 EditorDisplayPositionKind::Source};

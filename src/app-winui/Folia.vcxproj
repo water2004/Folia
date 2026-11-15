@@ -257,6 +257,9 @@
     <ClCompile Include="..\markdown\model\container_source.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\markdown\model\source_offset_map.ixx">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\markdown\parsing\block_source.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
