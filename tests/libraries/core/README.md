@@ -7,7 +7,9 @@ automatically. It does not configure the WinUI application or generate native
 math font tables. The search/math regex interoperation test compiles only the
 independent regex host needed by that test.
 
-The tests use the repository's forked **Boost.UT module** and `import std;`.
+Production modules use `import std;`. Tests include `support/folia_test.hpp`
+and obtain the standard-library API through the repository's forked
+**Boost.UT module**, which exports it; tests do not import `std` directly.
 A toolchain with real standard-library modules is required; no generated
 header-only or concatenated-source substitute is used.
 
@@ -19,7 +21,7 @@ Initialize the test dependency once:
 git submodule update --init third_party/ut
 ```
 
-With CMake 4.3, Ninja, and a Clang/libc++ installation that ships its standard
+With CMake 4.3, Ninja, and Clang/libc++ 21 or newer, including the standard
 library module sources and metadata:
 
 ```sh
@@ -29,6 +31,14 @@ CC=clang-21 CXX=clang++-21 cmake -G Ninja \
 cmake --build build/core-portable --parallel 4
 ctest --test-dir build/core-portable --output-on-failure
 ```
+
+For the Debian/Ubuntu LLVM 21 packages, explicitly select the versioned
+metadata with
+`-DCMAKE_CXX_STDLIB_MODULES_JSON=/usr/lib/llvm-21/lib/libc++.modules.json`.
+Those packages also install a multiarch metadata file whose relative paths
+can resolve outside the directory containing the module sources. Selecting
+the versioned file preserves the shipped module sources and their correct
+relative include paths.
 
 From a Visual Studio developer shell, omit the compiler environment variables
 and the `-stdlib=libc++` flag. The Windows console-runtime guard is linked on

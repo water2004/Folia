@@ -63,7 +63,8 @@ jobs:
         run: |
           set -euo pipefail
           cmake -S tests/libraries/core -B build/core-portable -G Ninja \
-            -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS=-stdlib=libc++
+            -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS=-stdlib=libc++ \
+            -DCMAKE_CXX_STDLIB_MODULES_JSON=/usr/lib/llvm-21/lib/libc++.modules.json
           cmake --build build/core-portable --target FoliaCoreTests --parallel 3
       - name: Run core behavior and complexity gates
         run: ctest --test-dir build/core-portable --output-on-failure --timeout 180
