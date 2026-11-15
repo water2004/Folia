@@ -13,45 +13,6 @@ namespace winrt::Folia
             float screenY = 0.0f;
         };
 
-        std::optional<SourceScrollAnchor> CaptureSourceScrollAnchor(
-            EditorPreparedDocument::Block const& block,
-            float documentTop,
-            float scrollOffset,
-            folia::RenderModel const& model)
-        {
-            if (!block.valid) return {};
-            std::optional<SourceScrollAnchor> result;
-            auto closest = (std::numeric_limits<float>::max)();
-            auto visit = [&](folia::platform::editor::EditorLayoutLines const& lines, float textTop)
-            {
-                if (!lines) return;
-                for (auto const& line : *lines)
-                {
-                    auto top = documentTop + textTop + line.rect.top;
-                    auto bottom = documentTop + textTop + line.rect.bottom;
-                    if (bottom <= scrollOffset) continue;
-                    auto distance = (std::max)(0.0f, top - scrollOffset);
-                    if (distance >= closest) continue;
-                    for (auto const& span : line.SourceSpans())
-                    {
-                        if (!model.editable_index.contains(span.container_id.v)) continue;
-                        result = SourceScrollAnchor{
-                            {span.container_id, span.source_range.start, folia::TextAffinity::Downstream},
-                            top - scrollOffset,
-                        };
-                        closest = distance;
-                        break;
-                    }
-                }
-            };
-            if (block.table)
-                for (auto const& cell : block.table->visual.cells)
-                    visit(cell.layoutLines, cell.textOrigin.y);
-            else
-                visit(block.layoutLines, block.textTop);
-            return result;
-        }
-
         std::optional<float> SourceScrollAnchorTop(
             EditorPreparedDocument::Block const& block,
             folia::TextPosition position)
@@ -82,6 +43,50 @@ namespace winrt::Folia
                 return {};
             }
             return locate(block.layout.Get(), block.display.displayToSource, block.textTop);
+        }
+
+        std::optional<SourceScrollAnchor> CaptureSourceScrollAnchor(
+            EditorPreparedDocument::Block const& block,
+            float documentTop,
+            float scrollOffset,
+            folia::RenderModel const& model)
+        {
+            if (!block.valid) return {};
+            std::optional<folia::TextPosition> position;
+            auto closest = (std::numeric_limits<float>::max)();
+            auto visit = [&](folia::platform::editor::EditorLayoutLines const& lines, float textTop)
+            {
+                if (!lines) return;
+                for (auto const& line : *lines)
+                {
+                    auto top = documentTop + textTop + line.rect.top;
+                    auto bottom = documentTop + textTop + line.rect.bottom;
+                    if (bottom <= scrollOffset) continue;
+                    auto distance = (std::max)(0.0f, top - scrollOffset);
+                    if (distance >= closest) continue;
+                    for (auto const& span : line.SourceSpans())
+                    {
+                        if (!model.editable_index.contains(span.container_id.v)) continue;
+                        position = folia::TextPosition{
+                            span.container_id, span.source_range.start, folia::TextAffinity::Downstream,
+                        };
+                        closest = distance;
+                        break;
+                    }
+                }
+            };
+            if (block.table)
+                for (auto const& cell : block.table->visual.cells)
+                    visit(cell.layoutLines, cell.textOrigin.y);
+            else
+                visit(block.layoutLines, block.textTop);
+            // The line box selects the first visible source position. Its top
+            // can differ from DirectWrite's hit-test origin for that position.
+            // Measure both sides of reflow using the same coordinate.
+            if (position)
+                if (auto localTop = SourceScrollAnchorTop(block, *position))
+                    return SourceScrollAnchor{*position, documentTop + *localTop - scrollOffset};
+            return {};
         }
     }
 
