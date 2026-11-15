@@ -6,6 +6,7 @@ import folia.markdown.ast;
 import folia.markdown.block_source;
 import folia.markdown.block_tree;
 import folia.markdown.callout;
+import folia.markdown.container_source;
 import folia.markdown.document;
 import folia.core.document_container_source;
 import folia.core.document_ids;
@@ -142,6 +143,37 @@ inline bool insert_container_and_move_range(
     return true;
 }
 
+inline void ensure_paragraph_boundary(
+    BlockNode& parent, std::size_t index, std::vector<DocumentOperation>& operations) {
+    if (index == 0 || index >= parent.children.size()) return;
+    auto& current = parent.children[index];
+    const auto& previous = parent.children[index - 1];
+    if (current.kind != BlockKind::Paragraph || previous.kind != BlockKind::Paragraph
+        || !current.separator_before) return;
+    const auto& separator = *current.separator_before;
+    std::size_t endings = 0;
+    for (std::size_t offset = 0; offset < separator.size(); ++offset) {
+        if (separator[offset] != U'\r' && separator[offset] != U'\n') continue;
+        ++endings;
+        if (separator[offset] == U'\r' && offset + 1 < separator.size()
+            && separator[offset + 1] == U'\n') ++offset;
+    }
+    if (endings >= 2) return;
+    DocumentTreeEdit spacing;
+    spacing.kind = DocumentTreeEditKind::UpdatePayload;
+    spacing.before = document_transaction_detail::payload_shell(current);
+    // A heading/quote marker can interrupt a paragraph after one line ending.
+    // Removing that marker needs a second ending, in the original spelling.
+    if (endings == 1) {
+        const auto offset = separator.find_first_of(U"\r\n");
+        const auto width = separator[offset] == U'\r' && offset + 1 < separator.size()
+            && separator[offset + 1] == U'\n' ? 2u : 1u;
+        current.separator_before = separator + separator.substr(offset, width);
+    } else current.separator_before = separator + U"\n\n";
+    spacing.after = document_transaction_detail::payload_shell(current);
+    operations.emplace_back(std::move(spacing));
+}
+
 inline bool unwrap_container(
     EditorDocument& document,
     const DirectRange& range,
@@ -150,25 +182,42 @@ inline bool unwrap_container(
     if (!parent || range.first != range.last || range.first >= parent->children.size()) return false;
     const auto parent_id = parent->id;
     const auto container_id = parent->children[range.first].id;
-    auto* container = find_block(document.root, container_id);
-    if (!container) return false;
-    const auto child_count = container->children.size();
+    const auto incoming_separator = parent->children[range.first].separator_before;
+    const auto child_count = parent->children[range.first].children.size();
     for (std::size_t target_index = 0; target_index < child_count; ++target_index) {
-        parent = find_block(document.root, parent_id);
-        container = find_block(document.root, container_id);
-        if (!parent || !container || container->children.empty()) return false;
+        parent = block_at_path(document.root, range.parent_path);
+        const auto index = range.first + target_index;
+        if (!parent || index >= parent->children.size()) return false;
+        auto* container = &parent->children[index];
+        if (container->id != container_id || container->children.empty()) return false;
+        auto& first_child = container->children.front();
+        if (target_index == 0 && first_child.separator_before != incoming_separator) {
+            DocumentTreeEdit boundary;
+            boundary.kind = DocumentTreeEditKind::UpdatePayload;
+            boundary.before = document_transaction_detail::payload_shell(first_child);
+            // The first child's former boundary belonged inside its wrapper
+            // (for a callout, it followed the header). It now takes the
+            // wrapper's exact incoming boundary in the surrounding flow.
+            first_child.separator_before = incoming_separator;
+            boundary.after = document_transaction_detail::payload_shell(first_child);
+            operations.emplace_back(std::move(boundary));
+        }
         DocumentTreeEdit move;
         move.kind = DocumentTreeEditKind::Move;
         move.parent_id = container_id;
         move.index = 0;
         move.other_parent_id = parent_id;
-        move.other_index = range.first + target_index;
-        move.moved_id = container->children.front().id;
+        move.other_index = index;
+        move.moved_id = first_child.id;
         auto child = remove_block(*container, 0);
-        if (!child || !insert_block(*parent, move.other_index, std::move(*child))) return false;
-        document_container_source::append_container_tree_operation(document, operations, std::move(move));
+        if (!child || !insert_block(*parent, index, std::move(*child))) return false;
+        auto shifted_container_path = range.parent_path;
+        shifted_container_path.push_back(index + 1);
+        document_container_source::append_container_tree_operation(document, operations,
+            std::move(move), shifted_container_path, range.parent_path, &parent->children[index]);
+        ensure_paragraph_boundary(*parent, index, operations);
     }
-    parent = find_block(document.root, parent_id);
+    parent = block_at_path(document.root, range.parent_path);
     const auto container_index = range.first + child_count;
     if (!parent || container_index >= parent->children.size()) return false;
     DocumentTreeEdit remove;
@@ -176,39 +225,182 @@ inline bool unwrap_container(
     remove.parent_id = parent_id;
     remove.index = container_index;
     remove.before = parent->children[container_index];
-        document_container_source::append_container_tree_operation(document, operations, std::move(remove));
+    document_container_source::append_container_tree_operation(
+        document, operations, std::move(remove), range.parent_path);
     parent->children.erase(parent->children.begin() + static_cast<std::ptrdiff_t>(container_index));
+    ensure_paragraph_boundary(*parent, container_index, operations);
     return true;
 }
 
 } // namespace document_structure_detail
 
-inline std::optional<DocumentTransaction> document_set_heading(EditorDocument& document, const TextSelection& selection, std::uint8_t level) {
-    if (level > 6 || selection.anchor.container_id != selection.active.container_id) return std::nullopt;
+inline std::optional<DocumentTransaction> document_set_heading(
+    EditorDocument& document, const TextSelection& selection, std::uint8_t level) {
+    if (level > 6) return std::nullopt;
+    for (const auto& position : {selection.anchor, selection.active}) {
+        const auto* block = find_document_block(document, position.container_id);
+        const auto length = block ? document_edit_detail::local_position_length(*block) : std::nullopt;
+        if (!length || position.source_offset > *length) return std::nullopt;
+    }
+    const auto anchor_index = document_editable_order_position(document, selection.anchor.container_id);
+    const auto active_index = document_editable_order_position(document, selection.active.container_id);
+    if (!anchor_index || !active_index) return std::nullopt;
+    const auto first = (std::min)(*anchor_index, *active_index);
+    auto last = (std::max)(*anchor_index, *active_index);
+    if (first < last) {
+        const auto end = *anchor_index < *active_index ? selection.active : selection.anchor;
+        const auto* end_block = find_document_block(document, end.container_id);
+        const auto length = end_block ? document_edit_detail::local_position_length(*end_block) : std::nullopt;
+        // An explicit upstream end of an empty owner (for example SelectAll)
+        // still includes that owner, unlike an endpoint before the next block.
+        if (end.source_offset == 0 && !(length == 0 && end.affinity == TextAffinity::Upstream)) --last;
+    }
+    std::vector<NodeId> owners;
+    for (auto index = first; index <= last; ++index) {
+        const auto id = document.cached_editable_order[index];
+        const auto* block = find_document_block(document, id);
+        // Callout titles have a required header role; heading formatting is
+        // available on their body paragraphs without replacing that title.
+        if (block && (block->kind == BlockKind::Paragraph || block->kind == BlockKind::Heading)) {
+            owners.push_back(id);
+        }
+    }
+    if (owners.empty()) return std::nullopt;
+
     const auto revision_before = document.revision;
-    auto& after = document;
-    auto* block = find_block(after.root, selection.active.container_id);
-    if (!block || !document_edit_detail::text_block(block->kind)) return std::nullopt;
-    DocumentTreeEdit update;
-    update.kind = DocumentTreeEditKind::UpdatePayload;
-    update.before = document_transaction_detail::payload_shell(*block);
-    block->kind = level == 0 ? BlockKind::Paragraph : BlockKind::Heading;
-    block->ensure_text_special().level = level;
-    block->ensure_text_special().opening_marker = level == 0
-        ? std::u32string{}
-        : std::u32string(level, U'#') + U" ";
-    block->ensure_text_special().closing_marker.clear();
-    update.after = document_transaction_detail::payload_shell(*block);
+    document_edit_detail::NodeAllocator allocator(document);
     std::vector<DocumentOperation> operations;
-    operations.emplace_back(std::move(update));
-    ++after.revision;
-    return make_recorded_document_transaction(
-        std::move(operations),
-        selection,
-        selection,
-        revision_before,
-        after.revision,
-        DocumentTransactionReason::Structure);
+    document_edit_detail::MutationRollback rollback(document, operations, revision_before);
+    auto target = selection;
+    const auto set_kind = [level](BlockNode& block, bool split_source) {
+        const auto was_heading = block.kind == BlockKind::Heading;
+        block.kind = level == 0 ? BlockKind::Paragraph : BlockKind::Heading;
+        auto& special = block.ensure_text_special();
+        special.level = level;
+        special.opening_marker = level == 0 ? std::u32string{} : std::u32string(level, U'#') + U" ";
+        special.closing_marker.clear();
+        if (level == 0 || !was_heading || split_source) special.slug.clear();
+    };
+    struct PhysicalLine {
+        std::size_t start;
+        std::size_t end;
+        std::size_t next;
+        NodeId owner;
+    };
+    // Later owners are split first, so earlier cached paths stay valid while
+    // the transaction has not yet repaired the derived document index.
+    for (auto owner = owners.rbegin(); owner != owners.rend(); ++owner) {
+        auto path = document_block_path(document, *owner);
+        if (!path || path->empty()) return std::nullopt;
+        auto parent_path = *path;
+        const auto block_index = parent_path.back();
+        parent_path.pop_back();
+        auto* parent = block_at_path(document.root, parent_path);
+        auto* block = &parent->children[block_index];
+        const auto source = block->inline_content.source;
+        const auto syntax = block->inline_content.syntax_mode;
+        std::vector<PhysicalLine> lines;
+        if (level != 0 && syntax != InlineSyntaxMode::HtmlText) {
+            std::size_t start = 0;
+            for (std::size_t index = 0; index < source.size(); ++index) {
+                if (source[index] != U'\r' && source[index] != U'\n') continue;
+                const auto end = index;
+                if (source[index] == U'\r' && index + 1 < source.size() && source[index + 1] == U'\n') ++index;
+                lines.push_back({start, end, index + 1, {}});
+                start = index + 1;
+            }
+            lines.push_back({start, source.size(), source.size(), {}});
+        } else lines.push_back({0, source.size(), source.size(), {}});
+        lines.front().owner = *owner;
+        std::vector<document_container_source::ContainerSourceSnapshot> snapshots;
+        if (lines.size() > 1) {
+            snapshots = document_container_source::snapshot_ancestors(document, *owner);
+            auto edited = document_edit_detail::edit_inline(document, *owner,
+                {lines.front().end, source.size()}, {}, allocator);
+            if (!edited) return std::nullopt;
+            document_edit_detail::append_source_operation(operations, std::move(*edited));
+        }
+        DocumentTreeEdit update;
+        update.kind = DocumentTreeEditKind::UpdatePayload;
+        update.before = document_transaction_detail::payload_shell(*block);
+        set_kind(*block, lines.size() > 1);
+        update.after = document_transaction_detail::payload_shell(*block);
+        operations.emplace_back(std::move(update));
+
+        BlockVec additions;
+        additions.reserve(lines.size() - 1);
+        for (std::size_t index = 1; index < lines.size(); ++index) {
+            auto heading = document_transaction_detail::payload_shell(*block);
+            heading.id = allocator.allocate();
+            lines[index].owner = heading.id;
+            const auto& previous = lines[index - 1];
+            heading.separator_before = source.substr(previous.end, previous.next - previous.end);
+            heading.inline_content = document_edit_detail::make_inline(
+                source.substr(lines[index].start, lines[index].end - lines[index].start),
+                document, allocator, syntax);
+            DocumentTreeEdit insert;
+            insert.kind = DocumentTreeEditKind::Insert;
+            insert.parent_id = parent->id;
+            insert.index = block_index + index;
+            insert.after = heading;
+            operations.emplace_back(std::move(insert));
+            additions.push_back(std::move(heading));
+        }
+        if (!additions.empty()) {
+            parent->children.insert(parent->children.begin() + static_cast<std::ptrdiff_t>(block_index + 1),
+                std::make_move_iterator(additions.begin()), std::make_move_iterator(additions.end()));
+            const auto line_index = [&](std::size_t offset) {
+                const auto found = std::upper_bound(lines.begin(), lines.end(), offset,
+                    [](std::size_t value, const PhysicalLine& line) { return value < line.start; });
+                return static_cast<std::size_t>((found - lines.begin()) - 1);
+            };
+            const auto map_position = [&](TextPosition& position) {
+                if (position.container_id != *owner) return;
+                const auto& line = lines[line_index(position.source_offset)];
+                position.container_id = line.owner;
+                position.source_offset = (std::min)(position.source_offset, line.end) - line.start;
+            };
+            map_position(target.anchor);
+            map_position(target.active);
+            // Prefix provenance follows the physical line into its new owner.
+            // A previously lazy continuation now needs an explicit container
+            // prefix because an ATX heading interrupts paragraph continuation.
+            for (const auto& snapshot : snapshots) {
+                auto* container = find_document_block(document, snapshot.container_id);
+                if (!container || !container->has_container_source()) continue;
+                auto next = container->container_source();
+                for (const auto& old_line : snapshot.source.lines) {
+                    if (old_line.anchor.part != ContainerAnchorPart::Source
+                        || old_line.anchor.owner_id != *owner
+                        || old_line.anchor.offset < lines[1].start) continue;
+                    const auto& line = lines[line_index(old_line.anchor.offset)];
+                    auto moved = old_line;
+                    moved.anchor.owner_id = line.owner;
+                    moved.anchor.offset = (std::min)(old_line.anchor.offset, line.end) - line.start;
+                    if (moved.lazy) {
+                        moved.text = document_container_source::canonical_prefix(*container);
+                        moved.lazy = false;
+                    }
+                    next.lines.push_back(std::move(moved));
+                }
+                if (next == container->container_source()) continue;
+                DocumentTreeEdit prefix;
+                prefix.kind = DocumentTreeEditKind::UpdatePayload;
+                prefix.before = document_transaction_detail::payload_shell(*container);
+                container->ensure_container_source() = std::move(next);
+                prefix.after = document_transaction_detail::payload_shell(*container);
+                operations.emplace_back(std::move(prefix));
+            }
+        }
+        if (level == 0) {
+            document_structure_detail::ensure_paragraph_boundary(*parent, block_index, operations);
+            document_structure_detail::ensure_paragraph_boundary(*parent, block_index + 1, operations);
+        }
+    }
+    document.revision = revision_before + 1;
+    rollback.commit();
+    return make_recorded_document_transaction(std::move(operations), selection, target,
+        revision_before, document.revision, DocumentTransactionReason::Structure);
 }
 
 inline std::optional<DocumentTransaction> document_toggle_block_quote(EditorDocument& document, const TextSelection& selection) {
