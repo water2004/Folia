@@ -136,12 +136,16 @@ inline std::optional<std::vector<BoundInlineEdit>> bind_inline_edits(
                 || block->inline_content.syntax_mode==InlineSyntaxMode::HtmlText) continue;
             const auto begin=edit.range_before.start-root.begin;
             const auto end=edit.range_before.end-root.begin;
-            const auto first=std::ranges::lower_bound(map.source_to_serialized,begin);
-            const auto last=std::ranges::lower_bound(map.source_to_serialized,end);
+            const auto first=map.source_to_serialized.lower_bound(begin);
+            const auto last=map.source_to_serialized.lower_bound(end);
             if (first==map.source_to_serialized.end() || last==map.source_to_serialized.end()
                 || *first!=begin || *last!=end || static_cast<std::size_t>(last-first)!=edit.range_before.length()) continue;
             bool contiguous=true;
-            for (auto p=first;p!=last;++p) if (*(p+1)!=*p+1) {contiguous=false;break;}
+            for (auto p=first;p!=last;++p) {
+                auto next=p;
+                ++next;
+                if (*next!=*p+1) {contiguous=false;break;}
+            }
             if (!contiguous) continue;
             result.push_back({map.container_id,{static_cast<std::size_t>(first-map.source_to_serialized.begin()),
                 static_cast<std::size_t>(last-map.source_to_serialized.begin())},edit.inserted});

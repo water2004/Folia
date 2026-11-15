@@ -92,6 +92,27 @@ suite source_offset_map_tests = [] {
         expect(moved.lower_bound(0) == moved.end());
     };
 
+    "source_offset_map_origin_translation_preserves_copies_and_rejects_underflow"_test = [] {
+        for (const auto& values : std::vector<std::vector<std::size_t>>{
+                {10, 11, 12, 13}, {10, 11, 30, 30, 30, 31, 32}, {10, 30, 50, 70}}) {
+            SourceOffsetMap original(values.begin(), values.end());
+            auto local = original;
+            local.subtract_origin(10);
+            for (std::size_t index = 0; index < values.size(); ++index)
+                expect(local[index] == values[index] - 10);
+            expect(std::ranges::equal(original, values));
+            const auto before = local;
+            expect(throws<std::out_of_range>([&] { local.subtract_origin(1); }));
+            expect(local == before);
+        }
+        SourceOffsetMap long_line;
+        long_line.assign_linear(100, 10'000'000);
+        long_line.subtract_origin(93);
+        expect(long_line.front() == 7_u);
+        expect(long_line.back() == 10'000'006_u);
+        expect(long_line.allocated_bytes() == 0_u);
+    };
+
     "source_offset_map_matches_dense_oracle_for_mixed_projection_runs"_test = [] {
         std::mt19937_64 random(0x736f75726365);
         for (std::size_t trial = 0; trial < 256; ++trial) {

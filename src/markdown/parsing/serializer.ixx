@@ -10,6 +10,7 @@ import folia.markdown.ids;
 import folia.markdown.serializer_visitor;
 import folia.markdown.serializer_writer;
 import folia.markdown.text_edit;
+import folia.markdown.source_offset_map;
 import folia.markdown.utf;
 
 export namespace folia {
@@ -97,8 +98,10 @@ inline std::u32string serialize_html_image_source(std::u32string_view destinatio
 
 struct SerializedSourceMap {
     NodeId container_id{};
-    // Index i stores the serialized Markdown offset for source offset i.
-    std::vector<std::size_t> source_to_serialized;
+    // Index i stores the exact serialized Markdown offset for source offset i.
+    // Finalized maps are compact; the writer separately owns mutable first-
+    // emission-wins slots while HTML and container source is being emitted.
+    SourceOffsetMap source_to_serialized;
 };
 
 using SerializedBlockRange=serializer_detail::SerializerBlockRange;
@@ -132,8 +135,8 @@ inline std::optional<TextPosition> source_position_for_serialized_offset(
     std::size_t preceding_offset = 0;
     std::size_t following_offset = (std::numeric_limits<std::size_t>::max)();
     for (const auto& map : projection.source_maps) {
-        for (std::size_t local = 0; local < map.source_to_serialized.size(); ++local) {
-            const auto projected = map.source_to_serialized[local];
+        std::size_t local = 0;
+        for (const auto projected : map.source_to_serialized) {
             const TextPosition candidate{map.container_id, local, affinity};
             if (projected == serialized_offset) return candidate;
             if (projected < serialized_offset && (!preceding || projected >= preceding_offset)) {
@@ -144,6 +147,7 @@ inline std::optional<TextPosition> source_position_for_serialized_offset(
                 following = candidate;
                 following_offset = projected;
             }
+            ++local;
         }
     }
     if (affinity == TextAffinity::Upstream) return preceding ? preceding : following;
@@ -159,7 +163,11 @@ inline SerializedMarkdownProjection to_public_projection(
     projection.blocks = std::move(emission.blocks);
     projection.source_maps.reserve(emission.source_maps.size());
     for (auto& map : emission.source_maps) {
-        projection.source_maps.push_back({map.owner, std::move(map.source_to_serialized)});
+        SourceOffsetMap positions(map.source_to_serialized.begin(), map.source_to_serialized.end());
+        // Release the writer's dense owner slots as each finalized projection
+        // is transferred, instead of overlapping both complete representations.
+        map.source_to_serialized = std::vector<std::size_t>{};
+        projection.source_maps.push_back({map.owner, std::move(positions)});
     }
     return projection;
 }

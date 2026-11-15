@@ -190,6 +190,24 @@ public:
         else append_run(source, 1, false);
     }
 
+    // Rebase a finalized projection without touching every scalar in linear
+    // or repeated runs. Validate first so a bad origin leaves the map intact.
+    void subtract_origin(std::size_t origin) {
+        if (origin == 0 || empty()) return;
+        if (auto* values = std::get_if<Dense>(&storage_)) {
+            if (std::ranges::any_of(*values, [origin](auto value) { return value < origin; }))
+                throw std::out_of_range("source offset map origin");
+            for (auto& value : *values) value -= origin;
+            return;
+        }
+        auto& following = std::get<Runs>(storage_);
+        if (first_.source < origin || std::ranges::any_of(following,
+                [origin](auto const& part) { return part.source < origin; }))
+            throw std::out_of_range("source offset map origin");
+        first_.source -= origin;
+        for (auto& part : following) part.source -= origin;
+    }
+
     SourceOffsetMap slice(std::size_t begin, std::size_t end) const {
         if (begin > end || end > size()) throw std::out_of_range("source offset map slice");
         SourceOffsetMap result;

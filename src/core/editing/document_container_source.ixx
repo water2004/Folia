@@ -261,7 +261,7 @@ inline std::vector<DocumentTreeEdit> rebind_fragment_anchors(
     if (before.text != after.text || before.blocks.empty() || after.blocks.empty()) return {};
     auto new_anchor = [&](std::size_t offset) -> std::optional<ContainerPrefixAnchor> {
         for (const auto& map : after.source_maps) {
-            const auto at = std::ranges::lower_bound(map.source_to_serialized, offset);
+            const auto at = map.source_to_serialized.lower_bound(offset);
             if (at != map.source_to_serialized.end() && *at == offset)
                 return ContainerPrefixAnchor{map.container_id, ContainerAnchorPart::Source,
                     static_cast<std::size_t>(at - map.source_to_serialized.begin())};

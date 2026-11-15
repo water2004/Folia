@@ -84,7 +84,7 @@ suite deep_serializer_tests = [] {
         const auto* map = find_map(projection, paragraph_id);
         expect(fatal(map != nullptr));
         if (map != nullptr) {
-            expect(fatal(map->source_to_serialized == std::vector<std::size_t>{depth * 2, depth * 2 + 1}));
+            expect(fatal(std::ranges::equal(map->source_to_serialized, std::vector<std::size_t>{depth * 2, depth * 2 + 1})));
         }
     };
 
@@ -110,7 +110,7 @@ suite deep_serializer_tests = [] {
             expect(fatal(map != nullptr));
             if (map == nullptr) continue;
             const auto source_begin = level * level + 5 * level + 2;
-            expect(fatal(map->source_to_serialized == std::vector<std::size_t>{source_begin, source_begin + 1}));
+            expect(fatal(std::ranges::equal(map->source_to_serialized, std::vector<std::size_t>{source_begin, source_begin + 1})));
         }
     };
 };
