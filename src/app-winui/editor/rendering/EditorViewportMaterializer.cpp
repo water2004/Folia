@@ -10,11 +10,13 @@ namespace winrt::Folia
         detail::EditorRenderFrame const& valueFrame,
         EditorRenderResources& valueResources,
         EditorDocumentBlockPreparer& valueBlockPreparer,
+        EditorInlineImageRenderer& valueInlineImages,
         folia::platform::editor::EditorScrollState& valueScrollState,
         std::unique_ptr<EditorPreparedDocument>& valuePreparedDocument)
         : frame(valueFrame),
           resources(valueResources),
           blockPreparer(valueBlockPreparer),
+          inlineImages(valueInlineImages),
           scrollState(valueScrollState),
           preparedDocument(valuePreparedDocument)
     {
@@ -40,8 +42,13 @@ namespace winrt::Folia
         auto const& block = frame.renderModel.blocks[index];
         auto& prepared = preparedDocument->blocks[index];
         if (block.kind == folia::RenderBlockKind::ThematicBreak || prepared.valid) return false;
-        auto previousHeight = prepared.height;
-        prepared = blockPreparer.Prepare(block, requestEmbedded, highPriority);
+        auto previousHeight = preparedDocument->GeometryHeight(index);
+        auto previousIntrinsic = prepared.intrinsicFlow;
+        auto flowContext = prepared.hasFlowContext
+            ? std::optional{prepared.appliedFlow} : std::nullopt;
+        prepared = blockPreparer.Prepare(block, requestEmbedded, highPriority, flowContext);
+        if (flowContext && prepared.intrinsicFlow != previousIntrinsic)
+            preparedDocument->flowContextsChanged = true;
         preparedDocument->layoutBlocks.insert(index);
         if (prepared.embeddedRequested
             && (prepared.containsMath || prepared.containsImage || prepared.containsMermaid))
@@ -50,10 +57,62 @@ namespace winrt::Folia
             preparedDocument->embeddedBlocks.erase(index);
         for (auto owner : prepared.owners)
             preparedDocument->ownerBlockIndex[owner.v] = index;
-        if (prepared.height == previousHeight) return false;
-        preparedDocument->geometry.UpdateHeight(index, prepared.height);
+        auto height = preparedDocument->GeometryHeight(index);
+        if (height == previousHeight) return false;
+        preparedDocument->geometry.UpdateHeight(index, height);
         preparedDocument->totalHeight = preparedDocument->geometry.TotalHeight();
         return true;
+    }
+
+    bool EditorViewportMaterializer::MaterializeTrailingPreview(
+        float scrollOffset, bool printMode, std::uint64_t embeddedGeneration)
+    {
+        if (printMode || !preparedDocument || !preparedDocument->trailingPreview
+            || !preparedDocument->geometry.Initialized()) return false;
+        auto& preview = *preparedDocument->trailingPreview;
+        if (preview.sourceIndex >= preparedDocument->blocks.size()
+            || preview.targetIndex >= preparedDocument->blocks.size()) return false;
+        auto plan = BuildEditorViewportPlan(preparedDocument->geometry, scrollOffset,
+            resources.surfaceHeightDip, false, true, viewportPolicy);
+        if (!plan.retention.Contains(preview.targetIndex))
+        {
+            preview.mathPreviews = {};
+            preview.mermaidPreviews = {};
+            preview.resident = false;
+        }
+        if (!plan.visible.Contains(preview.targetIndex)
+            || (preview.resident
+                && (!preview.pending || preview.embeddedGeneration == embeddedGeneration)))
+            return false;
+
+        auto sourceIndex = preview.sourceIndex;
+        auto& source = preparedDocument->blocks[sourceIndex];
+        auto previousPreviewHeight = preview.height;
+        // Geometry-only background preparation did not queue Mermaid. A prior
+        // pending request also needs a fresh projection after its completion.
+        if (!source.embeddedRequested || preview.pending) source.valid = false;
+        auto geometryChanged = EnsurePrepared(sourceIndex, true, true);
+        preview.mathPreviews.clear();
+        for (auto const& item : source.mathPreviews)
+            if (!item.floating) preview.mathPreviews.push_back(item);
+        preview.mermaidPreviews = source.mermaidPreviews;
+        preview.resident = source.valid && source.embeddedRequested;
+        preview.pending = source.pendingMath || source.pendingMermaid;
+        preview.embeddedGeneration = embeddedGeneration;
+        auto changed = geometryChanged || previousPreviewHeight != source.previewHeight
+            || preparedDocument->flowContextsChanged;
+
+        if (!plan.retention.Contains(sourceIndex))
+        {
+            auto imageSources = EditorDocumentBlockPreparer::ImageSources(source);
+            source.ReleaseVisualContent();
+            preparedDocument->layoutBlocks.erase(sourceIndex);
+            preparedDocument->embeddedBlocks.erase(sourceIndex);
+            for (auto const& imageSource : imageSources) inlineImages.ReleaseGif(imageSource);
+            if (frame.releaseBlocksOutside)
+                frame.releaseBlocksOutside(plan.retention.begin, plan.retention.end);
+        }
+        return changed;
     }
 
     EditorViewportMaterializationResult EditorViewportMaterializer::Materialize(
@@ -182,7 +241,7 @@ namespace winrt::Folia
             }
             needsAnotherFrame = !printMode;
         }
-        result.invalidateRequested = needsAnotherFrame;
+        result.invalidateRequested = needsAnotherFrame || preparedDocument->flowContextsChanged;
         return result;
     }
 }

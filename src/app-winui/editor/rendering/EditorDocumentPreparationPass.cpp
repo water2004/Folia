@@ -111,6 +111,7 @@ namespace winrt::Folia
               valueFrame,
               valueResources,
               valueBlockPreparer,
+              valueInlineImages,
               valueScrollState,
               valuePreparedDocument),
           embeddedContentUpdater(
@@ -206,6 +207,11 @@ namespace winrt::Folia
                 embeddedGeneration,
                 remoteImageGeneration)
             || invalidateRequested;
+        cache.ReconcileTrailingPreview();
+        invalidateRequested = viewportMaterializer.MaterializeTrailingPreview(
+                scrollOffset, printMode, embeddedGeneration)
+            || invalidateRequested;
+        cache.ReconcileTrailingPreview();
         auto offsetBeforeEmbeddedAnchor = scrollOffset;
         restoreAnchor();
         if (scrollOffset != offsetBeforeEmbeddedAnchor) invalidateRequested = true;

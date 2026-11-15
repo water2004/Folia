@@ -85,13 +85,18 @@ namespace winrt::Folia
             // visual block does not imply that its render fragment is resident.
             if (!block.materialized && frame.materializeBlocks)
                 frame.materializeBlocks(index, index + 1);
-            prepared = blockPreparer.Prepare(block, true, highPriority);
+            auto previousIntrinsic = prepared.intrinsicFlow;
+            auto flowContext = prepared.hasFlowContext
+                ? std::optional{prepared.appliedFlow} : std::nullopt;
+            prepared = blockPreparer.Prepare(block, true, highPriority, flowContext);
+            if (flowContext && prepared.intrinsicFlow != previousIntrinsic)
+                preparedDocument->flowContextsChanged = true;
             ++refreshes;
             preparedDocument->layoutBlocks.insert(index);
             preparedDocument->embeddedBlocks.insert(index);
             if (prepared.height != previousHeight)
             {
-                preparedDocument->geometry.UpdateHeight(index, prepared.height);
+                preparedDocument->geometry.UpdateHeight(index, preparedDocument->GeometryHeight(index));
                 geometryChanged = true;
             }
             return true;
@@ -136,18 +141,23 @@ namespace winrt::Folia
             auto previousHeight = prepared.height;
             if (!block.materialized && frame.materializeBlocks)
                 frame.materializeBlocks(index, index + 1);
-            prepared = blockPreparer.Prepare(block, false, false);
+            auto previousIntrinsic = prepared.intrinsicFlow;
+            auto flowContext = prepared.hasFlowContext
+                ? std::optional{prepared.appliedFlow} : std::nullopt;
+            prepared = blockPreparer.Prepare(block, false, false, flowContext);
+            if (flowContext && prepared.intrinsicFlow != previousIntrinsic)
+                preparedDocument->flowContextsChanged = true;
             preparedDocument->layoutBlocks.insert(index);
             preparedDocument->embeddedBlocks.erase(index);
             for (auto const& source : imageSources) inlineImages.ReleaseGif(source);
             if (prepared.height != previousHeight)
             {
-                preparedDocument->geometry.UpdateHeight(index, prepared.height);
+                preparedDocument->geometry.UpdateHeight(index, preparedDocument->GeometryHeight(index));
                 geometryChanged = true;
             }
         }
         if (geometryChanged)
             preparedDocument->totalHeight = preparedDocument->geometry.TotalHeight();
-        return workRemaining;
+        return workRemaining || preparedDocument->flowContextsChanged;
     }
 }

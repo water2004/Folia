@@ -31,10 +31,17 @@ namespace winrt::Folia
         void EnsureGeometry(
             std::stop_token stop = {},
             std::function<void(std::size_t, std::size_t)> progress = {});
+        void ReconcileTrailingPreview();
 
     private:
         std::optional<std::size_t> FindOwnerBlock(folia::NodeId owner) const;
-        void MeasureGeometry(std::size_t index);
+        void RemoveOwners(EditorPreparedDocument::Block const& block, std::size_t index);
+        void RegisterOwners(std::size_t index);
+        void MeasureGeometry(std::size_t index,
+            std::optional<EditorFlowLayoutContext> flowContext = {});
+        EditorPreparedDocument::FlowGroup* FindFlowGroup(std::size_t index);
+        void BuildFlowGroups();
+        void ReconcileFlowContexts(std::stop_token stop);
         void InitializeGeometry(
             std::stop_token stop,
             std::function<void(std::size_t, std::size_t)> const& progress);

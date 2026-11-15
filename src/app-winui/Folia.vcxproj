@@ -192,6 +192,7 @@
     <ClInclude Include="editor\rendering\EditorSvgPainter.h" />
     <ClInclude Include="editor\rendering\EditorSyntaxIcons.h" />
     <ClInclude Include="editor\rendering\EditorTextLayoutEngine.h" />
+    <ClInclude Include="editor\rendering\EditorFlowLayoutContext.h" />
     <ClInclude Include="editor\interaction\EditorTableInteraction.h" />
     <ClInclude Include="editor\rendering\EditorInlineImageRenderer.h" />
     <ClInclude Include="editor\rendering\EditorEmbeddedDraw.h" />

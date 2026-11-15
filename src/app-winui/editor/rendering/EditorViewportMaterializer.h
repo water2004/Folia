@@ -28,6 +28,7 @@ namespace winrt::Folia
             detail::EditorRenderFrame const& frame,
             EditorRenderResources& resources,
             EditorDocumentBlockPreparer& blockPreparer,
+            EditorInlineImageRenderer& inlineImages,
             folia::platform::editor::EditorScrollState& scrollState,
             std::unique_ptr<EditorPreparedDocument>& preparedDocument);
 
@@ -39,6 +40,11 @@ namespace winrt::Folia
         // edit. Resolve that one fragment before choosing the new viewport.
         bool EnsurePrepared(std::size_t index, bool requestEmbedded, bool highPriority);
 
+        // A raw block's editing preview follows its whole semantic flow. Only
+        // that active source fragment is needed when the remote tail is visible.
+        bool MaterializeTrailingPreview(float scrollOffset, bool printMode,
+            std::uint64_t embeddedGeneration);
+
     private:
         bool RequestEmbeddedAt(
             float documentTop,
@@ -48,6 +54,7 @@ namespace winrt::Folia
         detail::EditorRenderFrame const& frame;
         EditorRenderResources& resources;
         EditorDocumentBlockPreparer& blockPreparer;
+        EditorInlineImageRenderer& inlineImages;
         folia::platform::editor::EditorScrollState& scrollState;
         std::unique_ptr<EditorPreparedDocument>& preparedDocument;
         static constexpr folia::EditorViewportPolicy viewportPolicy{};

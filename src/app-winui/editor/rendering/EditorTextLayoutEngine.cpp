@@ -488,34 +488,52 @@ namespace winrt::Folia
 
     IDWriteTextFormat* EditorTextLayoutEngine::FormatFor(bool code, std::vector<InlineStyleRange> const& ranges) const
     {
-        if (code) return resources.codeFormat.Get();
+        return FormatFor(FormatKindFor(code, ranges));
+    }
+
+    EditorFlowTextFormat EditorTextLayoutEngine::FormatKindFor(bool code, std::vector<InlineStyleRange> const& ranges) const
+    {
+        if (code) return EditorFlowTextFormat::Code;
         if (auto const level = HomogeneousHeadingLevel(ranges))
         {
             switch (*level)
             {
-                case 1: return resources.heading1Format.Get();
-                case 2: return resources.heading2Format.Get();
-                case 3: return resources.heading3Format.Get();
-                default: return resources.textFormat.Get();
+                case 1: return EditorFlowTextFormat::Heading1;
+                case 2: return EditorFlowTextFormat::Heading2;
+                case 3: return EditorFlowTextFormat::Heading3;
+                default: break;
             }
         }
-        return resources.textFormat.Get();
+        return EditorFlowTextFormat::Body;
+    }
+
+    IDWriteTextFormat* EditorTextLayoutEngine::FormatFor(EditorFlowTextFormat format) const
+    {
+        switch (format)
+        {
+            case EditorFlowTextFormat::Code: return resources.codeFormat.Get();
+            case EditorFlowTextFormat::Heading1: return resources.heading1Format.Get();
+            case EditorFlowTextFormat::Heading2: return resources.heading2Format.Get();
+            case EditorFlowTextFormat::Heading3: return resources.heading3Format.Get();
+            default: return resources.textFormat.Get();
+        }
     }
 
     float EditorTextLayoutEngine::LineHeightFor(bool code, std::vector<InlineStyleRange> const& ranges) const
     {
-        if (code) return styleSheet.code.lineHeight;
-        if (auto const level = HomogeneousHeadingLevel(ranges))
+        return LineHeightFor(FormatKindFor(code, ranges));
+    }
+
+    float EditorTextLayoutEngine::LineHeightFor(EditorFlowTextFormat format) const
+    {
+        switch (format)
         {
-            switch (*level)
-            {
-                case 1: return styleSheet.heading1.lineHeight;
-                case 2: return styleSheet.heading2.lineHeight;
-                case 3: return styleSheet.heading3.lineHeight;
-                default: return styleSheet.body.lineHeight;
-            }
+            case EditorFlowTextFormat::Code: return styleSheet.code.lineHeight;
+            case EditorFlowTextFormat::Heading1: return styleSheet.heading1.lineHeight;
+            case EditorFlowTextFormat::Heading2: return styleSheet.heading2.lineHeight;
+            case EditorFlowTextFormat::Heading3: return styleSheet.heading3.lineHeight;
+            default: return styleSheet.body.lineHeight;
         }
-        return styleSheet.body.lineHeight;
     }
 
     void EditorTextLayoutEngine::ApplyStyles(IDWriteTextLayout* layout, std::vector<InlineStyleRange> const& ranges) const
@@ -658,11 +676,12 @@ namespace winrt::Folia
         ApplyCodeSpanSpacing(layout, ranges);
     }
 
-    float EditorTextLayoutEngine::MeasureHeight(IDWriteTextLayout* layout, float fallbackHeight) const
+    float EditorTextLayoutEngine::MeasureHeight(IDWriteTextLayout* layout, float fallbackHeight,
+        bool enforceMinimum) const
     {
         if (!layout) return fallbackHeight;
         DWRITE_TEXT_METRICS metrics{};
         if (FAILED(layout->GetMetrics(&metrics))) return fallbackHeight;
-        return (std::max)(fallbackHeight, metrics.height);
+        return enforceMinimum ? (std::max)(fallbackHeight, metrics.height) : metrics.height;
     }
 }
