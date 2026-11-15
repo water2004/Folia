@@ -554,9 +554,9 @@ namespace winrt::Folia
                         auto rawBlock = nested.kind == folia::RenderBlockKind::Code;
                         auto rect = D2D1::RectF(
                             left,
-                            rawBlock ? top : top - 4.0f,
+                            rawBlock || nested.flow_continues_before ? top : top - 4.0f,
                             documentRight,
-                            rawBlock ? bottom : bottom + 4.0f);
+                            rawBlock || nested.flow_continues_after ? bottom : bottom + 4.0f);
                         auto calloutPalette = calloutBrushes(nested.special().callout_kind);
                         auto brush = nested.kind == folia::RenderBlockKind::Callout
                             ? calloutPalette.first
@@ -621,8 +621,8 @@ namespace winrt::Folia
                             auto borderWidth = nested.block_style.border_left ? nested.block_style.border_left->width : 3.0f;
                             auto lineX = left + borderWidth * 0.5f;
                             resources.d2dContext->DrawLine(
-                                D2D1::Point2F(lineX, rect.top + 3.0f),
-                                D2D1::Point2F(lineX, rect.bottom - 3.0f),
+                                D2D1::Point2F(lineX, rect.top + (nested.flow_continues_before ? 0.0f : 3.0f)),
+                                D2D1::Point2F(lineX, rect.bottom - (nested.flow_continues_after ? 0.0f : 3.0f)),
                                 nested.kind == folia::RenderBlockKind::Callout
                                     ? calloutPalette.second
                                     : resources.mutedBrush.Get(),

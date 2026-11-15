@@ -380,6 +380,9 @@
     <ClCompile Include="..\core\query\latex_command_catalog.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\core\rendering\render_fragments.ixx">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\platform\windows\editor\geometry\editor_geometry.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>

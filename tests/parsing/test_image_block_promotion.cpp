@@ -16,6 +16,7 @@ import folia.markdown.outline;
 import folia.markdown.parser;
 import folia.core.render_builder;
 import folia.core.render_model;
+import folia.core.document_ids;
 import folia.markdown.serializer;
 import folia.markdown.symbols;
 import folia.core.theme;
@@ -41,6 +42,10 @@ BlockNode parsed_paragraph(std::string source) {
 
 EditorDocument document_with(BlockNode block, std::u32string trailing_line_ending = {}) {
     EditorDocument document;
+    // Parsed owners may own id 1. Allocate the synthetic document root after
+    // all imported block/CST identities instead of colliding with that owner.
+    reserve_document_node_ids(document, block);
+    document.root.id = NodeId{document.next_node_id++};
     document.root.children.push_back(std::move(block));
     document.trailing_line_ending = std::move(trailing_line_ending);
     rebuild_document_block_index(document);

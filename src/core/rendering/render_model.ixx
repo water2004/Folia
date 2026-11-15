@@ -14,6 +14,7 @@ import folia.markdown.selection;
 import folia.markdown.text_edit;
 import folia.core.source_style;
 import folia.markdown.block_source;
+export import folia.core.render_fragments;
 export import folia.core.syntax_marker;
 
 export namespace folia {
@@ -307,6 +308,8 @@ struct InlineRenderItem {
     }
 };
 
+// Define these after InlineRenderItem is complete: constructing/destroying
+// the semantic payload instantiates its vector<InlineRenderItem> on libc++.
 inline InlineRenderSemanticPayload const& InlineRenderPayload::semantic() const {
     static const InlineRenderSemanticPayload empty{};
     return semantic_payload ? *semantic_payload : empty;
@@ -380,6 +383,10 @@ struct RenderBlock {
     // offscreen content.  A materialized entry owns the derived inline render
     // projection; the authoritative block tree remains the source of truth.
     bool materialized = true;
+    // Physical slices of one semantic flow share boundary decoration and gaps.
+    bool fragment_continues = false;
+    bool flow_continues_before = false;
+    bool flow_continues_after = false;
     // Fingerprint of the authoritative block-tree inputs used to build this
     // projection. It permits block-local render-model rebuilding.
     std::uint64_t source_key = 0;
@@ -431,6 +438,9 @@ struct RenderModelUpdate {
 struct RenderModel {
     std::uint64_t revision = 1;
     std::vector<RenderBlock> blocks;
+    std::vector<RenderFragment> fragments;
+    // Physical lookup; editable_top_level below remains a semantic relationship.
+    std::unordered_map<std::uint64_t, std::size_t> editable_fragment_index;
     bool virtualized = false;
     // Only populated for virtualized rich-text models.  Tracking the sparse
     // working set avoids scanning every block when the viewport moves.

@@ -99,43 +99,94 @@ inline void append(Hasher& hash, InlineDocument const& document) {
     for (auto const& node : document.tree.nodes) append(hash, node);
 }
 
-inline void append(Hasher& hash, BlockNode const& block) {
-    hash.scalar(block.id); hash.scalar(block.kind); append(hash, block.inline_content);
+inline void append_metadata(Hasher& hash, BlockNode const& block) {
+    hash.scalar(block.id); hash.scalar(block.kind);
+    // The block tree stores kind-specific metadata sparsely. Do not serialize
+    // dozens of default fields for every ordinary paragraph during a structural
+    // index repair, and never inspect its inline source/CST here.
+    auto const* payload = block.payload.get();
+    auto const* supplemental = payload ? payload->supplemental.get() : nullptr;
+    auto field = [&](auto const* value, auto append_value) {
+        hash.scalar(value != nullptr);
+        if (value) append_value(*value);
+    };
+    field(payload ? payload->text.get() : nullptr, [&](auto const& text) {
+        hash.scalar(text.level); hash.text(text.slug);
+        hash.text(text.opening_marker); hash.text(text.closing_marker);
+    });
+    field(payload ? payload->item.get() : nullptr, [&](auto const& item) {
+        hash.text(item.marker); hash.scalar(item.checked);
+    });
+    field(payload ? payload->list.get() : nullptr, [&](auto const& list) {
+        hash.scalar(list.ordered); hash.scalar(list.start); hash.scalar(list.delimiter);
+    });
+    field(payload ? payload->atomic.get() : nullptr, [&](auto const& atomic) {
+        hash.scalar(atomic.code_indented); hash.scalar(atomic.math_delim);
+        hash.scalar(atomic.toc_marker); hash.scalar(atomic.fmt);
+        hash.scalar(atomic.unsup_reason); hash.text(atomic.ext_name);
+    });
+    field(payload ? payload->table.get() : nullptr, [&](auto const& table) {
+        hash.scalar(table.table_aligns.size());
+        for (auto alignment : table.table_aligns) hash.scalar(alignment);
+        hash.scalar(table.table_header_row);
+    });
+    field(supplemental ? supplemental->image.get() : nullptr, [&](auto const& image) {
+        hash.text(image.src); hash.text(image.image_alt);
+        hash.optional(image.image_title, [&](auto const& value) { hash.text(value); });
+        hash.optional(image.image_link, [&](auto const& value) { hash.text(value); });
+        hash.optional(image.image_width, [&](auto const& value) {
+            hash.scalar(value.value); hash.scalar(value.unit);
+        });
+        hash.optional(image.image_height, [&](auto const& value) {
+            hash.scalar(value.value); hash.scalar(value.unit);
+        });
+    });
+    field(supplemental ? supplemental->container.get() : nullptr, [&](auto const& container) {
+        hash.text(container.callout_kind); hash.text(container.footnote_label);
+    });
+    field(supplemental ? supplemental->html.get() : nullptr, [&](auto const& html) {
+        hash.text(html.root_tag); hash.text(html.opening_marker); hash.text(html.closing_marker);
+        hash.optional(html.text_alignment, [&](auto value) { hash.scalar(value); });
+    });
+}
+
+inline void append_header(Hasher& hash, BlockNode const& block) {
+    append_metadata(hash, block);
+    record_render_source_node(block.inline_content.source.size()
+        + block.block_source.source().size() + block.atomic_special().raw.size());
+    append(hash, block.inline_content);
     hash.text(block.block_source.source());
+    hash.text(block.atomic_special().raw);
     for (const auto& indent : block.block_source.tree().generated_indentation) {
         hash.scalar(indent.content_offset); hash.scalar(indent.source_offset); hash.scalar(indent.columns);
     }
-    auto const& text = block.text_special();
-    hash.scalar(text.level); hash.text(text.slug); hash.text(text.opening_marker); hash.text(text.closing_marker);
-    auto const& item = block.item_special();
-    hash.text(item.marker); hash.scalar(item.checked);
-    auto const& list = block.list_special();
-    hash.scalar(list.ordered); hash.scalar(list.start); hash.scalar(list.delimiter);
-    auto const& atomic = block.atomic_special();
-    hash.scalar(atomic.code_indented); hash.scalar(atomic.math_delim);
-    hash.scalar(atomic.toc_marker); hash.scalar(atomic.fmt); hash.text(atomic.raw);
-    hash.scalar(atomic.unsup_reason); hash.text(atomic.ext_name);
-    auto const& table = block.table_special();
-    hash.scalar(table.table_aligns.size());
-    for (auto alignment : table.table_aligns) hash.scalar(alignment);
-    hash.scalar(table.table_header_row);
-    auto const& image = block.image_special();
-    hash.text(image.src); hash.text(image.image_alt);
-    hash.optional(image.image_title, [&](auto const& value) { hash.text(value); });
-    hash.optional(image.image_link, [&](auto const& value) { hash.text(value); });
-    hash.optional(image.image_width, [&](auto const& value) {
-        hash.scalar(value.value);
-        hash.scalar(value.unit);
-    });
-    hash.optional(image.image_height, [&](auto const& value) {
-        hash.scalar(value.value);
-        hash.scalar(value.unit);
-    });
-    auto const& container = block.container_special();
-    hash.text(container.callout_kind); hash.text(container.footnote_label);
-    auto const& html = block.html_special();
-    hash.text(html.root_tag); hash.text(html.opening_marker); hash.text(html.closing_marker);
-    hash.optional(html.text_alignment, [&](auto value) { hash.scalar(value); });
+}
+
+inline std::uint64_t context_key(BlockNode const& block, std::uint64_t parent,
+    bool first, bool last, std::optional<std::size_t> ordinal) {
+    Hasher hash;
+    hash.scalar(parent);
+    hash.scalar(first);
+    hash.scalar(last);
+    hash.optional(ordinal, [&](auto value) { hash.scalar(value); });
+    append_metadata(hash, block);
+    if (!is_fragment_flow_container(block.kind)) {
+        // Atomic layout units such as tables retain their complete structure.
+        // Source content is invalidated separately by changed_owners.
+        auto children = [&](auto& self, BlockNode const& node) -> void {
+            hash.scalar(node.children.size());
+            for (auto const& child : node.children) {
+                append_metadata(hash, child);
+                self(self, child);
+            }
+        };
+        children(children, block);
+    }
+    return hash.value;
+}
+
+inline void append(Hasher& hash, BlockNode const& block) {
+    append_header(hash, block);
     hash.scalar(block.children.size());
     for (auto const& child : block.children) append(hash, child);
 }
@@ -145,6 +196,31 @@ inline std::uint64_t source_key(BlockNode const& block, std::uint64_t document_d
     Hasher hash;
     hash.scalar(document_dependency_key);
     append(hash, block);
+    return hash.value;
+}
+
+inline std::uint64_t fragment_key(
+    BlockNode const& block, RenderFragment const& fragment,
+    std::uint64_t document_dependency_key) {
+    if (fragment.first && fragment.last) return source_key(block, document_dependency_key);
+    record_render_source_key_derivation();
+    Hasher hash;
+    hash.scalar(document_dependency_key);
+    hash.scalar(fragment.id);
+    hash.scalar(fragment.first);
+    hash.scalar(fragment.last);
+    visit_render_fragment(block, fragment_range(fragment), [&](auto const& node, auto range) {
+        append_header(hash, node);
+        // Child ordinals affect ordered marker text. Unordered suffixes keep
+        // their visual identity when an earlier sibling is inserted/removed.
+        if ((node.kind == BlockKind::List || node.kind == BlockKind::TaskList)
+            && node.list_special().ordered) {
+            hash.scalar(range.begin());
+            hash.scalar(range.end(node.children.size()));
+        }
+        hash.scalar(range.starts_node());
+        hash.scalar(range.ends_node(node));
+    });
     return hash.value;
 }
 
@@ -378,7 +454,8 @@ struct Builder {
     RenderBlock make_flow_container(
         const BlockNode& block,
         FlowContext context,
-        std::size_t parent_indent_columns) {
+        std::size_t parent_indent_columns,
+        RenderFragmentRange range = {}) {
         auto rendered = render_block_base(
             block.kind,
             block.id,
@@ -387,7 +464,11 @@ struct Builder {
         rendered.block_style.text_alignment = block.html_special().text_alignment;
         rendered.flow_local_indent_columns = context.indent_columns -
             (std::min)(context.indent_columns, parent_indent_columns);
-        rendered.flow_anchor_owner_id = first_editable_owner(block).value_or(block.id);
+        auto const* anchor = &block;
+        for (auto index : range.first) anchor = &anchor->children[index];
+        rendered.flow_anchor_owner_id = first_editable_owner(*anchor).value_or(anchor->id);
+        rendered.flow_continues_before = !range.starts_node();
+        rendered.flow_continues_after = !range.ends_node(block);
         if (block.kind == BlockKind::Callout) {
             rendered.ensure_special().callout_kind = block.container_special().callout_kind;
         } else if (block.kind == BlockKind::FootnoteDefinition) {
@@ -431,16 +512,19 @@ struct Builder {
         const BlockNode& block,
         FlowContext context,
         std::size_t emitted_columns = 0,
-        std::size_t parent_indent_columns = 0) {
-        auto owner = first_editable_owner(block).value_or(block.id);
+        std::size_t parent_indent_columns = 0,
+        RenderFragmentRange range = {}) {
+        auto const* anchor = &block;
+        for (auto index : range.first) anchor = &anchor->children[index];
+        auto owner = first_editable_owner(*anchor).value_or(anchor->id);
         switch (block.kind) {
             case BlockKind::Document:
             case BlockKind::HtmlContainer:
             case BlockKind::ListItem:
             case BlockKind::TaskListItem: {
-                auto rendered = make_flow_container(block, context, parent_indent_columns);
-                for (std::size_t index = 0; index < block.children.size(); ++index) {
-                    if (index > 0) {
+                auto rendered = make_flow_container(block, context, parent_indent_columns, range);
+                for (std::size_t index = range.begin(); index < range.end(block.children.size()); ++index) {
+                    if (index > range.begin()) {
                         auto previous = last_editable_position(block.children[index - 1])
                             .value_or(TextPosition{owner, 0, TextAffinity::Upstream});
                         append_block_break(out, previous.container_id, previous.source_offset);
@@ -449,19 +533,22 @@ struct Builder {
                         out,
                         block.children[index],
                         FlowContext{context.indent_columns},
-                        index == 0 ? emitted_columns : 0,
-                        context.indent_columns));
+                        index == range.begin() ? emitted_columns : 0,
+                        context.indent_columns, range.child(index)));
                 }
                 return rendered;
             }
             case BlockKind::List:
             case BlockKind::TaskList: {
-                auto rendered = make_flow_container(block, context, parent_indent_columns);
-                for (std::size_t index = 0; index < block.children.size(); ++index) {
+                auto rendered = make_flow_container(block, context, parent_indent_columns, range);
+                for (std::size_t index = range.begin(); index < range.end(block.children.size()); ++index) {
                     auto const& item = block.children[index];
                     const bool task_item = item.kind == BlockKind::TaskListItem;
-                    auto item_owner = list_item_marker_owner(item);
-                    if (index > 0) {
+                    auto item_range = range.child(index);
+                    auto const* item_anchor = &item;
+                    for (auto child : item_range.first) item_anchor = &item_anchor->children[child];
+                    auto item_owner = first_editable_owner(*item_anchor).value_or(item_anchor->id);
+                    if (index > range.begin()) {
                         auto previous = last_editable_position(block.children[index - 1])
                             .value_or(TextPosition{item_owner, 0, TextAffinity::Upstream});
                         append_block_break(out, previous.container_id, previous.source_offset);
@@ -475,29 +562,31 @@ struct Builder {
                         else marker = U"- ";
                     }
                     auto marker_columns = list_marker_columns(block, index);
-                    auto missing_indent = context.indent_columns > (index == 0 ? emitted_columns : 0)
-                        ? context.indent_columns - (index == 0 ? emitted_columns : 0)
+                    auto missing_indent = context.indent_columns > (index == range.begin() ? emitted_columns : 0)
+                        ? context.indent_columns - (index == range.begin() ? emitted_columns : 0)
                         : 0;
                     auto display_marker = task_item
                         ? marker
                         : block.list_special().ordered
                             ? utf8_to_cps(std::to_string(block.list_special().start + index)) + std::u32string(1, block.list_special().delimiter) + U" "
                             : U"\u2022 ";
-                    std::size_t cursor = 0;
-                    push_marker(
-                        out,
-                        item_owner,
-                        cursor,
-                        marker,
-                        task_item ? MarkerRole::TaskCheckbox : block.list_special().ordered ? MarkerRole::ListNumber : MarkerRole::ListBullet,
-                        TextAffinity::Downstream,
-                        std::u32string(missing_indent, U' ') + display_marker);
-                    if (task_item) out.back().ensure_special().task_checked = item.item_special().checked;
+                    if (item_range.starts_node()) {
+                        std::size_t cursor = 0;
+                        push_marker(
+                            out,
+                            item_owner,
+                            cursor,
+                            marker,
+                            task_item ? MarkerRole::TaskCheckbox : block.list_special().ordered ? MarkerRole::ListNumber : MarkerRole::ListBullet,
+                            TextAffinity::Downstream,
+                            std::u32string(missing_indent, U' ') + display_marker);
+                        if (task_item) out.back().ensure_special().task_checked = item.item_special().checked;
+                    }
 
                     FlowContext item_context{context.indent_columns + marker_columns};
-                    auto item_rendered = make_flow_container(item, item_context, context.indent_columns);
-                    for (std::size_t child_index = 0; child_index < item.children.size(); ++child_index) {
-                        if (child_index > 0) {
+                    auto item_rendered = make_flow_container(item, item_context, context.indent_columns, item_range);
+                    for (std::size_t child_index = item_range.begin(); child_index < item_range.end(item.children.size()); ++child_index) {
+                        if (child_index > item_range.begin()) {
                             auto previous = last_editable_position(item.children[child_index - 1])
                                 .value_or(TextPosition{item_owner, 0, TextAffinity::Upstream});
                             append_block_break(out, previous.container_id, previous.source_offset);
@@ -506,8 +595,9 @@ struct Builder {
                             out,
                             item.children[child_index],
                             item_context,
-                            child_index == 0 ? context.indent_columns + marker_columns : 0,
-                            item_context.indent_columns));
+                            child_index == item_range.begin() && item_range.starts_node()
+                                ? context.indent_columns + marker_columns : 0,
+                            item_context.indent_columns, item_range.child(child_index)));
                     }
                     rendered.child_blocks.push_back(std::move(item_rendered));
                 }
@@ -516,7 +606,7 @@ struct Builder {
             case BlockKind::BlockQuote:
             case BlockKind::Callout:
             case BlockKind::FootnoteDefinition: {
-                auto rendered = make_flow_container(block, context, parent_indent_columns);
+                auto rendered = make_flow_container(block, context, parent_indent_columns, range);
                 std::u32string footnote_marker;
                 std::u32string callout_label;
                 if (block.kind == BlockKind::FootnoteDefinition && !block.container_special().footnote_label.empty()) {
@@ -527,7 +617,7 @@ struct Builder {
                 }
                 auto const content_indent = context.indent_columns
                     + (footnote_marker.empty() ? 2u : footnote_marker.size());
-                if (!footnote_marker.empty()) {
+                if (!footnote_marker.empty() && range.starts_node()) {
                     append_missing_indent(out, owner, 0, context.indent_columns, emitted_columns);
                     InlineRenderItem label;
                     label.kind = InlineRenderItem::Kind::Marker;
@@ -539,7 +629,7 @@ struct Builder {
                     label.ensure_special().visibility = MarkerVisibility::Always;
                     out.push_back(std::move(label));
                 }
-                if (!callout_label.empty()) {
+                if (!callout_label.empty() && range.starts_node()) {
                     append_missing_indent(out, owner, 0, content_indent, emitted_columns);
                     InlineRenderItem label;
                     label.kind = InlineRenderItem::Kind::Marker;
@@ -554,8 +644,8 @@ struct Builder {
                         append_block_break(out, owner, 0);
                     }
                 }
-                for (std::size_t index = 0; index < block.children.size(); ++index) {
-                    if (index > 0) {
+                for (std::size_t index = range.begin(); index < range.end(block.children.size()); ++index) {
+                    if (index > range.begin()) {
                         auto previous = last_editable_position(block.children[index - 1])
                             .value_or(TextPosition{owner, 0, TextAffinity::Upstream});
                         append_block_break(out, previous.container_id, previous.source_offset);
@@ -564,12 +654,12 @@ struct Builder {
                         out,
                         block.children[index],
                         FlowContext{content_indent},
-                        index == 0 && callout_label.empty()
+                        index == range.begin() && range.starts_node() && callout_label.empty()
                             ? !footnote_marker.empty()
                                 ? context.indent_columns + footnote_marker.size()
                                 : emitted_columns
                             : 0,
-                        context.indent_columns));
+                        context.indent_columns, range.child(index)));
                 }
                 return rendered;
             }
@@ -1309,7 +1399,7 @@ struct Builder {
         return base(BlockStyle::paragraph(theme.layout));
     }
 
-    RenderBlock build_block_skeleton(const BlockNode& b) {
+    RenderBlock build_block_skeleton(const BlockNode& b, RenderFragmentRange range = {}) {
         using BK = BlockKind;
         auto style = [&]() {
             switch (b.kind) {
@@ -1360,7 +1450,7 @@ struct Builder {
             characters += text.size();
             line_breaks += static_cast<std::uint64_t>(std::ranges::count(text, U'\n'));
         };
-        auto visit = [&](auto& self, BlockNode const& block) -> void {
+        auto visit = [&](BlockNode const& block, auto) {
             if (auto const* inline_document = editable_inline_document(block)) {
                 count_text(inline_document->source);
                 characters += block.text_special().opening_marker.size();
@@ -1377,9 +1467,8 @@ struct Builder {
                 characters += block.image_special().image_alt.size();
             }
             characters += block.item_special().marker.size();
-            for (auto const& child : block.children) self(self, child);
         };
-        visit(visit, b);
+        visit_render_fragment(b, range, visit);
         if (b.kind == BK::Table) {
             // The height estimator treats this field as a row-count fallback
             // until the full table projection is materialized.
@@ -1393,6 +1482,31 @@ struct Builder {
             static_cast<std::uint64_t>((std::numeric_limits<std::uint32_t>::max)())));
         return rendered;
     }
+    RenderBlock build_fragment(BlockNode const& source, RenderFragment const& fragment, bool skeleton) {
+        auto range = fragment_range(fragment);
+        RenderBlock rendered;
+        if (skeleton) {
+            rendered = build_block_skeleton(source, range);
+        } else if (is_fragment_flow_container(source.kind)) {
+            std::vector<InlineRenderItem> flow;
+            rendered = append_flow_block(flow, source, FlowContext{}, 0, 0, range);
+            rendered.inline_items = std::move(flow);
+        } else {
+            rendered = build_block(source);
+        }
+        rendered.id = fragment.id;
+        rendered.fragment_continues = !fragment.last;
+        if (!fragment.first) {
+            rendered.block_style.margin_top = 0.0f;
+            rendered.block_style.padding_top = 0.0f;
+        }
+        if (!fragment.last) {
+            rendered.block_style.margin_bottom = 0.0f;
+            rendered.block_style.padding_bottom = 0.0f;
+        }
+        return rendered;
+    }
+
 };
 
 inline std::uint64_t configure_render_dependencies(
@@ -1494,35 +1608,56 @@ inline RenderModel finish_render_model(
     return m;
 }
 
+// A physical slot is resolved through its semantic root and range. No host
+// assumes that the render-model index is a document.root.children index.
+inline RenderBlock build_render_fragment(
+    Builder& builder, EditorDocument const& doc, RenderFragment const& fragment,
+    std::uint64_t dependency_key, bool skeleton,
+    std::optional<std::uint64_t> known_key = std::nullopt) {
+    auto const* source = find_document_block(doc, fragment.source_root);
+    if (!source) return {};
+    auto rendered = builder.build_fragment(*source, fragment, skeleton);
+    if (!skeleton) {
+        update_render_geometry_hints(rendered);
+        rendered.source_key = known_key ? *known_key
+            : render_key_detail::fragment_key(*source, fragment, dependency_key);
+    }
+    render_key_detail::Hasher identity;
+    identity.scalar(dependency_key);
+    identity.scalar(fragment.id);
+    rendered.presentation_key = skeleton ? identity.value : rendered.source_key;
+    return rendered;
+}
+
+inline RenderModel build_render_model_with_fragments(
+    const EditorDocument& doc,
+    const Outline& outline,
+    DocumentSymbolIndex const& symbols,
+    ThemeProfile const& theme,
+    bool virtualized) {
+    Builder builder(theme);
+    auto dependency_key = configure_render_dependencies(builder, symbols);
+    auto fragments = plan_render_fragments(doc, render_key_detail::context_key);
+    std::vector<RenderBlock> blocks;
+    blocks.reserve(fragments.size());
+    for (auto const& fragment : fragments)
+        blocks.push_back(build_render_fragment(builder, doc, fragment, dependency_key, virtualized));
+    auto model = finish_render_model(doc, outline, std::move(blocks));
+    model.editable_fragment_index = index_render_fragment_owners(doc, fragments);
+    model.fragments = std::move(fragments);
+    model.document_dependency_key = dependency_key;
+    model.virtualized = virtualized;
+    model.rebuilt_block_count = virtualized ? 0 : model.blocks.size();
+    model.reused_block_count = virtualized ? model.blocks.size() : 0;
+    return model;
+}
+
 inline RenderModel build_render_model(
     const EditorDocument& doc,
     const Outline& outline,
     DocumentSymbolIndex const& symbols,
     ThemeProfile const& theme) {
-    Builder builder(theme);
-    auto dependency_key = configure_render_dependencies(builder, symbols);
-    std::vector<RenderBlock> blocks;
-    blocks.reserve(doc.root.children.size());
-    for (const auto& block : doc.root.children) {
-        auto rendered = builder.build_block(block);
-        update_render_geometry_hints(rendered);
-        rendered.source_key = render_key_detail::source_key(block, dependency_key);
-        rendered.presentation_key = rendered.source_key;
-        blocks.push_back(std::move(rendered));
-    }
-    auto model = finish_render_model(doc, outline, std::move(blocks));
-    model.document_dependency_key = dependency_key;
-    model.rebuilt_block_count = model.blocks.size();
-    return model;
-}
-
-inline std::uint64_t render_skeleton_key(
-    NodeId id,
-    std::uint64_t document_dependency_key) {
-    render_key_detail::Hasher hash;
-    hash.scalar(document_dependency_key);
-    hash.scalar(id);
-    return hash.value;
+    return build_render_model_with_fragments(doc, outline, symbols, theme, false);
 }
 
 inline RenderModel build_virtualized_render_model(
@@ -1530,20 +1665,7 @@ inline RenderModel build_virtualized_render_model(
     const Outline& outline,
     DocumentSymbolIndex const& symbols,
     ThemeProfile const& theme) {
-    Builder builder(theme);
-    auto dependency_key = configure_render_dependencies(builder, symbols);
-    std::vector<RenderBlock> blocks;
-    blocks.reserve(doc.root.children.size());
-    for (auto const& block : doc.root.children) {
-        auto rendered = builder.build_block_skeleton(block);
-        rendered.presentation_key = render_skeleton_key(block.id, dependency_key);
-        blocks.push_back(std::move(rendered));
-    }
-    auto model = finish_render_model(doc, outline, std::move(blocks));
-    model.document_dependency_key = dependency_key;
-    model.virtualized = true;
-    model.reused_block_count = model.blocks.size();
-    return model;
+    return build_render_model_with_fragments(doc, outline, symbols, theme, true);
 }
 
 inline void materialize_render_model_range(
@@ -1560,12 +1682,8 @@ inline void materialize_render_model_range(
     auto dependency_key = configure_render_dependencies(builder, symbols);
     for (auto index = begin; index < end; ++index) {
         if (model.blocks[index].materialized) continue;
-        auto const& source = doc.root.children[index];
-        auto rendered = builder.build_block(source);
-        update_render_geometry_hints(rendered);
-        rendered.source_key = render_key_detail::source_key(source, dependency_key);
-        rendered.presentation_key = rendered.source_key;
-        model.blocks[index] = std::move(rendered);
+        model.blocks[index] = build_render_fragment(
+            builder, doc, model.fragments[index], dependency_key, false);
         model.materialized_block_indices.insert(index);
     }
 }
@@ -1585,14 +1703,18 @@ inline void release_render_model_blocks_outside(
         model.materialized_block_indices.end());
     for (auto index : active) {
         if (index >= retain_begin && index < retain_end) continue;
-        if (index >= doc.root.children.size()) {
+        if (index >= model.fragments.size()) {
             model.materialized_block_indices.erase(index);
             continue;
         }
-        auto skeleton = builder.build_block_skeleton(doc.root.children[index]);
-        skeleton.presentation_key = render_skeleton_key(
-            skeleton.id,
-            model.document_dependency_key);
+        auto const key = model.blocks[index].source_key;
+        auto const presentation = model.blocks[index].presentation_key;
+        auto skeleton = build_render_fragment(
+            builder, doc, model.fragments[index], model.document_dependency_key, true);
+        // Eviction is not a content change. Retain the exact fingerprint so
+        // detached measured geometry remains reusable after a viewport move.
+        skeleton.source_key = key;
+        skeleton.presentation_key = presentation;
         model.blocks[index] = std::move(skeleton);
         model.materialized_block_indices.erase(index);
     }
@@ -1607,160 +1729,140 @@ inline RenderModel build_render_model_incremental(
     RenderModelUpdate const& update) {
     Builder builder(theme);
     auto dependency_key = configure_render_dependencies(builder, symbols);
-    bool top_level_identity_unchanged = previous.blocks.size() == doc.root.children.size();
-    if (top_level_identity_unchanged) {
-        for (std::size_t index = 0; index < previous.blocks.size(); ++index) {
-            if (previous.blocks[index].id != doc.root.children[index].id) {
-                top_level_identity_unchanged = false;
-                break;
-            }
-        }
-    }
-    const bool structure_unchanged = !update.structural && top_level_identity_unchanged;
-
-    std::unordered_set<std::uint64_t> changed_top_levels;
-    bool local_invalidation = structure_unchanged
-        && dependency_key == previous.document_dependency_key;
-    if (local_invalidation) {
+    bool local = !update.structural
+        && dependency_key == previous.document_dependency_key
+        && previous.fragments.size() == previous.blocks.size();
+    std::vector<std::size_t> changed;
+    if (local) {
         for (auto owner : update.changed_owners) {
-            auto found = previous.editable_top_level.find(owner.v);
-            if (found == previous.editable_top_level.end()) {
-                local_invalidation = false;
-                break;
-            }
-            changed_top_levels.insert(found->second.v);
+            auto found = previous.editable_fragment_index.find(owner.v);
+            if (found == previous.editable_fragment_index.end()) { local = false; break; }
+            changed.push_back(found->second);
         }
     }
-
-    if (local_invalidation) {
-        std::vector<std::size_t> changed_indices;
-        changed_indices.reserve(changed_top_levels.size());
-        for (auto top_level : changed_top_levels) {
-            auto path = document_block_path(doc, NodeId{top_level});
-            if (!path || path->size() != 1 || path->front() >= previous.blocks.size()) {
-                local_invalidation = false;
-                break;
+    if (local) {
+        std::ranges::sort(changed);
+        changed.erase(std::unique(changed.begin(), changed.end()), changed.end());
+        for (auto index : changed) {
+            auto was_materialized = previous.blocks[index].materialized;
+            previous.blocks[index] = build_render_fragment(
+                builder, doc, previous.fragments[index], dependency_key,
+                previous.virtualized && !was_materialized);
+            if (previous.blocks[index].materialized && previous.virtualized)
+                previous.materialized_block_indices.insert(index);
+            // A skeleton also needs a new revision key for offscreen edits.
+            if (!previous.blocks[index].materialized) {
+                render_key_detail::Hasher key;
+                key.scalar(previous.blocks[index].presentation_key);
+                key.scalar(doc.revision);
+                previous.blocks[index].presentation_key = key.value;
             }
-            changed_indices.push_back(path->front());
         }
-        if (local_invalidation) {
-            std::ranges::sort(changed_indices);
-            changed_indices.erase(
-                std::unique(changed_indices.begin(), changed_indices.end()),
-                changed_indices.end());
-            for (auto index : changed_indices) {
-                auto const& block = doc.root.children[index];
-                auto rendered = builder.build_block(block);
-                update_render_geometry_hints(rendered);
-                rendered.source_key = render_key_detail::source_key(block, dependency_key);
-                rendered.presentation_key = rendered.source_key;
-                previous.blocks[index] = std::move(rendered);
-                if (previous.virtualized) previous.materialized_block_indices.insert(index);
-            }
-            previous.revision = doc.revision;
-            if (previous.outline.content_key == outline.content_key) {
-                previous.outline.revision = outline.revision;
-                previous.outline.content_revision = outline.content_revision;
-            } else {
-                previous.outline = outline;
-            }
-            previous.document_dependency_key = dependency_key;
-            previous.rebuilt_block_count = changed_indices.size();
-            previous.reused_block_count = previous.blocks.size() - changed_indices.size();
-            previous.incremental_update = true;
-            previous.changed_block_indices = std::move(changed_indices);
-            return previous;
+        previous.revision = doc.revision;
+        if (previous.outline.content_key == outline.content_key) {
+            previous.outline.revision = outline.revision;
+            previous.outline.content_revision = outline.content_revision;
+        } else {
+            previous.outline = outline;
         }
+        previous.rebuilt_block_count = changed.size();
+        previous.reused_block_count = previous.blocks.size() - changed.size();
+        previous.incremental_update = true;
+        previous.changed_block_indices = std::move(changed);
+        return previous;
     }
 
+    changed.clear();
     const bool trusted_structural_locality = update.structural
         && update.structural_locality_known
         && (!update.changed_owners.empty() || !update.structural_anchors.empty())
         && dependency_key == previous.document_dependency_key;
-    if (previous.virtualized && update.structural && !trusted_structural_locality) {
-        auto model = build_virtualized_render_model(doc, outline, symbols, theme);
-        model.rebuilt_block_count = doc.root.children.size();
-        return model;
-    }
+    std::unordered_set<std::uint64_t> changed_roots;
     if (trusted_structural_locality) {
-        auto note_top_level = [&](NodeId id) {
-            auto path = document_block_path(doc, id);
-            if (!path || path->empty() || path->front() >= doc.root.children.size()) return;
-            changed_top_levels.insert(doc.root.children[path->front()].id.v);
+        auto note_root = [&](NodeId owner) {
+            if (auto root = document_top_level_block_id(doc, owner)) changed_roots.insert(root->v);
+            if (auto found = previous.editable_top_level.find(owner.v); found != previous.editable_top_level.end())
+                changed_roots.insert(found->second.v);
         };
-        for (auto owner : update.changed_owners) note_top_level(owner);
-        for (auto anchor : update.structural_anchors) note_top_level(anchor);
+        for (auto owner : update.changed_owners) note_root(owner);
+        for (auto anchor : update.structural_anchors) note_root(anchor);
     }
 
+    // Structural operations reconcile physical identities. Hash only bounded
+    // fragments, never the entire list as a single subtree. Unchanged visual
+    // objects (including their exact measured geometry in the host) survive.
+    auto fragments = plan_render_fragments(doc, render_key_detail::context_key, previous.fragments);
     std::unordered_map<std::uint64_t, std::size_t> previous_by_id;
     previous_by_id.reserve(previous.blocks.size());
-    for (std::size_t index = 0; index < previous.blocks.size(); ++index) {
+    for (std::size_t index = 0; index < previous.blocks.size(); ++index)
         previous_by_id.emplace(previous.blocks[index].id.v, index);
-    }
+    auto new_owner_index = index_render_fragment_owners(doc, fragments);
+    std::unordered_set<std::size_t> dirty_sources;
+    auto mark_source = [&](NodeId owner) {
+        auto found = new_owner_index.find(owner.v);
+        if (found != new_owner_index.end()) dirty_sources.insert(found->second);
+    };
+    for (auto owner : update.changed_owners) mark_source(owner);
+    // A payload-only change can modify an atomic raw source without a TextEdit.
+    // Editable anchors name exactly that unit; container anchors are accounted
+    // for by the source-free structure/context fingerprint instead.
+    for (auto anchor : update.structural_anchors) mark_source(anchor);
     std::vector<RenderBlock> blocks;
-    blocks.reserve(doc.root.children.size());
+    blocks.reserve(fragments.size());
     std::size_t reused = 0;
     std::size_t rebuilt = 0;
-    for (std::size_t index = 0; index < doc.root.children.size(); ++index) {
-        auto const& block = doc.root.children[index];
-        auto found = previous_by_id.find(block.id.v);
-        if (trusted_structural_locality
-            && !changed_top_levels.contains(block.id.v)
-            && found != previous_by_id.end()
-            && !previous.blocks[found->second].source_mode) {
+    bool same_slots = fragments.size() == previous.fragments.size();
+    for (std::size_t index = 0; index < fragments.size(); ++index) {
+        auto const& fragment = fragments[index];
+        if (same_slots && fragment.id != previous.fragments[index].id) same_slots = false;
+        auto found = previous_by_id.find(fragment.id.v);
+        if (trusted_structural_locality && !changed_roots.contains(fragment.source_root.v)
+            && found != previous_by_id.end() && !previous.blocks[found->second].source_mode) {
             blocks.push_back(std::move(previous.blocks[found->second]));
             ++reused;
             continue;
         }
-        auto source_key = render_key_detail::source_key(block, dependency_key);
+        if (trusted_structural_locality && !dirty_sources.contains(index)
+            && found != previous_by_id.end() && found->second < previous.fragments.size()) {
+            auto const& old_fragment = previous.fragments[found->second];
+            if (old_fragment.source_root == fragment.source_root
+                && old_fragment.structure_key == fragment.structure_key
+                && old_fragment.first == fragment.first && old_fragment.last == fragment.last
+                && !previous.blocks[found->second].source_mode) {
+                blocks.push_back(std::move(previous.blocks[found->second]));
+                ++reused;
+                continue;
+            }
+        }
+        auto const* source = find_document_block(doc, fragment.source_root);
+        auto key = source ? render_key_detail::fragment_key(*source, fragment, dependency_key) : 0;
         if (found != previous_by_id.end()
-            && previous.blocks[found->second].source_key == source_key
+            && previous.blocks[found->second].source_key == key
             && !previous.blocks[found->second].source_mode) {
             blocks.push_back(std::move(previous.blocks[found->second]));
             ++reused;
-            continue;
+        } else {
+            auto rendered = build_render_fragment(builder, doc, fragment, dependency_key, previous.virtualized, key);
+            rendered.source_key = key;
+            rendered.presentation_key = key;
+            blocks.push_back(std::move(rendered));
+            changed.push_back(index);
+            ++rebuilt;
         }
-        auto rendered = builder.build_block(block);
-        update_render_geometry_hints(rendered);
-        rendered.source_key = source_key;
-        rendered.presentation_key = source_key;
-        blocks.push_back(std::move(rendered));
-        ++rebuilt;
     }
-    std::optional<std::tuple<
-        std::vector<NodeId>,
-        std::unordered_map<std::uint64_t, std::size_t>,
-        std::unordered_map<std::uint64_t, NodeId>>> cached_editable;
-    if (structure_unchanged) {
-        cached_editable.emplace(
-            std::move(previous.editable_order),
-            std::move(previous.editable_index),
-            std::move(previous.editable_top_level));
-    }
-    auto model = finish_render_model(doc, outline, std::move(blocks), std::move(cached_editable));
+    auto model = finish_render_model(doc, outline, std::move(blocks));
+    model.editable_fragment_index = std::move(new_owner_index);
+    model.fragments = std::move(fragments);
     model.document_dependency_key = dependency_key;
     model.rebuilt_block_count = rebuilt;
     model.reused_block_count = reused;
-    model.incremental_update = trusted_structural_locality
-        && top_level_identity_unchanged;
+    model.incremental_update = same_slots;
     model.virtualized = previous.virtualized;
     if (model.virtualized) {
-        for (std::size_t index = 0; index < model.blocks.size(); ++index) {
-            if (model.blocks[index].materialized) {
-                model.materialized_block_indices.insert(index);
-            }
-        }
+        for (std::size_t index = 0; index < model.blocks.size(); ++index)
+            if (model.blocks[index].materialized) model.materialized_block_indices.insert(index);
     }
-    if (model.incremental_update) {
-        model.changed_block_indices.reserve(changed_top_levels.size());
-        for (std::size_t index = 0; index < doc.root.children.size(); ++index) {
-            if (changed_top_levels.contains(doc.root.children[index].id.v)) {
-                model.changed_block_indices.push_back(index);
-            }
-        }
-    } else {
-        model.changed_block_indices.clear();
-    }
+    if (same_slots) model.changed_block_indices = std::move(changed);
     return model;
 }
 

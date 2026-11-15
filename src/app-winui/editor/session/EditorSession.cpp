@@ -9,6 +9,7 @@ import folia.core.document_content_context;
 import folia.core.document_footnotes;
 import folia.core.render_builder;
 import folia.core.render_model;
+import folia.core.render_fragments;
 import folia.core.search;
 import folia.core.source_editor;
 import folia.core.source_render;
@@ -128,8 +129,11 @@ namespace winrt::Folia
     {
         if (!core_ || core_->editor.source_editor()) return false;
         auto const& document = core_->editor.document();
-        return document.root.children.size() > 4096
-            || document.cached_editable_order.size() > 8192;
+        // Use the same physical-fragment working-set policy for a long list
+        // and for many independent paragraphs. Small documents still take the
+        // identical projection path eagerly; this is only a cache policy.
+        return document.root.children.size() > folia::render_fragment_leaf_limit
+            || document.cached_editable_order.size() > folia::render_fragment_leaf_limit;
     }
 
     void EditorSession::MaterializeRenderBlocks(std::size_t begin, std::size_t end)
