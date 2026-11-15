@@ -23,6 +23,7 @@ import folia.markdown.outline;
 import folia.markdown.diagnostics;
 import folia.markdown.utf;
 import folia.core.render_model;
+import folia.core.render_fragments;
 import folia.core.html_inline_presentation;
 import folia.core.html_inline_flow;
 

@@ -547,6 +547,9 @@
     <ClCompile Include="..\core\rendering\render_model.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\core\rendering\render_model.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\core\source\source_style.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>

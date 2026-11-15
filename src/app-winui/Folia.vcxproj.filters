@@ -306,6 +306,9 @@
     <ClCompile Include="..\core\rendering\render_model.ixx">
       <Filter>Core Modules\Rendering</Filter>
     </ClCompile>
+    <ClCompile Include="..\core\rendering\render_model.cpp">
+      <Filter>Core Modules\Rendering</Filter>
+    </ClCompile>
     <ClCompile Include="..\core\source\source_style.ixx">
       <Filter>Core Modules\Source</Filter>
     </ClCompile>

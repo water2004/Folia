@@ -15,7 +15,7 @@ import folia.markdown.selection;
 import folia.markdown.text_edit;
 import folia.core.source_style;
 import folia.markdown.block_source;
-export import folia.core.render_fragments;
+import folia.markdown.block_tree;
 export import folia.core.syntax_marker;
 
 export namespace folia {
@@ -309,18 +309,6 @@ struct InlineRenderItem {
     }
 };
 
-// Define these after InlineRenderItem is complete: constructing/destroying
-// the semantic payload instantiates its vector<InlineRenderItem> on libc++.
-inline InlineRenderSemanticPayload const& InlineRenderPayload::semantic() const {
-    static const InlineRenderSemanticPayload empty{};
-    return semantic_payload ? *semantic_payload : empty;
-}
-
-inline InlineRenderSemanticPayload& InlineRenderPayload::ensure_semantic() {
-    if (!semantic_payload) semantic_payload = std::make_shared<InlineRenderSemanticPayload>();
-    return *semantic_payload;
-}
-
 enum class RenderBlockKind {
     Text, Blank, Quote, Code, Math, Table, Image, ThematicBreak, Toc, Callout, Frontmatter, Footnote, Unsupported, Extension,
 };
@@ -435,6 +423,23 @@ struct RenderModelUpdate {
     std::vector<NodeId> changed_owners;
     std::vector<NodeId> structural_anchors;
     std::vector<DocumentTreeDelta> tree_deltas;
+};
+
+struct RenderFragment {
+    NodeId id{};              // stable physical identity, never a text coordinate
+    NodeId source_root{};     // unchanged semantic top-level block
+    BlockPath first_leaf;     // inclusive, relative to source_root
+    BlockPath last_leaf;      // inclusive, relative to source_root
+    NodeId first_leaf_id{};
+    NodeId last_leaf_id{};
+    NodeId first_owner{};
+    NodeId last_owner{};
+    bool first = true;
+    bool last = true;
+    std::uint64_t structure_key = 0;
+    std::size_t leaf_count = 0;
+
+    bool operator==(RenderFragment const&) const = default;
 };
 
 struct RenderModel {

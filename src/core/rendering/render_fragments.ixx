@@ -3,6 +3,7 @@
 // paragraph, an inline CST, a table, or an atomic embedded block.
 export module folia.core.render_fragments;
 import std;
+import folia.core.render_model;
 import folia.markdown.ast;
 import folia.markdown.ids;
 import folia.markdown.block_tree;
@@ -29,23 +30,6 @@ inline bool is_fragment_flow_container(BlockKind kind) {
             return false;
     }
 }
-
-struct RenderFragment {
-    NodeId id{};              // stable physical identity, never a text coordinate
-    NodeId source_root{};     // unchanged semantic top-level block
-    BlockPath first_leaf;     // inclusive, relative to source_root
-    BlockPath last_leaf;      // inclusive, relative to source_root
-    NodeId first_leaf_id{};
-    NodeId last_leaf_id{};
-    NodeId first_owner{};
-    NodeId last_owner{};
-    bool first = true;
-    bool last = true;
-    std::uint64_t structure_key = 0;
-    std::size_t leaf_count = 0;
-
-    bool operator==(RenderFragment const&) const = default;
-};
 
 // A non-owning cursor into a descriptor. Empty paths mean the complete node.
 // Advancing to a child is O(1); materialization never scans excluded siblings.
