@@ -1,6 +1,7 @@
 #include "folia/math/native_renderer_bridge.h"
 
 import folia.math;
+import folia.math.output.svg.writer;
 import std;
 
 struct FoliaNativeMathRenderer {
@@ -15,6 +16,7 @@ struct FoliaNativeMathCancellation {
 struct FoliaNativeMathResult {
     std::string svg;
     std::string error;
+    std::optional<FoliaNativeMathSvgMetrics> fragmentMetrics;
 };
 
 extern "C" FoliaNativeMathStatus
@@ -64,10 +66,12 @@ extern "C" void FoliaNativeMathCancellationDestroy(FoliaNativeMathCancellation *
     delete cancellation;
 }
 
-extern "C" FoliaNativeMathStatus FoliaNativeMathRenderSvgBatch(FoliaNativeMathRenderer *renderer,
-                                                               FoliaNativeMathInput const *inputs,
-                                                               size_t count,
-                                                               FoliaNativeMathOutput *outputs) {
+namespace {
+std::atomic<std::uint64_t> nextFragmentId{1};
+
+FoliaNativeMathStatus renderSvgBatch(FoliaNativeMathRenderer *renderer,
+                                    FoliaNativeMathInput const *inputs, size_t count,
+                                    FoliaNativeMathOutput *outputs, bool fragment) {
     if (count && !outputs)
         return FOLIA_NATIVE_MATH_INFRASTRUCTURE_ERROR;
     for (size_t i = 0; i < count; ++i)
@@ -98,6 +102,12 @@ extern "C" FoliaNativeMathStatus FoliaNativeMathRenderSvgBatch(FoliaNativeMathRe
             options.display = input.display != 0;
             options.em = input.em;
             options.containerWidth = input.container_width;
+            if (fragment) {
+                options.svgMode = folia::math::SvgMode::standalone_display;
+                options.svgIdPrefix =
+                    "folia-math-" +
+                    std::to_string(nextFragmentId.fetch_add(1, std::memory_order_relaxed)) + "-";
+            }
             requests.push_back({texts.back(), input.cancellation->source.get_token(), options,
                                 std::chrono::milliseconds(input.timeout_ms)});
             indexes.push_back(i);
@@ -113,6 +123,13 @@ extern "C" FoliaNativeMathStatus FoliaNativeMathRenderSvgBatch(FoliaNativeMathRe
                     rendered[i].result->svg.find("<svg") == std::string::npos)
                     result->error = "Native renderer completed without SVG output";
                 else {
+                    if (fragment) {
+                        const auto metrics = folia::math::output::svg::pixel_metrics(
+                            rendered[i].result->scene);
+                        result->fragmentMetrics =
+                            FoliaNativeMathSvgMetrics{metrics.width, metrics.height,
+                                                     metrics.baseline};
+                    }
                     result->svg = std::move(rendered[i].result->svg);
                     statuses[target] = FOLIA_NATIVE_MATH_OK;
                 }
@@ -141,6 +158,13 @@ extern "C" FoliaNativeMathStatus FoliaNativeMathRenderSvgBatch(FoliaNativeMathRe
         return FOLIA_NATIVE_MATH_INFRASTRUCTURE_ERROR;
     }
 }
+} // namespace
+
+extern "C" FoliaNativeMathStatus FoliaNativeMathRenderSvgBatch(
+    FoliaNativeMathRenderer *renderer, FoliaNativeMathInput const *inputs, size_t count,
+    FoliaNativeMathOutput *outputs) {
+    return renderSvgBatch(renderer, inputs, count, outputs, false);
+}
 
 extern "C" FoliaNativeMathStatus
 FoliaNativeMathRenderSvg(FoliaNativeMathRenderer *renderer, uint16_t const *tex, size_t tex_units,
@@ -158,6 +182,34 @@ FoliaNativeMathRenderSvg(FoliaNativeMathRenderer *renderer, uint16_t const *tex,
         return status;
     *out_result = output.result;
     return output.status;
+}
+
+extern "C" FoliaNativeMathStatus FoliaNativeMathRenderSvgFragment(
+    FoliaNativeMathRenderer *renderer, uint16_t const *tex, size_t tex_units, double em,
+    double container_width, FoliaNativeMathCancellation *cancellation, unsigned int timeout_ms,
+    FoliaNativeMathResult **out_result) {
+    if (!out_result)
+        return FOLIA_NATIVE_MATH_INFRASTRUCTURE_ERROR;
+    *out_result = nullptr;
+    const FoliaNativeMathInput input{tex, tex_units, 1, em, container_width, cancellation,
+                                     timeout_ms};
+    FoliaNativeMathOutput output{};
+    const auto status = renderSvgBatch(renderer, &input, 1, &output, true);
+    if (status != FOLIA_NATIVE_MATH_OK)
+        return status;
+    *out_result = output.result;
+    return output.status;
+}
+
+extern "C" int FoliaNativeMathResultFragmentMetrics(FoliaNativeMathResult const *result,
+                                                     FoliaNativeMathSvgMetrics *metrics) {
+    if (!metrics)
+        return 0;
+    *metrics = {};
+    if (!result || !result->fragmentMetrics)
+        return 0;
+    *metrics = *result->fragmentMetrics;
+    return 1;
 }
 
 extern "C" char const *FoliaNativeMathResultSvg(FoliaNativeMathResult const *result, size_t *size) {

@@ -561,6 +561,10 @@ set_target_properties(FoliaNativeMath PROPERTIES CXX_MODULE_STD ON
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
 target_link_libraries(FoliaNativeMath PRIVATE folia_math)
+# Match the Windows .def boundary on ELF: archive-owned C++ module
+# initializers must not interpose with a test executable's static Math engine.
+target_link_options(FoliaNativeMath PRIVATE
+    "$<$<PLATFORM_ID:Linux>:LINKER:--exclude-libs,ALL>")
 if(WIN32)
     file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/FoliaNativeMath.def" CONTENT
 "LIBRARY FoliaNativeMath
@@ -572,7 +576,9 @@ FoliaNativeMathCancellationRequestStop
 FoliaNativeMathCancellationDestroy
 FoliaNativeMathRenderSvg
 FoliaNativeMathRenderSvgBatch
+FoliaNativeMathRenderSvgFragment
 FoliaNativeMathResultSvg
+FoliaNativeMathResultFragmentMetrics
 FoliaNativeMathResultError
 FoliaNativeMathResultDestroy
 ")
@@ -672,6 +678,7 @@ list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/parsing/test_deep_block_ownersh
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/parsing/test_serializer_deep\\.cpp$")
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/parsing/test_md4c_reference\\.cpp$")
 list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/mermaid_cpp/")
+list(FILTER FOLIA_TEST_SRC EXCLUDE REGEX "/tests/mermaid_math/")
 target_sources(FoliaTests PRIVATE
     ${FOLIA_TEST_SRC})
 target_include_directories(FoliaTests PRIVATE
@@ -877,6 +884,15 @@ target_compile_definitions(FoliaMathTests PRIVATE
 target_sources(FoliaMathTests PRIVATE tests/math/editor_scanner_conformance.cpp)
 target_link_libraries(FoliaMathTests PRIVATE folia_math folia::math_editor FoliaNativeMath Boost::ut_module)
 add_test(NAME FoliaMathTests COMMAND FoliaMathTests)
+# Focused native SVG/C ABI gate for embedders such as Mermaid. The same tests
+# remain in FoliaMathTests; this explicit target avoids compiling unrelated
+# TeX parser test translation units for an output-boundary change.
+add_executable(FoliaMathSvgBridgeTests EXCLUDE_FROM_ALL
+    tests/main.cpp tests/math/native_svg_writer.cpp tests/math/native_renderer_bridge.cpp)
+target_compile_features(FoliaMathSvgBridgeTests PRIVATE cxx_std_23)
+set_target_properties(FoliaMathSvgBridgeTests PROPERTIES CXX_MODULE_STD ON CXX_SCAN_FOR_MODULES ON)
+target_include_directories(FoliaMathSvgBridgeTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+target_link_libraries(FoliaMathSvgBridgeTests PRIVATE folia_math FoliaNativeMath Boost::ut_module)
 add_executable(FoliaMathFontDump EXCLUDE_FROM_ALL
     tools/math-port/font-data-dump.cpp)
 target_compile_features(FoliaMathFontDump PRIVATE cxx_std_23)

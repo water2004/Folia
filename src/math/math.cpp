@@ -133,8 +133,9 @@ SceneOutput::SceneOutput(common::FontRepository const &fonts, adaptors::lite::Li
 
 common::CommonOutputJaxConfig SceneOutput::config() const {
     common::CommonOptions commonOptions;
-    commonOptions.displayOverflow = "linebreak";
-    commonOptions.linebreaks.inlineBreaks = true;
+    const bool standalone = options_.svgMode == SvgMode::standalone_display;
+    commonOptions.displayOverflow = standalone ? "overflow" : "linebreak";
+    commonOptions.linebreaks.inlineBreaks = !standalone;
     common::ExtendedMetrics metrics{options_.em, options_.em * .5, options_.containerWidth, 1,
                                     {},          options_.display};
     common::CommonOutputJaxConfig result{metrics, std::move(commonOptions), fonts_, "MathJaxNewcm"};
@@ -189,6 +190,8 @@ RenderResult Renderer::State::render(std::u16string_view source, std::stop_token
         svg::SvgWriteOptions writeOptions;
         writeOptions.font_cache = svg::FontCacheMode::none;
         writeOptions.font_resources = &fontData.svg_resources;
+        writeOptions.pixel_viewport = options.svgMode == SvgMode::standalone_display;
+        writeOptions.id_prefix = options.svgIdPrefix;
         auto svgText = svg::write(completedScene, writeOptions);
         request.checkpoint();
         return {std::move(svgText), std::move(completedScene)};
@@ -223,6 +226,8 @@ scene::Scene Renderer::State::renderScene(std::u16string_view source, std::stop_
 }
 
 void Renderer::State::validateOptions(RenderOptions const &options) const {
+    if (options.svgMode == SvgMode::standalone_display && !options.display)
+        throw RenderError("InvalidArgument", "Standalone SVG requires display math");
     if (!std::isfinite(options.em) || options.em <= 0)
         throw RenderError("InvalidArgument", "Renderer em must be finite and positive");
     if (!std::isfinite(options.containerWidth) || options.containerWidth <= 0)
