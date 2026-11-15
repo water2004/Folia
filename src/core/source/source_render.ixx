@@ -213,7 +213,8 @@ inline std::vector<InlineRenderItem> line_items(SourceLine const& line) {
         item.text = line.text.substr(start, end - start);
         item.style = combined.inline_style;
         item.source_syntax = combined.syntax;
-        item.ensure_special().visibility = MarkerVisibility::Always;
+        // Text is always visible. Marker visibility has no meaning for these
+        // exact source runs and must not allocate one payload per style span.
         items.push_back(std::move(item));
     }
     return items;
@@ -284,7 +285,7 @@ inline RenderBlock render_line(
             + (block.presentation_key << 6)
             + (block.presentation_key >> 2);
     }
-    block.ensure_special().language = line.code_language;
+    if (line.code_language) block.ensure_special().language = line.code_language;
     return block;
 }
 
