@@ -194,4 +194,78 @@ suite layout_plan_tests = [] {
     }
 };
 
+"print_fragment_cuts_preserve_semantic_keep_together_and_stream_progress"_test = [] {
+    const std::vector<PrintBlockExtent> semantic{
+        {0, 100}, {120, 420}, {440, 2100}, {2120, 2250},
+    };
+    const std::vector<PrintBlockExtent> physical{
+        {0, 100},
+        {120, 200, 1}, {200, 420},
+        {440, 940, 3}, {940, 1440, 2}, {1440, 2040, 1}, {2040, 2100},
+        {2120, 2250},
+    };
+    auto expected = plan_print_pages(semantic, 0, 2250, 700);
+    auto actual = plan_print_pages(physical, 0, 2250, 700);
+    expect(fatal(actual.size() == expected.size()));
+    std::size_t consumed = 0;
+    float top = 0;
+    for (std::size_t page = 0; page < expected.size(); ++page) {
+        auto step = plan_next_print_page(std::span<PrintBlockExtent const>{physical}.subspan(consumed),
+            top, 2250, 700);
+        expect(actual[page].source_top == expected[page].source_top);
+        expect(actual[page].source_bottom == expected[page].source_bottom);
+        expect(step.slice.source_top == expected[page].source_top);
+        expect(step.slice.source_bottom == expected[page].source_bottom);
+        consumed += step.consumed_blocks;
+        top = step.next_source_top;
+        expect(step.has_more == (page + 1 < expected.size()));
+    }
+    expect(consumed == physical.size());
+};
+
+"print_fragment_groups_match_unfragmented_pages_for_varied_physical_sizes"_test = [] {
+    std::mt19937 random{0xF2A6u};
+    std::uniform_int_distribution<int> count{1, 45};
+    std::uniform_int_distribution<int> pieces{1, 7};
+    std::uniform_real_distribution<float> gap{0, 30};
+    std::uniform_real_distribution<float> height{16, 3200};
+    for (std::size_t sample = 0; sample < 100; ++sample) {
+        std::vector<PrintBlockExtent> semantic;
+        std::vector<PrintBlockExtent> physical;
+        float cursor = 0;
+        auto blocks = count(random);
+        for (int index = 0; index < blocks; ++index) {
+            cursor += gap(random);
+            auto top = cursor;
+            auto bottom = top + height(random);
+            semantic.push_back({top, bottom});
+            auto fragments = static_cast<std::size_t>(pieces(random));
+            for (std::size_t part = 0; part < fragments; ++part) {
+                auto start = top + (bottom - top) * static_cast<float>(part) / fragments;
+                auto end = part + 1 == fragments ? bottom
+                    : top + (bottom - top) * static_cast<float>(part + 1) / fragments;
+                physical.push_back({start, end, fragments - part - 1});
+            }
+            cursor = bottom;
+        }
+        auto expected = plan_print_pages(semantic, 0, cursor, 700);
+        auto actual = plan_print_pages(physical, 0, cursor, 700);
+        expect(fatal(actual.size() == expected.size()));
+        std::size_t consumed = 0;
+        float top = 0;
+        for (std::size_t page = 0; page < expected.size(); ++page) {
+            auto step = plan_next_print_page(std::span<PrintBlockExtent const>{physical}.subspan(consumed),
+                top, cursor, 700);
+            expect(actual[page].source_top == expected[page].source_top);
+            expect(actual[page].source_bottom == expected[page].source_bottom);
+            expect(step.slice.source_top == expected[page].source_top);
+            expect(step.slice.source_bottom == expected[page].source_bottom);
+            expect(step.has_more == (page + 1 < expected.size()));
+            consumed += step.consumed_blocks;
+            top = step.next_source_top;
+        }
+        expect(consumed == physical.size());
+    }
+};
+
 }; // suite layout_plan_tests

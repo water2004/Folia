@@ -41,6 +41,10 @@ struct DocumentLayoutPlan {
 struct PrintBlockExtent {
     float top = 0.0f;
     float bottom = 0.0f;
+    // Physical fragments of one semantic block share its keep-together rule.
+    // Store the remaining group length so pagination reaches its exact bottom
+    // in O(1), without rescanning the remainder of a long list on every page.
+    std::size_t following_fragments = 0;
 };
 
 struct PrintPageSlice {
@@ -53,8 +57,8 @@ struct PrintPageSlice {
 struct PrintPageStep {
     PrintPageSlice slice;
     // Number of leading extents that no longer need to participate in the
-    // next step. This remains zero while an oversized block is split across
-    // multiple pages.
+    // next step. Completed physical fragments can leave the suffix even when
+    // their semantic block continues on later pages.
     std::size_t consumed_blocks = 0;
     float next_source_top = 0.0f;
     bool has_more = false;
@@ -81,6 +85,13 @@ inline PrintPageStep plan_next_print_page(
     auto valid = [](PrintBlockExtent extent) {
         return std::isfinite(extent.top) && std::isfinite(extent.bottom);
     };
+    auto group_end = [&](std::size_t index) {
+        return index + (std::min)(remaining[index].following_fragments,
+            remaining.size() - index - 1);
+    };
+    auto group_extent = [&](std::size_t index) {
+        return PrintBlockExtent{remaining[index].top, remaining[group_end(index)].bottom};
+    };
     auto cursor = std::size_t{0};
     while (cursor < remaining.size()
         && (!valid(remaining[cursor]) || remaining[cursor].bottom <= document_top + epsilon))
@@ -97,14 +108,14 @@ inline PrintPageStep plan_next_print_page(
     auto page_bottom = document_top;
     auto fitted = false;
     while (cursor < remaining.size()) {
-        auto extent = remaining[cursor];
+        auto extent = group_extent(cursor);
         if (!valid(extent)) { ++cursor; continue; }
         extent.top = (std::max)(document_top, extent.top);
         extent.bottom = (std::max)(extent.top, extent.bottom);
         if (extent.bottom > limit + epsilon) break;
         page_bottom = (std::max)(page_bottom, extent.bottom);
         fitted = true;
-        ++cursor;
+        cursor = group_end(cursor) + 1;
     }
 
     if (fitted) {
@@ -118,17 +129,20 @@ inline PrintPageStep plan_next_print_page(
     // No complete block fits. Advance within the first oversized block, but
     // consume only invalid/finished leading entries so the same block remains
     // available to the following page when it still crosses the boundary.
-    auto first_extent = remaining[first];
+    auto first_extent = group_extent(first);
     first_extent.top = (std::max)(document_top, first_extent.top);
     first_extent.bottom = (std::max)(first_extent.top, first_extent.bottom);
     page_bottom = (std::min)(limit, first_extent.bottom);
     if (page_bottom <= document_top + epsilon) page_bottom = limit;
 
     auto consumed = first;
-    if (page_bottom >= first_extent.bottom - epsilon) consumed = first + 1;
+    auto last_fragment = group_end(first);
+    while (consumed <= last_fragment
+        && (!valid(remaining[consumed]) || remaining[consumed].bottom <= page_bottom + epsilon))
+        ++consumed;
     auto has_more = consumed < remaining.size();
     auto next_top = page_bottom;
-    if (has_more && consumed > first && valid(remaining[consumed]))
+    if (has_more && consumed > last_fragment && valid(remaining[consumed]))
         next_top = (std::max)(page_bottom, remaining[consumed].top);
     return {{document_top, page_bottom}, consumed, next_top, has_more};
 }
@@ -152,7 +166,10 @@ inline std::vector<PrintPageSlice> plan_print_pages(
 
     std::vector<PrintBlockExtent> blocks;
     blocks.reserve(input.size());
-    for (auto extent : input) {
+    for (std::size_t index = 0; index < input.size();) {
+        auto last = index + (std::min)(input[index].following_fragments, input.size() - index - 1);
+        PrintBlockExtent extent{input[index].top, input[last].bottom};
+        index = last + 1;
         if (!std::isfinite(extent.top) || !std::isfinite(extent.bottom)) continue;
         extent.top = (std::max)(document_top, extent.top);
         extent.bottom = (std::max)(extent.top, extent.bottom);
