@@ -60,15 +60,16 @@ suite parser_block_tests = [] {
     expect(serialize_markdown(parsed.document) == source);
 };
 
-"parse progress can cancel within a long paragraph before its block is complete"_test = [] {
+"parse progress can cancel during structure inline parsing or index handoff"_test = [] {
     struct Cancelled {};
     std::string source;
     while (source.size() < 65536) source += "ordinary repeated paragraph content\n";
-    for (auto phase : {ParsePhase::Blocks, ParsePhase::Inlines}) {
+    for (auto phase : {ParsePhase::Blocks, ParsePhase::Inlines, ParsePhase::Indexes}) {
         bool stopped = false;
         try {
             parse_text(1, source, default_dialect(), [&](ParseProgress progress) {
-                if (progress.phase == phase && progress.completed > 0 && progress.completed < progress.total)
+                if (progress.phase == phase && (phase == ParsePhase::Indexes
+                    || (progress.completed > 0 && progress.completed < progress.total)))
                     throw Cancelled{};
             });
         } catch (Cancelled const&) { stopped = true; }
