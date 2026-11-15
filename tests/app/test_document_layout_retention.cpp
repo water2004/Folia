@@ -90,7 +90,7 @@ namespace {
         EditorFlowLayoutContext expectedContext;
         fixture.WithPreparer(frame, [&](auto& preparer, auto& images, float width) {
             auto expected = preparer.Prepare(whole, false, false);
-            expect(fatal(expected.layout != nullptr));
+            expect(fatal(expected.Visuals().layout != nullptr));
             expectedContext = expected.intrinsicFlow;
             auto expectedHeight = 2.0 * fixture.sheet.verticalPadding
                 + whole.block_style.margin_top + expected.height
@@ -114,10 +114,10 @@ namespace {
             for (std::size_t index = 0; index < fixture.document->blocks.size(); ++index) {
                 materializer.EnsurePrepared(index, false, false);
                 auto const& block = fixture.document->blocks[index];
-                expect(fatal(block.layout != nullptr));
+                expect(fatal(block.Visuals().layout != nullptr));
                 DWRITE_LINE_SPACING_METHOD method{};
                 FLOAT spacing = 0.0f, baseline = 0.0f;
-                expect(SUCCEEDED(block.layout->GetLineSpacing(&method, &spacing, &baseline)));
+                expect(SUCCEEDED(block.Visuals().layout->GetLineSpacing(&method, &spacing, &baseline)));
                 expect((method == DWRITE_LINE_SPACING_METHOD_DEFAULT)
                     == expectedContext.naturalLineSpacing);
             }
@@ -132,14 +132,14 @@ namespace {
     float SourceDocumentTop(MeasurementFixture const& fixture, folia::TextPosition position) {
         auto index = fixture.document->ownerBlockIndex.at(position.container_id.v);
         auto const& block = fixture.document->blocks[index];
-        expect(fatal(block.layout != nullptr));
+        expect(fatal(block.Visuals().layout != nullptr));
         auto display = folia::platform::editor::DisplayPositionForSource(
-            block.display.displayToSource, position);
+            block.Visuals().display.displayToSource, position);
         FLOAT x = 0.0f, y = 0.0f;
         DWRITE_HIT_TEST_METRICS hit{};
-        expect(fatal(SUCCEEDED(block.layout->HitTestTextPosition(
+        expect(fatal(SUCCEEDED(block.Visuals().layout->HitTestTextPosition(
             static_cast<UINT32>(display), FALSE, &x, &y, &hit))));
-        return fixture.document->geometry.At(index).top + block.textTop + y;
+        return fixture.document->geometry.At(index).top + block.Visuals().textTop + y;
     }
 
     void PrepareFrame(MeasurementFixture& fixture, winrt::Folia::detail::EditorRenderFrame const& frame) {
@@ -171,6 +171,70 @@ namespace {
     }
 
     suite document_layout_retention_tests = [] {
+        "document layout keeps small block geometry independent of visual storage"_test = [] {
+            // A long list has few physical fragments; a document of small
+            // independent blocks exposes the cost of each retained entry.
+            std::string source;
+            for (std::size_t index = 0; index < 2049; ++index) {
+                source += "# Section " + std::to_string(index) + "\n\n";
+                source += "A **formatted** paragraph with 中文, e\xCC\x81 and 😀.\n\n";
+            }
+            source += "| first | second |\n| --- | --- |\n| one | two |\n";
+            EditorSession session;
+            session.SetText(winrt::to_hstring(source));
+            auto frame = session.RenderFrame();
+            expect(fatal(frame.renderModel.virtualized));
+            expect(fatal(frame.renderModel.blocks.size() > 4096_u));
+            expect(sizeof(EditorPreparedDocument::Block) <= std::size_t{128})
+                << "offscreen entries must not embed visual containers";
+            std::cerr << "document-memory prepared_block_bytes=" << sizeof(EditorPreparedDocument::Block)
+                << " visual_content_bytes=" << sizeof(EditorPreparedDocument::VisualContent) << '\n';
+
+            MeasurementFixture fixture;
+            fixture.WithPreparer(frame, [&](auto& preparer, auto& images, float width) {
+                EditorPreparedDocumentCache cache(frame, fixture.sheet, images, preparer, fixture.document);
+                cache.Reconcile(frame.selection, width, 1);
+                cache.EnsureGeometry();
+                auto const exactHeight = fixture.document->geometry.PreciseTotalHeight();
+                for (auto const& block : fixture.document->blocks) {
+                    expect(block.geometryMeasured);
+                    expect(!block.HasVisualContent());
+                    expect(block.Visuals().display.text.empty());
+                    expect(!block.HasVisualContent()) << "a read materialized an evicted block";
+                }
+                EditorViewportMaterializer materializer(frame, fixture.resources, preparer,
+                    images, fixture.scroll, fixture.document);
+                for (auto index : {std::size_t{0}, fixture.document->blocks.size() / 2,
+                                   fixture.document->blocks.size() - 1}) {
+                    auto& block = fixture.document->blocks[index];
+                    auto const height = block.height;
+                    auto const owners = block.owners;
+                    auto const sourceId = block.sourceId;
+                    auto const context = block.appliedFlow;
+                    materializer.EnsurePrepared(index, false, false);
+                    expect(fatal(block.HasVisualContent()));
+                    auto const* resident = &block.Visuals();
+                    materializer.EnsurePrepared(index, false, false);
+                    expect(&block.Visuals() == resident) << "a warm fragment lost its visual cache";
+                    expect(block.height == height);
+                    block.ReleaseVisualContent();
+                    fixture.document->layoutBlocks.erase(index);
+                    expect(!block.HasVisualContent());
+                    expect(block.geometryMeasured);
+                    expect(block.height == height);
+                    expect(block.owners == owners);
+                    expect(block.sourceId == sourceId);
+                    expect(block.appliedFlow == context);
+                    materializer.EnsurePrepared(index, false, false);
+                    expect(block.HasVisualContent());
+                    expect(block.height == height);
+                    block.ReleaseVisualContent();
+                    fixture.document->layoutBlocks.erase(index);
+                }
+                expect(fixture.document->geometry.PreciseTotalHeight() == exactHeight);
+            });
+        };
+
         "document layout fragments preserve real DirectWrite flow height"_test = [] {
             for (auto const& source : std::vector<std::string>{
                 RepeatedList(193, "- "),
@@ -196,7 +260,7 @@ namespace {
                     double actualHeight = 0;
                     for (auto const& block : model.blocks) {
                         auto measured = preparer.Prepare(block, false, false);
-                        expect(measured.layout != nullptr);
+                        expect(measured.Visuals().layout != nullptr);
                         actualHeight += block.block_style.margin_top + measured.height
                             + block.block_style.margin_bottom;
                     }
@@ -306,7 +370,7 @@ namespace {
             MeasurementFixture fixture;
             fixture.WithPreparer(frame, [&](auto& preparer, auto&, float) {
                 auto commentAtStart = [](auto const& prepared) {
-                    return std::ranges::any_of(prepared.display.ranges, [](auto const& range) {
+                    return std::ranges::any_of(prepared.Visuals().display.ranges, [](auto const& range) {
                         return range.start == 0 && range.length > 0
                             && range.syntax == SyntaxHighlightKind::Comment;
                     });
@@ -356,9 +420,10 @@ namespace {
                 for (auto const& block : fixture.document->blocks) {
                     expect(block.geometryMeasured);
                     expect(block.height > 0);
-                    expect(block.layout == nullptr);
-                    expect(block.display.text.empty());
-                    expect(!block.paintPlan);
+                    expect(!block.HasVisualContent());
+                    expect(block.Visuals().layout == nullptr);
+                    expect(block.Visuals().display.text.empty());
+                    expect(!block.Visuals().paintPlan);
                 }
                 auto exactHeight = fixture.document->geometry.PreciseTotalHeight();
                 for (float fraction : {0.0f, 0.5f, 0.95f, 0.2f, 0.0f}) {
@@ -375,6 +440,8 @@ namespace {
                     expect(fixture.document->geometry.PreciseTotalHeight() == exactHeight);
                     expect(fixture.document->layoutBlocks.size() < 16_u);
                     expect(frame.renderModel.materialized_block_indices.size() < 16_u);
+                    expect(std::ranges::count_if(fixture.document->blocks,
+                        [](auto const& block) { return block.HasVisualContent(); }) < 16);
                 }
             });
         };
@@ -390,8 +457,9 @@ namespace {
             expect(prepared->document->layoutBlocks.empty());
             for (auto const& block : prepared->document->blocks) {
                 expect(block.geometryMeasured);
-                expect(block.layout == nullptr);
-                expect(!block.paintPlan);
+                expect(!block.HasVisualContent());
+                expect(block.Visuals().layout == nullptr);
+                expect(!block.Visuals().paintPlan);
             }
             std::stop_source stop;
             bool canceled = false;
@@ -567,9 +635,10 @@ namespace {
             expect(session.RenderModel().materialized_block_indices.empty());
             for (auto const& block : prepared->document->blocks) {
                 expect(block.geometryMeasured);
-                expect(block.layout == nullptr);
-                expect(block.display.text.empty());
-                expect(!block.paintPlan);
+                expect(!block.HasVisualContent());
+                expect(block.Visuals().layout == nullptr);
+                expect(block.Visuals().display.text.empty());
+                expect(!block.Visuals().paintPlan);
             }
             std::cerr << "document-scalability-native fragments=" << fragments
                 << " retained_layouts=" << prepared->document->layoutBlocks.size()
@@ -636,7 +705,7 @@ namespace {
                     referenceHeight = 2 * fixture.sheet.verticalPadding + whole.block_style.margin_top
                         + expected.height + whole.block_style.margin_bottom + fixture.sheet.blockGap;
                     referenceTextEnd = fixture.sheet.verticalPadding + whole.block_style.margin_top
-                        + expected.textTop + expected.textHeight;
+                        + expected.Visuals().textTop + expected.Visuals().textHeight;
                     referencePreviewHeight = expected.previewHeight;
                     expect(fatal(referencePreviewHeight > 0));
                 });
@@ -660,7 +729,7 @@ namespace {
                     materializer.EnsurePrepared(targetIndex, false, false);
                     auto targetTop = fixture.document->geometry.At(targetIndex).top;
                     auto const& tail = fixture.document->blocks[targetIndex];
-                    expect(std::abs(targetTop + tail.textTop + tail.textHeight - referenceTextEnd) < 0.25)
+                    expect(std::abs(targetTop + tail.Visuals().textTop + tail.Visuals().textHeight - referenceTextEnd) < 0.25)
                         << "the preview moved into an artificial fragment boundary";
                     (void)materializer.MaterializeTrailingPreview(targetTop, false, 1);
                     cache.ReconcileTrailingPreview();
@@ -669,7 +738,7 @@ namespace {
                     expect(!preview.pending);
                     expect(std::abs(preview.height - referencePreviewHeight) < 0.25);
                     expect(diagram ? !preview.mermaidPreviews.empty() : !preview.mathPreviews.empty());
-                    expect(fixture.document->blocks[sourceIndex].layout == nullptr)
+                    expect(fixture.document->blocks[sourceIndex].Visuals().layout == nullptr)
                         << "a remote preview retained its source fragment layout";
                     expect(!frame.renderModel.blocks[sourceIndex].materialized);
                     expect(std::abs(fixture.document->geometry.PreciseTotalHeight() - referenceHeight) < 0.25);

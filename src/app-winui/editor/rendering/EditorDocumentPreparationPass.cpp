@@ -17,6 +17,7 @@ namespace winrt::Folia
             EditorPreparedDocument::Block const& block,
             folia::TextPosition position)
         {
+            auto const& content = block.Visuals();
             auto locate = [&](IDWriteTextLayout* layout, EditorDisplayMapping const& mapping,
                               float textTop) -> std::optional<float>
             {
@@ -35,14 +36,14 @@ namespace winrt::Folia
                         FALSE, &x, &y, &hit))) return {};
                 return textTop + y;
             };
-            if (block.table)
+            if (content.table)
             {
-                for (auto const& cell : block.table->visual.cells)
+                for (auto const& cell : content.table->visual.cells)
                     if (auto top = locate(cell.layout.Get(), cell.displayToSource, cell.textOrigin.y))
                         return top;
                 return {};
             }
-            return locate(block.layout.Get(), block.display.displayToSource, block.textTop);
+            return locate(content.layout.Get(), content.display.displayToSource, content.textTop);
         }
 
         std::optional<SourceScrollAnchor> CaptureSourceScrollAnchor(
@@ -52,6 +53,7 @@ namespace winrt::Folia
             folia::RenderModel const& model)
         {
             if (!block.valid) return {};
+            auto const& content = block.Visuals();
             std::optional<folia::TextPosition> position;
             auto closest = (std::numeric_limits<float>::max)();
             auto visit = [&](folia::platform::editor::EditorLayoutLines const& lines, float textTop)
@@ -75,11 +77,11 @@ namespace winrt::Folia
                     }
                 }
             };
-            if (block.table)
-                for (auto const& cell : block.table->visual.cells)
+            if (content.table)
+                for (auto const& cell : content.table->visual.cells)
                     visit(cell.layoutLines, cell.textOrigin.y);
             else
-                visit(block.layoutLines, block.textTop);
+                visit(content.layoutLines, content.textTop);
             // The line box selects the first visible source position. Its top
             // can differ from DirectWrite's hit-test origin for that position.
             // Measure both sides of reflow using the same coordinate.

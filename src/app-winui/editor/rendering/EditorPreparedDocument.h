@@ -34,7 +34,10 @@ namespace winrt::Folia
             float height = 0.0f;
         };
 
-        struct Block
+        // These objects exist only while a fragment is being measured or is in
+        // the visual working set. Even empty vectors and a disengaged table
+        // occupied substantial space when embedded in every geometry entry.
+        struct VisualContent
         {
             DisplayInlineText display;
             EditorCaretPresentationState caretPresentation;
@@ -46,9 +49,13 @@ namespace winrt::Folia
             std::vector<MermaidDraw> mermaids;
             std::vector<MermaidPreview> mermaidPreviews;
             std::optional<EditorTableBlockRenderer::PreparedTable> table;
-            std::vector<folia::NodeId> owners;
             float textTop = 0.0f;
             float textHeight = 0.0f;
+        };
+
+        struct Block
+        {
+            std::vector<folia::NodeId> owners;
             float previewHeight = 0.0f;
             float height = 0.0f;
             folia::NodeId sourceId{};
@@ -73,43 +80,38 @@ namespace winrt::Folia
             std::uint64_t embeddedGeneration = 0;
             std::uint64_t remoteImageGeneration = 0;
 
+            bool HasVisualContent() const noexcept { return static_cast<bool>(visualContent); }
+
+            // Reading an evicted block observes empty visual state without
+            // allocating it. Geometry and owner queries never materialize it.
+            VisualContent const& Visuals() const
+            {
+                static VisualContent const empty;
+                return visualContent ? *visualContent : empty;
+            }
+
+            VisualContent& EnsureVisuals()
+            {
+                if (!visualContent) visualContent = std::make_unique<VisualContent>();
+                return *visualContent;
+            }
+
             // Drop heavyweight DirectWrite/D2D/image state while retaining
             // exact measured geometry and stable block metadata. PDF export
             // uses this after each page so its working set is page-local.
             void ReleaseVisualContent()
             {
-                auto measuredHeight = height;
-                auto retainedSourceId = sourceId;
-                auto retainedPresentationKey = presentationKey;
-                auto retainedOwners = std::move(owners);
-                auto retainedSourceMode = sourceMode;
-                auto retainedCode = code;
-                auto retainedContainsMath = containsMath;
-                auto retainedContainsImage = containsImage;
-                auto retainedPendingImage = pendingImage;
-                auto retainedContainsMermaid = containsMermaid;
-                auto retainedGeometryMeasured = geometryMeasured;
-                auto retainedHasFlowContext = hasFlowContext;
-                auto retainedIntrinsicFlow = intrinsicFlow;
-                auto retainedAppliedFlow = appliedFlow;
-                auto retainedPreviewHeight = previewHeight;
-                *this = {};
-                height = measuredHeight;
-                sourceId = retainedSourceId;
-                presentationKey = retainedPresentationKey;
-                owners = std::move(retainedOwners);
-                sourceMode = retainedSourceMode;
-                code = retainedCode;
-                containsMath = retainedContainsMath;
-                containsImage = retainedContainsImage;
-                pendingImage = retainedPendingImage;
-                containsMermaid = retainedContainsMermaid;
-                geometryMeasured = retainedGeometryMeasured;
-                hasFlowContext = retainedHasFlowContext;
-                intrinsicFlow = retainedIntrinsicFlow;
-                appliedFlow = retainedAppliedFlow;
-                previewHeight = retainedPreviewHeight;
+                visualContent.reset();
+                embeddedRequested = false;
+                pendingMermaid = false;
+                pendingMath = false;
+                valid = false;
+                embeddedGeneration = 0;
+                remoteImageGeneration = 0;
             }
+
+        private:
+            std::unique_ptr<VisualContent> visualContent;
         };
 
         std::uint64_t modelRevision = 0;

@@ -165,22 +165,22 @@ namespace
             return lines;
         };
         auto first = preparer.Prepare(frame.renderModel.blocks[index], true, true);
-        Require(first.layout && !first.display.mathOverlays.empty(), "reading uses math inline objects");
-        auto firstLines = makeLines(first.layout.Get());
+        Require(first.Visuals().layout && !first.Visuals().display.mathOverlays.empty(), "reading uses math inline objects");
+        auto firstLines = makeLines(first.Visuals().layout.Get());
         Require(firstLines.size() > 1, "long inline formula wraps in DirectWrite");
-        auto firstPositions = EditorDocumentPainter::PositionMath(first.layout.Get(), first.display.mathOverlays, width);
+        auto firstPositions = EditorDocumentPainter::PositionMath(first.Visuals().layout.Get(), first.Visuals().display.mathOverlays, width);
         for (int pass = 0; pass < 6; ++pass)
         {
             // Exercise the same offscreen preparation used when a block returns to the viewport.
             auto reread = preparer.Prepare(frame.renderModel.blocks[index], pass % 2 != 0, false);
-            auto lines = makeLines(reread.layout.Get());
+            auto lines = makeLines(reread.Visuals().layout.Get());
             Require(lines.size() == firstLines.size(), "scroll rematerialization preserves line count");
             for (std::size_t line = 0; line < lines.size(); ++line)
                 Require(lines[line].length == firstLines[line].length
                     && lines[line].height == firstLines[line].height
                     && lines[line].baseline == firstLines[line].baseline,
                     "scroll rematerialization preserves line breaks and baselines");
-            auto positions = EditorDocumentPainter::PositionMath(reread.layout.Get(), reread.display.mathOverlays, width);
+            auto positions = EditorDocumentPainter::PositionMath(reread.Visuals().layout.Get(), reread.Visuals().display.mathOverlays, width);
             Require(positions.size() == firstPositions.size(), "scroll rematerialization preserves math fragments");
             for (std::size_t part = 0; part < positions.size(); ++part)
                 Require(positions[part].localX == firstPositions[part].localX

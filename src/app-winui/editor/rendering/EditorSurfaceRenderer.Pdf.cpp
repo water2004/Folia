@@ -220,11 +220,11 @@ namespace winrt::Folia
             auto imageStillLoading = [](EditorPreparedDocument::Block const& block)
             {
                 if (std::ranges::any_of(
-                        block.images,
+                        block.Visuals().images,
                         [](auto const& image) { return !image.Loaded(); }))
                     return true;
-                return block.table && std::ranges::any_of(
-                    block.table->imageDraws,
+                return block.Visuals().table && std::ranges::any_of(
+                    block.Visuals().table->imageDraws,
                     [](auto const& images)
                     {
                         return std::ranges::any_of(

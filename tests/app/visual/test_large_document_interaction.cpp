@@ -9,21 +9,21 @@ import folia.markdown.instrumentation;
 namespace winrt::Folia {
 struct EditorRendererTestAccess {
     static auto Layout(EditorSurfaceRenderer& renderer) {
-        return renderer.preparedDocument->blocks.front().layout;
+        return renderer.preparedDocument->blocks.front().Visuals().layout;
     }
     static auto PreparedIdentity(EditorSurfaceRenderer& renderer) {
         auto const& block = renderer.preparedDocument->blocks.front();
-        return std::tuple{block.layout.Get(), block.layoutLines.get(), block.paintPlan.get()};
+        return std::tuple{block.Visuals().layout.Get(), block.Visuals().layoutLines.get(), block.Visuals().paintPlan.get()};
     }
     static auto const& Display(EditorSurfaceRenderer& renderer) {
-        return renderer.preparedDocument->blocks.front().display.text;
+        return renderer.preparedDocument->blocks.front().Visuals().display.text;
     }
     static void CheckVisibleGlyphs(EditorSurfaceRenderer& renderer) {
         auto const& block = renderer.preparedDocument->blocks.front();
         folia::platform::editor::EditorTextPaintStatistics stats;
         auto& resources = renderer.resources;
         resources.d2dContext->BeginDraw();
-        winrt::check_hresult(block.paintPlan->Draw(resources.d2dContext.Get(), {0, 0},
+        winrt::check_hresult(block.Visuals().paintPlan->Draw(resources.d2dContext.Get(), {0, 0},
             resources.textBrush.Get(), {0, 0, 1280, 800}, &stats));
         winrt::check_hresult(resources.d2dContext->EndDraw());
         boost::ut::expect(stats.paintedGlyphs < std::size_t{10000});

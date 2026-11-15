@@ -117,7 +117,7 @@ namespace winrt::Folia
             if (!frame.renderModel.blocks[*index].materialized && frame.materializeBlocks)
                 frame.materializeBlocks(*index, *index + 1);
             auto const& source = frame.renderModel.blocks[*index];
-            if (!source.materialized || prepared.caretPresentation != CaretPresentationState(source, selection.active)) return index;
+            if (!source.materialized || prepared.Visuals().caretPresentation != CaretPresentationState(source, selection.active)) return index;
             return {};
         };
         auto invalidationPlan = BuildEditorPreparationInvalidationPlan(
@@ -184,7 +184,7 @@ namespace winrt::Folia
                     auto activeOwner = previousActiveBlock == found->second || activeBlock == found->second;
                     if (!source.source_mode && activeOwner && (completionChanged
                         || (invalidationPlan.activePositionChanged
-                            && (!source.materialized || candidate.caretPresentation != CaretPresentationState(source, selection.active))))) continue;
+                            && (!source.materialized || candidate.Visuals().caretPresentation != CaretPresentationState(source, selection.active))))) continue;
                     preparedDocument->blocks[index] = std::move(candidate);
                     retained[found->second] = true;
                     previousIndices[index] = found->second;
@@ -298,9 +298,9 @@ namespace winrt::Folia
         if (source.valid && source.embeddedRequested)
         {
             preview->mathPreviews.clear();
-            for (auto const& item : source.mathPreviews)
+            for (auto const& item : source.Visuals().mathPreviews)
                 if (!item.floating) preview->mathPreviews.push_back(item);
-            preview->mermaidPreviews = source.mermaidPreviews;
+            preview->mermaidPreviews = source.Visuals().mermaidPreviews;
             preview->resident = true;
             preview->pending = source.pendingMath || source.pendingMermaid;
             preview->embeddedGeneration = source.embeddedGeneration;
