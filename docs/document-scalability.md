@@ -58,6 +58,16 @@ NodeId，也不能引入以完整文档字符串为坐标的第二套编辑模�
 普通输入根据 owner 定位少量片段并只重建这些片段；未修改片段及其
 测量结果保持有效。
 
+当前每片最多包含 64 个完整 flow leaf。结构事务发布方向已经规范化的
+`DocumentTreeDelta`，区分孩子数组的插入/删除与父节点属性变化；undo 的
+delta 反向、逆序生成。可证明局部的结构变化只重新规划相邻片，溢出时
+平衡切分，删除后在相邻片内合并。片的首尾稳定 leaf/owner ID 用于修复
+路径；未变 source 不重新散列。中间插入仍需更新导航向量的后缀 rank。
+
+`Move`、编号变化、未知语义影响等操作仍通过同一个 planner 扩大失效范围。
+这不是另一套整块渲染器：无论失效多大，输出与缓存单位始终是相同的
+物理片段。实际 planner 节点访问、正文散列及导航写入均有工作量计数。
+
 必须同时覆盖完整模型和虚拟化模型的构建、增量更新、物化与释放，不能
 保留“旧整块渲染”和“新分片渲染”两个行为不同的引擎。
 
@@ -75,7 +85,34 @@ DirectWrite layout 和 paint plan 是可重建的视觉工作集。
 重型布局对象的同时驻留。宽度、字体或影响度量的样式变化确实需要重新
 测量；不应把颜色变化或光标移动扩大为全文重排。
 
-### 4. 交互与资源边界
+初次精确测量在已有文档加载后台执行，并支持停止令牌与进度。测量器仍
+使用真实 DirectWrite、相同字体、宽度和 display projection；不以平均
+字符宽度估算文字。它不创建 D3D/D2D 设备，发布到 UI 的是纯几何和源
+标识。当前主题 revision 或宽度变化仍按已有失效策略重新测量；本次没有
+宣称消除了这些会影响整份文档的重新排版成本。
+
+几何、准备失效计划与视口调度已经移到 `src/core/rendering`。几何索引的
+Fenwick 累计值改为 double，位置查询使用 O(log N) lower-bound；平台接口
+仍按 DirectWrite 的 float DIP 暴露位置。离屏回收保留测量高度，丢弃
+layout、行列表、display/source map 和 paint plan。原生 owner 索引也按
+稳定片 ID 移动复用，尾部新增一片不会重新登记整个列表的所有 owner。
+
+### 4. 同一语义流的共享排版上下文
+
+把一个 DirectWrite flow 拆成数片时，还必须继承原来的全流规则。
+例如，一个 image、公式或大字号 span 会让原 flow 使用 DEFAULT 行距；
+全流是否为同级 heading 也影响基础字体。每片记录实际产生的 intrinsic
+摘要，语义根保留摘要计数；只有共享策略发生变化时，才重新测量该根的
+其余片。强制使用的共享策略不回写为 intrinsic，移除最后一个特殊内容
+后可以恢复原策略。多片流不重复施加“整个块至少一行高”的最低高度。
+
+嵌套 raw math/Mermaid 的非浮动编辑预览仍属于语义根尾部。它的几何位置
+与源片分离，视口需要时只重建当前编辑 owner 的一个片来取得预览。
+后台不把预览的 DirectWrite 对象带回 UI。浮动 inline 预览保持原路径。
+PDF 分页也以语义根的 keep-together 边界为准，人工切片不成为新的分页
+依据。
+
+### 5. 交互与资源边界
 
 - 保存、复制、搜索、跨片段选择和历史从文档模型取得源内容；它们不要求
   所选全文的字形对象驻留。
@@ -136,8 +173,33 @@ list 和 compositor 数据分开。fragment 是布局结果，语义节点不必
 块树、CST和精确高度索引仍需 O(文档大小) 内存。现有 children/navigation
 向量在中部插入时仍可能线性搬移；必须区分轻量索引移动、复制整棵子树、
 重新解析全文和重新布局全文，不将它们统称为“常数时间编辑”。
+真正改变引用容器物理行前缀的操作，仍需记录可精确撤销的语法
+元数据；本次没有将所有此类 history payload 都改成常数大小。
 
 ## 实施与测量记录
 
-此节在代码验证后更新，列出每个提交、执行过的命令、合成基准、结果与
-尚未完成的平台验收。规划目标不当作实测结果。
+实现按设计、可移植工具链、物理分片、编辑索引、精确几何生命周期、
+结构 delta、语义分页、原生呈现兼容及测量证据分别提交。完整复现指令、
+同机新旧基线的原始 JSONL 和汇总脚本在
+[`tools/document-scalability`](../tools/document-scalability/README.md)。
+最初仍包含全结构扫描的测量结果单独保留，没有被后续数据覆盖。
+
+本地使用真实 Clang 21 C++23 modules、libc++ 标准库模块、CMake 4.3.4
+和仓库 fork 的 Boost.UT module。完整核心回归已有 821 tests /
+539,461 assertions 通过；随后补充的稳定语义根与分页回归通过对应
+fragment/print gate。它们没有把 `.ixx` 展开成头文件，也没有使用假的
+字体测量器来宣称原生精度。
+
+Windows gate 位于
+[`.github/workflows/document-scalability.yml`](../.github/workflows/document-scalability.yml)，
+包括 MSVC 核心构建、完整 WinUI 构建以及 13 项真实 DirectWrite 的高度、视口
+资源驻留、滚动锚点、owner 索引、共享行距和编辑预览测试。原生 10 MiB
+用例会输出 working set/private bytes，并检查测量后没有 layout 常驻。
+
+**平台验证限制：** GitHub Actions run
+[`43720698863`](https://github.com/water2004/Folia/actions/runs/43720698863)
+的三个 job 均在任何步骤开始前失败；GitHub annotation 原文为
+“The job was not started because your account is locked due to a billing issue.”
+因此本次不把 Windows 构建、DirectWrite 回归、IME 或原生内存数字报告为
+已验证，也不将 Linux RSS 当作 WinUI 工作集。账单限制解除后可以在本分支
+重新执行该 workflow。

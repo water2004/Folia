@@ -38,6 +38,9 @@ mark, and available architectural counters. Measurements cover:
   projections, separately from ordinary typing.
 
 `null` counters are absent from the older revision, not evidence of zero work.
+`rebuilt_units` is the model's most recent incremental-update count; viewport
+rows can retain that previous update's value. The work counters are reset for
+each timed phase.
 RSS includes allocator reservations and every live document/index/projection;
 it is not an allocation census. Outside Linux, the memory fields are zero and
 only timings/counters are usable. Run each executable in a fresh process, on
@@ -78,7 +81,7 @@ The patch deliberately uses zero context lines; `--unidiff-zero` is required.
 
 ## Recorded observations
 
-The raw 10 MiB runs are `results-baseline.jsonl` and `results-current.jsonl`;
+The first raw 10 MiB runs are `results-baseline.jsonl` and `results-current.jsonl`;
 the corresponding 1 MiB controls have the `-1mib` suffix. The actual machine,
 compiler, standard-library headers/runtime versions, flags, and measurement
 conditions are recorded in `results-environment.json`. The first results keep
@@ -95,3 +98,72 @@ Each ordinary edit phase contains three observations per location and is
 summarized by its median. Startup, viewport materialization, and structural
 phases occur once per location and remain individual observations. KiB values
 are divided by 1024 to report MiB. The raw files remain the source of truth.
+
+### Structural reconciliation and final series
+
+The intermediate `-structural` series records local structural reconciliation
+before the initial planner allocation improvement. It is preserved, including
+the 375.943 ms initial virtual projection. The final runs use separate files:
+`results-baseline-final.jsonl`, `results-current-final.jsonl`, and the matching
+`-1mib` controls. `results-final-environment.json` records the compiler/runtime,
+source fingerprint, benchmark fingerprint, and measurement conditions for
+this series. Both executables were rebuilt from the same benchmark source,
+including normalized tree-delta forwarding when the revision provides it.
+The baseline still contains only the disclosed Clang declaration/import patch.
+The final core source snapshot is commit
+`925d24af98bd477d49de060cb0109f205e2401ec` on
+[`architecture/bounded-document-layout`](https://github.com/water2004/Folia/tree/architecture/bounded-document-layout).
+The environment record preserves the local build commit and verifies the
+matching source fingerprint; the published commit has the same Git tree.
+
+```sh
+python tools/document-scalability/summarize.py --series final \
+  --output tools/document-scalability/results-final-summary.json
+```
+
+Selected 10 MiB observations, in milliseconds:
+
+| Phase | Baseline | Final implementation |
+| --- | ---: | ---: |
+| Parse and index | 3289.11 | 1870.09 |
+| Initial virtual projection | 105.665 | 188.154 |
+| First viewport projection | 940.401 | 4.175 |
+| Insert into final item | 3.68405 | 0.002644 |
+| Project that insertion | 645.73 | 0.101612 |
+| Project ordinary undo at final item | 672.765 | 0.101112 |
+| Enter in first item | 21.315 | 9.30102 |
+| Project Enter in first item | 759.243 | 19.6957 |
+| Enter in final item | 32.2169 | 0.022193 |
+| Project Enter in final item | 878.563 | 3.94721 |
+| Project structural undo at final item | 737.556 | 1.66522 |
+
+Initial virtual projection is more expensive because the new model constructs
+physical-fragment and navigation indexes. The subsequent viewport and edit
+work is substantially smaller. A tail split visits 125 fragment-planning nodes
+and updates 124 navigation entries; a split at the beginning visits 131
+planning nodes but updates 355,452 navigation entries in the shifted suffix.
+Structural edits are therefore not universally constant-time. The remaining
+work is visible in the raw counters rather than excluded from the timings.
+
+The last recorded process RSS is 877,828 KiB for the baseline and 383,272 KiB
+for the new model. Process high-water RSS is 1,072,924 KiB and 592,424 KiB,
+respectively; the new high-water mark is already reached during parsing.
+These measurements include core source/CST/tree/index storage and allocator
+reservations. They do not measure the native application's working set or
+prove its DirectWrite retention and scrolling behavior.
+
+## Verification boundaries
+
+`validation-linux.json` records the exact local test commands, counts and
+selected uncolored runner summaries. The complete portable run passed 821
+tests and 539,461 assertions before the last initial-planner, source-root
+validation and pagination refinements. After those refinements, the rebuilt
+runner passed the focused fragment set (15 tests /31,933 assertions) and
+print set (9 tests /33,813 assertions). These focused sets overlap; their
+counts must not be added as if they were independent full-suite runs.
+
+The native Windows and CI jobs have **not run**.
+[GitHub Actions run 43720698863](https://github.com/water2004/Folia/actions/runs/43720698863)
+was rejected before any job steps because the repository account was locked
+due to a billing issue. The committed DirectWrite, retention, source-anchor,
+shared-flow and preview regressions therefore remain unverified on Windows.

@@ -20,7 +20,7 @@
   "directwrite_measured": false,
   "method": "Each executable starts in a new process; sizes 1 and 10 MiB; baseline then current at each size; 3 insert/undo repetitions per first/middle/last location; structural split/undo once per location. Compilers and agent CPU tests paused during measurement. Timings use steady_clock. RSS and high-water RSS are /proc/self/status VmRSS/VmHWM in KiB. Startup phases are single observations; repeated edit phases use median in results-summary.json. No CPU affinity pinning.",
   "current_core_source_tree_sha256": "6a5764b85ce9e1da5ef6c888f6f895774c5bc220df7699700074325b16840407",
-  "source_fingerprint_method": "SHA256 of sorted src/core and src/markdown .ixx/.cpp relative POSIX paths, NUL, file bytes, NUL; all source timestamps predate the recorded run.",
+  "source_fingerprint_method": "SHA256 of src/core and src/markdown .ixx/.cpp sorted by relative POSIX path components; for each: path UTF-8, NUL, file bytes, NUL.",
   "benchmark_sha256": "1e942d6734be314aa3570bbe32051e39619552cbe74e666de02277a29bf0f225",
   "baseline_clang_patch_sha256": "d94b8bc49ea1e29ee20a90be23aff500b6c3c949a9eee413e34fe5a90c0e5349"
 }

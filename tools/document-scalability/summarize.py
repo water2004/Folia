@@ -36,12 +36,14 @@ def summarize(path: Path) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--directory", type=Path, default=Path(__file__).parent)
+    parser.add_argument("--series", choices=("initial", "structural", "final"), default="initial")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
+    series_suffix = "" if args.series == "initial" else f"-{args.series}"
     report = {}
     for size, suffix in ((1, "-1mib"), (10, "")):
         report[str(size)] = {
-            label: summarize(args.directory / f"results-{label}{suffix}.jsonl")
+            label: summarize(args.directory / f"results-{label}{series_suffix}{suffix}.jsonl")
             for label in ("baseline", "current")
         }
     text = json.dumps(report, indent=2) + "\n"

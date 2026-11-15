@@ -62,6 +62,14 @@ void emit_work(Counters const& work) {
     if constexpr (requires { work.block_index_entries_updated; })
         std::cout << work.block_index_entries_updated;
     else std::cout << "null";
+    std::cout << ",\"fragment_nodes_planned\":";
+    if constexpr (requires { work.render_fragment_nodes_planned; })
+        std::cout << work.render_fragment_nodes_planned;
+    else std::cout << "null";
+    std::cout << ",\"navigation_entries_updated\":";
+    if constexpr (requires { work.render_navigation_entries_updated; })
+        std::cout << work.render_navigation_entries_updated;
+    else std::cout << "null";
 }
 
 void emit(std::string_view phase, std::string_view position, std::size_t round,
@@ -81,6 +89,12 @@ void emit(std::string_view phase, std::string_view position, std::size_t round,
     std::cout << "}\n" << std::flush;
 }
 
+template<class Update, class Change>
+void copy_tree_deltas(Update& update, Change const& change) {
+    if constexpr (requires { update.tree_deltas = change.tree_deltas; })
+        update.tree_deltas = change.tree_deltas;
+}
+
 void update_projection(Editor& editor, RenderModel& model, ThemeProfile const& theme) {
     const auto change = editor.take_last_document_change();
     if (!change) throw std::runtime_error("edit did not report its document change");
@@ -88,6 +102,7 @@ void update_projection(Editor& editor, RenderModel& model, ThemeProfile const& t
     update.structural = change->structural;
     update.structural_locality_known = change->structural_locality_known;
     update.structural_anchors = change->structural_anchors;
+    copy_tree_deltas(update, *change);
     for (auto const& operation : change->text_operations)
         update.changed_owners.push_back(
             (change->forward ? operation.forward : operation.inverse).container_id);
