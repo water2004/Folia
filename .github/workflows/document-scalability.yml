@@ -1,0 +1,175 @@
+name: Document scalability
+
+on:
+  push:
+    branches: [architecture/bounded-document-layout, master]
+    paths:
+      - '.github/workflows/document-scalability.yml'
+      - 'src/core/**'
+      - 'src/markdown/**'
+      - 'src/platform/**'
+      - 'src/app-winui/**'
+      - 'tests/**'
+      - 'tools/document-scalability/**'
+      - 'tools/markdown-conformance/**'
+      - 'CMakeLists.txt'
+      - 'build_app.ps1'
+      - 'setup.ps1'
+  pull_request:
+    paths:
+      - '.github/workflows/document-scalability.yml'
+      - 'src/core/**'
+      - 'src/markdown/**'
+      - 'src/platform/**'
+      - 'src/app-winui/**'
+      - 'tests/**'
+      - 'tools/document-scalability/**'
+      - 'tools/markdown-conformance/**'
+      - 'CMakeLists.txt'
+      - 'build_app.ps1'
+      - 'setup.ps1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: document-scalability-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linux-core:
+    name: Portable core / Clang 21 and libc++
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install the module toolchain
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check cmake==4.3.4 ninja
+          curl --fail --show-error --location https://apt.llvm.org/llvm.sh --output "$RUNNER_TEMP/llvm.sh"
+          sudo bash "$RUNNER_TEMP/llvm.sh" 21
+          sudo apt-get install --yes clang-tools-21 libc++-21-dev libc++abi-21-dev
+      - name: Configure and build production core modules
+        env:
+          CC: clang-21
+          CXX: clang++-21
+        run: |
+          set -euo pipefail
+          cmake -S tests/libraries/core -B build/core-portable -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS=-stdlib=libc++
+          cmake --build build/core-portable --target FoliaCoreTests --parallel 3
+      - name: Run core behavior and complexity gates
+        run: ctest --test-dir build/core-portable --output-on-failure --timeout 180
+      - name: Preserve test diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: document-core-linux-diagnostics
+          retention-days: 7
+          path: build/core-portable/Testing/Temporary/
+
+  windows-core:
+    name: Portable core / MSVC
+    runs-on: windows-2025
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install CMake and Ninja
+        shell: pwsh
+        run: |
+          python -m pip install --disable-pip-version-check cmake==4.3.4 ninja
+          if ($LASTEXITCODE -ne 0) { throw 'CMake/Ninja installation failed.' }
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+      - name: Configure and build production core modules
+        shell: pwsh
+        run: |
+          cmake -S tests/libraries/core -B build/core-portable -G Ninja -DCMAKE_BUILD_TYPE=Release
+          if ($LASTEXITCODE -ne 0) { throw 'Core configure failed.' }
+          cmake --build build/core-portable --target FoliaCoreTests --parallel 3
+          if ($LASTEXITCODE -ne 0) { throw 'Core build failed.' }
+      - name: Run core behavior and complexity gates
+        shell: pwsh
+        run: |
+          ctest --test-dir build/core-portable --output-on-failure --timeout 180
+          if ($LASTEXITCODE -ne 0) { throw 'Core regression tests failed.' }
+      - name: Preserve test diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: document-core-windows-diagnostics
+          retention-days: 7
+          path: build/core-portable/Testing/Temporary/
+
+  windows-native-layout:
+    name: WinUI build and real DirectWrite layout
+    runs-on: windows-2025
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: recursive
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install CMake and Ninja
+        shell: pwsh
+        run: |
+          python -m pip install --disable-pip-version-check cmake==4.3.4 ninja
+          if ($LASTEXITCODE -ne 0) { throw 'CMake/Ninja installation failed.' }
+      - name: Restore pinned font-generation inputs
+        shell: pwsh
+        run: |
+          npm ci --prefix tools/mathjax-bundle --include=dev --ignore-scripts --no-audit --no-fund
+          if ($LASTEXITCODE -ne 0) { throw 'Pinned MathJax font input restore failed.' }
+      - name: Restore pinned entity-generation sources
+        uses: actions/checkout@v5
+        env:
+          # Match the exact Windows checkout bytes in the existing Source lock.
+          GIT_CONFIG_COUNT: '1'
+          GIT_CONFIG_KEY_0: core.autocrlf
+          GIT_CONFIG_VALUE_0: 'true'
+        with:
+          repository: mathjax/MathJax-src
+          ref: fb987178c2d279a99b0db5ea02e751691703955e
+          path: .reference/MathJax-src
+          fetch-depth: 1
+          sparse-checkout: ts/util
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+      - name: Restore native and WinUI dependencies
+        shell: pwsh
+        run: ./setup.ps1
+      - name: Build the self-contained application
+        shell: pwsh
+        run: ./build_app.ps1 -Configuration Release -SelfContained
+      - name: Verify exact heights and bounded viewport retention
+        shell: pwsh
+        run: ./tests/app/run.ps1 -Configuration Release -SourceFilter test_document_layout_retention -TestFilter 'document layout*' -TimeoutSeconds 600
+      - name: Preserve native test diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: document-native-layout-diagnostics
+          retention-days: 7
+          path: |
+            build/tests/winui/**/stdout.log
+            build/tests/winui/**/stderr.log
+            build/tests/winui/**/*.rsp

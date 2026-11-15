@@ -3,6 +3,7 @@ param(
     [ValidateSet('Debug', 'Release')][string]$Configuration = 'Debug',
     [string]$TestFilter = '*',
     [string]$SourceFilter = '*',
+    [ValidateRange(1, 3600)][int]$TimeoutSeconds = 60,
     [switch]$Visual
 )
 
@@ -144,10 +145,10 @@ if ($Visual) { $env:FOLIA_VISUAL_TEST_RESULT = Join-Path $scratch ('result-' + [
 $process = Start-Process -FilePath $executable -ArgumentList "`"$TestFilter`"" -WorkingDirectory $app -WindowStyle Hidden -PassThru `
     -RedirectStandardOutput (Join-Path $scratch 'stdout.log') -RedirectStandardError (Join-Path $scratch 'stderr.log')
 $null = $process.Handle
-if (-not $process.WaitForExit(60000)) {
+if (-not $process.WaitForExit($TimeoutSeconds * 1000)) {
     $process.Kill()
     $process.WaitForExit()
-    throw 'WinUI tests exceeded 60 seconds; only the test process was stopped.'
+    throw "WinUI tests exceeded $TimeoutSeconds seconds; only the test process was stopped."
 }
 $process.Refresh()
 Get-Content (Join-Path $scratch 'stdout.log')
