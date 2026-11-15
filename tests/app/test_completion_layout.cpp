@@ -35,20 +35,20 @@ suite completion_layout_tests = [] {
         prepare();
         // The viewport preparation pass can yield after its first block.
         // Establish the untouched block's cache before comparing its identity.
-        for (int frameIndex = 0; frameIndex < 8 && !document->blocks.back().layout; ++frameIndex) prepare();
-        expect(fatal(document->blocks.back().layout != nullptr));
+        for (int frameIndex = 0; frameIndex < 8 && !document->blocks.back().Visuals().layout; ++frameIndex) prepare();
+        expect(fatal(document->blocks.back().Visuals().layout != nullptr));
         auto baseline = document->blocks.front().height;
-        auto untouched = document->blocks.back().layout.Get();
+        auto untouched = document->blocks.back().Visuals().layout.Get();
         frame.completion = winrt::Folia::detail::EditorCompletionPreview{frame.selection.active,
             U" generated text that must wrap to several lines at this narrow width", 1};
         prepare(); expect(document->blocks.front().height > baseline) << "generated content increases height";
-        expect(document->blocks.back().layout.Get() == untouched) << "unaffected layout reused after suggestion";
+        expect(document->blocks.back().Visuals().layout.Get() == untouched) << "unaffected layout reused after suggestion";
         frame.completion = winrt::Folia::detail::EditorCompletionPreview{frame.selection.active, U" hi", 2};
-        prepare(); expect(document->blocks.front().display.text.find(U"generated") == std::u32string::npos);
+        prepare(); expect(document->blocks.front().Visuals().display.text.find(U"generated") == std::u32string::npos);
         frame.completion.reset(); prepare();
         expect(document->blocks.front().height == baseline) << "original height restored";
-        expect(std::ranges::none_of(document->blocks.front().display.ranges, [](auto const& range) { return range.completion; }));
-        expect(document->blocks.back().layout.Get() == untouched) << "unaffected layout reused after dismissal";
+        expect(std::ranges::none_of(document->blocks.front().Visuals().display.ranges, [](auto const& range) { return range.completion; }));
+        expect(document->blocks.back().Visuals().layout.Get() == untouched) << "unaffected layout reused after dismissal";
     };
     "completion layout shares native flow and theme brush across editable containers"_test = [] {
         for (auto theme : {folia::Theme::Light, folia::Theme::Dark}) {
@@ -98,14 +98,14 @@ suite completion_layout_tests = [] {
                 };
                 for (auto const& block : frame.renderModel.blocks) {
                     auto prepared = preparer.Prepare(block, false, false);
-                    if (prepared.table) {
-                        for (std::size_t index = 0; index < prepared.table->displays.size(); ++index) {
-                            auto display = prepared.table->displays[index];
-                            auto const& cell = prepared.table->visual.cells[index];
+                    if (prepared.Visuals().table) {
+                        for (std::size_t index = 0; index < prepared.Visuals().table->displays.size(); ++index) {
+                            auto display = prepared.Visuals().table->displays[index];
+                            auto const& cell = prepared.Visuals().table->visual.cells[index];
                             display.displayToSource = cell.displayToSource;
                             inspect(display, cell.layout.Get());
                         }
-                    } else inspect(prepared.display, prepared.layout.Get());
+                    } else inspect(prepared.Visuals().display, prepared.Visuals().layout.Get());
                 }
                 expect(found == 1_u) << winrt::to_string(source);
                 auto counts = folia::read_core_operation_counters();

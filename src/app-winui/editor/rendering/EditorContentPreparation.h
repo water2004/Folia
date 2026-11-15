@@ -4,6 +4,7 @@ import folia.markdown.ids;
 import folia.markdown.image_dimension;
 import folia.core.render_model;
 import folia.markdown.text_edit;
+import folia.markdown.source_offset_map;
 import folia.platform.editor_display_mapping;
 import folia.platform.editor_block_spacing;
 
@@ -72,7 +73,7 @@ namespace winrt::Folia
             folia::TextSpan span;
             // Block projections can include indentation/fences in source.
             // Inline math is linear and leaves this projection empty.
-            std::vector<std::size_t> toSource;
+            folia::SourceOffsetMap toSource;
         };
         struct MathBracket
         {
@@ -160,7 +161,7 @@ namespace winrt::Folia
         DisplayInlineText& display,
         std::u32string_view text,
         folia::NodeId owner,
-        std::vector<std::size_t> const& sourceOffsets,
+        folia::SourceOffsetMap const& sourceOffsets,
         folia::InlineStyle style);
     void AppendGeneratedText(
         DisplayInlineText& display,

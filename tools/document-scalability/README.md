@@ -1,5 +1,31 @@
 # Large-document core benchmark
 
+The phased memory probe is documented in
+[document-memory.md](../../docs/document-memory.md), with its own
+[raw results and environment](memory-results). Build `FoliaMemoryProfile` with
+the same `FOLIA_BUILD_SCALABILITY_BENCHMARK` option used below. Its default input
+is synthetic; `--input /explicit/path.md` is the only mode that opens a supplied
+file. `FoliaMemoryProfile 1 unique` adds distinct formula identifiers to the
+mixed-content control. No input content is printed or saved by the probe.
+
+`memory_profile.cpp` records parse/index, virtual projection, bounded projection
+sweep, first/middle/last edit+undo, source entry/projection/exit, and close. On
+glibc it additionally reports in-use allocator bytes from `mallinfo2`; other
+platforms report zero for that field. This excludes native layout and formula
+rendering. `materialized_units` is the virtual model's sparse resident-index
+count: eager source models do not populate that index, so zero does **not** mean
+that the source projection holds no text objects. The recorded sources and
+compiler options match between baseline and current runs; RSS and allocator
+bytes are distinct measurements.
+
+Recompute the memory summary, including timing ranges for all retained samples:
+
+```sh
+python3 tools/document-scalability/summarize_memory.py
+```
+
+## List editing benchmark
+
 `core_scalability.cpp` generates complete repetitions of:
 
 ```markdown

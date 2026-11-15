@@ -1620,7 +1620,8 @@ struct Parser {
             node.status = ParseStatus::Complete;
             node.range = {start, pos};
             node.ensure_delimiter_ranges() = {{start, pos}, {start, content_start}, {content_start, content_end}, SourceRange{content_end, close_end}};
-            node.ensure_semantics().math_delim = MathDelimiter::InlineDollar;
+            // Dollar math uses the default semantic value. Keep its source
+            // and delimiter ranges without allocating unrelated link/HTML data.
             out.push_back(std::move(node));
             run_start = pos;
             return true;

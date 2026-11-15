@@ -54,11 +54,9 @@ suite serializer_html_projection_tests = [] {
         expect(fatal(projection.source_maps.size() == 2u));
         if (projection.source_maps.size() == 2u) {
             expect(fatal(projection.source_maps[0].container_id == first_owner));
-            expect(fatal(projection.source_maps[0].source_to_serialized
-                == std::vector<std::size_t>{12, 13}));
+            expect(fatal(std::ranges::equal(projection.source_maps[0].source_to_serialized, std::vector<std::size_t>{12, 13})));
             expect(fatal(projection.source_maps[1].container_id == second_owner));
-            expect(fatal(projection.source_maps[1].source_to_serialized
-                == std::vector<std::size_t>{20, 21}));
+            expect(fatal(std::ranges::equal(projection.source_maps[1].source_to_serialized, std::vector<std::size_t>{20, 21})));
         }
     };
 
@@ -81,11 +79,9 @@ suite serializer_html_projection_tests = [] {
         expect(fatal(projection.source_maps.size() == 2u));
         if (projection.source_maps.size() == 2u) {
             expect(fatal(projection.source_maps[0].container_id == original_owner));
-            expect(fatal(projection.source_maps[0].source_to_serialized
-                == std::vector<std::size_t>{22, 23}));
+            expect(fatal(std::ranges::equal(projection.source_maps[0].source_to_serialized, std::vector<std::size_t>{22, 23})));
             expect(fatal(projection.source_maps[1].container_id == NodeId{999}));
-            expect(fatal(projection.source_maps[1].source_to_serialized
-                == std::vector<std::size_t>{27, 28}));
+            expect(fatal(std::ranges::equal(projection.source_maps[1].source_to_serialized, std::vector<std::size_t>{27, 28})));
         }
     };
 

@@ -93,9 +93,9 @@ namespace winrt::Folia
         if (!source.embeddedRequested || preview.pending) source.valid = false;
         auto geometryChanged = EnsurePrepared(sourceIndex, true, true);
         preview.mathPreviews.clear();
-        for (auto const& item : source.mathPreviews)
+        for (auto const& item : source.Visuals().mathPreviews)
             if (!item.floating) preview.mathPreviews.push_back(item);
-        preview.mermaidPreviews = source.mermaidPreviews;
+        preview.mermaidPreviews = source.Visuals().mermaidPreviews;
         preview.resident = source.valid && source.embeddedRequested;
         preview.pending = source.pendingMath || source.pendingMermaid;
         preview.embeddedGeneration = embeddedGeneration;

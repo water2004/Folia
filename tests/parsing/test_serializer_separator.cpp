@@ -71,10 +71,10 @@ suite serializer_block_separator_regression_tests = [] {
         for (const auto& map : output.source_maps) {
             if (map.container_id == NodeId{11}) {
                 first_map = true;
-                expect(fatal(map.source_to_serialized == std::vector<std::size_t>{2, 3, 4}));
+                expect(fatal(std::ranges::equal(map.source_to_serialized, std::vector<std::size_t>{2, 3, 4})));
             } else if (map.container_id == NodeId{12}) {
                 second_map = true;
-                expect(fatal(map.source_to_serialized == std::vector<std::size_t>{9, 10}));
+                expect(fatal(std::ranges::equal(map.source_to_serialized, std::vector<std::size_t>{9, 10})));
             }
         }
         expect(fatal(first_map && second_map));

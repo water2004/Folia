@@ -86,11 +86,12 @@ namespace winrt::Folia
                 interactionMap.lines.push_back(line);
                 continue;
             }
-            if (prepared.table)
+            auto const& content = prepared.Visuals();
+            if (content.table)
             {
                 EditorTableBlockRenderer::Paint(
                     block,
-                    *prepared.table,
+                    *content.table,
                     documentLeft,
                     top,
                     scrollOffset,
@@ -138,22 +139,22 @@ namespace winrt::Folia
                 && block.kind != folia::RenderBlockKind::Math
                 && block.block_style.background)
                 resources.d2dContext->FillRectangle(rect, resources.panelBrush.Get());
-            documentPainter.DrawFlowDecorations(prepared.layout.Get(), origin, block, prepared.display);
-            documentPainter.DrawInlineText(prepared.layout.Get(), origin, prepared.display, prepared.display.displayToSource,
-                prepared.code ? resources.codeBrush.Get() : resources.textBrush.Get(), prepared.paintPlan, prepared.layoutLines);
+            documentPainter.DrawFlowDecorations(content.layout.Get(), origin, block, content.display);
+            documentPainter.DrawInlineText(content.layout.Get(), origin, content.display, content.display.displayToSource,
+                prepared.code ? resources.codeBrush.Get() : resources.textBrush.Get(), content.paintPlan, content.layoutLines);
             documentPainter.DrawTaskCheckboxes(
-                prepared.layout.Get(), origin, prepared.display.taskCheckboxOverlays);
+                content.layout.Get(), origin, content.display.taskCheckboxOverlays);
             documentPainter.RegisterFootnotes(
-                prepared.layout.Get(), origin, prepared.display.footnoteOverlays);
-            inlineImages.Draw(prepared.layout.Get(), origin, prepared.images);
-            if (!prepared.mermaids.empty() && prepared.layout)
+                content.layout.Get(), origin, content.display.footnoteOverlays);
+            inlineImages.Draw(content.layout.Get(), origin, content.images);
+            if (!content.mermaids.empty() && content.layout)
             {
-                for (auto const& diagram : prepared.mermaids)
+                for (auto const& diagram : content.mermaids)
                 {
                     float pointX = 0.0f;
                     float lineTop = 0.0f;
                     DWRITE_HIT_TEST_METRICS hit{};
-                    if (FAILED(prepared.layout->HitTestTextPosition(
+                    if (FAILED(content.layout->HitTestTextPosition(
                             diagram.displayStart,
                             FALSE,
                             &pointX,
@@ -175,9 +176,9 @@ namespace winrt::Folia
                 }
             }
             for (auto const& positioned : EditorDocumentPainter::PaintMath(
-                    prepared.layout.Get(),
+                    content.layout.Get(),
                     origin,
-                    prepared.display.mathOverlays,
+                    content.display.mathOverlays,
                     contentWidth, resources, drawMath, drawMathFallback))
             {
                 auto const& overlay = *positioned.overlay;
@@ -195,7 +196,7 @@ namespace winrt::Folia
                     overlay.progressEnd,
                 });
             }
-            auto previewTop = origin.y + prepared.textHeight;
+            auto previewTop = origin.y + content.textHeight;
             auto paintPreviews = [&](auto const& mathPreviews, auto const& mermaidPreviews,
                                      bool suppressTrailing)
             {
@@ -254,7 +255,7 @@ namespace winrt::Folia
             };
             auto const* trailing = !printMode && preparedDocument.trailingPreview
                 ? &*preparedDocument.trailingPreview : nullptr;
-            paintPreviews(prepared.mathPreviews, prepared.mermaidPreviews,
+            paintPreviews(content.mathPreviews, content.mermaidPreviews,
                 trailing && trailing->sourceIndex == blockIndex);
             if (trailing && trailing->targetIndex == blockIndex && trailing->resident)
                 paintPreviews(trailing->mathPreviews, trailing->mermaidPreviews, false);
@@ -264,9 +265,9 @@ namespace winrt::Folia
             visual.textWidth = contentWidth;
             visual.sourceSpan = block.source_span;
             visual.documentY = documentY;
-            visual.displayToSource = prepared.display.displayToSource;
-            visual.layout = prepared.layout;
-            visual.layoutLines = prepared.layoutLines;
+            visual.displayToSource = content.display.displayToSource;
+            visual.layout = content.layout;
+            visual.layoutLines = content.layoutLines;
             interactionMap.blocks.push_back(std::move(visual));
             interactionMap.AddBlockLines(interactionMap.blocks.size() - 1);
         }

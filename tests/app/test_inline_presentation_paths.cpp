@@ -64,8 +64,8 @@ namespace {
                     if (range.syntax != SyntaxHighlightKind::None) mathSyntax.push_back(range);
             };
             for (auto const& block : document.blocks) {
-                collectSyntax(block.display);
-                if (block.table) for (auto const& display : block.table->displays) collectSyntax(display);
+                collectSyntax(block.Visuals().display);
+                if (block.Visuals().table) for (auto const& display : block.Visuals().table->displays) collectSyntax(display);
             }
             math.WaitForIdle();
             std::vector<BlockGeometryIndex::Entry> geometry;
@@ -75,13 +75,14 @@ namespace {
             }
             document.geometry.Reset(std::move(geometry), 20);
             if (!paintMatchingBrackets) for (auto& block : document.blocks) {
-                block.display.mathBrackets.clear();
-                if (block.table) for (auto& display : block.table->displays) display.mathBrackets.clear();
+                auto& content = block.EnsureVisuals();
+                content.display.mathBrackets.clear();
+                if (content.table) for (auto& display : content.table->displays) display.mathBrackets.clear();
             }
             std::vector<std::uint64_t> visibleIds;
             for (auto const& block : document.blocks) {
-                for (auto const& overlay : block.display.mathOverlays) visibleIds.push_back(overlay.fragment.renderId);
-                if (block.table) for (auto const& display : block.table->displays)
+                for (auto const& overlay : block.Visuals().display.mathOverlays) visibleIds.push_back(overlay.fragment.renderId);
+                if (block.Visuals().table) for (auto const& display : block.Visuals().table->displays)
                     for (auto const& overlay : display.mathOverlays) visibleIds.push_back(overlay.fragment.renderId);
             }
             math.SetVisibleSvgIds(visibleIds);

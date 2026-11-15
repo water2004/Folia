@@ -4,6 +4,7 @@
 export module folia.markdown.block_source;
 import std;
 import folia.markdown.text_edit;
+import folia.markdown.source_offset_map;
 import folia.markdown.utf;
 import folia.markdown.html_entities;
 
@@ -163,7 +164,7 @@ struct BlockSourceTree {
     std::optional<SourceRange> language_range;
     std::vector<SourceRange> content_ranges;
     std::vector<GeneratedCodeIndentation> generated_indentation;
-    std::vector<std::size_t> content_to_source;
+    SourceOffsetMap content_to_source;
     std::u32string content;
     std::optional<std::string> language;
     bool complete_opening = false;
@@ -337,10 +338,7 @@ inline void identity_content_map(BlockSourceTree& tree, SourceRange range) {
     tree.content_ranges.clear();
     if (!range.empty()) tree.content_ranges.push_back(range);
     tree.content.clear();
-    tree.content_to_source.reserve(range.length() + 1);
-    for (auto offset = range.start; offset <= range.end; ++offset) {
-        tree.content_to_source.push_back(offset);
-    }
+    tree.content_to_source.assign_linear(range.start, range.length() + 1);
 }
 
 inline BlockSourceTree parse_fenced(std::u32string_view source, BlockSourceKind kind) {
@@ -522,10 +520,8 @@ inline BlockSourceTree parse_indented(
             }
             tree.content_ranges.push_back({content_start, end});
             push_token(tree, BlockSourceTokenKind::Content, content_start, end);
-            for (auto offset = content_start; offset < end; ++offset) {
-                tree.content.push_back(source[offset]);
-                tree.content_to_source.push_back(offset);
-            }
+            tree.content.append(source.substr(content_start, end - content_start));
+            tree.content_to_source.append_linear(content_start, end - content_start);
         }
         const auto ending_length = line_ending_length(source, end);
         if (ending_length != 0) {
@@ -722,7 +718,7 @@ inline std::size_t block_source_clamp_editable_offset(
     if (mapping.empty()) return 0;
     if (source_offset <= mapping.front()) return mapping.front();
     if (source_offset >= mapping.back()) return mapping.back();
-    const auto next = std::ranges::lower_bound(mapping, source_offset);
+    const auto next = mapping.lower_bound(source_offset);
     if (next == mapping.end()) return mapping.back();
     if (*next == source_offset || next == mapping.begin()) return *next;
     const auto previous = *std::prev(next);
@@ -735,7 +731,7 @@ inline std::optional<SourceRange> block_source_backward_delete_range(
     const auto& mapping = document.tree().content_to_source;
     if (mapping.size() < 2) return std::nullopt;
     const auto offset = block_source_clamp_editable_offset(document, source_offset);
-    const auto current = std::ranges::lower_bound(mapping, offset);
+    const auto current = mapping.lower_bound(offset);
     if (current == mapping.end() || *current != offset || current == mapping.begin()) {
         return std::nullopt;
     }
@@ -750,7 +746,7 @@ inline std::optional<SourceRange> block_source_forward_delete_range(
     const auto& mapping = document.tree().content_to_source;
     if (mapping.size() < 2) return std::nullopt;
     const auto offset = block_source_clamp_editable_offset(document, source_offset);
-    const auto current = std::ranges::lower_bound(mapping, offset);
+    const auto current = mapping.lower_bound(offset);
     if (current == mapping.end() || *current != offset || std::next(current) == mapping.end()) {
         return std::nullopt;
     }

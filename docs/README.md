@@ -9,6 +9,7 @@
 | 仓库约束、块树与编辑坐标 | [AGENTS.md](../AGENTS.md) |
 | Markdown 可复用模块 | [src/markdown/README.md](../src/markdown/README.md) |
 | 编辑与核心模块 | [src/core/README.md](../src/core/README.md) |
+| 大文档内存与布局驻留 | [document-memory.md](document-memory.md) |
 | 撤销事务 | [undo-patches.md](undo-patches.md) |
 | CommonMark / GFM 对照 | [markdown-conformance.md](markdown-conformance.md) |
 | 测试入口与职责 | [tests/README.md](../tests/README.md) |

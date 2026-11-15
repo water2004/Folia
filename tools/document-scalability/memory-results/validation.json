@@ -1,0 +1,53 @@
+{
+  "production_code_tree": "894acaa50d27ccce782db7c5040cd52fbe92fb3d",
+  "core": {
+    "executable": "FoliaCoreTests",
+    "tests": 949,
+    "assertions": 680405,
+    "exit": 0,
+    "seconds": 10.71,
+    "build": "Real Clang 21 C++23 modules, libc++ import std and repository Boost.UT module; standalone tests/libraries/core Release configuration. No generated concatenated-header substitute.",
+    "scope": "All ordinary portable foundation/parsing/editing/rendering/query tests. Separate official conformance/generated pathological executables are not included.",
+    "focused": [
+      {
+        "filter": "*source_projection_storage*",
+        "tests": 3,
+        "assertions": 183
+      },
+      {
+        "filter": "*source_offset_map*",
+        "tests": 6,
+        "assertions": 8844
+      }
+    ],
+    "focused_sets_overlap_full_run": true
+  },
+  "deep_serializer": {
+    "executable": "FoliaDeepSerializerTests",
+    "tests": 2,
+    "assertions": 2005,
+    "exit": 0,
+    "seconds": 0.737,
+    "source": "tests/parsing/test_serializer_deep.cpp",
+    "scope": "50,000 nested quotes; 1,000 nested lists; exact output and every leaf source map.",
+    "build": "Linked separately against the same production core/Markdown/standard-library and Boost.UT modules, using the current standalone core test main. This source is intentionally excluded from the ordinary standalone runner."
+  },
+  "native_layout": {
+    "executed": false,
+    "reason": "No Windows/WinUI/DirectWrite runtime in this environment.",
+    "source": "tests/app/test_document_layout_retention.cpp",
+    "contracts": [
+      "sizeof retained Block <= 128 bytes",
+      "No visual payload after premeasurement; reads do not materialize",
+      "Warm visual identity is reused",
+      "Eviction and rematerialization retain exact height/owner/flow context",
+      "Existing bounded resident layouts, scroll anchor, source syntax and shared-flow cases"
+    ],
+    "actual_native_block_size_measured": false,
+    "native_application_memory_or_latency_measured": false
+  },
+  "unchanged": {
+    "existing_formula_cache": true,
+    "github_ci": true
+  }
+}

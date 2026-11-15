@@ -188,7 +188,8 @@ namespace winrt::Folia
         std::vector<std::size_t> offsets;
         if (block->kind == folia::BlockKind::MathBlock) {
             tex = folia::block_source_content(block->block_source);
-            offsets = block->block_source.tree().content_to_source;
+            const auto& projection = block->block_source.tree().content_to_source;
+            offsets.assign(projection.begin(), projection.end());
         } else {
             auto find = [&](auto& self, folia::InlineCstNodes const& nodes) -> std::optional<folia::SourceRange> {
                 for (auto const& node : nodes) {

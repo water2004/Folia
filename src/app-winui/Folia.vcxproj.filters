@@ -126,6 +126,9 @@
     <ClCompile Include="..\core\parsing\block_source.ixx">
       <Filter>Core Modules\Parsing</Filter>
     </ClCompile>
+    <ClCompile Include="..\markdown\model\source_offset_map.ixx">
+      <Filter>Core Modules\Model</Filter>
+    </ClCompile>
     <ClCompile Include="..\core\parsing\block_line_recognizer.ixx">
       <Filter>Core Modules\Parsing</Filter>
     </ClCompile>

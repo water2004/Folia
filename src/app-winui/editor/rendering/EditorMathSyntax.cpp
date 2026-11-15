@@ -67,7 +67,7 @@ namespace winrt::Folia {
             if (caret.container_id != math.span.container_id
                 || caret.source_offset < math.span.source_range.start || caret.source_offset > math.span.source_range.end) continue;
             auto local = math.toSource.empty() ? caret.source_offset - math.span.source_range.start
-                : static_cast<std::size_t>(std::lower_bound(math.toSource.begin(), math.toSource.end(), caret.source_offset) - math.toSource.begin());
+                : static_cast<std::size_t>(math.toSource.lower_bound(caret.source_offset) - math.toSource.begin());
             if (auto match = analysis.MatchAt(local)) {
                 display.mathBrackets.push_back({sourceSpan(match->at), match->mate.has_value()});
                 if (match->mate) display.mathBrackets.push_back({sourceSpan(*match->mate), true});

@@ -61,7 +61,7 @@ suite editor_raw_block_tests = [] {
         expect(editor.selection().active.source_offset == at);
         expect(block->block_source.source()[at] == U'\n');
         expect(block->block_source.tree().content.empty());
-        expect(block->block_source.tree().content_to_source == std::vector<std::size_t>{at});
+        expect(std::ranges::equal(block->block_source.tree().content_to_source, std::vector<std::size_t>{at}));
         const auto source_kind = block->block_source.tree().kind;
         const auto opened_selection = editor.selection();
         const auto saved = editor.markdown_utf8();

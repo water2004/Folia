@@ -26,6 +26,7 @@ import folia.markdown.symbols;
 import folia.markdown.ast;
 import folia.markdown.container_source;
 import folia.markdown.block_source;
+import folia.markdown.source_offset_map;
 import folia.markdown.block_tree;
 import folia.markdown.block_line_recognizer;
 import folia.markdown.callout;
@@ -3228,13 +3229,11 @@ std::optional<BlockNode> try_parse_link_definition(const LeafLine& first) {
         const auto begin = lines[first].start;
         const auto end = lines[last].break_end;
         std::u32string content = tree.content.substr(begin, end - begin);
-        std::vector<std::size_t> mapping(
-            tree.content_to_source.begin() + begin,
-            tree.content_to_source.begin() + end);
-        mapping.push_back(tree.content_to_source[end]);
+        auto mapping = tree.content_to_source.slice(begin, end + 1);
         std::vector<SourceRange> ranges;
-        for (std::size_t index = 0; index < content.size(); ++index) {
-            const auto source_offset = mapping[index];
+        auto mapped_offset = mapping.begin();
+        for (std::size_t index = 0; index < content.size(); ++index, ++mapped_offset) {
+            const auto source_offset = *mapped_offset;
             if (!ranges.empty() && ranges.back().end == source_offset) ranges.back().end = source_offset + 1;
             else ranges.push_back({source_offset, source_offset + 1});
         }
@@ -3260,13 +3259,13 @@ std::optional<BlockNode> try_parse_link_definition(const LeafLine& first) {
         if (tree.content_ranges.empty() || tree.content_to_source.size() != tree.content.size() + 1) return;
 
         std::u32string content;
-        std::vector<std::size_t> content_to_source;
+        SourceOffsetMap content_to_source;
         std::vector<SourceRange> content_ranges;
         content.reserve(tree.content.size());
-        content_to_source.reserve(tree.content_to_source.size());
         bool line_start = true;
         std::size_t line_indent = 0;
-        for (std::size_t index = 0; index < tree.content.size(); ++index) {
+        auto mapped_offset = tree.content_to_source.begin();
+        for (std::size_t index = 0; index < tree.content.size(); ++index, ++mapped_offset) {
             const auto ch = tree.content[index];
             if (line_start && ch == U' ' && line_indent < opening_indent) {
                 ++line_indent;
@@ -3276,7 +3275,7 @@ std::optional<BlockNode> try_parse_link_definition(const LeafLine& first) {
                 line_start = false;
                 line_indent = 0;
             }
-            const auto source_offset = tree.content_to_source[index];
+            const auto source_offset = *mapped_offset;
             content.push_back(ch);
             content_to_source.push_back(source_offset);
             if (!content_ranges.empty() && content_ranges.back().end == source_offset) {
@@ -3774,41 +3773,40 @@ inline void Parser::push_leaf_range(NodeId owner,LeafSourceAccumulator const& so
 // Public entry point.
 inline ParseOutput parse(const ParseInput& input) {
     record_full_document_parse();
-    detail::Parser p(&input);
-    auto blocks = p.parse_blocks(nullptr);
-    if (input.progress) input.progress({ParsePhase::Indexes, 0, 0});
-    EditorDocument doc;
-    doc.root.id = NodeId(p.node_counter++);
-    doc.next_node_id = p.node_counter;
-    doc.dialect = input.dialect;
-    doc.revision = input.revision;
-    doc.root.children = std::move(blocks);
-    if (!p.cps.empty() && p.cps.back() == U'\n') {
-        doc.trailing_line_ending = p.cps.size() >= 2 && p.cps[p.cps.size() - 2] == U'\r'
-            ? U"\r\n"
-            : U"\n";
-    } else if (!p.cps.empty() && p.cps.back() == U'\r') {
-        doc.trailing_line_ending = U"\r";
-    }
-
-    // metadata: frontmatter first
-    bool has_fm = false;
-    for (const auto& b : doc.root.children) {
-        if (b.kind == BlockKind::Frontmatter) {
-            doc.metadata = from_frontmatter(b.atomic_special().raw, b.atomic_special().fmt);
-            has_fm = true;
-            break;
-        }
-    }
-    if (!has_fm) {
-        doc.metadata=metadata_from_text(p.cps);
-    }
-
-    doc.diagnostics = std::move(p.diagnostics);
-
     ParseOutput out;
     out.revision = input.revision;
-    out.document = std::move(doc);
+    {
+        // The completed tree owns all source text and prefix bindings. Release
+        // the decoded input and parser discovery indexes before constructing
+        // the document's long-lived lookup, symbol and outline indexes.
+        detail::Parser p(&input);
+        auto& doc = out.document;
+        doc.root.children = p.parse_blocks(nullptr);
+        doc.root.id = NodeId(p.node_counter++);
+        doc.next_node_id = p.node_counter;
+        doc.dialect = input.dialect;
+        doc.revision = input.revision;
+        if (!p.cps.empty() && p.cps.back() == U'\n') {
+            doc.trailing_line_ending = p.cps.size() >= 2 && p.cps[p.cps.size() - 2] == U'\r'
+                ? U"\r\n"
+                : U"\n";
+        } else if (!p.cps.empty() && p.cps.back() == U'\r') {
+            doc.trailing_line_ending = U"\r";
+        }
+
+        // Metadata can still inspect the root source while the parser owns it.
+        bool has_fm = false;
+        for (const auto& b : doc.root.children) {
+            if (b.kind == BlockKind::Frontmatter) {
+                doc.metadata = from_frontmatter(b.atomic_special().raw, b.atomic_special().fmt);
+                has_fm = true;
+                break;
+            }
+        }
+        if (!has_fm) doc.metadata = metadata_from_text(p.cps);
+        doc.diagnostics = std::move(p.diagnostics);
+    }
+    if (input.progress) input.progress({ParsePhase::Indexes, 0, 0});
     rebuild_document_block_index(out.document);
     out.symbols = build_document_symbol_index(out.document, &out.symbol_contributions);
     out.outline = build_outline_from_headings(input.revision, out.symbols.headings);
@@ -3818,10 +3816,10 @@ inline ParseOutput parse(const ParseInput& input) {
 
 inline ParseOutput parse_text(
     std::uint64_t rev,
-    const std::string& text,
+    std::string text,
     MarkdownDialect d = default_dialect(),
     ParseProgressCallback progress = {}) {
-    return parse(ParseInput(rev, text, d, std::move(progress)));
+    return parse(ParseInput(rev, std::move(text), d, std::move(progress)));
 }
 
 inline std::optional<ParsedBlockFragment> plan_block_fragment(

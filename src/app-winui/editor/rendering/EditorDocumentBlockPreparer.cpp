@@ -442,7 +442,8 @@ namespace winrt::Folia
         EditorPreparedDocument::Block prepared;
         InitializeMetadata(prepared, block);
         InitializeContentMetadata(prepared, block);
-        prepared.caretPresentation = CaretPresentationState(block, caret);
+        auto& visual = prepared.EnsureVisuals();
+        visual.caretPresentation = CaretPresentationState(block, caret);
         prepared.embeddedRequested = requestEmbedded;
         prepared.embeddedGeneration = embeddedGeneration;
         prepared.remoteImageGeneration = remoteImageGeneration;
@@ -456,7 +457,7 @@ namespace winrt::Folia
         addOwner(block.source_span.container_id);
         if (block.kind == folia::RenderBlockKind::Table)
         {
-            prepared.table = EditorTableBlockRenderer::Prepare(
+            visual.table = EditorTableBlockRenderer::Prepare(
                 block,
                 caret,
                 documentWidth,
@@ -471,13 +472,13 @@ namespace winrt::Folia
                 svgNormalizer,
                 treeSitter,
                 frame.completion);
-            if (prepared.table)
+            if (visual.table)
             {
                 for (auto const& span : block.special().table_cell_spans)
                     addOwner(span.container_id);
-                prepared.pendingImage = prepared.table->pendingImage;
-                prepared.pendingMath = prepared.table->pendingMath;
-                prepared.height = prepared.table->height;
+                prepared.pendingImage = visual.table->pendingImage;
+                prepared.pendingMath = visual.table->pendingMath;
+                prepared.height = visual.table->height;
                 prepared.geometryMeasured = true;
                 prepared.valid = true;
                 mathJax.EndBlock();
@@ -490,21 +491,21 @@ namespace winrt::Folia
         auto paddingTop = flowContainer ? 0.0f : block.block_style.padding_top;
         auto paddingBottom = flowContainer ? 0.0f : block.block_style.padding_bottom;
         auto contentWidth = EditorBlockContentWidth(block, documentWidth);
-        prepared.textTop = paddingTop;
-        prepared.display = BuildDisplay(
+        visual.textTop = paddingTop;
+        visual.display = BuildDisplay(
             block,
             contentWidth,
             requestEmbedded,
             highPriority);
-        HighlightMathSources(prepared.display, caret, treeSitter);
+        HighlightMathSources(visual.display, caret, treeSitter);
         ApplyMermaidPresentation(
-            prepared.display,
+            visual.display,
             block,
             requestEmbedded);
         if (block.source_mode
             && block.source_code
             && block.special().language
-            && !prepared.display.text.empty())
+            && !visual.display.text.empty())
         {
             auto const& language = *block.special().language;
             if (!block.source_code_context
@@ -519,13 +520,13 @@ namespace winrt::Folia
                 sourceCodeHighlights = std::vector<SyntaxHighlightRange>{};
                 auto const& context = block.source_code_context
                     ? *block.source_code_context
-                    : prepared.display.text;
+                    : visual.display.text;
                 sourceCodeHighlights = treeSitter.Highlight(language, folia::cps_to_utf8(context));
                 sourceCodeLanguage = language;
                 sourceCodeContext = block.source_code_context;
             }
             auto lineStart = block.source_code_context ? block.source_code_context_offset : 0;
-            auto lineEnd = lineStart + prepared.display.text.size();
+            auto lineEnd = lineStart + visual.display.text.size();
             for (auto const& highlight : sourceCodeHighlights)
             {
                 auto highlightStart = static_cast<std::size_t>(highlight.start);
@@ -533,10 +534,10 @@ namespace winrt::Folia
                 if (highlightEnd <= lineStart || highlightStart >= lineEnd) continue;
                 auto start = (std::max)(highlightStart, lineStart) - lineStart;
                 auto end = (std::min)(highlightEnd, lineEnd) - lineStart;
-                auto displayStart = folia::char_index_to_utf16(prepared.display.text, start);
-                auto displayEnd = folia::char_index_to_utf16(prepared.display.text, end);
+                auto displayStart = folia::char_index_to_utf16(visual.display.text, start);
+                auto displayEnd = folia::char_index_to_utf16(visual.display.text, end);
                 if (displayEnd <= displayStart) continue;
-                prepared.display.ranges.push_back({
+                visual.display.ranges.push_back({
                     static_cast<UINT32>(displayStart),
                     static_cast<UINT32>(displayEnd - displayStart),
                     folia::InlineStyle::plain(),
@@ -545,37 +546,37 @@ namespace winrt::Folia
                 });
             }
         }
-        documentPainter.ApplyNestedCodeHighlights(prepared.display, block);
-        if (frame.completion) InsertCompletionPreview(prepared.display, frame.completion->position, frame.completion->text, frame.completion->before);
-        prepared.pendingMermaid = prepared.display.pendingMermaid;
-        prepared.pendingMath = prepared.display.pendingMath;
+        documentPainter.ApplyNestedCodeHighlights(visual.display, block);
+        if (frame.completion) InsertCompletionPreview(visual.display, frame.completion->position, frame.completion->text, frame.completion->before);
+        prepared.pendingMermaid = visual.display.pendingMermaid;
+        prepared.pendingMath = visual.display.pendingMath;
         prepared.hasFlowContext = true;
         prepared.intrinsicFlow.format = textLayoutEngine.FormatKindFor(
-            prepared.code || prepared.sourceMode, prepared.display.ranges);
+            prepared.code || prepared.sourceMode, visual.display.ranges);
         prepared.appliedFlow = flowContext.value_or(prepared.intrinsicFlow);
         auto format = textLayoutEngine.FormatFor(prepared.appliedFlow.format);
-        prepared.layout = textLayoutEngine.CreateFlow(
-            prepared.display,
+        visual.layout = textLayoutEngine.CreateFlow(
+            visual.display,
             format,
             contentWidth,
             [&](IDWriteTextLayout* candidate, DisplayInlineText const& candidateDisplay)
             {
                 if (!candidate) return;
-                prepared.images = inlineImages.Resolve(
+                visual.images = inlineImages.Resolve(
                     candidate,
                     candidateDisplay.imageOverlays,
                     contentWidth,
                     requestEmbedded);
                 prepared.pendingImage = std::ranges::any_of(
-                    prepared.images,
+                    visual.images,
                     [](auto const& image) { return image.pending; });
-                prepared.mermaids.clear();
+                visual.mermaids.clear();
                 if (!candidateDisplay.mermaidOverlays.empty())
                     candidate->SetLineSpacing(
                         DWRITE_LINE_SPACING_METHOD_DEFAULT,
                         0.0f,
                         0.0f);
-                prepared.mermaids.reserve(
+                visual.mermaids.reserve(
                     candidateDisplay.mermaidOverlays.size());
                 for (auto const& overlay : candidateDisplay.mermaidOverlays)
                 {
@@ -611,7 +612,7 @@ namespace winrt::Folia
                         advance,
                         lineHeight,
                         lineHeight);
-                    prepared.mermaids.push_back({
+                    visual.mermaids.push_back({
                         overlay.displayStart,
                         overlay.svg,
                         width,
@@ -631,7 +632,7 @@ namespace winrt::Folia
             });
         prepared.appliedFlow.naturalLineSpacing = prepared.intrinsicFlow.naturalLineSpacing
             || (flowContext && flowContext->naturalLineSpacing);
-        if (prepared.layout && !block.source_mode && block.block_style.text_alignment)
+        if (visual.layout && !block.source_mode && block.block_style.text_alignment)
         {
             auto alignment = DWRITE_TEXT_ALIGNMENT_LEADING;
             switch (*block.block_style.text_alignment)
@@ -649,45 +650,45 @@ namespace winrt::Folia
                     alignment = DWRITE_TEXT_ALIGNMENT_JUSTIFIED;
                     break;
             }
-            prepared.layout->SetTextAlignment(alignment);
+            visual.layout->SetTextAlignment(alignment);
         }
-        prepared.mathPreviews.reserve(prepared.display.mathPreviews.size());
-        for (auto const& preview : prepared.display.mathPreviews)
+        visual.mathPreviews.reserve(visual.display.mathPreviews.size());
+        for (auto const& preview : visual.display.mathPreviews)
         {
-            prepared.mathPreviews.push_back(PrepareMathPreview(preview, textLayoutEngine,
+            visual.mathPreviews.push_back(PrepareMathPreview(preview, textLayoutEngine,
                 resources.textFormat.Get(), (std::max)(1.0f, contentWidth - 16.0f),
                 resources.surfaceWidthDip, styleSheet.mathPreview));
         }
-        prepared.mermaidPreviews.reserve(
-            prepared.display.mermaidPreviews.size());
-        for (auto const& preview : prepared.display.mermaidPreviews)
+        visual.mermaidPreviews.reserve(
+            visual.display.mermaidPreviews.size());
+        for (auto const& preview : visual.display.mermaidPreviews)
         {
             auto available = (std::max)(1.0f, contentWidth - 16.0f);
             auto scale = (std::min)(
                 1.0f,
                 available / (std::max)(1.0f, preview.svg.width));
-            prepared.mermaidPreviews.push_back({
+            visual.mermaidPreviews.push_back({
                 preview.svg,
                 (std::max)(1.0f, preview.svg.width * scale),
                 (std::max)(1.0f, preview.svg.height * scale),
             });
         }
-        prepared.textHeight = textLayoutEngine.MeasureHeight(
-            prepared.layout.Get(),
+        visual.textHeight = textLayoutEngine.MeasureHeight(
+            visual.layout.Get(),
             textLayoutEngine.LineHeightFor(prepared.appliedFlow.format),
             !prepared.appliedFlow.fragmented);
-        prepared.layoutLines = folia::platform::editor::BuildEditorTextLines(
-            prepared.layout.Get(), prepared.display.displayToSource, block.source_span, contentWidth);
-        prepared.paintPlan = folia::platform::editor::EditorTextPaintPlan::Prepare(prepared.layout.Get());
+        visual.layoutLines = folia::platform::editor::BuildEditorTextLines(
+            visual.layout.Get(), visual.display.displayToSource, block.source_span, contentWidth);
+        visual.paintPlan = folia::platform::editor::EditorTextPaintPlan::Prepare(visual.layout.Get());
         auto previewHeight = 0.0f;
-        for (auto const& preview : prepared.mathPreviews)
+        for (auto const& preview : visual.mathPreviews)
             if (!preview.floating) previewHeight += preview.Height() + 24.0f;
-        for (auto const& preview : prepared.mermaidPreviews)
+        for (auto const& preview : visual.mermaidPreviews)
             previewHeight += preview.height + 24.0f;
         prepared.previewHeight = previewHeight;
-        prepared.height = prepared.textHeight + previewHeight + paddingTop + paddingBottom;
+        prepared.height = visual.textHeight + previewHeight + paddingTop + paddingBottom;
         prepared.geometryMeasured = true;
-        prepared.display.displayToSource.for_each_run(0, prepared.display.displayToSource.size(),
+        visual.display.displayToSource.for_each_run(0, visual.display.displayToSource.size(),
             [&](auto, auto, auto first, auto) { addOwner(first.container_id); return true; });
         prepared.valid = true;
         mathJax.EndBlock();
@@ -698,12 +699,13 @@ namespace winrt::Folia
         EditorPreparedDocument::Block const& prepared)
     {
         std::vector<std::string> sources;
-        sources.reserve(prepared.images.size());
-        for (auto const& image : prepared.images)
+        auto const& visual = prepared.Visuals();
+        sources.reserve(visual.images.size());
+        for (auto const& image : visual.images)
             if (!image.source.empty()) sources.push_back(image.source);
-        if (prepared.table)
+        if (visual.table)
         {
-            for (auto const& cellImages : prepared.table->imageDraws)
+            for (auto const& cellImages : visual.table->imageDraws)
                 for (auto const& image : cellImages)
                     if (!image.source.empty()) sources.push_back(image.source);
         }

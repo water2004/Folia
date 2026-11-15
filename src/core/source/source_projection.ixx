@@ -52,7 +52,7 @@ inline std::vector<SourceProjectionBlock> blocks(
         if (found==by_owner.end()) continue;
         auto map=owner;
         const auto relative_begin=result[found->second].begin-origin;
-        for (auto& offset:map.source_to_serialized) offset-=relative_begin;
+        map.source_to_serialized.subtract_origin(relative_begin);
         result[found->second].owners.push_back(std::move(map));
     }
     return result;
@@ -64,7 +64,7 @@ inline std::optional<TextPosition> owner_position(
     std::size_t before_offset=0,after_offset=(std::numeric_limits<std::size_t>::max)();
     for (const auto& map:owners) {
         const auto& positions=map.source_to_serialized;
-        const auto next=std::ranges::lower_bound(positions,offset);
+        const auto next=positions.lower_bound(offset);
         if (next!=positions.end() && *next==offset)
             return TextPosition{map.container_id,static_cast<std::size_t>(next-positions.begin()),affinity};
         if (next!=positions.end() && (!after || *next<after_offset)) {
