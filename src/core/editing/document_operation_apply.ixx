@@ -20,11 +20,6 @@ export namespace folia {
 
 namespace document_operation_detail {
 
-inline InlineDocument* inline_owner(BlockNode& root, NodeId id) {
-    auto* block = find_block(root, id);
-    return block ? editable_inline_document(*block) : nullptr;
-}
-
 inline void apply_payload(BlockNode& target, const BlockNode& shell) {
     auto children = std::move(target.children);
     std::optional<InlineDocument> preserved_inline;
@@ -84,10 +79,10 @@ inline bool move_child(
     return true;
 }
 
-inline bool apply_tree_edit(BlockNode& root, const DocumentTreeEdit& edit, bool forward) {
+inline bool apply_tree_edit(EditorDocument& document, const DocumentTreeEdit& edit, bool forward) {
     switch (edit.kind) {
         case DocumentTreeEditKind::Insert: {
-            auto* parent = find_block(root, edit.parent_id);
+            auto* parent = find_document_block(document, edit.parent_id);
             if (!parent) return false;
             if (forward) return insert_block(*parent, edit.index, edit.after);
             if (edit.index >= parent->children.size()
@@ -95,7 +90,7 @@ inline bool apply_tree_edit(BlockNode& root, const DocumentTreeEdit& edit, bool 
             return remove_block(*parent, edit.index).has_value();
         }
         case DocumentTreeEditKind::Remove: {
-            auto* parent = find_block(root, edit.parent_id);
+            auto* parent = find_document_block(document, edit.parent_id);
             if (!parent) return false;
             if (!forward) return insert_block(*parent, edit.index, edit.before);
             if (edit.index >= parent->children.size()
@@ -105,21 +100,21 @@ inline bool apply_tree_edit(BlockNode& root, const DocumentTreeEdit& edit, bool 
         case DocumentTreeEditKind::Move:
             return forward
                 ? move_child(
-                    root,
+                    document.root,
                     edit.parent_id,
                     edit.index,
                     edit.other_parent_id,
                     edit.other_index,
                     edit.moved_id)
                 : move_child(
-                    root,
+                    document.root,
                     edit.other_parent_id,
                     edit.other_index,
                     edit.parent_id,
                     edit.index,
                     edit.moved_id);
         case DocumentTreeEditKind::UpdatePayload: {
-            auto* target = find_block(root, edit.before.id);
+            auto* target = find_document_block(document, edit.before.id);
             if (!target) return false;
             apply_payload(*target, forward ? edit.after : edit.before);
             return true;
@@ -184,7 +179,7 @@ inline bool apply_document_operation(
     return std::visit([&](const auto& value) {
         using T = std::decay_t<decltype(value)>;
         if constexpr (std::is_same_v<T, DocumentTreeEdit>) {
-            const auto applied=document_operation_detail::apply_tree_edit(document.root,value,forward);
+            const auto applied=document_operation_detail::apply_tree_edit(document,value,forward);
             if (applied) document.reference_definitions_dirty=true;
             return applied;
         } else if constexpr (std::is_same_v<T,DocumentTextOperation>) {

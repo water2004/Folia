@@ -49,7 +49,7 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> outdent_list_item(
     EditorDocument& document,
     NodeId descendant_id,
     document_edit_detail::NodeAllocator& allocator) {
-    auto path = block_path(document.root, descendant_id);
+    auto path = document_block_path(document, descendant_id);
     if (!path) return std::nullopt;
     BlockNode* item = nullptr;
     while (!path->empty()) {

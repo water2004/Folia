@@ -28,10 +28,16 @@ inline void index_subtree(
     EditorDocument& document,
     const BlockNode& block,
     NodeId parent_id,
-    std::size_t child_index) {
+    std::size_t child_index,
+    const std::unordered_set<std::uint64_t>& added_blocks) {
+    record_block_index_entry_update();
     document.cached_block_locators[block.id.v] = {parent_id, child_index};
+    // A newly inserted wrapper may already contain an existing moved subtree.
+    // That subtree needs this one new parent edge, not new descendant edges.
+    if (!added_blocks.contains(block.id.v)) return;
+    if (block.has_container_source()) block.container_source().prepare_owner_lookup();
     for (std::size_t index = 0; index < block.children.size(); ++index) {
-        index_subtree(document, block.children[index], block.id, index);
+        index_subtree(document, block.children[index], block.id, index, added_blocks);
     }
 }
 
@@ -52,6 +58,7 @@ inline void rebuild_editable_positions(
     start = (std::min)(start, document.cached_editable_order.size());
     if (start == 0) document.cached_editable_index.clear();
     for (std::size_t index = start; index < document.cached_editable_order.size(); ++index) {
+        record_editable_order_entry_update();
         document.cached_editable_index[document.cached_editable_order[index].v] = index;
     }
 }
@@ -106,6 +113,7 @@ inline bool update_document_block_index(
     std::unordered_set<std::uint64_t> added_editable;
     std::unordered_set<std::uint64_t> relocated_roots;
     std::vector<NodeId> added_roots;
+    std::vector<NodeId> updated_payloads;
 
     auto note_parent = [&](NodeId id, std::size_t index) {
         auto [found, inserted] = affected_parents.emplace(id.v, index);
@@ -130,6 +138,7 @@ inline bool update_document_block_index(
                 != is_editable_block_owner(tree->after.kind)) {
                 return false;
             }
+            updated_payloads.push_back(tree->after.id);
             continue;
         }
 
@@ -182,13 +191,37 @@ inline bool update_document_block_index(
             if (!parent || parent->id != item.id) return false;
             const auto start = (std::min)(item.start, parent->children.size());
             for (std::size_t index = start; index < parent->children.size(); ++index) {
-                index_subtree(document, parent->children[index], parent->id, index);
+                const auto& child = parent->children[index];
+                if (added_blocks.contains(child.id.v)) {
+                    index_subtree(document, child, parent->id, index, added_blocks);
+                } else {
+                    // Sibling insertions shift this edge, not the edges
+                    // inside an untouched descendant tree. Inserting a
+                    // paragraph above a large list must not re-index every
+                    // item in that list.
+                    const BlockLocator location{parent->id, index};
+                    const auto found = document.cached_block_locators.find(child.id.v);
+                    if (found == document.cached_block_locators.end() || found->second != location) {
+                        record_block_index_entry_update();
+                        document.cached_block_locators[child.id.v] = location;
+                    }
+                }
             }
             item.done = true;
             --remaining;
             progressed = true;
         }
         if (!progressed) return false;
+    }
+
+    // A structural prefix mutation invalidates its owner lookup. Finish that
+    // derived work with this transaction, so the next ordinary keystroke does
+    // not pay to rebuild a large enclosing quote's provenance index.
+    for (const auto id : updated_payloads) {
+        if (const auto path = validated_cached_path(document, id)) {
+            const auto* block = block_at_path(document.root, *path);
+            if (block && block->has_container_source()) block->container_source().prepare_owner_lookup();
+        }
     }
 
     std::unordered_set<std::uint64_t> relocated_blocks;
@@ -203,10 +236,25 @@ inline bool update_document_block_index(
     }
 
     if (!removed_editable.empty()) {
-        std::erase_if(document.cached_editable_order, [&](NodeId id) {
-            return removed_editable.contains(id.v);
-        });
-        rebuild_editable_positions(document);
+        // Resolve the affected interval through the identity index first.
+        // Deleting the last owner used to scan and rewrite the entire order.
+        auto first = document.cached_editable_order.size();
+        for (const auto id : removed_editable) {
+            if (const auto found = document.cached_editable_index.find(id);
+                found != document.cached_editable_index.end()) {
+                first = (std::min)(first, found->second);
+                document.cached_editable_index.erase(found);
+            }
+        }
+        auto destination = first;
+        for (auto source = first; source < document.cached_editable_order.size(); ++source) {
+            const auto id = document.cached_editable_order[source];
+            if (removed_editable.contains(id.v)) continue;
+            document.cached_editable_order[destination] = id;
+            record_editable_order_entry_update();
+            document.cached_editable_index[id.v] = destination++;
+        }
+        document.cached_editable_order.resize(destination);
     }
 
     std::vector<AddedRoot> added;

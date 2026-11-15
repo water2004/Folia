@@ -222,7 +222,7 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> open_raw_block(
     EditorDocument& document,
     TextPosition position,
     document_edit_detail::NodeAllocator& allocator) {
-    auto path = block_path(document.root, position.container_id);
+    auto path = document_block_path(document, position.container_id);
     if (!path || path->empty()) return std::nullopt;
     auto* block = block_at_path(document.root, *path);
     if (!block || block->kind != BlockKind::Paragraph
@@ -242,7 +242,7 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> open_raw_block(
         allocator);
     if (!source_edit) return std::nullopt;
     document_edit_detail::append_source_operation(result.operations, std::move(*source_edit));
-    block = find_block(document.root, position.container_id);
+    block = find_document_block(document, position.container_id);
     if (!block) return std::nullopt;
 
     DocumentTreeEdit update;
@@ -265,7 +265,7 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> open_raw_block(
         allocator);
     if (!block_source_edit) return std::nullopt;
     document_edit_detail::append_source_operation(result.operations, std::move(*block_source_edit));
-    block = find_block(document.root, position.container_id);
+    block = find_document_block(document, position.container_id);
     if (!block) return std::nullopt;
     result.target.source_offset = block_source_editable_range(block->block_source).start;
     rollback.commit();
@@ -275,7 +275,7 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> open_raw_block(
 inline std::optional<document_edit_detail::RecordedBlockEdit> remove_heading_prefix(
     EditorDocument& document,
     TextPosition position) {
-    auto* block = find_block(document.root, position.container_id);
+    auto* block = find_document_block(document, position.container_id);
     if (!block || block->kind != BlockKind::Heading) return std::nullopt;
     document_edit_detail::RecordedBlockEdit result;
     result.target = TextPosition{block->id, 0, TextAffinity::Downstream};
@@ -305,7 +305,7 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> remove_callout_pre
     EditorDocument& document,
     TextPosition position,
     document_edit_detail::NodeAllocator& allocator) {
-    auto path = block_path(document.root, position.container_id);
+    auto path = document_block_path(document, position.container_id);
     if (!path || path->size() < 2) return std::nullopt;
     auto* selected = block_at_path(document.root, *path);
     if (!selected) return std::nullopt;
@@ -374,7 +374,7 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> remove_callout_pre
 inline std::optional<document_edit_detail::RecordedBlockEdit> remove_quote_prefix(
     EditorDocument& document,
     TextPosition position) {
-    auto path = block_path(document.root, position.container_id);
+    auto path = document_block_path(document, position.container_id);
     if (!path || path->size() < 2) return std::nullopt;
 
     auto quote_path = *path;

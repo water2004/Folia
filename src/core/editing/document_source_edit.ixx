@@ -223,7 +223,7 @@ inline std::optional<DocumentTransaction> document_enter(EditorDocument& documen
             operations.end(),
             std::make_move_iterator(handled->operations.begin()),
             std::make_move_iterator(handled->operations.end()));
-    } else if (auto* block = find_block(after.root, current.active.container_id);
+    } else if (auto* block = find_document_block(after, current.active.container_id);
                block && (block->kind == BlockKind::CodeBlock || block->kind == BlockKind::MathBlock)) {
         auto inserted = document_edit_detail::insert_text(after, current.active, U"\n", allocator);
         if (!inserted) return std::nullopt;
