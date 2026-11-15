@@ -598,7 +598,16 @@ private:
                 }
                 const auto body_begin = callout_body_start(block);
                 if (body_begin < block.children.size()) {
-                    writer_.generated_span(block.children[body_begin].separator_before.value_or(U"\n"));
+                    const auto& body = block.children[body_begin];
+                    const auto separator = body.separator_before.value_or(U"\n");
+                    // The header owns its ending, while later blank separator
+                    // lines belong inside the quote. Preserve their separator
+                    // anchor offsets so literal quote prefixes remain attached.
+                    auto header_ending = separator.find_first_of(U"\r\n");
+                    if (header_ending == std::u32string::npos) header_ending = separator.size();
+                    else if (separator[header_ending++] == U'\r'
+                        && header_ending < separator.size() && separator[header_ending] == U'\n') ++header_ending;
+                    writer_.generated_span(std::u32string_view(separator).substr(0, header_ending));
                     SerializerPrefixPolicy policy;
                     policy.rule = SerializerPrefixRule::FixedLines;
                     policy.fixed_prefix_on_first_line = true;
@@ -607,6 +616,8 @@ private:
                     policy.nonempty_prefix = U"> ";
                     policy.empty_prefix = U">";
                     writer_.begin_prefix_scope(block.id, block.container_source(), std::move(policy));
+                    writer_.sibling_separator({}, body.id, false, false,
+                        separator.substr(header_ending), false, header_ending);
                     Action close;
                     close.kind = ActionKind::EndPrefixScope;
                     close.block = &block;

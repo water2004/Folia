@@ -119,6 +119,7 @@ struct SerializerEvent {
     bool list_item_context = false;
     bool has_explicit_separator = false;
     std::u32string separator;
+    std::size_t separator_offset = 0;
 };
 
 struct SerializerRopeNode {
@@ -649,7 +650,8 @@ public:
         bool previous_empty_paragraph,
         bool next_is_list,
         std::optional<std::u32string> explicit_separator,
-        bool list_item_context = false) {
+        bool list_item_context = false,
+        std::size_t separator_offset = 0) {
         SerializerEvent event;
         event.kind = SerializerEventKind::SiblingSeparator;
         event.previous_block = previous;
@@ -658,6 +660,7 @@ public:
         event.next_is_list = next_is_list;
         event.list_item_context = list_item_context;
         event.has_explicit_separator = explicit_separator.has_value();
+        event.separator_offset = separator_offset;
         if (explicit_separator) event.separator = std::move(*explicit_separator);
         return push_event(std::move(event));
     }
@@ -954,7 +957,7 @@ private:
         }
         const auto token = plan_.store_generated_token(std::move(separator));
         const auto& value = plan_.generated(token);
-        attach_anchor_value({event.owner, ContainerAnchorPart::Separator, 0});
+        attach_anchor_value({event.owner, ContainerAnchorPart::Separator, event.separator_offset});
         std::size_t cursor = 0;
         while (cursor < value.size()) {
             std::size_t eol = cursor;
@@ -971,7 +974,7 @@ private:
             stack_.back().total_codepoints += ending_end - eol;
             finish_line(stack_.back(), ending);
             cursor = ending_end;
-            attach_anchor_value({event.owner, ContainerAnchorPart::Separator, cursor});
+            attach_anchor_value({event.owner, ContainerAnchorPart::Separator, event.separator_offset + cursor});
         }
     }
 
@@ -985,7 +988,6 @@ private:
         auto child_lines = std::move(stack_.back().lines);
         const auto scope = stack_.back().scope;
         stack_.pop_back();
-        if (suppress_empty) return;
 
         SerializerScopePrefixIndex scope_anchors;
         scope_anchors.build(*scope.source, anchor_lines_);
@@ -999,9 +1001,13 @@ private:
         for (std::size_t index = 0; index < child_lines.size(); ++index) {
             const auto& input = plan_.line(child_lines[index]);
             const auto* explicit_prefix = scope_anchors.find(anchor_lines_.canonicalize(input.id));
-            auto prefix = choose_serializer_prefix(policy, explicit_prefix,
-                input.facts, index == 0,
-                terminal_newline && index == terminal_line);
+            // An empty editing owner still contributes its source boundary.
+            // Suppress only a generated prefix for a synthetic empty body;
+            // explicit blank quote lines remain part of the original source.
+            auto prefix = suppress_empty && !explicit_prefix ? std::u32string{}
+                : choose_serializer_prefix(policy, explicit_prefix,
+                    input.facts, index == 0,
+                    terminal_newline && index == terminal_line);
             auto pieces = plan_.prepend_prefix(child_lines[index], input, std::move(prefix));
             prefixed_lines.insert(prefixed_lines.end(), pieces.begin(), pieces.end());
         }
