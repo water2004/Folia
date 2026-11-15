@@ -3,6 +3,7 @@ export module folia.core.document_input_syntax;
 import std;
 import folia.markdown.ast;
 import folia.markdown.block_source;
+import folia.markdown.block_line_recognizer;
 import folia.markdown.dialect;
 import folia.markdown.utf;
 
@@ -89,6 +90,20 @@ inline std::u32string trim_horizontal(std::u32string_view value) {
     while (begin < end && horizontal_space(value[begin])) ++begin;
     while (end > begin && horizontal_space(value[end - 1])) --end;
     return std::u32string(value.substr(begin, end - begin));
+}
+
+inline bool recognize_thematic_break(std::u32string_view source) {
+    std::size_t end = 0;
+    return folia::detail::BlockLineRecognizer(source).line_is_thematic_break(0, &end)
+        && end == source.size();
+}
+
+inline bool has_setext_underline(std::u32string_view source) {
+    const auto newline = source.find_last_of(U"\r\n");
+    if (newline == std::u32string_view::npos || newline == 0) return false;
+    const auto underline = folia::detail::BlockLineRecognizer(source)
+        .setext_underline_at(newline + 1);
+    return underline && underline->line_end == source.size();
 }
 
 struct FenceMatch {
