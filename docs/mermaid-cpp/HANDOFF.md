@@ -5,19 +5,19 @@
 - 2026-11-16：在 `feat/mermaid-comprehensive-regressions` 上执行全图族复杂回归，基于数学支持分支 `a368f9ea70dac36f235d9eca6bdb0be16ea82a5f`。远端同名分支已建立在该基线；本地已按来源、各图族修复与公共测量提取顺序分项提交，所有本轮提交尚未推送。保持 CI、公式缓存、10MB 压测文件不动。
 - 工作树 `/workspace/scratch/a4656ef82bb3/Folia`。已恢复固定 `.reference/mermaid-js`、oracle 依赖、ut 子模块。旧 source-lock 哈希不变，LF/CRLF 仅恢复锁定原字节；新增来源和许可证已随首个提交保存。
 - 语料 `tests/mermaid_regression/cases/*.json` 现有 **34 图族、375 例**，每族至少8例，多例复杂组合，53种Flowchart形状各重复覆盖。`corpus.mjs` 强制清单、复杂例、独立输入、来源/features，不允许 skip/expectedFailure。全部375例官方 syntax/config 通过：`build/mermaid-regression/official-prepare-final/report.json`。
-- 原生完整渲染首轮 **373/375**：`native-complete-first/report.json`。手绘 Bang 符号相对弧指令现已修正并复验通过（`symbol-repair/report.json`）；剩余 `flowchart-collapsed-handdrawn` 含真实 ELK 自环，正在补原版完整处理链，不能删除自环或切换布局器以通过。
+- 原生完整渲染首轮 **373/375**：`native-complete-first/report.json`。手绘 Bang 符号相对弧指令现已修正并复验通过（`symbol-repair/report.json`）；`flowchart-collapsed-handdrawn` 的真实 ELK 自环现已补齐处理链，定向完整渲染通过（`collapsed-selfloop-fixed/report.json`）；375全量待最终快照重跑。
 - Windows 测量编排已提取到平台无关 `measured_render.{ixx,cpp}` 与 `TextMeasurer`；Windows 仍供原 DirectWrite/Math 服务。Linux probe 通过同一生产管线用真实 Pango，另可 `--remote-measurement` 接同机 Skia。独立代码复核未发现明确回归，但 Windows 未执行。C4 的宿主工作区宽度仍由宿主提供。
 - LLVM21.1.8 在 `.../toolchain/llvm21/usr/lib/llvm-21/bin/clang++`；CMake4.3.4、Ninja 在 `.../toolchain/python/`。设置 `LD_LIBRARY_PATH=.../toolchain/llvm21/usr/lib/x86_64-linux-gnu:.../toolchain/llvm21/usr/lib/llvm-21/lib`。构建目录 `build/mermaid-regression-native`，并发≤4，始终只运行一个Ninja。
-- **当前没有运行的构建**。最后 session81028 正常退出，日志 `elk-repair-build.log`，已构建 Probe、Mermaid 核心测试、真实 Math 集成测试。原 Math `.so` 已用PIC重建在 `build/mermaid-regression-math`；无 Math 源码/缓存修改。此前 Ninja 日志损坏已修复，诊断在 `dependency-recovery/`，非生产缺陷。
+- **当前没有运行的构建**。最后 session93027 正常退出，日志 `elk-complete-build2.log`，已构建 Probe、Mermaid 核心测试、真实 Math 集成测试。前一轮缺失测试number import已补，无异常进程退出。原 Math `.so` 已用PIC重建在 `build/mermaid-regression-math`；无 Math 源码/缓存修改。此前 Ninja 日志损坏已修复，诊断在 `dependency-recovery/`，非生产缺陷。
 - 核心首轮 **243项/944922断言通过**（`core-tests-first.log`），还需收尾后完整重跑。真实 Math 集成 **5项/205断言通过**（`math-integration-repaired.log`）；本轮ER tokenizer对公式关系标签的回归已修正并增加测试。Gantt5项735断言、Treemap3项5853断言（含1794官方D3格式值）通过；数据/时间族105例实测渲染通过。
-- 严格完整SVG：Packet **8/8，257个元素**；Info **8/8**，含fontconfig实际字体文件hash/index与paint/geometry，未冒称栅格。ZenUML **24/24** 使用实际原版renderer与Skia，透明RGBA逐像素零差、视口和非空文本一致；296次实际测量，报告 `zenuml-canvas-native/comparison.json`。最后Probe重建后仍需刷新证据。严格比较器30项反例自测通过。
-- ELK方向原版adapter oracle **21例，19通过，2待修**（`elk-repair-tests.log`）：unoriented反馈边模型排序；独立方向子图内多组件排列。empty group、不同方向、跨层边、端点/中央标签等其余通过，固定算法容差1e-4。固定实测盒是算法对照，不是浏览器SVG/字体证据。
-- data 已定位并写好 model-order 默认 `DUMMY_NODE_OVER` 的 Java INT_MAX 修复，新3例官方stage fixture，加旧2例共5；待下一轮编译。此前边界dummy netflow、DFS前约束反转、同层入边比较修复均已编译，旧ELK算子及State/Class/Flowchart回归通过。
+- 严格完整SVG：Packet **8/8，257个元素**；Info **8/8**，含fontconfig实际字体文件hash/index与paint/geometry，未冒称栅格。ZenUML **24/24** 使用实际原版renderer与Skia，透明RGBA逐像素零差、视口和非空文本一致；296次实际测量，报告 `zenuml-canvas-native/comparison.json`。最后Probe重建后仍需刷新证据。严格比较器原30项自测通过；special复核发现隐藏文字可见性漏检及Windows Info无viewBox被错误拒绝，正在补严格可见性反例和仅Info自然浏览器视口路径，Windows路径仍未执行。
+- ELK方向原版adapter oracle **21例，20通过，1待修**（`elk-complete-tests-first-clean.log`）：unoriented反馈边已通过；多组件排列剩第二diamond上下翻面22断言，其他尺寸/组件一致，data正在诊断共享RNG消费。empty group、不同方向、跨层边、端点/中央标签等其余通过，固定算法容差1e-4。固定实测盒是算法对照，不是浏览器SVG/字体证据。
+- data 的 model-order 默认 `DUMMY_NODE_OVER` Java INT_MAX 修复已编译通过，新3例官方stage fixture加旧2例共5通过。此前边界dummy netflow、DFS前约束反转、同层入边比较修复均已编译，旧ELK算子及State/Class/Flowchart回归通过。
 - agents 当前所有权：graph 实现通用 self-loop 预处理、侧/slot路由、恢复，拥有 `elk_self_loops.*`、`elk_layout.*`、`elk_compound_layout.cpp`、`elk_ports.cpp` 与共用routing cycles提取；special 实现共享component划分/packing，拥有新 `elk_components.*`、`flowchart_elk_scopes.inc`、State packing glue；data 拥有 boundary/model-order/compound_graph 修复、direction与self-loop官方oracle/tests。root 保持 `flowchart_elk.cpp`、共享测量/入口/CMake/docs，等待全部ready统一编译。
-- 自环distribution/ordering是**node级**选项，不从graph继承；原版root-only EQUALLY实际无效，adapter不得把它套到每个child。graph 正在接 `ElkMeasuredNode::self_loops`，默认 NORTH/STACKED。组件之间原ELK共享RNG流，special与graph协调compound入口接线，不可各组件重新seed。
+- 自环distribution/ordering是**node级**选项，不从graph继承；已按默认 NORTH/STACKED 接入。**24个原版全几何自环例（61节点/219边）、5521断言全部通过**，日志 `elk-self-loops-first.log`。组件DFS/packing14个观察也已通过；独立复核发现通用helper consider_model_order=true需保留原排序身份，special/graph正补可空node_model_order及data反例fixture，不重排DFS。
 - 浏览器限制：普通 Chromium 启动 `socket() EPERM`；连接Edge的任意data测试页被URL策略拒绝且禁止变换载体绕过，已停止并发送completion summary。**不得绕过、不得把未执行的整图浏览器gate标绿**。工具按全清单及散列严格验收，缺项/浏览器证据缺失均失败；Node原版无DOM renderer和算法对照可继续。
-- 下一步：独立已验证修复分批提交；等待3位agent收尾，统一构建后定向验证所有ELK、自环、真实Math及collapsed handdrawn，再完整375原生语料、全核心、刷新Zen/Packet/Info证据。更新明确验证范围并推送新分支；不改CI。
-- 最新独立修复提交包：其余特殊图复杂语料补齐，含完整官方示例、四种Railroad语法、复杂交集/泳道/事件流程；全34族375例（230复杂）已入库，官方语法全部通过，原生首轮剩1个自环缺口待修。
+- 下一步：独立已验证修复分批提交；等待组件RNG、model-order映射和比较工具收尾，统一构建后验证所有ELK及真实Math，再完整375原生语料、全核心、刷新Zen/Packet/Info证据。更新明确验证范围并推送新分支；不改CI。
+- 最新独立修复提交包：全图族回归驱动与严格375例清单，原版syntax/config检查和Pango/DirectWrite生产测量驱动。无估算字宽、无expectedFailure；所有报告含语料与二进制散列并明确不是整图官方SVG通过。
 
 ## 数学支持基线（历史，已推送）
 

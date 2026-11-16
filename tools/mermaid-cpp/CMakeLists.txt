@@ -204,3 +204,21 @@ FoliaNativeMermaidFree
         FoliaNativeMermaid Boost::ut_module folia_console_test_runtime)
     add_test(NAME FoliaMermaidHostTests COMMAND FoliaMermaidHostTests)
 endif()
+
+# One corpus driver for every family. Windows uses the production DirectWrite
+# provider; other hosts supply real font measurements through the test protocol.
+add_executable(FoliaMermaidRegressionProbe regression/native-probe.cpp)
+set_target_properties(FoliaMermaidRegressionProbe PROPERTIES CXX_MODULE_STD ON)
+target_link_libraries(FoliaMermaidRegressionProbe PRIVATE folia::mermaid)
+if(TARGET folia_mermaid_math)
+    target_link_libraries(FoliaMermaidRegressionProbe PRIVATE folia_mermaid_math)
+    target_compile_definitions(FoliaMermaidRegressionProbe PRIVATE FOLIA_REGRESSION_NATIVE_MATH=1)
+endif()
+if(WIN32 AND MSVC)
+    target_link_libraries(FoliaMermaidRegressionProbe PRIVATE
+        folia_mermaid_measurement folia_console_test_runtime)
+    add_custom_command(TARGET FoliaMermaidRegressionProbe POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "$<TARGET_FILE:FoliaNativeMath>" "$<TARGET_FILE_DIR:FoliaMermaidRegressionProbe>"
+        VERBATIM)
+endif()
