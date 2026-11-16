@@ -9,6 +9,7 @@ export const cases=[
  ['arrow-directions','block-beta\ncolumns 2\na<["Left"]>(left) b<["Up"]>(up)\nc<["Down"]>(down) d<["Both"]>(up,down)'],
  ['arrow-axes','block-beta\ncolumns 2\na<["Horizontal"]>(x) b<["Vertical"]>(y)\nc<["Four way"]>(x,y)'],
  ['styles','block-beta\ncolumns 2\na["Accent"] b["Plain"]\nclassDef accent fill:#ffeecc,stroke:#aa4400,color:#663300\nclass a accent\nstyle b fill:#ddeeff,stroke:#335577'],
+ ['edge-markers-and-patterns',"block-beta\ncolumns 3\nA[\"Ingress\"] B(\"Worker\") C{{\"Router\"}}\nD[(\"Store\")] E[\"Commit\"] F((\"Complete\"))\nA<-->B\nB x--x C\nA o--o D\nD ==> E\nE -.-> F\nC <==> F\nF -- \"retry\" --x A\nB --o E\nD --- F\nA -- \"cross ends\" x--x C\nD -- \"circle ends\" o--o F\nA-->x\n"],
  ['incomplete-node','block-beta\na["Incomplete"',null],
  ['missing-end','block-beta\nblock:group\na["A"]',null],
 ];
