@@ -17,6 +17,7 @@ struct Node {
     Index parent = none, lane = none;
     bool group = false, placed = false;
     double padding = 20;
+    std::optional<FlowchartNodeBox> title;
 };
 
 struct Edge {
@@ -78,8 +79,10 @@ bool node_less(const Graph& graph, Index a, Index b) {
 }
 
 std::expected<Graph, std::string> make_graph(const FlowchartInput& input,
-    std::span<const FlowchartNodeBox> sizes, std::span<const FlowchartEdgeLabelSize> labels) {
-    if (sizes.size() != input.nodes.size() || labels.size() != input.edges.size())
+    std::span<const FlowchartNodeBox> sizes, std::span<const FlowchartEdgeLabelSize> labels,
+    std::span<const std::optional<FlowchartNodeBox>> titles) {
+    if (sizes.size() != input.nodes.size() || labels.size() != input.edges.size() ||
+        (!titles.empty() && titles.size() != input.nodes.size()))
         return std::unexpected("Swimlane measurement count does not match the graph");
     const auto valid_dimension = [](double value) { return std::isfinite(value) && value >= 0; };
     const auto valid_box = [&](const auto& box) {
@@ -106,6 +109,11 @@ std::expected<Graph, std::string> make_graph(const FlowchartInput& input,
         node.group = data.group;
         node.padding = data.padding;
         if (!valid_dimension(node.padding)) return std::unexpected("Invalid swimlane node padding");
+        if (!titles.empty() && titles[i]) {
+            if (!node.group || !valid_box(*titles[i]))
+                return std::unexpected("Invalid swimlane title measurement");
+            node.title = titles[i];
+        }
         if (!node.group) {
             node.box.width = sizes[i].width;
             node.box.height = sizes[i].height;
@@ -568,9 +576,16 @@ void assign_coordinates(Graph& graph, const Layers& layers) {
         for (Index id : layer) grouped[graph.nodes[id].lane].push_back(id);
         return grouped;
     };
+    const auto cross_span = [&](Index id) {
+        const auto& box = graph.nodes[id].box;
+        // The horizontal transform rotates centers, not the visible boxes.
+        // Preserve the original width allocation while reserving at least the
+        // physical height that will occupy this axis after the transform.
+        return horizontal ? std::max(box.width, box.height) : box.width;
+    };
     const auto total_width = [&](const Indices& nodes) {
         double width = graph.node_gap * (nodes.size() - 1);
-        for (Index id : nodes) width += graph.nodes[id].box.width;
+        for (Index id : nodes) width += cross_span(id);
         return width;
     };
     for (Index i = 0; i < layers.size(); ++i) {
@@ -581,6 +596,18 @@ void assign_coordinates(Graph& graph, const Layers& layers) {
         }
         for (const auto& [lane, nodes] : group_layer(layers[i]))
             column_widths[lane] = std::max(column_widths[lane], total_width(nodes));
+    }
+    for (Index lane : graph.lanes) {
+        const auto& title = graph.nodes[lane].title;
+        if (!title || !column_widths.contains(lane)) continue;
+        double required = title->width + 2 * graph.nodes[lane].padding;
+        if (graph.direction == u"RL") {
+            // RL keeps the heading horizontal. Its extra header space belongs
+            // to the whole lane row after the direction transform, including
+            // multiple siblings. Reserve it in addition to that physical span.
+            required = column_widths.at(lane) + 2 * (title->height + graph.nodes[lane].padding);
+        }
+        column_widths[lane] = std::max(column_widths[lane], required);
     }
     Indices columns;
     if (column_widths.contains(none)) columns.push_back(none);
@@ -604,10 +631,10 @@ void assign_coordinates(Graph& graph, const Layers& layers) {
             double x = center->second - total_width(nodes) / 2;
             for (Index id : nodes) {
                 auto& node = graph.nodes[id];
-                node.box.x = x + node.box.width / 2;
+                node.box.x = x + cross_span(id) / 2;
                 node.box.y = y + heights[i] / 2;
                 node.placed = true;
-                x += node.box.width + graph.node_gap;
+                x += cross_span(id) + graph.node_gap;
             }
         }
         for (Index order = 0; order < layers[i].size(); ++order) {
@@ -647,9 +674,13 @@ void write_back_groups(Graph& graph, std::vector<SwimlaneRoutingNode>& nodes) {
         }
         const bool top_level = group.parent == none;
         if (top_level) maximum_padding = std::max(maximum_padding, group.padding);
+        if (top_level && group.title)
+            maximum_padding = std::max(maximum_padding, group.title->height + group.padding);
         if (!bounds.empty()) {
             const auto horizontal_padding = top_level ? 2 * std::max(20.0, group.padding) : group.padding;
             apply_bounds(group.box, bounds, horizontal_padding, group.padding);
+            if (group.title)
+                group.box.width = std::max(group.box.width, group.title->width + horizontal_padding);
             if (top_level) {
                 lanes_with_content.push_back(i);
                 content.top = std::min(content.top, bounds.top);
@@ -685,7 +716,7 @@ void write_back_groups(Graph& graph, std::vector<SwimlaneRoutingNode>& nodes) {
         node.box.y = (content.top + content.bottom) / 2;
         node.box.height = content.height() + 2 * maximum_padding;
         if (node.box.width > 0) {
-            constexpr double title_height = 21;
+            const double title_height = graph.nodes[lane].title ? graph.nodes[lane].title->height : 21;
             node.title_box = FlowchartPlacedNode{node.box.id, node.box.x,
                 node.box.y - (node.box.height - title_height) / 2, node.box.width, title_height};
         }
@@ -724,7 +755,11 @@ void transform_horizontal(const Graph& graph, std::span<SwimlaneRoutingNode> nod
         total_height += node.box.height;
     }
     if (!std::isfinite(min_x)) return;
-    constexpr double title_band = 36;
+    double title_band = 36;
+    if (graph.direction == u"LR")
+        for (Index lane : graph.lanes)
+            if (graph.nodes[lane].title)
+                title_band = std::max(title_band, graph.nodes[lane].title->height + 8);
     const double scale = total_height > 0 ? std::max(1.0, total_width / total_height) : 1;
     const auto rotate = [&](auto& point) {
         const double new_x = (point.y - min_y) * scale + title_band;
@@ -760,14 +795,33 @@ void transform_horizontal(const Graph& graph, std::span<SwimlaneRoutingNode> nod
         for (Index j = 0; j < nodes.size(); ++j)
             if (!nodes[j].group && graph.nodes[j].lane == lane) bounds.include(nodes[j].box);
         if (bounds.empty()) continue;
+        const auto center = (bounds.top + bounds.bottom) / 2;
+        if (const auto& title = graph.nodes[lane].title) {
+            if (graph.direction == u"LR") {
+                const auto half = std::max(bounds.height() / 2, title->width / 2 + nodes[lane].padding);
+                bounds.top = center - half;
+                bounds.bottom = center + half;
+            } else {
+                bounds.top -= title->height + nodes[lane].padding;
+            }
+        }
         content.left = std::min(content.left, bounds.left);
         content.right = std::max(content.right, bounds.right);
-        lanes.push_back({lane, bounds, (bounds.top + bounds.bottom) / 2});
+        lanes.push_back({lane, bounds, center});
     }
     if (lanes.empty()) return;
     std::ranges::stable_sort(lanes, {}, &LaneBounds::center);
     const double horizontal_margin = std::max(max_padding, 10.0);
-    const double vertical_margin = std::max(max_padding, title_band);
+    const double vertical_margin = std::max(max_padding, 36.0);
+    if (graph.direction == u"RL") {
+        double minimum_width = content.width();
+        for (Index lane : graph.lanes)
+            if (graph.nodes[lane].title)
+                minimum_width = std::max(minimum_width, graph.nodes[lane].title->width);
+        const auto center = (content.left + content.right) / 2;
+        content.left = center - minimum_width / 2;
+        content.right = center + minimum_width / 2;
+    }
     const double left = content.left - horizontal_margin - title_band;
     const double right = content.right + horizontal_margin;
     for (Index i = 0; i < lanes.size(); ++i) {
@@ -780,6 +834,11 @@ void transform_horizontal(const Graph& graph, std::span<SwimlaneRoutingNode> nod
         apply_bounds(node.box, Bounds{left, right, top, bottom}, 0, 0);
         node.title_box = FlowchartPlacedNode{node.box.id, left + title_band / 2,
             node.box.y, title_band, node.box.height};
+        if (graph.direction == u"RL" && graph.nodes[lane.id].title) {
+            const auto height = graph.nodes[lane.id].title->height;
+            node.title_box = FlowchartPlacedNode{node.box.id, node.box.x,
+                node.box.y - node.box.height / 2 + height / 2, node.box.width, height};
+        }
     }
     if (graph.direction == u"RL") mirror_direction(nodes, edges, true);
 }
@@ -787,8 +846,9 @@ void transform_horizontal(const Graph& graph, std::span<SwimlaneRoutingNode> nod
 } // namespace
 
 std::expected<SwimlaneLayout, std::string> layout_swimlanes(const FlowchartInput& input,
-    std::span<const FlowchartNodeBox> sizes, std::span<const FlowchartEdgeLabelSize> labels) {
-    auto prepared = make_graph(input, sizes, labels);
+    std::span<const FlowchartNodeBox> sizes, std::span<const FlowchartEdgeLabelSize> labels,
+    std::span<const std::optional<FlowchartNodeBox>> titles) {
+    auto prepared = make_graph(input, sizes, labels, titles);
     if (!prepared) return std::unexpected(prepared.error());
     auto& graph = *prepared;
     const auto* config = input.effective_config.find(u"swimlane");
@@ -831,7 +891,17 @@ std::expected<SwimlaneLayout, std::string> layout_swimlanes(const FlowchartInput
     route_swimlane_edges(routing_nodes, routing_edges, graph.direction);
     if (graph.direction == u"LR" || graph.direction == u"RL")
         transform_horizontal(graph, routing_nodes, routing_edges);
-    else if (graph.direction == u"BT") mirror_direction(routing_nodes, routing_edges, false);
+    else if (graph.direction == u"BT") {
+        mirror_direction(routing_nodes, routing_edges, false);
+        // BT mirrors the body, while the renderer keeps visible headings at
+        // the top. Measured headers reserve space on both sides before this
+        // transform and retain their real top-band bounds for route finishing.
+        for (Index lane : graph.lanes) if (const auto& title = graph.nodes[lane].title) {
+            auto& node = routing_nodes[lane];
+            node.title_box = FlowchartPlacedNode{node.box.id, node.box.x,
+                node.box.y - node.box.height / 2 + title->height / 2, node.box.width, title->height};
+        }
+    }
     finish_swimlane_routes(routing_nodes, routing_edges);
     adjust_swimlane_title_bands(routing_nodes, routing_edges, graph.direction);
 

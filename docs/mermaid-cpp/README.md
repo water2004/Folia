@@ -13,8 +13,8 @@
 - **配置合并与主题计算**：通过 `yaml-cpp`（附带 JSON 转义补丁）与 `es-toolkit` 兼容合并语义归并配置树；基于 Khroma 颜色算法派生 11 种内置主题变量；通过 `ConfigSession` 提供请求级配置隔离。
 - **图族识别与统一入口**：`DiagramRegistry` 按上游探测器优先级识别图族，由 `folia.mermaid.render_entry` 统一提供 `prepare_native_diagram`（解析与配置提取）和 `render_native_diagram`（注入测量结果并生成 SVG）。
 
-### 2. 已接入公共渲染入口的 20 个图族
-以下 20 个图族已接入 `render_entry` 与平台渲染层 `folia.platform.mermaid_renderer`，并通过与官方 Mermaid 12.2.0 浏览器渲染结果的 SVG 对照测试：
+### 2. 流程、架构、数据与时间图族
+以下图族已接入 `render_entry` 与平台渲染层 `folia.platform.mermaid_renderer`，并有与官方 Mermaid 12.2.0 渲染结果的基础 SVG 对照记录。新增复杂语料的验收状态单独记录在当前交接中：
 
 | 类别 | 已贯通图族 | 核心实现说明 |
 | --- | --- | --- |
@@ -49,12 +49,27 @@
 - **显式错误图** 使用上游诊断 SVG 图形。普通语法失败通过原生入口的错误结果报告。
 
 ### 7. 平台文本测量与动态库接口（`src/platform/text/` / `tools/mermaid-cpp/`）
+- **可移植测量编排（`measured_render.{ixx,cpp}`）**：公共 source-to-SVG 管线通过 `TextMeasurer` 接收宿主实测字体数据。Windows 应用与跨平台完整图回归使用同一套编排、布局和 SVG 输出；核心模块不依赖 Windows。
 - **DirectWrite 文本测量（`mermaid_measurer.ixx`）**：在 Windows 平台解析 CSS `font-family` 候选列表，提供单行 advance/ink bounds 测量、按 Unicode 断行机会的文本折行以及 SVG 字体 ascent/descent 度量。
 - **C ABI 导出（`native-renderer.h` / `mermaid_host.ixx`）**：`FoliaNativeMermaid.dll` 导出 `FoliaNativeMermaidRender` 与 `FoliaNativeMermaidFree`，接收 UTF-8 源码与亮/暗主题参数，返回由 DLL 分配的 UTF-8 SVG 字符串（或错误文本）及宽高尺寸。
 
-### 8. 当前验证基线
+### 8. 数学标签
+
+`$$...$$` 通过现有 C++ MathJax 生成纯 SVG，普通文字和公式的真实尺寸共同参与布局。
+实现不引入浏览器或 JS 运行时，不复制数学字体数据，也不改变现有公式缓存。
+图族范围、配置、源码示例、版本区别及严格 SVG/位图对照见 [数学标签](math.md)。
+
+### 9. 当前验证基线
 - 迁移前的 PR 基线 `c128acc9` 中，GitHub Actions 工作流 [`.github/workflows/mermaid-cpp.yml`](../../.github/workflows/mermaid-cpp.yml) 在 Windows `standalone` / `integrated` × `Debug` / `Release` 四种配置下全部通过（上游 PR 检查见 [Actions Run #40820458232](https://github.com/water2004/Folia/actions/runs/40820458232)，Fork 仓库检查见 [Actions Run #40820482671](https://github.com/zhao0349/Folia/actions/runs/40820482671)）。
 - 自动化验证覆盖：核心模块测试（`FoliaMermaidTests`）、DirectWrite 平台与 DLL 宿主测试（`FoliaMermaidPlatformTests`、`FoliaMermaidHostTests`）、主工程回归测试（`FoliaTests`、`FoliaWindowsEditorTests`）、同机 DirectWrite 与 Chromium 文本测量对照，以及各图族与官方 Mermaid 浏览器输出的 SVG 对照（实测几何容差 `1.5`，ELK 算子坐标容差 `1e-4`）。
+
+### 10. 全图族复杂回归
+
+`tests/mermaid_regression/cases/` 为 34 个图族保留从基础到复杂的独立输入，
+每族至少 8 例，包含官方完整示例与复杂组合。`FoliaMermaidRegressionProbe`
+经生产测量管线输出 SVG；官方捕获器与严格比较器逐例检查输入及输出散列、
+字体、几何、文字、绘制属性和实际栅格。缺项或未执行的浏览器验收不会被标为通过。
+运行命令、固定基准、验证分层与真实 Canvas 对照见 [全图族回归](regressions.md)。
 
 ---
 
@@ -74,6 +89,7 @@
 - `src/mermaid/THIRD_PARTY_NOTICES.md`：第三方算法与上游源码许可证声明。
 - `src/platform/text/`：Windows DirectWrite 文本测量（`mermaid_measurer.ixx`）、平台渲染桥接（`mermaid_renderer.ixx`）与宿主会话封装（`mermaid_host.ixx`）。
 - `tests/mermaid_cpp/`：核心解析与布局单元测试（`FoliaMermaidTests`）及 TSV 基准数据（`fixtures/`）。
+- `tests/mermaid_math/`：通过现有 Math DLL 执行真实公式的可移植集成测试（`FoliaMermaidMathTests`）。
 - `tests/platform/`：DirectWrite 平台测量与各图族 SVG 生成测试（`FoliaMermaidPlatformTests`）。
 - `tools/mermaid-cpp/`：独立 CMake 工程、C ABI 动态库封装（`native-renderer.{h,cpp}`）、上游行为采样脚本（`*-oracle.mjs`、`*-browser-probe.mjs`）及 SVG 对照脚本（`compare-*-svg.mjs`）。
 - [`docs/mermaid-cpp/HANDOFF.md`](HANDOFF.md)：当前检查点、模块边界与复验入口。
@@ -84,12 +100,26 @@
   - 核心测试：`cmd /c tests\run_core.bat`
   - Windows 编辑器测试：`cmd /c tests\platform\run.bat`
 - 从仓库根目录配置时，使用 `-DFOLIA_BUILD_MERMAID=ON` 生成独立 Mermaid 库和测试目标。该选项默认关闭。
-- **独立构建并运行 Mermaid 测试（Windows + VS + Ninja）**：
+- **集成构建并运行 Mermaid 测试（Windows + VS + Ninja）**：
+  完成根目录 `setup.ps1` 的既有依赖恢复，在支持 `import std` 的 VS 开发者终端中运行：
   ```powershell
-  cmake -S tools/mermaid-cpp -B build/mermaid-cpp -G Ninja -DCMAKE_BUILD_TYPE=Release
+  cmake -S . -B build/core -G Ninja -DCMAKE_BUILD_TYPE=Release -DFOLIA_BUILD_MERMAID=ON
+  cmake --build build/core --target FoliaMermaidTests FoliaMermaidMathTests FoliaMermaidPlatformTests FoliaMermaidHostTests FoliaMathSvgBridgeTests --parallel 4
+  ctest --test-dir build/core -R "^FoliaMermaid(Tests|MathTests|PlatformTests|HostTests)$" --output-on-failure
+  ./build/core/FoliaMathSvgBridgeTests.exe
+  ```
+- **使用已有 Math DLL 独立构建**：
+  ```powershell
+  cmake -S tools/mermaid-cpp -B build/mermaid-cpp -G Ninja -DCMAKE_BUILD_TYPE=Release `
+    -DFOLIA_NATIVE_MATH_RUNTIME="$PWD/build/core/FoliaNativeMath.dll" `
+    -DFOLIA_NATIVE_MATH_IMPORT_LIBRARY="$PWD/build/core/FoliaNativeMath.lib"
   cmake --build build/mermaid-cpp --parallel 4
   ctest --test-dir build/mermaid-cpp --output-on-failure
   ```
+  Math DLL 需与当前源码配套，包含新 fragment C ABI。构建会把它放在 Mermaid DLL
+  和对应测试程序旁边。Linux 的纯核心构建不依赖 Windows；若提供
+  `FOLIA_NATIVE_MATH_RUNTIME=/absolute/path/libFoliaNativeMath.so`，也会构建真实数学
+  集成测试。独立工具链需要 CMake 4.3、Ninja 和支持 C++23 `import std` 的标准库。
 - **运行 Node.js 上游对照脚本（需 Node.js 24 与 pnpm）**：
   ```powershell
   pnpm --dir tools/mermaid-cpp/oracle install --frozen-lockfile --ignore-scripts

@@ -5,6 +5,7 @@ module folia.math.output.svg.writer;
 import folia.math.output.svg.serializer;
 import std;
 import folia.math.util.lengths;
+import folia.math.util.js_number;
 import folia.math.util.styles;
 import folia.math.util.utf16;
 
@@ -374,7 +375,7 @@ void append_glyphs(std::string &out, scene::GlyphRun const &run, SvgWriteOptions
             detail::append_attribute(out, "d", path_data(glyph, options));
         else
             detail::append_attribute(out, options.use_xlink ? "xlink:href" : "href",
-                                     "#" + cache_id(glyph, plan, scope));
+                                     "#" + options.id_prefix + cache_id(glyph, plan, scope));
         std::string transform;
         if (glyph.origin.x || glyph.origin.y)
             transform = "translate(" + number(glyph.origin.x * 1000) + "," +
@@ -854,6 +855,8 @@ void append_group_entries(std::string &out, scene::Group const &group,
 void open_group(std::string &out, scene::Group const &group, SvgWriteOptions const &options,
                 FontCachePlan const *plan, CacheScopeId scope) {
     if (group.foreign_content) {
+        if (options.pixel_viewport)
+            throw UnsupportedError("Standalone SVG cannot include visible HTML content");
         auto const &foreign = *group.foreign_content;
         auto const &geometry = foreign.geometry;
         out += "<foreignObject";
@@ -997,7 +1000,8 @@ void open_group(std::string &out, scene::Group const &group, SvgWriteOptions con
         append_paint(out, group.paint);
         if (group.clip)
             detail::append_attribute(out, "clip-path",
-                                     "url(#clip-" + std::to_string(group.id) + ")");
+                                     "url(#" + options.id_prefix + "clip-" +
+                                         std::to_string(group.id) + ")");
         detail::append_metadata(out, group.metadata, reserved);
         if (is_viewport) {
             append_aspect();
@@ -1019,7 +1023,10 @@ void open_group(std::string &out, scene::Group const &group, SvgWriteOptions con
                 out += "<title>" + detail::escape_text(group.tooltip->text) + "</title>";
         }
         if (group.clip) {
-            out += "<defs><clipPath id=\"clip-" + std::to_string(group.id) + "\"><path d=\"";
+            out += "<defs><clipPath";
+            detail::append_attribute(out, "id", options.id_prefix + "clip-" +
+                                                   std::to_string(group.id));
+            out += "><path d=\"";
             append_path(out, group.clip->geometry);
             out += "\"";
             if (group.clip->fill_rule == scene::FillRule::evenodd)
@@ -1046,7 +1053,7 @@ void append_font_cache(std::string &out, FontCachePlan const &plan, CacheScopeId
         if (!definition.glyph)
             throw std::logic_error("FontCachePlan definition has no glyph");
         out += "<path";
-        detail::append_attribute(out, "id", definition.id);
+        detail::append_attribute(out, "id", options.id_prefix + definition.id);
         detail::append_attribute(out, "d", path_data(*definition.glyph, options));
         out += "/>";
     }
@@ -1058,10 +1065,44 @@ void append_svg_start(std::string &out, scene::Metrics const &metrics,
                       scene::DisplayLayout const &layout, double minimum_extent,
                       bool apply_inline_layout, FontCachePlan const *plan = nullptr,
                       CacheScopeId scope = 0, bool cache_before_group = false,
-                      scene::PercentageFrame const *percentage = nullptr) {
+                      scene::PercentageFrame const *percentage = nullptr,
+                      SvgMetrics const *pixel = nullptr) {
     const double width = std::max(metrics.width, minimum_extent);
     const double height = std::max(metrics.height + metrics.depth, minimum_extent);
     out += "<svg";
+    if (pixel) {
+        detail::append_attribute(out, "xmlns", "http://www.w3.org/2000/svg");
+        detail::append_attribute(out, "width", folia::math::js_number::toString(pixel->width));
+        detail::append_attribute(out, "height", folia::math::js_number::toString(pixel->height));
+        detail::append_attribute(out, "role", "img");
+        detail::append_attribute(out, "focusable", "false");
+        if (percentage) {
+            detail::append_attribute(out, "viewBox",
+                                     "0 0 " + folia::math::js_number::toString(
+                                                   percentage->bounds.width * 1000) +
+                                         " " + folia::math::js_number::toString(
+                                                   percentage->bounds.height * 1000));
+        } else {
+            detail::append_attribute(out, "viewBox",
+                                     "0 " + number(-metrics.height * 1000) + " " +
+                                         number(width * 1000) + " " + number(height * 1000));
+        }
+        if (options.font_cache != FontCacheMode::none && options.use_xlink)
+            detail::append_attribute(out, "xmlns:xlink", "http://www.w3.org/1999/xlink");
+        out += ">";
+        if (cache_before_group && plan)
+            append_font_cache(out, *plan, scope, options);
+        out += "<g stroke=\"currentColor\" fill=\"currentColor\" stroke-width=\"0\" transform=\"";
+        if (percentage) {
+            out += "scale(" + number(percentage->scale, 6) + ",-" +
+                   number(percentage->scale, 6) + ") translate(0, " +
+                   number(-metrics.height * 1000) + ")";
+        } else {
+            out += "scale(1,-1)";
+        }
+        out += "\">";
+        return;
+    }
     if (percentage) {
         std::string style = "vertical-align: " + ex_value(-metrics.depth, font.x_height) + ";";
         if (layout.minimum_width > 0)
@@ -1205,7 +1246,10 @@ void append_action_region(std::string &out, scene::ActionRegion const &region,
                                                                "rx",
                                                                "ry"};
     detail::append_metadata(out, region.hitbox.metadata, reserved);
-    if (!region.tooltip) {
+    // The static SVG host cannot activate MathJax's hidden HTML tooltip widget.
+    // Keep the visible formula and its hit region; ordinary textual tooltips
+    // are already serialized as SVG <title>.
+    if (!region.tooltip || options.pixel_viewport) {
         out += "/>";
         return;
     }
@@ -1250,6 +1294,31 @@ void append_inline_break(std::string &out, scene::InlineBreak const &value) {
 }
 } // namespace
 
+SvgMetrics pixel_metrics(scene::Scene const &value) {
+    auto const &font = value.font_metrics();
+    auto const &layout = value.display_layout();
+    auto const &frame = value.frame_layout();
+    auto const &metrics = value.metrics();
+    if (!frame.inline_fragments.empty())
+        throw UnsupportedError("Standalone SVG requires a single completed frame");
+    if (!(font.x_height > 0 && font.ex > 0 && layout.font_scale > 0))
+        throw std::invalid_argument("Standalone SVG requires positive font metrics and scale");
+    const double pixels_per_em = font.ex / font.x_height;
+    const double width = frame.percentage
+                             ? frame.percentage->bounds.width * 1000
+                             : std::max(metrics.width, frame.minimum_extent) * pixels_per_em;
+    const double height = frame.percentage
+                              ? frame.percentage->bounds.height * 1000
+                              : std::max(metrics.height + metrics.depth, frame.minimum_extent) *
+                                    pixels_per_em;
+    const SvgMetrics result{width * layout.font_scale, height * layout.font_scale,
+                            metrics.height * pixels_per_em * layout.font_scale};
+    if (!std::isfinite(result.width) || !std::isfinite(result.height) ||
+        !std::isfinite(result.baseline))
+        throw std::invalid_argument("Standalone SVG pixel metrics must be finite");
+    return result;
+}
+
 std::string write(scene::Scene const &scene_value, SvgWriteOptions const &options) {
     validate_scene(scene_value.root());
     auto const &metrics = scene_value.metrics();
@@ -1265,8 +1334,12 @@ std::string write(scene::Scene const &scene_value, SvgWriteOptions const &option
         throw UnsupportedError(
             "global SVG font caching requires the owning document cache serializer");
 
+    const auto pixel = options.pixel_viewport
+                           ? std::optional<SvgMetrics>{pixel_metrics(scene_value)}
+                           : std::nullopt;
+    const bool include_container = options.include_math_container && !options.pixel_viewport;
     std::string out;
-    if (options.include_math_container) {
+    if (include_container) {
         out += "<mjx-container";
         bool container_style = false;
         const bool scaled_container = layout.font_scale != 1;
@@ -1322,7 +1395,8 @@ std::string write(scene::Scene const &scene_value, SvgWriteOptions const &option
     if (frames.inline_fragments.empty()) {
         append_svg_start(out, metrics, font, options, layout, frames.minimum_extent, true,
                          cache_plan ? &*cache_plan : nullptr, 0, true,
-                         frames.percentage ? &*frames.percentage : nullptr);
+                         frames.percentage ? &*frames.percentage : nullptr,
+                         pixel ? &*pixel : nullptr);
         open_group(out, scene_value.root(), options, cache_plan ? &*cache_plan : nullptr, 0);
         append_svg_end(out);
     } else {
@@ -1337,7 +1411,7 @@ std::string write(scene::Scene const &scene_value, SvgWriteOptions const &option
             append_svg_end(out, cache_plan ? &*cache_plan : nullptr, 0, i == 0, &options);
         }
     }
-    if (options.include_math_container)
+    if (include_container)
         out += "</mjx-container>";
     return out;
 }

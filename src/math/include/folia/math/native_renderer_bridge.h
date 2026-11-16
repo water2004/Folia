@@ -74,6 +74,33 @@ FoliaNativeMathStatus FoliaNativeMathRenderSvgBatch(
     size_t count,
     FoliaNativeMathOutput* outputs);
 
+// A display formula for embedding inside another SVG. The same native engine
+// emits a single SVG root with an explicit CSS-pixel viewport; no HTML math
+// container or surrounding-document line breaking is included. Generated SVG
+// resource IDs are scoped to this result so different formulas can coexist.
+FoliaNativeMathStatus FoliaNativeMathRenderSvgFragment(
+    FoliaNativeMathRenderer* renderer,
+    uint16_t const* tex,
+    size_t tex_units,
+    double em,
+    double container_width,
+    FoliaNativeMathCancellation* cancellation,
+    unsigned int timeout_ms,
+    FoliaNativeMathResult** result);
+
+typedef struct FoliaNativeMathSvgMetrics {
+    double width;
+    double height;
+    double baseline;
+} FoliaNativeMathSvgMetrics;
+
+// Returns 1 for a successful fragment result. All values are CSS pixels and
+// baseline is measured from its top edge. Returns 0 and clears metrics for
+// other results; a null metrics pointer also returns 0.
+int FoliaNativeMathResultFragmentMetrics(
+    FoliaNativeMathResult const* result,
+    FoliaNativeMathSvgMetrics* metrics);
+
 char const* FoliaNativeMathResultSvg(
     FoliaNativeMathResult const* result,
     size_t* size);

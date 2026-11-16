@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: EPL-2.0
-// Port of PortSideProcessor, InvertedPortProcessor and the fixed-node, label-free east/west branch
+// Port of PortSideProcessor, InvertedPortProcessor and the fixed-node, label-free branch
 // of NodeLabelAndSizeCalculator / PortPlacementCalculator in ELK 0.9.3.
 module folia.mermaid.elk_ports;
 import std;
@@ -67,8 +67,8 @@ std::expected<void,std::string> elk_place_flat_point_ports(
     for(const auto& node:graph.nodes) {
         if(node.kind!=ElkLayerNodeKind::normal||node.fixed_port_positions)continue;
         for(const auto p:node.ports)
-            if(graph.ports[p].side!=ElkPortSide::east&&graph.ports[p].side!=ElkPortSide::west)
-                return std::unexpected("ELK point port placement requires east/west side preprocessing");
+            if(graph.ports[p].side==ElkPortSide::undefined)
+                return std::unexpected("ELK point port placement requires assigned port sides");
     }
     for(std::size_t n=0;n<graph.nodes.size();++n) {
         const auto& node=graph.nodes[n];
@@ -76,15 +76,17 @@ std::expected<void,std::string> elk_place_flat_point_ports(
         const auto config=options.empty()?ElkPointPortOptions{}:options[n];
         // Empty north/south label cells still carry port-label border spacing.
         // updateVerticalInsidePortLabelCellPadding subtracts that and the gap.
-        const auto padding=std::max(0.0,config.surrounding_margin-
+        const auto vertical_padding=std::max(0.0,config.surrounding_margin-
             std::max(0.0,config.port_label_spacing_vertical)-2*config.label_label_spacing);
-        const auto available=node.height-2*padding;
-        for(const auto side:{ElkPortSide::east,ElkPortSide::west}) {
+        for(const auto side:{ElkPortSide::north,ElkPortSide::east,ElkPortSide::south,ElkPortSide::west}) {
+            const bool horizontal=side==ElkPortSide::north||side==ElkPortSide::south;
+            const auto padding=horizontal?std::max(0.0,config.surrounding_margin):vertical_padding;
+            const auto available=(horizontal?node.width:node.height)-2*padding;
             std::vector<std::size_t> ports;
             for(const auto p:node.ports)if(graph.ports[p].side==side)ports.push_back(p);
             if(ports.empty())continue;
-            // NodeContext reverses the clockwise west side into top-down order.
-            if(side==ElkPortSide::west)std::ranges::reverse(ports);
+            // NodeContext turns clockwise sides into left-to-right/top-down order.
+            if(side==ElkPortSide::west||side==ElkPortSide::south)std::ranges::reverse(ports);
             bool distributed=!config.center_alignment;
             auto calculated=(ports.size()-1)*config.port_spacing;
             if(distributed)calculated+=2*config.port_spacing;
@@ -97,8 +99,9 @@ std::expected<void,std::string> elk_place_flat_point_ports(
                 space+=std::max(0.0,(available-calculated)/(ports.size()+1));current+=space;
             } else current+=(available-calculated)/2;
             for(const auto p:ports) {
-                graph.ports[p].x=side==ElkPortSide::east?node.width:0;
-                graph.ports[p].y=current;current+=space;
+                graph.ports[p].x=horizontal?current:side==ElkPortSide::east?node.width:0;
+                graph.ports[p].y=horizontal?(side==ElkPortSide::south?node.height:0):current;
+                current+=space;
             }
         }
     }

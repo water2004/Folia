@@ -13,6 +13,12 @@ struct ErAttribute {
 struct ErEntity {
     std::u16string name, id, alias;
     std::vector<ErAttribute> attributes;
+    std::u16string parent, classes = u"default";
+    std::vector<std::u16string> styles, compiled_styles;
+};
+struct ErGroup {
+    std::u16string id, title, parent, direction;
+    std::vector<std::u16string> members, classes, styles, compiled_styles;
 };
 struct ErRelationship {
     std::u16string entity_a, role_a, entity_b;
@@ -24,10 +30,11 @@ struct ErInput {
     std::vector<ErEntity> entities;
     std::vector<ErRelationship> relationships;
     ConfigValue effective_config;
+    std::vector<ErGroup> groups;
 };
 struct ErLimits {
     FrontendLimits frontend;
-    std::size_t entities = 10000, attributes = 100000, relationships = 10000;
+    std::size_t entities = 10000, attributes = 100000, relationships = 10000, groups = 10000;
 };
 std::expected<ErInput, std::string> prepare_er(
     std::u16string_view source, const ConfigSession& session, ErLimits limits = {});

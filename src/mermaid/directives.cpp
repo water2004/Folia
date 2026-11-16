@@ -27,6 +27,7 @@ class JsonParser {
     std::u16string_view text_;
     std::size_t cursor_{};
     Budget& budget_;
+    std::vector<std::u16string>* root_keys_ = nullptr;
     bool take(char16_t c) {
         if (cursor_ == text_.size() || text_[cursor_] != c) return false;
         ++cursor_;
@@ -159,6 +160,7 @@ class JsonParser {
                     space();
                     if (!take(u':')) throw SyntaxError{};
                     auto item = value(depth + 1);
+                    if (depth == 0 && root_keys_ && !result.mapping.contains(key)) root_keys_->push_back(key);
                     result.mapping.insert_or_assign(std::move(key), std::move(item));
                     space();
                 } while (take(u','));
@@ -176,7 +178,8 @@ class JsonParser {
         return result;
     }
 public:
-    JsonParser(std::u16string_view text, Budget& budget) : text_{text}, budget_{budget} {}
+    JsonParser(std::u16string_view text, Budget& budget, std::vector<std::u16string>* root_keys = nullptr)
+        : text_{text}, budget_{budget}, root_keys_{root_keys} {}
     ConfigValue parse() {
         auto result = value(0);
         space();
@@ -217,6 +220,57 @@ bool matches(std::u16string_view type, DirectiveFilter filter) {
     return type.ends_with(u"init") || type.ends_with(u"initialize");
 }
 } // namespace
+
+std::expected<ConfigValue,std::string> parse_json_value(
+    std::u16string_view text,const DirectiveLimits& limits) {
+    if (text.size() > limits.source_units) return std::unexpected("JSON source budget exceeded");
+    try {
+        Budget budget{limits};
+        return JsonParser{text,budget}.parse();
+    } catch (const SyntaxError&) {
+        return std::unexpected("Invalid JSON value");
+    } catch (const LimitError& error) {
+        return std::unexpected(error.message);
+    }
+}
+
+std::expected<std::vector<std::pair<std::u16string,ConfigValue>>,std::string>
+parse_json_object_members(std::u16string_view text,const DirectiveLimits& limits) {
+    if (text.size() > limits.source_units) return std::unexpected("JSON source budget exceeded");
+    try {
+        Budget budget{limits};
+        std::vector<std::u16string> keys;
+        auto value=JsonParser{text,budget,&keys}.parse();
+        if (value.kind != ConfigKind::mapping) return std::unexpected("Expected a JSON object");
+        // ECMAScript enumerates canonical array-index keys before string keys.
+        const auto index=[](std::u16string_view key)->std::optional<std::uint32_t> {
+            if (key.empty() || key.size()>10 || (key.size()>1 && key.front()==u'0')) return {};
+            std::uint64_t number=0;
+            for (const auto c:key) {
+                if (c<u'0'||c>u'9') return {};
+                number=number*10+c-u'0';
+            }
+            if (number>=std::numeric_limits<std::uint32_t>::max()) return {};
+            return static_cast<std::uint32_t>(number);
+        };
+        std::stable_sort(keys.begin(),keys.end(),[&](const auto& a,const auto& b) {
+            const auto left=index(a),right=index(b);
+            if (left && right) return *left<*right;
+            return left.has_value() && !right.has_value();
+        });
+        std::vector<std::pair<std::u16string,ConfigValue>> result;
+        result.reserve(keys.size());
+        for (auto& key:keys) {
+            auto member=value.mapping.extract(key);
+            result.emplace_back(std::move(key),std::move(member.mapped()));
+        }
+        return result;
+    } catch (const SyntaxError&) {
+        return std::unexpected("Invalid JSON value");
+    } catch (const LimitError& error) {
+        return std::unexpected(error.message);
+    }
+}
 
 std::expected<std::vector<Directive>, std::string> detect_directives(
     std::u16string_view text, DirectiveFilter filter, const DirectiveLimits& limits) {

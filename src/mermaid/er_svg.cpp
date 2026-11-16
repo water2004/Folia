@@ -45,19 +45,37 @@ Box centered(FlowchartPoint p, double width, double height) {
     return {p.x-width/2,p.y-height/2,p.x+width/2,p.y+height/2};
 }
 
+// Shared declaration precedence and typography; measurements remain injected.
+#include "flowchart_styles.inc"
+
 struct Label {
     std::u16string text;
     double width=0,height=0,baseline=0,font_height=0;
+    std::optional<MathLabel> math_label;
+    FlowchartLabelFont font;
 };
 
-Label measure_label(const ErSvgMeasure& measure,std::u16string_view text,double size,bool html) {
+Label measure_label(const ErSvgMeasure& measure,std::u16string_view text,double size,bool html,
+    const MathLabelMeasure& math_measure={},std::u16string_view family={},
+    unsigned weight=400,bool italic=false) {
     if(text.empty()) return {};
-    auto result=measure(text,size,false);
+    if(html && math_measure) {
+        auto rich=math_measure(text,family,size,weight,italic);
+        if(!rich) throw std::runtime_error(rich.error());
+        if(*rich) {
+            Label label{.text=std::u16string{text},.width=(**rich).width,.height=(**rich).height};
+            label.math_label=std::move(**rich);
+            label.font={std::u16string{family},size,weight,italic};
+            return label;
+        }
+    }
+    auto result=measure(text,family,size,weight,italic);
     if(!result) throw std::runtime_error(result.error());
     for(double value:{result->advance,result->width,result->height,result->baseline})
         if(!std::isfinite(value)||value<0) throw std::runtime_error("Invalid ER text measurement");
     return {std::u16string(text),html?result->advance:result->width,
-        html?size*1.5:result->height,result->baseline,result->height};
+        html?size*1.5:result->height,result->baseline,result->height,{},
+        {std::u16string{family},size,weight,italic}};
 }
 
 std::u16string joined_keys(std::span<const std::u16string> keys) {
@@ -78,12 +96,23 @@ struct EntityBox {
     std::vector<Row> rows;
     std::array<double,4> columns{};
     double width=0,height=0,header_height=0;
+    FlowchartPaint paint;
+    FlowchartLabelFont font;
 };
 
 EntityBox measure_entity(const ErEntity& entity,const ErSvgMeasure& measure,double font_size,
-    double padding,double text_padding,double minimum_width,bool html,bool raw_html) {
+    double padding,double text_padding,double minimum_width,bool html,bool raw_html,
+    const MathLabelMeasure& math_measure,std::u16string_view family) {
     EntityBox box;
-    box.title=measure_label(measure,entity.alias.empty()?entity.name:entity.alias,font_size,html);
+    box.paint=compile_paint(entity.compiled_styles,entity.styles);
+    FlowchartSvgTheme default_font;
+    default_font.font_family=family;default_font.font_size=font_size;
+    box.font=box.paint.font(default_font);
+    const auto measure_cell=[&](std::u16string_view text) {
+        return measure_label(measure,text,box.font.size,html,math_measure,box.font.family,
+            box.font.weight,box.font.italic);
+    };
+    box.title=measure_cell(entity.alias.empty()?entity.name:entity.alias);
     if(entity.attributes.empty()) {
         box.width=std::max(minimum_width,box.title.width+2*padding);
         box.height=box.title.height+3*padding;
@@ -102,7 +131,7 @@ EntityBox measure_entity(const ErEntity& entity,const ErSvgMeasure& measure,doub
             attribute.type,attribute.name,keys,attribute.comment};
         for(std::size_t i=0;i<text.size();++i) {
             auto& label=row.cells[i];
-            label=measure_label(measure,text[i],font_size,html);
+            label=measure_cell(text[i]);
             box.columns[i]=std::max(box.columns[i],label.width+padding);
             row.height=std::max(row.height,label.height);
             widest_label=std::max(widest_label,label.width);
@@ -124,20 +153,30 @@ EntityBox measure_entity(const ErEntity& entity,const ErSvgMeasure& measure,doub
     return box;
 }
 
+std::string font_attribute(std::u16string_view family);
+
 struct Paint {
     const ErSvgTheme& theme;
     std::string family;
     std::string body;
+    const FlowchartPaint* style=nullptr;
+
+    std::string property(std::u16string_view name,std::string_view fallback) const {
+        return style?style->get(name,fallback):std::string{fallback};
+    }
 
     void plain_rect(Box box) {
         body+="<rect class=\"basic label-container\" x=\""+number(box.left)+
             "\" y=\""+number(box.top)+"\" width=\""+number(box.width())+
-            "\" height=\""+number(box.height())+"\" fill=\""+attr(theme.background)+
-            "\" stroke=\""+attr(theme.border)+"\" stroke-width=\"1\"/>";
+            "\" height=\""+number(box.height())+"\" fill=\""+property(u"fill",theme.background)+
+            "\" stroke=\""+property(u"stroke",theme.border)+"\" stroke-width=\""+
+            property(u"stroke-width","1")+"\" stroke-dasharray=\""+property(u"stroke-dasharray","none")+"\"/>";
     }
 
     void rough_rect(Box box,std::string_view fill,std::string_view css_class) {
-        rough_shape(rough_rectangle_paths(box.left,box.top,box.width(),box.height()),fill,css_class);
+        const bool override_fill=css_class=="outer-path"||css_class=="row-rect-even";
+        rough_shape(rough_rectangle_paths(box.left,box.top,box.width(),box.height()),
+            override_fill?property(u"fill",fill):std::string{fill},css_class);
     }
 
     void divider(double x1,double y1,double x2,double y2) {
@@ -147,14 +186,15 @@ struct Paint {
                 {x2+half_thickness,y2},{x2-half_thickness,y2}}} :
             std::array<RoughPoint,4>{{{x1,y1-half_thickness},{x1,y1+half_thickness},
                 {x2,y2+half_thickness},{x2,y2-half_thickness}}};
-        rough_shape(rough_polygon_paths(points),theme.background,"divider");
+        rough_shape(rough_polygon_paths(points),property(u"fill",theme.background),"divider");
     }
 
     void rough_shape(const RoughRectanglePaths& paths,std::string_view fill,std::string_view css_class) {
         body+="<g class=\""+std::string(css_class)+"\"><path d=\""+paths.fill_path+
             "\" stroke=\"none\" stroke-width=\"0\" fill=\""+attr(fill)+
-            "\"/><path d=\""+paths.stroke_path+"\" stroke=\""+attr(theme.border)+
-            "\" stroke-width=\"1.3\" fill=\"none\" stroke-dasharray=\"0 0\"/></g>";
+            "\"/><path d=\""+paths.stroke_path+"\" stroke=\""+property(u"stroke",theme.border)+
+            "\" stroke-width=\""+property(u"stroke-width","1.3")+"\" fill=\"none\" stroke-dasharray=\""+
+            property(u"stroke-dasharray","0 0")+"\"/></g>";
     }
 
     void label(const Label& value,double x,double y,double size,bool html,
@@ -170,18 +210,27 @@ struct Paint {
             body+="<rect class=\"er-label-background\""+bounds+
                 " fill=\""+attr(theme.edge_background)+"\"/>";
         }
+        if(value.math_label) {
+            auto svg=render_math_label_svg(*value.math_label,middle?x-value.width/2:x,y,
+                {value.font.family,property(u"color",theme.text),"er-math-label"});
+            if(!svg) throw std::runtime_error(svg.error());
+            body+=*svg+"</g>";
+            return;
+        }
         // Use the same measured font box inside the HTML line height. CSS
         // assigns the leading above the baseline to whole pixels for this box.
         const auto baseline=html?value.baseline+std::floor((value.height-value.font_height)/2):size;
-        text(value.text,x,y+baseline,size,middle,edge&&!html?theme.title_color:theme.text);
+        text(value.text,x,y+baseline,size,middle,property(u"color",edge&&!html?theme.title_color:theme.text),{},&value.font);
         body+="</g>";
     }
 
     void text(std::u16string_view value,double x,double baseline,double size,
-        bool middle,std::string_view color,std::string_view css_class={}) {
+        bool middle,std::string_view color,std::string_view css_class={},const FlowchartLabelFont* font=nullptr) {
         body+="<text x=\""+number(x)+"\" y=\""+number(baseline)+
-            "\" font-family=\""+family+"\" font-size=\""+number(size)+
+            "\" font-family=\""+(font?font_attribute(font->family):family)+"\" font-size=\""+number(size)+
             "px\" fill=\""+attr(color)+"\"";
+        if(font) body+=" font-weight=\""+std::to_string(font->weight)+"\" font-style=\""+
+            std::string(font->italic?"italic":"normal")+"\"";
         if(middle) body+=" text-anchor=\"middle\"";
         if(!css_class.empty()) body+=" class=\""+std::string(css_class)+"\"";
         body+=">"+xml(value)+"</text>";
@@ -192,11 +241,12 @@ void paint_entity(Paint& paint,const EntityBox& entity,FlowchartPoint center,
     double padding,double text_padding,bool html,bool raw_html) {
     const auto box=centered(center,entity.width,entity.height);
     const auto& theme=paint.theme;
+    paint.style=&entity.paint;
     paint.body+="<g class=\"node default\">";
     if(entity.rows.empty()) {
         paint.plain_rect(box);
         const double y=center.y-entity.title.height/2;
-        paint.label(entity.title,center.x,y,theme.font_size,html,true,"label");
+        paint.label(entity.title,center.x,y,entity.font.size,html,true,"label");
     } else {
         if(!raw_html) {padding*=1.25;text_padding*=1.25;}
         paint.rough_rect(box,theme.background,"outer-path");
@@ -209,14 +259,14 @@ void paint_entity(Paint& paint,const EntityBox& entity,FlowchartPoint center,
                 even?theme.attribute_even:theme.attribute_odd,even?"row-rect-even":"row-rect-odd");
             row_y=row_bottom;
         }
-        paint.label(entity.title,center.x,box.top+text_padding/2,theme.font_size,html,true,"label name");
+        paint.label(entity.title,center.x,box.top+text_padding/2,entity.font.size,html,true,"label name");
         row_y=header_bottom+text_padding/2;
         for(const auto& row:entity.rows) {
             double x=box.left+padding/2;
             constexpr std::array classes{"label attribute-type","label attribute-name",
                 "label attribute-keys","label attribute-comment"};
             for(std::size_t i=0;i<row.cells.size();++i) {
-                paint.label(row.cells[i],x,row_y,theme.font_size,html,false,classes[i]);
+                paint.label(row.cells[i],x,row_y,entity.font.size,html,false,classes[i]);
                 x+=entity.columns[i];
             }
             row_y+=row.height;
@@ -233,6 +283,7 @@ void paint_entity(Paint& paint,const EntityBox& entity,FlowchartPoint center,
         paint.divider(box.left,header_bottom,box.right,header_bottom);
     }
     paint.body+="</g>";
+    paint.style=nullptr;
 }
 
 bool html_label_setting(const ConfigValue* value,bool fallback) {
@@ -280,12 +331,21 @@ std::expected<ErRenderInput,std::string> prepare_er_render(
     theme.edge_background=color(*variables,u"edgeLabelBackground",theme.edge_background);
     theme.attribute_odd=color(*variables,u"rowOdd",theme.attribute_odd);
     theme.attribute_even=color(*variables,u"rowEven",theme.attribute_even);
+    theme.cluster_fill=color(*variables,u"clusterBkg",theme.cluster_fill);
+    theme.cluster_border=color(*variables,u"clusterBorder",theme.cluster_border);
+    theme.cluster_text=color(*variables,u"titleColor",theme.title_color);
+    if(const auto* flow=config.find(u"flowchart"))
+        if(const auto* margin=flow->find(u"subGraphTitleMargin")) {
+            theme.group_title_top=dimension(*margin,u"top",0);
+            theme.group_title_bottom=dimension(*margin,u"bottom",0);
+        }
     if(const auto* er=config.find(u"er"))
         theme.title_top_margin=dimension(*er,u"titleTopMargin",theme.title_top_margin);
     return out;
 }
 
-std::expected<ErSvg,std::string> render_er_svg(const ErRenderInput& render_input,const ErSvgMeasure& measure) {
+std::expected<ErSvg,std::string> render_er_svg(const ErRenderInput& render_input,const ErSvgMeasure& measure,
+    const MathLabelMeasure& math_measure) {
     try {
         if(!measure) return std::unexpected("ER renderer requires a text measurement callback");
         const auto& input=render_input.document;
@@ -313,13 +373,44 @@ std::expected<ErSvg,std::string> render_er_svg(const ErRenderInput& render_input
         graph.rank_spacing=dimension(options,u"rankSpacing",80);
         if(graph.node_spacing==0) graph.node_spacing=140;
         if(graph.rank_spacing==0) graph.rank_spacing=80;
+        graph.effective_config=input.effective_config;
         std::vector<EntityBox> entities;
+        std::vector<std::size_t> entity_nodes;
         std::vector<FlowchartNodeBox> node_sizes;
+        FlowchartMeasurements measured;
+        struct GroupBox { Label title; FlowchartPaint paint; };
+        std::vector<GroupBox> groups;
+        std::set<std::u16string,std::less<>> group_ids;
+        FlowchartSvgTheme graph_theme;
+        graph_theme.font_family=theme.font_family;
+        graph_theme.font_size=theme.font_size;
+        graph_theme.group_title_top=theme.group_title_top;
+        graph_theme.group_title_bottom=theme.group_title_bottom;
+        // ErDB emits containers in reverse declaration-completion order,
+        // then entities. Retain that order for both layout engines.
+        for(auto it=input.groups.rbegin();it!=input.groups.rend();++it) {
+            const auto& group=*it;
+            auto style=compile_paint(group.compiled_styles,group.styles);
+            const auto font=style.font(graph_theme);
+            auto title=measure_label(measure,group.title,font.size,node_html,math_measure,
+                font.family,font.weight,font.italic);
+            graph.nodes.push_back({.id=group.id,.label=group.title,.label_type=u"markdown",
+                .shape=u"rect",.parent=group.parent,.direction=group.direction,.group=true,.padding=8});
+            node_sizes.push_back({title.width,title.height});
+            measured.nodes.push_back({.width=title.width,.height=title.height,.baseline=title.baseline});
+            groups.push_back({std::move(title),std::move(style)});
+            group_ids.insert(group.id);
+        }
         for(const auto& entity:input.entities) {
+            // Relationships to already declared containers create a DB entity
+            // too; the upstream render projection deliberately omits that duplicate.
+            if(group_ids.contains(entity.name)) continue;
             auto box=measure_entity(entity,measure,theme.font_size,padding,text_padding,
-                minimum_width,node_html,raw_html);
-            graph.nodes.push_back({.id=entity.id,.shape=u"squareRect"});
+                minimum_width,node_html,raw_html,math_measure,theme.font_family);
+            entity_nodes.push_back(graph.nodes.size());
+            graph.nodes.push_back({.id=entity.id,.shape=u"squareRect",.parent=entity.parent});
             node_sizes.push_back({box.width,box.height});
+            measured.nodes.push_back({.width=box.title.width,.height=box.title.height,.baseline=box.title.baseline});
             entities.push_back(std::move(box));
         }
 
@@ -330,15 +421,18 @@ std::expected<ErSvg,std::string> render_er_svg(const ErRenderInput& render_input
             graph.edges.push_back({.id=u"er-edge-"+std::u16string(id.begin(),id.end()),
                 .start=relationship.entity_a,.end=relationship.entity_b,.label=relationship.label,
                 .type=u"arrow_open",.arrow_start=u"none",.arrow_end=u"none"});
-            auto label=measure_label(measure,relationship.label,label_size,edge_html);
+            auto label=measure_label(measure,relationship.label,label_size,edge_html,math_measure,theme.font_family);
             label_sizes.push_back({label.width,label.height+(edge_html || label.text.empty()?0:2)});
             labels.push_back(std::move(label));
         }
         auto layout=[&]()->std::expected<FlowchartLayout,std::string> {
-            if(!elk) return layout_flowchart(graph,node_sizes,label_sizes);
+            if(!elk) {
+                if(groups.empty()) return layout_flowchart(graph,node_sizes,label_sizes);
+                auto scene=layout_measured_flowchart(graph,node_sizes,label_sizes,measured,graph_theme);
+                if(!scene) return std::unexpected(scene.error());
+                return std::move(scene->layout);
+            }
             if(graph.nodes.empty()) return FlowchartLayout{};
-            FlowchartMeasurements measured;
-            measured.nodes.resize(node_sizes.size());
             auto scene=layout_measured_elk_scene(graph,node_sizes,label_sizes,measured,{});
             if(!scene) return std::unexpected(scene.error());
             std::unordered_map<std::u16string_view,std::size_t> ids;
@@ -349,7 +443,8 @@ std::expected<ErSvg,std::string> render_er_svg(const ErRenderInput& render_input
                 const auto& edge=graph.edges[i];
                 const auto& from=scene->layout.nodes[ids.at(edge.start)];
                 const auto& to=scene->layout.nodes[ids.at(edge.end)];
-                clip_elk_node_endpoints(points,from,to,u"rect",u"rect");
+                clip_elk_node_endpoints(points,from,to,u"rect",u"rect",ClassicElkOutline{},false,
+                    graph.nodes[ids.at(edge.start)].group,graph.nodes[ids.at(edge.end)].group);
                 elk_remove_short_marker_segment(points,to,false);
                 elk_remove_short_marker_segment(points,from,true);
             }
@@ -357,11 +452,28 @@ std::expected<ErSvg,std::string> render_er_svg(const ErRenderInput& render_input
         }();
         if(!layout) return std::unexpected(layout.error());
         Paint paint{theme,font_attribute(theme.font_family)};
-        paint.body="<g class=\"root\"><g class=\"edgePaths\">";
+        paint.body="<g class=\"root\"><g class=\"clusters\">";
         const auto place=[=](FlowchartPoint p) {
             return FlowchartPoint{p.x+layout_margin,p.y+layout_margin};
         };
         Box bounds;
+        for(std::size_t i=0;i<groups.size();++i) {
+            const auto& node=layout->nodes[i];
+            const auto center=place({node.x,node.y});
+            const auto box=centered(center,node.width,node.height);
+            bounds.include(box);
+            const auto& group=groups[i];
+            paint.body+="<g class=\"cluster\" data-node=\""+xml(node.id)+"\"><rect x=\""+
+                number(box.left)+"\" y=\""+number(box.top)+"\" width=\""+number(box.width())+
+                "\" height=\""+number(box.height())+"\""+
+                group.paint.attributes(theme.cluster_fill,theme.cluster_border)+"/>";
+            paint.style=&group.paint;
+            paint.label(group.title,center.x,box.top+theme.group_title_top,
+                group.title.font.size,node_html,true,"cluster-label");
+            paint.style=nullptr;
+            paint.body+="</g>";
+        }
+        paint.body+="</g><g class=\"edgePaths\">";
         for(std::size_t i=0;i<input.relationships.size();++i) {
             const auto& relationship=input.relationships[i];
             auto points=layout->edges[i].points;
@@ -387,7 +499,7 @@ std::expected<ErSvg,std::string> render_er_svg(const ErRenderInput& render_input
         }
         paint.body+="</g><g class=\"nodes\">";
         for(std::size_t i=0;i<entities.size();++i) {
-            const auto& node=layout->nodes[i];
+            const auto& node=layout->nodes[entity_nodes[i]];
             const auto center=place({node.x,node.y});
             bounds.include(centered(center,node.width,node.height));
             paint_entity(paint,entities[i],center,padding,text_padding,node_html,raw_html);
@@ -396,7 +508,7 @@ std::expected<ErSvg,std::string> render_er_svg(const ErRenderInput& render_input
 
         if(!std::isfinite(bounds.left)) bounds={0,0,0,0};
         if(!input.title.empty()) {
-            const auto title=measure_label(measure,input.title,theme.font_size,false);
+            const auto title=measure_label(measure,input.title,theme.font_size,false,{},theme.font_family);
             const auto x=(bounds.left+bounds.right)/2;
             const auto y=-theme.title_top_margin;
             paint.text(title.text,x,y,theme.font_size,true,theme.title_color,"erDiagramTitleText");

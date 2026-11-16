@@ -3,10 +3,54 @@ module folia.mermaid.elk_boundary_layers;
 import std;
 
 namespace folia::mermaid {
+std::expected<std::vector<std::size_t>,std::string> elk_boundary_feedback_edges(
+    const ElkCycleGraph& source,std::span<const ElkExternalLayerRole> roles) {
+    if(roles.size()!=source.node_count)return std::unexpected("ELK boundary roles must match nodes");
+    auto graph=source;
+    std::vector<std::vector<std::size_t>> ports(source.node_count),incoming(source.ports.size()),outgoing(source.ports.size());
+    for(std::size_t p=0;p<source.ports.size();++p) {
+        if(source.ports[p].node>=source.node_count)return std::unexpected("ELK cycle port has no node");
+        ports[source.ports[p].node].push_back(p);
+    }
+    for(std::size_t e=0;e<source.edges.size();++e) {
+        const auto& edge=source.edges[e];
+        if(edge.source_port>=source.ports.size()||edge.target_port>=source.ports.size())
+            return std::unexpected("ELK cycle edge has no port");
+        outgoing[edge.source_port].push_back(e);incoming[edge.target_port].push_back(e);
+    }
+    std::vector<std::size_t> result;
+    std::vector<bool> reversed(source.edges.size());
+    const auto reverse=[&](std::size_t e) {
+        auto& edge=graph.edges[e];
+        std::erase(outgoing[edge.source_port],e);std::erase(incoming[edge.target_port],e);
+        std::swap(edge.source_port,edge.target_port);
+        outgoing[edge.source_port].push_back(e);incoming[edge.target_port].push_back(e);
+        reversed[e]=true;result.push_back(e);
+    };
+    // Original handleOuterNodes/reverseEdges visits nodes and their ports in
+    // model order. Edges between equally constrained endpoints are retained;
+    // an edge reversed by a previous boundary must not be reversed twice here.
+    for(std::size_t n=0;n<source.node_count;++n) {
+        const auto role=roles[n];
+        if(role==ElkExternalLayerRole::none)continue;
+        for(const auto p:ports[n]) {
+            const auto incident=role==ElkExternalLayerRole::first_separate?incoming[p]:outgoing[p];
+            for(const auto e:incident) {
+                const auto& edge=graph.edges[e];
+                const auto opposite=role==ElkExternalLayerRole::first_separate?edge.source_port:edge.target_port;
+                if(!reversed[e]&&roles[source.ports[opposite].node]!=role)reverse(e);
+            }
+        }
+    }
+    const auto feedback=elk_depth_first_feedback_edges(graph);
+    if(!feedback)return std::unexpected(feedback.error());
+    result.insert(result.end(),feedback->begin(),feedback->end());
+    return result;
+}
 std::expected<ElkLayeringResult,std::string> elk_layer_boundary_graph(
     const ElkCycleGraph& source,std::span<const ElkExternalLayerRole> roles) {
     if(roles.size()!=source.node_count)return std::unexpected("ELK boundary roles must match nodes");
-    const auto reversed=elk_depth_first_feedback_edges(source);if(!reversed)return std::unexpected(reversed.error());
+    const auto reversed=elk_boundary_feedback_edges(source,roles);if(!reversed)return std::unexpected(reversed.error());
     auto edges=source.edges;
     std::vector<std::vector<std::size_t>> ports(source.node_count),incoming(source.ports.size()),outgoing(source.ports.size());
     std::vector<std::size_t> degree(source.node_count);

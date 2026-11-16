@@ -86,24 +86,17 @@ std::expected<FlowchartScene,std::string> layout_state_elk_scopes(const Flowchar
    for(std::size_t i=0;i<local.edges.size();++i)component.edges.push_back(i);
   }else{
    std::unordered_map<std::u16string,std::size_t> local_ids;
-   std::vector<std::size_t> links(local.nodes.size());
-   for(std::size_t i=0;i<local.nodes.size();++i){local_ids.emplace(local.nodes[i].id,i);links[i]=i;}
-   const auto representative=[&](std::size_t i){
-    while(i!=links[i]){links[i]=links[links[i]];i=links[i];}
-    return i;
-   };
-   for(const auto& edge:local.edges)
-    links[representative(local_ids.at(edge.start))]=representative(local_ids.at(edge.end));
-   std::unordered_map<std::size_t,std::size_t> component_by_root;
-   std::vector<std::size_t> component_by_node(local.nodes.size());
-   for(std::size_t i=0;i<local.nodes.size();++i){
-    const auto [component,inserted]=component_by_root.try_emplace(representative(i),components.size());
-    if(inserted)components.emplace_back();
-    component_by_node[i]=component->second;
-    components[component->second].nodes.push_back(i);
+   for(std::size_t i=0;i<local.nodes.size();++i)local_ids.emplace(local.nodes[i].id,i);
+   std::vector<ElkFlatEdge> topology;
+   for(const auto& edge:local.edges)topology.push_back({local_ids.at(edge.start),local_ids.at(edge.end)});
+   auto partition=elk_split_components(local.nodes.size(),topology);
+   if(!partition)return std::unexpected(partition.error());
+   for(auto& component:*partition){
+    // State's adapter already supplies its node-model order. Keep that import
+    // order while sharing component membership and packing with Flowchart.
+    std::ranges::sort(component.nodes);
+    components.push_back({std::move(component.nodes),std::move(component.edges),{}});
    }
-   for(std::size_t i=0;i<local.edges.size();++i)
-    components[component_by_node[local_ids.at(local.edges[i].start)]].edges.push_back(i);
   }
 
   for(auto& component:components){
@@ -130,23 +123,21 @@ std::expected<FlowchartScene,std::string> layout_state_elk_scopes(const Flowchar
    component.scene=std::move(*placed);
   }
 
-  constexpr double padding=24,component_spacing=24;
-  const auto width=[](const Component& c){return c.scene.layout.width-2*padding;};
-  const auto height=[](const Component& c){return c.scene.layout.height-2*padding;};
-  const auto area=[&](const Component& c){return width(c)*height(c);};
-  double max_row_width=0,total_area=0;
+  constexpr double padding=24;
+  ElkComponentPacking packing;
   if(components.size()>1){
-   // With no model order override or explicit priorities, ELK uses stable
-   // ascending area. The threshold uses its default aspect ratio of 1.6.
-   std::ranges::stable_sort(components,std::ranges::less{},area);
-   for(const auto& c:components){max_row_width=std::max(max_row_width,width(c));total_area+=area(c);}
-   max_row_width=std::max(max_row_width,std::sqrt(total_area)*static_cast<double>(1.6f));
+   std::vector<ElkComponentSize> sizes;
+   for(const auto& component:components)
+    sizes.push_back({component.scene.layout.width-2*padding,component.scene.layout.height-2*padding});
+   auto packed=elk_pack_components(sizes);
+   if(!packed)return std::unexpected(packed.error());
+   packing=std::move(*packed);
+  }else{
+   packing.order.push_back(0);packing.offsets.emplace_back();
   }
-  double x=0,y=0,row_height=0,broadest=component_spacing;
-  for(auto& component:components){
-   if(components.size()>1&&x+width(component)>max_row_width){
-    x=0;y+=row_height+component_spacing;row_height=0;
-   }
+  for(const auto index:packing.order){
+   auto& component=components[index];
+   const auto [x,y]=packing.offsets[index];
    for(std::size_t n=0;n<component.nodes.size();++n){
     const auto i=nodes[scope][component.nodes[n]];
     auto& node=scene.layout.nodes[i];
@@ -159,14 +150,12 @@ std::expected<FlowchartScene,std::string> layout_state_elk_scopes(const Flowchar
     for(auto& point:edge.points){point.x+=x;point.y+=y;}
     if(edge.label){edge.label->x+=x;edge.label->y+=y;}
    }
-   broadest=std::max(broadest,x+width(component));row_height=std::max(row_height,height(component));
-   x+=width(component)+component_spacing;
   }
   ScopeFrame frame;
   if(components.size()==1){
    frame.width=components.front().scene.layout.width;frame.height=components.front().scene.layout.height;
   }else{
-   frame.width=broadest+2*padding;frame.height=y+row_height+2*padding;
+   frame.width=packing.width+2*padding;frame.height=packing.height+2*padding;
   }
   if(scope!=root){
    const auto& group=graph.nodes[scope];

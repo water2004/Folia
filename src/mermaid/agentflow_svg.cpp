@@ -39,12 +39,15 @@ std::expected<AgentflowRenderInput, std::string> prepare_agentflow_render(const 
     out.theme.text = narrow(member(tv, u"textColor"), u"#333333");
     out.theme.background = narrow(member(tv, u"mainBkg"), u"#ffffff");
     out.theme.line = narrow(member(tv, u"lineColor"), u"#333333");
+    out.theme.container_stroke=narrow(member(tv,u"flowContainerStroke"),str(member(tv,u"secondaryBorderColor"),u"#aaaa33"));
     out.theme.border_colors = strings(member(tv, u"borderColorArray"));
     out.theme.bkg_colors = strings(member(tv, u"bkgColorArray"));
     out.theme.font_size = numeric(member(tv, u"fontSize"), 16);
     out.theme.diagram_padding = numeric(member(cfg, u"diagramPadding"), 8);
     out.theme.min_node_width = numeric(member(cfg, u"minNodeWidth"), 120);
     out.theme.wrapping_width = numeric(member(cfg, u"wrappingWidth"), 120);
+    const auto& html = member(p.effective_config, u"htmlLabels");
+    out.theme.html_labels = html.kind == ConfigKind::null || config_truthy(html);
     const auto look = str(member(cfg, u"look"), str(member(p.effective_config, u"look"), u"neo"));
     out.theme.neo = look == u"neo";
     const auto& hops = member(member(p.effective_config, u"elk"), u"lineHops");
@@ -55,7 +58,7 @@ std::expected<AgentflowRenderInput, std::string> prepare_agentflow_render(const 
     return out;
 }
 std::expected<AgentflowSvg, std::string> render_agentflow_svg(const AgentflowRenderInput &in,
-                                                              const SvgTextMeasure &measure) {
+    const SvgTextMeasure &measure, const MathLabelMeasure &math_measure) {
     try {
         if (!measure)
             return std::unexpected("Agentflow rendering requires platform text measurement");
@@ -73,28 +76,51 @@ std::expected<AgentflowSvg, std::string> render_agentflow_svg(const AgentflowRen
         graph.theme.border = in.theme.line;
         graph.theme.text = in.theme.text;
         graph.theme.line = in.theme.line;
+        graph.theme.cluster_fill="none";
+        graph.theme.cluster_border=in.theme.container_stroke;
+        graph.theme.cluster_stroke_width=.75;
+        graph.theme.cluster_radius=graph.theme.collapsed_radius=10;
+        graph.theme.collapsed_indicator_fill=graph.theme.border;
+        graph.theme.collapsed_indicator_opacity=.5;
         graph.theme.neo = in.theme.neo;
         graph.theme.elk_line_hops = in.theme.elk_line_hops;
         FlowchartMeasurements measured;
         const auto line_height = std::max(in.theme.font_size * 1.5, 1.0);
+        const auto label = [&](std::u16string_view text) -> std::expected<FlowchartTextBox, std::string> {
+            if (in.theme.html_labels && math_measure) {
+                auto rich = math_measure(text, in.theme.font_family, in.theme.font_size, 400, false);
+                if (!rich) return std::unexpected(rich.error());
+                if (*rich) {
+                    FlowchartTextBox box;
+                    box.width = (**rich).width;
+                    box.height = (**rich).height;
+                    box.math_label = std::make_shared<const MathLabel>(std::move(**rich));
+                    return box;
+                }
+            }
+            auto metrics = measure(text, in.theme.font_size, 400);
+            if (!metrics) return std::unexpected(metrics.error());
+            FlowchartTextBox box;
+            box.width = metrics->width;
+            box.height = std::max(metrics->height, line_height);
+            box.baseline = metrics->baseline + (box.height - metrics->height) / 2;
+            box.lines = {std::u16string{text}};
+            return box;
+        };
         for (const auto &c : in.document.containers) {
             FlowchartNode group;
             group.id = c.id;
             group.label = c.label;
             group.parent = c.parent;
-            group.shape = u"rect";
-            group.group = true;
+            const auto* view=c.metadata.find(u"view");
+            const bool collapsed=view && view->kind==ConfigKind::string && view->string==u"collapsed";
+            group.shape = collapsed?u"collapsedGroup":u"rect";
+            group.group = !collapsed;
+            const auto& stroke=in.theme.container_stroke;
+            group.styles={u"stroke:"+std::u16string{stroke.begin(),stroke.end()},u"stroke-width:0.75",u"fill:none"};
             group.padding = 8;
             graph.document.nodes.push_back(std::move(group));
-            auto m = measure(c.label, in.theme.font_size, 400);
-            if (!m)
-                return std::unexpected(m.error());
-            FlowchartTextBox b;
-            b.width = m->width;
-            b.height = std::max(m->height, line_height);
-            b.baseline = m->baseline + (b.height - m->height) / 2;
-            b.lines = {c.label};
-            measured.nodes.push_back(std::move(b));
+
         }
         for (const auto &n : in.document.nodes) {
             FlowchartNode node;
@@ -128,15 +154,7 @@ std::expected<AgentflowSvg, std::string> render_agentflow_svg(const AgentflowRen
                 }
             }
             graph.document.nodes.push_back(std::move(node));
-            auto m = measure(n.label, in.theme.font_size, 400);
-            if (!m)
-                return std::unexpected(m.error());
-            FlowchartTextBox b;
-            b.width = m->width;
-            b.height = std::max(m->height, line_height);
-            b.baseline = m->baseline + (b.height - m->height) / 2;
-            b.lines = {n.label};
-            measured.nodes.push_back(std::move(b));
+
         }
         for (const auto &e : in.document.edges) {
             FlowchartEdge edge;
@@ -144,20 +162,24 @@ std::expected<AgentflowSvg, std::string> render_agentflow_svg(const AgentflowRen
             edge.end = e.to;
             edge.label = e.label;
             edge.stroke = e.dashed ? u"dotted" : u"normal";
-            if (e.dashed)
-                edge.arrow_end = u"none";
+            edge.arrow_end=e.arrow_end;
             graph.document.edges.push_back(std::move(edge));
-            FlowchartTextBox b;
-            if (!e.label.empty()) {
-                auto m = measure(e.label, in.theme.font_size, 400);
-                if (!m)
-                    return std::unexpected(m.error());
-                b.width = m->width;
-                b.height = std::max(m->height, line_height);
-                b.baseline = m->baseline + (b.height - m->height) / 2;
-                b.lines = {e.label};
+        }
+        if(auto projected=project_collapsed_flowchart_groups(graph.document);!projected)
+            return std::unexpected(projected.error());
+        for(const auto& node:graph.document.nodes) {
+            auto box=label(node.label);
+            if(!box) return std::unexpected(box.error());
+            measured.nodes.push_back(std::move(*box));
+        }
+        for(const auto& edge:graph.document.edges) {
+            FlowchartTextBox box;
+            if(!edge.label.empty()) {
+                auto measured_label=label(edge.label);
+                if(!measured_label) return std::unexpected(measured_label.error());
+                box=std::move(*measured_label);
             }
-            measured.edges.push_back(std::move(b));
+            measured.edges.push_back(std::move(box));
         }
         auto svg = render_flowchart_svg(graph, measured);
         if (!svg)

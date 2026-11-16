@@ -32,31 +32,18 @@ FlowchartPoint intersect(const FlowchartPlacedNode& n,std::u16string_view shape,
     const FlowchartLocalShape* local=nullptr) {
     if(local) if(const auto* polygon=std::get_if<std::vector<FlowchartPoint>>(&local->attachment))
         return polygon_intersection(n,*polygon,p);
-    if(shape==u"stadium") return polygon_intersection(n,stadium_points(n.width,n.height),p);
-    if(shape==u"subroutine") return polygon_intersection(n,subroutine_points(n.width,n.height),p);
+    if(local) if(const auto* circle=std::get_if<FlowchartCircleAttachment>(&local->attachment)) {
+        const double dx=p.x-n.x,dy=p.y-n.y,distance=std::hypot(dx,dy);
+        const double radius=circle->radius?circle->radius:n.width/2;
+        return distance?FlowchartPoint{n.x+radius*dx/distance,n.y+radius*dy/distance}:FlowchartPoint{n.x,n.y};
+    }
     if(shape==u"lin-doc") return polygon_intersection(n,lined_document_points(n.width,n.height,neo),p);
-    if(classic_polygon(shape)) return polygon_intersection(n,classic_polygon_points(shape,n.width,n.height,neo),p);
     if(!local&&extra_flowchart_shape(shape)&&shape!=u"lin-rect"&&shape!=u"div-rect") {
         return polygon_intersection(n,extra_shape_outline(shape,n.width,n.height),p);
     }
-    const double dx=p.x-n.x,dy=p.y-n.y;
-    double factor;
-    if(shape==u"circle" || shape==u"doublecircle") factor=(n.width/2)/std::hypot(dx,dy);
-    else if(shape==u"diamond") factor=1/(std::abs(dx)/(n.width/2)+std::abs(dy)/(n.height/2));
-    else factor=1/std::max(std::abs(dx)/(n.width/2),std::abs(dy)/(n.height/2));
-    if(!std::isfinite(factor)) throw std::runtime_error("Invalid Flowchart shape intersection");
-    FlowchartPoint result{n.x+dx*factor,n.y+dy*factor};
+    auto result=classic_shape_intersection(n,shape,p,neo);
     if(local) if(const auto* cylinder=std::get_if<FlowchartCylinderAttachment>(&local->attachment))
         return apply_cylinder_attachment(*cylinder,n,p,result);
-    if(shape==u"cylinder") {
-        const double rx=n.width/2,ry=cylinder_radius_y(n.width),x=result.x-n.x;
-        if(rx!=0 && (std::abs(x)<rx || (std::abs(x)==rx && std::abs(result.y-n.y)>n.height/2-ry))) {
-            double y=ry*ry*(1-x*x/(rx*rx));
-            if(y>0) y=std::sqrt(y);
-            y=ry-y;if(dy>0) y=-y;
-            result.y+=y;
-        }
-    }
     return result;
 }
 #include "flowchart_elk_paint.inc"
@@ -67,35 +54,7 @@ void shorten(FlowchartPoint& p,FlowchartPoint neighbor,double amount) {
     if(length>0) {p.x+=amount*dx/length;p.y+=amount*dy/length;}
 }
 #include "flowchart_curves.inc"
-std::string_view marker_name(std::u16string_view arrow) {
-    if(arrow==u"none") return {};
-    if(arrow==u"arrow_point") return "point";
-    if(arrow==u"arrow_circle") return "circle";
-    if(arrow==u"arrow_cross") return "cross";
-    throw std::runtime_error("Flowchart SVG marker is not implemented yet");
-}
-// Original markers.js classic geometry. Circle/cross use their refX positions;
-// lineWithOffset shortens only point arrows in this look, not the neo offsets.
-std::string marker_definitions(std::string_view color,std::string_view prefix="flow",
-    std::string_view stroke={}) {
-    if(stroke.empty()) stroke=color;
-    std::string out="<defs>";
-    for(auto type:{"point","circle","cross"}) for(bool start:{false,true}) {
-        const std::string_view name=type;
-        const bool point=name=="point",cross=name=="cross";
-        out+="<marker id=\""+std::string(prefix)+"-"+std::string(name)+(start?"-start":"-end")+
-            "\" viewBox=\""+(cross?"0 0 11 11":"0 0 10 10")+
-            "\" refX=\""+(point?(start?"4.5":"5"):(start?"-1":cross?"12":"11"))+
-            "\" refY=\""+(cross?"5.2":"5")+"\" markerUnits=\"userSpaceOnUse\" markerWidth=\""+
-            (point?"8":"11")+"\" markerHeight=\""+(point?"8":"11")+"\" orient=\"auto\">";
-        if(name=="circle") out+="<circle cx=\"5\" cy=\"5\" r=\"5\"";
-        else out+="<path d=\""+std::string(cross?"M 1,1 l 9,9 M 10,1 l -9,9":
-            start?"M 0 5 L 10 10 L 10 0 z":"M 0 0 L 10 5 L 0 10 z")+"\"";
-        out+=" fill=\""+std::string(point?stroke:color)+"\" stroke=\""+std::string(stroke)+
-            "\" stroke-width=\""+(cross?"2":"1")+"\" stroke-dasharray=\"1,0\"/></marker>";
-    }
-    return out+"</defs>";
-}
+#include "flowchart_markers.inc"
 // utils.calcLabelPosition/calculatePoint: midpoint by polyline distance, with
 // the original five-decimal interpolation. This is not the curve's midpoint.
 FlowchartPoint label_midpoint(std::span<const FlowchartPoint> points) {
@@ -114,6 +73,7 @@ FlowchartPoint label_midpoint(std::span<const FlowchartPoint> points) {
     return points.back();
 }
 #include "flowchart_rough.inc"
+#include "flowchart_symbol_shapes.inc"
 #include "flowchart_storage_shapes.inc"
 #include "flowchart_clusters.inc"
 #include "flowchart_neo.inc"
@@ -123,6 +83,7 @@ FlowchartPoint flowchart_node_label_offset(const FlowchartNode& node,FlowchartNo
     const RoughFlowchartNode* rough=nullptr) {
     if(local) return local->label_offset;
     if(node.shape==u"cylinder") return {0,node.padding/1.5};
+    if(node.shape==u"collapsedGroup") return {0,-14};
     if(node.shape==u"lin-doc") {
         const double w=box.width/1.1,h=box.height/(theme.neo?1.5:1.25),amplitude=theme.neo?h/4:h/8;
         const double label_width=std::max(label.width,theme.minimum_label_width);
@@ -133,6 +94,11 @@ FlowchartPoint flowchart_node_label_offset(const FlowchartNode& node,FlowchartNo
     return {node.shape==u"odd"?box.height/8:0,0};
 }
 
+}
+
+bool flowchart_shape_has_label(std::u16string_view shape) {
+    const auto canonical=flowchart_classic_shape(shape);
+    return symbol_has_label(canonical.empty()?shape:canonical);
 }
 
 std::expected<FlowchartLabelFont,std::string> flowchart_label_font(
@@ -163,11 +129,17 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
         }
         if(measured.nodes.size()!=graph.nodes.size() || measured.edges.size()!=graph.edges.size())
             return std::unexpected("Flowchart needs one measured label per node and edge");
-        for(auto v:{theme.font_size,theme.minimum_label_width,theme.wrapping_width,theme.padding,theme.radius,theme.group_title_top,theme.group_title_bottom,theme.node_stroke_width})
+        for(std::size_t i=0;i<graph.nodes.size();++i) if(!graph.nodes[i].group&&!flowchart_shape_has_label(graph.nodes[i].shape)) {
+            graph.nodes[i].label.clear();measured.nodes[i]={};
+        }
+        for(auto v:{theme.font_size,theme.minimum_label_width,theme.wrapping_width,theme.padding,theme.radius,theme.group_title_top,theme.group_title_bottom,theme.node_stroke_width,theme.cluster_radius,theme.collapsed_radius,theme.cluster_stroke_width,theme.collapsed_indicator_opacity})
             if(!std::isfinite(v)||v<0) return std::unexpected("Invalid Flowchart style dimension");
+        if(theme.collapsed_indicator_opacity>1) return std::unexpected("Invalid Flowchart indicator opacity");
         if(theme.font_size==0||theme.font_family.empty()) return std::unexpected("Invalid Flowchart font");
         for(const auto& paint:{theme.fill,theme.border,theme.text,theme.line,theme.label_background,theme.cluster_fill,theme.cluster_border,theme.cluster_text})
-            theme_detail::color_adjust(std::u16string(paint.begin(),paint.end()),{});
+            if(paint!="none") theme_detail::color_adjust(std::u16string(paint.begin(),paint.end()),{});
+        if(!theme.collapsed_indicator_fill.empty()&&theme.collapsed_indicator_fill!="none")
+            theme_detail::color_adjust(std::u16string(theme.collapsed_indicator_fill.begin(),theme.collapsed_indicator_fill.end()),{});
         if(!graph.title.empty()) {
             if(!measured.title || !valid_box(*measured.title) || !std::isfinite(theme.title_top_margin))
                 return std::unexpected("Flowchart needs valid measured title metrics and margin");
@@ -179,6 +151,37 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
         std::vector<RoughFlowchartNode> rough_nodes;
         if(theme.hand_drawn) rough_nodes.resize(graph.nodes.size());
         std::unordered_map<std::u16string,std::size_t> ids;
+        for(std::size_t i=0;i<graph.nodes.size();++i) ids.emplace(graph.nodes[i].id,i);
+        std::vector<std::u16string_view> directions(graph.nodes.size(),graph.direction);
+        std::optional<FlowchartGraphPreparation> prepared_graph;
+        if(use_elk) {
+            // createGraph.resolveNodeDir runs before ELK's hierarchy mode is
+            // selected: the nearest explicit direction controls shape drawing.
+            for(std::size_t i=0;i<graph.nodes.size();++i) {
+                auto current=i;
+                for(std::size_t depth=0;;++depth) {
+                    if(depth>graph.nodes.size()) return std::unexpected("Cyclic Flowchart containment");
+                    const auto& node=graph.nodes[current];
+                    if(!node.direction.empty()) {directions[i]=node.direction;break;}
+                    if(node.parent.empty()) break;
+                    current=ids.at(node.parent);
+                }
+            }
+        } else {
+            auto prepared=prepare_flowchart_graph(graph);if(!prepared) return std::unexpected(prepared.error());
+            prepared_graph=std::move(*prepared);
+            const auto directions_in_scope=[&](auto&& self,const FlowchartPreparedGraph& scope)->void {
+                for(const auto& node:scope.nodes) if(node.source_index) directions[*node.source_index]=scope.direction;
+                for(const auto& child:scope.subgraphs) self(self,child);
+            };
+            directions_in_scope(directions_in_scope,prepared_graph->graph);
+        }
+        double state_padding=0;
+        if(const auto* state=graph.effective_config.find(u"state")) if(const auto* value=state->find(u"padding")) {
+            if(value->kind!=ConfigKind::number||!std::isfinite(value->number)||value->number<0)
+                return std::unexpected("Invalid Flowchart state symbol padding");
+            state_padding=value->number;
+        }
         const auto height=[](const FlowchartTextBox& b){return b.height;};
         for(std::size_t i=0;i<graph.nodes.size();++i) {
             const auto& n=graph.nodes[i];const auto& b=measured.nodes[i];
@@ -188,12 +191,24 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
             const double w=n.label.empty()?0:std::max(b.width,theme.minimum_label_width),h=n.label.empty()?0:height(b);
             FlowchartNodeBox box;
             if(n.group) box={b.width,h};
-            else if(n.shape==u"squareRect") box={w+(theme.neo?32:4*n.padding),h+(theme.neo?24:2*n.padding)};
-            else if(n.shape==u"roundedRect") box={w+2*n.padding,h+2*n.padding};
-            else if(n.shape==u"diamond") {const double side=w+h+2*n.padding;box={side,side};}
-            else if(n.shape==u"circle") {const double diameter=std::hypot(b.width,h)+(theme.neo?32:n.padding);box={diameter,diameter};}
-            else if(n.shape==u"stadium") box=stadium_box(w,h,theme.neo?40:n.padding,theme.neo?24:n.padding);
-            else if(n.shape==u"subroutine") box={w+16+(theme.neo?28:n.padding),h+(theme.neo?12:n.padding)};
+            else if(n.shape==u"collapsedGroup") {
+                box={std::max(b.width+2*n.padding,80.0),h+28+2*n.padding};
+                if(theme.hand_drawn) {
+                    auto& rough=rough_nodes[i];
+                    rough.drawing=sketch_svg_path(rough_rounded_rect(-box.width/2,-box.height/2,
+                        box.width,box.height,theme.collapsed_radius),{.seed=theme.hand_drawn_seed,
+                        .fill=theme.cluster_fill=="none"?RoughFill::none:RoughFill::solid,
+                        .stroke=theme.cluster_border!="none"});
+                    rough.solid_fill=true;
+                    if(rough.drawing.bounds) box={rough.drawing.bounds->width(),rough.drawing.bounds->height()};
+                }
+            }
+            else if(symbol_flowchart_shape(n.shape)) {
+                auto& local=local_shapes[i].emplace(measure_symbol_shape(n.shape,w,h,n.padding,
+                    directions[i],state_padding,node_paints[i],theme));
+                box=local.box;
+            }
+            else if(const auto classic=classic_shape_box(n.shape,n.label.empty()&&n.shape!=u"circle"&&n.shape!=u"doublecircle"?0:b.width,h,n.label.empty()?0:theme.minimum_label_width,n.padding,theme.neo)) box=*classic;
             else if(n.shape==u"lin-doc") {const double px=theme.neo?16:n.padding,py=theme.neo?12:n.padding;box={(w+2*px)*1.1,(h+2*py)*(theme.neo?1.5:1.25)};}
             else if(extra_flowchart_shape(n.shape)) {
                 box=extra_shape_box(n.shape,w,h,n.padding,theme.neo);
@@ -223,24 +238,13 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
                 else if(local.flat_rough_paths) measure_storage_flat_paths(local,node_paints[i],theme);
                 box=local.box;
             }
-            else if(n.shape==u"cylinder") {const double padding=theme.neo?24:n.padding;const double width=w+padding;box={width,h+padding+3*cylinder_radius_y(width)};}
-            else if(n.shape==u"doublecircle") {const double diameter=std::hypot(b.width,h)+(theme.neo?56:2*n.padding+10);box={diameter,diameter};}
-            else if(classic_polygon(n.shape)) {
-                const double padding=n.shape==u"inv_trapezoid"?2*n.padding:n.padding;
-                const double height=h+padding;
-                const double extra=n.shape==u"hexagon"?height/2:n.shape==u"odd"?height/4:height;
-                if(!theme.neo) box={w+padding+extra,height};
-                else if(n.shape==u"hexagon") box={w+32+2*(h+70)/3.5,h+70};
-                else if(n.shape==u"odd") box={w+42+(h+24)/4,h+24};
-                else box={w+2*padding+extra,height};
-            }
             else return std::unexpected("Flowchart SVG shape is not implemented yet");
-            if(theme.hand_drawn && !n.group && !document_flowchart_shape(n.shape) && !storage_flowchart_shape(n.shape)) {
+            if(theme.hand_drawn && !n.group && n.shape!=u"collapsedGroup" && !symbol_flowchart_shape(n.shape) && !document_flowchart_shape(n.shape) && !storage_flowchart_shape(n.shape)) {
                 rough_nodes[i]=rough_flowchart_node(n.shape,box,node_paints[i],theme);
                 if(const auto& bounds=rough_nodes[i].drawing.bounds)
                     box={bounds->width(),bounds->height()};
             }
-            if(theme.hand_drawn && !n.group) {
+            if(theme.hand_drawn && !n.group && n.shape!=u"collapsedGroup" && !symbol_flowchart_shape(n.shape)) {
                 auto& rough=rough_nodes[i];
                 rough.label_offset=flowchart_node_label_offset(n,box,b,theme,find_local_shape(local_shapes,i),&rough);
                 // With no drawable paths Mermaid measures the label itself for layout.
@@ -250,7 +254,7 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
                     rough.label_only_bounds=RoughBounds{x-w/2,y-h/2,x+w/2,y+h/2};
                 }
             }
-            boxes.push_back(box);ids.emplace(n.id,i);
+            boxes.push_back(box);
         }
         for(std::size_t i=0;i<graph.edges.size();++i) {
             const auto& e=graph.edges[i];const auto& b=measured.edges[i];
@@ -275,8 +279,7 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
             }
             if(!theme.hand_drawn) measure_flowchart_paint_bounds(scene,graph,labels,local_shapes);
         }else {
-            auto prepared=prepare_flowchart_graph(graph);if(!prepared)return std::unexpected(prepared.error());
-            scene=layout_prepared(graph,prepared->graph,boxes,labels,measured,theme,nullptr,
+            scene=layout_prepared(graph,prepared_graph->graph,boxes,labels,measured,theme,nullptr,
                 theme.hand_drawn?&rough_nodes:nullptr,local_shapes);
         }
         const auto* layout=&scene.layout;
@@ -308,6 +311,7 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
                 if(group&&use_elk) rough.drawing=rough_cluster_frame(n,theme);
                 if(const auto bounds=rough_flowchart_bounds(rough))
                     include(*bounds,group?0:n.x,group?0:n.y);
+                else if(local_shapes[i]) include(local_shapes[i]->paint_bounds,n.x,n.y);
             }
             for(std::size_t i=0;i<graph.edges.size();++i) {
                 const auto& e=layout->edges[i];
@@ -351,6 +355,14 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
                 marker_definitions(theme.line,"flow-"+std::to_string(i),xml(edge_paints[i].marker_stroke));
         svg+="<g font-family=\""+xml(theme.font_family)+"\" font-size=\""+number(theme.font_size)+"\" transform=\"translate("+number(wrapper_offset)+","+number(wrapper_offset)+")\">";
         const auto text=[&](std::u16string_view,FlowchartPoint center,const FlowchartTextBox& b,std::string_view css,const FlowchartPaint& paint) {
+            if(b.math_label) {
+                const auto& font=b.paint_font?b.paint_font:b.font;
+                const auto color=paint.get(u"color",css=="cluster-label"?theme.cluster_text:theme.text);
+                auto label=render_math_label_svg(*b.math_label,center.x-b.width/2,
+                    center.y-b.height/2,{font?font->family:theme.font_family,color,css,b.width});
+                if(!label) throw std::runtime_error(label.error());
+                return std::move(*label);
+            }
             // createLabel's unbounded HTML group box keeps each line left aligned.
             const bool left=css=="cluster-label" && theme.html_label_spacing && !b.centered_group;
             if(left) center.x-=b.width/2;
@@ -394,7 +406,7 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
                 theme.cluster_fill,theme.cluster_border,"3",rough_nodes[i].offset);
             else svg+="<rect x=\""+number(n.x-n.width/2)+
                 "\" y=\""+number(n.y-n.height/2)+"\" width=\""+number(n.width)+"\" height=\""+number(n.height)+
-                "\""+node_paints[i].attributes(theme.cluster_fill,theme.neo?border:theme.cluster_border)+shadow.attribute()+"/>";
+                "\" rx=\""+number(theme.cluster_radius)+"\" ry=\""+number(theme.cluster_radius)+"\""+node_paints[i].attributes(theme.cluster_fill,theme.neo?border:theme.cluster_border,number(theme.cluster_stroke_width))+shadow.attribute()+"/>";
             const auto rough_title_offset=theme.hand_drawn?rough_nodes[i].label_offset.y:0;
             svg+=text(source.label,{n.x,n.y-n.height/2+rough_title_offset+theme.group_title_top+height(measured.nodes[i])/2},
                 measured.nodes[i],"cluster-label",node_paints[i])+"</g>";
@@ -429,7 +441,37 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
             svg+=" transform=\"translate("+number(n.x)+","+number(n.y)+")\">";
             const auto paint=node_paints[i].attributes(theme.fill,border,stroke_width)+
                 (source.shape!=u"doublecircle"?shadow.attribute():"");
-            if(theme.hand_drawn) {
+            if(source.shape==u"collapsedGroup") {
+                const auto width=std::max(measured.nodes[i].width+2*source.padding,80.0);
+                const auto height=measured.nodes[i].height+28+2*source.padding;
+                if(theme.hand_drawn) {
+                    auto frame_paint=node_paints[i];
+                    frame_paint.values.erase(u"fill");frame_paint.values.erase(u"stroke");
+                    const auto frame_width=theme.cluster_stroke_width==1?std::string{}:number(theme.cluster_stroke_width);
+                    svg+=rough_flowchart_shape(rough_nodes[i].drawing,frame_paint,
+                        theme.cluster_fill,theme.cluster_border,"0",{},frame_width,
+                        "label-container collapsed-group",true);
+                } else {
+                    // The ordinary .node rect rule outranks the handler's
+                    // presentation attributes; explicit node CSS still wins.
+                    svg+="<rect class=\"label-container collapsed-group\" x=\""+number(-width/2)+
+                        "\" y=\""+number(-height/2)+"\" width=\""+number(width)+"\" height=\""+number(height)+
+                        "\" rx=\""+number(theme.collapsed_radius)+"\" ry=\""+number(theme.collapsed_radius)+"\""+
+                        node_paints[i].attributes(theme.fill,border,stroke_width)+shadow.attribute()+"/>";
+                }
+                const auto separator=-height/2+source.padding+measured.nodes[i].height+8;
+                svg+="<line class=\"collapsed-separator\" x1=\""+number(-width/2+8)+"\" x2=\""+number(width/2-8)+
+                    "\" y1=\""+number(separator)+"\" y2=\""+number(separator)+"\" stroke=\""+theme.cluster_border+
+                    "\" stroke-width=\""+(theme.hand_drawn?"1":"0.75")+"\" stroke-dasharray=\"3, 3\"/>";
+                const auto indicator=theme.hand_drawn||theme.collapsed_indicator_fill.empty()?
+                    theme.cluster_border:theme.collapsed_indicator_fill;
+                for(int dot=-1;dot<=1;++dot) svg+="<circle class=\"collapsed-indicator\" cx=\""+number(dot*10)+
+                    "\" cy=\""+number(separator+10)+"\" r=\"2.5\" fill=\""+indicator+
+                    "\" stroke=\"none\" opacity=\""+number(theme.hand_drawn?1:theme.collapsed_indicator_opacity)+"\"/>";
+            }
+            else if(symbol_flowchart_shape(source.shape)) svg+=paint_symbol_shape(source.shape,
+                *local_shapes[i],node_paints[i],theme,border,stroke_width,shadow.attribute());
+            else if(theme.hand_drawn) {
                 const auto& rough=rough_nodes[i];
                 const bool grouped=source.shape==u"doublecircle"||rough.grouped;
                 if(grouped) svg+="<g class=\"label-container\">";
@@ -457,9 +499,10 @@ std::expected<FlowchartSvg,std::string> render_flowchart_svg(const FlowchartRend
             else if(classic_polygon(source.shape)) svg+="<path class=\"label-container\" d=\""+
                 polygon_path(classic_polygon_points(source.shape,n.width,n.height,theme.neo))+"\""+paint+"/>";
             else svg+="<rect class=\"label-container\" x=\""+number(-n.width/2)+"\" y=\""+number(-n.height/2)+"\" width=\""+number(n.width)+"\" height=\""+number(n.height)+"\" rx=\""+number(source.shape==u"roundedRect"?theme.radius:0)+"\""+paint+"/>";
-            const auto label_offset=theme.hand_drawn?rough_nodes[i].label_offset:
+            const auto label_offset=theme.hand_drawn&&source.shape!=u"collapsedGroup"&&!symbol_flowchart_shape(source.shape)?rough_nodes[i].label_offset:
                 flowchart_node_label_offset(source,{n.width,n.height},measured.nodes[i],theme,find_local_shape(local_shapes,i));
-            svg+=text(source.label,label_offset,measured.nodes[i],"nodeLabel",node_paints[i])+"</g>";
+            if(flowchart_shape_has_label(source.shape)) svg+=text(source.label,label_offset,measured.nodes[i],"nodeLabel",node_paints[i]);
+            svg+="</g>";
         }
         if(!graph.title.empty()) svg+="<text class=\"flowchartTitleText\" text-anchor=\"middle\" font-size=\"18\" fill=\""+
             theme.title_color+"\" x=\""+number(title_x)+"\" y=\""+number(title_y)+"\">"+xml(graph.title)+"</text>";

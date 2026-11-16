@@ -1,0 +1,143 @@
+{
+  "family": "radar",
+  "cases": [
+    {
+      "id": "radar-official-grades",
+      "level": "intermediate",
+      "source": "---\ntitle: \"Grades\"\n---\nradar-beta\n  axis m[\"Math\"], s[\"Science\"], e[\"English\"]\n  axis h[\"History\"], g[\"Geography\"], a[\"Art\"]\n  curve a[\"Alice\"]{85, 90, 80, 70, 75, 90}\n  curve b[\"Bob\"]{70, 75, 85, 80, 90, 85}\n\n  max 100\n  min 0\n",
+      "features": [
+        "six-axes",
+        "multiple-axis-statements",
+        "two-curves",
+        "explicit-range"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/radar.md",
+        "section": "Examples"
+      }
+    },
+    {
+      "id": "radar-official-restaurants",
+      "level": "complex",
+      "source": "radar-beta\n  title Restaurant Comparison\n  axis food[\"Food Quality\"], service[\"Service\"], price[\"Price\"]\n  axis ambiance[\"Ambiance\"]\n\n  curve a[\"Restaurant A\"]{4, 3, 2, 4}\n  curve b[\"Restaurant B\"]{3, 4, 3, 3}\n  curve c[\"Restaurant C\"]{2, 3, 4, 2}\n  curve d[\"Restaurant D\"]{2, 2, 4, 3}\n\n  graticule polygon\n  max 5\n",
+      "features": [
+        "four-curves",
+        "polygon-graticule",
+        "legend",
+        "quoted-labels"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/radar.md",
+        "section": "Examples"
+      }
+    },
+    {
+      "id": "radar-official-themed-curves",
+      "level": "complex",
+      "source": "---\nconfig:\n  radar:\n    axisScaleFactor: 0.25\n    curveTension: 0.1\n  theme: base\n  themeVariables:\n    cScale0: \"#FF0000\"\n    cScale1: \"#00FF00\"\n    cScale2: \"#0000FF\"\n    radar:\n      curveOpacity: 0\n---\nradar-beta\n  axis A, B, C, D, E\n  curve c1{1,2,3,4,5}\n  curve c2{5,4,3,2,1}\n  curve c3{3,3,3,3,3}\n",
+      "features": [
+        "five-axes",
+        "three-curves",
+        "curve-tension",
+        "curve-opacity",
+        "custom-colors"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/radar.md",
+        "section": "Example on config and theme"
+      }
+    },
+    {
+      "id": "radar-three-axis-minimum",
+      "level": "basic",
+      "source": "radar-beta\naxis Readability, Fidelity, Speed\ncurve current{3,4,2}\nmax 5\n",
+      "features": [
+        "three-axes",
+        "single-curve",
+        "explicit-maximum"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/radar.md",
+        "section": "Combined documented syntax"
+      }
+    },
+    {
+      "id": "radar-reference-reordering",
+      "level": "complex",
+      "source": "radar-beta\ntitle Referenced axes in different orders\naxis A[\"Accessibility\"], B[\"Baseline\"], C[\"Clarity\"], D[\"Depth\"], E[\"Efficiency\"]\ncurve old[\"Previous release\"]{E: 6, C: 5, A: 7, D: 4, B: 3}\ncurve now[\"Current release\"]{C 8, A 9, E 8, B 7, D 6}\ncurve target[\"Target\"]{B: 10, D: 10, A: 10, E: 10, C: 10}\ngraticule polygon\nmin 2, max 10, ticks 8\n",
+      "features": [
+        "referenced-curves",
+        "axis-reordering",
+        "five-axes",
+        "three-curves",
+        "minimum",
+        "polygon-graticule"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/radar.md",
+        "section": "Combined documented syntax"
+      }
+    },
+    {
+      "id": "radar-eight-axis-labels",
+      "level": "complex",
+      "source": "radar-beta\ntitle Eight dimensions with a compact canvas\naxis A[\"Input latency\"], B[\"Document fidelity\"], C[\"Export quality\"], D[\"Memory efficiency\"]\naxis E[\"Search quality\"], F[\"Interoperability\"], G[\"Accessibility\"], H[\"Reliability\"]\ncurve a[\"Version A\"]{8,6,7,5,8,7,9,6}\ncurve b[\"Version B\"]{7,9,8,8,6,9,8,9}\ncurve c[\"Goal\"]{10,10,10,10,10,10,10,10}\nmax 10, ticks 5\n",
+      "features": [
+        "eight-axes",
+        "long-labels",
+        "three-curves",
+        "custom-margins"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/radar.md",
+        "section": "Combined documented syntax"
+      },
+      "config": {
+        "radar": {
+          "width": 520,
+          "height": 430,
+          "marginTop": 80,
+          "marginRight": 120,
+          "marginBottom": 80,
+          "marginLeft": 120,
+          "axisLabelFactor": 1.22
+        }
+      }
+    },
+    {
+      "id": "radar-clipped-range-hidden-legend",
+      "level": "complex",
+      "source": "radar-beta\naxis A, B, C, D, E, F\ncurve a{0,2,4,6,8,12}\ncurve b{12,8,6,4,2,0}\nmin 2, max 8, ticks 6, showLegend false\ngraticule polygon\n",
+      "features": [
+        "range-clipping",
+        "hidden-legend",
+        "six-axes",
+        "polygon-graticule"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/radar.md",
+        "section": "Combined documented syntax"
+      },
+      "config": {
+        "radar": {
+          "curveTension": 0.6,
+          "axisScaleFactor": 1.15
+        }
+      }
+    },
+    {
+      "id": "radar-unicode-accessibility",
+      "level": "intermediate",
+      "source": "radar-beta\naccTitle: 品质比较\naccDescr {\n  Four language-independent quality dimensions.\n}\ntitle 项目质量\naxis A[\"可读性\"], B[\"保真度\"], C[\"Ευχρηστία\"], D[\"可靠性 😀\"]\ncurve current[\"当前版本\"]{4.5,3.5,4,4.8}\ncurve target[\"目标\"]{5,5,5,5}\nmax 5\n",
+      "features": [
+        "unicode",
+        "accessibility",
+        "fractional-values"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/radar.md",
+        "section": "Combined documented syntax"
+      }
+    }
+  ]
+}

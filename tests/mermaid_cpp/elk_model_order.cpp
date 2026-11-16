@@ -1,6 +1,7 @@
 #include "support/folia_test.hpp"
 import folia.mermaid.elk_order;
 import folia.mermaid.elk_model_order;
+import folia.mermaid.elk_ports;
 
 namespace {
 using namespace boost::ut;
@@ -59,8 +60,19 @@ ElkLayeredGraph make_graph(const std::vector<std::string_view>& row) {
         graph.ports[e*2].side=ElkPortSide::east; graph.ports[e*2+1].side=ElkPortSide::west;
         graph.ports[e*2].y=(e*7)%23; graph.ports[e*2+1].y=(e*11)%19;
     }
+    if (row.size() == 10) {
+        const auto sides = fields(row[9], ',');
+        if (sides.size() != source.edges.size()) throw std::runtime_error("Invalid ELK port sides");
+        for (std::size_t e = 0; e < sides.size(); ++e) {
+            const auto ends = fields(sides[e], ':');
+            if (ends.size() != 2) throw std::runtime_error("Invalid ELK port side pair");
+            graph.ports[e*2].side=ends[0]=="W"?ElkPortSide::west:ElkPortSide::east;
+            graph.ports[e*2+1].side=ends[1]=="E"?ElkPortSide::east:ElkPortSide::west;
+        }
+    }
     for (const auto n : fields(row[3], ',')) graph.nodes[number(n)].fixed_port_positions=true;
     elk_split_long_edges(graph);
+    if (row.size() == 10) elk_prepare_inverted_ports(graph);
     return graph;
 }
 suite elk_model_order=[] {
@@ -69,13 +81,13 @@ suite elk_model_order=[] {
   std::string line;std::size_t count=0;
   while(std::getline(input,line)){
    if(!line.empty()&&line.back()=='\r')line.pop_back();if(line.empty()||line.front()=='#')continue;
-   const auto row=fields(line,'\t');expect(fatal(row.size()==9_u));auto graph=make_graph(row);
+   const auto row=fields(line,'\t');expect(fatal(row.size()==9_u || row.size()==10_u));auto graph=make_graph(row);
    expect(fatal(elk_sort_flat_ports(graph).has_value()));elk_sort_input_model(graph);expect(snapshot(graph)==row[5])<<row[0]<<snapshot(graph);
    ElkRandom random(number(row[4]));ElkHierarchyOrderGraph entry{.graph=&graph,.random=&random,.consider_model_order=true};
    const auto crossings=elk_order_hierarchy(std::span{&entry,1});expect(fatal(crossings.has_value()));
    expect(snapshot(graph)==row[6])<<row[0]<<snapshot(graph);expect(*crossings==number(row[7]));
    double next{};std::from_chars(row[8].data(),row[8].data()+row[8].size(),next);expect(std::abs(random.next_double()-next)<1e-12)<<row[0];++count;
-  }expect(count==2_u);
+  }expect(count==5_u);
  };
 };
 }

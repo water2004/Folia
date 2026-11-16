@@ -61,6 +61,7 @@ std::string markers(const ClassSvgTheme& theme) {
 }
 struct NodeBox { double width,height,header,member_height; bool extra; };
 double text_half_line(const ClassTextBox& t) {
+    if(t.math_label && t.line_step>0) return t.line_step/2;
     return t.height/(2*std::max<std::size_t>(1,t.lines.size()));
 }
 struct TextBounds {
@@ -94,7 +95,13 @@ NodeBox node_box(const ClassNodeMeasurements& m,const ClassSvgConfig& c) {
 }
 std::string text(const ClassTextBox& t,double x,double y,const ClassSvgTheme& theme,
     unsigned weight=400,std::u16string_view classifier={},double size=0,bool left_aligned=false) {
-    if(t.text.empty()) return {};
+    if(t.text.empty()&&!t.math_label) return {};
+    if(t.math_label) {
+        const auto& family=t.paint_font?t.paint_font->family:theme.font_family;
+        auto label=render_math_label_svg(*t.math_label,x,y,{family,theme.text,"label",t.width});
+        if(!label) throw std::runtime_error(label.error());
+        return std::move(*label);
+    }
     if(t.paint_font) {weight=t.paint_font->weight;size=t.paint_font->size;}
     std::string content;
     if(!t.runs.empty()) {

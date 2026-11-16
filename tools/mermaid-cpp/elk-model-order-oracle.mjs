@@ -12,7 +12,7 @@ for(const file of lock.elkCycle.files)
   assert.equal(createHash('sha256').update(readFileSync(path.join(base,file.path))).digest('hex'),file.sha256,file.path);
 const context=vm.createContext({module:{exports:{}},exports:{},setTimeout,clearTimeout});context.global=context;
 vm.runInContext(readFileSync(path.join(base,'lib/elk-worker.js'),'utf8'),context);
-const original=vm.runInContext(`(assignment, endpoints, fixed, seed) => {
+const original=vm.runInContext(`(assignment, endpoints, fixed, seed, sides) => {
   $clinit_LayeredOptions();$clinit_InternalProperties_1();$clinit_PortSide();$clinit_PortConstraints();$clinit_OrderingStrategy();
   const graph=new LGraph(), nodes=assignment.map(()=>new LNode(graph)), ports=[];
   $setProperty_0(graph,CONSIDER_MODEL_ORDER_STRATEGY_0,NODES_AND_EDGES);
@@ -23,13 +23,18 @@ const original=vm.runInContext(`(assignment, endpoints, fixed, seed) => {
   });
   endpoints.forEach(([s,t],i)=>{
     const a=new LPort(),b=new LPort(),e=new LEdge();$setProperty_0(e,MODEL_ORDER_1,valueOf_3(i));
-    $setNode(a,nodes[s]);$setNode(b,nodes[t]);a.side=EAST_2;b.side=WEST_2;
+    $setNode(a,nodes[s]);$setNode(b,nodes[t]);
+    a.side=sides?.[i]?.[0]==='W'?WEST_2:EAST_2;
+    b.side=sides?.[i]?.[1]==='E'?EAST_2:WEST_2;
     a.pos.y_0=(i*7)%23;b.pos.y_0=(i*11)%19;
     $setSource_0(e,a);$setTarget_0(e,b);ports.push(a,b);
   });
   const setLayer=$setLayer_0;
   $setLayer_0=(n,l)=>{if(!nodes.includes(n))nodes.push(n);setLayer(n,l);};
-  try{$process_35(graph,new BasicProgressMonitor());}finally{$setLayer_0=setLayer;}
+  try{
+    $process_35(graph,new BasicProgressMonitor());
+    if(sides)$process_24(graph,new BasicProgressMonitor());
+  }finally{$setLayer_0=setLayer;}
   for(const n of nodes.slice(assignment.length))ports.push(...n.ports.array);
   const snapshot=()=>graph.layers.array.map(l=>l.nodes.array.map(n=>nodes.indexOf(n)).join(',')).join(';')+'|'+
     nodes.map(n=>n.ports.array.map(p=>ports.indexOf(p)).join(',')||'-').join(';');
@@ -46,10 +51,20 @@ const original=vm.runInContext(`(assignment, endpoints, fixed, seed) => {
 const cases=[
  ['flowchart-triangle',[0,2,1],[[0,1],[0,2],[2,1]],[],1],
  ['flowchart-fan',[0,1,1],[[0,1],[0,2]],[],1],
+ ['inverted-feedback-first-and-last-layer',[0,1],[[0,1],[0,1]],[],1,[['E','W'],['W','E']]],
+ ['inverted-feedback-spanning-middle-layer',[0,1,2],[[0,1],[1,2],[0,2]],[],1,
+  [['E','W'],['E','W'],['W','E']]],
+ ['inverted-feedback-with-two-entry-nodes',[0,0,1,2],[[0,2],[1,2],[2,3],[0,3]],[],1,
+  [['E','W'],['E','W'],['E','W'],['W','E']]],
 ];
-const rows=['# ELK 0.9.3 flat crossing order; name, layers, node endpoints, fixed nodes, seed, sorted order, best order, crossings, next random double.'];
-for(const [name,layers,edges,fixed,seed] of cases)
- rows.push([name,layers.join(','),edges.map(e=>e.join(':')).join(',')||'-',fixed.join(',')||'-',seed,original(layers,edges,fixed,seed)].join('\t'));
+const rows=['# ELK 0.9.3 flat crossing order; name, layers, node endpoints, fixed nodes, seed, sorted order, best order, crossings, next random double.',
+ '# Optional final field specifies source:target port sides and enables the original InvertedPortProcessor.'];
+for(const [name,layers,edges,fixed,seed,sides] of cases){
+ const row=[name,layers.join(','),edges.map(e=>e.join(':')).join(',')||'-',fixed.join(',')||'-',seed,
+  original(layers,edges,fixed,seed,sides)];
+ if(sides)row.push(sides.map(pair=>pair.join(':')).join(','));
+ rows.push(row.join('\t'));
+}
 const fixture=new URL('../../tests/mermaid_cpp/fixtures/elk-model-order.tsv',import.meta.url),expected=rows.join('\n')+'\n';
 if(process.argv.includes('--write'))writeFileSync(fixture,expected);
 else assert.equal(readFileSync(fixture,'utf8').replaceAll('\r\n','\n'),expected);

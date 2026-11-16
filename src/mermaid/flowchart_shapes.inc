@@ -104,3 +104,57 @@ std::string cylinder_path(double width,double height) {
     return "M"+point({-width/2,-body/2})+arc+number(width)+",0"+arc+number(-width)+",0"+
         "l0,"+number(body)+arc+number(width)+",0l0,"+number(-body);
 }
+
+// Shared intrinsic boxes. Block uses these before assigning grid cells; its
+// positioned pass then applies the individual handler's explicit-size rule.
+std::optional<FlowchartNodeBox> classic_shape_box(std::u16string_view shape,
+    double label_width,double height,double minimum_width,double padding,bool neo=false) {
+    const auto width=std::max(label_width,minimum_width);
+    if(shape==u"squareRect") return FlowchartNodeBox{width+(neo?32:4*padding),height+(neo?24:2*padding)};
+    if(shape==u"roundedRect") return FlowchartNodeBox{width+2*padding,height+2*padding};
+    if(shape==u"diamond") {const double side=width+height+2*padding;return FlowchartNodeBox{side,side};}
+    if(shape==u"circle") {const double diameter=std::hypot(label_width,height)+(neo?32:padding);return FlowchartNodeBox{diameter,diameter};}
+    if(shape==u"stadium") return stadium_box(width,height,neo?40:padding,neo?24:padding);
+    if(shape==u"subroutine") return FlowchartNodeBox{width+16+(neo?28:padding),height+(neo?12:padding)};
+    if(shape==u"cylinder") {
+        const auto pad=neo?24:padding,w=width+pad;
+        return FlowchartNodeBox{w,height+pad+3*cylinder_radius_y(w)};
+    }
+    if(shape==u"doublecircle") {
+        const double diameter=std::hypot(label_width,height)+(neo?56:2*padding+10);
+        return FlowchartNodeBox{diameter,diameter};
+    }
+    if(classic_polygon(shape)) {
+        const double pad=shape==u"inv_trapezoid"?2*padding:padding,h=height+pad;
+        const double extra=shape==u"hexagon"?h/2:shape==u"odd"?h/4:h;
+        if(!neo) return FlowchartNodeBox{width+pad+extra,h};
+        if(shape==u"hexagon") return FlowchartNodeBox{width+32+2*(height+70)/3.5,height+70};
+        if(shape==u"odd") return FlowchartNodeBox{width+42+(height+24)/4,height+24};
+        return FlowchartNodeBox{width+2*pad+extra,h};
+    }
+    return {};
+}
+
+FlowchartPoint classic_shape_intersection(const FlowchartPlacedNode& node,
+    std::u16string_view shape,FlowchartPoint target,bool neo=false) {
+    if(shape==u"stadium") return polygon_intersection(node,stadium_points(node.width,node.height),target);
+    if(shape==u"subroutine") return polygon_intersection(node,subroutine_points(node.width,node.height),target);
+    if(classic_polygon(shape)) return polygon_intersection(node,classic_polygon_points(shape,node.width,node.height,neo),target);
+    const double dx=target.x-node.x,dy=target.y-node.y;
+    double factor;
+    if(shape==u"circle" || shape==u"doublecircle") factor=(node.width/2)/std::hypot(dx,dy);
+    else if(shape==u"diamond") factor=1/(std::abs(dx)/(node.width/2)+std::abs(dy)/(node.height/2));
+    else factor=1/std::max(std::abs(dx)/(node.width/2),std::abs(dy)/(node.height/2));
+    if(!std::isfinite(factor)) throw std::runtime_error("Invalid Flowchart shape intersection");
+    FlowchartPoint result{node.x+dx*factor,node.y+dy*factor};
+    if(shape==u"cylinder") {
+        const double rx=node.width/2,ry=cylinder_radius_y(node.width),x=result.x-node.x;
+        if(rx!=0 && (std::abs(x)<rx || (std::abs(x)==rx && std::abs(result.y-node.y)>node.height/2-ry))) {
+            double y=ry*ry*(1-x*x/(rx*rx));
+            if(y>0) y=std::sqrt(y);
+            y=ry-y;if(dy>0) y=-y;
+            result.y+=y;
+        }
+    }
+    return result;
+}

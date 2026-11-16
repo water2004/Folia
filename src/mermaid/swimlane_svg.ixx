@@ -18,9 +18,13 @@ struct SwimlaneSvgTheme {
     std::string arrowhead = "#333333";
     double stroke_width = 1;
 };
-struct SwimlaneRenderInput { FlowchartInput document; SwimlaneSvgTheme theme; };
+struct SwimlaneRenderInput {
+    FlowchartInput document;
+    SwimlaneSvgTheme theme;
+    bool nodes_html_labels = true, lane_html_labels = false;
+};
 struct SwimlaneSvg { std::string svg; double width = 0, height = 0; };
 std::expected<SwimlaneRenderInput, std::string> prepare_swimlane_render(const PreparedDiagram&);
 std::expected<SwimlaneSvg, std::string> render_swimlane_svg(
-    const SwimlaneRenderInput&, const SvgFamilyTextMeasure&);
+    const SwimlaneRenderInput&, const SvgFamilyTextMeasure&, const MathLabelMeasure& = {});
 }

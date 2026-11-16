@@ -37,5 +37,5 @@ struct ElkHierarchyOrderGraph {
 // Graphs already have separate external layers, split long edges and sorted
 // E/W ports. Parent/child links retain original external-port identities.
 [[nodiscard]] std::expected<std::size_t, std::string> elk_order_hierarchy(
-    std::span<ElkHierarchyOrderGraph> graphs, int thoroughness = 7);
+    std::span<ElkHierarchyOrderGraph> graphs,int thoroughness=7,bool hierarchical_layout=true);
 }

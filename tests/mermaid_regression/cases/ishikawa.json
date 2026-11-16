@@ -1,0 +1,116 @@
+{
+  "family": "ishikawa",
+  "cases": [
+    {
+      "id": "ishikawa-official-01",
+      "level": "complex",
+      "source": "ishikawa-beta\n    Blurry Photo\n    Process\n        Out of focus\n        Shutter speed too slow\n        Protective film not removed\n        Beautification filter applied\n    User\n        Shaky hands\n    Equipment\n        LENS\n            Inappropriate lens\n            Damaged lens\n            Dirty lens\n        SENSOR\n            Damaged sensor\n            Dirty sensor\n    Environment\n        Subject moved too quickly\n        Too dark\n",
+      "features": [
+        "official-example",
+        "syntax"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/ishikawa.md",
+        "section": "Syntax"
+      }
+    },
+    {
+      "id": "ishikawa-effect-only",
+      "level": "basic",
+      "source": "ishikawa-beta\nA reproducible rendering failure\n",
+      "features": [
+        "effect-only"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/ishikawa.md",
+        "section": "Combined syntax regression"
+      }
+    },
+    {
+      "id": "ishikawa-balanced-six-bones",
+      "level": "complex",
+      "source": "ishikawa-beta\n    Delayed shipment\n    People\n        Incomplete training\n        Missing ownership\n    Methods\n        Manual approvals\n        Duplicate review\n    Machines\n        Slow build workers\n        Unreliable test hardware\n    Materials\n        Missing dependencies\n        Corrupted inputs\n    Measurements\n        Incomplete telemetry\n        Incorrect baselines\n    Environment\n        Network interruptions\n        Peak load\n",
+      "features": [
+        "six-main-causes",
+        "balanced",
+        "multiple-children"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/ishikawa.md",
+        "section": "Combined syntax regression"
+      }
+    },
+    {
+      "id": "ishikawa-deep-alternating",
+      "level": "complex",
+      "source": "ishikawa-beta\n    Rendering mismatch\n    Geometry\n        Node measurements\n            Font resolution\n                Missing fallback family\n                Different font weight\n            Line breaking\n                Embedded markup\n        Layout direction\n            Reverse routes\n    Semantics\n        Parser\n            Incomplete grammar\n                Nested delimiters\n                Escaped quotes\n    Rasterization\n        Stroke clipping\n            Negative viewport\n",
+      "features": [
+        "five-levels",
+        "alternating-bones",
+        "uneven-depth"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/ishikawa.md",
+        "section": "Combined syntax regression"
+      }
+    },
+    {
+      "id": "ishikawa-wide-and-deep",
+      "level": "complex",
+      "source": "ishikawa-beta\n    Document open memory regression\n    Text model\n        Source\n        CST\n        Undo\n    Layout\n        Paragraphs\n            Line metrics\n            Glyph runs\n            Hit testing\n        Tables\n            Width negotiation\n            Cell wrapping\n        Lists\n            Nested indentation\n    Images\n        Decoding\n        Scaling\n    Math\n        Glyph geometry\n    Diagrams\n        Parsing\n        Layout\n            Compound nodes\n            Edges\n    Platform\n        Drawing surfaces\n        Brushes\n",
+      "features": [
+        "six-main-causes",
+        "mixed-branch-width",
+        "four-levels"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/ishikawa.md",
+        "section": "Combined syntax regression"
+      }
+    },
+    {
+      "id": "ishikawa-long-labels",
+      "level": "complex",
+      "source": "ishikawa-beta\n    A detailed root effect that must remain legible when its label wraps into several independently measured lines\n    A long primary cause concerning process documentation and team coordination\n        A subordinate cause that contains enough words to trigger the configured wrapping width\n            A still deeper cause requiring a carefully measured connector attachment\n    Another primary cause about instrument calibration and environmental conditions\n        Calibration drift between measurements\n        Temperature outside the normal operating range\n    Operator training and validation\n        Missing practical exercises\n",
+      "features": [
+        "wrapped-effect",
+        "wrapped-causes",
+        "depth",
+        "measured-labels"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/ishikawa.md",
+        "section": "Combined syntax regression"
+      }
+    },
+    {
+      "id": "ishikawa-unicode-and-punctuation",
+      "level": "complex",
+      "source": "ishikawa-beta\n    文档渲染出现差异\n    输入与解析\n        嵌套括号 (a + b) / c\n        引号与分隔符 \"x:y\"\n    布局与测量\n        中文、English 与数字 123\n            字体回退\n            基线对齐\n    输出与缓存\n        SVG <path> 坐标\n        重新编辑后的状态\n",
+      "features": [
+        "unicode",
+        "punctuation",
+        "mixed-scripts",
+        "three-levels"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/ishikawa.md",
+        "section": "Combined syntax regression"
+      }
+    },
+    {
+      "id": "ishikawa-uneven-indentation",
+      "level": "complex",
+      "source": "ishikawa-beta\n    Incorrect output\n    Parser\n      Tokens\n         Escapes\n         Quoted names\n      Grammar\n    Renderer\n      Shapes\n        Ports\n            Compound routing\n      Labels\n    Host\n",
+      "features": [
+        "uneven-indent-width",
+        "sibling-reset",
+        "four-levels"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/ishikawa.md",
+        "section": "Combined syntax regression"
+      }
+    }
+  ]
+}

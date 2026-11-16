@@ -1,0 +1,147 @@
+{
+  "family": "journey",
+  "cases": [
+    {
+      "id": "journey-official-working-day",
+      "level": "basic",
+      "source": "journey\n    title My working day\n    section Go to work\n      Make tea: 5: Me\n      Go upstairs: 3: Me\n      Do work: 1: Me, Cat\n    section Go home\n      Go downstairs: 5: Me\n      Sit down: 5: Me\n",
+      "features": [
+        "sections",
+        "multiple-actors",
+        "scores"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/userJourney.md",
+        "section": "User Journey Diagram"
+      }
+    },
+    {
+      "id": "journey-cross-functional-release",
+      "level": "complex",
+      "source": "journey\ntitle Cross-functional release journey\nsection Discovery\nInterview customers: 4: Researcher, Designer\nAlign requirements: 3: Researcher, Developer, Product owner\nsection Implementation\nBuild prototype: 5: Designer, Developer\nReview accessibility: 2: Designer, Reviewer\nIntegrate services: 3: Developer, Operations\nsection Release\nRun acceptance checks: 4: Reviewer, Operations\nDeploy release: 5: Developer, Operations, Product owner\nCollect feedback: 2: Researcher, Product owner\n",
+      "features": [
+        "three-sections",
+        "six-actors",
+        "eight-tasks",
+        "shared-actors",
+        "score-range"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/userJourney.md",
+        "section": "Combined documented syntax"
+      }
+    },
+    {
+      "id": "journey-long-wrapped-actors",
+      "level": "complex",
+      "source": "journey\ntitle Review and publishing workflow\nsection Editorial review<br/>and verification\nReview the complete manuscript: 3: Editorial coordination team, Independent technical reviewer\nVerify citations and corrections: 2: Independent technical reviewer, Copy editor\nsection Publish<br/>and distribute\nPrepare final publication: 5: Copy editor, Editorial coordination team\nNotify subscribers: 4: Distribution coordinator, Editorial coordination team\n",
+      "features": [
+        "long-actor-labels",
+        "long-task-labels",
+        "line-breaks",
+        "shared-actors",
+        "custom-margins"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/userJourney.md",
+        "section": "Combined documented syntax"
+      },
+      "config": {
+        "journey": {
+          "maxLabelWidth": 110,
+          "width": 180,
+          "height": 80,
+          "leftMargin": 230,
+          "taskMargin": 60
+        }
+      }
+    },
+    {
+      "id": "journey-repeated-sections",
+      "level": "complex",
+      "source": "journey\ntitle Iterative review cycles\nsection Draft\nWrite proposal: 4: Author\nsection Review\nTechnical review: 2: Reviewer, Author\nsection Draft\nAddress feedback: 3: Author, Editor\nsection Review\nFinal checks: 5: Reviewer, Editor\nsection Release\nPublish: 4: Editor, Reader\n",
+      "features": [
+        "repeated-section-name",
+        "actor-sharing",
+        "five-sections",
+        "score-transitions"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/userJourney.md",
+        "section": "Combined documented syntax"
+      }
+    },
+    {
+      "id": "journey-unicode-accessibility",
+      "level": "complex",
+      "source": "journey\ntitle 编辑与发布 / Δ workflow\naccTitle: 多语言文档工作流\naccDescr {\n  The editor and reviewer cooperate through two phases.\n  Labels include Chinese, Greek, and emoji.\n}\nsection 编辑阶段\n输入内容: 5: 编辑者 😀, 审阅者\n校对文档: 2: 审阅者, Συντάκτης\nsection 发布阶段\n导出预览: 3: 编辑者 😀, Συντάκτης\n保存版本: 4: 审阅者\n",
+      "features": [
+        "unicode",
+        "accessibility",
+        "multiline-description",
+        "multiple-actors",
+        "score-range"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/userJourney.md",
+        "section": "Combined documented syntax"
+      }
+    },
+    {
+      "id": "journey-empty-and-shared-actors",
+      "level": "intermediate",
+      "source": "journey\ntitle Automated and manual steps\nsection Automation\nParse document: 5\nBuild preview: 4\nsection Review\nInspect output: 3: Reviewer\nApprove release: 5: Reviewer, Editor\nsection Automation\nPublish archive: 4\n",
+      "features": [
+        "tasks-without-actors",
+        "mixed-actor-presence",
+        "repeated-sections"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/userJourney.md",
+        "section": "Combined documented syntax"
+      }
+    },
+    {
+      "id": "journey-custom-text-placement",
+      "level": "complex",
+      "source": "journey\ntitle Configured multi-stage workflow\nsection Intake\nReceive request: 4: Customer, Support\nClarify requirements: 2: Support, Engineer\nsection Resolution\nDiagnose issue: 3: Engineer\nVerify correction: 4: Engineer, Reviewer\nClose request: 5: Support, Customer\n",
+      "features": [
+        "custom-font-sizes",
+        "custom-colors",
+        "multi-section",
+        "four-actors",
+        "long-labels"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/userJourney.md",
+        "section": "Combined documented syntax"
+      },
+      "config": {
+        "journey": {
+          "width": 190,
+          "height": 70,
+          "textPlacement": "fo",
+          "taskFontSize": 18,
+          "titleFontSize": "26px",
+          "taskMargin": 55,
+          "boxTextMargin": 8,
+          "titleColor": "#335577"
+        }
+      }
+    },
+    {
+      "id": "journey-single-actor-score-extremes",
+      "level": "intermediate",
+      "source": "journey\ntitle One person's workflow\nsection Prepare\nPlan: 1: Contributor\nInvestigate: 2: Contributor\nsection Execute\nDraft: 3: Contributor\nVerify: 4: Contributor\nComplete: 5: Contributor\n",
+      "features": [
+        "single-actor",
+        "all-five-scores",
+        "two-sections"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/userJourney.md",
+        "section": "Combined documented syntax"
+      }
+    }
+  ]
+}

@@ -1,0 +1,150 @@
+{
+  "family": "sankey",
+  "cases": [
+    {
+      "id": "sankey-official-grid",
+      "level": "basic",
+      "source": "sankey\n\n%% source,target,value\nElectricity grid,Over generation / exports,104.453\nElectricity grid,Heating and cooling - homes,113.726\nElectricity grid,H2 conversion,27.14\n",
+      "features": [
+        "fan-out",
+        "decimal-values",
+        "comments"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/sankey.md",
+        "section": "Basic"
+      }
+    },
+    {
+      "id": "sankey-official-energy-system",
+      "level": "complex",
+      "source": "---\nconfig:\n  sankey:\n    showValues: false\n---\nsankey\n\nAgricultural 'waste',Bio-conversion,124.729\nBio-conversion,Liquid,0.597\nBio-conversion,Losses,26.862\nBio-conversion,Solid,280.322\nBio-conversion,Gas,81.144\nBiofuel imports,Liquid,35\nBiomass imports,Solid,35\nCoal imports,Coal,11.606\nCoal reserves,Coal,63.965\nCoal,Solid,75.571\nDistrict heating,Industry,10.639\nDistrict heating,Heating and cooling - commercial,22.505\nDistrict heating,Heating and cooling - homes,46.184\nElectricity grid,Over generation / exports,104.453\nElectricity grid,Heating and cooling - homes,113.726\nElectricity grid,H2 conversion,27.14\nElectricity grid,Industry,342.165\nElectricity grid,Road transport,37.797\nElectricity grid,Agriculture,4.412\nElectricity grid,Heating and cooling - commercial,40.858\nElectricity grid,Losses,56.691\nElectricity grid,Rail transport,7.863\nElectricity grid,Lighting & appliances - commercial,90.008\nElectricity grid,Lighting & appliances - homes,93.494\nGas imports,Ngas,40.719\nGas reserves,Ngas,82.233\nGas,Heating and cooling - commercial,0.129\nGas,Losses,1.401\nGas,Thermal generation,151.891\nGas,Agriculture,2.096\nGas,Industry,48.58\nGeothermal,Electricity grid,7.013\nH2 conversion,H2,20.897\nH2 conversion,Losses,6.242\nH2,Road transport,20.897\nHydro,Electricity grid,6.995\nLiquid,Industry,121.066\nLiquid,International shipping,128.69\nLiquid,Road transport,135.835\nLiquid,Domestic aviation,14.458\nLiquid,International aviation,206.267\nLiquid,Agriculture,3.64\nLiquid,National navigation,33.218\nLiquid,Rail transport,4.413\nMarine algae,Bio-conversion,4.375\nNgas,Gas,122.952\nNuclear,Thermal generation,839.978\nOil imports,Oil,504.287\nOil reserves,Oil,107.703\nOil,Liquid,611.99\nOther waste,Solid,56.587\nOther waste,Bio-conversion,77.81\nPumped heat,Heating and cooling - homes,193.026\nPumped heat,Heating and cooling - commercial,70.672\nSolar PV,Electricity grid,59.901\nSolar Thermal,Heating and cooling - homes,19.263\nSolar,Solar Thermal,19.263\nSolar,Solar PV,59.901\nSolid,Agriculture,0.882\nSolid,Thermal generation,400.12\nSolid,Industry,46.477\nThermal generation,Electricity grid,525.531\nThermal generation,Losses,787.129\nThermal generation,District heating,79.329\nTidal,Electricity grid,9.452\nUK land based bioenergy,Bio-conversion,182.01\nWave,Electricity grid,19.013\nWind,Electricity grid,289.366\n",
+      "features": [
+        "many-to-many",
+        "energy-system",
+        "long-labels",
+        "multiple-ranks",
+        "fractional-values"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/sankey.md",
+        "section": "Example"
+      }
+    },
+    {
+      "id": "sankey-official-quoted-csv",
+      "level": "intermediate",
+      "source": "sankey\n\nPumped heat,\"Heating and cooling, \"\"homes\"\"\",193.026\nPumped heat,\"Heating and cooling, \"\"commercial\"\"\",70.672\n",
+      "features": [
+        "csv-escaping",
+        "quoted-commas",
+        "quoted-double-quotes"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/sankey.md",
+        "section": "Double Quotes"
+      }
+    },
+    {
+      "id": "sankey-energy-left",
+      "level": "complex",
+      "source": "---\nconfig:\n  sankey:\n    showValues: false\n    nodeAlignment: left\n    nodeWidth: 14\n    nodePadding: 12\n---\nsankey\n\nAgricultural 'waste',Bio-conversion,124.729\nBio-conversion,Liquid,0.597\nBio-conversion,Losses,26.862\nBio-conversion,Solid,280.322\nBio-conversion,Gas,81.144\nBiofuel imports,Liquid,35\nBiomass imports,Solid,35\nCoal imports,Coal,11.606\nCoal reserves,Coal,63.965\nCoal,Solid,75.571\nDistrict heating,Industry,10.639\nDistrict heating,Heating and cooling - commercial,22.505\nDistrict heating,Heating and cooling - homes,46.184\nElectricity grid,Over generation / exports,104.453\nElectricity grid,Heating and cooling - homes,113.726\nElectricity grid,H2 conversion,27.14\nElectricity grid,Industry,342.165\nElectricity grid,Road transport,37.797\nElectricity grid,Agriculture,4.412\nElectricity grid,Heating and cooling - commercial,40.858\nElectricity grid,Losses,56.691\nElectricity grid,Rail transport,7.863\nElectricity grid,Lighting & appliances - commercial,90.008\nElectricity grid,Lighting & appliances - homes,93.494\nGas imports,Ngas,40.719\nGas reserves,Ngas,82.233\nGas,Heating and cooling - commercial,0.129\nGas,Losses,1.401\nGas,Thermal generation,151.891\nGas,Agriculture,2.096\nGas,Industry,48.58\nGeothermal,Electricity grid,7.013\nH2 conversion,H2,20.897\nH2 conversion,Losses,6.242\nH2,Road transport,20.897\nHydro,Electricity grid,6.995\nLiquid,Industry,121.066\nLiquid,International shipping,128.69\nLiquid,Road transport,135.835\nLiquid,Domestic aviation,14.458\nLiquid,International aviation,206.267\nLiquid,Agriculture,3.64\nLiquid,National navigation,33.218\nLiquid,Rail transport,4.413\nMarine algae,Bio-conversion,4.375\nNgas,Gas,122.952\nNuclear,Thermal generation,839.978\nOil imports,Oil,504.287\nOil reserves,Oil,107.703\nOil,Liquid,611.99\nOther waste,Solid,56.587\nOther waste,Bio-conversion,77.81\nPumped heat,Heating and cooling - homes,193.026\nPumped heat,Heating and cooling - commercial,70.672\nSolar PV,Electricity grid,59.901\nSolar Thermal,Heating and cooling - homes,19.263\nSolar,Solar Thermal,19.263\nSolar,Solar PV,59.901\nSolid,Agriculture,0.882\nSolid,Thermal generation,400.12\nSolid,Industry,46.477\nThermal generation,Electricity grid,525.531\nThermal generation,Losses,787.129\nThermal generation,District heating,79.329\nTidal,Electricity grid,9.452\nUK land based bioenergy,Bio-conversion,182.01\nWave,Electricity grid,19.013\nWind,Electricity grid,289.366\n",
+      "features": [
+        "energy-system",
+        "many-to-many",
+        "alignment-left",
+        "custom-node-geometry"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/sankey.md",
+        "section": "Example + Node Alignment"
+      }
+    },
+    {
+      "id": "sankey-energy-right",
+      "level": "complex",
+      "source": "---\nconfig:\n  sankey:\n    showValues: false\n    nodeAlignment: right\n    nodeWidth: 14\n    nodePadding: 12\n---\nsankey\n\nAgricultural 'waste',Bio-conversion,124.729\nBio-conversion,Liquid,0.597\nBio-conversion,Losses,26.862\nBio-conversion,Solid,280.322\nBio-conversion,Gas,81.144\nBiofuel imports,Liquid,35\nBiomass imports,Solid,35\nCoal imports,Coal,11.606\nCoal reserves,Coal,63.965\nCoal,Solid,75.571\nDistrict heating,Industry,10.639\nDistrict heating,Heating and cooling - commercial,22.505\nDistrict heating,Heating and cooling - homes,46.184\nElectricity grid,Over generation / exports,104.453\nElectricity grid,Heating and cooling - homes,113.726\nElectricity grid,H2 conversion,27.14\nElectricity grid,Industry,342.165\nElectricity grid,Road transport,37.797\nElectricity grid,Agriculture,4.412\nElectricity grid,Heating and cooling - commercial,40.858\nElectricity grid,Losses,56.691\nElectricity grid,Rail transport,7.863\nElectricity grid,Lighting & appliances - commercial,90.008\nElectricity grid,Lighting & appliances - homes,93.494\nGas imports,Ngas,40.719\nGas reserves,Ngas,82.233\nGas,Heating and cooling - commercial,0.129\nGas,Losses,1.401\nGas,Thermal generation,151.891\nGas,Agriculture,2.096\nGas,Industry,48.58\nGeothermal,Electricity grid,7.013\nH2 conversion,H2,20.897\nH2 conversion,Losses,6.242\nH2,Road transport,20.897\nHydro,Electricity grid,6.995\nLiquid,Industry,121.066\nLiquid,International shipping,128.69\nLiquid,Road transport,135.835\nLiquid,Domestic aviation,14.458\nLiquid,International aviation,206.267\nLiquid,Agriculture,3.64\nLiquid,National navigation,33.218\nLiquid,Rail transport,4.413\nMarine algae,Bio-conversion,4.375\nNgas,Gas,122.952\nNuclear,Thermal generation,839.978\nOil imports,Oil,504.287\nOil reserves,Oil,107.703\nOil,Liquid,611.99\nOther waste,Solid,56.587\nOther waste,Bio-conversion,77.81\nPumped heat,Heating and cooling - homes,193.026\nPumped heat,Heating and cooling - commercial,70.672\nSolar PV,Electricity grid,59.901\nSolar Thermal,Heating and cooling - homes,19.263\nSolar,Solar Thermal,19.263\nSolar,Solar PV,59.901\nSolid,Agriculture,0.882\nSolid,Thermal generation,400.12\nSolid,Industry,46.477\nThermal generation,Electricity grid,525.531\nThermal generation,Losses,787.129\nThermal generation,District heating,79.329\nTidal,Electricity grid,9.452\nUK land based bioenergy,Bio-conversion,182.01\nWave,Electricity grid,19.013\nWind,Electricity grid,289.366\n",
+      "features": [
+        "energy-system",
+        "many-to-many",
+        "alignment-right",
+        "custom-node-geometry"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/sankey.md",
+        "section": "Example + Node Alignment"
+      }
+    },
+    {
+      "id": "sankey-energy-center",
+      "level": "complex",
+      "source": "---\nconfig:\n  sankey:\n    showValues: false\n    nodeAlignment: center\n    nodeWidth: 14\n    nodePadding: 12\n---\nsankey\n\nAgricultural 'waste',Bio-conversion,124.729\nBio-conversion,Liquid,0.597\nBio-conversion,Losses,26.862\nBio-conversion,Solid,280.322\nBio-conversion,Gas,81.144\nBiofuel imports,Liquid,35\nBiomass imports,Solid,35\nCoal imports,Coal,11.606\nCoal reserves,Coal,63.965\nCoal,Solid,75.571\nDistrict heating,Industry,10.639\nDistrict heating,Heating and cooling - commercial,22.505\nDistrict heating,Heating and cooling - homes,46.184\nElectricity grid,Over generation / exports,104.453\nElectricity grid,Heating and cooling - homes,113.726\nElectricity grid,H2 conversion,27.14\nElectricity grid,Industry,342.165\nElectricity grid,Road transport,37.797\nElectricity grid,Agriculture,4.412\nElectricity grid,Heating and cooling - commercial,40.858\nElectricity grid,Losses,56.691\nElectricity grid,Rail transport,7.863\nElectricity grid,Lighting & appliances - commercial,90.008\nElectricity grid,Lighting & appliances - homes,93.494\nGas imports,Ngas,40.719\nGas reserves,Ngas,82.233\nGas,Heating and cooling - commercial,0.129\nGas,Losses,1.401\nGas,Thermal generation,151.891\nGas,Agriculture,2.096\nGas,Industry,48.58\nGeothermal,Electricity grid,7.013\nH2 conversion,H2,20.897\nH2 conversion,Losses,6.242\nH2,Road transport,20.897\nHydro,Electricity grid,6.995\nLiquid,Industry,121.066\nLiquid,International shipping,128.69\nLiquid,Road transport,135.835\nLiquid,Domestic aviation,14.458\nLiquid,International aviation,206.267\nLiquid,Agriculture,3.64\nLiquid,National navigation,33.218\nLiquid,Rail transport,4.413\nMarine algae,Bio-conversion,4.375\nNgas,Gas,122.952\nNuclear,Thermal generation,839.978\nOil imports,Oil,504.287\nOil reserves,Oil,107.703\nOil,Liquid,611.99\nOther waste,Solid,56.587\nOther waste,Bio-conversion,77.81\nPumped heat,Heating and cooling - homes,193.026\nPumped heat,Heating and cooling - commercial,70.672\nSolar PV,Electricity grid,59.901\nSolar Thermal,Heating and cooling - homes,19.263\nSolar,Solar Thermal,19.263\nSolar,Solar PV,59.901\nSolid,Agriculture,0.882\nSolid,Thermal generation,400.12\nSolid,Industry,46.477\nThermal generation,Electricity grid,525.531\nThermal generation,Losses,787.129\nThermal generation,District heating,79.329\nTidal,Electricity grid,9.452\nUK land based bioenergy,Bio-conversion,182.01\nWave,Electricity grid,19.013\nWind,Electricity grid,289.366\n",
+      "features": [
+        "energy-system",
+        "many-to-many",
+        "alignment-center",
+        "custom-node-geometry"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/sankey.md",
+        "section": "Example + Node Alignment"
+      }
+    },
+    {
+      "id": "sankey-many-to-many-quoted-flow",
+      "level": "complex",
+      "source": "sankey\n\"Raw, input\",\"Part \"\"A\"\"\",12.5\n\"Raw, input\",Part B,7.5\nOther input,\"Part \"\"A\"\"\",3.25\nOther input,Part B,11.75\n\"Part \"\"A\"\"\",Assembly,13.5\n\"Part \"\"A\"\"\",Losses,2.25\nPart B,Assembly,17.25\nPart B,Losses,2\nAssembly,Export,20.75\nAssembly,Domestic,10\n",
+      "features": [
+        "csv-escaping",
+        "many-to-many",
+        "four-ranks",
+        "value-labels",
+        "node-colors",
+        "target-link-color"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/sankey.md",
+        "section": "Combined documented syntax"
+      },
+      "config": {
+        "sankey": {
+          "showValues": true,
+          "prefix": "$",
+          "suffix": " M",
+          "width": 900,
+          "height": 520,
+          "labelStyle": "outlined",
+          "linkColor": "target",
+          "nodeColors": {
+            "Assembly": "#4477aa",
+            "Losses": "#cc6633"
+          }
+        }
+      }
+    },
+    {
+      "id": "sankey-disconnected-duplicate-links",
+      "level": "complex",
+      "source": "sankey\nA,B,12\nA,B,8\nA,C,15\nB,D,20\nC,D,10\nC,E,5\nD,F,30\nE,F,5\nIsland one,Island two,7\nIsland two,Island three,7\n",
+      "features": [
+        "duplicate-links",
+        "disconnected-component",
+        "merging-flows",
+        "source-link-color"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/sankey.md",
+        "section": "Combined documented syntax"
+      },
+      "config": {
+        "sankey": {
+          "nodeAlignment": "center",
+          "linkColor": "source",
+          "nodePadding": 24,
+          "width": 850,
+          "height": 520
+        }
+      }
+    }
+  ]
+}

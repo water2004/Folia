@@ -16,6 +16,7 @@ struct Segment {
     std::size_t slot = 0;
 };
 struct Dependency { std::size_t source, target; int weight; bool critical, active = true; };
+#include "elk_routing_cycles.inc"
 int crossings(const std::vector<double>& positions, double start, double end) {
     return static_cast<int>(std::ranges::count_if(positions,[&](double p){return p>=start&&p<=end;}));
 }
@@ -78,60 +79,8 @@ struct RoutingGap {
         else if(v1>0) {dependency(a,b,0,false);dependency(b,a,0,false);}
         return 0;
     }
-    void update_neighbors(std::size_t node,std::deque<std::size_t>& sources,std::deque<std::size_t>& sinks,bool critical_only) {
-        for(const auto d:segments[node].out_deps) {
-            const auto& e=deps[d]; auto& target=segments[e.target];
-            if ((!critical_only||e.critical)&&target.mark<0&&e.weight>0) {
-                target.in_weight-=e.weight; if(e.critical) target.critical_in-=e.weight;
-                if(target.in_weight<=0&&target.out_weight>0) sources.push_back(e.target);
-            }
-        }
-        for(const auto d:segments[node].in_deps) {
-            const auto& e=deps[d]; auto& source=segments[e.source];
-            if ((!critical_only||e.critical)&&source.mark<0&&e.weight>0) {
-                source.out_weight-=e.weight; if(e.critical) source.critical_out-=e.weight;
-                if(source.out_weight<=0&&source.in_weight>0) sinks.push_back(e.source);
-            }
-        }
-    }
     std::vector<std::size_t> cycles(bool critical_only) {
-        std::deque<std::size_t> sources,sinks;
-        for(std::size_t n=0;n<segments.size();++n) {
-            auto& s=segments[n]; s.mark=-static_cast<int>(n)-1;
-            s.in_weight=s.out_weight=s.critical_in=s.critical_out=0;
-            for(const auto d:s.in_deps) {if(deps[d].critical)s.critical_in+=deps[d].weight; if(!critical_only||deps[d].critical)s.in_weight+=deps[d].weight;}
-            for(const auto d:s.out_deps) {if(deps[d].critical)s.critical_out+=deps[d].weight; if(!critical_only||deps[d].critical)s.out_weight+=deps[d].weight;}
-            if(s.out_weight==0)sinks.push_back(n);else if(s.in_weight==0)sources.push_back(n);
-        }
-        const auto base=static_cast<int>(segments.size()); int sink_mark=base-1,source_mark=base+1;
-        std::size_t remaining=segments.size();
-        while(remaining) {
-            while(!sinks.empty()) {
-                const auto n=sinks.front();sinks.pop_front();--remaining;
-                segments[n].mark=sink_mark--; update_neighbors(n,sources,sinks,critical_only);
-            }
-            while(!sources.empty()) {
-                const auto n=sources.front();sources.pop_front();--remaining;
-                segments[n].mark=source_mark++; update_neighbors(n,sources,sinks,critical_only);
-            }
-            int max_flow=std::numeric_limits<int>::min(); std::vector<std::size_t> candidates;
-            // The original TreeSet is ordered by the initial negative marks.
-            for(std::size_t i=segments.size();i>0;--i) {
-                const auto n=i-1; const auto& s=segments[n]; if(s.mark>=0)continue;
-                if(!critical_only&&s.critical_out>0&&s.critical_in<=0) {candidates={n};break;}
-                const auto flow=s.out_weight-s.in_weight;
-                if(flow>=max_flow) {if(flow>max_flow){candidates.clear();max_flow=flow;}candidates.push_back(n);}
-            }
-            if(!candidates.empty()) {
-                const auto n=candidates[random.next_int(candidates.size())];--remaining;
-                segments[n].mark=source_mark++;update_neighbors(n,sources,sinks,critical_only);
-            }
-        }
-        for(auto& s:segments)if(s.mark<base)s.mark+=base+1;
-        std::vector<std::size_t> result;
-        for(const auto& s:segments)for(const auto d:s.out_deps)
-            if((!critical_only||deps[d].critical)&&s.mark>segments[deps[d].target].mark)result.push_back(d);
-        return result;
+        return routing_dependency_cycles(segments,deps,random,critical_only);
     }
     struct Area {double start,end;};
     struct Rating {int dependencies=0,crossings=0;};

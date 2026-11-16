@@ -1,0 +1,135 @@
+{
+  "family": "info",
+  "cases": [
+    {
+      "id": "info-default",
+      "level": "basic",
+      "source": "info showInfo\n",
+      "features": [
+        "version",
+        "font-profile"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/diagrams/info/infoRenderer.ts",
+        "section": "Info version rendering configuration"
+      },
+      "config": {}
+    },
+    {
+      "id": "info-dark",
+      "level": "intermediate",
+      "source": "info showInfo\n",
+      "features": [
+        "version",
+        "theme"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/diagrams/info/infoRenderer.ts",
+        "section": "Info version rendering configuration"
+      },
+      "config": {
+        "theme": "dark"
+      }
+    },
+    {
+      "id": "info-forest",
+      "level": "intermediate",
+      "source": "info showInfo\n",
+      "features": [
+        "version",
+        "theme"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/diagrams/info/infoRenderer.ts",
+        "section": "Info version rendering configuration"
+      },
+      "config": {
+        "theme": "forest"
+      }
+    },
+    {
+      "id": "info-neutral",
+      "level": "intermediate",
+      "source": "info showInfo\n",
+      "features": [
+        "version",
+        "theme"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/diagrams/info/infoRenderer.ts",
+        "section": "Info version rendering configuration"
+      },
+      "config": {
+        "theme": "neutral"
+      }
+    },
+    {
+      "id": "info-base-custom",
+      "level": "intermediate",
+      "source": "info showInfo\n",
+      "features": [
+        "version",
+        "theme"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/diagrams/info/infoRenderer.ts",
+        "section": "Info version rendering configuration"
+      },
+      "config": {
+        "theme": "base",
+        "themeVariables": {
+          "textColor": "#8b2252",
+          "fontFamily": "serif"
+        }
+      }
+    },
+    {
+      "id": "info-large-font",
+      "level": "intermediate",
+      "source": "info showInfo\n",
+      "features": [
+        "version",
+        "font-profile"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/diagrams/info/infoRenderer.ts",
+        "section": "Info version rendering configuration"
+      },
+      "config": {
+        "fontSize": 24
+      }
+    },
+    {
+      "id": "info-monospace",
+      "level": "intermediate",
+      "source": "info showInfo\n",
+      "features": [
+        "version",
+        "font-profile"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/diagrams/info/infoRenderer.ts",
+        "section": "Info version rendering configuration"
+      },
+      "config": {
+        "fontFamily": "monospace"
+      }
+    },
+    {
+      "id": "info-compact-font",
+      "level": "intermediate",
+      "source": "info showInfo\n",
+      "features": [
+        "version",
+        "font-profile"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/diagrams/info/infoRenderer.ts",
+        "section": "Info version rendering configuration"
+      },
+      "config": {
+        "fontSize": 12
+      }
+    }
+  ]
+}

@@ -46,7 +46,7 @@ class Parser {
     };
     std::vector<const Region*> regions;
     bool auto_wrap = false;
-    std::size_t offset = 0;
+    std::size_t offset = 0, link_count = 0;
     [[noreturn]] void fail(const char* message) const {
         throw std::runtime_error(std::string{message}+" at prepared UTF-16 offset "+std::to_string(offset));
     }
@@ -75,7 +75,10 @@ class Parser {
         if (found != actor_index.end() && !description) return Text{value};
         SequenceActor a{Text{value},Text{value},description ? description->text : Text{value},
             Text{type},description ? description->wrap : auto_wrap,box};
-        if (found != actor_index.end()) result.actors[found->second] = std::move(a);
+        if (found != actor_index.end()) {
+            link_count-=result.actors[found->second].links.size();
+            result.actors[found->second] = std::move(a);
+        }
         else {
             if (result.actors.size() >= limits.actors) fail("Sequence actor limit exceeded");
             actor_index.emplace(value,result.actors.size()); result.actors.push_back(std::move(a));
@@ -92,6 +95,55 @@ class Parser {
         const auto id = std::to_string(result.messages.size());
         result.messages.push_back({Text{id.begin(),id.end()},std::move(from),std::move(to),
             std::move(text.text),type,text.wrap,activate,placement});
+    }
+    void add_link(View actor_id,Text name,Text url) {
+        auto& links=result.actors[actor_index.at(Text{actor_id})].links;
+        const auto found=std::ranges::find(links,name,&SequenceLink::label);
+        if(found!=links.end()) found->url=std::move(url);
+        else {
+            if(link_count>=limits.links) fail("Sequence actor link limit exceeded");
+            ++link_count;
+            // Object enumeration puts canonical array indices before other keys,
+            // including indices introduced by a later link statement.
+            const auto array_index=[](View key) {
+                return !key.empty() && key.find_first_not_of(u"0123456789")==View::npos &&
+                    (key.size()==1 || key.front()!=u'0') &&
+                    (key.size()<10 || (key.size()==10 && key<u"4294967295"));
+            };
+            const auto position=array_index(name)?std::ranges::find_if(links,[&](const auto& link) {
+                return !array_index(link.label) || name.size()<link.label.size() ||
+                    (name.size()==link.label.size() && name<link.label);
+            }):links.end();
+            links.insert(position,{std::move(name),std::move(url)});
+        }
+    }
+    void menu(View rest,bool many) {
+        const auto colon=rest.find(u':');
+        if(colon==rest.npos) fail("Expected Sequence actor link colon");
+        const auto id=actor(rest.substr(0,colon));
+        auto text=label(rest.substr(colon+1)).text;
+        // SequenceDB restores these two entities before JSON.parse / URL storage.
+        for(const auto& [encoded,decoded]:{std::pair<View,View>{u"&equals;",u"="},{u"&amp;",u"&"}})
+            for(std::size_t pos=0;(pos=text.find(encoded,pos))!=Text::npos;pos+=decoded.size())
+                text.replace(pos,encoded.size(),decoded);
+        if(many) {
+            const auto entries=parse_json_object_members(text,limits.frontend.directives);
+            // Upstream logs malformed link JSON and retains the surrounding diagram.
+            if(!entries) {
+                if(entries.error()=="Invalid JSON value"||entries.error()=="Expected a JSON object") return;
+                throw std::runtime_error(entries.error());
+            }
+            for(const auto& [name,value]:*entries) {
+                auto url=config_to_string(value);
+                if(url) add_link(id,name,std::move(*url));
+            }
+        } else {
+            const auto separator=text.find(u'@');
+            if(separator==Text::npos) return;
+            const auto label_end=separator>0?separator-1:0;
+            add_link(id,Text{trim(View{text}.substr(0,label_end))},
+                Text{trim(View{text}.substr(separator+1))});
+        }
     }
     void statement(View line) {
         View rest = line;
@@ -234,6 +286,8 @@ class Parser {
             message(std::move(from),std::move(to),label(rest.substr(colon+1)),SequenceKind::note,false,placement);
             return;
         }
+        if (take(rest,u"links")) { menu(rest,true); return; }
+        if (take(rest,u"link")) { menu(rest,false); return; }
         if (take(rest,u"title") || take(rest,u"title:")) { result.title = trim(rest); return; }
         const auto folded = lower(rest);
         if (folded.starts_with(u"acctitle:")) { result.acc_title = trim(rest.substr(9)); return; }

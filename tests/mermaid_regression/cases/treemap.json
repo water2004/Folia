@@ -1,0 +1,343 @@
+{
+  "family": "treemap",
+  "cases": [
+    {
+      "id": "treemap-official-basic",
+      "level": "basic",
+      "source": "treemap-beta\n\"Category A\"\n    \"Item A1\": 10\n    \"Item A2\": 20\n\"Category B\"\n    \"Item B1\": 15\n    \"Item B2\": 25\n",
+      "features": [
+        "two-roots",
+        "four-leaves"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/treemap.md",
+        "section": "Basic Treemap"
+      }
+    },
+    {
+      "id": "treemap-official-hierarchy",
+      "level": "intermediate",
+      "source": "treemap-beta\n\"Products\"\n    \"Electronics\"\n        \"Phones\": 50\n        \"Computers\": 30\n        \"Accessories\": 20\n    \"Clothing\"\n        \"Men's\": 40\n        \"Women's\": 40\n",
+      "features": [
+        "three-levels",
+        "mixed-leaf-values"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/treemap.md",
+        "section": "Hierarchical Treemap"
+      }
+    },
+    {
+      "id": "treemap-official-styles",
+      "level": "complex",
+      "source": "treemap-beta\n\"Section 1\"\n    \"Leaf 1.1\": 12\n    \"Section 1.2\":::class1\n      \"Leaf 1.2.1\": 12\n\"Section 2\"\n    \"Leaf 2.1\": 20:::class1\n    \"Leaf 2.2\": 25\n    \"Leaf 2.3\": 12\n\nclassDef class1 fill:red,color:blue,stroke:#FFD600;\n",
+      "features": [
+        "branch-class",
+        "leaf-class",
+        "mixed-depths",
+        "class-definition"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/treemap.md",
+        "section": "Treemap with Styling"
+      }
+    },
+    {
+      "id": "treemap-official-budget",
+      "level": "complex",
+      "source": "---\nconfig:\n  treemap:\n    valueFormat: '$0,0'\n---\ntreemap-beta\n\"Budget\"\n    \"Operations\"\n        \"Salaries\": 700000\n        \"Equipment\": 200000\n        \"Supplies\": 100000\n    \"Marketing\"\n        \"Advertising\": 400000\n        \"Events\": 100000\n",
+      "features": [
+        "currency-format",
+        "nested-categories",
+        "large-values"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/treemap.md",
+        "section": "Value Formatting"
+      }
+    },
+    {
+      "id": "treemap-official-percentages",
+      "level": "complex",
+      "source": "---\nconfig:\n  treemap:\n    valueFormat: '$.1%'\n---\ntreemap-beta\n\"Market Share\"\n    \"Company A\": 0.35\n    \"Company B\": 0.25\n    \"Company C\": 0.15\n    \"Others\": 0.25\n",
+      "features": [
+        "percent-format",
+        "currency-prefix",
+        "fractional-values"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/treemap.md",
+        "section": "Value Formatting"
+      }
+    },
+    {
+      "id": "treemap-deep-product-hierarchy",
+      "level": "complex",
+      "source": "treemap-beta\ntitle Product portfolio\n\"Products\"\n    \"Applications\"\n        \"Desktop\":::focus\n            \"Editor\": 520\n            \"Reader\": 180\n            \"Converter\": 95\n        \"Mobile\"\n            \"Phone\": 160\n            \"Tablet\": 75\n    \"Services\"\n        \"Hosted\"\n            \"Sync\": 230\n            \"Collaboration\": 190\n        \"On-premises\": 90\n\"Operations\"\n    \"Support\": 110\n    \"Training\": 60\nclassDef focus fill:#ddeeff,stroke:#336699,stroke-width:2px,color:#113355;\n",
+      "features": [
+        "four-levels",
+        "multiple-roots",
+        "branch-styles",
+        "title",
+        "unequal-values"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/treemap.md",
+        "section": "Combined documented syntax"
+      },
+      "config": {
+        "treemap": {
+          "nodeWidth": 110,
+          "nodeHeight": 68,
+          "padding": 5
+        }
+      }
+    },
+    {
+      "id": "treemap-tiny-tiles-and-long-labels",
+      "level": "complex",
+      "source": "treemap-beta\n\"A parent category with a deliberately long heading\"\n    \"A large component with a long label\": 10000\n    \"A comparatively small component\": 17\n    \"Very small\": 2\n    \"Smallest\": 1\n\"Second hierarchy\"\n    \"An internal category with a long heading\"\n        \"Principal\": 5000\n        \"Minor\": 3\n    \"Another leaf\": 8\n",
+      "features": [
+        "tiny-tiles",
+        "long-label-clipping",
+        "mixed-depths",
+        "large-dynamic-range"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/treemap.md",
+        "section": "Combined documented syntax"
+      },
+      "config": {
+        "treemap": {
+          "nodeWidth": 56,
+          "nodeHeight": 38,
+          "diagramPadding": 24
+        }
+      }
+    },
+    {
+      "id": "treemap-unicode-and-style-precedence",
+      "level": "complex",
+      "source": "treemap-beta\ntitle 文档资源 / Δ allocation\naccTitle: 多语言资源分配\n\"工程团队\":::parent\n    \"编辑器\": 34.5:::accent\n    \"渲染器\": 28.25\n    \"検索\": 12.75\n\"Καταγραφή\"\n    \"Δ revisions\": 15:::accent\n    \"😀 review\": 9.5\nclassDef parent fill:#eef4e8,color:#224422,font-weight:bold;\nclassDef accent fill:#ffddbb,color:#663300,font-size:14px,font-style:italic;\n",
+      "features": [
+        "unicode",
+        "fractional-values",
+        "style-font-size",
+        "bold",
+        "italic",
+        "accessibility"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/treemap.md",
+        "section": "Combined documented syntax"
+      },
+      "config": {
+        "treemap": {
+          "valueFormat": ".2f",
+          "nodeWidth": 100,
+          "nodeHeight": 60
+        }
+      }
+    },
+    {
+      "id": "treemap-significant-digits",
+      "level": "complex",
+      "source": "treemap-beta\ntitle Resource allocation — significant digits\n\"Services\":::services\n  \"Interactive\"\n    \"Requests\": 1234567.5\n    \"Sessions\": 975000.125\n    \"Search\": 750000.625\n  \"Background\"\n    \"Workers\": 2125000.5\n    \"Queues\": 1125000.25\n\"Storage\":::storage\n  \"Primary\": 3250000.5\n  \"Replicas\": 2875000.125\n  \"Backups\": 1625000.875\nclassDef services fill:#dbeafe,stroke:#2563eb,color:#172554\nclassDef storage fill:#dcfce7,stroke:#16a34a,color:#14532d\n",
+      "features": [
+        "significant-digits",
+        "decimal-exponent-transition",
+        "rounded-values",
+        "three-levels",
+        "multiple-roots",
+        "branch-styles",
+        "fractional-sums"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/treemap.md",
+        "section": "Configuration valueFormat and styling; composed three-level resource hierarchy"
+      },
+      "config": {
+        "treemap": {
+          "valueFormat": ".3g",
+          "nodeWidth": 120,
+          "nodeHeight": 65
+        }
+      }
+    },
+    {
+      "id": "treemap-scientific-notation",
+      "level": "complex",
+      "source": "treemap-beta\ntitle Resource allocation — scientific notation\n\"Services\":::services\n  \"Interactive\"\n    \"Requests\": 1234567.5\n    \"Sessions\": 975000.125\n    \"Search\": 750000.625\n  \"Background\"\n    \"Workers\": 2125000.5\n    \"Queues\": 1125000.25\n\"Storage\":::storage\n  \"Primary\": 3250000.5\n  \"Replicas\": 2875000.125\n  \"Backups\": 1625000.875\nclassDef services fill:#dbeafe,stroke:#2563eb,color:#172554\nclassDef storage fill:#dcfce7,stroke:#16a34a,color:#14532d\n",
+      "features": [
+        "scientific-notation",
+        "fixed-exponent-precision",
+        "rounded-values",
+        "three-levels",
+        "multiple-roots",
+        "branch-styles",
+        "fractional-sums"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/treemap.md",
+        "section": "Configuration valueFormat and styling; composed three-level resource hierarchy"
+      },
+      "config": {
+        "treemap": {
+          "valueFormat": ".2e",
+          "nodeWidth": 120,
+          "nodeHeight": 65
+        }
+      }
+    },
+    {
+      "id": "treemap-si-prefixes",
+      "level": "complex",
+      "source": "treemap-beta\ntitle Resource allocation — si prefixes\n\"Services\":::services\n  \"Interactive\"\n    \"Requests\": 1234567.5\n    \"Sessions\": 975000.125\n    \"Search\": 750000.625\n  \"Background\"\n    \"Workers\": 2125000.5\n    \"Queues\": 1125000.25\n\"Storage\":::storage\n  \"Primary\": 3250000.5\n  \"Replicas\": 2875000.125\n  \"Backups\": 1625000.875\nclassDef services fill:#dbeafe,stroke:#2563eb,color:#172554\nclassDef storage fill:#dcfce7,stroke:#16a34a,color:#14532d\n",
+      "features": [
+        "si-prefixes",
+        "trimmed-trailing-zeros",
+        "different-magnitudes",
+        "three-levels",
+        "multiple-roots",
+        "branch-styles",
+        "fractional-sums"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/treemap.md",
+        "section": "Configuration valueFormat and styling; composed three-level resource hierarchy"
+      },
+      "config": {
+        "treemap": {
+          "valueFormat": ".3~s",
+          "nodeWidth": 120,
+          "nodeHeight": 65
+        }
+      }
+    },
+    {
+      "id": "treemap-signed-grouped-values",
+      "level": "complex",
+      "source": "treemap-beta\ntitle Resource allocation — signed grouped values\n\"Services\":::services\n  \"Interactive\"\n    \"Requests\": 1234567.5\n    \"Sessions\": 975000.125\n    \"Search\": 750000.625\n  \"Background\"\n    \"Workers\": 2125000.5\n    \"Queues\": 1125000.25\n\"Storage\":::storage\n  \"Primary\": 3250000.5\n  \"Replicas\": 2875000.125\n  \"Backups\": 1625000.875\nclassDef services fill:#dbeafe,stroke:#2563eb,color:#172554\nclassDef storage fill:#dcfce7,stroke:#16a34a,color:#14532d\n",
+      "features": [
+        "positive-sign",
+        "thousands-grouping",
+        "fixed-precision",
+        "three-levels",
+        "multiple-roots",
+        "branch-styles",
+        "fractional-sums"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/treemap.md",
+        "section": "Configuration valueFormat and styling; composed three-level resource hierarchy"
+      },
+      "config": {
+        "treemap": {
+          "valueFormat": "+,.2f",
+          "nodeWidth": 120,
+          "nodeHeight": 65
+        }
+      }
+    },
+    {
+      "id": "treemap-zero-padded-grouping",
+      "level": "complex",
+      "source": "treemap-beta\ntitle Resource allocation — zero padded grouping\n\"Services\":::services\n  \"Interactive\"\n    \"Requests\": 1234567.5\n    \"Sessions\": 975000.125\n    \"Search\": 750000.625\n  \"Background\"\n    \"Workers\": 2125000.5\n    \"Queues\": 1125000.25\n\"Storage\":::storage\n  \"Primary\": 3250000.5\n  \"Replicas\": 2875000.125\n  \"Backups\": 1625000.875\nclassDef services fill:#dbeafe,stroke:#2563eb,color:#172554\nclassDef storage fill:#dcfce7,stroke:#16a34a,color:#14532d\n",
+      "features": [
+        "sign-aware-padding",
+        "zero-padding",
+        "thousands-grouping",
+        "three-levels",
+        "multiple-roots",
+        "branch-styles",
+        "fractional-sums"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/treemap.md",
+        "section": "Configuration valueFormat and styling; composed three-level resource hierarchy"
+      },
+      "config": {
+        "treemap": {
+          "valueFormat": "0=+16,.2f",
+          "nodeWidth": 120,
+          "nodeHeight": 65
+        }
+      }
+    },
+    {
+      "id": "treemap-centered-significant-values",
+      "level": "complex",
+      "source": "treemap-beta\ntitle Resource allocation — centered significant values\n\"Services\":::services\n  \"Interactive\"\n    \"Requests\": 1234567.5\n    \"Sessions\": 975000.125\n    \"Search\": 750000.625\n  \"Background\"\n    \"Workers\": 2125000.5\n    \"Queues\": 1125000.25\n\"Storage\":::storage\n  \"Primary\": 3250000.5\n  \"Replicas\": 2875000.125\n  \"Backups\": 1625000.875\nclassDef services fill:#dbeafe,stroke:#2563eb,color:#172554\nclassDef storage fill:#dcfce7,stroke:#16a34a,color:#14532d\n",
+      "features": [
+        "centered-padding",
+        "significant-digits",
+        "trimmed-trailing-zeros",
+        "three-levels",
+        "multiple-roots",
+        "branch-styles",
+        "fractional-sums"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/treemap.md",
+        "section": "Configuration valueFormat and styling; composed three-level resource hierarchy"
+      },
+      "config": {
+        "treemap": {
+          "valueFormat": "^18.3~g",
+          "nodeWidth": 120,
+          "nodeHeight": 65
+        }
+      }
+    },
+    {
+      "id": "treemap-currency-grouped-precision",
+      "level": "complex",
+      "source": "treemap-beta\ntitle Resource allocation — currency grouped precision\n\"Services\":::services\n  \"Interactive\"\n    \"Requests\": 1234567.5\n    \"Sessions\": 975000.125\n    \"Search\": 750000.625\n  \"Background\"\n    \"Workers\": 2125000.5\n    \"Queues\": 1125000.25\n\"Storage\":::storage\n  \"Primary\": 3250000.5\n  \"Replicas\": 2875000.125\n  \"Backups\": 1625000.875\nclassDef services fill:#dbeafe,stroke:#2563eb,color:#172554\nclassDef storage fill:#dcfce7,stroke:#16a34a,color:#14532d\n",
+      "features": [
+        "currency-wrapper",
+        "grouped-significant-precision",
+        "fractional-values",
+        "three-levels",
+        "multiple-roots",
+        "branch-styles",
+        "fractional-sums"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/treemap.md",
+        "section": "Configuration valueFormat and styling; composed three-level resource hierarchy"
+      },
+      "config": {
+        "treemap": {
+          "valueFormat": "$,.4f",
+          "nodeWidth": 120,
+          "nodeHeight": 65
+        }
+      }
+    },
+    {
+      "id": "treemap-hexadecimal-capacities",
+      "level": "complex",
+      "source": "treemap-beta\ntitle Resource allocation — hexadecimal capacities\n\"Services\":::services\n  \"Interactive\"\n    \"Requests\": 1234567.5\n    \"Sessions\": 975000.125\n    \"Search\": 750000.625\n  \"Background\"\n    \"Workers\": 2125000.5\n    \"Queues\": 1125000.25\n\"Storage\":::storage\n  \"Primary\": 3250000.5\n  \"Replicas\": 2875000.125\n  \"Backups\": 1625000.875\nclassDef services fill:#dbeafe,stroke:#2563eb,color:#172554\nclassDef storage fill:#dcfce7,stroke:#16a34a,color:#14532d\n",
+      "features": [
+        "radix-prefix",
+        "hexadecimal-values",
+        "branch-value-totals",
+        "three-levels",
+        "multiple-roots",
+        "branch-styles",
+        "fractional-sums"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/treemap.md",
+        "section": "Configuration valueFormat and styling; composed three-level resource hierarchy"
+      },
+      "config": {
+        "treemap": {
+          "valueFormat": "#X",
+          "nodeWidth": 120,
+          "nodeHeight": 65
+        }
+      }
+    }
+  ]
+}

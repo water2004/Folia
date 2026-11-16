@@ -23,8 +23,6 @@ export import folia.math.core.tree.factory_types;
 
 export namespace folia::math::tree {
 template<class Product, class Kind> class Node;
-template<class Product, class Kind, class Base> class AbstractNode;
-template<class Product, class Kind, class Base> class AbstractEmptyNode;
 
 template<class Product, class Kind>
 class NodeOwner {

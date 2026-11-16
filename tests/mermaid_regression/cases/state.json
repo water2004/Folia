@@ -1,0 +1,117 @@
+{
+  "family": "state",
+  "cases": [
+    {
+      "id": "state-initial-final",
+      "level": "basic",
+      "source": "stateDiagram-v2\n    [*] --> s1\n    s1 --> [*]\n",
+      "features": [
+        "start",
+        "end"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/stateDiagram.md",
+        "section": "Start and End"
+      }
+    },
+    {
+      "id": "state-choice",
+      "level": "intermediate",
+      "source": "stateDiagram-v2\n    state if_state <<choice>>\n    [*] --> IsPositive\n    IsPositive --> if_state\n    if_state --> False: if n < 0\n    if_state --> True : if n >= 0\n",
+      "features": [
+        "choice",
+        "conditional-labels"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/stateDiagram.md",
+        "section": "Choice"
+      }
+    },
+    {
+      "id": "state-fork-join",
+      "level": "intermediate",
+      "source": "   stateDiagram-v2\n    state fork_state <<fork>>\n      [*] --> fork_state\n      fork_state --> State2\n      fork_state --> State3\n\n      state join_state <<join>>\n      State2 --> join_state\n      State3 --> join_state\n      join_state --> State4\n      State4 --> [*]\n",
+      "features": [
+        "fork",
+        "join",
+        "parallel"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/stateDiagram.md",
+        "section": "Forks"
+      }
+    },
+    {
+      "id": "state-nested-composites",
+      "level": "complex",
+      "source": "stateDiagram-v2\n    [*] --> First\n\n    state First {\n        [*] --> Second\n\n        state Second {\n            [*] --> second\n            second --> Third\n\n            state Third {\n                [*] --> third\n                third --> [*]\n            }\n        }\n    }\n",
+      "features": [
+        "nested-states",
+        "initial-states"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/stateDiagram.md",
+        "section": "Composite states"
+      }
+    },
+    {
+      "id": "state-composite-transitions",
+      "level": "complex",
+      "source": "stateDiagram-v2\n    [*] --> First\n    First --> Second\n    First --> Third\n\n    state First {\n        [*] --> fir\n        fir --> [*]\n    }\n    state Second {\n        [*] --> sec\n        sec --> [*]\n    }\n    state Third {\n        [*] --> thi\n        thi --> [*]\n    }\n",
+      "features": [
+        "composite-states",
+        "group-edges"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/stateDiagram.md",
+        "section": "Composite states"
+      }
+    },
+    {
+      "id": "state-concurrent-regions",
+      "level": "complex",
+      "source": "stateDiagram-v2\n    [*] --> Active\n\n    state Active {\n        [*] --> NumLockOff\n        NumLockOff --> NumLockOn : EvNumLockPressed\n        NumLockOn --> NumLockOff : EvNumLockPressed\n        --\n        [*] --> CapsLockOff\n        CapsLockOff --> CapsLockOn : EvCapsLockPressed\n        CapsLockOn --> CapsLockOff : EvCapsLockPressed\n        --\n        [*] --> ScrollLockOff\n        ScrollLockOff --> ScrollLockOn : EvScrollLockPressed\n        ScrollLockOn --> ScrollLockOff : EvScrollLockPressed\n    }\n",
+      "features": [
+        "concurrent-regions",
+        "nested-states",
+        "initial-states"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/stateDiagram.md",
+        "section": "Concurrency"
+      }
+    },
+    {
+      "id": "state-classed-transitions",
+      "level": "complex",
+      "source": "   stateDiagram\n   direction TB\n\n   accTitle: This is the accessible title\n   accDescr: This is an accessible description\n\n   classDef notMoving fill:white\n   classDef movement font-style:italic\n   classDef badBadEvent fill:#f00,color:white,font-weight:bold,stroke-width:2px,stroke:yellow\n\n   [*]--> Still\n   Still --> [*]\n   Still --> Moving\n   Moving --> Still\n   Moving --> Crash\n   Crash --> [*]\n\n   class Still notMoving\n   class Moving, Crash movement\n   class Crash badBadEvent\n   class end badBadEvent\n",
+      "features": [
+        "classDef",
+        "class",
+        "legacy-state-syntax",
+        "accessibility",
+        "comma-spaced-class-targets",
+        "multiple-class-styles"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/stateDiagram.md",
+        "section": "1. `class` statement"
+      }
+    },
+    {
+      "id": "state-descriptions-inline-classes",
+      "level": "intermediate",
+      "source": "stateDiagram\n    classDef yourState font-style:italic,font-weight:bold,fill:white\n\n    yswsii: Your state with spaces in it\n    [*] --> yswsii:::yourState\n    [*] --> SomeOtherState\n    SomeOtherState --> YetAnotherState\n    yswsii --> YetAnotherState\n    YetAnotherState --> [*]\n",
+      "features": [
+        "state-descriptions",
+        "inline-classes",
+        "fan-in",
+        "initial-final"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/stateDiagram.md",
+        "section": "Spaces in state names"
+      }
+    }
+  ]
+}

@@ -4,7 +4,18 @@
 
 - 2026-11-07：旧 QuickJS 源码、应用脚本和旧打包工具已移除。`tools/mathjax-bundle/` 的 `entry.cjs` 和锁文件继续作为原生数学构建及对照工具的固定输入。Release 启动、WiX 清单和锁定对照配置加载已验证。
 
-## 当前 checkpoint（2026-11-08，语义增量编辑与排版仍在进行）
+## 当前 checkpoint（2026-11-16，Mermaid 数学标签已完成）
+
+- 当前任务是 `feat/mermaid-native-math`，基线 `922b2fdc`；用户授权独立分支、分项提交推送，不改 CI，既有公式缓存保持原样。以下旧任务的 agents/推送限制与编辑待办均为历史记录，不能取代此任务。六个功能提交已推送，最后功能提交 `65ea222c`；本交接与 oracle/验收文档随最后一批提交。
+- 数学实现：`SvgMode::standalone_display` + 精确 CSS 像素 width/height/baseline，C ABI `RenderSvgFragment` / `ResultFragmentMetrics`；复用原 Renderer 管线，默认输出不变。比例来自 Scene 的 `ex / x_height * font_scale`，root viewport 用最短 roundtrip 数值；writer 同源处理 scoped IDs，无 host SVG 替换。结果仅持 SVG/metrics，不持 Scene。静态 SVG 省去隐藏 HTML tooltip，可见 texhtml 明确报错；旧默认模式未改。
+- Mermaid 按需通过现有 Math DLL 创建会话，不重复静态链接字体；常被布局复制的 typed label 使用共享不可变对象。普通文字用实测 advance 匹配 HTML flex，不把 ink overhang 重复计入公式间距；所有 CSS 字体列表先解析到安装字体，混排和普通标签共享相关语言环境下的字体选择。
+- 正式 `FoliaMathSvgBridgeTests` 53 项/1,063 断言全过、正常退出。Linux 静态+共享的 module initializer interposition 已由生产 target 的 `--exclude-libs,ALL` 边界修正：0 个 Math initializer 导出，12 个 C ABI 保留；没有临时全局 flag。日志 `build/mermaid-math-runtime/final-{configure,focused-build,focused-tests}.log`。
+- 最终 `build/mermaid-math-runtime/libFoliaNativeMath.so` SHA-256 `b4d61e7c88724a8b30777bad563a99d65ca698dba156fbf29d20becc88e5ddf2`。重采样与官方 MathJax 4.1.3/NewCM 比较 22/22 几何/绘制树/2× RGBA 全过；实测最大 metrics 差异、differentPixels、channel difference 均 0。完整验收摘要 `docs/mermaid-cpp/math-validation.json`，复现工具 `tools/mermaid-cpp/math-oracle/`。
+- 参考锁调查已结案：Entities/旧参考 TS 锁 CRLF，ignored `.reference/MathJax-src` 已按逐文件 SHA 恢复。旧 scope profile SHA 首次提交即不匹配当时 entry，Git 全历史已查；新 oracle 锁实际未改 profile `0e7e9855…`，旧 gate 未修改/跳过，不重开此调查。
+- 最终 Mermaid 核心 220 项/937,106 断言，真实 Math C ABI 集成 5 组/229 断言通过。12 份 native SVG 栅格化成功；11 个数学图族范围/上游配置与图布局限制见 Mermaid HANDOFF 和 math.md。Windows/WinUI 新用例未执行；Chromium socket EPERM 的升级被自动审批拒绝，没有绕过或宣称浏览器整图验收通过。
+- 所有 agents 已交回文件，无运行构建/测试句柄。实现与复验已完成，按用户要求分批提交推送；下一步为用户 Windows 核对，不自动改 CI、打 MSI 或发布。
+
+## 语义增量编辑与排版（2026-11-08，历史）
 
 - 用户要求解决10MB单段落交互卡顿，并让TextEdit→CST损伤→排版损伤贯通。普通编辑局部解析，重排传播到稳定边界复用后缀；不拆权威段落、不加第二选区坐标。原sample-10mb.md禁止读取/打开，只用生成fixture；不开agents/CUA/OS输入，编译≤4。本轮无新MSI/安装/推送要求。
 - Git **75eb49ab** 已修reconcile_nodes平方循环，**a5578a10** 已提交局部词法CST窗口、精简identity历史、条件block discovery。核心全量 **784项532111断言**通过（build/incremental-inline-core-accepted.log）；5000随机窗口/inverse与完整解析对照通过。普通1MB修改分析<128字符，保留NodeId且history不再存整owner ID数组。块发现仍扫描整个owner，但拒绝重分类时不再构建冗余CST；后续优化必须依据canonical依赖证明，不能字符前缀特判。

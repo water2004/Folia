@@ -1,0 +1,137 @@
+{
+  "schema": 1,
+  "cases": [
+    {
+      "name": "superscript",
+      "tex": "x^2+y^2=z^2",
+      "em": 16,
+      "width": 1280
+    },
+    {
+      "name": "fraction",
+      "tex": "\\frac{x^2+1}{y_1}",
+      "em": 16,
+      "width": 1280
+    },
+    {
+      "name": "nested-fraction",
+      "tex": "\\frac{1}{1+\\frac{1}{n}}",
+      "em": 16,
+      "width": 1280
+    },
+    {
+      "name": "sum",
+      "tex": "\\sum_{i=0}^{n} i^2",
+      "em": 16,
+      "width": 1280
+    },
+    {
+      "name": "integral",
+      "tex": "\\int_0^\\infty e^{-x^2}\\,dx=\\frac{\\sqrt{\\pi}}{2}",
+      "em": 16,
+      "width": 1280
+    },
+    {
+      "name": "matrix",
+      "tex": "\\begin{pmatrix}a & b \\\\ c & d\\end{pmatrix}",
+      "em": 16,
+      "width": 1280
+    },
+    {
+      "name": "aligned",
+      "tex": "\\begin{aligned}a&=b+c\\\\d&=e-f\\end{aligned}",
+      "em": 16,
+      "width": 1280
+    },
+    {
+      "name": "cases",
+      "tex": "f(x)=\\begin{cases}x^2 & x>0\\\\0 & x\\le0\\end{cases}",
+      "em": 16,
+      "width": 1280
+    },
+    {
+      "name": "nabla",
+      "tex": "\\nabla^2 u=\\frac{\\partial u}{\\partial t}",
+      "em": 16,
+      "width": 1280
+    },
+    {
+      "name": "delimiters",
+      "tex": "\\left\\langle \\frac{a}{b},\\sqrt{x}\\right\\rangle",
+      "em": 16,
+      "width": 1280
+    },
+    {
+      "name": "text",
+      "tex": "\\text{rate}=\\frac{1}{T}",
+      "em": 16,
+      "width": 1280
+    },
+    {
+      "name": "color",
+      "tex": "\\color{red}{x^2}+\\color{blue}{y^2}",
+      "em": 16,
+      "width": 1280
+    },
+    {
+      "name": "cancel",
+      "tex": "\\cancel{x}+\\bcancel{y}+\\xcancel{z}",
+      "em": 16,
+      "width": 1280
+    },
+    {
+      "name": "blackboard",
+      "tex": "\\mathbb{R}\\subseteq\\mathbb{C}",
+      "em": 16,
+      "width": 1280
+    },
+    {
+      "name": "chemistry",
+      "tex": "\\ce{2H2 + O2 -> 2H2O}",
+      "em": 16,
+      "width": 1280
+    },
+    {
+      "name": "small",
+      "tex": "\\frac{x^2+1}{y_1}",
+      "em": 12,
+      "width": 1280
+    },
+    {
+      "name": "large",
+      "tex": "\\frac{x^2+1}{y_1}",
+      "em": 24,
+      "width": 1280
+    },
+    {
+      "name": "overflow",
+      "tex": "x_{0}+x_{1}+x_{2}+x_{3}+x_{4}+x_{5}+x_{6}+x_{7}+x_{8}+x_{9}+x_{10}+x_{11}+x_{12}+x_{13}+x_{14}+x_{15}+x_{16}+x_{17}+x_{18}+x_{19}+x_{20}+x_{21}+x_{22}+x_{23}",
+      "em": 16,
+      "width": 80
+    },
+    {
+      "name": "empty",
+      "tex": "",
+      "em": 16,
+      "width": 1280
+    },
+    {
+      "name": "undefined-command",
+      "tex": "\\definitelyUnknown",
+      "em": 16,
+      "width": 1280
+    },
+    {
+      "name": "parse-error",
+      "tex": "\\frac{1}{",
+      "em": 16,
+      "width": 1280
+    },
+    {
+      "name": "script-attributes",
+      "tex": "\\class{diagram-math}{x+1}",
+      "em": 16,
+      "width": 1280
+    }
+  ]
+}

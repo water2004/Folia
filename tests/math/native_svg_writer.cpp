@@ -17,6 +17,64 @@ scene::Scene make_scene() {
 } // namespace
 
 suite native_svg_writer = [] {
+    "standalone SVG viewport resolves font metrics and display scale in pixels"_test = [] {
+        scene::Builder builder;
+        builder.set_metrics({2, .8, .2});
+        builder.set_font_metrics({16, 8, .4, .7});
+        builder.set_display_layout({.display = true, .font_scale = 1.5});
+        const auto source = std::move(builder).freeze();
+        const auto metrics = svg::pixel_metrics(source);
+        expect(metrics.width == 60.0 && metrics.height == 30.0 && metrics.baseline == 24.0);
+        const auto output = svg::write(
+            source, {.font_cache = svg::FontCacheMode::none, .pixel_viewport = true});
+        expect(output.starts_with("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"60\" "
+                                  "height=\"30\" role=\"img\" focusable=\"false\" "
+                                  "viewBox=\"0 -800 2000 1000\">"));
+        expect(output.ends_with("</g></svg>"));
+        expect(output.find("mjx-container") == output.npos);
+    };
+
+    "standalone SVG percentage frame retains its resolved viewport"_test = [] {
+        scene::Builder builder;
+        builder.set_metrics({4, .8, .2});
+        builder.set_font_metrics({16, 8, .4, .7});
+        builder.set_display_layout({.display = true, .font_scale = 1.5});
+        scene::FrameLayout frame;
+        frame.percentage = scene::PercentageFrame{50, "50%", {0, 0, .2, .02}, .02};
+        builder.set_frame_layout(frame);
+        const auto source = std::move(builder).freeze();
+        const auto metrics = svg::pixel_metrics(source);
+        expect(metrics.width == 300.0 && metrics.height == 30.0 && metrics.baseline == 24.0);
+        const auto output = svg::write(
+            source, {.font_cache = svg::FontCacheMode::none, .pixel_viewport = true});
+        expect(output.find("width=\"300\" height=\"30\"") != output.npos);
+        expect(output.find("viewBox=\"0 0 200 20\"") != output.npos);
+        expect(output.find("transform=\"scale(0.02,-0.02) translate(0, -800)\"") != output.npos);
+        expect(output.find("data-mjx-viewBox") == output.npos);
+    };
+
+    "standalone SVG scopes generated clip references without changing external links"_test = [] {
+        scene::Builder builder;
+        builder.set_metrics({1, .5, .1});
+        builder.set_font_metrics({16, 8, .5, .7});
+        const auto group = builder.add_group(
+            0, {}, scene::Clip{scene::PathGeometry{{scene::MoveTo{{0, 0}},
+                                                    scene::LineTo{{1, 1}}}}},
+            scene::Link{"https://example.test/#figure"});
+        const auto source = std::move(builder).freeze();
+        for (const auto prefix : {"first-", "second-"}) {
+            svg::SvgWriteOptions options;
+            options.font_cache = svg::FontCacheMode::none;
+            options.pixel_viewport = true;
+            options.id_prefix = prefix;
+            const auto output = svg::write(source, options);
+            const auto id = std::string(prefix) + "clip-" + std::to_string(group);
+            expect(output.find("clip-path=\"url(#" + id + ")\"") != output.npos);
+            expect(output.find("<clipPath id=\"" + id + "\"") != output.npos);
+            expect(output.find("href=\"https://example.test/#figure\"") != output.npos);
+        }
+    };
+
     "root preserves MathJax SVG attribute order and fixed dimensions"_test = [] {
         auto source = make_scene();
         auto output = svg::write(source, {.font_cache = svg::FontCacheMode::none});

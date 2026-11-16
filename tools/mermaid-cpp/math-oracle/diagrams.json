@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "diagrams": [
+    {
+      "name": "flow-nodes-edges",
+      "source": "flowchart LR\nA[\"before $$x^2$$ after\"] -->|\"$$\\frac{1}{2}$$\"| B[\"$$\\sum_{i=0}^{n} i$$\"]"
+    },
+    {
+      "name": "flow-matrix",
+      "source": "flowchart LR\nA[\"$$\\begin{pmatrix}a & b \\\\ c & d\\end{pmatrix}$$\"] --> B[\"$$\\nabla^2u=0$$\"]"
+    },
+    {
+      "name": "flow-mixed-markdown",
+      "source": "flowchart LR\nA[\"`**before** $$x^2$$ *after*`\"] --> B[\"$$\\frac{1}{2}$$ then $$y_1$$\"]"
+    },
+    {
+      "name": "flow-multiline",
+      "source": "flowchart TB\nA[\"first $$x^2$$<br/>second $$\\frac{1}{2}$$\"]"
+    },
+    {
+      "name": "flow-group",
+      "source": "flowchart LR\nsubgraph G[\"group $$x^2$$\"]\nA[\"$$y^2$$\"] --> B[\"done\"]\nend"
+    },
+    {
+      "name": "flow-dark",
+      "source": "flowchart LR\nA[\"$$x^2$$\"] -->|\"$$\\frac{1}{2}$$\"| B[\"$$\\color{red}{y^2}$$\"]",
+      "config": {
+        "theme": "dark"
+      }
+    },
+    {
+      "name": "flow-css",
+      "source": "flowchart LR\nA[\"before $$x^2$$ after\"]\nstyle A color:#884422,font-size:24px,font-weight:bold"
+    },
+    {
+      "name": "sequence-math",
+      "source": "sequenceDiagram\nparticipant A as before $$x^2$$ after\nparticipant B\nA->>B: before $$\\frac{x}{y}$$ after\nNote over A,B: note $$z_1$$\nloop loop $$x^2$$\nA->>B: yes\nend"
+    },
+    {
+      "name": "class-math",
+      "source": "classDiagram\nclass A[\"before $$x^2$$ after\"]\nA : +$$y^2$$"
+    },
+    {
+      "name": "state-math",
+      "source": "stateDiagram-v2\nstate \"before $$x^2$$ after\" as A\nA --> B : $$y^2$$"
+    },
+    {
+      "name": "mindmap-math",
+      "source": "mindmap\n  root((before $$x^2$$ after))\n    child $$y^2$$"
+    },
+    {
+      "name": "flow-invalid",
+      "source": "flowchart LR\nA[\"$$\\definitelyUnknown$$\"]"
+    },
+    {
+      "name": "flow-plain-dollar",
+      "source": "flowchart LR\nA[\"$x^2$\"] --> B[\"$$unclosed\"]"
+    },
+    {
+      "name": "flow-svg-label",
+      "source": "flowchart LR\nA[\"$$x^2$$\"]",
+      "config": {
+        "htmlLabels": false
+      }
+    }
+  ]
+}

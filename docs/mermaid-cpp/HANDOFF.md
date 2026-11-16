@@ -2,6 +2,32 @@
 
 ## 当前检查点
 
+- 2026-11-16：全图族复杂回归位于独立分支 `feat/mermaid-comprehensive-regressions`，基线 `a368f9ea70dac36f235d9eca6bdb0be16ea82a5f`。代码与回归按来源、各图族修复、测量编排、ELK阶段、组件接线和验收工具分项提交；最终验证源码为 `06beebb47d8971f73e4f4b320bc05e76ceec16a1`，后续收尾提交仅文档。GitHub接口发布改变提交元数据，每个提交文件树均与本地验证版本逐项一致，原始本地验证编号与树散列保存在验收JSON。保持CI、原生Math实现、公式缓存与10MB压测文件不动。
+- 固定 Mermaid **12.2.0** / `1fb7869866dd619168d840291c9c54b4f129758b`，ZenUML **3.49.2**。source-lock实际469文件全匹配，原417个已锁定文件哈希不变；原完整elk-worker保持固定来源。机器可读验收及每例SVG散列见 [regression-validation.json](regression-validation.json)，复验见 [regressions.md](regressions.md)。
+- **34图族、375例、230个complex**，每族至少8例；53种Flowchart形状各两次覆盖。官方syntax/config **375/375**，生产完整原生渲染 **375/375**，没有skip/expectedFailure，没有删去失败的复杂输入。
+- **最终核心255项/957780断言、真实Math集成5项/205断言全部通过，0跳过、正常退出0**。日志 `build/mermaid-regression/core-final-accepted.log`、`math-final-accepted.log`，汇总 `final-tests.json`。最终新增ER测试曾遗漏宿主initialize(default/classic)，现仅修测试初始化/诊断；原公式/多词标签输入保留，定向1项17断言通过，生产解析未因此放宽。
+- 最终ELK对照全部通过：24个完整自环布局/5521断言；25个Greedy阶段/980断言；7个完整组件布局+14个阶段观察/1794断言；21个Mermaid方向/层级adapter布局/3702断言。算法容差仍 **1e-4**，SVG几何容差仍 **1.5px**。D3时间格式72个值、数值格式1794个值亦通过原版对照。
+- ELK补齐自环预处理/恢复/side-slot路由、TWO_SIDED_GREEDY_SWITCH、共享弱连通组件DFS/packing、拆分前阈值和model-order身份。Greedy含真实交叉减少、端口重排、BARYCENTER后优化及48-bit RNG比较；SEPARATE孤点不采BARY/greedy RNG，INCLUDE原默认保留；node级自环配置不继承root。39/40/41节点阈值和DFS重排均有完整原版布局观察。
+- Windows测量编排已提取到 `measured_render` / `TextMeasurer`，Windows仍提供原DirectWrite、Math服务和宿主宽度；Linux以真实Pango **1.56.3** 走同一生产C++管线，Zen另用实际Skia。没有按字符估宽或样例坐标特判。Windows/WinUI本轮未执行。
+- 最终原生完整语料报告 `native-final/report.json`；Probe SHA-256 **d6932433fcc3440ec1cad64892bc9947849732958a9921c6360050679d473716**。原两例失败的Bang手绘和collapsed复杂自环均已按原输入修复，并在最终375例重跑中通过。
+- **可执行的完整官方SVG证据共40例/3图族**：Info8/8、Packet8/8（257元素）检查完整SVG、真实fontconfig文件hash/index、geometry/paint/text，明确无栅格；Zen24/24采用实际原版renderer与同机Skia，296次真实测量，透明RGBA逐像素零差、视口和非空文字一致。最终Zen报告 `final-zenuml-canvas-native/comparison.json` 与上述Probe散列一致。
+- **完整官方浏览器验收仍未完成：剩余335例/31图族**。本地Chromium启动socket EPERM；连接Edge任意测试页被URL安全策略拒绝且禁止间接变换载体绕过，已停止并完成CUA summary。不得将原生渲染、算法fixture或官方语法通过写成全部整图SVG通过；不得绕过浏览器限制。
+- 最终正式总gate只提供Info/Packet实际捕获时，`final-partial-comparison.json` **16/375，browserCompared=0，officialSvgCompared=false，exit1**；其余359项均缺官方browser case。Zen24作为独立Canvas验收记录，不能伪装成browser capture。比较器74项自测通过，覆盖缺字/漏画/RGBA、CSS隐藏、视口、dx/dy及不能验证的文本效果拒绝。
+- 工具链LLVM21.1.8/CMake4.3.4/Ninja；工作树 `/workspace/scratch/a4656ef82bb3/Folia`，构建目录 `build/mermaid-regression-native`。最后生产构建 `elk-final-build2.log`，测试增量构建 `er-test-config-build.log` 均正常成功；Math共享库以PIC构建，未改Math源码/缓存。始终单Ninja、并发≤4。全部agents已交回，无运行构建/测试/CUA句柄。
+- 本环境可执行的实现与验收已完成，按用户要求提交推送独立分支。后续必需验收是在同一字体环境执行完整官方捕获/比较，以及Windows宿主验证；不能声称该剩余阶段已通过。不重开已完成的源码锁、字体、数学profile或ELK阶段调查，不改CI或创建发布。
+
+## 数学支持基线（历史，已推送）
+
+- 2026-11-16：`feat/mermaid-native-math` 已实现 Mermaid 内使用现有 C++ MathJax，基线 `922b2fdc`。六个功能提交已推送：`27ca37ac`（可移植构建）、`a7ace9a1`（Math SVG fragment）、`d8e5440e`（typed labels）、`729774bf`（Block/ER/Requirement/Use Case）、`31bcbb33`（Swimlane）、`65ea222c`（共享运行时与平台集成）；本交接、oracle 和验收文档随最后一批提交。未改 CI、既有公式缓存、版本或发布资产。
+- 覆盖 Flowchart、Sequence、Mindmap、Class、State、Agentflow、Block、ER、Requirement、Use Case、Swimlane。TeX 在 Markdown/普通反斜杠处理前检测；普通文字用 DirectWrite 实测 advance，公式用 Math DLL 的精确 CSS 像素尺寸。布局副本共享不可变 MathLabel，Math fragment 结果不保留 Scene，没有静态复制字体数据。语法、配置和边界见 [math.md](math.md)。
+- 全部真实 C++23 模块构建与回归通过：`FoliaMermaidTests` 220 项/937,106 断言；`FoliaMermaidMathTests` 5 组/229 断言；`FoliaMathSvgBridgeTests` 53 项/1,063 断言，全部正常退出。最终日志 `build/mermaid-math/final-{build,core-tests,native-tests}.log` 与 `build/mermaid-math-runtime/final-focused-tests.log`。12 份 native SVG 成功栅格化，代表图已目视检查。
+- 与官方 MathJax 4.1.3、相同 NewCM profile 的 22 个公式，宽/高/基线实测最大差异 0，SVG 绘制树规范化后完全相同，2× RGBA 全部逐像素相同。记录与散列见 [math-validation.json](math-validation.json)；复现工具 `tools/mermaid-cpp/math-oracle/`。生产 Math DLL SHA-256 `b4d61e7c88724a8b30777bad563a99d65ca698dba156fbf29d20becc88e5ddf2`。
+- 图布局仍锁定 Mermaid 12.2.0；该版数学用 KaTeX。官方 13.0.0-alpha.3 的 MathJax 插件已无 DOM 渲染 14 图 SVG/PNG，作为官方集成参考，不能混同 v12 整图坐标。旧 math scope 的 profile hash 首次提交即不匹配已提交 entry，已查清；新 oracle 单独锁实际未改 profile，旧 gate 未修改/未冒称通过。
+- 验证限制：Windows DirectWrite/WinUI 与新增 Windows 宿主用例在此 Linux 环境未执行；Chromium socket EPERM，升级被自动审批拒绝，未绕过。公式精确一致不等于所有完整图通过浏览器验收。保留上游 Block 居中组合块标签、Dagre compound 标题 margin 等已有布局规则。
+- 无运行构建/测试/agent 句柄。功能与可复现检查已完成，下一步由用户在 Windows 构建核对；不重开已完成的 profile、字体、模块导出调查，不额外启动 CI/发布。
+
+## 已验证基线（历史）
+
 - 2026-11-13：已移除 Mermaid 渲染入口的 Markdown 复制转义恢复。带转义的 Kavora 输入与 Mermaid 12.2.0 一样报语法错误，标准 Mermaid 版在默认 ELK 下正常渲染。核心、平台、DLL 三套测试和 20 张 Flowchart SVG 对照通过。可运行样例为 `build/mermaid-kavora/Kavora-ELK.md`。
 
 - 2026-11-13：ELK 复合流程图支持跨子图反馈边。默认按 Mermaid 12.2.0 的子图投影确定反馈边，布局完成后恢复原箭头与端点标签方向。原生 ELK 在 `orientFeedbackEdges: false` 下也能路由固定端口造成的同层边。按上游顺序导入边及端口后，7 个 ELK 复合布局算例（412 断言）和 20 张 Flowchart SVG 对照通过。Class ELK、State ELK、Agentflow、ER、Requirement 的浏览器对照也通过。验收见 `build/mermaid-kavora/`。

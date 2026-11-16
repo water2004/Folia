@@ -19,6 +19,12 @@ struct DirectiveLimits {
     std::size_t string_units = 4 * 1024 * 1024; // Decoded keys, strings and types.
     std::size_t directives = 10000; // All matches, even if filtered out.
 };
+// Strict JSON grammar shared by directives and diagram metadata. Object member
+// iteration retains source insertion order (with JavaScript integer keys first).
+std::expected<ConfigValue, std::string> parse_json_value(
+    std::u16string_view text, const DirectiveLimits& limits = {});
+std::expected<std::vector<std::pair<std::u16string,ConfigValue>>,std::string>
+parse_json_object_members(std::u16string_view text, const DirectiveLimits& limits = {});
 // A single preprocessing request shares the original regexp cursor between
 // init and wrap scans. Syntax failures retain it; a completed scan resets it.
 // Never share this state between requests or store it globally.

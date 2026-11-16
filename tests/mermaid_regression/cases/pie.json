@@ -1,0 +1,169 @@
+{
+  "family": "pie",
+  "cases": [
+    {
+      "id": "pie-official-pets",
+      "level": "basic",
+      "source": "pie title Pets adopted by volunteers\n    \"Dogs\" : 386\n    \"Cats\" : 85\n    \"Rats\" : 15\n",
+      "features": [
+        "title",
+        "three-slices"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/pie.md",
+        "section": "Pie chart diagrams"
+      }
+    },
+    {
+      "id": "pie-official-donut-highlight",
+      "level": "complex",
+      "source": "---\nconfig:\n  pie:\n    textPosition: 0.5\n    donutHole: 0.2\n    highlightSlice: Potassium\n  themeVariables:\n    pieOuterStrokeWidth: \"5px\"\n---\npie showData\n    title Key elements in Product X\n    \"Calcium\" : 42.96\n    \"Potassium\" : 50.05\n    \"Magnesium\" : 10.01\n    \"Iron\" :  5\n",
+      "features": [
+        "donut",
+        "highlight-slice",
+        "show-data",
+        "outer-stroke",
+        "text-position"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/pie.md",
+        "section": "Example"
+      }
+    },
+    {
+      "id": "pie-donut-legend-top",
+      "level": "complex",
+      "source": "pie showData\ntitle Product mix and a highlighted small category\n\"Desktop editors\": 421.75\n\"Mobile readers\": 198.25\n\"Web integrations\": 75.5\n\"Offline sync\": 23.25\n\"Extensions\": 5.125\n\"Other\": 0.125\n",
+      "features": [
+        "donut",
+        "legend-top",
+        "highlight-slice",
+        "fractional-values",
+        "unequal-slices",
+        "show-data"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/pie.md",
+        "section": "Combined documented syntax"
+      },
+      "config": {
+        "pie": {
+          "legendPosition": "top",
+          "donutHole": 0.55,
+          "textPosition": 0.85,
+          "highlightSlice": "Extensions"
+        }
+      }
+    },
+    {
+      "id": "pie-donut-legend-bottom",
+      "level": "complex",
+      "source": "pie showData\ntitle Product mix and a highlighted small category\n\"Desktop editors\": 421.75\n\"Mobile readers\": 198.25\n\"Web integrations\": 75.5\n\"Offline sync\": 23.25\n\"Extensions\": 5.125\n\"Other\": 0.125\n",
+      "features": [
+        "donut",
+        "legend-bottom",
+        "highlight-slice",
+        "fractional-values",
+        "unequal-slices",
+        "show-data"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/pie.md",
+        "section": "Combined documented syntax"
+      },
+      "config": {
+        "pie": {
+          "legendPosition": "bottom",
+          "donutHole": 0.55,
+          "textPosition": 0.85,
+          "highlightSlice": "Extensions"
+        }
+      }
+    },
+    {
+      "id": "pie-donut-legend-left",
+      "level": "complex",
+      "source": "pie showData\ntitle Product mix and a highlighted small category\n\"Desktop editors\": 421.75\n\"Mobile readers\": 198.25\n\"Web integrations\": 75.5\n\"Offline sync\": 23.25\n\"Extensions\": 5.125\n\"Other\": 0.125\n",
+      "features": [
+        "donut",
+        "legend-left",
+        "highlight-slice",
+        "fractional-values",
+        "unequal-slices",
+        "show-data"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/pie.md",
+        "section": "Combined documented syntax"
+      },
+      "config": {
+        "pie": {
+          "legendPosition": "left",
+          "donutHole": 0.55,
+          "textPosition": 0.85,
+          "highlightSlice": "Extensions"
+        }
+      }
+    },
+    {
+      "id": "pie-donut-legend-center",
+      "level": "complex",
+      "source": "pie showData\ntitle Product mix and a highlighted small category\n\"Desktop editors\": 421.75\n\"Mobile readers\": 198.25\n\"Web integrations\": 75.5\n\"Offline sync\": 23.25\n\"Extensions\": 5.125\n\"Other\": 0.125\n",
+      "features": [
+        "donut",
+        "legend-center",
+        "highlight-slice",
+        "fractional-values",
+        "unequal-slices",
+        "show-data"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/pie.md",
+        "section": "Combined documented syntax"
+      },
+      "config": {
+        "pie": {
+          "legendPosition": "center",
+          "donutHole": 0.55,
+          "textPosition": 0.85,
+          "highlightSlice": "Extensions"
+        }
+      }
+    },
+    {
+      "id": "pie-duplicate-zero-and-tiny",
+      "level": "complex",
+      "source": "pie showData\ntitle Stable labels across duplicate and zero values\n\"Editor\": 1000\n\"Zero\": 0\n\"Tiny\": 0.001\n\"Editor\": 50\n\"Reader\": 200\n\"Another tiny\": 0.005\n",
+      "features": [
+        "duplicate-label",
+        "zero-value",
+        "tiny-sector",
+        "show-data"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/pie.md",
+        "section": "Combined documented syntax"
+      },
+      "config": {
+        "pie": {
+          "donutHole": 0.15,
+          "highlightSlice": "Reader"
+        }
+      }
+    },
+    {
+      "id": "pie-unicode-long-legend",
+      "level": "intermediate",
+      "source": "pie showData\ntitle 工作时间 / Δ releases\n\"文档编辑与校对\": 45.5\n\"Καταγραφή αλλαγών\": 22.25\n\"A category with a deliberately long display name\": 17.75\n\"日本語 / 😀\": 14.5\n",
+      "features": [
+        "unicode",
+        "long-legend",
+        "fractional-values"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/pie.md",
+        "section": "Combined documented syntax"
+      }
+    }
+  ]
+}

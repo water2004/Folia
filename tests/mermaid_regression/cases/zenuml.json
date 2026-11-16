@@ -1,0 +1,346 @@
+{
+  "family": "zenuml",
+  "cases": [
+    {
+      "id": "zenuml-official-01",
+      "level": "intermediate",
+      "source": "zenuml\n    title Demo\n    Alice->John: Hello John, how are you?\n    John->Alice: Great!\n    Alice->John: See you later!\n",
+      "features": [
+        "official-example",
+        "zenuml"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/zenuml.md",
+        "section": "ZenUML"
+      }
+    },
+    {
+      "id": "zenuml-official-02",
+      "level": "intermediate",
+      "source": "zenuml\n    title Declare participant (optional)\n    Bob\n    Alice\n    Alice->Bob: Hi Bob\n    Bob->Alice: Hi Alice\n",
+      "features": [
+        "official-example",
+        "participants"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/zenuml.md",
+        "section": "Participants"
+      }
+    },
+    {
+      "id": "zenuml-official-03",
+      "level": "intermediate",
+      "source": "zenuml\n    title Annotators\n    @Actor Alice\n    @Database Bob\n    Alice->Bob: Hi Bob\n    Bob->Alice: Hi Alice\n",
+      "features": [
+        "official-example",
+        "annotators"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/zenuml.md",
+        "section": "Annotators"
+      }
+    },
+    {
+      "id": "zenuml-official-04",
+      "level": "intermediate",
+      "source": "zenuml\n    title Aliases\n    A as Alice\n    J as John\n    A->J: Hello John, how are you?\n    J->A: Great!\n",
+      "features": [
+        "official-example",
+        "aliases"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/zenuml.md",
+        "section": "Aliases"
+      }
+    },
+    {
+      "id": "zenuml-official-05",
+      "level": "intermediate",
+      "source": "zenuml\n    title Sync message\n    A.SyncMessage\n    A.SyncMessage(with, parameters) {\n      B.nestedSyncMessage()\n    }\n",
+      "features": [
+        "official-example",
+        "sync-message"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/zenuml.md",
+        "section": "Sync message"
+      }
+    },
+    {
+      "id": "zenuml-official-06",
+      "level": "basic",
+      "source": "zenuml\n    title Async message\n    Alice->Bob: How are you?\n",
+      "features": [
+        "official-example",
+        "async-message"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/zenuml.md",
+        "section": "Async message"
+      }
+    },
+    {
+      "id": "zenuml-official-07",
+      "level": "basic",
+      "source": "zenuml\n    new A1\n    new A2(with, parameters)\n",
+      "features": [
+        "official-example",
+        "creation-message"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/zenuml.md",
+        "section": "Creation message"
+      }
+    },
+    {
+      "id": "zenuml-official-08",
+      "level": "complex",
+      "source": "zenuml\n    // 1. assign a variable from a sync message.\n    a = A.SyncMessage()\n\n    // 1.1. optionally give the variable a type\n    SomeType a = A.SyncMessage()\n\n    // 2. use return keyword\n    A.SyncMessage() {\n    return result\n    }\n\n    // 3. use @return or @reply annotator on an async message\n    @return\n    A->B: result\n",
+      "features": [
+        "official-example",
+        "reply-message"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/zenuml.md",
+        "section": "Reply message"
+      }
+    },
+    {
+      "id": "zenuml-official-09",
+      "level": "complex",
+      "source": "zenuml\n    title Reply message\n    Client->A.method() {\n      B.method() {\n        if(condition) {\n          return x1\n          // return early\n          @return\n          A->Client: x11\n        }\n      }\n      return x2\n    }\n",
+      "features": [
+        "official-example",
+        "reply-message"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/zenuml.md",
+        "section": "Reply message"
+      }
+    },
+    {
+      "id": "zenuml-official-10",
+      "level": "intermediate",
+      "source": "zenuml\n    A.method() {\n      B.nested_sync_method()\n      B->C: nested async message\n    }\n",
+      "features": [
+        "official-example",
+        "nesting"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/zenuml.md",
+        "section": "Nesting"
+      }
+    },
+    {
+      "id": "zenuml-official-11",
+      "level": "intermediate",
+      "source": "zenuml\n    // a comment on a participant will not be rendered\n    BookService\n    // a comment on a message.\n    // **Markdown** is supported.\n    BookService.getBook()\n",
+      "features": [
+        "official-example",
+        "comments"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/zenuml.md",
+        "section": "Comments"
+      }
+    },
+    {
+      "id": "zenuml-official-12",
+      "level": "intermediate",
+      "source": "zenuml\n    Alice->John: Hello John, how are you?\n    while(true) {\n      John->Alice: Great!\n    }\n",
+      "features": [
+        "official-example",
+        "loops"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/zenuml.md",
+        "section": "Loops"
+      }
+    },
+    {
+      "id": "zenuml-official-13",
+      "level": "intermediate",
+      "source": "zenuml\n    Alice->Bob: Hello Bob, how are you?\n    if(is_sick) {\n      Bob->Alice: Not so good :(\n    } else {\n      Bob->Alice: Feeling fresh like a daisy\n    }\n",
+      "features": [
+        "official-example",
+        "alt"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/zenuml.md",
+        "section": "Alt"
+      }
+    },
+    {
+      "id": "zenuml-official-14",
+      "level": "intermediate",
+      "source": "zenuml\n    Alice->Bob: Hello Bob, how are you?\n    Bob->Alice: Not so good :(\n    opt {\n      Bob->Alice: Thanks for asking\n    }\n",
+      "features": [
+        "official-example",
+        "opt"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/zenuml.md",
+        "section": "Opt"
+      }
+    },
+    {
+      "id": "zenuml-official-15",
+      "level": "intermediate",
+      "source": "zenuml\n    par {\n        Alice->Bob: Hello guys!\n        Alice->John: Hello guys!\n    }\n",
+      "features": [
+        "official-example",
+        "parallel"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/zenuml.md",
+        "section": "Parallel"
+      }
+    },
+    {
+      "id": "zenuml-official-16",
+      "level": "complex",
+      "source": "zenuml\n    try {\n      Consumer->API: Book something\n      API->BookingService: Start booking process\n    } catch {\n      API->Consumer: show failure\n    } finally {\n      API->BookingService: rollback status\n    }\n",
+      "features": [
+        "official-example",
+        "try-catch-finally-break"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/zenuml.md",
+        "section": "Try/Catch/Finally (Break)"
+      }
+    },
+    {
+      "id": "zenuml-transaction-control-flow",
+      "level": "complex",
+      "source": "zenuml\ntitle Transaction with retries\n@Actor User\nAPI as Application\n@Database Store\nUser->API.submit(order) {\n  try {\n    forEach(item in order) {\n      if(item.valid) {\n        Store.save(item)\n      } else if(item.retry) {\n        opt(retry) { API.schedule(item) }\n      } else {\n        API.reject(item)\n      }\n    }\n    par {\n      API->Audit: committed\n      API->Metrics: count\n    }\n  } catch(error) {\n    API->User: failed\n  } finally {\n    Store.close()\n  }\n  return receipt\n}\n",
+      "features": [
+        "typed-participants",
+        "aliases",
+        "explicit-sync-sender",
+        "foreach",
+        "else-if",
+        "optional",
+        "parallel",
+        "try-catch-finally",
+        "return"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/zenuml.md",
+        "section": "Combined Messages, Nesting, Loops, Alt, Opt, Parallel and Try/Catch/Finally"
+      }
+    },
+    {
+      "id": "zenuml-loop-aliases-and-critical",
+      "level": "complex",
+      "source": "zenuml\nClient.execute() {\n  for(index) {\n    Worker.prepare()\n  }\n  foreach(item) {\n    Worker.process(item)\n  }\n  loop(retry) {\n    critical(lock) {\n      Store.write()\n    }\n  }\n  while(waiting) {\n    Worker.poll()\n  }\n}\n",
+      "features": [
+        "four-loop-keywords",
+        "critical",
+        "nested-occurrences"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/zenuml.md",
+        "section": "Combined Messages, Nesting, Loops, Alt, Opt, Parallel and Try/Catch/Finally"
+      }
+    },
+    {
+      "id": "zenuml-lifecycle-and-replies",
+      "level": "complex",
+      "source": "zenuml\ntitle Lifecycle and reply destinations\n@Actor Client\nService\nClient->Service.create() {\n  new Worker(configuration) {\n    result = Store.read()\n    return result\n  }\n  if(success) {\n    @return\n    Service->Client: ready\n  } else {\n    @reply\n    Service->Client: rejected\n  }\n}\n",
+      "features": [
+        "creation-body",
+        "assignment",
+        "annotated-return",
+        "annotated-reply",
+        "conditional-return"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/zenuml.md",
+        "section": "Combined Messages, Nesting, Loops, Alt, Opt, Parallel and Try/Catch/Finally"
+      }
+    },
+    {
+      "id": "zenuml-comments-and-typed-results",
+      "level": "complex",
+      "source": "zenuml\nClient as Consumer\n@Database Database\n// Validate the request.\n// **Preserve** the source transaction.\nClient.validate() {\n  // Read the `current` version.\n  Version current = Database.read()\n  if(current) {\n    // The write is *atomic*.\n    Database.write(current)\n  } else {\n    Database.initialize()\n  }\n  return current\n}\n",
+      "features": [
+        "multiline-comments",
+        "markdown-comments",
+        "typed-assignment",
+        "aliases",
+        "conditional"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/zenuml.md",
+        "section": "Combined Messages, Nesting, Loops, Alt, Opt, Parallel and Try/Catch/Finally"
+      }
+    },
+    {
+      "id": "zenuml-parallel-sections",
+      "level": "complex",
+      "source": "zenuml\nOrchestrator.run() {\n  par {\n    section(stage1) {\n      A.prepare()\n      B.prepare()\n    }\n    section(stage2) {\n      opt(needsCache) {\n        Cache.warm()\n      }\n      Worker.start()\n    }\n    critical(commit) {\n      Store.commit()\n    }\n  }\n}\n",
+      "features": [
+        "parallel",
+        "section",
+        "optional",
+        "critical",
+        "four-levels"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/zenuml.md",
+        "section": "Combined Messages, Nesting, Loops, Alt, Opt, Parallel and Try/Catch/Finally"
+      }
+    },
+    {
+      "id": "zenuml-multiple-catches-and-branches",
+      "level": "complex",
+      "source": "zenuml\nGateway.handle() {\n  try {\n    if(primary) {\n      Primary.execute()\n    } else if(secondary) {\n      Secondary.execute()\n    } else if(offline) {\n      Cache.read()\n    } else {\n      Reject.send()\n    }\n  } catch(NetworkError) {\n    Retry.schedule()\n  } catch(StorageError) {\n    Audit.record()\n  } finally {\n    Gateway.release()\n  }\n  return status\n}\n",
+      "features": [
+        "three-conditions",
+        "else",
+        "two-catches",
+        "finally",
+        "self-call",
+        "return"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/zenuml.md",
+        "section": "Combined Messages, Nesting, Loops, Alt, Opt, Parallel and Try/Catch/Finally"
+      }
+    },
+    {
+      "id": "zenuml-assignment-return-nesting",
+      "level": "complex",
+      "source": "zenuml\n@Actor Client\nController\nWorker\nStore\nClient->Controller.run() {\n  result = Worker.execute() {\n    Store.read() {\n      return first\n      return second\n    }\n    if(cached) {\n      return cachedValue\n    } else {\n      return computedValue\n    }\n  }\n  Worker.flush()\n  return result\n}\n",
+      "features": [
+        "assignment-return-with-body",
+        "nested-activations",
+        "multiple-returns",
+        "conditional-return-sections"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/zenuml.md",
+        "section": "Reply message; Alt"
+      }
+    },
+    {
+      "id": "zenuml-comment-code-delimiters-and-escapes",
+      "level": "complex",
+      "source": "zenuml\n@Actor Client\nApplication\n@Database Store\n// **Receive** the `` a ` b `` token and `*literal*` marker.\n//   Preserve \\`escaped\\` and \\*literal\\* syntax.\nClient->Application.validate() {\n  critical(writeLock) {\n    // Compare `λ 中文 & < > \"quoted\" 'single'` exactly.\n    // Keep *italic*, **bold** and `` padded ` code `` together.\n    Value result = Store.write() {\n      // A reply keeps `two  spaces` inside the code span.\n      return stored\n    }\n  }\n  opt(notify) {\n    // Emit `a & b` with \\[literal\\] brackets.\n    Application->Client: accepted\n  }\n  return result\n}\n",
+      "features": [
+        "multiline-comments",
+        "code-span-delimiter-runs",
+        "escaped-markdown",
+        "entities-in-code",
+        "unicode-comments",
+        "typed-assignment",
+        "critical-optional-nesting",
+        "nested-return"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/zenuml.md",
+        "section": "Comments with Markdown; combined nested messages, critical and opt fragments"
+      }
+    }
+  ]
+}

@@ -1,0 +1,138 @@
+{
+  "family": "usecase",
+  "cases": [
+    {
+      "id": "usecase-customer-checkout",
+      "level": "basic",
+      "source": "usecase-beta\ndirection LR\nactor Customer(\"Customer\")\nsystemBoundary \"Order system\"\n  Checkout(\"Place order\")\nend\nCustomer --> Checkout\n",
+      "features": [
+        "actors",
+        "usecases",
+        "associations",
+        "system-boundary"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/usecase.md",
+        "section": "Use case diagrams (12.0.0+)"
+      }
+    },
+    {
+      "id": "usecase-actor-variants",
+      "level": "intermediate",
+      "source": "usecase-beta\nactor Normal(\"Normal actor\")\nactor Hollow(\"Hollow actor\")@{ type: hollow }\nactor Awesome(\"Awesome actor\")@{ type: awesome }\nactor Icon(\"Registered icon\")@{ icon: \"fa:user\" }\nactor Fallback(\"Missing icon fallback\")@{ icon: \"not-registered:user\" }\nNormal --> Manage\nHollow --> Manage\nAwesome --> Manage\nIcon --> Manage\nFallback --> Manage\n",
+      "features": [
+        "normal-actor",
+        "hollow-actor",
+        "awesome-actor",
+        "icon-reference",
+        "unregistered-icon-fallback",
+        "fan-in"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/usecase.md",
+        "section": "Actor variants"
+      }
+    },
+    {
+      "id": "usecase-include-extend-inheritance",
+      "level": "intermediate",
+      "source": "usecase-beta\nactor Admin\nactor Person\nCheckout\nPayment\nApplyCoupon\nAdmin --|> Person\nCheckout ..> : include Payment\nApplyCoupon ..> : extend Checkout\nApplyCoupon --|> Checkout\n",
+      "features": [
+        "include",
+        "extend",
+        "generalization"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/usecase.md",
+        "section": "Include, extend, and generalization"
+      }
+    },
+    {
+      "id": "usecase-edge-metadata",
+      "level": "complex",
+      "source": "usecase-beta\nactor Customer\nCheckout\nPayment\nCustomer opens@-- \"starts checkout\" ---> Checkout\nCheckout payment@..> : include Payment\nclassDef emphasized stroke:#d33,stroke-width:3px\nclass opens,payment emphasized\nstyle opens stroke:#06c,stroke-width:4px\nopens@{ animation: fast }\npayment@{ animate: false }\n",
+      "features": [
+        "edge-ids",
+        "edge-styles",
+        "animation",
+        "length"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/usecase.md",
+        "section": "Edge IDs, styles, animation, and length"
+      }
+    },
+    {
+      "id": "usecase-structured-json",
+      "level": "complex",
+      "source": "usecase-beta\nInspect(\"Inspect payload\")\njson Payload@{\n  \"2\": \"second in source\",\n  \"1\": \"first after 2\",\n  \"enabled\": true,\n  \"count\": 3,\n  \"missing\": null,\n  \"colors\": [\"Red\", \"Green\"],\n  \"address\": { \"city\": \"Oslo\" },\n  \"items\": [{ \"name\": \"Book\" }],\n  \"emptyObject\": {},\n  \"emptyArray\": []\n}:::data\nInspect --> Payload\nclassDef data stroke:#3572a5\nstyle Payload stroke-width:2px\n",
+      "features": [
+        "json-table",
+        "nested-values",
+        "numeric-key-order",
+        "null-boolean-number",
+        "arrays-and-objects",
+        "empty-collections",
+        "class-and-direct-styles",
+        "association"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/usecase.md",
+        "section": "JSON tables"
+      }
+    },
+    {
+      "id": "usecase-element-color-rotation",
+      "level": "intermediate",
+      "source": "---\nconfig:\n  theme: redux-color\n  usecase:\n    colorScheme: rotate\n---\nusecase-beta\ndirection LR\nactor Customer\nactor Auditor\nBrowse(\"Browse catalogue\")\nCheckout(\"Checkout\")\nCustomer --> Browse\nBrowse --> Checkout\nAuditor --> Checkout\n",
+      "features": [
+        "rotate-color-scheme",
+        "redux-color-theme",
+        "actors",
+        "usecases",
+        "relations",
+        "LR"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/usecase.md",
+        "section": "Per-element colour rotation"
+      }
+    },
+    {
+      "id": "usecase-fonts-and-spacing",
+      "level": "intermediate",
+      "source": "---\nconfig:\n  usecase:\n    actorFontSize: 16\n    actorFontFamily: Arial\n    actorFontWeight: bold\n    usecaseFontSize: 14\n    usecaseFontFamily: Georgia\n    usecaseFontWeight: normal\n    nodeSpacing: 60\n    rankSpacing: 70\n    diagramPadding: 24\n    colorScheme: role\n    useMaxWidth: false\n---\nusecase-beta\ndirection LR\nactor Customer\nBrowse(\"Browse catalog\")\nCustomer --> Browse\n",
+      "features": [
+        "configuration",
+        "font-families",
+        "font-weights",
+        "font-sizes",
+        "node-and-rank-spacing",
+        "diagram-padding",
+        "role-color-scheme"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/usecase.md",
+        "section": "Configuration"
+      }
+    },
+    {
+      "id": "usecase-official-ordering-system",
+      "level": "complex",
+      "source": "usecase-beta\ndirection LR\naccTitle: Online ordering use cases\naccDescr {\n  A customer places an order through the storefront.\n  Staff review the order and inspect its data.\n}\nactor Customer(\"Customer\")\nactor Staff(\"Order staff\")@{ type: hollow, business: true } <<Employee>>\nsystemBoundary ordering[\"Ordering System\"]@{ type: package }:::system\n  Browse(\"Browse products\")\n  Checkout(\"Checkout\") <<Core>>:::critical\n  Payment(\"Process payment\")\n  Review[Review order]\nend\njson OrderData@{\n  \"status\": \"pending\",\n  \"items\": [{ \"name\": \"Book\", \"quantity\": 1 }],\n  \"total\": 29.95\n}:::data\nnote for Checkout \"`Validates the **cart** before payment`\"\nCustomer starts@-- \"places order\" ---> Checkout\nCustomer --> Browse\nCheckout pays@..> : include Payment\nStaff --> Review\nReview --> OrderData\nclassDef system stroke:#c8a02a,stroke-width:2px\nclassDef critical stroke:#c33,stroke-width:3px\nclassDef data stroke:#3572a5\nstarts@{ animation: fast }\nstyle pays stroke:#6b46c1,stroke-width:2px\n",
+      "features": [
+        "boundary",
+        "stereotypes",
+        "json",
+        "markdown-note",
+        "accessibility",
+        "edge-styles",
+        "animation"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/usecase.md",
+        "section": "Complete example"
+      }
+    }
+  ]
+}

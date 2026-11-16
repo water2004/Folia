@@ -1,0 +1,211 @@
+{
+  "family": "eventmodeling",
+  "cases": [
+    {
+      "id": "eventmodeling-official-01",
+      "level": "basic",
+      "source": "eventmodeling\n\ntf 01 ui CartUI\ntf 02 cmd AddItem\ntf 03 evt ItemAdded\n",
+      "features": [
+        "official-example",
+        "timeline"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/eventmodeling.md",
+        "section": "Timeline"
+      }
+    },
+    {
+      "id": "eventmodeling-official-02",
+      "level": "basic",
+      "source": "eventmodeling\n\ntf 01 ui CartUI\ntf 02 cmd AddItem { description: string }\ntf 03 evt ItemAdded { description: string }\n",
+      "features": [
+        "official-example",
+        "inline-data"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/eventmodeling.md",
+        "section": "Inline data"
+      }
+    },
+    {
+      "id": "eventmodeling-official-03",
+      "level": "basic",
+      "source": "eventmodeling\n\ntimeframe 01 ui CartUI\ntimeframe 02 command AddItem { description: string }\ntimeframe 03 event ItemAdded { description: string }\n",
+      "features": [
+        "official-example",
+        "inline-data"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/eventmodeling.md",
+        "section": "Inline data"
+      }
+    },
+    {
+      "id": "eventmodeling-official-04",
+      "level": "complex",
+      "source": "eventmodeling\n\ntf 01 ui CartUI\ntf 02 cmd AddItem [[AddItem01]]\ntf 03 evt ItemAdded [[ItemAdded]]\ntf 04 cmd AddItem [[AddItem02]]\ntf 05 evt ItemAdded [[ItemAdded]]\n\ndata AddItem01 {\n  description: 'john'\n  image: 'avatar_john'\n  price: 20.4\n}\n\ndata AddItem02 {\n  description: 'jack'\n  image: 'avatar_jack'\n  price: 12.5\n}\n\ndata ItemAdded {\n  description: string\n  image: string\n  price: number\n}\n",
+      "features": [
+        "official-example",
+        "data-block"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/eventmodeling.md",
+        "section": "Data block"
+      }
+    },
+    {
+      "id": "eventmodeling-official-05",
+      "level": "complex",
+      "source": "eventmodeling\n\ntimeframe 01 ui CartUI\ntimeframe 02 command AddItem [[AddItem01]]\ntimeframe 03 event ItemAdded [[ItemAdded]]\ntimeframe 04 command AddItem [[AddItem02]]\ntimeframe 05 event ItemAdded [[ItemAdded]]\n\ndata AddItem01 {\n  description: 'john'\n  image: 'avatar_john'\n  price: 20.4\n}\n\ndata AddItem02 {\n  description: 'jack'\n  image: 'avatar_jack'\n  price: 12.5\n}\n\ndata ItemAdded {\n  description: string\n  image: string\n  price: number\n}\n",
+      "features": [
+        "official-example",
+        "data-block"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/eventmodeling.md",
+        "section": "Data block"
+      }
+    },
+    {
+      "id": "eventmodeling-official-06",
+      "level": "intermediate",
+      "source": "eventmodeling\n\ntf 01 ui CartUI\ntf 02 cmd AddItem\ntf 03 evt ItemAdded\n\nrf 04 evt External.InventoryChanged\ntf 05 pcr InventoryProcessor\ntf 06 cmd ChangeInventory\ntf 07 evt Cart.InventoryChanged\n",
+      "features": [
+        "official-example",
+        "resetting-the-flow"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/eventmodeling.md",
+        "section": "Resetting the flow"
+      }
+    },
+    {
+      "id": "eventmodeling-official-07",
+      "level": "intermediate",
+      "source": "eventmodeling\n\ntimeframe 01 ui CartUI\ntimeframe 02 command AddItem\ntimeframe 03 event ItemAdded\n\nresetframe 04 event External.InventoryChanged\ntimeframe 05 processor InventoryProcessor\ntimeframe 06 command ChangeInventory\ntimeframe 07 event Cart.InventoryChanged\n",
+      "features": [
+        "official-example",
+        "resetting-the-flow"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/eventmodeling.md",
+        "section": "Resetting the flow"
+      }
+    },
+    {
+      "id": "eventmodeling-official-08",
+      "level": "basic",
+      "source": "eventmodeling\n\ntf 01 evt ItemAdded\ntf 02 ui OtherUI\nrf 03 rmo CartItems ->> 01\n",
+      "features": [
+        "official-example",
+        "resetting-the-flow"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/eventmodeling.md",
+        "section": "Resetting the flow"
+      }
+    },
+    {
+      "id": "eventmodeling-official-09",
+      "level": "intermediate",
+      "source": "eventmodeling\n\nrf 02 evt CartCreated\nrf 03 evt ItemAdded\nrf 04 evt ItemRemoved\nrf 05 evt CartCleared\ntf 01 rmo CartUI ->> 02 ->> 03 ->> 04 ->> 05\n",
+      "features": [
+        "official-example",
+        "multiple-relations"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/eventmodeling.md",
+        "section": "Multiple relations"
+      }
+    },
+    {
+      "id": "eventmodeling-official-11",
+      "level": "basic",
+      "source": "eventmodeling\n\ntf 03 evt ItemAdded\ntf 02 rmo CartItems\ntf 04 ui CartUI\n",
+      "features": [
+        "official-example",
+        "state-view"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/eventmodeling.md",
+        "section": "State View"
+      }
+    },
+    {
+      "id": "eventmodeling-official-12",
+      "level": "intermediate",
+      "source": "eventmodeling\n\ntf 03 evt External.InventoryChanged\ntf 02 pcr InventoryProcessor\ntf 04 cmd ChangeInventory\ntf 05 evt Cart.InventoryChanged\n",
+      "features": [
+        "official-example",
+        "translation"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/eventmodeling.md",
+        "section": "Translation"
+      }
+    },
+    {
+      "id": "eventmodeling-official-13",
+      "level": "basic",
+      "source": "eventmodeling\n\nrf 01 evt Inventory.InventoryChanged\nrf 02 evt External.InventoryChanged\n",
+      "features": [
+        "official-example",
+        "swimlanes-and-namespaces"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/eventmodeling.md",
+        "section": "Swimlanes and Namespaces"
+      }
+    },
+    {
+      "id": "eventmodeling-checkout-and-fulfillment",
+      "level": "complex",
+      "source": "eventmodeling\ntf 01 ui Shop.Cart\ntf 02 cmd Shop.AddItem [[AddItem]]\ntf 03 evt Shop.ItemAdded [[ItemAdded]]\ntf 04 rmo Shop.CartView ->> 03\ntf 05 ui Shop.Checkout ->> 04\ntf 06 cmd Payments.Authorize [[Payment]]\ntf 07 evt Payments.Authorized ->> 06\nrf 08 processor Shipping.Prepare ->> 07 ->> 03\ntf 09 cmd Shipping.Dispatch\ntf 10 evt Shipping.Dispatched\nrf 11 rmo Shop.OrderStatus ->> 10 ->> 07\ndata AddItem {\n  productId: \"SKU-42\"\n  quantity: 2\n}\ndata ItemAdded {\n  productId: \"SKU-42\"\n  lineTotal: 19.98\n}\ndata Payment {\n  currency: \"EUR\"\n  amount: 19.98\n}\n",
+      "features": [
+        "eleven-frames",
+        "three-namespaces",
+        "shared-data-blocks",
+        "multi-relations",
+        "reset-flow",
+        "processor"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/eventmodeling.md",
+        "section": "Combined syntax stress regression"
+      }
+    },
+    {
+      "id": "eventmodeling-inventory-translation",
+      "level": "complex",
+      "source": "eventmodeling\nresetframe 10 event External.StockChanged { sku: \"A-7\", available: 42 }\ntimeframe 20 processor Inventory.Translate ->> 10\ntimeframe 30 command Inventory.AdjustStock { sku: \"A-7\", delta: -2 }\ntimeframe 40 event Inventory.StockAdjusted ->> 30\nresetframe 50 event Sales.OrderPlaced { sku: \"A-7\", count: 2 }\ntimeframe 60 processor Inventory.Reserve ->> 50 ->> 40\ntimeframe 70 command Inventory.ReserveStock\ntimeframe 80 event Inventory.StockReserved\ntimeframe 90 readmodel Inventory.Availability ->> 80 ->> 40\nresetframe 100 ui Operations.StockDashboard ->> 90\n",
+      "features": [
+        "relaxed-keywords",
+        "translation",
+        "reset-frames",
+        "multiple-inputs",
+        "numeric-ids",
+        "inline-data"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/eventmodeling.md",
+        "section": "Combined syntax stress regression"
+      }
+    },
+    {
+      "id": "eventmodeling-repeated-entities-distinct-data",
+      "level": "complex",
+      "source": "eventmodeling\ntf 01 ui Cart\ntf 02 cmd AddItem [[First]]\ntf 03 evt ItemAdded [[First]]\ntf 04 cmd AddItem [[Second]]\ntf 05 evt ItemAdded [[Second]]\ntf 06 cmd RemoveItem [[Removed]]\ntf 07 evt ItemRemoved [[Removed]]\nrf 08 rmo CartSummary ->> 03 ->> 05 ->> 07\ntf 09 ui Cart ->> 08\ndata First {\n productId: \"red\"\n quantity: 3\n price: 20.5\n}\ndata Second {\n productId: \"blue\"\n quantity: 2\n price: 10.25\n}\ndata Removed {\n productId: \"red\"\n quantity: 1\n}\n",
+      "features": [
+        "repeated-entities",
+        "three-data-blocks",
+        "three-way-join",
+        "reset-frame",
+        "revisit-ui"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/eventmodeling.md",
+        "section": "Combined syntax stress regression"
+      }
+    }
+  ]
+}

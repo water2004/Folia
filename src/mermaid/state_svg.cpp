@@ -4,6 +4,7 @@ import folia.mermaid.number;
 import folia.mermaid.svg_text;
 import folia.mermaid.rough_rectangle;
 import folia.mermaid.flowchart_elk;
+import folia.mermaid.elk_components;
 namespace folia::mermaid {
 namespace {
 std::u16string trim(std::u16string_view value){auto first=value.find_first_not_of(u" \t\r\n");return first==value.npos?u"":std::u16string(value.substr(first,value.find_last_not_of(u" \t\r\n")-first+1));}
@@ -124,6 +125,8 @@ std::expected<StateRenderInput,std::string> prepare_state(
         result.annotations = std::move(parsed->annotations);
         result.document.effective_config = prepared->effective_config;
         if (prepared->title) result.document.title = *prepared->title;
+        if (const auto* html = prepared->effective_config.find(u"htmlLabels"); html && html->kind != ConfigKind::null)
+            result.html_labels = config_truthy(*html);
 
         const auto& config = member(prepared->effective_config, u"state");
         const auto dimension = [&](std::u16string_view key, double fallback) {
@@ -172,9 +175,23 @@ std::expected<StateRenderInput,std::string> prepare_state(
         return std::unexpected(error.what());
     }
 }
-std::expected<StateSvg,std::string> render_state_svg(const StateRenderInput& in,const StateMeasure& measure){try{if(!measure)throw std::runtime_error("State requires text measurements");const auto& d=in.document;const auto& t=in.theme;auto metric=[&](std::u16string_view value,double size){auto b=measure(value,size);if(!b)throw std::runtime_error(b.error());return *b;};
- auto label=[&](std::u16string_view value,bool group=false,bool note=false){
+std::expected<StateSvg,std::string> render_state_svg(const StateRenderInput& in,const StateMeasure& measure,const MathLabelMeasure& math_measure){try{if(!measure)throw std::runtime_error("State requires text measurements");const auto& d=in.document;const auto& t=in.theme;auto metric=[&](std::u16string_view value,double size){auto b=measure(value,size);if(!b)throw std::runtime_error(b.error());return *b;};
+ auto label=[&](std::u16string_view value,bool group=false,bool note=false,const FlowchartNode* source=nullptr){
   FlowchartTextBox box;if(value.empty())return box;
+  if(in.html_labels&&math_measure) {
+   FlowchartLabelFont font{t.font_family,t.font_size};
+   if(source&&has_math_label(value)) {
+    FlowchartSvgTheme theme;theme.font_family=t.font_family;theme.font_size=t.font_size;
+    auto styled=flowchart_label_font(source->compiled_styles,source->styles,theme);
+    if(!styled)throw std::runtime_error(styled.error());font=std::move(*styled);
+   }
+   auto rich=math_measure(value,font.family,font.size,font.weight,font.italic);
+   if(!rich)throw std::runtime_error(rich.error());
+   if(*rich) {
+    box.width=(**rich).width;box.height=(**rich).height;box.font=std::move(font);
+    box.math_label=std::make_shared<const MathLabel>(std::move(**rich));return box;
+   }
+  }
   std::vector<std::u16string_view> paragraphs;
   if(note){std::size_t begin=0;for(;;){const auto end=value.find(u'\n',begin);paragraphs.push_back(value.substr(begin,end==value.npos?value.size()-begin:end-begin));if(end==value.npos)break;begin=end+1;}}
   else paragraphs.push_back(value);
@@ -206,7 +223,7 @@ std::expected<StateSvg,std::string> render_state_svg(const StateRenderInput& in,
  for(auto& node:graph.nodes){
   const bool terminal=node.shape==u"stateStart"||node.shape==u"stateEnd";
   const bool note_label=node.shape==u"note"||node.shape==u"noteGroup";
-  auto box=terminal||fork_join(node.shape)?FlowchartTextBox{}:label(node.label,node.group&&!note_label,note_label);
+  auto box=terminal||fork_join(node.shape)?FlowchartTextBox{}:label(node.label,node.group&&!note_label,note_label,&node);
   labels.nodes.push_back(box);
   if(terminal){
    const auto width=node.shape==u"stateEnd"?14+7*(1-std::cos(std::numbers::pi/18))/8:14;
@@ -239,7 +256,15 @@ std::expected<StateSvg,std::string> render_state_svg(const StateRenderInput& in,
   }
   return "<rect x=\""+num(x)+"\" y=\""+num(y)+"\" width=\""+num(w)+"\" height=\""+num(h)+"\" rx=\""+num(radius)+"\" ry=\""+num(radius)+"\" fill=\""+xml(fill)+"\" stroke=\""+xml(stroke)+"\""+style+"/>";
  };
- auto draw_label=[&](const FlowchartTextBox& box,double x,double y,std::u16string_view color,std::string_view css){if(box.lines.empty())return std::string{};std::string out="<text class=\""+std::string(css)+"\" data-html-label=\"true\" fill=\""+xml(color)+"\">";for(std::size_t i=0;i<box.lines.size();++i)out+="<tspan x=\""+num(x)+"\" y=\""+num(y+box.baseline+i*box.line_step)+"\" text-anchor=\"middle\">"+xml(box.lines[i])+"</tspan>";return out+"</text>";};
+ auto draw_label=[&](const FlowchartTextBox& box,double x,double y,std::u16string_view color,std::string_view css){
+  if(box.math_label) {
+   const std::string paint(color.begin(),color.end());
+   auto svg=render_math_label_svg(*box.math_label,x-box.width/2,y,
+       {box.font?box.font->family:t.font_family,paint,css,box.width});
+   if(!svg)throw std::runtime_error(svg.error());return std::move(*svg);
+  }
+  if(box.lines.empty())return std::string{};std::string out="<text class=\""+std::string(css)+"\" data-html-label=\"true\" fill=\""+xml(color)+"\">";for(std::size_t i=0;i<box.lines.size();++i)out+="<tspan x=\""+num(x)+"\" y=\""+num(y+box.baseline+i*box.line_step)+"\" text-anchor=\"middle\">"+xml(box.lines[i])+"</tspan>";return out+"</text>";
+ };
  for(std::size_t i=0;i<graph.nodes.size();++i){
   const auto& source=i<d.nodes.size()?d.nodes[i]:graph.nodes[i];
   if(!source.group)continue;

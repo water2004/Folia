@@ -1,0 +1,163 @@
+{
+  "family": "block",
+  "cases": [
+    {
+      "id": "block-columns",
+      "level": "basic",
+      "source": "block\n  columns 3\n  a b c d\n",
+      "features": [
+        "columns",
+        "grid"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/block.md",
+        "section": "Column Usage"
+      }
+    },
+    {
+      "id": "block-spanning-nested",
+      "level": "intermediate",
+      "source": "block\n  columns 3\n  a:3\n  block:group1:2\n    columns 2\n    h i j k\n  end\n  g\n  block:group2:3\n    %% columns auto (default)\n    l m n o p q r\n  end\n",
+      "features": [
+        "spans",
+        "nested-grid"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/block.md",
+        "section": "Adjusting Widths"
+      }
+    },
+    {
+      "id": "block-arrow-shapes",
+      "level": "intermediate",
+      "source": "block\n  blockArrowId<[\"Label\"]>(right)\n  blockArrowId2<[\"Label\"]>(left)\n  blockArrowId3<[\"Label\"]>(up)\n  blockArrowId4<[\"Label\"]>(down)\n  blockArrowId5<[\"Label\"]>(x)\n  blockArrowId6<[\"Label\"]>(y)\n  blockArrowId7<[\"Label\"]>(x, down)\n",
+      "features": [
+        "arrow-shapes",
+        "directions"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/block.md",
+        "section": "Example - Block Arrows"
+      }
+    },
+    {
+      "id": "block-official-overview",
+      "level": "complex",
+      "source": "block\ncolumns 1\n  db((\"DB\"))\n  blockArrowId6<[\"&nbsp;&nbsp;&nbsp;\"]>(down)\n  block:ID\n    A\n    B[\"A wide one in the middle\"]\n    C\n  end\n  space\n  D\n  ID --> D\n  C --> D\n  style B fill:#969,stroke:#333,stroke-width:4px\n",
+      "features": [
+        "spans",
+        "nested-grid",
+        "arrows",
+        "classes"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/block.md",
+        "section": "Introduction to Block Diagrams"
+      }
+    },
+    {
+      "id": "block-system-architecture",
+      "level": "complex",
+      "source": "block\n  columns 3\n  Frontend blockArrowId6<[\" \"]>(right) Backend\n  space:2 down<[\" \"]>(down)\n  Disk left<[\" \"]>(left) Database[(\"Database\")]\n\n  classDef front fill:#696,stroke:#333;\n  classDef back fill:#969,stroke:#333;\n  class Frontend front\n  class Backend,Database back\n",
+      "features": [
+        "nested-grid",
+        "spans",
+        "classDef"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/block.md",
+        "section": "Example - System Architecture"
+      }
+    },
+    {
+      "id": "block-business-process",
+      "level": "complex",
+      "source": "block\n  columns 3\n  Start((\"Start\")) space:2\n  down<[\" \"]>(down) space:2\n  Decision{{\"Make Decision\"}} right<[\"Yes\"]>(right) Process1[\"Process A\"]\n  downAgain<[\"No\"]>(down) space r3<[\"Done\"]>(down)\n  Process2[\"Process B\"] r2<[\"Done\"]>(right) End((\"End\"))\n\n  style Start fill:#969;\n  style End fill:#696;\n",
+      "features": [
+        "decision",
+        "labeled-links",
+        "space",
+        "styles"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/block.md",
+        "section": "Example - Business Process Flow"
+      }
+    },
+    {
+      "id": "block-nested-spans-and-feedback",
+      "level": "complex",
+      "source": "block-beta\ncolumns 3\nsource[\"Source\"]:3\nblock:parse:2\n  columns 2\n  token[\"Tokenizer\"] ast[\"Tree\"]\n  errors[\"Diagnostics\"]:2\nend\ncache[(\"Cache\")]\nblock:output:3\n  columns 3\n  svg[\"SVG\"] bitmap[\"Bitmap\"] pdf[\"PDF\"]\nend\nsource --> token\ntoken --> ast\nast --> svg\nerrors -- \"retry\" --> token\ncache --> bitmap\nclassDef result fill:#ddffee,stroke:#227744,stroke-width:2px\nclass svg,bitmap,pdf result\n",
+      "features": [
+        "nested-grids",
+        "spans",
+        "feedback",
+        "edge-labels",
+        "classDef"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/block.md",
+        "section": "Nested Blocks; Text on Links; Classes (combined regression)"
+      }
+    },
+    {
+      "id": "block-mixed-shape-grid",
+      "level": "complex",
+      "source": "block-beta\ncolumns 4\nin[\"Input\"] call[[\"Validate\"]] choose{\"Accept?\"} store[(\"Data\")]\nspacer<[\"route\"]>(x):2 memo>\"Note\"] done((\"Done\"))\nin --> call\ncall --> choose\nchoose -- \"yes\" --> store\nchoose -- \"no\" --> in\nstore --> done\nclassDef critical fill:#ffdddd,stroke:#cc2222\nclass choose critical\nstyle memo fill:#fff8cc,stroke:#887711\n",
+      "features": [
+        "mixed-shapes",
+        "arrow-block",
+        "spans",
+        "feedback",
+        "edge-labels",
+        "styles"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/block.md",
+        "section": "Block Shapes; Block Arrows; Text on Links (combined regression)"
+      }
+    },
+    {
+      "id": "block-all-classic-shape-delimiters",
+      "level": "complex",
+      "source": "block-beta\ncolumns 4\na[\"Square\"] b(\"Round\") c((\"Circle\")) d{{\"Hexagon\"}}\ne([\"Stadium\"]) f[[\"Subroutine\"]] g[(\"Cylinder\")] h(((\"Double\")))\ni[/\"Right\"/] j[\\\"Left\"\\] k[/\"Trapezoid\"\\] l[\\\"Inverse\"/]\nm>\"Note\"] n{\"Decision\"} o<[\"Route\"]>(x):2\nclassDef selected fill:#ffeecc,stroke:#883300\nclass g, m selected\na --> f\nf --> g\ng -- \"stored\" --> m\nm --> h\nh --> n\nn -- \"retry\" --> a\n",
+      "features": [
+        "all-classic-shapes",
+        "grid",
+        "spans",
+        "class-target-list",
+        "feedback",
+        "edge-labels"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/diagrams/block/blockDB.ts",
+        "section": "typeStr2Type; block syntax shape forms (combined regression)"
+      }
+    },
+    {
+      "id": "block-edge-markers-and-patterns",
+      "level": "complex",
+      "source": "block-beta\ncolumns 3\nA[\"Ingress\"] B(\"Worker\") C{{\"Router\"}}\nD[(\"Store\")] E[\"Commit\"] F((\"Complete\"))\nA<-->B\nB x--x C\nA o--o D\nD ==> E\nE -.-> F\nC <==> F\nF -- \"retry\" --x A\nB --o E\nD --- F\nA -- \"cross ends\" x--x C\nD -- \"circle ends\" o--o F\nA-->x\n",
+      "features": [
+        "bidirectional-edges",
+        "point-markers",
+        "circle-markers",
+        "cross-markers",
+        "thick-edges",
+        "dotted-edges",
+        "open-edges",
+        "feedback",
+        "edge-labels",
+        "mixed-shapes",
+        "node-id-lexer-precedence"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/diagrams/block/blockDB.spec.ts",
+        "section": "Edge styles/start and end arrows composed with parser/block.jison LINK grammar"
+      },
+      "config": {
+        "look": "classic"
+      }
+    }
+  ]
+}

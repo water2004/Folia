@@ -1,0 +1,104 @@
+{
+  "schema": 1,
+  "mathjax": {
+    "version": "4.1.3",
+    "commit": "fb987178c2d279a99b0db5ea02e751691703955e",
+    "font": "NewCM",
+    "dependencies": [
+      {
+        "name": "@mathjax/src",
+        "version": "4.1.3",
+        "modules": "cjs",
+        "tree": {
+          "files": 424,
+          "sha256": "773bf3ae1c075baa36c02b6958f7e3bed5fb116d0818ecf99bb70c5337d9e537"
+        }
+      },
+      {
+        "name": "@mathjax/mathjax-newcm-font",
+        "version": "4.1.3",
+        "modules": "cjs",
+        "tree": {
+          "files": 155,
+          "sha256": "85f1571edb5a2254007da8bc464cca4fc38bfb00195bca71034b8f7046778be1"
+        }
+      },
+      {
+        "name": "@mathjax/mathjax-bboldx-font-extension",
+        "version": "4.1.3",
+        "modules": "cjs",
+        "tree": {
+          "files": 3,
+          "sha256": "ad7985f7e668192cfa7370cd6d2548dde777a5595314ce6d8a4d326cf81ca690"
+        }
+      },
+      {
+        "name": "@mathjax/mathjax-bbm-font-extension",
+        "version": "4.1.3",
+        "modules": "cjs",
+        "tree": {
+          "files": 3,
+          "sha256": "085484295f3f8d0fad4431d3e9c5578900125384a99056e5daef1531b7c401a2"
+        }
+      },
+      {
+        "name": "@mathjax/mathjax-dsfont-font-extension",
+        "version": "4.1.3",
+        "modules": "cjs",
+        "tree": {
+          "files": 3,
+          "sha256": "5bb6b49f3a6960f549bb0b67e6d7990291e30c4f038c9126d6c8a976ae88994e"
+        }
+      },
+      {
+        "name": "mhchemparser",
+        "version": "4.2.1",
+        "modules": "esm",
+        "tree": {
+          "files": 2,
+          "sha256": "04828973e21444f11f7bdf03a77d59fc5d3db9bd3b7fbe2c5ad95205c20950f0"
+        }
+      }
+    ]
+  },
+  "mermaid": {
+    "runtimeBaseline": "12.2.0",
+    "runtimeCommit": "1fb7869866dd619168d840291c9c54b4f129758b",
+    "officialMathPlugin": "13.0.0-alpha.3",
+    "officialMathFont": "TeX"
+  },
+  "files": [
+    {
+      "path": "tools/mathjax-bundle/entry.cjs",
+      "sha256": "0e7e985517dbf8055a33595e6638746901442d9bec652792903dca52b7409893"
+    },
+    {
+      "path": "tools/mathjax-bundle/package-lock.json",
+      "sha256": "828fefdb77d220eb3ce0f4d2ad7deedc7411072824719897f9a50f61bf462c8b"
+    },
+    {
+      "path": "tools/mermaid-cpp/math-oracle/package-lock.json",
+      "sha256": "546877024e570dd475ac2173acb66b1d3c7f541da416c4f10c68c4877605e7ba"
+    },
+    {
+      "path": "tools/mermaid-cpp/math-oracle/node_modules/@mermaid-js/plugin-math/dist/index.js",
+      "sha256": "1ff13230d02ff5bb0dc254ae7340fe5391eae4e15259bfdc6087076d24d13261"
+    },
+    {
+      "path": "tools/mermaid-cpp/math-oracle/node_modules/@mermaid-js/plugin-math/dist/engine.js",
+      "sha256": "39e2d2de84e82ac43d32b9e1456cbc5e90a0ddbe3dfb59eaea3f7f8464399558"
+    },
+    {
+      "path": "tools/mermaid-cpp/math-oracle/node_modules/@mermaid-js/plugin-math/dist/macros.js",
+      "sha256": "e180d2f951e31abf94068f336ab8027227031e66c99db7eb76f3d2febfa76af6"
+    },
+    {
+      "path": "tools/mermaid-cpp/math-oracle/node_modules/@mermaid-js/core/dist/text/inline.js",
+      "sha256": "d60a4ef898f61fba3ee2e0b74a62cbbfea4e862a40cc46a8b01cbd932f9e91bc"
+    },
+    {
+      "path": "tools/mermaid-cpp/math-oracle/node_modules/@mermaid-js/core/dist/text/label.js",
+      "sha256": "838c5f4a4ed71b7b0eb7c07afb2677fc44b44cba9bd93fb723c2da7ae1677137"
+    }
+  ]
+}

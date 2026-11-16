@@ -5,6 +5,25 @@ namespace {
 using namespace boost::ut;using namespace folia::mermaid;
 #include "theme_fixture.hpp"
 suite mindmap_measured_svg=[] {
+    "mermaid_mindmap_unregistered_icon_classes_keep_the_unified_shape_geometry"_test=[] {
+        auto session=ConfigSession::create();expect(fatal(session.has_value()));
+        auto site=json(uR"({"theme":"default","look":"classic","htmlLabels":true})");
+        expect(fatal(session->save_initialize_config(site).has_value()));
+        expect(fatal(session->set_site_config(site).has_value()));
+        auto prepared=prepare_mindmap_render(u"mindmap\n  Root((Mindmap))\n    ::icon(fa fa-brain)\n    Child[Detail]\n      ::icon(fa fa-book)",*session);
+        expect(fatal(prepared.has_value()));
+        MindmapMeasurements measured;
+        for(const auto& node:prepared->document.nodes) {
+            FlowchartTextBox box;box.width=64;box.height=24;box.baseline=18;
+            box.lines={node.label};measured.nodes.push_back(std::move(box));
+        }
+        const auto decorated=render_mindmap_svg(*prepared,measured);
+        expect(fatal(decorated.has_value())) << (decorated?"":decorated.error());
+        for(auto& node:prepared->document.nodes) node.icon.clear();
+        const auto plain=render_mindmap_svg(*prepared,measured);
+        expect(fatal(plain.has_value()));
+        expect(decorated->svg==plain->svg);
+    };
     "mermaid_mindmap_original_measured_boxes_to_layout_and_svg"_test=[] {
         const auto file=std::getenv("FOLIA_MERMAID_MINDMAP_MEASUREMENTS");if(!file)return;
         std::ifstream input(file);expect(fatal(input.is_open()));std::string line;std::size_t count=0;

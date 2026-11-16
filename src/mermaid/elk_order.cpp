@@ -6,24 +6,8 @@ import std;
 
 namespace folia::mermaid {
 namespace {
-std::expected<void, std::string> supported(const ElkLayeredGraph& g,const ElkNorthSouthPreparation* north_south=nullptr) {
-    for (const auto& p : g.ports) {
-        if (north_south&&(p.side==ElkPortSide::north||p.side==ElkPortSide::south)&&p.incoming.empty()&&p.outgoing.empty())continue;
-        if (p.side != ElkPortSide::east && p.side != ElkPortSide::west)
-            return std::unexpected("ELK flat ordering requires east/west port preprocessing");
-        if (p.incoming.size() + p.outgoing.size() > 1)
-            return std::unexpected("ELK shared-port hyperedge crossing count is not implemented");
-    }
-    for (const auto& e : g.edges) {
-        const auto& s = g.ports[e.source_port]; const auto& t = g.ports[e.target_port];
-        const auto left = g.nodes[s.node].layer, right = g.nodes[t.node].layer;
-        const bool forward = right == left + 1 && s.side == ElkPortSide::east && t.side == ElkPortSide::west;
-        const bool in_layer = left == right && s.node != t.node && s.side == t.side;
-        if (!forward && !in_layer)
-            return std::unexpected("ELK ordering requires preprocessed adjacent or same-side in-layer edges");
-    }
-    return {};
-}
+#include "elk_order_validation.inc"
+#include "elk_order_crossings.inc"
 
 struct OrderCopy {
     std::vector<std::vector<std::size_t>> layers, ports;
@@ -208,41 +192,8 @@ struct Ordering {
     }
 
     std::size_t crossings() const {
-        // ELK CrossingsCounter visits the ports around each routing gap
-        // counterclockwise. A chord crosses any open chord ending before it.
-        std::vector<std::size_t> positions(g.ports.size(), g.ports.size());
-        std::size_t total = 0;
-        std::vector<std::size_t> ports, tree;
-        for (std::size_t gap = 0; gap <= g.layers.size(); ++gap) {
-            ports.clear();
-            if (gap > 0) for (const auto n : g.layers[gap - 1]) for (const auto p : g.nodes[n].ports)
-                if (g.ports[p].side == ElkPortSide::east) ports.push_back(p);
-            if (gap < g.layers.size()) for (const auto n : g.layers[gap] | std::views::reverse)
-                for (const auto p : g.nodes[n].ports)
-                    if (g.ports[p].side == ElkPortSide::west) ports.push_back(p);
-            for (std::size_t i = 0; i < ports.size(); ++i) positions[ports[i]] = i;
-            tree.assign(ports.size() + 1, 0);
-            const auto update = [&](std::size_t index, bool add) {
-                for (auto i = index + 1; i < tree.size(); i += i & (std::size_t{0} - i))
-                    if (add) ++tree[i]; else --tree[i];
-            };
-            for (std::size_t i = 0; i < ports.size(); ++i) {
-                const auto p = ports[i];
-                const auto& port = g.ports[p];
-                if (port.incoming.empty() && port.outgoing.empty()) continue;
-                const auto peer = port.incoming.empty() ? g.edges[port.outgoing.front()].target_port
-                    : g.edges[port.incoming.front()].source_port;
-                const auto end = positions[peer];
-                if (end >= ports.size()) continue;
-                if (end < i) {
-                    update(i, false);
-                } else {
-                    for (auto j = end; j; j &= j - 1) total += tree[j];
-                    update(end, true);
-                }
-            }
-            for (const auto p : ports) positions[p] = g.ports.size();
-        }
+        OrderCrossingsCounter counter(g);
+        auto total=counter.count_all();
         if(north_south)for(const auto& layer:g.layers)total+=elk_count_north_south_crossings(g,*north_south,layer);
         return total;
     }
@@ -320,12 +271,16 @@ std::expected<std::size_t,std::string> elk_order_flat_graph(ElkLayeredGraph& g,E
 std::expected<std::size_t,std::string> elk_order_north_south_graph(ElkLayeredGraph& g,const ElkNorthSouthPreparation& prepared,ElkRandom& random,int thoroughness){return order_graph(g,random,thoroughness,&prepared);}
 
 std::expected<std::size_t, std::string> elk_order_hierarchy(
-    std::span<ElkHierarchyOrderGraph> graphs, int thoroughness) {
+    std::span<ElkHierarchyOrderGraph> graphs,int thoroughness,bool hierarchical_layout) {
     if (graphs.empty()) return 0;
+    if(!hierarchical_layout&&graphs.size()!=1)
+        return std::unexpected("ELK independent ordering requires resolved child scopes");
     for (const auto& entry : graphs) if (const auto valid = supported(*entry.graph,entry.north_south); !valid)
         return std::unexpected(valid.error());
     if (thoroughness < 1) return std::unexpected("ELK ordering thoroughness must be positive");
     if (graphs[0].graph->layers.empty()) return 0;
+    if(!hierarchical_layout&&graphs[0].graph->layers.size()==1&&
+        graphs[0].graph->layers.front().size()==1)return 0;
     struct State {
         std::unique_ptr<Ordering> order;
         std::vector<std::size_t> children;

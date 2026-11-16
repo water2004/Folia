@@ -1,0 +1,676 @@
+{
+  "family": "flowchart",
+  "cases": [
+    {
+      "id": "flowchart-chained-fanout",
+      "level": "basic",
+      "source": "flowchart TB\n    A --> C\n    A --> D\n    B --> C\n    B --> D\n",
+      "features": [
+        "fan-in",
+        "fan-out",
+        "bipartite-graph"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/flowchart.md",
+        "section": "Chaining of links"
+      }
+    },
+    {
+      "id": "flowchart-metadata-storage-shapes",
+      "level": "intermediate",
+      "source": "flowchart RL\n    A@{ shape: manual-file, label: \"File Handling\"}\n    B@{ shape: manual-input, label: \"User Input\"}\n    C@{ shape: docs, label: \"Multiple Documents\"}\n    D@{ shape: procs, label: \"Process Automation\"}\n    E@{ shape: paper-tape, label: \"Paper Records\"}\n",
+      "features": [
+        "metadata",
+        "shapes",
+        "RL"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/flowchart.md",
+        "section": "Example Flowchart with New Shapes"
+      }
+    },
+    {
+      "id": "flowchart-bidirectional-markers",
+      "level": "intermediate",
+      "source": "flowchart LR\n    A o--o B\n    B <--> C\n    C x--x D\n",
+      "features": [
+        "arrows",
+        "circle",
+        "cross"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/flowchart.md",
+        "section": "Multi directional arrows"
+      }
+    },
+    {
+      "id": "flowchart-nested-directions",
+      "level": "complex",
+      "source": "flowchart LR\n  subgraph TOP\n    direction TB\n    subgraph B1\n        direction RL\n        i1 -->f1\n    end\n    subgraph B2\n        direction BT\n        i2 -->f2\n    end\n  end\n  A --> TOP --> B\n  B1 --> B2\n",
+      "features": [
+        "nested-subgraphs",
+        "group-endpoints",
+        "mixed-directions"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/flowchart.md",
+        "section": "Direction in subgraphs"
+      }
+    },
+    {
+      "id": "flowchart-external-subgraph-links",
+      "level": "complex",
+      "source": "flowchart LR\n    subgraph subgraph1\n        direction TB\n        top1[top] --> bottom1[bottom]\n    end\n    subgraph subgraph2\n        direction TB\n        top2[top] --> bottom2[bottom]\n    end\n    %% ^ These subgraphs are identical, except for the links to them:\n\n    %% Link *to* subgraph1: subgraph1 direction is maintained\n    outside --> subgraph1\n    %% Link *within* subgraph2:\n    %% subgraph2 inherits the direction of the top-level graph (LR)\n    outside ---> top2\n",
+      "features": [
+        "compound-edges",
+        "direction-inheritance",
+        "long-edges"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/flowchart.md",
+        "section": "Limitation"
+      }
+    },
+    {
+      "id": "flowchart-markdown-compounds",
+      "level": "complex",
+      "source": "---\nconfig:\n  htmlLabels: false\n---\nflowchart LR\nsubgraph \"One\"\n  a(\"`The **cat**\n  in the hat`\") -- \"edge label\" --> b{{\"`The **dog** in the hog`\"}}\nend\nsubgraph \"`**Two**`\"\n  c(\"`The **cat**\n  in the hat`\") -- \"`Bold **edge label**`\" --> d(\"The dog in the hog\")\nend\n",
+      "features": [
+        "markdown",
+        "multiline",
+        "svg-labels",
+        "subgraphs"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/flowchart.md",
+        "section": "Markdown Strings"
+      }
+    },
+    {
+      "id": "flowchart-official-service-workflow",
+      "level": "complex",
+      "source": "flowchart LR\n  subgraph Client\n    UI[Web app]\n    Cache[(Local cache)]\n  end\n  subgraph Services\n    API[API gateway]\n    Auth[Auth service]\n    Orders[Order service]\n  end\n  subgraph Storage\n    DB[(Orders DB)]\n  end\n  UI --> API\n  UI --> Cache\n  API --> Auth\n  API --> Orders\n  Orders --> DB\n  Auth -. token .-> UI\n",
+      "features": [
+        "subgraphs",
+        "feedback",
+        "database-shape",
+        "dotted-edge-label"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/flowchart.md",
+        "section": "With the defaults"
+      }
+    },
+    {
+      "id": "flowchart-collapsed-subgraph",
+      "level": "complex",
+      "source": "flowchart TD\n    Start --> one\n    subgraph one [My Group]\n        A --> B\n        B --> C\n    end\n    one --> End\n    one@{ view: collapsed }\n",
+      "features": [
+        "collapsed",
+        "group-endpoints",
+        "hidden-descendants"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/flowchart.md",
+        "section": "Collapsible subgraphs (v11.17.0+)"
+      }
+    },
+    {
+      "id": "flowchart-builtins-1-connected",
+      "level": "complex",
+      "source": "flowchart TB\n  N0@{ shape: rect, label: \"rect stage\", labelType: text }\n  N1@{ shape: rounded, label: \"rounded stage\", labelType: text }\n  N2@{ shape: stadium, label: \"stadium stage\", labelType: text }\n  N3@{ shape: fr-rect, label: \"fr-rect stage\", labelType: text }\n  N4@{ shape: cyl, label: \"cyl stage\", labelType: text }\n  N5@{ shape: datastore, label: \"datastore stage\", labelType: text }\n  N6@{ shape: folder, label: \"folder stage\", labelType: text }\n  N7@{ shape: bucket, label: \"bucket stage\", labelType: text }\nN0 -->|step 1| N1\nN1 -->|step 2| N2\nN2 -->|step 3| N3\nN3 -->|step 4| N4\nN4 -->|step 5| N5\nN5 -->|step 6| N6\nN6 -->|step 7| N7\nN0 -. retry .-> N2\nN7 -- feedback --> N0\nN1 --> N3\n",
+      "features": [
+        "all-builtins-matrix",
+        "direction-TB",
+        "branching",
+        "feedback",
+        "edge-labels",
+        "ordinary-labels",
+        "shape:rect",
+        "shape:rounded",
+        "shape:stadium",
+        "shape:fr-rect",
+        "shape:cyl",
+        "shape:datastore",
+        "shape:folder",
+        "shape:bucket"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes.ts",
+        "section": "shapesDefs (all registered built-in handlers, connected regression matrix)"
+      },
+      "config": {
+        "flowchart": {
+          "curve": "linear"
+        }
+      }
+    },
+    {
+      "id": "flowchart-builtins-1-multiline",
+      "level": "complex",
+      "source": "flowchart BT\nsubgraph Gallery[\"Built-in shape compositions\"]\n  N0@{ shape: rect, label: \"rect **detail**<br/>Second line\", labelType: markdown }\n  N1@{ shape: rounded, label: \"rounded **detail**<br/>Second line\", labelType: markdown }\n  N2@{ shape: stadium, label: \"stadium **detail**<br/>Second line\", labelType: markdown }\n  N3@{ shape: fr-rect, label: \"fr-rect **detail**<br/>Second line\", labelType: markdown }\n  N4@{ shape: cyl, label: \"cyl **detail**<br/>Second line\", labelType: markdown }\n  N5@{ shape: datastore, label: \"datastore **detail**<br/>Second line\", labelType: markdown }\n  N6@{ shape: folder, label: \"folder **detail**<br/>Second line\", labelType: markdown }\n  N7@{ shape: bucket, label: \"bucket **detail**<br/>Second line\", labelType: markdown }\nend\nN0 -->|step 1| N1\nN1 -->|step 2| N2\nN2 -->|step 3| N3\nN3 -->|step 4| N4\nN4 -->|step 5| N5\nN5 -->|step 6| N6\nN6 -->|step 7| N7\nN0 -. retry .-> N2\nN7 -- feedback --> N0\nN1 --> N3\nIngress --> Gallery\nGallery --> Egress\n",
+      "features": [
+        "all-builtins-matrix",
+        "direction-BT",
+        "branching",
+        "feedback",
+        "edge-labels",
+        "multiline-labels",
+        "markdown-labels",
+        "compound-endpoints",
+        "shape:rect",
+        "shape:rounded",
+        "shape:stadium",
+        "shape:fr-rect",
+        "shape:cyl",
+        "shape:datastore",
+        "shape:folder",
+        "shape:bucket"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes.ts",
+        "section": "shapesDefs (all registered built-in handlers, connected regression matrix)"
+      },
+      "config": {
+        "flowchart": {
+          "curve": "linear"
+        }
+      }
+    },
+    {
+      "id": "flowchart-builtins-2-connected",
+      "level": "complex",
+      "source": "flowchart LR\n  N0@{ shape: console, label: \"console stage\", labelType: text }\n  N1@{ shape: browser, label: \"browser stage\", labelType: text }\n  N2@{ shape: person, label: \"person stage\", labelType: text }\n  N3@{ shape: circle, label: \"circle stage\", labelType: text }\n  N4@{ shape: bang, label: \"bang stage\", labelType: text }\n  N5@{ shape: cloud, label: \"cloud stage\", labelType: text }\n  N6@{ shape: diam, label: \"diam stage\", labelType: text }\n  N7@{ shape: hex, label: \"hex stage\", labelType: text }\nN0 -->|step 1| N1\nN1 -->|step 2| N2\nN2 -->|step 3| N3\nN3 -->|step 4| N4\nN4 -->|step 5| N5\nN5 -->|step 6| N6\nN6 -->|step 7| N7\nN0 -. retry .-> N2\nN7 -- feedback --> N0\nN1 --> N3\n",
+      "features": [
+        "all-builtins-matrix",
+        "direction-LR",
+        "branching",
+        "feedback",
+        "edge-labels",
+        "ordinary-labels",
+        "shape:console",
+        "shape:browser",
+        "shape:person",
+        "shape:circle",
+        "shape:bang",
+        "shape:cloud",
+        "shape:diam",
+        "shape:hex"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes.ts",
+        "section": "shapesDefs (all registered built-in handlers, connected regression matrix)"
+      },
+      "config": {
+        "flowchart": {
+          "curve": "linear"
+        }
+      }
+    },
+    {
+      "id": "flowchart-builtins-2-multiline",
+      "level": "complex",
+      "source": "flowchart RL\nsubgraph Gallery[\"Built-in shape compositions\"]\n  N0@{ shape: console, label: \"console **detail**<br/>Second line\", labelType: markdown }\n  N1@{ shape: browser, label: \"browser **detail**<br/>Second line\", labelType: markdown }\n  N2@{ shape: person, label: \"person **detail**<br/>Second line\", labelType: markdown }\n  N3@{ shape: circle, label: \"circle **detail**<br/>Second line\", labelType: markdown }\n  N4@{ shape: bang, label: \"bang **detail**<br/>Second line\", labelType: markdown }\n  N5@{ shape: cloud, label: \"cloud **detail**<br/>Second line\", labelType: markdown }\n  N6@{ shape: diam, label: \"diam **detail**<br/>Second line\", labelType: markdown }\n  N7@{ shape: hex, label: \"hex **detail**<br/>Second line\", labelType: markdown }\nend\nN0 -->|step 1| N1\nN1 -->|step 2| N2\nN2 -->|step 3| N3\nN3 -->|step 4| N4\nN4 -->|step 5| N5\nN5 -->|step 6| N6\nN6 -->|step 7| N7\nN0 -. retry .-> N2\nN7 -- feedback --> N0\nN1 --> N3\nIngress --> Gallery\nGallery --> Egress\n",
+      "features": [
+        "all-builtins-matrix",
+        "direction-RL",
+        "branching",
+        "feedback",
+        "edge-labels",
+        "multiline-labels",
+        "markdown-labels",
+        "compound-endpoints",
+        "shape:console",
+        "shape:browser",
+        "shape:person",
+        "shape:circle",
+        "shape:bang",
+        "shape:cloud",
+        "shape:diam",
+        "shape:hex"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes.ts",
+        "section": "shapesDefs (all registered built-in handlers, connected regression matrix)"
+      },
+      "config": {
+        "flowchart": {
+          "curve": "linear"
+        }
+      }
+    },
+    {
+      "id": "flowchart-builtins-3-connected",
+      "level": "complex",
+      "source": "flowchart BT\n  N0@{ shape: lean-r, label: \"lean-r stage\", labelType: text }\n  N1@{ shape: lean-l, label: \"lean-l stage\", labelType: text }\n  N2@{ shape: trap-b, label: \"trap-b stage\", labelType: text }\n  N3@{ shape: trap-t, label: \"trap-t stage\", labelType: text }\n  N4@{ shape: dbl-circ, label: \"dbl-circ stage\", labelType: text }\n  N5@{ shape: text, label: \"text stage\", labelType: text }\n  N6@{ shape: notch-rect, label: \"notch-rect stage\", labelType: text }\n  N7@{ shape: lin-rect, label: \"lin-rect stage\", labelType: text }\nN0 -->|step 1| N1\nN1 -->|step 2| N2\nN2 -->|step 3| N3\nN3 -->|step 4| N4\nN4 -->|step 5| N5\nN5 -->|step 6| N6\nN6 -->|step 7| N7\nN0 -. retry .-> N2\nN7 -- feedback --> N0\nN1 --> N3\n",
+      "features": [
+        "all-builtins-matrix",
+        "direction-BT",
+        "branching",
+        "feedback",
+        "edge-labels",
+        "ordinary-labels",
+        "shape:lean-r",
+        "shape:lean-l",
+        "shape:trap-b",
+        "shape:trap-t",
+        "shape:dbl-circ",
+        "shape:text",
+        "shape:notch-rect",
+        "shape:lin-rect"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes.ts",
+        "section": "shapesDefs (all registered built-in handlers, connected regression matrix)"
+      },
+      "config": {
+        "flowchart": {
+          "curve": "linear"
+        }
+      }
+    },
+    {
+      "id": "flowchart-builtins-3-multiline",
+      "level": "complex",
+      "source": "flowchart TB\nsubgraph Gallery[\"Built-in shape compositions\"]\n  N0@{ shape: lean-r, label: \"lean-r **detail**<br/>Second line\", labelType: markdown }\n  N1@{ shape: lean-l, label: \"lean-l **detail**<br/>Second line\", labelType: markdown }\n  N2@{ shape: trap-b, label: \"trap-b **detail**<br/>Second line\", labelType: markdown }\n  N3@{ shape: trap-t, label: \"trap-t **detail**<br/>Second line\", labelType: markdown }\n  N4@{ shape: dbl-circ, label: \"dbl-circ **detail**<br/>Second line\", labelType: markdown }\n  N5@{ shape: text, label: \"text **detail**<br/>Second line\", labelType: markdown }\n  N6@{ shape: notch-rect, label: \"notch-rect **detail**<br/>Second line\", labelType: markdown }\n  N7@{ shape: lin-rect, label: \"lin-rect **detail**<br/>Second line\", labelType: markdown }\nend\nN0 -->|step 1| N1\nN1 -->|step 2| N2\nN2 -->|step 3| N3\nN3 -->|step 4| N4\nN4 -->|step 5| N5\nN5 -->|step 6| N6\nN6 -->|step 7| N7\nN0 -. retry .-> N2\nN7 -- feedback --> N0\nN1 --> N3\nIngress --> Gallery\nGallery --> Egress\n",
+      "features": [
+        "all-builtins-matrix",
+        "direction-TB",
+        "branching",
+        "feedback",
+        "edge-labels",
+        "multiline-labels",
+        "markdown-labels",
+        "compound-endpoints",
+        "shape:lean-r",
+        "shape:lean-l",
+        "shape:trap-b",
+        "shape:trap-t",
+        "shape:dbl-circ",
+        "shape:text",
+        "shape:notch-rect",
+        "shape:lin-rect"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes.ts",
+        "section": "shapesDefs (all registered built-in handlers, connected regression matrix)"
+      },
+      "config": {
+        "flowchart": {
+          "curve": "linear"
+        }
+      }
+    },
+    {
+      "id": "flowchart-builtins-4-connected",
+      "level": "complex",
+      "source": "flowchart RL\n  N0@{ shape: sm-circ, label: \"sm-circ stage\", labelType: text }\n  N1@{ shape: fr-circ, label: \"fr-circ stage\", labelType: text }\n  N2@{ shape: fork, label: \"fork stage\", labelType: text }\n  N3@{ shape: hourglass, label: \"hourglass stage\", labelType: text }\n  N4@{ shape: brace, label: \"brace stage\", labelType: text }\n  N5@{ shape: brace-r, label: \"brace-r stage\", labelType: text }\n  N6@{ shape: braces, label: \"braces stage\", labelType: text }\n  N7@{ shape: bolt, label: \"bolt stage\", labelType: text }\nN0 -->|step 1| N1\nN1 -->|step 2| N2\nN2 -->|step 3| N3\nN3 -->|step 4| N4\nN4 -->|step 5| N5\nN5 -->|step 6| N6\nN6 -->|step 7| N7\nN0 -. retry .-> N2\nN7 -- feedback --> N0\nN1 --> N3\n",
+      "features": [
+        "all-builtins-matrix",
+        "direction-RL",
+        "branching",
+        "feedback",
+        "edge-labels",
+        "ordinary-labels",
+        "shape:sm-circ",
+        "shape:fr-circ",
+        "shape:fork",
+        "shape:hourglass",
+        "shape:brace",
+        "shape:brace-r",
+        "shape:braces",
+        "shape:bolt"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes.ts",
+        "section": "shapesDefs (all registered built-in handlers, connected regression matrix)"
+      },
+      "config": {
+        "flowchart": {
+          "curve": "linear"
+        }
+      }
+    },
+    {
+      "id": "flowchart-builtins-4-multiline",
+      "level": "complex",
+      "source": "flowchart LR\nsubgraph Gallery[\"Built-in shape compositions\"]\n  N0@{ shape: sm-circ, label: \"sm-circ **detail**<br/>Second line\", labelType: markdown }\n  N1@{ shape: fr-circ, label: \"fr-circ **detail**<br/>Second line\", labelType: markdown }\n  N2@{ shape: fork, label: \"fork **detail**<br/>Second line\", labelType: markdown }\n  N3@{ shape: hourglass, label: \"hourglass **detail**<br/>Second line\", labelType: markdown }\n  N4@{ shape: brace, label: \"brace **detail**<br/>Second line\", labelType: markdown }\n  N5@{ shape: brace-r, label: \"brace-r **detail**<br/>Second line\", labelType: markdown }\n  N6@{ shape: braces, label: \"braces **detail**<br/>Second line\", labelType: markdown }\n  N7@{ shape: bolt, label: \"bolt **detail**<br/>Second line\", labelType: markdown }\nend\nN0 -->|step 1| N1\nN1 -->|step 2| N2\nN2 -->|step 3| N3\nN3 -->|step 4| N4\nN4 -->|step 5| N5\nN5 -->|step 6| N6\nN6 -->|step 7| N7\nN0 -. retry .-> N2\nN7 -- feedback --> N0\nN1 --> N3\nIngress --> Gallery\nGallery --> Egress\n",
+      "features": [
+        "all-builtins-matrix",
+        "direction-LR",
+        "branching",
+        "feedback",
+        "edge-labels",
+        "multiline-labels",
+        "markdown-labels",
+        "compound-endpoints",
+        "shape:sm-circ",
+        "shape:fr-circ",
+        "shape:fork",
+        "shape:hourglass",
+        "shape:brace",
+        "shape:brace-r",
+        "shape:braces",
+        "shape:bolt"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes.ts",
+        "section": "shapesDefs (all registered built-in handlers, connected regression matrix)"
+      },
+      "config": {
+        "flowchart": {
+          "curve": "linear"
+        }
+      }
+    },
+    {
+      "id": "flowchart-builtins-5-connected",
+      "level": "complex",
+      "source": "flowchart TB\n  N0@{ shape: doc, label: \"doc stage\", labelType: text }\n  N1@{ shape: delay, label: \"delay stage\", labelType: text }\n  N2@{ shape: h-cyl, label: \"h-cyl stage\", labelType: text }\n  N3@{ shape: lin-cyl, label: \"lin-cyl stage\", labelType: text }\n  N4@{ shape: curv-trap, label: \"curv-trap stage\", labelType: text }\n  N5@{ shape: div-rect, label: \"div-rect stage\", labelType: text }\n  N6@{ shape: tri, label: \"tri stage\", labelType: text }\n  N7@{ shape: win-pane, label: \"win-pane stage\", labelType: text }\nN0 -->|step 1| N1\nN1 -->|step 2| N2\nN2 -->|step 3| N3\nN3 -->|step 4| N4\nN4 -->|step 5| N5\nN5 -->|step 6| N6\nN6 -->|step 7| N7\nN0 -. retry .-> N2\nN7 -- feedback --> N0\nN1 --> N3\n",
+      "features": [
+        "all-builtins-matrix",
+        "direction-TB",
+        "branching",
+        "feedback",
+        "edge-labels",
+        "ordinary-labels",
+        "shape:doc",
+        "shape:delay",
+        "shape:h-cyl",
+        "shape:lin-cyl",
+        "shape:curv-trap",
+        "shape:div-rect",
+        "shape:tri",
+        "shape:win-pane"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes.ts",
+        "section": "shapesDefs (all registered built-in handlers, connected regression matrix)"
+      },
+      "config": {
+        "flowchart": {
+          "curve": "linear"
+        }
+      }
+    },
+    {
+      "id": "flowchart-builtins-5-multiline",
+      "level": "complex",
+      "source": "flowchart BT\nsubgraph Gallery[\"Built-in shape compositions\"]\n  N0@{ shape: doc, label: \"doc **detail**<br/>Second line\", labelType: markdown }\n  N1@{ shape: delay, label: \"delay **detail**<br/>Second line\", labelType: markdown }\n  N2@{ shape: h-cyl, label: \"h-cyl **detail**<br/>Second line\", labelType: markdown }\n  N3@{ shape: lin-cyl, label: \"lin-cyl **detail**<br/>Second line\", labelType: markdown }\n  N4@{ shape: curv-trap, label: \"curv-trap **detail**<br/>Second line\", labelType: markdown }\n  N5@{ shape: div-rect, label: \"div-rect **detail**<br/>Second line\", labelType: markdown }\n  N6@{ shape: tri, label: \"tri **detail**<br/>Second line\", labelType: markdown }\n  N7@{ shape: win-pane, label: \"win-pane **detail**<br/>Second line\", labelType: markdown }\nend\nN0 -->|step 1| N1\nN1 -->|step 2| N2\nN2 -->|step 3| N3\nN3 -->|step 4| N4\nN4 -->|step 5| N5\nN5 -->|step 6| N6\nN6 -->|step 7| N7\nN0 -. retry .-> N2\nN7 -- feedback --> N0\nN1 --> N3\nIngress --> Gallery\nGallery --> Egress\n",
+      "features": [
+        "all-builtins-matrix",
+        "direction-BT",
+        "branching",
+        "feedback",
+        "edge-labels",
+        "multiline-labels",
+        "markdown-labels",
+        "compound-endpoints",
+        "shape:doc",
+        "shape:delay",
+        "shape:h-cyl",
+        "shape:lin-cyl",
+        "shape:curv-trap",
+        "shape:div-rect",
+        "shape:tri",
+        "shape:win-pane"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes.ts",
+        "section": "shapesDefs (all registered built-in handlers, connected regression matrix)"
+      },
+      "config": {
+        "flowchart": {
+          "curve": "linear"
+        }
+      }
+    },
+    {
+      "id": "flowchart-builtins-6-connected",
+      "level": "complex",
+      "source": "flowchart LR\n  N0@{ shape: f-circ, label: \"f-circ stage\", labelType: text }\n  N1@{ shape: notch-pent, label: \"notch-pent stage\", labelType: text }\n  N2@{ shape: flip-tri, label: \"flip-tri stage\", labelType: text }\n  N3@{ shape: sl-rect, label: \"sl-rect stage\", labelType: text }\n  N4@{ shape: docs, label: \"docs stage\", labelType: text }\n  N5@{ shape: st-rect, label: \"st-rect stage\", labelType: text }\n  N6@{ shape: bow-rect, label: \"bow-rect stage\", labelType: text }\n  N7@{ shape: cross-circ, label: \"cross-circ stage\", labelType: text }\nN0 -->|step 1| N1\nN1 -->|step 2| N2\nN2 -->|step 3| N3\nN3 -->|step 4| N4\nN4 -->|step 5| N5\nN5 -->|step 6| N6\nN6 -->|step 7| N7\nN0 -. retry .-> N2\nN7 -- feedback --> N0\nN1 --> N3\n",
+      "features": [
+        "all-builtins-matrix",
+        "direction-LR",
+        "branching",
+        "feedback",
+        "edge-labels",
+        "ordinary-labels",
+        "shape:f-circ",
+        "shape:notch-pent",
+        "shape:flip-tri",
+        "shape:sl-rect",
+        "shape:docs",
+        "shape:st-rect",
+        "shape:bow-rect",
+        "shape:cross-circ"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes.ts",
+        "section": "shapesDefs (all registered built-in handlers, connected regression matrix)"
+      },
+      "config": {
+        "flowchart": {
+          "curve": "linear"
+        }
+      }
+    },
+    {
+      "id": "flowchart-builtins-6-multiline",
+      "level": "complex",
+      "source": "flowchart RL\nsubgraph Gallery[\"Built-in shape compositions\"]\n  N0@{ shape: f-circ, label: \"f-circ **detail**<br/>Second line\", labelType: markdown }\n  N1@{ shape: notch-pent, label: \"notch-pent **detail**<br/>Second line\", labelType: markdown }\n  N2@{ shape: flip-tri, label: \"flip-tri **detail**<br/>Second line\", labelType: markdown }\n  N3@{ shape: sl-rect, label: \"sl-rect **detail**<br/>Second line\", labelType: markdown }\n  N4@{ shape: docs, label: \"docs **detail**<br/>Second line\", labelType: markdown }\n  N5@{ shape: st-rect, label: \"st-rect **detail**<br/>Second line\", labelType: markdown }\n  N6@{ shape: bow-rect, label: \"bow-rect **detail**<br/>Second line\", labelType: markdown }\n  N7@{ shape: cross-circ, label: \"cross-circ **detail**<br/>Second line\", labelType: markdown }\nend\nN0 -->|step 1| N1\nN1 -->|step 2| N2\nN2 -->|step 3| N3\nN3 -->|step 4| N4\nN4 -->|step 5| N5\nN5 -->|step 6| N6\nN6 -->|step 7| N7\nN0 -. retry .-> N2\nN7 -- feedback --> N0\nN1 --> N3\nIngress --> Gallery\nGallery --> Egress\n",
+      "features": [
+        "all-builtins-matrix",
+        "direction-RL",
+        "branching",
+        "feedback",
+        "edge-labels",
+        "multiline-labels",
+        "markdown-labels",
+        "compound-endpoints",
+        "shape:f-circ",
+        "shape:notch-pent",
+        "shape:flip-tri",
+        "shape:sl-rect",
+        "shape:docs",
+        "shape:st-rect",
+        "shape:bow-rect",
+        "shape:cross-circ"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes.ts",
+        "section": "shapesDefs (all registered built-in handlers, connected regression matrix)"
+      },
+      "config": {
+        "flowchart": {
+          "curve": "linear"
+        }
+      }
+    },
+    {
+      "id": "flowchart-builtins-7-connected",
+      "level": "complex",
+      "source": "flowchart BT\n  N0@{ shape: tag-doc, label: \"tag-doc stage\", labelType: text }\n  N1@{ shape: tag-rect, label: \"tag-rect stage\", labelType: text }\n  N2@{ shape: flag, label: \"flag stage\", labelType: text }\n  N3@{ shape: odd, label: \"odd stage\", labelType: text }\n  N4@{ shape: lin-doc, label: \"lin-doc stage\", labelType: text }\nN0 -->|step 1| N1\nN1 -->|step 2| N2\nN2 -->|step 3| N3\nN3 -->|step 4| N4\nN0 -. retry .-> N2\nN4 -- feedback --> N0\nN1 --> N3\n",
+      "features": [
+        "all-builtins-matrix",
+        "direction-BT",
+        "branching",
+        "feedback",
+        "edge-labels",
+        "ordinary-labels",
+        "shape:tag-doc",
+        "shape:tag-rect",
+        "shape:flag",
+        "shape:odd",
+        "shape:lin-doc"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes.ts",
+        "section": "shapesDefs (all registered built-in handlers, connected regression matrix)"
+      },
+      "config": {
+        "flowchart": {
+          "curve": "linear"
+        }
+      }
+    },
+    {
+      "id": "flowchart-builtins-7-multiline",
+      "level": "complex",
+      "source": "flowchart TB\nsubgraph Gallery[\"Built-in shape compositions\"]\n  N0@{ shape: tag-doc, label: \"tag-doc **detail**<br/>Second line\", labelType: markdown }\n  N1@{ shape: tag-rect, label: \"tag-rect **detail**<br/>Second line\", labelType: markdown }\n  N2@{ shape: flag, label: \"flag **detail**<br/>Second line\", labelType: markdown }\n  N3@{ shape: odd, label: \"odd **detail**<br/>Second line\", labelType: markdown }\n  N4@{ shape: lin-doc, label: \"lin-doc **detail**<br/>Second line\", labelType: markdown }\nend\nN0 -->|step 1| N1\nN1 -->|step 2| N2\nN2 -->|step 3| N3\nN3 -->|step 4| N4\nN0 -. retry .-> N2\nN4 -- feedback --> N0\nN1 --> N3\nIngress --> Gallery\nGallery --> Egress\n",
+      "features": [
+        "all-builtins-matrix",
+        "direction-TB",
+        "branching",
+        "feedback",
+        "edge-labels",
+        "multiline-labels",
+        "markdown-labels",
+        "compound-endpoints",
+        "shape:tag-doc",
+        "shape:tag-rect",
+        "shape:flag",
+        "shape:odd",
+        "shape:lin-doc"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes.ts",
+        "section": "shapesDefs (all registered built-in handlers, connected regression matrix)"
+      },
+      "config": {
+        "flowchart": {
+          "curve": "linear"
+        }
+      }
+    },
+    {
+      "id": "flowchart-symbols-hidden-math-dark",
+      "level": "complex",
+      "source": "flowchart LR\n  Start@{shape: sm-circ, label: \"$$x_0$$\"}\n  Stop@{shape: fr-circ, label: \"$$x_1$$\"}\n  Fork@{shape: fork, label: \"$$x_2$$\"}\n  Collate@{shape: hourglass, label: \"$$x_3$$\"}\n  Signal@{shape: bolt, label: \"$$x_4$$\"}\n  Junction@{shape: f-circ, label: \"$$x_5$$\"}\n  Summary@{shape: cross-circ, label: \"$$x_6$$\"}\n  Bang@{shape: bang, label: \"**Batch complete**<br/>Notify subscribers\", labelType: markdown}\n  Caption@{shape: text, label: \"**Audit**<br/>Preserve event order\", labelType: markdown}\n  Start --> Fork\n  Fork -->|ordered| Collate\n  Fork -.->|streaming| Signal\n  Collate --> Junction\n  Signal --x Junction\n  Junction ==> Summary\n  Summary --> Bang\n  Bang --> Stop\n  Caption --- Bang\n  Summary -. retry .-> Fork\n  class Junction,Summary accent\n  classDef accent fill:#fee,stroke:#b44,stroke-width:2px\n",
+      "features": [
+        "fixed-symbols",
+        "hidden-math-labels",
+        "markdown-multiline",
+        "labeled-edges",
+        "cross-marker",
+        "thick-and-dotted-edges",
+        "feedback-cycle",
+        "class-styles",
+        "dark-theme"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes.ts",
+        "section": "All nine symbol/text handlers, composed with flowchart metadata, edge and styling syntax"
+      },
+      "config": {
+        "theme": "dark",
+        "look": "classic",
+        "flowchart": {
+          "curve": "linear"
+        }
+      }
+    },
+    {
+      "id": "flowchart-symbols-hidden-math-handdrawn",
+      "level": "complex",
+      "source": "flowchart TB\n  Start@{shape: sm-circ, label: \"$$x_0$$\"}\n  Stop@{shape: fr-circ, label: \"$$x_1$$\"}\n  Fork@{shape: fork, label: \"$$x_2$$\"}\n  Collate@{shape: hourglass, label: \"$$x_3$$\"}\n  Signal@{shape: bolt, label: \"$$x_4$$\"}\n  Junction@{shape: f-circ, label: \"$$x_5$$\"}\n  Summary@{shape: cross-circ, label: \"$$x_6$$\"}\n  Bang@{shape: bang, label: \"**Batch complete**<br/>Notify subscribers\", labelType: markdown}\n  Caption@{shape: text, label: \"**Audit**<br/>Preserve event order\", labelType: markdown}\n  Start --> Fork\n  Fork -->|ordered| Collate\n  Fork -.->|streaming| Signal\n  Collate --> Junction\n  Signal --x Junction\n  Junction ==> Summary\n  Summary --> Bang\n  Bang --> Stop\n  Caption --- Bang\n  Summary -. retry .-> Fork\n  class Junction,Summary accent\n  classDef accent fill:#fee,stroke:#b44,stroke-width:2px\n",
+      "features": [
+        "fixed-symbols",
+        "hidden-math-labels",
+        "markdown-multiline",
+        "labeled-edges",
+        "cross-marker",
+        "thick-and-dotted-edges",
+        "feedback-cycle",
+        "class-styles",
+        "handdrawn",
+        "seeded-rough-shapes"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes.ts",
+        "section": "All nine symbol/text handlers, composed with flowchart metadata, edge and styling syntax"
+      },
+      "config": {
+        "look": "handDrawn",
+        "handDrawnSeed": 42,
+        "flowchart": {
+          "curve": "linear"
+        }
+      }
+    },
+    {
+      "id": "flowchart-collapsed-handdrawn",
+      "level": "complex",
+      "source": "flowchart LR\n  Entry --> Hidden\n  subgraph Outer[\"Collapsed processing stage\"]\n    subgraph Nested[\"Nested audit\"]\n      Hidden --> Check --> Write\n    end\n    Finish\n  end\n  Nested@{view: collapsed}\n  Outer@{view: collapsed}\n  Write --> Done\n  Outer --> Outer\n  subgraph Visible[\"Follow-up work\"]\n    direction TB\n    Done --> Confirm\n  end\n  Confirm --> Exit\n",
+      "features": [
+        "collapsed",
+        "nested-containers",
+        "hidden-descendants",
+        "redirected-edges",
+        "self-loop",
+        "mixed-expanded-collapsed",
+        "handdrawn",
+        "seeded-rough-shapes"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/rendering-util/rendering-elements/shapes/collapsedGroup.ts",
+        "section": "Hand-drawn frame and indicator geometry with nested FlowDB boundary projection"
+      },
+      "config": {
+        "look": "handDrawn",
+        "handDrawnSeed": 42,
+        "flowchart": {
+          "curve": "linear"
+        }
+      }
+    },
+    {
+      "id": "flowchart-empty-directed-group",
+      "level": "intermediate",
+      "source": "flowchart TB\nsubgraph Empty[\"A long title for an empty processing group\"]\n  direction LR\nend\nEmpty --> Outside[\"Work outside the empty group\"]\n",
+      "features": [
+        "empty-subgraph",
+        "long-group-title",
+        "group-direction",
+        "group-endpoint",
+        "elk"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/flowchart.md",
+        "section": "Subgraphs; Direction in subgraphs (empty group regression)"
+      },
+      "config": {
+        "layout": "elk",
+        "flowchart": {
+          "curve": "linear"
+        }
+      }
+    },
+    {
+      "id": "flowchart-isolated-nested-direction-scopes",
+      "level": "complex",
+      "source": "flowchart TB\nEntry[\"Receive a batch\"] --> Pipeline\nsubgraph Pipeline[\"Processing pipeline with isolated direction scopes\"]\n  direction LR\n  subgraph Validation[\"Validation from top to bottom\"]\n    direction TB\n    Read[\"Read next item\"] --> Valid{\"Schema valid?\"}\n    Valid -->|yes| Accepted[\"Keep item\"]\n    Valid -->|no| Repair[\"Repair input\"]\n    Repair -. retry .-> Read\n  end\n  subgraph Storage[\"Storage from bottom to top\"]\n    direction BT\n    Append[\"Append journal\"] --> Durable{\"Commit durable?\"}\n    Durable -->|yes| Publish[\"Publish revision\"]\n    Durable -->|no| Retry[\"Retry transaction\"]\n    Retry -. retry .-> Append\n  end\n  Validation -->|accepted batch| Storage\nend\nsubgraph Audit[\"Audit from right to left\"]\n  direction RL\n  Record[\"Record revision\"] --> Verified{\"Checksum valid?\"}\n  Verified -->|yes| Seal[\"Seal history\"]\n  Verified -->|no| Recheck[\"Recheck journal\"]\n  Recheck -. retry .-> Record\nend\nPipeline -->|committed| Audit\nAudit --> Exit[\"Revision available\"]\n",
+      "features": [
+        "nested-subgraphs",
+        "isolated-direction-scopes",
+        "sibling-directions",
+        "group-endpoints",
+        "TB-LR-BT-RL",
+        "diamond-decisions",
+        "feedback-cycles",
+        "edge-labels",
+        "elk"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/flowchart.md",
+        "section": "Direction in subgraphs; Limitation (composed regression with only group boundary endpoints)"
+      },
+      "config": {
+        "layout": "elk",
+        "flowchart": {
+          "curve": "linear"
+        }
+      }
+    }
+  ]
+}

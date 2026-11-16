@@ -124,6 +124,111 @@ bool checkResult(FoliaNativeMathResult const *result, std::string_view expectedS
 }
 
 suite native_renderer_bridge = [] {
+    "C ABI SVG fragments retain typed pixel geometry and preserve document rendering"_test = [] {
+        auto renderer = makeRenderer();
+        auto cancel = makeCancellation();
+        const auto before = render(renderer.get(), u"x^2", cancel.get());
+        std::size_t beforeSize{};
+        const auto beforeData = FoliaNativeMathResultSvg(before.result.get(), &beforeSize);
+        const std::string documentSvg(beforeData, beforeSize);
+        std::array<std::uint16_t, 3> units{'x', '^', '2'};
+        FoliaNativeMathResult *raw{};
+        expect(FoliaNativeMathRenderSvgFragment(renderer.get(), units.data(), units.size(), 16,
+                                                1280, cancel.get(), 0, &raw) ==
+               FOLIA_NATIVE_MATH_OK);
+        Result fragment(raw);
+        FoliaNativeMathSvgMetrics metrics{};
+        expect(FoliaNativeMathResultFragmentMetrics(fragment.get(), &metrics) == 1);
+        expect(metrics.width > 0 && metrics.height > 0 && metrics.baseline > 0);
+        std::size_t size{};
+        const auto bytes = FoliaNativeMathResultSvg(fragment.get(), &size);
+        const std::string text(bytes, size);
+        expect(text.starts_with("<svg ") && text.ends_with("</svg>"));
+        expect(text.find("mjx-container") == text.npos);
+
+        folia::math::Renderer direct;
+        folia::math::RenderOptions options;
+        options.display = true;
+        options.svgMode = folia::math::SvgMode::standalone_display;
+        const auto expected = direct.render("x^2", options);
+        const auto expectedMetrics = svg::pixel_metrics(expected.scene);
+        expect(text == expected.svg);
+        expect(metrics.width == expectedMetrics.width && metrics.height == expectedMetrics.height &&
+               metrics.baseline == expectedMetrics.baseline);
+        const auto after = render(renderer.get(), u"x^2", cancel.get());
+        checkResult(after.result.get(), documentSvg, "document bytes after fragment rendering");
+        expect(FoliaNativeMathResultFragmentMetrics(after.result.get(), &metrics) == 0);
+        expect(metrics.width == 0 && metrics.height == 0 && metrics.baseline == 0);
+        renderer.reset();
+        expect(FoliaNativeMathResultFragmentMetrics(fragment.get(), &metrics) == 1);
+        expect(metrics.width == expectedMetrics.width);
+        expect(std::string_view(bytes, size) == text);
+    };
+
+    "C ABI SVG fragments scale with font size and do not wrap to the diagram width"_test = [] {
+        auto renderer = makeRenderer();
+        auto cancel = makeCancellation();
+        constexpr std::u16string_view tex = u"a+b+c+d+e+f+g+h+i+j";
+        std::vector<std::uint16_t> units(tex.begin(), tex.end());
+        std::array<FoliaNativeMathSvgMetrics, 3> metrics{};
+        std::array<Result, 3> results;
+        for (std::size_t i = 0; i < metrics.size(); ++i) {
+            FoliaNativeMathResult *raw{};
+            expect(FoliaNativeMathRenderSvgFragment(renderer.get(), units.data(), units.size(),
+                                                    i == 2 ? 32 : 16, i == 1 ? 24 : 1280,
+                                                    cancel.get(), 0, &raw) == FOLIA_NATIVE_MATH_OK);
+            results[i].reset(raw);
+            expect(FoliaNativeMathResultFragmentMetrics(raw, &metrics[i]) == 1);
+        }
+        expect(metrics[0].width > 24);
+        expect(metrics[1].width == metrics[0].width && metrics[1].height == metrics[0].height);
+        expect(metrics[2].width == metrics[0].width * 2 &&
+               metrics[2].height == metrics[0].height * 2 &&
+               metrics[2].baseline == metrics[0].baseline * 2);
+    };
+
+    "C ABI SVG fragment errors expose no successful geometry"_test = [] {
+        auto renderer = makeRenderer();
+        auto cancel = makeCancellation();
+        const std::uint16_t tex = 'x';
+        FoliaNativeMathResult *raw{};
+        expect(FoliaNativeMathRenderSvgFragment(renderer.get(), &tex, 1, 0, 1280, cancel.get(),
+                                                0, &raw) == FOLIA_NATIVE_MATH_INFRASTRUCTURE_ERROR);
+        expect(raw == nullptr);
+        FoliaNativeMathSvgMetrics metrics{1, 2, 3};
+        expect(FoliaNativeMathResultFragmentMetrics(nullptr, &metrics) == 0);
+        expect(metrics.width == 0 && metrics.height == 0 && metrics.baseline == 0);
+        expect(FoliaNativeMathResultFragmentMetrics(nullptr, nullptr) == 0);
+        FoliaNativeMathCancellationRequestStop(cancel.get());
+        expect(FoliaNativeMathRenderSvgFragment(renderer.get(), &tex, 1, 16, 1280, cancel.get(),
+                                                0, &raw) == FOLIA_NATIVE_MATH_CANCELLED);
+        Result cancelled(raw);
+        expect(FoliaNativeMathResultFragmentMetrics(cancelled.get(), &metrics) == 0);
+    };
+
+    "standalone math retains visible formulas and textual SVG tooltips"_test = [] {
+        folia::math::Renderer renderer;
+        folia::math::RenderOptions options;
+        options.display = true;
+        options.svgMode = folia::math::SvgMode::standalone_display;
+        const auto plain = renderer.render("x", options);
+        const auto expected = svg::pixel_metrics(plain.scene);
+        for (const auto source : {R"(\mathtip{x}{\frac{y}{z}})", R"(\texttip{x}{note})"}) {
+            const auto result = renderer.render(source, options);
+            const auto metrics = svg::pixel_metrics(result.scene);
+            expect(metrics.width == expected.width && metrics.height == expected.height);
+            expect(result.svg.find("foreignObject") == result.svg.npos);
+            expect(result.svg.find("data-c=\"1D465\"") != result.svg.npos);
+            if (std::string_view(source).starts_with(R"(\texttip)"))
+                expect(result.svg.find("<title>note</title>") != result.svg.npos);
+        }
+        expect(throws<svg::UnsupportedError>([&] {
+            (void)renderer.render(
+                R"(\setOptions{allowTexHTML=true}<tex-html><b>visible</b></tex-html>\setOptions{allowTexHTML=false})",
+                options);
+        })) << "visible HTML requires an HTML host and is not silently discarded";
+    };
+
     "C ABI batch isolates item errors and shares the single rendering path"_test = [] {
         auto renderer = makeRenderer();
         auto cancel = makeCancellation();

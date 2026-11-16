@@ -1,4 +1,5 @@
 module folia.math.core.mml_tree.mml_nodes.mpadded;
+import std;
 import folia.math.core.mml_tree.node_defaults;
 
 namespace folia::math::mml {

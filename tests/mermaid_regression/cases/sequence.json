@@ -1,0 +1,163 @@
+{
+  "family": "sequence",
+  "cases": [
+    {
+      "id": "sequence-conversation",
+      "level": "basic",
+      "source": "sequenceDiagram\n    Alice->>John: Hello John, how are you?\n    John-->>Alice: Great!\n    Alice-)John: See you later!\n",
+      "features": [
+        "messages",
+        "dotted-replies",
+        "asynchronous-arrows"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/sequenceDiagram.md",
+        "section": "Sequence diagrams"
+      }
+    },
+    {
+      "id": "sequence-lifecycle",
+      "level": "intermediate",
+      "source": "sequenceDiagram\n    Alice->>Bob: Hello Bob, how are you ?\n    Bob->>Alice: Fine, thank you. And you?\n    create participant Carl\n    Alice->>Carl: Hi Carl!\n    create actor D as Donald\n    Carl->>D: Hi!\n    destroy Carl\n    Alice-xCarl: We are too many\n    destroy Bob\n    Bob->>Alice: I agree\n",
+      "features": [
+        "create",
+        "destroy",
+        "actors"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/sequenceDiagram.md",
+        "section": "Actor Creation and Destruction (v10.3.0+)"
+      }
+    },
+    {
+      "id": "sequence-participant-boxes",
+      "level": "complex",
+      "source": "    sequenceDiagram\n    box Purple Alice & John\n    participant A\n    participant J\n    end\n    box Another Group\n    participant B\n    participant C\n    end\n    A->>J: Hello John, how are you?\n    J->>A: Great!\n    A->>B: Hello Bob, how is Charley?\n    B->>C: Hello Charley, how are you?\n",
+      "features": [
+        "boxes",
+        "named-color",
+        "cross-box-messages"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/sequenceDiagram.md",
+        "section": "Grouping / Box"
+      }
+    },
+    {
+      "id": "sequence-nested-parallel",
+      "level": "complex",
+      "source": "sequenceDiagram\n    par Alice to Bob\n        Alice->>Bob: Go help John\n    and Alice to John\n        Alice->>John: I want this done today\n        par John to Charlie\n            John->>Charlie: Can we do this today?\n        and John to Diana\n            John->>Diana: Can you help us today?\n        end\n    end\n",
+      "features": [
+        "par",
+        "nested-par",
+        "and",
+        "multiple-actors"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/sequenceDiagram.md",
+        "section": "Parallel"
+      }
+    },
+    {
+      "id": "sequence-critical-options",
+      "level": "complex",
+      "source": "sequenceDiagram\n    critical Establish a connection to the DB\n        Service-->DB: connect\n    option Network timeout\n        Service-->Service: Log error\n    option Credentials rejected\n        Service-->Service: Log different error\n    end\n",
+      "features": [
+        "critical",
+        "option",
+        "multiple-failures"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/sequenceDiagram.md",
+        "section": "Critical Region"
+      }
+    },
+    {
+      "id": "sequence-background-activations",
+      "level": "complex",
+      "source": "sequenceDiagram\n    participant Alice\n    participant John\n\n    rect rgb(191, 223, 255)\n    note right of Alice: Alice calls John.\n    Alice->>+John: Hello John, how are you?\n    rect rgb(200, 150, 255)\n    Alice->>+John: John, can you hear me?\n    John-->>-Alice: Hi Alice, I can hear you!\n    end\n    John-->>-Alice: I feel great!\n    end\n    Alice ->>+ John: Did you want to go to the game tonight?\n    John -->>- Alice: Yeah! See you there.\n\n",
+      "features": [
+        "rect",
+        "rgb-color",
+        "nested-rect",
+        "nested-activations",
+        "notes"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/sequenceDiagram.md",
+        "section": "Background Highlighting"
+      }
+    },
+    {
+      "id": "sequence-numbered-messages",
+      "level": "intermediate",
+      "source": "sequenceDiagram\n    autonumber\n    Alice->>John: Hello John, how are you?\n    loop HealthCheck\n        John->>John: Fight against hypochondria\n    end\n    Note right of John: Rational thoughts!\n    John-->>Alice: Great!\n    John->>Bob: How about you?\n    Bob-->>John: Jolly good!\n",
+      "features": [
+        "autonumber",
+        "loop",
+        "notes",
+        "self-calls",
+        "messages"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/sequenceDiagram.md",
+        "section": "sequenceNumbers"
+      }
+    },
+    {
+      "id": "sequence-actor-menus",
+      "level": "complex",
+      "source": "sequenceDiagram\n    participant Alice\n    participant John\n    link Alice: Dashboard @ https://dashboard.contoso.com/alice\n    link Alice: Wiki @ https://wiki.contoso.com/alice\n    link John: Dashboard @ https://dashboard.contoso.com/john\n    link John: Wiki @ https://wiki.contoso.com/john\n    Alice->>John: Hello John, how are you?\n    John-->>Alice: Great!\n    Alice-)John: See you later!\n",
+      "features": [
+        "actor-menus",
+        "links",
+        "dotted-replies",
+        "asynchronous-arrows"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/sequenceDiagram.md",
+        "section": "Actor Menus"
+      }
+    },
+    {
+      "id": "sequence-participant-shapes-and-control-flow",
+      "level": "complex",
+      "source": "sequenceDiagram\nautonumber 10 5\nactor User\nparticipant UI@{ \"type\": \"boundary\" }\nparticipant Controller@{ \"type\": \"control\" }\nparticipant Record@{ \"type\": \"entity\" }\nparticipant DB@{ \"type\": \"database\" }\nparticipant Cache@{ \"type\": \"collections\" }\nparticipant Queue@{ \"type\": \"queue\" }\nUser->>UI: Submit order\nUI->>+Controller: validate and store\nloop Every item\n  Controller->>Record: Validate item\n  alt Invalid input\n    Record-->>Controller: errors\n  else Accepted\n    Controller->>DB: Store record\n    DB-->>Controller: record ID\n  end\nend\nController->>Cache: Invalidate view\nController-)Queue: Notify subscribers\nController-->>-UI: Result\nNote over User,UI: The result remains editable\n",
+      "features": [
+        "typed-participants",
+        "loop",
+        "alt",
+        "activation",
+        "asynchronous",
+        "autonumber"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/sequenceDiagram.md",
+        "section": "Participant Types; Loops; Alt; Activations (combined regression)"
+      }
+    },
+    {
+      "id": "sequence-json-menus-and-order",
+      "level": "complex",
+      "source": "sequenceDiagram\nparticipant A as Reader\nparticipant B as Store\nlinks A: {\"Dashboard\": \"https://example.org/dash?a=1&b=2\", \"10\": \"https://example.org/ten\", \"Wiki\": \"https://example.org/wiki\"}\nlink A: 2 @ https://example.org/two\nlinks A: {\"Wiki\": \"https://example.org/latest\", \"Source<br/>code\": \"https://example.org/code\"}\nlink B: Details @ https://example.org/details\nA->>+B: Open menu target\nNote over A,B: Menus keep actor font and literal labels\nB-->>-A: Ready\n",
+      "features": [
+        "json-menus",
+        "numeric-key-order",
+        "duplicate-link-update",
+        "literal-html-in-menu-label",
+        "forced-menu-visibility",
+        "activation",
+        "notes"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/sequenceDiagram.md",
+        "section": "Actor Menus; Advanced Menu Syntax (combined regression)"
+      },
+      "config": {
+        "sequence": {
+          "forceMenus": true
+        }
+      }
+    }
+  ]
+}

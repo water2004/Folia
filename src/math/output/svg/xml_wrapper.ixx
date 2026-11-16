@@ -2,6 +2,7 @@
  * Native Source output/svg/Wrappers/semantics.ts and HtmlNode.ts owners.
  *************************************************************/
 export module folia.math.output.svg.xml_wrapper;
+import std;
 export import folia.math.output.common;
 import folia.math.core.dom_adaptor;
 import folia.math.util.styles;

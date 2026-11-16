@@ -1,0 +1,127 @@
+{
+  "family": "agentflow",
+  "cases": [
+    {
+      "id": "agentflow-workflow",
+      "level": "basic",
+      "source": "agentflow-beta TB\n  flow reviewer[\"Review Agent\"]\n    changes[\"Gather changes\"]@{ shape: input }\n    analyse[\"Analyse diff\"]@{ shape: task }\n    lint[\"run_linter\"]@{ shape: tool }\n    ok[\"Clean?\"]@{ shape: decision }\n\n    changes --> analyse --> lint --> ok\n  end\n",
+      "features": [
+        "input",
+        "task",
+        "tool",
+        "decision",
+        "container"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/agentflow.md",
+        "section": "Basic example"
+      }
+    },
+    {
+      "id": "agentflow-node-types",
+      "level": "intermediate",
+      "source": "agentflow-beta LR\n  brief[\"Brief\"]@{ shape: input }\n  draft[\"Draft copy\"]@{ shape: task }\n  spellcheck[\"spell_check\"]@{ shape: tool }\n  guide[\"Style guide\"]@{ shape: refdoc }\n  publish[\"Publish\"]@{ shape: action }\n\n  brief --> draft --> spellcheck --> publish\n  draft -.- guide\n",
+      "features": [
+        "input",
+        "task",
+        "tool",
+        "action",
+        "refdoc",
+        "dotted-reference"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/agentflow.md",
+        "section": "Nodes and shapes"
+      }
+    },
+    {
+      "id": "agentflow-edge-roles",
+      "level": "intermediate",
+      "source": "agentflow-beta TB\n  check[\"Tests pass?\"]@{ shape: decision }\n  ship[\"Ship it\"]@{ shape: action }\n  fix[\"Fix the build\"]@{ shape: task }\n  logs[\"Build logs\"]@{ shape: refdoc }\n\n  check -- yes --> ship\n  check -- no --> fix\n  fix --x check\n  fix -.- logs\n",
+      "features": [
+        "edge-labels",
+        "cross-arrow",
+        "dotted-line"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/agentflow.md",
+        "section": "Edges"
+      }
+    },
+    {
+      "id": "agentflow-nested-containers",
+      "level": "complex",
+      "source": "agentflow-beta TB\n  flow team[\"Content Team\"]\n    flow researcher[\"Researcher\"]\n      gather[\"Gather sources\"]@{ shape: task }\n    end\n\n    flow writer[\"Writer\"]\n      compose[\"Compose draft\"]@{ shape: task }\n    end\n\n    researcher --> writer\n  end\n",
+      "features": [
+        "flows",
+        "nested-flows",
+        "compound-edges"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/agentflow.md",
+        "section": "Containers"
+      }
+    },
+    {
+      "id": "agentflow-shared-global-data",
+      "level": "complex",
+      "source": "agentflow-beta TB\n  global\n    corpus[\"Shared corpus\"]@{ shape: refdoc }\n  end\n\n  flow summariser[\"Summariser\"]\n    summarise[\"Summarise\"]@{ shape: task }\n    summarise -.- corpus\n  end\n\n  flow indexer[\"Indexer\"]\n    index[\"Build index\"]@{ shape: task }\n    index -.- corpus\n  end\n",
+      "features": [
+        "global",
+        "cross-container-edges",
+        "refdoc"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/agentflow.md",
+        "section": "The `global` block"
+      }
+    },
+    {
+      "id": "agentflow-collapsed-container",
+      "level": "complex",
+      "source": "agentflow-beta TB\n  flow intake[\"Intake\"]\n    receive[\"Receive request\"]@{ shape: input }\n  end\n\n  flow processing[\"Processing\"]\n    validate[\"Validate\"]@{ shape: task }\n    enrich[\"Enrich\"]@{ shape: task }\n    validate --> enrich\n  end\n  processing@{ view: \"collapsed\" }\n\n  flow output[\"Output\"]\n    publish[\"Publish\"]@{ shape: action }\n  end\n\n  receive --> validate\n  enrich --> publish\n",
+      "features": [
+        "collapsed",
+        "flow",
+        "hidden-edges",
+        "external-edges"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/agentflow.md",
+        "section": "Collapsing a container"
+      }
+    },
+    {
+      "id": "agentflow-official-coffee-team",
+      "level": "complex",
+      "source": "agentflow-beta TB\n  connector llm[\"LLM API\"]\n  llm@{ protocol: \"http\", endpoint: \"https://api.example.com/chat\" }\n\n  flow coffee_team[\"Coffee Team\"]\n    city[\"city\"]@{ shape: input, value: \"Stockholm\" }\n\n    flow researcher[\"Researcher\"]\n      research[\"research_location\"]@{ shape: tool, params: \"city :: String\", returns: \"Report\" }\n      write[\"write_copy\"]@{ shape: tool, connectorRef: \"llm.chat\", returns: \"CoffeeCopy\" }\n      city --> research --> write\n    end\n    researcher@{ instruction: \"Research the city and draft English coffee copy citing sources.\" }\n\n    flow designer[\"Designer\"]\n      render[\"generate_html\"]@{ shape: tool, connectorRef: \"llm.chat\", returns: \"String\" }\n      brand[\"Nordic Brand Guide\"]@{ shape: refdoc }\n      render -.- brand\n    end\n\n    researcher --> designer\n  end\n",
+      "features": [
+        "nested-flows",
+        "connector",
+        "metadata",
+        "tools",
+        "cross-container-edge"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/agentflow.md",
+        "section": "A worked example"
+      }
+    },
+    {
+      "id": "agentflow-shared-review-feedback",
+      "level": "complex",
+      "source": "agentflow-beta LR\nglobal\n  policy[\"Review policy\"]@{ shape: refdoc }\nend\nconnector tracker[\"Issue tracker\"]\nflow delivery[\"Delivery\"]\n  intake[\"Receive report\"]@{ shape: input }\n  flow analysis[\"Analysis\"]\n    inspect[\"Inspect changes\"]@{ shape: tool }\n    review[\"Review result\"]@{ shape: decision }\n    inspect --> review\n    review -- revise --> inspect\n    inspect -.- policy\n  end\n  publish[\"Publish result\"]@{ shape: action }\n  intake --> inspect\n  review -- approve --> publish\nend\npublish --> tracker\n",
+      "features": [
+        "nested-flows",
+        "feedback",
+        "global",
+        "connector",
+        "decision-labels"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/agentflow.md",
+        "section": "Containers; The global block; Edges (combined regression)"
+      }
+    }
+  ]
+}

@@ -1,0 +1,133 @@
+{
+  "family": "cynefin",
+  "cases": [
+    {
+      "id": "cynefin-official-01",
+      "level": "complex",
+      "source": "cynefin-beta\n  title Incident Response\n\n  complex\n    \"Investigate root cause\"\n    \"Run chaos experiment\"\n\n  complicated\n    \"Analyze performance data\"\n    \"Expert review needed\"\n\n  clear\n    \"Restart service\"\n    \"Apply known fix\"\n\n  chaotic\n    \"Page on-call immediately\"\n\n  confusion\n    \"Unknown failure mode\"\n",
+      "features": [
+        "official-example",
+        "basic-example"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/cynefin.md",
+        "section": "Basic example"
+      }
+    },
+    {
+      "id": "cynefin-official-02",
+      "level": "complex",
+      "source": "cynefin-beta\n  title Strategy Categorization\n\n  complex\n    \"Market research\"\n\n  complicated\n    \"Competitive analysis\"\n\n  clear\n    \"Standard pricing\"\n\n  chaotic\n    \"Crisis management\"\n\n  complex --> complicated : \"Pattern identified\"\n  complicated --> clear : \"Best practice codified\"\n  clear --> chaotic : \"Complacency\"\n  chaotic --> complex : \"Stabilized\"\n",
+      "features": [
+        "official-example",
+        "with-transitions"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/cynefin.md",
+        "section": "With transitions"
+      }
+    },
+    {
+      "id": "cynefin-official-03",
+      "level": "intermediate",
+      "source": "cynefin-beta\n  title Cynefin Framework\n\n  complex\n  complicated\n  clear\n  chaotic\n",
+      "features": [
+        "official-example",
+        "empty-framework"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/cynefin.md",
+        "section": "Empty framework"
+      }
+    },
+    {
+      "id": "cynefin-all-directed-transitions",
+      "level": "complex",
+      "source": "cynefin-beta\ntitle Decision movement\ncomplex\n  \"Research alternatives\"\ncomplicated\n  \"Validate expertise\"\nclear\n  \"Apply runbook\"\nchaotic\n  \"Contain outage\"\nconfusion\n  \"Classify uncertainty\"\ncomplex --> complicated : \"Learn\"\ncomplicated --> clear : \"Codify\"\nclear --> chaotic : \"Disrupt\"\nchaotic --> complex : \"Stabilize\"\nconfusion --> clear : \"Known\"\nconfusion --> complicated : \"Analyze\"\nconfusion --> chaotic : \"Act\"\nconfusion --> complex : \"Probe\"\n",
+      "features": [
+        "five-domains",
+        "eight-transitions",
+        "transition-labels"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/cynefin.md",
+        "section": "Combined syntax regression"
+      }
+    },
+    {
+      "id": "cynefin-overflow-and-long-badges",
+      "level": "complex",
+      "source": "cynefin-beta\ntitle Unknown work classification\ncomplex\n  \"Experiment with a previously unexplored architecture\"\n  \"Measure actual behavior\"\ncomplicated\n  \"Independent expert analysis and verification\"\nclear\n  \"Follow the documented procedure\"\nchaotic\n  \"Restore a stable operational state\"\nconfusion\n  \"Unknown A\"\n  \"Unknown B\"\n  \"Unknown C\"\n  \"Unknown D\"\n  \"Unknown E\"\n  \"Unknown F\"\nconfusion --> complex : \"Investigate\"\nconfusion --> chaotic : \"Incident\"\n",
+      "features": [
+        "confusion-overflow",
+        "long-badges",
+        "five-domains",
+        "transitions"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/cynefin.md",
+        "section": "Combined syntax regression"
+      }
+    },
+    {
+      "id": "cynefin-reverse-transitions",
+      "level": "complex",
+      "source": "cynefin-beta\ntitle Reclassification\nclear\n  \"Manual checklist\"\ncomplicated\n  \"Reassess an expert conclusion\"\ncomplex\n  \"Unexpected interaction\"\nchaotic\n  \"Failure cascade\"\nconfusion\n  \"New evidence\"\nclear --> complicated : \"Revisit\"\ncomplicated --> complex : \"Uncertainty\"\ncomplex --> chaotic : \"Failure\"\nchaotic --> clear : \"Known recovery\"\ncomplex --> confusion : \"Ambiguous\"\nclear --> clear : \"Ignored self transition\"\n",
+      "features": [
+        "reverse-transitions",
+        "self-loop-filter",
+        "five-domains"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/cynefin.md",
+        "section": "Combined syntax regression"
+      }
+    },
+    {
+      "id": "cynefin-compact-theme",
+      "level": "complex",
+      "source": "cynefin-beta\ntitle Compact decision board\ncomplex\n  \"Probe\"\n  \"Sense\"\ncomplicated\n  \"Analyze\"\nclear\n  \"Categorize\"\nchaotic\n  \"Act\"\nconfusion\n  \"Unknown\"\ncomplex --> complicated : \"Evidence\"\ncomplicated --> clear : \"Routine\"\nclear --> chaotic : \"Cliff\"\n",
+      "features": [
+        "compact-canvas",
+        "hidden-descriptions",
+        "straight-boundaries",
+        "custom-theme"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/cynefin.md",
+        "section": "Combined syntax regression"
+      },
+      "config": {
+        "cynefin": {
+          "width": 620,
+          "height": 500,
+          "padding": 28,
+          "showDomainDescriptions": false,
+          "boundaryAmplitude": 0,
+          "seed": 19
+        },
+        "themeVariables": {
+          "cynefin": {
+            "complexBg": "#e7efff",
+            "cliffWidth": 4
+          }
+        }
+      }
+    },
+    {
+      "id": "cynefin-escaped-labels",
+      "level": "complex",
+      "source": "cynefin-beta:\ntitle Escaped labels and domain redeclarations\ncomplex\n  \"Discarded initial entry\"\nclear\n  \"Repeatable \\\"known\\\" procedure\"\ncomplex\n  \"A path with \\\\ separators\"\n  'Single quoted label'\ncomplicated\n  \"Multi-step expert assessment\"\nchaotic\n  \"Immediate response\"\nconfusion\n  \"Mixed context\"\ncomplex --> complicated : \"A \\\"pattern\\\" emerges\"\nchaotic --> complex\n",
+      "features": [
+        "quote-escapes",
+        "single-quotes",
+        "domain-redeclaration",
+        "unlabelled-transition"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/cynefin.md",
+        "section": "Combined syntax regression"
+      }
+    }
+  ]
+}

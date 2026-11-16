@@ -1,0 +1,119 @@
+{
+  "family": "mindmap",
+  "cases": [
+    {
+      "id": "mindmap-indentation",
+      "level": "basic",
+      "source": "mindmap\nRoot\n    A\n      B\n      C\n",
+      "features": [
+        "tree",
+        "indentation"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/mindmap.md",
+        "section": "Syntax"
+      }
+    },
+    {
+      "id": "mindmap-uneven-indent",
+      "level": "intermediate",
+      "source": "mindmap\nRoot\n    A\n        B\n      C\n",
+      "features": [
+        "indentation",
+        "implicit-parent"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/mindmap.md",
+        "section": "Unclear indentation"
+      }
+    },
+    {
+      "id": "mindmap-node-classes",
+      "level": "intermediate",
+      "source": "mindmap\n    Root\n        A[A]\n        :::urgent large\n        B(B)\n        C\n",
+      "features": [
+        "classes",
+        "tree"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/mindmap.md",
+        "section": "Classes"
+      }
+    },
+    {
+      "id": "mindmap-official-overview",
+      "level": "complex",
+      "source": "mindmap\n  root((mindmap))\n    Origins\n      Long history\n      ::icon(fa fa-book)\n      Popularisation\n        British popular psychology author Tony Buzan\n    Research\n      On effectiveness<br/>and features\n      On Automatic creation\n        Uses\n            Creative techniques\n            Strategic planning\n            Argument mapping\n    Tools\n      Pen and paper\n      Mermaid\n\n",
+      "features": [
+        "deep-tree",
+        "icon-metadata",
+        "html-breaks",
+        "long-labels"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/mindmap.md",
+        "section": "An example of a mindmap."
+      }
+    },
+    {
+      "id": "mindmap-depth-colors",
+      "level": "complex",
+      "source": "---\nconfig:\n  theme: base\n  mindmap:\n    colorBy: depth\n  themeVariables:\n    git0: '#374151'\n    gitBranchLabel0: '#ffffff'\n    cScaleLabel0: '#ffffff'\n    cScale1: '#bfdbfe'\n    cScaleLabel1: '#172554'\n    cScale2: '#bbf7d0'\n    cScaleLabel2: '#14532d'\n    cScale3: '#fde68a'\n    cScaleLabel3: '#451a03'\n---\nmindmap\n  root((mindmap))\n    origins{{Origins}}\n      history[Long history]\n        Popularisation\n        British popular psychology author Tony Buzan\n    research{{Research}}\n      uses[Uses]\n        Creative techniques\n",
+      "features": [
+        "depth-colors",
+        "theme-variables",
+        "shapes",
+        "deep-tree"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/mindmap.md",
+        "section": "Coloring by depth (v12.2.0+)"
+      }
+    },
+    {
+      "id": "mindmap-markdown-unicode",
+      "level": "complex",
+      "source": "mindmap\n    id1[\"`**Root** with\na second line\nUnicode works too: 🤓`\"]\n      id2[\"`The dog in **the** hog... a *very long text* that wraps to a new line`\"]\n      id3[Regular labels still works]\n",
+      "features": [
+        "markdown",
+        "multiline",
+        "emoji",
+        "long-labels"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/mindmap.md",
+        "section": "Markdown Strings"
+      }
+    },
+    {
+      "id": "mindmap-shape-hierarchy",
+      "level": "complex",
+      "source": "mindmap\n  root((Release planning))\n    source[Source tree]\n      parse(Parsing)\n        lossless{{Lossless source}}\n        diagnostics)Diagnostics(\n      state))State transitions((\n        focus[Selection and focus]\n        history(Undo and redo)\n    layout{{Layout}}\n      measure[Font measurement]\n        wraps[Wrapped text]\n      render)Rendering(\n        svg((SVG))\n        export[Vector export]\n",
+      "features": [
+        "all-node-shapes",
+        "deep-tree",
+        "branch-colors",
+        "siblings"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/mindmap.md",
+        "section": "Node shapes (combined regression)"
+      }
+    },
+    {
+      "id": "mindmap-unbalanced-wrap-depth",
+      "level": "complex",
+      "source": "---\nconfig:\n  mindmap:\n    colorBy: depth\n    maxNodeWidth: 120\n---\nmindmap\n  root((Dependency analysis))\n    frontend[Syntax and lossless document representation]\n      blocks[Block-level tree]\n        lists[Nested lists]\n          ordered[Ordered sequences]\n            nested[Mixed nested containers]\n      inline[Inline source and tokens]\n    layout[Measured geometry]\n      fonts[Font shaping and fallback]\n      charts[Diagram layout]\n      math[Mathematical typesetting]\n    paint[Vector output]\n    export[PDF export with document structure]\n",
+      "features": [
+        "unbalanced-tree",
+        "depth-colors",
+        "narrow-wrapping",
+        "deep-tree"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/mindmap.md",
+        "section": "Coloring by depth; Markdown Strings (combined regression)"
+      }
+    }
+  ]
+}

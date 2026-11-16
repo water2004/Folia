@@ -15,6 +15,99 @@ Result render(std::string_view source, bool dark = false) {
     return result;
 }
 suite host_contract = [] {
+    "mermaid_host_renders_math_as_svg_across_label_consumers"_test = [] {
+        for (const auto source : {
+            R"(flowchart TD
+A["$$\nabla f$$"] -->|$$x_1$$| B["$$\frac{a}{b}$$"])",
+            R"(---
+config:
+  layout: dagre
+---
+flowchart TD
+subgraph G["$$\sum_{k=1}^{n}k$$"]
+  A["value $$x_1$$"]
+end
+style G font-size:24px)",
+            R"(flowchart TD
+A["`**literal** $$x_1$$`"] --> B["<strong>value</strong> <em>f</em>$$\sqrt{x}$$"])",
+            R"(sequenceDiagram
+box $$\mathbb{R}$$
+participant A as $$x_1$$
+participant B as $$x_2$$
+end
+A->>B: $$\frac{a}{b}$$
+Note over A,B: $$\sum_{i=1}^n i$$
+loop $$n>0$$
+  B-->>A: $$\begin{pmatrix}a&b\\c&d\end{pmatrix}$$
+end)",
+            R"(mindmap
+  root(("$$\nabla f$$"))
+    child["$$\frac{a}{b}$$"])",
+            R"(classDiagram
+class A["$$\mathbb{R}$$"]
+A : +$$x_1$$ value
+A --> A : $$\frac{a}{b}$$)",
+            R"(stateDiagram-v2
+state "$$\nabla f$$" as A
+A --> A : $$x_1$$
+note right of A : $$\frac{a}{b}$$)",
+            R"(agentflow-beta TB
+flow G["$$\mathbb{R}$$"]
+A["$$\nabla f$$"] -->|$$x_1$$| B["$$\frac{a}{b}$$"]
+end)",
+            R"(block-beta
+columns 2
+A["$$\frac{a}{b}$$"] B{"$$\nabla f$$"}
+A -- "$$x_1$$" --> B)",
+            R"(erDiagram
+A["$$\mathbb{R}$$"] {
+  int value "$$\frac{a}{b}$$"
+}
+A ||--o{ B : "$$x_1$$")",
+            R"(requirementDiagram
+requirement R {
+id: R1
+text: "$$\frac{a}{b}$$"
+risk: low
+verifymethod: test
+})",
+            R"(usecase-beta
+actor A("$$x^2$$")
+U("$$\frac{a}{b}$$")
+A -- "$$n$$" --> U)",
+            R"(---
+config:
+  flowchart:
+    htmlLabels: true
+---
+swimlane-beta TB
+subgraph L["$$\frac{a}{b}$$"]
+A["$$x^2$$"]
+B["$$y$$"]
+end
+A -->|"$$\sqrt{x}$$"| B)"}) {
+            for (const bool dark : {false,true}) {
+                const auto result = render(source,dark);
+                expect(result.status == 0_i) << result.text;
+                expect(std::isfinite(result.width) && result.width > 0);
+                expect(std::isfinite(result.height) && result.height > 0);
+                expect(result.text.find("<path") != std::string::npos);
+                expect(result.text.find("$$") == std::string::npos);
+                expect(result.text.find("<foreignObject") == std::string::npos);
+                expect(result.text.find("<mjx-container") == std::string::npos);
+            }
+        }
+        // The pinned Mermaid SVG-text mode keeps dollar delimiters literal.
+        const auto literal = render(R"(---
+config:
+  htmlLabels: false
+---
+flowchart TD
+A["$$x_1$$"])");
+        expect(literal.status == 0_i) << literal.text;
+        expect(literal.text.find("$$x_1$$") != std::string::npos);
+    };
+
     "mermaid_host_requires_mermaid_source_for_compound_feedback_edges"_test = [] {
         constexpr auto escaped = R"(flowchart TB\
 &#x20; subgraph client[客户端]\

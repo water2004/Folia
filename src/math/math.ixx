@@ -4,11 +4,17 @@ export import folia.math.output.scene;
 import std;
 
 export namespace folia::math {
+enum class SvgMode { math_container, standalone_display };
+
 struct RenderOptions {
     bool display = false;
     double em = 16;
     double containerWidth = 1280;
     std::optional<std::chrono::steady_clock::time_point> deadline;
+    // A standalone display owns its pixel viewport and does not participate
+    // in line breaking by a surrounding text document.
+    SvgMode svgMode = SvgMode::math_container;
+    std::string svgIdPrefix;
 };
 
 struct RenderResult {

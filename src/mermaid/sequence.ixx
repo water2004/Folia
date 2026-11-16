@@ -14,10 +14,12 @@ enum class SequenceKind {
     critical_end = 29, break_start = 30, break_end = 31, par_over_start = 32,
     solid_point = 24, dotted_point = 25, autonumber = 26, bidirectional_solid = 33, bidirectional_dotted = 34
 };
+struct SequenceLink { std::u16string label, url; };
 struct SequenceActor {
     std::u16string id, name, description, type = u"participant";
     bool wrap = false;
     std::optional<std::size_t> box;
+    std::vector<SequenceLink> links;
 };
 struct SequenceBox {
     std::u16string name, fill;
@@ -43,7 +45,7 @@ struct SequenceInput {
 };
 struct SequenceLimits {
     FrontendLimits frontend;
-    std::size_t actors = 10000, messages = 10000;
+    std::size_t actors = 10000, messages = 10000, links = 10000;
 };
 // Common participants, signals, notes, activations and nested control regions.
 // Labels are owned source text; display conversion and measurement are separate.

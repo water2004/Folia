@@ -1,0 +1,159 @@
+{
+  "family": "venn",
+  "cases": [
+    {
+      "id": "venn-official-01",
+      "level": "complex",
+      "source": "venn-beta\n  title What makes a good feature\n  set Desirable\n  set Feasible\n  set Viable\n  union Desirable,Feasible[\"Buildable\"]\n  union Feasible,Viable[\"Sustainable\"]\n  union Desirable,Viable[\"Marketable\"]\n  union Desirable,Feasible,Viable[\"Ship it\"]\n",
+      "features": [
+        "official-example",
+        "with-the-defaults"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/venn.md",
+        "section": "With the defaults"
+      }
+    },
+    {
+      "id": "venn-official-02",
+      "level": "complex",
+      "source": "---\nconfig:\n  theme: default\n  look: classic\n---\nvenn-beta\n  title What makes a good feature\n  set Desirable\n  set Feasible\n  set Viable\n  union Desirable,Feasible[\"Buildable\"]\n  union Feasible,Viable[\"Sustainable\"]\n  union Desirable,Viable[\"Marketable\"]\n  union Desirable,Feasible,Viable[\"Ship it\"]\n",
+      "features": [
+        "official-example",
+        "the-previous-appearance"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/venn.md",
+        "section": "The previous appearance"
+      }
+    },
+    {
+      "id": "venn-official-03",
+      "level": "intermediate",
+      "source": "venn-beta\n  title \"Team overlap\"\n  set Frontend\n  set Backend\n  union Frontend,Backend[\"APIs\"]\n",
+      "features": [
+        "official-example",
+        "syntax"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/venn.md",
+        "section": "Syntax"
+      }
+    },
+    {
+      "id": "venn-official-04",
+      "level": "basic",
+      "source": "venn-beta\n  set A[\"Alpha\"]\n  set B[\"Beta\"]\n  union A,B[\"AB\"]\n",
+      "features": [
+        "official-example",
+        "labels"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/venn.md",
+        "section": "Labels"
+      }
+    },
+    {
+      "id": "venn-official-05",
+      "level": "intermediate",
+      "source": "venn-beta\n  set Desirable\n  set Feasible\n  set Viable\n  union Desirable,Feasible,Viable[\"Innovation\"]\n",
+      "features": [
+        "official-example",
+        "higher-arity-unions"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/venn.md",
+        "section": "Higher-arity unions"
+      }
+    },
+    {
+      "id": "venn-official-06",
+      "level": "basic",
+      "source": "venn-beta\n  set A[\"Alpha\"]:20\n  set B[\"Beta\"]:12\n  union A,B[\"AB\"]:3\n",
+      "features": [
+        "official-example",
+        "sizes"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/venn.md",
+        "section": "Sizes"
+      }
+    },
+    {
+      "id": "venn-official-07",
+      "level": "intermediate",
+      "source": "venn-beta\n  set A[\"Frontend\"]\n    text A1[\"React\"]\n    text A2[\"Design Systems\"]\n  set B[\"Backend\"]\n    text B1[\"API\"]\n  union A,B[\"Shared\"]\n    text AB1[\"OpenAPI\"]\n",
+      "features": [
+        "official-example",
+        "text-nodes"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/venn.md",
+        "section": "Text nodes"
+      }
+    },
+    {
+      "id": "venn-official-08",
+      "level": "complex",
+      "source": "venn-beta\n  set A[\"Alpha\"]:20\n    text A1[\"React\"]\n    text A2[\"Design Systems\"]\n  set B[\"Beta\"]:12\n  union A,B[\"AB\"]:3\n  style A fill:#ff6b6b\n  style A,B color:#333\n  style A1 color:red\n",
+      "features": [
+        "official-example",
+        "styling"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/venn.md",
+        "section": "Styling"
+      }
+    },
+    {
+      "id": "venn-four-set-weighted",
+      "level": "complex",
+      "source": "venn-beta\ntitle Four capabilities and shared ownership\nset A[Frontend]: 22\nset B[Backend]: 20\nset C[Operations]: 18\nset D[Quality]: 17\nunion A,B[API]: 7\nunion A,C[Delivery]: 5\nunion A,D[UX checks]: 6\nunion B,C[Runtime]: 8\nunion B,D[Contract checks]: 7\nunion C,D[Resilience]: 6\nunion A,B,C[Product delivery]: 3\nunion A,B,D[Acceptance]: 3\nunion B,C,D[Service reliability]: 4\nunion A,B,C,D[Release]: 2\nstyle A fill:#7aa2f7,stroke:#234b92\nstyle B fill:#9ece6a,stroke:#42632d\nstyle C,D fill:#ffcc88,stroke:#a66e20\n",
+      "features": [
+        "four-sets",
+        "six-pair-overlaps",
+        "three-triple-overlaps",
+        "quadruple-overlap",
+        "styles",
+        "weighted"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/venn.md",
+        "section": "Combined syntax stress regression"
+      }
+    },
+    {
+      "id": "venn-contained-labelled-items",
+      "level": "complex",
+      "source": "venn-beta\ntitle Access tiers\nset All[All records]: 30\n  text summary[Every record has a stable identifier]\nset Team[Team records]: 18\n  text team[Members can review assigned work]\nset Restricted[Restricted records]: 8\nunion All,Team[Team scope]: 18\nunion All,Restricted[Restricted scope]: 8\nunion Team,Restricted[Privileged team]: 8\nunion All,Team,Restricted[Approved access]: 8\ntext All,Team read[Read and annotate]\ntext All,Team,Restricted write[Change protected metadata]\nstyle write color:#8b2252\n",
+      "features": [
+        "containment",
+        "weighted",
+        "set-items",
+        "intersection-items",
+        "triple-overlap",
+        "text-styles"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/venn.md",
+        "section": "Combined syntax stress regression"
+      }
+    },
+    {
+      "id": "venn-five-set-intersections",
+      "level": "complex",
+      "source": "venn-beta\ntitle Five areas of responsibility\nset A[Design]: 25\nset B[Implementation]: 28\nset C[Testing]: 24\nset D[Operations]: 22\nset E[Documentation]: 20\nunion A,B[Specifications]: 8\nunion B,C[Regression]: 10\nunion C,D[Monitoring]: 7\nunion D,E[Runbooks]: 6\nunion E,A[Guidelines]: 6\nunion A,B,C[Acceptance]: 3\nunion C,D,E[Incident review]: 2\n",
+      "features": [
+        "five-sets",
+        "five-pair-overlaps",
+        "triple-overlaps",
+        "weighted",
+        "asymmetric"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/venn.md",
+        "section": "Combined syntax stress regression"
+      }
+    }
+  ]
+}

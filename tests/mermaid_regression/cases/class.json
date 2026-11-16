@@ -1,0 +1,176 @@
+{
+  "family": "class",
+  "cases": [
+    {
+      "id": "class-declarations",
+      "level": "basic",
+      "source": "classDiagram\n    class Animal\n    Vehicle <|-- Car\n",
+      "features": [
+        "class-declarations",
+        "inheritance"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/classDiagram.md",
+        "section": "Define a class"
+      }
+    },
+    {
+      "id": "class-generic-members",
+      "level": "intermediate",
+      "source": "classDiagram\nclass Square~Shape~{\n    int id\n    List~int~ position\n    setPoints(List~int~ points)\n    getPoints() List~int~\n}\n\nSquare : -List~string~ messages\nSquare : +setMessages(List~string~ messages)\nSquare : +getMessages() List~string~\nSquare : +getDistanceMatrix() List~List~int~~\n",
+      "features": [
+        "generics",
+        "methods",
+        "return-types"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/classDiagram.md",
+        "section": "Generic Types"
+      }
+    },
+    {
+      "id": "class-lollipop-interfaces",
+      "level": "intermediate",
+      "source": "classDiagram\n  class Class01 {\n    int amount\n    draw()\n  }\n  Class01 --() bar\n  Class02 --() bar\n\n  foo ()-- Class01\n",
+      "features": [
+        "lollipop",
+        "multiple-interfaces"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/classDiagram.md",
+        "section": "Lollipop Interfaces"
+      }
+    },
+    {
+      "id": "class-official-inheritance",
+      "level": "complex",
+      "source": "---\ntitle: Animal example\n---\nclassDiagram\n    note \"From Duck till Zebra\"\n    Animal <|-- Duck\n    note for Duck \"can fly<br>can swim<br>can dive<br>can help in debugging\"\n    Animal <|-- Fish\n    Animal <|-- Zebra\n    Animal : +int age\n    Animal : +String gender\n    Animal: +isMammal()\n    Animal: +mate()\n    class Duck{\n        +String beakColor\n        +swim()\n        +quack()\n    }\n    class Fish{\n        -int sizeInFeet\n        -canEat()\n    }\n    class Zebra{\n        +bool is_wild\n        +run()\n    }\n",
+      "features": [
+        "inheritance",
+        "methods",
+        "fields",
+        "visibility",
+        "class-note",
+        "standalone-note",
+        "title",
+        "multiline-note"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/classDiagram.md",
+        "section": "Class diagrams"
+      }
+    },
+    {
+      "id": "class-dotted-namespace-hierarchy",
+      "level": "complex",
+      "source": "classDiagram\n    namespace Company.Engineering.Backend {\n        class Developer {\n            +writeCode()\n        }\n    }\n    namespace Company.Engineering.Frontend {\n        class Designer {\n            +createMockup()\n        }\n    }\n    namespace Company.Engineering {\n        class TechLead {\n            +planSprint()\n        }\n    }\n    TechLead --> Developer : leads\n    TechLead --> Designer : leads\n",
+      "features": [
+        "namespace-dot-notation",
+        "shared-parent-namespace",
+        "methods",
+        "relations"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/classDiagram.md",
+        "section": "Nested Namespaces (v11.15.0+)"
+      }
+    },
+    {
+      "id": "class-explicit-nested-namespace-blocks",
+      "level": "complex",
+      "source": "classDiagram\n    namespace Platform {\n        namespace Auth {\n            class UserService {\n                +login()\n                +logout()\n            }\n        }\n        namespace Data {\n            class Repository {\n                +find()\n                +save()\n            }\n        }\n        class Gateway {\n            +route()\n        }\n    }\n    Gateway --> UserService : delegates\n    Gateway --> Repository : delegates\n",
+      "features": [
+        "nested-namespace-blocks",
+        "two-level-namespaces",
+        "methods",
+        "relations"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/classDiagram.md",
+        "section": "Nested Namespaces (v11.15.0+)"
+      }
+    },
+    {
+      "id": "class-compact-namespaces",
+      "level": "complex",
+      "source": "---\nconfig:\n  class:\n    hierarchicalNamespaces: false\n---\nclassDiagram\n    namespace Company.Engineering.Backend {\n        class Developer {\n            +writeCode()\n        }\n    }\n    namespace Company.Engineering.Frontend {\n        class Designer {\n            +createMockup()\n        }\n    }\n    namespace Company {\n        class CEO {\n            +makeDecisions()\n        }\n    }\n    CEO --> Developer : oversees\n    CEO --> Designer : oversees\n",
+      "features": [
+        "flat-namespace-rendering",
+        "namespace-dot-notation",
+        "methods",
+        "relations"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/classDiagram.md",
+        "section": "Compact rendering (`hierarchicalNamespaces: false`)"
+      }
+    },
+    {
+      "id": "class-annotations-members",
+      "level": "intermediate",
+      "source": "classDiagram\nclass Shape{\n    <<interface>>\n    noOfVertices\n    draw()\n}\nclass Color{\n    <<enumeration>>\n    RED\n    BLUE\n    GREEN\n    WHITE\n    BLACK\n}\n\n",
+      "features": [
+        "interface",
+        "enumeration",
+        "methods",
+        "fields"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/classDiagram.md",
+        "section": "Annotations on classes"
+      }
+    },
+    {
+      "id": "class-right-to-left-aggregation",
+      "level": "intermediate",
+      "source": "classDiagram\n  direction RL\n  class Student {\n    -idCard : IdCard\n  }\n  class IdCard{\n    -id : int\n    -name : string\n  }\n  class Bike{\n    -id : int\n    -name : string\n  }\n  Student \"1\" --o \"1\" IdCard : carries\n  Student \"1\" --o \"1\" Bike : rides\n",
+      "features": [
+        "direction-RL",
+        "aggregation",
+        "cardinality",
+        "fields",
+        "visibility",
+        "relationship-labels"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/classDiagram.md",
+        "section": "Setting the direction of the diagram"
+      }
+    },
+    {
+      "id": "class-commerce-contracts",
+      "level": "complex",
+      "source": "---\ntitle: Order processing contracts\n---\nclassDiagram\n  direction LR\n  namespace Commerce {\n    namespace Domain {\n      class Entity {\n        <<abstract>>\n        #id : UUID\n        +validate()*\n      }\n      class Order {\n        -items : List~LineItem~\n        +total : Decimal\n        +add(item LineItem)\n        +validate() bool\n      }\n      class LineItem {\n        +quantity : int\n        -unitPrice : Decimal\n        +subtotal() Decimal\n      }\n      class Status {\n        <<enumeration>>\n        PENDING\n        PAID\n        CANCELLED\n      }\n    }\n    namespace Application {\n      class Repository~T~ {\n        <<interface>>\n        +findById(id UUID) T\n        +matrix() List~List~T~~\n        +save(value T)\n      }\n      class OrderRepository {\n        -cache : List~List~Order~~\n        +findById(id UUID) Order\n        +save(value Order)\n      }\n      class CheckoutService {\n        -repository : OrderRepository\n        +submit(order Order) Status\n        +defaultCurrency() String$\n      }\n    }\n  }\n  Entity <|-- Order\n  Order \"1\" *-- \"1..*\" LineItem : contains\n  Order \"many\" o-- \"1\" Status : status\n  Repository <|.. OrderRepository : implements\n  CheckoutService ..> Repository : queries\n  CheckoutService --> Order : validates\n  OrderRepository -- Order : persists\n  note for Order \"An order owns its line items.<br/>Totals must remain consistent.\"\n  note \"Repository returns nested generic batches.\"\n  classDef service fill:#fff2cc,stroke:#b8860b,color:#222222\n  cssClass \"CheckoutService\" service\n  style Repository fill:#e8f1ff,stroke:#4466aa\n  cssClass \"Order,LineItem\" domain\n  classDef domain fill:#f4fbf4,stroke:#447744\n",
+      "features": [
+        "two-level-namespaces",
+        "nested-namespace-blocks",
+        "inheritance",
+        "composition",
+        "aggregation",
+        "realization",
+        "dependency",
+        "association",
+        "cardinality",
+        "annotations",
+        "nested-generics",
+        "method-visibility",
+        "field-visibility",
+        "abstract-method",
+        "static-method",
+        "classDef",
+        "direct-style",
+        "class-note",
+        "standalone-note",
+        "multiline-note",
+        "title",
+        "classDef-before-cssClass",
+        "cssClass-before-classDef",
+        "multiple-class-style-targets"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/classDiagram.md",
+        "section": "Composed regression from Generic Types, Defining Relationship, Cardinality, Annotations, Nested Namespaces, Notes and Styling"
+      }
+    }
+  ]
+}

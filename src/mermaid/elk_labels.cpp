@@ -7,7 +7,8 @@ std::expected<ElkLabelPreparation,std::string> elk_prepare_inline_labels(
     const ElkCycleGraph& source,std::span<const ElkInlineCenterLabel> labels,
     ElkLabelDirection direction,double edge_label_spacing,double label_label_spacing,
     std::span<const ElkExternalLayerRole> boundary_roles) {
-    const auto reversed=elk_depth_first_feedback_edges(source);
+    const auto reversed=boundary_roles.empty()?elk_depth_first_feedback_edges(source)
+        :elk_boundary_feedback_edges(source,boundary_roles);
     if(!reversed)return std::unexpected(reversed.error());
     ElkLayeringResult initial{.layers=std::vector<int>(source.node_count),.reversed_edges=*reversed,
         .layer_nodes={std::vector<std::size_t>(source.node_count)}};

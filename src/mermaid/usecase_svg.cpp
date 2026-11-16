@@ -86,6 +86,7 @@ unsigned font_weight(const ConfigValue& value) {
 struct Label {
     std::vector<std::u16string> lines;
     std::vector<FlowchartLabelLine> runs;
+    std::optional<MathLabel> math;
     std::u16string family;
     double size = 0, width = 0, height = 0, baseline = 0, line_step = 0;
     double glyph_width = 0, glyph_top = 0, font_height = 0;
@@ -202,8 +203,23 @@ std::string paint_actor(const UsecaseNode& node, NodePaint paint,
 std::expected<Label, std::string> measure_label(const UsecaseTextMeasure& measure,
     std::u16string_view text, std::u16string_view family, double size, double minimum_width = 0,
     double padding = 0, bool markdown = false, unsigned weight = 400, double wrapping = 0,
-    bool html = true) {
+    bool html = true, const MathLabelMeasure& math_measure = {}) {
     if (text.empty()) return Label{};
+    Label out{.family = std::u16string(family), .size = size, .line_step = size * (html ? 1.5 : 1.1),
+        .weight = weight, .html = html};
+    // createText handles mathematics before its ordinary HTML/Markdown label
+    // conversion. Keep TeX intact, and use the returned box for every shape,
+    // table cell and relationship that shares this label path.
+    if (html && math_measure && has_math_label(text)) {
+        auto math = math_measure(text, family, size, weight, false);
+        if (!math) return std::unexpected(math.error());
+        if (*math) {
+            out.width = std::max(minimum_width, (**math).width + 2 * padding);
+            out.height = (**math).height;
+            out.math = std::move(**math);
+            return out;
+        }
+    }
     std::u16string encoded;
     if (!markdown) {
         for (const auto ch : text) {
@@ -216,8 +232,6 @@ std::expected<Label, std::string> measure_label(const UsecaseTextMeasure& measur
     auto lines = html ? flowchart_label_runs(text, markdown ? u"markdown" : u"text") :
         flowchart_svg_label_runs(text, markdown ? u"markdown" : u"text");
     if (!lines) return std::unexpected(lines.error());
-    Label out{.family = std::u16string(family), .size = size, .line_step = size * (html ? 1.5 : 1.1),
-        .weight = weight, .html = html};
     double glyph_height = 0;
     for (const auto& runs : *lines) {
         std::u16string line;
@@ -300,6 +314,21 @@ std::expected<Label, std::string> measure_label(const UsecaseTextMeasure& measur
 void paint_label(std::string& svg, const Label& label, FlowchartPoint center,
                  std::string_view color, std::string_view css_class, std::string_view background = {},
                  SvgLabelPosition position = SvgLabelPosition::centered, const Label* svg_background = nullptr) {
+    if (label.math) {
+        const auto left = center.x - label.width / 2;
+        const auto top = center.y - label.height / 2;
+        if (!background.empty()) {
+            svg += "<rect class=\"background\" x=\"" + n(left) + "\" y=\"" + n(top) +
+                "\" width=\"" + n(label.width) + "\" height=\"" + n(label.height) +
+                "\" fill=\"" + std::string(background) + "\"/>";
+        }
+        const auto classes = std::string(css_class) + " usecase-math-label";
+        auto rendered = render_math_label_svg(*label.math, left, top,
+            {label.family, color, classes, label.width});
+        if (!rendered) throw std::runtime_error(rendered.error());
+        svg += *rendered;
+        return;
+    }
     if (label.lines.empty()) return;
     const auto size = label.size;
     const auto weight = label.weight;
@@ -368,14 +397,16 @@ struct JsonTable {
 
 std::expected<JsonTable, std::string> measure_json(const UsecaseNode& node,
     const Label& title, const UsecaseRenderTheme& theme, const UsecaseTextMeasure& measure,
-    const RoughPolygonOptions* rough, bool html) {
+    const RoughPolygonOptions* rough, bool html, const MathLabelMeasure& math_measure) {
     JsonTable table;
     double value_width = 0;
     table.inner_height = title.height + 8;
     for (const auto& row : node.json_rows) {
-        auto key = measure_label(measure, row.key, theme.font_family, theme.diagram_font_size, 0, 0, false, 400, 120, html);
+        auto key = measure_label(measure, row.key, theme.font_family, theme.diagram_font_size,
+            0, 0, false, 400, 120, html, math_measure);
         if (!key) return std::unexpected(key.error());
-        auto value = measure_label(measure, row.value, theme.font_family, theme.diagram_font_size, 0, 0, false, 400, 120, html);
+        auto value = measure_label(measure, row.value, theme.font_family, theme.diagram_font_size,
+            0, 0, false, 400, 120, html, math_measure);
         if (!value) return std::unexpected(value.error());
         const double height = std::max(key->height, value->height) + 8;
         table.key_width = std::max(table.key_width, key->width);
@@ -699,7 +730,8 @@ std::expected<UsecaseRenderInput, std::string> prepare_usecase_render(const Prep
 }
 
 std::expected<UsecaseSvg, std::string> render_usecase_svg(
-    const UsecaseRenderInput& input, const UsecaseTextMeasure& measure) {
+    const UsecaseRenderInput& input, const UsecaseTextMeasure& measure,
+    const MathLabelMeasure& math_measure) {
     if (!measure) return std::unexpected("Use Case rendering requires platform text measurement");
     try {
         const auto& theme = input.theme;
@@ -743,7 +775,7 @@ std::expected<UsecaseSvg, std::string> render_usecase_svg(
             const auto weight = actor ? theme.actor_weight : usecase_font ? theme.usecase_weight : 400u;
             auto label = measure_label(measure, node->label, family, size,
                 usecase || json || note ? input.min_node_width : 0, 0, node->markdown, weight,
-                input.wrapping_width, input.html_labels);
+                input.wrapping_width, input.html_labels, math_measure);
             if (!label) return std::unexpected(label.error());
             if (!input.html_labels && (actor || (elliptical(*node) && node->business))) {
                 // labelHelper measures before the actor/business caption class
@@ -762,7 +794,7 @@ std::expected<UsecaseSvg, std::string> render_usecase_svg(
             }
             auto stereotype = measure_label(measure,
                 node->stereotype.empty() ? std::u16string{} : u"«" + node->stereotype + u"»",
-                family, size, 0, 0, false, weight, input.wrapping_width, input.html_labels);
+                family, size, 0, 0, false, weight, input.wrapping_width, input.html_labels, math_measure);
             if (!stereotype) return std::unexpected(stereotype.error());
             node_index.emplace(node->id, graph.nodes.size());
             graph.nodes.push_back({.id = node->id, .label = node->label,
@@ -774,7 +806,8 @@ std::expected<UsecaseSvg, std::string> render_usecase_svg(
                 (stereotype->height > 0 && (actor || node->business) ? 2 : 0);
             JsonTable table;
             if (json) {
-                auto measured_table = measure_json(*node, *label, theme, measure, rough_options, input.html_labels);
+                auto measured_table = measure_json(*node, *label, theme, measure,
+                    rough_options, input.html_labels, math_measure);
                 if (!measured_table) return std::unexpected(measured_table.error());
                 table = std::move(*measured_table);
                 boxes.push_back({table.inner_width + 2, table.inner_height + 2});
@@ -811,7 +844,7 @@ std::expected<UsecaseSvg, std::string> render_usecase_svg(
             graph.edges.push_back({.id = edge.id, .start = edge.from, .end = edge.to, .label = text,
                 .min_length = edge.min_length});
             auto label = measure_label(measure, text, theme.font_family, edge_font_size, 0,
-                input.html_labels ? 2 : 0, edge.markdown, 400, 200, input.html_labels);
+                input.html_labels ? 2 : 0, edge.markdown, 400, 200, input.html_labels, math_measure);
             if (!label) return std::unexpected(label.error());
             // createText sizes the SVG background before the edge group CSS
             // sets the visible text to the smaller relationship font.
