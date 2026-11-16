@@ -8,4 +8,6 @@ struct TreemapDocument {std::u16string title,acc_title,acc_description;std::vect
 struct TreemapConfig {double width=960,height=500,padding=10,diagram_padding=8;bool show_values=true,use_max_width=true;std::u16string value_format=u",";};
 std::expected<TreemapDocument,std::string> parse_treemap(std::u16string_view);
 TreemapDocument layout_treemap(TreemapDocument,const TreemapConfig&);
+// Format a visible value using the chart's numeric format (including percentages).
+std::u16string format_treemap_value(double, std::u16string_view);
 }

@@ -14,7 +14,7 @@
 - agents：graph拥有11结构族与其cases/tests；special拥有12特殊族；data拥有11数据/时间族、严格compare-svg与新的ELK方向oracle/test（不改生产ELK）；root拥有共享入口/测量/CMake/docs/source-lock及ELK方向实现。agents都不运行Ninja，等root协调。
 - 完整SVG工具 `tools/mermaid-cpp/regression/` 的capture/compare按输入/输出hash和完整清单严格验收；缺项/过期/browser缺失均失败。比较器22项反例自测通过；仅Packet证据的全清单gate实际返回失败（8/369），没有假通过。新增源码锁旧hash未变，Block原始parser与新entry行尾已对齐旧rawFile锁。
 - 环境限制：普通Chromium启动 `socket() EPERM`；已检查Browser技能与连接的Edge，任意data测试页被URL安全策略拒绝，明确禁止变换载体绕过。已停止该浏览器方案并发completion summary。不得绕过，不得将未运行的整图浏览器gate标绿；原版无DOM renderer/算法仍可执行，最终要明确未验收范围。
-- 已分项提交：`f3c4982` 锁定上游来源、真实Canvas开发依赖与许可证；Gantt 日期/时间格式、epoch与空图修复随当前提交，独立5项735断言与11例真实Pango已通过。
+- 已分项提交：`f3c4982` 锁定上游来源、真实Canvas开发依赖与许可证；Gantt 日期/时间格式、epoch与空图修复已提交，独立5项735断言与11例真实Pango已通过。Treemap完整D3数值格式随当前提交，1794行官方结果/3项5853断言与16例Pango全流程通过。
 - 下一步：等Math session23081结束；统一新代码构建，先定向ELK坐标/符号/Block/Zen与真实数学集成，再完整native语料和核心；按实际快照更新记录，分批提交并推送新分支。官方整图浏览器未执行范围必须在交付中保留，不改CI。
 
 ## 数学支持基线（历史，已推送）
