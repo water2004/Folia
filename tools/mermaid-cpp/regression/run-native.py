@@ -161,7 +161,7 @@ def main():
     args.output.mkdir(parents=True, exist_ok=True)
     cases, hashes = [], {}
     for path in sorted(corpus_dir.glob("*.json")):
-        document = json.loads(path.read_text())
+        document = json.loads(path.read_text(encoding="utf-8"))
         if args.family and document["family"] not in args.family:
             continue
         hashes[path.name] = hashlib.sha256(path.read_bytes()).hexdigest()

@@ -71,7 +71,6 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Restore root-project generation inputs
-        if: matrix.scope == 'integrated'
         run: |
           npm ci --prefix tools/mathjax-bundle --ignore-scripts
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -97,7 +96,7 @@ jobs:
             throw 'The Mermaid source oracle is not at the pinned commit.'
           }
           New-Item -ItemType Directory -Force -Path build/mermaid-cpp | Out-Null
-          node tools/mermaid-cpp/source-text-oracle.mjs --check 2>&1 |
+          node tools/mermaid-cpp/source-text-oracle.mjs --check --restore-checkout-line-endings 2>&1 |
             Tee-Object -FilePath build/mermaid-cpp/source-oracle.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
@@ -291,7 +290,19 @@ jobs:
           $source = if ('${{ matrix.scope }}' -eq 'integrated') { '.' } else { 'tools/mermaid-cpp' }
           $binary = if ('${{ matrix.scope }}' -eq 'integrated') { 'build/mermaid-cpp/tools/mermaid-cpp' } else { 'build/mermaid-cpp' }
           $options = @()
-          if ('${{ matrix.scope }}' -eq 'integrated') { $options += '-DFOLIA_BUILD_MERMAID=ON' }
+          if ('${{ matrix.scope }}' -eq 'integrated') {
+            $options += '-DFOLIA_BUILD_MERMAID=ON'
+          } else {
+            $math = Join-Path $PWD 'build/mermaid-math-dependency'
+            cmake -Wno-dev -G Ninja -S . -B $math -DCMAKE_BUILD_TYPE=${{ matrix.configuration }} -DFOLIA_BUILD_MERMAID=OFF
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            cmake --build $math --parallel 4 --target FoliaNativeMath
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            $options += @(
+              "-DFOLIA_NATIVE_MATH_RUNTIME=$(Join-Path $math 'FoliaNativeMath.dll')",
+              "-DFOLIA_NATIVE_MATH_IMPORT_LIBRARY=$(Join-Path $math 'FoliaNativeMath.lib')"
+            )
+          }
           "FOLIA_MERMAID_BINARY_DIR=$binary" >> $env:GITHUB_ENV
           cmake -Wno-dev -G Ninja -S $source -B build/mermaid-cpp `
             -DCMAKE_BUILD_TYPE=${{ matrix.configuration }} @options 2>&1 |
@@ -300,7 +311,7 @@ jobs:
 
       - name: Build the native Mermaid tests
         run: |
-          $targets = @('FoliaMermaidTests', 'FoliaMermaidTextProbe', 'FoliaMermaidPlatformTests', 'FoliaMermaidHostTests')
+          $targets = @('FoliaMermaidTests', 'FoliaMermaidTextProbe', 'FoliaMermaidPlatformTests', 'FoliaMermaidHostTests', 'FoliaMermaidMathTests')
           if ('${{ matrix.scope }}' -eq 'integrated') {
             $targets += @('FoliaTests', 'FoliaWindowsEditorTests')
           }
@@ -402,7 +413,7 @@ jobs:
           # Match built suites exactly; unrelated optional Math/encoding/spec
           # runners are not part of the Mermaid integration check.
           ctest --test-dir build/mermaid-cpp --output-on-failure --no-tests=error `
-            -R '^Folia(MermaidTests|MermaidPlatformTests|MermaidHostTests|Tests|WindowsEditorTests)$' 2>&1 |
+            -R '^Folia(MermaidTests|MermaidPlatformTests|MermaidHostTests|MermaidMathTests|Tests|WindowsEditorTests)$' 2>&1 |
             Tee-Object -FilePath build/mermaid-cpp/tests.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/compare-flowchart-svg.mjs build/mermaid-cpp/flowchart-browser/original.json build/mermaid-cpp/pie-svg

@@ -9,9 +9,24 @@ import path from 'node:path';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const lock = JSON.parse(readFileSync(path.join(root, 'docs/mermaid-cpp/source-lock.json'), 'utf8'));
 const sourceRoot = path.join(root, '.reference/mermaid-js');
+const restoreCheckoutLineEndings = process.argv.includes('--restore-checkout-line-endings');
+const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 for (const entry of lock.files) {
-  assert.equal(createHash('sha256').update(readFileSync(path.join(sourceRoot, entry.path))).digest('hex'),
-    entry.sha256, `Changed official source: ${entry.path}`);
+  const filename = path.join(sourceRoot, entry.path);
+  const bytes = readFileSync(filename);
+  if (digest(bytes) === entry.sha256) continue;
+  // The source lock contains exact snapshots from both LF and CRLF checkouts.
+  // Restore only a line-ending conversion that reproduces the recorded bytes.
+  if (restoreCheckoutLineEndings) {
+    const lf = bytes.toString('latin1').replace(/\r\n/g, '\n');
+    const expected = [Buffer.from(lf, 'latin1'), Buffer.from(lf.replace(/\n/g, '\r\n'), 'latin1')]
+      .find(candidate => digest(candidate) === entry.sha256);
+    if (expected) {
+      writeFileSync(filename, expected);
+      continue;
+    }
+  }
+  assert.equal(digest(bytes), entry.sha256, `Changed official source: ${entry.path}`);
 }
 const { matchFrontMatter, stripAnyComments } = await import(pathToFileURL(path.join(sourceRoot,
   'packages/mermaid/src/diagram-api/regexes.ts')));
