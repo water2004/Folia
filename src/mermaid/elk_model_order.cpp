@@ -56,15 +56,31 @@ void elk_sort_input_model(ElkLayeredGraph& g){
    });});
   }
   Associations relations(g.nodes.size());
-  const auto source_port=[&](std::size_t n){std::optional<std::size_t> result;for(auto p:g.nodes[n].ports)if(!g.ports[p].incoming.empty())result=g.edges[g.ports[p].incoming.front()].source_port;return result;};
-  const auto incoming_order=[&](std::size_t n){for(auto p:g.nodes[n].ports)if(!g.ports[p].incoming.empty())return edge_order(g.ports[p].incoming.front());return std::size_t{0};};
+  const auto source_port=[&](std::size_t n){
+   std::optional<std::size_t> result;
+   for(auto p:g.nodes[n].ports)if(!g.ports[p].incoming.empty()){
+    const auto source=g.edges[g.ports[p].incoming.front()].source_port;
+    // Inverted-port dummies connect within their owner's layer. Upstream's
+    // ModelOrderNodeComparator does not treat them as a previous-layer source.
+    if(g.nodes[g.ports[source].node].layer!=g.nodes[n].layer)result=source;
+   }
+   return result;
+  };
+  const auto incoming_order=[&](std::size_t n){
+   for(auto p:g.nodes[n].ports)if(!g.ports[p].incoming.empty())return edge_order(g.ports[p].incoming.front());
+   // ELK's default long-edge ordering is DUMMY_NODE_OVER: a node without an
+   // incoming edge sorts after connected dummies, including feedback bends in
+   // the first layer. EQUAL (zero) incorrectly mirrors those feedback lanes.
+   return static_cast<std::size_t>(std::numeric_limits<int>::max());
+  };
   std::stable_sort(g.layers[layer].begin(),g.layers[layer].end(),[&](auto a,auto b){return relations.compare(a,b,[&](){
    const auto& x=g.nodes[a];const auto& y=g.nodes[b];
    if(x.kind==ElkLayerNodeKind::normal&&y.kind==ElkLayerNodeKind::normal)return compare(*x.original_node,*y.original_node);
    const auto pa=source_port(a),pb=source_port(b);
    if(pa&&pb){const auto na=g.ports[*pa].node,nb=g.ports[*pb].node;
     if(na==nb){const auto& ports=g.nodes[na].ports;return compare(std::ranges::find(ports,*pa)-ports.begin(),std::ranges::find(ports,*pb)-ports.begin());}
-    return compare(position(na),position(nb));}
+    const auto posa=position(na),posb=position(nb);
+    if(posa!=previous.size()||posb!=previous.size())return compare(posa,posb);}
    return compare(incoming_order(a),incoming_order(b));
   });});
  }
