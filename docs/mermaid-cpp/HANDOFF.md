@@ -2,6 +2,22 @@
 
 ## 当前检查点
 
+- 2026-11-16：正在 `feat/mermaid-comprehensive-regressions` 上执行全图族复杂回归，基于用户正在核验的数学支持分支 `a368f9ea70dac36f235d9eca6bdb0be16ea82a5f`。正在按独立任务分项提交，尚未推送，不能称完成或全部 SVG 通过。保持 CI、公式缓存与 10MB 压测文件不动。
+- 工作树 `/workspace/scratch/a4656ef82bb3/Folia`。本任务是新环境；已恢复固定 `.reference/mermaid-js`、oracle 依赖、ut 子模块。已有源码锁仅通过 LF/CRLF 恢复精确原字节，不改旧 hash。新增引用来源由 root 统一追加到 source-lock。
+- 语料 `tests/mermaid_regression/cases/*.json` 当前 34 图族、369 例以上（Block 还在补充），每族至少8例，包含完整官方原例、复杂组合与全部53种Flowchart形状的重复覆盖。`regression/corpus.mjs` 强制图族清单、复杂例、独立输入、来源/features，不允许 skip/expectedFailure。369例快照官方 syntax/config 全通过：`build/mermaid-regression/official-prepare-current/report.json`；最终改动后仍需重跑。
+- Windows 实测编排已移到平台无关 `measured_render.{ixx,cpp}` 和 `TextMeasurer` 契约；Windows仍供DirectWrite与原Math服务。C4工作区宽度由宿主显式传入。`FoliaMermaidRegressionProbe` / `run-native.py` 在Linux用真实Pango，经同一生产管线输出SVG，不冒充官方浏览器验收。新增 probe `--remote-measurement` 供同机Skia精确比较，尚待最终编译。
+- 工具链 LLVM21.1.8：`/workspace/scratch/a4656ef82bb3/toolchain/llvm21/usr/lib/llvm-21/bin/clang++`；CMake4.3.4 `.../toolchain/python/cmake/data/bin/cmake`；Ninja `.../toolchain/python/bin/ninja`。设置 `LD_LIBRARY_PATH=.../toolchain/llvm21/usr/lib/x86_64-linux-gnu:.../toolchain/llvm21/usr/lib/llvm-21/lib`。构建目录 `build/mermaid-regression-native`，并发≤4，任何时候只允许运行一个Ninja。
+- 旧Ninja依赖日志损坏已隔离保存至 `build/mermaid-regression/dependency-recovery/`，recompact、串行class_svg重建与完整构建成功，非生产修复。special的 session2841 已正常退出。当前 root 独占编译锁：Math原运行时重建 session23081、日志 `build/mermaid-regression/math-pic-build.log`（首次链接因本机配置未启用PIC失败，已用CMAKE_POSITION_INDEPENDENT_CODE=ON重配），目录 `build/mermaid-regression-math`，无Math源码/缓存修改。完成后将已有Mermaid构建接入该 .so，统一编译最新符号/Block/Zen/ELK和数学集成测试。
+- 首轮修复后核心243项、944922断言全过，无skip/异常退出：`build/mermaid-regression/core-tests-first.log`。此前全流程336/342中的6个失败（Agentflow、Architecture、Block、折叠Flowchart、空Gantt、Mindmap）已用新binary定向6/6通过：`previous-failures/report.json`。数据/时间族105例真实Pango全流程通过：`data-native/report.json`。Gantt5项735断言、Treemap3项5853断言（含1794官方D3格式fixture）通过。
+- 严格Packet官方完整SVG 8/8、257个rect/text几何/文字/字体/paint对照通过，1.5px固定；实际fontconfig字体文件/hash/index一致，`rasterCompared:false`。报告 `packet-official/comparison.json`；统一捕获 `packet-capture/report.json` 8/8。Zen23例原版Skia生成SVG；透明RGBA逐像素目前21/23相同，剩余2个Markdown注释修复已写、待重建。不得提前称23例通过。
+- 新增未编译改动：graph补齐9种Flowchart符号、Block边头和线型；special补Zen Markdown注释、C4 offset的JS整数语义；root补独立方向子图的ELK scope拆分 `flowchart_elk_scopes.inc`，复用既有compound算法。data正在用锁定官方ELK adapter函数生成16个固定测量盒的坐标对照；此为算法测试，容差1e-4，不能混同SVG字体验收。
+- agents：graph拥有11结构族与其cases/tests；special拥有12特殊族；data拥有11数据/时间族、严格compare-svg与新的ELK方向oracle/test（不改生产ELK）；root拥有共享入口/测量/CMake/docs/source-lock及ELK方向实现。agents都不运行Ninja，等root协调。
+- 完整SVG工具 `tools/mermaid-cpp/regression/` 的capture/compare按输入/输出hash和完整清单严格验收；缺项/过期/browser缺失均失败。比较器22项反例自测通过；仅Packet证据的全清单gate实际返回失败（8/369），没有假通过。新增源码锁旧hash未变，Block原始parser与新entry行尾已对齐旧rawFile锁。
+- 环境限制：普通Chromium启动 `socket() EPERM`；已检查Browser技能与连接的Edge，任意data测试页被URL安全策略拒绝，明确禁止变换载体绕过。已停止该浏览器方案并发completion summary。不得绕过，不得将未运行的整图浏览器gate标绿；原版无DOM renderer/算法仍可执行，最终要明确未验收范围。
+- 下一步：等Math session23081结束；统一新代码构建，先定向ELK坐标/符号/Block/Zen与真实数学集成，再完整native语料和核心；按实际快照更新记录，分批提交并推送新分支。官方整图浏览器未执行范围必须在交付中保留，不改CI。
+
+## 数学支持基线（历史，已推送）
+
 - 2026-11-16：`feat/mermaid-native-math` 已实现 Mermaid 内使用现有 C++ MathJax，基线 `922b2fdc`。六个功能提交已推送：`27ca37ac`（可移植构建）、`a7ace9a1`（Math SVG fragment）、`d8e5440e`（typed labels）、`729774bf`（Block/ER/Requirement/Use Case）、`31bcbb33`（Swimlane）、`65ea222c`（共享运行时与平台集成）；本交接、oracle 和验收文档随最后一批提交。未改 CI、既有公式缓存、版本或发布资产。
 - 覆盖 Flowchart、Sequence、Mindmap、Class、State、Agentflow、Block、ER、Requirement、Use Case、Swimlane。TeX 在 Markdown/普通反斜杠处理前检测；普通文字用 DirectWrite 实测 advance，公式用 Math DLL 的精确 CSS 像素尺寸。布局副本共享不可变 MathLabel，Math fragment 结果不保留 Scene，没有静态复制字体数据。语法、配置和边界见 [math.md](math.md)。
 - 全部真实 C++23 模块构建与回归通过：`FoliaMermaidTests` 220 项/937,106 断言；`FoliaMermaidMathTests` 5 组/229 断言；`FoliaMathSvgBridgeTests` 53 项/1,063 断言，全部正常退出。最终日志 `build/mermaid-math/final-{build,core-tests,native-tests}.log` 与 `build/mermaid-math-runtime/final-focused-tests.log`。12 份 native SVG 成功栅格化，代表图已目视检查。

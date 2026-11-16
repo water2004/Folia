@@ -4,6 +4,7 @@
   "type": "module",
   "dependencies": {
     "@mermaid-js/parser": "2.0.1",
+    "@napi-rs/canvas": "1.1.1",
     "acorn": "8.15.0",
     "ajv": "8.18.0",
     "d3-path": "3.1.0",

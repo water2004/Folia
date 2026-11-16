@@ -7,7 +7,7 @@
 ## 1. Mermaid (`mermaid-js/mermaid` 12.2.0)
 
 Parser, configuration, theme derivation, diagram database models, layout adapters, and SVG painters derived from `mermaid-js/mermaid` are covered by the MIT License in [`LICENSE`](LICENSE) (Copyright (c) 2014–2022 Knut Sveidqvist).
-The subgraph feedback edge orientation in `flowchart_elk.cpp` is derived from Mermaid's `subgraphFeedbackEdges.ts`.
+The subgraph feedback edge orientation in `flowchart_elk.cpp` is derived from Mermaid's `subgraphFeedbackEdges.ts`. Directional scope selection in `flowchart_elk_scopes.inc` follows the same pinned ELK adapter's hierarchy policy.
 
 ---
 
@@ -22,7 +22,7 @@ The connected-component row packing in `state_elk_scopes.inc` is also derived fr
 
 - Pie sector and arc geometry (`src/pie_geometry.{ixx,cpp}`) and Flowchart basis curves follow `d3-shape` 3.2.0 and `d3-path` 3.1.0.
 - XY chart scales and ticks (`src/xy.{ixx,cpp}`) follow `d3-scale` 4.0.2, `d3-array` 3.2.4, and `d3-interpolate` 3.0.1.
-- Treemap squarify layout and value formatting (`src/treemap.{ixx,cpp}`) follow `d3-hierarchy` 3.1.2 and `d3-format` 3.1.0.
+- Treemap squarify layout and value formatting (`treemap.{ixx,cpp}`, `treemap_format.cpp`) follow `d3-hierarchy` 3.1.2 and `d3-format` 3.1.0.
 - Gantt time intervals, ticks, and axis formatting (`src/gantt_svg.{ixx,cpp}`) follow `d3-time` 3.1.0, `d3-axis` 3.0.0, and `d3-time-format` 4.1.0.
 
 ```text
@@ -125,7 +125,7 @@ All are covered by the MIT License in [`ROUGHJS-LICENSE`](ROUGHJS-LICENSE).
 
 ## 13. ZenUML (`@zenuml/core` 3.49.2)
 
-ZenUML sequence parsing, horizontal constraint solving, recursive block positioning, and SVG rendering (`src/zenuml.{ixx,cpp}`, `src/zenuml_svg.{ixx,cpp}`, `src/zenuml_assets.inc`) follow `@zenuml/core` 3.49.2 under the MIT License (Copyright (c) 2022 Peng Xiao); see [`ZENUML-LICENSE`](ZENUML-LICENSE).
+ZenUML sequence parsing, horizontal constraint solving, recursive block positioning, and SVG rendering (`zenuml.{ixx,cpp}`, `zenuml_svg.{ixx,cpp}`, `zenuml_assets.inc`, `zen_fragment_icons.inc`, `zenuml_comments.inc`) follow `@zenuml/core` 3.49.2 under the MIT License (Copyright (c) 2022 Peng Xiao); see [`ZENUML-LICENSE`](ZENUML-LICENSE).
 
 ---
 
@@ -135,3 +135,12 @@ Venn circle layout and intersection geometry (`venn_layout.{ixx,cpp}`) follow
 `@upsetjs/venn.js` 2.0.0 under the MIT License. The optimizer follows the
 patched `fmin` 0.0.4 bundled in that release, under the BSD 3-Clause License.
 See [`VENN-JS-LICENSE`](VENN-JS-LICENSE) and [`FMIN-LICENSE`](FMIN-LICENSE).
+
+---
+
+## 15. Marked 4.3.0 (embedded in ZenUML)
+
+The code-span normalization in `zenuml_comments.inc` follows the Marked 4.3.0
+parser embedded in the pinned ZenUML bundle. Its exact source-map contents are
+locked separately from Mermaid's newer Markdown parser. Marked is covered by
+the MIT License; see [`MARKED-LICENSE`](MARKED-LICENSE).
