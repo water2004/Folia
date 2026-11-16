@@ -2,6 +2,8 @@
 import assert from 'node:assert/strict';
 import {readFileSync, writeFileSync, readdirSync} from 'node:fs';
 import {JSDOM} from './oracle/node_modules/jsdom/lib/api.js';
+const writeFixture = process.argv.includes('--write');
+process.argv = process.argv.filter(arg => arg !== '--write');
 const dom = new JSDOM('<!doctype html><body>');
 globalThis.window = dom.window; globalThis.document = dom.window.document;
 const {frontend} = await import('./frontend-oracle.mjs');
@@ -44,6 +46,8 @@ const cases = [
   ['missing-endpoint','classDiagram\nDocument -->'],
   ['nested-body','classDiagram\nclass Document {\nclass Store {\n}\n}'],
 ];
+const regressions = JSON.parse(readFileSync(new URL('../../tests/mermaid_regression/cases/class.json',import.meta.url)));
+cases.push(...regressions.cases.filter(c => c.id === 'class-commerce-contracts').map(c => [c.id,c.source]));
 const errors = ['empty-style','empty','unclosed-body','missing-endpoint','nested-body','unclosed-note','namespace-unclosed','namespace-relation'];
 const rows = ['# Original Mermaid 12.2.0 Class parser/DB; UTF-16 hex JSON.'];
 for (const [name,source] of cases) {
@@ -71,7 +75,7 @@ for (const [name,source] of cases) {
 }
 const output = new URL('../../tests/mermaid_cpp/fixtures/class.tsv',import.meta.url);
 const expected = rows.join('\n')+'\n';
-if (process.argv.includes('--write')) writeFileSync(output,expected);
+if (writeFixture) writeFileSync(output,expected);
 else assert.equal(readFileSync(output,'utf8').replaceAll('\r\n','\n'),expected);
 dom.window.close();
 console.log(`Class: ${cases.length-errors.length} original class/member/relation inputs and ${errors.length} parse failures checked.`);

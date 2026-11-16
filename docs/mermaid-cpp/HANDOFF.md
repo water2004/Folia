@@ -2,7 +2,7 @@
 
 ## 当前检查点
 
-- 2026-11-16：在 `feat/mermaid-comprehensive-regressions` 上执行全图族复杂回归，基于数学支持分支 `a368f9ea70dac36f235d9eca6bdb0be16ea82a5f`。远端同名分支已建立在该基线；本地已提交 `f3c4982`（来源/依赖）、`552609c`（Gantt）、`3319873`（Treemap），这些提交尚未推送。保持 CI、公式缓存、10MB 压测文件不动。
+- 2026-11-16：在 `feat/mermaid-comprehensive-regressions` 上执行全图族复杂回归，基于数学支持分支 `a368f9ea70dac36f235d9eca6bdb0be16ea82a5f`。远端同名分支已建立在该基线；本地已按来源、各图族修复与公共测量提取顺序分项提交，所有本轮提交尚未推送。保持 CI、公式缓存、10MB 压测文件不动。
 - 工作树 `/workspace/scratch/a4656ef82bb3/Folia`。已恢复固定 `.reference/mermaid-js`、oracle 依赖、ut 子模块。旧 source-lock 哈希不变，LF/CRLF 仅恢复锁定原字节；新增来源和许可证已随首个提交保存。
 - 语料 `tests/mermaid_regression/cases/*.json` 现有 **34 图族、375 例**，每族至少8例，多例复杂组合，53种Flowchart形状各重复覆盖。`corpus.mjs` 强制清单、复杂例、独立输入、来源/features，不允许 skip/expectedFailure。全部375例官方 syntax/config 通过：`build/mermaid-regression/official-prepare-final/report.json`。
 - 原生完整渲染首轮 **373/375**：`native-complete-first/report.json`。手绘 Bang 符号相对弧指令现已修正并复验通过（`symbol-repair/report.json`）；剩余 `flowchart-collapsed-handdrawn` 含真实 ELK 自环，正在补原版完整处理链，不能删除自环或切换布局器以通过。
@@ -17,7 +17,7 @@
 - 自环distribution/ordering是**node级**选项，不从graph继承；原版root-only EQUALLY实际无效，adapter不得把它套到每个child。graph 正在接 `ElkMeasuredNode::self_loops`，默认 NORTH/STACKED。组件之间原ELK共享RNG流，special与graph协调compound入口接线，不可各组件重新seed。
 - 浏览器限制：普通 Chromium 启动 `socket() EPERM`；连接Edge的任意data测试页被URL策略拒绝且禁止变换载体绕过，已停止并发送completion summary。**不得绕过、不得把未执行的整图浏览器gate标绿**。工具按全清单及散列严格验收，缺项/浏览器证据缺失均失败；Node原版无DOM renderer和算法对照可继续。
 - 下一步：独立已验证修复分批提交；等待3位agent收尾，统一构建后定向验证所有ELK、自环、真实Math及collapsed handdrawn，再完整375原生语料、全核心、刷新Zen/Packet/Info证据。更新明确验证范围并推送新分支；不改CI。
-- 最新独立修复提交包：生产测量编排提取为portable measured_render，TextMeasurer契约保留实测字段，Windows提供相同DirectWrite/Math与工作区宽度。独立只读复核完成，Linux原生渲染及真实Math已使用此管线；Windows未执行。
+- 最新独立修复提交包：Class/Requirement/Use Case复杂语料与Class原版样式顺序fixture；26例官方语法和原生实测通过。Class原版不会补应用更早的classDef，生产实现不按误解修改。
 
 ## 数学支持基线（历史，已推送）
 

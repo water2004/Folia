@@ -1,0 +1,126 @@
+{
+  "family": "requirement",
+  "cases": [
+    {
+      "id": "requirement-verification",
+      "level": "basic",
+      "source": "    requirementDiagram\n\n    requirement test_req {\n    id: 1\n    text: the test text.\n    risk: high\n    verifymethod: test\n    }\n\n    element test_entity {\n    type: simulation\n    }\n\n    test_entity - satisfies -> test_req\n",
+      "features": [
+        "requirement",
+        "element",
+        "satisfies"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/requirementDiagram.md",
+        "section": "Requirement Diagram"
+      }
+    },
+    {
+      "id": "requirement-markdown",
+      "level": "intermediate",
+      "source": "requirementDiagram\n\nrequirement \"__test_req__\" {\n    id: 1\n    text: \"*italicized text* **bold text**\"\n    risk: high\n    verifymethod: test\n}\n",
+      "features": [
+        "markdown",
+        "quoted-text"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/requirementDiagram.md",
+        "section": "Markdown Formatting"
+      }
+    },
+    {
+      "id": "requirement-direction",
+      "level": "intermediate",
+      "source": "requirementDiagram\n\ndirection LR\n\nrequirement test_req {\n    id: 1\n    text: the test text.\n    risk: high\n    verifymethod: test\n}\n\nelement test_entity {\n    type: simulation\n}\n\ntest_entity - satisfies -> test_req\n",
+      "features": [
+        "LR",
+        "requirements",
+        "elements"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/requirementDiagram.md",
+        "section": "Direction"
+      }
+    },
+    {
+      "id": "requirement-official-large-model",
+      "level": "complex",
+      "source": "    requirementDiagram\n\n    requirement test_req {\n    id: 1\n    text: the test text.\n    risk: high\n    verifymethod: test\n    }\n\n    functionalRequirement test_req2 {\n    id: 1.1\n    text: the second test text.\n    risk: low\n    verifymethod: inspection\n    }\n\n    performanceRequirement test_req3 {\n    id: 1.2\n    text: the third test text.\n    risk: medium\n    verifymethod: demonstration\n    }\n\n    interfaceRequirement test_req4 {\n    id: 1.2.1\n    text: the fourth test text.\n    risk: medium\n    verifymethod: analysis\n    }\n\n    physicalRequirement test_req5 {\n    id: 1.2.2\n    text: the fifth test text.\n    risk: medium\n    verifymethod: analysis\n    }\n\n    designConstraint test_req6 {\n    id: 1.2.3\n    text: the sixth test text.\n    risk: medium\n    verifymethod: analysis\n    }\n\n    element test_entity {\n    type: simulation\n    }\n\n    element test_entity2 {\n    type: word doc\n    docRef: reqs/test_entity\n    }\n\n    element test_entity3 {\n    type: \"test suite\"\n    docRef: github.com/all_the_tests\n    }\n\n\n    test_entity - satisfies -> test_req2\n    test_req - traces -> test_req2\n    test_req - contains -> test_req3\n    test_req3 - contains -> test_req4\n    test_req4 - derives -> test_req5\n    test_req5 - refines -> test_req6\n    test_entity3 - verifies -> test_req5\n    test_req <- copies - test_entity2\n",
+      "features": [
+        "all-requirement-types",
+        "all-verification-methods",
+        "risk",
+        "relationships"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/requirementDiagram.md",
+        "section": "Larger Example"
+      }
+    },
+    {
+      "id": "requirement-combined-styling",
+      "level": "intermediate",
+      "source": "requirementDiagram\n\nrequirement test_req:::important {\n    id: 1\n    text: \"class styling example\"\n    risk: low\n    verifymethod: test\n}\n\nelement test_entity {\n    type: simulation\n}\n\nclassDef important font-weight:bold\n\nclass test_entity important\nstyle test_entity fill:#f9f,stroke:#333\n",
+      "features": [
+        "inline-classes",
+        "classDef",
+        "class-assignment",
+        "direct-style",
+        "requirements-and-elements"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/requirementDiagram.md",
+        "section": "Combined Example"
+      }
+    },
+    {
+      "id": "requirement-traceability-style-matrix",
+      "level": "complex",
+      "source": "requirementDiagram\ndirection LR\nfunctionalRequirement Authentication:::essential {\n  id: \"FR-01\"\n  text: \"Every account must authenticate before opening private records\"\n  risk: high\n  verifyMethod: test\n}\ninterfaceRequirement Audit {\n  id: \"IR-02\"\n  text: \"Every authentication result must produce an audit event\"\n  risk: medium\n  verifyMethod: inspection\n}\nperformanceRequirement Latency {\n  id: \"PR-03\"\n  text: \"The p95 response time must remain below the service budget\"\n  risk: high\n  verifyMethod: analysis\n}\nelement Gateway {\n  type: software\n  docRef: service/gateway\n}\nelement IntegrationTests {\n  type: \"automated test suite\"\n  docRef: tests/integration\n}\nAuthentication - contains -> Audit\nAuthentication - traces -> Latency\nGateway - satisfies -> Authentication\nIntegrationTests - verifies -> Authentication\nIntegrationTests - verifies -> Latency\nclassDef essential fill:#ffeecc,stroke:#884400,stroke-width:2px\nstyle IntegrationTests fill:#ddeeff,stroke:#335577\n",
+      "features": [
+        "requirement-types",
+        "fan-out",
+        "traceability",
+        "inline-classes",
+        "direct-styles",
+        "LR"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/requirementDiagram.md",
+        "section": "Larger Example; Combined Example; Direction (combined regression)"
+      }
+    },
+    {
+      "id": "requirement-rich-labels-traceability",
+      "level": "complex",
+      "source": "requirementDiagram\nrequirement Transport {\n  id: \"R-01\"\n  text: \"A **signed** request <b>must</b><br/>stay _private_ for all permitted clients\"\n  risk: high\n  verifyMethod: test\n}\ndesignConstraint Encryption {\n  id: \"DC-02\"\n  text: \"Use **authenticated** encryption<br/>for stored and transmitted records\"\n  risk: high\n  verifyMethod: inspection\n}\nelement Client {\n  type: \"Approved **client**\"\n  docRef: \"client/specification\"\n}\nelement Server {\n  type: \"Service <b>boundary</b>\"\n  docRef: \"server/specification\"\n}\nTransport - derives -> Encryption\nClient - satisfies -> Transport\nServer - satisfies -> Transport\nclassDef verified fill:#e4f7ee,stroke:#236b45\nclass Client,Server verified\n",
+      "features": [
+        "markdown",
+        "html-labels",
+        "line-breaks",
+        "relationships",
+        "class-assignment"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/requirementDiagram.md",
+        "section": "Markdown Formatting; Class Definitions (combined regression)"
+      }
+    },
+    {
+      "id": "requirement-reverse-relations-and-classes",
+      "level": "complex",
+      "source": "requirementDiagram\ndirection BT\nrequirement Root {\n  id: \"SYS-1\"\n  text: \"Preserve the complete document\"\n  risk: high\n  verifyMethod: test\n}\nphysicalRequirement Memory {\n  id: \"HW-1\"\n  text: \"Remain within the memory budget\"\n  risk: medium\n  verifyMethod: analysis\n}\nelement Editor {\n  type: software\n  docRef: editor/design\n}\nelement Benchmark {\n  type: benchmark\n  docRef: tests/performance\n}\nRoot <- satisfies - Editor\nRoot - contains -> Memory\nMemory <- verifies - Benchmark\nMemory - traces -> Root\nclassDef budget fill:#fff0dd,stroke:#995500\nclassDef check stroke:#006699,stroke-width:2px\nMemory:::budget\nclass Benchmark check\n",
+      "features": [
+        "BT",
+        "reverse-relations",
+        "cycle",
+        "standalone-classes",
+        "requirements-and-elements"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/requirementDiagram.md",
+        "section": "Relationships; Direction; Class Definitions (combined regression)"
+      }
+    }
+  ]
+}
