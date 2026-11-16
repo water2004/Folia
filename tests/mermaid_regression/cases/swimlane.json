@@ -1,0 +1,174 @@
+{
+  "family": "swimlane",
+  "cases": [
+    {
+      "id": "swimlane-official-01",
+      "level": "complex",
+      "source": "swimlane-beta LR\n  subgraph Customer\n    Browse[Browse catalogue]\n    Pay[Pay]\n  end\n  subgraph Warehouse\n    Pick[Pick items]\n    Ship[Ship order]\n  end\n  subgraph Finance\n    Invoice[Raise invoice]\n  end\n  Browse --> Pay\n  Pay --> Pick\n  Pick --> Ship\n  Pay --> Invoice\n",
+      "features": [
+        "official-example",
+        "with-the-defaults"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/swimlanes.md",
+        "section": "With the defaults"
+      }
+    },
+    {
+      "id": "swimlane-official-02",
+      "level": "complex",
+      "source": "---\nconfig:\n  theme: default\n  look: classic\n---\nswimlane-beta LR\n  subgraph Customer\n    Browse[Browse catalogue]\n    Pay[Pay]\n  end\n  subgraph Warehouse\n    Pick[Pick items]\n    Ship[Ship order]\n  end\n  subgraph Finance\n    Invoice[Raise invoice]\n  end\n  Browse --> Pay\n  Pay --> Pick\n  Pick --> Ship\n  Pay --> Invoice\n",
+      "features": [
+        "official-example",
+        "the-previous-appearance"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/swimlanes.md",
+        "section": "The previous appearance"
+      }
+    },
+    {
+      "id": "swimlane-official-03",
+      "level": "complex",
+      "source": "swimlane-beta LR\n  subgraph Customer\n    request[Request service]\n    receive[Receive update]\n  end\n\n  subgraph Support\n    triage[Triage request]\n    answer[Send answer]\n  end\n\n  subgraph Engineering\n    investigate[Investigate issue]\n    fix[Prepare fix]\n  end\n\n  request --> triage\n  triage -->|Known issue| answer\n  triage -->|Needs code change| investigate\n  investigate --> fix --> answer\n  answer --> receive\n",
+      "features": [
+        "official-example",
+        "basic-example"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/swimlanes.md",
+        "section": "Basic Example"
+      }
+    },
+    {
+      "id": "swimlane-official-04",
+      "level": "intermediate",
+      "source": "swimlane-beta\n  subgraph Sales\n    lead[Qualify lead]\n    quote[Prepare quote]\n  end\n",
+      "features": [
+        "official-example",
+        "lanes"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/swimlanes.md",
+        "section": "Lanes"
+      }
+    },
+    {
+      "id": "swimlane-official-05",
+      "level": "complex",
+      "source": "swimlane-beta LR\n  subgraph sales [Sales team]\n    lead[Qualify lead]\n    quote[Prepare quote]\n  end\n\n  subgraph finance [Finance team]\n    review[Review terms]\n    approve[Approve quote]\n  end\n\n  lead --> quote --> review --> approve\n",
+      "features": [
+        "official-example",
+        "lanes"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/swimlanes.md",
+        "section": "Lanes"
+      }
+    },
+    {
+      "id": "swimlane-official-06",
+      "level": "complex",
+      "source": "swimlane-beta LR\n  subgraph Intake\n    start([Start])\n    task[Do work]\n    fix[Fix issues]\n  end\n\n  subgraph Review\n    decision{Ready?}\n  end\n\n  subgraph Complete\n    done((Done))\n  end\n\n  start --> task --> decision\n  decision -->|Yes| done\n  decision -->|No| fix\n  fix --> task\n",
+      "features": [
+        "official-example",
+        "nodes"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/swimlanes.md",
+        "section": "Nodes"
+      }
+    },
+    {
+      "id": "swimlane-official-07",
+      "level": "complex",
+      "source": "swimlane-beta LR\n  subgraph Buyer\n    choose[Choose product]\n    pay[Pay invoice]\n  end\n\n  subgraph Store\n    reserve[Reserve stock]\n    ship[Ship product]\n  end\n\n  choose --> reserve\n  reserve -->|Invoice ready| pay\n  pay --> ship\n",
+      "features": [
+        "official-example",
+        "edges"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/swimlanes.md",
+        "section": "Edges"
+      }
+    },
+    {
+      "id": "swimlane-official-08",
+      "level": "complex",
+      "source": "swimlane-beta LR\n  accTitle: Support escalation\n  accDescr: A request starts with the customer, is triaged by support, and may be escalated to engineering.\n\n  subgraph Customer\n    request[Open request]\n  end\n\n  subgraph Support\n    triage[Triage]\n  end\n\n  subgraph Engineering\n    resolve[Resolve]\n  end\n\n  request --> triage --> resolve\n",
+      "features": [
+        "official-example",
+        "accessibility"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/swimlanes.md",
+        "section": "Accessibility"
+      }
+    },
+    {
+      "id": "swimlane-official-09",
+      "level": "complex",
+      "source": "swimlane-beta LR\n  subgraph Customer\n    submit[Submit order]\n    confirm[Confirm delivery]\n  end\n\n  subgraph Store\n    check[Check order]\n    pack[Pack items]\n  end\n\n  subgraph Carrier\n    collect[Collect package]\n    deliver[Deliver package]\n  end\n\n  submit --> check --> pack --> collect --> deliver --> confirm\n",
+      "features": [
+        "official-example",
+        "make-each-lane-mean-one-kind-of-ownership"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/swimlanes.md",
+        "section": "Make Each Lane Mean One Kind of Ownership"
+      }
+    },
+    {
+      "id": "swimlane-official-10",
+      "level": "complex",
+      "source": "swimlane-beta LR\n  subgraph Applicant\n    apply[Submit application]\n    sign[Sign agreement]\n  end\n\n  subgraph Reviewer\n    screen[Screen application]\n    decide{Approved?}\n  end\n\n  subgraph System\n    create[Create account]\n    notify[Send welcome email]\n  end\n\n  apply -->|Application received| screen\n  screen --> decide\n  decide -->|Approved| create --> notify --> sign\n  decide -->|Needs changes| apply\n",
+      "features": [
+        "official-example",
+        "label-cross-lane-handoffs"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/swimlanes.md",
+        "section": "Label Cross-Lane Handoffs"
+      }
+    },
+    {
+      "id": "swimlane-official-11",
+      "level": "complex",
+      "source": "swimlane-beta TB\n  subgraph Intake\n    collect[Collect request]\n    validate[Validate details]\n  end\n\n  subgraph Review\n    review[Review request]\n    decide{Ready?}\n  end\n\n  subgraph Delivery\n    schedule[Schedule work]\n    complete[Complete work]\n  end\n\n  collect --> validate --> review --> decide\n  decide -->|Yes| schedule --> complete\n  decide -->|No| collect\n",
+      "features": [
+        "official-example",
+        "keep-long-processes-readable"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/swimlanes.md",
+        "section": "Keep Long Processes Readable"
+      }
+    },
+    {
+      "id": "swimlane-official-12",
+      "level": "complex",
+      "source": "swimlane-beta LR\n  subgraph ops [Operations]\n    intake[Receive request]\n    plan[Plan work]\n  end\n\n  subgraph legal [Legal]\n    review[Review contract]\n  end\n\n  intake --> plan --> review\n\n  classDef attention fill:#fff2cc,stroke:#d6a500,color:#111;\n  class review attention;\n",
+      "features": [
+        "official-example",
+        "use-stable-ids"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/swimlanes.md",
+        "section": "Use Stable Ids"
+      }
+    },
+    {
+      "id": "swimlane-official-13",
+      "level": "complex",
+      "source": "swimlane-beta LR\n  subgraph Support\n    classify{Can support solve it?}\n    respond[Respond to customer]\n  end\n\n  subgraph Product\n    prioritize[Prioritize fix]\n  end\n\n  subgraph Engineering\n    implement[Implement fix]\n  end\n\n  classify -->|Yes| respond\n  classify -->|No| prioritize --> implement --> respond\n",
+      "features": [
+        "official-example",
+        "put-decisions-where-they-are-made"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/swimlanes.md",
+        "section": "Put Decisions Where They Are Made"
+      }
+    }
+  ]
+}

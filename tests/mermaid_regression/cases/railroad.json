@@ -1,0 +1,259 @@
+{
+  "family": "railroad",
+  "cases": [
+    {
+      "id": "railroad-official-01",
+      "level": "basic",
+      "source": "railroad-ebnf-beta\ntitle \"Digit Definition\"\n\ndigit = \"0\" | \"1\" | \"2\" | \"3\" | \"4\" | \"5\" | \"6\" | \"7\" | \"8\" | \"9\" ;\n",
+      "features": [
+        "official-example",
+        "railroad-diagrams-v11-16-0"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/railroad.md",
+        "section": "Railroad Diagrams (v11.16.0+)"
+      }
+    },
+    {
+      "id": "railroad-official-02",
+      "level": "basic",
+      "source": "railroad-ebnf-beta\nletter = \"a\" | \"b\" | \"c\" ;\nidentifier = letter ;\n",
+      "features": [
+        "official-example",
+        "terminals-and-non-terminals"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/railroad.md",
+        "section": "Terminals and Non-terminals"
+      }
+    },
+    {
+      "id": "railroad-official-03",
+      "level": "basic",
+      "source": "railroad-ebnf-beta\ngreeting = \"Hello\" \" \" \"World\" ;\n",
+      "features": [
+        "official-example",
+        "sequence-concatenation"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/railroad.md",
+        "section": "Sequence (Concatenation)"
+      }
+    },
+    {
+      "id": "railroad-official-04",
+      "level": "basic",
+      "source": "railroad-ebnf-beta\nsign = \"+\" | \"-\" ;\n",
+      "features": [
+        "official-example",
+        "choice-alternation"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/railroad.md",
+        "section": "Choice (Alternation)"
+      }
+    },
+    {
+      "id": "railroad-official-05",
+      "level": "intermediate",
+      "source": "railroad-ebnf-beta\ntitle \"Optional Sign\"\n\nsign = \"+\" | \"-\" ;\nnumber = sign? digit+ ;\ndigit = \"0\" | \"1\" | \"2\" | \"3\" | \"4\" | \"5\" | \"6\" | \"7\" | \"8\" | \"9\" ;\n",
+      "features": [
+        "official-example",
+        "optional-elements"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/railroad.md",
+        "section": "Optional Elements"
+      }
+    },
+    {
+      "id": "railroad-official-06",
+      "level": "intermediate",
+      "source": "railroad-ebnf-beta\ntitle \"Identifier with Repetition\"\n\nidentifier = letter ( letter | digit | \"_\" )* ;\nletter = \"a\" | \"b\" | \"c\" | \"d\" | \"e\" ;\ndigit = \"0\" | \"1\" | \"2\" ;\n",
+      "features": [
+        "official-example",
+        "repetition"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/railroad.md",
+        "section": "Repetition"
+      }
+    },
+    {
+      "id": "railroad-official-07",
+      "level": "basic",
+      "source": "railroad-ebnf-beta\nexpression = term ( ( \"+\" | \"-\" ) term )* ;\nterm = \"number\" ;\n",
+      "features": [
+        "official-example",
+        "grouping"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/railroad.md",
+        "section": "Grouping"
+      }
+    },
+    {
+      "id": "railroad-official-08",
+      "level": "intermediate",
+      "source": "railroad-ebnf-beta\ntitle \"Arithmetic Expression Grammar\"\n\nexpression = term ( ( \"+\" | \"-\" ) term )* ;\nterm = factor ( ( \"*\" | \"/\" ) factor )* ;\nfactor = number | \"(\" expression \")\" ;\nnumber = digit+ ;\ndigit = \"0\" | \"1\" | \"2\" | \"3\" | \"4\" | \"5\" | \"6\" | \"7\" | \"8\" | \"9\" ;\n",
+      "features": [
+        "official-example",
+        "ebnf-examples"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/railroad.md",
+        "section": "EBNF Examples"
+      }
+    },
+    {
+      "id": "railroad-official-09",
+      "level": "intermediate",
+      "source": "railroad-ebnf-beta\ntitle \"JSON Grammar\"\n\njson = element ;\nelement = object | array | string | number | \"true\" | \"false\" | \"null\" ;\nobject = \"{\" [ member ( \",\" member )* ] \"}\" ;\narray = \"[\" [ element ( \",\" element )* ] \"]\" ;\nmember = string \":\" element ;\n",
+      "features": [
+        "official-example",
+        "ebnf-examples"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/railroad.md",
+        "section": "EBNF Examples"
+      }
+    },
+    {
+      "id": "railroad-official-10",
+      "level": "intermediate",
+      "source": "railroad-abnf-beta\ntitle \"Email Address\"\n\naddress = local-part \"@\" domain ;\nlocal-part = 1*( ALPHA / DIGIT / \".\" / \"-\" ) ;\ndomain = label *( \".\" label ) ;\nlabel = 1*( ALPHA / DIGIT / \"-\" ) ;\n",
+      "features": [
+        "official-example",
+        "abnf-railroad-abnf-beta"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/railroad.md",
+        "section": "ABNF (`railroad-abnf-beta`)"
+      }
+    },
+    {
+      "id": "railroad-official-11",
+      "level": "intermediate",
+      "source": "railroad-abnf-beta\ntitle \"Phone Number\"\n\nphone = [ \"+\" country-code ] subscriber ;\ncountry-code = 1*DIGIT ;\nsubscriber = 1*( DIGIT / \"-\" / \" \" ) ;\n",
+      "features": [
+        "official-example",
+        "abnf-railroad-abnf-beta"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/railroad.md",
+        "section": "ABNF (`railroad-abnf-beta`)"
+      }
+    },
+    {
+      "id": "railroad-official-12",
+      "level": "intermediate",
+      "source": "railroad-peg-beta\ntitle \"Calculator Grammar\"\n\nExpression <- Term ((\"+\" / \"-\") Term)* ;\nTerm <- Factor ((\"*\" / \"/\") Factor)* ;\nFactor <- Number / \"(\" Expression \")\" ;\nNumber <- Digit+ ;\nDigit <- \"0\" / \"1\" / \"2\" / \"3\" / \"4\" / \"5\" / \"6\" / \"7\" / \"8\" / \"9\" ;\n",
+      "features": [
+        "official-example",
+        "peg-railroad-peg-beta"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/railroad.md",
+        "section": "PEG (`railroad-peg-beta`)"
+      }
+    },
+    {
+      "id": "railroad-official-13",
+      "level": "intermediate",
+      "source": "railroad-peg-beta\ntitle \"Identifiers (keywords excluded)\"\n\nIdentifier <- !Keyword Letter Letter* ;\nKeyword <- \"if\" / \"else\" / \"while\" ;\nLetter <- \"a\" / \"b\" / \"c\" / \"_\" ;\n",
+      "features": [
+        "official-example",
+        "peg-railroad-peg-beta"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/railroad.md",
+        "section": "PEG (`railroad-peg-beta`)"
+      }
+    },
+    {
+      "id": "railroad-official-14",
+      "level": "complex",
+      "source": "railroad-beta\ntitle Expression Grammar\n\nexpression = sequence(\n    nonterminal(\"term\"),\n    zeroOrMore(sequence(\n        choice(terminal(\"+\"), terminal(\"-\")),\n        nonterminal(\"term\")\n    ))\n) ;\nterm = sequence(\n    nonterminal(\"factor\"),\n    zeroOrMore(sequence(\n        choice(terminal(\"*\"), terminal(\"/\")),\n        nonterminal(\"factor\")\n    ))\n) ;\nfactor = choice(\n    nonterminal(\"number\"),\n    sequence(terminal(\"(\"), nonterminal(\"expression\"), terminal(\")\"))\n) ;\nnumber = oneOrMore(nonterminal(\"digit\")) ;\ndigit = choice(terminal(\"0\"), terminal(\"1\"), terminal(\"2\"), terminal(\"3\"), terminal(\"4\"), terminal(\"5\"), terminal(\"6\"), terminal(\"7\"), terminal(\"8\"), terminal(\"9\")) ;\n",
+      "features": [
+        "official-example",
+        "ir-primitives-railroad-beta"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/railroad.md",
+        "section": "IR Primitives (`railroad-beta`)"
+      }
+    },
+    {
+      "id": "railroad-ir-nested-json",
+      "level": "complex",
+      "source": "railroad-beta\ntitle Recursive JSON values\naccTitle: JSON object and array grammar\naccDescr: Nested choices, sequences, optionals and repetitions\nvalue = choice(nonterminal('object'), nonterminal('array'), nonterminal('string'), nonterminal('number'), terminal('true'), terminal('false'), terminal('null'));\nobject = sequence(terminal('{'), optional(sequence(nonterminal('member'), zeroOrMore(sequence(terminal(','), nonterminal('member'))))), terminal('}'));\nmember = sequence(nonterminal('string'), terminal(':'), nonterminal('value'));\narray = sequence(terminal('['), optional(sequence(nonterminal('value'), zeroOrMore(sequence(terminal(','), nonterminal('value'))))), terminal(']'));\nstring = sequence(terminal('\"'), zeroOrMore(choice(special('Unicode character'), sequence(terminal('\\\\'), choice(terminal('\"'), terminal('n'), terminal('t'))))), terminal('\"'));\nnumber = sequence(optional(terminal('-')), oneOrMore(nonterminal('digit')), optional(sequence(terminal('.'), oneOrMore(nonterminal('digit')))));\n",
+      "features": [
+        "ir",
+        "six-rules",
+        "recursive",
+        "nested-choice",
+        "optional",
+        "repetition",
+        "escapes"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/railroad.md",
+        "section": "Combined syntax stress regression"
+      }
+    },
+    {
+      "id": "railroad-ebnf-language",
+      "level": "complex",
+      "source": "railroad-ebnf-beta\ntitle Small expression language\nprogram = { statement } ;\nstatement = identifier, \"=\", expression, \";\" | \"if\", \"(\", expression, \")\", \"{\", program, \"}\", [ \"else\", \"{\", program, \"}\" ] ;\nexpression = term, { (\"+\" | \"-\"), term } ;\nterm = factor, { (\"*\" | \"/\"), factor } ;\nfactor = number | identifier | \"(\", expression, \")\" ;\nidentifier = letter, { letter | digit | \"_\" } ;\nnumber = [ \"-\" ], digit, { digit }, [ \".\", digit, { digit } ] ;\nletter = ? Unicode letter ? ;\ndigit = \"0\" | \"1\" | \"2\" | \"3\" | \"4\" | \"5\" | \"6\" | \"7\" | \"8\" | \"9\" ;\n",
+      "features": [
+        "ebnf",
+        "nine-rules",
+        "recursive",
+        "iso-notation",
+        "special-sequence",
+        "alternation",
+        "optional"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/railroad.md",
+        "section": "Combined syntax stress regression"
+      }
+    },
+    {
+      "id": "railroad-abnf-http",
+      "level": "complex",
+      "source": "railroad-abnf-beta\ntitle Request line and headers\nrequest = method SP target SP version CRLF *( header CRLF ) CRLF ;\nmethod = \"GET\" / \"POST\" / \"PUT\" / \"DELETE\" ;\ntarget = \"/\" *( ALPHA / DIGIT / \"-\" / \"_\" / \"/\" ) [ \"?\" query ] ;\nquery = pair *( \"&\" pair ) ;\npair = 1*( ALPHA / DIGIT ) \"=\" *( ALPHA / DIGIT / \"%\" ) ;\nversion = \"HTTP/\" 1*2DIGIT \".\" 1*2DIGIT ;\nheader = 1*( ALPHA / \"-\" ) \":\" *SP *( %x20-7E ) ;\nSP = %x20 ;\nCRLF = %x0D.0A ;\n",
+      "features": [
+        "abnf",
+        "nine-rules",
+        "bounded-repeat",
+        "numeric-range",
+        "numeric-sequence",
+        "optional",
+        "alternation"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/railroad.md",
+        "section": "Combined syntax stress regression"
+      }
+    },
+    {
+      "id": "railroad-peg-expression",
+      "level": "complex",
+      "source": "railroad-peg-beta\ntitle Operator precedence and keyword exclusion\nProgram <- (Statement / Space)* ;\nStatement <- Identifier '=' Expression ';' / 'if' '(' Expression ')' '{' Program '}' ;\nExpression <- Term (('+' / '-') Term)* ;\nTerm <- Factor (('*' / '/') Factor)* ;\nFactor <- Number / Identifier / '(' Expression ')' ;\nIdentifier <- !Keyword Letter (Letter / Digit / '_')* ;\nKeyword <- 'if' / 'else' / 'return' ;\nNumber <- '-'? Digit+ ('.' Digit+)? ;\nLetter <- 'a' / 'b' / 'c' / 'x' / 'y' ;\nDigit <- '0' / '1' / '2' / '3' ;\nSpace <- ' ' / '\\t' / '\\n' ;\n",
+      "features": [
+        "peg",
+        "eleven-rules",
+        "recursive",
+        "negative-lookahead",
+        "precedence",
+        "optional",
+        "repetition"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/railroad.md",
+        "section": "Combined syntax stress regression"
+      }
+    }
+  ]
+}

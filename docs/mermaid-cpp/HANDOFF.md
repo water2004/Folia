@@ -17,7 +17,7 @@
 - 自环distribution/ordering是**node级**选项，不从graph继承；原版root-only EQUALLY实际无效，adapter不得把它套到每个child。graph 正在接 `ElkMeasuredNode::self_loops`，默认 NORTH/STACKED。组件之间原ELK共享RNG流，special与graph协调compound入口接线，不可各组件重新seed。
 - 浏览器限制：普通 Chromium 启动 `socket() EPERM`；连接Edge的任意data测试页被URL策略拒绝且禁止变换载体绕过，已停止并发送completion summary。**不得绕过、不得把未执行的整图浏览器gate标绿**。工具按全清单及散列严格验收，缺项/浏览器证据缺失均失败；Node原版无DOM renderer和算法对照可继续。
 - 下一步：独立已验证修复分批提交；等待3位agent收尾，统一构建后定向验证所有ELK、自环、真实Math及collapsed handdrawn，再完整375原生语料、全核心、刷新Zen/Packet/Info证据。更新明确验证范围并推送新分支；不改CI。
-- 最新独立修复提交包：数据/时间图复杂语料补齐，含合并/cherry-pick、轴/值极限、多序列、Sankey复杂流与Unicode；连同已提交Gantt/Treemap共105例官方语法和原生实测通过。
+- 最新独立修复提交包：其余特殊图复杂语料补齐，含完整官方示例、四种Railroad语法、复杂交集/泳道/事件流程；全34族375例（230复杂）已入库，官方语法全部通过，原生首轮剩1个自环缺口待修。
 
 ## 数学支持基线（历史，已推送）
 

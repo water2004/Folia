@@ -1,0 +1,125 @@
+{
+  "family": "kanban",
+  "cases": [
+    {
+      "id": "kanban-official-01",
+      "level": "basic",
+      "source": "kanban\n  column1[Column Title]\n    task1[Task Description]\n",
+      "features": [
+        "official-example",
+        "overview"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/kanban.md",
+        "section": "Overview"
+      }
+    },
+    {
+      "id": "kanban-official-02",
+      "level": "basic",
+      "source": "kanban\ntodo[Todo]\n  id3[Update Database Function]@{ ticket: MC-2037, assigned: 'knsv', priority: 'High' }\n",
+      "features": [
+        "official-example",
+        "supported-metadata-keys"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/kanban.md",
+        "section": "Supported Metadata Keys"
+      }
+    },
+    {
+      "id": "kanban-official-03",
+      "level": "complex",
+      "source": "---\nconfig:\n  kanban:\n    ticketBaseUrl: 'https://mermaidchart.atlassian.net/browse/#TICKET#'\n---\nkanban\n  Todo\n    [Create Documentation]\n    docs[Create Blog about the new diagram]\n  [In progress]\n    id6[Create renderer so that it works in all cases. We also add some extra text here for testing purposes. And some more just for the extra flare.]\n  id9[Ready for deploy]\n    id8[Design grammar]@{ assigned: 'knsv' }\n  id10[Ready for test]\n    id4[Create parsing tests]@{ ticket: MC-2038, assigned: 'K.Sveidqvist', priority: 'High' }\n    id66[last item]@{ priority: 'Very Low', assigned: 'knsv' }\n  id11[Done]\n    id5[define getData]\n    id2[Title of diagram is more than 100 chars when user duplicates diagram with 100 char]@{ ticket: MC-2036, priority: 'Very High'}\n    id3[Update DB function]@{ ticket: MC-2037, assigned: knsv, priority: 'High' }\n\n  id12[Can't reproduce]\n    id3[Weird flickering in Firefox]\n",
+      "features": [
+        "official-example",
+        "full-example"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/kanban.md",
+        "section": "Full Example"
+      }
+    },
+    {
+      "id": "kanban-priorities-and-ownership",
+      "level": "complex",
+      "source": "kanban\n  backlog[Planned work]\n    discovery[Discover interactions across documents]@{assigned: \"Ada\", ticket: \"F-100\", priority: \"Very High\"}\n    design[Define the lossless source editing contracts]@{assigned: \"Lin\", ticket: \"F-101\", priority: \"High\"}\n  doing[Implementation]\n    parser[Handle nested inline delimiters and incomplete input]@{assigned: \"Xu\", priority: \"Medium\"}\n    layout[Measure and lay out only visible paragraphs]@{assigned: \"Ada\", priority: \"Low\"}\n  review[Review]\n    tests[Run cross-platform editing and rendering regressions]@{ticket: \"F-105\", priority: \"Very Low\"}\n  complete[Complete]\n    merge[Merge tested transactions]@{assigned: \"Lin\"}\n",
+      "features": [
+        "all-priorities",
+        "multiple-columns",
+        "metadata",
+        "long-labels"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/kanban.md",
+        "section": "Combined syntax regression"
+      }
+    },
+    {
+      "id": "kanban-empty-columns-multiline",
+      "level": "complex",
+      "source": "kanban\n  ideas[Ideas]\n  ready[Ready to implement]\n    a[First line<br/>Second line<br/>Third line]@{assigned: \"Alice\", ticket: \"DOC-11\", priority: \"High\"}\n    b[Large text labels must retain their full description when they wrap across multiple visual lines]@{assigned: \"Bob\"}\n  blocked[Blocked]\n  done[Released]\n    c[UTF-16 and UTF-8 conversion]@{priority: \"Low\"}\n",
+      "features": [
+        "empty-columns",
+        "multiline",
+        "wrapping",
+        "metadata"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/kanban.md",
+        "section": "Combined syntax regression"
+      }
+    },
+    {
+      "id": "kanban-numeric-tickets-label-override",
+      "level": "complex",
+      "source": "kanban\n  todo[Todo]\n    a[Old title]@{label: \"Replacement description with a much longer label\", ticket: 12345, assigned: \"Team A\", priority: \"High\"}\n    b@{label: \"Metadata-only task\", ticket: 67890, priority: \"Very Low\"}\n  doing[Doing]\n    c[Code review]@{ticket: \"ENG-42\", assigned: \"Team B\", priority: \"Very High\"}\n  done[Done]\n    d[Published]\n",
+      "features": [
+        "numeric-metadata",
+        "metadata-label",
+        "implicit-label",
+        "multiple-columns"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/kanban.md",
+        "section": "Combined syntax regression"
+      }
+    },
+    {
+      "id": "kanban-narrow-board",
+      "level": "complex",
+      "source": "kanban\n  queued[A long queue heading with several words]\n    first[The parser must preserve every original source character while a user types an incomplete expression]@{assigned: \"Runtime team\", ticket: \"RT-1001\", priority: \"High\"}\n    second[The renderer measures ordinary text using the real font before computing the shape boundaries]@{priority: \"Low\"}\n  verify[Validation in progress]\n    third[Compare the complete SVG with the official renderer]@{ticket: \"RT-1002\", assigned: \"Quality team\"}\n  waiting[Waiting for review]\n",
+      "features": [
+        "narrow-columns",
+        "long-labels",
+        "ticket-link",
+        "wrapping"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/kanban.md",
+        "section": "Combined syntax regression"
+      },
+      "config": {
+        "kanban": {
+          "sectionWidth": 180,
+          "ticketBaseUrl": "https://example.org/issues/#TICKET#"
+        }
+      }
+    },
+    {
+      "id": "kanban-many-columns",
+      "level": "complex",
+      "source": "kanban\n  intake[Intake]\n    a[Collect requirements]@{priority: \"Very High\"}\n  triage[Triage]\n    b[Reproduce failure]@{assigned: \"Alice\", ticket: \"BUG-17\"}\n  implementation[Implementation]\n    c[Fix parser]@{priority: \"High\"}\n    d[Fix renderer]@{priority: \"Low\"}\n  verification[Verification]\n    e[Exercise official examples]@{assigned: \"Bob\"}\n    f[Compare complex geometry]@{priority: \"Very High\"}\n  review[Review]\n    g[Inspect regression coverage]@{ticket: \"BUG-18\"}\n  release[Release]\n    h[Ship validated changes]\n",
+      "features": [
+        "six-columns",
+        "uneven-card-count",
+        "metadata",
+        "priorities"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/kanban.md",
+        "section": "Combined syntax regression"
+      }
+    }
+  ]
+}
