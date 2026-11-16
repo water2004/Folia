@@ -7,15 +7,16 @@
 - 语料 **34图族、375例、230个complex**，每族至少8例；53种Flowchart形状各两次覆盖。禁止skip/expectedFailure、删除失败复杂输入或让原生输出覆盖官方期望。官方syntax/config **375/375**：`official-prepare-final/report.json`。
 - 生产测量编排提取到 `measured_render` / `TextMeasurer`。Windows仍为原DirectWrite/Math服务；Linux probe用真实Pango走同一C++管线，Zen另用实际Skia。Windows/WinUI本轮未执行，C4宿主可用宽度显式传入。
 - 工具链LLVM21.1.8、CMake4.3.4、Ninja在工作区外层toolchain；构建目录 `build/mermaid-regression-native`，始终单Ninja、并发≤4。最后构建session21110正常退出0，日志 `elk-final-build2.log`，包含所有最终ELK源码。没有Ninja在运行。
-- **全核心最终重跑发现失败，已停止后续全量**：session13877 exit255，`core-final.log` 在 `table_math_labels.cpp:52` 的新增 `mermaid_er_relation_math_labels_preserve_source_for_math_provider` 中prepare_er_render失败。定向同例亦exit255（`er-math-focused-before.log`）。graph正排查ER解析/官方语法；其他C++freeze。未执行该串行任务后面的Math。旧首轮核心243项944922断言、旧真实Math5项205断言只能作先前记录，不是最终全通过。
+- 核心最终重跑的新增ER测试初始化问题已定向修正：图族默认look=neo，测试必须和真实宿主一样initialize(default/classic)；不改输入、生产解析或Math实现。定向1项17断言通过（`er-math-focused-after.log`），增量测试构建session15567已退出0。**当前串行最终核心/Math session59585**，日志 `core-final-accepted.log` / `math-final-accepted.log`，成功后写 `final-tests.json`；此前失败保留在 `core-final.log`，不能当当前通过。
 - 最终ELK定向全部通过：Greedy **25例/980断言**（`greedy-final.log`）；components **7例完整几何+14个阶段观察，2项1794断言**（`components-final.log`）；direction/scope **21/21，3702断言**（`direction-final.log`）。原版自环 **24例/61节点/219边，5521断言**通过（`elk-self-loops-first.log`）。算法坐标容差保持1e-4。
 - ELK实现补齐自环预处理/恢复/side-slot路由、TWO_SIDED_GREEDY_SWITCH、共享弱连通组件DFS/packing、拆分前阈值与model-order身份。Greedy含17个真降交叉、5个port重排和3个BARYCENTER后仍改善案例；SEPARATE孤点不消费BARY/greedy RNG，INCLUDE旧默认保留；阈值0强制，其余严格count<40。node级self-loop选项不继承root。
-- 原生完整渲染首轮373/375；Bang相对弧手绘及collapsed复杂自环两例均已按原输入修复并定向通过（`symbol-repair/report.json`、`collapsed-selfloop-fixed/report.json`）。最终375须等ER定向修正后重跑。
-- 完整官方SVG可执行证据：Packet8/8（257元素）、Info8/8，检查实际fontconfig文件hash/index、geometry/paint/text，无栅格；新官方捕获分别在 `final-official-packet` / `final-official-info`。Zen24/24经实际原版renderer与同机Skia透明RGBA逐像素零差、视口/非空文字相同，报告 `zenuml-canvas-native/comparison.json`，最终Probe重建后须刷新散列。不能当34族全量browser通过。
+- **最终375/375原生完整渲染全部通过**，`native-final/report.json`，session66435 exit0。生产Probe SHA-256 `d6932433fcc3440ec1cad64892bc9947849732958a9921c6360050679d473716`。两例原失败的Bang手绘及collapsed自环均保留原输入并通过，所有生产C++冻结。
+- 最终完整官方SVG可执行证据：Packet8/8（257元素）、Info8/8，实际fontconfig文件hash/index、geometry/paint/text，无栅格；新捕获 `final-official-packet` / `final-official-info`，合并报告 `final-official-dom-independent`。最终总gate `final-partial-comparison.json` 16/375、browserCompared0、officialSvgComparedfalse，359项均缺官方case，未启动browser。另 **Zen24/24** 原版renderer/同机Skia透明RGBA逐像素零差、视口/非空文字相同，296次真实测量（`final-zenuml-canvas-native/comparison.json`），与上述最终Probe SHA完全一致。不能当34族全量browser通过。
 - 比较器最终 **74项自测通过**（6文字、8RGBA、12Packet、21Info、7视口、6visibility、14文本效果）。包含CSS/presentation、祖先display、可覆盖visibility、dx/dy及未建模效果拒绝；Windows Info自然视口改为实际browser读取但本环境未执行。Info-only正式总gate实测8/375失败，browserCompared0、officialSvgComparedfalse（`partial-gate-current.json`）。
 - Browser限制：本地Chromium socket EPERM；连接Edge任意data测试页被URL策略拒绝并明确禁止变换载体绕过，已停止且完成CUA summary。**不得重试间接载体、不得把未执行的整图browser gate标绿**。Node真实原版无DOM renderer/算法对照可继续；剩余335例31族完整官方SVG视觉对照未执行。
-- graph当前仅负责ER失败的定向排查；data/special已交回并freeze。special最新比较器文本效果修复随本独立工具提交保存。通用ELK阶段已提交11765f6；本批提交组件/scope接线及其7+14/21例。随后完成ER测试初始化核验及准确docs/validation并push。不存在并发构建。
-- 下一步：解决/核验ER单例，单Ninja重建必要目标；定向ER数学后全核心与真实Math；375原生；刷新Zen和Info/Packet实际SVG；分项提交剩余源码及准确验证清单；普通非force push新分支并核对远端。保持明确的未完成浏览器验收边界。
+- 全部agents已交回并freeze，ER测试初始化已修正。special最新比较器文本效果修复随本独立工具提交保存。通用ELK阶段11765f6及组件/scope接线75a6a70已提交；本批仅测试初始化。随后准确docs/validation并push。不存在并发构建。
+- 下一步：等待session59585最终核心/Math。若正常全过，记录准确断言数、源码/二进制/语料散列与40项可执行整图SVG证据；补齐README/regressions/validation，分项提交并普通非force push新分支、核对远端。浏览器限制和剩余335例31族未执行继续明确列出；不改CI，不扩展可选审计。
+
 
 ## 数学支持基线（历史，已推送）
 

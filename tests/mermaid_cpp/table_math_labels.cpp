@@ -42,6 +42,12 @@ suite table_math = [] {
     "mermaid_er_relation_math_labels_preserve_source_for_math_provider"_test=[] {
         auto session=ConfigSession::create();
         expect(fatal(session.has_value()));
+        ConfigValue config{.kind=ConfigKind::mapping};
+        config.mapping.emplace(u"theme",ConfigValue{.kind=ConfigKind::string,.string=u"default"});
+        config.mapping.emplace(u"look",ConfigValue{.kind=ConfigKind::string,.string=u"classic"});
+        const auto initialized=session->initialize(config);
+        expect(initialized.has_value()) << (initialized ? "" : initialized.error());
+        expect(fatal(initialized.has_value()));
         const auto input=prepare_er_render(uR"(erDiagram
 A["$$\frac{a}{b}$$"]
 B["$$\nabla f$$"]
@@ -49,7 +55,8 @@ A ||--o{ B : owns $$x_1$$ and $$\frac{y}{2}$$
 B ||..|{ C : "uses $$z_{n+1}$$"
 C ||--|| A : ordinary role words
 )",*session);
-        expect(fatal(input.has_value())) << (input ? "" : input.error());
+        expect(input.has_value()) << (input ? "" : input.error());
+        expect(fatal(input.has_value()));
         expect(input->document.relationships.size()==3_u);
         expect(bool(input->document.relationships[0].label==uR"(owns $$x_1$$ and $$\frac{y}{2}$$)"));
         expect(bool(input->document.relationships[1].label==u"uses $$z_{n+1}$$"));
@@ -68,7 +75,8 @@ C ||--|| A : ordinary role words
             return measured_math(text,size,weight,italic);
         };
         const auto result=render_er_svg(*input,ordinary,rich);
-        expect(fatal(result.has_value())) << (result ? "" : result.error());
+        expect(result.has_value()) << (result ? "" : result.error());
+        expect(fatal(result.has_value()));
         expect(bool(formulas==std::vector<std::u16string>{uR"($$\frac{a}{b}$$)",uR"($$\nabla f$$)",
             uR"(owns $$x_1$$ and $$\frac{y}{2}$$)",u"uses $$z_{n+1}$$"}));
         expect(result->svg.find("$$")==std::string::npos);
