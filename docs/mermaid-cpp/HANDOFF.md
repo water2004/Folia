@@ -2,6 +2,9 @@
 
 ## 当前检查点
 
+- 2026-11-16：全图族回归已在 Windows 合入 `master`（合并提交 `540c1775`）。`4b970717` 让 State 说明与行内注释在词法层保留花括号，覆盖带 TeX 分组的节点、边和注释。`627b4c3c` 给独立 CI 构建接入 Math DLL，并按已锁定的 SHA-256 恢复上游源码换行字节。自动触发使用版本标签。
+- Windows MSVC Release 的 Mermaid 核心、DirectWrite、DLL 宿主、Math 集成四套测试全部通过，Math SVG/C ABI 53 项通过。官方语法和 DirectWrite 完整原生语料均为 375/375。State 的 32 张 Edge SVG 对照通过，最大几何偏差 0.5 px，容差 1.5 px。独立 CMake 已用新 Math DLL 和导入库配置，登记了四套测试。日志见 `build/merge-mermaid-{ctest,math-bridge,corpus,state-comparison,standalone-configure}.log`，报告见 `build/mermaid-regression/windows-{native,official-prepare,state-browser}/`。下一步是完成全部 375 例的官方整图对照。
+
 - 2026-11-16：全图族复杂回归位于独立分支 `feat/mermaid-comprehensive-regressions`，基线 `a368f9ea70dac36f235d9eca6bdb0be16ea82a5f`。代码与回归按来源、各图族修复、测量编排、ELK阶段、组件接线和验收工具分项提交；最终验证源码为 `06beebb47d8971f73e4f4b320bc05e76ceec16a1`，后续收尾提交仅文档。GitHub接口发布改变提交元数据，每个提交文件树均与本地验证版本逐项一致，原始本地验证编号与树散列保存在验收JSON。保持CI、原生Math实现、公式缓存与10MB压测文件不动。
 - 固定 Mermaid **12.2.0** / `1fb7869866dd619168d840291c9c54b4f129758b`，ZenUML **3.49.2**。source-lock实际469文件全匹配，原417个已锁定文件哈希不变；原完整elk-worker保持固定来源。机器可读验收及每例SVG散列见 [regression-validation.json](regression-validation.json)，复验见 [regressions.md](regressions.md)。
 - **34图族、375例、230个complex**，每族至少8例；53种Flowchart形状各两次覆盖。官方syntax/config **375/375**，生产完整原生渲染 **375/375**，没有skip/expectedFailure，没有删去失败的复杂输入。

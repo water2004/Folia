@@ -6,6 +6,8 @@
 
 ## 当前 checkpoint（2026-11-16，Mermaid 数学标签已完成）
 
+- 2026-11-16 Windows 合并验证：MSVC Release 重建 Math 和 Mermaid DLL。`FoliaMathSvgBridgeTests` 53 项／1,063 断言及 Mermaid 数学集成、DirectWrite、DLL 宿主测试全部通过。State 带 TeX 分组的标签解析修正在 `4b970717`。下一步为 Mermaid 全语料官方整图对照，记录在 [Mermaid 交接](../mermaid-cpp/HANDOFF.md)。
+
 - 当前任务是 `feat/mermaid-native-math`，基线 `922b2fdc`；用户授权独立分支、分项提交推送，不改 CI，既有公式缓存保持原样。以下旧任务的 agents/推送限制与编辑待办均为历史记录，不能取代此任务。六个功能提交已推送，最后功能提交 `65ea222c`；本交接与 oracle/验收文档随最后一批提交。
 - 数学实现：`SvgMode::standalone_display` + 精确 CSS 像素 width/height/baseline，C ABI `RenderSvgFragment` / `ResultFragmentMetrics`；复用原 Renderer 管线，默认输出不变。比例来自 Scene 的 `ex / x_height * font_scale`，root viewport 用最短 roundtrip 数值；writer 同源处理 scoped IDs，无 host SVG 替换。结果仅持 SVG/metrics，不持 Scene。静态 SVG 省去隐藏 HTML tooltip，可见 texhtml 明确报错；旧默认模式未改。
 - Mermaid 按需通过现有 Math DLL 创建会话，不重复静态链接字体；常被布局复制的 typed label 使用共享不可变对象。普通文字用实测 advance 匹配 HTML flex，不把 ink overhang 重复计入公式间距；所有 CSS 字体列表先解析到安装字体，混排和普通标签共享相关语言环境下的字体选择。
