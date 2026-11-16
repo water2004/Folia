@@ -59,6 +59,26 @@ std::string snapshot(const std::vector<Directive>& directives) {
     return result;
 }
 suite directives = [] {
+    "mermaid_json_metadata_is_strict_owned_and_keeps_javascript_member_order"_test = [] {
+        std::u16string source=uR"({"later":1,"10":"ten","2":"two","01":true,"later":2,"0":null,"4294967294":[],"4294967295":{},"raw":"\uD800"})";
+        auto members=parse_json_object_members(source);
+        expect(fatal(members.has_value()));
+        source.clear();
+        const std::vector<std::u16string> names{u"0",u"2",u"10",u"4294967294",u"later",u"01",u"4294967295",u"raw"};
+        expect(fatal(members->size()==names.size()));
+        for(std::size_t i=0;i<names.size();++i) expect(bool((*members)[i].first==names[i]));
+        expect((*members)[4].second.number==2.0);
+        expect(bool(members->back().second.string==std::u16string(1,char16_t{0xd800})));
+        for(const auto invalid:{u"{'x':1}",u"{x:1}",u"{\"x\":01}",u"[1,]",u"NaN",u"true false"})
+            expect(!parse_json_value(invalid));
+        expect(parse_json_value(u"[true,null,-0,1.25e2,\"\\n\"]").has_value());
+        expect(!parse_json_object_members(u"[1,2]"));
+        expect(!parse_json_value(u"{\"a\":1}",{.source_units=4}));
+        expect(!parse_json_object_members(u"{\"a\":1,\"a\":2}",{.values=2}));
+        expect(!parse_json_value(u"[[[0]]]",{.depth=2}));
+        expect(!parse_json_value(u"\"long\"",{.string_units=3}));
+        expect(parse_json_object_members(u"{\"fresh\":true}").has_value());
+    };
     "mermaid_directives_match_official_isolated_detection"_test = [] {
         const auto override = std::getenv("FOLIA_MERMAID_FIXTURES");
         std::ifstream input{std::filesystem::path{override ? override : FOLIA_MERMAID_FIXTURE_DIR} / "directives.tsv"};

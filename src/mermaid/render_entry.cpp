@@ -368,6 +368,7 @@ std::expected<NativeDiagram,std::string> prepare_native_diagram(
             SequenceSvgConfig c;
             c.message_align=text(member(config,u"messageAlign"));
             c.mirror_actors=boolean(member(config,u"mirrorActors"));
+            c.force_menus=boolean(member(config,u"forceMenus"));
             c.hide_unused=boolean(member(config,u"hideUnusedParticipants"));
             c.show_numbers=boolean(member(config,u"showSequenceNumbers"));
             for(auto [key,target]:{std::pair{u"width",&c.width},{u"height",&c.height},{u"actorMargin",&c.actor_margin},

@@ -316,6 +316,9 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             return measure(joined);
         };
         sequence_measurements.wrap=wrap;
+        sequence_measurements.measure_menu=[measure_font,seq](std::u16string_view text) {
+            return measure_font(text,seq->theme.actor_font_weight,false);
+        };
         for(const auto& group:seq->document.boxes) {
             auto box=measure_font(group.name,seq->theme.message_font_weight);
             if(!box) return std::unexpected(box.error());

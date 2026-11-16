@@ -609,9 +609,45 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
             group_backgrounds=layer+group_backgrounds;
         }
         if(!groups.empty()) bottom+=c.box_margin;
-        const auto width=right-left+2*c.margin_x;
+        double menu_right=0,menu_bottom=0;
+        std::string menus;
+        for(std::size_t i=0;i<actors.size();++i) {
+            const auto& links=doc.actors[i].links;
+            if(links.empty()||!actors[i].visible) continue;
+            if(!measured.measure_menu) return std::unexpected("Sequence actor menus require text measurement");
+            std::vector<SequenceTextBox> labels;
+            double menu_width=actors[i].width;
+            for(const auto& link:links) {
+                auto label=measured.measure_menu(link.label);
+                if(!label) return std::unexpected(label.error());
+                if(!std::isfinite(label->width)||label->width<0) return std::unexpected("Invalid Sequence menu measurement");
+                menu_width=std::max(menu_width,label->width+2*c.wrap_padding+2*c.box_margin);
+                labels.push_back(std::move(*label));
+            }
+            const auto menu_height=20+30*links.size();
+            menu_right=std::max(menu_right,actors[i].x+menu_width);
+            menu_bottom=std::max(menu_bottom,c.height+menu_height);
+            menus+="<g class=\"actorPopupMenu\" display=\""+std::string(c.force_menus?"block":"none")+
+                "\"><rect class=\"actorPopupMenuPanel actor\" x=\""+num(actors[i].x)+"\" y=\""+num(c.height)+
+                "\" width=\""+num(menu_width)+"\" height=\""+num(static_cast<double>(menu_height))+
+                "\" rx=\"3\" ry=\"3\" fill=\""+paint(t.actor_fill)+"\" stroke=\""+paint(t.actor_border)+"\"/>";
+            for(std::size_t j=0;j<labels.size();++j) {
+                const auto& lines=labels[j].lines;
+                for(std::size_t k=0;k<lines.size();++k) {
+                    const auto dy=t.font_size*(static_cast<double>(k)-(lines.size()-1)/2.0);
+                    menus+="<text class=\"actor\" x=\""+num(actors[i].x+10)+"\" y=\""+
+                        num(c.height+30+30*j)+"\" text-anchor=\"start\" dominant-baseline=\"central\" alignment-baseline=\"central\" fill=\""+
+                        paint(t.actor_text)+"\""+actor_font+"><tspan x=\""+num(actors[i].x+10)+"\" dy=\""+num(dy)+"\">"+
+                        xml(lines[k])+"</tspan></text>";
+                }
+            }
+            menus+="</g>";
+        }
+        // Upstream reserves popup bounds even when the menus are initially hidden.
+        const auto width=std::max(right-left,menu_right)+2*c.margin_x;
         const auto title_height=doc.title.empty()?0:40;
-        const auto height=bottom+2*c.margin_y+(c.mirror_actors?-c.box_margin+c.bottom_margin:0)+title_height;
+        const auto height=std::max(bottom,menu_bottom)+2*c.margin_y+
+            (c.mirror_actors?-c.box_margin+c.bottom_margin:0)+title_height;
         std::string svg="<svg xmlns=\"http://www.w3.org/2000/svg\" width=\""+num(width)+"\" height=\""+num(height)+"\" viewBox=\""+
             num(left-c.margin_x)+" "+num(-c.margin_y-title_height)+" "+num(width)+" "+num(height)+"\" role=\"img\">";
         if(!doc.acc_title.empty()) svg+="<title>"+xml(doc.acc_title)+"</title>";
@@ -634,7 +670,7 @@ std::expected<SequenceSvg,std::string> render_sequence_svg(
         }
 
         for(const auto& layer:backgrounds) svg+=layer;
-        svg+=signals;
+        svg+=signals+menus;
         if(!doc.title.empty()) svg+="<text x=\""+num((right-left)/2-2*c.margin_x)+"\" y=\"-25\" fill=\""+paint(t.title_text)+"\""+font_attributes(t.font_weight)+">"+xml(doc.title)+"</text>";
         svg+="</svg>";
         return SequenceSvg{std::move(svg),width,height};

@@ -22,7 +22,7 @@ struct SequenceSvgConfig {
     double box_text_margin = 5, label_box_width = 50, label_box_height = 20;
     std::u16string note_align = u"center";
     std::u16string message_align = u"center";
-    bool right_angles = false;
+    bool right_angles = false, force_menus = false;
     bool mirror_actors = true, hide_unused = false, show_numbers = false;
 };
 struct SequenceRenderInput { SequenceInput document; SequenceSvgTheme theme; SequenceSvgConfig config; };
@@ -37,6 +37,8 @@ struct SequenceTextBox {
 };
 struct SequenceMeasurements {
     std::vector<SequenceTextBox> actors, messages, boxes;
+    // Actor menu labels are literal text, including dollar signs.
+    std::function<std::expected<SequenceTextBox,std::string>(std::u16string_view)> measure_menu;
     // Layout-dependent wrapping calls the host's real text measurement.
     std::function<std::expected<SequenceTextBox,std::string>(std::u16string_view,double,unsigned)> wrap;
 };
