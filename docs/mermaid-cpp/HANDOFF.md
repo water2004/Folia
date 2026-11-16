@@ -17,7 +17,7 @@
 - 自环distribution/ordering是**node级**选项，不从graph继承；原版root-only EQUALLY实际无效，adapter不得把它套到每个child。graph 正在接 `ElkMeasuredNode::self_loops`，默认 NORTH/STACKED。组件之间原ELK共享RNG流，special与graph协调compound入口接线，不可各组件重新seed。
 - 浏览器限制：普通 Chromium 启动 `socket() EPERM`；连接Edge的任意data测试页被URL策略拒绝且禁止变换载体绕过，已停止并发送completion summary。**不得绕过、不得把未执行的整图浏览器gate标绿**。工具按全清单及散列严格验收，缺项/浏览器证据缺失均失败；Node原版无DOM renderer和算法对照可继续。
 - 下一步：独立已验证修复分批提交；等待3位agent收尾，统一构建后定向验证所有ELK、自环、真实Math及collapsed handdrawn，再完整375原生语料、全核心、刷新Zen/Packet/Info证据。更新明确验证范围并推送新分支；不改CI。
-- 最新独立修复提交包：ZenUML 多控制区/嵌套返回/创建/Markdown注释；24例原版AST/布局fixture和原生完整图通过，实际Skia官方SVG透明RGBA24/24零差。
+- 最新独立修复提交包：生产测量编排提取为portable measured_render，TextMeasurer契约保留实测字段，Windows提供相同DirectWrite/Math与工作区宽度。独立只读复核完成，Linux原生渲染及真实Math已使用此管线；Windows未执行。
 
 ## 数学支持基线（历史，已推送）
 

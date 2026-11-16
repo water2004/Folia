@@ -8,39 +8,21 @@ module;
 
 export module folia.platform.mermaid_measurer;
 import std;
+export import folia.mermaid.text_measurer;
 
 export namespace folia::platform {
 
-struct MermaidFont {
-    // One resolved installed family, not a CSS family-list expression.
-    std::u16string family;
-    float size = 17;
-    unsigned weight = 400;
-    bool italic = false;
-    bool pair_kerning = false;
-};
-struct MermaidTextMetrics {
-    double advance{};
-    double ink_width{};
-    // Union of the advance interval with native glyph ink bounds, not
-    // Chromium's raster-hinted SVG bounding box. See compare-text-probe.mjs
-    // for measured corpus-specific error ceilings; no per-string correction.
-    double bounds_width{};
-    double line_height{};
-    double baseline{};
-};
-struct MermaidTextStyle {
-    std::size_t offset=0,length=0;
-    unsigned weight=400;
-    bool italic=false;
-};
-struct MermaidSvgFontMetrics { double height{},baseline{},middle_offset{}; };
+using folia::mermaid::MermaidFont;
+using folia::mermaid::MermaidTextMetrics;
+using folia::mermaid::MermaidTextStyle;
+using folia::mermaid::MermaidSvgFontMetrics;
+using folia::mermaid::MermaidFontContext;
 
 // Measures UTF-16 after SVG's default whitespace processing (collapse ASCII
 // whitespace, including LF/CR/TAB). The browser probe checks the
 // chosen width against real SVG bounds on the same machine. No approximation
 // is returned on failure. Sizes and results are 96-DPI SVG user units.
-class MermaidMeasurer {
+class MermaidMeasurer final : public folia::mermaid::TextMeasurer {
     // SVG text boxes use raster-hinted glyph bounds. Sequence's integer width
     // comparisons can change a wrap at a one-pixel difference, so retain shaped
     // advances but measure each glyph's coverage at its origin.
@@ -102,7 +84,7 @@ class MermaidMeasurer {
     }
 public:
     // SVG needs the font's ascent/descent box, excluding the layout line gap.
-    std::expected<MermaidSvgFontMetrics,std::string> svg_font_metrics(const MermaidFont& font) const {
+    std::expected<MermaidSvgFontMetrics,std::string> svg_font_metrics(const MermaidFont& font) const override {
         using Microsoft::WRL::ComPtr;
         ComPtr<IDWriteFactory> factory;
         if(FAILED(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED,__uuidof(IDWriteFactory),
@@ -124,15 +106,23 @@ public:
         const auto baseline=std::round(metrics.ascent*scale);
         return MermaidSvgFontMetrics{baseline+std::round(metrics.descent*scale),baseline,metrics.xHeight*scale/2};
     }
-    std::expected<double,std::string> svg_font_height(const MermaidFont& font) const {
-        auto metrics=svg_font_metrics(font);if(!metrics) return std::unexpected(metrics.error());
-        return metrics->height;
-    }
     // Resolve the configured CSS family list once, then share that exact family
     // between DirectWrite measurement and SVG emission. Generic families have
     // explicit Windows mappings; missing named candidates advance in list order.
-    std::expected<std::u16string, std::string> resolve_family(std::u16string_view list) const {
+    std::expected<std::u16string, std::string> resolve_family(std::u16string_view list,
+        MermaidFontContext context = MermaidFontContext::document) const override {
         using Microsoft::WRL::ComPtr;
+        std::u16string localized;
+        constexpr std::u16string_view generic = u"sans-serif";
+        if (context == MermaidFontContext::svg_label && list.ends_with(generic)) {
+            wchar_t locale[LOCALE_NAME_MAX_LENGTH]{};
+            if (GetUserDefaultLocaleName(locale, LOCALE_NAME_MAX_LENGTH) &&
+                std::wstring_view{locale} == L"zh-CN") {
+                localized.assign(list.substr(0, list.size() - generic.size()));
+                localized += u"Microsoft YaHei, Arial";
+                list = localized;
+            }
+        }
         ComPtr<IDWriteFactory> factory;
         if (FAILED(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory),
             reinterpret_cast<IUnknown**>(factory.GetAddressOf()))))
@@ -189,7 +179,7 @@ public:
     }
     std::expected<MermaidTextMetrics, std::string> measure(
         std::u16string_view source, MermaidFont const& font, bool preserve_spaces=false,
-        std::span<const MermaidTextStyle> styles={},bool svg_bounds=false) const {
+        std::span<const MermaidTextStyle> styles={},bool svg_bounds=false) const override {
         using Microsoft::WRL::ComPtr;
         if (font.family.empty() || font.family.find(u'\0') != std::u16string::npos ||
             !std::isfinite(font.size) || font.size <= 0)
@@ -273,7 +263,7 @@ public:
     // measured display lines and SVG text use the same characters and spacing.
     std::expected<std::vector<std::u16string>,std::string> wrap(
         std::u16string_view source, MermaidFont const& font, double width,
-        std::span<const MermaidTextStyle> styles={},bool break_spaces=true) const {
+        std::span<const MermaidTextStyle> styles={},bool break_spaces=true) const override {
         using Microsoft::WRL::ComPtr;
         auto valid=measure(source,font,true,styles);
         if(!valid) return std::unexpected(valid.error());
