@@ -1,0 +1,174 @@
+{
+  "family": "tree-view",
+  "cases": [
+    {
+      "id": "tree-view-official-01",
+      "level": "intermediate",
+      "source": "treeView-beta\n├── src/\n│   ├── index.ts\n│   └── utils.ts\n├── package.json\n└── README.md\n",
+      "features": [
+        "official-example",
+        "box-drawing-input"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/treeView.md",
+        "section": "Box-Drawing Input"
+      }
+    },
+    {
+      "id": "tree-view-official-02",
+      "level": "intermediate",
+      "source": "treeView-beta\n├── src/\n│   ├── App.tsx :::highlight icon(logos:react) ## main component\n│   └── index.ts ## entry point\n├── .env ## environment variables\n├── Dockerfile\n└── package.json\n",
+      "features": [
+        "official-example",
+        "box-drawing-input"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/treeView.md",
+        "section": "Box-Drawing Input"
+      }
+    },
+    {
+      "id": "tree-view-official-03",
+      "level": "complex",
+      "source": "treeView-beta\n├── packages/\n│   ├── mermaid/\n│   │   ├── src/\n│   │   │   ├── parser.ts\n│   │   │   └── renderer.ts\n│   │   └── package.json\n│   └── parser/\n│       └── src/\n└── README.md\n",
+      "features": [
+        "official-example",
+        "box-drawing-input"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/treeView.md",
+        "section": "Box-Drawing Input"
+      }
+    },
+    {
+      "id": "tree-view-official-04",
+      "level": "intermediate",
+      "source": "treeView-beta\n    src/\n        App.tsx :::highlight\n        index.js\n    package.json\n",
+      "features": [
+        "official-example",
+        "highlighting-with-class"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/treeView.md",
+        "section": "Highlighting with :::class"
+      }
+    },
+    {
+      "id": "tree-view-official-05",
+      "level": "intermediate",
+      "source": "treeView-beta\n    src/\n        index.js ## app entry point\n        config.ts ## runtime configuration\n    package.json ## project manifest\n",
+      "features": [
+        "official-example",
+        "inline-descriptions-with"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/treeView.md",
+        "section": "Inline descriptions with `##`"
+      }
+    },
+    {
+      "id": "tree-view-official-06",
+      "level": "complex",
+      "source": "---\nconfig:\n  treeView:\n    showIcons: true\n---\ntreeView-beta\n    src/\n        index.js\n    package.json\n",
+      "features": [
+        "official-example",
+        "icons"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/treeView.md",
+        "section": "Icons"
+      }
+    },
+    {
+      "id": "tree-view-official-07",
+      "level": "complex",
+      "source": "---\nconfig:\n  treeView:\n    showIcons: true\n    defaultIconPack: material-icon-theme\n    filenameIcons:\n      Dockerfile: docker\n    extensionIcons:\n      .ts: typescript\n      .tsx: react-ts\n      .txt: none\n---\ntreeView-beta\n    src/\n        App.tsx\n        utils.ts\n    Dockerfile\n    notes.txt\n    README.md\n",
+      "features": [
+        "official-example",
+        "file-type-icons-via-config-maps"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/treeView.md",
+        "section": "File-type icons via config maps"
+      }
+    },
+    {
+      "id": "tree-view-official-08",
+      "level": "intermediate",
+      "source": "treeView-beta\n    src/\n        App.tsx icon(logos:react)\n        index.js\n    package.json\n",
+      "features": [
+        "official-example",
+        "icon-overrides-with-icon"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/treeView.md",
+        "section": "Icon overrides with icon()"
+      }
+    },
+    {
+      "id": "tree-view-official-09",
+      "level": "complex",
+      "source": "---\nconfig:\n  treeView:\n    showIcons: true\n---\ntreeView-beta\n    src/\n        index.js icon(none)\n    package.json\n",
+      "features": [
+        "official-example",
+        "hiding-icons"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/treeView.md",
+        "section": "Hiding icons"
+      }
+    },
+    {
+      "id": "tree-view-official-10",
+      "level": "intermediate",
+      "source": "treeView-beta\n    my-project/\n        src/\n            App.tsx :::highlight icon(logos:react) ## main component\n            index.js ## entry point\n        .env ## environment variables\n        Dockerfile\n        package.json\n",
+      "features": [
+        "official-example",
+        "combined-annotations"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/treeView.md",
+        "section": "Combined annotations"
+      }
+    },
+    {
+      "id": "tree-view-official-11",
+      "level": "intermediate",
+      "source": "treeView-beta\n    \"packages\"\n        \"mermaid\"\n            \"src\"\n        \"parser\"\n",
+      "features": [
+        "official-example",
+        "examples"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/treeView.md",
+        "section": "Examples"
+      }
+    },
+    {
+      "id": "tree-view-official-12",
+      "level": "intermediate",
+      "source": "treeView-beta\n    🚀 rocket-app/\n        📦 packages/\n            🎨 ui/\n            🛠️ utils/\n        🧪 tests/\n        📝 README.md\n        ⚙️ config.yaml\n",
+      "features": [
+        "official-example",
+        "examples"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/treeView.md",
+        "section": "Examples"
+      }
+    },
+    {
+      "id": "tree-view-official-13",
+      "level": "complex",
+      "source": "---\nconfig:\n    treeView:\n        rowIndent: 80\n        lineThickness: 3\n    themeVariables:\n        treeView:\n            labelFontSize: '20px'\n            labelColor: '#FF0000'\n            lineColor: '#00FF00'\n---\ntreeView-beta\n    \"packages\"\n        \"mermaid\"\n            \"src\"\n        \"parser\"\n",
+      "features": [
+        "official-example",
+        "examples"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/treeView.md",
+        "section": "Examples"
+      }
+    }
+  ]
+}

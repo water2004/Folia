@@ -43,9 +43,14 @@ std::string icon_svg(std::string_view kind, double x, double y, std::string_view
         "<path fill=\"currentColor\" d=\"M10.59 4.59A2 2 0 0 0 9.17 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.17z\"/>";
     constexpr std::string_view file =
         "<path fill=\"currentColor\" fill-rule=\"evenodd\" d=\"M6 2a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8.83a2 2 0 0 0-.59-1.42l-4.82-4.82A2 2 0 0 0 13.17 2H6Zm7.5 1.9l4.6 4.6h-3.6a1 1 0 0 1-1-1V3.9Z\" clip-rule=\"evenodd\"/>";
-    auto const body = kind == "folder" ? folder : file;
+    constexpr std::string_view unknown =
+        "<g><rect width=\"80\" height=\"80\" style=\"fill: #087ebf; stroke-width: 0px;\"/>"
+        "<text transform=\"translate(21.16 64.67)\" style=\"fill: #fff; font-family: ArialMT, Arial; font-size: 67.75px;\">"
+        "<tspan x=\"0\" y=\"0\">?</tspan></text></g>";
+    const auto body = kind == "folder" ? folder : kind == "file" ? file : unknown;
     return "<svg class=\"treeView-node-icon\" x=\"" + number(x) + "\" y=\"" +
-        number(y) + "\" width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" color=\"" +
+        number(y) + "\" width=\"14\" height=\"14\" viewBox=\"0 0 " +
+        (kind == "unknown" ? "80 80" : "24 24") + "\" color=\"" +
         std::string(color) + "\">" + std::string(body) + "</svg>";
 }
 
@@ -71,17 +76,16 @@ std::expected<TreeViewSvg, std::string> render_tree_view_svg(
 
         for (const auto& node : input.document.nodes) {
             const unsigned weight = node.type == TreeViewNodeType::directory ? 700 : 400;
-            auto metrics = measure(node.name, 16, weight);
+            auto metrics = measure(node.name, theme.label_font_size, weight);
             if (!metrics) return std::unexpected(metrics.error());
 
             std::string icon_kind;
-            if (node.icon.empty() && config.show_icons) {
-                icon_kind = node.type == TreeViewNodeType::directory ? "folder" : "file";
-            } else if (node.icon == u"folder" || node.icon == u"mermaid-treeview:folder") {
+            const auto icon = resolve_tree_view_icon(node, config);
+            if (icon == u"mermaid-treeview:folder") {
                 icon_kind = "folder";
-            } else if (node.icon == u"file" || node.icon == u"mermaid-treeview:file") {
+            } else if (icon == u"mermaid-treeview:file") {
                 icon_kind = "file";
-            }
+            } else if (!icon.empty()) icon_kind = "unknown";
             const bool show_icon = !icon_kind.empty();
             const double x = static_cast<double>(node.level) *
                 (config.row_indent + config.padding_x);
@@ -104,7 +108,7 @@ std::expected<TreeViewSvg, std::string> render_tree_view_svg(
         if (has_descriptions) {
             for (const auto& row : rows) {
                 if (row.node->description.empty()) continue;
-                auto metrics = measure(row.node->description, 16, 400);
+                auto metrics = measure(row.node->description, theme.label_font_size, 400);
                 if (!metrics) return std::unexpected(metrics.error());
                 total_width = std::max(total_width,
                     description_x + metrics->width + config.padding_x);
@@ -169,7 +173,7 @@ std::expected<TreeViewSvg, std::string> render_tree_view_svg(
         const double width = std::max(1.0, total_width);
         const double height = std::max(1.0, total_height);
         std::string svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" font-family=\"" +
-            escape(theme.font_family) + "\" font-size=\"16\"" +
+            escape(theme.font_family) + "\"" + attribute("font-size", theme.label_font_size) +
             attribute("width", width) + attribute("height", height) +
             " viewBox=\"" + number(view_x) + " 0 " + number(width) + " " +
             number(height) + "\"><g class=\"tree-view\">" + body + "</g></svg>";

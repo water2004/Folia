@@ -19,13 +19,24 @@ bool boolean_option(const ConfigValue& config, std::u16string_view key, bool fal
     return value && value->kind == ConfigKind::boolean ? value->boolean : fallback;
 }
 
-std::string string_option(const ConfigValue& config, std::u16string_view key,
+std::string theme_option(const ConfigValue& config, std::u16string_view key,
     std::string fallback) {
-    const auto* value = tree_option(config, key);
+    const auto* variables = config.find(u"themeVariables");
+    const auto* tree = variables ? variables->find(u"treeView") : nullptr;
+    const auto* value = tree ? tree->find(key) : nullptr;
     if (!value || value->kind != ConfigKind::string) return fallback;
     std::string result;
     for (char16_t character : value->string) result.push_back(static_cast<char>(character));
     return result;
+}
+
+void icon_map(const ConfigValue& config, std::u16string_view key,
+    std::map<std::u16string, std::u16string>& output) {
+    const auto* value = tree_option(config, key);
+    if (!value || value->kind != ConfigKind::mapping) return;
+    for (const auto& [name, icon] : value->mapping) {
+        if (icon.kind == ConfigKind::string) output[name] = icon.string;
+    }
 }
 
 std::u16string trim(std::u16string_view text) {
@@ -283,12 +294,54 @@ std::expected<TreeViewRenderInput, std::string> prepare_tree_view_render(
     result.config.line_thickness = numeric_option(config, u"lineThickness", 1);
     result.config.show_icons = boolean_option(config, u"showIcons", false);
     result.config.use_max_width = boolean_option(config, u"useMaxWidth", true);
-    result.theme.label_color = string_option(config, u"labelColor", "black");
-    result.theme.line_color = string_option(config, u"lineColor", "black");
-    result.theme.icon_color = string_option(config, u"iconColor", "#546e7a");
-    result.theme.description_color = string_option(config, u"descriptionColor", "#6a9955");
-    result.theme.highlight_bg = string_option(config, u"highlightBg", "rgba(255, 193, 7, 0.15)");
-    result.theme.highlight_stroke = string_option(config, u"highlightStroke", "#ffc107");
+    if (const auto* pack = tree_option(config, u"defaultIconPack");
+        pack && pack->kind == ConfigKind::string) result.config.default_icon_pack = pack->string;
+    icon_map(config, u"filenameIcons", result.config.filename_icons);
+    icon_map(config, u"extensionIcons", result.config.extension_icons);
+    result.theme.label_color = theme_option(config, u"labelColor", "black");
+    result.theme.line_color = theme_option(config, u"lineColor", "black");
+    result.theme.icon_color = theme_option(config, u"iconColor", "#546e7a");
+    result.theme.description_color = theme_option(config, u"descriptionColor", "#6a9955");
+    result.theme.highlight_bg = theme_option(config, u"highlightBg", "rgba(255, 193, 7, 0.15)");
+    result.theme.highlight_stroke = theme_option(config, u"highlightStroke", "#ffc107");
+    const auto size = theme_option(config, u"labelFontSize", "16px");
+    double font_size{};
+    const auto parsed = std::from_chars(size.data(), size.data() + size.size(), font_size);
+    if (parsed.ec == std::errc{} && font_size > 0 && std::isfinite(font_size)) {
+        const std::string_view unit(parsed.ptr, size.data() + size.size());
+        if (unit.empty() || unit == "px") result.theme.label_font_size = font_size;
+        else if (unit == "em" || unit == "rem") result.theme.label_font_size = font_size * 16;
+        else if (unit == "%") result.theme.label_font_size = font_size * .16;
+    }
     return result;
+}
+
+std::u16string resolve_tree_view_icon(const TreeViewNode& node,
+    const TreeViewSvgConfig& config) {
+    auto icon = node.icon;
+    if (icon.empty()) {
+        if (!config.show_icons) return {};
+        if (node.type == TreeViewNodeType::file) {
+            const auto filename = config.filename_icons.find(node.name);
+            if (filename != config.filename_icons.end() && !filename->second.empty()) {
+                icon = filename->second;
+            } else if (const auto dot = node.name.rfind(u'.'); dot != node.name.npos && dot > 0) {
+                auto extension = node.name.substr(dot);
+                for (auto& character : extension) {
+                    if (character >= u'A' && character <= u'Z') character += u'a' - u'A';
+                }
+                auto found = config.extension_icons.find(extension);
+                if (found == config.extension_icons.end()) found = config.extension_icons.find(extension.substr(1));
+                if (found != config.extension_icons.end()) icon = found->second;
+            }
+        }
+        if (icon.empty()) icon = node.type == TreeViewNodeType::directory ? u"folder" : u"file";
+    }
+    if (icon == u"none") return {};
+    if (icon.find(u':') != icon.npos) return icon;
+    if (icon == u"folder" || icon == u"file" || config.default_icon_pack.empty()) {
+        return u"mermaid-treeview:" + icon;
+    }
+    return config.default_icon_pack + u":" + icon;
 }
 } // namespace folia::mermaid
