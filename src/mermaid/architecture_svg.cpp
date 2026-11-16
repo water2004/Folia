@@ -18,7 +18,13 @@ struct Bounds {
 std::string point(Point p){return num(p.x)+","+num(p.y);}
 bool horizontal(char16_t direction){return direction==u'L'||direction==u'R';}
 Point endpoint(const FCoseNode& n,char16_t direction,double size){switch(direction){case u'L':return {n.x,n.y+size/2};case u'R':return {n.x+size,n.y+size/2};case u'T':return {n.x+size/2,n.y};default:return {n.x+size/2,n.y+size};}}
-std::string icon(std::u16string_view name,double size){const auto body=architecture_icon(name);if(!body)throw std::runtime_error("Architecture external icon packs are not connected");return "<svg width=\""+num(size)+"\" height=\""+num(size)+"\" viewBox=\"0 0 80 80\">"+std::string(*body)+"</svg>";}
+std::string icon(std::u16string_view name, double size) {
+    // The official loader paints its unknown icon when a pack or name is absent.
+    auto body = architecture_icon(name);
+    if (!body) body = architecture_icon(u"unknown");
+    return "<svg width=\"" + num(size) + "\" height=\"" + num(size) +
+        "\" viewBox=\"0 0 80 80\">" + std::string(*body) + "</svg>";
+}
 std::string text(const FlowchartTextBox& box,const ArchitectureRenderInput& input,Point p,bool start,bool middle,double rotation=0) {
     const auto font=box.font.value_or(FlowchartLabelFont{input.theme.font_family,input.theme.font_size});
     std::string out="<g transform=\"translate("+point(p)+") rotate("+num(rotation)+")\"><text class=\"architecture-label\" xml:space=\"preserve\" font-family=\""+xml(font.family)+"\" font-size=\""+num(font.size)+"\" text-anchor=\""+(start?"start":"middle")+"\" dominant-baseline=\""+(middle?"middle":"auto")+"\" fill=\""+xml(input.text_color)+"\">";
