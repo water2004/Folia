@@ -335,7 +335,13 @@ suite mathematical_labels = [] {
     "mermaid_math_state_callback_measures_nodes_edges_and_notes_before_layout"_test = [] {
         auto session = ConfigSession::create();
         expect(fatal(session.has_value()));
-        auto input = prepare_state(u"---\nconfig: {look: classic, layout: dagre}\n---\nstateDiagram-v2\nstate \"$$x$$\" as A\nA --> A : $$y$$\nnote right of A : $$z$$", *session);
+        auto input = prepare_state(uR"(---
+config: {look: classic, layout: dagre}
+---
+stateDiagram-v2
+A: $$\frac{x}{y}$$
+A --> A : $$y_{n+1}$$
+note right of A : $$\sqrt{z}$$)", *session);
         expect(input.has_value()) << (input ? "" : input.error());
         expect(fatal(input.has_value()));
         const StateMeasure no_plain = [](std::u16string_view, double)

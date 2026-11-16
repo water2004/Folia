@@ -33,7 +33,7 @@ struct Parser {
   document.nodes.push_back(std::move(divider));region_start[key]=document.nodes.size();
   ++region_count[key];region_direction[key]=u"TB";
  }
- void line(std::u16string value,bool trailing_separator=false){value=trim(value);if(value.empty()||value.starts_with(u"%%"))return;if(value==u"}"){if(parents.empty())throw std::runtime_error("Unexpected State composite end");const auto parent=parents.back();if(region_count[parent]&&region_start[parent]<document.nodes.size())region(parent);if(region_count[parent])document.nodes[node(parent)].direction=u"TB";parents.pop_back();return;}
+ void line(std::u16string value,bool trailing_separator=false,bool opens_composite=false){value=trim(value);if(value.empty()||value.starts_with(u"%%"))return;if(value==u"}"){if(parents.empty())throw std::runtime_error("Unexpected State composite end");const auto parent=parents.back();if(region_count[parent]&&region_start[parent]<document.nodes.size())region(parent);if(region_count[parent])document.nodes[node(parent)].direction=u"TB";parents.pop_back();return;}
   if(value==u"--"){if(parents.empty())throw std::runtime_error("Concurrent region separator requires a composite state");const auto parent=parents.back();if(trailing_separator){FlowchartNode divider;const auto number=std::to_string(++divider_count);divider.id=u"divider-id-"+std::u16string(number.begin(),number.end());divider.shape=u"divider";divider.parent=parent;divider.padding=8;document.nodes.push_back(std::move(divider));return;}region(parent);document.nodes[node(parent)].direction=u"TB";const auto region_number=std::to_string(region_count[parent]+1);region_scope[parent]=parent+u"----region-"+std::u16string(region_number.begin(),region_number.end());return;}
   if(value.starts_with(u"note ")){
    auto rest=trim(std::u16string_view(value).substr(5));
@@ -76,9 +76,9 @@ struct Parser {
   for(auto key:{u"accTitle:",u"accDescr:"})if(value.starts_with(key)){auto label=trim(std::u16string_view(value).substr(std::u16string_view(key).size()));if(key==std::u16string_view(u"accTitle:"))document.acc_title=label;else document.acc_description=label;return;}
   if(value.starts_with(u"style ")){auto space=value.find(u' ',6);if(space==value.npos)throw std::runtime_error("Expected State style");auto ids=value.substr(6,space-6);auto declarations=split(std::u16string_view(value).substr(space+1),u',');for(const auto& id:split(ids,u','))document.nodes[node(id)].styles=declarations;return;}
   auto arrow=value.find(u"-->");if(arrow!=value.npos){auto left=trim(std::u16string_view(value).substr(0,arrow));auto rest=std::u16string_view(value).substr(arrow+3);auto colon=description_separator(rest);auto right=trim(rest.substr(0,colon));auto a=endpoint(left,true),b=endpoint(right,false);FlowchartEdge edge;auto id=std::to_string(document.edges.size());edge.id=u"edge"+std::u16string(id.begin(),id.end());edge.start=document.nodes[a].id;edge.end=document.nodes[b].id;edge.label=colon==rest.npos?u"":trim(rest.substr(colon+1));edge.label_type=u"markdown";edge.arrow_end=u"arrow_barb";edge.type=u"arrow_barb";edge.curve=u"basis";document.edges.push_back(std::move(edge));return;}
-  bool group=value.ends_with(u"{");if(group)value=trim(std::u16string_view(value).substr(0,value.size()-1));if(value.starts_with(u"state "))value=trim(std::u16string_view(value).substr(6));std::u16string special_shape;for(auto [marker,shape]:{std::pair<std::u16string_view,std::u16string_view>{u" <<fork>>",u"fork"},{u" <<join>>",u"join"},{u" <<choice>>",u"choice"},{u" [[fork]]",u"fork"},{u" [[join]]",u"join"},{u" [[choice]]",u"choice"}}){if(value.ends_with(marker)){special_shape=shape;value=trim(std::u16string_view(value).substr(0,value.size()-marker.size()));break;}}std::u16string id,label,css_class;
+  if(value.starts_with(u"state "))value=trim(std::u16string_view(value).substr(6));std::u16string special_shape;for(auto [marker,shape]:{std::pair<std::u16string_view,std::u16string_view>{u" <<fork>>",u"fork"},{u" <<join>>",u"join"},{u" <<choice>>",u"choice"},{u" [[fork]]",u"fork"},{u" [[join]]",u"join"},{u" [[choice]]",u"choice"}}){if(value.ends_with(marker)){special_shape=shape;value=trim(std::u16string_view(value).substr(0,value.size()-marker.size()));break;}}std::u16string id,label,css_class;
   if(value.starts_with(u"\"")){auto end=value.find(u'"',1);if(end==value.npos)throw std::runtime_error("Unclosed State label");label=value.substr(1,end-1);auto rest=trim(std::u16string_view(value).substr(end+1));if(!rest.starts_with(u"as "))throw std::runtime_error("Expected State alias");id=trim(std::u16string_view(rest).substr(3));}else{auto colon=description_separator(value);id=trim(std::u16string_view(value).substr(0,colon));if(colon!=value.npos)label=trim(std::u16string_view(value).substr(colon+1));}auto sep=id.find(u":::");if(sep!=id.npos){css_class=trim(std::u16string_view(id).substr(sep+3));id=trim(std::u16string_view(id).substr(0,sep));}
-  auto i=node(id);auto& n=document.nodes[i];if(!label.empty())n.label=label;if(!special_shape.empty())n.shape=special_shape;if(!css_class.empty())n.classes=css_class;if(group){n.group=true;n.shape=u"roundedWithTitle";n.direction=u"TB";parents.push_back(id);region_start[id]=document.nodes.size();region_count[id]=0;region_scope[id]=id;}
+  auto i=node(id);auto& n=document.nodes[i];if(!label.empty())n.label=label;if(!special_shape.empty())n.shape=special_shape;if(!css_class.empty())n.classes=css_class;if(opens_composite){n.group=true;n.shape=u"roundedWithTitle";n.direction=u"TB";parents.push_back(id);region_start[id]=document.nodes.size();region_count[id]=0;region_scope[id]=id;}
  }
  void parse(std::u16string_view source){
   const auto header_end=source.find(u'\n');
@@ -126,12 +126,27 @@ struct Parser {
     node(state);annotations.push_back({state,std::move(body),position});
     continue;
    }
-   std::u16string statement;bool quote=false;
-   for(const auto c:lines[i]){
-    if(c==u'"')quote=!quote;
-    if(!quote&&(c==u';'||c==u'{'||c==u'}')){
-     if(c==u'{')statement+=c;
-     line(std::move(statement));statement.clear();
+   std::u16string statement;
+   bool quote=false;
+   bool description=false;
+   const std::u16string_view physical_line=lines[i];
+   for(std::size_t pos=0;pos<physical_line.size();++pos){
+    const auto c=physical_line[pos];
+    if(!description&&c==u'"')quote=!quote;
+    if(!quote&&!description&&c==u':'){
+     if(physical_line.substr(pos).starts_with(u":::")){
+      statement+=u":::";
+      pos+=2;
+      continue;
+     }
+     // State DESCR and inline NOTE_TEXT consume braces as ordinary text.
+     description=true;
+    }
+    const bool composite_brace=!description&&(c==u'{'||c==u'}');
+    if(!quote&&(c==u';'||composite_brace)){
+     line(std::move(statement),false,c==u'{');
+     statement.clear();
+     description=false;
      if(c==u'}')line(u"}");
     }else statement+=c;
    }
