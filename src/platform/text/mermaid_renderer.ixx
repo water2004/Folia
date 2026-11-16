@@ -196,6 +196,10 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
             return measure(flow->document.nodes.at(index),width,true);
         };
         for(const auto& node:flow->document.nodes) {
+            if(!node.group && !flowchart_shape_has_label(node.shape)) {
+                flowchart_measurements.nodes.emplace_back();
+                continue;
+            }
             auto box=measure(node,node.group?std::numeric_limits<double>::infinity():flow->theme.wrapping_width,node.group);
             if(!box) return std::unexpected(box.error());
             flowchart_measurements.nodes.push_back(std::move(*box));

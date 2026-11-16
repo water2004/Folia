@@ -53,51 +53,6 @@ std::vector<FlowchartPoint> person_outline(double width, double height) {
     return outline;
 }
 
-// SVG elliptical arc endpoint-to-center conversion for the cloud's short,
-// positive sweep arcs. Test derivative zeros as well as both endpoints.
-void cloud_arc_bounds(RoughBounds& bounds, FlowchartPoint from, FlowchartPoint to,
-                      double rx, double ry, double rotation) {
-    const auto include = [&](FlowchartPoint p) {
-        bounds.left = std::min(bounds.left, p.x);
-        bounds.top = std::min(bounds.top, p.y);
-        bounds.right = std::max(bounds.right, p.x);
-        bounds.bottom = std::max(bounds.bottom, p.y);
-    };
-    include(to);
-    if (rx == 0 || ry == 0 || (from.x == to.x && from.y == to.y)) return;
-
-    const double cosine = std::cos(rotation), sine = std::sin(rotation);
-    const double dx = (from.x - to.x) / 2, dy = (from.y - to.y) / 2;
-    const double x = cosine * dx + sine * dy, y = -sine * dx + cosine * dy;
-    const double radii_scale = std::hypot(x / rx, y / ry);
-    if (radii_scale > 1) {
-        rx *= radii_scale;
-        ry *= radii_scale;
-    }
-    const double nx = x / rx, ny = y / ry;
-    const double distance_squared = nx * nx + ny * ny;
-    if (distance_squared == 0) return;
-    const double coefficient = std::sqrt(std::max(0.0, 1 / distance_squared - 1));
-    const double cx = coefficient * ny * rx, cy = -coefficient * nx * ry;
-    const double center_x = cosine * cx - sine * cy + (from.x + to.x) / 2;
-    const double center_y = sine * cx + cosine * cy + (from.y + to.y) / 2;
-    constexpr double revolution = 2 * std::numbers::pi;
-    const auto positive_angle = [](double angle) {
-        const auto normalized = std::fmod(angle, revolution);
-        return normalized < 0 ? normalized + revolution : normalized;
-    };
-    const double start = std::atan2((y - cy) / ry, (x - cx) / rx);
-    const double end = std::atan2((-y - cy) / ry, (-x - cx) / rx);
-    const double sweep = positive_angle(end - start);
-    const double dx_zero = std::atan2(-ry * sine, rx * cosine);
-    const double dy_zero = std::atan2(ry * cosine, rx * sine);
-    for (const auto angle : {dx_zero, dx_zero + std::numbers::pi, dy_zero, dy_zero + std::numbers::pi}) {
-        if (positive_angle(angle - start) > sweep) continue;
-        include({center_x + rx * cosine * std::cos(angle) - ry * sine * std::sin(angle),
-                 center_y + rx * sine * std::cos(angle) + ry * cosine * std::sin(angle)});
-    }
-}
-
 FlowchartOrganicGeometry cloud_geometry(double width, double height) {
     FlowchartOrganicGeometry out;
     out.path_offset = {-width / 2, -height / 2};
@@ -121,7 +76,7 @@ FlowchartOrganicGeometry cloud_geometry(double width, double height) {
         const FlowchartPoint to{from.x + arc.delta.x, from.y + arc.delta.y};
         out.cloud_path += "a" + number(arc.rx) + "," + number(arc.ry) + " " +
             number(arc.rotation) + " 0,1 " + point(arc.delta);
-        cloud_arc_bounds(out.bounds, from, to, arc.rx, arc.ry, arc.rotation * std::numbers::pi / 180);
+        short_svg_arc_bounds(out.bounds, from, to, arc.rx, arc.ry, arc.rotation * std::numbers::pi / 180);
         from = to;
     }
     out.cloud_path += "H0V0Z";

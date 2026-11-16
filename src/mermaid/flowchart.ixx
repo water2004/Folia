@@ -36,6 +36,10 @@ struct FlowchartLimits {
     FrontendLimits frontend;
     std::size_t nodes = 10000, edges = 500, subgraph_depth = 64;
 };
+// Collapse containers already marked with shape=collapsedGroup. Projection
+// hides descendants and redirects boundary-crossing edges to the outermost
+// collapsed ancestor, retaining genuine self loops and edge declaration order.
+std::expected<void,std::string> project_collapsed_flowchart_groups(FlowchartInput&);
 // Shared Flowchart grammar also serves the explicit ELK and Swimlane variants.
 std::expected<FlowchartInput, std::string> parse_flowchart(
     const PreparedDiagram&, FlowchartLimits limits = {});

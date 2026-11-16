@@ -28,15 +28,51 @@ std::u16string_view flowchart_classic_shape(std::u16string_view shape) {
         {u"data-store",u"datastore"},{u"directory",u"folder"},
         {u"procs",u"st-rect"},{u"processes",u"st-rect"},{u"stacked-rectangle",u"st-rect"},
         {u"stored-data",u"bow-rect"},{u"bow-tie-rectangle",u"bow-rect"},
-        {u"tagged-rectangle",u"tag-rect"},{u"tag-proc",u"tag-rect"},{u"tagged-process",u"tag-rect"}})
+        {u"tagged-rectangle",u"tag-rect"},{u"tag-proc",u"tag-rect"},{u"tagged-process",u"tag-rect"},
+        {u"start",u"sm-circ"},{u"small-circle",u"sm-circ"},{u"stateStart",u"sm-circ"},
+        {u"stop",u"fr-circ"},{u"framed-circle",u"fr-circ"},{u"stateEnd",u"fr-circ"},
+        {u"join",u"fork"},{u"forkJoin",u"fork"},{u"collate",u"hourglass"},
+        {u"com-link",u"bolt"},{u"lightning-bolt",u"bolt"},
+        {u"junction",u"f-circ"},{u"filled-circle",u"f-circ"},
+        {u"summary",u"cross-circ"},{u"crossed-circle",u"cross-circ"}})
         if(shape==name)return handler;
     for(const auto name:{u"squareRect",u"roundedRect",u"stadium",u"subroutine",u"cylinder",u"circle",u"diamond",
         u"hexagon",u"lean_right",u"lean_left",u"trapezoid",u"inv_trapezoid",u"doublecircle",u"odd",
         u"notch-rect",u"tri",u"flip-tri",u"notch-pent",u"sl-rect",u"lin-rect",u"div-rect",u"win-pane",u"lin-doc",
         u"person",u"cloud",u"doc",u"docs",u"tag-doc",u"flag",u"delay",u"h-cyl",u"lin-cyl",u"curv-trap",
         u"brace",u"brace-r",u"braces",u"datastore",u"folder",u"bucket",u"console",u"browser",
-        u"st-rect",u"tag-rect",u"bow-rect"})
+        u"st-rect",u"tag-rect",u"bow-rect",u"collapsedGroup",u"bang",u"text",u"sm-circ",u"fr-circ",
+        u"fork",u"hourglass",u"bolt",u"f-circ",u"cross-circ"})
         if(shape==name)return name;
+    return {};
+}
+std::expected<void,std::string> project_collapsed_flowchart_groups(FlowchartInput& graph) {
+    std::map<std::u16string,std::size_t,std::less<>> ids;
+    for(std::size_t i=0;i<graph.nodes.size();++i) ids.emplace(graph.nodes[i].id,i);
+    std::map<std::u16string,std::u16string,std::less<>> hidden;
+    for(const auto& node:graph.nodes) {
+        auto parent=node.parent;
+        std::size_t depth=0;
+        while(!parent.empty()) {
+            if(++depth>graph.nodes.size()) return std::unexpected("Cyclic Flowchart containment");
+            const auto it=ids.find(parent);
+            if(it==ids.end()) return std::unexpected("Missing Flowchart container");
+            const auto& ancestor=graph.nodes[it->second];
+            if(ancestor.shape==u"collapsedGroup") hidden[node.id]=ancestor.id;
+            parent=ancestor.parent;
+        }
+    }
+    std::erase_if(graph.nodes,[&](const auto& node){return hidden.contains(node.id);});
+    const auto visible=[&](const std::u16string& id)->const std::u16string& {
+        const auto it=hidden.find(id);return it==hidden.end()?id:it->second;
+    };
+    std::erase_if(graph.edges,[&](const auto& edge) {
+        const auto& start=visible(edge.start);const auto& end=visible(edge.end);
+        return start==end && (start!=edge.start || end!=edge.end);
+    });
+    for(auto& edge:graph.edges) {
+        edge.start=visible(edge.start);edge.end=visible(edge.end);
+    }
     return {};
 }
 namespace {
@@ -202,7 +238,7 @@ class Parser {
         if(!doc)throw std::runtime_error(doc.error());
         if(doc->kind!=ConfigKind::mapping)fail("Flowchart metadata requires a mapping");
         for(const auto& [key,value]:doc->mapping)
-            if(key!=u"shape"&&key!=u"label"&&key!=u"labelType"&&key!=u"curve")
+            if(key!=u"shape"&&key!=u"label"&&key!=u"labelType"&&key!=u"curve"&&key!=u"view")
                 fail("Flowchart asset, animation or group metadata is not implemented");
         const auto string=[&](View key)->Text {
             const auto* value=doc->find(key);
@@ -210,6 +246,14 @@ class Parser {
             if(value->kind!=ConfigKind::string)fail("Flowchart metadata field requires text");
             return value->string;
         };
+        if(auto group=std::ranges::find_if(groups,[&](const auto& value){return value.node.id==id;});group!=groups.end()) {
+            if(doc->find(u"view")) {
+                const bool collapsed=string(u"view")==u"collapsed";
+                group->node.group=!collapsed;
+                group->node.shape=collapsed?u"collapsedGroup":u"rect";
+            }
+            return;
+        }
         if(auto edge=std::ranges::find(result.edges,id,&FlowchartEdge::id);edge!=result.edges.end()) {
             if(auto curve=string(u"curve");!curve.empty())edge->curve=std::move(curve);
             return;
@@ -227,7 +271,8 @@ class Parser {
     }
     Text node() {
         auto id = identifier();horizontal();
-        if(at(u"@{") && std::ranges::find(result.edges,id,&FlowchartEdge::id)!=result.edges.end()) {
+        if(at(u"@{") && (std::ranges::find(result.edges,id,&FlowchartEdge::id)!=result.edges.end() ||
+            std::ranges::any_of(groups,[&](const auto& group){return group.node.id==id;}))) {
             metadata(id);horizontal();return id;
         }
         auto& v = vertex(id);
@@ -469,6 +514,8 @@ class Parser {
             edge.styles.insert(edge.styles.begin(),default_edge_styles.begin(),default_edge_styles.end());
             if (edge.curve.empty()) edge.curve = default_curve.empty() ? curve : default_curve;
         }
+        if(auto projected=project_collapsed_flowchart_groups(result);!projected)
+            throw std::runtime_error(projected.error());
     }
 public:
     Parser(View source_, FlowchartLimits limits_) : source(source_), limits(std::move(limits_)) {}

@@ -22,6 +22,10 @@ struct FlowchartSvgTheme {
     bool hand_drawn=false;
     std::uint32_t hand_drawn_seed=0;
     FlowchartElkLineHops elk_line_hops=FlowchartElkLineHops::off;
+    double cluster_radius=0,collapsed_radius=8,cluster_stroke_width=1;
+    // Family stylesheet defaults for the collapsed container's decoration.
+    std::string collapsed_indicator_fill;
+    double collapsed_indicator_opacity=.6;
 };
 struct FlowchartLabelFont {
     std::u16string family;
@@ -34,6 +38,9 @@ struct FlowchartLabelFont {
 std::expected<FlowchartLabelFont,std::string> flowchart_label_font(
     const std::vector<std::u16string>& classes,const std::vector<std::u16string>& direct,
     const FlowchartSvgTheme&);
+// The seven fixed symbols ignore their source labels, including TeX. Hosts
+// must skip measuring these labels; aliases have the same display contract.
+bool flowchart_shape_has_label(std::u16string_view shape);
 struct FlowchartTextBox {
     // Real measured display box and first baseline, in SVG user units.
     // Lines are the exact display strings measured by the platform adapter.

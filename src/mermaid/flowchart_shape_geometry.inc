@@ -20,13 +20,19 @@ struct FlowchartCylinderAttachment {
     double rx, ry;
 };
 
+struct FlowchartCircleAttachment {
+    // Zero uses the measured width, as stateStart/stateEnd do after getBBox().
+    double radius=0;
+};
+
 struct FlowchartLocalShape {
     FlowchartNodeBox box;
     RoughBounds paint_bounds;
     FlowchartPoint label_offset{};
     std::vector<FlowchartContour> contours;
     // The empty attachment clips against the layout box.
-    std::variant<std::monostate, std::vector<FlowchartPoint>, FlowchartCylinderAttachment> attachment;
+    std::variant<std::monostate, std::vector<FlowchartPoint>, FlowchartCylinderAttachment,
+        FlowchartCircleAttachment> attachment;
     FlowchartShadowPaint shadow = FlowchartShadowPaint::contour;
     bool flat_rough_paths = false;
     std::optional<FlowchartPoint> console_glyph;
