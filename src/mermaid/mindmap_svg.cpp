@@ -67,7 +67,10 @@ std::expected<MindmapSvg,std::string> render_mindmap_svg(const MindmapRenderInpu
         std::vector<MindmapShape> shapes;std::vector<CoseTreeNode> nodes;std::vector<CoseTreeEdge> edges;
         std::map<std::u16string,std::size_t> ids;
         for(std::size_t i=0;i<doc.nodes.size();++i) {
-            const auto& n=doc.nodes[i];if(!n.icon.empty())return std::unexpected("Native Mindmap icon assets are not implemented");
+            // The locked unified Mindmap renderer carries icon class metadata
+            // through its ordinary node handlers. Without a registered icon
+            // provider it does not add the legacy svgDraw icon row or width.
+            const auto& n=doc.nodes[i];
             auto shape=measure_mindmap_shape(n,{measured.nodes[i].width,measured.nodes[i].height},input.theme.radius);
             if(!shape)return std::unexpected(shape.error());
             if(!measured.node_bounds.empty()) {
