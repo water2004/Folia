@@ -2,6 +2,22 @@
 import folia.mermaid.wardley;
 namespace { using namespace boost::ut; using namespace folia::mermaid;
 suite mermaid_wardley = [] {
+ "mermaid_wardley_owns_combined_evolution_labels"_test = [] {
+   const auto diagram=parse_wardley(uR"(wardley-beta
+evolution Explore / Uncertain -> Build / Custom -> Buy / Product -> Utility / Standard
+component API [0.65, 0.45] (build)
+component Identity [0.58, 0.70] (buy)
+API --> Identity
+evolve API 0.75
+)");
+   expect(fatal(diagram.has_value()))<<(diagram?"":diagram.error());
+   const std::vector<std::u16string> labels={u"Explore / Uncertain",u"Build / Custom",u"Buy / Product",u"Utility / Standard"};
+   expect(diagram->stages==labels);
+   expect(diagram->boundaries.empty());
+   expect(diagram->nodes.size()==2_u);
+   expect(diagram->links.size()==1_u);
+   expect(diagram->trends.size()==1_u);
+ };
  "mermaid_wardley_parses_components_links_and_evolution"_test = [] {
    auto d=parse_wardley(u"wardley-beta\ntitle Example\nanchor User [1.0, 0.1]\ncomponent API [0.7, 0.65] (buy) inertia\ncomponent DB [0.4, 0.9]\nAPI --> DB\nevolve API 0.9\nnote \"Important\" [0.5, 0.4]\n");
    expect(fatal(d.has_value())); expect(d->title==u"Example");expect(d->nodes.size()==3_u);expect(d->nodes[0].x==10.0);expect(d->nodes[1].y==70.0);expect(d->nodes[1].inertia);expect(d->nodes[1].strategy==u"buy");expect(d->links.size()==1_u);expect(d->trends.size()==1_u);expect(d->notes.size()==1_u);

@@ -233,9 +233,10 @@ std::expected<WardleyDiagram, std::string> parse_wardley(View source) {
           if (slash != View::npos) {
             const auto first = trim(stage.substr(0, slash));
             const auto second = trim(stage.substr(slash + 1));
-            stage = std::u16string(first) + u" / " + std::u16string(second);
+            diagram.stages.push_back(std::u16string(first) + u" / " + std::u16string(second));
+          } else {
+            diagram.stages.emplace_back(stage);
           }
-          diagram.stages.emplace_back(stage);
           if (arrow == View::npos)
             break;
           rest = trim(rest.substr(arrow + 2));
