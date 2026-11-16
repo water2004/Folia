@@ -1,0 +1,145 @@
+{
+  "family": "quadrant",
+  "cases": [
+    {
+      "id": "quadrant-official-campaigns",
+      "level": "basic",
+      "source": "quadrantChart\n    title Reach and engagement of campaigns\n    x-axis Low Reach --> High Reach\n    y-axis Low Engagement --> High Engagement\n    quadrant-1 We should expand\n    quadrant-2 Need to promote\n    quadrant-3 Re-evaluate\n    quadrant-4 May be improved\n    Campaign A: [0.3, 0.6]\n    Campaign B: [0.45, 0.23]\n    Campaign C: [0.57, 0.69]\n    Campaign D: [0.78, 0.34]\n    Campaign E: [0.40, 0.34]\n    Campaign F: [0.35, 0.78]\n",
+      "features": [
+        "all-quadrants",
+        "six-points",
+        "axis-labels"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/quadrantChart.md",
+        "section": "Example"
+      }
+    },
+    {
+      "id": "quadrant-official-point-styles",
+      "level": "complex",
+      "source": "quadrantChart\n  title Reach and engagement of campaigns\n  x-axis Low Reach --> High Reach\n  y-axis Low Engagement --> High Engagement\n  quadrant-1 We should expand\n  quadrant-2 Need to promote\n  quadrant-3 Re-evaluate\n  quadrant-4 May be improved\n  Campaign A: [0.9, 0.0] radius: 12\n  Campaign B:::class1: [0.8, 0.1] color: #ff3300, radius: 10\n  Campaign C: [0.7, 0.2] radius: 25, color: #00ff33, stroke-color: #10f0f0\n  Campaign D: [0.6, 0.3] radius: 15, stroke-color: #00ff0f, stroke-width: 5px ,color: #ff33f0\n  Campaign E:::class2: [0.5, 0.4]\n  Campaign F:::class3: [0.4, 0.5] color: #0000ff\n  classDef class1 color: #109060\n  classDef class2 color: #908342, radius : 10, stroke-color: #310085, stroke-width: 10px\n  classDef class3 color: #f00fff, radius : 10\n",
+      "features": [
+        "point-classes",
+        "inline-overrides",
+        "boundary-points",
+        "stroke-width"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/quadrantChart.md",
+        "section": "Example on styling"
+      }
+    },
+    {
+      "id": "quadrant-official-theme",
+      "level": "intermediate",
+      "source": "---\nconfig:\n  quadrantChart:\n    chartWidth: 400\n    chartHeight: 400\n  themeVariables:\n    quadrant1TextFill: \"ff0000\"\n---\nquadrantChart\n  x-axis Urgent --> Not Urgent\n  y-axis Not Important --> \"Important ❤\"\n  quadrant-1 Plan\n  quadrant-2 Do\n  quadrant-3 Delegate\n  quadrant-4 Delete\n",
+      "features": [
+        "frontmatter-config",
+        "quoted-unicode-label",
+        "theme"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/quadrantChart.md",
+        "section": "Example on config and theme"
+      }
+    },
+    {
+      "id": "quadrant-boundaries-and-class-overrides",
+      "level": "complex",
+      "source": "quadrantChart\ntitle Boundary and center priorities\nx-axis Low urgency --> High urgency\ny-axis Low impact --> High impact\nquadrant-1 Prioritize\nquadrant-2 Investigate\nquadrant-3 Archive\nquadrant-4 Delegate\nOrigin:::focus: [0, 0]\nTopLeft: [0, 1] radius: 6, color: #4488aa\nTopRight:::focus: [1, 1] radius: 10\nBottomRight: [1, 0] stroke-width: 3px, stroke-color: #884422\nCenter:::focus: [0.5, 0.5]\nNearCenter: [0.501, 0.499]\nclassDef focus radius: 9, color: #aa44cc, stroke-color: #224466, stroke-width: 2px\n",
+      "features": [
+        "boundary-points",
+        "close-points",
+        "class-overrides",
+        "all-quadrants"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/quadrantChart.md",
+        "section": "Combined documented syntax"
+      },
+      "config": {
+        "quadrantChart": {
+          "chartWidth": 680,
+          "chartHeight": 430,
+          "xAxisPosition": "bottom",
+          "yAxisPosition": "right"
+        }
+      }
+    },
+    {
+      "id": "quadrant-dense-nine-point-matrix",
+      "level": "complex",
+      "source": "quadrantChart\ntitle Delivery cost versus expected value\nx-axis Small investment --> Large investment\ny-axis Low value --> High value\nquadrant-1 Fund\nquadrant-2 Execute\nquadrant-3 Reject\nquadrant-4 Reassess\nIndexing: [0.12, 0.88]\nStreaming: [0.38, 0.72]\nPlugins: [0.79, 0.89]\nSearch: [0.18, 0.42]\nSharing: [0.52, 0.51]\nCollaboration: [0.88, 0.48]\nMigration: [0.24, 0.14]\nThemes: [0.46, 0.23]\nTelemetry: [0.83, 0.17]\n",
+      "features": [
+        "nine-points",
+        "long-labels",
+        "custom-size"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/quadrantChart.md",
+        "section": "Combined documented syntax"
+      },
+      "config": {
+        "quadrantChart": {
+          "chartWidth": 760,
+          "chartHeight": 560,
+          "quadrantPadding": 14,
+          "pointLabelFontSize": 13
+        }
+      }
+    },
+    {
+      "id": "quadrant-theme-and-styles",
+      "level": "complex",
+      "source": "quadrantChart\ntitle Styled release priorities\nx-axis Short term --> Long term\ny-axis Low certainty --> High certainty\nquadrant-1 Commit\nquadrant-2 Ship\nquadrant-3 Prototype\nquadrant-4 Observe\nParser:::ready: [0.15, 0.75]\nRenderer:::ready: [0.35, 0.85] radius: 5\nExport:::risk: [0.7, 0.2]\nReview:::risk: [0.9, 0.4] color: #00aabb\nclassDef ready radius: 12, color: #228855, stroke-color: #113322, stroke-width: 3px\nclassDef risk radius: 7, color: #bb6633, stroke-color: #663311, stroke-width: 1px\n",
+      "features": [
+        "class-styles",
+        "inline-precedence",
+        "custom-theme",
+        "asymmetric-canvas"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/quadrantChart.md",
+        "section": "Combined documented syntax"
+      },
+      "config": {
+        "theme": "forest",
+        "quadrantChart": {
+          "chartWidth": 610,
+          "chartHeight": 480,
+          "titleFontSize": 24
+        }
+      }
+    },
+    {
+      "id": "quadrant-accessible-unicode",
+      "level": "complex",
+      "source": "quadrantChart\naccTitle: 工作评估\naccDescr {\n  Four quadrants compare effort and benefit.\n  Includes Unicode labels and three point sizes.\n}\ntitle 项目规划\nx-axis 简单 --> 复杂\ny-axis 低收益 --> 高收益\nquadrant-1 长期计划\nquadrant-2 立即实施\nquadrant-3 保持观察\nquadrant-4 重新评估\n\"编辑器 Δ\": [0.25, 0.8] radius: 6\n\"保存 😀\": [0.8, 0.35] radius: 9\n\"日本語検索\": [0.4, 0.4] radius: 4\n",
+      "features": [
+        "unicode",
+        "accessibility",
+        "multiline-description",
+        "point-styles"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/quadrantChart.md",
+        "section": "Combined documented syntax"
+      }
+    },
+    {
+      "id": "quadrant-single-ended-axes",
+      "level": "intermediate",
+      "source": "quadrantChart\ntitle One-sided axis labels\nx-axis Increasing effort -->\ny-axis Confidence\nquadrant-1 Explore\nquadrant-3 Maintain\nA: [0.1, 0.9]\nB: [0.9, 0.1]\nC: [0.5, 0.5]\n",
+      "features": [
+        "single-ended-axes",
+        "partial-quadrant-labels",
+        "center-point"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/quadrantChart.md",
+        "section": "Combined documented syntax"
+      }
+    }
+  ]
+}

@@ -1,0 +1,148 @@
+{
+  "family": "packet",
+  "cases": [
+    {
+      "id": "packet-official-udp",
+      "level": "basic",
+      "source": "packet\ntitle UDP Packet\n+16: \"Source Port\"\n+16: \"Destination Port\"\n32-47: \"Length\"\n48-63: \"Checksum\"\n64-95: \"Data (variable length)\"\n",
+      "features": [
+        "relative-fields",
+        "absolute-fields",
+        "title"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/packet.md",
+        "section": "Examples"
+      }
+    },
+    {
+      "id": "packet-official-tcp",
+      "level": "complex",
+      "source": "---\ntitle: \"TCP Packet\"\n---\npacket\n0-15: \"Source Port\"\n16-31: \"Destination Port\"\n32-63: \"Sequence Number\"\n64-95: \"Acknowledgment Number\"\n96-99: \"Data Offset\"\n100-105: \"Reserved\"\n106: \"URG\"\n107: \"ACK\"\n108: \"PSH\"\n109: \"RST\"\n110: \"SYN\"\n111: \"FIN\"\n112-127: \"Window\"\n128-143: \"Checksum\"\n144-159: \"Urgent Pointer\"\n160-191: \"(Options and Padding)\"\n192-255: \"Data (variable length)\"\n",
+      "features": [
+        "tcp-header",
+        "single-bit-flags",
+        "eight-rows",
+        "frontmatter-title"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/packet.md",
+        "section": "Examples"
+      }
+    },
+    {
+      "id": "packet-official-register",
+      "level": "intermediate",
+      "source": "---\nconfig:\n  packet:\n    showBits: true\n    bitOrder: descending\n    bitsPerRow: 16\n---\npacket\n0-7: \"DATA\"\n8-11: \"TYPE\"\n12: \"EN\"\n13-15: \"RESERVED\"\n",
+      "features": [
+        "descending-bits",
+        "sixteen-bit-rows"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/packet.md",
+        "section": "Bit Numbering Order (v12.0.0+)"
+      }
+    },
+    {
+      "id": "packet-cross-word-fields",
+      "level": "complex",
+      "source": "packet\ntitle Framed transport record\n+3: \"Version\"\n+5: \"Opcode\"\n+21: \"Payload length\"\n+7: \"Flags spanning words\"\n+48: \"Correlation identifier\"\n+3: \"Checksum kind\"\n+65: \"Checksum and partial final word\"\n",
+      "features": [
+        "multirow-field",
+        "partial-final-row",
+        "relative-addressing"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/packet.md",
+        "section": "Combined documented syntax"
+      },
+      "config": {
+        "packet": {
+          "bitsPerRow": 16,
+          "bitWidth": 27,
+          "rowHeight": 36
+        }
+      }
+    },
+    {
+      "id": "packet-descending-cross-word",
+      "level": "complex",
+      "source": "packet\ntitle Descending words with unaligned fields\n0-2: \"MODE\"\n3-35: \"ADDRESS\"\n36: \"READY\"\n37-74: \"PAYLOAD\"\n75-82: \"CRC\"\n",
+      "features": [
+        "descending-bits",
+        "multirow-field",
+        "partial-final-row",
+        "single-bit-field"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/packet.md",
+        "section": "Combined documented syntax"
+      },
+      "config": {
+        "packet": {
+          "bitsPerRow": 24,
+          "bitOrder": "descending",
+          "bitWidth": 20
+        }
+      }
+    },
+    {
+      "id": "packet-narrow-rows-hidden-bits",
+      "level": "complex",
+      "source": "packet\naccTitle: Three independent words\naccDescr {\n  Narrow rows retain labels when bit indices are hidden.\n}\n+1: \"α\"\n+2: \"β\"\n+9: \"Spanning field\"\n+7: \"Tail\"\n+1: \"Z\"\n",
+      "features": [
+        "accessibility",
+        "hidden-bit-labels",
+        "eight-bit-rows",
+        "multiline-description"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/packet.md",
+        "section": "Combined documented syntax"
+      },
+      "config": {
+        "packet": {
+          "bitsPerRow": 8,
+          "showBits": false,
+          "paddingX": 9,
+          "paddingY": 11
+        }
+      }
+    },
+    {
+      "id": "packet-large-word-small-tail",
+      "level": "complex",
+      "source": "packet\ntitle Four word message\n0-63: \"Message identifier\"\n+1: \"E\"\n+15: \"Epoch\"\n+112: \"Payload spanning two words\"\n+7: \"Tail\"\n",
+      "features": [
+        "sixty-four-bit-rows",
+        "wide-field",
+        "partial-final-row"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/packet.md",
+        "section": "Combined documented syntax"
+      },
+      "config": {
+        "packet": {
+          "bitsPerRow": 64,
+          "bitWidth": 14,
+          "bitOrder": "descending"
+        }
+      }
+    },
+    {
+      "id": "packet-unicode-fields",
+      "level": "intermediate",
+      "source": "packet\ntitle 文档传输 / Δ revision\n+8: \"版本\"\n+8: \"状態\"\n+16: \"校验和\"\n+32: \"Δ revision 😀\"\n",
+      "features": [
+        "unicode",
+        "mixed-scripts",
+        "full-word-field"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/packet.md",
+        "section": "Combined documented syntax"
+      }
+    }
+  ]
+}

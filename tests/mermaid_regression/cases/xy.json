@@ -1,0 +1,169 @@
+{
+  "family": "xy",
+  "cases": [
+    {
+      "id": "xy-official-revenue",
+      "level": "complex",
+      "source": "xychart\n    title \"Sales Revenue\"\n    x-axis [jan, feb, mar, apr, may, jun, jul, aug, sep, oct, nov, dec]\n    y-axis \"Revenue (in $)\" 4000 --> 11000\n    bar [5000, 6000, 7500, 8200, 9500, 10500, 11000, 10200, 9200, 8500, 7000, 6000]\n    line [5000, 6000, 7500, 8200, 9500, 10500, 11000, 10200, 9200, 8500, 7000, 6000]\n",
+      "features": [
+        "twelve-categories",
+        "mixed-bar-line",
+        "nonzero-minimum"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/xyChart.md",
+        "section": "Example"
+      }
+    },
+    {
+      "id": "xy-official-percentiles",
+      "level": "complex",
+      "source": "xychart-beta\n  title \"An Example Chart\"\n  x-axis [\"90d\", \"60d\", \"30d\", \"7d\", \"1d\", \"Current\"]\n  y-axis \"Seconds\" 0 --> 198.2\n  line \"avg\" [48.1, 41.5, 45.7, 72.8, 67.7, 59.9]\n  line \"p50\" [38.2, 36.8, 39.7, 54.5, 49.0, 38.4]\n  line \"p95\" [112.2, 75.3, 103.0, 177.0, 180.2, 109.4]\n",
+      "features": [
+        "three-series",
+        "legends",
+        "fractional-range"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/xyChart.md",
+        "section": "Legend (v11.17.0+)"
+      }
+    },
+    {
+      "id": "xy-official-four-series-colors",
+      "level": "complex",
+      "source": "---\nconfig:\n  themeVariables:\n    xyChart:\n      plotColorPalette: '#000000, #0000FF, #00FF00, #FF0000'\n---\nxychart\ntitle \"Different Colors in xyChart\"\nx-axis \"categoriesX\" [\"Category 1\", \"Category 2\", \"Category 3\", \"Category 4\"]\ny-axis \"valuesY\" 0 --> 50\n%% Black line\nline [10,20,30,40]\n%% Blue bar\nbar [20,30,25,35]\n%% Green bar\nbar [15,25,20,30]\n%% Red line\nline [5,15,25,35]\n",
+      "features": [
+        "four-series",
+        "custom-palette",
+        "mixed-bar-line"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/xyChart.md",
+        "section": "Setting Colors for Lines and Bars"
+      }
+    },
+    {
+      "id": "xy-official-data-labels",
+      "level": "intermediate",
+      "source": "---\nconfig:\n    xyChart:\n        showDataLabel: true\n---\nxychart\n    title \"Genres in top 100 book survey of 2025\"\n    x-axis [comedy, romance, mystery, crime, \"non fiction\", other]\n    y-axis \"Number of Books\" 0 --> 30\n    bar [12,2,20,25,17,24]\n",
+      "features": [
+        "bar-labels",
+        "quoted-categories"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/xyChart.md",
+        "section": "Displaying individual values on a bar chart (v11.14.0+)"
+      }
+    },
+    {
+      "id": "xy-official-outside-labels",
+      "level": "intermediate",
+      "source": "---\nconfig:\n    xyChart:\n        showDataLabel: true\n        showDataLabelOutsideBar: true\n---\nxychart\n    title \"Genres in top 100 book survey of 2025\"\n    x-axis [comedy, romance, mystery, crime, \"non fiction\", other]\n    y-axis \"Number of Books\" 0 --> 30\n    bar [12,2,20,25,17,24]\n",
+      "features": [
+        "outside-bar-labels",
+        "six-categories"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/xyChart.md",
+        "section": "Displaying individual values on a bar chart (v11.14.0+)"
+      }
+    },
+    {
+      "id": "xy-official-model-labels",
+      "level": "complex",
+      "source": "xychart\n    title \"Smallest AI models scoring above 60% on MMLU\"\n    x-axis \"Date\" [\"Apr 2022\", \"Feb 2023\", \"Jul 2023\", \"Sep 2023\", \"Apr 2024\"]\n    y-axis \"Parameters (B)\" 0 --> 600\n    line [540 \"PaLM\", 65 \"LLaMA-65B\", 34 \"Llama 2 34B\", 7 \"Mistral 7B\", 3.8 \"Phi-3-mini\"]\n",
+      "features": [
+        "per-point-labels",
+        "large-value-range",
+        "long-labels"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/xyChart.md",
+        "section": "Per-point text labels for line charts (v11.16.0+)"
+      }
+    },
+    {
+      "id": "xy-official-custom-size",
+      "level": "complex",
+      "source": "---\nconfig:\n    xyChart:\n        width: 900\n        height: 600\n        showDataLabel: true\n    themeVariables:\n        xyChart:\n            titleColor: \"#ff0000\"\n---\nxychart\n    title \"Sales Revenue\"\n    x-axis [jan, feb, mar, apr, may, jun, jul, aug, sep, oct, nov, dec]\n    y-axis \"Revenue (in $)\" 4000 --> 11000\n    bar [5000, 6000, 7500, 8200, 9500, 10500, 11000, 10200, 9200, 8500, 7000, 6000]\n    line [5000, 6000, 7500, 8200, 9500, 10500, 11000, 10200, 9200, 8500, 7000, 6000]\n",
+      "features": [
+        "twelve-categories",
+        "bar-labels",
+        "mixed-bar-line",
+        "custom-size"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/xyChart.md",
+        "section": "Example on config and theme"
+      }
+    },
+    {
+      "id": "xy-basic-single-line",
+      "level": "basic",
+      "source": "xychart\nx-axis [Start, Middle, End]\ny-axis 0 --> 10\nline [2,8,5]\n",
+      "features": [
+        "category-axis",
+        "single-series"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/xyChart.md",
+        "section": "Combined documented syntax"
+      }
+    },
+    {
+      "id": "xy-horizontal-series-and-labels",
+      "level": "complex",
+      "source": "xychart horizontal\ntitle \"Cross-platform latency\"\nx-axis [\"Windows desktop\", \"Linux desktop\", \"macOS desktop\", \"Remote session\"]\ny-axis \"Milliseconds\" 0 --> 120\nbar \"Median\" [35,28,32,55]\nline \"P95\" [68 \"Windows\",52,60,110 \"Remote\"]\nline \"P99\" [85,72,80,118]\n",
+      "features": [
+        "horizontal",
+        "bar-line-combination",
+        "three-series",
+        "legend",
+        "point-labels",
+        "outside-bar-labels"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/xyChart.md",
+        "section": "Combined documented syntax"
+      },
+      "config": {
+        "xyChart": {
+          "width": 900,
+          "height": 560,
+          "showLegend": true,
+          "showDataLabel": true,
+          "showDataLabelOutsideBar": true
+        }
+      }
+    },
+    {
+      "id": "xy-rotated-axes-decimals",
+      "level": "complex",
+      "source": "xychart\ntitle \"Quarterly change by department\"\nx-axis [\"Editorial services\", \"Research and design\", \"Platform engineering\", \"Customer support\", \"Infrastructure\"]\ny-axis \"Net change\" -12.5 --> 25\nbar \"Current\" [8.5,-4.5,12.25,0,21.5]\nline \"Previous\" [7,-8.25,9.5,3.75,18]\n",
+      "features": [
+        "negative-values",
+        "zero-values",
+        "fractional-values",
+        "rotated-labels",
+        "long-categories",
+        "legend"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/xyChart.md",
+        "section": "Combined documented syntax"
+      },
+      "config": {
+        "xyChart": {
+          "width": 960,
+          "height": 640,
+          "showLegend": true,
+          "xAxis": {
+            "labelRotation": -45,
+            "labelFontSize": 15
+          }
+        }
+      }
+    }
+  ]
+}

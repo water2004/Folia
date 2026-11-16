@@ -1,0 +1,130 @@
+{
+  "family": "timeline",
+  "cases": [
+    {
+      "id": "timeline-official-social-media",
+      "level": "basic",
+      "source": "timeline\n    title History of Social Media Platform\n    2002 : LinkedIn\n    2004 : Facebook : Google\n    2005 : YouTube\n    2006 : Twitter\n",
+      "features": [
+        "multiple-events",
+        "periods",
+        "title"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/timeline.md",
+        "section": "Syntax"
+      }
+    },
+    {
+      "id": "timeline-official-industry",
+      "level": "complex",
+      "source": "timeline\n    title Timeline of Industrial Revolution\n    section 17th-20th century\n        Industry 1.0 : Machinery, Water power, Steam <br>power\n        Industry 2.0 : Electricity, Internal combustion engine, Mass production\n        Industry 3.0 : Electronics, Computers, Automation\n    section 21st century\n        Industry 4.0 : Internet, Robotics, Internet of Things\n        Industry 5.0 : Artificial intelligence, Big data, 3D printing\n",
+      "features": [
+        "sections",
+        "long-event-labels",
+        "line-breaks"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/timeline.md",
+        "section": "Grouping of time periods in sections/ages"
+      }
+    },
+    {
+      "id": "timeline-official-british-history",
+      "level": "complex",
+      "source": "timeline\n        title England's History Timeline\n        section Stone Age\n          7600 BC : Britain's oldest known house was built in Orkney, Scotland\n          6000 BC : Sea levels rise and Britain becomes an island.<br> The people who live here are hunter-gatherers.\n        section Bronze Age\n          2300 BC : People arrive from Europe and settle in Britain. <br>They bring farming and metalworking.\n                  : New styles of pottery and ways of burying the dead appear.\n          2200 BC : The last major building works are completed at Stonehenge.<br> People now bury their dead in stone circles.\n                  : The first metal objects are made in Britain.Some other nice things happen. it is a good time to be alive.\n",
+      "features": [
+        "long-period-labels",
+        "long-event-labels",
+        "continuation-events",
+        "line-breaks"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/timeline.md",
+        "section": "Wrapping of text for long time-periods or events"
+      }
+    },
+    {
+      "id": "timeline-official-quarterly-release",
+      "level": "complex",
+      "source": "timeline\n        title MermaidChart 2023 Timeline\n        section 2023 Q1 <br> Release Personal Tier\n          Bullet 1 : sub-point 1a : sub-point 1b\n               : sub-point 1c\n          Bullet 2 : sub-point 2a : sub-point 2b\n        section 2023 Q2 <br> Release XYZ Tier\n          Bullet 3 : sub-point <br> 3a : sub-point 3b\n               : sub-point 3c\n          Bullet 4 : sub-point 4a : sub-point 4b\n",
+      "features": [
+        "section-line-breaks",
+        "continuation-events",
+        "multiple-events",
+        "event-line-breaks"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/timeline.md",
+        "section": "Wrapping of text for long time-periods or events"
+      }
+    },
+    {
+      "id": "timeline-official-top-down",
+      "level": "complex",
+      "source": "timeline TD\n  title MermaidChart 2023 Timeline\n    section 2023 Q1 <br> Release Personal Tier\n      Bullet 1 : sub-point 1a : sub-point 1b\n      Bullet 2 : sub-point 2a : sub-point 2b\n    section 2023 Q2 <br> Release XYZ Tier\n      Bullet 3 : sub-point <br> 3a : sub-point 3b\n      Bullet 4 : sub-point 4a : sub-point 4b\n",
+      "features": [
+        "top-down",
+        "multi-section",
+        "multiple-events",
+        "line-breaks"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/timeline.md",
+        "section": "Direction (v11.14.0+)"
+      }
+    },
+    {
+      "id": "timeline-official-custom-colors",
+      "level": "intermediate",
+      "source": "---\nconfig:\n  logLevel: 'debug'\n  theme: 'default'\n  themeVariables:\n    cScale0: '#ff0000'\n    cScaleLabel0: '#ffffff'\n    cScale1: '#00ff00'\n    cScale2: '#0000ff'\n    cScaleLabel2: '#ffffff'\n---\n       timeline\n        title History of Social Media Platform\n          2002 : LinkedIn\n          2004 : Facebook : Google\n          2005 : YouTube\n          2006 : Twitter\n          2007 : Tumblr\n          2008 : Instagram\n          2010 : Pinterest\n",
+      "features": [
+        "custom-colors",
+        "seven-periods",
+        "multiple-events"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/timeline.md",
+        "section": "Customizing Color scheme"
+      }
+    },
+    {
+      "id": "timeline-deep-events-accessibility",
+      "level": "complex",
+      "source": "timeline TD\ntitle Release train\naccTitle: Delivery milestones\naccDescr {\n  Two release phases with multiple events per milestone.\n  Continuation lines retain their owning period.\n}\nsection Preparation<br/>and validation\nJanuary : Design approved : Prototype ready\n        : Accessibility review : Compatibility review\nFebruary : Performance baseline : Documentation\nsection Launch<br/>and follow-up\nMarch : Release candidate : Migration rehearsal\n      : Final sign-off\nApril : General availability : User feedback : Maintenance update\n",
+      "features": [
+        "top-down",
+        "accessibility",
+        "four-events-per-period",
+        "continuation-events",
+        "line-breaks"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/timeline.md",
+        "section": "Combined documented syntax"
+      },
+      "config": {
+        "timeline": {
+          "padding": 16,
+          "leftMargin": 90
+        }
+      }
+    },
+    {
+      "id": "timeline-unicode-and-long-periods",
+      "level": "complex",
+      "source": "timeline\ntitle 文档系统演进 / Δ releases\nsection 第一阶段\n早期原型与需求分析 : 确定编辑模型 : 确定渲染模型\n内部测试与校验 : 多语言内容校验<br/>中文 Ελληνικά 日本語 : 完成 😀 回归\nsection 第二阶段\n正式发布与持续维护 : 收集反馈 : 修复兼容性问题\n      : 持续性能优化\n",
+      "features": [
+        "unicode",
+        "long-periods",
+        "long-events",
+        "continuation-events",
+        "multiple-sections"
+      ],
+      "upstream": {
+        "path": "packages/mermaid/src/docs/syntax/timeline.md",
+        "section": "Combined documented syntax"
+      }
+    }
+  ]
+}
