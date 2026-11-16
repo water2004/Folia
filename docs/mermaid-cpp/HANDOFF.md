@@ -2,7 +2,7 @@
 
 ## 当前检查点
 
-- 2026-11-16：全图族复杂回归位于独立分支 `feat/mermaid-comprehensive-regressions`，基线 `a368f9ea70dac36f235d9eca6bdb0be16ea82a5f`。代码与回归按来源、各图族修复、测量编排、ELK阶段、组件接线和验收工具分项提交；最终验证源码为 `0668f0fddc8245a76645e8a8e17675244bf1aa78`，后续收尾提交仅文档。保持CI、原生Math实现、公式缓存与10MB压测文件不动。
+- 2026-11-16：全图族复杂回归位于独立分支 `feat/mermaid-comprehensive-regressions`，基线 `a368f9ea70dac36f235d9eca6bdb0be16ea82a5f`。代码与回归按来源、各图族修复、测量编排、ELK阶段、组件接线和验收工具分项提交；最终验证源码为 `06beebb47d8971f73e4f4b320bc05e76ceec16a1`，后续收尾提交仅文档。GitHub接口发布改变提交元数据，每个提交文件树均与本地验证版本逐项一致，原始本地验证编号与树散列保存在验收JSON。保持CI、原生Math实现、公式缓存与10MB压测文件不动。
 - 固定 Mermaid **12.2.0** / `1fb7869866dd619168d840291c9c54b4f129758b`，ZenUML **3.49.2**。source-lock实际469文件全匹配，原417个已锁定文件哈希不变；原完整elk-worker保持固定来源。机器可读验收及每例SVG散列见 [regression-validation.json](regression-validation.json)，复验见 [regressions.md](regressions.md)。
 - **34图族、375例、230个complex**，每族至少8例；53种Flowchart形状各两次覆盖。官方syntax/config **375/375**，生产完整原生渲染 **375/375**，没有skip/expectedFailure，没有删去失败的复杂输入。
 - **最终核心255项/957780断言、真实Math集成5项/205断言全部通过，0跳过、正常退出0**。日志 `build/mermaid-regression/core-final-accepted.log`、`math-final-accepted.log`，汇总 `final-tests.json`。最终新增ER测试曾遗漏宿主initialize(default/classic)，现仅修测试初始化/诊断；原公式/多词标签输入保留，定向1项17断言通过，生产解析未因此放宽。

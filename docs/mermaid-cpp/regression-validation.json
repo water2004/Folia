@@ -3,7 +3,7 @@
   "verifiedAt": "2026-11-16T04:32:11.964248+00:00",
   "branch": "feat/mermaid-comprehensive-regressions",
   "baseCommit": "a368f9ea70dac36f235d9eca6bdb0be16ea82a5f",
-  "validatedSourceCommit": "0668f0fddc8245a76645e8a8e17675244bf1aa78",
+  "validatedSourceCommit": "06beebb47d8971f73e4f4b320bc05e76ceec16a1",
   "status": "Native rendering, core tests and available official comparisons passed; complete browser SVG acceptance is incomplete.",
   "upstream": {
     "version": "12.2.0",
@@ -4038,5 +4038,15 @@
     "No CI changes.",
     "No native Math implementation or formula cache changes.",
     "No sample-10mb.md read or modification."
-  ]
+  ],
+  "localValidationCommit": "0668f0fddc8245a76645e8a8e17675244bf1aa78",
+  "validatedSourceTree": "dd22a60614512b20be95f7ddddbbfa9159ef02f5",
+  "publication": {
+    "transport": "GitHub Git Data API",
+    "commitsWithIdenticalTrees": 29,
+    "localHistoryHead": "0d506bf81d0b2de3c952ae2ca4e96f943b9eea06",
+    "publishedHistoryHead": "00c43ea67a8712b24fc87cdd96661bbb895aff34",
+    "historyHeadTree": "3e7a1da3302f8d1db482aebe38d78bdbdf208307",
+    "note": "Commit metadata changed during authenticated API publication. Every original commit tree was verified identical before the branch update; source and binaries were not modified."
+  }
 }
