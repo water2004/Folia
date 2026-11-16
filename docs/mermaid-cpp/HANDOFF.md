@@ -2,7 +2,7 @@
 
 ## 当前检查点
 
-- 2026-11-16：独立分支 `feat/mermaid-comprehensive-regressions`，基线 `a368f9ea70dac36f235d9eca6bdb0be16ea82a5f`。远端同名分支仍在基线；本地已分项提交24批至 `5ff08a3`，均尚未推送。工作树 `/workspace/scratch/a4656ef82bb3/Folia`，CI、公式缓存、10MB压测文件不动。
+- 2026-11-16：独立分支 `feat/mermaid-comprehensive-regressions`，基线 `a368f9ea70dac36f235d9eca6bdb0be16ea82a5f`。远端同名分支仍在基线；本地已按来源、图族修复和共享算法分项提交，均尚未推送。工作树 `/workspace/scratch/a4656ef82bb3/Folia`，CI、公式缓存、10MB压测文件不动。
 - 固定 Mermaid 12.2.0 / `1fb7869866dd619168d840291c9c54b4f129758b`；source-lock实际469文件全匹配，原417个已锁定文件哈希不变，证据 `build/mermaid-regression/source-lock-verification.json`。原版完整elk-worker已锁定，新ELK阶段不另换来源。
 - 语料 **34图族、375例、230个complex**，每族至少8例；53种Flowchart形状各两次覆盖。禁止skip/expectedFailure、删除失败复杂输入或让原生输出覆盖官方期望。官方syntax/config **375/375**：`official-prepare-final/report.json`。
 - 生产测量编排提取到 `measured_render` / `TextMeasurer`。Windows仍为原DirectWrite/Math服务；Linux probe用真实Pango走同一C++管线，Zen另用实际Skia。Windows/WinUI本轮未执行，C4宿主可用宽度显式传入。
@@ -14,7 +14,7 @@
 - 完整官方SVG可执行证据：Packet8/8（257元素）、Info8/8，检查实际fontconfig文件hash/index、geometry/paint/text，无栅格；新官方捕获分别在 `final-official-packet` / `final-official-info`。Zen24/24经实际原版renderer与同机Skia透明RGBA逐像素零差、视口/非空文字相同，报告 `zenuml-canvas-native/comparison.json`，最终Probe重建后须刷新散列。不能当34族全量browser通过。
 - 比较器最终 **74项自测通过**（6文字、8RGBA、12Packet、21Info、7视口、6visibility、14文本效果）。包含CSS/presentation、祖先display、可覆盖visibility、dx/dy及未建模效果拒绝；Windows Info自然视口改为实际browser读取但本环境未执行。Info-only正式总gate实测8/375失败，browserCompared0、officialSvgComparedfalse（`partial-gate-current.json`）。
 - Browser限制：本地Chromium socket EPERM；连接Edge任意data测试页被URL策略拒绝并明确禁止变换载体绕过，已停止且完成CUA summary。**不得重试间接载体、不得把未执行的整图browser gate标绿**。Node真实原版无DOM renderer/算法对照可继续；剩余335例31族完整官方SVG视觉对照未执行。
-- graph当前仅负责ER失败的定向排查；data/special已交回并freeze。special最新比较器文本效果修复随本独立工具提交保存。未提交ELK分两包：通用处理阶段及其25/24例；组件/scope接线及其7+14/21例；随后准确docs/validation并push。不存在并发构建。
+- graph当前仅负责ER失败的定向排查；data/special已交回并freeze。special最新比较器文本效果修复随本独立工具提交保存。本批提交通用ELK处理阶段及其25/24例；组件/scope接线及其7+14/21例尚待下一批；随后准确docs/validation并push。不存在并发构建。
 - 下一步：解决/核验ER单例，单Ninja重建必要目标；定向ER数学后全核心与真实Math；375原生；刷新Zen和Info/Packet实际SVG；分项提交剩余源码及准确验证清单；普通非force push新分支并核对远端。保持明确的未完成浏览器验收边界。
 
 ## 数学支持基线（历史，已推送）

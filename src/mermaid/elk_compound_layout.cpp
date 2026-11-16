@@ -7,6 +7,16 @@ import folia.mermaid.elk_order;
 namespace folia::mermaid {
 std::expected<ElkCompoundLayoutResult,std::string> elk_layout_compound(
     const ElkCompoundLayoutInput& original,const ElkFlatLayoutOptions& original_options) {
+    ElkRandom random(static_cast<std::uint64_t>(original_options.seed));
+    return elk_layout_compound(original,original_options,random);
+}
+
+std::expected<ElkCompoundLayoutResult,std::string> elk_layout_compound(
+    const ElkCompoundLayoutInput& original,const ElkFlatLayoutOptions& original_options,ElkRandom& root_random) {
+    if(original.nodes.size()!=original.hierarchy.nodes.size())
+        return std::unexpected("ELK compound layout requires measured original nodes");
+    if(!original.node_model_order.empty()&&original.node_model_order.size()!=original.nodes.size())
+        return std::unexpected("ELK node model order must match the measured nodes");
     const auto direction=original_options.direction;
     const bool vertical=direction==ElkLayoutDirection::down||direction==ElkLayoutDirection::up;
     // ElkGraphImporter.importHierarchicalGraph forces parentGraphDirection
@@ -26,7 +36,6 @@ std::expected<ElkCompoundLayoutResult,std::string> elk_layout_compound(
         if(vertical&&!input.hierarchy.nodes[n].group)std::swap(input.nodes[n].width,input.nodes[n].height);
     }
     if(vertical){for(auto& l:input.center_labels)std::swap(l.width,l.height);for(auto& l:input.end_labels)std::swap(l.width,l.height);}
-    if(input.nodes.size()!=input.hierarchy.nodes.size())return std::unexpected("ELK compound layout requires measured original nodes");
     auto prepared=elk_prepare_compound_graph(input.hierarchy);if(!prepared)return std::unexpected(prepared.error());auto& topology=*prepared;
     // Only a port with a child-scope dummy has an imported position.
     // CompoundGraphPreprocessor gives all real ports dummies when a child
@@ -46,6 +55,7 @@ std::expected<ElkCompoundLayoutResult,std::string> elk_layout_compound(
         node.boundary->border_offset=graph_options(node.graph).placement.edge_edge/2;
     const auto absent=std::numeric_limits<std::size_t>::max();
     struct Local {
+        ElkSelfLoopPreparation self_loops;
         ElkLabelPreparation labels;
         std::vector<ElkEndLabel> ends;
         std::vector<std::size_t> ports,segments;
@@ -57,6 +67,7 @@ std::expected<ElkCompoundLayoutResult,std::string> elk_layout_compound(
     std::vector<std::size_t> local_node(topology.nodes.size()),local_port(topology.ports.size(),absent),local_segment(topology.segments.size());
     for(std::size_t gi=0;gi<topology.graphs.size();++gi) {
         const auto& sub=topology.graphs[gi];auto& local=locals.emplace_back(graph_options(gi));
+        if(gi==0)local.random=root_random;
         const auto& options=local.options;
         ElkCycleGraph source{.node_count=sub.nodes.size()};std::vector<ElkExternalLayerRole> roles(sub.nodes.size());
         for(std::size_t n=0;n<sub.nodes.size();++n)local_node[sub.nodes[n]]=n;
@@ -79,13 +90,26 @@ std::expected<ElkCompoundLayoutResult,std::string> elk_layout_compound(
             const auto s=label.head?chain.head_segment:chain.tail_segment;
             if(topology.segments[s].graph==gi){label.original_edge=local_segment[s];local.ends.push_back(label);}
         }
-        auto labels=elk_prepare_inline_labels(source,centers,label_direction,
+        std::vector<std::size_t> retained_nodes;
+        for(const auto n:sub.nodes)if(topology.nodes[n].nested_graph&&
+            std::ranges::any_of(topology.nodes[n].ports,[&](auto p){return imported_ports[p];}))
+            retained_nodes.push_back(local_node[n]);
+        auto loops=elk_prepare_self_loops(source,centers,local.ends,retained_nodes);
+        if(!loops)return std::unexpected(loops.error());local.self_loops=std::move(*loops);
+        local.ends=local.self_loops.end_labels;
+        for(std::size_t p=0;p<local.ports.size();++p)
+            local_port[local.ports[p]]=local.self_loops.port_indices[p].value_or(absent);
+        auto labels=elk_prepare_inline_labels(local.self_loops.graph,local.self_loops.center_labels,label_direction,
             options.edge_label_spacing,options.label_label_spacing,roles);
         if(!labels)return std::unexpected(labels.error());local.labels=std::move(*labels);auto& g=local.labels.graph;
         for(const auto n:sub.nodes) {
             auto& node=g.nodes[local_node[n]];
             if(topology.nodes[n].boundary){node.kind=ElkLayerNodeKind::external_port;node.fixed_port_positions=true;}
-            else {const auto& measured=input.nodes[*topology.nodes[n].original];node.width=measured.width;node.height=measured.height;}
+            else {
+                const auto original_node=*topology.nodes[n].original;
+                const auto& measured=input.nodes[original_node];node.width=measured.width;node.height=measured.height;
+                if(!input.node_model_order.empty())node.original_node=input.node_model_order[original_node];
+            }
         }
         elk_split_long_edges(g);elk_assign_flat_port_sides(g);
         // CompoundGraphPreprocessor fixes the side of linked parent ports
@@ -93,7 +117,7 @@ std::expected<ElkCompoundLayoutResult,std::string> elk_layout_compound(
         // no parent-layer edges from which PortSideProcessor can infer this.
         for(const auto p:local.ports) {
             const auto& port=topology.ports[p];
-            if(imported_ports[p]||topology.nodes[port.node].boundary)
+            if(local_port[p]!=absent&&(imported_ports[p]||topology.nodes[port.node].boundary))
                 g.ports[local_port[p]].side=port.side;
         }
         elk_prepare_inverted_ports(g);
@@ -107,7 +131,15 @@ std::expected<ElkCompoundLayoutResult,std::string> elk_layout_compound(
         for(const auto n:sub.nodes)if(topology.nodes[n].boundary_port)
             entry.ports.push_back({local_node[n],local_port[*topology.nodes[n].boundary_port]});
     }
-    if(const auto ordered=elk_order_hierarchy(order);!ordered)return std::unexpected(ordered.error());
+    if(const auto ordered=elk_order_hierarchy(order,7,options.hierarchical_layout);!ordered)
+        return std::unexpected(ordered.error());
+    if(elk_uses_greedy_switch(options,input.nodes.size())) {
+        // Non-hierarchical scope resolution precedes this pipeline; the
+        // independent wrapper above has already checked that no child remains.
+        auto& local=locals.front();
+        if(const auto switched=elk_greedy_switch(local.labels.graph,local.random);!switched)
+            return std::unexpected(switched.error());
+    }
     ElkCompoundGeometry geometry{.graphs=std::vector<ElkCompoundContent>(order.size()),
         .node_positions=std::vector<ElkRoutingPoint>(topology.nodes.size()),.port_positions=std::vector<ElkRoutingPoint>(topology.ports.size()),
         .segments=std::vector<ElkCompoundSegmentGeometry>(topology.segments.size())};
@@ -119,6 +151,12 @@ std::expected<ElkCompoundLayoutResult,std::string> elk_layout_compound(
     for(const auto gi:breadth|std::views::reverse) {
         auto& local=locals[gi];auto& g=local.labels.graph;const auto& sub=topology.graphs[gi];
         const auto& options=local.options;
+        std::vector<ElkSelfLoopNodeOptions> loop_options(sub.nodes.size());
+        for(const auto n:sub.nodes)if(topology.nodes[n].original)
+            loop_options[local_node[n]]=input.nodes[*topology.nodes[n].original].self_loops;
+        elk_restore_self_loop_ports(local.self_loops,g,loop_options);
+        for(std::size_t p=0;p<local.ports.size();++p)
+            local_port[local.ports[p]]=*local.self_loops.port_indices[p];
         std::vector<ElkPointPortOptions> port_options(g.nodes.size(),options.ports);
         for(const auto n:sub.nodes)if(topology.nodes[n].original) {
             auto& node=g.nodes[local_node[n]];port_options[local_node[n]].center_alignment=input.nodes[*topology.nodes[n].original].center_ports;
@@ -143,6 +181,9 @@ std::expected<ElkCompoundLayoutResult,std::string> elk_layout_compound(
             margins[n].left=std::max(margins[n].left,-g.ports[p].x);
             margins[n].right=std::max(margins[n].right,g.ports[p].x-g.nodes[n].width);
         }
+        const auto loop_geometry=elk_route_self_loops(local.self_loops,g,margins,local.random,
+            {options.node_self_loop_spacing,options.placement.edge_edge,options.edge_label_spacing,
+                options.label_label_spacing,label_direction});
         const auto end_cells=elk_prepare_end_labels(g,local.ends,margins,vertical,options.edge_label_spacing,options.label_label_spacing,vertical,false);
         if(!end_cells)return std::unexpected(end_cells.error());
         const auto y=elk_place_flat_nodes(g,options.placement,false);if(!y)return std::unexpected(y.error());
@@ -178,9 +219,10 @@ std::expected<ElkCompoundLayoutResult,std::string> elk_layout_compound(
             routed->node_x[local_node[n]]=dummies[i].position.x;
         }
         auto routes=elk_restore_flat_routes(g,*routed,*y,options.unnecessary_bendpoints);if(!routes)return std::unexpected(routes.error());
-        for(auto& route:*routes)geometry.segments[local.segments[route.original_edge]].bends=std::move(route.bends);
         auto center_labels=elk_restore_inline_labels(g,local.labels.dummies,routed->node_x,*y,label_direction,options.label_label_spacing);
         auto end_labels=elk_restore_end_labels(*end_cells,routed->node_x,*y,vertical,options.label_label_spacing);
+        elk_restore_self_loops(local.self_loops,loop_geometry,routed->node_x,*y,*routes,center_labels,end_labels);
+        for(auto& route:*routes)geometry.segments[local.segments[route.original_edge]].bends=std::move(route.bends);
         for(auto label:center_labels) {
             const auto s=local.segments[label.original_edge];label.original_edge=topology.segments[s].original_edge;
             center_positions.emplace_back(gi,label);
@@ -193,7 +235,9 @@ std::expected<ElkCompoundLayoutResult,std::string> elk_layout_compound(
             const auto ln=local_node[n];geometry.node_positions[n]={routed->node_x[ln],(*y)[ln]};
             if(topology.nodes[n].original)boxes[*topology.nodes[n].original]={routed->node_x[ln],(*y)[ln],g.nodes[ln].width,g.nodes[ln].height};
         }
-        for(std::size_t p=0;p<local.ports.size();++p)geometry.port_positions[local.ports[p]]={g.ports[p].x,g.ports[p].y};
+        for(const auto p:local.ports) {
+            const auto& port=g.ports[local_port[p]];geometry.port_positions[p]={port.x,port.y};
+        }
     }
     const auto origin=[&](std::size_t gi) {
         ElkRoutingPoint point{options.padding,options.padding};
@@ -225,6 +269,7 @@ std::expected<ElkCompoundLayoutResult,std::string> elk_layout_compound(
     result.group_titles.resize(input.nodes.size());
     for(std::size_t n=0;n<input.group_boxes.size();++n)if(input.hierarchy.nodes[n].group&&input.group_boxes[n].title)
         result.group_titles[n]=elk_group_title_box(result.nodes[n],*input.group_boxes[n].title);
+    root_random=locals.front().random;
     return result;
 }
 }

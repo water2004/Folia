@@ -15,6 +15,9 @@ struct ElkCompoundLayoutInput {
     // Optional per-group layered options, indexed by original node. Root
     // options are supplied to elk_layout_compound; empty entries inherit them.
     std::vector<std::optional<ElkFlatLayoutOptions>> group_options;
+    // Optional import-time MODEL_ORDER identities. Component DFS changes the
+    // working node order without renumbering these original ordering values.
+    std::vector<std::size_t> node_model_order;
 };
 struct ElkCompoundLayoutResult : ElkFlatLayoutResult {
     std::vector<std::optional<ElkNodeBox>> group_titles;
@@ -26,4 +29,8 @@ struct ElkCompoundLayoutResult : ElkFlatLayoutResult {
 // Per-group spacing and padding remain independent of the inherited direction.
 [[nodiscard]] std::expected<ElkCompoundLayoutResult,std::string> elk_layout_compound(
     const ElkCompoundLayoutInput& input,const ElkFlatLayoutOptions& options={});
+// Components share the original root graph's RNG stream. Child graphs retain
+// their own seeded state, matching the hierarchy importer and layered engine.
+[[nodiscard]] std::expected<ElkCompoundLayoutResult,std::string> elk_layout_compound(
+    const ElkCompoundLayoutInput& input,const ElkFlatLayoutOptions& options,ElkRandom& root_random);
 }
