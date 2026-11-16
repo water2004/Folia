@@ -98,6 +98,31 @@ function measurementFreeSnapshot(source,family) {
       const number=value===null?fallback:Number(value);
       assert(Number.isFinite(number),'Invalid '+family+' '+name);return number;
     };
+    const ordinaryText=element=>{
+      // These two renderers use plain horizontal text. Without a browser we
+      // cannot approve additional shaping, rotation, or decoration effects by
+      // comparing only x/y and font size. Fail explicitly instead of silently
+      // discarding an effect; the browser path can inspect its actual pixels.
+      const defaults={
+        rotate:['none','0','0deg'],lengthAdjust:['spacing'],
+        'letter-spacing':['normal','0','0px'],'word-spacing':['normal','0','0px'],
+        'text-decoration':['none'],'text-decoration-line':['none'],'text-shadow':['none'],
+        'baseline-shift':['baseline','0','0px'],
+        'writing-mode':['horizontal-tb','lr','lr-tb'],'text-orientation':['mixed'],
+        direction:['ltr'],'unicode-bidi':['normal']
+      };
+      for(let node=element;node;node=node.parentElement){
+        assert(!node.hasAttribute('textLength'),'Unsupported '+family+' textLength');
+        const computed=dom.window.getComputedStyle(node);
+        for(const [name,values]of Object.entries(defaults)){
+          for(const value of [node.getAttribute(name),computed.getPropertyValue(name)]){
+            if(value===null||!value.trim())continue;
+            assert(values.includes(value.trim()),'Unsupported '+family+' text effect '+name+': '+value);
+          }
+        }
+        if(node===svg)break;
+      }
+    };
     const elements=[];
     for(const element of svg.querySelectorAll('*')){
       if(element.closest('defs,style,title,desc'))continue;
@@ -134,6 +159,8 @@ function measurementFreeSnapshot(source,family) {
         result.width=numeric(element,'width');result.height=numeric(element,'height');
         result.rx=numeric(element,'rx');result.ry=numeric(element,'ry');
       }else{
+        ordinaryText(element);
+        result.dx=numeric(element,'dx');result.dy=numeric(element,'dy');
         result.text=element.textContent;
         result.fontSize=Number.parseFloat(property(element,'font-size','16px'));
         result.fontFamily=property(element,'font-family','').replace(/["']/g,'').replace(/\s*,\s*/g,',').toLowerCase();
@@ -423,10 +450,16 @@ async function renderCapture(page,source,family) {
   await page.setContent('<!doctype html><html><head><meta charset="utf-8">'+
     '<style>html,body{margin:0;padding:0;background:transparent}body>svg{vertical-align:top}</style>'+
     '</head><body>'+source+'</body></html>',{waitUntil:'load'});
-  const viewport=await page.evaluate(async({family,decide})=>{
+  const {viewport,sizing}=await page.evaluate(async({family,decide})=>{
     const captureViewport=(0,eval)('('+decide+')');
     const svg=document.querySelector('svg');
     if(!svg)throw new Error('Missing SVG root');
+    const style=getComputedStyle(svg);
+    const sizing=family==='info'?{
+      width:svg.getAttribute('width'),height:svg.getAttribute('height'),
+      maxWidth:style.maxWidth,maxHeight:style.maxHeight,
+      preserveAspectRatio:svg.getAttribute('preserveAspectRatio')??'xMidYMid meet'
+    }:null;
     const currentViewport=()=>captureViewport({family,viewBoxPresent:svg.hasAttribute('viewBox'),
       view:svg.viewBox.baseVal,bounds:svg.getBoundingClientRect()});
     const initial=currentViewport();
@@ -438,19 +471,18 @@ async function renderCapture(page,source,family) {
     }
     await document.fonts.ready;
     await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
-    return currentViewport();
+    return {viewport:currentViewport(),sizing};
   },{family,decide:captureViewport.toString()});
   const snapshot=await page.evaluate(inspectVisibleSvg,
     {viewport,visibilityDecision:visiblePresentation.toString()});
   const png=await page.screenshot({omitBackground:true,captureBeyondViewport:true,
     clip:{x:0,y:0,width:Math.ceil(viewport.width),height:Math.ceil(viewport.height)}});
-  return {snapshot,png};
+  return {snapshot,png,sizing};
 }
 
 async function compareBrowser(page,official,native,family) {
-  if(family==='info')
-    closeObject(infoSnapshot(native).sizing,infoSnapshot(official).sizing,'Info sizing contract');
   const expected=await renderCapture(page,official,family),actual=await renderCapture(page,native,family);
+  if(family==='info')closeObject(actual.sizing,expected.sizing,'Info sizing contract');
   near(actual.snapshot.width,expected.snapshot.width,'Viewport width');
   near(actual.snapshot.height,expected.snapshot.height,'Viewport height');
   const text=compareText(actual.snapshot.texts,expected.snapshot.texts);
@@ -598,6 +630,18 @@ export function selfTest() {
     '<style>svg{display:none}text{display:block}</style><text ')));
   compareInfo(info,info.replace('max-width:400px','max-width:400px;visibility:hidden')
     .replace('<text ','<text style="visibility:visible" '));
+  const textEffects=[
+    'dx="20"','dy="20"','rotate="45"','textLength="250"','lengthAdjust="spacingAndGlyphs"',
+    'letter-spacing="10"','word-spacing="8"','text-decoration="underline"',
+    'baseline-shift="super"','style="text-shadow:2px 2px red"',
+    'writing-mode="vertical-rl"','direction="rtl"'
+  ];
+  for(const effect of textEffects)
+    assert.throws(()=>compareInfo(info,info.replace('<text ','<text '+effect+' ')),effect);
+  assert.throws(()=>compareInfo(info,info.replace('<text ',
+    '<style>svg{letter-spacing:10px}</style><text ')));
+  compareInfo(info,info.replace('<text ',
+    '<text dx="0" dy="0" rotate="0" letter-spacing="0" word-spacing="normal" lengthAdjust="spacing" '));
   const explicit={family:'flowchart',viewBoxPresent:true,
     view:{width:250,height:180},bounds:{width:500,height:360}};
   assert.deepEqual(captureViewport(explicit),{width:250,height:180,intrinsic:false});
@@ -618,7 +662,8 @@ export function selfTest() {
   assert(!visiblePresentation({...visible,ancestors:[...visible.ancestors,{display:'block',opacity:'0'}]}));
   assert(visiblePresentation({...visible,
     ancestors:[...visible.ancestors,{display:'block',opacity:'.5',visibility:'hidden'}]}));
-  return {textChecks:6,rasterChecks:8,packetChecks:12,infoChecks:21,viewportChecks:7,visibilityChecks:6};
+  return {textChecks:6,rasterChecks:8,packetChecks:12,infoChecks:21,viewportChecks:7,visibilityChecks:6,
+    textEffectChecks:textEffects.length+2};
 }
 
 async function main() {
