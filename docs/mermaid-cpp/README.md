@@ -13,8 +13,8 @@
 - **配置合并与主题计算**：通过 `yaml-cpp`（附带 JSON 转义补丁）与 `es-toolkit` 兼容合并语义归并配置树；基于 Khroma 颜色算法派生 11 种内置主题变量；通过 `ConfigSession` 提供请求级配置隔离。
 - **图族识别与统一入口**：`DiagramRegistry` 按上游探测器优先级识别图族，由 `folia.mermaid.render_entry` 统一提供 `prepare_native_diagram`（解析与配置提取）和 `render_native_diagram`（注入测量结果并生成 SVG）。
 
-### 2. 已接入公共渲染入口的 20 个图族
-以下 20 个图族已接入 `render_entry` 与平台渲染层 `folia.platform.mermaid_renderer`，并通过与官方 Mermaid 12.2.0 浏览器渲染结果的 SVG 对照测试：
+### 2. 流程、架构、数据与时间图族
+以下图族已接入 `render_entry` 与平台渲染层 `folia.platform.mermaid_renderer`，并有与官方 Mermaid 12.2.0 渲染结果的基础 SVG 对照记录。新增复杂语料的验收状态单独记录在当前交接中：
 
 | 类别 | 已贯通图族 | 核心实现说明 |
 | --- | --- | --- |
@@ -49,6 +49,7 @@
 - **显式错误图** 使用上游诊断 SVG 图形。普通语法失败通过原生入口的错误结果报告。
 
 ### 7. 平台文本测量与动态库接口（`src/platform/text/` / `tools/mermaid-cpp/`）
+- **可移植测量编排（`measured_render.{ixx,cpp}`）**：公共 source-to-SVG 管线通过 `TextMeasurer` 接收宿主实测字体数据。Windows 应用与跨平台完整图回归使用同一套编排、布局和 SVG 输出；核心模块不依赖 Windows。
 - **DirectWrite 文本测量（`mermaid_measurer.ixx`）**：在 Windows 平台解析 CSS `font-family` 候选列表，提供单行 advance/ink bounds 测量、按 Unicode 断行机会的文本折行以及 SVG 字体 ascent/descent 度量。
 - **C ABI 导出（`native-renderer.h` / `mermaid_host.ixx`）**：`FoliaNativeMermaid.dll` 导出 `FoliaNativeMermaidRender` 与 `FoliaNativeMermaidFree`，接收 UTF-8 源码与亮/暗主题参数，返回由 DLL 分配的 UTF-8 SVG 字符串（或错误文本）及宽高尺寸。
 
@@ -61,6 +62,14 @@
 ### 9. 当前验证基线
 - 迁移前的 PR 基线 `c128acc9` 中，GitHub Actions 工作流 [`.github/workflows/mermaid-cpp.yml`](../../.github/workflows/mermaid-cpp.yml) 在 Windows `standalone` / `integrated` × `Debug` / `Release` 四种配置下全部通过（上游 PR 检查见 [Actions Run #40820458232](https://github.com/water2004/Folia/actions/runs/40820458232)，Fork 仓库检查见 [Actions Run #40820482671](https://github.com/zhao0349/Folia/actions/runs/40820482671)）。
 - 自动化验证覆盖：核心模块测试（`FoliaMermaidTests`）、DirectWrite 平台与 DLL 宿主测试（`FoliaMermaidPlatformTests`、`FoliaMermaidHostTests`）、主工程回归测试（`FoliaTests`、`FoliaWindowsEditorTests`）、同机 DirectWrite 与 Chromium 文本测量对照，以及各图族与官方 Mermaid 浏览器输出的 SVG 对照（实测几何容差 `1.5`，ELK 算子坐标容差 `1e-4`）。
+
+### 10. 全图族复杂回归
+
+`tests/mermaid_regression/cases/` 为 34 个图族保留从基础到复杂的独立输入，
+每族至少 8 例，包含官方完整示例与复杂组合。`FoliaMermaidRegressionProbe`
+经生产测量管线输出 SVG；官方捕获器与严格比较器逐例检查输入及输出散列、
+字体、几何、文字、绘制属性和实际栅格。缺项或未执行的浏览器验收不会被标为通过。
+运行命令、固定基准、验证分层与真实 Canvas 对照见 [全图族回归](regressions.md)。
 
 ---
 
