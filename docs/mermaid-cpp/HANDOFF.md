@@ -14,7 +14,7 @@
 - 完整官方SVG可执行证据：Packet8/8（257元素）、Info8/8，检查实际fontconfig文件hash/index、geometry/paint/text，无栅格；新官方捕获分别在 `final-official-packet` / `final-official-info`。Zen24/24经实际原版renderer与同机Skia透明RGBA逐像素零差、视口/非空文字相同，报告 `zenuml-canvas-native/comparison.json`，最终Probe重建后须刷新散列。不能当34族全量browser通过。
 - 比较器最终 **74项自测通过**（6文字、8RGBA、12Packet、21Info、7视口、6visibility、14文本效果）。包含CSS/presentation、祖先display、可覆盖visibility、dx/dy及未建模效果拒绝；Windows Info自然视口改为实际browser读取但本环境未执行。Info-only正式总gate实测8/375失败，browserCompared0、officialSvgComparedfalse（`partial-gate-current.json`）。
 - Browser限制：本地Chromium socket EPERM；连接Edge任意data测试页被URL策略拒绝并明确禁止变换载体绕过，已停止且完成CUA summary。**不得重试间接载体、不得把未执行的整图browser gate标绿**。Node真实原版无DOM renderer/算法对照可继续；剩余335例31族完整官方SVG视觉对照未执行。
-- graph当前仅负责ER失败的定向排查；data/special已交回并freeze。special最新比较器文本效果修复随本独立工具提交保存。本批提交通用ELK处理阶段及其25/24例；组件/scope接线及其7+14/21例尚待下一批；随后准确docs/validation并push。不存在并发构建。
+- graph当前仅负责ER失败的定向排查；data/special已交回并freeze。special最新比较器文本效果修复随本独立工具提交保存。通用ELK阶段已提交11765f6；本批提交组件/scope接线及其7+14/21例。随后完成ER测试初始化核验及准确docs/validation并push。不存在并发构建。
 - 下一步：解决/核验ER单例，单Ninja重建必要目标；定向ER数学后全核心与真实Math；375原生；刷新Zen和Info/Packet实际SVG；分项提交剩余源码及准确验证清单；普通非force push新分支并核对远端。保持明确的未完成浏览器验收边界。
 
 ## 数学支持基线（历史，已推送）

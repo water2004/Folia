@@ -4,6 +4,7 @@ import folia.mermaid.number;
 import folia.mermaid.svg_text;
 import folia.mermaid.rough_rectangle;
 import folia.mermaid.flowchart_elk;
+import folia.mermaid.elk_components;
 namespace folia::mermaid {
 namespace {
 std::u16string trim(std::u16string_view value){auto first=value.find_first_not_of(u" \t\r\n");return first==value.npos?u"":std::u16string(value.substr(first,value.find_last_not_of(u" \t\r\n")-first+1));}

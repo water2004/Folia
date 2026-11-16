@@ -1,6 +1,7 @@
 module folia.mermaid.flowchart_elk;
 import std;
 import folia.mermaid.elk_compound_layout;
+import folia.mermaid.elk_components;
 
 namespace folia::mermaid {
 namespace {
@@ -13,6 +14,8 @@ ElkFlatLayoutOptions root_options(std::u16string_view direction) {
 }
 ElkFlatLayoutOptions group_options() {
     ElkFlatLayoutOptions o;o.placement={50,12,20,12,1.2,6};o.routing={24,30,12};o.padding=24;
+    // Root-only unnecessaryBendpoints is not inherited by an ELK child graph.
+    o.unnecessary_bendpoints=false;
     o.edge_label_spacing=2.4;o.ports.port_spacing=12;o.ports.port_label_spacing_vertical=1.2;return o;
 }
 double group_title_floor(const FlowchartNode& node,const FlowchartTextBox& label) {
@@ -70,6 +73,8 @@ std::vector<bool> subgraph_feedback_edges(const ElkCompoundInput& input) {
     return flags;
 }
 
+#include "flowchart_elk_scopes.inc"
+
 std::expected<ElkMeasuredScene,std::string> layout_scope(
     const FlowchartInput& source,std::span<const FlowchartNodeBox> boxes,
     std::span<const FlowchartEdgeLabelSize> labels,const FlowchartMeasurements& measured,std::span<const ElkEndLabel> end_labels, const ElkFlatLayoutOptions& options) {
@@ -81,11 +86,18 @@ std::expected<ElkMeasuredScene,std::string> layout_scope(
         for(std::size_t i=0;i<source.nodes.size();++i)ids.emplace(source.nodes[i].id,i);
         input.group_boxes.resize(boxes.size());input.group_options.resize(boxes.size());
         std::vector<std::vector<std::size_t>> children(boxes.size());
+        for(std::size_t i=0;i<source.nodes.size();++i)
+            if(!source.nodes[i].parent.empty())children[ids.at(source.nodes[i].parent)].push_back(i);
         for(std::size_t i=0;i<boxes.size();++i) {
-            const auto& node=source.nodes[i];ElkCompoundInputNode n;n.group=node.group;n.direction=options.direction;
-            if(!node.parent.empty()){n.parent=ids.at(node.parent);children[*n.parent].push_back(i);}
+            const auto& node=source.nodes[i];ElkCompoundInputNode n;
+            // configureSubgraphNodes only installs compound options for groups
+            // that actually have children. An empty group stays a zero-size
+            // ELK leaf; its measured title only widens the painted frame later.
+            n.group=node.group&&!children[i].empty();n.direction=options.direction;
+            if(n.group && !node.direction.empty()) n.direction=root_options(node.direction).direction;
+            if(!node.parent.empty())n.parent=ids.at(node.parent);
             input.hierarchy.nodes.push_back(n);
-            if(node.group) {
+            if(n.group) {
                 input.nodes.push_back({group_title_floor(node,measured.nodes[i]),0});
                 input.group_boxes[i].padding={24,24,24,24};
                 if(node.shape!=u"divider"||measured.nodes[i].height>0) {
@@ -93,7 +105,7 @@ std::expected<ElkMeasuredScene,std::string> layout_scope(
                     input.group_boxes[i].title=ElkGroupTitle{width,std::max(0.0,measured.nodes[i].height-2)};
                 }
                 input.group_options[i]=group_options();
-            } else input.nodes.push_back({boxes[i].width,boxes[i].height});
+            } else input.nodes.push_back(node.group?ElkMeasuredNode{}:ElkMeasuredNode{boxes[i].width,boxes[i].height});
         }
         for(std::size_t i=0;i<source.edges.size();++i) {
             const auto& e=source.edges[i];input.hierarchy.edges.push_back({ids.at(e.start),ids.at(e.end)});
@@ -110,11 +122,15 @@ std::expected<ElkMeasuredScene,std::string> layout_scope(
                 return std::unexpected("ELK end label has no edge");
             if (reversed[label.original_edge]) label.head = !label.head;
         }
-        auto placed=elk_layout_compound(input,options);if(!placed)return std::unexpected(placed.error());
+        const auto separate=separate_group_scopes(source,input.hierarchy);
+        auto placed=std::ranges::any_of(separate,[](bool value){return value;})
+            ? layout_directed_scopes(input,options,separate) : elk_layout_compound(input,options);
+        if(!placed)return std::unexpected(placed.error());
         ElkMeasuredScene scene;scene.end_labels=placed->end_labels;auto& layout=scene.layout;layout.width=placed->width;layout.height=placed->height;
         layout.nodes.resize(boxes.size());layout.edges.resize(labels.size());
         for(std::size_t i=0;i<boxes.size();++i) {
-            const auto& b=placed->nodes[i];layout.nodes[i]={source.nodes[i].id,b.x+b.width/2,b.y+b.height/2,b.width,b.height};
+            const auto& b=placed->nodes[i];
+            layout.nodes[i]={source.nodes[i].id,b.x+b.width/2,b.y+b.height/2,b.width,b.height};
         }
         for(const auto& route:placed->routes) {
             auto& points=layout.edges[route.original_edge].points;points.push_back({route.start.x,route.start.y});
@@ -134,7 +150,11 @@ std::expected<ElkMeasuredScene,std::string> layout_scope(
             if(children[group].empty())return;
             double left=std::numeric_limits<double>::infinity(),right=-left,bottom=-left;
             const auto include=[&](double x,double y){left=std::min(left,x);right=std::max(right,x);bottom=std::max(bottom,y);};
-            for(auto child:children[group]){const auto& b=layout.nodes[child];include(b.x-b.width/2,b.y-b.height/2);include(b.x+b.width/2,b.y+b.height/2);}
+            for(auto child:children[group]) {
+                const auto& b=layout.nodes[child];
+                if(b.width>0&&b.height>0){include(b.x-b.width/2,b.y-b.height/2);include(b.x+b.width/2,b.y+b.height/2);}
+            }
+            if(!std::isfinite(left))return;
             for(std::size_t i=0;i<input.hierarchy.edges.size();++i) {
                 auto edge=input.hierarchy.edges[i];const auto& points=layout.edges[i].points;
                 if (reversed[i]) std::swap(edge.source, edge.target);
@@ -148,6 +168,29 @@ std::expected<ElkMeasuredScene,std::string> layout_scope(
             if(width>0&&bottom>oy){frame.x=left+width/2;frame.y=(oy+bottom)/2;frame.width=width;frame.height=bottom-oy;}
         };
         for(std::size_t i=0;i<boxes.size();++i)if(source.nodes[i].group&&!input.hierarchy.nodes[i].parent)tighten(tighten,i);
+        // alignDegenerateNodeToAnchor: on a side shorter than ELK's 12px
+        // surrounding margins, the clamped port can sit off-center. Keep the
+        // routed line and move the node onto its first anchor, as upstream does.
+        std::vector<bool> aligned(boxes.size());
+        const auto align=[&](std::size_t i,ElkRoutingPoint anchor) {
+            if(aligned[i]||source.nodes[i].shape==u"rect33")return;
+            auto& node=layout.nodes[i];
+            const bool along_width=std::abs(anchor.y-(node.y-node.height/2))<=0.5||
+                std::abs(anchor.y-(node.y+node.height/2))<=0.5;
+            if((along_width?node.width:node.height)>=24)return;
+            aligned[i]=true;
+            auto& center=along_width?node.x:node.y;
+            const auto desired=along_width?anchor.x:anchor.y;
+            if(std::abs(desired-center)>=0.01)center=desired;
+        };
+        for(const auto& route:placed->routes) {
+            align(route.source_node,route.start);
+            align(route.target_node,route.end);
+        }
+        // applyElkNodePositions widens an empty group's painted title without
+        // changing the ELK node box used by its parent's frame tightening.
+        for(std::size_t i=0;i<boxes.size();++i)
+            if(source.nodes[i].group)layout.nodes[i].width=std::max(layout.nodes[i].width,measured.nodes[i].width);
         scene.min_x=scene.min_y=std::numeric_limits<double>::infinity();scene.max_x=scene.max_y=-scene.min_x;
         const auto include=[&](double x,double y,double w=0,double h=0){scene.min_x=std::min(scene.min_x,x-w/2);scene.max_x=std::max(scene.max_x,x+w/2);scene.min_y=std::min(scene.min_y,y-h/2);scene.max_y=std::max(scene.max_y,y+h/2);};
         for(const auto& node:layout.nodes)include(node.x,node.y,node.width,node.height);
