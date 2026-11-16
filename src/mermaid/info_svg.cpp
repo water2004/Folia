@@ -12,6 +12,8 @@ std::expected<InfoRenderInput, std::string> prepare_info_render(const PreparedDi
     if (auto family = prepared.effective_config.find(u"fontFamily"); family && family->kind == ConfigKind::string)
         result.theme.font_family = family->string;
     if (auto vars = prepared.effective_config.find(u"themeVariables")) {
+        if (auto family = vars->find(u"fontFamily"); family && family->kind == ConfigKind::string)
+            result.theme.font_family = family->string;
         if (auto color = vars->find(u"textColor"); color && color->kind == ConfigKind::string)
             result.theme.text_color = color->string;
     }
