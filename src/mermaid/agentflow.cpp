@@ -361,11 +361,13 @@ private:
         auto pos = first;
         while (pos < line.size()) {
             const bool dashed = line.substr(pos).starts_with(u"-.-");
+            auto arrow=dashed?u"none":line.substr(pos).starts_with(u"--x")?u"arrow_cross":u"arrow_point";
             View label;
             auto after = pos + 3;
-            if (!dashed && !line.substr(pos).starts_with(u"-->")) {
-                const auto close = find_outside(line, pos + 2, {u"-->"});
+            if (!dashed && !line.substr(pos).starts_with(u"-->") && !line.substr(pos).starts_with(u"--x")) {
+                const auto close = find_outside(line, pos + 2, {u"-->",u"--x"});
                 if (close == View::npos) fail("Unclosed Agentflow edge label");
+                arrow=line.substr(close).starts_with(u"--x")?u"arrow_cross":u"arrow_point";
                 label = trim(line.substr(pos + 2, close - pos - 2));
                 if (label.size() >= 2 && label.front() == u'"' && label.back() == u'"')
                     label = label.substr(1, label.size() - 2);
@@ -383,6 +385,7 @@ private:
             auto to = add(vertex(target));
             if (!edge_id.empty()) edges.try_emplace(Text(edge_id), document.edges.size());
             document.edges.push_back({from, to, Text(label), dashed, Text(edge_id)});
+            document.edges.back().arrow_end=arrow;
             if (next == View::npos) break;
             pos = static_cast<std::size_t>(right.data() - line.data()) + next;
             from = std::move(to);

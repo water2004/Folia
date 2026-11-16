@@ -23,6 +23,7 @@ struct AgentflowEdge {
     bool dashed = false;
     std::u16string id;
     ConfigValue metadata;
+    std::u16string arrow_end = u"arrow_point";
 };
 struct AgentflowContainer {
     std::u16string id, label, parent;

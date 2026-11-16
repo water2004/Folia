@@ -39,6 +39,7 @@ std::expected<AgentflowRenderInput, std::string> prepare_agentflow_render(const 
     out.theme.text = narrow(member(tv, u"textColor"), u"#333333");
     out.theme.background = narrow(member(tv, u"mainBkg"), u"#ffffff");
     out.theme.line = narrow(member(tv, u"lineColor"), u"#333333");
+    out.theme.container_stroke=narrow(member(tv,u"flowContainerStroke"),str(member(tv,u"secondaryBorderColor"),u"#aaaa33"));
     out.theme.border_colors = strings(member(tv, u"borderColorArray"));
     out.theme.bkg_colors = strings(member(tv, u"bkgColorArray"));
     out.theme.font_size = numeric(member(tv, u"fontSize"), 16);
@@ -75,6 +76,12 @@ std::expected<AgentflowSvg, std::string> render_agentflow_svg(const AgentflowRen
         graph.theme.border = in.theme.line;
         graph.theme.text = in.theme.text;
         graph.theme.line = in.theme.line;
+        graph.theme.cluster_fill="none";
+        graph.theme.cluster_border=in.theme.container_stroke;
+        graph.theme.cluster_stroke_width=.75;
+        graph.theme.cluster_radius=graph.theme.collapsed_radius=10;
+        graph.theme.collapsed_indicator_fill=graph.theme.border;
+        graph.theme.collapsed_indicator_opacity=.5;
         graph.theme.neo = in.theme.neo;
         graph.theme.elk_line_hops = in.theme.elk_line_hops;
         FlowchartMeasurements measured;
@@ -105,13 +112,15 @@ std::expected<AgentflowSvg, std::string> render_agentflow_svg(const AgentflowRen
             group.id = c.id;
             group.label = c.label;
             group.parent = c.parent;
-            group.shape = u"rect";
-            group.group = true;
+            const auto* view=c.metadata.find(u"view");
+            const bool collapsed=view && view->kind==ConfigKind::string && view->string==u"collapsed";
+            group.shape = collapsed?u"collapsedGroup":u"rect";
+            group.group = !collapsed;
+            const auto& stroke=in.theme.container_stroke;
+            group.styles={u"stroke:"+std::u16string{stroke.begin(),stroke.end()},u"stroke-width:0.75",u"fill:none"};
             group.padding = 8;
             graph.document.nodes.push_back(std::move(group));
-            auto box = label(c.label);
-            if (!box) return std::unexpected(box.error());
-            measured.nodes.push_back(std::move(*box));
+
         }
         for (const auto &n : in.document.nodes) {
             FlowchartNode node;
@@ -145,9 +154,7 @@ std::expected<AgentflowSvg, std::string> render_agentflow_svg(const AgentflowRen
                 }
             }
             graph.document.nodes.push_back(std::move(node));
-            auto box = label(n.label);
-            if (!box) return std::unexpected(box.error());
-            measured.nodes.push_back(std::move(*box));
+
         }
         for (const auto &e : in.document.edges) {
             FlowchartEdge edge;
@@ -155,16 +162,24 @@ std::expected<AgentflowSvg, std::string> render_agentflow_svg(const AgentflowRen
             edge.end = e.to;
             edge.label = e.label;
             edge.stroke = e.dashed ? u"dotted" : u"normal";
-            if (e.dashed)
-                edge.arrow_end = u"none";
+            edge.arrow_end=e.arrow_end;
             graph.document.edges.push_back(std::move(edge));
-            FlowchartTextBox b;
-            if (!e.label.empty()) {
-                auto box = label(e.label);
-                if (!box) return std::unexpected(box.error());
-                b = std::move(*box);
+        }
+        if(auto projected=project_collapsed_flowchart_groups(graph.document);!projected)
+            return std::unexpected(projected.error());
+        for(const auto& node:graph.document.nodes) {
+            auto box=label(node.label);
+            if(!box) return std::unexpected(box.error());
+            measured.nodes.push_back(std::move(*box));
+        }
+        for(const auto& edge:graph.document.edges) {
+            FlowchartTextBox box;
+            if(!edge.label.empty()) {
+                auto measured_label=label(edge.label);
+                if(!measured_label) return std::unexpected(measured_label.error());
+                box=std::move(*measured_label);
             }
-            measured.edges.push_back(std::move(b));
+            measured.edges.push_back(std::move(box));
         }
         auto svg = render_flowchart_svg(graph, measured);
         if (!svg)

@@ -14,6 +14,7 @@ struct AgentflowSvgTheme {
     bool neo = true;
     FlowchartElkLineHops elk_line_hops = FlowchartElkLineHops::arc;
     bool html_labels = true;
+    std::string container_stroke = "#aaaa33";
 };
 struct AgentflowRenderInput {
     AgentflowDocument document;

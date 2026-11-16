@@ -4,6 +4,15 @@ namespace {
 using namespace boost::ut;
 using namespace folia::mermaid;
 suite agentflow = [] {
+    "mermaid_agentflow_cross_markers_survive_unlabeled_and_labeled_edges"_test=[] {
+        const auto parsed=parse_agentflow(u"agentflow-beta TB\nA --x B\nB -- retry --x C\nC -.- A");
+        expect(fatal(parsed.has_value())) << (parsed?"":parsed.error());
+        expect(fatal(parsed->edges.size()==3_u));
+        expect(bool(parsed->edges[0].arrow_end==u"arrow_cross"));
+        expect(bool(parsed->edges[1].arrow_end==u"arrow_cross"));
+        expect(bool(parsed->edges[1].label==u"retry"));
+        expect(bool(parsed->edges[2].arrow_end==u"none"));
+    };
     "mermaid_agentflow_nodes_edges_and_direction"_test = [] {
         auto d = parse_agentflow(u"agentflow-beta LR\nA[Planner] -->|request| "
                                  u"B[Tool] \nB -.- C[Result]\n");
