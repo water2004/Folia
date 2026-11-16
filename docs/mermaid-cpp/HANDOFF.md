@@ -17,7 +17,7 @@
 - 自环distribution/ordering是**node级**选项，不从graph继承；已按默认 NORTH/STACKED 接入。**24个原版全几何自环例（61节点/219边）、5521断言全部通过**，日志 `elk-self-loops-first.log`。组件DFS/packing14个观察也已通过；独立复核发现通用helper consider_model_order=true需保留原排序身份，special/graph正补可空node_model_order及data反例fixture，不重排DFS。
 - 浏览器限制：普通 Chromium 启动 `socket() EPERM`；连接Edge的任意data测试页被URL策略拒绝且禁止变换载体绕过，已停止并发送completion summary。**不得绕过、不得把未执行的整图浏览器gate标绿**。工具按全清单及散列严格验收，缺项/浏览器证据缺失均失败；Node原版无DOM renderer和算法对照可继续。
 - 下一步：独立已验证修复分批提交；等待组件RNG、model-order映射和比较工具收尾，统一构建后验证所有ELK及真实Math，再完整375原生语料、全核心、刷新Zen/Packet/Info证据。更新明确验证范围并推送新分支；不改CI。
-- 最新独立修复提交包：原版完整SVG捕获与严格图形/文字/RGBA比较，Zen真实Skia逐像素对照。60项比较器反例与分支检查通过，隐藏元素、父子可见性及Info自然viewport已修；缺失case/browser仍令总gate失败，browser路径未在本机执行。
+- 最新独立修复提交包：ELK compound边界端口按原direct-child netflow决定侧边，边界约束反转在DFS前运行；11个原版boundary fixture及既有算子通过，新direction复杂边界例已通过。
 
 ## 数学支持基线（历史，已推送）
 

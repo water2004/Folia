@@ -31,7 +31,7 @@ suite elk_boundary_layers=[] {
             for(std::size_t l=0;l<order.size();++l){const auto nodes=split(order[l],',');expect(fatal(nodes.size()==result->layer_nodes[l].size()))<<name;for(std::size_t n=0;n<nodes.size();++n)expect(result->layer_nodes[l][n]==number(nodes[n]))<<name<<l<<n;}
             ++count;
         }
-        expect(count==7_u);
+        expect(count==11_u);
     };
 };
 }

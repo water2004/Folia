@@ -26,10 +26,23 @@ struct Builder {
         const auto index=result.segments.size();result.segments.push_back({e,graph,s,t});
         result.graphs[graph].segments.push_back(index);result.edges[e].segments.push_back(index);return index;
     }
+    int net_flow(std::size_t p) const {
+        const auto node=result.ports[p].node;
+        int vote=0;
+        for(const auto e:outgoing[p])
+            vote+=result.graphs[result.nodes[input.edges[e].target].graph].parent_node==node?-1:1;
+        for(const auto e:incoming[p])
+            vote+=result.graphs[result.nodes[input.edges[e].source].graph].parent_node==node?1:-1;
+        return vote;
+    }
     std::size_t dummy(std::size_t graph,std::size_t parent,std::size_t e,bool out,
         std::optional<std::size_t> existing={}) {
         if(existing&&port_dummy[*existing])return *port_dummy[*existing];
         const auto n=result.nodes.size();
+        // CompoundGraphPreprocessor.calculateNetFlow distinguishes a direct
+        // child from a deeper descendant when an original group port is used.
+        // A group-to-grandchild edge can therefore enter from the output side.
+        if(existing)out=net_flow(*existing)>=0;
         auto boundary=elk_make_compound_port_dummy(result.graphs[graph].direction,out,existing?0:input.edge_spacing/2);
         result.nodes.push_back({.graph=graph,.boundary=boundary});
         port(n,boundary.inner_port_side);
@@ -60,10 +73,7 @@ struct Builder {
             if(external) {
                 const auto outer_ports=result.nodes[n].ports;
                 for(const auto p:outer_ports)if(!port_dummy[p]) {
-                    int vote=0;
-                    for(const auto e:outgoing[p])vote+=result.graphs[result.nodes[input.edges[e].target].graph].parent_node==n?-1:1;
-                    for(const auto e:incoming[p])vote+=result.graphs[result.nodes[input.edges[e].source].graph].parent_node==n?1:-1;
-                    const auto d=dummy(nested,n,0,vote>=0,p);result.graphs[nested].nodes.push_back(d);
+                    const auto d=dummy(nested,n,0,net_flow(p)>=0,p);result.graphs[nested].nodes.push_back(d);
                 }
             }
         }
