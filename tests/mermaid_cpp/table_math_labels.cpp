@@ -39,11 +39,47 @@ ErRenderInput er_input(std::u16string_view layout,bool html=true) {
 }
 
 suite table_math = [] {
+    "mermaid_er_relation_math_labels_preserve_source_for_math_provider"_test=[] {
+        auto session=ConfigSession::create();
+        expect(fatal(session.has_value()));
+        const auto input=prepare_er_render(uR"(erDiagram
+A["$$\frac{a}{b}$$"]
+B["$$\nabla f$$"]
+A ||--o{ B : owns $$x_1$$ and $$\frac{y}{2}$$
+B ||..|{ C : "uses $$z_{n+1}$$"
+C ||--|| A : ordinary role words
+)",*session);
+        expect(fatal(input.has_value())) << (input ? "" : input.error());
+        expect(input->document.relationships.size()==3_u);
+        expect(bool(input->document.relationships[0].label==uR"(owns $$x_1$$ and $$\frac{y}{2}$$)"));
+        expect(bool(input->document.relationships[1].label==u"uses $$z_{n+1}$$"));
+        expect(bool(input->document.relationships[2].label==u"ordinary role words"));
+        for(const auto& relationship:input->document.relationships)
+            expect(bool(relationship.role_a==relationship.label));
+        std::vector<std::u16string> formulas;
+        const ErSvgMeasure ordinary=[](std::u16string_view text,std::u16string_view,double,unsigned,bool)
+            ->std::expected<ErTextMetrics,std::string> {
+            if(has_math_label(text))return std::unexpected("TeX reached ordinary ER measurement");
+            return ErTextMetrics{24,24,16,12};
+        };
+        const MathLabelMeasure rich=[&](std::u16string_view text,std::u16string_view,
+            double size,unsigned weight,bool italic) {
+            if(has_math_label(text))formulas.emplace_back(text);
+            return measured_math(text,size,weight,italic);
+        };
+        const auto result=render_er_svg(*input,ordinary,rich);
+        expect(fatal(result.has_value())) << (result ? "" : result.error());
+        expect(bool(formulas==std::vector<std::u16string>{uR"($$\frac{a}{b}$$)",uR"($$\nabla f$$)",
+            uR"(owns $$x_1$$ and $$\frac{y}{2}$$)",u"uses $$z_{n+1}$$"}));
+        expect(result->svg.find("$$")==std::string::npos);
+        expect(result->svg.find("er-math-label")!=std::string::npos);
+    };
+
     "mermaid_er_math_sizes_headers_attribute_rows_and_relationships"_test=[] {
         for(std::u16string_view layout:{u"dagre",u"elk"}) {
             auto input=er_input(layout);
             std::size_t formulas=0;
-            const ErSvgMeasure ordinary=[](std::u16string_view text,double,bool)
+            const ErSvgMeasure ordinary=[](std::u16string_view text,std::u16string_view,double,unsigned,bool)
                 ->std::expected<ErTextMetrics,std::string> {
                 if(has_math_label(text))return std::unexpected("TeX reached ordinary ER measurement");
                 return ErTextMetrics{24,24,16,12};
@@ -67,7 +103,7 @@ suite table_math = [] {
     };
 
     "mermaid_table_math_gates_html_and_propagates_renderer_errors"_test=[] {
-        const ErSvgMeasure ordinary=[](std::u16string_view,double,bool)
+        const ErSvgMeasure ordinary=[](std::u16string_view,std::u16string_view,double,unsigned,bool)
             ->std::expected<ErTextMetrics,std::string> {return ErTextMetrics{24,24,16,12};};
         const MathLabelMeasure failure=[](std::u16string_view text,std::u16string_view,double,unsigned,bool)
             ->std::expected<std::optional<MathLabel>,std::string> {

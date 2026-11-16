@@ -216,7 +216,7 @@ A -->|"$$\sqrt{x}$$"| B)"},
                         return empty_only.template operator()<SvgTextMetrics>(text);
                     },rich));
                 } else if constexpr (std::same_as<Input,ErRenderInput>) {
-                    return convert(render_er_svg(content,[&](std::u16string_view text,double,bool) {
+                    return convert(render_er_svg(content,[&](std::u16string_view text,std::u16string_view,double,unsigned,bool) {
                         return empty_only.template operator()<ErTextMetrics>(text);
                     },rich));
                 } else if constexpr (std::same_as<Input,UsecaseRenderInput>) {

@@ -677,13 +677,16 @@ std::expected<folia::mermaid::DiagramSvg,std::string> render_mermaid(
     }
     ErSvgMeasure er_measure;
     if(auto er=std::get_if<ErRenderInput>(&input->content)) {
-        er_measure=[er,&measurer](std::u16string_view text,double size,bool bold)
+        er_measure=[&measurer](std::u16string_view text,std::u16string_view family,
+            double size,unsigned weight,bool italic)
             -> std::expected<ErTextMetrics,std::string> {
             if(!std::isfinite(size) || size<=0 || size>std::numeric_limits<float>::max())
                 return std::unexpected("Invalid ER font size");
             auto label=diagram_display_text(text);
             if(!label)return std::unexpected(label.error());
-            const MermaidFont font{er->theme.font_family,static_cast<float>(size),bold?700u:400u};
+            auto resolved=measurer.resolve_family(family);
+            if(!resolved)return std::unexpected(resolved.error());
+            const MermaidFont font{*resolved,static_cast<float>(size),weight,italic};
             auto metrics=measurer.measure(*label,font,false,{},true);
             if(!metrics)return std::unexpected(metrics.error());
             auto vertical=measurer.svg_font_metrics(font);
