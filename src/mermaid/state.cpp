@@ -51,7 +51,28 @@ struct Parser {
   }
   if(value.starts_with(u"direction ")){auto dir=trim(std::u16string_view(value).substr(10));if(dir!=u"TB"&&dir!=u"BT"&&dir!=u"LR"&&dir!=u"RL")throw std::runtime_error("Invalid State direction");if(parents.empty())document.direction=dir;else{document.nodes[node(parents.back())].direction=dir;region_direction[parents.back()]=dir;}return;}
   if(value.starts_with(u"classDef ")){auto rest=std::u16string_view(value).substr(9);auto space=rest.find_first_of(u" \t");if(space==rest.npos)throw std::runtime_error("Expected State classDef styles");auto name=trim(rest.substr(0,space));auto declarations=split(trim(rest.substr(space+1)),u',');if(name.empty())throw std::runtime_error("Expected State class name");auto& styles=class_defs[name];styles.append_range(std::move(declarations));return;}
-  if(value.starts_with(u"class ")){auto rest=std::u16string_view(value).substr(6);auto space=rest.find_first_of(u" \t");if(space==rest.npos)throw std::runtime_error("Expected State class assignment");auto ids=split(rest.substr(0,space),u',');auto name=trim(rest.substr(space+1));if(ids.empty()||name.empty())throw std::runtime_error("Expected State class assignment");class_assignments.emplace_back(std::move(ids),std::move(name));return;}
+  if(value.starts_with(u"class ")) {
+   const auto rest=std::u16string_view(value).substr(6);
+   std::vector<std::u16string> ids;
+   std::size_t pos=0;
+   const auto word=[](char16_t c) {
+    return (c>=u'a'&&c<=u'z')||(c>=u'A'&&c<=u'Z')||
+      (c>=u'0'&&c<=u'9')||c==u'_';
+   };
+   do {
+    while(pos<rest.size()&&(rest[pos]==u' '||rest[pos]==u'\t'))++pos;
+    const auto begin=pos;
+    while(pos<rest.size()&&word(rest[pos]))++pos;
+    if(pos==begin)throw std::runtime_error("Expected State class target");
+    ids.emplace_back(rest.substr(begin,pos-begin));
+    if(pos==rest.size()||rest[pos]!=u',')break;
+    ++pos;
+   } while(true);
+   auto name=trim(rest.substr(pos));
+   if(name.empty())throw std::runtime_error("Expected State class name");
+   class_assignments.emplace_back(std::move(ids),std::move(name));
+   return;
+  }
   for(auto key:{u"accTitle:",u"accDescr:"})if(value.starts_with(key)){auto label=trim(std::u16string_view(value).substr(std::u16string_view(key).size()));if(key==std::u16string_view(u"accTitle:"))document.acc_title=label;else document.acc_description=label;return;}
   if(value.starts_with(u"style ")){auto space=value.find(u' ',6);if(space==value.npos)throw std::runtime_error("Expected State style");auto ids=value.substr(6,space-6);auto declarations=split(std::u16string_view(value).substr(space+1),u',');for(const auto& id:split(ids,u','))document.nodes[node(id)].styles=declarations;return;}
   auto arrow=value.find(u"-->");if(arrow!=value.npos){auto left=trim(std::u16string_view(value).substr(0,arrow));auto rest=std::u16string_view(value).substr(arrow+3);auto colon=description_separator(rest);auto right=trim(rest.substr(0,colon));auto a=endpoint(left,true),b=endpoint(right,false);FlowchartEdge edge;auto id=std::to_string(document.edges.size());edge.id=u"edge"+std::u16string(id.begin(),id.end());edge.start=document.nodes[a].id;edge.end=document.nodes[b].id;edge.label=colon==rest.npos?u"":trim(rest.substr(colon+1));edge.label_type=u"markdown";edge.arrow_end=u"arrow_barb";edge.type=u"arrow_barb";edge.curve=u"basis";document.edges.push_back(std::move(edge));return;}

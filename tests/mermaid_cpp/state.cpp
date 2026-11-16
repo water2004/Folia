@@ -5,6 +5,19 @@ namespace {
 using namespace boost::ut;using namespace folia::mermaid;
 #include "theme_fixture.hpp"
 suite state=[] {
+ "mermaid_state_class_target_lists_preserve_spaces_after_commas"_test=[] {
+  auto parsed=parse_state_document(u"stateDiagram-v2\nclassDef moving font-style:italic\n"
+    u"Idle --> Moving\nMoving --> Crash\nclass Moving, Crash moving\n");
+  expect(fatal(parsed.has_value()))<<(parsed?"":parsed.error());
+  for(const auto id:{u"Moving",u"Crash"}) {
+   const auto node=std::ranges::find(parsed->document.nodes,id,&FlowchartNode::id);
+   expect(fatal(node!=parsed->document.nodes.end()));
+   expect(bool(node->classes==u"moving"));
+   expect(node->compiled_styles.size()==1_u);
+   expect(bool(node->compiled_styles.front()==u"font-style:italic"));
+  }
+  expect(parsed->document.nodes.size()==3_u);
+ };
  "mermaid_state_fork_join_and_class_styles_are_materialized"_test=[] {
   auto parsed=parse_state_document(u"stateDiagram-v2\nclassDef hot fill:#c00,color:#fff,stroke:#333;\nA:::hot --> B\nclass B hot\nstate fork <<fork>>\nstate join [[join]]");
   expect(fatal(parsed.has_value()))<<(parsed?"":parsed.error());if(!parsed)return;
