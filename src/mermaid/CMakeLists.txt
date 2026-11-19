@@ -16,6 +16,8 @@ target_sources(folia_mermaid PUBLIC
     BASE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}"
     FILES ${FOLIA_MERMAID_MODULES})
 target_sources(folia_mermaid PRIVATE ${FOLIA_MERMAID_SOURCES})
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}"
+    FILES ${FOLIA_MERMAID_MODULES} ${FOLIA_MERMAID_SOURCES})
 if(MSVC)
     # Optimized theme code exceeds the standard COFF object section limit.
     set_source_files_properties(themes/theme.cpp PROPERTIES COMPILE_OPTIONS /bigobj)

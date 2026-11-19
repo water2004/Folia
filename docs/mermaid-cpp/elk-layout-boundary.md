@@ -28,7 +28,7 @@ Mermaid 的 `packages/mermaid/src/rendering-util/layout-algorithms/elk/render.ts
 - 图的实际方向（`TB`/`BT`/`LR`/`RL`）覆盖根节点的默认 `DOWN` 方向；复合分组内边距、子图标题约束以及实测标签包围盒由适配器在进入 ELK 管线前组装。
 
 ### 3. C++ 原生 ELK 模块划分
-`src/mermaid/` 下按 ELK Layered 管线的实际处理阶段拆分为以下模块：
+`src/mermaid/layout/elk/` 下按 ELK Layered 管线的实际处理阶段拆分为以下模块：
 
 1. **去环与分层**：
    - `folia.mermaid.elk_cycle`：实现 `DepthFirstCycleBreaker`，按模型顺序与入度遍历节点并生成反馈边翻转计划（自环不参与去环）。
@@ -63,4 +63,4 @@ Mindmap 与 Architecture 分别依赖不同代际的 Cytoscape CoSE 布局库，
 - **上游版本与校验**：Mermaid 12.2.0 锁定 `@zenuml/core` **3.49.2**（MIT 许可证，Copyright 2022 Peng Xiao）。官方 npm 归档 `core-3.49.2.tgz` 的 SHA-512 为：
   `sha512-qeQMapuE0XETML2mRw2MIIrMCjcZBhRDSwW10//q8XQ+VyExzkAn39VCBwxIbbPdTBt6gJnaBBixF9A4hsIxcA==`
   其内置 `dist/zenuml.esm.mjs.map`（SHA-256：`c090e83b377121186edaa097c6e402562f72a9a694319c7a57cf3d06b4eba061`）包含全部 457 个上游源文件（含词法/语法分析器、横向坐标约束求解 `Coordinates`、纵向递归布局 `VerticalCoordinates`、`buildGeometry` 与 SVG 模板）。
-- **C++ 原生实现**：`src/mermaid/zenuml.{ixx,cpp}`、`zenuml_svg.{ixx,cpp}` 与 `zenuml_assets.inc` 原生实现了语法解析、横向参与者间距约束求解、纵向消息/嵌套块递归布局及 SVG 输出，由平台层通过 `ZenSvgMeasure` 注入 DirectWrite 实测字宽。
+- **C++ 原生实现**：`src/mermaid/diagrams/zenuml/zenuml.{ixx,cpp}`、`zenuml_svg.{ixx,cpp}` 与 `zenuml_assets.inc` 原生实现了语法解析、横向参与者间距约束求解、纵向消息/嵌套块递归布局及 SVG 输出，由平台层通过 `ZenSvgMeasure` 注入 DirectWrite 实测字宽。

@@ -13,7 +13,7 @@ The subgraph feedback edge orientation in `flowchart_elk.cpp` is derived from Me
 
 ## 2. Eclipse Layout Kernel (`elkjs` 0.9.3)
 
-The native ELK layered and compound layout modules (`src/mermaid/elk_*.{ixx,cpp}`) are derived from `elkjs` 0.9.3 (`lib/elk-worker.js`, https://github.com/kieler/elkjs). These files are covered by the **Eclipse Public License 2.0 (EPL-2.0)**; see [`ELK-LICENSE`](ELK-LICENSE) for the full license text.
+The native ELK layered and compound layout modules (`src/mermaid/layout/elk/elk_*.{ixx,cpp}`) are derived from `elkjs` 0.9.3 (`lib/elk-worker.js`, https://github.com/kieler/elkjs). These files are covered by the **Eclipse Public License 2.0 (EPL-2.0)**; see [`ELK-LICENSE`](ELK-LICENSE) for the full license text.
 The shared connected-component traversal and row packing (`elk_components.*`),
 self-loop processing (`elk_self_loops.*`), greedy switching
 (`elk_greedy_switch.*`), shared crossing checks (`elk_order_*.inc`), and the
@@ -25,10 +25,10 @@ implementation.
 
 ## 3. D3 Modules (`d3-shape`, `d3-path`, `d3-scale`, `d3-array`, `d3-interpolate`, `d3-hierarchy`, `d3-format`, `d3-time`, `d3-axis`, `d3-time-format`)
 
-- Pie sector and arc geometry (`src/pie_geometry.{ixx,cpp}`) and Flowchart basis curves follow `d3-shape` 3.2.0 and `d3-path` 3.1.0.
-- XY chart scales and ticks (`src/xy.{ixx,cpp}`) follow `d3-scale` 4.0.2, `d3-array` 3.2.4, and `d3-interpolate` 3.0.1.
+- Pie sector and arc geometry (`diagrams/pie/pie_geometry.{ixx,cpp}`) and Flowchart basis curves follow `d3-shape` 3.2.0 and `d3-path` 3.1.0.
+- XY chart scales and ticks (`diagrams/xy/xy.{ixx,cpp}`) follow `d3-scale` 4.0.2, `d3-array` 3.2.4, and `d3-interpolate` 3.0.1.
 - Treemap squarify layout and value formatting (`treemap.{ixx,cpp}`, `treemap_format.cpp`) follow `d3-hierarchy` 3.1.2 and `d3-format` 3.1.0.
-- Gantt time intervals, ticks, and axis formatting (`src/gantt_svg.{ixx,cpp}`) follow `d3-time` 3.1.0, `d3-axis` 3.0.0, and `d3-time-format` 4.1.0.
+- Gantt time intervals, ticks, and axis formatting (`diagrams/gantt/gantt_svg.{ixx,cpp}`) follow `d3-time` 3.1.0, `d3-axis` 3.0.0, and `d3-time-format` 4.1.0.
 
 ```text
 Copyright 2010-2021 Mike Bostock (d3-scale, d3-interpolate, d3-hierarchy, d3-format, d3-axis, d3-time-format)
@@ -53,7 +53,7 @@ USE OR PERFORMANCE OF THIS SOFTWARE.
 
 ## 4. `d3-sankey` 0.12.3
 
-Sankey node alignment, iterative relaxation/collision layout, and link positioning (`src/sankey.{ixx,cpp}`) follow `d3-sankey` 0.12.3 under the BSD-3-Clause License; see [`D3-SANKEY-LICENSE`](D3-SANKEY-LICENSE).
+Sankey node alignment, iterative relaxation/collision layout, and link positioning (`diagrams/sankey/sankey.{ixx,cpp}`) follow `d3-sankey` 0.12.3 under the BSD-3-Clause License; see [`D3-SANKEY-LICENSE`](D3-SANKEY-LICENSE).
 
 ---
 
@@ -84,38 +84,38 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 
 ## 6. Dagre (`dagre-d3-es` 7.0.14)
 
-The native Dagre ranking, ordering, compound nesting, and Brandes-Koepf coordinate assignment pipeline (`src/dagre_rank.{ixx,cpp}`, `src/dagre_order.inc`, `src/dagre_position.inc`) follows `dagre-d3-es` 7.0.14 under the MIT License; see [`DAGRE-LICENSE`](DAGRE-LICENSE).
+The native Dagre ranking, ordering, compound nesting, and Brandes-Koepf coordinate assignment pipeline (`layout/dagre/dagre_rank.{ixx,cpp}`, `layout/dagre/dagre_order.inc`, `layout/dagre/dagre_position.inc`) follows `dagre-d3-es` 7.0.14 under the MIT License; see [`DAGRE-LICENSE`](DAGRE-LICENSE).
 
 ---
 
 ## 7. Khroma 2.1.0
 
-Theme color manipulation primitives and the named-color table (`src/theme_color.{ixx,cpp}`) are derived from Khroma 2.1.0 by Fabio Spampinato under the MIT License; see [`KHROMA-LICENSE`](KHROMA-LICENSE).
+Theme color manipulation primitives and the named-color table (`themes/theme_color.{ixx,cpp}`) are derived from Khroma 2.1.0 by Fabio Spampinato under the MIT License; see [`KHROMA-LICENSE`](KHROMA-LICENSE).
 
 ---
 
 ## 8. `es-toolkit` 1.45.1
 
-Configuration `cleanAndMerge` compatibility merge semantics (`src/config_clean_merge.{ixx,cpp}`) follow `es-toolkit` 1.45.1 under the MIT License; see [`ES-TOOLKIT-LICENSE`](ES-TOOLKIT-LICENSE).
+Configuration `cleanAndMerge` compatibility merge semantics (`config/config_clean_merge.{ixx,cpp}`) follow `es-toolkit` 1.45.1 under the MIT License; see [`ES-TOOLKIT-LICENSE`](ES-TOOLKIT-LICENSE).
 
 ---
 
 ## 9. `js-yaml` 4.1.0
 
-Frontmatter YAML schema resolution and scalar coercion rules (`src/frontmatter.{ixx,cpp}`, `src/config_yaml.cpp`) follow `js-yaml` 4.1.0 under the MIT License; see [`JS-YAML-LICENSE`](JS-YAML-LICENSE).
+Frontmatter YAML schema resolution and scalar coercion rules (`frontend/frontmatter.{ixx,cpp}`, `config/config_yaml.cpp`) follow `js-yaml` 4.1.0 under the MIT License; see [`JS-YAML-LICENSE`](JS-YAML-LICENSE).
 
 ---
 
 ## 10. Day.js 1.11.21
 
-Gantt civil-date parsing, ISO week calculation, and duration arithmetic (`src/gantt.{ixx,cpp}`) follow Day.js 1.11.21 and its `customParseFormat`, `advancedFormat`, `isoWeek`, and `duration` plugins under the MIT License; see [`DAYJS-LICENSE`](DAYJS-LICENSE).
+Gantt civil-date parsing, ISO week calculation, and duration arithmetic (`diagrams/gantt/gantt.{ixx,cpp}`) follow Day.js 1.11.21 and its `customParseFormat`, `advancedFormat`, `isoWeek`, and `duration` plugins under the MIT License; see [`DAYJS-LICENSE`](DAYJS-LICENSE).
 
 ---
 
 ## 11. Cytoscape, CoSE-Bilkent, and fCoSE
 
-- Mindmap tree force-directed layout (`src/cose_tree.{ixx,cpp}`) follows `cytoscape-cose-bilkent` 4.1.0, `cose-base` 1.0.3, `layout-base` 1.0.2, and `cytoscape` 3.34.0 under the MIT License; see [`COSE-LICENSE`](COSE-LICENSE) and [`CYTOSCAPE-LICENSE`](CYTOSCAPE-LICENSE).
-- Architecture constrained force-directed layout (`src/architecture_constraints.{ixx,cpp}`, `src/architecture.{ixx,cpp}`) follows `cytoscape-fcose` 2.2.0, `cose-base` 2.2.0, and `layout-base` 2.0.1 under the MIT License; see [`FCOSE-LICENSE`](FCOSE-LICENSE).
+- Mindmap tree force-directed layout (`layout/cose/cose_tree.{ixx,cpp}`) follows `cytoscape-cose-bilkent` 4.1.0, `cose-base` 1.0.3, `layout-base` 1.0.2, and `cytoscape` 3.34.0 under the MIT License; see [`COSE-LICENSE`](COSE-LICENSE) and [`CYTOSCAPE-LICENSE`](CYTOSCAPE-LICENSE).
+- Architecture constrained force-directed layout (`diagrams/architecture/architecture_constraints.{ixx,cpp}`, `diagrams/architecture/architecture.{ixx,cpp}`) follows `cytoscape-fcose` 2.2.0, `cose-base` 2.2.0, and `layout-base` 2.0.1 under the MIT License; see [`FCOSE-LICENSE`](FCOSE-LICENSE).
 
 ---
 

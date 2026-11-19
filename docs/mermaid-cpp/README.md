@@ -25,7 +25,7 @@
 | 时间与序列图表 | **Gantt**、**Git graph**、**Journey**、**Timeline** | Gantt 日期解析、时长依赖排程（`dayjs`）与时间轴刻度（`d3-time`）；Git graph 分支车道、提交/合并/cherry-pick 符号与标签布局；Journey 任务评分与角色轨迹；Timeline 横向/纵向事件时间轴。 |
 
 ### 3. ZenUML 公共入口
-- `src/mermaid/zenuml.{ixx,cpp}` 与 `zenuml_svg.{ixx,cpp}` 负责语法解析、横向约束、纵向布局和 SVG 输出。公共入口、Windows 文本测量和 DLL 调用均已接通，5 个基准案例通过浏览器 SVG 对照。
+- `src/mermaid/diagrams/zenuml/zenuml.{ixx,cpp}` 与 `zenuml_svg.{ixx,cpp}` 负责语法解析、横向约束、纵向布局和 SVG 输出。公共入口、Windows 文本测量和 DLL 调用均已接通，5 个基准案例通过浏览器 SVG 对照。
 
 ### 4. Requirement 公共入口
 - `requirementDiagram` 的 classic 外观支持默认 ELK 和显式 Dagre。共 44 张浏览器 SVG 对照覆盖亮暗主题、节点和关系、HTML 与 SVG 标签、标题及标记。已验证强调、显式换行和实测的样式换行；任意 HTML/CSS 不在此覆盖范围内。
@@ -85,7 +85,7 @@
 ## 三、目录结构与构建说明
 
 ### 1. 目录结构
-- `src/mermaid/`：C++23 平台无关核心模块（`.ixx` 模块接口与 `.cpp` 实现）。
+- `src/mermaid/`：C++23 平台无关核心。公共编排在 `api/`，前处理在 `frontend/`，配置在 `config/`，主题在 `themes/`，各图族在 `diagrams/<family>/`，共享布局在 `layout/<engine>/`；文本、绘制和基础工具分别在 `text/`、`rendering/`、`support/`。完整归属和实际依赖见 [模块组织](architecture.md)。
 - `src/mermaid/THIRD_PARTY_NOTICES.md`：第三方算法与上游源码许可证声明。
 - `src/platform/text/`：Windows DirectWrite 文本测量（`mermaid_measurer.ixx`）、平台渲染桥接（`mermaid_renderer.ixx`）与宿主会话封装（`mermaid_host.ixx`）。
 - `tests/mermaid_cpp/`：核心解析与布局单元测试（`FoliaMermaidTests`）及 TSV 基准数据（`fixtures/`）。
@@ -119,7 +119,7 @@
   Math DLL 需与当前源码配套，包含新 fragment C ABI。构建会把它放在 Mermaid DLL
   和对应测试程序旁边。Linux 的纯核心构建不依赖 Windows；若提供
   `FOLIA_NATIVE_MATH_RUNTIME=/absolute/path/libFoliaNativeMath.so`，也会构建真实数学
-  集成测试。独立工具链需要 CMake 4.3、Ninja 和支持 C++23 `import std` 的标准库。
+  集成测试。独立工具链需要 CMake 4.3、Ninja、Python 3（结构检查）和支持 C++23 `import std` 的标准库。
 - **运行 Node.js 上游对照脚本（需 Node.js 24 与 pnpm）**：
   ```powershell
   pnpm --dir tools/mermaid-cpp/oracle install --frozen-lockfile --ignore-scripts
