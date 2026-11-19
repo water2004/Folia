@@ -2,13 +2,15 @@
 
 ## 当前检查点
 
-- 2026-11-19：分支 `refactor/mermaid-modules-and-themes` 从 `daba4996` 开始；五批结构提交与主题 API 已即时发布，最近为 `4bb41031`。Git CLI 无写凭据，使用已连接 GitHub Git Data API 发布，并逐次核对远端 tree 与本地 tree 一致。没有改默认分支、CI、版本或发布资产。
-- 所有原有 C++ 模块已按 `api`、`frontend`、`config`、`themes`、`diagrams/<family>`、`layout/<engine>`、`text`、`rendering`、`support` 归属，模块名不变。生成数据与生成器路径同步；相对 include 可解析；图族、布局算法的机械移动无语义变化。结构检查和架构说明已提交。
-- 主题 API 复用原有 11 种主题派生：新增主题清单／名称反查和 `ThemeOptions`／`make_theme_session`，未指定主题保留图族默认值，源码局部配置继续优先。新增 `folia.mermaid`/`render_diagram` 公共 facade；Windows 支持类型化配置，C ABI 增加命名主题入口并保留原 bool + classic 行为。Windows 回归用例已补充，但未在本 Linux 环境执行。
-- 当前工作树 Linux LLVM/libc++ 21.1.8、CMake 4.3.4、Ninja 1.13.2 完整构建与 CTest 2/2 通过：核心 115 suites、274 tests、959627 assertions，0 failure/skip（含 7 项主题、5 项 facade、5 项图族主题缺省及 2 项 State 深层嵌套测试）；结构检查通过。libc++ 时区使用 `-fexperimental-library`，不改 Gantt 源码。日志 `build/mermaid-refactor-{build,ctest}-theme-fixes.log`。
-- 真实 Pango 1.56.3 的 34 图族 × 11 主题矩阵已原生渲染 **374/374**。发现并按固定上游语义修复 Radar/XY 缺默认主题合并与 State 背景嵌套奇偶错误；生成主题数据未改，新增测试已通过。所有原始案例保留，栅格与目视验收正在收尾。Neo/Redux 暗色 Packet 的黑色位标等确属官方预设缺省，保持一致并在主题文档说明。
-- 固定源核查覆盖 Radar styles、XY database、cleanAndMerge、Packet styles、State dataFetcher/stateDb/styles 和相关暗色主题；均与现有 source-lock 匹配。证据 `build/refactor/theme-renderer-sources.json`、`build/theme-source-witness/validation.json`。未扩展上游版本或改锁。
-- 工作目录 `/workspace/scratch/daa11de45e84/Folia`；`source build/toolchain/env.sh` 后在 `build/mermaid-refactor` 单 Ninja、并发≤4 构建。根代理负责 API/宿主/文档/提交；主题代理负责 Radar/XY 的精确样式缺省修复；结构代理负责主题矩阵和栅格检查；构建代理已完成构建、暂无活动句柄。下一步是完成最终 374 张栅格检查与代表图目视验收，提交可复现矩阵工具、验证记录和最终文档。
+- 2026-11-19：`refactor/mermaid-modules-and-themes` 已完成目录重构与主题 API；基线 `daba4996`，最后的核心实现提交为 `a436adb3`，其后仅复现工具、维护说明与验收记录。每个实现批次均即时发布并核对远端文件树。用户要求的新分支保留独立，没有改默认分支、CI、版本或发布资产。
+- 原有 **342 个 C++ 源文件／片段** 按职责与图族归类，**144 个既有模块名全部保留**。当前 347 个源码文件、147 个模块接口。公共编排在 `api`，前端／配置／主题各自独立，图族在 `diagrams/<family>`，共享布局在 `layout/<engine>`。生成器、相对 include 与 MSVC `/bigobj` 路径已同步；结构检查注册到 CTest。说明见 [architecture.md](architecture.md)。
+- 公共 `folia.mermaid`/`render_diagram` facade、11 种主题清单／名称反查、`ThemeOptions`/`make_theme_session` 已接入。未指定主题保留图族默认值，显式 default 与源码覆盖的优先级有测试；自定义变量保留原始输入，按请求隔离。Windows 类型化宿主与命名主题 C ABI 已补齐，旧 bool 接口的 default/dark + classic 行为保留。用法见 [themes.md](themes.md)。
+- 主题完整图检查揭示并修复：Radar/XY 漏掉固定上游的默认主题合并，State 所有非顶层组合背景错误地使用同一 alternate 色。现在按上游规则合并缺省与逐层交替背景；既有主题生成数据不变。图族专属样式与节点顺序、并发 scope、多层嵌套均有回归。
+- **Linux 原生构建与 CTest 2/2 通过：115 suites、274 tests、959627 assertions，0 failure/skip**。新增 19 项测试涵盖主题、facade、图族缺省和 State 深层背景。工具链 LLVM/libc++ 21.1.8、CMake 4.3.4、Ninja 1.13.2，libc++ 时区使用 `-fexperimental-library`，无 Windows SDK。日志 `build/mermaid-refactor-{build,ctest}-theme-fixes.log`。
+- **34 图族 × 11 主题：374/374 有效原生 SVG，374/374 栅格化成功**，使用同一公共 facade、真实 Pango 1.56.3、librsvg 2.60.0/Cairo 1.18.4。10 个代表图族的主题对照已目视检查，最终 Radar/XY/State 再次检查。三处修复以外的 31 图族、341 个 SVG 与修复前逐字节一致。完整报告 `build/mermaid-themes/report.json`；可复现工具 `tools/mermaid-cpp/regression/render-themes.py`；持久验收摘要见 [theme-validation.json](theme-validation.json)。
+- 每图族选择一份现有语料进行主题组合验证；该 374 组合不是旧的 375 例复杂语料。没有声称本轮执行官方完整 SVG/像素差分、Windows DirectWrite/WinUI、真实 Math DLL 集成测试。Windows 宿主回归已添加但未运行。Neo/Redux 暗色 Packet 的黑色位标、neo-dark State 的浅色备用背景等确属锁定官方预设，保持一致并在主题文档说明。
+- 所有修复依据的上游文件均匹配现有 `source-lock.json`，不变更 Mermaid 12.2.0/commit `1fb7869866dd619168d840291c9c54b4f129758b` 或源码锁。固定源核查覆盖 Radar/XY/default merge、State 递归和样式、Packet 默认样式及暗色主题；证据散列保存在验收 JSON。
+- 工作目录 `/workspace/scratch/daa11de45e84/Folia`；`source build/toolchain/env.sh` 后使用 `build/mermaid-refactor`，单 Ninja、并发≤4。最终 probe SHA256 `07c1200c3696c5669ab2aaaf7b4a85f4d689f5a19401a5427dcc133dce5380c3`。本轮实现和此环境验证已完成，无活动构建／测试／agent 任务；不重开已完成的目录、主题、字体或源码锁调查。
 
 ## 先前验收记录（历史）
 
@@ -60,8 +62,8 @@
 
 ## 边界
 
-1. `src/mermaid/frontend.{ixx,cpp}` 识别图族、整理配置及主题。各图族模块解析并持有类型化数据。
-2. `src/mermaid/render_entry.{ixx,cpp}` 统一准备和分发。核心保持标准 C++23。布局与 SVG 写出使用图族模块和已有共享算法。
+1. `src/mermaid/frontend/frontend.{ixx,cpp}` 识别图族、整理配置及主题。各图族模块解析并持有类型化数据。
+2. `src/mermaid/api/render_entry.{ixx,cpp}` 统一准备和分发。核心保持标准 C++23。布局与 SVG 写出使用图族模块和已有共享算法。
 3. `src/platform/text/mermaid_measurer.ixx` 负责 DirectWrite 测量；`mermaid_renderer.ixx` 将平台测量结果传给核心。新图族平台测试需加入 `tools/mermaid-cpp/CMakeLists.txt`。
 4. `src/platform/text/mermaid_host.ixx` 和 `tools/mermaid-cpp/native-renderer.{h,cpp}` 提供宿主与 C ABI。JS 仅供上游对照脚本使用。
 

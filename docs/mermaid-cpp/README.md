@@ -126,6 +126,21 @@
   和对应测试程序旁边。Linux 的纯核心构建不依赖 Windows；若提供
   `FOLIA_NATIVE_MATH_RUNTIME=/absolute/path/libFoliaNativeMath.so`，也会构建真实数学
   集成测试。独立工具链需要 CMake 4.3、Ninja、Python 3（结构检查）和支持 C++23 `import std` 的标准库。
+- **Linux 独立构建（已验证 LLVM/libc++ 21.1.8）**：
+  安装匹配版本的 Clang、`clang-scan-deps`、libc++（含标准库模块与
+  experimental 库）、CMake 4.3 和 Ninja 后执行：
+  ```sh
+  cmake -S tools/mermaid-cpp -B build/mermaid-cpp -G Ninja \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_CXX_COMPILER=clang++-21 \
+    -DCMAKE_CXX_FLAGS="-stdlib=libc++ -fexperimental-library"
+  cmake --build build/mermaid-cpp \
+    --target FoliaMermaidTests FoliaMermaidRegressionProbe --parallel 4
+  ctest --test-dir build/mermaid-cpp --output-on-failure
+  ```
+  libc++ 21 的时区支持需要 `-fexperimental-library`。此构建不需要
+  Windows SDK；没有提供 Math 共享库时，不登记真实 Math 集成测试。
+  `FoliaMermaidStructure` 与核心测试均可在 Linux 运行。
 - **运行 Node.js 上游对照脚本（需 Node.js 24 与 pnpm）**：
   ```powershell
   pnpm --dir tools/mermaid-cpp/oracle install --frozen-lockfile --ignore-scripts

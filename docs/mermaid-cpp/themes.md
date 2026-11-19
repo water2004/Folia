@@ -204,3 +204,36 @@ Windows C ABI 测试另覆盖命名主题、原接口外观一致性及无效参
 走同一个 `render_diagram` 入口。原生图渲染和栅格检查不等于与官方整图 SVG
 完全一致；本轮的具体执行结果与尚未运行的平台检查记录在
 [当前交接](HANDOFF.md)。
+
+2026-11-19 在 Linux 上的本轮结果如下，源提交、二进制、工具与输入散列见
+[机器可读验收记录](theme-validation.json)：
+
+| 检查 | 结果 |
+| --- | --- |
+| 独立构建与 CTest | 2/2 通过 |
+| 核心测试 | 274 项、959,627 条断言，0 失败／跳过 |
+| 目录、模块和依赖结构 | 347 个源码文件、147 个模块接口通过检查 |
+| 34 图族 × 11 主题 | 374/374 有效原生 SVG |
+| librsvg/Cairo 栅格化 | 374/374 PNG |
+| 人工视觉检查 | 10 个代表图族的主题对照；最终 Radar/XY/State 复查 |
+| 不涉及修复的 31 图族 | 341 份 SVG 与修复前逐字节一致 |
+
+本轮未运行 Windows 宿主／WinUI、真实 Math DLL 集成、官方完整 SVG／像素
+差分或原有 375 例复杂语料的完整重跑。核心中的既有算法和主题 fixture
+均随上述 274 项测试执行。
+
+主题矩阵从已有语料中为每个图族选择一例，逐一应用 11 种主题；它是图族与
+主题组合的烟雾测试，完整的复杂语料回归仍由原有工具负责。可只生成 SVG：
+
+```sh
+python3 tools/mermaid-cpp/regression/render-themes.py \
+  --probe build/mermaid-cpp/FoliaMermaidRegressionProbe \
+  --output build/mermaid-themes --no-raster
+```
+
+Linux 需能使用 PyGObject/Pango 和 fontconfig 的 Python（某些环境为
+`/usr/bin/python3`）；Windows 使用 probe 内的 DirectWrite。
+去掉 `--no-raster` 可用 librsvg、Cairo 和 Pillow 栅格化原始 SVG 并生成
+代表图族的主题对照图。`--family radar --family xy` 可定向复验。
+报告保留每例输入、主题、SVG／位图散列、失败及工具版本；只要有失败就
+返回非零，不会把原生生成通过标成官方 SVG 对照通过。
