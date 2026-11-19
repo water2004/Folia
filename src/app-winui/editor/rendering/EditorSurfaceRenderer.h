@@ -62,6 +62,8 @@ namespace winrt::Folia
         void CancelPdfExport();
         void SetTheme(folia::ThemeProfile const& value);
         folia::ThemeProfile Theme() const;
+        void SetMediaDisplaySettings(MediaDisplaySettings const& value);
+        MediaDisplaySettings const& MediaSettings() const noexcept { return mediaSettings; }
         EditorMathPreparationContext CaptureMathPreparationContext() const;
         bool MatchesMathPreparationContext(EditorMathPreparationContext const& context) const;
         static std::unique_ptr<EditorMathPreparation> PrepareMath(
@@ -145,6 +147,7 @@ namespace winrt::Folia
         folia::ThemeProfile themeProfile = folia::default_theme_profile();
         std::uint64_t themeRevision = 1;
         EditorStyleSheet styleSheet = CreateEditorStyleSheet(themeProfile);
+        MediaDisplaySettings mediaSettings;
         EditorInteractionMap interactionMap;
         EditorCaretAnimation caretAnimation;
         std::vector<D2D1_RECT_F> nonInteractiveRegions;

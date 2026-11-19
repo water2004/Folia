@@ -104,6 +104,7 @@ namespace winrt::Folia::implementation
         void SetSettingsMode(bool enabled);
         void SetDocumentCommandsVisible(bool visible);
         std::optional<winrt::hstring> ApplySettings(winrt::Folia::AppSettings const& settings);
+        void UpdateMediaSettings(winrt::Folia::MediaDisplaySettings const& settings);
         void RegisterCommandHandlers();
         void ToggleSourceMode();
         void UpdateSourceModeUi();

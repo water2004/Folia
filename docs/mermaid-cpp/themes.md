@@ -175,6 +175,9 @@ DLL 新增 `FoliaNativeMermaidRenderWithTheme`，在 source 和 length 后接收
 UTF-8 主题名称指针及长度。名称最长 32 字节，未知名称返回输入错误。
 输出分配、`FoliaNativeMermaidFree` 和状态码沿用既有接口。
 源码中的主题配置可覆盖命名主题；该入口保留图族默认 look。
+宿主可从索引 0 开始调用 `FoliaNativeMermaidThemeName` 枚举主题，直到返回空指针。
+返回值是 DLL 持有的以零结尾的 UTF-16 名称。折笺设置页用同一清单提供独立的
+Mermaid 主题选择，也可选择跟随折笺的浅色／深色主题。
 
 既有 `FoliaNativeMermaidRender(..., bool dark, ...)` 的 ABI 与语义保留：
 `false` 是 `default`，`true` 是 `dark`，并继续显式使用 `classic` 外观。

@@ -71,6 +71,7 @@ namespace winrt::Folia
             resources.EnsureFrameResources(styleSheet);
             auto context = CaptureMathPreparationContext();
             context.surfaceWidth = PdfContentWidth;
+            context.imageMaxHeight = PdfContentHeight;
             auto preparationFrame = frame;
             preparationFrame.selection = {};
             preparationFrame.completion.reset();

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "media/MathJaxRenderer.h"
+#include "media/MediaDisplaySettings.h"
 #include "editor/session/EditorRenderFrame.h"
 #include "editor/rendering/EditorPreparedDocument.h"
 
@@ -14,6 +15,8 @@ namespace winrt::Folia
         float surfaceHeight = 1.0f;
         bool ready = false;
         bool svgSupported = true;
+        MediaDisplaySettings media;
+        std::optional<float> imageMaxHeight;
     };
 
     // Completed math results and compact measured geometry leave background

@@ -120,6 +120,12 @@
   <data name="EnglishLanguage" xml:space="preserve"><value>English</value></data>
   <data name="SimplifiedChineseLanguage" xml:space="preserve"><value>Simplified Chinese</value></data>
   <data name="LanguageRestartDescription" xml:space="preserve"><value>The selected language is used the next time Folia starts.</value></data>
+  <data name="DocumentMedia" xml:space="preserve"><value>Images and diagrams</value></data>
+  <data name="ImageMaximumWidth" xml:space="preserve"><value>Default image width limit</value></data>
+  <data name="ImageMaximumWidthDescription" xml:space="preserve"><value>Percentage of the available text width. Small images stay at their original size.</value></data>
+  <data name="MermaidTheme" xml:space="preserve"><value>Mermaid theme</value></data>
+  <data name="MermaidFollowFolia" xml:space="preserve"><value>Follow Folia theme</value></data>
+  <data name="MermaidThemeDescription" xml:space="preserve"><value>A theme set in the Mermaid source overrides this choice.</value></data>
   <data name="LanguageSavedRestart" xml:space="preserve"><value>Language saved. Restart Folia to apply it.</value></data>
   <data name="ThemesDescription" xml:space="preserve"><value>Choose a built-in theme or import a complete JSON profile. Selection only changes the preview until Apply.</value></data>
   <data name="LicensesDescription" xml:space="preserve"><value>Review the Folia license and notices for bundled third-party software.</value></data>

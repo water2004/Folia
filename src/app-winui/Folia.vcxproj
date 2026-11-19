@@ -230,6 +230,7 @@
     <ClInclude Include="media\MathJaxRenderer.State.h" />
     <ClInclude Include="media\MathJaxSvgParser.h" />
     <ClInclude Include="media\MermaidRenderer.h" />
+    <ClInclude Include="media\MediaDisplaySettings.h" />
     <ClInclude Include="media\SvgNormalizer.h" />
     <ClInclude Include="media\TreeSitterHighlighter.h" />
     <ClInclude Include="App.xaml.h">

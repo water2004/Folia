@@ -15,10 +15,9 @@ namespace
         return separator == std::wstring::npos ? std::wstring{} : path.substr(0, separator + 1);
     }
 
-    class Runtime
+    struct NativeLibrary
     {
-    public:
-        Runtime()
+        NativeLibrary()
         {
             module = LoadLibraryExW((ModuleDirectory() + L"FoliaNativeMermaid.dll").c_str(), nullptr, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
             if (!module)
@@ -27,36 +26,65 @@ namespace
                 return;
             }
             render = reinterpret_cast<Render>(GetProcAddress(module, "FoliaNativeMermaidRender"));
+            renderWithTheme = reinterpret_cast<RenderWithTheme>(GetProcAddress(module, "FoliaNativeMermaidRenderWithTheme"));
+            themeName = reinterpret_cast<ThemeName>(GetProcAddress(module, "FoliaNativeMermaidThemeName"));
             freeBuffer = reinterpret_cast<FreeBuffer>(GetProcAddress(module, "FoliaNativeMermaidFree"));
             if (!render || !freeBuffer)
                 error = "Native Mermaid library has an incompatible ABI";
         }
 
-        ~Runtime()
+        ~NativeLibrary()
         {
             if (module) FreeLibrary(module);
         }
 
-        winrt::Folia::MermaidSvg Process(std::string const& source, bool dark, std::uint64_t id)
+        using Render = decltype(&FoliaNativeMermaidRender);
+        using RenderWithTheme = decltype(&FoliaNativeMermaidRenderWithTheme);
+        using ThemeName = decltype(&FoliaNativeMermaidThemeName);
+        using FreeBuffer = decltype(&FoliaNativeMermaidFree);
+
+        HMODULE module = nullptr;
+        Render render = nullptr;
+        RenderWithTheme renderWithTheme = nullptr;
+        ThemeName themeName = nullptr;
+        FreeBuffer freeBuffer = nullptr;
+        std::string error;
+    };
+
+    NativeLibrary const& Library()
+    {
+        static const NativeLibrary library;
+        return library;
+    }
+
+    class Runtime
+    {
+    public:
+        winrt::Folia::MermaidSvg Process(std::string const& source,
+            std::string const& theme, bool dark, std::uint64_t id)
         {
             winrt::Folia::MermaidSvg result;
             result.renderId = id;
-            if (!error.empty())
+            auto const& library = Library();
+            if (!library.error.empty())
             {
-                result.error = error;
+                result.error = library.error;
+                return result;
+            }
+            if (!theme.empty() && !library.renderWithTheme)
+            {
+                result.error = "Native Mermaid library does not support named themes";
                 return result;
             }
             std::uint8_t* output = nullptr;
             std::size_t outputLength = 0;
-            auto status = render(
-                reinterpret_cast<std::uint8_t const*>(source.data()),
-                source.size(),
-                dark,
-                &output,
-                &outputLength,
-                &result.width,
-                &result.height);
-            auto release = [this](std::uint8_t* bytes) { if (bytes) freeBuffer(bytes); };
+            auto bytes = reinterpret_cast<std::uint8_t const*>(source.data());
+            auto status = theme.empty()
+                ? library.render(bytes, source.size(), dark, &output, &outputLength, &result.width, &result.height)
+                : library.renderWithTheme(bytes, source.size(),
+                    reinterpret_cast<std::uint8_t const*>(theme.data()), theme.size(),
+                    &output, &outputLength, &result.width, &result.height);
+            auto release = [&library](std::uint8_t* buffer) { if (buffer) library.freeBuffer(buffer); };
             std::unique_ptr<std::uint8_t, decltype(release)> ownedOutput(output, release);
             std::string value;
             if (output && outputLength > 0) value.assign(reinterpret_cast<char const*>(output), outputLength);
@@ -99,14 +127,7 @@ namespace
         }
 
     private:
-        using Render = decltype(&FoliaNativeMermaidRender);
-        using FreeBuffer = decltype(&FoliaNativeMermaidFree);
-
-        HMODULE module = nullptr;
-        Render render = nullptr;
-        FreeBuffer freeBuffer = nullptr;
         winrt::Folia::SvgNormalizer normalizer;
-        std::string error;
     };
 }
 
@@ -118,6 +139,7 @@ namespace winrt::Folia
         {
             std::string key;
             std::string source;
+            std::string theme;
             bool dark = false;
             std::uint64_t id = 0;
             std::uint64_t generation = 0;
@@ -149,7 +171,7 @@ namespace winrt::Folia
                     request = std::move(pending.front());
                     pending.pop_front();
                 }
-                auto result = runtime.Process(request.source, request.dark, request.id);
+                auto result = runtime.Process(request.source, request.theme, request.dark, request.id);
                 std::function<void()> callback;
                 {
                     std::scoped_lock lock(mutex);
@@ -167,6 +189,16 @@ namespace winrt::Folia
         static std::size_t ResultBytes(MermaidSvg const& result)
         {
             return sizeof(result) + result.svg.size() + result.error.size();
+        }
+
+        void Clear()
+        {
+            ++generation;
+            pending.clear();
+            queued.clear();
+            cache.clear();
+            cacheOrder.clear();
+            cacheBytes = 0;
         }
 
         void Store(std::string const& key, MermaidSvg result)
@@ -201,6 +233,7 @@ namespace winrt::Folia
         std::size_t cacheBytes = 0;
         std::uint64_t nextId = 1;
         std::uint64_t generation = 0;
+        std::string theme;
         std::function<void()> completion;
         // Start only after every queue/cache member has been initialized.
         std::thread worker;
@@ -208,6 +241,32 @@ namespace winrt::Folia
 
     MermaidRenderer::MermaidRenderer() : state(std::make_unique<State>()) {}
     MermaidRenderer::~MermaidRenderer() = default;
+
+    std::span<const std::string> MermaidRenderer::ThemeNames()
+    {
+        static const auto names = [] {
+            std::vector<std::string> result;
+            auto const& library = Library();
+            if (library.error.empty() && library.renderWithTheme && library.themeName)
+            {
+                for (std::size_t i = 0; auto name = library.themeName(i); ++i)
+                {
+                    std::u16string_view text(name);
+                    result.push_back(winrt::to_string(std::wstring(text.begin(), text.end())));
+                }
+            }
+            return result;
+        }();
+        return names;
+    }
+
+    void MermaidRenderer::SetTheme(std::string theme)
+    {
+        std::scoped_lock lock(state->mutex);
+        if (state->theme == theme) return;
+        state->theme = std::move(theme);
+        state->Clear();
+    }
 
     void MermaidRenderer::SetCompletionCallback(std::function<void()> completion)
     {
@@ -218,8 +277,9 @@ namespace winrt::Folia
     std::optional<MermaidSvg> MermaidRenderer::GetOrQueue(std::string_view source, bool dark, bool allowQueue)
     {
         if (source.empty()) return std::nullopt;
-        auto key = std::string(source) + '\x1f' + (dark ? "1" : "0");
         std::scoped_lock lock(state->mutex);
+        // A fixed theme has one cache entry regardless of the Folia theme.
+        auto key = std::string(source) + '\x1f' + (state->theme.empty() && dark ? "1" : "0");
         if (auto found = state->cache.find(key); found != state->cache.end()) return found->second;
         if (!allowQueue) return std::nullopt;
         if (state->queued.insert(key).second)
@@ -229,7 +289,8 @@ namespace winrt::Folia
                 state->queued.erase(state->pending.front().key);
                 state->pending.pop_front();
             }
-            state->pending.push_back(State::Request{ key, std::string(source), dark, state->nextId++, state->generation });
+            state->pending.push_back(State::Request{ key, std::string(source), state->theme,
+                dark, state->nextId++, state->generation });
             state->wake.notify_one();
         }
         return std::nullopt;
@@ -238,11 +299,6 @@ namespace winrt::Folia
     void MermaidRenderer::Clear()
     {
         std::scoped_lock lock(state->mutex);
-        ++state->generation;
-        state->pending.clear();
-        state->queued.clear();
-        state->cache.clear();
-        state->cacheOrder.clear();
-        state->cacheBytes = 0;
+        state->Clear();
     }
 }

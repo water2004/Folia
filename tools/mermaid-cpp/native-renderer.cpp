@@ -52,4 +52,9 @@ std::int32_t FoliaNativeMermaidRenderWithTheme(const std::uint8_t* source,
         });
 }
 
+const char16_t* FoliaNativeMermaidThemeName(std::size_t index) noexcept {
+    const auto themes = folia::mermaid::mermaid_themes();
+    return index < themes.size() ? themes[index].name.data() : nullptr;
+}
+
 void FoliaNativeMermaidFree(std::uint8_t* output) noexcept { delete[] output; }

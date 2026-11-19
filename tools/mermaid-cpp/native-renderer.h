@@ -17,4 +17,7 @@ extern "C" std::int32_t FoliaNativeMermaidRenderWithTheme(
     const std::uint8_t* source, std::size_t length,
     const std::uint8_t* theme, std::size_t theme_length,
     std::uint8_t** output, std::size_t* output_length, float* width, float* height) noexcept;
+// Enumerate canonical, null-terminated UTF-16 names. The DLL owns the returned
+// strings for its lifetime; a null result marks the end of the catalog.
+extern "C" const char16_t* FoliaNativeMermaidThemeName(std::size_t index) noexcept;
 extern "C" void FoliaNativeMermaidFree(std::uint8_t* output) noexcept;

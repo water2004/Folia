@@ -1,6 +1,7 @@
 #pragma once
 
 #include "App.xaml.g.h"
+#include "media/MediaDisplaySettings.h"
 #include "workspace/WorkspaceLaunch.h"
 
 namespace winrt::Folia::implementation
@@ -15,6 +16,7 @@ namespace winrt::Folia::implementation
         Microsoft::UI::Xaml::Window CreateMainWindow(winrt::hstring const& path = {});
         MainWindow* FindMainWindow(Microsoft::UI::WindowId id) const;
         MainWindow* FindDocumentWindow(std::uint64_t id) const;
+        void UpdateWindowMediaSettings(MainWindow const* source, MediaDisplaySettings const& settings);
 
     private:
         winrt::fire_and_forget LaunchAsync();

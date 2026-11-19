@@ -14,13 +14,13 @@ namespace winrt::Folia
         ::Microsoft::WRL::ComPtr<ID2D1DeviceContext5> svgContext;
         if (resources.d2dContext) resources.d2dContext.As(&svgContext);
         return {themeProfile, themeRevision, resources.surfaceWidthDip, resources.surfaceHeightDip,
-            resources.Ready(), static_cast<bool>(svgContext)};
+            resources.Ready(), static_cast<bool>(svgContext), mediaSettings};
     }
 
     bool EditorSurfaceRenderer::MatchesMathPreparationContext(EditorMathPreparationContext const& context) const
     {
         return context.ready && resources.Ready() && context.themeRevision == themeRevision
-            && context.surfaceWidth == resources.surfaceWidthDip;
+            && context.surfaceWidth == resources.surfaceWidthDip && context.media == mediaSettings;
     }
 
     std::unique_ptr<EditorMathPreparation> EditorSurfaceRenderer::PrepareMath(
@@ -120,9 +120,11 @@ namespace winrt::Folia
         SvgNormalizer normalizer;
         TreeSitterHighlighter syntax;
         MermaidRenderer diagrams;
+        diagrams.SetTheme(context.media.mermaidTheme);
         EditorInteractionMap interaction;
         EditorInlineImageRenderer images(measurementResources, measurementCache, sheet,
-            normalizer, svg, frame.baseDirectory, false);
+            normalizer, svg, frame.baseDirectory, false,
+            context.media.imageMaxWidthPercent, context.imageMaxHeight);
         EditorDocumentPainter painter(measurementResources, sheet, interaction, syntax, {},
             false, metrics.right, frame.selection, {}, frame.renderModel.editable_index);
         EditorDocumentBlockPreparer preparer(frame, measurementResources, measurementCache,

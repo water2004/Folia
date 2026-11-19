@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "App.xaml.h"
 #include "MainWindow.xaml.h"
 #include "localization/Localization.h"
 
@@ -29,6 +30,7 @@ namespace winrt::Folia::implementation
             return saveError;
         }
         auto themeChanged = appSettings.themeId != settings.themeId;
+        auto mediaChanged = appSettings.media != settings.media;
         auto shortcutsChanged = appSettings.shortcutBindings != settings.shortcutBindings;
         auto latexSuggestionsChanged =
             appSettings.latexSuggestionsEnabled != settings.latexSuggestionsEnabled;
@@ -41,7 +43,20 @@ namespace winrt::Folia::implementation
         if (latexSuggestionsChanged)
             latexCompletionController.SetEnabled(appSettings.latexSuggestionsEnabled);
         if (themeChanged) UpdateTheme();
+        if (mediaChanged) {
+            editorRenderer.SetMediaDisplaySettings(appSettings.media);
+            App::Current()->UpdateWindowMediaSettings(this, appSettings.media);
+        }
         return std::nullopt;
+    }
+
+    void MainWindow::UpdateMediaSettings(winrt::Folia::MediaDisplaySettings const& settings)
+    {
+        if (appSettings.media == settings) return;
+        appSettings.media = settings;
+        editorRenderer.SetMediaDisplaySettings(settings);
+        if (settingsView) settingsView->UpdateMediaSettings(settings);
+        if (!settingsMode) RenderEditorSurface();
     }
 
     void MainWindow::SetSettingsMode(bool enabled)

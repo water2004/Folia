@@ -100,6 +100,7 @@ namespace winrt::Folia
             auto title = std::filesystem::path(displayName.c_str()).stem().wstring();
             auto outputPath = state->pdfOutputPath;
             auto theme = state->renderer->Theme();
+            auto mediaSettings = state->renderer->MediaSettings();
             if (state->cancelRequested)
             {
                 state->pdfExporting = false;
@@ -119,7 +120,8 @@ namespace winrt::Folia
                 title = std::move(title),
                 baseDirectory = std::move(baseDirectory),
                 renderModel = std::move(renderModel),
-                theme = std::move(theme)](std::stop_token threadStop) mutable
+                theme = std::move(theme),
+                mediaSettings = std::move(mediaSettings)](std::stop_token threadStop) mutable
             {
                 struct ApartmentScope
                 {
@@ -141,6 +143,7 @@ namespace winrt::Folia
                     {
                         EditorSurfaceRenderer renderer;
                         renderer.SetTheme(theme);
+                        renderer.SetMediaDisplaySettings(mediaSettings);
                         renderer.SetMathPreparationStopToken(work->stop.get_token());
                         renderer.InitializeForPdf();
                         detail::EditorRenderFrame frame{

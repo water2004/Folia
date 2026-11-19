@@ -27,6 +27,7 @@ namespace winrt::Folia
         winrt::Microsoft::UI::Xaml::Controls::NavigationView Root() const { return navigation_; }
         void Reset(AppSettings settings, folia::Theme systemVariant);
         void SetSystemVariant(folia::Theme variant);
+        void UpdateMediaSettings(MediaDisplaySettings const& media);
         void SetNavigationWidth(double width) { navigation_.OpenPaneLength(width); }
         void Detach();
 
@@ -45,6 +46,8 @@ namespace winrt::Folia
         void UpdateThemePreview();
         void ApplyLatexSetting();
         void ApplyLanguageSetting();
+        void ApplyMediaSetting(MediaDisplaySettings const& media);
+        void RefreshMediaControls();
         bool ApplyShortcutSettings();
         void ApplyPendingTheme();
         void UpdateThemeActions();
@@ -94,6 +97,8 @@ namespace winrt::Folia
         winrt::Microsoft::UI::Xaml::UIElement aboutPage_{ nullptr };
         winrt::Microsoft::UI::Xaml::Controls::ToggleSwitch latexSuggestionsToggle_;
         winrt::Microsoft::UI::Xaml::Controls::ComboBox languageCombo_;
+        winrt::Microsoft::UI::Xaml::Controls::ComboBox imageWidthCombo_{nullptr};
+        winrt::Microsoft::UI::Xaml::Controls::ComboBox mermaidThemeCombo_{nullptr};
         winrt::Microsoft::UI::Xaml::Controls::ListView themeList_;
         winrt::Microsoft::UI::Xaml::Controls::Border themePreview_;
         winrt::Microsoft::UI::Xaml::Controls::ComboBox licenseSelector_;

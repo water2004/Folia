@@ -104,6 +104,41 @@ ListView ModelOptions(TextBox const& field) {
     return ChoiceButton(field).Flyout().as<Flyout>().Content().as<ListView>();
 }
 suite settings_style_tests = [] {
+    "document media settings select a Mermaid theme independently of Folia"_test = [] {
+        Window window;
+        Grid root;
+        window.Content(root);
+        std::optional<winrt::Folia::AppSettings> applied;
+        auto view = std::make_shared<winrt::Folia::SettingsView>(winrt::Folia::AppSettings{},
+            std::make_shared<winrt::Folia::ThemeCatalog>(), std::make_shared<winrt::Folia::LatexCommandCatalog>(),
+            folia::Theme::Light, nullptr, [&](auto const& settings) -> std::optional<winrt::hstring> {
+                applied = settings;
+                return {};
+            }, [] {});
+        struct Cleanup { Window window; std::shared_ptr<winrt::Folia::SettingsView> view;
+            ~Cleanup() { view->Detach(); window.Close(); } } cleanup{window, view};
+        root.Children().Append(view->Root());
+        window.Activate();
+        Pump([&] { return root.IsLoaded(); });
+        root.UpdateLayout();
+        auto page = view->Root().Content().as<FrameworkElement>();
+        auto width = Field<ComboBox>(page, winrt::Folia::Localize(L"ImageMaximumWidth"));
+        auto theme = Field<ComboBox>(page, winrt::Folia::Localize(L"MermaidTheme"));
+        expect(fatal(width && theme));
+        expect(winrt::unbox_value<winrt::hstring>(width.SelectedItem()) == L"100%");
+        expect(theme.SelectedIndex() == 0_i);
+        for (std::uint32_t i = 0; i < theme.Items().Size(); ++i)
+            if (winrt::unbox_value<winrt::hstring>(theme.Items().GetAt(i)) == L"forest")
+                theme.SelectedIndex(static_cast<int>(i));
+        Pump([&] { return applied && applied->media.mermaidTheme == "forest"; });
+        width.SelectedIndex(1);
+        Pump([&] { return applied && applied->media.imageMaxWidthPercent == 50; });
+        expect(applied->media.mermaidTheme == "forest" && applied->themeId == "system");
+        theme.SelectedIndex(0);
+        Pump([&] { return applied && applied->media.mermaidTheme.empty(); });
+        expect(applied->media.imageMaxWidthPercent == 50);
+    };
+
     "explicit prompt cache is opt-in and available only for Responses"_test = [] {
         CompletionPage fixture("https://fixture.invalid/v1", "fixture", {}, 1);
         auto cache = Field<ToggleSwitch>(fixture.page, winrt::Folia::Localize(L"AIExplicitCache"));

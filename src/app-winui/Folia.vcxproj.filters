@@ -722,6 +722,9 @@
     <ClInclude Include="media\MermaidRenderer.h">
       <Filter>Media Services</Filter>
     </ClInclude>
+    <ClInclude Include="media\MediaDisplaySettings.h">
+      <Filter>Media Services</Filter>
+    </ClInclude>
     <ClInclude Include="media\SvgNormalizer.h">
       <Filter>Media Services</Filter>
     </ClInclude>

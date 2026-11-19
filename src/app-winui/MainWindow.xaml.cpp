@@ -65,6 +65,7 @@ namespace winrt::Folia::implementation
         if (std::filesystem::exists(iconPath)) AppWindow().SetIcon(winrt::hstring(iconPath.c_str()));
         auto loadedSettings = winrt::Folia::LoadAppSettings();
         appSettings = std::move(loadedSettings.settings);
+        editorRenderer.SetMediaDisplaySettings(appSettings.media);
         themeCatalog->Refresh();
         ExtendsContentIntoTitleBar(true);
         AppWindow().TitleBar().PreferredHeightOption(Microsoft::UI::Windowing::TitleBarHeightOption::Tall);

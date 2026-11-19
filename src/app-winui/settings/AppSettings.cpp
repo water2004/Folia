@@ -3,6 +3,7 @@
 #include "settings/ShortcutSettingsSerialization.h"
 #include "settings/CompletionPromptSettings.h"
 #include "localization/Localization.h"
+#include "media/MermaidRenderer.h"
 #include "storage/AssetPaths.h"
 
 namespace
@@ -62,6 +63,16 @@ namespace winrt::Folia
             if (schemaVersion >= 4.0)
                 settings.latexSuggestionsEnabled = root.GetNamedBoolean(L"latexSuggestionsEnabled", true);
             settings.themeId = winrt::to_string(root.GetNamedString(L"themeId"));
+            auto imageWidth = root.GetNamedNumber(L"imageMaxWidthPercent", settings.media.imageMaxWidthPercent);
+            auto const& widths = MediaDisplaySettings::imageWidths;
+            if (auto width = std::find(widths.begin(), widths.end(), imageWidth); width != widths.end())
+                settings.media.imageMaxWidthPercent = *width;
+            auto mermaidTheme = winrt::to_string(root.GetNamedString(L"mermaidTheme", L""));
+            if (!mermaidTheme.empty()) {
+                auto names = MermaidRenderer::ThemeNames();
+                if (std::ranges::find(names, mermaidTheme) != names.end())
+                    settings.media.mermaidTheme = std::move(mermaidTheme);
+            }
             if (schemaVersion >= 2.0)
                 settings.languageId = winrt::to_string(root.GetNamedString(L"languageId"));
             if (schemaVersion >= 3.0)
@@ -106,6 +117,8 @@ namespace winrt::Folia
             root.Insert(L"latexSuggestionsEnabled", Windows::Data::Json::JsonValue::CreateBooleanValue(settings.latexSuggestionsEnabled));
             root.Insert(L"themeId", Windows::Data::Json::JsonValue::CreateStringValue(winrt::to_hstring(settings.themeId)));
             root.Insert(L"languageId", Windows::Data::Json::JsonValue::CreateStringValue(winrt::to_hstring(settings.languageId)));
+            root.Insert(L"imageMaxWidthPercent", Windows::Data::Json::JsonValue::CreateNumberValue(settings.media.imageMaxWidthPercent));
+            root.Insert(L"mermaidTheme", Windows::Data::Json::JsonValue::CreateStringValue(winrt::to_hstring(settings.media.mermaidTheme)));
             root.Insert(L"shortcutBindings", SerializeShortcutSettings(settings.shortcutBindings));
             auto target = directory / L"settings.json";
             auto temporary = directory / L"settings.json.tmp";

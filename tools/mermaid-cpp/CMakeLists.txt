@@ -204,6 +204,7 @@ if(WIN32 AND MSVC)
 EXPORTS
 FoliaNativeMermaidRender
 FoliaNativeMermaidRenderWithTheme
+FoliaNativeMermaidThemeName
 FoliaNativeMermaidFree
 ")
     target_sources(FoliaNativeMermaid PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/FoliaNativeMermaid.def")

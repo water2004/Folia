@@ -5,6 +5,7 @@
 #include "editor/rendering/EditorRenderResources.h"
 #include "editor/rendering/EditorStyleSheet.h"
 #include "editor/rendering/EditorSvgPainter.h"
+#include "media/MediaDisplaySettings.h"
 #include "media/SvgNormalizer.h"
 
 namespace winrt::Folia
@@ -40,7 +41,9 @@ namespace winrt::Folia
             SvgNormalizer& svgNormalizer,
             EditorSvgPainter& svgPainter,
             std::wstring const& baseDirectory,
-            bool animate = true);
+            bool animate = true,
+            int maximumWidthPercent = MediaDisplaySettings::imageWidths.back(),
+            std::optional<float> maximumHeight = std::nullopt);
         std::vector<ImageDraw> Resolve(IDWriteTextLayout* layout, std::vector<DisplayInlineText::ImageOverlay> const& overlays, float availableWidth, bool loadContent = true) const;
         void ReleaseGif(std::string_view source) const;
         void Draw(IDWriteTextLayout* layout, D2D1_POINT_2F origin, std::vector<ImageDraw> const& images) const;
@@ -53,5 +56,7 @@ namespace winrt::Folia
         EditorSvgPainter& svgPainter;
         std::wstring const& baseDirectory;
         bool animate = true;
+        float widthFraction;
+        std::optional<float> maximumHeight;
     };
 }

@@ -21,6 +21,29 @@ namespace
 
     suite native_mermaid_worker_tests = []
     {
+        "named Mermaid themes replace the ready diagram and respect source overrides"_test = []
+        {
+            auto names = MermaidRenderer::ThemeNames();
+            expect(fatal(std::ranges::find(names, "forest") != names.end()));
+            expect(fatal(std::ranges::find(names, "dark") != names.end()));
+            constexpr std::string_view source = "flowchart TD\n A[Start] --> B[Finish]";
+            constexpr std::string_view explicitTheme =
+                "---\nconfig:\n  theme: dark\n---\nflowchart TD\n A[Start] --> B[Finish]";
+            MermaidRenderer renderer;
+            renderer.SetTheme("forest");
+            auto forest = AwaitMermaid(renderer, source, false);
+            auto override = AwaitMermaid(renderer, explicitTheme, false);
+            expect(static_cast<bool>(forest) && static_cast<bool>(override)) << forest.error << override.error;
+            auto cached = renderer.GetOrQueue(source, true, false);
+            expect(cached && cached->renderId == forest.renderId);
+            renderer.SetTheme("dark");
+            expect(!renderer.GetOrQueue(source, false, false));
+            auto dark = AwaitMermaid(renderer, source, false);
+            expect(static_cast<bool>(dark)) << dark.error;
+            expect(dark.svg != forest.svg && dark.renderId != forest.renderId);
+            expect(AwaitMermaid(renderer, explicitTheme, false).svg == override.svg);
+        };
+
         "native Mermaid worker normalizes SVG and separates source and theme cache entries"_test = []
         {
             std::atomic_size_t completions{0};

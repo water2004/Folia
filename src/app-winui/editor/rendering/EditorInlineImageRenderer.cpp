@@ -14,14 +14,18 @@ namespace winrt::Folia
         SvgNormalizer& svgNormalizer,
         EditorSvgPainter& svgPainter,
         std::wstring const& baseDirectory,
-        bool animate)
+        bool animate,
+        int maximumWidthPercent,
+        std::optional<float> maximumHeight)
         : resources(resources),
           cache(cache),
           styleSheet(styleSheet),
           svgNormalizer(svgNormalizer),
           svgPainter(svgPainter),
           baseDirectory(baseDirectory),
-          animate(animate)
+          animate(animate),
+          widthFraction(static_cast<float>(maximumWidthPercent) / 100.0f),
+          maximumHeight(maximumHeight)
     {
     }
 
@@ -81,18 +85,18 @@ namespace winrt::Folia
                 draw.height = requestedHeight.value_or(dimensions->height);
                 if (requestedWidth && !requestedHeight) draw.height = dimensions->height * draw.width / dimensions->width;
                 if (!requestedWidth && requestedHeight) draw.width = dimensions->width * draw.height / dimensions->height;
-                auto maximumWidth = requestedWidth
-                    ? (std::max)(48.0f, availableWidth)
-                    : (std::max)(48.0f, availableWidth * 0.75f);
-                auto scale = (std::min)(1.0f, (std::min)(maximumWidth / draw.width, 240.0f / draw.height));
-                draw.width = (std::max)(1.0f, draw.width * scale);
-                draw.height = (std::max)(1.0f, draw.height * scale);
             }
             else
             {
-                draw.width = requestedWidth.value_or((std::min)((std::max)(48.0f, static_cast<float>(draw.alt.size()) * styleSheet.body.size * 0.56f), (std::max)(48.0f, availableWidth)));
+                draw.width = requestedWidth.value_or(
+                    (std::max)(48.0f, static_cast<float>(draw.alt.size()) * styleSheet.body.size * 0.56f));
                 draw.height = requestedHeight.value_or(styleSheet.body.lineHeight);
             }
+            const auto maximumWidth = availableWidth * (requestedWidth ? 1.0f : widthFraction);
+            auto scale = (std::min)(1.0f, maximumWidth / draw.width);
+            if (maximumHeight) scale = (std::min)(scale, *maximumHeight / draw.height);
+            draw.width = (std::max)(1.0f, draw.width * scale);
+            draw.height = (std::max)(1.0f, draw.height * scale);
             draw.advance = draw.width;
             if (draw.block)
             {

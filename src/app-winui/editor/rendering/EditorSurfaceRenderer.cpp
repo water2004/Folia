@@ -35,6 +35,15 @@ namespace winrt::Folia
         return themeProfile;
     }
 
+    void EditorSurfaceRenderer::SetMediaDisplaySettings(MediaDisplaySettings const& value)
+    {
+        if (value == mediaSettings) return;
+        mermaid.SetTheme(value.mermaidTheme);
+        mediaSettings = value;
+        renderCache.ClearTextLayouts();
+        ClearPreparedDocument();
+    }
+
     void EditorSurfaceRenderer::ResetDocumentCaches()
     {
         caretAnimation.Reset();

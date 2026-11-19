@@ -112,6 +112,7 @@ namespace winrt::Folia
         refreshing_ = true;
         latexSuggestionsToggle_.IsOn(settings_.latexSuggestionsEnabled);
         languageCombo_.SelectedIndex(LanguageIndex(settings_.languageId));
+        RefreshMediaControls();
         refreshing_ = false;
         if (shortcutsPage_) RefreshShortcutList();
         if (latexPage_) RefreshLatexCommandList();

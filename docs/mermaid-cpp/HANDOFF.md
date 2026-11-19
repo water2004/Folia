@@ -2,6 +2,8 @@
 
 ## 当前检查点
 
+- 2026-11-19：WinUI 的「常规 → 图片与图表」已接入独立 Mermaid 主题选择，通过 `FoliaNativeMermaidThemeName` 读取 DLL 的同一份主题清单，命名主题走现有 C ABI。切换主题会重建待渲染内容，源码主题仍优先。Windows Release 应用构建、Mermaid 工作线程 5 项和 WinUI 设置页定向测试通过，另验证图片按正文宽度缩放。日志 `build/media-settings-{build-final,mermaid-test,ui-test,image-test}.log`。
+
 - 2026-11-19：`refactor/mermaid-modules-and-themes`（`26fd18e3`）已快进合入 `master`。集成提交 `c9ba1b17` 将 Python 限于可选的结构检查，在 Windows 按实际写入的 SVG 字节计算散列。禁用 Python 查找的独立 CMake 配置已通过。
 - Windows MSVC Release 的结构、核心、DirectWrite、DLL 宿主、Math 集成测试 **5/5** 通过。DirectWrite 主题矩阵 **374/374** 生成有效 SVG，磁盘文件散列全匹配。官方浏览器 SVG 对照通过 **72 项**（State 32、Radar 16、XY 24），XY 另以浏览器测量复验 24 项。日志 `build/merge-mermaid-themes-{build,ctest,no-python,matrix}.log`，报告在 `build/mermaid-regression/windows-theme-merge*/`。本次没有执行完整 375 例官方 SVG 对照，亦没有运行 WinUI 界面验收。
 - 分支基线 `daba4996`，最后的核心实现提交为 `a436adb3`，其后是复现工具、维护说明与验收记录。

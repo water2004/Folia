@@ -62,7 +62,9 @@ namespace winrt::Folia
             svgNormalizer,
             svgPainter,
             frame.baseDirectory,
-            !printMode);
+            !printMode,
+            mediaSettings.imageMaxWidthPercent,
+            printMode ? std::optional{resources.surfaceHeightDip} : std::nullopt);
         std::vector<std::uint64_t> visibleMath;
         auto drawMath = [&](MathJaxSvgFragment const& fragment, D2D1_POINT_2F origin, D2D1_COLOR_F, float scale) {
             if (origin.x + fragment.width * scale < 0.0f || origin.y + fragment.height * scale < 0.0f

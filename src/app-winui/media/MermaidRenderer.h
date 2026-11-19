@@ -4,6 +4,7 @@
 #include <functional>
 #include <memory>
 #include <optional>
+#include <span>
 #include <string>
 #include <string_view>
 
@@ -29,6 +30,8 @@ namespace winrt::Folia
         MermaidRenderer& operator=(MermaidRenderer const&) = delete;
 
         void SetCompletionCallback(std::function<void()> completion);
+        static std::span<const std::string> ThemeNames();
+        void SetTheme(std::string theme);
         std::optional<MermaidSvg> GetOrQueue(std::string_view source, bool dark, bool allowQueue = true);
         void Clear();
 

@@ -171,6 +171,32 @@ namespace {
     }
 
     suite document_layout_retention_tests = [] {
+        "markdown image uses the available width and configured limit at its intrinsic ratio"_test = [] {
+            MeasurementFixture fixture;
+            std::wstring baseDirectory;
+            EditorSvgPainter svg(fixture.resources, fixture.resourcesCache);
+            EditorTextLayoutEngine engine(fixture.resources, fixture.sheet);
+            // A 1200 x 900 PNG keeps this layout test independent of disk and network resources.
+            std::vector<DisplayInlineText::ImageOverlay> images{{.source =
+                "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABLAAAAOEAQAAAACZFvVXAAAAm0"
+                "lEQVR42u3BAQ0AAADCoPdPbQ43oAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+                "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4NsAEvoAAfYq/V"
+                "EAAAAASUVORK5CYII=", .block = true}};
+            auto measure = [&](float width, int limit) {
+                EditorInlineImageRenderer renderer(fixture.resources, fixture.resourcesCache, fixture.sheet,
+                    fixture.normalizer, svg, baseDirectory, false, limit);
+                auto layout = engine.Create(L"\uFFFC", fixture.resources.textFormat.Get(), width);
+                auto draws = renderer.Resolve(layout.Get(), images, width, false);
+                expect(fatal(draws.size() == 1_u));
+                return std::pair(draws.front().width, draws.front().imageHeight);
+            };
+            expect(measure(480, 100) == std::pair(480.0f, 360.0f));
+            expect(measure(960, 100) == std::pair(960.0f, 720.0f));
+            expect(measure(960, 50) == std::pair(480.0f, 360.0f));
+            expect(measure(1800, 100) == std::pair(1200.0f, 900.0f));
+        };
+
         "document layout keeps small block geometry independent of visual storage"_test = [] {
             // A long list has few physical fragments; a document of small
             // independent blocks exposes the cost of each retained entry.

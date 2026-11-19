@@ -4,6 +4,7 @@
 #include <optional>
 #include <string>
 #include "completion/CompletionService.h"
+#include "media/MediaDisplaySettings.h"
 
 import folia.platform.editor_shortcuts;
 
@@ -15,6 +16,7 @@ namespace winrt::Folia
         CompletionConfig completion;
         std::string themeId = "system";
         std::string languageId = "system";
+        MediaDisplaySettings media;
         std::vector<folia::platform::editor::EditorShortcutBinding> shortcutBindings =
             folia::platform::editor::default_editor_shortcuts();
 
