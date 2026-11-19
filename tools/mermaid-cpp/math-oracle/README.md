@@ -76,6 +76,16 @@ during capture. It does not implement a renderer. The upstream capture observes
 MathJax's actual completed root box, since its printed SVG `viewBox` is rounded
 and cannot recover full-precision metrics.
 
+The Source capture retains the original `raw` host output and the actual
+upstream stylesheet. Before writing its standalone SVG, it independently
+materializes the stylesheet's SVG paint declarations using
+[`svg-paint/source-paint.mjs`](../../math-port/svg-paint/source-paint.mjs).
+For every input, including empty input, it verifies that this explicit Source
+paint has exactly the same pixels as the original SVG with the actual host CSS.
+The test host maps only the `mjx-container` selector tag to an outer SVG element,
+preserving direct-child and descendant relationships so the selectors really
+match. Native output and comparison tolerances are unchanged.
+
 `compare-fragments.mjs` checks:
 
 - CSS-pixel width, height, and baseline, with `1e-9` tolerance for floating-point
@@ -91,8 +101,12 @@ and cannot recover full-precision metrics.
 The 22-case corpus covers fractions, sums, integrals, matrices, aligned equations,
 cases, `\nabla`, delimiters, text, explicit colors, cancel marks, blackboard
 letters, chemistry, 12/16/24-pixel fonts, overflow, empty input, invalid input,
-and class attributes. The first completed native verification matched all
-22 metric records, all 22 drawing trees, and every pixel of all 22 bitmaps.
+and class attributes. Earlier raw-versus-raw results compared unstyled exports;
+they did not cover paint supplied by MathJax's host CSS. Current verification
+uses the explicit Source paint described above. The broader
+[`svg-paint` matrix](../../math-port/svg-paint/README.md) also checks array
+rules/frames, dotted direct-MathML tables, labeled viewports, error/link paint and
+per-primitive visible pixels in document and standalone modes.
 Artifacts and machine-readable results are written under
 `build/mermaid-math/{mathjax-newcm,native,comparison,official-v13}`.
 

@@ -127,6 +127,7 @@ scene::PaintColor const &stroke_color(scene::Paint const &paint) {
 struct PaintWriteOptions {
     bool stroke_first{};
     bool defer_colors{};
+    bool explicit_stroke_width{};
 };
 
 void append_paint(std::string &out, scene::Paint const &paint, PaintWriteOptions options = {}) {
@@ -140,7 +141,7 @@ void append_paint(std::string &out, scene::Paint const &paint, PaintWriteOptions
         detail::append_attribute(out, "fill-rule", "evenodd");
     if (!options.stroke_first && !options.defer_colors)
         append_color(out, "stroke", "stroke-opacity", stroke_color(paint));
-    if (paint.stroke_width != 0)
+    if (paint.stroke_width != 0 || options.explicit_stroke_width)
         detail::append_attribute(out, "stroke-width", number(paint.stroke_width * 1000));
     if (paint.opacity != 1)
         detail::append_attribute(out, "opacity", number(paint.opacity, 3));
@@ -409,7 +410,9 @@ void append_glyphs(std::string &out, scene::GlyphRun const &run, SvgWriteOptions
         }
         if (!transform.empty())
             detail::append_attribute(out, "transform", transform);
-        append_paint(out, glyph.paint);
+        // Glyph width is a completed value, including an intentional zero.
+        // It must not inherit a surrounding group's nonzero outline stroke.
+        append_paint(out, glyph.paint, {.explicit_stroke_width = true});
         out += "/>";
     }
 }
@@ -488,7 +491,7 @@ void append_rule(std::string &out, scene::Rule const &rule) {
         detail::append_attribute(out, "y", number(rule.bounds.y * 1000));
         // Standalone SVG consumers do not load MathJax's document stylesheet.
         // Scene already owns the resolved fill, stroke width, dash and cap.
-        append_paint(out, rule.paint);
+        append_paint(out, rule.paint, {.explicit_stroke_width = true});
         if (rule.corner_radius)
             detail::append_attribute(out, "rx", number(*rule.corner_radius * 1000));
         out += "/>";
@@ -672,7 +675,7 @@ void append_path_element(std::string &out, scene::Path const &path) {
         append_paint(out, path.paint,
                      {.stroke_first = path.role == scene::ElementRole::background_box});
     else {
-        append_paint(out, path.paint);
+        append_paint(out, path.paint, {.explicit_stroke_width = true});
         out += "/>";
         return;
     }

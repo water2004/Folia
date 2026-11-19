@@ -5,6 +5,7 @@ import {mkdirSync, readFileSync, writeFileSync} from 'node:fs';
 import {join, resolve} from 'node:path';
 import sharp from 'sharp';
 import {directory, fileHash, loadMathJaxProfile} from './profile.mjs';
+import {materializeSourcePaint, paintCanvas, sourceStyles} from '../../math-port/svg-paint/source-paint.mjs';
 
 const destination = resolve(process.argv[2] ?? 'build/mermaid-math/mathjax-newcm');
 mkdirSync(destination, {recursive: true});
@@ -46,6 +47,21 @@ for (const item of corpus.cases) {
     const baseline = h * pxPerEm;
     adaptor.setAttribute(svg, 'width', `${width}px`);
     adaptor.setAttribute(svg, 'height', `${height}px`);
+    // Source SVG is hosted by MathJax CSS in upstream. Keep raw above unchanged,
+    // then independently materialize that stylesheet's drawing declarations so
+    // the expected fragment is a self-contained picture like native output.
+    const styles = sourceStyles(profile);
+    const actualCssHost = paintCanvas(adaptor, svg, {width, height}, styles.css);
+    materializeSourcePaint(adaptor, svg, styles.rules);
+    const explicitHost = paintCanvas(adaptor, svg, {width, height});
+    const actualCssPixels = await sharp(Buffer.from(actualCssHost), {density: 144})
+      .ensureAlpha().raw().toBuffer({resolveWithObject: true});
+    const explicitPixels = await sharp(Buffer.from(explicitHost), {density: 144})
+      .ensureAlpha().raw().toBuffer({resolveWithObject: true});
+    assert.deepEqual(actualCssPixels.info, explicitPixels.info, 'Source CSS projection raster size');
+    assert(actualCssPixels.data.equals(explicitPixels.data),
+      'Explicit Source paint does not reproduce the actual upstream host CSS pixels');
+    writeFileSync(join(destination, item.name + '.host.svg'), actualCssHost);
     const standalone = adaptor.serializeXML(svg);
     const svgPath = join(destination, item.name + '.svg');
     writeFileSync(svgPath, standalone);
@@ -57,14 +73,16 @@ for (const item of corpus.cases) {
       const raster = await sharp(Buffer.from(standalone), {density: 144}).png().toFile(path);
       png = {sha256: fileHash(path), width: raster.width, height: raster.height};
     }
-    records.push({...item, svg: standalone, raw, width, height, baseline, viewBox: view,
+    records.push({...item, svg: standalone, raw, sourceCss: styles.css,
+      sourcePaint: styles.rules, sourceProjectionPixelsEqual: true,
+      width, height, baseline, viewBox: view,
       scale, rootMetrics, svgSha256: fileHash(svgPath), png, error: null});
   } catch (error) {
     records.push({...item, svg: null, error: {name: error.name, message: error.message}});
   }
 }
 writeFileSync(join(destination, 'report.json'), JSON.stringify({schema: 1,
-  reference: 'Official MathJax 4.1.3 / NewCM, committed Folia profile, display overflow fragment',
+  reference: 'Official MathJax 4.1.3 / NewCM, committed Folia profile, display overflow fragment with independently materialized host CSS paint',
   corpusSha256: fileHash(corpusPath), lock: profile.provenance,
   node: process.version, rasterizer: sharp.versions, dynamicModules: profile.dynamicModules,
   records}, null, 2) + '\n');

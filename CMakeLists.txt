@@ -891,7 +891,8 @@ add_test(NAME FoliaMathTests COMMAND FoliaMathTests)
 add_executable(FoliaMathSvgBridgeTests EXCLUDE_FROM_ALL
     tests/main.cpp tests/math/native_svg_writer.cpp tests/math/native_renderer_bridge.cpp
     tests/math/native_source_svg_paint.cpp tests/math/native_common_wrapper.cpp
-    tests/math/native_svg_merror.cpp tests/math/native_table_profile_source.cpp)
+    tests/math/native_svg_merror.cpp tests/math/native_table_profile_source.cpp
+    tests/math/native_common_table.cpp tests/math/native_common_text.cpp)
 target_compile_features(FoliaMathSvgBridgeTests PRIVATE cxx_std_23)
 set_target_properties(FoliaMathSvgBridgeTests PROPERTIES CXX_MODULE_STD ON CXX_SCAN_FOR_MODULES ON)
 target_include_directories(FoliaMathSvgBridgeTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)

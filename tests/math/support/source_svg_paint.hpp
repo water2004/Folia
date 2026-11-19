@@ -13,7 +13,7 @@ namespace source_svg_paint {
 // viewport declarations become explicit; geometry, glyphs, transforms, child
 // order and all other bytes continue to participate in exact SVG comparison.
 //
-// Sources: @mathjax/src/cjs/output/svg.js, Wrappers/{mtable,merror}.js.
+// Sources: @mathjax/src/cjs/output/svg.js, Wrappers/{mtable,merror,TextNode}.js.
 // Its default stroke width is 70px in the 1000-unit SVG coordinate system;
 // dashed uses 140, and dotted uses 0,140 with a round cap. The inherited stroke
 // color remains inherited. tools/math-port/svg-paint checks these declarations
@@ -173,6 +173,11 @@ inline std::string materialize(std::string_view source) {
             }
             if (svg && within_host_svg && name == "a")
                 detail::append(tag, " fill=\"blue\" stroke=\"blue\"");
+            if (svg && within_host_svg && (name == "path" || name == "use") &&
+                detail::has_attribute(tag, "data-c")) {
+                detail::erase_attribute(tag, "stroke-width");
+                detail::append(tag, " stroke-width=\"3\"");
+            }
             const bool table_viewport = svg && parent.name == "g" && detail::table(grandparent);
             if (name == "svg" && (host_svg || table_viewport))
                 detail::append(tag, " overflow=\"visible\"");

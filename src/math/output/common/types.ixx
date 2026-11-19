@@ -73,6 +73,9 @@ struct CommonOptions {
     LinebreakOptions linebreaks;
     enum class HtmlHDW : std::uint8_t { automatic, use, force, ignore };
     HtmlHDW htmlHDW = HtmlHDW::automatic;
+    // Glyph outline stroke in ems: MathJax 4.1.3 SVG's default blacker=3
+    // uses a 1000-unit em. Zero explicitly disables glyph thickening.
+    double glyphStrokeWidth = .003;
 };
 
 struct CommonOutputJaxConfig {

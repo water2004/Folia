@@ -1,4 +1,5 @@
 #include "support/source_svg_paint.hpp"
+#include "support/svg_paint_artifacts.hpp"
 #include "support/folia_test.hpp"
 import folia.math.fonts.newcm_font_module_provider;
 import folia.math.output.common;
@@ -215,6 +216,9 @@ void verifySourceMathmlTable(MathmlTableSceneCase const &expected,
         check(eq(rows[i]->getBBox().rscale, expected.row_rscales[i]), "row bbox rscale");
 
     const auto nativeSvg = svg::write(built, {.font_cache = svg::FontCacheMode::none});
+    svg_paint_artifacts::capture("table", expected.name, expected.source_svg, nativeSvg,
+                                 expected.metrics.em, expected.metrics.ex,
+                                 expected.metrics.container_width);
     const auto expectedSvg = source_svg_paint::materialize(expected.source_svg);
     if (nativeSvg != expectedSvg) {
         reportTableSvgDifference(expected.name, expectedSvg, nativeSvg);

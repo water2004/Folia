@@ -113,4 +113,30 @@ suite native_source_svg_paint = [] {
             expect(rejected) << "unbalanced structure is still rejected";
         }
     };
+
+    "Source glyph blacker only materializes MathJax SVG glyph selectors"_test = [] {
+        constexpr std::string_view source =
+            "<mjx-container jax=\"SVG\"><svg>"
+            "<defs><path id=\"outline\" d=\"M0 0L1 1\"/></defs>"
+            "<g stroke-width=\"0\"><path data-c=\"78\" d=\"M0 0L1 1\" transform=\"translate(10,20)\"/>"
+            "<use data-c=\"78\" href=\"#outline\"/>"
+            "<path data-c=\"79\" d=\"M0 0L2 2\" stroke-width=\"5\" style=\"stroke-width: 9;\"/>"
+            "<path d=\"M0 0L3 3\"/><text>Unknown font</text>"
+            "<foreignObject><path data-c=\"78\" d=\"HTML payload\"/>"
+            "<svg><path data-c=\"78\" d=\"M0 0L1 1\"/></svg></foreignObject>"
+            "</g></svg></mjx-container>";
+        constexpr std::string_view expected =
+            "<mjx-container jax=\"SVG\"><svg overflow=\"visible\">"
+            "<defs><path id=\"outline\" d=\"M0 0L1 1\"/></defs>"
+            "<g stroke-width=\"0\"><path data-c=\"78\" d=\"M0 0L1 1\" transform=\"translate(10,20)\" stroke-width=\"3\"/>"
+            "<use data-c=\"78\" href=\"#outline\" stroke-width=\"3\"/>"
+            "<path data-c=\"79\" d=\"M0 0L2 2\" style=\"stroke-width: 9;\" stroke-width=\"3\"/>"
+            "<path d=\"M0 0L3 3\"/><text>Unknown font</text>"
+            "<foreignObject><path data-c=\"78\" d=\"HTML payload\"/>"
+            "<svg><path data-c=\"78\" d=\"M0 0L1 1\" stroke-width=\"3\"/></svg></foreignObject>"
+            "</g></svg></mjx-container>";
+        expect(source_svg_paint::materialize(source) == expected);
+        constexpr std::string_view outside = "<svg><path data-c=\"78\" d=\"M0 0L1 1\"/></svg>";
+        expect(source_svg_paint::materialize(outside) == outside);
+    };
 };

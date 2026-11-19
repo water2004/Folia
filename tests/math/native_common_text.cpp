@@ -2,10 +2,14 @@
 import folia.math.fonts.newcm_font_module_provider;
 import folia.math.core.mml_tree.mml_document;
 import folia.math.output.common;
+import folia.math.output.svg.wrapper_factory;
+import folia.math.output.svg.writer;
 
 using namespace boost::ut;
 namespace mml = folia::math::mml;
 namespace common = folia::math::output::common;
+namespace scene = folia::math::output::scene;
+namespace svg = folia::math::output::svg;
 
 namespace {
 struct TestMeasurement final : common::MeasurementTarget {
@@ -93,6 +97,99 @@ folia::math::BBox const &buildAndGet(mml::MmlDocument &document, mml::MmlNode &e
 } // namespace
 
 suite common_text_native = [] {
+    "common_glyph_stroke_is_frozen_in_ems_and_explicit_in_both_svg_cache_modes"_test = [] {
+        struct NoTextMeasurement final : common::MeasurementTarget {
+            common::ExtendedMetrics measureMetrics(common::MetricRequest const &) override {
+                throw std::logic_error("glyph paint test supplies explicit metrics");
+            }
+            common::UnknownBBox measureUnknownText(common::UnknownTextRequest const &) override {
+                throw std::logic_error("glyph paint test requires a real NewCM outline");
+            }
+        };
+        struct StrokeCase {
+            std::optional<double> configured;
+            double expected_em;
+            std::string_view expected_svg;
+        };
+        // MathJax SVG.OPTIONS.blacker=3 and SvgTextNode.addStyles are the
+        // independent source of the default expectation, not inherited root paint.
+        const std::array cases{StrokeCase{{}, .003, "3"}, StrokeCase{0.0, 0.0, "0"},
+                               StrokeCase{.007, .007, "7"}};
+        const auto bundle = folia::math::fonts::makeNewcmFontData();
+        std::optional<scene::Metrics> default_metrics;
+        for (auto const &source : cases) {
+            const auto retained = [&] {
+                NoTextMeasurement measurement;
+                mml::MmlDocument document;
+                auto &text = document.factory().make(mml::NodeKind::text);
+                text.setText(u"x");
+                mml::AttributeSet attributes;
+                attributes.set(u"style", u"stroke-width: 100;");
+                const std::array<mml::MmlNode *, 1> tokenChildren{&text};
+                auto &token = document.factory().make(mml::NodeKind::mi, std::move(attributes),
+                                                       tokenChildren);
+                const std::array<mml::MmlNode *, 1> mathChildren{&token};
+                auto &math = document.factory().make(mml::NodeKind::math, {}, mathChildren);
+                document.setRoot(math);
+                math.setInheritedAttributes();
+                common::CommonOptions options;
+                if (source.configured)
+                    options.glyphStrokeWidth = *source.configured;
+                common::CommonOutputJaxConfig config{
+                    {16, 8, 1280, 1, "MathJaxNewcm", false}, options, bundle.fonts, "MathJaxNewcm"};
+                common::LayoutJob job(document, config, measurement,
+                                       svg::SvgWrapperFactory::defaultNodes(), makeVisitor);
+                return job.buildScene();
+            }();
+
+            // Emission owners have retired; paint and the outline remain Scene values.
+            std::size_t glyphs = 0;
+            const auto inspect = [&](auto const &self, scene::Group const &group) -> void {
+                for (auto const &entry : group.entries) {
+                    if (auto const *child = std::get_if<std::shared_ptr<scene::Group const>>(&entry)) {
+                        self(self, **child);
+                    } else if (auto const *primitive = std::get_if<scene::Primitive>(&entry)) {
+                        if (auto const *run = std::get_if<scene::GlyphRun>(primitive)) {
+                            for (auto const &glyph : run->glyphs) {
+                                ++glyphs;
+                                expect(glyph.resource != nullptr);
+                                expect(glyph.paint.stroke_width == source.expected_em);
+                                expect(std::holds_alternative<scene::InheritedPaint>(glyph.paint.fill));
+                                expect(std::holds_alternative<scene::InheritedPaint>(glyph.paint.stroke));
+                            }
+                        }
+                        expect(!std::holds_alternative<scene::TextRun>(*primitive));
+                    }
+                }
+            };
+            inspect(inspect, retained.root());
+            expect(glyphs == 1_u);
+            if (!default_metrics)
+                default_metrics = retained.metrics();
+            expect(retained.metrics() == *default_metrics)
+                << "glyph paint must not change mathematical metrics";
+
+            for (const auto mode : {svg::FontCacheMode::none, svg::FontCacheMode::local}) {
+                svg::SvgWriteOptions options{.font_cache = mode,
+                                              .font_resources = &bundle.svg_resources,
+                                              .local_cache_prefixes = {"1-"}};
+                const auto output = svg::write(retained, options);
+                const auto start = output.find(mode == svg::FontCacheMode::none
+                                                   ? "<path data-c=" : "<use data-c=");
+                expect(start != std::string::npos);
+                if (start == std::string::npos)
+                    continue;
+                const auto tag = std::string_view(output).substr(start, output.find('>', start) - start);
+                const auto width = " stroke-width=\"" + std::string(source.expected_svg) + "\"";
+                expect(tag.find(width) != std::string_view::npos)
+                    << "glyph width, including zero, overrides the parent stroke width";
+                expect(output.find("style=\"stroke-width: 100;\"") != std::string::npos);
+                expect(output.find("<g stroke=\"currentColor\" fill=\"currentColor\" "
+                                   "stroke-width=\"0\"") != std::string::npos);
+            }
+        }
+    };
+
     "text_families_preserve_pinned_glyph_metrics_scale_remaps_quotes_and_sizes"_test = [] {
         const auto bundle = folia::math::fonts::makeNewcmFontData();
         TestMeasurement measurement;

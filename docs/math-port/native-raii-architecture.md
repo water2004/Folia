@@ -1779,6 +1779,14 @@ stretch extenders retain clipping. Document/standalone root SVGs also carry
 visible overflow, matching the pinned root stylesheet without changing metrics.
 Hidden HTML tooltip frames keep their distinct hosting contract.
 
+`CommonOptions::glyphStrokeWidth` stores the completed outline stroke in ems,
+defaulting to `.003` for the pinned SVG `blacker=3` option. The shared `emitChar`
+path freezes it on every actual Glyph, including composition and stretched
+pieces; unknown text and filled fraction/radical rules remain distinct. SVG
+serializes glyph and table widths explicitly even when zero, so surrounding
+nonzero strokes cannot override a completed zero. Font cache none/local modes
+consume the same Paint, and neither outlines nor mathematical metrics change.
+
 ### XML/HTML native owner and request services (2026-10-21 Root lock)
 
 Migrate the existing Common XmlNode, SVG xml_wrapper, Scene html_types/snapshot,

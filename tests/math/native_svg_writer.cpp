@@ -685,6 +685,50 @@ suite native_svg_writer = [] {
                output.npos) << "glyph outlines retain the zero-stroke root";
     };
 
+    "completed glyph and table zero widths suppress a surrounding nonzero stroke"_test = [] {
+        scene::Builder builder;
+        builder.set_metrics({1, .5, .1});
+        builder.set_font_metrics({1, .5, .5, .7});
+        scene::Paint surrounding;
+        surrounding.stroke = scene::CurrentColorPaint{};
+        surrounding.stroke_width = .1;
+        const auto group = builder.add_group(0, {}, {}, {}, {}, {},
+                                            scene::ElementRole::math_wrapper, surrounding);
+        const auto resource = scene::GlyphResource::make("NewCM", scene::GlyphOutline{});
+        builder.add_primitive(group, scene::GlyphRun{{scene::Glyph{
+            resource, {"normal", "NCM-N", 0x78}, {}, .5, {}}}});
+        scene::Paint rule_paint;
+        rule_paint.fill = scene::NoPaint{};
+        scene::SemanticMetadata line_metadata;
+        line_metadata.ordered_attributes = {{"data-line", "h"}, {"class", "mjx-solid"}};
+        builder.add_primitive(group, scene::Path{
+            scene::PathGeometry{{scene::MoveTo{{0, 0}}, scene::LineTo{{1, 0}}}},
+            rule_paint, line_metadata, scene::ElementRole::table_horizontal_line,
+            scene::PathElement::line});
+        scene::SemanticMetadata frame_metadata;
+        frame_metadata.ordered_attributes = {{"data-frame", "true"}, {"class", "mjx-solid"}};
+        builder.add_primitive(group, scene::Rule{{0, -.1, 1, .6}, rule_paint, frame_metadata,
+                                                scene::ElementRole::table_frame});
+        const auto source = std::move(builder).freeze();
+        svg::SvgFontResourcesBuilder fonts;
+        fonts.add({"normal", 0x78}, {true, "M0 0L500 500Z", {}});
+        const auto resources = std::move(fonts).freeze();
+        for (const auto cache : {svg::FontCacheMode::none, svg::FontCacheMode::local}) {
+            const auto output = svg::write(source, {.font_cache = cache, .font_resources = &resources,
+                                                    .local_cache_prefixes = {"1-"}});
+            expect(output.find("<g stroke=\"currentColor\" stroke-width=\"100\">") != output.npos);
+            const auto glyph = cache == svg::FontCacheMode::none ? "<path data-c=" : "<use data-c=";
+            for (const auto opening : {glyph, "<line data-line=", "<rect data-frame="}) {
+                const auto begin = output.find(opening);
+                expect(begin != output.npos) << opening;
+                if (begin == output.npos)
+                    continue;
+                const auto tag = output.substr(begin, output.find('>', begin) - begin);
+                expect(tag.find("stroke-width=\"0\"") != tag.npos) << tag;
+            }
+        }
+    };
+
     "empty id alignment marker matches Source without a text reflection transform"_test = [] {
         scene::Builder builder;
         builder.set_metrics({1, 0.5, 0.1});
@@ -879,7 +923,7 @@ suite native_svg_writer = [] {
         auto font_resources = std::move(font_builder).freeze();
         auto empty_path = svg::write(
             source, {.font_cache = svg::FontCacheMode::none, .font_resources = &font_resources});
-        expect(empty_path.find("<path data-c=\"20\" d=\"\"/>") != empty_path.npos);
+        expect(empty_path.find("<path data-c=\"20\" d=\"\" stroke-width=\"0\"/>") != empty_path.npos);
 
         bool missing_failed = false;
         try {

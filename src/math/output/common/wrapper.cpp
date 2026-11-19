@@ -1319,6 +1319,7 @@ double CommonWrapper::emitChar(scene::Builder &builder, scene::NodeId parent,
     }
     if (glyph.resource) {
         scene::Glyph item{glyph.resource, resolved->key, {x + dx, y}, glyph.metrics.w, {}};
+        item.paint.stroke_width = jax().options().glyphStrokeWidth;
         item.transform = std::move(transform);
         scene::GlyphRun run;
         run.glyphs.push_back(std::move(item));

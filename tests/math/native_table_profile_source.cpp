@@ -11,6 +11,7 @@
 #include <string_view>
 #include <vector>
 #include "support/source_svg_paint.hpp"
+#include "support/svg_paint_artifacts.hpp"
 #include "support/folia_test.hpp"
 
 import folia.math.core.mml_tree.mml_document;
@@ -285,6 +286,8 @@ suite native_table_profile_source = [] {
                 }
             }();
             const auto afterRetirement = svg::write(captured.value, writeOptions(source, bundle));
+            svg_paint_artifacts::capture("table-profile", source.name, source.svg, afterRetirement,
+                                         source.em, source.ex, source.width);
             const auto expectedSvg = source_svg_paint::materialize(source.svg);
             if (afterRetirement != expectedSvg)
                 reportDifference(source.name, expectedSvg, afterRetirement);
