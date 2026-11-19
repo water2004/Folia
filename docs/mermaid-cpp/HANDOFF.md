@@ -2,7 +2,9 @@
 
 ## 当前检查点
 
-- 2026-11-19：`refactor/mermaid-modules-and-themes` 已完成目录重构与主题 API；基线 `daba4996`，最后的核心实现提交为 `a436adb3`，其后仅复现工具、维护说明与验收记录。每个实现批次均即时发布并核对远端文件树。用户要求的新分支保留独立，没有改默认分支、CI、版本或发布资产。
+- 2026-11-19：`refactor/mermaid-modules-and-themes`（`26fd18e3`）已快进合入 `master`。集成提交 `c9ba1b17` 将 Python 限于可选的结构检查，在 Windows 按实际写入的 SVG 字节计算散列。禁用 Python 查找的独立 CMake 配置已通过。
+- Windows MSVC Release 的结构、核心、DirectWrite、DLL 宿主、Math 集成测试 **5/5** 通过。DirectWrite 主题矩阵 **374/374** 生成有效 SVG，磁盘文件散列全匹配。官方浏览器 SVG 对照通过 **72 项**（State 32、Radar 16、XY 24），XY 另以浏览器测量复验 24 项。日志 `build/merge-mermaid-themes-{build,ctest,no-python,matrix}.log`，报告在 `build/mermaid-regression/windows-theme-merge*/`。本次没有执行完整 375 例官方 SVG 对照，亦没有运行 WinUI 界面验收。
+- 分支基线 `daba4996`，最后的核心实现提交为 `a436adb3`，其后是复现工具、维护说明与验收记录。
 - 原有 **342 个 C++ 源文件／片段** 按职责与图族归类，**144 个既有模块名全部保留**。当前 347 个源码文件、147 个模块接口。公共编排在 `api`，前端／配置／主题各自独立，图族在 `diagrams/<family>`，共享布局在 `layout/<engine>`。生成器、相对 include 与 MSVC `/bigobj` 路径已同步；结构检查注册到 CTest。说明见 [architecture.md](architecture.md)。
 - 公共 `folia.mermaid`/`render_diagram` facade、11 种主题清单／名称反查、`ThemeOptions`/`make_theme_session` 已接入。未指定主题保留图族默认值，显式 default 与源码覆盖的优先级有测试；自定义变量保留原始输入，按请求隔离。Windows 类型化宿主与命名主题 C ABI 已补齐，旧 bool 接口的 default/dark + classic 行为保留。用法见 [themes.md](themes.md)。
 - 主题完整图检查揭示并修复：Radar/XY 漏掉固定上游的默认主题合并，State 所有非顶层组合背景错误地使用同一 alternate 色。现在按上游规则合并缺省与逐层交替背景；既有主题生成数据不变。图族专属样式与节点顺序、并发 scope、多层嵌套均有回归。
