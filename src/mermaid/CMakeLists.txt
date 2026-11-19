@@ -18,7 +18,7 @@ target_sources(folia_mermaid PUBLIC
 target_sources(folia_mermaid PRIVATE ${FOLIA_MERMAID_SOURCES})
 if(MSVC)
     # Optimized theme code exceeds the standard COFF object section limit.
-    set_source_files_properties(theme.cpp PROPERTIES COMPILE_OPTIONS /bigobj)
+    set_source_files_properties(themes/theme.cpp PROPERTIES COMPILE_OPTIONS /bigobj)
 endif()
 
 # Grammar only: schema resolution is owned by folia.mermaid.frontmatter.

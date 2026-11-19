@@ -9,7 +9,7 @@ struct Reference {
     char32_t second;
 };
 constexpr Reference references[]{
-#include "../markdown/support/html_entity_data.inc"
+#include "../../markdown/support/html_entity_data.inc"
 };
 
 void append(std::u16string& result, char32_t scalar) {

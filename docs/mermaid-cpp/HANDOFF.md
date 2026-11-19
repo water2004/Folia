@@ -2,6 +2,12 @@
 
 ## 当前检查点
 
+- 2026-11-19：从 `daba4996` 建立 `refactor/mermaid-modules-and-themes`，按用户要求分批提交并立即推送。此次目标是目录职责重构与可移植、类型化主题入口，保持 Mermaid 12.2.0 锁定版本、现有模块名称和渲染算法。
+- 第一批将公共 API、前端、配置、主题、文本与支持代码移入对应目录，生成数据随所属组件保存；同步修改生成器目标路径与 MSVC `/bigobj` 源文件路径。64 个移动文件在排除相对 include 路径后逐字节相同，所有本地 include 均可解析。
+- 当前工作目录 `/workspace/scratch/daa11de45e84/Folia`，可移植工具链准备中；本轮尚未完成编译／运行验证。下一步：图族与布局模块归类、主题 API、Linux 构建与渲染验证。根代理负责共享接线及提交，主题代理负责新主题 API，构建代理负责工具链，架构代理负责结构约束与说明。
+
+## 先前验收记录（历史）
+
 - 2026-11-16：全图族回归已在 Windows 合入 `master`（合并提交 `540c1775`）。`4b970717` 让 State 说明与行内注释在词法层保留花括号，覆盖带 TeX 分组的节点、边和注释。`627b4c3c` 给独立 CI 构建接入 Math DLL，并按已锁定的 SHA-256 恢复上游源码换行字节。自动触发使用版本标签。
 - Windows MSVC Release 的 Mermaid 核心、DirectWrite、DLL 宿主、Math 集成四套测试全部通过，Math SVG/C ABI 53 项通过。官方语法和 DirectWrite 完整原生语料均为 375/375。State 的 32 张 Edge SVG 对照通过，最大几何偏差 0.5 px，容差 1.5 px。独立 CMake 已用新 Math DLL 和导入库配置，登记了四套测试。日志见 `build/merge-mermaid-{ctest,math-bridge,corpus,state-comparison,standalone-configure}.log`，报告见 `build/mermaid-regression/windows-{native,official-prepare,state-browser}/`。下一步是完成全部 375 例的官方整图对照。
 

@@ -4,7 +4,7 @@ import folia.mermaid.number;
 
 namespace folia::mermaid::theme_detail {
 namespace {
-#include "theme_color_names.inc"
+#include "generated/theme_color_names.inc"
 double clamp(double value, double maximum) {
     return value >= maximum ? maximum : value < 0 ? 0 : value;
 }

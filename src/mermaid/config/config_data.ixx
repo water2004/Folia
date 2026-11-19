@@ -4,7 +4,7 @@ import std;
 import folia.mermaid.config_value;
 
 namespace {
-#include "config_schema_data.inc"
+#include "generated/config_schema_data.inc"
 }
 export namespace folia::mermaid::config_detail {
 bool known_key(std::u16string_view key) {

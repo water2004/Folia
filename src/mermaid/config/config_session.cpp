@@ -8,11 +8,11 @@ import folia.mermaid.theme;
 
 namespace folia::mermaid {
 ConfigValue default_session_config() {
-#include "config_defaults.inc"
+#include "generated/config_defaults.inc"
 }
 namespace {
 using namespace config_detail;
-#include "config_callbacks.inc"
+#include "generated/config_callbacks.inc"
 ConfigValue required(std::expected<ConfigValue, std::string> value) {
     if (!value) throw std::runtime_error(value.error());
     return std::move(*value);

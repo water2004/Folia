@@ -149,17 +149,17 @@ struct Theme {
     void update_redux_dark_color();
     void update() { (this->*update_colors)(); }
 };
-#include "theme_default.inc"
-#include "theme_dark.inc"
-#include "theme_base.inc"
-#include "theme_forest.inc"
-#include "theme_neutral.inc"
-#include "theme_neo.inc"
-#include "theme_neo_dark.inc"
-#include "theme_redux.inc"
-#include "theme_redux_dark.inc"
-#include "theme_redux_color.inc"
-#include "theme_redux_dark_color.inc"
+#include "presets/theme_default.inc"
+#include "presets/theme_dark.inc"
+#include "presets/theme_base.inc"
+#include "presets/theme_forest.inc"
+#include "presets/theme_neutral.inc"
+#include "presets/theme_neo.inc"
+#include "presets/theme_neo_dark.inc"
+#include "presets/theme_redux.inc"
+#include "presets/theme_redux_dark.inc"
+#include "presets/theme_redux_color.inc"
+#include "presets/theme_redux_dark_color.inc"
 
 struct NamedTheme {
     std::u16string_view name;
