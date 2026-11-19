@@ -106,7 +106,7 @@ powershell -ExecutionPolicy Bypass -File .\build_app.ps1 -Configuration Release 
 Build the per-user x64 MSI with:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\build_msi.ps1 -Version 0.7.1
+powershell -ExecutionPolicy Bypass -File .\build_msi.ps1 -Version 0.7.2
 ```
 
 The installer creates a self-contained Windows App SDK build, so the target
@@ -130,7 +130,7 @@ Normal developer builds continue to use their existing Assets location.
 Build the self-contained x64 portable ZIP with:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\build_portable.ps1 -Version 0.7.1
+powershell -ExecutionPolicy Bypass -File .\build_portable.ps1 -Version 0.7.2
 ```
 
 Extract `build/portable/Folia-<version>-x64-portable.zip` to a writable folder and
