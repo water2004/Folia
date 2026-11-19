@@ -26,7 +26,7 @@ FlowchartPoint intersect(const FlowchartPlacedNode& node,std::u16string_view,Flo
     const double scale=std::max(2*std::abs(dx)/node.width,2*std::abs(dy)/node.height);
     return scale>0?FlowchartPoint{node.x+dx/scale,node.y+dy/scale}:p;
 }
-#include "flowchart_elk_paint.inc"
+#include "../flowchart/flowchart_elk_paint.inc"
 
 struct Box {
     double left=std::numeric_limits<double>::infinity(),top=left,right=-left,bottom=-left;
@@ -46,7 +46,7 @@ Box centered(FlowchartPoint p, double width, double height) {
 }
 
 // Shared declaration precedence and typography; measurements remain injected.
-#include "flowchart_styles.inc"
+#include "../flowchart/flowchart_styles.inc"
 
 struct Label {
     std::u16string text;

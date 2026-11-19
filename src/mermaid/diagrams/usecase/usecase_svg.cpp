@@ -494,8 +494,8 @@ FlowchartPoint intersect(const FlowchartPlacedNode& node, std::u16string_view sh
         FlowchartPoint{node.x + dx / scale, node.y + dy / scale};
 }
 
-#include "flowchart_elk_paint.inc"
-#include "flowchart_neo.inc"
+#include "../flowchart/flowchart_elk_paint.inc"
+#include "../flowchart/flowchart_neo.inc"
 
 // D3 curveBasis on Dagre points, with endpoint offsets applied before fitting.
 std::string basis(std::span<const FlowchartPoint> points, double* length) {

@@ -59,7 +59,7 @@ FlowchartPoint intersect(const FlowchartPlacedNode& node,std::u16string_view sha
   1/std::max(std::abs(dx)/(node.width/2),std::abs(dy)/(node.height/2));
  return {node.x+dx*factor,node.y+dy*factor};
 }
-#include "flowchart_elk_paint.inc"
+#include "../flowchart/flowchart_elk_paint.inc"
 #include "state_elk_terminals.inc"
 #include "state_elk_scopes.inc"
 

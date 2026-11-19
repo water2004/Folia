@@ -62,7 +62,7 @@ FlowchartPoint intersect(const FlowchartPlacedNode& node,std::u16string_view,Flo
     const double scale=std::max(2*std::abs(dx)/node.width,2*std::abs(dy)/node.height);
     return scale>0?FlowchartPoint{node.x+dx/scale,node.y+dy/scale}:p;
 }
-#include "flowchart_elk_paint.inc"
+#include "../flowchart/flowchart_elk_paint.inc"
 
 struct FieldLine {
     FlowchartLabelLine runs;

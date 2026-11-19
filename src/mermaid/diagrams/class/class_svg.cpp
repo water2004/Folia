@@ -16,7 +16,7 @@ std::string xml(std::u16string_view value) {
     auto s = escape_svg_text(value,u"Class text"); if (!s) throw std::runtime_error("Invalid Class XML text");
     std::string out; for (auto c : *s) out += c == '"' ? "&quot;" : std::string(1,c); return out;
 }
-#include "flowchart_styles.inc"
+#include "../flowchart/flowchart_styles.inc"
 std::string point(FlowchartPoint p) { return num(p.x)+","+num(p.y); }
 FlowchartPoint mix(FlowchartPoint a,FlowchartPoint b,double x,double y,double d) {
     return {(a.x*x+b.x*y)/d,(a.y*x+b.y*y)/d};
@@ -143,7 +143,7 @@ FlowchartPoint intersect(const FlowchartPlacedNode& n,std::u16string_view,Flowch
     const double scale=1/std::max(std::abs(dx)/(n.width/2),std::abs(dy)/(n.height/2));
     return {n.x+dx*scale,n.y+dy*scale};
 }
-#include "flowchart_elk_paint.inc"
+#include "../flowchart/flowchart_elk_paint.inc"
 }
 std::expected<ClassTextStyle,std::string> class_text_style(const ClassNode& node,const ClassSvgTheme& theme,unsigned weight,bool italic) {
     try {

@@ -6,7 +6,7 @@ import folia.mermaid.theme_color;
 import folia.mermaid.flowchart_svg;
 namespace folia::mermaid {
 namespace {
-#include "flowchart_markers.inc"
+#include "../flowchart/flowchart_markers.inc"
 const ConfigValue& member(const ConfigValue& v,std::u16string_view key){auto p=v.find(key);if(!p)throw std::runtime_error("Missing Block configuration");return *p;}
 std::u16string text(const ConfigValue& v){if(v.kind!=ConfigKind::string)throw std::runtime_error("Expected Block style");return v.string;}
 double number(const ConfigValue& v){if(v.kind==ConfigKind::number)return v.number;auto s=text(v);std::string raw(s.begin(),s.end());double n=0;auto p=std::from_chars(raw.data(),raw.data()+raw.size(),n);if(p.ec!=std::errc{})throw std::runtime_error("Invalid Block dimension");return n;}

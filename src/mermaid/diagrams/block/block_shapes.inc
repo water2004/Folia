@@ -4,7 +4,7 @@
 namespace block_shapes {
 std::string number(double value) { return num(value); }
 std::string point(FlowchartPoint value) { return number(value.x)+","+number(value.y); }
-#include "flowchart_shapes.inc"
+#include "../flowchart/flowchart_shapes.inc"
 
 std::u16string_view canonical(std::u16string_view type) {
     if(type==u"rect_left_inv_arrow") return u"odd";
