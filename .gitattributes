@@ -3,6 +3,9 @@
 third_party/model-providers/providers/** text eol=lf
 third_party/nlohmann-json/include/** text eol=lf
 tools/math-port/reference/mediawiki-texvc-2.7.9.js text eol=lf whitespace=-blank-at-eol
+tools/mathjax-bundle/entry.cjs text eol=lf
+tools/mathjax-bundle/package-lock.json text eol=lf
+tools/mermaid-cpp/math-oracle/package-lock.json text eol=lf
 tests/math/fixtures/tex_package_registry_source.hpp text eol=lf
 tests/math/fixtures/texvc_svg_source.hpp text eol=lf
 tools/math-port/common-layout-reference/profile-cases.json text eol=lf
