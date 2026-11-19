@@ -1,7 +1,7 @@
 // ZenUML comments preserve the source's display whitespace and use marked's
 // inline code/emphasis semantics (src/svg/components/comment.ts, @zenuml/core
 // 3.49.2). Flowchart labels deliberately collapse this whitespace instead.
-#include "diagrams/flowchart/flowchart_markdown.inc"
+#include "../flowchart/flowchart_markdown.inc"
 
 std::vector<FlowchartLabelLine> zen_comment_runs(std::u16string_view source) {
     std::u16string prepared;
