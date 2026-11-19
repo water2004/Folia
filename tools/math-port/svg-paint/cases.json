@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "modes": ["inline", "display", "fragment"],
+  "cases": [
+    {
+      "name": "array-rules",
+      "tex": "\\begin{array}{cc|c}a & b & c \\\\ \\hline d & e & f\\end{array}",
+      "features": ["table-lines"]
+    },
+    {
+      "name": "array-frame",
+      "tex": "\\begin{array}{|c|c|}\\hline a&b\\\\\\hline c&d\\\\\\hline\\end{array}",
+      "features": ["table-lines", "table-frame"]
+    },
+    {
+      "name": "array-dashed",
+      "tex": "\\begin{array}{:c:c:}\\hdashline a&b\\\\\\hdashline c&d\\\\\\hdashline\\end{array}",
+      "features": ["table-lines", "table-frame", "dashed"]
+    },
+    {
+      "name": "array-nested",
+      "tex": "\\begin{array}{c|c}\\begin{array}{c|c}a&b\\\\\\hline c&d\\end{array}&x\\\\\\hline y&z\\end{array}",
+      "features": ["table-lines"]
+    },
+    {
+      "name": "array-colored",
+      "tex": "\\color{#336699}{\\begin{array}{|c:c|}\\hline a&b\\\\\\hdashline c&d\\\\\\hline\\end{array}}",
+      "features": ["table-lines", "table-frame", "dashed"]
+    },
+    {
+      "name": "array-script",
+      "tex": "x_{\\begin{array}{c|c}a&b\\\\\\hline c&d\\end{array}}",
+      "em": 24,
+      "features": ["table-lines"]
+    },
+    {
+      "name": "undefined-hlined",
+      "tex": "\\begin{array}{cc|c}a & b & c \\\\ \\hlined & e & f\\end{array}",
+      "features": ["table-lines", "undefined-command"]
+    },
+    {"name": "strut-only", "tex": "\\strut", "features": ["invisible"]},
+    {"name": "mathstrut-only", "tex": "\\mathstrut", "features": ["invisible"]},
+    {"name": "strut-with-glyph", "tex": "x\\strut", "features": ["glyphs"]},
+    {"name": "fraction-radical", "tex": "\\frac{a+b}{c+d}+\\sqrt{x}", "features": ["glyphs"]},
+    {
+      "name": "enclosure-lines",
+      "tex": "\\enclose{top bottom left right horizontalstrike verticalstrike updiagonalstrike downdiagonalstrike}{x}",
+      "features": ["enclosure-lines"]
+    },
+    {
+      "name": "enclosure-curves",
+      "tex": "\\enclose{roundedbox}{x}+\\enclose{circle}{y}",
+      "features": ["enclosure-curves"]
+    },
+    {
+      "name": "enclosure-arrow",
+      "tex": "\\enclose{northeastsouthwestarrow}{x}",
+      "features": ["glyphs"]
+    },
+    {
+      "name": "broken-borders",
+      "tex": "\\bbox[border:2px dashed red]{x+y}+\\bbox[border:2px dotted blue]{z}",
+      "features": ["glyphs"]
+    },
+    {"name": "link", "tex": "\\href{https://example.test/}{x+y}", "features": ["link"]},
+    {"name": "tex-error", "tex": "\\frac{a}", "features": ["error"]},
+    {
+      "name": "glyph-variants",
+      "tex": "x+\\mathbf{x}+\\mathbb{R}+\\sqrt{y}",
+      "em": 12,
+      "features": ["glyphs"]
+    }
+  ]
+}

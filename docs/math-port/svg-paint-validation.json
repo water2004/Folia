@@ -1,0 +1,153 @@
+{
+  "schema": 1,
+  "feature": "Self-contained native Math SVG paint",
+  "verifiedDate": "2026-11-19",
+  "branch": "fix/native-math-svg-paint",
+  "baselineCommit": "003074466a459452032c33119bcddf798ad0f9aa",
+  "verifiedProductionRevision": "2d9c138bf7ee250672aad5e340c680f88a305073",
+  "scope": [
+    "array row and column rules, frames, solid/dashed/dotted paint",
+    "merror stylesheet colors and authored inline style priority",
+    "link shell colors and owned Scene lifetime",
+    "root/table viewport overflow with extender clipping preserved",
+    "glyph default, custom and explicit zero stroke widths"
+  ],
+  "environment": {
+    "system": "Linux",
+    "compiler": "Clang 21.1.8 with libc++ and C++23 modules",
+    "cmake": "4.3.4",
+    "ninja": "1.13.2",
+    "node": "v24.22.3",
+    "maximumBuildJobs": 4,
+    "windowsSdkRequired": false
+  },
+  "nativeMathLibrarySha256": "871648ef1a3b468119caae34e65e781245e1155f76b4da2759ffdb8f28d21264",
+  "fullMathExecutableSha256": "7a4f772a915ea8923856d05b30f88108e291236a7160f7e5fa02c955bd1ae89c",
+  "tests": {
+    "FoliaMathSvgBridgeTests": {
+      "suites": 8,
+      "tests": 83,
+      "assertions": 2381,
+      "exit_code": 0,
+      "log": "glyph-tests.log"
+    },
+    "FoliaMathTests": {
+      "suites": 194,
+      "tests": 996,
+      "assertions": 547262,
+      "exit_code": 0,
+      "log": "full-math-tests.log"
+    }
+  },
+  "mathReference": {
+    "mathjax": "4.1.3",
+    "commit": "fb987178c2d279a99b0db5ea02e751691703955e",
+    "font": "NewCM",
+    "profile": "tools/mermaid-cpp/math-oracle/source-lock.json",
+    "profileSha256": "67a52c24555bcb909b3b9d784d8a3dec3c50fd614d0a84773a701f79cfb5d941",
+    "sourceFixturesAndLocksUnchanged": true
+  },
+  "paintComparison": {
+    "total": 76,
+    "accepted": 76,
+    "svgParts": 82,
+    "texInputs": 18,
+    "cAbiRecords": 54,
+    "cAbiModes": [
+      "inline",
+      "display",
+      "fragment"
+    ],
+    "directMathmlRecords": 22,
+    "directMathmlFamilies": {
+      "table": {
+        "count": 8,
+        "fixture": "tests/math/fixtures/common-source/table-mathml-scene.inc",
+        "fixtureSha256": "893e46e25dc8520157bb05c2918a4ad6b82a4c3ada71e169262955d5afb48e0f"
+      },
+      "table-profile": {
+        "count": 14,
+        "fixture": "tests/math/fixtures/table_profile_source.hpp",
+        "fixtureSha256": "b23150d14cb8cdeb08e429428c87b6820f16bffb14eb87613165dad7209c12f8"
+      }
+    },
+    "directMathmlCaptureExecutableSha256": "89f2030f1c00628e690afe675685d93dd9e7a60391a3f22c576308560a438f98",
+    "finalFullMathCapturesEqualFocused": true,
+    "matchingCaptureFiles": 66,
+    "comparison": "Exact 2x transparent RGBA, no registration, filtering or tolerance",
+    "hostProjection": "Only mjx-container selector tag maps to svg[data-mathjax-host]; all CSS declarations retained",
+    "nativeVersusActualSourceCssDifferentPixels": 0,
+    "sourceProjectionVersusActualCssDifferentPixels": 0,
+    "visibilityAndTransparencyChecks": 127,
+    "primitiveRemovalChecks": 116,
+    "nodePaintChecks": 547,
+    "allChecksPassed": true,
+    "rasterizer": {
+      "sharp": "0.35.5",
+      "rsvg": "2.63.2",
+      "cairo": "1.18.6",
+      "vips": "8.18.7"
+    },
+    "corpusSha256": "200f7f6c72b1e41ccb9a504068751819616e401ee8072d673db20bac07767918"
+  },
+  "mermaidFormulaComparison": {
+    "total": 22,
+    "accepted": 22,
+    "metricsToleranceCssPixels": 1e-09,
+    "vectorComparison": "Exact ordered geometry and paint tree after serialization-only normalization",
+    "rasterComparison": "Exact RGBA pixels, common 2x SVG canvas, no image alignment or filtering",
+    "maximumDifferentPixels": 0,
+    "sourceProjectionPixelsEqual": true,
+    "nativeComparisonAndTolerancesUnchanged": true,
+    "corpusSha256": "043f76ba7fddb3c9e1de20dc99cff72a193d257b1cbd8f1146c4a11909881dc7"
+  },
+  "reproduction": "tools/math-port/svg-paint/README.md",
+  "evidenceReports": [
+    {
+      "path": "build/math-svg-paint/final-validation.json",
+      "sha256": "3a48dea6c9891882b35563d9996f7d2dfb3c0e55663907d715e45f98c87074cd"
+    },
+    {
+      "path": "build/math-svg-paint/oracle-glyph-comparison/report.json",
+      "sha256": "e04a565c672dae3c6555b2b5aa0265cb3f94926b9257f6f1272b89f030fdc22d"
+    },
+    {
+      "path": "build/math-svg-paint/mermaid-comparison/report.json",
+      "sha256": "90458cfc9572b78810706c506b15268ea3417bdb429f6f81ce877b03429a4d3a"
+    },
+    {
+      "path": "build/math-svg-paint/mermaid-source/report.json",
+      "sha256": "6eabb063bb5a23fa4632a9394af5863d4d6642fffcc790d7d8fd01f5004f523f"
+    }
+  ],
+  "toolFiles": [
+    {
+      "path": "tools/math-port/svg-paint/README.md",
+      "sha256": "0572298aae96e2d3b009ff3026823991003b06082c214033a0e6cf9ca88f64a9"
+    },
+    {
+      "path": "tools/math-port/svg-paint/capture-native.py",
+      "sha256": "5a7d655b3fc859290977c2f4eabf4bd9a1e16f71e651a48e84698bc364664ff1"
+    },
+    {
+      "path": "tools/math-port/svg-paint/cases.json",
+      "sha256": "200f7f6c72b1e41ccb9a504068751819616e401ee8072d673db20bac07767918"
+    },
+    {
+      "path": "tools/math-port/svg-paint/check.mjs",
+      "sha256": "2920ceee355337d68ca282a98f6d831b56c806e31b2dce3c1c0a8e9c4c5e3701"
+    },
+    {
+      "path": "tools/math-port/svg-paint/source-paint.mjs",
+      "sha256": "94653238f5e26e40b8c37e4f19bd5892a61be43c039d8193e2a7927e3696e67b"
+    }
+  ],
+  "limits": [
+    "No Windows/WinUI or browser UI validation was performed.",
+    "Multipart inline SVG paint was compared part-for-part; HTML line wrapping and placement were not validated.",
+    "Direct MathML tests use existing compiled fixture nodes through Common and SVG; no new native MathML parser is claimed.",
+    "Resolved nondefault table widths are tested against typed Scene intent. Upstream nonstandard stroke-thickness cases are not claimed pixel-equivalent.",
+    "Interactive HTML tooltips, host layout, application theme inheritance and browser text fallback are outside this paint validation."
+  ],
+  "texControlWordNote": "The literal \\hlined remains an undefined command as upstream. The horizontal rule example uses \\hline d."
+}
