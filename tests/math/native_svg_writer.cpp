@@ -29,7 +29,7 @@ suite native_svg_writer = [] {
             source, {.font_cache = svg::FontCacheMode::none, .pixel_viewport = true});
         expect(output.starts_with("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"60\" "
                                   "height=\"30\" role=\"img\" focusable=\"false\" "
-                                  "viewBox=\"0 -800 2000 1000\">"));
+                                  "viewBox=\"0 -800 2000 1000\" overflow=\"visible\">"));
         expect(output.ends_with("</g></svg>"));
         expect(output.find("mjx-container") == output.npos);
     };
@@ -82,7 +82,7 @@ suite native_svg_writer = [] {
             "<mjx-container class=\"MathJax\" jax=\"SVG\" overflow=\"linebreak\"><svg "
             "style=\"vertical-align: -0.444ex;\" xmlns=\"http://www.w3.org/2000/svg\" "
             "width=\"4.444ex\" height=\"2.222ex\" role=\"img\" focusable=\"false\" viewBox=\"0 "
-            "-800 2000 1000\">"));
+            "-800 2000 1000\" overflow=\"visible\">"));
         expect(output.ends_with("</g></svg></mjx-container>"));
     };
 
@@ -160,7 +160,8 @@ suite native_svg_writer = [] {
             scene::Translation{0.719, 0.363}, scene::Scaling{0.707, 0.707}}};
         auto parent =
             builder.add_group(0, ordered_transform, clip,
-                              scene::Link{"https://example.test/?a&b", "_blank", "noopener"},
+                              scene::Link{"https://example.test/?a&b", "_blank", "noopener",
+                                           {scene::CssColor{"blue"}, scene::CssColor{"blue"}}},
                               scene::Tooltip{"x<&"}, metadata);
         builder.add_primitive(
             parent,
@@ -179,7 +180,8 @@ suite native_svg_writer = [] {
         auto output =
             svg::write(std::move(builder).freeze(), {.font_cache = svg::FontCacheMode::none});
         auto anchor = output.find(
-            "<a href=\"https://example.test/?a&amp;b\" target=\"_blank\" rel=\"noopener\">");
+            "<a href=\"https://example.test/?a&amp;b\" target=\"_blank\" rel=\"noopener\" "
+            "fill=\"blue\" stroke=\"blue\">");
         auto rule = output.find("<rect x=\"0\" y=\"200\" width=\"250\" height=\"50\"");
         auto hitbox = output.find("<rect data-hitbox=\"true\" fill=\"none\" stroke=\"none\" "
                                   "pointer-events=\"all\" width=\"300\" height=\"400\" "
@@ -294,17 +296,35 @@ suite native_svg_writer = [] {
             svg::write(std::move(builder).freeze(), {.font_cache = svg::FontCacheMode::none});
         auto retained_root_group = output.find("<g");
         auto background = output.find("<rect data-background=\"true\" width=\"1000\" "
-                                      "height=\"800\" y=\"-200\" fill=\"blue\" "
-                                      "stroke=\"currentColor\"/>");
+                                      "height=\"800\" y=\"-200\" fill=\"yellow\" "
+                                      "stroke=\"none\"/>");
         auto title = output.find("<title>bad<&></title>");
         auto empty_title = output.find("<title/>");
         auto child = output.find("<text transform=\"scale(1,-1)\">child</text>");
         expect(retained_root_group < background);
         expect(background < title && title < empty_title && empty_title < child);
-        expect(output.find("fill=\"yellow\"") == output.npos);
-        expect(output.find("fill=\"red\"") == output.npos);
+        expect(output.find("<g fill=\"red\" stroke=\"red\">") != output.npos);
+        expect(output.find("fill=\"blue\"") == output.npos);
         expect(output.find("<title>legacy</title>") != output.npos);
         expect(output.find("tooltip child") != output.npos);
+    };
+
+    "stylesheet paint preserves authored inline style and inherited color components"_test = [] {
+        scene::Builder builder;
+        builder.set_metrics({1, .5, .1});
+        builder.set_font_metrics({1, .5, .5, .7});
+        scene::Paint paint;
+        paint.fill = scene::CssColor{"blue"};
+        paint.stroke = scene::CssColor{"purple"};
+        paint.stylesheet = scene::PaintColors{scene::CssColor{"red"}, scene::InheritedPaint{}};
+        scene::SemanticMetadata metadata;
+        metadata.ordered_attributes = {{"style", "fill: green; stroke: orange;"}};
+        builder.add_group(0, {}, {}, {}, {}, metadata, scene::ElementRole::math_wrapper, paint);
+        const auto output =
+            svg::write(std::move(builder).freeze(), {.font_cache = svg::FontCacheMode::none});
+        expect(output.find("<g style=\"fill: green; stroke: orange;\" fill=\"red\" "
+                           "stroke=\"purple\"/>") != output.npos)
+            << "inline style keeps CSS priority over the materialized presentation colors";
     };
 
     "Source initial transforms bracket metadata at the recorded phase"_test = [] {
@@ -541,8 +561,10 @@ suite native_svg_writer = [] {
                               scene::Path{scene::PathGeometry{{scene::MoveTo{{0, 0}}}}});
         scene::SemanticMetadata table_metadata;
         table_metadata.ordered_attributes.push_back({"data-table", "true"});
+        auto table_viewport = vertical;
+        table_viewport.clip_content = false;
         (void)builder.add_group(0, {}, {}, {}, {}, table_metadata,
-                                scene::ElementRole::table_content_viewport, {}, vertical);
+                                scene::ElementRole::table_content_viewport, {}, table_viewport);
         auto output =
             svg::write(std::move(builder).freeze(), {.font_cache = svg::FontCacheMode::none});
         auto vertical_start = output.find("<svg width=\"600\" height=\"800\" y=\"200\" x=\"100\"");
@@ -552,6 +574,9 @@ suite native_svg_writer = [] {
         expect(output.find("viewBox=\"-500 -400 1200 1300\"", vertical_start) != output.npos);
         expect(output.find("viewBox=\"-500 -400 1200 1300\" xmlns=\"http://www.w3.org/2000/svg\"",
                            vertical_start) != output.npos);
+        const auto vertical_tag = output.substr(vertical_start, output.find('>', vertical_start) - vertical_start);
+        expect(vertical_tag.find("overflow=") == vertical_tag.npos)
+            << "stretch extenders keep their nested SVG clipping";
         expect(output.find("<svg", vertical_start) < output.find("<path", vertical_start));
         expect(output.find("<g", vertical_start) == output.npos);
         expect(output.find("<svg width=\"700\" height=\"900\" x=\"300\" y=\"400\"") != output.npos);
@@ -566,6 +591,7 @@ suite native_svg_writer = [] {
                table_tag.find(" x=") == table_tag.npos && table_tag.find(" y=") == table_tag.npos);
         expect(table_tag.find("preserveAspectRatio=\"xMaxYMin slice\"") != table_tag.npos);
         expect(table_tag.find("viewBox=\"-500 -400 1200 1300\"") != table_tag.npos);
+        expect(table_tag.find("overflow=\"visible\"") != table_tag.npos);
     };
 
     "glyph transforms merge after origin in one transform attribute"_test = [] {
@@ -683,7 +709,8 @@ suite native_svg_writer = [] {
         expect(output.find(
                    "<svg style=\"vertical-align: -0.444ex;\" "
                    "xmlns=\"http://www.w3.org/2000/svg\" width=\"80%\" height=\"2.222ex\" "
-                   "role=\"img\" focusable=\"false\" data-mjx-viewBox=\"0 -800 2000 1000\">") !=
+                   "role=\"img\" focusable=\"false\" data-mjx-viewBox=\"0 -800 2000 1000\" "
+                   "overflow=\"visible\">") !=
                output.npos);
         expect(output.find(" viewBox=", output.find("<svg")) == output.npos);
         expect(output.find("min-width:") == output.npos);

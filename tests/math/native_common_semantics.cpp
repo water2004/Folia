@@ -1,3 +1,4 @@
+#include "support/source_svg_paint.hpp"
 #include "support/folia_test.hpp"
 import folia.math.fonts.newcm_font_module_provider;
 import folia.math.output.common;
@@ -83,11 +84,12 @@ suite common_semantics_native = [] {
         bool foundEmbellishedBreak = false;
         for (auto const &source : sourceSemanticsCases) {
             auto captured = captureSourceCase(source, bundle);
-            expect(captured.before_retirement == source.source_svg) << "case " << source.name;
+            const auto expectedSvg = source_svg_paint::materialize(source.source_svg);
+            expect(captured.before_retirement == expectedSvg) << "case " << source.name;
             const auto after_retirement =
                 svg::write(captured.value, {.font_cache = svg::FontCacheMode::none,
                                             .font_resources = &bundle.svg_resources});
-            expect(after_retirement == source.source_svg) << "retired case " << source.name;
+            expect(after_retirement == expectedSvg) << "retired case " << source.name;
             expect(after_retirement.find("data-mml-node=\"annotation\"") == std::string::npos)
                 << "annotation is not emitted in " << source.name;
             expect(after_retirement.find("data-mml-node=\"annotation-xml\"") == std::string::npos)

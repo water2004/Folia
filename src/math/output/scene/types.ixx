@@ -355,6 +355,8 @@ struct Link {
     std::string href;
     std::string target;
     std::string rel;
+    // Paint belongs to the link shell; its child groups can override inheritance.
+    PaintColors paint{};
 };
 struct Tooltip {
     std::string text;

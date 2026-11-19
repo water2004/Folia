@@ -9,6 +9,7 @@
 #include <string_view>
 #include <variant>
 #include <vector>
+#include "support/source_svg_paint.hpp"
 #include "support/folia_test.hpp"
 
 import folia.math;
@@ -26,7 +27,8 @@ struct Warnings final : WarningSink {
     std::vector<std::u16string> messages;
     void warn(std::u16string_view text) override { messages.emplace_back(text); }
 };
-void compareSvg(std::string_view name, std::string_view actual, std::string_view expected) {
+void compareSvg(std::string_view name, std::string_view actual, std::string_view source) {
+    const auto expected = source_svg_paint::materialize(source);
     if (actual != expected) {
         std::size_t at = 0;
         while (at < actual.size() && at < expected.size() && actual[at] == expected[at]) ++at;

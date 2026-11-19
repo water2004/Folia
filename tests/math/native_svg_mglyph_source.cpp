@@ -9,6 +9,7 @@
 #include <string_view>
 #include <variant>
 #include <vector>
+#include "support/source_svg_paint.hpp"
 #include "support/folia_test.hpp"
 
 import folia.math.core.mml_tree.mml_document;
@@ -343,15 +344,16 @@ suite native_svg_mglyph_source = [] {
                     }
                 }
                 const auto after = serialize(captured.value, bundle, source);
-                if (captured.before_retirement != source.svg)
-                    reportDifference(source.name, source.svg, captured.before_retirement);
-                expect(bool(captured.before_retirement == source.svg))
-                    << "raw Source SVG byte match case=" << source.name;
-                expect(bool(after == source.svg))
+                const auto expectedSvg = source_svg_paint::materialize(source.svg);
+                if (captured.before_retirement != expectedSvg)
+                    reportDifference(source.name, expectedSvg, captured.before_retirement);
+                expect(bool(captured.before_retirement == expectedSvg))
+                    << "Source SVG with explicit CSS byte match case=" << source.name;
+                expect(bool(after == expectedSvg))
                     << "owned Scene serializes after MML/job/measurement retirement case="
                     << source.name;
                 std::cout << source.name << ": "
-                          << (captured.before_retirement == source.svg ? "SVG byte-equal"
+                          << (captured.before_retirement == expectedSvg ? "SVG byte-equal"
                                                                        : "SVG mismatch")
                           << '\n';
             }

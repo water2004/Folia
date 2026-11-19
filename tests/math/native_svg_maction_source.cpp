@@ -10,6 +10,7 @@
 #include <string_view>
 #include <variant>
 #include <vector>
+#include "support/source_svg_paint.hpp"
 #include "support/folia_test.hpp"
 
 import folia.math.core.mml_tree.mml_document;
@@ -312,15 +313,16 @@ suite native_svg_maction_source = [] {
                 << source.name;
 
             const auto after = writeScene(captured.value, bundle, source);
-            if (captured.before != source.svg)
-                reportDifference(source.name, source.svg, captured.before);
-            expect(bool(captured.before == source.svg))
+            const auto expectedSvg = source_svg_paint::materialize(source.svg);
+            if (captured.before != expectedSvg)
+                reportDifference(source.name, expectedSvg, captured.before);
+            expect(bool(captured.before == expectedSvg))
                 << "pinned Source SVG bytes match case=" << source.name;
-            expect(bool(after == source.svg))
+            expect(bool(after == expectedSvg))
                 << "Scene serializes to pinned SVG after MML document/job retirement case="
                 << source.name;
             std::cout << source.name << ": "
-                      << (captured.before == source.svg ? "SVG byte-equal" : "SVG mismatch")
+                      << (captured.before == expectedSvg ? "SVG byte-equal" : "SVG mismatch")
                       << '\n';
         }
     };

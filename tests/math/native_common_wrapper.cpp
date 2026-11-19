@@ -5,6 +5,7 @@ namespace {
 using namespace folia::math;
 using namespace folia::math::output::common;
 using namespace boost::ut;
+namespace scene = folia::math::output::scene;
 
 struct TestMeasurementTarget final : MeasurementTarget {
     ExtendedMetrics measureMetrics(MetricRequest const &request) override {
@@ -117,6 +118,123 @@ struct WrapperProbe final : CommonWrapper {
 } // namespace
 
 suite native_common_wrapper_source_cases = [] {
+    "common_link_paint_is_owned_separately_from_authored_child_paint"_test = [] {
+        struct LinkCase {
+            std::string_view name;
+            std::u16string_view mathcolor;
+            std::u16string_view style;
+        };
+        constexpr std::array cases{
+            LinkCase{"inherited child", {}, {}},
+            LinkCase{"authored mathcolor", u"teal", {}},
+            LinkCase{"authored inline style", u"teal", u"fill: rebeccapurple; stroke: green"},
+        };
+        for (auto const &source : cases) {
+            auto retained = [&] {
+                // Empty rows exercise link ownership and style without text measurement.
+                TestMeasurementTarget target;
+                mml::MmlDocument document;
+                mml::AttributeSet attributes;
+                attributes.set(u"href", u"https://example.test/math-link");
+                if (!source.mathcolor.empty())
+                    attributes.set(u"mathcolor", std::u16string(source.mathcolor));
+                if (!source.style.empty())
+                    attributes.set(u"style", std::u16string(source.style));
+                auto &row = document.factory().make(mml::NodeKind::mrow, std::move(attributes));
+                document.setRoot(row);
+                auto jax = makeJax(document, target);
+                auto &wrapper = jax.factory().wrap(row);
+                scene::Builder builder;
+                scene::Paint surrounding;
+                surrounding.fill = scene::CssColor{"red"};
+                surrounding.stroke = scene::CssColor{"red"};
+                builder.set_paint(0, std::move(surrounding));
+                const std::array<scene::NodeId, 1> parents{0};
+                const auto emitted = wrapper.emitScene(builder, parents);
+                expect(emitted.size() == 1_u) << source.name;
+                auto value = std::move(builder).freeze();
+                row.attributes().set(u"href", u"https://example.test/changed");
+                row.attributes().set(u"mathcolor", u"orange");
+                return value;
+            }();
+
+            // The MML document, wrappers, builder, and measurement owner are now gone.
+            expect(retained.root().entries.size() == 1_u) << source.name;
+            if (retained.root().entries.size() != 1)
+                continue;
+            const auto *entry = std::get_if<std::shared_ptr<scene::Group const>>(
+                &retained.root().entries.front());
+            expect(entry && *entry) << source.name;
+            if (!entry || !*entry)
+                continue;
+            auto const &group = **entry;
+            expect(group.link.has_value()) << source.name;
+            if (!group.link)
+                continue;
+            expect(group.link->href == "https://example.test/math-link") << source.name;
+            expect(group.link->paint ==
+                   scene::PaintColors{scene::CssColor{"blue"}, scene::CssColor{"blue"}})
+                << source.name << ": Source link color is independent of surrounding red";
+            if (source.mathcolor.empty()) {
+                expect(std::holds_alternative<scene::InheritedPaint>(group.paint.fill));
+                expect(std::holds_alternative<scene::InheritedPaint>(group.paint.stroke));
+            } else {
+                expect(group.paint.fill == scene::PaintColor{scene::CssColor{"teal"}});
+                expect(group.paint.stroke == scene::PaintColor{scene::CssColor{"teal"}});
+            }
+            const auto style = std::ranges::find(group.metadata.ordered_attributes, "style",
+                                                  &scene::SemanticAttribute::name);
+            if (source.style.empty()) {
+                expect(style == group.metadata.ordered_attributes.end());
+            } else {
+                expect(style != group.metadata.ordered_attributes.end());
+                if (style != group.metadata.ordered_attributes.end()) {
+                    expect(style->value.find("fill: rebeccapurple") != std::string::npos);
+                    expect(style->value.find("stroke: green") != std::string::npos);
+                }
+            }
+            expect(group.entries.size() == 1_u) << source.name;
+            if (group.entries.size() != 1)
+                continue;
+            const auto *primitive = std::get_if<scene::Primitive>(&group.entries.front());
+            const auto *hitbox = primitive ? std::get_if<scene::Rule>(primitive) : nullptr;
+            expect(hitbox != nullptr) << source.name;
+            if (hitbox) {
+                expect(hitbox->role == scene::ElementRole::link_hitbox);
+                expect(std::holds_alternative<scene::NoPaint>(hitbox->paint.fill));
+                expect(std::holds_alternative<scene::NoPaint>(hitbox->paint.stroke));
+            }
+        }
+    };
+
+    "common_rows_without_href_do_not_acquire_link_paint_or_hitboxes"_test = [] {
+        const scene::Link unstyled{"https://example.test/direct-scene", {}, {}};
+        expect(std::holds_alternative<scene::InheritedPaint>(unstyled.paint.fill));
+        expect(std::holds_alternative<scene::InheritedPaint>(unstyled.paint.stroke));
+        for (const bool emptyHref : {false, true}) {
+            TestMeasurementTarget target;
+            mml::MmlDocument document;
+            mml::AttributeSet attributes;
+            if (emptyHref)
+                attributes.set(u"href", u"");
+            auto &row = document.factory().make(mml::NodeKind::mrow, std::move(attributes));
+            document.setRoot(row);
+            auto jax = makeJax(document, target);
+            auto &wrapper = jax.factory().wrap(row);
+            scene::Builder builder;
+            const std::array<scene::NodeId, 1> parents{0};
+            const auto emitted = wrapper.emitScene(builder, parents);
+            expect(emitted.size() == 1_u);
+            if (emitted.size() != 1 || !emitted.front())
+                continue;
+            const auto id = *emitted.front();
+            expect(!builder.link(id).has_value());
+            expect(builder.entry_count(id) == 0_u);
+            expect(std::holds_alternative<scene::InheritedPaint>(builder.paint(id).fill));
+            expect(std::holds_alternative<scene::InheritedPaint>(builder.paint(id).stroke));
+        }
+    };
+
     "real_common_wrapper_length2em_source_values_and_scale"_test = [] {
         TestMeasurementTarget target;
         mml::MmlDocument document;

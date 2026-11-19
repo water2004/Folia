@@ -759,7 +759,7 @@ suite common_scene_source = [] {
                 const auto expectedSvg = source_svg_paint::materialize(source.svg);
                 reportFirstDifference(name, expectedSvg, actual);
                 const bool svgMatches = actual == expectedSvg;
-                expect(bool(svgMatches)) << "Source SVG with explicit table CSS paint differs for " << name;
+                expect(bool(svgMatches)) << "Source SVG with explicit CSS paint differs for " << name;
                 const bool casePassed =
                     typedSceneOk && phantomEmissionOk && tableStructureOk &&
                     brokenBorderGeometryOk && svgMatches;

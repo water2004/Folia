@@ -7,6 +7,7 @@
 #include <string>
 #include <string_view>
 #include <vector>
+#include "support/source_svg_paint.hpp"
 #include "support/folia_test.hpp"
 import folia.math.output.common;
 import folia.math.core.mml_tree.mml_document;
@@ -312,10 +313,11 @@ suite native_common_limits_scene = [] {
             else
                 expect(source.local_cache_prefixes.empty())
                     << "none Source case has no prefixes case=" << source.name;
-            expect(captured.before_retirement == source.svg)
+            const auto expectedSvg = source_svg_paint::materialize(source.svg);
+            expect(captured.before_retirement == expectedSvg)
                 << "complete Source SVG matches before retirement case=" << source.name;
             const auto after = writeLimitsScene(captured.value, bundle, source);
-            expect(after == source.svg)
+            expect(after == expectedSvg)
                 << "complete Scene SVG survives document/job retirement case=" << source.name;
         }
     };

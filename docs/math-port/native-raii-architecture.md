@@ -1730,11 +1730,11 @@ Scene additions are narrowly scoped owned values:
 - PaintColors { PaintColor fill, stroke; } and trailing optional
   Paint::stylesheet preserve class-rule color declarations separately from
   authored presentation fill/stroke. Both are owned typed values; a blue
-  authored color is not lost when the merror class declares red. SVG serializes
-  authored paint and retains Source class styles, not extra inline class-rule
-  attributes. This does not introduce a general CSS engine or a second layout.
-  Class-style cascade outside these merror declarations remains in its separate
-  profile acceptance work.
+  authored color is not lost when the merror class declares red. For independent
+  SVG images the writer serializes the effective colors: stylesheet values
+  override presentation colors, while authored inline style remains intact and
+  retains its higher CSS priority. No document stylesheet is required to see
+  the error background or text. This does not introduce a CSS engine or layout.
 
 SvgMerror uses standardSceneNodes once. Append background then a truthy title
 to its first own node, then call the existing addSceneChildren on the content
@@ -1749,7 +1749,8 @@ The two Source CSS selectors and their color spellings belong only to this
 SVG owner and its class registration; derive native declarations from those
 same constants rather than scattering another palette in Common or Scene.
 
-Writer support adds only Source Title text/order and error rect encoding. Scene
+Writer support includes Source Title text/order, error rect encoding and the
+already frozen stylesheet colors. Scene
 freeze must retain Title and stylesheet strings independently of request owners;
 other primitives, tooltips and paint encodings keep their accepted behavior.
 Root owns rename/retired registration/CMake/build/Git. Scene, SVG writer,
@@ -1768,6 +1769,15 @@ specific Source title serialization rather than changing the independent
 fixture. It is not stored or interpreted as a prebuilt SVG fragment. Existing
 Group.tooltip serialization and other text escaping are not changed by this
 observation. The direct Source special-character witness is required evidence.
+
+Independent SVG also retains link paint on the existing `Link` value, separately
+from the child group's authored paint. Common freezes the pinned blue fill and
+stroke at link creation; the writer writes them on the anchor. Child colors can
+override this inheritance and hitboxes remain explicitly unpainted. Completed
+table viewports with `clip_content=false` serialize `overflow="visible"`;
+stretch extenders retain clipping. Document/standalone root SVGs also carry
+visible overflow, matching the pinned root stylesheet without changing metrics.
+Hidden HTML tooltip frames keep their distinct hosting contract.
 
 ### XML/HTML native owner and request services (2026-10-21 Root lock)
 

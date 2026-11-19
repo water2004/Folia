@@ -10,6 +10,7 @@
 #include <string>
 #include <string_view>
 #include <vector>
+#include "support/source_svg_paint.hpp"
 #include "support/folia_test.hpp"
 
 import folia.math.core.mml_tree.mml_document;
@@ -252,9 +253,10 @@ CapturedScene captureTableProfile(TableProfileSourceCase const &source,
 
     auto optionsForWrite = writeOptions(source, bundle);
     auto serialized = svg::write(value, optionsForWrite);
-    if (serialized != source.svg)
-        reportDifference(source.name, source.svg, serialized);
-    expect(serialized == source.svg) << source.name << ": complete Source SVG before retirement";
+    const auto expectedSvg = source_svg_paint::materialize(source.svg);
+    if (serialized != expectedSvg)
+        reportDifference(source.name, expectedSvg, serialized);
+    expect(serialized == expectedSvg) << source.name << ": complete Source SVG before retirement";
     return {std::move(value), std::move(serialized)};
 }
 } // namespace
@@ -283,9 +285,10 @@ suite native_table_profile_source = [] {
                 }
             }();
             const auto afterRetirement = svg::write(captured.value, writeOptions(source, bundle));
-            if (afterRetirement != source.svg)
-                reportDifference(source.name, source.svg, afterRetirement);
-            expect(afterRetirement == source.svg)
+            const auto expectedSvg = source_svg_paint::materialize(source.svg);
+            if (afterRetirement != expectedSvg)
+                reportDifference(source.name, expectedSvg, afterRetirement);
+            expect(afterRetirement == expectedSvg)
                 << source.name << ": complete Source SVG after request retirement";
             expect(captured.before_retirement == afterRetirement)
                 << source.name << ": Scene remains serializable after request retirement";

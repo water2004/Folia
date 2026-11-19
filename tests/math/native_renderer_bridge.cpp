@@ -375,7 +375,7 @@ suite native_renderer_bridge = [] {
                     expect(!output[i].error && output[i].result.has_value()) << source.name;
                     if (output[i].result)
                         expect(output[i].result->svg == source_svg_paint::materialize(source.modes[0].svg))
-                            << source.name << ": complete SVG with explicit table CSS paint";
+                            << source.name << ": complete SVG with explicit CSS paint";
                 }
             }
         }

@@ -237,7 +237,7 @@ suite mathjax_full_profile_package_bootstrap = [] {
                     const auto expectedSvg = source_svg_paint::materialize(expected.svg);
                     if (result.svg != expectedSvg)
                         reportDifference(source.name, expectedSvg, result.svg);
-                    expect(result.svg == expectedSvg) << source.name << ": UTF-8 full SVG with explicit table CSS paint";
+                    expect(result.svg == expectedSvg) << source.name << ": UTF-8 full SVG with explicit CSS paint";
                     ++utf8Svg;
                     const auto sceneOnly = sceneRenderer.renderScene(source.tex, optionsFor(source));
                     compareMetrics(sceneOnly.metrics(), expected.metrics, source.name);
@@ -261,7 +261,7 @@ suite mathjax_full_profile_package_bootstrap = [] {
                     const auto expectedSvg = source_svg_paint::materialize(expected.svg);
                     if (result.svg != expectedSvg)
                         reportDifference(source.name, expectedSvg, result.svg);
-                    expect(result.svg == expectedSvg) << source.name << ": UTF-16 full SVG with explicit table CSS paint";
+                    expect(result.svg == expectedSvg) << source.name << ": UTF-16 full SVG with explicit CSS paint";
                     ++utf16Svg;
                 } catch (std::exception const &error) {
                     expect(false) << source.name << ": UTF-16 Renderer threw: " << error.what();

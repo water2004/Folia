@@ -9,6 +9,7 @@
 #include <string>
 #include <string_view>
 #include <vector>
+#include "support/source_svg_paint.hpp"
 #include "support/folia_test.hpp"
 
 import folia.math.adaptors.lite_adaptor;
@@ -281,10 +282,11 @@ suite native_svg_xml = [] {
         for (auto const &source : sourceXmlCases) {
             auto captured = capture(source, bundle);
             const auto afterRetirement = serialize(captured.value, bundle);
-            const bool matches = captured.before_retirement == source.source.source_svg;
-            const bool retiredMatches = afterRetirement == source.source.source_svg;
+            const auto expectedSvg = source_svg_paint::materialize(source.source.source_svg);
+            const bool matches = captured.before_retirement == expectedSvg;
+            const bool retiredMatches = afterRetirement == expectedSvg;
             if (!matches)
-                reportDifference(source.source.name, source.source.source_svg,
+                reportDifference(source.source.name, expectedSvg,
                                  captured.before_retirement);
             expect(bool(matches)) << "independent Source SVG matches case=" << source.source.name;
             expect(bool(retiredMatches))

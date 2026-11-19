@@ -218,7 +218,7 @@ void verifySourceMathmlTable(MathmlTableSceneCase const &expected,
     const auto expectedSvg = source_svg_paint::materialize(expected.source_svg);
     if (nativeSvg != expectedSvg) {
         reportTableSvgDifference(expected.name, expectedSvg, nativeSvg);
-        check(false, "SVG bytes match pinned Source with explicit table CSS paint");
+        check(false, "SVG bytes match pinned Source with explicit CSS paint");
     }
 
     std::size_t dottedLines = 0;

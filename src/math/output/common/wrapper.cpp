@@ -855,8 +855,12 @@ SceneContainers CommonWrapper::createSceneNodes(scene::Builder &builder,
     containers.nodes.reserve(parents.size());
     auto metadata = sceneMetadata(*node);
     std::optional<scene::Link> link;
-    if (const auto *href = node->attributes().lookup(u"href"); truthy(href))
-        link = scene::Link{valueString(href), {}, {}};
+    if (const auto *href = node->attributes().lookup(u"href"); truthy(href)) {
+        // MathJax 4.1.3 svg.ts commonStyles gives SVG links blue fill and stroke.
+        // Freeze that paint on the link shell, beneath the child's authored paint.
+        link = scene::Link{valueString(href), {}, {},
+                           {scene::CssColor{"blue"}, scene::CssColor{"blue"}}};
+    }
     for (std::size_t i = 0; i < parents.size(); ++i) {
         const auto id = builder.add_group(parents[i], {}, {}, link, {}, metadata,
                                           scene::ElementRole::math_wrapper);

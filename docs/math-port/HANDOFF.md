@@ -8,11 +8,12 @@
 
 - 用户报告 array 的列分隔线和 `\hline` 消失，授权从最新 master 建新分支、分批提交推送，并检查同类问题。已从 `00307446` 创建远端 `fix/native-math-svg-paint`，当前在此分支；下方旧任务的 agents/推送限制不替代本次授权。
 - 已定位：Common mtable 已冻结完整 Paint，但 SVG writer 的 table 路径省略默认线宽、fill、dash、cap，非默认线宽还拼为无效 `stroke-thickness`。外层零线宽是字形轮廓的正常默认，不修改它；修复直接序列化已完成 Paint，不重算布局、不在宿主补字符串、不加入 CSS 解释器或旧输出开关。
-- 第一批 table 修复完成：Linux Clang/libc++ 21，focused **56 项／1,154 断言全部通过**。真实 C ABI 三模式覆盖用户 array、frame 和未知命令 `\hlined`。10 份单独采样中的 12 个 line/frame 均显式 fill none、width 70；撤去新增 paint 后其余字节与未修基线完全相同，fragment metrics 完全相同。日志 `build/math-svg-paint/table-{build,tests,render}.log`，对照 `table-vs-baseline.json`；基线和第一批库分别保留在 `baseline/`、`table/`。
+- 第一批 table 修复已推送 **620bc080**：Linux Clang/libc++ 21，focused **56 项／1,154 断言全部通过**。真实 C ABI 三模式覆盖用户 array、frame 和未知命令 `\hlined`。10 份单独采样中的 12 个 line/frame 均显式 fill none、width 70；撤去新增 paint 后其余字节与未修基线完全相同，fragment metrics 完全相同。日志 `build/math-svg-paint/table-{build,tests,render}.log`，对照 `table-vs-baseline.json`；基线和第一批库分别保留在 `baseline/`、`table/`。librsvg 实际前后图也确认 array 线恢复、frame 不再实心遮挡，图片位于 `visual-check/`。
+- 第二批 merror/link/viewport 已完成：expanded focused **72 项／1,968 断言全部通过**，涵盖 writer、C ABI、Source helper、Common Link 所有权、merror 与 table profile。Scene Link 保存蓝色，merror 冻结样式色参与输出而作者 inline style 继续优先，外层 SVG 与 table clipfalse 视口显式 overflow visible，伸缩符裁剪与隐藏 tooltip 保持各自语义。10 份真实 C ABI 输出成功、fragment metrics 与第一批相同。日志 `styles-{build,focused-build,tests,render}.log`，库保留 `styles/libFoliaNativeMath.so`，SHA-256 `04551b06…65e9f92`。
 - 原始 Source fixtures/锁不改；test-only `support/source_svg_paint.hpp` 从独立锁定 CSS 物化期望，再完整字节比较。非标准 `stroke-thickness` 分支不冒称官方像素等价，使用明确完成厚度的 writer 回归。历史“与无 stylesheet 的原版 SVG 字节相同”不足以证明独立图片外观正确。
 - 已完成全部静态 SVG wrapper/CSS 审计：另外确认 merror 的 `Paint::stylesheet` 未输出、链接默认蓝色未进入 Scene、table viewport 的 `clip_content=false` 被忽略、外层 overflow-visible 及字形 blacker=3 依赖宿主 CSS。menclose、分式/根号、普通背景/边框、hitbox、phantom 和 strut 未发现同根因遗漏。
-- 当前无运行构建；`portable_build` 负责后续唯一 Linux 构建（最多四任务），`structure_review` 负责独立期望物化和栅格工具，`theme_design` 将处理 Link/Glyph 的 Scene/Common 值。Root 负责 writer、文档与增量提交推送。
-- 下一步：提交推送已验证的 table 批；随后分批修复 merror/link/viewport 和 glyph 样式，并完成相关 Source 全量比较与实际像素验证。未执行 Windows/WinUI 构建，不改版本、CI、MSI 或发布资产。
+- 当前无运行构建；`portable_build` 负责后续唯一 Linux 构建（最多四任务），`structure_review` 负责独立期望物化和栅格工具，`theme_design` 将处理 Glyph 的 Common 完成值。Root 负责 writer、文档与增量提交推送。
+- 下一步：提交推送已验证的第二批；第三批补 glyph blacker=3 与显式零线宽，再进行一次完整 Math 测试和真实宿主 CSS 像素对照。工具将选择性采集既有 Direct MathML table fixtures，覆盖 TeX 接口不能直接表达的 dotted/viewport 分支。未执行 Windows/WinUI 构建，不改版本、CI、MSI 或发布资产。
 
 ## 上一轮 checkpoint（2026-11-16，Mermaid 数学标签已完成，历史）
 

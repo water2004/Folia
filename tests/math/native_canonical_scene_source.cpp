@@ -137,7 +137,7 @@ suite native_canonical_scene_source = [] {
                     if (serialized != expectedSvg)
                         reportDifference(modeName, expectedSvg, serialized);
                     expect(serialized == expectedSvg)
-                        << modeName << ": complete SVG matches Source with explicit table CSS paint after request teardown";
+                        << modeName << ": complete SVG matches Source with explicit CSS paint after request teardown";
                     ++svgComparisons;
                 } catch (std::exception const &error) {
                     expect(false) << modeName << ": native hosted pipeline threw: " << error.what();

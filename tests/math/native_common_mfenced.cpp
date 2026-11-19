@@ -1,3 +1,4 @@
+#include "support/source_svg_paint.hpp"
 #include "support/folia_test.hpp"
 
 import folia.math.core.mml_tree.mml_document;
@@ -87,6 +88,7 @@ common::CommonWrapperRegistration throwingMspaceRegistration() {
 
 void verifySourceMfenced(mathml_scene_test::Case const &expected,
                          folia::math::fonts::NewcmFontDataBundle const &bundle) {
+    const auto expectedSvg = source_svg_paint::materialize(expected.source_svg);
     RejectMeasurement measurement;
     std::unique_ptr<scene::Scene> savedScene;
     {
@@ -105,13 +107,13 @@ void verifySourceMfenced(mathml_scene_test::Case const &expected,
                               common::CommonWrapperFactory::standardNodes(), makeLinebreakVisitor);
         savedScene = std::make_unique<scene::Scene>(job.buildScene());
         const auto actual = serialize(*savedScene, bundle);
-        if (actual != expected.source_svg)
-            reportSvgDifference(expected.name, expected.source_svg, actual);
-        expect(actual == expected.source_svg)
+        if (actual != expectedSvg)
+            reportSvgDifference(expected.name, expectedSvg, actual);
+        expect(actual == expectedSvg)
             << "case " << expected.name << ": serialized SVG matches pinned Source";
     }
     const auto afterOwnerDestruction = serialize(*savedScene, bundle);
-    expect(afterOwnerDestruction == expected.source_svg)
+    expect(afterOwnerDestruction == expectedSvg)
         << "case " << expected.name << ": frozen Scene survives document and LayoutJob destruction";
 }
 } // namespace

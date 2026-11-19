@@ -110,14 +110,36 @@ std::string_view stroke_join_name(scene::StrokeJoin join) {
     throw std::invalid_argument("unknown Scene stroke join");
 }
 
-void append_paint(std::string &out, scene::Paint const &paint, bool stroke_first = false) {
-    if (stroke_first)
-        append_color(out, "stroke", "stroke-opacity", paint.stroke);
-    append_color(out, "fill", "fill-opacity", paint.fill);
+scene::PaintColor const &fill_color(scene::Paint const &paint) {
+    return paint.stylesheet &&
+                   !std::holds_alternative<scene::InheritedPaint>(paint.stylesheet->fill)
+               ? paint.stylesheet->fill
+               : paint.fill;
+}
+
+scene::PaintColor const &stroke_color(scene::Paint const &paint) {
+    return paint.stylesheet &&
+                   !std::holds_alternative<scene::InheritedPaint>(paint.stylesheet->stroke)
+               ? paint.stylesheet->stroke
+               : paint.stroke;
+}
+
+struct PaintWriteOptions {
+    bool stroke_first{};
+    bool defer_colors{};
+};
+
+void append_paint(std::string &out, scene::Paint const &paint, PaintWriteOptions options = {}) {
+    // Frozen stylesheet colors override presentation attributes. Authored
+    // inline style is retained separately and keeps its SVG cascade priority.
+    if (options.stroke_first && !options.defer_colors)
+        append_color(out, "stroke", "stroke-opacity", stroke_color(paint));
+    if (!options.defer_colors)
+        append_color(out, "fill", "fill-opacity", fill_color(paint));
     if (paint.fill_rule == scene::FillRule::evenodd)
         detail::append_attribute(out, "fill-rule", "evenodd");
-    if (!stroke_first)
-        append_color(out, "stroke", "stroke-opacity", paint.stroke);
+    if (!options.stroke_first && !options.defer_colors)
+        append_color(out, "stroke", "stroke-opacity", stroke_color(paint));
     if (paint.stroke_width != 0)
         detail::append_attribute(out, "stroke-width", number(paint.stroke_width * 1000));
     if (paint.opacity != 1)
@@ -599,10 +621,10 @@ void append_path_element(std::string &out, scene::Path const &path) {
     if (dashed_border_line) {
         // Source Wrapper.addBorderBroken writes line-specific attributes in this order.
         detail::append_attribute(out, "stroke-width", number(path.paint.stroke_width * 1000));
-        if (auto const *css = std::get_if<scene::CssColor>(&path.paint.stroke))
+        if (auto const *css = std::get_if<scene::CssColor>(&stroke_color(path.paint)))
             detail::append_attribute(out, "stroke", css->value);
         else
-            append_color(out, "stroke", "stroke-opacity", path.paint.stroke);
+            append_color(out, "stroke", "stroke-opacity", stroke_color(path.paint));
         if (path.paint.line_cap)
             detail::append_attribute(out, "stroke-linecap", stroke_cap_name(*path.paint.line_cap));
         if (path.paint.dash_array) {
@@ -631,10 +653,10 @@ void append_path_element(std::string &out, scene::Path const &path) {
                                                   : stroke_join_name(*path.paint.line_join);
             detail::append_attribute(out, "stroke-linejoin", spelling);
         }
-        append_color(out, "fill", "fill-opacity", path.paint.fill);
+        append_color(out, "fill", "fill-opacity", fill_color(path.paint));
         if (path.paint.fill_rule == scene::FillRule::evenodd)
             detail::append_attribute(out, "fill-rule", "evenodd");
-        append_color(out, "stroke", "stroke-opacity", path.paint.stroke);
+        append_color(out, "stroke", "stroke-opacity", stroke_color(path.paint));
         if (path.paint.opacity != 1)
             detail::append_attribute(out, "opacity", number(path.paint.opacity, 3));
         if (path.paint.dash_array) {
@@ -647,7 +669,8 @@ void append_path_element(std::string &out, scene::Path const &path) {
             detail::append_attribute(out, "stroke-dasharray", values.empty() ? "none" : values);
         }
     } else if (!table_line)
-        append_paint(out, path.paint, path.role == scene::ElementRole::background_box);
+        append_paint(out, path.paint,
+                     {.stroke_first = path.role == scene::ElementRole::background_box});
     else {
         append_paint(out, path.paint);
         out += "/>";
@@ -888,11 +911,13 @@ void open_group(std::string &out, scene::Group const &group, SvgWriteOptions con
             detail::append_attribute(out, "target", group.link->target);
         if (!group.link->rel.empty())
             detail::append_attribute(out, "rel", group.link->rel);
+        append_color(out, "fill", "fill-opacity", group.link->paint.fill);
+        append_color(out, "stroke", "stroke-opacity", group.link->paint.stroke);
         out += '>';
     }
     if (!sentinel)
         out += is_viewport ? "<svg" : "<g";
-    static constexpr std::array<std::string_view, 24> reserved{"data-mml-node",
+    static constexpr std::array<std::string_view, 25> reserved{"data-mml-node",
                                                                "transform",
                                                                "clip-path",
                                                                "fill",
@@ -915,7 +940,8 @@ void open_group(std::string &out, scene::Group const &group, SvgWriteOptions con
                                                                "height",
                                                                "viewBox",
                                                                "preserveAspectRatio",
-                                                               "xmlns"};
+                                                               "xmlns",
+                                                               "overflow"};
     if (!sentinel) {
         auto const is_extender = group.role == scene::ElementRole::vertical_extender_viewport ||
                                  group.role == scene::ElementRole::horizontal_extender_viewport;
@@ -982,7 +1008,7 @@ void open_group(std::string &out, scene::Group const &group, SvgWriteOptions con
             append_transform(out, group.transform, group.role);
         if (is_viewport && is_extender)
             append_viewport_bounds();
-        append_paint(out, group.paint);
+        append_paint(out, group.paint, {.defer_colors = group.paint.stylesheet.has_value()});
         if (group.clip)
             detail::append_attribute(out, "clip-path",
                                      "url(#" + options.id_prefix + "clip-" +
@@ -998,6 +1024,12 @@ void open_group(std::string &out, scene::Group const &group, SvgWriteOptions con
         }
         if (!group.metadata.initial_transform && !group.transform.operations().empty())
             append_transform(out, group.transform, group.role);
+        if (group.paint.stylesheet) {
+            append_color(out, "fill", "fill-opacity", fill_color(group.paint));
+            append_color(out, "stroke", "stroke-opacity", stroke_color(group.paint));
+        }
+        if (is_viewport && !group.viewport->clip_content)
+            detail::append_attribute(out, "overflow", "visible");
         out += self_closing ? "/>" : ">";
     }
     if (!self_closing) {
@@ -1051,7 +1083,7 @@ void append_svg_start(std::string &out, scene::Metrics const &metrics,
                       bool apply_inline_layout, FontCachePlan const *plan = nullptr,
                       CacheScopeId scope = 0, bool cache_before_group = false,
                       scene::PercentageFrame const *percentage = nullptr,
-                      SvgMetrics const *pixel = nullptr) {
+                      SvgMetrics const *pixel = nullptr, bool visible_overflow = true) {
     const double width = std::max(metrics.width, minimum_extent);
     const double height = std::max(metrics.height + metrics.depth, minimum_extent);
     out += "<svg";
@@ -1074,6 +1106,8 @@ void append_svg_start(std::string &out, scene::Metrics const &metrics,
         }
         if (options.font_cache != FontCacheMode::none && options.use_xlink)
             detail::append_attribute(out, "xmlns:xlink", "http://www.w3.org/1999/xlink");
+        if (visible_overflow)
+            detail::append_attribute(out, "overflow", "visible");
         out += ">";
         if (cache_before_group && plan)
             append_font_cache(out, *plan, scope, options);
@@ -1109,6 +1143,8 @@ void append_svg_start(std::string &out, scene::Metrics const &metrics,
         detail::append_attribute(out, "data-mjx-viewBox",
                                  "0 " + number(-metrics.height * 1000) + " " +
                                      number(width * 1000) + " " + number(height * 1000));
+        if (visible_overflow)
+            detail::append_attribute(out, "overflow", "visible");
         out += ">";
         if (cache_before_group && plan)
             append_font_cache(out, *plan, scope, options);
@@ -1144,6 +1180,8 @@ void append_svg_start(std::string &out, scene::Metrics const &metrics,
                                  " " + number(height * 1000));
     if (options.font_cache != FontCacheMode::none && options.use_xlink)
         detail::append_attribute(out, "xmlns:xlink", "http://www.w3.org/1999/xlink");
+    if (visible_overflow)
+        detail::append_attribute(out, "overflow", "visible");
     out += ">";
     if (cache_before_group && plan)
         append_font_cache(out, *plan, scope, options);
@@ -1182,7 +1220,8 @@ void append_nested_scene_svgs(std::string &out, scene::Scene const &nested,
     auto const &frames = nested.frame_layout();
     if (frames.inline_fragments.empty()) {
         append_svg_start(out, metrics, font, options, layout, frames.minimum_extent, false, plan,
-                         scope, true, frames.percentage ? &*frames.percentage : nullptr);
+                         scope, true, frames.percentage ? &*frames.percentage : nullptr, nullptr,
+                         false);
         open_group(out, nested.root(), options, plan, scope);
         append_svg_end(out);
         return;
@@ -1193,7 +1232,8 @@ void append_nested_scene_svgs(std::string &out, scene::Scene const &nested,
             append_inline_break(out, *fragment.before);
         append_svg_start(out, fragment.metrics, font, options, layout, frames.minimum_extent, false,
                          plan, scope, false,
-                         i == 0 && frames.percentage ? &*frames.percentage : nullptr);
+                         i == 0 && frames.percentage ? &*frames.percentage : nullptr, nullptr,
+                         false);
         open_group(out, frame_group(nested.root(), fragment.root), options, plan, scope);
         append_svg_end(out, plan, scope, i == 0, &options);
     }
