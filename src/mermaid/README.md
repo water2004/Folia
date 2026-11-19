@@ -4,7 +4,8 @@ Platform-independent C++23 Mermaid parsing, configuration, layout and SVG.
 The implementation is pinned to Mermaid 12.2.0; hosts supply actual font and
 math measurements. Windows services live in `src/platform/text/`.
 
-Start with the [architecture and ownership guide](../../docs/mermaid-cpp/architecture.md)
+Start with the [architecture and ownership guide](../../docs/mermaid-cpp/architecture.md),
+[theme/public API guide](../../docs/mermaid-cpp/themes.md)
 and [build/test guide](../../docs/mermaid-cpp/README.md). The `api/` directory owns
 public orchestration, `diagrams/<family>/` owns each diagram implementation,
 and `frontend/`, `config/`, `themes/`, `layout/`, `text/`, `rendering/` and

@@ -59,11 +59,17 @@
 实现不引入浏览器或 JS 运行时，不复制数学字体数据，也不改变现有公式缓存。
 图族范围、配置、源码示例、版本区别及严格 SVG/位图对照见 [数学标签](math.md)。
 
-### 9. 当前验证基线
+### 9. 主题与宿主 API
+
+`import folia.mermaid;` 提供一步 source-to-SVG 渲染、11 种主题清单、
+类型化 `ThemeOptions`、独立主题会话和变量自定义。源码主题覆盖沿用原有优先级。
+使用方式与 C ABI 见 [主题与公共 API](themes.md)。
+
+### 10. 当前验证基线
 - 迁移前的 PR 基线 `c128acc9` 中，GitHub Actions 工作流 [`.github/workflows/mermaid-cpp.yml`](../../.github/workflows/mermaid-cpp.yml) 在 Windows `standalone` / `integrated` × `Debug` / `Release` 四种配置下全部通过（上游 PR 检查见 [Actions Run #40820458232](https://github.com/water2004/Folia/actions/runs/40820458232)，Fork 仓库检查见 [Actions Run #40820482671](https://github.com/zhao0349/Folia/actions/runs/40820482671)）。
 - 自动化验证覆盖：核心模块测试（`FoliaMermaidTests`）、DirectWrite 平台与 DLL 宿主测试（`FoliaMermaidPlatformTests`、`FoliaMermaidHostTests`）、主工程回归测试（`FoliaTests`、`FoliaWindowsEditorTests`）、同机 DirectWrite 与 Chromium 文本测量对照，以及各图族与官方 Mermaid 浏览器输出的 SVG 对照（实测几何容差 `1.5`，ELK 算子坐标容差 `1e-4`）。
 
-### 10. 全图族复杂回归
+### 11. 全图族复杂回归
 
 `tests/mermaid_regression/cases/` 为 34 个图族保留从基础到复杂的独立输入，
 每族至少 8 例，包含官方完整示例与复杂组合。`FoliaMermaidRegressionProbe`

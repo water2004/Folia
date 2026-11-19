@@ -2,9 +2,9 @@
 
 ## 当前检查点
 
-- 2026-11-19：分支 `refactor/mermaid-modules-and-themes` 从 `daba4996` 开始；五批结构提交已即时发布，最近为 `4229bb19`。Git CLI 无写凭据，使用已连接 GitHub Git Data API 发布，并逐次核对远端 tree 与本地 tree 一致。没有改默认分支、CI、版本或发布资产。
+- 2026-11-19：分支 `refactor/mermaid-modules-and-themes` 从 `daba4996` 开始；五批结构提交与主题 API 已即时发布，最近为 `1e4f1647`。Git CLI 无写凭据，使用已连接 GitHub Git Data API 发布，并逐次核对远端 tree 与本地 tree 一致。没有改默认分支、CI、版本或发布资产。
 - 所有原有 C++ 模块已按 `api`、`frontend`、`config`、`themes`、`diagrams/<family>`、`layout/<engine>`、`text`、`rendering`、`support` 归属，模块名不变。生成数据与生成器路径同步；相对 include 可解析；图族、布局算法的机械移动无语义变化。结构检查和架构说明已提交。
-- 主题 API 复用原有 11 种主题派生：新增主题清单／名称反查和 `ThemeOptions`／`make_theme_session`，未指定主题保留图族默认值，源码局部配置继续优先。独立渲染 facade 和命名主题宿主接口正在集成。
+- 主题 API 复用原有 11 种主题派生：新增主题清单／名称反查和 `ThemeOptions`／`make_theme_session`，未指定主题保留图族默认值，源码局部配置继续优先。新增 `folia.mermaid`/`render_diagram` 公共 facade；Windows 支持类型化配置，C ABI 增加命名主题入口并保留原 bool + classic 行为。Windows 回归用例已补充，但未在本 Linux 环境执行。
 - 当前工作树 Linux LLVM/libc++ 21.1.8、CMake 4.3.4、Ninja 1.13.2 完整构建与 CTest 2/2 通过：核心 113 suites、267 tests、958480 assertions，0 failure/skip（含 7 项主题和 5 项 facade 测试）；结构检查通过。libc++ 时区使用 `-fexperimental-library`，不改 Gantt 源码。日志 `build/mermaid-refactor-{build-final,ctest}.log`。
 - 真实 Pango 1.56.3 的 34 图族 × 11 主题矩阵发现 12 个原有缺口：Radar 缺可选主题子树，XY 缺可选 dataLabelColor，均发生于 Neo/Redux 六种主题；其他 362 项原生 SVG 成功。正在按锁定上游样式语义修复，不改生成主题数据或删失败案例。此矩阵不是官方整图对照；Windows 宿主未运行。
 - 工作目录 `/workspace/scratch/daa11de45e84/Folia`；`source build/toolchain/env.sh` 后在 `build/mermaid-refactor` 单 Ninja、并发≤4 构建。根代理负责 API/宿主/文档/提交；主题代理负责 Radar/XY 的精确样式缺省修复；结构代理负责主题矩阵和栅格检查；构建代理已完成构建、暂无活动句柄。下一步是修复已发现的 12 项，重新运行矩阵与必要回归，然后完成文档与最终发布。

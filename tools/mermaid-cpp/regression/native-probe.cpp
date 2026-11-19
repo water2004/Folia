@@ -1,7 +1,7 @@
 // Newline-delimited JSON driver for the same pipeline used by the application.
 // JSON input is ASCII with escaped Unicode; output SVG remains UTF-8.
 import std;
-import folia.mermaid.measured_render;
+import folia.mermaid;
 import folia.mermaid.directives;
 #ifdef _WIN32
 import folia.platform.mermaid_measurer;
@@ -139,9 +139,9 @@ int main(int argc, char** argv) {
                 auto initialized = session->initialize(*config);
                 if (!initialized) throw std::runtime_error(initialized.error());
             }
-            auto input = prepare_native_diagram(source, *session);
-            if (!input) throw std::runtime_error(input.error());
             if (const auto* prepare = request->find(u"prepare"); prepare && prepare->boolean) {
+                auto input = prepare_native_diagram(source, *session);
+                if (!input) throw std::runtime_error(input.error());
                 std::cout << "{\"kind\":\"result\",\"ok\":true,\"stage\":\"prepare\"}\n" << std::flush;
                 continue;
             }
@@ -152,7 +152,7 @@ int main(int argc, char** argv) {
 #endif
             std::optional<double> available_width;
             if (const auto* width = request->find(u"availableWidth")) available_width = width->number;
-            auto result = render_measured_diagram(std::move(*input), measurer, math, available_width);
+            auto result = render_diagram(source, measurer, *session, math, {}, available_width);
             if (!result) throw std::runtime_error(result.error());
             std::cout << "{\"kind\":\"result\",\"ok\":true,\"width\":" << result->width <<
                 ",\"height\":" << result->height << ",\"svg\":" << quote(result->svg) << "}\n" << std::flush;

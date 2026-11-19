@@ -8,13 +8,12 @@ module;
 export module folia.platform.mermaid_host;
 import std;
 export import folia.platform.mermaid_renderer;
+export import folia.mermaid.theme_options;
 
 export namespace folia::platform {
-// The application supplies UTF-8 source and a light/dark choice. Initialize
-// a fresh source configuration per request; preserve family layout defaults.
+// UTF-8 decoding is the Windows boundary; sessions and themes stay portable.
 std::expected<folia::mermaid::DiagramSvg, std::string> render_mermaid_utf8(
-    std::string_view source, bool dark) {
-    using namespace folia::mermaid;
+    std::string_view source, const folia::mermaid::ConfigSession& session) {
     if (source.size() > static_cast<std::size_t>(std::numeric_limits<int>::max()))
         return std::unexpected("Mermaid source is too large");
     const auto length = static_cast<int>(source.size());
@@ -26,6 +25,20 @@ std::expected<folia::mermaid::DiagramSvg, std::string> render_mermaid_utf8(
         source.data(), length, wide.data(), count) != count)
         return std::unexpected("Mermaid UTF-8 conversion failed");
     const std::u16string text(wide.begin(), wide.end());
+    return render_mermaid(text, session);
+}
+
+std::expected<folia::mermaid::DiagramSvg, std::string> render_mermaid_utf8(
+    std::string_view source, const folia::mermaid::ThemeOptions& theme) {
+    auto session = folia::mermaid::make_theme_session(theme);
+    if (!session) return std::unexpected(session.error());
+    return render_mermaid_utf8(source, *session);
+}
+
+// Existing applications keep their explicit default/dark + classic appearance.
+std::expected<folia::mermaid::DiagramSvg, std::string> render_mermaid_utf8(
+    std::string_view source, bool dark) {
+    using namespace folia::mermaid;
     auto session = ConfigSession::create();
     if (!session) return std::unexpected(session.error());
     ConfigValue site{.kind=ConfigKind::mapping};
@@ -33,6 +46,6 @@ std::expected<folia::mermaid::DiagramSvg, std::string> render_mermaid_utf8(
     site.mapping.emplace(u"look", ConfigValue{.kind=ConfigKind::string,.string=u"classic"});
     auto configured = session->initialize(site);
     if (!configured) return std::unexpected(configured.error());
-    return render_mermaid(text, *session);
+    return render_mermaid_utf8(source, *session);
 }
 }

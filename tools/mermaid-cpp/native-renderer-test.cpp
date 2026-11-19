@@ -14,7 +14,63 @@ Result render(std::string_view source, bool dark = false) {
     FoliaNativeMermaidFree(data);
     return result;
 }
+Result render_named(std::string_view source, std::string_view theme) {
+    Result result;
+    std::uint8_t* data = nullptr; std::size_t size = 0;
+    result.status = FoliaNativeMermaidRenderWithTheme(
+        reinterpret_cast<const std::uint8_t*>(source.data()), source.size(),
+        reinterpret_cast<const std::uint8_t*>(theme.data()), theme.size(),
+        &data, &size, &result.width, &result.height);
+    if (data) result.text.assign(reinterpret_cast<const char*>(data), size);
+    FoliaNativeMermaidFree(data);
+    return result;
+}
 suite host_contract = [] {
+    "mermaid_host_named_themes_and_source_overrides"_test = [] {
+        for (const auto theme : {"default", "dark", "base", "forest", "neutral",
+            "neo", "neo-dark", "redux", "redux-dark", "redux-color", "redux-dark-color"}) {
+            const auto named = render_named("info showInfo", theme);
+            const auto local = render(std::string{"---\nconfig:\n  theme: "} +
+                theme + "\n---\ninfo showInfo");
+            expect(named.status == 0_i) << named.text;
+            expect(local.status == 0_i) << local.text;
+            expect(named.text == local.text);
+            expect(named.width == local.width && named.height == local.height);
+        }
+        const auto forest = render_named("packet\n0-7: \"Data\"", "forest");
+        const auto dark = render_named("packet\n0-7: \"Data\"", "dark");
+        const auto override = render_named(
+            "---\nconfig: {theme: dark}\n---\npacket\n0-7: \"Data\"", "forest");
+        expect(forest.status == 0_i && dark.status == 0_i && override.status == 0_i);
+        expect(override.text == dark.text);
+        expect(render_named("packet\n0-7: \"Data\"", "forest").text == forest.text);
+        // Explicit classic retains legacy bool-entry appearance exactly.
+        const auto classic = "---\nconfig: {look: classic}\n---\nflowchart LR\nA-->B";
+        for (const bool is_dark : {false, true}) {
+            const auto named = render_named(classic, is_dark ? "dark" : "default");
+            const auto legacy = render(classic, is_dark);
+            expect(named.status == 0_i) << named.text;
+            expect(legacy.status == 0_i) << legacy.text;
+            expect(named.text == legacy.text);
+        }
+    };
+    "mermaid_host_named_theme_errors_are_bounded_and_owned"_test = [] {
+        for (const auto theme : std::array<std::string_view, 6>{
+            "", "unknown", "Dark", "\xff", std::string_view{"default\0suffix", 14},
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}) {
+            const auto result = render_named("info", theme);
+            expect(result.status == 1_i);
+            expect(result.width == 0 && result.height == 0);
+            expect(result.text == "Unsupported native theme");
+        }
+        std::uint8_t* data = nullptr; std::size_t size = 0;
+        float width = 0, height = 0;
+        const auto source = reinterpret_cast<const std::uint8_t*>("info");
+        expect(FoliaNativeMermaidRenderWithTheme(source, 4, nullptr, 0,
+            &data, &size, &width, &height) == -1_i);
+        FoliaNativeMermaidFree(data);
+        expect(render_named("info", "forest").status == 0_i);
+    };
     "mermaid_host_renders_math_as_svg_across_label_consumers"_test = [] {
         for (const auto source : {
             R"(flowchart TD
