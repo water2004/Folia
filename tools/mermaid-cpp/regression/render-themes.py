@@ -284,9 +284,10 @@ def main():
                             record["ok"], record["error"] = False, str(error)
                     if record["ok"]:
                         file = output / "svg" / f"{case['family']}--{theme}.svg"
-                        file.write_text(svg, encoding="utf-8")
+                        svg_bytes = svg.encode("utf-8")
+                        file.write_bytes(svg_bytes)
                         record["svgFile"] = str(file.relative_to(output))
-                        record["svgSha256"] = sha(svg.encode())
+                        record["svgSha256"] = sha(svg_bytes)
                         record["textElements"] = len(tree.findall(".//{http://www.w3.org/2000/svg}text"))
                         record["elementCount"] = sum(1 for _ in tree.iter())
                     row = {"family": case["family"], "caseId": case["id"], "theme": theme,

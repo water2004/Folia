@@ -99,6 +99,8 @@ DirectWrite，`mermaid_renderer` 提供宿主桥接，`mermaid_host` 封装 DLL 
 python3 tools/mermaid-cpp/check-structure.py
 ```
 
+找到 Python 3 时，CMake 也会将它注册为 `FoliaMermaidStructure` 测试。
+
 它检查根目录没有散落源码、源码位于已定义职责目录、模块接口唯一、
 实现与导入能找到接口、局部 include 能解析、核心没有平台头文件，以及
 生成器输出位置与已提交数据一致。它不会代替 C++ 编译，也不会把未执行的

@@ -22,10 +22,12 @@ get_filename_component(FOLIA_MERMAID_REPO_ROOT "${CMAKE_CURRENT_LIST_DIR}/../.."
 # Source ownership and local includes can be checked on every host before any
 # Windows-specific targets are considered. Python is a test-tool dependency,
 # never a dependency of the folia::mermaid library itself.
-find_package(Python3 COMPONENTS Interpreter REQUIRED)
-add_test(NAME FoliaMermaidStructure
-    COMMAND "${Python3_EXECUTABLE}"
-        "${CMAKE_CURRENT_LIST_DIR}/check-structure.py")
+find_package(Python3 COMPONENTS Interpreter QUIET)
+if(Python3_Interpreter_FOUND)
+    add_test(NAME FoliaMermaidStructure
+        COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_LIST_DIR}/check-structure.py")
+endif()
 
 if(MSVC)
     add_compile_options(/utf-8 /permissive- /W3 /Zc:preprocessor /Zc:__cplusplus)
