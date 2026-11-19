@@ -180,6 +180,20 @@ constexpr NamedTheme named_themes[]={
     {u"redux-color",MermaidTheme::redux_color,&Theme::construct_redux_color,&Theme::update_redux_color},
     {u"redux-dark-color",MermaidTheme::redux_dark_color,&Theme::construct_redux_dark_color,&Theme::update_redux_dark_color},
 };
+// Derive the public catalog from the same table used for theme construction.
+// Adding a preset never requires maintaining a second name/id registry.
+constexpr auto theme_catalog = [] {
+    std::array<MermaidThemeInfo, std::size(named_themes)> result{};
+    for (std::size_t i = 0; i < result.size(); ++i)
+        result[i] = {named_themes[i].id, named_themes[i].name};
+    return result;
+}();
+}
+std::span<const MermaidThemeInfo> mermaid_themes() { return theme_catalog; }
+std::optional<std::u16string_view> mermaid_theme_name(MermaidTheme theme) {
+    const auto entry = std::ranges::find(theme_catalog, theme, &MermaidThemeInfo::id);
+    if (entry == theme_catalog.end()) return {};
+    return entry->name;
 }
 std::optional<MermaidTheme> find_mermaid_theme(std::u16string_view name) {
     for(const auto& entry:named_themes) if(entry.name==name) return entry.id;

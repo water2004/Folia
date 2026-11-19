@@ -8,6 +8,14 @@ enum class MermaidTheme {
     default_theme, dark, base, forest, neutral, neo, neo_dark, redux,
     redux_dark, redux_color, redux_dark_color
 };
+struct MermaidThemeInfo {
+    MermaidTheme id;
+    std::u16string_view name;
+};
+// Names are the pinned Mermaid configuration identifiers. The catalog and its
+// string views have static lifetime; an invalid enum has no name.
+std::span<const MermaidThemeInfo> mermaid_themes();
+std::optional<std::u16string_view> mermaid_theme_name(MermaidTheme theme);
 std::optional<MermaidTheme> find_mermaid_theme(std::u16string_view name);
 // Pure owned result, no session singleton. Overrides must be a mapping; nullptr
 // means omitted. Undefined derived fields are omitted, matching JSON output.
