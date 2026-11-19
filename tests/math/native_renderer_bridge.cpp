@@ -14,6 +14,7 @@
 #include <variant>
 #include <vector>
 #include "folia/math/native_renderer_bridge.h"
+#include "support/source_svg_paint.hpp"
 #include "support/folia_test.hpp"
 
 import folia.math.util.utf16;
@@ -124,6 +125,92 @@ bool checkResult(FoliaNativeMathResult const *result, std::string_view expectedS
 }
 
 suite native_renderer_bridge = [] {
+    "C ABI array rules and frames paint in inline display and standalone SVG"_test = [] {
+        auto renderer = makeRenderer();
+        auto cancellation = makeCancellation();
+        if (!renderer || !cancellation)
+            return;
+        const auto tags = [](std::string_view svg, std::string_view element) {
+            const std::string opening = "<" + std::string(element) + " ";
+            std::vector<std::string_view> result;
+            std::size_t offset = 0;
+            while ((offset = svg.find(opening, offset)) != svg.npos) {
+                const auto end = svg.find('>', offset);
+                if (end == svg.npos)
+                    throw std::logic_error("native SVG contains an unterminated element");
+                result.push_back(svg.substr(offset, end - offset + 1));
+                offset = end + 1;
+            }
+            return result;
+        };
+        enum class Mode { inline_math, display_math, fragment };
+        const auto capture = [&](std::u16string_view tex, Mode mode) {
+            RenderCall call;
+            if (mode != Mode::fragment) {
+                call = render(renderer.get(), tex, cancellation.get(), mode == Mode::display_math);
+            } else {
+                const std::vector<std::uint16_t> units(tex.begin(), tex.end());
+                FoliaNativeMathResult *raw{};
+                call.status = FoliaNativeMathRenderSvgFragment(
+                    renderer.get(), units.data(), units.size(), 16, 1280,
+                    cancellation.get(), 0, &raw);
+                call.result.reset(raw);
+            }
+            expect(call.status == FOLIA_NATIVE_MATH_OK && call.result != nullptr);
+            if (call.status != FOLIA_NATIVE_MATH_OK || !call.result)
+                return std::string{};
+            std::size_t size{};
+            const auto data = FoliaNativeMathResultSvg(call.result.get(), &size);
+            expect(data != nullptr && size > 0);
+            return data ? std::string(data, size) : std::string{};
+        };
+        const auto checkLinePaint = [&](std::string_view svg, std::size_t horizontal) {
+            std::size_t verticalCount = 0, horizontalCount = 0;
+            for (const auto tag : tags(svg, "line")) {
+                if (!tag.contains(" data-line=\""))
+                    continue;
+                verticalCount += tag.contains(" data-line=\"v\"");
+                horizontalCount += tag.contains(" data-line=\"h\"");
+                expect(tag.contains(" fill=\"none\"")) << tag;
+                expect(tag.contains(" stroke-width=\"70\"")) << tag;
+                expect(!tag.contains(" stroke-thickness=")) << tag;
+            }
+            expect(verticalCount == 1_u && horizontalCount == horizontal)
+                << "line nodes themselves retain visible resolved paint";
+        };
+        constexpr std::u16string_view array =
+            uR"(\begin{array}{cc|c}a & b & c \\ \hline d & e & f\end{array})";
+        constexpr std::u16string_view frame =
+            uR"(\begin{array}{|c|c|}\hline a&b\\\hline c&d\\\hline\end{array})";
+        constexpr std::u16string_view undefined =
+            uR"(\begin{array}{cc|c}a & b & c \\ \hlined & e & f\end{array})";
+        for (const auto mode : {Mode::inline_math, Mode::display_math, Mode::fragment}) {
+            checkLinePaint(capture(array, mode), 1);
+            const auto framed = capture(frame, mode);
+            checkLinePaint(framed, 1);
+            std::size_t frames = 0;
+            for (const auto tag : tags(framed, "rect")) {
+                if (!tag.contains(" data-frame=\"true\""))
+                    continue;
+                ++frames;
+                expect(tag.contains(" fill=\"none\"")) << tag;
+                expect(tag.contains(" stroke-width=\"70\"")) << tag;
+            }
+            expect(frames == 1_u);
+
+            // Pinned MathJax's noundefined package renders the complete unknown
+            // control sequence in red. It does not split \hlined into \hline d.
+            const auto typo = capture(undefined, mode);
+            checkLinePaint(typo, 0);
+            bool redUnknownCommand = false;
+            for (const auto tag : tags(typo, "g"))
+                redUnknownCommand |= tag.contains(" data-mml-node=\"mtext\"") &&
+                    tag.contains(" data-latex=\"\\hlined\"") &&
+                    tag.contains(" fill=\"red\"") && tag.contains(" stroke=\"red\"");
+            expect(redUnknownCommand);
+        }
+    };
+
     "C ABI SVG fragments retain typed pixel geometry and preserve document rendering"_test = [] {
         auto renderer = makeRenderer();
         auto cancel = makeCancellation();
@@ -286,7 +373,9 @@ suite native_renderer_bridge = [] {
                 for (std::size_t i = 0; i < output.size(); ++i) {
                     auto const& source = sourceCanonicalSceneCases[begin + i];
                     expect(!output[i].error && output[i].result.has_value()) << source.name;
-                    if (output[i].result) expect(output[i].result->svg == source.modes[0].svg) << source.name;
+                    if (output[i].result)
+                        expect(output[i].result->svg == source_svg_paint::materialize(source.modes[0].svg))
+                            << source.name << ": complete SVG with explicit table CSS paint";
                 }
             }
         }
@@ -320,7 +409,7 @@ suite native_renderer_bridge = [] {
                 continue;
             }
             if (mode.error_name.empty())
-                checkResult(call.result.get(), mode.svg, label);
+                checkResult(call.result.get(), source_svg_paint::materialize(mode.svg), label);
             else
                 expect(false) << label << ": Source mode is a successful canonical case";
             if (i == 0) {

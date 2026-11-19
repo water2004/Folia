@@ -600,7 +600,7 @@ suite native_svg_writer = [] {
                    .matrix());
     };
 
-    "table frame and line attributes precede geometry without duplicating CSS paint"_test = [] {
+    "table frame and lines preserve resolved paint without a document stylesheet"_test = [] {
         scene::Builder builder;
         builder.set_metrics({1, 0.5, 0.1});
         builder.set_font_metrics({1, 0.5, 0.5, 0.7});
@@ -620,6 +620,7 @@ suite native_svg_writer = [] {
         dotted_paint.fill = scene::NoPaint{};
         dotted_paint.stroke = scene::CurrentColorPaint{};
         dotted_paint.stroke_width = 0.07;
+        dotted_paint.line_cap = scene::StrokeCap::round;
         dotted_paint.dash_array = std::vector<double>{0, 0.14};
         builder.add_primitive(
             0, scene::Path{
@@ -639,22 +640,23 @@ suite native_svg_writer = [] {
         auto output =
             svg::write(std::move(builder).freeze(), {.font_cache = svg::FontCacheMode::none});
         expect(output.find("<rect data-frame=\"true\" class=\"MJX-TB-frame\" width=\"1300\" "
-                           "height=\"700\" x=\"100\" y=\"-200\" stroke-thickness=\"90\"/>") !=
+                           "height=\"700\" x=\"100\" y=\"-200\" fill=\"none\" "
+                           "stroke=\"currentColor\" stroke-width=\"90\"/>") !=
                output.npos);
         expect(output.find("<line data-line=\"v\" class=\"MJX-TB-dotted\" x1=\"300\" "
-                           "y1=\"-100\" x2=\"300\" y2=\"600\"/>") != output.npos);
+                           "y1=\"-100\" x2=\"300\" y2=\"600\" fill=\"none\" "
+                           "stroke=\"currentColor\" stroke-width=\"70\" "
+                           "stroke-linecap=\"round\" stroke-dasharray=\"0 140\"/>") != output.npos);
         expect(output.find("<line data-line=\"h\" class=\"MJX-TB-dotted\" x1=\"0\" "
-                           "y1=\"400\" x2=\"1000\" y2=\"400\" stroke-thickness=\"90\" "
-                           "stroke-dasharray=\"0,140\"/>") != output.npos);
+                           "y1=\"400\" x2=\"1000\" y2=\"400\" fill=\"none\" "
+                           "stroke=\"currentColor\" stroke-width=\"90\" "
+                           "stroke-linecap=\"round\" stroke-dasharray=\"0 140\"/>") != output.npos);
         auto frame = output.find("<rect data-frame=");
         auto line = output.find("<line data-line=");
         expect(frame != output.npos && line != output.npos && frame < line);
-        auto frame_end = output.find("/>", frame);
-        auto line_end = output.find("/>", line);
-        expect(output.substr(frame, frame_end - frame).find("fill=") == std::string::npos);
-        expect(output.substr(line, line_end - line).find("stroke=") == std::string::npos);
-        expect(output.substr(line, line_end - line).find("stroke-dasharray=") ==
-               std::string::npos);
+        expect(output.find("stroke-thickness=") == output.npos);
+        expect(output.find("<g stroke=\"currentColor\" fill=\"currentColor\" stroke-width=\"0\"") !=
+               output.npos) << "glyph outlines retain the zero-stroke root";
     };
 
     "empty id alignment marker matches Source without a text reflection transform"_test = [] {

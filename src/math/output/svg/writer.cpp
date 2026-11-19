@@ -399,23 +399,6 @@ void append_table_markers(std::string &out, scene::SemanticMetadata const &metad
             detail::append_attribute(out, attribute.name, attribute.value);
     }
 }
-void append_table_stroke(std::string &out, scene::Paint const &paint) {
-    if (paint.stroke_width != 0.07) {
-        detail::append_attribute(out, "stroke-thickness", number(paint.stroke_width * 1000, 1));
-        if (paint.dash_array) {
-            std::string values;
-            for (auto const length : *paint.dash_array) {
-                if (!values.empty())
-                    values.push_back(',');
-                values += number(length * 1000, 1);
-            }
-            if (paint.dash_array->empty())
-                values = "none";
-            detail::append_attribute(out, "stroke-dasharray", values);
-        }
-    }
-}
-
 void append_rule(std::string &out, scene::Rule const &rule) {
     out += "<rect";
     if (rule.role == scene::ElementRole::error_background) {
@@ -481,7 +464,9 @@ void append_rule(std::string &out, scene::Rule const &rule) {
         detail::append_attribute(out, "height", number(rule.bounds.height * 1000));
         detail::append_attribute(out, "x", number(rule.bounds.x * 1000));
         detail::append_attribute(out, "y", number(rule.bounds.y * 1000));
-        append_table_stroke(out, rule.paint);
+        // Standalone SVG consumers do not load MathJax's document stylesheet.
+        // Scene already owns the resolved fill, stroke width, dash and cap.
+        append_paint(out, rule.paint);
         if (rule.corner_radius)
             detail::append_attribute(out, "rx", number(*rule.corner_radius * 1000));
         out += "/>";
@@ -664,7 +649,7 @@ void append_path_element(std::string &out, scene::Path const &path) {
     } else if (!table_line)
         append_paint(out, path.paint, path.role == scene::ElementRole::background_box);
     else {
-        append_table_stroke(out, path.paint);
+        append_paint(out, path.paint);
         out += "/>";
         return;
     }

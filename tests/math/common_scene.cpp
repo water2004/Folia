@@ -13,6 +13,7 @@
 #include <typeinfo>
 #include <utility>
 #include <vector>
+#include "support/source_svg_paint.hpp"
 #include "support/folia_test.hpp"
 #include "support/tex_scene.hpp"
 #include "fixtures/common_scene.inc"
@@ -755,9 +756,10 @@ suite common_scene_source = [] {
                     expect(bool(stats.typed_paints > 0))
                         << "Source has drawing but Scene has no typed paint for " << name;
                 const auto actual = serialize(completed, owner);
-                reportFirstDifference(name, source.svg, actual);
-                const bool svgMatches = actual == source.svg;
-                expect(bool(svgMatches)) << "Source SVG bytes differ for " << name;
+                const auto expectedSvg = source_svg_paint::materialize(source.svg);
+                reportFirstDifference(name, expectedSvg, actual);
+                const bool svgMatches = actual == expectedSvg;
+                expect(bool(svgMatches)) << "Source SVG with explicit table CSS paint differs for " << name;
                 const bool casePassed =
                     typedSceneOk && phantomEmissionOk && tableStructureOk &&
                     brokenBorderGeometryOk && svgMatches;
@@ -842,12 +844,13 @@ suite common_scene_source = [] {
             auto second = buildScene(texInput(source), owner, measurement);
             const auto secondSvg = serialize(second, owner);
             const bool repeatedMatches = firstSvg == secondSvg;
-            const bool sourceMatches = firstSvg == source.svg;
+            const auto expectedSvg = source_svg_paint::materialize(source.svg);
+            const bool sourceMatches = firstSvg == expectedSvg;
             expect(bool(repeatedMatches))
                 << "repeated request changed the completed Scene output for " << name;
             expect(bool(sourceMatches))
                 << "retired-request Scene differs from independent Source SVG for " << name;
-            reportFirstDifference(name, source.svg, firstSvg);
+            reportFirstDifference(name, expectedSvg, firstSvg);
             std::cerr << "Common-to-Scene case=" << name << "-retirement result="
                       << (repeatedMatches && sourceMatches ? "success" : "mismatch") << '\n';
         }

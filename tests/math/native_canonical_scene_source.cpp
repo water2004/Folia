@@ -13,6 +13,7 @@
 #include <tuple>
 #include <utility>
 #include <vector>
+#include "support/source_svg_paint.hpp"
 #include "support/folia_test.hpp"
 
 import folia.math.output.scene;
@@ -132,10 +133,11 @@ suite native_canonical_scene_source = [] {
 
                     auto options = writeOptions(mode, modeIndex, owner);
                     const auto serialized = svg::write(value, options);
-                    if (serialized != mode.svg)
-                        reportDifference(modeName, mode.svg, serialized);
-                    expect(serialized == mode.svg)
-                        << modeName << ": complete SVG matches Source after request teardown";
+                    const auto expectedSvg = source_svg_paint::materialize(mode.svg);
+                    if (serialized != expectedSvg)
+                        reportDifference(modeName, expectedSvg, serialized);
+                    expect(serialized == expectedSvg)
+                        << modeName << ": complete SVG matches Source with explicit table CSS paint after request teardown";
                     ++svgComparisons;
                 } catch (std::exception const &error) {
                     expect(false) << modeName << ": native hosted pipeline threw: " << error.what();

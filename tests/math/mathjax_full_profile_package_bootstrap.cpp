@@ -14,6 +14,7 @@
 #include <variant>
 #include <vector>
 #include "fixtures/canonical_scene_modes_source.hpp"
+#include "support/source_svg_paint.hpp"
 #include "support/folia_test.hpp"
 
 import folia.math;
@@ -233,9 +234,10 @@ suite mathjax_full_profile_package_bootstrap = [] {
                     auto result = renderer.render(source.tex, optionsFor(source));
                     compareMetrics(result.scene.metrics(), expected.metrics, source.name);
                     ++utf8Metrics;
-                    if (result.svg != expected.svg)
-                        reportDifference(source.name, expected.svg, result.svg);
-                    expect(result.svg == expected.svg) << source.name << ": UTF-8 full SVG";
+                    const auto expectedSvg = source_svg_paint::materialize(expected.svg);
+                    if (result.svg != expectedSvg)
+                        reportDifference(source.name, expectedSvg, result.svg);
+                    expect(result.svg == expectedSvg) << source.name << ": UTF-8 full SVG with explicit table CSS paint";
                     ++utf8Svg;
                     const auto sceneOnly = sceneRenderer.renderScene(source.tex, optionsFor(source));
                     compareMetrics(sceneOnly.metrics(), expected.metrics, source.name);
@@ -256,9 +258,10 @@ suite mathjax_full_profile_package_bootstrap = [] {
                     auto result = renderer.render(std::u16string_view(utf16), optionsFor(source));
                     compareMetrics(result.scene.metrics(), expected.metrics, source.name);
                     ++utf16Metrics;
-                    if (result.svg != expected.svg)
-                        reportDifference(source.name, expected.svg, result.svg);
-                    expect(result.svg == expected.svg) << source.name << ": UTF-16 full SVG";
+                    const auto expectedSvg = source_svg_paint::materialize(expected.svg);
+                    if (result.svg != expectedSvg)
+                        reportDifference(source.name, expectedSvg, result.svg);
+                    expect(result.svg == expectedSvg) << source.name << ": UTF-16 full SVG with explicit table CSS paint";
                     ++utf16Svg;
                 } catch (std::exception const &error) {
                     expect(false) << source.name << ": UTF-16 Renderer threw: " << error.what();

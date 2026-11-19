@@ -972,10 +972,13 @@ while assembling, then are moved once into their completed parent before freeze.
 Scene roles table_frame/table_vertical_line/table_horizontal_line preserve
 Source data-frame/data-line,class and attribute order. Common records actual
 Paint: fill none, inherited stroke, width .07; dashed {.14}, dotted {0,.14}
-and round cap. Writer does not repeat these CSS-supplied paint attributes;
-Source class remains spelling only. Nondefault stroke-thickness/dasharray are
-serialized after geometry from completed Paint values, in Source units; do not
-duplicate numerical thickness strings in Common metadata. Mtable's emission is
+and round cap. The writer serializes these completed paint values explicitly:
+an independent SVG image cannot rely on MathJax's surrounding HTML stylesheet.
+Source classes remain semantic metadata, not the source of visible paint.
+Use the SVG `stroke-width` attribute for every nonzero width, including custom
+thickness; `stroke-thickness` is not an SVG presentation attribute. Preserve
+fill none, dash arrays and round caps for frames as well as row/column rules.
+Do not duplicate numerical thickness strings in Common metadata. Mtable's emission is
 thin orchestration over its original Source-shaped private methods for rows,
 lines, frame, percentage width and labels, not one accumulated function.
 Viewport adds clip_content=true; table viewports use false, reflecting Source's

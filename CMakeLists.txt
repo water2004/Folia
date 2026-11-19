@@ -741,6 +741,7 @@ add_executable(FoliaMathTests EXCLUDE_FROM_ALL
     tests/math/function_list.cpp
     tests/math/native_raii_tex_environment.cpp
     tests/math/native_svg_writer.cpp
+    tests/math/native_source_svg_paint.cpp
     tests/math/native_svg_font_cache_plan.cpp
     tests/math/native_tex_error_source.cpp
     tests/math/native_tex_error_utf8.cpp
@@ -888,7 +889,8 @@ add_test(NAME FoliaMathTests COMMAND FoliaMathTests)
 # remain in FoliaMathTests; this explicit target avoids compiling unrelated
 # TeX parser test translation units for an output-boundary change.
 add_executable(FoliaMathSvgBridgeTests EXCLUDE_FROM_ALL
-    tests/main.cpp tests/math/native_svg_writer.cpp tests/math/native_renderer_bridge.cpp)
+    tests/main.cpp tests/math/native_svg_writer.cpp tests/math/native_renderer_bridge.cpp
+    tests/math/native_source_svg_paint.cpp)
 target_compile_features(FoliaMathSvgBridgeTests PRIVATE cxx_std_23)
 set_target_properties(FoliaMathSvgBridgeTests PROPERTIES CXX_MODULE_STD ON CXX_SCAN_FOR_MODULES ON)
 target_include_directories(FoliaMathSvgBridgeTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)

@@ -1,3 +1,4 @@
+#include "support/source_svg_paint.hpp"
 #include "support/folia_test.hpp"
 import folia.math.fonts.newcm_font_module_provider;
 import folia.math.output.common;
@@ -214,9 +215,10 @@ void verifySourceMathmlTable(MathmlTableSceneCase const &expected,
         check(eq(rows[i]->getBBox().rscale, expected.row_rscales[i]), "row bbox rscale");
 
     const auto nativeSvg = svg::write(built, {.font_cache = svg::FontCacheMode::none});
-    if (nativeSvg != expected.source_svg) {
-        reportTableSvgDifference(expected.name, expected.source_svg, nativeSvg);
-        check(false, "SVG bytes match pinned Source");
+    const auto expectedSvg = source_svg_paint::materialize(expected.source_svg);
+    if (nativeSvg != expectedSvg) {
+        reportTableSvgDifference(expected.name, expectedSvg, nativeSvg);
+        check(false, "SVG bytes match pinned Source with explicit table CSS paint");
     }
 
     std::size_t dottedLines = 0;
