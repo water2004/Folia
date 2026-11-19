@@ -29,6 +29,37 @@ std::u16string paint(const FlowchartNode& node,std::u16string_view key,std::u16s
  return fallback;
 }
 bool fork_join(std::u16string_view shape){return shape==u"fork"||shape==u"join";}
+
+// Mermaid 12.2.0 stateDb starts the synthetic root with altFlag=true;
+// dataFetcher toggles it for every nested document. Compute the same parity
+// from containment, including concurrent regions, without depending on node
+// insertion order or recursive C++ calls.
+std::vector<bool> composite_alternates(std::span<const FlowchartNode> nodes) {
+ std::unordered_map<std::u16string_view,std::size_t> by_id;
+ for(std::size_t i=0;i<nodes.size();++i)by_id.emplace(nodes[i].id,i);
+ std::vector<std::vector<std::size_t>> children(nodes.size());
+ std::vector<std::size_t> pending;
+ std::vector<bool> alternate(nodes.size(),false);
+ pending.reserve(nodes.size());
+ for(std::size_t i=0;i<nodes.size();++i) {
+  if(nodes[i].parent.empty())pending.push_back(i);
+  else {
+   const auto parent=by_id.find(nodes[i].parent);
+   if(parent==by_id.end())throw std::runtime_error("Unknown State parent");
+   children[parent->second].push_back(i);
+  }
+ }
+ for(std::size_t cursor=0;cursor<pending.size();++cursor) {
+  const auto parent=pending[cursor];
+  for(const auto child:children[parent]) {
+   alternate[child]=!alternate[parent];
+   pending.push_back(child);
+  }
+ }
+ if(pending.size()!=nodes.size())throw std::runtime_error("Cyclic State containment");
+ return alternate;
+}
+
 void add_annotations(FlowchartInput& graph,std::span<const StateAnnotation> annotations,double note_padding,bool elk){
  for(std::size_t i=0;i<annotations.size();++i){
   const auto& annotation=annotations[i];
@@ -248,6 +279,7 @@ std::expected<StateSvg,std::string> render_state_svg(const StateRenderInput& in,
  auto scene=elk?layout_state_elk(graph,boxes,edge_boxes,labels):
   layout_measured_flowchart(graph,boxes,edge_boxes,labels,layout_theme);
  if(!scene)return std::unexpected(scene.error());
+ const auto alternate=composite_alternates(graph.nodes);
  std::string body;auto rect=[&](double x,double y,double w,double h,double radius,std::u16string_view fill,std::u16string_view stroke,const FlowchartNode* source=nullptr){
   std::string style=" stroke-width=\"1\"";
   if(source){
@@ -287,7 +319,7 @@ std::expected<StateSvg,std::string> render_state_svg(const StateRenderInput& in,
    body+=rect(node.x-node.width/2,node.y-node.height/2,node.width,node.height,5,t.composite_title,t.border);
    body+=rect(node.x-node.width/2,node.y-node.height/2+labels.nodes[i].height+2,
        node.width,node.height-labels.nodes[i].height-6,0,
-       source.parent.empty()?t.composite:t.alternate,t.border);
+       alternate[i]?t.alternate:t.composite,t.border);
    body+=draw_label(labels.nodes[i],node.x,node.y-node.height/2+1,t.text,"cluster-label");
   }
   body+="</g>";

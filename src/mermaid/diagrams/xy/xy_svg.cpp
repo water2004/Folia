@@ -2,6 +2,8 @@ module folia.mermaid.xy_svg;
 import std;
 import folia.mermaid.number;
 import folia.mermaid.svg_text;
+import folia.mermaid.theme;
+import folia.mermaid.config_clean_merge;
 namespace folia::mermaid {
 namespace {
 const ConfigValue& member(const ConfigValue& v,std::u16string_view key){auto p=v.find(key);if(!p)throw std::runtime_error("Missing XY configuration");return *p;}
@@ -33,7 +35,15 @@ void axis_theme(XYAxisTheme& out,const ConfigValue& v,std::u16string prefix){out
 std::expected<XYRenderInput,std::string> prepare_xy(std::u16string_view source,const ConfigSession& session){
     auto p=prepare_diagram(source,session);if(!p)return std::unexpected(p.error());auto d=parse_xy(encode_diagram_source(p->code.cleaned));if(!d)return std::unexpected(d.error());
     try{XYRenderInput out;out.document=std::move(*d);if(out.document.title.empty()&&p->title)out.document.title=*p->title;auto& c=out.config;auto& t=out.theme;
-        const auto& cfg=member(p->effective_config,u"xyChart");const auto& theme=member(member(p->effective_config,u"themeVariables"),u"xyChart");
+        const auto& cfg=member(p->effective_config,u"xyChart");
+        // xychartDb.ts getChartDefaultThemeConfig fills missing family fields
+        // from the default theme (e.g. dataLabelColor in neo/redux presets).
+        auto defaults=derive_theme_variables(MermaidTheme::default_theme);
+        if(!defaults)return std::unexpected(defaults.error());
+        auto resolved=clean_and_merge_config(member(*defaults,u"xyChart"),
+            member(p->effective_config,u"themeVariables").find(u"xyChart"));
+        if(!resolved)return std::unexpected(resolved.error());
+        const auto& theme=*resolved;
         for(auto [key,target]:{std::pair{u"width",&c.width},{u"height",&c.height},{u"titleFontSize",&c.title_size},{u"titlePadding",&c.title_padding},{u"legendFontSize",&c.legend_size},{u"legendPadding",&c.legend_padding},{u"plotReservedSpacePercent",&c.reserved}})*target=number(member(cfg,key));
         for(auto [key,target]:{std::pair{u"showTitle",&c.show_title},{u"showLegend",&c.show_legend},{u"showDataLabel",&c.data_labels},{u"showDataLabelOutsideBar",&c.outside_labels}})*target=boolean(member(cfg,key));
         c.horizontal=out.document.horizontal.value_or(text(member(cfg,u"chartOrientation"))==u"horizontal");axis_config(c.x,member(cfg,u"xAxis"));axis_config(c.y,member(cfg,u"yAxis"));

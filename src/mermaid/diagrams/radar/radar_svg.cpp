@@ -2,6 +2,8 @@ module folia.mermaid.radar_svg;
 import std;
 import folia.mermaid.number;
 import folia.mermaid.svg_text;
+import folia.mermaid.theme;
+import folia.mermaid.config_clean_merge;
 namespace folia::mermaid {
 namespace {
 const ConfigValue& member(const ConfigValue& v,std::u16string_view key){auto p=v.find(key);if(!p)throw std::runtime_error("Missing Radar configuration");return *p;}
@@ -28,7 +30,15 @@ std::expected<RadarRenderInput,std::string> prepare_radar(std::u16string_view so
     if(doc->title.empty()&&prepared->title)doc->title=*prepared->title;
     try {
         RadarRenderInput out;out.document=std::move(*doc);auto& c=out.config;auto& t=out.theme;
-        const auto& cfg=member(prepared->effective_config,u"radar");const auto& theme=member(prepared->effective_config,u"themeVariables");const auto& style=member(theme,u"radar");
+        const auto& cfg=member(prepared->effective_config,u"radar");
+        // radar/styles.ts buildRadarStyleOptions merges the default theme with
+        // the selected variables. Modern presets intentionally omit radar;
+        // their curve palette still comes from the selected theme.
+        auto defaults=derive_theme_variables(MermaidTheme::default_theme);
+        if(!defaults)return std::unexpected(defaults.error());
+        auto resolved=clean_and_merge_config(*defaults,prepared->effective_config.find(u"themeVariables"));
+        if(!resolved)return std::unexpected(resolved.error());
+        const auto& theme=*resolved;const auto& style=member(theme,u"radar");
         for(auto [key,target]:{std::pair{u"width",&c.width},{u"height",&c.height},{u"marginTop",&c.top},{u"marginRight",&c.right},{u"marginBottom",&c.bottom},{u"marginLeft",&c.left},
             {u"axisScaleFactor",&c.axis_scale},{u"axisLabelFactor",&c.label_scale},{u"curveTension",&c.tension}})*target=number(member(cfg,key));
         if(auto max=cfg.find(u"useMaxWidth")){if(max->kind!=ConfigKind::boolean)throw std::runtime_error("Expected Radar useMaxWidth boolean");c.use_max_width=max->boolean;}
