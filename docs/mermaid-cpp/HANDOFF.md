@@ -2,6 +2,8 @@
 
 ## 当前检查点
 
+- 2026-11-19：合入原生 Math SVG 绘制修复后，Windows 统一在构建时同步 Mermaid 使用的 Math DLL，覆盖导入库未变的增量构建。Mermaid Math、DLL 宿主测试与 22 项真实 MathJax CSS 公式对照通过。详见 [数学交接](../math-port/HANDOFF.md)。
+
 - 2026-11-19：WinUI 的「常规 → 图片与图表」已接入独立 Mermaid 主题选择，通过 `FoliaNativeMermaidThemeName` 读取 DLL 的同一份主题清单，命名主题走现有 C ABI。切换主题会重建待渲染内容，源码主题仍优先。Windows Release 应用构建、Mermaid 工作线程 5 项和 WinUI 设置页定向测试通过，另验证图片按正文宽度缩放。日志 `build/media-settings-{build-final,mermaid-test,ui-test,image-test}.log`。
 
 - 2026-11-19：`refactor/mermaid-modules-and-themes`（`26fd18e3`）已快进合入 `master`。集成提交 `c9ba1b17` 将 Python 限于可选的结构检查，在 Windows 按实际写入的 SVG 字节计算散列。禁用 Python 查找的独立 CMake 配置已通过。

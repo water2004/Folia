@@ -4,9 +4,11 @@
 
 - 2026-11-07：旧 QuickJS 源码、应用脚本和旧打包工具已移除。`tools/mathjax-bundle/` 的 `entry.cjs` 和锁文件继续作为原生数学构建及对照工具的固定输入。Release 启动、WiX 清单和锁定对照配置加载已验证。
 
-## 当前 checkpoint（2026-11-19，独立 SVG 绘制属性修复已完成）
+## 当前 checkpoint（2026-11-19，独立 SVG 绘制属性修复已合入）
 
-- 用户报告 array 的列分隔线和 `\hline` 消失，授权从最新 master 建新分支、分批提交推送，并检查同类问题。已从 `00307446` 创建远端 `fix/native-math-svg-paint`，当前在此分支；下方旧任务的 agents/推送限制不替代本次授权。
+- `fix/native-math-svg-paint`（`f6edae8f`）从 `00307446` 起修复用户报告的 array 列分隔线与 `\hline` 消失，现已快进合入 `master`。
+- Windows MSVC Release 的 Math SVG/C ABI 定向构建成功，83 项／2,381 断言全部通过；Mermaid Math 和 DLL 宿主两套测试通过。使用同一 Windows Math DLL，与上游真实 CSS 的严格 RGBA 对照通过 76/76（含 Direct MathML），Mermaid 独立公式对照通过 22/22。日志 `build/merge-math-svg-paint-{build,focused,stage,mermaid-ctest,matrix,mermaid-oracle}.log`，报告 `build/merge-math-svg-paint/`。
+- 合入时固定上游对照锁定文件的 LF，保留原 SHA-256。Windows 的 Mermaid 构建将 Math DLL 同步作为依赖步骤，导入库未变时也会更新实际加载的 DLL。未运行 WinUI 界面验收或更新 0.7.2 发布资产。
 - 已定位：Common mtable 已冻结完整 Paint，但 SVG writer 的 table 路径省略默认线宽、fill、dash、cap，非默认线宽还拼为无效 `stroke-thickness`。外层零线宽是字形轮廓的正常默认，不修改它；修复直接序列化已完成 Paint，不重算布局、不在宿主补字符串、不加入 CSS 解释器或旧输出开关。
 - 第一批 table 修复已推送 **620bc080**：Linux Clang/libc++ 21，focused **56 项／1,154 断言全部通过**。真实 C ABI 三模式覆盖用户 array、frame 和未知命令 `\hlined`。10 份单独采样中的 12 个 line/frame 均显式 fill none、width 70；撤去新增 paint 后其余字节与未修基线完全相同，fragment metrics 完全相同。日志 `build/math-svg-paint/table-{build,tests,render}.log`，对照 `table-vs-baseline.json`；基线和第一批库分别保留在 `baseline/`、`table/`。librsvg 实际前后图也确认 array 线恢复、frame 不再实心遮挡，图片位于 `visual-check/`。
 - 第二批 merror/link/viewport 已推送 **c64d4b2f**：expanded focused **72 项／1,968 断言全部通过**，涵盖 writer、C ABI、Source helper、Common Link 所有权、merror 与 table profile。Scene Link 保存蓝色，merror 冻结样式色参与输出而作者 inline style 继续优先，外层 SVG 与 table clipfalse 视口显式 overflow visible，伸缩符裁剪与隐藏 tooltip 保持各自语义。10 份真实 C ABI 输出成功、fragment metrics 与第一批相同。日志 `styles-{build,focused-build,tests,render}.log`，库保留 `styles/libFoliaNativeMath.so`，SHA-256 `04551b06…65e9f92`。
@@ -16,7 +18,7 @@
 - 最终完整 `FoliaMathTests` **194 组／996 项／547,262 断言全部通过，exit 0**；首次完整构建成功、全量仅运行一次。日志 `build/math-svg-paint/full-math-{build,tests}.log`，验证生产 revision 为 `2d9c138b`，之后仅增加工具与验收记录。Linux Clang/libc++ 21.1.8、CMake 4.3.4，单一 Ninja、最多四任务，无 Windows SDK。最终库 SHA-256 `871648ef1a3b468119caae34e65e781245e1155f76b4da2759ffdb8f28d21264`。
 - 独立实际宿主 CSS 对照 **76/76 记录、82 个 SVG 片段**全部精确 RGBA 一致；其中 18 TeX × inline/display/fragment 为 54 例，既有 Direct MathML table 8 + profile 14 为 22 例。**127 项可见性/透明检查**（116 项逐元素移除检查）、**547 项节点 paint 检查**全过。比较宿主只映射 `mjx-container` selector 标签，保留真实 CSS 声明和父子关系；Source 属性物化也先与真实 CSS 做零容差像素验证。原 Mermaid formula oracle **22/22** metrics、ordered drawing tree、2× RGBA 全过，未改 Native 比较器或容差。报告位于 `oracle-glyph-comparison/`、`mermaid-comparison/`、`mermaid-source/`。
 - `FOLIA_MATH_SVG_PAINT_CAPTURE_DIR` 从既有 Direct MathML 测试选择性导出未改 Source/实际 Native；最终完整测试与 focused 副本的 22 对 SVG + 22 manifest 共 66 文件逐字节一致。实际 solid/dashed/dotted、frame、labeled table viewport 图片已目检。字面 `\hlined` 按官方规则仍是未知命令；真正横线输入为 `\hline d`，两者分别回归。
-- 可复现工具见 `tools/math-port/svg-paint/README.md`；最终验收摘要见 [svg-paint-validation.json](svg-paint-validation.json)。本检查点、工具与摘要随收尾批次提交推送。所有 agents 已交回，无活动构建/测试句柄。工作已完成；后续以用户的新反馈为准，不重复已通过的广泛审计。未执行 Windows/WinUI 或浏览器 UI 验收，不改版本、CI、MSI 或发布资产；自定义表格厚度按已完成 Scene 值修正，不声称与上游无效 `stroke-thickness` 分支像素等价。
+- 可复现工具见 `tools/math-port/svg-paint/README.md`；分支的 Linux 验收摘要见 [svg-paint-validation.json](svg-paint-validation.json)。工作已完成，后续以用户新反馈为准。自定义表格厚度按已完成 Scene 值修正，不声称与上游无效 `stroke-thickness` 分支像素等价。
 
 ## 上一轮 checkpoint（2026-11-16，Mermaid 数学标签已完成，历史）
 
