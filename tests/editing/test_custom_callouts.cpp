@@ -1,5 +1,6 @@
 #include "support/folia_test.hpp"
 import folia.core.command;
+import folia.core.document_source_edit;
 import folia.core.editor;
 import folia.core.source_editor;
 import folia.markdown.ast;
@@ -8,6 +9,7 @@ import folia.markdown.document;
 import folia.markdown.inline_cst;
 import folia.markdown.instrumentation;
 import folia.markdown.selection;
+import folia.markdown.text_edit;
 import folia.markdown.utf;
 
 using namespace folia;
@@ -102,12 +104,12 @@ suite custom_callout_editing_tests = [] {
     reset_core_operation_counters();
     expect(fatal(editor.execute_command({.kind = CommandKind::ToggleCallout, .callout_kind = U"MY-note_2"})));
     expect_local_callout_edit();
-    expect(editor.source_editor()->source() == U"body");
+    expect(bool(editor.source_editor()->source() == U"body"));
     expect(editor.source_editor()->selection() == SourceSelection::caret(2));
     expect(fatal(editor.undo()));
-    expect(editor.source_editor()->source() == U"> [!my-note_2]\n> body");
+    expect(bool(editor.source_editor()->source() == U"> [!my-note_2]\n> body"));
     expect(fatal(editor.redo()));
-    expect(editor.source_editor()->source() == U"body");
+    expect(bool(editor.source_editor()->source() == U"body"));
 };
 
 "custom callout commands reject malformed identifiers without modifying the document"_test = [] {
@@ -135,7 +137,7 @@ suite custom_callout_editing_tests = [] {
     expect_local_callout_edit();
     expect(editor.markdown_utf8() == "> [!my-type_2] **tiXtle**\n> body");
     const auto& title = editor.document().root.children.front().children.front().inline_content;
-    expect(flatten_tokens(title.tree, title.source) == title.source);
+    expect(bool(flatten_tokens(title.tree, title.source) == title.source));
     expect(editor.document().root.children.front().container_special().callout_kind == "MY-TYPE_2");
     expect(fatal(editor.undo()));
     expect(editor.markdown_utf8() == source);

@@ -121,9 +121,9 @@ suite callout_source_roundtrip_tests = [] {
     }) {
         expect(normalize_callout_kind(kind) == std::optional<std::string>{normalized});
         expect(callout_visual_kind(kind) == CalloutVisualKind::Note);
-        expect(callout_display_label(kind) == utf8_to_cps(normalized));
-        expect(rewrite_callout_opening_marker(U"  >[!note]  ", kind)
-            == U"  >[!" + utf8_to_cps(normalized) + U"]  ");
+        expect(bool(callout_display_label(kind) == utf8_to_cps(normalized)));
+        expect(bool(rewrite_callout_opening_marker(U"  >[!note]  ", kind)
+            == U"  >[!" + utf8_to_cps(normalized) + U"]  "));
     }
     for (const auto& kind : std::vector<std::string>{
         "", "two words", "[note", "note]", "back\\slash", "line\nfeed", "tab\tname",
