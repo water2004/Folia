@@ -14,7 +14,7 @@ using namespace boost::ut;
 
 namespace { suite semantic_marker_tests = [] {
 "paired formatting marker deletion removes the pair and preserves content and undo"_test = [] {
-    for (auto spelling : {"*abc*", "**abc**", "_abc_", "__abc__", "~~abc~~", "`abc`", "``abc``", "````abc```` tail", "$abc$", "\\(abc\\)"})
+    for (auto spelling : {"*abc*", "**abc**", "_abc_", "__abc__", "~~abc~~", "==abc==", "`abc`", "``abc``", "````abc```` tail", "$abc$", "\\(abc\\)"})
     for (bool backward : {false, true}) {
         Editor editor(std::string{spelling} + "\n");
         auto const& block = editor.document().root.children.front();
@@ -79,7 +79,7 @@ namespace { suite semantic_marker_tests = [] {
 };
 
 "keyboard motion skips complete paired marker interiors but not incomplete input"_test = [] {
-    for (auto source : {"**abc**", "__abc__", "~~abc~~", "``abc``", "\\(abc\\)"}) {
+    for (auto source : {"**abc**", "__abc__", "~~abc~~", "==abc==", "``abc``", "\\(abc\\)"}) {
         Editor editor(std::string{source} + "\n");
         auto owner = editor.selection().active.container_id;
         editor.set_selection(TextSelection::caret({owner, 0, TextAffinity::Downstream}));
@@ -88,9 +88,11 @@ namespace { suite semantic_marker_tests = [] {
         expect(editor.execute_command(Command::MoveLeft(false)));
         expect(editor.selection().active.source_offset == 0_u);
     }
-    Editor incomplete("**abc\n");
-    expect(incomplete.execute_command(Command::MoveRight(false)));
-    expect(incomplete.selection().active.source_offset == 1_u);
+    for (auto source : {"**abc\n", "==abc\n"}) {
+        Editor incomplete(source);
+        expect(incomplete.execute_command(Command::MoveRight(false)));
+        expect(incomplete.selection().active.source_offset == 1_u);
+    }
 };
 
 "ATX heading backspace reduces the semantic level and preserves exact undo"_test = [] {

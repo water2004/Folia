@@ -78,6 +78,29 @@ namespace
     }
 
     suite syntax_icons_tests = [] {
+        "highlight and strong syntax icons use the same caret visibility"_test = [] {
+            MathJaxRenderer math;
+            SvgNormalizer normalizer;
+            auto const& theme = folia::default_theme_profile(folia::Theme::Light);
+            for (auto const& example : {std::pair{"pre **x** post", SyntaxIcon::DoubleStar},
+                    {"pre ==x== post", SyntaxIcon::DoubleEquals}}) {
+                auto parsed = folia::parse_text(1, example.first);
+                auto model = folia::build_render_model(parsed.document, parsed.outline, parsed.symbols, theme);
+                expect(fatal(model.blocks.size() == 1_u));
+                auto const& block = model.blocks.front();
+                for (std::size_t offset : {0u, 6u, 10u}) {
+                    auto display = BuildDisplayInlineText(block.inline_items,
+                        {block.id, offset, folia::TextAffinity::Downstream},
+                        {block.id, block.source_span.source_range.end, folia::TextAffinity::Downstream},
+                        math, normalizer, D2D1::ColorF(D2D1::ColorF::Black), 16, 150, false, false, false);
+                    auto icons = std::ranges::count_if(display.ranges, [&](auto const& range) {
+                        return range.icon == example.second && range.length == 2;
+                    });
+                    expect(icons == (offset == 6 ? 2 : 0)) << example.first << offset;
+                }
+            }
+        };
+
         "syntax icons are indivisible font independent layout objects"_test = [] {
             EditorRenderResources resources;
             winrt::check_hresult(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED,
@@ -86,7 +109,8 @@ namespace
             for (auto size : {12.f, 16.f, 32.f})
             for (auto const& example : {std::pair{U"*", SyntaxIcon::Star}, {U"**", SyntaxIcon::DoubleStar},
                 {U"_", SyntaxIcon::Underscore}, {U"__", SyntaxIcon::DoubleUnderscore},
-                {U"~~", SyntaxIcon::DoubleTilde}, {U"`", SyntaxIcon::Backtick}, {U"``", SyntaxIcon::DoubleBacktick},
+                {U"~~", SyntaxIcon::DoubleTilde}, {U"==", SyntaxIcon::DoubleEquals},
+                {U"`", SyntaxIcon::Backtick}, {U"``", SyntaxIcon::DoubleBacktick},
                 {U"```", SyntaxIcon::TripleBacktick}, {U"$", SyntaxIcon::Dollar}, {U"$$", SyntaxIcon::DoubleDollar},
                 {U"\\(", SyntaxIcon::MathOpen}, {U"\\)", SyntaxIcon::MathClose},
                 {U"\\[", SyntaxIcon::MathBracketOpen}, {U"\\]", SyntaxIcon::MathBracketClose}})

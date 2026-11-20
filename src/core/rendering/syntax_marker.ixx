@@ -7,14 +7,17 @@ export namespace folia {
 enum class SyntaxMarker : std::uint8_t {
     None, Star, DoubleStar, Underscore, DoubleUnderscore, Tilde, DoubleTilde,
     Backtick, DoubleBacktick, TripleBacktick, Dollar, DoubleDollar,
-    MathOpen, MathClose, MathBracketOpen, MathBracketClose, Count
+    MathOpen, MathClose, MathBracketOpen, MathBracketClose, DoubleEquals, Count
 };
 
 inline constexpr std::array<std::string_view, static_cast<std::size_t>(SyntaxMarker::Count)> syntax_marker_names{
     "", "star", "doubleStar", "underscore", "doubleUnderscore", "tilde", "doubleTilde",
     "backtick", "doubleBacktick", "tripleBacktick", "dollar", "doubleDollar",
-    "mathOpen", "mathClose", "mathBracketOpen", "mathBracketClose"
+    "mathOpen", "mathClose", "mathBracketOpen", "mathBracketClose", "doubleEquals"
 };
+
+// Themes written for the original schema 2 marker set can omit later icons.
+inline constexpr auto schema_2_required_marker_count = static_cast<std::size_t>(SyntaxMarker::MathBracketClose) + 1;
 
 struct SyntaxMarkerTheme {
     float size_em = 1.05f;

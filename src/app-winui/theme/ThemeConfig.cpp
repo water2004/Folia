@@ -207,7 +207,13 @@ namespace
         auto icons = object.GetNamedObject(L"icons");
         for (std::size_t i = 1; i < folia::syntax_marker_names.size(); ++i)
         {
-            auto source = icons.GetNamedString(winrt::to_hstring(folia::syntax_marker_names[i]));
+            auto key = winrt::to_hstring(folia::syntax_marker_names[i]);
+            if (i >= folia::schema_2_required_marker_count && !icons.HasKey(key))
+            {
+                markers->svg[i] = winrt::Folia::DefaultSyntaxMarkerTheme()->svg[i];
+                continue;
+            }
+            auto source = icons.GetNamedString(key);
             auto utf8 = winrt::to_string(source);
             if (utf8.empty() || utf8.size() > 65536)
                 throw std::runtime_error("each syntax marker must contain an SVG of at most 64 KiB");

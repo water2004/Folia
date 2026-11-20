@@ -33,6 +33,8 @@ or images, and are limited to 64 KiB UTF-8 each. `currentColor` uses the profile
 Required icon keys: `star`, `doubleStar`, `underscore`, `doubleUnderscore`,
 `tilde`, `doubleTilde`, `backtick`, `doubleBacktick`, `tripleBacktick`, `dollar`,
 `doubleDollar`, `mathOpen`, `mathClose`, `mathBracketOpen`, `mathBracketClose`.
+The `doubleEquals` icon represents a complete highlight delimiter (`==`).
+Themes that omit it use the bundled SVG.
 Use native Direct2D-supported SVG shapes and paths; fonts, HTML and external
 assets are unnecessary. The entire theme remains one portable JSON file, so
 the existing import flow also copies its artwork. There is no file access

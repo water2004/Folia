@@ -102,7 +102,9 @@ namespace
             markers.SetNamedValue(L"sizeEm", JsonValue::CreateNumberValue(1.2));
             markers.SetNamedValue(L"gapEm", JsonValue::CreateNumberValue(.4));
             auto replacement = L"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"5\" fill=\"currentColor\"/></svg>";
-            markers.GetNamedObject(L"icons").SetNamedValue(L"star", JsonValue::CreateStringValue(replacement));
+            auto icons = markers.GetNamedObject(L"icons");
+            icons.SetNamedValue(L"star", JsonValue::CreateStringValue(replacement));
+            icons.Remove(L"doubleEquals");
             files.Write(root);
             // ThemeCatalog imports the complete JSON with copy_file. No adjacent
             // SVG files or access to the original directory may be necessary.
@@ -116,6 +118,8 @@ namespace
             expect(std::abs(sheet.marker.sizeEm - 1.2f) < .001f);
             expect(std::abs(sheet.marker.gapEm - .4f) < .001f);
             expect(static_cast<bool>(sheet.markerAssets->svg[static_cast<std::size_t>(folia::SyntaxMarker::Star)] == winrt::to_string(replacement)));
+            auto highlight = static_cast<std::size_t>(folia::SyntaxMarker::DoubleEquals);
+            expect(static_cast<bool>(sheet.markerAssets->svg[highlight] == DefaultSyntaxMarkerTheme()->svg[highlight]));
         };
 
         "invalid marker themes are rejected as complete profiles"_test = [] {

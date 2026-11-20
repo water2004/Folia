@@ -781,6 +781,7 @@ struct Builder {
                 case K::Emphasis: return document.source[range.start] == U'*' ? M::Star : M::Underscore;
                 case K::Strong: return document.source[range.start] == U'*' ? M::DoubleStar : M::DoubleUnderscore;
                 case K::Strikethrough: return range.length() == 1 ? M::Tilde : M::DoubleTilde;
+                case K::Highlight: return M::DoubleEquals;
                 case K::CodeSpan:
                     switch (range.length()) {
                         case 1: return M::Backtick;
