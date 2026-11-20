@@ -213,6 +213,12 @@ inline void project_inline_nodes(
                 append_node(parent, std::move(n));
                 break;
             }
+            case K::Highlight: {
+                auto n = element("mark");
+                project_inline_nodes(n, doc, item.children, limitations);
+                append_node(parent, std::move(n));
+                break;
+            }
             case K::CodeSpan: {
                 auto n = element("code");
                 append_text(n, cps_to_utf8(normalize_inline_code_span(
