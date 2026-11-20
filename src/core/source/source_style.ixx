@@ -14,6 +14,7 @@ enum class SourceSyntaxKind {
     Emphasis,
     Strong,
     Strikethrough,
+    Highlight,
     Link,
     Code,
     Math,

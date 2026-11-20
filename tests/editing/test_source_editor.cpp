@@ -4,6 +4,7 @@
 
 #include "support/folia_test.hpp"
 import folia.markdown.selection;
+import folia.markdown.text_edit;
 import folia.core.source_editor;
 import folia.core.source_render;
 import folia.core.source_style;
@@ -69,6 +70,24 @@ suite source_editor_tests = [] {
     expect(fatal(has(0, SourceSyntaxKind::Math)));
     expect(fatal(has(2, SourceSyntaxKind::Marker)));
     expect(fatal(has(3, SourceSyntaxKind::Code)));
+};
+
+"source highlight styling retains exact equals markers"_test = [] {
+    SourceEditor editor(U"A ==hi== Z");
+    const auto model = build_source_render_model(editor);
+    expect(fatal(model.blocks.size() == 1u));
+    std::u32string visible;
+    for (const auto& item : model.blocks.front().inline_items) visible += item.text;
+    expect(bool(visible == editor.source()));
+    const auto& styles = editor.lines().front().styles;
+    expect(std::ranges::any_of(styles, [](const auto& span) {
+        return span.kind == SourceSyntaxKind::Highlight && span.range == SourceRange{4, 6};
+    }));
+    for (const auto range : {SourceRange{2, 4}, SourceRange{6, 8}}) {
+        expect(std::ranges::any_of(styles, [&](const auto& span) {
+            return span.kind == SourceSyntaxKind::Marker && span.range == range;
+        }));
+    }
 };
 
 "source fence state only invalidates lines until lexical state converges"_test = [] {

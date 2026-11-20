@@ -20,6 +20,7 @@ namespace winrt::Folia
                 case K::Emphasis: return SyntaxHighlightKind::Property;
                 case K::Strong: return SyntaxHighlightKind::Type;
                 case K::Strikethrough: return SyntaxHighlightKind::Comment;
+                case K::Highlight: return SyntaxHighlightKind::Constant;
                 case K::Link: return SyntaxHighlightKind::Property;
                 case K::Code: return SyntaxHighlightKind::String;
                 case K::Math: return SyntaxHighlightKind::Number;

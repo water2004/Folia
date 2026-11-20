@@ -982,6 +982,17 @@ struct Builder {
                         if (delim.closing) append_marker(target, node, *delim.closing);
                         break;
                     }
+                    case K::Highlight: {
+                        auto child_style = style;
+                        auto presentation = std::make_shared<InlinePresentationStyle>(
+                            style.presentation ? *style.presentation : InlinePresentationStyle{});
+                        presentation->highlight = true;
+                        child_style.presentation = std::move(presentation);
+                        append_marker(target, node, delim.opening);
+                        append_nodes(node.children, child_style, target);
+                        if (delim.closing) append_marker(target, node, *delim.closing);
+                        break;
+                    }
                     case K::CodeSpan: {
                         auto child_style = style; child_style.code = CodeStyle::Inline;
                         child_style.code_span_id = node.id;

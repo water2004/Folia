@@ -133,6 +133,9 @@ inline std::string inline_nodes_to_html(
             case K::Strikethrough:
                 html += "<del>" + inline_nodes_to_html(document, node.children, policy) + "</del>";
                 break;
+            case K::Highlight:
+                html += "<mark>" + inline_nodes_to_html(document, node.children, policy) + "</mark>";
+                break;
             case K::CodeSpan:
                 html += "<code>" + escape_raw_html(cps_to_utf8(inline_source_slice(document, node.delimiter_ranges().content))) + "</code>";
                 break;
@@ -248,7 +251,8 @@ inline std::string block_to_html(const BlockNode& b, ExportRawHtmlPolicy pol) {
             std::string h = "h" + std::to_string(special.level);
             return "<" + h + " id=\"" + escape_text(special.slug) + "\">" + s + "</" + h + ">\n";
         }
-        case BK::Paragraph: {
+        case BK::Paragraph:
+        case BK::CalloutTitle: {
             std::string s = inline_document_to_html(b.inline_content, pol);
             return "<p>" + s + "</p>\n";
         }

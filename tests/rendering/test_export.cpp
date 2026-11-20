@@ -15,6 +15,42 @@ using namespace boost::ut;
 
 suite export_tests = [] {
 
+"test_export_html_preserves_highlight_semantics_and_escaping"_test = [] {
+    const auto parsed = parse_text(1,
+        "==**marked** &amp; [link](https://example.com)== `==literal==`\n");
+    const auto result = export_html("", parsed.document, ExportOptions{});
+    expect(fatal(result.ok));
+    expect(result.value.content.find(
+        "<mark><strong>marked</strong> &amp; <a href=\"https://example.com\">link</a></mark>")
+        != std::string::npos);
+    expect(result.value.content.find("<code>==literal==</code>") != std::string::npos);
+    const auto markdown = export_markdown(parsed.document, ExportOptions{});
+    expect(fatal(markdown.ok));
+    expect(markdown.value.content ==
+        "==**marked** &amp; [link](https://example.com)== `==literal==`\n");
+};
+
+"test_export_html_preserves_custom_callout_kind_title_and_body"_test = [] {
+    const auto parsed = parse_text(1,
+        "> [!research-idea_2] **Custom title**\n> ==body==\n");
+    const auto result = export_html("", parsed.document, ExportOptions{});
+    expect(fatal(result.ok));
+    expect(result.value.content.find("<div class=\"callout callout-RESEARCH-IDEA_2\">")
+        != std::string::npos);
+    expect(result.value.content.find("<p><strong>Custom title</strong></p>")
+        != std::string::npos);
+    expect(result.value.content.find("<p><mark>body</mark></p>") != std::string::npos);
+};
+
+"test_export_html_escapes_arbitrary_callout_type_attributes"_test = [] {
+    const auto parsed = parse_text(1, "> [!a\"&<b>]\n> body\n");
+    const auto result = export_html("", parsed.document, ExportOptions{});
+    expect(fatal(result.ok));
+    expect(result.value.content.find("<div class=\"callout callout-A&quot;&amp;&lt;B&gt;\">")
+        != std::string::npos);
+    expect(result.value.content.find("<p>body</p>") != std::string::npos);
+};
+
 "test_export_html_uses_each_mixed_list_item_kind"_test = [] {
     auto dialect = default_dialect();
     dialect.gfm.task_lists = true;

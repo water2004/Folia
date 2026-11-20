@@ -76,6 +76,7 @@ inline void collect_inline_styles(std::vector<SourceStyleSpan>& styles, InlineCs
             case K::Strong: style_delimited(styles, node, SourceSyntaxKind::Strong); break;
             case K::Emphasis: style_delimited(styles, node, SourceSyntaxKind::Emphasis); break;
             case K::Strikethrough: style_delimited(styles, node, SourceSyntaxKind::Strikethrough); break;
+            case K::Highlight: style_delimited(styles, node, SourceSyntaxKind::Highlight); break;
             case K::CodeSpan: style_delimited(styles, node, SourceSyntaxKind::Code); break;
             case K::InlineMath: style_delimited(styles, node, SourceSyntaxKind::Math); break;
             case K::Link:

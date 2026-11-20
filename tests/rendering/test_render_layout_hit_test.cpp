@@ -99,6 +99,68 @@ suite render_layout_hit_test_tests = [] {
     expect(fatal(bool(text == U"Hello World")));
 };
 
+"highlight rendering preserves delimiters and source ranges"_test = [] {
+    const auto model = build_model("A ==hi== Z");
+    expect(fatal(model.blocks.size() == 1u));
+    const auto& block = model.blocks.front();
+    std::vector<const InlineRenderItem*> markers;
+    for (const auto& item : block.inline_items) {
+        if (item.kind == InlineRenderItem::Kind::Marker && item.text == U"==") {
+            markers.push_back(&item);
+            expect(item.special().visibility == MarkerVisibility::WhenCaretInsideNode);
+            expect(item.special().marker_construct == SourceRange{2, 8});
+            expect(!item.style.presentation || !item.style.presentation->highlight);
+        }
+    }
+    expect(fatal(markers.size() == 2u));
+    expect(markers[0]->source_span.source_range == SourceRange{2, 4});
+    expect(markers[1]->source_span.source_range == SourceRange{6, 8});
+    expect(markers[0]->special().marker_owner == markers[1]->special().marker_owner);
+    const auto* text = find_text_item(model, U"hi");
+    expect(fatal(text != nullptr));
+    expect(text->source_span.container_id == block.id);
+    expect(text->source_span.source_range == SourceRange{4, 6});
+    expect(fatal(text->style.presentation != nullptr));
+    expect(text->style.presentation->highlight);
+    for (const auto& item : block.inline_items) {
+        if (item.kind == InlineRenderItem::Kind::Text && item.text != U"hi")
+            expect(!item.style.presentation || !item.style.presentation->highlight);
+    }
+};
+
+"highlight presentation composes with nested content in every block context"_test = [] {
+    for (const auto& source : std::vector<std::string>{
+            "==**marked**==",
+            "# ==**marked**==",
+            "- ==**marked**==",
+            "- [ ] ==**marked**==",
+            "> ==**marked**==",
+            "> [!NOTE] ==**marked**==\n> body",
+            "[^n]: ==**marked**==",
+            "| ==**marked**== |\n| --- |\n| body |",
+            "==[**marked**](https://example.com)=="}) {
+        const auto model = build_model(source);
+        const auto* text = find_text_item(model, U"marked");
+        expect(fatal(text != nullptr)) << source;
+        expect(text->style.bold) << source;
+        expect(fatal(text->style.presentation != nullptr)) << source;
+        expect(text->style.presentation->highlight) << source;
+    }
+};
+
+"incomplete highlight remains visible without applying a background"_test = [] {
+    const auto model = build_model("==unfinished");
+    expect(fatal(model.blocks.size() == 1u));
+    std::u32string displayed;
+    for (const auto& item : model.blocks.front().inline_items) {
+        displayed += item.text;
+        expect(!item.style.presentation || !item.style.presentation->highlight);
+        if (item.kind == InlineRenderItem::Kind::Marker)
+            expect(item.special().visibility == MarkerVisibility::Always);
+    }
+    expect(bool(displayed == U"==unfinished"));
+};
+
 "renders_heading_soft_break_as_line_break"_test = [] {
     auto m = build_model("Hello\nWorld\n---");
     expect(fatal(bool(m.blocks.size() == 1u)));

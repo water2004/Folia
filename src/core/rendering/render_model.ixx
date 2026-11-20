@@ -109,9 +109,9 @@ struct RenderedMath {
 
 enum class InlineBaseline { Normal, Subscript, Superscript };
 
-// Optional presentation data used by embedded HTML.  It is shared by every
-// leaf under one HTML element so ordinary Markdown InlineStyle values stay
-// compact and nested HTML does not duplicate strings or colors per glyph run.
+// Optional presentation data for embedded HTML and Markdown highlights. It is
+// shared by every leaf under one styled construct so ordinary InlineStyle values
+// stay compact and nested content does not duplicate strings or colors per run.
 struct InlinePresentationStyle {
     std::optional<Color> foreground;
     std::optional<Color> background;

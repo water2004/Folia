@@ -19,7 +19,8 @@ suite extension_tests = [] {
 "test_registry_default_extensions"_test = [] {
     auto reg = default_extensions();
     auto names = reg.names();
-    expect(fatal(bool((names.size()) == (7u))));
+    expect(fatal(bool((names.size()) == (8u))));
+    expect(reg.find("highlight") != nullptr);
 };
 
 "test_registry_can_register_math"_test = [] {

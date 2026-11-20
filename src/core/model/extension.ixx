@@ -92,6 +92,9 @@ inline ExtensionRegistry default_extensions() {
     registry.register_extension(std::make_shared<DialectExtension>("callout", [](MarkdownDialect& dialect) {
         dialect.callouts = true;
     }));
+    registry.register_extension(std::make_shared<DialectExtension>("highlight", [](MarkdownDialect& dialect) {
+        dialect.highlights = true;
+    }));
     registry.register_extension(std::make_shared<DialectExtension>("wikilink", [](MarkdownDialect& dialect) {
         dialect.wiki_links = true;
     }));

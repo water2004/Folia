@@ -236,6 +236,8 @@ suite render_recursive_flow_tests = [] {
              {"TIP", CalloutVisualKind::Tip, U"Tip"},
              {"WARNING", CalloutVisualKind::Warning, U"Warning"},
              {"CAUTION", CalloutVisualKind::Warning, U"Caution"},
+             {"RESEARCH-IDEA_2", CalloutVisualKind::Note, U"RESEARCH-IDEA_2"},
+             {"自定义", CalloutVisualKind::Note, U"自定义"},
          }) {
         expect(fatal(bool(callout_visual_kind(test.marker) == test.visual))) << test.marker;
         expect(fatal(bool(callout_display_label(test.marker) == test.label))) << test.marker;
