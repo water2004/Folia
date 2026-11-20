@@ -437,7 +437,9 @@ inline std::optional<DocumentTransaction> document_toggle_block_quote(EditorDocu
 }
 
 inline std::optional<DocumentTransaction> document_toggle_callout(EditorDocument& document, const TextSelection& selection, std::string kind) {
-    kind = normalize_callout_kind(kind).value_or("NOTE");
+    const auto normalized = normalize_callout_kind(kind.empty() ? std::string_view{"NOTE"} : kind);
+    if (!normalized) return std::nullopt;
+    kind = *normalized;
     const auto revision_before = document.revision;
     auto& after = document; document_edit_detail::NodeAllocator allocator(after);
     auto first = selection.anchor.container_id;

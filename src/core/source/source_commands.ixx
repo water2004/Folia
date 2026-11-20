@@ -15,6 +15,7 @@ import folia.markdown.inline_document;
 import folia.markdown.inline_parser;
 import folia.markdown.serializer;
 import folia.markdown.block_line_recognizer;
+import folia.markdown.callout;
 import folia.markdown.utf;
 
 export namespace folia {
@@ -300,9 +301,10 @@ inline bool insert_block(SourceEditor& editor, const Command& command) {
 inline bool callout(SourceEditor& editor, const Command& command) {
     auto [first, last] = selected_lines(editor);
     const auto& lines = editor.lines();
-    auto kind = command.callout_kind.empty() ? std::u32string{U"NOTE"} : command.callout_kind;
-    if (kind.find_first_of(U"]\r\n") != std::u32string::npos) return false;
-    for (auto& c : kind) if (c >= U'a' && c <= U'z') c -= U'a' - U'A';
+    const auto normalized = normalize_callout_kind(command.callout_kind.empty()
+        ? std::string{"NOTE"} : cps_to_utf8(command.callout_kind));
+    if (!normalized) return false;
+    auto kind = utf8_to_cps(*normalized);
     auto quote = [&](std::size_t index) -> std::optional<SourceRange> {
         const auto& text = lines[index].text;
         auto begin = indentation_end(text);
@@ -321,8 +323,11 @@ inline bool callout(SourceEditor& editor, const Command& command) {
     const auto close = header_quote && std::u32string_view(header.text).substr(marker).starts_with(U"[!")
         ? header.text.find(U']', marker + 2) : std::u32string::npos;
     std::vector<SourceReplacement> edits;
-    if (close != std::u32string::npos) {
-        if (header.text.substr(marker + 2, close - marker - 2) != kind)
+    const auto existing_kind = close != std::u32string::npos
+        ? normalize_callout_kind(cps_to_utf8(std::u32string_view(header.text).substr(marker + 2, close - marker - 2)))
+        : std::nullopt;
+    if (existing_kind) {
+        if (*existing_kind != *normalized)
             return apply_prefix_edits(editor, {{{header.source_start + marker + 2,
                 header.source_start + close}, std::move(kind)}});
         first = run_first;
