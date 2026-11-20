@@ -151,6 +151,47 @@ suite highlight_tests = [] {
         expect(serialize_markdown(parsed.document) == "==literal==");
     };
 
+    "highlight shielding keeps incomplete math inside resolved link labels"_test = [] {
+        for (const auto& source : {
+            U"[price $5](url)", U"[math $x$](url)", U"[price \\$5](url)",
+            U"[math \\(x](url)", U"[math \\(x\\)](url)",
+        }) {
+            const auto link = highlight_document(source);
+            expect_lossless(link);
+            expect(fatal(link.tree.nodes.size() == 1u)) << cps_to_utf8(source);
+            expect(link.tree.nodes.front().kind == InlineCstKind::Link) << cps_to_utf8(source);
+            const auto wrapped = highlight_document(U"==" + std::u32string(source) + U"==");
+            expect_lossless(wrapped);
+            expect(fatal(wrapped.tree.nodes.size() == 1u)) << cps_to_utf8(source);
+            expect(wrapped.tree.nodes.front().kind == InlineCstKind::Highlight) << cps_to_utf8(source);
+            expect(first_inline(wrapped, InlineCstKind::Link) != nullptr);
+        }
+        const auto footnotes = highlight_document(U"This is text![^1]. Other text.[^footnote].");
+        auto count = 0u;
+        for (const auto& node : footnotes.tree.nodes) if (node.kind == InlineCstKind::FootnoteRef) ++count;
+        expect(count == 2u);
+        expect_lossless(footnotes);
+    };
+
+    "highlight delimiters do not escape completed strike scopes"_test = [] {
+        for (const auto& source : {U"~~==a~~b==c==", U"~==a~b==c=="}) {
+            const auto document = highlight_document(source);
+            expect_lossless(document);
+            const auto* highlight = first_inline(document, InlineCstKind::Highlight);
+            expect(fatal(highlight != nullptr));
+            expect(bool(inline_source_slice(document, highlight->delimiter_ranges().content) == U"c"));
+            expect(first_inline(document, InlineCstKind::Strikethrough) != nullptr);
+            expect(bool(inline_visible_text(document) == U"==abc"));
+        }
+        for (const auto& source : {U"$~~a$==b~~c==", U"*~~a*==b~~c=="}) {
+            const auto document = highlight_document(source);
+            expect_lossless(document);
+            const auto* highlight = first_inline(document, InlineCstKind::Highlight);
+            expect(fatal(highlight != nullptr));
+            expect(bool(inline_source_slice(document, highlight->delimiter_ranges().content) == U"b~~c"));
+        }
+    };
+
     "highlight survives all editable block containers and save reload"_test = [] {
         const std::string source =
             "# ==heading==\n\n==paragraph==\n\n- ==list==\n\n- [x] ==task==\n\n"
@@ -183,8 +224,15 @@ suite highlight_tests = [] {
                 expect_lossless(document);
             }
             expect(first_inline(document, InlineCstKind::Highlight) != nullptr);
-            expect(inline_backward_delete_range(document, 2) == std::optional<SourceRange>{{0, 2}});
-            expect(inline_forward_delete_range(document, 0) == std::optional<SourceRange>{{0, 2}});
+            // Raw source deletion removes one grapheme; semantic navigation
+            // separately snaps positions out of a complete paired marker.
+            expect(inline_backward_delete_range(document, 2) == std::optional<SourceRange>{{1, 2}});
+            expect(inline_forward_delete_range(document, 0) == std::optional<SourceRange>{{0, 1}});
+            const auto* marker = inline_format_marker_at(document.tree.nodes, 0);
+            expect(fatal(marker != nullptr));
+            expect(marker->kind == InlineCstKind::Highlight);
+            expect(inline_format_marker_boundary(document, 1, false) == 0u);
+            expect(inline_format_marker_boundary(document, 1, true) == 2u);
             for (auto edit = inverse.rbegin(); edit != inverse.rend(); ++edit) {
                 apply_inline_source_edit(NodeId{7}, document, *edit, context);
                 expect_lossless(document);

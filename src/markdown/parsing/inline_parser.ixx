@@ -245,25 +245,6 @@ struct Parser {
     // does not assign Markdown meaning or produce CST nodes.
     std::size_t skip_emphasis_opaque(std::size_t at) const {
         if (at >= limit) return at;
-        const bool dollar = src[at] == U'$' && ctx.dialect.math.inline_dollar
-            && !starts_with_at(at, U"$$");
-        const bool paren = starts_with_at(at, U"\\(") && ctx.dialect.math.inline_paren;
-        if (dollar || paren) {
-            auto end = at + (dollar ? 1u : 2u);
-            while (end < limit && src[end] != U'\n') {
-                if (dollar && src[end] == U'$') return end + 1;
-                if (paren && starts_with_at(end, U"\\)")) return end + 2;
-                ++end;
-            }
-            return find_line_or_doc_end(end);
-        }
-        if ((ctx.dialect.footnotes && starts_with_at(at, U"[^"))
-            || (ctx.dialect.wiki_links && starts_with_at(at, U"[["))) {
-            const auto close_marker = src[at + 1] == U'^' ? U"]" : U"]]";
-            const auto close = find_on_line(src.substr(0, limit), at + 2, close_marker);
-            return close == npos ? find_line_or_doc_end(at + 2)
-                : close + std::u32string_view(close_marker).size();
-        }
         if (src[at] == U'\\' && at + 1 < limit
             && (ascii_punct(src[at + 1]) || is_line_ending(src[at + 1]))) {
             return at + 2;
@@ -296,6 +277,31 @@ struct Parser {
             if (autolink_end != npos) return autolink_end;
         }
         return at;
+    }
+
+    // Formatting is parsed inside the already resolved link/image label.
+    // Missing math or wiki closers cannot consume that enclosing bracket or
+    // its destination. Keep this separate from the bracket index's scanner.
+    std::size_t skip_formatting_opaque(std::size_t at, std::size_t end_limit) const {
+        auto opening_length = std::size_t{2};
+        std::u32string_view closer;
+        if (src[at] == U'$' && ctx.dialect.math.inline_dollar && !starts_with_at(at, U"$$")) {
+            opening_length = 1;
+            closer = U"$";
+        } else if (starts_with_at(at, U"\\(") && ctx.dialect.math.inline_paren) {
+            closer = U"\\)";
+        } else if (ctx.dialect.footnotes && starts_with_at(at, U"[^")) {
+            closer = U"]";
+        } else if (ctx.dialect.wiki_links && starts_with_at(at, U"[[")) {
+            closer = U"]]";
+        }
+        if (closer.empty()) return skip_emphasis_opaque(at);
+        auto end = at + opening_length;
+        while (end < end_limit && src[end] != U'\n') {
+            if (end + closer.size() <= end_limit && starts_with_at(end, closer)) return end + closer.size();
+            ++end;
+        }
+        return end < end_limit ? end + 1 : end_limit;
     }
 
     // Skip only syntax that is opaque to Markdown delimiters. Inline HTML
@@ -500,13 +506,22 @@ struct Parser {
         std::unordered_set<std::size_t> label_closes;
         if (ctx.dialect.highlights) for (const auto& label : labels) label_closes.insert(label.close);
         auto paragraph_start = scope_start;
+        std::vector<LinkLabelRange> enclosing_labels;
+        auto next_label = std::size_t{0};
         for (auto scan = scope_start; scan < limit;) {
+            while (!enclosing_labels.empty() && enclosing_labels.back().close <= scan)
+                enclosing_labels.pop_back();
+            while (next_label < labels.size() && labels[next_label].open < scan) {
+                const auto label = labels[next_label++];
+                if (label.close > scan) enclosing_labels.push_back(label);
+            }
             if (is_line_ending(src[scan])) {
                 auto next = scan + line_ending_length(scan);
                 while (next < limit && (src[next] == U' ' || src[next] == U'\t')) ++next;
                 if (next < limit && is_line_ending(src[next])) paragraph_start = next;
             }
-            const auto skipped = skip_emphasis_opaque(scan);
+            const auto skipped = skip_formatting_opaque(scan,
+                enclosing_labels.empty() ? limit : enclosing_labels.back().close);
             if (skipped != scan) { scan = skipped; continue; }
             if (src[scan] == U']' && label_closes.contains(scan) && scan + 1 < limit) {
                 auto end = scan + 1;
@@ -523,7 +538,9 @@ struct Parser {
                 }
             }
             const auto marker = src[scan];
-            if (marker != U'*' && marker != U'_' && !(marker == U'=' && ctx.dialect.highlights)) {
+            const bool strike_scope = marker == U'~' && ctx.dialect.highlights && ctx.dialect.gfm.strikethrough;
+            if (marker != U'*' && marker != U'_' && !(marker == U'=' && ctx.dialect.highlights)
+                && !strike_scope) {
                 ++scan;
                 continue;
             }
@@ -531,6 +548,7 @@ struct Parser {
             while (scan < limit && src[scan] == marker) ++scan;
             const auto length = scan - start;
             if (marker == U'=' && (length != 2 || continues_highlight_run(start))) continue;
+            if (strike_scope && length != 1 && length != 2) continue;
             const auto flank = delimiter_flanking(start, length);
             const bool can_open = marker == U'_'
                 ? flank.left && (!flank.right || flank.previous_punctuation)
@@ -547,9 +565,7 @@ struct Parser {
             run.can_open = can_open;
             run.can_close = can_close;
             run.link_context.push_back(paragraph_start);
-            for (auto const& label : labels) {
-                if (start > label.open && start < label.close) run.link_context.push_back(label.open);
-            }
+            for (auto const& label : enclosing_labels) run.link_context.push_back(label.open);
             run.open_remaining = length;
             if (can_open) emphasis_opener_starts_cache.push_back(start);
             runs.push_back(std::move(run));
@@ -560,11 +576,12 @@ struct Parser {
         // length modulo three, and whether the run can also close. Keep the
         // most recent active opener in each category for each link context.
         // Failed searches therefore inspect six heads, not all earlier runs.
-        using OpenerHeads = std::array<std::vector<std::size_t>, 13>;
+        using OpenerHeads = std::array<std::vector<std::size_t>, 15>;
         std::map<std::vector<std::size_t>, OpenerHeads> heads_by_context;
         std::vector<std::size_t> active;
         auto category = [](EmphasisRun const& run) {
             if (run.marker == U'=') return std::size_t{12};
+            if (run.marker == U'~') return 12 + run.length;
             return (run.marker == U'_' ? 6u : 0u)
                 + (run.can_close ? 3u : 0u) + run.length % 3;
         };
@@ -574,8 +591,9 @@ struct Parser {
             std::size_t closer_remaining = closer.length;
             while (closer.can_close && closer_remaining != 0) {
                 std::size_t opener_index = npos;
-                const auto base = closer.marker == U'=' ? 12u : (closer.marker == U'_' ? 6u : 0u);
-                const auto categories = closer.marker == U'=' ? 1u : 6u;
+                const auto base = closer.marker == U'=' ? std::size_t{12}
+                    : (closer.marker == U'~' ? 12 + closer.length : (closer.marker == U'_' ? 6u : 0u));
+                const auto categories = closer.marker == U'=' || closer.marker == U'~' ? 1u : 6u;
                 for (std::size_t which = base; which < base + categories; ++which) {
                     auto& candidates = heads[which];
                     while (!candidates.empty() && !runs[candidates.back()].active_opener)
@@ -583,7 +601,8 @@ struct Parser {
                     if (candidates.empty()) continue;
                     const auto index = candidates.back();
                     auto const& opener = runs[index];
-                    const bool rule_of_three = closer.marker != U'=' && (closer.can_open || opener.can_close)
+                    const bool rule_of_three = (closer.marker == U'*' || closer.marker == U'_')
+                        && (closer.can_open || opener.can_close)
                         && ((opener.length + closer.length) % 3 == 0)
                         && (opener.length % 3 != 0 || closer.length % 3 != 0);
                     if (!rule_of_three && (opener_index == npos || index > opener_index)) opener_index = index;
@@ -593,9 +612,14 @@ struct Parser {
                 const auto use = opener.open_remaining >= 2 && closer_remaining >= 2 ? 2u : 1u;
                 const auto open_start = opener.start + opener.open_remaining - use;
                 const auto close_start = closer.start + closer.close_consumed;
-                pairs.push_back({open_start, open_start + use, close_start, close_start + use,
-                    closer.marker == U'=' ? InlineCstKind::Highlight
-                        : (use == 2 ? InlineCstKind::Strong : InlineCstKind::Emphasis)});
+                // Strikes retain their existing parser and pairing engine.
+                // They only delimit a scope here: a == opener consumed by a
+                // completed strike must not claim a later outside closer.
+                if (closer.marker != U'~') {
+                    pairs.push_back({open_start, open_start + use, close_start, close_start + use,
+                        closer.marker == U'=' ? InlineCstKind::Highlight
+                            : (use == 2 ? InlineCstKind::Strong : InlineCstKind::Emphasis)});
+                }
                 opener.open_remaining -= use;
                 if (opener.open_remaining == 0) opener.active_opener = false;
                 closer.close_consumed += use;
