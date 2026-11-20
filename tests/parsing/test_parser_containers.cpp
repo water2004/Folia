@@ -238,6 +238,9 @@ suite parser_container_tests = [] {
              {"> [!caution]\n> body", "CAUTION", std::nullopt},
              {"> [!IMPORTANT]\n> body", "IMPORTANT", std::nullopt},
              {"> [!custom-question_type2] _title_\n> body", "CUSTOM-QUESTION_TYPE2", U"_title_"},
+             {">    [!custom] title\n> body", "CUSTOM", U"title"},
+             {">\t[!custom] title\n> body", "CUSTOM", U"title"},
+             {"> \t [!custom]\n> body", "CUSTOM", std::nullopt},
              {"> [!研究笔记] 标题\n> body", "研究笔记", U"标题"},
              {"> [!123]\n> body", "123", std::nullopt},
          }) {
@@ -269,6 +272,28 @@ suite parser_container_tests = [] {
             expect(fatal(bool(invalid.document.root.children.front().kind == BlockKind::BlockQuote))) << source;
             expect(fatal(bool(serialize_markdown(invalid.document) == source))) << source;
         }
+    }
+};
+
+"custom callout markers remain literal inside quoted fenced and indented code"_test = [] {
+    struct Case { std::string source; std::u32string content; bool indented; };
+    for (const auto& test : std::vector<Case>{
+        {"> ```md\n> [!custom]\n> body\n> ```", U"[!custom]\nbody", false},
+        {">     [!custom]\n>     body", U"[!custom]\nbody", true},
+        {">\t  [!custom]\n>\t  body", U"[!custom]\nbody", true},
+        {">\t\t[!custom]\n>\t\tbody", U"  [!custom]\n  body", true},
+    }) {
+        const auto parsed = parse_text(1, test.source);
+        expect(fatal(parsed.document.root.children.size() == 1u)) << test.source;
+        expect(parsed.document.root.children.front().kind == BlockKind::BlockQuote) << test.source;
+        expect(first_block(parsed.document.root.children, BlockKind::Callout) == nullptr) << test.source;
+        const auto* code = first_block(parsed.document.root.children, BlockKind::CodeBlock);
+        expect(fatal(code != nullptr)) << test.source;
+        if (code) {
+            expect(code->atomic_special().code_indented == test.indented) << test.source;
+            expect(bool(block_source_code_projection(code->block_source) == test.content)) << test.source;
+        }
+        expect(serialize_markdown(parsed.document) == test.source) << test.source;
     }
 };
 

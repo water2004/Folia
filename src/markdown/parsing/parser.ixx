@@ -2454,6 +2454,9 @@ void recognize_callout_header() {
     if (!input->dialect.callouts || !std::holds_alternative<QuoteFrameState>(frame.state)) return;
     auto const* first=peek_leaf_line();
     if (!first) return;
+    // Four indentation columns belong to quoted code, including columns
+    // left by a tab partially consumed as the quote's optional space.
+    if (physical_source().indentation(first->content_cursor,4).columns>=4) return;
     const parser_source_detail::LeafLineText text(physical_source(),*first);
     std::size_t marker_start=0;
     while (marker_start<text.size() && (text.at(marker_start)==U' ' || text.at(marker_start)==U'\t')) ++marker_start;
