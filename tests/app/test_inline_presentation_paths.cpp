@@ -139,6 +139,44 @@ namespace {
     };
 
     suite inline_presentation_paths = [] {
+        "markdown and HTML highlighting share independent paint layers across wrapped lines"_test = [] {
+            NativeInlineFrame native;
+            native.width = 180;
+            native.sheet.highlightBackgroundColor = D2D1::ColorF(0xff0000);
+            native.sheet.highlightUnderlineColor = D2D1::ColorF(0x0000ff);
+            native.sheet.highlightUnderlineWidth = 2.0f;
+
+            EditorSession session;
+            auto const body = std::wstring{L"first group second group third group fourth group fifth group"};
+            session.SetText(winrt::hstring{L"before\n\n==" + body + L"== after\n"});
+            auto markdown = native.Paint(session);
+            session.SetText(winrt::hstring{L"before\n\n<mark>" + body + L"</mark> after\n"});
+            auto html = native.Paint(session);
+            expect(static_cast<bool>(markdown == html));
+
+            constexpr std::uint32_t red = 0xffff0000;
+            constexpr std::uint32_t blue = 0xff0000ff;
+            expect(std::ranges::find(html, red) != html.end());
+            std::vector<std::size_t> underlineRows;
+            for (std::size_t y = 0; y < 400; ++y) {
+                auto row = std::span{html}.subspan(y * 600, 600);
+                if (std::ranges::find(row, blue) != row.end())
+                    underlineRows.push_back(y);
+            }
+            expect(!underlineRows.empty() && underlineRows.back() - underlineRows.front() > 20);
+
+            native.sheet.highlightBackgroundColor.a = 0;
+            auto underlineOnly = native.Paint(session);
+            expect(std::ranges::find(underlineOnly, red) == underlineOnly.end());
+            expect(std::ranges::find(underlineOnly, blue) != underlineOnly.end());
+
+            native.sheet.highlightBackgroundColor.a = 1;
+            native.sheet.highlightUnderlineColor.a = 0;
+            auto backgroundOnly = native.Paint(session);
+            expect(std::ranges::find(backgroundOnly, red) != backgroundOnly.end());
+            expect(std::ranges::find(backgroundOnly, blue) == backgroundOnly.end());
+        };
+
         "new display math body keeps its caret row through bracket and letter input"_test = [] {
             for (auto prefix : {U"", U"> ", U"- ", U"- [ ] ", U"> - [ ] "}) {
                 EditorSession session; session.SetText(L"");

@@ -95,9 +95,8 @@ namespace
         return typography;
     }
 
-    folia::ThemeColors ParseColors(JsonObject const& object)
+    folia::ThemeColors ParseColors(JsonObject const& object, folia::ThemeColors colors)
     {
-        folia::ThemeColors colors;
         struct Field { wchar_t const* name; folia::Color folia::ThemeColors::* value; };
         static constexpr Field fields[] = {
             {L"background", &folia::ThemeColors::bg}, {L"foreground", &folia::ThemeColors::fg},
@@ -125,6 +124,10 @@ namespace
             {L"shellMutedForeground", &folia::ThemeColors::shell_muted_fg}, {L"shellAccent", &folia::ThemeColors::shell_accent},
         };
         for (auto const& field : fields) colors.*field.value = ParseColor(object.GetNamedString(field.name));
+        if (object.HasKey(L"highlightBackground"))
+            colors.highlight_bg = ParseColor(object.GetNamedString(L"highlightBackground"));
+        if (object.HasKey(L"highlightUnderline"))
+            colors.highlight_underline = ParseColor(object.GetNamedString(L"highlightUnderline"));
         colors.line_number_bg = object.HasKey(L"lineNumberBackground")
             ? ParseColor(object.GetNamedString(L"lineNumberBackground"))
             : colors.shell_layer_bg;
@@ -136,9 +139,8 @@ namespace
         return colors;
     }
 
-    folia::ThemeLayout ParseLayout(JsonObject const& object)
+    folia::ThemeLayout ParseLayout(JsonObject const& object, folia::ThemeLayout layout)
     {
-        folia::ThemeLayout layout;
         struct Field { wchar_t const* name; float folia::ThemeLayout::* value; };
         static constexpr Field fields[] = {
             {L"documentHorizontalPadding", &folia::ThemeLayout::document_horizontal_padding},
@@ -172,6 +174,8 @@ namespace
             {L"footnotePreviewSpacing", &folia::ThemeLayout::footnote_preview_spacing},
         };
         for (auto const& field : fields) layout.*field.value = Number(object, field.name);
+        if (object.HasKey(L"highlightUnderlineWidth"))
+            layout.highlight_underline_width = Number(object, L"highlightUnderlineWidth");
 
         auto headingMargins = object.GetNamedArray(L"headingMarginTop");
         if (headingMargins.Size() != layout.heading_margin_top.size())
@@ -231,8 +235,9 @@ namespace
         if (!ValidThemeId(profile.id) || profile.name.empty())
             throw std::runtime_error("theme identity is invalid");
         profile.typography = ParseTypography(root.GetNamedObject(L"typography"));
-        profile.colors = ParseColors(root.GetNamedObject(L"colors"));
-        profile.layout = ParseLayout(root.GetNamedObject(L"layout"));
+        auto const& defaults = folia::default_theme_profile(profile.variant);
+        profile.colors = ParseColors(root.GetNamedObject(L"colors"), defaults.colors);
+        profile.layout = ParseLayout(root.GetNamedObject(L"layout"), defaults.layout);
         if (root.HasKey(L"editor")) {
             auto object = root.GetNamedObject(L"editor");
             struct Field { wchar_t const* name; float folia::ThemeEditor::* value; };

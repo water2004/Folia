@@ -359,7 +359,6 @@ namespace winrt::Folia
         std::vector<InlineStyleRange> const& ranges)
     {
         if (!layout || !resources.d2dContext) return;
-        ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> brush;
         for (auto const& span : CodeSpanRanges(ranges)) {
             for (auto rect : InlineRangeRectangles(layout, span.start, span.length, origin)) {
                 rect.top += 2; rect.bottom -= 1;
@@ -367,31 +366,64 @@ namespace winrt::Folia
                     resources.inlineCodeBackgroundBrush.Get());
             }
         }
-        for (auto const& range : ranges)
+
+        struct PresentationPaint
         {
-            // Both flows and cells consume the same semantic code-span style.
-            // Fenced/source code also uses a monospace font, but owns its block
-            // background separately and must not receive per-token capsules.
-            const auto inlineCode = !range.marker && range.style.code == folia::CodeStyle::Inline;
-            auto const& presentation = range.style.presentation;
-            const auto explicitBackground = presentation && (presentation->background || presentation->highlight);
-            if (range.length == 0 || !explicitBackground) continue;
-            auto paint = resources.inlineCodeBackgroundBrush.Get();
-            if (explicitBackground) {
-                const auto color = presentation->background ? ToD2D(*presentation->background)
-                    : styleSheet.calloutWarningBackgroundColor;
-                if (!brush) {
-                    if (FAILED(resources.d2dContext->CreateSolidColorBrush(color, brush.GetAddressOf()))) return;
-                } else brush->SetColor(color);
-                paint = brush.Get();
-            }
-            for (auto rect : InlineRangeRectangles(layout, range.start, range.length, origin)) {
-                if (inlineCode) {
+            std::optional<folia::Color> background;
+            bool highlight = false;
+            bool inlineCode = false;
+            bool operator==(PresentationPaint const&) const = default;
+        };
+        UINT32 start = 0, end = 0;
+        PresentationPaint paint;
+        ::Microsoft::WRL::ComPtr<ID2D1SolidColorBrush> backgroundBrush, underlineBrush;
+        auto fill = [&](ID2D1SolidColorBrush* brush, D2D1_COLOR_F color, auto const& rectangles, bool underline) {
+            brush->SetColor(color);
+            for (auto rect : rectangles) {
+                if (underline) {
+                    rect.top = (std::max)(rect.top, rect.bottom - styleSheet.highlightUnderlineWidth);
+                    resources.d2dContext->FillRectangle(rect, brush);
+                } else if (paint.inlineCode) {
                     rect.top += 2; rect.bottom -= 1;
-                    resources.d2dContext->FillRoundedRectangle(D2D1::RoundedRect(rect, 4, 4), paint);
-                } else resources.d2dContext->FillRectangle(rect, paint);
+                    resources.d2dContext->FillRoundedRectangle(D2D1::RoundedRect(rect, 4, 4), brush);
+                } else resources.d2dContext->FillRectangle(rect, brush);
             }
+        };
+        auto draw = [&] {
+            if (start == end) return;
+            const auto background = paint.background ? ToD2D(*paint.background) : styleSheet.highlightBackgroundColor;
+            const auto underline = styleSheet.highlightUnderlineColor;
+            const bool drawUnderline = paint.highlight && underline.a > 0 && styleSheet.highlightUnderlineWidth > 0;
+            if (background.a <= 0 && !drawUnderline) return;
+            const auto rectangles = InlineRangeRectangles(layout, start, end - start, origin);
+            if (background.a > 0) {
+                if (!backgroundBrush && FAILED(resources.d2dContext->CreateSolidColorBrush(background, backgroundBrush.GetAddressOf()))) return;
+                fill(backgroundBrush.Get(), background, rectangles, false);
+            }
+            if (drawUnderline) {
+                if (!underlineBrush && FAILED(resources.d2dContext->CreateSolidColorBrush(underline, underlineBrush.GetAddressOf()))) return;
+                fill(underlineBrush.Get(), underline, rectangles, true);
+            }
+        };
+
+        for (auto const& range : ranges) {
+            auto const& presentation = range.style.presentation;
+            if (range.length == 0 || !presentation) continue;
+            const PresentationPaint next{
+                presentation->background,
+                !range.marker && presentation->highlight,
+                !range.marker && range.style.code == folia::CodeStyle::Inline,
+            };
+            if (!next.background && !next.highlight) continue;
+            // Foreground style changes within a highlight share the same painted run.
+            if (range.start != end || next != paint) {
+                draw();
+                start = range.start;
+                paint = next;
+            }
+            end = range.start + range.length;
         }
+        draw();
     }
 
     ::Microsoft::WRL::ComPtr<IDWriteTextLayout> EditorTextLayoutEngine::CreateFlow(

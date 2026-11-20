@@ -41,6 +41,7 @@ struct ThemeTypography {
 struct ThemeColors {
     Color bg, fg, muted_fg, accent_fg, heading_fg, strong_fg, emphasis_fg;
     Color inline_code_bg, inline_code_fg, code_block_bg, code_block_fg;
+    Color highlight_bg, highlight_underline;
     Color blockquote_border, blockquote_bg, nested_quote_bg, link_fg, image_border;
     Color selection_bg, selection_fg, caret_fg, marker_fg;
     Color math_bg, math_fg;
@@ -80,6 +81,7 @@ struct ThemeLayout {
     float code_margin = 8.0f;
     float code_padding_vertical = 8.0f;
     float code_padding_horizontal = 12.0f;
+    float highlight_underline_width = 1.5f;
     float quote_margin = 8.0f;
     float quote_padding_vertical = 6.0f;
     float quote_padding_left = 18.0f;
@@ -177,6 +179,7 @@ inline ThemeProfile dark_profile() {
     t.bg = Color(18, 20, 25); t.fg = Color(228, 232, 240); t.muted_fg = Color(139, 149, 170);
     t.accent_fg = Color(122, 162, 247); t.heading_fg = t.fg; t.strong_fg = t.fg; t.emphasis_fg = Color(224, 175, 104);
     t.inline_code_bg = Color(31, 35, 43); t.inline_code_fg = Color(224, 175, 104);
+    t.highlight_bg = Color(91, 70, 27, 160); t.highlight_underline = Color(254, 199, 90, 128);
     t.code_block_bg = Color(26, 29, 36); t.code_block_fg = Color(223, 228, 236);
     t.blockquote_border = Color(108, 182, 255); t.blockquote_bg = Color(26, 29, 36); t.nested_quote_bg = Color(22, 24, 30);
     t.link_fg = t.accent_fg; t.image_border = Color(74, 82, 100);
@@ -210,6 +213,7 @@ inline ThemeProfile light_profile() {
     t.bg = Color(250, 251, 252); t.fg = Color(32, 35, 41); t.muted_fg = Color(107, 116, 133);
     t.accent_fg = Color(37, 99, 235); t.heading_fg = t.fg; t.strong_fg = t.fg; t.emphasis_fg = Color(161, 74, 45);
     t.inline_code_bg = Color(240, 241, 244); t.inline_code_fg = Color(163, 21, 21);
+    t.highlight_bg = Color(255, 232, 144, 160); t.highlight_underline = Color(158, 99, 12, 120);
     t.code_block_bg = Color(240, 241, 244); t.code_block_fg = Color(46, 52, 64);
     t.blockquote_border = Color(79, 143, 232); t.blockquote_bg = Color(245, 247, 250); t.nested_quote_bg = Color(244, 245, 247);
     t.link_fg = t.accent_fg; t.image_border = Color(174, 181, 193);
@@ -245,6 +249,8 @@ inline ThemeProfile high_contrast_profile() {
     t.bg = Color(0, 0, 0); t.fg = Color(255, 255, 255); t.muted_fg = Color(220, 220, 220);
     t.accent_fg = Color(0, 255, 255); t.heading_fg = Color(255, 255, 0); t.strong_fg = t.fg; t.emphasis_fg = Color(255, 165, 0);
     t.inline_code_bg = Color(40, 40, 40); t.inline_code_fg = Color(255, 255, 0);
+    t.highlight_bg = Color(93, 76, 0, 208); t.highlight_underline = Color(255, 239, 0, 184);
+    profile.layout.highlight_underline_width = 2.0f;
     t.code_block_bg = Color(20, 20, 20); t.code_block_fg = t.fg;
     t.blockquote_border = t.accent_fg; t.blockquote_bg = Color(20, 30, 40); t.nested_quote_bg = Color(10, 15, 20);
     t.link_fg = t.accent_fg; t.image_border = t.fg;

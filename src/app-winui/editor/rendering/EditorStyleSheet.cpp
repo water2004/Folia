@@ -53,6 +53,9 @@ namespace winrt::Folia
         sheet.codeTextColor = ToD2D(colors.code_block_fg);
         sheet.inlineCodeTextColor = ToD2D(colors.inline_code_fg);
         sheet.inlineCodeBackgroundColor = ToD2D(colors.inline_code_bg);
+        sheet.highlightBackgroundColor = ToD2D(colors.highlight_bg);
+        sheet.highlightUnderlineColor = ToD2D(colors.highlight_underline);
+        sheet.highlightUnderlineWidth = theme.layout.highlight_underline_width;
         sheet.panelColor = ToD2D(colors.code_block_bg);
         sheet.previewBackgroundColor = ToD2D(colors.shell_layer_bg);
         sheet.previewBorderColor = ToD2D(colors.shell_border);

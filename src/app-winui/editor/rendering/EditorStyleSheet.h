@@ -41,6 +41,8 @@ namespace winrt::Folia
         D2D1_COLOR_F accentColor{};
         D2D1_COLOR_F codeTextColor{};
         D2D1_COLOR_F inlineCodeTextColor{}, inlineCodeBackgroundColor{};
+        D2D1_COLOR_F highlightBackgroundColor{}, highlightUnderlineColor{};
+        float highlightUnderlineWidth = 0.0f;
         D2D1_COLOR_F panelColor{};
         D2D1_COLOR_F previewBackgroundColor{}, previewBorderColor{};
         folia::ThemeMathPreview mathPreview;

@@ -46,6 +46,40 @@ namespace
     };
 
     suite syntax_marker_theme_tests = [] {
+        "bundled highlight themes configure both paint layers"_test = [] {
+            for (auto name : {L"light", L"dark", L"high-contrast", L"inkstone-paper", L"moss-linen", L"arctic-night", L"ember-night"}) {
+                auto path = BuiltinThemeDirectory() / (std::wstring{name} + L".json");
+                auto root = ReadTheme(path);
+                auto colors = root.GetNamedObject(L"colors");
+                expect(colors.HasKey(L"highlightBackground"));
+                expect(colors.HasKey(L"highlightUnderline"));
+                expect(root.GetNamedObject(L"layout").HasKey(L"highlightUnderlineWidth"));
+                auto loaded = LoadThemeFile(path);
+                expect(loaded.profile.has_value()) << winrt::to_string(loaded.diagnostic);
+                if (!loaded.profile) continue;
+                auto const& profile = *loaded.profile;
+                auto sheet = CreateEditorStyleSheet(profile);
+                expect(sheet.highlightUnderlineColor.a > 0.f);
+                expect(sheet.highlightUnderlineColor.a < sheet.highlightBackgroundColor.a);
+                expect(sheet.highlightUnderlineWidth > 0.f);
+            }
+
+            ThemeFiles files;
+            auto custom = ReadTheme(BuiltinThemeDirectory() / L"light.json");
+            auto colors = custom.GetNamedObject(L"colors");
+            colors.Remove(L"highlightBackground");
+            colors.SetNamedValue(L"highlightUnderline", JsonValue::CreateStringValue(L"#12345600"));
+            custom.GetNamedObject(L"layout").Remove(L"highlightUnderlineWidth");
+            files.Write(custom);
+            auto loaded = LoadThemeFile(files.source);
+            expect(loaded.profile.has_value()) << winrt::to_string(loaded.diagnostic);
+            if (!loaded.profile) return;
+            auto const& defaults = folia::default_theme_profile(folia::Theme::Light);
+            expect(static_cast<bool>(loaded.profile->colors.highlight_bg == defaults.colors.highlight_bg));
+            expect(static_cast<bool>(loaded.profile->colors.highlight_underline == folia::Color{0x12, 0x34, 0x56, 0}));
+            expect(loaded.profile->layout.highlight_underline_width == defaults.layout.highlight_underline_width);
+        };
+
         "theme marker assets travel in the single imported file and determine geometry"_test = [] {
             for (auto name : {L"light", L"dark", L"high-contrast", L"inkstone-paper", L"moss-linen", L"arctic-night", L"ember-night"}) {
                 auto loaded = LoadThemeFile(BuiltinThemeDirectory() / (std::wstring{name} + L".json"));
