@@ -161,6 +161,25 @@ suite render_layout_hit_test_tests = [] {
     expect(bool(displayed == U"==unfinished"));
 };
 
+"highlight presentation reaches wiki aliases and footnote references"_test = [] {
+    const auto model = build_model("==[[page|alias]] [^n]==\n\n[^n]: body\n");
+    const auto* alias = find_text_item(model, U"alias");
+    expect(fatal(alias != nullptr));
+    expect(alias->style.link);
+    expect(fatal(alias->style.presentation != nullptr));
+    expect(alias->style.presentation->highlight);
+    const auto& items = model.blocks.front().inline_items;
+    const auto reference = std::ranges::find_if(items, [](const auto& item) {
+        return item.kind == InlineRenderItem::Kind::FootnoteReference;
+    });
+    expect(fatal(reference != items.end()));
+    expect(bool(reference->special().semantic().footnote_label == "n"));
+    expect(!reference->style.link);
+    expect(fatal(reference->style.presentation != nullptr));
+    expect(reference->style.presentation->highlight);
+    expect(bool(reference->style.presentation == alias->style.presentation));
+};
+
 "renders_heading_soft_break_as_line_break"_test = [] {
     auto m = build_model("Hello\nWorld\n---");
     expect(fatal(bool(m.blocks.size() == 1u)));

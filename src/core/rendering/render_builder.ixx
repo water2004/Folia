@@ -1147,15 +1147,18 @@ struct Builder {
                         item.kind = InlineRenderItem::Kind::FootnoteReference;
                         item.id = node.id;
                         item.source_span = source_span(node.range);
+                        item.style = style;
                         item.text = utf8_to_cps(semantic.label);
                         item.ensure_special().display_text = footnote_display_label(semantic.label);
                         item.ensure_special().ensure_semantic().footnote_label = semantic.label;
                         target.push_back(std::move(item));
                         break;
                     }
-                    case K::WikiLink:
-                        append_text(utf8_to_cps(semantic.alias.value_or(semantic.target)), node.range, InlineStyle{.link = true});
+                    case K::WikiLink: {
+                        auto child_style = style; child_style.link = true;
+                        append_text(utf8_to_cps(semantic.alias.value_or(semantic.target)), node.range, child_style);
                         break;
+                    }
                     case K::Incomplete:
                         append_marker(target, node, delim.opening);
                         if (!node.children.empty()) append_nodes(node.children, style, target);
