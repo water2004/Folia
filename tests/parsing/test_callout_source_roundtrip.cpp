@@ -3,6 +3,8 @@ import folia.core.document_edit;
 import folia.core.source_projection;
 import folia.markdown.ast;
 import folia.markdown.block_tree;
+import folia.markdown.callout;
+import folia.markdown.dialect;
 import folia.markdown.document;
 import folia.markdown.document_text;
 import folia.markdown.inline_cst;
@@ -89,6 +91,54 @@ suite callout_source_roundtrip_tests = [] {
             U"", ending + U"> ", ending + U"> body", ending + U">" + ending + U"> body" + ending + U">",
         }) callout_source_roundtrip(nest_callout(header + tail, list));
     }
+};
+
+"custom callout types preserve raw markers nested source and suffixes"_test = [] {
+    for (const auto& kind : {U"custom-question_type2", U"研究笔记", U"123", U"résumé"})
+    for (const auto& suffix : {U"", U"  **Title**", U"-  _Title_", U"+ Title"})
+    for (const auto& ending : {U"\n", U"\r\n", U"\r"}) {
+        const auto source = U"> [!" + std::u32string(kind) + U"]" + suffix + ending
+            + U">" + ending + U"> body" + ending + U">";
+        callout_source_roundtrip(source);
+        for (const auto list : {false, true}) {
+            const auto nested = nest_callout(source, list);
+            callout_source_roundtrip(nested);
+            const auto parsed = parse_text(1, cps_to_utf8(nested));
+            auto count = 0u;
+            walk_blocks(parsed.document.root, [&](const BlockNode& block) {
+                if (block.kind != BlockKind::Callout) return;
+                ++count;
+                expect(block.container_special().callout_kind == normalize_callout_kind(cps_to_utf8(kind)));
+            });
+            expect(count == 1u);
+        }
+    }
+};
+
+"custom callout identifiers share normalization fallback and Unicode marker rewriting"_test = [] {
+    for (const auto& [kind, normalized] : std::vector<std::pair<std::string, std::string>>{
+        {"my-Type_12", "MY-TYPE_12"}, {"研究笔记", "研究笔记"}, {"résumé", "RéSUMé"},
+    }) {
+        expect(normalize_callout_kind(kind) == std::optional<std::string>{normalized});
+        expect(callout_visual_kind(kind) == CalloutVisualKind::Note);
+        expect(callout_display_label(kind) == utf8_to_cps(normalized));
+        expect(rewrite_callout_opening_marker(U"  >[!note]  ", kind)
+            == U"  >[!" + utf8_to_cps(normalized) + U"]  ");
+    }
+    for (const auto& kind : std::vector<std::string>{
+        "", "two words", "[note", "note]", "back\\slash", "line\nfeed", "tab\tname",
+        std::string{"nul\0type", 8}, "\xc0\xaf", "\xed\xa0\x80", "\xf4\x90\x80\x80",
+    }) expect(!normalize_callout_kind(kind).has_value());
+};
+
+"custom callout parsing respects the dialect switch"_test = [] {
+    auto dialect = default_dialect();
+    dialect.callouts = false;
+    const std::string source = "> [!custom-kind] title\n> body";
+    const auto parsed = parse_text(1, source, dialect);
+    expect(fatal(parsed.document.root.children.size() == 1u));
+    expect(parsed.document.root.children.front().kind == BlockKind::BlockQuote);
+    expect(serialize_markdown(parsed.document) == source);
 };
 
 };

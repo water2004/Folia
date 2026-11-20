@@ -237,6 +237,9 @@ suite parser_container_tests = [] {
              {"> [!WARNING] \n> body", "WARNING", std::nullopt},
              {"> [!caution]\n> body", "CAUTION", std::nullopt},
              {"> [!IMPORTANT]\n> body", "IMPORTANT", std::nullopt},
+             {"> [!custom-question_type2] _title_\n> body", "CUSTOM-QUESTION_TYPE2", U"_title_"},
+             {"> [!研究笔记] 标题\n> body", "研究笔记", U"标题"},
+             {"> [!123]\n> body", "123", std::nullopt},
          }) {
         const auto parsed = parse_text(1, test.source);
         expect(fatal(bool(parsed.document.root.children.size() == 1u))) << test.source;
@@ -254,11 +257,18 @@ suite parser_container_tests = [] {
         expect(fatal(bool(serialize_markdown(parsed.document) == test.source))) << test.source;
     }
 
-    const auto unknown = parse_text(1, "> [!CUSTOM] title\n> body");
-    expect(fatal(bool(unknown.document.root.children.size() == 1u)));
-    if (!unknown.document.root.children.empty()) {
-        expect(fatal(bool(unknown.document.root.children.front().kind == BlockKind::BlockQuote)));
-        expect(fatal(bool(serialize_markdown(unknown.document) == "> [!CUSTOM] title\n> body")));
+    for (const auto& source : std::vector<std::string>{
+             "> [!] title\n> body", "> [!custom type] title\n> body",
+             "> [!custom\ttype] title\n> body", "> [!custom[type] title\n> body",
+             "> [!custom\\type] title\n> body", "> [!custom type\n> body",
+             "> [!custom\xc2\xa0type] title\n> body", "> [!custom\xe2\x80\xa8type] title\n> body",
+         }) {
+        const auto invalid = parse_text(1, source);
+        expect(fatal(bool(invalid.document.root.children.size() == 1u))) << source;
+        if (!invalid.document.root.children.empty()) {
+            expect(fatal(bool(invalid.document.root.children.front().kind == BlockKind::BlockQuote))) << source;
+            expect(fatal(bool(serialize_markdown(invalid.document) == source))) << source;
+        }
     }
 };
 
