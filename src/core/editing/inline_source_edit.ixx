@@ -157,7 +157,8 @@ inline const InlineCstNode* inline_format_marker_at(
         if (auto child = inline_format_marker_at(node.children, character)) return child;
         switch (node.kind) {
             case InlineCstKind::Emphasis: case InlineCstKind::Strong:
-            case InlineCstKind::Strikethrough: case InlineCstKind::CodeSpan:
+            case InlineCstKind::Strikethrough: case InlineCstKind::Highlight:
+            case InlineCstKind::CodeSpan:
             case InlineCstKind::InlineMath: break;
             default: continue;
         }

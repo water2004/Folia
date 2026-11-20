@@ -109,7 +109,7 @@ struct Parser {
         return flanking.right && (!flanking.left || flanking.next_punctuation);
     }
 
-    struct EmphasisPair {
+    struct DelimitedPair {
         std::size_t open_start = 0;
         std::size_t open_end = 0;
         std::size_t close_start = 0;
@@ -132,9 +132,9 @@ struct Parser {
 
     struct LinkLabelRange { std::size_t open = 0; std::size_t close = 0; };
 
-    std::optional<std::vector<EmphasisPair>> emphasis_pairs_cache;
+    std::optional<std::vector<DelimitedPair>> emphasis_pairs_cache;
     std::vector<std::size_t> emphasis_opener_starts_cache;
-    std::optional<EmphasisPair> pending_emphasis;
+    std::optional<DelimitedPair> pending_delimited;
     // Last independent construct in this parser scope. Suffix queries must not
     // rescan the source for every unmatched delimiter run.
     std::optional<std::vector<std::size_t>> separate_structure_positions_cache;
@@ -245,6 +245,25 @@ struct Parser {
     // does not assign Markdown meaning or produce CST nodes.
     std::size_t skip_emphasis_opaque(std::size_t at) const {
         if (at >= limit) return at;
+        const bool dollar = src[at] == U'$' && ctx.dialect.math.inline_dollar
+            && !starts_with_at(at, U"$$");
+        const bool paren = starts_with_at(at, U"\\(") && ctx.dialect.math.inline_paren;
+        if (dollar || paren) {
+            auto end = at + (dollar ? 1u : 2u);
+            while (end < limit && src[end] != U'\n') {
+                if (dollar && src[end] == U'$') return end + 1;
+                if (paren && starts_with_at(end, U"\\)")) return end + 2;
+                ++end;
+            }
+            return find_line_or_doc_end(end);
+        }
+        if ((ctx.dialect.footnotes && starts_with_at(at, U"[^"))
+            || (ctx.dialect.wiki_links && starts_with_at(at, U"[["))) {
+            const auto close_marker = src[at + 1] == U'^' ? U"]" : U"]]";
+            const auto close = find_on_line(src.substr(0, limit), at + 2, close_marker);
+            return close == npos ? find_line_or_doc_end(at + 2)
+                : close + std::u32string_view(close_marker).size();
+        }
         if (src[at] == U'\\' && at + 1 < limit
             && (ascii_punct(src[at + 1]) || is_line_ending(src[at + 1]))) {
             return at + 2;
@@ -373,6 +392,13 @@ struct Parser {
         return *strikethrough_pairs_cache;
     }
 
+    bool continues_highlight_run(std::size_t at) const {
+        if (at == scope_start || src[at - 1] != U'=') return false;
+        auto escape_start = at - 1;
+        while (escape_start > scope_start && src[escape_start - 1] == U'\\') --escape_start;
+        return (at - 1 - escape_start) % 2 == 0;
+    }
+
     const std::vector<std::size_t>& bracket_close_index() const {
         if (bracket_close_index_cache
             && bracket_index_scope_start <= scope_start
@@ -414,12 +440,12 @@ struct Parser {
         return close < limit ? close : npos;
     }
 
-    std::vector<LinkLabelRange> emphasis_link_labels() const {
+    std::vector<LinkLabelRange> emphasis_link_labels(bool include_images = false) const {
         std::vector<LinkLabelRange> ranges;
         for (auto scan = scope_start; scan < limit;) {
             const auto skipped = skip_emphasis_opaque(scan);
             if (skipped != scan) { scan = skipped; continue; }
-            if (src[scan] == U'[' && (scan == scope_start || src[scan - 1] != U'!')) {
+            if (src[scan] == U'[' && (include_images || scan == scope_start || src[scan - 1] != U'!')) {
                 const auto close = find_link_label_close(scan);
                 if (close != npos) {
                     bool is_link_candidate = close + 1 < limit
@@ -468,17 +494,43 @@ struct Parser {
         return next != separate_structure_positions_cache->end() && *next < limit;
     }
 
-    std::vector<EmphasisPair> resolve_emphasis_pairs() {
+    std::vector<DelimitedPair> resolve_emphasis_pairs() {
         std::vector<EmphasisRun> runs;
-        const auto labels = emphasis_link_labels();
+        const auto labels = emphasis_link_labels(ctx.dialect.highlights);
+        std::unordered_set<std::size_t> label_closes;
+        if (ctx.dialect.highlights) for (const auto& label : labels) label_closes.insert(label.close);
+        auto paragraph_start = scope_start;
         for (auto scan = scope_start; scan < limit;) {
+            if (is_line_ending(src[scan])) {
+                auto next = scan + line_ending_length(scan);
+                while (next < limit && (src[next] == U' ' || src[next] == U'\t')) ++next;
+                if (next < limit && is_line_ending(src[next])) paragraph_start = next;
+            }
             const auto skipped = skip_emphasis_opaque(scan);
             if (skipped != scan) { scan = skipped; continue; }
+            if (src[scan] == U']' && label_closes.contains(scan) && scan + 1 < limit) {
+                auto end = scan + 1;
+                if (src[end] == U'(') {
+                    std::string href;
+                    std::optional<std::string> title;
+                    if (parse_inline_link_suffix(end, limit, end, href, title)) {
+                        scan = end;
+                        continue;
+                    }
+                } else if (src[end] == U'[') {
+                    const auto close = find_link_label_close(end);
+                    if (close != npos) { scan = close + 1; continue; }
+                }
+            }
             const auto marker = src[scan];
-            if (marker != U'*' && marker != U'_') { ++scan; continue; }
+            if (marker != U'*' && marker != U'_' && !(marker == U'=' && ctx.dialect.highlights)) {
+                ++scan;
+                continue;
+            }
             const auto start = scan;
             while (scan < limit && src[scan] == marker) ++scan;
             const auto length = scan - start;
+            if (marker == U'=' && (length != 2 || continues_highlight_run(start))) continue;
             const auto flank = delimiter_flanking(start, length);
             const bool can_open = marker == U'_'
                 ? flank.left && (!flank.right || flank.previous_punctuation)
@@ -494,6 +546,7 @@ struct Parser {
             run.length = length;
             run.can_open = can_open;
             run.can_close = can_close;
+            run.link_context.push_back(paragraph_start);
             for (auto const& label : labels) {
                 if (start > label.open && start < label.close) run.link_context.push_back(label.open);
             }
@@ -502,15 +555,16 @@ struct Parser {
             runs.push_back(std::move(run));
         }
 
-        std::vector<EmphasisPair> pairs;
+        std::vector<DelimitedPair> pairs;
         // Eligible opener categories differ only by marker, original run
         // length modulo three, and whether the run can also close. Keep the
         // most recent active opener in each category for each link context.
         // Failed searches therefore inspect six heads, not all earlier runs.
-        using OpenerHeads = std::array<std::vector<std::size_t>, 12>;
+        using OpenerHeads = std::array<std::vector<std::size_t>, 13>;
         std::map<std::vector<std::size_t>, OpenerHeads> heads_by_context;
         std::vector<std::size_t> active;
         auto category = [](EmphasisRun const& run) {
+            if (run.marker == U'=') return std::size_t{12};
             return (run.marker == U'_' ? 6u : 0u)
                 + (run.can_close ? 3u : 0u) + run.length % 3;
         };
@@ -520,15 +574,16 @@ struct Parser {
             std::size_t closer_remaining = closer.length;
             while (closer.can_close && closer_remaining != 0) {
                 std::size_t opener_index = npos;
-                const auto base = closer.marker == U'_' ? 6u : 0u;
-                for (std::size_t which = base; which < base + 6; ++which) {
+                const auto base = closer.marker == U'=' ? 12u : (closer.marker == U'_' ? 6u : 0u);
+                const auto categories = closer.marker == U'=' ? 1u : 6u;
+                for (std::size_t which = base; which < base + categories; ++which) {
                     auto& candidates = heads[which];
                     while (!candidates.empty() && !runs[candidates.back()].active_opener)
                         candidates.pop_back();
                     if (candidates.empty()) continue;
                     const auto index = candidates.back();
                     auto const& opener = runs[index];
-                    const bool rule_of_three = (closer.can_open || opener.can_close)
+                    const bool rule_of_three = closer.marker != U'=' && (closer.can_open || opener.can_close)
                         && ((opener.length + closer.length) % 3 == 0)
                         && (opener.length % 3 != 0 || closer.length % 3 != 0);
                     if (!rule_of_three && (opener_index == npos || index > opener_index)) opener_index = index;
@@ -539,7 +594,8 @@ struct Parser {
                 const auto open_start = opener.start + opener.open_remaining - use;
                 const auto close_start = closer.start + closer.close_consumed;
                 pairs.push_back({open_start, open_start + use, close_start, close_start + use,
-                    use == 2 ? InlineCstKind::Strong : InlineCstKind::Emphasis});
+                    closer.marker == U'=' ? InlineCstKind::Highlight
+                        : (use == 2 ? InlineCstKind::Strong : InlineCstKind::Emphasis)});
                 opener.open_remaining -= use;
                 if (opener.open_remaining == 0) opener.active_opener = false;
                 closer.close_consumed += use;
@@ -559,11 +615,11 @@ struct Parser {
                 active.push_back(closer_index);
             }
         }
-        std::ranges::sort(pairs, {}, &EmphasisPair::open_start);
+        std::ranges::sort(pairs, {}, &DelimitedPair::open_start);
         return pairs;
     }
 
-    std::vector<EmphasisPair> const& emphasis_pairs() {
+    std::vector<DelimitedPair> const& emphasis_pairs() {
         if (!emphasis_pairs_cache) emphasis_pairs_cache = resolve_emphasis_pairs();
         return *emphasis_pairs_cache;
     }
@@ -913,6 +969,7 @@ struct Parser {
                 case InlineCstKind::Emphasis:
                 case InlineCstKind::Strong:
                 case InlineCstKind::Strikethrough:
+                case InlineCstKind::Highlight:
                 case InlineCstKind::Link:
                     append_image_alt(node.children, source, output);
                     break;
@@ -1417,6 +1474,49 @@ struct Parser {
         return true;
     }
 
+    // Exactly two equals signs form a highlight delimiter; single signs and
+    // longer runs stay literal. Unfinished input remains a lossless CST node.
+    bool parse_highlight(InlineCstNodes& out, std::size_t& run_start) {
+        if (!ctx.dialect.highlights || !starts_with(pos, U"==")
+            || continues_highlight_run(pos) || peek(2) == U'=') return false;
+        const auto& pairs = emphasis_pairs();
+        const auto pair = std::ranges::lower_bound(pairs, pos, {}, &DelimitedPair::open_start);
+        if (pair != pairs.end() && pair->open_start == pos && pair->close_end <= limit) {
+            flush_text_to(out, run_start, pos);
+            pending_delimited = *pair;
+            pos = pair->open_end;
+            run_start = pos;
+            return true;
+        }
+        const auto content_start = pos + 2;
+        if (content_start < limit && !delimiter_flanking(pos, 2).left) return false;
+        // Stop before the next opener rather than recursively nesting every
+        // unfinished == in the remainder of a large editable paragraph.
+        const auto next = std::ranges::lower_bound(emphasis_opener_starts_cache, content_start);
+        const auto boundary = next == emphasis_opener_starts_cache.end() ? limit : (std::min)(limit, *next);
+        auto end = content_start;
+        while (end < boundary && !is_line_ending(src[end])) ++end;
+        if (end < boundary) end += line_ending_length(end);
+        flush_text_to(out, run_start, pos);
+        InlineCstNode node;
+        node.id = next_id();
+        node.kind = InlineCstKind::Incomplete;
+        node.status = ParseStatus::MissingCloser;
+        node.range = {pos, end};
+        node.ensure_delimiter_ranges() = {
+            node.range, {pos, content_start}, {content_start, end}, std::nullopt};
+        Parser inner{src, ctx};
+        inner.suppress_bare_autolinks = suppress_bare_autolinks;
+        inner.counter = counter;
+        inner.pos = content_start;
+        node.children = inner.parse_until(end);
+        counter = inner.counter;
+        out.push_back(std::move(node));
+        pos = end;
+        run_start = pos;
+        return true;
+    }
+
     bool parse_commonmark_emphasis(InlineCstNodes& out, std::size_t& run_start) {
         const auto marker = peek();
         if (marker != U'*' && marker != U'_') return false;
@@ -1427,8 +1527,8 @@ struct Parser {
         while (run_end_source < limit && src[run_end_source] == marker) ++run_end_source;
 
         const auto& pairs = emphasis_pairs();
-        const auto first = std::ranges::lower_bound(pairs, pos, {}, &EmphasisPair::open_start);
-        const EmphasisPair* match = first != pairs.end() && first->open_start < run_end_source
+        const auto first = std::ranges::lower_bound(pairs, pos, {}, &DelimitedPair::open_start);
+        const DelimitedPair* match = first != pairs.end() && first->open_start < run_end_source
             && first->close_end <= limit ? &*first : nullptr;
 
         if (match && match->open_start > pos) {
@@ -1456,7 +1556,7 @@ struct Parser {
             flush_text_to(out, run_start, pos);
 
             const auto later_pair = std::ranges::lower_bound(
-                pairs, run_end_source, {}, &EmphasisPair::open_start);
+                pairs, run_end_source, {}, &DelimitedPair::open_start);
             if ((can_open && later_pair != pairs.end() && later_pair->open_start < limit)
                 || has_separate_inline_structure(run_end_source)) {
                 InlineCstNode incomplete;
@@ -1505,7 +1605,7 @@ struct Parser {
         }
 
         flush_text_to(out, run_start, match->open_start);
-        pending_emphasis = *match;
+        pending_delimited = *match;
         pos = match->open_end;
         run_start = pos;
         return true;
@@ -1853,8 +1953,9 @@ struct Parser {
                 syntax_start = cursor;
                 break;
             }
-            if (src[cursor] == U'*' || src[cursor] == U'_') {
-                const auto pair = std::ranges::lower_bound(emphasis, cursor, {}, &EmphasisPair::open_start);
+            if (src[cursor] == U'*' || src[cursor] == U'_'
+                || (src[cursor] == U'=' && ctx.dialect.highlights)) {
+                const auto pair = std::ranges::lower_bound(emphasis, cursor, {}, &DelimitedPair::open_start);
                 if (pair != emphasis.end() && pair->open_start == cursor) {
                     syntax_start = cursor;
                     break;
@@ -2208,7 +2309,7 @@ struct Parser {
 
     static bool delimiter_char(char32_t c) {
         switch (c) {
-            case U'*': case U'_': case U'~': case U'`': case U'$':
+            case U'*': case U'_': case U'~': case U'=': case U'`': case U'$':
             case U'[': case U']': case U'(': case U')': case U'!':
             case U'<': case U'>': case U'"': case U'\'':
                 return true;
@@ -2282,11 +2383,11 @@ struct Parser {
         return tokens;
     }
 
-    // One dispatch engine for the source scope and its matched emphasis
-    // views. Other constructs retain their existing independent Parser scopes.
+    // One dispatch engine for the source scope and its matched emphasis and
+    // highlight views. Other constructs retain independent Parser scopes.
     InlineCstNodes parse_scope() {
-        struct EmphasisFrame {
-            EmphasisPair pair;
+        struct DelimitedFrame {
+            DelimitedPair pair;
             InlineCstNodes parent;
             std::size_t parent_scope_start;
             std::size_t parent_limit;
@@ -2295,7 +2396,7 @@ struct Parser {
             std::size_t link_scope_start;
             std::size_t link_limit;
         };
-        std::vector<EmphasisFrame> frames;
+        std::vector<DelimitedFrame> frames;
         InlineCstNodes out;
         std::size_t run_start = pos;
         while (true) {
@@ -2338,16 +2439,17 @@ struct Parser {
             if (peek() == U'$' || (peek() == U'\\' && peek(1) == U'(')) { if (parse_math(out, run_start)) continue; }
             if (parse_escape(out, run_start)) continue;
             if (parse_entity(out, run_start)) continue;
-            if (peek() == U'*' || peek() == U'_') {
-                if (parse_commonmark_emphasis(out, run_start)) {
-                    if (pending_emphasis) {
+            if (peek() == U'*' || peek() == U'_' || peek() == U'=') {
+                if (parse_commonmark_emphasis(out, run_start) || parse_highlight(out, run_start)) {
+                    if (pending_delimited) {
                         // Build source-scope indexes once before the first
-                        // emphasis view narrows its bounds. Child views only
+                        // delimited view narrows its bounds. Child views only
                         // filter these immutable matches.
                         (void)bracket_close_index();
                         (void)has_separate_inline_structure(scope_start);
-                        const auto pair = *pending_emphasis;
-                        pending_emphasis.reset();
+                        (void)emphasis_pairs();
+                        const auto pair = *pending_delimited;
+                        pending_delimited.reset();
                         frames.push_back({pair, std::move(out), scope_start, limit,
                             std::move(strikethrough_pairs_cache), std::move(nested_link_ranges_cache),
                             nested_link_index_scope_start, nested_link_index_limit});

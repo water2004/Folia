@@ -34,11 +34,12 @@ suite incremental_inline_tests = [] {
         std::vector<std::u32string> sources{
             U"alpha beta gamma\nnext **bold** line", U"alpha beta gamma",
             U"**alpha *beta gamma* delta** ~~epsilon zeta~~",
+            U"==alpha **beta** gamma== and ==unfinished",
             U"[missing] [known] [name](url) ![alt](url)", U"before <span unfinished after",
             U"word *a\nb* and **unclosed", U"text &amp; \\*more* $x$",
             U"x www.example.org y\nlast line", U"\U0001f642中文 e\u0301 words\r\nnext",
             U"alpha [label](<url> 'title') omega", U"<b>plain text</b>"};
-        std::vector<std::u32string> replacements{U"x", U"", U"**", U" ", U"\n", U"$", U"&amp;",
+        std::vector<std::u32string> replacements{U"x", U"", U"**", U"==", U"=", U" ", U"\n", U"$", U"&amp;",
             U"<", U"[", U"\\", U"www.example.org", U"\U0001f642", U"\u0301"};
         std::mt19937 random(913274);
         for (int trial = 0; trial < 5000; ++trial) {
@@ -68,7 +69,7 @@ suite incremental_inline_tests = [] {
 
     "incremental inline edits retain nested presentation wrappers and exact delimiter ranges"_test = [] {
         for (auto const& delimiters : {std::pair{U"**", U"**"}, std::pair{U"_", U"_"},
-            std::pair{U"~~", U"~~"}, std::pair{U"**a *", U"* z**"}}) {
+            std::pair{U"~~", U"~~"}, std::pair{U"==", U"=="}, std::pair{U"**a *", U"* z**"}}) {
             InlineDocument document;
             document.source = delimiters.first;
             auto begin = document.source.size();

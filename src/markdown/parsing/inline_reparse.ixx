@@ -33,7 +33,8 @@ inline bool independent_descendants(InlineCstNode const& node) {
     using K = InlineCstKind;
     return node.status == ParseStatus::Complete && node.delimited
         && node.delimiter_ranges().closing
-        && (node.kind == K::Emphasis || node.kind == K::Strong || node.kind == K::Strikethrough);
+        && (node.kind == K::Emphasis || node.kind == K::Strong || node.kind == K::Strikethrough
+            || node.kind == K::Highlight);
 }
 
 inline std::vector<std::size_t> literal_path(InlineDocument const& document, SourceRange range) {

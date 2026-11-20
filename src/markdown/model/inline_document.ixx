@@ -232,6 +232,7 @@ inline void append_inline_visible_text(
             case K::Emphasis:
             case K::Strong:
             case K::Strikethrough:
+            case K::Highlight:
             case K::Link:
                 append_inline_visible_text(document, node.children, output);
                 break;

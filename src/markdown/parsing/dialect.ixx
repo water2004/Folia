@@ -39,6 +39,7 @@ struct MarkdownDialect {
     bool definition_lists = true;
     bool callouts = true;
     bool wiki_links = true;
+    bool highlights = true;
     TableOptions tables{};
     ImageOptions images{};
     DiagramOptions diagrams{};

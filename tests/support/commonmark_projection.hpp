@@ -1005,6 +1005,7 @@ inline MarkdownDialect dialect() {
     d.definition_lists = false;
     d.callouts = false;
     d.wiki_links = false;
+    d.highlights = false;
     d.tables = {false, false};
     d.diagrams = {false, false, false};
     return d;
