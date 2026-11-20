@@ -1027,6 +1027,7 @@ struct Builder {
                         item.kind = InlineRenderItem::Kind::Link;
                         item.id = node.id;
                         item.source_span = source_span(node.range);
+                        item.style = style;
                         auto& special = item.ensure_special().ensure_semantic();
                         special.href = semantic.href;
                         special.content_range = delim.content;

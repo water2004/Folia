@@ -180,6 +180,25 @@ suite render_layout_hit_test_tests = [] {
     expect(bool(reference->style.presentation == alias->style.presentation));
 };
 
+"highlight link wrappers retain presentation for source reveal"_test = [] {
+    for (const auto& source : {"==[link](https://example.com)==", "==<https://example.com>=="}) {
+        const auto model = build_model(source);
+        expect(fatal(model.blocks.size() == 1u));
+        const auto& items = model.blocks.front().inline_items;
+        const auto link = std::ranges::find_if(items, [](const auto& item) {
+            return item.kind == InlineRenderItem::Kind::Link;
+        });
+        expect(fatal(link != items.end()));
+        expect(fatal(link->style.presentation != nullptr));
+        expect(link->style.presentation->highlight);
+        for (const auto& child : link->special().semantic().children) {
+            if (child.kind != InlineRenderItem::Kind::Text) continue;
+            expect(child.style.link);
+            expect(bool(child.style.presentation == link->style.presentation));
+        }
+    }
+};
+
 "renders_heading_soft_break_as_line_break"_test = [] {
     auto m = build_model("Hello\nWorld\n---");
     expect(fatal(bool(m.blocks.size() == 1u)));
