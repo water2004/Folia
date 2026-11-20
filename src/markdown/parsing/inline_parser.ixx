@@ -502,6 +502,8 @@ struct Parser {
 
     std::vector<DelimitedPair> resolve_emphasis_pairs() {
         std::vector<EmphasisRun> runs;
+        const bool has_highlight_markers = ctx.dialect.highlights
+            && src.substr(scope_start, limit - scope_start).find(U"==") != std::u32string_view::npos;
         const auto labels = emphasis_link_labels(ctx.dialect.highlights);
         std::unordered_set<std::size_t> label_closes;
         if (ctx.dialect.highlights) for (const auto& label : labels) label_closes.insert(label.close);
@@ -538,7 +540,7 @@ struct Parser {
                 }
             }
             const auto marker = src[scan];
-            const bool strike_scope = marker == U'~' && ctx.dialect.highlights && ctx.dialect.gfm.strikethrough;
+            const bool strike_scope = marker == U'~' && has_highlight_markers && ctx.dialect.gfm.strikethrough;
             if (marker != U'*' && marker != U'_' && !(marker == U'=' && ctx.dialect.highlights)
                 && !strike_scope) {
                 ++scan;
