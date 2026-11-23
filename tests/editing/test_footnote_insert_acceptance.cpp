@@ -226,13 +226,16 @@ suite footnote_insert_acceptance_tests = [] {
 "footnote_insert_blank_line_terminated_blocks_keep_definitions_at_document_end"_test = [] {
     for (const auto source : {"    value", "<div>\nraw", "<!-- closed -->", "<script>raw</ScRiPt>"}) {
         Editor editor(source);
-        const auto id = editor.document().root.children.back().id;
+        // Invisible-only documents also contain a zero-source destination.
+        // Track the original literal block, which must remain at the front.
+        const auto id = editor.document().root.children.front().id;
         const auto selected = editor.selection();
         const auto before = editor.markdown_utf8();
         expect(fatal(editor.execute_command({.kind = CommandKind::CreateFootnoteDefinition,
             .footnote_label = "1"})));
         expect(editor.document().root.children.front().id == id);
         expect(editor.document().root.children.back().kind == BlockKind::FootnoteDefinition);
+        expect(editor.markdown_utf8().starts_with(before));
         footnote_insert_history(editor, before, selected);
     }
 };
