@@ -16,6 +16,7 @@ import folia.markdown.text_edit;
 import folia.markdown.utf;
 import folia.markdown.serializer;
 import folia.core.document_edit_support;
+import folia.core.document_container_source;
 import folia.core.document_block_reparse;
 import folia.core.document_input_rules;
 import folia.core.document_inline_format;
@@ -288,44 +289,141 @@ inline std::optional<DocumentTransaction> document_enter(EditorDocument& documen
 
 namespace document_inline_insertion_detail {
 
-// Inline insertion commands share typing's object-boundary behavior. Creating
-// a destination paragraph and writing its source is one reversible operation.
+// Collect source only from the visible range of each selected owner. Image
+// replacement uses this for its default alt text, without exposing raw fences
+// or the atomic navigation placeholder in generated Markdown.
+inline std::optional<std::u32string> selected_label_source(
+    const EditorDocument& document, const TextSelection& selection, bool image_alt = false) {
+    auto first_index = document_editable_order_position(document, selection.anchor.container_id);
+    auto last_index = document_editable_order_position(document, selection.active.container_id);
+    if (!first_index || !last_index) return std::nullopt;
+    auto first = selection.anchor;
+    auto last = selection.active;
+    if (*first_index > *last_index
+        || (*first_index == *last_index && first.source_offset > last.source_offset)) {
+        std::swap(first_index, last_index);
+        std::swap(first, last);
+    }
+    std::u32string result;
+    for (auto index = *first_index; index <= *last_index; ++index) {
+        const auto* block = find_document_block(document, document.cached_editable_order[index]);
+        const auto visible = block ? editable_block_source_range(*block) : std::nullopt;
+        const auto source = block ? editable_block_text_view(*block) : std::nullopt;
+        if (!block || !visible || !source) return std::nullopt;
+        const auto start = index == *first_index
+            ? (std::clamp)(first.source_offset, visible->start, visible->end) : visible->start;
+        const auto end = index == *last_index
+            ? (std::clamp)(last.source_offset, visible->start, visible->end) : visible->end;
+        if (index != *first_index) result += U'\n';
+        if (start == end) continue;
+        if (document_edit_detail::atomic_block(block->kind)) {
+            if (image_alt && block->kind == BlockKind::ImageBlock)
+                result += utf8_to_cps(block->image_special().image_alt);
+            else {
+                BlockVec fragment;
+                fragment.push_back(*block);
+                fragment.front().separator_before.reset();
+                result += serialize_markdown_fragment(fragment);
+            }
+        } else {
+            result.append(source->substr(start, end - start));
+        }
+    }
+    return result;
+}
+
+inline std::u32string single_line_label(std::u32string_view source) {
+    std::u32string result;
+    result.reserve(source.size());
+    for (std::size_t index = 0; index < source.size(); ++index) {
+        if (source[index] == U'\r' || source[index] == U'\n') {
+            if (source[index] == U'\r' && index + 1 < source.size() && source[index + 1] == U'\n') ++index;
+            result += U' ';
+        } else result += source[index];
+    }
+    return result;
+}
+
+// Generated inline syntax edits one local source. A selected atomic block is
+// replaced in its own flow position; an atomic caret obtains a neighboring
+// paragraph. Raw owners receive literal syntax inside their content ranges.
 template<class BuildSource>
 inline std::optional<DocumentTransaction> insert(
     EditorDocument& document, const TextSelection& selection, BuildSource build_source) {
     if (selection.anchor.container_id != selection.active.container_id) return std::nullopt;
+    const auto label = selected_label_source(document, selection);
+    if (!label) return std::nullopt;
     const auto revision_before = document.revision;
     std::vector<DocumentOperation> operations;
     document_edit_detail::MutationRollback rollback(document, operations, revision_before);
+    document_edit_detail::NodeAllocator allocator(document);
     auto current = selection;
-    const auto* selected_block = find_document_block(document, selection.active.container_id);
+    auto* selected_block = find_document_block(document, selection.active.container_id);
     if (!selected_block) return std::nullopt;
     if (!selection.is_caret() && document_edit_detail::atomic_block(selected_block->kind)) {
-        auto deletion = document_delete_selection(document, selection);
-        if (!deletion) return std::nullopt;
-        current = deletion->selection_after;
-        operations = std::move(deletion->operations);
+        auto path = document_block_path(document, selected_block->id);
+        if (!path || path->empty()) return std::nullopt;
+        const auto index = path->back();
+        path->pop_back();
+        auto* parent = block_at_path(document.root, *path);
+        if (!parent) return std::nullopt;
+        auto syntax_mode = InlineSyntaxMode::Markdown;
+        const auto* context = &document.root;
+        for (const auto child_index : *path) {
+            context = &context->children[child_index];
+            if (context->kind == BlockKind::HtmlContainer || context->has_html_source()
+                || context->has_html_element_provenance()) syntax_mode = InlineSyntaxMode::HtmlText;
+        }
+        auto paragraph = document_edit_detail::empty_paragraph(allocator, document, syntax_mode);
+        paragraph.id = selected_block->id;
+        paragraph.separator_before = selected_block->separator_before;
+        DocumentTreeEdit remove;
+        remove.kind = DocumentTreeEditKind::Remove;
+        remove.parent_id = parent->id;
+        remove.index = index;
+        remove.before = *selected_block;
+        document_container_source::append_container_tree_operation(document, operations, std::move(remove));
+        DocumentTreeEdit insert;
+        insert.kind = DocumentTreeEditKind::Insert;
+        insert.parent_id = parent->id;
+        insert.index = index;
+        insert.after = paragraph;
+        operations.emplace_back(std::move(insert));
+        parent->children[index] = std::move(paragraph);
+        current = TextSelection::caret({selection.active.container_id, 0, TextAffinity::Downstream});
     }
-    document_edit_detail::NodeAllocator allocator(document);
     if (auto boundary = document_input_rules::ensure_atomic_boundary_paragraph(document, current.active, allocator)) {
         current = TextSelection::caret(boundary->target);
         operations.insert(operations.end(), std::make_move_iterator(boundary->operations.begin()),
             std::make_move_iterator(boundary->operations.end()));
     }
-    auto* owner = document_edit_detail::find_inline_owner(document, current.active.container_id);
-    if (!owner) return std::nullopt;
-    const auto start = (std::min)(current.anchor.source_offset, current.active.source_offset);
-    const auto end = (std::max)(current.anchor.source_offset, current.active.source_offset);
-    if (end > owner->source.size()) return std::nullopt;
-    auto [replacement, caret] = build_source(*owner, std::u32string_view{owner->source}.substr(start, end - start));
-    auto applied = document_edit_detail::edit_inline(document, current.active.container_id,
-        {start, end}, std::move(replacement), allocator);
-    if (!applied) return std::nullopt;
-    document_edit_detail::append_source_operation(operations, std::move(*applied));
-    ++document.revision;
+    auto* block = find_document_block(document, current.active.container_id);
+    const auto visible = block ? editable_block_source_range(*block) : std::nullopt;
+    const auto* owner = block ? editable_inline_document(*block) : nullptr;
+    if (!block || !visible || (!owner && !editable_raw_block_source(*block))) return std::nullopt;
+    const auto start = (std::clamp)((std::min)(current.anchor.source_offset, current.active.source_offset),
+        visible->start, visible->end);
+    const auto end = (std::clamp)((std::max)(current.anchor.source_offset, current.active.source_offset),
+        visible->start, visible->end);
+    auto [replacement, caret] = build_source(owner ? owner->syntax_mode : InlineSyntaxMode::Markdown,
+        std::u32string_view{*label});
+    auto caret_offset = start + caret;
+    if (start == end && !owner) {
+        const auto inserted_length = replacement.size();
+        auto inserted = document_edit_detail::insert_text(document, current.active, replacement, allocator);
+        if (!inserted || !inserted->source_edit) return std::nullopt;
+        caret_offset = inserted->offset - inserted_length + caret;
+        document_edit_detail::append_source_operation(operations, std::move(*inserted->source_edit));
+    } else {
+        auto applied = document_edit_detail::edit_block_source(document, block->id,
+            {start, end}, std::move(replacement), allocator);
+        if (!applied) return std::nullopt;
+        document_edit_detail::append_source_operation(operations, std::move(*applied));
+    }
+    document.revision = revision_before + 1;
     rollback.commit();
     return make_recorded_document_transaction(std::move(operations), selection,
-        TextSelection::caret({current.active.container_id, start + caret, TextAffinity::Downstream}),
+        TextSelection::caret({current.active.container_id, caret_offset, TextAffinity::Downstream}),
         revision_before, document.revision, DocumentTransactionReason::Format);
 }
 
@@ -333,8 +431,8 @@ inline std::optional<DocumentTransaction> insert(
 
 inline std::optional<DocumentTransaction> document_insert_link(EditorDocument& document, const TextSelection& selection, std::string href, std::optional<std::string> title) {
     return document_inline_insertion_detail::insert(document, selection,
-        [&](const InlineDocument& owner, std::u32string_view label) {
-            const auto html = owner.syntax_mode == InlineSyntaxMode::HtmlText;
+        [&](InlineSyntaxMode syntax_mode, std::u32string_view label) {
+            const auto html = syntax_mode == InlineSyntaxMode::HtmlText;
             const auto source_title = title ? std::optional{utf8_to_cps(*title)} : std::nullopt;
             auto replacement = html ? serialize_html_link_source(utf8_to_cps(href), label, source_title)
                 : serialize_link_source(utf8_to_cps(href), label, source_title);
@@ -345,16 +443,36 @@ inline std::optional<DocumentTransaction> document_insert_link(EditorDocument& d
 }
 
 inline std::optional<DocumentTransaction> document_insert_image(EditorDocument& document, const TextSelection& selection, std::string path, std::string alt) {
-    return document_inline_insertion_detail::insert(document, selection,
-        [&](const InlineDocument& owner, std::u32string_view selected_source) {
-            const auto label = alt.empty() ? std::u32string(selected_source) : utf8_to_cps(alt);
-            const auto destination = utf8_to_cps(path.empty() ? "image.png" : path);
-            auto replacement = owner.syntax_mode == InlineSyntaxMode::HtmlText
-                ? serialize_html_image_source(destination, label)
-                : serialize_image_source(destination, label, false);
-            const auto caret = replacement.size();
-            return std::pair{std::move(replacement), caret};
-        });
+    const auto selected = alt.empty()
+        ? document_inline_insertion_detail::selected_label_source(document, selection, true)
+        : std::optional<std::u32string>{utf8_to_cps(alt)};
+    if (!selected) return std::nullopt;
+    const auto label = document_inline_insertion_detail::single_line_label(*selected);
+    const auto destination = utf8_to_cps(path.empty() ? "image.png" : path);
+    const auto build_source = [&](InlineSyntaxMode syntax_mode, std::u32string_view) {
+        auto replacement = syntax_mode == InlineSyntaxMode::HtmlText
+            ? serialize_html_image_source(destination, label)
+            : serialize_image_source(destination, label, false);
+        const auto caret = replacement.size();
+        return std::pair{std::move(replacement), caret};
+    };
+    if (selection.anchor.container_id == selection.active.container_id)
+        return document_inline_insertion_detail::insert(document, selection, build_source);
+
+    const auto revision_before = document.revision;
+    std::vector<DocumentOperation> operations;
+    document_edit_detail::MutationRollback rollback(document, operations, revision_before);
+    auto deletion = document_delete_selection(document, selection);
+    if (!deletion) return std::nullopt;
+    operations = std::move(deletion->operations);
+    auto insertion = document_inline_insertion_detail::insert(document, deletion->selection_after, build_source);
+    if (!insertion) return std::nullopt;
+    operations.insert(operations.end(), std::make_move_iterator(insertion->operations.begin()),
+        std::make_move_iterator(insertion->operations.end()));
+    document.revision = revision_before + 1;
+    rollback.commit();
+    return make_recorded_document_transaction(std::move(operations), selection,
+        insertion->selection_after, revision_before, document.revision, DocumentTransactionReason::Format);
 }
 
 inline std::optional<DocumentTransaction> document_insert_soft_break(EditorDocument& document, const TextSelection& selection) {
