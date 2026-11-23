@@ -91,7 +91,7 @@ powershell -ExecutionPolicy Bypass -File .\build_app.ps1 -Configuration Release 
 构建当前用户安装的 x64 MSI：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\build_msi.ps1 -Version 0.7.2
+powershell -ExecutionPolicy Bypass -File .\build_msi.ps1 -Version 0.7.3
 ```
 
 安装器会生成自包含 Windows App SDK 的 Release 应用，因此目标电脑无需另行
@@ -113,7 +113,7 @@ powershell -ExecutionPolicy Bypass -File .\build_msi.ps1 -Version 0.7.2
 构建自包含的 x64 便携 ZIP：
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\build_portable.ps1 -Version 0.7.2
+powershell -ExecutionPolicy Bypass -File .\build_portable.ps1 -Version 0.7.3
 ```
 
 将 `build/portable/Folia-<version>-x64-portable.zip` 解压到可写目录后，

@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "v*.*.*"
+      - "!v0.7.3" # Packages built locally for this release.
 
 permissions:
   contents: read
