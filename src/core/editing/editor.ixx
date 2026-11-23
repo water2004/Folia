@@ -7,6 +7,7 @@ import folia.markdown.ids;
 import folia.markdown.selection;
 import folia.core.command;
 import folia.core.input;
+import folia.core.input_command;
 import folia.markdown.utf;
 import folia.markdown.dialect;
 import folia.markdown.document;
@@ -14,6 +15,8 @@ import folia.markdown.document_text;
 import folia.markdown.ast;
 import folia.markdown.block_tree;
 import folia.core.document_edit;
+import folia.core.document_text_navigation;
+import folia.core.document_indentation;
 import folia.core.document_history;
 import folia.core.document_operation_apply;
 import folia.core.document_search_replace;
@@ -444,7 +447,65 @@ public:
         last_document_change_.reset();
         if (cmd.kind == CommandKind::Undo) return undo();
         if (cmd.kind == CommandKind::Redo) return redo();
+        if (cmd.kind == CommandKind::TabForward || cmd.kind == CommandKind::TabBackward) {
+            const auto backward = cmd.kind == CommandKind::TabBackward;
+            const auto indent = backward ? CommandKind::OutdentText : CommandKind::IndentText;
+            if (source_view_) return execute_command({.kind = indent});
+            const auto& selection = rendered_selection_.value();
+            const auto* owner = find_document_block(document_, selection.active.container_id);
+            // The innermost editing surface owns Tab. A list ancestor must
+            // not intercept code indentation or navigation between cells.
+            if (owner && selection.anchor.container_id == selection.active.container_id
+                && editable_raw_block_source(*owner))
+                return execute_command({.kind = indent});
+            if (owner && owner->kind == BlockKind::TableCell)
+                return execute_command({.kind = backward
+                    ? CommandKind::MoveTableCellPrevious : CommandKind::MoveTableCellNext});
+            return execute_editor_tab(backward,
+                [&](const Command& action) { return execute_command(action); });
+        }
+        if (cmd.kind == CommandKind::MovePageUp || cmd.kind == CommandKind::MovePageDown) {
+            Command line;
+            line.kind = cmd.kind == CommandKind::MovePageUp ? CommandKind::MoveUp : CommandKind::MoveDown;
+            line.extend_selection = cmd.extend_selection;
+            bool moved = false;
+            for (std::size_t count = 0; count < cmd.page_line_count; ++count) {
+                const auto source_before = source_view_ ? source_view_->editor.selection() : SourceSelection{};
+                const auto rich_before = rendered_selection_;
+                if (!execute_command(line)) break;
+                if (source_view_ ? source_before == source_view_->editor.selection() : rich_before == rendered_selection_)
+                    break;
+                moved = true;
+            }
+            return moved;
+        }
         if (source_view_) return execute_source_command_(cmd);
+        if (cmd.kind == CommandKind::IndentText || cmd.kind == CommandKind::OutdentText) {
+            auto transaction = document_indent_text(document_, rendered_selection_.value(),
+                cmd.kind == CommandKind::OutdentText);
+            if (!transaction) return false;
+            apply_document_transaction_(*transaction);
+            return true;
+        }
+        if (cmd.kind == CommandKind::MoveWordLeft || cmd.kind == CommandKind::MoveWordRight
+            || cmd.kind == CommandKind::MoveParagraphStart || cmd.kind == CommandKind::MoveParagraphEnd) {
+            const auto movement = cmd.kind == CommandKind::MoveWordLeft ? DocumentTextMove::WordLeft
+                : cmd.kind == CommandKind::MoveWordRight ? DocumentTextMove::WordRight
+                : cmd.kind == CommandKind::MoveParagraphStart ? DocumentTextMove::ParagraphStart
+                : DocumentTextMove::ParagraphEnd;
+            const auto selected = document_move_text_selection(document_, rendered_selection_.value(),
+                movement, cmd.extend_selection);
+            if (!selected) return false;
+            rendered_selection_ = *selected;
+            return true;
+        }
+        if (cmd.kind == CommandKind::DeleteWordBackward || cmd.kind == CommandKind::DeleteWordForward) {
+            auto transaction = document_delete_word(document_, rendered_selection_.value(),
+                cmd.kind == CommandKind::DeleteWordBackward);
+            if (!transaction) return false;
+            apply_document_transaction_(*transaction);
+            return true;
+        }
         if (cmd.kind == CommandKind::ReplaceSourceText) {
             return cmd.replacement && execute_document_replace_text(
                 cmd.replacement->range, cmd.text, cmd.replacement->selection_after);
@@ -599,7 +660,6 @@ public:
     // scroll, focus — handled elsewhere).
     std::optional<Command> handle_input(const EditorInputEvent& ev) {
         using K = EditorInputEvent::Kind;
-        using TK = KeyCode;
         if (ev.kind == K::ClipboardPaste) {
             Command command;
             command.kind = CommandKind::Paste;
@@ -612,43 +672,7 @@ public:
             }
             return std::nullopt;
         }
-        if (ev.kind == K::KeyDown) {
-            bool ext = ev.key.modifiers.shift;
-            switch (ev.key.key_code) {
-                case TK::Char:
-                    if (ev.key.modifiers.ctrl) {
-                        char32_t c = ev.key.ch;
-                        if (c == 'b' || c == 'B') { Command c2; c2.kind = CommandKind::ToggleStrong; return c2; }
-                        if (c == 'i' || c == 'I') { Command c2; c2.kind = CommandKind::ToggleEmphasis; return c2; }
-                        if (c == 'z' || c == 'Z') { Command c2; c2.kind = ext ? CommandKind::Redo : CommandKind::Undo; return c2; }
-                        if (c == 'y' || c == 'Y') { Command c2; c2.kind = CommandKind::Redo; return c2; }
-                        if (c == 'c' || c == 'C') { Command c2; c2.kind = CommandKind::Copy; return c2; }
-                        if (c == 'x' || c == 'X') { Command c2; c2.kind = CommandKind::Cut; return c2; }
-                        if (c == 'v' || c == 'V') { Command c2; c2.kind = CommandKind::Paste; return c2; }
-                        if (c == 'a' || c == 'A') { Command c2; c2.kind = CommandKind::SelectAll; return c2; }
-                    } else {
-                        return Command::InsertText(std::u32string(1, ev.key.ch));
-                    }
-                    break;
-                case TK::Left:  return Command::MoveLeft(ext);
-                case TK::Right: return Command::MoveRight(ext);
-                case TK::Up:    return Command::MoveUp(ext);
-                case TK::Down:  return Command::MoveDown(ext);
-                case TK::Home:  { Command c; c.kind = ev.key.modifiers.ctrl ? CommandKind::MoveDocumentStart : CommandKind::MoveLineStart; c.extend_selection = ext; return c; }
-                case TK::End:   { Command c; c.kind = ev.key.modifiers.ctrl ? CommandKind::MoveDocumentEnd : CommandKind::MoveLineEnd; c.extend_selection = ext; return c; }
-                case TK::Backspace: { Command c; c.kind = CommandKind::DeleteBackward; return c; }
-                case TK::Delete:    { Command c; c.kind = CommandKind::DeleteForward;  return c; }
-                case TK::Enter:     { Command c; c.kind = ext ? CommandKind::InsertSoftBreak : CommandKind::InsertNewline; return c; }
-                case TK::Tab: {
-                    Command c;
-                    if (ext) c.kind = CommandKind::OutdentListItem;
-                    else if (source_view_) c.kind = CommandKind::IndentListItem;
-                    else return Command::InsertText(U"\t");
-                    return c;
-                }
-                default: break;
-            }
-        }
+        if (ev.kind == K::KeyDown) return default_editor_key_command(ev.key);
         return std::nullopt;
     }
 
@@ -722,8 +746,10 @@ private:
             case CommandKind::DeleteWordBackward: handled=source.delete_word_backward();break;
             case CommandKind::DeleteWordForward: handled=source.delete_word_forward();break;
             case CommandKind::DeleteSelection: handled=!source.selection().is_caret() && source.replace_selection({});break;
-            case CommandKind::IndentListItem: handled=source.indent();break;
-            case CommandKind::OutdentListItem: handled=source.outdent();break;
+            case CommandKind::IndentListItem:
+            case CommandKind::IndentText: handled=source.indent();break;
+            case CommandKind::OutdentListItem:
+            case CommandKind::OutdentText: handled=source.outdent();break;
             case CommandKind::FormatDocument: {
                 auto formatted=format_markdown_source(source.source(),source.selection(),dialect_);
                 handled=source.replace_document(std::move(formatted.source),formatted.selection);break;

@@ -1,6 +1,6 @@
-// folia.core.command — Command enum + to_transaction() translation.
-// Faithful port of editor-core::command. Some commands return std::nullopt
-// (unimplemented in v1) and are handled at the editor/UI layer (HANDOFF).
+// Portable editing intents consumed by the editor transaction pipeline.
+// Hosts provide clipboard access, text-service delivery and measured layout;
+// navigation, selection and document mutation semantics live in the core.
 export module folia.core.command;
 import std;
 import folia.markdown.dialect;
@@ -18,7 +18,7 @@ enum class CommandKind {
     ToggleStrong, ToggleEmphasis, ToggleStrikethrough, ToggleInlineCode, FormatDocument,
     SetHeading, ClearHeading,
     ToggleUnorderedList, ToggleOrderedList, ToggleTaskList, ToggleTaskCheckbox, ToggleBlockQuote,
-    IndentListItem, OutdentListItem,
+    IndentListItem, OutdentListItem, IndentText, OutdentText, TabForward, TabBackward,
     InsertCodeBlock, SetCodeBlockLanguage, InsertMathInline, InsertMathBlock,
     InsertTable, InsertImage, InsertLink, InsertFootnote, CreateFootnoteDefinition, InsertToc,
     MoveTableCellNext, MoveTableCellPrevious,
@@ -40,6 +40,9 @@ struct Command {
     std::u32string text{};                 // InsertText / Paste / Extension payload
     bool typed_input = false;             // Direct typing, not paste or snippet expansion
     bool extend_selection = false;         // Move*
+    // Logical page size for clients without measured visual layout. Native
+    // hosts use their viewport geometry; the portable fallback stays useful.
+    std::size_t page_line_count = 20;
     std::uint8_t level = 0;               // SetHeading
     std::optional<std::u32string> lang;    // InsertCodeBlock / SetCodeBlockLanguage
     std::size_t rows = 0, cols = 0;       // InsertTable

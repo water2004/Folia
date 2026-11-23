@@ -141,7 +141,16 @@
     <ClCompile Include="..\core\model\callout.ixx">
       <Filter>Core Modules\Model</Filter>
     </ClCompile>
+    <ClCompile Include="..\core\editing\input_command.ixx">
+      <Filter>Core Modules\Editing</Filter>
+    </ClCompile>
     <ClCompile Include="..\core\editing\text_navigation.ixx">
+      <Filter>Core Modules\Editing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\core\editing\document_text_navigation.ixx">
+      <Filter>Core Modules\Editing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\core\editing\document_indentation.ixx">
       <Filter>Core Modules\Editing</Filter>
     </ClCompile>
     <ClCompile Include="..\core\editing\input_text_echo.ixx">
