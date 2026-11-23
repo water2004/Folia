@@ -476,6 +476,33 @@ inline bool markdown_html_block_ends_on_line(
     return markdown_html_detail::block_ends_on_line(kind, source, line_start, line_end);
 }
 
+// Types 1–5 continue through blank lines until their grammar terminator.
+// Reuse the block grammar when an editor needs to insert following content;
+// HTML validity and a missing Markdown block boundary are different facts.
+inline std::optional<std::u32string> markdown_html_missing_block_terminator(
+    std::u32string_view source) {
+    const auto first_end = (std::min)(source.find_first_of(U"\r\n"), source.size());
+    const auto opening = scan_markdown_html_block_start(source, 0, first_end);
+    if (!opening || opening->kind == MarkdownHtmlBlockKind::BlockTag
+        || opening->kind == MarkdownHtmlBlockKind::OtherTag
+        || markdown_html_block_ends_on_line(opening->kind, source, 0, source.size())) return std::nullopt;
+    switch (opening->kind) {
+        case MarkdownHtmlBlockKind::RawText: {
+            auto name = std::u32string(source.substr(opening->tag_start.start + 1,
+                opening->tag_start.length() - 1));
+            for (auto& value : name) if (value >= U'A' && value <= U'Z') value += U'a' - U'A';
+            return U"</" + name + U">";
+        }
+        case MarkdownHtmlBlockKind::Comment: return std::u32string{U"-->"};
+        case MarkdownHtmlBlockKind::ProcessingInstruction: return std::u32string{U"?>"};
+        case MarkdownHtmlBlockKind::Declaration: return std::u32string{U">"};
+        case MarkdownHtmlBlockKind::Cdata: return std::u32string{U"]]>"};
+        case MarkdownHtmlBlockKind::BlockTag:
+        case MarkdownHtmlBlockKind::OtherTag: return std::nullopt;
+    }
+    return std::nullopt;
+}
+
 // Complete non-element raw HTML constructs, with no decoding or body copies.
 inline std::optional<MarkdownHtmlSpecial> scan_markdown_html_special(
     std::u32string_view source, std::size_t start, std::size_t limit,

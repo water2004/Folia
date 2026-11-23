@@ -14,6 +14,9 @@ import folia.markdown.inline_document;
 import folia.markdown.text_edit;
 import folia.markdown.parser;
 import folia.markdown.serializer;
+import folia.markdown.markdown_html;
+import folia.markdown.utf;
+import folia.core.document_block_reparse;
 import folia.core.document_input_syntax;
 import folia.core.document_list_input;
 
@@ -47,8 +50,33 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> insert_atomic_boun
             syntax_mode = InlineSyntaxMode::HtmlText;
         }
     }
-    auto paragraph = document_edit_detail::empty_paragraph(allocator, document, syntax_mode);
     document_edit_detail::RecordedBlockEdit result;
+    document_edit_detail::MutationRollback rollback(document, result.operations, document.revision);
+    const auto& object = parent->children[index];
+    if (position.source_offset != 0 && object.kind == BlockKind::UnsupportedMarkup) {
+        auto source = utf8_to_cps(object.atomic_special().raw);
+        if (const auto closing = markdown_html_missing_block_terminator(source)) {
+            // An unclosed HTML literal would swallow a following paragraph on
+            // reload. Creating an explicit after-boundary also completes that
+            // boundary, without replacing any of the existing source bytes.
+            // Reclassify this owner because a completed comment, for example,
+            // is a valid HTML container rather than malformed atomic markup.
+            source += *closing;
+            auto parsed = plan_block_fragment(source, document.dialect,
+                [](const BlockVec& blocks) { return blocks.size() == 1; });
+            if (!parsed || serialize_markdown_fragment(parsed->blocks) != source) return std::nullopt;
+            parsed->blocks.front().separator_before = object.separator_before;
+            const auto parser_id = parsed->blocks.front().id;
+            document_edit_detail::BlockReparsePlan plan{
+                object.id, std::move(parsed->blocks), parser_id, 0};
+            auto completed = document_edit_detail::apply_block_reparse_plan(document, std::move(plan), allocator);
+            if (!completed) return std::nullopt;
+            result.operations = std::move(completed->operations);
+            parent = block_at_path(document.root, parent_path);
+            if (!parent) return std::nullopt;
+        }
+    }
+    auto paragraph = document_edit_detail::empty_paragraph(allocator, document, syntax_mode);
     result.target = {paragraph.id, 0, TextAffinity::Downstream};
     const auto insert_index = index + (position.source_offset == 0 ? 0u : 1u);
     DocumentTreeEdit insert;
@@ -60,6 +88,7 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> insert_atomic_boun
     if (!insert_block(*parent, insert_index, std::move(paragraph))) return std::nullopt;
     parent_path.push_back(insert_index);
     cache_document_block_path(document, parent_path);
+    rollback.commit();
     return result;
 }
 
