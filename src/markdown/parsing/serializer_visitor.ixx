@@ -29,6 +29,9 @@ inline std::u32string serializer_html_escape_attribute(std::u32string_view value
             case U'>': result += U"&gt;"; break;
             case U'\"': result += U"&quot;"; break;
             case U'\'': result += U"&#39;"; break;
+            case U'\r': result += U"&#13;"; break;
+            case U'\n': result += U"&#10;"; break;
+            case U'|': result += U"&#124;"; break;
             default: result.push_back(cp); break;
         }
     }

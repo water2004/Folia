@@ -32,6 +32,13 @@ import folia.markdown.gfm_autolink;
 
 export namespace folia {
 
+struct InlineLinkTargetRanges {
+    // Includes destination angle delimiters and title quote delimiters when
+    // present, so replacing one field preserves all surrounding source.
+    SourceRange destination;
+    std::optional<SourceRange> title;
+};
+
 namespace inline_parser_detail {
 
 struct Parser {
@@ -886,7 +893,8 @@ struct Parser {
         std::size_t end,
         std::size_t& source_end,
         std::string& href,
-        std::optional<std::string>& title) const {
+        std::optional<std::string>& title,
+        InlineLinkTargetRanges* target_ranges = nullptr) const {
         if (suffix >= end || src[suffix] != U'(') return false;
         // A complete inline link suffix must end in an unescaped `)`.
         // Reject impossible suffixes before title/destination scans walk a tail.
@@ -896,6 +904,7 @@ struct Parser {
         if (!skip_link_whitespace(cursor, end)) return false;
         const bool leading_whitespace = cursor != after_open;
 
+        const auto destination_source_start = cursor;
         std::size_t destination_start = cursor;
         std::size_t destination_end = cursor;
         const bool title_opener = cursor < end
@@ -947,6 +956,7 @@ struct Parser {
         }
 
         const auto after_destination = cursor;
+        std::optional<SourceRange> title_source_range;
         if (!skip_link_whitespace(cursor, end)) return false;
         if (cursor < end && (src[cursor] == U'"' || src[cursor] == U'\'' || src[cursor] == U'(')) {
             if (cursor == after_destination && !leading_whitespace) return false;
@@ -965,6 +975,7 @@ struct Parser {
                     if (opener != U'(' || --nesting == 0) {
                         title = normalize_link_title(std::u32string_view(src).substr(title_start, cursor - title_start));
                         ++cursor;
+                        title_source_range = SourceRange{title_start - 1, cursor};
                         title_closed = true;
                         break;
                     }
@@ -975,6 +986,8 @@ struct Parser {
         }
         if (cursor >= end || src[cursor] != U')') return false;
         source_end = cursor + 1;
+        if (target_ranges) *target_ranges = {
+            {destination_source_start, after_destination}, title_source_range};
         return true;
     }
 
@@ -2525,6 +2538,35 @@ struct Parser {
 };
 
 } // namespace inline_parser_detail
+
+inline std::vector<SourceRange> inline_link_label_opaque_ranges(std::u32string_view source) {
+    inline_parser_detail::Parser parser{source, {}};
+    std::vector<SourceRange> result;
+    for (std::size_t index = 0; index < source.size();) {
+        const auto end = parser.skip_emphasis_opaque(index);
+        if (end > index) { result.push_back({index, end}); index = end; }
+        else ++index;
+    }
+    return result;
+}
+
+inline std::optional<InlineLinkTargetRanges> inline_link_target_ranges(
+    std::u32string_view source, const InlineCstNode& node) {
+    if (node.kind != InlineCstKind::Link || node.status != ParseStatus::Complete
+        || !node.range.valid_for(source.size()) || !node.delimiter_ranges().closing) return std::nullopt;
+    const auto suffix = node.delimiter_ranges().content.end + 1;
+    if (suffix >= node.range.end) return std::nullopt;
+    inline_parser_detail::Parser parser{source, {}};
+    parser.scope_start = suffix;
+    parser.limit = node.range.end;
+    auto end = suffix;
+    std::string href;
+    std::optional<std::string> title;
+    InlineLinkTargetRanges result;
+    if (!parser.parse_inline_link_suffix(suffix, node.range.end, end, href, title, &result)
+        || end != node.range.end) return std::nullopt;
+    return result;
+}
 
 inline InlineCstTree parse_inline(std::u32string_view source, const InlineParseContext& ctx) {
     record_inline_reparse();

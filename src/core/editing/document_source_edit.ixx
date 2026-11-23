@@ -11,6 +11,7 @@ import folia.core.table_selection;
 import folia.markdown.inline_cst;
 import folia.markdown.inline_document;
 import folia.markdown.inline_parser;
+import folia.markdown.markdown_html;
 import folia.core.inline_source_edit;
 import folia.markdown.text_edit;
 import folia.markdown.utf;
@@ -427,19 +428,225 @@ inline std::optional<DocumentTransaction> insert(
         revision_before, document.revision, DocumentTransactionReason::Format);
 }
 
+inline bool link_node(const InlineCstNode& node) {
+    return node.status == ParseStatus::Complete && (node.kind == InlineCstKind::Autolink
+        || (node.delimiter_ranges().closing && (node.kind == InlineCstKind::Link
+            || (node.kind == InlineCstKind::HtmlElement && node.semantics().html_tag == "a"))));
+}
+
+template<class Visit>
+inline void visit_links(const InlineCstNodes& nodes, Visit visit, bool include_image_labels = false) {
+    std::vector<const InlineCstNode*> pending;
+    for (const auto& node : nodes) pending.push_back(&node);
+    while (!pending.empty()) {
+        const auto* node = pending.back();
+        pending.pop_back();
+        if (link_node(*node)) visit(*node);
+        // Caret targeting treats an image as a unit. Constructing an outer
+        // link must also remove link wrappers from image alt labels, keeping
+        // their text and image source without creating forbidden nested links.
+        if (node->kind != InlineCstKind::Image || include_image_labels)
+            for (const auto& child : node->children) pending.push_back(&child);
+    }
+}
+
+inline const InlineCstNode* containing_link(const InlineDocument& owner, SourceRange selected) {
+    const InlineCstNode* result = nullptr;
+    visit_links(owner.tree.nodes, [&](const InlineCstNode& node) {
+        const auto contains = selected.empty()
+            ? node.range.start < selected.start && selected.start < node.range.end
+            : node.range.start <= selected.start && selected.end <= node.range.end;
+        if (contains && (!result || node.range.length() < result->range.length())) result = &node;
+    });
+    return result;
+}
+
+inline SourceRange expand_link_boundaries(const InlineDocument& owner, SourceRange selected) {
+    visit_links(owner.tree.nodes, [&](const InlineCstNode& node) {
+        if (node.range.start < selected.end && selected.start < node.range.end) {
+            selected.start = (std::min)(selected.start, node.range.start);
+            selected.end = (std::max)(selected.end, node.range.end);
+        }
+    });
+    return selected;
+}
+
+inline std::u32string label_without_links(const InlineDocument& owner, SourceRange selected) {
+    std::vector<SourceRange> wrappers;
+    visit_links(owner.tree.nodes, [&](const InlineCstNode& node) {
+        if (node.range.start < selected.start || node.range.end > selected.end) return;
+        const auto& delimiters = node.delimiter_ranges();
+        if (!delimiters.opening.empty()) wrappers.push_back(delimiters.opening);
+        if (delimiters.closing && !delimiters.closing->empty()) wrappers.push_back(*delimiters.closing);
+    }, true);
+    std::ranges::sort(wrappers, std::greater{}, &SourceRange::start);
+    auto result = owner.source.substr(selected.start, selected.length());
+    for (const auto wrapper : wrappers)
+        result.erase(wrapper.start - selected.start, wrapper.length());
+    return result;
+}
+
+inline std::optional<DocumentTransaction> retarget_link(
+    EditorDocument& document, const TextSelection& selection, const InlineDocument& owner,
+    const InlineCstNode& node, std::u32string_view href, const std::optional<std::u32string>& title) {
+    const auto id = selection.active.container_id;
+    auto caret = node.delimiter_ranges().content.end;
+    std::vector<TextEdit> edits;
+    std::vector<TextEdit> appended_fields;
+    const auto same_href = cps_to_utf8(href) == node.semantics().href;
+    const auto same_title = title && node.semantics().title
+        && cps_to_utf8(*title) == *node.semantics().title;
+    if (const auto ranges = inline_link_target_ranges(owner.source, node)) {
+        if (!same_href) {
+            const auto angled = !ranges->destination.empty() && owner.source[ranges->destination.start] == U'<';
+            auto destination = serialize_link_destination(href, angled);
+            if (!destination.empty() && ranges->destination.empty() && ranges->title
+                && ranges->title->start == ranges->destination.end) destination += U' ';
+            edits.push_back({id, ranges->destination, std::move(destination)});
+        }
+        if (title && !same_title) {
+            if (ranges->title) edits.push_back({id, *ranges->title, serialize_link_title(*title)});
+            else appended_fields.push_back({id, {ranges->destination.end, ranges->destination.end},
+                U" " + serialize_link_title(*title)});
+        }
+    } else if (node.kind == InlineCstKind::HtmlElement && node.semantics().html_tag == "a") {
+        const auto opening = node.delimiter_ranges().opening;
+        const auto tag = scan_markdown_html_tag(owner.source, opening.start, opening.end);
+        if (!tag) return std::nullopt;
+        const auto attribute_edit = [&](std::u32string_view name, std::u32string_view value) {
+            const auto escaped = serialize_html_attribute_value(value);
+            auto found = false;
+            for (const auto& attribute : tag->attributes) {
+                auto source_name = owner.source.substr(attribute.name.start, attribute.name.length());
+                for (auto& ch : source_name) if (ch >= U'A' && ch <= U'Z') ch += U'a' - U'A';
+                if (source_name != name) continue;
+                found = true;
+                if (!attribute.value) {
+                    edits.push_back({id, {attribute.name.end, attribute.name.end}, U"=\"" + escaped + U"\""});
+                } else {
+                    const auto range = *attribute.value;
+                    const auto quoted = range.start > 0 && range.end < owner.source.size()
+                        && (owner.source[range.start - 1] == U'\'' || owner.source[range.start - 1] == U'\"')
+                        && owner.source[range.start - 1] == owner.source[range.end];
+                    edits.push_back({id, range, quoted ? escaped : U"\"" + escaped + U"\""});
+                }
+            }
+            if (!found) {
+                const auto at = opening.end - (tag->self_closing ? 2u : 1u);
+                appended_fields.push_back({id, {at, at}, U" " + std::u32string(name) + U"=\"" + escaped + U"\""});
+            }
+        };
+        if (!same_href || !node.semantics().html_attributes.contains("href")) attribute_edit(U"href", href);
+        if (title && !same_title) attribute_edit(U"title", *title);
+    } else return std::nullopt;
+
+    // Apply later fields first. All ranges remain in the original local
+    // source coordinate. New attributes/titles at a field's empty boundary
+    // follow that field's value, regardless of which attribute was missing.
+    std::ranges::reverse(appended_fields);
+    edits.insert(edits.begin(), std::make_move_iterator(appended_fields.begin()),
+        std::make_move_iterator(appended_fields.end()));
+    std::ranges::stable_sort(edits, [](const auto& left, const auto& right) {
+        return left.range.start != right.range.start ? left.range.start > right.range.start
+            : left.range.end > right.range.end;
+    });
+    std::erase_if(edits, [&](const auto& edit) {
+        return owner.source.substr(edit.range.start, edit.range.length()) == edit.replacement;
+    });
+    const auto revision_before = document.revision;
+    std::vector<DocumentOperation> operations;
+    document_edit_detail::MutationRollback rollback(document, operations, revision_before);
+    document_edit_detail::NodeAllocator allocator(document);
+    for (auto& edit : edits) {
+        caret = translate_offset(caret, TextAffinity::Upstream, edit);
+        auto applied = document_edit_detail::edit_inline(document, id, edit.range, std::move(edit.replacement), allocator);
+        if (!applied) return std::nullopt;
+        document_edit_detail::append_source_operation(operations, std::move(*applied));
+    }
+    if (!operations.empty()) ++document.revision;
+    rollback.commit();
+    return make_recorded_document_transaction(std::move(operations), selection,
+        TextSelection::caret({id, caret, TextAffinity::Downstream}),
+        revision_before, document.revision, DocumentTransactionReason::Format);
+}
+
 } // namespace document_inline_insertion_detail
 
 inline std::optional<DocumentTransaction> document_insert_link(EditorDocument& document, const TextSelection& selection, std::string href, std::optional<std::string> title) {
-    return document_inline_insertion_detail::insert(document, selection,
-        [&](InlineSyntaxMode syntax_mode, std::u32string_view label) {
+    if (selection.anchor.container_id != selection.active.container_id) {
+        auto first_index = document_editable_order_position(document, selection.anchor.container_id);
+        auto last_index = document_editable_order_position(document, selection.active.container_id);
+        if (!first_index || !last_index) return std::nullopt;
+        auto first = selection.anchor;
+        auto last = selection.active;
+        if (*first_index > *last_index) { std::swap(first_index, last_index); std::swap(first, last); }
+        std::vector<TextSelection> selected;
+        for (auto index = *first_index; index <= *last_index; ++index) {
+            const auto id = document.cached_editable_order[index];
+            const auto* block = find_document_block(document, id);
+            const auto visible = block ? editable_block_source_range(*block) : std::nullopt;
+            if (!visible) return std::nullopt;
+            const auto start = index == *first_index
+                ? (std::clamp)(first.source_offset, visible->start, visible->end) : visible->start;
+            const auto end = index == *last_index
+                ? (std::clamp)(last.source_offset, visible->start, visible->end) : visible->end;
+            if (start != end) selected.push_back({{id, start}, {id, end}});
+        }
+        if (selected.empty()) selected.push_back(TextSelection::caret(first));
+        const auto revision_before = document.revision;
+        std::vector<DocumentOperation> operations;
+        document_edit_detail::MutationRollback rollback(document, operations, revision_before);
+        auto after = selection;
+        for (const auto& local : selected) {
+            auto insertion = document_insert_link(document, local, href, title);
+            if (!insertion) return std::nullopt;
+            after = insertion->selection_after;
+            operations.insert(operations.end(), std::make_move_iterator(insertion->operations.begin()),
+                std::make_move_iterator(insertion->operations.end()));
+        }
+        document.revision = revision_before + (operations.empty() ? 0u : 1u);
+        rollback.commit();
+        return make_recorded_document_transaction(std::move(operations), selection, after,
+            revision_before, document.revision, DocumentTransactionReason::Format);
+    }
+
+    const auto source_href = utf8_to_cps(href);
+    const auto source_title = title ? std::optional{utf8_to_cps(*title)} : std::nullopt;
+    auto local = selection;
+    std::optional<std::u32string> label_source;
+    const auto* block = find_document_block(document, selection.active.container_id);
+    const auto* owner = block ? editable_inline_document(*block) : nullptr;
+    if (owner) {
+        auto selected = SourceRange{(std::min)(selection.anchor.source_offset, selection.active.source_offset),
+            (std::max)(selection.anchor.source_offset, selection.active.source_offset)};
+        if (!selected.valid_for(owner->source.size())) return std::nullopt;
+        if (const auto* existing = document_inline_insertion_detail::containing_link(*owner, selected)) {
+            if (auto edit = document_inline_insertion_detail::retarget_link(
+                    document, selection, *owner, *existing, source_href, source_title)) return edit;
+            selected = existing->range;
+        }
+        if (!selected.empty()) {
+            selected = document_inline_insertion_detail::expand_link_boundaries(*owner, selected);
+            label_source = document_inline_insertion_detail::label_without_links(*owner, selected);
+            local = {{block->id, selected.start}, {block->id, selected.end}};
+        }
+    } else if (block && block->kind == BlockKind::ImageBlock && !selection.is_caret()
+        && !block->inline_content.source.empty()) {
+        label_source = document_inline_insertion_detail::label_without_links(block->inline_content,
+            {0, block->inline_content.source.size()});
+    }
+    auto insertion = document_inline_insertion_detail::insert(document, local,
+        [&](InlineSyntaxMode syntax_mode, std::u32string_view selected_source) {
+            const auto label = label_source ? std::u32string_view{*label_source} : selected_source;
             const auto html = syntax_mode == InlineSyntaxMode::HtmlText;
-            const auto source_title = title ? std::optional{utf8_to_cps(*title)} : std::nullopt;
-            auto replacement = html ? serialize_html_link_source(utf8_to_cps(href), label, source_title)
-                : serialize_link_source(utf8_to_cps(href), label, source_title);
+            auto replacement = html ? serialize_html_link_source(source_href, label, source_title)
+                : serialize_link_source(source_href, label, source_title);
             const auto caret = html ? replacement.size() - std::u32string_view{U"</a>"}.size()
                 : 1 + serialize_link_label(label).size();
             return std::pair{std::move(replacement), caret};
         });
+    if (insertion) insertion->selection_before = selection;
+    return insertion;
 }
 
 inline std::optional<DocumentTransaction> document_insert_image(EditorDocument& document, const TextSelection& selection, std::string path, std::string alt) {

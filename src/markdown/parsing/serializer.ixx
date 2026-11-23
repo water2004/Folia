@@ -7,6 +7,7 @@ import folia.markdown.selection;
 import folia.markdown.ast;
 import folia.markdown.document;
 import folia.markdown.ids;
+import folia.markdown.inline_parser;
 import folia.markdown.serializer_visitor;
 import folia.markdown.serializer_writer;
 import folia.markdown.text_edit;
@@ -21,6 +22,7 @@ inline std::u32string serialize_link_destination(std::u32string_view destination
     const auto angle = force_angle || destination.find_first_of(U" \t\r\n()<>\\") != std::u32string_view::npos;
     std::u32string result = angle ? U"<" : U"";
     for (auto c : destination) {
+        if (c == U'&') { result += U"&amp;"; continue; }
         if (c == U'\n') { result += U"%0A"; continue; }
         if (c == U'\r') { result += U"%0D"; continue; }
         if (c == U'\t') { result += U"%09"; continue; }
@@ -36,7 +38,13 @@ inline std::u32string serialize_link_label(std::u32string_view label) {
     // Escape only unmatched brackets; retain existing source escapes verbatim.
     std::vector<std::size_t> openings;
     std::vector<bool> escape(label.size(), false);
+    const auto opaque = inline_link_label_opaque_ranges(label);
+    auto next_opaque = std::size_t{0};
     for (std::size_t index = 0; index < label.size(); ++index) {
+        if (next_opaque < opaque.size() && opaque[next_opaque].start == index) {
+            index = opaque[next_opaque++].end - 1;
+            continue;
+        }
         if (label[index] == U'\\' && index + 1 < label.size()) { ++index; continue; }
         if (label[index] == U'|') escape[index] = true;
         if (label[index] == U'[') openings.push_back(index);
@@ -58,17 +66,23 @@ inline std::u32string serialize_link_label(std::u32string_view label) {
     return result;
 }
 
+inline std::u32string serialize_link_title(std::u32string_view title) {
+    std::u32string result{U"\""};
+    for (auto value : title) {
+        if (value == U'&') { result += U"&amp;"; continue; }
+        if (value == U'\r') { result += U"&#13;"; continue; }
+        if (value == U'\n') { result += U"&#10;"; continue; }
+        if (value == U'\\' || value == U'\"' || value == U'|') result += U'\\';
+        result += value;
+    }
+    result += U'\"';
+    return result;
+}
+
 inline std::u32string serialize_link_source(std::u32string_view destination,
     std::u32string_view label, const std::optional<std::u32string>& title = {}) {
     auto result = U"[" + serialize_link_label(label) + U"](" + serialize_link_destination(destination);
-    if (title) {
-        result += U" \"";
-        for (auto c : *title) {
-            if (c == U'\\' || c == U'\"') result += U'\\';
-            result += c;
-        }
-        result += U'\"';
-    }
+    if (title) result += U' ' + serialize_link_title(*title);
     result += U')';
     return result;
 }
@@ -77,11 +91,16 @@ inline std::u32string serialize_image_source(std::u32string_view destination,
     std::u32string_view alt = {}, bool force_angle_destination = true) {
     std::u32string result = U"![";
     for (auto c : alt) {
+        if (c == U'&') { result += U"&amp;"; continue; }
         if (c == U'\\' || c == U'[' || c == U']' || c == U'|') result += U'\\';
         result += c;
     }
     result += U"](" + serialize_link_destination(destination, force_angle_destination) + U")";
     return result;
+}
+
+inline std::u32string serialize_html_attribute_value(std::u32string_view value) {
+    return serializer_detail::serializer_html_escape_attribute(value);
 }
 
 inline std::u32string serialize_html_link_source(std::u32string_view destination,
