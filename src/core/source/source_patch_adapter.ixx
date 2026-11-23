@@ -164,6 +164,7 @@ inline bool same_inline_structure(const BlockVec& before,std::size_t first,std::
     while (!pending.empty()) {
         const auto [old,node]=pending.back();pending.pop_back();
         if (old->kind!=node->kind || old->children.size()!=node->children.size()
+            || old->separator_before!=node->separator_before
             || old->has_html_source() || node->has_html_source()) return false;
         if (const auto* owner=editable_inline_document(*old)) {
             auto expected=owner->source;
@@ -238,6 +239,10 @@ inline std::optional<SourceDocumentPatch> apply_source_document_patch(
     std::vector<DocumentOperation> operations;
     document_edit_detail::MutationRollback rollback(document,operations,revision);
     document_edit_detail::NodeAllocator allocator(document);
+    // The incoming separator is outside this bounded fragment. Every other
+    // separator belongs to its parsed structure, including the change in
+    // newline ownership when a final text owner becomes an empty paragraph.
+    if (!parsed.blocks.empty()) parsed.blocks.front().separator_before=document.root.children[first].separator_before;
     auto bindings=bind_inline_edits(document,projection,patch);
     if (bindings && same_inline_structure(document.root.children,first,last,parsed.blocks,*bindings)) {
         for (const auto& edit:*bindings) {
@@ -246,7 +251,6 @@ inline std::optional<SourceDocumentPatch> apply_source_document_patch(
             document_edit_detail::append_source_operation(operations,std::move(*applied));
         }
     } else {
-        if (!parsed.blocks.empty()) parsed.blocks.front().separator_before=document.root.children[first].separator_before;
         auto same=[&](std::size_t old_index,std::size_t new_index) {
             if (!same_semantics(document.root.children[old_index],parsed.blocks[new_index])) return false;
             const auto& old=projection.blocks()[old_index];
