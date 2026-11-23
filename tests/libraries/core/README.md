@@ -7,6 +7,12 @@ automatically. It does not configure the WinUI application or generate native
 math font tables. The search/math regex interoperation test compiles only the
 independent regex host needed by that test.
 
+The gate also compiles the production key-command, shortcut catalog, and
+shortcut-settings adapters from `src/platform/windows/editor/interaction`,
+together with their deterministic tests. These modules use no Windows APIs;
+native keyboard, text-service, and renderer integration remain outside this
+portable executable.
+
 Production modules use `import std;`. Tests include `support/folia_test.hpp`
 and obtain the standard-library API through the repository's forked
 **Boost.UT module**, which exports it; tests do not import `std` directly.
