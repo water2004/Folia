@@ -4,9 +4,14 @@ export module folia.core.source_commands;
 import std;
 import folia.core.command;
 import folia.core.source_editor;
+import folia.core.source_projection;
+import folia.core.document_source_edit;
 import folia.core.document_inline_format;
 import folia.core.document_edit_primitives;
 import folia.markdown.dialect;
+import folia.markdown.ast;
+import folia.markdown.block_tree;
+import folia.markdown.document;
 import folia.markdown.ids;
 import folia.markdown.text_edit;
 import folia.markdown.selection;
@@ -389,24 +394,32 @@ inline bool footnote(SourceEditor& editor, const Command& command, std::string_v
         SourceSelection::caret(end + reference.size() + definition.size()));
 }
 
-inline bool code_language(SourceEditor& editor, const Command& command) {
-    const auto& lines = editor.lines();
-    auto index = line_at(editor, editor.selection().active);
-    while (index > 0 && lines[index].state_before.in_fence()) --index;
-    const auto fence = source_editor_detail::fence_at(lines[index].text);
-    if (!fence) return false;
-    auto language = command.lang.value_or(std::u32string{});
-    if (language.find_first_of(U"\r\n") != std::u32string::npos
-        || (fence->first == U'`' && language.find(U'`') != std::u32string::npos)) return false;
-    if (!language.empty() && language.front() == fence->first) language.insert(language.begin(), U' ');
-    auto begin = source_editor_detail::leading_spaces(lines[index].text) + fence->second;
-    return apply_prefix_edits(editor, {{{lines[index].source_start + begin, lines[index].source_end()}, std::move(language)}});
+inline bool code_language(SourceEditor& editor, const Command& command,
+    const EditorDocument& document, const SourceProjectionIndex& projection) {
+    // The block parser has already resolved nested list/quote/footnote
+    // prefixes. Use that owner rather than a second top-level fence scanner.
+    const auto position = projection.position(document, editor.selection().active,
+        editor.selection().active_affinity);
+    const auto* block = find_document_block(document, position.container_id);
+    if (!block || block->kind != BlockKind::CodeBlock) return false;
+    const auto begin = projection.offset(TextPosition{block->id, 0, TextAffinity::Downstream});
+    const auto end = projection.offset(TextPosition{block->id, block->block_source.source().size(), TextAffinity::Upstream});
+    if (!begin || !end) return false;
+    const auto line = line_at(editor, editor.selection().active);
+    if (line < line_at(editor, *begin) || line > line_at(editor, *end)) return false;
+    auto edit = plan_code_block_language_edit(*block, command.lang.value_or(std::u32string{}));
+    if (!edit) return false;
+    const auto first = projection.offset(TextPosition{block->id, edit->range.start, TextAffinity::Downstream});
+    const auto last = projection.offset(TextPosition{block->id, edit->range.end, TextAffinity::Upstream});
+    if (!first || !last || *last < *first) return false;
+    return apply_prefix_edits(editor, {{{*first, *last}, std::move(edit->replacement)}});
 }
 
 } // namespace source_command_detail
 
 inline bool execute_source_markup_command(SourceEditor& editor, const Command& command,
-    const MarkdownDialect& dialect, std::string_view fresh_footnote_label = {}) {
+    const MarkdownDialect& dialect, const EditorDocument& document,
+    const SourceProjectionIndex& projection, std::string_view fresh_footnote_label = {}) {
     using namespace source_command_detail;
     switch (command.kind) {
         case CommandKind::ToggleStrong: return toggle_inline(editor, InlineFormat::Strong, dialect);
@@ -428,7 +441,7 @@ inline bool execute_source_markup_command(SourceEditor& editor, const Command& c
         case CommandKind::ToggleCallout: return callout(editor, command);
         case CommandKind::InsertFootnote:
         case CommandKind::CreateFootnoteDefinition: return footnote(editor, command, fresh_footnote_label);
-        case CommandKind::SetCodeBlockLanguage: return code_language(editor, command);
+        case CommandKind::SetCodeBlockLanguage: return code_language(editor, command, document, projection);
         case CommandKind::InsertImage: {
             const auto alt = command.alt.empty() ? editor.selected_text() : command.alt;
             return editor.replace_selection(serialize_image_source(command.path.empty() ? U"image.png" : command.path, alt));

@@ -738,7 +738,7 @@ private:
             default:
                 if (command.kind == CommandKind::CreateFootnoteDefinition
                     && find_footnote_definition(symbols_, command.footnote_label)) return false;
-                handled = execute_source_markup_command(source, command, dialect_,
+                handled = execute_source_markup_command(source, command, dialect_, document_, source_view_->index,
                     command.kind == CommandKind::InsertFootnote ? next_footnote_label(symbols_) : std::string{});
                 break;
         }

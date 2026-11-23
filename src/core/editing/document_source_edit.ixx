@@ -366,13 +366,11 @@ inline std::optional<DocumentTransaction> document_insert_soft_break(EditorDocum
     return document_insert_text(document, selection, U"\n");
 }
 
-inline std::optional<DocumentTransaction> document_set_code_block_language(
-    EditorDocument& document,
-    const TextSelection& selection,
+inline std::optional<TextEdit> plan_code_block_language_edit(
+    const BlockNode& block,
     std::u32string language) {
-    auto* block = find_document_block(document, selection.active.container_id);
-    if (!block || block->kind != BlockKind::CodeBlock
-        || block->block_source.tree().kind != BlockSourceKind::FencedCode) {
+    if (block.kind != BlockKind::CodeBlock
+        || block.block_source.tree().kind != BlockSourceKind::FencedCode) {
         return std::nullopt;
     }
     const auto horizontal_space = [](char32_t value) {
@@ -391,8 +389,11 @@ inline std::optional<DocumentTransaction> document_set_code_block_language(
         return std::nullopt;
     }
 
-    const auto& tree = block->block_source.tree();
+    const auto& tree = block.block_source.tree();
     if (!tree.info_range) return std::nullopt;
+    const auto& source = block.block_source.source();
+    const auto marker = tree.info_range->start != 0 ? source[tree.info_range->start - 1] : U'\0';
+    if (marker == U'`' && language.find(U'`') != std::u32string::npos) return std::nullopt;
     auto replacement_range = tree.language_range.value_or(
         SourceRange{tree.info_range->start, tree.info_range->start});
     if (language.empty() && tree.language_range) {
@@ -402,19 +403,34 @@ inline std::optional<DocumentTransaction> document_set_code_block_language(
         // metadata.
         replacement_range = *tree.info_range;
     }
-    if (block->block_source.source().substr(
+    // A leading marker character must not extend the opening fence when the
+    // original info token starts immediately after it (for example ~~~cpp).
+    if (!language.empty() && language.front() == marker
+        && replacement_range.start == tree.info_range->start) language.insert(language.begin(), U' ');
+    if (source.substr(
             replacement_range.start,
             replacement_range.length()) == language) {
         return std::nullopt;
     }
+    return TextEdit{block.id, replacement_range, std::move(language)};
+}
+
+inline std::optional<DocumentTransaction> document_set_code_block_language(
+    EditorDocument& document,
+    const TextSelection& selection,
+    std::u32string language) {
+    const auto* block = find_document_block(document, selection.active.container_id);
+    if (!block) return std::nullopt;
+    auto edit = plan_code_block_language_edit(*block, std::move(language));
+    if (!edit) return std::nullopt;
 
     const auto revision_before = document.revision;
     document_edit_detail::NodeAllocator allocator(document);
     auto applied = document_edit_detail::edit_block_source(
         document,
-        block->id,
-        replacement_range,
-        std::move(language),
+        edit->container_id,
+        edit->range,
+        std::move(edit->replacement),
         allocator);
     if (!applied) return std::nullopt;
     const auto selection_after = translate_selection(selection, applied->forward);
