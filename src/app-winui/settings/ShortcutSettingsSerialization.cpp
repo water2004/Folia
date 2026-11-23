@@ -14,6 +14,7 @@ namespace
             case EditorShortcutScope::Global: return "global";
             case EditorShortcutScope::Code: return "code";
             case EditorShortcutScope::Math: return "math";
+            case EditorShortcutScope::Table: return "table";
         }
         throw std::runtime_error("unsupported shortcut scope");
     }
@@ -23,6 +24,7 @@ namespace
         if (value == L"global") return EditorShortcutScope::Global;
         if (value == L"code") return EditorShortcutScope::Code;
         if (value == L"math") return EditorShortcutScope::Math;
+        if (value == L"table") return EditorShortcutScope::Table;
         throw std::runtime_error("unsupported shortcut scope");
     }
 
@@ -104,23 +106,9 @@ namespace winrt::Folia
         Windows::Data::Json::JsonArray const& values)
     {
         using namespace folia::platform::editor;
-        auto result = default_editor_shortcuts();
-        std::unordered_set<std::string> seen;
-        for (auto const& value : values)
-        {
-            auto parsed = ParseShortcut(value.GetObject());
-            if (!seen.insert(parsed.id).second) throw std::runtime_error("duplicate shortcut id");
-            auto existing = std::ranges::find(result, parsed.id, &EditorShortcutBinding::id);
-            if (existing != result.end()) *existing = std::move(parsed);
-            else result.push_back(std::move(parsed));
-        }
-        for (std::size_t index = 0; index < result.size(); ++index)
-        {
-            if (!result[index].gesture) continue;
-            if (find_editor_shortcut_conflict(
-                result, *result[index].gesture, result[index].scope, index))
-                throw std::runtime_error("conflicting shortcut gestures");
-        }
-        return result;
+        std::vector<EditorShortcutBinding> saved;
+        saved.reserve(values.Size());
+        for (auto const& value : values) saved.push_back(ParseShortcut(value.GetObject()));
+        return merge_editor_shortcut_settings(saved);
     }
 }

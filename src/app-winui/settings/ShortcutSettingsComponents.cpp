@@ -73,13 +73,14 @@ namespace winrt::Folia::settings_ui
     {
         if (index == 1) return ShortcutScope::Code;
         if (index == 2) return ShortcutScope::Math;
+        if (index == 3) return ShortcutScope::Table;
         return ShortcutScope::Global;
     }
 
     winrt::hstring ShortcutActionLabel(ShortcutBinding const& binding)
     {
         if (!binding.custom_name.empty()) return winrt::to_hstring(binding.custom_name);
-        constexpr std::array<std::pair<std::string_view, std::wstring_view>, 55> labels{{
+        constexpr std::array<std::pair<std::string_view, std::wstring_view>, 65> labels{{
             {"file.open", L"Open"}, {"file.save", L"Save"},
             {"file.new", L"NewDocument"}, {"file.open_folder", L"OpenFolder"}, {"file.close", L"CloseTab"},
             {"view.next_tab", L"NextTab"}, {"view.previous_tab", L"PreviousTab"},
@@ -104,6 +105,16 @@ namespace winrt::Folia::settings_ui
             {"block.ordered_list", L"NumberedList"},
             {"block.unordered_list", L"BulletedList"},
             {"block.task_list", L"TaskList"},
+            {"nav.word_left", L"ShortcutWordLeft"},
+            {"nav.word_left_select", L"ShortcutSelectWordLeft"},
+            {"nav.word_right", L"ShortcutWordRight"},
+            {"nav.word_right_select", L"ShortcutSelectWordRight"},
+            {"nav.paragraph_start", L"ShortcutParagraphStart"},
+            {"nav.paragraph_start_select", L"ShortcutSelectParagraphStart"},
+            {"nav.paragraph_end", L"ShortcutParagraphEnd"},
+            {"nav.paragraph_end_select", L"ShortcutSelectParagraphEnd"},
+            {"edit.delete_word_backward", L"ShortcutDeleteWordBackward"},
+            {"edit.delete_word_forward", L"ShortcutDeleteWordForward"},
             {"nav.document_start", L"ShortcutDocumentStart"},
             {"nav.document_start_select", L"ShortcutSelectDocumentStart"},
             {"nav.document_end", L"ShortcutDocumentEnd"},

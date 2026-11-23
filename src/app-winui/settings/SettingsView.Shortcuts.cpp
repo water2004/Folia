@@ -135,6 +135,7 @@ namespace winrt::Folia
         scope.Items().Append(box_value(Localize(L"ShortcutScopeGlobal")));
         scope.Items().Append(box_value(Localize(L"ShortcutScopeCode")));
         scope.Items().Append(box_value(Localize(L"ShortcutScopeMath")));
+        scope.Items().Append(box_value(Localize(L"ShortcutScopeTable")));
         scope.SelectedIndex(ShortcutScopeIndex(binding.scope));
         scope.SelectionChanged([this, index](auto const& sender, auto const&)
         {
@@ -409,6 +410,7 @@ namespace winrt::Folia
         scope.Items().Append(box_value(Localize(L"ShortcutScopeGlobal")));
         scope.Items().Append(box_value(Localize(L"ShortcutScopeCode")));
         scope.Items().Append(box_value(Localize(L"ShortcutScopeMath")));
+        scope.Items().Append(box_value(Localize(L"ShortcutScopeTable")));
         scope.SelectedIndex(existing ? ShortcutScopeIndex(existing->scope) : 0);
         scope.HorizontalAlignment(HorizontalAlignment::Stretch);
         assignment.Children().Append(scope);

@@ -3,6 +3,8 @@
 
 import folia.core.editor;
 import folia.markdown.document_text;
+import folia.markdown.document;
+import folia.markdown.ast;
 import folia.core.document_interaction;
 import folia.core.document_inline_format;
 import folia.core.document_content_context;
@@ -322,7 +324,12 @@ namespace winrt::Folia
         {
             case DocumentContentContext::Code: return EditorShortcutScope::Code;
             case DocumentContentContext::Math: return EditorShortcutScope::Math;
-            case DocumentContentContext::Normal: return EditorShortcutScope::Global;
+            case DocumentContentContext::Normal:
+                if (auto block = folia::find_document_block(core_->editor.document(),
+                        core_->editor.selection().active.container_id);
+                    block && block->kind == folia::BlockKind::TableCell)
+                    return EditorShortcutScope::Table;
+                return EditorShortcutScope::Global;
         }
         return EditorShortcutScope::Global;
     }

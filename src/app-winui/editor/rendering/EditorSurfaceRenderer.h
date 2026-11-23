@@ -87,6 +87,7 @@ namespace winrt::Folia
         std::optional<EditorVisualRawBlock> CodeLanguageAt(float x, float y) const;
         std::optional<D2D1_RECT_F> CaretBounds(folia::TextPosition position) const;
         std::optional<folia::TextPosition> MoveCaretVertically(folia::TextPosition position, bool down, float& goalX) const;
+        std::optional<folia::TextPosition> MoveCaretByPage(folia::TextPosition position, bool down, float& goalX) const;
         std::optional<folia::TextPosition> VisualLineStart(folia::TextPosition position) const;
         std::optional<folia::TextPosition> VisualLineEnd(folia::TextPosition position) const;
         void UpdatePointer(float x, float y);

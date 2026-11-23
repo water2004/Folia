@@ -59,6 +59,25 @@ target_include_directories(FoliaCoreTests PRIVATE
     "${FOLIA_SOURCE_ROOT}/tests" "${CMAKE_CURRENT_BINARY_DIR}/gfm-entities")
 target_link_libraries(FoliaCoreTests PRIVATE folia_core Boost::ut_module)
 
+# These deterministic Windows-key adapters contain no Windows APIs. Exercise
+# the production shortcut catalog and dispatch policy on the portable runner
+# as well, so a global binding cannot silently consume an unsupported command.
+add_library(folia_test_editor_input STATIC)
+target_sources(folia_test_editor_input PUBLIC FILE_SET CXX_MODULES
+    BASE_DIRS "${FOLIA_SOURCE_ROOT}/src/platform/windows/editor/interaction"
+    FILES
+        "${FOLIA_SOURCE_ROOT}/src/platform/windows/editor/interaction/editor_input_command.ixx"
+        "${FOLIA_SOURCE_ROOT}/src/platform/windows/editor/interaction/editor_shortcuts.ixx"
+        "${FOLIA_SOURCE_ROOT}/src/platform/windows/editor/interaction/editor_shortcut_settings.ixx")
+target_compile_features(folia_test_editor_input PUBLIC cxx_std_23)
+set_target_properties(folia_test_editor_input PROPERTIES CXX_MODULE_STD ON)
+target_link_libraries(folia_test_editor_input PUBLIC folia_core)
+target_sources(FoliaCoreTests PRIVATE
+    "${FOLIA_SOURCE_ROOT}/tests/platform/test_editor_input_command.cpp"
+    "${FOLIA_SOURCE_ROOT}/tests/platform/test_editor_shortcuts.cpp"
+    "${FOLIA_SOURCE_ROOT}/tests/platform/test_editor_shortcut_settings.cpp")
+target_link_libraries(FoliaCoreTests PRIVATE folia_test_editor_input)
+
 # One search regression deliberately loads the math regex host in the same
 # process to verify the two regex policies remain independent. This narrow
 # utility has no renderer/font dependency, and is compiled unchanged.
@@ -85,7 +104,7 @@ add_custom_target(FoliaCoreEntityFixtures DEPENDS "${FOLIA_GFM_ENTITY_CASES}")
 add_dependencies(FoliaCoreTests FoliaCoreEntityFixtures)
 
 if(MSVC)
-    foreach(folia_target IN ITEMS folia_core folia_test_math_regexp FoliaCoreTests)
+    foreach(folia_target IN ITEMS folia_core folia_test_math_regexp folia_test_editor_input FoliaCoreTests)
         target_compile_options(${folia_target} PRIVATE /utf-8 /permissive- /Zc:preprocessor)
     endforeach()
     add_library(folia_console_test_runtime OBJECT

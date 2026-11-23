@@ -88,4 +88,76 @@ suite editor_shortcut_tests = [] {
     check({EditorKey::Tab, true, true}, "view.previous_tab");
 };
 
+"text navigation shortcuts do not dispatch table mutations outside tables"_test = [] {
+    auto bindings = default_editor_shortcuts();
+    struct Case { EditorKey key; CommandKind text; CommandKind table; };
+    const Case cases[] = {
+        {EditorKey::Left, CommandKind::MoveWordLeft, CommandKind::InsertTableColumnLeft},
+        {EditorKey::Right, CommandKind::MoveWordRight, CommandKind::InsertTableColumnRight},
+        {EditorKey::Up, CommandKind::MoveParagraphStart, CommandKind::InsertTableRowAbove},
+        {EditorKey::Down, CommandKind::MoveParagraphEnd, CommandKind::InsertTableRowBelow},
+        {EditorKey::Back, CommandKind::DeleteWordBackward, CommandKind::DeleteTableRow},
+        {EditorKey::DeleteKey, CommandKind::DeleteWordForward, CommandKind::DeleteTableColumn},
+    };
+    for (auto item : cases) {
+        for (auto scope : {EditorShortcutScope::Global, EditorShortcutScope::Code,
+                EditorShortcutScope::Math, EditorShortcutScope::Table}) {
+            auto found = resolve_editor_shortcut(bindings, {item.key, true}, scope);
+            expect(fatal(found.has_value()));
+            expect(editor_shortcut_input_action(bindings[*found].action_id).command.kind
+                == (scope == EditorShortcutScope::Table ? item.table : item.text));
+        }
+    }
+    for (auto key : {EditorKey::Left, EditorKey::Right, EditorKey::Up, EditorKey::Down}) {
+        auto found = resolve_editor_shortcut(bindings, {key, true, true}, EditorShortcutScope::Table);
+        expect(fatal(found.has_value()));
+        expect(editor_shortcut_input_action(bindings[*found].action_id).command.extend_selection);
+    }
+    for (std::size_t i = 0; i < bindings.size(); ++i) {
+        if (bindings[i].gesture) expect(!find_editor_shortcut_conflict(bindings,
+            *bindings[i].gesture, bindings[i].scope, i));
+    }
+};
+
+"saved stock table shortcuts migrate without reviving disabled or customized bindings"_test = [] {
+    auto previous = default_editor_shortcuts();
+    std::erase_if(previous, [](auto const& binding) {
+        return binding.id.starts_with("nav.word_") || binding.id.starts_with("nav.paragraph_")
+            || binding.id.starts_with("edit.delete_word_");
+    });
+    for (auto& binding : previous) if (binding.scope == EditorShortcutScope::Table)
+        binding.scope = EditorShortcutScope::Global;
+    auto merged = merge_editor_shortcut_settings(previous);
+    auto find = [&](auto const& values, std::string_view id) -> auto const& {
+        return *std::ranges::find(values, id, &EditorShortcutBinding::id);
+    };
+    expect(find(merged, "table.column_left").scope == EditorShortcutScope::Table);
+    auto text = resolve_editor_shortcut(merged, {EditorKey::Left, true}, EditorShortcutScope::Global);
+    expect(fatal(text.has_value()));
+    expect(merged[*text].action_id == "nav.word_left");
+    auto customized = previous;
+    auto left = std::ranges::find(customized, std::string_view{"table.column_left"}, &EditorShortcutBinding::id);
+    left->custom_name = "My table command";
+    auto right = std::ranges::find(customized, std::string_view{"table.column_right"}, &EditorShortcutBinding::id);
+    right->gesture.reset();
+    auto retained = merge_editor_shortcut_settings(customized);
+    expect(find(retained, "table.column_left") == *left);
+    expect(!find(retained, "nav.word_left").gesture);
+    expect(!find(retained, "table.column_right").gesture);
+    expect(find(retained, "table.column_right").scope == EditorShortcutScope::Global);
+    expect(find(retained, "nav.word_right").gesture.has_value());
+};
+
+"saved custom shortcuts take precedence over newly introduced defaults"_test = [] {
+    std::vector<EditorShortcutBinding> saved{{.id = "user.left", .action_id = "custom",
+        .custom_name = "Wrap", .action_kind = EditorShortcutActionKind::InsertSnippet,
+        .gesture = EditorKeyGesture{EditorKey::Left, true}, .snippet = U"[$1]"}};
+    auto merged = merge_editor_shortcut_settings(saved);
+    auto found = resolve_editor_shortcut(merged, {EditorKey::Left, true}, EditorShortcutScope::Global);
+    expect(fatal(found.has_value()));
+    expect(merged[*found] == saved.front());
+    saved.push_back(saved.front());
+    expect(throws([&] { merge_editor_shortcut_settings(saved); }));
+};
+
 };

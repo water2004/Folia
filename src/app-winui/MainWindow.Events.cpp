@@ -25,7 +25,7 @@ namespace winrt::Folia::implementation
             [this] { documentController().PasteClipboard(); },
             [this](std::string_view action)
             {
-                DispatchApplicationAction(action);
+                return DispatchApplicationAction(action);
             },
             appSettings.shortcutBindings,
             [this] { RenderEditorSurface(); });
@@ -222,6 +222,7 @@ namespace winrt::Folia::implementation
         escapeAccelerator.Key(winrt::Windows::System::VirtualKey::Escape);
         escapeAccelerator.Invoked([this](auto const&, auto const& args)
         {
+            if (textInputController.IsComposing()) return;
             if (HandleCompletionKey(keyboardController.Gesture(winrt::Windows::System::VirtualKey::Escape))) { args.Handled(true); return; }
             if (FindReplaceBar().Visibility() != Microsoft::UI::Xaml::Visibility::Visible) return;
             HideFindBar();

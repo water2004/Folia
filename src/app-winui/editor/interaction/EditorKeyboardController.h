@@ -14,7 +14,7 @@ namespace winrt::Folia
     {
         using ExecuteCommand = std::function<bool(folia::Command const&)>;
         using Action = std::function<void()>;
-        using ApplicationAction = std::function<void(std::string_view)>;
+        using ApplicationAction = std::function<bool(std::string_view)>;
         using Render = std::function<void()>;
 
         void Attach(
@@ -46,13 +46,13 @@ namespace winrt::Folia
         std::vector<folia::platform::editor::EditorSnippetPlaceholder> SnippetPlaceholders();
 
     private:
-        bool DispatchInputAction(folia::platform::editor::EditorInputAction const& action);
+        bool DispatchInputAction(folia::EditorInputAction const& action);
         bool DispatchShortcut(folia::platform::editor::EditorShortcutBinding const& shortcut);
         bool InsertSnippet(
             std::u32string_view source,
             std::optional<std::u32string> selectedText = std::nullopt);
         bool MoveSnippetTabStop(bool backward);
-        bool MoveCaretVerticalStep(bool down, bool extend);
+        bool MoveCaretVerticalStep(bool down, bool extend, bool page = false);
         static bool KeyDown(winrt::Windows::System::VirtualKey key);
 
         EditorSession* session_ = nullptr;

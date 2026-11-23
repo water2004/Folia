@@ -87,4 +87,17 @@ suite editor_input_command_tests = [] {
     expect(!IsAppliedSemanticNewlineUpdate(L"plain", 5));
 };
 
+"page navigation gestures are reachable with selection extension"_test = [] {
+    for (bool extend : {false, true}) {
+        auto up = TranslateEditorKeyGesture({EditorKey::PageUp, false, extend});
+        expect(up.kind == EditorInputActionKind::VisualPageUp);
+        expect(up.command.kind == CommandKind::MovePageUp);
+        expect(up.command.extend_selection == extend);
+        auto down = TranslateEditorKeyGesture({EditorKey::PageDown, false, extend});
+        expect(down.kind == EditorInputActionKind::VisualPageDown);
+        expect(down.command.kind == CommandKind::MovePageDown);
+        expect(down.command.extend_selection == extend);
+    }
+};
+
 }; // suite editor_input_command_tests

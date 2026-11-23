@@ -1,7 +1,7 @@
 // folia.platform.editor_input_command — deterministic Windows key gesture mapping.
 export module folia.platform.editor_input_command;
 import std;
-export import folia.core.command;
+export import folia.core.input_command;
 
 export namespace folia::platform::editor
 {
@@ -102,30 +102,6 @@ export namespace folia::platform::editor
         return EditorCompletionKeyOwner::None;
     }
 
-    enum class EditorInputActionKind
-    {
-        None,
-        ExecuteCommand,
-        ExecuteCommandIfApplied,
-        Copy,
-        Cut,
-        Paste,
-        VisualLineStart,
-        VisualLineEnd,
-        VisualLineUp,
-        VisualLineDown,
-        TabForward,
-        TabBackward,
-    };
-
-    struct EditorInputAction
-    {
-        EditorInputActionKind kind = EditorInputActionKind::None;
-        folia::Command command{};
-
-        bool Handled() const noexcept { return kind != EditorInputActionKind::None; }
-    };
-
     // Hardware Enter is executed by the semantic block editor before
     // CoreText reports the corresponding text update.  Recognize that the
     // insertion is already present in the text service's UTF-16 projection
@@ -142,76 +118,23 @@ export namespace folia::platform::editor
 
     inline EditorInputAction TranslateEditorKeyGesture(EditorKeyGesture gesture)
     {
-        auto execute = [](folia::Command command)
-        {
-            return EditorInputAction{
-                .kind = EditorInputActionKind::ExecuteCommand,
-                .command = std::move(command),
-            };
-        };
-        auto command = folia::Command{};
-
-        // Configurable shortcuts are resolved by editor_shortcuts. Keeping a
-        // second Ctrl/Alt mapping here would make an unset binding fire its
-        // legacy action and violate the single command-mapping model.
-        if (gesture.control || gesture.alt) return {};
-
-        switch (gesture.key)
-        {
-            case EditorKey::Back:
-                command.kind = folia::CommandKind::DeleteBackward;
-                return execute(std::move(command));
-            case EditorKey::DeleteKey:
-                command.kind = folia::CommandKind::DeleteForward;
-                return execute(std::move(command));
-            case EditorKey::Enter:
-                command.kind = gesture.shift
-                    ? folia::CommandKind::InsertSoftBreak
-                    : folia::CommandKind::InsertNewline;
-                return {
-                    .kind = EditorInputActionKind::ExecuteCommandIfApplied,
-                    .command = std::move(command),
-                };
-            case EditorKey::Left:
-                command.kind = folia::CommandKind::MoveLeft;
-                command.extend_selection = gesture.shift;
-                return execute(std::move(command));
-            case EditorKey::Right:
-                command.kind = folia::CommandKind::MoveRight;
-                command.extend_selection = gesture.shift;
-                return execute(std::move(command));
-            case EditorKey::Up:
-                return {
-                    .kind = EditorInputActionKind::VisualLineUp,
-                    .command = folia::Command::MoveUp(gesture.shift),
-                };
-            case EditorKey::Down:
-                return {
-                    .kind = EditorInputActionKind::VisualLineDown,
-                    .command = folia::Command::MoveDown(gesture.shift),
-                };
-            case EditorKey::Home:
-                command.kind = folia::CommandKind::MoveLineStart;
-                command.extend_selection = gesture.shift;
-                return {
-                    .kind = EditorInputActionKind::VisualLineStart,
-                    .command = std::move(command),
-                };
-            case EditorKey::End:
-                command.kind = folia::CommandKind::MoveLineEnd;
-                command.extend_selection = gesture.shift;
-                return {
-                    .kind = EditorInputActionKind::VisualLineEnd,
-                    .command = std::move(command),
-                };
-            case EditorKey::Tab:
-                return {
-                    .kind = gesture.shift
-                        ? EditorInputActionKind::TabBackward
-                        : EditorInputActionKind::TabForward,
-                };
-            default:
-                return {};
+        auto key = KeyEvent{.modifiers = {.ctrl = gesture.control,
+            .shift = gesture.shift, .alt = gesture.alt}};
+        switch (gesture.key) {
+            case EditorKey::Back: key.key_code = KeyCode::Backspace; break;
+            case EditorKey::DeleteKey: key.key_code = KeyCode::Delete; break;
+            case EditorKey::Enter: key.key_code = KeyCode::Enter; break;
+            case EditorKey::Left: key.key_code = KeyCode::Left; break;
+            case EditorKey::Right: key.key_code = KeyCode::Right; break;
+            case EditorKey::Up: key.key_code = KeyCode::Up; break;
+            case EditorKey::Down: key.key_code = KeyCode::Down; break;
+            case EditorKey::Home: key.key_code = KeyCode::Home; break;
+            case EditorKey::End: key.key_code = KeyCode::End; break;
+            case EditorKey::PageUp: key.key_code = KeyCode::PageUp; break;
+            case EditorKey::PageDown: key.key_code = KeyCode::PageDown; break;
+            case EditorKey::Tab: key.key_code = KeyCode::Tab; break;
+            default: return {};
         }
+        return translate_editor_editing_key(key);
     }
 }

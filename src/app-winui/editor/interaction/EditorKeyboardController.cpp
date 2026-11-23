@@ -86,6 +86,7 @@ namespace winrt::Folia
 
         std::u32string text(1, codepoint);
         if (textInput_ && textInput_->ConsumeCommittedCoreTextCharacter(text)) return true;
+        if (textInput_ && textInput_->IsComposing()) return false;
 
         auto selection = session_->Selection();
         auto start = session_->TextInputAcpOffset(selection.active);
@@ -128,6 +129,7 @@ namespace winrt::Folia
     bool EditorKeyboardController::Key(folia::platform::editor::EditorKeyGesture gesture)
     {
         if (!session_ || !renderer_ || !executeCommand_) return false;
+        if (textInput_ && textInput_->IsComposing()) return false;
         if (textInput_) textInput_->BeginHardwareKey();
         pendingHighSurrogate_.reset();
         if (auto shortcut = folia::platform::editor::resolve_editor_shortcut(
@@ -139,7 +141,7 @@ namespace winrt::Folia
 
     bool EditorKeyboardController::InsertNewline()
     {
-        if (!executeCommand_) return false;
+        if (!executeCommand_ || (textInput_ && textInput_->IsComposing())) return false;
         auto shift = KeyDown(winrt::Windows::System::VirtualKey::Shift)
             || KeyDown(winrt::Windows::System::VirtualKey::LeftShift)
             || KeyDown(winrt::Windows::System::VirtualKey::RightShift);
@@ -151,9 +153,9 @@ namespace winrt::Folia
     }
 
     bool EditorKeyboardController::DispatchInputAction(
-        folia::platform::editor::EditorInputAction const& action)
+        folia::EditorInputAction const& action)
     {
-        using folia::platform::editor::EditorInputActionKind;
+        using folia::EditorInputActionKind;
         if (!executeCommand_) return false;
         switch (action.kind)
         {
@@ -162,10 +164,15 @@ namespace winrt::Folia
             case EditorInputActionKind::ExecuteCommand:
                 CancelSnippetSession();
                 if (action.command.kind == folia::CommandKind::MoveLeft
-                    || action.command.kind == folia::CommandKind::MoveRight)
+                    || action.command.kind == folia::CommandKind::MoveRight
+                    || action.command.kind == folia::CommandKind::MoveWordLeft
+                    || action.command.kind == folia::CommandKind::MoveWordRight
+                    || action.command.kind == folia::CommandKind::MoveParagraphStart
+                    || action.command.kind == folia::CommandKind::MoveParagraphEnd
+                    || action.command.kind == folia::CommandKind::MoveDocumentStart
+                    || action.command.kind == folia::CommandKind::MoveDocumentEnd)
                     ResetCaretGoal();
-                executeCommand_(action.command);
-                return true;
+                return executeCommand_(action.command);
             case EditorInputActionKind::ExecuteCommandIfApplied:
                 CancelSnippetSession();
                 if (!executeCommand_(action.command)) return false;
@@ -175,15 +182,18 @@ namespace winrt::Folia
                     textInput_->RecordSemanticLineBreakUpdate();
                 return true;
             case EditorInputActionKind::Copy:
-                if (copy_) copy_();
+                if (!copy_) return false;
+                copy_();
                 return true;
             case EditorInputActionKind::Cut:
                 CancelSnippetSession();
-                if (cut_) cut_();
+                if (!cut_) return false;
+                cut_();
                 return true;
             case EditorInputActionKind::Paste:
                 CancelSnippetSession();
-                if (paste_) paste_();
+                if (!paste_) return false;
+                paste_();
                 return true;
             case EditorInputActionKind::VisualLineUp:
                 CancelSnippetSession();
@@ -191,6 +201,12 @@ namespace winrt::Folia
             case EditorInputActionKind::VisualLineDown:
                 CancelSnippetSession();
                 return MoveCaretVerticalStep(true, action.command.extend_selection);
+            case EditorInputActionKind::VisualPageUp:
+                CancelSnippetSession();
+                return MoveCaretVerticalStep(false, action.command.extend_selection, true);
+            case EditorInputActionKind::VisualPageDown:
+                CancelSnippetSession();
+                return MoveCaretVerticalStep(true, action.command.extend_selection, true);
             case EditorInputActionKind::VisualLineStart:
             case EditorInputActionKind::VisualLineEnd:
             {
@@ -202,8 +218,7 @@ namespace winrt::Folia
                     : renderer_->VisualLineEnd(selection.active);
                 if (!position)
                 {
-                    executeCommand_(action.command);
-                    return true;
+                    return executeCommand_(action.command);
                 }
                 position->affinity = action.kind == EditorInputActionKind::VisualLineStart
                     ? folia::TextAffinity::Downstream
@@ -217,23 +232,12 @@ namespace winrt::Folia
                 return true;
             }
             case EditorInputActionKind::TabBackward:
-            {
-                if (MoveSnippetTabStop(true)) return true;
-                auto command = folia::Command{.kind = folia::CommandKind::OutdentListItem};
-                if (executeCommand_(command)) return true;
-                command.kind = folia::CommandKind::MoveTableCellPrevious;
-                executeCommand_(command);
-                return true;
-            }
             case EditorInputActionKind::TabForward:
             {
-                if (MoveSnippetTabStop(false)) return true;
-                auto command = folia::Command{.kind = folia::CommandKind::IndentListItem};
-                if (executeCommand_(command)) return true;
-                command.kind = folia::CommandKind::MoveTableCellNext;
-                if (!executeCommand_(command))
-                    executeCommand_(folia::Command::InsertText(U"    "));
-                return true;
+                const auto backward = action.kind == EditorInputActionKind::TabBackward;
+                if (MoveSnippetTabStop(backward)) return true;
+                return executeCommand_(folia::Command{.kind = backward
+                    ? folia::CommandKind::TabBackward : folia::CommandKind::TabForward});
             }
         }
         return false;
@@ -249,8 +253,7 @@ namespace winrt::Folia
         if (action.Handled()) return DispatchInputAction(action);
         CancelSnippetSession();
         if (!applicationAction_) return false;
-        applicationAction_(shortcut.action_id);
-        return true;
+        return applicationAction_(shortcut.action_id);
     }
 
     void EditorKeyboardController::ResetCaretGoal()
@@ -258,15 +261,21 @@ namespace winrt::Folia
         caretGoalX_ = -1.0f;
     }
 
-    bool EditorKeyboardController::MoveCaretVerticalStep(bool down, bool extend)
+    bool EditorKeyboardController::MoveCaretVerticalStep(bool down, bool extend, bool page)
     {
         if (!session_ || !renderer_) return false;
         auto selection = session_->Selection();
-        auto move = renderer_->MoveCaretVertically(selection.active, down, caretGoalX_);
-        if (!move)
+        auto move = page
+            ? renderer_->MoveCaretByPage(selection.active, down, caretGoalX_)
+            : renderer_->MoveCaretVertically(selection.active, down, caretGoalX_);
+        if (!move || *move == selection.active)
         {
             ResetCaretGoal();
-            return false;
+            if (!executeCommand_) return false;
+            return executeCommand_(folia::Command{.kind = page
+                ? (down ? folia::CommandKind::MovePageDown : folia::CommandKind::MovePageUp)
+                : (down ? folia::CommandKind::MoveDown : folia::CommandKind::MoveUp),
+                .extend_selection = extend});
         }
         session_->SetSelection(extend ? selection.anchor : *move, *move);
         if (textInput_) textInput_->NotifySelectionChanged();

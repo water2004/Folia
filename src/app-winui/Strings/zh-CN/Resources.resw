@@ -374,4 +374,15 @@
   <data name="AIReasoningMissingMetadata" xml:space="preserve"><value>上游未提供可用的思考档位信息，可手动填写。留空或选择服务默认时不发送力度参数。</value></data>
   <data name="AIExplicitCache" xml:space="preserve"><value>显式提示缓存</value></data>
   <data name="AIExplicitCacheDescription" xml:space="preserve"><value>仅在服务和模型支持显式缓存断点时开启。Folia 在稳定上下文末尾标记断点，是否写入或命中缓存及相关费用由服务决定。</value></data>
+  <data name="ShortcutScopeTable" xml:space="preserve"><value>表格区域</value></data>
+  <data name="ShortcutWordLeft" xml:space="preserve"><value>移至前一个词</value></data>
+  <data name="ShortcutSelectWordLeft" xml:space="preserve"><value>选择至前一个词</value></data>
+  <data name="ShortcutWordRight" xml:space="preserve"><value>移至后一个词</value></data>
+  <data name="ShortcutSelectWordRight" xml:space="preserve"><value>选择至后一个词</value></data>
+  <data name="ShortcutParagraphStart" xml:space="preserve"><value>移至前一段</value></data>
+  <data name="ShortcutSelectParagraphStart" xml:space="preserve"><value>选择至前一段</value></data>
+  <data name="ShortcutParagraphEnd" xml:space="preserve"><value>移至后一段</value></data>
+  <data name="ShortcutSelectParagraphEnd" xml:space="preserve"><value>选择至后一段</value></data>
+  <data name="ShortcutDeleteWordBackward" xml:space="preserve"><value>删除前一个词</value></data>
+  <data name="ShortcutDeleteWordForward" xml:space="preserve"><value>删除后一个词</value></data>
 </root>

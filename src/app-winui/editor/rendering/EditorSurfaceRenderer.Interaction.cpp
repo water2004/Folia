@@ -108,6 +108,17 @@ namespace winrt::Folia
     }
     std::optional<D2D1_RECT_F> EditorSurfaceRenderer::CaretBounds(folia::TextPosition position) const { return interactionMap.CaretBounds(position, styleSheet.body.lineHeight); }
     std::optional<folia::TextPosition> EditorSurfaceRenderer::MoveCaretVertically(folia::TextPosition position, bool down, float& goalX) const { return interactionMap.MoveCaretVertically(position, down, goalX, styleSheet.body.lineHeight); }
+    std::optional<folia::TextPosition> EditorSurfaceRenderer::MoveCaretByPage(
+        folia::TextPosition position, bool down, float& goalX) const
+    {
+        auto caret = CaretBounds(position);
+        if (!caret) return std::nullopt;
+        if (goalX < 0.0f) goalX = caret->left;
+        auto lineHeight = (std::max)(1.0f, caret->bottom - caret->top);
+        auto distance = (std::max)(lineHeight, ViewportHeight() - lineHeight);
+        auto targetY = (caret->top + caret->bottom) * 0.5f + (down ? distance : -distance);
+        return interactionMap.HitTest(goalX, targetY);
+    }
     std::optional<folia::TextPosition> EditorSurfaceRenderer::VisualLineStart(folia::TextPosition position) const { return interactionMap.VisualLineStart(position); }
     std::optional<folia::TextPosition> EditorSurfaceRenderer::VisualLineEnd(folia::TextPosition position) const { return interactionMap.VisualLineEnd(position); }
 

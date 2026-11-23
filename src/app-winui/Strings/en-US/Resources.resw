@@ -374,4 +374,15 @@
   <data name="AIReasoningMissingMetadata" xml:space="preserve"><value>The service did not provide usable reasoning-level information. You can enter a value manually; blank or service default sends no effort parameter.</value></data>
   <data name="AIExplicitCache" xml:space="preserve"><value>Explicit prompt caching</value></data>
   <data name="AIExplicitCacheDescription" xml:space="preserve"><value>Enable only if your service and model support explicit cache breakpoints. Folia marks the end of the reusable context. The service determines cache eligibility and charges.</value></data>
+  <data name="ShortcutScopeTable" xml:space="preserve"><value>Table</value></data>
+  <data name="ShortcutWordLeft" xml:space="preserve"><value>Previous word</value></data>
+  <data name="ShortcutSelectWordLeft" xml:space="preserve"><value>Select to previous word</value></data>
+  <data name="ShortcutWordRight" xml:space="preserve"><value>Next word</value></data>
+  <data name="ShortcutSelectWordRight" xml:space="preserve"><value>Select to next word</value></data>
+  <data name="ShortcutParagraphStart" xml:space="preserve"><value>Previous paragraph</value></data>
+  <data name="ShortcutSelectParagraphStart" xml:space="preserve"><value>Select to previous paragraph</value></data>
+  <data name="ShortcutParagraphEnd" xml:space="preserve"><value>Next paragraph</value></data>
+  <data name="ShortcutSelectParagraphEnd" xml:space="preserve"><value>Select to next paragraph</value></data>
+  <data name="ShortcutDeleteWordBackward" xml:space="preserve"><value>Delete previous word</value></data>
+  <data name="ShortcutDeleteWordForward" xml:space="preserve"><value>Delete next word</value></data>
 </root>

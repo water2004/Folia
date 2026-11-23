@@ -9,6 +9,7 @@ enum class EditorShortcutScope {
     Global,
     Code,
     Math,
+    Table,
 };
 
 enum class EditorShortcutActionKind {
@@ -141,17 +142,58 @@ inline std::vector<EditorShortcutBinding> default_editor_shortcuts() {
         built_in_shortcut("nav.document_start_select", "nav.document_start_select", ctrl(K::Home, true)),
         built_in_shortcut("nav.document_end", "nav.document_end", ctrl(K::End)),
         built_in_shortcut("nav.document_end_select", "nav.document_end_select", ctrl(K::End, true)),
-        built_in_shortcut("table.row_above", "table.row_above", ctrl(K::Up)),
-        built_in_shortcut("table.row_below", "table.row_below", ctrl(K::Down)),
-        built_in_shortcut("table.column_left", "table.column_left", ctrl(K::Left)),
-        built_in_shortcut("table.column_right", "table.column_right", ctrl(K::Right)),
-        built_in_shortcut("table.row_move_up", "table.row_move_up", ctrl(K::Up, false, true)),
-        built_in_shortcut("table.row_move_down", "table.row_move_down", ctrl(K::Down, false, true)),
-        built_in_shortcut("table.column_move_left", "table.column_move_left", ctrl(K::Left, false, true)),
-        built_in_shortcut("table.column_move_right", "table.column_move_right", ctrl(K::Right, false, true)),
-        built_in_shortcut("table.row_delete", "table.row_delete", ctrl(K::Back)),
-        built_in_shortcut("table.column_delete", "table.column_delete", ctrl(K::DeleteKey)),
+        built_in_shortcut("nav.word_left", "nav.word_left", ctrl(K::Left)),
+        built_in_shortcut("nav.word_left_select", "nav.word_left_select", ctrl(K::Left, true)),
+        built_in_shortcut("nav.word_right", "nav.word_right", ctrl(K::Right)),
+        built_in_shortcut("nav.word_right_select", "nav.word_right_select", ctrl(K::Right, true)),
+        built_in_shortcut("nav.paragraph_start", "nav.paragraph_start", ctrl(K::Up)),
+        built_in_shortcut("nav.paragraph_start_select", "nav.paragraph_start_select", ctrl(K::Up, true)),
+        built_in_shortcut("nav.paragraph_end", "nav.paragraph_end", ctrl(K::Down)),
+        built_in_shortcut("nav.paragraph_end_select", "nav.paragraph_end_select", ctrl(K::Down, true)),
+        built_in_shortcut("edit.delete_word_backward", "edit.delete_word_backward", ctrl(K::Back)),
+        built_in_shortcut("edit.delete_word_forward", "edit.delete_word_forward", ctrl(K::DeleteKey)),
+        built_in_shortcut("table.row_above", "table.row_above", ctrl(K::Up), S::Table),
+        built_in_shortcut("table.row_below", "table.row_below", ctrl(K::Down), S::Table),
+        built_in_shortcut("table.column_left", "table.column_left", ctrl(K::Left), S::Table),
+        built_in_shortcut("table.column_right", "table.column_right", ctrl(K::Right), S::Table),
+        built_in_shortcut("table.row_move_up", "table.row_move_up", ctrl(K::Up, false, true), S::Table),
+        built_in_shortcut("table.row_move_down", "table.row_move_down", ctrl(K::Down, false, true), S::Table),
+        built_in_shortcut("table.column_move_left", "table.column_move_left", ctrl(K::Left, false, true), S::Table),
+        built_in_shortcut("table.column_move_right", "table.column_move_right", ctrl(K::Right, false, true), S::Table),
+        built_in_shortcut("table.row_delete", "table.row_delete", ctrl(K::Back), S::Table),
+        built_in_shortcut("table.column_delete", "table.column_delete", ctrl(K::DeleteKey), S::Table),
     };
+}
+
+// Merge persisted customizations with newly added defaults without turning
+// an existing customization into a settings-load error. Only byte-for-byte
+// stock global table bindings migrate to the table scope.
+inline std::vector<EditorShortcutBinding> merge_editor_shortcut_settings(
+    std::span<const EditorShortcutBinding> saved) {
+    auto result = default_editor_shortcuts();
+    std::unordered_set<std::string> seen;
+    for (auto binding : saved) {
+        if (!seen.insert(binding.id).second) throw std::runtime_error("duplicate shortcut id");
+        auto existing = std::ranges::find(result, binding.id, &EditorShortcutBinding::id);
+        if (existing != result.end()) {
+            if (existing->scope == EditorShortcutScope::Table) {
+                auto previous_default = *existing;
+                previous_default.scope = EditorShortcutScope::Global;
+                if (binding == previous_default) binding = *existing;
+            }
+            *existing = std::move(binding);
+        } else result.push_back(std::move(binding));
+    }
+    for (std::size_t index = 0; index < result.size(); ++index) {
+        auto& binding = result[index];
+        if (!binding.gesture) continue;
+        auto other = find_editor_shortcut_conflict(result, *binding.gesture, binding.scope, index);
+        if (!other) continue;
+        if (!seen.contains(binding.id)) binding.gesture.reset();
+        else if (!seen.contains(result[*other].id)) result[*other].gesture.reset();
+        else throw std::runtime_error("conflicting shortcut gestures");
+    }
+    return result;
 }
 
 inline EditorInputAction editor_shortcut_input_action(std::string_view action_id) {
@@ -164,6 +206,8 @@ inline EditorInputAction editor_shortcut_input_action(std::string_view action_id
     if (action_id == "edit.cut") return {.kind = EditorInputActionKind::Cut};
     if (action_id == "edit.paste") return {.kind = EditorInputActionKind::Paste};
     if (action_id == "edit.select_all") return execute(folia::CommandKind::SelectAll);
+    if (action_id == "edit.delete_word_backward") return execute(folia::CommandKind::DeleteWordBackward);
+    if (action_id == "edit.delete_word_forward") return execute(folia::CommandKind::DeleteWordForward);
     if (action_id == "history.undo") return execute(folia::CommandKind::Undo);
     if (action_id == "history.redo") return execute(folia::CommandKind::Redo);
     if (action_id == "format.strong") return execute(folia::CommandKind::ToggleStrong);
@@ -207,6 +251,14 @@ inline EditorInputAction editor_shortcut_input_action(std::string_view action_id
     } else if (action_id == "block.heading1" || action_id == "block.heading2") {
         action = execute(folia::CommandKind::SetHeading);
         action.command.level = action_id.back() == '1' ? 1 : 2;
+    } else if (action_id.starts_with("nav.word_")) {
+        action = execute(action_id.starts_with("nav.word_left")
+            ? folia::CommandKind::MoveWordLeft : folia::CommandKind::MoveWordRight);
+        action.command.extend_selection = action_id.ends_with("_select");
+    } else if (action_id.starts_with("nav.paragraph_")) {
+        action = execute(action_id.starts_with("nav.paragraph_start")
+            ? folia::CommandKind::MoveParagraphStart : folia::CommandKind::MoveParagraphEnd);
+        action.command.extend_selection = action_id.ends_with("_select");
     } else if (action_id.starts_with("nav.document_")) {
         action = execute(action_id.contains("start")
             ? folia::CommandKind::MoveDocumentStart
