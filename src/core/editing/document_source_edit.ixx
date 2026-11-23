@@ -920,6 +920,10 @@ inline std::optional<DocumentTransaction> document_delete_selection(EditorDocume
             ? editable_block_source_range(*last_block)
             : std::nullopt;
         if (!first_range || !last_range) return std::nullopt;
+        const auto hidden_marker_gap = editable_raw_block_source(*first_block)
+            && editable_raw_block_source(*last_block)
+            && first.source_offset > first_range->end
+            && last.source_offset < last_range->start;
         first.source_offset = (std::clamp)(
             first.source_offset, first_range->start, first_range->end);
         last.source_offset = (std::clamp)(
@@ -962,6 +966,7 @@ inline std::optional<DocumentTransaction> document_delete_selection(EditorDocume
             if (!document_edit_detail::remove_node_recorded(after, id, operations)) return std::nullopt;
         }
         if (operations.empty()) {
+            if (hidden_marker_gap) return std::nullopt;
             // A range can select only a protected structural boundary. Its
             // deletion still collapses the selection, allowing typing, paste
             // or Enter to continue at the surviving insertion position.
