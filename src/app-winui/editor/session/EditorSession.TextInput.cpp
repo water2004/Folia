@@ -2,6 +2,8 @@
 #include "editor/session/EditorSession.h"
 
 import folia.markdown.document_text;
+import folia.core.document_text_navigation;
+import folia.core.text_navigation;
 
 namespace winrt::Folia
 {
@@ -101,5 +103,17 @@ namespace winrt::Folia
             return found->text;
         }
         return core_->editor.editable_source(id);
+    }
+
+    std::optional<folia::TextSelection> EditorSession::WordSelectionAt(folia::TextPosition position) const
+    {
+        if (!core_->editor.source_editor())
+            return folia::document_word_selection_at(core_->editor.document(), position);
+        const auto source = TextInputSourceView(position.container_id);
+        const auto range = source ? folia::text_word_selection_range(*source, position.source_offset) : std::nullopt;
+        if (!range) return std::nullopt;
+        return folia::TextSelection{
+            {position.container_id, range->start, folia::TextAffinity::Downstream},
+            {position.container_id, range->end, folia::TextAffinity::Upstream}};
     }
 }

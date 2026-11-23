@@ -310,7 +310,7 @@ namespace {
             EditorTextInputController input;
             EditorSelectionDrag drag;
             drag.Attach(session, renderer, scroll, input, panel);
-            drag.Begin(*hit, x, y);
+            drag.Begin(folia::TextSelection::caret(*hit), x, y);
             auto pressed = session.Selection();
             renderer.Render(session.RenderFrame());
             auto expanded = renderer.HitTest(x, y);

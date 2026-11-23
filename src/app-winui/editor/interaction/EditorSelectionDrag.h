@@ -20,7 +20,7 @@ namespace winrt::Folia
             winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel const& surface);
         void Detach();
         bool Active() const;
-        void Begin(folia::TextPosition anchor, float x, float y);
+        void Begin(folia::TextSelection initial, float x, float y);
         bool Update(float x, float y);
         bool Finish(float x, float y);
         void Cancel();

@@ -404,7 +404,7 @@ namespace folia::platform::editor
         return folia::TextPosition{span->container_id, span->source_range.end, folia::TextAffinity::Upstream};
     }
 
-    std::optional<folia::TextPosition> EditorInteractionMap::HitTest(float x, float y) const
+    std::optional<folia::TextPosition> EditorInteractionMap::HitTest(float x, float y, bool characterStart) const
     {
         for (auto hit = mathHits.rbegin(); hit != mathHits.rend(); ++hit)
         {
@@ -454,7 +454,7 @@ namespace folia::platform::editor
         DWRITE_HIT_TEST_METRICS metrics{};
         auto localY = (line.rect.top + line.rect.bottom) * 0.5f - textOrigin.y;
         if (FAILED(layout->HitTestPoint(x - textOrigin.x, localY, &trailing, &inside, &metrics))) return start;
-        auto displayPos = static_cast<std::size_t>(metrics.textPosition + (trailing ? metrics.length : 0));
+        auto displayPos = static_cast<std::size_t>(metrics.textPosition + (trailing && !characterStart ? metrics.length : 0));
         displayPos = (std::clamp)(displayPos, static_cast<std::size_t>(line.displayStart), static_cast<std::size_t>(line.displayEnd));
         auto resolved = ResolveMappedPosition(line, *mapping, displayPos);
         auto position = resolved.value_or(end);

@@ -35,16 +35,16 @@ namespace winrt::Folia
         return active;
     }
 
-    void EditorSelectionDrag::Begin(folia::TextPosition valueAnchor, float x, float y)
+    void EditorSelectionDrag::Begin(folia::TextSelection initial, float x, float y)
     {
         if (!session) return;
         StopAutoScroll();
         active = true;
-        anchor = valueAnchor;
+        anchor = initial.anchor;
         pointerX = x;
         pointerY = y;
         gesture.Begin(x, y);
-        session->SetSelection(anchor, anchor);
+        session->SetSelection(initial);
         if (textInput) textInput->NotifySelectionChanged();
     }
 

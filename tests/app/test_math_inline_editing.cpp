@@ -182,7 +182,7 @@ namespace
             << "] completions=" << fixture.completions << '\n';
 
         auto beforePreview = fixture.completions;
-        fixture.drag.Begin(click->position, click->x, click->y);
+        fixture.drag.Begin(folia::TextSelection::caret(click->position), click->x, click->y);
         auto pressedSelection = fixture.session.Selection();
         fixture.renderer.Render(fixture.session.RenderFrame());
         expect(fixture.session.Selection() == pressedSelection) << "math-edit-04 press-render-selection";
@@ -205,7 +205,7 @@ namespace
 
         // The source is already expanded here. Small movement must still be
         // measured from the physical press, never from the relocated caret.
-        fixture.drag.Begin(click->position, click->x, click->y);
+        fixture.drag.Begin(folia::TextSelection::caret(click->position), click->x, click->y);
         expect(!fixture.drag.Update(click->x + 3, click->y - 3)) << "math-edit-13 jitter-update";
         fixture.renderer.Render(fixture.session.RenderFrame());
         expect(!fixture.drag.Finish(click->x - 3, click->y + 3)) << "math-edit-14 jitter-release";
@@ -230,7 +230,7 @@ namespace
             }
         expect(destination.has_value()) << "math-edit-17 destination-found";
         if (!destination) return;
-        fixture.drag.Begin(click->position, click->x, click->y);
+        fixture.drag.Begin(folia::TextSelection::caret(click->position), click->x, click->y);
         expect(fixture.drag.Update(destination->x, destination->y)) << "math-edit-18 real-drag-update";
         expect(fixture.session.HasSelection()) << "math-edit-19 real-drag-selected";
         expect(fixture.session.Selection().anchor == click->position) << "math-edit-20 real-drag-anchor";

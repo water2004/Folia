@@ -199,6 +199,33 @@ suite editor_interaction_tests = [] {
     expect(interaction.CaretBounds({owner, 11, TextAffinity::Downstream}, 24).has_value());
 };
 
+"word hit testing selects the pointed glyph instead of its nearest caret edge"_test = [] {
+    const auto owner = NodeId{520};
+    auto layout = MakeLayout(L"word, next");
+    EditorInteractionMap interaction;
+    interaction.blocks.push_back(EditorVisualBlock{
+        .rect = {10.0f, 20.0f, 410.0f, 80.0f}, .textOrigin = {10.0f, 20.0f},
+        .textWidth = 400.0f, .sourceSpan = {owner, {0, 10}},
+        .displayToSource = IdentityMapping(owner, 10), .layout = layout});
+    interaction.AddBlockLines(0);
+    for (UINT32 index : {3u, 4u, 5u}) {
+        float x{}, y{};
+        DWRITE_HIT_TEST_METRICS metrics{};
+        expect(fatal(SUCCEEDED(layout->HitTestTextPosition(index, FALSE, &x, &y, &metrics))));
+        for (float fraction : {0.25f, 0.75f}) {
+            auto unit = interaction.HitTest(10.0f + x + fraction * metrics.width,
+                20.0f + y + metrics.height * 0.5f, true);
+            expect(fatal(unit.has_value()));
+            expect(unit->container_id == owner);
+            expect(unit->source_offset == index);
+        }
+        auto caret = interaction.HitTest(10.0f + x + 0.75f * metrics.width,
+            20.0f + y + metrics.height * 0.5f);
+        expect(fatal(caret.has_value()));
+        expect(caret->source_offset == index + 1u);
+    }
+};
+
 "directwrite block geometry keeps source coordinates authoritative"_test = [] {
     constexpr auto length = std::size_t{10};
     const auto owner = NodeId{501};

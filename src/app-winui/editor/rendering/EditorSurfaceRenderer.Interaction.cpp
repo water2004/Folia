@@ -72,6 +72,13 @@ namespace winrt::Folia
                 return std::nullopt;
         return interactionMap.HitTest(x, y);
     }
+    std::optional<folia::TextPosition> EditorSurfaceRenderer::HitTestTextUnit(float x, float y) const
+    {
+        for (auto const& rect : nonInteractiveRegions)
+            if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom)
+                return std::nullopt;
+        return interactionMap.HitTest(x, y, true);
+    }
     std::optional<folia::TextPosition> EditorSurfaceRenderer::ViewportPosition() const
     {
         // Use the existing lossless visual-to-source mapping, including nested

@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "editor/interaction/EditorPointerController.h"
 
+import folia.core.input_command;
 import folia.core.command;
 
 namespace winrt::Folia
@@ -150,7 +151,10 @@ namespace winrt::Folia
                 return;
             }
         }
-        selectionDrag_.Begin(*hit, static_cast<float>(point.X), static_cast<float>(point.Y));
+        auto const extend = (args.KeyModifiers() & winrt::Windows::System::VirtualKeyModifiers::Shift)
+            == winrt::Windows::System::VirtualKeyModifiers::Shift;
+        selectionDrag_.Begin(folia::editor_pointer_selection(session_->Selection(), *hit, extend),
+            static_cast<float>(point.X), static_cast<float>(point.Y));
         surface_.CapturePointer(args.Pointer());
         if (render_) render_();
         args.Handled(true);
@@ -279,7 +283,7 @@ namespace winrt::Folia
         selectionDrag_.Cancel();
         surface_.ReleasePointerCaptures();
         auto point = args.GetPosition(surface_);
-        auto hit = renderer_->HitTest(static_cast<float>(point.X), static_cast<float>(point.Y));
+        auto hit = renderer_->HitTestTextUnit(static_cast<float>(point.X), static_cast<float>(point.Y));
         if (hit && SelectWordAt(*hit))
         {
             if (render_) render_();
@@ -290,24 +294,9 @@ namespace winrt::Folia
     bool EditorPointerController::SelectWordAt(folia::TextPosition position)
     {
         if (!session_) return false;
-        auto source = session_->EditableSource(position.container_id);
-        if (!source || source->empty()) return false;
-        auto const& text = *source;
-        auto offset = position.source_offset;
-        auto isWordChar = [](char32_t ch)
-        {
-            return (ch >= U'a' && ch <= U'z') || (ch >= U'A' && ch <= U'Z') || (ch >= U'0' && ch <= U'9') || ch == U'_' || ch > 0x7f;
-        };
-        if (offset >= text.size()) offset = text.size() - 1;
-        if (!isWordChar(text[offset]) && offset > 0 && isWordChar(text[offset - 1])) --offset;
-        if (!isWordChar(text[offset])) return false;
-        auto start = offset;
-        while (start > 0 && isWordChar(text[start - 1])) --start;
-        auto end = offset + 1;
-        while (end < text.size() && isWordChar(text[end])) ++end;
-        session_->SetSelection(
-            {position.container_id, start, folia::TextAffinity::Downstream},
-            {position.container_id, end, folia::TextAffinity::Downstream});
+        const auto selection = session_->WordSelectionAt(position);
+        if (!selection) return false;
+        session_->SetSelection(*selection);
         if (textInput_) textInput_->NotifySelectionChanged();
         return true;
     }

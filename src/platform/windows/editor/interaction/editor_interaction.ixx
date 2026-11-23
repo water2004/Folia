@@ -135,7 +135,7 @@ export namespace folia::platform::editor
         void Clear();
         void AddBlockLines(std::size_t blockIndex);
         void AddTableCellLines(std::size_t blockIndex, std::size_t tableIndex, std::size_t cellIndex);
-        std::optional<folia::TextPosition> HitTest(float x, float y) const;
+        std::optional<folia::TextPosition> HitTest(float x, float y, bool characterStart = false) const;
         std::optional<folia::TextPosition> TaskCheckboxAt(float x, float y) const;
         std::optional<EditorVisualFootnoteHit> FootnoteAt(float x, float y) const;
         std::optional<EditorVisualRawBlock> RawBlockFor(folia::NodeId owner) const;
