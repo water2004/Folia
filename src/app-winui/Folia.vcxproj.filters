@@ -177,6 +177,12 @@
     <ClCompile Include="..\core\editing\document_edit_primitives.ixx">
       <Filter>Core Modules\Editing</Filter>
     </ClCompile>
+    <ClCompile Include="..\core\editing\document_editable_fallback.ixx">
+      <Filter>Core Modules\Editing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\core\editing\document_html_split.ixx">
+      <Filter>Core Modules\Editing</Filter>
+    </ClCompile>
     <ClCompile Include="..\core\editing\document_ids.ixx">
       <Filter>Core Modules\Editing</Filter>
     </ClCompile>

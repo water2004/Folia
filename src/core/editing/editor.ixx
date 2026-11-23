@@ -17,6 +17,7 @@ import folia.markdown.block_tree;
 import folia.core.document_edit;
 import folia.core.document_text_navigation;
 import folia.core.document_indentation;
+import folia.core.document_editable_fallback;
 import folia.core.document_history;
 import folia.core.document_operation_apply;
 import folia.core.document_search_replace;
@@ -686,6 +687,7 @@ private:
     DocumentHistory document_history_{1000};
     std::optional<EditorDocumentChange> last_document_change_;
     std::optional<TextSelection> rendered_selection_{TextSelection{}};
+    std::optional<DocumentEditableFallback> editable_fallback_;
     struct SourceViewState { SourceEditor editor; SourceProjectionIndex index; };
     std::optional<SourceViewState> source_view_;
     MarkdownDialect dialect_ = default_dialect();
@@ -808,6 +810,7 @@ private:
         last_document_change_=summarize_document_change(applied->transaction.operations,true,
             applied->transaction.revision_before,applied->transaction.revision_after);
         refresh_derived_from_document_(*last_document_change_,applied->transaction.operations);
+        editable_fallback_ = document_editable_fallback(document_);
         return true;
     }
 
@@ -827,6 +830,7 @@ private:
         if (!applied) std::terminate();
         last_document_change_=std::move(change);
         refresh_derived_from_document_(*last_document_change_,applied->operations);
+        editable_fallback_ = document_editable_fallback(document_);
         if (source_view_) {
             auto& view=*source_view_;
             const auto [first,last]=view.index.current_region(document_,*source_region);
@@ -869,10 +873,11 @@ private:
         outline_ = std::move(parsed.outline);
         document_history_.clear();
         last_document_change_.reset();
-        if (document_.root.children.empty()) {
-            normalize_document(document_);
+        if (document_.cached_editable_order.empty()) {
+            append_document_editable_destination(document_);
             rebuild_document_block_index(document_);
         }
+        editable_fallback_ = document_editable_fallback(document_);
         if (auto position = first_document_text_position(document_)) {
             rendered_selection_.value() = TextSelection::caret(*position);
         }
@@ -978,10 +983,21 @@ private:
         outline_.revision = document_.revision;
     }
 
-    void apply_document_transaction_(const DocumentTransaction& transaction) {
+    void apply_document_transaction_(DocumentTransaction& transaction) {
         if (transaction.revision_before == transaction.revision_after) {
             rendered_selection_.value() = transaction.selection_after;
             return;
+        }
+        if (editable_fallback_) {
+            materialize_document_editable_fallback(document_, *editable_fallback_, transaction);
+        }
+        // Newly inserted owners do not have their final locators until the
+        // structural index update below. A normal command already supplies a
+        // valid owner; do not turn that into a full-tree lookup on every edit.
+        if (transaction.selection_after.active.container_id.v == 0) {
+            if (const auto fallback = ensure_document_editable_destination(document_, &transaction.operations)) {
+                transaction.selection_after = TextSelection::caret(*fallback);
+            }
         }
         document_history_.push(transaction);
         rendered_selection_.value() = transaction.selection_after;
@@ -991,6 +1007,7 @@ private:
             transaction.revision_before,
             transaction.revision_after);
         refresh_derived_from_document_(*last_document_change_, transaction.operations);
+        editable_fallback_ = document_editable_fallback(document_);
     }
 
 };

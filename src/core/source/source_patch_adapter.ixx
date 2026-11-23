@@ -6,6 +6,7 @@ import folia.markdown.ast;
 import folia.markdown.block_tree;
 import folia.markdown.document;
 import folia.core.document_edit_primitives;
+import folia.core.document_editable_fallback;
 import folia.core.document_block_edit;
 import folia.core.document_ids;
 import folia.core.document_operation_apply;
@@ -232,6 +233,28 @@ inline std::optional<SourceDocumentPatch> apply_source_document_patch(
         ++last;
     }
 
+    // A source edit can remove the last visible owner while preserving only
+    // invisible structure. Check the parsed region first; cached owner-order
+    // endpoints identify surviving owners outside it without a document walk.
+    // These paths still describe the old tree before any splice is applied.
+    bool may_need_destination=!std::ranges::any_of(parsed.blocks,[](const BlockNode& block) {
+        return document_edit_detail::first_editable_position(block).has_value();
+    });
+    bool destination_state_known=true;
+    if (may_need_destination && !document.cached_editable_order.empty()) {
+        for (const auto owner : {document.cached_editable_order.front(),document.cached_editable_order.back()}) {
+            const auto path=cached_document_block_path(document,owner);
+            if (!path || path->empty()) {
+                destination_state_known=false;
+                continue;
+            }
+            if (path->front()<first || path->front()>=last) {
+                may_need_destination=false;
+                break;
+            }
+        }
+    }
+
     const auto revision=document.revision;
     const auto allocation=document.next_node_id;
     const auto metadata_source=frontmatter(document.root.children,first,last);
@@ -320,6 +343,7 @@ inline std::optional<SourceDocumentPatch> apply_source_document_patch(
             insert.after=document_edit_detail::empty_paragraph(allocator,document);
             operations.emplace_back(std::move(insert));
             if (!apply_document_operation(document,operations.back(),true)) std::terminate();
+            may_need_destination=false;
         }
     }
     const auto trailing=ending(after_source);
@@ -333,6 +357,17 @@ inline std::optional<SourceDocumentPatch> apply_source_document_patch(
     if (trailing!=document.trailing_line_ending) {
         operations.emplace_back(DocumentEndingEdit{document.trailing_line_ending,trailing});
         if (!apply_document_operation(document,operations.back(),true)) std::terminate();
+    }
+    if (may_need_destination) {
+        const auto destination=destination_state_known
+            ? std::optional<TextPosition>{append_document_editable_destination(document,&operations)}
+            : ensure_document_editable_destination(document,&operations);
+        if (destination) {
+            // The zero-source destination is appended at the document end.
+            // Include it and any untouched invisible suffix in projection and
+            // history, without reparsing the suffix or changing its bytes.
+            region=projection.region(first,projection.blocks().size());
+        }
     }
     if (operations.empty()) {document.next_node_id=allocation;return std::nullopt;}
     document.revision=revision+1;

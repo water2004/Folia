@@ -12,6 +12,7 @@ import folia.markdown.inline_document;
 import folia.markdown.text_edit;
 import folia.markdown.utf;
 import folia.core.document_edit_primitives;
+import folia.core.document_html_split;
 import folia.core.document_container_source;
 import folia.core.document_transaction;
 
@@ -119,17 +120,47 @@ inline std::optional<RecordedBlockEdit> split_direct(
 
     if (!text_block(block->kind)) return std::nullopt;
     offset = (std::min)(offset, block->inline_content.source.size());
-    auto right_source = block->inline_content.source.substr(offset);
     const auto syntax_mode = block->inline_content.syntax_mode;
-    if (offset < block->inline_content.source.size()) {
+    // Within a semantic HTML container, adjacent anonymous inline runs have
+    // no serialized boundary. Give both halves an explicit paragraph wrapper
+    // so Enter survives saving/reloading, including when either half is empty.
+    // A top-level HtmlText source block still uses its normal Markdown gap.
+    bool html_parent = false;
+    const auto* ancestor = &document.root;
+    for (const auto child_index : parent_path) {
+        ancestor = &ancestor->children[child_index];
+        html_parent = html_parent || ancestor->kind == BlockKind::HtmlContainer
+            || ancestor->has_html_source() || ancestor->has_html_element_provenance();
+    }
+    const bool html_paragraphs = syntax_mode == InlineSyntaxMode::HtmlText && html_parent;
+    const auto html_split = html_paragraphs
+        ? plan_html_inline_split(block->inline_content, offset)
+        : HtmlInlineSplitPlan{.source_offset = offset};
+    offset = html_split.source_offset;
+    auto right_source = html_split.right_prefix + block->inline_content.source.substr(offset);
+    if (offset < block->inline_content.source.size() || !html_split.left_suffix.empty()) {
         auto edit = edit_inline(
             document,
             id,
             {offset, block->inline_content.source.size()},
-            {},
+            html_split.left_suffix,
             allocator);
         if (!edit) return std::nullopt;
         append_source_operation(result.operations, std::move(*edit));
+    }
+    auto give_paragraph_wrapper = [](BlockNode& paragraph) {
+        auto& html = paragraph.ensure_html_special();
+        html.root_tag = "p";
+        html.opening_marker = U"<p>";
+        html.closing_marker = U"</p>";
+    };
+    if (html_paragraphs && !block->has_html_element_provenance()) {
+        DocumentTreeEdit wrapper;
+        wrapper.kind = DocumentTreeEditKind::UpdatePayload;
+        wrapper.before = document_transaction_detail::payload_shell(*block);
+        give_paragraph_wrapper(*block);
+        wrapper.after = document_transaction_detail::payload_shell(*block);
+        result.operations.emplace_back(std::move(wrapper));
     }
 
     BlockNode right;
@@ -140,7 +171,8 @@ inline std::optional<RecordedBlockEdit> split_direct(
         document,
         allocator,
         syntax_mode);
-    result.target = TextPosition{right.id, 0, TextAffinity::Downstream};
+    if (html_paragraphs) give_paragraph_wrapper(right);
+    result.target = TextPosition{right.id, html_split.right_caret_offset, TextAffinity::Downstream};
     DocumentTreeEdit insert;
     insert.kind = DocumentTreeEditKind::Insert;
     insert.parent_id = parent->id;
@@ -151,7 +183,7 @@ inline std::optional<RecordedBlockEdit> split_direct(
         parent->children.begin() + static_cast<std::ptrdiff_t>(index + 1),
         std::move(right));
     auto prefix_updates = document_container_source::transfer_split_anchors(
-        document, prefix_snapshots, id, offset, result.target.container_id);
+        document, prefix_snapshots, id, offset, result.target.container_id, html_split.right_prefix.size());
     for (auto& update : prefix_updates) result.operations.emplace_back(std::move(update));
     return result;
 }

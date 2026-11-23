@@ -17,6 +17,7 @@ import folia.markdown.text_edit;
 import folia.markdown.utf;
 import folia.markdown.serializer;
 import folia.core.document_edit_support;
+import folia.core.document_editable_fallback;
 import folia.core.document_container_source;
 import folia.core.document_block_reparse;
 import folia.core.document_input_rules;
@@ -1208,6 +1209,7 @@ inline std::optional<DocumentTransaction> document_delete_selection(EditorDocume
                 TextAffinity::Downstream};
         } else {
             auto first_position = first_document_text_position(after);
+            if (!first_position) first_position = append_document_editable_destination(after, &operations);
             if (!first_position) return std::nullopt;
             target = *first_position;
         }

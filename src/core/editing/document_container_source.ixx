@@ -193,7 +193,8 @@ inline std::vector<DocumentTreeEdit> transfer_split_anchors(
     const std::vector<ContainerSourceSnapshot>& snapshots,
     NodeId old_owner,
     std::size_t split_offset,
-    NodeId new_owner) {
+    NodeId new_owner,
+    std::size_t new_source_offset = 0) {
     std::vector<DocumentTreeEdit> updates;
     for (const auto& snapshot : snapshots) {
         auto* container = find_block(document.root, snapshot.container_id);
@@ -210,7 +211,7 @@ inline std::vector<DocumentTreeEdit> transfer_split_anchors(
                 || old_line.anchor.offset < split_offset) continue;
             auto moved = old_line;
             moved.anchor.owner_id = new_owner;
-            moved.anchor.offset -= split_offset;
+            moved.anchor.offset = new_source_offset + moved.anchor.offset - split_offset;
             if (moved.lazy) {
                 moved.text = canonical_prefix(*container);
                 moved.lazy = false;
