@@ -711,38 +711,48 @@ inline std::optional<DocumentTransaction> document_delete_selection(EditorDocume
 
     if (auto slices = document_table_barrier_text_slices(after, selection);
         slices && slices->size() > 1) {
-        // A cross-cell text selection never implies a structural table edit.
-        // Erase only the selected block-local source ranges and leave the
-        // rectangular row/cell tree intact.  Explicit table handles are the
-        // sole route to deleting rows or columns.
+        // Preserve the table's rectangular cell tree while editing the
+        // selected visible source. Non-table atomic/raw owners are removable
+        // when fully covered; passing their frame source to erase_text would
+        // reject an otherwise legal mixed selection (or expose hidden fences).
         std::vector<DocumentOperation> operations;
         document_edit_detail::MutationRollback rollback(
             after, operations, revision_before);
+        std::vector<NodeId> removed_ids;
+        std::optional<TextPosition> target;
         for (auto const& slice : *slices) {
+            const auto* block = find_document_block(after, slice.container_id);
+            const auto visible = block ? editable_block_source_range(*block) : std::nullopt;
+            if (!block || !visible) return std::nullopt;
+            const auto structural = document_edit_detail::atomic_block(block->kind)
+                || block->kind == BlockKind::CodeBlock || block->kind == BlockKind::MathBlock;
+            if (structural && slice.source_range == *visible) {
+                removed_ids.push_back(slice.container_id);
+                continue;
+            }
+            if (!target) target = TextPosition{
+                slice.container_id, slice.source_range.start, TextAffinity::Downstream};
             if (slice.source_range.empty()) continue;
             auto source_edit = document_edit_detail::erase_text(
-                after,
-                slice.container_id,
-                slice.source_range,
-                allocator);
+                after, slice.container_id, slice.source_range, allocator);
             if (!source_edit) return std::nullopt;
-            document_edit_detail::append_source_operation(
-                operations, std::move(*source_edit));
+            document_edit_detail::append_source_operation(operations, std::move(*source_edit));
         }
-        if (operations.empty()) return std::nullopt;
-        ++after.revision;
-        auto const target = TextPosition{
-            slices->front().container_id,
-            slices->front().source_range.start,
-            TextAffinity::Downstream};
+        // Every table contributes at least one surviving cell. Select it (or
+        // an earlier surviving owner) before removing nodes and invalidating
+        // their cached paths.
+        if (!target) return std::nullopt;
+        for (auto id = removed_ids.rbegin(); id != removed_ids.rend(); ++id) {
+            if (!document_edit_detail::remove_node_recorded(after, *id, operations)) return std::nullopt;
+        }
+        if (!removed_ids.empty()) {
+            document_edit_detail::prune_empty_containers_recorded(after.root, operations, after);
+        }
+        if (!operations.empty()) ++after.revision;
         rollback.commit();
         return make_recorded_document_transaction(
-            std::move(operations),
-            selection,
-            TextSelection::caret(target),
-            revision_before,
-            after.revision,
-            DocumentTransactionReason::Delete);
+            std::move(operations), selection, TextSelection::caret(*target),
+            revision_before, after.revision, DocumentTransactionReason::Delete);
     }
 
     const auto& order = after.cached_editable_order;
@@ -833,7 +843,14 @@ inline std::optional<DocumentTransaction> document_delete_selection(EditorDocume
         for (const auto id : remove_ids) {
             if (!document_edit_detail::remove_node_recorded(after, id, operations)) return std::nullopt;
         }
-        if (operations.empty()) return std::nullopt;
+        if (operations.empty()) {
+            // A range can select only a protected structural boundary. Its
+            // deletion still collapses the selection, allowing typing, paste
+            // or Enter to continue at the surviving insertion position.
+            rollback.commit();
+            return make_recorded_document_transaction({}, selection, TextSelection::caret(first),
+                revision_before, revision_before, DocumentTransactionReason::Delete);
+        }
         document_edit_detail::prune_empty_containers_recorded(after.root, operations, after);
         if (after.root.children.empty()) {
             auto paragraph = document_edit_detail::empty_paragraph(allocator, after);

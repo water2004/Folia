@@ -102,16 +102,16 @@ inline std::optional<std::vector<TextSpan>> document_table_barrier_text_slices(
     for (auto index = first_index; index <= last_index; ++index) {
         auto const owner = document.cached_editable_order[index];
         auto const* block = find_document_block(document, owner);
-        auto source = block ? editable_block_text_view(*block) : std::nullopt;
-        if (!source) return std::nullopt;
+        const auto visible = block ? editable_block_source_range(*block) : std::nullopt;
+        if (!visible) return std::nullopt;
         intersects_table = intersects_table
             || document_table_cell_address(document, owner).has_value();
         auto start = index == first_index
-            ? (std::min)(first.source_offset, source->size())
-            : std::size_t{0};
+            ? (std::clamp)(first.source_offset, visible->start, visible->end)
+            : visible->start;
         auto end = index == last_index
-            ? (std::min)(last.source_offset, source->size())
-            : source->size();
+            ? (std::clamp)(last.source_offset, visible->start, visible->end)
+            : visible->end;
         if (first_index == last_index && end < start) std::swap(start, end);
         result.push_back({owner, {start, end}});
     }
