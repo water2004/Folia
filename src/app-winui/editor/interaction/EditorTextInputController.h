@@ -3,6 +3,8 @@
 #include "editor/session/EditorSession.h"
 #include "editor/rendering/EditorSurfaceRenderer.h"
 
+import folia.core.input_text_echo;
+
 namespace winrt::Folia
 {
     struct EditorTextInputController
@@ -78,7 +80,7 @@ namespace winrt::Folia
             std::chrono::steady_clock::time_point recordedAt;
         };
         std::optional<CharacterUpdate> pendingCharacterUpdate_;
-        std::optional<CharacterUpdate> committedCoreTextUpdate_;
+        folia::InputTextEcho committedCoreTextEcho_;
         struct SemanticLineBreakUpdate
         {
             folia::NodeId container{};

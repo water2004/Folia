@@ -283,6 +283,9 @@
     <ClCompile Include="..\core\editing\text_navigation.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\core\editing\input_text_echo.ixx">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\core\editing\command.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>

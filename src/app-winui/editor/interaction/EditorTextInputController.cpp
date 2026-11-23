@@ -87,7 +87,7 @@ namespace winrt::Folia
         knownText_.clear();
         forceFullSynchronization_ = false;
         pendingCharacterUpdate_.reset();
-        committedCoreTextUpdate_.reset();
+        committedCoreTextEcho_.clear();
         pendingSemanticLineBreakUpdates_.clear();
         lifetime_.reset();
     }
@@ -148,7 +148,7 @@ namespace winrt::Folia
     void EditorTextInputController::BeginHardwareKey()
     {
         pendingCharacterUpdate_.reset();
-        committedCoreTextUpdate_.reset();
+        committedCoreTextEcho_.clear();
         auto const now = std::chrono::steady_clock::now();
         std::erase_if(pendingSemanticLineBreakUpdates_, [&](auto const& update)
         {
@@ -184,15 +184,8 @@ namespace winrt::Folia
 
     bool EditorTextInputController::ConsumeCommittedCoreTextCharacter(std::u32string_view text)
     {
-        if (!session_ || !committedCoreTextUpdate_) return false;
-        auto const fresh = std::chrono::steady_clock::now()
-                - committedCoreTextUpdate_->recordedAt
-            < std::chrono::milliseconds(250);
-        auto const matches = committedCoreTextUpdate_->revision == session_->Revision()
-            && committedCoreTextUpdate_->text == text
-            && fresh;
-        committedCoreTextUpdate_.reset();
-        return matches;
+        return session_ && committedCoreTextEcho_.consume(
+            text, session_->Revision(), std::chrono::steady_clock::now());
     }
 
     void EditorTextInputController::RecordCharacterTextUpdate(
@@ -206,7 +199,7 @@ namespace winrt::Folia
             session_->Revision(),
             std::chrono::steady_clock::now(),
         };
-        committedCoreTextUpdate_.reset();
+        committedCoreTextEcho_.clear();
     }
 
     void EditorTextInputController::QueueSynchronization()
@@ -482,6 +475,7 @@ namespace winrt::Folia
                 else if (start == activeAcp) command.kind = folia::CommandKind::DeleteForward;
                 if (command.kind != folia::CommandKind::DeleteSelection) session_->SetSelection(selection);
             }
+            auto const revisionBeforeEdit = session_->Revision();
             updating_ = true;
             bool executed = false;
             try
@@ -495,6 +489,7 @@ namespace winrt::Folia
             updating_ = false;
             if (!executed)
             {
+                if (session_->Revision() == revisionBeforeEdit) session_->SetSelection(selection);
                 knownLength_ = previousKnownLength;
                 knownRevision_ = previousKnownRevision;
                 knownText_ = std::move(previousKnownText);
@@ -543,12 +538,8 @@ namespace winrt::Folia
             }
             if (!incoming.empty() && !isIncomingNewline)
             {
-                committedCoreTextUpdate_ = CharacterUpdate{
-                    start,
-                    incoming,
-                    session_->Revision(),
-                    std::chrono::steady_clock::now(),
-                };
+                committedCoreTextEcho_.record(
+                    incoming, session_->Revision(), std::chrono::steady_clock::now());
             }
             args.Result(winrt::Windows::UI::Text::Core::CoreTextTextUpdatingResult::Succeeded);
             QueueSynchronization();

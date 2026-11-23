@@ -144,6 +144,9 @@
     <ClCompile Include="..\core\editing\text_navigation.ixx">
       <Filter>Core Modules\Editing</Filter>
     </ClCompile>
+    <ClCompile Include="..\core\editing\input_text_echo.ixx">
+      <Filter>Core Modules\Editing</Filter>
+    </ClCompile>
     <ClCompile Include="..\core\editing\command.ixx">
       <Filter>Core Modules\Editing</Filter>
     </ClCompile>
