@@ -2003,7 +2003,14 @@ std::optional<BlockNode> try_parse_raw_html_block(const LeafLine& first) {
     BlockSourceDocument make_leaf_block_source(
         parser_source_detail::CodeMathLeafSource& source, BlockSourceKind kind,
         std::optional<std::size_t> requested_end=std::nullopt) {
-        const auto owner_end=completed_leaf_source_end(source.view(),requested_end.value_or(source.size()));
+        // A fence/math recognizer chooses its exact source boundary. In an
+        // unclosed block the final accepted line ending is content, including
+        // a blank line before an enclosing list stops matching. Trimming it
+        // loses that physical line and leaves its prefix without a source
+        // anchor. Closed recognizers already exclude their closing-line EOL.
+        const auto end=requested_end.value_or(source.size());
+        const auto owner_end=kind==BlockSourceKind::IndentedCode
+            ? completed_leaf_source_end(source.view(),end) : end;
         return parser_source_detail::finish_code_math_source(source,kind,owner_end);
     }
 
@@ -3488,7 +3495,7 @@ std::optional<BlockNode> try_parse_code_block(const LeafLine& first) {
     block.kind = BlockKind::CodeBlock;
     block.block_source = make_leaf_block_source(raw, BlockSourceKind::FencedCode);
     project_fenced_code_indentation(block.block_source, opening_indent);
-    register_leaf_ownership(id, raw.view());
+    register_leaf_ownership(id, raw.view(), raw.size());
     push_leaf_range(id, raw.view(), {0, raw.size()}, {content_start, content_end}, markers);
     record_completion(id, completion_from_source(block.block_source.source()));
     return block;
@@ -3744,7 +3751,7 @@ inline void Parser::register_leaf_ownership(NodeId owner,LeafSourceAccumulator c
 }
 inline void Parser::register_leaf_ownership(
     NodeId owner,LeafSourceAccumulator const& source,std::size_t owner_source_end) {
-    owner_source_end=completed_leaf_source_end(source,owner_source_end);
+    if (owner_source_end>source.size()) throw std::out_of_range("leaf ownership source end");
     if (owner_source_end==0) {
         const auto point=source.physical_offset(0);
         if (!point) throw std::logic_error("empty source owner missing physical boundary");
