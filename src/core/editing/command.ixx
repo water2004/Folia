@@ -11,6 +11,8 @@ export namespace folia {
 enum class CommandKind {
     InsertText, DeleteBackward, DeleteForward, DeleteSelection, InsertNewline, InsertSoftBreak,
     MoveLeft, MoveRight, MoveUp, MoveDown,
+    MoveWordLeft, MoveWordRight, DeleteWordBackward, DeleteWordForward,
+    MoveParagraphStart, MoveParagraphEnd,
     MoveLineStart, MoveLineEnd, MoveDocumentStart, MoveDocumentEnd,
     MovePageUp, MovePageDown, SelectAll,
     ToggleStrong, ToggleEmphasis, ToggleStrikethrough, ToggleInlineCode, FormatDocument,

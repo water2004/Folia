@@ -719,6 +719,8 @@ private:
             case CommandKind::InsertSoftBreak: handled=source.insert_newline();break;
             case CommandKind::DeleteBackward: handled=source.delete_backward();break;
             case CommandKind::DeleteForward: handled=source.delete_forward();break;
+            case CommandKind::DeleteWordBackward: handled=source.delete_word_backward();break;
+            case CommandKind::DeleteWordForward: handled=source.delete_word_forward();break;
             case CommandKind::DeleteSelection: handled=!source.selection().is_caret() && source.replace_selection({});break;
             case CommandKind::IndentListItem: handled=source.indent();break;
             case CommandKind::OutdentListItem: handled=source.outdent();break;
@@ -729,12 +731,16 @@ private:
             case CommandKind::SelectAll: source.select_all();return true;
             case CommandKind::MoveLeft: source.move_left(command.extend_selection);return true;
             case CommandKind::MoveRight: source.move_right(command.extend_selection);return true;
+            case CommandKind::MoveWordLeft: source.move_word_left(command.extend_selection);return true;
+            case CommandKind::MoveWordRight: source.move_word_right(command.extend_selection);return true;
             case CommandKind::MoveUp: source.move_up(command.extend_selection);return true;
             case CommandKind::MoveDown: source.move_down(command.extend_selection);return true;
             case CommandKind::MoveLineStart: source.move_line_start(command.extend_selection);return true;
             case CommandKind::MoveLineEnd: source.move_line_end(command.extend_selection);return true;
             case CommandKind::MoveDocumentStart: source.move_document_start(command.extend_selection);return true;
             case CommandKind::MoveDocumentEnd: source.move_document_end(command.extend_selection);return true;
+            case CommandKind::MoveParagraphStart: source.move_paragraph_start(command.extend_selection);return true;
+            case CommandKind::MoveParagraphEnd: source.move_paragraph_end(command.extend_selection);return true;
             default:
                 if (command.kind == CommandKind::CreateFootnoteDefinition
                     && find_footnote_definition(symbols_, command.footnote_label)) return false;

@@ -141,6 +141,9 @@
     <ClCompile Include="..\core\model\callout.ixx">
       <Filter>Core Modules\Model</Filter>
     </ClCompile>
+    <ClCompile Include="..\core\editing\text_navigation.ixx">
+      <Filter>Core Modules\Editing</Filter>
+    </ClCompile>
     <ClCompile Include="..\core\editing\command.ixx">
       <Filter>Core Modules\Editing</Filter>
     </ClCompile>

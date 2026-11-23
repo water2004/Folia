@@ -280,6 +280,9 @@
     <ClCompile Include="..\markdown\model\callout.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\core\editing\text_navigation.ixx">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\core\editing\command.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>

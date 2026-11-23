@@ -10,6 +10,7 @@ import folia.markdown.inline_cst;
 import folia.markdown.inline_document;
 import folia.markdown.inline_parser;
 import folia.core.source_style;
+import folia.core.text_navigation;
 import folia.markdown.utf;
 
 export namespace folia {
@@ -379,6 +380,18 @@ public:
         return replace({selection_.active, next_grapheme_boundary_char(source_, selection_.active)}, {});
     }
 
+    bool delete_word_backward() {
+        if (!selection_.is_caret()) return replace_selection({});
+        if (selection_.active == 0) return false;
+        return replace({previous_word_boundary(source_, selection_.active), selection_.active}, {});
+    }
+
+    bool delete_word_forward() {
+        if (!selection_.is_caret()) return replace_selection({});
+        if (selection_.active >= source_.size()) return false;
+        return replace({selection_.active, next_word_boundary(source_, selection_.active)}, {});
+    }
+
     void select_all() { set_selection({0, source_.size(), TextAffinity::Downstream, TextAffinity::Upstream}); }
     void move_left(bool extend = false) {
         if (!extend && !selection_.is_caret()) { move_to_(selection_.ordered_range().start, false); return; }
@@ -388,8 +401,18 @@ public:
         if (!extend && !selection_.is_caret()) { move_to_(selection_.ordered_range().end, false); return; }
         move_to_(next_grapheme_boundary_char(source_, selection_.active), extend);
     }
+    void move_word_left(bool extend = false) {
+        if (!extend && !selection_.is_caret()) { move_to_(selection_.ordered_range().start, false); return; }
+        move_to_(previous_word_boundary(source_, selection_.active), extend);
+    }
+    void move_word_right(bool extend = false) {
+        if (!extend && !selection_.is_caret()) { move_to_(selection_.ordered_range().end, false); return; }
+        move_to_(next_word_boundary(source_, selection_.active), extend);
+    }
     void move_document_start(bool extend = false) { move_to_(0, extend); }
     void move_document_end(bool extend = false) { move_to_(source_.size(), extend); }
+    void move_paragraph_start(bool extend = false) { move_paragraph_(false, extend); }
+    void move_paragraph_end(bool extend = false) { move_paragraph_(true, extend); }
     void move_up(bool extend = false) { move_vertical_(false, extend); }
     void move_down(bool extend = false) { move_vertical_(true, extend); }
 
@@ -475,6 +498,43 @@ private:
         }
         move_to_(target, extend);
         preferred_column_ = goal;
+    }
+
+    void move_paragraph_(bool forward, bool extend) {
+        // Source paragraphs are runs of physical nonblank lines. Repeating a
+        // command at the current run's edge must advance to the adjacent run.
+        const auto blank = [&](std::size_t index) {
+            return std::ranges::all_of(lines_[index].text,
+                [](char32_t value) { return value == U' ' || value == U'\t'; });
+        };
+        auto index = physical_line_index_for_offset_(selection_.active);
+        if (forward) {
+            if (!blank(index)) {
+                while (index + 1 < lines_.size() && !blank(index + 1)) ++index;
+                if (selection_.active < lines_[index].source_end()) {
+                    move_to_(lines_[index].source_end(), extend);
+                    return;
+                }
+                ++index;
+            }
+            while (index < lines_.size() && blank(index)) ++index;
+            if (index == lines_.size()) { move_to_(source_.size(), extend); return; }
+            while (index + 1 < lines_.size() && !blank(index + 1)) ++index;
+            move_to_(lines_[index].source_end(), extend);
+        } else {
+            if (!blank(index)) {
+                while (index != 0 && !blank(index - 1)) --index;
+                if (selection_.active > lines_[index].source_start) {
+                    move_to_(lines_[index].source_start, extend);
+                    return;
+                }
+                if (index == 0) { move_to_(0, extend); return; }
+                --index;
+            }
+            while (index != 0 && blank(index)) --index;
+            while (index != 0 && !blank(index - 1)) --index;
+            move_to_(lines_[index].source_start, extend);
+        }
     }
 
     std::size_t physical_line_index_for_offset_(std::size_t offset) const {
