@@ -8,6 +8,7 @@ import folia.markdown.ast;
 import folia.markdown.block_source;
 import folia.markdown.block_tree;
 import folia.markdown.document;
+import folia.markdown.inline_document;
 import folia.core.document_container_source;
 import folia.core.document_edit_support;
 import folia.core.document_input_syntax;
@@ -182,8 +183,8 @@ inline void assign_fresh_ids(
 } // namespace block_reparse_detail
 
 // Reclassify an edited block when its source changes structural meaning. A
-// paragraph is reconsidered only for multiline code/math candidates or for a
-// cheap '<...>' HTML candidate, so ordinary character input remains a
+// paragraph is reconsidered only for indented/multiline code/math candidates
+// or for a cheap '<...>' HTML candidate, so ordinary character input remains a
 // one-node inline CST reparse.
 enum class BlockReparseScope { SingleBlock, Fragment };
 
@@ -211,7 +212,20 @@ inline std::optional<BlockReparsePlan> plan_block_reparse(
         && source.find(U'\n') != std::u32string::npos;
     const auto is_html_paragraph = current.kind == BlockKind::Paragraph
         && source.starts_with(U"<") && source.find(U'>') != std::u32string::npos;
-    if (!is_raw && !is_multiline_paragraph && !is_html_paragraph) return std::nullopt;
+    const auto is_indented_paragraph = [&] {
+        if (current.kind != BlockKind::Paragraph
+            || current.inline_content.syntax_mode != InlineSyntaxMode::Markdown) return false;
+        std::size_t columns = 0;
+        for (const auto character : source) {
+            if (character == U' ') ++columns;
+            else if (character == U'\t') columns += 4 - columns % 4;
+            else break;
+            if (columns >= 4) return true;
+        }
+        return false;
+    }();
+    if (!is_raw && !is_multiline_paragraph && !is_html_paragraph && !is_indented_paragraph)
+        return std::nullopt;
     auto planned = plan_block_fragment(source, document.dialect, [&](auto const& blocks) {
         return is_raw ? !block_reparse_detail::same_raw_projection(current, blocks)
             : block_reparse_detail::contains_structural_reclassification(blocks);

@@ -309,6 +309,47 @@ suite text_command_acceptance_tests = [] {
     }
 };
 
+"typing_after_empty_paragraph_indentation_activates_code_without_global_work"_test = [] {
+    for (const auto prefix : {U"    ", U"\t", U" \t"}) for (const auto tab : {false, true}) {
+        if (tab && std::u32string_view(prefix) != U"    ") continue;
+        Editor editor("");
+        const auto initial = editor.selection();
+        expect(fatal(editor.execute_command(tab ? Command{.kind = CommandKind::TabForward}
+            : Command::InsertText(prefix))));
+        const auto blank_source = editor.markdown_utf8();
+        const auto blank_selection = editor.selection();
+        expect(blank_source == cps_to_utf8(prefix));
+        reset_core_operation_counters();
+        expect(fatal(editor.execute_command(Command::InsertText(U"alpha"))));
+        text_command_local_work();
+        expect(read_core_operation_counters().block_fragment_parses == 1_u);
+        expect(editor.markdown_utf8() == cps_to_utf8(std::u32string(prefix) + U"alpha"));
+        const auto* code = find_document_block(editor.document(), editor.selection().active.container_id);
+        expect(fatal(code != nullptr && code->kind == BlockKind::CodeBlock));
+        expect(bool(code->block_source.tree().content == U"alpha"));
+        text_command_reload_consistency(editor);
+        text_command_history(editor, blank_source, blank_selection);
+        expect(fatal(editor.undo()));
+        expect(fatal(editor.undo()));
+        expect(editor.markdown_utf8().empty());
+        expect(editor.selection() == initial);
+    }
+    Editor ordinary("alpha");
+    ordinary.set_selection(caret(ordinary.document().root.children.front(), 2));
+    reset_core_operation_counters();
+    expect(fatal(ordinary.execute_command(Command::InsertText(U"X"))));
+    expect(read_core_operation_counters().block_fragment_parses == 0_u);
+    text_command_local_work();
+    Editor html("<p>alpha</p>");
+    html.set_selection(TextSelection::caret({html.document().cached_editable_order.front(), 0}));
+    reset_core_operation_counters();
+    expect(fatal(html.execute_command(Command::InsertText(U"    "))));
+    expect(read_core_operation_counters().block_fragment_parses == 0_u);
+    text_command_local_work();
+    expect(html.markdown_utf8() == "<p>    alpha</p>");
+    text_command_reload_consistency(html);
+};
+
 "rendered_tab_and_backtab_preserve_raw_fences_crlf_and_container_prefixes"_test = [] {
     const std::vector<std::string> fixtures{
         "```cpp\r\nalpha\r\nbeta\r\n```", "    alpha\r\n    beta",
