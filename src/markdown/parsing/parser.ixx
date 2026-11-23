@@ -2312,7 +2312,11 @@ void close_innermost_frame() {
         if (quote->callout || (!frame.node.children.empty()
             && frame.node.children.back().kind==BlockKind::Paragraph
             && frame.node.children.back().inline_content.source.empty())) tail=Completion::Other;
-    } else if (std::holds_alternative<ListFrameState>(frame.state) && tail==Completion::Empty) {
+    } else if ((std::holds_alternative<ListFrameState>(frame.state)
+            || std::holds_alternative<ItemFrameState>(frame.state)) && tail==Completion::Empty) {
+        // Even an empty item's first line emits its marker. Reporting Empty
+        // lets a preceding item separator masquerade as the whole list's
+        // terminal newline and discards the real boundary to following text.
         tail=Completion::Other;
     } else if (std::holds_alternative<FootnoteFrameState>(frame.state)
         && frame.children_completion==Completion::Empty) tail=Completion::Other;
