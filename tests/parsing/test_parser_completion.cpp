@@ -64,7 +64,7 @@ bool verify_completion_summary(std::string_view source) {
 
 suite parser_completion = [] {
     "parser_completion_matches_serializer_and_exact_save"_test = [] {
-        constexpr std::array<std::string_view, 24> cases{
+        constexpr std::array<std::string_view, 34> cases{
             "",
             "\r\n\n",
             "alpha\r\nbeta\n\nlast\r",
@@ -89,6 +89,16 @@ suite parser_completion = [] {
             ">",
             "> first\n>",
             "> first\r\n>",
+            "- one\n-",
+            "- one\n- ",
+            "- one\n-\n two",
+            "- one\r\n-\r\n two",
+            "- [ ] ",
+            "- outer\n  - ",
+            "> - ",
+            "- ```\n  ",
+            "- ```\r\n  ",
+            "> ```\n> ",
         };
         for (const auto source : cases) {
             expect(verify_completion_summary(source)) << "source=" << source;

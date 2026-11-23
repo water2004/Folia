@@ -1885,7 +1885,8 @@ std::optional<BlockNode> try_parse_raw_html_block(const LeafLine& first) {
     }
 
 
-    void append_completed_block(ContainerFrame& parent,BlockNode block,std::size_t consumed_end) {
+    void append_completed_block(ContainerFrame& parent,BlockNode block,std::size_t consumed_end,
+        std::optional<Completion> contribution=std::nullopt) {
         parent.block_dispatch_started=true;
         auto* range=source_range_for(block.id);
         if (!range) throw std::logic_error("completed block has no physical source range");
@@ -1931,7 +1932,7 @@ std::optional<BlockNode> try_parse_raw_html_block(const LeafLine& first) {
             range->separator_range=PhysicalRange{gap.begin,gap.end};
         }
         const auto separator=block.separator_before ? completion_from_source(*block.separator_before) : Completion::Empty;
-        const auto fact=completion(block.id);
+        const auto fact=contribution.value_or(completion(block.id));
         parent.children_completion=append_completion(parent.children_completion,separator,fact);
         auto ending=consumed_end;
         if (ending>range->source_range.start && fact!=Completion::LineEnding && is_line_ending_character(cps[ending-1])) {
@@ -1945,7 +1946,8 @@ std::optional<BlockNode> try_parse_raw_html_block(const LeafLine& first) {
 
     // A completed node enters the existing tree once. Producers supply their
     // own completion fact; this operation contains no formatting-kind switch.
-    void complete_container_frame(Completion produced) {
+    void complete_container_frame(Completion produced,
+        std::optional<Completion> contribution=std::nullopt) {
         if (active_container_frames.empty()) throw std::logic_error("no active block frame");
         const auto handle=active_container_frames.back();
         active_container_frames.pop_back();
@@ -1964,7 +1966,7 @@ std::optional<BlockNode> try_parse_raw_html_block(const LeafLine& first) {
         if (!frame.prefixes.empty()) pending_container_prefixes.emplace(id.v,std::move(frame.prefixes));
         if (!active_container_frames.empty()) {
             auto& parent=container_frames[active_container_frames.back()];
-            append_completed_block(parent,std::move(frame.node),frame.source.end);
+            append_completed_block(parent,std::move(frame.node),frame.source.end,contribution);
         }
     }
 
@@ -2319,31 +2321,35 @@ void close_innermost_frame() {
         if (quote->callout || (!frame.node.children.empty()
             && frame.node.children.back().kind==BlockKind::Paragraph
             && frame.node.children.back().inline_content.source.empty())) tail=Completion::Other;
-    } else if ((std::holds_alternative<ListFrameState>(frame.state)
-            || std::holds_alternative<ItemFrameState>(frame.state)) && tail==Completion::Empty) {
-        // Even an empty item's first line emits its marker. Reporting Empty
-        // lets a preceding item separator masquerade as the whole list's
-        // terminal newline and discards the real boundary to following text.
+    } else if (std::holds_alternative<ListFrameState>(frame.state) && tail==Completion::Empty)
         tail=Completion::Other;
-    } else if (std::holds_alternative<FootnoteFrameState>(frame.state)
+    else if (std::holds_alternative<FootnoteFrameState>(frame.state)
         && frame.children_completion==Completion::Empty) tail=Completion::Other;
-    if (tail==Completion::LineEnding && !frame.node.children.empty()) {
+    const bool item=std::holds_alternative<ItemFrameState>(frame.state);
+    auto emitted_tail=tail;
+    // A standalone item serializes its body, while its enclosing list also
+    // emits the item marker/prefixes. Keep those two completion facts distinct:
+    // an empty body is Empty, but its marker prevents a preceding separator
+    // from becoming the list's terminal newline.
+    if (item && emitted_tail==Completion::Empty) emitted_tail=Completion::Other;
+    if (emitted_tail==Completion::LineEnding && !frame.node.children.empty()) {
         const auto* terminal=source_range_for(frame.node.children.back().id);
         if (terminal) {
             for (auto const& prefix : frame.prefixes) {
                 if (prefix.role==ContainerPrefixRole::ItemOpening
-                    || prefix.content_physical_offset!=terminal->source_range.end) continue;
+                    || prefix.content_physical_offset<terminal->source_range.end) continue;
                 if (std::ranges::any_of(prefix.spelling,[](auto range){return !range.empty();})) {
                     // The final source newline is followed by a real stored
                     // container prefix. Its emitted text owns the tail fact.
-                    tail=Completion::Other;
+                    emitted_tail=Completion::Other;
                     break;
                 }
             }
         }
     }
+    if (!item) tail=emitted_tail;
     leaf_line_cache.clear();
-    complete_container_frame(tail);
+    complete_container_frame(tail,emitted_tail);
 }
 
 
@@ -3762,6 +3768,16 @@ inline void Parser::register_leaf_ownership(
         if (piece.source_begin>=owner_source_end) break;
         piece.physical.end=piece.physical.begin+(std::min)(piece.physical.size(),owner_source_end-piece.source_begin);
         physical_ownership.add_source(owner,piece);
+    }
+    // A final accepted line may contain only a container prefix and no EOL.
+    // Its empty append has an exact physical boundary after that prefix, but
+    // contributes no nonempty source piece. Publish the displaced endpoint so
+    // the prefix binds to the owner's final Source boundary, rather than to
+    // the enclosing container's End anchor outside its serialization scope.
+    if (owner_source_end==source.size() && !source.pieces().empty()) {
+        const auto point=source.physical_offset(owner_source_end);
+        if (point && *point>source.pieces().back().physical.end)
+            physical_ownership.add_source(owner,{{*point,*point},owner_source_end});
     }
 }
 
