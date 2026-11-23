@@ -777,6 +777,7 @@ private:
             if (requested_anchors_.contains(key)) {
                 anchor_lines_.insert_first({event.owner, ContainerAnchorPart::Source,
                     source_offset}, line);
+                prefix_boundary_lines_.insert(anchor_lines_.canonicalize(line));
             }
         }
     }
@@ -804,7 +805,8 @@ private:
                 break;
             }
             std::size_t ending_end = eol + 1;
-            if ((*event.source)[eol] == U'\r' && ending_end < end && (*event.source)[ending_end] == U'\n') {
+            if ((*event.source)[eol] == U'\r' && ending_end < end && (*event.source)[ending_end] == U'\n'
+                && !requested_anchors_.contains({event.owner.v, ContainerAnchorPart::Source, ending_end})) {
                 ++ending_end;
             }
             add_source_anchor_boundaries(event, eol, ending_end - 1,
@@ -863,6 +865,8 @@ private:
 
     void attach_anchor(SerializerEventId event_id, ContainerPrefixAnchor anchor) {
         anchor_lines_.insert_first(anchor, stack_.back().current_line);
+        if (requested_anchors_.contains(serializer_anchor_key(anchor)))
+            prefix_boundary_lines_.insert(anchor_lines_.canonicalize(stack_.back().current_line));
         (void)event_id;
         const auto rope = plan_.append_anchor_value(anchor);
         stack_.back().content = plan_.concat(stack_.back().content, rope);
@@ -870,6 +874,8 @@ private:
 
     void attach_anchor_value(ContainerPrefixAnchor anchor) {
         anchor_lines_.insert_first(anchor, stack_.back().current_line);
+        if (requested_anchors_.contains(serializer_anchor_key(anchor)))
+            prefix_boundary_lines_.insert(anchor_lines_.canonicalize(stack_.back().current_line));
         const auto rope = plan_.append_anchor_value(anchor);
         stack_.back().content = plan_.concat(stack_.back().content, rope);
     }
@@ -901,12 +907,16 @@ private:
                 && plan_.rope(previous.ending).codepoint_count == 1;
             const bool current_is_lone_lf = ending_facts.terminal_lf
                 && plan_.rope(ending).codepoint_count == 1;
-            if (previous_is_lone_cr && current_is_lone_lf) {
+            // Container prefixes are applied after this line plan is built.
+            // A stripped prefix between CR and LF proves these are separate
+            // physical endings, even though their local source is adjacent.
+            if (previous_is_lone_cr && current_is_lone_lf
+                && !prefix_boundary_lines_.contains(anchor_lines_.canonicalize(frame.current_line))) {
                 auto merged_ending = plan_.concat(previous.ending, frame.content);
                 merged_ending = plan_.concat(merged_ending, ending);
                 frame.lines.back() = plan_.append_line(
                     previous.content, merged_ending, previous.id);
-                anchor_lines_.alias(frame.current_line, previous.id);
+                alias_lines(frame.current_line, previous.id);
                 frame.content = no_serializer_rope;
                 frame.current_line = plan_.new_line_id();
                 return;
@@ -917,8 +927,14 @@ private:
         frame.current_line = plan_.new_line_id();
     }
 
+    void alias_lines(SerializerLineId from, SerializerLineId to) {
+        if (prefix_boundary_lines_.contains(anchor_lines_.canonicalize(from)))
+            prefix_boundary_lines_.insert(anchor_lines_.canonicalize(to));
+        anchor_lines_.alias(from, to);
+    }
+
     void append_child_line(Frame& parent, SerializerPlannedLine const& child) {
-        anchor_lines_.alias(parent.current_line, child.id);
+        alias_lines(parent.current_line, child.id);
         parent.current_line = child.id;
         parent.content = plan_.concat(parent.content, child.content);
         if (child.content != no_serializer_rope) {
@@ -969,7 +985,9 @@ private:
             }
             if (eol == value.size()) break;
             std::size_t ending_end = eol + 1;
-            if (value[eol] == U'\r' && ending_end < value.size() && value[ending_end] == U'\n') ++ending_end;
+            if (value[eol] == U'\r' && ending_end < value.size() && value[ending_end] == U'\n'
+                && !requested_anchors_.contains({event.owner.v, ContainerAnchorPart::Separator,
+                    event.separator_offset + ending_end})) ++ending_end;
             const auto ending = plan_.append_stored_generated(token, eol, ending_end);
             stack_.back().total_codepoints += ending_end - eol;
             finish_line(stack_.back(), ending);
@@ -1020,6 +1038,7 @@ private:
     SerializerPlanArena& plan_;
     SerializerAnchorLineIndex anchor_lines_;
     std::unordered_set<SerializerAnchorKey, SerializerAnchorKeyHash> requested_anchors_;
+    std::unordered_set<SerializerLineId> prefix_boundary_lines_;
     std::unordered_map<std::uint64_t, std::size_t> block_starts_;
     std::unordered_map<std::uint64_t, bool> completed_terminal_;
     std::unordered_map<std::uint64_t, std::size_t> outer_starts_;

@@ -606,7 +606,17 @@ private:
                     auto header_ending = separator.find_first_of(U"\r\n");
                     if (header_ending == std::u32string::npos) header_ending = separator.size();
                     else if (separator[header_ending++] == U'\r'
-                        && header_ending < separator.size() && separator[header_ending] == U'\n') ++header_ending;
+                        && header_ending < separator.size() && separator[header_ending] == U'\n') {
+                        // Stripping a quote prefix can make separate CR and
+                        // LF endings adjacent in the block-local separator.
+                        bool intervening_prefix = false;
+                        block.container_source().visit_owner(body.id, [&](const auto& prefix) {
+                            intervening_prefix = intervening_prefix
+                                || (prefix.anchor.part == ContainerAnchorPart::Separator
+                                    && prefix.anchor.offset == header_ending);
+                        });
+                        if (!intervening_prefix) ++header_ending;
+                    }
                     writer_.generated_span(std::u32string_view(separator).substr(0, header_ending));
                     SerializerPrefixPolicy policy;
                     policy.rule = SerializerPrefixRule::FixedLines;
