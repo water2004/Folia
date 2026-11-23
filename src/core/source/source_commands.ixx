@@ -6,6 +6,7 @@ import folia.core.command;
 import folia.core.source_editor;
 import folia.core.source_projection;
 import folia.core.document_source_edit;
+import folia.core.document_footnotes;
 import folia.core.document_inline_format;
 import folia.core.document_edit_primitives;
 import folia.markdown.dialect;
@@ -375,23 +376,38 @@ inline bool callout(SourceEditor& editor, const Command& command) {
     return apply_prefix_edits(editor, std::move(edits));
 }
 
-inline bool footnote(SourceEditor& editor, const Command& command, std::string_view fresh_label) {
+inline bool footnote(SourceEditor& editor, const Command& command, std::string_view fresh_label,
+    const EditorDocument& document, const SourceProjectionIndex& projection) {
     const auto label = utf8_to_cps(command.kind == CommandKind::CreateFootnoteDefinition
         ? std::string_view(command.footnote_label) : fresh_label);
     if (label.empty() || label.find_first_of(U"[]\r\n") != std::u32string::npos) return false;
     const auto reference = U"[^" + label + U"]";
     const auto ending = editor.preferred_line_ending();
-    auto definition = (editor.source().empty() && command.kind == CommandKind::CreateFootnoteDefinition
-        ? U"" : ending + ending) + reference + U": ";
-    const auto end = editor.source().size();
+    const auto index = footnote_definition_insertion_index(document);
+    const auto before_raw = index < document.root.children.size();
+    const auto definition_offset = before_raw ? projection.blocks().at(index).begin : editor.source().size();
+    const auto prefix = before_raw
+        || (editor.source().empty() && command.kind == CommandKind::CreateFootnoteDefinition)
+        ? std::u32string{} : ending + ending;
+    auto definition = prefix + reference + U": ";
+    const auto body_offset = definition.size();
+    if (before_raw) definition += ending + ending;
     const auto offset = editor.selection().ordered_range().end;
     if (command.kind == CommandKind::CreateFootnoteDefinition)
-        return editor.replace({end, end}, std::move(definition));
-    if (offset == end) return editor.replace({end, end}, reference + definition);
+        return editor.replace_with_selection({definition_offset, definition_offset}, std::move(definition),
+            SourceSelection::caret(definition_offset + body_offset));
+    if (offset == definition_offset) {
+        // At the opening of an unclosed raw owner the definition precedes
+        // the requested literal reference; at EOF the reference comes first.
+        const auto target = definition_offset + body_offset + (before_raw ? 0 : reference.size());
+        auto replacement = before_raw ? definition + reference : reference + definition;
+        return editor.replace_with_selection({offset, offset}, std::move(replacement),
+            SourceSelection::caret(target));
+    }
     const std::array edits{SourceReplacement{{offset, offset}, reference},
-        SourceReplacement{{end, end}, definition}};
+        SourceReplacement{{definition_offset, definition_offset}, definition}};
     return editor.replace_all_with_selection(edits,
-        SourceSelection::caret(end + reference.size() + definition.size()));
+        SourceSelection::caret(definition_offset + body_offset + (offset < definition_offset ? reference.size() : 0)));
 }
 
 inline bool code_language(SourceEditor& editor, const Command& command,
@@ -440,7 +456,8 @@ inline bool execute_source_markup_command(SourceEditor& editor, const Command& c
         case CommandKind::InsertToc: return insert_block(editor, command);
         case CommandKind::ToggleCallout: return callout(editor, command);
         case CommandKind::InsertFootnote:
-        case CommandKind::CreateFootnoteDefinition: return footnote(editor, command, fresh_footnote_label);
+        case CommandKind::CreateFootnoteDefinition:
+            return footnote(editor, command, fresh_footnote_label, document, projection);
         case CommandKind::SetCodeBlockLanguage: return code_language(editor, command, document, projection);
         case CommandKind::InsertImage: {
             const auto alt = command.alt.empty() ? editor.selected_text() : command.alt;

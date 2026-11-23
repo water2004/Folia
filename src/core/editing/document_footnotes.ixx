@@ -9,9 +9,11 @@ import folia.markdown.block_source;
 import folia.markdown.block_tree;
 import folia.markdown.document;
 import folia.core.document_edit_support;
+import folia.core.document_input_rules;
 import folia.markdown.document_text;
 import folia.core.document_transaction;
 import folia.markdown.inline_document;
+import folia.markdown.markdown_html;
 import folia.markdown.symbols;
 import folia.markdown.text_edit;
 import folia.markdown.utf;
@@ -91,7 +93,49 @@ inline std::optional<TextPosition> first_footnote_reference_target(
     };
 }
 
+// A trailing unclosed literal block owns all subsequent source. A definition
+// placed after it would disappear into that body when the document is opened
+// again. Place the new definition before that block, preserving its fences.
+inline std::size_t footnote_definition_insertion_index(const EditorDocument& document) {
+    const auto size = document.root.children.size();
+    if (size == 0) return 0;
+    const auto& last = document.root.children.back();
+    if (editable_raw_block_source(last)
+        && last.block_source.tree().kind != BlockSourceKind::IndentedCode
+        && !last.block_source.tree().complete_closing) return size - 1;
+    if (last.kind == BlockKind::UnsupportedMarkup
+        && markdown_html_missing_block_terminator(utf8_to_cps(last.atomic_special().raw))) return size - 1;
+    return size;
+}
+
 namespace document_footnotes_detail {
+
+inline std::optional<TextPosition> reference_insertion_position(
+    const EditorDocument& document, const TextSelection& selection) {
+    auto first_index = document_editable_order_position(document, selection.anchor.container_id);
+    auto last_index = document_editable_order_position(document, selection.active.container_id);
+    if (!first_index || !last_index) return std::nullopt;
+    auto first = selection.anchor;
+    auto last = selection.active;
+    if (*first_index > *last_index
+        || (*first_index == *last_index && first.source_offset > last.source_offset)) {
+        std::swap(first_index, last_index);
+        std::swap(first, last);
+    }
+    const auto* block = find_document_block(document, last.container_id);
+    const auto visible = block ? editable_block_source_range(*block) : std::nullopt;
+    if (!visible) return std::nullopt;
+    last.source_offset = (std::clamp)(last.source_offset, visible->start, visible->end);
+    if (*last_index > *first_index && last.source_offset == visible->start) {
+        // The final owner at offset zero contributes no selected characters.
+        // Attach the reference to the preceding selected text or object.
+        block = find_document_block(document, document.cached_editable_order[*last_index - 1]);
+        const auto previous = block ? editable_block_source_range(*block) : std::nullopt;
+        if (!previous) return std::nullopt;
+        last = {block->id, previous->end, TextAffinity::Upstream};
+    }
+    return last;
+}
 
 inline BlockNode make_definition(
     const EditorDocument& owner,
@@ -157,12 +201,14 @@ inline std::optional<DocumentTransaction> document_create_footnote_definition(
     DocumentTreeEdit insert;
     insert.kind = DocumentTreeEditKind::Insert;
     insert.parent_id = after.root.id;
-    insert.index = after.root.children.size();
+    insert.index = footnote_definition_insertion_index(after);
     insert.after = definition;
     std::vector<DocumentOperation> operations;
     document_edit_detail::MutationRollback rollback(after, operations, revision_before);
+    const auto insertion_index = insert.index;
     operations.emplace_back(std::move(insert));
-    after.root.children.push_back(std::move(definition));
+    after.root.children.insert(after.root.children.begin() + static_cast<std::ptrdiff_t>(insertion_index),
+        std::move(definition));
     ++after.revision;
     rollback.commit();
     return make_recorded_document_transaction(
@@ -178,31 +224,23 @@ inline std::optional<DocumentTransaction> document_insert_footnote(
     EditorDocument& document,
     const DocumentSymbolIndex& symbols,
     const TextSelection& selection) {
-    if (selection.anchor.container_id != selection.active.container_id) return std::nullopt;
+    auto position = document_footnotes_detail::reference_insertion_position(document, selection);
+    if (!position) return std::nullopt;
     const auto revision_before = document.revision;
     auto& after = document;
+    std::vector<DocumentOperation> operations;
+    document_edit_detail::MutationRollback rollback(after, operations, revision_before);
     document_edit_detail::NodeAllocator allocator(after);
-    auto* owner = document_edit_detail::find_inline_owner(
-        after.root, selection.active.container_id);
-    if (!owner) return std::nullopt;
-
-    const auto offset = selection.is_caret()
-        ? selection.active.source_offset
-        : (std::max)(selection.anchor.source_offset, selection.active.source_offset);
-    if (offset > owner->source.size()) return std::nullopt;
+    if (auto boundary = document_input_rules::ensure_atomic_boundary_paragraph(after, *position, allocator)) {
+        position = boundary->target;
+        operations.insert(operations.end(), std::make_move_iterator(boundary->operations.begin()),
+            std::make_move_iterator(boundary->operations.end()));
+    }
     const auto label = next_footnote_label(symbols);
     const auto reference_source = U"[^" + utf8_to_cps(label) + U"]";
-    auto source_edit = document_edit_detail::edit_inline(
-        after,
-        selection.active.container_id,
-        {offset, offset},
-        reference_source,
-        allocator);
-    if (!source_edit) return std::nullopt;
-
-    std::vector<DocumentOperation> operations;
-    document_edit_detail::append_source_operation(operations, std::move(*source_edit));
-    document_edit_detail::MutationRollback rollback(after, operations, revision_before);
+    auto inserted = document_edit_detail::insert_text(after, *position, reference_source, allocator);
+    if (!inserted || !inserted->source_edit) return std::nullopt;
+    document_edit_detail::append_source_operation(operations, std::move(*inserted->source_edit));
 
     auto definition = document_footnotes_detail::make_definition(after, allocator, label);
     const auto target = document_edit_detail::first_editable_position(definition);
@@ -210,10 +248,12 @@ inline std::optional<DocumentTransaction> document_insert_footnote(
     DocumentTreeEdit insert;
     insert.kind = DocumentTreeEditKind::Insert;
     insert.parent_id = after.root.id;
-    insert.index = after.root.children.size();
+    insert.index = footnote_definition_insertion_index(after);
     insert.after = definition;
+    const auto insertion_index = insert.index;
     operations.emplace_back(std::move(insert));
-    after.root.children.push_back(std::move(definition));
+    after.root.children.insert(after.root.children.begin() + static_cast<std::ptrdiff_t>(insertion_index),
+        std::move(definition));
     ++after.revision;
     rollback.commit();
     return make_recorded_document_transaction(
