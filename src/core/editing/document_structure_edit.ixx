@@ -8,6 +8,7 @@ import folia.markdown.block_tree;
 import folia.markdown.callout;
 import folia.markdown.container_source;
 import folia.markdown.document;
+import folia.markdown.document_text;
 import folia.core.document_container_source;
 import folia.core.document_ids;
 import folia.markdown.ids;
@@ -1005,10 +1006,13 @@ inline std::optional<DocumentTransaction> document_edit_table(
     std::size_t argument = 0) {
     const auto revision_before = document.revision;
     auto& after = document;
-    // A text range inside one cell still has an unambiguous structural target.
-    // A cross-cell range does not: row/column commands must come from an
-    // explicit handle that first collapses the selection to its source cell.
-    auto const target_cell = document_table_edit_target(after, selection);
+    // Navigation starts at the active cell, including when a text range spans
+    // several cells. Structural row/column edits still require one cell (or
+    // an explicit handle that collapsed the selection to its source cell).
+    const auto navigation = edit == DocumentTableEdit::MoveCellNext
+        || edit == DocumentTableEdit::MoveCellPrevious;
+    auto const target_cell = document_table_edit_target(after,
+        navigation ? TextSelection::caret(selection.active) : selection);
     if (!target_cell) return std::nullopt;
     const auto cell_id = target_cell->cell_id;
     const auto column = target_cell->column;
@@ -1124,7 +1128,45 @@ inline std::optional<DocumentTransaction> document_edit_table(
         case DocumentTableEdit::MoveCellPrevious: {
             if (column > 0) target_id = table->children[row_index].children[column - 1].id;
             else if (row_index > 0) target_id = table->children[row_index - 1].children.back().id;
-            else return std::nullopt;
+            else {
+                const auto first = document_editable_order_position(after, cell_id);
+                if (!first) return std::nullopt;
+                if (*first > 0) {
+                    const auto previous_id = after.cached_editable_order[*first - 1];
+                    const auto* previous = find_document_block(after, previous_id);
+                    const auto range = previous ? editable_block_source_range(*previous) : std::nullopt;
+                    if (!range) return std::nullopt;
+                    rollback.commit();
+                    return make_recorded_document_transaction({}, selection,
+                        TextSelection::caret({previous_id, range->end, TextAffinity::Upstream}),
+                        revision_before, revision_before, DocumentTransactionReason::Structure);
+                }
+
+                // A table at the start of its document still needs an exit.
+                // Create a real flow paragraph before the table in the same
+                // parent, so Shift+Tab never falls through to text outdent.
+                auto path = document_block_path(after, table_id);
+                if (!path || path->empty()) return std::nullopt;
+                const auto table_index = path->back();
+                path->pop_back();
+                auto* parent = block_at_path(after.root, *path);
+                if (!parent) return std::nullopt;
+                auto syntax_mode = InlineSyntaxMode::Markdown;
+                const auto* context = &after.root;
+                for (const auto child_index : *path) {
+                    context = &context->children[child_index];
+                    if (context->kind == BlockKind::HtmlContainer || context->has_html_source()
+                        || context->has_html_element_provenance()) syntax_mode = InlineSyntaxMode::HtmlText;
+                }
+                auto paragraph = document_edit_detail::empty_paragraph(allocator, after, syntax_mode);
+                target_id = paragraph.id;
+                if (!insert_node(parent->id, table_index, std::move(paragraph))) return std::nullopt;
+                ++after.revision;
+                rollback.commit();
+                return make_recorded_document_transaction(std::move(operations), selection,
+                    TextSelection::caret({target_id, 0, TextAffinity::Downstream}),
+                    revision_before, after.revision, DocumentTransactionReason::Structure);
+            }
             changed = false;
             break;
         }

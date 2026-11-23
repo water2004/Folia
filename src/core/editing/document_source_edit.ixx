@@ -912,6 +912,34 @@ inline std::optional<DocumentTransaction> document_delete_selection(EditorDocume
         DocumentTransactionReason::Delete);
 }
 
+namespace document_navigation_detail {
+
+// The editable source preserves physical line endings. A CRLF is one line
+// boundary, and a lone CR is a boundary as well; neither belongs to a line's
+// reachable Home/End columns.
+inline SourceRange physical_line_range(std::u32string_view text, std::size_t offset) {
+    offset = (std::min)(offset, text.size());
+    const auto previous = offset == 0 ? std::u32string_view::npos
+        : text.find_last_of(U"\r\n", offset - 1);
+    const auto next = text.find_first_of(U"\r\n", offset);
+    return {previous == std::u32string_view::npos ? 0 : previous + 1,
+        next == std::u32string_view::npos ? text.size() : next};
+}
+
+inline std::size_t after_line_ending(std::u32string_view text, std::size_t offset) {
+    if (offset >= text.size()) return text.size();
+    return offset + (text[offset] == U'\r' && offset + 1 < text.size()
+        && text[offset + 1] == U'\n' ? 2u : 1u);
+}
+
+inline std::size_t before_line_ending(std::u32string_view text, std::size_t offset) {
+    if (offset == 0) return 0;
+    return offset - (text[offset - 1] == U'\n' && offset >= 2
+        && text[offset - 2] == U'\r' ? 2u : 1u);
+}
+
+} // namespace document_navigation_detail
+
 inline std::optional<TextSelection> document_move_selection(const EditorDocument& document, const TextSelection& selection, DocumentMove movement, bool extend) {
     const auto& order = document.cached_editable_order;
     if (order.empty()) return std::nullopt;
@@ -936,11 +964,12 @@ inline std::optional<TextSelection> document_move_selection(const EditorDocument
     if (!text || !range || !active_block) return std::nullopt;
     auto target = selection.active;
     target.source_offset = clamp_editable_block_source_offset(*active_block, target.source_offset);
-    if (!extend && !selection.is_caret()) {
+    if (!extend && !selection.is_caret()
+        && (movement == DocumentMove::Left || movement == DocumentMove::Right)) {
         const auto anchor_index = document_editable_order_position(
             document, selection.anchor.container_id).value_or(*index);
         const bool anchor_first = anchor_index < *index || (anchor_index == *index && selection.anchor.source_offset < selection.active.source_offset);
-        target = (movement == DocumentMove::Left || movement == DocumentMove::Up || movement == DocumentMove::LineStart || movement == DocumentMove::DocumentStart)
+        target = movement == DocumentMove::Left
             ? (anchor_first ? selection.anchor : selection.active) : (anchor_first ? selection.active : selection.anchor);
         return TextSelection::caret(target);
     }
@@ -1006,26 +1035,44 @@ inline std::optional<TextSelection> document_move_selection(const EditorDocument
                 ? navigation_text.size()
                 : static_cast<std::size_t>(mapped - raw_mapping->begin());
         }
-        const auto before = navigation_offset == 0 ? std::u32string::npos : navigation_text.rfind(U'\n', navigation_offset - 1);
-        const auto line_start = before == std::u32string::npos ? 0 : before + 1;
-        const auto after = navigation_text.find(U'\n', navigation_offset);
-        const auto line_end = after == std::u32string::npos ? navigation_text.size() : after;
+        // External selections can arrive inside CRLF. Resolve the invisible
+        // interior by affinity before calculating a physical line column.
+        if (navigation_offset > 0 && navigation_offset < navigation_text.size()
+            && navigation_text[navigation_offset - 1] == U'\r'
+            && navigation_text[navigation_offset] == U'\n') {
+            if (target.affinity == TextAffinity::Downstream) ++navigation_offset;
+            else --navigation_offset;
+        }
+        const auto line = document_navigation_detail::physical_line_range(navigation_text, navigation_offset);
         auto destination = navigation_offset;
-        if (movement == DocumentMove::LineStart) destination = line_start;
-        else if (movement == DocumentMove::LineEnd) destination = line_end;
+        if (movement == DocumentMove::LineStart) destination = line.start;
+        else if (movement == DocumentMove::LineEnd) destination = line.end;
         else {
-            const auto column = navigation_offset - line_start;
-            if (movement == DocumentMove::Up && line_start > 0) {
-                const auto previous_end = line_start - 1;
-                const auto previous_break = previous_end == 0 ? std::u32string::npos : navigation_text.rfind(U'\n', previous_end - 1);
-                const auto previous_start = previous_break == std::u32string::npos ? 0 : previous_break + 1;
-                destination = previous_start + (std::min)(column, previous_end - previous_start);
-            } else if (movement == DocumentMove::Down && line_end < navigation_text.size()) {
-                const auto next_start = line_end + 1;
-                const auto next_break = navigation_text.find(U'\n', next_start);
-                const auto next_end = next_break == std::u32string::npos ? navigation_text.size() : next_break;
-                destination = next_start + (std::min)(column, next_end - next_start);
+            const auto backward = movement == DocumentMove::Up;
+            const auto column = navigation_offset - line.start;
+            std::optional<SourceRange> destination_line;
+            if (backward && line.start > 0) {
+                destination_line = document_navigation_detail::physical_line_range(navigation_text,
+                    document_navigation_detail::before_line_ending(navigation_text, line.start));
+            } else if (!backward && line.end < navigation_text.size()) {
+                destination_line = document_navigation_detail::physical_line_range(navigation_text,
+                    document_navigation_detail::after_line_ending(navigation_text, line.end));
+            } else if (backward ? *index > 0 : *index + 1 < order.size()) {
+                const auto* neighbor = block_at(backward ? *index - 1 : *index + 1);
+                const auto neighbor_text = neighbor ? editable_block_text_view(*neighbor) : std::nullopt;
+                if (!neighbor_text) return std::nullopt;
+                raw_mapping = editable_raw_block_source(*neighbor)
+                    ? &neighbor->block_source.tree().content_to_source : nullptr;
+                navigation_text = raw_mapping ? std::u32string_view{neighbor->block_source.tree().content}
+                    : *neighbor_text;
+                target.container_id = neighbor->id;
+                target.affinity = backward ? TextAffinity::Upstream : TextAffinity::Downstream;
+                destination_line = document_navigation_detail::physical_line_range(navigation_text,
+                    backward ? navigation_text.size() : 0);
             }
+            destination = destination_line
+                ? destination_line->start + (std::min)(column, destination_line->length())
+                : backward ? 0 : navigation_text.size();
         }
         // A line column may land inside a combining/emoji cluster on the new
         // line. Keep the same source coordinate unit while snapping to a
@@ -1044,8 +1091,9 @@ inline std::optional<TextSelection> document_move_selection(const EditorDocument
             || movement == DocumentMove::LineEnd || movement == DocumentMove::DocumentEnd;
         target.source_offset = inline_format_marker_boundary(*owner, target.source_offset, forward);
     }
-    if (target == selection.active) return std::nullopt;
-    return extend ? TextSelection{selection.anchor, target} : TextSelection::caret(target);
+    const auto result = extend ? TextSelection{selection.anchor, target} : TextSelection::caret(target);
+    if (result == selection) return std::nullopt;
+    return result;
 }
 
 inline std::optional<TextSelection> document_select_all(const EditorDocument& document) {
