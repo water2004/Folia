@@ -428,6 +428,43 @@ inline std::optional<DocumentTransaction> document_set_code_block_language(
         DocumentTransactionReason::Format);
 }
 
+// Local prefix and sibling rules run first. When their direct parent has no
+// matching neighbor, the next editable leaf may belong to another flow
+// container. Delete that boundary through the same tree transaction used for
+// an explicitly selected boundary; never flatten the document to find it.
+// Raw bodies, tables and different inline syntaxes retain their structure and
+// expose the neighboring edge instead of swallowing the deletion command.
+inline std::optional<DocumentTransaction> document_delete_flow_boundary(
+    EditorDocument& document, const TextSelection& selection, bool backward) {
+    const auto index = document_editable_order_position(document, selection.active.container_id);
+    const auto& order = document.cached_editable_order;
+    if (!index || (backward ? *index == 0 : *index + 1 >= order.size())) return std::nullopt;
+    const auto neighbor_index = backward ? *index - 1 : *index + 1;
+    const auto* current = find_document_block(document, selection.active.container_id);
+    const auto* neighbor = find_document_block(document, order[neighbor_index]);
+    if (!current || !neighbor) return std::nullopt;
+    const auto current_range = editable_block_source_range(*current);
+    const auto neighbor_range = editable_block_source_range(*neighbor);
+    if (!current_range || !neighbor_range) return std::nullopt;
+    const auto current_edge = backward ? current_range->start : current_range->end;
+    if (clamp_editable_block_source_offset(*current, selection.active.source_offset) != current_edge)
+        return std::nullopt;
+
+    const auto target = TextPosition{neighbor->id,
+        backward ? neighbor_range->end : neighbor_range->start,
+        backward ? TextAffinity::Upstream : TextAffinity::Downstream};
+    if (document_edit_detail::text_block(current->kind)
+        && document_edit_detail::text_block(neighbor->kind)
+        && current->inline_content.syntax_mode == neighbor->inline_content.syntax_mode) {
+        auto transaction = document_delete_selection(document,
+            TextSelection{selection.active, target});
+        if (transaction) transaction->selection_before = selection;
+        return transaction;
+    }
+    return make_recorded_document_transaction({}, selection, TextSelection::caret(target),
+        document.revision, document.revision, DocumentTransactionReason::Delete);
+}
+
 inline std::optional<DocumentTransaction> document_delete_backward(EditorDocument& document, const TextSelection& selection) {
     if (!selection.is_caret()) return document_delete_selection(document, selection);
     if (auto marker = document_delete_marker(document, selection, true)) return marker;
@@ -463,7 +500,7 @@ inline std::optional<DocumentTransaction> document_delete_backward(EditorDocumen
             auto range = block_source_backward_delete_range(
                 selected_block->block_source,
                 target.source_offset);
-            if (!range) return std::nullopt;
+            if (!range) return document_delete_flow_boundary(after, selection, true);
             source_edit = document_edit_detail::erase_text(
                 after, target.container_id, *range, allocator);
             if (!source_edit) return std::nullopt;
@@ -497,10 +534,7 @@ inline std::optional<DocumentTransaction> document_delete_backward(EditorDocumen
         target = joined->target;
         operations = std::move(joined->operations);
     } else {
-        auto removed = document_edit_detail::remove_atomic(after, target.container_id, allocator);
-        if (!removed) return std::nullopt;
-        target = removed->target;
-        operations = std::move(removed->operations);
+        return document_delete_flow_boundary(after, selection, true);
     }
     ++after.revision;
     if (source_edit) {
@@ -562,7 +596,7 @@ inline std::optional<DocumentTransaction> document_delete_forward(EditorDocument
             auto range = block_source_forward_delete_range(
                 selected_block->block_source,
                 target.source_offset);
-            if (!range) return std::nullopt;
+            if (!range) return document_delete_flow_boundary(after, selection, false);
             source_edit = document_edit_detail::erase_text(
                 after, target.container_id, *range, allocator);
             if (!source_edit) return std::nullopt;
@@ -605,7 +639,7 @@ inline std::optional<DocumentTransaction> document_delete_forward(EditorDocument
         target = joined->target;
         operations = std::move(joined->operations);
     } else {
-        return std::nullopt;
+        return document_delete_flow_boundary(after, selection, false);
     }
     ++after.revision;
     if (source_edit) {
