@@ -4,7 +4,8 @@ Folia 0.7.0 uses the native Mermaid renderer. The isolated acceptance worktree w
 
 ## Architecture and packaging
 
-`MermaidRenderer` retains its asynchronous source/theme cache and notifications,
+`src/platform/windows/media/mermaid/MermaidRenderer` owns the asynchronous
+source/theme cache and notifications,
 but calls the existing `FoliaNativeMermaid.dll` C ABI. DLL-owned buffers are
 released through that DLL. Native measured SVG passes through the independent
 `SvgNormalizer` for Direct2D and PDF. A numeric outer SVG preserves authoritative

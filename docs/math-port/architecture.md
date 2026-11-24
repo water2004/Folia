@@ -26,7 +26,8 @@ TeX 请求（单项也是批量中的一项）
 | `src/math/output/svg/` | 消费 Scene，不重新计算分式、根式、表格或基线 |
 | `src/math/fonts/` | 固定字体数据与按请求加载的字形资源 |
 | `src/math/include/folia/math/native_renderer_bridge.h` | DLL 的 C ABI；不属于另一个公共头文件模块 |
-| `src/platform/`、`src/app-winui/` | 后台请求、取消、缓存、窗口与图形 API |
+| `src/platform/windows/media/math/` | Windows 请求调度、取消、缓存和数学 DLL 会话 |
+| `src/app-winui/editor/rendering/` | 视口请求优先级、公式预览与主题绘制 |
 
 未来 Direct2D 后端消费相同的 Scene；当前 Folia 接入的是 SVG 后端。
 不能为新后端复制数学布局。源码文件以实际职责命名，不用 native/new/typed 名称保留竞争实现。

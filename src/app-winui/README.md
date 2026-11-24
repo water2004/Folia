@@ -7,8 +7,8 @@ This layer owns the native title bar and document tabs, main menu, animated file
 Source ownership:
 
 - The directory root contains XAML application/window files and the composition root. `MainWindow.xaml.cpp` owns lifecycle and window state; command and event wiring live in separate translation units.
-- `workspace/` owns the open-document collection, lazy background folder
-  enumeration and the shared vector icon definitions. Each document keeps its
+- `workspace/` owns the open-document collection, file explorer, outline
+  pane and shared vector icon definitions. Each document keeps its
   original session and document controller; activation only rebinds the shared
   input and rendering resources. `MainWindow.Documents.cpp` owns that binding,
   `MainWindow.Tabs.cpp` projects the collection into native tabs and sidebars,
@@ -19,35 +19,37 @@ Source ownership:
   lifecycle, rendered/source editing dispatch, search, and UTF-32-to-UTF-16
   text-input projection. These translation units share one session state; they
   must not introduce parallel selections or cached document models.
-- `editor/interaction/` translates WinUI routed events into platform input
-  actions and core commands; it also owns text input, scrolling, document
-  actions, frame scheduling, and sidebar controllers. Long-running PDF export
-  orchestration is isolated from file, clipboard, link, and image commands but
-  remains part of the document controller lifecycle so detach/cancel has one
-  owner.
-- `editor/rendering/` owns Direct2D/DirectWrite materialization and drawing.
+- `editor/interaction/` owns routed events, text input, scrolling and frame
+  scheduling. It translates input into platform actions and core commands.
+- `editor/document/` coordinates document open, save, reload, file relocation,
+  clipboard and unsaved state with each tab's session. Windows storage adapters
+  own file watching and filesystem operations.
+- `editor/rendering/` assembles native layouts and paints with the active
+  theme. The Windows platform supplies the text projection and its UTF-16
+  ranges, inline-object geometry, and text and SVG drawing primitives.
   `EditorSurfaceRenderer` is the stateful facade; document work is delegated to
   a preparation pass, a one-block resource preparer, and a render pass. Native
-  layouts, COM resources, image handles, and the prepared-document cache stay
-  here because they are application rendering state rather than portable
-  policy.
-- `media/` owns GIF decoding and native math, Mermaid, and SVG integration.
-  Native math request/queue ownership is separate from parsing the renderer's
-  SVG fragment protocol; fragment measurement preserves worker scheduling,
-  cancellation, generation and cache behavior. Images and animated GIFs are
-  loaded asynchronously around the viewport; intrinsic metadata is retained so unloaded media does not move the
-  surrounding layout.
-- `settings/` owns WinUI settings pages and persisted application settings.
-  Feature-specific schemas such as shortcut/snippet bindings serialize through
-  dedicated components; the root settings store owns only schema versioning,
-  validation dispatch, and atomic file replacement.
-- `export/` owns Windows PDF/print integration and the value types used to
-  report export progress across UI controllers.
+  layouts and the prepared-document cache live in `layout/`, asset placement
+  and previews in `media/`, and the themed drawing passes in `painting/`.
+- `media/` owns asynchronous viewport-facing image caching and display
+  preferences. Windows backends load image bytes and dimensions and handle
+  GIF decoding, math, Mermaid, and SVG integration. Code and TeX syntax
+  analysis comes from `folia::highlight`.
+- `completion/` connects editor state and suggestions to the Windows
+  completion backend.
+- `settings/views/` owns the settings pages and controls. `settings/storage/`
+  owns persisted application settings, feature schemas and atomic replacement.
+  `settings/latex/` coordinates the editable command catalog and usage history.
+- `export/` owns PDF export orchestration, page drawing, and the types used
+  for progress and cancellation. The Windows printing adapter owns the print
+  package and output stream.
 - `localization/`, `theme/`, and `storage/` own compiled WinUI resources,
-  complete theme materialization, the compile-time-configurable Assets root,
-  and ICU-backed document byte decoding/encoding. Storage reports ranked
-  detection candidates but does not own document state; the session owns the
-  encoding selected for the currently open document.
+  complete theme materialization and the compile-time-configurable Assets
+  root. `folia::encoding` detects and converts document bytes, and the session
+  owns the encoding selected for the open document. File watching, clipboard
+  image writes and workspace filesystem operations use Windows storage
+  adapters. Pickers, unsaved state and open-document relocation stay in the
+  application.
 
 File clicks use a replaceable preview tab. Double-clicking or editing keeps
 that document open; dirty previews cannot be replaced. The folder sidebar is
@@ -106,7 +108,7 @@ Build notes:
 - Build `Folia.vcxproj` through the root `build_app.ps1` script so Windows App SDK XAML/IDL/C++WinRT generation runs through the NuGet targets and all output stays below `build/app-winui`.
 - NuGet packages are restored into `packages/` by running `powershell -ExecutionPolicy Bypass -File setup.ps1` from the repository root.
 - Keep CMake for `folia_core`, `folia_platform`, and tests; do not configure `-DFOLIA_BUILD_WINUI=ON`.
-- Run `build_platform_test.bat` for deterministic Windows editor tests. These
+- Run `cmd /c tests\platform\run.bat` for deterministic Windows editor tests. These
   tests cover block geometry, DirectWrite hit testing/caret coordinates,
   table action/drop policy, preparation invalidation, viewport planning, scroll
   state, key gestures, and selection drag projection without UI automation.
