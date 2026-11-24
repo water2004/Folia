@@ -30,7 +30,7 @@ const BlockNode* find_kind(const BlockNode& block, BlockKind kind) {
 }
 
 const BlockNode* find_paragraph_with(const BlockNode& block, std::u32string_view text) {
-    if (block.kind == BlockKind::Paragraph && block.inline_content.source == text) return &block;
+    if (block.kind == BlockKind::Paragraph && block.inline_content().source == text) return &block;
     for (const auto& child : block.children) {
         if (const auto* found = find_paragraph_with(child, text)) return found;
     }
@@ -39,8 +39,8 @@ const BlockNode* find_paragraph_with(const BlockNode& block, std::u32string_view
 
 bool inline_sources_are_lossless(const BlockNode& block) {
     if (is_editable_block_owner(block.kind)
-        && !block.inline_content.source.empty()) {
-        const auto& document = block.inline_content;
+        && !block.inline_content().source.empty()) {
+        const auto& document = block.inline_content();
         if (!tokens_partition_source(document.tree, document.source.size())
             || !roots_partition_source(document.tree, document.source.size())
             || flatten_tokens(document.tree, document.source) != document.source
@@ -59,7 +59,7 @@ void append_signature(std::string& out, const BlockNode& block) {
     out.push_back('(');
     if (block.kind == BlockKind::Paragraph || block.kind == BlockKind::Heading
         || block.kind == BlockKind::CalloutTitle || block.kind == BlockKind::TableCell) {
-        out += cps_to_utf8(block.inline_content.source);
+        out += cps_to_utf8(block.inline_content().source);
     } else if (block.kind == BlockKind::CodeBlock || block.kind == BlockKind::MathBlock) {
         out += cps_to_utf8(block.block_source.source());
     } else if (block.kind == BlockKind::List) {
@@ -113,7 +113,7 @@ suite container_source_parser_tests = [] {
         if (roots.front().children.size() != 1u) return;
         const auto& paragraph = roots.front().children.front();
         expect(bool(paragraph.kind == BlockKind::Paragraph));
-        expect(bool(paragraph.inline_content.source == U"foo\nbar\n==="));
+        expect(bool(paragraph.inline_content().source == U"foo\nbar\n==="));
         expect_parse_save_reload_exact("CommonMark #93", std::string(source));
     }
     {
@@ -129,7 +129,7 @@ suite container_source_parser_tests = [] {
         expect(bool(roots.front().children.size() == 1u));
         if (roots.front().children.size() != 1u) return;
         expect(bool(roots.front().children.front().kind == BlockKind::Paragraph));
-        expect(bool(roots.front().children.front().inline_content.source == U"foo\n- bar"));
+        expect(bool(roots.front().children.front().inline_content().source == U"foo\n- bar"));
         expect_parse_save_reload_exact("CommonMark #238", std::string(source));
     }
     {
@@ -215,8 +215,8 @@ suite container_source_parser_tests = [] {
                     expect(bool(blocks.size() == 2u)) << label << " two paragraph children";
                     if (blocks.size() == 2u) {
                         expect(bool(blocks[0].kind == BlockKind::Paragraph && blocks[1].kind == BlockKind::Paragraph));
-                        expect(bool(blocks[0].inline_content.source == U"foo"));
-                        expect(bool(blocks[1].inline_content.source == U"bar"));
+                        expect(bool(blocks[0].inline_content().source == U"foo"));
+                        expect(bool(blocks[1].inline_content().source == U"bar"));
                     }
                 }
             }
@@ -263,7 +263,7 @@ suite container_source_parser_tests = [] {
     if (padded_list && padded_list->children.size() == 1u) {
         const auto* paragraph = find_kind(padded_list->children.front(), BlockKind::Paragraph);
         expect(bool(paragraph != nullptr));
-        if (paragraph) expect(bool(paragraph->inline_content.source == U"foo"));
+        if (paragraph) expect(bool(paragraph->inline_content().source == U"foo"));
     } else if (padded_list) {
         expect(bool(padded_list->children.size() == 1u));
     }

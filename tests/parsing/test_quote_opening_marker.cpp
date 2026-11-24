@@ -55,12 +55,12 @@ void expect_first_prefix_roundtrip(
         && quote.children.front().kind == BlockKind::Paragraph) {
         const auto& paragraph = quote.children.front();
         expect(flatten_tokens(
-            paragraph.inline_content.tree,
-            paragraph.inline_content.source)
-            == paragraph.inline_content.source);
+            paragraph.inline_content().tree,
+            paragraph.inline_content().source)
+            == paragraph.inline_content().source);
         expect(serialize_lossless(
-            paragraph.inline_content.tree,
-            paragraph.inline_content.source) == paragraph.inline_content.source);
+            paragraph.inline_content().tree,
+            paragraph.inline_content().source) == paragraph.inline_content().source);
 
         const auto projection = serialize_markdown_projection(parsed.document);
         expect(projection.text == utf8_to_cps(source));
@@ -87,7 +87,7 @@ void expect_first_prefix_roundtrip(
         expect(rendered_paragraph.source_span.container_id == source_paragraph.id);
         expect(rendered_paragraph.source_span.source_range.start == 0u);
         expect(rendered_paragraph.source_span.source_range.end
-            == source_paragraph.inline_content.source.size());
+            == source_paragraph.inline_content().source.size());
     }
 }
 
@@ -158,10 +158,10 @@ suite quote_opening_marker_tests = [] {
     if (split_quote.children.size() == 2u) {
         for (const auto& child : split_quote.children) {
             expect(flatten_tokens(
-                child.inline_content.tree,
-                child.inline_content.source) == child.inline_content.source);
-            expect(serialize_lossless(child.inline_content.tree, child.inline_content.source)
-                == child.inline_content.source);
+                child.inline_content().tree,
+                child.inline_content().source) == child.inline_content().source);
+            expect(serialize_lossless(child.inline_content().tree, child.inline_content().source)
+                == child.inline_content().source);
         }
     }
 

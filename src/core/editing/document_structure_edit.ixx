@@ -300,8 +300,8 @@ inline std::optional<DocumentTransaction> document_set_heading(
         parent_path.pop_back();
         auto* parent = block_at_path(document.root, parent_path);
         auto* block = &parent->children[block_index];
-        const auto source = block->inline_content.source;
-        const auto syntax = block->inline_content.syntax_mode;
+        const auto source = block->inline_content().source;
+        const auto syntax = block->inline_content().syntax_mode;
         std::vector<PhysicalLine> lines;
         if (level != 0 && syntax != InlineSyntaxMode::HtmlText) {
             std::size_t start = 0;
@@ -338,7 +338,7 @@ inline std::optional<DocumentTransaction> document_set_heading(
             lines[index].owner = heading.id;
             const auto& previous = lines[index - 1];
             heading.separator_before = source.substr(previous.end, previous.next - previous.end);
-            heading.inline_content = document_edit_detail::make_inline(
+            heading.edit_inline_content() = document_edit_detail::make_inline(
                 source.substr(lines[index].start, lines[index].end - lines[index].start),
                 document, allocator, syntax);
             DocumentTreeEdit insert;
@@ -731,7 +731,7 @@ inline BlockNode make_table_block(EditorDocument& document, std::size_t rows, st
     BlockNode header; header.id = allocator.allocate(); header.kind = BlockKind::TableRow; header.ensure_table_special().table_header_row = true;
     for (std::size_t column = 0; column < columns; ++column) {
         BlockNode cell; cell.id = allocator.allocate(); cell.kind = BlockKind::TableCell;
-        cell.inline_content = document_edit_detail::make_inline(
+        cell.edit_inline_content() = document_edit_detail::make_inline(
             U"Header", document, allocator, InlineSyntaxMode::TableCell);
         header.children.push_back(std::move(cell));
     }
@@ -740,7 +740,7 @@ inline BlockNode make_table_block(EditorDocument& document, std::size_t rows, st
         BlockNode row; row.id = allocator.allocate(); row.kind = BlockKind::TableRow;
         for (std::size_t column = 0; column < columns; ++column) {
             BlockNode cell; cell.id = allocator.allocate(); cell.kind = BlockKind::TableCell;
-            cell.inline_content = document_edit_detail::make_inline(
+            cell.edit_inline_content() = document_edit_detail::make_inline(
                 U"Cell", document, allocator, InlineSyntaxMode::TableCell);
             row.children.push_back(std::move(cell));
         }
@@ -812,10 +812,10 @@ inline std::optional<DocumentTransaction> document_insert_atomic_block(EditorDoc
     const auto replacement_in_text = !selection.is_caret()
         && document_edit_detail::text_block(selected_block->kind);
     const auto source_offset = replacement_in_text
-        ? (std::min)(current.active.source_offset, selected_block->inline_content.source.size())
+        ? (std::min)(current.active.source_offset, selected_block->inline_content().source.size())
         : 0;
     if (replacement_in_text && source_offset > 0
-        && source_offset < selected_block->inline_content.source.size()) {
+        && source_offset < selected_block->inline_content().source.size()) {
         auto split = document_edit_detail::split_direct(
             after, selected_block->id, source_offset, allocator);
         if (!split) return std::nullopt;
@@ -841,7 +841,7 @@ inline std::optional<DocumentTransaction> document_insert_atomic_block(EditorDoc
     }
     const auto& existing = parent->children[index];
     const auto replace_empty = ((existing.kind == BlockKind::Paragraph || replacement_in_text)
-            && existing.inline_content.source.empty())
+            && existing.inline_content().source.empty())
         || (!selection.is_caret()
             && (existing.kind == BlockKind::CodeBlock || existing.kind == BlockKind::MathBlock)
             && existing.block_source.tree().content.empty());
@@ -1034,7 +1034,7 @@ inline std::optional<DocumentTransaction> document_edit_table(
         BlockNode cell;
         cell.id = allocator.allocate();
         cell.kind = BlockKind::TableCell;
-        cell.inline_content = document_edit_detail::make_inline(
+        cell.edit_inline_content() = document_edit_detail::make_inline(
             {},
             after,
             allocator,

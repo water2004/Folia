@@ -84,7 +84,7 @@ suite render_incremental_tests = [] {
     auto symbols = build_document_symbol_index(after.document);
     NodeId changed_owner{};
     walk_blocks(after.document.root, [&](BlockNode const& block) {
-        if (block.inline_content.source == U"changed") changed_owner = block.id;
+        if (block.inline_content().source == U"changed") changed_owner = block.id;
     });
     expect(fatal(bool(changed_owner.v != 0u)));
     RenderModelUpdate update;

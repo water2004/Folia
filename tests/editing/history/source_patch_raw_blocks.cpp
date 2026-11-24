@@ -83,10 +83,10 @@ suite editing_history_source_patch_raw_blocks_tests = [] {
             expect(cut==expected);
             const auto& blocks=editor.document().root.children;
             const auto tail=std::ranges::find_if(blocks,[](const auto& block){
-                return block.kind==BlockKind::Paragraph && block.inline_content.source==U"b\n\\]";
+                return block.kind==BlockKind::Paragraph && block.inline_content().source==U"b\n\\]";
             });
             expect(fatal(tail!=blocks.end() && tail!=blocks.begin()));
-            expect(bool(std::prev(tail)->kind==BlockKind::Paragraph && std::prev(tail)->inline_content.source.empty()));
+            expect(bool(std::prev(tail)->kind==BlockKind::Paragraph && std::prev(tail)->inline_content().source.empty()));
             const auto blank=TextSelection::caret({std::prev(tail)->id,0});
             editor.set_selection(blank);
             expect(fatal(editor.execute_document_insert_text(blank,U"x").has_value()));
@@ -128,7 +128,7 @@ suite editing_history_source_patch_raw_blocks_tests = [] {
         expect(editor.markdown_utf8()==cut) << editor.markdown_utf8();
         const auto& children=editor.document().root.children.front().children;
         const auto body=std::ranges::find_if(children,[](const auto& block){
-            return block.kind==BlockKind::Paragraph && block.inline_content.source==U"b\n\\]";
+            return block.kind==BlockKind::Paragraph && block.inline_content().source==U"b\n\\]";
         });
         expect(fatal(body!=children.end() && body!=children.begin()));
         const auto blank=TextSelection::caret({std::prev(body)->id,0});

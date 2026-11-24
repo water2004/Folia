@@ -43,12 +43,12 @@ suite markdown_consumer = [] {
         const auto& title = callout.children.front();
         const auto& body = callout.children.back();
         expect(title.kind == BlockKind::CalloutTitle);
-        expect(bool(inline_visible_text(title.inline_content) == U"Title"));
-        expect(bool(inline_visible_text(body.inline_content) == U"Body and link"));
-        expect(fatal(!title.inline_content.tree.nodes.empty()));
-        expect(title.inline_content.tree.nodes.front().kind == InlineCstKind::Highlight);
-        expect(bool(flatten_tokens(title.inline_content.tree, title.inline_content.source)
-            == title.inline_content.source));
+        expect(bool(inline_visible_text(title.inline_content()) == U"Title"));
+        expect(bool(inline_visible_text(body.inline_content()) == U"Body and link"));
+        expect(fatal(!title.inline_content().tree.nodes.empty()));
+        expect(title.inline_content().tree.nodes.front().kind == InlineCstKind::Highlight);
+        expect(bool(flatten_tokens(title.inline_content().tree, title.inline_content().source)
+            == title.inline_content().source));
         expect(serialize_markdown(parsed.document) == source);
         expect(serialize_markdown(parse_text(2, serialize_markdown(parsed.document)).document) == source);
     };

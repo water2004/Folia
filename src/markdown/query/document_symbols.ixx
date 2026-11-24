@@ -109,7 +109,7 @@ inline DocumentSymbolIndex collect_block_symbols(const BlockNode& block) {
     DocumentSymbolIndex symbols;
     if (block.kind == BlockKind::Heading) {
         symbols.headings.push_back(HeadingSymbol{
-            block.id, block.text_special().level, cps_to_utf8(inline_visible_text(block.inline_content)), block.text_special().slug});
+            block.id, block.text_special().level, cps_to_utf8(inline_visible_text(block.inline_content())), block.text_special().slug});
     } else if (block.kind == BlockKind::FootnoteDefinition) {
         symbols.footnotes.push_back(FootnoteSymbol{block.id, block.container_special().footnote_label});
     } else if (block.kind == BlockKind::ImageBlock) {

@@ -30,7 +30,7 @@ inline InlineDocument* editable_inline_document(BlockNode& block) {
         case BlockKind::Heading:
         case BlockKind::CalloutTitle:
         case BlockKind::TableCell:
-            return &block.inline_content;
+            return &block.edit_inline_content();
         default:
             return nullptr;
     }
@@ -42,7 +42,7 @@ inline const InlineDocument* editable_inline_document(const BlockNode& block) {
         case BlockKind::Heading:
         case BlockKind::CalloutTitle:
         case BlockKind::TableCell:
-            return &block.inline_content;
+            return &block.inline_content();
         default:
             return nullptr;
     }

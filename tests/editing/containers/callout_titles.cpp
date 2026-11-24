@@ -43,7 +43,7 @@ suite editing_containers_callout_titles_tests = [] {
     expect(fatal(bool(title != nullptr)));
     if (!callout || !title) return;
     const auto title_id = title->id;
-    expect(fatal(bool(title->inline_content.source == U"_title_")));
+    expect(fatal(bool(title->inline_content().source == U"_title_")));
 
     const auto before_selection = TextSelection::caret(
         {title_id, 1, TextAffinity::Downstream});
@@ -60,9 +60,9 @@ suite editing_containers_callout_titles_tests = [] {
     title = callout ? callout_title_block(*callout) : nullptr;
     expect(fatal(bool(title != nullptr)));
     if (!callout || !title) return;
-    expect(fatal(bool(title->inline_content.source == U"_Xtitle_")));
-    expect(fatal(bool(flatten_tokens(title->inline_content.tree, title->inline_content.source)
-        == title->inline_content.source)));
+    expect(fatal(bool(title->inline_content().source == U"_Xtitle_")));
+    expect(fatal(bool(flatten_tokens(title->inline_content().tree, title->inline_content().source)
+        == title->inline_content().source)));
     const auto after_selection = editor.selection();
     expect(fatal(bool(after_selection.active == TextPosition{
         title_id, 2, TextAffinity::Downstream})));

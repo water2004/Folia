@@ -201,9 +201,9 @@ namespace winrt::Folia
                 }
                 return std::nullopt;
             };
-            auto range = find(find, block->inline_content.tree.nodes);
+            auto range = find(find, block->inline_content().tree.nodes);
             if (!range) return false;
-            tex = block->inline_content.source.substr(range->start, range->length());
+            tex = block->inline_content().source.substr(range->start, range->length());
             for (auto i = range->start; i <= range->end; ++i) offsets.push_back(i);
         }
         if (offsets.size() != tex.size() + 1) return false;

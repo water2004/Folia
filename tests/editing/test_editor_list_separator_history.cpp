@@ -24,7 +24,7 @@ void exercise_editor_edits(std::string_view label, const std::string& source) {
     expect(before == source) << label << " initial save";
     const auto owner = first_text(editor);
     const auto selection_before = TextSelection::caret(
-        {owner.id, (std::min)(std::size_t{2}, owner.inline_content.source.size()),
+        {owner.id, (std::min)(std::size_t{2}, owner.inline_content().source.size()),
          TextAffinity::Downstream});
     editor.set_selection(selection_before);
 
@@ -46,7 +46,7 @@ void exercise_editor_edits(std::string_view label, const std::string& source) {
     const auto delete_owner = first_text(deletion);
     const auto delete_before = deletion.markdown_utf8();
     const auto delete_selection = TextSelection::caret(
-        {delete_owner.id, (std::min)(std::size_t{2}, delete_owner.inline_content.source.size()),
+        {delete_owner.id, (std::min)(std::size_t{2}, delete_owner.inline_content().source.size()),
          TextAffinity::Downstream});
     deletion.set_selection(delete_selection);
     reset_core_operation_counters();

@@ -63,11 +63,11 @@ void expect_lossless(const InlineDocument& document) {
 
 void expect_type7_paragraph(const BlockNode& block, std::u32string_view content) {
     expect(block.kind == BlockKind::Paragraph);
-    expect(block.inline_content.syntax_mode == InlineSyntaxMode::HtmlText);
-    expect(block.inline_content.source == content);
+    expect(block.inline_content().syntax_mode == InlineSyntaxMode::HtmlText);
+    expect(block.inline_content().source == content);
     expect(!block.has_html_source());
     expect(!block.has_html_element_provenance());
-    expect_lossless(block.inline_content);
+    expect_lossless(block.inline_content());
 }
 
 } // namespace
@@ -84,8 +84,8 @@ suite commonmark_html_type7_boundary_tests = [] {
         const auto& html_paragraph = parsed.blocks.front();
         expect_type7_paragraph(html_paragraph, inline_source);
         expect(parsed.blocks.back().kind == BlockKind::Paragraph);
-        expect(parsed.blocks.back().inline_content.syntax_mode == InlineSyntaxMode::Markdown);
-        expect(parsed.blocks.back().inline_content.source == U"outside");
+        expect(parsed.blocks.back().inline_content().syntax_mode == InlineSyntaxMode::Markdown);
+        expect(parsed.blocks.back().inline_content().source == U"outside");
 
         const auto* range = source_range_for(parsed.source_ranges, html_paragraph.id);
         expect(fatal(range != nullptr));
@@ -137,8 +137,8 @@ suite commonmark_html_type7_boundary_tests = [] {
 
         const auto& block = parsed.blocks.front();
         expect_type7_paragraph(block, source);
-        const auto* link = first_html_tag(block.inline_content.tree.nodes, "a");
-        const auto* strong = first_html_tag(block.inline_content.tree.nodes, "strong");
+        const auto* link = first_html_tag(block.inline_content().tree.nodes, "a");
+        const auto* strong = first_html_tag(block.inline_content().tree.nodes, "strong");
         expect(fatal(link != nullptr));
         expect(fatal(strong != nullptr));
         if (link) {
@@ -160,15 +160,15 @@ suite commonmark_html_type7_boundary_tests = [] {
 
         const auto& block = parsed.blocks.front();
         expect_type7_paragraph(block, source);
-        expect(count_html_tag(block.inline_content.tree.nodes, "a") == 1u);
-        expect(count_html_tag(block.inline_content.tree.nodes, "em") == 1u);
-        const auto* link = first_html_tag(block.inline_content.tree.nodes, "a");
+        expect(count_html_tag(block.inline_content().tree.nodes, "a") == 1u);
+        expect(count_html_tag(block.inline_content().tree.nodes, "em") == 1u);
+        const auto* link = first_html_tag(block.inline_content().tree.nodes, "a");
         expect(fatal(link != nullptr));
         if (link) expect(link->semantics().href == "/one");
-        expect(!inline_contains_kind(block.inline_content, InlineCstKind::Emphasis));
-        expect(!inline_contains_kind(block.inline_content, InlineCstKind::Strong));
-        expect(!inline_contains_kind(block.inline_content, InlineCstKind::Link));
-        expect(block.inline_content.source.find(U"*two*") != std::u32string::npos);
+        expect(!inline_contains_kind(block.inline_content(), InlineCstKind::Emphasis));
+        expect(!inline_contains_kind(block.inline_content(), InlineCstKind::Strong));
+        expect(!inline_contains_kind(block.inline_content(), InlineCstKind::Link));
+        expect(block.inline_content().source.find(U"*two*") != std::u32string::npos);
     };
 
     "type7_incomplete_inline_html_remains_an_editable_incomplete_node"_test = [] {
@@ -181,7 +181,7 @@ suite commonmark_html_type7_boundary_tests = [] {
         const auto& block = parsed.blocks.front();
         expect_type7_paragraph(block, inline_source);
         const InlineCstNode* incomplete = nullptr;
-        for (const auto& node : block.inline_content.tree.nodes) {
+        for (const auto& node : block.inline_content().tree.nodes) {
             if (node.kind == InlineCstKind::Incomplete) {
                 incomplete = &node;
                 break;
@@ -215,8 +215,8 @@ suite commonmark_html_type7_boundary_tests = [] {
 
             const auto& block = parsed.blocks.front();
             expect_type7_paragraph(block, inline_source);
-            expect(inline_contains_kind(block.inline_content, InlineCstKind::Raw));
-            expect(!inline_contains_kind(block.inline_content, InlineCstKind::Incomplete));
+            expect(inline_contains_kind(block.inline_content(), InlineCstKind::Raw));
+            expect(!inline_contains_kind(block.inline_content(), InlineCstKind::Incomplete));
             const auto* range = source_range_for(parsed.source_ranges, block.id);
             expect(fatal(range != nullptr));
             if (range) {
@@ -238,8 +238,8 @@ suite commonmark_html_type7_boundary_tests = [] {
 
         const auto& paragraph = parsed.document.root.children.front();
         expect(paragraph.kind == BlockKind::Paragraph);
-        expect(paragraph.inline_content.syntax_mode == InlineSyntaxMode::Markdown);
-        expect(paragraph.inline_content.source == utf8_to_cps(source));
+        expect(paragraph.inline_content().syntax_mode == InlineSyntaxMode::Markdown);
+        expect(paragraph.inline_content().source == utf8_to_cps(source));
     };
 
     "link_definition_scanner_skips_type7_htmltext_body"_test = [] {
@@ -250,15 +250,15 @@ suite commonmark_html_type7_boundary_tests = [] {
 
         const auto& html_paragraph = parsed.document.root.children.front();
         expect(html_paragraph.kind == BlockKind::Paragraph);
-        expect(html_paragraph.inline_content.syntax_mode == InlineSyntaxMode::HtmlText);
-        expect(html_paragraph.inline_content.source == U"<a>\n[ref]: /inside\n</a>");
-        expect(!inline_contains_kind(html_paragraph.inline_content, InlineCstKind::Link));
+        expect(html_paragraph.inline_content().syntax_mode == InlineSyntaxMode::HtmlText);
+        expect(html_paragraph.inline_content().source == U"<a>\n[ref]: /inside\n</a>");
+        expect(!inline_contains_kind(html_paragraph.inline_content(), InlineCstKind::Link));
 
         const auto& unresolved = parsed.document.root.children.back();
         expect(unresolved.kind == BlockKind::Paragraph);
-        expect(unresolved.inline_content.syntax_mode == InlineSyntaxMode::Markdown);
-        expect(unresolved.inline_content.source == U"[ref]");
-        expect(!inline_contains_kind(unresolved.inline_content, InlineCstKind::Link));
+        expect(unresolved.inline_content().syntax_mode == InlineSyntaxMode::Markdown);
+        expect(unresolved.inline_content().source == U"[ref]");
+        expect(!inline_contains_kind(unresolved.inline_content(), InlineCstKind::Link));
         expect(std::ranges::none_of(parsed.document.root.children, [](const BlockNode& block) {
             return block.kind == BlockKind::LinkDefinition;
         }));

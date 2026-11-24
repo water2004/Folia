@@ -83,10 +83,10 @@ inline bool same_semantics(const BlockNode& before,const BlockNode& after) {
     while (!blocks.empty()) {
         const auto [old,node]=blocks.back();blocks.pop_back();
         if (old->kind!=node->kind || old->children.size()!=node->children.size()
-            || old->inline_content.tree.nodes.size()!=node->inline_content.tree.nodes.size()) return false;
+            || old->inline_content().tree.nodes.size()!=node->inline_content().tree.nodes.size()) return false;
         std::vector<std::pair<const InlineCstNode*,const InlineCstNode*>> nodes;
-        for (std::size_t i=0;i<old->inline_content.tree.nodes.size();++i)
-            nodes.emplace_back(&old->inline_content.tree.nodes[i],&node->inline_content.tree.nodes[i]);
+        for (std::size_t i=0;i<old->inline_content().tree.nodes.size();++i)
+            nodes.emplace_back(&old->inline_content().tree.nodes[i],&node->inline_content().tree.nodes[i]);
         while (!nodes.empty()) {
             const auto [a,b]=nodes.back();nodes.pop_back();
             if (a->kind!=b->kind || a->status!=b->status || a->range!=b->range
@@ -134,7 +134,7 @@ inline std::optional<std::vector<BoundInlineEdit>> bind_inline_edits(
         for (const auto& map:root.owners) {
             const auto* block=find_document_block(document,map.container_id);
             if (!block || block->has_html_source() || !editable_inline_document(*block)
-                || block->inline_content.syntax_mode==InlineSyntaxMode::HtmlText) continue;
+                || block->inline_content().syntax_mode==InlineSyntaxMode::HtmlText) continue;
             const auto begin=edit.range_before.start-root.begin;
             const auto end=edit.range_before.end-root.begin;
             const auto first=map.source_to_serialized.lower_bound(begin);
@@ -171,7 +171,7 @@ inline bool same_inline_structure(const BlockVec& before,std::size_t first,std::
             auto expected=owner->source;
             for (const auto& edit:edits) if (edit.owner==old->id)
                 expected.replace(edit.range.start,edit.range.length(),edit.replacement);
-            if (expected!=node->inline_content.source || owner->syntax_mode!=node->inline_content.syntax_mode) return false;
+            if (expected!=node->inline_content().source || owner->syntax_mode!=node->inline_content().syntax_mode) return false;
         } else if (old->block_source.source()!=node->block_source.source()) return false;
         for (std::size_t i=0;i<old->children.size();++i) pending.emplace_back(&old->children[i],&node->children[i]);
     }

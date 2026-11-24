@@ -17,7 +17,7 @@ suite serializer_action_visitor_tests = [] {
         BlockNode paragraph;
         paragraph.id = NodeId{3};
         paragraph.kind = BlockKind::Paragraph;
-        paragraph.inline_content.source = U"body\n";
+        paragraph.edit_inline_content().source = U"body\n";
         quote.children.push_back(std::move(paragraph));
         BlockVec blocks;
         blocks.push_back(std::move(quote));
@@ -44,7 +44,7 @@ suite serializer_action_visitor_tests = [] {
         BlockNode paragraph;
         paragraph.id = NodeId{12};
         paragraph.kind = BlockKind::Paragraph;
-        paragraph.inline_content.source = U"first\nsecond";
+        paragraph.edit_inline_content().source = U"first\nsecond";
         item.children.push_back(std::move(paragraph));
         list.children.push_back(std::move(item));
         BlockVec blocks;

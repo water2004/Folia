@@ -56,9 +56,9 @@ inline std::optional<RecordedBlockEdit> split_direct(
     RecordedBlockEdit result;
     if (block->kind == BlockKind::CalloutTitle) {
         if (parent->kind != BlockKind::Callout) return std::nullopt;
-        offset = (std::min)(offset, block->inline_content.source.size());
-        auto right_source = block->inline_content.source.substr(offset);
-        const auto syntax_mode = block->inline_content.syntax_mode;
+        offset = (std::min)(offset, block->inline_content().source.size());
+        auto right_source = block->inline_content().source.substr(offset);
+        const auto syntax_mode = block->inline_content().syntax_mode;
         if (offset == 0) {
             DocumentTreeEdit remove;
             remove.kind = DocumentTreeEditKind::Remove;
@@ -68,11 +68,11 @@ inline std::optional<RecordedBlockEdit> split_direct(
             document_container_source::append_container_tree_operation(document, result.operations, std::move(remove));
             parent->children.erase(
                 parent->children.begin() + static_cast<std::ptrdiff_t>(index));
-        } else if (offset < block->inline_content.source.size()) {
+        } else if (offset < block->inline_content().source.size()) {
             auto edit = edit_inline(
                 document,
                 id,
-                {offset, block->inline_content.source.size()},
+                {offset, block->inline_content().source.size()},
                 {},
                 allocator);
             if (!edit) return std::nullopt;
@@ -96,7 +96,7 @@ inline std::optional<RecordedBlockEdit> split_direct(
         BlockNode right;
         right.id = allocator.allocate();
         right.kind = BlockKind::Paragraph;
-        right.inline_content = make_inline(
+        right.edit_inline_content() = make_inline(
             std::move(right_source),
             document,
             allocator,
@@ -119,8 +119,8 @@ inline std::optional<RecordedBlockEdit> split_direct(
     }
 
     if (!text_block(block->kind)) return std::nullopt;
-    offset = (std::min)(offset, block->inline_content.source.size());
-    const auto syntax_mode = block->inline_content.syntax_mode;
+    offset = (std::min)(offset, block->inline_content().source.size());
+    const auto syntax_mode = block->inline_content().syntax_mode;
     // Within a semantic HTML container, adjacent anonymous inline runs have
     // no serialized boundary. Give both halves an explicit paragraph wrapper
     // so Enter survives saving/reloading, including when either half is empty.
@@ -134,15 +134,15 @@ inline std::optional<RecordedBlockEdit> split_direct(
     }
     const bool html_paragraphs = syntax_mode == InlineSyntaxMode::HtmlText && html_parent;
     const auto html_split = html_paragraphs
-        ? plan_html_inline_split(block->inline_content, offset)
+        ? plan_html_inline_split(block->inline_content(), offset)
         : HtmlInlineSplitPlan{.source_offset = offset};
     offset = html_split.source_offset;
-    auto right_source = html_split.right_prefix + block->inline_content.source.substr(offset);
-    if (offset < block->inline_content.source.size() || !html_split.left_suffix.empty()) {
+    auto right_source = html_split.right_prefix + block->inline_content().source.substr(offset);
+    if (offset < block->inline_content().source.size() || !html_split.left_suffix.empty()) {
         auto edit = edit_inline(
             document,
             id,
-            {offset, block->inline_content.source.size()},
+            {offset, block->inline_content().source.size()},
             html_split.left_suffix,
             allocator);
         if (!edit) return std::nullopt;
@@ -166,7 +166,7 @@ inline std::optional<RecordedBlockEdit> split_direct(
     BlockNode right;
     right.id = allocator.allocate();
     right.kind = BlockKind::Paragraph;
-    right.inline_content = make_inline(
+    right.edit_inline_content() = make_inline(
         std::move(right_source),
         document,
         allocator,
@@ -429,7 +429,7 @@ inline std::optional<RecordedBlockEdit> exit_empty_flow_container(
     auto path = document_block_path(document, position.container_id);
     if (!path || path->empty()) return std::nullopt;
     auto* selected = block_at_path(document.root, *path);
-    if (!selected || selected->kind != BlockKind::Paragraph || !selected->inline_content.source.empty()) return std::nullopt;
+    if (!selected || selected->kind != BlockKind::Paragraph || !selected->inline_content().source.empty()) return std::nullopt;
 
     std::optional<std::size_t> container_depth;
     for (std::size_t depth = path->size(); depth > 0; --depth) {
@@ -566,8 +566,8 @@ inline std::optional<RecordedBlockEdit> join_next_list_item(
     const auto item_id = item->id;
     const auto next_id = next.id;
     const auto removed_owner = next.children.front().id;
-    const auto offset = item->children.back().inline_content.source.size();
-    auto source = next.children.front().inline_content.source;
+    const auto offset = item->children.back().inline_content().source.size();
+    auto source = next.children.front().inline_content().source;
     RecordedBlockEdit result;
     result.target = {id, offset, TextAffinity::Downstream};
     if (!source.empty()) {
@@ -641,9 +641,9 @@ inline std::optional<RecordedBlockEdit> join_adjacent(
 
     if (backward && index > 0 && text_block(parent->children[index - 1].kind)) {
         const auto owner = parent->children[index - 1].id;
-        const auto offset = parent->children[index - 1].inline_content.source.size();
+        const auto offset = parent->children[index - 1].inline_content().source.size();
         const auto removed_owner = current.id;
-        auto source = current.inline_content.source;
+        auto source = current.inline_content().source;
         if (!source.empty()) {
             auto edit = edit_inline(document, owner, {offset, offset}, std::move(source), allocator);
             if (!edit) return std::nullopt;
@@ -669,7 +669,7 @@ inline std::optional<RecordedBlockEdit> join_adjacent(
         return result;
     }
     if (backward && index > 0 && current.kind == BlockKind::Paragraph
-        && current.inline_content.source.empty()) {
+        && current.inline_content().source.empty()) {
         if (auto previous = last_editable_position(parent->children[index - 1])) {
             result.target = *previous;
             DocumentTreeEdit remove;
@@ -686,9 +686,9 @@ inline std::optional<RecordedBlockEdit> join_adjacent(
     if (!backward && index + 1 < parent->children.size()
         && text_block(parent->children[index + 1].kind)) {
         const auto owner = current.id;
-        const auto offset = current.inline_content.source.size();
+        const auto offset = current.inline_content().source.size();
         const auto removed_owner = parent->children[index + 1].id;
-        auto source = parent->children[index + 1].inline_content.source;
+        auto source = parent->children[index + 1].inline_content().source;
         if (!source.empty()) {
             auto edit = edit_inline(document, owner, {offset, offset}, std::move(source), allocator);
             if (!edit) return std::nullopt;
@@ -711,7 +711,7 @@ inline std::optional<RecordedBlockEdit> join_adjacent(
         return result;
     }
     if (!backward && index + 1 < parent->children.size()
-        && current.kind == BlockKind::Paragraph && current.inline_content.source.empty()) {
+        && current.kind == BlockKind::Paragraph && current.inline_content().source.empty()) {
         if (auto next = first_editable_position(parent->children[index + 1])) {
             result.target = *next;
             DocumentTreeEdit remove;
@@ -733,7 +733,7 @@ inline std::optional<RecordedBlockEdit> join_adjacent(
         || (!backward && index + 1 < parent->children.size()
             && atomic_block(parent->children[index + 1].kind))) {
         const auto neighbor_index = backward ? index - 1 : index + 1;
-        result.target = {current.id, backward ? 0 : current.inline_content.source.size(),
+        result.target = {current.id, backward ? 0 : current.inline_content().source.size(),
             backward ? TextAffinity::Downstream : TextAffinity::Upstream};
         DocumentTreeEdit remove;
         remove.kind = DocumentTreeEditKind::Remove;
@@ -848,7 +848,7 @@ inline std::optional<RecordedBlockEdit> unwrap_math_marker(
     paragraph.id = block->id;
     paragraph.kind = BlockKind::Paragraph;
     paragraph.separator_before = block->separator_before;
-    paragraph.inline_content = make_inline(tree.content, document, allocator);
+    paragraph.edit_inline_content() = make_inline(tree.content, document, allocator);
     RecordedBlockEdit result;
     result.target = {paragraph.id,
         (std::clamp)(selection.active.source_offset, content.start, content.end) - content.start,

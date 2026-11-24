@@ -116,7 +116,7 @@ inline RenderedSearchFragment project_inline_owner(
     projection.container_id = block.id;
     auto const preserve_soft_breaks = block.kind == BlockKind::Heading;
     auto items = builder.build_inline_document(
-        block.inline_content,
+        block.inline_content(),
         block.id,
         InlineStyle::plain(),
         preserve_soft_breaks);

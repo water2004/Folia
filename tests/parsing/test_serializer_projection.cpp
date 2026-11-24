@@ -32,7 +32,7 @@ suite serializer_projection_tests = [] {
         expect(fatal(downstream.has_value()));
         if (upstream) {
             expect(fatal(upstream->container_id == first.id));
-            expect(fatal(upstream->source_offset == first.inline_content.source.size()));
+            expect(fatal(upstream->source_offset == first.inline_content().source.size()));
         }
         if (downstream) {
             expect(fatal(downstream->container_id == second.id));

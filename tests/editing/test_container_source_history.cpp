@@ -42,7 +42,7 @@ const BlockNode* paragraph_with(const EditorDocument& document, std::u32string_v
     const BlockNode* result = nullptr;
     walk_blocks(document.root, [&](const BlockNode& block) {
         if (!result && block.kind == BlockKind::Paragraph
-            && block.inline_content.source == text) result = &block;
+            && block.inline_content().source == text) result = &block;
     });
     return result;
 }
@@ -60,12 +60,12 @@ PrefixSnapshot prefix_snapshot(const EditorDocument& document) {
 bool inline_sources_are_lossless(const BlockNode& block) {
     if ((block.kind == BlockKind::Paragraph || block.kind == BlockKind::Heading
          || block.kind == BlockKind::CalloutTitle || block.kind == BlockKind::TableCell)
-        && (!tokens_partition_source(block.inline_content.tree, block.inline_content.source.size())
-            || !roots_partition_source(block.inline_content.tree, block.inline_content.source.size())
-            || flatten_tokens(block.inline_content.tree, block.inline_content.source)
-                != block.inline_content.source
-            || serialize_lossless(block.inline_content.tree, block.inline_content.source)
-                != block.inline_content.source)) {
+        && (!tokens_partition_source(block.inline_content().tree, block.inline_content().source.size())
+            || !roots_partition_source(block.inline_content().tree, block.inline_content().source.size())
+            || flatten_tokens(block.inline_content().tree, block.inline_content().source)
+                != block.inline_content().source
+            || serialize_lossless(block.inline_content().tree, block.inline_content().source)
+                != block.inline_content().source)) {
         return false;
     }
     for (const auto& child : block.children) {
@@ -79,7 +79,7 @@ void append_signature(std::string& out, const BlockNode& block) {
     out.push_back('(');
     if (block.kind == BlockKind::Paragraph || block.kind == BlockKind::Heading
         || block.kind == BlockKind::CalloutTitle || block.kind == BlockKind::TableCell) {
-        out += cps_to_utf8(block.inline_content.source);
+        out += cps_to_utf8(block.inline_content().source);
     } else if (block.kind == BlockKind::CodeBlock || block.kind == BlockKind::MathBlock) {
         out += cps_to_utf8(block.block_source.source());
     } else if (block.kind == BlockKind::List) {

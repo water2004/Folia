@@ -40,13 +40,13 @@ const BlockNode* paragraph_with_source(const BlockVec& blocks, std::u32string_vi
     std::vector<const BlockNode*> paragraphs;
     collect_paragraphs(blocks, paragraphs);
     const auto found = std::find_if(paragraphs.begin(), paragraphs.end(), [&](const auto* block) {
-        return block->inline_content.source == source;
+        return block->inline_content().source == source;
     });
     return found == paragraphs.end() ? nullptr : *found;
 }
 
 void expect_inline_source_is_lossless(const BlockNode& paragraph) {
-    const auto& document = paragraph.inline_content;
+    const auto& document = paragraph.inline_content();
     expect(tokens_partition_source(document.tree, document.source.size()));
     expect(roots_partition_source(document.tree, document.source.size()));
     expect(flatten_tokens(document.tree, document.source) == document.source);
@@ -75,7 +75,7 @@ suite blank_line_source_tests = [] {
     const auto* terminal_spaces = paragraphs.empty() ? nullptr : paragraphs.back();
     expect(terminal_spaces != nullptr);
     if (terminal_spaces) {
-        expect(terminal_spaces->inline_content.source == U"  ");
+        expect(terminal_spaces->inline_content().source == U"  ");
         expect_inline_source_is_lossless(*terminal_spaces);
     }
 };
@@ -85,7 +85,7 @@ suite blank_line_source_tests = [] {
     const auto* empty = paragraph_with_source(parsed.document.root.children, U"");
     expect(empty != nullptr);
     if (empty) {
-        expect(empty->inline_content.source.empty());
+        expect(empty->inline_content().source.empty());
         expect_inline_source_is_lossless(*empty);
     }
     expect(serialize_markdown(parsed.document) == "\ntext");
@@ -131,7 +131,7 @@ suite blank_line_source_tests = [] {
     expect(whitespace != nullptr);
     if (!whitespace) return;
     const auto ranges = inline_block_semantic_whitespace_ranges(
-        whitespace->inline_content, InlineBlockWhitespacePolicy::Paragraph);
+        whitespace->inline_content(), InlineBlockWhitespacePolicy::Paragraph);
     expect(ranges.size() == 1u);
     if (ranges.size() == 1u) {
         expect(ranges.front().start == 0u);
@@ -146,7 +146,7 @@ suite blank_line_source_tests = [] {
         expect(paragraph != nullptr);
         if (!paragraph) continue;
         const auto semantic = inline_block_semantic_whitespace_ranges(
-            paragraph->inline_content, InlineBlockWhitespacePolicy::Paragraph);
+            paragraph->inline_content(), InlineBlockWhitespacePolicy::Paragraph);
         const auto raw_prefix_only = source == U"  &amp;";
         expect(semantic.size() == (raw_prefix_only ? 1u : 0u)) << cps_to_utf8(source);
         if (raw_prefix_only && semantic.size() == 1u) {
@@ -198,7 +198,7 @@ suite blank_line_source_tests = [] {
     const auto* edited = find_document_block(document, paragraph_id);
     expect(edited != nullptr);
     if (edited) {
-        expect(edited->inline_content.source == U"\t  ");
+        expect(edited->inline_content().source == U"\t  ");
         expect_inline_source_is_lossless(*edited);
     }
 
@@ -209,14 +209,14 @@ suite blank_line_source_tests = [] {
     expect(selection == transaction->selection_before);
     const auto* undone = find_document_block(document, paragraph_id);
     expect(undone != nullptr);
-    if (undone) expect(undone->inline_content.source == U" \t");
+    if (undone) expect(undone->inline_content().source == U" \t");
 
     expect(history.redo(document, selection));
     expect(serialize_markdown(document) == "\t  \n\nbody");
     expect(selection == transaction->selection_after);
     const auto* redone = find_document_block(document, paragraph_id);
     expect(redone != nullptr);
-    if (redone) expect(redone->inline_content.source == U"\t  ");
+    if (redone) expect(redone->inline_content().source == U"\t  ");
 };
 
 };

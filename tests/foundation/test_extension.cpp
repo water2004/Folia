@@ -75,7 +75,7 @@ suite extension_tests = [] {
     disabled.math.inline_dollar = false;
     Editor withoutExtension("$x$", disabled);
     expect(fatal(bool(withoutExtension.document().root.children.size() == 1u)));
-    expect(fatal(bool(!inline_contains_kind(withoutExtension.document().root.children.front().inline_content, InlineCstKind::InlineMath))));
+    expect(fatal(bool(!inline_contains_kind(withoutExtension.document().root.children.front().inline_content(), InlineCstKind::InlineMath))));
 
     ExtensionRegistry registry;
     struct EnableInlineMath : MarkdownExtensionBase {
@@ -85,7 +85,7 @@ suite extension_tests = [] {
     registry.register_extension(std::make_shared<EnableInlineMath>());
     Editor withExtension("$x$", registry.configured_dialect(disabled));
     expect(fatal(bool(withExtension.document().root.children.size() == 1u)));
-    expect(fatal(bool(inline_contains_kind(withExtension.document().root.children.front().inline_content, InlineCstKind::InlineMath))));
+    expect(fatal(bool(inline_contains_kind(withExtension.document().root.children.front().inline_content(), InlineCstKind::InlineMath))));
 };
 
 }; // suite extension_tests

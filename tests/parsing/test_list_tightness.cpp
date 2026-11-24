@@ -133,7 +133,7 @@ suite parser_list_tightness_tests = [] {
     if (!lists.front()->children.empty()) {
         for (auto const& child : lists.front()->children.front().children) {
             has_empty_direct_paragraph = has_empty_direct_paragraph
-                || (child.kind == BlockKind::Paragraph && child.inline_content.source.empty());
+                || (child.kind == BlockKind::Paragraph && child.inline_content().source.empty());
         }
     }
     expect(has_empty_direct_paragraph) << "extra blank line remains an editable paragraph";

@@ -174,8 +174,8 @@ suite gfm_native_projection_tests = [] {
     auto const* paragraph = find_kind(parsed.document.root, BlockKind::Paragraph);
     expect(fatal(paragraph != nullptr));
     if (!paragraph) return;
-    expect(fatal(!contains_inline_kind(paragraph->inline_content.tree.nodes, InlineCstKind::Autolink)));
-    expect(fatal(contains_inline_kind(paragraph->inline_content.tree.nodes, InlineCstKind::Text)));
+    expect(fatal(!contains_inline_kind(paragraph->inline_content().tree.nodes, InlineCstKind::Autolink)));
+    expect(fatal(contains_inline_kind(paragraph->inline_content().tree.nodes, InlineCstKind::Text)));
     auto projection = folia::test::commonmark::project(parsed.document.root);
     expect(fatal(projection.projected_html
         == "<p>Visit www.commonmark.org/help.</p>\n"));

@@ -58,13 +58,13 @@ suite gfm_table_capacity_tests = [] {
         const auto& paragraph = parsed.document.root.children[0];
         const auto& table = parsed.document.root.children[1];
         expect(paragraph.kind == BlockKind::Paragraph);
-        expect(paragraph.inline_content.source == U"aaa");
+        expect(paragraph.inline_content().source == U"aaa");
         expect(table.kind == BlockKind::Table);
         expect(table.children.size() == 1 + 3 * (repetitions - 1));
         if (table.kind != BlockKind::Table || table.children.size() != 1 + 3 * (repetitions - 1)) return;
         expect(table.children.front().table_special().table_header_row);
         expect(table.children.front().children.size() == 1_u);
-        expect(table.children.front().children.front().inline_content.source == U"bbb");
+        expect(table.children.front().children.front().inline_content().source == U"bbb");
 
         for (std::size_t index = 1; index < table.children.size(); ++index) {
             const auto row_index = (index - 1) % 3;
@@ -72,13 +72,13 @@ suite gfm_table_capacity_tests = [] {
             const auto& row = table.children[index];
             expect(row.children.size() == 1_u);
             if (row.children.size() != 1) continue;
-            expect(row.children.front().inline_content.source == expected);
-            expect(flatten_tokens(row.children.front().inline_content.tree,
-                row.children.front().inline_content.source)
-                == row.children.front().inline_content.source);
-            expect(serialize_lossless(row.children.front().inline_content.tree,
-                row.children.front().inline_content.source)
-                == row.children.front().inline_content.source);
+            expect(row.children.front().inline_content().source == expected);
+            expect(flatten_tokens(row.children.front().inline_content().tree,
+                row.children.front().inline_content().source)
+                == row.children.front().inline_content().source);
+            expect(serialize_lossless(row.children.front().inline_content().tree,
+                row.children.front().inline_content().source)
+                == row.children.front().inline_content().source);
             expect(row.table_special().row_syntax.has_value());
             if (row.table_special().row_syntax) {
                 expect(row.table_special().row_syntax->cell_owners.size() == 1_u);

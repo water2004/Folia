@@ -38,8 +38,8 @@ bool has_emphasis(const InlineCstNodes& nodes) {
 
 void collect_html_owned_source(const BlockVec& blocks, std::vector<std::u32string>& out) {
     for (const auto& block : blocks) {
-        if (block.inline_content.syntax_mode == InlineSyntaxMode::HtmlText) {
-            out.push_back(block.inline_content.source);
+        if (block.inline_content().syntax_mode == InlineSyntaxMode::HtmlText) {
+            out.push_back(block.inline_content().source);
         }
         if (block.has_html_source()) out.push_back(block.html_special().source);
         if (block.kind == BlockKind::UnsupportedMarkup
@@ -52,7 +52,7 @@ void collect_html_owned_source(const BlockVec& blocks, std::vector<std::u32strin
 }
 
 bool inline_source_is_lossless(const BlockNode& block) {
-    const auto& document = block.inline_content;
+    const auto& document = block.inline_content();
     return tokens_partition_source(document.tree, document.source.size())
         && roots_partition_source(document.tree, document.source.size())
         && flatten_tokens(document.tree, document.source) == document.source
@@ -63,7 +63,7 @@ const BlockNode* paragraph_with_source(const BlockVec& blocks, std::u32string_vi
     std::vector<const BlockNode*> paragraphs;
     collect_paragraphs(blocks, paragraphs);
     const auto found = std::ranges::find_if(paragraphs, [source](const BlockNode* block) {
-        return block->inline_content.source == source;
+        return block->inline_content().source == source;
     });
     return found == paragraphs.end() ? nullptr : *found;
 }
@@ -89,8 +89,8 @@ suite commonmark_html_block_boundary_regressions = [] {
             const auto* after = paragraph_with_source(parsed.document.root.children, U"*after*");
             expect(fatal(after != nullptr));
             if (after) {
-                expect(has_emphasis(after->inline_content.tree.nodes));
-                expect(after->inline_content.syntax_mode == InlineSyntaxMode::Markdown);
+                expect(has_emphasis(after->inline_content().tree.nodes));
+                expect(after->inline_content().syntax_mode == InlineSyntaxMode::Markdown);
                 expect(inline_source_is_lossless(*after));
             }
             expect(serialize_markdown(parsed.document) == source);
@@ -110,8 +110,8 @@ suite commonmark_html_block_boundary_regressions = [] {
             const auto* after = paragraph_with_source(parsed.document.root.children, U"*after*");
             expect(fatal(after != nullptr));
             if (after) {
-                expect(has_emphasis(after->inline_content.tree.nodes));
-                expect(after->inline_content.syntax_mode == InlineSyntaxMode::Markdown);
+                expect(has_emphasis(after->inline_content().tree.nodes));
+                expect(after->inline_content().syntax_mode == InlineSyntaxMode::Markdown);
                 expect(inline_source_is_lossless(*after));
             }
             expect(serialize_markdown(parsed.document) == source);
@@ -124,10 +124,10 @@ suite commonmark_html_block_boundary_regressions = [] {
         const auto* unresolved = paragraph_with_source(parsed.document.root.children, U"[ref]");
         expect(fatal(unresolved != nullptr));
         if (unresolved) {
-            expect(unresolved->inline_content.syntax_mode == InlineSyntaxMode::Markdown);
+            expect(unresolved->inline_content().syntax_mode == InlineSyntaxMode::Markdown);
             expect(inline_source_is_lossless(*unresolved));
-            expect(!has_emphasis(unresolved->inline_content.tree.nodes));
-            expect(std::ranges::none_of(unresolved->inline_content.tree.nodes, [](const InlineCstNode& node) {
+            expect(!has_emphasis(unresolved->inline_content().tree.nodes));
+            expect(std::ranges::none_of(unresolved->inline_content().tree.nodes, [](const InlineCstNode& node) {
                 return node.kind == InlineCstKind::Link;
             }));
         }
@@ -144,8 +144,8 @@ suite commonmark_html_block_boundary_regressions = [] {
             collect_paragraphs(parsed.document.root.children, paragraphs);
             expect(fatal(paragraphs.size() == 1u));
             if (paragraphs.size() == 1u) {
-                expect(paragraphs.front()->inline_content.source == utf8_to_cps(source));
-                expect(paragraphs.front()->inline_content.syntax_mode == InlineSyntaxMode::Markdown);
+                expect(paragraphs.front()->inline_content().source == utf8_to_cps(source));
+                expect(paragraphs.front()->inline_content().syntax_mode == InlineSyntaxMode::Markdown);
             }
         }
     };
@@ -157,8 +157,8 @@ suite commonmark_html_block_boundary_regressions = [] {
         collect_paragraphs(parsed.document.root.children, paragraphs);
         expect(fatal(paragraphs.size() == 1u));
         if (paragraphs.size() == 1u) {
-            expect(paragraphs.front()->inline_content.source == U"lead");
-            expect(paragraphs.front()->inline_content.syntax_mode == InlineSyntaxMode::Markdown);
+            expect(paragraphs.front()->inline_content().source == U"lead");
+            expect(paragraphs.front()->inline_content().syntax_mode == InlineSyntaxMode::Markdown);
         }
         expect(parsed.document.root.children.size() == 2u);
         expect(serialize_markdown(parsed.document) == source);
@@ -171,7 +171,7 @@ suite commonmark_html_block_boundary_regressions = [] {
         expect(fatal(paragraph != nullptr));
         if (!paragraph) return;
         const auto owner = paragraph->id;
-        const auto inline_source = paragraph->inline_content.source;
+        const auto inline_source = paragraph->inline_content().source;
         const auto edit_offset = inline_source.size();
         const TextPosition caret{owner, edit_offset, TextAffinity::Downstream};
         editor.set_selection(TextSelection{caret, caret});
@@ -186,7 +186,7 @@ suite commonmark_html_block_boundary_regressions = [] {
         const auto* restored = paragraph_with_source(reloaded.document().root.children, U"*after*!");
         expect(fatal(restored != nullptr));
         if (restored) {
-            expect(has_emphasis(restored->inline_content.tree.nodes));
+            expect(has_emphasis(restored->inline_content().tree.nodes));
             expect(inline_source_is_lossless(*restored));
         }
     };

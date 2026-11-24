@@ -123,7 +123,7 @@ suite quote_terminal_prefix_tests = [] {
     expect(fatal(children.size() == 2u));
     if (children.size() != 2u) return;
     expect(children.back().kind == BlockKind::Paragraph);
-    expect(children.back().inline_content.source.empty());
+    expect(children.back().inline_content().source.empty());
 
     const auto saved = serialize_markdown(parsed.document);
     expect(saved == source) << "quoted real trailing blank actual=" << saved

@@ -66,7 +66,7 @@ suite gfm_footnote_projection_tests = [] {
     expect(fatal(paragraph != nullptr));
     if (paragraph) {
         std::size_t references = 0;
-        for (auto const& item : paragraph->inline_content.tree.nodes) {
+        for (auto const& item : paragraph->inline_content().tree.nodes) {
             if (item.kind == InlineCstKind::FootnoteRef) ++references;
         }
         expect(fatal(references == 4));

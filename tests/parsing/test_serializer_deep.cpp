@@ -16,7 +16,7 @@ BlockNode make_deep_quote_tree(std::size_t depth, NodeId& paragraph_id) {
     BlockNode node;
     node.id = NodeId{2};
     node.kind = BlockKind::Paragraph;
-    node.inline_content.source = U"a";
+    node.edit_inline_content().source = U"a";
     paragraph_id = node.id;
     std::uint64_t next_id = 3;
     for (std::size_t level = 0; level < depth; ++level) {
@@ -46,7 +46,7 @@ BlockNode make_deep_list_tree(std::size_t depth, std::vector<NodeId>& paragraph_
         BlockNode paragraph;
         paragraph.id = NodeId{next_id++};
         paragraph.kind = BlockKind::Paragraph;
-        paragraph.inline_content.source = U"x";
+        paragraph.edit_inline_content().source = U"x";
         paragraph_ids[level] = paragraph.id;
         item.children.push_back(std::move(paragraph));
         if (reverse < depth) item.children.push_back(std::move(subtree));

@@ -95,7 +95,7 @@ suite clipboard_editing_gap_tests = [] {
         expect(fatal(paragraph != nullptr));
         if (paragraph) {
             expect(paragraph->kind == BlockKind::Paragraph);
-            expect(paragraph->inline_content.source == U" \t ");
+            expect(paragraph->inline_content().source == U" \t ");
         }
         expect(editor.document().root.children.size() == 2_u);
         expect_clipboard_history(editor, before, before_selection);
@@ -112,7 +112,7 @@ suite clipboard_editing_gap_tests = [] {
         Editor editor("| old | other |\n| --- | --- |");
         const auto& cell = first_text(editor);
         const auto owner = cell.id;
-        editor.set_selection(range(cell, 0, cell.inline_content.source.size()));
+        editor.set_selection(range(cell, 0, cell.inline_content().source.size()));
         const auto before = editor.markdown_utf8();
         const auto before_selection = editor.selection();
         expect(fatal(paste_clipboard(editor, source)));
@@ -134,8 +134,8 @@ suite clipboard_editing_gap_tests = [] {
         expect(fatal(paragraph != nullptr));
         if (paragraph) {
             expect(paragraph->kind == BlockKind::Paragraph);
-            expect(paragraph->inline_content.syntax_mode == InlineSyntaxMode::HtmlText);
-            expect(bool(paragraph->inline_content.source == U"a" + std::u32string(source) + U"b"));
+            expect(paragraph->inline_content().syntax_mode == InlineSyntaxMode::HtmlText);
+            expect(bool(paragraph->inline_content().source == U"a" + std::u32string(source) + U"b"));
         }
         expect(editor.document().root.children.size() == 1_u);
         expect_clipboard_history(editor, before, before_selection);
@@ -152,7 +152,7 @@ suite clipboard_editing_gap_tests = [] {
         Editor editor("| old | other |\n| --- | --- |");
         const auto& cell = first_text(editor);
         const auto owner = cell.id;
-        editor.set_selection(range(cell, 0, cell.inline_content.source.size()));
+        editor.set_selection(range(cell, 0, cell.inline_content().source.size()));
         const auto before = editor.markdown_utf8();
         const auto before_selection = editor.selection();
         expect(fatal(paste_clipboard(editor, source)));

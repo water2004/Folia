@@ -92,8 +92,8 @@ std::vector<NodeId> project_child_splices(std::vector<NodeId> ids,
 
 void expect_compact_payload(BlockNode const& shell) {
     expect(shell.children.empty());
-    expect(shell.inline_content.source.empty());
-    expect(shell.inline_content.tree.nodes.empty());
+    expect(shell.inline_content().source.empty());
+    expect(shell.inline_content().tree.nodes.empty());
     expect(!shell.block_source.storage);
     expect(!shell.has_container_source());
     expect(shell.atomic_special().raw.empty());

@@ -71,7 +71,7 @@ suite commonmark_html_projection_tests = [] {
     expect(fatal(bool(unknown.document.root.children.size() == 1u)));
     if (unknown.document.root.children.empty()) return;
     expect(fatal(bool(first_inline(
-        unknown.document.root.children.front().inline_content,
+        unknown.document.root.children.front().inline_content(),
         InlineCstKind::Raw) != nullptr)));
     const auto unknown_projection = folia::test::commonmark::project(unknown.document.root);
     expect(fatal(bool(unknown_projection.projected_html == "<p><widget>x</widget></p>\n")));
@@ -85,7 +85,7 @@ suite commonmark_html_projection_tests = [] {
     expect(fatal(bool(incomplete.document.root.children.size() == 1u)));
     if (incomplete.document.root.children.empty()) return;
     const auto* incomplete_node = first_inline(
-        incomplete.document.root.children.front().inline_content,
+        incomplete.document.root.children.front().inline_content(),
         InlineCstKind::Incomplete);
     expect(fatal(bool(incomplete_node != nullptr)));
     if (incomplete_node) {

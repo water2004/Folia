@@ -241,7 +241,7 @@ suite render_layout_hit_test_tests = [] {
 "incomplete_inline_math_remains_structural"_test = [] {
     auto out = parse_text(1, "$x + 1\n");
     expect(fatal(bool(!out.document.root.children.empty())));
-    expect(fatal(bool(inline_contains_kind(out.document.root.children.front().inline_content, InlineCstKind::Incomplete))));
+    expect(fatal(bool(inline_contains_kind(out.document.root.children.front().inline_content(), InlineCstKind::Incomplete))));
 };
 
 "large_document_parse_and_render_model_build_are_bounded"_test = [] {

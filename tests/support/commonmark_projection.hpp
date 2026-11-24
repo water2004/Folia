@@ -19,7 +19,7 @@ inline std::string json_string(std::string_view value) {
 }
 
 inline bool inline_document_lossless(BlockNode const& block) {
-    auto const& doc = block.inline_content;
+    auto const& doc = block.inline_content();
     if (!(tokens_partition_source(doc.tree, doc.source.size())
         && roots_partition_source(doc.tree, doc.source.size())
         && flatten_tokens(doc.tree, doc.source) == doc.source

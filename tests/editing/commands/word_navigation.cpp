@@ -36,7 +36,7 @@ suite editing_commands_word_navigation_tests = [] {
         Editor editor(source);
         const auto id = editor.document().cached_editable_order.front();
         const auto& owner = *find_document_block(editor.document(), id);
-        const auto text = editable_raw_block_source(owner) ? owner.block_source.tree().content : owner.inline_content.source;
+        const auto text = editable_raw_block_source(owner) ? owner.block_source.tree().content : owner.inline_content().source;
         const auto word = text.find(U"beta");
         expect(fatal(word != std::u32string::npos)) << source;
         const auto selection = TextSelection::caret(text_command_content_position(owner, word + (backward ? 4u : 0u)));
@@ -78,7 +78,7 @@ suite editing_commands_word_navigation_tests = [] {
     for (const auto& fixture : fixtures) {
         Editor editor(cps_to_utf8(fixture));
         const auto& owner = *find_document_block(editor.document(), editor.document().cached_editable_order.front());
-        const auto text = editable_raw_block_source(owner) ? owner.block_source.tree().content : owner.inline_content.source;
+        const auto text = editable_raw_block_source(owner) ? owner.block_source.tree().content : owner.inline_content().source;
         const auto range = *editable_block_source_range(owner);
         for (const auto backward : {false, true}) {
             for (auto cursor = std::size_t{0}; cursor <= text.size();) {

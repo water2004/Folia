@@ -6,7 +6,7 @@ const BlockNode* gap_text(const Editor& editor, std::u32string_view source) {
     const BlockNode* result = nullptr;
     walk_blocks(editor.document().root, [&](const BlockNode& block) {
         if (!result && block.kind == BlockKind::Paragraph
-            && block.inline_content.source == source) result = &block;
+            && block.inline_content().source == source) result = &block;
     });
     return result;
 }
@@ -14,7 +14,7 @@ const BlockNode* gap_text(const Editor& editor, std::u32string_view source) {
 std::vector<std::u32string> gap_text_order(const EditorDocument& document) {
     std::vector<std::u32string> result;
     walk_blocks(document.root, [&](const BlockNode& block) {
-        if (block.kind == BlockKind::Paragraph) result.push_back(block.inline_content.source);
+        if (block.kind == BlockKind::Paragraph) result.push_back(block.inline_content().source);
     });
     return result;
 }

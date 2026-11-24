@@ -101,7 +101,7 @@ suite editing_history_indexed_edits_tests = [] {
     Editor prose("# title\n\nalpha\n\nbeta\n\ngamma");
     const auto& paragraph = prose.document().root.children.back();
     auto const initial_outline_content_revision = prose.outline().content_revision;
-    prose.set_selection(caret(paragraph, paragraph.inline_content.source.size()));
+    prose.set_selection(caret(paragraph, paragraph.inline_content().source.size()));
     reset_core_operation_counters();
     expect(fatal(prose.execute_command(Command::InsertText(U"!"))));
     auto counters = read_core_operation_counters();
@@ -112,7 +112,7 @@ suite editing_history_indexed_edits_tests = [] {
     expect(fatal(bool(prose.outline().content_revision == initial_outline_content_revision)));
 
     const auto& heading = prose.document().root.children.front();
-    prose.set_selection(caret(heading, heading.inline_content.source.size()));
+    prose.set_selection(caret(heading, heading.inline_content().source.size()));
     reset_core_operation_counters();
     expect(fatal(prose.execute_command(Command::InsertText(U"!"))));
     counters = read_core_operation_counters();
@@ -142,7 +142,7 @@ suite editing_history_indexed_edits_tests = [] {
     const auto parsed_cursor = editor.document().next_node_id;
     expect(fatal(bool(parsed_cursor > 0u)));
 
-    const auto literal_id = first_text(editor).inline_content.tree.nodes.front().id;
+    const auto literal_id = first_text(editor).inline_content().tree.nodes.front().id;
     editor.set_selection(caret(first_text(editor), 1));
     reset_core_operation_counters();
     expect(fatal(editor.execute_command(Command::InsertText(U"X"))));
@@ -159,7 +159,7 @@ suite editing_history_indexed_edits_tests = [] {
     reset_core_operation_counters();
     expect(fatal(editor.redo()));
     expect(fatal(bool(editor.document().next_node_id == undone_cursor)));
-    expect(fatal(bool(first_text(editor).inline_content.tree.nodes.front().id == literal_id)));
+    expect(fatal(bool(first_text(editor).inline_content().tree.nodes.front().id == literal_id)));
     expect(fatal(bool(read_core_operation_counters().full_document_block_index_scans == 0u)));
     expect(fatal(editor.execute_command(Command{.kind = CommandKind::InsertNewline})));
     expect(fatal(bool(editor.document().next_node_id > undone_cursor)));
@@ -174,10 +174,10 @@ suite editing_history_indexed_edits_tests = [] {
         auto saved = editor.markdown_utf8();
         const BlockNode* owner = nullptr;
         walk_blocks(editor.document().root, [&](auto const& node) {
-            if (node.inline_content.source.find(U"gamma") != std::u32string::npos) owner = &node;
+            if (node.inline_content().source.find(U"gamma") != std::u32string::npos) owner = &node;
         });
         expect(fatal(owner != nullptr));
-        auto originalSource = owner->inline_content.source;
+        auto originalSource = owner->inline_content().source;
         auto before = caret(*owner, originalSource.find(U"gamma") + 2);
         auto expected = originalSource;
         expected.insert(before.active.source_offset, U"X");
@@ -194,14 +194,14 @@ suite editing_history_indexed_edits_tests = [] {
         verify([&] { return editor.execute_command(Command::InsertText(U"X")); });
         auto after = editor.selection();
         expect(after.active.source_offset == before.active.source_offset + 1);
-        expect(bool(find_document_block(editor.document(), before.active.container_id)->inline_content.source == expected));
+        expect(bool(find_document_block(editor.document(), before.active.container_id)->inline_content().source == expected));
         verify([&] { return editor.undo(); });
         expect(editor.selection() == before);
-        expect(bool(find_document_block(editor.document(), before.active.container_id)->inline_content.source == originalSource));
+        expect(bool(find_document_block(editor.document(), before.active.container_id)->inline_content().source == originalSource));
         expect(editor.markdown_utf8() == saved);
         verify([&] { return editor.redo(); });
         expect(editor.selection() == after);
-        expect(bool(find_document_block(editor.document(), before.active.container_id)->inline_content.source == expected));
+        expect(bool(find_document_block(editor.document(), before.active.container_id)->inline_content().source == expected));
     }
 };
 

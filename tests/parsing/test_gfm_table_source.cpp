@@ -95,7 +95,7 @@ suite gfm_table_source_tests = [] {
         const auto old = serialize_markdown(parsed.document);
         reset_core_operation_counters();
         auto transaction = document_insert_text(parsed.document,
-            TextSelection::caret({cell->id, cell->inline_content.source.size(), TextAffinity::Downstream}), U"!");
+            TextSelection::caret({cell->id, cell->inline_content().source.size(), TextAffinity::Downstream}), U"!");
         expect(transaction.has_value());
         if (!transaction) return;
         auto counters = read_core_operation_counters();

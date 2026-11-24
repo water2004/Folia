@@ -50,7 +50,7 @@ suite atomic_html_boundary_tests = [] {
         expect(after.find(raw_before + entry.closing) != std::string::npos) << after;
         const auto* target = find_document_block(editor.document(), editor.selection().active.container_id);
         expect(fatal(target && target->kind == BlockKind::Paragraph));
-        expect(bool(target->inline_content.source == (kind == CommandKind::InsertText ? U"next" : U"")));
+        expect(bool(target->inline_content().source == (kind == CommandKind::InsertText ? U"next" : U"")));
         expect(validate_document(editor.document()).empty());
         expect(document_indexes_are_exact(editor.document()));
         Editor reloaded(after);
@@ -58,7 +58,7 @@ suite atomic_html_boundary_tests = [] {
         if (kind == CommandKind::InsertText) {
             const auto* last = find_document_block(reloaded.document(), reloaded.document().cached_editable_order.back());
             expect(fatal(last && last->kind == BlockKind::Paragraph));
-            expect(last->inline_content.source == U"next");
+            expect(last->inline_content().source == U"next");
         }
         expect(editor.undo());
         expect(editor.markdown_utf8() == input);

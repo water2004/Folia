@@ -40,8 +40,8 @@ suite document_boundary_tests = [] {
     expect(fatal(bool(backward.has_value())));
     if (backward) {
         expect(fatal(bool(backward->after.root.children.size() == 2u)));
-        expect(fatal(bool(backward->after.root.children[0].inline_content.source == U"alpha")));
-        expect(fatal(bool(backward->after.root.children[1].inline_content.source == U"beta")));
+        expect(fatal(bool(backward->after.root.children[0].inline_content().source == U"alpha")));
+        expect(fatal(bool(backward->after.root.children[1].inline_content().source == U"beta")));
         expect(fatal(bool(backward->selection_after.active.source_offset == 5u)));
         expect(fatal(bool(serialize_markdown(backward->after) == "alpha\nbeta")));
     }
@@ -49,8 +49,8 @@ suite document_boundary_tests = [] {
     expect(fatal(bool(forward.has_value())));
     if (forward) {
         expect(fatal(bool(forward->after.root.children.size() == 2u)));
-        expect(fatal(bool(forward->after.root.children[0].inline_content.source == U"alpha")));
-        expect(fatal(bool(forward->after.root.children[1].inline_content.source == U"beta")));
+        expect(fatal(bool(forward->after.root.children[0].inline_content().source == U"alpha")));
+        expect(fatal(bool(forward->after.root.children[1].inline_content().source == U"beta")));
         expect(fatal(bool(folia::find_block(forward->after.root, blank_id) == nullptr)));
         expect(fatal(bool(serialize_markdown(forward->after) == "alpha\nbeta")));
     }
@@ -67,7 +67,7 @@ suite document_boundary_tests = [] {
     if (backward) {
         expect(fatal(bool(backward->after.root.children.size() == 1u)));
         expect(fatal(bool(backward->after.root.children[0].kind == BlockKind::Heading)));
-        expect(fatal(bool(backward->after.root.children[0].inline_content.source == U"alphabeta")));
+        expect(fatal(bool(backward->after.root.children[0].inline_content().source == U"alphabeta")));
         expect(fatal(bool(serialize_markdown(backward->after) == "# alphabeta")));
     }
 
@@ -80,7 +80,7 @@ suite document_boundary_tests = [] {
     if (forward) {
         expect(fatal(bool(forward->after.root.children.size() == 1u)));
         expect(fatal(bool(forward->after.root.children[0].kind == BlockKind::Heading)));
-        expect(fatal(bool(forward->after.root.children[0].inline_content.source == U"alphabeta")));
+        expect(fatal(bool(forward->after.root.children[0].inline_content().source == U"alphabeta")));
         expect(fatal(bool(folia::find_block(forward->after.root, paragraph_id) == nullptr)));
         expect(fatal(bool(serialize_markdown(forward->after) == "# alphabeta")));
     }
@@ -102,8 +102,8 @@ suite document_boundary_tests = [] {
         expect(fatal(bool(callout_title_block(callout) == nullptr)));
         expect(fatal(bool(callout.children.size() == 2u)));
         if (callout.children.size() == 2u) {
-            expect(fatal(bool(callout.children[0].inline_content.source == U"title")));
-            expect(fatal(bool(callout.children[1].inline_content.source == U"body")));
+            expect(fatal(bool(callout.children[0].inline_content().source == U"title")));
+            expect(fatal(bool(callout.children[1].inline_content().source == U"body")));
             expect(fatal(bool(entered_at_start->selection_after.active.container_id == callout.children[0].id)));
             expect(fatal(bool(entered_at_start->selection_after.active.source_offset == 0u)));
         }
@@ -119,11 +119,11 @@ suite document_boundary_tests = [] {
         expect(fatal(bool(callout.kind == BlockKind::Callout)));
         const auto* title = callout_title_block(callout);
         expect(fatal(bool(title != nullptr)));
-        expect(fatal(bool(title && title->inline_content.source == U"ti")));
+        expect(fatal(bool(title && title->inline_content().source == U"ti")));
         expect(fatal(bool(callout.children.size() == 3u)));
         if (callout.children.size() == 3) {
-            expect(fatal(bool(callout.children[1].inline_content.source == U"tle")));
-            expect(fatal(bool(callout.children[2].inline_content.source == U"body")));
+            expect(fatal(bool(callout.children[1].inline_content().source == U"tle")));
+            expect(fatal(bool(callout.children[2].inline_content().source == U"body")));
             expect(fatal(bool(entered->selection_after.active.container_id == callout.children[1].id)));
         }
         auto serialized = serialize_markdown(entered->after);
@@ -140,7 +140,7 @@ suite document_boundary_tests = [] {
         auto const& callout = backward->after.root.children.front();
         const auto* title = callout_title_block(callout);
         expect(fatal(bool(title != nullptr)));
-        expect(fatal(bool(title && title->inline_content.source == U"titlebody")));
+        expect(fatal(bool(title && title->inline_content().source == U"titlebody")));
         expect(fatal(bool(callout.children.size() == 1u)));
         expect(fatal(bool(backward->selection_after.active.container_id == title_id)));
         expect(fatal(bool(backward->selection_after.active.source_offset == 5u)));
@@ -155,7 +155,7 @@ suite document_boundary_tests = [] {
         auto const& callout = forward->after.root.children.front();
         const auto* title = callout_title_block(callout);
         expect(fatal(bool(title != nullptr)));
-        expect(fatal(bool(title && title->inline_content.source == U"titlebody")));
+        expect(fatal(bool(title && title->inline_content().source == U"titlebody")));
         expect(fatal(bool(callout.children.size() == 1u)));
         expect(fatal(bool(forward->selection_after.active.container_id == title_id)));
         expect(fatal(bool(forward->selection_after.active.source_offset == 5u)));
@@ -172,7 +172,7 @@ suite document_boundary_tests = [] {
         expect(fatal(bool(quote.children.size() == 1u)));
         if (quote.children.size() == 1) {
             expect(fatal(bool(quote.children[0].id == title_id)));
-            expect(fatal(bool(quote.children[0].inline_content.source == U"title\nbody")));
+            expect(fatal(bool(quote.children[0].inline_content().source == U"title\nbody")));
         }
         expect(bool(serialize_markdown(unwrapped->after) == "> title\n> body")) << serialize_markdown(unwrapped->after);
         expect_document_valid(unwrapped->after);
@@ -216,7 +216,7 @@ suite document_boundary_tests = [] {
             const auto* updated_title = updated ? callout_title_block(*updated) : nullptr;
             expect(fatal(bool(updated_title != nullptr)));
             expect(fatal(bool(updated_title
-                && updated_title->inline_content.source == U"titlebody")));
+                && updated_title->inline_content().source == U"titlebody")));
             expect(fatal(bool(updated && updated->children.size() == 1u)));
             expect(fatal(bool(joined->after.root.children.front().kind == BlockKind::List)));
             expect_document_valid(joined->after);
@@ -253,7 +253,7 @@ suite document_boundary_tests = [] {
     if (!remove_quote) return;
     expect(fatal(bool(remove_quote->after.root.children.front().kind == BlockKind::Paragraph)));
     expect(fatal(bool(remove_quote->after.root.children.front().id == body_id)));
-    expect(fatal(bool(remove_quote->after.root.children.front().inline_content.source == U"body")));
+    expect(fatal(bool(remove_quote->after.root.children.front().inline_content().source == U"body")));
     expect_document_valid(remove_quote->after);
 };
 
@@ -289,7 +289,7 @@ suite document_boundary_tests = [] {
         if (!container) continue;
         expect(fatal(bool(container->children.size() == 1u))) << markdown;
         expect(fatal(bool(container->children.front().id == first_id))) << markdown;
-        expect(fatal(bool(container->children.front().inline_content.source == U"firstsecond"))) << markdown;
+        expect(fatal(bool(container->children.front().inline_content().source == U"firstsecond"))) << markdown;
         expect(fatal(bool(joined->selection_after.active.container_id == first_id))) << markdown;
         expect(fatal(bool(joined->selection_after.active.source_offset == 5u))) << markdown;
         expect_document_valid(joined->after);
@@ -313,7 +313,7 @@ suite document_boundary_tests = [] {
             expect(fatal(bool(updated_list.kind == BlockKind::List)));
             expect(fatal(bool(updated_list.children.front().children.size() == 1u)));
             expect(fatal(bool(updated_list.children.front().children.front().id == first_id)));
-            expect(fatal(bool(updated_list.children.front().children.front().inline_content.source == U"firstsecond")));
+            expect(fatal(bool(updated_list.children.front().children.front().inline_content().source == U"firstsecond")));
             expect(fatal(bool(joined->selection_after.active.container_id == first_id)));
             expect(fatal(bool(joined->selection_after.active.source_offset == 5u)));
             expect_document_valid(joined->after);
@@ -333,7 +333,7 @@ suite document_boundary_tests = [] {
             expect(fatal(bool(transaction->after.root.children.size() == 2u)));
             expect(fatal(bool(find_block(transaction->after.root, blank_id) == nullptr)));
             expect(fatal(bool(transaction->selection_after.active.container_id == quote_content.id)));
-            expect(fatal(bool(transaction->selection_after.active.source_offset == quote_content.inline_content.source.size())));
+            expect(fatal(bool(transaction->selection_after.active.source_offset == quote_content.inline_content().source.size())));
             expect_document_valid(transaction->after);
         }
     }

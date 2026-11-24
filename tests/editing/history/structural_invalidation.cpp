@@ -43,7 +43,7 @@ suite editing_history_structural_invalidation_tests = [] {
 
     Editor editor(markdown);
     const auto& last = editor.document().root.children.back();
-    editor.set_selection(caret(last, last.inline_content.source.size()));
+    editor.set_selection(caret(last, last.inline_content().source.size()));
 
     reset_core_operation_counters();
     expect(fatal(editor.execute_command(Command::InsertText(U"!"))));
@@ -89,7 +89,7 @@ suite editing_history_structural_invalidation_tests = [] {
     auto const& last = editor.document().root.children.back();
     const auto previous_id = previous.id;
     const auto last_id = last.id;
-    const auto previous_size = previous.inline_content.source.size();
+    const auto previous_size = previous.inline_content().source.size();
     editor.set_selection(caret(last, 0));
 
     reset_core_operation_counters();
@@ -108,7 +108,7 @@ suite editing_history_structural_invalidation_tests = [] {
 
     editor.set_selection(caret(
         editor.document().root.children.back(),
-        editor.document().root.children.back().inline_content.source.size()));
+        editor.document().root.children.back().inline_content().source.size()));
     expect(fatal(editor.execute_command(Command{.kind = CommandKind::InsertNewline})));
     const auto inserted_id = editor.selection().active.container_id;
     expect(fatal(bool(inserted_id != last_id)));
@@ -164,7 +164,7 @@ suite editing_history_structural_invalidation_tests = [] {
         return read_core_operation_counters();
     };
     const auto& last = editor.document().root.children.back();
-    editor.set_selection(caret(last, last.inline_content.source.size() / 2));
+    editor.set_selection(caret(last, last.inline_content().source.size() / 2));
 
     reset_core_operation_counters();
     expect(fatal(editor.execute_command(Command{.kind = CommandKind::InsertNewline})));
@@ -298,7 +298,7 @@ suite editing_history_structural_invalidation_tests = [] {
         default_theme_profile());
     const BlockNode* two = nullptr;
     walk_blocks(editor.document().root, [&](const BlockNode& block) {
-        if (block.inline_content.source == U"two") two = &block;
+        if (block.inline_content().source == U"two") two = &block;
     });
     expect(fatal(bool(two != nullptr)));
     if (!two) return;
@@ -334,9 +334,9 @@ suite editing_history_structural_invalidation_tests = [] {
     Editor donor("external");
     BlockNode paragraph = donor.document().root.children.front();
     paragraph.id = NodeId{99};
-    expect(fatal(bool(!paragraph.inline_content.tree.nodes.empty())));
-    if (paragraph.inline_content.tree.nodes.empty()) return;
-    paragraph.inline_content.tree.nodes.front().id = NodeId{149};
+    expect(fatal(bool(!paragraph.inline_content().tree.nodes.empty())));
+    if (paragraph.inline_content().tree.nodes.empty()) return;
+    paragraph.edit_inline_content().tree.nodes.front().id = NodeId{149};
 
     EditorDocument invalid = EditorDocument::empty(1);
     invalid.root.children.clear();

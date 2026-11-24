@@ -19,7 +19,7 @@ namespace { suite semantic_marker_tests = [] {
         Editor editor(std::string{spelling} + "\n");
         auto const& block = editor.document().root.children.front();
         auto owner = block.id;
-        auto const& node = block.inline_content.tree.nodes.front();
+        auto const& node = block.inline_content().tree.nodes.front();
         auto content = node.delimiter_ranges().content;
         auto offset = backward ? content.start : content.end;
         auto before = editor.markdown_utf8();

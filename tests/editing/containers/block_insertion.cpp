@@ -34,7 +34,7 @@ suite editing_containers_block_insertion_tests = [] {
         expect(changed.children.front().table_special().table_header_row);
         expect(!changed.children[1].table_special().table_header_row);
         expect(changed.children[1].id == header_id);
-        expect(bool(changed.children[1].children.front().inline_content.source == U"H1"));
+        expect(bool(changed.children[1].children.front().inline_content().source == U"H1"));
         Editor reloaded(editor.markdown_utf8());
         const auto& loaded = reloaded.document().root.children.front();
         expect(loaded.children.size() == changed.children.size());
@@ -66,8 +66,8 @@ suite editing_containers_block_insertion_tests = [] {
             expect(read_core_operation_counters().full_document_serializations == 0u);
             expect(fatal(editor.document().root.children.size() == 3u));
             const auto& blocks = editor.document().root.children;
-            expect(bool(blocks.front().inline_content.source == U"prefix "));
-            expect(bool(blocks.back().inline_content.source == U" suffix"));
+            expect(bool(blocks.front().inline_content().source == U"prefix "));
+            expect(bool(blocks.back().inline_content().source == U" suffix"));
             if (kind == CommandKind::InsertCodeBlock || kind == CommandKind::InsertMathBlock) {
                 expect(blocks[1].kind == (kind == CommandKind::InsertCodeBlock
                     ? BlockKind::CodeBlock : BlockKind::MathBlock));
@@ -84,7 +84,7 @@ suite editing_containers_block_insertion_tests = [] {
     for (const auto source : {"# **alpha**", "prefix ``` suffix", "alpha\n\nbeta"}) {
         Editor editor(source);
         const auto& first = first_text(editor);
-        auto selection = range(first, 0, first.inline_content.source.size());
+        auto selection = range(first, 0, first.inline_content().source.size());
         if (std::string_view(source).starts_with("prefix")) selection = range(first, 7, 10);
         else if (editor.document().root.children.size() > 1) {
             selection = {{first.id, 2, TextAffinity::Downstream},
@@ -140,7 +140,7 @@ suite editing_containers_block_insertion_tests = [] {
             expect(row.children.size() == 2u);
             for (const auto& cell : row.children) expect(cell.kind == BlockKind::TableCell);
         }
-        expect(bool(retained->children.front().children.front().inline_content.source == U"A"));
+        expect(bool(retained->children.front().children.front().inline_content().source == U"A"));
         gap_history(editor, before, selection);
     }
 };
@@ -165,8 +165,8 @@ suite editing_containers_block_insertion_tests = [] {
     expect(fatal(retained != nullptr));
     expect(retained->children.size() == 2u);
     for (const auto& row : retained->children) expect(row.children.size() == 2u);
-    expect(retained->children.front().children.front().inline_content.source.empty());
-    expect(retained->children.front().children.back().inline_content.source.empty());
+    expect(retained->children.front().children.front().inline_content().source.empty());
+    expect(retained->children.front().children.back().inline_content().source.empty());
     gap_history(editor, before, selection);
 };
 

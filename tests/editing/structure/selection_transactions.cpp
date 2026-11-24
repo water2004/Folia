@@ -82,7 +82,7 @@ suite editing_structure_selection_transactions_tests = [] {
         const BlockNode* selected = nullptr;
         walk_blocks(list.document().root, [&](const BlockNode& block) {
             if (block.kind != BlockKind::Paragraph) return;
-            if (!selected || block.inline_content.source == U"two") selected = &block;
+            if (!selected || block.inline_content().source == U"two") selected = &block;
         });
         expect(fatal(bool(selected != nullptr))) << markdown;
         if (selected) exercise(list, selected->id, markdown);
@@ -91,7 +91,7 @@ suite editing_structure_selection_transactions_tests = [] {
     Editor nested_list("- parent\n  - child");
     const BlockNode* nested_child = nullptr;
     walk_blocks(nested_list.document().root, [&](const BlockNode& block) {
-        if (block.kind == BlockKind::Paragraph && block.inline_content.source == U"child") {
+        if (block.kind == BlockKind::Paragraph && block.inline_content().source == U"child") {
             nested_child = &block;
         }
     });
@@ -143,8 +143,8 @@ suite editing_structure_selection_transactions_tests = [] {
     const BlockNode* last = nullptr;
     walk_blocks(nested.document().root, [&](const BlockNode& block) {
         if (block.kind != BlockKind::Paragraph) return;
-        if (block.inline_content.source == U"alpha") first = &block;
-        if (block.inline_content.source == U"omega") last = &block;
+        if (block.inline_content().source == U"alpha") first = &block;
+        if (block.inline_content().source == U"omega") last = &block;
     });
     expect(fatal(bool(first != nullptr && last != nullptr)));
     if (first && last) {

@@ -21,7 +21,7 @@ BlockNode paragraph(NodeId id, std::u32string source) {
     BlockNode block;
     block.id = id;
     block.kind = BlockKind::Paragraph;
-    block.inline_content.source = std::move(source);
+    block.edit_inline_content().source = std::move(source);
     return block;
 }
 
@@ -47,7 +47,7 @@ suite serializer_html_projection_tests = [] {
         const auto first_owner = root.children[0].id;
         const auto second_owner = root.children[1].id;
         expect(fatal(first_owner != second_owner));
-        root.children[1].inline_content.source = U"B";
+        root.children[1].edit_inline_content().source = U"B";
 
         const auto projection = serialize_markdown_projection(parsed.document);
         expect(fatal(projection.text == U"<section><p>A</p><p>B</p></section>"));

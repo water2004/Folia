@@ -98,7 +98,7 @@ suite editing_commands_indentation_tests = [] {
         const auto& heading = *find_document_block(editor.document(), editor.document().cached_editable_order.front());
         expect(fatal(heading.kind == BlockKind::Heading)) << source;
         const TextPosition start{heading.id, 0};
-        const TextPosition end{heading.id, heading.inline_content.source.size()};
+        const TextPosition end{heading.id, heading.inline_content().source.size()};
         const auto selected = reversed ? TextSelection{end, start} : TextSelection{start, end};
         editor.set_selection(selected);
         reset_core_operation_counters();

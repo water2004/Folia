@@ -40,7 +40,7 @@ suite parser_container_tests = [] {
     expect(nested.document.root.children[0].children[0].children.size() == 2u);
     const auto lazy = parse_text(1, "1. first\nlazy continuation\n");
     expect(fatal(lazy.document.root.children.size() == 1u));
-    expect(lazy.document.root.children[0].children[0].children[0].inline_content.source
+    expect(lazy.document.root.children[0].children[0].children[0].inline_content().source
         == U"first\nlazy continuation");
 };
 
@@ -69,8 +69,8 @@ suite parser_container_tests = [] {
     const auto* heading = first_block(parsed.document.root.children, BlockKind::Heading);
     expect(fatal(bool(heading != nullptr)));
     if (heading) {
-        expect(fatal(bool(heading->inline_content.source == U"*heading*")));
-        expect_lossless(heading->inline_content);
+        expect(fatal(bool(heading->inline_content().source == U"*heading*")));
+        expect_lossless(heading->inline_content());
     }
     const auto* footnote = first_block(parsed.document.root.children, BlockKind::FootnoteDefinition);
     expect(fatal(bool(footnote != nullptr)));
@@ -85,7 +85,7 @@ suite parser_container_tests = [] {
     if (callout) {
         const auto* title = callout_title_block(*callout);
         expect(fatal(bool(title != nullptr)));
-        if (title) expect_lossless(title->inline_content);
+        if (title) expect_lossless(title->inline_content());
     }
 };
 
@@ -104,7 +104,7 @@ suite parser_container_tests = [] {
     expect(fatal(bool(footnote_at != parsed.document.root.children.end())));
     if (footnote_at == parsed.document.root.children.end()) return;
     const auto after_at = std::ranges::find_if(parsed.document.root.children, [](auto const& block) {
-        return block.kind == BlockKind::Paragraph && block.inline_content.source == U"after";
+        return block.kind == BlockKind::Paragraph && block.inline_content().source == U"after";
     });
     expect(fatal(bool(after_at != parsed.document.root.children.end())));
     expect(fatal(bool(after_at > footnote_at)));
@@ -115,8 +115,8 @@ suite parser_container_tests = [] {
     expect(fatal(bool(footnote.children.size() == 2u)));
     if (footnote.children.size() == 2u) {
         expect(fatal(bool(footnote.children[0].kind == BlockKind::Paragraph)));
-        expect(fatal(bool(footnote.children[0].inline_content.source == U"first\ncontinuation")));
-        expect_lossless(footnote.children[0].inline_content);
+        expect(fatal(bool(footnote.children[0].inline_content().source == U"first\ncontinuation")));
+        expect_lossless(footnote.children[0].inline_content());
         expect(fatal(bool(footnote.children[1].kind == BlockKind::List)));
         expect(fatal(bool(first_block(footnote.children[1].children, BlockKind::List) != nullptr)));
     }
@@ -166,7 +166,7 @@ suite parser_container_tests = [] {
         expect(fatal(bool(definition.children.size() == 1u)));
         if (definition.children.size() == 1u) {
             expect(fatal(bool(definition.children.front().kind == BlockKind::Paragraph)));
-            expect(fatal(bool(definition.children.front().inline_content.source
+            expect(fatal(bool(definition.children.front().inline_content().source
                 == U"no code block here (spaces are stripped away)")));
         }
         expect(fatal(bool(serialize_markdown(spaced.document) == spaced_first_line)));
@@ -190,7 +190,7 @@ suite parser_container_tests = [] {
     expect(fatal(bool(footnote_at != parsed.document.root.children.end())));
     if (footnote_at == parsed.document.root.children.end()) return;
     const auto outside_at = std::ranges::find_if(parsed.document.root.children, [](auto const& block) {
-        return block.kind == BlockKind::Paragraph && block.inline_content.source == U"outside";
+        return block.kind == BlockKind::Paragraph && block.inline_content().source == U"outside";
     });
     expect(fatal(bool(outside_at != parsed.document.root.children.end())));
     expect(fatal(bool(outside_at > footnote_at)));
@@ -217,7 +217,7 @@ suite parser_container_tests = [] {
         expect(bool(serialize_markdown_fragment(definition.children).find(U"two-space") == std::u32string::npos));
         const auto outside_at = std::ranges::find_if(termination.document.root.children, [](auto const& block) {
             return block.kind == BlockKind::Paragraph
-                && block.inline_content.source.find(U"two-space") != std::u32string::npos;
+                && block.inline_content().source.find(U"two-space") != std::u32string::npos;
         });
         expect(bool(outside_at != termination.document.root.children.end()));
         expect(bool(outside_at > definition_at));
@@ -254,8 +254,8 @@ suite parser_container_tests = [] {
         const auto* title = callout_title_block(callout);
         expect(fatal(bool((title != nullptr) == test.title.has_value()))) << test.source;
         if (test.title && title) {
-            expect(fatal(bool(title->inline_content.source == *test.title))) << test.source;
-            expect_lossless(title->inline_content);
+            expect(fatal(bool(title->inline_content().source == *test.title))) << test.source;
+            expect_lossless(title->inline_content());
         }
         expect(fatal(bool(serialize_markdown(parsed.document) == test.source))) << test.source;
     }
@@ -311,8 +311,8 @@ suite parser_container_tests = [] {
     const auto& body = callout.children.back();
     expect(fatal(bool(title.kind == BlockKind::CalloutTitle)));
     expect(fatal(bool(title.id != callout.id)));
-    expect(fatal(bool(title.inline_content.source == U"_title_")));
-    expect_lossless(title.inline_content);
+    expect(fatal(bool(title.inline_content().source == U"_title_")));
+    expect_lossless(title.inline_content());
     expect(fatal(bool(body.kind == BlockKind::Paragraph)));
 
     const auto fragments = document_text_fragments(parsed.document);
@@ -342,15 +342,15 @@ suite parser_container_tests = [] {
         if (parsed.document.root.children.size() != 1) continue;
         const auto& heading = parsed.document.root.children.front();
         expect(fatal(bool(heading.kind == BlockKind::Heading))) << source;
-        expect(fatal(bool(heading.inline_content.source.ends_with(
+        expect(fatal(bool(heading.inline_content().source.ends_with(
             source.back() == '\t' ? U"\t" : U"  ")))) << source;
-        expect_lossless(heading.inline_content);
+        expect_lossless(heading.inline_content());
         expect(fatal(bool(serialize_markdown(parsed.document) == source))) << source;
     }
 
     const auto closed = parse_text(1, "# title  ###  ");
     const auto& heading = closed.document.root.children.front();
-    expect(fatal(bool(heading.inline_content.source == U"title")));
+    expect(fatal(bool(heading.inline_content().source == U"title")));
     expect(fatal(bool(heading.text_special().closing_marker == U"  ###  ")));
     expect(fatal(bool(serialize_markdown(closed.document) == "# title  ###  ")));
 };

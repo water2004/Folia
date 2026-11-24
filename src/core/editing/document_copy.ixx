@@ -183,7 +183,7 @@ inline std::optional<BlockNode> slice_block(
     BlockNode copy;
     copy.id = block.id;
     copy.kind = block.kind;
-    copy.inline_content = block.inline_content;
+    if (block.has_inline_content()) copy.edit_inline_content() = block.inline_content();
     copy.block_source = block.block_source;
     copy.separator_before = block.separator_before;
     copy.payload = block.payload ? std::make_unique<BlockNodeSpecial>(*block.payload) : nullptr;

@@ -161,7 +161,7 @@ suite inline_insert_acceptance_tests = [] {
         expect(bool(document_block_path(editor.document(), id) == path));
         const auto* replacement = find_document_block(editor.document(), id);
         expect(fatal(replacement != nullptr && editable_inline_document(*replacement) != nullptr));
-        expect(bool(replacement->inline_content.source
+        expect(bool(replacement->inline_content().source
             == (image ? U"![old](new.png)" : U"[![old](old.png)](new.png)")));
         expect(editor.markdown_utf8().find("before") < editor.markdown_utf8().find("new.png"));
         expect(editor.markdown_utf8().find("new.png") < editor.markdown_utf8().find("after"));
@@ -185,7 +185,7 @@ suite inline_insert_acceptance_tests = [] {
         inline_insert_locality();
         const auto* replacement = find_document_block(editor.document(), first);
         expect(fatal(replacement != nullptr));
-        expect(bool(replacement->inline_content.source == U"al![pha ome](new.png)ga"));
+        expect(bool(replacement->inline_content().source == U"al![pha ome](new.png)ga"));
         if (before.find("tail") != std::string::npos)
             expect(editor.markdown_utf8().find("tail") != std::string::npos);
         inline_insert_history(editor, before, selected);
@@ -203,12 +203,12 @@ suite inline_insert_acceptance_tests = [] {
         const std::vector<std::u32string> expected{U"a![a bb cc d](new.png)", U"", U"", U"d"};
         expect(bool(editor.document().cached_editable_order == order));
         for (std::size_t index = 0; index < order.size(); ++index)
-            expect(bool(find_document_block(editor.document(), order[index])->inline_content.source == expected[index]));
+            expect(bool(find_document_block(editor.document(), order[index])->inline_content().source == expected[index]));
         Editor reloaded(editor.markdown_utf8());
         expect(reloaded.document().cached_editable_order.size() == 4_u);
         for (std::size_t index = 0; index < expected.size(); ++index)
             expect(bool(find_document_block(reloaded.document(),
-                reloaded.document().cached_editable_order[index])->inline_content.source == expected[index]));
+                reloaded.document().cached_editable_order[index])->inline_content().source == expected[index]));
         inline_insert_history(editor, before, selected);
     }
 };
@@ -218,13 +218,13 @@ suite inline_insert_acceptance_tests = [] {
         Editor editor("first\r\nsecond]\rthird|end");
         const auto id = editor.document().cached_editable_order.front();
         const auto* block = find_document_block(editor.document(), id);
-        const auto selected = range(*block, 0, block->inline_content.source.size());
+        const auto selected = range(*block, 0, block->inline_content().source.size());
         editor.set_selection(selected);
         const auto before = editor.markdown_utf8();
         auto command = inline_insert_command(true);
         if (explicit_alt) command.alt = U"first\r\nsecond]\rthird|end";
         expect(fatal(editor.execute_command(command)));
-        const auto& owner = find_document_block(editor.document(), id)->inline_content;
+        const auto& owner = find_document_block(editor.document(), id)->inline_content();
         expect(bool(owner.source == U"![first second\\] third\\|end](new.png)"));
         expect(fatal(owner.tree.nodes.size() == 1_u));
         expect(owner.tree.nodes.front().kind == InlineCstKind::Image);

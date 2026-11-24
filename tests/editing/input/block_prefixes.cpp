@@ -59,7 +59,7 @@ suite editing_input_block_prefixes_tests = [] {
         if (root.kind == BlockKind::BlockQuote) content = &root.children.front();
         if (root.kind == BlockKind::List || root.kind == BlockKind::TaskList) content = &root.children.front().children.front();
         expect(fatal(bool(content->kind == test.content_kind)));
-        expect(fatal(bool(content->inline_content.source.empty())));
+        expect(fatal(bool(content->inline_content().source.empty())));
         expect(fatal(bool(result.active.container_id == content->id)));
         expect(fatal(bool(result.active.source_offset == 0u)));
         if (root.kind == BlockKind::Heading) {
@@ -93,7 +93,7 @@ suite editing_input_block_prefixes_tests = [] {
         if (!deletion) continue;
         expect(fatal(bool(deletion->after.root.children.size() == 1u)));
         expect(fatal(bool(deletion->after.root.children.front().kind == BlockKind::Paragraph)));
-        expect(fatal(bool(deletion->after.root.children.front().inline_content.source == U"content")));
+        expect(fatal(bool(deletion->after.root.children.front().inline_content().source == U"content")));
         expect(fatal(bool(deletion->selection_after.active.container_id
             == deletion->after.root.children.front().id)));
         expect(fatal(bool(deletion->selection_after.active.source_offset == 0u)));
@@ -136,7 +136,7 @@ suite editing_input_block_prefixes_tests = [] {
     if (!remove_heading) return;
     expect(fatal(bool(remove_heading->after.root.children.front().kind == BlockKind::BlockQuote)));
     expect(fatal(bool(remove_heading->after.root.children.front().children.front().kind == BlockKind::Paragraph)));
-    expect(fatal(bool(remove_heading->after.root.children.front().children.front().inline_content.source == U"nested")));
+    expect(fatal(bool(remove_heading->after.root.children.front().children.front().inline_content().source == U"nested")));
 
     auto remove_quote = test_edit::document_delete_backward(remove_heading->after, remove_heading->selection_after);
     expect(fatal(bool(remove_quote.has_value())));
@@ -144,7 +144,7 @@ suite editing_input_block_prefixes_tests = [] {
     expect(fatal(bool(remove_quote->after.root.children.size() == 1u)));
     expect(fatal(bool(remove_quote->after.root.children.front().kind == BlockKind::Paragraph)));
     expect(fatal(bool(remove_quote->after.root.children.front().id == content_id)));
-    expect(fatal(bool(remove_quote->after.root.children.front().inline_content.source == U"nested")));
+    expect(fatal(bool(remove_quote->after.root.children.front().inline_content().source == U"nested")));
     expect_document_valid(remove_quote->after);
 };
 
@@ -165,7 +165,7 @@ suite editing_input_block_prefixes_tests = [] {
     expect(fatal(bool(deletion->after.root.children[0].kind == BlockKind::List)));
     expect(fatal(bool(deletion->after.root.children[1].kind == BlockKind::Paragraph)));
     expect(fatal(bool(deletion->after.root.children[1].id == editable[1])));
-    expect(fatal(bool(deletion->after.root.children[1].inline_content.source == U"two")));
+    expect(fatal(bool(deletion->after.root.children[1].inline_content().source == U"two")));
     expect(fatal(bool(deletion->after.root.children[2].kind == BlockKind::List)));
     expect(fatal(bool(deletion->after.root.children[0].children.size() == 1u)));
     expect(fatal(bool(deletion->after.root.children[2].children.size() == 1u)));
@@ -176,7 +176,7 @@ suite editing_input_block_prefixes_tests = [] {
     auto document = parse_document("- outer\n  - inner");
     const BlockNode* inner = nullptr;
     walk_blocks(document.root, [&](const BlockNode& node) {
-        if (node.kind == BlockKind::Paragraph && node.inline_content.source == U"inner") inner = &node;
+        if (node.kind == BlockKind::Paragraph && node.inline_content().source == U"inner") inner = &node;
     });
     expect(fatal(bool(inner != nullptr)));
     if (!inner) return;
@@ -191,7 +191,7 @@ suite editing_input_block_prefixes_tests = [] {
     expect(fatal(bool(list.children.size() == 2u)));
     expect(fatal(bool(list.children[0].children.size() == 1u)));
     expect(fatal(bool(list.children[1].children.front().id == inner_id)));
-    expect(fatal(bool(list.children[1].children.front().inline_content.source == U"inner")));
+    expect(fatal(bool(list.children[1].children.front().inline_content().source == U"inner")));
     expect_document_valid(deletion->after);
 };
 

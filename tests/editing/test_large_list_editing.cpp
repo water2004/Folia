@@ -44,8 +44,8 @@ void expect_owner_source(const Editor& editor, NodeId id, std::u32string_view ex
     const auto* block = find_document_block(editor.document(), id);
     expect(fatal(block != nullptr));
     if (!block) return;
-    expect(block->inline_content.source == expected);
-    expect(flatten_tokens(block->inline_content.tree, block->inline_content.source) == expected);
+    expect(block->inline_content().source == expected);
+    expect(flatten_tokens(block->inline_content().tree, block->inline_content().source) == expected);
 }
 
 } // namespace
@@ -60,7 +60,7 @@ suite large_list_editing_tests = [] {
     expect(fatal(list.children.size() > 100000u));
     const auto& last = list.children.back().children.front();
     const auto id = last.id;
-    const auto original = last.inline_content.source;
+    const auto original = last.inline_content().source;
     const auto before = TextSelection::caret({id, 8, TextAffinity::Downstream});
     editor.set_selection(before);
 
@@ -108,7 +108,7 @@ suite large_list_editing_tests = [] {
     const auto count = list.children.size();
     const auto& last = list.children.back().children.front();
     editor.set_selection(TextSelection::caret(
-        {last.id, last.inline_content.source.size(), TextAffinity::Downstream}));
+        {last.id, last.inline_content().source.size(), TextAffinity::Downstream}));
     const auto before = editor.selection();
 
     auto check_work = [](std::string_view action) {

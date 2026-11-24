@@ -357,7 +357,7 @@ suite editor_command_tests = [] {
         Editor editor(markdown);
         const BlockNode* two = nullptr;
         walk_blocks(editor.document().root, [&](const BlockNode& block) {
-            if (block.kind == BlockKind::Paragraph && block.inline_content.source == U"two") two = &block;
+            if (block.kind == BlockKind::Paragraph && block.inline_content().source == U"two") two = &block;
         });
         expect(fatal(bool(two != nullptr))) << markdown;
         if (two) {
@@ -372,7 +372,7 @@ suite editor_command_tests = [] {
     Editor outdent("- parent\n  - > child");
     const BlockNode* child = nullptr;
     walk_blocks(outdent.document().root, [&](const BlockNode& block) {
-        if (block.kind == BlockKind::Paragraph && block.inline_content.source == U"child") child = &block;
+        if (block.kind == BlockKind::Paragraph && block.inline_content().source == U"child") child = &block;
     });
     expect(fatal(bool(child != nullptr)));
     if (child) {
@@ -388,7 +388,7 @@ suite editor_command_tests = [] {
     Editor symbols("- first\n- second[^1]\n\n[^1]: note");
     const BlockNode* referenced = nullptr;
     walk_blocks(symbols.document().root, [&](const BlockNode& block) {
-        if (block.inline_content.source == U"second[^1]") referenced = &block;
+        if (block.inline_content().source == U"second[^1]") referenced = &block;
     });
     expect(fatal(bool(referenced != nullptr)));
     if (!referenced) return;

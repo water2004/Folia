@@ -115,20 +115,20 @@ inline bool project_block(
         case BlockKind::Paragraph: {
             // Empty editable paragraphs encode preserved blank source lines.
             // They are not Markdown paragraphs in the specification's HTML.
-            if (block.inline_content.source.empty()
-                || (block.inline_content.syntax_mode == InlineSyntaxMode::Markdown
-                    && std::ranges::all_of(block.inline_content.source, [](char32_t ch) {
+            if (block.inline_content().source.empty()
+                || (block.inline_content().syntax_mode == InlineSyntaxMode::Markdown
+                    && std::ranges::all_of(block.inline_content().source, [](char32_t ch) {
                         return ch == U' ' || ch == U'\t';
                     }))) return false;
-            if (block.inline_content.syntax_mode == InlineSyntaxMode::HtmlText) {
-                append_raw_html(parent, utf8(block.inline_content.source) + "\n");
+            if (block.inline_content().syntax_mode == InlineSyntaxMode::HtmlText) {
+                append_raw_html(parent, utf8(block.inline_content().source) + "\n");
                 return true;
             }
             auto n = element("p");
             auto semantic_nodes = semantic_inline_nodes(
-                block.inline_content,
+                block.inline_content(),
                 InlineBlockWhitespacePolicy::Paragraph);
-            project_inline_nodes(n, block.inline_content, semantic_nodes, limitations);
+            project_inline_nodes(n, block.inline_content(), semantic_nodes, limitations);
             append_node(parent, std::move(n));
             return true;
         }
@@ -136,9 +136,9 @@ inline bool project_block(
             auto const level = static_cast<int>(block.text_special().level);
             auto n = element("h" + std::to_string(level));
             auto semantic_nodes = semantic_inline_nodes(
-                block.inline_content,
+                block.inline_content(),
                 InlineBlockWhitespacePolicy::Heading);
-            project_inline_nodes(n, block.inline_content, semantic_nodes, limitations);
+            project_inline_nodes(n, block.inline_content(), semantic_nodes, limitations);
             append_node(parent, std::move(n));
             return true;
         }
@@ -172,17 +172,17 @@ inline bool project_block(
                 };
                 for (auto const& child : item.children) {
                     if (list.tight && child.kind == BlockKind::Paragraph) {
-                        if (!child.inline_content.source.empty()) {
+                        if (!child.inline_content().source.empty()) {
                             if (checkbox_pending) append_checkbox(li);
-                            if (child.inline_content.syntax_mode == InlineSyntaxMode::HtmlText) {
-                                append_raw_html(li, utf8(child.inline_content.source) + "\n");
+                            if (child.inline_content().syntax_mode == InlineSyntaxMode::HtmlText) {
+                                append_raw_html(li, utf8(child.inline_content().source) + "\n");
                             } else {
                                 auto semantic_nodes = semantic_inline_nodes(
-                                    child.inline_content,
+                                    child.inline_content(),
                                     InlineBlockWhitespacePolicy::Paragraph);
                                 project_inline_nodes(
                                     li,
-                                    child.inline_content,
+                                    child.inline_content(),
                                     semantic_nodes,
                                     limitations);
                             }
@@ -191,8 +191,8 @@ inline bool project_block(
                         auto p = element("p");
                         append_checkbox(p);
                         auto semantic_nodes = semantic_inline_nodes(
-                            child.inline_content, InlineBlockWhitespacePolicy::Paragraph);
-                        project_inline_nodes(p, child.inline_content, semantic_nodes, limitations);
+                            child.inline_content(), InlineBlockWhitespacePolicy::Paragraph);
+                        project_inline_nodes(p, child.inline_content(), semantic_nodes, limitations);
                         append_node(li, std::move(p));
                     } else {
                         project_block(li, child, limitations, options);
@@ -316,8 +316,8 @@ inline bool project_block(
                         }
                         auto th = element(header ? "th" : "td", std::move(attrs));
                         auto semantic_nodes = semantic_inline_nodes(
-                            cell.inline_content, InlineBlockWhitespacePolicy::Paragraph);
-                        project_inline_nodes(th, cell.inline_content, semantic_nodes, limitations);
+                            cell.inline_content(), InlineBlockWhitespacePolicy::Paragraph);
+                        project_inline_nodes(th, cell.inline_content(), semantic_nodes, limitations);
                         append_node(tr, std::move(th));
                     }
                     if (header) {

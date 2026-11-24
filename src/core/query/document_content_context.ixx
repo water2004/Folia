@@ -43,7 +43,7 @@ inline DocumentContentContext document_content_context_at(
     if (!block) return DocumentContentContext::Normal;
     if (block->kind == BlockKind::CodeBlock) return DocumentContentContext::Code;
     if (block->kind == BlockKind::MathBlock) return DocumentContentContext::Math;
-    return inline_content_context(block->inline_content.tree.nodes, position)
+    return inline_content_context(block->inline_content().tree.nodes, position)
         .value_or(DocumentContentContext::Normal);
 }
 

@@ -73,9 +73,9 @@ suite document_format_tests = [] {
         "<div align=\"center\">\n  <strong>*literal html*</strong>\n</div>"));
 
     const auto& paragraph = editor.document().root.children[1];
-    expect(paragraph.inline_content.source == U"**open [title]( \\*literal\\* &amp;");
-    expect(flatten_tokens(paragraph.inline_content.tree, paragraph.inline_content.source)
-        == paragraph.inline_content.source);
+    expect(paragraph.inline_content().source == U"**open [title]( \\*literal\\* &amp;");
+    expect(flatten_tokens(paragraph.inline_content().tree, paragraph.inline_content().source)
+        == paragraph.inline_content().source);
 };
 
 "formatting is idempotent and one document history transaction"_test = [] {

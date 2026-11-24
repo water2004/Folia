@@ -141,7 +141,7 @@ std::string project_deep_emphasis(const BlockNode& root) {
         const auto* block = blocks.back(); blocks.pop_back();
         if (is_editable_block_owner(block->kind)) {
             if (document || block->kind != BlockKind::Paragraph) return {};
-            document = &block->inline_content;
+            document = &block->inline_content();
         }
         for (auto const& child : block->children) blocks.push_back(&child);
     }

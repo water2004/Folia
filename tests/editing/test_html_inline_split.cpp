@@ -103,7 +103,7 @@ void expect_html_split(
     auto expected_right = right_source;
     expected_right.insert(right_caret_offset, U"X");
     const auto* right = find_document_block(editor.document(), editor.selection().active.container_id);
-    expect(bool(right->inline_content.source == expected_right));
+    expect(bool(right->inline_content().source == expected_right));
     html_split_invariants(editor);
     Editor typed_reload(editor.markdown_utf8());
     expect(bool(html_inline_sources(typed_reload) == html_inline_sources(editor)));

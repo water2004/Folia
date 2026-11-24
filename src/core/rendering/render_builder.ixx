@@ -155,9 +155,9 @@ inline void append_metadata(Hasher& hash, BlockNode const& block) {
 
 inline void append_header(Hasher& hash, BlockNode const& block) {
     append_metadata(hash, block);
-    record_render_source_node(block.inline_content.source.size()
+    record_render_source_node(block.inline_content().source.size()
         + block.block_source.source().size() + block.atomic_special().raw.size());
-    append(hash, block.inline_content);
+    append(hash, block.inline_content());
     hash.text(block.block_source.source());
     hash.text(block.atomic_special().raw);
     for (const auto& indent : block.block_source.tree().generated_indentation) {
@@ -727,7 +727,7 @@ struct Builder {
                 for (const auto& row : block.children) {
                     for (const auto& cell : row.children) {
                         if (!first_cell) append_block_break(out, cell.id, 0);
-                        auto items = build_inline_document(cell.inline_content, cell.id, InlineStyle::plain());
+                        auto items = build_inline_document(cell.inline_content(), cell.id, InlineStyle::plain());
                         out.insert(out.end(), items.begin(), items.end());
                         first_cell = false;
                     }
@@ -1231,7 +1231,7 @@ struct Builder {
             case BK::CalloutTitle:
             case BK::TableCell: {
                 auto rb = base(BlockStyle::paragraph(theme.layout));
-                if (b.inline_content.source.empty() && b.text_special().opening_marker.empty() && b.text_special().closing_marker.empty()) {
+                if (b.inline_content().source.empty() && b.text_special().opening_marker.empty() && b.text_special().closing_marker.empty()) {
                     rb.kind = RenderBlockKind::Blank;
                     return rb;
                 }
@@ -1249,7 +1249,7 @@ struct Builder {
                     rb.inline_items.back().ensure_special().marker_owner = b.id;
                 }
                 auto items = build_inline_document(
-                    b.inline_content,
+                    b.inline_content(),
                     b.id,
                     s,
                     false,
@@ -1258,7 +1258,7 @@ struct Builder {
                         : InlineBlockWhitespacePolicy::None);
                 for (auto& item : items) rb.inline_items.push_back(std::move(item));
                 if (!b.text_special().closing_marker.empty()) {
-                    cursor = b.inline_content.source.size();
+                    cursor = b.inline_content().source.size();
                     push_marker(
                         rb.inline_items,
                         b.id,
@@ -1292,7 +1292,7 @@ struct Builder {
                 };
                 append_heading_marker(b.text_special().opening_marker, 0, TextAffinity::Downstream);
                 auto items = build_inline_document(
-                    b.inline_content,
+                    b.inline_content(),
                     b.id,
                     s,
                     true,
@@ -1300,7 +1300,7 @@ struct Builder {
                 for (auto& it : items) rb.inline_items.push_back(std::move(it));
                 append_heading_marker(
                     b.text_special().closing_marker,
-                    b.inline_content.source.size(),
+                    b.inline_content().source.size(),
                     TextAffinity::Upstream);
                 std::stable_sort(rb.inline_items.begin(), rb.inline_items.end(), [](auto const& left, auto const& right) {
                     return left.source_span.source_range.start < right.source_span.source_range.start;
@@ -1375,8 +1375,8 @@ struct Builder {
                 special.column_count = b.children.empty() ? 0 : b.children.front().children.size();
                 special.row_count = b.children.size();
                 auto build_cell = [&](const BlockNode& cell) {
-                    special.table_cell_spans.push_back({cell.id, {0, cell.inline_content.source.size()}});
-                    return build_inline_document(cell.inline_content, cell.id, InlineStyle::plain());
+                    special.table_cell_spans.push_back({cell.id, {0, cell.inline_content().source.size()}});
+                    return build_inline_document(cell.inline_content(), cell.id, InlineStyle::plain());
                 };
                 for (const auto& row : b.children) for (const auto& cell : row.children) special.table_cells.push_back(build_cell(cell));
                 return rb;
@@ -1443,7 +1443,7 @@ struct Builder {
         auto rendered = render_block_base(b.kind, b.id, block_local_length(b), std::move(style));
         rendered.materialized = false;
         if ((b.kind == BK::Paragraph || b.kind == BK::CalloutTitle || b.kind == BK::TableCell)
-            && b.inline_content.source.empty()
+            && b.inline_content().source.empty()
             && b.text_special().opening_marker.empty()
             && b.text_special().closing_marker.empty()) {
             rendered.kind = RenderBlockKind::Blank;

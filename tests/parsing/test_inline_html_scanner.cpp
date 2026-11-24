@@ -45,7 +45,7 @@ suite inline_html_scanner_tests = [] {
     const auto parsed = parse_text(1, markup);
     expect(fatal(bool(parsed.document.root.children.size() == 1u)));
     if (parsed.document.root.children.empty()) return;
-    const auto& document = parsed.document.root.children.front().inline_content;
+    const auto& document = parsed.document.root.children.front().inline_content();
     expect_lossless(document);
     const auto element = std::find_if(document.tree.nodes.begin(), document.tree.nodes.end(), [](const auto& node) {
         return node.kind == InlineCstKind::HtmlElement;
@@ -66,7 +66,7 @@ suite inline_html_scanner_tests = [] {
     expect(parsed.document.root.children.back().kind == BlockKind::LinkDefinition)
         << "last block kind=" << static_cast<int>(parsed.document.root.children.back().kind);
     if (parsed.document.root.children.empty()) return;
-    const auto& document = parsed.document.root.children.front().inline_content;
+    const auto& document = parsed.document.root.children.front().inline_content();
     expect_lossless(document);
     expect(fatal(bool(serialize_markdown_cps(parsed.document) == utf8_to_cps(source))));
     const bool has_link = std::any_of(document.tree.nodes.begin(), document.tree.nodes.end(), [](const auto& node) {
@@ -83,7 +83,7 @@ suite inline_html_scanner_tests = [] {
     const auto parsed = parse_text(1, source);
     expect(fatal(bool(parsed.document.root.children.size() == 1u)));
     if (parsed.document.root.children.empty()) return;
-    const auto& document = parsed.document.root.children.front().inline_content;
+    const auto& document = parsed.document.root.children.front().inline_content();
     expect_lossless(document);
     const bool has_link = std::any_of(document.tree.nodes.begin(), document.tree.nodes.end(), [](const auto& node) {
         return node.kind == InlineCstKind::Link;
@@ -116,7 +116,7 @@ suite inline_html_scanner_tests = [] {
     const auto parsed = parse_text(1, source);
     expect(fatal(bool(parsed.document.root.children.size() == 1u)));
     if (parsed.document.root.children.empty()) return;
-    const auto& document = parsed.document.root.children.front().inline_content;
+    const auto& document = parsed.document.root.children.front().inline_content();
     expect_lossless(document);
     expect(fatal(bool(serialize_markdown_cps(parsed.document) == utf8_to_cps(source))));
     const auto found = std::find_if(document.tree.nodes.begin(), document.tree.nodes.end(), [](const auto& node) {

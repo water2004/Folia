@@ -88,7 +88,7 @@ suite editing_structure_typed_markers_tests = [] {
             editor.document().root.children,
             [](const BlockNode& block) {
                 return block.kind == BlockKind::Paragraph
-                    && !block.inline_content.source.empty();
+                    && !block.inline_content().source.empty();
             });
         expect(fatal(bool(paragraph != editor.document().root.children.end()))) << markdown;
         if (paragraph == editor.document().root.children.end()) continue;
@@ -155,7 +155,7 @@ suite editing_structure_typed_markers_tests = [] {
             editor.document().root.children,
             [](const BlockNode& block) {
                 return block.kind == BlockKind::Paragraph
-                    && !block.inline_content.source.empty();
+                    && !block.inline_content().source.empty();
             });
         expect(fatal(paragraph != editor.document().root.children.end())) << diagnostic("find-paragraph");
         if (paragraph == editor.document().root.children.end()) continue;

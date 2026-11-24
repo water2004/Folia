@@ -36,8 +36,8 @@ suite parser_inline_tests = [] {
         expect(fatal(bool(parsed.document.root.children.size() == 1u)));
         const auto& paragraph = parsed.document.root.children.front();
         expect(fatal(bool(paragraph.kind == BlockKind::Paragraph)));
-        expect(fatal(bool(paragraph.inline_content.source == utf8_to_cps(source))));
-        expect_lossless(paragraph.inline_content);
+        expect(fatal(bool(paragraph.inline_content().source == utf8_to_cps(source))));
+        expect_lossless(paragraph.inline_content());
         expect(fatal(bool(serialize_markdown_cps(parsed.document) == utf8_to_cps(source))));
     }
 };
@@ -55,7 +55,7 @@ suite parser_inline_tests = [] {
     };
     for (const auto& test : cases) {
         const auto parsed = parse_text(1, test.source);
-        const auto& document = parsed.document.root.children.front().inline_content;
+        const auto& document = parsed.document.root.children.front().inline_content();
         const auto* node = first_inline(document, test.kind);
         expect(fatal(bool(node != nullptr)));
         if (!node) continue;
@@ -74,7 +74,7 @@ suite parser_inline_tests = [] {
 "incomplete_inline_syntax_remains_structural"_test = [] {
     for (const auto& source : {"**", "**abc", "~~abc", "`abc ", "[title](", "$abc"}) {
         const auto parsed = parse_text(1, source);
-        const auto& document = parsed.document.root.children.front().inline_content;
+        const auto& document = parsed.document.root.children.front().inline_content();
         expect_lossless(document);
         const bool incomplete = std::any_of(document.tree.nodes.begin(), document.tree.nodes.end(), [](const auto& node) {
             return node.status != ParseStatus::Complete || node.kind == InlineCstKind::Incomplete || node.kind == InlineCstKind::Error;
@@ -85,7 +85,7 @@ suite parser_inline_tests = [] {
 
 "nested_inline_nodes_use_block_local_source_ranges"_test = [] {
     const auto parsed = parse_text(1, "_outer **inner** tail_");
-    const auto& document = parsed.document.root.children.front().inline_content;
+    const auto& document = parsed.document.root.children.front().inline_content();
     const auto* emphasis = first_inline(document, InlineCstKind::Emphasis);
     const auto* strong = first_inline(document, InlineCstKind::Strong);
     expect(fatal(bool(emphasis != nullptr)));
@@ -103,18 +103,18 @@ suite parser_inline_tests = [] {
 "line_breaks_are_lossless_and_visible"_test = [] {
     const auto soft = parse_text(1, "Hello\nWorld");
     const auto hard = parse_text(2, "Hello  \nWorld");
-    expect(fatal(bool(has_inline(soft.document.root.children.front().inline_content, InlineCstKind::SoftBreak))));
-    expect(fatal(bool(has_inline(hard.document.root.children.front().inline_content, InlineCstKind::HardBreak))));
-    expect(fatal(bool(inline_visible_text(soft.document.root.children.front().inline_content) == U"Hello\nWorld")));
-    expect(fatal(bool(inline_visible_text(hard.document.root.children.front().inline_content) == U"Hello\nWorld")));
-    expect_lossless(soft.document.root.children.front().inline_content);
-    expect_lossless(hard.document.root.children.front().inline_content);
+    expect(fatal(bool(has_inline(soft.document.root.children.front().inline_content(), InlineCstKind::SoftBreak))));
+    expect(fatal(bool(has_inline(hard.document.root.children.front().inline_content(), InlineCstKind::HardBreak))));
+    expect(fatal(bool(inline_visible_text(soft.document.root.children.front().inline_content()) == U"Hello\nWorld")));
+    expect(fatal(bool(inline_visible_text(hard.document.root.children.front().inline_content()) == U"Hello\nWorld")));
+    expect_lossless(soft.document.root.children.front().inline_content());
+    expect_lossless(hard.document.root.children.front().inline_content());
 };
 
 "links_images_math_code_and_entities_are_structural"_test = [] {
     const auto parsed = parse_text(1,
         "[link](https://example.com \"title\") ![alt](image.png) `code` $x$ &amp; [[Page|alias]]");
-    const auto& document = parsed.document.root.children.front().inline_content;
+    const auto& document = parsed.document.root.children.front().inline_content();
     expect(fatal(bool(has_inline(document, InlineCstKind::Link))));
     expect(fatal(bool(has_inline(document, InlineCstKind::Image))));
     expect(fatal(bool(has_inline(document, InlineCstKind::CodeSpan))));

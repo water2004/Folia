@@ -43,8 +43,8 @@ suite document_operation_tests = [] {
     if (!transaction) return;
     expect(fatal(bool(document.root.children.size() == 2u)));
     if (document.root.children.size() != 2u) return;
-    expect(document.root.children[0].inline_content.source == U"alXpha");
-    expect(document.root.children[1].inline_content.source == U"beta");
+    expect(document.root.children[0].inline_content().source == U"alXpha");
+    expect(document.root.children[1].inline_content().source == U"beta");
     expect(transaction->revision_before == revision_before);
     expect(transaction->revision_after == document.revision);
     expect(transaction->revision_after == revision_before + 1);
@@ -123,12 +123,12 @@ suite document_operation_tests = [] {
 "insert_text_edits_only_the_target_inline_source"_test = [] {
     auto document = parse_document("alpha\n\nbeta");
     const auto first_id = document.root.children[0].id;
-    const auto second_before = document.root.children[1].inline_content;
+    const auto second_before = document.root.children[1].inline_content();
     auto transaction = test_edit::document_insert_text(document, caret(document.root.children[0], 2), U"X");
     expect(fatal(bool(transaction.has_value())));
     if (!transaction) return;
-    expect(fatal(bool(transaction->after.root.children[0].inline_content.source == U"alXpha")));
-    expect(fatal(bool(transaction->after.root.children[1].inline_content.source == second_before.source)));
+    expect(fatal(bool(transaction->after.root.children[0].inline_content().source == U"alXpha")));
+    expect(fatal(bool(transaction->after.root.children[1].inline_content().source == second_before.source)));
     expect(fatal(bool(transaction->after.root.children[0].id == first_id)));
     expect(fatal(bool(transaction->selection_after.active.source_offset == 3u)));
     expect_document_valid(transaction->after);
@@ -172,7 +172,7 @@ suite document_operation_tests = [] {
     const auto* cell = first_block(document.root.children, BlockKind::TableCell);
     expect(fatal(cell != nullptr));
     if (!cell) return;
-    auto selection = caret(*cell, cell->inline_content.source.size());
+    auto selection = caret(*cell, cell->inline_content().source.size());
     auto transaction = folia::document_insert_text(document, selection, U"!");
     expect(fatal(transaction.has_value()));
     if (!transaction) return;
@@ -239,7 +239,7 @@ suite document_operation_tests = [] {
         split->after,
         split->selection_after.active.container_id);
     expect(fatal(right != nullptr));
-    expect(fatal(right && right->inline_content.syntax_mode == InlineSyntaxMode::HtmlText));
+    expect(fatal(right && right->inline_content().syntax_mode == InlineSyntaxMode::HtmlText));
 
     auto working = std::move(split->after);
     auto selection = split->selection_after;
@@ -292,9 +292,9 @@ suite document_operation_tests = [] {
     expect(fatal(serialize_markdown(strong->after)
         == "<p><strong>alpha</strong></p>"));
     const auto& updated = first_editable(strong->after);
-    expect(fatal(updated.inline_content.syntax_mode == InlineSyntaxMode::HtmlText));
-    expect(fatal(!inline_contains_kind(updated.inline_content, InlineCstKind::Strong)));
-    expect(fatal(contains_html_tag(updated.inline_content.tree.nodes, "strong")));
+    expect(fatal(updated.inline_content().syntax_mode == InlineSyntaxMode::HtmlText));
+    expect(fatal(!inline_contains_kind(updated.inline_content(), InlineCstKind::Strong)));
+    expect(fatal(contains_html_tag(updated.inline_content().tree.nodes, "strong")));
     expect_document_valid(strong->after);
 
     auto heading_document = parse_document("<p class='old'>title</p>");
@@ -316,7 +316,7 @@ suite document_operation_tests = [] {
     auto transaction = test_edit::document_insert_text(document, range(paragraph, 2, 7), U"beta");
     expect(fatal(bool(transaction.has_value())));
     if (!transaction) return;
-    expect(fatal(bool(first_editable(transaction->after).inline_content.source == U"**beta**")));
+    expect(fatal(bool(first_editable(transaction->after).inline_content().source == U"**beta**")));
     expect(fatal(bool(transaction->selection_after.active.source_offset == 6u)));
     expect_document_valid(transaction->after);
 };
@@ -327,7 +327,7 @@ suite document_operation_tests = [] {
     auto transaction = test_edit::document_insert_text(document, caret(paragraph, 1), U"*");
     expect(fatal(bool(transaction.has_value())));
     if (!transaction) return;
-    const auto& inline_document = first_editable(transaction->after).inline_content;
+    const auto& inline_document = first_editable(transaction->after).inline_content();
     expect(fatal(bool(inline_document.source == U"a*bc")));
     expect(fatal(bool(transaction->selection_after.active.source_offset == 2u)));
     expect_inline_lossless(inline_document);

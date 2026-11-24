@@ -72,15 +72,15 @@ suite editing_history_inline_transactions_tests = [] {
         + std::string(source.substr(literal + 3u));
     expect(bool(editor.markdown_utf8() == edited)) << "edited source";
     expect(bool(inline_contains_kind(
-        first_text(editor).inline_content,
+        first_text(editor).inline_content(),
         InlineCstKind::HtmlElement))) << "html element";
     expect(bool(inline_contains_kind(
-        first_text(editor).inline_content,
+        first_text(editor).inline_content(),
         InlineCstKind::Emphasis))) << "markdown retained inside inline html";
     expect(bool(flatten_tokens(
-        first_text(editor).inline_content.tree,
-        first_text(editor).inline_content.source)
-        == first_text(editor).inline_content.source)) << "lossless flatten";
+        first_text(editor).inline_content().tree,
+        first_text(editor).inline_content().source)
+        == first_text(editor).inline_content().source)) << "lossless flatten";
     const auto after = editor.selection();
 
     expect(bool(editor.undo())) << "undo";
@@ -112,8 +112,8 @@ suite editing_history_inline_transactions_tests = [] {
         const auto& second = editor.document().root.children[1];
         expect(fatal(bool(first.kind == entry.first_kind))) << entry.source;
         expect(fatal(bool(second.kind == BlockKind::Paragraph))) << entry.source;
-        expect(fatal(bool(first.inline_content.source == U"first"))) << entry.source;
-        expect(fatal(bool(second.inline_content.source == U"second"))) << entry.source;
+        expect(fatal(bool(first.inline_content().source == U"first"))) << entry.source;
+        expect(fatal(bool(second.inline_content().source == U"second"))) << entry.source;
 
         const auto before = TextSelection::caret(
             {second.id, 1u, TextAffinity::Downstream});
@@ -130,7 +130,7 @@ suite editing_history_inline_transactions_tests = [] {
         Editor reloaded(editor.markdown_utf8());
         expect(fatal(bool(reloaded.document().root.children.size() == 2u))) << entry.source;
         if (reloaded.document().root.children.size() == 2u) {
-            expect(fatal(bool(reloaded.document().root.children[1].inline_content.source
+            expect(fatal(bool(reloaded.document().root.children[1].inline_content().source
                 == U"sXecond"))) << entry.source;
         }
 

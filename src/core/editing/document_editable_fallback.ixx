@@ -60,8 +60,8 @@ inline std::optional<DocumentEditableFallback> document_editable_fallback(
     const auto& last = document.root.children.back();
     if (last.id != document.cached_editable_order.front()
         || last.kind != BlockKind::Paragraph
-        || !last.inline_content.source.empty()
-        || last.inline_content.syntax_mode != InlineSyntaxMode::Markdown
+        || !last.inline_content().source.empty()
+        || last.inline_content().syntax_mode != InlineSyntaxMode::Markdown
         || !last.separator_before || !(*last.separator_before).empty()) return std::nullopt;
     return DocumentEditableFallback{last.id, document.root.children.size() - 1};
 }
@@ -75,7 +75,7 @@ inline void materialize_document_editable_fallback(
     // half has no saved content; use the newly created owner as the first real
     // paragraph, and record removal of the old landing point in this edit.
     if (found != roots.end() && found->kind == BlockKind::Paragraph
-        && found->inline_content.source.empty()
+        && found->inline_content().source.empty()
         && transaction.selection_after.anchor.container_id != fallback.owner
         && transaction.selection_after.active.container_id != fallback.owner) {
         DocumentTreeEdit remove;
@@ -98,7 +98,7 @@ inline void materialize_document_editable_fallback(
         // a single Enter in a comment-only file that originally ended in EOL.
         const bool saved_empty_line = !document.trailing_line_ending.empty()
             && block.id == roots.back().id && block.kind == BlockKind::Paragraph
-            && block.inline_content.source.empty();
+            && block.inline_content().source.empty();
         block.separator_before = saved_empty_line ? ending : ending + ending;
         gap.after = document_transaction_detail::payload_shell(block);
         transaction.operations.emplace_back(std::move(gap));

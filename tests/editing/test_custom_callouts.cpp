@@ -136,7 +136,7 @@ suite custom_callout_editing_tests = [] {
     expect(fatal(editor.execute_document_insert_text(selection, U"X").has_value()));
     expect_local_callout_edit();
     expect(editor.markdown_utf8() == "> [!my-type_2] **tiXtle**\n> body");
-    const auto& title = editor.document().root.children.front().children.front().inline_content;
+    const auto& title = editor.document().root.children.front().children.front().inline_content();
     expect(bool(flatten_tokens(title.tree, title.source) == title.source));
     expect(editor.document().root.children.front().container_special().callout_kind == "MY-TYPE_2");
     expect(fatal(editor.undo()));

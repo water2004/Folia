@@ -73,7 +73,7 @@ suite editing_raw_blocks_marker_boundaries_tests = [] {
     expect(fatal(editor.execute_command(Command::MoveLeft(false))));
     expect(fatal(editor.selection().active.container_id == before.id));
     expect(fatal(editor.selection().active.source_offset
-        == before.inline_content.source.size()));
+        == before.inline_content().source.size()));
 
     expect(fatal(editor.execute_command(Command::MoveRight(false))));
     expect(fatal(editor.selection().active.container_id == code.id));

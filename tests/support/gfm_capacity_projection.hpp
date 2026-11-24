@@ -9,11 +9,11 @@ enum class ContainerFixture { NestedBlockquotes, DeepLists };
 inline std::optional<std::string> project_pathological_containers(const BlockNode& root, ContainerFixture which) {
     auto inline_text = [](const BlockNode& block) -> std::optional<std::string> {
         if (block.kind != BlockKind::Paragraph
-            || block.inline_content.syntax_mode != InlineSyntaxMode::Markdown
-            || block.inline_content.source != U"a") return std::nullopt;
+            || block.inline_content().syntax_mode != InlineSyntaxMode::Markdown
+            || block.inline_content().source != U"a") return std::nullopt;
         std::u32string reconstructed;
         struct InlineFrame { const InlineCstNodes* nodes; std::size_t index; };
-        std::vector<InlineFrame> frames{{&block.inline_content.tree.nodes, 0}};
+        std::vector<InlineFrame> frames{{&block.inline_content().tree.nodes, 0}};
         while (!frames.empty()) {
             auto& frame = frames.back();
             if (frame.index == frame.nodes->size()) {
@@ -23,13 +23,13 @@ inline std::optional<std::string> project_pathological_containers(const BlockNod
             const auto& node = (*frame.nodes)[frame.index++];
             if (node.kind != InlineCstKind::Text || !node.children.empty()
                 || node.range.end < node.range.start
-                || node.range.end > block.inline_content.source.size()) return std::nullopt;
-            const auto value = inline_source_slice(block.inline_content, node.range);
+                || node.range.end > block.inline_content().source.size()) return std::nullopt;
+            const auto value = inline_source_slice(block.inline_content(), node.range);
             if (std::ranges::any_of(value, [](char32_t ch) { return ch != U'a'; }))
                 return std::nullopt;
             reconstructed.append(value);
         }
-        if (reconstructed != block.inline_content.source) return std::nullopt;
+        if (reconstructed != block.inline_content().source) return std::nullopt;
         return cps_to_utf8(reconstructed);
     };
 
@@ -89,7 +89,7 @@ inline bool pathological_inline_sources_lossless(const BlockNode& root, std::siz
         const auto* block = blocks.back();
         blocks.pop_back();
         if (is_editable_block_owner(block->kind)) {
-            const auto& document = block->inline_content;
+            const auto& document = block->inline_content();
             if (flatten_tokens(document.tree, document.source) != document.source
                 || serialize_lossless(document.tree, document.source) != document.source)
                 return false;

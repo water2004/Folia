@@ -61,8 +61,8 @@ suite editor_tree_history_tests = [] {
                 else {
                     expect(fatal(tree_edit.kind == DocumentTreeEditKind::UpdatePayload));
                     expect(fatal(tree_edit.before.children.empty() && tree_edit.after.children.empty()));
-                    expect(fatal(tree_edit.before.inline_content.source.empty()
-                        && tree_edit.after.inline_content.source.empty()));
+                    expect(fatal(tree_edit.before.inline_content().source.empty()
+                        && tree_edit.after.inline_content().source.empty()));
                 }
             }
         }
@@ -133,7 +133,7 @@ suite editor_tree_history_tests = [] {
     const auto& list = at_end.document().root.children.front();
     expect(fatal(bool(list.kind == BlockKind::List)));
     expect(fatal(bool(list.children.size() == 2u)));
-    expect(fatal(bool(list.children.back().children.front().inline_content.source.empty())));
+    expect(fatal(bool(list.children.back().children.front().inline_content().source.empty())));
     expect(fatal(bool(at_end.undo())));
     expect(fatal(bool(at_end.markdown_utf8() == "- ab")));
     expect(fatal(bool(at_end.selection() == before)));
@@ -190,7 +190,7 @@ suite editor_tree_history_tests = [] {
     Editor list("- one\n- ");
     const BlockNode* empty_item = nullptr;
     walk_blocks(list.document().root, [&](const BlockNode& block) {
-        if (!empty_item && block.kind == BlockKind::Paragraph && block.inline_content.source.empty()) {
+        if (!empty_item && block.kind == BlockKind::Paragraph && block.inline_content().source.empty()) {
             empty_item = &block;
         }
     });
@@ -203,7 +203,7 @@ suite editor_tree_history_tests = [] {
         Editor split_list(markdown);
         const BlockNode* empty = nullptr;
         walk_blocks(split_list.document().root, [&](const BlockNode& block) {
-            if (!empty && block.kind == BlockKind::Paragraph && block.inline_content.source.empty()) {
+            if (!empty && block.kind == BlockKind::Paragraph && block.inline_content().source.empty()) {
                 empty = &block;
             }
         });
@@ -222,7 +222,7 @@ suite editor_tree_history_tests = [] {
     expect(fatal(bool(initial_quote && initial_quote->children.size() == 3u)));
     const BlockNode* empty_quote_line = nullptr;
     walk_blocks(quote.document().root, [&](const BlockNode& block) {
-        if (!empty_quote_line && block.kind == BlockKind::Paragraph && block.inline_content.source.empty()) {
+        if (!empty_quote_line && block.kind == BlockKind::Paragraph && block.inline_content().source.empty()) {
             empty_quote_line = &block;
         }
     });
@@ -239,7 +239,7 @@ suite editor_tree_history_tests = [] {
     Editor nested_quote("- item\n  > ");
     const BlockNode* nested_empty = nullptr;
     walk_blocks(nested_quote.document().root, [&](const BlockNode& block) {
-        if (!nested_empty && block.kind == BlockKind::Paragraph && block.inline_content.source.empty()) {
+        if (!nested_empty && block.kind == BlockKind::Paragraph && block.inline_content().source.empty()) {
             nested_empty = &block;
         }
     });

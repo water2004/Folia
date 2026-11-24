@@ -51,7 +51,7 @@ suite editor_paste_tests = [] {
     expect(counts.full_document_parses == 0_u && counts.full_document_serializations == 0_u);
     expect(document.revision == revision && document.next_node_id == next_id);
     expect(editor.selection() == selection);
-    expect(first_text(editor).inline_content.source == U"$$");
+    expect(first_text(editor).inline_content().source == U"$$");
     expect(plan->blocks.size() == 2_u);
 };
 
@@ -76,7 +76,7 @@ suite editor_paste_tests = [] {
         expect(fatal(blocks.size() == 2_u));
         expect(blocks.front().kind == (opening == std::u32string_view{U"$$"} ? BlockKind::MathBlock : BlockKind::CodeBlock));
         expect(blocks.back().kind == BlockKind::Paragraph);
-        expect(blocks.back().inline_content.source == U"Following paragraph.");
+        expect(blocks.back().inline_content().source == U"Following paragraph.");
         auto saved = editor.markdown_utf8();
         expect(saved == before + cps_to_utf8(addition));
         Editor reloaded(saved);
@@ -104,7 +104,7 @@ suite editor_paste_tests = [] {
     expect(fatal(blocks.size() == 2_u));
     expect(blocks.front().kind == BlockKind::MathBlock);
     expect(block_source_content(blocks.front().block_source) == U"x+y");
-    expect(blocks.back().inline_content.source == U"After.");
+    expect(blocks.back().inline_content().source == U"After.");
     auto saved = editor.markdown_utf8(); auto after = editor.selection();
     expect(saved == "$$\nx+y\n$$\n\nAfter.");
     expect(editor.undo()); expect(editor.markdown_utf8() == "$$\nx"); expect(editor.selection() == selection);
@@ -267,8 +267,8 @@ suite editor_paste_tests = [] {
     const auto& bullet_list = bullet.document().root.children.front();
     expect(fatal(bool(bullet_list.kind == BlockKind::List)));
     expect(fatal(bool(bullet_list.children.size() == 2u)));
-    expect(fatal(bool(bullet_list.children[0].children[0].inline_content.source == U"ax")));
-    expect(fatal(bool(bullet_list.children[1].children[0].inline_content.source == U"y")));
+    expect(fatal(bool(bullet_list.children[0].children[0].inline_content().source == U"ax")));
+    expect(fatal(bool(bullet_list.children[1].children[0].inline_content().source == U"y")));
     expect(fatal(bool(bullet.markdown_utf8() == "- ax\n- y")));
     const auto bullet_after = bullet.selection();
     expect(fatal(bool(bullet.undo())));
@@ -284,9 +284,9 @@ suite editor_paste_tests = [] {
     const auto& task_list = task.document().root.children.front();
     expect(fatal(bool(task_list.kind == BlockKind::TaskList)));
     expect(fatal(bool(task_list.children.size() == 3u)));
-    expect(fatal(bool(task_list.children[0].children[0].inline_content.source == U"a")));
-    expect(fatal(bool(task_list.children[1].children[0].inline_content.source == U"x")));
-    expect(fatal(bool(task_list.children[2].children[0].inline_content.source == U"y")));
+    expect(fatal(bool(task_list.children[0].children[0].inline_content().source == U"a")));
+    expect(fatal(bool(task_list.children[1].children[0].inline_content().source == U"x")));
+    expect(fatal(bool(task_list.children[2].children[0].inline_content().source == U"y")));
 
     Editor nested("> - a");
     nested.set_selection(caret(first_text(nested), 1));
@@ -295,8 +295,8 @@ suite editor_paste_tests = [] {
     const auto& nested_list = nested.document().root.children.front().children.front();
     expect(fatal(bool(nested_list.kind == BlockKind::List)));
     expect(fatal(bool(nested_list.children.size() == 2u)));
-    expect(fatal(bool(nested_list.children[0].children[0].inline_content.source == U"ax")));
-    expect(fatal(bool(nested_list.children[1].children[0].inline_content.source == U"y")));
+    expect(fatal(bool(nested_list.children[0].children[0].inline_content().source == U"ax")));
+    expect(fatal(bool(nested_list.children[1].children[0].inline_content().source == U"y")));
 };
 
 "structural_paste_uses_the_nearest_recursive_container_context"_test = [] {
@@ -314,9 +314,9 @@ suite editor_paste_tests = [] {
     expect(fatal(bool(callout_title_block(result) == nullptr))) << callout.markdown_utf8();
     expect(fatal(bool(result.children.size() == 2u))) << callout.markdown_utf8();
     expect(fatal(bool(result.children.front().kind == BlockKind::BlockQuote))) << callout.markdown_utf8();
-    expect(fatal(bool(result.children.front().children.front().inline_content.source
+    expect(fatal(bool(result.children.front().children.front().inline_content().source
         == U"nestedtitle"))) << callout.markdown_utf8();
-    expect(fatal(bool(result.children.back().inline_content.source == U"body"))) << callout.markdown_utf8();
+    expect(fatal(bool(result.children.back().inline_content().source == U"body"))) << callout.markdown_utf8();
     expect(fatal(bool(validate_document(callout.document()).empty()))) << callout.markdown_utf8();
     expect(fatal(bool(callout.undo())));
     expect(fatal(bool(callout.markdown_utf8() == "> [!NOTE] title\n> body")));

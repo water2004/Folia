@@ -128,7 +128,7 @@ suite pathological_container_streaming_tests = [] {
         auto* paragraph = first_paragraph(source_changed.document.root);
         expect(paragraph != nullptr);
         if (paragraph) {
-            paragraph->inline_content.source = U"b";
+            paragraph->edit_inline_content().source = U"b";
             expect(!folia::test::gfm_capacity::project_pathological_containers(
                 source_changed.document.root, ContainerFixture::NestedBlockquotes).has_value());
         }
@@ -136,8 +136,8 @@ suite pathological_container_streaming_tests = [] {
         auto cst_changed = parse_text(1, "> a", folia::test::commonmark::dialect());
         paragraph = first_paragraph(cst_changed.document.root);
         expect(paragraph != nullptr);
-        if (paragraph && !paragraph->inline_content.tree.nodes.empty()) {
-            paragraph->inline_content.tree.nodes.front().kind = InlineCstKind::Emphasis;
+        if (paragraph && !paragraph->inline_content().tree.nodes.empty()) {
+            paragraph->edit_inline_content().tree.nodes.front().kind = InlineCstKind::Emphasis;
             expect(!folia::test::gfm_capacity::project_pathological_containers(
                 cst_changed.document.root, ContainerFixture::NestedBlockquotes).has_value());
         }

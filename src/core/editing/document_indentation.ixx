@@ -23,7 +23,7 @@ namespace document_indentation_detail {
 
 inline bool indentation_reparse_candidate(const BlockNode& owner) {
     return ((owner.kind == BlockKind::Paragraph || owner.kind == BlockKind::Heading)
-            && owner.inline_content.syntax_mode == InlineSyntaxMode::Markdown)
+            && owner.inline_content().syntax_mode == InlineSyntaxMode::Markdown)
         || (owner.kind == BlockKind::CodeBlock
             && owner.block_source.tree().kind == BlockSourceKind::IndentedCode);
 }
@@ -77,7 +77,7 @@ inline bool reclassify_owners(EditorDocument& document, std::span<const NodeId> 
                 const auto& candidate = blocks[index];
                 if (current.kind != candidate.kind) return true;
                 if (current.kind == BlockKind::Paragraph || current.kind == BlockKind::Heading) {
-                    if (current.inline_content.source != candidate.inline_content.source) return true;
+                    if (current.inline_content().source != candidate.inline_content().source) return true;
                 } else if (current.block_source.source() != candidate.block_source.source()
                     || current.block_source.tree().kind != candidate.block_source.tree().kind) return true;
             }
@@ -93,7 +93,7 @@ inline bool reclassify_owners(EditorDocument& document, std::span<const NodeId> 
                     &SerializedBlockRange::owner);
                 if (range != previous.blocks.end()) {
                     if (position.source_offset == 0) return std::optional{range->begin};
-                    if (position.source_offset == block->inline_content.source.size()) return std::optional{range->end};
+                    if (position.source_offset == block->inline_content().source.size()) return std::optional{range->end};
                 }
             }
             return serialized_offset_for_source_position(previous, position);
@@ -139,11 +139,11 @@ inline std::optional<DocumentTransaction> document_indent_text(
     if (!backward && selection.is_caret()) {
         const auto* owner = find_document_block(document, selection.active.container_id);
         const auto heading_line_start = owner && owner->kind == BlockKind::Heading
-            && owner->inline_content.syntax_mode == InlineSyntaxMode::Markdown
-            && document_navigation_detail::physical_line_range(owner->inline_content.source,
+            && owner->inline_content().syntax_mode == InlineSyntaxMode::Markdown
+            && document_navigation_detail::physical_line_range(owner->inline_content().source,
                 selection.active.source_offset).start == selection.active.source_offset;
         if (!owner || (owner->kind != BlockKind::Paragraph && !heading_line_start)
-            || owner->inline_content.syntax_mode != InlineSyntaxMode::Markdown)
+            || owner->inline_content().syntax_mode != InlineSyntaxMode::Markdown)
             return document_insert_text(document, selection, U"    ");
     }
     auto first = document_editable_order_position(document, selection.anchor.container_id);

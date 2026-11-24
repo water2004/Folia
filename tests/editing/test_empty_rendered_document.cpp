@@ -80,7 +80,7 @@ suite empty_rendered_document_tests = [] {
         expect(after.starts_with(before)) << source << static_cast<int>(kind) << after;
         const auto* owner = find_document_block(editor.document(), editor.selection().active.container_id);
         expect(fatal(owner && owner->kind == BlockKind::Paragraph));
-        expect(bool(owner->inline_content.source == (kind == CommandKind::InsertText ? U"next" : U"")));
+        expect(bool(owner->inline_content().source == (kind == CommandKind::InsertText ? U"next" : U"")));
         expect_valid_empty_html_editor(editor);
         Editor reloaded(after);
         expect(reloaded.markdown_utf8() == after);

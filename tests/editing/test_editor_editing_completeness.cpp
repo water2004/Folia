@@ -67,7 +67,7 @@ suite editor_editing_completeness = [] {
         expect(fatal(editor.document().root.children.size() == 2_u));
         const auto& paragraph = editor.document().root.children[offset == 0 ? 0 : 1];
         expect(paragraph.kind == BlockKind::Paragraph);
-        expect(bool(paragraph.inline_content.source == U"继续"));
+        expect(bool(paragraph.inline_content().source == U"继续"));
         expect(editor.selection().active.container_id == paragraph.id);
         complete_history(editor, before, selected);
     }
@@ -125,10 +125,10 @@ suite editor_editing_completeness = [] {
     editor.set_selection(selected);
     const auto before = editor.markdown_utf8();
     expect(fatal(editor.execute_command({.kind = CommandKind::InsertSoftBreak})));
-    expect(bool(find_document_block(editor.document(), id)->inline_content.source == U"a<br>b"));
+    expect(bool(find_document_block(editor.document(), id)->inline_content().source == U"a<br>b"));
     complete_history(editor, before, selected);
     expect(fatal(editor.execute_command({.kind = CommandKind::DeleteBackward})));
-    expect(bool(find_document_block(editor.document(), id)->inline_content.source == U"ab"));
+    expect(bool(find_document_block(editor.document(), id)->inline_content().source == U"ab"));
     complete_invariants(editor);
 };
 
@@ -159,12 +159,12 @@ suite editor_editing_completeness = [] {
         const auto before = editor.markdown_utf8();
         expect(fatal(editor.execute_command({.kind = paste ? CommandKind::Paste : CommandKind::InsertText, .text = U"\\"})));
         const auto* cell = find_document_block(editor.document(), id);
-        expect(bool(inline_visible_text(cell->inline_content) == U"\\|"));
+        expect(bool(inline_visible_text(cell->inline_content()) == U"\\|"));
         const auto saved = editor.markdown_utf8();
         Editor reloaded(saved);
         const auto& row = reloaded.document().root.children[0].children[1];
         expect(fatal(row.children.size() == 1_u));
-        expect(bool(inline_visible_text(row.children[0].inline_content) == U"\\|"));
+        expect(bool(inline_visible_text(row.children[0].inline_content()) == U"\\|"));
         complete_history(editor, before, selected);
     }
 };
@@ -182,7 +182,7 @@ suite editor_editing_completeness = [] {
         command.alt = U"label] text";
         command.title = U"a \"quoted\" title";
         expect(fatal(editor.execute_command(command)));
-        const auto& source = find_document_block(editor.document(), id)->inline_content;
+        const auto& source = find_document_block(editor.document(), id)->inline_content();
         const auto wanted = image ? InlineCstKind::Image : InlineCstKind::Link;
         const auto node = std::ranges::find(source.tree.nodes, wanted, &InlineCstNode::kind);
         expect(fatal(node != source.tree.nodes.end()));
@@ -209,7 +209,7 @@ suite editor_editing_completeness = [] {
         editor.set_selection(selected);
         const auto before = editor.markdown_utf8();
         expect(fatal(editor.execute_command({.kind = CommandKind::ToggleInlineCode})));
-        const auto& source = find_document_block(editor.document(), id)->inline_content;
+        const auto& source = find_document_block(editor.document(), id)->inline_content();
         expect(fatal(source.tree.nodes.size() == 1_u));
         expect(source.tree.nodes.front().kind == InlineCstKind::CodeSpan);
         expect(bool(source.source.substr(editor.selection().anchor.source_offset,
@@ -231,7 +231,7 @@ suite editor_editing_completeness = [] {
         command.alt = U"a\"b";
         command.title = U"title\"quoted";
         expect(fatal(editor.execute_command(command)));
-        const auto& source = find_document_block(editor.document(), id)->inline_content;
+        const auto& source = find_document_block(editor.document(), id)->inline_content();
         const auto node = std::ranges::find_if(source.tree.nodes, [image](const InlineCstNode& value) {
             return value.kind == InlineCstKind::HtmlElement
                 && value.semantics().html_tag == (image ? "img" : "a");

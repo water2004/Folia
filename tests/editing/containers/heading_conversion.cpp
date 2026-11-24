@@ -67,11 +67,11 @@ suite editing_containers_heading_conversion_tests = [] {
             const BlockNode* original = nullptr;
             walk_blocks(editor.document().root, [&](const BlockNode& block) {
                 if (block.kind == BlockKind::Paragraph
-                    && block.inline_content.source.starts_with(U"one")) original = &block;
+                    && block.inline_content().source.starts_with(U"one")) original = &block;
             });
             expect(fatal(original != nullptr)) << markdown;
             const auto original_id = original->id;
-            const auto last_start = original->inline_content.source.rfind(U"three");
+            const auto last_start = original->inline_content().source.rfind(U"three");
             expect(fatal(last_start != std::u32string::npos));
             const auto old_path = document_block_path(editor.document(), original_id);
             expect(fatal(old_path.has_value()));
@@ -91,9 +91,9 @@ suite editing_containers_heading_conversion_tests = [] {
             });
             expect(fatal(headings.size() == 3u)) << editor.markdown_utf8();
             expect(headings[0]->id == original_id);
-            expect(bool(headings[0]->inline_content.source == U"one"));
-            expect(bool(headings[1]->inline_content.source == U"two"));
-            expect(bool(headings[2]->inline_content.source == U"three"));
+            expect(bool(headings[0]->inline_content().source == U"one"));
+            expect(bool(headings[1]->inline_content().source == U"two"));
+            expect(bool(headings[2]->inline_content().source == U"three"));
             expect(editor.selection().anchor == selection.anchor);
             expect(editor.selection().active.container_id == headings[2]->id);
             expect(editor.selection().active.source_offset == 2u);
@@ -117,7 +117,7 @@ suite editing_containers_heading_conversion_tests = [] {
     {
         Editor editor("one  \r\ntwo\\\nthree");
         const auto& block = first_text(editor);
-        const auto selection = caret(block, block.inline_content.source.size());
+        const auto selection = caret(block, block.inline_content().source.size());
         editor.set_selection(selection);
         const auto before = editor.markdown_utf8();
         expect(fatal(editor.execute_document_set_heading(selection, 2).has_value()));
@@ -137,7 +137,7 @@ suite editing_containers_heading_conversion_tests = [] {
         expect(fatal(editor.document().root.children.size() == 2u));
         const auto& empty = editor.document().root.children.back();
         expect(empty.kind == BlockKind::Heading);
-        expect(empty.inline_content.source.empty());
+        expect(empty.inline_content().source.empty());
         expect(editor.selection().active.container_id == empty.id);
         expect(editor.selection().active.source_offset == 0u);
         gap_history(editor, before, selection);
@@ -148,7 +148,7 @@ suite editing_containers_heading_conversion_tests = [] {
         const auto before = editor.markdown_utf8();
         expect(fatal(editor.execute_document_set_heading(selection, 6).has_value()));
         expect(editor.document().root.children.front().kind == BlockKind::Heading);
-        expect(editor.document().root.children.front().inline_content.source.empty());
+        expect(editor.document().root.children.front().inline_content().source.empty());
         gap_history(editor, before, selection);
     }
 };
@@ -203,7 +203,7 @@ suite editing_containers_heading_conversion_tests = [] {
         expect(fatal(editor.execute_document_set_heading(selection, 2).has_value()));
         const auto& after = editor.document().root.children.front();
         expect(after.children.front().kind == BlockKind::CalloutTitle);
-        expect(bool(after.children.front().inline_content.source == U"Title"));
+        expect(bool(after.children.front().inline_content().source == U"Title"));
         expect(after.children.back().kind == BlockKind::Heading);
         gap_history(editor, before, selection);
     }
@@ -218,13 +218,13 @@ suite editing_containers_heading_conversion_tests = [] {
         const auto* heading = find_document_block(editor.document(), selection.active.container_id);
         expect(fatal(heading != nullptr));
         expect(heading->kind == BlockKind::Heading);
-        expect(bool(heading->inline_content.source == U"one\ntwo"));
+        expect(bool(heading->inline_content().source == U"one\ntwo"));
         Editor reloaded(editor.markdown_utf8());
         std::size_t headings = 0;
         walk_blocks(reloaded.document().root, [&](const BlockNode& block) {
             if (block.kind == BlockKind::Heading) {
                 ++headings;
-                expect(bool(block.inline_content.source == U"one\ntwo"));
+                expect(bool(block.inline_content().source == U"one\ntwo"));
             }
         });
         expect(headings == 1u) << editor.markdown_utf8();
@@ -241,7 +241,7 @@ suite editing_containers_heading_conversion_tests = [] {
         expect(!document_set_heading(document, invalid, 2).has_value());
         expect(document.root.children.size() == 1u);
         expect(document.root.children.front().kind == BlockKind::Paragraph);
-        expect(bool(document.root.children.front().inline_content.source == U"one\ntwo"));
+        expect(bool(document.root.children.front().inline_content().source == U"one\ntwo"));
     }
     Editor table("| A | B |\n|---|---|\n| one | two |");
     const auto& cell = table.document().root.children.front().children.front().children.front();
@@ -264,7 +264,7 @@ suite editing_containers_heading_conversion_tests = [] {
     const auto& after = editor.document().root.children.front();
     expect(after.text_special().level == 4u);
     expect(after.text_special().slug == slug);
-    expect(bool(after.inline_content.source == U"existing title"));
+    expect(bool(after.inline_content().source == U"existing title"));
     gap_history(editor, before, selection);
 };
 

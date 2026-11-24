@@ -16,7 +16,7 @@ import folia.markdown.utf;
 export namespace folia::serializer_detail {
 
 inline bool serializer_empty_paragraph(BlockNode const& block) {
-    return block.kind == BlockKind::Paragraph && block.inline_content.source.empty();
+    return block.kind == BlockKind::Paragraph && block.inline_content().source.empty();
 }
 
 inline std::u32string serializer_html_escape_attribute(std::u32string_view value) {
@@ -408,14 +408,14 @@ private:
         switch (block.kind) {
             case BK::Paragraph:
                 if (block.has_html_element_provenance()) {
-                    wrap_semantic_html(block, "p", std::nullopt, &block.inline_content.source);
-                } else writer_.source_span(block.id, block.inline_content.source);
+                    wrap_semantic_html(block, "p", std::nullopt, &block.inline_content().source);
+                } else writer_.source_span(block.id, block.inline_content().source);
                 return;
             case BK::Heading: {
                 const auto level = (std::clamp)(block.text_special().level,
                     std::uint8_t{1}, std::uint8_t{6});
                 wrap_semantic_html(block, std::string{"h"} + static_cast<char>('0' + level),
-                    std::nullopt, &block.inline_content.source);
+                    std::nullopt, &block.inline_content().source);
                 return;
             }
             case BK::HtmlContainer:
@@ -436,7 +436,7 @@ private:
                 wrap_semantic_html(block, "tr", std::pair{true, block.table_special().table_header_row}); return;
             case BK::TableCell:
                 wrap_semantic_html(block, header_cell ? "th" : "td",
-                    std::nullopt, &block.inline_content.source); return;
+                    std::nullopt, &block.inline_content().source); return;
             case BK::ThematicBreak:
                 if (!block.html_special().opening_marker.empty()) {
                     writer_.generated_span(block.html_special().opening_marker);
@@ -450,7 +450,7 @@ private:
             case BK::Document:
                 push_blocks(block.children, 0, block.children.size(), true, false, false); return;
             case BK::CalloutTitle:
-                writer_.source_span(block.id, block.inline_content.source); return;
+                writer_.source_span(block.id, block.inline_content().source); return;
             case BK::ImageBlock: {
                 const auto& image = block.image_special();
                 auto value = U"<img src=\"" + serializer_html_escape_attribute(utf8_to_cps(image.src)) + U"\"";
@@ -466,7 +466,7 @@ private:
             case BK::Toc:
             case BK::Frontmatter:
             case BK::Extension:
-                writer_.source_span(block.id, block.inline_content.source); return;
+                writer_.source_span(block.id, block.inline_content().source); return;
         }
     }
 
@@ -481,7 +481,7 @@ private:
             const auto child_index = syntax.cell_owners.size() + index;
             if (row.children[child_index].id != syntax.implicit_cell_owners[index]
                 || row.children[child_index].kind != BlockKind::TableCell
-                || !row.children[child_index].inline_content.source.empty()) return false;
+                || !row.children[child_index].inline_content().source.empty()) return false;
         }
         return true;
     }
@@ -492,7 +492,7 @@ private:
             for (std::size_t index = 0; index < syntax->cell_owners.size(); ++index) {
                 writer_.generated_span(syntax->gaps[index]);
                 const auto& cell = row.children[index];
-                writer_.source_span(cell.id, cell.inline_content.source);
+                writer_.source_span(cell.id, cell.inline_content().source);
             }
             writer_.generated_span(syntax->gaps.back());
             return;
@@ -500,7 +500,7 @@ private:
         writer_.generated_span(U"|");
         for (const auto& cell : row.children) {
             writer_.generated_span(U" ");
-            writer_.source_span(cell.id, cell.inline_content.source);
+            writer_.source_span(cell.id, cell.inline_content().source);
             writer_.generated_span(U" |");
         }
     }
@@ -532,7 +532,7 @@ private:
             case BK::HtmlContainer:
                 push_blocks(block.children, 0, block.children.size(), false, false, true); return;
             case BK::Paragraph:
-                writer_.source_span(block.id, block.inline_content.source); return;
+                writer_.source_span(block.id, block.inline_content().source); return;
             case BK::Heading: {
                 const auto& special = block.text_special();
                 if (!special.opening_marker.empty() || !special.closing_marker.empty()) {
@@ -541,7 +541,7 @@ private:
                     writer_.generated_owned(std::u32string(
                         special.level == 0 ? 1 : special.level, U'#') + U" ");
                 }
-                writer_.source_span(block.id, block.inline_content.source);
+                writer_.source_span(block.id, block.inline_content().source);
                 writer_.generated_span(special.closing_marker);
                 return;
             }
@@ -585,9 +585,9 @@ private:
             case BK::TableRow:
                 emit_table_row(block); return;
             case BK::TableCell:
-                writer_.source_span(block.id, block.inline_content.source); return;
+                writer_.source_span(block.id, block.inline_content().source); return;
             case BK::ImageBlock:
-                writer_.atomic_source_span(block.id, block.inline_content.source); return;
+                writer_.atomic_source_span(block.id, block.inline_content().source); return;
             case BK::Callout: {
                 const auto& marker = block.text_special().opening_marker;
                 auto first = marker.empty()
@@ -597,7 +597,7 @@ private:
                 const auto* title = callout_title_block(block);
                 if (title) {
                     if (marker.empty()) writer_.generated_span(U" ");
-                    writer_.source_span(title->id, title->inline_content.source);
+                    writer_.source_span(title->id, title->inline_content().source);
                 }
                 const auto body_begin = callout_body_start(block);
                 if (body_begin < block.children.size()) {
@@ -686,7 +686,7 @@ private:
                 writer_.atomic_generated_span(block.id, utf8_to_cps(block.atomic_special().raw));
                 return;
             case BK::CalloutTitle:
-                writer_.source_span(block.id, block.inline_content.source); return;
+                writer_.source_span(block.id, block.inline_content().source); return;
             case BK::Extension:
                 writer_.atomic_generated_span(block.id,
                     U"[ext:" + utf8_to_cps(block.atomic_special().ext_name) + U"]");

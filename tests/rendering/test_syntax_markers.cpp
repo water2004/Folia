@@ -95,7 +95,7 @@ namespace { suite syntax_marker_tests = [] {
                 }
                 return count;
             };
-            std::size_t count = inline_count(inline_count, block.inline_content.tree.nodes);
+            std::size_t count = inline_count(inline_count, block.inline_content().tree.nodes);
             for (const auto& child : block.children) count += self(self, child);
             return count;
         };

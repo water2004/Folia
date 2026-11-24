@@ -88,7 +88,7 @@ suite inline_format_range_tests = [] {
         const auto first = format_owner(editor, U"alpha");
         const auto last = format_owner(editor, U"beta");
         expect(fatal(first.v != 0 && last.v != 0 && first != last)) << source;
-        const auto html = find_document_block(editor.document(), first)->inline_content.syntax_mode == InlineSyntaxMode::HtmlText;
+        const auto html = find_document_block(editor.document(), first)->inline_content().syntax_mode == InlineSyntaxMode::HtmlText;
         const auto before = editor.markdown_utf8();
         const auto before_selection = format_selection(first, 2, last, 2, reversed);
         editor.set_selection(before_selection);

@@ -44,7 +44,7 @@ suite editing_containers_list_structure_tests = [] {
             expect(fatal(chosen_item != nullptr));
             expect(fatal(chosen_item->children.size() == 2u)) << editor.markdown_utf8();
             expect(chosen_item->children.back().children.size() == 2u);
-            expect(bool(chosen_item->children.back().children.front().children.front().inline_content.source == U"after"));
+            expect(bool(chosen_item->children.back().children.front().children.front().inline_content().source == U"after"));
             Editor reloaded(editor.markdown_utf8());
             expect(bool(gap_text_order(reloaded.document()) == order)) << editor.markdown_utf8();
             const auto* reloaded_chosen = gap_text(reloaded, U"chosen");
@@ -269,7 +269,7 @@ suite editing_containers_list_structure_tests = [] {
         expect(list.children[1].children.size() == 1u);
         expect(fatal(list.children[2].children.size() == 2u));
         expect(list.children[2].children.back().children.size() == 1u);
-        expect(bool(list.children[2].children.back().children.front().children.front().inline_content.source == U"tail"));
+        expect(bool(list.children[2].children.back().children.front().children.front().inline_content().source == U"tail"));
         expect(bool(gap_text_order(editor.document()) == order));
         expect(editor.selection() == selection);
         gap_history(editor, before, selection);

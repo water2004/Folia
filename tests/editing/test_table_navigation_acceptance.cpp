@@ -82,13 +82,13 @@ suite table_navigation_acceptance_tests = [] {
         const auto* paragraph = find_document_block(editor.document(), editor.selection().active.container_id);
         expect(fatal(paragraph != nullptr));
         expect(paragraph->kind == BlockKind::Paragraph);
-        expect(paragraph->inline_content.source.empty());
+        expect(paragraph->inline_content().source.empty());
         const auto paragraph_path = *document_block_path(editor.document(), paragraph->id);
         expect(paragraph_path == table_path);
         ++table_path.back();
         expect(*document_block_path(editor.document(), table_id) == table_path);
         if (std::string_view(source).starts_with("<div>"))
-            expect(paragraph->inline_content.syntax_mode == InlineSyntaxMode::HtmlText);
+            expect(paragraph->inline_content().syntax_mode == InlineSyntaxMode::HtmlText);
         expect(validate_document(editor.document()).empty());
         expect(document_indexes_are_exact(editor.document()));
         const auto after = editor.markdown_utf8();

@@ -21,7 +21,7 @@ namespace { suite clipboard_boundary_gap_tests = [] {
         Editor editor(source);
         const auto& first = editor.document().root.children.front();
         const auto& last = editor.document().root.children.back();
-        editor.set_selection({{first.id, 0}, {last.id, last.inline_content.source.size()}});
+        editor.set_selection({{first.id, 0}, {last.id, last.inline_content().source.size()}});
         expect(bool(editor.selected_markdown_cps() == utf8_to_cps(source))) << source;
     }
 };
@@ -56,9 +56,9 @@ namespace { suite clipboard_boundary_gap_tests = [] {
         const auto& blocks = editor.document().root.children;
         expect(fatal(blocks.size() == 2_u));
         if (blocks.size() != 2) continue;
-        expect(blocks.front().inline_content.source.empty());
+        expect(blocks.front().inline_content().source.empty());
         const auto begin = TextPosition{blocks.front().id, 0};
-        const auto end = TextPosition{blocks.back().id, blocks.back().inline_content.source.size()};
+        const auto end = TextPosition{blocks.back().id, blocks.back().inline_content().source.size()};
         editor.set_selection(reversed ? TextSelection{end, begin} : TextSelection{begin, end});
         const auto expected = with_text ? U"\ntail" : U"\n";
         expect(bool(editor.selected_markdown_cps() == expected));
@@ -89,10 +89,10 @@ namespace { suite clipboard_boundary_gap_tests = [] {
         expect(fatal(blocks.size() == 2_u));
         if (blocks.size() != 2) continue;
         expect(blocks.front().kind == BlockKind::Heading);
-        expect(blocks.front().inline_content.source == U"headX");
+        expect(blocks.front().inline_content().source == U"headX");
         expect(blocks.back().kind == BlockKind::Paragraph);
         const auto multiline = std::u32string_view(clipboard).find(U'Y') != std::u32string_view::npos;
-        expect(bool(blocks.back().inline_content.source == (multiline ? U"Y\n-tail" : U"-tail")));
+        expect(bool(blocks.back().inline_content().source == (multiline ? U"Y\n-tail" : U"-tail")));
         expect(editor.selection().active.container_id == blocks.back().id);
         expect(editor.selection().active.source_offset == (multiline ? 2u : 0u));
         const auto after = editor.markdown_utf8();

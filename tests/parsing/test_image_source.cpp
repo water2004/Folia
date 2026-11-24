@@ -35,7 +35,7 @@ suite image_source_roundtrip_tests = [] {
             const auto line_end = markdown.find_first_of("\r\n");
             const auto image_line = markdown.substr(0, line_end);
             const auto expected_inline = utf8_to_cps(image_line);
-            expect(fatal(found->inline_content.source == expected_inline));
+            expect(fatal(found->inline_content().source == expected_inline));
             expect(fatal(serialize_markdown(parsed.document) == markdown));
         }
     };

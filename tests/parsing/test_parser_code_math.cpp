@@ -52,7 +52,7 @@ suite code_math_leaf_parser = [] {
         expect(math.block_source.source() == U"$$x$$");
         const auto& suffix = parsed.document.root.children[1];
         expect(suffix.kind == BlockKind::Paragraph);
-        expect(suffix.inline_content.source == U"tail");
+        expect(suffix.inline_content().source == U"tail");
         expect(serialize_markdown(parsed.document) == input);
     };
 
@@ -63,7 +63,7 @@ suite code_math_leaf_parser = [] {
         if (parsed.document.root.children.size() != 2u) return;
         expect(parsed.document.root.children[0].kind == BlockKind::MathBlock);
         expect(parsed.document.root.children[0].block_source.source() == U"\\[x\\]");
-        expect(parsed.document.root.children[1].inline_content.source == U"tail");
+        expect(parsed.document.root.children[1].inline_content().source == U"tail");
         expect(serialize_markdown(parsed.document) == input);
     };
 

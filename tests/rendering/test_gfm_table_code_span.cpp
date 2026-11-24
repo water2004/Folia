@@ -31,12 +31,12 @@ suite gfm_table_code_span_tests = [] {
     const auto& cell = table.children[1].children.front();
 
     expect(fatal(cell.kind == BlockKind::TableCell));
-    expect(fatal(cell.inline_content.syntax_mode == InlineSyntaxMode::TableCell));
-    expect(fatal(cell.inline_content.source == U"`\\|`"));
-    expect(fatal(flatten_tokens(cell.inline_content.tree, cell.inline_content.source)
-        == cell.inline_content.source));
+    expect(fatal(cell.inline_content().syntax_mode == InlineSyntaxMode::TableCell));
+    expect(fatal(cell.inline_content().source == U"`\\|`"));
+    expect(fatal(flatten_tokens(cell.inline_content().tree, cell.inline_content().source)
+        == cell.inline_content().source));
     expect(fatal(serialize_markdown(parsed.document) == markdown));
-    expect(fatal(inline_visible_text(cell.inline_content) == U"|"));
+    expect(fatal(inline_visible_text(cell.inline_content()) == U"|"));
 
     const auto projection = folia::test::commonmark::project(parsed.document.root);
     expect(fatal(projection.projected_html.find("<code>|</code>") != std::string::npos));
@@ -67,7 +67,7 @@ suite gfm_table_code_span_tests = [] {
     expect(fatal(has_hidden_escape));
 
     const auto paragraph = parse_text(2, "`\\|`");
-    expect(fatal(inline_visible_text(paragraph.document.root.children.front().inline_content)
+    expect(fatal(inline_visible_text(paragraph.document.root.children.front().inline_content())
         == U"\\|"));
 };
 

@@ -59,7 +59,7 @@ suite editor_list_tightness_tests = [] {
 
     const BlockNode* empty_paragraph = nullptr;
     for (const auto& child : list->children[1].children) {
-        if (child.kind == BlockKind::Paragraph && child.inline_content.source.empty()) {
+        if (child.kind == BlockKind::Paragraph && child.inline_content().source.empty()) {
             empty_paragraph = &child;
             break;
         }

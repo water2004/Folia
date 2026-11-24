@@ -68,14 +68,14 @@ suite image_block_promotion_candidate_tests = [] {
         constexpr std::string_view source = "![alt](image.png \"Title\")\n";
         auto block = parsed_paragraph(std::string(source));
         const auto before_id = block.id;
-        const auto before_source = block.inline_content.source;
-        const auto before_tree_nodes = block.inline_content.tree.nodes.size();
+        const auto before_source = block.inline_content().source;
+        const auto before_tree_nodes = block.inline_content().tree.nodes.size();
 
         expect(promote_image_paragraph(block));
         expect(block.kind == BlockKind::ImageBlock);
         expect(block.id == before_id);
-        expect(block.inline_content.source == before_source);
-        expect(block.inline_content.tree.nodes.size() == before_tree_nodes);
+        expect(block.inline_content().source == before_source);
+        expect(block.inline_content().tree.nodes.size() == before_tree_nodes);
         expect(block.image_special().src == "image.png");
         expect(block.image_special().image_alt == "alt");
         expect(block.image_special().image_title == std::optional<std::string>{"Title"});
@@ -95,7 +95,7 @@ suite image_block_promotion_candidate_tests = [] {
         auto block = parsed_paragraph(
             "[![alt](image.png \"image title\")]"
             "(https://example.test/target)");
-        const auto source = block.inline_content.source;
+        const auto source = block.inline_content().source;
         expect(promote_image_paragraph(block));
         expect(block.kind == BlockKind::ImageBlock);
         expect(block.image_special().src == "image.png");
@@ -123,29 +123,29 @@ suite image_block_promotion_candidate_tests = [] {
                 std::string("![alt]("),
             }) {
             auto block = parsed_paragraph(source);
-            const auto before = block.inline_content.source;
+            const auto before = block.inline_content().source;
             expect(!promote_image_paragraph(block));
             expect(block.kind == BlockKind::Paragraph);
-            expect(block.inline_content.source == before);
+            expect(block.inline_content().source == before);
             expect(serialize_markdown(document_with(std::move(block))) == source);
         }
     };
 
     "a_multiline_sole_image_stays_an_editable_paragraph"_test = [] {
         auto block = parsed_paragraph("![alt](image.png)");
-        block.inline_content.source = U"![alt\ntext](image.png)";
-        block.inline_content.tree = parse_inline(
-            block.inline_content.source, InlineParseContext{});
-        expect(block.inline_content.tree.nodes.size() == 1u);
-        if (block.inline_content.tree.nodes.size() != 1) return;
-        expect(block.inline_content.tree.nodes.front().kind == InlineCstKind::Image);
-        const auto before_source = block.inline_content.source;
+        block.edit_inline_content().source = U"![alt\ntext](image.png)";
+        block.edit_inline_content().tree = parse_inline(
+            block.inline_content().source, InlineParseContext{});
+        expect(block.inline_content().tree.nodes.size() == 1u);
+        if (block.inline_content().tree.nodes.size() != 1) return;
+        expect(block.inline_content().tree.nodes.front().kind == InlineCstKind::Image);
+        const auto before_source = block.inline_content().source;
         const auto before_flattened = flatten_tokens(
-            block.inline_content.tree, block.inline_content.source);
+            block.inline_content().tree, block.inline_content().source);
         expect(!promote_image_paragraph(block));
         expect(block.kind == BlockKind::Paragraph);
-        expect(block.inline_content.source == before_source);
-        expect(flatten_tokens(block.inline_content.tree, block.inline_content.source)
+        expect(block.inline_content().source == before_source);
+        expect(flatten_tokens(block.inline_content().tree, block.inline_content().source)
             == before_flattened);
         expect(serialize_markdown(document_with(BlockNode(block)))
             == cps_to_utf8(before_source));
@@ -159,10 +159,10 @@ suite image_block_promotion_candidate_tests = [] {
         auto paragraph = parsed_paragraph("![x](u)");
         BlockNode heading = std::move(paragraph);
         heading.kind = BlockKind::Heading;
-        const auto before_source = heading.inline_content.source;
+        const auto before_source = heading.inline_content().source;
         expect(!promote_image_paragraph(heading));
         expect(heading.kind == BlockKind::Heading);
-        expect(heading.inline_content.source == before_source);
+        expect(heading.inline_content().source == before_source);
     };
 
     "raw_html_image_maker_builds_semantics_from_the_existing_html_cst"_test = [] {

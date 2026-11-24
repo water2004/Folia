@@ -9,10 +9,10 @@ std::string patch_document_state(const EditorDocument& document) {
     walk_blocks(document.root,[&](const BlockNode& block) {
         out<<block.id.v<<':'<<int(block.kind)<<':'<<block.children.size()<<':';
         out<<block.separator_before.has_value();if (block.separator_before) text(*block.separator_before);
-        text(block.inline_content.source);out<<int(block.inline_content.syntax_mode);
-        for (const auto& token:block.inline_content.tree.tokens) out<<':'<<token.packed_end_and_kind;
+        text(block.inline_content().source);out<<int(block.inline_content().syntax_mode);
+        for (const auto& token:block.inline_content().tree.tokens) out<<':'<<token.packed_end_and_kind;
         std::vector<const InlineCstNode*> pending;
-        for (auto i=block.inline_content.tree.nodes.size();i>0;--i) pending.push_back(&block.inline_content.tree.nodes[i-1]);
+        for (auto i=block.inline_content().tree.nodes.size();i>0;--i) pending.push_back(&block.inline_content().tree.nodes[i-1]);
         while (!pending.empty()) {
             const auto* node=pending.back();pending.pop_back();
             out<<'['<<node->id.v<<':'<<int(node->kind)<<':'<<int(node->status)<<':'<<node->range.start<<':'<<node->range.end;

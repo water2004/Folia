@@ -33,7 +33,7 @@ std::optional<std::u32string> nested_quote_paragraph(const BlockVec& blocks) {
     if (inner_quote.children.size() != 1 || inner_quote.children.front().kind != BlockKind::Paragraph) {
         return std::nullopt;
     }
-    return inner_quote.children.front().inline_content.source;
+    return inner_quote.children.front().inline_content().source;
 }
 
 bool contains_kind(const BlockNode& block, BlockKind kind) {
@@ -139,7 +139,7 @@ suite parser_nested_lazy_continuation_tests = [] {
                     expect(fatal(bool(inner_quote.kind == BlockKind::BlockQuote)));
                     expect(fatal(bool(inner_quote.children.size() == 1u)));
                     if (inner_quote.children.size() == 1) {
-                        expect(fatal(bool(inner_quote.children.front().inline_content.source
+                        expect(fatal(bool(inner_quote.children.front().inline_content().source
                             == U"Blockquote\ncontinued here.")));
                     }
                 }
@@ -160,7 +160,7 @@ suite parser_nested_lazy_continuation_tests = [] {
             expect(fatal(bool(list.children.size() == 1u)));
             if (list.children.size() == 1 && list.children.front().children.size() == 1) {
                 expect(fatal(bool(list.children.front().children.front().kind == BlockKind::Paragraph)));
-                expect(fatal(bool(list.children.front().children.front().inline_content.source
+                expect(fatal(bool(list.children.front().children.front().inline_content().source
                     == U"[ ] > Blockquote\ncontinued here.")));
             }
         }

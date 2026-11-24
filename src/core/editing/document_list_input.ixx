@@ -80,8 +80,8 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> upgrade_task_item(
     document_edit_detail::NodeAllocator& allocator,
     BlockNode& leaf) {
     if (leaf.kind != BlockKind::Paragraph || target.source_offset != 4
-        || leaf.inline_content.source.size() < 4) return std::nullopt;
-    const auto prefix = leaf.inline_content.source.substr(0, 4);
+        || leaf.inline_content().source.size() < 4) return std::nullopt;
+    const auto prefix = leaf.inline_content().source.substr(0, 4);
     if (prefix[0] != U'[' || (!horizontal_space(prefix[1]) && prefix[1] != U'x' && prefix[1] != U'X')
         || prefix[2] != U']' || !horizontal_space(prefix[3])) return std::nullopt;
     auto context = direct_list_context(document, target.container_id);
@@ -265,7 +265,7 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> exit_empty_list_it
     if (!context) return std::nullopt;
     auto* leaf = find_document_block(document, position.container_id);
     auto* list = block_at_path(document.root, context->list_path);
-    if (!leaf || leaf->kind != BlockKind::Paragraph || !leaf->inline_content.source.empty()
+    if (!leaf || leaf->kind != BlockKind::Paragraph || !leaf->inline_content().source.empty()
         || !list || context->item_index >= list->children.size()) return std::nullopt;
     auto& item = list->children[context->item_index];
     if (item.children.size() != 1 || context->child_index != 0) return std::nullopt;
@@ -280,7 +280,7 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> exit_empty_list_it
     auto paragraph = document_edit_detail::empty_paragraph(
         allocator,
         document,
-        leaf->inline_content.syntax_mode);
+        leaf->inline_content().syntax_mode);
     document_edit_detail::RecordedBlockEdit result;
     result.target = TextPosition{paragraph.id, 0, TextAffinity::Downstream};
     const auto parent_id = parent->id;
@@ -390,7 +390,7 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> split_list_item(
     if (context->child_index >= item.children.size()) return std::nullopt;
     auto& leaf = item.children[context->child_index];
     if (!document_edit_detail::text_block(leaf.kind)) return std::nullopt;
-    const auto offset = (std::min)(position.source_offset, leaf.inline_content.source.size());
+    const auto offset = (std::min)(position.source_offset, leaf.inline_content().source.size());
     document_edit_detail::RecordedBlockEdit result;
 
     auto insert_item = [&](BlockNode inserted, std::size_t index) {
@@ -427,11 +427,11 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> split_list_item(
     next.ensure_item_special().checked = false;
     next.ensure_item_special().marker = next_item_marker(*list, item, context->item_index + 1, true);
 
-    if (offset == leaf.inline_content.source.size() && context->child_index + 1 == item.children.size()) {
+    if (offset == leaf.inline_content().source.size() && context->child_index + 1 == item.children.size()) {
         auto paragraph = document_edit_detail::empty_paragraph(
             allocator,
             document,
-            leaf.inline_content.syntax_mode);
+            leaf.inline_content().syntax_mode);
         next.children.push_back(std::move(paragraph));
         insert_item(std::move(next), context->item_index + 1);
         return result;
@@ -442,12 +442,12 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> split_list_item(
     if (offset == 0) {
         result.target = {leaf.id, 0, TextAffinity::Downstream};
     } else {
-        auto right_source = leaf.inline_content.source.substr(offset);
-        const auto syntax_mode = leaf.inline_content.syntax_mode;
+        auto right_source = leaf.inline_content().source.substr(offset);
+        const auto syntax_mode = leaf.inline_content().syntax_mode;
         auto edit = document_edit_detail::edit_inline(
             document,
             leaf.id,
-            {offset, leaf.inline_content.source.size()},
+            {offset, leaf.inline_content().source.size()},
             {},
             allocator);
         if (!edit) return std::nullopt;
@@ -455,7 +455,7 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> split_list_item(
         BlockNode right;
         right.id = allocator.allocate();
         right.kind = BlockKind::Paragraph;
-        right.inline_content = document_edit_detail::make_inline(
+        right.edit_inline_content() = document_edit_detail::make_inline(
             std::move(right_source),
             document,
             allocator,

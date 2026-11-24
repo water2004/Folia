@@ -17,16 +17,16 @@ export namespace folia {
 // precedence and paragraph boundaries have already been decided.
 inline bool promote_image_paragraph(BlockNode& block) {
     if (block.kind != BlockKind::Paragraph
-        || block.inline_content.syntax_mode != InlineSyntaxMode::Markdown
+        || block.inline_content().syntax_mode != InlineSyntaxMode::Markdown
         || block.has_html_source()
-        || std::ranges::any_of(block.inline_content.source, [](char32_t ch) {
+        || std::ranges::any_of(block.inline_content().source, [](char32_t ch) {
             return ch == U'\r' || ch == U'\n';
         })
-        || block.inline_content.tree.nodes.size() != 1) {
+        || block.inline_content().tree.nodes.size() != 1) {
         return false;
     }
 
-    const auto& root = block.inline_content.tree.nodes.front();
+    const auto& root = block.inline_content().tree.nodes.front();
     const InlineCstNode* image = nullptr;
     std::optional<std::string> link;
     if (root.kind == InlineCstKind::Image) {

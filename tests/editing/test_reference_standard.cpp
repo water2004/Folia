@@ -53,10 +53,10 @@ suite reference_standard_tests = [] {
     expect(fatal(bool(reference_block_kind(parsed.document.root.children, BlockKind::CodeBlock))));
     expect(fatal(bool(reference_block_kind(parsed.document.root.children, BlockKind::ThematicBreak))));
     auto paragraph = std::find_if(parsed.document.root.children.begin(), parsed.document.root.children.end(), [](auto const& block) {
-        return block.kind == BlockKind::Paragraph && reference_inline_kind(block.inline_content, InlineCstKind::SoftBreak);
+        return block.kind == BlockKind::Paragraph && reference_inline_kind(block.inline_content(), InlineCstKind::SoftBreak);
     });
     expect(fatal(bool(paragraph != parsed.document.root.children.end())));
-    if (paragraph != parsed.document.root.children.end()) expect(fatal(bool(reference_inline_kind(paragraph->inline_content, InlineCstKind::HardBreak))));
+    if (paragraph != parsed.document.root.children.end()) expect(fatal(bool(reference_inline_kind(paragraph->inline_content(), InlineCstKind::HardBreak))));
 };
 
 "reference_standard_covers_links_images_and_inline_forms"_test = [] {
@@ -66,7 +66,7 @@ suite reference_standard_tests = [] {
         "[**formatted**](https://example.com) [![linked](image.png \"Image\")](https://example.com)\n\n"
         "[ref]: <https://example.com> 'Reference title'\n");
     auto has = [&](InlineCstKind kind) {
-        for (auto const& block : parsed.document.root.children) if (reference_inline_kind(block.inline_content, kind)) return true;
+        for (auto const& block : parsed.document.root.children) if (reference_inline_kind(block.inline_content(), kind)) return true;
         return false;
     };
     expect(fatal(bool(has(InlineCstKind::Strong))));
@@ -89,19 +89,19 @@ suite reference_standard_tests = [] {
         "<table><tr><th>A</th><th>B</th></tr><tr><td>1</td><td>2</td></tr></table>\n\n"
         "<script>alert(1)</script>\n");
     auto paragraph = std::find_if(parsed.document.root.children.begin(), parsed.document.root.children.end(), [](auto const& block) {
-        return block.kind == BlockKind::Paragraph && block.inline_content.source.starts_with(U"<span>");
+        return block.kind == BlockKind::Paragraph && block.inline_content().source.starts_with(U"<span>");
     });
     expect(fatal(bool(paragraph != parsed.document.root.children.end())));
     if (paragraph != parsed.document.root.children.end()) {
-        expect(fatal(bool(reference_inline_kind(paragraph->inline_content, InlineCstKind::Strong))));
-        expect(fatal(bool(!reference_inline_kind(paragraph->inline_content, InlineCstKind::Emphasis))));
-        expect(fatal(bool(!reference_inline_kind(paragraph->inline_content, InlineCstKind::Strikethrough))));
-        expect(fatal(bool(!reference_inline_kind(paragraph->inline_content, InlineCstKind::Link))));
-        expect(fatal(bool(!reference_inline_kind(paragraph->inline_content, InlineCstKind::Image))));
-        expect(fatal(bool(!reference_inline_kind(paragraph->inline_content, InlineCstKind::HardBreak))));
+        expect(fatal(bool(reference_inline_kind(paragraph->inline_content(), InlineCstKind::Strong))));
+        expect(fatal(bool(!reference_inline_kind(paragraph->inline_content(), InlineCstKind::Emphasis))));
+        expect(fatal(bool(!reference_inline_kind(paragraph->inline_content(), InlineCstKind::Strikethrough))));
+        expect(fatal(bool(!reference_inline_kind(paragraph->inline_content(), InlineCstKind::Link))));
+        expect(fatal(bool(!reference_inline_kind(paragraph->inline_content(), InlineCstKind::Image))));
+        expect(fatal(bool(!reference_inline_kind(paragraph->inline_content(), InlineCstKind::HardBreak))));
         for (auto tag : {"span", "cite", "del", "a", "img", "br"}) {
             expect(fatal(bool(reference_inline_html_tag(
-                paragraph->inline_content.tree.nodes,
+                paragraph->inline_content().tree.nodes,
                 tag))));
         }
     }

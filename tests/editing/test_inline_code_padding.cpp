@@ -59,7 +59,7 @@ suite inline_code_padding_tests = [] {
         code_toggle(editor);
         const auto wrapped = editor.markdown_utf8();
         const auto wrapped_selection = code_selection(editor, source_mode);
-        const auto& source = editor.document().root.children.front().inline_content.source;
+        const auto& source = editor.document().root.children.front().inline_content().source;
         const auto lower = (std::min)(wrapped_selection.first, wrapped_selection.second);
         const auto upper = (std::max)(wrapped_selection.first, wrapped_selection.second);
         expect(source.substr(lower, upper - lower) == text);

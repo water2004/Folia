@@ -55,7 +55,7 @@ suite parser_roundtrip_tests = [] {
     expect(fatal(table.children.size() == 2u));
     expect(fatal(table.children.front().children.size() == 5u));
     expect(fatal(table.children.back().children.size() == 5u));
-    expect(fatal(table.children.back().children[2].inline_content.source == U"%A0"));
+    expect(fatal(table.children.back().children[2].inline_content().source == U"%A0"));
     expect(fatal(serialize_markdown(parsed.document) == source));
 
     const auto reloaded = parse_text(2, serialize_markdown(parsed.document));
@@ -95,11 +95,11 @@ suite parser_roundtrip_tests = [] {
         BlockKind::Paragraph);
     expect(fatal(paragraph != nullptr));
     if (!paragraph) return;
-    expect(paragraph->inline_content.syntax_mode == InlineSyntaxMode::HtmlText);
-    expect(!inline_contains_kind(paragraph->inline_content, InlineCstKind::Emphasis));
-    expect(!inline_contains_kind(paragraph->inline_content, InlineCstKind::InlineMath));
-    expect(!inline_contains_kind(paragraph->inline_content, InlineCstKind::Strong));
-    expect(inline_contains_kind(paragraph->inline_content, InlineCstKind::HtmlElement));
+    expect(paragraph->inline_content().syntax_mode == InlineSyntaxMode::HtmlText);
+    expect(!inline_contains_kind(paragraph->inline_content(), InlineCstKind::Emphasis));
+    expect(!inline_contains_kind(paragraph->inline_content(), InlineCstKind::InlineMath));
+    expect(!inline_contains_kind(paragraph->inline_content(), InlineCstKind::Strong));
+    expect(inline_contains_kind(paragraph->inline_content(), InlineCstKind::HtmlElement));
     expect(fatal(serialize_markdown(parsed.document) == source));
 };
 
@@ -142,7 +142,7 @@ suite parser_roundtrip_tests = [] {
     expect(fatal(comment.html_special().tree.nodes.size() == 1u));
     expect(fatal(comment.html_special().tree.nodes.front().kind == HtmlCstKind::Comment));
     expect(fatal(parsed.document.root.children.back().kind == BlockKind::Paragraph));
-    expect(fatal(inline_visible_text(parsed.document.root.children.back().inline_content) == U"visible"));
+    expect(fatal(inline_visible_text(parsed.document.root.children.back().inline_content()) == U"visible"));
     expect(fatal(serialize_markdown(parsed.document) == source));
 };
 

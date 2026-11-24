@@ -175,7 +175,7 @@ inline std::optional<std::u32string> whole_pasted_link_destination(const BlockVe
     if (blocks.size() != 1 || blocks.front().kind != BlockKind::Paragraph) {
         return std::nullopt;
     }
-    const auto& document = blocks.front().inline_content;
+    const auto& document = blocks.front().inline_content();
     if (document.tree.nodes.size() != 1) return std::nullopt;
     const auto& node = document.tree.nodes.front();
     if (node.kind != InlineCstKind::Link || node.status != ParseStatus::Complete
@@ -192,12 +192,12 @@ inline void split_soft_lines_for_atx_heading(
     std::u32string_view clipboard_source) {
     if (!atx_heading(anchor) || blocks.size() != 1
         || blocks.front().kind != BlockKind::Paragraph) return;
-    auto& first = blocks.front().inline_content;
+    auto& first = blocks.front().edit_inline_content();
     auto& source = first.source;
     const auto newline = clipboard_source.find(U'\n');
     if (newline == std::u32string::npos) return;
     auto trailing = blocks.front();
-    trailing.inline_content.source = clipboard_source.substr(newline + 1);
+    trailing.edit_inline_content().source = clipboard_source.substr(newline + 1);
     trailing.separator_before.reset();
     source = clipboard_source.substr(0, newline);
 
@@ -208,7 +208,7 @@ inline void split_soft_lines_for_atx_heading(
     InlineParseContext context;
     context.dialect = dialect;
     reparse_inline_document(first, context);
-    reparse_inline_document(trailing.inline_content, context);
+    reparse_inline_document(trailing.edit_inline_content(), context);
     blocks.push_back(std::move(trailing));
 }
 
@@ -298,12 +298,12 @@ inline std::optional<TextPosition> paste_matching_list(
         first_item.children.erase(first_item.children.begin());
         const auto* head_inline = editable_inline_document(*head);
         if (!head_inline) return std::nullopt;
-        if (!first_paragraph.inline_content.source.empty()) {
+        if (!first_paragraph.inline_content().source.empty()) {
             auto merged = record_source_insert(
                 document,
                 head_id,
                 head_inline->source.size(),
-                first_paragraph.inline_content.source,
+                first_paragraph.inline_content().source,
                 allocator,
                 operations);
             if (!merged) return std::nullopt;
@@ -442,7 +442,7 @@ inline std::optional<TextPosition> paste_parsed_blocks(
             document,
             anchor->id,
             position.source_offset,
-            atx_heading(*anchor) ? std::u32string_view(blocks.front().inline_content.source)
+            atx_heading(*anchor) ? std::u32string_view(blocks.front().inline_content().source)
                 : clipboard_source,
             allocator,
             operations);
@@ -455,7 +455,7 @@ inline std::optional<TextPosition> paste_parsed_blocks(
                 document,
                 anchor->id,
                 position.source_offset,
-                blocks.front().inline_content.source,
+                blocks.front().inline_content().source,
                 allocator,
                 operations);
         }
@@ -525,7 +525,7 @@ inline std::optional<TextPosition> paste_parsed_blocks(
     const auto head_separator = anchor ? anchor->separator_before : original_head_separator;
     bool merged_first = false;
     if (head_inline && !blocks.empty() && blocks.front().kind == BlockKind::Paragraph) {
-        const auto pasted = blocks.front().inline_content.source;
+        const auto pasted = blocks.front().inline_content().source;
         if (!pasted.empty()) {
             auto merged = record_source_insert(
                 document,
@@ -540,7 +540,7 @@ inline std::optional<TextPosition> paste_parsed_blocks(
         merged_first = true;
     } else if (head_inline && !blocks.empty() && blocks.front().kind == BlockKind::Heading
                && !head_was_empty) {
-        const auto pasted = blocks.front().inline_content.source;
+        const auto pasted = blocks.front().inline_content().source;
         auto merged = record_source_insert(
             document,
             head_id,

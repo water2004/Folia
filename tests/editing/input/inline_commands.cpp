@@ -38,7 +38,7 @@ suite editing_input_inline_commands_tests = [] {
     auto transaction = test_edit::document_delete_backward(document, caret(paragraph, 1));
     expect(fatal(bool(transaction.has_value())));
     if (!transaction) return;
-    expect(fatal(bool(first_editable(transaction->after).inline_content.source == U"alpha")));
+    expect(fatal(bool(first_editable(transaction->after).inline_content().source == U"alpha")));
     expect(fatal(bool(transaction->selection_after.active.source_offset == 0u)));
     expect_document_valid(transaction->after);
 };
@@ -49,7 +49,7 @@ suite editing_input_inline_commands_tests = [] {
     auto transaction = test_edit::document_delete_forward(document, caret(paragraph, 11));
     expect(fatal(bool(transaction.has_value())));
     if (!transaction) return;
-    expect(fatal(bool(first_editable(transaction->after).inline_content.source == U"[title](url")));
+    expect(fatal(bool(first_editable(transaction->after).inline_content().source == U"[title](url")));
     expect_document_valid(transaction->after);
 };
 
@@ -68,12 +68,12 @@ suite editing_input_inline_commands_tests = [] {
         auto wrapped = test_edit::document_toggle_inline_format(document, range(paragraph, 0, 5), test.format);
         expect(fatal(bool(wrapped.has_value())));
         if (!wrapped) continue;
-        const auto& inline_document = first_editable(wrapped->after).inline_content;
+        const auto& inline_document = first_editable(wrapped->after).inline_content();
         expect(fatal(bool(inline_document.source == test.expected)));
         expect(fatal(bool(inline_contains_kind(inline_document, test.kind))));
         auto unwrapped = test_edit::document_toggle_inline_format(wrapped->after, wrapped->selection_after, test.format);
         expect(fatal(bool(unwrapped.has_value())));
-        if (unwrapped) expect(fatal(bool(first_editable(unwrapped->after).inline_content.source == U"value")));
+        if (unwrapped) expect(fatal(bool(first_editable(unwrapped->after).inline_content().source == U"value")));
     }
 };
 
@@ -83,7 +83,7 @@ suite editing_input_inline_commands_tests = [] {
     auto link = test_edit::document_insert_link(link_document, range(link_paragraph, 0, 5), "url", "name");
     expect(fatal(bool(link.has_value())));
     if (link) {
-        const auto& inline_document = first_editable(link->after).inline_content;
+        const auto& inline_document = first_editable(link->after).inline_content();
         expect(fatal(bool(inline_document.source == U"[title](url \"name\")")));
         expect(fatal(bool(inline_contains_kind(inline_document, InlineCstKind::Link))));
     }
@@ -92,7 +92,7 @@ suite editing_input_inline_commands_tests = [] {
     auto image = test_edit::document_insert_image(image_document, range(image_paragraph, 0, 7), "image.png", "diagram");
     expect(fatal(bool(image.has_value())));
     if (image) {
-        const auto& inline_document = first_editable(image->after).inline_content;
+        const auto& inline_document = first_editable(image->after).inline_content();
         expect(fatal(bool(inline_document.source == U"![diagram](image.png)")));
         expect(fatal(bool(inline_contains_kind(inline_document, InlineCstKind::Image))));
     }
@@ -110,7 +110,7 @@ suite editing_input_inline_commands_tests = [] {
     expect(fatal(bool(std::holds_alternative<DocumentTextOperation>(inserted->operations[0]))));
     expect(fatal(bool(std::holds_alternative<DocumentTreeEdit>(inserted->operations[1]))));
     expect(fatal(bool(inserted->after.root.children.size() == 3u)));
-    expect(fatal(bool(inserted->after.root.children[0].inline_content.source == U"body[^2][^1]")));
+    expect(fatal(bool(inserted->after.root.children[0].inline_content().source == U"body[^2][^1]")));
     const auto& definition = inserted->after.root.children.back();
     expect(fatal(bool(definition.kind == BlockKind::FootnoteDefinition)));
     expect(fatal(bool(definition.container_special().footnote_label == "2")));
@@ -137,7 +137,7 @@ suite editing_input_inline_commands_tests = [] {
 "missing_footnote_definitions_are_created_semantically_without_duplicates"_test = [] {
     auto document = parse_document("body[^missing]");
     const auto& owner = first_editable(document);
-    const auto before = caret(owner, owner.inline_content.source.size());
+    const auto before = caret(owner, owner.inline_content().source.size());
     auto created = test_edit::document_create_footnote_definition(document, before, "missing");
     expect(fatal(bool(created.has_value())));
     if (!created) return;

@@ -258,7 +258,6 @@ struct BlockNode {
     NodeId id{};
     BlockKind kind = BlockKind::Paragraph;
     BlockVec children;                  // the one structural child collection for every container
-    InlineDocument inline_content;      // Paragraph / Heading / CalloutTitle / TableCell
     BlockSourceDocument block_source;   // CodeBlock / MathBlock, exact full Markdown source
     // Exact source between the preceding direct sibling and this block.
     // Separators are common on ordinary paragraphs, so keeping this compact
@@ -272,13 +271,29 @@ struct BlockNode {
     std::unique_ptr<BlockNodeSpecial> payload;
 
 private:
+    // Structural nodes need no inline source or CST. Reading an empty node
+    // never creates content. Mutable access is confined to the writer paths.
+    std::unique_ptr<InlineDocument> inline_content_;
     struct ShallowCopyTag {};
     BlockNode(BlockNode const& other, ShallowCopyTag)
         : id(other.id), kind(other.kind),
-          inline_content(other.inline_content), block_source(other.block_source),
+          block_source(other.block_source),
           separator_before(other.separator_before),
-          payload(other.payload ? std::make_unique<BlockNodeSpecial>(*other.payload) : nullptr) {}
+          payload(other.payload ? std::make_unique<BlockNodeSpecial>(*other.payload) : nullptr),
+          inline_content_(other.inline_content_ ? std::make_unique<InlineDocument>(*other.inline_content_) : nullptr) {}
 public:
+    bool has_inline_content() const { return static_cast<bool>(inline_content_); }
+
+    InlineDocument const& inline_content() const {
+        static const InlineDocument empty;
+        return inline_content_ ? *inline_content_ : empty;
+    }
+
+    InlineDocument& edit_inline_content() {
+        if (!inline_content_) inline_content_ = std::make_unique<InlineDocument>();
+        return *inline_content_;
+    }
+
     BlockNode() = default;
     BlockNode(BlockNode const& other) : BlockNode(other, ShallowCopyTag{}) {
         if (other.children.empty()) return;
@@ -468,7 +483,7 @@ inline std::vector<HtmlBlockShapeEntry> html_block_structure_shape(const BlockNo
 }
 
 // Heading sibling helper used in several places.
-inline const InlineDocument& heading_inline_content(const BlockNode& b) { return b.inline_content; }
+inline const InlineDocument& heading_inline_content(const BlockNode& b) { return b.inline_content(); }
 inline bool is_heading_block(const BlockNode& b) { return b.kind == BlockKind::Heading; }
 
 } // namespace folia

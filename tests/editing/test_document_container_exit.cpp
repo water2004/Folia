@@ -52,7 +52,7 @@ suite document_container_exit_tests = [] {
     auto cell_break = test_edit::document_enter(table, caret(cell, 1));
     expect(fatal(bool(cell_break.has_value())));
     if (cell_break) {
-        auto const& edited = cell_break->after.root.children.front().children.front().children.front().inline_content;
+        auto const& edited = cell_break->after.root.children.front().children.front().children.front().inline_content();
         expect(fatal(bool(edited.source == U"a<br>b")));
         expect(fatal(bool(contains_html_tag(edited.tree.nodes, "br"))));
         expect(fatal(bool(serialize_markdown(cell_break->after).find("a<br>b") != std::string::npos)));
@@ -60,12 +60,12 @@ suite document_container_exit_tests = [] {
         auto second_break = test_edit::document_enter(cell_break->after, cell_break->selection_after);
         expect(fatal(bool(second_break.has_value())));
         if (second_break) {
-            auto const& with_empty_line = second_break->after.root.children.front().children.front().children.front().inline_content;
+            auto const& with_empty_line = second_break->after.root.children.front().children.front().children.front().inline_content();
             expect(fatal(bool(with_empty_line.source == U"a<br><br>b")));
             auto removed = test_edit::document_delete_backward(second_break->after, second_break->selection_after);
             expect(fatal(bool(removed.has_value())));
             if (removed) {
-                auto const& joined = removed->after.root.children.front().children.front().children.front().inline_content;
+                auto const& joined = removed->after.root.children.front().children.front().children.front().inline_content();
                 expect(fatal(bool(joined.source == U"a<br>b")));
                 expect(fatal(bool(removed->selection_after.active.source_offset == 5u)));
             }
@@ -134,7 +134,7 @@ suite document_container_exit_tests = [] {
             transaction->after.root,
             transaction->selection_after.active.container_id);
         expect(fatal(bool(selected != nullptr && selected->kind == BlockKind::Paragraph))) << source;
-        expect(fatal(bool(selected != nullptr && selected->inline_content.source.empty()))) << source;
+        expect(fatal(bool(selected != nullptr && selected->inline_content().source.empty()))) << source;
         expect_document_valid(transaction->after);
     }
 };
@@ -157,7 +157,7 @@ suite document_container_exit_tests = [] {
     auto const& outside = transaction->after.root.children[1];
     auto const& trailing = transaction->after.root.children[2];
     expect(fatal(bool(leading.kind == BlockKind::Callout && callout_title_block(leading) != nullptr)));
-    expect(fatal(bool(outside.kind == BlockKind::Paragraph && outside.inline_content.source.empty())));
+    expect(fatal(bool(outside.kind == BlockKind::Paragraph && outside.inline_content().source.empty())));
     expect(fatal(bool(trailing.kind == BlockKind::Callout && callout_title_block(trailing) == nullptr)));
     expect(fatal(bool(trailing.container_special().callout_kind == "IMPORTANT")));
     expect(fatal(bool(trailing.children.size() == 1u)));
@@ -186,7 +186,7 @@ suite document_container_exit_tests = [] {
     expect(fatal(bool(opened_definition && opened_definition->children.size() == 2u)));
     if (!opened_definition || opened_definition->children.size() != 2u) return;
     auto const empty_id = opened_definition->children.back().id;
-    expect(fatal(bool(opened_definition->children.back().inline_content.source.empty())));
+    expect(fatal(bool(opened_definition->children.back().inline_content().source.empty())));
 
     auto exited = test_edit::document_enter(
         opened->after,
@@ -199,7 +199,7 @@ suite document_container_exit_tests = [] {
     expect(fatal(bool(exited->after.root.children[1].kind == BlockKind::FootnoteDefinition)));
     expect(fatal(bool(exited->after.root.children[1].children.size() == 1u)));
     expect(fatal(bool(exited->after.root.children[2].kind == BlockKind::Paragraph)));
-    expect(fatal(bool(exited->after.root.children[2].inline_content.source.empty())));
+    expect(fatal(bool(exited->after.root.children[2].inline_content().source.empty())));
     expect(fatal(bool(exited->selection_after.active.container_id == exited->after.root.children[2].id)));
     expect(fatal(bool(find_block(exited->after.root, empty_id) == nullptr)));
     expect_document_valid(exited->after);
@@ -229,7 +229,7 @@ suite document_container_exit_tests = [] {
     expect(fatal(bool(selected != nullptr)));
     if (selected) {
         expect(fatal(bool(selected->kind == BlockKind::Paragraph)));
-        expect(fatal(bool(selected->inline_content.source.empty())));
+        expect(fatal(bool(selected->inline_content().source.empty())));
     }
     auto const* updated_list = find_block(transaction->after.root, list.id);
     expect(fatal(bool(updated_list != nullptr)));

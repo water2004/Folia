@@ -52,13 +52,13 @@ suite editing_properties_inline_contexts_tests = [] {
         expect(fatal(bool(edited == U"aXbc"))) << markdown << " source=" << cps_to_utf8(edited);
         auto const* owner = find_block(editor.document().root, id);
         expect(fatal(bool(owner != nullptr)));
-        if (owner) expect(fatal(bool(flatten_tokens(owner->inline_content.tree, owner->inline_content.source) == owner->inline_content.source)));
+        if (owner) expect(fatal(bool(flatten_tokens(owner->inline_content().tree, owner->inline_content().source) == owner->inline_content().source)));
         expect(fatal(bool(editor.selection().active.container_id == id)));
         expect(fatal(bool(editor.selection().active.source_offset == 2u)));
 
         const auto saved = editor.markdown_utf8();
         Editor reloaded(saved);
-        expect(fatal(bool(first_text(reloaded).inline_content.source == U"aXbc")));
+        expect(fatal(bool(first_text(reloaded).inline_content().source == U"aXbc")));
 
         expect(fatal(bool(editor.undo())));
         expect(fatal(bool(editor.markdown_utf8() == before)));
@@ -80,7 +80,7 @@ suite editing_properties_inline_contexts_tests = [] {
         for (const auto& markdown : documents) {
             Editor editor(markdown);
             const auto owner_id = first_text(editor).id;
-            expect(fatal(bool(first_text(editor).inline_content.source == original_source)));
+            expect(fatal(bool(first_text(editor).inline_content().source == original_source)));
             const auto offset = 1 + sample.size() / 2;
             const auto before_source = editor.markdown_utf8();
             const auto before_selection = TextSelection::caret(
@@ -100,15 +100,15 @@ suite editing_properties_inline_contexts_tests = [] {
             const auto* owner = find_block(editor.document().root, owner_id);
             expect(fatal(bool(owner != nullptr)));
             if (!owner) continue;
-            expect(fatal(bool(owner->inline_content.source == expected_source)));
-            expect(fatal(bool(flatten_tokens(owner->inline_content.tree, owner->inline_content.source)
-                == owner->inline_content.source)));
+            expect(fatal(bool(owner->inline_content().source == expected_source)));
+            expect(fatal(bool(flatten_tokens(owner->inline_content().tree, owner->inline_content().source)
+                == owner->inline_content().source)));
             expect(fatal(bool(editor.selection().active.container_id == owner_id)));
             expect(fatal(bool(editor.selection().active.source_offset == offset + 1)));
 
             const auto edited_source = editor.markdown_utf8();
             Editor reloaded(edited_source);
-            expect(fatal(bool(first_text(reloaded).inline_content.source == expected_source)));
+            expect(fatal(bool(first_text(reloaded).inline_content().source == expected_source)));
 
             expect(fatal(bool(editor.undo())));
             expect(fatal(bool(editor.markdown_utf8() == before_source)));
@@ -167,7 +167,7 @@ suite editing_properties_inline_contexts_tests = [] {
             // mutation; ordinary/incomplete text still loses one character.
             const auto* original_block = find_block(editor.document().root, owner->container_id);
             std::vector<const InlineCstNode*> pending;
-            for (const auto& node : original_block->inline_content.tree.nodes) pending.push_back(&node);
+            for (const auto& node : original_block->inline_content().tree.nodes) pending.push_back(&node);
             while (!pending.empty()) {
                 const auto* node = pending.back(); pending.pop_back();
                 for (const auto& child : node->children) pending.push_back(&child);

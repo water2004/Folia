@@ -137,7 +137,7 @@ suite editing_clipboard_source_fragments_tests = [] {
     expect(fatal(bool(code_copy.has_value())));
     if (!paragraph_copy || !code_copy) return;
 
-    const auto& inline_document = paragraph_copy->inline_content;
+    const auto& inline_document = paragraph_copy->inline_content();
     expect(fatal(bool(inline_document.source == U"**bold**")));
     expect(fatal(bool(tokens_partition_source(
         inline_document.tree,

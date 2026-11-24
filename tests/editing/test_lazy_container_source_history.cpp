@@ -34,7 +34,7 @@ const BlockNode* find_paragraph(const EditorDocument& document, std::u32string_v
     const BlockNode* result = nullptr;
     walk_blocks(document.root, [&](const BlockNode& block) {
         if (!result && block.kind == BlockKind::Paragraph
-            && block.inline_content.source == source) result = &block;
+            && block.inline_content().source == source) result = &block;
     });
     return result;
 }
@@ -67,12 +67,12 @@ PrefixSnapshot prefix_snapshot(const EditorDocument& document) {
 bool inline_sources_are_lossless(const BlockNode& block) {
     if ((block.kind == BlockKind::Paragraph || block.kind == BlockKind::Heading
          || block.kind == BlockKind::CalloutTitle || block.kind == BlockKind::TableCell)
-        && (!tokens_partition_source(block.inline_content.tree, block.inline_content.source.size())
-            || !roots_partition_source(block.inline_content.tree, block.inline_content.source.size())
-            || flatten_tokens(block.inline_content.tree, block.inline_content.source)
-                != block.inline_content.source
-            || serialize_lossless(block.inline_content.tree, block.inline_content.source)
-                != block.inline_content.source)) {
+        && (!tokens_partition_source(block.inline_content().tree, block.inline_content().source.size())
+            || !roots_partition_source(block.inline_content().tree, block.inline_content().source.size())
+            || flatten_tokens(block.inline_content().tree, block.inline_content().source)
+                != block.inline_content().source
+            || serialize_lossless(block.inline_content().tree, block.inline_content().source)
+                != block.inline_content().source)) {
         return false;
     }
     for (const auto& child : block.children) {
@@ -179,7 +179,7 @@ void exercise_lazy_quote_edit(
         if (reloaded_quote.children.size() == 1u) {
             expect(fatal(reloaded_quote.children.front().kind == BlockKind::Paragraph))
                 << label << " reload paragraph remains literal";
-            expect(fatal(reloaded_quote.children.front().inline_content.source == after_inline))
+            expect(fatal(reloaded_quote.children.front().inline_content().source == after_inline))
                 << label << " reload block-local source";
         }
     }

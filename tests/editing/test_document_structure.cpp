@@ -42,7 +42,7 @@ suite document_structure_tests = [] {
     expect(fatal(bool(transaction.has_value())));
     if (!transaction) return;
     expect(fatal(bool(transaction->after.root.children.size() == 1u)));
-    expect(fatal(bool(transaction->after.root.children.front().inline_content.source == U"alma")));
+    expect(fatal(bool(transaction->after.root.children.front().inline_content().source == U"alma")));
     expect(fatal(bool(transaction->selection_after.active.source_offset == 2u)));
     expect_document_valid(transaction->after);
 };
@@ -53,7 +53,7 @@ suite document_structure_tests = [] {
     expect(fatal(bool(transaction.has_value())));
     if (!transaction) return;
     expect(fatal(bool(transaction->after.root.children.size() == 1u)));
-    expect(fatal(bool(transaction->after.root.children[0].inline_content.source == U"aX\nYb")));
+    expect(fatal(bool(transaction->after.root.children[0].inline_content().source == U"aX\nYb")));
     expect_document_valid(transaction->after);
 };
 
@@ -67,8 +67,8 @@ suite document_structure_tests = [] {
     if (!transaction) return;
     expect(fatal(bool(transaction->after.root.children.size() == 2u)));
     if (transaction->after.root.children.size() != 2u) return;
-    expect(fatal(bool(transaction->after.root.children[0].inline_content.source == U"aX")));
-    expect(fatal(bool(transaction->after.root.children[1].inline_content.source == U"Yb")));
+    expect(fatal(bool(transaction->after.root.children[0].inline_content().source == U"aX")));
+    expect(fatal(bool(transaction->after.root.children[1].inline_content().source == U"Yb")));
     expect(fatal(bool(transaction->selection_after.active.container_id
         == transaction->after.root.children[1].id)));
     expect(fatal(bool(transaction->selection_after.active.source_offset == 1u)));
@@ -96,12 +96,12 @@ suite document_structure_tests = [] {
         table,
         TextSelection{
             {first_cell->id, 0, TextAffinity::Downstream},
-            {first_cell->id, first_cell->inline_content.source.size(), TextAffinity::Upstream}},
+            {first_cell->id, first_cell->inline_content().source.size(), TextAffinity::Upstream}},
         U"  x\r\ny  ");
     expect(fatal(bool(cell_paste.has_value())));
     if (cell_paste) {
         const auto& cell = cell_paste->after.root.children.front().children.front().children.front();
-        expect(fatal(bool(cell.inline_content.source == U"  x<br>y  ")));
+        expect(fatal(bool(cell.inline_content().source == U"  x<br>y  ")));
         expect_document_valid(cell_paste->after);
     }
 };
@@ -113,7 +113,7 @@ suite document_structure_tests = [] {
     if (!heading) return;
     expect(fatal(bool(heading->after.root.children.front().kind == BlockKind::Heading)));
     expect(fatal(bool(heading->after.root.children.front().text_special().level == 3u)));
-    expect(fatal(bool(heading->after.root.children.front().inline_content.source == U"__title__")));
+    expect(fatal(bool(heading->after.root.children.front().inline_content().source == U"__title__")));
     auto paragraph = test_edit::document_set_heading(heading->after, heading->selection_after, 0);
     expect(fatal(bool(paragraph.has_value())));
     if (paragraph) expect(fatal(bool(paragraph->after.root.children.front().kind == BlockKind::Paragraph)));
@@ -135,7 +135,7 @@ suite document_structure_tests = [] {
         expect(fatal(bool(root_list.kind == BlockKind::List)));
         expect(fatal(bool(root_list.children.size() == 2u)));
         expect(fatal(bool(root_list.children.front().kind == BlockKind::ListItem)));
-        expect(fatal(bool(root_list.children.front().children.front().inline_content.source == U"one")));
+        expect(fatal(bool(root_list.children.front().children.front().inline_content().source == U"one")));
     }
     auto callout = test_edit::document_toggle_callout(document, both, "NOTE");
     expect(fatal(bool(callout.has_value())));
@@ -211,7 +211,7 @@ suite document_structure_tests = [] {
     normalize_document(document);
     auto position = caret(first_editable(document), 0);
     for (std::size_t step = 0; step < 500; ++step) {
-        const bool insert = first_editable(document).inline_content.source.empty() || (random() & 1u) == 0;
+        const bool insert = first_editable(document).inline_content().source.empty() || (random() & 1u) == 0;
         if (insert) {
             const char32_t value = U'a' + static_cast<char32_t>(random() % 26);
             auto transaction = test_edit::document_insert_text(document, position, std::u32string(1, value));
@@ -226,7 +226,7 @@ suite document_structure_tests = [] {
             document = std::move(transaction->after);
             position = transaction->selection_after;
         }
-        const auto& inline_document = first_editable(document).inline_content;
+        const auto& inline_document = first_editable(document).inline_content();
         expect(fatal(bool(position.active.source_offset <= inline_document.source.size())));
         expect_document_valid(document);
     }

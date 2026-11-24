@@ -60,7 +60,7 @@ suite editing_formatting_transactions_tests = [] {
     expect(fatal(bool(editor.document().root.children.size() == 3u)));
     if (editor.document().root.children.size() != 3u) return;
     const auto title_id = editor.document().root.children.front().id;
-    const auto title_size = editor.document().root.children.front().inline_content.source.size();
+    const auto title_size = editor.document().root.children.front().inline_content().source.size();
     const auto blank_id = editor.document().root.children[1].id;
     const auto before = TextSelection::caret({blank_id, 0, TextAffinity::Downstream});
     editor.set_selection(before);
@@ -84,7 +84,7 @@ suite editing_formatting_transactions_tests = [] {
     editor.set_selection(range(first_text(editor), 0, 5));
     expect(fatal(bool(editor.execute_document_toggle_inline_format(editor.selection(), InlineFormat::Strong).has_value())));
     expect(fatal(bool(editor.markdown_utf8() == "**value**")));
-    expect(fatal(bool(inline_contains_kind(first_text(editor).inline_content, InlineCstKind::Strong))));
+    expect(fatal(bool(inline_contains_kind(first_text(editor).inline_content(), InlineCstKind::Strong))));
     expect(fatal(bool(editor.undo())));
     expect(fatal(bool(editor.markdown_utf8() == "value")));
     expect(fatal(bool(editor.redo())));
@@ -152,10 +152,10 @@ suite editing_formatting_transactions_tests = [] {
     expect(fatal(bool(editor.selection().is_caret())));
     expect(fatal(bool(editor.selection().active.source_offset == 5u)));
     expect(fatal(bool(inline_contains_kind(
-        first_text(editor).inline_content,
+        first_text(editor).inline_content(),
         InlineCstKind::Strong))));
     expect(fatal(bool(!inline_contains_kind(
-        first_text(editor).inline_content,
+        first_text(editor).inline_content(),
         InlineCstKind::Emphasis))));
 
     expect(fatal(bool(editor.undo())));

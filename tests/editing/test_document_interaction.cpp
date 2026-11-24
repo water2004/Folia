@@ -63,7 +63,7 @@ suite document_interaction_tests = [] {
     Editor editor("prefix <a href=\"https://example.com/html\" title=\"HTML title\">label</a> suffix");
     const auto* paragraph = first_block(editor, BlockKind::Paragraph);
     expect(fatal(paragraph != nullptr));
-    auto const labelOffset = paragraph->inline_content.source.find(U"label");
+    auto const labelOffset = paragraph->inline_content().source.find(U"label");
     expect(fatal(labelOffset != std::u32string::npos));
     auto interaction = document_interaction_at(
         editor.document(),
@@ -77,7 +77,7 @@ suite document_interaction_tests = [] {
     Editor editor("prefix <a href=\"https://example.com/badge\"><img src=\"badge.svg\" alt=\"badge alt\"></a> suffix");
     const auto* paragraph = first_block(editor, BlockKind::Paragraph);
     expect(fatal(paragraph != nullptr));
-    auto const imageOffset = paragraph->inline_content.source.find(U"<img");
+    auto const imageOffset = paragraph->inline_content().source.find(U"<img");
     expect(fatal(imageOffset != std::u32string::npos));
     auto interaction = document_interaction_at(
         editor.document(),
@@ -113,7 +113,7 @@ suite document_interaction_tests = [] {
     Editor editor(std::move(source));
     const auto* paragraph = last_block(editor, BlockKind::Paragraph);
     expect(fatal(paragraph != nullptr));
-    auto const linkOffset = paragraph->inline_content.source.find(U"[link]");
+    auto const linkOffset = paragraph->inline_content().source.find(U"[link]");
     expect(fatal(linkOffset != std::u32string::npos));
     reset_core_operation_counters();
     auto interaction = document_interaction_at(

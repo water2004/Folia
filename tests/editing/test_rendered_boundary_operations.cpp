@@ -94,7 +94,7 @@ suite rendered_boundary_operation_tests = [] {
         if (!active) continue;
         const auto before = editor.markdown_utf8();
         const auto selection = TextSelection::caret({active->id,
-            entry.backward ? 0u : active->inline_content.source.size(), TextAffinity::Downstream});
+            entry.backward ? 0u : active->inline_content().source.size(), TextAffinity::Downstream});
         editor.set_selection(selection);
         reset_core_operation_counters();
         expect(fatal(editor.execute_command({.kind = entry.backward

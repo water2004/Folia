@@ -102,14 +102,14 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> activate_thematic_
     document_edit_detail::NodeAllocator& allocator) {
     const auto* selected = find_document_block(document, position.container_id);
     if (!selected || selected->kind != BlockKind::Paragraph
-        || selected->inline_content.syntax_mode != InlineSyntaxMode::Markdown
-        || position.source_offset != selected->inline_content.source.size()) {
+        || selected->inline_content().syntax_mode != InlineSyntaxMode::Markdown
+        || position.source_offset != selected->inline_content().source.size()) {
         return std::nullopt;
     }
-    if (selected->inline_content.source.find_first_not_of(U" \t-*_")
+    if (selected->inline_content().source.find_first_not_of(U" \t-*_")
         != std::u32string::npos) return std::nullopt;
 
-    auto candidate = selected->inline_content.source;
+    auto candidate = selected->inline_content().source;
     std::optional<std::u32string> marker;
     std::size_t matching_prefixes = 0;
     if (recognize_thematic_break(candidate)) marker = candidate;
@@ -165,7 +165,7 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> activate_thematic_
     auto* block = find_document_block(document, position.container_id);
     if (!block || block->kind != BlockKind::Paragraph) return std::nullopt;
     auto source_edit = document_edit_detail::edit_inline(document, block->id,
-        {0, block->inline_content.source.size()}, {}, allocator);
+        {0, block->inline_content().source.size()}, {}, allocator);
     if (!source_edit) return std::nullopt;
     document_edit_detail::append_source_operation(result.operations, std::move(*source_edit));
     block = find_document_block(document, position.container_id);
@@ -195,9 +195,9 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> activate_setext_he
     document_edit_detail::NodeAllocator& allocator) {
     auto* block = find_document_block(document, position.container_id);
     if (!block || block->kind != BlockKind::Paragraph
-        || block->inline_content.syntax_mode != InlineSyntaxMode::Markdown
-        || position.source_offset != block->inline_content.source.size()
-        || !has_setext_underline(block->inline_content.source)) {
+        || block->inline_content().syntax_mode != InlineSyntaxMode::Markdown
+        || position.source_offset != block->inline_content().source.size()
+        || !has_setext_underline(block->inline_content().source)) {
         return std::nullopt;
     }
 
@@ -205,15 +205,15 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> activate_setext_he
     // content, including indentation, escapes and other block interruptions.
     // Recognition is bounded to this owner's source and keeps the parser's
     // exact marker spellings instead of rebuilding a canonical ATX heading.
-    auto parsed = plan_block_fragment(block->inline_content.source, document.dialect,
+    auto parsed = plan_block_fragment(block->inline_content().source, document.dialect,
         [](const BlockVec& blocks) {
             return blocks.size() == 1 && blocks.front().kind == BlockKind::Heading;
         });
     if (!parsed || parsed->blocks.size() != 1) return std::nullopt;
     const auto& heading = parsed->blocks.front();
     const auto syntax = heading.text_special();
-    const auto& content = heading.inline_content.source;
-    if (syntax.opening_marker + content + syntax.closing_marker != block->inline_content.source) {
+    const auto& content = heading.inline_content().source;
+    if (syntax.opening_marker + content + syntax.closing_marker != block->inline_content().source) {
         return std::nullopt;
     }
 
@@ -222,7 +222,7 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> activate_setext_he
     const auto content_start = syntax.opening_marker.size();
     const auto content_end = content_start + content.size();
     auto closing = document_edit_detail::edit_inline(document, block->id,
-        {content_end, block->inline_content.source.size()}, {}, allocator);
+        {content_end, block->inline_content().source.size()}, {}, allocator);
     if (!closing) return std::nullopt;
     document_edit_detail::append_source_operation(result.operations, std::move(*closing));
     if (content_start != 0) {
@@ -289,7 +289,7 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> replace_paragraph_
     document_edit_detail::RecordedBlockEdit result;
     result.target = target;
     const auto parent_id = parent->id;
-    const auto exact_marker = source_block.inline_content.source.substr(0, match.length);
+    const auto exact_marker = source_block.inline_content().source.substr(0, match.length);
     auto marker_edit = document_edit_detail::edit_inline(
         document, source_block.id, {0, match.length}, {}, allocator);
     if (!marker_edit) return std::nullopt;
@@ -465,9 +465,9 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> open_raw_block(
     if (!path || path->empty()) return std::nullopt;
     auto* block = block_at_path(document.root, *path);
     if (!block || block->kind != BlockKind::Paragraph
-        || block->inline_content.syntax_mode != InlineSyntaxMode::Markdown
-        || position.source_offset != block->inline_content.source.size()) return std::nullopt;
-    auto opening = recognize_raw_block_opening(block->inline_content.source, document.dialect);
+        || block->inline_content().syntax_mode != InlineSyntaxMode::Markdown
+        || position.source_offset != block->inline_content().source.size()) return std::nullopt;
+    auto opening = recognize_raw_block_opening(block->inline_content().source, document.dialect);
     if (!opening) return std::nullopt;
 
     document_edit_detail::RecordedBlockEdit result;
@@ -477,7 +477,7 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> open_raw_block(
     auto source_edit = document_edit_detail::edit_inline(
         document,
         block->id,
-        {0, block->inline_content.source.size()},
+        {0, block->inline_content().source.size()},
         {},
         allocator);
     if (!source_edit) return std::nullopt;
@@ -565,8 +565,8 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> remove_callout_pre
     if (selected_title && callout->children.size() > 1
         && document_edit_detail::text_block(callout->children[1].kind)) {
         const auto title_id = selected->id;
-        const auto offset = selected->inline_content.source.size();
-        auto appended = U"\n" + callout->children[1].inline_content.source;
+        const auto offset = selected->inline_content().source.size();
+        auto appended = U"\n" + callout->children[1].inline_content().source;
         auto edit = document_edit_detail::edit_inline(
             document,
             title_id,

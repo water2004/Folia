@@ -25,7 +25,7 @@ suite parser_inline_escape_tests = [] {
     expect(fatal(bool(paragraph != nullptr)));
     if (!paragraph) return;
 
-    const auto& document = paragraph->inline_content;
+    const auto& document = paragraph->inline_content();
     const auto label_source = std::u32string{U"[Foo*bar\\]]"};
     expect(fatal(bool(document.source == label_source)));
     expect_lossless(document);

@@ -46,10 +46,10 @@ suite editing_links_selection_tests = [] {
         expect(fatal(editor.execute_command(insert_link_command()))) << source;
         link_insert_locality();
         expect(bool(editor.document().cached_editable_order == order));
-        expect(bool(find_document_block(editor.document(), first_id)->inline_content.source == U"al[pha](new)"));
-        expect(bool(find_document_block(editor.document(), second_id)->inline_content.source == U"[ome](new)ga"));
-        expect(link_nodes(find_document_block(editor.document(), first_id)->inline_content).size() == 1_u);
-        expect(link_nodes(find_document_block(editor.document(), second_id)->inline_content).size() == 1_u);
+        expect(bool(find_document_block(editor.document(), first_id)->inline_content().source == U"al[pha](new)"));
+        expect(bool(find_document_block(editor.document(), second_id)->inline_content().source == U"[ome](new)ga"));
+        expect(link_nodes(find_document_block(editor.document(), first_id)->inline_content()).size() == 1_u);
+        expect(link_nodes(find_document_block(editor.document(), second_id)->inline_content()).size() == 1_u);
         link_insert_history(editor, before, selected);
     }
 };
@@ -69,10 +69,10 @@ suite editing_links_selection_tests = [] {
         expect(bool(editor.document().cached_editable_order == order));
         expect(bool(find_document_block(editor.document(), order[1])->block_source.source()
             == U"```cpp\n[value](new)\n```"));
-        expect(bool(find_document_block(editor.document(), order[2])->inline_content.source
+        expect(bool(find_document_block(editor.document(), order[2])->inline_content().source
             == U"[![old](old.png)](new)"));
-        expect(bool(find_document_block(editor.document(), order[3])->inline_content.source == U"[aa](new)"));
-        expect(bool(find_document_block(editor.document(), order[4])->inline_content.source == U"[bb](new)"));
+        expect(bool(find_document_block(editor.document(), order[3])->inline_content().source == U"[aa](new)"));
+        expect(bool(find_document_block(editor.document(), order[4])->inline_content().source == U"[bb](new)"));
         link_insert_history(editor, before, selected);
     }
     for (const auto reversed : {false, true}) {
@@ -83,8 +83,8 @@ suite editing_links_selection_tests = [] {
         editor.set_selection(selected);
         const auto before = editor.markdown_utf8();
         expect(fatal(editor.execute_command(insert_link_command())));
-        expect(bool(find_document_block(editor.document(), order[0])->inline_content.source == U"left[](new)"));
-        expect(bool(find_document_block(editor.document(), order[1])->inline_content.source == U"right"));
+        expect(bool(find_document_block(editor.document(), order[0])->inline_content().source == U"left[](new)"));
+        expect(bool(find_document_block(editor.document(), order[1])->inline_content().source == U"right"));
         link_insert_history(editor, before, selected);
     }
 };
@@ -112,7 +112,7 @@ suite editing_links_selection_tests = [] {
         reset_core_operation_counters();
         expect(fatal(editor.execute_command(insert_link_command()))) << source;
         link_insert_locality();
-        const auto& owner = find_document_block(editor.document(), id)->inline_content;
+        const auto& owner = find_document_block(editor.document(), id)->inline_content();
         expect(bool(owner.source == expected)) << cps_to_utf8(owner.source);
         const auto links = link_nodes(owner);
         expect(fatal(links.size() == 1_u)) << cps_to_utf8(owner.source);
@@ -126,14 +126,14 @@ suite editing_links_selection_tests = [] {
         Editor editor("pre [left](one) mid [right](two) post");
         const auto& first = first_text(editor);
         const auto id = first.id;
-        const auto left = first.inline_content.source.find(U"left") + 2;
-        const auto right = first.inline_content.source.find(U"right") + 2;
+        const auto left = first.inline_content().source.find(U"left") + 2;
+        const auto right = first.inline_content().source.find(U"right") + 2;
         const TextPosition from{id, left}, to{id, right};
         const auto selected = reversed ? TextSelection{to, from} : TextSelection{from, to};
         editor.set_selection(selected);
         const auto before = editor.markdown_utf8();
         expect(fatal(editor.execute_command(insert_link_command())));
-        const auto& owner = find_document_block(editor.document(), id)->inline_content;
+        const auto& owner = find_document_block(editor.document(), id)->inline_content();
         expect(bool(owner.source == U"pre [left mid right](new) post"));
         expect(link_nodes(owner).size() == 1_u);
         link_insert_history(editor, before, selected);
@@ -162,7 +162,7 @@ suite editing_links_selection_tests = [] {
         link_insert_locality();
         const auto* block = find_document_block(editor.document(), id);
         expect(fatal(block != nullptr && editable_inline_document(*block) != nullptr));
-        const auto& owner = block->inline_content;
+        const auto& owner = block->inline_content();
         expect(bool(owner.source == (owner.syntax_mode == InlineSyntaxMode::HtmlText
             ? U"<a href=\"new\"><img src='old.png' alt='pic'></a>"
             : U"[<img src='old.png' alt='pic'>](new)")));
@@ -198,12 +198,12 @@ suite editing_links_selection_tests = [] {
         expect(bool(raw->block_source.source() == (table_first ? U"```cpp\nue\n```"
             : U"```cpp\nva![lue a](new.png)\n```")));
         if (table_first) {
-            expect(bool(find_document_block(editor.document(), order[0])->inline_content.source
+            expect(bool(find_document_block(editor.document(), order[0])->inline_content().source
                 == U"a![a bb val](new.png)"));
-            expect(find_document_block(editor.document(), order[1])->inline_content.source.empty());
+            expect(find_document_block(editor.document(), order[1])->inline_content().source.empty());
         } else {
-            expect(bool(find_document_block(editor.document(), order[1])->inline_content.source == U"a"));
-            expect(bool(find_document_block(editor.document(), order[2])->inline_content.source == U"bb"));
+            expect(bool(find_document_block(editor.document(), order[1])->inline_content().source == U"a"));
+            expect(bool(find_document_block(editor.document(), order[2])->inline_content().source == U"bb"));
         }
         link_insert_history(editor, before, selected);
     }

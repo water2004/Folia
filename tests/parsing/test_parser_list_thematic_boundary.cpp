@@ -19,8 +19,8 @@ namespace {
 
 bool inline_sources_are_lossless(const BlockVec& blocks) {
     for (const auto& block : blocks) {
-        if (flatten_tokens(block.inline_content.tree, block.inline_content.source)
-            != block.inline_content.source) return false;
+        if (flatten_tokens(block.inline_content().tree, block.inline_content().source)
+            != block.inline_content().source) return false;
         if (!inline_sources_are_lossless(block.children)) return false;
     }
     return true;

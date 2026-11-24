@@ -41,7 +41,7 @@ suite parser_container_frame_tests=[] {
         expect(fatal(list.kind==BlockKind::List && list.children.size()==1u));
         auto const& item=list.children.front();
         expect(fatal(item.children.size()==1u));
-        expect(item.children.front().inline_content.source==U"body");
+        expect(item.children.front().inline_content().source==U"body");
     };
     "container_frame_lazy_line_cannot_swallow_interrupting_heading"_test=[] {
         auto parsed=parse_text(1,"> a\n# heading\n");
@@ -57,7 +57,7 @@ suite parser_container_frame_tests=[] {
         expect(fatal(quote.kind==BlockKind::BlockQuote && quote.children.size()==1u));
         if (quote.children.size()==1u) {
             expect(quote.children.front().kind==BlockKind::Paragraph);
-            expect(quote.children.front().inline_content.source==U"a\n  # literal");
+            expect(quote.children.front().inline_content().source==U"a\n  # literal");
         }
         expect(serialize_markdown(literal.document)==literal_source);
 
@@ -69,7 +69,7 @@ suite parser_container_frame_tests=[] {
             && heading_quote.children.size()==2u));
         if (heading_quote.children.size()==2u) {
             expect(heading_quote.children.back().kind==BlockKind::Heading);
-            expect(heading_quote.children.back().inline_content.source==U"heading");
+            expect(heading_quote.children.back().inline_content().source==U"heading");
         }
         expect(serialize_markdown(heading.document)==heading_source);
     };
@@ -86,11 +86,11 @@ suite parser_container_frame_tests=[] {
                 expect(fatal(list.children.front().children.size() == 1u));
                 if (list.children.front().children.size() == 1u) {
                     expect(list.children.front().children.front().kind == BlockKind::Paragraph);
-                    expect(list.children.front().children.front().inline_content.source == U"a");
+                    expect(list.children.front().children.front().inline_content().source == U"a");
                 }
             }
             expect(quote.children.back().kind == BlockKind::Heading);
-            expect(quote.children.back().inline_content.source == U"heading");
+            expect(quote.children.back().inline_content().source == U"heading");
         }
         expect(serialize_markdown(parsed.document) == source);
     };

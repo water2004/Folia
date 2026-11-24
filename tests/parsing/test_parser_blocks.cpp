@@ -160,12 +160,12 @@ suite parser_block_tests = [] {
     const auto& setext = parsed.document.root.children[1];
     expect(fatal(bool(atx.kind == BlockKind::Heading)));
     expect(fatal(bool(atx.text_special().level == 1u)));
-    expect(fatal(bool(atx.inline_content.source == U"*Hello*")));
-    expect(fatal(bool(has_inline(atx.inline_content, InlineCstKind::Emphasis))));
-    expect_lossless(atx.inline_content);
+    expect(fatal(bool(atx.inline_content().source == U"*Hello*")));
+    expect(fatal(bool(has_inline(atx.inline_content(), InlineCstKind::Emphasis))));
+    expect_lossless(atx.inline_content());
     expect(fatal(bool(setext.kind == BlockKind::Heading)));
     expect(fatal(bool(setext.text_special().level == 2u)));
-    expect(fatal(bool(setext.inline_content.source == U"Setext")));
+    expect(fatal(bool(setext.inline_content().source == U"Setext")));
     expect(fatal(bool(parsed.symbols.headings.size() == 2u)));
 };
 
@@ -175,11 +175,11 @@ suite parser_block_tests = [] {
     if (parsed.document.root.children.size() != 2u) return;
     const auto& heading = parsed.document.root.children.front();
     expect(fatal(bool(heading.kind == BlockKind::Heading)));
-    expect(fatal(bool(heading.inline_content.source == U"first")));
-    expect(fatal(!has_inline(heading.inline_content, InlineCstKind::SoftBreak)));
-    expect_lossless(heading.inline_content);
+    expect(fatal(bool(heading.inline_content().source == U"first")));
+    expect(fatal(!has_inline(heading.inline_content(), InlineCstKind::SoftBreak)));
+    expect_lossless(heading.inline_content());
     expect(fatal(bool(parsed.document.root.children.back().kind == BlockKind::Paragraph)));
-    expect(fatal(bool(parsed.document.root.children.back().inline_content.source == U"second")));
+    expect(fatal(bool(parsed.document.root.children.back().inline_content().source == U"second")));
     expect(fatal(bool(serialize_markdown(parsed.document) == "# first\nsecond")));
 
     const auto separated = parse_text(2, "# first\n\nsecond");
@@ -187,7 +187,7 @@ suite parser_block_tests = [] {
     if (separated.document.root.children.size() == 2u) {
         expect(fatal(bool(separated.document.root.children[0].kind == BlockKind::Heading)));
         expect(fatal(bool(separated.document.root.children[1].kind == BlockKind::Paragraph)));
-        expect(fatal(bool(separated.document.root.children[1].inline_content.source == U"second")));
+        expect(fatal(bool(separated.document.root.children[1].inline_content().source == U"second")));
         expect(fatal(bool(serialize_markdown(separated.document) == "# first\n\nsecond")));
 
         const auto projection = serialize_markdown_projection(separated.document);
@@ -209,9 +209,9 @@ suite parser_block_tests = [] {
     if (setext.document.root.children.size() == 1u) {
         const auto& multiline = setext.document.root.children.front();
         expect(fatal(bool(multiline.kind == BlockKind::Heading)));
-        expect(fatal(bool(multiline.inline_content.source == U"first\nsecond")));
-        expect(fatal(bool(has_inline(multiline.inline_content, InlineCstKind::SoftBreak))));
-        expect_lossless(multiline.inline_content);
+        expect(fatal(bool(multiline.inline_content().source == U"first\nsecond")));
+        expect(fatal(bool(has_inline(multiline.inline_content(), InlineCstKind::SoftBreak))));
+        expect_lossless(multiline.inline_content());
         expect(fatal(bool(serialize_markdown(setext.document) == "first\nsecond\n---")));
     }
 };
@@ -223,9 +223,9 @@ suite parser_block_tests = [] {
         << "CRLF root block count: " << parsed.document.root.children.size();
     if (parsed.document.root.children.size() != 2u) return;
     expect(fatal(bool(parsed.document.root.children[0].kind == BlockKind::Heading)));
-    expect(fatal(bool(parsed.document.root.children[0].inline_content.source == U"first")));
+    expect(fatal(bool(parsed.document.root.children[0].inline_content().source == U"first")));
     expect(fatal(bool(parsed.document.root.children[1].kind == BlockKind::Heading)));
-    expect(fatal(bool(parsed.document.root.children[1].inline_content.source == U"second")));
+    expect(fatal(bool(parsed.document.root.children[1].inline_content().source == U"second")));
     expect(fatal(bool(serialize_markdown(parsed.document) == source)));
 
     const auto projection = serialize_markdown_projection(parsed.document);
@@ -276,7 +276,7 @@ suite parser_block_tests = [] {
             parsed.document.root.children,
             [](auto const& block) {
                 return block.kind == BlockKind::Paragraph
-                    && block.inline_content.source.empty();
+                    && block.inline_content().source.empty();
             });
         expect(fatal(bool(empty_count == entry.empty_count))) << entry.source;
         expect(fatal(bool(serialize_markdown(parsed.document) == entry.source))) << entry.source;
@@ -312,8 +312,8 @@ suite parser_block_tests = [] {
         const auto& second = parsed.document.root.children[1];
         expect(fatal(bool(first.kind == entry.first_kind))) << entry.source;
         expect(fatal(bool(second.kind == entry.second_kind))) << entry.source;
-        expect(fatal(bool(first.inline_content.source == U"first"))) << entry.source;
-        expect(fatal(bool(second.inline_content.source == U"second"))) << entry.source;
+        expect(fatal(bool(first.inline_content().source == U"first"))) << entry.source;
+        expect(fatal(bool(second.inline_content().source == U"second"))) << entry.source;
 
         const auto projection = serialize_markdown_projection(parsed.document);
         expect(fatal(bool(projection.text == utf8_to_cps(entry.source)))) << entry.source;

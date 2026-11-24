@@ -72,9 +72,9 @@ suite footnote_insert_acceptance_tests = [] {
         reset_core_operation_counters();
         expect(fatal(editor.execute_command({.kind = CommandKind::InsertFootnote}))) << source;
         footnote_insert_locality();
-        expect(bool(find_document_block(editor.document(), first)->inline_content.source
+        expect(bool(find_document_block(editor.document(), first)->inline_content().source
             == (end_at_start ? U"left[^1]" : U"left")));
-        expect(bool(find_document_block(editor.document(), second)->inline_content.source
+        expect(bool(find_document_block(editor.document(), second)->inline_content().source
             == (end_at_start ? U"right" : U"rig[^1]ht")));
         expect(editor.symbols().footnote_references.size() == 1_u);
         footnote_insert_history(editor, before, selected);

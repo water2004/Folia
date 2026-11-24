@@ -59,7 +59,7 @@ suite editing_structure_task_items_tests = [] {
     const BlockNode* current = nullptr;
     walk_blocks(middle.document().root, [&](const BlockNode& block) {
         if (!current && block.kind == BlockKind::Paragraph
-            && block.inline_content.source == U"current") {
+            && block.inline_content().source == U"current") {
             current = &block;
         }
     });
@@ -102,7 +102,7 @@ suite editing_structure_task_items_tests = [] {
     const BlockNode* current = nullptr;
     walk_blocks(ordered.document().root, [&](const BlockNode& block) {
         if (!current && block.kind == BlockKind::Paragraph
-            && block.inline_content.source == U"current") current = &block;
+            && block.inline_content().source == U"current") current = &block;
     });
     expect(fatal(current != nullptr));
     if (!current) return;
@@ -144,7 +144,7 @@ suite editing_structure_task_items_tests = [] {
     const BlockNode* task_text = nullptr;
     walk_blocks(mixed.document().root, [&](const BlockNode& block) {
         if (!task_text && block.kind == BlockKind::Paragraph
-            && block.inline_content.source == U"task") task_text = &block;
+            && block.inline_content().source == U"task") task_text = &block;
     });
     expect(fatal(task_text != nullptr));
     if (!task_text) return;
@@ -186,12 +186,12 @@ suite editing_structure_task_items_tests = [] {
     const BlockNode* paragraph = nullptr;
     walk_blocks(editor.document().root, [&](const BlockNode& block) {
         if (!paragraph && block.kind == BlockKind::Paragraph
-            && block.inline_content.source == U"task") paragraph = &block;
+            && block.inline_content().source == U"task") paragraph = &block;
     });
     expect(fatal(paragraph != nullptr));
     if (!paragraph) return;
     editor.set_selection(TextSelection::caret(
-        {paragraph->id, paragraph->inline_content.source.size(), TextAffinity::Downstream}));
+        {paragraph->id, paragraph->inline_content().source.size(), TextAffinity::Downstream}));
     const auto before_selection = editor.selection();
     reset_core_operation_counters();
     auto transaction = editor.execute_document_enter(editor.selection());

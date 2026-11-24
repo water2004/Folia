@@ -40,7 +40,7 @@ boost::ut::suite gfm_pinned_entity_tests = [] {
             expect(fatal(!parsed.document.root.children.empty())) << label;
             if (parsed.document.root.children.empty()) continue;
 
-            const auto& inline_document = parsed.document.root.children.front().inline_content;
+            const auto& inline_document = parsed.document.root.children.front().inline_content();
             expect(fatal(inline_contains_kind(inline_document, InlineCstKind::Entity))) << label;
             expect(fatal(inline_document.source == test.source)) << label;
             expect(fatal(flatten_tokens(inline_document.tree, inline_document.source)

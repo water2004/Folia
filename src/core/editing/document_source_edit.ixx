@@ -248,7 +248,7 @@ inline std::optional<DocumentTransaction> document_enter(EditorDocument& documen
         target.source_offset = inserted->offset;
         target.affinity = inserted->affinity;
     } else if (block && block->kind == BlockKind::TableCell) {
-        const auto offset = (std::min)(current.active.source_offset, block->inline_content.source.size());
+        const auto offset = (std::min)(current.active.source_offset, block->inline_content().source.size());
         source_edit = document_edit_detail::edit_inline(after, block->id, {offset, offset}, U"<br>", allocator);
         if (!source_edit) return std::nullopt;
         target = {block->id, offset + 4, TextAffinity::Downstream};
@@ -632,9 +632,9 @@ inline std::optional<DocumentTransaction> document_insert_link(EditorDocument& d
             local = {{block->id, selected.start}, {block->id, selected.end}};
         }
     } else if (block && block->kind == BlockKind::ImageBlock && !selection.is_caret()
-        && !block->inline_content.source.empty()) {
-        label_source = document_inline_insertion_detail::label_without_links(block->inline_content,
-            {0, block->inline_content.source.size()});
+        && !block->inline_content().source.empty()) {
+        label_source = document_inline_insertion_detail::label_without_links(block->inline_content(),
+            {0, block->inline_content().source.size()});
     }
     auto insertion = document_inline_insertion_detail::insert(document, local,
         [&](InlineSyntaxMode syntax_mode, std::u32string_view selected_source) {
@@ -797,7 +797,7 @@ inline std::optional<DocumentTransaction> document_delete_flow_boundary(
         backward ? TextAffinity::Upstream : TextAffinity::Downstream};
     if (document_edit_detail::text_block(current->kind)
         && document_edit_detail::text_block(neighbor->kind)
-        && current->inline_content.syntax_mode == neighbor->inline_content.syntax_mode) {
+        && current->inline_content().syntax_mode == neighbor->inline_content().syntax_mode) {
         auto transaction = document_delete_selection(document,
             TextSelection{selection.active, target});
         if (transaction) transaction->selection_before = selection;

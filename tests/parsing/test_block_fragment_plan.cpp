@@ -21,7 +21,7 @@ suite block_fragment_plan_tests = [] {
         auto plan = plan_block_fragment(source, default_dialect(), [&](auto const& blocks) {
             inspected = true;
             expect(fatal(blocks.size() == 1_u));
-            expect(blocks.front().inline_content.tree.nodes.empty());
+            expect(blocks.front().inline_content().tree.nodes.empty());
             return false;
         });
         auto counters = read_core_operation_counters();

@@ -101,7 +101,7 @@ suite parser_list_separator_tests = [] {
     const auto projection = serialize_markdown_projection(parsed.document);
     expect(projection.text == U"- first\n\n- second\n") << "CommonMark #306 projection";
     for (const auto* block : texts) {
-        const auto expected = block->inline_content.source == U"first" ? U"first" : U"second";
+        const auto expected = block->inline_content().source == U"first" ? U"first" : U"second";
         const auto offset = projection.text.find(expected);
         expect(offset != std::u32string::npos) << "CommonMark #306 projected text";
         if (offset == std::u32string::npos) continue;

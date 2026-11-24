@@ -43,7 +43,7 @@ suite editing_containers_atomic_boundaries_tests = [] {
                 expect(read_core_operation_counters().full_document_serializations == 0u);
                 const auto* remaining = find_block(editor.document().root, id);
                 expect(fatal(remaining != nullptr));
-                expect(bool(remaining->inline_content.source == U"text"));
+                expect(bool(remaining->inline_content().source == U"text"));
                 expect(editor.selection().active.container_id == id);
                 expect(editor.selection().active.source_offset == (backward ? 0u : 4u));
                 std::size_t atomics = 0;

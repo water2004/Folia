@@ -91,10 +91,10 @@ static BlockNode make_render_block(BlockKind kind, std::uint64_t& next_id) {
 
 static BlockNode make_render_text_block(BlockKind kind, std::u32string source, std::uint64_t& next_id) {
     auto block = make_render_block(kind, next_id);
-    block.inline_content.source = std::move(source);
+    block.edit_inline_content().source = std::move(source);
     InlineParseContext context;
     context.allocate_id = [&] { return NodeId{next_id++}; };
-    reparse_inline_document(block.inline_content, context);
+    reparse_inline_document(block.edit_inline_content(), context);
     return block;
 }
 

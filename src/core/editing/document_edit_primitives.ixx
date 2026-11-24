@@ -174,7 +174,7 @@ inline BlockNode empty_paragraph(
     const EditorDocument& owner,
     InlineSyntaxMode syntax_mode = InlineSyntaxMode::Markdown) {
     BlockNode paragraph; paragraph.id = allocator.allocate(); paragraph.kind = BlockKind::Paragraph;
-    paragraph.inline_content = make_inline({}, owner, allocator, syntax_mode);
+    paragraph.edit_inline_content() = make_inline({}, owner, allocator, syntax_mode);
     return paragraph;
 }
 

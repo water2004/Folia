@@ -247,13 +247,13 @@ inline std::string block_to_html(const BlockNode& b, ExportRawHtmlPolicy pol) {
     switch (b.kind) {
         case BK::Heading: {
             auto const& special = b.text_special();
-            std::string s = inline_document_to_html(b.inline_content, pol);
+            std::string s = inline_document_to_html(b.inline_content(), pol);
             std::string h = "h" + std::to_string(special.level);
             return "<" + h + " id=\"" + escape_text(special.slug) + "\">" + s + "</" + h + ">\n";
         }
         case BK::Paragraph:
         case BK::CalloutTitle: {
-            std::string s = inline_document_to_html(b.inline_content, pol);
+            std::string s = inline_document_to_html(b.inline_content(), pol);
             return "<p>" + s + "</p>\n";
         }
         case BK::CodeBlock: {
@@ -296,7 +296,7 @@ inline std::string block_to_html(const BlockNode& b, ExportRawHtmlPolicy pol) {
                 const auto cell_tag = row.table_special().table_header_row ? "th" : "td";
                 html += "<tr>";
                 for (const auto& c : row.children) {
-                    std::string s = inline_document_to_html(c.inline_content, pol);
+                    std::string s = inline_document_to_html(c.inline_content(), pol);
                     html += "<" + std::string(cell_tag) + ">" + s
                         + "</" + std::string(cell_tag) + ">";
                 }

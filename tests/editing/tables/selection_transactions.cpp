@@ -63,10 +63,10 @@ suite editing_tables_selection_transactions_tests = [] {
     expect(fatal(bool(edited.children.size() == 2u)));
     expect(fatal(bool(edited.children[0].children.size() == 2u)));
     expect(fatal(bool(edited.children[1].children.size() == 2u)));
-    expect(fatal(bool(edited.children[0].children[0].inline_content.source == U"a")));
-    expect(fatal(bool(edited.children[0].children[1].inline_content.source.empty())));
-    expect(fatal(bool(edited.children[1].children[0].inline_content.source.empty())));
-    expect(fatal(bool(edited.children[1].children[1].inline_content.source == U"d")));
+    expect(fatal(bool(edited.children[0].children[0].inline_content().source == U"a")));
+    expect(fatal(bool(edited.children[0].children[1].inline_content().source.empty())));
+    expect(fatal(bool(edited.children[1].children[0].inline_content().source.empty())));
+    expect(fatal(bool(edited.children[1].children[1].inline_content().source == U"d")));
     expect(fatal(bool(validate_document(editor.document()).empty())));
 
     const auto after = editor.markdown_utf8();
@@ -101,12 +101,12 @@ suite editing_tables_selection_transactions_tests = [] {
     expect(fatal(bool(table.children.size() == 2u)));
     expect(fatal(bool(table.children[0].children.size() == 2u)));
     expect(fatal(bool(table.children[1].children.size() == 2u)));
-    expect(fatal(bool(editor.document().root.children[0].inline_content.source == U"le")));
-    expect(fatal(bool(table.children[0].children[0].inline_content.source.empty())));
-    expect(fatal(bool(table.children[0].children[1].inline_content.source == U"b")));
-    expect(fatal(bool(table.children[1].children[0].inline_content.source == U"cc")));
-    expect(fatal(bool(table.children[1].children[1].inline_content.source == U"dd")));
-    expect(fatal(bool(editor.document().root.children[2].inline_content.source == U"trail")));
+    expect(fatal(bool(editor.document().root.children[0].inline_content().source == U"le")));
+    expect(fatal(bool(table.children[0].children[0].inline_content().source.empty())));
+    expect(fatal(bool(table.children[0].children[1].inline_content().source == U"b")));
+    expect(fatal(bool(table.children[1].children[0].inline_content().source == U"cc")));
+    expect(fatal(bool(table.children[1].children[1].inline_content().source == U"dd")));
+    expect(fatal(bool(editor.document().root.children[2].inline_content().source == U"trail")));
     expect(fatal(bool(validate_document(editor.document()).empty())));
 
     expect(fatal(bool(editor.undo())));
@@ -132,10 +132,10 @@ suite editing_tables_selection_transactions_tests = [] {
     expect(fatal(bool(table.children.size() == 2u)));
     expect(fatal(bool(table.children[0].children.size() == 2u)));
     expect(fatal(bool(table.children[1].children.size() == 2u)));
-    expect(fatal(bool(table.children[0].children[0].inline_content.source == U"aX")));
-    expect(fatal(bool(table.children[0].children[1].inline_content.source.empty())));
-    expect(fatal(bool(table.children[1].children[0].inline_content.source.empty())));
-    expect(fatal(bool(table.children[1].children[1].inline_content.source == U"d")));
+    expect(fatal(bool(table.children[0].children[0].inline_content().source == U"aX")));
+    expect(fatal(bool(table.children[0].children[1].inline_content().source.empty())));
+    expect(fatal(bool(table.children[1].children[0].inline_content().source.empty())));
+    expect(fatal(bool(table.children[1].children[1].inline_content().source == U"d")));
     expect(fatal(bool(editor.selection().is_caret())));
     expect(fatal(bool(editor.selection().active.container_id
         == fragments[0].container_id)));

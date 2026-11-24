@@ -39,8 +39,8 @@ suite reference_leaf_tests = [] {
     if (parsed.document.root.children.size() != 2u) return;
     const auto& use = parsed.document.root.children.front();
     expect(use.kind == BlockKind::Paragraph);
-    expect(use.inline_content.source == U"[multi label]");
-    const auto* link = first_reference_link(use.inline_content);
+    expect(use.inline_content().source == U"[multi label]");
+    const auto* link = first_reference_link(use.inline_content());
     expect(fatal(link != nullptr));
     if (link) {
         expect(link->semantics().href == "/url");
@@ -67,7 +67,7 @@ suite reference_leaf_tests = [] {
     expect(fatal(definition != nullptr));
     if (definition) expect(definition->atomic_special().raw == "[cr]: /one\r");
     const auto& use = parsed.document.root.children.back();
-    const auto* link = first_reference_link(use.inline_content);
+    const auto* link = first_reference_link(use.inline_content());
     expect(fatal(link != nullptr));
     if (link) expect(link->semantics().href == "/one");
 };
@@ -80,7 +80,7 @@ suite reference_leaf_tests = [] {
     if (parsed.document.root.children.size() != 1u) return;
     const auto& quote = parsed.document.root.children.front();
     expect(quote.kind == BlockKind::BlockQuote);
-    const auto* link = quote.children.empty() ? nullptr : first_reference_link(quote.children.back().inline_content);
+    const auto* link = quote.children.empty() ? nullptr : first_reference_link(quote.children.back().inline_content());
     expect(fatal(link != nullptr));
     if (link) {
         expect(link->semantics().href == "/inside");

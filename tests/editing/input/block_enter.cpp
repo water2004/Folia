@@ -116,7 +116,7 @@ suite editing_input_block_enter_tests = [] {
         const auto& list = continued->after.root.children.front();
         expect(fatal(bool(list.children.size() == 2u)));
         expect(fatal(bool(list.children.back().item_special().marker == U"- ")));
-        expect(fatal(bool(list.children.back().children.front().inline_content.source.empty())));
+        expect(fatal(bool(list.children.back().children.front().inline_content().source.empty())));
         expect(fatal(bool(continued->selection_after.active.container_id == list.children.back().children.front().id)));
     }
 
@@ -135,7 +135,7 @@ suite editing_input_block_enter_tests = [] {
         const auto& list = inserted_before->after.root.children.front();
         expect(fatal(bool(list.children.front().item_special().marker == U"7) ")));
         expect(fatal(bool(list.children.back().item_special().marker == U"8) ")));
-        expect(fatal(bool(list.children.back().children.front().inline_content.source == U"one")));
+        expect(fatal(bool(list.children.back().children.front().inline_content().source == U"one")));
     }
 
     auto tasks = parse_document("- [x] done");
@@ -187,8 +187,8 @@ suite editing_input_block_enter_tests = [] {
     if (!transaction) return;
     expect(fatal(bool(transaction->after.root.children.size() == 2u)));
     expect(fatal(bool(transaction->after.root.children[0].id == original_id)));
-    expect(fatal(bool(transaction->after.root.children[0].inline_content.source == U"**alp")));
-    expect(fatal(bool(transaction->after.root.children[1].inline_content.source == U"ha**")));
+    expect(fatal(bool(transaction->after.root.children[0].inline_content().source == U"**alp")));
+    expect(fatal(bool(transaction->after.root.children[1].inline_content().source == U"ha**")));
     expect(fatal(bool(transaction->selection_after.active.container_id == transaction->after.root.children[1].id)));
     expect_document_valid(transaction->after);
 };

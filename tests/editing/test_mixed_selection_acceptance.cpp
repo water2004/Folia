@@ -60,8 +60,8 @@ suite mixed_selection_acceptance_tests = [] {
         const auto* cell = find_document_block(editor.document(), first);
         const auto expected = kind == CommandKind::DeleteSelection ? U"aa"
             : kind == CommandKind::InsertText || kind == CommandKind::Paste ? U"aaX" : U"aa<br>";
-        expect(bool(cell->inline_content.source == expected));
-        expect(bool(find_document_block(editor.document(), second)->inline_content.source == U"bb"));
+        expect(bool(cell->inline_content().source == expected));
+        expect(bool(find_document_block(editor.document(), second)->inline_content().source == U"bb"));
         if (kind == CommandKind::DeleteSelection) {
             expect(editor.revision() == revision);
             expect(editor.markdown_utf8() == before);

@@ -47,11 +47,11 @@ suite parser_format_tests = [] {
     expect(fatal(bool(table->children.size() == 2u)));
     expect(fatal(bool(table->table_special().table_aligns
         == std::vector{TableAlignment::Left, TableAlignment::Right})));
-    expect(fatal(bool(has_inline(table->children[0].children[0].inline_content, InlineCstKind::Strong))));
-    expect(fatal(bool(has_inline(table->children[0].children[1].inline_content, InlineCstKind::InlineMath))));
-    expect(fatal(bool(has_inline(table->children[1].children[0].inline_content, InlineCstKind::CodeSpan))));
-    expect(fatal(bool(has_inline(table->children[1].children[1].inline_content, InlineCstKind::Strikethrough))));
-    for (const auto& row : table->children) for (const auto& cell : row.children) expect_lossless(cell.inline_content);
+    expect(fatal(bool(has_inline(table->children[0].children[0].inline_content(), InlineCstKind::Strong))));
+    expect(fatal(bool(has_inline(table->children[0].children[1].inline_content(), InlineCstKind::InlineMath))));
+    expect(fatal(bool(has_inline(table->children[1].children[0].inline_content(), InlineCstKind::CodeSpan))));
+    expect(fatal(bool(has_inline(table->children[1].children[1].inline_content(), InlineCstKind::Strikethrough))));
+    for (const auto& row : table->children) for (const auto& cell : row.children) expect_lossless(cell.inline_content());
 };
 
 "block_line_endings_keep_pipe_tables_and_fenced_code_structurally_equivalent"_test = [] {
@@ -210,13 +210,13 @@ suite parser_format_tests = [] {
     const auto& paragraph = parsed.document.root.children.front();
     expect(fatal(paragraph.kind == BlockKind::Paragraph));
     const auto image = std::ranges::find_if(
-        paragraph.inline_content.tree.nodes,
+        paragraph.inline_content().tree.nodes,
         [](auto const& node) {
             return node.kind == InlineCstKind::HtmlElement
                 && node.semantics().html_tag == "img";
         });
-    expect(fatal(image != paragraph.inline_content.tree.nodes.end()));
-    if (image != paragraph.inline_content.tree.nodes.end()) {
+    expect(fatal(image != paragraph.inline_content().tree.nodes.end()));
+    if (image != paragraph.inline_content().tree.nodes.end()) {
         expect(fatal(image->semantics().image_width
             == std::optional<ImageDimension>{ImageDimension::percent(100.0f)}));
     }

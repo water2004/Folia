@@ -29,12 +29,12 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> apply_after_text_i
     document_edit_detail::NodeAllocator& allocator) {
     auto* block = find_document_block(document, target.container_id);
     if (!block || block->kind != BlockKind::Paragraph
-        || block->inline_content.syntax_mode != InlineSyntaxMode::Markdown) return std::nullopt;
+        || block->inline_content().syntax_mode != InlineSyntaxMode::Markdown) return std::nullopt;
     if (auto task = detail::upgrade_task_item(document, target, allocator, *block)) {
         target = task->target;
         return task;
     }
-    auto marker = detail::recognize_marker(block->inline_content.source, target.source_offset);
+    auto marker = detail::recognize_marker(block->inline_content().source, target.source_offset);
     if (!marker) return std::nullopt;
     auto path = document_block_path(document, target.container_id);
     if (!path) return std::nullopt;

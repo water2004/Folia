@@ -12,7 +12,7 @@ BlockNode paragraph(std::uint64_t id, std::u32string source) {
     BlockNode block;
     block.id = NodeId{id};
     block.kind = BlockKind::Paragraph;
-    block.inline_content.source = std::move(source);
+    block.edit_inline_content().source = std::move(source);
     return block;
 }
 

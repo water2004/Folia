@@ -20,7 +20,7 @@ inline void scan_inline_ids(const InlineCstNodes& nodes, std::uint64_t& maximum)
 
 inline void scan_block_ids(const BlockNode& block, std::uint64_t& maximum) {
     maximum = (std::max)(maximum, block.id.v);
-    scan_inline_ids(block.inline_content.tree.nodes, maximum);
+    scan_inline_ids(block.inline_content().tree.nodes, maximum);
     for (const auto& child : block.children) scan_block_ids(child, maximum);
 }
 
@@ -41,8 +41,9 @@ inline void assign_fresh_document_ids(EditorDocument& document,BlockNode& root) 
         const auto old=block.id;
         block.id=allocate_document_node_id(document);
         remapped.emplace(old.v,block.id);
+        if (!block.has_inline_content()) return;
         std::vector<InlineCstNode*> pending;
-        for (auto& node:block.inline_content.tree.nodes) pending.push_back(&node);
+        for (auto& node:block.edit_inline_content().tree.nodes) pending.push_back(&node);
         while (!pending.empty()) {
             auto* node=pending.back(); pending.pop_back();
             node->id=allocate_document_node_id(document);

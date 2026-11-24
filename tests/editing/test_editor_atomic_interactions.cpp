@@ -89,7 +89,7 @@ suite editor_atomic_interaction_tests = [] {
         expect(fatal(paragraph != nullptr));
         if (!paragraph) continue;
         expect(paragraph->kind == BlockKind::Paragraph);
-        expect(paragraph->inline_content.source.empty());
+        expect(paragraph->inline_content().source.empty());
         expect(after_selection.active.source_offset == 0_u);
         const auto paragraph_path = *document_block_path(editor.document(), paragraph->id);
         const auto atom_path = *document_block_path(editor.document(), owner_id);
@@ -103,9 +103,9 @@ suite editor_atomic_interaction_tests = [] {
         const auto* typed = find_document_block(editor.document(), editor.selection().active.container_id);
         expect(fatal(typed != nullptr));
         if (typed) {
-            expect(typed->inline_content.source == U"next\U0001F642");
-            expect(flatten_tokens(typed->inline_content.tree, typed->inline_content.source)
-                == typed->inline_content.source);
+            expect(typed->inline_content().source == U"next\U0001F642");
+            expect(flatten_tokens(typed->inline_content().tree, typed->inline_content().source)
+                == typed->inline_content().source);
         }
         expect(atomic_owner(editor, kind) != nullptr);
         expect(validate_document(editor.document()).empty());
@@ -154,7 +154,7 @@ suite editor_atomic_interaction_tests = [] {
         const auto* paragraph = find_document_block(editor.document(), owner_id);
         expect(fatal(paragraph != nullptr));
         if (!paragraph) continue;
-        expect(paragraph->inline_content.syntax_mode == InlineSyntaxMode::HtmlText);
+        expect(paragraph->inline_content().syntax_mode == InlineSyntaxMode::HtmlText);
         expect(editor.execute_command(Command::InsertText(U"# literal")));
         expect(find_document_block(editor.document(), owner_id)->kind == BlockKind::Paragraph);
         expect(editor.markdown_utf8().find("# literal") != std::string::npos);
@@ -170,7 +170,7 @@ suite editor_atomic_interaction_tests = [] {
     expect(fatal(standalone.execute_command(enter)));
     const auto* paragraph = find_document_block(standalone.document(), standalone.selection().active.container_id);
     expect(fatal(paragraph != nullptr));
-    if (paragraph) expect(paragraph->inline_content.syntax_mode == InlineSyntaxMode::Markdown);
+    if (paragraph) expect(paragraph->inline_content().syntax_mode == InlineSyntaxMode::Markdown);
 };
 
 "atomic_thematic_markers_activate_on_enter_and_leave_editable_following_text"_test = [] {
@@ -196,14 +196,14 @@ suite editor_atomic_interaction_tests = [] {
         expect(fatal(following != nullptr));
         if (!following) continue;
         expect(following->kind == BlockKind::Paragraph);
-        expect(following->inline_content.source.empty());
+        expect(following->inline_content().source.empty());
         const auto after = editor.markdown_utf8();
         const auto after_selection = editor.selection();
         check_atomic_history(editor, before, before_selection, after, after_selection);
         expect(editor.execute_command(Command::InsertText(U"after rule")));
         Editor reloaded(editor.markdown_utf8());
         expect(reloaded.document().root.children.front().kind == BlockKind::ThematicBreak);
-        expect(reloaded.document().root.children.back().inline_content.source == U"after rule");
+        expect(reloaded.document().root.children.back().inline_content().source == U"after rule");
     }
 };
 
@@ -238,7 +238,7 @@ suite editor_atomic_interaction_tests = [] {
     for (const auto source : {"-\n  --", "- \n  --", "*\n  **", "* \r\n  **"}) {
         Editor editor(source);
         const auto& paragraph = first_text(editor);
-        editor.set_selection(caret(paragraph, paragraph.inline_content.source.size()));
+        editor.set_selection(caret(paragraph, paragraph.inline_content().source.size()));
         Command enter;
         enter.kind = CommandKind::InsertNewline;
         expect(editor.execute_command(enter));
@@ -259,8 +259,8 @@ suite editor_atomic_interaction_tests = [] {
         expect(fatal(edited != nullptr));
         if (!edited) continue;
         expect(edited->kind == BlockKind::Paragraph);
-        expect(edited->inline_content.syntax_mode == InlineSyntaxMode::HtmlText);
-        expect(edited->inline_content.source == std::u32string(marker) + U"body");
+        expect(edited->inline_content().syntax_mode == InlineSyntaxMode::HtmlText);
+        expect(edited->inline_content().source == std::u32string(marker) + U"body");
         const auto after = editor.markdown_utf8();
         const auto after_selection = editor.selection();
         check_atomic_history(editor, before, before_selection, after, after_selection);
@@ -268,7 +268,7 @@ suite editor_atomic_interaction_tests = [] {
     for (const auto marker : {"```", "~~~", "$$", "---"}) {
         Editor editor(std::string("<p>") + marker + "</p>");
         const auto owner_id = first_text(editor).id;
-        editor.set_selection(caret(first_text(editor), first_text(editor).inline_content.source.size()));
+        editor.set_selection(caret(first_text(editor), first_text(editor).inline_content().source.size()));
         const auto before = editor.markdown_utf8();
         const auto before_selection = editor.selection();
         Command enter;
@@ -312,8 +312,8 @@ suite editor_atomic_interaction_tests = [] {
         if (!heading) continue;
         expect(heading->kind == BlockKind::Heading);
         expect(heading->text_special().level == entry.level);
-        expect(bool(heading->inline_content.source == entry.title));
-        expect(bool(heading->text_special().opening_marker + heading->inline_content.source
+        expect(bool(heading->inline_content().source == entry.title));
+        expect(bool(heading->text_special().opening_marker + heading->inline_content().source
             + heading->text_special().closing_marker == entry.source));
         const auto* following = find_document_block(editor.document(), editor.selection().active.container_id);
         expect(fatal(following != nullptr));
@@ -324,8 +324,8 @@ suite editor_atomic_interaction_tests = [] {
         expect(editor.execute_command(Command::InsertText(U"body")));
         Editor reloaded(editor.markdown_utf8());
         expect(reloaded.document().root.children.front().kind == BlockKind::Heading);
-        expect(bool(reloaded.document().root.children.front().inline_content.source == entry.title));
-        expect(reloaded.document().root.children.back().inline_content.source == U"body");
+        expect(bool(reloaded.document().root.children.front().inline_content().source == entry.title));
+        expect(reloaded.document().root.children.back().inline_content().source == U"body");
     }
 };
 
@@ -345,7 +345,7 @@ suite editor_atomic_interaction_tests = [] {
         expect(fatal(heading != nullptr));
         if (heading) {
             expect(heading->kind == BlockKind::Heading);
-            expect(heading->inline_content.source == U"title");
+            expect(heading->inline_content().source == U"title");
         }
         expect(editor.document().root.children.front().kind == root_kind);
         const auto after = editor.markdown_utf8();
@@ -374,7 +374,7 @@ suite editor_atomic_interaction_tests = [] {
     const auto& paragraph = editor.document().root.children.back();
     const auto owner_id = paragraph.id;
     const auto separator = paragraph.separator_before;
-    editor.set_selection(range(paragraph, 0, paragraph.inline_content.source.size()));
+    editor.set_selection(range(paragraph, 0, paragraph.inline_content().source.size()));
     expect(fatal(editor.execute_command(Command::InsertText(U"```cpp"))));
     const auto before = editor.markdown_utf8();
     const auto before_selection = editor.selection();

@@ -28,7 +28,7 @@ namespace {
 const BlockNode* type7_paragraph(const BlockVec& blocks) {
     for (const auto& block : blocks) {
         if (block.kind == BlockKind::Paragraph
-            && block.inline_content.syntax_mode == InlineSyntaxMode::HtmlText) {
+            && block.inline_content().syntax_mode == InlineSyntaxMode::HtmlText) {
             return &block;
         }
         if (const auto* nested = type7_paragraph(block.children)) return nested;
@@ -37,7 +37,7 @@ const BlockNode* type7_paragraph(const BlockVec& blocks) {
 }
 
 bool inline_source_is_lossless(const BlockNode& block) {
-    const auto& document = block.inline_content;
+    const auto& document = block.inline_content();
     return tokens_partition_source(document.tree, document.source.size())
         && roots_partition_source(document.tree, document.source.size())
         && flatten_tokens(document.tree, document.source) == document.source
@@ -140,7 +140,7 @@ suite html_block_editing_tests = [] {
     expect(split.find("</div>") == std::string::npos);
     const auto* left = find_document_block(editor.document(), owner);
     expect(fatal(left != nullptr));
-    if (left) expect(left->inline_content.source == U"t");
+    if (left) expect(left->inline_content().source == U"t");
     const auto split_selection = editor.selection();
     reset_core_operation_counters();
     expect(fatal(editor.undo()));
@@ -160,8 +160,8 @@ suite html_block_editing_tests = [] {
     if (parsed.document.root.children.size() != 1u) return;
     const auto& paragraph = parsed.document.root.children.front();
     expect(paragraph.kind == BlockKind::Paragraph);
-    expect(paragraph.inline_content.syntax_mode == InlineSyntaxMode::HtmlText);
-    expect(paragraph.inline_content.source == utf8_to_cps(kHtmlType7Body));
+    expect(paragraph.inline_content().syntax_mode == InlineSyntaxMode::HtmlText);
+    expect(paragraph.inline_content().source == utf8_to_cps(kHtmlType7Body));
     expect(parsed.document.trailing_line_ending == U"\n");
     expect(inline_source_is_lossless(paragraph));
     expect(serialize_markdown(parsed.document) == kHtmlType7Source);
@@ -198,10 +198,10 @@ suite html_block_editing_tests = [] {
     if (editor.document().root.children.size() != 1u) return;
     const auto& initial = editor.document().root.children.front();
     expect(initial.kind == BlockKind::Paragraph);
-    expect(initial.inline_content.syntax_mode == InlineSyntaxMode::HtmlText);
-    expect(initial.inline_content.source == utf8_to_cps(kHtmlType7Body));
+    expect(initial.inline_content().syntax_mode == InlineSyntaxMode::HtmlText);
+    expect(initial.inline_content().source == utf8_to_cps(kHtmlType7Body));
     const auto owner_id = initial.id;
-    const auto before_source = initial.inline_content.source;
+    const auto before_source = initial.inline_content().source;
     const auto visible = before_source.find(U"visible");
     expect(visible != std::u32string::npos);
     if (visible == std::u32string::npos) return;
@@ -220,8 +220,8 @@ suite html_block_editing_tests = [] {
     expect(fatal(inserted != nullptr));
     if (!inserted) return;
     expect(inserted->kind == BlockKind::Paragraph);
-    expect(inserted->inline_content.syntax_mode == InlineSyntaxMode::HtmlText);
-    expect(inserted->inline_content.source == expected_inserted_source);
+    expect(inserted->inline_content().syntax_mode == InlineSyntaxMode::HtmlText);
+    expect(inserted->inline_content().source == expected_inserted_source);
     expect(inline_source_is_lossless(*inserted));
     expect(inserted_selection.active.container_id == owner_id);
     expect(inserted_selection.active.source_offset == caret.active.source_offset + 1u);
@@ -237,7 +237,7 @@ suite html_block_editing_tests = [] {
     const auto* deleted = find_document_block(editor.document(), owner_id);
     expect(fatal(deleted != nullptr));
     if (!deleted) return;
-    expect(deleted->inline_content.source == before_source);
+    expect(deleted->inline_content().source == before_source);
     expect(inline_source_is_lossless(*deleted));
     expect(deleted_selection == caret);
     expect(editor.markdown_utf8() == kHtmlType7Source);
@@ -249,7 +249,7 @@ suite html_block_editing_tests = [] {
     const auto* undo_delete = find_document_block(editor.document(), owner_id);
     expect(fatal(undo_delete != nullptr));
     if (undo_delete) {
-        expect(undo_delete->inline_content.source == expected_inserted_source);
+        expect(undo_delete->inline_content().source == expected_inserted_source);
         expect(inline_source_is_lossless(*undo_delete));
     }
     expect(editor.markdown_utf8() == inserted_markdown);
@@ -261,7 +261,7 @@ suite html_block_editing_tests = [] {
     const auto* undo_insert = find_document_block(editor.document(), owner_id);
     expect(fatal(undo_insert != nullptr));
     if (undo_insert) {
-        expect(undo_insert->inline_content.source == before_source);
+        expect(undo_insert->inline_content().source == before_source);
         expect(inline_source_is_lossless(*undo_insert));
     }
     expect(editor.markdown_utf8() == kHtmlType7Source);
@@ -279,7 +279,7 @@ suite html_block_editing_tests = [] {
     const auto* redo_delete = find_document_block(editor.document(), owner_id);
     expect(fatal(redo_delete != nullptr));
     if (redo_delete) {
-        expect(redo_delete->inline_content.source == before_source);
+        expect(redo_delete->inline_content().source == before_source);
         expect(inline_source_is_lossless(*redo_delete));
     }
     expect(editor.markdown_utf8() == kHtmlType7Source);
@@ -291,9 +291,9 @@ suite html_block_editing_tests = [] {
     if (editor.document().root.children.size() != 1u) return;
     const auto& paragraph = editor.document().root.children.front();
     expect(paragraph.kind == BlockKind::Paragraph);
-    expect(paragraph.inline_content.syntax_mode == InlineSyntaxMode::HtmlText);
+    expect(paragraph.inline_content().syntax_mode == InlineSyntaxMode::HtmlText);
     const auto owner_id = paragraph.id;
-    const auto raw_body = paragraph.inline_content.source;
+    const auto raw_body = paragraph.inline_content().source;
     expect(raw_body == utf8_to_cps(kHtmlType7Body));
     const auto visible = raw_body.find(U"visible");
     expect(visible != std::u32string::npos);
@@ -315,10 +315,10 @@ suite html_block_editing_tests = [] {
     const auto& right = editor.document().root.children[1];
     expect(left.kind == BlockKind::Paragraph);
     expect(right.kind == BlockKind::Paragraph);
-    expect(left.inline_content.syntax_mode == InlineSyntaxMode::HtmlText);
-    expect(right.inline_content.syntax_mode == InlineSyntaxMode::HtmlText);
-    expect(left.inline_content.source == raw_body.substr(0, split_offset));
-    expect(right.inline_content.source == raw_body.substr(split_offset));
+    expect(left.inline_content().syntax_mode == InlineSyntaxMode::HtmlText);
+    expect(right.inline_content().syntax_mode == InlineSyntaxMode::HtmlText);
+    expect(left.inline_content().source == raw_body.substr(0, split_offset));
+    expect(right.inline_content().source == raw_body.substr(split_offset));
     expect(inline_source_is_lossless(left));
     expect(inline_source_is_lossless(right));
     const auto after_selection = editor.selection();
@@ -348,7 +348,7 @@ suite html_block_editing_tests = [] {
     if (editor.document().root.children.size() == 1u) {
         const auto& restored = editor.document().root.children.front();
         expect(restored.id == owner_id);
-        expect(restored.inline_content.source == raw_body);
+        expect(restored.inline_content().source == raw_body);
         expect(inline_source_is_lossless(restored));
     }
     expect(editor.selection() == before_selection);
@@ -359,9 +359,9 @@ suite html_block_editing_tests = [] {
     expect_no_global_rebuild("type7 Enter redo");
     expect(fatal(editor.document().root.children.size() == 2u));
     if (editor.document().root.children.size() == 2u) {
-        expect(editor.document().root.children[0].inline_content.source
+        expect(editor.document().root.children[0].inline_content().source
             == raw_body.substr(0, split_offset));
-        expect(editor.document().root.children[1].inline_content.source
+        expect(editor.document().root.children[1].inline_content().source
             == raw_body.substr(split_offset));
     }
     expect(editor.selection() == after_selection);

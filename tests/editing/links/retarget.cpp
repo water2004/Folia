@@ -38,7 +38,7 @@ suite editing_links_retarget_tests = [] {
     for (const auto select_label : {false, true}) {
         Editor editor(source);
         const auto& first = first_text(editor);
-        const auto nodes = link_nodes(first.inline_content);
+        const auto nodes = link_nodes(first.inline_content());
         expect(fatal(nodes.size() == 1_u)) << source;
         const auto content = nodes.front()->delimiter_ranges().content;
         const auto selected = select_label
@@ -49,7 +49,7 @@ suite editing_links_retarget_tests = [] {
         reset_core_operation_counters();
         expect(fatal(editor.execute_command(insert_link_command()))) << source;
         link_insert_locality();
-        const auto& owner = find_document_block(editor.document(), id)->inline_content;
+        const auto& owner = find_document_block(editor.document(), id)->inline_content();
         expect(bool(owner.source == expected)) << cps_to_utf8(owner.source);
         const auto links = link_nodes(owner);
         expect(fatal(links.size() == 1_u));
@@ -75,7 +75,7 @@ suite editing_links_retarget_tests = [] {
         Editor editor(source);
         const auto& first = first_text(editor);
         const auto id = first.id;
-        const auto selected = caret(first, first.inline_content.source.find(U"label") + 1);
+        const auto selected = caret(first, first.inline_content().source.find(U"label") + 1);
         editor.set_selection(selected);
         const auto before = editor.markdown_utf8();
         auto command = insert_link_command();
@@ -83,7 +83,7 @@ suite editing_links_retarget_tests = [] {
         reset_core_operation_counters();
         expect(fatal(editor.execute_command(command)));
         link_insert_locality();
-        const auto& owner = find_document_block(editor.document(), id)->inline_content;
+        const auto& owner = find_document_block(editor.document(), id)->inline_content();
         expect(bool(owner.source == expected)) << cps_to_utf8(owner.source);
         const auto links = link_nodes(owner);
         expect(fatal(links.size() == 1_u));
@@ -98,20 +98,20 @@ suite editing_links_retarget_tests = [] {
         Editor editor(std::string{"| "} + original + " |\n| --- |");
         const auto& first = first_text(editor);
         const auto id = first.id;
-        const auto selected = range(first, 0, first.inline_content.source.size());
+        const auto selected = range(first, 0, first.inline_content().source.size());
         editor.set_selection(selected);
         const auto before = editor.markdown_utf8();
         auto command = insert_link_command();
         command.title = U"a|b\r\n\"quoted\"";
         expect(fatal(editor.execute_command(command)));
-        const auto& owner = find_document_block(editor.document(), id)->inline_content;
+        const auto& owner = find_document_block(editor.document(), id)->inline_content();
         const auto nodes = link_nodes(owner);
         expect(fatal(nodes.size() == 1_u));
         expect(nodes.front()->semantics().href == "new");
         expect(nodes.front()->semantics().title == std::optional<std::string>{"a|b\r\n\"quoted\""});
         Editor reloaded(editor.markdown_utf8());
         expect(reloaded.document().cached_editable_order.size() == 1_u);
-        expect(link_nodes(first_text(reloaded).inline_content).size() == 1_u);
+        expect(link_nodes(first_text(reloaded).inline_content()).size() == 1_u);
         link_insert_history(editor, before, selected);
     }
     for (const auto source : {"<p><a data-x='keep'>label</a></p>", "<p><a href>label</a></p>",
@@ -119,13 +119,13 @@ suite editing_links_retarget_tests = [] {
         Editor html(source);
         const auto& owner = first_text(html);
         const auto id = owner.id;
-        const auto selected = caret(owner, owner.inline_content.source.find(U"label") + 1);
+        const auto selected = caret(owner, owner.inline_content().source.find(U"label") + 1);
         html.set_selection(selected);
         const auto before = html.markdown_utf8();
         auto command = insert_link_command();
         command.title = U"new title";
         expect(fatal(html.execute_command(command)));
-        const auto& changed = find_document_block(html.document(), id)->inline_content;
+        const auto& changed = find_document_block(html.document(), id)->inline_content();
         expect(bool(changed.source == (std::string_view(source).find("data-x") != std::string_view::npos
             ? U"<a data-x='keep' href=\"new\" title=\"new title\">label</a>"
             : std::string_view(source).find("href>") != std::string_view::npos
@@ -168,7 +168,7 @@ suite editing_links_retarget_tests = [] {
         Editor editor(initial);
         const auto& first = first_text(editor);
         const auto id = first.id;
-        const auto selected = range(first, 0, first.inline_content.source.size());
+        const auto selected = range(first, 0, first.inline_content().source.size());
         editor.set_selection(selected);
         const auto before = editor.markdown_utf8();
         auto command = insert_link_command();
@@ -177,7 +177,7 @@ suite editing_links_retarget_tests = [] {
         command.title = U"literal &copy; &#10; &amp;";
         command.alt = U"literal &copy; &#10; &amp;";
         expect(fatal(editor.execute_command(command)));
-        const auto& owner = find_document_block(editor.document(), id)->inline_content;
+        const auto& owner = find_document_block(editor.document(), id)->inline_content();
         const auto wanted = owner.syntax_mode == InlineSyntaxMode::HtmlText ? InlineCstKind::HtmlElement
             : image ? InlineCstKind::Image : InlineCstKind::Link;
         const auto node = std::ranges::find(owner.tree.nodes, wanted, &InlineCstNode::kind);
@@ -195,13 +195,13 @@ suite editing_links_retarget_tests = [] {
         Editor editor(initial);
         const auto& first = first_text(editor);
         const auto id = first.id;
-        const auto selected = range(first, 0, first.inline_content.source.size());
-        const auto label = first.inline_content.source;
-        const auto visible = inline_visible_text(first.inline_content);
+        const auto selected = range(first, 0, first.inline_content().source.size());
+        const auto label = first.inline_content().source;
+        const auto visible = inline_visible_text(first.inline_content());
         editor.set_selection(selected);
         const auto before = editor.markdown_utf8();
         expect(fatal(editor.execute_command(insert_link_command())));
-        const auto& owner = find_document_block(editor.document(), id)->inline_content;
+        const auto& owner = find_document_block(editor.document(), id)->inline_content();
         expect(bool(owner.source == U"[" + label + U"](new)")) << cps_to_utf8(owner.source);
         expect(bool(inline_visible_text(owner) == visible));
         const auto links = link_nodes(owner);
@@ -211,11 +211,11 @@ suite editing_links_retarget_tests = [] {
     }
     Editor table("| `x\\|y` |\n| --- |");
     const auto id = first_text(table).id;
-    const auto selected = range(first_text(table), 0, first_text(table).inline_content.source.size());
+    const auto selected = range(first_text(table), 0, first_text(table).inline_content().source.size());
     table.set_selection(selected);
     const auto before = table.markdown_utf8();
     expect(fatal(table.execute_command(insert_link_command())));
-    expect(bool(find_document_block(table.document(), id)->inline_content.source == U"[`x\\|y`](new)"));
+    expect(bool(find_document_block(table.document(), id)->inline_content().source == U"[`x\\|y`](new)"));
     Editor reloaded(table.markdown_utf8());
     expect(reloaded.document().cached_editable_order.size() == 1_u);
     link_insert_history(table, before, selected);

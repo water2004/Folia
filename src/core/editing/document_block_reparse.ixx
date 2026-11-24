@@ -214,7 +214,7 @@ inline std::optional<BlockReparsePlan> plan_block_reparse(
         && source.starts_with(U"<") && source.find(U'>') != std::u32string::npos;
     const auto is_indented_paragraph = [&] {
         if (current.kind != BlockKind::Paragraph
-            || current.inline_content.syntax_mode != InlineSyntaxMode::Markdown) return false;
+            || current.inline_content().syntax_mode != InlineSyntaxMode::Markdown) return false;
         std::size_t columns = 0;
         for (const auto character : source) {
             if (character == U' ') ++columns;
@@ -245,7 +245,7 @@ inline std::optional<BlockReparsePlan> plan_block_reparse(
         parsed.source_ranges.clear();
         BlockNode paragraph;
         paragraph.kind = BlockKind::Paragraph;
-        paragraph.inline_content.source = source;
+        paragraph.edit_inline_content().source = source;
         parsed.blocks.push_back(std::move(paragraph));
         target = block_reparse_detail::TargetCandidate{
             {},
@@ -273,10 +273,10 @@ inline std::optional<BlockReparsePlan> plan_adjacent_display_math(
     const auto* parent = block_at_path(document.root, *path);
     if (!parent || index + 1 >= parent->children.size()) return std::nullopt;
     const auto& following = parent->children[index + 1];
-    if (following.kind != BlockKind::Paragraph || following.inline_content.source.empty()) return std::nullopt;
+    if (following.kind != BlockKind::Paragraph || following.inline_content().source.empty()) return std::nullopt;
 
     auto projection = serialize_markdown_fragment_projection(parent->children, index, index + 2);
-    const auto& before = current.inline_content.source;
+    const auto& before = current.inline_content().source;
     if (projection.blocks.size() != 2 || projection.blocks.front().begin != 0
         || projection.blocks.front().end != before.size() || !projection.text.starts_with(before)) return std::nullopt;
     projection.text.replace(0, before.size(), source);
@@ -325,10 +325,10 @@ inline std::optional<BlockReparsePlan> plan_block_source_insertion(
     const auto* current = find_document_block(document, position.container_id);
     if (!current || current->kind != BlockKind::Paragraph) return std::nullopt;
     if (text.find(U'\n') == text.npos) {
-        if (position.source_offset != 0 || !current->inline_content.source.empty()) return std::nullopt;
+        if (position.source_offset != 0 || !current->inline_content().source.empty()) return std::nullopt;
         return plan_adjacent_display_math(document, *current, text, text.size());
     }
-    auto source = current->inline_content.source;
+    auto source = current->inline_content().source;
     if (position.source_offset > source.size()) return std::nullopt;
     source.insert(position.source_offset, text);
     return plan_block_reparse(document, *current, source,

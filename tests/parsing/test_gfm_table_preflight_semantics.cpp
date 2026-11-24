@@ -44,7 +44,7 @@ void expect_one_paragraph(std::string const& source, std::string const& expected
         ? std::string_view(source).substr(0, source.size() - 1) : std::string_view(source);
     for (const auto ch : source_without_terminal_newline)
         expected_source.push_back(static_cast<char32_t>(static_cast<unsigned char>(ch)));
-    expect(bool(block.inline_content.source == expected_source));
+    expect(bool(block.inline_content().source == expected_source));
     expect(serialize_markdown(parsed.document) == source);
     expect(folia::test::commonmark::project(parsed.document.root).projected_html == expected_html);
 }
@@ -73,7 +73,7 @@ suite gfm_table_preflight_semantics_tests = [] {
         expect(parsed.document.root.children.size() == 2_u);
         if (parsed.document.root.children.size() != 2) return;
         expect(parsed.document.root.children[0].kind == BlockKind::Paragraph);
-        expect(parsed.document.root.children[0].inline_content.source == U"123\n456");
+        expect(parsed.document.root.children[0].inline_content().source == U"123\n456");
         expect(parsed.document.root.children[1].kind == BlockKind::Table);
         expect(serialize_markdown(parsed.document) == source);
         expect(folia::test::commonmark::project(parsed.document.root).projected_html

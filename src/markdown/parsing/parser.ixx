@@ -886,14 +886,14 @@ BlockNode make_html_inline_block(
     BlockNode block;
     block.id = next_node_id();
     block.kind = kind;
-    block.inline_content.source.assign(body->begin(), body->end());
-    block.inline_content.syntax_mode = InlineSyntaxMode::HtmlText;
+    block.edit_inline_content().source.assign(body->begin(), body->end());
+    block.edit_inline_content().syntax_mode = InlineSyntaxMode::HtmlText;
     if (heading_level != 0) block.ensure_text_special().level = heading_level;
     attach_html_element(block, node, source);
     register_html_owner_source(block.id, source, node.content);
     push_html_range(block.id, node, source);
     slots.push_back({block.id, node.content});
-    auto tail = completion_from_source(block.inline_content.source);
+    auto tail = completion_from_source(block.inline_content().source);
     if (kind == BlockKind::Heading && tail == Completion::Empty) tail = Completion::Other;
     record_completion(block.id, tail);
     return block;
@@ -908,12 +908,12 @@ BlockNode make_html_inline_run(
     BlockNode block;
     block.id = next_node_id();
     block.kind = BlockKind::Paragraph;
-    block.inline_content.source.assign(body->begin(), body->end());
-    block.inline_content.syntax_mode = InlineSyntaxMode::HtmlText;
+    block.edit_inline_content().source.assign(body->begin(), body->end());
+    block.edit_inline_content().syntax_mode = InlineSyntaxMode::HtmlText;
     register_html_owner_source(block.id, source, range);
     push_leaf_range(block.id, source.physical_map(), range, range);
     slots.push_back({block.id, range});
-    record_completion(block.id, completion_from_source(block.inline_content.source));
+    record_completion(block.id, completion_from_source(block.inline_content().source));
     return block;
 }
 
@@ -1094,7 +1094,7 @@ std::optional<BlockNode> make_html_semantic(
         push_html_range(quote.id, node, source);
         const auto tail = !quote.children.empty()
                 && quote.children.back().kind == BlockKind::Paragraph
-                && quote.children.back().inline_content.source.empty()
+                && quote.children.back().inline_content().source.empty()
             ? Completion::Other : sequence_completion(quote.children);
         record_completion(quote.id, tail);
         return quote;
@@ -1204,13 +1204,13 @@ std::optional<BlockNode> try_parse_raw_html_block(const LeafLine& first) {
         BlockNode paragraph;
         paragraph.id = next_node_id();
         paragraph.kind = BlockKind::Paragraph;
-        paragraph.inline_content.source.assign(source.source());
-        paragraph.inline_content.syntax_mode = InlineSyntaxMode::HtmlText;
+        paragraph.edit_inline_content().source.assign(source.source());
+        paragraph.edit_inline_content().syntax_mode = InlineSyntaxMode::HtmlText;
         register_html_owner_source(paragraph.id, source, {0, raw_size});
         push_leaf_range(paragraph.id, html_leaf,
             {0, consumed_size}, {0, raw_size});
         record_completion(paragraph.id,
-            completion_from_source(paragraph.inline_content.source));
+            completion_from_source(paragraph.inline_content().source));
         return paragraph;
     }
 
@@ -1242,13 +1242,13 @@ std::optional<BlockNode> try_parse_raw_html_block(const LeafLine& first) {
             BlockNode paragraph;
             paragraph.id = next_node_id();
             paragraph.kind = BlockKind::Paragraph;
-            paragraph.inline_content.source.assign(source.source());
-            paragraph.inline_content.syntax_mode = InlineSyntaxMode::HtmlText;
+            paragraph.edit_inline_content().source.assign(source.source());
+            paragraph.edit_inline_content().syntax_mode = InlineSyntaxMode::HtmlText;
             register_html_owner_source(paragraph.id, source, {0, raw_size});
             push_leaf_range(paragraph.id, html_leaf,
                 {0, consumed_size}, {0, raw_size});
             record_completion(paragraph.id,
-                completion_from_source(paragraph.inline_content.source));
+                completion_from_source(paragraph.inline_content().source));
             return paragraph;
         }
         auto& html = block->ensure_html_special();
@@ -1540,7 +1540,7 @@ std::optional<BlockNode> try_parse_raw_html_block(const LeafLine& first) {
         physical_line_endings.resize(b.children.size());
         table.table_internal_line_endings = std::move(physical_line_endings);
         for (const auto& row : b.children) {
-            for (const auto& cell : row.children) record_completion(cell.id, completion_from_source(cell.inline_content.source));
+            for (const auto& cell : row.children) record_completion(cell.id, completion_from_source(cell.inline_content().source));
             record_completion(row.id, Completion::Other);
         }
         record_completion(b.id, Completion::Other);
@@ -1572,8 +1572,8 @@ std::optional<BlockNode> try_parse_raw_html_block(const LeafLine& first) {
             BlockNode cell;
             cell.id = cell_id;
             cell.kind = BlockKind::TableCell;
-            cell.inline_content.source = cell_source.materialize();
-            cell.inline_content.syntax_mode = InlineSyntaxMode::TableCell;
+            cell.edit_inline_content().source = cell_source.materialize();
+            cell.edit_inline_content().syntax_mode = InlineSyntaxMode::TableCell;
             register_leaf_ownership(cell_id, cell_source);
             push_leaf_range(cell_id, cell_source, SourceRange{0, cell_source.size()}, SourceRange{0, cell_source.size()});
             row_syntax.cell_owners.push_back(cell_id);
@@ -1592,7 +1592,7 @@ std::optional<BlockNode> try_parse_raw_html_block(const LeafLine& first) {
             BlockNode cell;
             cell.id = cell_id;
             cell.kind = BlockKind::TableCell;
-            cell.inline_content.syntax_mode = InlineSyntaxMode::TableCell;
+            cell.edit_inline_content().syntax_mode = InlineSyntaxMode::TableCell;
             LeafSourceAccumulator empty_source(physical_source());
             empty_source.append_content_range(line, text.size(), text.size());
             register_leaf_ownership(cell_id, empty_source);
@@ -2285,7 +2285,7 @@ void append_empty_frame_body(ContainerFrame& frame,std::size_t physical_point) {
     source.append({physical_point,physical_point});
     BlockNode empty;
     empty.id=next_node_id(); empty.kind=BlockKind::Paragraph;
-    empty.inline_content=make_inline_document(source);
+    empty.edit_inline_content()=make_inline_document(source);
     push_leaf_range(empty.id,source,{0,0},{0,0});
     register_leaf_ownership(empty.id,source);
     record_completion(empty.id,Completion::Empty);
@@ -2315,12 +2315,12 @@ void close_innermost_frame() {
             const bool fence_owns_blank=last.kind==BlockKind::CodeBlock
                 && last.block_source.tree().kind==BlockSourceKind::FencedCode
                 && !last.block_source.tree().complete_closing;
-            if (!fence_owns_blank && !(last.kind==BlockKind::Paragraph && last.inline_content.source.empty()))
+            if (!fence_owns_blank && !(last.kind==BlockKind::Paragraph && last.inline_content().source.empty()))
                 append_empty_frame_body(frame,frame.content.end);
         }
         if (quote->callout || (!frame.node.children.empty()
             && frame.node.children.back().kind==BlockKind::Paragraph
-            && frame.node.children.back().inline_content.source.empty())) tail=Completion::Other;
+            && frame.node.children.back().inline_content().source.empty())) tail=Completion::Other;
     } else if (std::holds_alternative<ListFrameState>(frame.state) && tail==Completion::Empty)
         tail=Completion::Other;
     else if (std::holds_alternative<FootnoteFrameState>(frame.state)
@@ -2497,10 +2497,10 @@ void recognize_callout_header() {
         LeafSourceAccumulator title_source(physical_source());
         title_source.append_content_range(*first,title_start,text.size());
         BlockNode title; title.id=next_node_id(); title.kind=BlockKind::CalloutTitle;
-        title.inline_content=make_inline_document(title_source);
+        title.edit_inline_content()=make_inline_document(title_source);
         register_leaf_ownership(title.id,title_source);
         push_leaf_range(title.id,title_source,{0,title_source.size()},{0,title_source.size()});
-        record_completion(title.id,completion_from_source(title.inline_content.source));
+        record_completion(title.id,completion_from_source(title.inline_content().source));
         // Header/title serialization is owned by the existing Callout producer;
         // a body separator starts after the header's physical ending.
         frame.node.children.push_back(std::move(title));
@@ -2543,7 +2543,7 @@ void parse_frame_blank_lines() {
     const auto* item=std::get_if<ItemFrameState>(&frame.state);
     const bool empty_item_body=item && !item->first_line_has_content
         && std::ranges::all_of(frame.node.children,[](auto const& child) {
-            return child.kind==BlockKind::Paragraph && child.inline_content.source.empty();
+            return child.kind==BlockKind::Paragraph && child.inline_content().source.empty();
         });
     if (body_container && !unaccepted_opening
         && (empty_item_body || !following || following->matched_container_frames<depth)) {
@@ -2575,17 +2575,17 @@ void parse_frame_blank_lines() {
     const bool skip_separator=following_content && !frame.node.children.empty()
         && frame.preceding_child_end
         && !(frame.node.children.back().kind==BlockKind::Paragraph
-            && frame.node.children.back().inline_content.source.empty());
+            && frame.node.children.back().inline_content().source.empty());
     for (std::size_t i=0;i<blanks;++i) {
         auto const* line=peek_leaf_line();
         if (i==0 && skip_separator) { accept_leaf_line(*line); continue; }
         LeafSourceAccumulator body(physical_source()); body.append_content(*line);
         LeafSourceAccumulator consumed(physical_source()); consumed.append_line(*line,true);
         BlockNode paragraph; paragraph.id=next_node_id(); paragraph.kind=BlockKind::Paragraph;
-        paragraph.inline_content=make_inline_document(body);
+        paragraph.edit_inline_content()=make_inline_document(body);
         register_leaf_ownership(paragraph.id,body);
         push_leaf_range(paragraph.id,consumed,{0,consumed.size()},{0,body.size()});
-        const auto fact=completion_from_source(paragraph.inline_content.source);
+        const auto fact=completion_from_source(paragraph.inline_content().source);
         record_completion(paragraph.id,fact);
         accept_leaf_line(*line);
         append_completed_block(container_frames[active_container_frames.back()],std::move(paragraph),pos);
@@ -2695,11 +2695,11 @@ std::optional<BlockNode> try_parse_atx_heading(LeafLine const& first) {
         for (std::size_t i = shape->content_end; i < text.size(); ++i)
             metadata.closing_marker.push_back(text.at(i));
     }
-    heading.inline_content = make_inline_document(inline_source);
+    heading.edit_inline_content() = make_inline_document(inline_source);
     const auto& tail = !metadata.closing_marker.empty()
         ? metadata.closing_marker
-        : !heading.inline_content.source.empty()
-            ? heading.inline_content.source : metadata.opening_marker;
+        : !heading.inline_content().source.empty()
+            ? heading.inline_content().source : metadata.opening_marker;
 
     register_leaf_ownership(heading.id, inline_source);
     std::array<SourceRange, 2> marker_storage{};
@@ -2929,9 +2929,9 @@ std::optional<BlockNode> try_parse_paragraph(LeafLine const& first) {
             closing.append(physical_source().text(last_line.ending));
         closing.append(underline_text);
         metadata.closing_marker = std::move(closing);
-        heading.inline_content = make_inline_document(heading_source);
+        heading.edit_inline_content() = make_inline_document(heading_source);
         const auto& tail = !metadata.closing_marker.empty()
-            ? metadata.closing_marker : heading.inline_content.source;
+            ? metadata.closing_marker : heading.inline_content().source;
 
         register_leaf_ownership(id, heading_source);
         const auto source_end = range_source.size();
@@ -2949,10 +2949,10 @@ std::optional<BlockNode> try_parse_paragraph(LeafLine const& first) {
     BlockNode paragraph;
     paragraph.id = id;
     paragraph.kind = BlockKind::Paragraph;
-    paragraph.inline_content = make_inline_document(body_source);
+    paragraph.edit_inline_content() = make_inline_document(body_source);
     register_leaf_ownership(id, body_source);
     push_leaf_range(id, range_source, {0, range_source.size()}, {0, body_source.size()});
-    record_completion(id, completion_from_source(paragraph.inline_content.source));
+    record_completion(id, completion_from_source(paragraph.inline_content().source));
     return paragraph;
 }
 

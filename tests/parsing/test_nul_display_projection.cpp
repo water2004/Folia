@@ -33,7 +33,7 @@ suite nul_display_projection_tests = [] {
     const auto parsed = parse_text(1, source);
     expect(fatal(parsed.document.root.children.size() == 1));
     if (parsed.document.root.children.size() != 1) return;
-    const auto& inline_document = parsed.document.root.children.front().inline_content;
+    const auto& inline_document = parsed.document.root.children.front().inline_content();
     expect(fatal(inline_document.source == std::u32string({U'a', U'b', U'c', U'\0', U'd', U'e', U'\0'})));
     expect(fatal(inline_visible_text(inline_document) == expected));
     expect(fatal(serialize_markdown(parsed.document) == source));
@@ -76,7 +76,7 @@ suite nul_display_projection_tests = [] {
     const auto parsed = parse_text(2, source);
     expect(fatal(parsed.document.root.children.size() == 1));
     if (parsed.document.root.children.size() != 1) return;
-    const auto& inline_document = parsed.document.root.children.front().inline_content;
+    const auto& inline_document = parsed.document.root.children.front().inline_content();
     expect(fatal(inline_document.source == std::u32string({U'`', U'a', U'\0', U'b', U'`'})));
     expect(fatal(inline_visible_text(inline_document) == U"a\uFFFDb"));
     expect(fatal(serialize_markdown(parsed.document) == source));

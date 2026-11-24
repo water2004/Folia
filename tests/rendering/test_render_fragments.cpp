@@ -223,10 +223,10 @@ suite render_fragment_tests = [] {
         for (auto const& block : model.blocks) before.push_back(block.presentation_key);
         auto* leaf = find_document_block(parsed.document, owner);
         expect(fatal(leaf != nullptr));
-        leaf->inline_content.source += U" edited";
+        leaf->edit_inline_content().source += U" edited";
         InlineParseContext context;
         context.allocate_id = [&] { return NodeId{parsed.document.next_node_id++}; };
-        reparse_inline_document(leaf->inline_content, context);
+        reparse_inline_document(leaf->edit_inline_content(), context);
         ++parsed.document.revision;
         RenderModelUpdate update;
         update.changed_owners.push_back(owner);
@@ -299,7 +299,7 @@ suite render_fragment_tests = [] {
             auto tail = editor.document().cached_editable_order.back();
             auto const* leaf = find_document_block(editor.document(), tail);
             expect(fatal(leaf != nullptr));
-            editor.set_selection(TextSelection::caret({tail, leaf->inline_content.source.size(), TextAffinity::Downstream}));
+            editor.set_selection(TextSelection::caret({tail, leaf->inline_content().source.size(), TextAffinity::Downstream}));
             auto project = [&] {
                 auto change = editor.take_last_document_change();
                 expect(fatal(change.has_value()));

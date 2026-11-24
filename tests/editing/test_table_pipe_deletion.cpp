@@ -25,12 +25,12 @@ suite table_pipe_deletion_tests = [] {
             expect(fatal(editor.execute_command({.kind = forward ? CommandKind::DeleteForward : CommandKind::DeleteBackward})));
             auto expected = source;
             expected.erase(start, 2);
-            expect(fatal(find_document_block(editor.document(), owner)->inline_content.source == expected));
+            expect(fatal(find_document_block(editor.document(), owner)->inline_content().source == expected));
             expect(fatal(validate_document(editor.document()).empty()));
             const auto saved = editor.markdown_utf8();
             Editor reloaded(saved);
             expect(reloaded.document().root.children.front().children[1].children.size() == 1u);
-            expect(reloaded.document().root.children.front().children[1].children.front().inline_content.source == expected);
+            expect(reloaded.document().root.children.front().children[1].children.front().inline_content().source == expected);
             expect(fatal(editor.undo()));
             expect(editor.markdown_utf8() == cps_to_utf8(markdown));
             expect(editor.selection() == selected);
