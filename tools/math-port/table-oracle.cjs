@@ -55,6 +55,4 @@ for(const change of ['indent-grow','indent-argument']){begin(change);input({chan
 begin('nested_arithmetic_cells');input({tree:'mtable/mlabeledtr/mtd(mtext label)/mtd(mroot(msqrt(mfrac(a,b)),n))',inheritance:{display:true,scriptlevel:0,prime:false}});{const f=new MmlFactory(),token=s=>f.create('mi',{},[f.create('text').setText(s)]),frac=f.create('mfrac',{},[token('a'),token('b')]),radical=f.create('mroot',{},[f.create('msqrt',{},[frac]),token('n')]),n=f.create('mtable',{},[f.create('mlabeledtr',{},[f.create('mtd',{},[token('label')]),f.create('mtd',{},[radical])])]);;observe(()=>n.setInheritedAttributes({},true,0,false));pp(snapshot(n));}end();
 const sourceProfile={schema:'folia.math.table-source.v1',source:{node:process.version,package:'@mathjax/src',version:'4.1.3',compiledPackage:packageLock.compiled_package,sourcePins:[...hashes,...arithmeticHashes]},summary:{cases,assertions,rawInheritanceRows:240,rawInheritanceAssertions:3120,tableDisplayDefaultRows:160,tableDisplayDefaultAssertions:800,otherAssertions:assertions-3920},cases:sourceCases};
 assert.equal(cases,135);assert.equal(assertions,4700);
-assert.ok(process.argv.includes('--check'),'Source-only oracle is check-only');
-assert.deepEqual(JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/evidence/table-source-profile.json'),'utf8')),sourceProfile);
-console.log(JSON.stringify({cases,sourceExpectations:assertions,rawInheritanceRows:240,tableDisplayDefaultRows:160,mode:'check'}));
+process.stdout.write(JSON.stringify(sourceProfile)+'\n');

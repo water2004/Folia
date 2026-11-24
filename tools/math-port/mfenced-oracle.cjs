@@ -7,7 +7,7 @@ function encode(v){if(v===undefined)return {$type:'undefined'};if(typeof v==='nu
 const records=[];let current=null;
 function start(name){current={name,observations:[]};records.push(current);}
 function record(v){current.observations.push(encode(v));}
-function finish(profileName){const profilePath=path.join(root,'docs/math-port/evidence',profileName);const expected=JSON.parse(fs.readFileSync(profilePath,'utf8'));assert.equal(records.length,expected.records.length);for(let i=0;i<records.length;i++){const a=records[i],b=expected.records[i];assert.equal(a.name,b.name);assert.equal(a.observations.length,b.observations.length,a.name+' count');for(let j=0;j<a.observations.length;j++){if(JSON.stringify(a.observations[j])!==JSON.stringify(b.observations[j])){function diff(x,y,p){if(require('node:util').isDeepStrictEqual(x,y))return null;if(!x||!y||typeof x!=='object'||typeof y!=='object')return {path:p,actual:x,expected:y};for(const k of new Set([...Object.keys(x),...Object.keys(y)])){const d=diff(x[k],y[k],p+'/'+k);if(d)return d;}return {path:p,actualKeys:Object.keys(x),expectedKeys:Object.keys(y)};}throw Error(JSON.stringify({case:a.name,observation:j,...diff(a.observations[j],b.observations[j],'')}));}}}console.log(JSON.stringify({profile:profileName,cases:records.length,observations:records.reduce((n,r)=>n+r.observations.length,0),mode:'check',sha256:crypto.createHash('sha256').update(fs.readFileSync(profilePath)).digest('hex')}));}
+function finish(profileName){process.stdout.write(JSON.stringify({profile:profileName,records})+'\n');}
 
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const {root,MmlFactory,core,MmlMfenced}=require(path.join(__dirname,'mfenced-reference.cjs'));

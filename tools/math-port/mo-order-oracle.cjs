@@ -91,4 +91,4 @@ begin('intrinsic_function_identity_metadata');{
  for(const [name,item]of identities){slot(String(item));for(const key of ['__proto__','constructor','call','apply','bind','toString','prototype','name','length','caller','arguments']){let got,error;try{got=item[key];}catch(e){error=e;}if(error)observe({kind:'error',name:error.name});else if(names.has(got))observe({kind:'identity',name:names.get(got)});else slot(got);}}
 }end();
 
-const profile=({cases,assertions});const frozen=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/evidence/p24-mo-order-source.json'),'utf8'));assert.deepEqual(profile,frozen);assert.ok(process.argv.includes('--check'),'Source-only owner supports --check');console.log(JSON.stringify({profile:'p24-mo-order-source.json',cases:profile.cases?.length??profile.cases,assertions:profile.assertions??null,mode:'check'}));
+const profile=({cases,assertions});process.stdout.write(JSON.stringify(profile)+'\n');

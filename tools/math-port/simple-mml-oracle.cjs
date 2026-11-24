@@ -246,5 +246,5 @@ for (const full of [false, true]) {
 }
 return finish();
 }
-if(require.main===module){assert.ok(process.argv.includes('--check'),'Source-only oracle is check-only');const result=buildProfile();assert.deepEqual(JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/evidence/simple-mml-source.json'),'utf8')),result.profile);console.log(JSON.stringify({...result.counts,mode:'check'}));}
+if(require.main===module)process.stdout.write(JSON.stringify(buildProfile().profile)+'\n');
 module.exports={buildProfile};

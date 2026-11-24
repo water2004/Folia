@@ -1,0 +1,67 @@
+{
+  "container": [
+    {
+      "owner": "simple-mml-oracle.cjs",
+      "profile": "docs/math-port/evidence/simple-mml-source.json",
+      "sha256": "d1e05bb92ff3bf94f435a642cd6fa8febf3fc689ece40c3754441782c2556ede",
+      "comparison": "profile",
+      "summary": "counts"
+    },
+    {
+      "owner": "mfenced-oracle.cjs",
+      "profile": "docs/math-port/evidence/source-mfenced-profile.json",
+      "sha256": "869b0e7fe7d550566b3e7b814403be902790eca7b9f7345b2e7b0af8508be6a6",
+      "comparison": "records"
+    },
+    {
+      "owner": "maction-oracle.cjs",
+      "profile": "docs/math-port/evidence/source-maction-profile.json",
+      "sha256": "e4a2c760c9a6a5ead9624db4b2d1c26d45eedaa77c042a1c31f3407de511ea0d",
+      "comparison": "records"
+    }
+  ],
+  "remaining": [
+    {
+      "owner": "mo-order-oracle.cjs",
+      "profile": "docs/math-port/evidence/p24-mo-order-source.json",
+      "sha256": "c733452b9d20788f5fd86eb2f9b07c3ae3edc35a43ea8b0cae16ff548d9073ad",
+      "comparison": "profile",
+      "summary": "mo-order"
+    },
+    {
+      "owner": "arithmetic-oracle.cjs",
+      "profile": "docs/math-port/evidence/source-arithmetic-profile.json",
+      "sha256": "d9e33d8e54cdbc8015834be3cd27fee76d1c6e7cf658a0c71c679cfbda014f55",
+      "comparison": "records"
+    },
+    {
+      "owner": "arithmetic-order-oracle.cjs",
+      "profile": "docs/math-port/evidence/source-arithmetic-order-profile.json",
+      "sha256": "9d7afae4ae5c2100b0b4c9f2a2672209707a574f6dae4555d4aa4eddd848a6fc",
+      "comparison": "records"
+    },
+    {
+      "owner": "table-oracle.cjs",
+      "profile": "docs/math-port/evidence/table-source-profile.json",
+      "sha256": "390573beb4e780eea0c806cae5ed68e974264f5c76499f9892df1a1cd3686de5",
+      "comparison": "profile",
+      "summary": "table"
+    },
+    {
+      "owner": "atom-semantics-oracle.cjs",
+      "profile": "docs/math-port/evidence/source-atom-semantics-profile.json",
+      "sha256": "73a09c4d0efce2a407f858aebf9991840323ec2372bc93d505311b040fffdfa6",
+      "comparison": "records"
+    },
+    {
+      "owner": "multiscript-oracle.cjs",
+      "profile": "docs/math-port/evidence/multiscript-source-profile.json",
+      "sha256": "d70c7f2afacf34a333c4581e65c0d9f45df2f7c558646b1c25a7ebc2691b0997",
+      "comparison": "profile",
+      "summary": "counts",
+      "parent_profile": "docs/math-port/evidence/multiscript-parent-source-profile.json",
+      "parent_cases": 88,
+      "parent_values": 288
+    }
+  ]
+}
