@@ -8,7 +8,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from comparison.family_checks import Check
-from comparison.family_simple import compare_family
+from comparison.families import compare_family
 
 
 class FamilyChecks(unittest.TestCase):
@@ -18,14 +18,17 @@ class FamilyChecks(unittest.TestCase):
 def register(document, case):
     def check(self):
         expected = document["expected"]
-        actual = copy.deepcopy(expected)
-        actual.pop("name")
+        actual = copy.deepcopy(document.get("actual", expected))
+        actual.pop("name", None)
         actual.pop("svg", None)
         for mutation in case["mutations"]:
             target = actual
             for key in mutation["path"][:-1]:
                 target = target[key]
-            target[mutation["path"][-1]] = mutation["value"]
+            if mutation.get("delete"):
+                del target[mutation["path"][-1]]
+            else:
+                target[mutation["path"][-1]] = mutation["value"]
         if case["accept"]:
             compare_family(document["family"], actual, expected, Check())
         else:

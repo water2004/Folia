@@ -1,0 +1,211 @@
+{
+  "family": "er",
+  "expected": {
+    "name": "rough-stroke",
+    "view": {
+      "x": 0,
+      "y": 0,
+      "width": 100,
+      "height": 100
+    },
+    "elements": [
+      {
+        "type": "path",
+        "rough": true,
+        "path": "M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0",
+        "box": {
+          "x": 10,
+          "y": 20,
+          "width": 30,
+          "height": 40
+        },
+        "paint": {
+          "fill": "none",
+          "stroke": "black",
+          "width": "1px",
+          "dash": "none",
+          "opacity": "1"
+        },
+        "markers": {
+          "start": "none",
+          "end": "arrow"
+        },
+        "roughRectangleStroke": true
+      }
+    ],
+    "labels": [
+      {
+        "text": "hello",
+        "font": {
+          "size": "12px",
+          "family": "Arial",
+          "weight": "400"
+        },
+        "box": {
+          "x": 10,
+          "y": 20,
+          "width": 30,
+          "height": 40
+        },
+        "runs": [
+          {
+            "text": "hello",
+            "fill": "black"
+          }
+        ]
+      },
+      {
+        "text": "hello",
+        "font": {
+          "size": "12px",
+          "family": "Arial",
+          "weight": "400"
+        },
+        "box": {
+          "x": 60,
+          "y": 20,
+          "width": 30,
+          "height": 40
+        },
+        "runs": [
+          {
+            "text": "hello",
+            "fill": "black"
+          }
+        ]
+      }
+    ],
+    "backgrounds": [
+      {
+        "box": {
+          "x": 10,
+          "y": 20,
+          "width": 30,
+          "height": 40
+        },
+        "color": "white",
+        "part": "entity"
+      }
+    ],
+    "markers": [
+      {
+        "orient": "auto",
+        "width": 10,
+        "height": 10,
+        "contents": [
+          {
+            "type": "path",
+            "path": "M1 2L3 4",
+            "paint": {
+              "fill": "red",
+              "stroke": "black",
+              "width": "1px",
+              "dash": "none",
+              "opacity": "1"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "cases": [
+    {
+      "id": "er-rough-identical",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "path"
+          ],
+          "value": "M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0"
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "er-rough-different-valid-handles",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "path"
+          ],
+          "value": "M0 0 C2 0 8 0 10 0 M0 0 C2 0 8 0 10 0 M0 0 C2 0 8 0 10 0 M0 0 C2 0 8 0 10 0 M0 0 C2 0 8 0 10 0 M0 0 C2 0 8 0 10 0 M0 0 C2 0 8 0 10 0 M0 0 C2 0 8 0 10 0"
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "er-rough-noncollinear",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "path"
+          ],
+          "value": "M0 0 C3 1 7 0 10 0 M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-rough-outside-segment",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "path"
+          ],
+          "value": "M0 0 C-1 0 7 0 10 0 M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-rough-reversed-handles",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "path"
+          ],
+          "value": "M0 0 C8 0 2 0 10 0 M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-rough-missing-stroke",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "path"
+          ],
+          "value": "M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0 M0 0 C3 0 7 0 10 0 "
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-rough-shifted-endpoint",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "path"
+          ],
+          "value": "M0 0 C3 0 7 0 12 0 M0 0 C3 0 7 0 12 0 M0 0 C3 0 7 0 12 0 M0 0 C3 0 7 0 12 0 M0 0 C3 0 7 0 12 0 M0 0 C3 0 7 0 12 0 M0 0 C3 0 7 0 12 0 M0 0 C3 0 7 0 12 0"
+        }
+      ],
+      "accept": false
+    }
+  ]
+}

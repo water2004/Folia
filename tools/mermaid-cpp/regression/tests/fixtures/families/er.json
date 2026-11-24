@@ -1,0 +1,1104 @@
+{
+  "family": "er",
+  "expected": {
+    "name": "base",
+    "view": {
+      "x": 0,
+      "y": 0,
+      "width": 100,
+      "height": 100
+    },
+    "elements": [
+      {
+        "type": "path",
+        "rough": false,
+        "path": "M1 2L3 4",
+        "box": {
+          "x": 10,
+          "y": 20,
+          "width": 30,
+          "height": 40
+        },
+        "paint": {
+          "fill": "red",
+          "stroke": "black",
+          "width": "1px",
+          "dash": "none",
+          "opacity": "1"
+        },
+        "markers": {
+          "start": "none",
+          "end": "arrow"
+        }
+      }
+    ],
+    "labels": [
+      {
+        "text": "hello",
+        "font": {
+          "size": "12px",
+          "family": "Arial",
+          "weight": "400"
+        },
+        "box": {
+          "x": 10,
+          "y": 20,
+          "width": 30,
+          "height": 40
+        },
+        "runs": [
+          {
+            "text": "hello",
+            "fill": "black"
+          }
+        ]
+      },
+      {
+        "text": "hello",
+        "font": {
+          "size": "12px",
+          "family": "Arial",
+          "weight": "400"
+        },
+        "box": {
+          "x": 60,
+          "y": 20,
+          "width": 30,
+          "height": 40
+        },
+        "runs": [
+          {
+            "text": "hello",
+            "fill": "black"
+          }
+        ]
+      }
+    ],
+    "backgrounds": [
+      {
+        "box": {
+          "x": 10,
+          "y": 20,
+          "width": 30,
+          "height": 40
+        },
+        "color": "white",
+        "part": "entity"
+      }
+    ],
+    "markers": [
+      {
+        "orient": "auto",
+        "width": 10,
+        "height": 10,
+        "contents": [
+          {
+            "type": "path",
+            "path": "M1 2L3 4",
+            "paint": {
+              "fill": "red",
+              "stroke": "black",
+              "width": "1px",
+              "dash": "none",
+              "opacity": "1"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "cases": [
+    {
+      "id": "er-identical",
+      "mutations": [],
+      "accept": true
+    },
+    {
+      "id": "er-mutation-0",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "x"
+          ],
+          "value": 4
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-1",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "y"
+          ],
+          "value": 4
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-2",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "width"
+          ],
+          "value": 104
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-3",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "height"
+          ],
+          "value": 104
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-4",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "type"
+          ],
+          "value": "path changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-5",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "rough"
+          ],
+          "value": true
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-6",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "path"
+          ],
+          "value": "M1 2L3 4 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-7",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "box",
+            "x"
+          ],
+          "value": 14
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-8",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "box",
+            "y"
+          ],
+          "value": 24
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-9",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "box",
+            "width"
+          ],
+          "value": 34
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-10",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "box",
+            "height"
+          ],
+          "value": 44
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-11",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "paint",
+            "fill"
+          ],
+          "value": "red changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-12",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "paint",
+            "stroke"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-13",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "paint",
+            "width"
+          ],
+          "value": "1px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-14",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "paint",
+            "dash"
+          ],
+          "value": "none changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-15",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "paint",
+            "opacity"
+          ],
+          "value": "1 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-16",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "markers",
+            "start"
+          ],
+          "value": "none changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-17",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "markers",
+            "end"
+          ],
+          "value": "arrow changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-18",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "text"
+          ],
+          "value": "hello changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-19",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "font",
+            "size"
+          ],
+          "value": "12px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-20",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "font",
+            "family"
+          ],
+          "value": "Arial changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-21",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "font",
+            "weight"
+          ],
+          "value": "400 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-22",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "box",
+            "x"
+          ],
+          "value": 14
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-23",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "box",
+            "y"
+          ],
+          "value": 24
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-24",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "box",
+            "width"
+          ],
+          "value": 34
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-25",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "box",
+            "height"
+          ],
+          "value": 44
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-26",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "runs",
+            0,
+            "text"
+          ],
+          "value": "hello changed"
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "er-mutation-27",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "runs",
+            0,
+            "fill"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "er-mutation-28",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            1,
+            "text"
+          ],
+          "value": "hello changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-29",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            1,
+            "font",
+            "size"
+          ],
+          "value": "12px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-30",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            1,
+            "font",
+            "family"
+          ],
+          "value": "Arial changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-31",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            1,
+            "font",
+            "weight"
+          ],
+          "value": "400 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-32",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            1,
+            "box",
+            "x"
+          ],
+          "value": 64
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-33",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            1,
+            "box",
+            "y"
+          ],
+          "value": 24
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-34",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            1,
+            "box",
+            "width"
+          ],
+          "value": 34
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-35",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            1,
+            "box",
+            "height"
+          ],
+          "value": 44
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-36",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            1,
+            "runs",
+            0,
+            "text"
+          ],
+          "value": "hello changed"
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "er-mutation-37",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            1,
+            "runs",
+            0,
+            "fill"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "er-mutation-38",
+      "mutations": [
+        {
+          "path": [
+            "backgrounds",
+            0,
+            "box",
+            "x"
+          ],
+          "value": 14
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-39",
+      "mutations": [
+        {
+          "path": [
+            "backgrounds",
+            0,
+            "box",
+            "y"
+          ],
+          "value": 24
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-40",
+      "mutations": [
+        {
+          "path": [
+            "backgrounds",
+            0,
+            "box",
+            "width"
+          ],
+          "value": 34
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-41",
+      "mutations": [
+        {
+          "path": [
+            "backgrounds",
+            0,
+            "box",
+            "height"
+          ],
+          "value": 44
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-42",
+      "mutations": [
+        {
+          "path": [
+            "backgrounds",
+            0,
+            "color"
+          ],
+          "value": "white changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-43",
+      "mutations": [
+        {
+          "path": [
+            "backgrounds",
+            0,
+            "part"
+          ],
+          "value": "entity changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-44",
+      "mutations": [
+        {
+          "path": [
+            "markers",
+            0,
+            "orient"
+          ],
+          "value": "auto changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-45",
+      "mutations": [
+        {
+          "path": [
+            "markers",
+            0,
+            "width"
+          ],
+          "value": 14
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-46",
+      "mutations": [
+        {
+          "path": [
+            "markers",
+            0,
+            "height"
+          ],
+          "value": 14
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-47",
+      "mutations": [
+        {
+          "path": [
+            "markers",
+            0,
+            "contents",
+            0,
+            "type"
+          ],
+          "value": "path changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-48",
+      "mutations": [
+        {
+          "path": [
+            "markers",
+            0,
+            "contents",
+            0,
+            "path"
+          ],
+          "value": "M1 2L3 4 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-49",
+      "mutations": [
+        {
+          "path": [
+            "markers",
+            0,
+            "contents",
+            0,
+            "paint",
+            "fill"
+          ],
+          "value": "red changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-50",
+      "mutations": [
+        {
+          "path": [
+            "markers",
+            0,
+            "contents",
+            0,
+            "paint",
+            "stroke"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-51",
+      "mutations": [
+        {
+          "path": [
+            "markers",
+            0,
+            "contents",
+            0,
+            "paint",
+            "width"
+          ],
+          "value": "1px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-52",
+      "mutations": [
+        {
+          "path": [
+            "markers",
+            0,
+            "contents",
+            0,
+            "paint",
+            "dash"
+          ],
+          "value": "none changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-mutation-53",
+      "mutations": [
+        {
+          "path": [
+            "markers",
+            0,
+            "contents",
+            0,
+            "paint",
+            "opacity"
+          ],
+          "value": "1 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-missing-elements",
+      "mutations": [
+        {
+          "path": [
+            "elements"
+          ],
+          "value": []
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-missing-labels",
+      "mutations": [
+        {
+          "path": [
+            "labels"
+          ],
+          "value": []
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-missing-backgrounds",
+      "mutations": [
+        {
+          "path": [
+            "backgrounds"
+          ],
+          "value": []
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-missing-markers",
+      "mutations": [
+        {
+          "path": [
+            "markers"
+          ],
+          "value": []
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-view-delta-0.19",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "width"
+          ],
+          "value": 100.19
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "er-view-delta-0.21",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "width"
+          ],
+          "value": 100.21
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "er-view-delta-0.99",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "width"
+          ],
+          "value": 100.99
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "er-view-delta-1.01",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "width"
+          ],
+          "value": 101.01
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "er-view-delta-1.49",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "width"
+          ],
+          "value": 101.49
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "er-view-delta-1.51",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "width"
+          ],
+          "value": 101.51
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "er-labels-reordered",
+      "mutations": [
+        {
+          "path": [
+            "labels"
+          ],
+          "value": [
+            {
+              "text": "hello",
+              "font": {
+                "size": "12px",
+                "family": "Arial",
+                "weight": "400"
+              },
+              "box": {
+                "x": 60,
+                "y": 20,
+                "width": 30,
+                "height": 40
+              },
+              "runs": [
+                {
+                  "text": "hello",
+                  "fill": "black"
+                }
+              ]
+            },
+            {
+              "text": "hello",
+              "font": {
+                "size": "12px",
+                "family": "Arial",
+                "weight": "400"
+              },
+              "box": {
+                "x": 10,
+                "y": 20,
+                "width": 30,
+                "height": 40
+              },
+              "runs": [
+                {
+                  "text": "hello",
+                  "fill": "black"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "accept": true
+    }
+  ]
+}

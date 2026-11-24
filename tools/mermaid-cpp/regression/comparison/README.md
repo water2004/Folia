@@ -39,3 +39,23 @@ verify the actual installed font file and index without pretending to measure
 text through a synthetic DOM. Every other family still requires official
 browser evidence and actual browser raster capture. Missing evidence is a
 failure, never a skip.
+
+## Historical family captures
+
+`../../compare-family.py FAMILY original.json native-svg-directory` compares
+the existing per-family capture formats. Shared checks live in `family_checks.py`;
+`family_simple.py` covers geometric drawings and `family_graphs.py` covers State,
+ER, Requirement, Sequence and Class. Each family keeps its original paint, text,
+route, marker and coordinate rules, including stricter Class geometry limits.
+RoughJS random handles are accepted only when they still describe the required
+straight segments. Sequence now rejects a missing route-point array instead of
+letting an empty loop silently pass.
+
+The capture functions in `../../oracle/observations/` only read browser state.
+Official generators and Python's Playwright driver share these exact observers;
+comparison decisions and process orchestration belong to Python. Run the
+externalized acceptance and rejection cases with:
+
+```sh
+python -m unittest discover -s tools/mermaid-cpp/regression/tests -q
+```

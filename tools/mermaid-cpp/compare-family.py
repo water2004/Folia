@@ -13,10 +13,12 @@ ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT / "regression"))
 from comparison.corpus import require
 from comparison.family_checks import Check
-from comparison.family_simple import FAMILIES, compare_family
+from comparison.families import FAMILIES, compare_family
 
 
 def observation(family):
+    if family == "class-elk":
+        family = "class"
     source = (ROOT / "oracle/observations" / (family + ".mjs")).read_text(encoding="utf-8")
     declaration = "export default "
     require(source.count(declaration) == 1, "Capture module must export one browser observation")
@@ -27,6 +29,8 @@ def run(args):
     from playwright.sync_api import sync_playwright
     rows = json.loads(args.reference.read_text(encoding="utf-8"))
     require(isinstance(rows, list) and bool(rows), "Official capture must contain cases")
+    if args.family == "er":
+        require(len(rows) == 32, "ER official corpus must contain all 32 cases")
     check, results = Check(), []
     with sync_playwright() as playwright:
         options = {"headless": True}
@@ -34,13 +38,17 @@ def run(args):
             options["executable_path"] = args.browser
         browser = playwright.chromium.launch(**options)
         try:
-            page = browser.new_page()
+            page = browser.new_page(viewport={"width": 1600, "height": 1200}) if args.family == "sequence" else browser.new_page()
             observer = observation(args.family)
             for expected in rows:
                 prefix = "" if args.family in ("venn", "wardley") else args.family + "-"
                 if args.family == "xy" and args.oracle_measurements:
                     prefix = "xy-oracle-"
+                elif args.family == "class-elk":
+                    prefix = "class-"
                 source = (args.native / (prefix + expected["name"] + ".svg")).read_text(encoding="utf-8")
+                if args.family == "requirement":
+                    require("<foreignObject" not in source, expected["name"] + ": labels must survive SVG normalization")
                 if args.family == "wardley":
                     source = '<style>svg{font-family:"trebuchet ms"}</style>' + source
                 page.set_content(source)

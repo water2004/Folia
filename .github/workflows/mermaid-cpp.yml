@@ -443,18 +443,18 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/compare-flowchart-svg.mjs build/mermaid-cpp/storage-flowchart-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          node tools/mermaid-cpp/compare-sequence-svg.mjs build/mermaid-cpp/sequence-browser/original.json build/mermaid-cpp/pie-svg
+          python tools/mermaid-cpp/compare-family.py sequence build/mermaid-cpp/sequence-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          node tools/mermaid-cpp/compare-class-svg.mjs build/mermaid-cpp/class-browser/original.json build/mermaid-cpp/pie-svg
+          python tools/mermaid-cpp/compare-family.py class build/mermaid-cpp/class-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          node tools/mermaid-cpp/compare-class-elk-svg.mjs build/mermaid-cpp/class-elk-browser/original.json build/mermaid-cpp/pie-svg
+          python tools/mermaid-cpp/compare-family.py class-elk build/mermaid-cpp/class-elk-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          node tools/mermaid-cpp/compare-requirement-svg.mjs build/mermaid-cpp/requirement-browser/original.json build/mermaid-cpp/pie-svg
+          python tools/mermaid-cpp/compare-family.py requirement build/mermaid-cpp/requirement-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          node tools/mermaid-cpp/compare-er-svg.mjs build/mermaid-cpp/er-browser/original.json build/mermaid-cpp/pie-svg
+          python tools/mermaid-cpp/compare-family.py er build/mermaid-cpp/er-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           foreach ($family in @('info', 'tree-view', 'ishikawa', 'cynefin', 'venn', 'railroad', 'error', 'agentflow', 'swimlane', 'eventmodeling', 'wardley', 'usecase')) {
-            if (@('block', 'c4', 'cynefin', 'gantt', 'git-graph', 'journey', 'kanban', 'quadrant', 'radar', 'sankey', 'timeline', 'treemap', 'venn', 'wardley', 'xy') -contains $family) {
+            if (@('block', 'c4', 'cynefin', 'gantt', 'git-graph', 'journey', 'kanban', 'quadrant', 'radar', 'sankey', 'timeline', 'treemap', 'venn', 'wardley', 'xy', 'state', 'er', 'requirement', 'sequence', 'class', 'class-elk') -contains $family) {
                 python tools/mermaid-cpp/compare-family.py $family "build/mermaid-cpp/${family}-browser/original.json" build/mermaid-cpp/pie-svg
             } else {
                 node "tools/mermaid-cpp/compare-${family}-svg.mjs" "build/mermaid-cpp/${family}-browser/original.json" build/mermaid-cpp/pie-svg
@@ -475,9 +475,9 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node tools/mermaid-cpp/compare-architecture-svg.mjs build/mermaid-cpp/architecture-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          node tools/mermaid-cpp/compare-state-svg.mjs build/mermaid-cpp/state-browser/original.json build/mermaid-cpp/pie-svg
+          python tools/mermaid-cpp/compare-family.py state build/mermaid-cpp/state-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          node tools/mermaid-cpp/compare-state-svg.mjs build/mermaid-cpp/state-elk-browser/original.json build/mermaid-cpp/pie-svg
+          python tools/mermaid-cpp/compare-family.py state build/mermaid-cpp/state-elk-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/mermaid-cpp/compare-family.py gantt build/mermaid-cpp/gantt-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -518,7 +518,7 @@ jobs:
               $failed += $family
               continue
             }
-            if (@('block', 'c4', 'cynefin', 'gantt', 'git-graph', 'journey', 'kanban', 'quadrant', 'radar', 'sankey', 'timeline', 'treemap', 'venn', 'wardley', 'xy') -contains $family) {
+            if (@('block', 'c4', 'cynefin', 'gantt', 'git-graph', 'journey', 'kanban', 'quadrant', 'radar', 'sankey', 'timeline', 'treemap', 'venn', 'wardley', 'xy', 'state', 'er', 'requirement', 'sequence', 'class', 'class-elk') -contains $family) {
                 python tools/mermaid-cpp/compare-family.py $family $original build/mermaid-cpp/pie-svg
             } else {
                 node "tools/mermaid-cpp/compare-$family-svg.mjs" $original build/mermaid-cpp/pie-svg

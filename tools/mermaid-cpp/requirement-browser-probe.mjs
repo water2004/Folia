@@ -7,76 +7,8 @@ import { cases, richCases } from './requirement-cases.mjs';
 
 // Observe rendered nodes, routes, labels and the final viewport in SVG space.
 // Geometry is transformed out of nested SVG groups before it is recorded.
-export function inspectRequirement() {
-  const svg = document.querySelector('svg');
-  const view = svg.viewBox.baseVal;
-  const inverse = svg.getScreenCTM().inverse();
-  const matrix = e => inverse.multiply(e.getScreenCTM());
-  const box = (e, b = e.getBBox()) => {
-    const m = matrix(e);
-    const points = [[b.x,b.y],[b.x+b.width,b.y],[b.x,b.y+b.height],[b.x+b.width,b.y+b.height]]
-      .map(([x,y]) => ({x:m.a*x+m.c*y+m.e,y:m.b*x+m.d*y+m.f}));
-    return {x:Math.min(...points.map(p=>p.x)),y:Math.min(...points.map(p=>p.y)),
-      width:Math.max(...points.map(p=>p.x))-Math.min(...points.map(p=>p.x)),
-      height:Math.max(...points.map(p=>p.y))-Math.min(...points.map(p=>p.y))};
-  };
-  const nodes=[...svg.querySelectorAll('g.nodes > g.node')].map(e=>{
-    const shape=e.querySelector('.outer-path');
-    const fill=getComputedStyle(shape.firstElementChild??shape).fill;
-    const outline=getComputedStyle(shape.lastElementChild??shape);
-    const divider=e.querySelector('.divider');
-    return {classes:e.getAttribute('class')??'',box:box(e),fill,stroke:outline.stroke,
-      strokeWidth:outline.strokeWidth,divider:divider?box(divider):null};
-  });
-  const edges=[...svg.querySelectorAll('g.edgePaths > path')].map(e=>({classes:e.getAttribute('class')??'',
-    box:box(e),path:e.getAttribute('d'),startMarker:e.hasAttribute('marker-start'),endMarker:e.hasAttribute('marker-end')}));
-  const labels = [...svg.querySelectorAll('text,foreignObject')].filter(e=>!e.closest('defs')).map(e=>{
-    let text, rect, font;
-    const runs=[];
-    const inspectRuns=root=>{
-      const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
-      let node;
-      while(node=walker.nextNode()) {
-        const {fontWeight:weight,fontStyle:style}=getComputedStyle(node.parentElement);
-        const last=runs.at(-1);
-        if(last?.weight===weight&&last?.style===style)last.text+=node.textContent;
-        else runs.push({text:node.textContent,weight,style});
-      }
-    };
-    if(e.tagName==='foreignObject'){
-      const span=e.querySelector('span')??e.firstElementChild;
-      inspectRuns(span);
-      const walker=document.createTreeWalker(span,NodeFilter.SHOW_TEXT),rects=[];let n;
-      while(n=walker.nextNode()){if(!n.textContent.trim())continue;const range=document.createRange();range.selectNodeContents(n);rects.push(...range.getClientRects());}
-      if(!rects.length)return null;
-      const x=Math.min(...rects.map(r=>r.x)),y=Math.min(...rects.map(r=>r.y)),right=Math.max(...rects.map(r=>r.right)),bottom=Math.max(...rects.map(r=>r.bottom));
-      const a=new DOMPoint(x,y).matrixTransform(inverse),b=new DOMPoint(right,bottom).matrixTransform(inverse);
-      rect={x:a.x,y:a.y,width:b.x-a.x,height:b.y-a.y};text=span.textContent.trim().replace(/\s+/g,' ');font=getComputedStyle(span);
-    } else {
-      inspectRuns(e);
-      text=e.textContent.trim().replace(/\s+/g,' ');rect=box(e);font=getComputedStyle(e);
-      if(e.hasAttribute('data-html-label')) {
-        // HTML Range reports typographic advance. SVG getBBox additionally
-        // encloses glyph overhang, so use the painted character positions here.
-        const lines=[...e.children].filter(line=>line.getNumberOfChars());
-        const extents=lines.flatMap(line=>[
-          line.getStartPositionOfChar(0).x,
-          line.getEndPositionOfChar(line.getNumberOfChars()-1).x,
-        ]);
-        if(extents.length) {
-          const b=e.getBBox(),x=Math.min(...extents);
-          rect=box(e,{x,y:b.y,width:Math.max(...extents)-x,height:b.height});
-        }
-      }
-    }
-    return text?{text,box:rect,font:{family:font.fontFamily,size:font.fontSize,weight:font.fontWeight,
-      color:e.tagName==='foreignObject'?font.color:font.fill},
-      runs:runs.map(run=>({...run,text:run.text.trim().replace(/\s+/g,' ')})).filter(run=>run.text)}:null;
-  }).filter(Boolean);
-  const sort=(a,b)=>a.box.y-b.box.y||a.box.x-b.box.x;
-  nodes.sort(sort);edges.sort(sort);labels.sort(sort);
-  return {view:{x:view.x,y:view.y,width:view.width,height:view.height},nodes,edges,labels};
-}
+import inspectRequirement from './oracle/observations/requirement.mjs';
+export {inspectRequirement};
 
 if(!process.argv.includes('--library')) {
   const directory=resolve(process.argv[2]??'build/mermaid-cpp/requirement-browser');

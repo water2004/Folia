@@ -1,0 +1,3268 @@
+{
+  "family": "sequence",
+  "expected": {
+    "name": "base",
+    "view": {
+      "x": 0,
+      "y": 0,
+      "width": 100,
+      "height": 100
+    },
+    "numbers": [
+      {
+        "tag": "rect",
+        "dash": "none",
+        "id": "test",
+        "footer": false,
+        "text": "hello",
+        "size": "12px",
+        "weight": "400",
+        "fill": "white",
+        "stroke": "black",
+        "strokeWidth": "1px",
+        "kind": "actor",
+        "x": 10,
+        "y": 20,
+        "width": 30,
+        "height": 40,
+        "r": 3
+      }
+    ],
+    "backgrounds": [
+      {
+        "tag": "rect",
+        "dash": "none",
+        "id": "test",
+        "footer": false,
+        "text": "hello",
+        "size": "12px",
+        "weight": "400",
+        "fill": "white",
+        "stroke": "black",
+        "strokeWidth": "1px",
+        "kind": "actor",
+        "x": 10,
+        "y": 20,
+        "width": 30,
+        "height": 40,
+        "r": 3
+      }
+    ],
+    "regions": [
+      {
+        "tag": "rect",
+        "dash": "none",
+        "id": "test",
+        "footer": false,
+        "text": "hello",
+        "size": "12px",
+        "weight": "400",
+        "fill": "white",
+        "stroke": "black",
+        "strokeWidth": "1px",
+        "kind": "actor",
+        "x": 10,
+        "y": 20,
+        "width": 30,
+        "height": 40,
+        "r": 3,
+        "points": [
+          [
+            1,
+            2
+          ],
+          [
+            3,
+            4
+          ]
+        ]
+      }
+    ],
+    "actors": [
+      {
+        "tag": "rect",
+        "dash": "none",
+        "id": "test",
+        "footer": false,
+        "text": "hello",
+        "size": "12px",
+        "weight": "400",
+        "fill": "white",
+        "stroke": "black",
+        "strokeWidth": "1px",
+        "kind": "actor",
+        "x": 10,
+        "y": 20,
+        "width": 30,
+        "height": 40,
+        "r": 3
+      }
+    ],
+    "notes": [
+      {
+        "tag": "rect",
+        "dash": "none",
+        "id": "test",
+        "footer": false,
+        "text": "hello",
+        "size": "12px",
+        "weight": "400",
+        "fill": "white",
+        "stroke": "black",
+        "strokeWidth": "1px",
+        "kind": "actor",
+        "x": 10,
+        "y": 20,
+        "width": 30,
+        "height": 40,
+        "r": 3
+      }
+    ],
+    "activations": [
+      {
+        "tag": "rect",
+        "dash": "none",
+        "id": "test",
+        "footer": false,
+        "text": "hello",
+        "size": "12px",
+        "weight": "400",
+        "fill": "white",
+        "stroke": "black",
+        "strokeWidth": "1px",
+        "kind": "actor",
+        "x": 10,
+        "y": 20,
+        "width": 30,
+        "height": 40,
+        "r": 3
+      }
+    ],
+    "figures": [
+      {
+        "tag": "rect",
+        "dash": "none",
+        "id": "test",
+        "footer": false,
+        "text": "hello",
+        "size": "12px",
+        "weight": "400",
+        "fill": "white",
+        "stroke": "black",
+        "strokeWidth": "1px",
+        "kind": "actor",
+        "x": 10,
+        "y": 20,
+        "width": 30,
+        "height": 40,
+        "r": 3
+      }
+    ],
+    "shapes": [
+      {
+        "tag": "rect",
+        "dash": "none",
+        "id": "test",
+        "footer": false,
+        "text": "hello",
+        "size": "12px",
+        "weight": "400",
+        "fill": "white",
+        "stroke": "black",
+        "strokeWidth": "1px",
+        "kind": "actor",
+        "x": 10,
+        "y": 20,
+        "width": 30,
+        "height": 40,
+        "r": 3,
+        "points": [
+          [
+            1,
+            2
+          ],
+          [
+            3,
+            4
+          ]
+        ]
+      }
+    ],
+    "lines": [
+      {
+        "tag": "rect",
+        "dash": "none",
+        "id": "test",
+        "footer": false,
+        "text": "hello",
+        "size": "12px",
+        "weight": "400",
+        "fill": "white",
+        "stroke": "black",
+        "strokeWidth": "1px",
+        "kind": "actor",
+        "x": 10,
+        "y": 20,
+        "width": 30,
+        "height": 40,
+        "r": 3
+      }
+    ],
+    "texts": [
+      {
+        "tag": "rect",
+        "dash": "none",
+        "id": "test",
+        "footer": false,
+        "text": "hello",
+        "size": "12px",
+        "weight": "400",
+        "fill": "white",
+        "stroke": "black",
+        "strokeWidth": "1px",
+        "kind": "actor",
+        "x": 10,
+        "y": 20,
+        "width": 30,
+        "height": 40,
+        "r": 3
+      }
+    ],
+    "signals": [
+      {
+        "tag": "rect",
+        "dash": "none",
+        "id": "test",
+        "footer": false,
+        "text": "hello",
+        "size": "12px",
+        "weight": "400",
+        "fill": "white",
+        "stroke": "black",
+        "strokeWidth": "1px",
+        "kind": "actor",
+        "x": 10,
+        "y": 20,
+        "width": 30,
+        "height": 40,
+        "r": 3,
+        "points": [
+          [
+            1,
+            2
+          ],
+          [
+            3,
+            4
+          ]
+        ],
+        "start": {
+          "shape": "arrow",
+          "fill": "black"
+        },
+        "end": null
+      }
+    ]
+  },
+  "cases": [
+    {
+      "id": "sequence-identical",
+      "mutations": [],
+      "accept": true
+    },
+    {
+      "id": "sequence-mutation-0",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "x"
+          ],
+          "value": 4
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-1",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "y"
+          ],
+          "value": 4
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-2",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "width"
+          ],
+          "value": 104
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-3",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "height"
+          ],
+          "value": 104
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-4",
+      "mutations": [
+        {
+          "path": [
+            "numbers",
+            0,
+            "tag"
+          ],
+          "value": "rect changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-5",
+      "mutations": [
+        {
+          "path": [
+            "numbers",
+            0,
+            "dash"
+          ],
+          "value": "none changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-6",
+      "mutations": [
+        {
+          "path": [
+            "numbers",
+            0,
+            "id"
+          ],
+          "value": "test changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-7",
+      "mutations": [
+        {
+          "path": [
+            "numbers",
+            0,
+            "footer"
+          ],
+          "value": true
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-8",
+      "mutations": [
+        {
+          "path": [
+            "numbers",
+            0,
+            "text"
+          ],
+          "value": "hello changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-9",
+      "mutations": [
+        {
+          "path": [
+            "numbers",
+            0,
+            "size"
+          ],
+          "value": "12px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-10",
+      "mutations": [
+        {
+          "path": [
+            "numbers",
+            0,
+            "weight"
+          ],
+          "value": "400 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-11",
+      "mutations": [
+        {
+          "path": [
+            "numbers",
+            0,
+            "fill"
+          ],
+          "value": "white changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-12",
+      "mutations": [
+        {
+          "path": [
+            "numbers",
+            0,
+            "stroke"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-13",
+      "mutations": [
+        {
+          "path": [
+            "numbers",
+            0,
+            "strokeWidth"
+          ],
+          "value": "1px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-14",
+      "mutations": [
+        {
+          "path": [
+            "numbers",
+            0,
+            "kind"
+          ],
+          "value": "actor changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-15",
+      "mutations": [
+        {
+          "path": [
+            "numbers",
+            0,
+            "x"
+          ],
+          "value": 14
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-16",
+      "mutations": [
+        {
+          "path": [
+            "numbers",
+            0,
+            "y"
+          ],
+          "value": 24
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-17",
+      "mutations": [
+        {
+          "path": [
+            "numbers",
+            0,
+            "width"
+          ],
+          "value": 34
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-18",
+      "mutations": [
+        {
+          "path": [
+            "numbers",
+            0,
+            "height"
+          ],
+          "value": 44
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-19",
+      "mutations": [
+        {
+          "path": [
+            "numbers",
+            0,
+            "r"
+          ],
+          "value": 7
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-20",
+      "mutations": [
+        {
+          "path": [
+            "backgrounds",
+            0,
+            "tag"
+          ],
+          "value": "rect changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-21",
+      "mutations": [
+        {
+          "path": [
+            "backgrounds",
+            0,
+            "dash"
+          ],
+          "value": "none changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-22",
+      "mutations": [
+        {
+          "path": [
+            "backgrounds",
+            0,
+            "id"
+          ],
+          "value": "test changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-23",
+      "mutations": [
+        {
+          "path": [
+            "backgrounds",
+            0,
+            "footer"
+          ],
+          "value": true
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-24",
+      "mutations": [
+        {
+          "path": [
+            "backgrounds",
+            0,
+            "text"
+          ],
+          "value": "hello changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-25",
+      "mutations": [
+        {
+          "path": [
+            "backgrounds",
+            0,
+            "size"
+          ],
+          "value": "12px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-26",
+      "mutations": [
+        {
+          "path": [
+            "backgrounds",
+            0,
+            "weight"
+          ],
+          "value": "400 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-27",
+      "mutations": [
+        {
+          "path": [
+            "backgrounds",
+            0,
+            "fill"
+          ],
+          "value": "white changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-28",
+      "mutations": [
+        {
+          "path": [
+            "backgrounds",
+            0,
+            "stroke"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-29",
+      "mutations": [
+        {
+          "path": [
+            "backgrounds",
+            0,
+            "strokeWidth"
+          ],
+          "value": "1px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-30",
+      "mutations": [
+        {
+          "path": [
+            "backgrounds",
+            0,
+            "kind"
+          ],
+          "value": "actor changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-31",
+      "mutations": [
+        {
+          "path": [
+            "backgrounds",
+            0,
+            "x"
+          ],
+          "value": 14
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-32",
+      "mutations": [
+        {
+          "path": [
+            "backgrounds",
+            0,
+            "y"
+          ],
+          "value": 24
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-33",
+      "mutations": [
+        {
+          "path": [
+            "backgrounds",
+            0,
+            "width"
+          ],
+          "value": 34
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-34",
+      "mutations": [
+        {
+          "path": [
+            "backgrounds",
+            0,
+            "height"
+          ],
+          "value": 44
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-35",
+      "mutations": [
+        {
+          "path": [
+            "backgrounds",
+            0,
+            "r"
+          ],
+          "value": 7
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-36",
+      "mutations": [
+        {
+          "path": [
+            "regions",
+            0,
+            "tag"
+          ],
+          "value": "rect changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-37",
+      "mutations": [
+        {
+          "path": [
+            "regions",
+            0,
+            "dash"
+          ],
+          "value": "none changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-38",
+      "mutations": [
+        {
+          "path": [
+            "regions",
+            0,
+            "id"
+          ],
+          "value": "test changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-39",
+      "mutations": [
+        {
+          "path": [
+            "regions",
+            0,
+            "footer"
+          ],
+          "value": true
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-40",
+      "mutations": [
+        {
+          "path": [
+            "regions",
+            0,
+            "text"
+          ],
+          "value": "hello changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-41",
+      "mutations": [
+        {
+          "path": [
+            "regions",
+            0,
+            "size"
+          ],
+          "value": "12px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-42",
+      "mutations": [
+        {
+          "path": [
+            "regions",
+            0,
+            "weight"
+          ],
+          "value": "400 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-43",
+      "mutations": [
+        {
+          "path": [
+            "regions",
+            0,
+            "fill"
+          ],
+          "value": "white changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-44",
+      "mutations": [
+        {
+          "path": [
+            "regions",
+            0,
+            "stroke"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-45",
+      "mutations": [
+        {
+          "path": [
+            "regions",
+            0,
+            "strokeWidth"
+          ],
+          "value": "1px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-46",
+      "mutations": [
+        {
+          "path": [
+            "regions",
+            0,
+            "kind"
+          ],
+          "value": "actor changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-47",
+      "mutations": [
+        {
+          "path": [
+            "regions",
+            0,
+            "x"
+          ],
+          "value": 14
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-48",
+      "mutations": [
+        {
+          "path": [
+            "regions",
+            0,
+            "y"
+          ],
+          "value": 24
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-49",
+      "mutations": [
+        {
+          "path": [
+            "regions",
+            0,
+            "width"
+          ],
+          "value": 34
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-50",
+      "mutations": [
+        {
+          "path": [
+            "regions",
+            0,
+            "height"
+          ],
+          "value": 44
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-51",
+      "mutations": [
+        {
+          "path": [
+            "regions",
+            0,
+            "r"
+          ],
+          "value": 7
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-52",
+      "mutations": [
+        {
+          "path": [
+            "regions",
+            0,
+            "points",
+            0,
+            0
+          ],
+          "value": 5
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-53",
+      "mutations": [
+        {
+          "path": [
+            "regions",
+            0,
+            "points",
+            0,
+            1
+          ],
+          "value": 6
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-54",
+      "mutations": [
+        {
+          "path": [
+            "regions",
+            0,
+            "points",
+            1,
+            0
+          ],
+          "value": 7
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-55",
+      "mutations": [
+        {
+          "path": [
+            "regions",
+            0,
+            "points",
+            1,
+            1
+          ],
+          "value": 8
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-56",
+      "mutations": [
+        {
+          "path": [
+            "actors",
+            0,
+            "tag"
+          ],
+          "value": "rect changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-57",
+      "mutations": [
+        {
+          "path": [
+            "actors",
+            0,
+            "dash"
+          ],
+          "value": "none changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-58",
+      "mutations": [
+        {
+          "path": [
+            "actors",
+            0,
+            "id"
+          ],
+          "value": "test changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-59",
+      "mutations": [
+        {
+          "path": [
+            "actors",
+            0,
+            "footer"
+          ],
+          "value": true
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-60",
+      "mutations": [
+        {
+          "path": [
+            "actors",
+            0,
+            "text"
+          ],
+          "value": "hello changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-61",
+      "mutations": [
+        {
+          "path": [
+            "actors",
+            0,
+            "size"
+          ],
+          "value": "12px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-62",
+      "mutations": [
+        {
+          "path": [
+            "actors",
+            0,
+            "weight"
+          ],
+          "value": "400 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-63",
+      "mutations": [
+        {
+          "path": [
+            "actors",
+            0,
+            "fill"
+          ],
+          "value": "white changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-64",
+      "mutations": [
+        {
+          "path": [
+            "actors",
+            0,
+            "stroke"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-65",
+      "mutations": [
+        {
+          "path": [
+            "actors",
+            0,
+            "strokeWidth"
+          ],
+          "value": "1px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-66",
+      "mutations": [
+        {
+          "path": [
+            "actors",
+            0,
+            "kind"
+          ],
+          "value": "actor changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-67",
+      "mutations": [
+        {
+          "path": [
+            "actors",
+            0,
+            "x"
+          ],
+          "value": 14
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-68",
+      "mutations": [
+        {
+          "path": [
+            "actors",
+            0,
+            "y"
+          ],
+          "value": 24
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-69",
+      "mutations": [
+        {
+          "path": [
+            "actors",
+            0,
+            "width"
+          ],
+          "value": 34
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-70",
+      "mutations": [
+        {
+          "path": [
+            "actors",
+            0,
+            "height"
+          ],
+          "value": 44
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-71",
+      "mutations": [
+        {
+          "path": [
+            "actors",
+            0,
+            "r"
+          ],
+          "value": 7
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-72",
+      "mutations": [
+        {
+          "path": [
+            "notes",
+            0,
+            "tag"
+          ],
+          "value": "rect changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-73",
+      "mutations": [
+        {
+          "path": [
+            "notes",
+            0,
+            "dash"
+          ],
+          "value": "none changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-74",
+      "mutations": [
+        {
+          "path": [
+            "notes",
+            0,
+            "id"
+          ],
+          "value": "test changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-75",
+      "mutations": [
+        {
+          "path": [
+            "notes",
+            0,
+            "footer"
+          ],
+          "value": true
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-76",
+      "mutations": [
+        {
+          "path": [
+            "notes",
+            0,
+            "text"
+          ],
+          "value": "hello changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-77",
+      "mutations": [
+        {
+          "path": [
+            "notes",
+            0,
+            "size"
+          ],
+          "value": "12px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-78",
+      "mutations": [
+        {
+          "path": [
+            "notes",
+            0,
+            "weight"
+          ],
+          "value": "400 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-79",
+      "mutations": [
+        {
+          "path": [
+            "notes",
+            0,
+            "fill"
+          ],
+          "value": "white changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-80",
+      "mutations": [
+        {
+          "path": [
+            "notes",
+            0,
+            "stroke"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-81",
+      "mutations": [
+        {
+          "path": [
+            "notes",
+            0,
+            "strokeWidth"
+          ],
+          "value": "1px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-82",
+      "mutations": [
+        {
+          "path": [
+            "notes",
+            0,
+            "kind"
+          ],
+          "value": "actor changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-83",
+      "mutations": [
+        {
+          "path": [
+            "notes",
+            0,
+            "x"
+          ],
+          "value": 14
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-84",
+      "mutations": [
+        {
+          "path": [
+            "notes",
+            0,
+            "y"
+          ],
+          "value": 24
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-85",
+      "mutations": [
+        {
+          "path": [
+            "notes",
+            0,
+            "width"
+          ],
+          "value": 34
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-86",
+      "mutations": [
+        {
+          "path": [
+            "notes",
+            0,
+            "height"
+          ],
+          "value": 44
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-87",
+      "mutations": [
+        {
+          "path": [
+            "notes",
+            0,
+            "r"
+          ],
+          "value": 7
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-88",
+      "mutations": [
+        {
+          "path": [
+            "activations",
+            0,
+            "tag"
+          ],
+          "value": "rect changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-89",
+      "mutations": [
+        {
+          "path": [
+            "activations",
+            0,
+            "dash"
+          ],
+          "value": "none changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-90",
+      "mutations": [
+        {
+          "path": [
+            "activations",
+            0,
+            "id"
+          ],
+          "value": "test changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-91",
+      "mutations": [
+        {
+          "path": [
+            "activations",
+            0,
+            "footer"
+          ],
+          "value": true
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-92",
+      "mutations": [
+        {
+          "path": [
+            "activations",
+            0,
+            "text"
+          ],
+          "value": "hello changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-93",
+      "mutations": [
+        {
+          "path": [
+            "activations",
+            0,
+            "size"
+          ],
+          "value": "12px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-94",
+      "mutations": [
+        {
+          "path": [
+            "activations",
+            0,
+            "weight"
+          ],
+          "value": "400 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-95",
+      "mutations": [
+        {
+          "path": [
+            "activations",
+            0,
+            "fill"
+          ],
+          "value": "white changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-96",
+      "mutations": [
+        {
+          "path": [
+            "activations",
+            0,
+            "stroke"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-97",
+      "mutations": [
+        {
+          "path": [
+            "activations",
+            0,
+            "strokeWidth"
+          ],
+          "value": "1px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-98",
+      "mutations": [
+        {
+          "path": [
+            "activations",
+            0,
+            "kind"
+          ],
+          "value": "actor changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-99",
+      "mutations": [
+        {
+          "path": [
+            "activations",
+            0,
+            "x"
+          ],
+          "value": 14
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-100",
+      "mutations": [
+        {
+          "path": [
+            "activations",
+            0,
+            "y"
+          ],
+          "value": 24
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-101",
+      "mutations": [
+        {
+          "path": [
+            "activations",
+            0,
+            "width"
+          ],
+          "value": 34
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-102",
+      "mutations": [
+        {
+          "path": [
+            "activations",
+            0,
+            "height"
+          ],
+          "value": 44
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-103",
+      "mutations": [
+        {
+          "path": [
+            "activations",
+            0,
+            "r"
+          ],
+          "value": 7
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-104",
+      "mutations": [
+        {
+          "path": [
+            "figures",
+            0,
+            "tag"
+          ],
+          "value": "rect changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-105",
+      "mutations": [
+        {
+          "path": [
+            "figures",
+            0,
+            "dash"
+          ],
+          "value": "none changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-106",
+      "mutations": [
+        {
+          "path": [
+            "figures",
+            0,
+            "id"
+          ],
+          "value": "test changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-107",
+      "mutations": [
+        {
+          "path": [
+            "figures",
+            0,
+            "footer"
+          ],
+          "value": true
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-108",
+      "mutations": [
+        {
+          "path": [
+            "figures",
+            0,
+            "text"
+          ],
+          "value": "hello changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-109",
+      "mutations": [
+        {
+          "path": [
+            "figures",
+            0,
+            "size"
+          ],
+          "value": "12px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-110",
+      "mutations": [
+        {
+          "path": [
+            "figures",
+            0,
+            "weight"
+          ],
+          "value": "400 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-111",
+      "mutations": [
+        {
+          "path": [
+            "figures",
+            0,
+            "fill"
+          ],
+          "value": "white changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-112",
+      "mutations": [
+        {
+          "path": [
+            "figures",
+            0,
+            "stroke"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-113",
+      "mutations": [
+        {
+          "path": [
+            "figures",
+            0,
+            "strokeWidth"
+          ],
+          "value": "1px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-114",
+      "mutations": [
+        {
+          "path": [
+            "figures",
+            0,
+            "kind"
+          ],
+          "value": "actor changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-115",
+      "mutations": [
+        {
+          "path": [
+            "figures",
+            0,
+            "x"
+          ],
+          "value": 14
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-116",
+      "mutations": [
+        {
+          "path": [
+            "figures",
+            0,
+            "y"
+          ],
+          "value": 24
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-117",
+      "mutations": [
+        {
+          "path": [
+            "figures",
+            0,
+            "width"
+          ],
+          "value": 34
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-118",
+      "mutations": [
+        {
+          "path": [
+            "figures",
+            0,
+            "height"
+          ],
+          "value": 44
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-119",
+      "mutations": [
+        {
+          "path": [
+            "figures",
+            0,
+            "r"
+          ],
+          "value": 7
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-120",
+      "mutations": [
+        {
+          "path": [
+            "shapes",
+            0,
+            "tag"
+          ],
+          "value": "rect changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-121",
+      "mutations": [
+        {
+          "path": [
+            "shapes",
+            0,
+            "dash"
+          ],
+          "value": "none changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-122",
+      "mutations": [
+        {
+          "path": [
+            "shapes",
+            0,
+            "id"
+          ],
+          "value": "test changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-123",
+      "mutations": [
+        {
+          "path": [
+            "shapes",
+            0,
+            "footer"
+          ],
+          "value": true
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-124",
+      "mutations": [
+        {
+          "path": [
+            "shapes",
+            0,
+            "text"
+          ],
+          "value": "hello changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-125",
+      "mutations": [
+        {
+          "path": [
+            "shapes",
+            0,
+            "size"
+          ],
+          "value": "12px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-126",
+      "mutations": [
+        {
+          "path": [
+            "shapes",
+            0,
+            "weight"
+          ],
+          "value": "400 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-127",
+      "mutations": [
+        {
+          "path": [
+            "shapes",
+            0,
+            "fill"
+          ],
+          "value": "white changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-128",
+      "mutations": [
+        {
+          "path": [
+            "shapes",
+            0,
+            "stroke"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-129",
+      "mutations": [
+        {
+          "path": [
+            "shapes",
+            0,
+            "strokeWidth"
+          ],
+          "value": "1px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-130",
+      "mutations": [
+        {
+          "path": [
+            "shapes",
+            0,
+            "kind"
+          ],
+          "value": "actor changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-131",
+      "mutations": [
+        {
+          "path": [
+            "shapes",
+            0,
+            "x"
+          ],
+          "value": 14
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-132",
+      "mutations": [
+        {
+          "path": [
+            "shapes",
+            0,
+            "y"
+          ],
+          "value": 24
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-133",
+      "mutations": [
+        {
+          "path": [
+            "shapes",
+            0,
+            "width"
+          ],
+          "value": 34
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-134",
+      "mutations": [
+        {
+          "path": [
+            "shapes",
+            0,
+            "height"
+          ],
+          "value": 44
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-135",
+      "mutations": [
+        {
+          "path": [
+            "shapes",
+            0,
+            "r"
+          ],
+          "value": 7
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-136",
+      "mutations": [
+        {
+          "path": [
+            "shapes",
+            0,
+            "points",
+            0,
+            0
+          ],
+          "value": 5
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-137",
+      "mutations": [
+        {
+          "path": [
+            "shapes",
+            0,
+            "points",
+            0,
+            1
+          ],
+          "value": 6
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-138",
+      "mutations": [
+        {
+          "path": [
+            "shapes",
+            0,
+            "points",
+            1,
+            0
+          ],
+          "value": 7
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-139",
+      "mutations": [
+        {
+          "path": [
+            "shapes",
+            0,
+            "points",
+            1,
+            1
+          ],
+          "value": 8
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-140",
+      "mutations": [
+        {
+          "path": [
+            "lines",
+            0,
+            "tag"
+          ],
+          "value": "rect changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-141",
+      "mutations": [
+        {
+          "path": [
+            "lines",
+            0,
+            "dash"
+          ],
+          "value": "none changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-142",
+      "mutations": [
+        {
+          "path": [
+            "lines",
+            0,
+            "id"
+          ],
+          "value": "test changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-143",
+      "mutations": [
+        {
+          "path": [
+            "lines",
+            0,
+            "footer"
+          ],
+          "value": true
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-144",
+      "mutations": [
+        {
+          "path": [
+            "lines",
+            0,
+            "text"
+          ],
+          "value": "hello changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-145",
+      "mutations": [
+        {
+          "path": [
+            "lines",
+            0,
+            "size"
+          ],
+          "value": "12px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-146",
+      "mutations": [
+        {
+          "path": [
+            "lines",
+            0,
+            "weight"
+          ],
+          "value": "400 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-147",
+      "mutations": [
+        {
+          "path": [
+            "lines",
+            0,
+            "fill"
+          ],
+          "value": "white changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-148",
+      "mutations": [
+        {
+          "path": [
+            "lines",
+            0,
+            "stroke"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-149",
+      "mutations": [
+        {
+          "path": [
+            "lines",
+            0,
+            "strokeWidth"
+          ],
+          "value": "1px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-150",
+      "mutations": [
+        {
+          "path": [
+            "lines",
+            0,
+            "kind"
+          ],
+          "value": "actor changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-151",
+      "mutations": [
+        {
+          "path": [
+            "lines",
+            0,
+            "x"
+          ],
+          "value": 14
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-152",
+      "mutations": [
+        {
+          "path": [
+            "lines",
+            0,
+            "y"
+          ],
+          "value": 24
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-153",
+      "mutations": [
+        {
+          "path": [
+            "lines",
+            0,
+            "width"
+          ],
+          "value": 34
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-154",
+      "mutations": [
+        {
+          "path": [
+            "lines",
+            0,
+            "height"
+          ],
+          "value": 44
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-155",
+      "mutations": [
+        {
+          "path": [
+            "lines",
+            0,
+            "r"
+          ],
+          "value": 7
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-156",
+      "mutations": [
+        {
+          "path": [
+            "texts",
+            0,
+            "tag"
+          ],
+          "value": "rect changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-157",
+      "mutations": [
+        {
+          "path": [
+            "texts",
+            0,
+            "dash"
+          ],
+          "value": "none changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-158",
+      "mutations": [
+        {
+          "path": [
+            "texts",
+            0,
+            "id"
+          ],
+          "value": "test changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-159",
+      "mutations": [
+        {
+          "path": [
+            "texts",
+            0,
+            "footer"
+          ],
+          "value": true
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-160",
+      "mutations": [
+        {
+          "path": [
+            "texts",
+            0,
+            "text"
+          ],
+          "value": "hello changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-161",
+      "mutations": [
+        {
+          "path": [
+            "texts",
+            0,
+            "size"
+          ],
+          "value": "12px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-162",
+      "mutations": [
+        {
+          "path": [
+            "texts",
+            0,
+            "weight"
+          ],
+          "value": "400 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-163",
+      "mutations": [
+        {
+          "path": [
+            "texts",
+            0,
+            "fill"
+          ],
+          "value": "white changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-164",
+      "mutations": [
+        {
+          "path": [
+            "texts",
+            0,
+            "stroke"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-165",
+      "mutations": [
+        {
+          "path": [
+            "texts",
+            0,
+            "strokeWidth"
+          ],
+          "value": "1px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-166",
+      "mutations": [
+        {
+          "path": [
+            "texts",
+            0,
+            "kind"
+          ],
+          "value": "actor changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-167",
+      "mutations": [
+        {
+          "path": [
+            "texts",
+            0,
+            "x"
+          ],
+          "value": 14
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-168",
+      "mutations": [
+        {
+          "path": [
+            "texts",
+            0,
+            "y"
+          ],
+          "value": 24
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-169",
+      "mutations": [
+        {
+          "path": [
+            "texts",
+            0,
+            "width"
+          ],
+          "value": 34
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-170",
+      "mutations": [
+        {
+          "path": [
+            "texts",
+            0,
+            "height"
+          ],
+          "value": 44
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-171",
+      "mutations": [
+        {
+          "path": [
+            "texts",
+            0,
+            "r"
+          ],
+          "value": 7
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-172",
+      "mutations": [
+        {
+          "path": [
+            "signals",
+            0,
+            "tag"
+          ],
+          "value": "rect changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-173",
+      "mutations": [
+        {
+          "path": [
+            "signals",
+            0,
+            "dash"
+          ],
+          "value": "none changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-174",
+      "mutations": [
+        {
+          "path": [
+            "signals",
+            0,
+            "id"
+          ],
+          "value": "test changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-175",
+      "mutations": [
+        {
+          "path": [
+            "signals",
+            0,
+            "footer"
+          ],
+          "value": true
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-176",
+      "mutations": [
+        {
+          "path": [
+            "signals",
+            0,
+            "text"
+          ],
+          "value": "hello changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-177",
+      "mutations": [
+        {
+          "path": [
+            "signals",
+            0,
+            "size"
+          ],
+          "value": "12px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-178",
+      "mutations": [
+        {
+          "path": [
+            "signals",
+            0,
+            "weight"
+          ],
+          "value": "400 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-179",
+      "mutations": [
+        {
+          "path": [
+            "signals",
+            0,
+            "fill"
+          ],
+          "value": "white changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-180",
+      "mutations": [
+        {
+          "path": [
+            "signals",
+            0,
+            "stroke"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-181",
+      "mutations": [
+        {
+          "path": [
+            "signals",
+            0,
+            "strokeWidth"
+          ],
+          "value": "1px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-182",
+      "mutations": [
+        {
+          "path": [
+            "signals",
+            0,
+            "kind"
+          ],
+          "value": "actor changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-183",
+      "mutations": [
+        {
+          "path": [
+            "signals",
+            0,
+            "x"
+          ],
+          "value": 14
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-184",
+      "mutations": [
+        {
+          "path": [
+            "signals",
+            0,
+            "y"
+          ],
+          "value": 24
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-185",
+      "mutations": [
+        {
+          "path": [
+            "signals",
+            0,
+            "width"
+          ],
+          "value": 34
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-186",
+      "mutations": [
+        {
+          "path": [
+            "signals",
+            0,
+            "height"
+          ],
+          "value": 44
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-187",
+      "mutations": [
+        {
+          "path": [
+            "signals",
+            0,
+            "r"
+          ],
+          "value": 7
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-188",
+      "mutations": [
+        {
+          "path": [
+            "signals",
+            0,
+            "points",
+            0,
+            0
+          ],
+          "value": 5
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-189",
+      "mutations": [
+        {
+          "path": [
+            "signals",
+            0,
+            "points",
+            0,
+            1
+          ],
+          "value": 6
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-190",
+      "mutations": [
+        {
+          "path": [
+            "signals",
+            0,
+            "points",
+            1,
+            0
+          ],
+          "value": 7
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-191",
+      "mutations": [
+        {
+          "path": [
+            "signals",
+            0,
+            "points",
+            1,
+            1
+          ],
+          "value": 8
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-192",
+      "mutations": [
+        {
+          "path": [
+            "signals",
+            0,
+            "start",
+            "shape"
+          ],
+          "value": "arrow changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-193",
+      "mutations": [
+        {
+          "path": [
+            "signals",
+            0,
+            "start",
+            "fill"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-mutation-194",
+      "mutations": [
+        {
+          "path": [
+            "signals",
+            0,
+            "end"
+          ],
+          "value": {
+            "unexpected": 1
+          }
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-missing-numbers",
+      "mutations": [
+        {
+          "path": [
+            "numbers"
+          ],
+          "value": []
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-missing-backgrounds",
+      "mutations": [
+        {
+          "path": [
+            "backgrounds"
+          ],
+          "value": []
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-missing-regions",
+      "mutations": [
+        {
+          "path": [
+            "regions"
+          ],
+          "value": []
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-missing-actors",
+      "mutations": [
+        {
+          "path": [
+            "actors"
+          ],
+          "value": []
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-missing-notes",
+      "mutations": [
+        {
+          "path": [
+            "notes"
+          ],
+          "value": []
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-missing-activations",
+      "mutations": [
+        {
+          "path": [
+            "activations"
+          ],
+          "value": []
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-missing-figures",
+      "mutations": [
+        {
+          "path": [
+            "figures"
+          ],
+          "value": []
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-missing-shapes",
+      "mutations": [
+        {
+          "path": [
+            "shapes"
+          ],
+          "value": []
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-missing-lines",
+      "mutations": [
+        {
+          "path": [
+            "lines"
+          ],
+          "value": []
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-missing-texts",
+      "mutations": [
+        {
+          "path": [
+            "texts"
+          ],
+          "value": []
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-missing-signals",
+      "mutations": [
+        {
+          "path": [
+            "signals"
+          ],
+          "value": []
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-view-delta-0.19",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "width"
+          ],
+          "value": 100.19
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "sequence-view-delta-0.21",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "width"
+          ],
+          "value": 100.21
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "sequence-view-delta-0.99",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "width"
+          ],
+          "value": 100.99
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "sequence-view-delta-1.01",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "width"
+          ],
+          "value": 101.01
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-view-delta-1.49",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "width"
+          ],
+          "value": 101.49
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-view-delta-1.51",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "width"
+          ],
+          "value": 101.51
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-extra-marker-paint",
+      "mutations": [
+        {
+          "path": [
+            "signals",
+            0,
+            "start",
+            "opacity"
+          ],
+          "value": "0"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "sequence-missing-route-points",
+      "mutations": [
+        {
+          "path": [
+            "signals",
+            0,
+            "points"
+          ],
+          "value": []
+        }
+      ],
+      "note": "Previously omitted route points escaped the loop; a missing route now fails.",
+      "accept": false
+    }
+  ]
+}

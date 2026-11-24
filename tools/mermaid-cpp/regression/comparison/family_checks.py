@@ -16,6 +16,26 @@ def numbers(value):
     return [float(n) for n in NUMBER.findall(value)]
 
 
+def exact(actual, expected, location):
+    """Deep strict equality, including object keys, for paint and text records."""
+    if isinstance(expected, dict):
+        require(isinstance(actual, dict) and actual.keys() == expected.keys(), location + " keys")
+        for key, value in expected.items():
+            exact(actual[key], value, location + "." + key)
+    elif isinstance(expected, list):
+        require(isinstance(actual, list) and len(actual) == len(expected), location + " count")
+        for index, value in enumerate(expected):
+            exact(actual[index], value, location + f".{index}")
+    else:
+        require((type(actual) is type(expected) or type(actual) in (int, float) and type(expected) in (int, float))
+                and actual == expected, location + " value")
+
+
+def exact_fields(actual, expected, keys, location):
+    for key in keys:
+        exact(actual.get(key, MISSING), expected.get(key, MISSING), location + "." + key)
+
+
 class Check:
     def __init__(self):
         self.maximum = 0
