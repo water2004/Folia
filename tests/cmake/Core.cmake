@@ -23,7 +23,7 @@ target_include_directories(${FOLIA_CORE_TEST_TARGET} PRIVATE
     "${FOLIA_SOURCE_ROOT}/tests" "${CMAKE_CURRENT_BINARY_DIR}/gfm-entities")
 target_compile_definitions(${FOLIA_CORE_TEST_TARGET} PRIVATE
     FOLIA_TEST_DATA_ROOT="${FOLIA_SOURCE_ROOT}/tests")
-target_link_libraries(${FOLIA_CORE_TEST_TARGET} PRIVATE folia_core Boost::ut_module)
+target_link_libraries(${FOLIA_CORE_TEST_TARGET} PRIVATE folia_core Boost::ut_module folia_test_support)
 
 # These deterministic Windows-key adapters contain no Windows APIs. Exercise
 # the production shortcut catalog and dispatch policy on the portable runner

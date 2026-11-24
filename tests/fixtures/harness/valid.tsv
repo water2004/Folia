@@ -1,0 +1,3 @@
+# Reader contract: interior and trailing empty cells are significant.
+first		last
+second	middle	

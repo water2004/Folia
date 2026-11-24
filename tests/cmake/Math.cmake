@@ -21,7 +21,7 @@ target_include_directories(FoliaMathTests PRIVATE ${FOLIA_SOURCE_ROOT}/tests)
 target_compile_definitions(FoliaMathTests PRIVATE
     FOLIA_TEST_DATA_ROOT="${FOLIA_SOURCE_ROOT}/tests"
     FOLIA_MATH_FIXTURE_DIR="${FOLIA_SOURCE_ROOT}/tests/math/fixtures")
-target_link_libraries(FoliaMathTests PRIVATE folia_math folia::math_editor FoliaNativeMath Boost::ut_module)
+target_link_libraries(FoliaMathTests PRIVATE folia_math folia::math_editor FoliaNativeMath Boost::ut_module folia_test_support)
 add_test(NAME FoliaMathTests COMMAND FoliaMathTests)
 # Focused native SVG/C ABI gate for embedders such as Mermaid. The same tests
 # remain in FoliaMathTests; this explicit target avoids compiling unrelated
@@ -39,7 +39,7 @@ set_target_properties(FoliaMathSvgBridgeTests PROPERTIES CXX_MODULE_STD ON CXX_S
 target_include_directories(FoliaMathSvgBridgeTests PRIVATE ${FOLIA_SOURCE_ROOT}/tests)
 target_compile_definitions(FoliaMathSvgBridgeTests PRIVATE
     FOLIA_TEST_DATA_ROOT="${FOLIA_SOURCE_ROOT}/tests")
-target_link_libraries(FoliaMathSvgBridgeTests PRIVATE folia_math FoliaNativeMath Boost::ut_module)
+target_link_libraries(FoliaMathSvgBridgeTests PRIVATE folia_math FoliaNativeMath Boost::ut_module folia_test_support)
 add_executable(FoliaMathFontDump EXCLUDE_FROM_ALL
     ${FOLIA_SOURCE_ROOT}/tools/math-port/font-data-dump.cpp)
 target_compile_features(FoliaMathFontDump PRIVATE cxx_std_23)
