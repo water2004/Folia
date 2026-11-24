@@ -22,7 +22,7 @@ Source behavior is observed by `textmacros-package-original-oracle.cjs`,
 tree oracle locks the same original CJS modules and records normalized full
 MML trees (kind, inferred/token state, token text, all attributes/properties,
 and ordered children) for 37 real TexParser/TextParser inputs. The matching
-`compare-native-frontend.cjs` requires exact case coverage and reports the
+`compare-native-frontend.py` requires exact case coverage and reports the
 first structural mismatch. `native-frontend-dump.cpp` writes native trees from
 actual owners to an ignored build path for that comparator; Root still needs to
 wire and compile the dump/comparison units.
