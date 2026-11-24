@@ -1,0 +1,1985 @@
+# Pinned reference observations; values exported without normalization.
+# format_utf16	expected_utf16
+# source_evidence=docs/math-port/evidence/p40-tex-error-source.json
+# source_sha256=8133cf789bce7f21b95c685dec132b291319dc00ea1a370740dbac394807021d
+	
+%	%
+%%	%
+%x	x
+%1	first
+%0	
+%00	
+%01	first
+%10	tenth
+%11	
+%9999999999999999999999999999	
+%{1}	first
+%{8}	[object Object]
+%{9}	{9}
+%{90}	{90}
+%{09}	ninth
+%{10}	tenth
+%{0}	
+%{1	{1
+%{plural:%1|a|b}	%{plural:%1|a|b}
+%{plural:%1|}	%{plural:%1|}
+%{plural:%1|%{2}}	%{plural:%1|%{2}}
+%{plural:%1|%}x}	%{plural:%1|%}x}
+%{plural:%1|%}}	%{plural:%1|%}}
+%{plural:%1|abc}def}	%{plural:%1|abc}def}
+%{PLURAL:%1|a}	{PLURAL:first|a}
+%{foo:%0|%1}	%{foo:%0|%1}
+%\u000a	%\u000a
+%{plural:%1|a\u000ab}	{plural:%1|a\u000ab}
+%{plural:%1|a}\u000a	%{plural:%1|a}\u000a
+%\u000d	%\u000d
+%{plural:%1|a\u000db}	{plural:%1|a\u000db}
+%{plural:%1|a}\u000d	%{plural:%1|a}\u000d
+%\u2028	%\u2028
+%{plural:%1|a\u2028b}	{plural:%1|a\u2028b}
+%{plural:%1|a}\u2028	%{plural:%1|a}\u2028
+%\u2029	%\u2029
+%{plural:%1|a\u2029b}	{plural:%1|a\u2029b}
+%{plural:%1|a}\u2029	%{plural:%1|a}\u2029
+%\ud800	\ud800
+%{plural:%1|a\ud800b}	%{plural:%1|a\ud800b}
+%{plural:%1|a}\ud800	%{plural:%1|a}\ud800
+%\udc00	\udc00
+%{plural:%1|a\udc00b}	%{plural:%1|a\udc00b}
+%{plural:%1|a}\udc00	%{plural:%1|a}\udc00
+%\ud83d\ude00	\ud83d\ude00
+%{plural:%1|a\ud83d\ude00b}	%{plural:%1|a\ud83d\ude00b}
+%{plural:%1|a}\ud83d\ude00	%{plural:%1|a}\ud83d\ude00
+%\u0000	\u0000
+%{plural:%1|a\u0000b}	%{plural:%1|a\u0000b}
+%{plural:%1|a}\u0000	%{plural:%1|a}\u0000
+%2	0
+%{2}	0
+%3	1e+21
+%{3}	1e+21
+%4	
+%{4}	
+%5	
+%{5}	
+%6	false
+%{6}	false
+%7	a,,b,c
+%{7}	a,,b,c
+%8	[object Object]
+%9	ninth
+%{11}	
+%12	
+%{12}	
+%13	
+%{13}	
+%14	
+%{14}	
+%15	
+%{15}	
+%16	
+%{16}	
+%17	
+%{17}	
+%18	
+%{18}	
+%19	
+%{19}	
+%20	
+%{20}	
+%21	
+%{21}	
+%22	
+%{22}	
+%23	
+%{23}	
+%24	
+%{24}	
+%25	
+%{25}	
+%26	
+%{26}	
+%27	
+%{27}	
+%28	
+%{28}	
+%29	
+%{29}	
+%30	
+%{30}	
+%31	
+%{31}	
+%32	
+%{32}	
+%33	
+%{33}	
+%34	
+%{34}	
+%35	
+%{35}	
+%36	
+%{36}	
+%37	
+%{37}	
+%38	
+%{38}	
+%39	
+%{39}	
+%40	
+%{40}	
+%41	
+%{41}	
+%42	
+%{42}	
+%43	
+%{43}	
+%44	
+%{44}	
+%45	
+%{45}	
+%46	
+%{46}	
+%47	
+%{47}	
+%48	
+%{48}	
+%49	
+%{49}	
+%50	
+%{50}	
+%51	
+%{51}	
+%52	
+%{52}	
+%53	
+%{53}	
+%54	
+%{54}	
+%55	
+%{55}	
+%56	
+%{56}	
+%57	
+%{57}	
+%58	
+%{58}	
+%59	
+%{59}	
+%60	
+%{60}	
+%61	
+%{61}	
+%62	
+%{62}	
+%63	
+%{63}	
+%64	
+%{64}	
+%65	
+%{65}	
+%66	
+%{66}	
+%67	
+%{67}	
+%68	
+%{68}	
+%69	
+%{69}	
+%70	
+%{70}	
+%71	
+%{71}	
+%72	
+%{72}	
+%73	
+%{73}	
+%74	
+%{74}	
+%75	
+%{75}	
+%76	
+%{76}	
+%77	
+%{77}	
+%78	
+%{78}	
+%79	
+%{79}	
+%80	
+%{80}	
+%81	
+%{81}	
+%82	
+%{82}	
+%83	
+%{83}	
+%84	
+%{84}	
+%85	
+%{85}	
+%86	
+%{86}	
+%87	
+%{87}	
+%88	
+%{88}	
+%89	
+%{89}	
+%90	
+%91	
+%{91}	{91}
+%92	
+%{92}	{92}
+%93	
+%{93}	{93}
+%94	
+%{94}	{94}
+%95	
+%{95}	{95}
+%96	
+%{96}	{96}
+%97	
+%{97}	{97}
+%98	
+%{98}	{98}
+%99	
+%{99}	{99}
+%100	
+%{100}	
+%101	
+%{101}	
+%102	
+%{102}	
+%103	
+%{103}	
+%104	
+%{104}	
+%105	
+%{105}	
+%106	
+%{106}	
+%107	
+%{107}	
+%108	
+%{108}	
+%109	
+%{109}	
+%110	
+%{110}	
+%111	
+%{111}	
+%112	
+%{112}	
+%113	
+%{113}	
+%114	
+%{114}	
+%115	
+%{115}	
+%116	
+%{116}	
+%117	
+%{117}	
+%118	
+%{118}	
+%119	
+%{119}	
+%{plural:%1|}\u000a	%{plural:%1|}\u000a
+%{\u000a1a%9\u2029}:\u20291\u000a%9}\u000d|{\u2028\ud800\u2029a}}	{\u000a1aninth\u2029}:\u20291\u000aninth}\u000d|{\u2028\ud800\u2029a}}
+prefix%}:a1}\u000d\ud800%z|\u000a\u000d\ud800\u2028z\u000aa%	prefix}:a1}\u000d\ud800z|\u000a\u000d\ud800\u2028z\u000aa%
+%{plural:%1|9\u000a\u000a|9:\u2029\u2028{%\u2029a9\u000d}	{plural:%1|9\u000a\u000a|9:\u2029\u2028{%\u2029a9\u000d}
+%{|9\u2029}a\u000d\u2028zzz}{0	{|9\u2029}a\u000d\u2028zzz}{0
+prefix%\ud800a\u202910a||10\u000a91\u000aa9\u202819}	prefix\ud800a\u202910a||10\u000a91\u000aa9\u202819}
+%{plural:%1|{a||{}}\u2028\u2029%\u2029\ud800{91%{z\u000d\u000d%9	%{plural:%1|{a||{}}\u2028\u2029%\u2029\ud800{91{z\u000d\u000dninth
+%{az\ud800}}	{az\ud800}}
+prefix%	prefix%
+%{plural:%1|1{\u2029|}\u000d\u000d900z1a{|}	{plural:%1|1{\u2029|}\u000d\u000d900z1a{|}
+%{\u000d}\u000a\ud800{1:\u000a|\u000a\u2029\u000d{|\u000az1aa\u000d:za	{\u000d}\u000a\ud800{1:\u000a|\u000a\u2029\u000d{|\u000az1aa\u000d:za
+prefix%{|zz1}\u000a9}	prefix{|zz1}\u000a9}
+%{plural:%1|\u000d\u2028a:9\u000a9\u2029\u202811za\u2028zz|\u2028	{plural:first|\u000d\u2028a:9\u000a9\u2029\u202811za\u2028zz|\u2028
+%{z0\ud800%%\ud800\u000d\u2028\u2028:z\u2029\u000a|z\ud800\u2029:}	{z0\ud800%\ud800\u000d\u2028\u2028:z\u2029\u000a|z\ud800\u2029:}
+prefix%\ud800}a\u2028%\ud800a\u000d%}\u2028\ud800	prefix\ud800}a\u2028\ud800a\u000d}\u2028\ud800
+%{plural:%1|1{\u000d::\u000d19z0\u000d\u2029}}1z\u000a1}	{plural:%1|1{\u000d::\u000d19z0\u000d\u2029}}1z\u000a1}
+%{\u2029\u2029\u2029}\u000d0}::|{:\u000a11\ud800	{\u2029\u2029\u2029}\u000d0}::|{:\u000a11\ud800
+prefix%9\u2029}|a|:aa:1:}	prefixninth\u2029}|a|:aa:1:}
+%{plural:%1|9a\u000d1z\ud800|{{09%\u000a\u202991\ud800\u000a\u2028aa9	{plural:first|9a\u000d1z\ud800|{{09%\u000a\u202991\ud800\u000a\u2028aa9
+%{9\u2029}	{9\u2029}
+prefix%a\u000a|{\u2028%az\u000d	prefixa\u000a|{\u2028az\u000d
+%{plural:%1|\u2029|\u000d1a|a\ud800\u000d19}	{plural:%1|\u2029|\u000d1a|a\ud800\u000d19}
+%{\u000a0|\u2029\u000a\ud800\u20281}	{\u000a0|\u2029\u000a\ud800\u20281}
+prefix%|9\ud800}	prefix|9\ud800}
+%{plural:%1|\u000d\u2029\u000a\u2028{%11}1{\u20290:|||a	{plural:%1|\u000d\u2029\u000a\u2028{%11}1{\u20290:|||a
+%{:\u2029z\u2028\ud800\u2029z9\u2028\ud800\u2029\u2029a\u2029\u20299}	{:\u2029z\u2028\ud800\u2029z9\u2028\ud800\u2029\u2029a\u2029\u20299}
+prefix%\u2029\u2029%\u000a{{zz0z\ud800\u2028\u000d\u000d\u000dz	prefix%\u2029\u2029%\u000a{{zz0z\ud800\u2028\u000d\u000d\u000dz
+%{plural:%1|z\u2028z\u2028}|}}z\u000aa1a\ud800\u2029}	{plural:%1|z\u2028z\u2028}|}}z\u000aa1a\ud800\u2029}
+%{91}\u202919a1|%{z{}|0\u000a	{91}\u202919a1|{z{}|0\u000a
+prefix%}{\ud800\u2029{\u2029z\ud800\u2028\u000d}|%:{\u2029{1\ud800z\ud800}}	prefix}{\ud800\u2029{\u2029z\ud800\u2028\u000d}|:{\u2029{1\ud800z\ud800}}
+%{plural:%1|\u2028|\u2029\u2029{\ud800z99z	{plural:first|\u2028|\u2029\u2029{\ud800z99z
+%{\u000a0%1%{199}z9\u000d}\u000a\u2028}	{\u000a0firstz9\u000d}\u000a\u2028}
+prefix%}009\u2029{|zz1	prefix}009\u2029{|zz1
+%{plural:%1|%a\u000a{\ud800\u2029a{}\u000d}1{}	{plural:%1|%a\u000a{\ud800\u2029a{}\u000d}1{}
+%{}{10\ud800%%0a%1\ud800a{\u000d}\u000a0\u2029\u000d\ud8009	{}{10\ud800%0afirst\ud800a{\u000d}\u000a0\u2029\u000d\ud8009
+prefix%:z\u000a%0z\u20291\u20290\ud800\u000aza}	prefix:z\u000az\u20291\u20290\ud800\u000aza}
+%{plural:%1|:\u2029|\u2028aaa\u000a\u2028\u2028\u000a9aa\u2029%\ud800a%\ud800:9\u000a	{plural:first|:\u2029|\u2028aaa\u000a\u2028\u2028\u000a9aa\u2029\ud800a\ud800:9\u000a
+prefix%}\u2029|%\u000d{\u20291:\u000a\u000d{:{	prefix}\u2029|%\u000d{\u20291:\u000a\u000d{:{
+%{plural:%1|zz}\u2029{\u000a:\u2029\u2028:11{:}|00\ud800}a|}	%{plural:%1|zz}\u2029{\u000a:\u2029\u2028:11{:}|00\ud800}a|}
+%{:z	{:z
+prefix%1|9}\u000a|z\ud8001{{\u000da}\u2028\u000a%:\u000a1%}	prefixfirst|9}\u000a|z\ud8001{{\u000da}\u2028\u000a:\u000a1}
+%{plural:%1|z0}\u000d\u2029}\u2029	%{plural:%1|z0}\u000d\u2029}\u2029
+%{9\u2028|0:\u2028\u000a10\ud800a0%}	{9\u2028|0:\u2028\u000a10\ud800a0}
+prefix%}\u000d}z%\u2028:1%\ud800\u000a00\ud800\u2029}\ud800%{\u000a1\u000az	prefix}\u000d}z%\u2028:1\ud800\u000a00\ud800\u2029}\ud800{\u000a1\u000az
+%{plural:%1|{\u000da%}\u2029\u000d\ud8009z\u000a:}}	{plural:%1|{\u000da%}\u2029\u000d\ud8009z\u000a:}}
+%{\u2028{{|{\u000d|0%\u000a	{\u2028{{|{\u000d|0%\u000a
+prefix%:%\u2028:a\u20289\u000dz1%\u000a\u2029{1}}	prefix:%\u2028:a\u20289\u000dz1%\u000a\u2029{1}}
+%{plural:%1|}\ud800}:	%{plural:%1|}\ud800}:
+%{9%0|}	{9|}
+prefix%|:\u2029%9\ud800\u000d\u2029}\ud800z\u000d\u000az{\ud800%1%\u000a:}a	prefix|:\u2029ninth\ud800\u000d\u2029}\ud800z\u000d\u000az{\ud800first%\u000a:}a
+%{plural:%1|\u000a0}\u000a99}	{plural:%1|\u000a0}\u000a99}
+%{:911}{\u2029\ud800{{	{:911}{\u2029\ud800{{
+prefix%1\u20281\u000aa\u000a\u2029\ud800}	prefixfirst\u20281\u000aa\u000a\u2029\ud800}
+%{plural:%1|90z\ud800\u000a%%\u000a:\u000d||z}\u000a99	{plural:%1|90z\ud800\u000a%%\u000a:\u000d||z}\u000a99
+%{1|%\u000a\u2028\ud800}	{1|%\u000a\u2028\ud800}
+prefix%9\u20280\u2028:\u2028a||\u000a\u2029\ud8000\ud800%\u2029	prefixninth\u20280\u2028:\u2028a||\u000a\u2029\ud8000\ud800%\u2029
+%{plural:%1|a0\u000a\u000a\u000d9\u2029}\u2028\u2028\u2028:}	{plural:%1|a0\u000a\u000a\u000d9\u2029}\u2028\u2028\u2028:}
+%{}zz:a\u2028\u2028:19{\u2029a%9a	{}zz:a\u2028\u2028:19{\u2029anintha
+prefix%z9{z\ud8009\ud800\u2028\u000a\u000a\u000d}	prefixz9{z\ud8009\ud800\u2028\u000a\u000a\u000d}
+%{plural:%1|1:%\u000d\u000a	{plural:first|1:%\u000d\u000a
+%{1\u2028:z\u20280:{:%}a}}0z}a\u2029\u2029%|}	{1\u2028:z\u20280:{:}a}}0z}a\u2029\u2029|}
+prefix%\ud8000{\ud800|\ud800	prefix\ud8000{\ud800|\ud800
+%{plural:%1|\u2028\u2028\ud800\ud800|\u2028{\u2029}%\u000a%|a9}	{plural:%1|\u2028\u2028\ud800\ud800|\u2028{\u2029}%\u000a|a9}
+%{%9\u000a1z%:|:\u000d\u2029%az\u2028{\u000a|z	{ninth\u000a1z:|:\u000d\u2029az\u2028{\u000a|z
+prefix%1z9z\u000a|}0\u000d{|\u2028%9z}	prefixfirstz9z\u000a|}0\u000d{|\u2028ninthz}
+%{plural:%1|{\u2028z	{plural:first|{\u2028z
+%{{\u000a9\u202999\u000d01:}	{{\u000a9\u202999\u000d01:}
+prefix%|a0\u000d	prefix|a0\u000d
+%{plural:%1|\u2028}\u20291}}zz%1\u000aa}	{plural:%1|\u2028}\u20291}}zzfirst\u000aa}
+%{0:0}\u000daa{:aa\u2028%	{0:0}\u000daa{:aa\u2028%
+prefix%z\u2029|%}	prefixz\u2029|}
+%{plural:%1|z1}1}}00:\u2028\u20281}}}\ud800	%{plural:%1|z1}1}}00:\u2028\u20281}}}\ud800
+%{\u000az}\u000d\ud80001}	{\u000az}\u000d\ud80001}
+prefix%\ud800|{\u000dz:9a\ud800:a00\u2028	prefix\ud800|{\u000dz:9a\ud800:a00\u2028
+%{plural:%1|\u000da}z}\u000d\ud800|91|0\ud800|\u000a\u2028\u000da\u20299}	{plural:%1|\u000da}z}\u000d\ud800|91|0\ud800|\u000a\u2028\u000da\u20299}
+%{{\u20290\u000d|{19\ud800	{{\u20290\u000d|{19\ud800
+prefix%aa\u000d:|\u2028}}	prefixaa\u000d:|\u2028}}
+%{plural:%1|\ud800|	{plural:first|\ud800|
+%{}\u2028\u000d\u2029{|9\u2029\ud800|\u2028z}}{1}	{}\u2028\u000d\u2029{|9\u2029\ud800|\u2028z}}{1}
+prefix%\u000az{\ud800\ud800:\u000a\u2029\u000d|\ud800%	prefix%\u000az{\ud800\ud800:\u000a\u2029\u000d|\ud800%
+%{plural:%1|\u2028a|}	{plural:%1|\u2028a|}
+%{{%%\u000a\ud800\u2028z\ud800\u000a900{{{\ud800|{z\u000d|\u2029\u000a	{{%\u000a\ud800\u2028z\ud800\u000a900{{{\ud800|{z\u000d|\u2029\u000a
+prefix%z\u000a\ud800za\u2028a|1a\u20280\u2029:\ud800%}	prefixz\u000a\ud800za\u2028a|1a\u20280\u2029:\ud800}
+%{plural:%1|:{}	%{plural:%1|:{}
+%{a\u000a\ud800}\ud8001a%}0a0%}	{a\u000a\ud800}\ud8001a}0a0}
+prefix%a:	prefixa:
+%{plural:%1|\u2028}91:\u20289a\ud800zz1\u2028{}	{plural:%1|\u2028}91:\u20289a\ud800zz1\u2028{}
+%{{{	{{{
+prefix%:\u2029\u2029:||\ud800\u000da19\u000da0\u000a\u2028\u000a}	prefix:\u2029\u2029:||\ud800\u000da19\u000da0\u000a\u2028\u000a}
+%{plural:%1|%9\u000d{\ud800\u2029	{plural:first|ninth\u000d{\ud800\u2029
+%{}\u20290%{\ud800|}\u000a}\ud800{}19\u000a\u2028|}\u000a}\ud800}	{}\u20290{\ud800|}\u000a}\ud800{}19\u000a\u2028|}\u000a}\ud800}
+prefix%\ud800z:9{\u2029:\u2028::|0:}|91{{%%\u2029	prefix\ud800z:9{\u2029:\u2028::|0:}|91{{%\u2029
+%{plural:%1|\u000d}09}	{plural:%1|\u000d}09}
+%{%0\u000a}9	{\u000a}9
+prefix%9\u2029|%:}\ud800\u000a\u2029{aa\u000a\ud8001\ud800%}	prefixninth\u2029|:}\ud800\u000a\u2029{aa\u000a\ud8001\ud800}
+%{plural:%1|	{plural:first|
+%{9a0:\u2028\u000da|\u000a\u000d:9\u000a:1:{\u20299\u000d99}	{9a0:\u2028\u000da|\u000a\u000d:9\u000a:1:{\u20299\u000d99}
+prefix%\u2028z\u000d{a9za	prefix%\u2028z\u000d{a9za
+%{plural:%1|a\ud800:\ud800|}{\ud800\ud800\u2029}	%{plural:%1|a\ud800:\ud800|}{\ud800\ud800\u2029}
+%{9|{\u2028\u000d{\u2029a0\ud80009	{9|{\u2028\u000d{\u2029a0\ud80009
+prefix%\u20280\u000d%\u000d||0\u000a}\u2028}	prefix%\u20280\u000d%\u000d||0\u000a}\u2028}
+%{plural:%1|:|z\ud800{\u000a|0\ud8009\u2028\u000d%9\u2029z9	{plural:first|:|z\ud800{\u000a|0\ud8009\u2028\u000dninth\u2029z9
+%{%{\u000d{a{|:\u000d\u000d%}	{{\u000d{a{|:\u000d\u000d}
+prefix%%	prefix%
+%{plural:%1|9\u000a}	{plural:%1|9\u000a}
+%{}az91\u000a\u000a%%1\ud800	{}az91\u000a\u000a%1\ud800
+prefix%\u000a1{}	prefix%\u000a1{}
+%{plural:%1|a}\ud800\ud800a%\u000a\ud800\ud8009}	%{plural:%1|a}\ud800\ud800a%\u000a\ud800\ud8009}
+%{a}	{a}
+prefix%1:0%{0{1\ud8009\u202911	prefixfirst:0{0{1\ud8009\u202911
+%{plural:%1|}{:a{0|\u20280\u20291\u2028%a\ud800}{}	%{plural:%1|}{:a{0|\u20280\u20291\u2028a\ud800}{}
+%{\u2029\u000a9%z0	{\u2029\u000a9z0
+prefix%}{\u000d\u2029}\u000a%zz{}	prefix}{\u000d\u2029}\u000azz{}
+%{plural:%1|1{\u2028}9	{plural:%1|1{\u2028}9
+%{\u20280z:\ud8001\u000a|\u2029\u000a|zz\u2028:}	{\u20280z:\ud8001\u000a|\u2029\u000a|zz\u2028:}
+prefix%\u2029	prefix%\u2029
+%{plural:%1|a|1}	%{plural:%1|a|1}
+%{19\u000a%1}{\u000a\u000a\ud800\u000d}a|\u2028a:}	{19\u000afirst}{\u000a\u000a\ud800\u000d}a|\u2028a:}
+prefix%z%9{\u20280z{aa\u000d:%1}	prefixzninth{\u20280z{aa\u000d:first}
+%{plural:%1|1}|\u2028	%{plural:%1|1}|\u2028
+%{%{{\ud800\u000da\u20289\u000d}	{{{\ud800\u000da\u20289\u000d}
+prefix%\u2028za\u20280|10\u2029{z1\u000d|{z\u000a\u000da	prefix%\u2028za\u20280|10\u2029{z1\u000d|{z\u000a\u000da
+%{plural:%1|\ud800z{z}az}	%{plural:%1|\ud800z{z}az}
+%{:\u2029\u2029%}\u2028\u000d	{:\u2029\u2029}\u2028\u000d
+prefix%1a:{%{a}	prefixfirsta:{{a}
+%{plural:%1|\u000d\u2028\u000d	{plural:first|\u000d\u2028\u000d
+%{0\u000a:%%\u2028z}}	{0\u000a:%\u2028z}}
+prefix%\u000a:\ud800za1\u000a\u000d\u20280\u2028\ud800\ud800	prefix%\u000a:\ud800za1\u000a\u000d\u20280\u2028\ud800\ud800
+%{plural:%1|\ud800\u2029{{:0aa{\u000a\ud800:}%}	{plural:%1|\ud800\u2029{{:0aa{\u000a\ud800:}}
+%{109\u000a\u000a:9{a	{109\u000a\u000a:9{a
+prefix%91\u2029\u2029%\u000d%\u2028\u000d\u000a:90|%0a:a9\u000d}	prefix\u2029\u2029%\u000d%\u2028\u000d\u000a:90|a:a9\u000d}
+%{plural:%1|\u2029%}	{plural:%1|\u2029%}
+%{::}	{::}
+prefix%\u000aa%\u2028::0a9z|9\u000d\u2028\u000a%:z\u2028{	prefix%\u000aa%\u2028::0a9z|9\u000d\u2028\u000a:z\u2028{
+%{plural:%1|z\ud800}11\ud800\u000d%:\u000a\u20289}\u000d\u000d{\u000a0}	%{plural:%1|z\ud800}11\ud800\u000d:\u000a\u20289}\u000d\u000d{\u000a0}
+%{%\ud800{:\u000d9	{\ud800{:\u000d9
+prefix%%:\u2029\u2028azz0}00{}:}	prefix%:\u2029\u2028azz0}00{}:}
+%{plural:%1|a:|z\u000a{|:z:91z	{plural:first|a:|z\u000a{|:z:91z
+%{\u2028}	{\u2028}
+prefix%\u20290a\ud800a\u000d	prefix%\u20290a\ud800a\u000d
+%{	{
+prefix%99}\u2029\u000d\ud8001a}	prefix}\u2029\u000d\ud8001a}
+%{plural:%1|\u2028\ud800\u2029}\ud800z\u2028{	{plural:%1|\u2028\ud800\u2029}\ud800z\u2028{
+%{za{%z0:a\u000a0:1\ud800%\u20280\ud800\u000a}	{za{z0:a\u000a0:1\ud800%\u20280\ud800\u000a}
+prefix%\u000a\u000a\ud800|a{\ud800a\u2029	prefix%\u000a\u000a\ud800|a{\ud800a\u2029
+%{plural:%1|\ud800a0|9:\ud800a}	%{plural:%1|\ud800a0|9:\ud800a}
+prefix%z0|::{\u2028a\ud80001a:\u000d\u2028\u000d}	prefixz0|::{\u2028a\ud80001a:\u000d\u2028\u000d}
+%{plural:%1|z\u000a\u000a%}%\ud800\u2028za\u000dz:\ud800\u000a	{plural:%1|z\u000a\u000a%}\ud800\u2028za\u000dz:\ud800\u000a
+%{a:%a}:}	{a:a}:}
+prefix%z\u2029z%1101\u000d00\u2029{aa}\u000a\u2029\u2029:}\u000a%	prefixz\u2029z\u000d00\u2029{aa}\u000a\u2029\u2029:}\u000a%
+%{plural:%1|\u000a\u2029{a\u2029:19\u000d99:\ud800{|a{a0\ud800}	{plural:%1|\u000a\u2029{a\u2029:19\u000d99:\ud800{|a{a0\ud800}
+%{\u2029{a\u000a9a\u000d0111:\u2029\u2029	{\u2029{a\u000a9a\u000d0111:\u2029\u2029
+prefix%\ud800\u000a\u2028{1\ud800{|:|{|{\u000d1a\u2028\ud800a\u2029}	prefix\ud800\u000a\u2028{1\ud800{|:|{|{\u000d1a\u2028\ud800a\u2029}
+%{plural:%1|%\u20299\u000d:}%	{plural:%1|%\u20299\u000d:}%
+%{{}	{{}
+prefix%\u2029\u2029:%\ud800z\u000d\u2028\u000d|z:1a\ud800\u2028%%}z\u2029\u000d	prefix%\u2029\u2029:\ud800z\u000d\u2028\u000d|z:1a\ud800\u2028%}z\u2029\u000d
+%{plural:%1|\u20290:\u000a}	{plural:%1|\u20290:\u000a}
+%{\u000aza\u000a	{\u000aza\u000a
+prefix%\u000d{\u000a|\u2029:}	prefix%\u000d{\u000a|\u2029:}
+%{plural:%1|}z{\u20280a|\u000d%\u000a91%	%{plural:%1|}z{\u20280a|\u000d%\u000a91%
+%{}\u2029{\u2029\u2028\u000d1\ud800\u000d|\u000d\u2029{}	{}\u2029{\u2029\u2028\u000d1\ud800\u000d|\u000d\u2029{}
+prefix%0\ud80090az1:\u20280{:1\u000a9z0%	prefix\ud80090az1:\u20280{:1\u000a9z0%
+%{plural:%1|zz}	%{plural:%1|zz}
+%{\u000d9\u2028z}a\u000a:a\ud800:\u2029:|\u000d\u000a:a	{\u000d9\u2028z}a\u000a:a\ud800:\u2029:|\u000d\u000a:a
+prefix%}	prefix}
+%{z}1}\u000d}	{z}1}\u000d}
+prefix%a%:\u2028	prefixa:\u2028
+%{plural:%1|9|1}{900:z\u000a|}%:1}1}	%{plural:%1|9|1}{900:z\u000a|}:1}1}
+%{|%\u000d\u000d9\u000a{\u2028\ud800{9	{|%\u000d\u000d9\u000a{\u2028\ud800{9
+prefix%\u000d0a9\u000d09\u2028\u2029a%a\u000aa}}	prefix%\u000d0a9\u000d09\u2028\u2029aa\u000aa}}
+%{plural:%1|:9%\u2028	{plural:first|:9%\u2028
+%{\u000d\u2029{0a}}	{\u000d\u2029{0a}}
+prefix%}}{\ud800\u000a%9\ud800|}9\u000d9\u2029\u000az09z%\u000d	prefix}}{\ud800\u000aninth\ud800|}9\u000d9\u2029\u000az09z%\u000d
+%{plural:%1|}{{}\u2028\ud800a\u000da1a9|}0\u000dzz\ud800:1\u000a\u000d}	%{plural:%1|}{{}\u2028\ud800a\u000da1a9|}0\u000dzz\ud800:1\u000a\u000d}
+%{a\u000d\u000a:z%zz%	{a\u000d\u000a:zzz%
+prefix%\u000a|a\u2028\u000a\ud8001\u2029%\u000d}	prefix%\u000a|a\u2028\u000a\ud8001\u2029%\u000d}
+%{plural:%1|\u2029\u20290|9\u000aaa0}|9z{z\u000d\u000d\ud800az}z\ud800	{plural:%1|\u2029\u20290|9\u000aaa0}|9z{z\u000d\u000d\ud800az}z\ud800
+%{}:{1:\ud800\u20291\u000a\u2028a\u2028\ud8001:00z}	{}:{1:\ud800\u20291\u000a\u2028a\u2028\ud8001:00z}
+prefix%|\u2029\u000a%:|\u2028|\u000d1z\u2028991\u000d:	prefix|\u2029\u000a:|\u2028|\u000d1z\u2028991\u000d:
+%{plural:%1|\ud8000\u000d9\u2028\u000a{\u2029{}|:\u000a1}	{plural:%1|\ud8000\u000d9\u2028\u000a{\u2029{}|:\u000a1}
+%{plural:%1|z\u000d\ud800{}0\u2028\u000d\u000a:\u20299\u000d{91\ud800011	{plural:%1|z\u000d\ud800{}0\u2028\u000d\u000a:\u20299\u000d{91\ud800011
+%{{\u2029a1%\u000d0{\u2028|{\u2028z}	{{\u2029a1%\u000d0{\u2028|{\u2028z}
+prefix%%\ud800\u000da{:1\u000a1az111}\u2028{\u2029\u000d:{9	prefix%\ud800\u000da{:1\u000a1az111}\u2028{\u2029\u000d:{9
+%{plural:%1|0:\u2029:0%:1z1\u2028{0a19a%a0\u000d}	{plural:%1|0:\u2029:0%:1z1\u2028{0a19a%a0\u000d}
+%{\ud800|1\ud800|z\u2029\ud800\u2028{9%\u2028\u2029z0\u2029%|\u2028}	{\ud800|1\ud800|z\u2029\ud800\u2028{9%\u2028\u2029z0\u2029|\u2028}
+prefix%90%\u000d\u000d%0\u000a:}a\u2028\u000d}\ud800%}	prefix%\u000d\u000d\u000a:}a\u2028\u000d}\ud800}
+%{plural:%1|{}z|\u000d\u2028\u2029	%{plural:%1|{}z|\u000d\u2028\u2029
+%{}}	{}}
+%{plural:%1|}1a{}\u000d:z:}	%{plural:%1|}1a{}\u000d:z:}
+%{1\u000d0%\u000d{1:1}:z\ud80090\u2029%\ud800\ud800}	{1\u000d0%\u000d{1:1}:z\ud80090\u2029\ud800\ud800}
+prefix%%%1}0||a}	prefix%first}0||a}
+%{plural:%1|%\u000d|	{plural:first|%\u000d|
+%{{0a\ud800|{191za0z1:\u000a\u2028z0:z}	{{0a\ud800|{191za0z1:\u000a\u2028z0:z}
+prefix%\ud800\u000a9}0	prefix\ud800\u000a9}0
+%{plural:%1|1\u000d0%{1\u2029\u2029}	{plural:%1|1\u000d0%{1\u2029\u2029}
+%{a{|\ud800}0\ud80099\u2029%\u20299\u000d\u000a\u000d{	{a{|\ud800}0\ud80099\u2029%\u20299\u000d\u000a\u000d{
+prefix%\u000d}\u2029}}	prefix%\u000d}\u2029}}
+%{plural:%1|a1\u000d}|z\u000az1z{\ud800\u000d\u000a}z1\u000a}\u2028:	{plural:%1|a1\u000d}|z\u000az1z{\ud800\u000d\u000a}z1\u000a}\u2028:
+%{|\u000a1a\u2028}	{|\u000a1a\u2028}
+prefix%a\u000d}:a\u000d19\u2028\ud800{\u2028z\ud800z\u000d\u000a|\ud800}:{{	prefixa\u000d}:a\u000d19\u2028\ud800{\u2028z\ud800z\u000d\u000a|\ud800}:{{
+%{plural:%1|}0%z}	%{plural:%1|}0z}
+%{9z0%z\u2028\u20291\u000d0z:|1\u000d\ud800\u000a\u000d:9	{9z0z\u2028\u20291\u000d0z:|1\u000d\ud800\u000a\u000d:9
+prefix%{\u2028a\u2028\u2028z\ud800{1\u2029z%:%\u2029a\u000d\u000a}	prefix{\u2028a\u2028\u2028z\ud800{1\u2029z:%\u2029a\u000d\u000a}
+%{plural:%1|11{\u000a{0\u20299a:{\u000d}\ud8009z1\u000a\u000d9\u000da9	{plural:%1|11{\u000a{0\u20299a:{\u000d}\ud8009z1\u000a\u000d9\u000da9
+%{z%|%}%\u2028:\u2028%9\u000d{\u000a%\u2028%0\u2028\u2029|\u2029a}	{z|}%\u2028:\u2028ninth\u000d{\u000a%\u2028\u2028\u2029|\u2029a}
+prefix%:az0\u000d11\ud800|z\u2029\u000a1:{\u20289:a9	prefix:az0\u000d11\ud800|z\u2029\u000a1:{\u20289:a9
+%{plural:%1|{0\u20291\u2029%9a:}\u2029%z}	{plural:%1|{0\u20291\u2029%9a:}\u2029z}
+%{\u000a\u202811\u2028a{1a	{\u000a\u202811\u2028a{1a
+prefix%\u2029%|\u2028|%\u000aa\u000a}	prefix%\u2029|\u2028|%\u000aa\u000a}
+%{plural:%1|:	{plural:first|:
+%{a{\ud8000%z{%}z\ud8000\u2028%0\u202899{}}	{a{\ud8000z{}z\ud8000\u2028\u202899{}}
+prefix%1\u2028\u2028\u2028z|\u2029z|z\u2029\u000d%\u000d\u000d:0\u20280\ud800\u000d0	prefixfirst\u2028\u2028\u2028z|\u2029z|z\u2029\u000d%\u000d\u000d:0\u20280\ud800\u000d0
+%{plural:%1||01:|99%{}	%{plural:%1||01:|99%{}
+%{\u2028%\u2028%%	{\u2028%\u2028%
+prefix%\u000d\ud800\u000a:}	prefix%\u000d\ud800\u000a:}
+%{plural:%1|%:\u2028%{0%|09\ud800%	{plural:first|:\u2028{0|09\ud800%
+%{|z}a\ud800:0%1:0:|\u000a0\u000a9%}	{|z}a\ud800:0first:0:|\u000a0\u000a9}
+prefix%:%\u20289a\u000a\u000a\u2028\u000d|0	prefix:%\u20289a\u000a\u000a\u2028\u000d|0
+%{plural:%1|z{a\u202890:\u2028z\ud800%0\ud800}}	{plural:%1|z{a\u202890:\u2028z\ud800%0\ud800}}
+%{00\u20280}91\u000a:\u000d%\u2028\u2028{}0\u000d	{00\u20280}91\u000a:\u000d%\u2028\u2028{}0\u000d
+prefix%9%\u2029z1%\u000d9%\u2029\u2028z\u2029a\u2029}z|a}	prefixninth%\u2029z1%\u000d9%\u2029\u2028z\u2029a\u2029}z|a}
+%{plural:%1|1|	{plural:first|1|
+%{|1\u2029\u2029%{\u000a}9\u000aa{z}{11|}}	{|1\u2029\u2029{\u000a}9\u000aa{z}{11|}}
+prefix%|%9	prefix|ninth
+%{plural:%1|0\ud800|z:\u2028}::%\u2029z|\ud800%\u2029a\u000a\ud800\u000d|%\u2028}	{plural:%1|0\ud800|z:\u2028}::%\u2029z|\ud800%\u2029a\u000a\ud800\u000d|%\u2028}
+%{%|a01\ud8001}{{\ud800\u2028:\u000a9%0\u000aa\ud800	{|a01\ud8001}{{\ud800\u2028:\u000a9\u000aa\ud800
+prefix%\u000d}%a\u2029|11:}	prefix%\u000d}a\u2029|11:}
+%{plural:%1|\u2029\ud800\u20281\u2029z}}9|:%\ud8001}	{plural:%1|\u2029\ud800\u20281\u2029z}}9|:\ud8001}
+%{\u2029z1}\u2028{\ud8001{%\u2029\ud800|90\u2029}	{\u2029z1}\u2028{\ud8001{%\u2029\ud800|90\u2029}
+prefix%a	prefixa
+%{plural:%1|1\u000a%:\u2029:\ud800z}	{plural:%1|1\u000a%:\u2029:\ud800z}
+%{\u000a}\u2029%:\u000a\u2029	{\u000a}\u2029:\u000a\u2029
+prefix%1\ud800{|\ud800a90|%0:\u000d{\u000a|a\u000d\ud800\ud8001:a}	prefixfirst\ud800{|\ud800a90|:\u000d{\u000a|a\u000d\ud800\ud8001:a}
+%{plural:%1|%9\ud8000\u000aa91\u000d\ud800}}	{plural:%1|%9\ud8000\u000aa91\u000d\ud800}}
+%{a|%az\u2028{\ud800}	{a|az\u2028{\ud800}
+prefix%0:\u000d\u2029a\u000d%\u2028	prefix:\u000d\u2029a\u000d%\u2028
+%{plural:%1|1z10{0{\u2029\u000a\ud800\ud800|}\u000a}{{\u000d}	{plural:%1|1z10{0{\u2029\u000a\ud800\ud800|}\u000a}{{\u000d}
+%{{1:\u2028\u20280za%\u000da\u2028{|	{{1:\u2028\u20280za%\u000da\u2028{|
+prefix%\u000a|\u000d:|9\ud800\u202990}9\u000d:}}	prefix%\u000a|\u000d:|9\ud800\u202990}9\u000d:}}
+%{plural:%1|\u2028\u000d1%{{%1\u20291	{plural:first|\u2028\u000d1{{first\u20291
+%{{{\ud800\u000d:|\ud800a\u2029::\u2028}	{{{\ud800\u000d:|\ud800a\u2029::\u2028}
+prefix%{0%aza9}9\u20290|\u000d{010{\u000a\u000d	prefix{0aza9}9\u20290|\u000d{010{\u000a\u000d
+%{plural:%1|{}	%{plural:%1|{}
+%{%z9a\u000da1\u000d0	{z9a\u000da1\u000d0
+prefix%}1000:z}	prefix}1000:z}
+%{plural:%1|%{91\u000d{:a\u2028z{|z{}::\u2029\ud800|a:	{plural:%1|%{91\u000d{:a\u2028z{|z{}::\u2029\ud800|a:
+%{\u2028{9\u000d\u000a\u2029{}	{\u2028{9\u000d\u000a\u2029{}
+prefix%z:}\u2029	prefixz:}\u2029
+%{plural:%1|\ud800a\u000a:0\u000d{z{:{:\u2028}	{plural:%1|\ud800a\u000a:0\u000d{z{:{:\u2028}
+%{:\u2028a%}\u000a0:\u2028|1%a\u2028}\u000a\u2029az	{:\u2028a}\u000a0:\u2028|1a\u2028}\u000a\u2029az
+prefix%{\u20291\u000a{9:a\u2029\u2028}	prefix{\u20291\u000a{9:a\u2029\u2028}
+%{plural:%1|z0\u2029\u000d11:0%\u202909z\ud800a\u000a	{plural:first|z0\u2029\u000d11:0%\u202909z\ud800a\u000a
+%{a{}1::%9{:1}	{a{}1::ninth{:1}
+prefix%%%	prefix%%
+%{plural:%1|0\ud800z00:zz\u2028{{{\u000d}	{plural:%1|0\ud800z00:zz\u2028{{{\u000d}
+%{z%1\ud800\ud800{11	{zfirst\ud800\ud800{11
+prefix%a:}	prefixa:}
+%{plural:%1|}\u000d}9\u000d%1\u2029|9{1	%{plural:%1|}\u000d}9\u000dfirst\u2029|9{1
+%{:\u2029zz%a0:\u000d:\u2029\ud800\ud800{9\u000a}	{:\u2029zza0:\u000d:\u2029\ud800\ud800{9\u000a}
+prefix%|\u000dz0\u000a\u000d\u000d\u2029\u20289	prefix|\u000dz0\u000a\u000d\u000d\u2029\u20289
+%{plural:%1|0:}	%{plural:%1|0:}
+%{\u2029\u2028\u000a19\u2029	{\u2029\u2028\u000a19\u2029
+prefix%%|\ud8009\ud800\u2028}1{\ud800{0}	prefix%|\ud8009\ud800\u2028}1{\ud800{0}
+%{plural:%1|00	{plural:first|00
+%{%\u2028}\u000a}0\u000d\u000d9{}\u2028}	{%\u2028}\u000a}0\u000d\u000d9{}\u2028}
+prefix%\ud800|z:}\ud800}0|aa:|	prefix\ud800|z:}\ud800}0|aa:|
+%{plural:%1||9}\ud800||\u2028\u000a%\u2028\u202999\ud800{0}}	%{plural:%1||9}\ud800||\u2028\u000a%\u2028\u202999\ud800{0}}
+%{|}1\u2028\u000d\u000d\ud8001\u000d\ud800|}	{|}1\u2028\u000d\u000d\ud8001\u000d\ud800|}
+prefix%%0}a0a||0|:}0:}	prefix%0}a0a||0|:}0:}
+%{plural:%1|}\ud80010\u2028\ud8000}\u2029a\u000a9}\u2028:1z%	%{plural:%1|}\ud80010\u2028\ud8000}\u2029a\u000a9}\u2028:1z%
+%{:9}	{:9}
+prefix%a}:\u2028\u000aa{a\u202811\ud8001	prefixa}:\u2028\u000aa{a\u202811\ud8001
+%{plural:%1|1\u000d{}\ud80010\ud8009\u2029\u2029\ud800\ud800\ud800{0\u000a\u000aa\ud800\u000d}	{plural:%1|1\u000d{}\ud80010\ud8009\u2029\u2029\ud800\ud800\ud800{0\u000a\u000aa\ud800\u000d}
+%{\u000da	{\u000da
+prefix%9\u000d\ud800:\u000a\u2029a1{\u000d:1\u000a|a}	prefixninth\u000d\ud800:\u000a\u2029a1{\u000d:1\u000a|a}
+%{plural:%1|0\u2028{\ud800\u202901\u000d\u2028z\u2028	{plural:first|0\u2028{\ud800\u202901\u000d\u2028z\u2028
+%{a00\ud800}	{a00\ud800}
+prefix%|:a\u2028a	prefix|:a\u2028a
+%{:|\u000a{\u000a%|\u000d	{:|\u000a{\u000a|\u000d
+prefix%\u2028}}	prefix%\u2028}}
+%{plural:%1|\u000d}a:\ud8000	{plural:%1|\u000d}a:\ud8000
+%{}	{}
+prefix%z%{9\u000a\ud800{}z%}\u000d	prefixz{9\u000a\ud800{}z}\u000d
+%{plural:%1|0:\u000a0||\ud800|}z{\ud800\u000d\u000d|\ud8009091:}	{plural:%1|0:\u000a0||\ud800|}z{\ud800\u000d\u000d|\ud8009091:}
+%{\ud800z|{\ud800\u000a}\u000a9{{\u000d{:%	{\ud800z|{\ud800\u000a}\u000a9{{\u000d{:%
+prefix%\u000d9\u2029\u2029\u2028\u2028\u000d\ud800{1119{10\u20281\ud800a0|\u2028}	prefix%\u000d9\u2029\u2029\u2028\u2028\u000d\ud800{1119{10\u20281\ud800a0|\u2028}
+%{plural:%1|{\u2029%9\ud800\ud800\u000d0}z\u2028	{plural:%1|{\u2029%9\ud800\ud800\u000d0}z\u2028
+%{\u20299}	{\u20299}
+prefix%\ud800\u2029}az}\u20291%\u000d\ud800:	prefix\ud800\u2029}az}\u20291%\u000d\ud800:
+%{plural:%1|\u2029:1\u2029\u2029\u000d{}\ud800\u2028\u2029}	{plural:%1|\u2029:1\u2029\u2029\u000d{}\ud800\u2028\u2029}
+%{1}|	first|
+prefix%|\u2028\u000d|9\u2028\ud800:\u2028z\u2028}	prefix|\u2028\u000d|9\u2028\ud800:\u2028z\u2028}
+%{plural:%1|\u2029	{plural:first|\u2029
+%{a\u000a{a}a{\ud80090z:z\ud800\u000d\u2028\u2029z0|}	{a\u000a{a}a{\ud80090z:z\ud800\u000d\u2028\u2029z0|}
+prefix%{:	prefix{:
+%{plural:%1|0a\u000d}9\u2029\u2028:\u2028:%\ud800}}{}%{}	{plural:%1|0a\u000d}9\u2029\u2028:\u2028:\ud800}}{}{}
+%{{}}\u2029	{{}}\u2029
+prefix%\ud800\u2029::%\u000d\ud800\ud800:\u000d\u2029z\u000d:}	prefix\ud800\u2029::%\u000d\ud800\ud800:\u000d\u2029z\u000d:}
+%{{z\u000d\u2029\u000da0%}	{{z\u000d\u2029\u000da0}
+prefix%000\u2028\u000a\u000a%:\u2029\u000az1|{}%\ud800a0%%\u2028\u000a	prefix\u2028\u000a\u000a:\u2029\u000az1|{}\ud800a0%\u2028\u000a
+%{plural:%1|z|\u000a%a{}1{az\u000a1|:{|}	{plural:%1|z|\u000a%a{}1{az\u000a1|:{|}
+%{\ud800}\ud800{{}a\u2029}}\ud800	{\ud800}\ud800{{}a\u2029}}\ud800
+prefix%|::\ud800z\u000d1\ud80099\ud8001\ud800}	prefix|::\ud800z\u000d1\ud80099\ud8001\ud800}
+%{plural:%1|\u2028\u000da\u000aa}z99\u000d9}z11}}\u000d\u000a\u000a\ud800	{plural:%1|\u2028\u000da\u000aa}z99\u000d9}z11}}\u000d\u000a\u000a\ud800
+%{%0:\u000d}\u000a0zz}	{:\u000d}\u000a0zz}
+prefix%0a\u000da\u2028}}{1a\ud8001:9a{|z}\u2029|	prefixa\u000da\u2028}}{1a\ud8001:9a{|z}\u2029|
+%{plural:%1|\ud800\u000a{}	{plural:%1|\ud800\u000a{}
+%{}1:1{{\u2028|%\u2028\u2029%\u000da	{}1:1{{\u2028|%\u2028\u2029%\u000da
+prefix%\u000daa\ud800}	prefix%\u000daa\ud800}
+%{plural:%1|:{%%\u20290%a}:|900\u000d	{plural:%1|:{%%\u20290%a}:|900\u000d
+%{\ud8000\u000d|\u000d\ud800}	{\ud8000\u000d|\u000d\ud800}
+prefix%11\u202891:99\u000a\u000dz\ud800%|0\ud800\u2029zz:a\u000d	prefix\u202891:99\u000a\u000dz\ud800|0\ud800\u2029zz:a\u000d
+%{plural:%1|a\u000a\u2028:%\u000aa\u2028\u2028a%a{{:\u2029\u000d9z}	{plural:%1|a\u000a\u2028:%\u000aa\u2028\u2028a%a{{:\u2029\u000d9z}
+%{\u2029\u202801\u2028\u20299}{{}9\ud8001{z1\u000d	{\u2029\u202801\u2028\u20299}{{}9\ud8001{z1\u000d
+prefix%11{0%\u000d}}	prefix{0%\u000d}}
+%{plural:%1|\ud800\u000d111::\u000d0z\u20290	{plural:first|\ud800\u000d111::\u000d0z\u20290
+%{\u2028%}}	{\u2028}}
+prefix%\u000a11\u2028\ud8001\u000d\u000d00|\u000da	prefix%\u000a11\u2028\ud8001\u000d\u000d00|\u000da
+%{plural:%1|\u2029z:{\u000a}	{plural:%1|\u2029z:{\u000a}
+%{0{\u2028|}\u20289|1{|a	{0{\u2028|}\u20289|1{|a
+prefix%\u2028\u000a\ud800|}a00}1:011\u000a\u2029}	prefix%\u2028\u000a\ud800|}a00}1:011\u000a\u2029}
+%{plural:%1|0\u2029\u000d\u000a09:}\u2029:{\u000a0z\u000d{%%\ud800}\u2029%{	{plural:%1|0\u2029\u000d\u000a09:}\u2029:{\u000a0z\u000d{%\ud800}\u2029{
+%{1\u2029\u20281{\u2028\u000d|0|\u2028\ud800\u2029\ud800z%\u000a\u000a\u20280:9}	{1\u2029\u20281{\u2028\u000d|0|\u2028\ud800\u2029\ud800z%\u000a\u000a\u20280:9}
+prefix%%:\u000d11\u2029\ud800{%\u000da\u000a	prefix%:\u000d11\u2029\ud800{%\u000da\u000a
+%{plural:%1|{a1a\ud800%\u000a}	{plural:%1|{a1a\ud800%\u000a}
+%{:09z\ud800}0:}}:\u2028:zzz\u2029}\ud800\u2028\u000a9\ud800	{:09z\ud800}0:}}:\u2028:zzz\u2029}\ud800\u2028\u000a9\ud800
+prefix%\u000d1}	prefix%\u000d1}
+%{plural:%1|\u20290\u000d:\u000a}{\u000d	{plural:%1|\u20290\u000d:\u000a}{\u000d
+%{\u000a1a99\ud800\u2028z0z\ud800}{z}a%}	{\u000a1a99\ud800\u2028z0z\ud800}{z}a}
+prefix%}0%\u000a{za{0}	prefix}0%\u000a{za{0}
+%{plural:%1|:}1\u000a%}	%{plural:%1|:}1\u000a}
+%{0%z10\u000d1	{0z10\u000d1
+prefix%91\u2029z1{%91\u2028}:\u2029z{}a\u000a}	prefix\u2029z1{\u2028}:\u2029z{}a\u000a}
+%{plural:%1|\u20299}1%{}\u000a\u000a\u202819	{plural:%1|\u20299}1{}\u000a\u000a\u202819
+%{1a\ud800}	{1a\ud800}
+prefix%}\u2028%\u2028\u2029a:z1	prefix}\u2028%\u2028\u2029a:z1
+%{plural:%1|z1{9%}}\u2029%\ud8009\ud800a\u2028|\u000a9}	%{plural:%1|z1{9%}}\u2029\ud8009\ud800a\u2028|\u000a9}
+%{:\u2029\ud800z|\u2029\u2028z\u2029z}{0{|{	{:\u2029\ud800z|\u2029\u2028z\u2029z}{0{|{
+prefix%\u000dzz\u000a9\ud800%0}	prefix%\u000dzz\u000a9\ud800}
+%{plural:%1|}0%\ud800\u000a\u000a110\u000d\ud800{	%{plural:%1|}0\ud800\u000a\u000a110\u000d\ud800{
+%{1z\u20290}%\ud800z1\ud800}19:az1z}	{1z\u20290}\ud800z1\ud800}19:az1z}
+prefix%\u2028}	prefix%\u2028}
+%{plural:%1|1|}:}	%{plural:%1|1|}:}
+%{z\u2029:0:}%\ud800:\ud800%\u20289a\u000d}{:\u000a{|9\u000a	{z\u2029:0:}\ud800:\ud800%\u20289a\u000d}{:\u000a{|9\u000a
+prefix%\u2028{\u20299{%{0%|:{\u2029{|}	prefix%\u2028{\u20299{{0|:{\u2029{|}
+%{plural:%1|\u2028|a1\u000a%\u000a}9{\u2028%{}	{plural:%1|\u2028|a1\u000a%\u000a}9{\u2028{}
+%{\u000d\u000a\u20280}	{\u000d\u000a\u20280}
+prefix%\ud8009:a\u000a:9z\ud800\u2028}%}\u2028za0}\u000a	prefix\ud8009:a\u000a:9z\ud800\u2028}}\u2028za0}\u000a
+%{plural:%1|0\ud8001z\u2029\u2029a{:\ud800z1\u2029\u2029}\ud800}	{plural:%1|0\ud8001z\u2029\u2029a{:\ud800z1\u2029\u2029}\ud800}
+%{|z\u000d\u2029\ud800\u2029{\u000a1|\u000d1}a|\u2029\u000a|a\u2028	{|z\u000d\u2029\ud800\u2029{\u000a1|\u000d1}a|\u2029\u000a|a\u2028
+prefix%\u000da\u000d\u000a:0{01}	prefix%\u000da\u000d\u000a:0{01}
+%{plural:%1|z|}}9z\u000a\u000d\ud800|	%{plural:%1|z|}}9z\u000a\u000d\ud800|
+%{aa:\u20280a}\u20281\ud800{:0\u2029\u202891:az{9\u2029}	{aa:\u20280a}\u20281\ud800{:0\u2029\u202891:az{9\u2029}
+prefix%z{\u2028	prefixz{\u2028
+%{plural:%1|\u000d}1\u000d%}	{plural:%1|\u000d}1\u000d}
+%{z	{z
+prefix%9a\u000da\ud8000:a|z0\u2029}\u000a\u000d{1\u000a\ud800}	prefixnintha\u000da\ud8000:a|z0\u2029}\u000a\u000d{1\u000a\ud800}
+%{plural:%1|\u000d%z	{plural:first|\u000dz
+%{\u000a}%}}\ud800}}{}\u2029{\u2028%\u000a{|{z%\u000d\u000d%}	{\u000a}}}\ud800}}{}\u2029{\u2028%\u000a{|{z%\u000d\u000d}
+prefix%%\u2028}\u000a\u000d{9\u2028\u2028a|	prefix%\u2028}\u000a\u000d{9\u2028\u2028a|
+%{plural:%1|}}\u2028}	%{plural:%1|}}\u2028}
+%{|1\u000d%z1\u2028a\ud8000	{|1\u000dz1\u2028a\ud8000
+prefix%{\u000a\u20280}	prefix{\u000a\u20280}
+%{plural:%1|\u000a0\u000d1\u2028\ud800}90|\ud800\u000a|\ud800	{plural:%1|\u000a0\u000d1\u2028\ud800}90|\ud800\u000a|\ud800
+%{a:%%\u20281}%z|\u000a{\u000a%\ud800|}	{a:%\u20281}z|\u000a{\u000a\ud800|}
+prefix%\u000a%01%%9%a	prefix%\u000afirst%9a
+%{plural:%1|\u000a9\u2028\u000d90\ud800\u000a|za%|{\u000d{a9}	{plural:%1|\u000a9\u2028\u000d90\ud800\u000a|za%|{\u000d{a9}
+%{\u2028\u000d|	{\u2028\u000d|
+prefix%:%9\u2028|:9\u2029\u000a1{{}	prefix:ninth\u2028|:9\u2029\u000a1{{}
+%{plural:%1|0|}\u000d9\u202800\u2029	%{plural:%1|0|}\u000d9\u202800\u2029
+%{\u000a\ud8009}	{\u000a\ud8009}
+prefix%0{zz\u000d0\u20280\u2028\u000a|a\u2028\ud800	prefix{zz\u000d0\u20280\u2028\u000a|a\u2028\ud800
+%{plural:%1|0}	%{plural:%1|0}
+%{\u000d:9%%a\u000a\u2029\u000d\ud800:\ud800	{\u000d:9%a\u000a\u2029\u000d\ud800:\ud800
+prefix%%:{\u2029z\u000d%\u2028}9\u2029|919}	prefix%:{\u2029z\u000d%\u2028}9\u2029|919}
+%{plural:%1|{\u000a	{plural:first|{\u000a
+%{\ud800:\u000d}\u000a\u000d9\u2028\u2028\u000d}1\u000d{1}	{\ud800:\u000d}\u000a\u000d9\u2028\u2028\u000d}1\u000d{1}
+prefix%{\u2028{a{{%:	prefix{\u2028{a{{:
+%{plural:%1|0a\u000d\u000d1\u000a1a\ud800\u000a:9%%z0%{}z\u000a9\u2029}	{plural:%1|0a\u000d\u000d1\u000a1a\ud800\u000a:9%%z0%{}z\u000a9\u2029}
+%{\u2028:9}:}a%0\u20289\u000a	{\u2028:9}:}a\u20289\u000a
+prefix%{9{|\u2028|z%}	prefix{9{|\u2028|z}
+%{plural:%1|\u000a:%\u202910\u2028\u20289|z\u20291}010:\u000d%:\u000a%	{plural:%1|\u000a:%\u202910\u2028\u20289|z\u20291}010:\u000d:\u000a%
+%{9z:a01\u202809|9%\u000d|\u000a\u20299}	{9z:a01\u202809|9%\u000d|\u000a\u20299}
+prefix%9%\u000d:\u000a\u2028z	prefixninth%\u000d:\u000a\u2028z
+%{plural:%1|a{\u000a{9\u000a\u2028\u000az\u000d91|{}01|\u000a}	{plural:%1|a{\u000a{9\u000a\u2028\u000az\u000d91|{}01|\u000a}
+%{}z%%z\u000d{a\u2028	{}z%z\u000d{a\u2028
+prefix%::%9a}\u000a}\u000d{{{\u000a\ud8000a\u2029\u000d\u202800:}	prefix::nintha}\u000a}\u000d{{{\u000a\ud8000a\u2029\u000d\u202800:}
+%{plural:%1|\u2028\u20291	{plural:first|\u2028\u20291
+%{{9z\u000d|\u000d{00\u2028\u2028:}	{{9z\u000d|\u000d{00\u2028\u2028:}
+prefix%{{%\ud800z{\u2029z\u2029\u000aa%	prefix{{\ud800z{\u2029z\u2029\u000aa%
+%{plural:%1|:}\ud800{{\u2028}	%{plural:%1|:}\ud800{{\u2028}
+%{{9\u000a\u2029\u000d\u20289z00\u000d\u000a\u20299\u20291\u000a\u000a}\u000a}	{{9\u000a\u2029\u000d\u20289z00\u000d\u000a\u20299\u20291\u000a\u000a}\u000a}
+prefix%\u000d\u000da}a|\u2029:}19\u000a\ud800%{0\u2029a}1}	prefix%\u000d\u000da}a|\u2029:}19\u000a\ud800{0\u2029a}1}
+%{plural:%1|{\u000a\u2029\ud800\u000a	{plural:first|{\u000a\u2029\ud800\u000a
+%{1\ud800\u000a{\ud800:\u000a\u2028\u2028%9\u2028\u000dz\u2028}	{1\ud800\u000a{\ud800:\u000a\u2028\u2028ninth\u2028\u000dz\u2028}
+prefix%a|aa}10}\u2029%0\u2029\ud800\ud800}}{\u2029\u000d1	prefixa|aa}10}\u2029\u2029\ud800\ud800}}{\u2029\u000d1
+%{plural:%1|9}}|\u000a0\u2028%\u2028:z:}\u000a%0}z}	%{plural:%1|9}}|\u000a0\u2028%\u2028:z:}\u000a}z}
+%{a\u000a00:a0z:z\u000a\ud800}	{a\u000a00:a0z:z\u000a\ud800}
+prefix%9\u000d\u000a\u2028}\u000a\ud800:\u000a\u2029\u000d9a{9a}	prefixninth\u000d\u000a\u2028}\u000a\ud800:\u000a\u2029\u000d9a{9a}
+%{plural:%1|%\ud800\u2029a1\u000a9	{plural:first|\ud800\u2029a1\u000a9
+%{9%|%1z\u000d0}	{9|firstz\u000d0}
+prefix%%|9\u2029\u2029|:\ud800\u2028%0}%a	prefix%|9\u2029\u2029|:\ud800\u2028}a
+%{plural:%1|9\ud8009}	%{plural:%1|9\ud8009}
+prefix%||9:a}{\u000az|a\u000d\u000a}	prefix||9:a}{\u000az|a\u000d\u000a}
+%{plural:%1|:{\u2028\ud800\u000a\ud8009\u000a|0\u000aa\u000d|\u2029\ud800}{\u2028	{plural:%1|:{\u2028\ud800\u000a\ud8009\u000a|0\u000aa\u000d|\u2029\ud800}{\u2028
+%{\ud80099%z\u000d}0}\u000a:}1\u2029{z}	{\ud80099z\u000d}0}\u000a:}1\u2029{z}
+prefix%\u2029z\u2029:z:\u2029\ud800\u2028|z	prefix%\u2029z\u2029:z:\u2029\ud800\u2028|z
+%{plural:%1|00\u20280z}%a%\u2028\u000d}9a|z\u000a}	{plural:%1|00\u20280z}a%\u2028\u000d}9a|z\u000a}
+%{\ud800%\u2028\u20280a%11%a0\ud800\u2029	{\ud800%\u2028\u20280aa0\ud800\u2029
+prefix%|1z0990\u000a%}	prefix|1z0990\u000a}
+%{aa|{\u20280:%\u000a}\u000d\u000a0a\u2028}}	{aa|{\u20280:%\u000a}\u000d\u000a0a\u2028}}
+prefix%\u000d1|\u000a\u2029a	prefix%\u000d1|\u000a\u2029a
+%{plural:%1|::99|\u000a\u000a:{z:{}z\ud800\ud800}}	{plural:%1|::99|\u000a\u000a:{z:{}z\ud800\ud800}}
+%{%\u000d0%9{	{%\u000d0ninth{
+prefix%\u2028z0\u000a\u000d9\u000a0}	prefix%\u2028z0\u000a\u000d9\u000a0}
+%{plural:%1|}9\ud800|\u000d0\ud800{	%{plural:%1|}9\ud800|\u000d0\ud800{
+%{\u2029\ud800\u000d}0%}	{\u2029\ud800\u000d}0}
+prefix%a\ud800z|0:\u000d	prefixa\ud800z|0:\u000d
+%{plural:%1||10\u2029|%|}	{plural:%1||10\u2029|%|}
+%{}\u20290\u000a\u000a1\u000a	{}\u20290\u000a\u000a1\u000a
+prefix%%:0\u000d0}	prefix%:0\u000d0}
+%{plural:%1|\u2028}1%0\u20281:\u000d{\u2028\u2029\ud800\u2029\u2028	{plural:%1|\u2028}1\u20281:\u000d{\u2028\u2029\ud800\u2029\u2028
+%{\u20299\u2028:0|:01{\u000a\u000a|\u000azzz11}	{\u20299\u2028:0|:01{\u000a\u000a|\u000azzz11}
+prefix%1a0\ud800:9{\u2029z\u000d\u000d:	prefixfirsta0\ud800:9{\u2029z\u000d\u000d:
+%{plural:%1|00{\u2029\u000aa\ud800z\u000a:\u000d\u000a0\ud800\u2028z\u000d|9}	{plural:%1|00{\u2029\u000aa\ud800z\u000a:\u000d\u000a0\ud800\u2028z\u000d|9}
+%{z:z|1}1	{z:z|1}1
+prefix%\ud800\u2029\u20289{{z}}	prefix\ud800\u2029\u20289{{z}}
+%{plural:%1|\u2028\u000d}\u000d\ud800\u2028a%\u000a|}z	{plural:%1|\u2028\u000d}\u000d\ud800\u2028a%\u000a|}z
+%{z\u000a}90a:\u202891}}1aa%0\u2029%0}	{z\u000a}90a:\u202891}}1aa\u2029}
+prefix%:9\u2029:1}\u000a\ud800\u000a:\u2029a1:9z{:z	prefix:9\u2029:1}\u000a\ud800\u000a:\u2029a1:9z{:z
+%{plural:%1|\u000d{}:9a\ud800|:10}	{plural:%1|\u000d{}:9a\ud800|:10}
+%{19\u000d}\ud800	{19\u000d}\ud800
+prefix%\ud800{\ud800{\u000a1}	prefix\ud800{\ud800{\u000a1}
+%{plural:%1|99a}\u2028\u000d{\ud8001:	%{plural:%1|99a}\u2028\u000d{\ud8001:
+prefix%}\ud800z%%\u000d|z\u000d	prefix}\ud800z%\u000d|z\u000d
+%{plural:%1|}z}1\u000d09:\ud800|}\u2029|:%9{\u2029z90}	%{plural:%1|}z}1\u000d09:\ud800|}\u2029|:ninth{\u2029z90}
+%{\u000az%\u2028\u202890|%}0\u000d\u2028|\u2028\u2029	{\u000az%\u2028\u202890|}0\u000d\u2028|\u2028\u2029
+prefix%\ud800}|0|}	prefix\ud800}|0|}
+%{1{a0z9%1a%{a:az\u2028%1}	{1{a0z9firsta{a:az\u2028first}
+prefix%\ud800\u2029}a\ud800{\u2029	prefix\ud800\u2029}a\ud800{\u2029
+%{plural:%1|a}\u2028z1\u000az:}0\u202810z\ud800\u2028\u000d}	%{plural:%1|a}\u2028z1\u000az:}0\u202810z\ud800\u2028\u000d}
+%{za:\u000a%\u2029\u202910	{za:\u000a%\u2029\u202910
+%{plural:%1|%|\ud800\ud800	{plural:first||\ud800\ud800
+%{9%}	{9}
+prefix%\u2028z\u2028:{|1|}1\u000aa1%	prefix%\u2028z\u2028:{|1|}1\u000aa1%
+%{0}|\u000d%%{|\u000d{\ud800a|9\u000d9\u000a\u000d|\u000az	|\u000d%{|\u000d{\ud800a|9\u000d9\u000a\u000d|\u000az
+prefix%\u000a\ud800\u2028z{}	prefix%\u000a\ud800\u2028z{}
+%{plural:%1|\u000a{a\ud800\u2029\u2029\u000d9109	{plural:first|\u000a{a\ud800\u2029\u2029\u000d9109
+%{\ud800a\ud800\u000dz\u000a\u000d|}\u000a\u000d\u000dz\u2028{a9\ud800{}:}	{\ud800a\ud800\u000dz\u000a\u000d|}\u000a\u000d\u000dz\u2028{a9\ud800{}:}
+prefix%|}9%{\u000d|1{a\u000a|z\u2028\u2029\u2029\u000a|{}{\u000a\u000d	prefix|}9{\u000d|1{a\u000a|z\u2028\u2029\u2029\u000a|{}{\u000a\u000d
+%{plural:%1|\u2028\u000a\ud800\u000a\u000d%0\u20299\u000a\u000a\u000a\u000d}	{plural:%1|\u2028\u000a\ud800\u000a\u000d%0\u20299\u000a\u000a\u000a\u000d}
+%{\ud800\u2028\u2028|10\u000aa{9%9\u2028\u000d\u000d|0\u000d	{\ud800\u2028\u2028|10\u000aa{9ninth\u2028\u000d\u000d|0\u000d
+prefix%\u000d%a\u000d\u000d{:z\u000da%\u000a\u20299a9\u000a0a}	prefix%\u000da\u000d\u000d{:z\u000da%\u000a\u20299a9\u000a0a}
+%{plural:%1|\u000d\u20290\u000d0\u000a	{plural:first|\u000d\u20290\u000d0\u000a
+%{:\u2029a}	{:\u2029a}
+prefix%%\u000a\u2029\ud800}0}z||\u2028	prefix%\u000a\u2029\ud800}0}z||\u2028
+%{plural:%1|0:91\u2029z|:\ud800%:\u000d}	{plural:%1|0:91\u2029z|:\ud800%:\u000d}
+%{9\u000a\u000a{\u000d\u000d9|a\u20289\u2029a9\u000a\u2028\u000d\u000d\u2029	{9\u000a\u000a{\u000d\u000d9|a\u20289\u2029a9\u000a\u2028\u000d\u000d\u2029
+prefix%\u000d\ud800\ud800\u2028}\u2029\u202909|10\u000d\u000d91\u2028%\u000a:}	prefix%\u000d\ud800\ud800\u2028}\u2029\u202909|10\u000d\u000d91\u2028%\u000a:}
+%{plural:%1|\u2029|\u000d\u000a\u000d\u000a\u2029a\ud8009\u000a%}\ud800	{plural:%1|\u2029|\u000d\u000a\u000d\u000a\u2029a\ud8009\u000a%}\ud800
+%{|\ud800z:\ud800}	{|\ud800z:\ud800}
+prefix%90\u000d\u000a\ud800\u000a	prefix\u000d\u000a\ud800\u000a
+%{plural:%1|\u2029aa\u000d|\u000a{\u20290%\u2029\u000da\u2028:}	{plural:%1|\u2029aa\u000d|\u000a{\u20290%\u2029\u000da\u2028:}
+%{\ud8000{99\u000d9z|{:aa}\u20290|19\u2029	{\ud8000{99\u000d9z|{:aa}\u20290|19\u2029
+prefix%||\u000a0\u000a9\ud800}	prefix||\u000a0\u000a9\ud800}
+%{plural:%1|}1111\u2029\u2028	%{plural:%1|}1111\u2029\u2028
+%{plural:%1|}::}1}{:\u2029z\u2029}\u2029%}	%{plural:%1|}::}1}{:\u2029z\u2029}\u2029}
+%{%\u2029|a\u000d\u000a\u2029a\u000d\u000d\u000d:\u000d9z0z|}|1\ud800|	{%\u2029|a\u000d\u000a\u2029a\u000d\u000d\u000d:\u000d9z0z|}|1\ud800|
+prefix%\u2028\ud8001\ud800|1%{a9{\u2028{}a1:\u000d\u000d1z}	prefix%\u2028\ud8001\ud800|1{a9{\u2028{}a1:\u000d\u000d1z}
+%{plural:%1|\u000d\u000a%zz\u2029z|1\u2028{0	{plural:first|\u000d\u000azz\u2029z|1\u2028{0
+%{%|\u000a0}9z9\u2028}	{|\u000a0}9z9\u2028}
+prefix%%1\u2029\u2028:}\ud800a\u2029:1z{\u000d90z\u000d%{\u000az:	prefix%1\u2029\u2028:}\ud800a\u2029:1z{\u000d90z\u000d{\u000az:
+%{plural:%1|\u000d0\u000d\u2028\ud800\u000a{\ud800\u2029\u000aaa\ud800}	{plural:%1|\u000d0\u000d\u2028\ud800\u000a{\ud800\u2029\u000aaa\ud800}
+%{9\ud800\u2028\ud800\u2029\u000a|\u20280z%%\u000d\u2029\u000a	{9\ud800\u2028\ud800\u2029\u000a|\u20280z%\u000d\u2029\u000a
+prefix%%\u2028{01{|\u2029z%{1\u2029|9\u2028\u2029|9z\u2028\u000d}	prefix%\u2028{01{|\u2029z{1\u2029|9\u2028\u2029|9z\u2028\u000d}
+%{plural:%1|\ud800a\u2029\u000d%1%\u2029\u20291\u000dz\u000a\u20299}9\ud8001	{plural:%1|\ud800a\u2029\u000d%1%\u2029\u20291\u000dz\u000a\u20299}9\ud8001
+%{{%z91{0\u000dz{9:|\u2028{a:\u000a}%}	{{z91{0\u000dz{9:|\u2028{a:\u000a}}
+prefix%0\u000d19\u000d\u2028\u2028\u000a{a\u000a11%\u2029{0	prefix\u000d19\u000d\u2028\u2028\u000a{a\u000a11%\u2029{0
+%{plural:%1|%}:}	%{plural:%1|%}:}
+%{|}\u000a9%\u000dz|	{|}\u000a9%\u000dz|
+prefix%%}%}||\ud800:}	prefix%}}||\ud800:}
+%{plural:%1|1	{plural:first|1
+prefix%0\u000d\u2029}a	prefix\u000d\u2029}a
+%{plural:%1|z}	%{plural:%1|z}
+%{\ud800{1\u000azz0	{\ud800{1\u000azz0
+prefix%\u000d\u000d%{:%}}\u000a9\u2028\ud800}	prefix%\u000d\u000d{:}}\u000a9\u2028\ud800}
+%{plural:%1|10{91|:\ud8009	{plural:first|10{91|:\ud8009
+%{9a{}\u2028\ud800a\u000d0:1|a\u000a}	{9a{}\u2028\ud800a\u000d0:1|a\u000a}
+prefix%}\u000d9\u000a0z1%\u000d:\u2029}\u202811:%0|%\u2029	prefix}\u000d9\u000a0z1%\u000d:\u2029}\u202811:|%\u2029
+%{plural:%1|\u2028\u000a\u2028{%z}zzz}	{plural:%1|\u2028\u000a\u2028{%z}zzz}
+%{\u2028\ud800%\u20289::}9{\u2029\u000a\u2029|}1\u2028}%9%{	{\u2028\ud800%\u20289::}9{\u2029\u000a\u2029|}1\u2028}ninth{
+prefix%}0{z}	prefix}0{z}
+%{plural:%1|1\u20289a\u202919{\u2029\u2028{:}\ud800::0:z\ud8009	{plural:%1|1\u20289a\u202919{\u2029\u2028{:}\ud800::0:z\ud8009
+%{1}a\u2029\u2029%}}	firsta\u2029\u2029}}
+prefix%%a:1aa{a%1a%\u000d\u2028}\u000a	prefix%a:1aa{afirsta%\u000d\u2028}\u000a
+%{plural:%1|{\u000d11\u2028:\u000d|\u000d\ud800\u20281%%|}	{plural:%1|{\u000d11\u2028:\u000d|\u000d\ud800\u20281%%|}
+%{z}\u2029\u2029:1z11{|{\u202900\u000a9	{z}\u2029\u2029:1z11{|{\u202900\u000a9
+prefix%\u2029%09\u000a1{az9}	prefix%\u2029ninth\u000a1{az9}
+%{plural:%1|a:\ud80001\u2028{1\u2028	{plural:first|a:\ud80001\u2028{1\u2028
+%{{z%\u000d\u2028a\u2028{}%19z%%0\u20290}}:\u000a}	{{z%\u000d\u2028a\u2028{}z%0\u20290}}:\u000a}
+prefix%}\u000d\u20290\u000a%%}\u000d%\u000a	prefix}\u000d\u20290\u000a%}\u000d%\u000a
+%{\ud800\u000a	{\ud800\u000a
+prefix%\ud800090\u2029|:9}:}1}	prefix\ud800090\u2029|:9}:}1}
+%{plural:%1|1|\u202990\u000a\u202900\ud8000z%9	{plural:first|1|\u202990\u000a\u202900\ud8000zninth
+%{aa:a}	{aa:a}
+prefix%:{{\u2029\u20280a}\u2029{00\u2028z1	prefix:{{\u2029\u20280a}\u2029{00\u2028z1
+%{plural:%1|a:}1{%\u2028\u2029\u000d||\u000a\u2029\ud800\u20299\u2028\u000d\u000a}	%{plural:%1|a:}1{%\u2028\u2029\u000d||\u000a\u2029\ud800\u20299\u2028\u000d\u000a}
+%{%\u000a{{0\u2028\u000a}1\ud8001|%\u000a9\ud800\ud800	{%\u000a{{0\u2028\u000a}1\ud8001|%\u000a9\ud800\ud800
+prefix%%|11}	prefix%|11}
+%{plural:%1|\u000d\u20280|a|9\ud800\u2028\u000d0za%\u000a{0	{plural:first|\u000d\u20280|a|9\ud800\u2028\u000d0za%\u000a{0
+%{0\u2028\u2029\u000d\u2028|\u000d\u2029z|\u000d00:\u2028{%{\u000a%|\ud800\u2029}	{0\u2028\u2029\u000d\u2028|\u000d\u2029z|\u000d00:\u2028{{\u000a|\ud800\u2029}
+prefix%\u000d91\u20291||1\u000a	prefix%\u000d91\u20291||1\u000a
+%{plural:%1|\ud800a9%a}z}a\ud800\u000a}	%{plural:%1|\ud800a9%a}z}a\ud800\u000a}
+%{\u000d	{\u000d
+prefix%\u000d\u20291z|\u2029a\u2029009|{\u000a0z|:a9|\u000d}	prefix%\u000d\u20291z|\u2029a\u2029009|{\u000a0z|:a9|\u000d}
+%{plural:%1|\ud800a{\u000dz|}\u000da{z1a\u2028\u2028\u2028\u2029\u2029	{plural:%1|\ud800a{\u000dz|}\u000da{z1a\u2028\u2028\u2028\u2029\u2029
+%{1%\u000a%|zz}	{1%\u000a|zz}
+prefix%}|}\u000d\u000d%%\u2029%\u2028a|\ud800aa%11:\u2029	prefix}|}\u000d\u000d%\u2029%\u2028a|\ud800aa:\u2029
+%{plural:%1|1\u000a\ud800}	{plural:%1|1\u000a\ud800}
+%{\u2028\u2028\u000d}:\u000a09\u000aa}}	{\u2028\u2028\u000d}:\u000a09\u000aa}}
+prefix%00a1}\u2028\ud800:|}	prefixa1}\u2028\ud800:|}
+%{plural:%1|\u2029{}99}\u000a\u000a1\u2029\u2029	{plural:%1|\u2029{}99}\u000a\u000a1\u2029\u2029
+%{0z}	{0z}
+prefix%\u2029\u000d%1\u2028\u000d:\u000a}\ud800\u20289\u2029{a\u2029\u000a\u2028\u000aa\u000d	prefix%\u2029\u000dfirst\u2028\u000d:\u000a}\ud800\u20289\u2029{a\u2029\u000a\u2028\u000aa\u000d
+%{plural:%1|\u2029\u000a{00\u000a%z9\u20281\u20299%0a}	{plural:%1|\u2029\u000a{00\u000a%z9\u20281\u20299%0a}
+%{1\u000dz:{91\u202891a{:%\u20280%{\u2029}	{1\u000dz:{91\u202891a{:%\u20280{\u2029}
+prefix%9\ud800{%01\ud800}z\ud800|\ud8001z\u000d\u20290|aa}	prefixninth\ud800{first\ud800}z\ud800|\ud8001z\u000d\u20290|aa}
+%{plural:%1|a:\u2028a|%|	{plural:first|a:\u2028a||
+%{|}|\u000d%9\u000d0\u2029\u000a\ud800\ud800\ud800\u2028|}%\u2028\u2029\u000d\u2028}	{|}|\u000dninth\u000d0\u2029\u000a\ud800\ud800\ud800\u2028|}%\u2028\u2029\u000d\u2028}
+prefix%a0zz}a9	prefixa0zz}a9
+%{plural:%1|\u2028\u2028\u2028\u000a\u000a%z}	{plural:%1|\u2028\u2028\u2028\u000a\u000a%z}
+%{\u20289}:\u2029zz{\u2029\u000d\u2028\u000d{a	{\u20289}:\u2029zz{\u2029\u000d\u2028\u000d{a
+prefix%:\u2028091%\u000d%\u000d1\ud800z\ud800\ud8000\u2029\u000d\u2028}	prefix:\u2028091%\u000d%\u000d1\ud800z\ud800\ud8000\u2029\u000d\u2028}
+%{plural:%1|0a|\u000d%\ud800\u000a:a:\u2029|:1\u2029\u000az\u000d\u2029}%1{	{plural:%1|0a|\u000d%\ud800\u000a:a:\u2029|:1\u2029\u000az\u000d\u2029}first{
+%{z{}%\u2028z\u20299{|0:z\u000a\u000a{\u000a1z}	{z{}%\u2028z\u20299{|0:z\u000a\u000a{\u000a1z}
+prefix%\u2028\u000d{{\ud800z	prefix%\u2028\u000d{{\ud800z
+%{plural:%1|9\u000aa\u2028\u2029z}}\u2029\u2028\ud800}\u2028}zzz9|{1}	{plural:%1|9\u000aa\u2028\u2029z}}\u2029\u2028\ud800}\u2028}zzz9|{1}
+%{0\u20289\ud800\u000aa\u2029\u000aa}\u20289%	{0\u20289\ud800\u000aa\u2029\u000aa}\u20289%
+prefix%}\ud800|\ud800|a\u2028{a{}	prefix}\ud800|\ud800|a\u2028{a{}
+%{plural:%1|91{%\u2028:	{plural:first|91{%\u2028:
+%{z\ud8000\u000da\u20281z10\u20299%9a:\ud800aa\u000a}	{z\ud8000\u000da\u20281z10\u20299nintha:\ud800aa\u000a}
+prefix%|1}\u2029}%|	prefix|1}\u2029}|
+%{plural:%1|\ud800z|:{\u000d\u2029\u000a1}	{plural:%1|\ud800z|:{\u000d\u2029\u000a1}
+%{11\u20290\u000d1\ud800\ud80001a{9\u2028|11z{	{11\u20290\u000d1\ud800\ud80001a{9\u2028|11z{
+prefix%\u000dz}1z\u2028|%9\u000d\u000a:::az{\ud800\u000azz}	prefix%\u000dz}1z\u2028|ninth\u000d\u000a:::az{\ud800\u000azz}
+%{plural:%1|0\ud800{{1a\ud800|{:{\u000a|\u2029\ud800%:\u000a\u000aaz%	{plural:first|0\ud800{{1a\ud800|{:{\u000a|\u2029\ud800:\u000a\u000aaz%
+%{z\u000d:}\u000d{{z1\u2028:\u000d1%\u000aa1z910}	{z\u000d:}\u000d{{z1\u2028:\u000d1%\u000aa1z910}
+prefix%\ud800\u000d1\u000da}\u000d\u2029zz\u000d\u000a\u20280\u2029%\u20280\u2029|	prefix\ud800\u000d1\u000da}\u000d\u2029zz\u000d\u000a\u20280\u2029%\u20280\u2029|
+%{plural:%1|\u000d}	{plural:%1|\u000d}
+%{\ud800\u2029\u2028}1||}0:z	{\ud800\u2029\u2028}1||}0:z
+prefix%{z1zz1%|\ud800:{%%}|\ud800|0\u2029|}	prefix{z1zz1|\ud800:{%}|\ud800|0\u2029|}
+%{plural:%1|:\ud800}0%z\u000a\u000d}9}\u2029\u000d00\u000a\u2029\u2028:|a\u000d9	%{plural:%1|:\ud800}0z\u000a\u000d}9}\u2029\u000d00\u000a\u2029\u2028:|a\u000d9
+%{19z:a\u000d\u2029a0%|\u000a\u2028}	{19z:a\u000d\u2029a0|\u000a\u2028}
+prefix%9a\u2028	prefixnintha\u2028
+%{plural:%1|}\u000a1{{09\u202901\u2028\ud8001}\u2029\u000d\u000d0\u000d|%0%}	%{plural:%1|}\u000a1{{09\u202901\u2028\ud8001}\u2029\u000d\u000d0\u000d|}
+%{z:}0\u000a{{	{z:}0\u000a{{
+prefix%\u000d\u000a\u000d%}	prefix%\u000d\u000a\u000d}
+%{plural:%1||:\u000d}%\u2029}a0\u000da%z%zz\u000d\u000d{	{plural:%1||:\u000d}%\u2029}a0\u000dazzz\u000d\u000d{
+%{1\u000a\ud800\u2029|\u000a\u000d:a\u000d}	{1\u000a\ud800\u2029|\u000a\u000d:a\u000d}
+prefix%99::%	prefix::%
+%{plural:%1|{\u2028\ud800\u000a:1}	{plural:%1|{\u2028\ud800\u000a:1}
+%{|\u000a\u2029{}\u000a::a	{|\u000a\u2029{}\u000a::a
+%{plural:%1||{{|0	{plural:first||{{|0
+%{{{{\u2028}	{{{{\u2028}
+prefix%1\u000d\u2029\u2028\u2028}|}\u202819\u2028\u2029{\u000d|1\u000a1	prefixfirst\u000d\u2029\u2028\u2028}|}\u202819\u2028\u2029{\u000d|1\u000a1
+%{plural:%1|\u20280a9{|aa0}	{plural:%1|\u20280a9{|aa0}
+%{\u2028	{\u2028
+prefix%\u2029}\u000a}{0a1}	prefix%\u2029}\u000a}{0a1}
+%{plural:%1|%0|0\u2028\u000a|}9\u2028a\u000d	{plural:%1|%0|0\u2028\u000a|}9\u2028a\u000d
+%{\ud800aa%0az9|:\u20280z}\ud800}	{\ud800aaaz9|:\u20280z}\ud800}
+prefix%9%a%z%}{az\ud800\u2029\ud800{\u2029\ud8000:0\u2028%}:	prefixninthaz}{az\ud800\u2029\ud800{\u2029\ud8000:0\u2028}:
+%{plural:%1|\u000d\u000a}	{plural:%1|\u000d\u000a}
+%{%\u20280%%\u000a\ud800:}}\ud800{\u2028{1\u2029	{%\u20280%\u000a\ud800:}}\ud800{\u2028{1\u2029
+prefix%%:\u000aa%:z\u000a|\u000a|0}\ud800\ud800\u000a\ud800\u000dza\u000d{}	prefix%:\u000aa:z\u000a|\u000a|0}\ud800\ud800\u000a\ud800\u000dza\u000d{}
+%{plural:%1||}\u000d}\u000a\u2029\u2029\u2028|\u2028	%{plural:%1||}\u000d}\u000a\u2029\u2029\u2028|\u2028
+%{:z\u000d\u000dz1}\u2029:\u2028{{9}	{:z\u000d\u000dz1}\u2029:\u2028{{9}
+prefix%9%}\ud800a\u2029\ud8000a|\ud800\u000a1}z99\u2028\u000a9\u2029\ud800\ud800	prefixninth}\ud800a\u2029\ud8000a|\ud800\u000a1}z99\u2028\u000a9\u2029\ud800\ud800
+%{plural:%1|\u000a|\ud800z:}:\u000d}	{plural:%1|\u000a|\ud800z:}:\u000d}
+%{:\ud800\u000a\u000d\u2028	{:\ud800\u000a\u000d\u2028
+prefix%0\u000d\u000d\ud80000%|\u2029z{}	prefix\u000d\u000d\ud80000|\u2029z{}
+%{plural:%1|z\u000d:{a{\u000a\u2029:}{	{plural:%1|z\u000d:{a{\u000a\u2029:}{
+%{\u000a{%{{\u000d\u2028}	{\u000a{{{\u000d\u2028}
+prefix%{	prefix{
+%{plural:%1|\u2028%}	{plural:%1|\u2028%}
+%{1\u2029z1\u000da}z0}}|\u000dz|}9a:}	{1\u2029z1\u000da}z0}}|\u000dz|}9a:}
+prefix%{}	prefix{}
+%{\ud8001|a01}{9\u000a{a\ud8001|\u000dazz90\ud800}	{\ud8001|a01}{9\u000a{a\ud8001|\u000dazz90\ud800}
+prefix%}{1a\u000d\u000d1a{\ud800\ud8000\u20281\ud800%9\u2028\ud8001	prefix}{1a\u000d\u000d1a{\ud800\ud8000\u20281\ud800ninth\u2028\ud8001
+%{plural:%1|}a{1\u000d|\u000d\u000d}	%{plural:%1|}a{1\u000d|\u000d\u000d}
+%{a\u2028}\u000d{|	{a\u2028}\u000d{|
+prefix%\u000a0\u2029\ud8000|z\u2029a%9\u000a}\u000d\ud800a9\u2028}z%}	prefix%\u000a0\u2029\ud8000|z\u2029aninth\u000a}\u000d\ud800a9\u2028}z}
+%{plural:%1|\ud8009:}1\ud800:|\ud800\ud8009\u000d\u000a\u000a\ud800\u2029{z\u000a	%{plural:%1|\ud8009:}1\ud800:|\ud800\ud8009\u000d\u000a\u000a\ud800\u2029{z\u000a
+%{plural:%1|1}{\ud800\u000az9%\u2029az\u000a{\u000d\u000a\ud800{0}}	%{plural:%1|1}{\ud800\u000az9%\u2029az\u000a{\u000d\u000a\ud800{0}}
+%{9\u000d9a9\u20291\ud800|}}:\u2029az1:\u000a	{9\u000d9a9\u20291\ud800|}}:\u2029az1:\u000a
+prefix%::%a9||\ud800\u000a{%%\u000a9:19\ud800\u000a}	prefix::a9||\ud800\u000a{%\u000a9:19\ud800\u000a}
+%{0%\u2028{\u000a:}|}	{0%\u2028{\u000a:}|}
+prefix%\u000a0\u000a9	prefix%\u000a0\u000a9
+%{plural:%1|1%0|0}	%{plural:%1|1%0|0}
+%{z\ud800z{1	{z\ud800z{1
+prefix%a\ud8000\ud8009\u2028\u000a\u2029\ud800\u000a9\u2029z|\u2028\u2028\u000d|\u2029}	prefixa\ud8000\ud8009\u2028\u000a\u2029\ud800\u000a9\u2029z|\u2028\u2028\u000d|\u2029}
+%{plural:%1|a\u2029:\u000d}0\u000d\u000a}}\u2028\u20291\u000d\u2029\u000d\u000az\u000a|\u000d\ud8001	{plural:%1|a\u2029:\u000d}0\u000d\u000a}}\u2028\u20291\u000d\u2029\u000d\u000az\u000a|\u000d\ud8001
+%{\ud800}a\ud800}}0|1\ud800\u2029\u000dzaz%:9}	{\ud800}a\ud800}}0|1\ud800\u2029\u000dzaz:9}
+prefix%}1|90zza9\u000a\u2028\u2028|:0a1\u000d\u000d\u000d	prefix}1|90zza9\u000a\u2028\u2028|:0a1\u000d\u000d\u000d
+%{plural:%1|{\u000d\u2029{\u2029\ud800\u2029a{\u000a%z\u000a\u2028z09a\u20281}	{plural:%1|{\u000d\u2029{\u2029\ud800\u2029a{\u000a%z\u000a\u2028z09a\u20281}
+%{\ud800|}z%0\u20281\u000d	{\ud800|}z\u20281\u000d
+prefix%:\ud8000}9\u000a9z|{|zz{9}%a}	prefix:\ud8000}9\u000a9z|{|zz{9}a}
+%{plural:%1|a\ud800a{|a\u000a\u000d\u2029\u000d}:}z\u2029}|a|\u000d	{plural:%1|a\ud800a{|a\u000a\u000d\u2029\u000d}:}z\u2029}|a|\u000d
+%{|}91{9%za}}{{|{}	{|}91{9za}}{{|{}
+prefix%\u2029|%}	prefix%\u2029|}
+%{plural:%1|\u000d{\u000a}{}0\ud8000\u2029:a:\u000a{90\ud800{\u000a{1{}	{plural:%1|\u000d{\u000a}{}0\ud8000\u2029:a:\u000a{90\ud800{\u000a{1{}
+%{\u000aa0\u000d}|za|\u000d\u000a0\u2028	{\u000aa0\u000d}|za|\u000d\u000a0\u2028
+prefix%\u000a}0%\u000a\ud800{:}	prefix%\u000a}0%\u000a\ud800{:}
+%{plural:%1|%9}\u000d9:|\u2028\u20299	%{plural:%1|%9}\u000d9:|\u2028\u20299
+prefix%{9\u000d{\u000a:{	prefix{9\u000d{\u000a:{
+%{plural:%1|\u2029%{\ud8000a\ud800\u000a\u000d\u2029\ud800%{1a|\u2028\u000d}	{plural:%1|\u2029%{\ud8000a\ud800\u000a\u000d\u2029\ud800%{1a|\u2028\u000d}
+prefix%\u000d}	prefix%\u000d}
+%{plural:%1|\u000dz1az\u000d\u000d0\u2028}\u000d\u2028\u000d%	{plural:%1|\u000dz1az\u000d\u000d0\u2028}\u000d\u2028\u000d%
+%{\u2029\u000d\u2028{{}{1z1\u2029\ud800\u2028}{1|{}\u000d9z%}	{\u2029\u000d\u2028{{}{1z1\u2029\ud800\u2028}{1|{}\u000d9z}
+prefix%0%\u2028:a1z\u20291\u2028}{	prefix%\u2028:a1z\u20291\u2028}{
+%{plural:%1|:\ud800a1}\u2028\ud800%\ud800:z}	%{plural:%1|:\ud800a1}\u2028\ud800\ud800:z}
+%{\u000d0z%\u000d:\u000d1\u202991\ud800:1\u2029	{\u000d0z%\u000d:\u000d1\u202991\ud800:1\u2029
+prefix%|:}	prefix|:}
+%{plural:%1|a\u000a	{plural:first|a\u000a
+%{{9\u000d1\ud800}\u000da{}	{{9\u000d1\ud800}\u000da{}
+prefix%:1}|:\u2028{%a\u2029\u000d919:}\ud800\u000a	prefix:1}|:\u2028{a\u2029\u000d919:}\ud800\u000a
+%{plural:%1|0|\u2028\u000a1z1}	{plural:%1|0|\u2028\u000a1z1}
+%{0z{	{0z{
+prefix%%\u2028\u000d:a|{{\u000d}{{a\u000d:{\ud800\u000a\ud800\ud800%}	prefix%\u2028\u000d:a|{{\u000d}{{a\u000d:{\ud800\u000a\ud800\ud800}
+%{plural:%1|:0}0}	%{plural:%1|:0}0}
+%{}|\u2029\u000a}	{}|\u2029\u000a}
+prefix%\ud800\u000a}\ud800\u2029\ud8001\u2029	prefix\ud800\u000a}\ud800\u2029\ud8001\u2029
+%{plural:%1|z|\u20290\u000az\ud800\u2029\ud800\u2029\u000d1\ud800|%0\u2028\u000d|}	{plural:%1|z|\u20290\u000az\ud800\u2029\ud800\u2029\u000d1\ud800|%0\u2028\u000d|}
+%{\ud800{\u000d|z91|:\u000d\u2029%0:9\u000d\u000a}	{\ud800{\u000d|z91|:\u000d\u2029:9\u000d\u000a}
+prefix%:%\u000a\ud800{9:%|%\u000d|\u000d|9\u2029}1aza\u2028}	prefix:%\u000a\ud800{9:|%\u000d|\u000d|9\u2029}1aza\u2028}
+%{plural:%1|\u000d1	{plural:first|\u000d1
+%{%1|z\ud8009z\u2029z\u2029\ud8001\u20290}	{first|z\ud8009z\u2029z\u2029\ud8001\u20290}
+prefix%\u000d\u2029{\u2028|\u2029:\ud800a%%	prefix%\u000d\u2029{\u2028|\u2029:\ud800a%
+%{plural:%1|%||%%{|%}9}\u20281{\u000da\u2028}	%{plural:%1|%||%%{|%}9}\u20281{\u000da\u2028}
+%{{9:\ud800	{{9:\ud800
+prefix%%}\u2029\u000d0a}}\u2029\ud800{%10%\u2028{|\u2029|%z}	prefix%}\u2029\u000d0a}}\u2029\ud800{tenth%\u2028{|\u2029|z}
+%{plural:%1|:1:\ud800\u000a\u2029	{plural:first|:1:\ud800\u000a\u2029
+prefix%z90\u2029\u2029z|z\u2029	prefixz90\u2029\u2029z|z\u2029
+%{|1z|}}a10\ud800\u20281	{|1z|}}a10\ud800\u20281
+prefix%191\u000a:\u000a|a\u000a\u2029{90a\ud800{90}|}	prefix\u000a:\u000a|a\u000a\u2029{90a\ud800{90}|}
+%{plural:%1|\u000d|a9	{plural:first|\u000d|a9
+prefix%\ud800:}\u2028{%\u000aa\u000a9\u000a\u20280\u000d0\ud800\u2028	prefix\ud800:}\u2028{%\u000aa\u000a9\u000a\u20280\u000d0\ud800\u2028
+%{plural:%1||990{\u000a:\u2028:00:\u2028\u000d1%1|0:}	{plural:%1||990{\u000a:\u2028:00:\u2028\u000d1%1|0:}
+%{{\u202909z\u2029{\u202819\u2028	{{\u202909z\u2029{\u202819\u2028
+prefix%\u2029\u2029{:}:9\u000d\u2029%9:\ud800\u2028:\u000a\u2029:{}	prefix%\u2029\u2029{:}:9\u000d\u2029ninth:\ud800\u2028:\u000a\u2029:{}
+%{plural:%1|%\ud800}}\u2028	%{plural:%1|%\ud800}}\u2028
+%{a{0}\u20291:\u000d\u000dz|zz1a9|1}	{a{0}\u20291:\u000d\u000dz|zz1a9|1}
+prefix%1\ud800\ud8009z0|\u20289\u000d}\u000d	prefixfirst\ud800\ud8009z0|\u20289\u000d}\u000d
+%{plural:%1|0\u000aa0{\u000dz%1}}%}	{plural:%1|0\u000aa0{\u000dz%1}}}
+prefix%9}\u2028z\ud800a1{:}1\u000a%}	prefixninth}\u2028z\ud800a1{:}1\u000a}
+%{plural:%1|\ud800a\u000d	{plural:first|\ud800a\u000d
+%{\u000a1%\u000a\u2028}z\ud800:}}0z\u000a\u2029\u2028\u000a|{:}	{\u000a1%\u000a\u2028}z\ud800:}}0z\u000a\u2029\u2028\u000a|{:}
+prefix%|\u2028	prefix|\u2028
+%{plural:%1|\u2029\u2028\u2029{0\ud800a|1\ud800z}}	{plural:%1|\u2029\u2028\u2029{0\ud800a|1\ud800z}}
+%{:z\ud800\u2028::|9z	{:z\ud800\u2028::|9z
+prefix%\u000d\ud800}\u2029}%|%a\u000d\u20281{19%:}\u000d0\ud800}	prefix%\u000d\ud800}\u2029}|a\u000d\u20281{19:}\u000d0\ud800}
+%{plural:%1|\u000d{|\u000a	{plural:first|\u000d{|\u000a
+prefix%|0	prefix|0
+%{plural:%1|:10\u2029zzz\ud80009\ud800|:za%\ud800\u2029}	{plural:%1|:10\u2029zzz\ud80009\ud800|:za%\ud800\u2029}
+%{:0z\u20291z\ud800|}\ud800\u2029\u000a::\ud800|\u000a1}	{:0z\u20291z\ud800|}\ud800\u2029\u000a::\ud800|\u000a1}
+prefix%1|z:\u000d\u000d9}	prefixfirst|z:\u000d\u000d9}
+%{plural:%1|0|\u000d	{plural:first|0|\u000d
+%{\u2028\u000a%1\ud800a|:\u2028z|\u000az{|\ud800}	{\u2028\u000afirst\ud800a|:\u2028z|\u000az{|\ud800}
+%{z%9z|}\u2028:\u000d{1\u2029z	{zninthz|}\u2028:\u000d{1\u2029z
+prefix%\u2028\u2028\u000a:\u2029|\u2029\ud8001|9z%%az\ud800\u000aa:\ud800}\ud800}	prefix%\u2028\u2028\u000a:\u2029|\u2029\ud8001|9z%az\ud800\u000aa:\ud800}\ud800}
+%{plural:%1|\u000d1\ud8000:za\u000d{az|\u000a\u2029\ud800\u202901	{plural:first|\u000d1\ud8000:za\u000d{az|\u000a\u2029\ud800\u202901
+%{\u000a%{a}}9\u2029|}	{\u000a{a}}9\u2029|}
+prefix%::\u20290%|}9\u2029:||%	prefix::\u20290|}9\u2029:||%
+%{plural:%1|}\u20289{\ud800{\u000aa{:%:}	%{plural:%1|}\u20289{\ud800{\u000aa{::}
+%{:%\u2029a\u000a1a|\u20299a:\u2028\u000a\u2029\u2028z:1\u000a\ud80090	{:%\u2029a\u000a1a|\u20299a:\u2028\u000a\u2029\u2028z:1\u000a\ud80090
+prefix%%::a}	prefix%::a}
+%{plural:%1|\u2029\u2029	{plural:first|\u2029\u2029
+%{\u2029|%\ud800|\u2028\u000a{a\u2028:\ud800|0}}	{\u2029|\ud800|\u2028\u000a{a\u2028:\ud800|0}}
+prefix%\u2028}1%9\u000a1\u000d\ud800\u2028%	prefix%\u2028}1ninth\u000a1\u000d\ud800\u2028%
+%{plural:%1|9\u000a|\ud800\ud800\u2028:911z0\u000d0}\u000d:\u20291\u2028|\u2028\u000a}	{plural:%1|9\u000a|\ud800\ud800\u2028:911z0\u000d0}\u000d:\u20291\u2028|\u2028\u000a}
+%{\u000a\u2028:}	{\u000a\u2028:}
+prefix%|\u2028:19:9{za\u2029}\ud800\u000d1|\ud8001a\u000a}	prefix|\u2028:19:9{za\u2029}\ud800\u000d1|\ud8001a\u000a}
+%{plural:%1|%}\u2028%	%{plural:%1|%}\u2028%
+%{|\ud800\u2028|0z\u2029\u2029\u000d{|1%\ud800\u2028\u2028{|}%}	{|\ud800\u2028|0z\u2029\u2029\u000d{|1\ud800\u2028\u2028{|}}
+prefix%10z%\ud800|%z\u20290}\ud800}	prefixtenthz\ud800|z\u20290}\ud800}
+%{plural:%1|:}{00}\u2028a%1|\ud800:\u2028\u2029}	%{plural:%1|:}{00}\u2028afirst|\ud800:\u2028\u2029}
+%{%\ud8009:\u000d\ud800\u20291\ud800a\u2029}%	{\ud8009:\u000d\ud800\u20291\ud800a\u2029}%
+prefix%\u2028}\ud800:%z9z\u2028%1{%0|{0}	prefix%\u2028}\ud800:z9z\u2028first{|{0}
+%{plural:%1|\u20281az{}9\u000d\u2028\u000a:0%|z1}z:0	{plural:%1|\u20281az{}9\u000d\u2028\u000a:0|z1}z:0
+%{%:90aa1\u000a0{a}	{:90aa1\u000a0{a}
+prefix%}|\ud800\u2029z\u000a|z:	prefix}|\ud800\u2029z\u000a|z:
+%{plural:%1|\u000d\ud800\u2028|\ud8000\u000d\u000a:|\ud8000}	{plural:%1|\u000d\ud800\u2028|\ud8000\u000d\u000a:|\ud8000}
+%{z\ud800\ud800\ud800}{\u2029{%z|:\ud800a\u000d\u000d|a9z1:|	{z\ud800\ud800\ud800}{\u2029{z|:\ud800a\u000d\u000d|a9z1:|
+prefix%\u000a\u000d\u2029:%0a\u2029\u000d}\ud800a%{}	prefix%\u000a\u000d\u2029:a\u2029\u000d}\ud800a{}
+%{plural:%1|\u000d\u000d\u2029:z\u20281%{	{plural:first|\u000d\u000d\u2029:z\u20281{
+%{az%|\u000a1\u2028||{\ud800a\u000a:|\u000a{\u000aa}	{az|\u000a1\u2028||{\ud800a\u000a:|\u000a{\u000aa}
+prefix%\u2029:|:|}0z\u2029z0\u000a	prefix%\u2029:|:|}0z\u2029z0\u000a
+%{plural:%1|{%a0\u000a110\u2028:z\u000d\ud800}	{plural:%1|{%a0\u000a110\u2028:z\u000d\ud800}
+%{\ud8000\u2028\ud800}\u2028|0z	{\ud8000\u2028\ud800}\u2028|0z
+prefix%z}	prefixz}
+%{plural:%1|9:z}0	%{plural:%1|9:z}0
+%{\ud800|1\ud800\u2029|0a0\ud80090\ud800\u2029a9}|\u000a\u000a0\u000aa}	{\ud800|1\ud800\u2029|0a0\ud80090\ud800\u2029a9}|\u000a\u000a0\u000aa}
+prefix%\u2029\u2028|1\u000a|\ud800\u2029:\u20299\u000a100%|}	prefix%\u2029\u2028|1\u000a|\ud800\u2029:\u20299\u000a100|}
+%{plural:%1|\ud800||9\u000d\u2029%\u2029:\u000dz\u000a19z0\u2028\u000a1}	{plural:%1|\ud800||9\u000d\u2029%\u2029:\u000dz\u000a19z0\u2028\u000a1}
+%{%0	{
+prefix%\ud800\u000d%\u2028\u000a\u000a\u2028a1\u000daz|1}	prefix\ud800\u000d%\u2028\u000a\u000a\u2028a1\u000daz|1}
+%{plural:%1||11{	{plural:first||11{
+prefix%0\u000d%{	prefix\u000d{
+%{plural:%1|\u20291}	{plural:%1|\u20291}
+%{\u20290\u000d\u2028\u2029%:|\u2028a	{\u20290\u000d\u2028\u2029:|\u2028a
+prefix%}%}:%:9\u000d\u2029}\u000a}0}	prefix}}::9\u000d\u2029}\u000a}0}
+%{plural:%1|1\u2029\u000a\u2029a1\ud800z{	{plural:first|1\u2029\u000a\u2029a1\ud800z{
+%{1z:}	{1z:}
+prefix%0:z	prefix:z
+%{plural:%1|1{0z91\u000d\u20280{9z9}	{plural:%1|1{0z91\u000d\u20280{9z9}
+%{\u20280%\u000a	{\u20280%\u000a
+prefix%1\u000d}|%1{%|\u000d\u20280\ud8001}\ud8001}:\u000a{}	prefixfirst\u000d}|first{|\u000d\u20280\ud8001}\ud8001}:\u000a{}
+%{plural:%1|}a%a}\u2028|{0a	%{plural:%1|}aa}\u2028|{0a
+%{:1%1}}	{:1first}}
+prefix%z\ud800\u2029\u2029	prefixz\ud800\u2029\u2029
+%{plural:%1|9\u000a\u000a:\u2029\u202890\u000d01\u2028\u2028a0\u2028}	{plural:%1|9\u000a\u000a:\u2029\u202890\u000d01\u2028\u2028a0\u2028}
+%{:\u2029\u000d}:\u2029\u000d\u2028911::}a{\u2029}z	{:\u2029\u000d}:\u2029\u000d\u2028911::}a{\u2029}z
+%{plural:%1|\u000d\u000d9\u2028\u000a1\ud800\ud8001\u2028a%|::{\u2029}1a\ud800	{plural:%1|\u000d\u000d9\u2028\u000a1\ud800\ud8001\u2028a%|::{\u2029}1a\ud800
+%{0:\u000az9\u2028|}	{0:\u000az9\u2028|}
+prefix%{01\u2028\u2029z|91	prefix{01\u2028\u2029z|91
+%{plural:%1|\u2028\ud800%z\u000a}0{0|}	{plural:%1|\u2028\ud800%z\u000a}0{0|}
+%{\u2028|:0000\u000d	{\u2028|:0000\u000d
+prefix%\u2028{\u000d\u2028\ud80010\u2029:{}	prefix%\u2028{\u000d\u2028\ud80010\u2029:{}
+%{plural:%1|09\ud800\u2029\u20290\u20299%1	{plural:first|09\ud800\u2029\u20290\u20299first
+%{zz\u2028}	{zz\u2028}
+prefix%\u000d	prefix%\u000d
+%{plural:%1|\u20290}	{plural:%1|\u20290}
+%{\u20290|a}|	{\u20290|a}|
+prefix%99}}	prefix}}
+%{plural:%1|1z\u000a|}|%\u20299|z\u000d\u000a|\u20291\u000a:\u2028	{plural:%1|1z\u000a|}|%\u20299|z\u000d\u000a|\u20291\u000a:\u2028
+%{a%1a|}1\ud800:{z:\u000a11}	{afirsta|}1\ud800:{z:\u000a11}
+prefix%{a::z\ud800\u000aa}\u2028	prefix{a::z\ud800\u000aa}\u2028
+%{\ud800|0:\u000da%\u2028}\ud800}\u20290\u000a%%\u2028\u2028\u2029	{\ud800|0:\u000da%\u2028}\ud800}\u20290\u000a%\u2028\u2028\u2029
+prefix%\u000da\u20291\u000d\u2028{}	prefix%\u000da\u20291\u000d\u2028{}
+%{plural:%1|:09:|9}:\u000d	%{plural:%1|:09:|9}:\u000d
+%{\u20289|9a{\u2028|90{\u000a0}	{\u20289|9a{\u2028|90{\u000a0}
+prefix%az\u000d%}:\u000d1	prefixaz\u000d}:\u000d1
+%{plural:%1|1z{%}	%{plural:%1|1z{%}
+%{{{\ud800\u2029%0\ud800	{{{\ud800\u2029\ud800
+prefix%%9}}	prefix%9}}
+%{plural:%1|0\ud800\u000a\u2028\u000da\u2029\u20289z\u2029:\u2029{%9a}	{plural:%1|0\ud800\u000a\u2028\u000da\u2029\u20289z\u2029:\u2029{%9a}
+%{|:z0\u000d0|za\u2028}:z\u000a|{a\u000a\u2028z:|\u2029}	{|:z0\u000d0|za\u2028}:z\u000a|{a\u000a\u2028z:|\u2029}
+prefix%\u000d\ud800	prefix%\u000d\ud800
+%{plural:%1|\u2029z\u20299}:%\u000d}|01}a\u000aa}	{plural:%1|\u2029z\u20299}:%\u000d}|01}a\u000aa}
+%{1{9:0\u000a{z0{	{1{9:0\u000a{z0{
+prefix%:9\u000d9\u000a|\u2029\u000d|\u000d\u20290\u2028|{:\u000d}\u2029\u2028%%}	prefix:9\u000d9\u000a|\u2029\u000d|\u000d\u20290\u2028|{:\u000d}\u2029\u2028%}
+%{1}a\u000a\u2029\u2029}	firsta\u000a\u2029\u2029}
+prefix%\u20281{0:\u20290\ud800{:\u000d	prefix%\u20281{0:\u20290\ud800{:\u000d
+%{plural:%1|\u2029\ud800\u000d\u2029|az\ud800|{z\ud800\u000a0\ud800:01}	{plural:%1|\u2029\ud800\u000d\u2029|az\ud800|{z\ud800\u000a0\ud800:01}
+%{z{:}:9\u2028{\u2029\u2029:9}{\u2029\u000d\u000d\u000az|\u000d	{z{:}:9\u2028{\u2029\u2029:9}{\u2029\u000d\u000d\u000az|\u000d
+prefix%{{\u2029\u000a11{9{0\u20290{aa%|\u2029}}	prefix{{\u2029\u000a11{9{0\u20290{aa|\u2029}}
+%{plural:%1|9	{plural:first|9
+%{\ud8001{z1\u2029\u2029:\u2029|\u202910\ud8000aa1}	{\ud8001{z1\u2029\u2029:\u2029|\u202910\ud8000aa1}
+prefix%{\u2028\u000d9\u000a19z\u000d	prefix{\u2028\u000d9\u000a19z\u000d
+%{plural:%1|{:z9\u000dz{%{}	{plural:%1|{:z9\u000dz{%{}
+%{1|0a	{1|0a
+prefix%919%a\ud800\u2029}	prefixa\ud800\u2029}
+%{plural:%1|{:{za:{\u20289\u000a1:%\u000d{\u2029\u20290\ud8001\u000a\u2028	{plural:first|{:{za:{\u20289\u000a1:%\u000d{\u2029\u20290\ud8001\u000a\u2028
+prefix%{|z1|\u000da\u2028\ud800\u000a	prefix{|z1|\u000da\u2028\ud800\u000a
+%{plural:%1|a\u000da}	{plural:%1|a\u000da}
+%{\u000d\u000a|:\ud800\u000d\u000d|0}\u000a{|\ud800\u2029\u2028:\ud800\u2028|}	{\u000d\u000a|:\ud800\u000d\u000d|0}\u000a{|\ud800\u2029\u2028:\ud800\u2028|}
+prefix%\u2029\u20280\u2028}	prefix%\u2029\u20280\u2028}
+%{plural:%1|z}\u000a\ud800	%{plural:%1|z}\u000a\ud800
+%{0\ud8001\u000a\u2028}a0a09\u000d%0:|%\u2028|%:1}}	{0\ud8001\u000a\u2028}a0a09\u000d:|%\u2028|:1}}
+prefix%9\u2029\u2029\u20289\u2029\u2029\u000a9\u20281\u000a|0a\u2029	prefixninth\u2029\u2029\u20289\u2029\u2029\u000a9\u20281\u000a|0a\u2029
+%{plural:%1|\ud800{{\u000d\u2029\u20290}	{plural:%1|\ud800{{\u000d\u2029\u20290}
+%{|9%\u2028|z\u000d\u000dz\u000a|\u000da%	{|9%\u2028|z\u000d\u000dz\u000a|\u000da%
+prefix%}9\u000d000\u000d\u2029011\u000d\ud800\u000d::0\u000d}	prefix}9\u000d000\u000d\u2029011\u000d\ud800\u000d::0\u000d}
+%{plural:%1||a:|\u20281\u2029\u2028\ud800}\u2028%1	{plural:%1||a:|\u20281\u2029\u2028\ud800}\u2028first
+%{\u000d1\u000a%}	{\u000d1\u000a}
+prefix%az\ud800\u000d{1a|%\u000a9:9{\u000a\u2028\u20291	prefixaz\ud800\u000d{1a|%\u000a9:9{\u000a\u2028\u20291
+%{plural:%1|%\u2029\u000d}	{plural:%1|%\u2029\u000d}
+%{\u000d9}z%a99|\u000d{\u2029	{\u000d9}za99|\u000d{\u2029
+prefix%\u000d1\u2028{\u2028:\u2028z}\u2028\u2028a\u20291a}	prefix%\u000d1\u2028{\u2028:\u2028z}\u2028\u2028a\u20291a}
+%{plural:%1|\u000d\u000d9\u2029\u2029zaz\u000d:{\u2029}\u2029\u000d:9|9}1a	{plural:%1|\u000d\u000d9\u2029\u2029zaz\u000d:{\u2029}\u2029\u000d:9|9}1a
+%{\u000a\u000d}	{\u000a\u000d}
+prefix%|0}\u2029\ud80019}\u2029:\u2028%\u000a	prefix|0}\u2029\ud80019}\u2029:\u2028%\u000a
+%{plural:%1|z}\u2029\u2028z\u000d|\u000d\ud800:\ud800\u2028\u000a%9|:%1zz}	%{plural:%1|z}\u2029\u2028z\u000d|\u000d\ud800:\ud800\u2028\u000aninth|:firstzz}
+%{%a91a10\ud8000\u000a99	{a91a10\ud8000\u000a99
+prefix%0a\u000a{%|:{\u000d9{\u20281{\ud8000z%%\u000d\u000a\u000d}	prefixa\u000a{|:{\u000d9{\u20281{\ud8000z%\u000d\u000a\u000d}
+%{plural:%1|z\u2029\u2029%\u2029%	{plural:first|z\u2029\u2029%\u2029%
+%{\u202810a9}	{\u202810a9}
+prefix%\u000d|{{0\u000d|	prefix%\u000d|{{0\u000d|
+%{plural:%1|\ud800z\ud8000}%|\ud800z0\ud800%}	%{plural:%1|\ud800z\ud8000}|\ud800z0\ud800}
+%{%9za\ud8009z{	{ninthza\ud8009z{
+prefix%:a\u000a\u000d:%\u000d9}	prefix:a\u000a\u000d:%\u000d9}
+%{plural:%1|%\u2028:1{}}0{}0%%}0|\u000d{	{plural:%1|%\u2028:1{}}0{}0%}0|\u000d{
+%{\u2029:}	{\u2029:}
+prefix%aa0z9{	prefixaa0z9{
+%{|	{|
+prefix%\u000d|\u000a0}}\u2029\u2029a\u2028{09a}\u2029%\ud800\u000d%1}	prefix%\u000d|\u000a0}}\u2029\u2029a\u2028{09a}\u2029\ud800\u000dfirst}
+%{plural:%1|\ud800\ud800z{09}\ud800z\ud800a\u2028\u2028z	%{plural:%1|\ud800\ud800z{09}\ud800z\ud800a\u2028\u2028z
+%{z:%\ud800\ud8009:%:\u000d}	{z:\ud800\ud8009::\u000d}
+prefix%%{9{\u2028\ud8000\ud800z\u000d9\u2028\u000a0:	prefix%{9{\u2028\ud8000\ud800z\u000d9\u2028\u000a0:
+%{plural:%1|z\ud800a9\u2028\u000d}	{plural:%1|z\ud800a9\u2028\u000d}
+%{}a\u2029:\u2029%\u2029z:\u2029\u2028\ud800aa	{}a\u2029:\u2029%\u2029z:\u2029\u2028\ud800aa
+prefix%|}:\u2028::%\u000az9aa9\u2029}	prefix|}:\u2028::%\u000az9aa9\u2029}
+%{plural:%1|:\u2029%\u2028\u000da\u000d9{%a	{plural:first|:\u2029%\u2028\u000da\u000d9{a
+%{\u2028:\ud800a\u000d:}|}\u2028\u2029|:1a}\u2029\ud800}	{\u2028:\ud800a\u000d:}|}\u2028\u2029|:1a}\u2029\ud800}
+prefix%|%	prefix|%
+%{plural:%1|\ud800\u2029}%a\u20281:{\u000a%z%\u000d|9\u2028a}z\ud800%{}	{plural:%1|\ud800\u2029}a\u20281:{\u000az%\u000d|9\u2028a}z\ud800{}
+%{{\u2028|||:\u20281|{:{1aa\ud8009\u2029%\u000a{	{{\u2028|||:\u20281|{:{1aa\ud8009\u2029%\u000a{
+prefix%z%\u000d|aa:9\u2029\u000d%\u2028\u000a\u000d\u000a\u000d}	prefixz%\u000d|aa:9\u2029\u000d%\u2028\u000a\u000d\u000a\u000d}
+%{plural:%1|\u000d\u000a0\u2029\u000a\u2028z|	{plural:first|\u000d\u000a0\u2029\u000a\u2028z|
+%{\u20299\u2029%|\u2029\u2028\u2028{|\ud8000z\u20290\u000dz\ud800}\u2028}	{\u20299\u2029|\u2029\u2028\u2028{|\ud8000z\u20290\u000dz\ud800}\u2028}
+prefix%%\u20299%z%\u2028z\u000a}\ud800\ud800|}z:	prefix%\u20299z%\u2028z\u000a}\ud800\ud800|}z:
+%{plural:%1|\ud8000}z1\ud800}1}	%{plural:%1|\ud8000}z1\ud800}1}
+%{%a\u000aa	{a\u000aa
+prefix%\u2029:z}	prefix%\u2029:z}
+%{plural:%1|:\u000a\u000a%{\ud800\u000a\ud8001\u2028\u000d\u2028%9}\ud800\u2028%\u000a{z	{plural:%1|:\u000a\u000a%{\ud800\u000a\ud8001\u2028\u000d\u2028%9}\ud800\u2028%\u000a{z
+%{01:\u2029{%\u2029{|\u000d\u2029}{\u000a%1\u2029}	{01:\u2029{%\u2029{|\u000d\u2029}{\u000afirst\u2029}
+prefix%0%a\u2028:z\u2028%z\u000d\u2029	prefixa\u2028:z\u2028z\u000d\u2029
+%{plural:%1|{\u000d|%%\ud8001}	{plural:%1|{\u000d|%%\ud8001}
+%{a\u2028\ud800zzz\u2029}%9\u202901}%%9\u000d\u2028\ud8001\u000d	{a\u2028\ud800zzz\u2029}ninth\u202901}%9\u000d\u2028\ud8001\u000d
+prefix%\u2029\ud800\u000a\u2029\ud800\ud800}\u000d}0\u2028\u000d\u000d\u000a\u2029|\u2029:\u202899%\u000d}	prefix%\u2029\ud800\u000a\u2029\ud800\ud800}\u000d}0\u2028\u000d\u000d\u000a\u2029|\u2029:\u202899%\u000d}
+%{plural:%1|\u2029}z\u000a}z9|%0%{\u000a%\u000d00%}\u20290\u2028\u000a	{plural:%1|\u2029}z\u000a}z9|{\u000a%\u000d00}\u20290\u2028\u000a
+%{a1|\u000d\u000a{}	{a1|\u000d\u000a{}
+prefix%0||	prefix||
+%{plural:%1|9\u000a0\u2028:}	{plural:%1|9\u000a0\u2028:}
+%{|:}|9\ud800	{|:}|9\ud800
+prefix%\u000d%\u2028a}	prefix%\u000d%\u2028a}
+%{plural:%1|\u20299\u2028	{plural:first|\u20299\u2028
+%{\u2029\u20281199\u000d\u2028%}11z1%9\u000a}:}	{\u2029\u20281199\u000d\u2028}11z1ninth\u000a}:}
+prefix%\u000daa0	prefix%\u000daa0
+%{plural:%1|\ud800aa00aa::9\u202819}	{plural:%1|\ud800aa00aa::9\u202819}
+%{\u000a\u000dz11\u000d\u2028%||9\u000d{}z%}9{{|{	{\u000a\u000dz11\u000d\u2028||9\u000d{}z}9{{|{
+prefix%|}0\u000d}\u000a}100}	prefix|}0\u000d}\u000a}100}
+%{plural:%1|a}\u000a}	%{plural:%1|a}\u000a}
+%{\u2029a1%|\u2029\u2028\u2028}}	{\u2029a1|\u2029\u2028\u2028}}
+prefix%\u2028a\u2029\u20289\u000aa\ud800|\ud800%%{\ud800\u20290	prefix%\u2028a\u2029\u20289\u000aa\ud800|\ud800%{\ud800\u20290
+%{plural:%1|}}	%{plural:%1|}}
+%{\u2029{\u2029|}\u2028\ud800\u20291a\u20280\u000d\ud800|||	{\u2029{\u2029|}\u2028\ud800\u20291a\u20280\u000d\ud800|||
+%{plural:%1|a%|a:{%\u20299%1{1|z	{plural:first|a|a:{%\u20299first{1|z
+%{\u000a9}	{\u000a9}
+prefix%\u2028a	prefix%\u2028a
+%{plural:%1|\ud8000}	%{plural:%1|\ud8000}
+%{z\u000d%01:}\u000a\u000a||1	{z\u000dfirst:}\u000a\u000a||1
+prefix%%\u2028z\u2029}%}	prefix%\u2028z\u2029}}
+%{plural:%1|z%\u2029|{0\ud800z\u000d\ud800\u000a\u2028	{plural:first|z%\u2029|{0\ud800z\u000d\ud800\u000a\u2028
+%{9{0}:}|9\u2028a:z}	{9{0}:}|9\u2028a:z}
+%{plural:%1|\ud8001\u000a\u2029\u000a\ud800a{\u000d1\u000d\u000d91{%}\u000a}	{plural:%1|\ud8001\u000a\u2029\u000a\ud800a{\u000d1\u000d\u000d91{%}\u000a}
+%{}||a\u000d\u000d\ud8009\u000d|\u2028a0}\ud800\ud800	{}||a\u000d\u000d\ud8009\u000d|\u2028a0}\ud800\ud800
+prefix%:z\u000a\u000a1z\u20290{\u2029:\u000d%}}\ud800{\u2028\u2028\u000d}	prefix:z\u000a\u000a1z\u20290{\u2029:\u000d}}\ud800{\u2028\u2028\u000d}
+%{plural:%1|\u000a\u000d9}az:{\u2028%z:{1z}|\u20281{	{plural:%1|\u000a\u000d9}az:{\u2028z:{1z}|\u20281{
+prefix%0|:z\ud800:0\u2029:%%\ud8009\u000d}\u2028\ud8000	prefix|:z\ud800:0\u2029:%\ud8009\u000d}\u2028\ud8000
+%{plural:%1|a09\ud800\ud800\u2029{\u2028\ud800\ud800z9%}	{plural:%1|a09\ud800\ud800\u2029{\u2028\ud800\ud800z9%}
+%{0|\u000dz\u000a\u2029\u000a\u20291a1|%01a	{0|\u000dz\u000a\u2029\u000a\u20291a1|firsta
+prefix%z\u2028\u2028\u2028\u000dz{:9\u000a\u000a\ud800}z\u000az%\u000d\u2029}	prefixz\u2028\u2028\u2028\u000dz{:9\u000a\u000a\ud800}z\u000az%\u000d\u2029}
+%{plural:%1|\ud800\u000a%1\u20291\ud800\u202900}1\u2028:\ud800}	{plural:%1|\ud800\u000a%1\u20291\ud800\u202900}1\u2028:\ud800}
+%{:z:\u2029|\u2029:1z9|}	{:z:\u2029|\u2029:1z9|}
+prefix%%}\u000a\u2029a|}	prefix%}\u000a\u2029a|}
+%{plural:%1|\u000d\u2028}	{plural:%1|\u000d\u2028}
+%{|%|0|\u2029a||\u000d01\u2029%	{||0|\u2029a||\u000d01\u2029%
+prefix%}1za0\ud800a0\u2028}}%\u2028\ud800|z}	prefix}1za0\ud800a0\u2028}}%\u2028\ud800|z}
+%{plural:%1|:{\u2028\u000d0\u2028\u20289a}}:	{plural:%1|:{\u2028\u000d0\u2028\u20289a}}:
+%{\u2028}}	{\u2028}}
+prefix%}\u2028|{{z\ud800z{\u000d\u2028%a\u20290%	prefix}\u2028|{{z\ud800z{\u000d\u2028a\u20290%
+%{plural:%1|%}a\u000d1|\u000aa}	{plural:%1|%}a\u000d1|\u000aa}
+%{z:01\u000a{9\u2028}%\u2029{za%za\ud800z1	{z:01\u000a{9\u2028}%\u2029{zaza\ud800z1
+prefix%\u2028\u2029%:\u000d}	prefix%\u2028\u2029:\u000d}
+%{plural:%1|1|\u2029{\u20281\u000d}z\ud8000\u000d\ud8009\ud800	{plural:%1|1|\u2029{\u20281\u000d}z\ud8000\u000d\ud8009\ud800
+%{\ud800\ud80000}\u2029{0|:}9}\ud800\u000aa}	{\ud800\ud80000}\u2029{0|:}9}\ud800\u000aa}
+prefix%\u000a{zz}1z:{{\u2028\u2028\u2028|	prefix%\u000a{zz}1z:{{\u2028\u2028\u2028|
+%{plural:%1|1:1:\ud800}	%{plural:%1|1:1:\ud800}
+%{\u2029\u20281z}:{\ud800	{\u2029\u20281z}:{\ud800
+prefix%\ud8009|}1{\u000d|%99||a\u000d1\u000d{|z\u000a}	prefix\ud8009|}1{\u000d|||a\u000d1\u000d{|z\u000a}
+%{plural:%1|%z\u2028\u2028}0a\u000da	{plural:%1|%z\u2028\u2028}0a\u000da
+%{|\u000a\ud800|}\u2028za%z|z|\u2028}	{|\u000a\ud800|}\u2028zaz|z|\u2028}
+prefix%%\u000d:}\u2028%:\u000a	prefix%\u000d:}\u2028:\u000a
+%{0|}90z\u2028|a\u2028z|10\ud800\u20281%	{0|}90z\u2028|a\u2028z|10\ud800\u20281%
+prefix%|\u2028z\u2029\u000d0}\u2028}|}}	prefix|\u2028z\u2029\u000d0}\u2028}|}}
+%{plural:%1|z\u000d||\ud800%	{plural:first|z\u000d||\ud800%
+%{\u2029\u2029\u2029|%\u000a}	{\u2029\u2029\u2029|%\u000a}
+prefix%\u000a19\u000a{zz\u000d\u000d90%{a\ud800}\ud8001\u2028	prefix%\u000a19\u000a{zz\u000d\u000d90{a\ud800}\ud8001\u2028
+%{plural:%1|\u2029z{1\ud8001\ud800{\ud800\u000a\u2029\u000a{}\u20290::\u000d}	{plural:%1|\u2029z{1\ud8001\ud800{\ud800\u000a\u2029\u000a{}\u20290::\u000d}
+%{|}z	{|}z
+prefix%\u000d{}|0\u000a1|\ud800\u000d:\u000d\u2028%a}	prefix%\u000d{}|0\u000a1|\ud800\u000d:\u000d\u2028a}
+%{plural:%1|\u2028a	{plural:first|\u2028a
+%{9}\ud800\u000d1z|\u2029\ud800\u000a}	{9}\ud800\u000d1z|\u2029\ud800\u000a}
+prefix%\ud800%:	prefix\ud800:
+%{plural:%1|0%z\ud800{}	%{plural:%1|0%z\ud800{}
+%{0%\u2028\u2029%}z}|\u000a\ud800a0\u000aa{:%	{0%\u2028\u2029}z}|\u000a\ud800a0\u000aa{:%
+prefix%%0{9a\u000a\u000a:z|z|\u000a\u2028\u000d\u2029}}\u2029}	prefix%0{9a\u000a\u000a:z|z|\u000a\u2028\u000d\u2029}}\u2029}
+%{plural:%1|\u2028{\u2029%|9{0%\u2029za}z:0\ud800	{plural:%1|\u2028{\u2029%|9{0%\u2029za}z:0\ud800
+%{az}%%\u2028\u2028\u000daa\ud800:\u2029a\u2029\u2029}}	{az}%\u2028\u2028\u000daa\ud800:\u2029a\u2029\u2029}}
+prefix%:9%|{{\ud800z%\u000a}z1:\u20281:1\u2029	prefix:9|{{\ud800z%\u000a}z1:\u20281:1\u2029
+%{plural:%1|\u2029\ud8001a:\u000a\u20281}	{plural:%1|\u2029\ud8001a:\u000a\u20281}
+%{:\ud800:0\u2028\u000d\u000d\u2029\u2029:}0{{	{:\ud800:0\u2028\u000d\u000d\u2029\u2029:}0{{
+prefix%%{\u2029\u2029%:\u2029:}	prefix%{\u2029\u2029:\u2029:}
+%{plural:%1|a\ud800\ud800\ud800\u000a1z{\u000d\ud800}	{plural:%1|a\ud800\ud800\ud800\u000a1z{\u000d\ud800}
+%{{}1|\u000da\u000d\u2028|\u000a}9:\u000a\u2028}	{{}1|\u000da\u000d\u2028|\u000a}9:\u000a\u2028}
+prefix%\u000d|	prefix%\u000d|
+%{plural:%1|0\u2029\ud800\u000a\u000d1%z%%9\u2028}}	{plural:%1|0\u2029\ud800\u000a\u000d1%z%%9\u2028}}
+%{1|%{1z99	{1|{1z99
+prefix%}\ud800|{\ud800\u000d\u000dz1%%9|11\u000d\u2029}	prefix}\ud800|{\ud800\u000d\u000dz1%9|11\u000d\u2029}
+%{plural:%1|a||\u2028a}\u000d\u2028\u000az%\u2029\u000da{91\u2028}a}\u2029	{plural:%1|a||\u2028a}\u000d\u2028\u000az%\u2029\u000da{91\u2028}a}\u2029
+%{\u20290\u2029a|\u000d}0\u000d}	{\u20290\u2029a|\u000d}0\u000d}
+prefix%{}:a	prefix{}:a
+%{plural:%1|:0|\u202810\u000a1a}\u2029{\ud8009a}	{plural:%1|:0|\u202810\u000a1a}\u2029{\ud8009a}
+%{\ud800\u000a\u000dz}\u2029\u000a}1\ud8000	{\ud800\u000a\u000dz}\u2029\u000a}1\ud8000
+%{plural:%1|\u2029\u000d:	{plural:first|\u2029\u000d:
+%{az}	{az}
+prefix%1\u2029aa|\u000a\u000a:9a\ud800	prefixfirst\u2029aa|\u000a\u000a:9a\ud800
+%{plural:%1|a||\ud800|{091%}	%{plural:%1|a||\ud800|{091%}
+%{a|\u000a9:\u000a10{\u000a:	{a|\u000a9:\u000a10{\u000a:
+prefix%a1\u000a91\u000d\u000d\ud800a}	prefixa1\u000a91\u000d\u000d\ud800a}
+%{plural:%1|9%\u000d:{a9{|%\u000d|:\u000aa\ud800z	{plural:first|9%\u000d:{a9{|%\u000d|:\u000aa\ud800z
+%{zzz{\u000a\u2029\u000a|}1}|\u000d}	{zzz{\u000a\u2029\u000a|}1}|\u000d}
+prefix%\u2029a\u2029\u000d\u000d\u2029001{a}1:}9z\ud800\ud800\u2028\ud800\ud8000	prefix%\u2029a\u2029\u000d\u000d\u2029001{a}1:}9z\ud800\ud800\u2028\ud800\ud8000
+%{plural:%1|}|%z}	%{plural:%1|}|z}
+%{1\ud800|0{{1901\u2028{\u000a\u000a{{|{|{\ud800\u2029	{1\ud800|0{{1901\u2028{\u000a\u000a{{|{|{\ud800\u2029
+prefix%1}a99\u000a\u000d}	prefixfirst}a99\u000a\u000d}
+%{plural:%1||\u2029%z99\u000a%a\u2028	{plural:first||\u2029z99\u000aa\u2028
+%{{a\u2029:a\ud800\u2028|:}\u000a\ud800%9}	{{a\u2029:a\ud800\u2028|:}\u000a\ud800ninth}
+prefix%z\u000d1\u2028	prefixz\u000d1\u2028
+%{plural:%1|1z%\u000d{\u000az:0|}	{plural:%1|1z%\u000d{\u000az:0|}
+%{\u2029	{\u2029
+prefix%a\u2028\ud800\u000d1%\u000d}%\u000a}9|1\ud800\u000a1\u000a}	prefixa\u2028\ud800\u000d1%\u000d}%\u000a}9|1\ud800\u000a1\u000a}
+%{plural:%1|\u000a|1z\u2028\u2028}090%\u2029{\u000a	{plural:%1|\u000a|1z\u2028\u2028}090%\u2029{\u000a
+%{z}a}	{z}a}
+prefix%z}}a\ud800|{{a\u000d1:}\u000d\u2029}a1	prefixz}}a\ud800|{{a\u000d1:}\u000d\u2029}a1
+%{plural:%1|\u2028\u000a}	{plural:%1|\u2028\u000a}
+%{9|0z0za0\u2028}1}\u2029\u000d%a\u2028\ud800\u2028\ud800{{0	{9|0z0za0\u2028}1}\u2029\u000da\u2028\ud800\u2028\ud800{{0
+prefix%0:\u000a\u2028:}}	prefix:\u000a\u2028:}}
+%{plural:%1|\u2028%|\u000d\u000a{%9}	{plural:%1|\u2028%|\u000d\u000a{%9}
+%{|\u2029\u000a}\u2028|\ud800{\u000a:|{\u2028}1}z\u000d1\u000d}	{|\u2029\u000a}\u2028|\ud800{\u000a:|{\u2028}1}z\u000d1\u000d}
+%{plural:%1|z\u000d\u2028{z91\u000d}	{plural:%1|z\u000d\u2028{z91\u000d}
+%{\ud800|\u000a\u000a	{\ud800|\u000a\u000a
+prefix%:}	prefix:}
+%{plural:%1|:{\u000da\ud800\u2028%{:	{plural:first|:{\u000da\ud800\u2028{:
+%{:\ud800\u2028:0%\u2029\u000a1{aa\ud800|\u000d9\ud800\ud8009}}	{:\ud800\u2028:0%\u2029\u000a1{aa\ud800|\u000d9\ud800\ud8009}}
+prefix%09\u2028za0\u2028}a|\ud800}\u202990\ud8009:	prefixninth\u2028za0\u2028}a|\ud800}\u202990\ud8009:
+%{plural:%1|a\u2028z\u2029:1z9\ud800aa}}\u000d\u000d\ud80090}	{plural:%1|a\u2028z\u2029:1z9\ud800aa}}\u000d\u000d\ud80090}
+%{%:|z	{:|z
+prefix%}|0}	prefix}|0}
+%{plural:%1|%999\u2029%9\u000a|9\ud800|919}{:	{plural:%1|%999\u2029%9\u000a|9\ud800|919}{:
+%{\u2029:zz:zz0zz\u2028%}	{\u2029:zz:zz0zz\u2028}
+prefix%\ud800%z1%a	prefix\ud800z1a
+%{plural:%1|\u2028:0\u2028}\u000d91z0%|{\ud800}||%:}	{plural:%1|\u2028:0\u2028}\u000d91z0|{\ud800}||:}
+%{\u2029|0\u2029\u2029\u000a	{\u2029|0\u2029\u2029\u000a
+prefix%|}	prefix|}
+prefix%{\u2029\u2028|%10\u20291a{009}90\u000a\u20289}9\u2028	prefix{\u2029\u2028|tenth\u20291a{009}90\u000a\u20289}9\u2028
+%{plural:%1|:\u2028aa\u000d{\u2029z}\u000a\u000az}	{plural:%1|:\u2028aa\u000d{\u2029z}\u000a\u000az}
+prefix%z1::9{\u000a::\u000d\u000a\u000a\ud800z{||}	prefixz1::9{\u000a::\u000d\u000a\u000a\ud800z{||}
+%{plural:%1|z{101\u2028}0\u20290\ud800\ud800	{plural:%1|z{101\u2028}0\u20290\ud800\ud800
+%{99\ud800\ud800\u2028%}	{99\ud800\ud800\u2028}
+prefix%%9%9\u2028	prefix%9ninth\u2028
+%{plural:%1|:\ud800}}90\u000a}\u2028\u2028|\u20289|\ud800\u2029\u000a|z09\u000dz}	%{plural:%1|:\ud800}}90\u000a}\u2028\u2028|\u20289|\ud800\u2029\u000a|z09\u000dz}
+%{%	{%
+prefix%:9\u000d\u2028{%%\ud8000\u20291}\u000a1\u2029||}	prefix:9\u000d\u2028{%\ud8000\u20291}\u000a1\u2029||}
+%{{|\u000d\u000d|\ud800\u2029}	{{|\u000d\u000d|\ud800\u2029}
+prefix%\ud800\u2029a\ud800\u2029|\u2028}	prefix\ud800\u2029a\ud800\u2029|\u2028}
+%{plural:%1|aa1\u2029}	{plural:%1|aa1\u2029}
+%{a}%9	{a}ninth
+prefix%\u2028{9\ud8000}	prefix%\u2028{9\ud8000}
+%{plural:%1|0%	{plural:first|0%
+prefix%|\u2029\ud800\u2029\u2028|%{\u2029:|9z\u202890|	prefix|\u2029\ud800\u2029\u2028|{\u2029:|9z\u202890|
+%{plural:%1|\u2028:}	{plural:%1|\u2028:}
+%{z9{}\u2029a%:0\u2028:1{\u000d91	{z9{}\u2029a:0\u2028:1{\u000d91
+prefix%\u000d1\u000a9zz\ud8009}\u2029\ud800a|\u000dz011}	prefix%\u000d1\u000a9zz\ud8009}\u2029\ud800a|\u000dz011}
+%{plural:%1|\u2029|%\u000d:\u2028:1\u2028a|\u2029\u000a\u2029	{plural:first|\u2029|%\u000d:\u2028:1\u2028a|\u2029\u000a\u2029
+%{\u2029\u2029%1%0|0%a\u2028::|aaz0\u2029\u000d}	{\u2029\u2029first|0a\u2028::|aaz0\u2029\u000d}
+prefix%|%a\u2028\u000d:}a:|\u2028\u000d	prefix|a\u2028\u000d:}a:|\u2028\u000d
+%{plural:%1|%{\u2028:z%%0}	{plural:%1|%{\u2028:z%%0}
+prefix%9\u2029\u20281\u2029\u202811\ud8009%\u000d9\ud800:0\u000a|a1\u000a}	prefixninth\u2029\u20281\u2029\u202811\ud8009%\u000d9\ud800:0\u000a|a1\u000a}
+%{plural:%1|{\u20299|a\u000a\u2029\ud800}\u2029a|\u2028\u2028\u2029\u000a1z\u000d	{plural:%1|{\u20299|a\u000a\u2029\ud800}\u2029a|\u2028\u2028\u2029\u000a1z\u000d
+%{1::0}91}	{1::0}91}
+prefix%0zz\u2029{azz\u2029:\u000d0\u000a9|%}|\ud800%	prefixzz\u2029{azz\u2029:\u000d0\u000a9|}|\ud800%
+%{plural:%1|\u2029\u000a\u000a\u000d1{\u000a0%}\u000d|}0a\u2028}	{plural:%1|\u2029\u000a\u000a\u000d1{\u000a0%}\u000d|}0a\u2028}
+%{\u2028|\u000a}\ud800\u000a	{\u2028|\u000a}\ud800\u000a
+prefix%z90\u000a1{{\u000a0z{}1}}	prefixz90\u000a1{{\u000a0z{}1}}
+%{plural:%1|09%\ud800\u2029\ud8001\u2029	{plural:first|09\ud800\u2029\ud8001\u2029
+%{1\ud800\u2029\u2029\u2028}	{1\ud800\u2029\u2029\u2028}
+prefix%\u2028|\u2029\u2029%9:\u000aa\ud800%{{\u2029	prefix%\u2028|\u2029\u2029ninth:\u000aa\ud800{{\u2029
+%{plural:%1|\u000d\u000d\u000a{%\u2029}	{plural:%1|\u000d\u000d\u000a{%\u2029}
+%{za:%\u000a	{za:%\u000a
+prefix%0{a\u20290\u000d99\u000a0\ud8009{\u2028z:\u202801|%\u20280}	prefix{a\u20290\u000d99\u000a0\ud8009{\u2028z:\u202801|%\u20280}
+%{plural:%1|}\u000d:z|:za{%:1	%{plural:%1|}\u000d:z|:za{:1
+%{a:\u2028\ud800}	{a:\u2028\ud800}
+prefix%{a}\u000aza01{%|\u000d:\ud8001\u2029%z%1%	prefix{a}\u000aza01{|\u000d:\ud8001\u2029zfirst%
+%{plural:%1|}9z\u2029|a}\u2029\ud8009|\u2029\u000a}{{|\u2029%|}	%{plural:%1|}9z\u2029|a}\u2029\ud8009|\u2029\u000a}{{|\u2029|}
+%{\u2029\u20290:\ud800\u000d\u2029\u2028}\u000d0\u2029\u000a0z	{\u2029\u20290:\ud800\u000d\u2029\u2028}\u000d0\u2029\u000a0z
+prefix%10\u000a}	prefixtenth\u000a}
+%{plural:%1|:zz}\ud800}}:a0{0zz:1:}%a\u2028\ud800%	%{plural:%1|:zz}\ud800}}:a0{0zz:1:}a\u2028\ud800%
+%{\ud800:{\u2028}\u000a}19\u000d9\u000da\u000d:9}	{\ud800:{\u2028}\u000a}19\u000d9\u000da\u000d:9}
+prefix%9011\u2028	prefix\u2028
+%{plural:%1|1%\u000a:z1}	{plural:%1|1%\u000a:z1}
+%{}:%00\u000a\u2029\u000d{99\ud800:1|\u000a\ud800|\u2028	{}:\u000a\u2029\u000d{99\ud800:1|\u000a\ud800|\u2028
+prefix%\u20290\u000a\ud800\u000a\u000d1\u2029\u2028%9\u20281\u2029\u2028}	prefix%\u20290\u000a\ud800\u000a\u000d1\u2029\u2028ninth\u20281\u2029\u2028}
+%{plural:%1|%:\u000d\u2028{9	{plural:first|:\u000d\u2028{9
+prefix%0\u000a\u000a9z:1|}1\ud800\ud800\u2028z1%\u000d:19	prefix\u000a\u000a9z:1|}1\ud800\ud800\u2028z1%\u000d:19
+%{plural:%1|\u2029\u000a}	{plural:%1|\u2029\u000a}
+%{011	{011
+prefix%|\ud8009az}\u2028%}	prefix|\ud8009az}\u2028}
+%{plural:%1|0{11	{plural:first|0{11
+%{%0a{:z\u2029\u000d\u000d%\u000a\u000a\u000a1|9}z%{}	{a{:z\u2029\u000d\u000d%\u000a\u000a\u000a1|9}z{}
+prefix%a\u000a\u2029\ud800\u2028}\ud8009a\u000d%\u000az0{\u2029a	prefixa\u000a\u2029\ud800\u2028}\ud8009a\u000d%\u000az0{\u2029a
+%{plural:%1|}1\u000a\u000az0%{%z}	%{plural:%1|}1\u000a\u000az0{z}
+%{\u000d\ud8001}1\u20280a\u2029z%a%az\u000d9|{19	{\u000d\ud8001}1\u20280a\u2029zaaz\u000d9|{19
+prefix%|z91\u000d19%%\u000a\u2028\u2028{\u000d\u2029}	prefix|z91\u000d19%\u000a\u2028\u2028{\u000d\u2029}
+%{plural:%1|{0\u2028\ud800|\u2028\ud800|90\u2029%%\u000d\u2028\u000d}\u000a:a\u000a\ud800\u2029	{plural:%1|{0\u2028\ud800|\u2028\ud800|90\u2029%%\u000d\u2028\u000d}\u000a:a\u000a\ud800\u2029
+%{}\u000d1}	{}\u000d1}
+prefix%a\ud800z1|\u2028%z\u2028|}|0{a\u2028\u000d1\u000az9az	prefixa\ud800z1|\u2028z\u2028|}|0{a\u2028\u000d1\u000az9az
+%{plural:%1|\u000aa\u000a}	{plural:%1|\u000aa\u000a}
+%{\u000d|0%{\u000d|	{\u000d|0{\u000d|
+prefix%:|}:\ud800%{\ud800\ud800199}	prefix:|}:\ud800{\ud800\ud800199}
+%{plural:%1|0\u000d\u2029z\u2028%0\u2029\u20299\ud800:}%z::9:	{plural:%1|0\u000d\u2029z\u2028%0\u2029\u20299\ud800:}z::9:
+%{z\u000d|%\u2028%\u2028}	{z\u000d|%\u2028%\u2028}
+prefix%\u2028\u2029{}\u000a{%aa1\u000d\u2029a\u000a0z9:\u000a	prefix%\u2028\u2029{}\u000a{aa1\u000d\u2029a\u000a0z9:\u000a
+%{plural:%1|z%\u2028|\u2029z0\u000a%:}	{plural:%1|z%\u2028|\u2029z0\u000a%:}
+%{|1z\u000a\u000a\u2028%\u2028az\u000a\u2028::a9z\u000a\u000a9a|	{|1z\u000a\u000a\u2028%\u2028az\u000a\u2028::a9z\u000a\u000a9a|
+prefix%%\u2028|a}1|\u000a}	prefix%\u2028|a}1|\u000a}
+%{plural:%1|\u202811\u000d}|\u000d\u000a|\u000aa%z%\u000a0z}	{plural:%1|\u202811\u000d}|\u000d\u000a|\u000aaz%\u000a0z}
+%{a:\u2029|a\u000d}\ud800a\u000d\u2028%|{\u2028\u2029:}%\ud800\u2029|}}	{a:\u2029|a\u000d}\ud800a\u000d\u2028|{\u2028\u2029:}\ud800\u2029|}}
+prefix%%:\u000d	prefix%:\u000d
+%{plural:%1||\u000d{a0|0%9\ud800\u2029a01:|\ud800\u000a\u000d}1}	{plural:%1||\u000d{a0|0%9\ud800\u2029a01:|\ud800\u000a\u000d}1}
+%{{%\u20289a\u2029	{{%\u20289a\u2029
+prefix%|{1a}	prefix|{1a}
+%{plural:%1|{}01\u2029\u000dz{}}0{\u20289\u000d\u2029{1az\u000da	%{plural:%1|{}01\u2029\u000dz{}}0{\u20289\u000d\u2029{1az\u000da
+%{1\u000d\ud800}:00\u2028\u000d\u000d}	{1\u000d\ud800}:00\u2028\u000d\u000d}
+prefix%}|:}\u202991\u000aa\u2029\ud800\u000d\u2029:a\u2028\ud80099a\u000d	prefix}|:}\u202991\u000aa\u2029\ud800\u000d\u2029:a\u2028\ud80099a\u000d
+%{plural:%1|a\u2028a{%}:}	{plural:%1|a\u2028a{%}:}
+%{:|1|90:9\ud80010%\u000d\ud8009{01\ud800	{:|1|90:9\ud80010%\u000d\ud8009{01\ud800
+prefix%{}\u000a0\u2028\u20281}	prefix{}\u000a0\u2028\u20281}
+%{plural:%1|\u000a9\u000a{9\ud800}	{plural:%1|\u000a9\u000a{9\ud800}
+prefix%:}z	prefix:}z
+%{plural:%1|z{%|z\ud800{}	%{plural:%1|z{%|z\ud800{}
+%{{\u202891z%9|	{{\u202891zninth|
+prefix%\u2028a|}\ud800\u000a9|\u20299\u20280z|%}\u2029\u000a\u2029}	prefix%\u2028a|}\ud800\u000a9|\u20299\u20280z|}\u2029\u000a\u2029}
+%{plural:%1||:\ud800%:a\ud800}a\u000d|0}a:\u2029\u000a	%{plural:%1||:\ud800%:a\ud800}a\u000d|0}a:\u2029\u000a
+%{\u20291}\u000d\u2028%\u20280|:}	{\u20291}\u000d\u2028%\u20280|:}
+prefix%|a\ud800\u000d1	prefix|a\ud800\u000d1
+%{plural:%1|1a|0{:z\u000a\u20299%{:a\u2029\u2029\u2028}:}	{plural:%1|1a|0{:z\u000a\u20299%{:a\u2029\u2029\u2028}:}
+%{}1|}:\u000a|}\u000a90\u000a:{\u000a\u2029	{}1|}:\u000a|}\u000a90\u000a:{\u000a\u2029
+prefix%1\ud8000}\u2029{99109\u2028|9}z}	prefixfirst\ud8000}\u2029{99109\u2028|9}z}
+%{plural:%1|\u2028:9:0%0}:%a9}	{plural:%1|\u2028:9:0%0}:a9}
+%{}\u2029\u000d\u2028}1\u000d|\u2028\u2029z|\u000d\u2028a:a\u2028{}a\u000a}	{}\u2029\u000d\u2028}1\u000d|\u2028\u2029z|\u000d\u2028a:a\u2028{}a\u000a}
+prefix%9:\ud8000\ud800\u000d|\u2029\u2029\u000d\u20289\u2029\u2029z\ud800:a	prefixninth:\ud8000\ud800\u000d|\u2029\u2029\u000d\u20289\u2029\u2029z\ud800:a
+%{plural:%1|:\u000d}\u000a9119{\u20280}}	{plural:%1|:\u000d}\u000a9119{\u20280}}
+%{{9	{{9
+prefix%1%%\ud800}	prefixfirst%\ud800}
+%{plural:%1|9\ud800\ud8000a\u000a:}|\u2028z\u000aa19}\u000d}%:9z	{plural:%1|9\ud800\ud8000a\u000a:}|\u2028z\u000aa19}\u000d}:9z
+%{||0z}\u000aa}%|{a%1{\u000dz}{9}	{||0z}\u000aa}|{afirst{\u000dz}{9}
+prefix%\u2028\ud8009\u2029\u20290	prefix%\u2028\ud8009\u2029\u20290
+%{plural:%1|\u000d:\u2029}	{plural:%1|\u000d:\u2029}
+%{0{a	{0{a
+prefix%0z\u20299\u20299}	prefixz\u20299\u20299}
+%{plural:%1|{z0}%\ud800	%{plural:%1|{z0}\ud800
+%{\u20289{z%{}	{\u20289{z{}
+prefix%a|\u2029\u000a\u000d1{\u000d\u000a1\u000dz\u2028\u2028{\u000aa\u000a\u2029|\u000a	prefixa|\u2029\u000a\u000d1{\u000d\u000a1\u000dz\u2028\u2028{\u000aa\u000a\u2029|\u000a
+%{plural:%1|%\u2029|z\u000a:zz\u20290\u000d\ud800:{}	{plural:%1|%\u2029|z\u000a:zz\u20290\u000d\ud800:{}
+%{%\u000d9{0z9\ud800a%a\ud800%\u2029}a	{%\u000d9{0z9\ud800aa\ud800%\u2029}a
+prefix%\u2029z|\ud800}0:\u000d%:::0}\u2029:{|\u000a\u2029\u000d0\ud800}	prefix%\u2029z|\ud800}0:\u000d:::0}\u2029:{|\u000a\u2029\u000d0\ud800}
+%{plural:%1|{\u2028\ud8000\u000d\u2029%:1{\u000a:00\u2029	{plural:first|{\u2028\ud8000\u000d\u2029:1{\u000a:00\u2029
+%{|%::\u2028%{z}\u2029\u000da|\u2029:\u2029}	{|::\u2028{z}\u2029\u000da|\u2029:\u2029}
+prefix%%%0\u000d	prefix%\u000d
+%{plural:%1|\ud800}	%{plural:%1|\ud800}
+prefix%|a\ud800:\u2029\ud800|a|%1%:09||\u000a0|}	prefix|a\ud800:\u2029\ud800|a|first:09||\u000a0|}
+%{plural:%1|}\u2029%9\ud800	%{plural:%1|}\u2029ninth\ud800
+%{\u000a|09:0z\u000a:\u2028|a\ud800\ud800a%a\ud800\ud8001a0}	{\u000a|09:0z\u000a:\u2028|a\ud800\ud800aa\ud800\ud8001a0}
+prefix%\u000az\u000d9|0:{{9z\u20281%zaza1	prefix%\u000az\u000d9|0:{{9z\u20281zaza1
+%{plural:%1|\ud800\u000dz0a\ud800\u2028%a:11\u2029\u2028a0\u2029%9}	{plural:%1|\ud800\u000dz0a\ud800\u2028%a:11\u2029\u2028a0\u2029%9}
+%{|\u000az{:1\ud800|z1901\u000d\u20290z\u2029%|\u2029}	{|\u000az{:1\ud800|z1901\u000d\u20290z\u2029|\u2029}
+prefix%}0}	prefix}0}
+%{plural:%1||1\u202999%\u000a%}|\u2029aaaz	{plural:%1||1\u202999%\u000a%}|\u2029aaaz
+%{\u20289\u2028z}%\u2028{{{\u2028%}	{\u20289\u2028z}%\u2028{{{\u2028}
+prefix%|\ud800\u2029z\u000d1z:|\ud800|}|%0a01{\u000d	prefix|\ud800\u2029z\u000d1z:|\ud800|}|a01{\u000d
+%{plural:%1||\ud800\u2029%:|}\u000a\ud800\ud800}\u2029\u2029|:\u2028|\u2028a|{\ud800z}	{plural:%1||\ud800\u2029%:|}\u000a\ud800\ud800}\u2029\u2029|:\u2028|\u2028a|{\ud800z}
+%{\u20289z\ud80001\u202899\u000a\u2028|:0	{\u20289z\ud80001\u202899\u000a\u2028|:0
+prefix%\u000a\ud8001\u2029\ud8009\u2029\u2028|\u2029\u2029\u000a}	prefix%\u000a\ud8001\u2029\ud8009\u2029\u2028|\u2029\u2029\u000a}
+%{plural:%1|\ud800\u000d1\u2029\u2028\u000d\u20299:11	{plural:first|\ud800\u000d1\u2029\u2028\u000d\u20299:11
+prefix%{\ud800{	prefix{\ud800{
+%{plural:%1|%a|\u2029a\u20281\u000d{{\u000a0}	{plural:%1|%a|\u2029a\u20281\u000d{{\u000a0}
+%{%1%z::\u20289\u20281z{\u20280%\u2028za	{firstz::\u20289\u20281z{\u20280%\u2028za
+prefix%}1\ud800\ud800\u2028\u000a:|:\u000d\ud8000:a0\u000d:}	prefix}1\ud800\ud800\u2028\u000a:|:\u000d\ud8000:a0\u000d:}
+%{plural:%1|9%a\u2029z|a%|1}\u000d0{\ud8000\u2029\u2029z	{plural:%1|9%a\u2029z|a%|1}\u000d0{\ud8000\u2029\u2029z
+%{1{\u2029\u2029\u2029\u000a:\u2028\u000d%%|\u000da0aa\u20289:}	{1{\u2029\u2029\u2029\u000a:\u2028\u000d%|\u000da0aa\u20289:}
+prefix%|:\u2029a\u000a}\u2029%%	prefix|:\u2029a\u000a}\u2029%
+%{plural:%1|1\u2028\u000d0\ud800{{}	{plural:%1|1\u2028\u000d0\ud800{{}
+%{0\u2028\ud8009	{0\u2028\ud8009
+prefix%\u2028\u2028\ud800:{\ud800\ud8000}	prefix%\u2028\u2028\ud800:{\ud800\ud8000}
+%{plural:%1|\u2029a}1:\u2028\u000d0\u2028z\u2029\u2028z\ud8000z0{{%az1	{plural:%1|\u2029a}1:\u2028\u000d0\u2028z\u2029\u2028z\ud8000z0{{az1
+%{a||1z9{9\u000d\u2028{%9\ud800}	{a||1z9{9\u000d\u2028{ninth\ud800}
+prefix%%\ud8009\u000a%|%\u000aa\u000a	prefix%\ud8009\u000a|%\u000aa\u000a
+%{plural:%1|\u2028|%\u2028\u2029\u2028}	{plural:%1|\u2028|%\u2028\u2029\u2028}
+%{9za%\ud800\u2029\u000a\u000a\u2029}a%\u000a:0\u20289\u2028%1{\u000a}	{9za\ud800\u2029\u000a\u000a\u2029}a%\u000a:0\u20289\u2028first{\u000a}
+prefix%\u2029\u000d|\ud800}	prefix%\u2029\u000d|\ud800}
+%{plural:%1|a\u000d1	{plural:first|a\u000d1
+prefix%\u000a\u2028\u000d\u2028%\ud800\u000d}%\u000a:\u000d\ud800	prefix%\u000a\u2028\u000d\u2028\ud800\u000d}%\u000a:\u000d\ud800
+%{1|a\u000a	{1|a\u000a
+prefix%}\ud800}\u2029\u000a}	prefix}\ud800}\u2029\u000a}
+%{plural:%1|a:0{{0	{plural:first|a:0{{0
+%{1}\ud800{}\u2029001\u000a\u2028%\u2028}	first\ud800{}\u2029001\u000a\u2028%\u2028}
+prefix%9z0|a%:a1a\u000a:9\u000a1090	prefixninthz0|a:a1a\u000a:9\u000a1090
+%{plural:%1|{\u000a}	{plural:%1|{\u000a}
+%{z|0%\u2028	{z|0%\u2028
+prefix%|9\u2029\ud8001}\u20281{}\u20291\ud800\u2028\u000az\u2028\ud800:z|}	prefix|9\u2029\ud8001}\u20281{}\u20291\ud800\u2028\u000az\u2028\ud800:z|}
+%{plural:%1|%\ud800%az:%}0119\u2029\ud800{\u000d:	%{plural:%1|%\ud800%az:%}0119\u2029\ud800{\u000d:
+%{}az:}a||{|%a|}	{}az:}a||{|a|}
+prefix%:\u000a0	prefix:\u000a0
+%{plural:%1|\ud8009\u2028\u000a9}	{plural:%1|\ud8009\u2028\u000a9}
+%{\u000aa:a90\u000d}\ud8009\ud800\u000d\u2028\u2029{\ud800z9\u2029%\u000dz	{\u000aa:a90\u000d}\ud8009\ud800\u000d\u2028\u2029{\ud800z9\u2029%\u000dz
+prefix%0::|0a\u2028a1}	prefix::|0a\u2028a1}
+%{plural:%1|\u000d\ud8001%\ud800a{99a\ud800\ud800%1\u000d::\u2029z1	{plural:first|\u000d\ud8001\ud800a{99a\ud800\ud800first\u000d::\u2029z1
+%{%1a\u000a}	{firsta\u000a}
+prefix%1}|1}z|{|\u2028{a\u000a91|\u000a|\u2028	prefixfirst}|1}z|{|\u2028{a\u000a91|\u000a|\u2028
+%{plural:%1|9z\u000d\u000d0{0\ud800a\u000dz\u000a|19z\u000a1a0\u000d}	{plural:%1|9z\u000d\u000d0{0\ud800a\u000dz\u000a|19z\u000a1a0\u000d}
+%{|}00\u2028	{|}00\u2028
+prefix%\u2028\ud8001\u2029\u000d:\u20281}	prefix%\u2028\ud8001\u2029\u000d:\u20281}
+%{plural:%1|:9:\u2028%\u000d0z:\u000d}\u000a	{plural:%1|:9:\u2028%\u000d0z:\u000d}\u000a
+%{|\u2028}	{|\u2028}
+prefix%:a\u20280::a\ud800\u2029}\u2029	prefix:a\u20280::a\ud800\u2029}\u2029
+%{plural:%1|\u2028%:091\u2029\ud800\u20299a0\u000a\u000d\ud800\u000az%0\ud800}	{plural:%1|\u2028%:091\u2029\ud800\u20299a0\u000a\u000d\ud800\u000az%0\ud800}
+%{1\u2028\u000a%0:}1|\u000a%	{1\u2028\u000a:}1|\u000a%
+prefix%\u2029\u000d\ud800{:%90:\u2029:\u000a\u000a0z}	prefix%\u2029\u000d\ud800{::\u2029:\u000a\u000a0z}
+%{plural:%1|\u000a\u000d%\ud800%\ud8009\ud800a{%\u2028}\ud800\u2028\u2029|0\u2028	{plural:%1|\u000a\u000d%\ud800%\ud8009\ud800a{%\u2028}\ud800\u2028\u2029|0\u2028
+prefix%az1\u2029:a:\u000d\u2028\u000aa	prefixaz1\u2029:a:\u000d\u2028\u000aa
+%{plural:%1|9|%}\u000d011\u000d:{{\u000a\u000dz}	{plural:%1|9|%}\u000d011\u000d:{{\u000a\u000dz}
+%{\ud800}09{%1\u000a\u2028:a\u000d:\ud800\u2029\u2029\ud8009{%\ud800\ud800\u2028	{\ud800}09{first\u000a\u2028:a\u000d:\ud800\u2029\u2029\ud8009{\ud800\ud800\u2028
+prefix%0\u2028:\u000d0:\u202909\ud800{\u2028{1}	prefix\u2028:\u000d0:\u202909\ud800{\u2028{1}
+%{plural:%1|\u2028:9\ud800%z{z\u000d9	{plural:first|\u2028:9\ud800z{z\u000d9
+%{\ud8009\u20281z\u000d:1\u000a1z0{}	{\ud8009\u20281z\u000d:1\u000a1z0{}
+prefix%|}0%	prefix|}0%
+%{plural:%1|:}1z}	%{plural:%1|:}1z}
+%{1\u000d1z|\u20290\u2029{a9\u2028}|	{1\u000d1z|\u20290\u2029{a9\u2028}|
+prefix%\u000a\u000d\u2029\u2028%}a|:\u2029|\ud800\u000a}	prefix%\u000a\u000d\u2029\u2028}a|:\u2029|\ud800\u000a}
+%{plural:%1|\u20299|\ud800|	{plural:first|\u20299|\ud800|
+%{\u000d}\u2029\ud800\u2028:|{1\u000a000}	{\u000d}\u2029\ud800\u2028:|{1\u000a000}
+prefix%{%	prefix{%
+%{plural:%1|\u2029\u2028\u000a\u2028|z|\u2029%\ud8000a\u2028|}	{plural:%1|\u2029\u2028\u000a\u2028|z|\u2029%\ud8000a\u2028|}
+%{:\u2029\ud800|z{	{:\u2029\ud800|z{
+prefix%90%a9\u20291z9:||a0\u000a1}	prefixa9\u20291z9:||a0\u000a1}
+%{plural:%1|:\ud800a9\u000a\u000a\u2028:	{plural:first|:\ud800a9\u000a\u000a\u2028:
+prefix%a1|\u000dz\u2028|:9||}|0::01	prefixa1|\u000dz\u2028|:9||}|0::01
+%{plural:%1|aa1%0:%0\u2028}	{plural:%1|aa1%0:%0\u2028}
+%{1\u2029\u2028\u2029:9}a\u000a\u20280\ud800a	{1\u2029\u2028\u2029:9}a\u000a\u20280\ud800a
+prefix%00:z\u2029:\u2028}10\ud800z\u2029\u2028:\u2029\u000a}	prefix:z\u2029:\u2028}10\ud800z\u2029\u2028:\u2029\u000a}
+%{plural:%1|\u2028|	{plural:first|\u2028|
+prefix%0\u20299{:\u2028\ud800azzz:\u000dz\ud800:9a}:a\u000d	prefix\u20299{:\u2028\ud800azzz:\u000dz\ud800:9a}:a\u000d
+%{0\ud800\ud80010a{|\u000a\u2028{z1\u000a	{0\ud800\ud80010a{|\u000a\u2028{z1\u000a
+prefix%{1\u000a\u000a\u000azz}	prefix{1\u000a\u000a\u000azz}
+%{plural:%1|0	{plural:first|0
+%{%%a\u000a}:\u2029%\u2028aa1::}	{%a\u000a}:\u2029%\u2028aa1::}
+prefix%z\ud800\u000a\u2029\u2029|}%{{z{	prefixz\ud800\u000a\u2029\u2029|}{{z{
+%{plural:%1|\ud800aaza}	%{plural:%1|\ud800aaza}
+%{%:0:}a}|\u2028\u000a9\ud800|%\u2029	{:0:}a}|\u2028\u000a9\ud800|%\u2029
+prefix%\u2029:|\u000d\u2028a}\u000a}\u2029a:}|1|}	prefix%\u2029:|\u000d\u2028a}\u000a}\u2029a:}|1|}
+%{plural:%1|{	{plural:first|{
+%{{a{:\u000a{z\u000a1:1\u2029\u000a\ud800\u2029%a%0{}	{{a{:\u000a{z\u000a1:1\u2029\u000a\ud800\u2029a{}
+prefix%999:%9%:|}}\u2029\u2028	prefix:ninth:|}}\u2029\u2028
+%{plural:%1|z9:\ud800}\u000d}	%{plural:%1|z9:\ud800}\u000d}
+%{0az\u000dza}%1|:{\u000a\u20280%9z	{0az\u000dza}first|:{\u000a\u20280ninthz
+%{plural:%1|1z}|9z:\u20281{}\u000d\ud800\u2028\ud8001\u2029\ud8001	%{plural:%1|1z}|9z:\u20281{}\u000d\ud800\u2028\ud8001\u2029\ud8001
+prefix%{%{a\ud800{}aaz{1|	prefix{{a\ud800{}aaz{1|
+%{plural:%1|\u2028{a\u000a0:|%za|1|\u20291\u2029\u000a|\u20290\u20291}	{plural:%1|\u2028{a\u000a0:|%za|1|\u20291\u2029\u000a|\u20290\u20291}
+%{\ud800\u20291:1:9:	{\ud800\u20291:1:9:
+%{plural:%1|9a\u2028\u2028{:|zz91a9z9}9	{plural:%1|9a\u2028\u2028{:|zz91a9z9}9
+%{\u2029\u000a\u000d%1|:|}a1%}	{\u2029\u000a\u000dfirst|:|}a1}
+prefix%\u2029\u2029}\u000d9{\u000d\ud8009\ud800z0}\u20280\u000a\u000dz	prefix%\u2029\u2029}\u000d9{\u000d\ud8009\ud800z0}\u20280\u000a\u000dz
+%{plural:%1|11\u000a\u000d\ud800%{}|a1\u000a\u000a\u2028{0%\u000a9\ud800}}	{plural:%1|11\u000a\u000d\ud800%{}|a1\u000a\u000a\u2028{0%\u000a9\ud800}}
+%{\u000dz\u000a	{\u000dz\u000a
+prefix%9|\u000d:}9\u2029a}9a\ud800\u000d1|00a:\u2029\ud800}	prefixninth|\u000d:}9\u2029a}9a\ud800\u000d1|00a:\u2029\ud800}
+%{plural:%1|z:\u2029{}z}%|9\ud800\u000d0zz11\u2029\u2028\ud8000\u000a	{plural:%1|z:\u2029{}z}|9\ud800\u000d0zz11\u2029\u2028\ud8000\u000a
+%{\u000aa\u2028%:\u2028\u2028\u20290{\u000d1|\u000a{\u2029\u2029}	{\u000aa\u2028:\u2028\u2028\u20290{\u000d1|\u000a{\u2029\u2029}
+prefix%z9%\u000a\u2029%9\u000a1\u2028z\u000d\ud800|	prefixz9%\u000a\u2029ninth\u000a1\u2028z\u000d\ud800|
+%{plural:%1|\u2029}:\u000d\u000a}	{plural:%1|\u2029}:\u000d\u000a}
+%{}}\u000a	{}}\u000a
+prefix%1\u000a}:%}	prefixfirst\u000a}:}
+%{plural:%1|1\ud800\u2028a	{plural:first|1\ud800\u2028a
+%{%\ud800%\u000d|{\u000a0\u000a\u000d{1%\u000a:0{\u2029:0}	{\ud800%\u000d|{\u000a0\u000a\u000d{1%\u000a:0{\u2029:0}
+prefix%z0a:z:	prefixz0a:z:
+%{plural:%1|}\u000d\u2029{a%\ud800\ud800a%\u000a::0{199a}	%{plural:%1|}\u000d\u2029{a\ud800\ud800a%\u000a::0{199a}
+%{\u000a%\u000d\u2029\u000d0{\u2028	{\u000a%\u000d\u2029\u000d0{\u2028
+prefix%\ud800{}	prefix\ud800{}
+%{plural:%1|a}z}0:z\u2028}	%{plural:%1|a}z}0:z\u2028}
+%{\u2028%1z|{\u000d{\u2028\u000aa19\u2028\u000d\u2028%1}\u2028}	{\u2028firstz|{\u000d{\u2028\u000aa19\u2028\u000d\u2028first}\u2028}
+prefix%a\u2029\u000a9\u000d}\ud800\u2028{|\u000d9}9z%\u2029\u2029	prefixa\u2029\u000a9\u000d}\ud800\u2028{|\u000d9}9z%\u2029\u2029
+%{plural:%1|}\u2029a%\u20281}z:}	%{plural:%1|}\u2029a%\u20281}z:}
+%{\u000d\ud800|\u000da\u000d9}%{\u000a{}\u2029	{\u000d\ud800|\u000da\u000d9}{\u000a{}\u2029
+prefix%%{{\u2028}	prefix%{{\u2028}
+%{plural:%1|\u000a\ud800\u2028\ud800{{%0\u000d9a|{	{plural:first|\u000a\ud800\u2028\ud800{{\u000d9a|{
+%{:{\u000dz{\ud8009}	{:{\u000dz{\ud8009}
+prefix%a\u000a9\u2029}\u000d:\ud800|\u2028a\u2028%\u000a9\ud800%z{{\u000d	prefixa\u000a9\u2029}\u000d:\ud800|\u2028a\u2028%\u000a9\ud800z{{\u000d
+%{plural:%1|z}1::%\u000d\ud800\u202901\u000dz}	%{plural:%1|z}1::%\u000d\ud800\u202901\u000dz}
+%{91\u2028\u000a::%a{{	{91\u2028\u000a::a{{
+prefix%%1{}\ud800\ud800|\u000a\u000a:}:%\u000d\u000d\u000d}	prefix%1{}\ud800\ud800|\u000a\u000a:}:%\u000d\u000d\u000d}
+%{plural:%1|%\u20291|\u2029\ud8001\u000a}9a\ud800\ud8000a}10z\u2028|a\u2028	{plural:%1|%\u20291|\u2029\ud8001\u000a}9a\ud800\ud8000a}10z\u2028|a\u2028
+%{{{\u2029z\u2028\u000a\u000a11\ud800z|\u20291}	{{{\u2029z\u2028\u000a\u000a11\ud800z|\u20291}
+prefix%%\u2029\u000d{\u000d1%}	prefix%\u2029\u000d{\u000d1}
+%{plural:%1|\u000d|\u000a09|{\u000d1{1%:}\u000d%a0}	{plural:%1|\u000d|\u000a09|{\u000d1{1%:}\u000da0}
+%{z}\u000da\u000az|:\ud800}\ud800\ud800	{z}\u000da\u000az|:\ud800}\ud800\ud800
+prefix%\u000d\u000d%90\u000a1za\ud8000:\u20280\u000d:a|:z\u2028\ud800a}	prefix%\u000d\u000d\u000a1za\ud8000:\u20280\u000d:a|:z\u2028\ud800a}
+%{plural:%1|a|a\ud800\ud800\u2029%:1\u000d\u000d{1||\ud800{z	{plural:first|a|a\ud800\ud800\u2029:1\u000d\u000d{1||\ud800{z
+%{9\ud800:01\u2029\u2028\ud800}	{9\ud800:01\u2029\u2028\ud800}
+prefix%z|{	prefixz|{
+%{plural:%1|a9%}	%{plural:%1|a9%}
+prefix%}\u000a}	prefix}\u000a}
+%{plural:%1|}\u000a{\u000a%\ud800:}9\u2029}\u2029\u20289	%{plural:%1|}\u000a{\u000a\ud800:}9\u2029}\u2029\u20289
+%{\u20281a{}\u2029\ud800\u000a\u000a}	{\u20281a{}\u2029\ud800\u000a\u000a}
+prefix%a{\u2029:0\u2029|90z|	prefixa{\u2029:0\u2029|90z|
+%{plural:%1|z}9}	%{plural:%1|z}9}
+%{\u20290\u000az\u2028\u2028|}:0\u000a|\u2028%\ud800\u000d{}{	{\u20290\u000az\u2028\u2028|}:0\u000a|\u2028\ud800\u000d{}{
+prefix%}\ud800\u2028}	prefix}\ud800\u2028}
+%{plural:%1|\u2029\u2028\u2029\u2028	{plural:first|\u2029\u2028\u2029\u2028
+%{\ud80019\u000aa\u000a1\u000a19}	{\ud80019\u000aa\u000a1\u000a19}
+prefix%0}\u2028\u2028|a1a901|9	prefix}\u2028\u2028|a1a901|9
+%{plural:%1|\ud800}}{19}{\u2029%|\u000a0{1{0}\u2029\u2028:z}	%{plural:%1|\ud800}}{19}{\u2029|\u000a0{1{0}\u2029\u2028:z}
+%{:\u2028\u2029:\u2029\u000a}	{:\u2028\u2029:\u2029\u000a}
+prefix%{{\u000aa:\u2029:\u2029\u2029\ud8001%}	prefix{{\u000aa:\u2029:\u2029\u2029\ud8001}
+%{plural:%1|\u000d|0\u2028%|{:z{9z|:z\u2028|\u20291	{plural:first|\u000d|0\u2028|{:z{9z|:z\u2028|\u20291
+%{\u2028}\ud800a}{\u2028:}	{\u2028}\ud800a}{\u2028:}
+prefix%\u2028\u000d	prefix%\u2028\u000d
+%{plural:%1|1\u2029}9\ud800}	{plural:%1|1\u2029}9\ud800}
+%{z|\u000d:1|\u2028\u2029\u2029a	{z|\u000d:1|\u2028\u2029\u2029a
+prefix%\ud8000a\u000a\u2028\u000a\u2029:0}	prefix\ud8000a\u000a\u2028\u000a\u2029:0}
+%{plural:%1|%\u000a\u000d%%0\u2029\u000aa\u2029\ud800\u000dz:\u2029{a\u000a{\u000a{	{plural:first|%\u000a\u000d%0\u2029\u000aa\u2029\ud800\u000dz:\u2029{a\u000a{\u000a{
+%{%}9\u000d\u2028\u20290{\u20281%}	{}9\u000d\u2028\u20290{\u20281}
+prefix%|z\ud800za1a\u000aa\u20280\u000az|	prefix|z\ud800za1a\u000aa\u20280\u000az|
+%{plural:%1|9\u000d\ud8000}:\u000d}	{plural:%1|9\u000d\ud8000}:\u000d}
+%{\u2028}\u000a\u000a\u2028\u2029%%z1\u000a{|}\u000d\u000dz	{\u2028}\u000a\u000a\u2028\u2029%z1\u000a{|}\u000d\u000dz
+prefix%%\u000a\u000a\u000a9%z\u000a\u2028\u000a}	prefix%\u000a\u000a\u000a9z\u000a\u2028\u000a}
+%{plural:%1|{|:	{plural:first|{|:
+%{|9|\ud800%\u20291}\ud800{%}}\u2029:9\u000d90\u20289z|}	{|9|\ud800%\u20291}\ud800{}}\u2029:9\u000d90\u20289z|}
+prefix%:\u2029\u000d|\u2029{\u000az\ud8009\ud800z\u000a\u000d:|\u20280	prefix:\u2029\u000d|\u2029{\u000az\ud8009\ud800z\u000a\u000d:|\u20280
+%{plural:%1|1\u000d|\u2028a:\u2029|0|a:{\ud800100\u2029:{\u2028\u2028a}	{plural:%1|1\u000d|\u2028a:\u2029|0|a:{\ud800100\u2029:{\u2028\u2028a}
+%{:}%0z9\ud800	{:}z9\ud800
+prefix%z\u2029a{a\ud80001|{}:}}0\u000a\u2028{\u2028{9\u2028}}	prefixz\u2029a{a\ud80001|{}:}}0\u000a\u2028{\u2028{9\u2028}}
+%{plural:%1|z\ud800|\u000da\ud800\ud800{a|\u000a\u000a:	{plural:first|z\ud800|\u000da\ud800\ud800{a|\u000a\u000a:
+%{\u000d\u000d\u2029\u2028\u2028\ud800}	{\u000d\u000d\u2029\u2028\u2028\ud800}
+%{plural:%1|%\u2029\u2028\ud800a\u000d9\u2029}0{\u2028}}	{plural:%1|%\u2029\u2028\ud800a\u000d9\u2029}0{\u2028}}
+%{zz0\u2029{{0}	{zz0\u2029{{0}
+prefix%a9a}	prefixa9a}
+%{plural:%1||z{1\u2029%{azz||\u2028\u000a{\u000d0}0	{plural:%1||z{1\u2029%{azz||\u2028\u000a{\u000d0}0
+prefix%\ud800\u2029a\u2028\u000d}:\u000a||\u2029:\u000d%z\ud800%\u000d	prefix\ud800\u2029a\u2028\u000d}:\u000a||\u2029:\u000dz\ud800%\u000d
+%{plural:%1|%zz%zz1a\ud800019\u000aa\u000a\ud800}	{plural:%1|%zz%zz1a\ud800019\u000aa\u000a\ud800}
+prefix%\u000a1\u20289}909|%\u2028\u2029\u2029\u2028:z9\u000dz}{10}	prefix%\u000a1\u20289}909|%\u2028\u2029\u2029\u2028:z9\u000dz}{10}
+%{plural:%1|\u2028::a|}%:1z%9|{	{plural:%1|\u2028::a|}:1zninth|{
+%{0\u000d1\ud800}	{0\u000d1\ud800}
+prefix%%:{\u000a1\u2029:}\u000d|aaaz909}:}%	prefix%:{\u000a1\u2029:}\u000d|aaaz909}:}%
+%{plural:%1|:9z%}\u2028{\u000a\u2029zzz\u000d\u000d%\u2028\u20290%}	{plural:%1|:9z%}\u2028{\u000a\u2029zzz\u000d\u000d%\u2028\u20290%}
+%{\ud8000z\ud800\u2028\u2028|a\u000aa{	{\ud8000z\ud800\u2028\u2028|a\u000aa{
+%{plural:%1|\u000a	{plural:first|\u000a
+%{\u000d\u2029\u2028\u2028|0%a\u2029\u000d:\u2029\u20291}}	{\u000d\u2029\u2028\u2028|0a\u2029\u000d:\u2029\u20291}}
+prefix%z}1\u000d{\u2029\u000da09}\u2029z}0|a\ud800	prefixz}1\u000d{\u2029\u000da09}\u2029z}0|a\ud800
+%{plural:%1|0\u2028|91\u000a|%\ud800%z9:\u000dz}	{plural:%1|0\u2028|91\u000a|%\ud800%z9:\u000dz}
+%{0%9{}9\u2029{9:	{0ninth{}9\u2029{9:
+%{plural:%1|zz\u000d}9\u20281a19{}9\u000a\ud8001	{plural:%1|zz\u000d}9\u20281a19{}9\u000a\ud8001
+%{{1\u2029z\u000d:z:\u2029\u000d0\ud800}%:\u2029\u000d}	{{1\u2029z\u000d:z:\u2029\u000d0\ud800}:\u2029\u000d}
+prefix%{:%}|	prefix{:}|
+%{plural:%1|{09\u000a9\u2028z}	{plural:%1|{09\u000a9\u2028z}
+%{\u2029}\u000a\ud800{%{\u2028\u000d1\u000a1\u000a{\u2029	{\u2029}\u000a\ud800{{\u2028\u000d1\u000a1\u000a{\u2029
+prefix%\u000d\ud800%|\ud800\u20290\u000a:0|a}	prefix%\u000d\ud800|\ud800\u20290\u000a:0|a}
+%{plural:%1|09\u000da%\u000a9a\u2028z\u000d|\u000d|\u000a\u2028%	{plural:first|09\u000da%\u000a9a\u2028z\u000d|\u000d|\u000a\u2028%
+%{%\u2028a\ud800}	{%\u2028a\ud800}
+prefix%:\u20290\u000d:\u000da\u2028\u000a\u000a}0\u2028z	prefix:\u20290\u000d:\u000da\u2028\u000a\u000a}0\u2028z
+%{plural:%1|:\ud800}|\u2029}	%{plural:%1|:\ud800}|\u2029}
+%{%\u20290\u2029:{|999|\u000d	{%\u20290\u2029:{|999|\u000d
+prefix%|\ud800{0|\u2028z\u2028\u2029}	prefix|\ud800{0|\u2028z\u2028\u2029}
+%{plural:%1|0%z\u2029\ud8000a\u000d\ud800%	{plural:first|0z\u2029\ud8000a\u000d\ud800%
+%{zz}	{zz}
+%{plural:%1|\ud80019z\u000a\u000a\u000a:|az\u2028|}	{plural:%1|\ud80019z\u000a\u000a\u000a:|az\u2028|}
+%{\u000a}0|\u202909\u2029\u000dazzza	{\u000a}0|\u202909\u2029\u000dazzza
+prefix%\u2029\u000a%\ud800\u000d\u000d:\u20281|\u000d9a:0}\u2028\ud800}	prefix%\u2029\u000a\ud800\u000d\u000d:\u20281|\u000d9a:0}\u2028\ud800}
+%{plural:%1|\u000d%%%\u000a\u2029%}1}1\u000a\u000d|\ud800\ud800}{	{plural:%1|\u000d%%%\u000a\u2029%}1}1\u000a\u000d|\ud800\ud800}{
+%{\u000da\u2028\ud8009}::}\u202809\u000a0}	{\u000da\u2028\ud8009}::}\u202809\u000a0}
+prefix%\u000d{:\u2028\u000d\u000d91	prefix%\u000d{:\u2028\u000d\u000d91
+%{plural:%1|:}1|9\u2029:\u2029\ud800{%a1}|:|}z{|:\u000d}	%{plural:%1|:}1|9\u2029:\u2029\ud800{a1}|:|}z{|:\u000d}
+%{:\u2028{1\u000a|\u000d|101\u2029}z\u000a::0a\u000d%a	{:\u2028{1\u000a|\u000d|101\u2029}z\u000a::0a\u000da
+prefix%%}a%\ud8009\ud8001}	prefix%}a\ud8009\ud8001}
+%{plural:%1|\u000d\ud800\u2029\u2028:9	{plural:first|\u000d\ud800\u2029\u2028:9
+%{z\u000d\u000a\u20281z\ud8001%:00\u000a}	{z\u000d\u000a\u20281z\ud8001:00\u000a}
+prefix%{z1|{\u2029:	prefix{z1|{\u2029:
+%{plural:%1|0az0}\ud800\u000a\u000a\u2028{|a{\ud800\ud800:}	%{plural:%1|0az0}\ud800\u000a\u000a\u2028{|a{\ud800\ud800:}
+%{\u20281\ud800%0::%|\u2028\u000d\u20281{}\u2029|%|z\u2028	{\u20281\ud800::|\u2028\u000d\u20281{}\u2029||z\u2028
+prefix%|\ud800\u2028\u20291\u000a|00\ud800\u000d{9}	prefix|\ud800\u2028\u20291\u000a|00\ud800\u000d{9}
+%{plural:%1|{|\ud800:9%{||{%}|9\u2029:z\u2028:|9}\u000a	{plural:%1|{|\ud800:9%{||{%}|9\u2029:z\u2028:|9}\u000a
+%{|\u2028\u000a\u000a}%:\u20299az\u000d0a\ud800|{\u000a\u2028%a|\u000d}	{|\u2028\u000a\u000a}:\u20299az\u000d0a\ud800|{\u000a\u2028a|\u000d}
+prefix%\u000a0\ud800991|z%}\u000d	prefix%\u000a0\ud800991|z}\u000d
+%{plural:%1|11a\ud800\u20280{::z9\u000d1z9}	{plural:%1|11a\ud800\u20280{::z9\u000d1z9}
+%{01\u000d9\u000a:0::90%	{01\u000d9\u000a:0::90%
+prefix%\u000dz{:z\u2029{:9\u000a%}::a}%\u2029{a}	prefix%\u000dz{:z\u2029{:9\u000a}::a}%\u2029{a}
+%{plural:%1|\u20280\u2028\u2028%\ud8009%1}\ud800	{plural:%1|\u20280\u2028\u2028%\ud8009%1}\ud800
+%{{a%\u000a1\u000a9\u202900\u2029{z\u2028\u000d\u2029}	{{a%\u000a1\u000a9\u202900\u2029{z\u2028\u000d\u2029}
+prefix%11}}\ud800	prefix}}\ud800
+%{\u2028\u000a{\u000d:\u000d9z\u000a{1\u2028\u000a\u000d\u20291az%	{\u2028\u000a{\u000d:\u000d9z\u000a{1\u2028\u000a\u000d\u20291az%
+prefix%z%}	prefixz}
+%{plural:%1|z\u000a\u20281::01}z\u2028\u2028\u20291\ud8009{%|	{plural:%1|z\u000a\u20281::01}z\u2028\u2028\u20291\ud8009{|
+%{{\ud800z}\ud800|z11\u000a\u2028\ud800{|||\ud800%\u000a11}}	{{\ud800z}\ud800|z11\u000a\u2028\ud800{|||\ud800%\u000a11}}
+prefix%}}\u20299	prefix}}\u20299
+%{plural:%1|\u000d\u2029za0\ud800a\u2029z|}	{plural:%1|\u000d\u2029za0\ud800a\u2029z|}
+%{0%}9:a0%:	{0}9:a0:
+prefix%}01a{z}:\u2029\u000d:z\u000d9a{\u000d}	prefix}01a{z}:\u2029\u000d:z\u000d9a{\u000d}
+%{plural:%1|:\u000d:	{plural:first|:\u000d:
+%{\u000a|\u000a:91::}	{\u000a|\u000a:91::}
+prefix%\u000a91:\u000d\u2028z\u000d	prefix%\u000a91:\u000d\u2028z\u000d
+%{plural:%1|\u2029{z|{\u2028:|::\u000a\u20289||\u000a1{a\ud8000}	{plural:%1|\u2029{z|{\u2028:|::\u000a\u20289||\u000a1{a\ud8000}
+%{\u2028\u000d%{{0:9aa1\ud800|\ud800	{\u2028\u000d{{0:9aa1\ud800|\ud800
+prefix%\u20299z|a\u000a|\u000aa:|\u2028aa{}	prefix%\u20299z|a\u000a|\u000aa:|\u2028aa{}
+%{plural:%1|1\u000d{a:	{plural:first|1\u000d{a:
+%{:\u2029|}}	{:\u2029|}}
+prefix%}\u000a01:}%z	prefix}\u000a01:}z
+%{plural:%1|\u2028%z}	{plural:%1|\u2028%z}
+%{z}{\u2028|z\u20290z|\u000a|0\u000d	{z}{\u2028|z\u20290z|\u000a|0\u000d
+prefix%{1|{\u2029}	prefix{1|{\u2029}
+%{plural:%1|\u000d}a0:	{plural:%1|\u000d}a0:
+%{0z|\u20280%0\ud800\u000dz\ud800}	{0z|\u20280\ud800\u000dz\ud800}
+prefix%\u000a\ud8001}z\u000d\ud8001\u000a0%|1\u2028z\u2029z100\u2029:	prefix%\u000a\ud8001}z\u000d\ud8001\u000a0|1\u2028z\u2029z100\u2029:
+%{plural:%1|\u000a\u000a9|09}a:90\u000a9}	{plural:%1|\u000a\u000a9|09}a:90\u000a9}
+%{\u000aa%\ud800\u000d\u000a	{\u000aa\ud800\u000d\u000a
+prefix%\u000a:z\u000a|\ud800\u000az9\u20289%\u2029\u000d9|\u000a{}	prefix%\u000a:z\u000a|\ud800\u000az9\u20289%\u2029\u000d9|\u000a{}
+%{plural:%1||\ud800\u20299:\u2028\u2029{0\u2028\u2029	{plural:first||\ud800\u20299:\u2028\u2029{0\u2028\u2029
+%{%%\u2029z\u000a\u2029}	{%\u2029z\u000a\u2029}
+prefix%|{|%\u000a\u000aza	prefix|{|%\u000a\u000aza
+%{plural:%1|{9az:}\ud800|0}{\u2028\ud800:{:9\u000a\u2028}	%{plural:%1|{9az:}\ud800|0}{\u2028\ud800:{:9\u000a\u2028}
+%{0z9a\ud800\ud800a\u000aa}z%:01%1\u000d	{0z9a\ud800\ud800a\u000aa}z:01first\u000d
+prefix%a100\u000d{\u000a{a\ud800z\u000d{9a0}	prefixa100\u000d{\u000a{a\ud800z\u000d{9a0}
+%{plural:%1|\u000a}\u000d|\u000a9\ud8000\u2028\u000d\u2029}%1}0%1\u2028a	{plural:%1|\u000a}\u000d|\u000a9\ud8000\u2028\u000d\u2029}first}0first\u2028a
+%{\ud8009:a09:990:a\u2028}	{\ud8009:a09:990:a\u2028}
+prefix%\u2029}\ud800a:}\u2028{9}{||9}a9%	prefix%\u2029}\ud800a:}\u2028{9}{||9}a9%
+%{plural:%1|:90{|\u20299:a:%:|00\u000a}}	{plural:%1|:90{|\u20299:a:%:|00\u000a}}
+%{}\ud800:\u20280|a\u000d|	{}\ud800:\u20280|a\u000d|
+prefix%0{}	prefix{}
+%{plural:%1|\u000d:\ud800\u000a9z9{\u2029\u000az\u2028\u000dz	{plural:first|\u000d:\ud800\u000a9z9{\u2029\u000az\u2028\u000dz
+%{plural:%1|\u2029919z}\u2028:|a9}	{plural:%1|\u2029919z}\u2028:|a9}
+%{|a|0\u000a}::z\u000a9\u2029\u000d|\u2029\ud800\u20280z1:\u000a	{|a|0\u000a}::z\u000a9\u2029\u000d|\u2029\ud800\u20280z1:\u000a
+prefix%1%{0z|\u000d9{}{}	prefixfirst{0z|\u000d9{}{}
+%{plural:%1|:9\ud800\u000d%zz\u000a{}{1||z{::\u000a1|	{plural:%1|:9\ud800\u000d%zz\u000a{}{1||z{::\u000a1|
+%{%\u000dza\u2029}\u2028|0a%\u2028\u000a\u2029\u000a:}	{%\u000dza\u2029}\u2028|0a%\u2028\u000a\u2029\u000a:}
+prefix%1z|}\u000d\u000a\ud800\u2029:%:\u000a{	prefixfirstz|}\u000d\u000a\ud800\u2029::\u000a{
+%{plural:%1|:09z\u20281\u2029\u2029|}	{plural:%1|:09z\u20281\u2029\u2029|}
+%{%:\u2029\u000a\u000da\u2029}||:1}\u000d\ud800:%}9|9|	{:\u2029\u000a\u000da\u2029}||:1}\u000d\ud800:}9|9|
+prefix%91\ud800z:}:}	prefix\ud800z:}:}
+%{{9a\u2029}	{{9a\u2029}
+prefix%19\u2028\u2029	prefix\u2028\u2029
+%{plural:%1|\u2029\ud800}a{0\u2028|\ud800\u2028z}	{plural:%1|\u2029\ud800}a{0\u2028|\ud800\u2028z}
+%{\u2029\u2029{9\u2029\u000a\u20281\u2029\u000a\u2029%\u000a}\ud800	{\u2029\u2029{9\u2029\u000a\u20281\u2029\u000a\u2029%\u000a}\ud800
+prefix%\u000d\u000d}%{:}	prefix%\u000d\u000d}{:}
+%{plural:%1|\u000d\u000a|\u000d100\ud800	{plural:first|\u000d\u000a|\u000d100\ud800
+%{%a9}|}:\ud800|\ud800%z\u2029109}	{a9}|}:\ud800|\ud800z\u2029109}
+prefix%\ud800a\u000d\ud800a|z\u000a\ud8000|:99a1\ud800{	prefix\ud800a\u000d\ud800a|z\u000a\ud8000|:99a1\ud800{
+%{plural:%1|}\u000a9a\u000d\u000d0\u000d}	%{plural:%1|}\u000a9a\u000d\u000d0\u000d}
+prefix%z\u2028%\u000d}	prefixz\u2028%\u000d}
+%{plural:%1|\u2028|\ud800:\u2029{a9|{}0}%%19\ud800\ud8001{\u20289	{plural:%1|\u2028|\ud800:\u2029{a9|{}0}%19\ud800\ud8001{\u20289
+%{0\ud80009}:z|1|:}	{0\ud80009}:z|1|:}
+%{plural:%1|}\u000d%1:0:z:}%|\u000d{\ud800\u2028z9{\u000dz}	%{plural:%1|}\u000dfirst:0:z:}|\u000d{\ud800\u2028z9{\u000dz}
+%{\u20291|0}	{\u20291|0}
+prefix%}}}%1{:zaz}	prefix}}}first{:zaz}
+%{plural:%1|\u000a0\u202899\u000d:\u20291az\u000d\u000a\u000da0%	{plural:first|\u000a0\u202899\u000d:\u20291az\u000d\u000a\u000da0%
+%{1|%|%\u2029%\u000d9:}	{1||%\u2029%\u000d9:}
+prefix%a0	prefixa0
+%{plural:%1|{%0{|{:{\u2028}a\u000a}	{plural:%1|{%0{|{:{\u2028}a\u000a}
+%{}%9|0\u2029%19||z}0\u2028%9|\ud800	{}ninth|0\u2029||z}0\u2028ninth|\ud800
+prefix%a%\u2028a|\u2029}	prefixa%\u2028a|\u2029}
+%{plural:%1|%9	{plural:first|ninth
+%{\u2029\u000a%|}0\ud800\ud800\u000a{{z|\u20289}z1}	{\u2029\u000a|}0\ud800\ud800\u000a{{z|\u20289}z1}
+prefix%1\u2028{\u2028a	prefixfirst\u2028{\u2028a
+%{plural:%1|\ud800z\u000a}\u000d\u000a1\u20289%\u000a|%\u2028{\u000aa|\ud800{\ud8001}	{plural:%1|\ud800z\u000a}\u000d\u000a1\u20289%\u000a|%\u2028{\u000aa|\ud800{\ud8001}
+%{\u000a\ud800:9\ud800\u2028\ud8009:1z\u000az\u2028\ud800%1{|\u2029	{\u000a\ud800:9\ud800\u2028\ud8009:1z\u000az\u2028\ud800first{|\u2029
+prefix%1:0\ud800{}	prefixfirst:0\ud800{}
+%{plural:%1|:\ud800\u000a\u2029\u2029%}90|aa\u000a9z{:	{plural:%1|:\ud800\u000a\u2029\u2029%}90|aa\u000a9z{:
+%{\u000a|%z\u2028|%%99\u2028\u000a\u2028\u000a9\u2029\u20299\u000d\u000az}	{\u000a|z\u2028|%99\u2028\u000a\u2028\u000a9\u2029\u20299\u000d\u000az}
+prefix%\u000d0\u2029\u000a19{\u000aa|\u2029%9}}%{\ud800\u000d9%	prefix%\u000d0\u2029\u000a19{\u000aa|\u2029ninth}}{\ud800\u000d9%
+%{\ud8009:1\u000a900a:09\u000d9\ud800%	{\ud8009:1\u000a900a:09\u000d9\ud800%
+prefix%|%1:\u000aa\u000d\ud800\u20280}}\u000a|90}	prefix|first:\u000aa\u000d\ud800\u20280}}\u000a|90}
+%{plural:%1||{\ud800:\u2029}}0z\u2029:9|z|1	{plural:%1||{\ud800:\u2029}}0z\u2029:9|z|1
+%{0:\u2029a}	{0:\u2029a}
+prefix%0\u2028|zzzz%\u2029\u2028z%9\u20281	prefix\u2028|zzzz%\u2029\u2028zninth\u20281
+%{plural:%1|\u000d|1|:\u2029:\u000a}1\u2029az}	{plural:%1|\u000d|1|:\u2029:\u000a}1\u2029az}
+prefix%}\u000d\u000d}	prefix}\u000d\u000d}
+%{:%%%\ud800\u000a}	{:%\ud800\u000a}
+prefix%%{9}}\u000az\u2029:a\u2029}{1%9\u2029\u2029{\u000a}09	prefix%{9}}\u000az\u2029:a\u2029}{1ninth\u2029\u2029{\u000a}09
+%{plural:%1|}}|\u000a\u2028\u2029\ud800\u2028|\u000d:{:z\u202910a0:%}	%{plural:%1|}}|\u000a\u2028\u2029\ud800\u2028|\u000d:{:z\u202910a0:}
+%{%%\u000d0:|||190\ud8000{0	{%\u000d0:|||190\ud8000{0
+prefix%\u000a\u000d\u000a:\u2028z1}	prefix%\u000a\u000d\u000a:\u2028z1}
+%{plural:%1|:10{z\u000d\u2029:%\u2029|0\u000a\u2028||\u000d:9%	{plural:first|:10{z\u000d\u2029:%\u2029|0\u000a\u2028||\u000d:9%
+prefix%a\u000az{10\u000d\u2029a}\ud800:\u20281:\u20290\u2029}0:\u2029	prefixa\u000az{10\u000d\u2029a}\ud800:\u20281:\u20290\u2029}0:\u2029
+%{plural:%1|z\u2029z\ud800%9z|0}	{plural:%1|z\u2029z\ud800%9z|0}
+%{|0\ud800\u2028\u000d1:\ud800|z\ud800\u2029}|a	{|0\ud800\u2028\u000d1:\ud800|z\ud800\u2029}|a
+prefix%\u2029:%aa\u20299\u2029:}	prefix%\u2029:aa\u20299\u2029:}
+%{plural:%1|}\u000d\ud800\ud800a::11:9\u2028\ud800a\u000d:\u2028\u000d1\u2029	%{plural:%1|}\u000d\ud800\ud800a::11:9\u2028\ud800a\u000d:\u2028\u000d1\u2029
+%{{}a1\u20281\u2029{|9\u000dz\ud800\u202811\u000aa\u2029\u000d}	{{}a1\u20281\u2029{|9\u000dz\ud800\u202811\u000aa\u2029\u000d}
+prefix%\u000d\u000d	prefix%\u000d\u000d
+%{plural:%1|:a:1{{}	%{plural:%1|:a:1{{}
+%{a:\u2028:%9}az}{\u2029:\u2029%az	{a:\u2028:ninth}az}{\u2029:\u2029az
+prefix%\ud800{\u000a|1\u2028\u000d}	prefix\ud800{\u000a|1\u2028\u000d}
+%{plural:%1|10:\u2028{\u2029|\u000d}9:a\ud800\u000d1|%\u2029\u2029||a\u2029	{plural:%1|10:\u2028{\u2029|\u000d}9:a\ud800\u000d1|%\u2029\u2029||a\u2029
+%{{z0\ud800}	{{z0\ud800}
+prefix%%\u2029	prefix%\u2029
+%{plural:%1|aa\u000d{z\u000a\u2028\u20290\u000a%\u2029\ud800az1a\ud800}	{plural:%1|aa\u000d{z\u000a\u2028\u20290\u000a%\u2029\ud800az1a\ud800}
+%{99a10\u2029z\ud80099	{99a10\u2029z\ud80099
+prefix%|\ud800}	prefix|\ud800}
+%{plural:%1|\u000d\u2028\ud800\u000aa\u2028%za	{plural:first|\u000d\u2028\ud800\u000aa\u2028za
+%{|{\ud800}\u000a\ud8009\u000d\ud800\u000d}	{|{\ud800}\u000a\ud8009\u000d\ud800\u000d}
+prefix%\u000d|\u2029{{:\u20281:\u000a{	prefix%\u000d|\u2029{{:\u20281:\u000a{
+%{plural:%1|}\u000a\u000dz0z1%a{\u000dz\ud800|}	%{plural:%1|}\u000a\u000dz0z1a{\u000dz\ud800|}
+%{}\u000a9\u2029\u000a:|}\u2029\u000a\u000d|\ud800\u2028	{}\u000a9\u2029\u000a:|}\u2029\u000a\u000d|\ud800\u2028
+prefix%}{\u2029z}\u2029z\u2029}	prefix}{\u2029z}\u2029z\u2029}
+%{plural:%1|0|\u000a\u2029{a1a\u2028\u2028\u000d1\u2029}1a\ud800\u2028:	{plural:%1|0|\u000a\u2029{a1a\u2028\u2028\u000d1\u2029}1a\ud800\u2028:
+%{}:099\ud800\ud800\ud800\ud800\u2029:}	{}:099\ud800\ud800\ud800\ud800\u2029:}
+prefix%:%|z{|9{1\u000da\u20299\u000a\u2029\u000a\u000a	prefix:|z{|9{1\u000da\u20299\u000a\u2029\u000a\u000a
+%{plural:%1|a0{|\u2029\u2029:9\u2029\u000a\u000a0}|\u20290}\ud800%|9}	{plural:%1|a0{|\u2029\u2029:9\u2029\u000a\u000a0}|\u20290}\ud800|9}
+%{\u000aa\u000a\u20290|\u2028\u20281\u000daz\u2028z\u000a1	{\u000aa\u000a\u20290|\u2028\u20281\u000daz\u2028z\u000a1
+prefix%|{0\u20290\u20280:\u000d\u2028\ud8001}{}	prefix|{0\u20290\u20280:\u000d\u2028\ud8001}{}
+%{plural:%1|\ud800{199\u000aa:a	{plural:first|\ud800{199\u000aa:a
+%{a\u2028{\ud800%9}0%\ud80010|99:\ud8001}	{a\u2028{\ud800ninth}0\ud80010|99:\ud8001}
+prefix%z\u000d\u000a\u2028\ud800{a\u2029}\u2028zz|}}%0%\u000a:	prefixz\u000d\u000a\u2028\ud800{a\u2029}\u2028zz|}}%\u000a:
+%{plural:%1|%\u000a0{\u2029{\u000a:\u2029::99%\u000d%|:{\u2029}	{plural:%1|%\u000a0{\u2029{\u000a:\u2029::99%\u000d%|:{\u2029}
+%{}:0\ud800%\u2028a\u000d90\ud800%|	{}:0\ud800%\u2028a\u000d90\ud800|
+prefix%1\u2028\ud80099\ud8000z:}}	prefixfirst\u2028\ud80099\ud8000z:}}
+%{plural:%1|01a1\u000a\u2029\u20289\u20281|9:0a	{plural:first|01a1\u000a\u2029\u20289\u20281|9:0a
+%{z\u20281\u000dz09a}a\u000d\u000d0|\u2029\u000d\u2028}	{z\u20281\u000dz09a}a\u000d\u000d0|\u2029\u000d\u2028}
+prefix%9\u2029}%0\ud800\ud800\u000a	prefixninth\u2029}\ud800\ud800\u000a
+%{plural:%1|\u000a:}|1}0}	{plural:%1|\u000a:}|1}0}
+%{z\ud8000{a{%z}%z\u000a	{z\ud8000{a{z}z\u000a
+prefix%{z9{|%\u000az1\ud8000\u000a|\u000d\u2028za{11a{}	prefix{z9{|%\u000az1\ud8000\u000a|\u000d\u2028za{11a{}
+%{plural:%1|\u2029:%\u2029z}%:\u2029|\u2029a\u20291\u2029%1|\ud800	{plural:%1|\u2029:%\u2029z}:\u2029|\u2029a\u20291\u2029first|\ud800
+%{a\u000a0\u2028\u000d||{}	{a\u000a0\u2028\u000d||{}
+prefix%\u000a0z\u20291\u000a:\u000a:|\u000az0:	prefix%\u000a0z\u20291\u000a:\u000a:|\u000az0:
+%{plural:%1|\u000a0}	{plural:%1|\u000a0}
+%{a:a1\ud800{0%1{\u2028\u202999	{a:a1\ud800{0first{\u2028\u202999
+prefix%{\u000d\u2028%:0a91\u2029z\u2029|\u000a}	prefix{\u000d\u2028:0a91\u2029z\u2029|\u000a}
+%{plural:%1|\ud8009{9%1aa|0\u2028%	{plural:first|\ud8009{9firstaa|0\u2028%
+%{\u000a%\ud800:1{a|{z}	{\u000a\ud800:1{a|{z}
+prefix%}9\u000d	prefix}9\u000d
+%{|\u2028||{:999\ud800\u2028a\u2029a\u20289\u000a{	{|\u2028||{:999\ud800\u2028a\u2029a\u20289\u000a{
+prefix%|::\u2028\u000d:za%}	prefix|::\u2028\u000d:za}
+%{plural:%1|1}1{z{\u2029a	%{plural:%1|1}1{z{\u2029a
+%{\u000aa\u000a\u2029\u000a%{\u2029}|{1\u2029}	{\u000aa\u000a\u2029\u000a{\u2029}|{1\u2029}
+prefix%}a19\u000da}\u000a:\u2029%:0\u000d|{	prefix}a19\u000da}\u000a:\u2029:0\u000d|{
+%{|\u20299z0\u2028	{|\u20299z0\u2028
+prefix%:|9az90}	prefix:|9az90}
+%{plural:%1|1:|0%%\u2028a}1\u2029}0\u2029%|}:}a\u2028	{plural:%1|1:|0%%\u2028a}1\u2029}0\u2029|}:}a\u2028
+%{|za}}	{|za}}
+%{plural:%1|0\u2028z1\u000d11:\ud8001\u000a\u000d9a\u20291}	{plural:%1|0\u2028z1\u000d11:\ud8001\u000a\u000d9a\u20291}
+%{\u000d\u000a0z:9{zzz9\u20280}91\u000d\u2028{|%:	{\u000d\u000a0z:9{zzz9\u20280}91\u000d\u2028{|:
+prefix%\u000a}	prefix%\u000a}
+%{plural:%1|\ud800:%z\u2029}z|}:{\u000d\ud800z|{\ud8009z0\ud800}	{plural:%1|\ud800:%z\u2029}z|}:{\u000d\ud800z|{\ud8009z0\ud800}
+%{\u000a00\u000a}	{\u000a00\u000a}
+prefix%|%9\u2029	prefix|ninth\u2029
+%{plural:%1|z\u2029a1{\u2029\u000a0}	{plural:%1|z\u2029a1{\u2029\u000a0}
+%{1}|a\u20280\u2028{:z	first|a\u20280\u2028{:z
+%{plural:%1|{}a\u000d:%\u2029%\u000a}{	%{plural:%1|{}a\u000d:%\u2029%\u000a}{
+%{\u000dz\u000d0\u2029:\ud800\u000a:}\u000a|}{:\u2028\ud800\u000a{}}	{\u000dz\u000d0\u2029:\ud800\u000a:}\u000a|}{:\u2028\ud800\u000a{}}
+prefix%{\u2028\u2029}19{{\u000aa	prefix{\u2028\u2029}19{{\u000aa
+%{plural:%1|\u000a|\u000d{\u2029}z}	{plural:%1|\u000a|\u000d{\u2029}z}
+%{\u000a}0{1{%0}\u000d\u000a|1	{\u000a}0{1{}\u000d\u000a|1
+prefix%\u2028|\u000a\u000d9\u2028z}	prefix%\u2028|\u000a\u000d9\u2028z}
+%{plural:%1|\u000a09}\u202800\u2029\u000d\u000d0||\ud800}{\u2028\u2029%\u000a	{plural:%1|\u000a09}\u202800\u2029\u000d\u000d0||\ud800}{\u2028\u2029%\u000a
+%{:}	{:}
+prefix%}10	prefix}10
+%{plural:%1|:\u000a}\u2028\u000a}0:z\u2028}0a\u2029}	{plural:%1|:\u000a}\u2028\u000a}0:z\u2028}0a\u2029}
+%{9{9aa\ud80090\u000d9\u000a\u2028|}%}\u2029	{9{9aa\ud80090\u000d9\u000a\u2028|}}\u2029
+prefix%\u000a\ud800\u000a\u000d\u2028}\ud800\ud8000\u2028\u000a\ud800{za{1z:\u000d11}	prefix%\u000a\ud800\u000a\u000d\u2028}\ud800\ud8000\u2028\u000a\ud800{za{1z:\u000d11}
+%{plural:%1|}|0:%%1\u000d}\u2029\ud8000z0\u2029\u000d\u000a%	%{plural:%1|}|0:%1\u000d}\u2029\ud8000z0\u2029\u000d\u000a%
+%{00\u000a:\ud800a{1z:\ud8000a\u000d}	{00\u000a:\ud800a{1z:\ud8000a\u000d}
+prefix%|	prefix|
+%{plural:%1|:{:%\u000a|:|1}	{plural:%1|:{:%\u000a|:|1}
+%{|\u000d9{a\u000a\u000a\ud800\u2029|1%{\u2028\u000d9\ud8001	{|\u000d9{a\u000a\u000a\ud800\u2029|1{\u2028\u000d9\ud8001
+prefix%1\ud800%\u202810\u2028|0\ud800a|1}	prefixfirst\ud800%\u202810\u2028|0\ud800a|1}
+%{plural:%1|}\ud800\ud800\u000d:\u2029z9	%{plural:%1|}\ud800\ud800\u000d:\u2029z9
+%{{0}\u000a%:|a{{0\u20290\u2029\u2029zzza\u000dzz\u2028}	{{0}\u000a:|a{{0\u20290\u2029\u2029zzza\u000dzz\u2028}
+prefix%9:\u2028{%	prefixninth:\u2028{%
+%{plural:%1|\ud800a\u2028a{\u000a|\ud800{\u000a\u000a|a0z\ud800}	{plural:%1|\ud800a\u2028a{\u000a|\ud800{\u000a\u000a|a0z\ud800}
+%{0}z:a||\u000a\ud800||%z|aa	z:a||\u000a\ud800||z|aa
+prefix%00\u2028z\u000d}	prefix\u2028z\u000d}
+%{plural:%1|{\u000aa0\u000d0\u000d\u20291zz\u000d}\ud800\u2029\u000aa\ud800\u20289z	{plural:%1|{\u000aa0\u000d0\u000d\u20291zz\u000d}\ud800\u2029\u000aa\ud800\u20289z
+%{a\u000aza\u20289\ud800\u000a\u000a9\ud800\u000az1\ud800|0}	{a\u000aza\u20289\ud800\u000a\u000a9\ud800\u000az1\ud800|0}
+prefix%0\u000d|1\u000a|\ud800\ud800a::09\u000a1a\u000dz|	prefix\u000d|1\u000a|\ud800\ud800a::09\u000a1a\u000dz|
+%{plural:%1|\u000daz{za1\u2029|\ud800:|\u2029|}	{plural:%1|\u000daz{za1\u2029|\ud800:|\u2029|}
+%{01%|\u000d{a\u20299|\u2028|\u000d|	{01|\u000d{a\u20299|\u2028|\u000d|
+prefix%:}\ud800%\u000a}	prefix:}\ud800%\u000a}
+%{\u000d%}	{\u000d}
+prefix%a:a	prefixa:a
+%{plural:%1|z9z%%}\u000a\u202811}{\u2028}	%{plural:%1|z9z%%}\u000a\u202811}{\u2028}
+%{9\u000da9\u2028z9|\u2028a\u000a\ud800:z	{9\u000da9\u2028z9|\u2028a\u000a\ud800:z
+%{plural:%1|::9\u202909\u000d:	{plural:first|::9\u202909\u000d:
+%{}{\u000d\ud800:az|\ud800z%\ud800\ud800\ud800\u2029\ud8000}\ud800\ud800:}	{}{\u000d\ud800:az|\ud800z\ud800\ud800\ud800\u2029\ud8000}\ud800\ud800:}
+prefix%}\u2028%{\u000a\ud800{\u000d%{|{9:{%|a:}	prefix}\u2028{\u000a\ud800{\u000d{|{9:{|a:}
+%{plural:%1|\u2028\u000a||\ud800\ud800}	{plural:%1|\u2028\u000a||\ud800\ud800}
+%{a{\u2028%{\u2028{	{a{\u2028{\u2028{
+prefix%%\u000aa\ud8009\u2029az10\u000a\u20280\u000az9{}9\u20291}	prefix%\u000aa\ud8009\u2029az10\u000a\u20280\u000az9{}9\u20291}
+%{plural:%1|9\u2029\u000d}}\u2028z\ud80091\u000d}9%z1{:	{plural:%1|9\u2029\u000d}}\u2028z\ud80091\u000d}9z1{:
+%{\ud800\ud800z\u2029:%1z0a{0:\ud800\u2028\u000d\u000d}	{\ud800\ud800z\u2029:firstz0a{0:\ud800\u2028\u000d\u000d}
+prefix%a%:a}\ud800a9a:}\u000a1\u20290	prefixa:a}\ud800a9a:}\u000a1\u20290
+%{plural:%1|}990\u202990%:{a\u2029a\u2029\u20289}	%{plural:%1|}990\u202990:{a\u2029a\u2029\u20289}
+prefix%191\u2028zz}	prefix\u2028zz}
+%{plural:%1|\u2028\u000d\u2028|	{plural:first|\u2028\u000d\u2028|
+%{za\u20280|0}	{za\u20280|0}
+prefix%z}\u000aa1z\u2029a0\u000a\u000aa9\u000az9a	prefixz}\u000aa1z\u2029a0\u000a\u000aa9\u000az9a
+%{plural:%1|0{1\u2028\u000d\u000dza:1\u202909{\u000a}19\u2029:09}	{plural:%1|0{1\u2028\u000d\u000dza:1\u202909{\u000a}19\u2029:09}
+%{{aa1\u000d\u2028a:0\u000a\u000d{	{{aa1\u000d\u2028a:0\u000a\u000d{
+prefix%\u000d:{\u000aa9\u000a{:\ud800%\u000d0\u2029{{}	prefix%\u000d:{\u000aa9\u000a{:\ud800%\u000d0\u2029{{}
+%{plural:%1|\u2029:0z0\u20291a9%\ud800:	{plural:first|\u2029:0z0\u20291a9\ud800:
+%{}:119a0\u000a%%\u000aa\u000d{\ud8001\u000d\u2028%a:}	{}:119a0\u000a%\u000aa\u000d{\ud8001\u000d\u2028a:}
+prefix%|\u000d}0%	prefix|\u000d}0%
+%{plural:%1|\u2028{\u000a}z\u000d|z\u20291%\ud8009\ud800}\u202890\u2028:||}	{plural:%1|\u2028{\u000a}z\u000d|z\u20291\ud8009\ud800}\u202890\u2028:||}
+%{{\u000a	{{\u000a
+prefix%\u2028\u000d\u000a\u2029\u2028\u000a\ud800\u2028:\u000d9}	prefix%\u2028\u000d\u000a\u2029\u2028\u000a\ud800\u2028:\u000d9}
+%{plural:%1|\ud800|\u000d{a{	{plural:first|\ud800|\u000d{a{
+%{:\u2028zz11}	{:\u2028zz11}
+prefix%\ud8009\u000a\u000d{919\u000d}z{{\ud800\u000a9\u000d00\u2029}\u2028	prefix\ud8009\u000a\u000d{919\u000d}z{{\ud800\u000a9\u000d00\u2029}\u2028
+%{plural:%1|:0\u000a\u000az\u20299\u2029}	{plural:%1|:0\u000a\u000az\u20299\u2029}
+prefix%0|1%z%%1}\u000a\u2029}\u000a0}0{z9a\u2028}	prefix|1z%1}\u000a\u2029}\u000a0}0{z9a\u2028}
+%{plural:%1|1}9\u000a{:9{\ud8001a\u000a	%{plural:%1|1}9\u000a{:9{\ud8001a\u000a
+%{:9{99||:\u2029{\u000d\u2029|9}\ud8001a{}9a}	{:9{99||:\u2029{\u000d\u2029|9}\ud8001a{}9a}
+prefix%%%|z%{}%%1}	prefix%|z{}%1}
+%{plural:%1|a:a:9}\ud800\u000d}	%{plural:%1|a:a:9}\ud800\u000d}
+prefix%\ud800\u2028\u000a\u2028\u2029\u000d0\u000d|\u000d%}	prefix\ud800\u2028\u000a\u2028\u2029\u000d0\u000d|\u000d}
+%{plural:%1|z\u000a0|%%0:z{\u2029\u2029%za	{plural:first|z\u000a0|%0:z{\u2029\u2029za
+%{\u000d\u000a0a}\u2028\u2028:a|\u2028%%\u2029:\ud8000%|{}	{\u000d\u000a0a}\u2028\u2028:a|\u2028%\u2029:\ud8000|{}
+prefix%}%1}z0z%\u2028\u000a:|}z}0%{0\u000az\u000a9	prefix}first}z0z%\u2028\u000a:|}z}0{0\u000az\u000a9
+%{plural:%1|z\u2029\ud800\u2029\u2029z\u2028\u2028\u2029\u000d\u2028a\u000d\ud800%}	{plural:%1|z\u2029\ud800\u2029\u2029z\u2028\u2028\u2029\u000d\u2028a\u000d\ud800%}
+prefix%\u000d\u20291\u2029\u20290%aa{}	prefix%\u000d\u20291\u2029\u20290aa{}
+%{plural:%1|:a%{\u2029\ud80009\ud800:0\u2029a}0\u000d%z0{\u000a|\u2028	{plural:%1|:a%{\u2029\ud80009\ud800:0\u2029a}0\u000dz0{\u000a|\u2028
+%{|:}	{|:}
+prefix%z1%1\u000a{|}%z\u2029}:\u000a9\ud800	prefixz1first\u000a{|}z\u2029}:\u000a9\ud800
+%{plural:%1|aa\u2029z\ud800{\u000a\u2029|}	{plural:%1|aa\u2029z\ud800{\u000a\u2029|}
+%{:\u000a\u000dz\u000d9\u000a1\u2028\u000a\u000az\u000a}|:\ud8000099\u2029	{:\u000a\u000dz\u000d9\u000a1\u2028\u000a\u000az\u000a}|:\ud8000099\u2029
+prefix%za{za\u2029}\u2028a{0}{}a\ud8009\u2029}a\u000daz}	prefixza{za\u2029}\u2028a{0}{}a\ud8009\u2029}a\u000daz}
+%{plural:%1|z\u2029{	{plural:first|z\u2029{
+%{:z\u20280a\u2028\u2028\ud800\u000d\u000da{\u2028:\ud800\u000a}	{:z\u20280a\u2028\u2028\ud800\u000d\u000da{\u2028:\ud800\u000a}
+prefix%}1\ud8001\u2028\u20291{}z\u2029\u2029	prefix}1\ud8001\u2028\u20291{}z\u2029\u2029
+%{plural:%1|:\u000da00z\u2029az\u000d}	{plural:%1|:\u000da00z\u2029az\u000d}
+%{z\u2029z\u2028}:\u000a0|99%\u000d\ud8001\u2028z	{z\u2029z\u2028}:\u000a0|99%\u000d\ud8001\u2028z
+prefix%az\u000d\u2029\ud800\u2029}\u2028\u2029z0a|%}	prefixaz\u000d\u2029\ud800\u2029}\u2028\u2029z0a|}
+%{plural:%1|\u000d%}0|1\ud800\ud800:{}a\u000a\u000a	{plural:%1|\u000d%}0|1\ud800\ud800:{}a\u000a\u000a
+%{%0\u2029}\u000d||}	{\u2029}\u000d||}
+prefix%\u000a0\u2028}9z110|}:1:}	prefix%\u000a0\u2028}9z110|}:1:}
+%{plural:%1|\u2029\u000d\u2028:0\u000d\u2028za1{:za\u2028:}\u2028}	{plural:%1|\u2029\u000d\u2028:0\u000d\u2028za1{:za\u2028:}\u2028}
+%{a%|0%%9||::z%|\ud800{%{	{a|0%9||::z|\ud800{{
+prefix%\ud800\u000d|1}}\u000a\u2029a}}\u20289}:0\u000d0\u000d\u2028}	prefix\ud800\u000d|1}}\u000a\u2029a}}\u20289}:0\u000d0\u000d\u2028}
+%{plural:%1|\ud800z\ud8009%\u000a%91}%\u20290\u2028\u000a\u2029:\u000a:a{	{plural:%1|\ud800z\ud8009%\u000a%91}%\u20290\u2028\u000a\u2029:\u000a:a{
+%{\u2028\u000az%0\u2029%{\u2028\u000a1|0%\u000d}|{|0%\u2029}	{\u2028\u000az\u2029{\u2028\u000a1|0%\u000d}|{|0%\u2029}
+%{plural:%1|}z}9%9}	%{plural:%1|}z}9ninth}
+%{:{%\u2029|\ud8000|\u2029}\u2029\u2028}\u000d	{:{%\u2029|\ud8000|\u2029}\u2029\u2028}\u000d
+prefix%\u000a\u000d\u000a}\u000d1\u2029%\u000d:%\u000a9|:0\ud8001\u2029}	prefix%\u000a\u000d\u000a}\u000d1\u2029%\u000d:%\u000a9|:0\ud8001\u2029}
+%{plural:%1|||{\ud800:\ud800{\u000aza\u2029%\u000da\u2028\ud800\ud800	{plural:first|||{\ud800:\ud800{\u000aza\u2029%\u000da\u2028\ud800\ud800
+%{}110\ud800{%1}	{}110\ud800{first}
+%{plural:%1|\u000d\ud8000\u20291a9%}z1}	{plural:%1|\u000d\ud8000\u20291a9%}z1}
+%{|\u000a\u000d\u2029a\u000d\u000d1\u000d0\u2029\u000d	{|\u000a\u000d\u2029a\u000d\u000d1\u000d0\u2029\u000d
+prefix%%{9\ud800\u2028{\u000a{\u2028}	prefix%{9\ud800\u2028{\u000a{\u2028}
+%{plural:%1|\u2028\u000d%z%\ud8000z%\ud800a0|{\ud800|0\ud800|0	{plural:first|\u2028\u000dz\ud8000z\ud800a0|{\ud800|0\ud800|0
+%{91|\u2028%z{1}\ud8009\u2029}	{91|\u2028z{1}\ud8009\u2029}
+prefix%\u000a\u000a\u20281\ud800{1}9\u2028%91a1	prefix%\u000a\u000a\u20281\ud800{1}9\u2028a1
+%{plural:%1|aza\u000d{\u000d\u20299:}	{plural:%1|aza\u000d{\u000d\u20299:}
+%{{|a\ud800%:{a0\u2028%z	{{|a\ud800:{a0\u2028z
+prefix%\u000a\ud800{\u2029\u2028\u000a}1:0|}	prefix%\u000a\ud800{\u2029\u2028\u000a}1:0|}
+%{plural:%1|0{9\u2029	{plural:first|0{9\u2029
+prefix%\u000d}{\u000d}%%1\ud8009\u000a%\ud8000\u20281%	prefix%\u000d}{\u000d}%1\ud8009\u000a\ud8000\u20281%
+%{a}}11|	{a}}11|
+prefix%9\u202900{:\u2029\u000a{1\u000a0|}\u000d0\u20280}	prefixninth\u202900{:\u2029\u000a{1\u000a0|}\u000d0\u20280}
+%{plural:%1||\u000d\ud8001\u000a\u000a}\u2029\u2028z90}\u000d}|z\u000d{11	{plural:%1||\u000d\ud8001\u000a\u000a}\u2029\u2028z90}\u000d}|z\u000d{11
+%{\u2028:\u000d:\u000a:\u2028\u2029\u000az\u000d}1}	{\u2028:\u000d:\u000a:\u2028\u2029\u000az\u000d}1}
+prefix%:	prefix:
+%{plural:%1|\u000a|%\u2028a\ud800}\ud800\ud800:%\u2029\ud800z\ud8009\u000az\u000d%}	{plural:%1|\u000a|%\u2028a\ud800}\ud800\ud800:%\u2029\ud800z\ud8009\u000az\u000d}
+%{{\u2029{\u2028\ud800\u000d9a\ud8000\u000d}%%\u2029\u20299{	{{\u2029{\u2028\ud800\u000d9a\ud8000\u000d}%\u2029\u20299{
+prefix%\u000d0\u000a\u000d0|0\u000a\u000d0\ud800{{|%a}\u2028}	prefix%\u000d0\u000a\u000d0|0\u000a\u000d0\ud800{{|a}\u2028}
+%{plural:%1|}9\u000a\u2029|a\u2028za%:\u000a\u000az|\u2029{\u000a%	%{plural:%1|}9\u000a\u2029|a\u2028za:\u000a\u000az|\u2029{\u000a%
+%{\ud800\u000aaza\u2028}0}	{\ud800\u000aaza\u2028}0}
+prefix%}\u000a{\ud800\u000a\ud800|:|{\ud800\u000a\u20299|{{a\ud800\u000d991	prefix}\u000a{\ud800\u000a\ud800|:|{\ud800\u000a\u20299|{{a\ud800\u000d991
+%{plural:%1|:1%a{\ud800:}\u20299|}	%{plural:%1|:1%a{\ud800:}\u20299|}
+%{0\u20289}0	{0\u20289}0
+prefix%|\u000d\u000a\ud800{0}	prefix|\u000d\u000a\ud800{0}
+%{plural:%1|\u000a}\ud800\u2028\u000a0%%:\u000d0:{{|%10a\u000d0:\u2028	{plural:%1|\u000a}\ud800\u2028\u000a0%:\u000d0:{{|tentha\u000d0:\u2028
+%{%z:\u2028{%}	{z:\u2028{}
+prefix%\u2028	prefix%\u2028
+%{plural:%1|0199\u000d{1000\u000a\ud800|\u2029\u000a\u000d1a\u2028\u000d1:{}	{plural:%1|0199\u000d{1000\u000a\ud800|\u2029\u000a\u000d1a\u2028\u000d1:{}
+%{\u000d}\u20289\u2029	{\u000d}\u20289\u2029
+prefix%\u000da1\u000d:%%\u000a|9\u000a\u000a\u000a0z0:\u2029{\u2029\u2029a9}	prefix%\u000da1\u000d:%\u000a|9\u000a\u000a\u000a0z0:\u2029{\u2029\u2029a9}
+%{plural:%1|a{a{\u2029z%1}}}a:0%|\ud800|%a%z{	{plural:%1|a{a{\u2029z%1}}}a:0|\ud800|az{
+%{z}	{z}
+prefix%1{19%0\u000a0\u20291%z\u000d{\u2028%9\u000da\u000aa	prefixfirst{19\u000a0\u20291z\u000d{\u2028ninth\u000da\u000aa
+%{plural:%1|1|\u2029az|\ud800|9\u2029\ud800\u000d0{1%\u000d{0\u000a}	{plural:%1|1|\u2029az|\ud800|9\u2029\ud800\u000d0{1%\u000d{0\u000a}
+%{|z910%\u2029}|\u2029}%\u20281|z\u000d\u2029\u000a}	{|z910%\u2029}|\u2029}%\u20281|z\u000d\u2029\u000a}
+prefix%\u2029\u2028\u2029\u000a%z9\u2028\u2029z\u2029}90:\u000a}	prefix%\u2029\u2028\u2029\u000az9\u2028\u2029z\u2029}90:\u000a}
+%{plural:%1|z:9}\u2029|\ud800\u2029:\u000d}\u2028%	%{plural:%1|z:9}\u2029|\ud800\u2029:\u000d}\u2028%
+%{{:\ud800%\u000a}%\u20281%:\ud800\u2029z\u2029a:}	{{:\ud800%\u000a}%\u20281:\ud800\u2029z\u2029a:}
+%{plural:%1|1\u000d90}0}	{plural:%1|1\u000d90}0}
+%{\u2029|a0	{\u2029|a0
+prefix%\u000a1za\ud800}	prefix%\u000a1za\ud800}
+%{plural:%1|0\u2028\u2028}0}%||\u20299{a\ud800%|a1%\u000d\u2028\ud800\u000d	{plural:%1|0\u2028\u2028}0}||\u20299{a\ud800|a1%\u000d\u2028\ud800\u000d
+%{\u000a\ud800\ud800az\u2029}	{\u000a\ud800\ud800az\u2029}
+prefix%1{:a:9%\u000a%|0{:\u000a\u2028\u000d\u000a\u000a	prefixfirst{:a:9%\u000a|0{:\u000a\u2028\u000d\u000a\u000a
+%{plural:%1|\u2028{0:a}	{plural:%1|\u2028{0:a}
+%{00:\u000d|:1}\u2028\u000a	{00:\u000d|:1}\u2028\u000a
+prefix%%\ud800z\ud800\u000d\ud800%\ud800}	prefix%\ud800z\ud800\u000d\ud800\ud800}
+%{plural:%1|1\u20289\ud800199{9zz|01{}\u2029	{plural:%1|1\u20289\ud800199{9zz|01{}\u2029
+%{\u2029|{}	{\u2029|{}
+prefix%\ud800z1\u000a%\ud800\u000d\ud800\ud8001:}\u000az%zz\ud8009z{10	prefix\ud800z1\u000a\ud800\u000d\ud800\ud8001:}\u000azzz\ud8009z{10
+%{plural:%1|\ud800z\u2029z\u000a\ud800:\u2029z{}	{plural:%1|\ud800z\u2029z\u000a\ud800:\u2029z{}
+prefix%%\u000a1\ud800}	prefix%\u000a1\ud800}
+%{plural:%1|19|\u000d|\u000d{\u000d9\u000d1|	{plural:first|19|\u000d|\u000d{\u000d9\u000d1|
+%{:\u2029%{0\u000a1\ud800\ud800\u2029\ud800}9\u2029a%0%9%|}	{:\u2029{0\u000a1\ud800\ud800\u2029\ud800}9\u2029aninth|}
+prefix%1\ud8000\ud800:\u2029	prefixfirst\ud8000\ud800:\u2029
+%{plural:%1|a}	%{plural:%1|a}
+%{0\u20289\ud800:\u2028|\u000d:}a0\ud800|\u2028	{0\u20289\ud800:\u2028|\u000d:}a0\ud800|\u2028
+prefix%:}z|0:009}	prefix:}z|0:009}
+%{plural:%1|aa1{:{|%\u000d\u2029\u2029	{plural:first|aa1{:{|%\u000d\u2029\u2029
+%{z9\u000d}	{z9\u000d}
+prefix%\u2028\u000d|\u000da	prefix%\u2028\u000d|\u000da
+%{plural:%1|:\u000a{z:9\u000d\ud800\u2028|0\ud800\u20281\u2028\u000a9\ud800}	{plural:%1|:\u000a{z:9\u000d\ud800\u2028|0\ud800\u20281\u2028\u000a9\ud800}
+%{19	{19
+prefix%}\u2029\u000d::\u000d}	prefix}\u2029\u000d::\u000d}
+%{plural:%1|z|\u000a0\ud800\u000d1a}%1\ud800\ud800\u000d\ud800|9:	{plural:%1|z|\u000a0\ud800\u000d1a}first\ud800\ud800\u000d\ud800|9:
+%{|\u2029\ud80001\ud800:}	{|\u2029\ud80001\ud800:}
+prefix%10\u2029%\u000d:%\u000d%|{\u000da\u2028\ud800\u000d	prefixtenth\u2029%\u000d:%\u000d|{\u000da\u2028\ud800\u000d
+%{plural:%1|:9}	%{plural:%1|:9}
+%{9:\u2028\u000d:{a	{9:\u2028\u000d:{a
+prefix%\u000a1\ud8001:9%\u2028{\ud800:\u20299\u000d\u000aa\u2028\u202919}	prefix%\u000a1\ud8001:9%\u2028{\ud800:\u20299\u000d\u000aa\u2028\u202919}
+%{90{\u000a{|\u20299\ud800{%|0\u000a\ud800||\u000a{}\u20299|}	{90{\u000a{|\u20299\ud800{|0\u000a\ud800||\u000a{}\u20299|}
+prefix%\u20291zz\u2028}\u000d:\u000d\u000dz9\u2029:\u2028%\u000d{\ud800	prefix%\u20291zz\u2028}\u000d:\u000d\u000dz9\u2029:\u2028%\u000d{\ud800
+%{plural:%1|{\u2029\u000a\ud800}	{plural:%1|{\u2029\u000a\ud800}
+%{\u000a\ud800\ud800a9\u2028%	{\u000a\ud800\ud800a9\u2028%
+prefix%{|a}\u2028:}1|00|}	prefix{|a}\u2028:}1|00|}
+%{plural:%1|\u2028\u000d{a\u000a0\u2029\u2029%\u000a{\u000a|9	{plural:first|\u2028\u000d{a\u000a0\u2029\u2029%\u000a{\u000a|9
+%{\u2028\u000a}\u2029\u000d|9:z{9\u20280a}	{\u2028\u000a}\u2029\u000d|9:z{9\u20280a}
+prefix%\u20299{||	prefix%\u20299{||
+%{plural:%1|z{\u2028\u2029\u000aa\u000d1{\ud800\u20299:z1\u000d%}{}	{plural:%1|z{\u2028\u2029\u000aa\u000d1{\ud800\u20299:z1\u000d%}{}
+%{0}}\u000aa1%1\u2029\u000a\u2029a0{a11a{\u000d\ud800a	}\u000aa1first\u2029\u000a\u2029a0{a11a{\u000d\ud800a
+prefix%01\u2029}9}	prefixfirst\u2029}9}
+%{plural:%1|\u000a1|\u2028\ud8000{\u2029{\u2029z	{plural:first|\u000a1|\u2028\ud8000{\u2029{\u2029z
+%{|\u000d{\u2029\u000a\ud8000\u000d\u000d}\u2029\u000a\u000aa\u20291z\u000d}0}	{|\u000d{\u2029\u000a\ud8000\u000d\u000d}\u2029\u000a\u000aa\u20291z\u000d}0}
+prefix%|z\ud800\ud800\u000a1	prefix|z\ud800\ud800\u000a1
+%{plural:%1|}}|\u2028a}|}	%{plural:%1|}}|\u2028a}|}
+%{az:{\u000d1\u000d\u20289\u2029{	{az:{\u000d1\u000d\u20289\u2029{
+prefix%}\u20289%%01:\u000a|{|\u2029}	prefix}\u20289%01:\u000a|{|\u2029}
+%{plural:%1|}\u2029	%{plural:%1|}\u2029
+%{\u000az:91|1\u2028zzza\u000d9\u2028}	{\u000az:91|1\u2028zzza\u000d9\u2028}
+prefix%1}{910a\u2029:a0\u000a	prefixfirst}{910a\u2029:a0\u000a
+%{plural:%1|%{\u000da9\u2029\u000d{%}|z}	{plural:%1|%{\u000da9\u2029\u000d{%}|z}
+%{z}{a\u000d\u000a\ud800{9\u000d:\u000a\ud8000z|\u000d\ud800\u2029|a	{z}{a\u000d\u000a\ud800{9\u000d:\u000a\ud8000z|\u000d\ud800\u2029|a
+prefix%\u000a%}::a%1%\u2029a%\u2028}	prefix%\u000a}::afirst%\u2029a%\u2028}
+%{plural:%1|a\u2029|\u2029\ud800}{a1%:	{plural:%1|a\u2029|\u2029\ud800}{a1:
+%{\u000d\u000a1%1|}	{\u000d\u000a1first|}
+prefix%}\u20299a\ud800	prefix}\u20299a\ud800
+%{plural:%1|\u2029a:0\u000a0\u000a}	{plural:%1|\u2029a:0\u000a0\u000a}
+%{\ud800{10\u000a91{\u000a}:1z	{\ud800{10\u000a91{\u000a}:1z
+prefix%}0}\u000da19\u000d%\u2029\u2029|\u000d{a}\u20281a\u2028\u2028\u000a}	prefix}0}\u000da19\u000d%\u2029\u2029|\u000d{a}\u20281a\u2028\u2028\u000a}
+%{plural:%1|:%	{plural:first|:%
+%{0|a0109|%9a|z{0a1a:}	{0|a0109|nintha|z{0a1a:}
+prefix%\u2029z}z	prefix%\u2029z}z
+%{plural:%1|\u000d}9:0%\u000a|\u2029z\ud800{z}	{plural:%1|\u000d}9:0%\u000a|\u2029z\ud800{z}
+%{|z}0z\u2028z\u000d	{|z}0z\u2028z\u000d
+prefix%z|z\u2028\u2028\u2028\ud800}	prefixz|z\u2028\u2028\u2028\ud800}
+%{plural:%1|z0	{plural:first|z0
+%{90{10}	{90{10}
+prefix%99|\u20281}}z1\u2028|:}\ud800|z:	prefix|\u20281}}z1\u2028|:}\ud800|z:
+%{plural:%1|\u2028}	{plural:%1|\u2028}
+%{:}z%\u2028\ud800\u000d|\u20289\u000a|%	{:}z%\u2028\ud800\u000d|\u20289\u000a|%
+prefix%9{a|}	prefixninth{a|}
+%{plural:%1|\ud800:|%011{1\u20280%\u000a\u2028z\u20290{	{plural:first|\ud800:|{1\u20280%\u000a\u2028z\u20290{
+%{}\ud800|a\u2029{9}|%\u000d\u20299|\ud800\u000a}	{}\ud800|a\u2029{9}|%\u000d\u20299|\ud800\u000a}
+prefix%z909{|a0a:\ud800	prefixz909{|a0a:\ud800
+%{plural:%1|\u202909\u2029:09\u000az\u000d}	{plural:%1|\u202909\u2029:09\u000az\u000d}
+%{\u000a%\ud8000%{\u2028\u2028\ud800z\u2029:\u2029|a{9\u2028|}|\u2028%	{\u000a\ud8000{\u2028\u2028\ud800z\u2029:\u2029|a{9\u2028|}|\u2028%
+prefix%|1\u000d%9{\u000d\u2028:\u000d\u000a}	prefix|1\u000dninth{\u000d\u2028:\u000d\u000a}
+%{{%|z1}09z:\ud800%}	{{|z1}09z:\ud800}
+prefix%\ud800{1	prefix\ud800{1
+%{plural:%1|\u2028:9a}|||00|}1az\u2028|%z%a}	{plural:%1|\u2028:9a}|||00|}1az\u2028|za}
+%{:\u000a\ud800}\u20280\u2029\u20290|\u000d\u2029\u202911\u2029\u000d}:|%z:	{:\u000a\ud800}\u20280\u2029\u20290|\u000d\u2029\u202911\u2029\u000d}:|z:
+prefix%0\ud800\u2029\u000d|\u2029|}\ud800\u000a\u2029\u000d\u2029{zz}	prefix\ud800\u2029\u000d|\u2029|}\ud800\u000a\u2029\u000d\u2029{zz}
+%{plural:%1|\u2028\u000d|11\u2028	{plural:first|\u2028\u000d|11\u2028
+%{::\ud8001}\u2028\u2029\ud800:{0\u2029z}	{::\ud8001}\u2028\u2029\ud800:{0\u2029z}
+prefix%\ud8009\ud8001|z\u000aa\u2028a%a1\u000d{}\u2029\u2028	prefix\ud8009\ud8001|z\u000aa\u2028aa1\u000d{}\u2029\u2028
+%{plural:%1|\u000d\u2029\u000d1%1%|%9::\u000d0z}%\u2029\u2028z|za}	{plural:%1|\u000d\u2029\u000d1%1%|%9::\u000d0z}%\u2029\u2028z|za}
+%{{\ud800{|0	{{\ud800{|0
+prefix%9\u000a\u000d\u000d|\ud800\u000a}||1z|}	prefixninth\u000a\u000d\u000d|\ud800\u000a}||1z|}
+%{plural:%1||1\u000d0\u000d9	{plural:first||1\u000d0\u000d9
+%{0:00}z1}	{0:00}z1}
+prefix%0}\u2028|	prefix}\u2028|
+%{plural:%1|{\ud800\u000d{::1a{z1a{}	{plural:%1|{\ud800\u000d{::1a{z1a{}
+%{:0:{0\u000d{\u000d9\ud800%1\ud800\u2029\u000d11a|}|0%	{:0:{0\u000d{\u000d9\ud800first\ud800\u2029\u000d11a|}|0%
+prefix%91:\ud800\u2029\u000a1\u000a\u2029\u000a0|a\u20289\ud800}}	prefix:\ud800\u2029\u000a1\u000a\u2029\u000a0|a\u20289\ud800}}
+%{plural:%1|1az	{plural:first|1az
+%{\u2029\u2029\u000d|}	{\u2029\u2029\u000d|}
+prefix%9{\u000d00:a\u2028\u000a99	prefixninth{\u000d00:a\u2028\u000a99
+%{plural:%1|11\u000da\u000a0%z\u2028z0\u000d1\u000a\ud800z:\u2028}	{plural:%1|11\u000da\u000a0%z\u2028z0\u000d1\u000a\ud800z:\u2028}
+%{0%\u000d{\ud800a\ud800	{0%\u000d{\ud800a\ud800
+prefix%\ud800}0\u000d\ud800\u20289\u000a}:\u2029z9\u2028|\u000aa\u2028}{90}	prefix\ud800}0\u000d\ud800\u20289\u000a}:\u2029z9\u2028|\u000aa\u2028}{90}
+%{plural:%1|}\ud800\ud8001\u2028{a\ud800\u2029z\ud800	%{plural:%1|}\ud800\ud8001\u2028{a\ud800\u2029z\ud800
+%{\ud800z{%:09z:\u2028\u20291\u2028{:|\u000a\u000a}\u000a}	{\ud800z{:09z:\u2028\u20291\u2028{:|\u000a\u000a}\u000a}
+prefix%\u2029\u000d1z\ud800{1}{\u20299|{\ud800zz	prefix%\u2029\u000d1z\ud800{1}{\u20299|{\ud800zz
+%{plural:%1|\u000a}}\u000dz}	{plural:%1|\u000a}}\u000dz}
+%{|z\u000a\u000d1}\u2028\u000a	{|z\u000a\u000d1}\u2028\u000a
+prefix%z%\u000a:\u000a\u000d:{{}	prefixz%\u000a:\u000a\u000d:{{}
+%{1{\ud800\ud800\u2028\ud800:\u2029}\ud8009\u000az|{{\u2029\u2029%}	{1{\ud800\ud800\u2028\ud800:\u2029}\ud8009\u000az|{{\u2029\u2029}
+prefix%\u2028z0\u2029{0%\ud8001:a||z9}0	prefix%\u2028z0\u2029{0\ud8001:a||z9}0
+%{plural:%1|0\u000a9\ud800}\u2029\u000a}	{plural:%1|0\u000a9\ud800}\u2029\u000a}
+%{0	{0
+prefix%\u000a\u2029\u000d}	prefix%\u000a\u2029\u000d}
+%{plural:%1|9\u2029\u000a	{plural:first|9\u2029\u000a
+%{{\u2028\ud800{|\ud800:\u000a\u2029{0{\u000a|%1z\u000d}	{{\u2028\ud800{|\ud800:\u000a\u2029{0{\u000a|firstz\u000d}
+prefix%\u2028a\u2028%\u2029\ud8001{\u000d|\u2028\u000d0z{:\ud8009\u2029	prefix%\u2028a\u2028%\u2029\ud8001{\u000d|\u2028\u000d0z{:\ud8009\u2029
+%{plural:%1|a\u2028:}\u2029\u000a\u2029%{:1%99\u2028\u000a}	{plural:%1|a\u2028:}\u2029\u000a\u2029{:1\u2028\u000a}
+%{\u000a\u000d{\u2029	{\u000a\u000d{\u2029
+prefix%\u000a909\u2028{\ud800\u2029\u000d{a}\u000d\u000da\u2029\u000aa9}	prefix%\u000a909\u2028{\ud800\u2029\u000d{a}\u000d\u000da\u2029\u000aa9}

@@ -1,0 +1,16 @@
+# Pinned reference observations; values exported without normalization.
+# name_bytes	format_utf16	expected_utf16	argument_count
+literal-percent	100% ready	100 ready	12
+numbered-and-braced	%1/%2/%10/%12/%0/%00/%01/%{1}/%{8}/%{9}/%{10}/%{12}/%{99}	arg-1-\u03bb/arg-2-\u03bb/arg-10-\u03bb/arg-12-\u03bb///arg-1-\u03bb/arg-1-\u03bb/arg-8-\u03bb/{9}/arg-10-\u03bb/arg-12-\u03bb/{99}	12
+missing-argument	missing:%2:end	missing::end	1
+plural-forms-remain-source-text	plural %{plural:%1|item|items}: %{1}	plural %{plural:%1|item|items}: arg-1-\u03bb	12
+nested-plural-capture	nested %{plural:%1|%{2}|many}	nested %{plural:%1|%{2}|many}	12
+empty-plural-malformed	empty %{plural:%1|}	empty %{plural:%1|}	12
+uppercase-plural-malformed	upper %{Plural:%1|one|many}	upper {Plural:arg-1-\u03bb|one|many}	12
+unfinished-plural	unfinished %{plural:%1|one	unfinished {plural:arg-1-\u03bb|one	12
+unfinished-braced	unfinished %{1	unfinished {1	12
+escaped-percent-shape	double %% and percent-%x	double % and percent-x	12
+percent-before-line-terminators	%\u000a%\u000d%\u2028%\u2029	%\u000a%\u000d%\u2028%\u2029	12
+unicode-format-and-argument	\u03bb=%1; emoji=%2	\u03bb=\u03b1; emoji=\ud83e\uddee	2
+astral-after-percent	%\ud83d\ude00	\ud83d\ude00	12
+nul-and-surrogate-units	a\u0000b\ud800c\udc00d	a\u0000b\ud800c\udc00d	12
