@@ -31,38 +31,7 @@ const cases = [
   {name:'mglyph-invalid-empty-source-and-index',kind:'verification',mathml:'<math xmlns="http://www.w3.org/1998/Math/MathML"><mglyph src="" fontfamily="" index=""/></math>',display:false,em:16,ex:8,width:1280,fontCache:'none'},
 ];
 
-function cppRaw(value, prefix) {
-  const chunks = [];
-  let rest = value;
-  while (Buffer.byteLength(rest, 'utf8') > 3500) {
-    let end = Math.min(rest.length, 3500);
-    while (Buffer.byteLength(rest.slice(0, end), 'utf8') > 3500) end--;
-    while (end > 0 && end < rest.length && /[\uD800-\uDBFF]/.test(rest[end - 1])) end--;
-    assert.ok(end > 0, 'Unable to split a C++ raw string at UTF-8 boundary');
-    chunks.push(rest.slice(0, end)); rest = rest.slice(end);
-  }
-  chunks.push(rest);
-  return chunks.map((chunk, i) => {
-    const delimiter = `${prefix}${i}`;
-    assert.ok(delimiter.length <= 16 && !chunk.includes(`)${delimiter}"`));
-    return `R"${delimiter}(${chunk})${delimiter}"`;
-  }).join('\n    ');
-}
 
-function cppU16(value) {
-  let out = 'u"';
-  for (const ch of value) {
-    const cp = ch.codePointAt(0);
-    if (ch === '"') out += '\\"';
-    else if (ch === '\\') out += '\\\\';
-    else if (ch === '\n') out += '\\n';
-    else if (ch === '\r') out += '\\r';
-    else if (ch === '\t') out += '\\t';
-    else if (cp < 0x20 || cp === 0x7f) out += `\\u${cp.toString(16).padStart(4,'0')}`;
-    else out += ch;
-  }
-  return out + '"';
-}
 
 function flattenMml(rootNode) {
   const nodes = [], attributes = [], indices = new Map();
@@ -90,27 +59,7 @@ function imageAttributes(svg) {
     .map(match => ({name:match[1],value:match[2]})));
 }
 
-function cppArrays(record, i) {
-  const n = record.mml.nodes.map((node,j)=>`{${cppRaw(node.kind,`K${i}${j}`)},${node.inferred},${node.parent},${node.first},${node.count},${cppU16(node.text)}}`);
-  const a = record.mml.attributes.map(attr=>`{${cppU16(attr.name)},mathml_scene_test::AttributeKind::${attr.kind},${cppU16(attr.text ?? '')},${attr.number ?? 0},${attr.boolean ?? false}}`);
-  const prefixes = record.prefixes.map((prefix,j)=>cppRaw(prefix,`P${i}${j}`));
-  const images = record.imageAttributes.flatMap((attrs,j)=>attrs.map((attr,k)=>`{${j},${cppRaw(attr.name,`IN${i}${j}${k}`)},${cppRaw(attr.value,`IV${i}${j}${k}`)}}`));
-  const measures = record.measurements.map((measure,j)=>`{${cppU16(measure.text)},${cppRaw(measure.variant,`MV${i}${j}`)},${cppRaw(measure.fontFamily ?? '',`MF${i}${j}`)},${measure.italic ?? false},${measure.bold ?? false},${measure.bbox.w},${measure.bbox.h},${measure.bbox.d}}`);
-  return `constexpr std::array<mathml_scene_test::Node,${n.length}> mglyphNodes${i}{{${n.join(',')}}};\n`+
-    `constexpr std::array<mathml_scene_test::Attribute,${a.length}> mglyphAttributes${i}{{${a.join(',')}}};\n`+
-    `constexpr std::array<std::string_view,${prefixes.length}> mglyphPrefixes${i}{{${prefixes.join(',')}}};\n`+
-    `constexpr std::array<MglyphImageAttribute,${images.length}> mglyphImageAttributes${i}{{${images.join(',')}}};\n`+
-    `constexpr std::array<MglyphSourceMeasurement,${measures.length}> mglyphMeasurements${i}{{${measures.join(',')}}};\n`;
-}
 
-function cppRecord(record,i) {
-  const kind = {image:'image',legacy:'legacy',verification:'verification'}[record.kind];
-  const svg = cppRaw(record.svg ?? '',`S${i}`), mathml = cppRaw(record.mathml,`T${i}`);
-  const box = record.mglyphBBox
-    ? `MglyphSourceBBox{${record.mglyphBBox.w},${record.mglyphBBox.h},${record.mglyphBBox.d},${record.mglyphBBox.scale},${record.mglyphBBox.rscale},${record.mglyphBBox.L},${record.mglyphBBox.R}}`
-    : 'std::nullopt';
-  return `{${cppRaw(record.name,`N${i}`)},MglyphSourceKind::${kind},${mathml},${record.requestedDisplay},${record.display},${record.em},${record.ex},${record.width},${cppRaw(record.fontCache,`C${i}`)},${cppRaw(record.localID ?? '',`I${i}`)},${record.rootBBox.w},${record.rootBBox.h},${record.rootBBox.d},${box},${cppRaw(record.error?.name ?? '',`EN${i}`)},${cppRaw(record.error?.message ?? '',`EM${i}`)},${svg},mglyphPrefixes${i},mglyphImageAttributes${i},mglyphMeasurements${i},mglyphNodes${i},mglyphAttributes${i}}`;
-}
 
 async function main() {
   const {createReference}=require('./reference-profile.cjs');
@@ -240,17 +189,21 @@ async function main() {
   const evidence=path.join(root,'build/math-port/mglyph-scene-source.json');
   fs.mkdirSync(path.dirname(evidence),{recursive:true});
   fs.writeFileSync(evidence,JSON.stringify({provenance,records},null,2)+'\n');
-  const header=`// Pinned MathJax ${scope.upstream.version} ${scope.upstream.commit}; independent Source observations.\n`+
-`enum class MglyphSourceKind { image, legacy, verification };\n`+
-`struct MglyphImageAttribute { unsigned image_index; std::string_view name; std::string_view value; };\n`+
-`struct MglyphSourceMeasurement { std::u16string_view text; std::string_view variant; std::string_view font_family; bool italic; bool bold; double w,h,d; };\n`+
-`struct MglyphSourceBBox { double w,h,d,scale,rscale,L,R; };\n`+
-`struct MglyphSourceCase { std::string_view name; MglyphSourceKind kind; std::string_view mathml; bool requested_display; bool display; double em,ex,width; std::string_view font_cache,local_id; double root_w,root_h,root_d; std::optional<MglyphSourceBBox> mglyph_bbox; std::string_view error_name,error_message,svg; std::span<std::string_view const> local_cache_prefixes; std::span<MglyphImageAttribute const> image_attributes; std::span<MglyphSourceMeasurement const> measurements; std::span<mathml_scene_test::Node const> nodes; std::span<mathml_scene_test::Attribute const> attributes; };\n`;
-  const fixture=header+records.map(cppArrays).join('')+`constexpr MglyphSourceCase sourceMglyphCases[]{\n`+records.map(cppRecord).join(',\n')+`\n};\n`;
-  const target=path.join(root,'tests/math/fixtures/mglyph_scene_source.hpp');
-  const previous=fs.existsSync(target)?fs.readFileSync(target,'utf8'):null;
-  if(process.argv[2]==='--write-fixture') { if(previous!==fixture) fs.writeFileSync(target,fixture); }
-  else assert.equal(previous,fixture,'Independent pinned Source mglyph fixture differs; review before --write-fixture');
+  const {writeObservations, flatMml} = require('./mathml-observation-data.cjs');
+  const observations = {sourceMglyphCases: records.map(r => ({
+    name: r.name, kind: r.kind, mathml: r.mathml, requested_display: r.requestedDisplay,
+    display: r.display, em: r.em, ex: r.ex, width: r.width,
+    font_cache: r.fontCache, local_id: r.localID ?? '',
+    root_w: r.rootBBox.w, root_h: r.rootBBox.h, root_d: r.rootBBox.d,
+    mglyph_bbox: r.mglyphBBox, error_name: r.error?.name ?? '', error_message: r.error?.message ?? '',
+    svg: r.svg ?? '', local_cache_prefixes: r.prefixes,
+    image_attributes: r.imageAttributes.flatMap((attrs, image_index) =>
+      attrs.map(a => ({image_index, ...a}))),
+    measurements: r.measurements.map(m => ({text: m.text, variant: m.variant,
+      font_family: m.fontFamily ?? '', italic: m.italic ?? false, bold: m.bold ?? false, ...m.bbox})),
+    ...flatMml(r.mml.nodes, r.mml.attributes)
+  }))};
+  writeObservations('mglyph', observations);
   process.stdout.write(`Verified ${records.length} pinned Source mglyph cases; evidence ${path.relative(root,evidence)}\n`);
 }
 

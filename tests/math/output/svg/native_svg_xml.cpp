@@ -22,7 +22,7 @@ import folia.math.output.svg.wrapper_factory;
 import folia.math.output.svg.writer;
 import folia.math.util.utf16;
 
-#include "math/support/mathml_scene.hpp"
+#include "math/support/mathml_observations.hpp"
 
 using namespace boost::ut;
 namespace mml = folia::math::mml;
@@ -31,7 +31,7 @@ namespace scene = folia::math::output::scene;
 namespace svg = folia::math::output::svg;
 namespace lite = folia::math::adaptors::lite;
 
-#include "math/fixtures/common-source/xml-mathml-scene.inc"
+#include "math/support/xml_observations.hpp"
 
 namespace {
 class XmlMeasurement final : public common::MeasurementTarget {
@@ -266,20 +266,20 @@ suite native_svg_xml = [] {
         expect(bool(annotationXmlRegistration != nullptr))
             << "SVG catalog has annotation-xml wrapper registration";
         if (xmlRegistration != nullptr)
-            expect(bool(sourceStylesMatch(xmlRegistration->data, sourceXmlStyleEntries)))
+            expect(bool(sourceStylesMatch(xmlRegistration->data, sourceXmlStyleEntries())))
                 << "native XML registration styles match pinned Source style entries";
         if (htmlRegistration != nullptr)
-            expect(bool(sourceStylesMatch(htmlRegistration->data, sourceXmlStyleEntries)))
+            expect(bool(sourceStylesMatch(htmlRegistration->data, sourceXmlStyleEntries())))
                 << "native HTML registration styles match pinned Source style entries";
         if (annotationXmlRegistration != nullptr)
             expect(bool(sourceStylesMatch(annotationXmlRegistration->data,
-                                          sourceAnnotationXmlStyleEntries)))
+                                          sourceAnnotationXmlStyleEntries())))
                 << "native annotation-xml registration styles match pinned Source style entries";
 
         bool sawAutomaticForce = false;
         bool sawAutomaticForceDimensions = false;
         bool sawAuthoredStyleFallback = false;
-        for (auto const &source : sourceXmlCases) {
+        for (auto const &source : sourceXmlCases()) {
             auto captured = capture(source, bundle);
             const auto afterRetirement = serialize(captured.value, bundle);
             const auto expectedSvg = source_svg_paint::materialize(source.source.source_svg);

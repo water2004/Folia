@@ -4,7 +4,7 @@
 import folia.math.fonts.newcm_font_module_provider;
 import folia.math.output.common;
 import folia.math.output.svg.writer;
-#include "math/support/mathml_scene.hpp"
+#include "math/support/mathml_observations.hpp"
 
 using namespace boost::ut;
 namespace mml = folia::math::mml;
@@ -92,27 +92,7 @@ mml::MmlNode &mathTableRoot(mml::MmlDocument &doc, mml::MmlNode &table,
     return doc.factory().make(mml::NodeKind::math, std::move(attrs), children);
 }
 
-using MathmlAttributeKind = mathml_scene_test::AttributeKind;
-using MathmlSceneAttribute = mathml_scene_test::Attribute;
-using MathmlSceneNode = mathml_scene_test::Node;
-using MathmlSceneMetrics = mathml_scene_test::Metrics;
-struct MathmlSceneBBox {
-    double w{}, h{}, d{}, L{}, R{};
-};
-struct MathmlTableSceneCase {
-    std::string_view name;
-    MathmlSceneMetrics metrics;
-    std::span<MathmlSceneNode const> nodes;
-    std::span<MathmlSceneAttribute const> attributes;
-    std::span<double const> H, D, W;
-    double L{};
-    std::span<double const> row_rscales;
-    std::size_t dotted_lines{};
-    std::size_t dotted_frames{};
-    MathmlSceneBBox bbox;
-    std::string_view source_svg;
-};
-#include "math/fixtures/common-source/table-mathml-scene.inc"
+#include "math/support/table_observations.hpp"
 
 mml::MmlNode &constructSourceMathml(mml::MmlDocument &doc, MathmlTableSceneCase const &source,
                                     mml::MmlNode **tableOut) {
@@ -723,7 +703,7 @@ suite common_table_native = [] {
 
     "direct_MathML_table_attributes_match_pinned_Source_SVG"_test = [] {
         auto bundle = folia::math::fonts::makeNewcmFontData();
-        for (const auto &test : sourceTableCases) {
+        for (const auto &test : sourceTableCases()) {
             try {
                 verifySourceMathmlTable(test, bundle);
             } catch (const std::exception &error) {

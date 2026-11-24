@@ -21,7 +21,7 @@ import folia.math.output.scene;
 import folia.math.output.svg.wrapper_factory;
 import folia.math.output.svg.writer;
 
-#include "math/support/mathml_scene.hpp"
+#include "math/support/mathml_observations.hpp"
 
 using namespace boost::ut;
 namespace common = folia::math::output::common;
@@ -29,39 +29,7 @@ namespace mml = folia::math::mml;
 namespace scene = folia::math::output::scene;
 namespace svg = folia::math::output::svg;
 
-struct TableProfileBBox {
-    double w{}, h{}, d{}, scale{}, rscale{}, L{}, R{};
-};
-struct TableProfileTable {
-    std::size_t node_index{};
-    TableProfileBBox bbox;
-    std::size_t rows{}, cols{};
-    bool has_labels{}, is_top{};
-    double pwidth{};
-    std::span<double const> H, D, W, NH, ND;
-    double label_width{};
-};
-struct TableProfileMeasurement {
-    std::u16string_view text;
-    std::string_view variant, font_family;
-    bool italic{}, bold{};
-    double w{}, h{}, d{};
-};
-struct TableProfileSourceCase {
-    std::string_view name, mathml;
-    bool requested_display{}, display{};
-    double em{}, ex{}, width{};
-    std::string_view font_cache;
-    TableProfileBBox root_bbox;
-    std::string_view error_name, error_message, svg;
-    std::span<std::string_view const> local_cache_prefixes;
-    std::span<TableProfileTable const> tables;
-    std::span<TableProfileMeasurement const> measurements;
-    std::span<mathml_scene_test::Node const> nodes;
-    std::span<mathml_scene_test::Attribute const> attributes;
-};
-
-#include "math/fixtures/table_profile_source.hpp"
+#include "math/support/table_profile_observations.hpp"
 
 namespace {
 bool close(double actual, double expected) {
@@ -265,9 +233,9 @@ CapturedScene captureTableProfile(TableProfileSourceCase const &source,
 suite native_table_profile_source = [] {
     "pinned_MathML_table_profile_matches_layout_cache_modes_and_request_retirement"_test = [] {
         auto bundle = folia::math::fonts::makeNewcmFontData();
-        expect(std::size(sourceTableProfileCases) == 14u)
+        expect(std::size(sourceTableProfileCases()) == 14u)
             << "Source profile contains seven representative cases in none/local modes";
-        for (const auto &source : sourceTableProfileCases) {
+        for (const auto &source : sourceTableProfileCases()) {
             expect(source.error_name.empty())
                 << source.name << ": pinned Source compilation succeeded (" << source.error_name
                 << ": " << source.error_message << ')';

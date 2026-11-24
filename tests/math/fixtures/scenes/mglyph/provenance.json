@@ -1,0 +1,11 @@
+{
+  "upstream": "MathJax 4.1.3",
+  "original_fixture": "mglyph_scene_source.hpp",
+  "original_sha256": "ef8fe550e9d54839050ffa896556f7d8adc555b02f184ed827a476d05d31e1ab",
+  "source_metadata": [
+    "Pinned MathJax 4.1.3 fb987178c2d279a99b0db5ea02e751691703955e; independent Source observations."
+  ],
+  "record_counts": {
+    "sourceMglyphCases": 13
+  }
+}

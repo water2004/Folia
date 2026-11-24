@@ -207,76 +207,9 @@ function validateSourceRecord(record) {
   else assert.equal(record.local_cache_prefixes.length,0,`${record.name}: none cache has no local prefix`);
 }
 
-function cppString(value, prefix) {
-  let rest = String(value), chunks = [];
-  while (Buffer.byteLength(rest, 'utf8') > 3200) {
-    let end = Math.min(rest.length, 3200);
-    while (end > 0 && Buffer.byteLength(rest.slice(0,end), 'utf8') > 3200) end--;
-    if (end > 0 && end < rest.length && /[\uD800-\uDBFF]/.test(rest[end-1])) end--;
-    assert.ok(end > 0);
-    chunks.push(rest.slice(0,end)); rest = rest.slice(end);
-  }
-  chunks.push(rest);
-  return chunks.map((chunk,i) => {
-    const delimiter = `${prefix}${i}`;
-    assert.ok(delimiter.length <= 16 && !chunk.includes(`)${delimiter}"`));
-    return `R"${delimiter}(${chunk})${delimiter}"`;
-  }).join('\n    ');
-}
 
-function cppU16(value) {
-  let out='u"';
-  for (const char of String(value)) {
-    const cp=char.codePointAt(0);
-    if (char==='"') out+='\\"'; else if (char==='\\') out+='\\\\';
-    else if (char==='\n') out+='\\n'; else if (char==='\r') out+='\\r';
-    else if (char==='\t') out+='\\t'; else if (cp<0x20 || cp===0x7f) out+=`\\u${cp.toString(16).padStart(4,'0')}`;
-    else out+=char;
-  }
-  return out+'"';
-}
 
-function cppAttribute(attribute) {
-  const name = cppU16(attribute.name);
-  if (attribute.kind === 'boolean') return `{${name}, mathml_scene_test::AttributeKind::boolean, {}, 0, ${attribute.boolean}}`;
-  if (attribute.kind === 'number') return `{${name}, mathml_scene_test::AttributeKind::number, {}, ${attribute.number}, false}`;
-  return `{${name}, mathml_scene_test::AttributeKind::text, ${cppU16(attribute.text)}, 0, false}`;
-}
 
-function emitTree(record, index) {
-  const prefix = `tableProfile${index}`;
-  assert.ok(record.nodes.length);
-  const nodes = record.nodes.map(node => `{${cppString(node.kind,`K${index}`)},${node.inferred},`+
-    `${node.parent === null ? 'std::numeric_limits<std::size_t>::max()' : node.parent},`+
-    `${node.first},${node.count},${cppU16(node.text)}}`).join(',\n');
-  const attrs = record.attributes.map(cppAttribute).join(',\n');
-  let declarations = `constexpr std::array<mathml_scene_test::Node,${record.nodes.length}> ${prefix}Nodes{{\n${nodes}\n}};\n`+
-    `constexpr std::array<mathml_scene_test::Attribute,${record.attributes.length}> ${prefix}Attributes{{\n${attrs}\n}};\n`;
-  const tableValues = record.tables.map((table, tableIndex) => {
-    const arrays = {};
-    for (const key of ['H','D','W','NH','ND']) {
-      assert.ok(table[key].length, `${record.name}: empty ${key}`);
-      arrays[key] = `${prefix}T${tableIndex}${key}`;
-      declarations += `constexpr std::array<double,${table[key].length}> ${arrays[key]}{{${table[key].join(',')}}};\n`;
-    }
-    return `TableProfileTable{${table.node_index},TableProfileBBox{${Object.values(table.bbox).join(',')}},`+
-      `${table.rows},${table.cols},${table.has_labels},${table.is_top},${table.pwidth},`+
-      `${arrays.H},${arrays.D},${arrays.W},${arrays.NH},${arrays.ND},${table.label_width}}`;
-  }).join(',\n');
-  declarations += `constexpr std::array<TableProfileTable,${record.tables.length}> ${prefix}Tables{{\n${tableValues}\n}};\n`;
-  declarations += `constexpr std::array<std::string_view,${record.local_cache_prefixes.length}> ${prefix}Prefixes{{`+
-    record.local_cache_prefixes.map((value,i)=>cppString(value,`P${index}${i}`)).join(',')+'}};\n';
-  const measurementValues = record.measurements.map((measure,i) =>
-    `TableProfileMeasurement{${cppU16(measure.text)},${cppString(measure.variant,`V${index}${i}`)},`+
-    `${cppString(measure.font_family,`F${index}${i}`)},${measure.italic},${measure.bold},${measure.w},${measure.h},${measure.d}}`).join(',\n');
-  declarations += `constexpr std::array<TableProfileMeasurement,${record.measurements.length}> ${prefix}Measurements{{\n${measurementValues}\n}};\n`;
-  const value = `TableProfileSourceCase{${cppString(record.name,`N${index}`)},${cppString(record.mathml,`I${index}`)},`+
-    `${record.requested_display},${record.display},${record.em},${record.ex},${record.width},`+
-    `${cppString(record.font_cache,`C${index}`)},TableProfileBBox{${Object.values(record.root_bbox).join(',')}},`+
-    `${cppString(record.error_name,`E${index}`)},${cppString(record.error_message,`M${index}`)},`+
-    `${cppString(record.svg,`S${index}`)},${prefix}Prefixes,${prefix}Tables,${prefix}Measurements,${prefix}Nodes,${prefix}Attributes}`;
-  return {declarations,value};
-}
 
 async function main() {
   const records = [];
@@ -285,25 +218,13 @@ async function main() {
   const provenance = {upstream:scope.upstream,profile_sha256:scope.profile.sha256,
     dependency_lock_sha256:scope.dependency_lock_sha256,output_profile:ref.provenance,
     scope_sha256:sha(fs.readFileSync(scopePath)), node:process.version};
-  const generated = records.map(emitTree);
-  const header = `// Pinned MathJax ${scope.upstream.version} ${scope.upstream.commit}; independent Source observations.\n`+
-    `// full38 profile/NewCM output with actual MathML compiler; SVG bytes originate from Source.\n`+
-    `// packages ${scope.profile.tex_packages.join(',')}\n`+
-    `// dependency-lock-sha256 ${provenance.dependency_lock_sha256}\n`+
-    `// compiled-source-sha256 ${ref.provenance.compiled_source_sha256}\n`+
-    `// font-packages ${scope.font_packages.map(font=>`${font.package}@${font.version}:${font.integrity}`).join(' | ')}\n`+
-    `// scope-sha256 ${provenance.scope_sha256}\n// profile-sha256 ${provenance.profile_sha256}\n`;
-  const fixture = header + generated.map(item=>item.declarations).join('\n')+
-    `\nconstexpr TableProfileSourceCase sourceTableProfileCases[]{\n`+
-    generated.map(item=>'  '+item.value).join(',\n')+'\n};\n';
-  const target = path.join(root,'tests/math/fixtures/table_profile_source.hpp');
-  const previous = fs.existsSync(target) ? fs.readFileSync(target,'utf8') : null;
+  const {writeObservations, flatMml} = require('./mathml-observation-data.cjs');
+  const observations = {sourceTableProfileCases: records.map(r => ({...r,
+    ...flatMml(r.nodes, r.attributes)}))};
   const evidence = path.join(root,'build/math-port/table-profile-source.json');
   fs.mkdirSync(path.dirname(evidence),{recursive:true});
   fs.writeFileSync(evidence,JSON.stringify({provenance,records},null,2)+'\n');
-  if (process.argv[2] === '--write-fixture') {
-    if (previous !== fixture) fs.writeFileSync(target,fixture);
-  } else assert.equal(previous,fixture,'Independent table profile fixture differs; review before --write-fixture');
+  writeObservations('table-profile', observations);
   process.stdout.write(`Verified ${records.length} pinned Source table profile cases; evidence ${path.relative(root,evidence)}\n`);
 }
 

@@ -1,0 +1,13 @@
+{
+  "upstream": "MathJax 4.1.3",
+  "original_fixture": "maction_scene_source.hpp",
+  "original_sha256": "e00941e648aae4ce257f227b89c6f9e76974a4d3ac49c83987ff6708ff5e4fa1",
+  "source_metadata": [
+    "Pinned MathJax 4.1.3 fb987178c2d279a99b0db5ea02e751691703955e",
+    "Independent MathML Source; passive event registration only; no dispatch."
+  ],
+  "record_counts": {
+    "sourceMactionStyles": 32,
+    "sourceMactionCases": 14
+  }
+}

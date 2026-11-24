@@ -21,7 +21,7 @@ import folia.math.output.svg.maction;
 import folia.math.output.svg.wrapper_factory;
 import folia.math.output.svg.writer;
 
-#include "math/support/mathml_scene.hpp"
+#include "math/support/mathml_observations.hpp"
 
 using namespace boost::ut;
 namespace common = folia::math::output::common;
@@ -29,7 +29,7 @@ namespace mml = folia::math::mml;
 namespace scene = folia::math::output::scene;
 namespace svg = folia::math::output::svg;
 
-#include "math/fixtures/maction_scene_source.hpp"
+#include "math/support/maction_observations.hpp"
 
 namespace {
 class RejectMeasurement final : public common::MeasurementTarget {
@@ -83,11 +83,11 @@ bool sourceStylesMatch(common::CommonWrapperClassData const &data) {
     std::vector<FlatStyle> actual;
     for (auto const &rule : data.styles)
         flattenStyleRule(rule, {}, actual);
-    if (actual.size() != std::size(sourceMactionStyles))
+    if (actual.size() != std::size(sourceMactionStyles()))
         return false;
     for (std::size_t i = 0; i < actual.size(); ++i) {
         auto const &a = actual[i];
-        auto const &e = sourceMactionStyles[i];
+        auto const &e = sourceMactionStyles()[i];
         if (a.selector != e.selector || a.property != e.property || a.numeric != e.numeric)
             return false;
         if (e.numeric ? !close(a.number, e.number) : a.text != e.text)
@@ -266,7 +266,7 @@ suite native_svg_maction_source = [] {
         expect(bool(sourceStylesMatch(registration->data)))
             << "native maction registration matches typed pinned Source styles";
 
-        for (auto const &source : sourceMactionCases) {
+        for (auto const &source : sourceMactionCases()) {
             const auto captured = capture(source, bundle);
             const bool sourceListenersValid = sourceListenerShapeValid(source);
             expect(bool(sourceListenersValid))

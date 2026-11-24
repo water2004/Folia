@@ -1,0 +1,18 @@
+{
+  "upstream": "MathJax 4.1.3",
+  "original_fixture": "table_profile_source.hpp",
+  "original_sha256": "b23150d14cb8cdeb08e429428c87b6820f16bffb14eb87613165dad7209c12f8",
+  "source_metadata": [
+    "Pinned MathJax 4.1.3 fb987178c2d279a99b0db5ea02e751691703955e; independent Source observations.",
+    "full38 profile/NewCM output with actual MathML compiler; SVG bytes originate from Source.",
+    "packages base,action,ams,amscd,bbm,bboldx,bbox,begingroup,boldsymbol,braket,bussproofs,cancel,cases,centernot,color,colortbl,configmacros,dsfont,empheq,enclose,extpfeil,fontsizev3,gensymb,html,mathtools,mhchem,newcommand,noundefined,physics,setoptions,tagformat,texhtml,textcomp,textmacros,unicode,units,upgreek,verb",
+    "dependency-lock-sha256 828fefdb77d220eb3ce0f4d2ad7deedc7411072824719897f9a50f61bf462c8b",
+    "compiled-source-sha256 cbb0d3b6a08fbde6614b070f111fb58cc3cfe9d00a9713163fd4cd6d0300355a",
+    "font-packages @mathjax/mathjax-newcm-font@4.1.3:sha512-gzAB3dFHilHX1l5x2xUqRL+1jDQt3Fyza1DkEMVXWC4E8SvsGdlgEza47HYi2WhVcgfkvf4zgUGzuhbq3Pjlew== | @mathjax/mathjax-bbm-font-extension@4.1.3:sha512-dhL8qBIA7COFAeB+ypxbmNtb85+E8Xgis1TaUP5SKpYMMhU0wLcbDwgpriZcpca4Jneo7r6Ty4qEN+0yu6FQyw== | @mathjax/mathjax-bboldx-font-extension@4.1.3:sha512-14X0eHMrl9s5jHYuvb3hZcKD1wM6lBHPrnmgFFLAminw2QvZ7mcaLHQJ5epTjPYLe0zKcICZJk+9ndih/JVuPg== | @mathjax/mathjax-dsfont-font-extension@4.1.3:sha512-etOaSzjnPlt/iMHrw1NKyBQ3p41juyyzarOIIMZ5wiSoti+THx0mEtxh33sa/Y0/xXa0CwiSsT5uhHXNKnI7QA==",
+    "scope-sha256 9705d389538b2fc8bf782feea4372ace639b3727304f2971937bbcfb0042a0d1",
+    "profile-sha256 a5a03eed8a10872b9b435b9e602523a08a9f574e21cc5636e8377f0222811ac9"
+  ],
+  "record_counts": {
+    "sourceTableProfileCases": 14
+  }
+}

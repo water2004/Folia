@@ -20,7 +20,7 @@ import folia.math.output.svg.wrapper_factory;
 import folia.math.output.svg.writer;
 import folia.math.util.utf16;
 
-#include "math/support/mathml_scene.hpp"
+#include "math/support/mathml_observations.hpp"
 
 using namespace boost::ut;
 namespace common = folia::math::output::common;
@@ -28,7 +28,7 @@ namespace mml = folia::math::mml;
 namespace scene = folia::math::output::scene;
 namespace svg = folia::math::output::svg;
 
-#include "math/fixtures/mglyph_scene_source.hpp"
+#include "math/support/mglyph_observations.hpp"
 
 namespace {
 bool close(double a, double b) {
@@ -247,7 +247,7 @@ suite native_svg_mglyph_source = [] {
     "pinned_MathML_mglyph_Source_cases_match_scene_images_legacy_measurements_and_retirement"_test =
         [] {
             auto bundle = folia::math::fonts::makeNewcmFontData();
-            for (auto const &source : sourceMglyphCases) {
+            for (auto const &source : sourceMglyphCases()) {
                 expect(source.error_name.empty())
                     << "Source conversion completed case=" << source.name;
                 expect(imageAttributesOrdered(source))

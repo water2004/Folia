@@ -97,110 +97,8 @@ const runtime = createMathmlSourceRuntime({root, scope, scopePath,
   }
 });
 
-function cppString(value) { return JSON.stringify(value); }
-function cppU16(value) { return `u${cppString(value)}`; }
-function cppRaw(value) {
-  const result = [];
-  let part = '', bytes = 0;
-  for (const scalar of value) {
-    const size = Buffer.byteLength(scalar);
-    if (bytes + size > 3500 && part) { result.push(part); part = ''; bytes = 0; }
-    part += scalar;
-    bytes += size;
-  }
-  if (part || !result.length) result.push(part);
-  return result.map(text => {
-    let delimiter = 'FOLIAXML';
-    for (let suffix = 0; text.includes(`)${delimiter}"`); ++suffix)
-      delimiter = `FOLIAXML${suffix + 1}`;
-    return `R"${delimiter}(${text})${delimiter}"`;
-  }).join('\n      ');
-}
-function cppAttribute(name, value) {
-  const key = cppU16(name);
-  if (typeof value === 'boolean')
-    return `{${key}, mathml_scene_test::AttributeKind::boolean, {}, 0, ${value}}`;
-  if (typeof value === 'number') {
-    assert.ok(Number.isFinite(value), `Nonfinite Source attribute ${name}`);
-    return `{${key}, mathml_scene_test::AttributeKind::number, {}, ${value}, false}`;
-  }
-  assert.equal(typeof value, 'string', `Unsupported Source attribute ${name}`);
-  return `{${key}, mathml_scene_test::AttributeKind::text, ${cppU16(value)}, 0, false}`;
-}
 
-function cppSourceStyles(sourceStyles) {
-  const entries = [];
-  for (const [selector, declarations] of Object.entries(sourceStyles)) {
-    assert.ok(declarations && typeof declarations === 'object' && !Array.isArray(declarations),
-      `Unsupported Source style declaration for ${selector}`);
-    for (const [property, value] of Object.entries(declarations)) {
-      if (typeof value === 'string')
-        entries.push(`  {${cppU16(selector)}, ${cppU16(property)}, XmlSourceStyleKind::text, ${cppU16(value)}, 0}`);
-      else if (typeof value === 'number' && Number.isFinite(value))
-        entries.push(`  {${cppU16(selector)}, ${cppU16(property)}, XmlSourceStyleKind::number, {}, ${value}}`);
-      else
-        assert.fail(`Unsupported Source style value ${selector}.${property}`);
-    }
-  }
-  assert.ok(entries.length, 'Source XML/HTML class style table is empty');
-  return entries;
-}
 
-function cppTree(record, index) {
-  const prefix = `xml${index}`;
-  const nodes = [], attributes = [], xmlPayloads = [];
-  function visit(node, parent) {
-    assert.equal(node.isInferred, node.kind === 'inferredMrow');
-    const at = nodes.length, first = attributes.length;
-    const own = Object.entries(node.attributes || {});
-    attributes.push(...own.map(([name, value]) => cppAttribute(name, value)));
-    let xmlIndex = 'std::numeric_limits<std::size_t>::max()';
-    if (node.kind === 'XML') {
-      assert.ok(node.xml?.serialized, `${record.name}: Source XML payload missing`);
-      xmlIndex = String(xmlPayloads.length);
-      xmlPayloads.push(node.xml.serialized);
-    }
-    nodes.push(`  {${cppString(node.kind)}, ${node.isInferred}, ${parent}, ${first}, ${own.length}, ` +
-      `${cppU16(node.kind === 'text' ? node.text || '' : '')}, ${xmlIndex}}`);
-    node.children.forEach(child => visit(child, at));
-  }
-  visit(record.mml, 'std::numeric_limits<std::size_t>::max()');
-  assert.ok(xmlPayloads.length, `${record.name}: expected an XML payload`);
-  const declarations =
-    `constexpr std::array<mathml_scene_test::Node, ${nodes.length}> ${prefix}Nodes{{\n${nodes.join(',\n')}\n}};\n` +
-    `constexpr std::array<mathml_scene_test::Attribute, ${attributes.length}> ${prefix}Attributes{{\n` +
-    `${attributes.length ? '  ' + attributes.join(',\n  ') : ''}\n}};\n` +
-    `constexpr std::array<std::u16string_view, ${xmlPayloads.length}> ${prefix}XmlPayloads{{\n  ` +
-    `${xmlPayloads.map(cppU16).join(',\n  ')}\n}};\n`;
-  const xmlWrappers = record.wrappers.filter(wrapper => wrapper.kind === 'XML');
-  assert.equal(xmlWrappers.length, xmlPayloads.length, `${record.name}: Source XML wrappers/payloads`);
-  const observations = xmlWrappers.map(wrapper => {
-    assert.ok(wrapper.xml && Object.values(wrapper.xml.bbox).every(Number.isFinite),
-      `${record.name}: XML wrapper bbox capture`);
-  return `  {${wrapper.xml.bbox.w}, ${wrapper.xml.bbox.h}, ${wrapper.xml.bbox.d}, ` +
-      `${wrapper.xml.bbox.scale}, ${wrapper.xml.bbox.rscale}, ${cppU16(wrapper.xml.styles['font-family'])}, ` +
-      `${cppU16(wrapper.xml.styles['font-size'])}, ${cppRaw(wrapper.xml.getHTML)}, ` +
-      `${cppRaw(JSON.stringify(wrapper.xml.wrapperStyles))}, ${cppString(wrapper.xml.htmlHDW)}, ` +
-      `${wrapper.xml.canMeasureNodes}, ${wrapper.xml.outputScale}, ${wrapper.xml.metrics.scale}, ${wrapper.xml.metrics.em}, ` +
-      `${wrapper.xml.metrics.ex}, ${cppU16(wrapper.xml.metrics.family || '')}}`;
-  });
-  const observationDeclaration =
-    `constexpr std::array<XmlSourceObservation, ${observations.length}> ${prefix}Observations{{\n` +
-    `${observations.join(',\n')}\n}};\n`;
-  const source = `mathml_scene_test::Case{${cppString(record.name)},` +
-    `mathml_scene_test::Metrics{${record.metrics.em},${record.metrics.ex},${record.metrics.container_width},${record.metrics.display}},` +
-    `${prefix}Nodes,${prefix}Attributes,${cppRaw(record.svg)}}`;
-  const option = record.outputOptions.htmlHDW;
-  const policy = {auto: 'automatic', force: 'force', use: 'use', ignore: 'ignore'}[option];
-  assert.ok(policy, `${record.name}: unsupported htmlHDW option ${option}`);
-  const measurementParent = record.measurementParent;
-  assert.ok(measurementParent?.startKind && measurementParent.parentKind,
-    `${record.name}: actual Source math.start parent capture missing`);
-  return {declarations: declarations + observationDeclaration,
-    value: `{${source}, XmlHdwPolicy::${policy}, ${record.outputOptions.scale}, ` +
-    `${record.canMeasureNodes}, ${cppString(measurementParent.startKind)}, ${cppString(measurementParent.parentKind)}, ` +
-    `${prefix}XmlPayloads, ${prefix}Observations}`};
-}
 
 function find(node, kind, output = []) {
   if (node.kind === kind) output.push(node);
@@ -268,44 +166,34 @@ async function main() {
   }
   validate(records);
   const {provenance, modules} = runtime.provenance('MathML', __filename);
-  const header = [
-    `// Source MathJax ${scope.upstream.version} ${scope.upstream.commit}`,
-    '// Input: pinned direct MathML XMLNode/foreignObject witness; not TeX package coverage.',
-    `// scope-sha256 ${provenance.scopeSha256}`,
-    ...modules.map(module => `// ${module.compiled} ${module.compiledSha256} | ${module.source} ${module.sourceSha256}`)
-  ].join('\n');
-  const generated = records.map(cppTree);
-  const sourceWrapperStyles = records[0].wrappers.find(wrapper => wrapper.kind === 'XML').xml.wrapperStyles;
-  const sourceAnnotationXmlStyles = records[0].wrappers.find(
-    wrapper => wrapper.kind === 'annotation-xml').annotationXmlStyles;
-  for (const record of records)
-    assert.deepEqual(record.wrappers.find(wrapper => wrapper.kind === 'XML').xml.wrapperStyles,
-      sourceWrapperStyles, `${record.name}: Source XML wrapper style registration remains stable`);
-  for (const record of records)
-    assert.deepEqual(record.wrappers.find(wrapper => wrapper.kind === 'annotation-xml').annotationXmlStyles,
-      sourceAnnotationXmlStyles, `${record.name}: Source annotation-xml wrapper style registration remains stable`);
-  const sourceStyleEntries = cppSourceStyles(sourceWrapperStyles);
-  const sourceAnnotationXmlStyleEntries = cppSourceStyles(sourceAnnotationXmlStyles);
-  const fixture = header + '\n' +
-    'enum class XmlHdwPolicy { automatic, use, force, ignore };\n' +
-    'enum class XmlSourceStyleKind { text, number };\n' +
-    'struct XmlSourceStyleEntry { std::u16string_view selector,property; XmlSourceStyleKind kind; std::u16string_view text; double number; };\n' +
-    'struct XmlSourceObservation { double w,h,d,scale,rscale; std::u16string_view family,font_size; std::string_view html,wrapper_styles,source_html_hdw; bool can_measure_nodes; double output_scale,metrics_scale,em,ex; std::u16string_view metrics_family; };\n' +
-    'struct XmlSourceCase { mathml_scene_test::Case source; XmlHdwPolicy hdw; double scale; bool can_measure_nodes; std::string_view start_kind,start_parent_kind; std::span<std::u16string_view const> payloads; std::span<XmlSourceObservation const> observations; };\n' +
-    `constexpr XmlSourceStyleEntry sourceXmlStyleEntries[]{\n${sourceStyleEntries.join(',\n')}\n};\n` +
-    `constexpr XmlSourceStyleEntry sourceAnnotationXmlStyleEntries[]{\n${sourceAnnotationXmlStyleEntries.join(',\n')}\n};\n` +
-    generated.map(item => item.declarations).join('\n') +
-    '\nconstexpr XmlSourceCase sourceXmlCases[]{\n' + generated.map(item => `  ${item.value}`).join(',\n') + '\n};\n';
+
+  const {writeObservations, sourceCase, treeMml} = require('./mathml-observation-data.cjs');
+  const styles = rules => Object.entries(rules).flatMap(([selector, declarations]) =>
+    Object.entries(declarations).map(([property, value]) => ({selector, property,
+      kind: typeof value === 'number' ? 'number' : 'text',
+      text: typeof value === 'string' ? value : '', number: typeof value === 'number' ? value : 0})));
+  const observations = {
+    sourceXmlStyleEntries: styles(records[0].wrappers.find(w => w.kind === 'XML').xml.wrapperStyles),
+    sourceAnnotationXmlStyleEntries: styles(records[0].wrappers.find(w => w.kind === 'annotation-xml').annotationXmlStyles),
+    sourceXmlCases: records.map(r => {
+      const wrappers = r.wrappers.filter(w => w.kind === 'XML');
+      const payloads = treeMml(r.mml).payloads;
+      assert.equal(wrappers.length, payloads.length);
+      return {source: sourceCase(r), hdw: {auto: 'automatic', use: 'use', force: 'force', ignore: 'ignore'}[r.outputOptions.htmlHDW],
+        scale: r.outputOptions.scale, can_measure_nodes: r.canMeasureNodes,
+        start_kind: r.measurementParent.startKind, start_parent_kind: r.measurementParent.parentKind,
+        payloads, observations: wrappers.map(({xml: x}) => ({...x.bbox,
+          family: x.styles['font-family'], font_size: x.styles['font-size'],
+          html: x.getHTML, wrapper_styles: JSON.stringify(x.wrapperStyles), source_html_hdw: x.htmlHDW,
+          can_measure_nodes: x.canMeasureNodes, output_scale: x.outputScale,
+          metrics_scale: x.metrics.scale, em: x.metrics.em, ex: x.metrics.ex,
+          metrics_family: x.metrics.family || ''}))};
+    })
+  };
   const evidencePath = path.join(root, 'build/math-port/common-source/xml-mathml-scene.json');
   fs.mkdirSync(path.dirname(evidencePath), {recursive: true});
-  fs.writeFileSync(evidencePath, JSON.stringify({provenance, cases: records}, null, 2) + '\n');
-  const target = path.join(root, 'tests/math/fixtures/common-source/xml-mathml-scene.inc');
-  const previous = fs.existsSync(target) ? fs.readFileSync(target, 'utf8') : null;
-  if (process.argv[2] === '--write-fixture') {
-    if (previous !== fixture) fs.writeFileSync(target, fixture);
-  } else {
-    assert.equal(previous, fixture, 'Independent XML Source fixture differs; review before --write-fixture');
-  }
+  fs.writeFileSync(evidencePath, JSON.stringify({provenance, modules, cases: records}, null, 2) + '\n');
+  writeObservations('xml', observations);
   process.stdout.write(`Verified ${records.length} independent XML Source cases\n`);
 }
 

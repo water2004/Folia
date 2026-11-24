@@ -1,0 +1,923 @@
+# Pinned MathJax 4.1.3 observations; exact fields from the original compiled fixture.
+# field	type	value
+sourceXmlStyleEntries.count	integer	17
+sourceXmlStyleEntries[0].selector	utf16	foreignObject[data-mjx-html]
+sourceXmlStyleEntries[0].property	utf16	overflow
+sourceXmlStyleEntries[0].kind	enum	0
+sourceXmlStyleEntries[0].text	utf16	visible
+sourceXmlStyleEntries[0].number	binary64	0000000000000000
+sourceXmlStyleEntries[1].selector	utf16	mjx-measure-xml
+sourceXmlStyleEntries[1].property	utf16	position
+sourceXmlStyleEntries[1].kind	enum	0
+sourceXmlStyleEntries[1].text	utf16	absolute
+sourceXmlStyleEntries[1].number	binary64	0000000000000000
+sourceXmlStyleEntries[2].selector	utf16	mjx-measure-xml
+sourceXmlStyleEntries[2].property	utf16	left
+sourceXmlStyleEntries[2].kind	enum	1
+sourceXmlStyleEntries[2].text	utf16	
+sourceXmlStyleEntries[2].number	binary64	0000000000000000
+sourceXmlStyleEntries[3].selector	utf16	mjx-measure-xml
+sourceXmlStyleEntries[3].property	utf16	top
+sourceXmlStyleEntries[3].kind	enum	1
+sourceXmlStyleEntries[3].text	utf16	
+sourceXmlStyleEntries[3].number	binary64	0000000000000000
+sourceXmlStyleEntries[4].selector	utf16	mjx-measure-xml
+sourceXmlStyleEntries[4].property	utf16	display
+sourceXmlStyleEntries[4].kind	enum	0
+sourceXmlStyleEntries[4].text	utf16	inline-block
+sourceXmlStyleEntries[4].number	binary64	0000000000000000
+sourceXmlStyleEntries[5].selector	utf16	mjx-measure-xml
+sourceXmlStyleEntries[5].property	utf16	line-height
+sourceXmlStyleEntries[5].kind	enum	0
+sourceXmlStyleEntries[5].text	utf16	normal
+sourceXmlStyleEntries[5].number	binary64	0000000000000000
+sourceXmlStyleEntries[6].selector	utf16	mjx-measure-xml
+sourceXmlStyleEntries[6].property	utf16	white-space
+sourceXmlStyleEntries[6].kind	enum	0
+sourceXmlStyleEntries[6].text	utf16	normal
+sourceXmlStyleEntries[6].number	binary64	0000000000000000
+sourceXmlStyleEntries[7].selector	utf16	mjx-html
+sourceXmlStyleEntries[7].property	utf16	display
+sourceXmlStyleEntries[7].kind	enum	0
+sourceXmlStyleEntries[7].text	utf16	inline-block
+sourceXmlStyleEntries[7].number	binary64	0000000000000000
+sourceXmlStyleEntries[8].selector	utf16	mjx-html
+sourceXmlStyleEntries[8].property	utf16	line-height
+sourceXmlStyleEntries[8].kind	enum	0
+sourceXmlStyleEntries[8].text	utf16	normal
+sourceXmlStyleEntries[8].number	binary64	0000000000000000
+sourceXmlStyleEntries[9].selector	utf16	mjx-html
+sourceXmlStyleEntries[9].property	utf16	text-align
+sourceXmlStyleEntries[9].kind	enum	0
+sourceXmlStyleEntries[9].text	utf16	initial
+sourceXmlStyleEntries[9].number	binary64	0000000000000000
+sourceXmlStyleEntries[10].selector	utf16	mjx-html
+sourceXmlStyleEntries[10].property	utf16	white-space
+sourceXmlStyleEntries[10].kind	enum	0
+sourceXmlStyleEntries[10].text	utf16	initial
+sourceXmlStyleEntries[10].number	binary64	0000000000000000
+sourceXmlStyleEntries[11].selector	utf16	mjx-html-holder
+sourceXmlStyleEntries[11].property	utf16	display
+sourceXmlStyleEntries[11].kind	enum	0
+sourceXmlStyleEntries[11].text	utf16	block
+sourceXmlStyleEntries[11].number	binary64	0000000000000000
+sourceXmlStyleEntries[12].selector	utf16	mjx-html-holder
+sourceXmlStyleEntries[12].property	utf16	position
+sourceXmlStyleEntries[12].kind	enum	0
+sourceXmlStyleEntries[12].text	utf16	absolute
+sourceXmlStyleEntries[12].number	binary64	0000000000000000
+sourceXmlStyleEntries[13].selector	utf16	mjx-html-holder
+sourceXmlStyleEntries[13].property	utf16	top
+sourceXmlStyleEntries[13].kind	enum	1
+sourceXmlStyleEntries[13].text	utf16	
+sourceXmlStyleEntries[13].number	binary64	0000000000000000
+sourceXmlStyleEntries[14].selector	utf16	mjx-html-holder
+sourceXmlStyleEntries[14].property	utf16	left
+sourceXmlStyleEntries[14].kind	enum	1
+sourceXmlStyleEntries[14].text	utf16	
+sourceXmlStyleEntries[14].number	binary64	0000000000000000
+sourceXmlStyleEntries[15].selector	utf16	mjx-html-holder
+sourceXmlStyleEntries[15].property	utf16	bottom
+sourceXmlStyleEntries[15].kind	enum	1
+sourceXmlStyleEntries[15].text	utf16	
+sourceXmlStyleEntries[15].number	binary64	0000000000000000
+sourceXmlStyleEntries[16].selector	utf16	mjx-html-holder
+sourceXmlStyleEntries[16].property	utf16	right
+sourceXmlStyleEntries[16].kind	enum	1
+sourceXmlStyleEntries[16].text	utf16	
+sourceXmlStyleEntries[16].number	binary64	0000000000000000
+sourceAnnotationXmlStyleEntries.count	integer	3
+sourceAnnotationXmlStyleEntries[0].selector	utf16	foreignObject[data-mjx-xml]
+sourceAnnotationXmlStyleEntries[0].property	utf16	font-family
+sourceAnnotationXmlStyleEntries[0].kind	enum	0
+sourceAnnotationXmlStyleEntries[0].text	utf16	initial
+sourceAnnotationXmlStyleEntries[0].number	binary64	0000000000000000
+sourceAnnotationXmlStyleEntries[1].selector	utf16	foreignObject[data-mjx-xml]
+sourceAnnotationXmlStyleEntries[1].property	utf16	line-height
+sourceAnnotationXmlStyleEntries[1].kind	enum	0
+sourceAnnotationXmlStyleEntries[1].text	utf16	normal
+sourceAnnotationXmlStyleEntries[1].number	binary64	0000000000000000
+sourceAnnotationXmlStyleEntries[2].selector	utf16	foreignObject[data-mjx-xml]
+sourceAnnotationXmlStyleEntries[2].property	utf16	overflow
+sourceAnnotationXmlStyleEntries[2].kind	enum	0
+sourceAnnotationXmlStyleEntries[2].text	utf16	visible
+sourceAnnotationXmlStyleEntries[2].number	binary64	0000000000000000
+sourceXmlCases.count	integer	11
+sourceXmlCases[0].source.name	bytes	xml-unknown-measurement-mixed-payload
+sourceXmlCases[0].source.metrics.em	binary64	4030000000000000
+sourceXmlCases[0].source.metrics.ex	binary64	4020000000000000
+sourceXmlCases[0].source.metrics.container_width	binary64	4084000000000000
+sourceXmlCases[0].source.metrics.display	boolean	0
+sourceXmlCases[0].source.nodes.count	integer	5
+sourceXmlCases[0].source.nodes[0].kind	bytes	math
+sourceXmlCases[0].source.nodes[0].is_inferred	boolean	0
+sourceXmlCases[0].source.nodes[0].parent	integer	max
+sourceXmlCases[0].source.nodes[0].attribute_first	integer	0
+sourceXmlCases[0].source.nodes[0].attribute_count	integer	0
+sourceXmlCases[0].source.nodes[0].text	utf16	
+sourceXmlCases[0].source.nodes[0].xml_payload_index	integer	max
+sourceXmlCases[0].source.nodes[1].kind	bytes	inferredMrow
+sourceXmlCases[0].source.nodes[1].is_inferred	boolean	1
+sourceXmlCases[0].source.nodes[1].parent	integer	0
+sourceXmlCases[0].source.nodes[1].attribute_first	integer	0
+sourceXmlCases[0].source.nodes[1].attribute_count	integer	0
+sourceXmlCases[0].source.nodes[1].text	utf16	
+sourceXmlCases[0].source.nodes[1].xml_payload_index	integer	max
+sourceXmlCases[0].source.nodes[2].kind	bytes	semantics
+sourceXmlCases[0].source.nodes[2].is_inferred	boolean	0
+sourceXmlCases[0].source.nodes[2].parent	integer	1
+sourceXmlCases[0].source.nodes[2].attribute_first	integer	0
+sourceXmlCases[0].source.nodes[2].attribute_count	integer	0
+sourceXmlCases[0].source.nodes[2].text	utf16	
+sourceXmlCases[0].source.nodes[2].xml_payload_index	integer	max
+sourceXmlCases[0].source.nodes[3].kind	bytes	annotation-xml
+sourceXmlCases[0].source.nodes[3].is_inferred	boolean	0
+sourceXmlCases[0].source.nodes[3].parent	integer	2
+sourceXmlCases[0].source.nodes[3].attribute_first	integer	0
+sourceXmlCases[0].source.nodes[3].attribute_count	integer	1
+sourceXmlCases[0].source.nodes[3].text	utf16	
+sourceXmlCases[0].source.nodes[3].xml_payload_index	integer	max
+sourceXmlCases[0].source.nodes[4].kind	bytes	XML
+sourceXmlCases[0].source.nodes[4].is_inferred	boolean	0
+sourceXmlCases[0].source.nodes[4].parent	integer	3
+sourceXmlCases[0].source.nodes[4].attribute_first	integer	1
+sourceXmlCases[0].source.nodes[4].attribute_count	integer	0
+sourceXmlCases[0].source.nodes[4].text	utf16	
+sourceXmlCases[0].source.nodes[4].xml_payload_index	integer	0
+sourceXmlCases[0].source.attributes.count	integer	1
+sourceXmlCases[0].source.attributes[0].name	utf16	encoding
+sourceXmlCases[0].source.attributes[0].kind	enum	0
+sourceXmlCases[0].source.attributes[0].text	utf16	application/xhtml+xml
+sourceXmlCases[0].source.attributes[0].number	binary64	0000000000000000
+sourceXmlCases[0].source.attributes[0].boolean	boolean	0
+sourceXmlCases[0].source.source_svg	bytes	<mjx-container class="MathJax" jax="SVG" overflow="linebreak"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="0.036ex" height="0.036ex" role="img" focusable="false" viewBox="0 0 16 16"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="semantics"><g data-mml-node="annotation-xml"><foreignObject data-mjx-xml="true" y="0px" width="0px" height="0px" transform="scale(62.5) matrix(1 0 0 -1 0 0)"><mjx-html style="font-family: Times; font-size: 16px;" variant=""><section class="xml-probe" data-order="a&amp;b"><span title="A &amp; B">Alpha &amp; Beta</span><!--inside--><br/><svg xmlns="http://www.w3.org/2000/svg"><text>G</text></svg></section></mjx-html></foreignObject></g></g></g></g></svg></mjx-container>
+sourceXmlCases[0].hdw	enum	0
+sourceXmlCases[0].scale	binary64	3ff0000000000000
+sourceXmlCases[0].can_measure_nodes	boolean	0
+sourceXmlCases[0].start_kind	bytes	body
+sourceXmlCases[0].start_parent_kind	bytes	html
+sourceXmlCases[0].payloads.count	integer	1
+sourceXmlCases[0].payloads[0]	utf16	<section class="xml-probe" data-order="a&amp;b"><span title="A &amp; B">Alpha &amp; Beta</span><!--inside--><br><svg xmlns="http://www.w3.org/2000/svg"><text>G</text></svg></section>
+sourceXmlCases[0].observations.count	integer	1
+sourceXmlCases[0].observations[0].w	binary64	0000000000000000
+sourceXmlCases[0].observations[0].h	binary64	0000000000000000
+sourceXmlCases[0].observations[0].d	binary64	0000000000000000
+sourceXmlCases[0].observations[0].scale	binary64	3ff0000000000000
+sourceXmlCases[0].observations[0].rscale	binary64	3ff0000000000000
+sourceXmlCases[0].observations[0].family	utf16	Times
+sourceXmlCases[0].observations[0].font_size	utf16	16px
+sourceXmlCases[0].observations[0].html	bytes	<mjx-html style="font-family: Times; font-size: 16px;" variant=""><section class="xml-probe" data-order="a&amp;b"><span title="A &amp; B">Alpha &amp; Beta</span><!--inside--><br><svg xmlns="http://www.w3.org/2000/svg"><text>G</text></svg></section></mjx-html>
+sourceXmlCases[0].observations[0].wrapper_styles	bytes	{"foreignObject[data-mjx-html]":{"overflow":"visible"},"mjx-measure-xml":{"position":"absolute","left":0,"top":0,"display":"inline-block","line-height":"normal","white-space":"normal"},"mjx-html":{"display":"inline-block","line-height":"normal","text-align":"initial","white-space":"initial"},"mjx-html-holder":{"display":"block","position":"absolute","top":0,"left":0,"bottom":0,"right":0}}
+sourceXmlCases[0].observations[0].source_html_hdw	bytes	force
+sourceXmlCases[0].observations[0].can_measure_nodes	boolean	0
+sourceXmlCases[0].observations[0].output_scale	binary64	3ff0000000000000
+sourceXmlCases[0].observations[0].metrics_scale	binary64	3ff0000000000000
+sourceXmlCases[0].observations[0].em	binary64	4030000000000000
+sourceXmlCases[0].observations[0].ex	binary64	4020000000000000
+sourceXmlCases[0].observations[0].metrics_family	utf16	
+sourceXmlCases[1].source.name	bytes	xml-force-nonzero-hdw
+sourceXmlCases[1].source.metrics.em	binary64	4030000000000000
+sourceXmlCases[1].source.metrics.ex	binary64	4020000000000000
+sourceXmlCases[1].source.metrics.container_width	binary64	4084000000000000
+sourceXmlCases[1].source.metrics.display	boolean	0
+sourceXmlCases[1].source.nodes.count	integer	5
+sourceXmlCases[1].source.nodes[0].kind	bytes	math
+sourceXmlCases[1].source.nodes[0].is_inferred	boolean	0
+sourceXmlCases[1].source.nodes[0].parent	integer	max
+sourceXmlCases[1].source.nodes[0].attribute_first	integer	0
+sourceXmlCases[1].source.nodes[0].attribute_count	integer	0
+sourceXmlCases[1].source.nodes[0].text	utf16	
+sourceXmlCases[1].source.nodes[0].xml_payload_index	integer	max
+sourceXmlCases[1].source.nodes[1].kind	bytes	inferredMrow
+sourceXmlCases[1].source.nodes[1].is_inferred	boolean	1
+sourceXmlCases[1].source.nodes[1].parent	integer	0
+sourceXmlCases[1].source.nodes[1].attribute_first	integer	0
+sourceXmlCases[1].source.nodes[1].attribute_count	integer	0
+sourceXmlCases[1].source.nodes[1].text	utf16	
+sourceXmlCases[1].source.nodes[1].xml_payload_index	integer	max
+sourceXmlCases[1].source.nodes[2].kind	bytes	semantics
+sourceXmlCases[1].source.nodes[2].is_inferred	boolean	0
+sourceXmlCases[1].source.nodes[2].parent	integer	1
+sourceXmlCases[1].source.nodes[2].attribute_first	integer	0
+sourceXmlCases[1].source.nodes[2].attribute_count	integer	0
+sourceXmlCases[1].source.nodes[2].text	utf16	
+sourceXmlCases[1].source.nodes[2].xml_payload_index	integer	max
+sourceXmlCases[1].source.nodes[3].kind	bytes	annotation-xml
+sourceXmlCases[1].source.nodes[3].is_inferred	boolean	0
+sourceXmlCases[1].source.nodes[3].parent	integer	2
+sourceXmlCases[1].source.nodes[3].attribute_first	integer	0
+sourceXmlCases[1].source.nodes[3].attribute_count	integer	1
+sourceXmlCases[1].source.nodes[3].text	utf16	
+sourceXmlCases[1].source.nodes[3].xml_payload_index	integer	max
+sourceXmlCases[1].source.nodes[4].kind	bytes	XML
+sourceXmlCases[1].source.nodes[4].is_inferred	boolean	0
+sourceXmlCases[1].source.nodes[4].parent	integer	3
+sourceXmlCases[1].source.nodes[4].attribute_first	integer	1
+sourceXmlCases[1].source.nodes[4].attribute_count	integer	0
+sourceXmlCases[1].source.nodes[4].text	utf16	
+sourceXmlCases[1].source.nodes[4].xml_payload_index	integer	0
+sourceXmlCases[1].source.attributes.count	integer	1
+sourceXmlCases[1].source.attributes[0].name	utf16	encoding
+sourceXmlCases[1].source.attributes[0].kind	enum	0
+sourceXmlCases[1].source.attributes[0].text	utf16	application/xhtml+xml
+sourceXmlCases[1].source.attributes[0].number	binary64	0000000000000000
+sourceXmlCases[1].source.attributes[0].boolean	boolean	0
+sourceXmlCases[1].source.source_svg	bytes	<mjx-container class="MathJax" jax="SVG" overflow="linebreak"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="6.787ex" height="2.828ex" role="img" focusable="false" viewBox="0 -1000 3000 1250"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="semantics"><g data-mml-node="annotation-xml"><foreignObject data-mjx-xml="true" y="-16px" width="48px" height="20px" transform="scale(62.5) matrix(1 0 0 -1 0 0)"><mjx-html style="height: 1.25em; width: 3em; vertical-align: -0.25em;" variant=""><mjx-html-holder style="font-family: Times; font-size: 16px;"><div data-mjx-hdw="1em .25em 3em"><span>F</span></div></mjx-html-holder></mjx-html></foreignObject></g></g></g></g></svg></mjx-container>
+sourceXmlCases[1].hdw	enum	2
+sourceXmlCases[1].scale	binary64	3ff0000000000000
+sourceXmlCases[1].can_measure_nodes	boolean	0
+sourceXmlCases[1].start_kind	bytes	body
+sourceXmlCases[1].start_parent_kind	bytes	html
+sourceXmlCases[1].payloads.count	integer	1
+sourceXmlCases[1].payloads[0]	utf16	<div data-mjx-hdw="1em .25em 3em"><span>F</span></div>
+sourceXmlCases[1].observations.count	integer	1
+sourceXmlCases[1].observations[0].w	binary64	4008000000000000
+sourceXmlCases[1].observations[0].h	binary64	3ff0000000000000
+sourceXmlCases[1].observations[0].d	binary64	3fd0000000000000
+sourceXmlCases[1].observations[0].scale	binary64	3ff0000000000000
+sourceXmlCases[1].observations[0].rscale	binary64	3ff0000000000000
+sourceXmlCases[1].observations[0].family	utf16	Times
+sourceXmlCases[1].observations[0].font_size	utf16	16px
+sourceXmlCases[1].observations[0].html	bytes	<mjx-html style="height: 1.25em; width: 3em; vertical-align: -0.25em;" variant=""><mjx-html-holder style="font-family: Times; font-size: 16px;"><div data-mjx-hdw="1em .25em 3em"><span>F</span></div></mjx-html-holder></mjx-html>
+sourceXmlCases[1].observations[0].wrapper_styles	bytes	{"foreignObject[data-mjx-html]":{"overflow":"visible"},"mjx-measure-xml":{"position":"absolute","left":0,"top":0,"display":"inline-block","line-height":"normal","white-space":"normal"},"mjx-html":{"display":"inline-block","line-height":"normal","text-align":"initial","white-space":"initial"},"mjx-html-holder":{"display":"block","position":"absolute","top":0,"left":0,"bottom":0,"right":0}}
+sourceXmlCases[1].observations[0].source_html_hdw	bytes	force
+sourceXmlCases[1].observations[0].can_measure_nodes	boolean	0
+sourceXmlCases[1].observations[0].output_scale	binary64	3ff0000000000000
+sourceXmlCases[1].observations[0].metrics_scale	binary64	3ff0000000000000
+sourceXmlCases[1].observations[0].em	binary64	4030000000000000
+sourceXmlCases[1].observations[0].ex	binary64	4020000000000000
+sourceXmlCases[1].observations[0].metrics_family	utf16	
+sourceXmlCases[2].source.name	bytes	xml-use-nonzero-hdw
+sourceXmlCases[2].source.metrics.em	binary64	4030000000000000
+sourceXmlCases[2].source.metrics.ex	binary64	4020000000000000
+sourceXmlCases[2].source.metrics.container_width	binary64	4084000000000000
+sourceXmlCases[2].source.metrics.display	boolean	0
+sourceXmlCases[2].source.nodes.count	integer	5
+sourceXmlCases[2].source.nodes[0].kind	bytes	math
+sourceXmlCases[2].source.nodes[0].is_inferred	boolean	0
+sourceXmlCases[2].source.nodes[0].parent	integer	max
+sourceXmlCases[2].source.nodes[0].attribute_first	integer	0
+sourceXmlCases[2].source.nodes[0].attribute_count	integer	0
+sourceXmlCases[2].source.nodes[0].text	utf16	
+sourceXmlCases[2].source.nodes[0].xml_payload_index	integer	max
+sourceXmlCases[2].source.nodes[1].kind	bytes	inferredMrow
+sourceXmlCases[2].source.nodes[1].is_inferred	boolean	1
+sourceXmlCases[2].source.nodes[1].parent	integer	0
+sourceXmlCases[2].source.nodes[1].attribute_first	integer	0
+sourceXmlCases[2].source.nodes[1].attribute_count	integer	0
+sourceXmlCases[2].source.nodes[1].text	utf16	
+sourceXmlCases[2].source.nodes[1].xml_payload_index	integer	max
+sourceXmlCases[2].source.nodes[2].kind	bytes	semantics
+sourceXmlCases[2].source.nodes[2].is_inferred	boolean	0
+sourceXmlCases[2].source.nodes[2].parent	integer	1
+sourceXmlCases[2].source.nodes[2].attribute_first	integer	0
+sourceXmlCases[2].source.nodes[2].attribute_count	integer	0
+sourceXmlCases[2].source.nodes[2].text	utf16	
+sourceXmlCases[2].source.nodes[2].xml_payload_index	integer	max
+sourceXmlCases[2].source.nodes[3].kind	bytes	annotation-xml
+sourceXmlCases[2].source.nodes[3].is_inferred	boolean	0
+sourceXmlCases[2].source.nodes[3].parent	integer	2
+sourceXmlCases[2].source.nodes[3].attribute_first	integer	0
+sourceXmlCases[2].source.nodes[3].attribute_count	integer	1
+sourceXmlCases[2].source.nodes[3].text	utf16	
+sourceXmlCases[2].source.nodes[3].xml_payload_index	integer	max
+sourceXmlCases[2].source.nodes[4].kind	bytes	XML
+sourceXmlCases[2].source.nodes[4].is_inferred	boolean	0
+sourceXmlCases[2].source.nodes[4].parent	integer	3
+sourceXmlCases[2].source.nodes[4].attribute_first	integer	1
+sourceXmlCases[2].source.nodes[4].attribute_count	integer	0
+sourceXmlCases[2].source.nodes[4].text	utf16	
+sourceXmlCases[2].source.nodes[4].xml_payload_index	integer	0
+sourceXmlCases[2].source.attributes.count	integer	1
+sourceXmlCases[2].source.attributes[0].name	utf16	encoding
+sourceXmlCases[2].source.attributes[0].kind	enum	0
+sourceXmlCases[2].source.attributes[0].text	utf16	application/xhtml+xml
+sourceXmlCases[2].source.attributes[0].number	binary64	0000000000000000
+sourceXmlCases[2].source.attributes[0].boolean	boolean	0
+sourceXmlCases[2].source.source_svg	bytes	<mjx-container class="MathJax" jax="SVG" overflow="linebreak"><svg style="vertical-align: -0.283ex;" xmlns="http://www.w3.org/2000/svg" width="5.656ex" height="1.98ex" role="img" focusable="false" viewBox="0 -750 2500 875"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="semantics"><g data-mml-node="annotation-xml"><foreignObject data-mjx-xml="true" y="-12px" width="40px" height="14px" transform="scale(62.5) matrix(1 0 0 -1 0 0)"><mjx-html style="font-family: Times; font-size: 16px;" variant=""><div data-mjx-hdw=".75em .125em 2.5em"><i>U</i></div></mjx-html></foreignObject></g></g></g></g></svg></mjx-container>
+sourceXmlCases[2].hdw	enum	1
+sourceXmlCases[2].scale	binary64	3ff0000000000000
+sourceXmlCases[2].can_measure_nodes	boolean	1
+sourceXmlCases[2].start_kind	bytes	body
+sourceXmlCases[2].start_parent_kind	bytes	html
+sourceXmlCases[2].payloads.count	integer	1
+sourceXmlCases[2].payloads[0]	utf16	<div data-mjx-hdw=".75em .125em 2.5em"><i>U</i></div>
+sourceXmlCases[2].observations.count	integer	1
+sourceXmlCases[2].observations[0].w	binary64	4004000000000000
+sourceXmlCases[2].observations[0].h	binary64	3fe8000000000000
+sourceXmlCases[2].observations[0].d	binary64	3fc0000000000000
+sourceXmlCases[2].observations[0].scale	binary64	3ff0000000000000
+sourceXmlCases[2].observations[0].rscale	binary64	3ff0000000000000
+sourceXmlCases[2].observations[0].family	utf16	Times
+sourceXmlCases[2].observations[0].font_size	utf16	16px
+sourceXmlCases[2].observations[0].html	bytes	<mjx-html style="font-family: Times; font-size: 16px;" variant=""><div data-mjx-hdw=".75em .125em 2.5em"><i>U</i></div></mjx-html>
+sourceXmlCases[2].observations[0].wrapper_styles	bytes	{"foreignObject[data-mjx-html]":{"overflow":"visible"},"mjx-measure-xml":{"position":"absolute","left":0,"top":0,"display":"inline-block","line-height":"normal","white-space":"normal"},"mjx-html":{"display":"inline-block","line-height":"normal","text-align":"initial","white-space":"initial"},"mjx-html-holder":{"display":"block","position":"absolute","top":0,"left":0,"bottom":0,"right":0}}
+sourceXmlCases[2].observations[0].source_html_hdw	bytes	use
+sourceXmlCases[2].observations[0].can_measure_nodes	boolean	1
+sourceXmlCases[2].observations[0].output_scale	binary64	3ff0000000000000
+sourceXmlCases[2].observations[0].metrics_scale	binary64	3ff0000000000000
+sourceXmlCases[2].observations[0].em	binary64	4030000000000000
+sourceXmlCases[2].observations[0].ex	binary64	4020000000000000
+sourceXmlCases[2].observations[0].metrics_family	utf16	
+sourceXmlCases[3].source.name	bytes	xml-ignore-hdw-measures
+sourceXmlCases[3].source.metrics.em	binary64	4030000000000000
+sourceXmlCases[3].source.metrics.ex	binary64	4020000000000000
+sourceXmlCases[3].source.metrics.container_width	binary64	4084000000000000
+sourceXmlCases[3].source.metrics.display	boolean	0
+sourceXmlCases[3].source.nodes.count	integer	5
+sourceXmlCases[3].source.nodes[0].kind	bytes	math
+sourceXmlCases[3].source.nodes[0].is_inferred	boolean	0
+sourceXmlCases[3].source.nodes[0].parent	integer	max
+sourceXmlCases[3].source.nodes[0].attribute_first	integer	0
+sourceXmlCases[3].source.nodes[0].attribute_count	integer	0
+sourceXmlCases[3].source.nodes[0].text	utf16	
+sourceXmlCases[3].source.nodes[0].xml_payload_index	integer	max
+sourceXmlCases[3].source.nodes[1].kind	bytes	inferredMrow
+sourceXmlCases[3].source.nodes[1].is_inferred	boolean	1
+sourceXmlCases[3].source.nodes[1].parent	integer	0
+sourceXmlCases[3].source.nodes[1].attribute_first	integer	0
+sourceXmlCases[3].source.nodes[1].attribute_count	integer	0
+sourceXmlCases[3].source.nodes[1].text	utf16	
+sourceXmlCases[3].source.nodes[1].xml_payload_index	integer	max
+sourceXmlCases[3].source.nodes[2].kind	bytes	semantics
+sourceXmlCases[3].source.nodes[2].is_inferred	boolean	0
+sourceXmlCases[3].source.nodes[2].parent	integer	1
+sourceXmlCases[3].source.nodes[2].attribute_first	integer	0
+sourceXmlCases[3].source.nodes[2].attribute_count	integer	0
+sourceXmlCases[3].source.nodes[2].text	utf16	
+sourceXmlCases[3].source.nodes[2].xml_payload_index	integer	max
+sourceXmlCases[3].source.nodes[3].kind	bytes	annotation-xml
+sourceXmlCases[3].source.nodes[3].is_inferred	boolean	0
+sourceXmlCases[3].source.nodes[3].parent	integer	2
+sourceXmlCases[3].source.nodes[3].attribute_first	integer	0
+sourceXmlCases[3].source.nodes[3].attribute_count	integer	1
+sourceXmlCases[3].source.nodes[3].text	utf16	
+sourceXmlCases[3].source.nodes[3].xml_payload_index	integer	max
+sourceXmlCases[3].source.nodes[4].kind	bytes	XML
+sourceXmlCases[3].source.nodes[4].is_inferred	boolean	0
+sourceXmlCases[3].source.nodes[4].parent	integer	3
+sourceXmlCases[3].source.nodes[4].attribute_first	integer	1
+sourceXmlCases[3].source.nodes[4].attribute_count	integer	0
+sourceXmlCases[3].source.nodes[4].text	utf16	
+sourceXmlCases[3].source.nodes[4].xml_payload_index	integer	0
+sourceXmlCases[3].source.attributes.count	integer	1
+sourceXmlCases[3].source.attributes[0].name	utf16	encoding
+sourceXmlCases[3].source.attributes[0].kind	enum	0
+sourceXmlCases[3].source.attributes[0].text	utf16	application/xhtml+xml
+sourceXmlCases[3].source.attributes[0].number	binary64	0000000000000000
+sourceXmlCases[3].source.attributes[0].boolean	boolean	0
+sourceXmlCases[3].source.source_svg	bytes	<mjx-container class="MathJax" jax="SVG" overflow="linebreak"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="0.036ex" height="0.036ex" role="img" focusable="false" viewBox="0 0 16 16"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="semantics"><g data-mml-node="annotation-xml"><foreignObject data-mjx-xml="true" y="0px" width="0px" height="0px" transform="scale(62.5) matrix(1 0 0 -1 0 0)"><mjx-html style="font-family: Times; font-size: 16px;" variant=""><div data-mjx-hdw="1em .25em 3em"><b>I</b></div></mjx-html></foreignObject></g></g></g></g></svg></mjx-container>
+sourceXmlCases[3].hdw	enum	3
+sourceXmlCases[3].scale	binary64	3ff0000000000000
+sourceXmlCases[3].can_measure_nodes	boolean	0
+sourceXmlCases[3].start_kind	bytes	body
+sourceXmlCases[3].start_parent_kind	bytes	html
+sourceXmlCases[3].payloads.count	integer	1
+sourceXmlCases[3].payloads[0]	utf16	<div data-mjx-hdw="1em .25em 3em"><b>I</b></div>
+sourceXmlCases[3].observations.count	integer	1
+sourceXmlCases[3].observations[0].w	binary64	0000000000000000
+sourceXmlCases[3].observations[0].h	binary64	0000000000000000
+sourceXmlCases[3].observations[0].d	binary64	0000000000000000
+sourceXmlCases[3].observations[0].scale	binary64	3ff0000000000000
+sourceXmlCases[3].observations[0].rscale	binary64	3ff0000000000000
+sourceXmlCases[3].observations[0].family	utf16	Times
+sourceXmlCases[3].observations[0].font_size	utf16	16px
+sourceXmlCases[3].observations[0].html	bytes	<mjx-html style="font-family: Times; font-size: 16px;" variant=""><div data-mjx-hdw="1em .25em 3em"><b>I</b></div></mjx-html>
+sourceXmlCases[3].observations[0].wrapper_styles	bytes	{"foreignObject[data-mjx-html]":{"overflow":"visible"},"mjx-measure-xml":{"position":"absolute","left":0,"top":0,"display":"inline-block","line-height":"normal","white-space":"normal"},"mjx-html":{"display":"inline-block","line-height":"normal","text-align":"initial","white-space":"initial"},"mjx-html-holder":{"display":"block","position":"absolute","top":0,"left":0,"bottom":0,"right":0}}
+sourceXmlCases[3].observations[0].source_html_hdw	bytes	ignore
+sourceXmlCases[3].observations[0].can_measure_nodes	boolean	0
+sourceXmlCases[3].observations[0].output_scale	binary64	3ff0000000000000
+sourceXmlCases[3].observations[0].metrics_scale	binary64	3ff0000000000000
+sourceXmlCases[3].observations[0].em	binary64	4030000000000000
+sourceXmlCases[3].observations[0].ex	binary64	4020000000000000
+sourceXmlCases[3].observations[0].metrics_family	utf16	
+sourceXmlCases[4].source.name	bytes	xml-automatic-measurable-policy
+sourceXmlCases[4].source.metrics.em	binary64	4030000000000000
+sourceXmlCases[4].source.metrics.ex	binary64	4020000000000000
+sourceXmlCases[4].source.metrics.container_width	binary64	4084000000000000
+sourceXmlCases[4].source.metrics.display	boolean	0
+sourceXmlCases[4].source.nodes.count	integer	5
+sourceXmlCases[4].source.nodes[0].kind	bytes	math
+sourceXmlCases[4].source.nodes[0].is_inferred	boolean	0
+sourceXmlCases[4].source.nodes[0].parent	integer	max
+sourceXmlCases[4].source.nodes[0].attribute_first	integer	0
+sourceXmlCases[4].source.nodes[0].attribute_count	integer	0
+sourceXmlCases[4].source.nodes[0].text	utf16	
+sourceXmlCases[4].source.nodes[0].xml_payload_index	integer	max
+sourceXmlCases[4].source.nodes[1].kind	bytes	inferredMrow
+sourceXmlCases[4].source.nodes[1].is_inferred	boolean	1
+sourceXmlCases[4].source.nodes[1].parent	integer	0
+sourceXmlCases[4].source.nodes[1].attribute_first	integer	0
+sourceXmlCases[4].source.nodes[1].attribute_count	integer	0
+sourceXmlCases[4].source.nodes[1].text	utf16	
+sourceXmlCases[4].source.nodes[1].xml_payload_index	integer	max
+sourceXmlCases[4].source.nodes[2].kind	bytes	semantics
+sourceXmlCases[4].source.nodes[2].is_inferred	boolean	0
+sourceXmlCases[4].source.nodes[2].parent	integer	1
+sourceXmlCases[4].source.nodes[2].attribute_first	integer	0
+sourceXmlCases[4].source.nodes[2].attribute_count	integer	0
+sourceXmlCases[4].source.nodes[2].text	utf16	
+sourceXmlCases[4].source.nodes[2].xml_payload_index	integer	max
+sourceXmlCases[4].source.nodes[3].kind	bytes	annotation-xml
+sourceXmlCases[4].source.nodes[3].is_inferred	boolean	0
+sourceXmlCases[4].source.nodes[3].parent	integer	2
+sourceXmlCases[4].source.nodes[3].attribute_first	integer	0
+sourceXmlCases[4].source.nodes[3].attribute_count	integer	1
+sourceXmlCases[4].source.nodes[3].text	utf16	
+sourceXmlCases[4].source.nodes[3].xml_payload_index	integer	max
+sourceXmlCases[4].source.nodes[4].kind	bytes	XML
+sourceXmlCases[4].source.nodes[4].is_inferred	boolean	0
+sourceXmlCases[4].source.nodes[4].parent	integer	3
+sourceXmlCases[4].source.nodes[4].attribute_first	integer	1
+sourceXmlCases[4].source.nodes[4].attribute_count	integer	0
+sourceXmlCases[4].source.nodes[4].text	utf16	
+sourceXmlCases[4].source.nodes[4].xml_payload_index	integer	0
+sourceXmlCases[4].source.attributes.count	integer	1
+sourceXmlCases[4].source.attributes[0].name	utf16	encoding
+sourceXmlCases[4].source.attributes[0].kind	enum	0
+sourceXmlCases[4].source.attributes[0].text	utf16	application/xhtml+xml
+sourceXmlCases[4].source.attributes[0].number	binary64	0000000000000000
+sourceXmlCases[4].source.attributes[0].boolean	boolean	0
+sourceXmlCases[4].source.source_svg	bytes	<mjx-container class="MathJax" jax="SVG" overflow="linebreak"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="0.036ex" height="0.036ex" role="img" focusable="false" viewBox="0 0 16 16"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="semantics"><g data-mml-node="annotation-xml"><foreignObject data-mjx-xml="true" y="0px" width="0px" height="0px" transform="scale(62.5) matrix(1 0 0 -1 0 0)"><mjx-html style="font-family: Times; font-size: 16px;" variant=""><div data-mjx-hdw=".5em .2em 2em"><span>A</span></div></mjx-html></foreignObject></g></g></g></g></svg></mjx-container>
+sourceXmlCases[4].hdw	enum	0
+sourceXmlCases[4].scale	binary64	3ff0000000000000
+sourceXmlCases[4].can_measure_nodes	boolean	1
+sourceXmlCases[4].start_kind	bytes	body
+sourceXmlCases[4].start_parent_kind	bytes	html
+sourceXmlCases[4].payloads.count	integer	1
+sourceXmlCases[4].payloads[0]	utf16	<div data-mjx-hdw=".5em .2em 2em"><span>A</span></div>
+sourceXmlCases[4].observations.count	integer	1
+sourceXmlCases[4].observations[0].w	binary64	0000000000000000
+sourceXmlCases[4].observations[0].h	binary64	0000000000000000
+sourceXmlCases[4].observations[0].d	binary64	0000000000000000
+sourceXmlCases[4].observations[0].scale	binary64	3ff0000000000000
+sourceXmlCases[4].observations[0].rscale	binary64	3ff0000000000000
+sourceXmlCases[4].observations[0].family	utf16	Times
+sourceXmlCases[4].observations[0].font_size	utf16	16px
+sourceXmlCases[4].observations[0].html	bytes	<mjx-html style="font-family: Times; font-size: 16px;" variant=""><div data-mjx-hdw=".5em .2em 2em"><span>A</span></div></mjx-html>
+sourceXmlCases[4].observations[0].wrapper_styles	bytes	{"foreignObject[data-mjx-html]":{"overflow":"visible"},"mjx-measure-xml":{"position":"absolute","left":0,"top":0,"display":"inline-block","line-height":"normal","white-space":"normal"},"mjx-html":{"display":"inline-block","line-height":"normal","text-align":"initial","white-space":"initial"},"mjx-html-holder":{"display":"block","position":"absolute","top":0,"left":0,"bottom":0,"right":0}}
+sourceXmlCases[4].observations[0].source_html_hdw	bytes	ignore
+sourceXmlCases[4].observations[0].can_measure_nodes	boolean	1
+sourceXmlCases[4].observations[0].output_scale	binary64	3ff0000000000000
+sourceXmlCases[4].observations[0].metrics_scale	binary64	3ff0000000000000
+sourceXmlCases[4].observations[0].em	binary64	4030000000000000
+sourceXmlCases[4].observations[0].ex	binary64	4020000000000000
+sourceXmlCases[4].observations[0].metrics_family	utf16	
+sourceXmlCases[5].source.name	bytes	xml-automatic-force-policy
+sourceXmlCases[5].source.metrics.em	binary64	4030000000000000
+sourceXmlCases[5].source.metrics.ex	binary64	4020000000000000
+sourceXmlCases[5].source.metrics.container_width	binary64	4084000000000000
+sourceXmlCases[5].source.metrics.display	boolean	0
+sourceXmlCases[5].source.nodes.count	integer	5
+sourceXmlCases[5].source.nodes[0].kind	bytes	math
+sourceXmlCases[5].source.nodes[0].is_inferred	boolean	0
+sourceXmlCases[5].source.nodes[0].parent	integer	max
+sourceXmlCases[5].source.nodes[0].attribute_first	integer	0
+sourceXmlCases[5].source.nodes[0].attribute_count	integer	0
+sourceXmlCases[5].source.nodes[0].text	utf16	
+sourceXmlCases[5].source.nodes[0].xml_payload_index	integer	max
+sourceXmlCases[5].source.nodes[1].kind	bytes	inferredMrow
+sourceXmlCases[5].source.nodes[1].is_inferred	boolean	1
+sourceXmlCases[5].source.nodes[1].parent	integer	0
+sourceXmlCases[5].source.nodes[1].attribute_first	integer	0
+sourceXmlCases[5].source.nodes[1].attribute_count	integer	0
+sourceXmlCases[5].source.nodes[1].text	utf16	
+sourceXmlCases[5].source.nodes[1].xml_payload_index	integer	max
+sourceXmlCases[5].source.nodes[2].kind	bytes	semantics
+sourceXmlCases[5].source.nodes[2].is_inferred	boolean	0
+sourceXmlCases[5].source.nodes[2].parent	integer	1
+sourceXmlCases[5].source.nodes[2].attribute_first	integer	0
+sourceXmlCases[5].source.nodes[2].attribute_count	integer	0
+sourceXmlCases[5].source.nodes[2].text	utf16	
+sourceXmlCases[5].source.nodes[2].xml_payload_index	integer	max
+sourceXmlCases[5].source.nodes[3].kind	bytes	annotation-xml
+sourceXmlCases[5].source.nodes[3].is_inferred	boolean	0
+sourceXmlCases[5].source.nodes[3].parent	integer	2
+sourceXmlCases[5].source.nodes[3].attribute_first	integer	0
+sourceXmlCases[5].source.nodes[3].attribute_count	integer	1
+sourceXmlCases[5].source.nodes[3].text	utf16	
+sourceXmlCases[5].source.nodes[3].xml_payload_index	integer	max
+sourceXmlCases[5].source.nodes[4].kind	bytes	XML
+sourceXmlCases[5].source.nodes[4].is_inferred	boolean	0
+sourceXmlCases[5].source.nodes[4].parent	integer	3
+sourceXmlCases[5].source.nodes[4].attribute_first	integer	1
+sourceXmlCases[5].source.nodes[4].attribute_count	integer	0
+sourceXmlCases[5].source.nodes[4].text	utf16	
+sourceXmlCases[5].source.nodes[4].xml_payload_index	integer	0
+sourceXmlCases[5].source.attributes.count	integer	1
+sourceXmlCases[5].source.attributes[0].name	utf16	encoding
+sourceXmlCases[5].source.attributes[0].kind	enum	0
+sourceXmlCases[5].source.attributes[0].text	utf16	application/xhtml+xml
+sourceXmlCases[5].source.attributes[0].number	binary64	0000000000000000
+sourceXmlCases[5].source.attributes[0].boolean	boolean	0
+sourceXmlCases[5].source.source_svg	bytes	<mjx-container class="MathJax" jax="SVG" overflow="linebreak"><svg style="vertical-align: -0.452ex;" xmlns="http://www.w3.org/2000/svg" width="4.525ex" height="1.584ex" role="img" focusable="false" viewBox="0 -500 2000 700"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="semantics"><g data-mml-node="annotation-xml"><foreignObject data-mjx-xml="true" y="-8px" width="32px" height="11.2px" transform="scale(62.5) matrix(1 0 0 -1 0 0)"><mjx-html style="height: 0.7em; width: 2em; vertical-align: -0.2em;" variant=""><mjx-html-holder style="font-family: Times; font-size: 16px;"><div data-mjx-hdw=".5em .2em 2em"><span>B</span></div></mjx-html-holder></mjx-html></foreignObject></g></g></g></g></svg></mjx-container>
+sourceXmlCases[5].hdw	enum	0
+sourceXmlCases[5].scale	binary64	3ff0000000000000
+sourceXmlCases[5].can_measure_nodes	boolean	0
+sourceXmlCases[5].start_kind	bytes	body
+sourceXmlCases[5].start_parent_kind	bytes	html
+sourceXmlCases[5].payloads.count	integer	1
+sourceXmlCases[5].payloads[0]	utf16	<div data-mjx-hdw=".5em .2em 2em"><span>B</span></div>
+sourceXmlCases[5].observations.count	integer	1
+sourceXmlCases[5].observations[0].w	binary64	4000000000000000
+sourceXmlCases[5].observations[0].h	binary64	3fe0000000000000
+sourceXmlCases[5].observations[0].d	binary64	3fc999999999999a
+sourceXmlCases[5].observations[0].scale	binary64	3ff0000000000000
+sourceXmlCases[5].observations[0].rscale	binary64	3ff0000000000000
+sourceXmlCases[5].observations[0].family	utf16	Times
+sourceXmlCases[5].observations[0].font_size	utf16	16px
+sourceXmlCases[5].observations[0].html	bytes	<mjx-html style="height: 0.7em; width: 2em; vertical-align: -0.2em;" variant=""><mjx-html-holder style="font-family: Times; font-size: 16px;"><div data-mjx-hdw=".5em .2em 2em"><span>B</span></div></mjx-html-holder></mjx-html>
+sourceXmlCases[5].observations[0].wrapper_styles	bytes	{"foreignObject[data-mjx-html]":{"overflow":"visible"},"mjx-measure-xml":{"position":"absolute","left":0,"top":0,"display":"inline-block","line-height":"normal","white-space":"normal"},"mjx-html":{"display":"inline-block","line-height":"normal","text-align":"initial","white-space":"initial"},"mjx-html-holder":{"display":"block","position":"absolute","top":0,"left":0,"bottom":0,"right":0}}
+sourceXmlCases[5].observations[0].source_html_hdw	bytes	force
+sourceXmlCases[5].observations[0].can_measure_nodes	boolean	0
+sourceXmlCases[5].observations[0].output_scale	binary64	3ff0000000000000
+sourceXmlCases[5].observations[0].metrics_scale	binary64	3ff0000000000000
+sourceXmlCases[5].observations[0].em	binary64	4030000000000000
+sourceXmlCases[5].observations[0].ex	binary64	4020000000000000
+sourceXmlCases[5].observations[0].metrics_family	utf16	
+sourceXmlCases[6].source.name	bytes	xml-scale-not-one
+sourceXmlCases[6].source.metrics.em	binary64	4030000000000000
+sourceXmlCases[6].source.metrics.ex	binary64	4020000000000000
+sourceXmlCases[6].source.metrics.container_width	binary64	4084000000000000
+sourceXmlCases[6].source.metrics.display	boolean	0
+sourceXmlCases[6].source.nodes.count	integer	5
+sourceXmlCases[6].source.nodes[0].kind	bytes	math
+sourceXmlCases[6].source.nodes[0].is_inferred	boolean	0
+sourceXmlCases[6].source.nodes[0].parent	integer	max
+sourceXmlCases[6].source.nodes[0].attribute_first	integer	0
+sourceXmlCases[6].source.nodes[0].attribute_count	integer	0
+sourceXmlCases[6].source.nodes[0].text	utf16	
+sourceXmlCases[6].source.nodes[0].xml_payload_index	integer	max
+sourceXmlCases[6].source.nodes[1].kind	bytes	inferredMrow
+sourceXmlCases[6].source.nodes[1].is_inferred	boolean	1
+sourceXmlCases[6].source.nodes[1].parent	integer	0
+sourceXmlCases[6].source.nodes[1].attribute_first	integer	0
+sourceXmlCases[6].source.nodes[1].attribute_count	integer	0
+sourceXmlCases[6].source.nodes[1].text	utf16	
+sourceXmlCases[6].source.nodes[1].xml_payload_index	integer	max
+sourceXmlCases[6].source.nodes[2].kind	bytes	semantics
+sourceXmlCases[6].source.nodes[2].is_inferred	boolean	0
+sourceXmlCases[6].source.nodes[2].parent	integer	1
+sourceXmlCases[6].source.nodes[2].attribute_first	integer	0
+sourceXmlCases[6].source.nodes[2].attribute_count	integer	0
+sourceXmlCases[6].source.nodes[2].text	utf16	
+sourceXmlCases[6].source.nodes[2].xml_payload_index	integer	max
+sourceXmlCases[6].source.nodes[3].kind	bytes	annotation-xml
+sourceXmlCases[6].source.nodes[3].is_inferred	boolean	0
+sourceXmlCases[6].source.nodes[3].parent	integer	2
+sourceXmlCases[6].source.nodes[3].attribute_first	integer	0
+sourceXmlCases[6].source.nodes[3].attribute_count	integer	1
+sourceXmlCases[6].source.nodes[3].text	utf16	
+sourceXmlCases[6].source.nodes[3].xml_payload_index	integer	max
+sourceXmlCases[6].source.nodes[4].kind	bytes	XML
+sourceXmlCases[6].source.nodes[4].is_inferred	boolean	0
+sourceXmlCases[6].source.nodes[4].parent	integer	3
+sourceXmlCases[6].source.nodes[4].attribute_first	integer	1
+sourceXmlCases[6].source.nodes[4].attribute_count	integer	0
+sourceXmlCases[6].source.nodes[4].text	utf16	
+sourceXmlCases[6].source.nodes[4].xml_payload_index	integer	0
+sourceXmlCases[6].source.attributes.count	integer	1
+sourceXmlCases[6].source.attributes[0].name	utf16	encoding
+sourceXmlCases[6].source.attributes[0].kind	enum	0
+sourceXmlCases[6].source.attributes[0].text	utf16	application/xhtml+xml
+sourceXmlCases[6].source.attributes[0].number	binary64	0000000000000000
+sourceXmlCases[6].source.attributes[0].boolean	boolean	0
+sourceXmlCases[6].source.source_svg	bytes	<mjx-container class="MathJax" jax="SVG" overflow="linebreak" style="font-size: 200%;"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="0.036ex" height="0.036ex" role="img" focusable="false" viewBox="0 0 16 16"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="semantics"><g data-mml-node="annotation-xml"><foreignObject data-mjx-xml="true" y="0px" width="0px" height="0px" transform="scale(62.5) matrix(1 0 0 -1 0 0)"><mjx-html style="height: 0; width: 0; vertical-align: 0;" variant=""><mjx-html-holder style="font-family: Times; font-size: 16px;"><article><em>S</em></article></mjx-html-holder></mjx-html></foreignObject></g></g></g></g></svg></mjx-container>
+sourceXmlCases[6].hdw	enum	3
+sourceXmlCases[6].scale	binary64	4000000000000000
+sourceXmlCases[6].can_measure_nodes	boolean	0
+sourceXmlCases[6].start_kind	bytes	body
+sourceXmlCases[6].start_parent_kind	bytes	html
+sourceXmlCases[6].payloads.count	integer	1
+sourceXmlCases[6].payloads[0]	utf16	<article><em>S</em></article>
+sourceXmlCases[6].observations.count	integer	1
+sourceXmlCases[6].observations[0].w	binary64	0000000000000000
+sourceXmlCases[6].observations[0].h	binary64	0000000000000000
+sourceXmlCases[6].observations[0].d	binary64	0000000000000000
+sourceXmlCases[6].observations[0].scale	binary64	3ff0000000000000
+sourceXmlCases[6].observations[0].rscale	binary64	3ff0000000000000
+sourceXmlCases[6].observations[0].family	utf16	Times
+sourceXmlCases[6].observations[0].font_size	utf16	16px
+sourceXmlCases[6].observations[0].html	bytes	<mjx-html style="height: 0; width: 0; vertical-align: 0;" variant=""><mjx-html-holder style="font-family: Times; font-size: 16px;"><article><em>S</em></article></mjx-html-holder></mjx-html>
+sourceXmlCases[6].observations[0].wrapper_styles	bytes	{"foreignObject[data-mjx-html]":{"overflow":"visible"},"mjx-measure-xml":{"position":"absolute","left":0,"top":0,"display":"inline-block","line-height":"normal","white-space":"normal"},"mjx-html":{"display":"inline-block","line-height":"normal","text-align":"initial","white-space":"initial"},"mjx-html-holder":{"display":"block","position":"absolute","top":0,"left":0,"bottom":0,"right":0}}
+sourceXmlCases[6].observations[0].source_html_hdw	bytes	ignore
+sourceXmlCases[6].observations[0].can_measure_nodes	boolean	0
+sourceXmlCases[6].observations[0].output_scale	binary64	4000000000000000
+sourceXmlCases[6].observations[0].metrics_scale	binary64	3ff0000000000000
+sourceXmlCases[6].observations[0].em	binary64	4030000000000000
+sourceXmlCases[6].observations[0].ex	binary64	4020000000000000
+sourceXmlCases[6].observations[0].metrics_family	utf16	
+sourceXmlCases[7].source.name	bytes	xml-scale-two-force-hdw
+sourceXmlCases[7].source.metrics.em	binary64	4030000000000000
+sourceXmlCases[7].source.metrics.ex	binary64	4020000000000000
+sourceXmlCases[7].source.metrics.container_width	binary64	4084000000000000
+sourceXmlCases[7].source.metrics.display	boolean	0
+sourceXmlCases[7].source.nodes.count	integer	5
+sourceXmlCases[7].source.nodes[0].kind	bytes	math
+sourceXmlCases[7].source.nodes[0].is_inferred	boolean	0
+sourceXmlCases[7].source.nodes[0].parent	integer	max
+sourceXmlCases[7].source.nodes[0].attribute_first	integer	0
+sourceXmlCases[7].source.nodes[0].attribute_count	integer	0
+sourceXmlCases[7].source.nodes[0].text	utf16	
+sourceXmlCases[7].source.nodes[0].xml_payload_index	integer	max
+sourceXmlCases[7].source.nodes[1].kind	bytes	inferredMrow
+sourceXmlCases[7].source.nodes[1].is_inferred	boolean	1
+sourceXmlCases[7].source.nodes[1].parent	integer	0
+sourceXmlCases[7].source.nodes[1].attribute_first	integer	0
+sourceXmlCases[7].source.nodes[1].attribute_count	integer	0
+sourceXmlCases[7].source.nodes[1].text	utf16	
+sourceXmlCases[7].source.nodes[1].xml_payload_index	integer	max
+sourceXmlCases[7].source.nodes[2].kind	bytes	semantics
+sourceXmlCases[7].source.nodes[2].is_inferred	boolean	0
+sourceXmlCases[7].source.nodes[2].parent	integer	1
+sourceXmlCases[7].source.nodes[2].attribute_first	integer	0
+sourceXmlCases[7].source.nodes[2].attribute_count	integer	0
+sourceXmlCases[7].source.nodes[2].text	utf16	
+sourceXmlCases[7].source.nodes[2].xml_payload_index	integer	max
+sourceXmlCases[7].source.nodes[3].kind	bytes	annotation-xml
+sourceXmlCases[7].source.nodes[3].is_inferred	boolean	0
+sourceXmlCases[7].source.nodes[3].parent	integer	2
+sourceXmlCases[7].source.nodes[3].attribute_first	integer	0
+sourceXmlCases[7].source.nodes[3].attribute_count	integer	1
+sourceXmlCases[7].source.nodes[3].text	utf16	
+sourceXmlCases[7].source.nodes[3].xml_payload_index	integer	max
+sourceXmlCases[7].source.nodes[4].kind	bytes	XML
+sourceXmlCases[7].source.nodes[4].is_inferred	boolean	0
+sourceXmlCases[7].source.nodes[4].parent	integer	3
+sourceXmlCases[7].source.nodes[4].attribute_first	integer	1
+sourceXmlCases[7].source.nodes[4].attribute_count	integer	0
+sourceXmlCases[7].source.nodes[4].text	utf16	
+sourceXmlCases[7].source.nodes[4].xml_payload_index	integer	0
+sourceXmlCases[7].source.attributes.count	integer	1
+sourceXmlCases[7].source.attributes[0].name	utf16	encoding
+sourceXmlCases[7].source.attributes[0].kind	enum	0
+sourceXmlCases[7].source.attributes[0].text	utf16	application/xhtml+xml
+sourceXmlCases[7].source.attributes[0].number	binary64	0000000000000000
+sourceXmlCases[7].source.attributes[0].boolean	boolean	0
+sourceXmlCases[7].source.source_svg	bytes	<mjx-container class="MathJax" jax="SVG" overflow="linebreak" style="font-size: 200%;"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="6.787ex" height="2.828ex" role="img" focusable="false" viewBox="0 -1000 3000 1250"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="semantics"><g data-mml-node="annotation-xml"><foreignObject data-mjx-xml="true" y="-16px" width="48px" height="20px" transform="scale(62.5) matrix(1 0 0 -1 0 0)"><mjx-html style="height: 1.25em; width: 3em; vertical-align: -0.25em;" variant=""><mjx-html-holder style="font-family: Times; font-size: 16px;"><div data-mjx-hdw="1em .25em 3em"><span>Scale</span></div></mjx-html-holder></mjx-html></foreignObject></g></g></g></g></svg></mjx-container>
+sourceXmlCases[7].hdw	enum	2
+sourceXmlCases[7].scale	binary64	4000000000000000
+sourceXmlCases[7].can_measure_nodes	boolean	0
+sourceXmlCases[7].start_kind	bytes	body
+sourceXmlCases[7].start_parent_kind	bytes	html
+sourceXmlCases[7].payloads.count	integer	1
+sourceXmlCases[7].payloads[0]	utf16	<div data-mjx-hdw="1em .25em 3em"><span>Scale</span></div>
+sourceXmlCases[7].observations.count	integer	1
+sourceXmlCases[7].observations[0].w	binary64	4008000000000000
+sourceXmlCases[7].observations[0].h	binary64	3ff0000000000000
+sourceXmlCases[7].observations[0].d	binary64	3fd0000000000000
+sourceXmlCases[7].observations[0].scale	binary64	3ff0000000000000
+sourceXmlCases[7].observations[0].rscale	binary64	3ff0000000000000
+sourceXmlCases[7].observations[0].family	utf16	Times
+sourceXmlCases[7].observations[0].font_size	utf16	16px
+sourceXmlCases[7].observations[0].html	bytes	<mjx-html style="height: 1.25em; width: 3em; vertical-align: -0.25em;" variant=""><mjx-html-holder style="font-family: Times; font-size: 16px;"><div data-mjx-hdw="1em .25em 3em"><span>Scale</span></div></mjx-html-holder></mjx-html>
+sourceXmlCases[7].observations[0].wrapper_styles	bytes	{"foreignObject[data-mjx-html]":{"overflow":"visible"},"mjx-measure-xml":{"position":"absolute","left":0,"top":0,"display":"inline-block","line-height":"normal","white-space":"normal"},"mjx-html":{"display":"inline-block","line-height":"normal","text-align":"initial","white-space":"initial"},"mjx-html-holder":{"display":"block","position":"absolute","top":0,"left":0,"bottom":0,"right":0}}
+sourceXmlCases[7].observations[0].source_html_hdw	bytes	force
+sourceXmlCases[7].observations[0].can_measure_nodes	boolean	0
+sourceXmlCases[7].observations[0].output_scale	binary64	4000000000000000
+sourceXmlCases[7].observations[0].metrics_scale	binary64	3ff0000000000000
+sourceXmlCases[7].observations[0].em	binary64	4030000000000000
+sourceXmlCases[7].observations[0].ex	binary64	4020000000000000
+sourceXmlCases[7].observations[0].metrics_family	utf16	
+sourceXmlCases[8].source.name	bytes	xml-authored-font-style-removed-times-fallback
+sourceXmlCases[8].source.metrics.em	binary64	4030000000000000
+sourceXmlCases[8].source.metrics.ex	binary64	4020000000000000
+sourceXmlCases[8].source.metrics.container_width	binary64	4084000000000000
+sourceXmlCases[8].source.metrics.display	boolean	0
+sourceXmlCases[8].source.nodes.count	integer	5
+sourceXmlCases[8].source.nodes[0].kind	bytes	math
+sourceXmlCases[8].source.nodes[0].is_inferred	boolean	0
+sourceXmlCases[8].source.nodes[0].parent	integer	max
+sourceXmlCases[8].source.nodes[0].attribute_first	integer	0
+sourceXmlCases[8].source.nodes[0].attribute_count	integer	0
+sourceXmlCases[8].source.nodes[0].text	utf16	
+sourceXmlCases[8].source.nodes[0].xml_payload_index	integer	max
+sourceXmlCases[8].source.nodes[1].kind	bytes	inferredMrow
+sourceXmlCases[8].source.nodes[1].is_inferred	boolean	1
+sourceXmlCases[8].source.nodes[1].parent	integer	0
+sourceXmlCases[8].source.nodes[1].attribute_first	integer	0
+sourceXmlCases[8].source.nodes[1].attribute_count	integer	0
+sourceXmlCases[8].source.nodes[1].text	utf16	
+sourceXmlCases[8].source.nodes[1].xml_payload_index	integer	max
+sourceXmlCases[8].source.nodes[2].kind	bytes	semantics
+sourceXmlCases[8].source.nodes[2].is_inferred	boolean	0
+sourceXmlCases[8].source.nodes[2].parent	integer	1
+sourceXmlCases[8].source.nodes[2].attribute_first	integer	0
+sourceXmlCases[8].source.nodes[2].attribute_count	integer	0
+sourceXmlCases[8].source.nodes[2].text	utf16	
+sourceXmlCases[8].source.nodes[2].xml_payload_index	integer	max
+sourceXmlCases[8].source.nodes[3].kind	bytes	annotation-xml
+sourceXmlCases[8].source.nodes[3].is_inferred	boolean	0
+sourceXmlCases[8].source.nodes[3].parent	integer	2
+sourceXmlCases[8].source.nodes[3].attribute_first	integer	0
+sourceXmlCases[8].source.nodes[3].attribute_count	integer	2
+sourceXmlCases[8].source.nodes[3].text	utf16	
+sourceXmlCases[8].source.nodes[3].xml_payload_index	integer	max
+sourceXmlCases[8].source.nodes[4].kind	bytes	XML
+sourceXmlCases[8].source.nodes[4].is_inferred	boolean	0
+sourceXmlCases[8].source.nodes[4].parent	integer	3
+sourceXmlCases[8].source.nodes[4].attribute_first	integer	2
+sourceXmlCases[8].source.nodes[4].attribute_count	integer	0
+sourceXmlCases[8].source.nodes[4].text	utf16	
+sourceXmlCases[8].source.nodes[4].xml_payload_index	integer	0
+sourceXmlCases[8].source.attributes.count	integer	2
+sourceXmlCases[8].source.attributes[0].name	utf16	style
+sourceXmlCases[8].source.attributes[0].kind	enum	0
+sourceXmlCases[8].source.attributes[0].text	utf16	font-family: ProbeFamily
+sourceXmlCases[8].source.attributes[0].number	binary64	0000000000000000
+sourceXmlCases[8].source.attributes[0].boolean	boolean	0
+sourceXmlCases[8].source.attributes[1].name	utf16	encoding
+sourceXmlCases[8].source.attributes[1].kind	enum	0
+sourceXmlCases[8].source.attributes[1].text	utf16	application/xhtml+xml
+sourceXmlCases[8].source.attributes[1].number	binary64	0000000000000000
+sourceXmlCases[8].source.attributes[1].boolean	boolean	0
+sourceXmlCases[8].source.source_svg	bytes	<mjx-container class="MathJax" jax="SVG" overflow="linebreak"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="0.036ex" height="0.036ex" role="img" focusable="false" viewBox="0 0 16 16"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="semantics"><g data-mml-node="annotation-xml"><foreignObject data-mjx-xml="true" y="0px" width="0px" height="0px" transform="scale(62.5) matrix(1 0 0 -1 0 0)"><mjx-html style="font-family: Times; font-size: 16px;" variant=""><div>font</div></mjx-html></foreignObject></g></g></g></g></svg></mjx-container>
+sourceXmlCases[8].hdw	enum	3
+sourceXmlCases[8].scale	binary64	3ff0000000000000
+sourceXmlCases[8].can_measure_nodes	boolean	0
+sourceXmlCases[8].start_kind	bytes	body
+sourceXmlCases[8].start_parent_kind	bytes	html
+sourceXmlCases[8].payloads.count	integer	1
+sourceXmlCases[8].payloads[0]	utf16	<div>font</div>
+sourceXmlCases[8].observations.count	integer	1
+sourceXmlCases[8].observations[0].w	binary64	0000000000000000
+sourceXmlCases[8].observations[0].h	binary64	0000000000000000
+sourceXmlCases[8].observations[0].d	binary64	0000000000000000
+sourceXmlCases[8].observations[0].scale	binary64	3ff0000000000000
+sourceXmlCases[8].observations[0].rscale	binary64	3ff0000000000000
+sourceXmlCases[8].observations[0].family	utf16	Times
+sourceXmlCases[8].observations[0].font_size	utf16	16px
+sourceXmlCases[8].observations[0].html	bytes	<mjx-html style="font-family: Times; font-size: 16px;" variant=""><div>font</div></mjx-html>
+sourceXmlCases[8].observations[0].wrapper_styles	bytes	{"foreignObject[data-mjx-html]":{"overflow":"visible"},"mjx-measure-xml":{"position":"absolute","left":0,"top":0,"display":"inline-block","line-height":"normal","white-space":"normal"},"mjx-html":{"display":"inline-block","line-height":"normal","text-align":"initial","white-space":"initial"},"mjx-html-holder":{"display":"block","position":"absolute","top":0,"left":0,"bottom":0,"right":0}}
+sourceXmlCases[8].observations[0].source_html_hdw	bytes	ignore
+sourceXmlCases[8].observations[0].can_measure_nodes	boolean	0
+sourceXmlCases[8].observations[0].output_scale	binary64	3ff0000000000000
+sourceXmlCases[8].observations[0].metrics_scale	binary64	3ff0000000000000
+sourceXmlCases[8].observations[0].em	binary64	4030000000000000
+sourceXmlCases[8].observations[0].ex	binary64	4020000000000000
+sourceXmlCases[8].observations[0].metrics_family	utf16	
+sourceXmlCases[9].source.name	bytes	xml-after-preceding-math
+sourceXmlCases[9].source.metrics.em	binary64	4030000000000000
+sourceXmlCases[9].source.metrics.ex	binary64	4020000000000000
+sourceXmlCases[9].source.metrics.container_width	binary64	4084000000000000
+sourceXmlCases[9].source.metrics.display	boolean	0
+sourceXmlCases[9].source.nodes.count	integer	8
+sourceXmlCases[9].source.nodes[0].kind	bytes	math
+sourceXmlCases[9].source.nodes[0].is_inferred	boolean	0
+sourceXmlCases[9].source.nodes[0].parent	integer	max
+sourceXmlCases[9].source.nodes[0].attribute_first	integer	0
+sourceXmlCases[9].source.nodes[0].attribute_count	integer	0
+sourceXmlCases[9].source.nodes[0].text	utf16	
+sourceXmlCases[9].source.nodes[0].xml_payload_index	integer	max
+sourceXmlCases[9].source.nodes[1].kind	bytes	inferredMrow
+sourceXmlCases[9].source.nodes[1].is_inferred	boolean	1
+sourceXmlCases[9].source.nodes[1].parent	integer	0
+sourceXmlCases[9].source.nodes[1].attribute_first	integer	0
+sourceXmlCases[9].source.nodes[1].attribute_count	integer	0
+sourceXmlCases[9].source.nodes[1].text	utf16	
+sourceXmlCases[9].source.nodes[1].xml_payload_index	integer	max
+sourceXmlCases[9].source.nodes[2].kind	bytes	mrow
+sourceXmlCases[9].source.nodes[2].is_inferred	boolean	0
+sourceXmlCases[9].source.nodes[2].parent	integer	1
+sourceXmlCases[9].source.nodes[2].attribute_first	integer	0
+sourceXmlCases[9].source.nodes[2].attribute_count	integer	0
+sourceXmlCases[9].source.nodes[2].text	utf16	
+sourceXmlCases[9].source.nodes[2].xml_payload_index	integer	max
+sourceXmlCases[9].source.nodes[3].kind	bytes	mi
+sourceXmlCases[9].source.nodes[3].is_inferred	boolean	0
+sourceXmlCases[9].source.nodes[3].parent	integer	2
+sourceXmlCases[9].source.nodes[3].attribute_first	integer	0
+sourceXmlCases[9].source.nodes[3].attribute_count	integer	0
+sourceXmlCases[9].source.nodes[3].text	utf16	
+sourceXmlCases[9].source.nodes[3].xml_payload_index	integer	max
+sourceXmlCases[9].source.nodes[4].kind	bytes	text
+sourceXmlCases[9].source.nodes[4].is_inferred	boolean	0
+sourceXmlCases[9].source.nodes[4].parent	integer	3
+sourceXmlCases[9].source.nodes[4].attribute_first	integer	0
+sourceXmlCases[9].source.nodes[4].attribute_count	integer	0
+sourceXmlCases[9].source.nodes[4].text	utf16	x
+sourceXmlCases[9].source.nodes[4].xml_payload_index	integer	max
+sourceXmlCases[9].source.nodes[5].kind	bytes	semantics
+sourceXmlCases[9].source.nodes[5].is_inferred	boolean	0
+sourceXmlCases[9].source.nodes[5].parent	integer	2
+sourceXmlCases[9].source.nodes[5].attribute_first	integer	0
+sourceXmlCases[9].source.nodes[5].attribute_count	integer	0
+sourceXmlCases[9].source.nodes[5].text	utf16	
+sourceXmlCases[9].source.nodes[5].xml_payload_index	integer	max
+sourceXmlCases[9].source.nodes[6].kind	bytes	annotation-xml
+sourceXmlCases[9].source.nodes[6].is_inferred	boolean	0
+sourceXmlCases[9].source.nodes[6].parent	integer	5
+sourceXmlCases[9].source.nodes[6].attribute_first	integer	0
+sourceXmlCases[9].source.nodes[6].attribute_count	integer	1
+sourceXmlCases[9].source.nodes[6].text	utf16	
+sourceXmlCases[9].source.nodes[6].xml_payload_index	integer	max
+sourceXmlCases[9].source.nodes[7].kind	bytes	XML
+sourceXmlCases[9].source.nodes[7].is_inferred	boolean	0
+sourceXmlCases[9].source.nodes[7].parent	integer	6
+sourceXmlCases[9].source.nodes[7].attribute_first	integer	1
+sourceXmlCases[9].source.nodes[7].attribute_count	integer	0
+sourceXmlCases[9].source.nodes[7].text	utf16	
+sourceXmlCases[9].source.nodes[7].xml_payload_index	integer	0
+sourceXmlCases[9].source.attributes.count	integer	1
+sourceXmlCases[9].source.attributes[0].name	utf16	encoding
+sourceXmlCases[9].source.attributes[0].kind	enum	0
+sourceXmlCases[9].source.attributes[0].text	utf16	application/xhtml+xml
+sourceXmlCases[9].source.attributes[0].number	binary64	0000000000000000
+sourceXmlCases[9].source.attributes[0].boolean	boolean	0
+sourceXmlCases[9].source.source_svg	bytes	<mjx-container class="MathJax" jax="SVG" overflow="linebreak"><svg style="vertical-align: -0.025ex;" xmlns="http://www.w3.org/2000/svg" width="1.294ex" height="1.025ex" role="img" focusable="false" viewBox="0 -442 572 453"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mrow"><g data-mml-node="mi"><path data-c="1D465" d="M527 373C527 419 482 442 432 442C389 442 355 419 329 373C308 419 273 442 222 442C173 442 133 419 101 374C74 335 60 306 60 287C60 278 65 273 75 273C84 273 90 278 92 287C111 345 153 413 220 413C253 413 269 392 269 351C269 330 251 252 216 118C199 51 169 18 126 18C112 18 99 21 88 26C114 36 127 54 127 80C127 106 114 119 87 119C54 119 29 91 29 58C29 12 76-11 125-11C167-11 201 12 228 58C247 12 283-11 335-11C383-11 423 12 455 57C482 96 496 125 496 144C496 153 491 158 481 158C472 158 467 153 464 144C447 87 402 18 337 18C304 18 287 38 287 79C287 92 292 120 303 165L337 300C356 375 387 413 431 413C445 413 458 410 469 405C442 396 429 378 429 351C429 325 443 312 470 312C502 312 527 341 527 373Z"/></g><g data-mml-node="semantics" transform="translate(572,0)"><g data-mml-node="annotation-xml"><foreignObject data-mjx-xml="true" y="0px" width="0px" height="0px" transform="scale(62.5) matrix(1 0 0 -1 0 0)"><mjx-html style="font-family: Times; font-size: 16px;" variant=""><div><br/><svg xmlns="http://www.w3.org/2000/svg"><text>Y</text></svg></div></mjx-html></foreignObject></g></g></g></g></g></svg></mjx-container>
+sourceXmlCases[9].hdw	enum	2
+sourceXmlCases[9].scale	binary64	3ff0000000000000
+sourceXmlCases[9].can_measure_nodes	boolean	0
+sourceXmlCases[9].start_kind	bytes	body
+sourceXmlCases[9].start_parent_kind	bytes	html
+sourceXmlCases[9].payloads.count	integer	1
+sourceXmlCases[9].payloads[0]	utf16	<div><br><svg xmlns="http://www.w3.org/2000/svg"><text>Y</text></svg></div>
+sourceXmlCases[9].observations.count	integer	1
+sourceXmlCases[9].observations[0].w	binary64	0000000000000000
+sourceXmlCases[9].observations[0].h	binary64	0000000000000000
+sourceXmlCases[9].observations[0].d	binary64	0000000000000000
+sourceXmlCases[9].observations[0].scale	binary64	3ff0000000000000
+sourceXmlCases[9].observations[0].rscale	binary64	3ff0000000000000
+sourceXmlCases[9].observations[0].family	utf16	Times
+sourceXmlCases[9].observations[0].font_size	utf16	16px
+sourceXmlCases[9].observations[0].html	bytes	<mjx-html style="font-family: Times; font-size: 16px;" variant=""><div><br><svg xmlns="http://www.w3.org/2000/svg"><text>Y</text></svg></div></mjx-html>
+sourceXmlCases[9].observations[0].wrapper_styles	bytes	{"foreignObject[data-mjx-html]":{"overflow":"visible"},"mjx-measure-xml":{"position":"absolute","left":0,"top":0,"display":"inline-block","line-height":"normal","white-space":"normal"},"mjx-html":{"display":"inline-block","line-height":"normal","text-align":"initial","white-space":"initial"},"mjx-html-holder":{"display":"block","position":"absolute","top":0,"left":0,"bottom":0,"right":0}}
+sourceXmlCases[9].observations[0].source_html_hdw	bytes	force
+sourceXmlCases[9].observations[0].can_measure_nodes	boolean	0
+sourceXmlCases[9].observations[0].output_scale	binary64	3ff0000000000000
+sourceXmlCases[9].observations[0].metrics_scale	binary64	3ff0000000000000
+sourceXmlCases[9].observations[0].em	binary64	4030000000000000
+sourceXmlCases[9].observations[0].ex	binary64	4020000000000000
+sourceXmlCases[9].observations[0].metrics_family	utf16	
+sourceXmlCases[10].source.name	bytes	xml-empty-element
+sourceXmlCases[10].source.metrics.em	binary64	4030000000000000
+sourceXmlCases[10].source.metrics.ex	binary64	4020000000000000
+sourceXmlCases[10].source.metrics.container_width	binary64	4084000000000000
+sourceXmlCases[10].source.metrics.display	boolean	0
+sourceXmlCases[10].source.nodes.count	integer	5
+sourceXmlCases[10].source.nodes[0].kind	bytes	math
+sourceXmlCases[10].source.nodes[0].is_inferred	boolean	0
+sourceXmlCases[10].source.nodes[0].parent	integer	max
+sourceXmlCases[10].source.nodes[0].attribute_first	integer	0
+sourceXmlCases[10].source.nodes[0].attribute_count	integer	0
+sourceXmlCases[10].source.nodes[0].text	utf16	
+sourceXmlCases[10].source.nodes[0].xml_payload_index	integer	max
+sourceXmlCases[10].source.nodes[1].kind	bytes	inferredMrow
+sourceXmlCases[10].source.nodes[1].is_inferred	boolean	1
+sourceXmlCases[10].source.nodes[1].parent	integer	0
+sourceXmlCases[10].source.nodes[1].attribute_first	integer	0
+sourceXmlCases[10].source.nodes[1].attribute_count	integer	0
+sourceXmlCases[10].source.nodes[1].text	utf16	
+sourceXmlCases[10].source.nodes[1].xml_payload_index	integer	max
+sourceXmlCases[10].source.nodes[2].kind	bytes	semantics
+sourceXmlCases[10].source.nodes[2].is_inferred	boolean	0
+sourceXmlCases[10].source.nodes[2].parent	integer	1
+sourceXmlCases[10].source.nodes[2].attribute_first	integer	0
+sourceXmlCases[10].source.nodes[2].attribute_count	integer	0
+sourceXmlCases[10].source.nodes[2].text	utf16	
+sourceXmlCases[10].source.nodes[2].xml_payload_index	integer	max
+sourceXmlCases[10].source.nodes[3].kind	bytes	annotation-xml
+sourceXmlCases[10].source.nodes[3].is_inferred	boolean	0
+sourceXmlCases[10].source.nodes[3].parent	integer	2
+sourceXmlCases[10].source.nodes[3].attribute_first	integer	0
+sourceXmlCases[10].source.nodes[3].attribute_count	integer	1
+sourceXmlCases[10].source.nodes[3].text	utf16	
+sourceXmlCases[10].source.nodes[3].xml_payload_index	integer	max
+sourceXmlCases[10].source.nodes[4].kind	bytes	XML
+sourceXmlCases[10].source.nodes[4].is_inferred	boolean	0
+sourceXmlCases[10].source.nodes[4].parent	integer	3
+sourceXmlCases[10].source.nodes[4].attribute_first	integer	1
+sourceXmlCases[10].source.nodes[4].attribute_count	integer	0
+sourceXmlCases[10].source.nodes[4].text	utf16	
+sourceXmlCases[10].source.nodes[4].xml_payload_index	integer	0
+sourceXmlCases[10].source.attributes.count	integer	1
+sourceXmlCases[10].source.attributes[0].name	utf16	encoding
+sourceXmlCases[10].source.attributes[0].kind	enum	0
+sourceXmlCases[10].source.attributes[0].text	utf16	application/xhtml+xml
+sourceXmlCases[10].source.attributes[0].number	binary64	0000000000000000
+sourceXmlCases[10].source.attributes[0].boolean	boolean	0
+sourceXmlCases[10].source.source_svg	bytes	<mjx-container class="MathJax" jax="SVG" overflow="linebreak"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="0.036ex" height="0.036ex" role="img" focusable="false" viewBox="0 0 16 16"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="semantics"><g data-mml-node="annotation-xml"><foreignObject data-mjx-xml="true" y="0px" width="0px" height="0px" transform="scale(62.5) matrix(1 0 0 -1 0 0)"><mjx-html style="font-family: Times; font-size: 16px;" variant=""><div/></mjx-html></foreignObject></g></g></g></g></svg></mjx-container>
+sourceXmlCases[10].hdw	enum	3
+sourceXmlCases[10].scale	binary64	3ff0000000000000
+sourceXmlCases[10].can_measure_nodes	boolean	0
+sourceXmlCases[10].start_kind	bytes	body
+sourceXmlCases[10].start_parent_kind	bytes	html
+sourceXmlCases[10].payloads.count	integer	1
+sourceXmlCases[10].payloads[0]	utf16	<div></div>
+sourceXmlCases[10].observations.count	integer	1
+sourceXmlCases[10].observations[0].w	binary64	0000000000000000
+sourceXmlCases[10].observations[0].h	binary64	0000000000000000
+sourceXmlCases[10].observations[0].d	binary64	0000000000000000
+sourceXmlCases[10].observations[0].scale	binary64	3ff0000000000000
+sourceXmlCases[10].observations[0].rscale	binary64	3ff0000000000000
+sourceXmlCases[10].observations[0].family	utf16	Times
+sourceXmlCases[10].observations[0].font_size	utf16	16px
+sourceXmlCases[10].observations[0].html	bytes	<mjx-html style="font-family: Times; font-size: 16px;" variant=""><div></div></mjx-html>
+sourceXmlCases[10].observations[0].wrapper_styles	bytes	{"foreignObject[data-mjx-html]":{"overflow":"visible"},"mjx-measure-xml":{"position":"absolute","left":0,"top":0,"display":"inline-block","line-height":"normal","white-space":"normal"},"mjx-html":{"display":"inline-block","line-height":"normal","text-align":"initial","white-space":"initial"},"mjx-html-holder":{"display":"block","position":"absolute","top":0,"left":0,"bottom":0,"right":0}}
+sourceXmlCases[10].observations[0].source_html_hdw	bytes	ignore
+sourceXmlCases[10].observations[0].can_measure_nodes	boolean	0
+sourceXmlCases[10].observations[0].output_scale	binary64	3ff0000000000000
+sourceXmlCases[10].observations[0].metrics_scale	binary64	3ff0000000000000
+sourceXmlCases[10].observations[0].em	binary64	4030000000000000
+sourceXmlCases[10].observations[0].ex	binary64	4020000000000000
+sourceXmlCases[10].observations[0].metrics_family	utf16	

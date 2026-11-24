@@ -1,0 +1,1174 @@
+# Pinned MathJax 4.1.3 observations; exact fields from the original compiled fixture.
+# field	type	value
+sourceMglyphCases.count	integer	13
+sourceMglyphCases[0].name	bytes	mglyph-image-auto-default
+sourceMglyphCases[0].kind	enum	0
+sourceMglyphCases[0].mathml	bytes	<math xmlns="http://www.w3.org/1998/Math/MathML"><mglyph src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222%22%20height%3D%221%22%3E%3Crect%20width%3D%222%22%20height%3D%221%22%2F%3E%3C%2Fsvg%3E" width="auto" height="auto"/></math>
+sourceMglyphCases[0].requested_display	boolean	0
+sourceMglyphCases[0].display	boolean	0
+sourceMglyphCases[0].em	binary64	4030000000000000
+sourceMglyphCases[0].ex	binary64	4020000000000000
+sourceMglyphCases[0].width	binary64	4094000000000000
+sourceMglyphCases[0].font_cache	bytes	none
+sourceMglyphCases[0].local_id	bytes	
+sourceMglyphCases[0].root_w	binary64	3ff0000000000000
+sourceMglyphCases[0].root_h	binary64	3ff0000000000000
+sourceMglyphCases[0].root_d	binary64	0000000000000000
+sourceMglyphCases[0].mglyph_bbox.present	boolean	1
+sourceMglyphCases[0].mglyph_bbox.value.w	binary64	3ff0000000000000
+sourceMglyphCases[0].mglyph_bbox.value.h	binary64	3ff0000000000000
+sourceMglyphCases[0].mglyph_bbox.value.d	binary64	0000000000000000
+sourceMglyphCases[0].mglyph_bbox.value.scale	binary64	3ff0000000000000
+sourceMglyphCases[0].mglyph_bbox.value.rscale	binary64	3ff0000000000000
+sourceMglyphCases[0].mglyph_bbox.value.L	binary64	0000000000000000
+sourceMglyphCases[0].mglyph_bbox.value.R	binary64	0000000000000000
+sourceMglyphCases[0].error_name	bytes	
+sourceMglyphCases[0].error_message	bytes	
+sourceMglyphCases[0].svg	bytes	<mjx-container class="MathJax" jax="SVG" overflow="linebreak"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="2.262ex" height="2.262ex" role="img" focusable="false" viewBox="0 -1000 1000 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mglyph"><image width="1000" height="1000" transform="translate(0 1000) matrix(1 0 0 -1 0 0)" preserveAspectRatio="none" aria-label="" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222%22%20height%3D%221%22%3E%3Crect%20width%3D%222%22%20height%3D%221%22%2F%3E%3C%2Fsvg%3E"/></g></g></g></svg></mjx-container>
+sourceMglyphCases[0].local_cache_prefixes.count	integer	0
+sourceMglyphCases[0].image_attributes.count	integer	6
+sourceMglyphCases[0].image_attributes[0].image_index	integer	0
+sourceMglyphCases[0].image_attributes[0].name	bytes	width
+sourceMglyphCases[0].image_attributes[0].value	bytes	1000
+sourceMglyphCases[0].image_attributes[1].image_index	integer	0
+sourceMglyphCases[0].image_attributes[1].name	bytes	height
+sourceMglyphCases[0].image_attributes[1].value	bytes	1000
+sourceMglyphCases[0].image_attributes[2].image_index	integer	0
+sourceMglyphCases[0].image_attributes[2].name	bytes	transform
+sourceMglyphCases[0].image_attributes[2].value	bytes	translate(0 1000) matrix(1 0 0 -1 0 0)
+sourceMglyphCases[0].image_attributes[3].image_index	integer	0
+sourceMglyphCases[0].image_attributes[3].name	bytes	preserveAspectRatio
+sourceMglyphCases[0].image_attributes[3].value	bytes	none
+sourceMglyphCases[0].image_attributes[4].image_index	integer	0
+sourceMglyphCases[0].image_attributes[4].name	bytes	aria-label
+sourceMglyphCases[0].image_attributes[4].value	bytes	
+sourceMglyphCases[0].image_attributes[5].image_index	integer	0
+sourceMglyphCases[0].image_attributes[5].name	bytes	href
+sourceMglyphCases[0].image_attributes[5].value	bytes	data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222%22%20height%3D%221%22%3E%3Crect%20width%3D%222%22%20height%3D%221%22%2F%3E%3C%2Fsvg%3E
+sourceMglyphCases[0].measurements.count	integer	0
+sourceMglyphCases[0].nodes.count	integer	3
+sourceMglyphCases[0].nodes[0].kind	bytes	math
+sourceMglyphCases[0].nodes[0].is_inferred	boolean	0
+sourceMglyphCases[0].nodes[0].parent	integer	max
+sourceMglyphCases[0].nodes[0].attribute_first	integer	0
+sourceMglyphCases[0].nodes[0].attribute_count	integer	0
+sourceMglyphCases[0].nodes[0].text	utf16	
+sourceMglyphCases[0].nodes[0].xml_payload_index	integer	max
+sourceMglyphCases[0].nodes[1].kind	bytes	inferredMrow
+sourceMglyphCases[0].nodes[1].is_inferred	boolean	1
+sourceMglyphCases[0].nodes[1].parent	integer	0
+sourceMglyphCases[0].nodes[1].attribute_first	integer	0
+sourceMglyphCases[0].nodes[1].attribute_count	integer	0
+sourceMglyphCases[0].nodes[1].text	utf16	
+sourceMglyphCases[0].nodes[1].xml_payload_index	integer	max
+sourceMglyphCases[0].nodes[2].kind	bytes	mglyph
+sourceMglyphCases[0].nodes[2].is_inferred	boolean	0
+sourceMglyphCases[0].nodes[2].parent	integer	1
+sourceMglyphCases[0].nodes[2].attribute_first	integer	0
+sourceMglyphCases[0].nodes[2].attribute_count	integer	3
+sourceMglyphCases[0].nodes[2].text	utf16	
+sourceMglyphCases[0].nodes[2].xml_payload_index	integer	max
+sourceMglyphCases[0].attributes.count	integer	3
+sourceMglyphCases[0].attributes[0].name	utf16	src
+sourceMglyphCases[0].attributes[0].kind	enum	0
+sourceMglyphCases[0].attributes[0].text	utf16	data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222%22%20height%3D%221%22%3E%3Crect%20width%3D%222%22%20height%3D%221%22%2F%3E%3C%2Fsvg%3E
+sourceMglyphCases[0].attributes[0].number	binary64	0000000000000000
+sourceMglyphCases[0].attributes[0].boolean	boolean	0
+sourceMglyphCases[0].attributes[1].name	utf16	width
+sourceMglyphCases[0].attributes[1].kind	enum	0
+sourceMglyphCases[0].attributes[1].text	utf16	auto
+sourceMglyphCases[0].attributes[1].number	binary64	0000000000000000
+sourceMglyphCases[0].attributes[1].boolean	boolean	0
+sourceMglyphCases[0].attributes[2].name	utf16	height
+sourceMglyphCases[0].attributes[2].kind	enum	0
+sourceMglyphCases[0].attributes[2].text	utf16	auto
+sourceMglyphCases[0].attributes[2].number	binary64	0000000000000000
+sourceMglyphCases[0].attributes[2].boolean	boolean	0
+sourceMglyphCases[1].name	bytes	mglyph-image-explicit-positive-valign-alt
+sourceMglyphCases[1].kind	enum	0
+sourceMglyphCases[1].mathml	bytes	<math xmlns="http://www.w3.org/1998/Math/MathML"><mglyph src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222%22%20height%3D%221%22%3E%3Crect%20width%3D%222%22%20height%3D%221%22%2F%3E%3C%2Fsvg%3E" width="2em" height=".75em" valign=".2em" alt="Glyph &amp; &lt; &quot; &apos;"/></math>
+sourceMglyphCases[1].requested_display	boolean	0
+sourceMglyphCases[1].display	boolean	0
+sourceMglyphCases[1].em	binary64	4030000000000000
+sourceMglyphCases[1].ex	binary64	4020000000000000
+sourceMglyphCases[1].width	binary64	4094000000000000
+sourceMglyphCases[1].font_cache	bytes	none
+sourceMglyphCases[1].local_id	bytes	
+sourceMglyphCases[1].root_w	binary64	4000000000000000
+sourceMglyphCases[1].root_h	binary64	3fee666666666666
+sourceMglyphCases[1].root_d	binary64	bfc999999999999a
+sourceMglyphCases[1].mglyph_bbox.present	boolean	1
+sourceMglyphCases[1].mglyph_bbox.value.w	binary64	4000000000000000
+sourceMglyphCases[1].mglyph_bbox.value.h	binary64	3fee666666666666
+sourceMglyphCases[1].mglyph_bbox.value.d	binary64	bfc999999999999a
+sourceMglyphCases[1].mglyph_bbox.value.scale	binary64	3ff0000000000000
+sourceMglyphCases[1].mglyph_bbox.value.rscale	binary64	3ff0000000000000
+sourceMglyphCases[1].mglyph_bbox.value.L	binary64	0000000000000000
+sourceMglyphCases[1].mglyph_bbox.value.R	binary64	0000000000000000
+sourceMglyphCases[1].error_name	bytes	
+sourceMglyphCases[1].error_message	bytes	
+sourceMglyphCases[1].svg	bytes	<mjx-container class="MathJax" jax="SVG" overflow="linebreak"><svg style="vertical-align: 0.452ex;" xmlns="http://www.w3.org/2000/svg" width="4.525ex" height="1.697ex" role="img" focusable="false" viewBox="0 -950 2000 750"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mglyph"><image width="2000" height="750" transform="translate(0 950) matrix(1 0 0 -1 0 0)" preserveAspectRatio="none" aria-label="Glyph &amp; &lt; &quot; '" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222%22%20height%3D%221%22%3E%3Crect%20width%3D%222%22%20height%3D%221%22%2F%3E%3C%2Fsvg%3E"/></g></g></g></svg></mjx-container>
+sourceMglyphCases[1].local_cache_prefixes.count	integer	0
+sourceMglyphCases[1].image_attributes.count	integer	6
+sourceMglyphCases[1].image_attributes[0].image_index	integer	0
+sourceMglyphCases[1].image_attributes[0].name	bytes	width
+sourceMglyphCases[1].image_attributes[0].value	bytes	2000
+sourceMglyphCases[1].image_attributes[1].image_index	integer	0
+sourceMglyphCases[1].image_attributes[1].name	bytes	height
+sourceMglyphCases[1].image_attributes[1].value	bytes	750
+sourceMglyphCases[1].image_attributes[2].image_index	integer	0
+sourceMglyphCases[1].image_attributes[2].name	bytes	transform
+sourceMglyphCases[1].image_attributes[2].value	bytes	translate(0 950) matrix(1 0 0 -1 0 0)
+sourceMglyphCases[1].image_attributes[3].image_index	integer	0
+sourceMglyphCases[1].image_attributes[3].name	bytes	preserveAspectRatio
+sourceMglyphCases[1].image_attributes[3].value	bytes	none
+sourceMglyphCases[1].image_attributes[4].image_index	integer	0
+sourceMglyphCases[1].image_attributes[4].name	bytes	aria-label
+sourceMglyphCases[1].image_attributes[4].value	bytes	Glyph &amp; &lt; &quot; '
+sourceMglyphCases[1].image_attributes[5].image_index	integer	0
+sourceMglyphCases[1].image_attributes[5].name	bytes	href
+sourceMglyphCases[1].image_attributes[5].value	bytes	data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222%22%20height%3D%221%22%3E%3Crect%20width%3D%222%22%20height%3D%221%22%2F%3E%3C%2Fsvg%3E
+sourceMglyphCases[1].measurements.count	integer	0
+sourceMglyphCases[1].nodes.count	integer	3
+sourceMglyphCases[1].nodes[0].kind	bytes	math
+sourceMglyphCases[1].nodes[0].is_inferred	boolean	0
+sourceMglyphCases[1].nodes[0].parent	integer	max
+sourceMglyphCases[1].nodes[0].attribute_first	integer	0
+sourceMglyphCases[1].nodes[0].attribute_count	integer	0
+sourceMglyphCases[1].nodes[0].text	utf16	
+sourceMglyphCases[1].nodes[0].xml_payload_index	integer	max
+sourceMglyphCases[1].nodes[1].kind	bytes	inferredMrow
+sourceMglyphCases[1].nodes[1].is_inferred	boolean	1
+sourceMglyphCases[1].nodes[1].parent	integer	0
+sourceMglyphCases[1].nodes[1].attribute_first	integer	0
+sourceMglyphCases[1].nodes[1].attribute_count	integer	0
+sourceMglyphCases[1].nodes[1].text	utf16	
+sourceMglyphCases[1].nodes[1].xml_payload_index	integer	max
+sourceMglyphCases[1].nodes[2].kind	bytes	mglyph
+sourceMglyphCases[1].nodes[2].is_inferred	boolean	0
+sourceMglyphCases[1].nodes[2].parent	integer	1
+sourceMglyphCases[1].nodes[2].attribute_first	integer	0
+sourceMglyphCases[1].nodes[2].attribute_count	integer	5
+sourceMglyphCases[1].nodes[2].text	utf16	
+sourceMglyphCases[1].nodes[2].xml_payload_index	integer	max
+sourceMglyphCases[1].attributes.count	integer	5
+sourceMglyphCases[1].attributes[0].name	utf16	src
+sourceMglyphCases[1].attributes[0].kind	enum	0
+sourceMglyphCases[1].attributes[0].text	utf16	data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222%22%20height%3D%221%22%3E%3Crect%20width%3D%222%22%20height%3D%221%22%2F%3E%3C%2Fsvg%3E
+sourceMglyphCases[1].attributes[0].number	binary64	0000000000000000
+sourceMglyphCases[1].attributes[0].boolean	boolean	0
+sourceMglyphCases[1].attributes[1].name	utf16	width
+sourceMglyphCases[1].attributes[1].kind	enum	0
+sourceMglyphCases[1].attributes[1].text	utf16	2em
+sourceMglyphCases[1].attributes[1].number	binary64	0000000000000000
+sourceMglyphCases[1].attributes[1].boolean	boolean	0
+sourceMglyphCases[1].attributes[2].name	utf16	height
+sourceMglyphCases[1].attributes[2].kind	enum	0
+sourceMglyphCases[1].attributes[2].text	utf16	.75em
+sourceMglyphCases[1].attributes[2].number	binary64	0000000000000000
+sourceMglyphCases[1].attributes[2].boolean	boolean	0
+sourceMglyphCases[1].attributes[3].name	utf16	valign
+sourceMglyphCases[1].attributes[3].kind	enum	0
+sourceMglyphCases[1].attributes[3].text	utf16	.2em
+sourceMglyphCases[1].attributes[3].number	binary64	0000000000000000
+sourceMglyphCases[1].attributes[3].boolean	boolean	0
+sourceMglyphCases[1].attributes[4].name	utf16	alt
+sourceMglyphCases[1].attributes[4].kind	enum	0
+sourceMglyphCases[1].attributes[4].text	utf16	Glyph & < " '
+sourceMglyphCases[1].attributes[4].number	binary64	0000000000000000
+sourceMglyphCases[1].attributes[4].boolean	boolean	0
+sourceMglyphCases[2].name	bytes	mglyph-image-negative-valign-empty-alt
+sourceMglyphCases[2].kind	enum	0
+sourceMglyphCases[2].mathml	bytes	<math xmlns="http://www.w3.org/1998/Math/MathML"><mglyph src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222%22%20height%3D%221%22%3E%3Crect%20width%3D%222%22%20height%3D%221%22%2F%3E%3C%2Fsvg%3E" width="2em" height="0em" valign="-.25em" alt=""/></math>
+sourceMglyphCases[2].requested_display	boolean	0
+sourceMglyphCases[2].display	boolean	0
+sourceMglyphCases[2].em	binary64	4030000000000000
+sourceMglyphCases[2].ex	binary64	4020000000000000
+sourceMglyphCases[2].width	binary64	4094000000000000
+sourceMglyphCases[2].font_cache	bytes	none
+sourceMglyphCases[2].local_id	bytes	
+sourceMglyphCases[2].root_w	binary64	4000000000000000
+sourceMglyphCases[2].root_h	binary64	bfd0000000000000
+sourceMglyphCases[2].root_d	binary64	3fd0000000000000
+sourceMglyphCases[2].mglyph_bbox.present	boolean	1
+sourceMglyphCases[2].mglyph_bbox.value.w	binary64	4000000000000000
+sourceMglyphCases[2].mglyph_bbox.value.h	binary64	bfd0000000000000
+sourceMglyphCases[2].mglyph_bbox.value.d	binary64	3fd0000000000000
+sourceMglyphCases[2].mglyph_bbox.value.scale	binary64	3ff0000000000000
+sourceMglyphCases[2].mglyph_bbox.value.rscale	binary64	3ff0000000000000
+sourceMglyphCases[2].mglyph_bbox.value.L	binary64	0000000000000000
+sourceMglyphCases[2].mglyph_bbox.value.R	binary64	0000000000000000
+sourceMglyphCases[2].error_name	bytes	
+sourceMglyphCases[2].error_message	bytes	
+sourceMglyphCases[2].svg	bytes	<mjx-container class="MathJax" jax="SVG" overflow="linebreak"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="4.525ex" height="0.036ex" role="img" focusable="false" viewBox="0 250 2000 16"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mglyph"><image width="2000" height="0" transform="translate(0 -250) matrix(1 0 0 -1 0 0)" preserveAspectRatio="none" aria-label="" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222%22%20height%3D%221%22%3E%3Crect%20width%3D%222%22%20height%3D%221%22%2F%3E%3C%2Fsvg%3E"/></g></g></g></svg></mjx-container>
+sourceMglyphCases[2].local_cache_prefixes.count	integer	0
+sourceMglyphCases[2].image_attributes.count	integer	6
+sourceMglyphCases[2].image_attributes[0].image_index	integer	0
+sourceMglyphCases[2].image_attributes[0].name	bytes	width
+sourceMglyphCases[2].image_attributes[0].value	bytes	2000
+sourceMglyphCases[2].image_attributes[1].image_index	integer	0
+sourceMglyphCases[2].image_attributes[1].name	bytes	height
+sourceMglyphCases[2].image_attributes[1].value	bytes	0
+sourceMglyphCases[2].image_attributes[2].image_index	integer	0
+sourceMglyphCases[2].image_attributes[2].name	bytes	transform
+sourceMglyphCases[2].image_attributes[2].value	bytes	translate(0 -250) matrix(1 0 0 -1 0 0)
+sourceMglyphCases[2].image_attributes[3].image_index	integer	0
+sourceMglyphCases[2].image_attributes[3].name	bytes	preserveAspectRatio
+sourceMglyphCases[2].image_attributes[3].value	bytes	none
+sourceMglyphCases[2].image_attributes[4].image_index	integer	0
+sourceMglyphCases[2].image_attributes[4].name	bytes	aria-label
+sourceMglyphCases[2].image_attributes[4].value	bytes	
+sourceMglyphCases[2].image_attributes[5].image_index	integer	0
+sourceMglyphCases[2].image_attributes[5].name	bytes	href
+sourceMglyphCases[2].image_attributes[5].value	bytes	data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222%22%20height%3D%221%22%3E%3Crect%20width%3D%222%22%20height%3D%221%22%2F%3E%3C%2Fsvg%3E
+sourceMglyphCases[2].measurements.count	integer	0
+sourceMglyphCases[2].nodes.count	integer	3
+sourceMglyphCases[2].nodes[0].kind	bytes	math
+sourceMglyphCases[2].nodes[0].is_inferred	boolean	0
+sourceMglyphCases[2].nodes[0].parent	integer	max
+sourceMglyphCases[2].nodes[0].attribute_first	integer	0
+sourceMglyphCases[2].nodes[0].attribute_count	integer	0
+sourceMglyphCases[2].nodes[0].text	utf16	
+sourceMglyphCases[2].nodes[0].xml_payload_index	integer	max
+sourceMglyphCases[2].nodes[1].kind	bytes	inferredMrow
+sourceMglyphCases[2].nodes[1].is_inferred	boolean	1
+sourceMglyphCases[2].nodes[1].parent	integer	0
+sourceMglyphCases[2].nodes[1].attribute_first	integer	0
+sourceMglyphCases[2].nodes[1].attribute_count	integer	0
+sourceMglyphCases[2].nodes[1].text	utf16	
+sourceMglyphCases[2].nodes[1].xml_payload_index	integer	max
+sourceMglyphCases[2].nodes[2].kind	bytes	mglyph
+sourceMglyphCases[2].nodes[2].is_inferred	boolean	0
+sourceMglyphCases[2].nodes[2].parent	integer	1
+sourceMglyphCases[2].nodes[2].attribute_first	integer	0
+sourceMglyphCases[2].nodes[2].attribute_count	integer	5
+sourceMglyphCases[2].nodes[2].text	utf16	
+sourceMglyphCases[2].nodes[2].xml_payload_index	integer	max
+sourceMglyphCases[2].attributes.count	integer	5
+sourceMglyphCases[2].attributes[0].name	utf16	src
+sourceMglyphCases[2].attributes[0].kind	enum	0
+sourceMglyphCases[2].attributes[0].text	utf16	data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222%22%20height%3D%221%22%3E%3Crect%20width%3D%222%22%20height%3D%221%22%2F%3E%3C%2Fsvg%3E
+sourceMglyphCases[2].attributes[0].number	binary64	0000000000000000
+sourceMglyphCases[2].attributes[0].boolean	boolean	0
+sourceMglyphCases[2].attributes[1].name	utf16	width
+sourceMglyphCases[2].attributes[1].kind	enum	0
+sourceMglyphCases[2].attributes[1].text	utf16	2em
+sourceMglyphCases[2].attributes[1].number	binary64	0000000000000000
+sourceMglyphCases[2].attributes[1].boolean	boolean	0
+sourceMglyphCases[2].attributes[2].name	utf16	height
+sourceMglyphCases[2].attributes[2].kind	enum	0
+sourceMglyphCases[2].attributes[2].text	utf16	0em
+sourceMglyphCases[2].attributes[2].number	binary64	0000000000000000
+sourceMglyphCases[2].attributes[2].boolean	boolean	0
+sourceMglyphCases[2].attributes[3].name	utf16	valign
+sourceMglyphCases[2].attributes[3].kind	enum	0
+sourceMglyphCases[2].attributes[3].text	utf16	-.25em
+sourceMglyphCases[2].attributes[3].number	binary64	0000000000000000
+sourceMglyphCases[2].attributes[3].boolean	boolean	0
+sourceMglyphCases[2].attributes[4].name	utf16	alt
+sourceMglyphCases[2].attributes[4].kind	enum	0
+sourceMglyphCases[2].attributes[4].text	utf16	
+sourceMglyphCases[2].attributes[4].number	binary64	0000000000000000
+sourceMglyphCases[2].attributes[4].boolean	boolean	0
+sourceMglyphCases[3].name	bytes	mglyph-image-nonem-pixels
+sourceMglyphCases[3].kind	enum	0
+sourceMglyphCases[3].mathml	bytes	<math xmlns="http://www.w3.org/1998/Math/MathML"><mglyph src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222%22%20height%3D%221%22%3E%3Crect%20width%3D%222%22%20height%3D%221%22%2F%3E%3C%2Fsvg%3E" width="16px" height="12px" valign="2px" alt="pixel"/></math>
+sourceMglyphCases[3].requested_display	boolean	0
+sourceMglyphCases[3].display	boolean	0
+sourceMglyphCases[3].em	binary64	4030000000000000
+sourceMglyphCases[3].ex	binary64	4020000000000000
+sourceMglyphCases[3].width	binary64	4094000000000000
+sourceMglyphCases[3].font_cache	bytes	none
+sourceMglyphCases[3].local_id	bytes	
+sourceMglyphCases[3].root_w	binary64	3fec49ba5e353f7d
+sourceMglyphCases[3].root_h	binary64	3fe8c083126e978e
+sourceMglyphCases[3].root_d	binary64	bfbc49ba5e353f7d
+sourceMglyphCases[3].mglyph_bbox.present	boolean	1
+sourceMglyphCases[3].mglyph_bbox.value.w	binary64	3fec49ba5e353f7d
+sourceMglyphCases[3].mglyph_bbox.value.h	binary64	3fe8c083126e978e
+sourceMglyphCases[3].mglyph_bbox.value.d	binary64	bfbc49ba5e353f7d
+sourceMglyphCases[3].mglyph_bbox.value.scale	binary64	3ff0000000000000
+sourceMglyphCases[3].mglyph_bbox.value.rscale	binary64	3ff0000000000000
+sourceMglyphCases[3].mglyph_bbox.value.L	binary64	0000000000000000
+sourceMglyphCases[3].mglyph_bbox.value.R	binary64	0000000000000000
+sourceMglyphCases[3].error_name	bytes	
+sourceMglyphCases[3].error_message	bytes	
+sourceMglyphCases[3].svg	bytes	<mjx-container class="MathJax" jax="SVG" overflow="linebreak"><svg style="vertical-align: 0.25ex;" xmlns="http://www.w3.org/2000/svg" width="2ex" height="1.5ex" role="img" focusable="false" viewBox="0 -773.5 884 663"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mglyph"><image width="884" height="663" transform="translate(0 773.5) matrix(1 0 0 -1 0 0)" preserveAspectRatio="none" aria-label="pixel" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222%22%20height%3D%221%22%3E%3Crect%20width%3D%222%22%20height%3D%221%22%2F%3E%3C%2Fsvg%3E"/></g></g></g></svg></mjx-container>
+sourceMglyphCases[3].local_cache_prefixes.count	integer	0
+sourceMglyphCases[3].image_attributes.count	integer	6
+sourceMglyphCases[3].image_attributes[0].image_index	integer	0
+sourceMglyphCases[3].image_attributes[0].name	bytes	width
+sourceMglyphCases[3].image_attributes[0].value	bytes	884
+sourceMglyphCases[3].image_attributes[1].image_index	integer	0
+sourceMglyphCases[3].image_attributes[1].name	bytes	height
+sourceMglyphCases[3].image_attributes[1].value	bytes	663
+sourceMglyphCases[3].image_attributes[2].image_index	integer	0
+sourceMglyphCases[3].image_attributes[2].name	bytes	transform
+sourceMglyphCases[3].image_attributes[2].value	bytes	translate(0 773.5) matrix(1 0 0 -1 0 0)
+sourceMglyphCases[3].image_attributes[3].image_index	integer	0
+sourceMglyphCases[3].image_attributes[3].name	bytes	preserveAspectRatio
+sourceMglyphCases[3].image_attributes[3].value	bytes	none
+sourceMglyphCases[3].image_attributes[4].image_index	integer	0
+sourceMglyphCases[3].image_attributes[4].name	bytes	aria-label
+sourceMglyphCases[3].image_attributes[4].value	bytes	pixel
+sourceMglyphCases[3].image_attributes[5].image_index	integer	0
+sourceMglyphCases[3].image_attributes[5].name	bytes	href
+sourceMglyphCases[3].image_attributes[5].value	bytes	data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222%22%20height%3D%221%22%3E%3Crect%20width%3D%222%22%20height%3D%221%22%2F%3E%3C%2Fsvg%3E
+sourceMglyphCases[3].measurements.count	integer	0
+sourceMglyphCases[3].nodes.count	integer	3
+sourceMglyphCases[3].nodes[0].kind	bytes	math
+sourceMglyphCases[3].nodes[0].is_inferred	boolean	0
+sourceMglyphCases[3].nodes[0].parent	integer	max
+sourceMglyphCases[3].nodes[0].attribute_first	integer	0
+sourceMglyphCases[3].nodes[0].attribute_count	integer	0
+sourceMglyphCases[3].nodes[0].text	utf16	
+sourceMglyphCases[3].nodes[0].xml_payload_index	integer	max
+sourceMglyphCases[3].nodes[1].kind	bytes	inferredMrow
+sourceMglyphCases[3].nodes[1].is_inferred	boolean	1
+sourceMglyphCases[3].nodes[1].parent	integer	0
+sourceMglyphCases[3].nodes[1].attribute_first	integer	0
+sourceMglyphCases[3].nodes[1].attribute_count	integer	0
+sourceMglyphCases[3].nodes[1].text	utf16	
+sourceMglyphCases[3].nodes[1].xml_payload_index	integer	max
+sourceMglyphCases[3].nodes[2].kind	bytes	mglyph
+sourceMglyphCases[3].nodes[2].is_inferred	boolean	0
+sourceMglyphCases[3].nodes[2].parent	integer	1
+sourceMglyphCases[3].nodes[2].attribute_first	integer	0
+sourceMglyphCases[3].nodes[2].attribute_count	integer	5
+sourceMglyphCases[3].nodes[2].text	utf16	
+sourceMglyphCases[3].nodes[2].xml_payload_index	integer	max
+sourceMglyphCases[3].attributes.count	integer	5
+sourceMglyphCases[3].attributes[0].name	utf16	src
+sourceMglyphCases[3].attributes[0].kind	enum	0
+sourceMglyphCases[3].attributes[0].text	utf16	data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222%22%20height%3D%221%22%3E%3Crect%20width%3D%222%22%20height%3D%221%22%2F%3E%3C%2Fsvg%3E
+sourceMglyphCases[3].attributes[0].number	binary64	0000000000000000
+sourceMglyphCases[3].attributes[0].boolean	boolean	0
+sourceMglyphCases[3].attributes[1].name	utf16	width
+sourceMglyphCases[3].attributes[1].kind	enum	0
+sourceMglyphCases[3].attributes[1].text	utf16	16px
+sourceMglyphCases[3].attributes[1].number	binary64	0000000000000000
+sourceMglyphCases[3].attributes[1].boolean	boolean	0
+sourceMglyphCases[3].attributes[2].name	utf16	height
+sourceMglyphCases[3].attributes[2].kind	enum	0
+sourceMglyphCases[3].attributes[2].text	utf16	12px
+sourceMglyphCases[3].attributes[2].number	binary64	0000000000000000
+sourceMglyphCases[3].attributes[2].boolean	boolean	0
+sourceMglyphCases[3].attributes[3].name	utf16	valign
+sourceMglyphCases[3].attributes[3].kind	enum	0
+sourceMglyphCases[3].attributes[3].text	utf16	2px
+sourceMglyphCases[3].attributes[3].number	binary64	0000000000000000
+sourceMglyphCases[3].attributes[3].boolean	boolean	0
+sourceMglyphCases[3].attributes[4].name	utf16	alt
+sourceMglyphCases[3].attributes[4].kind	enum	0
+sourceMglyphCases[3].attributes[4].text	utf16	pixel
+sourceMglyphCases[3].attributes[4].number	binary64	0000000000000000
+sourceMglyphCases[3].attributes[4].boolean	boolean	0
+sourceMglyphCases[4].name	bytes	mglyph-image-signed-zero-extents
+sourceMglyphCases[4].kind	enum	0
+sourceMglyphCases[4].mathml	bytes	<math xmlns="http://www.w3.org/1998/Math/MathML"><mglyph src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222%22%20height%3D%221%22%3E%3Crect%20width%3D%222%22%20height%3D%221%22%2F%3E%3C%2Fsvg%3E" width="-1em" height="0em" valign="-.5em" alt="signed"/></math>
+sourceMglyphCases[4].requested_display	boolean	0
+sourceMglyphCases[4].display	boolean	0
+sourceMglyphCases[4].em	binary64	4030000000000000
+sourceMglyphCases[4].ex	binary64	4020000000000000
+sourceMglyphCases[4].width	binary64	4094000000000000
+sourceMglyphCases[4].font_cache	bytes	none
+sourceMglyphCases[4].local_id	bytes	
+sourceMglyphCases[4].root_w	binary64	bff0000000000000
+sourceMglyphCases[4].root_h	binary64	bfe0000000000000
+sourceMglyphCases[4].root_d	binary64	3fe0000000000000
+sourceMglyphCases[4].mglyph_bbox.present	boolean	1
+sourceMglyphCases[4].mglyph_bbox.value.w	binary64	bff0000000000000
+sourceMglyphCases[4].mglyph_bbox.value.h	binary64	bfe0000000000000
+sourceMglyphCases[4].mglyph_bbox.value.d	binary64	3fe0000000000000
+sourceMglyphCases[4].mglyph_bbox.value.scale	binary64	3ff0000000000000
+sourceMglyphCases[4].mglyph_bbox.value.rscale	binary64	3ff0000000000000
+sourceMglyphCases[4].mglyph_bbox.value.L	binary64	0000000000000000
+sourceMglyphCases[4].mglyph_bbox.value.R	binary64	0000000000000000
+sourceMglyphCases[4].error_name	bytes	
+sourceMglyphCases[4].error_message	bytes	
+sourceMglyphCases[4].svg	bytes	<mjx-container class="MathJax" jax="SVG" overflow="linebreak"><svg style="vertical-align: -1.131ex;" xmlns="http://www.w3.org/2000/svg" width="0.036ex" height="0.036ex" role="img" focusable="false" viewBox="0 500 16 16"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mglyph"><image width="-1000" height="0" transform="translate(0 -500) matrix(1 0 0 -1 0 0)" preserveAspectRatio="none" aria-label="signed" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222%22%20height%3D%221%22%3E%3Crect%20width%3D%222%22%20height%3D%221%22%2F%3E%3C%2Fsvg%3E"/></g></g></g></svg></mjx-container>
+sourceMglyphCases[4].local_cache_prefixes.count	integer	0
+sourceMglyphCases[4].image_attributes.count	integer	6
+sourceMglyphCases[4].image_attributes[0].image_index	integer	0
+sourceMglyphCases[4].image_attributes[0].name	bytes	width
+sourceMglyphCases[4].image_attributes[0].value	bytes	-1000
+sourceMglyphCases[4].image_attributes[1].image_index	integer	0
+sourceMglyphCases[4].image_attributes[1].name	bytes	height
+sourceMglyphCases[4].image_attributes[1].value	bytes	0
+sourceMglyphCases[4].image_attributes[2].image_index	integer	0
+sourceMglyphCases[4].image_attributes[2].name	bytes	transform
+sourceMglyphCases[4].image_attributes[2].value	bytes	translate(0 -500) matrix(1 0 0 -1 0 0)
+sourceMglyphCases[4].image_attributes[3].image_index	integer	0
+sourceMglyphCases[4].image_attributes[3].name	bytes	preserveAspectRatio
+sourceMglyphCases[4].image_attributes[3].value	bytes	none
+sourceMglyphCases[4].image_attributes[4].image_index	integer	0
+sourceMglyphCases[4].image_attributes[4].name	bytes	aria-label
+sourceMglyphCases[4].image_attributes[4].value	bytes	signed
+sourceMglyphCases[4].image_attributes[5].image_index	integer	0
+sourceMglyphCases[4].image_attributes[5].name	bytes	href
+sourceMglyphCases[4].image_attributes[5].value	bytes	data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222%22%20height%3D%221%22%3E%3Crect%20width%3D%222%22%20height%3D%221%22%2F%3E%3C%2Fsvg%3E
+sourceMglyphCases[4].measurements.count	integer	0
+sourceMglyphCases[4].nodes.count	integer	3
+sourceMglyphCases[4].nodes[0].kind	bytes	math
+sourceMglyphCases[4].nodes[0].is_inferred	boolean	0
+sourceMglyphCases[4].nodes[0].parent	integer	max
+sourceMglyphCases[4].nodes[0].attribute_first	integer	0
+sourceMglyphCases[4].nodes[0].attribute_count	integer	0
+sourceMglyphCases[4].nodes[0].text	utf16	
+sourceMglyphCases[4].nodes[0].xml_payload_index	integer	max
+sourceMglyphCases[4].nodes[1].kind	bytes	inferredMrow
+sourceMglyphCases[4].nodes[1].is_inferred	boolean	1
+sourceMglyphCases[4].nodes[1].parent	integer	0
+sourceMglyphCases[4].nodes[1].attribute_first	integer	0
+sourceMglyphCases[4].nodes[1].attribute_count	integer	0
+sourceMglyphCases[4].nodes[1].text	utf16	
+sourceMglyphCases[4].nodes[1].xml_payload_index	integer	max
+sourceMglyphCases[4].nodes[2].kind	bytes	mglyph
+sourceMglyphCases[4].nodes[2].is_inferred	boolean	0
+sourceMglyphCases[4].nodes[2].parent	integer	1
+sourceMglyphCases[4].nodes[2].attribute_first	integer	0
+sourceMglyphCases[4].nodes[2].attribute_count	integer	5
+sourceMglyphCases[4].nodes[2].text	utf16	
+sourceMglyphCases[4].nodes[2].xml_payload_index	integer	max
+sourceMglyphCases[4].attributes.count	integer	5
+sourceMglyphCases[4].attributes[0].name	utf16	src
+sourceMglyphCases[4].attributes[0].kind	enum	0
+sourceMglyphCases[4].attributes[0].text	utf16	data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222%22%20height%3D%221%22%3E%3Crect%20width%3D%222%22%20height%3D%221%22%2F%3E%3C%2Fsvg%3E
+sourceMglyphCases[4].attributes[0].number	binary64	0000000000000000
+sourceMglyphCases[4].attributes[0].boolean	boolean	0
+sourceMglyphCases[4].attributes[1].name	utf16	width
+sourceMglyphCases[4].attributes[1].kind	enum	0
+sourceMglyphCases[4].attributes[1].text	utf16	-1em
+sourceMglyphCases[4].attributes[1].number	binary64	0000000000000000
+sourceMglyphCases[4].attributes[1].boolean	boolean	0
+sourceMglyphCases[4].attributes[2].name	utf16	height
+sourceMglyphCases[4].attributes[2].kind	enum	0
+sourceMglyphCases[4].attributes[2].text	utf16	0em
+sourceMglyphCases[4].attributes[2].number	binary64	0000000000000000
+sourceMglyphCases[4].attributes[2].boolean	boolean	0
+sourceMglyphCases[4].attributes[3].name	utf16	valign
+sourceMglyphCases[4].attributes[3].kind	enum	0
+sourceMglyphCases[4].attributes[3].text	utf16	-.5em
+sourceMglyphCases[4].attributes[3].number	binary64	0000000000000000
+sourceMglyphCases[4].attributes[3].boolean	boolean	0
+sourceMglyphCases[4].attributes[4].name	utf16	alt
+sourceMglyphCases[4].attributes[4].kind	enum	0
+sourceMglyphCases[4].attributes[4].text	utf16	signed
+sourceMglyphCases[4].attributes[4].number	binary64	0000000000000000
+sourceMglyphCases[4].attributes[4].boolean	boolean	0
+sourceMglyphCases[5].name	bytes	mglyph-image-after-math-styled
+sourceMglyphCases[5].kind	enum	0
+sourceMglyphCases[5].mathml	bytes	<math xmlns="http://www.w3.org/1998/Math/MathML"><mstyle mathsize="150%"><mi>x</mi><mglyph src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222%22%20height%3D%221%22%3E%3Crect%20width%3D%222%22%20height%3D%221%22%2F%3E%3C%2Fsvg%3E" width="2em" height=".75em" valign=".1em" alt="scaled"/></mstyle></math>
+sourceMglyphCases[5].requested_display	boolean	0
+sourceMglyphCases[5].display	boolean	0
+sourceMglyphCases[5].em	binary64	4030000000000000
+sourceMglyphCases[5].ex	binary64	4020000000000000
+sourceMglyphCases[5].width	binary64	4094000000000000
+sourceMglyphCases[5].font_cache	bytes	local
+sourceMglyphCases[5].local_id	bytes	
+sourceMglyphCases[5].root_w	binary64	400edd2f1a9fbe77
+sourceMglyphCases[5].root_h	binary64	3ff4666666666666
+sourceMglyphCases[5].root_d	binary64	3f90e5604189374c
+sourceMglyphCases[5].mglyph_bbox.present	boolean	1
+sourceMglyphCases[5].mglyph_bbox.value.w	binary64	4000000000000000
+sourceMglyphCases[5].mglyph_bbox.value.h	binary64	3feb333333333333
+sourceMglyphCases[5].mglyph_bbox.value.d	binary64	bfb999999999999a
+sourceMglyphCases[5].mglyph_bbox.value.scale	binary64	3ff8000000000000
+sourceMglyphCases[5].mglyph_bbox.value.rscale	binary64	3ff0000000000000
+sourceMglyphCases[5].mglyph_bbox.value.L	binary64	0000000000000000
+sourceMglyphCases[5].mglyph_bbox.value.R	binary64	0000000000000000
+sourceMglyphCases[5].error_name	bytes	
+sourceMglyphCases[5].error_message	bytes	
+sourceMglyphCases[5].svg	bytes	<mjx-container class="MathJax" jax="SVG" overflow="linebreak"><svg style="vertical-align: -0.037ex;" xmlns="http://www.w3.org/2000/svg" width="8.729ex" height="2.922ex" role="img" focusable="false" viewBox="0 -1275 3858 1291.5" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><path id="MJX-1-NCM-I-1D465" d="M527 373C527 419 482 442 432 442C389 442 355 419 329 373C308 419 273 442 222 442C173 442 133 419 101 374C74 335 60 306 60 287C60 278 65 273 75 273C84 273 90 278 92 287C111 345 153 413 220 413C253 413 269 392 269 351C269 330 251 252 216 118C199 51 169 18 126 18C112 18 99 21 88 26C114 36 127 54 127 80C127 106 114 119 87 119C54 119 29 91 29 58C29 12 76-11 125-11C167-11 201 12 228 58C247 12 283-11 335-11C383-11 423 12 455 57C482 96 496 125 496 144C496 153 491 158 481 158C472 158 467 153 464 144C447 87 402 18 337 18C304 18 287 38 287 79C287 92 292 120 303 165L337 300C356 375 387 413 431 413C445 413 458 410 469 405C442 396 429 378 429 351C429 325 443 312 470 312C502 312 527 341 527 373Z"/></defs><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mstyle" transform="scale(1.5)"><g data-mml-node="mi"><use data-c="1D465" xlink:href="\x23MJX-1-NCM-I-1D465"/></g><g data-mml-node="mglyph" transform="translate(572,0)"><image width="2000" height="750" transform="translate(0 850) matrix(1 0 0 -1 0 0)" preserveAspectRatio="none" aria-label="scaled" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222%22%20height%3D%221%22%3E%3Crect%20width%3D%222%22%20height%3D%221%22%2F%3E%3C%2Fsvg%3E"/></g></g></g></g></svg></mjx-container>
+sourceMglyphCases[5].local_cache_prefixes.count	integer	1
+sourceMglyphCases[5].local_cache_prefixes[0]	bytes	1-
+sourceMglyphCases[5].image_attributes.count	integer	6
+sourceMglyphCases[5].image_attributes[0].image_index	integer	0
+sourceMglyphCases[5].image_attributes[0].name	bytes	width
+sourceMglyphCases[5].image_attributes[0].value	bytes	2000
+sourceMglyphCases[5].image_attributes[1].image_index	integer	0
+sourceMglyphCases[5].image_attributes[1].name	bytes	height
+sourceMglyphCases[5].image_attributes[1].value	bytes	750
+sourceMglyphCases[5].image_attributes[2].image_index	integer	0
+sourceMglyphCases[5].image_attributes[2].name	bytes	transform
+sourceMglyphCases[5].image_attributes[2].value	bytes	translate(0 850) matrix(1 0 0 -1 0 0)
+sourceMglyphCases[5].image_attributes[3].image_index	integer	0
+sourceMglyphCases[5].image_attributes[3].name	bytes	preserveAspectRatio
+sourceMglyphCases[5].image_attributes[3].value	bytes	none
+sourceMglyphCases[5].image_attributes[4].image_index	integer	0
+sourceMglyphCases[5].image_attributes[4].name	bytes	aria-label
+sourceMglyphCases[5].image_attributes[4].value	bytes	scaled
+sourceMglyphCases[5].image_attributes[5].image_index	integer	0
+sourceMglyphCases[5].image_attributes[5].name	bytes	href
+sourceMglyphCases[5].image_attributes[5].value	bytes	data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222%22%20height%3D%221%22%3E%3Crect%20width%3D%222%22%20height%3D%221%22%2F%3E%3C%2Fsvg%3E
+sourceMglyphCases[5].measurements.count	integer	0
+sourceMglyphCases[5].nodes.count	integer	7
+sourceMglyphCases[5].nodes[0].kind	bytes	math
+sourceMglyphCases[5].nodes[0].is_inferred	boolean	0
+sourceMglyphCases[5].nodes[0].parent	integer	max
+sourceMglyphCases[5].nodes[0].attribute_first	integer	0
+sourceMglyphCases[5].nodes[0].attribute_count	integer	0
+sourceMglyphCases[5].nodes[0].text	utf16	
+sourceMglyphCases[5].nodes[0].xml_payload_index	integer	max
+sourceMglyphCases[5].nodes[1].kind	bytes	inferredMrow
+sourceMglyphCases[5].nodes[1].is_inferred	boolean	1
+sourceMglyphCases[5].nodes[1].parent	integer	0
+sourceMglyphCases[5].nodes[1].attribute_first	integer	0
+sourceMglyphCases[5].nodes[1].attribute_count	integer	0
+sourceMglyphCases[5].nodes[1].text	utf16	
+sourceMglyphCases[5].nodes[1].xml_payload_index	integer	max
+sourceMglyphCases[5].nodes[2].kind	bytes	mstyle
+sourceMglyphCases[5].nodes[2].is_inferred	boolean	0
+sourceMglyphCases[5].nodes[2].parent	integer	1
+sourceMglyphCases[5].nodes[2].attribute_first	integer	0
+sourceMglyphCases[5].nodes[2].attribute_count	integer	1
+sourceMglyphCases[5].nodes[2].text	utf16	
+sourceMglyphCases[5].nodes[2].xml_payload_index	integer	max
+sourceMglyphCases[5].nodes[3].kind	bytes	inferredMrow
+sourceMglyphCases[5].nodes[3].is_inferred	boolean	1
+sourceMglyphCases[5].nodes[3].parent	integer	2
+sourceMglyphCases[5].nodes[3].attribute_first	integer	1
+sourceMglyphCases[5].nodes[3].attribute_count	integer	0
+sourceMglyphCases[5].nodes[3].text	utf16	
+sourceMglyphCases[5].nodes[3].xml_payload_index	integer	max
+sourceMglyphCases[5].nodes[4].kind	bytes	mi
+sourceMglyphCases[5].nodes[4].is_inferred	boolean	0
+sourceMglyphCases[5].nodes[4].parent	integer	3
+sourceMglyphCases[5].nodes[4].attribute_first	integer	1
+sourceMglyphCases[5].nodes[4].attribute_count	integer	0
+sourceMglyphCases[5].nodes[4].text	utf16	
+sourceMglyphCases[5].nodes[4].xml_payload_index	integer	max
+sourceMglyphCases[5].nodes[5].kind	bytes	text
+sourceMglyphCases[5].nodes[5].is_inferred	boolean	0
+sourceMglyphCases[5].nodes[5].parent	integer	4
+sourceMglyphCases[5].nodes[5].attribute_first	integer	1
+sourceMglyphCases[5].nodes[5].attribute_count	integer	0
+sourceMglyphCases[5].nodes[5].text	utf16	x
+sourceMglyphCases[5].nodes[5].xml_payload_index	integer	max
+sourceMglyphCases[5].nodes[6].kind	bytes	mglyph
+sourceMglyphCases[5].nodes[6].is_inferred	boolean	0
+sourceMglyphCases[5].nodes[6].parent	integer	3
+sourceMglyphCases[5].nodes[6].attribute_first	integer	1
+sourceMglyphCases[5].nodes[6].attribute_count	integer	5
+sourceMglyphCases[5].nodes[6].text	utf16	
+sourceMglyphCases[5].nodes[6].xml_payload_index	integer	max
+sourceMglyphCases[5].attributes.count	integer	6
+sourceMglyphCases[5].attributes[0].name	utf16	mathsize
+sourceMglyphCases[5].attributes[0].kind	enum	0
+sourceMglyphCases[5].attributes[0].text	utf16	150%
+sourceMglyphCases[5].attributes[0].number	binary64	0000000000000000
+sourceMglyphCases[5].attributes[0].boolean	boolean	0
+sourceMglyphCases[5].attributes[1].name	utf16	src
+sourceMglyphCases[5].attributes[1].kind	enum	0
+sourceMglyphCases[5].attributes[1].text	utf16	data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222%22%20height%3D%221%22%3E%3Crect%20width%3D%222%22%20height%3D%221%22%2F%3E%3C%2Fsvg%3E
+sourceMglyphCases[5].attributes[1].number	binary64	0000000000000000
+sourceMglyphCases[5].attributes[1].boolean	boolean	0
+sourceMglyphCases[5].attributes[2].name	utf16	width
+sourceMglyphCases[5].attributes[2].kind	enum	0
+sourceMglyphCases[5].attributes[2].text	utf16	2em
+sourceMglyphCases[5].attributes[2].number	binary64	0000000000000000
+sourceMglyphCases[5].attributes[2].boolean	boolean	0
+sourceMglyphCases[5].attributes[3].name	utf16	height
+sourceMglyphCases[5].attributes[3].kind	enum	0
+sourceMglyphCases[5].attributes[3].text	utf16	.75em
+sourceMglyphCases[5].attributes[3].number	binary64	0000000000000000
+sourceMglyphCases[5].attributes[3].boolean	boolean	0
+sourceMglyphCases[5].attributes[4].name	utf16	valign
+sourceMglyphCases[5].attributes[4].kind	enum	0
+sourceMglyphCases[5].attributes[4].text	utf16	.1em
+sourceMglyphCases[5].attributes[4].number	binary64	0000000000000000
+sourceMglyphCases[5].attributes[4].boolean	boolean	0
+sourceMglyphCases[5].attributes[5].name	utf16	alt
+sourceMglyphCases[5].attributes[5].kind	enum	0
+sourceMglyphCases[5].attributes[5].text	utf16	scaled
+sourceMglyphCases[5].attributes[5].number	binary64	0000000000000000
+sourceMglyphCases[5].attributes[5].boolean	boolean	0
+sourceMglyphCases[6].name	bytes	mglyph-image-display-block
+sourceMglyphCases[6].kind	enum	0
+sourceMglyphCases[6].mathml	bytes	<math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mglyph src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222%22%20height%3D%221%22%3E%3Crect%20width%3D%222%22%20height%3D%221%22%2F%3E%3C%2Fsvg%3E" width="1.5em" height=".5em" valign=".125em" alt="block"/></math>
+sourceMglyphCases[6].requested_display	boolean	0
+sourceMglyphCases[6].display	boolean	1
+sourceMglyphCases[6].em	binary64	4030000000000000
+sourceMglyphCases[6].ex	binary64	4020000000000000
+sourceMglyphCases[6].width	binary64	4094000000000000
+sourceMglyphCases[6].font_cache	bytes	none
+sourceMglyphCases[6].local_id	bytes	
+sourceMglyphCases[6].root_w	binary64	3ff8000000000000
+sourceMglyphCases[6].root_h	binary64	3fe4000000000000
+sourceMglyphCases[6].root_d	binary64	bfc0000000000000
+sourceMglyphCases[6].mglyph_bbox.present	boolean	1
+sourceMglyphCases[6].mglyph_bbox.value.w	binary64	3ff8000000000000
+sourceMglyphCases[6].mglyph_bbox.value.h	binary64	3fe4000000000000
+sourceMglyphCases[6].mglyph_bbox.value.d	binary64	bfc0000000000000
+sourceMglyphCases[6].mglyph_bbox.value.scale	binary64	3ff0000000000000
+sourceMglyphCases[6].mglyph_bbox.value.rscale	binary64	3ff0000000000000
+sourceMglyphCases[6].mglyph_bbox.value.L	binary64	0000000000000000
+sourceMglyphCases[6].mglyph_bbox.value.R	binary64	0000000000000000
+sourceMglyphCases[6].error_name	bytes	
+sourceMglyphCases[6].error_message	bytes	
+sourceMglyphCases[6].svg	bytes	<mjx-container class="MathJax" jax="SVG" overflow="linebreak" display="true"><svg style="vertical-align: 0.283ex;" xmlns="http://www.w3.org/2000/svg" width="3.394ex" height="1.131ex" role="img" focusable="false" viewBox="0 -625 1500 500"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mglyph"><image width="1500" height="500" transform="translate(0 625) matrix(1 0 0 -1 0 0)" preserveAspectRatio="none" aria-label="block" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222%22%20height%3D%221%22%3E%3Crect%20width%3D%222%22%20height%3D%221%22%2F%3E%3C%2Fsvg%3E"/></g></g></g></svg></mjx-container>
+sourceMglyphCases[6].local_cache_prefixes.count	integer	0
+sourceMglyphCases[6].image_attributes.count	integer	6
+sourceMglyphCases[6].image_attributes[0].image_index	integer	0
+sourceMglyphCases[6].image_attributes[0].name	bytes	width
+sourceMglyphCases[6].image_attributes[0].value	bytes	1500
+sourceMglyphCases[6].image_attributes[1].image_index	integer	0
+sourceMglyphCases[6].image_attributes[1].name	bytes	height
+sourceMglyphCases[6].image_attributes[1].value	bytes	500
+sourceMglyphCases[6].image_attributes[2].image_index	integer	0
+sourceMglyphCases[6].image_attributes[2].name	bytes	transform
+sourceMglyphCases[6].image_attributes[2].value	bytes	translate(0 625) matrix(1 0 0 -1 0 0)
+sourceMglyphCases[6].image_attributes[3].image_index	integer	0
+sourceMglyphCases[6].image_attributes[3].name	bytes	preserveAspectRatio
+sourceMglyphCases[6].image_attributes[3].value	bytes	none
+sourceMglyphCases[6].image_attributes[4].image_index	integer	0
+sourceMglyphCases[6].image_attributes[4].name	bytes	aria-label
+sourceMglyphCases[6].image_attributes[4].value	bytes	block
+sourceMglyphCases[6].image_attributes[5].image_index	integer	0
+sourceMglyphCases[6].image_attributes[5].name	bytes	href
+sourceMglyphCases[6].image_attributes[5].value	bytes	data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222%22%20height%3D%221%22%3E%3Crect%20width%3D%222%22%20height%3D%221%22%2F%3E%3C%2Fsvg%3E
+sourceMglyphCases[6].measurements.count	integer	0
+sourceMglyphCases[6].nodes.count	integer	3
+sourceMglyphCases[6].nodes[0].kind	bytes	math
+sourceMglyphCases[6].nodes[0].is_inferred	boolean	0
+sourceMglyphCases[6].nodes[0].parent	integer	max
+sourceMglyphCases[6].nodes[0].attribute_first	integer	0
+sourceMglyphCases[6].nodes[0].attribute_count	integer	1
+sourceMglyphCases[6].nodes[0].text	utf16	
+sourceMglyphCases[6].nodes[0].xml_payload_index	integer	max
+sourceMglyphCases[6].nodes[1].kind	bytes	inferredMrow
+sourceMglyphCases[6].nodes[1].is_inferred	boolean	1
+sourceMglyphCases[6].nodes[1].parent	integer	0
+sourceMglyphCases[6].nodes[1].attribute_first	integer	1
+sourceMglyphCases[6].nodes[1].attribute_count	integer	0
+sourceMglyphCases[6].nodes[1].text	utf16	
+sourceMglyphCases[6].nodes[1].xml_payload_index	integer	max
+sourceMglyphCases[6].nodes[2].kind	bytes	mglyph
+sourceMglyphCases[6].nodes[2].is_inferred	boolean	0
+sourceMglyphCases[6].nodes[2].parent	integer	1
+sourceMglyphCases[6].nodes[2].attribute_first	integer	1
+sourceMglyphCases[6].nodes[2].attribute_count	integer	5
+sourceMglyphCases[6].nodes[2].text	utf16	
+sourceMglyphCases[6].nodes[2].xml_payload_index	integer	max
+sourceMglyphCases[6].attributes.count	integer	6
+sourceMglyphCases[6].attributes[0].name	utf16	display
+sourceMglyphCases[6].attributes[0].kind	enum	0
+sourceMglyphCases[6].attributes[0].text	utf16	block
+sourceMglyphCases[6].attributes[0].number	binary64	0000000000000000
+sourceMglyphCases[6].attributes[0].boolean	boolean	0
+sourceMglyphCases[6].attributes[1].name	utf16	src
+sourceMglyphCases[6].attributes[1].kind	enum	0
+sourceMglyphCases[6].attributes[1].text	utf16	data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222%22%20height%3D%221%22%3E%3Crect%20width%3D%222%22%20height%3D%221%22%2F%3E%3C%2Fsvg%3E
+sourceMglyphCases[6].attributes[1].number	binary64	0000000000000000
+sourceMglyphCases[6].attributes[1].boolean	boolean	0
+sourceMglyphCases[6].attributes[2].name	utf16	width
+sourceMglyphCases[6].attributes[2].kind	enum	0
+sourceMglyphCases[6].attributes[2].text	utf16	1.5em
+sourceMglyphCases[6].attributes[2].number	binary64	0000000000000000
+sourceMglyphCases[6].attributes[2].boolean	boolean	0
+sourceMglyphCases[6].attributes[3].name	utf16	height
+sourceMglyphCases[6].attributes[3].kind	enum	0
+sourceMglyphCases[6].attributes[3].text	utf16	.5em
+sourceMglyphCases[6].attributes[3].number	binary64	0000000000000000
+sourceMglyphCases[6].attributes[3].boolean	boolean	0
+sourceMglyphCases[6].attributes[4].name	utf16	valign
+sourceMglyphCases[6].attributes[4].kind	enum	0
+sourceMglyphCases[6].attributes[4].text	utf16	.125em
+sourceMglyphCases[6].attributes[4].number	binary64	0000000000000000
+sourceMglyphCases[6].attributes[4].boolean	boolean	0
+sourceMglyphCases[6].attributes[5].name	utf16	alt
+sourceMglyphCases[6].attributes[5].kind	enum	0
+sourceMglyphCases[6].attributes[5].text	utf16	block
+sourceMglyphCases[6].attributes[5].number	binary64	0000000000000000
+sourceMglyphCases[6].attributes[5].boolean	boolean	0
+sourceMglyphCases[7].name	bytes	mglyph-image-source-escaped-query-local
+sourceMglyphCases[7].kind	enum	0
+sourceMglyphCases[7].mathml	bytes	<math xmlns="http://www.w3.org/1998/Math/MathML"><mi>x</mi><mglyph src="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222%22%20height%3D%221%22%3E%3Crect%20width%3D%222%22%20height%3D%221%22%2F%3E%3C%2Fsvg%3E?label=a&amp;mode=b" width="1.25em" height=".5em" alt="A &amp; B"/></math>
+sourceMglyphCases[7].requested_display	boolean	0
+sourceMglyphCases[7].display	boolean	0
+sourceMglyphCases[7].em	binary64	4030000000000000
+sourceMglyphCases[7].ex	binary64	4020000000000000
+sourceMglyphCases[7].width	binary64	4094000000000000
+sourceMglyphCases[7].font_cache	bytes	local
+sourceMglyphCases[7].local_id	bytes	
+sourceMglyphCases[7].root_w	binary64	3ffd26e978d4fdf4
+sourceMglyphCases[7].root_h	binary64	3fe0000000000000
+sourceMglyphCases[7].root_d	binary64	3f86872b020c49ba
+sourceMglyphCases[7].mglyph_bbox.present	boolean	1
+sourceMglyphCases[7].mglyph_bbox.value.w	binary64	3ff4000000000000
+sourceMglyphCases[7].mglyph_bbox.value.h	binary64	3fe0000000000000
+sourceMglyphCases[7].mglyph_bbox.value.d	binary64	0000000000000000
+sourceMglyphCases[7].mglyph_bbox.value.scale	binary64	3ff0000000000000
+sourceMglyphCases[7].mglyph_bbox.value.rscale	binary64	3ff0000000000000
+sourceMglyphCases[7].mglyph_bbox.value.L	binary64	0000000000000000
+sourceMglyphCases[7].mglyph_bbox.value.R	binary64	0000000000000000
+sourceMglyphCases[7].error_name	bytes	
+sourceMglyphCases[7].error_message	bytes	
+sourceMglyphCases[7].svg	bytes	<mjx-container class="MathJax" jax="SVG" overflow="linebreak"><svg style="vertical-align: -0.025ex;" xmlns="http://www.w3.org/2000/svg" width="4.122ex" height="1.156ex" role="img" focusable="false" viewBox="0 -500 1822 511" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><path id="MJX-2-NCM-I-1D465" d="M527 373C527 419 482 442 432 442C389 442 355 419 329 373C308 419 273 442 222 442C173 442 133 419 101 374C74 335 60 306 60 287C60 278 65 273 75 273C84 273 90 278 92 287C111 345 153 413 220 413C253 413 269 392 269 351C269 330 251 252 216 118C199 51 169 18 126 18C112 18 99 21 88 26C114 36 127 54 127 80C127 106 114 119 87 119C54 119 29 91 29 58C29 12 76-11 125-11C167-11 201 12 228 58C247 12 283-11 335-11C383-11 423 12 455 57C482 96 496 125 496 144C496 153 491 158 481 158C472 158 467 153 464 144C447 87 402 18 337 18C304 18 287 38 287 79C287 92 292 120 303 165L337 300C356 375 387 413 431 413C445 413 458 410 469 405C442 396 429 378 429 351C429 325 443 312 470 312C502 312 527 341 527 373Z"/></defs><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><use data-c="1D465" xlink:href="\x23MJX-2-NCM-I-1D465"/></g><g data-mml-node="mglyph" transform="translate(572,0)"><image width="1250" height="500" transform="translate(0 500) matrix(1 0 0 -1 0 0)" preserveAspectRatio="none" aria-label="A &amp; B" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222%22%20height%3D%221%22%3E%3Crect%20width%3D%222%22%20height%3D%221%22%2F%3E%3C%2Fsvg%3E?label=a&amp;mode=b"/></g></g></g></svg></mjx-container>
+sourceMglyphCases[7].local_cache_prefixes.count	integer	1
+sourceMglyphCases[7].local_cache_prefixes[0]	bytes	2-
+sourceMglyphCases[7].image_attributes.count	integer	6
+sourceMglyphCases[7].image_attributes[0].image_index	integer	0
+sourceMglyphCases[7].image_attributes[0].name	bytes	width
+sourceMglyphCases[7].image_attributes[0].value	bytes	1250
+sourceMglyphCases[7].image_attributes[1].image_index	integer	0
+sourceMglyphCases[7].image_attributes[1].name	bytes	height
+sourceMglyphCases[7].image_attributes[1].value	bytes	500
+sourceMglyphCases[7].image_attributes[2].image_index	integer	0
+sourceMglyphCases[7].image_attributes[2].name	bytes	transform
+sourceMglyphCases[7].image_attributes[2].value	bytes	translate(0 500) matrix(1 0 0 -1 0 0)
+sourceMglyphCases[7].image_attributes[3].image_index	integer	0
+sourceMglyphCases[7].image_attributes[3].name	bytes	preserveAspectRatio
+sourceMglyphCases[7].image_attributes[3].value	bytes	none
+sourceMglyphCases[7].image_attributes[4].image_index	integer	0
+sourceMglyphCases[7].image_attributes[4].name	bytes	aria-label
+sourceMglyphCases[7].image_attributes[4].value	bytes	A &amp; B
+sourceMglyphCases[7].image_attributes[5].image_index	integer	0
+sourceMglyphCases[7].image_attributes[5].name	bytes	href
+sourceMglyphCases[7].image_attributes[5].value	bytes	data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222%22%20height%3D%221%22%3E%3Crect%20width%3D%222%22%20height%3D%221%22%2F%3E%3C%2Fsvg%3E?label=a&amp;mode=b
+sourceMglyphCases[7].measurements.count	integer	0
+sourceMglyphCases[7].nodes.count	integer	5
+sourceMglyphCases[7].nodes[0].kind	bytes	math
+sourceMglyphCases[7].nodes[0].is_inferred	boolean	0
+sourceMglyphCases[7].nodes[0].parent	integer	max
+sourceMglyphCases[7].nodes[0].attribute_first	integer	0
+sourceMglyphCases[7].nodes[0].attribute_count	integer	0
+sourceMglyphCases[7].nodes[0].text	utf16	
+sourceMglyphCases[7].nodes[0].xml_payload_index	integer	max
+sourceMglyphCases[7].nodes[1].kind	bytes	inferredMrow
+sourceMglyphCases[7].nodes[1].is_inferred	boolean	1
+sourceMglyphCases[7].nodes[1].parent	integer	0
+sourceMglyphCases[7].nodes[1].attribute_first	integer	0
+sourceMglyphCases[7].nodes[1].attribute_count	integer	0
+sourceMglyphCases[7].nodes[1].text	utf16	
+sourceMglyphCases[7].nodes[1].xml_payload_index	integer	max
+sourceMglyphCases[7].nodes[2].kind	bytes	mi
+sourceMglyphCases[7].nodes[2].is_inferred	boolean	0
+sourceMglyphCases[7].nodes[2].parent	integer	1
+sourceMglyphCases[7].nodes[2].attribute_first	integer	0
+sourceMglyphCases[7].nodes[2].attribute_count	integer	0
+sourceMglyphCases[7].nodes[2].text	utf16	
+sourceMglyphCases[7].nodes[2].xml_payload_index	integer	max
+sourceMglyphCases[7].nodes[3].kind	bytes	text
+sourceMglyphCases[7].nodes[3].is_inferred	boolean	0
+sourceMglyphCases[7].nodes[3].parent	integer	2
+sourceMglyphCases[7].nodes[3].attribute_first	integer	0
+sourceMglyphCases[7].nodes[3].attribute_count	integer	0
+sourceMglyphCases[7].nodes[3].text	utf16	x
+sourceMglyphCases[7].nodes[3].xml_payload_index	integer	max
+sourceMglyphCases[7].nodes[4].kind	bytes	mglyph
+sourceMglyphCases[7].nodes[4].is_inferred	boolean	0
+sourceMglyphCases[7].nodes[4].parent	integer	1
+sourceMglyphCases[7].nodes[4].attribute_first	integer	0
+sourceMglyphCases[7].nodes[4].attribute_count	integer	4
+sourceMglyphCases[7].nodes[4].text	utf16	
+sourceMglyphCases[7].nodes[4].xml_payload_index	integer	max
+sourceMglyphCases[7].attributes.count	integer	4
+sourceMglyphCases[7].attributes[0].name	utf16	src
+sourceMglyphCases[7].attributes[0].kind	enum	0
+sourceMglyphCases[7].attributes[0].text	utf16	data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%222%22%20height%3D%221%22%3E%3Crect%20width%3D%222%22%20height%3D%221%22%2F%3E%3C%2Fsvg%3E?label=a&mode=b
+sourceMglyphCases[7].attributes[0].number	binary64	0000000000000000
+sourceMglyphCases[7].attributes[0].boolean	boolean	0
+sourceMglyphCases[7].attributes[1].name	utf16	width
+sourceMglyphCases[7].attributes[1].kind	enum	0
+sourceMglyphCases[7].attributes[1].text	utf16	1.25em
+sourceMglyphCases[7].attributes[1].number	binary64	0000000000000000
+sourceMglyphCases[7].attributes[1].boolean	boolean	0
+sourceMglyphCases[7].attributes[2].name	utf16	height
+sourceMglyphCases[7].attributes[2].kind	enum	0
+sourceMglyphCases[7].attributes[2].text	utf16	.5em
+sourceMglyphCases[7].attributes[2].number	binary64	0000000000000000
+sourceMglyphCases[7].attributes[2].boolean	boolean	0
+sourceMglyphCases[7].attributes[3].name	utf16	alt
+sourceMglyphCases[7].attributes[3].kind	enum	0
+sourceMglyphCases[7].attributes[3].text	utf16	A & B
+sourceMglyphCases[7].attributes[3].number	binary64	0000000000000000
+sourceMglyphCases[7].attributes[3].boolean	boolean	0
+sourceMglyphCases[8].name	bytes	mglyph-legacy-ascii-index
+sourceMglyphCases[8].kind	enum	1
+sourceMglyphCases[8].mathml	bytes	<math xmlns="http://www.w3.org/1998/Math/MathML"><mglyph src="" fontfamily="MathJaxNewcm" index="65"/></math>
+sourceMglyphCases[8].requested_display	boolean	0
+sourceMglyphCases[8].display	boolean	0
+sourceMglyphCases[8].em	binary64	4030000000000000
+sourceMglyphCases[8].ex	binary64	4020000000000000
+sourceMglyphCases[8].width	binary64	4094000000000000
+sourceMglyphCases[8].font_cache	bytes	none
+sourceMglyphCases[8].local_id	bytes	
+sourceMglyphCases[8].root_w	binary64	3fe3333333333333
+sourceMglyphCases[8].root_h	binary64	3fe8000000000000
+sourceMglyphCases[8].root_d	binary64	3fc999999999999a
+sourceMglyphCases[8].mglyph_bbox.present	boolean	1
+sourceMglyphCases[8].mglyph_bbox.value.w	binary64	3fe3333333333333
+sourceMglyphCases[8].mglyph_bbox.value.h	binary64	3fe8000000000000
+sourceMglyphCases[8].mglyph_bbox.value.d	binary64	3fc999999999999a
+sourceMglyphCases[8].mglyph_bbox.value.scale	binary64	3ff0000000000000
+sourceMglyphCases[8].mglyph_bbox.value.rscale	binary64	3ff0000000000000
+sourceMglyphCases[8].mglyph_bbox.value.L	binary64	0000000000000000
+sourceMglyphCases[8].mglyph_bbox.value.R	binary64	0000000000000000
+sourceMglyphCases[8].error_name	bytes	
+sourceMglyphCases[8].error_message	bytes	
+sourceMglyphCases[8].svg	bytes	<mjx-container class="MathJax" jax="SVG" overflow="linebreak"><svg style="vertical-align: -0.452ex;" xmlns="http://www.w3.org/2000/svg" width="1.357ex" height="2.149ex" role="img" focusable="false" viewBox="0 -750 600 950"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mglyph" style="font-family: MathJaxNewcm;"><text data-variant="-explicitFont" transform="scale(1,-1)" font-size="884px">A</text></g></g></g></svg></mjx-container>
+sourceMglyphCases[8].local_cache_prefixes.count	integer	0
+sourceMglyphCases[8].image_attributes.count	integer	0
+sourceMglyphCases[8].measurements.count	integer	1
+sourceMglyphCases[8].measurements[0].text	utf16	A
+sourceMglyphCases[8].measurements[0].variant	bytes	-explicitFont
+sourceMglyphCases[8].measurements[0].font_family	bytes	MathJaxNewcm
+sourceMglyphCases[8].measurements[0].italic	boolean	0
+sourceMglyphCases[8].measurements[0].bold	boolean	0
+sourceMglyphCases[8].measurements[0].w	binary64	3fe3333333333333
+sourceMglyphCases[8].measurements[0].h	binary64	3fe8000000000000
+sourceMglyphCases[8].measurements[0].d	binary64	3fc999999999999a
+sourceMglyphCases[8].nodes.count	integer	3
+sourceMglyphCases[8].nodes[0].kind	bytes	math
+sourceMglyphCases[8].nodes[0].is_inferred	boolean	0
+sourceMglyphCases[8].nodes[0].parent	integer	max
+sourceMglyphCases[8].nodes[0].attribute_first	integer	0
+sourceMglyphCases[8].nodes[0].attribute_count	integer	0
+sourceMglyphCases[8].nodes[0].text	utf16	
+sourceMglyphCases[8].nodes[0].xml_payload_index	integer	max
+sourceMglyphCases[8].nodes[1].kind	bytes	inferredMrow
+sourceMglyphCases[8].nodes[1].is_inferred	boolean	1
+sourceMglyphCases[8].nodes[1].parent	integer	0
+sourceMglyphCases[8].nodes[1].attribute_first	integer	0
+sourceMglyphCases[8].nodes[1].attribute_count	integer	0
+sourceMglyphCases[8].nodes[1].text	utf16	
+sourceMglyphCases[8].nodes[1].xml_payload_index	integer	max
+sourceMglyphCases[8].nodes[2].kind	bytes	mglyph
+sourceMglyphCases[8].nodes[2].is_inferred	boolean	0
+sourceMglyphCases[8].nodes[2].parent	integer	1
+sourceMglyphCases[8].nodes[2].attribute_first	integer	0
+sourceMglyphCases[8].nodes[2].attribute_count	integer	3
+sourceMglyphCases[8].nodes[2].text	utf16	
+sourceMglyphCases[8].nodes[2].xml_payload_index	integer	max
+sourceMglyphCases[8].attributes.count	integer	3
+sourceMglyphCases[8].attributes[0].name	utf16	src
+sourceMglyphCases[8].attributes[0].kind	enum	0
+sourceMglyphCases[8].attributes[0].text	utf16	
+sourceMglyphCases[8].attributes[0].number	binary64	0000000000000000
+sourceMglyphCases[8].attributes[0].boolean	boolean	0
+sourceMglyphCases[8].attributes[1].name	utf16	fontfamily
+sourceMglyphCases[8].attributes[1].kind	enum	0
+sourceMglyphCases[8].attributes[1].text	utf16	MathJaxNewcm
+sourceMglyphCases[8].attributes[1].number	binary64	0000000000000000
+sourceMglyphCases[8].attributes[1].boolean	boolean	0
+sourceMglyphCases[8].attributes[2].name	utf16	index
+sourceMglyphCases[8].attributes[2].kind	enum	0
+sourceMglyphCases[8].attributes[2].text	utf16	65
+sourceMglyphCases[8].attributes[2].number	binary64	0000000000000000
+sourceMglyphCases[8].attributes[2].boolean	boolean	0
+sourceMglyphCases[9].name	bytes	mglyph-legacy-supplementary-index
+sourceMglyphCases[9].kind	enum	1
+sourceMglyphCases[9].mathml	bytes	<math xmlns="http://www.w3.org/1998/Math/MathML"><mglyph fontfamily="MathJaxNewcm" index="128512"/></math>
+sourceMglyphCases[9].requested_display	boolean	0
+sourceMglyphCases[9].display	boolean	0
+sourceMglyphCases[9].em	binary64	4030000000000000
+sourceMglyphCases[9].ex	binary64	4020000000000000
+sourceMglyphCases[9].width	binary64	4094000000000000
+sourceMglyphCases[9].font_cache	bytes	none
+sourceMglyphCases[9].local_id	bytes	
+sourceMglyphCases[9].root_w	binary64	3fe3333333333333
+sourceMglyphCases[9].root_h	binary64	3fe8000000000000
+sourceMglyphCases[9].root_d	binary64	3fc999999999999a
+sourceMglyphCases[9].mglyph_bbox.present	boolean	1
+sourceMglyphCases[9].mglyph_bbox.value.w	binary64	3fe3333333333333
+sourceMglyphCases[9].mglyph_bbox.value.h	binary64	3fe8000000000000
+sourceMglyphCases[9].mglyph_bbox.value.d	binary64	3fc999999999999a
+sourceMglyphCases[9].mglyph_bbox.value.scale	binary64	3ff0000000000000
+sourceMglyphCases[9].mglyph_bbox.value.rscale	binary64	3ff0000000000000
+sourceMglyphCases[9].mglyph_bbox.value.L	binary64	0000000000000000
+sourceMglyphCases[9].mglyph_bbox.value.R	binary64	0000000000000000
+sourceMglyphCases[9].error_name	bytes	
+sourceMglyphCases[9].error_message	bytes	
+sourceMglyphCases[9].svg	bytes	<mjx-container class="MathJax" jax="SVG" overflow="linebreak"><svg style="vertical-align: -0.452ex;" xmlns="http://www.w3.org/2000/svg" width="1.357ex" height="2.149ex" role="img" focusable="false" viewBox="0 -750 600 950"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mglyph" style="font-family: MathJaxNewcm;"><text data-variant="-explicitFont" transform="scale(1,-1)" font-size="884px">\xf0\x9f\x98\x80</text></g></g></g></svg></mjx-container>
+sourceMglyphCases[9].local_cache_prefixes.count	integer	0
+sourceMglyphCases[9].image_attributes.count	integer	0
+sourceMglyphCases[9].measurements.count	integer	1
+sourceMglyphCases[9].measurements[0].text	utf16	\ud83d\ude00
+sourceMglyphCases[9].measurements[0].variant	bytes	-explicitFont
+sourceMglyphCases[9].measurements[0].font_family	bytes	MathJaxNewcm
+sourceMglyphCases[9].measurements[0].italic	boolean	0
+sourceMglyphCases[9].measurements[0].bold	boolean	0
+sourceMglyphCases[9].measurements[0].w	binary64	3fe3333333333333
+sourceMglyphCases[9].measurements[0].h	binary64	3fe8000000000000
+sourceMglyphCases[9].measurements[0].d	binary64	3fc999999999999a
+sourceMglyphCases[9].nodes.count	integer	3
+sourceMglyphCases[9].nodes[0].kind	bytes	math
+sourceMglyphCases[9].nodes[0].is_inferred	boolean	0
+sourceMglyphCases[9].nodes[0].parent	integer	max
+sourceMglyphCases[9].nodes[0].attribute_first	integer	0
+sourceMglyphCases[9].nodes[0].attribute_count	integer	0
+sourceMglyphCases[9].nodes[0].text	utf16	
+sourceMglyphCases[9].nodes[0].xml_payload_index	integer	max
+sourceMglyphCases[9].nodes[1].kind	bytes	inferredMrow
+sourceMglyphCases[9].nodes[1].is_inferred	boolean	1
+sourceMglyphCases[9].nodes[1].parent	integer	0
+sourceMglyphCases[9].nodes[1].attribute_first	integer	0
+sourceMglyphCases[9].nodes[1].attribute_count	integer	0
+sourceMglyphCases[9].nodes[1].text	utf16	
+sourceMglyphCases[9].nodes[1].xml_payload_index	integer	max
+sourceMglyphCases[9].nodes[2].kind	bytes	mglyph
+sourceMglyphCases[9].nodes[2].is_inferred	boolean	0
+sourceMglyphCases[9].nodes[2].parent	integer	1
+sourceMglyphCases[9].nodes[2].attribute_first	integer	0
+sourceMglyphCases[9].nodes[2].attribute_count	integer	2
+sourceMglyphCases[9].nodes[2].text	utf16	
+sourceMglyphCases[9].nodes[2].xml_payload_index	integer	max
+sourceMglyphCases[9].attributes.count	integer	2
+sourceMglyphCases[9].attributes[0].name	utf16	fontfamily
+sourceMglyphCases[9].attributes[0].kind	enum	0
+sourceMglyphCases[9].attributes[0].text	utf16	MathJaxNewcm
+sourceMglyphCases[9].attributes[0].number	binary64	0000000000000000
+sourceMglyphCases[9].attributes[0].boolean	boolean	0
+sourceMglyphCases[9].attributes[1].name	utf16	index
+sourceMglyphCases[9].attributes[1].kind	enum	0
+sourceMglyphCases[9].attributes[1].text	utf16	128512
+sourceMglyphCases[9].attributes[1].number	binary64	0000000000000000
+sourceMglyphCases[9].attributes[1].boolean	boolean	0
+sourceMglyphCases[10].name	bytes	mglyph-legacy-supplementary-local
+sourceMglyphCases[10].kind	enum	1
+sourceMglyphCases[10].mathml	bytes	<math xmlns="http://www.w3.org/1998/Math/MathML"><mi>x</mi><mglyph fontfamily="MathJaxNewcm" index="128512"/></math>
+sourceMglyphCases[10].requested_display	boolean	0
+sourceMglyphCases[10].display	boolean	0
+sourceMglyphCases[10].em	binary64	4030000000000000
+sourceMglyphCases[10].ex	binary64	4020000000000000
+sourceMglyphCases[10].width	binary64	4094000000000000
+sourceMglyphCases[10].font_cache	bytes	local
+sourceMglyphCases[10].local_id	bytes	
+sourceMglyphCases[10].root_w	binary64	3ff2c083126e978d
+sourceMglyphCases[10].root_h	binary64	3fe8000000000000
+sourceMglyphCases[10].root_d	binary64	3fc999999999999a
+sourceMglyphCases[10].mglyph_bbox.present	boolean	1
+sourceMglyphCases[10].mglyph_bbox.value.w	binary64	3fe3333333333333
+sourceMglyphCases[10].mglyph_bbox.value.h	binary64	3fe8000000000000
+sourceMglyphCases[10].mglyph_bbox.value.d	binary64	3fc999999999999a
+sourceMglyphCases[10].mglyph_bbox.value.scale	binary64	3ff0000000000000
+sourceMglyphCases[10].mglyph_bbox.value.rscale	binary64	3ff0000000000000
+sourceMglyphCases[10].mglyph_bbox.value.L	binary64	0000000000000000
+sourceMglyphCases[10].mglyph_bbox.value.R	binary64	0000000000000000
+sourceMglyphCases[10].error_name	bytes	
+sourceMglyphCases[10].error_message	bytes	
+sourceMglyphCases[10].svg	bytes	<mjx-container class="MathJax" jax="SVG" overflow="linebreak"><svg style="vertical-align: -0.452ex;" xmlns="http://www.w3.org/2000/svg" width="2.652ex" height="2.149ex" role="img" focusable="false" viewBox="0 -750 1172 950" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><path id="MJX-3-NCM-I-1D465" d="M527 373C527 419 482 442 432 442C389 442 355 419 329 373C308 419 273 442 222 442C173 442 133 419 101 374C74 335 60 306 60 287C60 278 65 273 75 273C84 273 90 278 92 287C111 345 153 413 220 413C253 413 269 392 269 351C269 330 251 252 216 118C199 51 169 18 126 18C112 18 99 21 88 26C114 36 127 54 127 80C127 106 114 119 87 119C54 119 29 91 29 58C29 12 76-11 125-11C167-11 201 12 228 58C247 12 283-11 335-11C383-11 423 12 455 57C482 96 496 125 496 144C496 153 491 158 481 158C472 158 467 153 464 144C447 87 402 18 337 18C304 18 287 38 287 79C287 92 292 120 303 165L337 300C356 375 387 413 431 413C445 413 458 410 469 405C442 396 429 378 429 351C429 325 443 312 470 312C502 312 527 341 527 373Z"/></defs><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><use data-c="1D465" xlink:href="\x23MJX-3-NCM-I-1D465"/></g><g data-mml-node="mglyph" style="font-family: MathJaxNewcm;" transform="translate(572,0)"><text data-variant="-explicitFont" transform="scale(1,-1)" font-size="884px">\xf0\x9f\x98\x80</text></g></g></g></svg></mjx-container>
+sourceMglyphCases[10].local_cache_prefixes.count	integer	1
+sourceMglyphCases[10].local_cache_prefixes[0]	bytes	3-
+sourceMglyphCases[10].image_attributes.count	integer	0
+sourceMglyphCases[10].measurements.count	integer	1
+sourceMglyphCases[10].measurements[0].text	utf16	\ud83d\ude00
+sourceMglyphCases[10].measurements[0].variant	bytes	-explicitFont
+sourceMglyphCases[10].measurements[0].font_family	bytes	MathJaxNewcm
+sourceMglyphCases[10].measurements[0].italic	boolean	0
+sourceMglyphCases[10].measurements[0].bold	boolean	0
+sourceMglyphCases[10].measurements[0].w	binary64	3fe3333333333333
+sourceMglyphCases[10].measurements[0].h	binary64	3fe8000000000000
+sourceMglyphCases[10].measurements[0].d	binary64	3fc999999999999a
+sourceMglyphCases[10].nodes.count	integer	5
+sourceMglyphCases[10].nodes[0].kind	bytes	math
+sourceMglyphCases[10].nodes[0].is_inferred	boolean	0
+sourceMglyphCases[10].nodes[0].parent	integer	max
+sourceMglyphCases[10].nodes[0].attribute_first	integer	0
+sourceMglyphCases[10].nodes[0].attribute_count	integer	0
+sourceMglyphCases[10].nodes[0].text	utf16	
+sourceMglyphCases[10].nodes[0].xml_payload_index	integer	max
+sourceMglyphCases[10].nodes[1].kind	bytes	inferredMrow
+sourceMglyphCases[10].nodes[1].is_inferred	boolean	1
+sourceMglyphCases[10].nodes[1].parent	integer	0
+sourceMglyphCases[10].nodes[1].attribute_first	integer	0
+sourceMglyphCases[10].nodes[1].attribute_count	integer	0
+sourceMglyphCases[10].nodes[1].text	utf16	
+sourceMglyphCases[10].nodes[1].xml_payload_index	integer	max
+sourceMglyphCases[10].nodes[2].kind	bytes	mi
+sourceMglyphCases[10].nodes[2].is_inferred	boolean	0
+sourceMglyphCases[10].nodes[2].parent	integer	1
+sourceMglyphCases[10].nodes[2].attribute_first	integer	0
+sourceMglyphCases[10].nodes[2].attribute_count	integer	0
+sourceMglyphCases[10].nodes[2].text	utf16	
+sourceMglyphCases[10].nodes[2].xml_payload_index	integer	max
+sourceMglyphCases[10].nodes[3].kind	bytes	text
+sourceMglyphCases[10].nodes[3].is_inferred	boolean	0
+sourceMglyphCases[10].nodes[3].parent	integer	2
+sourceMglyphCases[10].nodes[3].attribute_first	integer	0
+sourceMglyphCases[10].nodes[3].attribute_count	integer	0
+sourceMglyphCases[10].nodes[3].text	utf16	x
+sourceMglyphCases[10].nodes[3].xml_payload_index	integer	max
+sourceMglyphCases[10].nodes[4].kind	bytes	mglyph
+sourceMglyphCases[10].nodes[4].is_inferred	boolean	0
+sourceMglyphCases[10].nodes[4].parent	integer	1
+sourceMglyphCases[10].nodes[4].attribute_first	integer	0
+sourceMglyphCases[10].nodes[4].attribute_count	integer	2
+sourceMglyphCases[10].nodes[4].text	utf16	
+sourceMglyphCases[10].nodes[4].xml_payload_index	integer	max
+sourceMglyphCases[10].attributes.count	integer	2
+sourceMglyphCases[10].attributes[0].name	utf16	fontfamily
+sourceMglyphCases[10].attributes[0].kind	enum	0
+sourceMglyphCases[10].attributes[0].text	utf16	MathJaxNewcm
+sourceMglyphCases[10].attributes[0].number	binary64	0000000000000000
+sourceMglyphCases[10].attributes[0].boolean	boolean	0
+sourceMglyphCases[10].attributes[1].name	utf16	index
+sourceMglyphCases[10].attributes[1].kind	enum	0
+sourceMglyphCases[10].attributes[1].text	utf16	128512
+sourceMglyphCases[10].attributes[1].number	binary64	0000000000000000
+sourceMglyphCases[10].attributes[1].boolean	boolean	0
+sourceMglyphCases[11].name	bytes	mglyph-invalid-missing-source-and-index
+sourceMglyphCases[11].kind	enum	2
+sourceMglyphCases[11].mathml	bytes	<math xmlns="http://www.w3.org/1998/Math/MathML"><mglyph/></math>
+sourceMglyphCases[11].requested_display	boolean	0
+sourceMglyphCases[11].display	boolean	0
+sourceMglyphCases[11].em	binary64	4030000000000000
+sourceMglyphCases[11].ex	binary64	4020000000000000
+sourceMglyphCases[11].width	binary64	4094000000000000
+sourceMglyphCases[11].font_cache	bytes	none
+sourceMglyphCases[11].local_id	bytes	
+sourceMglyphCases[11].root_w	binary64	400ccccccccccccc
+sourceMglyphCases[11].root_h	binary64	3fe8000000000000
+sourceMglyphCases[11].root_d	binary64	3fc999999999999a
+sourceMglyphCases[11].mglyph_bbox.present	boolean	0
+sourceMglyphCases[11].error_name	bytes	
+sourceMglyphCases[11].error_message	bytes	
+sourceMglyphCases[11].svg	bytes	<mjx-container class="MathJax" jax="SVG" overflow="linebreak"><svg style="vertical-align: -0.452ex;" xmlns="http://www.w3.org/2000/svg" width="8.145ex" height="2.149ex" role="img" focusable="false" viewBox="0 -750 3600 950"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="merror" data-mjx-message="mglyph must have either src or fontfamily and index attributes" title="mglyph must have either src or fontfamily and index attributes"><rect data-background="true" width="3600" height="950" y="-200"/><title>mglyph must have either src or fontfamily and index attributes</title><g data-mml-node="mtext" style="font-family: serif;"><text data-variant="-explicitFont" transform="scale(1,-1)" font-size="884px">mglyph</text></g></g></g></g></svg></mjx-container>
+sourceMglyphCases[11].local_cache_prefixes.count	integer	0
+sourceMglyphCases[11].image_attributes.count	integer	0
+sourceMglyphCases[11].measurements.count	integer	1
+sourceMglyphCases[11].measurements[0].text	utf16	mglyph
+sourceMglyphCases[11].measurements[0].variant	bytes	-explicitFont
+sourceMglyphCases[11].measurements[0].font_family	bytes	serif
+sourceMglyphCases[11].measurements[0].italic	boolean	0
+sourceMglyphCases[11].measurements[0].bold	boolean	0
+sourceMglyphCases[11].measurements[0].w	binary64	400ccccccccccccc
+sourceMglyphCases[11].measurements[0].h	binary64	3fe8000000000000
+sourceMglyphCases[11].measurements[0].d	binary64	3fc999999999999a
+sourceMglyphCases[11].nodes.count	integer	6
+sourceMglyphCases[11].nodes[0].kind	bytes	math
+sourceMglyphCases[11].nodes[0].is_inferred	boolean	0
+sourceMglyphCases[11].nodes[0].parent	integer	max
+sourceMglyphCases[11].nodes[0].attribute_first	integer	0
+sourceMglyphCases[11].nodes[0].attribute_count	integer	0
+sourceMglyphCases[11].nodes[0].text	utf16	
+sourceMglyphCases[11].nodes[0].xml_payload_index	integer	max
+sourceMglyphCases[11].nodes[1].kind	bytes	inferredMrow
+sourceMglyphCases[11].nodes[1].is_inferred	boolean	1
+sourceMglyphCases[11].nodes[1].parent	integer	0
+sourceMglyphCases[11].nodes[1].attribute_first	integer	0
+sourceMglyphCases[11].nodes[1].attribute_count	integer	0
+sourceMglyphCases[11].nodes[1].text	utf16	
+sourceMglyphCases[11].nodes[1].xml_payload_index	integer	max
+sourceMglyphCases[11].nodes[2].kind	bytes	merror
+sourceMglyphCases[11].nodes[2].is_inferred	boolean	0
+sourceMglyphCases[11].nodes[2].parent	integer	1
+sourceMglyphCases[11].nodes[2].attribute_first	integer	0
+sourceMglyphCases[11].nodes[2].attribute_count	integer	2
+sourceMglyphCases[11].nodes[2].text	utf16	
+sourceMglyphCases[11].nodes[2].xml_payload_index	integer	max
+sourceMglyphCases[11].nodes[3].kind	bytes	inferredMrow
+sourceMglyphCases[11].nodes[3].is_inferred	boolean	1
+sourceMglyphCases[11].nodes[3].parent	integer	2
+sourceMglyphCases[11].nodes[3].attribute_first	integer	2
+sourceMglyphCases[11].nodes[3].attribute_count	integer	0
+sourceMglyphCases[11].nodes[3].text	utf16	
+sourceMglyphCases[11].nodes[3].xml_payload_index	integer	max
+sourceMglyphCases[11].nodes[4].kind	bytes	mtext
+sourceMglyphCases[11].nodes[4].is_inferred	boolean	0
+sourceMglyphCases[11].nodes[4].parent	integer	3
+sourceMglyphCases[11].nodes[4].attribute_first	integer	2
+sourceMglyphCases[11].nodes[4].attribute_count	integer	0
+sourceMglyphCases[11].nodes[4].text	utf16	
+sourceMglyphCases[11].nodes[4].xml_payload_index	integer	max
+sourceMglyphCases[11].nodes[5].kind	bytes	text
+sourceMglyphCases[11].nodes[5].is_inferred	boolean	0
+sourceMglyphCases[11].nodes[5].parent	integer	4
+sourceMglyphCases[11].nodes[5].attribute_first	integer	2
+sourceMglyphCases[11].nodes[5].attribute_count	integer	0
+sourceMglyphCases[11].nodes[5].text	utf16	mglyph
+sourceMglyphCases[11].nodes[5].xml_payload_index	integer	max
+sourceMglyphCases[11].attributes.count	integer	2
+sourceMglyphCases[11].attributes[0].name	utf16	data-mjx-message
+sourceMglyphCases[11].attributes[0].kind	enum	0
+sourceMglyphCases[11].attributes[0].text	utf16	mglyph must have either src or fontfamily and index attributes
+sourceMglyphCases[11].attributes[0].number	binary64	0000000000000000
+sourceMglyphCases[11].attributes[0].boolean	boolean	0
+sourceMglyphCases[11].attributes[1].name	utf16	title
+sourceMglyphCases[11].attributes[1].kind	enum	0
+sourceMglyphCases[11].attributes[1].text	utf16	mglyph must have either src or fontfamily and index attributes
+sourceMglyphCases[11].attributes[1].number	binary64	0000000000000000
+sourceMglyphCases[11].attributes[1].boolean	boolean	0
+sourceMglyphCases[12].name	bytes	mglyph-invalid-empty-source-and-index
+sourceMglyphCases[12].kind	enum	2
+sourceMglyphCases[12].mathml	bytes	<math xmlns="http://www.w3.org/1998/Math/MathML"><mglyph src="" fontfamily="" index=""/></math>
+sourceMglyphCases[12].requested_display	boolean	0
+sourceMglyphCases[12].display	boolean	0
+sourceMglyphCases[12].em	binary64	4030000000000000
+sourceMglyphCases[12].ex	binary64	4020000000000000
+sourceMglyphCases[12].width	binary64	4094000000000000
+sourceMglyphCases[12].font_cache	bytes	none
+sourceMglyphCases[12].local_id	bytes	
+sourceMglyphCases[12].root_w	binary64	400ccccccccccccc
+sourceMglyphCases[12].root_h	binary64	3fe8000000000000
+sourceMglyphCases[12].root_d	binary64	3fc999999999999a
+sourceMglyphCases[12].mglyph_bbox.present	boolean	0
+sourceMglyphCases[12].error_name	bytes	
+sourceMglyphCases[12].error_message	bytes	
+sourceMglyphCases[12].svg	bytes	<mjx-container class="MathJax" jax="SVG" overflow="linebreak"><svg style="vertical-align: -0.452ex;" xmlns="http://www.w3.org/2000/svg" width="8.145ex" height="2.149ex" role="img" focusable="false" viewBox="0 -750 3600 950"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="merror" data-mjx-message="mglyph must have either src or fontfamily and index attributes" title="mglyph must have either src or fontfamily and index attributes"><rect data-background="true" width="3600" height="950" y="-200"/><title>mglyph must have either src or fontfamily and index attributes</title><g data-mml-node="mtext" style="font-family: serif;"><text data-variant="-explicitFont" transform="scale(1,-1)" font-size="884px">mglyph</text></g></g></g></g></svg></mjx-container>
+sourceMglyphCases[12].local_cache_prefixes.count	integer	0
+sourceMglyphCases[12].image_attributes.count	integer	0
+sourceMglyphCases[12].measurements.count	integer	1
+sourceMglyphCases[12].measurements[0].text	utf16	mglyph
+sourceMglyphCases[12].measurements[0].variant	bytes	-explicitFont
+sourceMglyphCases[12].measurements[0].font_family	bytes	serif
+sourceMglyphCases[12].measurements[0].italic	boolean	0
+sourceMglyphCases[12].measurements[0].bold	boolean	0
+sourceMglyphCases[12].measurements[0].w	binary64	400ccccccccccccc
+sourceMglyphCases[12].measurements[0].h	binary64	3fe8000000000000
+sourceMglyphCases[12].measurements[0].d	binary64	3fc999999999999a
+sourceMglyphCases[12].nodes.count	integer	6
+sourceMglyphCases[12].nodes[0].kind	bytes	math
+sourceMglyphCases[12].nodes[0].is_inferred	boolean	0
+sourceMglyphCases[12].nodes[0].parent	integer	max
+sourceMglyphCases[12].nodes[0].attribute_first	integer	0
+sourceMglyphCases[12].nodes[0].attribute_count	integer	0
+sourceMglyphCases[12].nodes[0].text	utf16	
+sourceMglyphCases[12].nodes[0].xml_payload_index	integer	max
+sourceMglyphCases[12].nodes[1].kind	bytes	inferredMrow
+sourceMglyphCases[12].nodes[1].is_inferred	boolean	1
+sourceMglyphCases[12].nodes[1].parent	integer	0
+sourceMglyphCases[12].nodes[1].attribute_first	integer	0
+sourceMglyphCases[12].nodes[1].attribute_count	integer	0
+sourceMglyphCases[12].nodes[1].text	utf16	
+sourceMglyphCases[12].nodes[1].xml_payload_index	integer	max
+sourceMglyphCases[12].nodes[2].kind	bytes	merror
+sourceMglyphCases[12].nodes[2].is_inferred	boolean	0
+sourceMglyphCases[12].nodes[2].parent	integer	1
+sourceMglyphCases[12].nodes[2].attribute_first	integer	0
+sourceMglyphCases[12].nodes[2].attribute_count	integer	2
+sourceMglyphCases[12].nodes[2].text	utf16	
+sourceMglyphCases[12].nodes[2].xml_payload_index	integer	max
+sourceMglyphCases[12].nodes[3].kind	bytes	inferredMrow
+sourceMglyphCases[12].nodes[3].is_inferred	boolean	1
+sourceMglyphCases[12].nodes[3].parent	integer	2
+sourceMglyphCases[12].nodes[3].attribute_first	integer	2
+sourceMglyphCases[12].nodes[3].attribute_count	integer	0
+sourceMglyphCases[12].nodes[3].text	utf16	
+sourceMglyphCases[12].nodes[3].xml_payload_index	integer	max
+sourceMglyphCases[12].nodes[4].kind	bytes	mtext
+sourceMglyphCases[12].nodes[4].is_inferred	boolean	0
+sourceMglyphCases[12].nodes[4].parent	integer	3
+sourceMglyphCases[12].nodes[4].attribute_first	integer	2
+sourceMglyphCases[12].nodes[4].attribute_count	integer	0
+sourceMglyphCases[12].nodes[4].text	utf16	
+sourceMglyphCases[12].nodes[4].xml_payload_index	integer	max
+sourceMglyphCases[12].nodes[5].kind	bytes	text
+sourceMglyphCases[12].nodes[5].is_inferred	boolean	0
+sourceMglyphCases[12].nodes[5].parent	integer	4
+sourceMglyphCases[12].nodes[5].attribute_first	integer	2
+sourceMglyphCases[12].nodes[5].attribute_count	integer	0
+sourceMglyphCases[12].nodes[5].text	utf16	mglyph
+sourceMglyphCases[12].nodes[5].xml_payload_index	integer	max
+sourceMglyphCases[12].attributes.count	integer	2
+sourceMglyphCases[12].attributes[0].name	utf16	data-mjx-message
+sourceMglyphCases[12].attributes[0].kind	enum	0
+sourceMglyphCases[12].attributes[0].text	utf16	mglyph must have either src or fontfamily and index attributes
+sourceMglyphCases[12].attributes[0].number	binary64	0000000000000000
+sourceMglyphCases[12].attributes[0].boolean	boolean	0
+sourceMglyphCases[12].attributes[1].name	utf16	title
+sourceMglyphCases[12].attributes[1].kind	enum	0
+sourceMglyphCases[12].attributes[1].text	utf16	mglyph must have either src or fontfamily and index attributes
+sourceMglyphCases[12].attributes[1].number	binary64	0000000000000000
+sourceMglyphCases[12].attributes[1].boolean	boolean	0
