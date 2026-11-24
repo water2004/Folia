@@ -16,7 +16,7 @@ comparison of every Scene field.
 Build `FoliaMathBboldxTextSvgProbe` in the existing `build/core` tree, then run:
 
 ```powershell
-node tools/math-port/regressions/g198/bboldx-text-svg/compare.cjs build/core/FoliaMathBboldxTextSvgProbe.exe
+python tools/math-port/regressions/g198/bboldx-text-svg/compare.py build/core/FoliaMathBboldxTextSvgProbe.exe
 ```
 
 The original candidate was compiled against unchanged Gate198 modules and
