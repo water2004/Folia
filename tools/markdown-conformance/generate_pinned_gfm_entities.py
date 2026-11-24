@@ -2,7 +2,7 @@
 """Generate Folia parsing cases from the pinned cmark-gfm entity table.
 
 The pinned source is cached under build/dependencies/markdown-conformance/gfm.
-This emits data only; it does not link cmark.
+This emits lossless runtime TSV data only; it does not link cmark.
 """
 
 from __future__ import annotations
@@ -13,29 +13,14 @@ import json
 import re
 import urllib.request
 from pathlib import Path
+from fixture_table import escape
 
 ROOT = Path(__file__).resolve().parents[2]
 CACHE = ROOT / "build" / "dependencies" / "markdown-conformance" / "gfm"
 ENTITY_FILE = CACHE / "entities.inc"
-OUTPUT = ROOT / "build" / "dependencies" / "markdown-conformance" / "gfm-entities" / "gfm_entity_cases.inc"
+OUTPUT = ROOT / "tests/parsing/fixtures/conformance/entities.tsv"
+BUNDLED = ROOT / "tests/parsing/fixtures/conformance/upstream/gfm/entities.inc"
 PATTERN = re.compile(r'^\{\(unsigned char\*\)"([^"]+)", \{([^}]+)\}', re.MULTILINE)
-
-
-def cpp_u32(value: str) -> str:
-    escaped = []
-    for char in value:
-        cp = ord(char)
-        if char == "\\":
-            escaped.append("\\\\")
-        elif char == '"':
-            escaped.append('\\"')
-        elif 0x20 <= cp <= 0x7E:
-            escaped.append(char)
-        elif cp <= 0xFFFF:
-            escaped.append(f"\\u{cp:04x}")
-        else:
-            escaped.append(f"\\U{cp:08x}")
-    return 'U"' + "".join(escaped) + '"'
 
 
 def main() -> None:
@@ -48,6 +33,8 @@ def main() -> None:
     pin = lock["commit"]
     entry = next(source for source in lock["sources"] if source["name"] == "entities.inc")
     expected_hash = entry["sha256"]
+    if args.source == ENTITY_FILE and not args.source.exists() and BUNDLED.is_file():
+        args.source = BUNDLED
     if not args.source.exists():
         if not args.fetch:
             raise SystemExit(f"missing cached entity source {args.source}; rerun with --fetch")
@@ -77,11 +64,11 @@ def main() -> None:
         raise SystemExit(f"expected 2125 cmark-gfm named entities, found {len(rows)}")
     args.output.parent.mkdir(parents=True, exist_ok=True)
     lines = [
-        "// Generated from pinned cmark-gfm entities.inc; do not edit.",
-        f"// Source commit: {pin}; SHA256: {digest}; records: {len(rows)}.",
-        "// Used only as independent expected data; cmark is not linked or called.",
+        "# Independent cmark-gfm named entity observations; do not edit.",
+        f"# Source commit: {pin}; SHA256: {digest}; records: {len(rows)}.",
+        "# source\tdecoded",
     ]
-    lines.extend(f"GfmEntityCase{{{cpp_u32('&' + name + ';')}, {cpp_u32(decoded)}}}," for name, decoded in rows)
+    lines.extend(escape('&' + name + ';') + "\t" + escape(decoded) for name, decoded in rows)
     args.output.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
     print(f"wrote {len(rows)} records to {args.output}")
 

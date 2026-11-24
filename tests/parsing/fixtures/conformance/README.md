@@ -8,6 +8,7 @@ string literals or download fixtures during a build.
 | --- | ---: | --- |
 | `commonmark.tsv` | 652 | CommonMark 0.31.2 example numbers 1–652 |
 | `gfm.tsv` | 1,426 | Published GFM plus six cmark-gfm corpora, with all original corpus IDs and native profile IDs |
+| `entities.tsv` | 2,125 | Every named entity in the pinned cmark-gfm UTF-8 table |
 
 Each table has four tab-separated columns: integer example ID, section/profile,
 Markdown, and expected HTML. String fields use JSON string escaping without the
@@ -15,6 +16,8 @@ surrounding quotes. Literal Unicode remains UTF-8; backslashes, tabs, physical C
 LF and embedded NUL are escaped. Empty strings remain empty columns. The native
 reader owns the decoded strings and rejects missing, malformed, duplicate-ID or
 incomplete data. No HTML canonicalization happens during fixture loading.
+The entity table has two string columns, source and decoded value, using the
+same escaping. Its expectations preserve complete Unicode scalar sequences.
 
 ## Provenance and offline verification
 
@@ -44,6 +47,7 @@ From the repository root:
 ```sh
 python tools/markdown-conformance/prepare.py --output tests/parsing/fixtures/conformance/commonmark.tsv
 python tools/markdown-conformance/prepare_gfm.py --output tests/parsing/fixtures/conformance/gfm.tsv
+python tools/markdown-conformance/generate_pinned_gfm_entities.py
 python -m unittest discover -s tools/markdown-conformance -p 'test_*.py'
 python tests/run.py --suite conformance
 ```

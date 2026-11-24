@@ -20,7 +20,7 @@ target_compile_features(${FOLIA_CORE_TEST_TARGET} PRIVATE cxx_std_23)
 set_target_properties(${FOLIA_CORE_TEST_TARGET} PROPERTIES
     CXX_MODULE_STD ON CXX_SCAN_FOR_MODULES ON)
 target_include_directories(${FOLIA_CORE_TEST_TARGET} PRIVATE
-    "${FOLIA_SOURCE_ROOT}/tests" "${CMAKE_CURRENT_BINARY_DIR}/gfm-entities")
+    "${FOLIA_SOURCE_ROOT}/tests")
 target_compile_definitions(${FOLIA_CORE_TEST_TARGET} PRIVATE
     FOLIA_TEST_DATA_ROOT="${FOLIA_SOURCE_ROOT}/tests")
 target_link_libraries(${FOLIA_CORE_TEST_TARGET} PRIVATE folia_core Boost::ut_module folia_test_support)
@@ -58,16 +58,6 @@ target_include_directories(folia_test_math_regexp PRIVATE
     "${FOLIA_SOURCE_ROOT}/third_party/srell")
 target_link_libraries(${FOLIA_CORE_TEST_TARGET} PRIVATE folia_test_math_regexp)
 
-set(FOLIA_GFM_ENTITY_CASES "${CMAKE_CURRENT_BINARY_DIR}/gfm-entities/gfm_entity_cases.inc")
-add_custom_command(OUTPUT "${FOLIA_GFM_ENTITY_CASES}"
-    COMMAND "${Python3_EXECUTABLE}"
-        "${FOLIA_SOURCE_ROOT}/tools/markdown-conformance/generate_pinned_gfm_entities.py"
-        --fetch --output "${FOLIA_GFM_ENTITY_CASES}"
-    DEPENDS "${FOLIA_SOURCE_ROOT}/tools/markdown-conformance/generate_pinned_gfm_entities.py"
-        "${FOLIA_SOURCE_ROOT}/tools/markdown-conformance/gfm-sources.lock.json"
-    VERBATIM)
-add_custom_target(FoliaCoreEntityFixtures DEPENDS "${FOLIA_GFM_ENTITY_CASES}")
-add_dependencies(${FOLIA_CORE_TEST_TARGET} FoliaCoreEntityFixtures)
 
 if(MSVC)
     foreach(folia_target IN ITEMS folia_core folia_test_math_regexp folia_test_editor_input ${FOLIA_CORE_TEST_TARGET})

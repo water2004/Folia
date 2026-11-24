@@ -5,6 +5,7 @@
 #include <string_view>
 
 #include "support/folia_test.hpp"
+#include "support/fixture.hpp"
 
 import folia.markdown.parser;
 import folia.markdown.ast;
@@ -17,14 +18,18 @@ using namespace folia;
 using namespace boost::ut;
 
 struct GfmEntityCase {
-    std::u32string_view source;
-    std::u32string_view decoded;
+    std::u32string source;
+    std::u32string decoded;
 };
 
-constexpr GfmEntityCase gfm_entity_cases[]{
-#include "gfm_entity_cases.inc"
-};
-static_assert(std::size(gfm_entity_cases) == 2125);
+const auto gfm_entity_cases = [] {
+    const auto rows = folia::test::data::read_tsv("parsing/fixtures/conformance/entities.tsv", 2);
+    if (rows.size() != 2125) throw std::runtime_error("Incomplete cmark-gfm entity fixture");
+    std::vector<GfmEntityCase> cases;
+    for (const auto& row : rows)
+        cases.push_back({folia::test::data::decode_utf32(row[0]), folia::test::data::decode_utf32(row[1])});
+    return cases;
+}();
 
 boost::ut::suite gfm_pinned_entity_tests = [] {
     "pinned_cmark_gfm_2125_named_entities_are_semantic_and_lossless"_test = [] {
