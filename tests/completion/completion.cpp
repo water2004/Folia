@@ -7,14 +7,28 @@ namespace {
 suite completion_tests = [] {
     "completion request remains bounded for 10 MB documents"_test = [] {
         std::u32string source(10 * 1024 * 1024, U'x');
+        const folia::completion::Budget budget;
+        const auto empty = completion_tests::MakePrompt({}, budget);
+        const auto framing = empty.context.size() + empty.cursor.size();
+        const auto document_budget = budget.prefix_bytes + budget.suffix_bytes
+            + budget.preceding_bytes + budget.following_bytes;
         for (auto offset : {std::size_t{0}, source.size() / 2, source.size()}) {
             std::u32string_view neighbors[] = {source, source, source};
-            auto c = folia::completion::capture(source, offset, neighbors);
-            auto p = completion_tests::MakePrompt(c);
-            expect(c.prefix.size() <= 4096_u);
-            expect(c.suffix.size() <= 1024_u);
-            expect(c.preceding.size() <= 2048_u);
-            expect(p.instructions.size() + p.context.size() + p.cursor.size() < 8192_u);
+            auto c = folia::completion::capture(source, offset, neighbors, budget);
+            auto p = completion_tests::MakePrompt(c, budget);
+            expect(c.prefix.size() <= budget.prefix_bytes);
+            expect(c.suffix.size() <= budget.suffix_bytes);
+            expect(c.preceding.size() <= budget.preceding_bytes);
+            expect(c.following.size() <= budget.following_bytes);
+            // User-editable instructions have their own validated limit. The
+            // document must not grow instructions/examples or duplicate text
+            // while being framed, regardless of its original size.
+            expect(p.instructions == empty.instructions);
+            expect(bool(p.examples == empty.examples));
+            const auto captured = c.prefix.size() + c.suffix.size()
+                + c.preceding.size() + c.following.size();
+            expect(p.context.size() + p.cursor.size() == framing + captured);
+            expect(p.context.size() + p.cursor.size() <= framing + document_budget);
             expect(p.output_tokens == 128_u);
         }
     };
