@@ -28,9 +28,11 @@ add_test(NAME FoliaMathTests COMMAND FoliaMathTests)
 # TeX parser test translation units for an output-boundary change.
 file(GLOB FOLIA_MATH_SVG_WRITER_TEST_SOURCES CONFIGURE_DEPENDS
     "${FOLIA_SOURCE_ROOT}/tests/math/output/svg/native_svg_writer*.cpp")
+file(GLOB FOLIA_MATH_RENDERER_TEST_SOURCES CONFIGURE_DEPENDS
+    "${FOLIA_SOURCE_ROOT}/tests/math/integration/renderer/*.cpp")
 add_executable(FoliaMathSvgBridgeTests EXCLUDE_FROM_ALL
     ${FOLIA_SOURCE_ROOT}/tests/main.cpp ${FOLIA_MATH_SVG_WRITER_TEST_SOURCES}
-    ${FOLIA_SOURCE_ROOT}/tests/math/integration/native_renderer_bridge.cpp
+    ${FOLIA_MATH_RENDERER_TEST_SOURCES}
     ${FOLIA_SOURCE_ROOT}/tests/math/output/svg/native_source_svg_paint.cpp ${FOLIA_SOURCE_ROOT}/tests/math/output/common/native_common_wrapper.cpp
     ${FOLIA_SOURCE_ROOT}/tests/math/output/svg/native_svg_merror.cpp ${FOLIA_SOURCE_ROOT}/tests/math/output/common/native_table_profile_source.cpp
     ${FOLIA_SOURCE_ROOT}/tests/math/output/common/native_common_table.cpp ${FOLIA_SOURCE_ROOT}/tests/math/output/common/native_common_text.cpp)
