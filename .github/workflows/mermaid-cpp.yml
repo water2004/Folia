@@ -480,7 +480,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python tools/mermaid-cpp/compare-family.py radar build/mermaid-cpp/radar-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          node tools/mermaid-cpp/pie-svg-oracle.mjs --compare build/mermaid-cpp/pie-svg
+          python tools/mermaid-cpp/compare-pie.py build/mermaid-cpp/pie-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Compare real browser and DirectWrite text measurements

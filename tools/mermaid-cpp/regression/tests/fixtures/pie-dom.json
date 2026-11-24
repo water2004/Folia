@@ -1,0 +1,371 @@
+{
+  "source": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 420 300\" width=\"100%\" height=\"300\" style=\"max-width:420px\"><style>.pieCircle.highlighted{scale:1.05;opacity:1;}.pieCircle.highlightedOnHover:hover{transition-duration:250ms;scale:1.05;opacity:1;}</style><g transform=\"translate(210,150)\" font-family=\"Arial\"><g transform=\"translate(-40,0)\"><circle class=\"pieOuterCircle\" r=\"120\" stroke=\"#111111\" stroke-width=\"2\" fill=\"none\"/><path class=\"pieCircle\" d=\"M0,-120A120,120,0,0,1,0,120L0,0Z\" fill=\"#112233\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><path class=\"pieCircle highlighted\" d=\"M0,120A120,120,0,0,1,0,-120L0,0Z\" fill=\"#223344\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><text class=\"slice\" transform=\"translate(45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text><text class=\"slice\" transform=\"translate(-45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text></g><text class=\"pieTitleText\" x=\"0\" y=\"-135\" text-anchor=\"middle\" font-size=\"25\" fill=\"#111111\">Café 中文 &amp; title</text><g class=\"legend\" transform=\"translate(90,-22)\"><rect width=\"18\" height=\"18\" fill=\"#112233\" stroke=\"#112233\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">😀</text></g><g class=\"legend\" transform=\"translate(90,0)\"><rect width=\"18\" height=\"18\" fill=\"#223344\" stroke=\"#223344\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">مرحبا</text></g></g></svg>",
+  "snapshot": {
+    "viewBox": [
+      0,
+      0,
+      420,
+      300
+    ],
+    "width": "100%",
+    "height": "300",
+    "maxWidth": "420px",
+    "outer": [
+      210,
+      150
+    ],
+    "pie": [
+      -40,
+      0
+    ],
+    "radius": 120,
+    "paths": [
+      [
+        "M0,-120A120,120,0,0,1,0,120L0,0Z",
+        "#112233",
+        "pieCircle"
+      ],
+      [
+        "M0,120A120,120,0,0,1,0,-120L0,0Z",
+        "#223344",
+        "pieCircle highlighted"
+      ]
+    ],
+    "slices": [
+      [
+        "50%",
+        45,
+        0,
+        "middle"
+      ],
+      [
+        "50%",
+        -45,
+        0,
+        "middle"
+      ]
+    ],
+    "title": [
+      "Café 中文 & title",
+      "0",
+      "-135"
+    ],
+    "legends": [
+      [
+        90,
+        -22,
+        "😀",
+        "#112233",
+        "#112233",
+        "18",
+        "18",
+        "22",
+        "14"
+      ],
+      [
+        90,
+        0,
+        "مرحبا",
+        "#223344",
+        "#223344",
+        "18",
+        "18",
+        "22",
+        "14"
+      ]
+    ]
+  },
+  "styles": [
+    {
+      "selector": ".pieCircle",
+      "declarations": [
+        [
+          "stroke",
+          "#111111"
+        ],
+        [
+          "stroke-width",
+          "2px"
+        ],
+        [
+          "opacity",
+          "0.7"
+        ]
+      ]
+    },
+    {
+      "selector": ".pieCircle.highlighted",
+      "declarations": [
+        [
+          "scale",
+          "1.05"
+        ],
+        [
+          "opacity",
+          "1"
+        ]
+      ]
+    },
+    {
+      "selector": ".pieCircle.highlightedOnHover:hover",
+      "declarations": [
+        [
+          "transition-duration",
+          "250ms"
+        ],
+        [
+          "scale",
+          "1.05"
+        ],
+        [
+          "opacity",
+          "1"
+        ]
+      ]
+    },
+    {
+      "selector": ".pieOuterCircle",
+      "declarations": [
+        [
+          "stroke",
+          "#111111"
+        ],
+        [
+          "stroke-width",
+          "2px"
+        ],
+        [
+          "fill",
+          "none"
+        ]
+      ]
+    },
+    {
+      "selector": ".pieTitleText",
+      "declarations": [
+        [
+          "text-anchor",
+          "middle"
+        ],
+        [
+          "font-size",
+          "25px"
+        ],
+        [
+          "fill",
+          "#111111"
+        ],
+        [
+          "font-family",
+          "Arial"
+        ]
+      ]
+    },
+    {
+      "selector": ".slice",
+      "declarations": [
+        [
+          "font-family",
+          "Arial"
+        ],
+        [
+          "fill",
+          "#111111"
+        ],
+        [
+          "font-size",
+          "17px"
+        ]
+      ]
+    },
+    {
+      "selector": ".legend text",
+      "declarations": [
+        [
+          "fill",
+          "#111111"
+        ],
+        [
+          "font-family",
+          "Arial"
+        ],
+        [
+          "font-size",
+          "17px"
+        ]
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "id": "identical",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 420 300\" width=\"100%\" height=\"300\" style=\"max-width:420px\"><style>.pieCircle.highlighted{scale:1.05;opacity:1;}.pieCircle.highlightedOnHover:hover{transition-duration:250ms;scale:1.05;opacity:1;}</style><g transform=\"translate(210,150)\" font-family=\"Arial\"><g transform=\"translate(-40,0)\"><circle class=\"pieOuterCircle\" r=\"120\" stroke=\"#111111\" stroke-width=\"2\" fill=\"none\"/><path class=\"pieCircle\" d=\"M0,-120A120,120,0,0,1,0,120L0,0Z\" fill=\"#112233\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><path class=\"pieCircle highlighted\" d=\"M0,120A120,120,0,0,1,0,-120L0,0Z\" fill=\"#223344\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><text class=\"slice\" transform=\"translate(45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text><text class=\"slice\" transform=\"translate(-45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text></g><text class=\"pieTitleText\" x=\"0\" y=\"-135\" text-anchor=\"middle\" font-size=\"25\" fill=\"#111111\">Café 中文 &amp; title</text><g class=\"legend\" transform=\"translate(90,-22)\"><rect width=\"18\" height=\"18\" fill=\"#112233\" stroke=\"#112233\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">😀</text></g><g class=\"legend\" transform=\"translate(90,0)\"><rect width=\"18\" height=\"18\" fill=\"#223344\" stroke=\"#223344\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">مرحبا</text></g></g></svg>",
+      "accepted": true
+    },
+    {
+      "id": "same-geometry-spelling",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 420 300\" width=\"100%\" height=\"300\" style=\"max-width:420px\"><style>.pieCircle.highlighted{scale:1.05;opacity:1;}.pieCircle.highlightedOnHover:hover{transition-duration:250ms;scale:1.05;opacity:1;}</style><g transform=\"translate(210,150)\" font-family=\"Arial\"><g transform=\"translate(-40,0)\"><circle class=\"pieOuterCircle\" r=\"120.0\" stroke=\"#111111\" stroke-width=\"2\" fill=\"none\"/><path class=\"pieCircle\" d=\"M0,-120A120,120,0,0,1,0,120L0,0Z\" fill=\"#112233\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><path class=\"pieCircle highlighted\" d=\"M0,120A120,120,0,0,1,0,-120L0,0Z\" fill=\"#223344\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><text class=\"slice\" transform=\"translate(45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text><text class=\"slice\" transform=\"translate(-45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text></g><text class=\"pieTitleText\" x=\"0\" y=\"-135\" text-anchor=\"middle\" font-size=\"25\" fill=\"#111111\">Café 中文 &amp; title</text><g class=\"legend\" transform=\"translate(90,-22)\"><rect width=\"18\" height=\"18\" fill=\"#112233\" stroke=\"#112233\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">😀</text></g><g class=\"legend\" transform=\"translate(90,0)\"><rect width=\"18\" height=\"18\" fill=\"#223344\" stroke=\"#223344\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">مرحبا</text></g></g></svg>",
+      "accepted": true
+    },
+    {
+      "id": "same-style-fill",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 420 300\" width=\"100%\" height=\"300\" style=\"max-width:420px\"><style>.pieCircle.highlighted{scale:1.05;opacity:1;}.pieCircle.highlightedOnHover:hover{transition-duration:250ms;scale:1.05;opacity:1;}</style><g transform=\"translate(210,150)\" font-family=\"Arial\"><g transform=\"translate(-40,0)\"><circle class=\"pieOuterCircle\" r=\"120\" stroke=\"#111111\" stroke-width=\"2\" fill=\"none\"/><path class=\"pieCircle\" d=\"M0,-120A120,120,0,0,1,0,120L0,0Z\" fill=\"#112233\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\" style=\"fill: #112233\"/><path class=\"pieCircle highlighted\" d=\"M0,120A120,120,0,0,1,0,-120L0,0Z\" fill=\"#223344\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><text class=\"slice\" transform=\"translate(45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text><text class=\"slice\" transform=\"translate(-45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text></g><text class=\"pieTitleText\" x=\"0\" y=\"-135\" text-anchor=\"middle\" font-size=\"25\" fill=\"#111111\">Café 中文 &amp; title</text><g class=\"legend\" transform=\"translate(90,-22)\"><rect width=\"18\" height=\"18\" fill=\"#112233\" stroke=\"#112233\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">😀</text></g><g class=\"legend\" transform=\"translate(90,0)\"><rect width=\"18\" height=\"18\" fill=\"#223344\" stroke=\"#223344\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">مرحبا</text></g></g></svg>",
+      "accepted": true
+    },
+    {
+      "id": "wrong-viewbox",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 421 300\" width=\"100%\" height=\"300\" style=\"max-width:420px\"><style>.pieCircle.highlighted{scale:1.05;opacity:1;}.pieCircle.highlightedOnHover:hover{transition-duration:250ms;scale:1.05;opacity:1;}</style><g transform=\"translate(210,150)\" font-family=\"Arial\"><g transform=\"translate(-40,0)\"><circle class=\"pieOuterCircle\" r=\"120\" stroke=\"#111111\" stroke-width=\"2\" fill=\"none\"/><path class=\"pieCircle\" d=\"M0,-120A120,120,0,0,1,0,120L0,0Z\" fill=\"#112233\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><path class=\"pieCircle highlighted\" d=\"M0,120A120,120,0,0,1,0,-120L0,0Z\" fill=\"#223344\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><text class=\"slice\" transform=\"translate(45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text><text class=\"slice\" transform=\"translate(-45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text></g><text class=\"pieTitleText\" x=\"0\" y=\"-135\" text-anchor=\"middle\" font-size=\"25\" fill=\"#111111\">Café 中文 &amp; title</text><g class=\"legend\" transform=\"translate(90,-22)\"><rect width=\"18\" height=\"18\" fill=\"#112233\" stroke=\"#112233\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">😀</text></g><g class=\"legend\" transform=\"translate(90,0)\"><rect width=\"18\" height=\"18\" fill=\"#223344\" stroke=\"#223344\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">مرحبا</text></g></g></svg>",
+      "accepted": false
+    },
+    {
+      "id": "wrong-width",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 420 300\" width=\"420\" height=\"300\" style=\"max-width:420px\"><style>.pieCircle.highlighted{scale:1.05;opacity:1;}.pieCircle.highlightedOnHover:hover{transition-duration:250ms;scale:1.05;opacity:1;}</style><g transform=\"translate(210,150)\" font-family=\"Arial\"><g transform=\"translate(-40,0)\"><circle class=\"pieOuterCircle\" r=\"120\" stroke=\"#111111\" stroke-width=\"2\" fill=\"none\"/><path class=\"pieCircle\" d=\"M0,-120A120,120,0,0,1,0,120L0,0Z\" fill=\"#112233\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><path class=\"pieCircle highlighted\" d=\"M0,120A120,120,0,0,1,0,-120L0,0Z\" fill=\"#223344\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><text class=\"slice\" transform=\"translate(45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text><text class=\"slice\" transform=\"translate(-45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text></g><text class=\"pieTitleText\" x=\"0\" y=\"-135\" text-anchor=\"middle\" font-size=\"25\" fill=\"#111111\">Café 中文 &amp; title</text><g class=\"legend\" transform=\"translate(90,-22)\"><rect width=\"18\" height=\"18\" fill=\"#112233\" stroke=\"#112233\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">😀</text></g><g class=\"legend\" transform=\"translate(90,0)\"><rect width=\"18\" height=\"18\" fill=\"#223344\" stroke=\"#223344\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">مرحبا</text></g></g></svg>",
+      "accepted": false
+    },
+    {
+      "id": "wrong-height",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 420 300\" width=\"100%\" height=\"301\" style=\"max-width:420px\"><style>.pieCircle.highlighted{scale:1.05;opacity:1;}.pieCircle.highlightedOnHover:hover{transition-duration:250ms;scale:1.05;opacity:1;}</style><g transform=\"translate(210,150)\" font-family=\"Arial\"><g transform=\"translate(-40,0)\"><circle class=\"pieOuterCircle\" r=\"120\" stroke=\"#111111\" stroke-width=\"2\" fill=\"none\"/><path class=\"pieCircle\" d=\"M0,-120A120,120,0,0,1,0,120L0,0Z\" fill=\"#112233\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><path class=\"pieCircle highlighted\" d=\"M0,120A120,120,0,0,1,0,-120L0,0Z\" fill=\"#223344\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><text class=\"slice\" transform=\"translate(45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text><text class=\"slice\" transform=\"translate(-45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text></g><text class=\"pieTitleText\" x=\"0\" y=\"-135\" text-anchor=\"middle\" font-size=\"25\" fill=\"#111111\">Café 中文 &amp; title</text><g class=\"legend\" transform=\"translate(90,-22)\"><rect width=\"18\" height=\"18\" fill=\"#112233\" stroke=\"#112233\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">😀</text></g><g class=\"legend\" transform=\"translate(90,0)\"><rect width=\"18\" height=\"18\" fill=\"#223344\" stroke=\"#223344\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">مرحبا</text></g></g></svg>",
+      "accepted": false
+    },
+    {
+      "id": "wrong-max-width",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 420 300\" width=\"100%\" height=\"300\" style=\"max-width:421px\"><style>.pieCircle.highlighted{scale:1.05;opacity:1;}.pieCircle.highlightedOnHover:hover{transition-duration:250ms;scale:1.05;opacity:1;}</style><g transform=\"translate(210,150)\" font-family=\"Arial\"><g transform=\"translate(-40,0)\"><circle class=\"pieOuterCircle\" r=\"120\" stroke=\"#111111\" stroke-width=\"2\" fill=\"none\"/><path class=\"pieCircle\" d=\"M0,-120A120,120,0,0,1,0,120L0,0Z\" fill=\"#112233\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><path class=\"pieCircle highlighted\" d=\"M0,120A120,120,0,0,1,0,-120L0,0Z\" fill=\"#223344\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><text class=\"slice\" transform=\"translate(45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text><text class=\"slice\" transform=\"translate(-45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text></g><text class=\"pieTitleText\" x=\"0\" y=\"-135\" text-anchor=\"middle\" font-size=\"25\" fill=\"#111111\">Café 中文 &amp; title</text><g class=\"legend\" transform=\"translate(90,-22)\"><rect width=\"18\" height=\"18\" fill=\"#112233\" stroke=\"#112233\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">😀</text></g><g class=\"legend\" transform=\"translate(90,0)\"><rect width=\"18\" height=\"18\" fill=\"#223344\" stroke=\"#223344\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">مرحبا</text></g></g></svg>",
+      "accepted": false
+    },
+    {
+      "id": "missing-viewbox",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" height=\"300\" style=\"max-width:420px\"><style>.pieCircle.highlighted{scale:1.05;opacity:1;}.pieCircle.highlightedOnHover:hover{transition-duration:250ms;scale:1.05;opacity:1;}</style><g transform=\"translate(210,150)\" font-family=\"Arial\"><g transform=\"translate(-40,0)\"><circle class=\"pieOuterCircle\" r=\"120\" stroke=\"#111111\" stroke-width=\"2\" fill=\"none\"/><path class=\"pieCircle\" d=\"M0,-120A120,120,0,0,1,0,120L0,0Z\" fill=\"#112233\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><path class=\"pieCircle highlighted\" d=\"M0,120A120,120,0,0,1,0,-120L0,0Z\" fill=\"#223344\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><text class=\"slice\" transform=\"translate(45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text><text class=\"slice\" transform=\"translate(-45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text></g><text class=\"pieTitleText\" x=\"0\" y=\"-135\" text-anchor=\"middle\" font-size=\"25\" fill=\"#111111\">Café 中文 &amp; title</text><g class=\"legend\" transform=\"translate(90,-22)\"><rect width=\"18\" height=\"18\" fill=\"#112233\" stroke=\"#112233\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">😀</text></g><g class=\"legend\" transform=\"translate(90,0)\"><rect width=\"18\" height=\"18\" fill=\"#223344\" stroke=\"#223344\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">مرحبا</text></g></g></svg>",
+      "accepted": false
+    },
+    {
+      "id": "nonfinite-viewbox",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 NaN 300\" width=\"100%\" height=\"300\" style=\"max-width:420px\"><style>.pieCircle.highlighted{scale:1.05;opacity:1;}.pieCircle.highlightedOnHover:hover{transition-duration:250ms;scale:1.05;opacity:1;}</style><g transform=\"translate(210,150)\" font-family=\"Arial\"><g transform=\"translate(-40,0)\"><circle class=\"pieOuterCircle\" r=\"120\" stroke=\"#111111\" stroke-width=\"2\" fill=\"none\"/><path class=\"pieCircle\" d=\"M0,-120A120,120,0,0,1,0,120L0,0Z\" fill=\"#112233\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><path class=\"pieCircle highlighted\" d=\"M0,120A120,120,0,0,1,0,-120L0,0Z\" fill=\"#223344\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><text class=\"slice\" transform=\"translate(45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text><text class=\"slice\" transform=\"translate(-45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text></g><text class=\"pieTitleText\" x=\"0\" y=\"-135\" text-anchor=\"middle\" font-size=\"25\" fill=\"#111111\">Café 中文 &amp; title</text><g class=\"legend\" transform=\"translate(90,-22)\"><rect width=\"18\" height=\"18\" fill=\"#112233\" stroke=\"#112233\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">😀</text></g><g class=\"legend\" transform=\"translate(90,0)\"><rect width=\"18\" height=\"18\" fill=\"#223344\" stroke=\"#223344\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">مرحبا</text></g></g></svg>",
+      "accepted": false
+    },
+    {
+      "id": "wrong-outer-translation",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 420 300\" width=\"100%\" height=\"300\" style=\"max-width:420px\"><style>.pieCircle.highlighted{scale:1.05;opacity:1;}.pieCircle.highlightedOnHover:hover{transition-duration:250ms;scale:1.05;opacity:1;}</style><g transform=\"translate(211,150)\" font-family=\"Arial\"><g transform=\"translate(-40,0)\"><circle class=\"pieOuterCircle\" r=\"120\" stroke=\"#111111\" stroke-width=\"2\" fill=\"none\"/><path class=\"pieCircle\" d=\"M0,-120A120,120,0,0,1,0,120L0,0Z\" fill=\"#112233\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><path class=\"pieCircle highlighted\" d=\"M0,120A120,120,0,0,1,0,-120L0,0Z\" fill=\"#223344\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><text class=\"slice\" transform=\"translate(45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text><text class=\"slice\" transform=\"translate(-45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text></g><text class=\"pieTitleText\" x=\"0\" y=\"-135\" text-anchor=\"middle\" font-size=\"25\" fill=\"#111111\">Café 中文 &amp; title</text><g class=\"legend\" transform=\"translate(90,-22)\"><rect width=\"18\" height=\"18\" fill=\"#112233\" stroke=\"#112233\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">😀</text></g><g class=\"legend\" transform=\"translate(90,0)\"><rect width=\"18\" height=\"18\" fill=\"#223344\" stroke=\"#223344\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">مرحبا</text></g></g></svg>",
+      "accepted": false
+    },
+    {
+      "id": "wrong-pie-translation",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 420 300\" width=\"100%\" height=\"300\" style=\"max-width:420px\"><style>.pieCircle.highlighted{scale:1.05;opacity:1;}.pieCircle.highlightedOnHover:hover{transition-duration:250ms;scale:1.05;opacity:1;}</style><g transform=\"translate(210,150)\" font-family=\"Arial\"><g transform=\"translate(-41,0)\"><circle class=\"pieOuterCircle\" r=\"120\" stroke=\"#111111\" stroke-width=\"2\" fill=\"none\"/><path class=\"pieCircle\" d=\"M0,-120A120,120,0,0,1,0,120L0,0Z\" fill=\"#112233\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><path class=\"pieCircle highlighted\" d=\"M0,120A120,120,0,0,1,0,-120L0,0Z\" fill=\"#223344\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><text class=\"slice\" transform=\"translate(45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text><text class=\"slice\" transform=\"translate(-45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text></g><text class=\"pieTitleText\" x=\"0\" y=\"-135\" text-anchor=\"middle\" font-size=\"25\" fill=\"#111111\">Café 中文 &amp; title</text><g class=\"legend\" transform=\"translate(90,-22)\"><rect width=\"18\" height=\"18\" fill=\"#112233\" stroke=\"#112233\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">😀</text></g><g class=\"legend\" transform=\"translate(90,0)\"><rect width=\"18\" height=\"18\" fill=\"#223344\" stroke=\"#223344\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">مرحبا</text></g></g></svg>",
+      "accepted": false
+    },
+    {
+      "id": "wrong-radius",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 420 300\" width=\"100%\" height=\"300\" style=\"max-width:420px\"><style>.pieCircle.highlighted{scale:1.05;opacity:1;}.pieCircle.highlightedOnHover:hover{transition-duration:250ms;scale:1.05;opacity:1;}</style><g transform=\"translate(210,150)\" font-family=\"Arial\"><g transform=\"translate(-40,0)\"><circle class=\"pieOuterCircle\" r=\"121\" stroke=\"#111111\" stroke-width=\"2\" fill=\"none\"/><path class=\"pieCircle\" d=\"M0,-120A120,120,0,0,1,0,120L0,0Z\" fill=\"#112233\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><path class=\"pieCircle highlighted\" d=\"M0,120A120,120,0,0,1,0,-120L0,0Z\" fill=\"#223344\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><text class=\"slice\" transform=\"translate(45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text><text class=\"slice\" transform=\"translate(-45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text></g><text class=\"pieTitleText\" x=\"0\" y=\"-135\" text-anchor=\"middle\" font-size=\"25\" fill=\"#111111\">Café 中文 &amp; title</text><g class=\"legend\" transform=\"translate(90,-22)\"><rect width=\"18\" height=\"18\" fill=\"#112233\" stroke=\"#112233\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">😀</text></g><g class=\"legend\" transform=\"translate(90,0)\"><rect width=\"18\" height=\"18\" fill=\"#223344\" stroke=\"#223344\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">مرحبا</text></g></g></svg>",
+      "accepted": false
+    },
+    {
+      "id": "wrong-path",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 420 300\" width=\"100%\" height=\"300\" style=\"max-width:420px\"><style>.pieCircle.highlighted{scale:1.05;opacity:1;}.pieCircle.highlightedOnHover:hover{transition-duration:250ms;scale:1.05;opacity:1;}</style><g transform=\"translate(210,150)\" font-family=\"Arial\"><g transform=\"translate(-40,0)\"><circle class=\"pieOuterCircle\" r=\"120\" stroke=\"#111111\" stroke-width=\"2\" fill=\"none\"/><path class=\"pieCircle\" d=\"M0,0Z\" fill=\"#112233\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><path class=\"pieCircle highlighted\" d=\"M0,120A120,120,0,0,1,0,-120L0,0Z\" fill=\"#223344\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><text class=\"slice\" transform=\"translate(45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text><text class=\"slice\" transform=\"translate(-45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text></g><text class=\"pieTitleText\" x=\"0\" y=\"-135\" text-anchor=\"middle\" font-size=\"25\" fill=\"#111111\">Café 中文 &amp; title</text><g class=\"legend\" transform=\"translate(90,-22)\"><rect width=\"18\" height=\"18\" fill=\"#112233\" stroke=\"#112233\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">😀</text></g><g class=\"legend\" transform=\"translate(90,0)\"><rect width=\"18\" height=\"18\" fill=\"#223344\" stroke=\"#223344\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">مرحبا</text></g></g></svg>",
+      "accepted": false
+    },
+    {
+      "id": "wrong-path-paint",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 420 300\" width=\"100%\" height=\"300\" style=\"max-width:420px\"><style>.pieCircle.highlighted{scale:1.05;opacity:1;}.pieCircle.highlightedOnHover:hover{transition-duration:250ms;scale:1.05;opacity:1;}</style><g transform=\"translate(210,150)\" font-family=\"Arial\"><g transform=\"translate(-40,0)\"><circle class=\"pieOuterCircle\" r=\"120\" stroke=\"#111111\" stroke-width=\"2\" fill=\"none\"/><path class=\"pieCircle\" d=\"M0,-120A120,120,0,0,1,0,120L0,0Z\" fill=\"#abcdef\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><path class=\"pieCircle highlighted\" d=\"M0,120A120,120,0,0,1,0,-120L0,0Z\" fill=\"#223344\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><text class=\"slice\" transform=\"translate(45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text><text class=\"slice\" transform=\"translate(-45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text></g><text class=\"pieTitleText\" x=\"0\" y=\"-135\" text-anchor=\"middle\" font-size=\"25\" fill=\"#111111\">Café 中文 &amp; title</text><g class=\"legend\" transform=\"translate(90,-22)\"><rect width=\"18\" height=\"18\" fill=\"#112233\" stroke=\"#112233\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">😀</text></g><g class=\"legend\" transform=\"translate(90,0)\"><rect width=\"18\" height=\"18\" fill=\"#223344\" stroke=\"#223344\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">مرحبا</text></g></g></svg>",
+      "accepted": false
+    },
+    {
+      "id": "wrong-path-class",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 420 300\" width=\"100%\" height=\"300\" style=\"max-width:420px\"><style>.pieCircle.highlighted{scale:1.05;opacity:1;}.pieCircle.highlightedOnHover:hover{transition-duration:250ms;scale:1.05;opacity:1;}</style><g transform=\"translate(210,150)\" font-family=\"Arial\"><g transform=\"translate(-40,0)\"><circle class=\"pieOuterCircle\" r=\"120\" stroke=\"#111111\" stroke-width=\"2\" fill=\"none\"/><path class=\"other\" d=\"M0,-120A120,120,0,0,1,0,120L0,0Z\" fill=\"#112233\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><path class=\"pieCircle highlighted\" d=\"M0,120A120,120,0,0,1,0,-120L0,0Z\" fill=\"#223344\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><text class=\"slice\" transform=\"translate(45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text><text class=\"slice\" transform=\"translate(-45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text></g><text class=\"pieTitleText\" x=\"0\" y=\"-135\" text-anchor=\"middle\" font-size=\"25\" fill=\"#111111\">Café 中文 &amp; title</text><g class=\"legend\" transform=\"translate(90,-22)\"><rect width=\"18\" height=\"18\" fill=\"#112233\" stroke=\"#112233\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">😀</text></g><g class=\"legend\" transform=\"translate(90,0)\"><rect width=\"18\" height=\"18\" fill=\"#223344\" stroke=\"#223344\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">مرحبا</text></g></g></svg>",
+      "accepted": false
+    },
+    {
+      "id": "lost-path",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 420 300\" width=\"100%\" height=\"300\" style=\"max-width:420px\"><style>.pieCircle.highlighted{scale:1.05;opacity:1;}.pieCircle.highlightedOnHover:hover{transition-duration:250ms;scale:1.05;opacity:1;}</style><g transform=\"translate(210,150)\" font-family=\"Arial\"><g transform=\"translate(-40,0)\"><circle class=\"pieOuterCircle\" r=\"120\" stroke=\"#111111\" stroke-width=\"2\" fill=\"none\"/><path class=\"pieCircle highlighted\" d=\"M0,120A120,120,0,0,1,0,-120L0,0Z\" fill=\"#223344\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><text class=\"slice\" transform=\"translate(45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text><text class=\"slice\" transform=\"translate(-45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text></g><text class=\"pieTitleText\" x=\"0\" y=\"-135\" text-anchor=\"middle\" font-size=\"25\" fill=\"#111111\">Café 中文 &amp; title</text><g class=\"legend\" transform=\"translate(90,-22)\"><rect width=\"18\" height=\"18\" fill=\"#112233\" stroke=\"#112233\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">😀</text></g><g class=\"legend\" transform=\"translate(90,0)\"><rect width=\"18\" height=\"18\" fill=\"#223344\" stroke=\"#223344\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">مرحبا</text></g></g></svg>",
+      "accepted": false
+    },
+    {
+      "id": "extra-path",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 420 300\" width=\"100%\" height=\"300\" style=\"max-width:420px\"><style>.pieCircle.highlighted{scale:1.05;opacity:1;}.pieCircle.highlightedOnHover:hover{transition-duration:250ms;scale:1.05;opacity:1;}</style><g transform=\"translate(210,150)\" font-family=\"Arial\"><g transform=\"translate(-40,0)\"><circle class=\"pieOuterCircle\" r=\"120\" stroke=\"#111111\" stroke-width=\"2\" fill=\"none\"/><path class=\"pieCircle\" d=\"M0,-120A120,120,0,0,1,0,120L0,0Z\" fill=\"#112233\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><path class=\"pieCircle highlighted\" d=\"M0,120A120,120,0,0,1,0,-120L0,0Z\" fill=\"#223344\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><text class=\"slice\" transform=\"translate(45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text><text class=\"slice\" transform=\"translate(-45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text><path class=\"pieCircle\" d=\"M0,-120A120,120,0,0,1,0,120L0,0Z\" fill=\"#112233\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/></g><text class=\"pieTitleText\" x=\"0\" y=\"-135\" text-anchor=\"middle\" font-size=\"25\" fill=\"#111111\">Café 中文 &amp; title</text><g class=\"legend\" transform=\"translate(90,-22)\"><rect width=\"18\" height=\"18\" fill=\"#112233\" stroke=\"#112233\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">😀</text></g><g class=\"legend\" transform=\"translate(90,0)\"><rect width=\"18\" height=\"18\" fill=\"#223344\" stroke=\"#223344\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">مرحبا</text></g></g></svg>",
+      "accepted": false
+    },
+    {
+      "id": "wrong-slice-text",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 420 300\" width=\"100%\" height=\"300\" style=\"max-width:420px\"><style>.pieCircle.highlighted{scale:1.05;opacity:1;}.pieCircle.highlightedOnHover:hover{transition-duration:250ms;scale:1.05;opacity:1;}</style><g transform=\"translate(210,150)\" font-family=\"Arial\"><g transform=\"translate(-40,0)\"><circle class=\"pieOuterCircle\" r=\"120\" stroke=\"#111111\" stroke-width=\"2\" fill=\"none\"/><path class=\"pieCircle\" d=\"M0,-120A120,120,0,0,1,0,120L0,0Z\" fill=\"#112233\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><path class=\"pieCircle highlighted\" d=\"M0,120A120,120,0,0,1,0,-120L0,0Z\" fill=\"#223344\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><text class=\"slice\" transform=\"translate(45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">51%</text><text class=\"slice\" transform=\"translate(-45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text></g><text class=\"pieTitleText\" x=\"0\" y=\"-135\" text-anchor=\"middle\" font-size=\"25\" fill=\"#111111\">Café 中文 &amp; title</text><g class=\"legend\" transform=\"translate(90,-22)\"><rect width=\"18\" height=\"18\" fill=\"#112233\" stroke=\"#112233\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">😀</text></g><g class=\"legend\" transform=\"translate(90,0)\"><rect width=\"18\" height=\"18\" fill=\"#223344\" stroke=\"#223344\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">مرحبا</text></g></g></svg>",
+      "accepted": false
+    },
+    {
+      "id": "wrong-slice-transform",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 420 300\" width=\"100%\" height=\"300\" style=\"max-width:420px\"><style>.pieCircle.highlighted{scale:1.05;opacity:1;}.pieCircle.highlightedOnHover:hover{transition-duration:250ms;scale:1.05;opacity:1;}</style><g transform=\"translate(210,150)\" font-family=\"Arial\"><g transform=\"translate(-40,0)\"><circle class=\"pieOuterCircle\" r=\"120\" stroke=\"#111111\" stroke-width=\"2\" fill=\"none\"/><path class=\"pieCircle\" d=\"M0,-120A120,120,0,0,1,0,120L0,0Z\" fill=\"#112233\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><path class=\"pieCircle highlighted\" d=\"M0,120A120,120,0,0,1,0,-120L0,0Z\" fill=\"#223344\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><text class=\"slice\" transform=\"translate(46,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text><text class=\"slice\" transform=\"translate(-45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text></g><text class=\"pieTitleText\" x=\"0\" y=\"-135\" text-anchor=\"middle\" font-size=\"25\" fill=\"#111111\">Café 中文 &amp; title</text><g class=\"legend\" transform=\"translate(90,-22)\"><rect width=\"18\" height=\"18\" fill=\"#112233\" stroke=\"#112233\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">😀</text></g><g class=\"legend\" transform=\"translate(90,0)\"><rect width=\"18\" height=\"18\" fill=\"#223344\" stroke=\"#223344\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">مرحبا</text></g></g></svg>",
+      "accepted": false
+    },
+    {
+      "id": "wrong-anchor",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 420 300\" width=\"100%\" height=\"300\" style=\"max-width:420px\"><style>.pieCircle.highlighted{scale:1.05;opacity:1;}.pieCircle.highlightedOnHover:hover{transition-duration:250ms;scale:1.05;opacity:1;}</style><g transform=\"translate(210,150)\" font-family=\"Arial\"><g transform=\"translate(-40,0)\"><circle class=\"pieOuterCircle\" r=\"120\" stroke=\"#111111\" stroke-width=\"2\" fill=\"none\"/><path class=\"pieCircle\" d=\"M0,-120A120,120,0,0,1,0,120L0,0Z\" fill=\"#112233\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><path class=\"pieCircle highlighted\" d=\"M0,120A120,120,0,0,1,0,-120L0,0Z\" fill=\"#223344\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><text class=\"slice\" transform=\"translate(45,0)\" text-anchor=\"start\" fill=\"#111111\" font-size=\"17\">50%</text><text class=\"slice\" transform=\"translate(-45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text></g><text class=\"pieTitleText\" x=\"0\" y=\"-135\" text-anchor=\"middle\" font-size=\"25\" fill=\"#111111\">Café 中文 &amp; title</text><g class=\"legend\" transform=\"translate(90,-22)\"><rect width=\"18\" height=\"18\" fill=\"#112233\" stroke=\"#112233\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">😀</text></g><g class=\"legend\" transform=\"translate(90,0)\"><rect width=\"18\" height=\"18\" fill=\"#223344\" stroke=\"#223344\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">مرحبا</text></g></g></svg>",
+      "accepted": false
+    },
+    {
+      "id": "wrong-title",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 420 300\" width=\"100%\" height=\"300\" style=\"max-width:420px\"><style>.pieCircle.highlighted{scale:1.05;opacity:1;}.pieCircle.highlightedOnHover:hover{transition-duration:250ms;scale:1.05;opacity:1;}</style><g transform=\"translate(210,150)\" font-family=\"Arial\"><g transform=\"translate(-40,0)\"><circle class=\"pieOuterCircle\" r=\"120\" stroke=\"#111111\" stroke-width=\"2\" fill=\"none\"/><path class=\"pieCircle\" d=\"M0,-120A120,120,0,0,1,0,120L0,0Z\" fill=\"#112233\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><path class=\"pieCircle highlighted\" d=\"M0,120A120,120,0,0,1,0,-120L0,0Z\" fill=\"#223344\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><text class=\"slice\" transform=\"translate(45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text><text class=\"slice\" transform=\"translate(-45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text></g><text class=\"pieTitleText\" x=\"0\" y=\"-135\" text-anchor=\"middle\" font-size=\"25\" fill=\"#111111\">Title</text><g class=\"legend\" transform=\"translate(90,-22)\"><rect width=\"18\" height=\"18\" fill=\"#112233\" stroke=\"#112233\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">😀</text></g><g class=\"legend\" transform=\"translate(90,0)\"><rect width=\"18\" height=\"18\" fill=\"#223344\" stroke=\"#223344\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">مرحبا</text></g></g></svg>",
+      "accepted": false
+    },
+    {
+      "id": "wrong-title-x",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 420 300\" width=\"100%\" height=\"300\" style=\"max-width:420px\"><style>.pieCircle.highlighted{scale:1.05;opacity:1;}.pieCircle.highlightedOnHover:hover{transition-duration:250ms;scale:1.05;opacity:1;}</style><g transform=\"translate(210,150)\" font-family=\"Arial\"><g transform=\"translate(-40,0)\"><circle class=\"pieOuterCircle\" r=\"120\" stroke=\"#111111\" stroke-width=\"2\" fill=\"none\"/><path class=\"pieCircle\" d=\"M0,-120A120,120,0,0,1,0,120L0,0Z\" fill=\"#112233\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><path class=\"pieCircle highlighted\" d=\"M0,120A120,120,0,0,1,0,-120L0,0Z\" fill=\"#223344\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><text class=\"slice\" transform=\"translate(45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text><text class=\"slice\" transform=\"translate(-45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text></g><text class=\"pieTitleText\" x=\"1\" y=\"-135\" text-anchor=\"middle\" font-size=\"25\" fill=\"#111111\">Café 中文 &amp; title</text><g class=\"legend\" transform=\"translate(90,-22)\"><rect width=\"18\" height=\"18\" fill=\"#112233\" stroke=\"#112233\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">😀</text></g><g class=\"legend\" transform=\"translate(90,0)\"><rect width=\"18\" height=\"18\" fill=\"#223344\" stroke=\"#223344\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">مرحبا</text></g></g></svg>",
+      "accepted": false
+    },
+    {
+      "id": "wrong-legend-label",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 420 300\" width=\"100%\" height=\"300\" style=\"max-width:420px\"><style>.pieCircle.highlighted{scale:1.05;opacity:1;}.pieCircle.highlightedOnHover:hover{transition-duration:250ms;scale:1.05;opacity:1;}</style><g transform=\"translate(210,150)\" font-family=\"Arial\"><g transform=\"translate(-40,0)\"><circle class=\"pieOuterCircle\" r=\"120\" stroke=\"#111111\" stroke-width=\"2\" fill=\"none\"/><path class=\"pieCircle\" d=\"M0,-120A120,120,0,0,1,0,120L0,0Z\" fill=\"#112233\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><path class=\"pieCircle highlighted\" d=\"M0,120A120,120,0,0,1,0,-120L0,0Z\" fill=\"#223344\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><text class=\"slice\" transform=\"translate(45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text><text class=\"slice\" transform=\"translate(-45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text></g><text class=\"pieTitleText\" x=\"0\" y=\"-135\" text-anchor=\"middle\" font-size=\"25\" fill=\"#111111\">Café 中文 &amp; title</text><g class=\"legend\" transform=\"translate(90,-22)\"><rect width=\"18\" height=\"18\" fill=\"#112233\" stroke=\"#112233\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">different</text></g><g class=\"legend\" transform=\"translate(90,0)\"><rect width=\"18\" height=\"18\" fill=\"#223344\" stroke=\"#223344\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">مرحبا</text></g></g></svg>",
+      "accepted": false
+    },
+    {
+      "id": "wrong-legend-transform",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 420 300\" width=\"100%\" height=\"300\" style=\"max-width:420px\"><style>.pieCircle.highlighted{scale:1.05;opacity:1;}.pieCircle.highlightedOnHover:hover{transition-duration:250ms;scale:1.05;opacity:1;}</style><g transform=\"translate(210,150)\" font-family=\"Arial\"><g transform=\"translate(-40,0)\"><circle class=\"pieOuterCircle\" r=\"120\" stroke=\"#111111\" stroke-width=\"2\" fill=\"none\"/><path class=\"pieCircle\" d=\"M0,-120A120,120,0,0,1,0,120L0,0Z\" fill=\"#112233\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><path class=\"pieCircle highlighted\" d=\"M0,120A120,120,0,0,1,0,-120L0,0Z\" fill=\"#223344\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><text class=\"slice\" transform=\"translate(45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text><text class=\"slice\" transform=\"translate(-45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text></g><text class=\"pieTitleText\" x=\"0\" y=\"-135\" text-anchor=\"middle\" font-size=\"25\" fill=\"#111111\">Café 中文 &amp; title</text><g class=\"legend\" transform=\"translate(91,-22)\"><rect width=\"18\" height=\"18\" fill=\"#112233\" stroke=\"#112233\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">😀</text></g><g class=\"legend\" transform=\"translate(90,0)\"><rect width=\"18\" height=\"18\" fill=\"#223344\" stroke=\"#223344\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">مرحبا</text></g></g></svg>",
+      "accepted": false
+    },
+    {
+      "id": "wrong-legend-stroke",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 420 300\" width=\"100%\" height=\"300\" style=\"max-width:420px\"><style>.pieCircle.highlighted{scale:1.05;opacity:1;}.pieCircle.highlightedOnHover:hover{transition-duration:250ms;scale:1.05;opacity:1;}</style><g transform=\"translate(210,150)\" font-family=\"Arial\"><g transform=\"translate(-40,0)\"><circle class=\"pieOuterCircle\" r=\"120\" stroke=\"#111111\" stroke-width=\"2\" fill=\"none\"/><path class=\"pieCircle\" d=\"M0,-120A120,120,0,0,1,0,120L0,0Z\" fill=\"#112233\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><path class=\"pieCircle highlighted\" d=\"M0,120A120,120,0,0,1,0,-120L0,0Z\" fill=\"#223344\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><text class=\"slice\" transform=\"translate(45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text><text class=\"slice\" transform=\"translate(-45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text></g><text class=\"pieTitleText\" x=\"0\" y=\"-135\" text-anchor=\"middle\" font-size=\"25\" fill=\"#111111\">Café 中文 &amp; title</text><g class=\"legend\" transform=\"translate(90,-22)\"><rect width=\"18\" height=\"18\" fill=\"#112233\" stroke=\"none\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">😀</text></g><g class=\"legend\" transform=\"translate(90,0)\"><rect width=\"18\" height=\"18\" fill=\"#223344\" stroke=\"#223344\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">مرحبا</text></g></g></svg>",
+      "accepted": false
+    },
+    {
+      "id": "wrong-legend-size",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 420 300\" width=\"100%\" height=\"300\" style=\"max-width:420px\"><style>.pieCircle.highlighted{scale:1.05;opacity:1;}.pieCircle.highlightedOnHover:hover{transition-duration:250ms;scale:1.05;opacity:1;}</style><g transform=\"translate(210,150)\" font-family=\"Arial\"><g transform=\"translate(-40,0)\"><circle class=\"pieOuterCircle\" r=\"120\" stroke=\"#111111\" stroke-width=\"2\" fill=\"none\"/><path class=\"pieCircle\" d=\"M0,-120A120,120,0,0,1,0,120L0,0Z\" fill=\"#112233\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><path class=\"pieCircle highlighted\" d=\"M0,120A120,120,0,0,1,0,-120L0,0Z\" fill=\"#223344\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><text class=\"slice\" transform=\"translate(45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text><text class=\"slice\" transform=\"translate(-45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text></g><text class=\"pieTitleText\" x=\"0\" y=\"-135\" text-anchor=\"middle\" font-size=\"25\" fill=\"#111111\">Café 中文 &amp; title</text><g class=\"legend\" transform=\"translate(90,-22)\"><rect width=\"19\" height=\"18\" fill=\"#112233\" stroke=\"#112233\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">😀</text></g><g class=\"legend\" transform=\"translate(90,0)\"><rect width=\"18\" height=\"18\" fill=\"#223344\" stroke=\"#223344\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">مرحبا</text></g></g></svg>",
+      "accepted": false
+    },
+    {
+      "id": "wrong-legend-text-position",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 420 300\" width=\"100%\" height=\"300\" style=\"max-width:420px\"><style>.pieCircle.highlighted{scale:1.05;opacity:1;}.pieCircle.highlightedOnHover:hover{transition-duration:250ms;scale:1.05;opacity:1;}</style><g transform=\"translate(210,150)\" font-family=\"Arial\"><g transform=\"translate(-40,0)\"><circle class=\"pieOuterCircle\" r=\"120\" stroke=\"#111111\" stroke-width=\"2\" fill=\"none\"/><path class=\"pieCircle\" d=\"M0,-120A120,120,0,0,1,0,120L0,0Z\" fill=\"#112233\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><path class=\"pieCircle highlighted\" d=\"M0,120A120,120,0,0,1,0,-120L0,0Z\" fill=\"#223344\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><text class=\"slice\" transform=\"translate(45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text><text class=\"slice\" transform=\"translate(-45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text></g><text class=\"pieTitleText\" x=\"0\" y=\"-135\" text-anchor=\"middle\" font-size=\"25\" fill=\"#111111\">Café 中文 &amp; title</text><g class=\"legend\" transform=\"translate(90,-22)\"><rect width=\"18\" height=\"18\" fill=\"#112233\" stroke=\"#112233\"/><text x=\"23\" y=\"14\" fill=\"#111111\" font-size=\"17\">😀</text></g><g class=\"legend\" transform=\"translate(90,0)\"><rect width=\"18\" height=\"18\" fill=\"#223344\" stroke=\"#223344\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">مرحبا</text></g></g></svg>",
+      "accepted": false
+    },
+    {
+      "id": "wrong-family",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 420 300\" width=\"100%\" height=\"300\" style=\"max-width:420px\"><style>.pieCircle.highlighted{scale:1.05;opacity:1;}.pieCircle.highlightedOnHover:hover{transition-duration:250ms;scale:1.05;opacity:1;}</style><g transform=\"translate(210,150)\" font-family=\"serif\"><g transform=\"translate(-40,0)\"><circle class=\"pieOuterCircle\" r=\"120\" stroke=\"#111111\" stroke-width=\"2\" fill=\"none\"/><path class=\"pieCircle\" d=\"M0,-120A120,120,0,0,1,0,120L0,0Z\" fill=\"#112233\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><path class=\"pieCircle highlighted\" d=\"M0,120A120,120,0,0,1,0,-120L0,0Z\" fill=\"#223344\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><text class=\"slice\" transform=\"translate(45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text><text class=\"slice\" transform=\"translate(-45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text></g><text class=\"pieTitleText\" x=\"0\" y=\"-135\" text-anchor=\"middle\" font-size=\"25\" fill=\"#111111\">Café 中文 &amp; title</text><g class=\"legend\" transform=\"translate(90,-22)\"><rect width=\"18\" height=\"18\" fill=\"#112233\" stroke=\"#112233\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">😀</text></g><g class=\"legend\" transform=\"translate(90,0)\"><rect width=\"18\" height=\"18\" fill=\"#223344\" stroke=\"#223344\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">مرحبا</text></g></g></svg>",
+      "accepted": false
+    },
+    {
+      "id": "wrong-font-size",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 420 300\" width=\"100%\" height=\"300\" style=\"max-width:420px\"><style>.pieCircle.highlighted{scale:1.05;opacity:1;}.pieCircle.highlightedOnHover:hover{transition-duration:250ms;scale:1.05;opacity:1;}</style><g transform=\"translate(210,150)\" font-family=\"Arial\"><g transform=\"translate(-40,0)\"><circle class=\"pieOuterCircle\" r=\"120\" stroke=\"#111111\" stroke-width=\"2\" fill=\"none\"/><path class=\"pieCircle\" d=\"M0,-120A120,120,0,0,1,0,120L0,0Z\" fill=\"#112233\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><path class=\"pieCircle highlighted\" d=\"M0,120A120,120,0,0,1,0,-120L0,0Z\" fill=\"#223344\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><text class=\"slice\" transform=\"translate(45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text><text class=\"slice\" transform=\"translate(-45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text></g><text class=\"pieTitleText\" x=\"0\" y=\"-135\" text-anchor=\"middle\" font-size=\"26\" fill=\"#111111\">Café 中文 &amp; title</text><g class=\"legend\" transform=\"translate(90,-22)\"><rect width=\"18\" height=\"18\" fill=\"#112233\" stroke=\"#112233\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">😀</text></g><g class=\"legend\" transform=\"translate(90,0)\"><rect width=\"18\" height=\"18\" fill=\"#223344\" stroke=\"#223344\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">مرحبا</text></g></g></svg>",
+      "accepted": false
+    },
+    {
+      "id": "wrong-base-stroke",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 420 300\" width=\"100%\" height=\"300\" style=\"max-width:420px\"><style>.pieCircle.highlighted{scale:1.05;opacity:1;}.pieCircle.highlightedOnHover:hover{transition-duration:250ms;scale:1.05;opacity:1;}</style><g transform=\"translate(210,150)\" font-family=\"Arial\"><g transform=\"translate(-40,0)\"><circle class=\"pieOuterCircle\" r=\"120\" stroke=\"#111111\" stroke-width=\"2\" fill=\"none\"/><path class=\"pieCircle\" d=\"M0,-120A120,120,0,0,1,0,120L0,0Z\" fill=\"#112233\" stroke=\"#222222\" stroke-width=\"2\" opacity=\"0.7\"/><path class=\"pieCircle highlighted\" d=\"M0,120A120,120,0,0,1,0,-120L0,0Z\" fill=\"#223344\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><text class=\"slice\" transform=\"translate(45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text><text class=\"slice\" transform=\"translate(-45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text></g><text class=\"pieTitleText\" x=\"0\" y=\"-135\" text-anchor=\"middle\" font-size=\"25\" fill=\"#111111\">Café 中文 &amp; title</text><g class=\"legend\" transform=\"translate(90,-22)\"><rect width=\"18\" height=\"18\" fill=\"#112233\" stroke=\"#112233\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">😀</text></g><g class=\"legend\" transform=\"translate(90,0)\"><rect width=\"18\" height=\"18\" fill=\"#223344\" stroke=\"#223344\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">مرحبا</text></g></g></svg>",
+      "accepted": false
+    },
+    {
+      "id": "wrong-stroke-width",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 420 300\" width=\"100%\" height=\"300\" style=\"max-width:420px\"><style>.pieCircle.highlighted{scale:1.05;opacity:1;}.pieCircle.highlightedOnHover:hover{transition-duration:250ms;scale:1.05;opacity:1;}</style><g transform=\"translate(210,150)\" font-family=\"Arial\"><g transform=\"translate(-40,0)\"><circle class=\"pieOuterCircle\" r=\"120\" stroke=\"#111111\" stroke-width=\"3\" fill=\"none\"/><path class=\"pieCircle\" d=\"M0,-120A120,120,0,0,1,0,120L0,0Z\" fill=\"#112233\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><path class=\"pieCircle highlighted\" d=\"M0,120A120,120,0,0,1,0,-120L0,0Z\" fill=\"#223344\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><text class=\"slice\" transform=\"translate(45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text><text class=\"slice\" transform=\"translate(-45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text></g><text class=\"pieTitleText\" x=\"0\" y=\"-135\" text-anchor=\"middle\" font-size=\"25\" fill=\"#111111\">Café 中文 &amp; title</text><g class=\"legend\" transform=\"translate(90,-22)\"><rect width=\"18\" height=\"18\" fill=\"#112233\" stroke=\"#112233\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">😀</text></g><g class=\"legend\" transform=\"translate(90,0)\"><rect width=\"18\" height=\"18\" fill=\"#223344\" stroke=\"#223344\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">مرحبا</text></g></g></svg>",
+      "accepted": false
+    },
+    {
+      "id": "wrong-opacity",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 420 300\" width=\"100%\" height=\"300\" style=\"max-width:420px\"><style>.pieCircle.highlighted{scale:1.05;opacity:1;}.pieCircle.highlightedOnHover:hover{transition-duration:250ms;scale:1.05;opacity:1;}</style><g transform=\"translate(210,150)\" font-family=\"Arial\"><g transform=\"translate(-40,0)\"><circle class=\"pieOuterCircle\" r=\"120\" stroke=\"#111111\" stroke-width=\"2\" fill=\"none\"/><path class=\"pieCircle\" d=\"M0,-120A120,120,0,0,1,0,120L0,0Z\" fill=\"#112233\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.8\"/><path class=\"pieCircle highlighted\" d=\"M0,120A120,120,0,0,1,0,-120L0,0Z\" fill=\"#223344\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><text class=\"slice\" transform=\"translate(45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text><text class=\"slice\" transform=\"translate(-45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text></g><text class=\"pieTitleText\" x=\"0\" y=\"-135\" text-anchor=\"middle\" font-size=\"25\" fill=\"#111111\">Café 中文 &amp; title</text><g class=\"legend\" transform=\"translate(90,-22)\"><rect width=\"18\" height=\"18\" fill=\"#112233\" stroke=\"#112233\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">😀</text></g><g class=\"legend\" transform=\"translate(90,0)\"><rect width=\"18\" height=\"18\" fill=\"#223344\" stroke=\"#223344\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">مرحبا</text></g></g></svg>",
+      "accepted": false
+    },
+    {
+      "id": "missing-highlight-rule",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 420 300\" width=\"100%\" height=\"300\" style=\"max-width:420px\"><style/><g transform=\"translate(210,150)\" font-family=\"Arial\"><g transform=\"translate(-40,0)\"><circle class=\"pieOuterCircle\" r=\"120\" stroke=\"#111111\" stroke-width=\"2\" fill=\"none\"/><path class=\"pieCircle\" d=\"M0,-120A120,120,0,0,1,0,120L0,0Z\" fill=\"#112233\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><path class=\"pieCircle highlighted\" d=\"M0,120A120,120,0,0,1,0,-120L0,0Z\" fill=\"#223344\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><text class=\"slice\" transform=\"translate(45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text><text class=\"slice\" transform=\"translate(-45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text></g><text class=\"pieTitleText\" x=\"0\" y=\"-135\" text-anchor=\"middle\" font-size=\"25\" fill=\"#111111\">Café 中文 &amp; title</text><g class=\"legend\" transform=\"translate(90,-22)\"><rect width=\"18\" height=\"18\" fill=\"#112233\" stroke=\"#112233\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">😀</text></g><g class=\"legend\" transform=\"translate(90,0)\"><rect width=\"18\" height=\"18\" fill=\"#223344\" stroke=\"#223344\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">مرحبا</text></g></g></svg>",
+      "accepted": false
+    },
+    {
+      "id": "changed-highlight-rule",
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 420 300\" width=\"100%\" height=\"300\" style=\"max-width:420px\"><style>.pieCircle.highlighted{scale:1.04;opacity:1;}.pieCircle.highlightedOnHover:hover{transition-duration:250ms;scale:1.05;opacity:1;}</style><g transform=\"translate(210,150)\" font-family=\"Arial\"><g transform=\"translate(-40,0)\"><circle class=\"pieOuterCircle\" r=\"120\" stroke=\"#111111\" stroke-width=\"2\" fill=\"none\"/><path class=\"pieCircle\" d=\"M0,-120A120,120,0,0,1,0,120L0,0Z\" fill=\"#112233\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><path class=\"pieCircle highlighted\" d=\"M0,120A120,120,0,0,1,0,-120L0,0Z\" fill=\"#223344\" stroke=\"#111111\" stroke-width=\"2\" opacity=\"0.7\"/><text class=\"slice\" transform=\"translate(45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text><text class=\"slice\" transform=\"translate(-45,0)\" text-anchor=\"middle\" fill=\"#111111\" font-size=\"17\">50%</text></g><text class=\"pieTitleText\" x=\"0\" y=\"-135\" text-anchor=\"middle\" font-size=\"25\" fill=\"#111111\">Café 中文 &amp; title</text><g class=\"legend\" transform=\"translate(90,-22)\"><rect width=\"18\" height=\"18\" fill=\"#112233\" stroke=\"#112233\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">😀</text></g><g class=\"legend\" transform=\"translate(90,0)\"><rect width=\"18\" height=\"18\" fill=\"#223344\" stroke=\"#223344\"/><text x=\"22\" y=\"14\" fill=\"#111111\" font-size=\"17\">مرحبا</text></g></g></svg>",
+      "accepted": false
+    }
+  ]
+}

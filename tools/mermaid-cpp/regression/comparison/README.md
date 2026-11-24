@@ -87,3 +87,22 @@ option remains as a convenience that runs capture before the offline comparison.
 Process timeouts, malformed responses, abnormal exits, missing glyph samples,
 changed hashes and missing coverage are failures. The committed tiny Canvas
 fixture contains real captured font metrics and raster bytes for negative tests.
+
+## Pie DOM evidence
+
+Pie has a separate deterministic family fixture with 80 inputs, including the
+upstream non-finite layouts whose native result must be exactly `ERROR`.
+The official renderer captures its complete DOM snapshot and all seven original
+stylesheet rules. Python checks the same ordered elements, text, paints,
+interaction CSS and strict `< 1e-10` numeric limit; no browser is needed:
+
+```sh
+node tools/mermaid-cpp/pie-svg-oracle.mjs --check
+python tools/mermaid-cpp/compare-pie.py build/mermaid-cpp/pie-browser/original.json build/mermaid-cpp/pie-svg
+```
+
+Official capture still verifies the pinned upstream source files and bundled
+renderer source maps. The saved evidence is bound to the source lock, complete
+TSV corpus, input text and SVG bytes. Missing cases, changed inputs and altered
+snapshots fail. `test_pie.py` includes 34 decisions captured from the former
+JavaScript gate, plus numeric-boundary and evidence-integrity checks.

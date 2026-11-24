@@ -1,9 +1,12 @@
-// Execute the pinned official family renderer and compare native SVG DOMs.
+// Capture the pinned official Pie renderer. Acceptance belongs to compare-pie.py.
 import assert from 'node:assert/strict';
-import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, readdirSync, mkdirSync } from 'node:fs';
 import { createHash } from 'node:crypto';
-import { resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
 import { JSDOM } from './oracle/node_modules/jsdom/lib/api.js';
+for(const argument of process.argv.slice(2)) assert(
+ argument==='--write'||argument==='--check'||argument.startsWith('--output='),
+ 'Use --check/--write [--output=file.json]; native comparison is compare-pie.py.');
 const lock = JSON.parse(readFileSync(new URL('../../docs/mermaid-cpp/source-lock.json',import.meta.url)));
 for (const file of lock.files) assert.equal(createHash('sha256').update(readFileSync(
   new URL('../../.reference/mermaid-js/'+file.path,import.meta.url))).digest('hex'),file.sha256);
@@ -46,7 +49,8 @@ for(const position of ['right','left','top','bottom','center']) {
  }
 }
 const fixture=['# name source position widths title-width donut text-position highlight max-width dark'];
-let compared=0;
+const observations=[];
+const hash=value=>createHash('sha256').update(value).digest('hex');
 const numeric=value=>Number.parseFloat(value);
 function snapshot(svg) {
  const translate=node=>(node.getAttribute('transform')??'translate(0,0)').slice(10,-1).split(/[, ]+/).map(Number);
@@ -65,11 +69,6 @@ function snapshot(svg) {
    n.querySelector('rect').getAttribute('width'),n.querySelector('rect').getAttribute('height'),
    n.querySelector('text').getAttribute('x'),n.querySelector('text').getAttribute('y')])
  };
-}
-function equal(a,b,path) {
- if(typeof a==='number') { assert(Number.isFinite(a)&&Number.isFinite(b)&&Math.abs(a-b)<1e-10,`${path}: ${a} != ${b}`); return; }
- if(a&&typeof a==='object') { assert.deepEqual(Object.keys(a),Object.keys(b),path); for(const key of Object.keys(a)) equal(a[key],b[key],`${path}.${key}`); return; }
- assert.equal(a,b,path);
 }
 for(const item of cases) {
  const ink=item.dark?'#eeeeee':'#111111';
@@ -102,40 +101,25 @@ for(const item of cases) {
  const finite=snapshot(svg).viewBox.every(Number.isFinite) && !svg.outerHTML.includes('Infinity');
  fixture.push([item.name,hex(item.source),item.position,widths.join(',')||'-',item.titleWidth,
   item.donut,item.textPosition,hex(item.highlight),Number(item.maxWidth),Number(item.dark),Number(finite)].join('\t'));
- if(process.argv[2]==='--compare') {
-  const native=readFileSync(resolve(process.argv[3],item.name+'.svg'),'utf8');
-  if(!finite) {assert.equal(native,'ERROR',item.name);continue;}
-  const parsed=new JSDOM(native,{contentType:'image/svg+xml'});
-  const actual=parsed.window.document.documentElement;
-  equal(snapshot(svg),snapshot(actual),item.name);
-  // Compare every declaration from the official family stylesheet. The native
-  // writer uses presentation attributes for base rules and CSS for interactions.
-  const css=definition.styles(theme).replace(/\/\/[^\n]*/g,'');
-  let rules=0;
-  for(const [,selectorText,body] of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
-   const selector=selectorText.trim();
-   const declarations=body.split(';').map(s=>s.trim()).filter(Boolean).map(s=>{
-    const colon=s.indexOf(':'); return [s.slice(0,colon).trim(),s.slice(colon+1).trim()];
-   });
-   if(selector.includes('highlighted')) {
-    const rule=selector+'{'+declarations.map(([key,value])=>`${key}:${value};`).join('')+'}';
-    assert(actual.querySelector('style').textContent.includes(rule),`${item.name} ${selector}`);
-   } else for(const n of actual.querySelectorAll(selector)) {
-    for(const [key,value] of declarations) {
-     const owner=key==='font-family'?actual.querySelector('g'):n;
-     const expected=(key==='font-size'||key==='stroke-width')?String(Number.parseFloat(value)):value;
-     assert.equal(owner.getAttribute(key),expected,`${item.name} ${selector} ${key}`);
-    }
-   }
-   ++rules;
-  }
-  assert.equal(rules,7);
-  parsed.window.close();++compared;
- }
+ const css=definition.styles(theme).replace(/\/\/[^\n]*/g,'');
+ const styles=[...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map(([,selectorText,body])=>({
+  selector:selectorText.trim(),
+  declarations:body.split(';').map(value=>value.trim()).filter(Boolean).map(value=>{
+   const colon=value.indexOf(':');return [value.slice(0,colon).trim(),value.slice(colon+1).trim()];
+  })
+ }));
+ observations.push({name:item.name,sourceSha256:hash(item.source),finite,
+  svg:svg.outerHTML,svgSha256:hash(svg.outerHTML),snapshot:finite?snapshot(svg):null,styles});
 }
 const file=new URL('../../tests/mermaid_cpp/fixtures/pie-svg.tsv',import.meta.url);
 const output=fixture.join('\n')+'\n';
-if(process.argv[2]==='--write') writeFileSync(file,output);
+if(process.argv.includes('--write')) writeFileSync(file,output);
 else assert.equal(readFileSync(file,'utf8').replaceAll('\r\n','\n'),output);
+const destination=resolve(process.argv.find(arg=>arg.startsWith('--output='))?.slice(9)??'build/mermaid-cpp/pie-browser/original.json');
+mkdirSync(dirname(destination),{recursive:true});
+writeFileSync(destination,JSON.stringify({schemaVersion:1,
+ upstream:{version:'12.2.0',commit:lock.commit},
+ sourceLockSha256:hash(readFileSync(new URL('../../docs/mermaid-cpp/source-lock.json',import.meta.url))),
+ fixtureSha256:hash(readFileSync(file)),cases:observations},null,2)+'\n');
 dom.window.close();
-console.log(`Verified ${cases.length} official Pie SVG cases; compared ${compared} native DOMs.`);
+console.log(`Captured ${cases.length} official Pie SVG cases: ${destination}`);
