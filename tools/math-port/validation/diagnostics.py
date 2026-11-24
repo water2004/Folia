@@ -94,14 +94,21 @@ def summarize(source, native) -> dict:
 
 
 def diagnose(source_path: Path, native_path: Path, output: Path, *, root: Path = ROOT) -> dict:
+    def report_path(path: Path) -> str:
+        try:
+            return os.path.relpath(path, root)
+        except ValueError:
+            # Windows cannot express a relative path across drives.
+            return str(path.resolve())
+
     source, native = loads(source_path.read_bytes()), loads(native_path.read_bytes())
-    summary = {'source': os.path.relpath(source_path, root), 'sourceSha256': digest(source_path),
-               'native': os.path.relpath(native_path, root), 'nativeSha256': digest(native_path),
+    summary = {'source': report_path(source_path), 'sourceSha256': digest(source_path),
+               'native': report_path(native_path), 'nativeSha256': digest(native_path),
                **summarize(source, native)}
     write(output, summary, parents=True)
     return {'cases': summary['cases'], 'matched': summary['matched'],
             'totalDifferences': summary['totalDifferences'], 'groups': len(summary['groups']),
-            'firstGroups': summary['groups'][:12], 'output': os.path.relpath(output, root)}
+            'firstGroups': summary['groups'][:12], 'output': report_path(output)}
 
 
 def main(argv: list[str] | None = None) -> int:

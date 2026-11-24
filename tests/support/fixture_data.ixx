@@ -10,7 +10,7 @@ inline std::filesystem::path path(std::string_view relative) {
 #error "Test targets must define FOLIA_TEST_DATA_ROOT to the tests directory"
 #endif
     const std::filesystem::path name{relative};
-    if (name.empty() || name.is_absolute())
+    if (name.empty() || name.has_root_path())
         throw std::invalid_argument("Fixture path must be relative: " + std::string(relative));
     for (const auto& part : name)
         if (part == "..") throw std::invalid_argument("Fixture path escapes test data root");

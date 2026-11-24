@@ -14,9 +14,10 @@ ROOT = Path(__file__).resolve().parents[2]
 MANIFEST = 'tests/fixtures/preservation/fixture-integrity.json'
 PURPOSE = ('Integrity checkpoint for retained portable observations; hashes detect subsequent changes, '
            'but do not by themselves prove equivalence to pre-refactor data.')
+TOOL_FIXTURE_ROOTS = ('tools/math-port/tests/fixtures', 'tools/mermaid-cpp/regression/tests/fixtures')
 SCOPE = ['tests/**/fixtures/** excluding SDK suites, preservation, code and README files',
          'tests/mermaid_regression/cases/**',
-         'tools/**/tests/fixtures/** excluding code and README files']
+         *(f'{root}/** excluding code and README files' for root in TOOL_FIXTURE_ROOTS)]
 CODE = {'.c', '.cc', '.cpp', '.cxx', '.h', '.hh', '.hpp', '.hxx', '.inc', '.ixx',
         '.py', '.pyc', '.pyo', '.js', '.cjs', '.mjs', '.ts', '.tsx', '.jsx',
         '.sh', '.bat', '.cmd', '.ps1', '.cmake'}
@@ -35,8 +36,7 @@ def selected(path: PurePosixPath) -> bool:
             return False
         in_scope = 'fixtures' in parts[1:-1] or path.is_relative_to('tests/mermaid_regression/cases')
     elif parts[0] == 'tools':
-        in_scope = any(parts[index:index + 2] == ('tests', 'fixtures')
-                       for index in range(1, len(parts) - 2))
+        in_scope = any(path.is_relative_to(root) for root in TOOL_FIXTURE_ROOTS)
     else:
         return False
     if not in_scope or path.name.lower().startswith('readme'):
@@ -66,7 +66,7 @@ def safe_path(root: Path, relative: str) -> Path:
 
 def fixture_paths(root: Path) -> list[str]:
     paths = []
-    for base in ('tests', 'tools'):
+    for base in ('tests', *TOOL_FIXTURE_ROOTS):
         for directory, dirs, files in os.walk(root / base, followlinks=False):
             dirs[:] = sorted(name for name in dirs if name not in SKIP_DIRS and not name.startswith('.'))
             parent = Path(directory).relative_to(root)

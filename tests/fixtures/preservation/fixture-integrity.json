@@ -5,7 +5,8 @@
   "scope": [
     "tests/**/fixtures/** excluding SDK suites, preservation, code and README files",
     "tests/mermaid_regression/cases/**",
-    "tools/**/tests/fixtures/** excluding code and README files"
+    "tools/math-port/tests/fixtures/** excluding code and README files",
+    "tools/mermaid-cpp/regression/tests/fixtures/** excluding code and README files"
   ],
   "files": [
     {

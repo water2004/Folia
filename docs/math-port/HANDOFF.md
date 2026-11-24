@@ -2,6 +2,7 @@
 
 ## 当前任务：测试系统重构（2026-11-24，已完成）
 
+- Windows 主分支集成以重构分支 `f3b073b9` 为基线。修正测试语料的路径校验、跨盘符诊断路径和 Windows 临时目录短路径处理。统一入口的 core、conformance、tooling 三套在 MSVC 下通过 19/19 个 CTest 条目，包括 Math Python 工具回归。主工程 Release Math DLL 构建通过。日志位于 `build/portable-test-merge/`。
 - 在既有 `refactor/portable-test-system` 上完成；master 基线仍为 `2ba389aa34a5c2f23500dc552b9fab9c434a0cdd`。本次从 `c603f4db` 续做，所有完成批次均独立提交并立即推送，提交带 `[skip ci]`。本次续做未改 CI，master 与标签未动；此前分支已同步 Mermaid workflow 的 Python 比较入口/依赖，触发配置与 master 相同。分支 Actions 查询为 0 次运行。
 - **最终统一入口通过**：`python tests/run.py --suite all --build-dir build/test-refactor/portable --jobs 4 --test-jobs 1`，七套 catalog、**26/26 CTest、0 failed/CTest skipped**。验证代码版本 `d378f543aff1398f4b36b8868c88c88d1017862d`，之后只补验收文档。Linux Clang/libc++ 21.1.8、CMake 4.3.4、Ninja，真实 Boost.UT/C++23 模块、单 native 构建并发 4；CTest 用时 54.24 秒。
 - 完整原生结果：Core **1098 项/1305869 断言**；新增接线的既有 SDK-free policies **41/9096485**；Markdown 独立消费者 **4/61**；Completion **23/5562**；Math editor **7/15330**；Math **996/547261**；SVG/C ABI **83/2381**；Mermaid **274/959627**；真实 Math 集成 **5/205**，这些完整入口均无过滤/跳过。

@@ -94,7 +94,7 @@ class ParserFaultTests(unittest.TestCase):
         with self.assertRaisesRegex(ComparisonError, 'explicit --build-dir'):
             main(['--execute'])
         with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
+            root = Path(directory).resolve()
             build = root / 'build'
             build.mkdir()
             cache = build / 'CMakeCache.txt'

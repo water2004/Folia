@@ -26,8 +26,8 @@ class CanvasEvidenceChecks(unittest.TestCase):
 
     def compare(self, rewrite_log=False):
         if rewrite_log:
-            log = "".join(json.dumps(entry) + "\n" for entry in self.entries)
-            (self.root / "samples/samples.jsonl").write_text(log)
+            log = "".join(json.dumps(entry) + "\n" for entry in self.entries).encode("utf-8")
+            (self.root / "samples/samples.jsonl").write_bytes(log)
             self.document["samplesSha256"] = digest(log)
         path = self.root / "native-observations.json"
         path.write_text(json.dumps(self.document))

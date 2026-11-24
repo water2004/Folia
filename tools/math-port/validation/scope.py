@@ -43,6 +43,7 @@ def owner(source: str) -> str:
 
 def manifest(root: Path, source_root: Path, prior: dict | None) -> dict:
     """Preserve reviewed ownership only when the exact upstream bytes match."""
+    source_root = source_root.resolve()
     profile = (root / "tools/mathjax-bundle/entry.cjs").read_bytes().decode("utf-8")
     package_array = re.search(r"packages:\s*\[([\s\S]*?)\]", profile)
     if not package_array:

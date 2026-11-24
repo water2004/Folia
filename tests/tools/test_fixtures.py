@@ -86,6 +86,7 @@ class FixtureCheckpointTests(unittest.TestCase):
                      'tests/encoding/fixtures/utf8.bin', 'tests/math/fixtures/helper.hpp',
                      'tests/math/fixtures/README.md', 'tests/math/fixtures/observer.mjs',
                      'tools/math-port/tests/fixtures/child.py', 'tools/node_modules/tests/fixtures/data.json',
+                     'tools/math-port/drafts/old-checkout/tests/fixtures/cases.tsv',
                      'tests/fixtures/preservation/other-checkpoint.json'):
             self.write(path, b'not fixture data')
         self.assertTrue(check_fixtures.check(self.root)['success'])

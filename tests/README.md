@@ -179,6 +179,12 @@ portable fixture text uses LF through `.gitattributes`. The guard neither
 normalizes files nor regenerates expectations. Its negative controls and the
 repository check run with the `tooling` suite.
 
+An existing Windows checkout may retain CRLF in unchanged files after merging
+the LF attributes. If `git ls-files --eol` shows `i/lf w/crlf` for a fixture
+marked `eol=lf`, run the checks from a fresh worktree so Git writes the
+committed bytes. Tool fixtures are discovered under `tools/math-port/tests/fixtures`
+and `tools/mermaid-cpp/regression/tests/fixtures`.
+
 For an intentional fixture change, verify the independent source observation,
 review the complete data diff and run its native consumers. Then record the new
 checkpoint explicitly with `python tests/tools/check_fixtures.py --refresh` and

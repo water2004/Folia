@@ -26,7 +26,7 @@ class RaiiFileApiChecks(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
-        self.root = Path(self.temp.name)
+        self.root = Path(self.temp.name).resolve()
         files = json.loads(FIXTURE.read_text().replace("$ROOT", self.root.as_posix()))
         for path, value in files.items():
             self.write(path, value)
