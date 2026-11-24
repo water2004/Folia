@@ -1,4 +1,5 @@
 #include "support/folia_test.hpp"
+#include "math/support/operator_fixtures.hpp"
 import folia.math.core.mml_tree.operator_dictionary;
 import folia.math.core.mml_tree.mo_patterns;
 
@@ -7,11 +8,11 @@ using namespace folia::math;
 using namespace folia::math::mml;
 using namespace folia::math::mml::operator_dict;
 
-#include "fixtures/tex-source/operator_source_entries.inc"
-#include "fixtures/tex-source/operator_source_named.inc"
-#include "fixtures/tex-source/operator_source_ranges.inc"
-#include "fixtures/tex-source/operator_source_spacing.inc"
-#include "fixtures/tex-source/operator_source_queries.inc"
+using OperatorFixtures = math_test::fixtures::OperatorFixtureData<TexClass, MoPattern>;
+using SourceOperatorProperty = OperatorFixtures::Property;
+using SourceRangeQuery = OperatorFixtures::Query;
+using SourceMoMask = OperatorFixtures::Mask;
+
 
 namespace {
 bool sourcePropertyEqual(const AttributeValue& actual,
@@ -47,8 +48,6 @@ bool sourceRangeEqual(const RangeDef& actual, const SourceRangeQuery& expected) 
            (!expected.hasVariant || *actual.variant == expected.variant);
 }
 } // namespace
-#include "fixtures/tex-source/mo_pattern_utf16_masks.inc"
-#include "fixtures/tex-source/mo_pattern_retained_values.inc"
 namespace {
 std::u16string sourceMaskInput(char16_t c, unsigned shape, char16_t first) {
     if (shape == 0) return std::u16string(1, c);
@@ -75,45 +74,45 @@ std::string sourceMask(const SourceMoMask& row) {
 suite typed_operator_dictionary = [] {
     "all pinned Source operator records preserve order and every field"_test = [] {
         const auto actual = OPTABLE();
-        expect(actual.size() == std::size(source_operator_entries));
-        const auto count = std::min(actual.size(), std::size(source_operator_entries));
+        expect(actual.size() == std::size(OperatorFixtures::entries()));
+        const auto count = std::min(actual.size(), std::size(OperatorFixtures::entries()));
         for (std::size_t i = 0; i < count; ++i) {
-            const auto& expected = source_operator_entries[i];
+            const auto& expected = OperatorFixtures::entries()[i];
             const auto* lookup = findOperatorDefinition(expected.form, expected.text);
             expect(actual[i].form == expected.form);
             expect(static_cast<bool>(actual[i].text == expected.text));
             expect(sourceDefinitionEqual(actual[i].definition, expected.left,
                 expected.right, expected.texClass, expected.propertyOffset,
-                expected.propertyCount, source_operator_properties));
+                expected.propertyCount, OperatorFixtures::properties().data()));
             expect(lookup != nullptr);
             if (lookup) {
                 expect(sourceDefinitionEqual(*lookup, expected.left, expected.right,
                     expected.texClass, expected.propertyOffset, expected.propertyCount,
-                    source_operator_properties));
+                    OperatorFixtures::properties().data()));
             }
         }
     };
 
     "all 27 pinned Source named MO records preserve every field"_test = [] {
         const auto actual = MO();
-        expect(actual.size() == std::size(source_named_operators));
-        const auto count = std::min(actual.size(), std::size(source_named_operators));
+        expect(actual.size() == std::size(OperatorFixtures::named()));
+        const auto count = std::min(actual.size(), std::size(OperatorFixtures::named()));
         for (std::size_t i = 0; i < count; ++i) {
-            const auto& expected = source_named_operators[i];
+            const auto& expected = OperatorFixtures::named()[i];
             expect(actual[i].first == expected.name);
             expect(sourceDefinitionEqual(actual[i].second, expected.left,
                 expected.right, expected.texClass, expected.propertyOffset,
-                expected.propertyCount, source_named_properties));
+                expected.propertyCount, OperatorFixtures::namedProperties().data()));
         }
     };
 
     "all 50 pinned Source ranges and eight spacing rows match"_test = [] {
         const auto actualRanges = RANGES();
-        expect(actualRanges.size() == std::size(source_ranges));
-        const auto rangeCount = std::min(actualRanges.size(), std::size(source_ranges));
+        expect(actualRanges.size() == std::size(OperatorFixtures::ranges()));
+        const auto rangeCount = std::min(actualRanges.size(), std::size(OperatorFixtures::ranges()));
         for (std::size_t i = 0; i < rangeCount; ++i) {
             const auto& actual = actualRanges[i];
-            const auto& expected = source_ranges[i];
+            const auto& expected = OperatorFixtures::ranges()[i];
             expect(actual.first == expected.first);
             expect(actual.last == expected.last);
             expect(actual.texClass == expected.texClass);
@@ -121,18 +120,18 @@ suite typed_operator_dictionary = [] {
             expect(actual.variant == expected.variant);
         }
         const auto actualSpacing = MMLSPACING();
-        expect(actualSpacing.size() == std::size(source_spacing));
-        const auto spacingCount = std::min(actualSpacing.size(), std::size(source_spacing));
+        expect(actualSpacing.size() == std::size(OperatorFixtures::spacing()));
+        const auto spacingCount = std::min(actualSpacing.size(), std::size(OperatorFixtures::spacing()));
         for (std::size_t i = 0; i < spacingCount; ++i)
-            expect(actualSpacing[i] == source_spacing[i]);
+            expect(actualSpacing[i] == OperatorFixtures::spacing()[i]);
     };
 
     "all pinned Source operator lookups and range boundaries match"_test = [] {
-        for (const auto& expected : source_operator_queries)
+        for (const auto& expected : OperatorFixtures::queries())
             expect(sourceRangeEqual(getRange(expected.input), expected));
     };
     "all pinned Source MoPattern UTF16 masks match every unit for each source shape"_test = [] {
-        for (const auto& row : source_mo_masks)
+        for (const auto& row : OperatorFixtures::masks())
             expect(sourceMask(row) == row.expected);
     };
     "operator_tables_preserve_source_order_and_records"_test = [] {
@@ -285,7 +284,7 @@ suite typed_mo_pattern_data = [] {
     };
 
     "all five retained MoPattern specs preserve every Source metadata field"_test = [] {
-        for (const auto& row : source_mo_retained_values) {
+        for (const auto& row : OperatorFixtures::retainedValues()) {
             const auto& actual = moPatternSpec(row.pattern);
             expect(actual.source.compare(row.source) == 0);
             expect(actual.flags == row.flags);
@@ -299,7 +298,7 @@ suite typed_mo_pattern_data = [] {
     };
 
     "all retained MoPattern members and mixed products match Source values"_test = [] {
-        for (const auto& row : source_mo_retained_values) {
+        for (const auto& row : OperatorFixtures::retainedValues()) {
             std::vector<unsigned> actualMembers;
             for (unsigned unit = 0; unit < 65536; ++unit)
                 if (matchMoPattern(row.pattern,
@@ -323,9 +322,9 @@ suite typed_mo_pattern_data = [] {
     };
 
     "all 255 additional and 40 independent MoPattern Source truth values match"_test = [] {
-        for (const auto& row : source_mo_retained_samples)
+        for (const auto& row : OperatorFixtures::retainedSamples())
             expect(matchMoPattern(row.pattern, row.text) == row.expected);
-        for (const auto& row : source_mo_independent_truths)
+        for (const auto& row : OperatorFixtures::independentTruths())
             expect(matchMoPattern(row.pattern, row.text) == row.expected);
     };
 };

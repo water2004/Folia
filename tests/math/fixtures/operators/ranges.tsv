@@ -1,0 +1,52 @@
+# Pinned reference observations; values exported without normalization.
+# first_codepoint	last_codepoint	tex_class	kind_utf16	has_variant	variant_utf16
+32	127	rel	mo	0	
+160	191	ord	mo	0	
+192	591	ord	mi	0	
+688	879	ord	mo	0	
+880	6688	ord	mi	0	
+6832	6911	ord	mo	0	
+6912	7615	ord	mi	0	
+7616	7679	ord	mo	0	
+7680	8191	ord	mi	0	
+8192	8303	ord	mo	0	
+8304	8351	ord	mo	0	
+8448	8527	ord	mi	0	
+8528	8591	ord	mn	0	
+8592	8703	rel	mo	0	
+8704	8959	bin	mo	0	
+8960	9215	ord	mo	0	
+9312	9471	ord	mn	0	
+9472	10223	ord	mo	0	
+10224	10239	rel	mo	0	
+10240	10495	ord	mtext	0	
+10496	10623	rel	mo	0	
+10624	10751	ord	mo	0	
+10752	11007	bin	mo	0	
+11008	11055	ord	mo	0	
+11056	11087	rel	mo	0	
+11088	11263	ord	mo	0	
+11264	11744	ord	mi	0	
+11776	11903	ord	mo	0	
+11904	12255	ord	mi	1	normal
+12272	12351	ord	mo	0	
+12352	42143	ord	mi	1	normal
+42192	43055	ord	mi	0	
+43056	43071	ord	mn	0	
+43072	55295	ord	mi	0	
+63744	64255	ord	mi	1	normal
+64256	65023	ord	mi	0	
+65024	65135	ord	mo	0	
+65136	65791	ord	mi	0	
+65792	65935	ord	mn	0	
+65936	74751	ord	mi	1	normal
+74752	74879	ord	mn	0	
+74880	113823	ord	mi	1	normal
+113824	119391	ord	mo	0	
+119648	119679	ord	mn	0	
+119808	120781	ord	mi	0	
+120782	120831	ord	mn	0	
+122624	129023	ord	mo	0	
+129024	129279	rel	mo	0	
+129280	129535	ord	mo	0	
+131072	195103	ord	mi	1	normal

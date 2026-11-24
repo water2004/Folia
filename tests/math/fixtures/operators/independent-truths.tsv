@@ -1,0 +1,42 @@
+# Pinned reference observations; values exported without normalization.
+# pattern	text_utf16	expected_boolean
+pseudoScripts	*	1
+primes	*	0
+opPattern	*	0
+mathaccents	*	0
+mathaccentsWithWidth	*	0
+pseudoScripts	'	1
+primes	'	1
+opPattern	'	0
+mathaccents	'	0
+mathaccentsWithWidth	'	0
+pseudoScripts	ab	0
+primes	ab	0
+opPattern	ab	1
+mathaccents	ab	0
+mathaccentsWithWidth	ab	0
+pseudoScripts	^	0
+primes	^	0
+opPattern	^	0
+mathaccents	^	1
+mathaccentsWithWidth	^	0
+pseudoScripts	\u2192	0
+primes	\u2192	0
+opPattern	\u2192	0
+mathaccents	\u2192	0
+mathaccentsWithWidth	\u2192	1
+pseudoScripts		0
+primes		0
+opPattern		0
+mathaccents		0
+mathaccentsWithWidth		0
+pseudoScripts	'''	1
+primes	'''	1
+opPattern	'''	0
+mathaccents	'''	0
+mathaccentsWithWidth	'''	0
+pseudoScripts	a1	0
+primes	a1	0
+opPattern	a1	0
+mathaccents	a1	0
+mathaccentsWithWidth	a1	0
