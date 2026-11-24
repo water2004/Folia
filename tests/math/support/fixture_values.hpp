@@ -40,6 +40,24 @@ inline auto rows(std::string_view path, std::size_t columns, std::size_t expecte
     return result;
 }
 
+// An explicit count distinguishes an empty list from a list containing "".
+// Literal pipe units are escaped as \u007c before joining the UTF-16 fields.
+inline std::vector<std::u16string> utf16List(std::string_view value, std::size_t count) {
+    std::vector<std::u16string> result;
+    if (count || !value.empty()) {
+        std::size_t start{};
+        for (;;) {
+            const auto end = value.find('|', start);
+            result.push_back(folia::test::data::decode_utf16(
+                value.substr(start, end == std::string_view::npos ? end : end - start)));
+            if (end == std::string_view::npos) break;
+            start = end + 1;
+        }
+    }
+    if (result.size() != count) throw std::runtime_error("UTF-16 fixture list count changed");
+    return result;
+}
+
 template <class Row, class Decode>
 std::vector<Row> records(std::string_view path, std::size_t columns,
                          std::size_t expected, Decode decode) {

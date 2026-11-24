@@ -1,0 +1,5 @@
+# Pinned reference observations; values exported without normalization.
+# shard_utf16	name_utf16	trigger_utf16	input_utf16	expected_utf16	files_count	files_utf16_list
+l	lsquo	LJcy	&lsquo; &LJcy;	\u2018 \u0409	2	l|test-overrides
+n	nbsp	NJcy	&nbsp; &NJcy;	\u00a0 \u040a	2	n|test-overrides
+r	rsquo	RBarr	&rsquo; &RBarr;	\u2019 \u2910	2	r|test-overrides

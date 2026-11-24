@@ -1,0 +1,4 @@
+# Pinned reference observations; values exported without normalization.
+# trigger_utf16	input_utf16	files_count	files_utf16_list
+nle	&\u00231114112;&nle;	0	
+nle	&nle;&\u00231114112;	1	n

@@ -1,0 +1,21 @@
+# Pinned reference observations; values exported without normalization.
+# module_integer	loadMissing_boolean	input_utf16	output_utf16	error_boolean	loaded_count	loaded_utf16_list
+0	1	&alpha; &amp; &lt; &gt; &quot;	\u03b1 & < > "	0	0	
+0	1	&AElig; &Afr; &Ascr; &Aopf;	\u00c6 \ud835\udd04 \ud835\udc9c \ud835\udd38	0	4	a|fr|opf|scr
+0	1	&Aunknown; &aUnknown;	&Aunknown; &aUnknown;	0	4	a|fr|opf|scr
+0	1	&Aunknown; &Afr;	&Aunknown; \ud835\udd04	0	4	a|fr|opf|scr
+0	1	&ALPHA; &Alpha; &alpha;	&ALPHA; \u0391 \u03b1	0	4	a|fr|opf|scr
+0	1	&bad_name; &bad-name; &; &a &amp;&alpha	&bad_name; &bad-name; &; &a &&alpha	0	4	a|fr|opf|scr
+0	1	&x &amp; &bad&beta;	&x & &bad\u03b2	0	4	a|fr|opf|scr
+0	1	&afr; &aFr; &afr;	\ud835\udd1e &aFr; \ud835\udd1e	0	4	a|fr|opf|scr
+0	1	&\u002365; &\u0023x41; &\u0023x1F600; &\u00230; &\u0023xD800;	A A \ud83d\ude00 \u0000 \ud800	0	4	a|fr|opf|scr
+0	1	&\u0023X41;		1	4	a|fr|opf|scr
+0	1	&\u0023xZZ; &\u0023x; &\u0023-1;	&\u0023xZZ; &\u0023x; &\u0023-1;	0	4	a|fr|opf|scr
+0	1	&\u00231114112;		1	4	a|fr|opf|scr
+0	1	&AMP; &amp; &AMP;	& & &	0	4	a|fr|opf|scr
+1	0	&alpha; &AElig; &Afr; &AMP;	\u03b1 &AElig; &Afr; &AMP;	0	0	
+1	0	&unknown;	&unknown;	0	0	
+1	0	&\u0023xDFFF; &\u0023x10FFFF;	\udfff \udbff\udfff	0	0	
+2	1	&zUnknown;&zUnknown;	&zUnknown;&zUnknown;	0	1	z
+2	1	&zeta; &zunknown;	\u03b6 &zunknown;	0	1	z
+2	1	&NotEqualTilde; &CounterClockwiseContourIntegral;	\u2242\u0338 \u2233	0	3	c|n|z

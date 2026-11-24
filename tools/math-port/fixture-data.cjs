@@ -32,6 +32,8 @@ const utf16Field = value => {
   return result;
 };
 
+const utf16List = values => values.map(value => utf16Field(value).replaceAll('|', '\\u007c')).join('|');
+
 const primitiveFields = value => {
   if (value === null) return ['null', ''];
   if (typeof value === 'boolean') return ['boolean', +value];
@@ -65,4 +67,4 @@ const writeTables = (directory, definitions, write = process.argv.includes('--wr
   }
 };
 
-module.exports = {byteField, utf16Field, binary64, primitiveFields, table, writeTables};
+module.exports = {byteField, utf16Field, utf16List, binary64, primitiveFields, table, writeTables};

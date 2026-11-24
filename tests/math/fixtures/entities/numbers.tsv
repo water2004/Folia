@@ -1,0 +1,23 @@
+# Pinned reference observations; values exported without normalization.
+# input_utf16	output_utf16	error_boolean
+0	\u0000	0
+-0	\u0000	0
+65	A	0
+x41	A	0
+x1F600	\ud83d\ude00	0
+xD800	\ud800	0
+xDFFF	\udfff	0
+x10FFFF	\udbff\udfff	0
+1114111	\udbff\udfff	0
+1114112		1
+-1		1
+x110000		1
+X41		1
+		1
+1.9	\u0001	0
+0x41	A	0
+010	\u000a	0
+ 65x	A	0
+x41suffix	A	0
+x		1
+9999999999999999999999999999999999999999999		1

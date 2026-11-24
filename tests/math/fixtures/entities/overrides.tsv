@@ -1,0 +1,5 @@
+# Pinned reference observations; values exported without normalization.
+# name_utf16	shard_utf16	expected_utf16	afterOverrideReload_utf16	afterRemoveReload_utf16
+lsquo	l	\u2018	\u2018	\u2018
+nbsp	n	\u00a0	\u00a0	\u00a0
+rsquo	r	\u2019	\u2019	\u2019

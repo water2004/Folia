@@ -102,29 +102,6 @@ async function translate(api, input) {
     }
     throw Error('Source retry did not finish')
 }
-function cpp(s) {
-    let out = 'u"';
-    for (let i = 0; i < s.length; ++i) {
-        const n = s.charCodeAt(i), c = s[i];
-        if (c === '\\')
-            out += '\\\\';
-        else if (c === '"')
-            out += '\\"';
-        else if (n === 0 || (n >= 0xd800 && n <= 0xdfff))
-            out += '\\x' + n.toString(16).padStart(4, '0') + '" u"';
-        else if (n === 10)
-            out += '\\n';
-        else if (n === 13)
-            out += '\\r';
-        else if (n === 9)
-            out += '\\t';
-        else if (n < 32 || n > 126)
-            out += '\\u' + n.toString(16).padStart(4, '0');
-        else
-            out += c
-    }
-    return out + '"sv'
-}
 async function main() {
     const cases = [];
     for (const item of retryInputs) {
@@ -203,54 +180,23 @@ async function main() {
     assert.equal(mutation.translate('&AddedByProbe; &emptyByProbe;'), 'Ω &emptyByProbe;');
     mutation.remove('AddedByProbe');
     assert.equal(mutation.translate('&AddedByProbe;'), '&AddedByProbe;');
-    let text = '// Independent pinned Source Entities tables and completed translations.\n';
-    text += 'const std::array entityRows{\n' +
-            rows.map(r => '    EntityRow{' + cpp(r.shard) + ', ' + cpp(r.name) + ', ' +
-                          cpp(r.value) + '},')
-                .join('\n') +
-            '\n};\n';
-    text += 'const std::array entityShards{\n' +
-            shards.map(r => '    EntityShard{' + cpp(r.name) + ', ' + r.size + '},').join('\n') +
-            '\n};\n';
-    text += 'const std::array entityOverrideCases{\n' +
-            overrideCases
-                .map(r => '    EntityOverrideCase{' + cpp(r.name) + ', ' + cpp(r.shard) + ', ' +
-                          cpp(r.expected) + ', ' + cpp(r.afterOverrideReload) + ', ' +
-                          cpp(r.afterRemoveReload) + '},')
-                .join('\n') +
-            '\n};\n';
-    text += 'const std::array entityRetryCases{\n' +
-            retryCases
-                .map(r => '    EntityRetryCase{' + cpp(r.shard) + ', ' + cpp(r.name) + ', ' +
-                          cpp(r.trigger) + ', ' + cpp(r.input) + ', ' + cpp(r.expected) + ', {' +
-                          r.files.map(cpp).join(', ') + '}},')
-                .join('\n') +
-            '\n};\n';
-    text += 'const std::array entityNumericRetryCases{\n' +
-            numericRetryCases
-                .map(r => '    EntityNumericRetryCase{' + cpp(r.trigger) + ', ' + cpp(r.input) +
-                          ', {' + r.files.map(cpp).join(', ') + '}},')
-                .join('\n') +
-            '\n};\n';
-    text += 'const std::array entityNumbers{\n' +
-            numeric
-                .map(r => '    EntityNumber{' + cpp(r.input) + ', ' + cpp(r.value) + ', ' +
-                          r.error + '},')
-                .join('\n') +
-            '\n};\n';
-    text += 'const std::array entityTranslations{\n' +
-            cases
-                .map(r => '    EntityTranslation{' + r.group + ', ' + r.load + ', ' + cpp(r.input) +
-                          ', ' + cpp(r.value) + ', ' + r.error + ', {' +
-                          r.files.map(cpp).join(', ') + '}},')
-                .join('\n') +
-            '\n};\n';
-    const dest = path.join(root, 'tests/math/fixtures/entities.inc');
-    if (process.argv.includes('--write-fixture'))
-        fs.writeFileSync(dest, text);
-    else
-        assert.equal(fs.readFileSync(dest, 'utf8').replaceAll('\r\n', '\n'), text,
-                     'Entities Source data changed; regenerate explicitly');
+    const {utf16Field, utf16List, writeTables} = require('./fixture-data.cjs');
+    writeTables(path.join(root, 'tests/math/fixtures/entities'), {
+        "rows": {columns: ["file_utf16", "name_utf16", "value_utf16"],
+            rows: rows.map(r => [utf16Field(r.shard), utf16Field(r.name), utf16Field(r.value)])},
+        "shards": {columns: ["name_utf16", "tableSize_integer"],
+            rows: shards.map(r => [utf16Field(r.name), r.size])},
+        "overrides": {columns: ["name_utf16", "shard_utf16", "expected_utf16", "afterOverrideReload_utf16", "afterRemoveReload_utf16"],
+            rows: overrideCases.map(r => [utf16Field(r.name), utf16Field(r.shard), utf16Field(r.expected), utf16Field(r.afterOverrideReload), utf16Field(r.afterRemoveReload)])},
+        "retries": {columns: ["shard_utf16", "name_utf16", "trigger_utf16", "input_utf16", "expected_utf16", "files_count", "files_utf16_list"],
+            rows: retryCases.map(r => [utf16Field(r.shard), utf16Field(r.name), utf16Field(r.trigger), utf16Field(r.input), utf16Field(r.expected), r.files.length, utf16List(r.files)])},
+        "numeric-retries": {columns: ["trigger_utf16", "input_utf16", "files_count", "files_utf16_list"],
+            rows: numericRetryCases.map(r => [utf16Field(r.trigger), utf16Field(r.input), r.files.length, utf16List(r.files)])},
+        "numbers": {columns: ["input_utf16", "output_utf16", "error_boolean"],
+            rows: numeric.map(r => [utf16Field(r.input), utf16Field(r.value), +!!r.error])},
+        "translations": {columns: ["module_integer", "loadMissing_boolean", "input_utf16", "output_utf16", "error_boolean", "loaded_count", "loaded_utf16_list"],
+            rows: cases.map(r => [r.group, +!!r.load, utf16Field(r.input), utf16Field(r.value), +!!r.error, r.files.length, utf16List(r.files)])},
+    });
     console.log(JSON.stringify({
         base : base.length,
         shards : shards.length,

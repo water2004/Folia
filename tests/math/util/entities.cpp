@@ -1,4 +1,5 @@
 #include "support/folia_test.hpp"
+#include "math/support/entity_fixtures.hpp"
 import folia.math.util.entities;
 
 namespace {
@@ -7,49 +8,14 @@ using namespace std::literals;
 using folia::math::entities::EntityEntry;
 using folia::math::entities::EntityModule;
 
-struct EntityRow {
-    std::u16string_view file;
-    std::u16string_view name;
-    std::u16string_view value;
-};
-struct EntityShard {
-    std::u16string_view name;
-    std::size_t tableSize;
-};
-struct EntityNumber {
-    std::u16string_view input;
-    std::u16string_view output;
-    bool error;
-};
-struct EntityTranslation {
-    std::size_t module;
-    bool loadMissing;
-    std::u16string_view input;
-    std::u16string_view output;
-    bool error;
-    std::vector<std::u16string_view> loaded;
-};
-struct EntityOverrideCase {
-    std::u16string_view name;
-    std::u16string_view shard;
-    std::u16string_view expected;
-    std::u16string_view afterOverrideReload;
-    std::u16string_view afterRemoveReload;
-};
-struct EntityRetryCase {
-    std::u16string_view shard;
-    std::u16string_view name;
-    std::u16string_view trigger;
-    std::u16string_view input;
-    std::u16string_view expected;
-    std::vector<std::u16string_view> files;
-};
-struct EntityNumericRetryCase {
-    std::u16string_view trigger;
-    std::u16string_view input;
-    std::vector<std::u16string_view> files;
-};
-#include "math/fixtures/entities.inc"
+using math_test::fixtures::entityRows;
+using math_test::fixtures::entityShards;
+using math_test::fixtures::entityOverrideCases;
+using math_test::fixtures::entityRetryCases;
+using math_test::fixtures::entityNumericRetryCases;
+using math_test::fixtures::entityNumbers;
+using math_test::fixtures::entityTranslations;
+
 
 bool hasLoaded(EntityModule const &module, std::u16string_view file) {
     return module.loadedFiles().contains(file);
@@ -60,7 +26,7 @@ suite entities_tables = [] {
     "entities base table matches every independent Source row"_test = [] {
         EntityModule module;
         std::size_t expectedRows = 0;
-        for (auto const &row : entityRows) {
+        for (auto const &row : entityRows()) {
             if (!row.file.empty())
                 continue;
             ++expectedRows;
@@ -75,10 +41,10 @@ suite entities_tables = [] {
     };
 
     "entities all 29 shards match every raw Source row and load once"_test = [] {
-        expect(entityShards.size() == 29_u);
-        expect(entityRows.size() == 2128_u);
+        expect(entityShards().size() == 29_u);
+        expect(entityRows().size() == 2128_u);
         std::size_t totalShardRows = 0;
-        for (auto const &shard : entityShards) {
+        for (auto const &shard : entityShards()) {
             EntityModule module;
             expect(module.table().size() == 406_u);
             expect(module.installShard(shard.name));
@@ -86,7 +52,7 @@ suite entities_tables = [] {
             expect(hasLoaded(module, shard.name));
 
             std::size_t rows = 0;
-            for (auto const &row : entityRows) {
+            for (auto const &row : entityRows()) {
                 if (row.file != shard.name)
                     continue;
                 ++rows;
@@ -102,12 +68,12 @@ suite entities_tables = [] {
             expect(module.loadedFiles().size() == 1_u);
             expect(module.table().size() == shard.tableSize);
         }
-        expect(totalShardRows == entityRows.size() - 406u);
+        expect(totalShardRows == entityRows().size() - 406u);
         EntityModule module;
         std::map<std::u16string, std::u16string, std::less<>> expected;
-        for (auto const &row : entityRows)
+        for (auto const &row : entityRows())
             expected.insert_or_assign(std::u16string(row.name), std::u16string(row.value));
-        for (auto const &shard : entityShards)
+        for (auto const &shard : entityShards())
             expect(module.installShard(shard.name));
         expect(module.table().size() == expected.size());
         expect(module.table() == expected);
@@ -119,8 +85,8 @@ suite entities_tables = [] {
 
 suite entities_numeric = [] {
     "entities numeric preserves exact UTF16 values and Source errors"_test = [] {
-        expect(entityNumbers.size() == 21_u);
-        for (auto const &entry : entityNumbers) {
+        expect(entityNumbers().size() == 21_u);
+        for (auto const &entry : entityNumbers()) {
             if (entry.error) {
                 expect(throws<std::range_error>(
                     [&] { (void)folia::math::entities::numeric(entry.input); }));
@@ -137,8 +103,8 @@ suite entities_numeric = [] {
 suite entities_translation = [] {
     "entities completed translations retain exact output and cumulative loads"_test = [] {
         std::array<EntityModule, 3> modules;
-        expect(entityTranslations.size() == 19_u);
-        for (auto const &entry : entityTranslations) {
+        expect(entityTranslations().size() == 19_u);
+        for (auto const &entry : entityTranslations()) {
             auto &module = modules[entry.module];
             module.options().loadMissingEntities = entry.loadMissing;
             if (entry.error) {
@@ -162,7 +128,7 @@ suite entities_translation = [] {
     };
 
     "entities completed retry rescans the full input after loading a shard"_test = [] {
-        for (auto const &entry : entityRetryCases) {
+        for (auto const &entry : entityRetryCases()) {
             EntityModule module;
             const std::array overrideEntry{
                 EntityEntry{std::u16string(entry.name), std::u16string(u"changed")}};
@@ -179,9 +145,9 @@ suite entities_translation = [] {
     };
 
     "entities numeric RangeError preserves shard loads before and after trigger"_test = [] {
-        expect(entityNumericRetryCases.size() == 2_u);
-        for (std::size_t index = 0; index < entityNumericRetryCases.size(); ++index) {
-            auto const &entry = entityNumericRetryCases[index];
+        expect(entityNumericRetryCases().size() == 2_u);
+        for (std::size_t index = 0; index < entityNumericRetryCases().size(); ++index) {
+            auto const &entry = entityNumericRetryCases()[index];
             auto numericPosition = entry.input.find(u"&#1114112;");
             auto triggerPosition = entry.input.find(entry.trigger);
             expect(numericPosition != std::u16string_view::npos);
@@ -222,8 +188,8 @@ suite entities_mutation = [] {
 
     "entities overlapping shard entries restore Source values after remove and reinstall"_test =
         [] {
-            expect(entityOverrideCases.size() == 3_u);
-            for (auto const &entry : entityOverrideCases) {
+            expect(entityOverrideCases().size() == 3_u);
+            for (auto const &entry : entityOverrideCases()) {
                 EntityModule module;
                 auto base = module.table().find(entry.name);
                 expect(base != module.table().end());
