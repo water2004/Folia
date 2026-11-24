@@ -169,6 +169,9 @@ namespace winrt::Folia
         auto preparation = preparationPass.Prepare();
         scrollOffset = preparation.scrollOffset;
         if (preparation.invalidateRequested) Invalidate();
+        if (!printMode)
+            documentPainter.BeginSelectionFrame(selectionAnimation, scrollOffset,
+                EditorCaretAnimation::Now(), frame.renderModel.revision);
         EditorDocumentRenderPass renderPass(
             resources,
             styleSheet,
@@ -196,7 +199,9 @@ namespace winrt::Folia
             printMode,
             pointerPosition,
             draggedTableAction,
-            tableDropIndex);
+            tableDropIndex,
+            selectionDrop);
+        if (!printMode) selectionAnimation.EndFrame();
         std::vector<std::uint64_t> visibleMathBlocks;
         visibleMathBlocks.reserve(preparation.visible.end - preparation.visible.begin);
         for (auto index = preparation.visible.begin; index < preparation.visible.end; ++index)

@@ -22,7 +22,8 @@ namespace winrt::Folia {
                 auto& owner = *current->owner;
                 auto scrolling = owner.scroll->AdvanceFrame(elapsed);
                 render();
-                return scrolling || owner.renderer->CaretAnimationFrame().animating;
+                return scrolling || owner.renderer->CaretAnimationFrame().animating
+                    || owner.renderer->SelectionAnimating();
             });
     }
     void EditorAnimationController::Detach() {
@@ -40,7 +41,7 @@ namespace winrt::Folia {
         if (!renderer || !wake) return;
         wake.Stop();
         auto const& frame = renderer->CaretAnimationFrame();
-        if (frame.animating) RequestFrame();
+        if (frame.animating || renderer->SelectionAnimating()) RequestFrame();
         else if (std::isfinite(frame.wakeAfter)) {
             wake.Interval(std::chrono::duration_cast<Windows::Foundation::TimeSpan>(
                 std::chrono::duration<double>((std::max)(.001, frame.wakeAfter))));

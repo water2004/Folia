@@ -22,6 +22,7 @@ namespace winrt::Folia
     float EditorSurfaceRenderer::ScrollOffset() const { return scrollState.Offset(); }
     float EditorSurfaceRenderer::MaximumScrollOffset() const { return (std::max)(0.0f, totalDocumentHeight - resources.surfaceHeightDip); }
     float EditorSurfaceRenderer::ViewportHeight() const { return resources.surfaceHeightDip; }
+    float EditorSurfaceRenderer::ViewportWidth() const { return resources.surfaceWidthDip; }
     HANDLE EditorSurfaceRenderer::FrameLatencyWaitableObject() const { return resources.frameLatencyWaitableObject; }
     void EditorSurfaceRenderer::UpdatePointer(float x, float y) { pointerPosition = D2D1::Point2F(x, y); }
     void EditorSurfaceRenderer::ClearPointer() { pointerPosition.reset(); }

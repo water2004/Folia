@@ -44,7 +44,8 @@ namespace winrt::Folia
         bool printMode,
         std::optional<D2D1_POINT_2F> pointerPosition,
         std::optional<EditorTableAction> const& draggedTableAction,
-        std::optional<std::size_t> tableDropIndex)
+        std::optional<std::size_t> tableDropIndex,
+        std::optional<folia::TextPosition> selectionDrop)
     {
         if (sourceGutterWidth > 0.0f && resources.lineNumberBackgroundBrush)
         {
@@ -140,7 +141,7 @@ namespace winrt::Folia
                 && block.block_style.background)
                 resources.d2dContext->FillRectangle(rect, resources.panelBrush.Get());
             documentPainter.DrawFlowDecorations(content.layout.Get(), origin, block, content.display);
-            documentPainter.DrawInlineText(content.layout.Get(), origin, content.display, content.display.displayToSource,
+            documentPainter.DrawInlineText(block.id, content.layout.Get(), origin, content.display, content.display.displayToSource,
                 prepared.code ? resources.codeBrush.Get() : resources.textBrush.Get(), content.paintPlan, content.layoutLines);
             documentPainter.DrawTaskCheckboxes(
                 content.layout.Get(), origin, content.display.taskCheckboxOverlays);
@@ -281,8 +282,11 @@ namespace winrt::Folia
         if (!printMode) DrawSnippetPlaceholders(frame.snippetPlaceholders);
         if (!printMode)
         {
-            auto rect = selection.is_caret() ? interactionMap.CaretBounds(caret, styleSheet.body.lineHeight) : std::nullopt;
-            auto visual = caretAnimation.Sample(rect, caret, scrollOffset, EditorCaretAnimation::Now(), frame.renderModel.revision);
+            auto position = selectionDrop.value_or(caret);
+            auto rect = selectionDrop || selection.is_caret()
+                ? interactionMap.CaretBounds(position, styleSheet.body.lineHeight) : std::nullopt;
+            auto visual = caretAnimation.Sample(rect, position, scrollOffset,
+                EditorCaretAnimation::Now(), frame.renderModel.revision, selectionDrop.has_value());
             if (visual.opacity > 0) {
                 resources.caretBrush->SetOpacity(visual.opacity);
                 resources.d2dContext->DrawLine(

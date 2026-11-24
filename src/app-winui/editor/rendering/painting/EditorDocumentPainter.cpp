@@ -8,7 +8,7 @@ import folia.markdown.utf;
 
 namespace winrt::Folia
 {
-    void EditorDocumentPainter::DrawInlineText(IDWriteTextLayout* layout, D2D1_POINT_2F origin,
+    void EditorDocumentPainter::DrawInlineText(folia::NodeId owner, IDWriteTextLayout* layout, D2D1_POINT_2F origin,
         DisplayInlineText const& display, EditorDisplayMapping const& mapping, ID2D1Brush* textBrush,
         std::shared_ptr<const folia::platform::editor::EditorTextPaintPlan> const& paintPlan,
         folia::platform::editor::EditorLayoutLines const& lines)
@@ -29,7 +29,7 @@ namespace winrt::Folia
         DrawInlinePresentationBackgrounds(resources, styleSheet, layout, origin, display.ranges);
         PaintMathBrackets(resources, styleSheet, layout, origin, display, mapping);
         DrawSyntaxMarkers(layout, origin, display);
-        DrawSelection(layout, origin, mapping, visible);
+        DrawSelection(owner, layout, origin, mapping, visible);
         DrawSearchHighlights(layout, origin, mapping, visible);
         winrt::check_bool(static_cast<bool>(paintPlan));
         winrt::check_hresult(paintPlan->Draw(resources.d2dContext.Get(), origin, textBrush, viewport));
@@ -294,14 +294,24 @@ namespace winrt::Folia
         return positioned;
     }
 
+    void EditorDocumentPainter::BeginSelectionFrame(EditorSelectionAnimation& animation,
+        float scrollOffset, double now, std::uint64_t revision)
+    {
+        selectionAnimation = &animation;
+        animation.BeginFrame(selection, !PositionLess(selection.active, selection.anchor), scrollOffset, now, revision);
+    }
+
     void EditorDocumentPainter::DrawSelection(
+        folia::NodeId owner,
         IDWriteTextLayout* layout,
         D2D1_POINT_2F origin,
         EditorDisplayMapping const& mapping, std::pair<std::size_t, std::size_t> visible)
     {
-        if (!layout || selection.is_caret() || mapping.empty()) return;
-        auto ranges = folia::platform::editor::DisplayRangesForSourceSelection(mapping, selectionStart, selectionEnd,
-            [&](auto a, auto b) { return PositionLess(a, b); });
+        std::vector<EditorSelectionRect> target;
+        auto ranges = selection.is_caret() || mapping.empty()
+            ? std::vector<std::pair<std::size_t, std::size_t>>{}
+            : folia::platform::editor::DisplayRangesForSourceSelection(mapping, selectionStart, selectionEnd,
+                [&](auto a, auto b) { return PositionLess(a, b); });
         for (auto [start, end] : ranges)
         {
             start = (std::max)(start, visible.first);
@@ -315,10 +325,17 @@ namespace winrt::Folia
             for (UINT32 metricIndex = 0; metricIndex < count; ++metricIndex)
             {
                 auto const& metric = metrics[metricIndex];
-                resources.d2dContext->FillRectangle(
+                target.push_back({
                     D2D1::RectF(metric.left, metric.top, metric.left + metric.width, metric.top + metric.height),
-                    resources.selectionBrush.Get());
+                    (metric.bidiLevel & 1) != 0});
             }
+        }
+        if (selectionAnimation) {
+            for (auto const& bounds : selectionAnimation->Sample(owner, std::move(target)))
+                resources.d2dContext->FillRectangle(bounds, resources.selectionBrush.Get());
+        } else {
+            for (auto const& rect : target)
+                resources.d2dContext->FillRectangle(rect.bounds, resources.selectionBrush.Get());
         }
     }
 

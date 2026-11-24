@@ -24,7 +24,7 @@ namespace winrt::Folia
         scroll_ = &scroll;
         textInput_ = &textInput;
         surface_ = surface;
-        selectionDrag_.Attach(session, renderer, scroll, textInput, surface);
+        selectionDrag_.Attach(session, renderer, scroll, textInput);
         textCursor_ = winrt::Microsoft::UI::Input::InputSystemCursor::Create(
             winrt::Microsoft::UI::Input::InputSystemCursorShape::IBeam);
         linkCursor_ = winrt::Microsoft::UI::Input::InputSystemCursor::Create(
@@ -84,6 +84,20 @@ namespace winrt::Folia
         auto point = pointerPoint.Position();
         if (scroll_) scroll_->Stop();
         renderer_->UpdatePointer(static_cast<float>(point.X), static_cast<float>(point.Y));
+        using Modifiers = winrt::Windows::System::VirtualKeyModifiers;
+        if (args.Pointer().PointerDeviceType() == winrt::Microsoft::UI::Input::PointerDeviceType::Mouse
+            && args.KeyModifiers() == Modifiers::None
+            && session_->HasSelection()
+            && renderer_->SelectionBackgroundAt(static_cast<float>(point.X), static_cast<float>(point.Y)))
+        {
+            if (auto hit = renderer_->HitTest(static_cast<float>(point.X), static_cast<float>(point.Y));
+                hit && surface_.CapturePointer(args.Pointer()))
+            {
+                selectionDrag_.BeginMove(*hit, static_cast<float>(point.X), static_cast<float>(point.Y));
+                args.Handled(true);
+                return;
+            }
+        }
         if (auto action = renderer_->TableActionAt(static_cast<float>(point.X), static_cast<float>(point.Y)))
         {
             if (action->kind == EditorTableActionKind::DragRow || action->kind == EditorTableActionKind::DragColumn)
@@ -238,7 +252,7 @@ namespace winrt::Folia
         if (selectionDrag_.Active())
         {
             auto point = args.GetCurrentPoint(surface_).Position();
-            auto changed = selectionDrag_.Finish(static_cast<float>(point.X), static_cast<float>(point.Y));
+            auto changed = selectionDrag_.Finish(static_cast<float>(point.X), static_cast<float>(point.Y), executeCommand_);
             surface_.ReleasePointerCapture(args.Pointer());
             if (changed && render_) render_();
             args.Handled(true);
@@ -261,6 +275,7 @@ namespace winrt::Folia
 
     void EditorPointerController::CancelPointerInteraction()
     {
+        auto repaint = selectionDrag_.Moving();
         selectionDrag_.Cancel();
         SetLinkCursor(false);
         if (tableDrag_ && renderer_)
@@ -268,8 +283,17 @@ namespace winrt::Folia
             tableDrag_.reset();
             tableDropIndex_.reset();
             renderer_->SetTableDrag(std::nullopt, std::nullopt);
-            if (render_) render_();
+            repaint = true;
         }
+        if (repaint && render_) render_();
+    }
+
+    bool EditorPointerController::CancelSelectionMove()
+    {
+        if (!selectionDrag_.Moving()) return false;
+        CancelPointerInteraction();
+        if (surface_) surface_.ReleasePointerCaptures();
+        return true;
     }
 
     void EditorPointerController::DoubleTapped(winrt::Microsoft::UI::Xaml::Input::DoubleTappedRoutedEventArgs const& args)

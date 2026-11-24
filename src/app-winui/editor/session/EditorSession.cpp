@@ -192,6 +192,21 @@ namespace winrt::Folia
             : !core_->editor.selection().is_caret();
     }
 
+    bool EditorSession::SelectionCovers(folia::TextPosition position) const
+    {
+        const auto selection = Selection();
+        if (selection.is_caret()) return false;
+        const auto& ranks = RenderModel().editable_index;
+        auto anchor = ranks.find(selection.anchor.container_id.v);
+        auto active = ranks.find(selection.active.container_id.v);
+        auto candidate = ranks.find(position.container_id.v);
+        if (!anchor || !active || !candidate) return false;
+        const auto a = std::pair{anchor->second, selection.anchor.source_offset};
+        const auto b = std::pair{active->second, selection.active.source_offset};
+        const auto point = std::pair{candidate->second, position.source_offset};
+        return point >= (std::min)(a, b) && point <= (std::max)(a, b);
+    }
+
     std::u32string EditorSession::SelectedSource() const
     {
         return core_->editor.source_editor()

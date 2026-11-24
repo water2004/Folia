@@ -4,6 +4,7 @@ import folia.markdown.owner_index;
 import folia.platform.editor_interaction;
 
 #include "editor/rendering/layout/EditorContentPreparation.h"
+#include "editor/rendering/EditorCaretAnimation.h"
 #include "editor/rendering/EditorRenderResources.h"
 #include "editor/rendering/EditorStyleSheet.h"
 #include "editor/rendering/media/EditorEmbeddedDraw.h"
@@ -44,10 +45,8 @@ namespace winrt::Folia
             IDWriteTextLayout* layout,
             D2D1_POINT_2F origin,
             std::vector<DisplayInlineText::FootnoteOverlay> const& overlays);
-        void DrawSelection(
-            IDWriteTextLayout* layout,
-            D2D1_POINT_2F origin,
-            EditorDisplayMapping const& mapping, std::pair<std::size_t, std::size_t> visible);
+        void BeginSelectionFrame(EditorSelectionAnimation& animation, float scrollOffset,
+            double now, std::uint64_t revision);
         void DrawSearchHighlights(
             IDWriteTextLayout* layout,
             D2D1_POINT_2F origin,
@@ -64,7 +63,7 @@ namespace winrt::Folia
             IDWriteTextLayout* layout,
             D2D1_POINT_2F origin,
             DisplayInlineText const& display);
-        void DrawInlineText(IDWriteTextLayout* layout, D2D1_POINT_2F origin,
+        void DrawInlineText(folia::NodeId owner, IDWriteTextLayout* layout, D2D1_POINT_2F origin,
             DisplayInlineText const& display, EditorDisplayMapping const& mapping, ID2D1Brush* textBrush,
             std::shared_ptr<const folia::platform::editor::EditorTextPaintPlan> const& paintPlan,
             folia::platform::editor::EditorLayoutLines const& lines);
@@ -80,6 +79,8 @@ namespace winrt::Folia
             float width);
 
     private:
+        void DrawSelection(folia::NodeId owner, IDWriteTextLayout* layout, D2D1_POINT_2F origin,
+            EditorDisplayMapping const& mapping, std::pair<std::size_t, std::size_t> visible);
         bool PositionLess(folia::TextPosition left, folia::TextPosition right) const;
 
         EditorRenderResources& resources;
@@ -94,5 +95,6 @@ namespace winrt::Folia
         folia::OwnerIndex const& editableIndex;
         folia::TextPosition selectionStart;
         folia::TextPosition selectionEnd;
+        EditorSelectionAnimation* selectionAnimation = nullptr;
     };
 }

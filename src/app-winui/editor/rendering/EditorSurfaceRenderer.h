@@ -105,11 +105,25 @@ namespace winrt::Folia
         float ScrollOffset() const;
         float MaximumScrollOffset() const;
         float ViewportHeight() const;
+        float ViewportWidth() const;
         HANDLE FrameLatencyWaitableObject() const;
-        void FocusCaret(bool focused) { caretAnimation.Focus(focused); }
-        void ConfigureCaret(bool animations, double blinkHalfPeriod) { caretAnimation.Configure(styleSheet.editor, animations, blinkHalfPeriod); }
+        void FocusCaret(bool focused) {
+            caretAnimation.Focus(focused);
+            selectionAnimation.Focus(focused);
+        }
+        void ConfigureCaret(bool animations, double blinkHalfPeriod) {
+            caretAnimation.Configure(styleSheet.editor, animations, blinkHalfPeriod);
+            selectionAnimation.Configure(animations ? styleSheet.editor.caret_move_ms / 1000.0 : 0.0);
+        }
         EditorCaretFrame const& CaretAnimationFrame() const { return caretAnimation.Frame(); }
+        bool SelectionAnimating() const { return selectionAnimation.Animating(); }
         bool ScrollToPosition(folia::TextPosition position, EditorScrollAlignment alignment = EditorScrollAlignment::Nearest);
+        bool SelectionBackgroundAt(float x, float y) const { return selectionAnimation.HitTest(x, y); }
+        bool SetSelectionDrop(std::optional<folia::TextPosition> position) {
+            if (selectionDrop == position) return false;
+            selectionDrop = position;
+            return true;
+        }
 
     private:
         struct PdfExportState;
@@ -154,6 +168,11 @@ namespace winrt::Folia
         MediaDisplaySettings mediaSettings;
         EditorInteractionMap interactionMap;
         EditorCaretAnimation caretAnimation;
+        EditorSelectionAnimation selectionAnimation;
+        void ResetTextMotion() {
+            caretAnimation.Reset();
+            selectionAnimation.Reset();
+        }
         std::vector<D2D1_RECT_F> nonInteractiveRegions;
         std::optional<D2D1_RECT_F> inlineMathPreviewBounds;
         std::unique_ptr<EditorPreparedDocument> preparedDocument;
@@ -161,6 +180,7 @@ namespace winrt::Folia
         std::uint64_t embeddedGeneration = 0;
         std::optional<std::uint64_t> mathModelRevision;
         std::optional<D2D1_POINT_2F> pointerPosition;
+        std::optional<folia::TextPosition> selectionDrop;
         std::optional<EditorTableAction> draggedTableAction;
         std::optional<std::size_t> tableDropIndex;
         EditorScrollState scrollState;

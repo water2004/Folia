@@ -50,7 +50,8 @@ namespace winrt::Folia
             bool printMode,
             std::optional<D2D1_POINT_2F> pointerPosition,
             std::optional<EditorTableAction> const& draggedTableAction,
-            std::optional<std::size_t> tableDropIndex);
+            std::optional<std::size_t> tableDropIndex,
+            std::optional<folia::TextPosition> selectionDrop);
 
     private:
         void DrawSnippetPlaceholders(

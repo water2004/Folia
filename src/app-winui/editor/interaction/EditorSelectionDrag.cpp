@@ -9,21 +9,18 @@ namespace winrt::Folia
         EditorSession& valueSession,
         EditorSurfaceRenderer& valueRenderer,
         EditorScrollController& valueScroll,
-        EditorTextInputController& valueTextInput,
-        winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel const& valueSurface)
+        EditorTextInputController& valueTextInput)
     {
         Detach();
         session = &valueSession;
         renderer = &valueRenderer;
         scroll = &valueScroll;
         textInput = &valueTextInput;
-        surface = valueSurface;
     }
 
     void EditorSelectionDrag::Detach()
     {
         Cancel();
-        surface = nullptr;
         textInput = nullptr;
         scroll = nullptr;
         renderer = nullptr;
@@ -38,7 +35,7 @@ namespace winrt::Folia
     void EditorSelectionDrag::Begin(folia::TextSelection initial, float x, float y)
     {
         if (!session) return;
-        StopAutoScroll();
+        Cancel();
         active = true;
         anchor = initial.anchor;
         pointerX = x;
@@ -48,21 +45,59 @@ namespace winrt::Folia
         if (textInput) textInput->NotifySelectionChanged();
     }
 
+    void EditorSelectionDrag::BeginMove(folia::TextPosition position, float x, float y)
+    {
+        if (!session) return;
+        Cancel();
+        move = Move{position, session->Selection(), session->Revision()};
+        pointerX = x;
+        pointerY = y;
+        gesture.Begin(x, y);
+        active = true;
+    }
+
+    bool EditorSelectionDrag::MoveStillValid() const
+    {
+        return move && session && session->Revision() == move->revision
+            && session->Selection() == move->selection;
+    }
+
     bool EditorSelectionDrag::Update(float x, float y)
     {
         pointerX = x;
         pointerY = y;
-        return active && gesture.Update(x, y) && UpdateSelection(x, y, true);
+        return active && gesture.Update(x, y) && UpdatePosition(x, y, true);
     }
 
-    bool EditorSelectionDrag::Finish(float x, float y)
+    bool EditorSelectionDrag::Finish(float x, float y, std::function<bool(folia::Command const&)> const& execute)
     {
         if (!active) return false;
         pointerX = x;
         pointerY = y;
-        auto changed = gesture.Update(x, y) && UpdateSelection(x, y, false);
-        StopAutoScroll();
-        active = false;
+        auto dragged = gesture.Update(x, y);
+        if (move)
+        {
+            auto valid = MoveStillValid();
+            auto point = move->press;
+            auto width = renderer->ViewportWidth();
+            if (valid && dragged && x >= 0.0f && x <= width
+                && y >= 0.0f && y <= renderer->ViewportHeight())
+                UpdatePosition(x, y, false);
+            else
+                drop.reset();
+            auto destination = drop;
+            Cancel();
+            if (destination && execute)
+                return !execute({.kind = folia::CommandKind::MoveSelection, .move_destination = destination});
+            if (valid && !dragged)
+            {
+                session->SetSelection(folia::TextSelection::caret(point));
+                if (textInput) textInput->NotifySelectionChanged();
+            }
+            return true;
+        }
+        auto changed = dragged && UpdatePosition(x, y, false);
+        Cancel();
         return changed;
     }
 
@@ -70,13 +105,16 @@ namespace winrt::Folia
     {
         StopAutoScroll();
         active = false;
+        move.reset();
+        drop.reset();
+        if (renderer) renderer->SetSelectionDrop({});
     }
 
-    bool EditorSelectionDrag::UpdateSelection(float x, float y, bool updateAutoScroll)
+    bool EditorSelectionDrag::UpdatePosition(float x, float y, bool updateAutoScroll)
     {
         if (!active || !session || !renderer) return false;
         auto viewportHeight = renderer->ViewportHeight();
-        auto width = surface ? static_cast<float>(surface.ActualWidth()) : 0.0f;
+        auto width = renderer->ViewportWidth();
         auto projection = folia::platform::editor::ProjectEditorSelectionPointer(
             x,
             y,
@@ -90,7 +128,7 @@ namespace winrt::Folia
                 autoScrolling = true;
                 scroll->BeginSelectionAutoScroll(velocity, [this]
                 {
-                    UpdateSelection(pointerX, pointerY, false);
+                    UpdatePosition(pointerX, pointerY, false);
                 });
             }
             else
@@ -100,6 +138,11 @@ namespace winrt::Folia
         }
 
         auto hit = renderer->HitTest(projection.hitX, projection.hitY);
+        if (move)
+        {
+            drop = hit && MoveStillValid() && !session->SelectionCovers(*hit) ? hit : std::nullopt;
+            return renderer->SetSelectionDrop(drop);
+        }
         if (!hit) return false;
         auto selection = session->Selection();
         if (selection.anchor == anchor && selection.active == *hit) return false;

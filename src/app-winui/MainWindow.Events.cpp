@@ -196,6 +196,11 @@ namespace winrt::Folia::implementation
 
         EditorSurface().KeyDown(WindowEvent([this](auto const&, Microsoft::UI::Xaml::Input::KeyRoutedEventArgs const& args)
         {
+            if (args.Key() == winrt::Windows::System::VirtualKey::Escape && pointerController.CancelSelectionMove())
+            {
+                args.Handled(true);
+                return;
+            }
             auto gesture = keyboardController.Gesture(args.Key());
             if (HandleCompletionKey(gesture)) { args.Handled(true); return; }
             auto handled = keyboardController.Key(gesture);
@@ -222,6 +227,7 @@ namespace winrt::Folia::implementation
         escapeAccelerator.Key(winrt::Windows::System::VirtualKey::Escape);
         escapeAccelerator.Invoked([this](auto const&, auto const& args)
         {
+            if (pointerController.CancelSelectionMove()) { args.Handled(true); return; }
             if (textInputController.IsComposing()) return;
             if (HandleCompletionKey(keyboardController.Gesture(winrt::Windows::System::VirtualKey::Escape))) { args.Handled(true); return; }
             if (FindReplaceBar().Visibility() != Microsoft::UI::Xaml::Visibility::Visible) return;

@@ -73,7 +73,7 @@ namespace
             });
             renderer.Render(session.RenderFrame());
             Settle();
-            drag.Attach(session, renderer, scroll, textInput, panel);
+            drag.Attach(session, renderer, scroll, textInput);
         }
 
         ~MathDragFixture()

@@ -12,6 +12,90 @@ using namespace winrt::Folia;
 
 namespace {
     suite inline_format_controls_tests = [] {
+        "selection movement eases the highlight and keeps hit testing in document coordinates"_test = [] {
+            EditorSelectionAnimation animation;
+            animation.Configure(0.1);
+            auto owner = folia::NodeId{1};
+            auto caret = folia::TextSelection::caret({owner, 0});
+            auto selected = caret;
+            selected.active.source_offset = 5;
+
+            animation.BeginFrame(caret, true, 10, 1.0, 1);
+            animation.EndFrame();
+            animation.BeginFrame(selected, true, 10, 1.01, 1);
+            expect(animation.Sample(owner, {{{20, 5, 60, 18}, false}}).empty());
+            expect(animation.HitTest(55, 8));
+            animation.EndFrame();
+
+            animation.BeginFrame(selected, true, 13, 1.06, 1);
+            auto midway = animation.Sample(owner, {{{20, 2, 60, 15}, false}});
+            expect(fatal(midway.size() == 1_u));
+            expect(std::abs(midway.front().right - 55.0f) < 0.1f);
+            expect(midway.front().top == 2.0f && animation.Animating());
+            animation.EndFrame();
+
+            animation.BeginFrame(selected, true, 13, 1.12, 1);
+            auto settled = animation.Sample(owner, {{{20, 2, 60, 15}, false}});
+            expect(fatal(settled.size() == 1_u));
+            expect(settled.front().right == 60.0f && !animation.Animating());
+            animation.EndFrame();
+
+            animation.BeginFrame(caret, true, 13, 1.13, 1);
+            expect(animation.Sample(owner, {}).size() == 1_u);
+            expect(!animation.HitTest(55, 8) && animation.Animating());
+            animation.EndFrame();
+            animation.BeginFrame(caret, true, 13, 1.24, 1);
+            expect(animation.Sample(owner, {}).empty() && !animation.Animating());
+            animation.EndFrame();
+        };
+
+        "selection movement drops once and keeps the range on invalid drops"_test = [] {
+            auto xaml = winrt::Microsoft::UI::Xaml::Hosting::WindowsXamlManager::InitializeForCurrentThread();
+            winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel panel;
+            EditorSession session;
+            session.SetText(L"move these words");
+            auto owner = session.Selection().active.container_id;
+            auto position = [&](std::size_t offset) {
+                return folia::TextPosition{owner, offset, folia::TextAffinity::Downstream};
+            };
+            folia::TextSelection before{position(0), position(4)};
+            session.SetSelection(before);
+            EditorSurfaceRenderer renderer;
+            renderer.Initialize(panel);
+            renderer.Resize(panel, 680, 420);
+            renderer.Render(session.RenderFrame());
+            auto start = renderer.CaretBounds(position(0));
+            auto end = renderer.CaretBounds(position(4));
+            auto target = renderer.CaretBounds(position(16));
+            expect(fatal(start.has_value() && end.has_value() && target.has_value()));
+            auto inside = (start->left + end->left) * 0.5f;
+            auto y = (start->top + start->bottom) * 0.5f;
+            expect(renderer.SelectionBackgroundAt(inside, y));
+            auto hit = renderer.HitTest(inside, y);
+            expect(fatal(hit.has_value()));
+            EditorScrollController scroll;
+            EditorTextInputController input;
+            EditorSelectionDrag drag;
+            drag.Attach(session, renderer, scroll, input);
+            unsigned executions = 0;
+            auto execute = [&](folia::Command const& command) {
+                ++executions;
+                return session.ExecuteCommand(command);
+            };
+            drag.BeginMove(*hit, inside, y);
+            drag.Update(inside, y + 10);
+            drag.Finish(inside, y, execute);
+            expect(executions == 0_u && session.Selection() == before);
+
+            drag.BeginMove(*hit, inside, y);
+            drag.Update(target->left + 2, y);
+            drag.Finish(target->left + 2, y, execute);
+            expect(executions == 1_u && session.Text() == L" these wordsmove");
+            expect(session.ExecuteCommand({.kind = folia::CommandKind::Undo}));
+            expect(session.Text() == L"move these words" && session.Selection() == before);
+            drag.Detach();
+        };
+
         "marker layout reserves space outside italic ink at multiple font sizes"_test = [] {
             EditorRenderResources resources;
             winrt::check_hresult(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED,
@@ -309,7 +393,7 @@ namespace {
             EditorScrollController scroll;
             EditorTextInputController input;
             EditorSelectionDrag drag;
-            drag.Attach(session, renderer, scroll, input, panel);
+            drag.Attach(session, renderer, scroll, input);
             drag.Begin(folia::TextSelection::caret(*hit), x, y);
             auto pressed = session.Selection();
             renderer.Render(session.RenderFrame());

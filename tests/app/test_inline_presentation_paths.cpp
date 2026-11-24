@@ -101,7 +101,7 @@ namespace {
             resources.d2dContext->BeginDraw();
             resources.d2dContext->Clear(sheet.canvasColor);
             pass.Paint(frame, document, selection, selection.active, 20, 20 + width, width, 0, 0, 0,
-                0, document.blocks.size(), false, {}, {}, {});
+                0, document.blocks.size(), false, {}, {}, {}, {});
             winrt::check_hresult(resources.d2dContext->EndDraw());
             resources.d2dContext->SetTarget(nullptr);
             auto properties = D2D1::BitmapProperties1(D2D1_BITMAP_OPTIONS_CPU_READ | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,

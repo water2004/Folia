@@ -37,6 +37,7 @@ namespace winrt::Folia
         void PointerReleased(winrt::Microsoft::UI::Xaml::Input::PointerRoutedEventArgs const& args);
         void PointerExited();
         void CancelPointerInteraction();
+        bool CancelSelectionMove();
         void DoubleTapped(winrt::Microsoft::UI::Xaml::Input::DoubleTappedRoutedEventArgs const& args);
 
     private:

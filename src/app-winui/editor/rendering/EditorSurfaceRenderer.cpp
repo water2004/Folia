@@ -46,7 +46,8 @@ namespace winrt::Folia
 
     void EditorSurfaceRenderer::ResetDocumentCaches()
     {
-        caretAnimation.Reset();
+        ResetTextMotion();
+        selectionDrop.reset();
         mathJax.Clear();
         AttachMathCompletion();
         mathModelRevision.reset();
@@ -208,7 +209,7 @@ namespace winrt::Folia
 
     void EditorSurfaceRenderer::Render(detail::EditorRenderFrame const& frame)
     {
-        if (!resources.Ready()) { caretAnimation.Reset(); return; }
+        if (!resources.Ready()) { ResetTextMotion(); return; }
         if (resizing || rendering)
         {
             // A source edit may request a frame while an embedded-content
@@ -232,12 +233,12 @@ namespace winrt::Folia
             // Synchronous native/file preparation can report an error. Close
             // the drawing transaction so the next frame can still render.
             resources.d2dContext->EndDraw();
-            caretAnimation.Reset();
+            ResetTextMotion();
             throw;
         }
         auto ended = resources.d2dContext->EndDraw();
-        if (ended == D2DERR_RECREATE_TARGET) { caretAnimation.Reset(); resources.ResetTargets(); return; }
-        if (FAILED(ended)) { caretAnimation.Reset(); return; }
+        if (ended == D2DERR_RECREATE_TARGET) { ResetTextMotion(); resources.ResetTargets(); return; }
+        if (FAILED(ended)) { ResetTextMotion(); return; }
         presentPending = true;
         if (frameUpdateDepth == 0 && !xamlPresentation.value) PresentPendingFrame();
     }
@@ -268,7 +269,7 @@ namespace winrt::Folia
         if (!std::exchange(presentPending, false) || !resources.Ready()) return;
         auto presented = resources.swapChain->Present(0, 0);
         if (presented == DXGI_ERROR_DEVICE_REMOVED || presented == DXGI_ERROR_DEVICE_RESET) {
-            caretAnimation.Reset();
+            ResetTextMotion();
             resources.ResetTargets();
         }
     }

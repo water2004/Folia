@@ -97,6 +97,7 @@ namespace winrt::Folia
         void SetSelection(folia::TextPosition anchor, folia::TextPosition active);
         void SetSelection(folia::TextSelection selection);
         bool HasSelection() const;
+        bool SelectionCovers(folia::TextPosition position) const;
         std::u32string SelectedSource() const;
         std::string SelectedTextUtf8() const;
         bool HasFile() const;

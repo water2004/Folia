@@ -189,7 +189,8 @@ namespace winrt::Folia
             auto const& display = prepared.displays[cellIndex];
             if (cell.layout)
             {
-                documentPainter.DrawInlineText(cell.layout.Get(), cell.textOrigin, display, cell.displayToSource, resources.textBrush.Get(), cell.paintPlan, cell.layoutLines);
+                documentPainter.DrawInlineText(cell.sourceSpan.container_id, cell.layout.Get(), cell.textOrigin,
+                    display, cell.displayToSource, resources.textBrush.Get(), cell.paintPlan, cell.layoutLines);
                 for (auto const& overlay : display.footnoteOverlays)
                 {
                     UINT32 count = 0;
