@@ -20,7 +20,7 @@ BlockNode make_quote_ownership_tree(std::uint64_t depth) {
     BlockNode node;
     node.id = NodeId{depth+2}; node.kind = BlockKind::Paragraph;
     node.inline_content.source = U"a";
-    node.inline_content.tree.nodes.push_back(InlineCstNode{NodeId{depth+3}, InlineCstKind::Text, {0,1}, ParseStatus::Complete});
+    node.inline_content.tree.nodes.push_back(InlineCstNode{NodeId{depth+3}, InlineCstKind::Text, ParseStatus::Complete, {0,1}});
     node.inline_content.tree.tokens.push_back(InlineToken{TokenKind::Text,1});
     for (std::uint64_t index=depth; index>0; --index) {
         BlockNode parent;

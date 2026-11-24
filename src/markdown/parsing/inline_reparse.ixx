@@ -73,10 +73,10 @@ inline void shift_subtree(InlineCstNode& root, std::size_t boundary, std::ptrdif
         auto& node = *pending.back(); pending.pop_back();
         shift(node.range);
         if (node.delimited) {
-            node.delimited = std::make_shared<DelimitedRanges>(*node.delimited);
-            auto& ranges = *node.delimited;
-            shift(ranges.full); shift(ranges.opening); shift(ranges.content);
+            auto ranges = *node.delimited;
+            shift(ranges.opening); shift(ranges.content);
             if (ranges.closing) shift(*ranges.closing);
+            node.set_delimiter_ranges(ranges);
         }
         for (auto& child : node.children) pending.push_back(&child);
     }
@@ -152,16 +152,15 @@ inline void apply_inline_reparse(InlineDocument& document, InlineReparseWindow w
         for (auto sibling = index + 1; sibling < nodes->size(); ++sibling)
             inline_reparse_detail::shift_subtree((*nodes)[sibling], boundary, window.delta, pending);
         if (node.delimited && window.delta) {
-            // The ancestor's opening delimiter is unchanged. The content and
-            // full ranges grow, and its closing delimiter moves with the edit.
-            node.delimited = std::make_shared<DelimitedRanges>(*node.delimited);
-            auto& ranges = *node.delimited;
-            ranges.full.end = inline_reparse_detail::shifted(ranges.full.end, window.delta);
+            // The ancestor's opening delimiter is unchanged. Its content
+            // grows, and its closing delimiter moves with the edit.
+            auto ranges = *node.delimited;
             ranges.content.end = inline_reparse_detail::shifted(ranges.content.end, window.delta);
             if (ranges.closing) {
                 ranges.closing->start = inline_reparse_detail::shifted(ranges.closing->start, window.delta);
                 ranges.closing->end = inline_reparse_detail::shifted(ranges.closing->end, window.delta);
             }
+            node.set_delimiter_ranges(ranges);
         }
         nodes = &node.children;
     }

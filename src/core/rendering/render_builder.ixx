@@ -88,9 +88,11 @@ struct Hasher {
 
 inline void append(Hasher& hash, InlineCstNode const& node) {
     hash.scalar(node.id); hash.scalar(node.kind); hash.scalar(node.range); hash.scalar(node.status);
-    const auto& delim = node.delimiter_ranges();
-    hash.scalar(delim.full); hash.scalar(delim.opening); hash.scalar(delim.content);
-    hash.optional(delim.closing, [&](auto value) { hash.scalar(value); });
+    if (node.delimited) {
+        const auto& delim = *node.delimited;
+        hash.scalar(delim.opening); hash.scalar(delim.content);
+        hash.optional(delim.closing, [&](auto value) { hash.scalar(value); });
+    }
     hash.scalar(node.children.size());
     for (auto const& child : node.children) append(hash, child);
 }

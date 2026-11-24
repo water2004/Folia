@@ -14,16 +14,16 @@ static_assert(std::is_nothrow_move_assignable_v<InlineCstNode>);
 namespace {
 InlineCstNodes make_deep_owner(std::size_t depth) {
     InlineCstNodes nodes;
-    nodes.push_back(InlineCstNode{NodeId{1}, InlineCstKind::Text, {depth, depth+1}, ParseStatus::Complete});
+    nodes.push_back(InlineCstNode{NodeId{1}, InlineCstKind::Text, ParseStatus::Complete, {depth, depth+1}});
     for (std::size_t index=0; index<depth; ++index) {
         InlineCstNode parent;
         parent.id = NodeId{index+2};
         parent.kind = InlineCstKind::Emphasis;
         parent.range = {depth-index-1, depth+index+2};
-        parent.ensure_delimiter_ranges() = {parent.range,
+        parent.set_delimiter_ranges({
             {parent.range.start, parent.range.start+1},
             {parent.range.start+1, parent.range.end-1},
-            SourceRange{parent.range.end-1, parent.range.end}};
+            SourceRange{parent.range.end-1, parent.range.end}});
         parent.children = std::move(nodes);
         nodes.push_back(std::move(parent));
     }

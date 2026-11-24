@@ -1194,11 +1194,10 @@ struct Parser {
         node.kind = is_image ? InlineCstKind::Image : InlineCstKind::Link;
         node.status = ParseStatus::Complete;
         node.range = {start, source_end};
-        node.ensure_delimiter_ranges() = {
-            {start, source_end},
+        node.set_delimiter_ranges({
             {start, text_start},
             {text_start, text_end},
-            SourceRange{text_end, source_end}};
+            SourceRange{text_end, source_end}});
         auto& semantic = node.ensure_semantics();
         semantic.href = std::move(href);
         semantic.title = std::move(title);
@@ -1313,7 +1312,6 @@ struct Parser {
             hb.id = next_id();
             hb.kind = InlineCstKind::HardBreak;
             hb.range = {break_start, pos};
-            hb.ensure_delimiter_ranges() = {{break_start, pos}, {break_start, pos}, {break_start, pos}, std::nullopt};
             out.push_back(std::move(hb));
             run_start = pos;
         } else {
@@ -1326,7 +1324,6 @@ struct Parser {
             sb.id = next_id();
             sb.kind = InlineCstKind::SoftBreak;
             sb.range = {soft_break_start, pos};
-            sb.ensure_delimiter_ranges() = {{soft_break_start, pos}, {soft_break_start, pos}, {soft_break_start, pos}, std::nullopt};
             out.push_back(std::move(sb));
             run_start = pos;
         }
@@ -1345,7 +1342,6 @@ struct Parser {
         node.id = next_id();
         node.kind = InlineCstKind::Escape;
         node.range = {start, pos};
-        node.ensure_delimiter_ranges() = {{start, pos}, {start, pos}, {start, pos}, std::nullopt};
         out.push_back(std::move(node));
         run_start = pos;
         return true;
@@ -1363,7 +1359,6 @@ struct Parser {
         node.id = next_id();
         node.kind = InlineCstKind::Entity;
         node.range = {start, pos};
-        node.ensure_delimiter_ranges() = {{start, pos}, {start, pos}, {start, pos}, std::nullopt};
         out.push_back(std::move(node));
         run_start = pos;
         return true;
@@ -1392,7 +1387,7 @@ struct Parser {
             node.kind = InlineCstKind::Incomplete;
             node.status = ParseStatus::MissingCloser;
             node.range = {start, pos};
-            node.ensure_delimiter_ranges() = {{start, pos}, {start, pos}, {pos, pos}, std::nullopt};
+            node.set_delimiter_ranges({{start, pos}, {pos, pos}, std::nullopt});
             out.push_back(std::move(node));
             run_start = pos;
             return true;
@@ -1424,7 +1419,7 @@ struct Parser {
             node.kind = InlineCstKind::Incomplete;
             node.status = ParseStatus::MissingCloser;
             node.range = {start, pos};
-            node.ensure_delimiter_ranges() = {{start, pos}, {start, content_start}, {content_start, pos}, std::nullopt};
+            node.set_delimiter_ranges({{start, content_start}, {content_start, pos}, std::nullopt});
             node.children = std::move(children);
             out.push_back(std::move(node));
             run_start = pos;
@@ -1446,7 +1441,7 @@ struct Parser {
         node.kind = kind;
         node.status = ParseStatus::Complete;
         node.range = {start, pos};
-        node.ensure_delimiter_ranges() = {{start, pos}, {start, content_start}, {content_start, content_end}, SourceRange{content_end, close_end}};
+        node.set_delimiter_ranges({{start, content_start}, {content_start, content_end}, SourceRange{content_end, close_end}});
         node.children = std::move(children);
         out.push_back(std::move(node));
         run_start = pos;
@@ -1481,7 +1476,7 @@ struct Parser {
             node.kind = InlineCstKind::Incomplete;
             node.status = ParseStatus::MissingCloser;
             node.range = {start, pos};
-            node.ensure_delimiter_ranges() = {{start, pos}, {start, content_start}, {content_start, pos}, std::nullopt};
+            node.set_delimiter_ranges({{start, content_start}, {content_start, pos}, std::nullopt});
             Parser inner{src, ctx};
             inner.suppress_bare_autolinks = suppress_bare_autolinks;
         inner.counter = counter;
@@ -1506,7 +1501,7 @@ struct Parser {
         node.kind = InlineCstKind::Strikethrough;
         node.status = ParseStatus::Complete;
         node.range = {start, pos};
-        node.ensure_delimiter_ranges() = {{start, pos}, {start, content_start}, {content_start, closer}, SourceRange{closer, pos}};
+        node.set_delimiter_ranges({{start, content_start}, {content_start, closer}, SourceRange{closer, pos}});
         node.children = std::move(children);
         out.push_back(std::move(node));
         run_start = pos;
@@ -1542,8 +1537,7 @@ struct Parser {
         node.kind = InlineCstKind::Incomplete;
         node.status = ParseStatus::MissingCloser;
         node.range = {pos, end};
-        node.ensure_delimiter_ranges() = {
-            node.range, {pos, content_start}, {content_start, end}, std::nullopt};
+        node.set_delimiter_ranges({{pos, content_start}, {content_start, end}, std::nullopt});
         Parser inner{src, ctx};
         inner.suppress_bare_autolinks = suppress_bare_autolinks;
         inner.counter = counter;
@@ -1577,9 +1571,8 @@ struct Parser {
             literal_open.kind = InlineCstKind::Incomplete;
             literal_open.status = ParseStatus::MissingCloser;
             literal_open.range = {pos, match->open_start};
-            literal_open.ensure_delimiter_ranges() = {
-                {pos, match->open_start}, {pos, match->open_start},
-                {match->open_start, match->open_start}, std::nullopt};
+            literal_open.set_delimiter_ranges({{pos, match->open_start},
+                {match->open_start, match->open_start}, std::nullopt});
             out.push_back(std::move(literal_open));
             pos = match->open_start;
             run_start = pos;
@@ -1603,9 +1596,8 @@ struct Parser {
                 incomplete.kind = InlineCstKind::Incomplete;
                 incomplete.status = ParseStatus::MissingCloser;
                 incomplete.range = {pos, run_end_source};
-                incomplete.ensure_delimiter_ranges() = {
-                    {pos, run_end_source}, {pos, run_end_source},
-                    {run_end_source, run_end_source}, std::nullopt};
+                incomplete.set_delimiter_ranges({{pos, run_end_source},
+                    {run_end_source, run_end_source}, std::nullopt});
                 out.push_back(std::move(incomplete));
                 pos = run_end_source;
                 run_start = pos;
@@ -1633,9 +1625,8 @@ struct Parser {
             incomplete.kind = InlineCstKind::Incomplete;
             incomplete.status = ParseStatus::MissingCloser;
             incomplete.range = {pos, incomplete_end};
-            incomplete.ensure_delimiter_ranges() = {
-                {pos, incomplete_end}, {pos, run_end_source},
-                {run_end_source, incomplete_end}, std::nullopt};
+            incomplete.set_delimiter_ranges({{pos, run_end_source},
+                {run_end_source, incomplete_end}, std::nullopt});
             incomplete.children = std::move(children);
             out.push_back(std::move(incomplete));
             pos = incomplete_end;
@@ -1708,7 +1699,7 @@ struct Parser {
             node.kind = InlineCstKind::Incomplete;
             node.status = ParseStatus::MissingCloser;
             node.range = {start, pos};
-            node.ensure_delimiter_ranges() = {{start, pos}, {start, content_start}, {content_start, pos}, std::nullopt};
+            node.set_delimiter_ranges({{start, content_start}, {content_start, pos}, std::nullopt});
             out.push_back(std::move(node));
             run_start = pos;
             return true;
@@ -1722,7 +1713,7 @@ struct Parser {
         node.kind = InlineCstKind::CodeSpan;
         node.status = ParseStatus::Complete;
         node.range = {start, pos};
-        node.ensure_delimiter_ranges() = {{start, pos}, {start, content_start}, {content_start, content_end}, SourceRange{content_end, close_end}};
+        node.set_delimiter_ranges({{start, content_start}, {content_start, content_end}, SourceRange{content_end, close_end}});
         out.push_back(std::move(node));
         run_start = pos;
         return true;
@@ -1744,7 +1735,7 @@ struct Parser {
                 node.kind = InlineCstKind::Incomplete;
                 node.status = ParseStatus::MissingCloser;
                 node.range = {start, pos};
-                node.ensure_delimiter_ranges() = {{start, pos}, {start, content_start}, {content_start, pos}, std::nullopt};
+                node.set_delimiter_ranges({{start, content_start}, {content_start, pos}, std::nullopt});
                 out.push_back(std::move(node));
                 run_start = pos;
                 return true;
@@ -1758,7 +1749,7 @@ struct Parser {
             node.kind = InlineCstKind::InlineMath;
             node.status = ParseStatus::Complete;
             node.range = {start, pos};
-            node.ensure_delimiter_ranges() = {{start, pos}, {start, content_start}, {content_start, content_end}, SourceRange{content_end, close_end}};
+            node.set_delimiter_ranges({{start, content_start}, {content_start, content_end}, SourceRange{content_end, close_end}});
             // Dollar math uses the default semantic value. Keep its source
             // and delimiter ranges without allocating unrelated link/HTML data.
             out.push_back(std::move(node));
@@ -1778,7 +1769,7 @@ struct Parser {
                 node.kind = InlineCstKind::Incomplete;
                 node.status = ParseStatus::MissingCloser;
                 node.range = {start, pos};
-                node.ensure_delimiter_ranges() = {{start, pos}, {start, content_start}, {content_start, pos}, std::nullopt};
+                node.set_delimiter_ranges({{start, content_start}, {content_start, pos}, std::nullopt});
                 out.push_back(std::move(node));
                 run_start = pos;
                 return true;
@@ -1792,7 +1783,7 @@ struct Parser {
             node.kind = InlineCstKind::InlineMath;
             node.status = ParseStatus::Complete;
             node.range = {start, pos};
-            node.ensure_delimiter_ranges() = {{start, pos}, {start, content_start}, {content_start, content_end}, SourceRange{content_end, close_end}};
+            node.set_delimiter_ranges({{start, content_start}, {content_start, content_end}, SourceRange{content_end, close_end}});
             node.ensure_semantics().math_delim = MathDelimiter::InlineParen;
             out.push_back(std::move(node));
             run_start = pos;
@@ -1926,7 +1917,7 @@ struct Parser {
         node.kind = InlineCstKind::Incomplete;
         node.status = ParseStatus::MissingCloser;
         node.range = {start, pos};
-        node.ensure_delimiter_ranges() = {{start, pos}, {start, opener_end}, {opener_end, pos}, std::nullopt};
+        node.set_delimiter_ranges({{start, opener_end}, {opener_end, pos}, std::nullopt});
         out.push_back(std::move(node));
         run_start = pos;
         return true;
@@ -1955,9 +1946,9 @@ struct Parser {
         node.kind = InlineCstKind::Autolink;
         node.status = ParseStatus::Complete;
         node.range = {start, pos};
-        node.ensure_delimiter_ranges() = {{start, close_end}, {start, content_start}, {content_start, close_end - 1}, SourceRange{close_end - 1, close_end}};
+        node.set_delimiter_ranges({{start, content_start}, {content_start, close_end - 1}, SourceRange{close_end - 1, close_end}});
         node.ensure_semantics().href = href;
-        node.children.push_back(InlineCstNode{next_id(), InlineCstKind::Text, {content_start, close_end - 1}, ParseStatus::Complete});
+        node.children.push_back(InlineCstNode{next_id(), InlineCstKind::Text, ParseStatus::Complete, {content_start, close_end - 1}});
         out.push_back(std::move(node));
         run_start = pos;
         return true;
@@ -2035,14 +2026,13 @@ struct Parser {
         node.kind = InlineCstKind::Autolink;
         node.status = ParseStatus::Complete;
         node.range = match->range;
-        node.ensure_delimiter_ranges() = {
-            match->range,
+        node.set_delimiter_ranges({
             SourceRange{match->range.start, match->range.start},
             match->content_range,
-            std::nullopt};
+            std::nullopt});
         node.ensure_semantics().href = normalize_link_destination(match->href);
         node.children.push_back(InlineCstNode{
-            next_id(), InlineCstKind::Text, match->content_range, ParseStatus::Complete});
+            next_id(), InlineCstKind::Text, ParseStatus::Complete, match->content_range});
         out.push_back(std::move(node));
         run_start = pos;
         return true;
@@ -2175,8 +2165,7 @@ struct Parser {
         node.kind = special->kind == MarkdownHtmlSpecialKind::Comment
             ? InlineCstKind::HtmlComment : InlineCstKind::Raw;
         node.range = special->range;
-        node.ensure_delimiter_ranges() = {special->range, special->opening,
-            special->content, special->closing};
+        node.set_delimiter_ranges({special->opening, special->content, special->closing});
         out.push_back(std::move(node));
         run_start = pos;
         return true;
@@ -2210,7 +2199,7 @@ struct Parser {
             node.id = next_id();
             node.kind = InlineCstKind::HtmlElement;
             node.range = {start, tag->end};
-            node.ensure_delimiter_ranges() = {{start, tag->end}, {start, tag->end}, {tag->end, tag->end}, std::nullopt};
+            node.set_delimiter_ranges({{start, tag->end}, {tag->end, tag->end}, std::nullopt});
             auto& semantic = node.ensure_semantics();
             semantic.html_tag = tag->name;
             semantic.html_attributes = tag->attributes;
@@ -2237,7 +2226,7 @@ struct Parser {
             node.kind = InlineCstKind::Incomplete;
             node.status = ParseStatus::MissingCloser;
             node.range = {start, pos};
-            node.ensure_delimiter_ranges() = {{start, pos}, {start, tag->end}, {tag->end, pos}, std::nullopt};
+            node.set_delimiter_ranges({{start, tag->end}, {tag->end, pos}, std::nullopt});
             auto& semantic = node.ensure_semantics();
             semantic.html_tag = tag->name;
             semantic.html_attributes = tag->attributes;
@@ -2273,7 +2262,7 @@ struct Parser {
         node.id = next_id();
         node.kind = InlineCstKind::HtmlElement;
         node.range = {start, source_end};
-        node.ensure_delimiter_ranges() = {{start, source_end}, {start, content_start}, {content_start, content_end}, SourceRange{content_end, source_end}};
+        node.set_delimiter_ranges({{start, content_start}, {content_start, content_end}, SourceRange{content_end, source_end}});
         node.children = std::move(children);
         auto& semantic = node.ensure_semantics();
         semantic.html_tag = tag->name;
@@ -2304,7 +2293,7 @@ struct Parser {
         node.kind = InlineCstKind::FootnoteRef;
         node.status = ParseStatus::Complete;
         node.range = {start, pos};
-        node.ensure_delimiter_ranges() = {{start, pos}, {start, label_start}, {label_start, label_end}, SourceRange{label_end, pos}};
+        node.set_delimiter_ranges({{start, label_start}, {label_start, label_end}, SourceRange{label_end, pos}});
         node.ensure_semantics().label = cps_to_utf8(src.substr(label_start, label_end - label_start));
         out.push_back(std::move(node));
         run_start = pos;
@@ -2337,7 +2326,7 @@ struct Parser {
         node.kind = InlineCstKind::WikiLink;
         node.status = ParseStatus::Complete;
         node.range = {start, pos};
-        node.ensure_delimiter_ranges() = {{start, pos}, {start, content_start}, {content_start, content_end}, SourceRange{content_end, pos}};
+        node.set_delimiter_ranges({{start, content_start}, {content_start, content_end}, SourceRange{content_end, pos}});
         auto& semantic = node.ensure_semantics();
         semantic.target = std::move(target);
         semantic.alias = std::move(alias);
@@ -2449,11 +2438,10 @@ struct Parser {
                 node.kind = frame.pair.kind;
                 node.status = ParseStatus::Complete;
                 node.range = {frame.pair.open_start, frame.pair.close_end};
-                node.ensure_delimiter_ranges() = {
-                    node.range,
+                node.set_delimiter_ranges({
                     {frame.pair.open_start, frame.pair.open_end},
                     {frame.pair.open_end, frame.pair.close_start},
-                    SourceRange{frame.pair.close_start, frame.pair.close_end}};
+                    SourceRange{frame.pair.close_start, frame.pair.close_end}});
                 node.children = std::move(out);
                 out = std::move(frame.parent);
                 scope_start = frame.parent_scope_start;

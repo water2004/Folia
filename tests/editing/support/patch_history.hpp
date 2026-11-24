@@ -21,7 +21,7 @@ std::string patch_document_state(const EditorDocument& document) {
                 <<std::quoted(sem.target)<<std::quoted(sem.alt)<<std::quoted(sem.html_tag);
             if (node->delimited) {
                 const auto& d=*node->delimited;
-                out<<':'<<d.full.start<<':'<<d.full.end<<':'<<d.opening.start<<':'<<d.opening.end
+                out<<':'<<d.opening.start<<':'<<d.opening.end
                     <<':'<<d.content.start<<':'<<d.content.end<<':'<<d.closing.has_value();
                 if (d.closing) out<<':'<<d.closing->start<<':'<<d.closing->end;
             }

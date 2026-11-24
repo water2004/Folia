@@ -51,6 +51,22 @@ std::size_t count_tokens(const InlineCstTree& tree, TokenKind kind) {
 
 suite inline_scalar_properties = [] {
 
+"atomic inline lexemes reuse their exact node range"_test = [] {
+    const std::u32string source = U"a\\* &amp;  \r\nb\nc";
+    const auto tree = parse_inline(source, context());
+    expect(lossless(tree, source));
+    for (auto kind : {InlineCstKind::Escape, InlineCstKind::Entity,
+                      InlineCstKind::HardBreak, InlineCstKind::SoftBreak}) {
+        auto node = std::ranges::find(tree.nodes, kind, &InlineCstNode::kind);
+        if (!expect(fatal(node != tree.nodes.end()))) return;
+        expect(!node->delimited);
+        auto ranges = node->delimiter_ranges();
+        expect(ranges.opening == node->range);
+        expect(ranges.content == node->range);
+        expect(!ranges.closing);
+    }
+};
+
 "literal CR LF and CRLF form one lossless break each"_test = [] {
     const std::vector<std::pair<std::u32string, std::size_t>> cases{
         {U"left\rright", 1},

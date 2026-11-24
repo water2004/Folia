@@ -26,8 +26,8 @@ struct ReferenceDefinitionBinding {
 
 struct EditorDocument {
     std::uint64_t revision = 1;
-    // Monotonic identity source for every block, inline CST node, and inline
-    // token owned by this document. The default root owns id 1, so 2 is the
+    // Monotonic identity source for every block and inline CST node
+    // owned by this document. The default root owns id 1, so 2 is the
     // first unassigned identity; imported subtrees must reserve their ids
     // explicitly before insertion.
     std::uint64_t next_node_id = 2;

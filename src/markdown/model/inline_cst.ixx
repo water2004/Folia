@@ -67,7 +67,6 @@ enum class InlineCstKind {
 };
 
 struct DelimitedRanges {
-    SourceRange full;
     SourceRange opening;
     SourceRange content;
     std::optional<SourceRange> closing;
@@ -119,23 +118,32 @@ public:
 struct InlineCstNode {
     NodeId id{};
     InlineCstKind kind = InlineCstKind::Text;
-    SourceRange range;
     ParseStatus status = ParseStatus::Complete;
+    SourceRange range;
     InlineCstNodes children;
     // Plain text is by far the most frequent CST node. Delimiter ranges and
     // semantic projection data are therefore allocated only for node kinds
     // that use them instead of widening every text node.
-    std::shared_ptr<DelimitedRanges> delimited;
+    std::shared_ptr<const DelimitedRanges> delimited;
     std::shared_ptr<InlineCstSemantic> semantic;
 
-    DelimitedRanges const& delimiter_ranges() const {
-        static const DelimitedRanges empty{};
-        return delimited ? *delimited : empty;
+    DelimitedRanges delimiter_ranges() const {
+        if (delimited) return *delimited;
+        // These syntax leaves span one lexeme. Their projection needs no
+        // stored subdivision, even when the lexeme covers multiple characters.
+        switch (kind) {
+        case InlineCstKind::SoftBreak:
+        case InlineCstKind::HardBreak:
+        case InlineCstKind::Escape:
+        case InlineCstKind::Entity:
+            return {range, range, std::nullopt};
+        default:
+            return {};
+        }
     }
 
-    DelimitedRanges& ensure_delimiter_ranges() {
-        if (!delimited) delimited = std::make_shared<DelimitedRanges>();
-        return *delimited;
+    void set_delimiter_ranges(DelimitedRanges ranges) {
+        delimited = std::make_shared<const DelimitedRanges>(std::move(ranges));
     }
 
     InlineCstSemantic const& semantics() const {
@@ -189,7 +197,7 @@ inline void InlineCstNodes::copy_owned_tree(Base const& source) {
         frame.destination->reserve(frame.source->size());
         for (auto const& node : *frame.source) {
             frame.destination->push_back(InlineCstNode{
-                node.id, node.kind, node.range, node.status, {}, node.delimited, node.semantic});
+                node.id, node.kind, node.status, node.range, {}, node.delimited, node.semantic});
         }
         for (std::size_t index = frame.source->size(); index > 0; --index) {
             const auto& original = (*frame.source)[index-1];
