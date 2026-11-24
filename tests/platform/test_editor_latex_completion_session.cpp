@@ -2,6 +2,7 @@
 
 import folia.core.latex_completion;
 import folia.markdown.ids;
+import folia.markdown.text_edit;
 import folia.platform.editor_latex_completion_session;
 
 using namespace boost::ut;

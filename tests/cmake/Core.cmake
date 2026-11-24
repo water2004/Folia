@@ -70,3 +70,5 @@ endif()
 add_test(NAME ${FOLIA_CORE_TEST_TARGET} COMMAND ${FOLIA_CORE_TEST_TARGET})
 set_tests_properties(${FOLIA_CORE_TEST_TARGET} PROPERTIES LABELS "core;portable")
 
+include("${CMAKE_CURRENT_LIST_DIR}/PortablePolicies.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/MarkdownConsumer.cmake")

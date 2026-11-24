@@ -2,8 +2,8 @@
   "schema": 1,
   "suites": {
     "core": {
-      "description": "Foundation, parsing, editing, queries, render models and portable key policies",
-      "targets": ["FoliaCoreTests"]
+      "description": "Foundation, parsing, editing, queries, render models, portable editor policies and the Markdown library contract",
+      "targets": ["FoliaCoreTests", "FoliaPortablePolicyTests", "FoliaMarkdownConsumer"]
     },
     "completion": {
       "description": "Completion contracts and model-provider protocols",
@@ -24,7 +24,8 @@
     },
     "conformance": {
       "description": "All CommonMark/GFM examples and bounded pathological parser/serializer cases",
-      "targets": ["FoliaCommonMarkTests", "FoliaGfmTests", "FoliaGfmPathologicalTests", "FoliaDeepSerializerTests"]
+      "targets": ["FoliaCommonMarkTests", "FoliaGfmTests", "FoliaGfmPathologicalTests", "FoliaDeepSerializerTests"],
+      "optional_targets": ["FoliaMd4cReferenceTests"]
     },
     "tooling": {
       "description": "Fixture readers, comparison failures, corpus integrity and test-runner checks",

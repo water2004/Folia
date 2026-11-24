@@ -2,6 +2,7 @@
 
 import folia.core.snippet_template;
 import folia.markdown.ids;
+import folia.markdown.selection;
 import folia.markdown.text_edit;
 import folia.platform.editor_snippet_session;
 

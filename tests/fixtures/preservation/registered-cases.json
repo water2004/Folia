@@ -19803,5 +19803,9 @@
     "tests/platform/test_editor_text_paint.cpp": "4f06acee7c181520345760426e70c1b3e57f4e1cdb147d197b274220b3d3930a",
     "tests/support/windows_console_runtime.cpp": "fee5d2b3ecbf544a5c8de1bb86aa8cabe22cb16a5b6b063392c1034d42d3ad38"
   },
-  "windows_source_hashing": "SHA-256 after normalizing checkout CRLF to LF"
+  "windows_source_hashing": "SHA-256 after normalizing checkout CRLF to LF",
+  "portable_import_additions": {
+    "tests/platform/test_editor_latex_completion_session.cpp": "import folia.markdown.text_edit;",
+    "tests/platform/test_editor_snippet_session.cpp": "import folia.markdown.selection;"
+  }
 }
