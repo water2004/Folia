@@ -234,7 +234,7 @@ namespace {
                                    fixture.document->blocks.size() - 1}) {
                     auto& block = fixture.document->blocks[index];
                     auto const height = block.height;
-                    auto const owners = block.owners;
+                    auto const structuralOwners = block.structuralOwners;
                     auto const sourceId = block.sourceId;
                     auto const context = block.appliedFlow;
                     materializer.EnsurePrepared(index, false, false);
@@ -248,7 +248,7 @@ namespace {
                     expect(!block.HasVisualContent());
                     expect(block.geometryMeasured);
                     expect(block.height == height);
-                    expect(block.owners == owners);
+                    expect(block.structuralOwners == structuralOwners);
                     expect(block.sourceId == sourceId);
                     expect(block.appliedFlow == context);
                     materializer.EnsurePrepared(index, false, false);
