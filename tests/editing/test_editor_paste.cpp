@@ -23,6 +23,7 @@ import folia.core.input;
 import folia.core.render_builder;
 import folia.core.render_model;
 import folia.markdown.serializer;
+import folia.core.source_editor;
 import folia.markdown.text_edit;
 import folia.core.theme;
 import folia.markdown.utf;
@@ -33,6 +34,73 @@ using namespace boost::ut;
 #include "support/editor_test_support.hpp"
 
 suite editor_paste_tests = [] {
+
+"move_selection_preserves_markdown_and_records_one_undo"_test = [] {
+    for (bool backwards : {false, true}) {
+        Editor editor("left **bold** right");
+        auto const& block = first_text(editor);
+        auto before = backwards ? range(block, 14, 5) : range(block, 5, 14);
+        auto id = block.id;
+        editor.set_selection(before);
+        auto revision = editor.document().revision;
+        auto move = [&](std::size_t target) {
+            return editor.execute_command({.kind = CommandKind::MoveSelection,
+                .move_destination = TextPosition{id, target}});
+        };
+        for (auto rejected : {5u, 9u, 14u, 100u}) expect(!move(rejected));
+        expect(editor.document().revision == revision && editor.selection() == before && !editor.has_undo());
+        reset_core_operation_counters();
+        expect(fatal(move(backwards ? 0 : 19)));
+        auto counts = read_core_operation_counters();
+        expect(counts.full_document_parses == 0_u && counts.full_document_serializations == 0_u);
+        auto expected = backwards ? "**bold** left right" : "left right**bold** ";
+        expect(editor.markdown_utf8() == expected);
+        expect(editor.document().revision == revision + 1);
+        auto after = editor.selection();
+        expect(after.is_caret());
+        expect(after.active.source_offset == (backwards ? std::size_t{9} : std::size_t{19}));
+        expect(editor.undo());
+        expect(editor.markdown_utf8() == "left **bold** right");
+        expect(editor.selection() == before && !editor.has_undo());
+        expect(editor.redo());
+        expect(editor.markdown_utf8() == expected && editor.selection() == after);
+        expect(document_indexes_are_exact(editor.document()));
+    }
+};
+
+"move_selection_maps_drop_through_join_and_matches_cut_paste"_test = [] {
+    Editor editor("abXY\n\nZcdef\n\nLast");
+    auto const& blocks = editor.document().root.children;
+    auto before = TextSelection{{blocks[0].id, 2}, {blocks[1].id, 1}};
+    auto target = TextPosition{blocks[1].id, 3};
+    editor.set_selection(before);
+    expect(fatal(editor.execute_command({.kind = CommandKind::MoveSelection, .move_destination = target})));
+    expect(editor.markdown_utf8() == "abcdXY\n\nZef\n\nLast");
+    expect(document_indexes_are_exact(editor.document()));
+    expect(editor.undo());
+    expect(editor.markdown_utf8() == "abXY\n\nZcdef\n\nLast" && editor.selection() == before);
+    expect(document_indexes_are_exact(editor.document()));
+    expect(editor.redo());
+    expect(editor.markdown_utf8() == "abcdXY\n\nZef\n\nLast");
+};
+
+"move_selection_in_source_mode_preserves_characters_and_history"_test = [] {
+    Editor editor("one\ntwo\nthree");
+    expect(fatal(editor.enter_source_mode()));
+    editor.set_source_selection({7, 4});
+    auto before = editor.source_editor()->selection();
+    auto const& source = editor.source_editor()->lines();
+    expect(fatal(source.size() == 3_u));
+    auto target = TextPosition{source.front().id, 0};
+    expect(fatal(editor.execute_command({.kind = CommandKind::MoveSelection, .move_destination = target})));
+    expect(editor.markdown_utf8() == "twoone\n\nthree");
+    auto after = editor.source_editor()->selection();
+    expect(after == SourceSelection::caret(3));
+    expect(editor.undo());
+    expect(editor.markdown_utf8() == "one\ntwo\nthree" && editor.source_editor()->selection() == before);
+    expect(!editor.has_undo() && editor.redo());
+    expect(editor.markdown_utf8() == "twoone\n\nthree" && editor.source_editor()->selection() == after);
+};
 
 "paste_structure_planning_leaves_source_ids_and_selection_unchanged"_test = [] {
     Editor editor("");

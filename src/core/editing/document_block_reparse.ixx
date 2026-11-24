@@ -336,7 +336,8 @@ inline std::optional<BlockReparsePlan> plan_block_source_insertion(
 }
 
 inline std::optional<RecordedBlockEdit> apply_block_reparse_plan(
-    EditorDocument& document, BlockReparsePlan plan, NodeAllocator& allocator) {
+    EditorDocument& document, BlockReparsePlan plan, NodeAllocator& allocator,
+    TextPosition* tracked = nullptr) {
     auto path = document_block_path(document, plan.owner);
     if (!path || path->empty() || plan.blocks.empty()) return std::nullopt;
 
@@ -348,10 +349,19 @@ inline std::optional<RecordedBlockEdit> apply_block_reparse_plan(
         || plan.replaced_siblings > parent->children.size() - index) return std::nullopt;
     const auto parent_id = parent->id;
     const auto prefix_owners = document_container_source::snapshot_ancestors(document, plan.owner);
+    bool track_in_fragment = false;
+    if (tracked)
+        for (auto i = index; i < index + plan.replaced_siblings; ++i)
+            if (find_block(parent->children[i], tracked->container_id)) {
+                track_in_fragment = true;
+                break;
+            }
     std::optional<SerializedMarkdownProjection> previous_source;
-    if (!prefix_owners.empty()) {
+    if (!prefix_owners.empty() || track_in_fragment) {
         previous_source = serialize_markdown_fragment_projection(parent->children, index, index + plan.replaced_siblings);
     }
+    auto tracked_offset = track_in_fragment
+        ? serialized_offset_for_source_position(*previous_source, *tracked) : std::nullopt;
     for (auto& block : plan.blocks) {
         std::vector<std::pair<NodeId, NodeId>> remapped_ids;
         block_reparse_detail::assign_fresh_ids(block, plan.target_parser_id,
@@ -393,20 +403,28 @@ inline std::optional<RecordedBlockEdit> apply_block_reparse_plan(
     }
     if (previous_source) {
         auto next_source = serialize_markdown_fragment_projection(parent->children, index, index + plan.blocks.size());
-        auto prefix_edits = document_container_source::rebind_fragment_anchors(
-            document, prefix_owners, *previous_source, next_source);
-        result.operations.insert(result.operations.end(), std::make_move_iterator(prefix_edits.begin()),
-            std::make_move_iterator(prefix_edits.end()));
+        if (track_in_fragment) {
+            auto translated = tracked_offset
+                ? source_position_for_serialized_offset(next_source, *tracked_offset, tracked->affinity)
+                : std::nullopt;
+            *tracked = translated.value_or(TextPosition{});
+        }
+        if (!prefix_owners.empty()) {
+            auto prefix_edits = document_container_source::rebind_fragment_anchors(
+                document, prefix_owners, *previous_source, next_source);
+            result.operations.insert(result.operations.end(), std::make_move_iterator(prefix_edits.begin()),
+                std::make_move_iterator(prefix_edits.end()));
+        }
     }
     return result;
 }
 
 inline std::optional<RecordedBlockEdit> reparse_edited_direct_block(
     EditorDocument& document, TextPosition position, NodeAllocator& allocator,
-    const AppliedSourceEdit* source_edit = nullptr) {
+    const AppliedSourceEdit* source_edit = nullptr, TextPosition* tracked = nullptr) {
     auto plan = plan_edited_direct_block(document, position, BlockReparseScope::SingleBlock, source_edit);
     if (!plan) return std::nullopt;
-    return apply_block_reparse_plan(document, std::move(*plan), allocator);
+    return apply_block_reparse_plan(document, std::move(*plan), allocator, tracked);
 }
 
 } // namespace folia::document_edit_detail

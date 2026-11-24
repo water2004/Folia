@@ -10,6 +10,7 @@ import folia.markdown.document;
 import folia.core.document_ids;
 import folia.core.document_edit_support;
 import folia.core.document_source_edit;
+import folia.core.document_copy;
 import folia.core.document_block_reparse;
 import folia.core.document_input_rules;
 import folia.markdown.document_text;
@@ -692,6 +693,41 @@ inline std::optional<DocumentTransaction> document_paste_text(
         revision_before,
         working.revision,
         DocumentTransactionReason::Paste);
+}
+
+inline std::optional<DocumentTransaction> document_move_selection(
+    EditorDocument& document, const TextSelection& selection, TextPosition destination) {
+    auto ordered = document_copy_detail::order_selection(document, selection);
+    auto rank = document_editable_order_position(document, destination.container_id);
+    auto extent = document_edit_detail::editable_length(document, destination.container_id);
+    if (!ordered || !rank || !extent || destination.source_offset > *extent) return std::nullopt;
+    const auto key = std::pair{*rank, destination.source_offset};
+    if (key >= std::pair{ordered->start_index, ordered->start.source_offset}
+        && key <= std::pair{ordered->end_index, ordered->end.source_offset}) return std::nullopt;
+    auto fragment = document_selected_markdown(document, selection);
+    if (!fragment || fragment->empty()) return std::nullopt;
+
+    const auto before = document.revision;
+    std::vector<DocumentOperation> operations;
+    document_edit_detail::MutationRollback rollback(document, operations, before);
+    auto removal = document_delete_selection(document, selection, &destination);
+    if (!removal || removal->operations.empty()) return std::nullopt;
+    operations = std::move(removal->operations);
+    extent = document_edit_detail::editable_length(document, destination.container_id);
+    if (!extent || destination.source_offset > *extent) return std::nullopt;
+
+    auto insertion = document_paste_text(document, TextSelection::caret(destination), *fragment);
+    if (!insertion) return std::nullopt;
+    document_edit_detail::MutationRollback insertion_rollback(
+        document, insertion->operations, insertion->revision_before);
+    operations.reserve(operations.size() + insertion->operations.size());
+    operations.insert(operations.end(), std::make_move_iterator(insertion->operations.begin()),
+        std::make_move_iterator(insertion->operations.end()));
+    insertion_rollback.commit();
+    document.revision = before + 1;
+    rollback.commit();
+    return make_recorded_document_transaction(std::move(operations), selection,
+        insertion->selection_after, before, document.revision, DocumentTransactionReason::Replace);
 }
 
 } // namespace folia

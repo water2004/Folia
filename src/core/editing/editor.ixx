@@ -481,6 +481,13 @@ public:
             return moved;
         }
         if (source_view_) return execute_source_command_(cmd);
+        if (cmd.kind == CommandKind::MoveSelection) {
+            if (!cmd.move_destination) return false;
+            auto transaction = document_move_selection(document_, rendered_selection_.value(), *cmd.move_destination);
+            if (!transaction) return false;
+            apply_document_transaction_(*transaction);
+            return true;
+        }
         if (cmd.kind == CommandKind::IndentText || cmd.kind == CommandKind::OutdentText) {
             auto transaction = document_indent_text(document_, rendered_selection_.value(),
                 cmd.kind == CommandKind::OutdentText);
@@ -703,6 +710,22 @@ private:
         const auto revision = source.revision();
         bool handled=false;
         switch (command.kind) {
+            case CommandKind::MoveSelection: {
+                if (!command.move_destination) return false;
+                const auto& position = *command.move_destination;
+                auto line = std::ranges::find(source.lines(), position.container_id, &SourceLine::id);
+                if (line == source.lines().end() || position.source_offset > line->text.size()) return false;
+                auto destination = line->source_start + position.source_offset;
+                auto range = source.selection().ordered_range();
+                if (range.empty() || range.covers(destination)) return false;
+                const std::array replacements{
+                    SourceReplacement{range, {}},
+                    SourceReplacement{SourceRange::empty_at(destination), source.selected_text()},
+                };
+                auto caret = destination < range.start ? destination + range.length() : destination;
+                handled = source.replace_all_with_selection(replacements, SourceSelection::caret(caret));
+                break;
+            }
             case CommandKind::InsertText:
                 handled=source.insert_text(command.text);break;
             case CommandKind::Paste: {

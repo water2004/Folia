@@ -55,21 +55,39 @@ inline std::vector<DocumentInvariantError> validate_document(const EditorDocumen
     return errors;
 }
 
-inline std::optional<DocumentTransaction> document_delete_selection(EditorDocument&, const TextSelection&);
+inline std::optional<DocumentTransaction> document_delete_selection(
+    EditorDocument&, const TextSelection&, TextPosition* tracked = nullptr);
 inline std::optional<TextSelection> document_move_selection(
     const EditorDocument&, const TextSelection&, DocumentMove, bool);
 
 inline std::optional<DocumentTransaction> document_delete_marker(
-    EditorDocument& document, const TextSelection& selection, bool backward) {
-    if (auto inline_edit = document_delete_inline_marker(document, selection, backward)) return inline_edit;
+    EditorDocument& document, const TextSelection& selection, bool backward,
+    TextPosition* tracked = nullptr) {
+    if (auto inline_edit = document_delete_inline_marker(document, selection, backward, tracked)) return inline_edit;
     const auto revision = document.revision;
     document_edit_detail::NodeAllocator allocator(document);
-    auto block_edit = document_edit_detail::unwrap_math_marker(document, selection, backward, allocator);
+    auto block_edit = document_edit_detail::unwrap_math_marker(document, selection, backward, allocator, tracked);
     if (!block_edit) return std::nullopt;
     ++document.revision;
     return make_recorded_document_transaction(std::move(block_edit->operations), selection,
         TextSelection::caret(block_edit->target), revision, document.revision, DocumentTransactionReason::Delete);
 }
+
+namespace document_edit_detail {
+
+inline void track_source_edit(TextPosition* tracked, const TextEdit& edit) {
+    if (tracked && tracked->container_id == edit.container_id)
+        tracked->source_offset = translate_offset(tracked->source_offset, tracked->affinity, edit);
+}
+
+inline void track_source_operations(TextPosition* tracked, std::span<const DocumentOperation> operations) {
+    if (!tracked) return;
+    for (const auto& operation : operations)
+        if (const auto* edit = std::get_if<DocumentTextOperation>(&operation))
+            track_source_edit(tracked, edit->forward);
+}
+
+} // namespace document_edit_detail
 
 inline DocumentTransaction source_transaction_with_block_reparse(
     EditorDocument& after,
@@ -77,14 +95,16 @@ inline DocumentTransaction source_transaction_with_block_reparse(
     TextSelection selection_before,
     TextPosition target,
     std::uint64_t revision_before,
-    DocumentTransactionReason reason) {
+    DocumentTransactionReason reason,
+    TextPosition* tracked = nullptr) {
     std::vector<DocumentOperation> operations;
     const auto reparse_edit = edit;
+    document_edit_detail::track_source_edit(tracked, edit.forward);
     document_edit_detail::append_source_operation(operations, std::move(edit));
     document_edit_detail::MutationRollback rollback(after, operations, revision_before);
     document_edit_detail::NodeAllocator allocator(after);
     if (auto reclassified = document_edit_detail::reparse_edited_direct_block(
-            after, target, allocator, &reparse_edit)) {
+            after, target, allocator, &reparse_edit, tracked)) {
         target = reclassified->target;
         operations.insert(
             operations.end(),
@@ -999,9 +1019,10 @@ inline std::optional<DocumentTransaction> document_delete_forward(EditorDocument
         DocumentTransactionReason::Delete);
 }
 
-inline std::optional<DocumentTransaction> document_delete_selection(EditorDocument& document, const TextSelection& selection) {
+inline std::optional<DocumentTransaction> document_delete_selection(
+    EditorDocument& document, const TextSelection& selection, TextPosition* tracked) {
     if (selection.is_caret()) return std::nullopt;
-    if (auto marker = document_delete_marker(document, selection, false)) return marker;
+    if (auto marker = document_delete_marker(document, selection, false, tracked)) return marker;
     const auto revision_before = document.revision;
     auto& after = document; document_edit_detail::NodeAllocator allocator(after);
     if (selection.anchor.container_id == selection.active.container_id) {
@@ -1032,7 +1053,7 @@ inline std::optional<DocumentTransaction> document_delete_selection(EditorDocume
         const auto target = TextPosition{selection.active.container_id, start, TextAffinity::Downstream};
         return source_transaction_with_block_reparse(
             after, std::move(*source_edit), selection, target,
-            revision_before, DocumentTransactionReason::Delete);
+            revision_before, DocumentTransactionReason::Delete, tracked);
     }
 
     if (auto slices = document_table_barrier_text_slices(after, selection);
@@ -1074,6 +1095,7 @@ inline std::optional<DocumentTransaction> document_delete_selection(EditorDocume
         if (!removed_ids.empty()) {
             document_edit_detail::prune_empty_containers_recorded(after.root, operations, after);
         }
+        document_edit_detail::track_source_operations(tracked, operations);
         if (!operations.empty()) ++after.revision;
         rollback.commit();
         return make_recorded_document_transaction(
@@ -1213,6 +1235,7 @@ inline std::optional<DocumentTransaction> document_delete_selection(EditorDocume
             if (!first_position) return std::nullopt;
             target = *first_position;
         }
+        document_edit_detail::track_source_operations(tracked, operations);
         ++after.revision;
         rollback.commit();
         return make_recorded_document_transaction(
@@ -1259,8 +1282,13 @@ inline std::optional<DocumentTransaction> document_delete_selection(EditorDocume
     }
     ++after.revision;
     auto target = TextPosition{first.container_id, first.source_offset, TextAffinity::Downstream};
+    if (tracked && tracked->container_id == last.container_id
+        && tracked->source_offset >= last.source_offset) {
+        tracked->container_id = first.container_id;
+        tracked->source_offset = first.source_offset + (tracked->source_offset - last.source_offset);
+    }
     if (auto reclassified = document_edit_detail::reparse_edited_direct_block(
-            after, target, allocator, &reparse_edit)) {
+            after, target, allocator, &reparse_edit, tracked)) {
         target = reclassified->target;
         operations.insert(
             operations.end(),

@@ -820,7 +820,7 @@ inline std::optional<RecordedBlockEdit> remove_empty_raw_block(
 
 inline std::optional<RecordedBlockEdit> unwrap_math_marker(
     EditorDocument& document, const TextSelection& selection, bool backward,
-    NodeAllocator& allocator) {
+    NodeAllocator& allocator, TextPosition* tracked = nullptr) {
     if (selection.anchor.container_id != selection.active.container_id) return std::nullopt;
     auto path = document_block_path(document, selection.active.container_id);
     if (!path || path->empty()) return std::nullopt;
@@ -853,6 +853,8 @@ inline std::optional<RecordedBlockEdit> unwrap_math_marker(
     result.target = {paragraph.id,
         (std::clamp)(selection.active.source_offset, content.start, content.end) - content.start,
         selection.active.affinity};
+    if (tracked && tracked->container_id == paragraph.id)
+        tracked->source_offset = (std::clamp)(tracked->source_offset, content.start, content.end) - content.start;
     const auto index = path->back();
     path->pop_back();
     auto* parent = block_at_path(document.root, *path);

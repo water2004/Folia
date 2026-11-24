@@ -27,7 +27,7 @@ enum class CommandKind {
     SetTableColumnAlignment, NormalizeTable,
     InsertTableRowAt, InsertTableColumnAt, MoveTableRowTo, MoveTableColumnTo,
     ToggleCallout, ExtensionCmd,
-    Undo, Redo, Cut, Copy, Paste, ReplaceSourceText,
+    Undo, Redo, Cut, Copy, Paste, ReplaceSourceText, MoveSelection,
 };
 
 struct ReplaceTextTarget {
@@ -56,6 +56,7 @@ struct Command {
     std::u32string ext_name;               // Extension
     std::optional<ReplaceTextTarget> replacement; // Explicit block-local replacement
     std::optional<TextSpan> paste_range;  // Semantic Markdown paste without changing selection first
+    std::optional<TextPosition> move_destination;
 
     static Command InsertText(std::u32string t) { Command c; c.kind = CommandKind::InsertText; c.text = std::move(t); return c; }
     static Command MoveLeft(bool ext)  { Command c; c.kind = CommandKind::MoveLeft;  c.extend_selection = ext; return c; }

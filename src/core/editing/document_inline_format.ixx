@@ -405,7 +405,8 @@ inline std::optional<DocumentTransaction> document_toggle_inline_format(
 }
 
 inline std::optional<DocumentTransaction> document_delete_inline_marker(
-    EditorDocument& document, const TextSelection& selection, bool backward) {
+    EditorDocument& document, const TextSelection& selection, bool backward,
+    TextPosition* tracked = nullptr) {
     if (selection.anchor.container_id != selection.active.container_id) return std::nullopt;
     auto owner = document_edit_detail::find_inline_owner(document, selection.active.container_id);
     if (!owner) return std::nullopt;
@@ -423,13 +424,20 @@ inline std::optional<DocumentTransaction> document_delete_inline_marker(
     if (end > marker.end) return std::nullopt;
     const auto format = document_inline_format_detail::without_code_padding(*owner,
         {node->range, delim.opening, delim.content, *delim.closing, node->kind});
-    const auto caret = node->range.start
+    const auto full = node->range;
+    const auto caret = full.start
         + (std::clamp)(selection.active.source_offset, format.content.start, format.content.end) - format.content.start;
     const auto revision = document.revision;
     document_edit_detail::NodeAllocator allocator(document);
     auto applied = document_edit_detail::edit_inline(document, selection.active.container_id,
-        node->range, inline_source_slice(*owner, format.content), allocator);
+        full, inline_source_slice(*owner, format.content), allocator);
     if (!applied) return std::nullopt;
+    if (tracked && tracked->container_id == selection.active.container_id) {
+        tracked->source_offset = full.covers(tracked->source_offset)
+            ? full.start + (std::clamp)(tracked->source_offset, format.content.start, format.content.end)
+                - format.content.start
+            : translate_offset(tracked->source_offset, tracked->affinity, applied->forward);
+    }
     ++document.revision;
     return document_edit_detail::source_transaction(document, std::move(*applied), selection,
         TextSelection::caret({selection.active.container_id, caret, selection.active.affinity}),
