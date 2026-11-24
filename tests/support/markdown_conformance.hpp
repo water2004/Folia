@@ -1,15 +1,9 @@
 #pragma once
+#include "support/markdown_fixture.hpp"
 
 // Shared native source-invariant runner for official Markdown fixtures.
 namespace folia::test::conformance {
 using namespace boost::ut;
-
-struct MarkdownCase {
-    int example;
-    std::string_view section;
-    std::string_view markdown;
-    std::string_view html;
-};
 
 inline std::mutex report_mutex;
 

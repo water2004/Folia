@@ -8,21 +8,14 @@
 
 #include "md4c-html.h"
 #include "support/folia_test.hpp"
+#include "support/markdown_fixture.hpp"
 
 using namespace boost::ut;
 
-struct MarkdownCase {
-    int example;
-    std::string_view section;
-    std::string_view markdown;
-    std::string_view html;
-};
-
-#include "commonmark_cases.inc"
+using folia::test::conformance::MarkdownCase;
+const auto markdown_cases = folia::test::conformance::markdown_fixture(
+    "parsing/fixtures/conformance/commonmark.tsv", 652);
 #include "md4c_failed_examples.inc"
-
-static_assert(std::size(markdown_cases) == 652,
-              "the official CommonMark fixture must contain all 652 examples");
 
 namespace {
 

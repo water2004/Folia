@@ -9,10 +9,12 @@ import re
 import urllib.request
 from html.parser import HTMLParser
 from pathlib import Path
+import fixture_table
 
 HERE = Path(__file__).resolve().parent
 REPO_ROOT = Path(__file__).resolve().parents[2]
 CACHE = REPO_ROOT / 'build' / 'dependencies' / 'markdown-conformance' / 'gfm'
+BUNDLED = REPO_ROOT / 'tests/parsing/fixtures/conformance/upstream/gfm'
 LOCK_PATH = HERE / 'gfm-sources.lock.json'
 FENCE = chr(96) * 32
 
@@ -54,6 +56,8 @@ def _source(name: str, fetch: bool) -> bytes:
     lock = _lock()
     entry = next(source for source in lock['sources'] if source['name'] == name)
     path = CACHE / name
+    if not path.exists() and (BUNDLED / name).is_file():
+        path = BUNDLED / name
     expected = entry['sha256']
     if not path.exists():
         if not fetch:
@@ -343,27 +347,10 @@ def native_groups(cases: list[dict]) -> dict[str, list[dict]]:
     return groups
 
 
-def literal(value: str) -> str:
-    return '"' + ''.join(f'\\x{byte:02x}' for byte in value.encode('utf-8')) + '"'
-
-
-def string_view(value: str) -> str:
-    """Emit byte-counted views so embedded U+0000 is never C-string-truncated."""
-    return f'std::string_view{{{literal(value)},{len(value.encode("utf-8"))}}}'
-
-
 def generate(path: Path, cases: list[dict]) -> None:
-    output = [
-        '// Generated from hash-verified published GFM and cmark-gfm sources.',
-        'static constexpr MarkdownCase gfm_all_cases[] = {',
-    ]
-    for case in cases:
-        section = f"{case['native_profile']}|{case['id']}|{case['section']}"
-        values = [section, case['markdown'], case['html']]
-        output.append('{' + str(case['native_id']) + ',' + ','.join(map(string_view, values)) + '},')
-    output.extend(['};', ''])
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text('\n'.join(output), encoding='utf-8')
+    fixture_table.write(path, ([case['native_id'],
+        f"{case['native_profile']}|{case['id']}|{case['section']}", case['markdown'], case['html']]
+        for case in cases), 'Hash-verified published GFM and cmark-gfm sources; do not edit.')
 
 
 if __name__ == '__main__':

@@ -30,8 +30,8 @@ import folia.markdown.dialect;
 
 #include "support/markdown_conformance.hpp"
 using folia::test::conformance::MarkdownCase;
-#include "commonmark_cases.inc"
-static_assert(std::size(markdown_cases) == 652);
+const auto markdown_cases = folia::test::conformance::markdown_fixture(
+    "parsing/fixtures/conformance/commonmark.tsv", 652);
 
 boost::ut::suite commonmark_official_tests = [] {
     auto dialect = folia::test::commonmark::dialect();

@@ -5,6 +5,8 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
+import json
+import fixture_table
 import canonical_html
 import prepare
 
@@ -17,28 +19,14 @@ class FixtureTests(unittest.TestCase):
     def test_official_examples_are_complete_ordered_and_preserved_in_generated_data(self):
         self.assertEqual(len(self.cases), 652)
         self.assertEqual([case['example'] for case in self.cases], list(range(1, 653)))
-
         with tempfile.TemporaryDirectory() as directory:
-            output = Path(directory) / 'commonmark_cases.inc'
+            output = Path(directory) / 'commonmark.tsv'
             prepare.generate(output, self.cases)
-            generated = output.read_text(encoding='utf-8')
-
-        rows = re.findall(r'^\{(\d+),((?:"(?:\\x[0-9a-f]{2})*"(?:,|(?=\})))+)', generated, re.M)
-        self.assertEqual(len(rows), len(self.cases))
-        self.assertEqual([int(example) for example, _ in rows], list(range(1, 653)))
-
-        def decode_literals(encoded):
-            literals = re.findall(r'"((?:\\x[0-9a-f]{2})*)"', encoded)
-            return [bytes.fromhex(re.sub(r'\\x', '', literal)).decode('utf-8')
-                    for literal in literals]
-
-        for case, (example, encoded) in zip(self.cases, rows):
-            self.assertEqual(int(example), case['example'])
-            fields = decode_literals(encoded)
-            self.assertEqual(len(fields), 3)
-            self.assertEqual(fields[0], case['section'])
-            self.assertEqual(fields[1], case['markdown'])
-            self.assertEqual(fields[2], case['html'])
+            rows = fixture_table.read(output)
+            committed = prepare.ROOT / 'tests/parsing/fixtures/conformance/commonmark.tsv'
+            self.assertEqual(output.read_bytes(), committed.read_bytes())
+        self.assertEqual(rows, [[case['example'], case['section'], case['markdown'], case['html']]
+                                for case in self.cases])
 
     def test_source_hash_rejects_modified_fixture_in_temporary_cache(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -48,11 +36,23 @@ class FixtureTests(unittest.TestCase):
                 with self.assertRaisesRegex(RuntimeError, 'Source hash mismatch: spec.json'):
                     prepare.prepare()
 
-    def test_cpp_literal_encodes_utf8_backslash_and_nul_as_exact_bytes(self):
+    def test_fixture_transport_encodes_utf8_backslash_and_nul_as_exact_bytes(self):
         value = '雪\\\x00'
-        self.assertEqual(prepare.literal(value), '"\\xe9\\x9b\\xaa\\x5c\\x00"')
-        encoded = prepare.literal(value)[1:-1]
-        self.assertEqual(bytes.fromhex(re.sub(r'\\x', '', encoded)), value.encode('utf-8'))
+        encoded = fixture_table.escape(value)
+        self.assertNotIn('\x00', encoded)
+        self.assertEqual(json.loads('"' + encoded + '"').encode('utf-8'), value.encode('utf-8'))
+
+    def test_pinned_examples_remain_available_with_an_empty_download_cache(self):
+        with tempfile.TemporaryDirectory() as directory:
+            with patch.object(prepare, 'DEPENDENCIES', Path(directory)):
+                self.assertEqual(prepare.prepare(), self.cases)
+
+    def test_missing_source_and_bundle_still_fail(self):
+        with tempfile.TemporaryDirectory() as directory:
+            with patch.object(prepare, 'DEPENDENCIES', Path(directory) / 'cache'), \
+                    patch.object(prepare, 'BUNDLED', Path(directory) / 'bundle'):
+                with self.assertRaisesRegex(RuntimeError, 'Missing fixture'):
+                    prepare.prepare()
 
 
 class CanonicalHtmlTests(unittest.TestCase):

@@ -1,12 +1,14 @@
-"""Verify official fixtures and generate unchanged examples as C++ test data."""
+"""Verify official fixtures and serialize unchanged examples as runtime TSV data."""
 import argparse
 import hashlib
 import json
 from pathlib import Path
 import urllib.request
+import fixture_table
 
 ROOT = Path(__file__).resolve().parents[2]
 DEPENDENCIES = ROOT / 'build/dependencies/markdown-conformance'
+BUNDLED = ROOT / 'tests/parsing/fixtures/conformance/upstream/commonmark'
 
 
 def prepare(fetch=False, reference=False):
@@ -16,6 +18,8 @@ def prepare(fetch=False, reference=False):
         if entry['name'] != 'spec.json' and not reference:
             continue
         path = DEPENDENCIES / entry['name']
+        if not path.exists() and (BUNDLED / entry['name']).is_file():
+            path = BUNDLED / entry['name']
         if not path.exists():
             if not fetch:
                 raise RuntimeError('Missing fixture; run python tools/markdown-conformance/prepare.py --fetch')
@@ -25,25 +29,18 @@ def prepare(fetch=False, reference=False):
             path.write_bytes(data)
         if hashlib.sha256(path.read_bytes()).hexdigest() != entry['sha256']:
             raise RuntimeError('Source hash mismatch: ' + entry['name'])
-    cases = json.loads((DEPENDENCIES / 'spec.json').read_text(encoding='utf-8'))
+    spec = DEPENDENCIES / 'spec.json'
+    if not spec.exists():
+        spec = BUNDLED / 'spec.json'
+    cases = json.loads(spec.read_bytes())
     if len(cases) != 652 or [c['example'] for c in cases] != list(range(1, 653)):
         raise RuntimeError('Incomplete or reordered CommonMark 0.31.2 fixtures')
     return cases
 
 
-def literal(value):
-    return '"' + ''.join(f'\\x{byte:02x}' for byte in value.encode('utf-8')) + '"'
-
-
 def generate(path, cases, label="CommonMark 0.31.2"):
-    output = [f'// Generated from hash-verified {label}; do not edit.',
-              'static constexpr MarkdownCase markdown_cases[] = {']
-    for case in cases:
-        values = [case['section'], case['markdown'], case['html']]
-        output.append('{' + str(case['example']) + ',' + ','.join(map(literal, values)) + '},')
-    output.append('};\n')
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text('\n'.join(output), encoding='utf-8')
+    fixture_table.write(path, ([case['example'], case['section'], case['markdown'], case['html']]
+                              for case in cases), f'Hash-verified {label}; do not edit.')
 
 
 if __name__ == '__main__':

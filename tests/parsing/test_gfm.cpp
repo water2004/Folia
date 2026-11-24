@@ -32,7 +32,8 @@ using folia::MarkdownDialect;
 using folia::test::conformance::MarkdownCase;
 using folia::test::conformance::report_path;
 using folia::test::conformance::run_case;
-#include "gfm_cases.inc"
+const auto gfm_all_cases = folia::test::conformance::markdown_fixture(
+    "parsing/fixtures/conformance/gfm.tsv", 1426);
 
 namespace {
 
@@ -96,8 +97,6 @@ void reset_markdown_report() {
 }
 
 } // namespace
-
-static_assert(std::size(gfm_all_cases) == 1426);
 
 boost::ut::suite gfm_expanded_tests = [] {
     reset_markdown_report();

@@ -6,6 +6,7 @@ import re
 import sys
 import tempfile
 import unittest
+import fixture_table
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -25,15 +26,6 @@ EXPECTED_COUNTS = {
     'table-style-option': 1,
     'full-info-option': 4,
 }
-
-
-def decode_cpp_literal(literal: str) -> str:
-    if not (literal.startswith('"') and literal.endswith('"')):
-        raise AssertionError(f'not a generated C++ string literal: {literal!r}')
-    body = literal[1:-1]
-    if re.search(r'(?<!\\)\\(?!x[0-9a-f]{2})', body):
-        raise AssertionError(f'unexpected non-byte escape in generated literal: {literal!r}')
-    return bytes.fromhex(re.sub(r'\\x', '', body)).decode('utf-8')
 
 
 class ExpandedFixtureTests(unittest.TestCase):
@@ -160,58 +152,36 @@ class ExpandedFixtureTests(unittest.TestCase):
                 case['native_profile'] == 'published-gfm+' + extension
                 for case in published.values() if case['section'] == section))
 
-    def test_generated_cpp_groups_keep_unique_native_ids_and_exact_sample_strings(self):
+    def test_generated_groups_keep_unique_native_ids_and_exact_sample_strings(self):
         with tempfile.TemporaryDirectory() as directory:
-            output = Path(directory) / 'gfm_cases.inc'
+            output = Path(directory) / 'gfm.tsv'
             prepare_gfm.generate(output, self.cases)
-            generated = output.read_text(encoding='utf-8')
-        row_re = re.compile(r'^\{(\d+),(.+)\},$', re.MULTILINE)
-        self.assertIn('static constexpr MarkdownCase gfm_all_cases[] = {', generated)
-        rows = row_re.findall(generated)
-        self.assertEqual(len(rows), len(self.cases))
-        observed_ids = []
-        by_native_id = {case['native_id']: case for case in self.cases}
-        self.assertEqual(len(by_native_id), len(self.cases))
-        observed_cases = []
-        for native_id, literals in rows:
-            case = by_native_id[int(native_id)]
-            fields = re.findall(
-                r'std::string_view\{"((?:\\x[0-9a-f]{2})*)",(\d+)\}', literals)
-            decoded = [decode_cpp_literal('"' + value + '"') for value, _ in fields]
-            lengths = [int(length) for _, length in fields]
-            self.assertEqual(int(native_id), case['native_id'])
-            self.assertEqual(lengths, [len(value.encode('utf-8')) for value in (
-                f"{case['native_profile']}|{case['id']}|{case['section']}",
-                case['markdown'], case['html'])])
-            self.assertEqual(decoded, [
-                f"{case['native_profile']}|{case['id']}|{case['section']}",
-                case['markdown'], case['html']])
-            observed_ids.append(int(native_id))
-            observed_cases.append(case['id'])
-        self.assertEqual(len(set(observed_ids)), len(observed_ids))
-        self.assertEqual(set(observed_cases), {case['id'] for case in self.cases})
-        self.assertIn('static constexpr MarkdownCase gfm_all_cases[] = {', generated)
+            rows = fixture_table.read(output)
+            self.assertEqual(output.read_bytes(),
+                (ROOT / 'tests/parsing/fixtures/conformance/gfm.tsv').read_bytes())
+        expected = [[case['native_id'],
+            f"{case['native_profile']}|{case['id']}|{case['section']}",
+            case['markdown'], case['html']] for case in self.cases]
+        self.assertEqual(rows, expected)
+        self.assertEqual(len({row[0] for row in rows}), len(self.cases))
+        self.assertEqual({row[1].split('|')[1] for row in rows}, {case['id'] for case in self.cases})
 
-    def test_embedded_nul_has_explicit_utf8_byte_length_in_generated_view(self):
+    def test_embedded_nul_preserves_complete_utf8_bytes_in_runtime_data(self):
         source = '```ruby nul\x00nul\nmodule Foo\n```\n'
-        case = {
-            'native_id': 60003,
-            'native_profile': 'full-info-option',
-            'id': 'full-info-option:3',
-            'section': 'full info',
-            'markdown': source,
-            'html': '<pre><code>nul\x00</code></pre>\n',
-        }
-        view = prepare_gfm.string_view(source)
-        match = re.fullmatch(r'std::string_view\{"((?:\\x[0-9a-f]{2})*)",(\d+)\}', view)
-        self.assertIsNotNone(match)
-        self.assertEqual(int(match.group(2)), len(source.encode('utf-8')))
-        self.assertEqual(decode_cpp_literal('"' + match.group(1) + '"'), source)
+        case = {'native_id': 60003, 'native_profile': 'full-info-option',
+                'id': 'full-info-option:3', 'section': 'full info',
+                'markdown': source, 'html': '<pre><code>nul\x00</code></pre>\n'}
         with tempfile.TemporaryDirectory() as directory:
-            output = Path(directory) / 'nul.inc'
+            output = Path(directory) / 'nul.tsv'
             prepare_gfm.generate(output, [case])
-            generated = output.read_text(encoding='utf-8')
-        self.assertIn(view, generated)
+            rows = fixture_table.read(output)
+        self.assertEqual(rows[0][2].encode('utf-8'), source.encode('utf-8'))
+        self.assertEqual(rows[0][3], case['html'])
+
+    def test_pinned_gfm_examples_work_without_a_download_cache(self):
+        with tempfile.TemporaryDirectory() as directory:
+            with patch.object(prepare_gfm, 'CACHE', Path(directory)):
+                self.assertEqual(prepare_gfm.prepare(), self.cases)
 
     def test_repository_spec_parser_matches_upstream_arrow_and_cr_rules(self):
         sample = (

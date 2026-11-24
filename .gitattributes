@@ -69,3 +69,7 @@ docs/math-port/evidence/tree-source.json text eol=lf
 docs/math-port/evidence/input-host-source.json -text
 docs/math-port/evidence/operator-source-profile.json text eol=lf
 docs/math-port/evidence/p12b-mo-pattern-complete-source.json -text
+
+# Official Markdown samples contain significant physical CR and trailing whitespace.
+tests/parsing/fixtures/conformance/upstream/** -text whitespace=-blank-at-eol,-blank-at-eof
+tests/parsing/fixtures/conformance/*.tsv text eol=lf
