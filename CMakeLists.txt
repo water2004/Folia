@@ -684,6 +684,8 @@ target_sources(FoliaTests PRIVATE
 target_include_directories(FoliaTests PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/tests
     "${CMAKE_CURRENT_BINARY_DIR}/gfm-entities")
+target_compile_definitions(FoliaTests PRIVATE
+    FOLIA_TEST_DATA_ROOT="${CMAKE_CURRENT_SOURCE_DIR}/tests")
 set(FOLIA_GFM_ENTITY_CASES "${CMAKE_CURRENT_BINARY_DIR}/gfm-entities/gfm_entity_cases.inc")
 add_custom_command(OUTPUT "${FOLIA_GFM_ENTITY_CASES}"
     COMMAND python "${CMAKE_CURRENT_SOURCE_DIR}/tools/markdown-conformance/generate_pinned_gfm_entities.py"
@@ -881,6 +883,7 @@ target_sources(FoliaMathTests PRIVATE
     src/math/util/ordered_map_storage.ixx)
 target_include_directories(FoliaMathTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 target_compile_definitions(FoliaMathTests PRIVATE
+    FOLIA_TEST_DATA_ROOT="${CMAKE_CURRENT_SOURCE_DIR}/tests"
     FOLIA_MATH_FIXTURE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/math/fixtures")
 target_sources(FoliaMathTests PRIVATE tests/math/editor_scanner_conformance.cpp)
 target_link_libraries(FoliaMathTests PRIVATE folia_math folia::math_editor FoliaNativeMath Boost::ut_module)
@@ -896,6 +899,8 @@ add_executable(FoliaMathSvgBridgeTests EXCLUDE_FROM_ALL
 target_compile_features(FoliaMathSvgBridgeTests PRIVATE cxx_std_23)
 set_target_properties(FoliaMathSvgBridgeTests PROPERTIES CXX_MODULE_STD ON CXX_SCAN_FOR_MODULES ON)
 target_include_directories(FoliaMathSvgBridgeTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+target_compile_definitions(FoliaMathSvgBridgeTests PRIVATE
+    FOLIA_TEST_DATA_ROOT="${CMAKE_CURRENT_SOURCE_DIR}/tests")
 target_link_libraries(FoliaMathSvgBridgeTests PRIVATE folia_math FoliaNativeMath Boost::ut_module)
 add_executable(FoliaMathFontDump EXCLUDE_FROM_ALL
     tools/math-port/font-data-dump.cpp)

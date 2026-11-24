@@ -57,6 +57,8 @@ set_target_properties(FoliaCoreTests PROPERTIES
     CXX_MODULE_STD ON CXX_SCAN_FOR_MODULES ON)
 target_include_directories(FoliaCoreTests PRIVATE
     "${FOLIA_SOURCE_ROOT}/tests" "${CMAKE_CURRENT_BINARY_DIR}/gfm-entities")
+target_compile_definitions(FoliaCoreTests PRIVATE
+    FOLIA_TEST_DATA_ROOT="${FOLIA_SOURCE_ROOT}/tests")
 target_link_libraries(FoliaCoreTests PRIVATE folia_core Boost::ut_module)
 
 # These deterministic Windows-key adapters contain no Windows APIs. Exercise

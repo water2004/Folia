@@ -1,18 +1,49 @@
 #include "support/folia_test.hpp"
+#include "support/fixture.hpp"
 import folia.markdown.utf;
 
 using namespace folia;
 using namespace boost::ut;
 
 namespace {
-#include "fixtures/unicode/grapheme_break.inc"
+
+struct GraphemeCase {
+    std::u32string text;
+    std::vector<std::size_t> boundaries;
+    std::size_t source_line;
+};
+
+std::vector<GraphemeCase> grapheme_cases() {
+    std::vector<GraphemeCase> cases;
+    for (const auto& fields : folia::test::data::read_tsv("fixtures/unicode/grapheme_break.tsv", 3)) {
+        std::size_t source_line{};
+        const auto [end, error] = std::from_chars(
+            fields[0].data(), fields[0].data() + fields[0].size(), source_line);
+        if (error != std::errc{} || end != fields[0].data() + fields[0].size() || !source_line) {
+            throw std::runtime_error("Invalid grapheme fixture source line: " + fields[0]);
+        }
+        GraphemeCase test{folia::test::data::decode_utf32(fields[1]), {}, source_line};
+        std::istringstream offsets(fields[2]);
+        std::size_t offset;
+        while (offsets >> offset) test.boundaries.push_back(offset);
+        if (!offsets.eof() || test.boundaries.empty()
+            || test.boundaries.front() != 0 || test.boundaries.back() != test.text.size()
+            || !std::ranges::is_sorted(test.boundaries)
+            || std::ranges::adjacent_find(test.boundaries) != test.boundaries.end()) {
+            throw std::runtime_error("Invalid grapheme boundary fixture at source line " + fields[0]);
+        }
+        cases.push_back(std::move(test));
+    }
+    return cases;
+}
+
 }
 
 suite unicode_grapheme_tests = [] {
 
 "unicode grapheme boundaries match all pinned official Unicode 15.1 cases"_test = [] {
-    for (const auto& test : grapheme_cases) {
-        const std::span expected(test.boundaries.data(), test.boundary_count);
+    for (const auto& test : grapheme_cases()) {
+        const std::span expected(test.boundaries);
         std::vector<std::size_t> forward{0};
         auto cursor = std::size_t{0};
         while (cursor < test.text.size()) {
@@ -22,7 +53,7 @@ suite unicode_grapheme_tests = [] {
             cursor = next;
         }
         expect(fatal(std::ranges::equal(forward, expected))) << test.source_line;
-        expect(count_graphemes(test.text) + 1 == test.boundary_count) << test.source_line;
+        expect(count_graphemes(test.text) + 1 == test.boundaries.size()) << test.source_line;
         std::vector<std::size_t> reverse{test.text.size()};
         while (cursor != 0) {
             const auto previous = prev_grapheme_boundary_char(test.text, cursor);

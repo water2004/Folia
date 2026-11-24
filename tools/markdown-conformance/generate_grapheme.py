@@ -35,6 +35,23 @@ def merge(ranges):
     return result
 
 
+def boundary_fixture(cases, version, license_text):
+    """Keep the official corpus as runtime data, including embedded NULs."""
+    def escaped(points):
+        units = ''.join(chr(point) for point in points).encode('utf-16-be')
+        return ''.join(f'\\u{int.from_bytes(units[i:i + 2], "big"):04x}'
+                       for i in range(0, len(units), 2))
+
+    lines = [f'# Unicode {version} official extended grapheme boundary cases.',
+             '# Regenerate: python tools/markdown-conformance/generate_grapheme.py --fetch',
+             '# Hashes: tools/markdown-conformance/grapheme-sources.lock.json',
+             '# Columns: source_line, escaped UTF-16 text, space-separated boundaries.']
+    lines.extend('# ' + line for line in license_text.splitlines())
+    lines.extend(f'{line_number}\t{escaped(points)}\t{" ".join(map(str, boundaries))}'
+                 for points, boundaries, line_number in cases)
+    return '\n'.join(lines) + '\n'
+
+
 def generate(fetch=False):
     lock = json.loads(Path(__file__).with_name('grapheme-sources.lock.json').read_text())
     for entry in lock['files']:
@@ -83,19 +100,9 @@ def generate(fetch=False):
             elif token != '×':
                 points.append(int(token, 16))
         cases.append((points, boundaries, line_number))
-    fixture = list(header)
-    fixture.extend(['struct GraphemeCase {', '    std::u32string_view text;',
-                    f'    std::array<std::size_t, {max(len(case[1]) for case in cases)}> boundaries;',
-                    '    std::size_t boundary_count;', '    std::size_t source_line;', '};',
-                    'inline constexpr GraphemeCase grapheme_cases[] = {'])
-    for points, boundaries, line_number in cases:
-        text = ''.join(f'\\x{point:08x}' for point in points)
-        fixture.append(f'    {{std::u32string_view{{U"{text}", {len(points)}}}, '
-                       f'{{{", ".join(map(str, boundaries))}}}, {len(boundaries)}, {line_number}}},')
-    fixture.append('};\n')
-    fixture_path = ROOT / 'tests/fixtures/unicode/grapheme_break.inc'
+    fixture_path = ROOT / 'tests/fixtures/unicode/grapheme_break.tsv'
     fixture_path.parent.mkdir(parents=True, exist_ok=True)
-    fixture_path.write_text('\n'.join(fixture), encoding='utf-8')
+    fixture_path.write_text(boundary_fixture(cases, lock['version'], license_text), encoding='utf-8')
     print(f'Generated {len(merge(gcb))} grapheme, {len(merge(indic))} Indic and '
           f'{len(merge(emoji))} pictographic ranges; {len(cases)} official cases')
 
