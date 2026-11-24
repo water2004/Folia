@@ -1,4 +1,5 @@
 #include "support/folia_test.hpp"
+#include "math/support/find_tex_fixtures.hpp"
 import folia.math.core.math_item;
 import folia.math.input.tex.find_tex;
 
@@ -9,19 +10,9 @@ using folia::math::core::ProtoItem;
 using folia::math::tex::FindTeX;
 using folia::math::tex::FindTeXOptions;
 
-struct FindTexExpected {
-    std::u16string_view math, open, close;
-    std::size_t n, start, end;
-    MathDisplay display;
-};
-struct FindTexCase {
-    std::u16string_view name;
-    std::vector<std::u16string_view> strings;
-    std::vector<std::array<std::u16string_view, 2>> inlineMath, displayMath;
-    bool processEscapes, processEnvironments, processRefs;
-    std::vector<FindTexExpected> expected;
-};
-#include "math/fixtures/find_tex.inc"
+using FindTexData = math_test::fixtures::FindTexFixtureData<MathDisplay>;
+using FindTexCase = FindTexData::FindTexCase;
+
 
 FindTeXOptions optionsFor(FindTexCase const &test) {
     FindTeXOptions options;
@@ -65,8 +56,8 @@ void expectSourceRows(FindTexCase const &test, std::vector<ProtoItem> const &act
 
 suite find_tex = [] {
     "FindTeX matches every pinned Source ProtoItem field"_test = [] {
-        expect(findTexCases.size() == 22_u);
-        for (const auto &test : findTexCases) {
+        expect(FindTexData::findTexCases().size() == 22_u);
+        for (const auto &test : FindTexData::findTexCases()) {
             FindTeX finder(optionsFor(test));
             const auto strings = ownStrings(test);
             const auto actual = finder.findMath(strings);
@@ -76,7 +67,7 @@ suite find_tex = [] {
 
     "FindTeX resets Source regex cursors between repeated calls"_test = [] {
         std::size_t checked = 0;
-        for (const auto &test : findTexCases) {
+        for (const auto &test : FindTexData::findTexCases()) {
             FindTeX finder(optionsFor(test));
             const auto strings = ownStrings(test);
             const auto first = finder.findMath(strings);
@@ -86,7 +77,7 @@ suite find_tex = [] {
             expect(first.size() == second.size());
             ++checked;
         }
-        expect(checked == findTexCases.size());
+        expect(checked == FindTexData::findTexCases().size());
     };
 
     "FindTeX rejects an empty opening delimiter in the typed API"_test = [] {
@@ -104,13 +95,10 @@ suite find_tex = [] {
     };
 };
 
-namespace {
-#include "math/fixtures/find-tex-retained-source.inc"
-}
 suite retained_find_tex_original_scan_corpus = [] {
     "FindTeX preserves all 56 directly typed original scan cases"_test = [] {
-        expect(retainedFindTexSourceCases.size() == 56_u);
-        for (auto const& test : retainedFindTexSourceCases) {
+        expect(FindTexData::retainedFindTexSourceCases().size() == 56_u);
+        for (auto const& test : FindTexData::retainedFindTexSourceCases()) {
             FindTeX finder(optionsFor(test));
             auto strings = ownStrings(test);
             expectSourceRows(test, finder.findMath(strings));

@@ -1,0 +1,62 @@
+# Pinned reference observations; values exported without normalization.
+# case_index	row_index	math_utf16	open_utf16	close_utf16	n	start	end	display
+3	0	x+1	\u005c(	\u005c)	0	2	9	inline_math
+4	0	x	$$	$$	0	2	7	display_math
+5	0	x	\u005c[	\u005c]	0	0	5	display_math
+6	0	x	\u005c(	\u005c)	0	0	5	inline_math
+6	1	y	$$	$$	0	6	11	display_math
+6	2	z	\u005c[	\u005c]	0	12	17	display_math
+7	0	x	\u005c(	\u005c)	0	2	7	inline_math
+7	1	y	$$	$$	1	0	5	display_math
+9	0		\u005c(	\u005c)	0	0	4	inline_math
+10	0	a\u005cfoo b	\u005c(	\u005c)	0	0	11	inline_math
+11	0	a{b\u005c)c}d	\u005c(	\u005c)	0	0	12	inline_math
+13	0	a}b	\u005c(	\u005c)	0	0	7	inline_math
+14	0	a\u000ab	\u005c(	\u005c)	0	0	7	inline_math
+15	0	\u005cbegin{align}x&y\u005cend{align}			0	2	29	display_math
+16	0	\u005cbegin\u00a0{align}x\u005cend\ufeff{align}			0	0	27	display_math
+17	0	\u005cbegin{}x\u005cend{}			0	0	15	display_math
+18	0	\u005cbegin{a-b:c}x\u005cend{a-b:c}			0	0	25	display_math
+20	0	\u005cref{r}			0	2	9	inline_math
+20	1	\u005ceqref{s}			0	10	19	inline_math
+21	0	\u005cref\u00a0{r}			0	0	8	inline_math
+22	0	$	\u005c		0	2	4	escaped
+23	0	\u005c	\u005c		0	2	4	escaped
+24	0	$	\u005c		0	0	2	escaped
+24	1	\u005cref{r}			0	3	10	inline_math
+24	2	x	\u005c(	\u005c)	0	11	16	inline_math
+25	0	\ud83d\ude00+x	\u005c(	\u005c)	0	3	11	inline_math
+26	0	\udc00	\u005c(	\u005c)	0	2	7	inline_math
+27	0	\u005c\ud83d\ude00{x}	\u005c(	\u005c)	0	0	10	inline_math
+28	0	x	$	$	0	2	5	inline_math
+30	0	x	$$	$$	0	0	5	display_math
+30	1	y	$	$	0	6	9	inline_math
+31	0	x	$	$	0	0	3	inline_math
+31	1	y	$	$	0	4	7	inline_math
+32	0	$	\u005c		0	0	2	escaped
+32	1	y	$	$	0	4	7	inline_math
+33	0	a{b$c}d	$	$	0	0	9	inline_math
+34	0	a\u005c$b	$	$	0	0	6	inline_math
+36	0	x	\u005c(	\u005c)	0	0	5	inline_math
+36	1	y	\u005c(	\u005c)	0	5	10	inline_math
+37	0	x	$	$	0	0	3	inline_math
+37	1	y	$	$	0	3	6	inline_math
+39	0	x	$	$	0	1	4	inline_math
+42	0	\u005cref{r}			0	0	7	inline_math
+42	1	\u005ceqref{s}			0	8	17	inline_math
+43	0	$	\u005c		0	0	2	escaped
+43	1	\u005c	\u005c		0	3	5	escaped
+44	0	\u005cbegin{x}a\u005cend{x}			0	0	17	display_math
+45	0	x	:(	-]	0	2	7	inline_math
+46	0	x	^$(){}.+*?-|[]:\u005c	END.*	0	0	22	inline_math
+47	0	x	@@	@@	0	0	5	inline_math
+47	1	y	@	@	0	6	9	inline_math
+48	0	x	b@	@b	0	0	5	inline_math
+48	1	y	a@	@a	0	6	11	inline_math
+49	0	x!y	@	?	0	0	5	inline_math
+50	0	x	@	?	0	0	3	display_math
+51	0	x	__proto__	END	0	0	13	inline_math
+52	0	x	constructor	END	0	0	15	inline_math
+53	0	x	toString	END	0	0	12	inline_math
+54	0	x	\ud83d\ude00	\ud83e\uddee	0	1	6	inline_math
+55	0		@		0	0	1	inline_math

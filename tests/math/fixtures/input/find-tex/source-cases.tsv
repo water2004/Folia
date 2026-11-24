@@ -1,0 +1,24 @@
+# Pinned reference observations; values exported without normalization.
+# name_utf16	string_count	strings_utf16_list	inline_pair_count	inline_utf16_list	display_pair_count	display_utf16_list	process_escapes	process_environments	process_refs	expected_count
+options-0	2	a \u005c$ b \u005cref{x} c $$q$$ \u005cbegin{equation}z\u005cend{equation}|again \u005c$ $$r$$ \u005ceqref{y}	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	0	0	0	2
+options-1	2	a \u005c$ b \u005cref{x} c $$q$$ \u005cbegin{equation}z\u005cend{equation}|again \u005c$ $$r$$ \u005ceqref{y}	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	0	0	4
+options-2	2	a \u005c$ b \u005cref{x} c $$q$$ \u005cbegin{equation}z\u005cend{equation}|again \u005c$ $$r$$ \u005ceqref{y}	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	0	1	0	3
+options-3	2	a \u005c$ b \u005cref{x} c $$q$$ \u005cbegin{equation}z\u005cend{equation}|again \u005c$ $$r$$ \u005ceqref{y}	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	0	5
+options-4	2	a \u005c$ b \u005cref{x} c $$q$$ \u005cbegin{equation}z\u005cend{equation}|again \u005c$ $$r$$ \u005ceqref{y}	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	0	0	1	4
+options-5	2	a \u005c$ b \u005cref{x} c $$q$$ \u005cbegin{equation}z\u005cend{equation}|again \u005c$ $$r$$ \u005ceqref{y}	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	0	1	6
+options-6	2	a \u005c$ b \u005cref{x} c $$q$$ \u005cbegin{equation}z\u005cend{equation}|again \u005c$ $$r$$ \u005ceqref{y}	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	0	1	1	5
+options-7	2	a \u005c$ b \u005cref{x} c $$q$$ \u005cbegin{equation}z\u005cend{equation}|again \u005c$ $$r$$ \u005ceqref{y}	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	7
+upstream-0	1	abc $$ x + 1 $$ def	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	1
+upstream-1	1	abc \u005cbegin{equation} x=y \u005cend{equation} def	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	1
+upstream-2	1	abc $$a + {\u005cbf b} + c$$ def	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	1
+upstream-3	1	abc \u005c$ def	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	1
+upstream-4	1	abc \u005cref{x} def	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	1
+upstream-5	1	abc $$ x + 1	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	0
+upstream-6	1	abc \u005cbegin{align} x + 1	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	0
+brace-controls	1	L $$a {b $$ c} \u005c} d \u005c{ e$$ R \u005ctext{\u005c$}	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	2
+overlap-longest	1	<a>one</a> <ab>two</ab> <a>three</a>	2	<a>|</a>|<ab>|</ab>	0		0	0	0	3
+duplicate-last-mode	1	\u0023\u0023d\u0023\u0023	1	\u0023\u0023|\u0023\u0023	1	\u0023\u0023|\u0023\u0023	0	0	0	1
+environment-cases	2	x \u005cbegin {align*}a {b} \u005cend{align*} y \u005cbegin{align}c\u005cend{align}|bad \u005cbegin{align}open	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	0	1	0	2
+ref-escapes	1	\u005cref {x} \u005ceqref{y} \u005c$ \u005c\u005c \u005c% \u005cref{unfinished	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	0	1	4
+utf16-nul-surrogates	2	\ud83d\ude00 $$x$$ \u0000 \ud800 \udfff $$y$$|tail \ud83d\ude00 \u005cref{z}	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	0	0	1	3
+repeat-cursor	1	$$first$$ then $$second$$ \u005c$	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	3

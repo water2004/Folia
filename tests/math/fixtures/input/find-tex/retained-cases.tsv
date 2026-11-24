@@ -1,0 +1,58 @@
+# Pinned reference observations; values exported without normalization.
+# name_utf16	string_count	strings_utf16_list	inline_pair_count	inline_utf16_list	display_pair_count	display_utf16_list	process_escapes	process_environments	process_refs	expected_count
+default-empty	0		1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	0
+default-plain	1	abc	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	0
+default-dollar-not-inline	1	$x$	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	0
+default-inline	1	a \u005c(x+1\u005c) b	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	1
+default-display-dollar	1	a $$x$$ b	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	1
+default-display-bracket	1	\u005c[x\u005c]	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	1
+default-mixed	1	\u005c(x\u005c) $$y$$ \u005c[z\u005c]	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	3
+default-multiple-strings	3	a \u005c(x\u005c)|$$y$$|plain	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	2
+default-unmatched	1	\u005c(x	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	0
+default-empty-math	1	\u005c(\u005c)	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	1
+default-control-sequence-skips-close	1	\u005c(a\u005cfoo b\u005c)	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	1
+default-braces-hide-close	1	\u005c(a{b\u005c)c}d\u005c)	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	1
+default-unbalanced-braces	1	\u005c(a{b\u005c)	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	0
+default-extra-close-brace	1	\u005c(a}b\u005c)	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	1
+default-newlines	1	\u005c(a\u000ab\u005c)	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	1
+default-environment	1	a \u005cbegin{align}x&y\u005cend{align} b	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	1
+default-environment-whitespace	1	\u005cbegin\u00a0{align}x\u005cend\ufeff{align}	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	1
+default-empty-environment-name	1	\u005cbegin{}x\u005cend{}	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	1
+default-punctuation-environment	1	\u005cbegin{a-b:c}x\u005cend{a-b:c}	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	1
+default-unmatched-environment	1	\u005cbegin{align}x\u005cend{other}	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	0
+default-ref-and-eqref	1	a \u005cref{r} \u005ceqref{s}	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	2
+default-ref-whitespace	1	\u005cref\u00a0{r}	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	1
+default-escaped-dollar	1	a \u005c$ b	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	1
+default-escaped-backslash	1	a \u005c\u005c b	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	1
+default-substitutions-mixed	1	\u005c$ \u005cref{r} \u005c(x\u005c)	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	3
+default-astral-offsets	1	\ud83d\ude00 \u005c(\ud83d\ude00+x\u005c) \ud83e\uddee	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	1
+default-surrogate-halves	1	\ud800 \u005c(\udc00\u005c)	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	1
+default-slash-astral-control	1	\u005c(\u005c\ud83d\ude00{x}\u005c)	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	1
+inline-dollar	1	a $x$ b	1	$|$	2	$$|$$|\u005c[|\u005c]	1	1	1	1
+inline-dollar-empty	1	$$	1	$|$	2	$$|$$|\u005c[|\u005c]	1	1	1	0
+display-dollar-wins-prefix	1	$$x$$ $y$	1	$|$	2	$$|$$|\u005c[|\u005c]	1	1	1	2
+multiple-dollar	1	$x$ $y$	1	$|$	2	$$|$$|\u005c[|\u005c]	1	1	1	2
+escaped-dollar-with-inline	1	\u005c$x $y$	1	$|$	2	$$|$$|\u005c[|\u005c]	1	1	1	2
+dollar-in-braces	1	$a{b$c}d$	1	$|$	2	$$|$$|\u005c[|\u005c]	1	1	1	1
+dollar-escaped-close	1	$a\u005c$b$	1	$|$	2	$$|$$|\u005c[|\u005c]	1	1	1	1
+incomplete-then-valid	1	$a \u005c(x\u005c)	1	$|$	2	$$|$$|\u005c[|\u005c]	1	1	1	0
+adjacent-default-math	1	\u005c(x\u005c)\u005c(y\u005c)	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	1	2
+adjacent-inline-dollar	1	$x$$y$	1	$|$	2	$$|$$|\u005c[|\u005c]	1	1	1	2
+disabled-no-patterns	1	$x$ \u005c(y\u005c) \u005cref{r}	0		0		0	0	0	0
+escapes-disabled	1	\u005c$x$	1	$|$	2	$$|$$|\u005c[|\u005c]	0	1	1	1
+environments-disabled	1	\u005cbegin{align}x\u005cend{align}	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	0	1	0
+references-disabled	1	\u005cref{r} \u005ceqref{s}	1	\u005c(|\u005c)	2	$$|$$|\u005c[|\u005c]	1	1	0	0
+only-references	1	\u005cref{r} \u005ceqref{s}	0		0		0	0	1	2
+only-escapes	1	\u005c$ \u005c\u005c	0		0		1	0	0	2
+only-environments	1	\u005cbegin{x}a\u005cend{x}	0		0		0	1	0	1
+literal-quoted-punctuation	1	a :(x-] b	1	:(|-]	0		1	1	1	1
+literal-all-regex-punctuation	1	^$(){}.+*?-\u007c[]:\u005cxEND.*	1	^$(){}.+*?-\u007c[]:\u005c|END.*	0		1	1	1	1
+longer-opener-wins	1	@@x@@ @y@	2	@|@|@@|@@	0		1	1	1	2
+same-length-opener-lexical-sort	1	b@x@b a@y@a	2	b@|@b|a@|@a	0		1	1	1	2
+duplicate-opener-last-end-wins	1	@x!y?	2	@|!|@|?	0		1	1	1	1
+display-definition-overwrites-inline	1	@x?	1	@|!	1	@|?	1	1	1	1
+ordinary-end-prototype-key	1	__proto__xEND	1	__proto__|END	0		1	1	1	1
+ordinary-end-constructor-key	1	constructorxEND	1	constructor|END	0		1	1	1	1
+ordinary-end-tostring-key	1	toStringxEND	1	toString|END	0		1	1	1	1
+astral-delimiter-and-utf16-offsets	1	a\ud83d\ude00x\ud83e\uddeeb	1	\ud83d\ude00|\ud83e\uddee	0		1	1	1	1
+empty-close-delimiter	1	@x	1	@|	0		1	1	1	1

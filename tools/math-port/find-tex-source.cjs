@@ -6,7 +6,7 @@ const crypto = require('node:crypto');
 const assert = require('node:assert/strict');
 
 const root = path.resolve(__dirname, '../..');
-const fixturePath = path.join(root, 'tests/math/fixtures/find_tex.inc');
+const fixturePath = path.join(root, 'tests/math/fixtures/input/find-tex');
 const pins = [
   ['.reference/MathJax-src/ts/input/tex/FindTeX.ts',
     '65355d94cac0c1e8a790313c52e231212733b5a98d6f6697c2c7864812a72944'],
@@ -72,53 +72,34 @@ cases.push(
     processEscapes: true, processEnvironments: true, processRefs: true}
 );
 
-const cppString = value => {
-  let out = 'std::u16string_view{u\"';
-  for (let i = 0; i < value.length; ++i) {
-    const code = value.charCodeAt(i), ch = value[i];
-    if (ch === '\\') out += '\\\\';
-    else if (ch === '\"') out += '\\\"';
-    else if (code === 0 || (code >= 0xd800 && code <= 0xdfff))
-      out += '\\x' + code.toString(16).padStart(4, '0') + '\" u\"';
-    else if (code === 10) out += '\\n';
-    else if (code === 13) out += '\\r';
-    else if (code === 9) out += '\\t';
-    else if (code < 32 || code > 126) out += '\\u' + code.toString(16).padStart(4, '0');
-    else out += ch;
+const {utf16Field, utf16List, writeTables} = require('./fixture-data.cjs');
+const inputs = [], expected = [];
+for (const [index, c] of cases.entries()) {
+  const options = sourceOptions(c);
+  const found = new FindTeX(options).findMath(c.strings);
+  inputs.push([utf16Field(c.name), c.strings.length, utf16List(c.strings),
+    options.inlineMath.length, utf16List(options.inlineMath.flat()),
+    options.displayMath.length, utf16List(options.displayMath.flat()),
+    +c.processEscapes, +c.processEnvironments, +c.processRefs, found.length]);
+  for (const [row, m] of found.entries()) {
+    expected.push([index, row, ...[m.math, m.open, m.close].map(utf16Field),
+      m.n, m.start.n, m.end.n,
+      m.display === null ? 'escaped' : m.display ? 'display_math' : 'inline_math']);
   }
-  return out + '\", ' + value.length + '}';
-};
-function capture() {
-  return cases.map(c => {
-    const finder = new FindTeX(sourceOptions(c));
-    const found = finder.findMath(c.strings);
-    const strings = c.strings.map(cppString).join(', ');
-    const inlines = (c.inlineMath || [['\\(', '\\)']])
-      .map(pair => '{' + cppString(pair[0]) + ', ' + cppString(pair[1]) + '}').join(', ');
-    const displays = (c.displayMath || [['$$', '$$'], ['\\[', '\\]']])
-      .map(pair => '{' + cppString(pair[0]) + ', ' + cppString(pair[1]) + '}').join(', ');
-    const rows = found.map(m => '    {' + cppString(m.math) + ', ' + cppString(m.open) + ', ' +
-      cppString(m.close) + ', ' + m.n + ', ' + m.start.n + ', ' + m.end.n + ', ' +
-      'MathDisplay::' + (m.display === null ? 'escaped' : m.display ? 'display_math' :
-        'inline_math') + '}').join(',\n');
-    return '    {' + cppString(c.name) + ', {' + strings + '}, {' + inlines + '}, {' + displays +
-      '}, ' + c.processEscapes + ', ' + c.processEnvironments + ', ' + c.processRefs +
-      ', {\n' + rows + '\n    }}';
-  }).join(',\n');
 }
-
-const fixture = '// Generated from pinned MathJax FindTeX Source; UTF-16 lengths are explicit.\n' +
-  'static const std::vector<FindTexCase> findTexCases{\n' + capture() + '\n};\n';
-const existing = fs.existsSync(fixturePath) ? fs.readFileSync(fixturePath) : null;
-if (process.argv.includes('--write-fixture')) {
-  if (!existing || !existing.equals(Buffer.from(fixture))) fs.writeFileSync(fixturePath, fixture);
-} else {
-  assert.ok(existing, 'fixture missing; run with --write-fixture');
-  assert.deepEqual(existing, Buffer.from(fixture),
-    'Source witness differs from checked-in fixture');
-}
-const recordCount = cases.reduce((n, c) =>
-  n + new FindTeX(sourceOptions(c)).findMath(c.strings).length, 0);
+writeTables(fixturePath, {
+  'source-cases': {
+    columns: ['name_utf16', 'string_count', 'strings_utf16_list', 'inline_pair_count',
+      'inline_utf16_list', 'display_pair_count', 'display_utf16_list',
+      'process_escapes', 'process_environments', 'process_refs', 'expected_count'],
+    rows: inputs
+  },
+  'source-expected': {
+    columns: ['case_index', 'row_index', 'math_utf16', 'open_utf16', 'close_utf16', 'n', 'start', 'end', 'display'],
+    rows: expected
+  }
+});
+const recordCount = expected.length;
 console.log('FindTeX Source witness: ' + cases.length + ' parser inputs; ' +
   recordCount + ' records; ' + sourceTests.length +
   ' upstream Tex.test.ts Finder inputs');
