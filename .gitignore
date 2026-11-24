@@ -29,6 +29,8 @@ CMakeCache.txt
 cmake_install.cmake
 compile_commands.json
 *.cmake
+!cmake/*.cmake
+!tests/cmake/*.cmake
 
 # Object / precompiled
 *.obj

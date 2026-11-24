@@ -1,0 +1,7 @@
+add_executable(FoliaMathEditorTests ${FOLIA_SOURCE_ROOT}/tests/main.cpp ${FOLIA_SOURCE_ROOT}/tests/math/editor_syntax.cpp)
+target_compile_features(FoliaMathEditorTests PRIVATE cxx_std_23)
+set_target_properties(FoliaMathEditorTests PROPERTIES CXX_MODULE_STD ON)
+target_include_directories(FoliaMathEditorTests PRIVATE ${FOLIA_SOURCE_ROOT}/tests)
+target_link_libraries(FoliaMathEditorTests PRIVATE folia::math_editor Boost::ut_module)
+add_test(NAME FoliaMathEditorTests COMMAND FoliaMathEditorTests)
+set_tests_properties(FoliaMathEditorTests PROPERTIES LABELS "math-editor;portable")
