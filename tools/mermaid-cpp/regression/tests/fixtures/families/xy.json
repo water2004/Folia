@@ -1,0 +1,578 @@
+{
+  "family": "xy",
+  "expected": {
+    "name": "base",
+    "view": {
+      "x": 0,
+      "y": 0,
+      "width": 100,
+      "height": 100
+    },
+    "elements": [
+      {
+        "type": "text",
+        "cls": "node",
+        "text": "hello",
+        "path": "M1 2L3 4",
+        "points": "1,2 3,4",
+        "box": {
+          "x": 10,
+          "y": 20,
+          "width": 30,
+          "height": 40
+        },
+        "paint": {
+          "fill": "red",
+          "stroke": "black",
+          "width": "1px",
+          "dash": "none",
+          "opacity": "1",
+          "anchor": "start",
+          "transform": "matrix(1, 0, 0, 1, 10, 20)"
+        },
+        "font": {
+          "size": "12px",
+          "family": "Arial",
+          "weight": "400"
+        },
+        "transform": [
+          1,
+          0,
+          0,
+          1,
+          10,
+          20
+        ],
+        "groups": [
+          "main"
+        ],
+        "attrs": {
+          "d": "M1 2L3 4"
+        }
+      }
+    ]
+  },
+  "cases": [
+    {
+      "id": "xy-identical",
+      "mutations": [],
+      "accept": true
+    },
+    {
+      "id": "xy-mutation-0",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "x"
+          ],
+          "value": 2
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "xy-mutation-1",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "y"
+          ],
+          "value": 2
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "xy-mutation-2",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "width"
+          ],
+          "value": 102
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "xy-mutation-3",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "height"
+          ],
+          "value": 102
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "xy-mutation-4",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "type"
+          ],
+          "value": "text changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "xy-mutation-5",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "cls"
+          ],
+          "value": "node changed"
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "xy-mutation-6",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "text"
+          ],
+          "value": "hello changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "xy-mutation-7",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "path"
+          ],
+          "value": "M1 2L3 4 changed"
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "xy-mutation-8",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "points"
+          ],
+          "value": "1,2 3,4 changed"
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "xy-mutation-9",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "box",
+            "x"
+          ],
+          "value": 12
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "xy-mutation-10",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "box",
+            "y"
+          ],
+          "value": 22
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "xy-mutation-11",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "box",
+            "width"
+          ],
+          "value": 32
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "xy-mutation-12",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "box",
+            "height"
+          ],
+          "value": 42
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "xy-mutation-13",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "paint",
+            "fill"
+          ],
+          "value": "red changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "xy-mutation-14",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "paint",
+            "stroke"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "xy-mutation-15",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "paint",
+            "width"
+          ],
+          "value": "1px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "xy-mutation-16",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "paint",
+            "dash"
+          ],
+          "value": "black"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "xy-mutation-17",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "paint",
+            "opacity"
+          ],
+          "value": "1 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "xy-mutation-18",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "paint",
+            "anchor"
+          ],
+          "value": "start changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "xy-mutation-19",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "paint",
+            "transform"
+          ],
+          "value": "matrix(1, 0, 0, 1, 10, 20) changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "xy-mutation-20",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "font",
+            "size"
+          ],
+          "value": "12px changed"
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "xy-mutation-21",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "font",
+            "family"
+          ],
+          "value": "Arial changed"
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "xy-mutation-22",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "font",
+            "weight"
+          ],
+          "value": "400 changed"
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "xy-mutation-23",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "transform",
+            0
+          ],
+          "value": 3
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "xy-mutation-24",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "transform",
+            1
+          ],
+          "value": 2
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "xy-mutation-25",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "transform",
+            2
+          ],
+          "value": 2
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "xy-mutation-26",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "transform",
+            3
+          ],
+          "value": 3
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "xy-mutation-27",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "transform",
+            4
+          ],
+          "value": 12
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "xy-mutation-28",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "transform",
+            5
+          ],
+          "value": 22
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "xy-mutation-29",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "groups",
+            0
+          ],
+          "value": "main changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "xy-mutation-30",
+      "mutations": [
+        {
+          "path": [
+            "elements",
+            0,
+            "attrs",
+            "d"
+          ],
+          "value": "M1 2L3 4 changed"
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "xy-missing-elements",
+      "mutations": [
+        {
+          "path": [
+            "elements"
+          ],
+          "value": []
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "xy-view-delta-0.04",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "width"
+          ],
+          "value": 100.04
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "xy-view-delta-0.06",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "width"
+          ],
+          "value": 100.06
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "xy-view-delta-1.4",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "width"
+          ],
+          "value": 101.4
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "xy-view-delta-1.6",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "width"
+          ],
+          "value": 101.6
+        }
+      ],
+      "accept": false
+    }
+  ]
+}

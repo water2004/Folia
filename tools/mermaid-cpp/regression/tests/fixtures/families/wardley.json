@@ -1,0 +1,354 @@
+{
+  "family": "wardley",
+  "expected": {
+    "name": "base",
+    "svg": "<svg/>",
+    "view": {
+      "x": 0,
+      "y": 0,
+      "width": 100,
+      "height": 100
+    },
+    "labels": [
+      {
+        "text": "hello",
+        "font": {
+          "size": "12px",
+          "family": "Arial",
+          "weight": "400"
+        },
+        "box": {
+          "x": 10,
+          "y": 20,
+          "width": 30,
+          "height": 40
+        },
+        "rotation": [
+          1,
+          0,
+          0,
+          1
+        ],
+        "x": "10"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "id": "wardley-identical",
+      "mutations": [],
+      "accept": true
+    },
+    {
+      "id": "wardley-mutation-0",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "x"
+          ],
+          "value": 2
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "wardley-mutation-1",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "y"
+          ],
+          "value": 2
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "wardley-mutation-2",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "width"
+          ],
+          "value": 102
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "wardley-mutation-3",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "height"
+          ],
+          "value": 102
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "wardley-mutation-4",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "text"
+          ],
+          "value": "hello changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "wardley-mutation-5",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "font",
+            "size"
+          ],
+          "value": "12px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "wardley-mutation-6",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "font",
+            "family"
+          ],
+          "value": "Arial changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "wardley-mutation-7",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "font",
+            "weight"
+          ],
+          "value": "400 changed"
+        }
+      ],
+      "accept": false,
+      "note": "The old JS comparator accidentally accepted NaN after numeric conversion; invalid numeric input now fails."
+    },
+    {
+      "id": "wardley-mutation-8",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "box",
+            "x"
+          ],
+          "value": 12
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "wardley-mutation-9",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "box",
+            "y"
+          ],
+          "value": 22
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "wardley-mutation-10",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "box",
+            "width"
+          ],
+          "value": 32
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "wardley-mutation-11",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "box",
+            "height"
+          ],
+          "value": 42
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "wardley-mutation-12",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "rotation",
+            0
+          ],
+          "value": 3
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "wardley-mutation-13",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "rotation",
+            1
+          ],
+          "value": 2
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "wardley-mutation-14",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "rotation",
+            2
+          ],
+          "value": 2
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "wardley-mutation-15",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "rotation",
+            3
+          ],
+          "value": 3
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "wardley-mutation-16",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "x"
+          ],
+          "value": "10 changed"
+        }
+      ],
+      "accept": false,
+      "note": "The old JS comparator accidentally accepted NaN after numeric conversion; invalid numeric input now fails."
+    },
+    {
+      "id": "wardley-missing-labels",
+      "mutations": [
+        {
+          "path": [
+            "labels"
+          ],
+          "value": []
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "wardley-view-delta-0.04",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "width"
+          ],
+          "value": 100.04
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "wardley-view-delta-0.06",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "width"
+          ],
+          "value": 100.06
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "wardley-view-delta-1.4",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "width"
+          ],
+          "value": 101.4
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "wardley-view-delta-1.6",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "width"
+          ],
+          "value": 101.6
+        }
+      ],
+      "accept": false
+    }
+  ]
+}
