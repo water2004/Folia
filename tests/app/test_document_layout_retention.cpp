@@ -576,8 +576,9 @@ namespace {
                     << "a tail edit revisited the full document owner index";
                 expect(&fixture.document->ownerBlockIndex.at(first.v) == retainedOwnerEntry)
                     << "the retained owner-map node was replaced";
-                for (auto const& [owner, index] : session.RenderModel().editable_fragment_index)
-                    expect(fixture.document->ownerBlockIndex.at(owner) == index);
+                for (auto owner : session.RenderModel().editable_order)
+                    expect(fixture.document->ownerBlockIndex.at(owner.v)
+                        == session.RenderModel().fragment_for_owner(owner).value());
             };
             auto visits = fixture.document->ownerIndexEntriesVisited;
             expect(fatal(session.ExecuteCommand({.kind = folia::CommandKind::InsertNewline})));
@@ -615,7 +616,7 @@ namespace {
                     expect(fatal(found != fixture.document->ownerBlockIndex.end()));
                     expect(found->second < fixture.document->blocks.size());
                     auto expected = sourceMode ? frame.renderModel.editable_index.at(owner.v)
-                        : frame.renderModel.editable_fragment_index.at(owner.v);
+                        : frame.renderModel.fragment_for_owner(owner).value();
                     expect(found->second == expected);
                 }
                 if (!sourceMode) {

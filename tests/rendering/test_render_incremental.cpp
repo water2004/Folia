@@ -107,7 +107,8 @@ suite render_incremental_tests = [] {
     }
     expect(fatal(bool(incremental.editable_order == full.editable_order)));
     expect(fatal(bool(incremental.editable_index == full.editable_index)));
-    expect(fatal(bool(incremental.editable_top_level == full.editable_top_level)));
+    for (auto owner : full.editable_order)
+        expect(incremental.fragment_for_owner(owner) == full.fragment_for_owner(owner));
     expect(fatal(bool(incremental.rebuilt_block_count == 1u)));
     expect(fatal(incremental.incremental_update));
     expect(fatal(bool(incremental.changed_block_indices == std::vector<std::size_t>{2u})));

@@ -53,7 +53,15 @@ RenderModelUpdate fragment_update(EditorDocumentChange const& change) {
 void expect_fragment_navigation(Editor const& editor, RenderModel const& model) {
     expect(model.editable_order == editor.document().cached_editable_order);
     expect(model.editable_index == editor.document().cached_editable_index);
-    expect(model.editable_fragment_index == index_render_fragment_owners(editor.document(), model.fragments));
+    std::size_t next_owner = 0;
+    for (auto const& interval : model.owner_intervals) {
+        expect(interval.begin == next_owner);
+        expect(interval.fragment < model.fragments.size());
+        next_owner = interval.end;
+        for (auto ordinal = interval.begin; ordinal < interval.end; ++ordinal)
+            expect(model.fragment_for_owner(model.editable_order[ordinal]) == interval.fragment);
+    }
+    expect(next_owner == model.editable_order.size());
     for (auto const& fragment : model.fragments)
         expect(fragment.leaf_count <= render_fragment_leaf_limit);
     Builder reference(default_theme_profile());
@@ -68,6 +76,35 @@ void expect_fragment_navigation(Editor const& editor, RenderModel const& model) 
 }
 
 suite render_fragment_tests = [] {
+    "fragment owner intervals cover mixed blocks and skip unowned fragments"_test = [] {
+        auto parsed = parse_text(1, "# title\n\n---\n\n> quote\n\n"
+            "| A | B |\n| --- | --- |\n| C | |\n\n"
+            "```cpp\nint x;\n```\n\n$$\nx\n$$\n");
+        auto model = build_render_model(parsed.document, parsed.outline, parsed.symbols, default_theme_profile());
+        std::size_t expected_count = 0;
+        for (std::size_t index = 0; index < model.fragments.size(); ++index) {
+            auto const& fragment = model.fragments[index];
+            auto const* root = find_document_block(parsed.document, fragment.source_root);
+            if (!expect(fatal(root != nullptr))) return;
+            visit_render_fragment(*root, fragment_range(fragment), [&](auto const& node, auto) {
+                if (is_editable_block_owner(node.kind)) {
+                    expect(model.fragment_for_owner(node.id) == index);
+                    ++expected_count;
+                } else {
+                    expect(!model.fragment_for_owner(node.id));
+                }
+            });
+        }
+        expect(expected_count == model.editable_order.size());
+        // Physical blocks without an editable owner do not consume a rank.
+        // A later fragment must still resolve to its actual physical slot.
+        auto fragments = model.fragments;
+        fragments.insert(fragments.begin(), RenderFragment{});
+        auto intervals = index_render_fragment_owners(parsed.document, fragments);
+        expect(intervals.size() == model.owner_intervals.size());
+        expect(render_fragment_at(intervals, 0) == 1u);
+    };
+
     "flow_fragments_preserve_nested_flow_spelling_and_owner_coordinates"_test = [] {
         for (auto const& source : std::vector<std::string>{
             list_source(193),
@@ -102,12 +139,12 @@ suite render_fragment_tests = [] {
                     [&](auto const& node, auto) {
                         if (!is_fragment_flow_container(node.kind) || node.children.empty()) ++leaves;
                         if (is_editable_block_owner(node.kind))
-                            expect(model.editable_fragment_index.at(node.id.v) == i);
+                            expect(model.fragment_for_owner(node.id) == i);
                     });
                 expect(leaves <= render_fragment_leaf_limit);
             }
             expect(joined == flow_spelling(whole));
-            expect(model.editable_fragment_index.size() == parsed.document.cached_editable_order.size());
+            expect(model.owner_intervals.back().end == parsed.document.cached_editable_order.size());
         }
     };
 
@@ -163,7 +200,7 @@ suite render_fragment_tests = [] {
         auto parsed = parse_text(1, list_source(4097));
         auto model = build_render_model(parsed.document, parsed.outline, parsed.symbols, default_theme_profile());
         auto owner = parsed.document.cached_editable_order[2048];
-        auto changed_index = model.editable_fragment_index.at(owner.v);
+        auto changed_index = model.fragment_for_owner(owner).value();
         std::vector<std::uint64_t> before;
         for (auto const& block : model.blocks) before.push_back(block.presentation_key);
         auto* leaf = find_document_block(parsed.document, owner);

@@ -1605,8 +1605,7 @@ inline RenderModel finish_render_model(
     std::vector<RenderBlock> blocks,
     std::optional<std::tuple<
         std::vector<NodeId>,
-        std::unordered_map<std::uint64_t, std::size_t>,
-        std::unordered_map<std::uint64_t, NodeId>>> cached_editable = std::nullopt) {
+        std::unordered_map<std::uint64_t, std::size_t>>> cached_editable = std::nullopt) {
     std::vector<RenderDiagnostic> diags;
     for (const auto& d : doc.diagnostics) diags.push_back(convert_diagnostic(d));
     RenderModel m; m.revision = doc.revision; m.blocks = std::move(blocks);
@@ -1614,18 +1613,10 @@ inline RenderModel finish_render_model(
     if (cached_editable) {
         m.editable_order = std::move(std::get<0>(*cached_editable));
         m.editable_index = std::move(std::get<1>(*cached_editable));
-        m.editable_top_level = std::move(std::get<2>(*cached_editable));
         return m;
     }
     m.editable_order = doc.cached_editable_order;
     m.editable_index = doc.cached_editable_index;
-    m.editable_top_level.reserve(m.editable_order.size());
-    for (auto owner : m.editable_order) {
-        record_render_navigation_entry_update();
-        if (auto top_level = document_top_level_block_id(doc, owner)) {
-            m.editable_top_level.emplace(owner.v, *top_level);
-        }
-    }
     return m;
 }
 
@@ -1664,7 +1655,7 @@ inline RenderModel build_render_model_with_fragments(
     for (auto const& fragment : fragments)
         blocks.push_back(build_render_fragment(builder, doc, fragment, dependency_key, virtualized));
     auto model = finish_render_model(doc, outline, std::move(blocks));
-    model.editable_fragment_index = index_render_fragment_owners(doc, fragments);
+    model.owner_intervals = index_render_fragment_owners(doc, fragments);
     model.fragments = std::move(fragments);
     model.document_dependency_key = dependency_key;
     model.virtualized = virtualized;
@@ -1834,20 +1825,19 @@ inline std::optional<Repair> repair_plan(
             root.insertions.push_back(std::move(*path));
         } else {
             if (document.cached_block_locators.contains(delta.root_id.v)) return std::nullopt;
-            auto first = previous.editable_fragment_index.find(delta.first_owner.v);
-            auto last = previous.editable_fragment_index.find(delta.last_owner.v);
-            if (first == previous.editable_fragment_index.end() || last == previous.editable_fragment_index.end()
-                || first->second < root.begin || last->second >= root.end || first->second > last->second)
+            auto first = previous.fragment_for_owner(delta.first_owner);
+            auto last = previous.fragment_for_owner(delta.last_owner);
+            if (!first || !last || *first < root.begin || *last >= root.end || *first > *last)
                 return std::nullopt;
             // Include neighbors for closure changes and local underflow merges.
-            mark(root, first->second > root.begin ? first->second - 1 : root.begin,
-                (std::min)(root.end, last->second + 2));
+            mark(root, *first > root.begin ? *first - 1 : root.begin,
+                (std::min)(root.end, *last + 2));
         }
     }
     for (auto owner : update.changed_owners) {
-        auto found = previous.editable_fragment_index.find(owner.v);
-        if (found == previous.editable_fragment_index.end()) continue;
-        auto index = found->second;
+        auto found = previous.fragment_for_owner(owner);
+        if (!found) continue;
+        auto index = *found;
         if (index >= previous.fragments.size()) return std::nullopt;
         auto& root = roots[root_index.at(previous.fragments[index].source_root.v)];
         mark(root, index, index + 1);
@@ -1921,51 +1911,26 @@ inline std::optional<Repair> repair_plan(
     return result;
 }
 
-inline std::optional<std::pair<std::size_t, std::size_t>> owner_interval(
-    RenderFragment const& fragment, std::unordered_map<std::uint64_t, std::size_t> const& index) {
-    if (fragment.first_owner.v == 0 || fragment.last_owner.v == 0) return std::nullopt;
-    auto first = index.find(fragment.first_owner.v);
-    auto last = index.find(fragment.last_owner.v);
-    if (first == index.end() || last == index.end() || first->second > last->second) return std::nullopt;
-    return std::pair{first->second, last->second + 1};
-}
-
 // Apply the same splice to derived navigation. Rank entries after a middle
 // insertion still move with the existing contiguous owner order, but an edit
 // near the tail never copies or rehashes unrelated preceding owners.
 inline void repair_navigation(EditorDocument const& document, RenderModel& previous,
-    Repair const& plan, std::unordered_map<std::uint64_t, std::size_t> const& previous_by_id) {
+    Repair const& plan) {
     auto first_changed_owner = previous.editable_order.size();
     for (auto const& splice : plan.splices) {
         for (auto index = splice.old_begin; index < splice.old_end; ++index) {
-            auto interval = owner_interval(previous.fragments[index], previous.editable_index);
+            auto interval = editable_owner_range(previous.fragments[index], previous.editable_index);
             if (!interval) continue;
             first_changed_owner = (std::min)(first_changed_owner, interval->first);
             for (auto ordinal = interval->first; ordinal < interval->second; ++ordinal) {
                 auto owner = previous.editable_order[ordinal];
-                previous.editable_fragment_index.erase(owner.v);
-                if (!document.cached_editable_index.contains(owner.v)) {
+                if (!document.cached_editable_index.contains(owner.v))
                     previous.editable_index.erase(owner.v);
-                    previous.editable_top_level.erase(owner.v);
-                }
             }
         }
-    }
-    for (std::size_t index = 0; index < plan.fragments.size(); ++index) {
-        auto const& fragment = plan.fragments[index];
-        auto old = previous_by_id.find(fragment.id.v);
-        auto dirty = std::ranges::any_of(plan.splices, [&](auto const& splice) {
-            return index >= splice.new_begin && index < splice.new_end;
-        });
-        if (!dirty && old != previous_by_id.end() && old->second == index) continue;
-        auto interval = owner_interval(fragment, document.cached_editable_index);
-        if (!interval) continue;
-        if (dirty) first_changed_owner = (std::min)(first_changed_owner, interval->first);
-        for (auto ordinal = interval->first; ordinal < interval->second; ++ordinal) {
-            auto owner = document.cached_editable_order[ordinal];
-            previous.editable_fragment_index[owner.v] = index;
-            previous.editable_top_level[owner.v] = fragment.source_root;
-            record_render_navigation_entry_update();
+        for (auto index = splice.new_begin; index < splice.new_end; ++index) {
+            if (auto interval = editable_owner_range(plan.fragments[index], document.cached_editable_index))
+                first_changed_owner = (std::min)(first_changed_owner, interval->first);
         }
     }
     first_changed_owner = (std::min)(first_changed_owner, document.cached_editable_order.size());
@@ -1995,9 +1960,9 @@ inline RenderModel build_render_model_incremental(
     std::vector<std::size_t> changed;
     if (local) {
         for (auto owner : update.changed_owners) {
-            auto found = previous.editable_fragment_index.find(owner.v);
-            if (found == previous.editable_fragment_index.end()) { local = false; break; }
-            changed.push_back(found->second);
+            auto found = previous.fragment_for_owner(owner);
+            if (!found) { local = false; break; }
+            changed.push_back(*found);
         }
     }
     if (local) {
@@ -2041,8 +2006,8 @@ inline RenderModel build_render_model_incremental(
     if (trusted_structural_locality) {
         auto note_root = [&](NodeId owner) {
             if (auto root = document_top_level_block_id(doc, owner)) changed_roots.insert(root->v);
-            if (auto found = previous.editable_top_level.find(owner.v); found != previous.editable_top_level.end())
-                changed_roots.insert(found->second.v);
+            if (auto found = previous.fragment_for_owner(owner))
+                changed_roots.insert(previous.fragments[*found].source_root.v);
         };
         for (auto owner : update.changed_owners) note_root(owner);
         for (auto anchor : update.structural_anchors) note_root(anchor);
@@ -2059,15 +2024,17 @@ inline RenderModel build_render_model_incremental(
     for (std::size_t index = 0; index < previous.blocks.size(); ++index)
         previous_by_id.emplace(previous.blocks[index].id.v, index);
     if (repair)
-        render_fragment_update_detail::repair_navigation(doc, previous, *repair, previous_by_id);
+        render_fragment_update_detail::repair_navigation(doc, previous, *repair);
     auto fragments = repair ? std::move(repair->fragments)
         : plan_render_fragments(doc, render_key_detail::context_key, previous.fragments);
-    auto new_owner_index = repair ? std::move(previous.editable_fragment_index)
-        : index_render_fragment_owners(doc, fragments);
+    auto owner_intervals = index_render_fragment_owners(doc, fragments);
     std::unordered_set<std::size_t> dirty_sources;
     auto mark_source = [&](NodeId owner) {
-        auto found = new_owner_index.find(owner.v);
-        if (found != new_owner_index.end()) dirty_sources.insert(found->second);
+        auto found = doc.cached_editable_index.find(owner.v);
+        if (found != doc.cached_editable_index.end()) {
+            if (auto fragment = render_fragment_at(owner_intervals, found->second))
+                dirty_sources.insert(*fragment);
+        }
     };
     for (auto owner : update.changed_owners) mark_source(owner);
     // A payload-only change can modify an atomic raw source without a TextEdit.
@@ -2119,12 +2086,11 @@ inline RenderModel build_render_model_incremental(
         }
     }
     std::optional<std::tuple<std::vector<NodeId>,
-        std::unordered_map<std::uint64_t, std::size_t>,
-        std::unordered_map<std::uint64_t, NodeId>>> navigation;
+        std::unordered_map<std::uint64_t, std::size_t>>> navigation;
     if (repair) navigation.emplace(std::move(previous.editable_order),
-        std::move(previous.editable_index), std::move(previous.editable_top_level));
+        std::move(previous.editable_index));
     auto model = finish_render_model(doc, outline, std::move(blocks), std::move(navigation));
-    model.editable_fragment_index = std::move(new_owner_index);
+    model.owner_intervals = std::move(owner_intervals);
     model.fragments = std::move(fragments);
     model.document_dependency_key = dependency_key;
     model.rebuilt_block_count = rebuilt;

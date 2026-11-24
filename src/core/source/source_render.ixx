@@ -291,7 +291,6 @@ inline RenderBlock render_line(
 
 inline void append_editable_line(RenderModel& model, SourceLine const& line) {
     model.editable_index.emplace(line.id.v, model.editable_order.size());
-    model.editable_top_level.emplace(line.id.v, line.id);
     model.editable_order.push_back(line.id);
 }
 
@@ -352,9 +351,7 @@ inline RenderModel build_source_render_model_incremental(
             previous.blocks[index] = rebuild(index);
             if (old_id != lines[index].id) {
                 previous.editable_index.erase(old_id.v);
-                previous.editable_top_level.erase(old_id.v);
                 previous.editable_index[lines[index].id.v] = index;
-                previous.editable_top_level[lines[index].id.v] = lines[index].id;
                 previous.editable_order[index] = lines[index].id;
             }
         }

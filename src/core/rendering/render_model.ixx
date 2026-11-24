@@ -443,12 +443,26 @@ struct RenderFragment {
     bool operator==(RenderFragment const&) const = default;
 };
 
+// A physical fragment covers one consecutive interval in editable order.
+// Fragments without an editable owner have no interval.
+struct RenderOwnerInterval {
+    std::size_t begin = 0;
+    std::size_t end = 0;
+    std::size_t fragment = 0;
+};
+
+inline std::optional<std::size_t> render_fragment_at(
+    std::span<const RenderOwnerInterval> intervals, std::size_t ordinal) {
+    auto found = std::ranges::upper_bound(intervals, ordinal, {}, &RenderOwnerInterval::end);
+    if (found == intervals.end() || ordinal < found->begin) return std::nullopt;
+    return found->fragment;
+}
+
 struct RenderModel {
     std::uint64_t revision = 1;
     std::vector<RenderBlock> blocks;
     std::vector<RenderFragment> fragments;
-    // Physical lookup; editable_top_level below remains a semantic relationship.
-    std::unordered_map<std::uint64_t, std::size_t> editable_fragment_index;
+    std::vector<RenderOwnerInterval> owner_intervals;
     bool virtualized = false;
     // Only populated for virtualized rich-text models.  Tracking the sparse
     // working set avoids scanning every block when the viewport moves.
@@ -459,9 +473,6 @@ struct RenderModel {
     // Stable document-order rank, built with the render projection instead of
     // reconstructed by every viewport draw.
     std::unordered_map<std::uint64_t, std::size_t> editable_index;
-    // Maps every editable owner to the top-level render block that contains
-    // it, allowing local source transactions to invalidate one subtree.
-    std::unordered_map<std::uint64_t, NodeId> editable_top_level;
     std::uint64_t document_dependency_key = 0;
     std::size_t rebuilt_block_count = 0;
     std::size_t reused_block_count = 0;
@@ -469,6 +480,12 @@ struct RenderModel {
     // structural or document-wide dependency change.
     bool incremental_update = false;
     std::vector<std::size_t> changed_block_indices;
+
+    std::optional<std::size_t> fragment_for_owner(NodeId owner) const {
+        auto found = editable_index.find(owner.v);
+        if (found == editable_index.end()) return std::nullopt;
+        return render_fragment_at(owner_intervals, found->second);
+    }
 };
 
 } // namespace folia

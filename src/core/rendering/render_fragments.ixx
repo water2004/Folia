@@ -250,17 +250,22 @@ inline void visit_render_fragment(
         visit_render_fragment(node.children[index], range.child(index), visitor);
 }
 
-inline std::unordered_map<std::uint64_t, std::size_t> index_render_fragment_owners(
+inline std::optional<std::pair<std::size_t, std::size_t>> editable_owner_range(
+    RenderFragment const& fragment, std::unordered_map<std::uint64_t, std::size_t> const& ordinals) {
+    auto first = ordinals.find(fragment.first_owner.v);
+    auto last = ordinals.find(fragment.last_owner.v);
+    if (first == ordinals.end() || last == ordinals.end() || first->second > last->second)
+        return std::nullopt;
+    return std::pair{first->second, last->second + 1};
+}
+
+inline std::vector<RenderOwnerInterval> index_render_fragment_owners(
     EditorDocument const& document, std::span<RenderFragment const> fragments) {
-    std::unordered_map<std::uint64_t, std::size_t> result;
-    result.reserve(document.cached_editable_order.size());
+    std::vector<RenderOwnerInterval> result;
+    result.reserve(fragments.size());
     for (std::size_t index = 0; index < fragments.size(); ++index) {
-        auto const& fragment = fragments[index];
-        auto const* root = find_document_block(document, fragment.source_root);
-        if (!root) continue;
-        visit_render_fragment(*root, fragment_range(fragment), [&](auto const& node, auto) {
-            if (is_editable_block_owner(node.kind)) result.emplace(node.id.v, index);
-        });
+        if (auto range = editable_owner_range(fragments[index], document.cached_editable_index))
+            result.push_back({range->first, range->second, index});
     }
     return result;
 }
