@@ -23,7 +23,7 @@ Reproduce from the repository root:
 
 ```powershell
 node tools/math-port/regressions/g252/common-passive-source.cjs --profile-corpus > build/math-port/common-passive-source.json
-node tools/math-port/regressions/g252/compare-common-passive.cjs build/math-port/common-passive-source.json build/math-port/g247-layout-font/common-native.json build/math-port/common-passive-comparison.json
+python tools/math-port/regressions/g252/compare-common-passive.py build/math-port/common-passive-source.json build/math-port/g247-layout-font/common-native.json build/math-port/common-passive-comparison.json
 ```
 
 The source JSON is an ignored generated artifact. Its expected bytes, observer,
