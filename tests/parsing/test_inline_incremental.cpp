@@ -30,6 +30,33 @@ bool SameTokens(InlineCstTree const& a, InlineCstTree const& b) {
 }
 
 suite incremental_inline_tests = [] {
+    "paged inline token splices preserve distant offsets and token kinds"_test = [] {
+        InlineTokens tokens;
+        for (std::size_t end = 1; end <= 800; ++end)
+            tokens.emplace_back(TokenKind::Text, end);
+        constexpr auto distant = std::size_t{1} << 30;
+        tokens.emplace_back(TokenKind::Escape, distant);
+        tokens.emplace_back(TokenKind::Entity, distant + 5);
+        auto original = tokens;
+
+        InlineTokens replacement;
+        replacement.emplace_back(TokenKind::Whitespace, 4);
+        replacement.emplace_back(TokenKind::Text, 14);
+        tokens.replace(249, 261, replacement, 249, 2);
+
+        expect(tokens.size() == 792u);
+        expect(tokens[248].end() == 249u);
+        expect(tokens[249].kind() == TokenKind::Whitespace);
+        expect(tokens[249].end() == 253u);
+        expect(tokens[250].end() == 263u);
+        expect(tokens[251].end() == 264u);
+        expect(tokens[790].kind() == TokenKind::Escape);
+        expect(tokens[790].end() == distant + 2);
+        expect(tokens[791].end() == distant + 7);
+        expect(original[800].end() == distant);
+        expect(!tokens.only_kinds(512, tokens.size(), 1u << static_cast<unsigned>(TokenKind::Text)));
+    };
+
     "incremental inline edits agree with complete parsing through temporary syntax"_test = [] {
         std::vector<std::u32string> sources{
             U"alpha beta gamma\nnext **bold** line", U"alpha beta gamma",

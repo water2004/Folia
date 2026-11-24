@@ -19,8 +19,8 @@ std::string patch_document_state(const EditorDocument& document) {
             const auto& sem=node->semantics();
             out<<std::quoted(sem.href)<<std::quoted(sem.title.value_or(""))<<std::quoted(sem.label)
                 <<std::quoted(sem.target)<<std::quoted(sem.alt)<<std::quoted(sem.html_tag);
-            if (node->delimited) {
-                const auto& d=*node->delimited;
+            if (auto delimiters = node->stored_delimiters()) {
+                const auto& d=*delimiters;
                 out<<':'<<d.opening.start<<':'<<d.opening.end
                     <<':'<<d.content.start<<':'<<d.content.end<<':'<<d.closing.has_value();
                 if (d.closing) out<<':'<<d.closing->start<<':'<<d.closing->end;

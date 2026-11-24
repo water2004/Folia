@@ -22,7 +22,7 @@ suite inline_math_storage = [] {
         for (auto const& node : tree.nodes) {
             if (node.kind != InlineCstKind::InlineMath) continue;
             ++formulas;
-            expect(node.semantic == nullptr);
+            expect(!node.has_semantics());
             expect(node.semantics().math_delim == MathDelimiter::InlineDollar);
             expect(node.status == ParseStatus::Complete);
             const auto& ranges = node.delimiter_ranges();

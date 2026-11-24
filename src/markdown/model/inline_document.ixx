@@ -138,8 +138,8 @@ inline std::vector<SourceRange> inline_block_semantic_whitespace_ranges(
 // covering node (leaf or innermost container).
 inline const InlineCstNode* node_at_offset(const InlineCstTree& tree, std::size_t offset) {
     const InlineCstNode* deepest = nullptr;
-    std::function<const InlineCstNode*(const std::vector<InlineCstNode>&)> search =
-        [&](const std::vector<InlineCstNode>& nodes) -> const InlineCstNode* {
+    std::function<const InlineCstNode*(const InlineCstNodes&)> search =
+        [&](const InlineCstNodes& nodes) -> const InlineCstNode* {
         for (const auto& node : nodes) {
             if (!node.range.covers(offset)) continue;
             deepest = &node;

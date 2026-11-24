@@ -37,7 +37,7 @@ std::size_t check_copy_chain(InlineCstNodes const& original, InlineCstNodes cons
         auto const& first=a->front(); auto const& second=b->front();
         if (first.id != second.id || first.kind != second.kind
             || first.range.start != second.range.start || first.range.end != second.range.end
-            || first.delimited != second.delimited || first.semantic != second.semantic) return 0;
+            || first.metadata != second.metadata) return 0;
         ++count;
         a=&first.children; b=&second.children;
     }

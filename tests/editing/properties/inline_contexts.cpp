@@ -171,17 +171,17 @@ suite editing_properties_inline_contexts_tests = [] {
             while (!pending.empty()) {
                 const auto* node = pending.back(); pending.pop_back();
                 for (const auto& child : node->children) pending.push_back(&child);
-                if (node->status != ParseStatus::Complete || !node->delimited || !node->delimited->closing) continue;
+                auto const* parts = node->stored_delimiters();
+                if (node->status != ParseStatus::Complete || !parts || !parts->closing) continue;
                 const auto paired = node->kind == InlineCstKind::Emphasis || node->kind == InlineCstKind::Strong
                     || node->kind == InlineCstKind::Strikethrough || node->kind == InlineCstKind::CodeSpan
                     || node->kind == InlineCstKind::InlineMath;
-                const auto& parts = *node->delimited;
                 const auto character = offset - 1;
-                const auto in_marker = (character >= parts.opening.start && character < parts.opening.end)
-                    || (character >= parts.closing->start && character < parts.closing->end);
+                const auto in_marker = (character >= parts->opening.start && character < parts->opening.end)
+                    || (character >= parts->closing->start && character < parts->closing->end);
                 if (!paired || !in_marker) continue;
                 expected = original.substr(0, node->range.start)
-                    + original.substr(parts.content.start, parts.content.length())
+                    + original.substr(parts->content.start, parts->content.length())
                     + original.substr(node->range.end);
                 break;
             }

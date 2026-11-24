@@ -34,6 +34,7 @@ target_sources(folia_markdown PUBLIC FILE_SET CXX_MODULES FILES
     model/inline_cst.ixx
     model/inline_document.ixx
     model/metadata.ixx
+    model/node_sequence.ixx
     model/owner_index.ixx
     model/selection.ixx
     model/source_offset_map.ixx

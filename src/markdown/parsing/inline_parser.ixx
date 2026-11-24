@@ -2349,8 +2349,8 @@ struct Parser {
     // Produce the lexical leaf stream independently of the structural parse.
     // Ranges are exhaustive and never overlap, so concatenating token source
     // slices is a real leaf-token flatten, not a top-level node shortcut.
-    std::vector<InlineToken> tokenize() {
-        std::vector<InlineToken> tokens;
+    InlineTokens tokenize() {
+        InlineTokens tokens;
         std::size_t cursor = 0;
         auto emit = [&](TokenKind kind, std::size_t, std::size_t end) {
             tokens.emplace_back(kind, end);

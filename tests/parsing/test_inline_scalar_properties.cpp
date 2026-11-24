@@ -59,7 +59,7 @@ suite inline_scalar_properties = [] {
                       InlineCstKind::HardBreak, InlineCstKind::SoftBreak}) {
         auto node = std::ranges::find(tree.nodes, kind, &InlineCstNode::kind);
         if (!expect(fatal(node != tree.nodes.end()))) return;
-        expect(!node->delimited);
+        expect(!node->stored_delimiters());
         auto ranges = node->delimiter_ranges();
         expect(ranges.opening == node->range);
         expect(ranges.content == node->range);
