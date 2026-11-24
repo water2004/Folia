@@ -1,4 +1,5 @@
 #include "math/support/tex_fixture.hpp"
+#include "math/support/tex_binding_fixtures.hpp"
 import folia.math.input.tex.textmacros.configuration;
 import folia.math.input.tex.color.configuration;
 import folia.math.input.tex.html.configuration;
@@ -117,11 +118,11 @@ struct TextRequest {
     bool levelPresent;
 };
 struct TextMappingCase {
-    std::u16string_view map, name;
+    std::u16string map, name;
     MacroHandler method;
     std::vector<TexArgument> arguments;
 };
-#include "math/fixtures/textmacros-mappings.inc"
+#include "math/support/textmacros_mapping_fixtures.hpp"
 thread_local std::vector<TextRequest> *textRequests{};
 MmlNode &observeTextNode(NodeFactory &factory, NodeKind kind, std::span<MmlNode *const> children,
                          NodeDefinition definition, MmlNode *text) {
@@ -140,7 +141,7 @@ suite textmacros = [] {
     "textmacros every original character and command mapping keeps its compiled callback and typed arguments"_test =
         [] {
             TextFixture f;
-            for (auto const &entry : textMappingCases) {
+            for (auto const &entry : textMappingCases()) {
                 auto lookup = f.maps.getMap(entry.map)->lookup(entry.name);
                 auto macro = std::get_if<Macro const *>(&lookup);
                 expect(macro && *macro);

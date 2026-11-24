@@ -36,11 +36,15 @@ for(const prefix of ['','text-']){
 }
 assert.equal(charRows.length,168);assert.equal(commandRows.length,12);
 assert.equal(charRows.find(r=>r.name==='bfbblambda').glyph,'οBB');assert.equal(charRows.find(r=>r.name==='txtbfbblambda').glyph,'λ');assert.equal(commandRows.some(r=>r.name==='jmathbfbb'),true);
-const cpp=s=>'u"'+[...s].map(c=>{const n=c.codePointAt(0);return n>=32&&n<127?(c==='"'||c==='\\'?'\\'+c:c):n>0xffff?'\\U'+n.toString(16).padStart(8,'0'):'\\u'+n.toString(16).padStart(4,'0')}).join('')+'"';
-const callback=name=>name==='Macro'?'BboldxMethods::Macro':'&BboldxMethods::'+name;
-const fixtureText='// Original MathJax 4.1.3 Bboldx maps and actual font outcomes; Apache-2.0.\n// Generated independently by tex-bboldx-source.cjs --write-fixture.\n'+
- 'static constexpr BboldxCharacterCase bboldxCharacters[]{\n'+charRows.map(r=>'    {'+[cpp(r.map),cpp(r.name),cpp(r.glyph),callback(r.method),'NodeKind::'+r.kind,'{'+r.fonts.map(cpp).join(', ')+'}',String(r.text)].join(', ')+'},').join('\n')+'\n};\n'+
- 'static constexpr BboldxCommandCase bboldxCommands[]{\n'+commandRows.map(r=>'    {'+[cpp(r.map),cpp(r.name),callback(r.method),'{'+[...r.args,...Array(3-r.args.length).fill('')].map(cpp).join(', ')+'}',r.args.length,cpp(r.glyph),'NodeKind::'+r.kind,'{'+r.fonts.map(cpp).join(', ')+'}',String(r.text)].join(', ')+'},').join('\n')+'\n};\n';
+const {utf16Field: u, writeTables} = require('./fixture-data.cjs');
+const fixtureDirectory = path.join(root, 'tests/math/fixtures/packages/bboldx');
+const fixtureTables = {
+ characters: {columns: ['map','name','glyph','method','kind','font00','font01','font10','font11','text'],
+   rows: charRows.map(r => [u(r.map),u(r.name),u(r.glyph),r.method,r.kind,...r.fonts.map(u),+r.text])},
+ commands: {columns: ['map','name','method','argument0','argument1','argument2','count','glyph','kind','font00','font01','font10','font11','text'],
+   rows: commandRows.map(r => [u(r.map),u(r.name),r.method,...[...r.args,...Array(3-r.args.length).fill('')].map(u),r.args.length,u(r.glyph),r.kind,...r.fonts.map(u),+r.text])}
+};
+
 {
  const f=text[0];assert.deepEqual(f.jax.parseOptions.options.textmacros.packages,['text-base','text-bboldx']);assert.equal(f.jax.parseOptions.packageData.get('textmacros').parseOptions.options===f.jax.parseOptions.options,true);
  for(const reverse of [false,true])assert.equal(fontNode(ok(fixture(false,false,true,false,reverse),'\\mathbb{x}')).attributes.get('mathvariant'),'-bboldx');
@@ -62,6 +66,5 @@ for(const [source,id]of errors){const f=fixture();assert.equal(f.compile(source)
  const f=fixture(false,false,true,true);ok(f,'\\let\\savedFont\\mathbb\\let\\savedChar\\bbGamma\\let\\savedDelim\\bfbbLparen\\let\\savedMacro\\imathbb\\let\\savedBold\\bfbbGamma\\let\\savedNormalDelim\\bbLparen');for(const [command,glyph]of [['savedFont{x}','x'],['savedChar','Γ'],['savedDelim','('],['savedMacro','ı'],['savedBold','Γ'],['savedNormalDelim','(']])assert.equal(fontNode(ok(f,'\\'+command)).getText(),glyph);
  f.jax.parseOptions.options.bboldx.light=true;assert.equal(fontNode(ok(f,'\\savedChar')).attributes.get('mathvariant'),'-bboldx-light');assert.equal(fontNode(ok(f,'\\savedDelim')).attributes.get('mathvariant'),'-bboldx');assert.equal(fontNode(ok(f,'\\savedBold')).attributes.get('mathvariant'),'-bboldx');assert.equal(fontNode(ok(f,'\\savedNormalDelim')).attributes.get('mathvariant'),'-bboldx-light');assert.equal(f.compile('\\text{\\savedChar}').error,'MathMacro');ok(f,'\\text{\\txtbbGamma}');
 }
-const fixturePath=path.join(root,'tests/math/fixtures/bboldx.inc');
-if(process.argv.includes('--write-fixture'))fs.writeFileSync(fixturePath,fixtureText);else assert.equal(fs.readFileSync(fixturePath,'utf8').replace(/\r\n/g,'\n'),fixtureText);
-console.log(JSON.stringify({maps:10,characters:charRows.length,commands:commandRows.length,combinations:4,cases,errorCases:errors.length,sourceFixture:'tests/math/fixtures/bboldx.inc',compiled_source_sha256:reference.provenance.compiled_source_sha256}));
+writeTables(fixtureDirectory, fixtureTables);
+console.log(JSON.stringify({maps:10,characters:charRows.length,commands:commandRows.length,combinations:4,cases,errorCases:errors.length,sourceFixture:path.relative(root,fixtureDirectory),compiled_source_sha256:reference.provenance.compiled_source_sha256}));

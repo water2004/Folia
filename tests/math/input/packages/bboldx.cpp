@@ -4,25 +4,9 @@ import folia.math.input.tex.bboldx.methods;
 import folia.math.input.tex.textmacros.configuration;
 import folia.math.input.tex.newcommand.configuration;
 
+#include "math/support/bboldx_fixtures.hpp"
+
 namespace {
-struct BboldxCharacterCase {
-    std::u16string_view map, name, glyph;
-    TokenInputHandler parser;
-    NodeKind kind;
-    std::array<std::u16string_view, 4> fonts;
-    bool text;
-};
-struct BboldxCommandCase {
-    std::u16string_view map, name;
-    MacroHandler parser;
-    std::array<std::u16string_view, 3> arguments;
-    std::size_t count;
-    std::u16string_view glyph;
-    NodeKind kind;
-    std::array<std::u16string_view, 4> fonts;
-    bool text;
-};
-#include "math/fixtures/bboldx.inc"
 constexpr std::array<MacroHandler, 3> bbCallbacks{BboldxMethods::Macro, &BboldxMethods::ChooseFont,
                                                   &BboldxMethods::ChooseTextFont};
 constexpr std::array<TokenInputHandler, 4> bbTokenCallbacks{
@@ -139,10 +123,10 @@ suite bboldx = [] {
     "bboldx all ten maps retain independent Source character rows and original command arguments"_test =
         [] {
             BboldxFixture f;
-            expect(std::size(bboldxCharacters) == 168_u);
-            expect(std::size(bboldxCommands) == 12_u);
+            expect(std::size(bboldxCharacters()) == 168_u);
+            expect(std::size(bboldxCommands()) == 12_u);
             expect(BboldxMethods::Macro == &BaseMethods::Macro);
-            for (auto const &entry : bboldxCharacters) {
+            for (auto const &entry : bboldxCharacters()) {
                 auto map = f.maps.getMap(entry.map);
                 expect(map != nullptr);
                 if (!map)
@@ -153,7 +137,7 @@ suite bboldx = [] {
                 if (token && token->character)
                     expect(std::ranges::equal(*token->character, entry.glyph));
             }
-            for (auto const &entry : bboldxCommands) {
+            for (auto const &entry : bboldxCommands()) {
                 auto macro = std::get<Macro const *>(f.maps.getMap(entry.map)->lookup(entry.name));
                 expect(std::get<MacroHandler>(macro->function) == entry.parser);
                 expect(macro->arguments.size() == entry.count);
@@ -170,7 +154,7 @@ suite bboldx = [] {
         [] {
             for (std::size_t i = 0; i < 4; ++i) {
                 BboldxFixture math(false, i >= 2, i % 2 != 0), text(true, i >= 2, i % 2 != 0);
-                for (auto const &entry : bboldxCharacters) {
+                for (auto const &entry : bboldxCharacters()) {
                     auto &fixture = entry.text ? text : math;
                     auto node = bbFontNode(fixture.ok(bbSource(entry.name, entry.text)));
                     if (!node)
@@ -181,7 +165,7 @@ suite bboldx = [] {
                     if (entry.kind == NodeKind::mo)
                         expect(bbFalse(node->attributes(), u"stretchy"));
                 }
-                for (auto const &entry : bboldxCommands) {
+                for (auto const &entry : bboldxCommands()) {
                     auto &fixture = entry.text ? text : math;
                     auto node =
                         bbFontNode(fixture.ok(bbSource(entry.name, entry.text, entry.count == 3)));

@@ -1,0 +1,14 @@
+# Pinned reference observations; values exported without normalization.
+# map	name	method	argument0	argument1	argument2	count	glyph	kind	font00	font01	font10	font11	text
+bboldx	mathbb	ChooseFont	-bboldx	-bboldx-light	-bboldx-bold	3	x	mi	-bboldx	-bboldx-light	-bboldx-bold	-bboldx-bold	0
+bboldx	mathbfbb	ChooseFont	-bboldx-bold	-bboldx	-bboldx-bold	3	x	mi	-bboldx-bold	-bboldx	-bboldx-bold	-bboldx-bold	0
+bboldx	imathbb	Macro	\u005cbbdotlessi			1	\u0131	mi	-bboldx	-bboldx-light	-bboldx-bold	-bboldx-bold	0
+bboldx	jmathbb	Macro	\u005cbbdotlessj			1	\u0237	mi	-bboldx	-bboldx-light	-bboldx-bold	-bboldx-bold	0
+bboldx	imathbfbb	Macro	\u005cbfbbdotlessi			1	\u0131	mi	-bboldx-bold	-bboldx	-bboldx-bold	-bboldx-bold	0
+bboldx	jmathbfbb	Macro	\u005cbfbbdotlessj			1	\u0237	mi	-bboldx-bold	-bboldx	-bboldx-bold	-bboldx-bold	0
+text-bboldx	textbb	ChooseTextFont	-bboldx	-bboldx-light	-bboldx-bold	3	x	mtext	-bboldx	-bboldx-light	-bboldx-bold	-bboldx-bold	1
+text-bboldx	textbfbb	ChooseTextFont	-bboldx-bold	-bboldx	-bboldx-bold	3	x	mtext	-bboldx-bold	-bboldx	-bboldx-bold	-bboldx-bold	1
+text-bboldx	itextbb	Macro	\u005ctxtbbdotlessi			1	\u0131	mi	-bboldx	-bboldx-light	-bboldx-bold	-bboldx-bold	1
+text-bboldx	jtextbb	Macro	\u005ctxtbbdotlessj			1	\u0237	mi	-bboldx	-bboldx-light	-bboldx-bold	-bboldx-bold	1
+text-bboldx	itextbfbb	Macro	\u005ctxtbfbbdotlessi			1	\u0131	mi	-bboldx-bold	-bboldx	-bboldx-bold	-bboldx-bold	1
+text-bboldx	jtextbfbb	Macro	\u005ctxtbfbbdotlessj			1	\u0237	mi	-bboldx-bold	-bboldx	-bboldx-bold	-bboldx-bold	1
