@@ -1,11 +1,32 @@
 #include "support/folia_test.hpp"
+#include "math/support/fixture_values.hpp"
 import folia.math.dependencies.mhchem_parser;
 
 namespace {
 using namespace boost::ut;
 using namespace folia::math::mhchem;
 
-#include "math/fixtures/mhchem_parser.inc"
+enum class MhchemSourceMode { parse, pattern, tables, regexes };
+struct MhchemSourceCase {
+    MhchemSourceMode mode;
+    std::u16string name, input;
+    std::string expected;
+};
+
+std::vector<MhchemSourceCase> sourceCases() {
+    std::vector<MhchemSourceCase> result;
+    for (auto& row : math_test::fixtures::rows("math/fixtures/mhchem_parser.tsv", 4, 7960)) {
+        MhchemSourceMode mode;
+        if (row[0] == "parse") mode = MhchemSourceMode::parse;
+        else if (row[0] == "pattern") mode = MhchemSourceMode::pattern;
+        else if (row[0] == "tables") mode = MhchemSourceMode::tables;
+        else if (row[0] == "regexes") mode = MhchemSourceMode::regexes;
+        else throw std::runtime_error("Unknown mhchem reference mode: " + row[0]);
+        result.push_back({mode, folia::test::data::decode_utf16(row[1]),
+                          folia::test::data::decode_utf16(row[2]), std::move(row[3])});
+    }
+    return result;
+}
 
 std::string quote(std::u16string_view value) {
     constexpr char digits[] = "0123456789abcdef";
@@ -152,14 +173,6 @@ std::string observation(const MhchemSourceCase& row) {
     }
 }
 
-std::string expectedFixture(const MhchemSourceCase& row) {
-    std::string expected;
-    expected.reserve(row.expectedSize);
-    for (std::size_t i = 0; i < row.expectedChunkCount; ++i)
-        expected += mhchemSourceExpectedChunks[row.expectedChunkBegin + i];
-    return expected;
-}
-
 std::size_t firstMismatch(std::string_view actual, std::string_view expected) {
     const auto limit = std::min(actual.size(), expected.size());
     for (std::size_t i = 0; i < limit; ++i)
@@ -222,7 +235,7 @@ std::string_view modeName(MhchemSourceMode mode) {
 
 suite mhchem_parser_source = [] {
     "mhchem parser, patterns, FSMs, and regexes match every pinned Source record"_test = [] {
-        expect(mhchemSourceCaseCount == std::size(mhchemSourceCases));
+        const auto mhchemSourceCases = sourceCases();
         expect(std::size(mhchemSourceCases) == 7960);
         std::size_t parseCount = 0, patternCount = 0, tableCount = 0, regexCount = 0;
         std::size_t failures = 0;
@@ -234,7 +247,7 @@ suite mhchem_parser_source = [] {
             else if (row.mode == MhchemSourceMode::tables) ++tableCount;
             else if (row.mode == MhchemSourceMode::regexes) ++regexCount;
             const auto actual = observation(row);
-            const auto expected = expectedFixture(row);
+            const auto& expected = row.expected;
             const auto mismatch = firstMismatch(actual, expected);
             if (mismatch != std::string_view::npos) {
                 if (failures < 8) {

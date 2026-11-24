@@ -1,4 +1,5 @@
 #include "../support/folia_test.hpp"
+#include "math/support/numeric_fixtures.hpp"
 import folia.math.util.lengths;
 import folia.math.util.js_number;
 import folia.math.util.numeric;
@@ -82,40 +83,6 @@ suite lengths_tests = [] {
 namespace {
 using namespace boost::ut;
 namespace lengths = folia::math::lengths;
-struct NumberFormatRow {
-    std::uint64_t bits;
-    unsigned digits;
-    std::string_view shortest, fixed;
-};
-struct TextLengthRow {
-    std::string_view input;
-    std::uint64_t size, scale, pixels, expected;
-};
-struct NumberLengthRow {
-    std::uint64_t input, size, scale, pixels, expected;
-};
-struct FormattedLengthRow {
-    bool percent;
-    std::uint64_t input;
-    std::string_view expected;
-};
-struct PixelRow {
-    std::uint64_t input, minimum, pixels;
-    std::string_view expected;
-};
-struct UnitRow {
-    std::string_view input;
-    bool physical;
-    std::uint64_t expected;
-};
-struct ReductionRow {
-    std::vector<std::uint64_t> input;
-    bool sumNan;
-    std::uint64_t sum;
-    bool maxNan;
-    std::uint64_t max;
-};
-#include "fixtures/tex-source/numeric_source_values.inc"
 double number(std::uint64_t bits) {
     return std::bit_cast<double>(bits);
 }
@@ -133,7 +100,7 @@ bool exact(double actual, bool nan, std::uint64_t bits) {
 }
 suite native_numeric_full_values = [] {
     "native complete Source Number shortest and fixed values"_test = [] {
-        for (const auto &row : numberFormatRows) {
+        for (const auto &row : math_test::fixtures::numberFormats()) {
             const auto x = number(row.bits);
             expect(folia::math::js_number::toString(x) == row.shortest) << row.bits;
             expect(folia::math::js_number::toFixed(x, row.digits) == row.fixed)
@@ -155,31 +122,31 @@ suite native_numeric_full_values = [] {
         expect(equalNumber(lengths::length2em(1.0), 0.0));
         expect(lengths::px(1.0) == "16px");
 
-        for (const auto &row : textLengthRows) {
+        for (const auto &row : math_test::fixtures::textLengths()) {
             lengths::LengthContext context{
                 number(row.size), number(row.scale), number(row.pixels)};
             expect(equalNumber(
                 lengths::length2em(row.input, context), number(row.expected)))
                 << row.input;
         }
-        for (const auto &row : numberLengthRows) {
+        for (const auto &row : math_test::fixtures::numberLengths()) {
             lengths::LengthContext context{
                 number(row.size), number(row.scale), number(row.pixels)};
             expect(equalNumber(
                 lengths::length2em(number(row.input), context), number(row.expected)))
                 << row.input;
         }
-        for (const auto &row : formattedLengthRows) {
+        for (const auto &row : math_test::fixtures::formattedLengths()) {
             const auto actual = row.percent ? lengths::percent(number(row.input))
                                             : lengths::em(number(row.input));
             expect(actual == row.expected) << row.input;
         }
-        for (const auto &row : pixelRows) {
+        for (const auto &row : math_test::fixtures::pixels()) {
             expect(lengths::px(
                 number(row.input), number(row.minimum), number(row.pixels)) == row.expected)
                 << row.input;
         }
-        for (const auto &row : unitRows) {
+        for (const auto &row : math_test::fixtures::units()) {
             lengths::LengthContext context{};
             if (row.physical) context.em_pixels = 1;
             expect(equalNumber(
@@ -189,7 +156,7 @@ suite native_numeric_full_values = [] {
     };
 
     "native complete Source dense numeric reductions"_test = [] {
-        for (const auto &row : reductionRows) {
+        for (const auto &row : math_test::fixtures::reductions()) {
             std::vector<double> input;
             input.reserve(row.input.size());
             for (auto bits : row.input) input.push_back(number(bits));

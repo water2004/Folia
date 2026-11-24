@@ -1,0 +1,32 @@
+# Pinned reference observations; values exported without normalization.
+# input_bytes	physical	expected_binary64
+1px	1	3ff0000000000000
+1in	1	4058000000000000
+1cm	1	4042e5cb972e5cb9
+1mm	1	400e3c78f1e3c790
+1em	0	3ff0000000000000
+1ex	0	3fdb95810624dd2f
+1pt	0	3fb999999999999a
+1pc	0	3ff3333333333333
+1mu	0	3fac71c71c71c71c
+veryverythinmathspace	0	3fac71c71c71c71c
+verythinmathspace	0	3fbc71c71c71c71c
+thinmathspace	0	3fc5555555555555
+mediummathspace	0	3fcc71c71c71c71c
+thickmathspace	0	3fd1c71c71c71c72
+verythickmathspace	0	3fd5555555555555
+veryverythickmathspace	0	3fd8e38e38e38e39
+negativeveryverythinmathspace	0	bfac71c71c71c71c
+negativeverythinmathspace	0	bfbc71c71c71c71c
+negativethinmathspace	0	bfc5555555555555
+negativemediummathspace	0	bfcc71c71c71c71c
+negativethickmathspace	0	bfd1c71c71c71c72
+negativeverythickmathspace	0	bfd5555555555555
+negativeveryverythickmathspace	0	bfd8e38e38e38e39
+thin	0	3fa47ae147ae147b
+medium	0	3faeb851eb851eb8
+thick	0	3fb999999999999a
+normal	0	3ff0000000000000
+big	0	4000000000000000
+small	0	3fe6a09e667f3bcc
+infinity	0	412e848000000000

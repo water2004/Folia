@@ -1,4 +1,5 @@
 #include "support/folia_test.hpp"
+#include "math/support/fixture_values.hpp"
 import folia.math.input.tex.parse_util;
 import folia.math.util.js_numeric_input;
 
@@ -8,7 +9,6 @@ namespace {
 using folia::math::mml::AttributeSet;
 using folia::math::mml::AttributeValue;
 namespace numeric = folia::math::js_input;
-#include "fixtures/tex-source/input_host_numeric_values.inc"
 void optionText(AttributeSet const &options, std::u16string_view key,
                 std::u16string_view expected) {
     auto value = options.own(key);
@@ -226,10 +226,19 @@ suite keyval_options = [] {
             return std::isnan(expected) ? std::isnan(actual)
                  : std::bit_cast<std::uint64_t>(actual) == bits;
         };
-        for (const auto& row : source_number_cases)
-            expect(matches(numeric::number(row.input), row.bits));
-        for (const auto& row : source_parse_int_cases)
-            expect(matches(numeric::parseInt(row.input, row.radix), row.bits));
+        for (const auto& row : math_test::fixtures::rows(
+                 "math/fixtures/numeric/input-number.tsv", 2, 1013))
+            expect(matches(numeric::number(folia::test::data::decode_utf16(row[0])),
+                           math_test::fixtures::binary64(row[1])));
+        for (const auto& row : math_test::fixtures::rows(
+                 "math/fixtures/numeric/input-parse-int.tsv", 3, 944)) {
+            const auto radix = math_test::fixtures::integer<unsigned>(row[1]);
+            if (radix != 0 && radix != 8 && radix != 10 && radix != 16)
+                throw std::runtime_error("Invalid radix in numeric reference fixture");
+            expect(matches(numeric::parseInt(folia::test::data::decode_utf16(row[0]),
+                                             static_cast<numeric::IntegerRadix>(radix)),
+                           math_test::fixtures::binary64(row[2])));
+        }
     };
     "keyval options oneof owns choices including empty set and custom types use compiled functions"_test =
         [] {

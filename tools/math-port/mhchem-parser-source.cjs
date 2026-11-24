@@ -162,44 +162,29 @@ const allRows = [
 ];
 assert.equal(allRows.length, 7960, 'Complete parser/pattern/table/regex corpus is required');
 
-const u16Expr = value => {
-  if (!value.length) return 'std::u16string_view{}';
-  const chunks = [];
-  for (let i = 0; i < value.length; i += 128) {
-    const part = value.slice(i, i + 128);
-    chunks.push(`u"${Array.from({ length: part.length }, (_, j) =>
-      `\\x${part.charCodeAt(j).toString(16).padStart(4, '0')}`).join('')}"`);
+// Store reference observations as runtime data. Escaping UTF-16 code units
+// preserves malformed strings exactly without compiling multi-megabyte literals.
+const escape16 = value => {
+  let result = '';
+  for (let i = 0; i < value.length; ++i) {
+    const unit = value.charCodeAt(i);
+    result += unit >= 32 && unit < 127 && unit !== 92 && unit !== 35
+      ? value[i] : `\\u${unit.toString(16).padStart(4, '0')}`;
   }
-  return `std::u16string_view{${chunks.join(' ')}, ${value.length}}`;
-};
-const expectedChunks = [];
-const splitExpected = value => {
-  const begin = expectedChunks.length;
-  for (let i = 0; i < value.length; i += 256) {
-    expectedChunks.push(value.slice(i, i + 256));
-  }
-  return { begin, count: expectedChunks.length - begin, size: value.length };
+  return result;
 };
 const fixture = [
-  '// Generated from pinned mhchemparser 4.2.1 Source; do not edit.',
-  `constexpr std::string_view mhchemSourceLockSha256 = "${hash(lockPath)}";`,
-  'enum class MhchemSourceMode { parse, pattern, tables, regexes };',
-  'struct MhchemSourceCase { MhchemSourceMode mode; std::u16string_view name, input; std::size_t expectedChunkBegin, expectedChunkCount, expectedSize; };',
-  'constexpr MhchemSourceCase mhchemSourceCases[] = {'
+  '# Pinned reference observations; values exported without normalization.',
+  '# mode\tname_utf16\tinput_utf16\texpected_json',
+  `# source_lock_sha256=${hash(lockPath)}`
 ];
 for (const row of allRows) {
-  const mode = row.mode === 'parse' ? 'parse' : row.mode === 'pattern' ? 'pattern' : row.mode;
-  const expected = splitExpected(row.expected);
-  fixture.push(`    {MhchemSourceMode::${mode}, ${u16Expr(row.name)}, ${u16Expr(row.input)}, ${expected.begin}, ${expected.count}, ${expected.size}},`);
+  assert(!/[\t\r\n]/.test(row.expected), 'Wire observations must fit one TSV field');
+  fixture.push([row.mode, escape16(row.name), escape16(row.input), row.expected].join('\t'));
 }
-fixture.push('};', 'constexpr std::string_view mhchemSourceExpectedChunks[] = {');
-for (const value of expectedChunks) {
-  const escaped = value.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
-  fixture.push(`    "${escaped}",`);
-}
-fixture.push('};', `constexpr std::size_t mhchemSourceCaseCount = ${allRows.length};`, '');
+fixture.push('');
 const bytes = fixture.join('\n');
-const target = path.join(root, 'tests/math/fixtures/mhchem_parser.inc');
+const target = path.join(root, 'tests/math/fixtures/mhchem_parser.tsv');
 if (process.argv.includes('--write-fixture')) {
   const current = fs.existsSync(target) ? fs.readFileSync(target, 'utf8') : null;
   if (current !== bytes) fs.writeFileSync(target, bytes);
