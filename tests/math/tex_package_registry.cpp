@@ -11,6 +11,7 @@
 #include <vector>
 #include "support/source_svg_paint.hpp"
 #include "support/folia_test.hpp"
+#include "math/support/package_registry_fixtures.hpp"
 
 import folia.math;
 import folia.math.input.tex.default_packages;
@@ -20,8 +21,6 @@ using namespace boost::ut;
 using namespace folia::math::tex;
 
 namespace {
-#include "fixtures/tex_package_registry_source.hpp"
-#include "fixtures/texvc_svg_source.hpp"
 
 struct Warnings final : WarningSink {
     std::vector<std::u16string> messages;
@@ -43,6 +42,8 @@ void compareSvg(std::string_view name, std::string_view actual, std::string_view
 
 suite tex_package_conformance = [] {
     "production TeX package registry matches every upstream finite command map"_test = [] {
+        const auto& sourcePackages = math_test::fixtures::sourcePackages();
+        const auto& sourceRegistrations = math_test::fixtures::sourceRegistrations<HandlerKind>();
         ConfigurationHandler registry;
         MapHandler maps;
         DefaultPackages::initialize(registry, maps,
@@ -80,6 +81,7 @@ suite tex_package_conformance = [] {
     };
 
     "texvc aliases and preserved v4 commands match upstream SVG in both modes"_test = [] {
+        const auto& texvcSourceSvgs = math_test::fixtures::texvcSourceSvgs();
         folia::math::Renderer renderer;
         // The same session handles all cases, including explicit TeX definition
         // groups and restoration of aliases after those groups close.
@@ -93,6 +95,7 @@ suite tex_package_conformance = [] {
     };
 
     "texvc batch uses the same package profile as individual requests"_test = [] {
+        const auto& texvcSourceSvgs = math_test::fixtures::texvcSourceSvgs();
         folia::math::Renderer renderer;
         std::vector<folia::math::RenderInput> inputs;
         for (auto const &source : texvcSourceSvgs) {

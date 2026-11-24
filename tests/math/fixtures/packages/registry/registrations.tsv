@@ -1,0 +1,1766 @@
+# Pinned reference observations; values exported without normalization.
+# handler_kind	map_utf16	token_utf16	owner_utf16	character_boolean	text_utf16
+# source=MathJax 4.1.3; mediawiki-texvc 2.7.9 aliases priority 6; existing v4 names win.
+macro	Braket-macros	bra	Braket-macros	0	
+macro	Braket-macros	ket	Braket-macros	0	
+macro	Braket-macros	braket	Braket-macros	0	
+macro	Braket-macros	set	Braket-macros	0	
+macro	Braket-macros	Bra	Braket-macros	0	
+macro	Braket-macros	Ket	Braket-macros	0	
+macro	Braket-macros	Braket	Braket-macros	0	
+macro	Braket-macros	Set	Braket-macros	0	
+macro	Braket-macros	ketbra	Braket-macros	0	
+macro	Braket-macros	Ketbra	Braket-macros	0	
+macro	Braket-macros	|	Braket-macros	0	
+macro	bboldx-delimiterBold	bfbbLparen	bboldx-delimiterBold	1	(
+macro	bboldx-delimiterBold	bfbbRparen	bboldx-delimiterBold	1	)
+macro	bboldx-delimiterBold	bfbbLbrack	bboldx-delimiterBold	1	[
+macro	bboldx-delimiterBold	bfbbRbrack	bboldx-delimiterBold	1	]
+macro	bboldx-delimiterBold	bfbbLangle	bboldx-delimiterBold	1	\u2329
+macro	bboldx-delimiterBold	bfbbRangle	bboldx-delimiterBold	1	\u232a
+macro	bboldx-mathchar0miBold	bfbbGamma	bboldx-mathchar0miBold	1	\u0393
+macro	bboldx-mathchar0miBold	bfbbDelta	bboldx-mathchar0miBold	1	\u2206
+macro	bboldx-mathchar0miBold	bfbbTheta	bboldx-mathchar0miBold	1	\u0398
+macro	bboldx-mathchar0miBold	bfbbLambda	bboldx-mathchar0miBold	1	\u039b
+macro	bboldx-mathchar0miBold	bfbbXi	bboldx-mathchar0miBold	1	\u039e
+macro	bboldx-mathchar0miBold	bfbbPi	bboldx-mathchar0miBold	1	\u03a0
+macro	bboldx-mathchar0miBold	bfbbSigma	bboldx-mathchar0miBold	1	\u03a3
+macro	bboldx-mathchar0miBold	bfbbUpsilon	bboldx-mathchar0miBold	1	\u03a5
+macro	bboldx-mathchar0miBold	bfbbPhi	bboldx-mathchar0miBold	1	\u03a6
+macro	bboldx-mathchar0miBold	bfbbPsi	bboldx-mathchar0miBold	1	\u03a8
+macro	bboldx-mathchar0miBold	bfbbOmega	bboldx-mathchar0miBold	1	\u2126
+macro	bboldx-mathchar0miBold	bfbbalpha	bboldx-mathchar0miBold	1	\u03b1
+macro	bboldx-mathchar0miBold	bfbbbeta	bboldx-mathchar0miBold	1	\u03b2
+macro	bboldx-mathchar0miBold	bfbbgamma	bboldx-mathchar0miBold	1	\u03b3
+macro	bboldx-mathchar0miBold	bfbbdelta	bboldx-mathchar0miBold	1	\u03b4
+macro	bboldx-mathchar0miBold	bfbbepsilon	bboldx-mathchar0miBold	1	\u03b5
+macro	bboldx-mathchar0miBold	bfbbzeta	bboldx-mathchar0miBold	1	\u03b6
+macro	bboldx-mathchar0miBold	bfbbeta	bboldx-mathchar0miBold	1	\u03b7
+macro	bboldx-mathchar0miBold	bfbbtheta	bboldx-mathchar0miBold	1	\u03b8
+macro	bboldx-mathchar0miBold	bfbbiota	bboldx-mathchar0miBold	1	\u03b9
+macro	bboldx-mathchar0miBold	bfbbkappa	bboldx-mathchar0miBold	1	\u03ba
+macro	bboldx-mathchar0miBold	bfbblambda	bboldx-mathchar0miBold	1	\u03bfBB
+macro	bboldx-mathchar0miBold	bfbbmu	bboldx-mathchar0miBold	1	\u00b5
+macro	bboldx-mathchar0miBold	bfbbnu	bboldx-mathchar0miBold	1	\u03bd
+macro	bboldx-mathchar0miBold	bfbbxi	bboldx-mathchar0miBold	1	\u03be
+macro	bboldx-mathchar0miBold	bfbbpi	bboldx-mathchar0miBold	1	\u03c0
+macro	bboldx-mathchar0miBold	bfbbrho	bboldx-mathchar0miBold	1	\u03c1
+macro	bboldx-mathchar0miBold	bfbbsigma	bboldx-mathchar0miBold	1	\u03c3
+macro	bboldx-mathchar0miBold	bfbbtau	bboldx-mathchar0miBold	1	\u03c4
+macro	bboldx-mathchar0miBold	bfbbupsilon	bboldx-mathchar0miBold	1	\u03c5
+macro	bboldx-mathchar0miBold	bfbbphi	bboldx-mathchar0miBold	1	\u03c6
+macro	bboldx-mathchar0miBold	bfbbchi	bboldx-mathchar0miBold	1	\u03c7
+macro	bboldx-mathchar0miBold	bfbbpsi	bboldx-mathchar0miBold	1	\u03c8
+macro	bboldx-mathchar0miBold	bfbbomega	bboldx-mathchar0miBold	1	\u03c9
+macro	bboldx-mathchar0miBold	bfbbdotlessi	bboldx-mathchar0miBold	1	\u0131
+macro	bboldx-mathchar0miBold	bfbbdotlessj	bboldx-mathchar0miBold	1	\u0237
+macro	bboldx-delimiterNormal	bbLparen	bboldx-delimiterNormal	1	(
+macro	bboldx-delimiterNormal	bbRparen	bboldx-delimiterNormal	1	)
+macro	bboldx-delimiterNormal	bbLbrack	bboldx-delimiterNormal	1	[
+macro	bboldx-delimiterNormal	bbRbrack	bboldx-delimiterNormal	1	]
+macro	bboldx-delimiterNormal	bbLangle	bboldx-delimiterNormal	1	\u2329
+macro	bboldx-delimiterNormal	bbRangle	bboldx-delimiterNormal	1	\u232a
+macro	bboldx-mathchar0miNormal	bbGamma	bboldx-mathchar0miNormal	1	\u0393
+macro	bboldx-mathchar0miNormal	bbDelta	bboldx-mathchar0miNormal	1	\u2206
+macro	bboldx-mathchar0miNormal	bbTheta	bboldx-mathchar0miNormal	1	\u0398
+macro	bboldx-mathchar0miNormal	bbLambda	bboldx-mathchar0miNormal	1	\u039b
+macro	bboldx-mathchar0miNormal	bbXi	bboldx-mathchar0miNormal	1	\u039e
+macro	bboldx-mathchar0miNormal	bbPi	bboldx-mathchar0miNormal	1	\u03a0
+macro	bboldx-mathchar0miNormal	bbSigma	bboldx-mathchar0miNormal	1	\u03a3
+macro	bboldx-mathchar0miNormal	bbUpsilon	bboldx-mathchar0miNormal	1	\u03a5
+macro	bboldx-mathchar0miNormal	bbPhi	bboldx-mathchar0miNormal	1	\u03a6
+macro	bboldx-mathchar0miNormal	bbPsi	bboldx-mathchar0miNormal	1	\u03a8
+macro	bboldx-mathchar0miNormal	bbOmega	bboldx-mathchar0miNormal	1	\u2126
+macro	bboldx-mathchar0miNormal	bbalpha	bboldx-mathchar0miNormal	1	\u03b1
+macro	bboldx-mathchar0miNormal	bbbeta	bboldx-mathchar0miNormal	1	\u03b2
+macro	bboldx-mathchar0miNormal	bbgamma	bboldx-mathchar0miNormal	1	\u03b3
+macro	bboldx-mathchar0miNormal	bbdelta	bboldx-mathchar0miNormal	1	\u03b4
+macro	bboldx-mathchar0miNormal	bbepsilon	bboldx-mathchar0miNormal	1	\u03b5
+macro	bboldx-mathchar0miNormal	bbzeta	bboldx-mathchar0miNormal	1	\u03b6
+macro	bboldx-mathchar0miNormal	bbeta	bboldx-mathchar0miNormal	1	\u03b7
+macro	bboldx-mathchar0miNormal	bbtheta	bboldx-mathchar0miNormal	1	\u03b8
+macro	bboldx-mathchar0miNormal	bbiota	bboldx-mathchar0miNormal	1	\u03b9
+macro	bboldx-mathchar0miNormal	bbkappa	bboldx-mathchar0miNormal	1	\u03ba
+macro	bboldx-mathchar0miNormal	bblambda	bboldx-mathchar0miNormal	1	\u03bb
+macro	bboldx-mathchar0miNormal	bbmu	bboldx-mathchar0miNormal	1	\u00b5
+macro	bboldx-mathchar0miNormal	bbnu	bboldx-mathchar0miNormal	1	\u03bd
+macro	bboldx-mathchar0miNormal	bbxi	bboldx-mathchar0miNormal	1	\u03be
+macro	bboldx-mathchar0miNormal	bbpi	bboldx-mathchar0miNormal	1	\u03c0
+macro	bboldx-mathchar0miNormal	bbrho	bboldx-mathchar0miNormal	1	\u03c1
+macro	bboldx-mathchar0miNormal	bbsigma	bboldx-mathchar0miNormal	1	\u03c3
+macro	bboldx-mathchar0miNormal	bbtau	bboldx-mathchar0miNormal	1	\u03c4
+macro	bboldx-mathchar0miNormal	bbupsilon	bboldx-mathchar0miNormal	1	\u03c5
+macro	bboldx-mathchar0miNormal	bbphi	bboldx-mathchar0miNormal	1	\u03c6
+macro	bboldx-mathchar0miNormal	bbchi	bboldx-mathchar0miNormal	1	\u03c7
+macro	bboldx-mathchar0miNormal	bbpsi	bboldx-mathchar0miNormal	1	\u03c8
+macro	bboldx-mathchar0miNormal	bbomega	bboldx-mathchar0miNormal	1	\u03c9
+macro	bboldx-mathchar0miNormal	bbdotlessi	bboldx-mathchar0miNormal	1	\u0131
+macro	bboldx-mathchar0miNormal	bbdotlessj	bboldx-mathchar0miNormal	1	\u0237
+macro	bboldx	mathbb	bboldx	0	
+macro	bboldx	mathbfbb	bboldx	0	
+macro	bboldx	imathbb	bboldx	0	
+macro	bboldx	jmathbb	bboldx	0	
+macro	bboldx	imathbfbb	bboldx	0	
+macro	bboldx	jmathbfbb	bboldx	0	
+macro	setoptions	setOptions	setoptions	0	
+macro	verb	verb	verb	0	
+macro	upgreek	upalpha	upgreek	1	\u03b1
+macro	upgreek	upbeta	upgreek	1	\u03b2
+macro	upgreek	upgamma	upgreek	1	\u03b3
+macro	upgreek	updelta	upgreek	1	\u03b4
+macro	upgreek	upepsilon	upgreek	1	\u03f5
+macro	upgreek	upzeta	upgreek	1	\u03b6
+macro	upgreek	upeta	upgreek	1	\u03b7
+macro	upgreek	uptheta	upgreek	1	\u03b8
+macro	upgreek	upiota	upgreek	1	\u03b9
+macro	upgreek	upkappa	upgreek	1	\u03ba
+macro	upgreek	uplambda	upgreek	1	\u03bb
+macro	upgreek	upmu	upgreek	1	\u03bc
+macro	upgreek	upnu	upgreek	1	\u03bd
+macro	upgreek	upxi	upgreek	1	\u03be
+macro	upgreek	upomicron	upgreek	1	\u03bf
+macro	upgreek	uppi	upgreek	1	\u03c0
+macro	upgreek	uprho	upgreek	1	\u03c1
+macro	upgreek	upsigma	upgreek	1	\u03c3
+macro	upgreek	uptau	upgreek	1	\u03c4
+macro	upgreek	upupsilon	upgreek	1	\u03c5
+macro	upgreek	upphi	upgreek	1	\u03d5
+macro	upgreek	upchi	upgreek	1	\u03c7
+macro	upgreek	uppsi	upgreek	1	\u03c8
+macro	upgreek	upomega	upgreek	1	\u03c9
+macro	upgreek	upvarepsilon	upgreek	1	\u03b5
+macro	upgreek	upvartheta	upgreek	1	\u03d1
+macro	upgreek	upvarpi	upgreek	1	\u03d6
+macro	upgreek	upvarrho	upgreek	1	\u03f1
+macro	upgreek	upvarsigma	upgreek	1	\u03c2
+macro	upgreek	upvarphi	upgreek	1	\u03c6
+macro	upgreek	Upgamma	upgreek	1	\u0393
+macro	upgreek	Updelta	upgreek	1	\u0394
+macro	upgreek	Uptheta	upgreek	1	\u0398
+macro	upgreek	Uplambda	upgreek	1	\u039b
+macro	upgreek	Upxi	upgreek	1	\u039e
+macro	upgreek	Uppi	upgreek	1	\u03a0
+macro	upgreek	Upsigma	upgreek	1	\u03a3
+macro	upgreek	Upupsilon	upgreek	1	\u03a5
+macro	upgreek	Upphi	upgreek	1	\u03a6
+macro	upgreek	Uppsi	upgreek	1	\u03a8
+macro	upgreek	Upomega	upgreek	1	\u03a9
+macro	units	units	units	0	
+macro	units	unitfrac	units	0	
+macro	units	nicefrac	units	0	
+macro	unicode	unicode	unicode	0	
+macro	unicode	U	unicode	0	
+macro	unicode	char	unicode	0	
+macro	textcomp-macros	textasciicircum	textcomp-macros	0	
+macro	textcomp-macros	textasciitilde	textcomp-macros	0	
+macro	textcomp-macros	textasteriskcentered	textcomp-macros	0	
+macro	textcomp-macros	textbackslash	textcomp-macros	0	
+macro	textcomp-macros	textbar	textcomp-macros	0	
+macro	textcomp-macros	textbraceleft	textcomp-macros	0	
+macro	textcomp-macros	textbraceright	textcomp-macros	0	
+macro	textcomp-macros	textbullet	textcomp-macros	0	
+macro	textcomp-macros	textdagger	textcomp-macros	0	
+macro	textcomp-macros	textdaggerdbl	textcomp-macros	0	
+macro	textcomp-macros	textellipsis	textcomp-macros	0	
+macro	textcomp-macros	textemdash	textcomp-macros	0	
+macro	textcomp-macros	textendash	textcomp-macros	0	
+macro	textcomp-macros	textexclamdown	textcomp-macros	0	
+macro	textcomp-macros	textgreater	textcomp-macros	0	
+macro	textcomp-macros	textless	textcomp-macros	0	
+macro	textcomp-macros	textordfeminine	textcomp-macros	0	
+macro	textcomp-macros	textordmasculine	textcomp-macros	0	
+macro	textcomp-macros	textparagraph	textcomp-macros	0	
+macro	textcomp-macros	textperiodcentered	textcomp-macros	0	
+macro	textcomp-macros	textquestiondown	textcomp-macros	0	
+macro	textcomp-macros	textquotedblleft	textcomp-macros	0	
+macro	textcomp-macros	textquotedblright	textcomp-macros	0	
+macro	textcomp-macros	textquoteleft	textcomp-macros	0	
+macro	textcomp-macros	textquoteright	textcomp-macros	0	
+macro	textcomp-macros	textsection	textcomp-macros	0	
+macro	textcomp-macros	textunderscore	textcomp-macros	0	
+macro	textcomp-macros	textvisiblespace	textcomp-macros	0	
+macro	textcomp-macros	textacutedbl	textcomp-macros	0	
+macro	textcomp-macros	textasciiacute	textcomp-macros	0	
+macro	textcomp-macros	textasciibreve	textcomp-macros	0	
+macro	textcomp-macros	textasciicaron	textcomp-macros	0	
+macro	textcomp-macros	textasciidieresis	textcomp-macros	0	
+macro	textcomp-macros	textasciimacron	textcomp-macros	0	
+macro	textcomp-macros	textgravedbl	textcomp-macros	0	
+macro	textcomp-macros	texttildelow	textcomp-macros	0	
+macro	textcomp-macros	textbaht	textcomp-macros	0	
+macro	textcomp-macros	textcent	textcomp-macros	0	
+macro	textcomp-macros	textcolonmonetary	textcomp-macros	0	
+macro	textcomp-macros	textcurrency	textcomp-macros	0	
+macro	textcomp-macros	textdollar	textcomp-macros	0	
+macro	textcomp-macros	textdong	textcomp-macros	0	
+macro	textcomp-macros	texteuro	textcomp-macros	0	
+macro	textcomp-macros	textflorin	textcomp-macros	0	
+macro	textcomp-macros	textguarani	textcomp-macros	0	
+macro	textcomp-macros	textlira	textcomp-macros	0	
+macro	textcomp-macros	textnaira	textcomp-macros	0	
+macro	textcomp-macros	textpeso	textcomp-macros	0	
+macro	textcomp-macros	textsterling	textcomp-macros	0	
+macro	textcomp-macros	textwon	textcomp-macros	0	
+macro	textcomp-macros	textyen	textcomp-macros	0	
+macro	textcomp-macros	textcircledP	textcomp-macros	0	
+macro	textcomp-macros	textcompwordmark	textcomp-macros	0	
+macro	textcomp-macros	textcopyleft	textcomp-macros	0	
+macro	textcomp-macros	textcopyright	textcomp-macros	0	
+macro	textcomp-macros	textregistered	textcomp-macros	0	
+macro	textcomp-macros	textservicemark	textcomp-macros	0	
+macro	textcomp-macros	texttrademark	textcomp-macros	0	
+macro	textcomp-macros	textbardbl	textcomp-macros	0	
+macro	textcomp-macros	textbigcircle	textcomp-macros	0	
+macro	textcomp-macros	textblank	textcomp-macros	0	
+macro	textcomp-macros	textbrokenbar	textcomp-macros	0	
+macro	textcomp-macros	textdiscount	textcomp-macros	0	
+macro	textcomp-macros	textestimated	textcomp-macros	0	
+macro	textcomp-macros	textinterrobang	textcomp-macros	0	
+macro	textcomp-macros	textinterrobangdown	textcomp-macros	0	
+macro	textcomp-macros	textmusicalnote	textcomp-macros	0	
+macro	textcomp-macros	textnumero	textcomp-macros	0	
+macro	textcomp-macros	textopenbullet	textcomp-macros	0	
+macro	textcomp-macros	textpertenthousand	textcomp-macros	0	
+macro	textcomp-macros	textperthousand	textcomp-macros	0	
+macro	textcomp-macros	textrecipe	textcomp-macros	0	
+macro	textcomp-macros	textreferencemark	textcomp-macros	0	
+macro	textcomp-macros	textlangle	textcomp-macros	0	
+macro	textcomp-macros	textrangle	textcomp-macros	0	
+macro	textcomp-macros	textlbrackdbl	textcomp-macros	0	
+macro	textcomp-macros	textrbrackdbl	textcomp-macros	0	
+macro	textcomp-macros	textlquill	textcomp-macros	0	
+macro	textcomp-macros	textrquill	textcomp-macros	0	
+macro	textcomp-macros	textcelsius	textcomp-macros	0	
+macro	textcomp-macros	textdegree	textcomp-macros	0	
+macro	textcomp-macros	textdiv	textcomp-macros	0	
+macro	textcomp-macros	textdownarrow	textcomp-macros	0	
+macro	textcomp-macros	textfractionsolidus	textcomp-macros	0	
+macro	textcomp-macros	textleftarrow	textcomp-macros	0	
+macro	textcomp-macros	textlnot	textcomp-macros	0	
+macro	textcomp-macros	textmho	textcomp-macros	0	
+macro	textcomp-macros	textminus	textcomp-macros	0	
+macro	textcomp-macros	textmu	textcomp-macros	0	
+macro	textcomp-macros	textohm	textcomp-macros	0	
+macro	textcomp-macros	textonehalf	textcomp-macros	0	
+macro	textcomp-macros	textonequarter	textcomp-macros	0	
+macro	textcomp-macros	textonesuperior	textcomp-macros	0	
+macro	textcomp-macros	textpm	textcomp-macros	0	
+macro	textcomp-macros	textrightarrow	textcomp-macros	0	
+macro	textcomp-macros	textsurd	textcomp-macros	0	
+macro	textcomp-macros	textthreequarters	textcomp-macros	0	
+macro	textcomp-macros	textthreesuperior	textcomp-macros	0	
+macro	textcomp-macros	texttimes	textcomp-macros	0	
+macro	textcomp-macros	texttwosuperior	textcomp-macros	0	
+macro	textcomp-macros	textuparrow	textcomp-macros	0	
+macro	textcomp-macros	textborn	textcomp-macros	0	
+macro	textcomp-macros	textdied	textcomp-macros	0	
+macro	textcomp-macros	textdivorced	textcomp-macros	0	
+macro	textcomp-macros	textmarried	textcomp-macros	0	
+macro	textcomp-macros	textcentoldstyle	textcomp-macros	0	
+macro	textcomp-macros	textdollaroldstyle	textcomp-macros	0	
+macro	textcomp-macros	textzerooldstyle	textcomp-macros	0	
+macro	textcomp-macros	textoneoldstyle	textcomp-macros	0	
+macro	textcomp-macros	texttwooldstyle	textcomp-macros	0	
+macro	textcomp-macros	textthreeoldstyle	textcomp-macros	0	
+macro	textcomp-macros	textfouroldstyle	textcomp-macros	0	
+macro	textcomp-macros	textfiveoldstyle	textcomp-macros	0	
+macro	textcomp-macros	textsixoldstyle	textcomp-macros	0	
+macro	textcomp-macros	textsevenoldstyle	textcomp-macros	0	
+macro	textcomp-macros	texteightoldstyle	textcomp-macros	0	
+macro	textcomp-macros	textnineoldstyle	textcomp-macros	0	
+macro	Physics-matrix-macros	matrixquantity	Physics-matrix-macros	0	
+macro	Physics-matrix-macros	mqty	Physics-matrix-macros	0	
+macro	Physics-matrix-macros	pmqty	Physics-matrix-macros	0	
+macro	Physics-matrix-macros	Pmqty	Physics-matrix-macros	0	
+macro	Physics-matrix-macros	bmqty	Physics-matrix-macros	0	
+macro	Physics-matrix-macros	vmqty	Physics-matrix-macros	0	
+macro	Physics-matrix-macros	smallmatrixquantity	Physics-matrix-macros	0	
+macro	Physics-matrix-macros	smqty	Physics-matrix-macros	0	
+macro	Physics-matrix-macros	spmqty	Physics-matrix-macros	0	
+macro	Physics-matrix-macros	sPmqty	Physics-matrix-macros	0	
+macro	Physics-matrix-macros	sbmqty	Physics-matrix-macros	0	
+macro	Physics-matrix-macros	svmqty	Physics-matrix-macros	0	
+macro	Physics-matrix-macros	matrixdeterminant	Physics-matrix-macros	0	
+macro	Physics-matrix-macros	mdet	Physics-matrix-macros	0	
+macro	Physics-matrix-macros	smdet	Physics-matrix-macros	0	
+macro	Physics-matrix-macros	identitymatrix	Physics-matrix-macros	0	
+macro	Physics-matrix-macros	imat	Physics-matrix-macros	0	
+macro	Physics-matrix-macros	xmatrix	Physics-matrix-macros	0	
+macro	Physics-matrix-macros	xmat	Physics-matrix-macros	0	
+macro	Physics-matrix-macros	zeromatrix	Physics-matrix-macros	0	
+macro	Physics-matrix-macros	zmat	Physics-matrix-macros	0	
+macro	Physics-matrix-macros	paulimatrix	Physics-matrix-macros	0	
+macro	Physics-matrix-macros	pmat	Physics-matrix-macros	0	
+macro	Physics-matrix-macros	diagonalmatrix	Physics-matrix-macros	0	
+macro	Physics-matrix-macros	dmat	Physics-matrix-macros	0	
+macro	Physics-matrix-macros	antidiagonalmatrix	Physics-matrix-macros	0	
+macro	Physics-matrix-macros	admat	Physics-matrix-macros	0	
+macro	Physics-bra-ket-macros	bra	Braket-macros	0	
+macro	Physics-bra-ket-macros	ket	Braket-macros	0	
+macro	Physics-bra-ket-macros	innerproduct	Physics-bra-ket-macros	0	
+macro	Physics-bra-ket-macros	ip	Physics-bra-ket-macros	0	
+macro	Physics-bra-ket-macros	braket	Braket-macros	0	
+macro	Physics-bra-ket-macros	outerproduct	Physics-bra-ket-macros	0	
+macro	Physics-bra-ket-macros	dyad	Physics-bra-ket-macros	0	
+macro	Physics-bra-ket-macros	ketbra	Braket-macros	0	
+macro	Physics-bra-ket-macros	op	Physics-bra-ket-macros	0	
+macro	Physics-bra-ket-macros	expectationvalue	Physics-bra-ket-macros	0	
+macro	Physics-bra-ket-macros	expval	Physics-bra-ket-macros	0	
+macro	Physics-bra-ket-macros	ev	Physics-bra-ket-macros	0	
+macro	Physics-bra-ket-macros	matrixelement	Physics-bra-ket-macros	0	
+macro	Physics-bra-ket-macros	matrixel	Physics-bra-ket-macros	0	
+macro	Physics-bra-ket-macros	mel	Physics-bra-ket-macros	0	
+macro	Physics-quick-quad-macros	qqtext	Physics-quick-quad-macros	0	
+macro	Physics-quick-quad-macros	qq	Physics-quick-quad-macros	0	
+macro	Physics-quick-quad-macros	qcomma	Physics-quick-quad-macros	0	
+macro	Physics-quick-quad-macros	qc	Physics-quick-quad-macros	0	
+macro	Physics-quick-quad-macros	qcc	Physics-quick-quad-macros	0	
+macro	Physics-quick-quad-macros	qif	Physics-quick-quad-macros	0	
+macro	Physics-quick-quad-macros	qthen	Physics-quick-quad-macros	0	
+macro	Physics-quick-quad-macros	qelse	Physics-quick-quad-macros	0	
+macro	Physics-quick-quad-macros	qotherwise	Physics-quick-quad-macros	0	
+macro	Physics-quick-quad-macros	qunless	Physics-quick-quad-macros	0	
+macro	Physics-quick-quad-macros	qgiven	Physics-quick-quad-macros	0	
+macro	Physics-quick-quad-macros	qusing	Physics-quick-quad-macros	0	
+macro	Physics-quick-quad-macros	qassume	Physics-quick-quad-macros	0	
+macro	Physics-quick-quad-macros	qsince	Physics-quick-quad-macros	0	
+macro	Physics-quick-quad-macros	qlet	Physics-quick-quad-macros	0	
+macro	Physics-quick-quad-macros	qfor	Physics-quick-quad-macros	0	
+macro	Physics-quick-quad-macros	qall	Physics-quick-quad-macros	0	
+macro	Physics-quick-quad-macros	qeven	Physics-quick-quad-macros	0	
+macro	Physics-quick-quad-macros	qodd	Physics-quick-quad-macros	0	
+macro	Physics-quick-quad-macros	qinteger	Physics-quick-quad-macros	0	
+macro	Physics-quick-quad-macros	qand	Physics-quick-quad-macros	0	
+macro	Physics-quick-quad-macros	qor	Physics-quick-quad-macros	0	
+macro	Physics-quick-quad-macros	qas	Physics-quick-quad-macros	0	
+macro	Physics-quick-quad-macros	qin	Physics-quick-quad-macros	0	
+macro	Physics-expressions-macros	sin	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	sinh	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	arcsin	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	asin	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	cos	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	cosh	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	arccos	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	acos	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	tan	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	tanh	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	arctan	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	atan	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	csc	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	csch	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	arccsc	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	acsc	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	sec	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	sech	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	arcsec	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	asec	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	cot	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	coth	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	arccot	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	acot	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	exp	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	log	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	ln	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	det	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	Pr	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	tr	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	trace	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	Tr	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	Trace	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	rank	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	erf	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	Residue	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	Res	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	principalvalue	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	pv	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	PV	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	Re	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	Im	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	sine	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	hypsine	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	arcsine	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	asine	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	cosine	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	hypcosine	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	arccosine	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	acosine	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	tangent	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	hyptangent	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	arctangent	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	atangent	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	cosecant	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	hypcosecant	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	arccosecant	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	acosecant	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	secant	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	hypsecant	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	arcsecant	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	asecant	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	cotangent	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	hypcotangent	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	arccotangent	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	acotangent	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	exponential	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	logarithm	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	naturallogarithm	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	determinant	Physics-expressions-macros	0	
+macro	Physics-expressions-macros	Probability	Physics-expressions-macros	0	
+macro	Physics-derivative-macros	diffd	Physics-derivative-macros	0	
+macro	Physics-derivative-macros	flatfrac	Physics-derivative-macros	0	
+macro	Physics-derivative-macros	differential	Physics-derivative-macros	0	
+macro	Physics-derivative-macros	dd	Physics-derivative-macros	0	
+macro	Physics-derivative-macros	variation	Physics-derivative-macros	0	
+macro	Physics-derivative-macros	var	Physics-derivative-macros	0	
+macro	Physics-derivative-macros	derivative	Physics-derivative-macros	0	
+macro	Physics-derivative-macros	dv	Physics-derivative-macros	0	
+macro	Physics-derivative-macros	partialderivative	Physics-derivative-macros	0	
+macro	Physics-derivative-macros	pderivative	Physics-derivative-macros	0	
+macro	Physics-derivative-macros	pdv	Physics-derivative-macros	0	
+macro	Physics-derivative-macros	functionalderivative	Physics-derivative-macros	0	
+macro	Physics-derivative-macros	fderivative	Physics-derivative-macros	0	
+macro	Physics-derivative-macros	fdv	Physics-derivative-macros	0	
+macro	Physics-vector-mi	real	Physics-vector-mi	1	\u211c
+macro	Physics-vector-mi	imaginary	Physics-vector-mi	1	\u2111
+macro	Physics-vector-mo	dotproduct	Physics-vector-mo	1	\u22c5
+macro	Physics-vector-mo	vdot	Physics-vector-mo	1	\u22c5
+macro	Physics-vector-mo	crossproduct	Physics-vector-mo	1	\u00d7
+macro	Physics-vector-mo	cross	Physics-vector-mo	1	\u00d7
+macro	Physics-vector-mo	cp	Physics-vector-mo	1	\u00d7
+macro	Physics-vector-mo	gradientnabla	Physics-vector-mo	1	\u2207
+macro	Physics-vector-mo	divsymbol	Physics-vector-mo	1	\u00f7
+macro	Physics-vector-mo	divisionsymbol	Physics-vector-mo	1	\u00f7
+macro	Physics-vector-macros	vnabla	Physics-vector-macros	0	
+macro	Physics-vector-macros	vectorbold	Physics-vector-macros	0	
+macro	Physics-vector-macros	vb	Physics-vector-macros	0	
+macro	Physics-vector-macros	vectorarrow	Physics-vector-macros	0	
+macro	Physics-vector-macros	va	Physics-vector-macros	0	
+macro	Physics-vector-macros	vectorunit	Physics-vector-macros	0	
+macro	Physics-vector-macros	vu	Physics-vector-macros	0	
+macro	Physics-vector-macros	gradient	Physics-vector-macros	0	
+macro	Physics-vector-macros	grad	Physics-vector-macros	0	
+macro	Physics-vector-macros	divergence	Physics-vector-macros	0	
+macro	Physics-vector-macros	div	Physics-vector-macros	0	
+macro	Physics-vector-macros	curl	Physics-vector-macros	0	
+macro	Physics-vector-macros	laplacian	Physics-vector-macros	0	
+macro	Physics-automatic-bracing-macros	quantity	Physics-automatic-bracing-macros	0	
+macro	Physics-automatic-bracing-macros	qty	Physics-automatic-bracing-macros	0	
+macro	Physics-automatic-bracing-macros	pqty	Physics-automatic-bracing-macros	0	
+macro	Physics-automatic-bracing-macros	bqty	Physics-automatic-bracing-macros	0	
+macro	Physics-automatic-bracing-macros	vqty	Physics-automatic-bracing-macros	0	
+macro	Physics-automatic-bracing-macros	Bqty	Physics-automatic-bracing-macros	0	
+macro	Physics-automatic-bracing-macros	absolutevalue	Physics-automatic-bracing-macros	0	
+macro	Physics-automatic-bracing-macros	abs	Physics-automatic-bracing-macros	0	
+macro	Physics-automatic-bracing-macros	norm	Physics-automatic-bracing-macros	0	
+macro	Physics-automatic-bracing-macros	evaluated	Physics-automatic-bracing-macros	0	
+macro	Physics-automatic-bracing-macros	eval	Physics-automatic-bracing-macros	0	
+macro	Physics-automatic-bracing-macros	order	Physics-automatic-bracing-macros	0	
+macro	Physics-automatic-bracing-macros	commutator	Physics-automatic-bracing-macros	0	
+macro	Physics-automatic-bracing-macros	comm	Physics-automatic-bracing-macros	0	
+macro	Physics-automatic-bracing-macros	anticommutator	Physics-automatic-bracing-macros	0	
+macro	Physics-automatic-bracing-macros	acomm	Physics-automatic-bracing-macros	0	
+macro	Physics-automatic-bracing-macros	poissonbracket	Physics-automatic-bracing-macros	0	
+macro	Physics-automatic-bracing-macros	pb	Physics-automatic-bracing-macros	0	
+macro	Newcommand-macros	newcommand	Newcommand-macros	0	
+macro	Newcommand-macros	renewcommand	Newcommand-macros	0	
+macro	Newcommand-macros	newenvironment	Newcommand-macros	0	
+macro	Newcommand-macros	renewenvironment	Newcommand-macros	0	
+macro	Newcommand-macros	def	Newcommand-macros	0	
+macro	Newcommand-macros	let	Newcommand-macros	0	
+macro	mhchem-chars	tripledash	mhchem-chars	1	\ue410
+macro	mhchem-chars	mhchemBondTD	mhchem-chars	1	\ue411
+macro	mhchem-chars	mhchemBondTDD	mhchem-chars	1	\ue412
+macro	mhchem-chars	mhchemBondDTD	mhchem-chars	1	\ue413
+macro	mhchem-chars	mhchemlongleftarrow	mhchem-chars	1	\ue428
+macro	mhchem-chars	mhchemlongrightarrow	mhchem-chars	1	\ue429
+macro	mhchem-chars	mhchemlongleftrightarrow	mhchem-chars	1	\ue42a
+macro	mhchem-chars	mhchemlongrightleftharpoons	mhchem-chars	1	\ue408
+macro	mhchem-chars	mhchemlongRightleftharpoons	mhchem-chars	1	\ue409
+macro	mhchem-chars	mhchemlongLeftrightharpoons	mhchem-chars	1	\ue40a
+macro	mhchem-chars	mhchemlongleftrightarrows	mhchem-chars	1	\ue42b
+macro	mhchem-chars	mhchemrightarrow	mhchem-chars	1	\ue42d
+macro	mhchem-chars	mhchemleftarrow	mhchem-chars	1	\ue42c
+macro	mhchem-chars	mhchemleftrightarrow	mhchem-chars	1	\ue42e
+macro	mhchem	ce	mhchem	0	
+macro	mhchem	pu	mhchem	0	
+macro	mhchem	mhchemxrightarrow	mhchem	0	
+macro	mhchem	mhchemxleftarrow	mhchem	0	
+macro	mhchem	mhchemxleftrightarrow	mhchem	0	
+macro	mhchem	mhchemxleftrightarrows	mhchem	0	
+macro	mhchem	mhchemxrightleftharpoons	mhchem	0	
+macro	mhchem	mhchemxRightleftharpoons	mhchem	0	
+macro	mhchem	mhchemxLeftrightharpoons	mhchem	0	
+macro	mathtools-delimiters	\u005clparen	mathtools-delimiters	1	(
+macro	mathtools-delimiters	\u005crparen	mathtools-delimiters	1	)
+macro	mathtools-macros	shoveleft	mathtools-macros	0	
+macro	mathtools-macros	shoveright	mathtools-macros	0	
+macro	mathtools-macros	xleftrightarrow	mathtools-macros	0	
+macro	mathtools-macros	xLeftarrow	mathtools-macros	0	
+macro	mathtools-macros	xRightarrow	mathtools-macros	0	
+macro	mathtools-macros	xLeftrightarrow	mathtools-macros	0	
+macro	mathtools-macros	xhookleftarrow	mathtools-macros	0	
+macro	mathtools-macros	xhookrightarrow	mathtools-macros	0	
+macro	mathtools-macros	xmapsto	mathtools-macros	0	
+macro	mathtools-macros	xrightharpoondown	mathtools-macros	0	
+macro	mathtools-macros	xleftharpoondown	mathtools-macros	0	
+macro	mathtools-macros	xrightleftharpoons	mathtools-macros	0	
+macro	mathtools-macros	xrightharpoonup	mathtools-macros	0	
+macro	mathtools-macros	xleftharpoonup	mathtools-macros	0	
+macro	mathtools-macros	xleftrightharpoons	mathtools-macros	0	
+macro	mathtools-macros	xlongrightarrow	mathtools-macros	0	
+macro	mathtools-macros	xlongleftarrow	mathtools-macros	0	
+macro	mathtools-macros	xLongrightarrow	mathtools-macros	0	
+macro	mathtools-macros	xLongleftarrow	mathtools-macros	0	
+macro	mathtools-macros	mathllap	mathtools-macros	0	
+macro	mathtools-macros	mathrlap	mathtools-macros	0	
+macro	mathtools-macros	mathclap	mathtools-macros	0	
+macro	mathtools-macros	clap	mathtools-macros	0	
+macro	mathtools-macros	textllap	mathtools-macros	0	
+macro	mathtools-macros	textrlap	mathtools-macros	0	
+macro	mathtools-macros	textclap	mathtools-macros	0	
+macro	mathtools-macros	cramped	mathtools-macros	0	
+macro	mathtools-macros	crampedllap	mathtools-macros	0	
+macro	mathtools-macros	crampedrlap	mathtools-macros	0	
+macro	mathtools-macros	crampedclap	mathtools-macros	0	
+macro	mathtools-macros	crampedsubstack	mathtools-macros	0	
+macro	mathtools-macros	mathmbox	mathtools-macros	0	
+macro	mathtools-macros	mathmakebox	mathtools-macros	0	
+macro	mathtools-macros	overbracket	mathtools-macros	0	
+macro	mathtools-macros	underbracket	mathtools-macros	0	
+macro	mathtools-macros	refeq	mathtools-macros	0	
+macro	mathtools-macros	MoveEqLeft	mathtools-macros	0	
+macro	mathtools-macros	Aboxed	mathtools-macros	0	
+macro	mathtools-macros	MakeAboxedCommand	mathtools-macros	0	
+macro	mathtools-macros	ArrowBetweenLines	mathtools-macros	0	
+macro	mathtools-macros	vdotswithin	mathtools-macros	0	
+macro	mathtools-macros	shortvdotswithin	mathtools-macros	0	
+macro	mathtools-macros	MTFlushSpaceAbove	mathtools-macros	0	
+macro	mathtools-macros	MTFlushSpaceBelow	mathtools-macros	0	
+macro	mathtools-macros	DeclarePairedDelimiter	mathtools-macros	0	
+macro	mathtools-macros	DeclarePairedDelimiterX	mathtools-macros	0	
+macro	mathtools-macros	DeclarePairedDelimiterXPP	mathtools-macros	0	
+macro	mathtools-macros	DeclarePairedDelimiters	mathtools-macros	0	
+macro	mathtools-macros	DeclarePairedDelimitersX	mathtools-macros	0	
+macro	mathtools-macros	DeclarePairedDelimitersXPP	mathtools-macros	0	
+macro	mathtools-macros	vcentercolon	mathtools-macros	0	
+macro	mathtools-macros	ordinarycolon	mathtools-macros	0	
+macro	mathtools-macros	MTThinColon	mathtools-macros	0	
+macro	mathtools-macros	coloneqq	mathtools-macros	0	
+macro	mathtools-macros	Coloneqq	mathtools-macros	0	
+macro	mathtools-macros	coloneq	mathtools-macros	0	
+macro	mathtools-macros	Coloneq	mathtools-macros	0	
+macro	mathtools-macros	eqqcolon	mathtools-macros	0	
+macro	mathtools-macros	Eqqcolon	mathtools-macros	0	
+macro	mathtools-macros	eqcolon	mathtools-macros	0	
+macro	mathtools-macros	Eqcolon	mathtools-macros	0	
+macro	mathtools-macros	colonapprox	mathtools-macros	0	
+macro	mathtools-macros	Colonapprox	mathtools-macros	0	
+macro	mathtools-macros	colonsim	mathtools-macros	0	
+macro	mathtools-macros	Colonsim	mathtools-macros	0	
+macro	mathtools-macros	dblcolon	mathtools-macros	0	
+macro	mathtools-macros	approxcolon	mathtools-macros	0	
+macro	mathtools-macros	Approxcolon	mathtools-macros	0	
+macro	mathtools-macros	simcolon	mathtools-macros	0	
+macro	mathtools-macros	Simcolon	mathtools-macros	0	
+macro	mathtools-macros	colondash	mathtools-macros	0	
+macro	mathtools-macros	Colondash	mathtools-macros	0	
+macro	mathtools-macros	dashcolon	mathtools-macros	0	
+macro	mathtools-macros	Dashcolon	mathtools-macros	0	
+macro	mathtools-macros	nuparrow	mathtools-macros	0	
+macro	mathtools-macros	ndownarrow	mathtools-macros	0	
+macro	mathtools-macros	bigtimes	mathtools-macros	0	
+macro	mathtools-macros	splitfrac	mathtools-macros	0	
+macro	mathtools-macros	splitdfrac	mathtools-macros	0	
+macro	mathtools-macros	xmathstrut	mathtools-macros	0	
+macro	mathtools-macros	prescript	mathtools-macros	0	
+macro	mathtools-macros	newtagform	mathtools-macros	0	
+macro	mathtools-macros	renewtagform	mathtools-macros	0	
+macro	mathtools-macros	usetagform	mathtools-macros	0	
+macro	mathtools-macros	adjustlimits	mathtools-macros	0	
+macro	mathtools-macros	mathtoolsset	mathtools-macros	0	
+macro	html_macros	data	html_macros	0	
+macro	html_macros	href	html_macros	0	
+macro	html_macros	class	html_macros	0	
+macro	html_macros	style	html_macros	0	
+macro	html_macros	cssId	html_macros	0	
+macro	gensymb-symbols	ohm	gensymb-symbols	1	\u2126
+macro	gensymb-symbols	degree	gensymb-symbols	1	\u00b0
+macro	gensymb-symbols	celsius	gensymb-symbols	1	\u2103
+macro	gensymb-symbols	perthousand	gensymb-symbols	1	\u2030
+macro	gensymb-symbols	micro	gensymb-symbols	1	\u00b5
+macro	fontsizev3-macros	tiny	fontsizev3-macros	0	
+macro	fontsizev3-macros	Tiny	fontsizev3-macros	0	
+macro	fontsizev3-macros	scriptsize	fontsizev3-macros	0	
+macro	fontsizev3-macros	small	fontsizev3-macros	0	
+macro	fontsizev3-macros	normalsize	fontsizev3-macros	0	
+macro	fontsizev3-macros	large	fontsizev3-macros	0	
+macro	fontsizev3-macros	Large	fontsizev3-macros	0	
+macro	fontsizev3-macros	LARGE	fontsizev3-macros	0	
+macro	fontsizev3-macros	huge	fontsizev3-macros	0	
+macro	fontsizev3-macros	Huge	fontsizev3-macros	0	
+macro	extpfeil	xtwoheadrightarrow	extpfeil	0	
+macro	extpfeil	xtwoheadleftarrow	extpfeil	0	
+macro	extpfeil	xmapsto	mathtools-macros	0	
+macro	extpfeil	xlongequal	extpfeil	0	
+macro	extpfeil	xtofrom	extpfeil	0	
+macro	extpfeil	Newextarrow	extpfeil	0	
+macro	enclose	enclose	enclose	0	
+macro	empheq-macros	empheqlbrace	empheq-macros	0	
+macro	empheq-macros	empheqrbrace	empheq-macros	0	
+macro	empheq-macros	empheqlbrack	empheq-macros	0	
+macro	empheq-macros	empheqrbrack	empheq-macros	0	
+macro	empheq-macros	empheqlangle	empheq-macros	0	
+macro	empheq-macros	empheqrangle	empheq-macros	0	
+macro	empheq-macros	empheqlparen	empheq-macros	0	
+macro	empheq-macros	empheqrparen	empheq-macros	0	
+macro	empheq-macros	empheqlvert	empheq-macros	0	
+macro	empheq-macros	empheqrvert	empheq-macros	0	
+macro	empheq-macros	empheqlVert	empheq-macros	0	
+macro	empheq-macros	empheqrVert	empheq-macros	0	
+macro	empheq-macros	empheqlfloor	empheq-macros	0	
+macro	empheq-macros	empheqrfloor	empheq-macros	0	
+macro	empheq-macros	empheqlceil	empheq-macros	0	
+macro	empheq-macros	empheqrceil	empheq-macros	0	
+macro	empheq-macros	empheqbiglbrace	empheq-macros	0	
+macro	empheq-macros	empheqbigrbrace	empheq-macros	0	
+macro	empheq-macros	empheqbiglbrack	empheq-macros	0	
+macro	empheq-macros	empheqbigrbrack	empheq-macros	0	
+macro	empheq-macros	empheqbiglangle	empheq-macros	0	
+macro	empheq-macros	empheqbigrangle	empheq-macros	0	
+macro	empheq-macros	empheqbiglparen	empheq-macros	0	
+macro	empheq-macros	empheqbigrparen	empheq-macros	0	
+macro	empheq-macros	empheqbiglvert	empheq-macros	0	
+macro	empheq-macros	empheqbigrvert	empheq-macros	0	
+macro	empheq-macros	empheqbiglVert	empheq-macros	0	
+macro	empheq-macros	empheqbigrVert	empheq-macros	0	
+macro	empheq-macros	empheqbiglfloor	empheq-macros	0	
+macro	empheq-macros	empheqbigrfloor	empheq-macros	0	
+macro	empheq-macros	empheqbiglceil	empheq-macros	0	
+macro	empheq-macros	empheqbigrceil	empheq-macros	0	
+macro	empheq-macros	empheql	empheq-macros	0	
+macro	empheq-macros	empheqr	empheq-macros	0	
+macro	empheq-macros	empheqbigl	empheq-macros	0	
+macro	empheq-macros	empheqbigr	empheq-macros	0	
+macro	dsfont	mathds	dsfont	0	
+macro	color	color	color	0	
+macro	color	textcolor	color	0	
+macro	color	definecolor	color	0	
+macro	color	colorbox	color	0	
+macro	color	fcolorbox	color	0	
+macro	centernot	centerOver	centernot	0	
+macro	centernot	centernot	centernot	0	
+macro	cancel	cancel	cancel	0	
+macro	cancel	bcancel	cancel	0	
+macro	cancel	xcancel	cancel	0	
+macro	cancel	cancelto	cancel	0	
+macro	Bussproofs-macros	AxiomC	Bussproofs-macros	0	
+macro	Bussproofs-macros	UnaryInfC	Bussproofs-macros	0	
+macro	Bussproofs-macros	BinaryInfC	Bussproofs-macros	0	
+macro	Bussproofs-macros	TrinaryInfC	Bussproofs-macros	0	
+macro	Bussproofs-macros	QuaternaryInfC	Bussproofs-macros	0	
+macro	Bussproofs-macros	QuinaryInfC	Bussproofs-macros	0	
+macro	Bussproofs-macros	RightLabel	Bussproofs-macros	0	
+macro	Bussproofs-macros	LeftLabel	Bussproofs-macros	0	
+macro	Bussproofs-macros	AXC	Bussproofs-macros	0	
+macro	Bussproofs-macros	UIC	Bussproofs-macros	0	
+macro	Bussproofs-macros	BIC	Bussproofs-macros	0	
+macro	Bussproofs-macros	TIC	Bussproofs-macros	0	
+macro	Bussproofs-macros	RL	Bussproofs-macros	0	
+macro	Bussproofs-macros	LL	Bussproofs-macros	0	
+macro	Bussproofs-macros	noLine	Bussproofs-macros	0	
+macro	Bussproofs-macros	singleLine	Bussproofs-macros	0	
+macro	Bussproofs-macros	solidLine	Bussproofs-macros	0	
+macro	Bussproofs-macros	dashedLine	Bussproofs-macros	0	
+macro	Bussproofs-macros	alwaysNoLine	Bussproofs-macros	0	
+macro	Bussproofs-macros	alwaysSingleLine	Bussproofs-macros	0	
+macro	Bussproofs-macros	alwaysSolidLine	Bussproofs-macros	0	
+macro	Bussproofs-macros	alwaysDashedLine	Bussproofs-macros	0	
+macro	Bussproofs-macros	rootAtTop	Bussproofs-macros	0	
+macro	Bussproofs-macros	alwaysRootAtTop	Bussproofs-macros	0	
+macro	Bussproofs-macros	rootAtBottom	Bussproofs-macros	0	
+macro	Bussproofs-macros	alwaysRootAtBottom	Bussproofs-macros	0	
+macro	Bussproofs-macros	fCenter	Bussproofs-macros	0	
+macro	Bussproofs-macros	Axiom	Bussproofs-macros	0	
+macro	Bussproofs-macros	UnaryInf	Bussproofs-macros	0	
+macro	Bussproofs-macros	BinaryInf	Bussproofs-macros	0	
+macro	Bussproofs-macros	TrinaryInf	Bussproofs-macros	0	
+macro	Bussproofs-macros	QuaternaryInf	Bussproofs-macros	0	
+macro	Bussproofs-macros	QuinaryInf	Bussproofs-macros	0	
+macro	boldsymbol	boldsymbol	boldsymbol	0	
+macro	begingroup	begingroup	begingroup	0	
+macro	begingroup	endgroup	begingroup	0	
+macro	begingroup	global	begingroup	0	
+macro	begingroup	gdef	begingroup	0	
+macro	begingroup	begingroupReset	begingroup	0	
+macro	begingroup	begingroupSandbox	begingroup	0	
+macro	bbox	bbox	bbox	0	
+macro	bbm	mathversion	bbm	0	
+macro	bbm	mathbbm	bbm	0	
+macro	bbm	mathbbmss	bbm	0	
+macro	bbm	mathbbmtt	bbm	0	
+macro	amscd_macros	minCDarrowwidth	amscd_macros	0	
+macro	amscd_macros	minCDarrowheight	amscd_macros	0	
+macro	AMSmath-delimiter	\u005clvert	AMSmath-delimiter	1	|
+macro	AMSmath-delimiter	\u005crvert	AMSmath-delimiter	1	|
+macro	AMSmath-delimiter	\u005clVert	AMSmath-delimiter	1	\u2016
+macro	AMSmath-delimiter	\u005crVert	AMSmath-delimiter	1	\u2016
+macro	AMSmath-macros	mathring	AMSmath-macros	0	
+macro	AMSmath-macros	nobreakspace	AMSmath-macros	0	
+macro	AMSmath-macros	negmedspace	AMSmath-macros	0	
+macro	AMSmath-macros	negthickspace	AMSmath-macros	0	
+macro	AMSmath-macros	idotsint	AMSmath-macros	0	
+macro	AMSmath-macros	dddot	AMSmath-macros	0	
+macro	AMSmath-macros	ddddot	AMSmath-macros	0	
+macro	AMSmath-macros	sideset	AMSmath-macros	0	
+macro	AMSmath-macros	boxed	AMSmath-macros	0	
+macro	AMSmath-macros	tag	AMSmath-macros	0	
+macro	AMSmath-macros	notag	AMSmath-macros	0	
+macro	AMSmath-macros	eqref	AMSmath-macros	0	
+macro	AMSmath-macros	substack	AMSmath-macros	0	
+macro	AMSmath-macros	injlim	AMSmath-macros	0	
+macro	AMSmath-macros	projlim	AMSmath-macros	0	
+macro	AMSmath-macros	varliminf	AMSmath-macros	0	
+macro	AMSmath-macros	varlimsup	AMSmath-macros	0	
+macro	AMSmath-macros	varinjlim	AMSmath-macros	0	
+macro	AMSmath-macros	varprojlim	AMSmath-macros	0	
+macro	AMSmath-macros	DeclareMathOperator	AMSmath-macros	0	
+macro	AMSmath-macros	operatorname	AMSmath-macros	0	
+macro	AMSmath-macros	genfrac	AMSmath-macros	0	
+macro	AMSmath-macros	frac	AMSmath-macros	0	
+macro	AMSmath-macros	tfrac	AMSmath-macros	0	
+macro	AMSmath-macros	dfrac	AMSmath-macros	0	
+macro	AMSmath-macros	binom	AMSmath-macros	0	
+macro	AMSmath-macros	tbinom	AMSmath-macros	0	
+macro	AMSmath-macros	dbinom	AMSmath-macros	0	
+macro	AMSmath-macros	cfrac	AMSmath-macros	0	
+macro	AMSmath-macros	shoveleft	mathtools-macros	0	
+macro	AMSmath-macros	shoveright	mathtools-macros	0	
+macro	AMSmath-macros	xrightarrow	AMSmath-macros	0	
+macro	AMSmath-macros	xleftarrow	AMSmath-macros	0	
+macro	AMSmath-mathchar0mo	iiiint	AMSmath-mathchar0mo	1	\u2a0c
+macro	AMSsymbols-macros	implies	AMSsymbols-macros	0	
+macro	AMSsymbols-macros	impliedby	AMSsymbols-macros	0	
+macro	AMSsymbols-delimiter	\u005culcorner	AMSsymbols-delimiter	1	\u231c
+macro	AMSsymbols-delimiter	\u005curcorner	AMSsymbols-delimiter	1	\u231d
+macro	AMSsymbols-delimiter	\u005cllcorner	AMSsymbols-delimiter	1	\u231e
+macro	AMSsymbols-delimiter	\u005clrcorner	AMSsymbols-delimiter	1	\u231f
+macro	AMSsymbols-mathchar0mo	dotplus	AMSsymbols-mathchar0mo	1	\u2214
+macro	AMSsymbols-mathchar0mo	ltimes	AMSsymbols-mathchar0mo	1	\u22c9
+macro	AMSsymbols-mathchar0mo	smallsetminus	AMSsymbols-mathchar0mo	1	\u2216
+macro	AMSsymbols-mathchar0mo	rtimes	AMSsymbols-mathchar0mo	1	\u22ca
+macro	AMSsymbols-mathchar0mo	Cap	AMSsymbols-mathchar0mo	1	\u22d2
+macro	AMSsymbols-mathchar0mo	doublecap	AMSsymbols-mathchar0mo	1	\u22d2
+macro	AMSsymbols-mathchar0mo	leftthreetimes	AMSsymbols-mathchar0mo	1	\u22cb
+macro	AMSsymbols-mathchar0mo	Cup	AMSsymbols-mathchar0mo	1	\u22d3
+macro	AMSsymbols-mathchar0mo	doublecup	AMSsymbols-mathchar0mo	1	\u22d3
+macro	AMSsymbols-mathchar0mo	rightthreetimes	AMSsymbols-mathchar0mo	1	\u22cc
+macro	AMSsymbols-mathchar0mo	barwedge	AMSsymbols-mathchar0mo	1	\u22bc
+macro	AMSsymbols-mathchar0mo	curlywedge	AMSsymbols-mathchar0mo	1	\u22cf
+macro	AMSsymbols-mathchar0mo	veebar	AMSsymbols-mathchar0mo	1	\u22bb
+macro	AMSsymbols-mathchar0mo	curlyvee	AMSsymbols-mathchar0mo	1	\u22ce
+macro	AMSsymbols-mathchar0mo	doublebarwedge	AMSsymbols-mathchar0mo	1	\u2a5e
+macro	AMSsymbols-mathchar0mo	boxminus	AMSsymbols-mathchar0mo	1	\u229f
+macro	AMSsymbols-mathchar0mo	circleddash	AMSsymbols-mathchar0mo	1	\u229d
+macro	AMSsymbols-mathchar0mo	boxtimes	AMSsymbols-mathchar0mo	1	\u22a0
+macro	AMSsymbols-mathchar0mo	circledast	AMSsymbols-mathchar0mo	1	\u229b
+macro	AMSsymbols-mathchar0mo	boxdot	AMSsymbols-mathchar0mo	1	\u22a1
+macro	AMSsymbols-mathchar0mo	circledcirc	AMSsymbols-mathchar0mo	1	\u229a
+macro	AMSsymbols-mathchar0mo	boxplus	AMSsymbols-mathchar0mo	1	\u229e
+macro	AMSsymbols-mathchar0mo	centerdot	AMSsymbols-mathchar0mo	1	\u22c5
+macro	AMSsymbols-mathchar0mo	divideontimes	AMSsymbols-mathchar0mo	1	\u22c7
+macro	AMSsymbols-mathchar0mo	intercal	AMSsymbols-mathchar0mo	1	\u22ba
+macro	AMSsymbols-mathchar0mo	leqq	AMSsymbols-mathchar0mo	1	\u2266
+macro	AMSsymbols-mathchar0mo	geqq	AMSsymbols-mathchar0mo	1	\u2267
+macro	AMSsymbols-mathchar0mo	leqslant	AMSsymbols-mathchar0mo	1	\u2a7d
+macro	AMSsymbols-mathchar0mo	geqslant	AMSsymbols-mathchar0mo	1	\u2a7e
+macro	AMSsymbols-mathchar0mo	eqslantless	AMSsymbols-mathchar0mo	1	\u2a95
+macro	AMSsymbols-mathchar0mo	eqslantgtr	AMSsymbols-mathchar0mo	1	\u2a96
+macro	AMSsymbols-mathchar0mo	lesssim	AMSsymbols-mathchar0mo	1	\u2272
+macro	AMSsymbols-mathchar0mo	gtrsim	AMSsymbols-mathchar0mo	1	\u2273
+macro	AMSsymbols-mathchar0mo	lessapprox	AMSsymbols-mathchar0mo	1	\u2a85
+macro	AMSsymbols-mathchar0mo	gtrapprox	AMSsymbols-mathchar0mo	1	\u2a86
+macro	AMSsymbols-mathchar0mo	approxeq	AMSsymbols-mathchar0mo	1	\u224a
+macro	AMSsymbols-mathchar0mo	lessdot	AMSsymbols-mathchar0mo	1	\u22d6
+macro	AMSsymbols-mathchar0mo	gtrdot	AMSsymbols-mathchar0mo	1	\u22d7
+macro	AMSsymbols-mathchar0mo	lll	AMSsymbols-mathchar0mo	1	\u22d8
+macro	AMSsymbols-mathchar0mo	llless	AMSsymbols-mathchar0mo	1	\u22d8
+macro	AMSsymbols-mathchar0mo	ggg	AMSsymbols-mathchar0mo	1	\u22d9
+macro	AMSsymbols-mathchar0mo	gggtr	AMSsymbols-mathchar0mo	1	\u22d9
+macro	AMSsymbols-mathchar0mo	lessgtr	AMSsymbols-mathchar0mo	1	\u2276
+macro	AMSsymbols-mathchar0mo	gtrless	AMSsymbols-mathchar0mo	1	\u2277
+macro	AMSsymbols-mathchar0mo	lesseqgtr	AMSsymbols-mathchar0mo	1	\u22da
+macro	AMSsymbols-mathchar0mo	gtreqless	AMSsymbols-mathchar0mo	1	\u22db
+macro	AMSsymbols-mathchar0mo	lesseqqgtr	AMSsymbols-mathchar0mo	1	\u2a8b
+macro	AMSsymbols-mathchar0mo	gtreqqless	AMSsymbols-mathchar0mo	1	\u2a8c
+macro	AMSsymbols-mathchar0mo	doteqdot	AMSsymbols-mathchar0mo	1	\u2251
+macro	AMSsymbols-mathchar0mo	Doteq	AMSsymbols-mathchar0mo	1	\u2251
+macro	AMSsymbols-mathchar0mo	eqcirc	AMSsymbols-mathchar0mo	1	\u2256
+macro	AMSsymbols-mathchar0mo	risingdotseq	AMSsymbols-mathchar0mo	1	\u2253
+macro	AMSsymbols-mathchar0mo	circeq	AMSsymbols-mathchar0mo	1	\u2257
+macro	AMSsymbols-mathchar0mo	fallingdotseq	AMSsymbols-mathchar0mo	1	\u2252
+macro	AMSsymbols-mathchar0mo	triangleq	AMSsymbols-mathchar0mo	1	\u225c
+macro	AMSsymbols-mathchar0mo	backsim	AMSsymbols-mathchar0mo	1	\u223d
+macro	AMSsymbols-mathchar0mo	thicksim	AMSsymbols-mathchar0mo	1	\u223c
+macro	AMSsymbols-mathchar0mo	backsimeq	AMSsymbols-mathchar0mo	1	\u22cd
+macro	AMSsymbols-mathchar0mo	thickapprox	AMSsymbols-mathchar0mo	1	\u2248
+macro	AMSsymbols-mathchar0mo	subseteqq	AMSsymbols-mathchar0mo	1	\u2ac5
+macro	AMSsymbols-mathchar0mo	supseteqq	AMSsymbols-mathchar0mo	1	\u2ac6
+macro	AMSsymbols-mathchar0mo	Subset	AMSsymbols-mathchar0mo	1	\u22d0
+macro	AMSsymbols-mathchar0mo	Supset	AMSsymbols-mathchar0mo	1	\u22d1
+macro	AMSsymbols-mathchar0mo	sqsubset	AMSsymbols-mathchar0mo	1	\u228f
+macro	AMSsymbols-mathchar0mo	sqsupset	AMSsymbols-mathchar0mo	1	\u2290
+macro	AMSsymbols-mathchar0mo	preccurlyeq	AMSsymbols-mathchar0mo	1	\u227c
+macro	AMSsymbols-mathchar0mo	succcurlyeq	AMSsymbols-mathchar0mo	1	\u227d
+macro	AMSsymbols-mathchar0mo	curlyeqprec	AMSsymbols-mathchar0mo	1	\u22de
+macro	AMSsymbols-mathchar0mo	curlyeqsucc	AMSsymbols-mathchar0mo	1	\u22df
+macro	AMSsymbols-mathchar0mo	precsim	AMSsymbols-mathchar0mo	1	\u227e
+macro	AMSsymbols-mathchar0mo	succsim	AMSsymbols-mathchar0mo	1	\u227f
+macro	AMSsymbols-mathchar0mo	precapprox	AMSsymbols-mathchar0mo	1	\u2ab7
+macro	AMSsymbols-mathchar0mo	succapprox	AMSsymbols-mathchar0mo	1	\u2ab8
+macro	AMSsymbols-mathchar0mo	vartriangleleft	AMSsymbols-mathchar0mo	1	\u22b2
+macro	AMSsymbols-mathchar0mo	lhd	AMSsymbols-mathchar0mo	1	\u22b2
+macro	AMSsymbols-mathchar0mo	vartriangleright	AMSsymbols-mathchar0mo	1	\u22b3
+macro	AMSsymbols-mathchar0mo	rhd	AMSsymbols-mathchar0mo	1	\u22b3
+macro	AMSsymbols-mathchar0mo	trianglelefteq	AMSsymbols-mathchar0mo	1	\u22b4
+macro	AMSsymbols-mathchar0mo	unlhd	AMSsymbols-mathchar0mo	1	\u22b4
+macro	AMSsymbols-mathchar0mo	trianglerighteq	AMSsymbols-mathchar0mo	1	\u22b5
+macro	AMSsymbols-mathchar0mo	unrhd	AMSsymbols-mathchar0mo	1	\u22b5
+macro	AMSsymbols-mathchar0mo	vDash	AMSsymbols-mathchar0mo	1	\u22a8
+macro	AMSsymbols-mathchar0mo	Vdash	AMSsymbols-mathchar0mo	1	\u22a9
+macro	AMSsymbols-mathchar0mo	Vvdash	AMSsymbols-mathchar0mo	1	\u22aa
+macro	AMSsymbols-mathchar0mo	smallsmile	AMSsymbols-mathchar0mo	1	\u2323
+macro	AMSsymbols-mathchar0mo	shortmid	AMSsymbols-mathchar0mo	1	\u2223
+macro	AMSsymbols-mathchar0mo	smallfrown	AMSsymbols-mathchar0mo	1	\u2322
+macro	AMSsymbols-mathchar0mo	shortparallel	AMSsymbols-mathchar0mo	1	\u2225
+macro	AMSsymbols-mathchar0mo	bumpeq	AMSsymbols-mathchar0mo	1	\u224f
+macro	AMSsymbols-mathchar0mo	between	AMSsymbols-mathchar0mo	1	\u226c
+macro	AMSsymbols-mathchar0mo	Bumpeq	AMSsymbols-mathchar0mo	1	\u224e
+macro	AMSsymbols-mathchar0mo	pitchfork	AMSsymbols-mathchar0mo	1	\u22d4
+macro	AMSsymbols-mathchar0mo	varpropto	AMSsymbols-mathchar0mo	1	\u221d
+macro	AMSsymbols-mathchar0mo	backepsilon	AMSsymbols-mathchar0mo	1	\u220d
+macro	AMSsymbols-mathchar0mo	blacktriangleleft	AMSsymbols-mathchar0mo	1	\u25c2
+macro	AMSsymbols-mathchar0mo	blacktriangleright	AMSsymbols-mathchar0mo	1	\u25b8
+macro	AMSsymbols-mathchar0mo	therefore	AMSsymbols-mathchar0mo	1	\u2234
+macro	AMSsymbols-mathchar0mo	because	AMSsymbols-mathchar0mo	1	\u2235
+macro	AMSsymbols-mathchar0mo	eqsim	AMSsymbols-mathchar0mo	1	\u2242
+macro	AMSsymbols-mathchar0mo	vartriangle	AMSsymbols-mathchar0mo	1	\u25b3
+macro	AMSsymbols-mathchar0mo	Join	AMSsymbols-mathchar0mo	1	\u22c8
+macro	AMSsymbols-mathchar0mo	nless	AMSsymbols-mathchar0mo	1	\u226e
+macro	AMSsymbols-mathchar0mo	ngtr	AMSsymbols-mathchar0mo	1	\u226f
+macro	AMSsymbols-mathchar0mo	nleq	AMSsymbols-mathchar0mo	1	\u2270
+macro	AMSsymbols-mathchar0mo	ngeq	AMSsymbols-mathchar0mo	1	\u2271
+macro	AMSsymbols-mathchar0mo	nleqslant	AMSsymbols-mathchar0mo	1	\u2a87
+macro	AMSsymbols-mathchar0mo	ngeqslant	AMSsymbols-mathchar0mo	1	\u2a88
+macro	AMSsymbols-mathchar0mo	nleqq	AMSsymbols-mathchar0mo	1	\u2270
+macro	AMSsymbols-mathchar0mo	ngeqq	AMSsymbols-mathchar0mo	1	\u2271
+macro	AMSsymbols-mathchar0mo	lneq	AMSsymbols-mathchar0mo	1	\u2a87
+macro	AMSsymbols-mathchar0mo	gneq	AMSsymbols-mathchar0mo	1	\u2a88
+macro	AMSsymbols-mathchar0mo	lneqq	AMSsymbols-mathchar0mo	1	\u2268
+macro	AMSsymbols-mathchar0mo	gneqq	AMSsymbols-mathchar0mo	1	\u2269
+macro	AMSsymbols-mathchar0mo	lvertneqq	AMSsymbols-mathchar0mo	1	\u2268
+macro	AMSsymbols-mathchar0mo	gvertneqq	AMSsymbols-mathchar0mo	1	\u2269
+macro	AMSsymbols-mathchar0mo	lnsim	AMSsymbols-mathchar0mo	1	\u22e6
+macro	AMSsymbols-mathchar0mo	gnsim	AMSsymbols-mathchar0mo	1	\u22e7
+macro	AMSsymbols-mathchar0mo	lnapprox	AMSsymbols-mathchar0mo	1	\u2a89
+macro	AMSsymbols-mathchar0mo	gnapprox	AMSsymbols-mathchar0mo	1	\u2a8a
+macro	AMSsymbols-mathchar0mo	nprec	AMSsymbols-mathchar0mo	1	\u2280
+macro	AMSsymbols-mathchar0mo	nsucc	AMSsymbols-mathchar0mo	1	\u2281
+macro	AMSsymbols-mathchar0mo	npreceq	AMSsymbols-mathchar0mo	1	\u22e0
+macro	AMSsymbols-mathchar0mo	nsucceq	AMSsymbols-mathchar0mo	1	\u22e1
+macro	AMSsymbols-mathchar0mo	precneqq	AMSsymbols-mathchar0mo	1	\u2ab5
+macro	AMSsymbols-mathchar0mo	succneqq	AMSsymbols-mathchar0mo	1	\u2ab6
+macro	AMSsymbols-mathchar0mo	precnsim	AMSsymbols-mathchar0mo	1	\u22e8
+macro	AMSsymbols-mathchar0mo	succnsim	AMSsymbols-mathchar0mo	1	\u22e9
+macro	AMSsymbols-mathchar0mo	precnapprox	AMSsymbols-mathchar0mo	1	\u2ab9
+macro	AMSsymbols-mathchar0mo	succnapprox	AMSsymbols-mathchar0mo	1	\u2aba
+macro	AMSsymbols-mathchar0mo	nsim	AMSsymbols-mathchar0mo	1	\u2241
+macro	AMSsymbols-mathchar0mo	ncong	AMSsymbols-mathchar0mo	1	\u2247
+macro	AMSsymbols-mathchar0mo	nshortmid	AMSsymbols-mathchar0mo	1	\u2224
+macro	AMSsymbols-mathchar0mo	nshortparallel	AMSsymbols-mathchar0mo	1	\u2226
+macro	AMSsymbols-mathchar0mo	nmid	AMSsymbols-mathchar0mo	1	\u2224
+macro	AMSsymbols-mathchar0mo	nparallel	AMSsymbols-mathchar0mo	1	\u2226
+macro	AMSsymbols-mathchar0mo	nvdash	AMSsymbols-mathchar0mo	1	\u22ac
+macro	AMSsymbols-mathchar0mo	nvDash	AMSsymbols-mathchar0mo	1	\u22ad
+macro	AMSsymbols-mathchar0mo	nVdash	AMSsymbols-mathchar0mo	1	\u22ae
+macro	AMSsymbols-mathchar0mo	nVDash	AMSsymbols-mathchar0mo	1	\u22af
+macro	AMSsymbols-mathchar0mo	ntriangleleft	AMSsymbols-mathchar0mo	1	\u22ea
+macro	AMSsymbols-mathchar0mo	ntriangleright	AMSsymbols-mathchar0mo	1	\u22eb
+macro	AMSsymbols-mathchar0mo	ntrianglelefteq	AMSsymbols-mathchar0mo	1	\u22ec
+macro	AMSsymbols-mathchar0mo	ntrianglerighteq	AMSsymbols-mathchar0mo	1	\u22ed
+macro	AMSsymbols-mathchar0mo	nsubseteq	AMSsymbols-mathchar0mo	1	\u2288
+macro	AMSsymbols-mathchar0mo	nsupseteq	AMSsymbols-mathchar0mo	1	\u2289
+macro	AMSsymbols-mathchar0mo	nsubseteqq	AMSsymbols-mathchar0mo	1	\u2288
+macro	AMSsymbols-mathchar0mo	nsupseteqq	AMSsymbols-mathchar0mo	1	\u2289
+macro	AMSsymbols-mathchar0mo	subsetneq	AMSsymbols-mathchar0mo	1	\u228a
+macro	AMSsymbols-mathchar0mo	supsetneq	AMSsymbols-mathchar0mo	1	\u228b
+macro	AMSsymbols-mathchar0mo	varsubsetneq	AMSsymbols-mathchar0mo	1	\u228a
+macro	AMSsymbols-mathchar0mo	varsupsetneq	AMSsymbols-mathchar0mo	1	\u228b
+macro	AMSsymbols-mathchar0mo	subsetneqq	AMSsymbols-mathchar0mo	1	\u2acb
+macro	AMSsymbols-mathchar0mo	supsetneqq	AMSsymbols-mathchar0mo	1	\u2acc
+macro	AMSsymbols-mathchar0mo	varsubsetneqq	AMSsymbols-mathchar0mo	1	\u2acb
+macro	AMSsymbols-mathchar0mo	varsupsetneqq	AMSsymbols-mathchar0mo	1	\u2acc
+macro	AMSsymbols-mathchar0mo	leftleftarrows	AMSsymbols-mathchar0mo	1	\u21c7
+macro	AMSsymbols-mathchar0mo	rightrightarrows	AMSsymbols-mathchar0mo	1	\u21c9
+macro	AMSsymbols-mathchar0mo	leftrightarrows	AMSsymbols-mathchar0mo	1	\u21c6
+macro	AMSsymbols-mathchar0mo	rightleftarrows	AMSsymbols-mathchar0mo	1	\u21c4
+macro	AMSsymbols-mathchar0mo	Lleftarrow	AMSsymbols-mathchar0mo	1	\u21da
+macro	AMSsymbols-mathchar0mo	Rrightarrow	AMSsymbols-mathchar0mo	1	\u21db
+macro	AMSsymbols-mathchar0mo	twoheadleftarrow	AMSsymbols-mathchar0mo	1	\u219e
+macro	AMSsymbols-mathchar0mo	twoheadrightarrow	AMSsymbols-mathchar0mo	1	\u21a0
+macro	AMSsymbols-mathchar0mo	leftarrowtail	AMSsymbols-mathchar0mo	1	\u21a2
+macro	AMSsymbols-mathchar0mo	rightarrowtail	AMSsymbols-mathchar0mo	1	\u21a3
+macro	AMSsymbols-mathchar0mo	looparrowleft	AMSsymbols-mathchar0mo	1	\u21ab
+macro	AMSsymbols-mathchar0mo	looparrowright	AMSsymbols-mathchar0mo	1	\u21ac
+macro	AMSsymbols-mathchar0mo	leftrightharpoons	AMSsymbols-mathchar0mo	1	\u21cb
+macro	AMSsymbols-mathchar0mo	rightleftharpoons	AMSsymbols-mathchar0mo	1	\u21cc
+macro	AMSsymbols-mathchar0mo	curvearrowleft	AMSsymbols-mathchar0mo	1	\u21b6
+macro	AMSsymbols-mathchar0mo	curvearrowright	AMSsymbols-mathchar0mo	1	\u21b7
+macro	AMSsymbols-mathchar0mo	circlearrowleft	AMSsymbols-mathchar0mo	1	\u21ba
+macro	AMSsymbols-mathchar0mo	circlearrowright	AMSsymbols-mathchar0mo	1	\u21bb
+macro	AMSsymbols-mathchar0mo	Lsh	AMSsymbols-mathchar0mo	1	\u21b0
+macro	AMSsymbols-mathchar0mo	Rsh	AMSsymbols-mathchar0mo	1	\u21b1
+macro	AMSsymbols-mathchar0mo	upuparrows	AMSsymbols-mathchar0mo	1	\u21c8
+macro	AMSsymbols-mathchar0mo	downdownarrows	AMSsymbols-mathchar0mo	1	\u21ca
+macro	AMSsymbols-mathchar0mo	upharpoonleft	AMSsymbols-mathchar0mo	1	\u21bf
+macro	AMSsymbols-mathchar0mo	upharpoonright	AMSsymbols-mathchar0mo	1	\u21be
+macro	AMSsymbols-mathchar0mo	downharpoonleft	AMSsymbols-mathchar0mo	1	\u21c3
+macro	AMSsymbols-mathchar0mo	restriction	AMSsymbols-mathchar0mo	1	\u21be
+macro	AMSsymbols-mathchar0mo	multimap	AMSsymbols-mathchar0mo	1	\u22b8
+macro	AMSsymbols-mathchar0mo	downharpoonright	AMSsymbols-mathchar0mo	1	\u21c2
+macro	AMSsymbols-mathchar0mo	leftrightsquigarrow	AMSsymbols-mathchar0mo	1	\u21ad
+macro	AMSsymbols-mathchar0mo	rightsquigarrow	AMSsymbols-mathchar0mo	1	\u21dd
+macro	AMSsymbols-mathchar0mo	leadsto	AMSsymbols-mathchar0mo	1	\u21dd
+macro	AMSsymbols-mathchar0mo	dashrightarrow	AMSsymbols-mathchar0mo	1	\u21e2
+macro	AMSsymbols-mathchar0mo	dashleftarrow	AMSsymbols-mathchar0mo	1	\u21e0
+macro	AMSsymbols-mathchar0mo	nleftarrow	AMSsymbols-mathchar0mo	1	\u219a
+macro	AMSsymbols-mathchar0mo	nrightarrow	AMSsymbols-mathchar0mo	1	\u219b
+macro	AMSsymbols-mathchar0mo	nLeftarrow	AMSsymbols-mathchar0mo	1	\u21cd
+macro	AMSsymbols-mathchar0mo	nRightarrow	AMSsymbols-mathchar0mo	1	\u21cf
+macro	AMSsymbols-mathchar0mo	nleftrightarrow	AMSsymbols-mathchar0mo	1	\u21ae
+macro	AMSsymbols-mathchar0mo	nLeftrightarrow	AMSsymbols-mathchar0mo	1	\u21ce
+macro	AMSsymbols-mathchar0mi	digamma	AMSsymbols-mathchar0mi	1	\u03dd
+macro	AMSsymbols-mathchar0mi	varkappa	AMSsymbols-mathchar0mi	1	\u03f0
+macro	AMSsymbols-mathchar0mi	varGamma	AMSsymbols-mathchar0mi	1	\u0393
+macro	AMSsymbols-mathchar0mi	varDelta	AMSsymbols-mathchar0mi	1	\u0394
+macro	AMSsymbols-mathchar0mi	varTheta	AMSsymbols-mathchar0mi	1	\u0398
+macro	AMSsymbols-mathchar0mi	varLambda	AMSsymbols-mathchar0mi	1	\u039b
+macro	AMSsymbols-mathchar0mi	varXi	AMSsymbols-mathchar0mi	1	\u039e
+macro	AMSsymbols-mathchar0mi	varPi	AMSsymbols-mathchar0mi	1	\u03a0
+macro	AMSsymbols-mathchar0mi	varSigma	AMSsymbols-mathchar0mi	1	\u03a3
+macro	AMSsymbols-mathchar0mi	varUpsilon	AMSsymbols-mathchar0mi	1	\u03a5
+macro	AMSsymbols-mathchar0mi	varPhi	AMSsymbols-mathchar0mi	1	\u03a6
+macro	AMSsymbols-mathchar0mi	varPsi	AMSsymbols-mathchar0mi	1	\u03a8
+macro	AMSsymbols-mathchar0mi	varOmega	AMSsymbols-mathchar0mi	1	\u03a9
+macro	AMSsymbols-mathchar0mi	beth	AMSsymbols-mathchar0mi	1	\u2136
+macro	AMSsymbols-mathchar0mi	gimel	AMSsymbols-mathchar0mi	1	\u2137
+macro	AMSsymbols-mathchar0mi	daleth	AMSsymbols-mathchar0mi	1	\u2138
+macro	AMSsymbols-mathchar0mi	backprime	AMSsymbols-mathchar0mi	1	\u2035
+macro	AMSsymbols-mathchar0mi	hslash	AMSsymbols-mathchar0mi	1	\u210f
+macro	AMSsymbols-mathchar0mi	varnothing	AMSsymbols-mathchar0mi	1	\u2205
+macro	AMSsymbols-mathchar0mi	blacktriangle	AMSsymbols-mathchar0mi	1	\u25b4
+macro	AMSsymbols-mathchar0mi	triangledown	AMSsymbols-mathchar0mi	1	\u25bd
+macro	AMSsymbols-mathchar0mi	blacktriangledown	AMSsymbols-mathchar0mi	1	\u25be
+macro	AMSsymbols-mathchar0mi	square	AMSsymbols-mathchar0mi	1	\u25fb
+macro	AMSsymbols-mathchar0mi	Box	AMSsymbols-mathchar0mi	1	\u25fb
+macro	AMSsymbols-mathchar0mi	blacksquare	AMSsymbols-mathchar0mi	1	\u25fc
+macro	AMSsymbols-mathchar0mi	lozenge	AMSsymbols-mathchar0mi	1	\u25ca
+macro	AMSsymbols-mathchar0mi	Diamond	AMSsymbols-mathchar0mi	1	\u25ca
+macro	AMSsymbols-mathchar0mi	blacklozenge	AMSsymbols-mathchar0mi	1	\u29eb
+macro	AMSsymbols-mathchar0mi	circledS	AMSsymbols-mathchar0mi	1	\u24c8
+macro	AMSsymbols-mathchar0mi	bigstar	AMSsymbols-mathchar0mi	1	\u2605
+macro	AMSsymbols-mathchar0mi	sphericalangle	AMSsymbols-mathchar0mi	1	\u2222
+macro	AMSsymbols-mathchar0mi	measuredangle	AMSsymbols-mathchar0mi	1	\u2221
+macro	AMSsymbols-mathchar0mi	nexists	AMSsymbols-mathchar0mi	1	\u2204
+macro	AMSsymbols-mathchar0mi	complement	AMSsymbols-mathchar0mi	1	\u2201
+macro	AMSsymbols-mathchar0mi	mho	AMSsymbols-mathchar0mi	1	\u2127
+macro	AMSsymbols-mathchar0mi	eth	AMSsymbols-mathchar0mi	1	\u00f0
+macro	AMSsymbols-mathchar0mi	Finv	AMSsymbols-mathchar0mi	1	\u2132
+macro	AMSsymbols-mathchar0mi	diagup	AMSsymbols-mathchar0mi	1	\u2571
+macro	AMSsymbols-mathchar0mi	Game	AMSsymbols-mathchar0mi	1	\u2141
+macro	AMSsymbols-mathchar0mi	diagdown	AMSsymbols-mathchar0mi	1	\u2572
+macro	AMSsymbols-mathchar0mi	Bbbk	AMSsymbols-mathchar0mi	1	k
+macro	AMSsymbols-mathchar0mi	yen	AMSsymbols-mathchar0mi	1	\u00a5
+macro	AMSsymbols-mathchar0mi	circledR	AMSsymbols-mathchar0mi	1	\u00ae
+macro	AMSsymbols-mathchar0mi	checkmark	AMSsymbols-mathchar0mi	1	\u2713
+macro	AMSsymbols-mathchar0mi	maltese	AMSsymbols-mathchar0mi	1	\u2720
+macro	action-macros	toggle	action-macros	0	
+macro	action-macros	mathtip	action-macros	0	
+macro	action-macros	texttip	action-macros	0	
+macro	mathchar7	_	mathchar7	1	_
+macro	mathchar7	\u0023	mathchar7	1	\u0023
+macro	mathchar7	$	mathchar7	1	$
+macro	mathchar7	%	mathchar7	1	%
+macro	mathchar7	&	mathchar7	1	&
+macro	mathchar7	And	mathchar7	1	&
+macro	mathchar0mo	surd	mathchar0mo	1	\u221a
+macro	mathchar0mo	coprod	mathchar0mo	1	\u2210
+macro	mathchar0mo	bigvee	mathchar0mo	1	\u22c1
+macro	mathchar0mo	bigwedge	mathchar0mo	1	\u22c0
+macro	mathchar0mo	biguplus	mathchar0mo	1	\u2a04
+macro	mathchar0mo	bigcap	mathchar0mo	1	\u22c2
+macro	mathchar0mo	bigcup	mathchar0mo	1	\u22c3
+macro	mathchar0mo	int	mathchar0mo	1	\u222b
+macro	mathchar0mo	intop	mathchar0mo	1	\u222b
+macro	mathchar0mo	iint	mathchar0mo	1	\u222c
+macro	mathchar0mo	iiint	mathchar0mo	1	\u222d
+macro	mathchar0mo	prod	mathchar0mo	1	\u220f
+macro	mathchar0mo	sum	mathchar0mo	1	\u2211
+macro	mathchar0mo	bigotimes	mathchar0mo	1	\u2a02
+macro	mathchar0mo	bigoplus	mathchar0mo	1	\u2a01
+macro	mathchar0mo	bigodot	mathchar0mo	1	\u2a00
+macro	mathchar0mo	oint	mathchar0mo	1	\u222e
+macro	mathchar0mo	ointop	mathchar0mo	1	\u222e
+macro	mathchar0mo	oiint	mathchar0mo	1	\u222f
+macro	mathchar0mo	oiiint	mathchar0mo	1	\u2230
+macro	mathchar0mo	bigsqcup	mathchar0mo	1	\u2a06
+macro	mathchar0mo	smallint	mathchar0mo	1	\u222b
+macro	mathchar0mo	triangleleft	mathchar0mo	1	\u25c3
+macro	mathchar0mo	triangleright	mathchar0mo	1	\u25b9
+macro	mathchar0mo	bigtriangleup	mathchar0mo	1	\u25b3
+macro	mathchar0mo	bigtriangledown	mathchar0mo	1	\u25bd
+macro	mathchar0mo	wedge	mathchar0mo	1	\u2227
+macro	mathchar0mo	land	mathchar0mo	1	\u2227
+macro	mathchar0mo	vee	mathchar0mo	1	\u2228
+macro	mathchar0mo	lor	mathchar0mo	1	\u2228
+macro	mathchar0mo	cap	mathchar0mo	1	\u2229
+macro	mathchar0mo	cup	mathchar0mo	1	\u222a
+macro	mathchar0mo	ddagger	mathchar0mo	1	\u2021
+macro	mathchar0mo	dagger	mathchar0mo	1	\u2020
+macro	mathchar0mo	sqcap	mathchar0mo	1	\u2293
+macro	mathchar0mo	sqcup	mathchar0mo	1	\u2294
+macro	mathchar0mo	uplus	mathchar0mo	1	\u228e
+macro	mathchar0mo	amalg	mathchar0mo	1	\u2a3f
+macro	mathchar0mo	diamond	mathchar0mo	1	\u22c4
+macro	mathchar0mo	bullet	mathchar0mo	1	\u2219
+macro	mathchar0mo	wr	mathchar0mo	1	\u2240
+macro	mathchar0mo	div	Physics-vector-macros	1	\u00f7
+macro	mathchar0mo	odot	mathchar0mo	1	\u2299
+macro	mathchar0mo	oslash	mathchar0mo	1	\u2298
+macro	mathchar0mo	otimes	mathchar0mo	1	\u2297
+macro	mathchar0mo	ominus	mathchar0mo	1	\u2296
+macro	mathchar0mo	oplus	mathchar0mo	1	\u2295
+macro	mathchar0mo	mp	mathchar0mo	1	\u2213
+macro	mathchar0mo	pm	mathchar0mo	1	\u00b1
+macro	mathchar0mo	circ	mathchar0mo	1	\u2218
+macro	mathchar0mo	bigcirc	mathchar0mo	1	\u25ef
+macro	mathchar0mo	setminus	mathchar0mo	1	\u2216
+macro	mathchar0mo	cdot	mathchar0mo	1	\u22c5
+macro	mathchar0mo	ast	mathchar0mo	1	\u2217
+macro	mathchar0mo	times	mathchar0mo	1	\u00d7
+macro	mathchar0mo	star	mathchar0mo	1	\u22c6
+macro	mathchar0mo	propto	mathchar0mo	1	\u221d
+macro	mathchar0mo	sqsubseteq	mathchar0mo	1	\u2291
+macro	mathchar0mo	sqsupseteq	mathchar0mo	1	\u2292
+macro	mathchar0mo	parallel	mathchar0mo	1	\u2225
+macro	mathchar0mo	mid	mathchar0mo	1	\u2223
+macro	mathchar0mo	dashv	mathchar0mo	1	\u22a3
+macro	mathchar0mo	vdash	mathchar0mo	1	\u22a2
+macro	mathchar0mo	leq	mathchar0mo	1	\u2264
+macro	mathchar0mo	le	mathchar0mo	1	\u2264
+macro	mathchar0mo	geq	mathchar0mo	1	\u2265
+macro	mathchar0mo	ge	mathchar0mo	1	\u2265
+macro	mathchar0mo	lt	mathchar0mo	1	<
+macro	mathchar0mo	gt	mathchar0mo	1	>
+macro	mathchar0mo	succ	mathchar0mo	1	\u227b
+macro	mathchar0mo	prec	mathchar0mo	1	\u227a
+macro	mathchar0mo	approx	mathchar0mo	1	\u2248
+macro	mathchar0mo	succeq	mathchar0mo	1	\u2ab0
+macro	mathchar0mo	preceq	mathchar0mo	1	\u2aaf
+macro	mathchar0mo	supset	mathchar0mo	1	\u2283
+macro	mathchar0mo	subset	mathchar0mo	1	\u2282
+macro	mathchar0mo	supseteq	mathchar0mo	1	\u2287
+macro	mathchar0mo	subseteq	mathchar0mo	1	\u2286
+macro	mathchar0mo	in	mathchar0mo	1	\u2208
+macro	mathchar0mo	ni	mathchar0mo	1	\u220b
+macro	mathchar0mo	notin	mathchar0mo	1	\u2209
+macro	mathchar0mo	owns	mathchar0mo	1	\u220b
+macro	mathchar0mo	gg	mathchar0mo	1	\u226b
+macro	mathchar0mo	ll	mathchar0mo	1	\u226a
+macro	mathchar0mo	sim	mathchar0mo	1	\u223c
+macro	mathchar0mo	simeq	mathchar0mo	1	\u2243
+macro	mathchar0mo	perp	mathchar0mo	1	\u27c2
+macro	mathchar0mo	equiv	mathchar0mo	1	\u2261
+macro	mathchar0mo	asymp	mathchar0mo	1	\u224d
+macro	mathchar0mo	smile	mathchar0mo	1	\u2323
+macro	mathchar0mo	frown	mathchar0mo	1	\u2322
+macro	mathchar0mo	ne	mathchar0mo	1	\u2260
+macro	mathchar0mo	neq	mathchar0mo	1	\u2260
+macro	mathchar0mo	cong	mathchar0mo	1	\u2245
+macro	mathchar0mo	doteq	mathchar0mo	1	\u2250
+macro	mathchar0mo	bowtie	mathchar0mo	1	\u22c8
+macro	mathchar0mo	models	mathchar0mo	1	\u22a7
+macro	mathchar0mo	notChar	mathchar0mo	1	\u29f8
+macro	mathchar0mo	Leftrightarrow	mathchar0mo	1	\u21d4
+macro	mathchar0mo	Leftarrow	mathchar0mo	1	\u21d0
+macro	mathchar0mo	Rightarrow	mathchar0mo	1	\u21d2
+macro	mathchar0mo	leftrightarrow	mathchar0mo	1	\u2194
+macro	mathchar0mo	leftarrow	mathchar0mo	1	\u2190
+macro	mathchar0mo	gets	mathchar0mo	1	\u2190
+macro	mathchar0mo	rightarrow	mathchar0mo	1	\u2192
+macro	mathchar0mo	to	mathchar0mo	1	\u2192
+macro	mathchar0mo	mapsto	mathchar0mo	1	\u21a6
+macro	mathchar0mo	leftharpoonup	mathchar0mo	1	\u21bc
+macro	mathchar0mo	leftharpoondown	mathchar0mo	1	\u21bd
+macro	mathchar0mo	rightharpoonup	mathchar0mo	1	\u21c0
+macro	mathchar0mo	rightharpoondown	mathchar0mo	1	\u21c1
+macro	mathchar0mo	nearrow	mathchar0mo	1	\u2197
+macro	mathchar0mo	searrow	mathchar0mo	1	\u2198
+macro	mathchar0mo	nwarrow	mathchar0mo	1	\u2196
+macro	mathchar0mo	swarrow	mathchar0mo	1	\u2199
+macro	mathchar0mo	rightleftharpoons	AMSsymbols-mathchar0mo	1	\u21cc
+macro	mathchar0mo	hookrightarrow	mathchar0mo	1	\u21aa
+macro	mathchar0mo	hookleftarrow	mathchar0mo	1	\u21a9
+macro	mathchar0mo	longleftarrow	mathchar0mo	1	\u27f5
+macro	mathchar0mo	Longleftarrow	mathchar0mo	1	\u27f8
+macro	mathchar0mo	longrightarrow	mathchar0mo	1	\u27f6
+macro	mathchar0mo	Longrightarrow	mathchar0mo	1	\u27f9
+macro	mathchar0mo	Longleftrightarrow	mathchar0mo	1	\u27fa
+macro	mathchar0mo	longleftrightarrow	mathchar0mo	1	\u27f7
+macro	mathchar0mo	longmapsto	mathchar0mo	1	\u27fc
+macro	mathchar0mo	ldots	mathchar0mo	1	\u2026
+macro	mathchar0mo	cdots	mathchar0mo	1	\u22ef
+macro	mathchar0mo	vdots	mathchar0mo	1	\u22ee
+macro	mathchar0mo	ddots	mathchar0mo	1	\u22f1
+macro	mathchar0mo	iddots	mathchar0mo	1	\u22f0
+macro	mathchar0mo	dotsc	mathchar0mo	1	\u2026
+macro	mathchar0mo	dotsb	mathchar0mo	1	\u22ef
+macro	mathchar0mo	dotsm	mathchar0mo	1	\u22ef
+macro	mathchar0mo	dotsi	mathchar0mo	1	\u22ef
+macro	mathchar0mo	dotso	mathchar0mo	1	\u2026
+macro	mathchar0mo	ldotp	mathchar0mo	1	.
+macro	mathchar0mo	cdotp	mathchar0mo	1	\u22c5
+macro	mathchar0mo	colon	mathchar0mo	1	:
+macro	mathchar0mi	AA	mathchar0mi	1	\u212b
+macro	mathchar0mi	S	mathchar0mi	1	\u00a7
+macro	mathchar0mi	aleph	mathchar0mi	1	\u2135
+macro	mathchar0mi	hbar	mathchar0mi	1	\u210f
+macro	mathchar0mi	imath	mathchar0mi	1	\u0131
+macro	mathchar0mi	jmath	mathchar0mi	1	\u0237
+macro	mathchar0mi	ell	mathchar0mi	1	\u2113
+macro	mathchar0mi	wp	mathchar0mi	1	\u2118
+macro	mathchar0mi	Re	Physics-expressions-macros	1	\u211c
+macro	mathchar0mi	Im	Physics-expressions-macros	1	\u2111
+macro	mathchar0mi	partial	mathchar0mi	1	\u2202
+macro	mathchar0mi	infty	mathchar0mi	1	\u221e
+macro	mathchar0mi	prime	mathchar0mi	1	\u2032
+macro	mathchar0mi	emptyset	mathchar0mi	1	\u2205
+macro	mathchar0mi	nabla	mathchar0mi	1	\u2207
+macro	mathchar0mi	top	mathchar0mi	1	\u22a4
+macro	mathchar0mi	bot	mathchar0mi	1	\u22a5
+macro	mathchar0mi	angle	mathchar0mi	1	\u2220
+macro	mathchar0mi	triangle	mathchar0mi	1	\u25b3
+macro	mathchar0mi	backslash	mathchar0mi	1	\u005c
+macro	mathchar0mi	forall	mathchar0mi	1	\u2200
+macro	mathchar0mi	exists	mathchar0mi	1	\u2203
+macro	mathchar0mi	neg	mathchar0mi	1	\u00ac
+macro	mathchar0mi	lnot	mathchar0mi	1	\u00ac
+macro	mathchar0mi	flat	mathchar0mi	1	\u266d
+macro	mathchar0mi	natural	mathchar0mi	1	\u266e
+macro	mathchar0mi	sharp	mathchar0mi	1	\u266f
+macro	mathchar0mi	clubsuit	mathchar0mi	1	\u2663
+macro	mathchar0mi	diamondsuit	mathchar0mi	1	\u2662
+macro	mathchar0mi	heartsuit	mathchar0mi	1	\u2661
+macro	mathchar0mi	spadesuit	mathchar0mi	1	\u2660
+macro	ucGreek	Gamma	ucGreek	1	\u0393
+macro	ucGreek	Delta	ucGreek	1	\u0394
+macro	ucGreek	Theta	ucGreek	1	\u0398
+macro	ucGreek	Lambda	ucGreek	1	\u039b
+macro	ucGreek	Xi	ucGreek	1	\u039e
+macro	ucGreek	Pi	ucGreek	1	\u03a0
+macro	ucGreek	Sigma	ucGreek	1	\u03a3
+macro	ucGreek	Upsilon	ucGreek	1	\u03a5
+macro	ucGreek	Phi	ucGreek	1	\u03a6
+macro	ucGreek	Psi	ucGreek	1	\u03a8
+macro	ucGreek	Omega	ucGreek	1	\u03a9
+macro	lcGreek	alpha	lcGreek	1	\u03b1
+macro	lcGreek	beta	lcGreek	1	\u03b2
+macro	lcGreek	gamma	lcGreek	1	\u03b3
+macro	lcGreek	delta	lcGreek	1	\u03b4
+macro	lcGreek	epsilon	lcGreek	1	\u03f5
+macro	lcGreek	zeta	lcGreek	1	\u03b6
+macro	lcGreek	eta	lcGreek	1	\u03b7
+macro	lcGreek	theta	lcGreek	1	\u03b8
+macro	lcGreek	iota	lcGreek	1	\u03b9
+macro	lcGreek	kappa	lcGreek	1	\u03ba
+macro	lcGreek	lambda	lcGreek	1	\u03bb
+macro	lcGreek	mu	lcGreek	1	\u03bc
+macro	lcGreek	nu	lcGreek	1	\u03bd
+macro	lcGreek	xi	lcGreek	1	\u03be
+macro	lcGreek	omicron	lcGreek	1	\u03bf
+macro	lcGreek	pi	lcGreek	1	\u03c0
+macro	lcGreek	rho	lcGreek	1	\u03c1
+macro	lcGreek	sigma	lcGreek	1	\u03c3
+macro	lcGreek	tau	lcGreek	1	\u03c4
+macro	lcGreek	upsilon	lcGreek	1	\u03c5
+macro	lcGreek	phi	lcGreek	1	\u03d5
+macro	lcGreek	chi	lcGreek	1	\u03c7
+macro	lcGreek	psi	lcGreek	1	\u03c8
+macro	lcGreek	omega	lcGreek	1	\u03c9
+macro	lcGreek	varepsilon	lcGreek	1	\u03b5
+macro	lcGreek	vartheta	lcGreek	1	\u03d1
+macro	lcGreek	varpi	lcGreek	1	\u03d6
+macro	lcGreek	varrho	lcGreek	1	\u03f1
+macro	lcGreek	varsigma	lcGreek	1	\u03c2
+macro	lcGreek	varphi	lcGreek	1	\u03c6
+macro	macros	displaystyle	macros	0	
+macro	macros	textstyle	macros	0	
+macro	macros	scriptstyle	macros	0	
+macro	macros	scriptscriptstyle	macros	0	
+macro	macros	rm	macros	0	
+macro	macros	mit	macros	0	
+macro	macros	oldstyle	macros	0	
+macro	macros	cal	macros	0	
+macro	macros	it	macros	0	
+macro	macros	bf	macros	0	
+macro	macros	sf	macros	0	
+macro	macros	tt	macros	0	
+macro	macros	frak	macros	0	
+macro	macros	Bbb	macros	0	
+macro	macros	mathrm	macros	0	
+macro	macros	mathup	macros	0	
+macro	macros	mathnormal	macros	0	
+macro	macros	mathbf	macros	0	
+macro	macros	mathbfup	macros	0	
+macro	macros	mathit	macros	0	
+macro	macros	mathbfit	macros	0	
+macro	macros	mathbb	bboldx	0	
+macro	macros	mathfrak	macros	0	
+macro	macros	mathbffrak	macros	0	
+macro	macros	mathscr	macros	0	
+macro	macros	mathbfscr	macros	0	
+macro	macros	mathsf	macros	0	
+macro	macros	mathsfup	macros	0	
+macro	macros	mathbfsf	macros	0	
+macro	macros	mathbfsfup	macros	0	
+macro	macros	mathsfit	macros	0	
+macro	macros	mathbfsfit	macros	0	
+macro	macros	mathtt	macros	0	
+macro	macros	mathcal	macros	0	
+macro	macros	mathbfcal	macros	0	
+macro	macros	symrm	macros	0	
+macro	macros	symup	macros	0	
+macro	macros	symnormal	macros	0	
+macro	macros	symbf	macros	0	
+macro	macros	symbfup	macros	0	
+macro	macros	symit	macros	0	
+macro	macros	symbfit	macros	0	
+macro	macros	symbb	macros	0	
+macro	macros	symfrak	macros	0	
+macro	macros	symbffrak	macros	0	
+macro	macros	symscr	macros	0	
+macro	macros	symbfscr	macros	0	
+macro	macros	symsf	macros	0	
+macro	macros	symsfup	macros	0	
+macro	macros	symbfsf	macros	0	
+macro	macros	symbfsfup	macros	0	
+macro	macros	symsfit	macros	0	
+macro	macros	symbfsfit	macros	0	
+macro	macros	symtt	macros	0	
+macro	macros	symcal	macros	0	
+macro	macros	symbfcal	macros	0	
+macro	macros	textrm	macros	0	
+macro	macros	textup	macros	0	
+macro	macros	textnormal	macros	0	
+macro	macros	textit	macros	0	
+macro	macros	textbf	macros	0	
+macro	macros	textsf	macros	0	
+macro	macros	texttt	macros	0	
+macro	macros	Tiny	fontsizev3-macros	0	
+macro	macros	tiny	fontsizev3-macros	0	
+macro	macros	scriptsize	fontsizev3-macros	0	
+macro	macros	SMALL	macros	0	
+macro	macros	Small	macros	0	
+macro	macros	footnotesize	macros	0	
+macro	macros	small	fontsizev3-macros	0	
+macro	macros	normalsize	fontsizev3-macros	0	
+macro	macros	large	fontsizev3-macros	0	
+macro	macros	Large	fontsizev3-macros	0	
+macro	macros	LARGE	fontsizev3-macros	0	
+macro	macros	huge	fontsizev3-macros	0	
+macro	macros	Huge	fontsizev3-macros	0	
+macro	macros	HUGE	macros	0	
+macro	macros	arcsin	Physics-expressions-macros	0	
+macro	macros	arccos	Physics-expressions-macros	0	
+macro	macros	arctan	Physics-expressions-macros	0	
+macro	macros	arg	macros	0	
+macro	macros	cos	Physics-expressions-macros	0	
+macro	macros	cosh	Physics-expressions-macros	0	
+macro	macros	cot	Physics-expressions-macros	0	
+macro	macros	coth	Physics-expressions-macros	0	
+macro	macros	csc	Physics-expressions-macros	0	
+macro	macros	deg	macros	0	
+macro	macros	det	Physics-expressions-macros	0	
+macro	macros	dim	macros	0	
+macro	macros	exp	Physics-expressions-macros	0	
+macro	macros	gcd	macros	0	
+macro	macros	hom	macros	0	
+macro	macros	inf	macros	0	
+macro	macros	ker	macros	0	
+macro	macros	lg	macros	0	
+macro	macros	lim	macros	0	
+macro	macros	liminf	macros	0	
+macro	macros	limsup	macros	0	
+macro	macros	ln	Physics-expressions-macros	0	
+macro	macros	log	Physics-expressions-macros	0	
+macro	macros	max	macros	0	
+macro	macros	min	macros	0	
+macro	macros	Pr	Physics-expressions-macros	0	
+macro	macros	sec	Physics-expressions-macros	0	
+macro	macros	sin	Physics-expressions-macros	0	
+macro	macros	sinh	Physics-expressions-macros	0	
+macro	macros	sup	macros	0	
+macro	macros	tan	Physics-expressions-macros	0	
+macro	macros	tanh	Physics-expressions-macros	0	
+macro	macros	limits	macros	0	
+macro	macros	nolimits	macros	0	
+macro	macros	overline	macros	0	
+macro	macros	underline	macros	0	
+macro	macros	overbrace	macros	0	
+macro	macros	underbrace	macros	0	
+macro	macros	overparen	macros	0	
+macro	macros	underparen	macros	0	
+macro	macros	overrightarrow	macros	0	
+macro	macros	underrightarrow	macros	0	
+macro	macros	overleftarrow	macros	0	
+macro	macros	underleftarrow	macros	0	
+macro	macros	overleftrightarrow	macros	0	
+macro	macros	underleftrightarrow	macros	0	
+macro	macros	overset	macros	0	
+macro	macros	underset	macros	0	
+macro	macros	overunderset	macros	0	
+macro	macros	stackrel	macros	0	
+macro	macros	stackbin	macros	0	
+macro	macros	over	macros	0	
+macro	macros	overwithdelims	macros	0	
+macro	macros	atop	macros	0	
+macro	macros	atopwithdelims	macros	0	
+macro	macros	above	macros	0	
+macro	macros	abovewithdelims	macros	0	
+macro	macros	brace	macros	0	
+macro	macros	brack	macros	0	
+macro	macros	choose	macros	0	
+macro	macros	frac	AMSmath-macros	0	
+macro	macros	sqrt	macros	0	
+macro	macros	root	macros	0	
+macro	macros	uproot	macros	0	
+macro	macros	leftroot	macros	0	
+macro	macros	left	macros	0	
+macro	macros	right	macros	0	
+macro	macros	middle	macros	0	
+macro	macros	llap	macros	0	
+macro	macros	rlap	macros	0	
+macro	macros	raise	macros	0	
+macro	macros	lower	macros	0	
+macro	macros	moveleft	macros	0	
+macro	macros	moveright	macros	0	
+macro	macros	,	macros	0	
+macro	macros	:	macros	0	
+macro	macros	>	macros	0	
+macro	macros	;	macros	0	
+macro	macros	!	macros	0	
+macro	macros	enspace	macros	0	
+macro	macros	quad	macros	0	
+macro	macros	qquad	macros	0	
+macro	macros	thinspace	macros	0	
+macro	macros	negthinspace	macros	0	
+macro	macros	*	macros	0	
+macro	macros	allowbreak	macros	0	
+macro	macros	goodbreak	macros	0	
+macro	macros	badbreak	macros	0	
+macro	macros	nobreak	macros	0	
+macro	macros	break	macros	0	
+macro	macros	hskip	macros	0	
+macro	macros	hspace	macros	0	
+macro	macros	kern	macros	0	
+macro	macros	mskip	macros	0	
+macro	macros	mspace	macros	0	
+macro	macros	mkern	macros	0	
+macro	macros	rule	macros	0	
+macro	macros	Rule	macros	0	
+macro	macros	Space	macros	0	
+macro	macros	nonscript	macros	0	
+macro	macros	big	macros	0	
+macro	macros	Big	macros	0	
+macro	macros	bigg	macros	0	
+macro	macros	Bigg	macros	0	
+macro	macros	bigl	macros	0	
+macro	macros	Bigl	macros	0	
+macro	macros	biggl	macros	0	
+macro	macros	Biggl	macros	0	
+macro	macros	bigr	macros	0	
+macro	macros	Bigr	macros	0	
+macro	macros	biggr	macros	0	
+macro	macros	Biggr	macros	0	
+macro	macros	bigm	macros	0	
+macro	macros	Bigm	macros	0	
+macro	macros	biggm	macros	0	
+macro	macros	Biggm	macros	0	
+macro	macros	mathord	macros	0	
+macro	macros	mathop	macros	0	
+macro	macros	mathopen	macros	0	
+macro	macros	mathclose	macros	0	
+macro	macros	mathbin	macros	0	
+macro	macros	mathrel	macros	0	
+macro	macros	mathpunct	macros	0	
+macro	macros	mathinner	macros	0	
+macro	macros	vtop	macros	0	
+macro	macros	vcenter	macros	0	
+macro	macros	vbox	macros	0	
+macro	macros	hsize	macros	0	
+macro	macros	parbox	macros	0	
+macro	macros	breakAlign	macros	0	
+macro	macros	buildrel	macros	0	
+macro	macros	hbox	macros	0	
+macro	macros	text	macros	0	
+macro	macros	mbox	macros	0	
+macro	macros	fbox	macros	0	
+macro	macros	boxed	AMSmath-macros	0	
+macro	macros	framebox	macros	0	
+macro	macros	makebox	macros	0	
+macro	macros	strut	macros	0	
+macro	macros	mathstrut	macros	0	
+macro	macros	phantom	macros	0	
+macro	macros	vphantom	macros	0	
+macro	macros	hphantom	macros	0	
+macro	macros	smash	macros	0	
+macro	macros	acute	macros	0	
+macro	macros	grave	macros	0	
+macro	macros	ddot	macros	0	
+macro	macros	dddot	AMSmath-macros	0	
+macro	macros	ddddot	AMSmath-macros	0	
+macro	macros	tilde	macros	0	
+macro	macros	bar	macros	0	
+macro	macros	breve	macros	0	
+macro	macros	check	macros	0	
+macro	macros	hat	macros	0	
+macro	macros	vec	macros	0	
+macro	macros	dot	macros	0	
+macro	macros	widetilde	macros	0	
+macro	macros	widehat	macros	0	
+macro	macros	matrix	macros	0	
+macro	macros	array	macros	0	
+macro	macros	pmatrix	macros	0	
+macro	macros	cases	macros	0	
+macro	macros	eqalign	macros	0	
+macro	macros	displaylines	macros	0	
+macro	macros	cr	macros	0	
+macro	macros	\u005c	macros	0	
+macro	macros	newline	macros	0	
+macro	macros	hline	macros	0	
+macro	macros	hdashline	macros	0	
+macro	macros	eqalignno	macros	0	
+macro	macros	leqalignno	macros	0	
+macro	macros	hfill	macros	0	
+macro	macros	hfil	macros	0	
+macro	macros	hfilll	macros	0	
+macro	macros	bmod	macros	0	
+macro	macros	pmod	macros	0	
+macro	macros	mod	macros	0	
+macro	macros	pod	macros	0	
+macro	macros	iff	macros	0	
+macro	macros	skew	macros	0	
+macro	macros	pmb	macros	0	
+macro	macros	TeX	macros	0	
+macro	macros	LaTeX	macros	0	
+macro	macros	not	macros	0	
+macro	macros	dots	macros	0	
+macro	macros	space	macros	0	
+macro	macros	\u00a0	macros	0	
+macro	macros	 	macros	0	
+macro	macros	begin	macros	0	
+macro	macros	end	macros	0	
+macro	macros	label	macros	0	
+macro	macros	ref	macros	0	
+macro	macros	nonumber	macros	0	
+macro	macros	newcolumntype	macros	0	
+macro	macros	mathchoice	macros	0	
+macro	macros	mmlToken	macros	0	
+macro	delimiter	(	delimiter	1	(
+macro	delimiter	)	delimiter	1	)
+macro	delimiter	[	delimiter	1	[
+macro	delimiter	]	delimiter	1	]
+macro	delimiter	<	delimiter	1	\u27e8
+macro	delimiter	>	macros	1	\u27e9
+macro	delimiter	\u005clt	delimiter	1	\u27e8
+macro	delimiter	\u005cgt	delimiter	1	\u27e9
+macro	delimiter	/	delimiter	1	/
+macro	delimiter	|	Braket-macros	1	|
+macro	delimiter	.	delimiter	1	
+macro	delimiter	\u005clmoustache	delimiter	1	\u23b0
+macro	delimiter	\u005crmoustache	delimiter	1	\u23b1
+macro	delimiter	\u005clgroup	delimiter	1	\u27ee
+macro	delimiter	\u005crgroup	delimiter	1	\u27ef
+macro	delimiter	\u005carrowvert	delimiter	1	\u23d0
+macro	delimiter	\u005cArrowvert	delimiter	1	\u2016
+macro	delimiter	\u005cbracevert	delimiter	1	\u23aa
+macro	delimiter	\u005cVert	delimiter	1	\u2016
+macro	delimiter	\u005c|	delimiter	1	\u2016
+macro	delimiter	\u005cvert	delimiter	1	|
+macro	delimiter	\u005cuparrow	delimiter	1	\u2191
+macro	delimiter	\u005cdownarrow	delimiter	1	\u2193
+macro	delimiter	\u005cupdownarrow	delimiter	1	\u2195
+macro	delimiter	\u005cUparrow	delimiter	1	\u21d1
+macro	delimiter	\u005cDownarrow	delimiter	1	\u21d3
+macro	delimiter	\u005cUpdownarrow	delimiter	1	\u21d5
+macro	delimiter	\u005cbackslash	delimiter	1	\u005c
+macro	delimiter	\u005crangle	delimiter	1	\u27e9
+macro	delimiter	\u005clangle	delimiter	1	\u27e8
+macro	delimiter	\u005crbrace	delimiter	1	}
+macro	delimiter	\u005clbrace	delimiter	1	{
+macro	delimiter	\u005c}	delimiter	1	}
+macro	delimiter	\u005c{	delimiter	1	{
+macro	delimiter	\u005crceil	delimiter	1	\u2309
+macro	delimiter	\u005clceil	delimiter	1	\u2308
+macro	delimiter	\u005crfloor	delimiter	1	\u230b
+macro	delimiter	\u005clfloor	delimiter	1	\u230a
+macro	delimiter	\u005clbrack	delimiter	1	[
+macro	delimiter	\u005crbrack	delimiter	1	]
+macro	mediawiki-texvc-macros	AA	mathchar0mi	0	
+macro	mediawiki-texvc-macros	alef	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	alefsym	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	Alpha	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	and	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	ang	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	Bbb	macros	0	
+macro	mediawiki-texvc-macros	Beta	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	bold	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	bull	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	C	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	Chi	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	clubs	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	cnums	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	Complex	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	coppa	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	Coppa	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	Dagger	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	Digamma	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	darr	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	dArr	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	Darr	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	dashint	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	ddashint	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	diamonds	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	empty	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	Epsilon	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	Eta	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	euro	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	exist	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	geneuro	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	geneuronarrow	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	geneurowide	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	H	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	hAar	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	harr	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	Harr	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	hearts	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	image	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	infin	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	Iota	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	isin	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	Kappa	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	koppa	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	Koppa	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	lang	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	larr	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	Larr	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	lArr	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	lrarr	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	Lrarr	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	lrArr	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	Mu	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	N	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	natnums	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	Nu	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	O	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	oiint	mathchar0mo	0	
+macro	mediawiki-texvc-macros	oiiint	mathchar0mo	0	
+macro	mediawiki-texvc-macros	ointctrclockwise	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	officialeuro	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	Omicron	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	or	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	P	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	pagecolor	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	part	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	plusmn	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	Q	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	R	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	rang	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	rarr	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	Rarr	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	rArr	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	real	Physics-vector-mi	0	
+macro	mediawiki-texvc-macros	reals	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	Reals	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	Rho	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	sdot	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	sampi	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	Sampi	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	sect	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	spades	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	stigma	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	Stigma	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	sub	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	sube	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	supe	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	Tau	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	textvisiblespace	textcomp-macros	0	
+macro	mediawiki-texvc-macros	thetasym	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	uarr	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	uArr	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	Uarr	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	unicodeInt	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	varcoppa	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	varstigma	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	varointclockwise	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	vline	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	weierp	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	Z	mediawiki-texvc-macros	0	
+macro	mediawiki-texvc-macros	Zeta	mediawiki-texvc-macros	0	
+macro	colortbl	cellcolor	colortbl	0	
+macro	colortbl	rowcolor	colortbl	0	
+macro	colortbl	columncolor	colortbl	0	
+delimiter	mathtools-delimiters	\u005clparen	mathtools-delimiters	1	(
+delimiter	mathtools-delimiters	\u005crparen	mathtools-delimiters	1	)
+delimiter	AMSmath-delimiter	\u005clvert	AMSmath-delimiter	1	|
+delimiter	AMSmath-delimiter	\u005crvert	AMSmath-delimiter	1	|
+delimiter	AMSmath-delimiter	\u005clVert	AMSmath-delimiter	1	\u2016
+delimiter	AMSmath-delimiter	\u005crVert	AMSmath-delimiter	1	\u2016
+delimiter	AMSsymbols-delimiter	\u005culcorner	AMSsymbols-delimiter	1	\u231c
+delimiter	AMSsymbols-delimiter	\u005curcorner	AMSsymbols-delimiter	1	\u231d
+delimiter	AMSsymbols-delimiter	\u005cllcorner	AMSsymbols-delimiter	1	\u231e
+delimiter	AMSsymbols-delimiter	\u005clrcorner	AMSsymbols-delimiter	1	\u231f
+delimiter	delimiter	(	delimiter	1	(
+delimiter	delimiter	)	delimiter	1	)
+delimiter	delimiter	[	delimiter	1	[
+delimiter	delimiter	]	delimiter	1	]
+delimiter	delimiter	<	delimiter	1	\u27e8
+delimiter	delimiter	>	delimiter	1	\u27e9
+delimiter	delimiter	\u005clt	delimiter	1	\u27e8
+delimiter	delimiter	\u005cgt	delimiter	1	\u27e9
+delimiter	delimiter	/	delimiter	1	/
+delimiter	delimiter	|	delimiter	1	|
+delimiter	delimiter	.	delimiter	1	
+delimiter	delimiter	\u005clmoustache	delimiter	1	\u23b0
+delimiter	delimiter	\u005crmoustache	delimiter	1	\u23b1
+delimiter	delimiter	\u005clgroup	delimiter	1	\u27ee
+delimiter	delimiter	\u005crgroup	delimiter	1	\u27ef
+delimiter	delimiter	\u005carrowvert	delimiter	1	\u23d0
+delimiter	delimiter	\u005cArrowvert	delimiter	1	\u2016
+delimiter	delimiter	\u005cbracevert	delimiter	1	\u23aa
+delimiter	delimiter	\u005cVert	delimiter	1	\u2016
+delimiter	delimiter	\u005c|	delimiter	1	\u2016
+delimiter	delimiter	\u005cvert	delimiter	1	|
+delimiter	delimiter	\u005cuparrow	delimiter	1	\u2191
+delimiter	delimiter	\u005cdownarrow	delimiter	1	\u2193
+delimiter	delimiter	\u005cupdownarrow	delimiter	1	\u2195
+delimiter	delimiter	\u005cUparrow	delimiter	1	\u21d1
+delimiter	delimiter	\u005cDownarrow	delimiter	1	\u21d3
+delimiter	delimiter	\u005cUpdownarrow	delimiter	1	\u21d5
+delimiter	delimiter	\u005cbackslash	delimiter	1	\u005c
+delimiter	delimiter	\u005crangle	delimiter	1	\u27e9
+delimiter	delimiter	\u005clangle	delimiter	1	\u27e8
+delimiter	delimiter	\u005crbrace	delimiter	1	}
+delimiter	delimiter	\u005clbrace	delimiter	1	{
+delimiter	delimiter	\u005c}	delimiter	1	}
+delimiter	delimiter	\u005c{	delimiter	1	{
+delimiter	delimiter	\u005crceil	delimiter	1	\u2309
+delimiter	delimiter	\u005clceil	delimiter	1	\u2308
+delimiter	delimiter	\u005crfloor	delimiter	1	\u230b
+delimiter	delimiter	\u005clfloor	delimiter	1	\u230a
+delimiter	delimiter	\u005clbrack	delimiter	1	[
+delimiter	delimiter	\u005crbrack	delimiter	1	]
+delimiter	mediawiki-texvc-delimiters	\u005clang	mediawiki-texvc-delimiters	1	\u27e8
+delimiter	mediawiki-texvc-delimiters	\u005crang	mediawiki-texvc-delimiters	1	\u27e9
+environment	Physics-aux-envs	smallmatrix	Physics-aux-envs	0	
+environment	mathtools-environments	dcases	mathtools-environments	0	
+environment	mathtools-environments	rcases	mathtools-environments	0	
+environment	mathtools-environments	drcases	mathtools-environments	0	
+environment	mathtools-environments	dcases*	mathtools-environments	0	
+environment	mathtools-environments	rcases*	mathtools-environments	0	
+environment	mathtools-environments	drcases*	mathtools-environments	0	
+environment	mathtools-environments	cases*	mathtools-environments	0	
+environment	mathtools-environments	matrix*	mathtools-environments	0	
+environment	mathtools-environments	pmatrix*	mathtools-environments	0	
+environment	mathtools-environments	bmatrix*	mathtools-environments	0	
+environment	mathtools-environments	Bmatrix*	mathtools-environments	0	
+environment	mathtools-environments	vmatrix*	mathtools-environments	0	
+environment	mathtools-environments	Vmatrix*	mathtools-environments	0	
+environment	mathtools-environments	smallmatrix*	mathtools-environments	0	
+environment	mathtools-environments	psmallmatrix	mathtools-environments	0	
+environment	mathtools-environments	psmallmatrix*	mathtools-environments	0	
+environment	mathtools-environments	bsmallmatrix	mathtools-environments	0	
+environment	mathtools-environments	bsmallmatrix*	mathtools-environments	0	
+environment	mathtools-environments	Bsmallmatrix	mathtools-environments	0	
+environment	mathtools-environments	Bsmallmatrix*	mathtools-environments	0	
+environment	mathtools-environments	vsmallmatrix	mathtools-environments	0	
+environment	mathtools-environments	vsmallmatrix*	mathtools-environments	0	
+environment	mathtools-environments	Vsmallmatrix	mathtools-environments	0	
+environment	mathtools-environments	Vsmallmatrix*	mathtools-environments	0	
+environment	mathtools-environments	crampedsubarray	mathtools-environments	0	
+environment	mathtools-environments	multlined	mathtools-environments	0	
+environment	mathtools-environments	spreadlines	mathtools-environments	0	
+environment	mathtools-environments	lgathered	mathtools-environments	0	
+environment	mathtools-environments	rgathered	mathtools-environments	0	
+environment	empheq-env	empheq	empheq-env	0	
+environment	cases-env	numcases	cases-env	0	
+environment	cases-env	subnumcases	cases-env	0	
+environment	Bussproofs-environments	prooftree	Bussproofs-environments	0	
+environment	amscd_environment	CD	amscd_environment	0	
+environment	AMSmath-environment	equation*	AMSmath-environment	0	
+environment	AMSmath-environment	eqnarray*	AMSmath-environment	0	
+environment	AMSmath-environment	align	AMSmath-environment	0	
+environment	AMSmath-environment	align*	AMSmath-environment	0	
+environment	AMSmath-environment	multline	AMSmath-environment	0	
+environment	AMSmath-environment	multline*	AMSmath-environment	0	
+environment	AMSmath-environment	split	AMSmath-environment	0	
+environment	AMSmath-environment	gather	AMSmath-environment	0	
+environment	AMSmath-environment	gather*	AMSmath-environment	0	
+environment	AMSmath-environment	alignat	AMSmath-environment	0	
+environment	AMSmath-environment	alignat*	AMSmath-environment	0	
+environment	AMSmath-environment	alignedat	AMSmath-environment	0	
+environment	AMSmath-environment	aligned	AMSmath-environment	0	
+environment	AMSmath-environment	gathered	AMSmath-environment	0	
+environment	AMSmath-environment	xalignat	AMSmath-environment	0	
+environment	AMSmath-environment	xalignat*	AMSmath-environment	0	
+environment	AMSmath-environment	xxalignat	AMSmath-environment	0	
+environment	AMSmath-environment	flalign	AMSmath-environment	0	
+environment	AMSmath-environment	flalign*	AMSmath-environment	0	
+environment	AMSmath-environment	subarray	AMSmath-environment	0	
+environment	AMSmath-environment	smallmatrix	Physics-aux-envs	0	
+environment	AMSmath-environment	matrix	AMSmath-environment	0	
+environment	AMSmath-environment	pmatrix	AMSmath-environment	0	
+environment	AMSmath-environment	bmatrix	AMSmath-environment	0	
+environment	AMSmath-environment	Bmatrix	AMSmath-environment	0	
+environment	AMSmath-environment	vmatrix	AMSmath-environment	0	
+environment	AMSmath-environment	Vmatrix	AMSmath-environment	0	
+environment	AMSmath-environment	cases	AMSmath-environment	0	
+environment	environment	displaymath	environment	0	
+environment	environment	math	environment	0	
+environment	environment	array	environment	0	
+environment	environment	darray	environment	0	
+environment	environment	equation	environment	0	
+environment	environment	eqnarray	environment	0	
+environment	environment	indentalign	environment	0	
+character	Braket-characters	|	Braket-characters	0	
+character	tex-html	<	tex-html	0	
+character	Physics-characters	|	Braket-characters	0	
+character	Physics-characters	)	Physics-characters	0	
+character	Physics-characters	]	Physics-characters	0	
+character	mathtools-characters	:	mathtools-characters	0	
+character	cases-macros	&	cases-macros	0	
+character	amscd_special	@	amscd_special	0	
+character	special	{	special	0	
+character	special	}	special	0	
+character	special	~	special	0	
+character	special	^	special	0	
+character	special	_	special	0	
+character	special	|	Braket-characters	0	
+character	special	 	special	0	
+character	special	\u0009	special	0	
+character	special	\u000d	special	0	
+character	special	\u000a	special	0	
+character	special	'	special	0	
+character	special	%	special	0	
+character	special	&	cases-macros	0	
+character	special	\u0023	special	0	
+character	special	\u00a0	special	0	
+character	special	\u2019	special	0	

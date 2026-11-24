@@ -32,13 +32,25 @@ expansion alone cannot provide this: MathJax has a separate delimiter handler.
 - `alias_data.inc`: generated immutable definitions, no parser or renderer logic.
 - `tools/math-port/tex-package-conformance.cjs`: offline reference generation
   using the locked MathJax 4.1.3 distribution and pristine v2 alias table;
-  also adds missing aliases to the bundled completion catalog, preserving
-  existing entries/snippets. No JS is executed by the application.
-- `tests/math/tex_package_registry.cpp` and generated `*_source.hpp` fixtures:
+  emits alias, registry and SVG reference observations only. No JS is executed
+  by the application or the native tests.
+- `tools/math-port/generate-texvc-aliases.py`: serializes native alias definitions
+  from the captured `aliases.json`; `--check` verifies the committed C++ data.
+- `tools/latex-completion/generate.py`: builds the completion catalog from registry
+  metadata and editor templates, preserving existing entries/snippets.
+- `tests/math/tex_package_registry.cpp` and `fixtures/packages/registry/` data:
   production registry and actual individual/batch renderer conformance.
 
 The generator checks the installed version, dependency lock, profile hash,
-and the existing locked runtime/font source hashes. Run it with Node, then build/run `FoliaMathTests`.
+and the existing locked runtime/font source hashes. Regenerate reference
+observations, serialize native alias data, then build/run `FoliaMathTests`:
+
+```sh
+node tools/math-port/tex-package-conformance.cjs
+python tools/math-port/generate-texvc-aliases.py
+```
+
+Ordinary native tests read the committed TSV data and require neither command.
 It compares 1,763 entries across 75 finite maps, including effective handler
 precedence and character values. There are 216 byte-exact reference SVG cases
 covering all legacy names in inline/display modes, explicit definition groups,

@@ -18,8 +18,12 @@ def load(name):
 
 def registry():
     data = load("registry.json")
-    source = (ROOT / "tests/math/fixtures/tex_package_registry_source.hpp").read_text(encoding="utf-8")
-    digest = hashlib.sha256(source.replace("\r\n", "\n").encode()).hexdigest()
+    source = ROOT / "tests/math/fixtures/packages/registry"
+    digest = hashlib.sha256()
+    for name in ("registrations.tsv", "packages.tsv"):
+        text = (source / name).read_text(encoding="utf-8")
+        digest.update(text.replace("\r\n", "\n").encode())
+    digest = digest.hexdigest()
     if digest != data["registrySha256"]:
         raise ValueError("TeX registry changed: regenerate its metadata with tex-package-conformance.cjs --registry-only")
     return data["entries"]

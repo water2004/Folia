@@ -1,0 +1,615 @@
+{
+  "source": {
+    "file": "tools/math-port/reference/mediawiki-texvc-2.7.9.js",
+    "version": "2.7.9",
+    "sha256": "89ecae737ad14acb4aaf65491afa7bedb4b893eada05f15c23d98f6ebbfb3ad8"
+  },
+  "aliases": [
+    {
+      "name": "AA",
+      "method": "Macro",
+      "replacement": "Å",
+      "argument_count": null
+    },
+    {
+      "name": "alef",
+      "method": "Macro",
+      "replacement": "\\aleph",
+      "argument_count": null
+    },
+    {
+      "name": "alefsym",
+      "method": "Macro",
+      "replacement": "\\aleph",
+      "argument_count": null
+    },
+    {
+      "name": "Alpha",
+      "method": "Macro",
+      "replacement": "\\mathrm{A}",
+      "argument_count": null
+    },
+    {
+      "name": "and",
+      "method": "Macro",
+      "replacement": "\\land",
+      "argument_count": null
+    },
+    {
+      "name": "ang",
+      "method": "Macro",
+      "replacement": "\\angle",
+      "argument_count": null
+    },
+    {
+      "name": "Bbb",
+      "method": "Macro",
+      "replacement": "\\mathbb",
+      "argument_count": null
+    },
+    {
+      "name": "Beta",
+      "method": "Macro",
+      "replacement": "\\mathrm{B}",
+      "argument_count": null
+    },
+    {
+      "name": "bold",
+      "method": "Macro",
+      "replacement": "\\mathbf",
+      "argument_count": null
+    },
+    {
+      "name": "bull",
+      "method": "Macro",
+      "replacement": "\\bullet",
+      "argument_count": null
+    },
+    {
+      "name": "C",
+      "method": "Macro",
+      "replacement": "\\mathbb{C}",
+      "argument_count": null
+    },
+    {
+      "name": "Chi",
+      "method": "Macro",
+      "replacement": "\\mathrm{X}",
+      "argument_count": null
+    },
+    {
+      "name": "clubs",
+      "method": "Macro",
+      "replacement": "\\clubsuit",
+      "argument_count": null
+    },
+    {
+      "name": "cnums",
+      "method": "Macro",
+      "replacement": "\\mathbb{C}",
+      "argument_count": null
+    },
+    {
+      "name": "Complex",
+      "method": "Macro",
+      "replacement": "\\mathbb{C}",
+      "argument_count": null
+    },
+    {
+      "name": "coppa",
+      "method": "Macro",
+      "replacement": "ϙ",
+      "argument_count": null
+    },
+    {
+      "name": "Coppa",
+      "method": "Macro",
+      "replacement": "Ϙ",
+      "argument_count": null
+    },
+    {
+      "name": "Dagger",
+      "method": "Macro",
+      "replacement": "\\ddagger",
+      "argument_count": null
+    },
+    {
+      "name": "Digamma",
+      "method": "Macro",
+      "replacement": "Ϝ",
+      "argument_count": null
+    },
+    {
+      "name": "darr",
+      "method": "Macro",
+      "replacement": "\\downarrow",
+      "argument_count": null
+    },
+    {
+      "name": "dArr",
+      "method": "Macro",
+      "replacement": "\\Downarrow",
+      "argument_count": null
+    },
+    {
+      "name": "Darr",
+      "method": "Macro",
+      "replacement": "\\Downarrow",
+      "argument_count": null
+    },
+    {
+      "name": "dashint",
+      "method": "Macro",
+      "replacement": "\\unicodeInt{x2A0D}",
+      "argument_count": null
+    },
+    {
+      "name": "ddashint",
+      "method": "Macro",
+      "replacement": "\\unicodeInt{x2A0E}",
+      "argument_count": null
+    },
+    {
+      "name": "diamonds",
+      "method": "Macro",
+      "replacement": "\\diamondsuit",
+      "argument_count": null
+    },
+    {
+      "name": "empty",
+      "method": "Macro",
+      "replacement": "\\emptyset",
+      "argument_count": null
+    },
+    {
+      "name": "Epsilon",
+      "method": "Macro",
+      "replacement": "\\mathrm{E}",
+      "argument_count": null
+    },
+    {
+      "name": "Eta",
+      "method": "Macro",
+      "replacement": "\\mathrm{H}",
+      "argument_count": null
+    },
+    {
+      "name": "euro",
+      "method": "Macro",
+      "replacement": "€",
+      "argument_count": null
+    },
+    {
+      "name": "exist",
+      "method": "Macro",
+      "replacement": "\\exists",
+      "argument_count": null
+    },
+    {
+      "name": "geneuro",
+      "method": "Macro",
+      "replacement": "€",
+      "argument_count": null
+    },
+    {
+      "name": "geneuronarrow",
+      "method": "Macro",
+      "replacement": "€",
+      "argument_count": null
+    },
+    {
+      "name": "geneurowide",
+      "method": "Macro",
+      "replacement": "€",
+      "argument_count": null
+    },
+    {
+      "name": "H",
+      "method": "Macro",
+      "replacement": "\\mathbb{H}",
+      "argument_count": null
+    },
+    {
+      "name": "hAar",
+      "method": "Macro",
+      "replacement": "\\Leftrightarrow",
+      "argument_count": null
+    },
+    {
+      "name": "harr",
+      "method": "Macro",
+      "replacement": "\\leftrightarrow",
+      "argument_count": null
+    },
+    {
+      "name": "Harr",
+      "method": "Macro",
+      "replacement": "\\Leftrightarrow",
+      "argument_count": null
+    },
+    {
+      "name": "hearts",
+      "method": "Macro",
+      "replacement": "\\heartsuit",
+      "argument_count": null
+    },
+    {
+      "name": "image",
+      "method": "Macro",
+      "replacement": "\\Im",
+      "argument_count": null
+    },
+    {
+      "name": "infin",
+      "method": "Macro",
+      "replacement": "\\infty",
+      "argument_count": null
+    },
+    {
+      "name": "Iota",
+      "method": "Macro",
+      "replacement": "\\mathrm{I}",
+      "argument_count": null
+    },
+    {
+      "name": "isin",
+      "method": "Macro",
+      "replacement": "\\in",
+      "argument_count": null
+    },
+    {
+      "name": "Kappa",
+      "method": "Macro",
+      "replacement": "\\mathrm{K}",
+      "argument_count": null
+    },
+    {
+      "name": "koppa",
+      "method": "Macro",
+      "replacement": "ϟ",
+      "argument_count": null
+    },
+    {
+      "name": "Koppa",
+      "method": "Macro",
+      "replacement": "Ϟ",
+      "argument_count": null
+    },
+    {
+      "name": "lang",
+      "method": "Macro",
+      "replacement": "\\langle",
+      "argument_count": null
+    },
+    {
+      "name": "larr",
+      "method": "Macro",
+      "replacement": "\\leftarrow",
+      "argument_count": null
+    },
+    {
+      "name": "Larr",
+      "method": "Macro",
+      "replacement": "\\Leftarrow",
+      "argument_count": null
+    },
+    {
+      "name": "lArr",
+      "method": "Macro",
+      "replacement": "\\Leftarrow",
+      "argument_count": null
+    },
+    {
+      "name": "lrarr",
+      "method": "Macro",
+      "replacement": "\\leftrightarrow",
+      "argument_count": null
+    },
+    {
+      "name": "Lrarr",
+      "method": "Macro",
+      "replacement": "\\Leftrightarrow",
+      "argument_count": null
+    },
+    {
+      "name": "lrArr",
+      "method": "Macro",
+      "replacement": "\\Leftrightarrow",
+      "argument_count": null
+    },
+    {
+      "name": "Mu",
+      "method": "Macro",
+      "replacement": "\\mathrm{M}",
+      "argument_count": null
+    },
+    {
+      "name": "N",
+      "method": "Macro",
+      "replacement": "\\mathbb{N}",
+      "argument_count": null
+    },
+    {
+      "name": "natnums",
+      "method": "Macro",
+      "replacement": "\\mathbb{N}",
+      "argument_count": null
+    },
+    {
+      "name": "Nu",
+      "method": "Macro",
+      "replacement": "\\mathrm{N}",
+      "argument_count": null
+    },
+    {
+      "name": "O",
+      "method": "Macro",
+      "replacement": "\\emptyset",
+      "argument_count": null
+    },
+    {
+      "name": "oiint",
+      "method": "Macro",
+      "replacement": "\\unicodeInt{x222F}",
+      "argument_count": null
+    },
+    {
+      "name": "oiiint",
+      "method": "Macro",
+      "replacement": "\\unicodeInt{x2230}",
+      "argument_count": null
+    },
+    {
+      "name": "ointctrclockwise",
+      "method": "Macro",
+      "replacement": "\\unicodeInt{x2233}",
+      "argument_count": null
+    },
+    {
+      "name": "officialeuro",
+      "method": "Macro",
+      "replacement": "€",
+      "argument_count": null
+    },
+    {
+      "name": "Omicron",
+      "method": "Macro",
+      "replacement": "\\mathrm{O}",
+      "argument_count": null
+    },
+    {
+      "name": "or",
+      "method": "Macro",
+      "replacement": "\\lor",
+      "argument_count": null
+    },
+    {
+      "name": "P",
+      "method": "Macro",
+      "replacement": "¶",
+      "argument_count": null
+    },
+    {
+      "name": "pagecolor",
+      "method": "Macro",
+      "replacement": "",
+      "argument_count": 1
+    },
+    {
+      "name": "part",
+      "method": "Macro",
+      "replacement": "\\partial",
+      "argument_count": null
+    },
+    {
+      "name": "plusmn",
+      "method": "Macro",
+      "replacement": "\\pm",
+      "argument_count": null
+    },
+    {
+      "name": "Q",
+      "method": "Macro",
+      "replacement": "\\mathbb{Q}",
+      "argument_count": null
+    },
+    {
+      "name": "R",
+      "method": "Macro",
+      "replacement": "\\mathbb{R}",
+      "argument_count": null
+    },
+    {
+      "name": "rang",
+      "method": "Macro",
+      "replacement": "\\rangle",
+      "argument_count": null
+    },
+    {
+      "name": "rarr",
+      "method": "Macro",
+      "replacement": "\\rightarrow",
+      "argument_count": null
+    },
+    {
+      "name": "Rarr",
+      "method": "Macro",
+      "replacement": "\\Rightarrow",
+      "argument_count": null
+    },
+    {
+      "name": "rArr",
+      "method": "Macro",
+      "replacement": "\\Rightarrow",
+      "argument_count": null
+    },
+    {
+      "name": "real",
+      "method": "Macro",
+      "replacement": "\\Re",
+      "argument_count": null
+    },
+    {
+      "name": "reals",
+      "method": "Macro",
+      "replacement": "\\mathbb{R}",
+      "argument_count": null
+    },
+    {
+      "name": "Reals",
+      "method": "Macro",
+      "replacement": "\\mathbb{R}",
+      "argument_count": null
+    },
+    {
+      "name": "Rho",
+      "method": "Macro",
+      "replacement": "\\mathrm{P}",
+      "argument_count": null
+    },
+    {
+      "name": "sdot",
+      "method": "Macro",
+      "replacement": "\\cdot",
+      "argument_count": null
+    },
+    {
+      "name": "sampi",
+      "method": "Macro",
+      "replacement": "ϡ",
+      "argument_count": null
+    },
+    {
+      "name": "Sampi",
+      "method": "Macro",
+      "replacement": "Ϡ",
+      "argument_count": null
+    },
+    {
+      "name": "sect",
+      "method": "Macro",
+      "replacement": "\\S",
+      "argument_count": null
+    },
+    {
+      "name": "spades",
+      "method": "Macro",
+      "replacement": "\\spadesuit",
+      "argument_count": null
+    },
+    {
+      "name": "stigma",
+      "method": "Macro",
+      "replacement": "ϛ",
+      "argument_count": null
+    },
+    {
+      "name": "Stigma",
+      "method": "Macro",
+      "replacement": "Ϛ",
+      "argument_count": null
+    },
+    {
+      "name": "sub",
+      "method": "Macro",
+      "replacement": "\\subset",
+      "argument_count": null
+    },
+    {
+      "name": "sube",
+      "method": "Macro",
+      "replacement": "\\subseteq",
+      "argument_count": null
+    },
+    {
+      "name": "supe",
+      "method": "Macro",
+      "replacement": "\\supseteq",
+      "argument_count": null
+    },
+    {
+      "name": "Tau",
+      "method": "Macro",
+      "replacement": "\\mathrm{T}",
+      "argument_count": null
+    },
+    {
+      "name": "textvisiblespace",
+      "method": "Macro",
+      "replacement": "␣",
+      "argument_count": null
+    },
+    {
+      "name": "thetasym",
+      "method": "Macro",
+      "replacement": "\\vartheta",
+      "argument_count": null
+    },
+    {
+      "name": "uarr",
+      "method": "Macro",
+      "replacement": "\\uparrow",
+      "argument_count": null
+    },
+    {
+      "name": "uArr",
+      "method": "Macro",
+      "replacement": "\\Uparrow",
+      "argument_count": null
+    },
+    {
+      "name": "Uarr",
+      "method": "Macro",
+      "replacement": "\\Uparrow",
+      "argument_count": null
+    },
+    {
+      "name": "unicodeInt",
+      "method": "Macro",
+      "replacement": "\\mathop{\\vcenter{\\mathchoice{\\huge\\unicode{#1}\\,}{\\unicode{#1}}{\\unicode{#1}}{\\unicode{#1}}}\\,}\\nolimits",
+      "argument_count": 1
+    },
+    {
+      "name": "varcoppa",
+      "method": "Macro",
+      "replacement": "ϙ",
+      "argument_count": null
+    },
+    {
+      "name": "varstigma",
+      "method": "Macro",
+      "replacement": "ϛ",
+      "argument_count": null
+    },
+    {
+      "name": "varointclockwise",
+      "method": "Macro",
+      "replacement": "\\unicodeInt{x2232}",
+      "argument_count": null
+    },
+    {
+      "name": "vline",
+      "method": "Macro",
+      "replacement": "\\smash{\\large\\lvert}",
+      "argument_count": 0
+    },
+    {
+      "name": "weierp",
+      "method": "Macro",
+      "replacement": "\\wp",
+      "argument_count": null
+    },
+    {
+      "name": "Z",
+      "method": "Macro",
+      "replacement": "\\mathbb{Z}",
+      "argument_count": null
+    },
+    {
+      "name": "Zeta",
+      "method": "Macro",
+      "replacement": "\\mathrm{Z}",
+      "argument_count": null
+    }
+  ]
+}

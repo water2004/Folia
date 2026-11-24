@@ -1,6 +1,6 @@
 {
   "mathjaxVersion": "4.1.3",
-  "registrySha256": "bd32be7dea9a625d6406131f4eb114a676c03ff252daf70be1d668625aaa2d6c",
+  "registrySha256": "01a920932e22c564d53bb360d853b7161da5f6bb4d978f612afabdce0d044e12",
   "entries": [
     {"kind":"delimiter","name":"(","map":"delimiter","symbol":"(","method":"","args":[]},
     {"kind":"delimiter","name":")","map":"delimiter","symbol":")","method":"","args":[]},
