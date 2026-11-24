@@ -1,0 +1,528 @@
+{
+  "paths": [
+    {
+      "input": "",
+      "expected": {
+        "segments": [],
+        "error": null
+      }
+    },
+    {
+      "input": "0 0",
+      "expected": {
+        "segments": [
+          {
+            "type": "M",
+            "to": [
+              0,
+              0
+            ]
+          },
+          {
+            "type": "Z"
+          }
+        ],
+        "error": null
+      }
+    },
+    {
+      "input": "0 0L1000 1000",
+      "expected": {
+        "segments": [
+          {
+            "type": "M",
+            "to": [
+              0,
+              0
+            ]
+          },
+          {
+            "type": "L",
+            "to": [
+              1,
+              1
+            ]
+          },
+          {
+            "type": "Z"
+          }
+        ],
+        "error": null
+      }
+    },
+    {
+      "input": "0 0l-30.1 408.5l67 100.5",
+      "expected": {
+        "segments": [
+          {
+            "type": "M",
+            "to": [
+              0,
+              0
+            ]
+          },
+          {
+            "type": "L",
+            "to": [
+              -0.030100000000000002,
+              0.4085
+            ]
+          },
+          {
+            "type": "L",
+            "to": [
+              0.036899999999999995,
+              0.509
+            ]
+          },
+          {
+            "type": "Z"
+          }
+        ],
+        "error": null
+      }
+    },
+    {
+      "input": "0 0C1 2 3 4 5 6",
+      "expected": {
+        "segments": [
+          {
+            "type": "M",
+            "to": [
+              0,
+              0
+            ]
+          },
+          {
+            "type": "C",
+            "control1": [
+              0.001,
+              0.002
+            ],
+            "control2": [
+              0.003,
+              0.004
+            ],
+            "to": [
+              0.005,
+              0.006
+            ]
+          },
+          {
+            "type": "Z"
+          }
+        ],
+        "error": null
+      }
+    },
+    {
+      "input": "0 0q1 2 3 4",
+      "expected": {
+        "segments": [
+          {
+            "type": "M",
+            "to": [
+              0,
+              0
+            ]
+          },
+          {
+            "type": "Q",
+            "control": [
+              0.001,
+              0.002
+            ],
+            "to": [
+              0.003,
+              0.004
+            ]
+          },
+          {
+            "type": "Z"
+          }
+        ],
+        "error": null
+      }
+    },
+    {
+      "input": "0 0Z1 2",
+      "expected": {
+        "segments": [
+          {
+            "type": "M",
+            "to": [
+              0,
+              0
+            ]
+          },
+          {
+            "type": "Z"
+          }
+        ],
+        "error": {
+          "byte_offset": 5,
+          "command": null,
+          "reason": "missing_command"
+        }
+      }
+    },
+    {
+      "input": "0 0H1",
+      "expected": {
+        "segments": [
+          {
+            "type": "M",
+            "to": [
+              0,
+              0
+            ]
+          }
+        ],
+        "error": {
+          "byte_offset": 4,
+          "command": "H",
+          "reason": "unsupported_command"
+        }
+      }
+    },
+    {
+      "input": "0",
+      "expected": {
+        "segments": [],
+        "error": {
+          "byte_offset": 2,
+          "command": "M",
+          "reason": "incomplete_segment"
+        }
+      }
+    },
+    {
+      "input": "@ 0",
+      "expected": {
+        "segments": [],
+        "error": {
+          "byte_offset": 1,
+          "command": "M",
+          "reason": "invalid_number"
+        }
+      }
+    },
+    {
+      "input": "1e 0",
+      "expected": {
+        "segments": [],
+        "error": {
+          "byte_offset": 1,
+          "command": "M",
+          "reason": "invalid_number"
+        }
+      }
+    },
+    {
+      "input": "1e999 0",
+      "expected": {
+        "segments": [],
+        "error": {
+          "byte_offset": 1,
+          "command": "M",
+          "reason": "invalid_number"
+        }
+      }
+    },
+    {
+      "input": "0 0L",
+      "expected": {
+        "segments": [
+          {
+            "type": "M",
+            "to": [
+              0,
+              0
+            ]
+          }
+        ],
+        "error": {
+          "byte_offset": 5,
+          "command": "L",
+          "reason": "incomplete_segment"
+        }
+      }
+    },
+    {
+      "input": "0 0Q1 2 3",
+      "expected": {
+        "segments": [
+          {
+            "type": "M",
+            "to": [
+              0,
+              0
+            ]
+          }
+        ],
+        "error": {
+          "byte_offset": 10,
+          "command": "Q",
+          "reason": "incomplete_segment"
+        }
+      }
+    },
+    {
+      "input": "0 0C1 2 3 4 5",
+      "expected": {
+        "segments": [
+          {
+            "type": "M",
+            "to": [
+              0,
+              0
+            ]
+          }
+        ],
+        "error": {
+          "byte_offset": 14,
+          "command": "C",
+          "reason": "incomplete_segment"
+        }
+      }
+    },
+    {
+      "input": "0 0L😀",
+      "expected": {
+        "segments": [
+          {
+            "type": "M",
+            "to": [
+              0,
+              0
+            ]
+          }
+        ],
+        "error": {
+          "byte_offset": 5,
+          "command": "L",
+          "reason": "invalid_number"
+        }
+      }
+    },
+    {
+      "input": "+1 -.2",
+      "expected": {
+        "segments": [
+          {
+            "type": "M",
+            "to": [
+              0.001,
+              -0.0002
+            ]
+          },
+          {
+            "type": "Z"
+          }
+        ],
+        "error": null
+      }
+    },
+    {
+      "input": "1.2.3 4",
+      "expected": {
+        "segments": [
+          {
+            "type": "M",
+            "to": [
+              0.0012,
+              0.0003
+            ]
+          }
+        ],
+        "error": {
+          "byte_offset": 8,
+          "command": "L",
+          "reason": "incomplete_segment"
+        }
+      }
+    }
+  ],
+  "glyphs": [
+    {
+      "input": [
+        1,
+        2,
+        3
+      ],
+      "expected": {
+        "metrics": [
+          1,
+          2,
+          3,
+          0,
+          0,
+          0,
+          0
+        ],
+        "path_defined": false,
+        "path_data": "",
+        "content_data": null,
+        "composition": []
+      }
+    },
+    {
+      "input": [
+        null,
+        0,
+        0,
+        {
+          "p": ""
+        }
+      ],
+      "expected": {
+        "metrics": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "path_defined": true,
+        "path_data": "",
+        "content_data": null,
+        "composition": []
+      }
+    },
+    {
+      "input": [
+        1,
+        2,
+        3,
+        {
+          "p": null
+        }
+      ],
+      "expected": {
+        "metrics": [
+          1,
+          2,
+          3,
+          0,
+          0,
+          0,
+          0
+        ],
+        "path_defined": true,
+        "path_data": "",
+        "content_data": null,
+        "composition": []
+      }
+    },
+    {
+      "input": [
+        1,
+        2,
+        3,
+        {
+          "c": "𝒙µ\ud800"
+        }
+      ],
+      "expected": {
+        "metrics": [
+          1,
+          2,
+          3,
+          0,
+          0,
+          0,
+          0
+        ],
+        "path_defined": false,
+        "path_data": "",
+        "content_data": "𝒙µ\ud800",
+        "composition": [
+          119961,
+          181,
+          55296
+        ]
+      }
+    },
+    {
+      "input": [
+        1,
+        2,
+        3,
+        {
+          "c": [
+            "x",
+            119909,
+            "🙂"
+          ]
+        }
+      ],
+      "expected": {
+        "metrics": [
+          1,
+          2,
+          3,
+          0,
+          0,
+          0,
+          0
+        ],
+        "path_defined": false,
+        "path_data": "",
+        "content_data": "x,119909,🙂",
+        "composition": [
+          120,
+          119909,
+          128578
+        ]
+      }
+    },
+    {
+      "input": [
+        1,
+        2,
+        3,
+        {
+          "c": 119909
+        }
+      ],
+      "reject": true
+    },
+    {
+      "input": [
+        1,
+        2,
+        3,
+        {
+          "c": 1.5
+        }
+      ],
+      "reject": true
+    },
+    {
+      "input": [
+        1,
+        2,
+        3,
+        {
+          "c": [
+            null
+          ]
+        }
+      ],
+      "reject": true
+    },
+    {
+      "input": [
+        1,
+        2,
+        3,
+        {
+          "c": false
+        }
+      ],
+      "reject": true
+    }
+  ]
+}

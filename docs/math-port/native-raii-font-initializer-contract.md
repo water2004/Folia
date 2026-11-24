@@ -50,7 +50,7 @@ Reproduce after configuring and building `FoliaMathFontDump`:
 
 ```bat
 cmd /c "build\core\FoliaMathFontDump.exe > build\math-port\native-raii-font-dump.json 2> build\math-port\native-raii-font-dump.stderr.log"
-node tools/math-port/font-data-compare-native.cjs build/math-port/font-generated-native-raii/font-source-expected.json build/math-port/native-raii-font-dump.json
+python tools/math-port/font-data-compare-native.py build/math-port/font-generated-native-raii/font-source-expected.json build/math-port/native-raii-font-dump.json
 ```
 
 The full current native component suite also passed 102 tests / 30,600
