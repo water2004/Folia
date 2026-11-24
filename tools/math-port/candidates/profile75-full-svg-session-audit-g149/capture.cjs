@@ -1,25 +1,11 @@
 'use strict';
 // Read-only diagnostic for whether fresh captures inherit state from the first group.
-const fs=require('node:fs'),path=require('node:path'),cp=require('node:child_process');
+const fs=require('node:fs'),path=require('node:path');
 const root=path.resolve(__dirname,'../../../..'), packages=path.join(root,'tools/mathjax-bundle/node_modules/@mathjax'), cjsRoot=path.join(packages,'src/cjs');
 const scope=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/scope.json'),'utf8'));
 const profileText=fs.readFileSync(path.join(root,scope.profile.file),'utf8');
 const inventory=JSON.parse(fs.readFileSync(path.join(root,'build/math-port/common-layout-profile-root-locked.json'),'utf8')).records;
 const mode=process.argv[2], caseName=process.argv[3];
-if(mode==='parent'){
- const names=['extpfeil-arrows','textcomp-symbols','verb-literal','unknown-text-families'];
- const rows=[];
- for(const name of names){
-   const isolated=JSON.parse(cp.execFileSync(process.execPath,[__filename,'single',name],{encoding:'utf8'}));
-   const afterContinuous=JSON.parse(cp.execFileSync(process.execPath,[__filename,'after-continuous',name],{encoding:'utf8'}));
-   const capture=JSON.parse(fs.readFileSync(path.join(root,'build/math-port/profile75-full-svg-source-g149.json'),'utf8')).records;
-   const locked=capture.find(r=>r.group==='fresh-session-per-case'&&r.name===name);
-   const continuous=capture.find(r=>r.group==='continuous'&&r.name===name);
-   const signature=r=>JSON.stringify({svg:r.svg,error:r.error});
-   rows.push({name,isolatedMatchesContinuous:signature(isolated)===signature(continuous),afterContinuousMatchesLocked:signature(afterContinuous)===signature(locked),isolatedError:isolated.error,afterContinuousError:afterContinuous.error,isolatedLength:isolated.svg?.length,afterContinuousLength:afterContinuous.svg?.length,continuousLength:continuous.svg?.length});
- }
- console.log(JSON.stringify({rows},null,2));process.exit(0);
-}
 const caseItem=inventory.find(x=>x.name===caseName); if(!caseItem)throw Error('unknown case '+caseName);
 const load=file=>require(path.join(cjsRoot,file));
 const {mathjax}=load('mathjax.js'),{TeX}=load('input/tex.js'),{SVG}=load('output/svg.js'),{liteAdaptor}=load('adaptors/liteAdaptor.js'),{RegisterHTMLHandler}=load('handlers/html.js');
