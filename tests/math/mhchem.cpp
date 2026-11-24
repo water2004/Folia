@@ -1,4 +1,5 @@
 #include "math/support/tex_fixture.hpp"
+#include "math/support/mhchem_fixtures.hpp"
 import folia.math.input.tex.ams.configuration;
 import folia.math.input.tex.ams.methods;
 import folia.math.input.tex.base_configuration;
@@ -18,7 +19,21 @@ constexpr std::array<MacroHandler, 4> mhchemCallbacks{
     &NewcommandMethods::Let};
 constexpr std::array<TokenInputHandler, 1> mhchemTokenCallbacks{&MhchemUtils::relmo};
 
-#include "math/fixtures/mhchem.inc"
+using math_test::fixtures::mhchemCases;
+using math_test::fixtures::MhchemCase;
+using math_test::fixtures::mhchemReplacementCases;
+using math_test::fixtures::MhchemReplacementCase;
+using math_test::fixtures::mhchemMutationInput;
+using math_test::fixtures::mhchemMutationCases;
+using math_test::fixtures::MhchemMutationCase;
+using math_test::fixtures::mhchemUntypedMapValueMutations;
+using math_test::fixtures::mhchemRetiredObjectApiMutations;
+using math_test::fixtures::mhchemAliasCases;
+using math_test::fixtures::MhchemAliasCase;
+using math_test::fixtures::mhchemCreatorCase;
+using math_test::fixtures::MhchemCreatorCase;
+using math_test::fixtures::mhchemRecoveryCases;
+using math_test::fixtures::MhchemRecoveryCase;
 
 struct MhchemError {
     std::string id;
@@ -341,8 +356,8 @@ suite mhchem = [] {
     };
 
     "Mhchem original Source MML and TexErrors match every package case"_test = [] {
-        expect(std::size(mhchemCases) == 220_u);
-        for (const auto &entry : mhchemCases) {
+        expect(std::size(mhchemCases()) == 220_u);
+        for (const auto &entry : mhchemCases()) {
             MhchemFixture fixture(entry.ams);
             auto *tree = fixture.compile(entry.input);
             expect(tree != nullptr) << folia::math::utf16::encode(entry.name);
@@ -374,9 +389,9 @@ suite mhchem = [] {
         expect(chars != nullptr);
         if (!macros || !chars)
             return;
-        expect(std::size(mhchemReplacementCases) == 63_u);
+        expect(std::size(mhchemReplacementCases()) == 63_u);
         const auto rules = mhchemReplacements();
-        for (const auto &entry : mhchemReplacementCases) {
+        for (const auto &entry : mhchemReplacementCases()) {
             std::u16string stage(entry.input);
             for (std::size_t i = 0; i < rules.size(); ++i) {
                 stage = applyMhchemReplacement(std::move(stage), rules[i], *macros, *chars);
@@ -430,8 +445,8 @@ suite mhchem = [] {
     };
 
     "Mhchem uses real let aliases and preserves relmo creator overrides"_test = [] {
-        expect(std::size(mhchemAliasCases) == 2_u);
-        for (const auto &entry : mhchemAliasCases) {
+        expect(std::size(mhchemAliasCases()) == 2_u);
+        for (const auto &entry : mhchemAliasCases()) {
             MhchemFixture fixture(true, true);
             auto *tree = fixture.compile(entry.input);
             expect(tree != nullptr);
@@ -474,20 +489,20 @@ suite mhchem = [] {
         activeRequests = &requests;
         fixture.jax->parseOptions().request().nodeFactory.setCreators(
             NodeCreators{.token = creator});
-        auto *tree = fixture.compile(mhchemCreatorCase.input);
+        auto *tree = fixture.compile(mhchemCreatorCase().input);
         activeRequests = nullptr;
         expect(tree != nullptr);
         expect(requests.size() == 1_u);
         if (tree)
-            expect(snapshot(*tree) == mhchemCreatorCase.snapshot);
+            expect(snapshot(*tree) == mhchemCreatorCase().snapshot);
         if (requests.size() == 1) {
             expect(requests[0].kind == NodeKind::mo);
-            expect(requests[0].text == mhchemCreatorCase.text);
+            expect(requests[0].text == mhchemCreatorCase().text);
             expect(attribute(requests[0].definition.attributes, u"stretchy") == u"false");
             expect(attribute(requests[0].definition.attributes, u"mathvariant") ==
-                   mhchemCreatorCase.mathvariant);
+                   mhchemCreatorCase().mathvariant);
             expect(attribute(requests[0].definition.attributes, u"texClass") == u"0");
-            auto *arrow = findToken(*tree, NodeKind::mo, mhchemCreatorCase.text);
+            auto *arrow = findToken(*tree, NodeKind::mo, mhchemCreatorCase().text);
             expect(arrow != nullptr);
             if (arrow) {
                 const auto classValue = arrow->texClass();
@@ -500,8 +515,8 @@ suite mhchem = [] {
 
     "Mhchem error recovery succeeds on the same configured TeX instance"_test = [] {
         MhchemFixture fixture(true);
-        expect(std::size(mhchemRecoveryCases) == 2_u);
-        for (const auto &entry : mhchemRecoveryCases) {
+        expect(std::size(mhchemRecoveryCases()) == 2_u);
+        for (const auto &entry : mhchemRecoveryCases()) {
             auto *tree = fixture.compile(entry.input);
             expect(tree != nullptr) << folia::math::utf16::encode(entry.input);
             if (tree)
@@ -524,15 +539,15 @@ suite mhchem = [] {
             "character-arrow-custom", "macro-arrow-removed",
             "character-false-macro-fallback", "registry-maps-replaced",
             "registry-shadow-added-arrow"};
-        constexpr std::array<std::string_view, 6> sourceOnly{
-            mhchemUntypedMapValueMutations[0], mhchemUntypedMapValueMutations[1],
-            mhchemRetiredObjectApiMutations[0], mhchemRetiredObjectApiMutations[1],
-            mhchemRetiredObjectApiMutations[2], mhchemRetiredObjectApiMutations[3]};
-        expect(std::size(mhchemMutationCases) == 14_u);
+        const std::array<std::string_view, 6> sourceOnly{
+            mhchemUntypedMapValueMutations()[0], mhchemUntypedMapValueMutations()[1],
+            mhchemRetiredObjectApiMutations()[0], mhchemRetiredObjectApiMutations()[1],
+            mhchemRetiredObjectApiMutations()[2], mhchemRetiredObjectApiMutations()[3]};
+        expect(std::size(mhchemMutationCases()) == 14_u);
         const auto rules = mhchemReplacements();
         const auto stages = [&](TokenMap const &macros, TokenMap const &characters) {
             std::array<std::u16string, 6> output;
-            std::u16string current(mhchemMutationInput);
+            std::u16string current(mhchemMutationInput());
             for (std::size_t i = 0; i < rules.size(); ++i) {
                 current = applyMhchemReplacement(std::move(current), rules[i], macros, characters);
                 output[i] = current;
@@ -546,10 +561,10 @@ suite mhchem = [] {
                     << std::string(name) << " " << phase << " replacement stage " << i;
         };
         const auto run = [&](std::string_view name) {
-            const auto entry = std::ranges::find(mhchemMutationCases, name,
+            const auto entry = std::ranges::find(mhchemMutationCases(), name,
                                                  &MhchemMutationCase::name);
-            expect(entry != std::end(mhchemMutationCases)) << std::string(name) << " fixture row";
-            if (entry == std::end(mhchemMutationCases))
+            expect(entry != std::end(mhchemMutationCases())) << std::string(name) << " fixture row";
+            if (entry == std::end(mhchemMutationCases()))
                 return;
             MhchemFixture fixture(true);
             auto originalMacros = std::dynamic_pointer_cast<CommandMap>(
@@ -722,11 +737,11 @@ suite mhchem = [] {
         for (const auto name : exercised)
             run(name);
         for (const auto name : sourceOnly) {
-            const auto entry = std::ranges::find(mhchemMutationCases, name,
+            const auto entry = std::ranges::find(mhchemMutationCases(), name,
                                                  &MhchemMutationCase::name);
-            expect(entry != std::end(mhchemMutationCases))
+            expect(entry != std::end(mhchemMutationCases()))
                 << std::string(name) << " Source-only fixture row";
-            if (entry != std::end(mhchemMutationCases)) {
+            if (entry != std::end(mhchemMutationCases())) {
                 expect(entry->before == entry->after)
                     << std::string(name) << " Source-only restored stages";
                 if (name == "character-arrow-false" || name == "character-arrow-null")

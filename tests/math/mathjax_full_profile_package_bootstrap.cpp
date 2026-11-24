@@ -13,13 +13,13 @@
 #include <string_view>
 #include <variant>
 #include <vector>
+#include "support/folia_test.hpp"
 #include "math/support/scene_fixtures.hpp"
 using math_test::fixtures::CanonicalSceneCase;
 using math_test::fixtures::CanonicalSceneMode;
 using math_test::fixtures::CanonicalSceneMetrics;
 using math_test::fixtures::sourceCanonicalSceneCases;
 #include "support/source_svg_paint.hpp"
-#include "support/folia_test.hpp"
 
 import folia.math;
 import folia.math.output.scene;
