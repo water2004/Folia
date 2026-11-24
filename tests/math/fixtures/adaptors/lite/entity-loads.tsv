@@ -1,0 +1,6 @@
+# Pinned reference observations; values exported without normalization.
+# recordId_utf16	order_integer	file_utf16
+entities/async-load-and-parser-retry	0	./util/entities/opf.js
+entities/async-load-and-parser-retry	1	./util/entities/z.js
+entities/unknown-name-with-present-shard	0	./util/entities/n.js
+entities/missing-shard-retry-before-invalid-numeric	0	./util/entities/n.js

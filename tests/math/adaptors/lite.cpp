@@ -1,4 +1,5 @@
 #include "support/folia_test.hpp"
+#include "math/support/lite_fixtures.hpp"
 import folia.math.adaptors.lite_adaptor;
 import folia.math.util.utf16;
 
@@ -6,7 +7,7 @@ namespace {
 using namespace boost::ut;
 using namespace folia::math;
 namespace lite = folia::math::adaptors::lite;
-#include "math/fixtures/lite.inc"
+using namespace math_test::fixtures;
 
 std::string quote(std::u16string_view value) {
     std::string result = "\"";
@@ -89,14 +90,14 @@ std::string parseJson(lite::LiteBase const &adaptor, DOMDocumentRef const &docum
 }
 
 LiteSourceFixture const &fixture(std::u16string_view id) {
-    for (const auto &row : liteSourceFixtures)
+    for (const auto &row : liteSourceFixtures())
         if (row.id == id)
             return row;
     throw std::runtime_error("missing Lite Source fixture");
 }
 
 LiteSourceMutationStep const &mutationStep(std::u16string_view name) {
-    for (const auto &row : liteSourceMutationSteps)
+    for (const auto &row : liteSourceMutationSteps())
         if (row.name == name)
             return row;
     throw std::runtime_error("missing Lite Source mutation step");
@@ -104,7 +105,7 @@ LiteSourceMutationStep const &mutationStep(std::u16string_view name) {
 
 std::vector<LiteSourceLoadStep> sourceLoads(std::u16string_view recordId) {
     std::vector<LiteSourceLoadStep> result;
-    for (const auto &load : liteSourceEntityLoadSteps)
+    for (const auto &load : liteSourceEntityLoadSteps())
         if (load.recordId == recordId)
             result.push_back(load);
     return result;
@@ -202,12 +203,12 @@ std::string pathsJson(lite::LiteBase const &adaptor, std::span<DOMNodeRef const>
 
 std::vector<std::u16string_view> const fixtureSelectors() {
     std::vector<std::u16string_view> result;
-    for (std::size_t i = 0; i < liteSourceFixtureCount; ++i) {
-        const auto &row = liteSourceFixtures[i];
+    for (std::size_t i = 0; i < liteSourceFixtureCount(); ++i) {
+        const auto &row = liteSourceFixtures()[i];
         if (row.kind == LiteSourceFixtureKind::query) {
             for (std::size_t j = row.selectorOffset; j < row.selectorOffset + row.selectorCount;
                  ++j)
-                result.push_back(liteSourceSelectors[j].value);
+                result.push_back(liteSourceSelectors()[j].value);
             break;
         }
     }
@@ -226,7 +227,7 @@ suite lite_source_parser_records = [] {
     "Lite parser matches Source trees and serialization"_test = [] {
         lite::LiteAdaptor adaptor;
         std::size_t compared = 0;
-        for (const auto &row : liteSourceFixtures) {
+        for (const auto &row : liteSourceFixtures()) {
             if (row.kind != LiteSourceFixtureKind::parse)
                 continue;
             try {
@@ -551,25 +552,25 @@ suite lite_source_node_mixin_metrics = [] {
         lite::LiteAdaptor adaptor;
         const auto document = adaptor.parse(row.html);
         const auto element = adaptor.getElement(u"#sized", adaptor.body(document));
-        expect(adaptor.fontSize(element) == liteSourceElementMetric.fontSize);
-        expect(adaptor.fontFamily(element) == liteSourceElementMetric.fontFamily);
+        expect(adaptor.fontSize(element) == liteSourceElementMetric().fontSize);
+        expect(adaptor.fontFamily(element) == liteSourceElementMetric().fontFamily);
         const auto [width, height] = adaptor.nodeSize(element);
-        expect(width == liteSourceElementMetric.width);
-        expect(height == liteSourceElementMetric.height);
+        expect(width == liteSourceElementMetric().width);
+        expect(height == liteSourceElementMetric().height);
         const auto [emWidth, emHeight] = adaptor.nodeSize(element, 2);
-        expect(emWidth == liteSourceElementMetric.width);
-        expect(emHeight == liteSourceElementMetric.height);
+        expect(emWidth == liteSourceElementMetric().width);
+        expect(emHeight == liteSourceElementMetric().height);
         const auto [localWidth, localHeight] = adaptor.nodeSize(element, 1, false);
-        expect(localWidth == liteSourceElementMetric.width);
-        expect(localHeight == liteSourceElementMetric.height);
+        expect(localWidth == liteSourceElementMetric().width);
+        expect(localHeight == liteSourceElementMetric().height);
         const auto box = adaptor.nodeBBox(element);
-        expect(box.left == liteSourceElementMetric.left);
-        expect(box.top == liteSourceElementMetric.top);
-        expect(box.right == liteSourceElementMetric.right);
-        expect(box.bottom == liteSourceElementMetric.bottom);
-        expect(liteSourceTextNodeSizeThrows)
-            << "Source text receiver error " << utf16::encode(liteSourceTextNodeSizeErrorName)
-            << ": " << utf16::encode(liteSourceTextNodeSizeErrorMessage)
+        expect(box.left == liteSourceElementMetric().left);
+        expect(box.top == liteSourceElementMetric().top);
+        expect(box.right == liteSourceElementMetric().right);
+        expect(box.bottom == liteSourceElementMetric().bottom);
+        expect(liteSourceTextNodeSizeThrows())
+            << "Source text receiver error " << utf16::encode(liteSourceTextNodeSizeErrorName())
+            << ": " << utf16::encode(liteSourceTextNodeSizeErrorMessage())
             << " is Source-only; native text nodes use typed Lite APIs";
     };
 };

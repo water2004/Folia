@@ -1,0 +1,11 @@
+# Pinned reference observations; values exported without normalization.
+# value_utf16
+\u0023one
+.b
+p
+[data-v="x"]
+main
+span
+p span
+[class="b"]
+:first-child

@@ -417,116 +417,62 @@ async function main() {
     },
     records
   };
-  const cpp16 = value => {
-    const chunks = [];
-    let chunk = '';
-    const flush = () => {
-      if (chunk) chunks.push(chunk);
-      chunk = '';
-    };
-    for (let i = 0; i < value.length; ++i) {
-      const unit = value.charCodeAt(i);
-      if (unit === 0 || (unit < 32) || unit > 126) {
-        // End each variable-length hex escape with a new UTF-16 literal. This
-        // prevents following ASCII hex digits from extending the escape.
-        flush();
-        const escaped = unit === 0 ? '\\x0000' :
-          unit === 10 ? '\\n' : unit === 13 ? '\\r' : unit === 9 ? '\\t' :
-            `\\x${unit.toString(16).padStart(4, '0')}`;
-        chunks.push(escaped);
-      } else {
-        const escaped = unit === 34 ? '\\"' : unit === 92 ? '\\\\' : value[i];
-        if (chunk.length + escaped.length > 200) flush();
-        chunk += escaped;
-      }
-    }
-    flush();
-    if (!chunks.length) chunks.push('');
-    for (const part of chunks) assert.ok(part.length <= 240, 'C++ literal chunk exceeds MSVC-safe limit');
-    return { literal: chunks.map(part => `u"${part}"`).join(' '), length: value.length };
-  };
+  const {utf16Field, binary64, writeTables} = require('./fixture-data.cjs');
   const kindFor = id => id.startsWith('parse/') ? 'parse' : id.startsWith('queries/') ? 'query' :
     id.startsWith('mutations/') ? 'mutation' : id.startsWith('style/') ? 'style' :
       id.startsWith('serialization/') ? 'serialization' : id.startsWith('measurement/') ? 'measurement' : 'entity';
-  const view = value => { const x = cpp16(value); return `{${x.literal}, ${x.length}}`; };
-  const lines = [
-    '// Generated from MathJax 4.1.3 Source by tools/math-port/lite-source.cjs.',
-    '// Test-only Source observation strings; native product code does not parse JSON.',
-    'enum class LiteSourceFixtureKind { parse, query, mutation, style, serialization, measurement, entity };',
-    'struct LiteSourceFixture {',
-    '    std::u16string_view id;', '    LiteSourceFixtureKind kind;',
-    '    std::u16string_view html;', '    std::u16string_view format;',
-    '    std::u16string_view text;', '    std::u16string_view path;', '    std::u16string_view rawInput;',
-    '    std::u16string_view expectedText;',
-    '    std::u16string_view expectedDocument;',
-    '    std::size_t selectorOffset;', '    std::size_t selectorCount;',
-    '    std::u16string_view expectedObservation;', '};',
-    'struct LiteSourceSelector { std::u16string_view value; };',
-    'inline constexpr LiteSourceSelector liteSourceSelectors[] = {'
-  ];
   const queryRecord = report.records.find(row => row.id === 'queries/simple-selector-contract');
   const selectors = queryRecord.input.selectors;
-  for (const selector of selectors) lines.push(`    {${view(selector)}},`);
-  lines.push('};', 'inline constexpr LiteSourceFixture liteSourceFixtures[] = {');
+  const mutation = report.records.find(row => row.id === 'mutations/clone-insert-move-remove-replace-split');
+  const measurement = report.records.find(row => row.id === 'measurement/NodeMixin-text-and-element');
+  const elementMetric = measurement.observation.element;
+  const textMetric = measurement.observation.text;
+  const number = value => Number.isFinite(value) ? value : 0;
+  const point = name => typeof elementMetric.nodeBBox?.[name] === 'number'
+    ? number(elementMetric.nodeBBox[name]) : 0;
   let selectorCursor = 0;
-  for (const row of report.records) {
-    const html = typeof row.input?.html === 'string' ? row.input.html : '';
-    const format = typeof row.input?.format === 'string' ? row.input.format : '';
-    const inputText = typeof row.input?.text === 'string' ? row.input.text : '';
-    const inputPath = typeof row.input?.path === 'string' ? row.input.path : '';
-    const rawInput = typeof row.input === 'string' ? row.input : '';
+  const cases = report.records.map(row => {
+    const string = value => typeof value === 'string' ? value : '';
     const expectedText = typeof row.observation?.translatedText === 'string' ? row.observation.translatedText :
-      typeof row.observation?.text === 'string' ? row.observation.text : '';
+      string(row.observation?.text);
     const expectedDocument = row.observation?.document ? JSON.stringify(row.observation.document) : '';
     const selectorOffset = row.id === 'queries/simple-selector-contract' ? selectorCursor : 0;
     const selectorCount = row.id === 'queries/simple-selector-contract' ? selectors.length : 0;
     if (selectorCount) selectorCursor += selectorCount;
-    lines.push(`    {${view(row.id)}, LiteSourceFixtureKind::${kindFor(row.id)},`);
-    lines.push(`     ${view(html)}, ${view(format)}, ${view(inputText)}, ${view(inputPath)}, ${view(rawInput)}, ${view(expectedText)}, ${view(expectedDocument)}, ${selectorOffset}, ${selectorCount},`);
-    lines.push(`     ${view(JSON.stringify(row.observation))}},`);
-  }
-  lines.push('};', `inline constexpr std::size_t liteSourceFixtureCount = ${report.records.length};`,
-    'struct LiteSourceMutationStep { std::u16string_view name; std::u16string_view expected; };',
-    'inline constexpr LiteSourceMutationStep liteSourceMutationSteps[] = {');
-  const mutation = report.records.find(row => row.id === 'mutations/clone-insert-move-remove-replace-split');
-  for (const step of mutation.observation)
-    lines.push(`    {${view(step.step)}, ${view(JSON.stringify(step))}},`);
-  const measurement = report.records.find(row => row.id === 'measurement/NodeMixin-text-and-element');
-  const elementMetric = measurement.observation.element;
-  const textMetric = measurement.observation.text;
-  const numeric = value => Number.isFinite(value) ? String(value) : '0';
-  const point = (metric, name) => metric.nodeBBox && typeof metric.nodeBBox[name] === 'number'
-    ? numeric(metric.nodeBBox[name]) : '0';
-  lines.push('};', `inline constexpr std::size_t liteSourceMutationStepCount = ${mutation.observation.length};`,
-    'struct LiteSourceMetric { double fontSize; std::u16string_view fontFamily; double width; double height; double left; double top; double right; double bottom; };',
-    'inline constexpr LiteSourceMetric liteSourceElementMetric{',
-    `    ${numeric(elementMetric.fontSize)}, ${view(elementMetric.fontFamily)},`,
-    `    ${numeric(elementMetric.nodeSize[0])}, ${numeric(elementMetric.nodeSize[1])},`,
-    `    ${point(elementMetric, 'left')}, ${point(elementMetric, 'top')}, ${point(elementMetric, 'right')}, ${point(elementMetric, 'bottom')}};`,
-    `inline constexpr bool liteSourceTextNodeSizeThrows = ${Boolean(textMetric.nodeSize.error)};`,
-    `inline constexpr std::u16string_view liteSourceTextNodeSizeErrorName = ${view(textMetric.nodeSize.error?.name || '')};`,
-    `inline constexpr std::u16string_view liteSourceTextNodeSizeErrorMessage = ${view(textMetric.nodeSize.error?.message || '')};`,
-    'struct LiteSourceLoadStep { std::u16string_view recordId; std::size_t order; std::u16string_view file; };',
-    'inline constexpr LiteSourceLoadStep liteSourceEntityLoadSteps[] = {');
-  for (const row of report.records) {
-    const loaded = row.observation?.loadedFiles;
-    if (!Array.isArray(loaded)) continue;
-    loaded.forEach((file, order) => lines.push(`    {${view(row.id)}, ${order}, ${view(file)}},`));
-  }
-  lines.push('};', '');
-  const bytes = lines.join('\n');
-  const output = path.join(root, 'tests/math/fixtures/lite.inc');
-  const writeFixture = process.argv.includes('--write-fixture');
-  if (writeFixture) {
-    if (!fs.existsSync(output) || fs.readFileSync(output, 'utf8') !== bytes) fs.writeFileSync(output, bytes);
-  } else {
-    assert.ok(process.argv.includes('--check') || process.argv.length === 2, 'Use --check or --write-fixture');
-    assert.equal(fs.readFileSync(output, 'utf8'), bytes, 'Lite Source fixture changed; regenerate explicitly');
-  }
-  const actualHash = crypto.createHash('sha256').update(bytes).digest('hex');
+    return [utf16Field(row.id), kindFor(row.id),
+      ...[string(row.input?.html), string(row.input?.format), string(row.input?.text), string(row.input?.path),
+        string(row.input), expectedText, expectedDocument].map(utf16Field),
+      selectorOffset, selectorCount, utf16Field(JSON.stringify(row.observation))];
+  });
+  const loads = report.records.flatMap(row => Array.isArray(row.observation?.loadedFiles)
+    ? row.observation.loadedFiles.map((file, order) => [utf16Field(row.id), order, utf16Field(file)]) : []);
+  const definitions = {
+    "selectors": {columns: ["value_utf16"],
+      rows: selectors.map(value => [utf16Field(value)])},
+    "cases": {columns: ["id_utf16", "kind_kind", "html_utf16", "format_utf16", "text_utf16", "path_utf16", "rawInput_utf16", "expectedText_utf16", "expectedDocument_utf16", "selectorOffset_integer", "selectorCount_integer", "expectedObservation_utf16"],
+      rows: cases},
+    "mutations": {columns: ["name_utf16", "expected_utf16"],
+      rows: mutation.observation.map(row => [utf16Field(row.step), utf16Field(JSON.stringify(row))])},
+    "element-metric": {columns: ["fontSize_binary64", "fontFamily_utf16", "width_binary64", "height_binary64", "left_binary64", "top_binary64", "right_binary64", "bottom_binary64"],
+      rows: [[binary64(number(elementMetric.fontSize)), utf16Field(elementMetric.fontFamily),
+        ...[number(elementMetric.nodeSize[0]), number(elementMetric.nodeSize[1]),
+          point('left'), point('top'), point('right'), point('bottom')].map(binary64)]]},
+    "entity-loads": {columns: ["recordId_utf16", "order_integer", "file_utf16"],
+      rows: loads},
+    "text-error": {columns: ["throws_boolean", "name_utf16", "message_utf16"],
+      rows: [[+Boolean(textMetric.nodeSize.error), utf16Field(textMetric.nodeSize.error?.name || ''),
+        utf16Field(textMetric.nodeSize.error?.message || '')]]},
+    "counts": {columns: ["fixtures_integer", "mutations_integer"],
+      rows: [[report.records.length, mutation.observation.length]]},
+  };
+  const output = path.join(root, 'tests/math/fixtures/adaptors/lite');
+  writeTables(output, definitions);
+  const fixtureSha256 = crypto.createHash('sha256');
+  for (const name of Object.keys(definitions)) fixtureSha256.update(fs.readFileSync(path.join(output, `${name}.tsv`)));
   console.log(JSON.stringify({ accepted: true, version: VERSION, commit, records: records.length,
     parserHtmlInputs: htmlInputs.length, upstreamCases: 24, cjsInputs: loadedCjs.length,
-    fixtureSha256: actualHash, output: path.relative(root, output) }));
+    fixtureSha256: fixtureSha256.digest('hex'), output: path.relative(root, output) }));
+
 }
 
 main().catch(error => {
