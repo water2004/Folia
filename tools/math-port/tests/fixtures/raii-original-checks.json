@@ -1,0 +1,1179 @@
+{
+  "operations": {
+    "interface-extension": {
+      "function": "source",
+      "args": [
+        "src/math/output/scene/builder.ixx"
+      ],
+      "kwargs": {}
+    },
+    "implementation-extension": {
+      "function": "source",
+      "args": [
+        "src/math/output/scene/builder.cpp"
+      ],
+      "kwargs": {}
+    },
+    "unresolved-reference": {
+      "function": "refs",
+      "args": [
+        [
+          "src/math/missing.ixx"
+        ],
+        [
+          "src/math/present.ixx"
+        ]
+      ],
+      "kwargs": {}
+    },
+    "implementation-edges": {
+      "function": "edges",
+      "args": [
+        "impl.cpp",
+        {
+          "isImplementationUnit": true,
+          "primaryModule": "fixture.primary",
+          "imports": [
+            {
+              "module": ":node",
+              "kind": "partition",
+              "exported": false
+            }
+          ]
+        },
+        {
+          "fixture.primary": [
+            "primary.ixx"
+          ],
+          "fixture.primary:node": [
+            "partition.ixx"
+          ]
+        },
+        [
+          "impl.cpp"
+        ]
+      ],
+      "kwargs": {}
+    },
+    "missing-import": {
+      "function": "edges",
+      "args": [
+        "active.ixx",
+        {
+          "isImplementationUnit": false,
+          "primaryModule": "fixture.primary",
+          "imports": [
+            {
+              "module": "fixture.old",
+              "kind": "named-module",
+              "exported": false
+            }
+          ]
+        },
+        {
+          "fixture.primary": [
+            "primary.ixx"
+          ],
+          "fixture.primary:node": [
+            "partition.ixx"
+          ]
+        },
+        [
+          "active.ixx"
+        ]
+      ],
+      "kwargs": {}
+    },
+    "missing-primary": {
+      "function": "edges",
+      "args": [
+        "active.cpp",
+        {
+          "isImplementationUnit": true,
+          "primaryModule": "fixture.absent",
+          "imports": []
+        },
+        {
+          "fixture.primary": [
+            "primary.ixx"
+          ],
+          "fixture.primary:node": [
+            "partition.ixx"
+          ]
+        },
+        [
+          "active.cpp"
+        ]
+      ],
+      "kwargs": {}
+    },
+    "source-variables": {
+      "function": "variables",
+      "args": [
+        [
+          "target_sources(folia_math PRIVATE literal.cpp ${FOLIA_FONT_GENERATED_CPP} ${UNKNOWN_SOURCE_LIST})"
+        ],
+        "folia_math",
+        {
+          "fontDependencies": {
+            "generated_cpp": [
+              "build/font/a.cpp",
+              "build/font/data.inc",
+              "build/font/b.cpp"
+            ]
+          },
+          "fontDependenciesPath": "fixture-dependencies.json",
+          "fontDependenciesSha256": "fixture-hash"
+        }
+      ],
+      "kwargs": {}
+    },
+    "malformed-manifest": {
+      "function": "variables",
+      "args": [
+        [
+          "target_sources(folia_math PRIVATE ${FOLIA_FONT_GENERATED_CPP})"
+        ],
+        "folia_math",
+        {
+          "fontDependencies": {},
+          "fontDependenciesPath": "fixture-dependencies.json"
+        }
+      ],
+      "kwargs": {}
+    },
+    "missing-envelope": {
+      "function": "envelope",
+      "args": [],
+      "kwargs": {
+        "root": "/fixture",
+        "index": null,
+        "codemodel": null
+      }
+    },
+    "malformed-envelope": {
+      "function": "envelope",
+      "args": [],
+      "kwargs": {
+        "root": "/fixture",
+        "indexError": "bad json",
+        "codemodel": null
+      }
+    },
+    "wrong-root": {
+      "function": "envelope",
+      "args": [],
+      "kwargs": {
+        "root": "/fixture",
+        "index": {
+          "reply": {
+            "client-math-port": {
+              "codemodel-v2": {
+                "jsonFile": "cm.json"
+              }
+            }
+          }
+        },
+        "codemodel": {
+          "paths": {
+            "source": "/fixture/elsewhere",
+            "build": "/fixture/build/core"
+          },
+          "configurations": []
+        }
+      }
+    },
+    "missing-build-root": {
+      "function": "envelope",
+      "args": [],
+      "kwargs": {
+        "root": "/fixture",
+        "index": {
+          "reply": {
+            "client-math-port": {
+              "codemodel-v2": {
+                "jsonFile": "cm.json"
+              }
+            }
+          }
+        },
+        "codemodel": {
+          "paths": {
+            "source": "/fixture"
+          },
+          "configurations": []
+        }
+      }
+    },
+    "malformed-configurations": {
+      "function": "envelope",
+      "args": [],
+      "kwargs": {
+        "root": "/fixture",
+        "index": {
+          "reply": {
+            "client-math-port": {
+              "codemodel-v2": {
+                "jsonFile": "cm.json"
+              }
+            }
+          }
+        },
+        "codemodel": {
+          "paths": {
+            "source": "/fixture",
+            "build": "/fixture/build/core"
+          },
+          "configurations": {}
+        }
+      }
+    },
+    "missing-reader": {
+      "function": "reader",
+      "args": [],
+      "kwargs": {}
+    },
+    "configured": {
+      "function": "evaluate",
+      "args": [
+        "/fixture"
+      ],
+      "kwargs": {
+        "indexFile": "fixture-index.json",
+        "codemodelFile": "fixture-codemodel.json",
+        "codemodel": {
+          "paths": {
+            "source": "/fixture",
+            "build": "/fixture/build"
+          }
+        },
+        "configuration": "Debug",
+        "targetFacts": [
+          {
+            "name": "folia_math",
+            "id": "folia_math::@fixture",
+            "sources": [
+              {
+                "path": "src/math/a.ixx",
+                "exists": true
+              },
+              {
+                "path": "src/math/b.ixx",
+                "exists": true
+              },
+              {
+                "path": "src/math/a.cpp",
+                "exists": true
+              }
+            ]
+          },
+          {
+            "name": "FoliaNativeMath",
+            "id": "FoliaNativeMath::@fixture",
+            "sources": [
+              {
+                "path": "src/math/native_renderer_bridge.cpp",
+                "exists": true
+              }
+            ]
+          }
+        ],
+        "moduleMap": {
+          "modules": {
+            "fixture.a": {},
+            "fixture.b": {}
+          }
+        },
+        "texts": {
+          "src/math/a.ixx": "export module fixture.a;",
+          "src/math/b.ixx": "export module fixture.b;"
+        }
+      }
+    },
+    "missing-generated": {
+      "function": "evaluate",
+      "args": [
+        "/fixture"
+      ],
+      "kwargs": {
+        "indexFile": "fixture-index.json",
+        "codemodelFile": "fixture-codemodel.json",
+        "codemodel": {
+          "paths": {
+            "source": "/fixture",
+            "build": "/fixture/build"
+          }
+        },
+        "configuration": "Debug",
+        "targetFacts": [
+          {
+            "name": "folia_math",
+            "id": "folia_math::@fixture",
+            "sources": [
+              {
+                "path": "src/math/a.ixx",
+                "exists": true
+              },
+              {
+                "path": "src/math/b.ixx",
+                "exists": true
+              },
+              {
+                "path": "src/math/a.cpp",
+                "exists": true
+              }
+            ]
+          },
+          {
+            "name": "FoliaNativeMath",
+            "id": "FoliaNativeMath::@fixture",
+            "sources": [
+              {
+                "path": "src/math/native_renderer_bridge.cpp",
+                "exists": true
+              }
+            ]
+          }
+        ],
+        "moduleMap": {
+          "modules": {
+            "fixture.a": {},
+            "fixture.b": {}
+          }
+        },
+        "texts": {
+          "src/math/a.ixx": "export module fixture.a;",
+          "src/math/b.ixx": "export module fixture.b;"
+        },
+        "generatedFontCpp": [
+          "build/font/missing.cpp"
+        ]
+      }
+    },
+    "stale-summary": {
+      "function": "summary",
+      "args": [
+        "missing-generated",
+        {
+          "indexFile": "latest-index.json",
+          "codemodelFile": "latest-codemodel.json",
+          "missingFontInputs": [
+            "build/font/missing.cpp"
+          ],
+          "evidence": {
+            "index": {
+              "sha256": "fixture"
+            }
+          }
+        }
+      ],
+      "kwargs": {}
+    },
+    "scan": {
+      "function": "scan",
+      "args": [
+        [
+          "fixture-present.cpp",
+          "fixture-missing.cpp"
+        ],
+        [
+          "fixture-present.cpp"
+        ]
+      ],
+      "kwargs": {}
+    },
+    "missing-module-map": {
+      "function": "evaluate",
+      "args": [
+        "/fixture"
+      ],
+      "kwargs": {
+        "indexFile": "fixture-index.json",
+        "codemodelFile": "fixture-codemodel.json",
+        "codemodel": {
+          "paths": {
+            "source": "/fixture",
+            "build": "/fixture/build"
+          }
+        },
+        "configuration": "Debug",
+        "targetFacts": [
+          {
+            "name": "folia_math",
+            "id": "folia_math::@fixture",
+            "sources": [
+              {
+                "path": "src/math/a.ixx",
+                "exists": true
+              },
+              {
+                "path": "src/math/b.ixx",
+                "exists": true
+              },
+              {
+                "path": "src/math/a.cpp",
+                "exists": true
+              }
+            ]
+          },
+          {
+            "name": "FoliaNativeMath",
+            "id": "FoliaNativeMath::@fixture",
+            "sources": [
+              {
+                "path": "src/math/native_renderer_bridge.cpp",
+                "exists": true
+              }
+            ]
+          }
+        ],
+        "moduleMap": {},
+        "texts": {
+          "src/math/a.ixx": "export module fixture.a;",
+          "src/math/b.ixx": "export module fixture.b;"
+        }
+      }
+    },
+    "malformed-target": {
+      "function": "evaluate",
+      "args": [
+        "/fixture"
+      ],
+      "kwargs": {
+        "indexFile": "fixture-index.json",
+        "codemodelFile": "fixture-codemodel.json",
+        "codemodel": {
+          "paths": {
+            "source": "/fixture",
+            "build": "/fixture/build"
+          }
+        },
+        "configuration": "Debug",
+        "targetFacts": [
+          {
+            "name": "folia_math",
+            "sources": null
+          }
+        ],
+        "moduleMap": {
+          "modules": {
+            "fixture.a": {},
+            "fixture.b": {}
+          }
+        },
+        "texts": {
+          "src/math/a.ixx": "export module fixture.a;",
+          "src/math/b.ixx": "export module fixture.b;"
+        }
+      }
+    },
+    "missing-source": {
+      "function": "evaluate",
+      "args": [
+        "/fixture"
+      ],
+      "kwargs": {
+        "indexFile": "fixture-index.json",
+        "codemodelFile": "fixture-codemodel.json",
+        "codemodel": {
+          "paths": {
+            "source": "/fixture",
+            "build": "/fixture/build"
+          }
+        },
+        "configuration": "Debug",
+        "targetFacts": [
+          {
+            "name": "folia_math",
+            "id": "folia_math::@fixture",
+            "sources": [
+              {
+                "path": "src/math/missing.ixx",
+                "exists": false
+              }
+            ]
+          },
+          {
+            "name": "FoliaNativeMath",
+            "id": "FoliaNativeMath::@fixture",
+            "sources": [
+              {
+                "path": "src/math/native_renderer_bridge.cpp",
+                "exists": true
+              }
+            ]
+          }
+        ],
+        "moduleMap": {
+          "modules": {
+            "fixture.a": {},
+            "fixture.b": {}
+          }
+        },
+        "texts": {
+          "src/math/a.ixx": "export module fixture.a;",
+          "src/math/b.ixx": "export module fixture.b;"
+        }
+      }
+    },
+    "mismatched-map": {
+      "function": "evaluate",
+      "args": [
+        "/fixture"
+      ],
+      "kwargs": {
+        "indexFile": "fixture-index.json",
+        "codemodelFile": "fixture-codemodel.json",
+        "codemodel": {
+          "paths": {
+            "source": "/fixture",
+            "build": "/fixture/build"
+          }
+        },
+        "configuration": "Debug",
+        "targetFacts": [
+          {
+            "name": "folia_math",
+            "id": "folia_math::@fixture",
+            "sources": [
+              {
+                "path": "src/math/a.ixx",
+                "exists": true
+              },
+              {
+                "path": "src/math/b.ixx",
+                "exists": true
+              },
+              {
+                "path": "src/math/a.cpp",
+                "exists": true
+              }
+            ]
+          },
+          {
+            "name": "FoliaNativeMath",
+            "id": "FoliaNativeMath::@fixture",
+            "sources": [
+              {
+                "path": "src/math/native_renderer_bridge.cpp",
+                "exists": true
+              }
+            ]
+          }
+        ],
+        "moduleMap": {
+          "modules": {
+            "fixture.a": {},
+            "fixture.other": {}
+          }
+        },
+        "texts": {
+          "src/math/a.ixx": "export module fixture.a;",
+          "src/math/b.ixx": "export module fixture.b;"
+        }
+      }
+    },
+    "duplicate-provider": {
+      "function": "evaluate",
+      "args": [
+        "/fixture"
+      ],
+      "kwargs": {
+        "indexFile": "fixture-index.json",
+        "codemodelFile": "fixture-codemodel.json",
+        "codemodel": {
+          "paths": {
+            "source": "/fixture",
+            "build": "/fixture/build"
+          }
+        },
+        "configuration": "Debug",
+        "targetFacts": [
+          {
+            "name": "folia_math",
+            "id": "folia_math::@fixture",
+            "sources": [
+              {
+                "path": "src/math/a.ixx",
+                "exists": true
+              },
+              {
+                "path": "src/math/b.ixx",
+                "exists": true
+              },
+              {
+                "path": "src/math/a.cpp",
+                "exists": true
+              },
+              {
+                "path": "src/math/c.ixx",
+                "exists": true
+              }
+            ]
+          }
+        ],
+        "moduleMap": {
+          "modules": {
+            "fixture.a": {},
+            "fixture.b": {}
+          }
+        },
+        "texts": {
+          "src/math/a.ixx": "export module fixture.a;",
+          "src/math/b.ixx": "export module fixture.b;",
+          "src/math/c.ixx": "export module fixture.a;"
+        }
+      }
+    },
+    "undeclared-interface": {
+      "function": "evaluate",
+      "args": [
+        "/fixture"
+      ],
+      "kwargs": {
+        "indexFile": "fixture-index.json",
+        "codemodelFile": "fixture-codemodel.json",
+        "codemodel": {
+          "paths": {
+            "source": "/fixture",
+            "build": "/fixture/build"
+          }
+        },
+        "configuration": "Debug",
+        "targetFacts": [
+          {
+            "name": "folia_math",
+            "id": "folia_math::@fixture",
+            "sources": [
+              {
+                "path": "src/math/a.ixx",
+                "exists": true
+              },
+              {
+                "path": "src/math/b.ixx",
+                "exists": true
+              },
+              {
+                "path": "src/math/a.cpp",
+                "exists": true
+              },
+              {
+                "path": "src/math/c.ixx",
+                "exists": true
+              }
+            ]
+          }
+        ],
+        "moduleMap": {
+          "modules": {
+            "fixture.a": {},
+            "fixture.b": {}
+          }
+        },
+        "texts": {
+          "src/math/a.ixx": "export module fixture.a;",
+          "src/math/b.ixx": "export module fixture.b;",
+          "src/math/c.ixx": "module;"
+        }
+      }
+    },
+    "no-build-reader": {
+      "function": "reader",
+      "args": [],
+      "kwargs": {}
+    }
+  },
+  "checks": [
+    {
+      "operation": "interface-extension",
+      "path": [],
+      "id": "original-01-interface-extension",
+      "expected": true
+    },
+    {
+      "operation": "implementation-extension",
+      "path": [],
+      "id": "original-02-implementation-extension",
+      "expected": true
+    },
+    {
+      "operation": "unresolved-reference",
+      "path": [],
+      "id": "original-03-unresolved-reference",
+      "expected": [
+        "src/math/missing.ixx"
+      ]
+    },
+    {
+      "operation": "implementation-edges",
+      "path": [
+        "edges"
+      ],
+      "projection": {
+        "keys": [
+          "kind",
+          "file"
+        ]
+      },
+      "id": "original-04-implementation-edges",
+      "expected": [
+        [
+          "partition",
+          "partition.ixx"
+        ],
+        [
+          "implicit-primary-interface",
+          "primary.ixx"
+        ]
+      ]
+    },
+    {
+      "operation": "implementation-edges",
+      "path": [
+        "unresolved"
+      ],
+      "id": "original-05-implementation-edges",
+      "expected": []
+    },
+    {
+      "operation": "missing-import",
+      "path": [
+        "edges"
+      ],
+      "projection": {
+        "length": true
+      },
+      "id": "original-06-missing-import",
+      "expected": 0
+    },
+    {
+      "operation": "missing-import",
+      "path": [
+        "unresolved",
+        0,
+        "reason"
+      ],
+      "id": "original-07-missing-import",
+      "expected": "no-registered-interface-provider"
+    },
+    {
+      "operation": "missing-primary",
+      "path": [
+        "unresolved",
+        0,
+        "reason"
+      ],
+      "id": "original-08-missing-primary",
+      "expected": "implementation-unit-missing-primary-interface"
+    },
+    {
+      "operation": "source-variables",
+      "path": [
+        "resolved",
+        0,
+        "generatedCpp"
+      ],
+      "id": "original-09-source-variables",
+      "expected": [
+        "build/font/a.cpp",
+        "build/font/b.cpp"
+      ]
+    },
+    {
+      "operation": "source-variables",
+      "path": [
+        "unresolved",
+        0,
+        "variable"
+      ],
+      "id": "original-10-source-variables",
+      "expected": "UNKNOWN_SOURCE_LIST"
+    },
+    {
+      "operation": "source-variables",
+      "path": [
+        "resolved",
+        0,
+        "generatedCpp"
+      ],
+      "projection": {
+        "contains": "literal.cpp"
+      },
+      "id": "original-11-source-variables",
+      "expected": false
+    },
+    {
+      "operation": "source-variables",
+      "path": [
+        "resolved",
+        0,
+        "generatedCpp"
+      ],
+      "projection": {
+        "prepend": [
+          "literal.cpp"
+        ]
+      },
+      "id": "original-12-source-variables",
+      "expected": [
+        "literal.cpp",
+        "build/font/a.cpp",
+        "build/font/b.cpp"
+      ]
+    },
+    {
+      "operation": "malformed-manifest",
+      "path": [
+        "unresolved",
+        0,
+        "reason"
+      ],
+      "id": "original-13-malformed-manifest",
+      "expected": "known-font-dependency-manifest-has-no-generated_cpp-array"
+    },
+    {
+      "operation": "missing-envelope",
+      "path": [
+        "status"
+      ],
+      "id": "original-14-missing-envelope",
+      "expected": "missing"
+    },
+    {
+      "operation": "missing-envelope",
+      "path": [
+        "authoritative"
+      ],
+      "id": "original-15-missing-envelope",
+      "expected": false
+    },
+    {
+      "operation": "malformed-envelope",
+      "path": [
+        "status"
+      ],
+      "id": "original-16-malformed-envelope",
+      "expected": "malformed"
+    },
+    {
+      "operation": "wrong-root",
+      "path": [
+        "status"
+      ],
+      "id": "original-17-wrong-root",
+      "expected": "wrong-source-root"
+    },
+    {
+      "operation": "wrong-root",
+      "path": [
+        "authoritative"
+      ],
+      "id": "original-18-wrong-root",
+      "expected": false
+    },
+    {
+      "operation": "missing-build-root",
+      "path": [
+        "status"
+      ],
+      "id": "original-19-missing-build-root",
+      "expected": "malformed"
+    },
+    {
+      "operation": "malformed-configurations",
+      "path": [
+        "status"
+      ],
+      "id": "original-20-malformed-configurations",
+      "expected": "malformed"
+    },
+    {
+      "operation": "missing-reader",
+      "path": [
+        "status"
+      ],
+      "id": "original-21-missing-reader",
+      "expected": "missing"
+    },
+    {
+      "operation": "missing-reader",
+      "path": [
+        "authoritative"
+      ],
+      "id": "original-22-missing-reader",
+      "expected": false
+    },
+    {
+      "operation": "configured",
+      "path": [
+        "status"
+      ],
+      "id": "original-23-configured",
+      "expected": "ready"
+    },
+    {
+      "operation": "configured",
+      "path": [
+        "authoritative"
+      ],
+      "id": "original-24-configured",
+      "expected": true
+    },
+    {
+      "operation": "configured",
+      "path": [
+        "foliaMathSourceCount"
+      ],
+      "id": "original-25-configured",
+      "expected": 3
+    },
+    {
+      "operation": "configured",
+      "path": [
+        "foliaMathInterfaceCount"
+      ],
+      "id": "original-26-configured",
+      "expected": 2
+    },
+    {
+      "operation": "configured",
+      "path": [
+        "moduleMapCheck",
+        "exactMatch"
+      ],
+      "id": "original-27-configured",
+      "expected": true
+    },
+    {
+      "operation": "configured",
+      "path": [
+        "bridgeSourceMember"
+      ],
+      "id": "original-28-configured",
+      "expected": true
+    },
+    {
+      "operation": "configured",
+      "path": [
+        "bridgeTargets"
+      ],
+      "id": "original-29-configured",
+      "expected": [
+        "FoliaNativeMath"
+      ]
+    },
+    {
+      "operation": "configured",
+      "path": [
+        "allTargetMathMembership"
+      ],
+      "projection": {
+        "membership": {
+          "name": "FoliaNativeMath",
+          "path": "src/math/native_renderer_bridge.cpp"
+        }
+      },
+      "id": "original-30-configured",
+      "expected": true
+    },
+    {
+      "operation": "missing-generated",
+      "path": [
+        "status"
+      ],
+      "id": "original-31-missing-generated",
+      "expected": "stale-inputs"
+    },
+    {
+      "operation": "missing-generated",
+      "path": [
+        "authoritative"
+      ],
+      "id": "original-32-missing-generated",
+      "expected": false
+    },
+    {
+      "operation": "stale-summary",
+      "path": [
+        "indexFile"
+      ],
+      "id": "original-33-stale-summary",
+      "expected": "latest-index.json"
+    },
+    {
+      "operation": "stale-summary",
+      "path": [
+        "missingFontInputs",
+        0
+      ],
+      "id": "original-34-stale-summary",
+      "expected": "build/font/missing.cpp"
+    },
+    {
+      "operation": "stale-summary",
+      "path": [
+        "evidence",
+        "index",
+        "sha256"
+      ],
+      "id": "original-35-stale-summary",
+      "expected": "fixture"
+    },
+    {
+      "operation": "scan",
+      "path": [
+        "paths"
+      ],
+      "id": "original-36-scan",
+      "expected": [
+        "fixture-present.cpp"
+      ]
+    },
+    {
+      "operation": "scan",
+      "path": [
+        "missing"
+      ],
+      "id": "original-37-scan",
+      "expected": [
+        "fixture-missing.cpp"
+      ]
+    },
+    {
+      "operation": "missing-module-map",
+      "path": [
+        "status"
+      ],
+      "id": "original-38-missing-module-map",
+      "expected": "malformed"
+    },
+    {
+      "operation": "missing-module-map",
+      "path": [
+        "authoritative"
+      ],
+      "id": "original-39-missing-module-map",
+      "expected": false
+    },
+    {
+      "operation": "malformed-target",
+      "path": [
+        "status"
+      ],
+      "id": "original-40-malformed-target",
+      "expected": "malformed"
+    },
+    {
+      "operation": "malformed-target",
+      "path": [
+        "authoritative"
+      ],
+      "id": "original-41-malformed-target",
+      "expected": false
+    },
+    {
+      "operation": "missing-source",
+      "path": [
+        "status"
+      ],
+      "id": "original-42-missing-source",
+      "expected": "stale-inputs"
+    },
+    {
+      "operation": "missing-source",
+      "path": [
+        "authoritative"
+      ],
+      "id": "original-43-missing-source",
+      "expected": false
+    },
+    {
+      "operation": "mismatched-map",
+      "path": [
+        "status"
+      ],
+      "id": "original-44-mismatched-map",
+      "expected": "incomplete"
+    },
+    {
+      "operation": "mismatched-map",
+      "path": [
+        "authoritative"
+      ],
+      "id": "original-45-mismatched-map",
+      "expected": false
+    },
+    {
+      "operation": "mismatched-map",
+      "path": [
+        "moduleMapCheck",
+        "exactMatch"
+      ],
+      "id": "original-46-mismatched-map",
+      "expected": false
+    },
+    {
+      "operation": "duplicate-provider",
+      "path": [
+        "status"
+      ],
+      "id": "original-47-duplicate-provider",
+      "expected": "incomplete"
+    },
+    {
+      "operation": "duplicate-provider",
+      "path": [
+        "moduleMapCheck",
+        "duplicateProviders"
+      ],
+      "projection": {
+        "length": true
+      },
+      "id": "original-48-duplicate-provider",
+      "expected": 1
+    },
+    {
+      "operation": "undeclared-interface",
+      "path": [
+        "status"
+      ],
+      "id": "original-49-undeclared-interface",
+      "expected": "incomplete"
+    },
+    {
+      "operation": "undeclared-interface",
+      "path": [
+        "moduleMapCheck",
+        "undeclaredInterfaceCount"
+      ],
+      "id": "original-50-undeclared-interface",
+      "expected": 1
+    },
+    {
+      "operation": "no-build-reader",
+      "path": [
+        "status"
+      ],
+      "id": "original-51-no-build-reader",
+      "expected": "missing"
+    },
+    {
+      "operation": "no-build-reader",
+      "path": [
+        "authoritative"
+      ],
+      "id": "original-52-no-build-reader",
+      "expected": false
+    },
+    {
+      "operation": "no-build-reader",
+      "path": [
+        "foliaMathSources"
+      ],
+      "id": "original-53-no-build-reader",
+      "expected": {
+        "$undefined": true
+      }
+    }
+  ]
+}

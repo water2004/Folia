@@ -63,3 +63,11 @@ candidate target was not part of master's tracked CMake graph; the tool does
 not silently configure it or update stale plan hashes. Each compile/test is
 bounded, every changed source is restored byte for byte, and the original
 progress, result, witness, and unchanged-gold checks remain in place.
+
+`python tools/math-port/native-raii-inventory.py` inventories native source,
+module ownership and review provenance without Node. `--build-dir` and
+`--configuration` select existing CMake File API observations. Lexical CMake
+discovery follows the shared `.cmake` includes; it remains distinct from
+verified configured target membership. `--self-test` runs the retained original
+checks together with missing, malformed and stale File API controls. The tool
+only reports review state and does not mark unreviewed implementation as accepted.

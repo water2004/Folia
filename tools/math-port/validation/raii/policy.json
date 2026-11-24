@@ -1,0 +1,29 @@
+{
+  "retirementPlan": [
+    {
+      "category": "retire-js-only-contract-tests",
+      "rule": "Retire only contracts for withdrawn JS identities/prototypes/descriptors/call mutation/sparse holes/JS coercion, Context projection, and host/object-heap mechanics. The candidate filename list is a review queue, not a claim every file has been read; decide per script and record rationale."
+    },
+    {
+      "category": "rewrite-mathematical-coverage",
+      "rule": "Preserve math assertions from mixed scripts in typed C++ tests and Source-locked outputs: parser/package behavior, MML structure/attributes, CommonWrapper/BBox/placement, fonts, SVG bytes, errors, and persistent semantic state. The CMake-linked tests list is the current compiled baseline, not the future acceptance suite."
+    },
+    {
+      "category": "retain-development-oracles",
+      "rule": "CJS scripts may remain as offline Source oracles/data generators; they are not linked into or executed by native rendering."
+    },
+    {
+      "category": "single-target",
+      "rule": "Root replaces the current folia_math source graph once with the reviewed graph. Retire old target inputs and tests as batches; add no adapter, alternate target, native2 option, or legacy fallback."
+    }
+  ],
+  "limitations": [
+    "Configured membership comes from the latest matching CMake File API Debug codemodel only when its source root matches this repository, target replies parse, input mtimes do not postdate the index, source paths exist, and generated font .cpp membership matches the dependency manifest. Otherwise configured membership is unavailable and the literal CMake scan is an incomplete lexical candidate, not a configuration error. The File API cannot attest non-CMake glob contents or source-file content hashes after configure.",
+    "The separate lexical CMake scan follows literal add_subdirectory and include paths (including the shared cmake/FoliaMath.cmake list) and literal source paths; it does not expand foreach, evaluate conditions, or resolve arbitrary source-list variables. FOLIA_FONT_GENERATED_CPP is resolved from its dependency manifest as an independent candidate input.",
+    "The configured mathematical test list comes from all Debug File API target sources under tests/math when available. The separate lexical test scan is a candidate only; historical mathematical test migration remains incomplete.",
+    "Only configured folia_math .ixx sources supply active module providers. Implementation units are not import providers; they receive an implicit edge to their primary interface. Lexical fallback providers and unresolved imports are candidate notes only, not compiler/configuration errors. Textual includes are not resolved.",
+    "Forward-declaration flags are conservative textual name checks against imported module units, not compiler visibility diagnostics.",
+    "Source annotations are a note index harvested from Markdown/header text by path/module and TS path/hash patterns. They do not establish algorithm equivalence, complete Source mapping, or a pass/fail provenance gate.",
+    "Responsibilities are narrow filename/location group labels. All non-license file decisions remain unreviewed; active membership does not prove behavioral coverage and inactive membership does not mean dead code."
+  ]
+}

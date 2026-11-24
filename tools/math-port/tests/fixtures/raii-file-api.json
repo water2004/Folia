@@ -1,0 +1,91 @@
+{
+  "CMakeLists.txt": "include(cmake/FoliaMath.cmake)\n",
+  "cmake/FoliaMath.cmake": "add_library(folia_math STATIC)\ntarget_sources(folia_math PUBLIC FILE_SET CXX_MODULES BASE_DIRS \"${FOLIA_SOURCE_ROOT}\" FILES ${FOLIA_SOURCE_ROOT}/src/math/a.ixx ${FOLIA_SOURCE_ROOT}/src/math/b.ixx)\ntarget_sources(folia_math PRIVATE ${FOLIA_SOURCE_ROOT}/src/math/a.cpp ${FOLIA_FONT_GENERATED_CPP})\nadd_library(FoliaNativeMath SHARED src/math/native_renderer_bridge.cpp)\n",
+  "docs/math-port/HANDOFF.md": "# Fixture\n",
+  "docs/math-port/evidence/font-data-source-lock.json": {
+    "outputs": []
+  },
+  "src/math/a.ixx": "export module fixture.a;\nimport std;\nexport struct A {};\n",
+  "src/math/b.ixx": "export module fixture.b;\nimport fixture.a;\n",
+  "src/math/a.cpp": "module fixture.a;\n",
+  "src/math/native_renderer_bridge.cpp": "import fixture.a;\n",
+  "build/math-port/font-generated-native-raii/font-data-source-dependencies.json": {
+    "generated_cpp": []
+  },
+  "build/core/CMakeFiles/folia_math.dir/CXXModules.json": {
+    "modules": {
+      "fixture.a": {},
+      "fixture.b": {}
+    }
+  },
+  "build/core/.cmake/api/v1/reply/index-fixture.json": {
+    "reply": {
+      "client-math-port": {
+        "codemodel-v2": {
+          "jsonFile": "codemodel.json"
+        }
+      }
+    }
+  },
+  "build/core/.cmake/api/v1/reply/codemodel.json": {
+    "paths": {
+      "source": "$ROOT",
+      "build": "$ROOT/build/core"
+    },
+    "configurations": [
+      {
+        "name": "Debug",
+        "directories": [
+          {
+            "source": "."
+          }
+        ],
+        "targets": [
+          {
+            "name": "folia_math",
+            "jsonFile": "math.json"
+          },
+          {
+            "name": "FoliaNativeMath",
+            "jsonFile": "bridge.json"
+          }
+        ]
+      }
+    ]
+  },
+  "build/core/.cmake/api/v1/reply/math.json": {
+    "name": "folia_math",
+    "id": "folia_math::@fixture",
+    "type": "STATIC_LIBRARY",
+    "paths": {
+      "source": "."
+    },
+    "sources": [
+      {
+        "path": "src/math/a.ixx",
+        "compileGroupIndex": 0
+      },
+      {
+        "path": "src/math/b.ixx",
+        "compileGroupIndex": 0
+      },
+      {
+        "path": "src/math/a.cpp",
+        "compileGroupIndex": 0
+      }
+    ]
+  },
+  "build/core/.cmake/api/v1/reply/bridge.json": {
+    "name": "FoliaNativeMath",
+    "id": "FoliaNativeMath::@fixture",
+    "type": "SHARED_LIBRARY",
+    "paths": {
+      "source": "."
+    },
+    "sources": [
+      {
+        "path": "src/math/native_renderer_bridge.cpp"
+      }
+    ]
+  }
+}
