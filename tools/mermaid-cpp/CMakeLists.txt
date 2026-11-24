@@ -18,6 +18,7 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 get_filename_component(FOLIA_MERMAID_REPO_ROOT "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)
+option(FOLIA_MERMAID_BUILD_WINDOWS_HOST "Build DirectWrite and Windows DLL host probes" ON)
 
 # Source ownership and local includes can be checked on every host before any
 # Windows-specific targets are considered. Python is a test-tool dependency,
@@ -112,7 +113,7 @@ if(TARGET FoliaNativeMath)
     add_test(NAME FoliaMermaidMathTests COMMAND FoliaMermaidMathTests)
 endif()
 
-if(WIN32 AND MSVC)
+if(WIN32 AND MSVC AND FOLIA_MERMAID_BUILD_WINDOWS_HOST)
     if(NOT TARGET folia_mermaid_math)
         message(FATAL_ERROR
             "Native Mermaid math requires FoliaNativeMath. Build from the repository root with FOLIA_BUILD_MERMAID=ON, or set FOLIA_NATIVE_MATH_RUNTIME and FOLIA_NATIVE_MATH_IMPORT_LIBRARY to an existing Math DLL build.")
@@ -205,6 +206,7 @@ endif()
 
 # One corpus driver for every family. Windows uses the production DirectWrite
 # provider; other hosts supply real font measurements through the test protocol.
+if(NOT WIN32 OR FOLIA_MERMAID_BUILD_WINDOWS_HOST)
 add_executable(FoliaMermaidRegressionProbe regression/native-probe.cpp)
 set_target_properties(FoliaMermaidRegressionProbe PROPERTIES CXX_MODULE_STD ON)
 target_link_libraries(FoliaMermaidRegressionProbe PRIVATE folia::mermaid)
@@ -228,4 +230,5 @@ if(WIN32 AND MSVC)
             FoliaMermaidPlatformTests FoliaMermaidRegressionProbe)
         add_dependencies(${consumer} FoliaMermaidMathRuntime)
     endforeach()
+endif()
 endif()
