@@ -1,4 +1,5 @@
 #include "support/folia_test.hpp"
+#include "math/support/fixture_values.hpp"
 import folia.math.fonts.newcm_font_module_provider;
 
 namespace {
@@ -6,56 +7,29 @@ using namespace boost::ut;
 using namespace folia::math::output::common;
 
 struct ExpectedCssFont {
-    std::string_view variant;
-    std::string_view family;
+    std::string variant;
+    std::string family;
     bool italic;
     bool bold;
 };
 
-constexpr std::array expectedCssFonts{
-    ExpectedCssFont{"-bbold", "serif", false, false},
-    ExpectedCssFont{"-ex-md", "serif", false, false},
-    ExpectedCssFont{"-largeop", "serif", false, false},
-    ExpectedCssFont{"-lf-tp", "serif", false, false},
-    ExpectedCssFont{"-rt-bt", "serif", false, false},
-    ExpectedCssFont{"-size3", "serif", false, false},
-    ExpectedCssFont{"-size4", "serif", false, false},
-    ExpectedCssFont{"-size5", "serif", false, false},
-    ExpectedCssFont{"-size6", "serif", false, false},
-    ExpectedCssFont{"-size7", "serif", false, false},
-    ExpectedCssFont{"-smallop", "serif", false, false},
-    ExpectedCssFont{"-tex-bold-calligraphic", "cursive", true, true},
-    ExpectedCssFont{"-tex-bold-oldstyle", "serif", false, true},
-    ExpectedCssFont{"-tex-calligraphic", "cursive", true, false},
-    ExpectedCssFont{"-tex-mathit", "serif", true, false},
-    ExpectedCssFont{"-tex-oldstyle", "serif", false, false},
-    ExpectedCssFont{"-tex-variant", "serif", false, false},
-    ExpectedCssFont{"-uplarge", "serif", false, false},
-    ExpectedCssFont{"-upsmall", "serif", false, false},
-    ExpectedCssFont{"bold", "serif", false, true},
-    ExpectedCssFont{"bold-fraktur", "serif", false, true},
-    ExpectedCssFont{"bold-italic", "serif", true, true},
-    ExpectedCssFont{"bold-sans-serif", "sans-serif", false, true},
-    ExpectedCssFont{"bold-script", "cursive", false, true},
-    ExpectedCssFont{"double-struck", "serif", false, true},
-    ExpectedCssFont{"fraktur", "serif", false, false},
-    ExpectedCssFont{"italic", "serif", true, false},
-    ExpectedCssFont{"monospace", "monospace", false, false},
-    ExpectedCssFont{"normal", "serif", false, false},
-    ExpectedCssFont{"sans-serif", "sans-serif", false, false},
-    ExpectedCssFont{"sans-serif-bold-italic", "sans-serif", true, true},
-    ExpectedCssFont{"sans-serif-italic", "sans-serif", true, false},
-    ExpectedCssFont{"script", "cursive", false, false},
-};
+const auto& expectedCssFonts() {
+    static const auto result = math_test::fixtures::records<ExpectedCssFont>(
+        "math/fixtures/fonts/css-metadata.tsv", 4, 33, [](const auto& r) {
+            return ExpectedCssFont{math_test::fixtures::bytes(r[0]), math_test::fixtures::bytes(r[1]),
+                math_test::fixtures::boolean(r[2]), math_test::fixtures::boolean(r[3])};
+        });
+    return result;
+}
 
 suite newcm_font_css_metadata = [] {
     "canonical NewCM provider publishes all locked CSS metadata"_test = [] {
         const auto bundle = folia::math::fonts::makeNewcmFontData();
         const auto &face = bundle.fonts.face("MathJaxNewcm");
         expect(face.cssFamilyPrefix.empty());
-        expect(face.cssFontMap.size() == expectedCssFonts.size());
+        expect(face.cssFontMap.size() == expectedCssFonts().size());
         expect(face.styles.empty());
-        for (const auto &expected : expectedCssFonts) {
+        for (const auto &expected : expectedCssFonts()) {
             const auto found = face.cssFontMap.find(expected.variant);
             expect(found != face.cssFontMap.end()) << expected.variant;
             if (found == face.cssFontMap.end())
