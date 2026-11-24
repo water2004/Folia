@@ -1,0 +1,23 @@
+# id	escaped inline source
+01	abc
+02	*abc*
+03	_abc_
+04	**abc**
+05	__abc__
+06	**
+07	**abc
+08	a***b***c
+09	~~abc~~
+10	~~abc
+11	`abc`
+12	`abc
+13	[title](url)
+14	[title](<url>)
+15	[title](url "name")
+16	[title](
+17	![alt](url)
+18	$abc$
+19	$abc
+20	\\*abc\\*
+21	&amp;
+22	a\\**b*

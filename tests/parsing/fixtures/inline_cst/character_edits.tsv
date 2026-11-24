@@ -1,0 +1,16 @@
+# id	escaped source (Unicode scalars; exact whitespace and spelling)
+01	abc
+02	**abc**
+03	__abc__
+04	**
+05	**abc
+06	a***b***c
+07	`abc`
+08	`abc
+09	[title](url)
+10	[title](
+11	$abc$
+12	$abc
+13	~~abc~~
+14	~~abc
+15	\\*abc\\*

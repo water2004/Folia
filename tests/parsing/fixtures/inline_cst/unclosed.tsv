@@ -1,0 +1,8 @@
+# id	escaped source (Unicode scalars; exact whitespace and spelling)
+01	**
+02	**abc
+03	*
+04	`abc
+05	[title](
+06	$abc
+07	~~abc

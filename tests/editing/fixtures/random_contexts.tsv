@@ -1,0 +1,9 @@
+# id	escaped prefix	escaped suffix
+paragraph		
+heading	# 	
+list	- 	
+quote	> 	
+table	| 	 |\n| --- |
+callout-title	> [!NOTE] 	\n> body
+callout-body	> [!NOTE] title\n> 	
+footnote	[^n]: 	

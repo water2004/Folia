@@ -1,0 +1,4 @@
+# id	escaped source (Unicode scalars; exact whitespace and spelling)
+01	[title](url)
+02	[title](<url>)
+03	[title](url 'name')

@@ -1,0 +1,28 @@
+# id	escaped source (Unicode scalars; exact whitespace and spelling)
+01	
+02	abc
+03	*abc*
+04	_abc_
+05	**abc**
+06	__abc__
+07	**
+08	**abc
+09	a***b***c
+10	~~abc~~
+11	~~abc
+12	`abc`
+13	`abc
+14	[title](url)
+15	[title](<url>)
+16	[title](url "name")
+17	[title](
+18	![alt](url)
+19	$abc$
+20	$abc
+21	\\*abc\\*
+22	&amp;
+23	a\\**b*
+24	two  \nlines
+25	two\\\nlines
+26	'文本'
+27	"文本"

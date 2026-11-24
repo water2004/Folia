@@ -30,23 +30,12 @@ using namespace folia;
 using namespace boost::ut;
 
 #include "support/editor_test_support.hpp"
+#include "editing/support/inline_contexts.hpp"
 
 suite editing_properties_inline_contexts_tests = [] {
 
 "all_editable_block_contexts_share_the_source_edit_history_pipeline"_test = [] {
-    const std::vector<std::string> cases{
-        "abc",
-        "# abc",
-        "- abc",
-        "- [ ] abc",
-        "> abc",
-        "| abc |\n| --- |",
-        "> [!NOTE]\n> abc",
-        "[^1]: abc",
-        "- > abc",
-        "> - abc",
-        "- [ ] > abc",
-    };
+    const auto cases = editable_context_documents("editing/fixtures/history_contexts.tsv", "abc");
     for (auto const& markdown : cases) {
         Editor editor(markdown);
         auto const id = first_text(editor).id;
@@ -80,27 +69,13 @@ suite editing_properties_inline_contexts_tests = [] {
 };
 
 "representative_inline_states_round_trip_through_every_editable_context"_test = [] {
-    const std::vector<std::u32string> samples{
-        U"abc", U"*abc*", U"_abc_", U"**abc**", U"__abc__", U"**", U"**abc",
-        U"a***b***c", U"~~abc~~", U"~~abc", U"`abc`", U"`abc", U"[title](url)",
-        U"[title](<url>)", U"[title](url \"name\")", U"[title](", U"![alt](url)",
-        U"$abc$", U"$abc", U"\\*abc\\*", U"&amp;", U"a\\**b*",
-    };
+    const auto samples = editable_inline_cases();
 
     for (const auto& sample : samples) {
         const auto original_source = U"p" + sample + U"q";
         const auto source_utf8 = cps_to_utf8(original_source);
-        const std::vector<std::string> documents{
-            source_utf8,
-            "# " + source_utf8,
-            "- " + source_utf8,
-            "- [ ] " + source_utf8,
-            "> " + source_utf8,
-            "| " + source_utf8 + " |\n| --- |",
-            "> [!NOTE]\n> " + source_utf8,
-            "[^1]: " + source_utf8,
-            "- > " + source_utf8,
-        };
+        const auto documents = editable_context_documents(
+            "editing/fixtures/representative_contexts.tsv", source_utf8);
 
         for (const auto& markdown : documents) {
             Editor editor(markdown);
@@ -148,18 +123,10 @@ suite editing_properties_inline_contexts_tests = [] {
 "random_editor_source_edits_restore_exactly_across_editable_contexts"_test = [] {
     std::mt19937_64 random{0xED1705u};
     const std::u32string alphabet = U"abc *_~`[]()!$\\&;'\"😀";
-    const auto make_document = [](std::size_t context, std::u32string_view source) {
-        const auto text = cps_to_utf8(source);
-        switch (context) {
-            case 0: return text;
-            case 1: return "# " + text;
-            case 2: return "- " + text;
-            case 3: return "> " + text;
-            case 4: return "| " + text + " |\n| --- |";
-            case 5: return "> [!NOTE] " + text + "\n> body";
-            case 6: return "> [!NOTE] title\n> " + text;
-            default: return "[^n]: " + text;
-        }
+    const auto contexts = folia::test::data::read_tsv("editing/fixtures/random_contexts.tsv", 3);
+    const auto make_document = [&contexts](std::size_t context, std::u32string_view source) {
+        return folia::test::data::decode_bytes(contexts[context][1]) + cps_to_utf8(source)
+            + folia::test::data::decode_bytes(contexts[context][2]);
     };
 
     for (std::size_t iteration = 0; iteration < 240; ++iteration) {
@@ -170,7 +137,7 @@ suite editing_properties_inline_contexts_tests = [] {
         }
         original.push_back(U'q');
 
-        const auto context = iteration % 8;
+        const auto context = iteration % contexts.size();
         Editor editor(make_document(context, original));
         const auto fragments = document_text_fragments(editor.document());
         auto owner = std::find_if(fragments.begin(), fragments.end(), [&](const auto& fragment) {

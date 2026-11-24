@@ -1,0 +1,10 @@
+# id	escaped prefix	escaped suffix
+paragraph		
+heading	# 	
+list	- 	
+task	- [ ] 	
+quote	> 	
+table	| 	 |\n| --- |
+callout-body	> [!NOTE]\n> 	
+footnote	[^1]: 	
+list-quote	- > 	

@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "support/folia_test.hpp"
+#include "support/fixture.hpp"
 import folia.markdown.ids;
 import folia.markdown.dialect;
 import folia.markdown.inline_cst;
@@ -27,14 +28,7 @@ using namespace boost::ut;
 suite parsing_inline_cst_lossless_tests = [] {
 
 "lossless representative editing states"_test = [] {
-    const std::vector<std::u32string> sources{
-        U"", U"abc", U"*abc*", U"_abc_", U"**abc**", U"__abc__",
-        U"**", U"**abc", U"a***b***c", U"~~abc~~", U"~~abc",
-        U"`abc`", U"`abc", U"[title](url)", U"[title](<url>)",
-        U"[title](url \"name\")", U"[title](", U"![alt](url)",
-        U"$abc$", U"$abc", U"\\*abc\\*", U"&amp;", U"a\\**b*",
-        U"two  \nlines", U"two\\\nlines", U"'文本'", U"\"文本\"",
-    };
+    const auto sources = inline_cst_cases("parsing/fixtures/inline_cst/representative.tsv");
 
     for (const auto& source : sources) {
         expect(is_lossless(source)) << "source=" << cps_to_utf8(source);
@@ -42,7 +36,7 @@ suite parsing_inline_cst_lossless_tests = [] {
 };
 
 "unclosed syntax remains structural"_test = [] {
-    const std::vector<std::u32string> sources{U"**", U"**abc", U"*", U"`abc", U"[title](", U"$abc", U"~~abc"};
+    const auto sources = inline_cst_cases("parsing/fixtures/inline_cst/unclosed.tsv");
     for (const auto& source : sources) {
         const auto tree = parse_inline(source, test_context());
         const auto* incomplete = first_node(tree, InlineCstKind::Incomplete);
@@ -68,7 +62,7 @@ suite parsing_inline_cst_lossless_tests = [] {
         expect(underscores_source.substr(underscore_strong->delimiter_ranges().opening.start, underscore_strong->delimiter_ranges().opening.length()) == U"__");
     }
 
-    const std::vector<std::u32string> links{U"[title](url)", U"[title](<url>)", U"[title](url 'name')"};
+    const auto links = inline_cst_cases("parsing/fixtures/inline_cst/link_spellings.tsv");
     for (const auto& link : links) {
         const auto tree = parse_inline(link, test_context());
         expect(first_node(tree, InlineCstKind::Link) != nullptr);
@@ -77,11 +71,7 @@ suite parsing_inline_cst_lossless_tests = [] {
 };
 
 "every character boundary remains lossless after insert and delete"_test = [] {
-    const std::vector<std::u32string> samples{
-        U"abc", U"**abc**", U"__abc__", U"**", U"**abc", U"a***b***c",
-        U"`abc`", U"`abc", U"[title](url)", U"[title](", U"$abc$", U"$abc",
-        U"~~abc~~", U"~~abc", U"\\*abc\\*",
-    };
+    const auto samples = inline_cst_cases("parsing/fixtures/inline_cst/character_edits.tsv");
     for (const auto& original : samples) {
         for (std::size_t offset = 0; offset <= original.size(); ++offset) {
             auto inserted = original;

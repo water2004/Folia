@@ -1,6 +1,15 @@
 #pragma once
+#include "support/fixture.hpp"
 
 namespace {
+
+std::vector<std::u32string> inline_cst_cases(std::string_view fixture) {
+    std::vector<std::u32string> result;
+    for (const auto& row : folia::test::data::read_tsv(fixture, 2))
+        result.push_back(folia::test::data::decode_utf32(row[1]));
+    return result;
+}
+
 
 InlineParseContext test_context() {
     InlineParseContext context;
