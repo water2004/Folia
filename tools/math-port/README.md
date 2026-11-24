@@ -51,3 +51,15 @@ The reviewed targets, evidence requirements, all members and module bindings,
 and optional explicit `--freeze-reviewed` operation are preserved. Validation
 never freezes metadata automatically; a missing pinned TypeScript installation,
 runtime version mismatch, or stale native target still fails.
+
+`python tools/math-port/parser-host-mutation-test.py` (or `--preflight`) is
+read-only: it verifies all 33 retained fault anchors, original baseline hashes,
+and named native witnesses. Executing mutations requires `--execute
+--build-dir <configured-build>`; use `--repo-root <isolated-checkout>` to keep
+other builds independent. CMake must be configured from that same checkout.
+`--target` defaults to the historical optional `FoliaMathHostTests` target, and
+`--executable` supports multi-configuration output paths. That historical
+candidate target was not part of master's tracked CMake graph; the tool does
+not silently configure it or update stale plan hashes. Each compile/test is
+bounded, every changed source is restored byte for byte, and the original
+progress, result, witness, and unchanged-gold checks remain in place.
