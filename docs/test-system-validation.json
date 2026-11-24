@@ -417,8 +417,13 @@
   "publication": {
     "commit_policy": "Every completed batch committed and immediately pushed with [skip ci].",
     "actions_runs_on_branch_at_final_check": 0,
-    "ci_files_changed": false,
-    "master_modified": false
+    "master_modified": false,
+    "continuation_start_revision": "c603f4db9d5274a3ac4ba132bbecdb478a583fdf",
+    "ci_files_changed_in_continuation": false,
+    "prior_branch_workflow_adaptations": {
+      ".github/workflows/mermaid-cpp.yml": "Existing comparison calls and preparation switched to the new Python entry points and dependencies before this continuation."
+    },
+    "workflow_trigger_configuration_unchanged": true
   },
   "local_evidence": [
     {

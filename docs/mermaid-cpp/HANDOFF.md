@@ -2,7 +2,7 @@
 
 ## 当前任务：测试系统重构（2026-11-24，已完成）
 
-- 在既有 `refactor/portable-test-system` 上完成；master 基线仍为 `2ba389aa34a5c2f23500dc552b9fab9c434a0cdd`。本次从 `c603f4db` 续做，所有完成批次均独立提交并立即推送，提交带 `[skip ci]`。未修改 CI、master 或创建标签；分支 Actions 查询为 0 次运行。
+- 在既有 `refactor/portable-test-system` 上完成；master 基线仍为 `2ba389aa34a5c2f23500dc552b9fab9c434a0cdd`。本次从 `c603f4db` 续做，所有完成批次均独立提交并立即推送，提交带 `[skip ci]`。本次续做未改 CI，master 与标签未动；此前分支已同步 Mermaid workflow 的 Python 比较入口/依赖，触发配置与 master 相同。分支 Actions 查询为 0 次运行。
 - **最终统一入口通过**：`python tests/run.py --suite all --build-dir build/test-refactor/portable --jobs 4 --test-jobs 1`，七套 catalog、**26/26 CTest、0 failed/CTest skipped**。验证代码版本 `d378f543aff1398f4b36b8868c88c88d1017862d`，之后只补验收文档。Linux Clang/libc++ 21.1.8、CMake 4.3.4、Ninja，真实 Boost.UT/C++23 模块、单 native 构建并发 4；CTest 用时 54.24 秒。
 - 完整原生结果：Core **1098 项/1305869 断言**；新增接线的既有 SDK-free policies **41/9096485**；Markdown 独立消费者 **4/61**；Completion **23/5562**；Math editor **7/15330**；Math **996/547261**；SVG/C ABI **83/2381**；Mermaid **274/959627**；真实 Math 集成 **5/205**，这些完整入口均无过滤/跳过。
 - 所有活跃 portable Python 测试文件 **40/40** 已接入，实际执行 **2828 项**全部通过：Mermaid 比较器 2567、Math 工具 176、Markdown 工具 45、GFM runner 11、LaTeX 目录 7、测试系统 22。遗漏的 7 个 SDK-free editor policy 文件、4 个 Markdown consumer 用例和 LaTeX 目录检查均已补入统一入口；可选 md4c target 开启时也纳入聚合，默认关闭且本轮未运行。
