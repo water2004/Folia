@@ -100,7 +100,7 @@ namespace winrt::Folia
         float documentRight,
         folia::TextSelection selection,
         std::span<const detail::EditorSearchHighlight> searchHighlights,
-        std::unordered_map<std::uint64_t, std::size_t> const& editableIndex)
+        folia::OwnerIndex const& editableIndex)
         : resources(resources),
           styleSheet(styleSheet),
           interactionMap(interactionMap),

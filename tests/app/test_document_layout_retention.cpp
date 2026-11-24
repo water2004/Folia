@@ -130,7 +130,7 @@ namespace {
     }
 
     float SourceDocumentTop(MeasurementFixture const& fixture, folia::TextPosition position) {
-        auto index = fixture.document->ownerBlockIndex.at(position.container_id.v);
+        auto index = fixture.document->FindOwnerBlock(position.container_id).value();
         auto const& block = fixture.document->blocks[index];
         expect(fatal(block.Visuals().layout != nullptr));
         auto display = folia::platform::editor::DisplayPositionForSource(
@@ -162,7 +162,7 @@ namespace {
             cache.EnsureGeometry();
             EditorViewportMaterializer materializer(frame, fixture.resources, preparer,
                 images, fixture.scroll, fixture.document);
-            materializer.EnsurePrepared(fixture.document->ownerBlockIndex.at(position.container_id.v),
+            materializer.EnsurePrepared(fixture.document->FindOwnerBlock(position.container_id).value(),
                 true, true);
             fixture.scroll.Set(SourceDocumentTop(fixture, position) + 3.0f,
                 fixture.document->totalHeight);
@@ -508,7 +508,7 @@ namespace {
             folia::TextPosition anchor{owner, 0, folia::TextAffinity::Downstream};
             MeasurementFixture fixture(460);
             ScrollToSource(fixture, frame, anchor);
-            expect(fixture.document->ownerBlockIndex.at(owner.v) == 0_u);
+            expect(fixture.document->FindOwnerBlock(owner).value() == 0_u);
             auto beforeOffset = fixture.scroll.Offset();
             auto screenY = SourceDocumentTop(fixture, anchor) - beforeOffset;
             expect(std::abs(screenY + 3.0f) < 0.25f);
@@ -570,14 +570,14 @@ namespace {
             ScrollToSource(fixture, session.RenderFrame(),
                 {first, 0, folia::TextAffinity::Downstream});
             auto originalFragments = fixture.document->blocks.size();
-            auto const* retainedOwnerEntry = &fixture.document->ownerBlockIndex.at(first.v);
+            auto initialOwner = fixture.document->FindOwnerBlock(first);
             auto verifyLocalRepair = [&](std::size_t before) {
                 expect(fixture.document->ownerIndexEntriesVisited - before < 2048_u)
                     << "a tail edit revisited the full document owner index";
-                expect(&fixture.document->ownerBlockIndex.at(first.v) == retainedOwnerEntry)
-                    << "the retained owner-map node was replaced";
+                expect(fixture.document->FindOwnerBlock(first) == initialOwner)
+                    << "a retained fragment lost its owner association";
                 for (auto owner : session.RenderModel().editable_order)
-                    expect(fixture.document->ownerBlockIndex.at(owner.v)
+                    expect(fixture.document->FindOwnerBlock(owner).value()
                         == session.RenderModel().fragment_for_owner(owner).value());
             };
             auto visits = fixture.document->ownerIndexEntriesVisited;
@@ -591,7 +591,7 @@ namespace {
             expect(fatal(session.ExecuteCommand({.kind = folia::CommandKind::Undo})));
             PrepareFrame(fixture, session.RenderFrame());
             verifyLocalRepair(visits);
-            expect(!fixture.document->ownerBlockIndex.contains(inserted.v));
+            expect(!fixture.document->FindOwnerBlock(inserted).has_value());
 
             visits = fixture.document->ownerIndexEntriesVisited;
             expect(fatal(session.ExecuteCommand({.kind = folia::CommandKind::Redo})));
@@ -612,18 +612,18 @@ namespace {
                     cache.EnsureGeometry();
                 });
                 for (auto owner : frame.renderModel.editable_order) {
-                    auto found = fixture.document->ownerBlockIndex.find(owner.v);
-                    expect(fatal(found != fixture.document->ownerBlockIndex.end()));
-                    expect(found->second < fixture.document->blocks.size());
+                    auto found = fixture.document->FindOwnerBlock(owner);
+                    expect(fatal(found.has_value()));
+                    expect(*found < fixture.document->blocks.size());
                     auto expected = sourceMode ? frame.renderModel.editable_index.at(owner.v)
                         : frame.renderModel.fragment_for_owner(owner).value();
-                    expect(found->second == expected);
+                    expect(*found == expected);
                 }
                 if (!sourceMode) {
                     auto thematic = std::ranges::find(frame.renderModel.blocks,
                         folia::RenderBlockKind::ThematicBreak, &folia::RenderBlock::kind);
                     expect(fatal(thematic != frame.renderModel.blocks.end()));
-                    expect(fixture.document->ownerBlockIndex.contains(thematic->id.v));
+                    expect(fixture.document->FindOwnerBlock(thematic->id).has_value());
                 }
             }
         };

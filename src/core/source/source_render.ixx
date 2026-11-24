@@ -290,7 +290,7 @@ inline RenderBlock render_line(
 }
 
 inline void append_editable_line(RenderModel& model, SourceLine const& line) {
-    model.editable_index.emplace(line.id.v, model.editable_order.size());
+    model.editable_index.set(line.id.v, model.editable_order.size());
     model.editable_order.push_back(line.id);
 }
 
@@ -301,7 +301,6 @@ inline RenderModel build_source_render_model(SourceEditor const& editor) {
     model.revision = editor.revision();
     model.outline = source_render_detail::source_outline(editor.lines(), editor.revision());
     model.blocks.reserve(editor.lines().size());
-    model.editable_order.reserve(editor.lines().size());
     auto code_contexts = source_render_detail::code_contexts(
         editor.lines(), 0, editor.lines().size());
 
@@ -351,8 +350,8 @@ inline RenderModel build_source_render_model_incremental(
             previous.blocks[index] = rebuild(index);
             if (old_id != lines[index].id) {
                 previous.editable_index.erase(old_id.v);
-                previous.editable_index[lines[index].id.v] = index;
-                previous.editable_order[index] = lines[index].id;
+                previous.editable_index.set(lines[index].id.v, index);
+                previous.editable_order.set(index, lines[index].id);
             }
         }
         previous.revision = editor.revision();
@@ -371,7 +370,6 @@ inline RenderModel build_source_render_model_incremental(
     model.revision = editor.revision();
     model.outline = Outline::empty(editor.revision());
     model.blocks.reserve(lines.size());
-    model.editable_order.reserve(lines.size());
     for (std::size_t index = 0; index < lines.size(); ++index) {
         if (index >= rebuild_start && index < rebuild_end) {
             model.blocks.push_back(rebuild(index));

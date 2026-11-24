@@ -9,6 +9,7 @@ import folia.markdown.diagnostics;
 import folia.markdown.dialect;
 import folia.markdown.instrumentation;
 import folia.markdown.inline_document;
+import folia.markdown.owner_index;
 
 export namespace folia {
 
@@ -50,8 +51,8 @@ struct EditorDocument {
     mutable std::unordered_map<std::uint64_t, BlockLocator> cached_block_locators;
     // Tree-order navigation index. It contains node identities only; text
     // offsets remain block-local and are always resolved against the tree.
-    std::vector<NodeId> cached_editable_order;
-    std::unordered_map<std::uint64_t, std::size_t> cached_editable_index;
+    OwnerOrder cached_editable_order;
+    OwnerIndex cached_editable_index;
     // Derived from LinkDefinition block syntax, in tree order. Duplicate labels
     // remain available when their first definition is removed by a patch.
     mutable std::unordered_map<std::string,std::vector<ReferenceDefinitionBinding>> cached_reference_definitions;
@@ -68,7 +69,7 @@ struct EditorDocument {
         d.cached_block_locators.emplace(d.root.id.v, BlockLocator{});
         d.cached_block_locators.emplace(paragraph.id.v, BlockLocator{d.root.id, 0});
         d.cached_editable_order.push_back(paragraph.id);
-        d.cached_editable_index.emplace(paragraph.id.v, 0);
+        d.cached_editable_index.set(paragraph.id.v, 0);
         return d;
     }
 };
@@ -83,7 +84,7 @@ inline void rebuild_document_block_index(EditorDocument& document) {
         document.cached_block_locators[block.id.v] = {parent_id, child_index};
         if (block.has_container_source()) block.container_source().prepare_owner_lookup();
         if (block.kind != BlockKind::Document && is_editable_block_owner(block.kind)) {
-            document.cached_editable_index.emplace(
+            document.cached_editable_index.set(
                 block.id.v,
                 document.cached_editable_order.size());
             document.cached_editable_order.push_back(block.id);

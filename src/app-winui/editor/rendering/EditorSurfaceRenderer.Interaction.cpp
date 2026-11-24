@@ -44,11 +44,10 @@ namespace winrt::Folia
         }
         if (preparedDocument)
         {
-            auto owner = preparedDocument->ownerBlockIndex.find(position.container_id.v);
-            if (owner != preparedDocument->ownerBlockIndex.end()
-                && owner->second < preparedDocument->geometry.Size())
+            auto owner = preparedDocument->FindOwnerBlock(position.container_id);
+            if (owner && *owner < preparedDocument->geometry.Size())
             {
-                auto placement = preparedDocument->geometry.At(owner->second);
+                auto placement = preparedDocument->geometry.At(*owner);
                 scrollState.Set(
                     placement.top - styleSheet.verticalPadding,
                     MaximumScrollOffset());

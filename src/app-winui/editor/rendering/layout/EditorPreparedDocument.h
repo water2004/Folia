@@ -1,6 +1,8 @@
 #pragma once
 
 import folia.core.block_geometry;
+import folia.core.render_model;
+import folia.markdown.owner_index;
 
 #include "editor/rendering/layout/EditorContentPreparation.h"
 #include "editor/rendering/EditorCaretPresentation.h"
@@ -55,7 +57,7 @@ namespace winrt::Folia
 
         struct Block
         {
-            std::vector<folia::NodeId> owners;
+            std::vector<folia::NodeId> structuralOwners;
             float previewHeight = 0.0f;
             float height = 0.0f;
             folia::NodeId sourceId{};
@@ -122,7 +124,17 @@ namespace winrt::Folia
         std::uint64_t themeRevision = 0;
         std::vector<Block> blocks;
         BlockGeometryIndex geometry;
-        std::unordered_map<std::uint64_t, std::size_t> ownerBlockIndex;
+        folia::OwnerOrder editableOrder;
+        folia::OwnerIndex editableIndex;
+        std::shared_ptr<const std::vector<folia::RenderOwnerInterval>> ownerIntervals;
+        folia::OwnerIndex structuralOwnerIndex;
+        bool sourceRows = false;
+
+        void UseNavigation(folia::RenderModel const& model);
+        std::optional<std::size_t> FindOwnerBlock(folia::NodeId owner) const;
+        std::optional<folia::NodeId> FirstSurvivingOwner(
+            std::size_t index, folia::OwnerIndex const& current) const;
+        void RegisterStructuralOwners(std::size_t index);
         // Work counter for native regression gates. Count records visited,
         // including no-op lookups, so a hidden full-owner pass is observable.
         std::size_t ownerIndexEntriesVisited = 0;

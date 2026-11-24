@@ -157,37 +157,32 @@ namespace winrt::Folia
             });
         }
 
+        template<class AddOwner>
         void CollectInlineOwners(
             std::vector<folia::InlineRenderItem> const& items,
-            std::unordered_set<std::uint64_t>& seen,
-            std::vector<folia::NodeId>& owners)
+            AddOwner const& add)
         {
             for (auto const& item : items)
             {
-                auto owner = item.source_span.container_id;
-                if (owner.v != 0 && seen.insert(owner.v).second) owners.push_back(owner);
-                CollectInlineOwners(item.special().semantic().children, seen, owners);
+                add(item.source_span.container_id);
+                CollectInlineOwners(item.special().semantic().children, add);
             }
         }
 
+        template<class AddOwner>
         void CollectRenderOwners(
             folia::RenderBlock const& block,
-            std::unordered_set<std::uint64_t>& seen,
-            std::vector<folia::NodeId>& owners)
+            AddOwner const& add)
         {
-            auto add = [&](folia::NodeId owner)
-            {
-                if (owner.v != 0 && seen.insert(owner.v).second) owners.push_back(owner);
-            };
             add(block.id);
             add(block.source_span.container_id);
             add(block.content_span.container_id);
-            CollectInlineOwners(block.inline_items, seen, owners);
+            CollectInlineOwners(block.inline_items, add);
             for (auto const& cell : block.special().table_cells)
-                CollectInlineOwners(cell, seen, owners);
+                CollectInlineOwners(cell, add);
             for (auto const& span : block.special().table_cell_spans) add(span.container_id);
             for (auto const& child : block.child_blocks)
-                CollectRenderOwners(child, seen, owners);
+                CollectRenderOwners(child, add);
         }
     }
 
@@ -251,7 +246,10 @@ namespace winrt::Folia
         prepared.containsImage = RenderBlockContainsImage(block);
         prepared.containsMermaid = RenderBlockContainsMermaid(block);
         std::unordered_set<std::uint64_t> owners;
-        CollectRenderOwners(block, owners, prepared.owners);
+        CollectRenderOwners(block, [&](folia::NodeId id) {
+            if (id.v != 0 && !frame.renderModel.editable_index.contains(id.v) && owners.insert(id.v).second)
+                prepared.structuralOwners.push_back(id);
+        });
     }
 
     DisplayInlineText EditorDocumentBlockPreparer::BuildDisplay(
@@ -448,10 +446,11 @@ namespace winrt::Folia
         prepared.embeddedGeneration = embeddedGeneration;
         prepared.remoteImageGeneration = remoteImageGeneration;
         std::unordered_set<std::uint64_t> owners;
-        for (auto owner : prepared.owners) owners.insert(owner.v);
+        for (auto owner : prepared.structuralOwners) owners.insert(owner.v);
         auto addOwner = [&](folia::NodeId id)
         {
-            if (id.v != 0 && owners.insert(id.v).second) prepared.owners.push_back(id);
+            if (id.v != 0 && !frame.renderModel.editable_index.contains(id.v) && owners.insert(id.v).second)
+                prepared.structuralOwners.push_back(id);
         };
         addOwner(block.id);
         addOwner(block.source_span.container_id);

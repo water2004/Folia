@@ -312,6 +312,9 @@
     <ClCompile Include="..\markdown\model\document.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\markdown\model\owner_index.ixx">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\core\editing\document_edit.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>

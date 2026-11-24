@@ -17,6 +17,7 @@ import folia.core.source_style;
 import folia.markdown.block_source;
 import folia.markdown.source_offset_map;
 import folia.markdown.block_tree;
+import folia.markdown.owner_index;
 export import folia.core.syntax_marker;
 
 export namespace folia {
@@ -462,17 +463,16 @@ struct RenderModel {
     std::uint64_t revision = 1;
     std::vector<RenderBlock> blocks;
     std::vector<RenderFragment> fragments;
-    std::vector<RenderOwnerInterval> owner_intervals;
+    std::shared_ptr<const std::vector<RenderOwnerInterval>> owner_intervals;
     bool virtualized = false;
     // Only populated for virtualized rich-text models.  Tracking the sparse
     // working set avoids scanning every block when the viewport moves.
     std::unordered_set<std::size_t> materialized_block_indices;
     Outline outline;
     std::vector<RenderDiagnostic> diagnostics;
-    std::vector<NodeId> editable_order;
-    // Stable document-order rank, built with the render projection instead of
-    // reconstructed by every viewport draw.
-    std::unordered_map<std::uint64_t, std::size_t> editable_index;
+    // Shared snapshot of the document's navigation pages.
+    OwnerOrder editable_order;
+    OwnerIndex editable_index;
     std::uint64_t document_dependency_key = 0;
     std::size_t rebuilt_block_count = 0;
     std::size_t reused_block_count = 0;
@@ -481,10 +481,15 @@ struct RenderModel {
     bool incremental_update = false;
     std::vector<std::size_t> changed_block_indices;
 
+    std::span<const RenderOwnerInterval> owner_ranges() const {
+        if (owner_intervals) return *owner_intervals;
+        return {};
+    }
+
     std::optional<std::size_t> fragment_for_owner(NodeId owner) const {
         auto found = editable_index.find(owner.v);
         if (found == editable_index.end()) return std::nullopt;
-        return render_fragment_at(owner_intervals, found->second);
+        return render_fragment_at(owner_ranges(), found->second);
     }
 };
 

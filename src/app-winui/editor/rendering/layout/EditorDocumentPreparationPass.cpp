@@ -161,13 +161,8 @@ namespace winrt::Folia
             anchorIndex = (std::min)(preparedDocument->geometry.FirstIntersecting(scrollOffset),
                 preparedDocument->blocks.size() - 1);
             auto const& anchor = preparedDocument->blocks[anchorIndex];
-            anchorOwner = anchor.sourceId;
-            for (auto owner : anchor.owners)
-                if (frame.renderModel.editable_index.contains(owner.v))
-                {
-                    anchorOwner = owner;
-                    break;
-                }
+            anchorOwner = preparedDocument->FirstSurvivingOwner(anchorIndex, frame.renderModel.editable_index)
+                .value_or(anchor.sourceId);
             anchorTop = preparedDocument->geometry.At(anchorIndex).top;
             sourceAnchor = CaptureSourceScrollAnchor(anchor, anchorTop, scrollOffset, frame.renderModel);
         }
@@ -179,10 +174,9 @@ namespace winrt::Folia
             std::optional<float> anchoredOffset;
             if (sourceAnchor)
             {
-                auto found = preparedDocument->ownerBlockIndex.find(sourceAnchor->position.container_id.v);
-                if (found != preparedDocument->ownerBlockIndex.end())
+                if (auto found = preparedDocument->FindOwnerBlock(sourceAnchor->position.container_id))
                 {
-                    auto index = found->second;
+                    auto index = *found;
                     viewportMaterializer.EnsurePrepared(index, true, true);
                     if (auto localTop = SourceScrollAnchorTop(
                             preparedDocument->blocks[index], sourceAnchor->position))
@@ -190,9 +184,8 @@ namespace winrt::Folia
                             + *localTop - sourceAnchor->screenY;
                 }
             }
-            auto found = preparedDocument->ownerBlockIndex.find(anchorOwner->v);
-            auto currentIndex = found != preparedDocument->ownerBlockIndex.end()
-                ? found->second : (std::min)(anchorIndex, preparedDocument->blocks.size() - 1);
+            auto currentIndex = preparedDocument->FindOwnerBlock(*anchorOwner)
+                .value_or((std::min)(anchorIndex, preparedDocument->blocks.size() - 1));
             auto target = anchoredOffset.value_or(initialScrollOffset
                 + preparedDocument->geometry.At(currentIndex).top - anchorTop);
             auto shift = target - scrollOffset;

@@ -23,65 +23,71 @@ namespace winrt::Folia
     {
     }
 
-    std::optional<std::size_t> EditorPreparedDocumentCache::FindOwnerBlock(
-        folia::NodeId owner) const
+    void EditorPreparedDocument::UseNavigation(folia::RenderModel const& model)
     {
-        if (!preparedDocument) return std::nullopt;
-        auto found = preparedDocument->ownerBlockIndex.find(owner.v);
-        if (found == preparedDocument->ownerBlockIndex.end()) return std::nullopt;
-        return found->second;
+        editableOrder = model.editable_order;
+        editableIndex = model.editable_index;
+        ownerIntervals = model.owner_intervals;
+        sourceRows = !model.blocks.empty() && model.blocks.front().source_mode;
+    }
+
+    std::optional<std::size_t> EditorPreparedDocument::FindOwnerBlock(folia::NodeId owner) const
+    {
+        if (auto rank = editableIndex.find(owner.v))
+        {
+            if (sourceRows) return rank->second;
+            if (ownerIntervals) return folia::render_fragment_at(*ownerIntervals, rank->second);
+        }
+        if (auto association = structuralOwnerIndex.find(owner.v)) return association->second;
+        return std::nullopt;
+    }
+
+    std::optional<folia::NodeId> EditorPreparedDocument::FirstSurvivingOwner(
+        std::size_t index, folia::OwnerIndex const& current) const
+    {
+        if (sourceRows && index < editableOrder.size())
+        {
+            auto owner = editableOrder[index];
+            if (current.contains(owner.v)) return owner;
+        }
+        if (ownerIntervals)
+        {
+            auto interval = std::ranges::lower_bound(*ownerIntervals, index, {},
+                &folia::RenderOwnerInterval::fragment);
+            if (interval != ownerIntervals->end() && interval->fragment == index)
+                for (auto ordinal = interval->begin; ordinal < interval->end; ++ordinal)
+                {
+                    auto owner = editableOrder[ordinal];
+                    if (current.contains(owner.v)) return owner;
+                }
+        }
+        return std::nullopt;
     }
 
     void EditorPreparedDocumentCache::RemoveOwners(
         EditorPreparedDocument::Block const& block, std::size_t index)
     {
-        for (auto owner : block.owners)
+        auto& lookup = preparedDocument->structuralOwnerIndex;
+        for (auto owner : block.structuralOwners)
         {
             ++preparedDocument->ownerIndexEntriesVisited;
-            auto found = preparedDocument->ownerBlockIndex.find(owner.v);
-            if (found != preparedDocument->ownerBlockIndex.end() && found->second == index)
-                preparedDocument->ownerBlockIndex.erase(found);
+            if (auto found = lookup.find(owner.v); found && found->second == index)
+                lookup.erase(owner.v);
         }
     }
 
-    void EditorPreparedDocumentCache::RegisterOwners(std::size_t index)
+    void EditorPreparedDocument::RegisterStructuralOwners(std::size_t index)
     {
-        auto& prepared = preparedDocument->blocks[index];
-        std::unordered_set<std::uint64_t> owners;
-        owners.reserve(prepared.owners.size() + 1);
-        for (auto owner : prepared.owners)
+        auto& block = blocks[index];
+        // Thematic breaks and source rows resolve through the model even when
+        // they have no text layout. Geometry-only structural owners are extra.
+        if (block.sourceId.v != 0 && !editableIndex.contains(block.sourceId.v)
+            && std::ranges::find(block.structuralOwners, block.sourceId) == block.structuralOwners.end())
+            block.structuralOwners.push_back(block.sourceId);
+        for (auto owner : block.structuralOwners)
         {
-            ++preparedDocument->ownerIndexEntriesVisited;
-            owners.insert(owner.v);
-        }
-        auto add = [&](folia::NodeId owner)
-        {
-            ++preparedDocument->ownerIndexEntriesVisited;
-            if (owner.v != 0 && owners.insert(owner.v).second) prepared.owners.push_back(owner);
-        };
-        // Thematic breaks have geometry without a text layout. Source-mode
-        // rows have their own physical owner and no fragment descriptor.
-        add(prepared.sourceId);
-        if (index < frame.renderModel.fragments.size())
-        {
-            auto const& fragment = frame.renderModel.fragments[index];
-            auto first = frame.renderModel.editable_index.find(fragment.first_owner.v);
-            auto last = frame.renderModel.editable_index.find(fragment.last_owner.v);
-            if (first != frame.renderModel.editable_index.end()
-                && last != frame.renderModel.editable_index.end()
-                && first->second <= last->second
-                && last->second < frame.renderModel.editable_order.size())
-            {
-                // Include every editable cell in an atomic table and every
-                // empty/hidden source owner, independently of visible glyphs.
-                for (auto ordinal = first->second; ordinal <= last->second; ++ordinal)
-                    add(frame.renderModel.editable_order[ordinal]);
-            }
-        }
-        for (auto owner : prepared.owners)
-        {
-            ++preparedDocument->ownerIndexEntriesVisited;
-            preparedDocument->ownerBlockIndex[owner.v] = index;
+            ++ownerIndexEntriesVisited;
+            structuralOwnerIndex.set(owner.v, index);
         }
     }
 
@@ -103,9 +109,9 @@ namespace winrt::Folia
                 .themeRevision = preparedDocument->themeRevision,
                 .active = preparedDocument->selection.active,
             };
-            previousActiveBlock = FindOwnerBlock(
+            previousActiveBlock = preparedDocument->FindOwnerBlock(
                 preparedDocument->selection.active.container_id);
-            activeBlock = FindOwnerBlock(selection.active.container_id);
+            activeBlock = preparedDocument->FindOwnerBlock(selection.active.container_id);
         }
         auto sourceMode = !frame.renderModel.blocks.empty()
             && frame.renderModel.blocks.front().source_mode;
@@ -157,13 +163,14 @@ namespace winrt::Folia
             preparedDocument->documentWidth = documentWidth;
             preparedDocument->themeRevision = themeRevision;
             preparedDocument->blocks.resize(frame.renderModel.blocks.size());
+            preparedDocument->UseNavigation(frame.renderModel);
             if (previous)
                 preparedDocument->ownerIndexEntriesVisited = previous->ownerIndexEntriesVisited;
             if (previous
                 && previous->documentWidth == documentWidth
                 && previous->themeRevision == themeRevision)
             {
-                preparedDocument->ownerBlockIndex = std::move(previous->ownerBlockIndex);
+                preparedDocument->structuralOwnerIndex = std::move(previous->structuralOwnerIndex);
                 std::vector<bool> retained(previous->blocks.size());
                 std::vector<std::optional<std::size_t>> previousIndices(frame.renderModel.blocks.size());
                 std::unordered_map<std::uint64_t, std::size_t> previousById;
@@ -198,11 +205,12 @@ namespace winrt::Folia
                     if (!retained[index]) RemoveOwners(previous->blocks[index], index);
                 for (std::size_t index = 0; index < previousIndices.size(); ++index)
                     if (previousIndices[index] && *previousIndices[index] != index)
-                        RegisterOwners(index);
+                        preparedDocument->RegisterStructuralOwners(index);
             }
         }
         else
         {
+            if (invalidationPlan.modelChanged) preparedDocument->UseNavigation(frame.renderModel);
             for (auto index : invalidationPlan.invalidatedBlocks)
             {
                 auto const& source = frame.renderModel.blocks[index];
@@ -232,7 +240,7 @@ namespace winrt::Folia
                             + (source.source_mode || source.fragment_continues ? 0.0f : styleSheet.blockGap),
                     });
                 }
-                RegisterOwners(index);
+                preparedDocument->RegisterStructuralOwners(index);
                 preparedDocument->layoutBlocks.erase(index);
                 preparedDocument->embeddedBlocks.erase(index);
                 for (auto const& imageSource : imageSources)
@@ -260,15 +268,14 @@ namespace winrt::Folia
     void EditorPreparedDocumentCache::ReconcileTrailingPreview()
     {
         auto owner = preparedDocument->selection.active.container_id;
-        auto found = preparedDocument->ownerBlockIndex.find(owner.v);
-        if (owner.v == 0 || found == preparedDocument->ownerBlockIndex.end()
-            || found->second >= frame.renderModel.fragments.size())
+        auto found = preparedDocument->FindOwnerBlock(owner);
+        if (!found || *found >= frame.renderModel.fragments.size())
         {
             preparedDocument->ResetTrailingPreview();
             preparedDocument->totalHeight = preparedDocument->geometry.TotalHeight();
             return;
         }
-        auto index = found->second;
+        auto index = *found;
         auto& source = preparedDocument->blocks[index];
         auto group = FindFlowGroup(index);
         if (!group || group->end == index + 1
@@ -360,7 +367,7 @@ namespace winrt::Folia
                 if (!block.hasFlowContext || block.appliedFlow == context) continue;
                 auto imageSources = EditorDocumentBlockPreparer::ImageSources(block);
                 MeasureGeometry(index, context);
-                RegisterOwners(index);
+                preparedDocument->RegisterStructuralOwners(index);
                 preparedDocument->geometry.UpdateHeight(index, preparedDocument->GeometryHeight(index));
                 for (auto const& imageSource : imageSources) inlineImages.ReleaseGif(imageSource);
             }
@@ -424,12 +431,12 @@ namespace winrt::Folia
             if (!prepared.geometryMeasured)
             {
                 MeasureGeometry(index);
-                RegisterOwners(index);
+                preparedDocument->RegisterStructuralOwners(index);
             }
             else if (prepared.sourceId.v == 0)
             {
                 blockPreparer.InitializeMetadata(prepared, block);
-                RegisterOwners(index);
+                preparedDocument->RegisterStructuralOwners(index);
             }
             entries.push_back({
                 block.block_style.margin_top,

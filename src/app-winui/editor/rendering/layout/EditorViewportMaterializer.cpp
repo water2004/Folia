@@ -55,8 +55,7 @@ namespace winrt::Folia
             preparedDocument->embeddedBlocks.insert(index);
         else
             preparedDocument->embeddedBlocks.erase(index);
-        for (auto owner : prepared.owners)
-            preparedDocument->ownerBlockIndex[owner.v] = index;
+        preparedDocument->RegisterStructuralOwners(index);
         auto height = preparedDocument->GeometryHeight(index);
         if (height == previousHeight) return false;
         preparedDocument->geometry.UpdateHeight(index, height);

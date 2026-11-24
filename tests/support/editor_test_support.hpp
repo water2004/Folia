@@ -43,7 +43,7 @@ bool document_indexes_are_exact(const EditorDocument& document) {
     visit(visit, document.root, NodeId{}, 0);
     valid = valid
         && document.cached_block_locators.size() == block_count
-        && document.cached_editable_order == editable_order
+        && std::ranges::equal(document.cached_editable_order, editable_order)
         && document.cached_editable_index.size() == editable_order.size();
     for (std::size_t index = 0; index < editable_order.size(); ++index) {
         const auto cached = document.cached_editable_index.find(editable_order[index].v);

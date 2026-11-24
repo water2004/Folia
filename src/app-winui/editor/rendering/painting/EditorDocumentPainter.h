@@ -1,5 +1,6 @@
 #pragma once
 
+import folia.markdown.owner_index;
 import folia.platform.editor_interaction;
 
 #include "editor/rendering/layout/EditorContentPreparation.h"
@@ -33,7 +34,7 @@ namespace winrt::Folia
             float documentRight,
             folia::TextSelection selection,
             std::span<const detail::EditorSearchHighlight> searchHighlights,
-            std::unordered_map<std::uint64_t, std::size_t> const& editableIndex);
+            folia::OwnerIndex const& editableIndex);
 
         void DrawTaskCheckboxes(
             IDWriteTextLayout* layout,
@@ -90,7 +91,7 @@ namespace winrt::Folia
         float documentRight = 0.0f;
         folia::TextSelection selection;
         std::span<const detail::EditorSearchHighlight> searchHighlights;
-        std::unordered_map<std::uint64_t, std::size_t> const& editableIndex;
+        folia::OwnerIndex const& editableIndex;
         folia::TextPosition selectionStart;
         folia::TextPosition selectionEnd;
     };

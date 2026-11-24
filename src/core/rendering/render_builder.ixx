@@ -1602,19 +1602,11 @@ inline void update_render_geometry_hints(RenderBlock& block) {
 inline RenderModel finish_render_model(
     const EditorDocument& doc,
     const Outline& outline,
-    std::vector<RenderBlock> blocks,
-    std::optional<std::tuple<
-        std::vector<NodeId>,
-        std::unordered_map<std::uint64_t, std::size_t>>> cached_editable = std::nullopt) {
+    std::vector<RenderBlock> blocks) {
     std::vector<RenderDiagnostic> diags;
     for (const auto& d : doc.diagnostics) diags.push_back(convert_diagnostic(d));
     RenderModel m; m.revision = doc.revision; m.blocks = std::move(blocks);
     m.outline = outline; m.diagnostics = std::move(diags);
-    if (cached_editable) {
-        m.editable_order = std::move(std::get<0>(*cached_editable));
-        m.editable_index = std::move(std::get<1>(*cached_editable));
-        return m;
-    }
     m.editable_order = doc.cached_editable_order;
     m.editable_index = doc.cached_editable_index;
     return m;
@@ -1655,7 +1647,8 @@ inline RenderModel build_render_model_with_fragments(
     for (auto const& fragment : fragments)
         blocks.push_back(build_render_fragment(builder, doc, fragment, dependency_key, virtualized));
     auto model = finish_render_model(doc, outline, std::move(blocks));
-    model.owner_intervals = index_render_fragment_owners(doc, fragments);
+    model.owner_intervals = std::make_shared<const std::vector<RenderOwnerInterval>>(
+        index_render_fragment_owners(doc, fragments));
     model.fragments = std::move(fragments);
     model.document_dependency_key = dependency_key;
     model.virtualized = virtualized;
@@ -1734,16 +1727,8 @@ inline void release_render_model_blocks_outside(
 
 namespace render_fragment_update_detail {
 
-struct Splice {
-    std::size_t old_begin = 0;
-    std::size_t old_end = 0;
-    std::size_t new_begin = 0;
-    std::size_t new_end = 0;
-};
-
 struct Repair {
     std::vector<RenderFragment> fragments;
-    std::vector<Splice> splices;
 };
 
 inline bool same_semantic_payload(DocumentTreeDelta const& delta) {
@@ -1902,45 +1887,11 @@ inline std::optional<Repair> repair_plan(
             {*first, *last}, {}, true);
         if (replacement.empty()) return std::nullopt;
         append_unchanged(root.begin, root.dirty_begin);
-        auto begin = result.fragments.size();
         result.fragments.insert(result.fragments.end(), std::make_move_iterator(replacement.begin()),
             std::make_move_iterator(replacement.end()));
-        result.splices.push_back({root.dirty_begin, root.dirty_end, begin, result.fragments.size()});
         append_unchanged(root.dirty_end, root.end);
     }
     return result;
-}
-
-// Apply the same splice to derived navigation. Rank entries after a middle
-// insertion still move with the existing contiguous owner order, but an edit
-// near the tail never copies or rehashes unrelated preceding owners.
-inline void repair_navigation(EditorDocument const& document, RenderModel& previous,
-    Repair const& plan) {
-    auto first_changed_owner = previous.editable_order.size();
-    for (auto const& splice : plan.splices) {
-        for (auto index = splice.old_begin; index < splice.old_end; ++index) {
-            auto interval = editable_owner_range(previous.fragments[index], previous.editable_index);
-            if (!interval) continue;
-            first_changed_owner = (std::min)(first_changed_owner, interval->first);
-            for (auto ordinal = interval->first; ordinal < interval->second; ++ordinal) {
-                auto owner = previous.editable_order[ordinal];
-                if (!document.cached_editable_index.contains(owner.v))
-                    previous.editable_index.erase(owner.v);
-            }
-        }
-        for (auto index = splice.new_begin; index < splice.new_end; ++index) {
-            if (auto interval = editable_owner_range(plan.fragments[index], document.cached_editable_index))
-                first_changed_owner = (std::min)(first_changed_owner, interval->first);
-        }
-    }
-    first_changed_owner = (std::min)(first_changed_owner, document.cached_editable_order.size());
-    previous.editable_order.resize(document.cached_editable_order.size());
-    std::copy(document.cached_editable_order.begin() + static_cast<std::ptrdiff_t>(first_changed_owner),
-        document.cached_editable_order.end(), previous.editable_order.begin() + static_cast<std::ptrdiff_t>(first_changed_owner));
-    for (auto ordinal = first_changed_owner; ordinal < previous.editable_order.size(); ++ordinal) {
-        previous.editable_index[previous.editable_order[ordinal].v] = ordinal;
-        record_render_navigation_entry_update();
-    }
 }
 
 } // namespace render_fragment_update_detail
@@ -2023,8 +1974,6 @@ inline RenderModel build_render_model_incremental(
     previous_by_id.reserve(previous.blocks.size());
     for (std::size_t index = 0; index < previous.blocks.size(); ++index)
         previous_by_id.emplace(previous.blocks[index].id.v, index);
-    if (repair)
-        render_fragment_update_detail::repair_navigation(doc, previous, *repair);
     auto fragments = repair ? std::move(repair->fragments)
         : plan_render_fragments(doc, render_key_detail::context_key, previous.fragments);
     auto owner_intervals = index_render_fragment_owners(doc, fragments);
@@ -2085,12 +2034,8 @@ inline RenderModel build_render_model_incremental(
             ++rebuilt;
         }
     }
-    std::optional<std::tuple<std::vector<NodeId>,
-        std::unordered_map<std::uint64_t, std::size_t>>> navigation;
-    if (repair) navigation.emplace(std::move(previous.editable_order),
-        std::move(previous.editable_index));
-    auto model = finish_render_model(doc, outline, std::move(blocks), std::move(navigation));
-    model.owner_intervals = std::move(owner_intervals);
+    auto model = finish_render_model(doc, outline, std::move(blocks));
+    model.owner_intervals = std::make_shared<const std::vector<RenderOwnerInterval>>(std::move(owner_intervals));
     model.fragments = std::move(fragments);
     model.document_dependency_key = dependency_key;
     model.rebuilt_block_count = rebuilt;

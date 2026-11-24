@@ -9,6 +9,7 @@ import folia.markdown.ids;
 import folia.markdown.block_tree;
 import folia.markdown.document;
 import folia.markdown.instrumentation;
+import folia.markdown.owner_index;
 
 export namespace folia {
 
@@ -251,7 +252,7 @@ inline void visit_render_fragment(
 }
 
 inline std::optional<std::pair<std::size_t, std::size_t>> editable_owner_range(
-    RenderFragment const& fragment, std::unordered_map<std::uint64_t, std::size_t> const& ordinals) {
+    RenderFragment const& fragment, OwnerIndex const& ordinals) {
     auto first = ordinals.find(fragment.first_owner.v);
     auto last = ordinals.find(fragment.last_owner.v);
     if (first == ordinals.end() || last == ordinals.end() || first->second > last->second)

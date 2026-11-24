@@ -54,7 +54,7 @@ void expect_fragment_navigation(Editor const& editor, RenderModel const& model) 
     expect(model.editable_order == editor.document().cached_editable_order);
     expect(model.editable_index == editor.document().cached_editable_index);
     std::size_t next_owner = 0;
-    for (auto const& interval : model.owner_intervals) {
+    for (auto const& interval : model.owner_ranges()) {
         expect(interval.begin == next_owner);
         expect(interval.fragment < model.fragments.size());
         next_owner = interval.end;
@@ -76,6 +76,24 @@ void expect_fragment_navigation(Editor const& editor, RenderModel const& model) 
 }
 
 suite render_fragment_tests = [] {
+    "render navigation snapshots preserve prior ranks through edits and undo"_test = [] {
+        Editor editor(list_source(900));
+        auto original = build_virtualized_render_model(editor.document(), editor.outline(),
+            editor.symbols(), default_theme_profile());
+        auto first = original.editable_order.front();
+        auto last = original.editable_order.back();
+        const auto original_size = original.editable_order.size();
+        editor.set_selection(TextSelection::caret({first, 3, TextAffinity::Downstream}));
+        if (!expect(fatal(editor.execute_command(Command{.kind = CommandKind::InsertNewline})))) return;
+        auto inserted = editor.selection().active.container_id;
+        expect(!original.editable_index.contains(inserted.v));
+        expect(original.editable_index.at(last.v) == original_size - 1);
+        expect(editor.document().cached_editable_index.at(last.v) == original_size);
+        if (!expect(fatal(editor.undo()))) return;
+        expect(editor.document().cached_editable_index == original.editable_index);
+        expect(editor.document().cached_editable_order == original.editable_order);
+    };
+
     "fragment owner intervals cover mixed blocks and skip unowned fragments"_test = [] {
         auto parsed = parse_text(1, "# title\n\n---\n\n> quote\n\n"
             "| A | B |\n| --- | --- |\n| C | |\n\n"
@@ -101,7 +119,7 @@ suite render_fragment_tests = [] {
         auto fragments = model.fragments;
         fragments.insert(fragments.begin(), RenderFragment{});
         auto intervals = index_render_fragment_owners(parsed.document, fragments);
-        expect(intervals.size() == model.owner_intervals.size());
+        expect(intervals.size() == model.owner_ranges().size());
         expect(render_fragment_at(intervals, 0) == 1u);
     };
 
@@ -144,7 +162,7 @@ suite render_fragment_tests = [] {
                 expect(leaves <= render_fragment_leaf_limit);
             }
             expect(joined == flow_spelling(whole));
-            expect(model.owner_intervals.back().end == parsed.document.cached_editable_order.size());
+            expect(model.owner_ranges().back().end == parsed.document.cached_editable_order.size());
         }
     };
 
@@ -291,7 +309,6 @@ suite render_fragment_tests = [] {
                     default_theme_profile(), std::move(model), update);
                 auto work = read_core_operation_counters();
                 expect(work.render_fragment_nodes_planned < 512u);
-                expect(work.render_navigation_entries_updated < 512u);
                 expect(work.render_source_nodes_hashed < 512u);
                 expect(work.full_document_block_index_scans == 0u);
                 expect(model.rebuilt_block_count <= 3u);

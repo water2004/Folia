@@ -16,7 +16,6 @@ struct CoreOperationCounters {
     std::uint64_t render_source_nodes_hashed = 0;
     std::uint64_t render_source_characters_hashed = 0;
     std::uint64_t render_fragment_nodes_planned = 0;
-    std::uint64_t render_navigation_entries_updated = 0;
     std::uint64_t full_document_block_index_scans = 0;
     std::uint64_t incremental_document_block_index_repairs = 0;
     std::uint64_t full_document_text_projections = 0;
@@ -55,9 +54,6 @@ inline void record_render_source_node(std::size_t characters) {
 }
 inline void record_render_fragment_plan_node() {
     ++core_operation_counters.render_fragment_nodes_planned;
-}
-inline void record_render_navigation_entry_update() {
-    ++core_operation_counters.render_navigation_entries_updated;
 }
 inline void record_full_document_block_index_scan() {
     ++core_operation_counters.full_document_block_index_scans;

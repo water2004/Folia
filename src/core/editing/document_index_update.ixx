@@ -59,7 +59,7 @@ inline void rebuild_editable_positions(
     if (start == 0) document.cached_editable_index.clear();
     for (std::size_t index = start; index < document.cached_editable_order.size(); ++index) {
         record_editable_order_entry_update();
-        document.cached_editable_index[document.cached_editable_order[index].v] = index;
+        document.cached_editable_index.set(document.cached_editable_order[index].v, index);
     }
 }
 
@@ -243,16 +243,16 @@ inline bool update_document_block_index(
             if (const auto found = document.cached_editable_index.find(id);
                 found != document.cached_editable_index.end()) {
                 first = (std::min)(first, found->second);
-                document.cached_editable_index.erase(found);
+                document.cached_editable_index.erase(id);
             }
         }
         auto destination = first;
         for (auto source = first; source < document.cached_editable_order.size(); ++source) {
             const auto id = document.cached_editable_order[source];
             if (removed_editable.contains(id.v)) continue;
-            document.cached_editable_order[destination] = id;
+            if (destination != source) document.cached_editable_order.set(destination, id);
             record_editable_order_entry_update();
-            document.cached_editable_index[id.v] = destination++;
+            document.cached_editable_index.set(id.v, destination++);
         }
         document.cached_editable_order.resize(destination);
     }
@@ -285,10 +285,7 @@ inline bool update_document_block_index(
             insertion = found->second + 1;
         }
         insertion = (std::min)(insertion, document.cached_editable_order.size());
-        document.cached_editable_order.insert(
-            document.cached_editable_order.begin() + static_cast<std::ptrdiff_t>(insertion),
-            owners.begin(),
-            owners.end());
+        document.cached_editable_order.insert(insertion, owners);
         rebuild_editable_positions(document, insertion);
     }
 

@@ -34,9 +34,7 @@ namespace winrt::Folia
         void ReconcileTrailingPreview();
 
     private:
-        std::optional<std::size_t> FindOwnerBlock(folia::NodeId owner) const;
         void RemoveOwners(EditorPreparedDocument::Block const& block, std::size_t index);
-        void RegisterOwners(std::size_t index);
         void MeasureGeometry(std::size_t index,
             std::optional<EditorFlowLayoutContext> flowContext = {});
         EditorPreparedDocument::FlowGroup* FindFlowGroup(std::size_t index);
