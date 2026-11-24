@@ -175,12 +175,15 @@ for(const source of ['\\mathtoolsset{multlined-pos=true}\\begin{multlined}x\\end
  assert.equal(caught instanceof TypeError,true,source);
  typeExceptions.push({source,name:caught.name,message:caught.message});
 }
-function cpp(text){const chunks=[];let s='';for(const c of text){const n=c.codePointAt(0);const e=c==='\\'?'\\\\':c==='"'?'\\"':n===10?'\\n':n===13?'\\r':n===9?'\\t':n<32||n>126?(n>65535?'\\U'+n.toString(16).padStart(8,'0'):'\\u'+n.toString(16).padStart(4,'0')):c;if(s.length+e.length>1800){chunks.push('u"'+s+'"');s='';}s+=e;}chunks.push('u"'+s+'"');return chunks.join('\n        ');}
-let output='// Generated independently from pinned Mathtools Source; use --write-fixture explicitly.\n// Each case uses tags=ams; packages=base,ams,newcommand,mathtools,boldsymbol; maxMacros=1000.\n';
-output+='const std::array mathtoolsTrees{\n'+trees.map(c=>'    MathtoolsTree{'+cpp(c.source)+', '+cpp(c.snapshot)+'},').join('\n')+'\n};\n';
-output+='const std::array mathtoolsErrors{\n'+errors.map(c=>'    MathtoolsError{'+cpp(c.source)+', '+JSON.stringify(c.id)+'},').join('\n')+'\n};\n';
-output+='const std::array mathtoolsSteps{\n'+steps.map(c=>'    MathtoolsStep{'+c.group+', '+cpp(c.source)+', '+cpp(c.snapshot)+', '+JSON.stringify(c.error)+'},').join('\n')+'\n};\n';
-output+='// reverse=false: extpfeil,mathtools; reverse=true: mathtools,extpfeil.\n';
-output+='const std::array mathtoolsOrder{\n'+order.map(c=>'    MathtoolsOrder{'+c.reverse+', '+cpp(c.source)+', '+cpp(c.snapshot)+'},').join('\n')+'\n};\n';
-const file=path.join(root,'tests/math/fixtures/mathtools.inc');if(process.argv.includes('--write-fixture'))fs.writeFileSync(file,output);else assert.equal(fs.readFileSync(file,'utf8').replaceAll('\r\n','\n').replace(/^\uFEFF/,''),output,'Mathtools fixture changed; explicitly regenerate from Source');
+const {utf16Field, byteField, writeTables} = require('./fixture-data.cjs');
+writeTables(path.join(root, 'tests/math/fixtures/packages/mathtools'), {
+  'trees': {columns: ["source_utf16", "snapshot_utf16"],
+    rows: trees.map(c => [utf16Field(c.source), utf16Field(c.snapshot)])},
+  'errors': {columns: ["source_utf16", "id_bytes"],
+    rows: errors.map(c => [utf16Field(c.source), byteField(c.id)])},
+  'steps': {columns: ["group_integer", "source_utf16", "snapshot_utf16", "error_bytes"],
+    rows: steps.map(c => [c.group, utf16Field(c.source), utf16Field(c.snapshot), byteField(c.error)])},
+  'order': {columns: ["reverse_boolean", "source_utf16", "snapshot_utf16"],
+    rows: order.map(c => [+!!c.reverse, utf16Field(c.source), utf16Field(c.snapshot)])},
+});
 console.log(JSON.stringify({compiles,trees:trees.length,errors:errors.length,steps:steps.length,groups:6,historicalCases:historicalCases.length,historicalErrors,order:order.length,orderCompiles,containerBoundary:1,typeExceptions,compiled_source_sha256:reference.provenance.compiled_source_sha256}));

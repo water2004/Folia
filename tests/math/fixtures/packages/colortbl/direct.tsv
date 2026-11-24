@@ -1,0 +1,11 @@
+# Pinned reference observations; values exported without normalization.
+# name_utf16	snapshot_utf16
+precedence	6:mtable1:117:data-frame-styles6:string0:0:1:23:mtr1:00:1:23:mtd1:114:mathbackground6:string3:red0:1:112:inferredMrow1:00:1:12:mi1:01:a1:03:mtd1:114:mathbackground6:string4:blue0:1:112:inferredMrow1:00:1:12:mi1:01:b1:03:mtr1:00:1:13:mtd1:114:mathbackground6:string5:green0:1:112:inferredMrow1:00:1:12:mi1:01:c1:0
+sparse	6:mtable1:117:data-frame-styles6:string0:0:1:13:mtr1:00:1:33:mtd1:00:1:112:inferredMrow1:00:1:12:mi1:01:a1:03:mtd1:00:1:112:inferredMrow1:00:1:12:mi1:01:b1:03:mtd1:114:mathbackground6:string6:yellow0:1:112:inferredMrow1:00:1:12:mi1:01:c1:0
+partialRow	6:mtable1:117:data-frame-styles6:string0:0:1:13:mtr1:00:1:13:mtd1:114:mathbackground6:string4:blue0:1:112:inferredMrow1:00:1:12:mi1:01:x1:0
+plain	6:mtable1:117:data-frame-styles6:string0:0:1:13:mtr1:00:1:13:mtd1:114:mathbackground6:string3:red0:1:112:inferredMrow1:00:1:12:mi1:01:x1:0
+fenced	4:mrow1:00:1:32:mo1:35:fence7:boolean4:true8:stretchy7:boolean4:true9:symmetric7:boolean4:true1:(1:06:mtable1:117:data-frame-styles6:string0:0:1:13:mtr1:00:1:13:mtd1:114:mathbackground6:string3:red0:1:112:inferredMrow1:00:1:12:mi1:01:x1:02:mo1:35:fence7:boolean4:true8:stretchy7:boolean4:true9:symmetric7:boolean4:true1:)1:0
+style	6:mstyle1:111:scriptlevel6:number1:10:1:112:inferredMrow1:00:1:16:mtable1:117:data-frame-styles6:string0:0:1:13:mtr1:00:1:13:mtd1:114:mathbackground6:string3:red0:1:112:inferredMrow1:00:1:12:mi1:01:x1:0
+menclose	8:menclose1:212:data-padding6:number1:08:notation6:string4:left0:1:112:inferredMrow1:00:1:16:mtable1:117:data-frame-styles6:string0:0:1:13:mtr1:00:1:13:mtd1:114:mathbackground6:string3:red0:1:112:inferredMrow1:00:1:12:mi1:01:x1:0
+fullframe	6:mtable1:15:frame6:string5:solid0:1:13:mtr1:00:1:13:mtd1:114:mathbackground6:string3:red0:1:112:inferredMrow1:00:1:12:mi1:01:x1:0
+mixed	6:mtable1:117:data-frame-styles6:string22:none dashed none solid0:1:13:mtr1:00:1:13:mtd1:114:mathbackground6:string3:red0:1:112:inferredMrow1:00:1:12:mi1:01:x1:0

@@ -1,0 +1,14 @@
+# Pinned reference observations; values exported without normalization.
+# source_utf16	id_bytes	recoveryTag_utf16
+\u005cbegin{numcases*}{f=}a & text\u005cend{numcases*}	UnknownEnv	1
+\u005cbegin{subnumcases*}{f=}a & text\u005cend{subnumcases*}	UnknownEnv	1
+\u005cbegin{numcases}{f=}a & one & two\u005cend{numcases}	ExtraCasesAlignTab	1
+\u005cbegin{numcases}{f=}a & &amp;\u005cend{numcases}	ExtraCasesAlignTab	1
+\u005cbegin{numcases}{f=}a & \u005c& escaped\u005cend{numcases}	ExtraCasesAlignTab	1
+\u005cbegin{numcases}	MissingArgFor	1
+\u005cbegin{numcases}{f=}a & text	EnvMissingEnd	2
+\u005cbegin{numcases}{f=}a & text}\u005cend{numcases}	ExtraCloseMissingOpen	2
+\u005cbegin{numcases}{f=}a & {text\u005cend{numcases}	EnvMissingEnd	2
+\u005cbegin{numcases}{\u005cunknown}a & text\u005cend{numcases}	UndefinedControlSequence	2
+\u005cbegin{numcases}{f=}\u005cunknown & text\u005cend{numcases}	UndefinedControlSequence	1
+\u005cbegin{numcases}{f=}a & text\u005cend{align}	EnvBadEnd	2

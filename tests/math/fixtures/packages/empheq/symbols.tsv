@@ -1,0 +1,34 @@
+# Pinned reference observations; values exported without normalization.
+# name_utf16	glyph_utf16	snapshot_utf16
+empheqlbrace	{	4:math1:210:data-latex6:string13:\u005cempheqlbrace7:display6:string5:block0:1:112:inferredMrow1:00:1:12:mo1:110:data-latex6:string13:\u005cempheqlbrace1:{1:0
+empheqrbrace	}	4:math1:210:data-latex6:string13:\u005cempheqrbrace7:display6:string5:block0:1:112:inferredMrow1:00:1:12:mo1:110:data-latex6:string13:\u005cempheqrbrace1:}1:0
+empheqlbrack	[	4:math1:210:data-latex6:string13:\u005cempheqlbrack7:display6:string5:block0:1:112:inferredMrow1:00:1:12:mo1:110:data-latex6:string13:\u005cempheqlbrack1:[1:0
+empheqrbrack	]	4:math1:210:data-latex6:string13:\u005cempheqrbrack7:display6:string5:block0:1:112:inferredMrow1:00:1:12:mo1:110:data-latex6:string13:\u005cempheqrbrack1:]1:0
+empheqlangle	\u27e8	4:math1:210:data-latex6:string13:\u005cempheqlangle7:display6:string5:block0:1:112:inferredMrow1:00:1:12:mo1:110:data-latex6:string13:\u005cempheqlangle1:\u27e81:0
+empheqrangle	\u27e9	4:math1:210:data-latex6:string13:\u005cempheqrangle7:display6:string5:block0:1:112:inferredMrow1:00:1:12:mo1:110:data-latex6:string13:\u005cempheqrangle1:\u27e91:0
+empheqlparen	(	4:math1:210:data-latex6:string13:\u005cempheqlparen7:display6:string5:block0:1:112:inferredMrow1:00:1:12:mo1:110:data-latex6:string13:\u005cempheqlparen1:(1:0
+empheqrparen	)	4:math1:210:data-latex6:string13:\u005cempheqrparen7:display6:string5:block0:1:112:inferredMrow1:00:1:12:mo1:110:data-latex6:string13:\u005cempheqrparen1:)1:0
+empheqlvert	|	4:math1:210:data-latex6:string12:\u005cempheqlvert7:display6:string5:block0:1:112:inferredMrow1:00:1:12:mo1:110:data-latex6:string12:\u005cempheqlvert1:|1:0
+empheqrvert	|	4:math1:210:data-latex6:string12:\u005cempheqrvert7:display6:string5:block0:1:112:inferredMrow1:00:1:12:mo1:110:data-latex6:string12:\u005cempheqrvert1:|1:0
+empheqlVert	\u2016	4:math1:210:data-latex6:string12:\u005cempheqlVert7:display6:string5:block0:1:112:inferredMrow1:00:1:12:mo1:110:data-latex6:string12:\u005cempheqlVert1:\u20161:0
+empheqrVert	\u2016	4:math1:210:data-latex6:string12:\u005cempheqrVert7:display6:string5:block0:1:112:inferredMrow1:00:1:12:mo1:110:data-latex6:string12:\u005cempheqrVert1:\u20161:0
+empheqlfloor	\u230a	4:math1:210:data-latex6:string13:\u005cempheqlfloor7:display6:string5:block0:1:112:inferredMrow1:00:1:12:mo1:110:data-latex6:string13:\u005cempheqlfloor1:\u230a1:0
+empheqrfloor	\u230b	4:math1:210:data-latex6:string13:\u005cempheqrfloor7:display6:string5:block0:1:112:inferredMrow1:00:1:12:mo1:110:data-latex6:string13:\u005cempheqrfloor1:\u230b1:0
+empheqlceil	\u2308	4:math1:210:data-latex6:string12:\u005cempheqlceil7:display6:string5:block0:1:112:inferredMrow1:00:1:12:mo1:110:data-latex6:string12:\u005cempheqlceil1:\u23081:0
+empheqrceil	\u2309	4:math1:210:data-latex6:string12:\u005cempheqrceil7:display6:string5:block0:1:112:inferredMrow1:00:1:12:mo1:110:data-latex6:string12:\u005cempheqrceil1:\u23091:0
+empheqbiglbrace	{	4:math1:210:data-latex6:string16:\u005cempheqbiglbrace7:display6:string5:block0:1:112:inferredMrow1:00:1:12:mo1:110:data-latex6:string16:\u005cempheqbiglbrace1:{1:0
+empheqbigrbrace	}	4:math1:210:data-latex6:string16:\u005cempheqbigrbrace7:display6:string5:block0:1:112:inferredMrow1:00:1:12:mo1:110:data-latex6:string16:\u005cempheqbigrbrace1:}1:0
+empheqbiglbrack	[	4:math1:210:data-latex6:string16:\u005cempheqbiglbrack7:display6:string5:block0:1:112:inferredMrow1:00:1:12:mo1:110:data-latex6:string16:\u005cempheqbiglbrack1:[1:0
+empheqbigrbrack	]	4:math1:210:data-latex6:string16:\u005cempheqbigrbrack7:display6:string5:block0:1:112:inferredMrow1:00:1:12:mo1:110:data-latex6:string16:\u005cempheqbigrbrack1:]1:0
+empheqbiglangle	\u27e8	4:math1:210:data-latex6:string16:\u005cempheqbiglangle7:display6:string5:block0:1:112:inferredMrow1:00:1:12:mo1:110:data-latex6:string16:\u005cempheqbiglangle1:\u27e81:0
+empheqbigrangle	\u27e9	4:math1:210:data-latex6:string16:\u005cempheqbigrangle7:display6:string5:block0:1:112:inferredMrow1:00:1:12:mo1:110:data-latex6:string16:\u005cempheqbigrangle1:\u27e91:0
+empheqbiglparen	(	4:math1:210:data-latex6:string16:\u005cempheqbiglparen7:display6:string5:block0:1:112:inferredMrow1:00:1:12:mo1:110:data-latex6:string16:\u005cempheqbiglparen1:(1:0
+empheqbigrparen	)	4:math1:210:data-latex6:string16:\u005cempheqbigrparen7:display6:string5:block0:1:112:inferredMrow1:00:1:12:mo1:110:data-latex6:string16:\u005cempheqbigrparen1:)1:0
+empheqbiglvert	|	4:math1:210:data-latex6:string15:\u005cempheqbiglvert7:display6:string5:block0:1:112:inferredMrow1:00:1:12:mo1:110:data-latex6:string15:\u005cempheqbiglvert1:|1:0
+empheqbigrvert	|	4:math1:210:data-latex6:string15:\u005cempheqbigrvert7:display6:string5:block0:1:112:inferredMrow1:00:1:12:mo1:110:data-latex6:string15:\u005cempheqbigrvert1:|1:0
+empheqbiglVert	\u2016	4:math1:210:data-latex6:string15:\u005cempheqbiglVert7:display6:string5:block0:1:112:inferredMrow1:00:1:12:mo1:110:data-latex6:string15:\u005cempheqbiglVert1:\u20161:0
+empheqbigrVert	\u2016	4:math1:210:data-latex6:string15:\u005cempheqbigrVert7:display6:string5:block0:1:112:inferredMrow1:00:1:12:mo1:110:data-latex6:string15:\u005cempheqbigrVert1:\u20161:0
+empheqbiglfloor	\u230a	4:math1:210:data-latex6:string16:\u005cempheqbiglfloor7:display6:string5:block0:1:112:inferredMrow1:00:1:12:mo1:110:data-latex6:string16:\u005cempheqbiglfloor1:\u230a1:0
+empheqbigrfloor	\u230b	4:math1:210:data-latex6:string16:\u005cempheqbigrfloor7:display6:string5:block0:1:112:inferredMrow1:00:1:12:mo1:110:data-latex6:string16:\u005cempheqbigrfloor1:\u230b1:0
+empheqbiglceil	\u2308	4:math1:210:data-latex6:string15:\u005cempheqbiglceil7:display6:string5:block0:1:112:inferredMrow1:00:1:12:mo1:110:data-latex6:string15:\u005cempheqbiglceil1:\u23081:0
+empheqbigrceil	\u2309	4:math1:210:data-latex6:string15:\u005cempheqbigrceil7:display6:string5:block0:1:112:inferredMrow1:00:1:12:mo1:110:data-latex6:string15:\u005cempheqbigrceil1:\u23091:0

@@ -98,14 +98,17 @@ for(const source of ['\\begin{empheq}{array}a\\end{empheq}','\\begin{empheq}[bad
 assert.deepEqual(util.splitOptions('left={a=b},right={c,d}',{left:1,right:1}),{left:'a=b',right:'c,d'});
 assert.throws(()=>util.splitOptions('bad=x',{left:1}),e=>e.id==='InvalidOption');
 assert.equal(typeErrors.length,3);assert.equal(utilityCaptures.length,8);assert.equal(captures.length,68);
-function cpp(text){let s='u"';for(const c of text){const n=c.codePointAt(0);if(c==='\\')s+='\\\\';else if(c==='"')s+='\\"';else if(n<32||n>126)s+=n>65535?'\\U'+n.toString(16).padStart(8,'0'):'\\u'+n.toString(16).padStart(4,'0');else s+=c;}return s+'"';}
-let fixtureText='// Generated from actual pinned Source: tex-empheq-source.cjs --write-fixture\n';
-fixtureText+='const std::array empheqCases{\n'+captures.map(c=>'    EmpheqCase{'+[c.source,c.tagSide,c.snapshot].map(cpp).join(', ')+(c.bold?', true':'')+'},').join('\n')+'\n};\n';
-fixtureText+='const std::array empheqSymbols{\n'+symbols.map(c=>'    EmpheqSymbol{'+[c.name,c.glyph,c.snapshot].map(cpp).join(', ')+'},').join('\n')+'\n};\n';
-fixtureText+='const std::array empheqUtilityCases{\n'+utilityCaptures.map(c=>'    EmpheqUtilityCase{'+[c.name,c.shape,c.snapshot].map(cpp).join(', ')+'},').join('\n')+'\n};\n';
-fixtureText+='const std::array empheqErrors{\n'+errors.map(c=>'    EmpheqError{'+cpp(c.source)+', "'+c.id+'"},').join('\n')+'\n};\n';
-fixtureText+='const std::array<std::u16string_view,3> empheqTypeErrors{\n'+typeErrors.map(c=>'    '+cpp(c)+',').join('\n')+'\n};\n';
-const fixturePath=path.join(root,'tests/math/fixtures/empheq.inc');
-if(process.argv.includes('--write-fixture'))fs.writeFileSync(fixturePath,fixtureText);
-else assert.equal(fs.readFileSync(fixturePath,'utf8').replaceAll('\r\n','\n').replace(/^\uFEFF/,''),fixtureText,'Independent Source fixture changed; regenerate explicitly');
+const {utf16Field, byteField, writeTables} = require('./fixture-data.cjs');
+writeTables(path.join(root, 'tests/math/fixtures/packages/empheq'), {
+  'cases': {columns: ["source_utf16", "tagSide_utf16", "snapshot_utf16", "bold_boolean"],
+    rows: captures.map(c => [utf16Field(c.source), utf16Field(c.tagSide), utf16Field(c.snapshot), +!!c.bold])},
+  'symbols': {columns: ["name_utf16", "glyph_utf16", "snapshot_utf16"],
+    rows: symbols.map(c => [utf16Field(c.name), utf16Field(c.glyph), utf16Field(c.snapshot)])},
+  'utilities': {columns: ["name_utf16", "shape_utf16", "snapshot_utf16"],
+    rows: utilityCaptures.map(c => [utf16Field(c.name), utf16Field(c.shape), utf16Field(c.snapshot)])},
+  'errors': {columns: ["source_utf16", "id_bytes"],
+    rows: errors.map(c => [utf16Field(c.source), byteField(c.id)])},
+  'type-errors': {columns: ["value_utf16"],
+    rows: typeErrors.map(c => [utf16Field(c)])},
+});
 console.log(JSON.stringify({cases,environments:6,matrix:48,treeCases:captures.length,symbols:symbols.length,utilityCases:utilityCaptures.length,texErrors:errors.length,typeErrors:typeErrors.length,compiled_source_sha256:reference.provenance.compiled_source_sha256}));

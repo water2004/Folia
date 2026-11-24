@@ -1,0 +1,16 @@
+# Pinned reference observations; values exported without normalization.
+# source_utf16	id_bytes
+\u005ccellcolor{red}	UnsupportedTableColor
+\u005ccellcolor	MissingArgFor
+\u005ccellcolor[invalid]{red}	UndefinedColorModel
+\u005ccellcolor[rgb]{2,0,0}	ModelArg2
+\u005cbegin{array}{c}x\u005crowcolor{red}\u005cend{array}	RowColorNotFirst
+\u005cbegin{array}{cc}a&\u005crowcolor{red}b\u005cend{array}	RowColorNotFirst
+\u005cbegin{array}{c}a\u005c\u005c\u005ccolumncolor{red}b\u005cend{array}	ColumnColorNotTop
+\u005cbegin{array}{c}\u005ccolumncolor{red}a\u005c\u005c\u005ccolumncolor{blue}b\u005cend{array}	ColumnColorNotTop
+\u005cbegin{array}{c}a\u005c\u005c\u005ccolumncolor{}b\u005cend{array}	ColumnColorNotTop
+\u005cbegin{align}\u005ccellcolor{red}a&=b\u005cend{align}	UnsupportedTableColor
+\u005cbegin{array}{c}{\u005ccellcolor{red}a}\u005cend{array}	UnsupportedTableColor
+\u005cbegin{array}{c}\u005cmathbf{\u005ccellcolor{red}a}\u005cend{array}	UnsupportedTableColor
+\u005cbegin{array}{c}\u005ccellcolor[rgb]{1,2}a\u005cend{array}	ModelArg1
+\u005cbegin{array}{c}\u005ccellcolor{red}\u005cunknown\u005cend{array}	UndefinedControlSequence

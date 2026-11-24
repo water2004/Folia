@@ -111,11 +111,15 @@ for(const mode of ['plain','fenced','style','menclose','fullframe','mixed'])dire
  if(mode==='mixed')array.frame=[['left','solid'],['right','dashed']];
  direct.push({name:mode,snapshot:snapshot(array.createMml())});
 });
-function cpp(text){let s='u"';for(const c of text){const n=c.codePointAt(0);if(c==='\\')s+='\\\\';else if(c==='"')s+='\\"';else if(n===0)s+='\\0';else if(n===10)s+='\\n';else if(n===13)s+='\\r';else if(n===9)s+='\\t';else if(n<32||n>126)s+=n>65535?'\\U'+n.toString(16).padStart(8,'0'):'\\u'+n.toString(16).padStart(4,'0');else s+=c;}return s+'"';}
-let fixtureText='// Generated from pinned real Source: tex-colortbl-source.cjs --write-fixture\n';
-fixtureText+='const std::array colortblTrees{\n'+captures.map(c=>'    ColortblTree{'+cpp(c.source)+', '+c.color+', '+c.reversed+', '+cpp(c.snapshot)+'},').join('\n')+'\n};\n';
-fixtureText+='const std::array colortblErrors{\n'+errors.map(c=>'    ColortblError{'+cpp(c.source)+', "'+c.id+'"},').join('\n')+'\n};\n';
-fixtureText+='const std::array colortblSequence{\n'+sequence.map(c=>'    ColortblSequence{'+cpp(c.source)+', '+cpp(c.snapshot)+'},').join('\n')+'\n};\n';
-fixtureText+='const std::array colortblDirect{\n'+direct.map(c=>'    ColortblDirect{'+cpp(c.name)+', '+cpp(c.snapshot)+'},').join('\n')+'\n};\n';
-const fixturePath=path.join(root,'tests/math/fixtures/colortbl.inc');if(process.argv.includes('--write-fixture'))fs.writeFileSync(fixturePath,fixtureText);else assert.equal(fs.readFileSync(fixturePath,'utf8').replaceAll('\r\n','\n').replace(/^\uFEFF/,''),fixtureText,'Colortbl Source fixture changed; regenerate explicitly');
+const {utf16Field, byteField, writeTables} = require('./fixture-data.cjs');
+writeTables(path.join(root, 'tests/math/fixtures/packages/colortbl'), {
+  'trees': {columns: ["source_utf16", "color_boolean", "reversed_boolean", "snapshot_utf16"],
+    rows: captures.map(c => [utf16Field(c.source), +!!c.color, +!!c.reversed, utf16Field(c.snapshot)])},
+  'errors': {columns: ["source_utf16", "id_bytes"],
+    rows: errors.map(c => [utf16Field(c.source), byteField(c.id)])},
+  'sequence': {columns: ["source_utf16", "snapshot_utf16"],
+    rows: sequence.map(c => [utf16Field(c.source), utf16Field(c.snapshot)])},
+  'direct': {columns: ["name_utf16", "snapshot_utf16"],
+    rows: direct.map(c => [utf16Field(c.name), utf16Field(c.snapshot)])},
+});
 console.log(JSON.stringify({cases,snapshots:captures.length,errors:errors.length,sequence:sequence.length,direct:direct.length,compiled_source_sha256:reference.provenance.compiled_source_sha256}));

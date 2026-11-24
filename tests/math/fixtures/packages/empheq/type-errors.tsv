@@ -1,0 +1,5 @@
+# Pinned reference observations; values exported without normalization.
+# value_utf16
+\u005cbegin{empheq}[right=R]{equation*}a=b\u005cend{empheq}
+\u005cbegin{empheq}[left]{align}a&=b\u005cend{empheq}
+\u005cbegin{empheq}[right]{align}a&=b\u005cend{empheq}

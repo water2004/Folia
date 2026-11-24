@@ -1,4 +1,5 @@
 #include "math/support/tex_fixture.hpp"
+#include "math/support/fixture_values.hpp"
 import folia.math.input.tex.empheq.configuration;
 import folia.math.input.tex.empheq.util;
 import folia.math.input.tex.ams.configuration;
@@ -147,20 +148,59 @@ void parentLinks(MmlNode &root) {
     });
 }
 struct EmpheqCase {
-    std::u16string_view source, tagSide, snapshot;
+    std::u16string source, tagSide, snapshot;
     bool bold{};
 };
 struct EmpheqSymbol {
-    std::u16string_view name, glyph, snapshot;
+    std::u16string name, glyph, snapshot;
 };
 struct EmpheqUtilityCase {
-    std::u16string_view name, shape, snapshot;
+    std::u16string name, shape, snapshot;
 };
 struct EmpheqError {
-    std::u16string_view source;
-    std::string_view id;
+    std::u16string source;
+    std::string id;
 };
-#include "math/fixtures/empheq.inc"
+const auto& empheqCases() {
+    static const auto result = math_test::fixtures::records<EmpheqCase>(
+        "math/fixtures/packages/empheq/cases.tsv", 4, 68, [](const auto& r) {
+            return EmpheqCase{folia::test::data::decode_utf16(r[0]), folia::test::data::decode_utf16(r[1]), folia::test::data::decode_utf16(r[2]), math_test::fixtures::boolean(r[3])};
+        });
+    return result;
+}
+
+const auto& empheqSymbols() {
+    static const auto result = math_test::fixtures::records<EmpheqSymbol>(
+        "math/fixtures/packages/empheq/symbols.tsv", 3, 32, [](const auto& r) {
+            return EmpheqSymbol{folia::test::data::decode_utf16(r[0]), folia::test::data::decode_utf16(r[1]), folia::test::data::decode_utf16(r[2])};
+        });
+    return result;
+}
+
+const auto& empheqUtilityCases() {
+    static const auto result = math_test::fixtures::records<EmpheqUtilityCase>(
+        "math/fixtures/packages/empheq/utilities.tsv", 3, 8, [](const auto& r) {
+            return EmpheqUtilityCase{folia::test::data::decode_utf16(r[0]), folia::test::data::decode_utf16(r[1]), folia::test::data::decode_utf16(r[2])};
+        });
+    return result;
+}
+
+const auto& empheqErrors() {
+    static const auto result = math_test::fixtures::records<EmpheqError>(
+        "math/fixtures/packages/empheq/errors.tsv", 2, 9, [](const auto& r) {
+            return EmpheqError{folia::test::data::decode_utf16(r[0]), math_test::fixtures::bytes(r[1])};
+        });
+    return result;
+}
+
+const auto& empheqTypeErrors() {
+    static const auto result = math_test::fixtures::records<std::u16string>(
+        "math/fixtures/packages/empheq/type-errors.tsv", 1, 3, [](const auto& r) {
+            return folia::test::data::decode_utf16(r[0]);
+        });
+    return result;
+}
+
 MmlNode &utilityTable(EmpheqFixture &f, std::u16string_view shape = u"ragged") {
     auto &factory = f.document.factory();
     auto cell = [&](std::u16string_view content) -> MmlNode & {
@@ -213,7 +253,7 @@ suite empheq_suite = [] {
             }
         }
         auto map = f.maps.getMap(u"empheq-macros");
-        for (auto const &c : empheqSymbols) {
+        for (auto const &c : empheqSymbols()) {
             auto lookup = map->lookup(c.name);
             auto macro = std::get<Macro const *>(lookup);
             expect(std::get<MacroHandler>(macro->function) == &EmpheqMethods::EmpheqMO);
@@ -240,8 +280,8 @@ suite empheq_suite = [] {
             expect(!EmpheqUtil::checkEnv(invalid));
     };
     "empheq six environments stars side combinations tags and exact Source trees"_test = [] {
-        expect(empheqCases.size() == 68_u);
-        for (auto const &c : empheqCases) {
+        expect(empheqCases().size() == 68_u);
+        for (auto const &c : empheqCases()) {
             EmpheqFixture f(c.tagSide, c.bold);
             auto &root = f.ok(std::u16string(c.source));
             matchesSource(root, c.snapshot);
@@ -249,8 +289,8 @@ suite empheq_suite = [] {
         }
     };
     "empheq all thirty two fixed symbols preserve real glyphs and definitions"_test = [] {
-        expect(empheqSymbols.size() == 32_u);
-        for (auto const &c : empheqSymbols) {
+        expect(empheqSymbols().size() == 32_u);
+        for (auto const &c : empheqSymbols()) {
             EmpheqFixture f;
             auto &root = f.ok(u"\\" + std::u16string(c.name));
             matchesSource(root, c.snapshot);
@@ -261,7 +301,7 @@ suite empheq_suite = [] {
         }
     };
     "empheq direct utility transformations match independent Source trees"_test = [] {
-        for (auto const &c : empheqUtilityCases) {
+        for (auto const &c : empheqUtilityCases()) {
             EmpheqFixture f;
             TexParser parser(u"x", {}, f.jax->parseOptions());
             auto &original = utilityTable(f, c.shape);
@@ -352,14 +392,14 @@ suite empheq_suite = [] {
         EmpheqFixture labels(u"left");
         labels.ok(u"\\begin{empheq}[left=L,right=R]{align}a&=b\\tag{A}\\label{first}\\end{empheq}");
         expect(std::ranges::equal(emphText(labels.ok(u"\\ref{first}+\\eqref{first}")), u"A+(A)"sv));
-        for (auto const &c : empheqErrors) {
+        for (auto const &c : empheqErrors()) {
             EmpheqFixture f;
             f.compile(std::u16string(c.source));
             expect(f.error == c.id);
             expect(f.jax->parseOptions().request().parsers.empty());
             f.ok(u"x");
         }
-        for (auto source : empheqTypeErrors) {
+        for (auto source : empheqTypeErrors()) {
             EmpheqFixture f;
             try {
                 f.compile(std::u16string(source));

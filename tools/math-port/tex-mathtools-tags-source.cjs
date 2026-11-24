@@ -83,11 +83,11 @@ let invalidShapes=0;for(const bad of ['x',['a','b'],['a','b','c','d']]){assert.t
 {
  const f=fixture('ams',false,false,{numeric:[1,2,3]});select(f,'numeric');assert.deepEqual(f.jax.parseOptions.tags.formatTag('Q'),[1,'3{Q}',2]);
 }
-function cpp(text){let s='u"';for(const c of text){const n=c.codePointAt(0);if(c==='\\')s+='\\\\';else if(c==='"')s+='\\"';else if(n===0)s+='\\0';else if(n===10)s+='\\n';else if(n===13)s+='\\r';else if(n===9)s+='\\t';else if(n<32||n>126)s+=n>65535?'\\U'+n.toString(16).padStart(8,'0'):'\\u'+n.toString(16).padStart(4,'0');else s+=c;}return s+'"';}
-let fixtureText='// Generated from actual pinned Source: tex-mathtools-tags-source.cjs --write-fixture\n';
-fixtureText+='// Forms: box=["[","]",""]; bold=["<",">","\\\\mathbf"]. TF: Nn and ["<",tag,">"].\n';
-fixtureText+='const std::array mtTagTrees{\n'+trees.map(c=>'    MtTagTree{'+cpp(c.mode)+', '+c.tagformat+', '+c.reverse+', '+[c.selected,c.source,c.snapshot].map(cpp).join(', ')+'},').join('\n')+'\n};\n';
-fixtureText+='// mode=all, no TF. Actions 0 keep,1 box,2 replace box with ( ),3 reselect,4 clear,5 bold.\n';
-fixtureText+='const std::array mtTagSequence{\n'+steps.map(c=>'    MtTagStep{'+c.action+', '+cpp(c.source)+', '+cpp(c.snapshot)+'},').join('\n')+'\n};\n';
-const fixturePath=path.join(root,'tests/math/fixtures/mathtools_tags.inc');if(process.argv.includes('--write-fixture'))fs.writeFileSync(fixturePath,fixtureText);else assert.equal(fs.readFileSync(fixturePath,'utf8').replaceAll('\r\n','\n').replace(/^\uFEFF/,''),fixtureText,'Mathtools tag fixture changed; regenerate explicitly');
+const {utf16Field, byteField, writeTables} = require('./fixture-data.cjs');
+writeTables(path.join(root, 'tests/math/fixtures/packages/mathtools_tags'), {
+  'trees': {columns: ["mode_utf16", "tagformat_boolean", "reverse_boolean", "selected_utf16", "source_utf16", "snapshot_utf16"],
+    rows: trees.map(c => [utf16Field(c.mode), +!!c.tagformat, +!!c.reverse, utf16Field(c.selected), utf16Field(c.source), utf16Field(c.snapshot)])},
+  'sequence': {columns: ["action_integer", "source_utf16", "snapshot_utf16"],
+    rows: steps.map(c => [c.action, utf16Field(c.source), utf16Field(c.snapshot)])},
+});
 console.log(JSON.stringify({compiles,trees:trees.length,steps:steps.length,methodErrors,invalidShapes,compiled_source_sha256:reference.provenance.compiled_source_sha256}));

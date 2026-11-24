@@ -40,4 +40,14 @@ inline auto rows(std::string_view path, std::size_t columns, std::size_t expecte
     return result;
 }
 
+template <class Row, class Decode>
+std::vector<Row> records(std::string_view path, std::size_t columns,
+                         std::size_t expected, Decode decode) {
+    std::vector<Row> result;
+    result.reserve(expected);
+    for (const auto& fields : rows(path, columns, expected))
+        result.push_back(decode(fields));
+    return result;
+}
+
 } // namespace math_test::fixtures

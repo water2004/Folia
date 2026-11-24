@@ -1,4 +1,5 @@
 #include "math/support/tex_fixture.hpp"
+#include "math/support/fixture_values.hpp"
 import folia.math.input.tex.mathtools.configuration;
 import folia.math.input.tex.ams.configuration;
 import folia.math.input.tex.mathtools.util;
@@ -146,22 +147,53 @@ void checkFullTree(MmlNode &root, std::u16string_view expected) {
     });
 }
 struct MathtoolsTree {
-    std::u16string_view source, snapshot;
+    std::u16string source, snapshot;
 };
 struct MathtoolsError {
-    std::u16string_view source;
-    std::string_view id;
+    std::u16string source;
+    std::string id;
 };
 struct MathtoolsStep {
     int group;
-    std::u16string_view source, snapshot;
-    std::string_view error;
+    std::u16string source, snapshot;
+    std::string error;
 };
 struct MathtoolsOrder {
     bool reverse;
-    std::u16string_view source, snapshot;
+    std::u16string source, snapshot;
 };
-#include "fixtures/mathtools.inc"
+const auto& mathtoolsTrees() {
+    static const auto result = math_test::fixtures::records<MathtoolsTree>(
+        "math/fixtures/packages/mathtools/trees.tsv", 2, 218, [](const auto& r) {
+            return MathtoolsTree{folia::test::data::decode_utf16(r[0]), folia::test::data::decode_utf16(r[1])};
+        });
+    return result;
+}
+
+const auto& mathtoolsErrors() {
+    static const auto result = math_test::fixtures::records<MathtoolsError>(
+        "math/fixtures/packages/mathtools/errors.tsv", 2, 61, [](const auto& r) {
+            return MathtoolsError{folia::test::data::decode_utf16(r[0]), math_test::fixtures::bytes(r[1])};
+        });
+    return result;
+}
+
+const auto& mathtoolsSteps() {
+    static const auto result = math_test::fixtures::records<MathtoolsStep>(
+        "math/fixtures/packages/mathtools/steps.tsv", 4, 37, [](const auto& r) {
+            return MathtoolsStep{math_test::fixtures::integer<int>(r[0]), folia::test::data::decode_utf16(r[1]), folia::test::data::decode_utf16(r[2]), math_test::fixtures::bytes(r[3])};
+        });
+    return result;
+}
+
+const auto& mathtoolsOrder() {
+    static const auto result = math_test::fixtures::records<MathtoolsOrder>(
+        "math/fixtures/packages/mathtools/order.tsv", 3, 4, [](const auto& r) {
+            return MathtoolsOrder{math_test::fixtures::boolean(r[0]), folia::test::data::decode_utf16(r[1]), folia::test::data::decode_utf16(r[2])};
+        });
+    return result;
+}
+
 } // namespace
 suite mathtools = [] {
     "mathtools package registers original handlers factory defaults aliases and prescript filter"_test =
@@ -195,14 +227,14 @@ suite mathtools = [] {
             dynamic_cast<MultlinedItem &>(*product).EndTable();
         };
     "mathtools package mathematical families match pinned Source MML"_test = [] {
-        for (auto const &row : mathtoolsTrees) {
+        for (auto const &row : mathtoolsTrees()) {
             MathtoolsFixture f;
             auto &root = f.ok(std::u16string(row.source));
             checkFullTree(root, row.snapshot);
         }
     };
     "mathtools package Source errors leave next formula usable"_test = [] {
-        for (auto const &row : mathtoolsErrors) {
+        for (auto const &row : mathtoolsErrors()) {
             MathtoolsFixture f;
             f.compile(std::u16string(row.source));
             expect(f.error == row.id) << folia::math::utf16::encode(row.source) << " actual "
@@ -213,7 +245,7 @@ suite mathtools = [] {
     "mathtools package Source sequences preserve definitions options and tag forms"_test = [] {
         std::unique_ptr<MathtoolsFixture> fixture;
         int current = -1;
-        for (auto const &row : mathtoolsSteps) {
+        for (auto const &row : mathtoolsSteps()) {
             if (!fixture || current != row.group) {
                 fixture = std::make_unique<MathtoolsFixture>();
                 current = row.group;
@@ -227,7 +259,7 @@ suite mathtools = [] {
         }
     };
     "mathtools package preserves extpfeil override order in actual Source MML"_test = [] {
-        for (auto const &row : mathtoolsOrder) {
+        for (auto const &row : mathtoolsOrder()) {
             MathtoolsFixture f({}, row.reverse);
             checkFullTree(f.ok(std::u16string(row.source)), row.snapshot);
         }

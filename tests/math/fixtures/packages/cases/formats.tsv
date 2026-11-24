@@ -1,0 +1,10 @@
+# Pinned reference observations; values exported without normalization.
+# sub_optional_integer	expected_utf16
+null	7
+0	7`
+1	7a
+26	7z
+27	7{
+-97	7\uffff
+65440	7\u0000
+65536	7`

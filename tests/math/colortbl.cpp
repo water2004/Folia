@@ -1,4 +1,5 @@
 #include "math/support/tex_fixture.hpp"
+#include "math/support/fixture_values.hpp"
 import folia.math.input.tex.colortbl.configuration;
 import folia.math.input.tex.color.configuration;
 import folia.math.input.tex.ams.configuration;
@@ -174,23 +175,54 @@ void checkTableTree(MmlNode &root, std::u16string_view expected) {
     });
 }
 struct ColortblTree {
-    std::u16string_view source;
+    std::u16string source;
     bool color, reversed;
-    std::u16string_view snapshot;
+    std::u16string snapshot;
 };
 struct ColortblError {
-    std::u16string_view source;
-    std::string_view id;
+    std::u16string source;
+    std::string id;
 };
 struct ColortblSequence {
-    std::u16string_view source, snapshot;
+    std::u16string source, snapshot;
 };
 struct ColortblDirect {
-    std::u16string_view name, snapshot;
+    std::u16string name, snapshot;
 };
-#include "math/fixtures/colortbl.inc"
+const auto& colortblTrees() {
+    static const auto result = math_test::fixtures::records<ColortblTree>(
+        "math/fixtures/packages/colortbl/trees.tsv", 4, 27, [](const auto& r) {
+            return ColortblTree{folia::test::data::decode_utf16(r[0]), math_test::fixtures::boolean(r[1]), math_test::fixtures::boolean(r[2]), folia::test::data::decode_utf16(r[3])};
+        });
+    return result;
+}
+
+const auto& colortblErrors() {
+    static const auto result = math_test::fixtures::records<ColortblError>(
+        "math/fixtures/packages/colortbl/errors.tsv", 2, 14, [](const auto& r) {
+            return ColortblError{folia::test::data::decode_utf16(r[0]), math_test::fixtures::bytes(r[1])};
+        });
+    return result;
+}
+
+const auto& colortblSequence() {
+    static const auto result = math_test::fixtures::records<ColortblSequence>(
+        "math/fixtures/packages/colortbl/sequence.tsv", 2, 4, [](const auto& r) {
+            return ColortblSequence{folia::test::data::decode_utf16(r[0]), folia::test::data::decode_utf16(r[1])};
+        });
+    return result;
+}
+
+const auto& colortblDirect() {
+    static const auto result = math_test::fixtures::records<ColortblDirect>(
+        "math/fixtures/packages/colortbl/direct.tsv", 2, 9, [](const auto& r) {
+            return ColortblDirect{folia::test::data::decode_utf16(r[0]), folia::test::data::decode_utf16(r[1])};
+        });
+    return result;
+}
+
 std::u16string_view directExpected(std::u16string_view name) {
-    for (auto const &c : colortblDirect)
+    for (auto const &c : colortblDirect())
         if (std::ranges::equal(c.name, name))
             return c.snapshot;
     throw std::logic_error("Missing Source direct case");
@@ -248,8 +280,8 @@ suite colortbl_suite = [] {
             }
     };
     "colortbl actual arrays precedence models overlaps and wrappers match Source"_test = [] {
-        expect(colortblTrees.size() == 27_u);
-        for (auto const &c : colortblTrees) {
+        expect(colortblTrees().size() == 27_u);
+        for (auto const &c : colortblTrees()) {
             ColortblFixture f(c.color, true, c.reversed);
             checkTableTree(f.ok(std::u16string(c.source)), c.snapshot);
         }
@@ -280,7 +312,7 @@ suite colortbl_suite = [] {
     "colortbl user color definitions persist across formulas and reset with isolated jaxes"_test =
         [] {
             ColortblFixture f(true);
-            for (auto const &c : colortblSequence)
+            for (auto const &c : colortblSequence())
                 checkTableTree(f.ok(std::u16string(c.source)), c.snapshot);
             auto model = f.jax->session().colorModel();
             f.jax->reset();
@@ -291,8 +323,8 @@ suite colortbl_suite = [] {
                 other.jax->session().colorModel()->getColor(u"named", u"Stored"), u"Stored"sv));
         };
     "colortbl errors preserve parsing order and recover fresh array colors"_test = [] {
-        expect(colortblErrors.size() == 14_u);
-        for (auto const &c : colortblErrors) {
+        expect(colortblErrors().size() == 14_u);
+        for (auto const &c : colortblErrors()) {
             ColortblFixture f;
             f.compile(std::u16string(c.source));
             expect(f.error == c.id);

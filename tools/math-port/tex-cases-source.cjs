@@ -88,11 +88,15 @@ const sequence=[];
  tag.start('numcases-left',true,true);tag.autoTag();assert.equal(tag.currentTag.tag,'1');tag.end();
  tag.start('subnumcases',true,true);tag.autoTag();assert.equal(tag.currentTag.tag,'2a');tag.end();
 }
-function cpp(text){let s='u"';for(const c of text){const n=c.codePointAt(0);if(c==='\\')s+='\\\\';else if(c==='"')s+='\\"';else if(n===0)s+='\\0';else if(n===10)s+='\\n';else if(n===13)s+='\\r';else if(n===9)s+='\\t';else if(n<32||n>126)s+=n>65535?'\\U'+n.toString(16).padStart(8,'0'):'\\u'+n.toString(16).padStart(4,'0');else s+=c;}return s+'"';}
-let fixtureText='// Generated only from real pinned Source: tex-cases-source.cjs --write-fixture\n';
-fixtureText+='const std::array casesTrees{\n'+captures.map(c=>'    CasesTree{'+[c.source,c.mode,c.tagSide,c.snapshot].map(cpp).join(', ')+', '+c.tagformat+'},').join('\n')+'\n};\n';
-fixtureText+='const std::array casesErrors{\n'+errors.map(c=>'    CasesError{'+cpp(c.source)+', "'+c.id+'", '+cpp(c.recoveryTag)+'},').join('\n')+'\n};\n';
-fixtureText+='const std::array casesFormats{\n'+formats.map(c=>'    CasesFormat{'+(c.sub===null?'std::nullopt':c.sub)+', std::u16string_view('+cpp(c.expected)+', '+c.expected.length+')},').join('\n')+'\n};\n';
-fixtureText+='const std::array casesSequence{\n'+sequence.map(c=>'    CasesSequence{'+[c.source,c.snapshot].map(cpp).join(', ')+'},').join('\n')+'\n};\n';
-const fixturePath=path.join(root,'tests/math/fixtures/cases.inc');if(process.argv.includes('--write-fixture'))fs.writeFileSync(fixturePath,fixtureText);else assert.equal(fs.readFileSync(fixturePath,'utf8').replaceAll('\r\n','\n').replace(/^\uFEFF/,''),fixtureText,'Independent Cases fixture changed; regenerate explicitly');
+const {utf16Field, byteField, writeTables} = require('./fixture-data.cjs');
+writeTables(path.join(root, 'tests/math/fixtures/packages/cases'), {
+  'trees': {columns: ["source_utf16", "mode_utf16", "tagSide_utf16", "snapshot_utf16", "tagformat_boolean"],
+    rows: captures.map(c => [utf16Field(c.source), utf16Field(c.mode), utf16Field(c.tagSide), utf16Field(c.snapshot), +!!c.tagformat])},
+  'errors': {columns: ["source_utf16", "id_bytes", "recoveryTag_utf16"],
+    rows: errors.map(c => [utf16Field(c.source), byteField(c.id), utf16Field(c.recoveryTag)])},
+  'formats': {columns: ["sub_optional_integer", "expected_utf16"],
+    rows: formats.map(c => [(c.sub === null ? "null" : c.sub), utf16Field(c.expected)])},
+  'sequence': {columns: ["source_utf16", "snapshot_utf16"],
+    rows: sequence.map(c => [utf16Field(c.source), utf16Field(c.snapshot)])},
+});
 console.log(JSON.stringify({cases,snapshots:captures.length,errors:errors.length,formats:formats.length,sequence:sequence.length,compiled_source_sha256:reference.provenance.compiled_source_sha256}));

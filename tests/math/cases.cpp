@@ -1,4 +1,5 @@
 #include "math/support/tex_fixture.hpp"
+#include "math/support/fixture_values.hpp"
 import folia.math.input.tex.cases.configuration;
 import folia.math.input.tex.tagformat.tag_format_configuration;
 import folia.math.util.utf16;
@@ -157,22 +158,53 @@ void checkTree(MmlNode &tree, std::u16string_view expected) {
     });
 }
 struct CasesTree {
-    std::u16string_view source, mode, tagSide, snapshot;
+    std::u16string source, mode, tagSide, snapshot;
     bool tagformat;
 };
 struct CasesError {
-    std::u16string_view source;
-    std::string_view id;
-    std::u16string_view recoveryTag;
+    std::u16string source;
+    std::string id;
+    std::u16string recoveryTag;
 };
 struct CasesFormat {
     std::optional<std::int64_t> sub;
-    std::u16string_view expected;
+    std::u16string expected;
 };
 struct CasesSequence {
-    std::u16string_view source, snapshot;
+    std::u16string source, snapshot;
 };
-#include "math/fixtures/cases.inc"
+const auto& casesTrees() {
+    static const auto result = math_test::fixtures::records<CasesTree>(
+        "math/fixtures/packages/cases/trees.tsv", 5, 32, [](const auto& r) {
+            return CasesTree{folia::test::data::decode_utf16(r[0]), folia::test::data::decode_utf16(r[1]), folia::test::data::decode_utf16(r[2]), folia::test::data::decode_utf16(r[3]), math_test::fixtures::boolean(r[4])};
+        });
+    return result;
+}
+
+const auto& casesErrors() {
+    static const auto result = math_test::fixtures::records<CasesError>(
+        "math/fixtures/packages/cases/errors.tsv", 3, 12, [](const auto& r) {
+            return CasesError{folia::test::data::decode_utf16(r[0]), math_test::fixtures::bytes(r[1]), folia::test::data::decode_utf16(r[2])};
+        });
+    return result;
+}
+
+const auto& casesFormats() {
+    static const auto result = math_test::fixtures::records<CasesFormat>(
+        "math/fixtures/packages/cases/formats.tsv", 2, 8, [](const auto& r) {
+            return CasesFormat{(r[0] == "null" ? std::nullopt : std::optional<std::int64_t>{math_test::fixtures::integer<std::int64_t>(r[0])}), folia::test::data::decode_utf16(r[1])};
+        });
+    return result;
+}
+
+const auto& casesSequence() {
+    static const auto result = math_test::fixtures::records<CasesSequence>(
+        "math/fixtures/packages/cases/sequence.tsv", 2, 5, [](const auto& r) {
+            return CasesSequence{folia::test::data::decode_utf16(r[0]), folia::test::data::decode_utf16(r[1])};
+        });
+    return result;
+}
+
 class CasesNumberProbe : public CasesTags {
   public:
     using CasesTags::CasesTags;
@@ -255,8 +287,8 @@ suite cases_suite = [] {
             parser.mml();
         };
     "cases environments text scanner tag modes and tagformat match actual Source trees"_test = [] {
-        expect(casesTrees.size() == 32_u);
-        for (auto const &c : casesTrees) {
+        expect(casesTrees().size() == 32_u);
+        for (auto const &c : casesTrees()) {
             CasesFixture f(c.mode, c.tagSide, c.tagformat);
             checkTree(f.ok(std::u16string(c.source)), c.snapshot);
         }
@@ -264,7 +296,7 @@ suite cases_suite = [] {
     "cases left expression labels references and subnumber counters persist across formulas"_test =
         [] {
             CasesFixture f;
-            for (auto const &c : casesSequence)
+            for (auto const &c : casesSequence())
                 checkTree(f.ok(std::u16string(c.source)), c.snapshot);
             auto const &labels = f.jax->session().labels();
             struct Label {
@@ -276,8 +308,8 @@ suite cases_suite = [] {
                 expect(std::ranges::equal(labels.at(std::u16string(c.key)).tag, c.tag));
         };
     "cases original errors preserve consumed numbering and recover parser borrows"_test = [] {
-        expect(casesErrors.size() == 12_u);
-        for (auto const &c : casesErrors) {
+        expect(casesErrors().size() == 12_u);
+        for (auto const &c : casesErrors()) {
             CasesFixture f;
             f.compile(std::u16string(c.source));
             expect(f.error == c.id);
@@ -290,7 +322,7 @@ suite cases_suite = [] {
     "cases tags preserve explicit zero UTF16 subnumbers and reset their local counter"_test = [] {
         CasesFixture f;
         CasesNumberProbe tag(f.jax->parseOptions());
-        for (auto const &c : casesFormats)
+        for (auto const &c : casesFormats())
             expect(std::ranges::equal(tag.formatNumberDefault(7, c.sub), c.expected));
         auto &eq = f.jax->parseOptions().request().equation;
         tag.start("subnumcases", true, true);

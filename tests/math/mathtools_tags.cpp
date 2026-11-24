@@ -1,4 +1,5 @@
 #include "math/support/tex_fixture.hpp"
+#include "math/support/fixture_values.hpp"
 import folia.math.input.tex.mathtools.tags;
 import folia.math.input.tex.cases.configuration;
 import folia.math.input.tex.tagformat.tag_format_configuration;
@@ -211,15 +212,30 @@ void mtCheckTree(MmlNode &root, std::u16string_view expected) {
     });
 }
 struct MtTagTree {
-    std::u16string_view mode;
+    std::u16string mode;
     bool tagformat, reverse;
-    std::u16string_view selected, source, snapshot;
+    std::u16string selected, source, snapshot;
 };
 struct MtTagStep {
     int action;
-    std::u16string_view source, snapshot;
+    std::u16string source, snapshot;
 };
-#include "fixtures/mathtools_tags.inc"
+const auto& mtTagTrees() {
+    static const auto result = math_test::fixtures::records<MtTagTree>(
+        "math/fixtures/packages/mathtools_tags/trees.tsv", 6, 72, [](const auto& r) {
+            return MtTagTree{folia::test::data::decode_utf16(r[0]), math_test::fixtures::boolean(r[1]), math_test::fixtures::boolean(r[2]), folia::test::data::decode_utf16(r[3]), folia::test::data::decode_utf16(r[4]), folia::test::data::decode_utf16(r[5])};
+        });
+    return result;
+}
+
+const auto& mtTagSequence() {
+    static const auto result = math_test::fixtures::records<MtTagStep>(
+        "math/fixtures/packages/mathtools_tags/sequence.tsv", 3, 8, [](const auto& r) {
+            return MtTagStep{math_test::fixtures::integer<int>(r[0]), folia::test::data::decode_utf16(r[1]), folia::test::data::decode_utf16(r[2])};
+        });
+    return result;
+}
+
 } // namespace
 
 suite mathtools_tags = [] {
@@ -305,7 +321,7 @@ suite mathtools_tags = [] {
         }
     };
     "mathtools tags match actual Source MML with parent numbering and refs"_test = [] {
-        for (auto const &row : mtTagTrees) {
+        for (auto const &row : mtTagTrees()) {
             MtTagFixture f(row.mode, row.tagformat, row.reverse);
             f.select(row.selected);
             mtCheckTree(f.ok(std::u16string(row.source)), row.snapshot);
@@ -313,7 +329,7 @@ suite mathtools_tags = [] {
     };
     "mathtools tags match Source state sequences without claiming macro registration"_test = [] {
         MtTagFixture f;
-        for (auto const &row : mtTagSequence) {
+        for (auto const &row : mtTagSequence()) {
             switch (row.action) {
             case 0:
                 break;

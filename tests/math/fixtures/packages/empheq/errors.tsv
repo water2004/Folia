@@ -1,0 +1,11 @@
+# Pinned reference observations; values exported without normalization.
+# source_utf16	id_bytes
+\u005cbegin{empheq}{array}a\u005cend{empheq}	EmpheqInvalidEnv
+\u005cbegin{empheq}[bad=x]{align}a&=b\u005cend{empheq}	InvalidOption
+\u005cbegin{empheq}	MissingArgFor
+\u005cbegin{empheq}{alignat}a&=b\u005cend{empheq}	PositiveIntegerArg
+\u005cbegin{empheq}{align}a&=b	EnvMissingEnd
+\u005cbegin{empheq}{align}\u005cbegin{empheq}{align}a&=b\u005cend{empheq}\u005cend{empheq}	ErroneousNestingEq
+\u005cbegin{empheq}[left={\u005cunknown}]{align}a&=b\u005cend{empheq}	UndefinedControlSequence
+\u005cempheql	MissingOrUnrecognizedDelim
+\u005cempheqr{bad}	MissingOrUnrecognizedDelim
