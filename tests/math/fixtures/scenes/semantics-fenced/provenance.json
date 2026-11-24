@@ -1,0 +1,19 @@
+{
+  "upstream": "MathJax 4.1.3",
+  "original_fixture": "common-source/semantics-fenced-mathml-scene.inc",
+  "original_sha256": "11d404fe4054172ee0ff87b355dee48f6e39dfe3e3a0cd9aade3959bc0e9984d",
+  "source_metadata": [
+    "Source MathJax 4.1.3 fb987178c2d279a99b0db5ea02e751691703955e",
+    "Input: pinned direct MathML source for Common semantics/mfenced; not TeX input coverage.",
+    "scope-sha256 9705d389538b2fc8bf782feea4372ace639b3727304f2971937bbcfb0042a0d1",
+    "cases-sha256 4f04cfb63cd3feeab04c1da77567210464391921187ad559ccebdfb861ae1e3e",
+    "profile-sha256 a5a03eed8a10872b9b435b9e602523a08a9f574e21cc5636e8377f0222811ac9",
+    "input/mathml.js 8fc5382e4a81b8be02484c9f6de91618ce8a5c859af97b5175df6badf35035db | input/mathml.ts e027607ae93b8dedf7b8312b1b814c50cf8cd0c6b332f56edba02d1d3bd7be1b",
+    "input/mathml/FindMathML.js fec27373d9b959de3511e5162eb98bb50d0b17a95e4e746a62f55fe625b86c2a | input/mathml/FindMathML.ts 1237e59c4a1b1e4852b4bf6986db1cbbb84efc0726426051021bcc6d2595dfd9",
+    "input/mathml/MathMLCompile.js 0b190d56a673941b6b4d1c8e8632dfa894ed50ddccce484e9e8d142c6d1e8880 | input/mathml/MathMLCompile.ts 2bb1f7258daf68fa6d51ea585b08312c1bc407719bd6711651369db1d5b68349"
+  ],
+  "record_counts": {
+    "sourceSemanticsCases": 4,
+    "sourceMfencedCases": 7
+  }
+}

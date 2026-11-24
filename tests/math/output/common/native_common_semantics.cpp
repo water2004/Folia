@@ -10,8 +10,8 @@ namespace mathml = folia::math::mml;
 namespace scene = folia::math::output::scene;
 namespace svg = folia::math::output::svg;
 
-#include "math/support/mathml_scene.hpp"
-#include "math/fixtures/common-source/semantics-fenced-mathml-scene.inc"
+#include "math/support/mathml_observations.hpp"
+#include "math/support/semantics_fenced_observations.hpp"
 
 namespace {
 class RejectMeasurement final : public common::MeasurementTarget {
@@ -82,7 +82,7 @@ suite common_semantics_native = [] {
     "pinned_MathML_semantics_emits_only_its_presentation_child_and_survives_retirement"_test = [] {
         auto bundle = folia::math::fonts::makeNewcmFontData();
         bool foundEmbellishedBreak = false;
-        for (auto const &source : sourceSemanticsCases) {
+        for (auto const &source : sourceSemanticsCases()) {
             auto captured = captureSourceCase(source, bundle);
             const auto expectedSvg = source_svg_paint::materialize(source.source_svg);
             expect(captured.before_retirement == expectedSvg) << "case " << source.name;

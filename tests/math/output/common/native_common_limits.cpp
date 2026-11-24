@@ -17,7 +17,7 @@ import folia.math.output.scene;
 import folia.math.output.svg.wrapper_factory;
 import folia.math.output.svg.writer;
 
-#include "math/support/mathml_scene.hpp"
+#include "math/support/mathml_observations.hpp"
 
 namespace {
 using namespace folia::math;
@@ -193,7 +193,7 @@ CommonWrapper &wrapInMath(CommonOutputJax &jax, mml::MmlNode &node) {
 }
 } // namespace
 
-#include "math/fixtures/common-source/limits-mathml-scene.inc"
+#include "math/support/limits_observations.hpp"
 
 namespace {
 class RejectLimitsMeasurement final : public MeasurementTarget {
@@ -302,8 +302,8 @@ LimitsSceneCapture captureLimitsScene(LimitsSceneSourceCase const &source,
 suite native_common_limits_scene = [] {
     "direct_MathML_limits_Source_cases_match_BBoxes_and_survive_retirement"_test = [] {
         auto bundle = folia::math::fonts::makeNewcmFontData();
-        expect(sourceLimitsSceneCases.size() == 24_u);
-        for (auto const &source : sourceLimitsSceneCases) {
+        expect(sourceLimitsSceneCases().size() == 24_u);
+        for (auto const &source : sourceLimitsSceneCases()) {
             const auto captured = captureLimitsScene(source, bundle);
             expect(captured.boxes_match)
                 << "root/limits BBoxes and Scene metrics match Source case=" << source.name;

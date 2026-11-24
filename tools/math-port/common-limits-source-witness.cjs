@@ -91,46 +91,9 @@ const movableOver=run('mover',[factory.create('mo',{movablelimits:true},[text('â
 const movableOverResult=bboxOf(movableOver);
 assert.equal(movableOver.hasMovableLimits(),true);
 
-function cppString(value) {
-  return JSON.stringify(value);
-}
 
-function cppU16(value) {
-  return `u${JSON.stringify(value)}`;
-}
 
-function cppRaw(value, limit = 3000) {
-  const parts = [];
-  let part = '', bytes = 0;
-  for (const cp of value) {
-    const size = Buffer.byteLength(cp);
-    if (part && bytes + size > limit) {
-      parts.push(part);
-      part = '';
-      bytes = 0;
-    }
-    part += cp;
-    bytes += size;
-  }
-  if (part || !parts.length) parts.push(part);
-  return parts.map((text, i) => {
-    let delimiter = `LIMITS${i}`;
-    while (text.includes(`)${delimiter}"`)) delimiter += 'X';
-    return `R"${delimiter}(${text})${delimiter}"`;
-  }).join('\n    ');
-}
 
-function cppAttribute(attribute) {
-  const name = cppU16(attribute.name);
-  switch (typeof attribute.value) {
-    case 'boolean': return `{${name}, mathml_scene_test::AttributeKind::boolean, {}, 0, ${attribute.value}}`;
-    case 'number':
-      assert.ok(Number.isFinite(attribute.value), `Non-finite MML attribute ${attribute.name}`);
-      return `{${name}, mathml_scene_test::AttributeKind::number, {}, ${attribute.value}, false}`;
-    case 'string': return `{${name}, mathml_scene_test::AttributeKind::text, ${cppU16(attribute.value)}, 0, false}`;
-    default: throw new Error(`Unsupported actual MML attribute ${attribute.name}: ${typeof attribute.value}`);
-  }
-}
 
 function flattenActualMml(rootNode) {
   const nodes = [], attributes = [], indices = new WeakMap();
@@ -312,23 +275,6 @@ async function captureLimitsScene() {
   return {ref, records};
 }
 
-function cppLimitsTree(record, index) {
-  const prefix = `sourceLimits${index}`;
-  const nodes = record.nodes.map(node =>
-    `{${cppString(node.kind)}, ${node.inferred}, ${node.parent}, ${node.first}, ${node.count}, ${cppU16(node.text)}}`);
-  const attributes = record.attributes.map(cppAttribute);
-  const declarations =
-    `constexpr std::array<mathml_scene_test::Node, ${nodes.length}> ${prefix}Nodes{{\n  ${nodes.join(',\n  ')}\n}};\n`+
-    `constexpr std::array<mathml_scene_test::Attribute, ${attributes.length}> ${prefix}Attributes{{\n`+
-    `${attributes.length ? '  ' + attributes.join(',\n  ') : ''}\n}};\n`+
-    `constexpr std::array<std::string_view, ${record.localCachePrefixes.length}> ${prefix}Prefixes{{`+
-    `${record.localCachePrefixes.map(cppString).join(',')}}};\n`;
-  const bbox = value => `LimitsSceneBBox{${value.w},${value.h},${value.d},${value.scale},${value.rscale},${value.L},${value.R}}`;
-  const item = `LimitsSceneSourceCase{${cppString(record.name)},${cppString(record.fontCache)},`+
-    `${record.display},${record.em},${record.ex},${record.width},${prefix}Nodes,${prefix}Attributes,`+
-    `${bbox(record.rootBBox)},${record.limitsNodeIndex},${bbox(record.limitsBBox)},${prefix}Prefixes,${cppRaw(record.svg)}}`;
-  return {declarations, item};
-}
 
 async function mainScene() {
   const {ref, records} = await captureLimitsScene();
@@ -339,28 +285,18 @@ async function mainScene() {
     packages:ref.provenance.packages,
     caseCount:records.length,
   };
-  const generated = records.map(cppLimitsTree);
-  const fixture = `// Pinned MathJax ${lock.version}; direct MathML limits Source; full38 NewCM profile.\n`+
-    `// Generated from actual compiled MML, Common wrapper BBoxes, local IDs, and complete SVG.\n`+
-    `struct LimitsSceneBBox { double w,h,d,scale,rscale,L,R; };\n`+
-    `struct LimitsSceneSourceCase { std::string_view name,font_cache; bool display; double em,ex,width; `+
-    `std::span<mathml_scene_test::Node const> nodes; std::span<mathml_scene_test::Attribute const> attributes; `+
-    `LimitsSceneBBox root_bbox; std::size_t limits_node_index; LimitsSceneBBox limits_bbox; `+
-    `std::span<std::string_view const> local_cache_prefixes; std::string_view svg; };\n\n`+
-    generated.map(item => item.declarations).join('\n')+
-    `\nconstexpr std::array<LimitsSceneSourceCase, ${generated.length}> sourceLimitsSceneCases{{\n`+
-    generated.map(item => `  ${item.item}`).join(',\n')+`\n}};\n`;
+  const {writeObservations, flatMml} = require('./mathml-observation-data.cjs');
+  const observations = {sourceLimitsSceneCases: records.map(r => ({
+    name: r.name, font_cache: r.fontCache, display: r.display, em: r.em, ex: r.ex, width: r.width,
+    ...flatMml(r.nodes, r.attributes), root_bbox: r.rootBBox,
+    limits_node_index: r.limitsNodeIndex, limits_bbox: r.limitsBBox,
+    local_cache_prefixes: r.localCachePrefixes, svg: r.svg
+  }))};
   const evidencePath = path.join(root, 'build/math-port/common-source/limits-mathml-scene.json');
   fs.mkdirSync(path.dirname(evidencePath), {recursive:true});
   fs.writeFileSync(evidencePath, JSON.stringify({provenance, records:records.map(({nodes,attributes,...rest}) =>
     ({...rest, nodes, attributes}))}, null, 2)+'\n');
-  const target = path.join(root, 'tests/math/fixtures/common-source/limits-mathml-scene.inc');
-  const previous = fs.existsSync(target) ? fs.readFileSync(target, 'utf8').replaceAll('\r\n','\n') : null;
-  if (writeFixture) {
-    if (previous !== fixture) fs.writeFileSync(target, fixture);
-  } else if (!captureOnly) {
-    assert.equal(previous, fixture, 'Independent limits MathML Source fixture differs; review before --write-fixture');
-  }
+  const target = captureOnly ? '' : writeObservations('limits', observations, writeFixture);
   const numericBefore = fs.readFileSync(path.join(root, 'tests/math/fixtures/common-source/limits-source-expected.json'));
   assert.equal(crypto.createHash('sha256').update(numericBefore).digest('hex'),
     '439b8fd72e0e6a1505107e6547d385536eff2bd73108ee3958900e21e36e644e',

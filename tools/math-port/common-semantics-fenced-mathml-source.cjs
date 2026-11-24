@@ -90,73 +90,10 @@ function validateSource(records) {
   }
 }
 
-function cppString(value) {
-  return JSON.stringify(value);
-}
 
-function cppU16(value) {
-  return `u${cppString(value)}`;
-}
 
-function cppAttribute(name, value) {
-  const key = cppU16(name);
-  switch (typeof value) {
-    case 'boolean': return `{${key}, mathml_scene_test::AttributeKind::boolean, {}, 0, ${value}}`;
-    case 'number':
-      assert.ok(Number.isFinite(value), `Nonfinite Source attribute ${name}`);
-      return `{${key}, mathml_scene_test::AttributeKind::number, {}, ${value}, false}`;
-    case 'string': return `{${key}, mathml_scene_test::AttributeKind::text, ${cppU16(value)}, 0, false}`;
-    default: throw new Error(`Unsupported Source attribute value type for ${name}: ${typeof value}`);
-  }
-}
 
-function cppRaw(value) {
-  const parts = [];
-  let part = '';
-  let bytes = 0;
-  for (const codePoint of value) {
-    const size = Buffer.byteLength(codePoint);
-    if (bytes + size > 3500 && part) {
-      parts.push(part);
-      part = '';
-      bytes = 0;
-    }
-    part += codePoint;
-    bytes += size;
-  }
-  if (part || !parts.length) parts.push(part);
-  return parts.map(text => {
-    let delimiter = 'FOLIAMATHML';
-    for (let suffix = 0; text.includes(`)${delimiter}"`); ++suffix)
-      delimiter = `FOLIAMATHML${suffix + 1}`;
-    return `R"${delimiter}(${text})${delimiter}"`;
-  }).join('\n      ');
-}
 
-function cppTree(record, index) {
-  const prefix = `${record.group === 'semantics' ? 'semantics' : 'mfenced'}${index}`;
-  const nodes = [], attributes = [];
-  function visit(node, parent) {
-    assert.equal(node.isInferred, node.kind === 'inferredMrow');
-    const nodeIndex = nodes.length;
-    const first = attributes.length;
-    const own = Object.entries(node.attributes);
-    attributes.push(...own.map(([name, value]) => cppAttribute(name, value)));
-    const text = node.kind === 'text' ? cppU16(node.text || '') : 'u""';
-    nodes.push(`  {${cppString(node.kind)}, ${node.isInferred}, ${parent}, ${first}, ${own.length}, ${text}}`);
-    node.children.forEach(child => visit(child, nodeIndex));
-  }
-  visit(record.mml, 'std::numeric_limits<std::size_t>::max()');
-  const declarations =
-    `constexpr std::array<mathml_scene_test::Node, ${nodes.length}> ${prefix}Nodes{{\n${nodes.join(',\n')}\n}};\n` +
-    `constexpr std::array<mathml_scene_test::Attribute, ${attributes.length}> ${prefix}Attributes{{\n` +
-    `${attributes.length ? '  ' + attributes.join(',\n  ') : ''}\n}};\n`;
-  const {em, ex, container_width, display} = record.metrics;
-  const value = `mathml_scene_test::Case{${cppString(record.name)},` +
-    `mathml_scene_test::Metrics{${em},${ex},${container_width},${display}},` +
-    `${prefix}Nodes,${prefix}Attributes,${cppRaw(record.svg)}}`;
-  return {declarations, value};
-}
 
 async function main() {
   const records = [];
@@ -169,33 +106,16 @@ async function main() {
   }
   validateSource(records);
   const {provenance, modules} = runtime.provenance('MathML', casesPath);
-  const header = [
-    `// Source MathJax ${scope.upstream.version} ${scope.upstream.commit}`,
-    '// Input: pinned direct MathML source for Common semantics/mfenced; not TeX input coverage.',
-    `// scope-sha256 ${provenance.scopeSha256}`,
-    `// cases-sha256 ${provenance.casesSha256}`,
-    `// profile-sha256 ${scope.profile.sha256}`,
-    ...modules.map(module => `// ${module.compiled} ${module.compiledSha256}` +
-      ` | ${module.source} ${module.sourceSha256}`)
-  ].join('\n');
-  const declarations = records.map(cppTree);
-  const fixture = header + '\n' + declarations.map(item => item.declarations).join('\n') +
-    '\nconstexpr mathml_scene_test::Case sourceSemanticsCases[]{\n' +
-    declarations.filter((_, index) => records[index].group === 'semantics')
-      .map(item => '  ' + item.value).join(',\n') + '\n};\n' +
-    '\nconstexpr mathml_scene_test::Case sourceMfencedCases[]{\n' +
-    declarations.filter((_, index) => records[index].group === 'mfenced')
-      .map(item => '  ' + item.value).join(',\n') + '\n};\n';
+
+  const {writeObservations, sourceCase} = require('./mathml-observation-data.cjs');
+  const observations = {
+    sourceSemanticsCases: records.filter(r => r.group === 'semantics').map(sourceCase),
+    sourceMfencedCases: records.filter(r => r.group === 'mfenced').map(sourceCase)
+  };
   const evidencePath = path.join(root, 'build/math-port/common-source/semantics-fenced-mathml-scene.json');
   fs.mkdirSync(path.dirname(evidencePath), {recursive: true});
-  fs.writeFileSync(evidencePath, JSON.stringify({provenance, records}, null, 2) + '\n');
-  const target = path.join(root, 'tests/math/fixtures/common-source/semantics-fenced-mathml-scene.inc');
-  const previous = fs.existsSync(target) ? fs.readFileSync(target, 'utf8') : null;
-  if (process.argv[2] === '--write-fixture') {
-    if (previous !== fixture) fs.writeFileSync(target, fixture);
-  } else {
-    assert.equal(previous, fixture, 'Independent semantics/fenced Source fixture differs');
-  }
+  fs.writeFileSync(evidencePath, JSON.stringify({provenance, modules, records}, null, 2) + '\n');
+  writeObservations('semantics-fenced', observations);
   process.stdout.write(`Verified ${records.length} direct MathML semantics/fenced Source cases\n`);
 }
 

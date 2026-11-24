@@ -20,7 +20,7 @@ import folia.math.output.svg.wrapper_factory;
 import folia.math.output.svg.writer;
 import folia.math.util.utf16;
 
-#include "math/support/mathml_scene.hpp"
+#include "math/support/mathml_observations.hpp"
 
 using namespace boost::ut;
 namespace mml = folia::math::mml;
@@ -28,7 +28,7 @@ namespace common = folia::math::output::common;
 namespace scene = folia::math::output::scene;
 namespace svg = folia::math::output::svg;
 
-#include "math/fixtures/common-source/merror-mathml-scene.inc"
+#include "math/support/merror_observations.hpp"
 
 namespace {
 class LiteUnknownTextMeasurement final : public common::MeasurementTarget {
@@ -126,10 +126,10 @@ bool hasStylesheet(scene::Paint const &paint, std::string_view fill, std::string
 }
 
 bool sourceClassStylesMatch(folia::math::output::common::CommonWrapperClassData const &data) {
-    if (data.styles.size() != std::size(sourceMerrorStyleRules))
+    if (data.styles.size() != std::size(sourceMerrorStyleRules()))
         return false;
-    for (std::size_t i = 0; i < std::size(sourceMerrorStyleRules); ++i) {
-        auto const &expected = sourceMerrorStyleRules[i];
+    for (std::size_t i = 0; i < std::size(sourceMerrorStyleRules()); ++i) {
+        auto const &expected = sourceMerrorStyleRules()[i];
         auto const &rule = data.styles[i];
         if (rule.name != expected.selector)
             return false;
@@ -279,7 +279,7 @@ suite native_svg_merror = [] {
         bool foundLinkedChild = false;
         bool foundNestedSvgViewport = false;
         bool foundDirectStyledChild = false;
-        for (auto const &source : sourceMerrorCases) {
+        for (auto const &source : sourceMerrorCases()) {
             auto captured = captureMerrorSourceCase(source, bundle);
             const auto afterRetirement = serialize(captured.value, bundle);
             const auto expectedSvg = source_svg_paint::materialize(source.source.source_svg);

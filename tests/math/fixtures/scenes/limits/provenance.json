@@ -1,0 +1,12 @@
+{
+  "upstream": "MathJax 4.1.3",
+  "original_fixture": "common-source/limits-mathml-scene.inc",
+  "original_sha256": "bb52168574af0b70a7f63a6dcff0c5bff05f9c5ca6922cdb10f76527abafc636",
+  "source_metadata": [
+    "Pinned MathJax 4.1.3; direct MathML limits Source; full38 NewCM profile.",
+    "Generated from actual compiled MML, Common wrapper BBoxes, local IDs, and complete SVG."
+  ],
+  "record_counts": {
+    "sourceLimitsSceneCases": 24
+  }
+}

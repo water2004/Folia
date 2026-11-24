@@ -94,87 +94,9 @@ function validate(records) {
   }
 }
 
-function cppString(value) { return JSON.stringify(value); }
-function cppU16(value) { return `u${cppString(value)}`; }
-function cppAttribute(name, value) {
-  const key = cppU16(name);
-  switch (typeof value) {
-    case 'boolean': return `{${key}, mathml_scene_test::AttributeKind::boolean, {}, 0, ${value}}`;
-    case 'number':
-      assert.ok(Number.isFinite(value), `Nonfinite Source attribute ${name}`);
-      return `{${key}, mathml_scene_test::AttributeKind::number, {}, ${value}, false}`;
-    case 'string': return `{${key}, mathml_scene_test::AttributeKind::text, ${cppU16(value)}, 0, false}`;
-    default: throw new Error(`Unsupported Source attribute type for ${name}`);
-  }
-}
 
-function cppRaw(value) {
-  const parts = [];
-  let part = '', bytes = 0;
-  for (const codePoint of value) {
-    const size = Buffer.byteLength(codePoint);
-    if (bytes + size > 3500 && part) { parts.push(part); part = ''; bytes = 0; }
-    part += codePoint;
-    bytes += size;
-  }
-  if (part || !parts.length) parts.push(part);
-  return parts.map(text => {
-    let delimiter = 'FOLIAMERROR';
-    for (let suffix = 0; text.includes(`)${delimiter}"`); ++suffix)
-      delimiter = `FOLIAMERROR${suffix + 1}`;
-    return `R"${delimiter}(${text})${delimiter}"`;
-  }).join('\n      ');
-}
 
-function cppTree(record, index) {
-  const prefix = `merror${index}`;
-  const nodes = [], attributes = [];
-  function visit(node, parent) {
-    assert.equal(node.isInferred, node.kind === 'inferredMrow');
-    const nodeIndex = nodes.length, first = attributes.length;
-    const own = Object.entries(node.attributes);
-    attributes.push(...own.map(([name, value]) => cppAttribute(name, value)));
-    nodes.push(`  {${cppString(node.kind)}, ${node.isInferred}, ${parent}, ${first}, ${own.length}, ${node.kind === 'text' ? cppU16(node.text || '') : 'u""'}}`);
-    node.children.forEach(child => visit(child, nodeIndex));
-  }
-  visit(record.mml, 'std::numeric_limits<std::size_t>::max()');
-  const declarations =
-    `constexpr std::array<mathml_scene_test::Node, ${nodes.length}> ${prefix}Nodes{{\n${nodes.join(',\n')}\n}};\n` +
-    `constexpr std::array<mathml_scene_test::Attribute, ${attributes.length}> ${prefix}Attributes{{\n` +
-    `${attributes.length ? '  ' + attributes.join(',\n  ') : ''}\n}};\n`;
-  const mmlErrors = findNodes(record.mml, 'merror');
-  const observed = record.wrappers.filter(wrapper => wrapper.kind === 'merror');
-  const unused = new Set(observed);
-  const boxes = mmlErrors.map(node => {
-    const title = node.attributes.title || '';
-    const match = observed.find(wrapper => unused.has(wrapper) && wrapper.merror.title === title);
-    assert.ok(match, `${record.name}: Source bbox associates with MML merror preorder`);
-    unused.delete(match);
-    return match.merror.bbox;
-  });
-  assert.equal(unused.size, 0, `${record.name}: all observed Source merror boxes are assigned`);
-  assert.ok(boxes.length > 0 && boxes.length <= 2, `${record.name}: expected one or two merror boxes`);
-  const boxArray = `std::array<MerrorSourceBBox, 2>{{${boxes.map(box =>
-    `{${box.w},${box.h},${box.d},${box.L},${box.R}}`).join(',')}${boxes.length === 1 ? ',{}' : ''}}}`;
-  const {em, ex, container_width, display} = record.metrics;
-  const sourceCase = `mathml_scene_test::Case{${cppString(record.name)},` +
-    `mathml_scene_test::Metrics{${em},${ex},${container_width},${display}},` +
-    `${prefix}Nodes,${prefix}Attributes,${cppRaw(record.svg)}}`;
-  return {declarations, value: `{${sourceCase},${boxArray},${boxes.length}}`};
-}
 
-function cppSourceStyles(records) {
-  const observed = records.flatMap(record => record.wrappers
-    .filter(wrapper => wrapper.kind === 'merror')
-    .map(wrapper => wrapper.merror.styles));
-  assert.ok(observed.length > 0, 'Source merror class styles were observed');
-  const styles = observed[0];
-  assert.deepEqual(styles, expectedStyles, 'all Source merror wrappers share actual class styles');
-  return `constexpr std::array<MerrorSourceStyleRule, ${Object.keys(styles).length}> ` +
-    `sourceMerrorStyleRules{{\n${Object.entries(styles).map(([selector, paint]) =>
-      `  {${cppU16(selector)}, ${cppU16(paint.fill)}, ${cppU16(paint.stroke)}}`).join(',\n')}` +
-    '\n}};\n';
-}
 
 async function main() {
   const records = [];
@@ -185,29 +107,35 @@ async function main() {
     })});
   validate(records);
   const {provenance, modules} = runtime.provenance('MathML', __filename);
-  const header = [
-    `// Source MathJax ${scope.upstream.version} ${scope.upstream.commit}`,
-    '// Input: pinned direct MathML merror wrapper cases; not TeX input coverage.',
-    `// scope-sha256 ${provenance.scopeSha256}`,
-    ...modules.map(module => `// ${module.compiled} ${module.compiledSha256} | ${module.source} ${module.sourceSha256}`)
-  ].join('\n');
-  const generated = records.map(cppTree);
-  const fixture = header + '\nstruct MerrorSourceBBox { double width, height, depth, left, right; };\n' +
-    'struct MerrorSourceCase { mathml_scene_test::Case source; std::array<MerrorSourceBBox, 2> boxes; std::size_t box_count; };\n' +
-    'struct MerrorSourceStyleRule { std::u16string_view selector, fill, stroke; };\n' +
-    cppSourceStyles(records) +
-    generated.map(item => item.declarations).join('\n') +
-    '\nconstexpr MerrorSourceCase sourceMerrorCases[]{\n' + generated.map(item => `  ${item.value}`).join(',\n') + '\n};\n';
+
+  const {writeObservations, sourceCase} = require('./mathml-observation-data.cjs');
+  const observedStyles = records.flatMap(r => r.wrappers.filter(w => w.kind === 'merror').map(w => w.merror.styles));
+  assert.ok(observedStyles.length);
+  assert.deepEqual(observedStyles[0], expectedStyles);
+  const observations = {
+    sourceMerrorStyleRules: Object.entries(observedStyles[0]).map(([selector, paint]) =>
+      ({selector, fill: paint.fill, stroke: paint.stroke})),
+    sourceMerrorCases: records.map(record => {
+      const errors = findNodes(record.mml, 'merror');
+      const observed = record.wrappers.filter(w => w.kind === 'merror');
+      const unused = new Set(observed);
+      const boxes = errors.map(node => {
+        const match = observed.find(w => unused.has(w) && w.merror.title === (node.attributes.title || ''));
+        assert.ok(match, `${record.name}: missing observed merror`); unused.delete(match);
+        const b = match.merror.bbox;
+        return {width: b.w, height: b.h, depth: b.d, left: b.L, right: b.R};
+      });
+      assert.equal(unused.size, 0);
+      assert.ok(boxes.length > 0 && boxes.length <= 2);
+      return {source: sourceCase(record), box_count: boxes.length,
+        boxes: [...boxes, ...Array.from({length: 2 - boxes.length}, () =>
+          ({width: 0, height: 0, depth: 0, left: 0, right: 0}))]};
+    })
+  };
   const evidencePath = path.join(root, 'build/math-port/common-source/merror-mathml-scene.json');
   fs.mkdirSync(path.dirname(evidencePath), {recursive: true});
-  fs.writeFileSync(evidencePath, JSON.stringify({provenance, cases: records}, null, 2) + '\n');
-  const target = path.join(root, 'tests/math/fixtures/common-source/merror-mathml-scene.inc');
-  const previous = fs.existsSync(target) ? fs.readFileSync(target, 'utf8') : null;
-  if (process.argv[2] === '--write-fixture') {
-    if (previous !== fixture) fs.writeFileSync(target, fixture);
-  } else {
-    assert.equal(previous, fixture, 'Independent merror Source fixture differs');
-  }
+  fs.writeFileSync(evidencePath, JSON.stringify({provenance, modules, cases: records}, null, 2) + '\n');
+  writeObservations('merror', observations);
   process.stdout.write(`Verified ${records.length} direct MathML merror Source cases\n`);
 }
 

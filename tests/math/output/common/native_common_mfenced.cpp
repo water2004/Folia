@@ -8,7 +8,7 @@ import folia.math.core.mml_tree.mml_nodes.mspace;
 import folia.math.fonts.newcm_font_module_provider;
 import folia.math.output.common;
 import folia.math.output.svg.writer;
-#include "math/support/mathml_scene.hpp"
+#include "math/support/mathml_observations.hpp"
 
 using namespace boost::ut;
 namespace mml = folia::math::mml;
@@ -118,7 +118,7 @@ void verifySourceMfenced(mathml_scene_test::Case const &expected,
 }
 } // namespace
 
-#include "math/fixtures/common-source/semantics-fenced-mathml-scene.inc"
+#include "math/support/semantics_fenced_observations.hpp"
 
 suite native_common_mfenced = [] {
     "Mfenced rejects non-string typed delimiter inputs without changing the MML tree"_test = [] {
@@ -168,7 +168,7 @@ suite native_common_mfenced = [] {
 
     "mfenced Scene serialization matches pinned Source MathML cases"_test = [] {
         auto bundle = folia::math::fonts::makeNewcmFontData();
-        for (const auto &expected : sourceMfencedCases) {
+        for (const auto &expected : sourceMfencedCases()) {
             try {
                 verifySourceMfenced(expected, bundle);
             } catch (const std::exception &error) {
