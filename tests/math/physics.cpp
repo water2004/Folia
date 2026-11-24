@@ -1,4 +1,5 @@
 #include "math/support/tex_fixture.hpp"
+#include "math/support/physics_fixture_data.hpp"
 import folia.math.input.tex.physics.configuration;
 import folia.math.input.tex.physics.mappings;
 import folia.math.input.tex.newcommand.configuration;
@@ -177,37 +178,14 @@ void physicsParents(MmlNode &root) {
                 expect(child->parent() == &node);
     });
 }
-struct PhysicsTree {
-    std::u16string_view name, source;
-    bool italic, arrow;
-    std::u16string_view snapshot;
-};
-struct PhysicsError {
-    std::u16string_view source;
-    bool italic, arrow;
-    std::string_view id;
-};
-struct PhysicsRuntime {
-    std::u16string_view source;
-    std::string_view kind;
-    std::u16string_view message;
-};
-struct PhysicsStep {
-    int group;
-    std::u16string_view source, snapshot;
-    std::string_view error, runtime;
-};
-struct PhysicsDirect {
-    std::u16string_view name, snapshot;
-};
-struct PhysicsBinding {
-    std::u16string_view map, token;
-    std::string_view method;
-    std::vector<TexArgument> arguments;
-    std::optional<std::u16string> character;
-    std::vector<AttributeSet::Entry> attributes;
-};
-#include "math/fixtures/physics.inc"
+using PhysicsData = math_test::fixtures::PhysicsFixtureData<TexArgument, AttributeSet::Entry>;
+using PhysicsTree = PhysicsData::PhysicsTree;
+using PhysicsError = PhysicsData::PhysicsError;
+using PhysicsRuntime = PhysicsData::PhysicsRuntime;
+using PhysicsStep = PhysicsData::PhysicsStep;
+using PhysicsDirect = PhysicsData::PhysicsDirect;
+using PhysicsBinding = PhysicsData::PhysicsBinding;
+
 MmlNode &runPhysicsDirect(PhysicsDirect const &entry, AutoOpen &item, TexParser &parser,
                           StackItemFactory &factory) {
     auto token = [&](std::u16string_view text, NodeKind kind = NodeKind::mi) -> MmlNode & {
@@ -331,7 +309,7 @@ suite physics_package = [] {
         expect(config->options.physics->italicdiff == false);
         expect(config->options.physics->arrowdel == false);
         std::vector<std::u16string> seen;
-        for (auto const &binding : physicsBindings) {
+        for (auto const &binding : PhysicsData::physicsBindings()) {
             const std::string label(binding.token.begin(), binding.token.end());
             if (std::ranges::find(seen, binding.map) == seen.end())
                 seen.emplace_back(binding.map);
@@ -381,14 +359,14 @@ suite physics_package = [] {
             }
         }
         expect(seen.size() == 11_u);
-        expect(physicsBindings.size() == 196_u);
+        expect(PhysicsData::physicsBindings().size() == 196_u);
         auto frame = f.jax->parseOptions().itemFactory->create(StackKind::auto_open);
         expect(dynamic_cast<AutoOpen *>(frame.get()) != nullptr);
         expect(frame->isOpen());
     };
     "physics all mathematical families and both options match real Source physical trees"_test =
         [] {
-            for (auto const &entry : physicsTrees) {
+            for (auto const &entry : PhysicsData::physicsTrees()) {
                 PhysicsFixture f(entry.italic, entry.arrow);
                 auto &root = f.ok(std::u16string(entry.source));
                 physicsMatchesSource(root, entry.snapshot);
@@ -397,7 +375,7 @@ suite physics_package = [] {
             }
         };
     "physics Source errors and finite matrix runtime boundary recover the next formula"_test = [] {
-        for (auto const &entry : physicsErrors) {
+        for (auto const &entry : PhysicsData::physicsErrors()) {
             PhysicsFixture f(entry.italic, entry.arrow);
             f.compile(std::u16string(entry.source));
             expect(f.error == entry.id) << entry.id;
@@ -405,7 +383,7 @@ suite physics_package = [] {
             f.ok(u"x");
             f.ok(u"\\qty(x)");
         }
-        for (auto const &entry : physicsRuntime) {
+        for (auto const &entry : PhysicsData::physicsRuntime()) {
             PhysicsFixture f;
             expect(entry.kind == "RangeError");
             expect(throws<std::length_error>([&] { f.compile(std::u16string(entry.source)); }));
@@ -417,7 +395,7 @@ suite physics_package = [] {
     "physics captured bra ket aliases and vector failures retain definition sequences"_test = [] {
         std::unique_ptr<PhysicsFixture> fixture;
         int group = -1;
-        for (auto const &entry : physicsSteps) {
+        for (auto const &entry : PhysicsData::physicsSteps()) {
             if (group != entry.group) {
                 fixture = std::make_unique<PhysicsFixture>(false, false, true);
                 group = entry.group;
@@ -430,7 +408,7 @@ suite physics_package = [] {
         }
     };
     "physics AutoOpen direct output flags markers and signed closing match Source"_test = [] {
-        for (auto const &entry : physicsDirect) {
+        for (auto const &entry : PhysicsData::physicsDirect()) {
             PhysicsFixture f;
             f.ok(u"x");
             auto &options = f.jax->parseOptions();

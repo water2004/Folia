@@ -77,14 +77,27 @@ let sourceCreatorLeak=false;
  factory.setCreators({token,node:NodeFactory.createNode});ok(f,'x');
 }
 for(const binding of bindings)if(binding.char!==null)capture('\\'+binding.token);
-function cpp(s){let out='u"';for(const c of s){const n=c.codePointAt(0);if(c==='\\')out+='\\\\';else if(c==='"')out+='\\"';else if(n===10)out+='\\n';else if(n===13)out+='\\r';else if(n===9)out+='\\t';else if(n<32||n>126)out+=n>65535?'\\U'+n.toString(16).padStart(8,'0'):'\\u'+n.toString(16).padStart(4,'0');else out+=c}return out+'"'}
-const argument=v=>v===null?'NullArgument{}':typeof v==='string'?'std::u16string('+cpp(v)+')':typeof v==='boolean'?String(v):Number.isInteger(v)?v+'.0':String(v);
-let text='// Independent pinned Physics Source data; regenerate explicitly with tex-physics-source.cjs --write-fixture.\n';
-text+='const std::array physicsTrees{\n'+trees.map(r=>'    PhysicsTree{'+cpp(r.name)+', '+cpp(r.source)+', '+r.italic+', '+r.arrow+', '+cpp(r.snapshot)+'},').join('\n')+'\n};\n';
-text+='const std::array physicsErrors{\n'+errors.map(r=>'    PhysicsError{'+cpp(r.source)+', '+r.italic+', '+r.arrow+', "'+r.id+'"},').join('\n')+'\n};\n';
-text+='const std::vector<PhysicsRuntime> physicsRuntime{\n'+runtime.map(r=>'    PhysicsRuntime{'+cpp(r.source)+', "'+r.kind+'", '+cpp(r.message)+'},').join('\n')+'\n};\n';
-text+='const std::array physicsSteps{\n'+steps.map(r=>'    PhysicsStep{'+r.group+', '+cpp(r.source)+', '+cpp(r.snapshot)+', "'+r.error+'", "'+r.runtime+'"},').join('\n')+'\n};\n';
-text+='const std::array physicsDirect{\n'+direct.map(r=>'    PhysicsDirect{'+cpp(r.name)+', '+cpp(r.snapshot)+'},').join('\n')+'\n};\n';
-text+='const std::array physicsBindings{\n'+bindings.map(r=>'    PhysicsBinding{'+cpp(r.map)+', '+cpp(r.token)+', "'+r.method+'", {'+r.args.map(argument).join(', ')+'}, '+(r.char===null?'std::nullopt':'std::optional<std::u16string>{'+cpp(r.char)+'}')+', {'+Object.entries(r.attributes).map(([k,v])=>'{'+cpp(k)+', '+argument(v)+'}').join(', ')+'}},').join('\n')+'\n};\n';
-const file=path.join(root,'tests/math/fixtures/physics.inc');if(process.argv.includes('--write-fixture'))fs.writeFileSync(file,text);else assert.equal(fs.readFileSync(file,'utf8').replaceAll('\r\n','\n'),text,'Physics Source fixture changed; regenerate explicitly');
+const {utf16Field, byteField, primitiveFields, writeTables} = require('./fixture-data.cjs');
+writeTables(path.join(root, 'tests/math/fixtures/packages/physics'), {
+  "trees": {columns: ["name_utf16", "source_utf16", "italic_boolean", "arrow_boolean", "snapshot_utf16"],
+    rows: trees.map(r => [utf16Field(r.name), utf16Field(r.source), +!!r.italic, +!!r.arrow, utf16Field(r.snapshot)])},
+  "errors": {columns: ["source_utf16", "italic_boolean", "arrow_boolean", "id_bytes"],
+    rows: errors.map(r => [utf16Field(r.source), +!!r.italic, +!!r.arrow, byteField(r.id)])},
+  "runtime": {columns: ["source_utf16", "kind_bytes", "message_utf16"],
+    rows: runtime.map(r => [utf16Field(r.source), byteField(r.kind), utf16Field(r.message)])},
+  "steps": {columns: ["group_integer", "source_utf16", "snapshot_utf16", "error_bytes", "runtime_bytes"],
+    rows: steps.map(r => [r.group, utf16Field(r.source), utf16Field(r.snapshot), byteField(r.error), byteField(r.runtime)])},
+  "direct": {columns: ["name_utf16", "snapshot_utf16"],
+    rows: direct.map(r => [utf16Field(r.name), utf16Field(r.snapshot)])},
+  bindings: {columns: ['map_utf16', 'token_utf16', 'method_bytes', 'argument_count',
+      'has_character', 'character_utf16', 'attribute_count'],
+    rows: bindings.map(r => [utf16Field(r.map), utf16Field(r.token), byteField(r.method),
+      r.args.length, +(r.char !== null), utf16Field(r.char ?? ''), Object.keys(r.attributes).length])},
+  attributes: {columns: ['binding_index', 'attribute_index', 'key_utf16', 'type', 'value'],
+    rows: bindings.flatMap((r, index) => Object.entries(r.attributes).map(([key, value], attribute) =>
+      [index, attribute, utf16Field(key), ...primitiveFields(value)]))},
+  arguments: {columns: ['binding_index', 'argument_index', 'type', 'value'],
+    rows: bindings.flatMap((r, index) => r.args.map((value, argument) =>
+      [index, argument, ...primitiveFields(value)]))}
+});
 console.log(JSON.stringify({compiles,historical:historical.length,trees:trees.length,errors:errors.length,runtime,steps:steps.length,direct:direct.length,maps:mapNames.length,bindings:bindings.length,sourceCreatorLeak,compiled_source_sha256:reference.provenance.compiled_source_sha256}));

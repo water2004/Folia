@@ -116,14 +116,25 @@ semanticCase('preserve-existing',n=>n.attributes.set('semantics','existing'));
 semanticCase('margins-only',n=>{n.setProperty('proof-left',.25);n.setProperty('proof-right',.5)});
 assert.equal(direct[0].semantics,'bspr_inferenceRule:down;bspr_inference:0;bspr_proof:true');
 assert.equal(direct[2].semantics,'bspr_inference:1;bspr_proof:false');assert.equal(direct[3].semantics,'existing');assert.equal(direct[4].present,false);
-function cpp(s){let out='u"';for(const c of s){const n=c.codePointAt(0);if(c==='\\')out+='\\\\';else if(c==='"')out+='\\"';else if(n===10)out+='\\n';else if(n===13)out+='\\r';else if(n===9)out+='\\t';else if(n<32||n>126)out+=n>65535?'\\U'+n.toString(16).padStart(8,'0'):'\\u'+n.toString(16).padStart(4,'0');else out+=c}return out+'"'}
-let text='// Independent pinned Source Bussproofs; regenerate with tex-bussproofs-source.cjs --write-fixture.\n';
-text+='const std::array bussproofsTrees{\n'+trees.map(r=>'    BussproofsTree{'+cpp(r.name)+', '+cpp(r.source)+', '+cpp(r.snapshot)+'},').join('\n')+'\n};\n';
-text+='const std::array bussproofsErrors{\n'+errors.map(r=>'    BussproofsError{'+cpp(r.source)+', "'+r.id+'"},').join('\n')+'\n};\n';
-text+='const std::array bussproofsRuntime{\n'+runtime.map(r=>'    BussproofsRuntime{'+cpp(r.source)+', "'+r.kind+'", '+cpp(r.message)+'},').join('\n')+'\n};\n';
-text+='const std::array bussproofsSteps{\n'+steps.map(r=>'    BussproofsStep{'+r.group+', '+cpp(r.source)+', '+cpp(r.snapshot)+', "'+r.error+'", "'+r.runtime+'", '+!!r.reset+'},').join('\n')+'\n};\n';
-const methodNames=Object.keys(Methods);
-text+='const std::array bussproofsBindings{\n'+[...map.map].map(([name,macro])=>{const args=(macro.args||[]).map(v=>typeof v==='string'?'std::u16string('+cpp(v)+')':typeof v==='boolean'?String(v):Number.isInteger(v)?v+'.0':String(v));return '    BussproofsBinding{'+cpp(name)+', '+methodNames.indexOf(Object.keys(Methods).find(k=>Methods[k]===macro.func))+', {'+args.join(', ')+'}},'}).join('\n')+'\n};\n';
-text+='const std::array bussproofsDirect{\n'+direct.map(r=>'    BussproofsDirect{'+cpp(r.name)+', '+r.present+', '+cpp(r.semantics)+'},').join('\n')+'\n};\n';
-const file=path.join(root,'tests/math/fixtures/bussproofs.inc');if(process.argv.includes('--write-fixture'))fs.writeFileSync(file,text);else assert.equal(fs.readFileSync(file,'utf8').replaceAll('\r\n','\n'),text,'Bussproofs Source fixture changed; regenerate explicitly');
+const {utf16Field, byteField, primitiveFields, writeTables} = require('./fixture-data.cjs');
+const methodNames = Object.keys(Methods);
+const bindings = [...map.map].map(([name, macro]) => ({name,
+  method: methodNames.indexOf(methodNames.find(key => Methods[key] === macro.func)), args: macro.args || []}));
+writeTables(path.join(root, 'tests/math/fixtures/packages/bussproofs'), {
+  "trees": {columns: ["name_utf16", "source_utf16", "snapshot_utf16"],
+    rows: trees.map(r => [utf16Field(r.name), utf16Field(r.source), utf16Field(r.snapshot)])},
+  "errors": {columns: ["source_utf16", "id_bytes"],
+    rows: errors.map(r => [utf16Field(r.source), byteField(r.id)])},
+  "runtime": {columns: ["source_utf16", "kind_bytes", "message_utf16"],
+    rows: runtime.map(r => [utf16Field(r.source), byteField(r.kind), utf16Field(r.message)])},
+  "steps": {columns: ["group_integer", "source_utf16", "snapshot_utf16", "error_bytes", "runtime_bytes", "reset_boolean"],
+    rows: steps.map(r => [r.group, utf16Field(r.source), utf16Field(r.snapshot), byteField(r.error), byteField(r.runtime), +!!r.reset])},
+  "direct": {columns: ["name_utf16", "present_boolean", "semantics_utf16"],
+    rows: direct.map(r => [utf16Field(r.name), +!!r.present, utf16Field(r.semantics)])},
+  bindings: {columns: ['name_utf16', 'method_integer', 'argument_count'],
+    rows: bindings.map(r => [utf16Field(r.name), r.method, r.args.length])},
+  arguments: {columns: ['binding_index', 'argument_index', 'type', 'value'],
+    rows: bindings.flatMap((r, index) => r.args.map((value, argument) =>
+      [index, argument, ...primitiveFields(value)]))}
+});
 console.log(JSON.stringify({compiles,measurements,historical:historical.length,expanded:expanded.length,trees:trees.length,errors:errors.length,runtime,steps:steps.length,direct:direct.length,compiled_source_sha256:reference.provenance.compiled_source_sha256}));

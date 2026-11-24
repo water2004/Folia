@@ -1,4 +1,5 @@
 #include "math/support/tex_fixture.hpp"
+#include "math/support/bussproofs_fixture_data.hpp"
 import folia.math.input.tex.bussproofs.configuration;
 import folia.math.input.tex.bussproofs.mappings;
 import folia.math.input.tex.bussproofs.util;
@@ -232,35 +233,14 @@ void proofParents(MmlNode &root) {
                 expect(child->parent() == &node);
     });
 }
-struct BussproofsTree {
-    std::u16string_view name, source, snapshot;
-};
-struct BussproofsError {
-    std::u16string_view source;
-    std::string_view id;
-};
-struct BussproofsRuntime {
-    std::u16string_view source;
-    std::string_view kind;
-    std::u16string_view message;
-};
-struct BussproofsStep {
-    int group;
-    std::u16string_view source, snapshot;
-    std::string_view error, runtime;
-    bool reset{};
-};
-struct BussproofsDirect {
-    std::u16string_view name;
-    bool present;
-    std::u16string_view semantics;
-};
-struct BussproofsBinding {
-    std::u16string_view name;
-    int method;
-    std::vector<TexArgument> arguments;
-};
-#include "math/fixtures/bussproofs.inc"
+using BussproofsData = math_test::fixtures::BussproofsFixtureData<TexArgument>;
+using BussproofsTree = BussproofsData::BussproofsTree;
+using BussproofsError = BussproofsData::BussproofsError;
+using BussproofsRuntime = BussproofsData::BussproofsRuntime;
+using BussproofsStep = BussproofsData::BussproofsStep;
+using BussproofsDirect = BussproofsData::BussproofsDirect;
+using BussproofsBinding = BussproofsData::BussproofsBinding;
+
 struct ProofRequest {
     NodeKind kind;
     NodeDefinition definition;
@@ -320,8 +300,8 @@ suite bussproofs_package = [] {
             &BussproofsMethods::SetLine, &BussproofsMethods::RootAtTop, &BussproofsMethods::AxiomF,
             &BussproofsMethods::FCenter, &BussproofsMethods::InferenceF};
         auto map = f.maps.getMap(u"Bussproofs-macros");
-        expect(bussproofsBindings.size() == 33_u);
-        for (auto const &binding : bussproofsBindings) {
+        expect(BussproofsData::bussproofsBindings().size() == 33_u);
+        for (auto const &binding : BussproofsData::bussproofsBindings()) {
             auto macro = std::get<Macro const *>(map->lookup(binding.name));
             expect(macro != nullptr);
             if (!macro)
@@ -343,7 +323,7 @@ suite bussproofs_package = [] {
         alone.ok(u"\\begin{prooftree}\\AxiomC{A}\\UnaryInfC{B}\\end{prooftree}");
     };
     "bussproofs mathematical trees match real Source including semantic insertion order"_test = [] {
-        for (auto const &entry : bussproofsTrees) {
+        for (auto const &entry : BussproofsData::bussproofsTrees()) {
             ProofFixture f;
             auto &root = f.ok(std::u16string(entry.source));
             proofMatchesSource(root, entry.snapshot);
@@ -352,7 +332,7 @@ suite bussproofs_package = [] {
         }
     };
     "bussproofs original errors and Source runtime boundaries recover the next request"_test = [] {
-        for (auto const &entry : bussproofsErrors) {
+        for (auto const &entry : BussproofsData::bussproofsErrors()) {
             ProofFixture f;
             f.compile(std::u16string(entry.source));
             expect(f.error == entry.id) << entry.id;
@@ -360,7 +340,7 @@ suite bussproofs_package = [] {
             f.ok(u"x");
             f.ok(u"\\begin{prooftree}\\AxiomC{A}\\UnaryInfC{B}\\end{prooftree}");
         }
-        for (auto const &entry : bussproofsRuntime) {
+        for (auto const &entry : BussproofsData::bussproofsRuntime()) {
             ProofFixture f;
             expect(entry.kind == "TypeError");
             expect(throws<std::logic_error>([&] { f.compile(std::u16string(entry.source)); }));
@@ -373,7 +353,7 @@ suite bussproofs_package = [] {
         [] {
             int group = -1;
             std::unique_ptr<ProofFixture> f;
-            for (auto const &entry : bussproofsSteps) {
+            for (auto const &entry : BussproofsData::bussproofsSteps()) {
                 if (entry.group != group) {
                     f = std::make_unique<ProofFixture>();
                     group = entry.group;
@@ -411,7 +391,7 @@ suite bussproofs_package = [] {
         };
     "bussproofs semantic postprocessor preserves finite insertion deletion and margin exclusions"_test =
         [] {
-            for (auto const &entry : bussproofsDirect) {
+            for (auto const &entry : BussproofsData::bussproofsDirect()) {
                 ProofFixture f;
                 f.ok(u"x");
                 auto &options = f.jax->parseOptions();

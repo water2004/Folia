@@ -32,6 +32,14 @@ const utf16Field = value => {
   return result;
 };
 
+const primitiveFields = value => {
+  if (value === null) return ['null', ''];
+  if (typeof value === 'boolean') return ['boolean', +value];
+  if (typeof value === 'number') return ['number', binary64(value)];
+  if (typeof value === 'string') return ['string', utf16Field(value)];
+  throw new Error('Unsupported reference primitive: ' + typeof value);
+};
+
 const table = (columns, records, metadata = []) => [
   '# Pinned reference observations; values exported without normalization.',
   `# ${columns.join('\t')}`,
@@ -57,4 +65,4 @@ const writeTables = (directory, definitions, write = process.argv.includes('--wr
   }
 };
 
-module.exports = {byteField, utf16Field, binary64, table, writeTables};
+module.exports = {byteField, utf16Field, binary64, primitiveFields, table, writeTables};

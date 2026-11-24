@@ -1,0 +1,31 @@
+# Pinned reference observations; values exported without normalization.
+# source_utf16	id_bytes
+\u005cAxiomC{A}	IllegalProofCommand
+\u005cbegin{prooftree}\u005cAxiomC{A}\u005cBinaryInfC{B}\u005cend{prooftree}	BadProofTree
+\u005cbegin{prooftree}\u005cBadProofCommand{A}\u005cend{prooftree}	UndefinedControlSequence
+\u005cbegin{prooftree}\u005cAxiomC{A}	EnvMissingEnd
+\u005cbegin{prooftree}\u005cAxiom$A=B$\u005cend{prooftree}	MissingProofCommand
+\u005cbegin{prooftree}\u005cAxiom A\u005cfCenter B\u005cend{prooftree}	IllegalUseOfCommand
+\u005cbegin{prooftree}\u005cUnaryInfC{B}\u005cend{prooftree}	BadProofTree
+\u005cbegin{prooftree}\u005cAxiomC{A}\u005cTrinaryInfC{B}\u005cend{prooftree}	BadProofTree
+\u005cbegin{prooftree}\u005cAxiomC{A}\u005cAxiomC{B}\u005cQuaternaryInfC{C}\u005cend{prooftree}	BadProofTree
+\u005cbegin{prooftree}\u005cAxiomC{A}\u005cAxiomC{B}\u005cAxiomC{C}\u005cAxiomC{D}\u005cQuinaryInfC{E}\u005cend{prooftree}	BadProofTree
+\u005cLeftLabel{x}	IllegalProofCommand
+\u005cUnaryInfC{B}	IllegalProofCommand
+\u005crootAtBottom	IllegalProofCommand
+\u005cbegin{prooftree}\u005cAxiomC{\u005cbegin{prooftree}\u005cAxiomC{A}\u005cUnaryInfC{B}\u005cend{prooftree}}\u005cUnaryInfC{C}\u005cend{prooftree}	BadRawUnicode
+\u005cUnaryInfC{B}	IllegalProofCommand
+\u005cLeftLabel{x}	IllegalProofCommand
+\u005cRightLabel{x}	IllegalProofCommand
+\u005cnoLine	IllegalProofCommand
+\u005crootAtTop	IllegalProofCommand
+\u005cAxiom$A\u005cfCenter B$	IllegalProofCommand
+\u005cUnaryInf$A\u005cfCenter B$	IllegalProofCommand
+\u005cbegin{prooftree}\u005cAxiomC\u005cend{prooftree}	EnvMissingEnd
+\u005cbegin{prooftree}\u005cAxiomC{A}\u005cUnaryInfC\u005cend{prooftree}	EnvMissingEnd
+\u005cbegin{prooftree}\u005cAxiomC{A}\u005cLeftLabel\u005cend{prooftree}	EnvMissingEnd
+\u005cbegin{prooftree}\u005cAxiom$A\u005cfCenter B\u005cend{prooftree}	TokenNotFoundForCommand
+\u005cbegin{prooftree}\u005cAxiomC{A}\u005cUnaryInf A\u005cend{prooftree}	IllegalUseOfCommand
+\u005cbegin{prooftree}\u005cAxiomC{A}\u005cUnaryInf$A=B$\u005cend{prooftree}	MissingProofCommand
+\u005cbegin{prooftree}\u005cAxiomC{A}\u005cBinaryInf$A\u005cfCenter B$\u005cend{prooftree}	BadProofTree
+\u005cbegin{prooftree}\u005cAxiomC{A}\u005cend{array}	MissingBeginExtraEnd

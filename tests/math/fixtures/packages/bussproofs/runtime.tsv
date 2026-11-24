@@ -1,0 +1,4 @@
+# Pinned reference observations; values exported without normalization.
+# source_utf16	kind_bytes	message_utf16
+\u005cbegin{prooftree}\u005cAxiom$A\u005cfCenter B$\u005cend{prooftree}	TypeError	Cannot read properties of null (reading 'getProperty')
+\u005cbegin{prooftree}\u005cAxiom$A\u005cfCenter B\u005cfCenter C$\u005cend{prooftree}	TypeError	Cannot read properties of null (reading 'getProperty')

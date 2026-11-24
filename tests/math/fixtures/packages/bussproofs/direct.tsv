@@ -1,0 +1,7 @@
+# Pinned reference observations; values exported without normalization.
+# name_utf16	present_boolean	semantics_utf16
+plain-inference	1	bspr_inferenceRule:down;bspr_inference:0;bspr_proof:true
+all-finite-reinsert	1	bspr_sequent:true;bspr_axiom:true;bspr_proof:true;bspr_inference:0;bspr_inferenceRule:up;bspr_labelledRule:both;bspr_prooflabel:left;bspr_sequentAdjust_right:0;bspr_sequentAdjust_left:0.5;bspr_sequentProcessed:false
+delete-reinsert	1	bspr_inference:1;bspr_proof:false
+preserve-existing	1	existing
+margins-only	0	

@@ -1,0 +1,35 @@
+# Pinned reference observations; values exported without normalization.
+# name_utf16	method_integer	argument_count
+AxiomC	1	0
+UnaryInfC	2	1
+BinaryInfC	2	1
+TrinaryInfC	2	1
+QuaternaryInfC	2	1
+QuinaryInfC	2	1
+RightLabel	3	1
+LeftLabel	3	1
+AXC	1	0
+UIC	2	1
+BIC	2	1
+TIC	2	1
+RL	3	1
+LL	3	1
+noLine	4	2
+singleLine	4	2
+solidLine	4	2
+dashedLine	4	2
+alwaysNoLine	4	2
+alwaysSingleLine	4	2
+alwaysSolidLine	4	2
+alwaysDashedLine	4	2
+rootAtTop	5	1
+alwaysRootAtTop	5	1
+rootAtBottom	5	1
+alwaysRootAtBottom	5	1
+fCenter	7	0
+Axiom	6	0
+UnaryInf	8	1
+BinaryInf	8	1
+TrinaryInf	8	1
+QuaternaryInf	8	1
+QuinaryInf	8	1

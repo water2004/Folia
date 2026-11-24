@@ -1,0 +1,7 @@
+# Pinned reference observations; values exported without normalization.
+# binding_index	attribute_index	key_utf16	type	value
+18	0	mathvariant	string	bold
+19	0	mathvariant	string	bold
+23	0	mathvariant	string	bold
+26	0	mathvariant	string	normal
+27	0	mathvariant	string	normal

@@ -1,0 +1,11 @@
+# Pinned reference observations; values exported without normalization.
+# name_utf16	snapshot_utf16
+default	4:mrow1:00:0:0:0:0:0:0:1:32:mo1:35:fence7:boolean4:true8:stretchy7:boolean4:true9:symmetric7:boolean4:true0:0:0:0:6:number1:41:(1:02:mi1:00:0:0:0:0:0:1:x1:02:mo1:35:fence7:boolean4:true8:stretchy7:boolean4:true9:symmetric7:boolean4:true0:0:0:0:6:number1:51:)1:0
+force-ignored	4:mrow1:00:0:0:0:0:0:0:1:32:mo1:35:fence7:boolean4:true8:stretchy7:boolean4:true9:symmetric7:boolean4:true0:0:0:0:6:number1:41:(1:02:mi1:00:0:0:0:0:0:1:x1:02:mo1:35:fence7:boolean4:true8:stretchy7:boolean4:true9:symmetric7:boolean4:true0:0:0:0:6:number1:51:)1:0
+false-force	4:mrow1:00:0:0:0:0:0:0:1:12:mi1:06:string1:o6:string1:c6:number1:21:x1:0
+smash-right	4:mrow1:00:0:0:0:0:0:0:1:42:mo1:35:fence7:boolean4:true8:stretchy7:boolean4:true9:symmetric7:boolean4:true0:0:0:0:6:number1:41:(1:07:TeXAtom1:00:0:0:0:6:number1:00:1:112:inferredMrow1:00:0:0:0:0:0:0:1:17:mpadded1:25:depth6:number1:06:height6:number1:00:0:0:0:0:0:0:1:112:inferredMrow1:00:0:0:0:0:0:0:1:12:mi1:00:0:0:0:0:0:1:x1:02:mi1:110:data-latex6:string1:y0:0:0:0:0:0:1:y1:02:mo1:35:fence7:boolean4:true8:stretchy7:boolean4:true9:symmetric7:boolean4:true0:0:0:0:6:number1:51:)1:0
+pre-close	2:mi1:00:0:0:0:0:0:1:x1:0
+autoclose	4:mrow1:00:0:0:0:0:0:0:1:32:mo1:35:fence7:boolean4:true8:stretchy7:boolean4:true9:symmetric7:boolean4:true0:0:0:0:6:number1:41:(1:02:mi1:00:0:0:0:0:0:1:x1:02:mo1:35:fence7:boolean4:true8:stretchy7:boolean4:true9:symmetric7:boolean4:true0:0:0:0:6:number1:51:)1:0
+ignore	4:mrow1:00:0:0:0:0:0:0:1:0
+nested-count	2:mo1:00:0:0:0:0:0:1:(1:0
+stop	4:mrow1:00:0:0:0:0:0:0:1:0
