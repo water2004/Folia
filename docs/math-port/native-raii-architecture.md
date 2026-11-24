@@ -1521,9 +1521,11 @@ to reach equalrows/equalcolumns/dotted attributes absent from the TeX profile.
 The independent Source tool freezes the actual compiled MML tree, typed own
 attributes, table metrics and raw SVG. Native tests rebuild that exact tree via
 MmlDocument and consume the same Common LayoutJob and SVG writer; no native
-output is used as an expectation. The test fixture uses flat constexpr records
-to avoid MSVC heap exhaustion on recursive vector initializers. Its provenance
-locks the MathML compiler separately; it is not extra TeX package coverage.
+output is used as an expectation. The flat records are stored in
+`tests/math/fixtures/scenes/table/observations.tsv` and loaded through
+`tests/math/support/table_observations.hpp`, avoiding compiled recursive
+initializers. Its provenance locks the MathML compiler separately; it is not
+extra TeX package coverage.
 Source preserves mtr mathsize="150%" but keeps that row's rscale at 1 in the
 captured case. A separate mstyle scales cell content to 1.5. These observations
 do not establish nonunit row-scale coverage.
@@ -1619,8 +1621,8 @@ boundary. Extract that runtime/capture into common-mathml-source-runtime.cjs;
 the existing table entry retains its table observations, fixture formatting,
 CLI and unchanged eight-case output. New semantics/fenced cases and entry live
 in common-semantics-fenced-mathml-cases.json and
-common-semantics-fenced-mathml-source.cjs, with a separate canonical
-semantics-fenced-mathml-scene.inc. Preserve original element tree records;
+common-semantics-fenced-mathml-source.cjs, with separate canonical data in
+`tests/math/fixtures/scenes/semantics-fenced/observations.tsv`. Preserve original element tree records;
 actual text nodes additionally carry getText() contents. Unsupported XML payload
 capture fails explicitly. A single runtime/reference instance serves a process.
 
@@ -1630,8 +1632,9 @@ AttributeKind{text,boolean,number}; Attribute{name,kind,text,number,boolean};
 Node{kind,is_inferred,parent,attribute_first,attribute_count,text};
 Metrics{em,ex,container_width,display};
 Case{name,metrics,nodes,attributes,source_svg}. Attribute names and text use
-u16string_view; case names/kind/SVG use string_view. Spans borrow constexpr
-fixture arrays. Node text
+u16string_view; case names/kind/SVG use string_view. The typed fixture reader in
+`tests/math/support/semantics_fenced_observations.hpp` owns the strings and
+sequences backing those views. Node text
 is trailing and defaults empty. constructRoot(document,nodes,attributes) returns
 an owned MML root, checks parent/attribute ranges and inference markers, and
 uses allNodeKinds/nodeKindName instead of duplicating a kind catalog. It sets
@@ -1639,8 +1642,8 @@ actual text-node contents; it does not parse markup, infer layout or keep owners
 Existing table tests reuse these types/construction, retaining table assertions.
 
 Dedicated native_common_semantics.cpp and native_common_mfenced.cpp tests consume
-the new Source cases. Keep their responsibilities separate; shared fixture arrays
-are sourceSemanticsCases and sourceMfencedCases. Compare complete SVG bytes after
+the new Source cases. Keep their responsibilities separate; shared fixture views
+are returned by sourceSemanticsCases() and sourceMfencedCases(). Compare complete SVG bytes after
 fresh document/job layout and again after their destruction. Exercise ordinary,
 scaled/nested presentation, hidden text annotations and empty annotation-xml,
 embellished forced breaks, default/custom/repeated/empty separators, absent
@@ -2068,8 +2071,8 @@ not keep two implementations or adapt Property/NodeRef to the new value.
 Luna files: scene_values_writer owns types.ixx/scene.cpp and native_scene_images
 UT; common_scene_entry owns svg/mglyph pair, SVG catalog and native_svg_mglyph
 owner UT; common_base_emission owns writer.cpp and native_svg_images UT;
-common_scene_source_tests owns source-mglyph-scene.cjs, generated flat named
-fixture arrays and native_svg_mglyph_source UT. Root owns CMake, old placement
+common_scene_source_tests owns source-mglyph-scene.cjs, named observations in
+`tests/math/fixtures/scenes/mglyph/observations.tsv` and native_svg_mglyph_source UT. Root owns CMake, old placement
 retirement, current Scene inspection helper, review/build/tests/Git.
 
 Independent Source witnesses use the pinned full38/NewCM profile, real MathML
@@ -2095,8 +2098,9 @@ table layout, SVG table wrapper, compatibility route, or expand mtable.cpp with
 unrelated helpers. Existing direct-MathML8, SVG14 and numeric branch8 evidence
 remains unchanged. New evidence is separate from those accepted fixtures.
 
-Luna Source owner creates tools/math-port/source-table-profile.cjs and the flat
-named arrays in tests/math/fixtures/table_profile_source.hpp. Use pinned full38
+The independent capture in `tools/math-port/source-table-profile.cjs` writes
+named fields to `tests/math/fixtures/scenes/table-profile/observations.tsv`.
+Use pinned full38
 NewCM, real MathML compilation, actual MathItem.display and real none/local
 FontCache prefixes. Observe after original processMath completes: root BBox,
 every table's compiled-MML node index, BBox, rows/columns, hasLabels/isTop/pWidth,
@@ -2123,8 +2127,9 @@ error_message,svg; span<string_view const> local_cache_prefixes;
 span<TableProfileTable const> tables; span<TableProfileMeasurement const>
 measurements; span<mathml_scene_test::Node const> nodes;
 span<mathml_scene_test::Attribute const> attributes;};
-constexpr sourceTableProfileCases[] stores the cases. Spans reference named
-namespace-scope arrays only; raw strings are split below compiler limits.
+`tests/math/support/table_profile_observations.hpp` reads the complete ordered
+records and exposes sourceTableProfileCases(). Its reader owns all backing
+strings and sequences; full SVG bytes and binary64 values remain in the TSV.
 
 Independent UT owner creates tests/math/output/common/native_table_profile_source.cpp, using
 support/mathml_scene.hpp and SvgWrapperFactory::defaultNodes. Capture native
@@ -2144,7 +2149,8 @@ default86/canonical75 and full math. All builds remain single and parallel4.
 
 ### 2026-10-21 Root lock: canonical hosted none/local witnesses
 
-Keep strict common_scene.inc, its 75 outcomes and default86 behavior. Hosted
+Keep the strict `tests/math/fixtures/scenes/common.tsv` observations, their
+75 canonical outcomes and default86 behavior. Hosted
 Source is additional evidence, using the same canonical18+profile57 input
 objects in exactly their existing order. Do not copy/shorten/reorder the corpus
 or replace the two strict Lite event-API errors with fabricated expected SVG.
@@ -2156,8 +2162,9 @@ all appended witnesses, capture semantics, scope/dependency checks and default
 fixture output stay unchanged. Prove strict default bytecheck/hash unchanged.
 This file replaces the existing input table and has two real Source consumers.
 
-Source-mode owner creates tools/math-port/source-canonical-scene-modes.cjs and
-tests/math/fixtures/canonical_scene_modes_source.hpp. Parent generation runs
+Source-mode generation in tools/math-port/source-canonical-scene-modes.cjs writes
+`tests/math/fixtures/scenes/canonical-cases.tsv` and `canonical-modes.tsv`;
+`tests/math/support/scene_fixtures.hpp` reads the ordered records. Parent generation runs
 none/local in separate bounded child Node processes, each with heap512 MB,
 cwd C:/Windows and one createReference. Each child evaluates canonical75 once
 in order with one persistent input jax, original metrics/display/tagSide and
@@ -2357,7 +2364,7 @@ This batch extends evidence only, at the existing limits owners; it does not
 replace accepted CommonMunder/CommonMover/CommonMunderover algorithms. Extend
 `common-limits-source-witness.cjs` with a separate `--scene` mode, retaining the
 existing numeric witness and fixture byte-for-byte. New data belongs in
-`tests/math/fixtures/common-source/limits-mathml-scene.inc`; add one compact
+`tests/math/fixtures/scenes/limits/observations.tsv`; add one compact
 table-driven test to the already registered `native_common_limits.cpp`.
 No new production file/module, copied layout pipeline or CMake registration.
 
@@ -2367,7 +2374,8 @@ stretchy accents over/under a wider row. Capture all twelve real MathML inputs
 in none/local cache modes through the pinned full38 profile and NewCM. Record
 actual compiled MML, root and selected limits-wrapper BBox, resolved local
 prefixes and complete SVG; do not synthesize cache IDs or expected geometry.
-The fixture owns named static arrays, not temporary spans or generated asserts.
+`tests/math/support/limits_observations.hpp` reads the named fields and owns
+the backing strings and sequences for its fixture views.
 
 Shared fixture contract: LimitsSceneBBox {w,h,d,scale,rscale,L,R};
 LimitsSceneSourceCase {name,font_cache,display,em,ex,width,nodes,attributes,

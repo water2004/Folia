@@ -97,7 +97,7 @@
 - `tests/mermaid_cpp/`：核心解析与布局单元测试（`FoliaMermaidTests`）及 TSV 基准数据（`fixtures/`）。
 - `tests/mermaid_math/`：通过现有 Math DLL 执行真实公式的可移植集成测试（`FoliaMermaidMathTests`）。
 - `tests/platform/`：DirectWrite 平台测量与各图族 SVG 生成测试（`FoliaMermaidPlatformTests`）。
-- `tools/mermaid-cpp/`：独立 CMake 工程、C ABI 动态库封装（`native-renderer.{h,cpp}`）、上游行为采样脚本（`*-oracle.mjs`、`*-browser-probe.mjs`）及 SVG 对照脚本（`compare-*-svg.mjs`）。
+- `tools/mermaid-cpp/`：独立 CMake 工程、C ABI 动态库封装（`native-renderer.{h,cpp}`）、上游行为采样脚本（`*-oracle.mjs`、`*-browser-probe.mjs`）及 Python 图族 SVG 比较入口 `compare-family.py`。JavaScript 负责官方样本和浏览器观测采集，Python 负责原生进程编排与验收。
 - [`docs/mermaid-cpp/HANDOFF.md`](HANDOFF.md)：当前检查点、模块边界与复验入口。
 - [`docs/mermaid-cpp/elk-layout-boundary.md`](elk-layout-boundary.md)：ELK、CoSE/fCoSE 及 ZenUML 布局算法与上游依赖边界说明。
 
@@ -141,12 +141,13 @@
   libc++ 21 的时区支持需要 `-fexperimental-library`。此构建不需要
   Windows SDK；没有提供 Math 共享库时，不登记真实 Math 集成测试。
   `FoliaMermaidStructure` 与核心测试均可在 Linux 运行。
-- **运行 Node.js 上游对照脚本（需 Node.js 24 与 pnpm）**：
+- **生成官方上游样本（需 Node.js 24 与 pnpm）**：
   ```powershell
   pnpm --dir tools/mermaid-cpp/oracle install --frozen-lockfile --ignore-scripts
   node tools/mermaid-cpp/zenuml-oracle.mjs
   node tools/mermaid-cpp/er-oracle.mjs
   ```
+- **比较已保存的图族 SVG**：安装 [比较器依赖](../../tools/mermaid-cpp/regression/comparison/README.md) 后，从仓库根目录运行 `python tools/mermaid-cpp/compare-family.py FAMILY original.json native-svg-directory`。`FAMILY` 选择图族，后两个参数分别指向同图族的官方捕获和原生 SVG 目录；使用 `--browser` 或 `FOLIA_BROWSER` 选择实际浏览器。比较保留原有字体、几何、文字和绘制规则。
 
 ---
 

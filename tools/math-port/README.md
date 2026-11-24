@@ -2,6 +2,9 @@
 
 Folia renders mathematics with the C++ library in `src/math`. These scripts run
 offline against pinned MathJax sources; none is loaded by the application.
+JavaScript captures official reference observations and generates native data
+tables. Python owns portable test orchestration, comparisons, inventories and
+reports; C++ owns the executable native tests.
 Do not remove a script just because it is CommonJS: many produce the formal
 native tests' expected values.
 
@@ -14,7 +17,13 @@ native tests' expected values.
 | Verify TeX package registrations and produce alias/SVG fixtures | `tex-package-conformance.cjs` |
 | Check complete reviewed TypeScript member inventories | `*-ledger-check.py` and `ledger-profiles.json` |
 | Replay complete pinned Source profiles in Python | `container-observer-source-check.py`, `remaining-observer-source-check.py` |
+| Check original script and leaf observer profiles | `mml-observer-source-profiles.py --packet=script` or `--packet=leaf` |
+| Check original operator and registry observer profiles | `operator-registry-observer-profile.py --packet=mo-values`, `--packet=mml-registry` or `--packet=mo` |
+| Check the complete MmlNode observer profile | `mml-node-source-profile.py` |
+| Check both complete MathChoice observer profiles | `mathchoice-observer-source-profile.py` |
 | Compare native font data | `font-data-compare-native.py` and `font-data-dump.cpp` |
+| Compare native SVG paint with official MathJax CSS and raster samples | `svg-paint/check.py`; stages and commands in [svg-paint/README.md](svg-paint/README.md) |
+| Inventory native source, module ownership and review provenance | `native-raii-inventory.py` |
 | Exercise the app's native layout/worker performance | `winui-math-layout-probe.ps1`, `winui-math-worker-probe.ps1` |
 | Native verification requirements | `../../docs/math-port/native-raii-acceptance.md` |
 
@@ -43,6 +52,17 @@ the independent 88-case multiscript parent projection. Run `python
 tools/math-port/container-observer-source-check.py` or `python
 tools/math-port/remaining-observer-source-check.py`; the historical Node
 `--check` commands in old acceptance reports now correspond to these entries.
+
+The seven owners in `observer-packets.json` also emit complete official
+observations. Their four Python entry points in the table above retain the
+canonical and original profile hashes, legacy file sizes, complete ordered
+records and summaries. MathChoice checks both its 410 canonical cases and all
+409 original Source calls, including the original binary64 and own-key
+encoding. For example, run `python
+tools/math-port/mml-observer-source-profiles.py --packet=leaf` or `python
+tools/math-port/mathchoice-observer-source-profile.py`. Capturing fresh Source
+observations still requires each owner's pinned Node version and dependencies;
+an unavailable or mismatched reference fails without replacing the source lock.
 
 The ten ledger checkers also run in Python. `ledger-source.cjs`,
 `member-ledger.cjs`, and the two specialized member generators only sample the
