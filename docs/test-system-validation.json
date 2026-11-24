@@ -1,0 +1,457 @@
+{
+  "schema": 1,
+  "task": "portable-test-system refactor",
+  "validated_date": "2026-11-24",
+  "timezone": "Asia/Shanghai",
+  "branch": "refactor/portable-test-system",
+  "master_baseline": "2ba389aa34a5c2f23500dc552b9fab9c434a0cdd",
+  "tested_revision": "d378f543aff1398f4b36b8868c88c88d1017862d",
+  "environment": {
+    "os": "Linux x86_64",
+    "compiler": "Clang 21.1.8",
+    "standard_library": "libc++ 21",
+    "cmake": "4.3.4",
+    "ninja": "1.13.2",
+    "cpp_standard": 23,
+    "boost_ut": "vendored C++23 module",
+    "windows_sdk_required": false,
+    "build_parallelism": 4,
+    "test_parallelism": 1
+  },
+  "run": {
+    "command": "python tests/run.py --suite all --build-dir build/test-refactor/portable --jobs 4 --test-jobs 1",
+    "suites": [
+      "core",
+      "completion",
+      "math-editor",
+      "math",
+      "mermaid",
+      "conformance",
+      "tooling"
+    ],
+    "success": true,
+    "phases": [
+      {
+        "name": "configure",
+        "returncode": 0,
+        "seconds": 14.608
+      },
+      {
+        "name": "build",
+        "returncode": 0,
+        "seconds": 150.473
+      },
+      {
+        "name": "ctest",
+        "returncode": 0,
+        "seconds": 54.329
+      }
+    ],
+    "ctest_entries": 26,
+    "ctest_passed": 26,
+    "ctest_failed": 0,
+    "ctest_skipped": 0,
+    "python_test_files": 40,
+    "python_tests_executed": 2828,
+    "entries": [
+      {
+        "name": "FoliaCoreTests",
+        "passed": true,
+        "native_cases": 1098,
+        "native_assertions": 1305869,
+        "filtered_cases": 0,
+        "seconds": 13.09
+      },
+      {
+        "name": "FoliaPortablePolicyTests",
+        "passed": true,
+        "native_cases": 41,
+        "native_assertions": 9096485,
+        "filtered_cases": 0,
+        "seconds": 0.236004
+      },
+      {
+        "name": "markdown_consumer",
+        "passed": true,
+        "native_cases": 4,
+        "native_assertions": 61,
+        "filtered_cases": 0,
+        "seconds": 0.00310631
+      },
+      {
+        "name": "FoliaCompletionTests",
+        "passed": true,
+        "native_cases": 23,
+        "native_assertions": 5562,
+        "filtered_cases": 0,
+        "seconds": 0.0425399
+      },
+      {
+        "name": "FoliaMathEditorTests",
+        "passed": true,
+        "native_cases": 7,
+        "native_assertions": 15330,
+        "filtered_cases": 0,
+        "seconds": 0.0267507
+      },
+      {
+        "name": "FoliaMathTests",
+        "passed": true,
+        "native_cases": 996,
+        "native_assertions": 547261,
+        "filtered_cases": 0,
+        "seconds": 4.1638
+      },
+      {
+        "name": "FoliaMathSvgBridgeTests",
+        "passed": true,
+        "native_cases": 83,
+        "native_assertions": 2381,
+        "filtered_cases": 0,
+        "seconds": 0.458573
+      },
+      {
+        "name": "FoliaCommonMarkTests",
+        "passed": true,
+        "native_cases": 652,
+        "native_assertions": 1304,
+        "filtered_cases": 0,
+        "seconds": 0.161545
+      },
+      {
+        "name": "FoliaGfmTests",
+        "passed": true,
+        "native_cases": 1428,
+        "native_assertions": 2878,
+        "filtered_cases": 0,
+        "seconds": 0.437694
+      },
+      {
+        "name": "FoliaGfmPathologicalTests",
+        "passed": true,
+        "seconds": 5.36923
+      },
+      {
+        "name": "FoliaInlineCstOwnershipTests",
+        "passed": true,
+        "native_cases": 1,
+        "native_assertions": 6,
+        "filtered_cases": 34,
+        "seconds": 0.0986666
+      },
+      {
+        "name": "FoliaParserCompletionTests",
+        "passed": true,
+        "native_cases": 1,
+        "native_assertions": 143,
+        "filtered_cases": 34,
+        "seconds": 0.00370255
+      },
+      {
+        "name": "FoliaParserContainerFrameTests",
+        "passed": true,
+        "native_cases": 10,
+        "native_assertions": 164,
+        "filtered_cases": 25,
+        "seconds": 0.00264351
+      },
+      {
+        "name": "FoliaBlockLineThematicTests",
+        "passed": true,
+        "native_cases": 1,
+        "native_assertions": 20,
+        "filtered_cases": 34,
+        "seconds": 0.00165341
+      },
+      {
+        "name": "FoliaDeepBlockOwnershipTests",
+        "passed": true,
+        "native_cases": 1,
+        "native_assertions": 10,
+        "filtered_cases": 34,
+        "seconds": 0.0853676
+      },
+      {
+        "name": "FoliaDeepSerializerQuotes",
+        "passed": true,
+        "native_cases": 1,
+        "native_assertions": 3,
+        "filtered_cases": 1,
+        "seconds": 0.256291
+      },
+      {
+        "name": "FoliaDeepSerializerLists",
+        "passed": true,
+        "native_cases": 1,
+        "native_assertions": 2002,
+        "filtered_cases": 1,
+        "seconds": 0.288323
+      },
+      {
+        "name": "FoliaGfmPathologicalRunnerTests",
+        "passed": true,
+        "python_tests": 11,
+        "seconds": 0.123167
+      },
+      {
+        "name": "FoliaMermaidComparatorTests",
+        "passed": true,
+        "python_tests": 2567,
+        "seconds": 1.20074
+      },
+      {
+        "name": "FoliaMarkdownToolTests",
+        "passed": true,
+        "python_tests": 45,
+        "seconds": 0.445019
+      },
+      {
+        "name": "FoliaMathToolTests",
+        "passed": true,
+        "python_tests": 176,
+        "seconds": 10.9735
+      },
+      {
+        "name": "FoliaLatexCatalogTests",
+        "passed": true,
+        "python_tests": 7,
+        "seconds": 0.136474
+      },
+      {
+        "name": "FoliaTestRunnerTests",
+        "passed": true,
+        "python_tests": 22,
+        "seconds": 0.838249
+      },
+      {
+        "name": "FoliaMermaidStructure",
+        "passed": true,
+        "seconds": 0.289077
+      },
+      {
+        "name": "FoliaMermaidTests",
+        "passed": true,
+        "native_cases": 274,
+        "native_assertions": 959627,
+        "filtered_cases": 0,
+        "seconds": 15.2717
+      },
+      {
+        "name": "FoliaMermaidMathTests",
+        "passed": true,
+        "native_cases": 5,
+        "native_assertions": 205,
+        "filtered_cases": 0,
+        "seconds": 0.216992
+      }
+    ],
+    "counting_note": "Per-entry native counts are executions, not globally unique cases. Focused CTest entries deliberately filter a shared executable; filtered_cases are not omitted corpus rows. Full output counts come from LastTest.log because JUnit truncates successful output at 1024 bytes."
+  },
+  "preservation": {
+    "registrations_and_original_sources": {
+      "baseline_commit": "2ba389aa34a5c2f23500dc552b9fab9c434a0cdd",
+      "original_registrations": 2811,
+      "current_registrations": 2816,
+      "recorded_windows_sources": 120,
+      "verified_windows_sources": 120,
+      "unchanged_windows_sources": 118,
+      "portable_import_fixes": 2,
+      "failures": [],
+      "success": true
+    },
+    "fixture_checkpoint": {
+      "recorded_files": 464,
+      "current_files": 464,
+      "recorded_tsv_rows": 119059,
+      "failures": [],
+      "success": true
+    },
+    "math_fixture_headers_remaining": 0,
+    "scene_datasets": 8,
+    "scene_fields_roundtripped_exactly": 14326,
+    "scene_generator_emitters_replayed_exactly": 8,
+    "css_metadata_rows": 33,
+    "css_metadata_fields_preserved": 132,
+    "mhchem_rows_independently_recompared": 7960,
+    "mhchem_expected_chunks_reassembled": 22287,
+    "math_assertion_count_explanation": "547261 vs the historical 547262: a redundant comparison of the 7960-element mhchem constexpr array count was replaced by the strict 7960-row loader; the independent size assertion and all 7960 records remain.",
+    "historical_migration_evidence": "tests/fixtures/preservation/math-fixture-migrations.json",
+    "historical_migration_scope": "19 retained numbered reports, 43 original blobs and 133 fixture files. Consolidation reverified hashes, not historical compiler/reference runs; this is not an exhaustive proof for all later migrations."
+  },
+  "organization": {
+    "scope": "tests/**/*.cpp and tests/**/*.hpp excluding app, platform, encoding and fixture data; the seven SDK-free policy files in platform are additionally compiled unchanged except the two recorded imports.",
+    "portable_cpp_and_support_files": 591,
+    "largest_files": [
+      {
+        "lines": 577,
+        "path": "tests/math/input/packages/texhtml.cpp"
+      },
+      {
+        "lines": 552,
+        "path": "tests/math/input/packages/physics.cpp"
+      },
+      {
+        "lines": 544,
+        "path": "tests/math/output/common/native_common_menclose.cpp"
+      },
+      {
+        "lines": 532,
+        "path": "tests/math/core/mml/mml_native_factory.cpp"
+      },
+      {
+        "lines": 507,
+        "path": "tests/math/input/packages/setoptions.cpp"
+      },
+      {
+        "lines": 500,
+        "path": "tests/math/input/tex/parse_util.cpp"
+      },
+      {
+        "lines": 495,
+        "path": "tests/editing/test_container_source_history.cpp"
+      },
+      {
+        "lines": 491,
+        "path": "tests/rendering/test_render_layout_hit_test.cpp"
+      },
+      {
+        "lines": 491,
+        "path": "tests/math/fonts/native_raii_fonts.cpp"
+      },
+      {
+        "lines": 484,
+        "path": "tests/math/input/packages/bussproofs.cpp"
+      }
+    ],
+    "math_compiled_fixture_headers": 0
+  },
+  "conformance": {
+    "commonmark": {
+      "fixture_rows": 652,
+      "reported_rows": 652,
+      "exit_code": 0,
+      "totals": {
+        "fixture_rows": 652,
+        "reported": 652,
+        "strict_pass": 652,
+        "semantic_skipped": 0,
+        "strict_diff": 0,
+        "unreported": 0,
+        "relaxed_list_only": 0,
+        "inline_lossless": 652,
+        "inline_lossless_fail": 0,
+        "exact_serialization": 652,
+        "exact_serialization_fail": 0,
+        "fixture_input_mismatch": 0,
+        "reference_difference_reported": 0,
+        "reference_difference_verified": 0,
+        "unresolved_diff": 0,
+        "with_reported_limitations": 0
+      },
+      "native_interface_gaps": {},
+      "upstream_disabled_rows_retained": 0,
+      "missing_examples": 0,
+      "duplicate_examples": 0
+    },
+    "gfm": {
+      "fixture_rows": 1426,
+      "reported_rows": 1426,
+      "exit_code": 0,
+      "totals": {
+        "fixture_rows": 1426,
+        "reported": 1426,
+        "strict_pass": 1395,
+        "semantic_skipped": 20,
+        "strict_diff": 11,
+        "unreported": 0,
+        "relaxed_list_only": 0,
+        "inline_lossless": 1426,
+        "inline_lossless_fail": 0,
+        "exact_serialization": 1426,
+        "exact_serialization_fail": 0,
+        "fixture_input_mismatch": 0,
+        "reference_difference_reported": 11,
+        "reference_difference_verified": 11,
+        "unresolved_diff": 0,
+        "with_reported_limitations": 0
+      },
+      "native_interface_gaps": {
+        "smart-punctuation output option": 16,
+        "tagfilter HTML output option": 4
+      },
+      "upstream_disabled_rows_retained": 2,
+      "missing_examples": 0,
+      "duplicate_examples": 0
+    },
+    "generated_pathological": {
+      "expected_cases": 21,
+      "passed": 21,
+      "failed": 0,
+      "not_run": 0,
+      "timeout_seconds": 30.0
+    }
+  },
+  "svg_paint_acceptance": {
+    "schema": 1,
+    "legacyRecords": 76,
+    "pythonRecords": 76,
+    "offlineRecords": 76,
+    "texInputs": 18,
+    "texModes": 3,
+    "directMathmlCases": 22,
+    "parts": 82,
+    "paintChecks": 547,
+    "visibilityChecks": 127,
+    "allDecisionsAndCountsEqual": true,
+    "identicalPngs": 246,
+    "offlineNodeProgram": "/must-not-run-node",
+    "corruptionAndReplayTests": 19
+  },
+  "scope_limits": [
+    "Windows SDK, WinUI, DirectWrite and Windows host integration were excluded as requested.",
+    "This refactor does not claim a new complete 375-case official-browser Mermaid SVG comparison.",
+    "GFM preserves all 1426 native source/save records: 1395 strict HTML matches, 11 independently reviewed current-CommonMark differences, and 20 explicitly unscored HTML projections. No unresolved differences or missing records.",
+    "Fresh historical source replay retains existing source and Node version locks; absent old captures/source paths or the Node 24.13.0 requirement still fail explicitly. Offline comparator/negative-control tests are not represented as fresh source captures.",
+    "The optional md4c reference target remains off by default and was not run; when explicitly enabled it now belongs to the selected aggregate."
+  ],
+  "publication": {
+    "commit_policy": "Every completed batch committed and immediately pushed with [skip ci].",
+    "actions_runs_on_branch_at_final_check": 0,
+    "ci_files_changed": false,
+    "master_modified": false
+  },
+  "local_evidence": [
+    {
+      "path": "build/test-refactor/resume-portable-all.log",
+      "sha256": "c99044515f9360a85cf0cfe56e5920111945a4e71e27c40806d80224d3391663"
+    },
+    {
+      "path": "build/test-refactor/portable/run.json",
+      "sha256": "b9b69f9f52447e544651dc59cf2af2bef5017596b3f71c5e3f8a4390e4dc4ab1"
+    },
+    {
+      "path": "build/test-refactor/portable/results.xml",
+      "sha256": "029c749d97c63ae515faedd48a3ceef594ece82d7bdcf05522f9c9faba2c2a7d"
+    },
+    {
+      "path": "build/test-refactor/portable/Testing/Temporary/LastTest.log",
+      "sha256": "da0b7984cc5f21119a36598dab5452cb46d3e59dd7bf6b6c99427a7afc160032"
+    },
+    {
+      "path": "build/test-refactor/portable/markdown-conformance/results.json",
+      "sha256": "eafe62af3441e690e9b8845dc2093d53ae1adb6aa46c911c328d192042f6d0e0"
+    },
+    {
+      "path": "build/test-refactor/portable/gfm-conformance/results.json",
+      "sha256": "ed8a67232f03a4444ff65950959328237dc2bbb1fc729c46c6091f891a2e02c2"
+    },
+    {
+      "path": "build/test-refactor/portable/gfm-pathological/results.json",
+      "sha256": "ba7581aa8107516729feaef3fb68880b824f5b066778e5d73ce0c9d8b7b430fb"
+    },
+    {
+      "path": "build/tooling-migration/paint-data-final/report.json",
+      "sha256": "026cdebe038a9c8b52b6663bb80fe9935d5001a03574193ff8f5e066d98e5e0c"
+    }
+  ]
+}

@@ -1,17 +1,19 @@
 # 当前开发交接
 
-## 当前任务：测试系统重构（2026-11-24，进行中）
+## 当前任务：测试系统重构（2026-11-24，已完成）
 
-- 继续既有 `refactor/portable-test-system`，master 基线为 `2ba389aa34a5c2f23500dc552b9fab9c434a0cdd`；本次从已推送 `c603f4db` 和上轮未提交文件恢复。用户要求保留全部样例、每批提交立即推送、Windows SDK 测试不处理。所有提交带 `[skip ci]`；不改 CI、不建标签。
-- 已保留核心/数学/图表分类、共享 `tests/run.py` 与七套 `tests/suites.json` 入口、真实 Boost.UT/C++23 模块及 runtime fixture 读取器。原始 2,811 个具名注册（含重复）均保留，现有 2,816；120 个 Windows test/support 文件与基线逐字节规则核验一致。
-- 本次已推送 parser-host fault runner、RAII inventory、package/extpfeil diagnostics 的 Python 迁移。82 项 RAII、13 项 diagnostic、5 项故障验证测试通过，原比较/失败/来源策略保留；RAII 恢复对提取后 `.cmake` include 的目标发现。历史候选缺失 capture/旧 source path 时仍严格失败，不伪造 replay。
-- 本次已推送 setoptions 96 字段、bboldx 168 字符+12命令、TextMacros 116映射+74参数外置，精确保留原值/顺序/本地类型绑定；定向执行分别 10项759断言、6项6048断言、12项868断言通过。恢复构建发现并修复 common bbox 支持头遗漏类型 namespace；5项20564断言通过。
-- Renderer 14 个测试体和 Lite 8 个 suite 按职责逐字节拆分，C ABI/SVG focused gate 83项2381断言通过；Lite 过滤14项177断言通过。支持代码拆分不替代全量最终验证。完整原始数据和转换证明在 ignored `build/test-refactor-math/`。
-- 当前在做：剩余 maction/mglyph/table/common MathML 大数据外置，SVG paint 验收迁 Python，CommonMark 1047行辅助代码已拆为6个职责头（待原生回归），永久 fixture 完整性清单。不能宣称已完成。
-- 已有 CommonMark 652/GFM 1426有序字段保留、34图族比较器迁移、24个ZenUML和22个公式离线/真实采样对照等上轮证据继续有效；此次最终必须通过新统一入口 `--suite all`。不重开旧源码锁/宏包功能调查。
-- 工作区 `/workspace/scratch/1c7d52d1a954/Folia`；`source build/test-refactor/env.sh` 使用 LLVM/libc++21/CMake4.3。现有 native build 为 `build/test-refactor/integrated`，新统一入口全套构建为 `build/test-refactor/portable`。各轮输出 `build/test-refactor/resume-*.log`。Python工具依赖使用环境完整解释器。
-- agents：`math_fixtures` 外置剩余数学数据；`tooling_python` 完成SVG paint及剩余JS职责；`audit_test_scope` 完成fixture完整性清单；root负责共享接线、串行native构建、每批提交推送。Git CLI只用于fetch，本地/远端树通过 `build/test-refactor/publish_impl.js` GitHub API发布辅助逐批核对，无积压本地提交。
-- 下一步：各剩余批次核验/发布 → native table剩余大文件拆分 → 统一七套全部回归 → 更新文档/最终检查点 → 核对工作区干净及远端同一树。Windows/WinUI不运行；旧335例浏览器整图对照待办不属于此测试重构完成声明。
+- 在既有 `refactor/portable-test-system` 上完成；master 基线仍为 `2ba389aa34a5c2f23500dc552b9fab9c434a0cdd`。本次从 `c603f4db` 续做，所有完成批次均独立提交并立即推送，提交带 `[skip ci]`。未修改 CI、master 或创建标签；分支 Actions 查询为 0 次运行。
+- **最终统一入口通过**：`python tests/run.py --suite all --build-dir build/test-refactor/portable --jobs 4 --test-jobs 1`，七套 catalog、**26/26 CTest、0 failed/CTest skipped**。验证代码版本 `d378f543aff1398f4b36b8868c88c88d1017862d`，之后只补验收文档。Linux Clang/libc++ 21.1.8、CMake 4.3.4、Ninja，真实 Boost.UT/C++23 模块、单 native 构建并发 4；CTest 用时 54.24 秒。
+- 完整原生结果：Core **1098 项/1305869 断言**；新增接线的既有 SDK-free policies **41/9096485**；Markdown 独立消费者 **4/61**；Completion **23/5562**；Math editor **7/15330**；Math **996/547261**；SVG/C ABI **83/2381**；Mermaid **274/959627**；真实 Math 集成 **5/205**，这些完整入口均无过滤/跳过。
+- 所有活跃 portable Python 测试文件 **40/40** 已接入，实际执行 **2828 项**全部通过：Mermaid 比较器 2567、Math 工具 176、Markdown 工具 45、GFM runner 11、LaTeX 目录 7、测试系统 22。遗漏的 7 个 SDK-free editor policy 文件、4 个 Markdown consumer 用例和 LaTeX 目录检查均已补入统一入口；可选 md4c target 开启时也纳入聚合，默认关闭且本轮未运行。
+- 数据与逻辑分离完成：`tests/math/fixtures` 无 `.inc/.hpp` 编译数据；最后八组 MathML/scene 的 **14326 个字段**通过旧 aggregate 与新 reader 独立逐位回环，8 个实际生成器 emitter 输出逐字节相同。最后 33 行 CSS 元数据/132 字段亦完整保留。Renderer、Lite、table 和 CommonMark projection 按职责拆分；排除 Windows/fixture 数据后，591 个通用 C++ 测试与支持文件最大 **577 行**。
+- 永久完整性检查 `tests/tools/check_fixtures.py` 覆盖 **464 个文件、119059 条 TSV 记录**；SHA-256、字节、顺序、行数、缺失/新增均有失败控制。12 项破坏/边界测试通过。LF 文本、原始上游物理 CR 与 PNG/RGBA 二进制分别受 Git attributes 保护。历史19批迁移记录的43个原始blob/133个现存fixture哈希重新核对；明确不把此哈希汇编冒称重跑所有历史 Source 实验。
+- 原始 **2811 个具名注册（含重复）全部保留，现有2816**。120个历史Windows-runner/support原始哈希仍保留：118无改，2个SDK-free测试各补一条确切import；只移除此唯一整行后必须恢复原哈希，新增负例确保不能隐藏断言/输入修改。production snippet模块也仅补selection import；实际Windows SDK测试未改。本轮独立重比mhchem 7960记录/22287 expected chunks零差异；完整Math较历史少1断言，是冗余constexpr数组计数检查由严格7960行loader替代，并非删例。
+- JavaScript 测试工具职责收束为官方 MathJax/Mermaid/真实参考后端采样；原生进程编排、比较、RAII inventory、ledger、Source profile验收、parser faults、diagnostics与报告由Python承担。最后SVG paint真实对照 **76/76记录、82 SVG、547 paint、127可见性检查**通过；原/新验收246张PNG字节相同，禁用Node的离线replay也76/76通过。保持原容差、Source锁和来源独立性。
+- CommonMark **652/652**严格HTML、CST/保存均过；GFM **1426/1426**输入/无损/精确保存检查执行，HTML为1395严格一致、11已审查的当前CommonMark差异、20明确不评分（smart/tagfilter/上游IGNORE），0未解决差异/缺例。完整21个病理输入及深层owner/50000quote/1000list检查通过。不能将GFM不评分项写成1426个严格HTML通过。
+- 验收摘要见 [test-system-validation.json](../test-system-validation.json)，使用说明见 [tests/README.md](../../tests/README.md) 与各域README；完整日志 `build/test-refactor/resume-portable-all.log`、`build/test-refactor/portable/Testing/Temporary/LastTest.log`，JUnit和`run.json`同目录。JUnit成功输出有1024字节截断，断言总数取完整LastTest.log。
+- 边界：按用户要求未运行Windows SDK/WinUI/DirectWrite；本任务不声称新完成旧375例Mermaid官方浏览器整图验收。历史Source命令缺旧capture/source path或要求Node24.13.0时仍严格失败，未改锁或把offline测试冒称fresh capture。生产资源生成器仍按现有构建使用Node。
+- **本轮实现、统一回归与分批发布已完成，无继续实施的待办。** 所有agents已交回，无活动构建/测试句柄；最终文档发布后核对本地与远端同一HEAD、工作树干净。下一步仅按用户新反馈，不因恢复/压缩重开历史功能任务。
 
 下方记录是本任务开始前已完成的功能基线，不能替代本轮测试结果。
 

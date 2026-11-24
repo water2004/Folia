@@ -4,6 +4,11 @@ Use `tests/run.py` to configure, build and run portable suites. The suite catalo
 is `tests/suites.json`; the standalone project and the repository's main CMake
 project share the same production libraries and test definitions.
 
+The completed refactor's [validation record](../docs/test-system-validation.json)
+records the tested revision, all 26 portable CTest entries, fixture preservation
+checks, and the separate scoring boundaries for CommonMark/GFM and browser
+captures.
+
 ## Start here
 
 From the repository root:
