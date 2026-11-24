@@ -12,6 +12,7 @@ native tests' expected values.
 | Generate native font tables (also run by CMake) | `font-data-generate-native.cjs` |
 | Generate native entity tables (also run by CMake) | `entities-data-generate.cjs` |
 | Verify TeX package registrations and produce alias/SVG fixtures | `tex-package-conformance.cjs` |
+| Check complete reviewed TypeScript member inventories | `*-ledger-check.py` and `ledger-profiles.json` |
 | Replay complete pinned Source profiles in Python | `container-observer-source-check.py`, `remaining-observer-source-check.py` |
 | Compare native font data | `font-data-compare-native.py` and `font-data-dump.cpp` |
 | Exercise the app's native layout/worker performance | `winui-math-layout-probe.ps1`, `winui-math-worker-probe.ps1` |
@@ -42,3 +43,11 @@ the independent 88-case multiscript parent projection. Run `python
 tools/math-port/container-observer-source-check.py` or `python
 tools/math-port/remaining-observer-source-check.py`; the historical Node
 `--check` commands in old acceptance reports now correspond to these entries.
+
+The ten ledger checkers also run in Python. `ledger-source.cjs`,
+`member-ledger.cjs`, and the two specialized member generators only sample the
+locked MathJax TypeScript sources, retaining each original reference loader.
+The reviewed targets, evidence requirements, all members and module bindings,
+and optional explicit `--freeze-reviewed` operation are preserved. Validation
+never freezes metadata automatically; a missing pinned TypeScript installation,
+runtime version mismatch, or stale native target still fails.

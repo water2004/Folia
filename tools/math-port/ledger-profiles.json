@@ -1,0 +1,563 @@
+{
+  "atom-semantics": {
+    "accepted": "docs/math-port/evidence/p15bc-members.json",
+    "inputs": [
+      "ts/core/MmlTree/MmlNodes/TeXAtom.ts",
+      "ts/core/MmlTree/MmlNodes/semantics.ts"
+    ],
+    "member_counts": [
+      8,
+      10
+    ],
+    "skip_member_keys": [
+      "target",
+      "review"
+    ],
+    "file_fields": "source",
+    "target": "string",
+    "generator": "atom-semantics-member-ledger.cjs",
+    "groups": [
+      "members",
+      "module_bindings"
+    ],
+    "evidence": "docs/math-port/evidence/p15bc-atom-semantics-acceptance.md",
+    "summary": {
+      "members": 18,
+      "module_bindings": 1,
+      "source_files": 2,
+      "status": "root_reviewed_inventory_matches_pinned_source"
+    }
+  },
+  "html-node": {
+    "accepted": "docs/math-port/evidence/p15d-html-members.json",
+    "inputs": [
+      "ts/core/MmlTree/MmlNodes/HtmlNode.ts"
+    ],
+    "member_counts": [
+      7
+    ],
+    "skip_member_keys": [
+      "target",
+      "review"
+    ],
+    "file_fields": "source",
+    "target": "truthy",
+    "bootstrap": "html-node-reference.cjs",
+    "input_selector": "source",
+    "evidence": "docs/math-port/evidence/p15d-html-node-acceptance.md",
+    "summary": {
+      "members": 7,
+      "source_files": 1,
+      "status": "root_reviewed_inventory_matches_pinned_source"
+    }
+  },
+  "map-handler": {
+    "accepted": "docs/math-port/evidence/p20a-map-handler-members.json",
+    "inputs": [
+      "ts/input/tex/MapHandler.ts"
+    ],
+    "member_counts": [
+      21
+    ],
+    "skip_member_keys": [
+      "target",
+      "review",
+      "evidence"
+    ],
+    "file_fields": "source",
+    "target": "mapped",
+    "generator": "map-handler-member-ledger.cjs",
+    "groups": [
+      "members",
+      "object_methods"
+    ],
+    "evidence_exists": true,
+    "target_exists": true,
+    "freeze_status": "locally_accepted_complete_map_handler_not_concrete_token_maps_parser_or_renderer",
+    "freeze_files": {
+      "ts/input/tex/MapHandler.ts": {
+        "native_adaptation": "Root-frozen TokenMap protocol with raw Property map keys, actual prioritized-list records, native MethodConfig, RTTI CharacterMap family and retained live Map iterator. Concrete TokenMap algorithms and regexp engine remain unaccepted.",
+        "members": {
+          "members/<module>/maps": {
+            "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+          },
+          "members/<module>/MapHandler": {
+            "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+          },
+          "members/SubHandler/FALLBACK": {
+            "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+          },
+          "members/SubHandler/_configuration": {
+            "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+          },
+          "members/SubHandler/_fallback": {
+            "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+          },
+          "members/SubHandler/add": {
+            "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+          },
+          "members/SubHandler/remove": {
+            "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+          },
+          "members/SubHandler/parse": {
+            "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+          },
+          "members/SubHandler/lookup": {
+            "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+          },
+          "members/SubHandler/contains": {
+            "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+          },
+          "members/SubHandler/toString": {
+            "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+          },
+          "members/SubHandler/applicable": {
+            "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+          },
+          "members/SubHandler/retrieve": {
+            "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+          },
+          "members/SubHandler/warn": {
+            "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+          },
+          "members/SubHandlers/map": {
+            "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+          },
+          "members/SubHandlers/add": {
+            "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+          },
+          "members/SubHandlers/remove": {
+            "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+          },
+          "members/SubHandlers/set": {
+            "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+          },
+          "members/SubHandlers/get": {
+            "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+          },
+          "members/SubHandlers/retrieve": {
+            "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+          },
+          "members/SubHandlers/keys": {
+            "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+          },
+          "object_methods/MapHandler/register": {
+            "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+          },
+          "object_methods/MapHandler/getMap": {
+            "evidence": "docs/math-port/evidence/p20a-map-handler-acceptance.md"
+          }
+        }
+      }
+    },
+    "summary": {
+      "source_files": 1,
+      "inventoried_members": 21,
+      "object_methods": 2,
+      "status": "reviewed_pinned_inventory_matches"
+    }
+  },
+  "mathchoice": {
+    "accepted": "docs/math-port/evidence/p17c-mathchoice-members.json",
+    "inputs": [
+      "ts/core/MmlTree/MmlNodes/mathchoice.ts"
+    ],
+    "member_counts": [
+      5
+    ],
+    "skip_member_keys": [
+      "target",
+      "review",
+      "evidence",
+      "native_adaptation"
+    ],
+    "file_fields": "all",
+    "target": "truthy",
+    "bootstrap": "inheritance-reference.cjs",
+    "freeze_status": "locally_accepted_mathchoice_semantics_not_renderer",
+    "freeze_files": {
+      "ts/core/MmlTree/MmlNodes/mathchoice.ts": {
+        "members": {
+          "members/MathChoice/defaults": {
+            "evidence": "docs/math-port/evidence/p17c-mathchoice-acceptance.md"
+          },
+          "members/MathChoice/kind": {
+            "evidence": "docs/math-port/evidence/p17c-mathchoice-acceptance.md"
+          },
+          "members/MathChoice/arity": {
+            "evidence": "docs/math-port/evidence/p17c-mathchoice-acceptance.md"
+          },
+          "members/MathChoice/notParent": {
+            "evidence": "docs/math-port/evidence/p17c-mathchoice-acceptance.md"
+          },
+          "members/MathChoice/setInheritedAttributes": {
+            "evidence": "docs/math-port/evidence/p17c-mathchoice-acceptance.md",
+            "native_adaptation": "The single raw public facade dispatches here without defaults; qualified source body identity is preserved."
+          }
+        }
+      }
+    },
+    "summary": {
+      "source_files": 1,
+      "members": 5,
+      "status": "reviewed_pinned_inventory_matches"
+    }
+  },
+  "mfenced": {
+    "accepted": "docs/math-port/evidence/p16c-mfenced-members.json",
+    "inputs": [
+      "ts/core/MmlTree/MmlNodes/mfenced.ts"
+    ],
+    "member_counts": [
+      10
+    ],
+    "skip_member_keys": [
+      "target",
+      "review"
+    ],
+    "file_fields": "source",
+    "target": "truthy",
+    "bootstrap": "mfenced-reference.cjs",
+    "input_selector": "source",
+    "evidence": "docs/math-port/evidence/p16c-mfenced-acceptance.md",
+    "summary": {
+      "source_files": 1,
+      "members": 10,
+      "status": "root_reviewed_inventory_matches_pinned_source"
+    }
+  },
+  "mml-action": {
+    "accepted": "docs/math-port/evidence/p18-mml-action-members.json",
+    "inputs": [
+      "ts/core/MmlTree/MML.ts",
+      "ts/core/MmlTree/MmlFactory.ts",
+      "ts/core/MmlTree/MmlNodes/maction.ts"
+    ],
+    "member_counts": [
+      1,
+      2,
+      12
+    ],
+    "skip_member_keys": [
+      "target",
+      "review",
+      "evidence",
+      "native_adaptation"
+    ],
+    "file_fields": "all",
+    "target": "mapped",
+    "bootstrap": "inheritance-reference.cjs",
+    "target_exists": true,
+    "freeze_status": "locally_accepted_mml_registry_and_action_not_renderer",
+    "freeze_files": {
+      "ts/core/MmlTree/MML.ts": {
+        "members": {
+          "members/<module>/MML": {
+            "evidence": "docs/math-port/evidence/p18c-mml-registry-acceptance.md",
+            "native_adaptation": "One const shared binding to an ordered mutable registry; all 43 compiled constructor identities retained."
+          }
+        }
+      },
+      "ts/core/MmlTree/MmlFactory.ts": {
+        "members": {
+          "members/MmlFactory/defaultNodes": {
+            "evidence": "docs/math-port/evidence/p18c-mml-registry-acceptance.md",
+            "native_adaptation": "Separately rebindable shared handle initially aliases the registry; inherited this.constructor.defaultNodes is selected by the existing typed injected-default constructor."
+          },
+          "members/MmlFactory/MML": {
+            "evidence": "docs/math-port/evidence/p18c-mml-registry-acceptance.md"
+          }
+        }
+      },
+      "ts/core/MmlTree/MmlNodes/maction.ts": {
+        "members": {
+          "members/MmlMaction/defaults": {
+            "evidence": "docs/math-port/evidence/p18b-maction-acceptance.md"
+          },
+          "members/MmlMaction/kind": {
+            "evidence": "docs/math-port/evidence/p18b-maction-acceptance.md"
+          },
+          "members/MmlMaction/arity": {
+            "evidence": "docs/math-port/evidence/p18b-maction-acceptance.md"
+          },
+          "members/MmlMaction/selected": {
+            "evidence": "docs/math-port/evidence/p18b-maction-acceptance.md",
+            "native_adaptation": "Virtual pointer getter in the dense nullable native child-array and raw scalar/record/array host; full NaN/fraction/default behavior retained."
+          },
+          "members/MmlMaction/isEmbellished": {
+            "evidence": "docs/math-port/evidence/p18b-maction-acceptance.md"
+          },
+          "members/MmlMaction/isSpacelike": {
+            "evidence": "docs/math-port/evidence/p18b-maction-acceptance.md"
+          },
+          "members/MmlMaction/core": {
+            "evidence": "docs/math-port/evidence/p18b-maction-acceptance.md"
+          },
+          "members/MmlMaction/coreMO": {
+            "evidence": "docs/math-port/evidence/p18b-maction-acceptance.md"
+          },
+          "members/MmlMaction/verifyAttributes": {
+            "evidence": "docs/math-port/evidence/p18b-maction-acceptance.md"
+          },
+          "members/MmlMaction/setTeXclass": {
+            "evidence": "docs/math-port/evidence/p18b-maction-acceptance.md"
+          },
+          "members/MmlMaction/nextToggleSelection": {
+            "evidence": "docs/math-port/evidence/p18b-maction-acceptance.md"
+          },
+          "members/MmlMaction/setChildInheritedAttributes": {
+            "evidence": "docs/math-port/evidence/p18b-maction-acceptance.md",
+            "native_adaptation": "The accepted general Unicode default-lowercase host implements the actual string method; no coercion of non-string receivers."
+          }
+        }
+      }
+    },
+    "summary": {
+      "source_files": 3,
+      "members": 15,
+      "registry_entries": 43,
+      "status": "reviewed_pinned_inventory_matches"
+    }
+  },
+  "numeric-reductions": {
+    "accepted": "docs/math-port/evidence/p20c-numeric-reductions-members.json",
+    "inputs": [
+      "ts/util/numeric.ts"
+    ],
+    "member_counts": [
+      2
+    ],
+    "skip_member_keys": [
+      "target",
+      "review",
+      "evidence"
+    ],
+    "file_fields": "source",
+    "target": "mapped",
+    "evidence_exists": true,
+    "target_exists": true,
+    "freeze_status": "locally_accepted_complete_numeric_reductions_with_dense_binary64_host_adaptation",
+    "freeze_files": {
+      "ts/util/numeric.ts": {
+        "native_adaptation": "Borrowed readonly dense binary64 span. Common mtable retains its numeric array producer and string-width conversion responsibilities.",
+        "members": {
+          "members/<module>/sum": {
+            "evidence": "docs/math-port/evidence/p20c-numeric-reductions-acceptance.md"
+          },
+          "members/<module>/max": {
+            "evidence": "docs/math-port/evidence/p20c-numeric-reductions-acceptance.md"
+          }
+        }
+      }
+    },
+    "summary": {
+      "source_files": 1,
+      "inventoried_members": 2,
+      "status": "reviewed_pinned_inventory_matches"
+    }
+  },
+  "simple-mml": {
+    "accepted": "docs/math-port/evidence/p16a-simple-mml-members.json",
+    "inputs": [
+      "ts/core/MmlTree/MmlNodes/menclose.ts",
+      "ts/core/MmlTree/MmlNodes/mpadded.ts",
+      "ts/core/MmlTree/MmlNodes/maligngroup.ts",
+      "ts/core/MmlTree/MmlNodes/malignmark.ts",
+      "ts/core/MmlTree/MmlNodes/mglyph.ts"
+    ],
+    "member_counts": [
+      6,
+      4,
+      4,
+      4,
+      4
+    ],
+    "skip_member_keys": [
+      "target",
+      "review"
+    ],
+    "file_fields": "source",
+    "target": "truthy",
+    "bootstrap": "simple-mml-reference.cjs",
+    "input_selector": "hashes",
+    "evidence": "docs/math-port/evidence/p16a-simple-mml-acceptance.md",
+    "summary": {
+      "source_files": 5,
+      "members": 22,
+      "status": "root_reviewed_inventory_matches_pinned_source"
+    }
+  },
+  "tex-token": {
+    "accepted": "docs/math-port/evidence/p17a-token-members.json",
+    "inputs": [
+      "ts/input/tex/Token.ts",
+      "ts/input/tex/Types.ts",
+      "ts/input/tex/HandlerTypes.ts",
+      "ts/input/tex/TexConstants.ts"
+    ],
+    "member_counts": [
+      8,
+      0,
+      0,
+      1
+    ],
+    "skip_member_keys": [
+      "target",
+      "review"
+    ],
+    "file_fields": "source",
+    "target": "truthy",
+    "bootstrap": "tex-token-reference.cjs",
+    "input_selector": "hashes",
+    "freeze_status": "locally_accepted_token_and_type_foundation_not_parser",
+    "freeze_files": {
+      "ts/input/tex/Token.ts": {
+        "members": {
+          "members/Token/constructor": {
+            "evidence": "docs/math-port/evidence/p17a-token-acceptance.md"
+          },
+          "members/Token/token": {
+            "evidence": "docs/math-port/evidence/p17a-token-acceptance.md"
+          },
+          "members/Token/char": {
+            "evidence": "docs/math-port/evidence/p17a-token-acceptance.md"
+          },
+          "members/Token/attributes": {
+            "evidence": "docs/math-port/evidence/p17a-token-acceptance.md"
+          },
+          "members/Macro/constructor": {
+            "evidence": "docs/math-port/evidence/p17a-token-acceptance.md"
+          },
+          "members/Macro/token": {
+            "evidence": "docs/math-port/evidence/p17a-token-acceptance.md"
+          },
+          "members/Macro/func": {
+            "evidence": "docs/math-port/evidence/p17a-token-acceptance.md"
+          },
+          "members/Macro/args": {
+            "evidence": "docs/math-port/evidence/p17a-token-acceptance.md"
+          }
+        }
+      },
+      "ts/input/tex/Types.ts": {
+        "members": {}
+      },
+      "ts/input/tex/HandlerTypes.ts": {
+        "members": {}
+      },
+      "ts/input/tex/TexConstants.ts": {
+        "members": {
+          "members/<module>/TexConstant": {
+            "evidence": "docs/math-port/evidence/p17a-token-acceptance.md"
+          }
+        }
+      }
+    },
+    "summary": {
+      "files": 4,
+      "members": 9,
+      "type_aliases": 6,
+      "string_enum_members": 16,
+      "status": "reviewed_pinned_inventory_matches"
+    }
+  },
+  "token-map": {
+    "accepted": "docs/math-port/evidence/p22b-token-map-members.json",
+    "inputs": [
+      "ts/input/tex/TokenMap.ts"
+    ],
+    "member_counts": [
+      23
+    ],
+    "skip_member_keys": [
+      "target",
+      "review",
+      "evidence"
+    ],
+    "file_fields": "source",
+    "target": "mapped",
+    "evidence_exists": true,
+    "target_exists": true,
+    "freeze_status": "locally_accepted_complete_token_map_under_explicit_native_host_profile_not_engine_parser_or_renderer",
+    "freeze_files": {
+      "ts/input/tex/TokenMap.ts": {
+        "native_adaptation": "One final shared allocation before original base-to-derived initialization/registration; optional ordered SameValueZero Map; canonical Property/Token/Macro/callable owners and virtual getters; controlled identity-bearing RegExpContext dependency. Regex engine and complete configured parser/Common/SVG/Folia remain unaccepted.",
+        "members": {
+          "members/<module>/parseResult": {
+            "evidence": "docs/math-port/evidence/p22b-token-map-acceptance.md"
+          },
+          "members/AbstractTokenMap/constructor": {
+            "evidence": "docs/math-port/evidence/p22b-token-map-acceptance.md"
+          },
+          "members/AbstractTokenMap/name": {
+            "evidence": "docs/math-port/evidence/p22b-token-map-acceptance.md"
+          },
+          "members/AbstractTokenMap/parserFor": {
+            "evidence": "docs/math-port/evidence/p22b-token-map-acceptance.md"
+          },
+          "members/AbstractTokenMap/parse": {
+            "evidence": "docs/math-port/evidence/p22b-token-map-acceptance.md"
+          },
+          "members/AbstractTokenMap/parser": {
+            "evidence": "docs/math-port/evidence/p22b-token-map-acceptance.md"
+          },
+          "members/RegExpMap/constructor": {
+            "evidence": "docs/math-port/evidence/p22b-token-map-acceptance.md"
+          },
+          "members/RegExpMap/contains": {
+            "evidence": "docs/math-port/evidence/p22b-token-map-acceptance.md"
+          },
+          "members/RegExpMap/lookup": {
+            "evidence": "docs/math-port/evidence/p22b-token-map-acceptance.md"
+          },
+          "members/AbstractParseMap/map": {
+            "evidence": "docs/math-port/evidence/p22b-token-map-acceptance.md"
+          },
+          "members/AbstractParseMap/lookup": {
+            "evidence": "docs/math-port/evidence/p22b-token-map-acceptance.md"
+          },
+          "members/AbstractParseMap/contains": {
+            "evidence": "docs/math-port/evidence/p22b-token-map-acceptance.md"
+          },
+          "members/AbstractParseMap/add": {
+            "evidence": "docs/math-port/evidence/p22b-token-map-acceptance.md"
+          },
+          "members/AbstractParseMap/remove": {
+            "evidence": "docs/math-port/evidence/p22b-token-map-acceptance.md"
+          },
+          "members/CharacterMap/constructor": {
+            "evidence": "docs/math-port/evidence/p22b-token-map-acceptance.md"
+          },
+          "members/DelimiterMap/parse": {
+            "evidence": "docs/math-port/evidence/p22b-token-map-acceptance.md"
+          },
+          "members/MacroMap/constructor": {
+            "evidence": "docs/math-port/evidence/p22b-token-map-acceptance.md"
+          },
+          "members/MacroMap/parserFor": {
+            "evidence": "docs/math-port/evidence/p22b-token-map-acceptance.md"
+          },
+          "members/MacroMap/parse": {
+            "evidence": "docs/math-port/evidence/p22b-token-map-acceptance.md"
+          },
+          "members/CommandMap/parse": {
+            "evidence": "docs/math-port/evidence/p22b-token-map-acceptance.md"
+          },
+          "members/EnvironmentMap/constructor": {
+            "evidence": "docs/math-port/evidence/p22b-token-map-acceptance.md"
+          },
+          "members/EnvironmentMap/parse": {
+            "evidence": "docs/math-port/evidence/p22b-token-map-acceptance.md"
+          }
+        }
+      }
+    },
+    "freeze_evidence_required": "docs/math-port/evidence/p22b-token-map-acceptance.md",
+    "summary": {
+      "source_files": 1,
+      "executable_members": 22,
+      "initialized_fields": 1,
+      "status": "reviewed_pinned_inventory_matches"
+    }
+  }
+}
