@@ -11,6 +11,8 @@ import folia.math.input.tex.noundefined.configuration;
 import folia.math.input.tex.newcommand.configuration;
 import folia.math.input.tex.tagformat.tag_format_configuration;
 
+#include "math/support/setoptions_bindings.hpp"
+
 namespace {
 using namespace std::literals;
 thread_local std::string *optionError{};
@@ -147,61 +149,8 @@ OptionInputValue nullRegexp(TexParser &, std::u16string_view, std::u16string_vie
 TagFormatValue optionReference(std::u16string_view value) {
     return u"custom:" + std::u16string(value);
 }
-enum class OptionKind { boolean, string, budget, regexp, complex };
-template <auto Head, auto... Tail, class Owner> auto &optionSlot(Owner &owner) {
-    auto &value = owner.*Head;
-    if constexpr (sizeof...(Tail) == 0)
-        return value;
-    else {
-        if (!value)
-            value.emplace();
-        return optionSlot<Tail...>(*value);
-    }
-}
-struct OptionCase {
-    std::u16string_view package, key;
-    OptionKind kind;
-    std::u16string_view input;
-    void (*seed)(TexOptionValues &);
-    bool (*matches)(TexOptionValues &);
-};
-template <auto... Members>
-OptionCase optionCase(std::u16string_view package, std::u16string_view key, OptionKind kind,
-                      std::u16string_view input) {
-    return {
-        package,
-        key,
-        kind,
-        input,
-        +[](TexOptionValues &options) {
-            auto &value = optionSlot<Members...>(options);
-            if (!value)
-                value.emplace();
-        },
-        +[](TexOptionValues &options) {
-            auto &value = optionSlot<Members...>(options);
-            if (!value)
-                return false;
-            using T = typename std::remove_reference_t<decltype(value)>::value_type;
-            if constexpr (std::is_same_v<T, bool>)
-                return !*value;
-            else if constexpr (std::is_same_v<T, std::variant<bool, std::u16string>>)
-                return std::holds_alternative<bool>(*value) && !std::get<bool>(*value);
-            else if constexpr (std::is_same_v<T, std::u16string>)
-                return std::ranges::equal(*value, u"set-value"sv);
-            else if constexpr (std::is_same_v<T, double>)
-                return *value == 2048;
-            else if constexpr (std::is_same_v<T, folia::math::regexp_host::RegExpRef>)
-                return *value && std::ranges::equal((*value)->source(), u"^Q"sv);
-            else if constexpr (std::is_same_v<T, std::variant<std::u16string,
-                                                              folia::math::regexp_host::RegExpRef>>)
-                return std::holds_alternative<std::u16string>(*value) &&
-                       std::ranges::equal(std::get<std::u16string>(*value), u"set-value"sv);
-            else
-                return false;
-        }};
-}
-#include "math/fixtures/setoptions.inc"
+using namespace math_test::setoptions;
+
 std::u16string assignment(OptionCase const &c, std::u16string_view value) {
     return u"\\setOptions[" + std::u16string(c.package) + u"]{" + std::u16string(c.key) + u"=" +
            std::u16string(value) + u"}";
@@ -245,7 +194,7 @@ suite setoptions_suite = [] {
     "setoptions complete Source schema presence and scalar writes"_test = [] {
         OptionFixture f;
         std::size_t scalar{}, complex{};
-        for (auto const &c : optionCases) {
+        for (auto const &c : optionCases()) {
             auto saved = f.jax->options;
             if (!std::ranges::equal(c.key, u"FindTeX"sv))
                 c.seed(f.jax->options);
@@ -266,7 +215,7 @@ suite setoptions_suite = [] {
             }
             f.jax->options = std::move(saved);
         }
-        expect(optionCases.size() == 96_u);
+        expect(optionCases().size() == 96_u);
         expect(scalar == 59_u);
         expect(complex == 37_u);
     };

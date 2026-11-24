@@ -95,18 +95,18 @@ function addField(pkg,key,value){
  }
  const member=memberNames[key]||key;
  const parameters=pkg==='tex'?'&TexOptionValues::'+member:'&TexOptionValues::'+pkg+', &'+domainTypes[pkg]+'::'+member;
- fields.push('    optionCase<'+parameters+'>(u'+JSON.stringify(pkg)+', u'+JSON.stringify(key)+', OptionKind::'+kind+', u'+JSON.stringify(input)+'),');
+ fields.push({binding:parameters.replaceAll('&','').replaceAll(', ','/'),package:pkg,key,kind,input});
 }
 for(const [key,value]of Object.entries(full.jax.parseOptions.options)){
  addField('tex',key,value);
  if(domainTypes[key])for(const [nested,v]of Object.entries(value))addField(key,nested,v);
 }
-const fixtureText='// Generated only from pinned real Source: tex-setoptions-source.cjs --write-fixture\n'+
- '// Full profile finite fields; tagformat.ref is a native compiled callback boundary.\n'+
- 'const std::array optionCases{\n'+fields.join('\n')+'\n};\n';
-const fixturePath=path.join(root,'tests/math/fixtures/setoptions.inc');
-if(process.argv.includes('--write-fixture'))fs.writeFileSync(fixturePath,fixtureText);
-else assert.equal(fs.readFileSync(fixturePath,'utf8').replaceAll('\r\n','\n').replace(/^\uFEFF/,''),fixtureText,'Source fixture stale; regenerate explicitly');
+const {byteField, utf16Field, writeTables} = require('./fixture-data.cjs');
+const fixturePath = path.join(root, 'tests/math/fixtures/packages/setoptions');
+writeTables(fixturePath, {
+ fields: {columns: ['binding_bytes', 'package_utf16', 'key_utf16', 'kind', 'input_utf16'],
+  rows: fields.map(r => [byteField(r.binding), utf16Field(r.package), utf16Field(r.key), r.kind, utf16Field(r.input)])}
+});
 // A locally compiled require callback tests the real wrapper without loading anything.
 {
  const calls=[];new CommandMap('setoptions-local-require',{require:(p,n)=>{calls.push(p.GetArgument(n));p.Push(p.itemFactory.create('null'))},setOptions:(p,n)=>{throw Error('priority-4 map must override this old macro')}});

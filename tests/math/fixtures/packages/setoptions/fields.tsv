@@ -1,0 +1,98 @@
+# Pinned reference observations; values exported without normalization.
+# binding_bytes	package_utf16	key_utf16	kind	input_utf16
+TexOptionValues::preFilters	tex	preFilters	complex	
+TexOptionValues::postFilters	tex	postFilters	complex	
+TexOptionValues::findTeX	tex	FindTeX	complex	
+TexOptionValues::packages	tex	packages	complex	
+TexOptionValues::maxBuffer	tex	maxBuffer	budget	2048
+TexOptionValues::maxTemplateSubtitutions	tex	maxTemplateSubtitutions	budget	2048
+TexOptionValues::mathStyle	tex	mathStyle	string	set-value
+TexOptionValues::formatError	tex	formatError	complex	
+TexOptionValues::tags	tex	tags	string	set-value
+TexOptionValues::tagSide	tex	tagSide	string	set-value
+TexOptionValues::tagIndent	tex	tagIndent	string	set-value
+TexOptionValues::useLabelIds	tex	useLabelIds	boolean	false
+TexOptionValues::ignoreDuplicateLabels	tex	ignoreDuplicateLabels	boolean	false
+TexOptionValues::tagAlign	tex	tagAlign	string	set-value
+TexOptionValues::textmacros	tex	textmacros	complex	
+TexOptionValues::textmacros/TextMacrosOptions::packages	textmacros	packages	complex	
+TexOptionValues::setoptions	tex	setoptions	complex	
+TexOptionValues::setoptions/SetOptionsOptions::filterPackage	setoptions	filterPackage	complex	
+TexOptionValues::setoptions/SetOptionsOptions::filterOption	setoptions	filterOption	complex	
+TexOptionValues::setoptions/SetOptionsOptions::filterValue	setoptions	filterValue	complex	
+TexOptionValues::setoptions/SetOptionsOptions::allowPackageDefault	setoptions	allowPackageDefault	boolean	false
+TexOptionValues::setoptions/SetOptionsOptions::allowOptionsDefault	setoptions	allowOptionsDefault	boolean	false
+TexOptionValues::setoptions/SetOptionsOptions::allowOptions	setoptions	allowOptions	complex	
+TexOptionValues::noundefined	tex	noundefined	complex	
+TexOptionValues::noundefined/NoUndefinedOptions::color	noundefined	color	string	set-value
+TexOptionValues::noundefined/NoUndefinedOptions::background	noundefined	background	string	set-value
+TexOptionValues::noundefined/NoUndefinedOptions::size	noundefined	size	string	set-value
+TexOptionValues::bboldx	tex	bboldx	complex	
+TexOptionValues::bboldx/BboldxOptions::bfbb	bboldx	bfbb	boolean	false
+TexOptionValues::bboldx/BboldxOptions::light	bboldx	light	boolean	false
+TexOptionValues::units	tex	units	complex	
+TexOptionValues::units/UnitsOptions::loose	units	loose	boolean	false
+TexOptionValues::units/UnitsOptions::ugly	units	ugly	boolean	false
+TexOptionValues::allowTexHTML	tex	allowTexHTML	boolean	false
+TexOptionValues::tagformat	tex	tagformat	complex	
+TexOptionValues::tagformat/TagFormatOptions::number	tagformat	number	complex	
+TexOptionValues::tagformat/TagFormatOptions::tag	tagformat	tag	complex	
+TexOptionValues::tagformat/TagFormatOptions::ref	tagformat	ref	complex	
+TexOptionValues::tagformat/TagFormatOptions::id	tagformat	id	complex	
+TexOptionValues::tagformat/TagFormatOptions::url	tagformat	url	complex	
+TexOptionValues::physics	tex	physics	complex	
+TexOptionValues::physics/PhysicsOptions::italicdiff	physics	italicdiff	boolean	false
+TexOptionValues::physics/PhysicsOptions::arrowdel	physics	arrowdel	boolean	false
+TexOptionValues::maxMacros	tex	maxMacros	budget	2048
+TexOptionValues::protectedMacros	tex	protectedMacros	complex	
+TexOptionValues::mathtools	tex	mathtools	complex	
+TexOptionValues::mathtools/MathtoolsOptions::multlinedGap	mathtools	multlined-gap	string	set-value
+TexOptionValues::mathtools/MathtoolsOptions::multlinedPos	mathtools	multlined-pos	string	set-value
+TexOptionValues::mathtools/MathtoolsOptions::multlinedWidth	mathtools	multlined-width	string	set-value
+TexOptionValues::mathtools/MathtoolsOptions::firstlineAfterskip	mathtools	firstline-afterskip	string	set-value
+TexOptionValues::mathtools/MathtoolsOptions::lastlinePreskip	mathtools	lastline-preskip	string	set-value
+TexOptionValues::mathtools/MathtoolsOptions::smallmatrixAlign	mathtools	smallmatrix-align	string	set-value
+TexOptionValues::mathtools/MathtoolsOptions::shortvdotsAdjustAbove	mathtools	shortvdotsadjustabove	string	set-value
+TexOptionValues::mathtools/MathtoolsOptions::shortvdotsAdjustBelow	mathtools	shortvdotsadjustbelow	string	set-value
+TexOptionValues::mathtools/MathtoolsOptions::centercolon	mathtools	centercolon	boolean	false
+TexOptionValues::mathtools/MathtoolsOptions::centercolonOffset	mathtools	centercolon-offset	string	set-value
+TexOptionValues::mathtools/MathtoolsOptions::thincolonDx	mathtools	thincolon-dx	string	set-value
+TexOptionValues::mathtools/MathtoolsOptions::thincolonDw	mathtools	thincolon-dw	string	set-value
+TexOptionValues::mathtools/MathtoolsOptions::useUnicode	mathtools	use-unicode	boolean	false
+TexOptionValues::mathtools/MathtoolsOptions::legacycolonsymbols	mathtools	legacycolonsymbols	boolean	false
+TexOptionValues::mathtools/MathtoolsOptions::prescriptSubFormat	mathtools	prescript-sub-format	string	set-value
+TexOptionValues::mathtools/MathtoolsOptions::prescriptSupFormat	mathtools	prescript-sup-format	string	set-value
+TexOptionValues::mathtools/MathtoolsOptions::prescriptArgFormat	mathtools	prescript-arg-format	string	set-value
+TexOptionValues::mathtools/MathtoolsOptions::allowMathtoolsset	mathtools	allow-mathtoolsset	boolean	false
+TexOptionValues::mathtools/MathtoolsOptions::pairedDelimiters	mathtools	pairedDelimiters	complex	
+TexOptionValues::mathtools/MathtoolsOptions::tagforms	mathtools	tagforms	complex	
+TexOptionValues::dsfont	tex	dsfont	complex	
+TexOptionValues::dsfont/DsfontOptions::sans	dsfont	sans	boolean	false
+TexOptionValues::active	tex	active	complex	
+TexOptionValues::macros	tex	macros	complex	
+TexOptionValues::environments	tex	environments	complex	
+TexOptionValues::color	tex	color	complex	
+TexOptionValues::color/ColorOptions::padding	color	padding	string	set-value
+TexOptionValues::color/ColorOptions::borderWidth	color	borderWidth	string	set-value
+TexOptionValues::begingroup	tex	begingroup	complex	
+TexOptionValues::begingroup/BegingroupOptions::allowGlobal	begingroup	allowGlobal	complex	
+TexOptionValues::bbm	tex	bbm	complex	
+TexOptionValues::bbm/BbmOptions::bold	bbm	bold	boolean	false
+TexOptionValues::amscd	tex	amscd	complex	
+TexOptionValues::amscd/AmscdOptions::colspace	amscd	colspace	string	set-value
+TexOptionValues::amscd/AmscdOptions::rowspace	amscd	rowspace	string	set-value
+TexOptionValues::amscd/AmscdOptions::harrowsize	amscd	harrowsize	string	set-value
+TexOptionValues::amscd/AmscdOptions::varrowsize	amscd	varrowsize	string	set-value
+TexOptionValues::amscd/AmscdOptions::hideHorizontalLabels	amscd	hideHorizontalLabels	boolean	false
+TexOptionValues::multlineWidth	tex	multlineWidth	string	set-value
+TexOptionValues::ams	tex	ams	complex	
+TexOptionValues::ams/AmsOptions::operatornamePattern	ams	operatornamePattern	regexp	/^Q/
+TexOptionValues::ams/AmsOptions::multlineWidth	ams	multlineWidth	string	set-value
+TexOptionValues::ams/AmsOptions::multlineIndent	ams	multlineIndent	string	set-value
+TexOptionValues::digits	tex	digits	string	set-value
+TexOptionValues::numberPattern	tex	numberPattern	regexp	/^Q/
+TexOptionValues::initialDigit	tex	initialDigit	regexp	/^Q/
+TexOptionValues::identifierPattern	tex	identifierPattern	regexp	/^Q/
+TexOptionValues::initialLetter	tex	initialLetter	regexp	/^Q/
+TexOptionValues::baseURL	tex	baseURL	string	set-value
+TexOptionValues::internalMath	tex	internalMath	complex	
