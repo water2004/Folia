@@ -71,3 +71,11 @@ discovery follows the shared `.cmake` includes; it remains distinct from
 verified configured target membership. `--self-test` runs the retained original
 checks together with missing, malformed and stale File API controls. The tool
 only reports review state and does not mark unreviewed implementation as accepted.
+
+Use `python tools/math-port/diagnose-tex-package-differences.py <source.json>
+<native.json>` for retained package/case difference reports. Differences are
+grouped deterministically, and arbitrary unequal JSON values produce a root
+diagnostic as well. `python tools/math-port/extpfeil-render-diagnostic.py` keeps
+the historical source/native provenance checks and only delegates official
+Source generation to JavaScript. The original g113 captures are still required;
+missing or mismatched historical observations are reported as failures.

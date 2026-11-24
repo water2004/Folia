@@ -1,0 +1,678 @@
+{
+  "schema": 1,
+  "provenance": {
+    "generator": "diagnose-tex-package-differences.cjs",
+    "sha256": "d25f9c473d9bb3fa07e3ed09b23195329b455afe1d6d2aafb9635c0d0e978b1d",
+    "purpose": "Synthetic edge captures evaluated by the unchanged pre-migration diagnostic."
+  },
+  "checks": [
+    {
+      "name": "identical",
+      "source_json": "{\"cases\": [{\"name\": \"first\", \"value\": {\"a\": [1, 2, null]}, \"flags\": true}]}",
+      "native_json": "{\"cases\": [{\"name\": \"first\", \"value\": {\"a\": [1, 2, null]}, \"flags\": true}]}",
+      "report": {
+        "cases": 1,
+        "matched": 1,
+        "totalDifferences": 0,
+        "groups": [],
+        "rows": [
+          {
+            "name": "first",
+            "differences": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "scalars",
+      "source_json": "{\"cases\": [{\"name\": \"numbers\", \"a\": true, \"b\": null, \"c\": 1, \"d\": \"1\"}]}",
+      "native_json": "{\"cases\": [{\"name\": \"numbers\", \"a\": 1, \"b\": false, \"c\": 2, \"d\": 1}]}",
+      "report": {
+        "cases": 1,
+        "matched": 0,
+        "totalDifferences": 4,
+        "groups": [
+          {
+            "path": "case.a",
+            "count": 1,
+            "samples": [
+              {
+                "case": "numbers",
+                "source": true,
+                "native": 1
+              }
+            ]
+          },
+          {
+            "path": "case.b",
+            "count": 1,
+            "samples": [
+              {
+                "case": "numbers",
+                "source": null,
+                "native": false
+              }
+            ]
+          },
+          {
+            "path": "case.c",
+            "count": 1,
+            "samples": [
+              {
+                "case": "numbers",
+                "source": 1,
+                "native": 2
+              }
+            ]
+          },
+          {
+            "path": "case.d",
+            "count": 1,
+            "samples": [
+              {
+                "case": "numbers",
+                "source": "1",
+                "native": 1
+              }
+            ]
+          }
+        ],
+        "rows": [
+          {
+            "name": "numbers",
+            "differences": [
+              {
+                "path": "cases[0](numbers).a",
+                "source": true,
+                "native": 1
+              },
+              {
+                "path": "cases[0](numbers).b",
+                "source": null,
+                "native": false
+              },
+              {
+                "path": "cases[0](numbers).c",
+                "source": 1,
+                "native": 2
+              },
+              {
+                "path": "cases[0](numbers).d",
+                "source": "1",
+                "native": 1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "nested",
+      "source_json": "{\"cases\": [{\"name\": \"tree\", \"node\": {\"array\": [1, 2, 3], \"object\": {}, \"deleted\": 42}}]}",
+      "native_json": "{\"cases\": [{\"name\": \"tree\", \"node\": {\"array\": [9, 2], \"object\": [], \"added\": 13}}]}",
+      "report": {
+        "cases": 1,
+        "matched": 0,
+        "totalDifferences": 6,
+        "groups": [
+          {
+            "path": "case.node.[keys]",
+            "count": 1,
+            "samples": [
+              {
+                "case": "tree",
+                "source": [
+                  "array",
+                  "deleted",
+                  "object"
+                ],
+                "native": [
+                  "added",
+                  "array",
+                  "object"
+                ]
+              }
+            ]
+          },
+          {
+            "path": "case.node.added",
+            "count": 1,
+            "samples": [
+              {
+                "case": "tree",
+                "source": {
+                  "$missing": true
+                },
+                "native": 13
+              }
+            ]
+          },
+          {
+            "path": "case.node.array.length",
+            "count": 1,
+            "samples": [
+              {
+                "case": "tree",
+                "source": 3,
+                "native": 2
+              }
+            ]
+          },
+          {
+            "path": "case.node.array[0]",
+            "count": 1,
+            "samples": [
+              {
+                "case": "tree",
+                "source": 1,
+                "native": 9
+              }
+            ]
+          },
+          {
+            "path": "case.node.deleted",
+            "count": 1,
+            "samples": [
+              {
+                "case": "tree",
+                "source": 42,
+                "native": {
+                  "$missing": true
+                }
+              }
+            ]
+          },
+          {
+            "path": "case.node.object",
+            "count": 1,
+            "samples": [
+              {
+                "case": "tree"
+              }
+            ]
+          }
+        ],
+        "rows": [
+          {
+            "name": "tree",
+            "differences": [
+              {
+                "path": "cases[0](tree).node.[keys]",
+                "source": [
+                  "array",
+                  "deleted",
+                  "object"
+                ],
+                "native": [
+                  "added",
+                  "array",
+                  "object"
+                ]
+              },
+              {
+                "path": "cases[0](tree).node.array.length",
+                "source": 3,
+                "native": 2
+              },
+              {
+                "path": "cases[0](tree).node.array[0]",
+                "source": 1,
+                "native": 9
+              },
+              {
+                "path": "cases[0](tree).node.deleted",
+                "source": 42,
+                "native": {
+                  "$missing": true
+                }
+              },
+              {
+                "path": "cases[0](tree).node.object",
+                "sourceType": "object",
+                "nativeType": "array"
+              },
+              {
+                "path": "cases[0](tree).node.added",
+                "source": {
+                  "$missing": true
+                },
+                "native": 13
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "short-native",
+      "source_json": "{\"cases\": [{\"name\": \"first\", \"value\": 1}, {\"name\": \"last\", \"value\": 2}]}",
+      "native_json": "{\"cases\": [{\"name\": \"first\", \"value\": 1}]}",
+      "report": {
+        "cases": 3,
+        "matched": 1,
+        "totalDifferences": 2,
+        "groups": [
+          {
+            "path": "cases.length",
+            "count": 1,
+            "samples": [
+              {
+                "case": "<cases>",
+                "source": 2,
+                "native": 1
+              }
+            ]
+          },
+          {
+            "path": "cases[1](last)",
+            "count": 1,
+            "samples": [
+              {
+                "case": "last",
+                "source": {
+                  "name": "last",
+                  "value": 2
+                }
+              }
+            ]
+          }
+        ],
+        "rows": [
+          {
+            "name": "<cases>",
+            "differences": [
+              {
+                "path": "cases.length",
+                "source": 2,
+                "native": 1
+              }
+            ]
+          },
+          {
+            "name": "first",
+            "differences": []
+          },
+          {
+            "name": "last",
+            "differences": [
+              {
+                "path": "cases[1](last)",
+                "source": {
+                  "name": "last",
+                  "value": 2
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "long-native",
+      "source_json": "{\"cases\": [{\"name\": \"first\", \"value\": 1}]}",
+      "native_json": "{\"cases\": [{\"name\": \"first\", \"value\": 1}, {\"name\": \"extra\", \"value\": 2}]}",
+      "report": {
+        "cases": 2,
+        "matched": 1,
+        "totalDifferences": 1,
+        "groups": [
+          {
+            "path": "cases.length",
+            "count": 1,
+            "samples": [
+              {
+                "case": "<cases>",
+                "source": 1,
+                "native": 2
+              }
+            ]
+          }
+        ],
+        "rows": [
+          {
+            "name": "<cases>",
+            "differences": [
+              {
+                "path": "cases.length",
+                "source": 1,
+                "native": 2
+              }
+            ]
+          },
+          {
+            "name": "first",
+            "differences": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "sample-limit",
+      "source_json": "{\"cases\": [{\"name\": \"case-0\", \"field\": 0}, {\"name\": \"case-1\", \"field\": 1}, {\"name\": \"case-2\", \"field\": 2}, {\"name\": \"case-3\", \"field\": 3}, {\"name\": \"case-4\", \"field\": 4}, {\"name\": \"case-5\", \"field\": 5}, {\"name\": \"case-6\", \"field\": 6}]}",
+      "native_json": "{\"cases\": [{\"name\": \"case-0\", \"field\": -1}, {\"name\": \"case-1\", \"field\": -1}, {\"name\": \"case-2\", \"field\": -1}, {\"name\": \"case-3\", \"field\": -1}, {\"name\": \"case-4\", \"field\": -1}, {\"name\": \"case-5\", \"field\": -1}, {\"name\": \"case-6\", \"field\": -1}]}",
+      "report": {
+        "cases": 7,
+        "matched": 0,
+        "totalDifferences": 7,
+        "groups": [
+          {
+            "path": "case.field",
+            "count": 7,
+            "samples": [
+              {
+                "case": "case-0",
+                "source": 0,
+                "native": -1
+              },
+              {
+                "case": "case-1",
+                "source": 1,
+                "native": -1
+              },
+              {
+                "case": "case-2",
+                "source": 2,
+                "native": -1
+              },
+              {
+                "case": "case-3",
+                "source": 3,
+                "native": -1
+              },
+              {
+                "case": "case-4",
+                "source": 4,
+                "native": -1
+              }
+            ]
+          }
+        ],
+        "rows": [
+          {
+            "name": "case-0",
+            "differences": [
+              {
+                "path": "cases[0](case-0).field",
+                "source": 0,
+                "native": -1
+              }
+            ]
+          },
+          {
+            "name": "case-1",
+            "differences": [
+              {
+                "path": "cases[1](case-1).field",
+                "source": 1,
+                "native": -1
+              }
+            ]
+          },
+          {
+            "name": "case-2",
+            "differences": [
+              {
+                "path": "cases[2](case-2).field",
+                "source": 2,
+                "native": -1
+              }
+            ]
+          },
+          {
+            "name": "case-3",
+            "differences": [
+              {
+                "path": "cases[3](case-3).field",
+                "source": 3,
+                "native": -1
+              }
+            ]
+          },
+          {
+            "name": "case-4",
+            "differences": [
+              {
+                "path": "cases[4](case-4).field",
+                "source": 4,
+                "native": -1
+              }
+            ]
+          },
+          {
+            "name": "case-5",
+            "differences": [
+              {
+                "path": "cases[5](case-5).field",
+                "source": 5,
+                "native": -1
+              }
+            ]
+          },
+          {
+            "name": "case-6",
+            "differences": [
+              {
+                "path": "cases[6](case-6).field",
+                "source": 6,
+                "native": -1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "utf16-order",
+      "source_json": "{\"cases\": [{\"name\": \"unicode\", \"\\ue000\": 0, \"\\ud800\\udc00\": 1, \"\\u00e9\": 2, \"z\": 3, \"[x]\": 4}]}",
+      "native_json": "{\"cases\": [{\"name\": \"unicode\", \"\\ue000\": 1, \"\\ud800\\udc00\": 2, \"\\u00e9\": 3, \"z\": 4, \"[x]\": 5}]}",
+      "report": {
+        "cases": 1,
+        "matched": 0,
+        "totalDifferences": 5,
+        "groups": [
+          {
+            "path": "case.[x]",
+            "count": 1,
+            "samples": [
+              {
+                "case": "unicode",
+                "source": 4,
+                "native": 5
+              }
+            ]
+          },
+          {
+            "path": "case.\u00e9",
+            "count": 1,
+            "samples": [
+              {
+                "case": "unicode",
+                "source": 2,
+                "native": 3
+              }
+            ]
+          },
+          {
+            "path": "case.z",
+            "count": 1,
+            "samples": [
+              {
+                "case": "unicode",
+                "source": 3,
+                "native": 4
+              }
+            ]
+          },
+          {
+            "path": "case.\ud800\udc00",
+            "count": 1,
+            "samples": [
+              {
+                "case": "unicode",
+                "source": 1,
+                "native": 2
+              }
+            ]
+          },
+          {
+            "path": "case.\ue000",
+            "count": 1,
+            "samples": [
+              {
+                "case": "unicode",
+                "source": 0,
+                "native": 1
+              }
+            ]
+          }
+        ],
+        "rows": [
+          {
+            "name": "unicode",
+            "differences": [
+              {
+                "path": "cases[0](unicode).[x]",
+                "source": 4,
+                "native": 5
+              },
+              {
+                "path": "cases[0](unicode).z",
+                "source": 3,
+                "native": 4
+              },
+              {
+                "path": "cases[0](unicode).\u00e9",
+                "source": 2,
+                "native": 3
+              },
+              {
+                "path": "cases[0](unicode).\ud800\udc00",
+                "source": 1,
+                "native": 2
+              },
+              {
+                "path": "cases[0](unicode).\ue000",
+                "source": 0,
+                "native": 1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "array-shape",
+      "source_json": "{\"cases\": [{\"name\": \"arrays\", \"a\": [[1], {}], \"b\": [1, 2]}]}",
+      "native_json": "{\"cases\": [{\"name\": \"arrays\", \"a\": [{}, [1]], \"b\": [0, 2, 3]}]}",
+      "report": {
+        "cases": 1,
+        "matched": 0,
+        "totalDifferences": 4,
+        "groups": [
+          {
+            "path": "case.a[0]",
+            "count": 1,
+            "samples": [
+              {
+                "case": "arrays"
+              }
+            ]
+          },
+          {
+            "path": "case.a[1]",
+            "count": 1,
+            "samples": [
+              {
+                "case": "arrays"
+              }
+            ]
+          },
+          {
+            "path": "case.b.length",
+            "count": 1,
+            "samples": [
+              {
+                "case": "arrays",
+                "source": 2,
+                "native": 3
+              }
+            ]
+          },
+          {
+            "path": "case.b[0]",
+            "count": 1,
+            "samples": [
+              {
+                "case": "arrays",
+                "source": 1,
+                "native": 0
+              }
+            ]
+          }
+        ],
+        "rows": [
+          {
+            "name": "arrays",
+            "differences": [
+              {
+                "path": "cases[0](arrays).a[0]",
+                "sourceType": "array",
+                "nativeType": "object"
+              },
+              {
+                "path": "cases[0](arrays).a[1]",
+                "sourceType": "object",
+                "nativeType": "array"
+              },
+              {
+                "path": "cases[0](arrays).b.length",
+                "source": 2,
+                "native": 3
+              },
+              {
+                "path": "cases[0](arrays).b[0]",
+                "source": 1,
+                "native": 0
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "signed-zero",
+      "source_json": "{\"cases\":[{\"name\":\"zero\",\"value\":-0}]}",
+      "native_json": "{\"cases\":[{\"name\":\"zero\",\"value\":0}]}",
+      "report": {
+        "cases": 1,
+        "matched": 0,
+        "totalDifferences": 1,
+        "groups": [
+          {
+            "path": "case.value",
+            "count": 1,
+            "samples": [
+              {
+                "case": "zero",
+                "source": 0,
+                "native": 0
+              }
+            ]
+          }
+        ],
+        "rows": [
+          {
+            "name": "zero",
+            "differences": [
+              {
+                "path": "cases[0](zero).value",
+                "source": 0,
+                "native": 0
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

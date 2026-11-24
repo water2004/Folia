@@ -1,0 +1,154 @@
+{
+  "schema": 1,
+  "source": {
+    "version": "4.1.3",
+    "scopeHash": "scope-observation",
+    "records": [
+      {
+        "name": "extpfeil-arrows",
+        "tex": "\\xmapsto{x}",
+        "mml": {
+          "kind": "math",
+          "children": [
+            {
+              "kind": "mo",
+              "text": "\u21a6",
+              "attributes": {
+                "stretchy": true
+              }
+            }
+          ]
+        },
+        "calls": [
+          {
+            "method": "other",
+            "value": 9
+          },
+          {
+            "method": "placeChar",
+            "codepoint": 10236,
+            "wrapper": 7,
+            "variant": "normal"
+          }
+        ],
+        "wrappers": [
+          {
+            "id": 11,
+            "kind": "mo",
+            "bbox": {
+              "w": 1.25,
+              "scale": 1
+            }
+          },
+          {
+            "id": 15,
+            "kind": "mpadded",
+            "bbox": {
+              "w": 2.5,
+              "scale": 0.7
+            }
+          }
+        ],
+        "loads": [
+          "newcm/dynamic/arrows"
+        ]
+      }
+    ]
+  },
+  "native_json": "{\"records\": [{\"name\": \"extpfeil-arrows\", \"tex\": \"\\\\xmapsto{x}\", \"mml\": {\"kind\": \"math\", \"children\": [{\"kind\": \"mo\", \"text\": \"\u21a6\", \"attributes\": {\"stretchy\": true}}]}, \"calls\": [{\"method\": \"other\", \"value\": 9}, {\"method\": \"placeChar\", \"codepoint\": 8614, \"wrapper\": 9, \"variant\": \"normal\"}], \"wrappers\": [{\"id\": 13, \"kind\": \"mo\", \"bbox\": {\"w\": 1.5, \"scale\": 1}}, {\"id\": 15, \"kind\": \"mpadded\", \"bbox\": {\"w\": 2.5, \"scale\": 0.7}}], \"loads\": [\"newcm/dynamic/arrows\"]}]}",
+  "comparison": {
+    "nativeSha256": "5f1892d00130c8fae0e80a14f71de6c6fa725b23da80f8d92f74f379ab7edf18"
+  },
+  "provenance": {
+    "executableSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+    "startedUtc": "2020-01-01T00:00:00Z",
+    "finishedUtc": "2020-01-01T00:00:01Z",
+    "pid": 123,
+    "exitCode": 0
+  },
+  "warnings": "  warning one\r\n\r\nwarning two\n",
+  "expected": {
+    "schema": 1,
+    "purpose": "Diagnose extpfeil source semantics versus common/font rendering.",
+    "sourceVersion": "4.1.3",
+    "sourceScopeHash": "scope-observation",
+    "input": "\\xmapsto{x}",
+    "sourceMmlArrow": {
+      "text": "\u21a6",
+      "attributes": {
+        "stretchy": true
+      }
+    },
+    "nativeMmlArrow": {
+      "text": "\u21a6",
+      "attributes": {
+        "stretchy": true
+      }
+    },
+    "sourcePlaceChars": [
+      {
+        "codepoint": 10236,
+        "wrapper": 7,
+        "variant": "normal"
+      }
+    ],
+    "nativePlaceChars": [
+      {
+        "codepoint": 8614,
+        "wrapper": 9,
+        "variant": "normal"
+      }
+    ],
+    "selectedGlyphs": {
+      "source": "U+27FC",
+      "native": "U+21A6"
+    },
+    "wrappers": {
+      "sourceMo": {
+        "id": 11,
+        "kind": "mo",
+        "width": 1.25,
+        "scale": 1
+      },
+      "nativeMo": {
+        "id": 13,
+        "kind": "mo",
+        "width": 1.5,
+        "scale": 1
+      },
+      "sourceMpadded": {
+        "id": 15,
+        "kind": "mpadded",
+        "width": 2.5,
+        "scale": 0.7
+      },
+      "nativeMpadded": {
+        "id": 15,
+        "kind": "mpadded",
+        "width": 2.5,
+        "scale": 0.7
+      }
+    },
+    "sourceDynamicLoads": [
+      "newcm/dynamic/arrows"
+    ],
+    "nativeCapture": {
+      "file": "build/math-port/common-layout-native-g113.json",
+      "sha256": "5f1892d00130c8fae0e80a14f71de6c6fa725b23da80f8d92f74f379ab7edf18",
+      "executableSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+      "startedUtc": "2020-01-01T00:00:00Z",
+      "finishedUtc": "2020-01-01T00:00:01Z",
+      "pid": 123,
+      "exitCode": 0
+    },
+    "sourceWarnings": [
+      "warning one",
+      "warning two"
+    ]
+  },
+  "capture_provenance": {
+    "generator": "extpfeil-render-diagnostic.cjs",
+    "sha256": "4b538052bcc233a3c42d085fd3572ba5caa005fa6120b44ec30a38a4b40ef341",
+    "purpose": "Synthetic retained capture passed through original diagnostic with observer/file inputs isolated; not a historical native replay."
+  }
+}
