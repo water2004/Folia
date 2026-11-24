@@ -10,7 +10,7 @@
 2. **模块与平台边界（硬约束）**：
    - **核心层（平台无关）**：`src/mermaid/` 下的所有模块（`.ixx` / `.cpp`）统一使用 C++23 modules 与 `import std;`，严禁包含任何 Windows、WinRT、Direct2D 或 DirectWrite 头文件。
    - **平台测量与桥接层（Windows）**：字体解析与文本测量位于 `src/platform/text/mermaid_measurer.ixx`，平台渲染桥接位于 `src/platform/text/mermaid_renderer.ixx`，DLL 会话封装位于 `src/platform/text/mermaid_host.ixx`。
-   - **CMake 源文件收集规则**：`src/mermaid/CMakeLists.txt` 自动收集库源码，`tools/mermaid-cpp/CMakeLists.txt` 自动收集 `tests/mermaid_cpp/*.cpp`，并为 `FoliaMermaidPlatformTests` 显式列出平台测试。主工程通过 `FOLIA_BUILD_MERMAID=ON` 开启这些独立目标。
+   - **CMake 源文件收集规则**：`src/mermaid/CMakeLists.txt` 自动收集库源码，`tools/mermaid-cpp/CMakeLists.txt` 自动收集 `tests/mermaid_cpp/**/*.cpp`，并为 `FoliaMermaidPlatformTests` 显式列出平台测试。主工程通过 `FOLIA_BUILD_MERMAID=ON` 开启这些独立目标。
    - **源码归属**：公共编排在 `api/`，前端在 `frontend/`，配置在 `config/`，主题在 `themes/`，图族在 `diagrams/<family>/`，共享布局在 `layout/<engine>/`；其余按 `text/`、`rendering/`、`support/` 职责维护。根目录不新增 `.cpp`、`.ixx`、`.inc`。物理移动保留模块名称；生成数据移动时同步更新生成器。运行 `python3 tools/mermaid-cpp/check-structure.py` 检查结构。
 3. **算法还原与文本测量纪律**：
    - 行为基准固定为官方 `mermaid-js/mermaid` **12.2.0**（commit `1fb7869866dd619168d840291c9c54b4f129758b`），新增上游依赖文件时需将源码 SHA-256 记入 `docs/mermaid-cpp/source-lock.json` 并核对 `src/mermaid/THIRD_PARTY_NOTICES.md`。
