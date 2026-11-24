@@ -1,0 +1,378 @@
+{
+  "schema": 1,
+  "origin": "Unmodified former svg-paint/check.mjs at c603f4db; exact actual Sharp results",
+  "sourceReportSha256": "4a9b8398a51138fa3bb556deff6d4f6e5f5fcf9cc72c8f462cb20b15ef567ea7",
+  "records": [
+    {
+      "name": "array-dashed--display",
+      "case": "array-dashed",
+      "mode": "display",
+      "accepted": true,
+      "parts": [
+        {
+          "name": "array-dashed--display",
+          "accepted": true,
+          "metrics": {
+            "width": 58.984,
+            "height": 51.768
+          },
+          "raster": {
+            "differentPixels": 0,
+            "maximumChannelDifference": 0
+          },
+          "sourceCssEffect": {
+            "differentPixels": 11709,
+            "maximumChannelDifference": 255
+          },
+          "sourceProjection": {
+            "differentPixels": 0,
+            "maximumChannelDifference": 0
+          },
+          "inkPixels": {
+            "official": 2040,
+            "native": 2040
+          },
+          "paint": [
+            {
+              "name": "glyph-root-stroke-stays-zero",
+              "passed": true
+            },
+            {
+              "name": "table-lines-present",
+              "passed": true
+            },
+            {
+              "name": "table-lines-0-paint",
+              "passed": true,
+              "attributes": [
+                {
+                  "name": "data-line",
+                  "value": "v"
+                },
+                {
+                  "name": "class",
+                  "value": "mjx-dashed"
+                },
+                {
+                  "name": "x1",
+                  "value": "1634"
+                },
+                {
+                  "name": "y1",
+                  "value": "-1180"
+                },
+                {
+                  "name": "x2",
+                  "value": "1634"
+                },
+                {
+                  "name": "y2",
+                  "value": "1680"
+                },
+                {
+                  "name": "fill",
+                  "value": "none"
+                },
+                {
+                  "name": "stroke-width",
+                  "value": "70"
+                },
+                {
+                  "name": "stroke-dasharray",
+                  "value": "140"
+                }
+              ]
+            },
+            {
+              "name": "table-lines-1-paint",
+              "passed": true,
+              "attributes": [
+                {
+                  "name": "data-line",
+                  "value": "h"
+                },
+                {
+                  "name": "class",
+                  "value": "mjx-dashed"
+                },
+                {
+                  "name": "x1",
+                  "value": "0"
+                },
+                {
+                  "name": "y1",
+                  "value": "250"
+                },
+                {
+                  "name": "x2",
+                  "value": "3259"
+                },
+                {
+                  "name": "y2",
+                  "value": "250"
+                },
+                {
+                  "name": "fill",
+                  "value": "none"
+                },
+                {
+                  "name": "stroke-width",
+                  "value": "70"
+                },
+                {
+                  "name": "stroke-dasharray",
+                  "value": "140"
+                }
+              ]
+            },
+            {
+              "name": "table-frame-present",
+              "passed": true
+            },
+            {
+              "name": "table-frame-0-paint",
+              "passed": true,
+              "attributes": [
+                {
+                  "name": "data-frame",
+                  "value": "true"
+                },
+                {
+                  "name": "class",
+                  "value": "mjx-dashed"
+                },
+                {
+                  "name": "width",
+                  "value": "3189"
+                },
+                {
+                  "name": "height",
+                  "value": "2790"
+                },
+                {
+                  "name": "x",
+                  "value": "35"
+                },
+                {
+                  "name": "y",
+                  "value": "-1145"
+                },
+                {
+                  "name": "fill",
+                  "value": "none"
+                },
+                {
+                  "name": "stroke-width",
+                  "value": "70"
+                },
+                {
+                  "name": "stroke-dasharray",
+                  "value": "140"
+                }
+              ]
+            },
+            {
+              "name": "glyph-blacker",
+              "passed": true
+            },
+            {
+              "name": "glyph-blacker",
+              "passed": true
+            },
+            {
+              "name": "glyph-blacker",
+              "passed": true
+            },
+            {
+              "name": "glyph-blacker",
+              "passed": true
+            }
+          ],
+          "features": [
+            {
+              "feature": "table-lines",
+              "index": 0,
+              "officialPixels": 249,
+              "nativePixels": 249,
+              "passed": true
+            },
+            {
+              "feature": "table-lines",
+              "index": 1,
+              "officialPixels": 286,
+              "nativePixels": 286,
+              "passed": true
+            },
+            {
+              "feature": "table-frame",
+              "index": 0,
+              "officialPixels": 824,
+              "nativePixels": 824,
+              "passed": true
+            }
+          ],
+          "hashes": {
+            "source": "b76fe0b11eef8946f5e318a8b9598fd3093f2c3575b000d36235e0479b9acc13",
+            "sourceCss": "8e02c666b7a119bdd20c28f685c4b560571efaf3f89ea726096fea23220c4fcd",
+            "native": "048b0688c9e4717e56de5378c4ea34c81f3a0e28ce1a818a7a6b74166982ac0b",
+            "officialPng": "0c63c1cc41e4bf06b330e032d918c945c44501f74aff8894774bfd7067dc5daf",
+            "nativePng": "0c63c1cc41e4bf06b330e032d918c945c44501f74aff8894774bfd7067dc5daf"
+          }
+        }
+      ],
+      "raster": {
+        "differentPixels": 0,
+        "maximumChannelDifference": 0
+      },
+      "sourceProjection": {
+        "differentPixels": 0,
+        "maximumChannelDifference": 0
+      },
+      "sourceCssEffect": {
+        "differentPixels": 11709,
+        "maximumChannelDifference": 255
+      }
+    },
+    {
+      "name": "strut-only--display",
+      "case": "strut-only",
+      "mode": "display",
+      "accepted": true,
+      "parts": [
+        {
+          "name": "strut-only--display",
+          "accepted": true,
+          "metrics": {
+            "width": 0.288,
+            "height": 20.992
+          },
+          "raster": {
+            "differentPixels": 0,
+            "maximumChannelDifference": 0
+          },
+          "sourceCssEffect": {
+            "differentPixels": 0,
+            "maximumChannelDifference": 0
+          },
+          "sourceProjection": {
+            "differentPixels": 0,
+            "maximumChannelDifference": 0
+          },
+          "inkPixels": {
+            "official": 0,
+            "native": 0
+          },
+          "paint": [
+            {
+              "name": "glyph-root-stroke-stays-zero",
+              "passed": true
+            }
+          ],
+          "features": [
+            {
+              "feature": "invisible",
+              "passed": true
+            }
+          ],
+          "hashes": {
+            "source": "c4e575650ead1917438338c5a4a8d6763d3540c69599a03461441bf77e5c1b0c",
+            "sourceCss": "8e02c666b7a119bdd20c28f685c4b560571efaf3f89ea726096fea23220c4fcd",
+            "native": "4bf7dcbb253a1c24d19ce57717ff6cd281c1176eb84c4fd5e64ab2776334f741",
+            "officialPng": "37281596fb53c8e64cf6d2e9fddd8d0858d99fd3fab3cad2bce33445ceade559",
+            "nativePng": "37281596fb53c8e64cf6d2e9fddd8d0858d99fd3fab3cad2bce33445ceade559"
+          }
+        }
+      ],
+      "raster": {
+        "differentPixels": 0,
+        "maximumChannelDifference": 0
+      },
+      "sourceProjection": {
+        "differentPixels": 0,
+        "maximumChannelDifference": 0
+      },
+      "sourceCssEffect": {
+        "differentPixels": 0,
+        "maximumChannelDifference": 0
+      }
+    },
+    {
+      "name": "link--display",
+      "case": "link",
+      "mode": "display",
+      "accepted": true,
+      "parts": [
+        {
+          "name": "link--display",
+          "accepted": true,
+          "metrics": {
+            "width": 41.344,
+            "height": 14.264
+          },
+          "raster": {
+            "differentPixels": 0,
+            "maximumChannelDifference": 0
+          },
+          "sourceCssEffect": {
+            "differentPixels": 502,
+            "maximumChannelDifference": 255
+          },
+          "sourceProjection": {
+            "differentPixels": 0,
+            "maximumChannelDifference": 0
+          },
+          "inkPixels": {
+            "official": 502,
+            "native": 502
+          },
+          "paint": [
+            {
+              "name": "glyph-root-stroke-stays-zero",
+              "passed": true
+            },
+            {
+              "name": "glyph-blacker",
+              "passed": true
+            },
+            {
+              "name": "glyph-blacker",
+              "passed": true
+            },
+            {
+              "name": "glyph-blacker",
+              "passed": true
+            }
+          ],
+          "features": [
+            {
+              "feature": "link",
+              "index": 0,
+              "officialPixels": 502,
+              "nativePixels": 502,
+              "passed": true
+            }
+          ],
+          "hashes": {
+            "source": "bbe9fed046492d9307f0a8e08cd994cfb5cbedf43bde6cdb4d97be5d30c7c79f",
+            "sourceCss": "8e02c666b7a119bdd20c28f685c4b560571efaf3f89ea726096fea23220c4fcd",
+            "native": "9b23de466edabb8399b39c21c4e7a8e790c17fc0e46db51b38c8396e9dddc2a8",
+            "officialPng": "9bb1819f51f9f786303f7026565b6c1add97b9e447bcc73651129b299c846f0d",
+            "nativePng": "9bb1819f51f9f786303f7026565b6c1add97b9e447bcc73651129b299c846f0d"
+          }
+        }
+      ],
+      "raster": {
+        "differentPixels": 0,
+        "maximumChannelDifference": 0
+      },
+      "sourceProjection": {
+        "differentPixels": 0,
+        "maximumChannelDifference": 0
+      },
+      "sourceCssEffect": {
+        "differentPixels": 502,
+        "maximumChannelDifference": 255
+      }
+    }
+  ]
+}

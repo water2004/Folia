@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "modes": [
+    "display"
+  ],
+  "cases": [
+    {
+      "name": "array-dashed",
+      "tex": "\\begin{array}{:c:c:}\\hdashline a&b\\\\\\hdashline c&d\\\\\\hdashline\\end{array}",
+      "features": [
+        "table-lines",
+        "table-frame",
+        "dashed"
+      ]
+    },
+    {
+      "name": "strut-only",
+      "tex": "\\strut",
+      "features": [
+        "invisible"
+      ]
+    },
+    {
+      "name": "link",
+      "tex": "\\href{https://example.test/}{x+y}",
+      "features": [
+        "link"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "schema": 1,
+  "inputs": {
+    "corpusSha256": "bf1c90d6039aea101eb800634db1ef9df1aa20161ff8db7d9544f838b12a93f7",
+    "referenceSha256": "c12b8ee3c9edf29910a98b818fe042f216a7625742f858bdcb60a0262431b638",
+    "nativeSha256": "27255d00d33b1535e58b1a4daf32dedca955146bb9ade88e9e8a2eec76bf0d6d"
+  },
+  "samplesSha256": "01648fcfbd886a42d5506fa9c37b64f70d856e5813a498fda32ab1208fe4e0bd"
+}

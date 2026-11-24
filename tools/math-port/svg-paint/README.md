@@ -2,8 +2,10 @@
 
 This development oracle compares the production C++ Math SVG with pinned
 MathJax 4.1.3 / NewCM **including the upstream stylesheet**. It requires no
-Windows SDK or browser. JavaScript is used only to establish independent
-expectations; it is not part of Folia's renderer.
+Windows SDK or browser. JavaScript captures official MathJax expectations and
+real raster samples. Python owns input completeness, native comparison,
+negative controls, diagnostics and pass/fail status. Saved observations replay
+without Node or installed MathJax packages.
 
 Comparing two bare SVG strings misses paint that both renderers assume a host
 stylesheet supplies. In particular, the old native array rules inherited the
@@ -28,15 +30,37 @@ Then pass the resulting shared library explicitly:
 python3 tools/math-port/svg-paint/capture-native.py \
   --library build/math-svg-paint/libFoliaNativeMath.so \
   --output build/math-svg-paint/native
-node tools/math-port/svg-paint/check.mjs \
+node tools/math-port/svg-paint/capture-source.mjs \
+  --output build/math-svg-paint/source
+python3 tools/math-port/svg-paint/check.py \
+  --reference build/math-svg-paint/source/report.json \
   --native build/math-svg-paint/native/report.json \
   --output build/math-svg-paint/comparison
 ```
 
 On Windows use the built DLL. A separately installed Linux LLVM / libc++
 toolchain may require its normal `LD_LIBRARY_PATH` before Python loads the
-library. Both commands return a failure status when their checks fail; individual
-render failures remain in the JSON report.
+library. Install the Python comparison dependencies from
+`tools/mermaid-cpp/regression/requirements.txt`. Every command returns a failure
+status when capture or verification fails; individual render failures remain in
+the JSON report. The optional Sharp subprocess only renders the exact requested
+SVG and returns its original RGBA/PNG bytes, size and backend version. It never
+reads a native executable or decides test acceptance.
+
+The resulting `raster-observations.json` and `samples/` bind every render request
+and byte stream to the complete input reports. Replay the same checks offline:
+
+```sh
+python3 tools/math-port/svg-paint/check.py \
+  --reference build/math-svg-paint/source/report.json \
+  --native build/math-svg-paint/native/report.json \
+  --observations build/math-svg-paint/comparison/raster-observations.json \
+  --output build/math-svg-paint/replayed
+```
+
+Missing, reordered, corrupted or incompatible observations fail. The offline
+stage verifies the captured source/profile lock against the committed lock and
+profile files; the capture stage verifies all pinned upstream module bytes.
 
 `cases.json` contains 18 TeX inputs in each of the actual inline, display and
 standalone fragment C ABI modes. Coverage includes solid and dashed array
@@ -58,7 +82,8 @@ existing math test executable containing `common_table_native` and
 ```sh
 FOLIA_MATH_SVG_PAINT_CAPTURE_DIR="$PWD/build/math-svg-paint/mathml-fixtures" \
   build/math-svg-paint/FoliaMathSvgBridgeTests
-node tools/math-port/svg-paint/check.mjs \
+python3 tools/math-port/svg-paint/check.py \
+  --reference build/math-svg-paint/source/report.json \
   --native build/math-svg-paint/native/report.json \
   --mathml build/math-svg-paint/mathml-fixtures \
   --mathml-binary build/math-svg-paint/FoliaMathSvgBridgeTests \
@@ -75,7 +100,7 @@ coverage. Existing recorded measurement observations stay part of those strict
 C++ tests.
 
 The tool requires both complete fixture families, identifies each record as
-`direct-mathml`, and records the fixture header and test executable hashes.
+`direct-mathml`, and records the fixture data and test executable hashes.
 Percentage SVG widths use the fixture's actual CSS-pixel container width. Keep
 the executable used for capture unchanged until comparison finishes.
 
@@ -86,7 +111,8 @@ modules' real `styleSheet()` and style registry. Its table rules have width 70,
 no fill, dashed spacing 140, and round dotted caps with spacing `0,140`; glyph
 `path[data-c]` and `use[data-c]` have the profile's default blacker width 3.
 The registry also supplies error colors, link colors and viewport overflow.
-`source-paint.mjs` asserts the pinned table and glyph declarations before use.
+`source-paint.mjs` captures the pinned table and glyph declarations; the Python
+checker validates those same declarations before applying the projection.
 
 For each SVG piece the tool saves these views:
 
