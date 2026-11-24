@@ -206,6 +206,53 @@ struct BlockNodeSpecial {
     BlockNodeSpecial& operator=(BlockNodeSpecial&&) noexcept = default;
 };
 
+// Exact spelling of a sibling boundary. An explicit empty boundary is
+// distinct from an absent boundary, which lets the serializer choose one.
+class BlockSeparator {
+    using ShortSpelling = std::array<char32_t, 4>;
+    using LongSpelling = std::shared_ptr<const std::u32string>;
+    // Four code points fit two CRLFs. An out-of-Unicode padding value keeps
+    // the short storage the same size as the owning handle.
+    static constexpr char32_t terminator = (std::numeric_limits<char32_t>::max)();
+    std::variant<std::monostate, ShortSpelling, LongSpelling> spelling_;
+
+    bool assign_short(std::u32string_view text) {
+        ShortSpelling spelling;
+        if (text.size() > spelling.size() || text.find(terminator) != text.npos) return false;
+        spelling.fill(terminator);
+        std::ranges::copy(text, spelling.begin());
+        spelling_ = spelling;
+        return true;
+    }
+
+public:
+    void assign(std::u32string&& text) {
+        if (!assign_short(text)) spelling_ = std::make_shared<const std::u32string>(std::move(text));
+    }
+
+    BlockSeparator& operator=(std::u32string_view text) {
+        if (!assign_short(text)) spelling_ = std::make_shared<const std::u32string>(text);
+        return *this;
+    }
+
+    std::optional<std::u32string_view> view() const {
+        if (auto short_text = std::get_if<ShortSpelling>(&spelling_)) {
+            auto end = std::ranges::find(*short_text, terminator);
+            return std::u32string_view(short_text->data(), static_cast<std::size_t>(end - short_text->begin()));
+        }
+        if (auto long_text = std::get_if<LongSpelling>(&spelling_); long_text && *long_text)
+            return std::u32string_view(**long_text);
+        return std::nullopt;
+    }
+
+    bool has_value() const { return view().has_value(); }
+    explicit operator bool() const { return has_value(); }
+    std::u32string_view operator*() const { return view().value(); }
+    std::u32string_view value_or(std::u32string_view fallback) const { return view().value_or(fallback); }
+    void reset() { spelling_.emplace<std::monostate>(); }
+    bool operator==(BlockSeparator const& other) const { return view() == other.view(); }
+};
+
 struct BlockNode {
     NodeId id{};
     BlockKind kind = BlockKind::Paragraph;
@@ -217,7 +264,7 @@ struct BlockNode {
     // optional beside the node avoids allocating the much larger kind payload
     // merely to retain a newline.  It is serializer metadata, never an editing
     // coordinate or part of the block-local source.
-    std::optional<std::u32string> separator_before;
+    BlockSeparator separator_before;
     // Paragraphs and structural containers must not carry the full payload of
     // every unrelated block kind. The optional payload retains ordinary value
     // semantics through the deep-copy operations below.

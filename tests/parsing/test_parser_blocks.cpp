@@ -25,6 +25,27 @@ using namespace boost::ut;
 
 suite parser_block_tests = [] {
 
+"compact block boundaries preserve absent empty short and long spellings"_test = [] {
+    static_assert(sizeof(BlockSeparator) < sizeof(std::optional<std::u32string>));
+    BlockSeparator separator;
+    expect(!separator.has_value());
+    separator = U"";
+    expect(separator.has_value() && (*separator).empty());
+    separator = U"\r\n\r\n";
+    expect(*separator == U"\r\n\r\n");
+    const std::u32string long_spelling{U"\r\n\t   \r\n"};
+    separator = long_spelling;
+    auto copy = separator;
+    separator = U"\n";
+    expect(*copy == long_spelling);
+    expect(*separator == U"\n");
+    copy.reset();
+    expect(!copy.has_value());
+
+    const std::string markdown = "left\r\n\t   \r\n# right\r\n";
+    expect(serialize_markdown(parse_text(1, markdown).document) == markdown);
+};
+
 "parse progress reports structure inline syntax and indexes separately"_test = [] {
     const std::string source =
         "# heading\n\n"

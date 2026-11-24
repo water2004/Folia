@@ -556,7 +556,7 @@ inline std::optional<TextPosition> paste_parsed_blocks(
     if (!blocks.empty() && !merged_first) {
         blocks.front().separator_before = head_was_empty
             ? head_separator
-            : std::nullopt;
+            : BlockSeparator{};
     }
     std::vector<NodeId> inserted_ids;
     inserted_ids.reserve(blocks.size());

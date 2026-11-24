@@ -62,7 +62,7 @@ inline std::optional<DocumentEditableFallback> document_editable_fallback(
         || last.kind != BlockKind::Paragraph
         || !last.inline_content.source.empty()
         || last.inline_content.syntax_mode != InlineSyntaxMode::Markdown
-        || !last.separator_before || !last.separator_before->empty()) return std::nullopt;
+        || !last.separator_before || !(*last.separator_before).empty()) return std::nullopt;
     return DocumentEditableFallback{last.id, document.root.children.size() - 1};
 }
 
@@ -87,7 +87,7 @@ inline void materialize_document_editable_fallback(
         roots.erase(found);
     }
     auto real_gap = [&](BlockNode& block) {
-        if (block.separator_before && !block.separator_before->empty()) return;
+        if (block.separator_before && !(*block.separator_before).empty()) return;
         DocumentTreeEdit gap;
         gap.kind = DocumentTreeEditKind::UpdatePayload;
         gap.before = document_transaction_detail::payload_shell(block);
@@ -107,7 +107,7 @@ inline void materialize_document_editable_fallback(
     // A command can insert an object before the original owner and retain
     // that empty owner for its caret. It now needs an ordinary saved gap too.
     found = std::ranges::find(roots, fallback.owner, &BlockNode::id);
-    if (found != roots.end() && found->separator_before && found->separator_before->empty())
+    if (found != roots.end() && found->separator_before && (*found->separator_before).empty())
         real_gap(*found);
 }
 

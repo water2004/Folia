@@ -151,7 +151,7 @@ inline void ensure_paragraph_boundary(
     const auto& previous = parent.children[index - 1];
     if (current.kind != BlockKind::Paragraph || previous.kind != BlockKind::Paragraph
         || !current.separator_before) return;
-    const auto& separator = *current.separator_before;
+    const auto separator = *current.separator_before;
     std::size_t endings = 0;
     for (std::size_t offset = 0; offset < separator.size(); ++offset) {
         if (separator[offset] != U'\r' && separator[offset] != U'\n') continue;
@@ -165,12 +165,14 @@ inline void ensure_paragraph_boundary(
     spacing.before = document_transaction_detail::payload_shell(current);
     // A heading/quote marker can interrupt a paragraph after one line ending.
     // Removing that marker needs a second ending, in the original spelling.
+    std::u32string updated(separator);
     if (endings == 1) {
         const auto offset = separator.find_first_of(U"\r\n");
         const auto width = separator[offset] == U'\r' && offset + 1 < separator.size()
             && separator[offset + 1] == U'\n' ? 2u : 1u;
-        current.separator_before = separator + separator.substr(offset, width);
-    } else current.separator_before = separator + U"\n\n";
+        updated.append(separator.substr(offset, width));
+    } else updated += U"\n\n";
+    current.separator_before.assign(std::move(updated));
     spacing.after = document_transaction_detail::payload_shell(current);
     operations.emplace_back(std::move(spacing));
 }

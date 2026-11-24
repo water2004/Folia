@@ -117,7 +117,7 @@ inline std::optional<document_edit_detail::RecordedBlockEdit> activate_thematic_
     for (std::size_t prefixes = 1;; ++prefixes) {
         const auto* child = find_document_block(document, descendant);
         if (!child || (child->separator_before
-                && child->separator_before->find_first_of(U"\r\n") != std::u32string::npos)) {
+                && (*child->separator_before).find_first_of(U"\r\n") != std::u32string_view::npos)) {
             break;
         }
         const auto context = direct_list_context(document, descendant);
@@ -260,7 +260,7 @@ inline void record_list_item_boundary(
     EditorDocument& document,
     std::vector<DocumentOperation>& operations,
     NodeId item_id,
-    const std::optional<std::u32string>& boundary) {
+    const BlockSeparator& boundary) {
     if (!boundary) return;
     auto* item = find_block(document.root, item_id);
     if (!item || item->separator_before == boundary) return;

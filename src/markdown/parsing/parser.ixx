@@ -1928,7 +1928,7 @@ std::optional<BlockNode> try_parse_raw_html_block(const LeafLine& first) {
             // The Callout header already emits this boundary. An explicit empty
             // sibling gap would suppress separators after later title splits.
             if (!header_to_first_body || !spelling.empty())
-                block.separator_before=std::move(spelling);
+                block.separator_before.assign(std::move(spelling));
             range->separator_range=PhysicalRange{gap.begin,gap.end};
         }
         const auto separator=block.separator_before ? completion_from_source(*block.separator_before) : Completion::Empty;

@@ -76,7 +76,7 @@ private:
         NodeId previous_owner{};
         bool previous_empty_paragraph = false;
         bool next_is_list = false;
-        std::optional<std::u32string> separator;
+        std::optional<std::u32string_view> separator;
         std::u32string text;
         SerializerPrefixPolicy policy{};
     };
@@ -159,7 +159,7 @@ private:
                 case ActionKind::SiblingSeparator:
                     writer_.sibling_separator(action.previous_owner, action.owner,
                         action.previous_empty_paragraph, action.next_is_list,
-                        std::move(action.separator), action.list_item_children);
+                        action.separator, action.list_item_children);
                     break;
             }
         }
@@ -178,7 +178,7 @@ private:
             writer_.sibling_separator(previous.id, current.id,
                 serializer_empty_paragraph(previous),
                 action.list_item_children && is_list_block(current),
-                current.separator_before, action.list_item_children);
+                current.separator_before.view(), action.list_item_children);
         }
         push_block(current, action.html_semantic, action.header_cell,
             action.emit_block_anchors);

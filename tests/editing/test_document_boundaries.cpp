@@ -89,7 +89,7 @@ suite document_boundary_tests = [] {
 "callout_title_boundaries_use_tree_split_join_and_unwrap"_test = [] {
     auto document = parse_document("> [!NOTE] title\n> body");
     // The complete physical header ending belongs to this structural boundary.
-    expect(bool(document.root.children.front().children[1].separator_before==std::optional<std::u32string>{U"\n"}));
+    expect(bool(document.root.children.front().children[1].separator_before.view() == U"\n"));
     const auto callout_id = document.root.children.front().id;
     const auto title_id = document.root.children.front().children.front().id;
 

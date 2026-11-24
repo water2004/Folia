@@ -649,7 +649,7 @@ public:
         NodeId current,
         bool previous_empty_paragraph,
         bool next_is_list,
-        std::optional<std::u32string> explicit_separator,
+        std::optional<std::u32string_view> explicit_separator,
         bool list_item_context = false,
         std::size_t separator_offset = 0) {
         SerializerEvent event;
@@ -661,7 +661,7 @@ public:
         event.list_item_context = list_item_context;
         event.has_explicit_separator = explicit_separator.has_value();
         event.separator_offset = separator_offset;
-        if (explicit_separator) event.separator = std::move(*explicit_separator);
+        if (explicit_separator) event.separator = *explicit_separator;
         return push_event(std::move(event));
     }
 private:
