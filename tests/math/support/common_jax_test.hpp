@@ -260,7 +260,7 @@ void checkBBoxTreeState(std::span<BBoxTreeState const> saved) {
         expect(entry.node->properties().layout == entry.layout);
     }
 }
-void checkSourceBBox(folia::math::BBox const &box, BBoxSourceCase const &expected) {
+void checkSourceBBox(folia::math::BBox const &box, math_test::fixtures::BBoxSourceCase const &expected) {
     auto check = [&](double actual, double value, char const *field) {
         expect(std::abs(actual - value) < 1e-11)
             << expected.name << " " << field << " " << actual << " " << value;
