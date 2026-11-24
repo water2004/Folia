@@ -112,14 +112,14 @@ child case rather than a decorative handler. Raw Source SVG, BBox, TRBL and
 ordered geometry are retained in the locked JSON. Normal replay compares it
 read-only and writes observations/header only under ignored build output.
 
-`common-menclose-compare-svg.cjs --repo-root <repository> --dump <tsv>` compares
+`common-menclose-compare-svg.py --repo-root <repository> --dump <tsv>` compares
 the 56 actual native Scene-to-SVG fragments with those raw handler outputs.
 Decimal values use exact reduced rationals: relative and absolute path forms
 are equivalent without floating-point summation artifacts, rounding or epsilon.
 Rectangles/ellipses are expanded by explicit path rules, and Source `mitre`
 maps to typed `miter`; ordered transforms, paint inheritance, cap/join and arc
 flags remain checked. This is semantic geometry equality, not byte equality.
-`common-menclose-comparator-selftest.cjs` verifies an equivalent baseline and
+`common-menclose-comparator-selftest.py` verifies an equivalent baseline and
 13 rejected changes, including a `1e-15` coordinate change; direct parser tests
 also check negative arc radii, overflow and raw fill semantics.
 

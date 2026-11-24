@@ -1,0 +1,51 @@
+{
+  "svg": "<svg style=\"x\" xmlns=\"http://www.w3.org/2000/svg\" width=\"1\" height=\"1\" role=\"img\" focusable=\"false\" viewBox=\"0 0 1 1\"><g stroke=\"currentColor\" fill=\"currentColor\" stroke-width=\"0\" transform=\"scale(1,-1)\"><g data-mml-node=\"mrow\"><line x1=\"1\" y1=\"2\" x2=\"5\" y2=\"7\" stroke-width=\"2\" /><rect x=\"0\" y=\"0\" width=\"10\" height=\"8\" rx=\"8\" fill=\"none\" stroke-width=\"1\" /><ellipse rx=\"3\" ry=\"4\" cx=\"10\" cy=\"11\" fill=\"none\" stroke-width=\"2\" /><path style=\"stroke-width: 3;\" d=\"M 0 0 l 2 3 a 4 5 0 0,1 2 3 L 9 9\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"mitre\" transform=\"rotate(20,0,0)\" /></g></g></svg>",
+  "source_svg": [
+    {
+      "tag": "line",
+      "attrs": {
+        "x1": "1",
+        "y1": "2",
+        "x2": "5",
+        "y2": "7",
+        "stroke-width": "2"
+      }
+    },
+    {
+      "tag": "rect",
+      "attrs": {
+        "x": "0",
+        "y": "0",
+        "width": "10",
+        "height": "8",
+        "rx": "8",
+        "fill": "none",
+        "stroke-width": "1"
+      }
+    },
+    {
+      "tag": "ellipse",
+      "attrs": {
+        "rx": "3",
+        "ry": "4",
+        "cx": "10",
+        "cy": "11",
+        "fill": "none",
+        "stroke-width": "2"
+      }
+    },
+    {
+      "tag": "path",
+      "attrs": {
+        "d": "M 0 0 l 2 3 a 4 5 0 0,1 2 3 L 9 9",
+        "style": {
+          "stroke-width": "3"
+        },
+        "fill": "none",
+        "stroke-linecap": "round",
+        "stroke-linejoin": "mitre",
+        "transform": "rotate(20,0,0)"
+      }
+    }
+  ]
+}
