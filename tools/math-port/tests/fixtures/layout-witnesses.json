@@ -1,0 +1,122 @@
+{
+  "description": "Synthetic comparator protocol selftest only; this is not an official Source capture or native parity evidence.",
+  "source": [
+    {
+      "source": "synthetic unshift selftest",
+      "sourceSha256": "fixture",
+      "method": "unshift",
+      "inherited": {
+        "value": 1
+      },
+      "sparsePresence": [
+        true,
+        false
+      ],
+      "order": [
+        "length",
+        "get"
+      ],
+      "zeroArgTrace": [
+        "length"
+      ],
+      "partial": {
+        "write": 1
+      },
+      "nullReceiverThrows": true
+    },
+    {
+      "source": "synthetic getBBox selftest",
+      "sourceSha256": "fixture",
+      "method": "getBBox",
+      "item": {
+        "width": 1
+      },
+      "measurements": [
+        {
+          "w": 3.25
+        }
+      ],
+      "replacementCalls": [
+        1,
+        2
+      ],
+      "exceptionPropagated": true
+    }
+  ],
+  "native": [
+    {
+      "source": "synthetic unshift selftest",
+      "sourceSha256": "fixture",
+      "method": "unshift",
+      "inherited": {
+        "value": 1
+      },
+      "sparsePresence": [
+        true,
+        false
+      ],
+      "order": [
+        "length",
+        "get"
+      ],
+      "zeroArgTrace": [
+        "length"
+      ],
+      "partial": {
+        "write": 1
+      },
+      "nullReceiverThrows": true,
+      "nativeChecks": {
+        "ordinary": [
+          "one",
+          "two",
+          "three"
+        ],
+        "generic": [
+          "one",
+          "head",
+          "inherited-tail"
+        ],
+        "nativeView": {
+          "length": 3,
+          "values": [
+            "start",
+            "left",
+            "right"
+          ]
+        },
+        "zeroArgResult": 2,
+        "readOnlyLengthThrows": true,
+        "partialWriteThrows": true
+      }
+    },
+    {
+      "source": "synthetic getBBox selftest",
+      "sourceSha256": "fixture",
+      "method": "getBBox",
+      "item": {
+        "width": 1
+      },
+      "measurements": [
+        {
+          "w": 3.25
+        }
+      ],
+      "replacementCalls": [
+        1,
+        2
+      ],
+      "exceptionPropagated": true,
+      "nativeChecks": {
+        "sourceSetMetricsExposed": false,
+        "nativeMathItemSetMetricsUsed": true,
+        "firstCanonical": true,
+        "secondCanonical": true,
+        "firstWidthBefore": 3.25,
+        "firstWidthAfter": 3.5,
+        "liveField": true,
+        "replacementForwarded": true
+      }
+    }
+  ]
+}
