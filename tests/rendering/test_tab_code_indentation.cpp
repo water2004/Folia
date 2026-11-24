@@ -32,7 +32,7 @@ using namespace boost::ut;
 
 namespace {
 
-const BlockNode* first_code_block(const std::vector<BlockNode>& blocks) {
+const BlockNode* first_code_block(const BlockVec& blocks) {
     for (const auto& block : blocks) {
         if (block.kind == BlockKind::CodeBlock) return &block;
         if (const auto* nested = first_code_block(block.children)) return nested;

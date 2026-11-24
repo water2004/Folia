@@ -3,6 +3,7 @@
 // wiki_links+tables+images and safe recursive HTML semantics.
 export module folia.markdown.ast;
 import std;
+import folia.markdown.node_sequence;
 import folia.markdown.block_source;
 import folia.markdown.ids;
 import folia.markdown.dialect;
@@ -16,7 +17,7 @@ export namespace folia {
 
 struct BlockNode;
 
-using BlockVec = std::vector<BlockNode>;
+using BlockVec = NodeSequence<BlockNode>;
 
 enum class BlockKind {
     Document,

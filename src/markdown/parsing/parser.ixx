@@ -620,7 +620,7 @@ public:
 
 
 // Sole block dispatch loop. Source discovery precedes final inline CSTs.
-std::vector<BlockNode> parse_blocks(std::function<bool(const std::u32string&)> stop=nullptr,
+BlockVec parse_blocks(std::function<bool(const std::u32string&)> stop=nullptr,
     std::function<bool(const BlockVec&)> accept_discovered = {}) {
     if (!active_container_frames.empty()) throw std::logic_error("block session already active");
     BlockNode root; root.kind=BlockKind::Document;
@@ -973,11 +973,11 @@ std::optional<BlockNode> make_html_table(
     return table;
 }
 
-std::vector<BlockNode> make_html_children(
+BlockVec make_html_children(
     std::span<const HtmlCstNode> children,
     const HtmlSourceView& source,
     std::vector<HtmlContentSlot>& slots) {
-    std::vector<BlockNode> blocks;
+    BlockVec blocks;
     std::optional<SourceRange> inline_run;
     auto flush_inline = [&]() {
         if (!inline_run) return;

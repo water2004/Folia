@@ -13,7 +13,7 @@ using namespace folia;
 using namespace boost::ut;
 static_assert(std::is_nothrow_move_constructible_v<BlockNode>);
 static_assert(std::is_nothrow_move_assignable_v<BlockNode>);
-static_assert(std::is_same_v<BlockVec, std::vector<BlockNode>>);
+static_assert(sizeof(BlockVec) == sizeof(void*));
 
 namespace {
 BlockNode make_quote_ownership_tree(std::uint64_t depth) {

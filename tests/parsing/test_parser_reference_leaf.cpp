@@ -14,7 +14,7 @@ using namespace boost::ut;
 #include "support/parser_test_support.hpp"
 
 namespace {
-const BlockNode* find_link_definition(const std::vector<BlockNode>& blocks) {
+const BlockNode* find_link_definition(const BlockVec& blocks) {
     for (const auto& block : blocks) {
         if (block.kind == BlockKind::LinkDefinition) return &block;
         if (const auto* found = find_link_definition(block.children)) return found;
