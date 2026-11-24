@@ -36,7 +36,8 @@ const outputDir=path.join(root,'build/math-port-reference');
 fs.mkdirSync(outputDir,{recursive:true});
 const manifest={schema:1,corpus_sha256:textSha(fs.readFileSync(corpusPath)),
   provenance:reference.provenance,tools_sha256:{},neutrality:'all_serialized_results_or_exceptions_equal_fresh_uninstrumented_profile',cases:[]};
-for (const file of ['reference-profile.cjs','reference-capture.cjs','reference-compare.cjs','reference-fixtures.cjs','reference-mutations.cjs'])
+for (const file of ['reference-profile.cjs', 'reference-capture.cjs', 'reference-fixtures.cjs',
+  'reference-compare.py', 'reference-mutations.py', 'validation/common.py', 'validation/reference.py'])
   manifest.tools_sha256[file]=textSha(fs.readFileSync(path.join(__dirname,file)));
 for (let i=0;i<corpus.cases.length;i++) {
   const c=corpus.cases[i],snapshot=capture(c.request),plain=renders[i];

@@ -40,7 +40,7 @@ Full snapshots are regenerated as gzip JSON in ignored
 `build/math-port-reference/`; committed `reference-golden.json` pins a complete
 snapshot hash and individual semantic/layout/result layer hashes per case.
 There is no truncated snapshot or path-only golden. After hash verification,
-`reference-compare.cjs` can compare the full regenerated expected snapshot to a
+`reference-compare.py` can compare the full regenerated expected snapshot to a
 future native snapshot. Numeric tolerance is limited to listed BBox geometry
 and placement coordinates (absolute 1e-10 plus relative 1e-10). Other values,
 including numeric priorities, classes and codepoints, compare exactly.
@@ -61,7 +61,7 @@ Run, in order:
 ```powershell
 node tools/math-port/inventory.cjs --check
 node tools/math-port/reference-fixtures.cjs
-node tools/math-port/reference-mutations.cjs
+python tools/math-port/reference-mutations.py
 ```
 
 `--freeze` is a root-only expectation-authoring action, not a test repair step.

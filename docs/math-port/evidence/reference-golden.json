@@ -109,9 +109,11 @@
   "tools_sha256": {
     "reference-profile.cjs": "054186fae7a72c7e268d978f350829d732bd9b2f8043ef5fbf1bec60608bf11e",
     "reference-capture.cjs": "0107331c5f54ff7c64f4838bb5556d1bbfa5972abd5336201a9a1aff8774470f",
-    "reference-compare.cjs": "bf0de5cc6d4712ca41c4623e48ca205400237fa070d3dc53fb86fd0231b96b90",
-    "reference-fixtures.cjs": "f56be43b4aa6e2dde3d98798ed379b7caa3dfb3a9eb9c3fbca7d5d8d1b0f7572",
-    "reference-mutations.cjs": "3cd5e2c357dd78eb9b8da7843769f10622f1621cc9e9de5a282d26a7810c7a93"
+    "reference-fixtures.cjs": "db6a29f6e09c45ed22d14a54efbdf60ff9584da131500055f3d83475d57e63f1",
+    "reference-compare.py": "cd5bd875cd683a6f68faa6850fd89cab8bfcd703d7ad41a5ce2ba2e146d81af0",
+    "reference-mutations.py": "e8a3f97fca5671908e1884278d02655bfd024404d81172f68a1f0e4509da41fc",
+    "validation/common.py": "b416f7295902a7c1ac89fe84878984fefe11889ac135c7faeb0a9b7f8485badc",
+    "validation/reference.py": "0a4e041dc32c40ad7eae1d7b28ebd8dae12aaedd71af2b4bf15cb16f2befe50c"
   },
   "neutrality": "all_serialized_results_or_exceptions_equal_fresh_uninstrumented_profile",
   "cases": [
