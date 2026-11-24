@@ -43,7 +43,7 @@ namespace {
                 resources.InitializeOffscreen(sheet, 600, 240);
                 resources.EnsureFrameResources(sheet);
                 EditorTextLayoutEngine engine(resources, sheet);
-                MathJaxRenderer math; SvgNormalizer normalizer;
+                folia::platform::MathJaxRenderer math; folia::platform::SvgNormalizer normalizer;
                 auto display = BuildDisplayInlineText(frame.renderModel.blocks.front().inline_items, {}, {},
                     math, normalizer, sheet.textColor, sheet.body.size, 560, false, false, false);
                 auto layout = engine.CreateFlow(display, resources.textFormat.Get(), 560, {});
@@ -95,8 +95,8 @@ namespace {
                 resources.InitializeOffscreen(sheet, 400, 260);
                 resources.EnsureFrameResources(sheet);
                 EditorTextLayoutEngine engine(resources, sheet);
-                MathJaxRenderer math;
-                SvgNormalizer normalizer;
+                folia::platform::MathJaxRenderer math;
+                folia::platform::SvgNormalizer normalizer;
                 auto properties = D2D1::BitmapProperties1(D2D1_BITMAP_OPTIONS_TARGET,
                     D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED));
                 ::Microsoft::WRL::ComPtr<ID2D1Bitmap1> target;

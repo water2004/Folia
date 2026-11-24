@@ -91,8 +91,8 @@ namespace {
                 auto source = session.EditableSource(owner);
                 expect(source.has_value());
                 if (!source) continue;
-                MathJaxRenderer math;
-                SvgNormalizer normalizer;
+                folia::platform::MathJaxRenderer math;
+                folia::platform::SvgNormalizer normalizer;
                 auto frame = session.RenderFrame();
                 if (frame.materializeBlocks) frame.materializeBlocks(0, frame.renderModel.blocks.size());
                 auto const& block = frame.renderModel.blocks.front();
@@ -137,8 +137,8 @@ namespace {
                 auto source = session.EditableSource(owner);
                 auto frame = session.RenderFrame();
                 if (frame.materializeBlocks) frame.materializeBlocks(0, frame.renderModel.blocks.size());
-                MathJaxRenderer math;
-                SvgNormalizer normalizer;
+                folia::platform::MathJaxRenderer math;
+                folia::platform::SvgNormalizer normalizer;
                 auto display = BuildDisplayInlineText(frame.renderModel.blocks.front().inline_items,
                     {owner, 3, folia::TextAffinity::Downstream},
                     {owner, source->size(), folia::TextAffinity::Upstream}, math, normalizer,
@@ -197,8 +197,8 @@ namespace {
                 auto source = session.EditableSource(owner);
                 auto frame = session.RenderFrame();
                 if (frame.materializeBlocks) frame.materializeBlocks(0, frame.renderModel.blocks.size());
-                MathJaxRenderer math;
-                SvgNormalizer normalizer;
+                folia::platform::MathJaxRenderer math;
+                folia::platform::SvgNormalizer normalizer;
                 auto display = BuildDisplayInlineText(frame.renderModel.blocks.front().inline_items,
                     {owner, 3, folia::TextAffinity::Downstream},
                     {owner, source->size(), folia::TextAffinity::Upstream}, math, normalizer,

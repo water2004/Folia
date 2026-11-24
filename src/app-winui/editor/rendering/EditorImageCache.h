@@ -4,8 +4,8 @@
 
 namespace winrt::Folia
 {
-    struct DecodedGifAnimation;
-    struct GifInitialDecode;
+    struct folia::platform::DecodedGifAnimation;
+    struct folia::platform::GifInitialDecode;
 
     // UI-thread device images and GIF presentation. Encoded downloads and their
     // completion lifetime belong to ImageResourceCache, not to the renderer.
@@ -15,7 +15,7 @@ namespace winrt::Folia
         struct RasterImage
         {
             ::Microsoft::WRL::ComPtr<ID2D1Bitmap1> bitmap;
-            std::shared_ptr<DecodedGifAnimation> animation;
+            std::shared_ptr<folia::platform::DecodedGifAnimation> animation;
             float width = 0.0f, height = 0.0f;
             std::size_t bytes = 0;
         };
@@ -41,7 +41,7 @@ namespace winrt::Folia
     private:
         struct PendingGifImage
         {
-            std::shared_ptr<GifInitialDecode> decode;
+            std::shared_ptr<folia::platform::GifInitialDecode> decode;
             std::shared_ptr<std::vector<std::uint8_t>> encodedBacking;
             std::filesystem::path path;
         };

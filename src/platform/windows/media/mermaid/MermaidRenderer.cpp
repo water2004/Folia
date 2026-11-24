@@ -1,41 +1,30 @@
-#include "pch.h"
-#include "media/MermaidRenderer.h"
-#include "media/SvgNormalizer.h"
-#include "../../../tools/mermaid-cpp/native-renderer.h"
+#include "windows/media/ExecutableLibrary.h"
+#include <winrt/base.h>
+#include "windows/media/mermaid/MermaidRenderer.h"
+#include "windows/media/svg/SvgNormalizer.h"
+#include "../../../../../tools/mermaid-cpp/native-renderer.h"
 #include <cmath>
+
+import std;
 
 namespace
 {
-    std::wstring ModuleDirectory()
-    {
-        std::wstring path(32768, L'\0');
-        auto length = GetModuleFileNameW(nullptr, path.data(), static_cast<DWORD>(path.size()));
-        path.resize(length);
-        auto separator = path.find_last_of(L"\\/");
-        return separator == std::wstring::npos ? std::wstring{} : path.substr(0, separator + 1);
-    }
-
     struct NativeLibrary
     {
         NativeLibrary()
         {
-            module = LoadLibraryExW((ModuleDirectory() + L"FoliaNativeMermaid.dll").c_str(), nullptr, LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR | LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
+            module = folia::platform::LoadExecutableLibrary(L"FoliaNativeMermaid.dll");
             if (!module)
             {
                 error = "Native Mermaid library could not be loaded";
                 return;
             }
-            render = reinterpret_cast<Render>(GetProcAddress(module, "FoliaNativeMermaidRender"));
-            renderWithTheme = reinterpret_cast<RenderWithTheme>(GetProcAddress(module, "FoliaNativeMermaidRenderWithTheme"));
-            themeName = reinterpret_cast<ThemeName>(GetProcAddress(module, "FoliaNativeMermaidThemeName"));
-            freeBuffer = reinterpret_cast<FreeBuffer>(GetProcAddress(module, "FoliaNativeMermaidFree"));
+            render = reinterpret_cast<Render>(GetProcAddress(module.get(), "FoliaNativeMermaidRender"));
+            renderWithTheme = reinterpret_cast<RenderWithTheme>(GetProcAddress(module.get(), "FoliaNativeMermaidRenderWithTheme"));
+            themeName = reinterpret_cast<ThemeName>(GetProcAddress(module.get(), "FoliaNativeMermaidThemeName"));
+            freeBuffer = reinterpret_cast<FreeBuffer>(GetProcAddress(module.get(), "FoliaNativeMermaidFree"));
             if (!render || !freeBuffer)
                 error = "Native Mermaid library has an incompatible ABI";
-        }
-
-        ~NativeLibrary()
-        {
-            if (module) FreeLibrary(module);
         }
 
         using Render = decltype(&FoliaNativeMermaidRender);
@@ -43,7 +32,7 @@ namespace
         using ThemeName = decltype(&FoliaNativeMermaidThemeName);
         using FreeBuffer = decltype(&FoliaNativeMermaidFree);
 
-        HMODULE module = nullptr;
+        folia::platform::ExecutableLibrary module;
         Render render = nullptr;
         RenderWithTheme renderWithTheme = nullptr;
         ThemeName themeName = nullptr;
@@ -60,10 +49,10 @@ namespace
     class Runtime
     {
     public:
-        winrt::Folia::MermaidSvg Process(std::string const& source,
+        folia::platform::MermaidSvg Process(std::string const& source,
             std::string const& theme, bool dark, std::uint64_t id)
         {
-            winrt::Folia::MermaidSvg result;
+            folia::platform::MermaidSvg result;
             result.renderId = id;
             auto const& library = Library();
             if (!library.error.empty())
@@ -127,11 +116,11 @@ namespace
         }
 
     private:
-        winrt::Folia::SvgNormalizer normalizer;
+        folia::platform::SvgNormalizer normalizer;
     };
 }
 
-namespace winrt::Folia
+namespace folia::platform
 {
     struct MermaidRenderer::State
     {

@@ -156,7 +156,7 @@
     <ClCompile Include="..\encoding\document_encoding.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClInclude Include="storage\ClipboardImageStore.h" />
+    <ClInclude Include="..\platform\windows\storage\ClipboardImageStore.h" />
     <ClInclude Include="localization\Localization.h" />
     <ClInclude Include="settings\AppSettings.h" />
     <ClInclude Include="settings\CompletionPromptSettings.h" />
@@ -186,7 +186,8 @@
     <ClInclude Include="editor\rendering\EditorMathSyntax.h" />
     <ClInclude Include="editor\rendering\EditorCaretAnimation.h" />
     <ClInclude Include="editor\interaction\EditorAnimationController.h" />
-    <ClInclude Include="media\EditorGifDecoder.h" />
+    <ClInclude Include="..\platform\windows\media\ExecutableLibrary.h" />
+    <ClInclude Include="..\platform\windows\media\images\EditorGifDecoder.h" />
     <ClInclude Include="editor\rendering\EditorRenderCache.h" />
     <ClInclude Include="editor\rendering\EditorImageCache.h" />
     <ClInclude Include="media\ImageSource.h" />
@@ -223,17 +224,17 @@
     <ClInclude Include="editor\rendering\EditorSurfaceRenderer.h" />
       <ClInclude Include="editor\rendering\EditorMathPreparation.h" />
       <ClInclude Include="editor\rendering\EditorContentGeometry.h" />
-      <ClInclude Include="media\NativeMathSession.h" />
-      <ClInclude Include="media\MathSvgStore.h" />
+      <ClInclude Include="..\platform\windows\media\math\NativeMathSession.h" />
+      <ClInclude Include="..\platform\windows\media\math\MathSvgStore.h" />
       <ClInclude Include="editor\rendering\EditorPreparedDocument.h" />
       <ClInclude Include="editor\rendering\EditorPreparedDocumentCache.h" />
       <ClInclude Include="editor\rendering\EditorPreparedDocumentRetention.h" />
-    <ClInclude Include="media\MathJaxRenderer.h" />
-    <ClInclude Include="media\MathJaxRenderer.State.h" />
-    <ClInclude Include="media\MathJaxSvgParser.h" />
-    <ClInclude Include="media\MermaidRenderer.h" />
+    <ClInclude Include="..\platform\windows\media\math\MathJaxRenderer.h" />
+    <ClInclude Include="..\platform\windows\media\math\MathJaxRenderer.State.h" />
+    <ClInclude Include="..\platform\windows\media\math\MathJaxSvgParser.h" />
+    <ClInclude Include="..\platform\windows\media\mermaid\MermaidRenderer.h" />
     <ClInclude Include="media\MediaDisplaySettings.h" />
-    <ClInclude Include="media\SvgNormalizer.h" />
+    <ClInclude Include="..\platform\windows\media\svg\SvgNormalizer.h" />
     <ClInclude Include="media\TreeSitterHighlighter.h" />
     <ClInclude Include="App.xaml.h">
       <DependentUpon>App.xaml</DependentUpon>
@@ -657,7 +658,9 @@
     <ClCompile Include="MainWindow.Search.cpp">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </ClCompile>
-    <ClCompile Include="media\EditorGifDecoder.cpp" />
+    <ClCompile Include="..\platform\windows\media\images\EditorGifDecoder.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="editor\rendering\EditorStyleSheet.cpp" />
     <ClCompile Include="..\platform\windows\editor\interaction\editor_interaction.cpp">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
@@ -710,7 +713,9 @@
     <ClCompile Include="editor\interaction\EditorDocumentController.Relocation.cpp" />
     <ClCompile Include="editor\interaction\EditorDocumentController.Save.cpp" />
     <ClCompile Include="editor\interaction\EditorDocumentController.Clipboard.cpp" />
-    <ClCompile Include="storage\ClipboardImageStore.cpp" />
+    <ClCompile Include="..\platform\windows\storage\ClipboardImageStore.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="MainWindow.Lifecycle.cpp" />
     <ClCompile Include="editor\interaction\EditorDocumentController.Reload.cpp" />
     <ClCompile Include="..\encoding\document_encoding.cpp">
@@ -723,16 +728,34 @@
     <ClCompile Include="editor\rendering\EditorSurfaceRenderer.Document.cpp" />
     <ClCompile Include="editor\rendering\EditorSurfaceRenderer.Interaction.cpp" />
     <ClCompile Include="editor\rendering\EditorSurfaceRenderer.Pdf.cpp" />
-    <ClCompile Include="media\MathJaxRenderer.cpp" />
-    <ClCompile Include="media\MathJaxRenderer.Cache.cpp" />
-    <ClCompile Include="media\MathJaxRenderer.Batch.cpp" />
-    <ClCompile Include="media\MathJaxRenderer.Worker.cpp" />
-    <ClCompile Include="media\NativeMathSession.cpp" />
-    <ClCompile Include="media\MathSvgStore.cpp" />
+    <ClCompile Include="..\platform\windows\media\math\MathJaxRenderer.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\platform\windows\media\math\MathJaxRenderer.Cache.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\platform\windows\media\math\MathJaxRenderer.Batch.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\platform\windows\media\math\MathJaxRenderer.Worker.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\platform\windows\media\math\NativeMathSession.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\platform\windows\media\math\MathSvgStore.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="editor\rendering\EditorSurfaceRenderer.Math.cpp" />
-    <ClCompile Include="media\MathJaxSvgParser.cpp" />
-    <ClCompile Include="media\MermaidRenderer.cpp" />
-    <ClCompile Include="media\SvgNormalizer.cpp" />
+    <ClCompile Include="..\platform\windows\media\math\MathJaxSvgParser.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\platform\windows\media\mermaid\MermaidRenderer.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\platform\windows\media\svg\SvgNormalizer.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="media\TreeSitterHighlighter.cpp">
       <AdditionalIncludeDirectories>..\..\third_party\tree-sitter\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>

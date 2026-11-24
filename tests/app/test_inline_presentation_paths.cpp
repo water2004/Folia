@@ -15,9 +15,9 @@ namespace {
         EditorStyleSheet sheet;
         EditorRenderResources resources;
         EditorRenderCache cache;
-        MathJaxRenderer math;
-        MermaidRenderer mermaid;
-        SvgNormalizer normalizer;
+        folia::platform::MathJaxRenderer math;
+        folia::platform::MermaidRenderer mermaid;
+        folia::platform::SvgNormalizer normalizer;
         TreeSitterHighlighter syntax;
         EditorInteractionMap interaction;
         EditorCaretAnimation caretAnimation;

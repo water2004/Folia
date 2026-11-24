@@ -4,9 +4,9 @@
 #include <stop_token>
 #include <string_view>
 
-#include "media/MathJaxRenderer.h"
+#include "windows/media/math/MathJaxRenderer.h"
 
-namespace winrt::Folia
+namespace folia::platform
 {
     struct NativeMathInput
     {

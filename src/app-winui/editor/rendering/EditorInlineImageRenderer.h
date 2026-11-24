@@ -6,7 +6,7 @@
 #include "editor/rendering/EditorStyleSheet.h"
 #include "editor/rendering/EditorSvgPainter.h"
 #include "media/MediaDisplaySettings.h"
-#include "media/SvgNormalizer.h"
+#include "windows/media/svg/SvgNormalizer.h"
 
 namespace winrt::Folia
 {
@@ -16,7 +16,7 @@ namespace winrt::Folia
         {
             std::uint32_t displayStart = 0;
             std::optional<EditorImageCache::RasterImage> image;
-            std::optional<NormalizedSvg> svg;
+            std::optional<folia::platform::NormalizedSvg> svg;
             std::string source;
             std::wstring alt;
             std::wstring caption;
@@ -38,7 +38,7 @@ namespace winrt::Folia
             EditorRenderResources& resources,
             EditorRenderCache& cache,
             EditorStyleSheet const& styleSheet,
-            SvgNormalizer& svgNormalizer,
+            folia::platform::SvgNormalizer& svgNormalizer,
             EditorSvgPainter& svgPainter,
             std::wstring const& baseDirectory,
             bool animate = true,
@@ -52,7 +52,7 @@ namespace winrt::Folia
         EditorRenderResources& resources;
         EditorRenderCache& cache;
         EditorStyleSheet const& styleSheet;
-        SvgNormalizer& svgNormalizer;
+        folia::platform::SvgNormalizer& svgNormalizer;
         EditorSvgPainter& svgPainter;
         std::wstring const& baseDirectory;
         bool animate = true;

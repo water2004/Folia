@@ -7,7 +7,7 @@
 #include <string>
 #include <string_view>
 
-namespace winrt::Folia
+namespace folia::platform
 {
     class MathSvgStore
     {

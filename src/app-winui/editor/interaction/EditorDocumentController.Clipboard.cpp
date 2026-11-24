@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "editor/interaction/EditorDocumentControllerState.h"
-#include "storage/ClipboardImageStore.h"
+#include "windows/storage/ClipboardImageStore.h"
 #include "localization/Localization.h"
 
 import folia.markdown.serializer;
@@ -56,11 +56,11 @@ namespace winrt::Folia {
                 if (bitmap) {
                     auto image = co_await content.GetBitmapAsync();
                     auto input = co_await image.OpenReadAsync();
-                    if (current()) created.push_back(co_await ClipboardImageStore::SavePngAsync(input, winrt::hstring(base)));
+                    if (current()) created.push_back(co_await folia::platform::ClipboardImageStore::SavePngAsync(input, winrt::hstring(base)));
                 } else {
                     for (auto const& file : files) {
                         if (!current()) break;
-                        created.push_back(co_await ClipboardImageStore::CopyFileAsync(file, winrt::hstring(base)));
+                        created.push_back(co_await folia::platform::ClipboardImageStore::CopyFileAsync(file, winrt::hstring(base)));
                     }
                 }
                 co_await ui;

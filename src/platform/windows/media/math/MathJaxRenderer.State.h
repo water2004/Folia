@@ -1,9 +1,13 @@
 #pragma once
 
-#include "media/MathJaxRenderer.h"
-#include "media/MathSvgStore.h"
+#include <deque>
+#include <unordered_map>
+#include <unordered_set>
 
-namespace winrt::Folia
+#include "windows/media/math/MathJaxRenderer.h"
+#include "windows/media/math/MathSvgStore.h"
+
+namespace folia::platform
 {
     class NativeMathSession;
     class SvgNormalizer;

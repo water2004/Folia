@@ -2,7 +2,7 @@
 #include "settings/SettingsView.h"
 #include "settings/SettingsViewSupport.h"
 #include "localization/Localization.h"
-#include "media/MermaidRenderer.h"
+#include "windows/media/mermaid/MermaidRenderer.h"
 
 namespace winrt::Folia
 {
@@ -56,7 +56,7 @@ namespace winrt::Folia
         mermaidThemeCombo_.Header(box_value(Localize(L"MermaidTheme")));
         mermaidThemeCombo_.Style(settings_ui::ResourceStyle(L"SettingsComboBoxStyle"));
         mermaidThemeCombo_.Items().Append(box_value(Localize(L"MermaidFollowFolia")));
-        for (auto const& name : MermaidRenderer::ThemeNames())
+        for (auto const& name : folia::platform::MermaidRenderer::ThemeNames())
             mermaidThemeCombo_.Items().Append(box_value(winrt::to_hstring(name)));
         mediaSection.Children().Append(mermaidThemeCombo_);
         mediaSection.Children().Append(settings_ui::Hint(Localize(L"MermaidThemeDescription")));
@@ -77,7 +77,7 @@ namespace winrt::Folia
         {
             if (refreshing_) return;
             auto index = mermaidThemeCombo_.SelectedIndex();
-            auto names = MermaidRenderer::ThemeNames();
+            auto names = folia::platform::MermaidRenderer::ThemeNames();
             if (index < 0 || static_cast<std::size_t>(index) > names.size()) return;
             auto media = appliedSettings_.media;
             media.mermaidTheme = index == 0 ? std::string{} : names[static_cast<std::size_t>(index - 1)];
@@ -94,7 +94,7 @@ namespace winrt::Folia
         auto const& widths = MediaDisplaySettings::imageWidths;
         auto width = std::ranges::find(widths, settings_.media.imageMaxWidthPercent);
         imageWidthCombo_.SelectedIndex(static_cast<int>(width == widths.end() ? widths.size() - 1 : width - widths.begin()));
-        auto names = MermaidRenderer::ThemeNames();
+        auto names = folia::platform::MermaidRenderer::ThemeNames();
         auto theme = std::ranges::find(names, settings_.media.mermaidTheme);
         mermaidThemeCombo_.SelectedIndex(theme == names.end() ? 0 : 1 + static_cast<int>(theme - names.begin()));
     }

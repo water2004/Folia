@@ -40,8 +40,8 @@ suite nested_math_blocks = [] {
             auto command = raw.find(U"\\frac");
             auto contentOffset = command == std::u32string::npos
                 ? mathBlock->content_span.source_range.start : command + 1;
-            MathJaxRenderer math;
-            SvgNormalizer normalizer;
+            folia::platform::MathJaxRenderer math;
+            folia::platform::SvgNormalizer normalizer;
             TreeSitterHighlighter highlighter;
             for (auto offset : {std::size_t{0}, contentOffset, raw.size()}) {
                 auto caret = folia::TextPosition{mathBlock->id, offset, folia::TextAffinity::Downstream};

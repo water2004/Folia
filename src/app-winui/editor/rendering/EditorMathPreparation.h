@@ -1,6 +1,6 @@
 #pragma once
 
-#include "media/MathJaxRenderer.h"
+#include "windows/media/math/MathJaxRenderer.h"
 #include "media/MediaDisplaySettings.h"
 #include "editor/session/EditorRenderFrame.h"
 #include "editor/rendering/EditorPreparedDocument.h"
@@ -24,7 +24,7 @@ namespace winrt::Folia
     struct EditorMathPreparation
     {
         EditorMathPreparationContext context;
-        MathJaxRenderer math;
+        folia::platform::MathJaxRenderer math;
         std::size_t formulaCount = 0;
         std::unique_ptr<EditorPreparedDocument> document;
     };

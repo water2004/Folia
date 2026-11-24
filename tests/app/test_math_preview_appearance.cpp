@@ -58,11 +58,11 @@ namespace {
             EditorRenderResources resources;
             resources.InitializeOffscreen(sheet, 1200, 800);
             resources.EnsureFrameResources(sheet);
-            MathJaxRenderer math;
+            folia::platform::MathJaxRenderer math;
             auto color = SvgColor(sheet.textColor);
-            math.Render(math_editor_examples::longChain, false, sheet.body.size, 400, color, {}, MathRenderPurpose::Preview);
+            math.Render(math_editor_examples::longChain, false, sheet.body.size, 400, color, {}, folia::platform::MathRenderPurpose::Preview);
             math.WaitForIdle();
-            auto svg = math.Lookup(math_editor_examples::longChain, false, sheet.body.size, 400, color, MathRenderPurpose::Preview);
+            auto svg = math.Lookup(math_editor_examples::longChain, false, sheet.body.size, 400, color, folia::platform::MathRenderPurpose::Preview);
             expect(static_cast<bool>(svg));
             if (!svg) return;
             DisplayInlineText::MathPreview input{*svg, {}, false, sheet.textColor};
@@ -90,17 +90,17 @@ namespace {
                 EditorRenderResources resources;
                 resources.InitializeOffscreen(sheet, 600, 280);
                 resources.EnsureFrameResources(sheet);
-                MathJaxRenderer math;
+                folia::platform::MathJaxRenderer math;
                 auto color = SvgColor(sheet.textColor);
-                math.Render(tex, block, sheet.body.size, width, color, {}, MathRenderPurpose::Preview);
+                math.Render(tex, block, sheet.body.size, width, color, {}, folia::platform::MathRenderPurpose::Preview);
                 math.WaitForIdle();
                 auto statistics = math.Snapshot();
                 expect(statistics.fileReads == 0_u && statistics.fileWrites == 0_u);
                 expect(statistics.previewSvgBytes > 0_u);
-                auto svg = math.Lookup(tex, block, sheet.body.size, width, color, MathRenderPurpose::Preview);
+                auto svg = math.Lookup(tex, block, sheet.body.size, width, color, folia::platform::MathRenderPurpose::Preview);
                 expect(static_cast<bool>(svg));
                 if (!svg) return;
-                expect(svg->errorKind == MathJaxErrorKind::None);
+                expect(svg->errorKind == folia::platform::MathJaxErrorKind::None);
                 DisplayInlineText::MathPreview input{*svg, {}, false, sheet.textColor};
                 EditorTextLayoutEngine engine(resources, sheet);
                 auto preview = PrepareMathPreview(input, engine, resources.textFormat.Get(), width,

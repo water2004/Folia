@@ -71,7 +71,7 @@ namespace winrt::Folia
             DisplayInlineText& display,
             std::uint32_t start,
             std::uint32_t end,
-            MermaidSvg svg,
+            folia::platform::MermaidSvg svg,
             folia::TextSpan sourceSpan)
         {
             if (start >= end || end > folia::utf16_len(display.text)) return;
@@ -199,9 +199,9 @@ namespace winrt::Folia
         EditorTextLayoutEngine& valueTextLayoutEngine,
         EditorInlineImageRenderer& valueInlineImages,
         EditorDocumentPainter& valueDocumentPainter,
-        MathJaxRenderer& valueMathJax,
-        MermaidRenderer& valueMermaid,
-        SvgNormalizer& valueSvgNormalizer,
+        folia::platform::MathJaxRenderer& valueMathJax,
+        folia::platform::MermaidRenderer& valueMermaid,
+        folia::platform::SvgNormalizer& valueSvgNormalizer,
         TreeSitterHighlighter& valueTreeSitter,
         folia::TextPosition valueCaret,
         float valueDocumentWidth,
@@ -368,7 +368,7 @@ namespace winrt::Folia
         {
             std::uint32_t start = 0;
             std::uint32_t end = 0;
-            MermaidSvg svg;
+            folia::platform::MermaidSvg svg;
             folia::TextSpan sourceSpan;
         };
         std::vector<Replacement> replacements;

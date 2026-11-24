@@ -20,7 +20,7 @@ namespace winrt::Folia
         struct MermaidDraw
         {
             std::uint32_t displayStart = 0;
-            MermaidSvg svg;
+            folia::platform::MermaidSvg svg;
             float width = 0.0f;
             float height = 0.0f;
             float lineHeight = 0.0f;
@@ -29,7 +29,7 @@ namespace winrt::Folia
 
         struct MermaidPreview
         {
-            MermaidSvg svg;
+            folia::platform::MermaidSvg svg;
             float width = 0.0f;
             float height = 0.0f;
         };

@@ -23,9 +23,9 @@ namespace {
         EditorStyleSheet sheet = CreateEditorStyleSheet(folia::default_theme_profile());
         EditorRenderResources resources;
         EditorRenderCache resourcesCache;
-        MathJaxRenderer math;
-        MermaidRenderer mermaid;
-        SvgNormalizer normalizer;
+        folia::platform::MathJaxRenderer math;
+        folia::platform::MermaidRenderer mermaid;
+        folia::platform::SvgNormalizer normalizer;
         TreeSitterHighlighter syntax;
         EditorInteractionMap interaction;
         EditorScrollState scroll;
@@ -716,7 +716,7 @@ namespace {
                 fixture.math.WaitForIdle();
                 if (diagram) {
                     auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(15);
-                    std::optional<MermaidSvg> rendered;
+                    std::optional<folia::platform::MermaidSvg> rendered;
                     do {
                         rendered = fixture.mermaid.GetOrQueue(diagramSource, false);
                         if (rendered) break;

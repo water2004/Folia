@@ -3,7 +3,7 @@
 #include "MainWindow.xaml.h"
 #include "localization/Localization.h"
 #include "settings/AppSettings.h"
-#include "media/MathSvgStore.h"
+#include "windows/media/math/MathSvgStore.h"
 
 using namespace winrt;
 using namespace winrt::Microsoft::UI::Xaml;
@@ -17,7 +17,7 @@ namespace winrt::Folia::implementation
             try
             {
                 co_await winrt::resume_background();
-                auto result = winrt::Folia::MathSvgStore::ReclaimOrphans();
+                auto result = folia::platform::MathSvgStore::ReclaimOrphans();
                 if (result.failed != 0)
                     ::OutputDebugStringW(L"Folia: some unused math cache files could not be reclaimed.\n");
             }

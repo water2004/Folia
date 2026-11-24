@@ -13,8 +13,8 @@ suite completion_layout_tests = [] {
     "completion layout cache invalidates only generated content at the current owner"_test = [] {
         auto sheet = CreateEditorStyleSheet(folia::default_theme_profile());
         EditorRenderResources resources; resources.InitializeOffscreen(sheet, 600, 400); resources.EnsureFrameResources(sheet);
-        EditorRenderCache cache; MathJaxRenderer math; MermaidRenderer mermaid;
-        SvgNormalizer normalizer; TreeSitterHighlighter syntax; EditorInteractionMap interaction;
+        EditorRenderCache cache; folia::platform::MathJaxRenderer math; folia::platform::MermaidRenderer mermaid;
+        folia::platform::SvgNormalizer normalizer; TreeSitterHighlighter syntax; EditorInteractionMap interaction;
         EditorTextLayoutEngine engine(resources, sheet);
         EditorSession session; session.SetText(L"abc\n\nuntouched");
         auto frame = session.RenderFrame();
@@ -54,8 +54,8 @@ suite completion_layout_tests = [] {
         for (auto theme : {folia::Theme::Light, folia::Theme::Dark}) {
             auto sheet = CreateEditorStyleSheet(folia::default_theme_profile(theme));
             EditorRenderResources resources; resources.InitializeOffscreen(sheet, 600, 400); resources.EnsureFrameResources(sheet);
-            EditorRenderCache cache; MathJaxRenderer math; MermaidRenderer mermaid;
-            SvgNormalizer normalizer; TreeSitterHighlighter syntax; EditorInteractionMap interaction;
+            EditorRenderCache cache; folia::platform::MathJaxRenderer math; folia::platform::MermaidRenderer mermaid;
+            folia::platform::SvgNormalizer normalizer; TreeSitterHighlighter syntax; EditorInteractionMap interaction;
             EditorTextLayoutEngine engine(resources, sheet);
             for (auto source : {L"abc", L"# abc", L"> abc", L"- abc", L"- [ ] abc", L"| abc |\n| --- |\n| def |", L"```cpp\nabc\n```", L""}) {
                 EditorSession session; session.SetText(source);

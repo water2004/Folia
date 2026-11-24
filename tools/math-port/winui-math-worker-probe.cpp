@@ -29,14 +29,14 @@
 #include <vector>
 
 
-#include "media/MathJaxRenderer.h"
-#include "media/MathSvgStore.h"
+#include "windows/media/math/MathJaxRenderer.h"
+#include "windows/media/math/MathSvgStore.h"
 
-using winrt::Folia::MathJaxErrorKind;
-using winrt::Folia::MathRenderPurpose;
-using winrt::Folia::MathJaxRenderer;
-using winrt::Folia::MathJaxSvg;
-using winrt::Folia::MathSvgStore;
+using folia::platform::MathJaxErrorKind;
+using folia::platform::MathRenderPurpose;
+using folia::platform::MathJaxRenderer;
+using folia::platform::MathJaxSvg;
+using folia::platform::MathSvgStore;
 
 namespace {
 void require(bool condition, std::string_view message) {
@@ -44,7 +44,7 @@ void require(bool condition, std::string_view message) {
         throw std::runtime_error(std::string(message));
 }
 
-void checkGeometry(MathJaxSvg const& value, std::string_view name) {
+void checkGeometry(folia::platform::MathJaxSvg const& value, std::string_view name) {
     require(static_cast<bool>(value), std::string(name) + ": parsed result is usable");
     require(value.width > 0 && value.height > 0, std::string(name) + ": aggregate dimensions");
     require(!value.fragments.empty(), std::string(name) + ": at least one SVG fragment");
@@ -55,16 +55,16 @@ void checkGeometry(MathJaxSvg const& value, std::string_view name) {
     }
 }
 
-void checkFragments(MathJaxSvg const &value, std::string_view name) {
+void checkFragments(folia::platform::MathJaxSvg const &value, std::string_view name) {
     checkGeometry(value, name);
     for (auto const &fragment : value.fragments)
         require(fragment.svg && !fragment.svg->empty(), std::string(name) + ": fragment SVG bytes");
 }
 
-std::shared_ptr<MathJaxSvg const> Ready(MathJaxRenderer& renderer,
+std::shared_ptr<folia::platform::MathJaxSvg const> Ready(folia::platform::MathJaxRenderer& renderer,
     std::string_view tex, bool display, float em, float containerWidth,
     std::string_view color, std::stop_token stop = {},
-    MathRenderPurpose purpose = MathRenderPurpose::Document) {
+    folia::platform::MathRenderPurpose purpose = folia::platform::MathRenderPurpose::Document) {
     auto prepared = renderer.Prepare(tex, display, em, containerWidth, color, stop, purpose);
     auto rendered = renderer.Render(tex, display, em, containerWidth, color, stop, purpose);
     require(static_cast<bool>(rendered), "prepared math geometry is immediately available");
@@ -76,7 +76,7 @@ std::shared_ptr<MathJaxSvg const> Ready(MathJaxRenderer& renderer,
     return prepared;
 }
 
-void WaitForIdleBounded(MathJaxRenderer& renderer,
+void WaitForIdleBounded(folia::platform::MathJaxRenderer& renderer,
     std::chrono::seconds timeout = std::chrono::seconds(50))
 {
     std::stop_source waitStop;
@@ -99,7 +99,7 @@ void WaitForIdleBounded(MathJaxRenderer& renderer,
     watchdog.request_stop();
 }
 
-bool sameMetrics(MathJaxSvg const& left, MathJaxSvg const& right) {
+bool sameMetrics(folia::platform::MathJaxSvg const& left, folia::platform::MathJaxSvg const& right) {
     if (left.width != right.width || left.height != right.height
         || left.verticalAlign != right.verticalAlign || left.fragments.size() != right.fragments.size())
         return false;
@@ -114,7 +114,7 @@ bool sameMetrics(MathJaxSvg const& left, MathJaxSvg const& right) {
     return true;
 }
 
-bool sameRenderIds(MathJaxSvg const& left, MathJaxSvg const& right) {
+bool sameRenderIds(folia::platform::MathJaxSvg const& left, folia::platform::MathJaxSvg const& right) {
     if (left.fragments.size() != right.fragments.size())
         return false;
     for (std::size_t i = 0; i < left.fragments.size(); ++i) {
@@ -140,7 +140,7 @@ std::filesystem::path MakeGuidPath(std::filesystem::path const& directory,
 }
 
 void testChildStore(std::filesystem::path const& receiptPath) {
-    MathSvgStore store;
+    folia::platform::MathSvgStore store;
     const auto range = store.Append("<svg xmlns=\"http://www.w3.org/2000/svg\"/>");
     require(range.size != 0 && !store.Path().empty(), "child store created backing file");
 
@@ -276,7 +276,7 @@ void CreateSeedFile(std::filesystem::path const& path, std::string_view contents
                                 std::system_category(), "WriteFile(cache fixture)");
 }
 
-void RequireNoReclaimFailures(MathSvgStore::CleanupResult const& result,
+void RequireNoReclaimFailures(folia::platform::MathSvgStore::CleanupResult const& result,
                               std::string_view phase) {
     require(result.failed == 0, std::string(phase) + ": orphan cleanup reported failures");
 }
@@ -301,7 +301,7 @@ void runCacheProbe(std::filesystem::path const& isolatedRoot) {
                                 "CreateDirectoryW(missing cache root)");
     {
         TemporaryPathOverride missingTemp(missingRoot);
-        const auto missingResult = MathSvgStore::ReclaimOrphans();
+        const auto missingResult = folia::platform::MathSvgStore::ReclaimOrphans();
         require(missingResult.removed == 0 && missingResult.inUse == 0
                     && missingResult.skipped == 0 && missingResult.failed == 0,
                 "missing cache directory is a quiet cleanup no-op");
@@ -365,7 +365,7 @@ void runCacheProbe(std::filesystem::path const& isolatedRoot) {
         std::cout << "cache junction fixtures=skipped powershell-creation-unavailable\n";
     }
 
-    auto first = MathSvgStore::ReclaimOrphans();
+    auto first = folia::platform::MathSvgStore::ReclaimOrphans();
     require(first.failed == 1, "read-only orphan is reported as a cleanup failure");
     require(first.removed == 2, "first cleanup removes the empty and partial orphan files");
     require(first.inUse == 1, "first cleanup preserves the open cache handle");
@@ -390,7 +390,7 @@ void runCacheProbe(std::filesystem::path const& isolatedRoot) {
         throw std::system_error(static_cast<int>(GetLastError()), std::system_category(),
                                 "Restore read-only cache fixture attributes");
     busyHandle.reset();
-    auto released = MathSvgStore::ReclaimOrphans();
+    auto released = folia::platform::MathSvgStore::ReclaimOrphans();
     RequireNoReclaimFailures(released, "released cache cleanup");
     require(released.removed == 2 && released.inUse == 0,
             "released and restored cache files become reclaimable");
@@ -400,7 +400,7 @@ void runCacheProbe(std::filesystem::path const& isolatedRoot) {
 
     auto child = StartChildStore();
     require(FileExists(child.storePath), "independent child holds a live SVG store file");
-    auto whileChildActive = MathSvgStore::ReclaimOrphans();
+    auto whileChildActive = folia::platform::MathSvgStore::ReclaimOrphans();
     RequireNoReclaimFailures(whileChildActive, "cleanup with active child");
     require(whileChildActive.inUse >= 1, "active child cache is reported in use");
     require(FileExists(child.storePath), "cleanup preserves cache owned by another process");
@@ -417,10 +417,10 @@ void runCacheProbe(std::filesystem::path const& isolatedRoot) {
         CreateSeedFile(orphan, "concurrent startup orphan");
         concurrentOrphans.push_back(std::move(orphan));
     }
-    std::array<MathSvgStore::CleanupResult, 2> concurrentResults{};
+    std::array<folia::platform::MathSvgStore::CleanupResult, 2> concurrentResults{};
     std::array<std::thread, 2> reclaimers{
-        std::thread([&] { concurrentResults[0] = MathSvgStore::ReclaimOrphans(); }),
-        std::thread([&] { concurrentResults[1] = MathSvgStore::ReclaimOrphans(); }),
+        std::thread([&] { concurrentResults[0] = folia::platform::MathSvgStore::ReclaimOrphans(); }),
+        std::thread([&] { concurrentResults[1] = folia::platform::MathSvgStore::ReclaimOrphans(); }),
     };
     for (auto& reclaimer : reclaimers)
         reclaimer.join();
@@ -436,7 +436,7 @@ void runCacheProbe(std::filesystem::path const& isolatedRoot) {
 
     child.Terminate();
     require(!FileExists(child.storePath), "child termination deletes its owned store");
-    auto afterChildExit = MathSvgStore::ReclaimOrphans();
+    auto afterChildExit = folia::platform::MathSvgStore::ReclaimOrphans();
     RequireNoReclaimFailures(afterChildExit, "cleanup after child exit");
     require(afterChildExit.inUse == 0, "no active cache remains after child exit");
     require(FileExists(unrelated) && FileExists(malformed)
@@ -449,7 +449,7 @@ void runCacheProbe(std::filesystem::path const& isolatedRoot) {
                 "both cache reparse points remain after orphan scans");
         {
             TemporaryPathOverride reparseTemp(reparseRoot);
-            const auto reparseRootResult = MathSvgStore::ReclaimOrphans();
+            const auto reparseRootResult = folia::platform::MathSvgStore::ReclaimOrphans();
             require(reparseRootResult.removed == 0 && reparseRootResult.inUse == 0
                         && reparseRootResult.failed == 0 && reparseRootResult.skipped >= 1,
                     "reparse-point FoliaMath root is skipped without traversing target");
@@ -520,11 +520,11 @@ void testStore() {
     constexpr std::size_t recordCount = 4097;
     constexpr std::size_t recordSize = 4096;
     const std::string record(recordSize, 'S');
-    std::vector<MathSvgStore::Range> ranges;
+    std::vector<folia::platform::MathSvgStore::Range> ranges;
     ranges.reserve(recordCount);
     std::filesystem::path storePath;
     {
-        MathSvgStore store;
+        folia::platform::MathSvgStore store;
         require(store.Path().empty(), "empty store does not create a file");
         for (std::size_t i = 0; i < recordCount; ++i)
             ranges.push_back(store.Append(record));
@@ -559,7 +559,7 @@ void testStore() {
 }
 
 void testOwnership() {
-    MathJaxRenderer renderer;
+    folia::platform::MathJaxRenderer renderer;
     constexpr std::string_view sharedTex = R"(\frac{7}{9})";
     constexpr std::string_view replacementTex = R"(\sqrt{13})";
     auto sharedId = std::uint64_t{};
@@ -624,18 +624,18 @@ void testOwnership() {
 }
 
 void testAsyncEditsAndClear() {
-    MathJaxRenderer renderer;
+    folia::platform::MathJaxRenderer renderer;
     auto completions = std::make_shared<std::atomic_size_t>(0);
     renderer.SetCompletionCallback([completions] { completions->fetch_add(1, std::memory_order_relaxed); });
 
     constexpr std::string_view initialTex = R"(\frac{1}{x+1})";
     renderer.BeginBlock(403);
     auto initialPending = renderer.Render(initialTex, false, 16.0f, 640.0f, "#000000", {},
-                                          MathRenderPurpose::Preview);
+                                          folia::platform::MathRenderPurpose::Preview);
     renderer.EndBlock();
     require(!initialPending, "cold edit preview returns immediately while native work is pending");
     auto initial = renderer.Prepare(initialTex, false, 16.0f, 640.0f, "#000000", {},
-                                    MathRenderPurpose::Preview);
+                                    folia::platform::MathRenderPurpose::Preview);
     checkFragments(*initial, "memory-only initial preview");
     WaitForIdleBounded(renderer);
     auto initialStats = renderer.Snapshot();
@@ -647,16 +647,16 @@ void testAsyncEditsAndClear() {
     constexpr std::string_view latestPreview = R"(\sqrt{101})";
     renderer.BeginBlock(404);
     auto oldPending = renderer.Render(oldPreview, false, 16.0f, 640.0f, "#000000", {},
-                                     MathRenderPurpose::Preview);
+                                     folia::platform::MathRenderPurpose::Preview);
     renderer.EndBlock();
     require(!oldPending, "cold live-edit preview returns immediately while native work is pending");
 
     renderer.BeginBlock(404);
     auto latestPending = renderer.Render(latestPreview, false, 16.0f, 640.0f, "#000000", {},
-                                        MathRenderPurpose::Preview);
+                                        folia::platform::MathRenderPurpose::Preview);
     renderer.EndBlock();
     auto latest = Ready(renderer, latestPreview, false, 16.0f, 640.0f, "#000000", {},
-                        MathRenderPurpose::Preview);
+                        folia::platform::MathRenderPurpose::Preview);
     checkFragments(*latest, "latest edited preview");
     WaitForIdleBounded(renderer);
     auto afterEdit = renderer.Snapshot();
@@ -664,7 +664,7 @@ void testAsyncEditsAndClear() {
             "replacing a block preview releases its stale key and keeps the newest result");
     require(sameRenderIds(*latest,
                 *renderer.Render(latestPreview, false, 16.0f, 640.0f, "#000000", {},
-                                 MathRenderPurpose::Preview)),
+                                 folia::platform::MathRenderPurpose::Preview)),
             "latest edit preview remains cached with stable SVG ids");
     std::cout << "async-edit old-request=pending latest-request="
               << (latestPending ? "already-ready" : "pending")
@@ -675,35 +675,35 @@ void testAsyncEditsAndClear() {
     constexpr std::string_view malformed = R"(\frac{x}{)";
     renderer.BeginBlock(404);
     (void)renderer.Render(malformed, false, 16.0f, 640.0f, "#000000", {},
-                          MathRenderPurpose::Preview);
+                          folia::platform::MathRenderPurpose::Preview);
     renderer.EndBlock();
     auto malformedResult = Ready(renderer, malformed, false, 16.0f, 640.0f, "#000000", {},
-                                 MathRenderPurpose::Preview);
-    require(malformedResult->errorKind == MathJaxErrorKind::Formula && !malformedResult->fragments.empty(),
+                                 folia::platform::MathRenderPurpose::Preview);
+    require(malformedResult->errorKind == folia::platform::MathJaxErrorKind::Formula && !malformedResult->fragments.empty(),
             "malformed edit preview returns a formula diagnostic during editing");
     constexpr std::string_view repaired = R"(\frac{x}{2})";
     renderer.BeginBlock(404);
     (void)renderer.Render(repaired, false, 16.0f, 640.0f, "#000000", {},
-                          MathRenderPurpose::Preview);
+                          folia::platform::MathRenderPurpose::Preview);
     renderer.EndBlock();
     auto repairedResult = Ready(renderer, repaired, false, 16.0f, 640.0f, "#000000", {},
-                                MathRenderPurpose::Preview);
+                                folia::platform::MathRenderPurpose::Preview);
     checkFragments(*repairedResult, "repaired edit preview");
-    require(repairedResult->errorKind == MathJaxErrorKind::None,
+    require(repairedResult->errorKind == folia::platform::MathJaxErrorKind::None,
             "valid source immediately replaces the malformed preview");
 
     renderer.BeginBlock(405);
     (void)renderer.Render(R"(\sum_{i=1}^{500} i^2)", false, 16.0f, 640.0f,
-                          "#000000", {}, MathRenderPurpose::Preview);
+                          "#000000", {}, folia::platform::MathRenderPurpose::Preview);
     renderer.EndBlock();
     renderer.Clear();
     constexpr std::string_view afterClearTex = R"(\mathbb{N})";
     renderer.BeginBlock(406);
     (void)renderer.Render(afterClearTex, false, 16.0f, 640.0f, "#000000", {},
-                          MathRenderPurpose::Preview);
+                          folia::platform::MathRenderPurpose::Preview);
     renderer.EndBlock();
     auto afterClear = Ready(renderer, afterClearTex, false, 16.0f, 640.0f, "#000000", {},
-                            MathRenderPurpose::Preview);
+                            folia::platform::MathRenderPurpose::Preview);
     WaitForIdleBounded(renderer);
     auto afterClearStats = renderer.Snapshot();
     require(afterClear && afterClearStats.pending == 0 && afterClearStats.entries == 1
@@ -729,7 +729,7 @@ void testDocumentSvgEviction() {
     std::string body = "x";
     for (std::size_t index = 0; index < 767; ++index) body += "+x";
 
-    MathJaxRenderer renderer;
+    folia::platform::MathJaxRenderer renderer;
     std::vector<std::uint64_t> owners;
     owners.reserve(formulaLimit);
     std::string firstFormula;
@@ -744,11 +744,11 @@ void testDocumentSvgEviction() {
         owners.push_back(owner);
         renderer.BeginBlock(owner);
         auto prepared = renderer.Prepare(formula, false, 16.0f, 640.0f, "#000000", {},
-                                         MathRenderPurpose::Document);
+                                         folia::platform::MathRenderPurpose::Document);
         renderer.EndBlock();
         checkFragments(*prepared, "document formula before SVG eviction");
         auto geometry = renderer.Render(formula, false, 16.0f, 640.0f, "#000000", {},
-                                        MathRenderPurpose::Document);
+                                        folia::platform::MathRenderPurpose::Document);
         checkGeometry(*geometry, "resident document geometry");
         require(geometry->fragments.size() == prepared->fragments.size(),
                 "document geometry retains all prepared SVG fragments");
@@ -789,7 +789,7 @@ void testDocumentSvgEviction() {
     std::cout << "opening-engine-private=" << privateBytes() << " native-session=retained\n";
 
     auto geometry = renderer.Render(firstFormula, false, 16.0f, 640.0f, "#000000", {},
-                                    MathRenderPurpose::Document);
+                                    folia::platform::MathRenderPurpose::Document);
     checkGeometry(*geometry, "evicted formula geometry");
     require(geometry->fragments.size() == firstRenderIds.size()
                 && geometry->fragments.front().renderId == firstRenderIds.front()
@@ -858,7 +858,7 @@ void testDocumentSvgEviction() {
         gate->changed.notify_all();
         gate->changed.wait_for(lock, seconds(10), [&] { return gate->released; });
     });
-    (void)renderer.Render("x+917", false, 16.0f, 640.0f, "#000000", {}, MathRenderPurpose::Preview);
+    (void)renderer.Render("x+917", false, 16.0f, 640.0f, "#000000", {}, folia::platform::MathRenderPurpose::Preview);
     {
         std::unique_lock lock(gate->mutex);
         require(gate->changed.wait_for(lock, seconds(10), [&] { return gate->entered; }),
@@ -916,7 +916,7 @@ void testDocumentSvgEviction() {
 }
 
 void testAbandonedBatch() {
-    MathJaxRenderer renderer;
+    folia::platform::MathJaxRenderer renderer;
     {
         auto batch = renderer.BeginBatch();
         renderer.BeginBlock(12001);
@@ -932,7 +932,7 @@ void testAbandonedBatch() {
                 && abandoned.backingPath.empty(),
             "abandoning a batch removes its requests without leaving pending work or files");
     auto preview = Ready(renderer, R"(\mathbb{R})", false, 16.0f, 640.0f, "#000000", {},
-                         MathRenderPurpose::Preview);
+                         folia::platform::MathRenderPurpose::Preview);
     checkFragments(*preview, "preview after abandoned opening batch");
     require(renderer.Snapshot().nativeRenders == 1 && renderer.Snapshot().fileWrites == 0,
             "the same cache remains usable for an asynchronous memory-only preview");
@@ -940,7 +940,7 @@ void testAbandonedBatch() {
 }
 
 void runCancellationProbe() {
-    MathJaxRenderer renderer;
+    folia::platform::MathJaxRenderer renderer;
     std::stop_source cancelled;
     cancelled.request_stop();
     bool caughtCancellation = false;
@@ -956,14 +956,14 @@ void runCancellationProbe() {
 
 void testCrossThreadRendererMove() {
     constexpr std::string_view cachedTex = R"(\frac{23}{29})";
-    std::optional<MathJaxRenderer> transferred;
+    std::optional<folia::platform::MathJaxRenderer> transferred;
     std::exception_ptr workerFailure;
     std::uint64_t expectedRenderId = 0;
     std::string expectedSvg;
 
     std::thread worker([&] {
         try {
-            MathJaxRenderer producer;
+            folia::platform::MathJaxRenderer producer;
             producer.BeginBlock(303);
             auto first = Ready(producer, cachedTex, false, 16.0f, 640.0f,
                                          "#000000");
@@ -1006,7 +1006,7 @@ void testCrossThreadRendererMove() {
 
 void runIndexProbe() {
     constexpr std::size_t formulaCount = 4100;
-    MathJaxRenderer renderer;
+    folia::platform::MathJaxRenderer renderer;
     std::vector<std::uint64_t> owners;
     owners.reserve(formulaCount);
     std::uint64_t firstRenderId = 0;
@@ -1058,7 +1058,7 @@ void runIndexProbe() {
 }
 
 void runProbe() {
-    MathJaxRenderer renderer;
+    folia::platform::MathJaxRenderer renderer;
 
     auto mathbb = Ready(renderer, R"(\mathbb{R})", false, 16.0f, 1280.0f,
                                   "#000000");
@@ -1088,7 +1088,7 @@ void runProbe() {
     constexpr std::string_view malformed = R"(\frac{a}{)";
     auto formulaError = Ready(renderer, malformed, false, 16.0f, 1280.0f,
                                         "#000000");
-    require(formulaError->errorKind == MathJaxErrorKind::Formula,
+    require(formulaError->errorKind == folia::platform::MathJaxErrorKind::Formula,
             "malformed TeX is classified as a formula diagnostic");
     require(!formulaError->error.empty(), "formula diagnostic retains its message");
     checkFragments(*formulaError, "malformed formula output");

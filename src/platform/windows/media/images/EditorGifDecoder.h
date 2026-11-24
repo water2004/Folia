@@ -1,6 +1,19 @@
 #pragma once
 
-namespace winrt::Folia
+#include <d2d1_1.h>
+#include <wincodec.h>
+#include <wrl/client.h>
+
+#include <array>
+#include <chrono>
+#include <cstdint>
+#include <filesystem>
+#include <functional>
+#include <memory>
+#include <mutex>
+#include <vector>
+
+namespace folia::platform
 {
     struct GifInitialFrame
     {

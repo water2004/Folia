@@ -1,12 +1,12 @@
-#include "pch.h"
-
-import std;
-#include "media/NativeMathSession.h"
+#include <winrt/base.h>
+#include "windows/media/math/NativeMathSession.h"
 
 #include "folia/math/native_renderer_bridge.h"
-#include "media/MathJaxSvgParser.h"
+#include "windows/media/math/MathJaxSvgParser.h"
 
-namespace winrt::Folia
+import std;
+
+namespace folia::platform
 {
 namespace
 {
@@ -209,4 +209,4 @@ std::vector<MathJaxSvg> NativeMathSession::RenderBatch(std::span<NativeMathInput
         return failed("Unknown native math renderer failure");
     }
 }
-} // namespace winrt::Folia
+} // namespace folia::platform

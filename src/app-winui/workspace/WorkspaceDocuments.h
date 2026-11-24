@@ -2,7 +2,7 @@
 
 #include "editor/session/EditorSession.h"
 #include "editor/interaction/EditorDocumentController.h"
-#include "media/MathJaxRenderer.h"
+#include "windows/media/math/MathJaxRenderer.h"
 
 namespace winrt::Folia {
     enum class WorkspaceOpenMode { Preview, Keep };
@@ -14,7 +14,7 @@ namespace winrt::Folia {
         EditorSession session;
         EditorDocumentController controller;
         std::filesystem::path path;
-        std::optional<MathJaxRenderer> math;
+        std::optional<folia::platform::MathJaxRenderer> math;
         std::optional<folia::TextPosition> viewportPosition;
         float scrollOffset = 0;
         float viewportInset = 0;

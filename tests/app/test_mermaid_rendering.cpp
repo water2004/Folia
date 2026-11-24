@@ -1,14 +1,14 @@
 #include "pch.h"
 #include "support/folia_test.hpp"
-#include "media/MermaidRenderer.h"
-#include "media/SvgNormalizer.h"
+#include "windows/media/mermaid/MermaidRenderer.h"
+#include "windows/media/svg/SvgNormalizer.h"
 
 using namespace boost::ut;
 using namespace winrt::Folia;
 
 namespace
 {
-    MermaidSvg AwaitMermaid(MermaidRenderer& renderer, std::string_view source, bool dark)
+    folia::platform::MermaidSvg AwaitMermaid(folia::platform::MermaidRenderer& renderer, std::string_view source, bool dark)
     {
         auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(15);
         do
@@ -23,13 +23,13 @@ namespace
     {
         "named Mermaid themes replace the ready diagram and respect source overrides"_test = []
         {
-            auto names = MermaidRenderer::ThemeNames();
+            auto names = folia::platform::MermaidRenderer::ThemeNames();
             expect(fatal(std::ranges::find(names, "forest") != names.end()));
             expect(fatal(std::ranges::find(names, "dark") != names.end()));
             constexpr std::string_view source = "flowchart TD\n A[Start] --> B[Finish]";
             constexpr std::string_view explicitTheme =
                 "---\nconfig:\n  theme: dark\n---\nflowchart TD\n A[Start] --> B[Finish]";
-            MermaidRenderer renderer;
+            folia::platform::MermaidRenderer renderer;
             renderer.SetTheme("forest");
             auto forest = AwaitMermaid(renderer, source, false);
             auto override = AwaitMermaid(renderer, explicitTheme, false);
@@ -47,7 +47,7 @@ namespace
         "native Mermaid worker normalizes SVG and separates source and theme cache entries"_test = []
         {
             std::atomic_size_t completions{0};
-            MermaidRenderer renderer;
+            folia::platform::MermaidRenderer renderer;
             renderer.SetCompletionCallback([&] { ++completions; });
             constexpr std::string_view source = "flowchart TD\n A[Start 中文] --> B[Finish]";
             expect(!renderer.GetOrQueue(source, false, false).has_value());
@@ -74,7 +74,7 @@ namespace
 
         "native Mermaid normalizer supports synchronous use before its first queued request"_test = []
         {
-            SvgNormalizer normalizer;
+            folia::platform::SvgNormalizer normalizer;
             constexpr std::string_view source = R"(<svg xmlns="http://www.w3.org/2000/svg" width="120" height="80"><text x="5" y="30">中文 SVG</text></svg>)";
             auto synchronous = normalizer.NormalizeNow(source, 16);
             expect(static_cast<bool>(synchronous)) << synchronous.error;
@@ -83,7 +83,7 @@ namespace
             // Synchronous work remains safe while the lazy queue worker runs.
             auto concurrent = normalizer.NormalizeNow(source, 16);
             expect(static_cast<bool>(concurrent));
-            std::optional<NormalizedSvg> queued;
+            std::optional<folia::platform::NormalizedSvg> queued;
             auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(15);
             do {
                 queued = normalizer.GetOrQueue(source, 16, false);
@@ -100,7 +100,7 @@ namespace
 
         "native Mermaid worker preserves the Info intrinsic viewport"_test = []
         {
-            MermaidRenderer renderer;
+            folia::platform::MermaidRenderer renderer;
             auto info = AwaitMermaid(renderer, "info", false);
             expect(static_cast<bool>(info)) << info.error;
             expect(info.width == 400.0f && info.height == 100.0f);
@@ -110,7 +110,7 @@ namespace
 
         "native Mermaid worker reports errors and clears in-flight generations"_test = []
         {
-            MermaidRenderer renderer;
+            folia::platform::MermaidRenderer renderer;
             auto error = AwaitMermaid(renderer, "not a Mermaid diagram", false);
             expect(!static_cast<bool>(error) && !error.error.empty());
             constexpr std::string_view source = "sequenceDiagram\n Alice->>Bob: Hello";

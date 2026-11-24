@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "support/folia_test.hpp"
-#include "media/MathJaxRenderer.h"
+#include "windows/media/math/MathJaxRenderer.h"
 
 using namespace boost::ut;
 using namespace winrt::Folia;
@@ -11,7 +11,7 @@ namespace
     {
         "math cache repeated owner membership preserves pending work without IO"_test = []
         {
-            MathJaxRenderer math;
+            folia::platform::MathJaxRenderer math;
             auto batch = math.BeginBatch();
             std::vector<std::string> formulas;
             for (int i = 0; i < 32; ++i) formulas.push_back("x+" + std::to_string(i));
@@ -42,7 +42,7 @@ namespace
 
         "math cache replaced membership releases only the last owner"_test = []
         {
-            MathJaxRenderer math;
+            folia::platform::MathJaxRenderer math;
             auto batch = math.BeginBatch();
             math.BeginBlock(1);
             batch.Render("x", false, 16, 500, "#000000");

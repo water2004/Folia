@@ -8,7 +8,7 @@
 #include <string>
 #include <string_view>
 
-namespace winrt::Folia
+namespace folia::platform
 {
     struct MermaidSvg
     {

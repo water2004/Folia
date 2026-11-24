@@ -11,7 +11,7 @@ namespace winrt::Folia
         EditorRenderResources& resources,
         EditorRenderCache& cache,
         EditorStyleSheet const& styleSheet,
-        SvgNormalizer& svgNormalizer,
+        folia::platform::SvgNormalizer& svgNormalizer,
         EditorSvgPainter& svgPainter,
         std::wstring const& baseDirectory,
         bool animate,

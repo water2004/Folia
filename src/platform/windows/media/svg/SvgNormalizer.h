@@ -11,7 +11,7 @@
 #include <vector>
 
 
-namespace winrt::Folia
+namespace folia::platform
 {
     struct SvgNormalizationInput
     {

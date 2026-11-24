@@ -21,8 +21,8 @@ namespace winrt::Folia
         EditorStyleSheet const& styleSheet,
         EditorTextLayoutEngine& textLayoutEngine,
         EditorInlineImageRenderer& inlineImageRenderer,
-        MathJaxRenderer& mathJax,
-        SvgNormalizer& svgNormalizer,
+        folia::platform::MathJaxRenderer& mathJax,
+        folia::platform::SvgNormalizer& svgNormalizer,
         TreeSitterHighlighter& treeSitter,
         std::optional<detail::EditorCompletionPreview> completion)
     {

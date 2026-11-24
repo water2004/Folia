@@ -15,7 +15,7 @@ namespace
     {
         "math scrolling canceled work does not request another repaint"_test = []
         {
-            MathJaxRenderer math;
+            folia::platform::MathJaxRenderer math;
             auto completions = std::make_shared<std::atomic_size_t>(0);
             auto published = std::make_shared<winrt::handle>(::CreateEventW(nullptr, TRUE, FALSE, nullptr));
             winrt::check_bool(published->get() != nullptr);
@@ -53,8 +53,8 @@ namespace
             auto frame = session.RenderFrame();
             if (frame.materializeBlocks) frame.materializeBlocks(0, frame.renderModel.blocks.size());
             auto const& block = frame.renderModel.blocks.front();
-            MathJaxRenderer math;
-            SvgNormalizer normalizer;
+            folia::platform::MathJaxRenderer math;
+            folia::platform::SvgNormalizer normalizer;
             auto prepare = [&](std::uint64_t owner, bool visible)
             {
                 math.BeginBlock(owner);
@@ -87,8 +87,8 @@ namespace
             auto frame = session.RenderFrame();
             if (frame.materializeBlocks) frame.materializeBlocks(0, frame.renderModel.blocks.size());
             auto const& block = frame.renderModel.blocks.front();
-            MathJaxRenderer math;
-            SvgNormalizer normalizer;
+            folia::platform::MathJaxRenderer math;
+            folia::platform::SvgNormalizer normalizer;
             math.BeginBlock(block.id.v);
             auto display = BuildMathBlockText(block, {}, math, normalizer,
                 D2D1::ColorF(D2D1::ColorF::Black), 16, 500, true, true, false);

@@ -3,7 +3,7 @@
 #include <winrt/Windows.Storage.h>
 #include <winrt/Windows.Storage.Streams.h>
 
-namespace winrt::Folia {
+namespace folia::platform {
     struct ClipboardImageStore {
         static winrt::Windows::Foundation::IAsyncOperation<winrt::Windows::Storage::StorageFile> SavePngAsync(
             winrt::Windows::Storage::Streams::IRandomAccessStream input, winrt::hstring directory);

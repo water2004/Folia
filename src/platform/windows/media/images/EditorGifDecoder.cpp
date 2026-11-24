@@ -1,5 +1,7 @@
-#include "pch.h"
-#include "media/EditorGifDecoder.h"
+#include <objbase.h>
+#include "windows/media/images/EditorGifDecoder.h"
+
+import std;
 
 namespace
 {
@@ -154,7 +156,7 @@ namespace
         }
     }
 
-    std::shared_ptr<winrt::Folia::GifInitialFrame> DecodeInitialFrame(
+    std::shared_ptr<folia::platform::GifInitialFrame> DecodeInitialFrame(
         IWICImagingFactory* factory,
         IWICBitmapDecoder* decoder,
         std::size_t backingBytes,
@@ -185,7 +187,7 @@ namespace
             || canvasPixels > 16ull * 1024ull * 1024ull
             || runtimeBytes > runtimeByteBudget) return {};
 
-        auto result = std::make_shared<winrt::Folia::GifInitialFrame>();
+        auto result = std::make_shared<folia::platform::GifInitialFrame>();
         result->frameCount = frameCount;
         result->width = width;
         result->height = height;
@@ -221,7 +223,7 @@ namespace
     }
 }
 
-namespace winrt::Folia
+namespace folia::platform
 {
     bool GifInitialDecode::Complete() const
     {

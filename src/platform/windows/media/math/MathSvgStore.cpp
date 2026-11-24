@@ -1,11 +1,11 @@
-#include "pch.h"
-
-import std;
-#include "media/MathSvgStore.h"
+#include <windows.h>
+#include "windows/media/math/MathSvgStore.h"
 
 #include <objbase.h>
 
-namespace winrt::Folia
+import std;
+
+namespace folia::platform
 {
     namespace
     {

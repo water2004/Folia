@@ -4,9 +4,9 @@ import folia.platform.editor_interaction;
 import folia.platform.editor_scroll_state;
 
 #include "editor/session/EditorRenderFrame.h"
-#include "media/MathJaxRenderer.h"
-#include "media/MermaidRenderer.h"
-#include "media/SvgNormalizer.h"
+#include "windows/media/math/MathJaxRenderer.h"
+#include "windows/media/mermaid/MermaidRenderer.h"
+#include "windows/media/svg/SvgNormalizer.h"
 #include "media/TreeSitterHighlighter.h"
 #include "editor/rendering/EditorStyleSheet.h"
 #include "editor/rendering/EditorMathPreparation.h"
@@ -74,8 +74,8 @@ namespace winrt::Folia
         void AdoptMathPreparation(std::unique_ptr<EditorMathPreparation> preparation);
         void SetMathPreparationStopToken(std::stop_token stop);
         void ResetDocumentCaches();
-        MathJaxRenderer TakeMathCache();
-        void RestoreMathCache(MathJaxRenderer cache);
+        folia::platform::MathJaxRenderer TakeMathCache();
+        void RestoreMathCache(folia::platform::MathJaxRenderer cache);
         void SetInvalidateCallback(std::function<void()> callback);
 
         std::optional<D2D1_RECT_F> InlineMathPreviewBounds() const noexcept { return inlineMathPreviewBounds; }
@@ -141,9 +141,9 @@ namespace winrt::Folia
         winrt::Microsoft::UI::Dispatching::DispatcherQueue mathDispatcher{nullptr};
         EditorRenderResources resources;
         EditorRenderCache renderCache;
-        MathJaxRenderer mathJax;
-        MermaidRenderer mermaid;
-        SvgNormalizer svgNormalizer;
+        folia::platform::MathJaxRenderer mathJax;
+        folia::platform::MermaidRenderer mermaid;
+        folia::platform::SvgNormalizer svgNormalizer;
         TreeSitterHighlighter treeSitter;
         std::shared_ptr<InvalidationState> invalidationState = std::make_shared<InvalidationState>();
         folia::ThemeProfile themeProfile = folia::default_theme_profile();

@@ -52,6 +52,15 @@
     <Filter Include="Platform Modules\Windows Editor">
       <UniqueIdentifier>{4471bd78-463e-4c51-a2fa-99914b6194bb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Platform Modules\Media">
+      <UniqueIdentifier>{184fa546-0b57-4629-baa1-91cb038dc284}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Platform Modules\Storage">
+      <UniqueIdentifier>{086ca1e7-05ca-4ed6-9bcf-28f555569323}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Encoding Modules">
+      <UniqueIdentifier>{ef44d0f2-5c53-4906-942c-215f935641b8}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Third Party">
       <UniqueIdentifier>{c15f70e8-7f12-4e04-ac76-8d246b5e3ca4}</UniqueIdentifier>
     </Filter>
@@ -109,10 +118,10 @@
       <Filter>Platform Modules\Windows Editor</Filter>
     </ClCompile>
     <ClCompile Include="..\platform\windows\storage\document_reload.ixx">
-      <Filter>Platform Modules\Windows Editor</Filter>
+      <Filter>Platform Modules\Storage</Filter>
     </ClCompile>
     <ClCompile Include="..\platform\windows\storage\document_reload.cpp">
-      <Filter>Platform Modules\Windows Editor</Filter>
+      <Filter>Platform Modules\Storage</Filter>
     </ClCompile>
     <ClCompile Include="..\platform\windows\editor\interaction\editor_selection_drag_model.ixx">
       <Filter>Platform Modules\Windows Editor</Filter>
@@ -408,11 +417,14 @@
     <ClCompile Include="MainWindow.Settings.cpp">
       <Filter>Settings</Filter>
     </ClCompile>
+    <ClCompile Include="..\platform\windows\storage\ClipboardImageStore.cpp">
+      <Filter>Platform Modules\Storage</Filter>
+    </ClCompile>
     <ClCompile Include="storage\AssetPaths.cpp">
       <Filter>Storage</Filter>
     </ClCompile>
     <ClCompile Include="..\encoding\document_encoding.cpp">
-      <Filter>Storage</Filter>
+      <Filter>Encoding Modules</Filter>
     </ClCompile>
     <ClCompile Include="editor\session\EditorSession.cpp">
       <Filter>Editor\Session</Filter>
@@ -426,8 +438,8 @@
     <ClCompile Include="editor\session\EditorSession.Search.cpp">
       <Filter>Editor\Session</Filter>
     </ClCompile>
-    <ClCompile Include="media\EditorGifDecoder.cpp">
-      <Filter>Media Services</Filter>
+    <ClCompile Include="..\platform\windows\media\images\EditorGifDecoder.cpp">
+      <Filter>Platform Modules\Media</Filter>
     </ClCompile>
     <ClCompile Include="editor\rendering\EditorStyleSheet.cpp">
       <Filter>Editor\Rendering</Filter>
@@ -549,17 +561,17 @@
     <ClCompile Include="editor\rendering\EditorSurfaceRenderer.Pdf.cpp">
       <Filter>Editor\Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="media\MathJaxRenderer.cpp">
-      <Filter>Media Services</Filter>
+    <ClCompile Include="..\platform\windows\media\math\MathJaxRenderer.cpp">
+      <Filter>Platform Modules\Media</Filter>
     </ClCompile>
-    <ClCompile Include="media\MathJaxSvgParser.cpp">
-      <Filter>Media Services</Filter>
+    <ClCompile Include="..\platform\windows\media\math\MathJaxSvgParser.cpp">
+      <Filter>Platform Modules\Media</Filter>
     </ClCompile>
-    <ClCompile Include="media\MermaidRenderer.cpp">
-      <Filter>Media Services</Filter>
+    <ClCompile Include="..\platform\windows\media\mermaid\MermaidRenderer.cpp">
+      <Filter>Platform Modules\Media</Filter>
     </ClCompile>
-    <ClCompile Include="media\SvgNormalizer.cpp">
-      <Filter>Media Services</Filter>
+    <ClCompile Include="..\platform\windows\media\svg\SvgNormalizer.cpp">
+      <Filter>Platform Modules\Media</Filter>
     </ClCompile>
     <ClCompile Include="media\TreeSitterHighlighter.cpp">
       <Filter>Media Services</Filter>
@@ -621,7 +633,7 @@
       <Filter>Storage</Filter>
     </ClInclude>
     <ClCompile Include="..\encoding\document_encoding.ixx">
-      <Filter>Storage</Filter>
+      <Filter>Encoding Modules</Filter>
     </ClCompile>
     <ClInclude Include="editor\session\EditorSession.h">
       <Filter>Editor\Session</Filter>
@@ -656,8 +668,14 @@
     <ClInclude Include="editor\rendering\EditorRenderResources.h">
       <Filter>Editor\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="media\EditorGifDecoder.h">
-      <Filter>Media Services</Filter>
+    <ClInclude Include="..\platform\windows\media\ExecutableLibrary.h">
+      <Filter>Platform Modules\Media</Filter>
+    </ClInclude>
+    <ClInclude Include="..\platform\windows\storage\ClipboardImageStore.h">
+      <Filter>Platform Modules\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\platform\windows\media\images\EditorGifDecoder.h">
+      <Filter>Platform Modules\Media</Filter>
     </ClInclude>
     <ClInclude Include="editor\rendering\EditorRenderCache.h">
       <Filter>Editor\Rendering</Filter>
@@ -734,20 +752,20 @@
     <ClInclude Include="media\AsyncWorkDependency.h">
       <Filter>Media Services</Filter>
     </ClInclude>
-    <ClInclude Include="media\MathJaxRenderer.h">
-      <Filter>Media Services</Filter>
+    <ClInclude Include="..\platform\windows\media\math\MathJaxRenderer.h">
+      <Filter>Platform Modules\Media</Filter>
     </ClInclude>
-    <ClInclude Include="media\MathJaxSvgParser.h">
-      <Filter>Media Services</Filter>
+    <ClInclude Include="..\platform\windows\media\math\MathJaxSvgParser.h">
+      <Filter>Platform Modules\Media</Filter>
     </ClInclude>
-    <ClInclude Include="media\MermaidRenderer.h">
-      <Filter>Media Services</Filter>
+    <ClInclude Include="..\platform\windows\media\mermaid\MermaidRenderer.h">
+      <Filter>Platform Modules\Media</Filter>
     </ClInclude>
     <ClInclude Include="media\MediaDisplaySettings.h">
       <Filter>Media Services</Filter>
     </ClInclude>
-    <ClInclude Include="media\SvgNormalizer.h">
-      <Filter>Media Services</Filter>
+    <ClInclude Include="..\platform\windows\media\svg\SvgNormalizer.h">
+      <Filter>Platform Modules\Media</Filter>
     </ClInclude>
     <ClInclude Include="media\TreeSitterHighlighter.h">
       <Filter>Media Services</Filter>

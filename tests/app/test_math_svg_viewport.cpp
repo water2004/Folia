@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "support/folia_test.hpp"
-#include "media/MathJaxSvgParser.h"
-#include "media/NativeMathSession.h"
-#include "media/SvgNormalizer.h"
+#include "windows/media/math/MathJaxSvgParser.h"
+#include "windows/media/math/NativeMathSession.h"
+#include "windows/media/svg/SvgNormalizer.h"
 
 using namespace boost::ut;
 using namespace winrt::Folia;
@@ -24,12 +24,12 @@ namespace
         "math SVG percentage viewport honors container and intrinsic minimum"_test = []
         {
             constexpr std::string_view source = R"(<mjx-container width="full"><svg xmlns="http://www.w3.org/2000/svg" style="vertical-align: -1ex; min-width: 40ex;" width="100%" height="4ex" data-mjx-viewBox="0 -1000 4000 2000"><svg width="100%" height="100%" viewBox="0 0 100 10"><path d="M0 0L100 10"/></svg></svg></mjx-container>)";
-            SvgNormalizer normalizer;
+            folia::platform::SvgNormalizer normalizer;
             for (float em : {16.0f, 24.0f})
             {
                 for (float available : {120.0f, 1280.0f})
                 {
-                    auto parsed = ParseMathJaxSvgOutput(source, true, em, available);
+                    auto parsed = folia::platform::ParseMathJaxSvgOutput(source, true, em, available);
                     expect(static_cast<bool>(parsed));
                     expect(parsed.fragments.size() == 1_u);
                     if (parsed.fragments.size() != 1) continue;
@@ -55,7 +55,7 @@ namespace
             constexpr std::string_view first = R"(<svg width="3ex" height="2ex" style="vertical-align: -0.5ex;"><path d="M0 0"/></svg>)";
             constexpr std::string_view second = R"(<svg width="2em" height="1em"><svg width="100%" height="100%" style="min-width: 900ex;"></svg></svg>)";
             auto output = std::string(first) + R"(<mjx-break size="3"></mjx-break>)" + std::string(second);
-            auto parsed = ParseMathJaxSvgOutput(output, false, 16, 1280);
+            auto parsed = folia::platform::ParseMathJaxSvgOutput(output, false, 16, 1280);
             expect(parsed.fragments.size() == 2_u);
             if (parsed.fragments.size() != 2) return;
             expect(*parsed.fragments[0].svg == first);
@@ -68,10 +68,10 @@ namespace
 
         "math SVG tagged equations normalize consistently in single and batch requests"_test = []
         {
-            NativeMathSession session;
-            SvgNormalizer normalizer;
+            folia::platform::NativeMathSession session;
+            folia::platform::SvgNormalizer normalizer;
             auto aligned = std::string(alignedBody) + R"(\end{aligned}\tag{4.1})";
-            std::vector<NativeMathInput> inputs;
+            std::vector<folia::platform::NativeMathInput> inputs;
             for (auto tex : {taggedEquation, std::string_view(aligned)})
                 for (float em : {16.0f, 24.0f})
                     for (float available : {240.0f, 1280.0f})
@@ -83,7 +83,7 @@ namespace
                 auto const& input = inputs[i];
                 auto const& rendered = results[i];
                 expect(rendered.error.empty()) << rendered.error;
-                expect(rendered.errorKind == MathJaxErrorKind::None);
+                expect(rendered.errorKind == folia::platform::MathJaxErrorKind::None);
                 expect(rendered.fragments.size() == 1_u);
                 if (rendered.fragments.size() != 1) continue;
                 expect(rendered.width >= input.containerWidth);
@@ -105,10 +105,10 @@ namespace
 
         "math SVG aligned rejects inner tag as MathJax does"_test = []
         {
-            NativeMathSession session;
+            folia::platform::NativeMathSession session;
             auto tex = std::string(alignedBody) + R"(\tag{4.1}\end{aligned})";
             auto rendered = session.Render(tex, true, 16, 1280);
-            expect(rendered.errorKind == MathJaxErrorKind::Formula);
+            expect(rendered.errorKind == folia::platform::MathJaxErrorKind::Formula);
             expect(rendered.error == R"(\tag not allowed in aligned environment)");
         };
     };

@@ -11,9 +11,9 @@ import folia.markdown.text_edit;
 #include "editor/rendering/EditorStyleSheet.h"
 #include "editor/rendering/EditorTextLayoutEngine.h"
 #include "editor/session/EditorRenderFrame.h"
-#include "media/MathJaxRenderer.h"
-#include "media/MermaidRenderer.h"
-#include "media/SvgNormalizer.h"
+#include "windows/media/math/MathJaxRenderer.h"
+#include "windows/media/mermaid/MermaidRenderer.h"
+#include "windows/media/svg/SvgNormalizer.h"
 #include "media/TreeSitterHighlighter.h"
 
 namespace winrt::Folia
@@ -31,9 +31,9 @@ namespace winrt::Folia
             EditorTextLayoutEngine& textLayoutEngine,
             EditorInlineImageRenderer& inlineImages,
             EditorDocumentPainter& documentPainter,
-            MathJaxRenderer& mathJax,
-            MermaidRenderer& mermaid,
-            SvgNormalizer& svgNormalizer,
+            folia::platform::MathJaxRenderer& mathJax,
+            folia::platform::MermaidRenderer& mermaid,
+            folia::platform::SvgNormalizer& svgNormalizer,
             TreeSitterHighlighter& treeSitter,
             folia::TextPosition caret,
             float documentWidth,
@@ -76,9 +76,9 @@ namespace winrt::Folia
         EditorTextLayoutEngine& textLayoutEngine;
         EditorInlineImageRenderer& inlineImages;
         EditorDocumentPainter& documentPainter;
-        MathJaxRenderer& mathJax;
-        MermaidRenderer& mermaid;
-        SvgNormalizer& svgNormalizer;
+        folia::platform::MathJaxRenderer& mathJax;
+        folia::platform::MermaidRenderer& mermaid;
+        folia::platform::SvgNormalizer& svgNormalizer;
         TreeSitterHighlighter& treeSitter;
         folia::TextPosition caret;
         float documentWidth = 0.0f;

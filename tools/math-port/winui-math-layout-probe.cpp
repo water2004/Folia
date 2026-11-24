@@ -12,8 +12,8 @@ import folia.core.render_model;
 #include "editor/rendering/EditorDocumentBlockPreparer.h"
 #include "editor/rendering/EditorSvgPainter.h"
 #include "editor/rendering/EditorContentGeometry.h"
-#include "media/SvgNormalizer.h"
-#include "media/NativeMathSession.h"
+#include "windows/media/svg/SvgNormalizer.h"
+#include "windows/media/math/NativeMathSession.h"
 
 #pragma comment(lib, "Psapi.lib")
 
@@ -26,7 +26,7 @@ namespace
         if (!condition) throw std::runtime_error(std::string(message));
     }
 
-    void WaitForIdleBounded(MathJaxRenderer& renderer,
+    void WaitForIdleBounded(folia::platform::MathJaxRenderer& renderer,
         std::chrono::seconds timeout = std::chrono::seconds(50))
     {
         std::stop_source waitStop;
@@ -119,7 +119,7 @@ namespace
         throw std::runtime_error("math-only wrapping paragraph was not projected as an inline block");
     }
 
-    bool SameMetrics(MathJaxSvg const& left, MathJaxSvg const& right)
+    bool SameMetrics(folia::platform::MathJaxSvg const& left, folia::platform::MathJaxSvg const& right)
     {
         if (left.width != right.width || left.height != right.height
             || left.verticalAlign != right.verticalAlign
@@ -143,8 +143,8 @@ namespace
         EditorRenderResources resources;
         resources.InitializeOffscreen(sheet, context.surfaceWidth, context.surfaceHeight);
         EditorRenderCache cache;
-        SvgNormalizer normalizer;
-        MermaidRenderer mermaid;
+        folia::platform::SvgNormalizer normalizer;
+        folia::platform::MermaidRenderer mermaid;
         TreeSitterHighlighter highlighter;
         EditorSvgPainter svgPainter(resources, cache);
         EditorInlineImageRenderer images(resources, cache, sheet, normalizer, svgPainter, frame.baseDirectory, false);
@@ -251,8 +251,8 @@ namespace
 
         auto const sheet = CreateEditorStyleSheet(context.theme);
         const auto contentWidth = DocumentWidth(context);
-        SvgNormalizer normalizer;
-        MathJaxRenderer previewRenderer;
+        folia::platform::SvgNormalizer normalizer;
+        folia::platform::MathJaxRenderer previewRenderer;
         auto buildInlineDisplay = [&](folia::TextPosition position) {
             previewRenderer.BeginBlock(owner.v);
             auto display = BuildDisplayInlineText(editedBlock.inline_items, position,
@@ -361,11 +361,11 @@ namespace
         std::vector<std::string> tex;
         for (int i = 0; i < 512; ++i)
             tex.push_back("\\frac{x_{" + std::to_string(i) + "}^2+\\sqrt{a+b}}{1+\\alpha}");
-        NativeMathSession native;
+        folia::platform::NativeMathSession native;
         // One configured parser stays alive; font bodies belong to each batch.
         for (std::size_t size : {1, 16, 32, 64})
         {
-            std::vector<NativeMathInput> inputs;
+            std::vector<folia::platform::NativeMathInput> inputs;
             auto start = Clock::now();
             std::size_t bytes = 0;
             for (std::size_t begin = 0; begin < tex.size(); begin += size)

@@ -1,10 +1,10 @@
-#include "pch.h"
+#include <winrt/base.h>
+#include "windows/media/math/MathJaxRenderer.h"
+#include "windows/media/math/MathJaxRenderer.State.h"
 
 import std;
-#include "media/MathJaxRenderer.h"
-#include "media/MathJaxRenderer.State.h"
 
-namespace winrt::Folia
+namespace folia::platform
 {
     MathJaxRenderer::MathJaxRenderer() : state(std::make_shared<State>()) {}
 

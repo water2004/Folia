@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
 #include "editor/rendering/EditorImageCache.h"
-#include "media/EditorGifDecoder.h"
+#include "windows/media/images/EditorGifDecoder.h"
 
 namespace winrt::Folia
 {
@@ -243,7 +243,7 @@ namespace winrt::Folia
         };
 
         std::shared_ptr<std::vector<std::uint8_t>> encodedBacking;
-        std::shared_ptr<GifInitialFrame const> gifInitial;
+        std::shared_ptr<folia::platform::GifInitialFrame const> gifInitial;
         auto gifCandidate = !encoded.empty()
             ? HasGifMagic(encoded)
             : HasGifExtension(path) || HasGifMagic(path);
@@ -256,7 +256,7 @@ namespace winrt::Folia
                 if (!encoded.empty())
                     encodedBacking = std::make_shared<std::vector<std::uint8_t>>(std::move(encoded));
                 auto completion = sources.CompletionCallback();
-                auto decode = QueueGifInitialDecode(
+                auto decode = folia::platform::QueueGifInitialDecode(
                     path,
                     encodedBacking,
                     std::move(completion),
@@ -289,7 +289,7 @@ namespace winrt::Folia
         }
         else if (FAILED(resources.wicFactory->CreateDecoderFromFilename(path.c_str(), nullptr, GENERIC_READ, WICDecodeMetadataCacheOnLoad, decoder.GetAddressOf()))) return fail();
         RasterImage image;
-        if (auto decoded = DecodeGifAnimation(
+        if (auto decoded = folia::platform::DecodeGifAnimation(
                 resources.wicFactory.Get(),
                 resources.d2dContext.Get(),
                 decoder.Get(),

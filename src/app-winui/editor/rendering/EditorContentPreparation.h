@@ -8,9 +8,9 @@ import folia.markdown.source_offset_map;
 import folia.platform.editor_display_mapping;
 import folia.platform.editor_block_spacing;
 
-#include "media/MathJaxRenderer.h"
-#include "media/MermaidRenderer.h"
-#include "media/SvgNormalizer.h"
+#include "windows/media/math/MathJaxRenderer.h"
+#include "windows/media/mermaid/MermaidRenderer.h"
+#include "windows/media/svg/SvgNormalizer.h"
 #include "media/TreeSitterHighlighter.h"
 #include "editor/rendering/EditorSyntaxIcons.h"
 
@@ -50,7 +50,7 @@ namespace winrt::Folia
         struct MathOverlay
         {
             std::uint32_t displayStart = 0;
-            MathJaxSvgFragment fragment;
+            folia::platform::MathJaxSvgFragment fragment;
             float leadingSpace = 0.0f;
             folia::TextSpan sourceSpan;
             float progressStart = 0.0f;
@@ -62,7 +62,7 @@ namespace winrt::Folia
 
         struct MathPreview
         {
-            MathJaxSvg svg;
+            folia::platform::MathJaxSvg svg;
             folia::TextSpan contentSpan;
             bool strikethrough = false;
             D2D1_COLOR_F foreground{0, 0, 0, 1};
@@ -95,13 +95,13 @@ namespace winrt::Folia
         struct MermaidOverlay
         {
             std::uint32_t displayStart = 0;
-            MermaidSvg svg;
+            folia::platform::MermaidSvg svg;
             folia::TextSpan sourceSpan;
         };
 
         struct MermaidPreview
         {
-            MermaidSvg svg;
+            folia::platform::MermaidSvg svg;
         };
 
         struct IndentOverlay
@@ -172,7 +172,7 @@ namespace winrt::Folia
     void AppendMathPlaceholder(DisplayInlineText& display, std::size_t count, folia::TextPosition sourcePosition);
     void AppendMathFragments(
         DisplayInlineText& display,
-        MathJaxSvg const& math,
+        folia::platform::MathJaxSvg const& math,
         folia::TextSpan sourceSpan,
         bool editing,
         folia::InlineStyle style, D2D1_COLOR_F foreground);
@@ -187,8 +187,8 @@ namespace winrt::Folia
         std::vector<folia::InlineRenderItem> const& items,
         folia::TextPosition caret,
         EditorDisplayPosition sourceEnd,
-        MathJaxRenderer& mathJax,
-        SvgNormalizer& svgNormalizer,
+        folia::platform::MathJaxRenderer& mathJax,
+        folia::platform::SvgNormalizer& svgNormalizer,
         D2D1_COLOR_F svgColor,
         float fontSize,
         float containerWidth,
@@ -199,8 +199,8 @@ namespace winrt::Folia
     DisplayInlineText BuildMathBlockText(
         folia::RenderBlock const& block,
         folia::TextPosition caret,
-        MathJaxRenderer& mathJax,
-        SvgNormalizer& svgNormalizer,
+        folia::platform::MathJaxRenderer& mathJax,
+        folia::platform::SvgNormalizer& svgNormalizer,
         D2D1_COLOR_F svgColor,
         float fontSize,
         float containerWidth,

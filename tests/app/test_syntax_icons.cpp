@@ -46,8 +46,8 @@ namespace
         auto parsed = folia::parse_text(1, "$$\nr_0=\\frac{\\mu}{\\lambda}\n$$\n");
         auto model = folia::build_render_model(parsed.document, parsed.outline, parsed.symbols, theme);
         auto const& block = model.blocks.front();
-        MathJaxRenderer math;
-        SvgNormalizer normalizer;
+        folia::platform::MathJaxRenderer math;
+        folia::platform::SvgNormalizer normalizer;
         auto display = BuildMathBlockText(block, {block.id, 3, folia::TextAffinity::Downstream},
             math, normalizer, sheet.textColor, sheet.body.size, 320, false, false, false);
         EditorTextLayoutEngine engine(resources, sheet);
@@ -79,8 +79,8 @@ namespace
 
     suite syntax_icons_tests = [] {
         "highlight and strong syntax icons use the same caret visibility"_test = [] {
-            MathJaxRenderer math;
-            SvgNormalizer normalizer;
+            folia::platform::MathJaxRenderer math;
+            folia::platform::SvgNormalizer normalizer;
             auto const& theme = folia::default_theme_profile(folia::Theme::Light);
             for (auto const& example : {std::pair{"pre **x** post", SyntaxIcon::DoubleStar},
                     {"pre ==x== post", SyntaxIcon::DoubleEquals}}) {

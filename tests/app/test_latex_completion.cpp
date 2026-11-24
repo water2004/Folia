@@ -2,7 +2,7 @@
 #include "support/folia_test.hpp"
 #include "settings/LatexCommandStore.h"
 #include "editor/interaction/EditorKeyboardController.h"
-#include "media/NativeMathSession.h"
+#include "windows/media/math/NativeMathSession.h"
 import folia.core.snippet_template;
 import folia.markdown.instrumentation;
 import folia.markdown.utf;
@@ -141,7 +141,7 @@ suite latex_completion_app = [] {
     "new math templates render through the production native engine after filling arguments"_test = [] {
         struct Case { std::u32string_view trigger; std::vector<std::u32string> values; };
         const auto catalog = Catalog();
-        NativeMathSession renderer;
+        folia::platform::NativeMathSession renderer;
         auto cases = std::vector<Case>{
             {U"boldsymbol", {U"\\mu"}}, {U"mathbfit", {U"x"}}, {U"cancelto", {U"0", U"x"}},
             {U"ce", {}}, {U"pu", {}}, {U"dv", {U"y", U"x"}}, {U"pdv", {U"f", U"x"}},
@@ -166,7 +166,7 @@ suite latex_completion_app = [] {
             }
             const auto tex = folia::cps_to_utf8(parsed.text);
             const auto svg = renderer.Render(tex, true, 18, 1000);
-            expect(svg.errorKind == MathJaxErrorKind::None) << tex << ": " << svg.error;
+            expect(svg.errorKind == folia::platform::MathJaxErrorKind::None) << tex << ": " << svg.error;
             expect(bool(svg)) << tex;
         }
     };

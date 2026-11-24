@@ -1,10 +1,10 @@
-#include "pch.h"
+#include <winrt/base.h>
+#include "windows/media/math/MathJaxRenderer.State.h"
+#include "windows/media/svg/SvgNormalizer.h"
 
 import std;
-#include "media/MathJaxRenderer.State.h"
-#include "media/SvgNormalizer.h"
 
-namespace winrt::Folia
+namespace folia::platform
 {
     void MathJaxRenderer::State::StartWorker()
     {

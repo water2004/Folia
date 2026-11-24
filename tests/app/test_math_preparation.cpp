@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "support/folia_test.hpp"
-#include "media/MathJaxRenderer.h"
+#include "windows/media/math/MathJaxRenderer.h"
 #include "editor/session/EditorSession.h"
 #include "editor/rendering/EditorSurfaceRenderer.h"
 #include "editor/rendering/EditorContentPreparation.h"

@@ -4,7 +4,7 @@
 #include "editor/rendering/EditorContentPreparation.h"
 #include "editor/rendering/EditorSurfaceRenderer.h"
 #include "editor/rendering/EditorTextLayoutEngine.h"
-#include "media/NativeMathSession.h"
+#include "windows/media/math/NativeMathSession.h"
 #include <winrt/Microsoft.UI.Xaml.Hosting.h>
 
 import folia.markdown.utf;
@@ -20,8 +20,8 @@ namespace
         auto source = session.EditableSource(caret.container_id);
         auto frame = session.RenderFrame();
         if (frame.materializeBlocks) frame.materializeBlocks(0, frame.renderModel.blocks.size());
-        MathJaxRenderer math;
-        SvgNormalizer normalizer;
+        folia::platform::MathJaxRenderer math;
+        folia::platform::SvgNormalizer normalizer;
         std::vector<SyntaxIcon> icons;
         auto collect = [&](DisplayInlineText const& display) {
             for (auto const& range : display.ranges)
@@ -194,8 +194,8 @@ namespace
             EditorRenderResources resources;
             winrt::check_hresult(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory),
                 reinterpret_cast<IUnknown**>(resources.dwriteFactory.GetAddressOf())));
-            MathJaxRenderer math;
-            SvgNormalizer normalizer;
+            folia::platform::MathJaxRenderer math;
+            folia::platform::SvgNormalizer normalizer;
             for (auto source : {L"$$\nx+1\n$$\n", L"\\[\nx+1\n\\]\n"})
             for (float size : {12.f, 18.f, 32.f})
             for (float width : {80.f, 600.f}) {
@@ -245,7 +245,7 @@ namespace
         };
 
         "unmatched tilde keeps the list formula on the native math rendering path"_test = [] {
-            NativeMathSession native;
+            folia::platform::NativeMathSession native;
             for (auto source : {L"1. 微观粒子质量~原子质量单位 $1u=1.6605655\\timesz10^{-27}kg$\n",
                 L"1. 微观粒子质量原子质量单位 $1u=1.6605655\\timesz10^{-27}kg$\n"}) {
                 EditorSession session;

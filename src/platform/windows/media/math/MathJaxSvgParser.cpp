@@ -1,5 +1,6 @@
-#include "pch.h"
-#include "media/MathJaxSvgParser.h"
+#include "windows/media/math/MathJaxSvgParser.h"
+
+import std;
 
 namespace
 {
@@ -139,7 +140,7 @@ namespace
     }
 }
 
-namespace winrt::Folia
+namespace folia::platform
 {
     MathJaxSvg ParseMathJaxSvgOutput(std::string_view output, bool display, float em,
                                    float containerWidth)

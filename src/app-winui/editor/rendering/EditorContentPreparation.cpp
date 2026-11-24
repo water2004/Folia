@@ -308,7 +308,7 @@ namespace winrt::Folia
         }
     }
 
-    void AppendMathFragments(DisplayInlineText& display, MathJaxSvg const& math, folia::TextSpan sourceSpan, bool editing, folia::InlineStyle style, D2D1_COLOR_F foreground)
+    void AppendMathFragments(DisplayInlineText& display, folia::platform::MathJaxSvg const& math, folia::TextSpan sourceSpan, bool editing, folia::InlineStyle style, D2D1_COLOR_F foreground)
     {
         auto sourceStart = sourceSpan.source_range.start;
         auto sourceEnd = sourceSpan.source_range.end;
@@ -380,8 +380,8 @@ namespace winrt::Folia
         std::vector<folia::InlineRenderItem> const& items,
         folia::TextPosition caret,
         EditorDisplayPosition sourceEnd,
-        MathJaxRenderer& mathJax,
-        SvgNormalizer& svgNormalizer,
+        folia::platform::MathJaxRenderer& mathJax,
+        folia::platform::SvgNormalizer& svgNormalizer,
         D2D1_COLOR_F svgColor,
         float fontSize,
         float containerWidth,
@@ -445,7 +445,7 @@ namespace winrt::Folia
                 }
                 auto displayMath = item.special().display == folia::MathDisplayMode::Block;
                 auto editing = presentation == EditorInlinePresentation::Source;
-                auto purpose = editing ? MathRenderPurpose::Preview : MathRenderPurpose::Document;
+                auto purpose = editing ? folia::platform::MathRenderPurpose::Preview : folia::platform::MathRenderPurpose::Document;
                 auto tex = folia::cps_to_utf8(item.text);
                 auto foreground = InlineForeground(item.style, svgColor);
                 auto color = SvgColor(foreground);

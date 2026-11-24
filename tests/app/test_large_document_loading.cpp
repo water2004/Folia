@@ -75,8 +75,8 @@ namespace
             log("math preparation");
             expect(prepared != nullptr);
             auto const& block = session.RenderModel().blocks.front();
-            winrt::Folia::MathJaxRenderer math;
-            winrt::Folia::SvgNormalizer normalizer;
+            folia::platform::MathJaxRenderer math;
+            folia::platform::SvgNormalizer normalizer;
             auto display = winrt::Folia::BuildDisplayInlineText(block.inline_items, {},
                 {block.id, source.size() - 1, folia::TextAffinity::Downstream},
                 math, normalizer, {}, 18, 1000, true, false, false);

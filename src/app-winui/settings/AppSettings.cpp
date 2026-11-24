@@ -3,7 +3,7 @@
 #include "settings/ShortcutSettingsSerialization.h"
 #include "settings/CompletionPromptSettings.h"
 #include "localization/Localization.h"
-#include "media/MermaidRenderer.h"
+#include "windows/media/mermaid/MermaidRenderer.h"
 #include "storage/AssetPaths.h"
 
 namespace
@@ -69,7 +69,7 @@ namespace winrt::Folia
                 settings.media.imageMaxWidthPercent = *width;
             auto mermaidTheme = winrt::to_string(root.GetNamedString(L"mermaidTheme", L""));
             if (!mermaidTheme.empty()) {
-                auto names = MermaidRenderer::ThemeNames();
+                auto names = folia::platform::MermaidRenderer::ThemeNames();
                 if (std::ranges::find(names, mermaidTheme) != names.end())
                     settings.media.mermaidTheme = std::move(mermaidTheme);
             }

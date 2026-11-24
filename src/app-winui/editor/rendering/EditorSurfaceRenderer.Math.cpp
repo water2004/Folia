@@ -117,9 +117,9 @@ namespace winrt::Folia
         EditorRenderCache measurementCache;
         EditorTextLayoutEngine engine(measurementResources, sheet);
         EditorSvgPainter svg(measurementResources, measurementCache);
-        SvgNormalizer normalizer;
+        folia::platform::SvgNormalizer normalizer;
         TreeSitterHighlighter syntax;
-        MermaidRenderer diagrams;
+        folia::platform::MermaidRenderer diagrams;
         diagrams.SetTheme(context.media.mermaidTheme);
         EditorInteractionMap interaction;
         EditorInlineImageRenderer images(measurementResources, measurementCache, sheet,

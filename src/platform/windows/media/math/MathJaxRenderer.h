@@ -16,7 +16,7 @@
 #include <thread>
 #include <vector>
 
-namespace winrt::Folia
+namespace folia::platform
 {
     enum class MathJaxErrorKind
     {

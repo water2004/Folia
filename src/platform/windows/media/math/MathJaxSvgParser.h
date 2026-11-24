@@ -2,9 +2,9 @@
 
 #include <string_view>
 
-#include "media/MathJaxRenderer.h"
+#include "windows/media/math/MathJaxRenderer.h"
 
-namespace winrt::Folia
+namespace folia::platform
 {
     MathJaxSvg ParseMathJaxSvgOutput(
         std::string_view output,

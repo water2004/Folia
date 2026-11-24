@@ -1,11 +1,11 @@
-#include "pch.h"
+#include <winrt/base.h>
+#include "windows/media/math/MathJaxRenderer.State.h"
+#include "windows/media/math/NativeMathSession.h"
+#include "windows/media/svg/SvgNormalizer.h"
 
 import std;
-#include "media/MathJaxRenderer.State.h"
-#include "media/NativeMathSession.h"
-#include "media/SvgNormalizer.h"
 
-namespace winrt::Folia
+namespace folia::platform
 {
     void MathJaxRenderer::State::CacheDocumentSvgLocked(
         std::uint64_t id, std::shared_ptr<std::string const> bytes)

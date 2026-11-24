@@ -8,8 +8,8 @@ import folia.platform.editor_interaction;
 #include "editor/rendering/EditorRenderResources.h"
 #include "editor/rendering/EditorStyleSheet.h"
 #include "editor/rendering/EditorTextLayoutEngine.h"
-#include "media/MathJaxRenderer.h"
-#include "media/SvgNormalizer.h"
+#include "windows/media/math/MathJaxRenderer.h"
+#include "windows/media/svg/SvgNormalizer.h"
 #include "editor/session/EditorRenderFrame.h"
 
 namespace folia
@@ -54,8 +54,8 @@ namespace winrt::Folia
             EditorStyleSheet const& styleSheet,
             EditorTextLayoutEngine& textLayoutEngine,
             EditorInlineImageRenderer& inlineImageRenderer,
-            MathJaxRenderer& mathJax,
-            SvgNormalizer& svgNormalizer,
+            folia::platform::MathJaxRenderer& mathJax,
+            folia::platform::SvgNormalizer& svgNormalizer,
             TreeSitterHighlighter& treeSitter,
             std::optional<detail::EditorCompletionPreview> completion = {});
 

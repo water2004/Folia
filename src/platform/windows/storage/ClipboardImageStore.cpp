@@ -1,8 +1,11 @@
-#include "pch.h"
-#include "storage/ClipboardImageStore.h"
+#include <objbase.h>
+#include <winrt/Windows.Foundation.h>
+#include "windows/storage/ClipboardImageStore.h"
 #include <winrt/Windows.Graphics.Imaging.h>
 
-namespace winrt::Folia {
+import std;
+
+namespace folia::platform {
     namespace {
         winrt::hstring ImageName(winrt::hstring const& extension) {
             GUID id{};

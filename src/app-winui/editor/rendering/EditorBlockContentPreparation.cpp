@@ -122,8 +122,8 @@ namespace winrt::Folia
     DisplayInlineText BuildMathBlockText(
         folia::RenderBlock const& block,
         folia::TextPosition caret,
-        MathJaxRenderer& mathJax,
-        SvgNormalizer& svgNormalizer,
+        folia::platform::MathJaxRenderer& mathJax,
+        folia::platform::SvgNormalizer& svgNormalizer,
         D2D1_COLOR_F svgColor,
         float fontSize,
         float containerWidth,
@@ -161,7 +161,7 @@ namespace winrt::Folia
             return display;
         }
 
-        auto purpose = editing ? MathRenderPurpose::Preview : MathRenderPurpose::Document;
+        auto purpose = editing ? folia::platform::MathRenderPurpose::Preview : folia::platform::MathRenderPurpose::Document;
         auto tex = folia::cps_to_utf8(special.tex);
         auto color = SvgColor(svgColor);
         auto math = highPriority

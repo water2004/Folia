@@ -62,7 +62,7 @@ namespace winrt::Folia
         preparedDocument.reset();
     }
 
-    MathJaxRenderer EditorSurfaceRenderer::TakeMathCache()
+    folia::platform::MathJaxRenderer EditorSurfaceRenderer::TakeMathCache()
     {
         mathJax.SetCompletionCallback({});
         mathJax.SetVisibleSvgIds({});
@@ -76,7 +76,7 @@ namespace winrt::Folia
         return cache;
     }
 
-    void EditorSurfaceRenderer::RestoreMathCache(MathJaxRenderer cache)
+    void EditorSurfaceRenderer::RestoreMathCache(folia::platform::MathJaxRenderer cache)
     {
         ResetDocumentCaches();
         mathJax = std::move(cache);

@@ -82,6 +82,7 @@ if(WIN32)
     list(FILTER FOLIA_PLATFORM_MODULE EXCLUDE REGEX "/src/platform/text/mermaid_[^/]+\\.ixx$")
     file(GLOB_RECURSE FOLIA_PLATFORM_SRC CONFIGURE_DEPENDS
         ${CMAKE_CURRENT_SOURCE_DIR}/src/platform/*.cpp)
+    list(FILTER FOLIA_PLATFORM_SRC EXCLUDE REGEX "/src/platform/windows/media/")
 
     if(FOLIA_PLATFORM_MODULE OR FOLIA_PLATFORM_SRC)
         add_library(folia_platform STATIC)
@@ -103,8 +104,9 @@ if(WIN32)
         target_link_libraries(folia_platform PUBLIC
             dwrite d2d1 d3d11 dxgi windowscodecs dwmapi uxtheme shlwapi
             ole32 oleaut32 uuid user32 gdi32 comctl32
-            shell32 advapi32 imm32 propsys)
+            shell32 advapi32 imm32 propsys runtimeobject)
 
+        add_subdirectory(src/platform/windows/media)
     endif()
 endif()
 
