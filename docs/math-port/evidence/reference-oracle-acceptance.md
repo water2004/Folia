@@ -59,7 +59,7 @@ a 1e-12 priority change fails exact comparison.
 Run, in order:
 
 ```powershell
-node tools/math-port/inventory.cjs --check
+python tools/math-port/inventory.py --check
 node tools/math-port/reference-fixtures.cjs
 python tools/math-port/reference-mutations.py
 ```

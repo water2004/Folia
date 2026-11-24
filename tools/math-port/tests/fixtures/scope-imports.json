@@ -1,0 +1,17 @@
+{
+  "profile": "const x = {packages: ['base', 'ams']};\nrequire('@mathjax/src/js/input/tex/ams/AmsConfiguration.js');\n",
+  "sources": {
+    "ts/input/tex.ts": "import {factory} from '../core/MmlTree/MmlFactory.js';\nimport type {Config} from './tex/ams/AmsConfiguration.js';\n// from '@ignored/comment'\n",
+    "ts/output/common.ts": "export {BBox} from '../util/BBox.js';\nexport type {Factory} from '../core/MmlTree/MmlFactory.js';\n",
+    "ts/output/svg.ts": "import 'external-package';\nimport '../output/common.js';\nexport * from './common.js';\n",
+    "ts/util/BBox.ts": "export class BBox {}\n",
+    "ts/core/MmlTree/MmlFactory.ts": "export class MmlFactory {}\n",
+    "ts/input/tex/ams/AmsConfiguration.ts": "export const Config = {};\n"
+  },
+  "dependencies": {
+    "ts/input/tex.ts": ["ts/core/MmlTree/MmlFactory.ts", "ts/input/tex/ams/AmsConfiguration.ts"],
+    "ts/output/common.ts": ["ts/core/MmlTree/MmlFactory.ts", "ts/util/BBox.ts"],
+    "ts/output/svg.ts": ["ts/output/common.ts"]
+  },
+  "snake": {"BBox": "bbox", "HTMLNode": "html_node", "MmlFactory": "mml_factory", "foo2Bar": "foo2_bar"}
+}
