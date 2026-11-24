@@ -7,10 +7,10 @@ import folia.core.render_model;
 #include <Psapi.h>
 
 #include "editor/session/EditorSession.h"
-#include "editor/rendering/EditorContentPreparation.h"
+#include "editor/rendering/layout/EditorContentPreparation.h"
 #include "editor/rendering/EditorSurfaceRenderer.h"
-#include "editor/rendering/EditorDocumentBlockPreparer.h"
-#include "editor/rendering/EditorSvgPainter.h"
+#include "editor/rendering/layout/EditorDocumentBlockPreparer.h"
+#include "editor/rendering/painting/EditorSvgPainter.h"
 #include "editor/rendering/EditorContentGeometry.h"
 #include "windows/media/svg/SvgNormalizer.h"
 #include "windows/media/math/NativeMathSession.h"

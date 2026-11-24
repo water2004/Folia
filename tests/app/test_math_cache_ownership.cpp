@@ -3,7 +3,6 @@
 #include "windows/media/math/MathJaxRenderer.h"
 
 using namespace boost::ut;
-using namespace winrt::Folia;
 
 namespace
 {

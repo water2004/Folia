@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "support/folia_test.hpp"
-#include "settings/CompletionPromptSettings.h"
+#include "settings/storage/CompletionPromptSettings.h"
 
 namespace {
 using namespace boost::ut;

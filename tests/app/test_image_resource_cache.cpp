@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "support/folia_test.hpp"
 #include "media/ImageResourceCache.h"
-#include "editor/rendering/EditorImageCache.h"
+#include "editor/rendering/media/EditorImageCache.h"
 
 using namespace boost::ut;
 using namespace winrt::Folia;

@@ -1,9 +1,9 @@
 #include "pch.h"
 #include "support/folia_test.hpp"
 #include "support/MathEditorExamples.h"
-#include "editor/rendering/EditorMathPreview.h"
-#include "editor/rendering/EditorTextLayoutEngine.h"
-#include "editor/rendering/EditorSvgPainter.h"
+#include "editor/rendering/media/EditorMathPreview.h"
+#include "editor/rendering/layout/EditorTextLayoutEngine.h"
+#include "editor/rendering/painting/EditorSvgPainter.h"
 
 namespace {
     using namespace boost::ut;

@@ -2,12 +2,12 @@
 
 import folia.platform.editor_interaction;
 
-#include "editor/rendering/EditorEmbeddedDraw.h"
-#include "editor/rendering/EditorMathPreview.h"
-#include "editor/rendering/EditorInlineImageRenderer.h"
+#include "editor/rendering/media/EditorEmbeddedDraw.h"
+#include "editor/rendering/media/EditorMathPreview.h"
+#include "editor/rendering/media/EditorInlineImageRenderer.h"
 #include "editor/rendering/EditorRenderResources.h"
 #include "editor/rendering/EditorStyleSheet.h"
-#include "editor/rendering/EditorTextLayoutEngine.h"
+#include "editor/rendering/layout/EditorTextLayoutEngine.h"
 #include "windows/media/math/MathJaxRenderer.h"
 #include "windows/media/svg/SvgNormalizer.h"
 #include "editor/session/EditorRenderFrame.h"

@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "support/folia_test.hpp"
 #include "editor/session/EditorSession.h"
-#include "editor/rendering/EditorContentPreparation.h"
-#include "editor/rendering/EditorTextLayoutEngine.h"
+#include "editor/rendering/layout/EditorContentPreparation.h"
+#include "editor/rendering/layout/EditorTextLayoutEngine.h"
 #include <dwrite_1.h>
 
 namespace {

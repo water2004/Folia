@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "support/folia_test.hpp"
-#include "editor/interaction/EditorSidebarController.h"
+#include "workspace/EditorSidebarController.h"
 #include <winrt/Microsoft.UI.Xaml.Hosting.h>
 
 import folia.markdown.instrumentation;

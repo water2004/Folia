@@ -2,7 +2,7 @@
 #include "App.xaml.h"
 #include "MainWindow.xaml.h"
 #include "localization/Localization.h"
-#include "settings/AppSettings.h"
+#include "settings/storage/AppSettings.h"
 #include "windows/media/math/MathSvgStore.h"
 
 using namespace winrt;

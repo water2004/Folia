@@ -1,9 +1,9 @@
 #include "pch.h"
 #include "support/folia_test.hpp"
 #include "editor/session/EditorSession.h"
-#include "editor/rendering/EditorContentPreparation.h"
+#include "editor/rendering/layout/EditorContentPreparation.h"
 #include "editor/rendering/EditorSurfaceRenderer.h"
-#include "editor/rendering/EditorTextLayoutEngine.h"
+#include "editor/rendering/layout/EditorTextLayoutEngine.h"
 #include "windows/media/math/NativeMathSession.h"
 #include <winrt/Microsoft.UI.Xaml.Hosting.h>
 

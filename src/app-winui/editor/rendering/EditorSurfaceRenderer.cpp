@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "editor/rendering/EditorSurfaceRenderer.h"
-#include "editor/rendering/EditorPreparedDocument.h"
+#include "editor/rendering/layout/EditorPreparedDocument.h"
 
 namespace winrt::Folia
 {

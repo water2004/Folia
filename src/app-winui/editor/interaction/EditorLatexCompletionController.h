@@ -2,7 +2,7 @@
 
 #include "editor/session/EditorSession.h"
 #include "editor/rendering/EditorSurfaceRenderer.h"
-#include "settings/LatexCommandCatalog.h"
+#include "settings/latex/LatexCommandCatalog.h"
 
 import folia.platform.editor_latex_completion_session;
 

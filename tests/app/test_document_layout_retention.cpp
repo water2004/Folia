@@ -3,8 +3,8 @@
 #include "editor/session/EditorSession.h"
 #include "editor/rendering/EditorSurfaceRenderer.h"
 #include "editor/rendering/EditorContentGeometry.h"
-#include "editor/rendering/EditorPreparedDocumentCache.h"
-#include "editor/rendering/EditorDocumentPreparationPass.h"
+#include "editor/rendering/layout/EditorPreparedDocumentCache.h"
+#include "editor/rendering/layout/EditorDocumentPreparationPass.h"
 #include <psapi.h>
 
 import folia.markdown.parser;

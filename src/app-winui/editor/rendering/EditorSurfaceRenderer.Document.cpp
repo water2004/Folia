@@ -1,20 +1,20 @@
 #include "pch.h"
 #include "editor/rendering/EditorSurfaceRenderer.h"
-#include "editor/rendering/EditorPreparedDocument.h"
+#include "editor/rendering/layout/EditorPreparedDocument.h"
 #include "localization/Localization.h"
 
 import folia.core.render_model;
 
-#include "editor/rendering/EditorContentPreparation.h"
+#include "editor/rendering/layout/EditorContentPreparation.h"
 #include "editor/rendering/EditorContentGeometry.h"
-#include "editor/rendering/EditorDocumentBlockPreparer.h"
-#include "editor/rendering/EditorDocumentPainter.h"
-#include "editor/rendering/EditorDocumentPreparationPass.h"
-#include "editor/rendering/EditorDocumentRenderPass.h"
-#include "editor/rendering/EditorInlineImageRenderer.h"
-#include "editor/rendering/EditorSvgPainter.h"
+#include "editor/rendering/layout/EditorDocumentBlockPreparer.h"
+#include "editor/rendering/painting/EditorDocumentPainter.h"
+#include "editor/rendering/layout/EditorDocumentPreparationPass.h"
+#include "editor/rendering/painting/EditorDocumentRenderPass.h"
+#include "editor/rendering/media/EditorInlineImageRenderer.h"
+#include "editor/rendering/painting/EditorSvgPainter.h"
 #include "editor/rendering/EditorTableBlockRenderer.h"
-#include "editor/rendering/EditorTextLayoutEngine.h"
+#include "editor/rendering/layout/EditorTextLayoutEngine.h"
 
 namespace winrt::Folia
 {

@@ -2,7 +2,7 @@
 #include "support/folia_test.hpp"
 #include "editor/session/EditorSession.h"
 #include "editor/rendering/EditorSurfaceRenderer.h"
-#include "editor/rendering/EditorPreparedDocument.h"
+#include "editor/rendering/layout/EditorPreparedDocument.h"
 
 import folia.markdown.instrumentation;
 

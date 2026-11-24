@@ -1,6 +1,6 @@
 #pragma once
 
-#include "editor/interaction/EditorDocumentController.h"
+#include "editor/document/EditorDocumentController.h"
 #include "localization/Localization.h"
 #include <winrt/Windows.Graphics.Imaging.h>
 

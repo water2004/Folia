@@ -55,6 +55,12 @@
     <Filter Include="Platform Modules\Media">
       <UniqueIdentifier>{184fa546-0b57-4629-baa1-91cb038dc284}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Platform Modules\Completion">
+      <UniqueIdentifier>{bfe7ba4b-2c40-4dcb-8407-54f01b3c10e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Platform Modules\Printing">
+      <UniqueIdentifier>{017d3401-094f-4081-87ae-2b7a795d900d}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Platform Modules\Storage">
       <UniqueIdentifier>{086ca1e7-05ca-4ed6-9bcf-28f555569323}</UniqueIdentifier>
     </Filter>
@@ -63,6 +69,30 @@
     </Filter>
     <Filter Include="Encoding Modules">
       <UniqueIdentifier>{ef44d0f2-5c53-4906-942c-215f935641b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Editor\Document">
+      <UniqueIdentifier>{d212d3ad-9189-5d1b-8ce1-014986566a67}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Editor\Rendering\Layout">
+      <UniqueIdentifier>{36ad3a2b-bee1-5bd0-b2d7-e33a21ae3ded}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Editor\Rendering\Painting">
+      <UniqueIdentifier>{023ef499-20a7-5fe8-996f-63f985384898}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Editor\Rendering\Media">
+      <UniqueIdentifier>{d4a1d189-9679-5b06-8ef1-d16033bb805d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Settings\Storage">
+      <UniqueIdentifier>{e7145a47-5e26-5025-bc52-6dcaaf0ef433}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Settings\Views">
+      <UniqueIdentifier>{bf5c49bd-9dcc-5e89-a3dc-d2548163c5a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Settings\LaTeX">
+      <UniqueIdentifier>{8d242144-6376-537c-b81c-73fbd12431cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Workspace">
+      <UniqueIdentifier>{0189686c-9247-5184-9efe-dc0e93473804}</UniqueIdentifier>
     </Filter>
     <Filter Include="Third Party">
       <UniqueIdentifier>{c15f70e8-7f12-4e04-ac76-8d246b5e3ca4}</UniqueIdentifier>
@@ -90,6 +120,141 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="settings\storage\CompletionPromptSettings.h">
+      <Filter>Settings\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="settings\views\SettingsViewSupport.h">
+      <Filter>Settings\Views</Filter>
+    </ClInclude>
+    <ClInclude Include="settings\latex\LatexCommandCatalog.h">
+      <Filter>Settings\LaTeX</Filter>
+    </ClInclude>
+    <ClInclude Include="settings\views\LatexCommandSettingsComponents.h">
+      <Filter>Settings\Views</Filter>
+    </ClInclude>
+    <ClInclude Include="settings\storage\LatexCommandStore.h">
+      <Filter>Settings\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="editor\rendering\painting\EditorPopupShadow.h">
+      <Filter>Editor\Rendering\Painting</Filter>
+    </ClInclude>
+    <ClInclude Include="editor\rendering\media\EditorMathSyntax.h">
+      <Filter>Editor\Rendering\Media</Filter>
+    </ClInclude>
+    <ClInclude Include="editor\rendering\media\EditorImageCache.h">
+      <Filter>Editor\Rendering\Media</Filter>
+    </ClInclude>
+    <ClInclude Include="editor\rendering\painting\EditorSyntaxIcons.h">
+      <Filter>Editor\Rendering\Painting</Filter>
+    </ClInclude>
+    <ClInclude Include="editor\rendering\media\EditorMathPreview.h">
+      <Filter>Editor\Rendering\Media</Filter>
+    </ClInclude>
+    <ClInclude Include="workspace\WorkspaceDocuments.h">
+      <Filter>Workspace</Filter>
+    </ClInclude>
+    <ClInclude Include="workspace\WorkspaceIcons.h">
+      <Filter>Workspace</Filter>
+    </ClInclude>
+    <ClInclude Include="workspace\FolderEntry.h">
+      <Filter>Workspace</Filter>
+    </ClInclude>
+    <ClInclude Include="workspace\FolderExplorerView.h">
+      <Filter>Workspace</Filter>
+    </ClInclude>
+    <ClInclude Include="workspace\FolderExplorerState.h">
+      <Filter>Workspace</Filter>
+    </ClInclude>
+    <ClInclude Include="workspace\WorkspaceFileCoordinator.h">
+      <Filter>Workspace</Filter>
+    </ClInclude>
+    <ClInclude Include="workspace\FolderExplorerController.h">
+      <Filter>Workspace</Filter>
+    </ClInclude>
+    <ClInclude Include="editor\rendering\media\EditorMathPreparation.h">
+      <Filter>Editor\Rendering\Media</Filter>
+    </ClInclude>
+    <ClCompile Include="settings\storage\CompletionPromptSettings.cpp">
+      <Filter>Settings\Storage</Filter>
+    </ClCompile>
+    <ClCompile Include="settings\latex\LatexCommandCatalog.cpp">
+      <Filter>Settings\LaTeX</Filter>
+    </ClCompile>
+    <ClCompile Include="settings\views\LatexCommandSettingsComponents.cpp">
+      <Filter>Settings\Views</Filter>
+    </ClCompile>
+    <ClCompile Include="settings\storage\LatexCommandStore.cpp">
+      <Filter>Settings\Storage</Filter>
+    </ClCompile>
+    <ClCompile Include="settings\views\SettingsView.General.cpp">
+      <Filter>Settings\Views</Filter>
+    </ClCompile>
+    <ClCompile Include="settings\views\SettingsView.Shortcuts.cpp">
+      <Filter>Settings\Views</Filter>
+    </ClCompile>
+    <ClCompile Include="settings\views\SettingsView.Latex.cpp">
+      <Filter>Settings\Views</Filter>
+    </ClCompile>
+    <ClCompile Include="settings\views\SettingsView.Themes.cpp">
+      <Filter>Settings\Views</Filter>
+    </ClCompile>
+    <ClCompile Include="settings\views\SettingsView.Licenses.cpp">
+      <Filter>Settings\Views</Filter>
+    </ClCompile>
+    <ClCompile Include="editor\rendering\media\EditorMathPreview.cpp">
+      <Filter>Editor\Rendering\Media</Filter>
+    </ClCompile>
+    <ClCompile Include="editor\rendering\media\EditorImageCache.cpp">
+      <Filter>Editor\Rendering\Media</Filter>
+    </ClCompile>
+    <ClCompile Include="editor\rendering\painting\EditorSyntaxIcons.cpp">
+      <Filter>Editor\Rendering\Painting</Filter>
+    </ClCompile>
+    <ClCompile Include="workspace\WorkspaceDocuments.cpp">
+      <Filter>Workspace</Filter>
+    </ClCompile>
+    <ClCompile Include="workspace\WorkspaceIcons.cpp">
+      <Filter>Workspace</Filter>
+    </ClCompile>
+    <ClCompile Include="workspace\FolderExplorerView.cpp">
+      <Filter>Workspace</Filter>
+    </ClCompile>
+    <ClCompile Include="workspace\FolderExplorerController.Editing.cpp">
+      <Filter>Workspace</Filter>
+    </ClCompile>
+    <ClCompile Include="workspace\FolderExplorerController.DragDrop.cpp">
+      <Filter>Workspace</Filter>
+    </ClCompile>
+    <ClCompile Include="workspace\WorkspaceFileCoordinator.cpp">
+      <Filter>Workspace</Filter>
+    </ClCompile>
+    <ClCompile Include="workspace\FolderExplorerController.cpp">
+      <Filter>Workspace</Filter>
+    </ClCompile>
+    <ClCompile Include="editor\document\EditorDocumentController.Relocation.cpp">
+      <Filter>Editor\Document</Filter>
+    </ClCompile>
+    <ClCompile Include="editor\document\EditorDocumentController.Save.cpp">
+      <Filter>Editor\Document</Filter>
+    </ClCompile>
+    <ClCompile Include="editor\document\EditorDocumentController.Clipboard.cpp">
+      <Filter>Editor\Document</Filter>
+    </ClCompile>
+    <ClCompile Include="workspace\WorkspaceLaunch.cpp">
+      <Filter>Workspace</Filter>
+    </ClCompile>
+    <ClInclude Include="workspace\WorkspaceLaunch.h">
+      <Filter>Workspace</Filter>
+    </ClInclude>
+    <ClCompile Include="editor\rendering\painting\EditorPopupShadow.cpp">
+      <Filter>Editor\Rendering\Painting</Filter>
+    </ClCompile>
+    <ClCompile Include="editor\rendering\media\EditorMathSyntax.cpp">
+      <Filter>Editor\Rendering\Media</Filter>
+    </ClCompile>
+    <ClCompile Include="settings\views\SettingsView.Completion.cpp">
+      <Filter>Settings\Views</Filter>
+    </ClCompile>
     <ClCompile Include="..\core\model\ast.ixx">
       <Filter>Core Modules\Model</Filter>
     </ClCompile>
@@ -98,6 +263,27 @@
     </ClCompile>
     <ClCompile Include="..\core\rendering\block_geometry.ixx">
       <Filter>Core Modules\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\platform\windows\editor\rendering\editor_text_paint.ixx">
+      <Filter>Platform Modules\Windows Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\platform\windows\editor\rendering\editor_text_paint.cpp">
+      <Filter>Platform Modules\Windows Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\platform\windows\editor\rendering\editor_svg_drawing.ixx">
+      <Filter>Platform Modules\Windows Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\platform\windows\editor\layout\editor_block_spacing.ixx">
+      <Filter>Platform Modules\Windows Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\platform\windows\editor\interaction\editor_shortcut_settings.ixx">
+      <Filter>Platform Modules\Windows Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\platform\windows\editor\interaction\editor_snippet_session.ixx">
+      <Filter>Platform Modules\Windows Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\platform\windows\editor\interaction\editor_latex_completion_session.ixx">
+      <Filter>Platform Modules\Windows Editor</Filter>
     </ClCompile>
     <ClCompile Include="..\platform\windows\editor\layout\editor_inline_projection.ixx">
       <Filter>Platform Modules\Windows Editor</Filter>
@@ -414,17 +600,26 @@
     <ClCompile Include="theme\ThemeCatalog.cpp">
       <Filter>Theme</Filter>
     </ClCompile>
-    <ClCompile Include="settings\AppSettings.cpp">
-      <Filter>Settings</Filter>
+    <ClCompile Include="settings\storage\AppSettings.cpp">
+      <Filter>Settings\Storage</Filter>
     </ClCompile>
-    <ClCompile Include="settings\ShortcutSettingsSerialization.cpp">
-      <Filter>Settings</Filter>
+    <ClCompile Include="settings\storage\ShortcutSettingsSerialization.cpp">
+      <Filter>Settings\Storage</Filter>
     </ClCompile>
-    <ClCompile Include="settings\SettingsView.cpp">
-      <Filter>Settings</Filter>
+    <ClCompile Include="settings\views\SettingsView.cpp">
+      <Filter>Settings\Views</Filter>
     </ClCompile>
     <ClCompile Include="MainWindow.Settings.cpp">
       <Filter>Settings</Filter>
+    </ClCompile>
+    <ClCompile Include="..\platform\windows\completion\CompletionService.cpp">
+      <Filter>Platform Modules\Completion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\platform\windows\completion\CompletionHttpTransport.cpp">
+      <Filter>Platform Modules\Completion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\platform\windows\printing\PdfPrintJob.cpp">
+      <Filter>Platform Modules\Printing</Filter>
     </ClCompile>
     <ClCompile Include="..\platform\windows\storage\WorkspaceFileOperations.cpp">
       <Filter>Platform Modules\Storage</Filter>
@@ -480,41 +675,41 @@
     <ClCompile Include="..\platform\windows\editor\interaction\editor_interaction.cpp">
       <Filter>Platform Modules\Windows Editor</Filter>
     </ClCompile>
-    <ClCompile Include="editor\rendering\EditorContentPreparation.cpp">
-      <Filter>Editor\Rendering</Filter>
+    <ClCompile Include="editor\rendering\layout\EditorContentPreparation.cpp">
+      <Filter>Editor\Rendering\Layout</Filter>
     </ClCompile>
-    <ClCompile Include="editor\rendering\EditorDocumentBlockPreparer.cpp">
-      <Filter>Editor\Rendering</Filter>
+    <ClCompile Include="editor\rendering\layout\EditorDocumentBlockPreparer.cpp">
+      <Filter>Editor\Rendering\Layout</Filter>
     </ClCompile>
-    <ClCompile Include="editor\rendering\EditorEmbeddedContentUpdater.cpp">
-      <Filter>Editor\Rendering</Filter>
+    <ClCompile Include="editor\rendering\media\EditorEmbeddedContentUpdater.cpp">
+      <Filter>Editor\Rendering\Media</Filter>
     </ClCompile>
-    <ClCompile Include="editor\rendering\EditorDocumentPainter.cpp">
-      <Filter>Editor\Rendering</Filter>
+    <ClCompile Include="editor\rendering\painting\EditorDocumentPainter.cpp">
+      <Filter>Editor\Rendering\Painting</Filter>
     </ClCompile>
-    <ClCompile Include="editor\rendering\EditorDocumentPreparationPass.cpp">
-      <Filter>Editor\Rendering</Filter>
+    <ClCompile Include="editor\rendering\layout\EditorDocumentPreparationPass.cpp">
+      <Filter>Editor\Rendering\Layout</Filter>
     </ClCompile>
-    <ClCompile Include="editor\rendering\EditorViewportMaterializer.cpp">
-      <Filter>Editor\Rendering</Filter>
+    <ClCompile Include="editor\rendering\layout\EditorViewportMaterializer.cpp">
+      <Filter>Editor\Rendering\Layout</Filter>
     </ClCompile>
-    <ClCompile Include="editor\rendering\EditorPreparedDocumentCache.cpp">
-      <Filter>Editor\Rendering</Filter>
+    <ClCompile Include="editor\rendering\layout\EditorPreparedDocumentCache.cpp">
+      <Filter>Editor\Rendering\Layout</Filter>
     </ClCompile>
-    <ClCompile Include="editor\rendering\EditorPreparedDocumentRetention.cpp">
-      <Filter>Editor\Rendering</Filter>
+    <ClCompile Include="editor\rendering\layout\EditorPreparedDocumentRetention.cpp">
+      <Filter>Editor\Rendering\Layout</Filter>
     </ClCompile>
-    <ClCompile Include="editor\rendering\EditorDocumentRenderPass.cpp">
-      <Filter>Editor\Rendering</Filter>
+    <ClCompile Include="editor\rendering\painting\EditorDocumentRenderPass.cpp">
+      <Filter>Editor\Rendering\Painting</Filter>
     </ClCompile>
-    <ClCompile Include="editor\rendering\EditorContentUtilities.cpp">
-      <Filter>Editor\Rendering</Filter>
+    <ClCompile Include="editor\rendering\layout\EditorContentUtilities.cpp">
+      <Filter>Editor\Rendering\Layout</Filter>
     </ClCompile>
     <ClCompile Include="editor\rendering\EditorInlineObjects.cpp">
       <Filter>Editor\Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="editor\rendering\EditorBlockContentPreparation.cpp">
-      <Filter>Editor\Rendering</Filter>
+    <ClCompile Include="editor\rendering\layout\EditorBlockContentPreparation.cpp">
+      <Filter>Editor\Rendering\Layout</Filter>
     </ClCompile>
     <ClCompile Include="editor\rendering\EditorRenderResources.cpp">
       <Filter>Editor\Rendering</Filter>
@@ -528,17 +723,17 @@
     <ClCompile Include="editor\rendering\EditorRenderCache.Layout.cpp">
       <Filter>Editor\Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="editor\rendering\EditorSvgPainter.cpp">
-      <Filter>Editor\Rendering</Filter>
+    <ClCompile Include="editor\rendering\painting\EditorSvgPainter.cpp">
+      <Filter>Editor\Rendering\Painting</Filter>
     </ClCompile>
-    <ClCompile Include="editor\rendering\EditorTextLayoutEngine.cpp">
-      <Filter>Editor\Rendering</Filter>
+    <ClCompile Include="editor\rendering\layout\EditorTextLayoutEngine.cpp">
+      <Filter>Editor\Rendering\Layout</Filter>
     </ClCompile>
     <ClCompile Include="editor\interaction\EditorTableInteraction.cpp">
       <Filter>Editor\Interaction</Filter>
     </ClCompile>
-    <ClCompile Include="editor\rendering\EditorInlineImageRenderer.cpp">
-      <Filter>Editor\Rendering</Filter>
+    <ClCompile Include="editor\rendering\media\EditorInlineImageRenderer.cpp">
+      <Filter>Editor\Rendering\Media</Filter>
     </ClCompile>
     <ClCompile Include="editor\rendering\EditorTableBlockRenderer.cpp">
       <Filter>Editor\Rendering</Filter>
@@ -567,20 +762,17 @@
     <ClCompile Include="editor\interaction\EditorCodeLanguageController.cpp">
       <Filter>Editor\Interaction</Filter>
     </ClCompile>
-    <ClCompile Include="editor\interaction\EditorDocumentController.cpp">
-      <Filter>Editor\Interaction</Filter>
+    <ClCompile Include="editor\document\EditorDocumentController.cpp">
+      <Filter>Editor\Document</Filter>
     </ClCompile>
-    <ClCompile Include="editor\interaction\EditorDocumentController.Reload.cpp">
-      <Filter>Editor\Interaction</Filter>
+    <ClCompile Include="editor\document\EditorDocumentController.Reload.cpp">
+      <Filter>Editor\Document</Filter>
     </ClCompile>
-    <ClCompile Include="editor\interaction\EditorDocumentController.Pdf.cpp">
-      <Filter>Editor\Interaction</Filter>
-    </ClCompile>
-    <ClCompile Include="export\EditorPdfPrintJob.cpp">
+    <ClCompile Include="export\EditorDocumentController.Pdf.cpp">
       <Filter>Export</Filter>
     </ClCompile>
-    <ClCompile Include="editor\interaction\EditorSidebarController.cpp">
-      <Filter>Editor\Interaction</Filter>
+    <ClCompile Include="workspace\EditorSidebarController.cpp">
+      <Filter>Workspace</Filter>
     </ClCompile>
     <ClCompile Include="editor\rendering\EditorSurfaceRenderer.cpp">
       <Filter>Editor\Rendering</Filter>
@@ -591,8 +783,8 @@
     <ClCompile Include="editor\rendering\EditorSurfaceRenderer.Interaction.cpp">
       <Filter>Editor\Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="editor\rendering\EditorSurfaceRenderer.Pdf.cpp">
-      <Filter>Editor\Rendering</Filter>
+    <ClCompile Include="export\EditorSurfaceRenderer.Pdf.cpp">
+      <Filter>Export</Filter>
     </ClCompile>
     <ClCompile Include="..\platform\windows\media\math\MathJaxRenderer.cpp">
       <Filter>Platform Modules\Media</Filter>
@@ -656,14 +848,14 @@
     <ClInclude Include="theme\ThemeCatalog.h">
       <Filter>Theme</Filter>
     </ClInclude>
-    <ClInclude Include="settings\AppSettings.h">
-      <Filter>Settings</Filter>
+    <ClInclude Include="settings\storage\AppSettings.h">
+      <Filter>Settings\Storage</Filter>
     </ClInclude>
-    <ClInclude Include="settings\ShortcutSettingsSerialization.h">
-      <Filter>Settings</Filter>
+    <ClInclude Include="settings\storage\ShortcutSettingsSerialization.h">
+      <Filter>Settings\Storage</Filter>
     </ClInclude>
-    <ClInclude Include="settings\SettingsView.h">
-      <Filter>Settings</Filter>
+    <ClInclude Include="settings\views\SettingsView.h">
+      <Filter>Settings\Views</Filter>
     </ClInclude>
     <ClInclude Include="storage\AssetPaths.h">
       <Filter>Storage</Filter>
@@ -680,32 +872,41 @@
     <ClInclude Include="editor\rendering\EditorStyleSheet.h">
       <Filter>Editor\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="editor\rendering\EditorContentPreparation.h">
-      <Filter>Editor\Rendering</Filter>
+    <ClInclude Include="editor\rendering\layout\EditorContentPreparation.h">
+      <Filter>Editor\Rendering\Layout</Filter>
     </ClInclude>
-    <ClInclude Include="editor\rendering\EditorDocumentBlockPreparer.h">
-      <Filter>Editor\Rendering</Filter>
+    <ClInclude Include="editor\rendering\layout\EditorDocumentBlockPreparer.h">
+      <Filter>Editor\Rendering\Layout</Filter>
     </ClInclude>
-    <ClInclude Include="editor\rendering\EditorEmbeddedContentUpdater.h">
-      <Filter>Editor\Rendering</Filter>
+    <ClInclude Include="editor\rendering\media\EditorEmbeddedContentUpdater.h">
+      <Filter>Editor\Rendering\Media</Filter>
     </ClInclude>
-    <ClInclude Include="editor\rendering\EditorDocumentPainter.h">
-      <Filter>Editor\Rendering</Filter>
+    <ClInclude Include="editor\rendering\painting\EditorDocumentPainter.h">
+      <Filter>Editor\Rendering\Painting</Filter>
     </ClInclude>
-    <ClInclude Include="editor\rendering\EditorDocumentPreparationPass.h">
-      <Filter>Editor\Rendering</Filter>
+    <ClInclude Include="editor\rendering\layout\EditorDocumentPreparationPass.h">
+      <Filter>Editor\Rendering\Layout</Filter>
     </ClInclude>
-    <ClInclude Include="editor\rendering\EditorViewportMaterializer.h">
-      <Filter>Editor\Rendering</Filter>
+    <ClInclude Include="editor\rendering\layout\EditorViewportMaterializer.h">
+      <Filter>Editor\Rendering\Layout</Filter>
     </ClInclude>
-    <ClInclude Include="editor\rendering\EditorDocumentRenderPass.h">
-      <Filter>Editor\Rendering</Filter>
+    <ClInclude Include="editor\rendering\painting\EditorDocumentRenderPass.h">
+      <Filter>Editor\Rendering\Painting</Filter>
     </ClInclude>
     <ClInclude Include="editor\rendering\EditorRenderResources.h">
       <Filter>Editor\Rendering</Filter>
     </ClInclude>
     <ClInclude Include="..\platform\windows\media\ExecutableLibrary.h">
       <Filter>Platform Modules\Media</Filter>
+    </ClInclude>
+    <ClInclude Include="..\platform\windows\completion\CompletionService.h">
+      <Filter>Platform Modules\Completion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\platform\windows\completion\CompletionHttpTransport.h">
+      <Filter>Platform Modules\Completion</Filter>
+    </ClInclude>
+    <ClInclude Include="..\platform\windows\printing\PdfPrintJob.h">
+      <Filter>Platform Modules\Printing</Filter>
     </ClInclude>
     <ClInclude Include="..\platform\windows\storage\WorkspaceFileOperations.h">
       <Filter>Platform Modules\Storage</Filter>
@@ -734,23 +935,23 @@
     <ClInclude Include="editor\rendering\EditorRenderCache.h">
       <Filter>Editor\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="editor\rendering\EditorSvgPainter.h">
-      <Filter>Editor\Rendering</Filter>
+    <ClInclude Include="editor\rendering\painting\EditorSvgPainter.h">
+      <Filter>Editor\Rendering\Painting</Filter>
     </ClInclude>
-    <ClInclude Include="editor\rendering\EditorTextLayoutEngine.h">
-      <Filter>Editor\Rendering</Filter>
+    <ClInclude Include="editor\rendering\layout\EditorTextLayoutEngine.h">
+      <Filter>Editor\Rendering\Layout</Filter>
     </ClInclude>
-    <ClInclude Include="editor\rendering\EditorFlowLayoutContext.h">
-      <Filter>Editor\Rendering</Filter>
+    <ClInclude Include="editor\rendering\layout\EditorFlowLayoutContext.h">
+      <Filter>Editor\Rendering\Layout</Filter>
     </ClInclude>
     <ClInclude Include="editor\interaction\EditorTableInteraction.h">
       <Filter>Editor\Interaction</Filter>
     </ClInclude>
-    <ClInclude Include="editor\rendering\EditorInlineImageRenderer.h">
-      <Filter>Editor\Rendering</Filter>
+    <ClInclude Include="editor\rendering\media\EditorInlineImageRenderer.h">
+      <Filter>Editor\Rendering\Media</Filter>
     </ClInclude>
-    <ClInclude Include="editor\rendering\EditorEmbeddedDraw.h">
-      <Filter>Editor\Rendering</Filter>
+    <ClInclude Include="editor\rendering\media\EditorEmbeddedDraw.h">
+      <Filter>Editor\Rendering\Media</Filter>
     </ClInclude>
     <ClInclude Include="editor\rendering\EditorTableBlockRenderer.h">
       <Filter>Editor\Rendering</Filter>
@@ -776,32 +977,29 @@
     <ClInclude Include="editor\interaction\EditorCodeLanguageController.h">
       <Filter>Editor\Interaction</Filter>
     </ClInclude>
-    <ClInclude Include="editor\interaction\EditorDocumentController.h">
-      <Filter>Editor\Interaction</Filter>
+    <ClInclude Include="editor\document\EditorDocumentController.h">
+      <Filter>Editor\Document</Filter>
     </ClInclude>
-    <ClInclude Include="editor\interaction\EditorDocumentControllerState.h">
-      <Filter>Editor\Interaction</Filter>
-    </ClInclude>
-    <ClInclude Include="export\EditorPdfPrintJob.h">
-      <Filter>Export</Filter>
+    <ClInclude Include="editor\document\EditorDocumentControllerState.h">
+      <Filter>Editor\Document</Filter>
     </ClInclude>
     <ClInclude Include="export\EditorPdfExportTypes.h">
       <Filter>Export</Filter>
     </ClInclude>
-    <ClInclude Include="editor\interaction\EditorSidebarController.h">
-      <Filter>Editor\Interaction</Filter>
+    <ClInclude Include="workspace\EditorSidebarController.h">
+      <Filter>Workspace</Filter>
     </ClInclude>
     <ClInclude Include="editor\rendering\EditorSurfaceRenderer.h">
       <Filter>Editor\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="editor\rendering\EditorPreparedDocument.h">
-      <Filter>Editor\Rendering</Filter>
+    <ClInclude Include="editor\rendering\layout\EditorPreparedDocument.h">
+      <Filter>Editor\Rendering\Layout</Filter>
     </ClInclude>
-    <ClInclude Include="editor\rendering\EditorPreparedDocumentCache.h">
-      <Filter>Editor\Rendering</Filter>
+    <ClInclude Include="editor\rendering\layout\EditorPreparedDocumentCache.h">
+      <Filter>Editor\Rendering\Layout</Filter>
     </ClInclude>
-    <ClInclude Include="editor\rendering\EditorPreparedDocumentRetention.h">
-      <Filter>Editor\Rendering</Filter>
+    <ClInclude Include="editor\rendering\layout\EditorPreparedDocumentRetention.h">
+      <Filter>Editor\Rendering\Layout</Filter>
     </ClInclude>
     <ClInclude Include="media\AsyncWorkDependency.h">
       <Filter>Media Services</Filter>
@@ -839,16 +1037,16 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="settings\ShortcutSettingsComponents.cpp">
-      <Filter>Settings</Filter>
+    <ClCompile Include="settings\views\ShortcutSettingsComponents.cpp">
+      <Filter>Settings\Views</Filter>
     </ClCompile>
     <Midl Include="MainWindow.idl">
       <Filter>Resources</Filter>
     </Midl>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="settings\ShortcutSettingsComponents.h">
-      <Filter>Settings</Filter>
+    <ClInclude Include="settings\views\ShortcutSettingsComponents.h">
+      <Filter>Settings\Views</Filter>
     </ClInclude>
     <PRIResource Include="Strings\en-US\Resources.resw">
       <Filter>Localization</Filter>

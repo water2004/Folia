@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "support/folia_test.hpp"
-#include "settings/LatexCommandStore.h"
+#include "settings/storage/LatexCommandStore.h"
 #include "editor/interaction/EditorKeyboardController.h"
 #include "windows/media/math/NativeMathSession.h"
 import folia.core.snippet_template;

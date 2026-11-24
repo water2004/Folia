@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "support/folia_test.hpp"
 #include "../support/DocumentControllerFixture.h"
-#include "settings/SettingsView.h"
+#include "settings/views/SettingsView.h"
 #include "visual_window.h"
 
 namespace {

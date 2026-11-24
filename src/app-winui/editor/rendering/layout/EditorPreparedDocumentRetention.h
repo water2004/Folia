@@ -1,0 +1,32 @@
+#pragma once
+
+import folia.core.viewport_plan;
+
+#include "editor/rendering/media/EditorInlineImageRenderer.h"
+#include "editor/rendering/layout/EditorPreparedDocument.h"
+#include "editor/rendering/EditorRenderResources.h"
+#include "editor/session/EditorRenderFrame.h"
+
+namespace winrt::Folia
+{
+    // Keeps heavyweight visual resources close to the viewport while leaving
+    // measured geometry and stable block metadata intact.
+    class EditorPreparedDocumentRetention final
+    {
+    public:
+        EditorPreparedDocumentRetention(
+            detail::EditorRenderFrame const& frame,
+            EditorRenderResources& resources,
+            EditorInlineImageRenderer& inlineImages,
+            std::unique_ptr<EditorPreparedDocument>& preparedDocument);
+
+        void ReleaseOutside(float scrollOffset, bool printMode);
+
+    private:
+        detail::EditorRenderFrame const& frame;
+        EditorRenderResources& resources;
+        EditorInlineImageRenderer& inlineImages;
+        std::unique_ptr<EditorPreparedDocument>& preparedDocument;
+        static constexpr folia::EditorViewportPolicy viewportPolicy{};
+    };
+}

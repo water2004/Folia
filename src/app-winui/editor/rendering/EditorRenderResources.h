@@ -1,8 +1,8 @@
 #pragma once
 
 #include "editor/rendering/EditorStyleSheet.h"
-#include "editor/rendering/EditorSyntaxIcons.h"
-#include "editor/rendering/EditorPopupShadow.h"
+#include "editor/rendering/painting/EditorSyntaxIcons.h"
+#include "editor/rendering/painting/EditorPopupShadow.h"
 
 namespace winrt::Folia
 {

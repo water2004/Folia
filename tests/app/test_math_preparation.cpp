@@ -3,7 +3,7 @@
 #include "windows/media/math/MathJaxRenderer.h"
 #include "editor/session/EditorSession.h"
 #include "editor/rendering/EditorSurfaceRenderer.h"
-#include "editor/rendering/EditorContentPreparation.h"
+#include "editor/rendering/layout/EditorContentPreparation.h"
 #include "editor/rendering/EditorContentGeometry.h"
 
 using namespace boost::ut;

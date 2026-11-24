@@ -3,7 +3,7 @@
 #include "editor/session/EditorSession.h"
 #include "editor/rendering/EditorSurfaceRenderer.h"
 #include "editor/rendering/EditorContentGeometry.h"
-#include "editor/rendering/EditorContentPreparation.h"
+#include "editor/rendering/layout/EditorContentPreparation.h"
 #include <winrt/Microsoft.UI.Xaml.Hosting.h>
 
 import folia.markdown.instrumentation;

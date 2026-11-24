@@ -1,0 +1,46 @@
+#pragma once
+import std;
+import folia.completion;
+
+namespace folia::platform::completion {
+struct CompletionConfig {
+    bool enabled = false;
+    std::string baseUrl, model;
+    int protocol = 0; // Chat Completions, Responses, Anthropic Messages
+    std::string reasoningEffort;
+    folia::completion::Eagerness eagerness = folia::completion::Eagerness::Balanced;
+    std::uint32_t contextKB = 7, outputTokens = 128;
+    std::optional<folia::completion::PromptSettings> prompt;
+    std::string promptError;
+    bool explicitPromptCache = false;
+    bool operator==(CompletionConfig const&) const = default;
+};
+struct CompletionResult {
+    std::u32string text;
+    std::string error;
+    std::optional<std::uint64_t> inputTokens, outputTokens, cachedInputTokens;
+    bool truncated = false;
+};
+// Resolve the protocol path against the configured service base URL.
+std::string ResolveCompletionEndpoint(CompletionConfig const&);
+std::string ResolveCompletionModelsEndpoint(CompletionConfig const&);
+std::string ValidateCompletionService(CompletionConfig const&);
+std::string ValidateCompletionConfig(CompletionConfig const&);
+bool SupportsExplicitCompletionCache(int protocol) noexcept;
+std::wstring LoadCompletionKey();
+void StoreCompletionKey(std::wstring_view key);
+class CompletionService {
+public:
+    using Deliver = std::function<void(CompletionResult)>;
+    using Transport = std::function<CompletionResult(CompletionConfig const&, folia::completion::Prompt const&, std::stop_token)>;
+    explicit CompletionService(Transport transport = {});
+    ~CompletionService();
+    CompletionService(CompletionService const&) = delete;
+    CompletionService& operator=(CompletionService const&) = delete;
+    void Submit(CompletionConfig, folia::completion::Prompt, Deliver);
+    void Cancel();
+private:
+    struct State;
+    std::shared_ptr<State> state_;
+};
+}

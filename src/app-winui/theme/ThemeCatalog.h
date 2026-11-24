@@ -1,6 +1,6 @@
 #pragma once
 
-#include "settings/AppSettings.h"
+#include "settings/storage/AppSettings.h"
 #include "theme/ThemeConfig.h"
 
 #include <string_view>

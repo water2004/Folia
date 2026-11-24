@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "editor/rendering/EditorContentPreparation.h"
+#include "editor/rendering/layout/EditorContentPreparation.h"
 import folia.markdown.utf;
 import folia.completion;
 

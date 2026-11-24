@@ -2,7 +2,7 @@
 #include "support/folia_test.hpp"
 #include "../support/DocumentControllerFixture.h"
 #include "visual_window.h"
-#include "settings/SettingsView.h"
+#include "settings/views/SettingsView.h"
 #include "localization/Localization.h"
 #include <winrt/Microsoft.UI.Xaml.Automation.Peers.h>
 #include <winrt/Microsoft.UI.Xaml.Automation.Provider.h>

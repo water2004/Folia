@@ -3,7 +3,7 @@
 #include "localization/Localization.h"
 
 namespace winrt::Folia::implementation {
-void MainWindow::ConfigureInlineCompletion(winrt::Folia::CompletionService::Transport transport) {
+void MainWindow::ConfigureInlineCompletion(folia::platform::completion::CompletionService::Transport transport) {
     inlineCompletion.reset();
     UpdateCompletionStatus(winrt::Folia::CompletionState::Idle);
     if (!appSettings.completion.enabled) return;

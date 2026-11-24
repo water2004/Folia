@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "support/folia_test.hpp"
 #include "editor/session/EditorSession.h"
-#include "editor/rendering/EditorContentPreparation.h"
+#include "editor/rendering/layout/EditorContentPreparation.h"
 
 import folia.markdown.instrumentation;
 

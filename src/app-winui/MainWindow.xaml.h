@@ -9,12 +9,12 @@
 #include "editor/interaction/EditorKeyboardController.h"
 #include "editor/interaction/EditorLatexCompletionController.h"
 #include "editor/interaction/EditorCodeLanguageController.h"
-#include "editor/interaction/EditorDocumentController.h"
-#include "editor/interaction/EditorSidebarController.h"
-#include "settings/AppSettings.h"
+#include "editor/document/EditorDocumentController.h"
+#include "workspace/EditorSidebarController.h"
+#include "settings/storage/AppSettings.h"
 #include "completion/InlineCompletionController.h"
-#include "settings/SettingsView.h"
-#include "settings/LatexCommandCatalog.h"
+#include "settings/views/SettingsView.h"
+#include "settings/latex/LatexCommandCatalog.h"
 #include "theme/ThemeCatalog.h"
 #include "theme/ThemeConfig.h"
 #include "MainWindow.g.h"
@@ -118,7 +118,7 @@ namespace winrt::Folia::implementation
         void ReplaceAllSearchMatches();
         folia::SearchOptions CurrentSearchOptions();
         bool ExecuteEditorCommand(folia::Command const& command);
-        void ConfigureInlineCompletion(winrt::Folia::CompletionService::Transport transport = {});
+        void ConfigureInlineCompletion(folia::platform::completion::CompletionService::Transport transport = {});
         void UpdateCompletionStatus(winrt::Folia::CompletionState, std::string const& error = {});
         bool HandleCompletionKey(folia::platform::editor::EditorKeyGesture);
         void ShowFootnoteFlyout(

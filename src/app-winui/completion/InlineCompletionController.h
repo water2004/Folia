@@ -1,8 +1,12 @@
 #pragma once
-#include "completion/CompletionService.h"
+#include "windows/completion/CompletionService.h"
 #include "editor/session/EditorSession.h"
 
 namespace winrt::Folia {
+using folia::platform::completion::CompletionConfig;
+using folia::platform::completion::CompletionResult;
+using folia::platform::completion::CompletionService;
+
 enum class CompletionState { Idle, Requesting, Ready, Empty, BudgetExhausted, Failed };
 class InlineCompletionController : public std::enable_shared_from_this<InlineCompletionController> {
 public:

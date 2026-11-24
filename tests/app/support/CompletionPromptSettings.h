@@ -1,5 +1,5 @@
 #pragma once
-#include "settings/CompletionPromptSettings.h"
+#include "settings/storage/CompletionPromptSettings.h"
 
 namespace completion_tests {
 inline folia::completion::Prompt MakePrompt(folia::completion::Context const& context,

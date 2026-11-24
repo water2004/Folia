@@ -9,7 +9,7 @@ import folia.platform.editor_scroll_state;
 #include "windows/media/mermaid/MermaidRenderer.h"
 #include "windows/media/svg/SvgNormalizer.h"
 #include "editor/rendering/EditorStyleSheet.h"
-#include "editor/rendering/EditorMathPreparation.h"
+#include "editor/rendering/media/EditorMathPreparation.h"
 #include "editor/rendering/EditorRenderCache.h"
 #include "editor/rendering/EditorRenderResources.h"
 #include "editor/rendering/EditorCaretAnimation.h"

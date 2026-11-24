@@ -3,8 +3,8 @@
 #include <winrt/Microsoft.UI.Xaml.Hosting.h>
 #include "editor/interaction/EditorSelectionDrag.h"
 #include "editor/rendering/EditorContentGeometry.h"
-#include "editor/rendering/EditorContentPreparation.h"
-#include "editor/rendering/EditorMathPreview.h"
+#include "editor/rendering/layout/EditorContentPreparation.h"
+#include "editor/rendering/media/EditorMathPreview.h"
 
 import folia.markdown.instrumentation;
 

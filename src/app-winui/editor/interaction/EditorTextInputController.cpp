@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "editor/interaction/EditorTextInputController.h"
-#include "editor/rendering/EditorContentPreparation.h"
+#include "editor/rendering/layout/EditorContentPreparation.h"
 
 import folia.core.command;
 import folia.markdown.utf;

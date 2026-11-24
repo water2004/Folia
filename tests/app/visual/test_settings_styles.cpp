@@ -3,7 +3,7 @@
 #include "../support/DocumentControllerFixture.h"
 #include "visual_window.h"
 #include "localization/Localization.h"
-#include "settings/SettingsView.h"
+#include "settings/views/SettingsView.h"
 #include "theme/ThemeConfig.h"
 #include "../support/CompletionHttpServer.h"
 #include <winrt/Microsoft.UI.Xaml.Automation.Peers.h>

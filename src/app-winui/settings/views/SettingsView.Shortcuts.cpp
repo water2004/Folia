@@ -1,0 +1,538 @@
+#include "pch.h"
+#include "settings/views/SettingsView.h"
+#include "settings/views/ShortcutSettingsComponents.h"
+#include "settings/views/SettingsViewSupport.h"
+#include "localization/Localization.h"
+
+import folia.markdown.utf;
+import folia.core.snippet_template;
+
+namespace winrt::Folia
+{
+    using namespace Microsoft::UI::Xaml;
+    using namespace Microsoft::UI::Xaml::Controls;
+    using settings_ui::Brush;
+    using settings_ui::PageHeading;
+    using settings_ui::Text;
+    using settings_ui::ShortcutActionLabel;
+    using settings_ui::ShortcutCaptureDisposition;
+    using settings_ui::ShortcutGestureLabel;
+    using settings_ui::ShortcutScopeFromIndex;
+    using settings_ui::ShortcutScopeIndex;
+    using ShortcutBinding = folia::platform::editor::EditorShortcutBinding;
+    using EditorKeyGesture = folia::platform::editor::EditorKeyGesture;
+
+    UIElement SettingsView::BuildShortcutsPage()
+    {
+        StackPanel page = settings_ui::PagePanel();
+
+        page.Children().Append(settings_ui::PageHeader(Localize(L"Shortcuts"), Localize(L"ShortcutsDescription")));
+
+        Grid listHeader;
+        listHeader.ColumnDefinitions().Append(ColumnDefinition{});
+        ColumnDefinition addColumn;
+        addColumn.Width(GridLengthHelper::Auto());
+        listHeader.ColumnDefinitions().Append(addColumn);
+        auto listTitle = settings_ui::SectionHeading(Localize(L"ShortcutBindings"));
+        listTitle.VerticalAlignment(VerticalAlignment::Center);
+        listHeader.Children().Append(listTitle);
+        Button addAction;
+        addAction.Content(box_value(Localize(L"AddInsertionAction")));
+        addAction.Click([this](auto const&, auto const&)
+        {
+            ShowSnippetEditorAsync(std::nullopt);
+        });
+        Grid::SetColumn(addAction, 1);
+        listHeader.Children().Append(addAction);
+        page.Children().Append(listHeader);
+
+        Grid tableHeader;
+        tableHeader.ColumnSpacing(12);
+        for (auto width : {2.0, 1.0, 1.2})
+        {
+            ColumnDefinition column;
+            column.Width(GridLengthHelper::FromValueAndType(width, GridUnitType::Star));
+            tableHeader.ColumnDefinitions().Append(column);
+        }
+        ColumnDefinition operationsColumn;
+        operationsColumn.Width(GridLengthHelper::Auto());
+        tableHeader.ColumnDefinitions().Append(operationsColumn);
+        auto appendHeader = [&](hstring const& label, int column)
+        {
+            auto text = settings_ui::Hint(label);
+            text.FontWeight(winrt::Windows::UI::Text::FontWeights::SemiBold());
+            Grid::SetColumn(text, column);
+            tableHeader.Children().Append(text);
+        };
+        appendHeader(Localize(L"ShortcutAction"), 0);
+        appendHeader(Localize(L"ShortcutScope"), 1);
+        appendHeader(Localize(L"ShortcutKeys"), 2);
+        appendHeader(Localize(L"ShortcutOperations"), 3);
+        page.Children().Append(tableHeader);
+
+        shortcutRows_ = shortcutList_.ContainerContentChanging(winrt::auto_revoke,
+            [this](auto const&, ContainerContentChangingEventArgs const& args)
+            {
+                auto container = args.ItemContainer();
+                auto presenter = container.ContentTemplateRoot().as<ContentPresenter>();
+                if (args.InRecycleQueue())
+                {
+                    // A capture belongs to a realized control, never to a new
+                    // item which later occupies its recycled container.
+                    if (capturingShortcut_ && container.Tag()
+                        && *capturingShortcut_ == unbox_value<std::uint32_t>(container.Tag()))
+                        CancelShortcutCapture();
+                    presenter.Content(nullptr);
+                    return;
+                }
+                container.Tag(box_value(static_cast<std::uint32_t>(args.ItemIndex())));
+                presenter.Content(BuildShortcutRow(static_cast<std::size_t>(args.ItemIndex())));
+                args.Handled(true);
+            });
+        return settings_ui::ListPage(page, shortcutList_, shortcutStatus_);
+    }
+
+    void SettingsView::SetShortcutStatus(hstring const& message, bool error)
+    {
+        settings_ui::SetStatus(shortcutStatus_, message, error);
+    }
+
+    void SettingsView::RefreshShortcutList()
+    {
+        auto const& bindings = shortcutModel_.Bindings();
+        if (shortcutList_.ItemsSource() && displayedShortcuts_ == bindings) return;
+        capturingShortcut_.reset();
+        captureButton_ = {};
+        displayedShortcuts_ = bindings;
+        std::vector<Windows::Foundation::IInspectable> items;
+        items.reserve(bindings.size());
+        for (std::uint32_t index = 0; index < bindings.size(); ++index) items.push_back(box_value(index));
+        shortcutList_.ItemsSource(winrt::single_threaded_observable_vector<Windows::Foundation::IInspectable>(std::move(items)));
+    }
+
+    FrameworkElement SettingsView::BuildShortcutRow(std::size_t index)
+    {
+        if (index >= shortcutModel_.Bindings().size()) return nullptr;
+        auto const& binding = shortcutModel_.Bindings()[index];
+        Grid row;
+        row.Padding(Thickness{4, 4, 4, 4});
+        row.ColumnSpacing(12);
+        for (auto width : {2.0, 1.0, 1.2})
+        {
+            ColumnDefinition column;
+            column.Width(GridLengthHelper::FromValueAndType(width, GridUnitType::Star));
+            row.ColumnDefinitions().Append(column);
+        }
+        ColumnDefinition operationsColumn;
+        operationsColumn.Width(GridLengthHelper::Auto());
+        row.ColumnDefinitions().Append(operationsColumn);
+
+        auto action = Text(ShortcutActionLabel(binding));
+        action.VerticalAlignment(VerticalAlignment::Center);
+        row.Children().Append(action);
+
+        auto scope = settings_ui::Choice();
+        scope.Items().Append(box_value(Localize(L"ShortcutScopeGlobal")));
+        scope.Items().Append(box_value(Localize(L"ShortcutScopeCode")));
+        scope.Items().Append(box_value(Localize(L"ShortcutScopeMath")));
+        scope.Items().Append(box_value(Localize(L"ShortcutScopeTable")));
+        scope.SelectedIndex(ShortcutScopeIndex(binding.scope));
+        scope.SelectionChanged([this, index](auto const& sender, auto const&)
+        {
+            if (refreshing_ || detached_) return;
+            auto combo = sender.template as<ComboBox>();
+            ChangeShortcutScope(index, combo.SelectedIndex());
+            // Conflicts or failed persistence restore the model. Reflect that
+            // value even when no data changed and the list was not rebuilt.
+            auto previous = std::exchange(refreshing_, true);
+            if (index < shortcutModel_.Bindings().size())
+                combo.SelectedIndex(ShortcutScopeIndex(shortcutModel_.Bindings()[index].scope));
+            refreshing_ = previous;
+        });
+        Grid::SetColumn(scope, 1);
+        row.Children().Append(scope);
+
+        Button capture;
+        capture.HorizontalAlignment(HorizontalAlignment::Stretch);
+        capture.HorizontalContentAlignment(HorizontalAlignment::Center);
+        capture.Content(box_value(ShortcutGestureLabel(binding.gesture)));
+        capture.Click([this, index](auto const& sender, auto const&) { BeginShortcutCapture(index, sender.template as<Button>()); });
+        capture.KeyDown([this, index](
+            auto const& sender, Input::KeyRoutedEventArgs const& args)
+        {
+            CaptureShortcut(index, sender.template as<Button>(), args);
+        });
+        Grid::SetColumn(capture, 2);
+        row.Children().Append(capture);
+
+        Button more;
+        FontIcon moreIcon;
+        moreIcon.Glyph(L"\xE712");
+        more.Content(moreIcon);
+        more.Padding(Thickness{8, 4, 8, 4});
+        more.HorizontalAlignment(HorizontalAlignment::Right);
+        more.VerticalAlignment(VerticalAlignment::Center);
+        ToolTipService::SetToolTip(more, box_value(Localize(L"MoreActions")));
+        MenuFlyout menu;
+        MenuFlyoutItem clear;
+        clear.Text(Localize(L"Clear"));
+        clear.Click([this, index](auto const&, auto const&) { ClearShortcut(index); });
+        menu.Items().Append(clear);
+        if (binding.action_kind
+            == folia::platform::editor::EditorShortcutActionKind::InsertSnippet)
+        {
+            MenuFlyoutItem edit;
+            edit.Text(Localize(L"Edit"));
+            edit.Click([this, index](auto const&, auto const&)
+            {
+                ShowSnippetEditorAsync(index);
+            });
+            menu.Items().Append(edit);
+            MenuFlyoutItem remove;
+            remove.Text(Localize(L"Remove"));
+            remove.Click([this, index](auto const&, auto const&) { RemoveSnippet(index); });
+            menu.Items().Append(remove);
+        }
+        else
+        {
+            MenuFlyoutItem resetDefault;
+            resetDefault.Text(Localize(L"ResetDefault"));
+            resetDefault.Click([this, index](auto const&, auto const&) { ResetShortcut(index); });
+            menu.Items().Append(resetDefault);
+        }
+        more.Flyout(menu);
+        Grid::SetColumn(more, 3);
+        row.Children().Append(more);
+
+        Border separator;
+        separator.Style(settings_ui::ResourceStyle(L"SettingsListSeparatorStyle"));
+        separator.Child(row);
+        return separator;
+    }
+
+    void SettingsView::CancelShortcutCapture()
+    {
+        if (capturingShortcut_) SetShortcutStatus({});
+        if (capturingShortcut_ && *capturingShortcut_ < shortcutModel_.Bindings().size())
+            if (auto button = captureButton_.get()) button.Content(box_value(
+                ShortcutGestureLabel(shortcutModel_.Bindings()[*capturingShortcut_].gesture)));
+        capturingShortcut_.reset();
+        captureButton_ = {};
+    }
+
+    void SettingsView::BeginShortcutCapture(std::size_t index, Button const& button)
+    {
+        auto const& bindings = shortcutModel_.Bindings();
+        if (index >= bindings.size()) return;
+        if (detached_) return;
+        CancelShortcutCapture();
+        capturingShortcut_ = index;
+        captureButton_ = winrt::make_weak(button);
+        button.Content(box_value(Localize(L"PressShortcut")));
+        button.Focus(FocusState::Programmatic);
+        SetShortcutStatus(Localize(L"ShortcutCaptureHint"));
+    }
+
+    void SettingsView::CaptureShortcut(
+        std::size_t index,
+        Button const& button,
+        Input::KeyRoutedEventArgs const& args)
+    {
+        auto const& bindings = shortcutModel_.Bindings();
+        if (detached_ || !capturingShortcut_ || *capturingShortcut_ != index || index >= bindings.size())
+            return;
+        auto captured = settings_ui::CaptureShortcutGesture(args);
+        if (captured.disposition == ShortcutCaptureDisposition::Cancel)
+        {
+            CancelShortcutCapture();
+            args.Handled(true);
+            return;
+        }
+        if (captured.disposition == ShortcutCaptureDisposition::Ignore)
+        {
+            args.Handled(true);
+            return;
+        }
+        auto result = shortcutModel_.SetGesture(index, captured.gesture);
+        if (HandleShortcutResult(result, captured.gesture))
+        {
+            capturingShortcut_.reset();
+            if (ApplyShortcutSettings()) RefreshShortcutList();
+            button.Content(box_value(ShortcutGestureLabel(shortcutModel_.Bindings()[index].gesture)));
+        }
+        args.Handled(true);
+    }
+
+    void SettingsView::ClearShortcut(std::size_t index)
+    {
+        auto result = shortcutModel_.SetGesture(index, std::nullopt);
+        if (!HandleShortcutResult(result)) return;
+        capturingShortcut_.reset();
+        if (ApplyShortcutSettings()) RefreshShortcutList();
+    }
+
+    void SettingsView::ResetShortcut(std::size_t index)
+    {
+        auto const& bindings = shortcutModel_.Bindings();
+        if (index >= bindings.size()) return;
+        auto defaults = folia::platform::editor::default_editor_shortcuts();
+        auto found = std::ranges::find(
+            defaults, bindings[index].id, &ShortcutBinding::id);
+        if (found == defaults.end()) return;
+        auto result = shortcutModel_.ResetBuiltIn(index, *found);
+        if (!HandleShortcutResult(result, found->gesture)) return;
+        capturingShortcut_.reset();
+        if (ApplyShortcutSettings()) RefreshShortcutList();
+    }
+
+    void SettingsView::ChangeShortcutScope(std::size_t index, std::int32_t selectedIndex)
+    {
+        auto const& bindings = shortcutModel_.Bindings();
+        if (index >= bindings.size()) return;
+        auto gesture = bindings[index].gesture;
+        auto result = shortcutModel_.SetScope(
+            index, ShortcutScopeFromIndex(selectedIndex));
+        if (!HandleShortcutResult(result, gesture))
+        {
+            RefreshShortcutList();
+            return;
+        }
+        if (ApplyShortcutSettings()) RefreshShortcutList();
+    }
+
+    bool SettingsView::HandleShortcutResult(
+        folia::platform::editor::ShortcutSettingsResult const& result,
+        std::optional<EditorKeyGesture> gesture)
+    {
+        using folia::platform::editor::ShortcutSettingsError;
+        if (result) return true;
+        if (result.error == ShortcutSettingsError::Conflict && result.conflict_index)
+        {
+            auto const& bindings = shortcutModel_.Bindings();
+            if (*result.conflict_index < bindings.size())
+            {
+                if (!gesture) gesture = bindings[*result.conflict_index].gesture;
+                SetShortcutStatus(LocalizeFormat(
+                    L"ShortcutConflict",
+                    {ShortcutGestureLabel(gesture),
+                     ShortcutActionLabel(bindings[*result.conflict_index])}),
+                    true);
+            }
+        }
+        else if (result.error == ShortcutSettingsError::EmptyName
+            || result.error == ShortcutSettingsError::EmptyTemplate)
+        {
+            SetShortcutStatus(Localize(L"SnippetFieldsRequired"), true);
+        }
+        return false;
+    }
+
+    bool SettingsView::ApplyShortcutSettings()
+    {
+        if (detached_ || !applySettings_) return false;
+        auto validation = shortcutModel_.Validate();
+        if (!HandleShortcutResult(validation)) return false;
+        auto proposed = appliedSettings_;
+        proposed.shortcutBindings = shortcutModel_.Bindings();
+        if (auto error = applySettings_(proposed))
+        {
+            shortcutModel_.Reset(appliedSettings_.shortcutBindings);
+            settings_.shortcutBindings = appliedSettings_.shortcutBindings;
+            SetShortcutStatus(*error, true);
+            RefreshShortcutList();
+            return false;
+        }
+        settings_.shortcutBindings = proposed.shortcutBindings;
+        appliedSettings_.shortcutBindings = proposed.shortcutBindings;
+        SetShortcutStatus(Localize(L"ShortcutsSaved"));
+        return true;
+    }
+
+    fire_and_forget SettingsView::ShowSnippetEditorAsync(
+        std::optional<std::size_t> index)
+    {
+        auto lifetime = shared_from_this();
+        if (editorDialogOpen_) co_return;
+        std::optional<ShortcutBinding> existing;
+        if (index)
+        {
+            auto const& bindings = shortcutModel_.Bindings();
+            if (*index >= bindings.size()
+                || bindings[*index].action_kind
+                    != folia::platform::editor::EditorShortcutActionKind::InsertSnippet)
+                co_return;
+            existing = bindings[*index];
+        }
+
+        editorDialogOpen_ = true;
+        struct DialogGuard
+        {
+            bool& open;
+            ~DialogGuard() { open = false; }
+        } guard{editorDialogOpen_};
+
+        ContentDialog dialog;
+        dialog.XamlRoot(navigation_.XamlRoot());
+        dialog.Title(box_value(Localize(existing
+            ? L"EditInsertionAction" : L"CustomInsertionAction")));
+        dialog.PrimaryButtonText(Localize(existing
+            ? L"SaveInsertionAction" : L"AddInsertionAction"));
+        dialog.CloseButtonText(Localize(L"Cancel"));
+        dialog.DefaultButton(ContentDialogButton::Primary);
+
+        StackPanel fields;
+        fields.Spacing(10);
+        fields.MinWidth(560);
+        fields.Children().Append(settings_ui::Hint(Localize(L"SnippetPlaceholderDescription")));
+        TextBox name;
+        name.Header(box_value(Localize(L"ActionName")));
+        name.PlaceholderText(Localize(L"ActionNameExample"));
+        if (existing) name.Text(winrt::to_hstring(existing->custom_name));
+        fields.Children().Append(name);
+        TextBox snippet;
+        snippet.Header(box_value(Localize(L"InsertionTemplate")));
+        snippet.PlaceholderText(LR"(\\frac{${1}}{${2}}$0)");
+        snippet.AcceptsReturn(false);
+        snippet.TextWrapping(TextWrapping::NoWrap);
+        if (existing)
+        {
+            auto literal = folia::encode_snippet_literal(existing->snippet);
+            snippet.Text(winrt::to_hstring(folia::cps_to_utf8(literal)));
+        }
+        fields.Children().Append(snippet);
+
+        Grid assignment;
+        assignment.ColumnSpacing(10);
+        assignment.ColumnDefinitions().Append(ColumnDefinition{});
+        assignment.ColumnDefinitions().Append(ColumnDefinition{});
+        auto scope = settings_ui::Choice();
+        scope.Header(box_value(Localize(L"ShortcutScope")));
+        scope.Items().Append(box_value(Localize(L"ShortcutScopeGlobal")));
+        scope.Items().Append(box_value(Localize(L"ShortcutScopeCode")));
+        scope.Items().Append(box_value(Localize(L"ShortcutScopeMath")));
+        scope.Items().Append(box_value(Localize(L"ShortcutScopeTable")));
+        scope.SelectedIndex(existing ? ShortcutScopeIndex(existing->scope) : 0);
+        scope.HorizontalAlignment(HorizontalAlignment::Stretch);
+        assignment.Children().Append(scope);
+        Grid gestureField;
+        gestureField.RowSpacing(4);
+        RowDefinition gestureLabelRow;
+        gestureLabelRow.Height(GridLengthHelper::Auto());
+        gestureField.RowDefinitions().Append(gestureLabelRow);
+        RowDefinition gestureButtonRow;
+        gestureButtonRow.Height(GridLengthHelper::Auto());
+        gestureField.RowDefinitions().Append(gestureButtonRow);
+        gestureField.HorizontalAlignment(HorizontalAlignment::Stretch);
+        gestureField.Children().Append(Text(Localize(L"ShortcutKeys"), 12));
+        Button gestureButton;
+        std::optional<EditorKeyGesture> gesture = existing
+            ? existing->gesture : std::nullopt;
+        gestureButton.Content(box_value(ShortcutGestureLabel(gesture)));
+        gestureButton.HorizontalAlignment(HorizontalAlignment::Stretch);
+        gestureButton.HorizontalContentAlignment(HorizontalAlignment::Center);
+        Grid::SetRow(gestureButton, 1);
+        bool capturing = false;
+        gestureButton.Click([&gestureButton, &capturing](auto const&, auto const&)
+        {
+            capturing = true;
+            gestureButton.Content(box_value(Localize(L"PressShortcut")));
+            gestureButton.Focus(FocusState::Programmatic);
+        });
+        gestureButton.KeyDown([&gestureButton, &gesture, &capturing](
+            auto const&, Input::KeyRoutedEventArgs const& args)
+        {
+            if (!capturing) return;
+            auto result = settings_ui::CaptureShortcutGesture(args);
+            if (result.disposition == ShortcutCaptureDisposition::Cancel)
+            {
+                capturing = false;
+                gestureButton.Content(box_value(ShortcutGestureLabel(gesture)));
+                args.Handled(true);
+                return;
+            }
+            if (result.disposition == ShortcutCaptureDisposition::Ignore)
+            {
+                args.Handled(true);
+                return;
+            }
+            gesture = result.gesture;
+            capturing = false;
+            gestureButton.Content(box_value(ShortcutGestureLabel(gesture)));
+            args.Handled(true);
+        });
+        gestureField.Children().Append(gestureButton);
+        Grid::SetColumn(gestureField, 1);
+        assignment.Children().Append(gestureField);
+        fields.Children().Append(assignment);
+
+        TextBlock error;
+        error.TextWrapping(TextWrapping::Wrap);
+        settings_ui::SetStatus(error, {}, true);
+        fields.Children().Append(error);
+        dialog.Content(fields);
+
+        dialog.PrimaryButtonClick([this, &name, &snippet, &scope, &gesture, &error, index](
+            auto const&, ContentDialogButtonClickEventArgs const& args)
+        {
+            auto literal = folia::utf8_to_cps(winrt::to_string(snippet.Text()));
+            auto decoded = folia::decode_snippet_literal(literal);
+            if (!decoded)
+            {
+                error.Text(LocalizeFormat(L"SnippetLiteralError", {
+                    winrt::to_hstring(decoded.error_offset.value_or(0) + 1)}));
+                args.Cancel(true);
+                return;
+            }
+
+            auto candidate = shortcutModel_;
+            folia::platform::editor::ShortcutSettingsResult result;
+            if (index)
+            {
+                result = candidate.SetGesture(*index, std::nullopt);
+                if (result)
+                    result = candidate.UpdateSnippet(
+                        *index,
+                        winrt::to_string(name.Text()),
+                        std::move(decoded.value),
+                        ShortcutScopeFromIndex(scope.SelectedIndex()));
+                if (result) result = candidate.SetGesture(*index, gesture);
+            }
+            else
+            {
+                auto id = std::string("snippet.") + std::to_string(GetTickCount64());
+                while (std::ranges::find(candidate.Bindings(), id, &ShortcutBinding::id)
+                    != candidate.Bindings().end()) id.push_back('x');
+                result = candidate.AddSnippet({
+                    .id = std::move(id),
+                    .custom_name = winrt::to_string(name.Text()),
+                    .scope = ShortcutScopeFromIndex(scope.SelectedIndex()),
+                    .gesture = gesture,
+                    .snippet = std::move(decoded.value),
+                });
+            }
+            if (!HandleShortcutResult(result, gesture))
+            {
+                error.Text(shortcutStatus_.Text());
+                args.Cancel(true);
+                return;
+            }
+            shortcutModel_ = std::move(candidate);
+            if (!ApplyShortcutSettings())
+            {
+                error.Text(shortcutStatus_.Text());
+                args.Cancel(true);
+                return;
+            }
+            RefreshShortcutList();
+        });
+
+        co_await dialog.ShowAsync();
+    }
+
+    void SettingsView::RemoveSnippet(std::size_t index)
+    {
+        auto result = shortcutModel_.RemoveSnippet(index);
+        if (!HandleShortcutResult(result)) return;
+        if (ApplyShortcutSettings()) RefreshShortcutList();
+    }
+}

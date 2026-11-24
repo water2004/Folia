@@ -1,12 +1,13 @@
 #include "pch.h"
 #include "support/CompletionPromptSettings.h"
 #include "support/folia_test.hpp"
-#include "completion/CompletionHttpTransport.h"
+#include "windows/completion/CompletionHttpTransport.h"
 #include "support/CompletionHttpServer.h"
 
 namespace {
 using namespace boost::ut;
 using namespace winrt::Folia;
+using namespace folia::platform::completion;
 using completion_tests::Server;
 std::string const response = R"(data: {"choices":[{"index":0,"delta":{"content":" hello"},"finish_reason":null}]})" "\n\n"
     R"(data: {"choices":[{"index":0,"delta":{},"finish_reason":"stop"}]})" "\n\n"

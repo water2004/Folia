@@ -1,7 +1,7 @@
 #pragma once
 
 #include "editor/session/EditorSession.h"
-#include "editor/interaction/EditorDocumentController.h"
+#include "editor/document/EditorDocumentController.h"
 #include "windows/media/math/MathJaxRenderer.h"
 
 namespace winrt::Folia {

@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "support/folia_test.hpp"
-#include "settings/SettingsView.h"
+#include "settings/views/SettingsView.h"
 
 using namespace boost::ut;
 using namespace winrt::Folia;

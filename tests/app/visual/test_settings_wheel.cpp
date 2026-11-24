@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "support/folia_test.hpp"
 #include "../support/DocumentControllerFixture.h"
-#include "settings/SettingsViewSupport.h"
+#include "settings/views/SettingsViewSupport.h"
 
 namespace {
 using namespace boost::ut;

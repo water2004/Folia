@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "support/folia_test.hpp"
 #include "editor/session/EditorSession.h"
-#include "editor/rendering/EditorDocumentBlockPreparer.h"
-#include "editor/rendering/EditorDocumentRenderPass.h"
+#include "editor/rendering/layout/EditorDocumentBlockPreparer.h"
+#include "editor/rendering/painting/EditorDocumentRenderPass.h"
 #include "editor/rendering/EditorSurfaceRenderer.h"
 #include "editor/rendering/EditorContentGeometry.h"
 import folia.markdown.instrumentation;

@@ -4,8 +4,8 @@ import std;
 import folia.markdown.utf;
 #include "editor/rendering/EditorSurfaceRenderer.h"
 #include "editor/rendering/EditorContentGeometry.h"
-#include "editor/rendering/EditorContentPreparation.h"
-#include "editor/rendering/EditorPreparedDocumentCache.h"
+#include "editor/rendering/layout/EditorContentPreparation.h"
+#include "editor/rendering/layout/EditorPreparedDocumentCache.h"
 
 namespace winrt::Folia
 {

@@ -1,0 +1,62 @@
+#pragma once
+
+#include "editor/rendering/layout/EditorContentPreparation.h"
+#include "editor/rendering/EditorRenderCache.h"
+#include "editor/rendering/EditorRenderResources.h"
+#include "editor/rendering/EditorStyleSheet.h"
+#include "editor/rendering/painting/EditorSvgPainter.h"
+#include "media/MediaDisplaySettings.h"
+#include "windows/media/svg/SvgNormalizer.h"
+
+namespace winrt::Folia
+{
+    struct EditorInlineImageRenderer
+    {
+        struct ImageDraw
+        {
+            std::uint32_t displayStart = 0;
+            std::optional<EditorImageCache::RasterImage> image;
+            std::optional<folia::platform::NormalizedSvg> svg;
+            std::string source;
+            std::wstring alt;
+            std::wstring caption;
+            ::Microsoft::WRL::ComPtr<IDWriteTextLayout> captionLayout;
+            float width = 0.0f;
+            float height = 0.0f;
+            float imageHeight = 0.0f;
+            float imageTopOffset = 0.0f;
+            float captionGap = 0.0f;
+            float captionHeight = 0.0f;
+            float advance = 0.0f;
+            bool block = false;
+            bool pending = false;
+
+            bool Loaded() const { return image.has_value() || svg.has_value(); }
+        };
+
+        EditorInlineImageRenderer(
+            EditorRenderResources& resources,
+            EditorRenderCache& cache,
+            EditorStyleSheet const& styleSheet,
+            folia::platform::SvgNormalizer& svgNormalizer,
+            EditorSvgPainter& svgPainter,
+            std::wstring const& baseDirectory,
+            bool animate = true,
+            int maximumWidthPercent = MediaDisplaySettings::imageWidths.back(),
+            std::optional<float> maximumHeight = std::nullopt);
+        std::vector<ImageDraw> Resolve(IDWriteTextLayout* layout, std::vector<DisplayInlineText::ImageOverlay> const& overlays, float availableWidth, bool loadContent = true) const;
+        void ReleaseGif(std::string_view source) const;
+        void Draw(IDWriteTextLayout* layout, D2D1_POINT_2F origin, std::vector<ImageDraw> const& images) const;
+
+    private:
+        EditorRenderResources& resources;
+        EditorRenderCache& cache;
+        EditorStyleSheet const& styleSheet;
+        folia::platform::SvgNormalizer& svgNormalizer;
+        EditorSvgPainter& svgPainter;
+        std::wstring const& baseDirectory;
+        bool animate = true;
+        float widthFraction;
+        std::optional<float> maximumHeight;
+    };
+}

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "editor/rendering/EditorImageCache.h"
+#include "editor/rendering/media/EditorImageCache.h"
 
 import folia.platform.editor_svg_drawing;
 

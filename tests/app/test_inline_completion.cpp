@@ -3,7 +3,7 @@
 #include "support/folia_test.hpp"
 #include "completion/InlineCompletionController.h"
 #include "support/CompletionReply.h"
-#include "editor/rendering/EditorContentPreparation.h"
+#include "editor/rendering/layout/EditorContentPreparation.h"
 import folia.markdown.instrumentation;
 import folia.markdown.block_source;
 import folia.markdown.utf;

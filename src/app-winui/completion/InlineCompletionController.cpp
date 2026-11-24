@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "completion/InlineCompletionController.h"
 #include <unicode/ubrk.h>
-#include "editor/rendering/EditorContentPreparation.h"
-#include "settings/CompletionPromptSettings.h"
+#include "editor/rendering/layout/EditorContentPreparation.h"
+#include "settings/storage/CompletionPromptSettings.h"
 import folia.markdown.utf;
 
 namespace winrt::Folia {

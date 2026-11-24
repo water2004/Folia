@@ -3,9 +3,9 @@
 import folia.core.render_model;
 import folia.core.types;
 
-#include "editor/rendering/EditorContentPreparation.h"
+#include "editor/rendering/layout/EditorContentPreparation.h"
 #include "editor/rendering/EditorContentGeometry.h"
-#include "editor/rendering/EditorDocumentPainter.h"
+#include "editor/rendering/painting/EditorDocumentPainter.h"
 #include "editor/rendering/EditorTableBlockRenderer.h"
 
 namespace winrt::Folia

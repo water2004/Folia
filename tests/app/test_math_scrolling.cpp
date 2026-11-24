@@ -4,7 +4,7 @@
 #include "editor/rendering/EditorSurfaceRenderer.h"
 #include "editor/session/EditorSession.h"
 #include "editor/interaction/EditorFrameScheduler.h"
-#include "editor/rendering/EditorContentPreparation.h"
+#include "editor/rendering/layout/EditorContentPreparation.h"
 
 using namespace boost::ut;
 using namespace winrt::Folia;

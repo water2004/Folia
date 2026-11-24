@@ -152,21 +152,23 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
+    <ClInclude Include="..\platform\windows\completion\CompletionHttpTransport.h" />
+    <ClInclude Include="..\platform\windows\completion\CompletionService.h" />
     <ClInclude Include="storage\AssetPaths.h" />
     <ClCompile Include="..\encoding\document_encoding.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClInclude Include="..\platform\windows\storage\ClipboardImageStore.h" />
     <ClInclude Include="localization\Localization.h" />
-    <ClInclude Include="settings\AppSettings.h" />
-    <ClInclude Include="settings\CompletionPromptSettings.h" />
-    <ClInclude Include="settings\ShortcutSettingsSerialization.h" />
-    <ClInclude Include="settings\SettingsView.h" />
-    <ClInclude Include="settings\SettingsViewSupport.h" />
-    <ClInclude Include="settings\LatexCommandCatalog.h" />
-    <ClInclude Include="settings\LatexCommandSettingsComponents.h" />
-    <ClInclude Include="settings\ShortcutSettingsComponents.h" />
-    <ClInclude Include="settings\LatexCommandStore.h" />
+    <ClInclude Include="settings\storage\AppSettings.h" />
+    <ClInclude Include="settings\storage\CompletionPromptSettings.h" />
+    <ClInclude Include="settings\storage\ShortcutSettingsSerialization.h" />
+    <ClInclude Include="settings\views\SettingsView.h" />
+    <ClInclude Include="settings\views\SettingsViewSupport.h" />
+    <ClInclude Include="settings\latex\LatexCommandCatalog.h" />
+    <ClInclude Include="settings\views\LatexCommandSettingsComponents.h" />
+    <ClInclude Include="settings\views\ShortcutSettingsComponents.h" />
+    <ClInclude Include="settings\storage\LatexCommandStore.h" />
     <ClInclude Include="editor\interaction\EditorLatexCompletionController.h" />
     <ClInclude Include="editor\interaction\EditorCodeLanguageController.h" />
     <ClInclude Include="theme\ThemeConfig.h" />
@@ -174,16 +176,16 @@
     <ClInclude Include="editor\session\EditorSession.h" />
     <ClInclude Include="editor\session\EditorRenderFrame.h" />
     <ClInclude Include="editor\rendering\EditorStyleSheet.h" />
-    <ClInclude Include="editor\rendering\EditorContentPreparation.h" />
-    <ClInclude Include="editor\rendering\EditorDocumentBlockPreparer.h" />
-    <ClInclude Include="editor\rendering\EditorEmbeddedContentUpdater.h" />
-    <ClInclude Include="editor\rendering\EditorDocumentPainter.h" />
-    <ClInclude Include="editor\rendering\EditorDocumentPreparationPass.h" />
-    <ClInclude Include="editor\rendering\EditorViewportMaterializer.h" />
-    <ClInclude Include="editor\rendering\EditorDocumentRenderPass.h" />
+    <ClInclude Include="editor\rendering\layout\EditorContentPreparation.h" />
+    <ClInclude Include="editor\rendering\layout\EditorDocumentBlockPreparer.h" />
+    <ClInclude Include="editor\rendering\media\EditorEmbeddedContentUpdater.h" />
+    <ClInclude Include="editor\rendering\painting\EditorDocumentPainter.h" />
+    <ClInclude Include="editor\rendering\layout\EditorDocumentPreparationPass.h" />
+    <ClInclude Include="editor\rendering\layout\EditorViewportMaterializer.h" />
+    <ClInclude Include="editor\rendering\painting\EditorDocumentRenderPass.h" />
     <ClInclude Include="editor\rendering\EditorRenderResources.h" />
-    <ClInclude Include="editor\rendering\EditorPopupShadow.h" />
-    <ClInclude Include="editor\rendering\EditorMathSyntax.h" />
+    <ClInclude Include="editor\rendering\painting\EditorPopupShadow.h" />
+    <ClInclude Include="editor\rendering\media\EditorMathSyntax.h" />
     <ClInclude Include="editor\rendering\EditorCaretAnimation.h" />
     <ClInclude Include="editor\interaction\EditorAnimationController.h" />
     <ClInclude Include="..\platform\windows\media\ExecutableLibrary.h" />
@@ -191,16 +193,16 @@
     <ClInclude Include="..\platform\windows\media\images\ImageDownload.h" />
     <ClInclude Include="..\platform\windows\media\images\EditorGifDecoder.h" />
     <ClInclude Include="editor\rendering\EditorRenderCache.h" />
-    <ClInclude Include="editor\rendering\EditorImageCache.h" />
+    <ClInclude Include="editor\rendering\media\EditorImageCache.h" />
     <ClInclude Include="media\ImageResourceCache.h" />
-    <ClInclude Include="editor\rendering\EditorSvgPainter.h" />
-    <ClInclude Include="editor\rendering\EditorSyntaxIcons.h" />
-    <ClInclude Include="editor\rendering\EditorTextLayoutEngine.h" />
-    <ClInclude Include="editor\rendering\EditorFlowLayoutContext.h" />
+    <ClInclude Include="editor\rendering\painting\EditorSvgPainter.h" />
+    <ClInclude Include="editor\rendering\painting\EditorSyntaxIcons.h" />
+    <ClInclude Include="editor\rendering\layout\EditorTextLayoutEngine.h" />
+    <ClInclude Include="editor\rendering\layout\EditorFlowLayoutContext.h" />
     <ClInclude Include="editor\interaction\EditorTableInteraction.h" />
-    <ClInclude Include="editor\rendering\EditorInlineImageRenderer.h" />
-    <ClInclude Include="editor\rendering\EditorEmbeddedDraw.h" />
-    <ClInclude Include="editor\rendering\EditorMathPreview.h" />
+    <ClInclude Include="editor\rendering\media\EditorInlineImageRenderer.h" />
+    <ClInclude Include="editor\rendering\media\EditorEmbeddedDraw.h" />
+    <ClInclude Include="editor\rendering\media\EditorMathPreview.h" />
     <ClInclude Include="editor\rendering\EditorTableBlockRenderer.h" />
     <ClInclude Include="editor\interaction\EditorFrameScheduler.h" />
     <ClInclude Include="editor\interaction\EditorSelectionDrag.h" />
@@ -208,7 +210,7 @@
     <ClInclude Include="editor\interaction\EditorTextInputController.h" />
     <ClInclude Include="editor\interaction\EditorPointerController.h" />
     <ClInclude Include="editor\interaction\EditorKeyboardController.h" />
-    <ClInclude Include="editor\interaction\EditorDocumentController.h" />
+    <ClInclude Include="editor\document\EditorDocumentController.h" />
     <ClInclude Include="workspace\WorkspaceDocuments.h" />
     <ClInclude Include="workspace\WorkspaceIcons.h" />
     <ClInclude Include="..\platform\windows\storage\WorkspaceFileOperations.h" />
@@ -217,19 +219,19 @@
     <ClInclude Include="workspace\FolderExplorerState.h" />
     <ClInclude Include="workspace\WorkspaceFileCoordinator.h" />
     <ClInclude Include="workspace\FolderExplorerController.h" />
-    <ClInclude Include="editor\interaction\EditorDocumentControllerState.h" />
+    <ClInclude Include="editor\document\EditorDocumentControllerState.h" />
     <ClInclude Include="MainWindow.Lifecycle.h" />
-    <ClInclude Include="export\EditorPdfPrintJob.h" />
+    <ClInclude Include="..\platform\windows\printing\PdfPrintJob.h" />
     <ClInclude Include="export\EditorPdfExportTypes.h" />
-    <ClInclude Include="editor\interaction\EditorSidebarController.h" />
+    <ClInclude Include="workspace\EditorSidebarController.h" />
     <ClInclude Include="editor\rendering\EditorSurfaceRenderer.h" />
-      <ClInclude Include="editor\rendering\EditorMathPreparation.h" />
+      <ClInclude Include="editor\rendering\media\EditorMathPreparation.h" />
       <ClInclude Include="editor\rendering\EditorContentGeometry.h" />
       <ClInclude Include="..\platform\windows\media\math\NativeMathSession.h" />
       <ClInclude Include="..\platform\windows\media\math\MathSvgStore.h" />
-      <ClInclude Include="editor\rendering\EditorPreparedDocument.h" />
-      <ClInclude Include="editor\rendering\EditorPreparedDocumentCache.h" />
-      <ClInclude Include="editor\rendering\EditorPreparedDocumentRetention.h" />
+      <ClInclude Include="editor\rendering\layout\EditorPreparedDocument.h" />
+      <ClInclude Include="editor\rendering\layout\EditorPreparedDocumentCache.h" />
+      <ClInclude Include="editor\rendering\layout\EditorPreparedDocumentRetention.h" />
     <ClInclude Include="..\platform\windows\media\math\MathJaxRenderer.h" />
     <ClInclude Include="..\platform\windows\media\math\MathJaxRenderer.State.h" />
     <ClInclude Include="..\platform\windows\media\math\MathJaxSvgParser.h" />
@@ -638,20 +640,20 @@
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="settings\AppSettings.cpp" />
-    <ClCompile Include="settings\CompletionPromptSettings.cpp" />
-    <ClCompile Include="settings\ShortcutSettingsSerialization.cpp" />
-    <ClCompile Include="settings\LatexCommandCatalog.cpp" />
-    <ClCompile Include="settings\LatexCommandSettingsComponents.cpp" />
-    <ClCompile Include="settings\ShortcutSettingsComponents.cpp" />
-    <ClCompile Include="settings\LatexCommandStore.cpp" />
+    <ClCompile Include="settings\storage\AppSettings.cpp" />
+    <ClCompile Include="settings\storage\CompletionPromptSettings.cpp" />
+    <ClCompile Include="settings\storage\ShortcutSettingsSerialization.cpp" />
+    <ClCompile Include="settings\latex\LatexCommandCatalog.cpp" />
+    <ClCompile Include="settings\views\LatexCommandSettingsComponents.cpp" />
+    <ClCompile Include="settings\views\ShortcutSettingsComponents.cpp" />
+    <ClCompile Include="settings\storage\LatexCommandStore.cpp" />
     <ClCompile Include="localization\Localization.cpp" />
-    <ClCompile Include="settings\SettingsView.cpp" />
-    <ClCompile Include="settings\SettingsView.General.cpp" />
-    <ClCompile Include="settings\SettingsView.Shortcuts.cpp" />
-    <ClCompile Include="settings\SettingsView.Latex.cpp" />
-    <ClCompile Include="settings\SettingsView.Themes.cpp" />
-    <ClCompile Include="settings\SettingsView.Licenses.cpp" />
+    <ClCompile Include="settings\views\SettingsView.cpp" />
+    <ClCompile Include="settings\views\SettingsView.General.cpp" />
+    <ClCompile Include="settings\views\SettingsView.Shortcuts.cpp" />
+    <ClCompile Include="settings\views\SettingsView.Latex.cpp" />
+    <ClCompile Include="settings\views\SettingsView.Themes.cpp" />
+    <ClCompile Include="settings\views\SettingsView.Licenses.cpp" />
     <ClCompile Include="storage\AssetPaths.cpp">
       <PreprocessorDefinitions>FOLIA_ASSETS_DIRECTORY=LR&quot;FOLIA($(FoliaAssetsDirectory))FOLIA&quot;;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -677,30 +679,30 @@
     <ClCompile Include="..\platform\windows\editor\interaction\editor_interaction.cpp">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="editor\rendering\EditorContentPreparation.cpp" />
-    <ClCompile Include="editor\rendering\EditorDocumentBlockPreparer.cpp" />
-    <ClCompile Include="editor\rendering\EditorEmbeddedContentUpdater.cpp" />
-    <ClCompile Include="editor\rendering\EditorDocumentPainter.cpp" />
+    <ClCompile Include="editor\rendering\layout\EditorContentPreparation.cpp" />
+    <ClCompile Include="editor\rendering\layout\EditorDocumentBlockPreparer.cpp" />
+    <ClCompile Include="editor\rendering\media\EditorEmbeddedContentUpdater.cpp" />
+    <ClCompile Include="editor\rendering\painting\EditorDocumentPainter.cpp" />
     <ClCompile Include="editor\rendering\EditorCaretPresentation.cpp" />
-      <ClCompile Include="editor\rendering\EditorDocumentPreparationPass.cpp" />
-      <ClCompile Include="editor\rendering\EditorViewportMaterializer.cpp" />
-      <ClCompile Include="editor\rendering\EditorPreparedDocumentCache.cpp" />
-      <ClCompile Include="editor\rendering\EditorPreparedDocumentRetention.cpp" />
-    <ClCompile Include="editor\rendering\EditorMathPreview.cpp" />
-    <ClCompile Include="editor\rendering\EditorDocumentRenderPass.cpp" />
-    <ClCompile Include="editor\rendering\EditorContentUtilities.cpp" />
+      <ClCompile Include="editor\rendering\layout\EditorDocumentPreparationPass.cpp" />
+      <ClCompile Include="editor\rendering\layout\EditorViewportMaterializer.cpp" />
+      <ClCompile Include="editor\rendering\layout\EditorPreparedDocumentCache.cpp" />
+      <ClCompile Include="editor\rendering\layout\EditorPreparedDocumentRetention.cpp" />
+    <ClCompile Include="editor\rendering\media\EditorMathPreview.cpp" />
+    <ClCompile Include="editor\rendering\painting\EditorDocumentRenderPass.cpp" />
+    <ClCompile Include="editor\rendering\layout\EditorContentUtilities.cpp" />
     <ClCompile Include="editor\rendering\EditorInlineObjects.cpp" />
-    <ClCompile Include="editor\rendering\EditorBlockContentPreparation.cpp" />
+    <ClCompile Include="editor\rendering\layout\EditorBlockContentPreparation.cpp" />
     <ClCompile Include="editor\rendering\EditorRenderResources.cpp" />
     <ClCompile Include="editor\rendering\EditorRenderCache.cpp" />
-    <ClCompile Include="editor\rendering\EditorImageCache.cpp" />
+    <ClCompile Include="editor\rendering\media\EditorImageCache.cpp" />
     <ClCompile Include="media\ImageResourceCache.cpp" />
     <ClCompile Include="editor\rendering\EditorRenderCache.Layout.cpp" />
-    <ClCompile Include="editor\rendering\EditorSvgPainter.cpp" />
-    <ClCompile Include="editor\rendering\EditorSyntaxIcons.cpp" />
-    <ClCompile Include="editor\rendering\EditorTextLayoutEngine.cpp" />
+    <ClCompile Include="editor\rendering\painting\EditorSvgPainter.cpp" />
+    <ClCompile Include="editor\rendering\painting\EditorSyntaxIcons.cpp" />
+    <ClCompile Include="editor\rendering\layout\EditorTextLayoutEngine.cpp" />
     <ClCompile Include="editor\interaction\EditorTableInteraction.cpp" />
-    <ClCompile Include="editor\rendering\EditorInlineImageRenderer.cpp" />
+    <ClCompile Include="editor\rendering\media\EditorInlineImageRenderer.cpp" />
     <ClCompile Include="editor\rendering\EditorTableBlockRenderer.cpp" />
     <ClCompile Include="editor\interaction\EditorFrameScheduler.cpp" />
     <ClCompile Include="editor\interaction\EditorAnimationController.cpp" />
@@ -712,7 +714,7 @@
     <ClCompile Include="editor\interaction\EditorKeyboardController.Snippets.cpp" />
     <ClCompile Include="editor\interaction\EditorLatexCompletionController.cpp" />
     <ClCompile Include="editor\interaction\EditorCodeLanguageController.cpp" />
-    <ClCompile Include="editor\interaction\EditorDocumentController.cpp" />
+    <ClCompile Include="editor\document\EditorDocumentController.cpp" />
     <ClCompile Include="workspace\WorkspaceDocuments.cpp" />
     <ClCompile Include="workspace\WorkspaceIcons.cpp" />
     <ClCompile Include="..\platform\windows\storage\WorkspaceFileOperations.cpp">
@@ -723,24 +725,26 @@
     <ClCompile Include="workspace\FolderExplorerController.DragDrop.cpp" />
     <ClCompile Include="workspace\WorkspaceFileCoordinator.cpp" />
     <ClCompile Include="workspace\FolderExplorerController.cpp" />
-    <ClCompile Include="editor\interaction\EditorDocumentController.Relocation.cpp" />
-    <ClCompile Include="editor\interaction\EditorDocumentController.Save.cpp" />
-    <ClCompile Include="editor\interaction\EditorDocumentController.Clipboard.cpp" />
+    <ClCompile Include="editor\document\EditorDocumentController.Relocation.cpp" />
+    <ClCompile Include="editor\document\EditorDocumentController.Save.cpp" />
+    <ClCompile Include="editor\document\EditorDocumentController.Clipboard.cpp" />
     <ClCompile Include="..\platform\windows\storage\ClipboardImageStore.cpp">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="MainWindow.Lifecycle.cpp" />
-    <ClCompile Include="editor\interaction\EditorDocumentController.Reload.cpp" />
+    <ClCompile Include="editor\document\EditorDocumentController.Reload.cpp" />
     <ClCompile Include="..\encoding\document_encoding.cpp">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="editor\interaction\EditorDocumentController.Pdf.cpp" />
-    <ClCompile Include="export\EditorPdfPrintJob.cpp" />
-    <ClCompile Include="editor\interaction\EditorSidebarController.cpp" />
+    <ClCompile Include="export\EditorDocumentController.Pdf.cpp" />
+    <ClCompile Include="..\platform\windows\printing\PdfPrintJob.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="workspace\EditorSidebarController.cpp" />
     <ClCompile Include="editor\rendering\EditorSurfaceRenderer.cpp" />
     <ClCompile Include="editor\rendering\EditorSurfaceRenderer.Document.cpp" />
     <ClCompile Include="editor\rendering\EditorSurfaceRenderer.Interaction.cpp" />
-    <ClCompile Include="editor\rendering\EditorSurfaceRenderer.Pdf.cpp" />
+    <ClCompile Include="export\EditorSurfaceRenderer.Pdf.cpp" />
     <ClCompile Include="..\platform\windows\media\math\MathJaxRenderer.cpp">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
@@ -822,8 +826,8 @@
     <ClCompile Include="App.Windows.cpp" />
     <ClCompile Include="workspace\WorkspaceLaunch.cpp" />
     <ClInclude Include="workspace\WorkspaceLaunch.h" />
-    <ClCompile Include="editor\rendering\EditorPopupShadow.cpp" />
-    <ClCompile Include="editor\rendering\EditorMathSyntax.cpp" />
+    <ClCompile Include="editor\rendering\painting\EditorPopupShadow.cpp" />
+    <ClCompile Include="editor\rendering\media\EditorMathSyntax.cpp" />
     <ClCompile Include="editor\rendering\EditorCaretAnimation.cpp" />
     <ClCompile Include="MainWindow.Folders.cpp" />
     <ClCompile Include="MainWindow.Shortcuts.cpp" />
@@ -913,11 +917,15 @@
     <ClCompile Include="..\..\third_party\model-providers\providers\ModelValidation.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_providers_ModelValidation.obj</ObjectFileName></ClCompile>
     <ClCompile Include="..\..\third_party\model-providers\providers\SseParser.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_providers_SseParser.obj</ObjectFileName></ClCompile>
     <ClCompile Include="..\..\third_party\model-providers\providers\StreamResponse.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader><ObjectFileName>$(IntDir)providers_providers_StreamResponse.obj</ObjectFileName></ClCompile>
-    <ClCompile Include="completion\CompletionService.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
-    <ClCompile Include="completion\CompletionHttpTransport.cpp"><PrecompiledHeader>NotUsing</PrecompiledHeader></ClCompile>
+    <ClCompile Include="..\platform\windows\completion\CompletionService.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\platform\windows\completion\CompletionHttpTransport.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="completion\InlineCompletionController.cpp" />
     <ClCompile Include="MainWindow.Completion.cpp" />
-    <ClCompile Include="settings\SettingsView.Completion.cpp" />
+    <ClCompile Include="settings\views\SettingsView.Completion.cpp" />
     <ClCompile Include="editor\session\EditorSession.Completion.cpp" />
     <ClCompile Include="editor\rendering\EditorCompletionPreview.cpp" />
   </ItemGroup>

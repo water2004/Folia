@@ -1,7 +1,7 @@
 #include "pch.h"
 
 import folia.platform.editor_inline_layout;
-#include "editor/rendering/EditorContentPreparation.h"
+#include "editor/rendering/layout/EditorContentPreparation.h"
 
 namespace winrt::Folia
 {

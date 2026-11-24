@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "support/folia_test.hpp"
-#include "editor/interaction/EditorDocumentController.h"
+#include "editor/document/EditorDocumentController.h"
 #include "localization/Localization.h"
 
 using namespace boost::ut;
