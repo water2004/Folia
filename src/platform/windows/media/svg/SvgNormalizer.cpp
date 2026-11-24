@@ -1,5 +1,6 @@
 #include "windows/media/ExecutableLibrary.h"
 #include "windows/media/svg/SvgNormalizer.h"
+#include "usvg-normalizer/include/folia_svg_normalizer.h"
 
 import folia.platform.editor_priority_work_queue;
 
@@ -93,15 +94,15 @@ namespace
             return result;
         }
 
-        using Create = void* (*)();
-        using Destroy = void (*)(void*);
-        using Normalize = std::int32_t (*)(void*, std::uint8_t const*, std::size_t, float, std::uint8_t**, std::size_t*, float*, float*);
-        using FreeBuffer = void (*)(std::uint8_t*, std::size_t);
-        using BeginRequest = std::int32_t (*)(void*);
-        using EndRequest = void (*)(void*);
+        using Create = decltype(&folia_svg_normalizer_create);
+        using Destroy = decltype(&folia_svg_normalizer_destroy);
+        using Normalize = decltype(&folia_svg_normalize);
+        using FreeBuffer = decltype(&folia_svg_buffer_destroy);
+        using BeginRequest = decltype(&folia_svg_request_begin);
+        using EndRequest = decltype(&folia_svg_request_end);
 
         folia::platform::ExecutableLibrary module;
-        void* context = nullptr;
+        folia_svg_normalizer* context = nullptr;
         Create create = nullptr;
         Destroy destroy = nullptr;
         Normalize normalize = nullptr;

@@ -875,11 +875,11 @@
     <None Include="Assets\completion.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="third_party\usvg-normalizer\Cargo.toml" />
-    <None Include="third_party\usvg-normalizer\Cargo.lock" />
-    <None Include="third_party\usvg-normalizer\src\lib.rs" />
-    <None Include="third_party\usvg-normalizer\include\folia_svg_normalizer.h" />
-    <None Include="third_party\usvg-normalizer\LICENSE-MIT" />
+    <None Include="..\platform\windows\media\svg\usvg-normalizer\Cargo.toml" />
+    <None Include="..\platform\windows\media\svg\usvg-normalizer\Cargo.lock" />
+    <None Include="..\platform\windows\media\svg\usvg-normalizer\src\lib.rs" />
+    <None Include="..\platform\windows\media\svg\usvg-normalizer\include\folia_svg_normalizer.h" />
+    <None Include="..\platform\windows\media\svg\usvg-normalizer\LICENSE-MIT" />
     <None Include="$(FoliaBuildRoot)..\dependencies\usvg-normalizer\release\folia_svg_normalizer.dll" />
   </ItemGroup>
   <ItemGroup>

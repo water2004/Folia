@@ -61,7 +61,7 @@ Add-LicenseFile 'mhchemparser 4.2.1 — Apache License 2.0' `
 Add-LicenseFile 'MathJax Unicode support data' `
     (Join-Path $Root 'src\math\util\LICENSE-Unicode.txt')
 Add-LicenseFile 'Native SVG normalizer wrapper — MIT License' `
-    (Join-Path $Root 'src\app-winui\third_party\usvg-normalizer\LICENSE-MIT')
+    (Join-Path $Root 'src\platform\windows\media\svg\usvg-normalizer\LICENSE-MIT')
 Add-LicenseFile 'Tree-sitter Unicode support data' `
     (Join-Path $Root 'third_party\tree-sitter\runtime\unicode\LICENSE')
 
@@ -70,7 +70,7 @@ Get-ChildItem -LiteralPath $TreeSitterLicenses -File | Sort-Object Name | ForEac
     Add-LicenseFile "Tree-sitter component — $($_.BaseName)" $_.FullName
 }
 
-$CargoManifest = Join-Path $Root 'src\app-winui\third_party\usvg-normalizer\Cargo.toml'
+$CargoManifest = Join-Path $Root 'src\platform\windows\media\svg\usvg-normalizer\Cargo.toml'
 $CargoJson = & cargo metadata --manifest-path $CargoManifest --format-version 1 --locked
 if ($LASTEXITCODE -ne 0) { throw "cargo metadata failed with exit code $LASTEXITCODE" }
 $CargoMetadata = $CargoJson | ConvertFrom-Json
