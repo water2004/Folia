@@ -47,7 +47,8 @@ not enough: update stale entries before handoff and actually read it on recovery
 ## Build and test
 
 - Use C++23 modules and `import std;`.
-- Core tests: `cmd /c tests\run_core.bat 2>&1`.
+- Portable suites: `python tests/run.py list`, then `python tests/run.py --suite core` or `--suite all`; see `tests/README.md` for toolchains and preparation.
+- Core Windows wrapper: `cmd /c tests\run_core.bat 2>&1`.
 - Deterministic Windows editor tests: `cmd /c tests\platform\run.bat 2>&1`.
 - Core-only builds may target `folia_core` with CMake.
 - Restore WinUI/NuGet and native SVG dependencies with `powershell -ExecutionPolicy Bypass -File .\setup.ps1` before building the WinUI app.

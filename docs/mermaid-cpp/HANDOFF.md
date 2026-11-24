@@ -1,6 +1,21 @@
 # Mermaid C++ 交接
 
-## 当前检查点
+## 当前任务：测试系统重构（2026-11-24，进行中）
+
+- 用户授权在 `master` 的 `2ba389aa34a5c2f23500dc552b9fab9c434a0cdd` 上新建远端 `refactor/portable-test-system`，完整保留测试样例、分批提交立即推送，Windows SDK 专属测试不处理。所有批次经 GitHub API 同步并核对树散列，均带 `[skip ci]`，没有创建标签或触发 CI。Git 命令行无 push 凭据；忽略目录 `build/test-refactor/publish_impl.js` 是已验证的原子发布辅助，不以本地提交代替推送。
+- 已完成核心巨型测试拆分（拆分当时 236 个测试体字节相同）、数学 171 个 `.cpp` 按模块分类（1,003 个源码具名测试、7,574 处断言保留）、图表 115 个 `.cpp` 按图族/布局引擎分类（274 个具名测试保留）。Math 和 Mermaid 的移动证明在 `build/test-refactor-math/source-move-preservation.json` 与 `build/test-refactor/mermaid-source-move.json`。
+- 共享运行入口 `tests/run.py`、套件目录 `tests/suites.json`、`tests/CMakeLists.txt`、真实 `folia.test.fixture_data` C++ 模块已推送。仅 tooling 不需要 C++ 编译器。根 CMake 与兼容 core 入口共享生产/测试清单。源目录与 fixture 路径不依赖 cwd。Math 产物仍用原 Node 字体/实体资源生成器，普通测试验收逻辑由 C++/Python 执行。
+- 本轮实际验证：核心首轮 1,093 tests / 1,305,833 assertions；新增 fixture 读取器 5 项/36断言通过；外置核心 2,125 entities 的 14,875 断言通过。分类后的 Math/Bridge/MathEditor 三套完整通过，Mermaid 全套分类后通过；Completion 原有预算测试改为检查捕获预算与固定包装，23项/5,562断言通过，不改产品行为。
+- CommonMark 652 + GFM 1,426 所有有序字段已与迁移前数据逐项相等；原始上游文件按原 SHA-256 提交为离线输入，所有元数据和既有策略不变。11 组完整 conformance/bounded tests 通过；45 个 Markdown 工具测试通过。核心 entities 不再在 build 时生成 C++ 字符串表。
+- 图表 34 类验收已统一 Python，保留几何/像素容差和负向样例；24/24 ZenUML 用实际原生 probe 与锁定 Skia 完成零差 RGBA，22/22公式片段用当前 Math DLL 和 MathJax 完成 metrics/vector/2×RGBA。旧新相应 SVG/PNG 逐字节相同；保存后的验收无需 Node。浏览器下载返回403，本轮不声明完整375例浏览器整图验收。
+- Math fixture 已逐批外置大数据，证据为 `build/test-refactor-math/preservation-batch*.json`，保留 UTF-16 单元、binary64位、可选值、顺序和原始 SVG。仍在继续 Lite/剩余小型 fixture 与超过600行的行为文件拆分。JS验收迁移尚余ledger、库存器、SVG paint等，不能宣称任务完成。
+- 历史候选 replay 有原有缺失 drafts/陈旧 source hash；移植保留严格失败，单元测试保留其比较记录与损坏用例。旧 scope inventory 的 accepted `src/math/util/options.ixx` 已不存在，旧/新均失败；新的纯 Python scope manifest 对246个实际upstream文件与旧工具逐字段相同，未伪造或更新旧scope验收。
+- 工作区 `/workspace/scratch/1c7d52d1a954/Folia`；`source build/test-refactor/env.sh` 使用 LLVM/libc++21、CMake4.3。实际 native builds 在 `build/test-refactor/{core,integrated}`，日志同目录 `*-tests.log` / `*-build.log`。Python完整依赖解释器 `/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python`。三个agents分别继续math fixture、math工具、Mermaid/paint/inventory；root负责接线/提交/推送。
+- 下一步：完成剩余数据与JS职责迁移，加入永久的用例/fixture清单核验，使用统一入口 `--suite all` 做最终回归，更新文档和最终checkpoint，确认所有修改已推送。本轮尚未结束，不复用下方历史完成状态，不运行Windows/WinUI验收。
+
+下方记录是本任务开始前已完成的功能基线，不能替代本轮测试结果。
+
+## 历史检查点
 
 - 2026-11-19：合入原生 Math SVG 绘制修复后，Windows 统一在构建时同步 Mermaid 使用的 Math DLL，覆盖导入库未变的增量构建。Mermaid Math、DLL 宿主测试与 22 项真实 MathJax CSS 公式对照通过。详见 [数学交接](../math-port/HANDOFF.md)。
 

@@ -19,6 +19,17 @@ checks source invariants but does not run the HTML semantic comparison.
 
 ## Run
 
+With a portable C++23 module toolchain, use the shared suite runner:
+
+```sh
+python tests/run.py --suite conformance
+```
+
+All official paired examples and entity cases are committed as runtime TSV
+data. The unchanged, hash-verified source files are also committed, so a normal
+run does not need to download them or compile generated string arrays. See
+`tests/parsing/fixtures/conformance/README.md` for transport and regeneration.
+
 From a Windows command prompt or PowerShell session with the Visual Studio C++
 tools installed:
 
@@ -27,7 +38,7 @@ cmd /c tests\parsing\run_commonmark.bat
 ```
 
 The wrapper locates the latest Visual Studio installation with the required
-C++ tools, verifies/fetches the official fixture, configures `build\core`,
+C++ tools, verifies the official fixture, configures `build\core`,
 builds only `FoliaCommonMarkTests`, then runs it. A normal run writes:
 
 - `build\markdown-conformance\results.jsonl` — raw per-example records from

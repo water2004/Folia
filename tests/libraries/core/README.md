@@ -1,5 +1,10 @@
 # Portable core tests
 
+The shared entry is now `python tests/run.py --suite core`; see `tests/README.md`
+for suite selection, toolchain options and reports. This directory remains a
+compatible standalone core-only CMake entry. Both use the same production and
+test definitions.
+
 This standalone CMake entry point builds the production `src/markdown` and
 `src/core` C++23 modules and the ordinary foundation, parsing, editing, rendering,
 and query tests. New core modules and tests in those directories are picked up
@@ -56,8 +61,8 @@ Boost.UT accepts a positional test-name pattern for a focused run:
 build/core-portable/FoliaCoreTests '*geometry*'
 ```
 
-The pinned GFM entity fixture is generated with the same source-lock checks as
-the main build; its first generation may fetch the pinned upstream input.
-The full CommonMark/GFM corpus and generated pathological suites remain their
-separate gates in the root project. A passing portable run does not claim
+All 2,125 pinned GFM entities are read from committed runtime data. The source
+lock and complete decoded values are checked by the Python tooling suite.
+The full CommonMark/GFM corpora and bounded pathological suites are selected
+with `python tests/run.py --suite conformance`. A passing portable run does not claim
 DirectWrite, TSF, WinUI, or native visual-test coverage.

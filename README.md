@@ -151,8 +151,16 @@ All generated files stay below `build/`. Application binaries are written to
 `build/app-winui/bin/<platform>/<configuration>/`; builds do not write into
 the source tree.
 
-Run the platform-independent core test suite and deterministic Windows editor
-tests with:
+Run the portable test system with a C++23 module toolchain:
+
+```sh
+python tests/run.py list
+python tests/run.py --suite core
+python tests/run.py --suite all
+```
+
+The [test guide](tests/README.md) covers toolchain/dependency preparation, suite
+selection, offline fixtures and reports. Existing Windows entry points remain:
 
 ```powershell
 cmd /c tests\run_core.bat

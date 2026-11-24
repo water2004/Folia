@@ -1,77 +1,194 @@
-# Test layout
+# Folia test system
 
-Folia's Boost.UT C++23-module test executables include:
+Use `tests/run.py` to configure, build and run portable suites. The suite catalog
+is `tests/suites.json`; the standalone project and the repository's main CMake
+project share the same production libraries and test definitions.
 
-- `FoliaTests` covers the platform-independent core under `foundation/`,
-  `parsing/`, `editing/`, `query/`, and `rendering/`.
-- `FoliaWindowsEditorTests` covers deterministic Windows editor adapters under
-  `platform/` without creating a WinUI window.
-- `FoliaWinUITests` covers application controllers under `app/` using the real
-  WinRT UI dispatcher, production app objects and a bounded message pump. File
-  loading tests hold the surface unavailable, then initialize it or cancel the
-  operation; they check UI thread affinity, exact document content and reopening.
-  Math scrolling tests cover UI queue fairness under repeated slow frames,
-  deferred repaint without recursion, canceled-work notification, offscreen
-  geometry lookup without new native work/IO, and rapid viewport replacements
-  that settle while preserving document content and selection.
-- `FoliaEncodingTests` covers the app storage boundary against the pinned ICU
-  runtime: BOM handling, detection candidate ordering, strict transcoding,
-  converter enumeration, and byte-faithful round trips.
-- `FoliaCommonMarkTests` registers all 652 official CommonMark 0.31.2 examples
-  individually, plus per-example source-preservation assertions. It remains a separate conformance suite; no known-failure skips or
-  alternate expected outputs are used. Run `cmd /c tests\parsing\run_commonmark.bat`.
-  Reports and test-projection limits are documented in
-  [markdown-conformance](../tools/markdown-conformance/README.md).
+## Start here
 
-Run the following from the repository root. Each wrapper locates the repository
-relative to its own file and initializes the Visual Studio compiler environment:
+From the repository root:
 
-```powershell
-cmd /c tests\run_core.bat
-cmd /c tests\platform\run.bat
-cmd /c tests\encoding\run.bat
-cmd /c tests\parsing\run_commonmark.bat
-cmd /c tests\parsing\run_gfm.bat
+```sh
+git submodule update --init third_party/ut
+python tests/run.py list
+python tests/run.py --suite core
+python tests/run.py --suite core --suite completion --suite math-editor
+python tests/run.py --suite all
 ```
 
-After `setup.ps1` and a Debug `build_app.ps1`, run application tests with:
+Native suites require CMake 4.3, Ninja, Python, and a C++23 toolchain with real
+`import std` support. Clang/libc++ 21 and the repository's forked Boost.UT module
+are used by the portable Linux verification. MSVC builds use a Visual Studio
+developer shell and the existing console-runtime guard.
+
+A Linux example with the versioned libc++ module metadata is:
+
+```sh
+CC=clang-21 CXX=clang++-21 python tests/run.py --suite core \
+  --cmake-arg='-DCMAKE_CXX_FLAGS=-stdlib=libc++ -fexperimental-library' \
+  --cmake-arg=-DCMAKE_CXX_STDLIB_MODULES_JSON=/usr/lib/llvm-21/lib/libc++.modules.json
+```
+
+Use the paths supplied by your installed toolchain. A CMake toolchain file can
+also be passed with `--cmake-arg=-DCMAKE_TOOLCHAIN_FILE=...`. Compiler, standard
+library and module metadata must belong to a compatible toolchain; neither a
+header-only Boost.UT substitute nor concatenated source files are used.
+
+## Suites and dependencies
+
+| Suite | Native targets / coverage | Additional preparation |
+| --- | --- | --- |
+| `core` | `FoliaCoreTests`: foundation, parsing, editing, queries, render models and portable key policies | Boost.UT submodule |
+| `completion` | `FoliaCompletionTests`: context budgets, edits, cache and provider protocols | Vendored protocol sources |
+| `math-editor` | `FoliaMathEditorTests`: incremental TeX editing and syntax | Boost.UT submodule |
+| `math` | `FoliaMathTests` and `FoliaMathSvgBridgeTests`: parser/packages, MathML, layout, scenes, fonts and C ABI | Pinned MathJax/font packages for production resource generation |
+| `mermaid` | `FoliaMermaidTests`: all diagram families and shared layout engines | The pinned yaml-cpp dependency is restored by CMake |
+| `conformance` | Complete CommonMark/GFM corpora plus bounded parser/serializer processes | Committed, hash-verified source observations; ordinary runs work offline |
+| `tooling` | Python fixture, comparator, failure, integrity and runner tests | Python packages in the Mermaid comparison requirements |
+
+Selecting `math` and `mermaid` together also builds and runs
+`FoliaMermaidMathTests` against the actual Math shared library. `--suite all`
+selects every portable suite. Tooling alone does not require a C++ compiler:
+
+```sh
+python -m pip install -r tools/mermaid-cpp/regression/requirements.txt
+python tests/run.py --suite tooling
+```
+
+Before the first full math build, restore its existing production inputs:
+
+```sh
+npm ci --prefix tools/mathjax-bundle --ignore-scripts
+python tools/math-port/prepare-source.py
+```
+
+The preparation command copies the TypeScript entity inputs from that installed
+package and verifies their exact source-lock bytes, including pinned line
+endings. It does not download sources or change locks. CMake also invokes this
+idempotent step. Node remains a dependency of the existing production font and
+entity data generators; executable native test assertions and Python acceptance
+checks do not evaluate JavaScript.
+
+A first Mermaid build may fetch yaml-cpp at its pinned revision. An already
+prepared dependency can be supplied through CMake's
+`FETCHCONTENT_SOURCE_DIR_FOLIA_YAML_CPP` override. Official browser/raster capture
+has separate optional prerequisites documented beside the oracle tools; ordinary
+native suites use committed observations.
+
+## Commands, filtering and reports
+
+```sh
+python tests/run.py configure --suite math
+python tests/run.py build --suite math --jobs 4
+python tests/run.py --suite math --test-regex '^FoliaMathSvgBridgeTests$'
+python tests/run.py --suite conformance --build-dir build/tests/conformance
+python tests/run.py --suite all --test-jobs 1 --timeout 180
+```
+
+The default build directory is `build/tests/portable`. The runner builds the
+explicit `FoliaSelectedTests` aggregate, including selected executables marked
+`EXCLUDE_FROM_ALL`. It stops on configure/build failure, propagates the failing
+exit status, and treats an empty CTest selection as an error. It uses the same
+Python interpreter that launched it; arguments are passed without a shell.
+
+Each invocation writes `run.json` with selected suites, command arguments,
+actual exit codes, timings and success status. A test run also writes CTest's
+`results.xml`. Native output and any failed assertions are included in CTest's
+normal reports. Pathological Markdown cases retain their individual bounded
+processes and established time limits.
+
+For a test-name filter inside a native executable, use Boost.UT's positional
+pattern after building it, for example:
+
+```sh
+build/tests/portable/FoliaCoreTests '*geometry*'
+```
+
+The root CMake target `FoliaTests`, the `tests/libraries/core` entry and existing
+Windows wrappers remain available. The portable entry calls the core executable
+`FoliaCoreTests`.
+
+## Source and data layout
+
+| Location | Responsibility |
+| --- | --- |
+| `foundation/`, `parsing/`, `editing/`, `query/`, `rendering/` | Portable editor/model behavior, grouped further by concern |
+| `completion/` | Completion and provider contracts |
+| `math/` | Input/packages, semantic trees, layout, scenes, SVG, fonts, utilities and integration; see its README |
+| `mermaid_cpp/` | API, frontend, config, themes, labels, diagram families and layout engines; see its README |
+| `support/` | Reusable test setup, assertions and the `folia.test.fixture_data` module |
+| Feature `fixtures/` directories | Inputs and independently observed expected values |
+| `cmake/` | Shared suite definitions used by both CMake entry points |
+| `tools/` | Portable test-system checks |
+| `platform/`, `app/`, `encoding/` | Existing Windows/WinUI/storage integration entry points |
+
+Large data matrices belong in fixture files. Their readers preserve byte strings,
+UTF-16 code units (including isolated surrogates), Unicode scalar sequences,
+ordered fields and exact floating-point representations. Missing or malformed
+files fail loudly. Paths are resolved against the configured test-data root,
+independently of the process working directory.
+
+`python tests/tools/check_inventory.py` verifies all 2,811 literal test
+registrations from the refactor's master baseline, including multiplicity.
+Dynamic corpus records are checked by their fixture readers and independent
+source verifiers. The optional `--windows-baseline` audit also checks the 120
+recorded Windows test/support sources against that baseline; it is an audit for
+this refactor, rather than a restriction on future Windows test maintenance.
+
+Small inputs that explain one behavior can remain beside that assertion. Shared
+setup belongs in a focused support file; do not assemble unrelated behaviors into
+one large translation unit. Each migrated dataset documents its schema and
+provenance. CommonMark/GFM originals and their transport rules are documented in
+`parsing/fixtures/conformance/README.md`.
+
+## JavaScript and reference captures
+
+The test tooling has two stages. JavaScript calls the pinned official
+MathJax/Mermaid implementations or real reference rendering backends to capture
+observations. Python owns native-process execution, corpus completeness checks,
+comparisons, tolerances, negative controls, diagnostics and pass/fail status.
+Saved Canvas/formula observations can be compared entirely offline without Node.
+
+Keep source locks and source-derived expectations independent of Folia's output.
+Do not regenerate expected values from a candidate implementation or relax
+numeric/pixel tolerances to pass a refactor. Both positive cases and deliberate
+corruption cases belong in the portable tooling tests.
+
+Historical candidate tools retain their original strict provenance checks.
+Some require old build captures or drafts that were already absent from master;
+replaying those commands fails visibly if their prerequisites are unavailable.
+Their comparison policies and retained example records remain covered by the
+portable Python tests. Historical replay is not counted as a successful current
+native run.
+
+The product's tree-sitter grammar and production resource generators are
+separate build inputs. They are not general-purpose test runners.
+
+## Windows-specific integration
+
+The portable project excludes WinUI, DirectWrite and Windows DLL-host targets.
+The existing integration commands are:
 
 ```powershell
+cmd /c tests\platform\run.bat
+cmd /c tests\encoding\run.bat
 powershell -ExecutionPolicy Bypass -File .\tests\app\run.ps1
 ```
 
-The application runner compiles the same Boost.UT module against the app's
-module/PCH settings and links its existing production objects plus the console
-test runtime. Tests and logs stay in `build/tests/winui/`, outside the MSI payload.
-It does not launch the normal application or change an installed copy.
+Application tests require the existing `setup.ps1` and app build workflow. Their
+runners use the real UI dispatcher and production objects; this portable test
+refactor does not claim Windows SDK or application/UI validation.
 
-The md4c diagnostic runner is `tests/parsing/run_md4c_reference.bat`; run the
-official conformance tests first. Historical validation notes retain their old
-root-level command names; the commands above are the current entry points.
+## Native test conventions
 
-The wrappers configure an ignored build directory, build only the requested
-executable, and forward command-line arguments. Boost.UT accepts a positional name pattern,
-for example `cmd /c tests\run_core.bat "*inline*"`; `-t` lists tags.
+Every test includes `support/folia_test.hpp`, which imports the repository's
+forked `boost.ut` module. Test translation units obtain the standard library
+through that module and do not directly `import std;`. App tests keep their
+required `pch.h` ordering. Import the narrowest production modules required by
+the behavior under test.
 
-## Conventions
-
-- Every test translation unit includes `support/folia_test.hpp` first. That
-  shared header imports the repository's forked `boost.ut` module and exposes
-  the common literals; test files deliberately do not `import std;`.
-  Application tests use the required `pch.h` before this shared header.
-- Import the narrowest required `folia.markdown.*`, `folia.core.*`, or `folia.platform.*` modules.
-  Do not use the header-only `<boost/ut.hpp>` path.
-- Shared fixtures belong in `support/`; feature tests stay beside the owning
-  concern rather than accumulating in a single giant file.
-- Core tests must remain platform independent. Window/XAML behavior is not
-  simulated inside the core suite; deterministic geometry, scrolling,
-  shortcuts, snippet sessions, completion sessions, and viewport work plans
-  belong in the platform suite.
-
-Editing and parsing tests assert the long-lived architectural invariants, not
-only visible examples: inline CST flattening and serialization are
-character-exact, selection remains in one block-local source coordinate,
-normal edits avoid full-document parse/serialization, and Undo/Redo restores
-the exact tree, source, and selection. Property tests exercise randomized
-source edits, nested containers, structural transactions, tables, save/reload,
-and malformed-but-editable Markdown states.
+Editing/parsing tests retain their architectural assertions: exact CST flattening
+and serialization, one block-local source coordinate, bounded incremental work,
+and exact tree/source/selection restoration by Undo/Redo. Property and stress
+cases remain active; examples are not removed or replaced with known-failure
+skips during reorganization.
