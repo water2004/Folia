@@ -12,6 +12,8 @@ namespace winrt::Folia
     // Owns one pointer gesture for extending or moving the selection.
     struct EditorSelectionDrag
     {
+        enum class MoveFeedback { None, Allowed, Blocked };
+
         void Attach(
             EditorSession& session,
             EditorSurfaceRenderer& renderer,
@@ -20,6 +22,7 @@ namespace winrt::Folia
         void Detach();
         bool Active() const;
         bool Moving() const { return move.has_value(); }
+        MoveFeedback Feedback() const;
         void Begin(folia::TextSelection initial, float x, float y);
         void BeginMove(folia::TextPosition position, float x, float y);
         bool Update(float x, float y);

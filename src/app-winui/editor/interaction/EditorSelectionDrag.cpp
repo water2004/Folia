@@ -32,6 +32,12 @@ namespace winrt::Folia
         return active;
     }
 
+    EditorSelectionDrag::MoveFeedback EditorSelectionDrag::Feedback() const
+    {
+        if (!move || !gesture.Dragging()) return MoveFeedback::None;
+        return drop ? MoveFeedback::Allowed : MoveFeedback::Blocked;
+    }
+
     void EditorSelectionDrag::Begin(folia::TextSelection initial, float x, float y)
     {
         if (!session) return;
@@ -79,9 +85,7 @@ namespace winrt::Folia
         {
             auto valid = MoveStillValid();
             auto point = move->press;
-            auto width = renderer->ViewportWidth();
-            if (valid && dragged && x >= 0.0f && x <= width
-                && y >= 0.0f && y <= renderer->ViewportHeight())
+            if (valid && dragged)
                 UpdatePosition(x, y, false);
             else
                 drop.reset();
@@ -137,7 +141,8 @@ namespace winrt::Folia
             }
         }
 
-        auto hit = renderer->HitTest(projection.hitX, projection.hitY);
+        const auto insideViewport = x >= 0.0f && x <= width && y >= 0.0f && y <= viewportHeight;
+        auto hit = !move || insideViewport ? renderer->HitTest(projection.hitX, projection.hitY) : std::nullopt;
         if (move)
         {
             drop = hit && MoveStillValid() && !session->SelectionCovers(*hit) ? hit : std::nullopt;

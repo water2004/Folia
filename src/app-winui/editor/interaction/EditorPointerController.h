@@ -41,8 +41,9 @@ namespace winrt::Folia
         void DoubleTapped(winrt::Microsoft::UI::Xaml::Input::DoubleTappedRoutedEventArgs const& args);
 
     private:
+        enum class Cursor { Text, Link, Move, Blocked };
         bool SelectWordAt(folia::TextPosition position);
-        void SetLinkCursor(bool link);
+        void SetCursor(Cursor cursor);
         std::optional<std::string> LinkAtPosition(folia::TextPosition position) const;
 
         EditorSession* session_ = nullptr;
@@ -51,14 +52,13 @@ namespace winrt::Folia
         EditorTextInputController* textInput_ = nullptr;
         EditorSelectionDrag selectionDrag_;
         winrt::Microsoft::UI::Xaml::Controls::SwapChainPanel surface_{ nullptr };
-        winrt::Microsoft::UI::Input::InputCursor textCursor_{ nullptr };
-        winrt::Microsoft::UI::Input::InputCursor linkCursor_{ nullptr };
+        std::array<winrt::Microsoft::UI::Input::InputCursor, 4> cursors_{nullptr, nullptr, nullptr, nullptr};
+        std::optional<Cursor> currentCursor_;
         ExecuteCommand executeCommand_;
         Render render_;
         OpenLink openLink_;
         OpenFootnote openFootnote_;
         ResetCaretGoal resetCaretGoal_;
-        bool linkCursorActive_ = false;
         std::optional<std::string> hoverTooltip_;
         std::optional<folia::TextPosition> hoverTaskCheckbox_;
         std::optional<EditorTableAction> hoverTableAction_;

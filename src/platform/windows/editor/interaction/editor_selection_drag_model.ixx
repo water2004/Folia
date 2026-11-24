@@ -10,6 +10,7 @@ export namespace folia::platform::editor
     {
     public:
         void Begin(float x, float y) { startX_ = x; startY_ = y; dragging_ = false; }
+        bool Dragging() const { return dragging_; }
         bool Update(float x, float y)
         {
             constexpr float threshold = 4.0f;

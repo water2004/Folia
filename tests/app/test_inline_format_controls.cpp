@@ -82,14 +82,22 @@ namespace {
                 ++executions;
                 return session.ExecuteCommand(command);
             };
+            using Feedback = EditorSelectionDrag::MoveFeedback;
             drag.BeginMove(*hit, inside, y);
+            expect(drag.Feedback() == Feedback::None);
             drag.Update(inside, y + 10);
             drag.Finish(inside, y, execute);
             expect(executions == 0_u && session.Selection() == before);
 
             drag.BeginMove(*hit, inside, y);
             drag.Update(target->left + 2, y);
+            expect(drag.Feedback() == Feedback::Allowed);
+            drag.Update(renderer.ViewportWidth() + 10, y);
+            expect(drag.Feedback() == Feedback::Blocked);
+            drag.Update(target->left + 2, y);
+            expect(drag.Feedback() == Feedback::Allowed);
             drag.Finish(target->left + 2, y, execute);
+            expect(drag.Feedback() == Feedback::None);
             expect(executions == 1_u && session.Text() == L" these wordsmove");
             expect(session.ExecuteCommand({.kind = folia::CommandKind::Undo}));
             expect(session.Text() == L"move these words" && session.Selection() == before);

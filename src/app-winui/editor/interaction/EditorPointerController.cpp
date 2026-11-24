@@ -6,6 +6,22 @@ import folia.core.command;
 
 namespace winrt::Folia
 {
+    namespace
+    {
+        using namespace winrt::Microsoft::UI::Input;
+
+        InputCursor SystemSelectionMoveCursor()
+        {
+            static const std::unique_ptr<std::remove_pointer_t<HMODULE>, decltype(&::FreeLibrary)> ole32{
+                ::LoadLibraryExW(L"ole32.dll", nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32), ::FreeLibrary};
+            // OLE's move-drop cursor, with the dashed box next to the arrow.
+            constexpr std::uint32_t oleMoveCursor = 2;
+            if (ole32 && ::FindResourceW(ole32.get(), MAKEINTRESOURCEW(oleMoveCursor), RT_GROUP_CURSOR))
+                return InputDesktopResourceCursor::CreateFromModule(L"ole32.dll", oleMoveCursor);
+            return InputSystemCursor::Create(InputSystemCursorShape::Arrow);
+        }
+    }
+
     void EditorPointerController::Attach(
         EditorSession& session,
         EditorSurfaceRenderer& renderer,
@@ -25,12 +41,11 @@ namespace winrt::Folia
         textInput_ = &textInput;
         surface_ = surface;
         selectionDrag_.Attach(session, renderer, scroll, textInput);
-        textCursor_ = winrt::Microsoft::UI::Input::InputSystemCursor::Create(
-            winrt::Microsoft::UI::Input::InputSystemCursorShape::IBeam);
-        linkCursor_ = winrt::Microsoft::UI::Input::InputSystemCursor::Create(
-            winrt::Microsoft::UI::Input::InputSystemCursorShape::Hand);
-        linkCursorActive_ = true;
-        SetLinkCursor(false);
+        using winrt::Microsoft::UI::Input::InputSystemCursor;
+        using Shape = winrt::Microsoft::UI::Input::InputSystemCursorShape;
+        cursors_ = {InputSystemCursor::Create(Shape::IBeam), InputSystemCursor::Create(Shape::Hand),
+            SystemSelectionMoveCursor(), InputSystemCursor::Create(Shape::UniversalNo)};
+        SetCursor(Cursor::Text);
         executeCommand_ = std::move(executeCommand);
         render_ = std::move(render);
         openLink_ = std::move(openLink);
@@ -61,9 +76,8 @@ namespace winrt::Folia
         openLink_ = {};
         openFootnote_ = {};
         resetCaretGoal_ = {};
-        linkCursorActive_ = false;
-        linkCursor_ = nullptr;
-        textCursor_ = nullptr;
+        currentCursor_.reset();
+        cursors_.fill(nullptr);
         surface_ = nullptr;
         textInput_ = nullptr;
         scroll_ = nullptr;
@@ -189,8 +203,9 @@ namespace winrt::Folia
             auto hit = renderer_->HitTest(static_cast<float>(point.X), static_cast<float>(point.Y));
             auto interaction = hit && session_ ? session_->InteractionAt(*hit) : std::nullopt;
             auto tooltip = interaction ? std::move(interaction->tooltip) : std::nullopt;
-            SetLinkCursor((interaction && interaction->link.has_value())
-                || renderer_->CodeLanguageAt(static_cast<float>(point.X), static_cast<float>(point.Y)).has_value());
+            auto interactive = (interaction && interaction->link.has_value())
+                || renderer_->CodeLanguageAt(static_cast<float>(point.X), static_cast<float>(point.Y)).has_value();
+            SetCursor(interactive ? Cursor::Link : Cursor::Text);
             if (tooltip != hoverTooltip_)
             {
                 hoverTooltip_ = tooltip;
@@ -201,7 +216,7 @@ namespace winrt::Folia
         }
         if (tableDrag_)
         {
-            SetLinkCursor(false);
+            SetCursor(Cursor::Text);
             auto rows = tableDrag_->kind == EditorTableActionKind::DragRow;
             tableDropIndex_ = renderer_->TableDropIndexAt(static_cast<float>(point.X), static_cast<float>(point.Y), rows);
             renderer_->SetTableDrag(tableDrag_, tableDropIndex_);
@@ -214,8 +229,14 @@ namespace winrt::Folia
             if (hoverVisualChanged && render_) render_();
             return;
         }
-        SetLinkCursor(false);
         auto changed = selectionDrag_.Update(static_cast<float>(point.X), static_cast<float>(point.Y));
+        using Feedback = EditorSelectionDrag::MoveFeedback;
+        switch (selectionDrag_.Feedback())
+        {
+            case Feedback::Allowed: SetCursor(Cursor::Move); break;
+            case Feedback::Blocked: SetCursor(Cursor::Blocked); break;
+            case Feedback::None: SetCursor(Cursor::Text); break;
+        }
         if ((changed || hoverVisualChanged) && render_) render_();
         args.Handled(true);
     }
@@ -253,6 +274,7 @@ namespace winrt::Folia
         {
             auto point = args.GetCurrentPoint(surface_).Position();
             auto changed = selectionDrag_.Finish(static_cast<float>(point.X), static_cast<float>(point.Y), executeCommand_);
+            SetCursor(Cursor::Text);
             surface_.ReleasePointerCapture(args.Pointer());
             if (changed && render_) render_();
             args.Handled(true);
@@ -261,7 +283,7 @@ namespace winrt::Folia
 
     void EditorPointerController::PointerExited()
     {
-        SetLinkCursor(false);
+        SetCursor(selectionDrag_.Feedback() == EditorSelectionDrag::MoveFeedback::None ? Cursor::Text : Cursor::Blocked);
         hoverTooltip_.reset();
         hoverTaskCheckbox_.reset();
         hoverTableAction_.reset();
@@ -277,7 +299,7 @@ namespace winrt::Folia
     {
         auto repaint = selectionDrag_.Moving();
         selectionDrag_.Cancel();
-        SetLinkCursor(false);
+        SetCursor(Cursor::Text);
         if (tableDrag_ && renderer_)
         {
             tableDrag_.reset();
@@ -305,6 +327,7 @@ namespace winrt::Folia
         // if that release completes the old drag, it collapses the
         // authoritative source selection after the word was already painted.
         selectionDrag_.Cancel();
+        SetCursor(Cursor::Text);
         surface_.ReleasePointerCaptures();
         auto point = args.GetPosition(surface_);
         auto hit = renderer_->HitTestTextUnit(static_cast<float>(point.X), static_cast<float>(point.Y));
@@ -325,13 +348,13 @@ namespace winrt::Folia
         return true;
     }
 
-    void EditorPointerController::SetLinkCursor(bool link)
+    void EditorPointerController::SetCursor(Cursor cursor)
     {
-        if (!surface_ || link == linkCursorActive_) return;
+        if (!surface_ || cursor == currentCursor_) return;
         auto protectedElement = surface_.try_as<winrt::Microsoft::UI::Xaml::IUIElementProtected>();
         if (!protectedElement) return;
-        protectedElement.ProtectedCursor(link ? linkCursor_ : textCursor_);
-        linkCursorActive_ = link;
+        protectedElement.ProtectedCursor(cursors_[static_cast<std::size_t>(cursor)]);
+        currentCursor_ = cursor;
     }
 
     std::optional<std::string> EditorPointerController::LinkAtPosition(folia::TextPosition position) const
