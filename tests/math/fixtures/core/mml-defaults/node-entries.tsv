@@ -1,0 +1,320 @@
+# Pinned reference observations; values exported without normalization.
+# name_utf16	value_kind	value
+mathbackground	string	transparent
+mathcolor	string	
+mathsize	string	normal
+dir	string	ltr
+mathvariant	string	normal
+scriptlevel	number	0000000000000000
+displaystyle	boolean	0
+display	string	inline
+maxwidth	string	
+overflow	string	linebreak
+altimg	string	
+altimg-width	string	
+altimg-height	string	
+altimg-valign	string	
+alttext	string	
+cdgroup	string	
+scriptsizemultiplier	number	3fe6a09e667f3bcc
+scriptminsize	string	.4em
+infixlinebreakstyle	string	before
+lineleading	string	100%
+linebreakmultchar	string	\u2062
+indentshift	string	auto
+indentalign	string	auto
+indenttarget	string	
+indentalignfirst	string	indentalign
+indentshiftfirst	string	indentshift
+indentalignlast	string	indentalign
+indentshiftlast	string	indentshift
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+mathvariant	string	normal
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+mathvariant	string	normal
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+mathvariant	string	normal
+form	string	infix
+fence	boolean	0
+separator	boolean	0
+lspace	string	thickmathspace
+rspace	string	thickmathspace
+stretchy	boolean	0
+symmetric	boolean	0
+maxsize	string	infinity
+minsize	string	0em
+largeop	boolean	0
+movablelimits	boolean	0
+accent	boolean	0
+linebreak	string	auto
+lineleading	string	100%
+linebreakstyle	string	before
+indentalign	string	auto
+indentshift	string	0
+indenttarget	string	
+indentalignfirst	string	indentalign
+indentshiftfirst	string	indentshift
+indentalignlast	string	indentalign
+indentshiftlast	string	indentshift
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+mathvariant	string	normal
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+mathvariant	string	normal
+width	string	0em
+height	string	0ex
+depth	string	0ex
+linebreak	string	auto
+indentshift	string	auto
+indentalign	string	auto
+indenttarget	string	
+indentalignfirst	string	indentalign
+indentshiftfirst	string	indentshift
+indentalignlast	string	indentalign
+indentshiftlast	string	indentshift
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+mathvariant	string	normal
+lquote	string	"
+rquote	string	"
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+linethickness	string	medium
+numalign	string	center
+denomalign	string	center
+bevelled	boolean	0
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+data-vertical-align	string	bottom
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+data-vertical-align	string	bottom
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+scriptlevel	string	_inherit_
+displaystyle	string	_inherit_
+scriptsizemultiplier	number	3fe6a09e667f3bcc
+scriptminsize	string	.4em
+infixlinebreakstyle	string	before
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+width	string	
+height	string	
+depth	string	
+lspace	number	0000000000000000
+voffset	number	0000000000000000
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+open	string	(
+close	string	)
+separators	string	,
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+notation	string	longdiv
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+actiontype	string	toggle
+selection	number	3ff0000000000000
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+subscriptshift	string	
+superscriptshift	string	
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+subscriptshift	string	
+superscriptshift	string	
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+subscriptshift	string	
+superscriptshift	string	
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+accent	boolean	0
+accentunder	boolean	0
+align	string	center
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+accent	boolean	0
+accentunder	boolean	0
+align	string	center
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+accent	boolean	0
+accentunder	boolean	0
+align	string	center
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+subscriptshift	string	
+superscriptshift	string	
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+align	string	axis
+rowalign	string	baseline
+columnalign	string	center
+groupalign	string	{left}
+alignmentscope	boolean	1
+columnwidth	string	auto
+width	string	auto
+rowspacing	string	1ex
+columnspacing	string	.8em
+rowlines	string	none
+columnlines	string	none
+frame	string	none
+framespacing	string	0.4em 0.5ex
+equalrows	boolean	0
+equalcolumns	boolean	0
+displaystyle	boolean	0
+side	string	right
+minlabelspacing	string	0.8em
+data-break-align	string	top
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+rowalign	string	_inherit_
+columnalign	string	_inherit_
+groupalign	string	_inherit_
+data-break-align	string	top
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+rowalign	string	_inherit_
+columnalign	string	_inherit_
+groupalign	string	_inherit_
+data-break-align	string	top
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+rowspan	number	3ff0000000000000
+columnspan	number	3ff0000000000000
+rowalign	string	_inherit_
+columnalign	string	_inherit_
+groupalign	string	_inherit_
+data-vertical-align	string	top
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+groupalign	string	_inherit_
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+edge	string	left
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+mathvariant	string	normal
+alt	string	
+src	string	
+index	string	
+width	string	auto
+height	string	auto
+valign	string	0em
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+definitionUrl	null	
+encoding	null	
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+definitionUrl	null	
+encoding	null	
+cd	string	mathmlkeys
+name	string	
+src	null	
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+definitionUrl	null	
+encoding	null	
+cd	string	mathmlkeys
+name	string	
+src	null	
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_
+mathbackground	string	_inherit_
+mathcolor	string	_inherit_
+mathsize	string	_inherit_
+dir	string	_inherit_

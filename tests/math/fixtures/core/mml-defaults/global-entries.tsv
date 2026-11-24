@@ -1,0 +1,30 @@
+# Pinned reference observations; values exported without normalization.
+# name_utf16	value_kind	value
+mathbackground	string	transparent
+mathcolor	string	
+mathsize	string	normal
+dir	string	ltr
+mathvariant	string	normal
+scriptlevel	number	0000000000000000
+displaystyle	boolean	0
+display	string	inline
+maxwidth	string	
+overflow	string	linebreak
+altimg	string	
+altimg-width	string	
+altimg-height	string	
+altimg-valign	string	
+alttext	string	
+cdgroup	string	
+scriptsizemultiplier	number	3fe6a09e667f3bcc
+scriptminsize	string	.4em
+infixlinebreakstyle	string	before
+lineleading	string	100%
+linebreakmultchar	string	\u2062
+indentshift	string	auto
+indentalign	string	auto
+indenttarget	string	
+indentalignfirst	string	indentalign
+indentshiftfirst	string	indentshift
+indentalignlast	string	indentalign
+indentshiftlast	string	indentshift
