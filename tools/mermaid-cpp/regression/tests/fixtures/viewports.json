@@ -1,0 +1,126 @@
+[
+  {
+    "id": "explicit",
+    "input": {
+      "family": "flowchart",
+      "viewBoxPresent": true,
+      "view": {
+        "width": 250,
+        "height": 180
+      },
+      "bounds": {
+        "width": 500,
+        "height": 360
+      }
+    },
+    "expected": {
+      "width": 250,
+      "height": 180,
+      "intrinsic": false
+    }
+  },
+  {
+    "id": "intrinsic",
+    "input": {
+      "family": "info",
+      "viewBoxPresent": false,
+      "view": {
+        "width": 0,
+        "height": 0
+      },
+      "bounds": {
+        "width": 400,
+        "height": 150
+      }
+    },
+    "expected": {
+      "width": 400,
+      "height": 150,
+      "intrinsic": true
+    }
+  },
+  {
+    "id": "packet",
+    "input": {
+      "family": "packet",
+      "viewBoxPresent": false,
+      "view": {
+        "width": 0,
+        "height": 0
+      },
+      "bounds": {
+        "width": 400,
+        "height": 150
+      }
+    },
+    "expected": null
+  },
+  {
+    "id": "invalid-present",
+    "input": {
+      "family": "info",
+      "viewBoxPresent": true,
+      "view": {
+        "width": 0,
+        "height": 0
+      },
+      "bounds": {
+        "width": 400,
+        "height": 150
+      }
+    },
+    "expected": null
+  },
+  {
+    "id": "nan",
+    "input": {
+      "family": "info",
+      "viewBoxPresent": false,
+      "view": {
+        "width": 0,
+        "height": 0
+      },
+      "bounds": {
+        "width": "NaN",
+        "height": 150
+      }
+    },
+    "expected": null
+  },
+  {
+    "id": "zero",
+    "input": {
+      "family": "info",
+      "viewBoxPresent": false,
+      "view": {
+        "width": 0,
+        "height": 0
+      },
+      "bounds": {
+        "width": 400,
+        "height": 0
+      }
+    },
+    "expected": null
+  },
+  {
+    "id": "info-explicit",
+    "input": {
+      "family": "info",
+      "viewBoxPresent": true,
+      "view": {
+        "width": 250,
+        "height": 180
+      },
+      "bounds": {
+        "width": 500,
+        "height": 360
+      }
+    },
+    "expected": {
+      "width": 250,
+      "height": 180,
+      "intrinsic": false
+    }
+  }
+]

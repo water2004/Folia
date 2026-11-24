@@ -1,0 +1,7 @@
+# Optional SVG evidence comparison; native C++ regression tests need none of these.
+cssselect2==0.8.0
+tinycss2==1.4.0
+lxml>=5.3,<7
+numpy>=2.0,<3
+Pillow>=11,<13
+playwright>=1.52,<2

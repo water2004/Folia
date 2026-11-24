@@ -1,0 +1,331 @@
+[
+  {
+    "id": "packet-01",
+    "family": "packet",
+    "accept": true,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 40\" font-family=\"Arial\"><style>.packetBlock{fill:#efefef;stroke:black;stroke-width:1}.packetLabel{fill:black;font-size:12px}</style><g><rect x=\"1\" y=\"2\" width=\"98\" height=\"30\" class=\"packetBlock\"/><text x=\"50\" y=\"17\" class=\"packetLabel\" text-anchor=\"middle\" dominant-baseline=\"middle\">A</text></g></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 40\" font-family=\"Arial\"><style>.packetBlock{fill:#efefef;stroke:black;stroke-width:1}.packetLabel{fill:black;font-size:12px}</style><g><rect x=\"1\" y=\"2\" width=\"98\" height=\"30\" class=\"packetBlock\"/><text x=\"50\" y=\"17\" class=\"packetLabel\" text-anchor=\"middle\" dominant-baseline=\"middle\">A</text></g></svg>"
+  },
+  {
+    "id": "packet-02",
+    "family": "packet",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 40\" font-family=\"Arial\"><style>.packetBlock{fill:#efefef;stroke:black;stroke-width:1}.packetLabel{fill:black;font-size:12px}</style><g><rect x=\"1\" y=\"2\" width=\"98\" height=\"30\" class=\"packetBlock\"/><text x=\"50\" y=\"17\" class=\"packetLabel\" text-anchor=\"middle\" dominant-baseline=\"middle\">A</text></g></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 40\" font-family=\"Arial\"><style>.packetBlock{fill:#efefef;stroke:black;stroke-width:1}.packetLabel{fill:black;font-size:12px}</style><g><rect x=\"1\" y=\"2\" width=\"98\" height=\"30\" class=\"packetBlock\"/><text x=\"50\" y=\"17\" class=\"packetLabel\" text-anchor=\"middle\" dominant-baseline=\"middle\">B</text></g></svg>"
+  },
+  {
+    "id": "packet-03",
+    "family": "packet",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 40\" font-family=\"Arial\"><style>.packetBlock{fill:#efefef;stroke:black;stroke-width:1}.packetLabel{fill:black;font-size:12px}</style><g><rect x=\"1\" y=\"2\" width=\"98\" height=\"30\" class=\"packetBlock\"/><text x=\"50\" y=\"17\" class=\"packetLabel\" text-anchor=\"middle\" dominant-baseline=\"middle\">A</text></g></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 40\" font-family=\"Arial\"><style>.packetBlock{fill:#efefef;stroke:black;stroke-width:1}.packetLabel{fill:black;font-size:12px}</style><g><rect x=\"1\" y=\"2\" width=\"80\" height=\"30\" class=\"packetBlock\"/><text x=\"50\" y=\"17\" class=\"packetLabel\" text-anchor=\"middle\" dominant-baseline=\"middle\">A</text></g></svg>"
+  },
+  {
+    "id": "packet-04",
+    "family": "packet",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 40\" font-family=\"Arial\"><style>.packetBlock{fill:#efefef;stroke:black;stroke-width:1}.packetLabel{fill:black;font-size:12px}</style><g><rect x=\"1\" y=\"2\" width=\"98\" height=\"30\" class=\"packetBlock\"/><text x=\"50\" y=\"17\" class=\"packetLabel\" text-anchor=\"middle\" dominant-baseline=\"middle\">A</text></g></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 40\" font-family=\"Arial\"><style>.packetBlock{fill:#eeeeee;stroke:black;stroke-width:1}.packetLabel{fill:black;font-size:12px}</style><g><rect x=\"1\" y=\"2\" width=\"98\" height=\"30\" class=\"packetBlock\"/><text x=\"50\" y=\"17\" class=\"packetLabel\" text-anchor=\"middle\" dominant-baseline=\"middle\">A</text></g></svg>"
+  },
+  {
+    "id": "packet-05",
+    "family": "packet",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 40\" font-family=\"Arial\"><style>.packetBlock{fill:#efefef;stroke:black;stroke-width:1}.packetLabel{fill:black;font-size:12px}</style><g><rect x=\"1\" y=\"2\" width=\"98\" height=\"30\" class=\"packetBlock\"/><text x=\"50\" y=\"17\" class=\"packetLabel\" text-anchor=\"middle\" dominant-baseline=\"middle\">A</text></g></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 40\" font-family=\"Arial\"><style>.packetBlock{fill:#efefef;stroke:black;stroke-width:1}.packetLabel{fill:black;font-size:13px}</style><g><rect x=\"1\" y=\"2\" width=\"98\" height=\"30\" class=\"packetBlock\"/><text x=\"50\" y=\"17\" class=\"packetLabel\" text-anchor=\"middle\" dominant-baseline=\"middle\">A</text></g></svg>"
+  },
+  {
+    "id": "packet-06",
+    "family": "packet",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 40\" font-family=\"Arial\"><style>.packetBlock{fill:#efefef;stroke:black;stroke-width:1}.packetLabel{fill:black;font-size:12px}</style><g><rect x=\"1\" y=\"2\" width=\"98\" height=\"30\" class=\"packetBlock\"/><text x=\"50\" y=\"17\" class=\"packetLabel\" text-anchor=\"middle\" dominant-baseline=\"middle\">A</text></g></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 40\" font-family=\"Arial\"><style>.packetBlock{fill:#efefef;stroke:black;stroke-width:1}.packetLabel{fill:black;font-size:12px;font-style:italic}</style><g><rect x=\"1\" y=\"2\" width=\"98\" height=\"30\" class=\"packetBlock\"/><text x=\"50\" y=\"17\" class=\"packetLabel\" text-anchor=\"middle\" dominant-baseline=\"middle\">A</text></g></svg>"
+  },
+  {
+    "id": "packet-07",
+    "family": "packet",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 40\" font-family=\"Arial\"><style>.packetBlock{fill:#efefef;stroke:black;stroke-width:1}.packetLabel{fill:black;font-size:12px}</style><g><rect x=\"1\" y=\"2\" width=\"98\" height=\"30\" class=\"packetBlock\"/><text x=\"50\" y=\"17\" class=\"packetLabel\" text-anchor=\"middle\" dominant-baseline=\"middle\">A</text></g></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" opacity=\"0.5\" viewBox=\"0 0 100 40\" font-family=\"Arial\"><style>.packetBlock{fill:#efefef;stroke:black;stroke-width:1}.packetLabel{fill:black;font-size:12px}</style><g><rect x=\"1\" y=\"2\" width=\"98\" height=\"30\" class=\"packetBlock\"/><text x=\"50\" y=\"17\" class=\"packetLabel\" text-anchor=\"middle\" dominant-baseline=\"middle\">A</text></g></svg>"
+  },
+  {
+    "id": "packet-08",
+    "family": "packet",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 40\" font-family=\"Arial\"><style>.packetBlock{fill:#efefef;stroke:black;stroke-width:1}.packetLabel{fill:black;font-size:12px}</style><g><rect x=\"1\" y=\"2\" width=\"98\" height=\"30\" class=\"packetBlock\"/><text x=\"50\" y=\"17\" class=\"packetLabel\" text-anchor=\"middle\" dominant-baseline=\"middle\">A</text></g></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 40\" font-family=\"Arial\"><style>.packetBlock{fill:#efefef;stroke:black;stroke-width:1}.packetLabel{fill:black;font-size:12px}</style><title>Unexpected title</title><g><rect x=\"1\" y=\"2\" width=\"98\" height=\"30\" class=\"packetBlock\"/><text x=\"50\" y=\"17\" class=\"packetLabel\" text-anchor=\"middle\" dominant-baseline=\"middle\">A</text></g></svg>"
+  },
+  {
+    "id": "packet-09",
+    "family": "packet",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 40\" font-family=\"Arial\"><style>.packetBlock{fill:#efefef;stroke:black;stroke-width:1}.packetLabel{fill:black;font-size:12px}</style><g><rect x=\"1\" y=\"2\" width=\"98\" height=\"30\" class=\"packetBlock\"/><text x=\"50\" y=\"17\" class=\"packetLabel\" text-anchor=\"middle\" dominant-baseline=\"middle\">A</text></g></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 40\" font-family=\"Arial\"><style>.packetBlock{fill:#efefef;stroke:black;stroke-width:1}.packetLabel{fill:black;font-size:12px}</style><g display=\"none\"><rect x=\"1\" y=\"2\" width=\"98\" height=\"30\" class=\"packetBlock\"/><text x=\"50\" y=\"17\" class=\"packetLabel\" text-anchor=\"middle\" dominant-baseline=\"middle\">A</text></g></svg>"
+  },
+  {
+    "id": "packet-10",
+    "family": "packet",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 40\" font-family=\"Arial\"><style>.packetBlock{fill:#efefef;stroke:black;stroke-width:1}.packetLabel{fill:black;font-size:12px}</style><g><rect x=\"1\" y=\"2\" width=\"98\" height=\"30\" class=\"packetBlock\"/><text x=\"50\" y=\"17\" class=\"packetLabel\" text-anchor=\"middle\" dominant-baseline=\"middle\">A</text></g></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 40\" font-family=\"Arial\"><style>.packetBlock{fill:#efefef;stroke:black;stroke-width:1}.packetLabel{fill:black;font-size:12px}</style><g><rect visibility=\"hidden\" x=\"1\" y=\"2\" width=\"98\" height=\"30\" class=\"packetBlock\"/><text x=\"50\" y=\"17\" class=\"packetLabel\" text-anchor=\"middle\" dominant-baseline=\"middle\">A</text></g></svg>"
+  },
+  {
+    "id": "packet-11",
+    "family": "packet",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 40\" font-family=\"Arial\"><style>.packetBlock{fill:#efefef;stroke:black;stroke-width:1}.packetLabel{fill:black;font-size:12px}</style><g><rect x=\"1\" y=\"2\" width=\"98\" height=\"30\" class=\"packetBlock\"/><text x=\"50\" y=\"17\" class=\"packetLabel\" text-anchor=\"middle\" dominant-baseline=\"middle\">A</text></g></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 40\" font-family=\"Arial\"><style>.packetBlock{fill:#efefef;stroke:black;stroke-width:1}.packetLabel{fill:black;font-size:12px}</style><style>g{visibility:hidden}</style><g><rect x=\"1\" y=\"2\" width=\"98\" height=\"30\" class=\"packetBlock\"/><text x=\"50\" y=\"17\" class=\"packetLabel\" text-anchor=\"middle\" dominant-baseline=\"middle\">A</text></g></svg>"
+  },
+  {
+    "id": "packet-12",
+    "family": "packet",
+    "accept": true,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 40\" font-family=\"Arial\"><style>.packetBlock{fill:#efefef;stroke:black;stroke-width:1}.packetLabel{fill:black;font-size:12px}</style><g><rect x=\"1\" y=\"2\" width=\"98\" height=\"30\" class=\"packetBlock\"/><text x=\"50\" y=\"17\" class=\"packetLabel\" text-anchor=\"middle\" dominant-baseline=\"middle\">A</text></g></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 40\" font-family=\"Arial\"><style>.packetBlock{fill:#efefef;stroke:black;stroke-width:1}.packetLabel{fill:black;font-size:12px}</style><g visibility=\"hidden\"><rect visibility=\"visible\" x=\"1\" y=\"2\" width=\"98\" height=\"30\" class=\"packetBlock\"/><text visibility=\"visible\" x=\"50\" y=\"17\" class=\"packetLabel\" text-anchor=\"middle\" dominant-baseline=\"middle\">A</text></g></svg>"
+  },
+  {
+    "id": "info-13",
+    "family": "info",
+    "accept": true,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>"
+  },
+  {
+    "id": "info-14",
+    "family": "info",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.1</text></svg>"
+  },
+  {
+    "id": "info-15",
+    "family": "info",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"102\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>"
+  },
+  {
+    "id": "info-16",
+    "family": "info",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:450px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>"
+  },
+  {
+    "id": "info-17",
+    "family": "info",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"31\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>"
+  },
+  {
+    "id": "info-18",
+    "family": "info",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#334\" text-anchor=\"middle\">v12.2.0</text></svg>"
+  },
+  {
+    "id": "info-19",
+    "family": "info",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"serif\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>"
+  },
+  {
+    "id": "info-20",
+    "family": "info",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 400 100\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>"
+  },
+  {
+    "id": "info-21",
+    "family": "info",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text display=\"none\" x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>"
+  },
+  {
+    "id": "info-22",
+    "family": "info",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text visibility=\"hidden\" x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>"
+  },
+  {
+    "id": "info-23",
+    "family": "info",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text style=\"visibility:hidden\" x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>"
+  },
+  {
+    "id": "info-24",
+    "family": "info",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>",
+    "native": "<svg visibility=\"hidden\" xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>"
+  },
+  {
+    "id": "info-25",
+    "family": "info",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>",
+    "native": "<svg display=\"none\" xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text style=\"display:block\" x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>"
+  },
+  {
+    "id": "info-26",
+    "family": "info",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><style>svg{visibility:hidden}</style><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>"
+  },
+  {
+    "id": "info-27",
+    "family": "info",
+    "accept": true,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>",
+    "native": "<svg visibility=\"hidden\" xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text visibility=\"visible\" x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>"
+  },
+  {
+    "id": "info-28",
+    "family": "info",
+    "accept": true,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><style>svg{visibility:hidden}text{visibility:visible}</style><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>"
+  },
+  {
+    "id": "info-29",
+    "family": "info",
+    "accept": true,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><style>text{visibility:visible}</style><text visibility=\"hidden\" x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>"
+  },
+  {
+    "id": "info-30",
+    "family": "info",
+    "accept": true,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><style>text{display:block}</style><text display=\"none\" x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>"
+  },
+  {
+    "id": "info-31",
+    "family": "info",
+    "accept": true,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text visibility=\"hidden\" style=\"visibility:visible\" x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>"
+  },
+  {
+    "id": "info-32",
+    "family": "info",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><style>svg{display:none}text{display:block}</style><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>"
+  },
+  {
+    "id": "info-33",
+    "family": "info",
+    "accept": true,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px;visibility:hidden\"><text style=\"visibility:visible\" x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>"
+  },
+  {
+    "id": "info-34",
+    "family": "info",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text dx=\"20\" x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>"
+  },
+  {
+    "id": "info-35",
+    "family": "info",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text dy=\"20\" x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>"
+  },
+  {
+    "id": "info-36",
+    "family": "info",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text rotate=\"45\" x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>"
+  },
+  {
+    "id": "info-37",
+    "family": "info",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text textLength=\"250\" x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>"
+  },
+  {
+    "id": "info-38",
+    "family": "info",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text lengthAdjust=\"spacingAndGlyphs\" x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>"
+  },
+  {
+    "id": "info-39",
+    "family": "info",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text letter-spacing=\"10\" x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>"
+  },
+  {
+    "id": "info-40",
+    "family": "info",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text word-spacing=\"8\" x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>"
+  },
+  {
+    "id": "info-41",
+    "family": "info",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text text-decoration=\"underline\" x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>"
+  },
+  {
+    "id": "info-42",
+    "family": "info",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text baseline-shift=\"super\" x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>"
+  },
+  {
+    "id": "info-43",
+    "family": "info",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text style=\"text-shadow:2px 2px red\" x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>"
+  },
+  {
+    "id": "info-44",
+    "family": "info",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text writing-mode=\"vertical-rl\" x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>"
+  },
+  {
+    "id": "info-45",
+    "family": "info",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text direction=\"rtl\" x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>"
+  },
+  {
+    "id": "info-46",
+    "family": "info",
+    "accept": false,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><style>svg{letter-spacing:10px}</style><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>"
+  },
+  {
+    "id": "info-47",
+    "family": "info",
+    "accept": true,
+    "official": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>",
+    "native": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100%\" style=\"max-width:400px\"><text dx=\"0\" dy=\"0\" rotate=\"0\" letter-spacing=\"0\" word-spacing=\"normal\" lengthAdjust=\"spacing\" x=\"100\" y=\"40\" font-family=\"Arial\" font-size=\"32\" fill=\"#333\" text-anchor=\"middle\">v12.2.0</text></svg>"
+  }
+]

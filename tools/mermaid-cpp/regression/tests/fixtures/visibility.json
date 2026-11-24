@@ -1,0 +1,93 @@
+[
+  {
+    "id": "visible",
+    "input": {
+      "visibility": "visible",
+      "ancestors": [
+        {
+          "display": "inline",
+          "opacity": "1"
+        }
+      ]
+    },
+    "expected": true
+  },
+  {
+    "id": "hidden",
+    "input": {
+      "visibility": "hidden",
+      "ancestors": [
+        {
+          "display": "inline",
+          "opacity": "1"
+        }
+      ]
+    },
+    "expected": false
+  },
+  {
+    "id": "collapse",
+    "input": {
+      "visibility": "collapse",
+      "ancestors": [
+        {
+          "display": "inline",
+          "opacity": "1"
+        }
+      ]
+    },
+    "expected": false
+  },
+  {
+    "id": "ancestor-display",
+    "input": {
+      "visibility": "visible",
+      "ancestors": [
+        {
+          "display": "inline",
+          "opacity": "1"
+        },
+        {
+          "display": "none",
+          "opacity": "1"
+        }
+      ]
+    },
+    "expected": false
+  },
+  {
+    "id": "ancestor-opacity",
+    "input": {
+      "visibility": "visible",
+      "ancestors": [
+        {
+          "display": "inline",
+          "opacity": "1"
+        },
+        {
+          "display": "block",
+          "opacity": "0"
+        }
+      ]
+    },
+    "expected": false
+  },
+  {
+    "id": "ancestor-visibility",
+    "input": {
+      "visibility": "visible",
+      "ancestors": [
+        {
+          "display": "inline",
+          "opacity": "1"
+        },
+        {
+          "display": "block",
+          "opacity": ".5",
+          "visibility": "hidden"
+        }
+      ]
+    },
+    "expected": true
+  }
+]

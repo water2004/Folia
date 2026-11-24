@@ -1,0 +1,205 @@
+[
+  {
+    "id": "translation",
+    "actual": [
+      {
+        "text": "A",
+        "x": 3,
+        "y": 3,
+        "width": 6,
+        "height": 9,
+        "size": 12,
+        "weight": "400",
+        "style": "normal",
+        "paint": "rgb(0, 0, 0)|none|0",
+        "family": "Arial"
+      }
+    ],
+    "expected": [
+      {
+        "text": "A",
+        "x": 2,
+        "y": 3,
+        "width": 6,
+        "height": 9,
+        "size": 12,
+        "weight": "400",
+        "style": "normal",
+        "paint": "rgb(0, 0, 0)|none|0",
+        "family": "Arial"
+      }
+    ],
+    "accept": true
+  },
+  {
+    "id": "missing",
+    "actual": [],
+    "expected": [
+      {
+        "text": "A",
+        "x": 2,
+        "y": 3,
+        "width": 6,
+        "height": 9,
+        "size": 12,
+        "weight": "400",
+        "style": "normal",
+        "paint": "rgb(0, 0, 0)|none|0",
+        "family": "Arial"
+      }
+    ],
+    "accept": false
+  },
+  {
+    "id": "different",
+    "actual": [
+      {
+        "text": "B",
+        "x": 2,
+        "y": 3,
+        "width": 6,
+        "height": 9,
+        "size": 12,
+        "weight": "400",
+        "style": "normal",
+        "paint": "rgb(0, 0, 0)|none|0",
+        "family": "Arial"
+      }
+    ],
+    "expected": [
+      {
+        "text": "A",
+        "x": 2,
+        "y": 3,
+        "width": 6,
+        "height": 9,
+        "size": 12,
+        "weight": "400",
+        "style": "normal",
+        "paint": "rgb(0, 0, 0)|none|0",
+        "family": "Arial"
+      }
+    ],
+    "accept": false
+  },
+  {
+    "id": "weight",
+    "actual": [
+      {
+        "text": "A",
+        "x": 2,
+        "y": 3,
+        "width": 6,
+        "height": 9,
+        "size": 12,
+        "weight": "700",
+        "style": "normal",
+        "paint": "rgb(0, 0, 0)|none|0",
+        "family": "Arial"
+      }
+    ],
+    "expected": [
+      {
+        "text": "A",
+        "x": 2,
+        "y": 3,
+        "width": 6,
+        "height": 9,
+        "size": 12,
+        "weight": "400",
+        "style": "normal",
+        "paint": "rgb(0, 0, 0)|none|0",
+        "family": "Arial"
+      }
+    ],
+    "accept": false
+  },
+  {
+    "id": "displaced",
+    "actual": [
+      {
+        "text": "A",
+        "x": 4,
+        "y": 3,
+        "width": 6,
+        "height": 9,
+        "size": 12,
+        "weight": "400",
+        "style": "normal",
+        "paint": "rgb(0, 0, 0)|none|0",
+        "family": "Arial"
+      }
+    ],
+    "expected": [
+      {
+        "text": "A",
+        "x": 2,
+        "y": 3,
+        "width": 6,
+        "height": 9,
+        "size": 12,
+        "weight": "400",
+        "style": "normal",
+        "paint": "rgb(0, 0, 0)|none|0",
+        "family": "Arial"
+      }
+    ],
+    "accept": false
+  },
+  {
+    "id": "assignment",
+    "actual": [
+      {
+        "text": "A",
+        "x": 1,
+        "y": 3,
+        "width": 6,
+        "height": 9,
+        "size": 12,
+        "weight": "400",
+        "style": "normal",
+        "paint": "rgb(0, 0, 0)|none|0",
+        "family": "Arial"
+      },
+      {
+        "text": "A",
+        "x": -1,
+        "y": 3,
+        "width": 6,
+        "height": 9,
+        "size": 12,
+        "weight": "400",
+        "style": "normal",
+        "paint": "rgb(0, 0, 0)|none|0",
+        "family": "Arial"
+      }
+    ],
+    "expected": [
+      {
+        "text": "A",
+        "x": 0,
+        "y": 3,
+        "width": 6,
+        "height": 9,
+        "size": 12,
+        "weight": "400",
+        "style": "normal",
+        "paint": "rgb(0, 0, 0)|none|0",
+        "family": "Arial"
+      },
+      {
+        "text": "A",
+        "x": 2,
+        "y": 3,
+        "width": 6,
+        "height": 9,
+        "size": 12,
+        "weight": "400",
+        "style": "normal",
+        "paint": "rgb(0, 0, 0)|none|0",
+        "family": "Arial"
+      }
+    ],
+    "accept": true
+  }
+]
