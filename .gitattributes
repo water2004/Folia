@@ -6,30 +6,18 @@ tools/math-port/reference/mediawiki-texvc-2.7.9.js text eol=lf whitespace=-blank
 tools/mathjax-bundle/entry.cjs text eol=lf
 tools/mathjax-bundle/package-lock.json text eol=lf
 tools/mermaid-cpp/math-oracle/package-lock.json text eol=lf
-tests/math/fixtures/tex_package_registry_source.hpp text eol=lf
-tests/math/fixtures/texvc_svg_source.hpp text eol=lf
 tools/math-port/common-layout-reference/profile-cases.json text eol=lf
 tools/math-port/common-layout-reference/profile-source-lock.json text eol=lf
 tools/math-port/regressions/g252/common-passive-source.cjs text eol=lf
 tools/math-port/regressions/g252/passive-event-host.cjs text eol=lf
 tools/math-port/regressions/g252/common-reference-lock.json text eol=lf
-tools/math-port/regressions/g252/compare-common-passive.cjs text eol=lf
 
 # Reproducible MathJax Source observation tables.
 tests/math/fixtures/fraction_source_pairs.txt text eol=lf
 tests/math/fixtures/radical_source_pairs.txt text eol=lf
-tests/math/fixtures/common_scene.inc text eol=lf
 tools/math-port/common-scene-source.cjs text eol=lf
 tools/math-port/table-mathml-cases.json text eol=lf
-tests/math/fixtures/common-source/table-mathml-scene.inc text eol=lf
 tools/math-port/common-semantics-fenced-mathml-cases.json text eol=lf
-tests/math/fixtures/common-source/semantics-fenced-mathml-scene.inc text eol=lf
-tests/math/fixtures/common-source/merror-mathml-scene.inc text eol=lf
-tests/math/fixtures/common-source/xml-mathml-scene.inc text eol=lf
-tests/math/fixtures/maction_scene_source.hpp text eol=lf
-tests/math/fixtures/mglyph_scene_source.hpp text eol=lf
-tests/math/fixtures/table_profile_source.hpp text eol=lf
-tests/math/fixtures/canonical_scene_modes_source.hpp text eol=lf
 
 # Preserve frozen Source observation profile bytes across Windows checkouts.
 docs/math-port/evidence/leaf-source-profile.json text eol=lf
@@ -70,8 +58,24 @@ docs/math-port/evidence/input-host-source.json -text
 docs/math-port/evidence/operator-source-profile.json text eol=lf
 docs/math-port/evidence/p12b-mo-pattern-complete-source.json -text
 
-# Official Markdown samples contain significant physical CR and trailing whitespace.
-tests/parsing/fixtures/conformance/upstream/** -text whitespace=-blank-at-eol,-blank-at-eof
+# Portable fixture checkpoints hash exact bytes, including line endings.
+# Scope these defaults to portable corpora; Windows integration data is separate.
+tests/fixtures/** text eol=lf
+tests/editing/fixtures/** text eol=lf
+tests/math/fixtures/** text eol=lf
+tests/mermaid_cpp/fixtures/** text eol=lf
+tests/mermaid_regression/cases/** text eol=lf
+tests/parsing/fixtures/** text eol=lf
+tools/math-port/tests/fixtures/** text eol=lf
+tools/mermaid-cpp/regression/tests/fixtures/** text eol=lf
 tests/parsing/fixtures/conformance/*.tsv text eol=lf
 tests/**/fixtures/**/*.tsv text eol=lf
-tools/mermaid-cpp/regression/tests/fixtures/**/*.rgba -text
+
+# Raster observations are binary and must never undergo line-ending conversion.
+tests/**/fixtures/**/*.png -text !eol
+tests/**/fixtures/**/*.rgba -text !eol
+tools/**/tests/fixtures/**/*.png -text !eol
+tools/**/tests/fixtures/**/*.rgba -text !eol
+
+# Official Markdown samples contain significant physical CR and trailing whitespace.
+tests/parsing/fixtures/conformance/upstream/** -text !eol whitespace=-blank-at-eol,-blank-at-eof

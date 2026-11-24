@@ -1,0 +1,2586 @@
+{
+  "schema": 1,
+  "purpose": "Integrity checkpoint for retained portable observations; hashes detect subsequent changes, but do not by themselves prove equivalence to pre-refactor data.",
+  "hash_policy": "sha256-exact-bytes",
+  "scope": [
+    "tests/**/fixtures/** excluding SDK suites, preservation, code and README files",
+    "tests/mermaid_regression/cases/**",
+    "tools/**/tests/fixtures/** excluding code and README files"
+  ],
+  "files": [
+    {
+      "path": "tests/editing/fixtures/history_contexts.tsv",
+      "bytes": 212,
+      "sha256": "063a432f96ef4c947d69ac606b5d8517cd0c02254a9a966743dd0e7a0aa98bc0",
+      "tsv_rows": 11
+    },
+    {
+      "path": "tests/editing/fixtures/inline_states.tsv",
+      "bytes": 273,
+      "sha256": "7dc5416ecee986c064b7c6fa40da55577835e870da890253ee0f3c7e2714e1fb",
+      "tsv_rows": 22
+    },
+    {
+      "path": "tests/editing/fixtures/random_contexts.tsv",
+      "bytes": 184,
+      "sha256": "dfe0c5fcc22d528ff0760b99d273e64d9fa8d66a83a81d34e6c3733d96744ab9",
+      "tsv_rows": 8
+    },
+    {
+      "path": "tests/editing/fixtures/representative_contexts.tsv",
+      "bytes": 174,
+      "sha256": "7c06b36ae08fb554f12bb7fd55f0190134b4b0fde2e25f33a7a5551bdf1f1cdb",
+      "tsv_rows": 9
+    },
+    {
+      "path": "tests/fixtures/harness/empty.tsv",
+      "bytes": 78,
+      "sha256": "1d949bda30afda6a9c54fe223773549bb8dda3ec27a957ffca0143560cd05939",
+      "tsv_rows": 0
+    },
+    {
+      "path": "tests/fixtures/harness/valid.tsv",
+      "bytes": 97,
+      "sha256": "ac8eac071b98025e1d5ea226313221fa42d72c963d17cba766bec9d29d0071f3",
+      "tsv_rows": 2
+    },
+    {
+      "path": "tests/fixtures/harness/wrong_columns.tsv",
+      "bytes": 78,
+      "sha256": "fee50f21fd3597dab3090c7ad20f826096ef36b1bc58d97fe030e76afb224d06",
+      "tsv_rows": 1
+    },
+    {
+      "path": "tests/fixtures/unicode/grapheme_break.tsv",
+      "bytes": 33701,
+      "sha256": "343453cfb5ef1ffdf7ed18ae2147fa4ca2f5be90e17755e2ba786f5f3cb7d00e",
+      "tsv_rows": 1187
+    },
+    {
+      "path": "tests/math/fixtures/adaptors/lite/cases.tsv",
+      "bytes": 61603,
+      "sha256": "b14c6205232a949c44d1531fb35e49629fca4c347db316b271e722276abaaaf4",
+      "tsv_rows": 41
+    },
+    {
+      "path": "tests/math/fixtures/adaptors/lite/counts.tsv",
+      "bytes": 115,
+      "sha256": "7d2aca420df4af31226eacd81f88c97b73b34e27a0756c15bacd29f67856153b",
+      "tsv_rows": 1
+    },
+    {
+      "path": "tests/math/fixtures/adaptors/lite/element-metric.tsv",
+      "bytes": 323,
+      "sha256": "2b5223d9cfb498a43eb90dcd85e845823d9f2b0852b9061d43ab1e4f91e0e6d4",
+      "tsv_rows": 1
+    },
+    {
+      "path": "tests/math/fixtures/adaptors/lite/entity-loads.tsv",
+      "bytes": 375,
+      "sha256": "611b040069fa185549cdeaab4d8ee35078f4e5c5875516d5a7cadea46695e805",
+      "tsv_rows": 4
+    },
+    {
+      "path": "tests/math/fixtures/adaptors/lite/mutations.tsv",
+      "bytes": 9702,
+      "sha256": "9f9ac2b7e7e4dbda631b3b6299eaa1aed6a48e888a2bb9ad3ee7b9c3761eb30f",
+      "tsv_rows": 14
+    },
+    {
+      "path": "tests/math/fixtures/adaptors/lite/selectors.tsv",
+      "bytes": 156,
+      "sha256": "b7c3d02a7257c29a3852413a781a6d4519906c1447f9798be6f32d193971b70e",
+      "tsv_rows": 9
+    },
+    {
+      "path": "tests/math/fixtures/adaptors/lite/text-error.tsv",
+      "bytes": 181,
+      "sha256": "5a2838b9bc428e216c81ccf848209391aca554fd90521a0045c5b72d796e9f59",
+      "tsv_rows": 1
+    },
+    {
+      "path": "tests/math/fixtures/common-source/border-dash-source-expected.json",
+      "bytes": 10319,
+      "sha256": "cd7149fbd3725328ae1c3ecb4addfe541fd75faa88cd2c295c0dead62e494194"
+    },
+    {
+      "path": "tests/math/fixtures/common-source/containers-source-geometry-expected.json",
+      "bytes": 2993,
+      "sha256": "9a3e0e8cca26efa63c7862e2d8e7ec620a0d45c19bb3295d5c8769a075c1f42c"
+    },
+    {
+      "path": "tests/math/fixtures/common-source/containers-source-lock.json",
+      "bytes": 2103,
+      "sha256": "f99bb59d2e4db01aa56a5246d79c94f548b64ed34ad416b15e35dc0678f84b3e"
+    },
+    {
+      "path": "tests/math/fixtures/common-source/fence-action-source-lock.json",
+      "bytes": 560,
+      "sha256": "82b138e3a718580917fd05046fdb0a2ab172ceb327f5f8df64488e55ae20cc14"
+    },
+    {
+      "path": "tests/math/fixtures/common-source/inline-policy.expected.json",
+      "bytes": 1308,
+      "sha256": "2c776b4a4286138de169b30fdf6040458f06b4a56a952b40b95a0662bcef56fe"
+    },
+    {
+      "path": "tests/math/fixtures/common-source/jax-source-witness.expected.json",
+      "bytes": 1043,
+      "sha256": "fcd070ce9255af804da38ddabb5672763222094ca972413903062011db0a8b14"
+    },
+    {
+      "path": "tests/math/fixtures/common-source/limits-source-expected.json",
+      "bytes": 3039,
+      "sha256": "439b8fd72e0e6a1505107e6547d385536eff2bd73108ee3958900e21e36e644e"
+    },
+    {
+      "path": "tests/math/fixtures/common-source/limits-source-lock.json",
+      "bytes": 2429,
+      "sha256": "7927396547214bc9d41f017a20bbbcdfa0423e346745f4d8919eb6b3098a68bf"
+    },
+    {
+      "path": "tests/math/fixtures/common-source/linebreak-source-expectations.json",
+      "bytes": 327,
+      "sha256": "144dfb8e97337dd0a9d82c423831319af45fecea1684e1075ba0a2811155b33d"
+    },
+    {
+      "path": "tests/math/fixtures/common-source/menclose-geometry-source-expected.json",
+      "bytes": 204604,
+      "sha256": "e7e4272ef5e1a7ab6707294c17988eaa111b1a0a7d3e54fc58a98462c1899236"
+    },
+    {
+      "path": "tests/math/fixtures/common-source/menclose-source-expected.json",
+      "bytes": 5649,
+      "sha256": "61ad7d1e89920441851500cdc3fa1db028e99225cbe9a2d075681457a2e2f5e9"
+    },
+    {
+      "path": "tests/math/fixtures/common-source/menclose-source-lock.json",
+      "bytes": 2451,
+      "sha256": "f1fc0ab993b036116e0fc1217bad84a1ba53ba3a0a7912eb042a4a122ac8a3e4"
+    },
+    {
+      "path": "tests/math/fixtures/common-source/scripts-real-source-expected.json",
+      "bytes": 50368,
+      "sha256": "361f3caa0fd117b5356eab72b11c574bcce1e1d589e296b833879b2ddb0bd408"
+    },
+    {
+      "path": "tests/math/fixtures/common-source/scripts-real-source-lock.json",
+      "bytes": 2541,
+      "sha256": "df8145083746a5dcb809ebb9f6940e2f7fc4ef0cc9bc1c62b6a9a5187a45b17b"
+    },
+    {
+      "path": "tests/math/fixtures/common-source/scripts-source-lock.json",
+      "bytes": 991,
+      "sha256": "88ee79145588b967466814bedd1311b113c11f5ee029313a04bd1e12fdc32918"
+    },
+    {
+      "path": "tests/math/fixtures/common-source/table-branch-source-expected.json",
+      "bytes": 13229,
+      "sha256": "6dc99f800b9bb576390445499195eb1beb84356387af292b1b0ccb3c569ce09b"
+    },
+    {
+      "path": "tests/math/fixtures/common-source/table-source-lock.json",
+      "bytes": 1475,
+      "sha256": "696b8b39c0094379d38c7cce081bcc176418860d9bf35922287dc415d7586564"
+    },
+    {
+      "path": "tests/math/fixtures/common-source/text-source-lock.json",
+      "bytes": 3771,
+      "sha256": "af35abaec9c277212f2ceb1e19454f4f93481ad242fb8895eb4235ce0bb02c79"
+    },
+    {
+      "path": "tests/math/fixtures/common-source/text-source-witness.expected.json",
+      "bytes": 19584,
+      "sha256": "78fea581154b9371289b543466ab724e9617abc7dea3d343978ff3ff92d1a555"
+    },
+    {
+      "path": "tests/math/fixtures/common-source/variant-source-lock.json",
+      "bytes": 1529,
+      "sha256": "94a5068951f0d24f4931207dce2223a8e7105b3f9832cfaf3607d2b9d0a88d59"
+    },
+    {
+      "path": "tests/math/fixtures/common-source/variant-source-witness.expected.json",
+      "bytes": 385,
+      "sha256": "77f930dc6c0e7226c27454e0ec8d5e885d8423e3f322f435b3b398565a3ff447"
+    },
+    {
+      "path": "tests/math/fixtures/core-source/math-item-source-expected.json",
+      "bytes": 4339,
+      "sha256": "d1bed7ae6455263127652b9fcfb511d2bbb33efb00230d89df11cf0054c0312f"
+    },
+    {
+      "path": "tests/math/fixtures/core/mml-defaults/global-entries.tsv",
+      "bytes": 826,
+      "sha256": "16232dffb8875678ce9e8793c8c43864db802dd1cec30c45b7f093b64b1ea213",
+      "tsv_rows": 28
+    },
+    {
+      "path": "tests/math/fixtures/core/mml-defaults/node-entries.tsv",
+      "bytes": 8108,
+      "sha256": "58a58e614629532cb2a28d160e0fc89fdbe38904e3e4a85520cec6eee9194c55",
+      "tsv_rows": 318
+    },
+    {
+      "path": "tests/math/fixtures/core/mml-defaults/nodes.tsv",
+      "bytes": 809,
+      "sha256": "dd9c3f3bb02799b0bdefce91a8e531f8a640d439dd4316b4e75c5cf1aed92207",
+      "tsv_rows": 43
+    },
+    {
+      "path": "tests/math/fixtures/entities/numbers.tsv",
+      "bytes": 398,
+      "sha256": "282170acae2a6045fff8c59b03dcc271a5e796bfa0b11ae6e430dc5346f6f016",
+      "tsv_rows": 21
+    },
+    {
+      "path": "tests/math/fixtures/entities/numeric-retries.tsv",
+      "bytes": 186,
+      "sha256": "238a0668591384b7fbdfdbfc551c1cad42d2694cbe62fdead4cd3d015449e6f6",
+      "tsv_rows": 2
+    },
+    {
+      "path": "tests/math/fixtures/entities/overrides.tsv",
+      "bytes": 248,
+      "sha256": "989bae42a4ea825c0657246a49d289b32b6d9adcf6042446d4928886bc2b30d2",
+      "tsv_rows": 3
+    },
+    {
+      "path": "tests/math/fixtures/entities/retries.tsv",
+      "bytes": 350,
+      "sha256": "e89d37f5505cbdd3ffaa080dbdc2f1d0f75c14b71b63503deb939b258fe98f66",
+      "tsv_rows": 3
+    },
+    {
+      "path": "tests/math/fixtures/entities/rows.tsv",
+      "bytes": 36386,
+      "sha256": "904ba01c4b220b1472c318e9ceb0672975494b3ea231b37ce95b64b62a1cde77",
+      "tsv_rows": 2128
+    },
+    {
+      "path": "tests/math/fixtures/entities/shards.tsv",
+      "bytes": 282,
+      "sha256": "d9b6b85c7e7fbefa09146b6f3ac7e14321c3c1caf204a9bb5d817701ac4cc289",
+      "tsv_rows": 29
+    },
+    {
+      "path": "tests/math/fixtures/entities/translations.tsv",
+      "bytes": 1400,
+      "sha256": "adc3aeee904575e1b3161cfa0ac3a83a591ad6c4e209e79f543fa68dbd8fe8f2",
+      "tsv_rows": 19
+    },
+    {
+      "path": "tests/math/fixtures/fonts/css-metadata.tsv",
+      "bytes": 822,
+      "sha256": "3bb572b6c0d03771ee748b8a25266f0531ef19fc8204f9f8289875ebc43e0533",
+      "tsv_rows": 33
+    },
+    {
+      "path": "tests/math/fixtures/fraction_source_pairs.txt",
+      "bytes": 124496,
+      "sha256": "af219765723984c030b183e107891cf61ff9b8d1244e8f0aacf911d8e1d72a7d"
+    },
+    {
+      "path": "tests/math/fixtures/input/find-tex/retained-cases.tsv",
+      "bytes": 5102,
+      "sha256": "a3a37e83fbfe412b6b4ac0c4efce5e644cdd7d48ae92edb1997aca77e759424d",
+      "tsv_rows": 56
+    },
+    {
+      "path": "tests/math/fixtures/input/find-tex/retained-expected.tsv",
+      "bytes": 2516,
+      "sha256": "1cb3b803924277a7f05a076b6de8e7a881145adaf87fb6200997ca6ea5e9d81e",
+      "tsv_rows": 60
+    },
+    {
+      "path": "tests/math/fixtures/input/find-tex/source-cases.tsv",
+      "bytes": 3159,
+      "sha256": "680a5c2ae8e6bd633a1fa19d9954a85b2454c5c347ab55f4acd58ad84108e44b",
+      "tsv_rows": 22
+    },
+    {
+      "path": "tests/math/fixtures/input/find-tex/source-expected.tsv",
+      "bytes": 2470,
+      "sha256": "22cce4b99ce41329faa34a8cad2bd76413f5b160ccd6f7eb373412b3a586d9ff",
+      "tsv_rows": 59
+    },
+    {
+      "path": "tests/math/fixtures/input/parse-options/cases.tsv",
+      "bytes": 631,
+      "sha256": "f4a328b5c83e4e2d6bf30976af9150d66ca6115e7009d9f72aaefc16ee7572ce",
+      "tsv_rows": 30
+    },
+    {
+      "path": "tests/math/fixtures/input/unit-util/defaults.tsv",
+      "bytes": 595,
+      "sha256": "175793be50a525b8abcc515307ce70eec607581da6026b5d1c68c82205c249f0",
+      "tsv_rows": 9
+    },
+    {
+      "path": "tests/math/fixtures/input/unit-util/formats.tsv",
+      "bytes": 703,
+      "sha256": "6ee7797e29ee54da5ce20ca91508b71d90547f421843456a20d9b53f5ac3f130",
+      "tsv_rows": 23
+    },
+    {
+      "path": "tests/math/fixtures/input/unit-util/matches.tsv",
+      "bytes": 3247,
+      "sha256": "2f5535f9291c816ccd4805742be714dddb377dc81f4a619b5a9d9691875d665a",
+      "tsv_rows": 29
+    },
+    {
+      "path": "tests/math/fixtures/input/unit-util/trims.tsv",
+      "bytes": 745,
+      "sha256": "0f9297ee3a9831a5e340075eb24322a45b656de6d2f27310400df29dd7c58ca4",
+      "tsv_rows": 37
+    },
+    {
+      "path": "tests/math/fixtures/mhchem_parser.tsv",
+      "bytes": 4305067,
+      "sha256": "1cacc8e653ec0b2a3836de1d9b03650f99e2304100c9b60f0bbf5ee22d80e6c3",
+      "tsv_rows": 7960
+    },
+    {
+      "path": "tests/math/fixtures/numeric/formatted-length.tsv",
+      "bytes": 16414,
+      "sha256": "d1caa1da1ec6ab38738c423b17c7f68799514c39c6effad9373caa1e6f799e6e",
+      "tsv_rows": 512
+    },
+    {
+      "path": "tests/math/fixtures/numeric/input-number.tsv",
+      "bytes": 274310,
+      "sha256": "288187798d782a7ca0d36e1c4d45dbbed21a2793434e39ebdffab9f08937f049",
+      "tsv_rows": 1013
+    },
+    {
+      "path": "tests/math/fixtures/numeric/input-parse-int.tsv",
+      "bytes": 229827,
+      "sha256": "a6b811e180628361d6905e37238d7ed8b95d674e67e0a09ed07223a611d6c558",
+      "tsv_rows": 944
+    },
+    {
+      "path": "tests/math/fixtures/numeric/number-format.tsv",
+      "bytes": 417456,
+      "sha256": "3c4eacf84fbe1bfc9cb7b32dad4e0134664c1f782404bd07e7f17af820cf5218",
+      "tsv_rows": 6412
+    },
+    {
+      "path": "tests/math/fixtures/numeric/number-length.tsv",
+      "bytes": 7632,
+      "sha256": "250351c2781e69b63f6cf6bda71915ce59414996b1f050232ec802bc52cc8474",
+      "tsv_rows": 88
+    },
+    {
+      "path": "tests/math/fixtures/numeric/pixel.tsv",
+      "bytes": 61166,
+      "sha256": "7c4cc56ceb1300b0fa78fd386aff40aedc7a6419c99c42a310b3476061b3481b",
+      "tsv_rows": 1024
+    },
+    {
+      "path": "tests/math/fixtures/numeric/reduction.tsv",
+      "bytes": 31162,
+      "sha256": "670a76a2d444c808879180a620fb017ee7a3edf89607fe65a645b982b480c381",
+      "tsv_rows": 145
+    },
+    {
+      "path": "tests/math/fixtures/numeric/text-length.tsv",
+      "bytes": 43137,
+      "sha256": "0940bd649168ccedde8ee493bddbf0a31c4ea967a1fd7a9fecb1fbb698b56bda",
+      "tsv_rows": 520
+    },
+    {
+      "path": "tests/math/fixtures/numeric/unit.tsv",
+      "bytes": 1073,
+      "sha256": "32aed7369435c883602f64cb60aad54a6f598b34dc9f41651e5e5ecf8a2ebb38",
+      "tsv_rows": 30
+    },
+    {
+      "path": "tests/math/fixtures/operators/entries.tsv",
+      "bytes": 71557,
+      "sha256": "7bf5034c80e49985fce99c17c35e62bbb033227a94868e8b41ac6d768d078204",
+      "tsv_rows": 1252
+    },
+    {
+      "path": "tests/math/fixtures/operators/independent-truths.tsv",
+      "bytes": 822,
+      "sha256": "b6aa22cd35ff43d70278d23a6e3a1879f2de2486347c8d2b91373392e066c4a5",
+      "tsv_rows": 40
+    },
+    {
+      "path": "tests/math/fixtures/operators/masks.tsv",
+      "bytes": 492210,
+      "sha256": "f6f634c82c0f299e0db6687ac5f634d645b0fbea9099f828c5cf0b5ff080e73e",
+      "tsv_rows": 30
+    },
+    {
+      "path": "tests/math/fixtures/operators/named-properties.tsv",
+      "bytes": 499,
+      "sha256": "d2d36d0d792d3204afd1cbdf54c4625113ffaafc27c1138eef57e72406e5579f",
+      "tsv_rows": 28
+    },
+    {
+      "path": "tests/math/fixtures/operators/named.tsv",
+      "bytes": 1508,
+      "sha256": "63f2d67ca1de462a666ef9a03f94e7904b252e5dff2936206baaa04e7dac445d",
+      "tsv_rows": 27
+    },
+    {
+      "path": "tests/math/fixtures/operators/properties.tsv",
+      "bytes": 12781,
+      "sha256": "9bb23fc2c5ce9c31a4c86ce553d1e6053b04bad8992e8f5e47a6814b3524df69",
+      "tsv_rows": 944
+    },
+    {
+      "path": "tests/math/fixtures/operators/queries.tsv",
+      "bytes": 32863,
+      "sha256": "17df3ffd85947db75c662d353ffe3571df0c6fd408c2c43237075f92bd7c130d",
+      "tsv_rows": 1480
+    },
+    {
+      "path": "tests/math/fixtures/operators/ranges.tsv",
+      "bytes": 1263,
+      "sha256": "c2c6edd71041a1fb8b30bc3071a2ed07ee729cca5304188664a2dfaa0828ee88",
+      "tsv_rows": 50
+    },
+    {
+      "path": "tests/math/fixtures/operators/retained-samples.tsv",
+      "bytes": 52129,
+      "sha256": "b86c65d67c17b2c59bc0b8a7008d3fa7b56bd6431a1939159d740bcdadc6abdc",
+      "tsv_rows": 255
+    },
+    {
+      "path": "tests/math/fixtures/operators/retained-values.tsv",
+      "bytes": 50084,
+      "sha256": "e766ec2aef70b6bf3af9ff117070188c8e9266cd0a7ea689e88d9c6311951715",
+      "tsv_rows": 5
+    },
+    {
+      "path": "tests/math/fixtures/operators/spacing.tsv",
+      "bytes": 375,
+      "sha256": "665cb27e2488c1871a004cf55dd16ca1aac7956af933b32414bd2fd5ae2e889f",
+      "tsv_rows": 8
+    },
+    {
+      "path": "tests/math/fixtures/output/common-bbox/cases.tsv",
+      "bytes": 7386,
+      "sha256": "f3bd1eddcff03b7320ee7c5db1798b0c89142568ac26f6a8129a0ac43c82eed3",
+      "tsv_rows": 36
+    },
+    {
+      "path": "tests/math/fixtures/output/menclose/geometry.tsv",
+      "bytes": 8240,
+      "sha256": "a3ee5072ecd5b1123dea27b96991aa6723d27e905ed05b1bb7d2e4071875cb82",
+      "tsv_rows": 56
+    },
+    {
+      "path": "tests/math/fixtures/packages/bboldx/characters.tsv",
+      "bytes": 18960,
+      "sha256": "ab9c10c3d217984ad23d632137f70602d86cc1cb26fe9695737a1087f50942af",
+      "tsv_rows": 168
+    },
+    {
+      "path": "tests/math/fixtures/packages/bboldx/commands.tsv",
+      "bytes": 1522,
+      "sha256": "f31cc2930ff81e70aec29c67cb776dda778b02b9a32768e012f7bc266cd63d02",
+      "tsv_rows": 12
+    },
+    {
+      "path": "tests/math/fixtures/packages/bussproofs-items/errors.tsv",
+      "bytes": 528,
+      "sha256": "b1f3702b4836846cbd5643f7ef78aa5bae040c0f25c9cf5508243c947a98a1fc",
+      "tsv_rows": 6
+    },
+    {
+      "path": "tests/math/fixtures/packages/bussproofs-items/trees.tsv",
+      "bytes": 663,
+      "sha256": "22d6c0da0de042af0e4eb2e077ff437b2621e5bdda064e4087a059df51b445b8",
+      "tsv_rows": 11
+    },
+    {
+      "path": "tests/math/fixtures/packages/bussproofs/arguments.tsv",
+      "bytes": 877,
+      "sha256": "40af0213cedd9adb8b5f03a58d8943e3a80e64dc6739077c4f51f87db236e789",
+      "tsv_rows": 37
+    },
+    {
+      "path": "tests/math/fixtures/packages/bussproofs/bindings.tsv",
+      "bytes": 586,
+      "sha256": "385041cb2077945e1296192d6709694202c2d862f97bc36a05457336d0ff1550",
+      "tsv_rows": 33
+    },
+    {
+      "path": "tests/math/fixtures/packages/bussproofs/direct.tsv",
+      "bytes": 527,
+      "sha256": "25cb816f51011695106577e4783244af3adceed908da69960dbee054ce9d7a70",
+      "tsv_rows": 5
+    },
+    {
+      "path": "tests/math/fixtures/packages/bussproofs/errors.tsv",
+      "bytes": 2225,
+      "sha256": "5b6d80b64ddea51559d799d39d2a72462ac0843df9f9ee316a126dcf38d0f388",
+      "tsv_rows": 29
+    },
+    {
+      "path": "tests/math/fixtures/packages/bussproofs/runtime.tsv",
+      "bytes": 401,
+      "sha256": "0e47cd972108baba1e98add9d0c392ee9ac9f74794dfaad0c73b11a259f7632a",
+      "tsv_rows": 2
+    },
+    {
+      "path": "tests/math/fixtures/packages/bussproofs/steps.tsv",
+      "bytes": 12348,
+      "sha256": "7bb63dae3b31041bdc443a626ce95a75e62f80cc1f3691b5cf214368bf3f2bd2",
+      "tsv_rows": 15
+    },
+    {
+      "path": "tests/math/fixtures/packages/bussproofs/trees.tsv",
+      "bytes": 99764,
+      "sha256": "25334c368b790ab7020e43b62ec1b4189c4dbc105bc5f809d1b4e1fbdab65bd8",
+      "tsv_rows": 63
+    },
+    {
+      "path": "tests/math/fixtures/packages/cases/errors.tsv",
+      "bytes": 976,
+      "sha256": "c216554e684f5dc0b9de51ba87f596af66b740ce34d7ba918db62f3bbdb2239d",
+      "tsv_rows": 12
+    },
+    {
+      "path": "tests/math/fixtures/packages/cases/formats.tsv",
+      "bytes": 174,
+      "sha256": "0c0d0ab9576f1e094d0c627193efc932981ac45a5c14cbb6f71b5036aae09187",
+      "tsv_rows": 8
+    },
+    {
+      "path": "tests/math/fixtures/packages/cases/sequence.tsv",
+      "bytes": 10511,
+      "sha256": "48ab6a2f426a572d90b7a8a0dcb6ed345f7ee20823e8025b2dd5e8472b89480d",
+      "tsv_rows": 5
+    },
+    {
+      "path": "tests/math/fixtures/packages/cases/trees.tsv",
+      "bytes": 118529,
+      "sha256": "44d984f80d036fe36d155155f8ee60d1ad144597ad32325611cc578ca9464cda",
+      "tsv_rows": 32
+    },
+    {
+      "path": "tests/math/fixtures/packages/colortbl/direct.tsv",
+      "bytes": 2056,
+      "sha256": "7b84f6e67cd9b7434888b42872dfcbd2cd0a046c3770999ce1da4c3b96a9561c",
+      "tsv_rows": 9
+    },
+    {
+      "path": "tests/math/fixtures/packages/colortbl/errors.tsv",
+      "bytes": 1135,
+      "sha256": "8b8e58f4f98ecd2d3fe39a68e0a4a2f6b55ff4a1e3851feec5ad41f943ebe105",
+      "tsv_rows": 14
+    },
+    {
+      "path": "tests/math/fixtures/packages/colortbl/sequence.tsv",
+      "bytes": 1606,
+      "sha256": "d404303828e1b0cb564bdbbfc2f2d8f1123d4163e92512f635c48c332e6e9746",
+      "tsv_rows": 4
+    },
+    {
+      "path": "tests/math/fixtures/packages/colortbl/trees.tsv",
+      "bytes": 22436,
+      "sha256": "22b2303d37f160fe8a60b76d3c899056d87168b8114509a08a555568fb791016",
+      "tsv_rows": 27
+    },
+    {
+      "path": "tests/math/fixtures/packages/empheq/cases.tsv",
+      "bytes": 171137,
+      "sha256": "d45334231c0a0cd2a522f64618803c98471228b729f66f28801ac8ada11be6c5",
+      "tsv_rows": 68
+    },
+    {
+      "path": "tests/math/fixtures/packages/empheq/errors.tsv",
+      "bytes": 667,
+      "sha256": "4564ed3515d6d4697117ffe7c53999fd30886dc515242e64a49b8778867a1e32",
+      "tsv_rows": 9
+    },
+    {
+      "path": "tests/math/fixtures/packages/empheq/symbols.tsv",
+      "bytes": 5948,
+      "sha256": "e037245d59c901b88f35dc80720d77d212be4a7ba5c19bc8498bf4fdc70ee0c6",
+      "tsv_rows": 32
+    },
+    {
+      "path": "tests/math/fixtures/packages/empheq/type-errors.tsv",
+      "bytes": 255,
+      "sha256": "9ce6a8e9bdff3741b8a0f35315beae84b318107c9d2f5d9e3654b9aef7ec2b85",
+      "tsv_rows": 3
+    },
+    {
+      "path": "tests/math/fixtures/packages/empheq/utilities.tsv",
+      "bytes": 8310,
+      "sha256": "248e9be3d7629f5dae8249166b18b66defa0ec124edc7b52bc9b837c051cc8a3",
+      "tsv_rows": 8
+    },
+    {
+      "path": "tests/math/fixtures/packages/mathtools/errors.tsv",
+      "bytes": 3643,
+      "sha256": "7692b216d402f1a528e753cdbaabfe5c4cf13d177f187e7b019d14342f941b15",
+      "tsv_rows": 61
+    },
+    {
+      "path": "tests/math/fixtures/packages/mathtools/order.tsv",
+      "bytes": 3154,
+      "sha256": "43c6d2a7230ab439045b64f1ace16bb0a960e63133e28fae794591197833c00e",
+      "tsv_rows": 4
+    },
+    {
+      "path": "tests/math/fixtures/packages/mathtools/steps.tsv",
+      "bytes": 19092,
+      "sha256": "4ab2277ddfaace6c21c871aa7ab9c6a117efefc827e709b2b94d149f5aabbc80",
+      "tsv_rows": 37
+    },
+    {
+      "path": "tests/math/fixtures/packages/mathtools/trees.tsv",
+      "bytes": 201841,
+      "sha256": "e67df5aa5841ac800a18bea9595b26dd8fe397c0afc295e8d0dfcff30b1f44f5",
+      "tsv_rows": 218
+    },
+    {
+      "path": "tests/math/fixtures/packages/mathtools_tags/sequence.tsv",
+      "bytes": 5878,
+      "sha256": "bae0c76613141aed5248d505775ee926925370b973c2a8b59e1614af35e6942e",
+      "tsv_rows": 8
+    },
+    {
+      "path": "tests/math/fixtures/packages/mathtools_tags/trees.tsv",
+      "bytes": 88435,
+      "sha256": "7f53a0d955884bfe6cf019cddf996003cd733188897f46c288898d8a65ebcfd0",
+      "tsv_rows": 72
+    },
+    {
+      "path": "tests/math/fixtures/packages/mhchem/aliases.tsv",
+      "bytes": 2522,
+      "sha256": "4c032e4b1857567a85bb57f6f01e85886dfa6cfc6840bf2d25491ba25b77b119",
+      "tsv_rows": 2
+    },
+    {
+      "path": "tests/math/fixtures/packages/mhchem/cases.tsv",
+      "bytes": 566019,
+      "sha256": "b4b386fa9d173c9ab944ddf16a9ae59751d480ab8b689d4a0ebb684557f0926b",
+      "tsv_rows": 220
+    },
+    {
+      "path": "tests/math/fixtures/packages/mhchem/creator.tsv",
+      "bytes": 522,
+      "sha256": "ce55b405a753531744fc9bbf1ec2b08f48c0e0efacc5c7559fd8950a53db1ba1",
+      "tsv_rows": 1
+    },
+    {
+      "path": "tests/math/fixtures/packages/mhchem/mutation-input.tsv",
+      "bytes": 506,
+      "sha256": "cbc15eb8e479e858eb943dbf6298a6d0f08b88fcea9887c75917793d94b789fc",
+      "tsv_rows": 1
+    },
+    {
+      "path": "tests/math/fixtures/packages/mhchem/mutations.tsv",
+      "bytes": 110754,
+      "sha256": "e33937edb0f88c9a37cb4aab1ba0f078a7c8ac591f3835df18faf0e348354012",
+      "tsv_rows": 14
+    },
+    {
+      "path": "tests/math/fixtures/packages/mhchem/recovery.tsv",
+      "bytes": 2252,
+      "sha256": "0600299f9f1fd0a2e21d000f600f14232c567217f3d78de244f95a08c8d1065d",
+      "tsv_rows": 2
+    },
+    {
+      "path": "tests/math/fixtures/packages/mhchem/replacements.tsv",
+      "bytes": 19072,
+      "sha256": "9cb48086454aa783ff0f1d888c37e8d6ef440fa9d027efc29141e0feb7416bdd",
+      "tsv_rows": 63
+    },
+    {
+      "path": "tests/math/fixtures/packages/mhchem/retired-mutations.tsv",
+      "bytes": 185,
+      "sha256": "7a57b602ccef51982f8d30c3e0bc69166359fdbfc92f10853ee7f73f1cc02ddc",
+      "tsv_rows": 4
+    },
+    {
+      "path": "tests/math/fixtures/packages/mhchem/untyped-mutations.tsv",
+      "bytes": 129,
+      "sha256": "e19722611886c0376b6245a160188b924dbe4ac2cf78262db485254452ec40a6",
+      "tsv_rows": 2
+    },
+    {
+      "path": "tests/math/fixtures/packages/physics/arguments.tsv",
+      "bytes": 4416,
+      "sha256": "2a0f8a1fac1f99bbdc67b83a1edcd0ca60e6c3ece46d8f245ca51892b94b84ce",
+      "tsv_rows": 198
+    },
+    {
+      "path": "tests/math/fixtures/packages/physics/attributes.tsv",
+      "bytes": 274,
+      "sha256": "99c740b9218c8d5f1ee1cb42916998f7da3748f5625ebb54bafe5fc3d4bad195",
+      "tsv_rows": 5
+    },
+    {
+      "path": "tests/math/fixtures/packages/physics/bindings.tsv",
+      "bytes": 9993,
+      "sha256": "86a2fd21ef8119991aadd50ad09c96dc047e709c72db8f76fcb1dbd11b98806d",
+      "tsv_rows": 196
+    },
+    {
+      "path": "tests/math/fixtures/packages/physics/direct.tsv",
+      "bytes": 1639,
+      "sha256": "1bd818c60853edc1656456368d30b2432a3e4b974e9c7e27e748debbf31105aa",
+      "tsv_rows": 9
+    },
+    {
+      "path": "tests/math/fixtures/packages/physics/errors.tsv",
+      "bytes": 1436,
+      "sha256": "e6c8d7d73f2a8894f5c9685f56c3b9bbbc838ec726a07daa3747fce35c155328",
+      "tsv_rows": 37
+    },
+    {
+      "path": "tests/math/fixtures/packages/physics/runtime.tsv",
+      "bytes": 557,
+      "sha256": "0cb663b6f62d9d032652b2f9c057e5dcde45ca6296279953b285ebd299b970b0",
+      "tsv_rows": 1
+    },
+    {
+      "path": "tests/math/fixtures/packages/physics/steps.tsv",
+      "bytes": 5554,
+      "sha256": "145d09a6594f213cb4c7759d52288290ab864b474faa7d39aa15a674b42d24e0",
+      "tsv_rows": 13
+    },
+    {
+      "path": "tests/math/fixtures/packages/physics/trees.tsv",
+      "bytes": 140589,
+      "sha256": "470d43ecbe63ce3303bbb46c69e32a4cd24a7ad99f2d445cc6bde1243e20f17c",
+      "tsv_rows": 192
+    },
+    {
+      "path": "tests/math/fixtures/packages/registry/aliases.json",
+      "bytes": 12852,
+      "sha256": "b526eadf562a5705b03514d4b75898b384840597860b744e3118764b52eed3d3"
+    },
+    {
+      "path": "tests/math/fixtures/packages/registry/packages.tsv",
+      "bytes": 522,
+      "sha256": "210921f6a42e7d273d8dbe2fa0cad8ab8f0a5d3f4de4a6dd7d62baf9e4afd2f4",
+      "tsv_rows": 39
+    },
+    {
+      "path": "tests/math/fixtures/packages/registry/registrations.tsv",
+      "bytes": 94158,
+      "sha256": "e8365811e0b27f21a19371a49a384d6324cb59ad69722e9252c7219ae14bf42a",
+      "tsv_rows": 1763
+    },
+    {
+      "path": "tests/math/fixtures/packages/registry/texvc-svg.tsv",
+      "bytes": 442436,
+      "sha256": "0bb38644cbb557fb46db0965140f93d3d0fcc81b7e6c33287f03373b44b99993",
+      "tsv_rows": 216
+    },
+    {
+      "path": "tests/math/fixtures/packages/setoptions/fields.tsv",
+      "bytes": 7269,
+      "sha256": "297b30ef7592f73c15ff4b73d43f97a23db050b326346f9ddf0623cd8e01bf41",
+      "tsv_rows": 96
+    },
+    {
+      "path": "tests/math/fixtures/packages/texhtml/direct.tsv",
+      "bytes": 29060,
+      "sha256": "faeae1fc72aa23076937bece096f1218cce92e85f3e7193f3422b801e6e4120a",
+      "tsv_rows": 22
+    },
+    {
+      "path": "tests/math/fixtures/packages/texhtml/dom-strings.tsv",
+      "bytes": 108,
+      "sha256": "0dc1701e22ff9b3075769d58b72469fc2a354b1b79ca08d349691b5a4a531c8c",
+      "tsv_rows": 3
+    },
+    {
+      "path": "tests/math/fixtures/packages/texhtml/metadata.tsv",
+      "bytes": 158,
+      "sha256": "5ff52eacebaba560c24f5aa892d31ba5062f544497b20726295b607a307cda75",
+      "tsv_rows": 1
+    },
+    {
+      "path": "tests/math/fixtures/packages/texhtml/pipeline.tsv",
+      "bytes": 6237,
+      "sha256": "5f2df99fde692da7048684ac9af6a484829fc91d3be6197149a80c01de872126",
+      "tsv_rows": 5
+    },
+    {
+      "path": "tests/math/fixtures/packages/texhtml/recovery.tsv",
+      "bytes": 527,
+      "sha256": "cc3ffc8c87548ef6d2fc08afce73b1406b179541890103747ace5b2a566b83f9",
+      "tsv_rows": 1
+    },
+    {
+      "path": "tests/math/fixtures/packages/textcomp/commands.tsv",
+      "bytes": 2683,
+      "sha256": "3fdae1bba77f9b8aaec66fc6da96c7452785fffda2751da050b789cad808f649",
+      "tsv_rows": 117
+    },
+    {
+      "path": "tests/math/fixtures/packages/textmacros/mapping-arguments.tsv",
+      "bytes": 1959,
+      "sha256": "99ae35181e46b635d91aee3e108146f3bf812acab11f56eee9479a8f32e11c83",
+      "tsv_rows": 74
+    },
+    {
+      "path": "tests/math/fixtures/packages/textmacros/mappings.tsv",
+      "bytes": 3299,
+      "sha256": "70476b118dde75cac4b70858f6f69cdbeaad6cd3db98c9cd749e2ab12048110e",
+      "tsv_rows": 116
+    },
+    {
+      "path": "tests/math/fixtures/packages/unicode/cases.tsv",
+      "bytes": 13729,
+      "sha256": "f1caa721127620daa1f6645c5b9700a58d014e11a45747030015252d5e4cda1a",
+      "tsv_rows": 51
+    },
+    {
+      "path": "tests/math/fixtures/packages/unicode/creator-input.tsv",
+      "bytes": 381,
+      "sha256": "d80b3722e2dfa7c4a98f66644401405be995c62431509e8e68857b62ef3102ee",
+      "tsv_rows": 1
+    },
+    {
+      "path": "tests/math/fixtures/packages/unicode/creator-requests.tsv",
+      "bytes": 134,
+      "sha256": "4d464cd8b50eede67ad5e41100d8498fa9d8273ebf2e768e6be2c0b5cc778568",
+      "tsv_rows": 1
+    },
+    {
+      "path": "tests/math/fixtures/packages/unicode/recovery.tsv",
+      "bytes": 1452,
+      "sha256": "87174b97088bba98ba1d0ba07c3b25028915d7bb4b348855f76bc7dfedf8e4ef",
+      "tsv_rows": 6
+    },
+    {
+      "path": "tests/math/fixtures/packages/unicode/registry.tsv",
+      "bytes": 1639,
+      "sha256": "440085e8bf77c2e7f5c31cd75907929ef2508a7fb88ce7bfd7f5006d156c06cc",
+      "tsv_rows": 6
+    },
+    {
+      "path": "tests/math/fixtures/radical_source_pairs.txt",
+      "bytes": 93486,
+      "sha256": "ec17997df11343784b8e80651d971060739eba68b14d13f500e69df33285e5ab"
+    },
+    {
+      "path": "tests/math/fixtures/scenes/canonical-cases.tsv",
+      "bytes": 8801,
+      "sha256": "16fba8fdd64bcbf2b80e7831046ff24c442b915748e0a44bfa710170aad64e0e",
+      "tsv_rows": 75
+    },
+    {
+      "path": "tests/math/fixtures/scenes/canonical-modes.tsv",
+      "bytes": 746447,
+      "sha256": "9758e80c7efcce0fb7faba440218b9a3270f74505eea1cb440aa80df2f0442c5",
+      "tsv_rows": 150
+    },
+    {
+      "path": "tests/math/fixtures/scenes/common.tsv",
+      "bytes": 1217182,
+      "sha256": "c43f609261d0e1d8317724cef696cba033b8b044183b833091973d8c333953ab",
+      "tsv_rows": 150
+    },
+    {
+      "path": "tests/math/fixtures/scenes/limits/observations.tsv",
+      "bytes": 205168,
+      "sha256": "c0188144e4b29bf1d5768f3baecfa126bf02382270b0a4d97e477f96d6879244",
+      "tsv_rows": 2435
+    },
+    {
+      "path": "tests/math/fixtures/scenes/limits/provenance.json",
+      "bytes": 447,
+      "sha256": "07c1dc10a411c03d79faf14ff417bb94497e279b2585a141258c929380274e6d"
+    },
+    {
+      "path": "tests/math/fixtures/scenes/maction/observations.tsv",
+      "bytes": 385978,
+      "sha256": "bbc8e18e9f3bbc378119d28c88a5e314e1070c0289cb1ca731de62b20a02cb05",
+      "tsv_rows": 2968
+    },
+    {
+      "path": "tests/math/fixtures/scenes/maction/provenance.json",
+      "bytes": 435,
+      "sha256": "156579589021c9e2c6808c38f506fc89fdd5a4b045984ebf384cc2a1a88e9ec8"
+    },
+    {
+      "path": "tests/math/fixtures/scenes/merror/observations.tsv",
+      "bytes": 54786,
+      "sha256": "0f4496daba53435c492e358b30c94138992f608652eccc05aebb1ba4cf60aab2",
+      "tsv_rows": 679
+    },
+    {
+      "path": "tests/math/fixtures/scenes/merror/provenance.json",
+      "bytes": 1097,
+      "sha256": "bc8ed69aee7872122365feefe3b7c0f30f399df154636ed274c6a0a633c70203"
+    },
+    {
+      "path": "tests/math/fixtures/scenes/mglyph/observations.tsv",
+      "bytes": 81366,
+      "sha256": "6a43d5e8f4412d0066b02eac64a6b78470fca11613cd6767bd6af54d8eabb642",
+      "tsv_rows": 1172
+    },
+    {
+      "path": "tests/math/fixtures/scenes/mglyph/provenance.json",
+      "bytes": 356,
+      "sha256": "97cfe9c469f5863a31a3bd14445f22f2939e9e955d72cece7f9690a023e6540d"
+    },
+    {
+      "path": "tests/math/fixtures/scenes/semantics-fenced/observations.tsv",
+      "bytes": 83746,
+      "sha256": "a19ed9699e13f62c4b1ef29a0edbf465327a3de71cd9fcfcfb7c0509e18c1342",
+      "tsv_rows": 969
+    },
+    {
+      "path": "tests/math/fixtures/scenes/semantics-fenced/provenance.json",
+      "bytes": 1293,
+      "sha256": "56e70664c28081925164b0f33ab6925dcf58b4247a9558a9b0b04ab10aaa26ee"
+    },
+    {
+      "path": "tests/math/fixtures/scenes/table-profile/observations.tsv",
+      "bytes": 315393,
+      "sha256": "db85a26de3ef041bd161416a52949d0798867a08d69b665806ba2c9dd15b03f2",
+      "tsv_rows": 3750
+    },
+    {
+      "path": "tests/math/fixtures/scenes/table-profile/provenance.json",
+      "bytes": 1723,
+      "sha256": "90126b6ee826c071a2c887b150f042990a85b2d7a819bf8a1e9e8415d0c484c2"
+    },
+    {
+      "path": "tests/math/fixtures/scenes/table/observations.tsv",
+      "bytes": 80523,
+      "sha256": "b14ee9ed4c618d6217038a895c525c13b99aade1b142834803e554e85ebf56b5",
+      "tsv_rows": 1432
+    },
+    {
+      "path": "tests/math/fixtures/scenes/table/provenance.json",
+      "bytes": 1250,
+      "sha256": "60129ccd5f2e7d73186706f09d2ebe4e3c770856b63635331eef19494649fd2c"
+    },
+    {
+      "path": "tests/math/fixtures/scenes/xml/observations.tsv",
+      "bytes": 66919,
+      "sha256": "c56244c176621256c7ca7392c40ac9a1b2d898993474e32d0cd5e27031bcae1c",
+      "tsv_rows": 921
+    },
+    {
+      "path": "tests/math/fixtures/scenes/xml/provenance.json",
+      "bytes": 1145,
+      "sha256": "449a82b3a37ebb06253f33857a9df9a22e164a171260755f481b4aa7e36901f7"
+    },
+    {
+      "path": "tests/math/fixtures/tex-source/color-source-expected.json",
+      "bytes": 7110,
+      "sha256": "d960f03b40decb388facd9f37143cc54ad0afcd9dd08d1f68edb94c6f456739c"
+    },
+    {
+      "path": "tests/math/fixtures/tex-source/color-source-lock.json",
+      "bytes": 3066,
+      "sha256": "5fb132e6bb9d8c3972e4e4921dabe83ff467a0926c72c37619801de560245156"
+    },
+    {
+      "path": "tests/math/fixtures/tex-source/column-source-lock.json",
+      "bytes": 1246,
+      "sha256": "89ca2e57670eebb68a80ccf9da6a54a3c41e6c009af73e84177e7497a49193ec"
+    },
+    {
+      "path": "tests/math/fixtures/tex-source/frame-activation-source-expected.json",
+      "bytes": 2536,
+      "sha256": "391a66918ef71e6deb69dc40a72f0f8f57eaf4d6e6d600f28a17a9652879c7e2"
+    },
+    {
+      "path": "tests/math/fixtures/tex-source/frame-activation-source-lock.json",
+      "bytes": 1878,
+      "sha256": "3a34fcdcfa724b300a2aa4112edfa9d3c7b9a26860ef41d91c0f6035a515e350"
+    },
+    {
+      "path": "tests/math/fixtures/tex-source/parser-interface-method-map-source-lock.json",
+      "bytes": 1483,
+      "sha256": "64ebd5c08ccc25877e3de4303e0983e643a6c4b5b413d98a0f91fd2de5d2d2df"
+    },
+    {
+      "path": "tests/math/fixtures/tex-source/parser-interface-source-expected.json",
+      "bytes": 939,
+      "sha256": "4d7ade7f4de6f7092c31092f98436491446366579c3efb43016df4a16e1fc567"
+    },
+    {
+      "path": "tests/math/fixtures/tex-source/parser-interface-source-lock.json",
+      "bytes": 6866,
+      "sha256": "25b3b093df5e18ca6dc11f888af51e051cfe451a56c092f18c145aba7022cd66"
+    },
+    {
+      "path": "tests/math/fixtures/tex-source/session-definitions-source-expected.json",
+      "bytes": 2033,
+      "sha256": "03f97d6dfdb189bb80b52aab9649ef920e52d8c8c7054920e89af75449cec0e1"
+    },
+    {
+      "path": "tests/math/fixtures/tex-source/session-definitions-source-lock.json",
+      "bytes": 3339,
+      "sha256": "15f1d6492b76ce9f4ddf829e549bf59839293a552a437086d27163e242353db8"
+    },
+    {
+      "path": "tests/math/fixtures/tex-source/unit-util-source-expected.json",
+      "bytes": 16981,
+      "sha256": "3b49a8e054526843ffb736300fba8125fd2ad026e6fab4af52fa436b6b27800b"
+    },
+    {
+      "path": "tests/math/fixtures/tex-source/unit-util-source-lock.json",
+      "bytes": 308,
+      "sha256": "5a1ac110413729636dfc216dee22a5d102ce226399a1134de76ae69cc5cee311"
+    },
+    {
+      "path": "tests/math/fixtures/text/input-decode.tsv",
+      "bytes": 24254,
+      "sha256": "73ce29b9c98cd89d73d2e2063c33ded18d396c1b8f217674a5ce0c41b26866b5",
+      "tsv_rows": 68
+    },
+    {
+      "path": "tests/math/fixtures/text/input-invalid.tsv",
+      "bytes": 1197,
+      "sha256": "4580470846fa5e7e28b14dbb1ae6ee3adab916d3173e43b183005d2d69e6a4fb",
+      "tsv_rows": 60
+    },
+    {
+      "path": "tests/math/fixtures/text/input-utf16.tsv",
+      "bytes": 36016,
+      "sha256": "1ea98773fe889e35dff6bd0dbe1639783a16796be3009466d89122d228801a1f",
+      "tsv_rows": 112
+    },
+    {
+      "path": "tests/math/fixtures/text/lowercase-contexts.tsv",
+      "bytes": 15453,
+      "sha256": "f4b942df8382aaf669b72f65111642109271f5e6c8c56d172a45e6d3b26505f5",
+      "tsv_rows": 1162
+    },
+    {
+      "path": "tests/math/fixtures/text/lowercase-examples.tsv",
+      "bytes": 169075,
+      "sha256": "911698e85c18edcf0a5a47b02464d084959302cc1e122d7ccc1a2127396cebbf",
+      "tsv_rows": 474
+    },
+    {
+      "path": "tests/math/fixtures/text/lowercase-mappings.tsv",
+      "bytes": 19544,
+      "sha256": "993734a278db7fb1732066e9e84a9425ef9495f137c314733e1de5a614a4ed38",
+      "tsv_rows": 1460
+    },
+    {
+      "path": "tests/math/fixtures/text/regexp-case-groups.tsv",
+      "bytes": 56514,
+      "sha256": "8cfe0ebd1dc836654a6bc27562b334704333345deffd94d0945692e66794acac",
+      "tsv_rows": 1141
+    },
+    {
+      "path": "tests/math/fixtures/text/tex-error-exhaustive-arguments.tsv",
+      "bytes": 169,
+      "sha256": "57f8c9bc2fa88e658a57adc882fce4808ff0d2718d91dee4abf4d688de508850",
+      "tsv_rows": 10
+    },
+    {
+      "path": "tests/math/fixtures/text/tex-error-exhaustive.tsv",
+      "bytes": 140617,
+      "sha256": "82b1470bec2076aae5d8c2b17301c5a7b264ba80dfcd2c4bff6c0b5ff38b8fd2",
+      "tsv_rows": 1981
+    },
+    {
+      "path": "tests/math/fixtures/text/tex-error-focused-arguments.tsv",
+      "bytes": 2699,
+      "sha256": "00571d23491bde4f5b09b68a40d40e093d97e3836d479efacf39c87c1e5c983e",
+      "tsv_rows": 147
+    },
+    {
+      "path": "tests/math/fixtures/text/tex-error-focused.tsv",
+      "bytes": 1299,
+      "sha256": "a243f6d3b0b6efd2647349890537e344cdabc0e9c9ef57ad5ddea04ee7d5e301",
+      "tsv_rows": 14
+    },
+    {
+      "path": "tests/math/fixtures/unicode/normalization-corpus.tsv",
+      "bytes": 2205318,
+      "sha256": "50825b0671fbc3e6772fa3db7b79bec4a8cf667c896ee54ce7c0f10e591b2d8a",
+      "tsv_rows": 19965
+    },
+    {
+      "path": "tests/math/fixtures/unicode/normalization-digests.tsv",
+      "bytes": 423,
+      "sha256": "7575bd91dc0c79da2c04f03a4acc7f5dad1ee8f8fd1e8dcd365351ffeee2dd76",
+      "tsv_rows": 17
+    },
+    {
+      "path": "tests/math/fixtures/unicode/normalization-metadata.tsv",
+      "bytes": 244,
+      "sha256": "c2ed9971f6d5af3c7992224683819b1137619a0771b1e7b49c7668edecbce253",
+      "tsv_rows": 1
+    },
+    {
+      "path": "tests/math/fixtures/unicode/normalization-sequences.tsv",
+      "bytes": 38948,
+      "sha256": "6028cbfed603db5632e481f20f5dd5b7f7b28837939d0a464a41e8b87e5a0469",
+      "tsv_rows": 85
+    },
+    {
+      "path": "tests/math/fixtures/util/bbox/definitions.tsv",
+      "bytes": 440,
+      "sha256": "b47d3e880a5546aab370345fb5cf2e88f39feffd50f64553f765561780752ebb",
+      "tsv_rows": 7
+    },
+    {
+      "path": "tests/math/fixtures/util/bbox/expected.tsv",
+      "bytes": 8993,
+      "sha256": "97f105231da7d11ea3fbc5c24a8db000d0120203585520fabfcd31cdde68c9cf",
+      "tsv_rows": 46
+    },
+    {
+      "path": "tests/math/fixtures/util/bbox/full-width.tsv",
+      "bytes": 91,
+      "sha256": "a0276005c961991456f2e5ce97703f3051fbe6b708866e909f92a6f29785b7b0",
+      "tsv_rows": 1
+    },
+    {
+      "path": "tests/math/fixtures/util/bbox/sides.tsv",
+      "bytes": 145,
+      "sha256": "a465e083236f8a02b197d44b299811ea43c3e5c065539f414166d9eb1b5cd6e7",
+      "tsv_rows": 4
+    },
+    {
+      "path": "tests/math/fixtures/util/bbox/steps.tsv",
+      "bytes": 7662,
+      "sha256": "406e2975f6c021085c33f08e81b50aa3fe14dce64afdcc0948ebd2fa3b828936",
+      "tsv_rows": 32
+    },
+    {
+      "path": "tests/math/fixtures/util/bbox/zero-setup.tsv",
+      "bytes": 412,
+      "sha256": "f3e940b924bf4229fb2d455066b131b33fc66686d52eec5efb4d8b6760c374a8",
+      "tsv_rows": 1
+    },
+    {
+      "path": "tests/math/fixtures/util/priority/cases.tsv",
+      "bytes": 3234,
+      "sha256": "7a31450fee4fe42d3500e06e6a80496ae93e0ac2c2d29aa464d5510a95e8feb3",
+      "tsv_rows": 15
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/architecture-constraints.tsv",
+      "bytes": 7745,
+      "sha256": "54a82f46be22d1f6742342a079a0cd7116fa1ace338fb324e63489983adbe2d2",
+      "tsv_rows": 6
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/architecture-layout.tsv",
+      "bytes": 251450,
+      "sha256": "d83de295454a3d2aee9fa194a8a41fc929db326db9cebbd9e72ba915f4fdbe49",
+      "tsv_rows": 6
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/architecture.tsv",
+      "bytes": 27357,
+      "sha256": "b17f081e7da00341546a19745118a8fcb694560750f9f5881042122556227f50",
+      "tsv_rows": 8
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/block.tsv",
+      "bytes": 43603,
+      "sha256": "3ac57a233cedb6382f7bb1b6ac5b68d8e3ee6514536798c8f696ec08d3c2734d",
+      "tsv_rows": 13
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/c4.tsv",
+      "bytes": 32066,
+      "sha256": "a533fc62880961a0500130e1573c169f256fe9725585b6998805af45dea9d2f4",
+      "tsv_rows": 10
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/class-elk.tsv",
+      "bytes": 4448,
+      "sha256": "38da2fb2762e694c340342268d837c5235e6a5a2cadcc19382b56f80fe4dcb33",
+      "tsv_rows": 5
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/class.tsv",
+      "bytes": 106436,
+      "sha256": "e6863c4753a40bde81c33edc8d88049b851e2594cbe797bd0e0e59b4e1e8de40",
+      "tsv_rows": 29
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/config.tsv",
+      "bytes": 1596066,
+      "sha256": "8900729454b2f9982ddd41e0c39d07d2883296fae6d0be70cae50e22983d8088",
+      "tsv_rows": 2940
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/dagre-layout.tsv",
+      "bytes": 88252,
+      "sha256": "de07cbf915d41122c439810f0be6259a23803cc63c936097087b11dbbab3dfdc",
+      "tsv_rows": 29
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/dagre-rank.tsv",
+      "bytes": 54246,
+      "sha256": "7e3ac4d6a7b07e3b2b1a6a16042102c5eb733e99703de95c95040202d95e2fa5",
+      "tsv_rows": 29
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/detector-order.tsv",
+      "bytes": 4786,
+      "sha256": "b8f5e9dce2b872ac17718912f972bc07caee27a046fcaa82c35382fc8deefeda",
+      "tsv_rows": 2
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/detector-registry.tsv",
+      "bytes": 37858,
+      "sha256": "6a5dd380ac60524eebe82b9382eaac4bdef537ea335925b632aaa4f76c92e8e1",
+      "tsv_rows": 39
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/detectors.tsv",
+      "bytes": 4002640,
+      "sha256": "1e651cb6d08f9093b80d0f2e0fd4e2fdcf4147a8939f78c0577a4911150d3a65",
+      "tsv_rows": 8084
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/directives.tsv",
+      "bytes": 737341,
+      "sha256": "f9d88cfdb331860adb223005da7eb5272fe174840c4b554f4d83353cb455b302",
+      "tsv_rows": 3279
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/elk-boundary-layers.tsv",
+      "bytes": 796,
+      "sha256": "b06c1a92e11102430966e6c252d9a0e4b56d2fffe3cc1b5972dec13132085adc",
+      "tsv_rows": 11
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/elk-boundary-layout.tsv",
+      "bytes": 1635,
+      "sha256": "6ba59c6b13dd140d76c8c010e7a2d1cda8ccda3c791384ab47b4f15f05f4f178",
+      "tsv_rows": 4
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/elk-components-layout.tsv",
+      "bytes": 41461,
+      "sha256": "886e421c4e1d0a84d9794de00f582f13c6e67373a8e05174d67be67865d7acbe",
+      "tsv_rows": 7
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/elk-components.tsv",
+      "bytes": 7518,
+      "sha256": "8138ee60e168554d1ad68fda934c37b0be45b357c139de0f6cf048771aae0cdb",
+      "tsv_rows": 14
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/elk-compound-direction.tsv",
+      "bytes": 1312,
+      "sha256": "aeb53e7e48b807dcb9106b44bd2f4fff4a1084bfe1cd2851ada88240c8b50129",
+      "tsv_rows": 6
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/elk-compound-graph.tsv",
+      "bytes": 1475,
+      "sha256": "f5d0712c7ff3057476fcc0db5604959f3062e32d4ddff390271b7bdf764b4ba8",
+      "tsv_rows": 7
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/elk-compound-layout.tsv",
+      "bytes": 2198,
+      "sha256": "d469a6996c79e07e54ba307df2ffde8b178e6e36327fec57528c594058fd796a",
+      "tsv_rows": 7
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/elk-compound-options.tsv",
+      "bytes": 861,
+      "sha256": "51c04982d1a5390e6240d2935a9e5a5c9baf29495f06101d626536aff070103f",
+      "tsv_rows": 2
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/elk-compound-ports.tsv",
+      "bytes": 912,
+      "sha256": "950e73e1c974a824dccbe7099d2251b97f4fee7e36dbd004e79f185ccba015b5",
+      "tsv_rows": 10
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/elk-compound-restore.tsv",
+      "bytes": 925,
+      "sha256": "9e996fad7332a059b2a5b8ee2c6a7ea5b7d80de91c929396f99ad226b4af7b6c",
+      "tsv_rows": 4
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/elk-cycle.tsv",
+      "bytes": 374,
+      "sha256": "261e224027ece1089560ec1673bcb602fd387c3e0e71110e85ae44041f32ad0a",
+      "tsv_rows": 7
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/elk-directed-scopes.tsv",
+      "bytes": 275034,
+      "sha256": "0c697357160c83e05dbb09ed920181fd4a8c68a857c1aed14f04bdba5b83fe92",
+      "tsv_rows": 21
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/elk-end-labels.tsv",
+      "bytes": 808,
+      "sha256": "4f393e633a5e5b4b9507e4e4fc23b7dbef6f1c5c644be9d99f5f76d8bf574eb7",
+      "tsv_rows": 8
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/elk-greedy-switch.tsv",
+      "bytes": 254860,
+      "sha256": "70d8fd32362b4a0e1ebe27239ecaacbb502db0be324c87ecae9d556116bc761e",
+      "tsv_rows": 25
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/elk-hierarchy-order.tsv",
+      "bytes": 720,
+      "sha256": "31b659e42d2e895559821849ee285d7844c0bc43f1bd0827a6ccaaf52ba672fb",
+      "tsv_rows": 6
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/elk-hierarchy-sweep.tsv",
+      "bytes": 1460,
+      "sha256": "803fe8571b305d904a7b3fd96f89573928bb6c2cf818b6a01b15a5670b378417",
+      "tsv_rows": 5
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/elk-labels.tsv",
+      "bytes": 2073,
+      "sha256": "cf0935d21bf38cd390bcc70d5ef792022d2c67ca02aa2491c848df3db15738b5",
+      "tsv_rows": 8
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/elk-layering.tsv",
+      "bytes": 1287,
+      "sha256": "aa2015d8ebf0fc1eb03c834f47bb093661591cb75c4ab0c32ca5eab200e89e4c",
+      "tsv_rows": 11
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/elk-layout.tsv",
+      "bytes": 1474,
+      "sha256": "ae01183c2b55efe2f874342eec1fb4c09aa791d87bdb5a212ea52c2b5c557fbd",
+      "tsv_rows": 8
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/elk-long-edges.tsv",
+      "bytes": 2047,
+      "sha256": "1921eaf6c1f65d9f6eb1d7ed3e62f935a9317ccf68cddf5056d94b6dbd07207b",
+      "tsv_rows": 5
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/elk-model-order.tsv",
+      "bytes": 935,
+      "sha256": "017ce4d0fe6f175610ce6e2b18b8ed2820ab9d84a6904056bfffc7835e7b20e1",
+      "tsv_rows": 5
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/elk-north-south-layout.tsv",
+      "bytes": 815,
+      "sha256": "183fe01ea0425be14f945be4994eb2576ac8a6d546eb9e9c0bd1de15dea85e6d",
+      "tsv_rows": 4
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/elk-north-south-order.tsv",
+      "bytes": 523,
+      "sha256": "e51784ca4602fc1d5e0da90feefe2f1e7bfe2847d56a30ced1b766be14d57320",
+      "tsv_rows": 4
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/elk-north-south.tsv",
+      "bytes": 1090,
+      "sha256": "4a573f11a8aabf6fcfe875ca561c038d6909cebd11191e0e3d5630edf8142603",
+      "tsv_rows": 4
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/elk-order-constraints.tsv",
+      "bytes": 585,
+      "sha256": "88e05b34625378079b44e7eca39d5fae4a4fb9e9b292bb6081eb7c410acc8304",
+      "tsv_rows": 4
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/elk-order.tsv",
+      "bytes": 1271,
+      "sha256": "237deac95f091951e5a6805e5344ecd8b3a748285b3da353123de4a57bdf32c1",
+      "tsv_rows": 10
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/elk-pipeline.tsv",
+      "bytes": 1468,
+      "sha256": "847714af58b3d864e1a8084fd4c07e7f8a1248acf410ad30346f30c76bde6a10",
+      "tsv_rows": 4
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/elk-placement.tsv",
+      "bytes": 1721,
+      "sha256": "0498c4c7884be160e0c4b6192156f0f22ab0af87b64f19a01aa91b5c132db93f",
+      "tsv_rows": 7
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/elk-ports.tsv",
+      "bytes": 553,
+      "sha256": "75493c8c88a8e7a3fdf327ddf4a5d1682bca1f2a6aad6aae5e09ab9b37079cfa",
+      "tsv_rows": 8
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/elk-restore.tsv",
+      "bytes": 949,
+      "sha256": "feabf859ed186240bc625e09dac56f69510c39870dfbcb7a58d08095c4ba83af",
+      "tsv_rows": 4
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/elk-routing.tsv",
+      "bytes": 903,
+      "sha256": "93a2792708d76bf64b222ceec71df2c5b6bc22176079d2084dd9d452dfad42ba",
+      "tsv_rows": 7
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/elk-self-loops.tsv",
+      "bytes": 25707,
+      "sha256": "95861bcb4e8bf726fc653c1c2173db4c8285815d19728dff8bb24d3d640dbc69",
+      "tsv_rows": 24
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/er-regressions.tsv",
+      "bytes": 64426,
+      "sha256": "663535685e920fd733234a828b3cc191eefb8c0398a29275c54262dcc1c7b259",
+      "tsv_rows": 9
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/er.tsv",
+      "bytes": 32331,
+      "sha256": "21d4888fe76b252cc2f0c499aa1a9dc2ccb56f9d1e20e2796a75d5c4a6f18e03",
+      "tsv_rows": 10
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/fcose-layout.tsv",
+      "bytes": 36852,
+      "sha256": "bca728798fafc17416446da667c25e73e5e101ac56550ee9dcc2b55c77754ca0",
+      "tsv_rows": 6
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/flowchart-elk.tsv",
+      "bytes": 3641,
+      "sha256": "ffcc80252e0bbb94841fbeb53acd243e92a732f05151a58aa6e37a327edf6cd7",
+      "tsv_rows": 6
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/flowchart-graph.tsv",
+      "bytes": 57390,
+      "sha256": "5edcf5468d9feccb06aa46a3f0fc0b8f41cd285b488653568e87e9f830247dce",
+      "tsv_rows": 15
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/flowchart-label.tsv",
+      "bytes": 2465,
+      "sha256": "642a86b55715648849e293f775d7f0402001a7ba553b079a9988011af956d9b1",
+      "tsv_rows": 8
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/flowchart.tsv",
+      "bytes": 148424,
+      "sha256": "70859129b0f869ae119e410f1b5c0e215a2a4f573812158c49438db21b295d3e",
+      "tsv_rows": 35
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/frontend.tsv",
+      "bytes": 1095805,
+      "sha256": "2319d9c3db871bb116fb03ae4daefcd95aad0a5604e886f49f1b3bd45ce1995c",
+      "tsv_rows": 49
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/frontmatter.tsv",
+      "bytes": 149034,
+      "sha256": "4880912c1d5790eea54658b97d5094b49b8a1da94e15be1820a5d715357b9ce7",
+      "tsv_rows": 515
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/gantt-formats.tsv",
+      "bytes": 17423,
+      "sha256": "8edafb74a7980eb68926e79eed2d6682d9fdec9e668180dec02f5419cca85856",
+      "tsv_rows": 72
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/gantt.tsv",
+      "bytes": 45460,
+      "sha256": "a33f427356ff39f4d615d3030406804413426e06960de5c5a755add2e3e9bfbf",
+      "tsv_rows": 10
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/git-graph.tsv",
+      "bytes": 59869,
+      "sha256": "8ebd78e544cd762c5c6a81962d3cc8affbba16a4089bc06263684b297ef3b88b",
+      "tsv_rows": 31
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/init-merge.tsv",
+      "bytes": 777339,
+      "sha256": "42225c5bff3ea5ee5c1ba68be72d5b809dbc768d43b7f8a4fb033022683f5d5c",
+      "tsv_rows": 2956
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/journey.tsv",
+      "bytes": 28099,
+      "sha256": "184ad83f67ace30fd621e19505dfa6524107b41584c57a6f51d914df136f0b08",
+      "tsv_rows": 8
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/kanban.tsv",
+      "bytes": 17283,
+      "sha256": "6465e8a3852805db05d2e1ce4bc2fc141251cc958bd6812bc2070c56ccf501e5",
+      "tsv_rows": 8
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/mindmap-layout.tsv",
+      "bytes": 10259,
+      "sha256": "86d1ee50b58c7963afc9c9262fcf0f0a5b7ffe2be5cd402d09a3951f897f28e1",
+      "tsv_rows": 5
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/mindmap-shapes.tsv",
+      "bytes": 11650,
+      "sha256": "4f7b9b0bb8a14c48c95f5cd1fa1618becbd55e71b073bbe3b8f6786b60052287",
+      "tsv_rows": 4
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/mindmap.tsv",
+      "bytes": 32021,
+      "sha256": "ba74fb4a6dfc9ac742157a64be3593016e4daf9dd0dbd790d00119c98dd8084c",
+      "tsv_rows": 8
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/number.tsv",
+      "bytes": 372884,
+      "sha256": "4a19c4515ebf67245ea0fd3dc8de3afd581cd8d111a3db903bc359b10ceaf81f",
+      "tsv_rows": 9695
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/packet-svg.tsv",
+      "bytes": 122160,
+      "sha256": "55ec7e7222c13231e52adf40d4f396c1f739988582b144b1be3c0deb716c3ead",
+      "tsv_rows": 55
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/packet.tsv",
+      "bytes": 424686,
+      "sha256": "0d3f63a28fbd0161fffef65d04625894cdaa8d72e78851bcf82d1a7a22c1bcf9",
+      "tsv_rows": 2707
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/pie-geometry.tsv",
+      "bytes": 106017,
+      "sha256": "f5fb199862fa5ee4b6f3a7191d03679e0ff92b1b83e1591c2d820eb0c477f719",
+      "tsv_rows": 86
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/pie-layout.tsv",
+      "bytes": 8301,
+      "sha256": "177479595e622f74cea32fe16bdae8bd6a50cd8604e19f475f3a4cbc16e4bc64",
+      "tsv_rows": 40
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/pie-svg.tsv",
+      "bytes": 16305,
+      "sha256": "d2364d5b061106070dd7a6c3c3fb7fedfad7875f53bdd4192dd56cee73be2b28",
+      "tsv_rows": 80
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/pie.tsv",
+      "bytes": 290898,
+      "sha256": "9186f09f6faf7476aea19c9d647f8f5c12fae90b332ce1c06ccd6eed04582b90",
+      "tsv_rows": 1665
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/preprocess-text.tsv",
+      "bytes": 535957,
+      "sha256": "191e4ec5e50bf205efae848365d4d79330ae69f2cc1c304996ddeb11396dc374",
+      "tsv_rows": 1221
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/quadrant.tsv",
+      "bytes": 179796,
+      "sha256": "1eb81a5e358d18cea9c9ef5457c599e26558c9ab1a896e267aa4555a4b208bdb",
+      "tsv_rows": 28
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/radar.tsv",
+      "bytes": 112780,
+      "sha256": "63d688dca5e5ae6f9aeaeab4de42a61498fb25bc1aa13ec49ef07dbfcf7d6341",
+      "tsv_rows": 22
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/render-entry.tsv",
+      "bytes": 739791,
+      "sha256": "751def66787005a2430e96b1f2e5398f0a02550dcff7444815873c30592841fe",
+      "tsv_rows": 18
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/requirement.tsv",
+      "bytes": 20738,
+      "sha256": "dfaf7940aead5fbe1ed110e11b6d7e6d8efbb6bc14fb9b79a4ac7ec142bba333",
+      "tsv_rows": 10
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/sankey.tsv",
+      "bytes": 53050,
+      "sha256": "164a5cfb59c5fbf0e5b817cea1e7766364aabf1859b8cffedc05f9d4028d1dd9",
+      "tsv_rows": 12
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/sequence.tsv",
+      "bytes": 132308,
+      "sha256": "854c32073ca051cefde3560dff009656e6b00d68eee96ed5524d3c7998b0ec34",
+      "tsv_rows": 52
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/session.tsv",
+      "bytes": 2698190,
+      "sha256": "a46f6c591a260a06812914a2a4f7d1db0a07965b5afbc08e5b0844d9f42237de",
+      "tsv_rows": 712
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/source-text.tsv",
+      "bytes": 261002,
+      "sha256": "9796ec710e99c7850117384dd2f8c7a4281c6553979781a1b947fb4c3362e84e",
+      "tsv_rows": 862
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/state.tsv",
+      "bytes": 81263,
+      "sha256": "6c44c768f6fc08e0c8c02554b04780fbc7ea7c627212db58a9bba0c87f13a804",
+      "tsv_rows": 19
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/theme-colors.tsv",
+      "bytes": 709493,
+      "sha256": "0fdc12da056d72d1bea07fb4fd1b9c620bca2f8ca77c0ff6e542c3de10ce58a6",
+      "tsv_rows": 2412
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/themes.tsv",
+      "bytes": 3664476,
+      "sha256": "c95ad8eb79e0df09beb63896e2e40e4bf3139d86dff6058ccb80340f8dd1b5fa",
+      "tsv_rows": 1585
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/timeline.tsv",
+      "bytes": 25390,
+      "sha256": "39853214833613a01929fc2865e16a467dd314240077c96934460d9552a5b7f4",
+      "tsv_rows": 8
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/treemap-layout.tsv",
+      "bytes": 11569,
+      "sha256": "cb0344a8032017edaf601a2b90fad0939c335cbe01767dd04c3af78e88dd8c72",
+      "tsv_rows": 8
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/treemap-values.tsv",
+      "bytes": 141701,
+      "sha256": "aa7adbe0f3f9df0c25ee9fe0289b15cd50dc8226a340e7fabce84c3c0414a6fd",
+      "tsv_rows": 1794
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/treemap.tsv",
+      "bytes": 18524,
+      "sha256": "b9a4895ec2ea2b7f56c0baf43653fd341cba7c2b7df421790d23c0a24e7ead14",
+      "tsv_rows": 10
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/xy-measurements.tsv",
+      "bytes": 121478,
+      "sha256": "e217cbf6124435ce72c0d0ba0c3f28367221bc76fca669157f0e4d4c8d04ed5e",
+      "tsv_rows": 24
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/xy.tsv",
+      "bytes": 62170,
+      "sha256": "736c700af668e21e676afa22dbef103d323c5927cc5d4e43a6f0997b8759e4b1",
+      "tsv_rows": 15
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/zenuml-canvas.tsv",
+      "bytes": 115822,
+      "sha256": "0d415d6ed85fc537bc1cbe1a8908237215d70c56491a62a83262b03fb52a1cc0",
+      "tsv_rows": 24
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/zenuml-regression.tsv",
+      "bytes": 82142,
+      "sha256": "a9db2f55983c24942183511aede698cc1509a4d3d680c115a40f4101e4ae97a9",
+      "tsv_rows": 24
+    },
+    {
+      "path": "tests/mermaid_cpp/fixtures/zenuml.tsv",
+      "bytes": 18221,
+      "sha256": "81d9a893fc5f2f059f030bfdcdab59fd3430d1237e729a3ce44c5e1d2d20e22c",
+      "tsv_rows": 5
+    },
+    {
+      "path": "tests/mermaid_regression/cases/agentflow.json",
+      "bytes": 6138,
+      "sha256": "a21a46e988e57a90beba744b9ebb75a0221f8391be22ef78bc06b9a650040904"
+    },
+    {
+      "path": "tests/mermaid_regression/cases/architecture.json",
+      "bytes": 7055,
+      "sha256": "24f456acde19241ac8c17c50073da9c273be0160a8225bf780345a396afcf8e5"
+    },
+    {
+      "path": "tests/mermaid_regression/cases/block.json",
+      "bytes": 6691,
+      "sha256": "6e59d2fd10dfd111a5715c61f55b49c900c736148e64d76983ac6d72bf092c61"
+    },
+    {
+      "path": "tests/mermaid_regression/cases/c4.json",
+      "bytes": 15054,
+      "sha256": "53674bbb5f7e0d8752166feb117834be3d013f3c387685f36fc53c261ca2c086"
+    },
+    {
+      "path": "tests/mermaid_regression/cases/class.json",
+      "bytes": 8973,
+      "sha256": "6dfe37e1c8b448cef36fe7bac89d3e24594813fd4b4bdc397c6b87d95ccdf576"
+    },
+    {
+      "path": "tests/mermaid_regression/cases/cynefin.json",
+      "bytes": 6165,
+      "sha256": "a0b511b3598a2cd327390185dd6c0ce6574c01d7256c2e90cdc7af362aba17d3"
+    },
+    {
+      "path": "tests/mermaid_regression/cases/er.json",
+      "bytes": 6152,
+      "sha256": "f37ddbcb96bd6e93c664d82b6ebb5d2e0d0124ba41738c8355ca2d795b6f359c"
+    },
+    {
+      "path": "tests/mermaid_regression/cases/eventmodeling.json",
+      "bytes": 9055,
+      "sha256": "cc80ef48bd2aa581c016bd8f3762718cc28d391752f96d904b3aeeb95571c309"
+    },
+    {
+      "path": "tests/mermaid_regression/cases/flowchart.json",
+      "bytes": 34269,
+      "sha256": "116f71db5d9f0c72d287ebe55a7e96957f5daa4b25092f41a7b04c8cc3bac80c"
+    },
+    {
+      "path": "tests/mermaid_regression/cases/gantt.json",
+      "bytes": 10128,
+      "sha256": "ef854d7b7df0f36762ce810b75d19346b5ab05280e787f5e3fcf0ac08a40d3cf"
+    },
+    {
+      "path": "tests/mermaid_regression/cases/gitgraph.json",
+      "bytes": 10082,
+      "sha256": "8aecbd5aa7ec72f770d8fbc99e4bfe2a67aabc350566d004664609d1488145e5"
+    },
+    {
+      "path": "tests/mermaid_regression/cases/info.json",
+      "bytes": 3182,
+      "sha256": "df6bb44ca16b9b399216108e4698d32b59cbb14e66cce31a4a1fca4c4c1a12b4"
+    },
+    {
+      "path": "tests/mermaid_regression/cases/ishikawa.json",
+      "bytes": 5979,
+      "sha256": "2ee1eda3fcead4033f604331e4d858f0f53ac682ad20b576961f4a1e6840a5fb"
+    },
+    {
+      "path": "tests/mermaid_regression/cases/journey.json",
+      "bytes": 6147,
+      "sha256": "4a225093b96e8dbb2a3faf35d00d33563964ad191338f6487c3b007ffcd9f51c"
+    },
+    {
+      "path": "tests/mermaid_regression/cases/kanban.json",
+      "bytes": 6583,
+      "sha256": "2311258017110aea9d6ece8d7b7e62e286d556d41c270ae6ba1950acfbd05291"
+    },
+    {
+      "path": "tests/mermaid_regression/cases/mindmap.json",
+      "bytes": 5050,
+      "sha256": "0ecc567ae0eb1c61ff9f6924df2de1e5b75e22ba92a64e341cc8c23a29788ec6"
+    },
+    {
+      "path": "tests/mermaid_regression/cases/packet.json",
+      "bytes": 4986,
+      "sha256": "e1e986abf0135dbf836f585f4cee775c7d89ea4e14e263bf38db82c69579fcf3"
+    },
+    {
+      "path": "tests/mermaid_regression/cases/pie.json",
+      "bytes": 5543,
+      "sha256": "738b6e5da5d65ef195f9647e7afd1324b4ff006665ee29b17cc2a3f395f33e99"
+    },
+    {
+      "path": "tests/mermaid_regression/cases/quadrant.json",
+      "bytes": 7151,
+      "sha256": "45473536e7f53131e41cb1b0910b5036822f4fe5db4bd74e0d1e36560b0f1227"
+    },
+    {
+      "path": "tests/mermaid_regression/cases/radar.json",
+      "bytes": 5546,
+      "sha256": "021079cd1349ac8c90f91bc1269eca6b2179b83c9cac9baca699dc90b0e8f96f"
+    },
+    {
+      "path": "tests/mermaid_regression/cases/railroad.json",
+      "bytes": 11900,
+      "sha256": "7b0c59c883a768dab20cb7c89435971792ff7e7d366d8d08e6629da307251fca"
+    },
+    {
+      "path": "tests/mermaid_regression/cases/requirement.json",
+      "bytes": 7933,
+      "sha256": "fbc88109e271d8aca9db15041be73b9b7fe726afa6fb0bbb11115388fd37a980"
+    },
+    {
+      "path": "tests/mermaid_regression/cases/sankey.json",
+      "bytes": 13971,
+      "sha256": "a8a359852f36db7f3256df08c77e6c98c914107e872bd41237611865f9665288"
+    },
+    {
+      "path": "tests/mermaid_regression/cases/sequence.json",
+      "bytes": 7569,
+      "sha256": "e04ce1b7cbed0e9a5b177ddd0235ca6e30be67602d6a14cdf79c7d48c3beea48"
+    },
+    {
+      "path": "tests/mermaid_regression/cases/state.json",
+      "bytes": 5099,
+      "sha256": "8dd89b1187f906b7d56e857f203fc8ccce8194539985154519a878afe0be7368"
+    },
+    {
+      "path": "tests/mermaid_regression/cases/swimlane.json",
+      "bytes": 8188,
+      "sha256": "dc85c24fb1acb78feb917b47041b3b4d319ef507e0013aa8056d93590d4d4b20"
+    },
+    {
+      "path": "tests/mermaid_regression/cases/timeline.json",
+      "bytes": 6662,
+      "sha256": "2b6c5171f9075a46b3ad7e8a8b0953742aafead646a4bfcf8b365cc6190761b1"
+    },
+    {
+      "path": "tests/mermaid_regression/cases/tree-view.json",
+      "bytes": 6512,
+      "sha256": "f966f7e27030496e4c9a7733b757bc8264a912499c8b6eaa80734c67bf947fef"
+    },
+    {
+      "path": "tests/mermaid_regression/cases/treemap.json",
+      "bytes": 14924,
+      "sha256": "c0e307443ef85cf7379e033e4c405a03b04ced72c2d12395d352545366399446"
+    },
+    {
+      "path": "tests/mermaid_regression/cases/usecase.json",
+      "bytes": 6436,
+      "sha256": "c0f443550258ed35ceca8dabacaf526af9a4f3518d42dc91f46ab052cabab7ba"
+    },
+    {
+      "path": "tests/mermaid_regression/cases/venn.json",
+      "bytes": 6363,
+      "sha256": "0aa6bb34487b203705aaf68a7ae6329d638559de77c460d74f909dd5d806ef28"
+    },
+    {
+      "path": "tests/mermaid_regression/cases/wardley.json",
+      "bytes": 13386,
+      "sha256": "06f486a60040d815aea8768f16534d93a55904f329db39bec99bf6e3e2fc50d5"
+    },
+    {
+      "path": "tests/mermaid_regression/cases/xy.json",
+      "bytes": 7160,
+      "sha256": "2b42f89e4abb48df4e3c54da1d8e89ea6ec29926e4c69e7755dcf2c067d63648"
+    },
+    {
+      "path": "tests/mermaid_regression/cases/zenuml.json",
+      "bytes": 13743,
+      "sha256": "e079fe6e3bfb144ed55747bf672dc9964c00b8269dce83b457f092a5ac4eb420"
+    },
+    {
+      "path": "tests/parsing/fixtures/conformance/commonmark.tsv",
+      "bytes": 61139,
+      "sha256": "fb48f28c198cc320bf8dec05f9b9c87f45d08d9b99913084b40601812f4c3a3f",
+      "tsv_rows": 652
+    },
+    {
+      "path": "tests/parsing/fixtures/conformance/entities.tsv",
+      "bytes": 28954,
+      "sha256": "c4da46c4fc063dc269fdda775de7b242f10c5e349bc640fbec606b6a25e9cdcb",
+      "tsv_rows": 2125
+    },
+    {
+      "path": "tests/parsing/fixtures/conformance/gfm.tsv",
+      "bytes": 207657,
+      "sha256": "1a7a42e8d6e26b67aac5aa2be3775e07d8d278c7636490c4b32244fd0f11d42c",
+      "tsv_rows": 1426
+    },
+    {
+      "path": "tests/parsing/fixtures/conformance/upstream/commonmark/spec.json",
+      "bytes": 140487,
+      "sha256": "d431b29d97b6f73e69d547109cf5081578fac931e72afe95639ebe766c1b2a20"
+    },
+    {
+      "path": "tests/parsing/fixtures/conformance/upstream/gfm/COPYING",
+      "bytes": 7567,
+      "sha256": "c22e885f33b821bddb24cf007145e5540655b6c0f403e49e6c76a93c28e6d9a9"
+    },
+    {
+      "path": "tests/parsing/fixtures/conformance/upstream/gfm/entities.inc",
+      "bytes": 102718,
+      "sha256": "3932dfa630067813f47be6ae0072e1645c1183bde41140b51443f50857c88909"
+    },
+    {
+      "path": "tests/parsing/fixtures/conformance/upstream/gfm/extensions-full-info-string.txt",
+      "bytes": 1527,
+      "sha256": "dec5fc65880d74f97d5181e0b75466fbe12662cda8383d8b51fd78e06191092f"
+    },
+    {
+      "path": "tests/parsing/fixtures/conformance/upstream/gfm/extensions-table-prefer-style-attributes.txt",
+      "bytes": 741,
+      "sha256": "3d902a4a1ce48df5dd7910647602fbae4535d8bac6700e918280fe1d928a4cee"
+    },
+    {
+      "path": "tests/parsing/fixtures/conformance/upstream/gfm/extensions.txt",
+      "bytes": 21274,
+      "sha256": "a2a45e98be9fca95f564f927265a0f63beea6cae5369d1cf4bde44caa51b2a3a"
+    },
+    {
+      "path": "tests/parsing/fixtures/conformance/upstream/gfm/published.html",
+      "bytes": 508310,
+      "sha256": "b153d814fdfc8624bb6da7449162c1cd707a637f7d1c1b636eb44b9cf63fa220"
+    },
+    {
+      "path": "tests/parsing/fixtures/conformance/upstream/gfm/regression.txt",
+      "bytes": 10806,
+      "sha256": "0920d7e8134d5e4ec3693f3f52d904b42de45e23a66c29f54fe714dc54213fd9"
+    },
+    {
+      "path": "tests/parsing/fixtures/conformance/upstream/gfm/smart_punct.txt",
+      "bytes": 4175,
+      "sha256": "b1dcfb0e0b6f314cf087edc06f47d9271849da539acfbfac0b9d7b16f10139c9"
+    },
+    {
+      "path": "tests/parsing/fixtures/conformance/upstream/gfm/spec.txt",
+      "bytes": 216680,
+      "sha256": "7d8e5814befec287ac116786d81ff14e0adc9b13295b4494649e995408fd871c"
+    },
+    {
+      "path": "tests/parsing/fixtures/inline_cst/character_edits.tsv",
+      "bytes": 221,
+      "sha256": "dd93061055be6c71cec6aa5c9aac4f21eebfe212002873ba836c49c8cb541a70",
+      "tsv_rows": 15
+    },
+    {
+      "path": "tests/parsing/fixtures/inline_cst/link_spellings.tsv",
+      "bytes": 126,
+      "sha256": "c714b0b1901e5fac7a16613ae757ba5d14b219dc135241d8e87869fa57b78173",
+      "tsv_rows": 3
+    },
+    {
+      "path": "tests/parsing/fixtures/inline_cst/representative.tsv",
+      "bytes": 375,
+      "sha256": "bd12eb580e9054b0a8408356f5e0453fd7a07e34cd5a8184baca91e65c3edca9",
+      "tsv_rows": 27
+    },
+    {
+      "path": "tests/parsing/fixtures/inline_cst/unclosed.tsv",
+      "bytes": 126,
+      "sha256": "2079a54830a73ee23ea9e7028f11033ce5490cf1e6ebf7591d0520538d788d03",
+      "tsv_rows": 7
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/diagnostic-differences.json",
+      "bytes": 17310,
+      "sha256": "3a7dfbb0e6542519bc46f64ee8c0ca8c3c52fa48266ca2f1a2b2d16da84fd53b"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/extpfeil-diagnostic.json",
+      "bytes": 4216,
+      "sha256": "1f4d39def540ed6665a64e7a72d3416023e1ddab5ace57584bd436a45cb9bdcd"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/font-catalog.json",
+      "bytes": 85660,
+      "sha256": "19d55ed871592d4b24753aec180dcd16d267a7701137de0fc7474745207ef020"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/font-helper-edge-cases.json",
+      "bytes": 8676,
+      "sha256": "2a9415885a2e44a7924a042f033864169be2d1602295eb5e3c96a7d654f3edcf"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/layout-witnesses.json",
+      "bytes": 2446,
+      "sha256": "b802d013649d5c80b9ce45f43fbc4740d9f1e4beceb63a1025be8a9085db6aa9"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/menclose-primitives.json",
+      "bytes": 1579,
+      "sha256": "4f54d0ae7f3249b3dbb0d2a1c3eba6bf2ddb329fada6337cafcdc446f80eb83e"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/cases.json",
+      "bytes": 542,
+      "sha256": "bf1c90d6039aea101eb800634db1ef9df1aa20161ff8db7d9544f838b12a93f7"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/expected.json",
+      "bytes": 10602,
+      "sha256": "2c5c8cb10b0fb1b5d2c4dd21303c63ce8a4d98d034b701c09d6ca4510784d698"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/native.json",
+      "bytes": 8522,
+      "sha256": "27255d00d33b1535e58b1a4daf32dedca955146bb9ade88e9e8a2eec76bf0d6d"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/raster-observations.json",
+      "bytes": 390,
+      "sha256": "3501e03e5952a6e81060c41e1da23b2b04f3e9f9906ecc7bdf22a803acf2be72"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/reference.json",
+      "bytes": 40101,
+      "sha256": "c12b8ee3c9edf29910a98b818fe042f216a7625742f858bdcb60a0262431b638"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/1897e77f33c8014f45cc5ee0bc2d054e4b56d3f8d1c8ea3924e70926aeb0c4de.png",
+      "bytes": 119,
+      "sha256": "1a697fbce3a15b6d6023fa4ff5f2fe219a6d457d51b61c552c95b78cfcc3a985"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/1897e77f33c8014f45cc5ee0bc2d054e4b56d3f8d1c8ea3924e70926aeb0c4de.rgba",
+      "bytes": 18400,
+      "sha256": "5486d1c5ca2758399ce6f094791064979a46f157baaf3c3162e014c065a1abe7"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/3071f50d66957d102401fdc54f8fcbdc0e9a53847295f0ee15dad5d7b91c8061.png",
+      "bytes": 644,
+      "sha256": "af69626195d94a98bc5649c07a1006ce9bbd4e8e610ab2f4f80b1a0a138dff31"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/3071f50d66957d102401fdc54f8fcbdc0e9a53847295f0ee15dad5d7b91c8061.rgba",
+      "bytes": 64320,
+      "sha256": "501668fc9d1bf0ed974a44c64a3a38c19f29cc38ccf5facb199a23205f809832"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/3714cb073a611348f9fabd632edd91892bfcf4e249f8ea8557a10afff3da5044.png",
+      "bytes": 2679,
+      "sha256": "70429a1877167bbeaa79261b525ace6cef2ef48c803a0c1a907f673a5ff6656c"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/3714cb073a611348f9fabd632edd91892bfcf4e249f8ea8557a10afff3da5044.rgba",
+      "bytes": 64320,
+      "sha256": "5af007b457d134334a484f9ce79e33b92ef8625ee05a0cf97abfade9d5369666"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/3c7c6444c0b0d3d80c9d4ebde3e76a8b07683f31d83465c3f56f6780672fc4b2.png",
+      "bytes": 2615,
+      "sha256": "362947e90d10afea385f6ef54aafcc3b0489e1c11bcbbedbbbe7d6fe5f664987"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/3c7c6444c0b0d3d80c9d4ebde3e76a8b07683f31d83465c3f56f6780672fc4b2.rgba",
+      "bytes": 64320,
+      "sha256": "3cf342b9d70a4ca7f2939a5f5b3718674df0fb1dd1fd3aa9518be6141695a74c"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/52a59e48a218cf4ee5db4cd651c5229b89f37336656aea9b92276078439940e9.png",
+      "bytes": 976,
+      "sha256": "4b3b9bc2da5d82ff82e1098e96140b49b1bd5fb9fb3859094a65fdd2402e476a"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/52a59e48a218cf4ee5db4cd651c5229b89f37336656aea9b92276078439940e9.rgba",
+      "bytes": 18400,
+      "sha256": "29fc566f62196f3dc4f5cca63ce7fbce62ae26bc2766b9b979419991e2d1ed76"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/5b8db168efa415401330081fe69b13fe71263ef84a79d195cc682ed4b7801edc.png",
+      "bytes": 119,
+      "sha256": "1a697fbce3a15b6d6023fa4ff5f2fe219a6d457d51b61c552c95b78cfcc3a985"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/5b8db168efa415401330081fe69b13fe71263ef84a79d195cc682ed4b7801edc.rgba",
+      "bytes": 18400,
+      "sha256": "5486d1c5ca2758399ce6f094791064979a46f157baaf3c3162e014c065a1abe7"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/5d9628c3853de5144747782f5b05e71ccb18b1f52a8c1520a33c93437855ac8d.png",
+      "bytes": 2869,
+      "sha256": "0c63c1cc41e4bf06b330e032d918c945c44501f74aff8894774bfd7067dc5daf"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/5d9628c3853de5144747782f5b05e71ccb18b1f52a8c1520a33c93437855ac8d.rgba",
+      "bytes": 64320,
+      "sha256": "1037eb2aa09a0f792b8c50b15b4d00f52709ec6ac91c927d72094b108345a24b"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/67a92398c4c828e32c7acd593e2a1da2a25c1e90c5f0c0e9b2c42c93c8d1268c.png",
+      "bytes": 2869,
+      "sha256": "0c63c1cc41e4bf06b330e032d918c945c44501f74aff8894774bfd7067dc5daf"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/67a92398c4c828e32c7acd593e2a1da2a25c1e90c5f0c0e9b2c42c93c8d1268c.rgba",
+      "bytes": 64320,
+      "sha256": "1037eb2aa09a0f792b8c50b15b4d00f52709ec6ac91c927d72094b108345a24b"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/728804ca1a6403ddb7f155943ccf646c96bc76a42f91fef4e8ea5db472e7fb2c.png",
+      "bytes": 1071,
+      "sha256": "9bb1819f51f9f786303f7026565b6c1add97b9e447bcc73651129b299c846f0d"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/728804ca1a6403ddb7f155943ccf646c96bc76a42f91fef4e8ea5db472e7fb2c.rgba",
+      "bytes": 18400,
+      "sha256": "71e72feebbd9233638ab4efc099cab4560741ad77ea917a0899da2fd15e25557"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/73264689747bc11489e0ed210d86c9c2a49833d7e9eb7271d612297910a0b90d.png",
+      "bytes": 2109,
+      "sha256": "ddd93838b58721bf82cc7a37a2e980e4de4a8d4493f30050147fc49ada301260"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/73264689747bc11489e0ed210d86c9c2a49833d7e9eb7271d612297910a0b90d.rgba",
+      "bytes": 64320,
+      "sha256": "b4316af26d1511cea1da4603d55a917771f191b17750c7af6cf420b72b01fd81"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/842a41a555498b9ef324b37134d0a42e4b361aad1050b1bb7426e589a2fb1572.png",
+      "bytes": 2109,
+      "sha256": "ddd93838b58721bf82cc7a37a2e980e4de4a8d4493f30050147fc49ada301260"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/842a41a555498b9ef324b37134d0a42e4b361aad1050b1bb7426e589a2fb1572.rgba",
+      "bytes": 64320,
+      "sha256": "b4316af26d1511cea1da4603d55a917771f191b17750c7af6cf420b72b01fd81"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/8857388c4c759ae07ca0f8e562f7f13b496cb1fcc1576908f6a4f323408a3537.png",
+      "bytes": 2615,
+      "sha256": "362947e90d10afea385f6ef54aafcc3b0489e1c11bcbbedbbbe7d6fe5f664987"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/8857388c4c759ae07ca0f8e562f7f13b496cb1fcc1576908f6a4f323408a3537.rgba",
+      "bytes": 64320,
+      "sha256": "3cf342b9d70a4ca7f2939a5f5b3718674df0fb1dd1fd3aa9518be6141695a74c"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/c6103d84551539e8a1bb181d3c5ac280e7018566b4d09ace36e07f6bc25c3116.png",
+      "bytes": 105,
+      "sha256": "37281596fb53c8e64cf6d2e9fddd8d0858d99fd3fab3cad2bce33445ceade559"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/c6103d84551539e8a1bb181d3c5ac280e7018566b4d09ace36e07f6bc25c3116.rgba",
+      "bytes": 4176,
+      "sha256": "e71721e2c1418bf00a46998846ddaefed9c954ac4f1c4d0f12b26be8c8ea3a68"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/e1eb7929dc93a4081ecbcbaf81312713d995e866d13fc37ad860834f32ed6125.png",
+      "bytes": 2679,
+      "sha256": "70429a1877167bbeaa79261b525ace6cef2ef48c803a0c1a907f673a5ff6656c"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/e1eb7929dc93a4081ecbcbaf81312713d995e866d13fc37ad860834f32ed6125.rgba",
+      "bytes": 64320,
+      "sha256": "5af007b457d134334a484f9ce79e33b92ef8625ee05a0cf97abfade9d5369666"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/e809de86a2599e68c4b5f6d6441d16d47f2ab2b428eecf6459df69bdd47b5975.png",
+      "bytes": 105,
+      "sha256": "37281596fb53c8e64cf6d2e9fddd8d0858d99fd3fab3cad2bce33445ceade559"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/e809de86a2599e68c4b5f6d6441d16d47f2ab2b428eecf6459df69bdd47b5975.rgba",
+      "bytes": 4176,
+      "sha256": "e71721e2c1418bf00a46998846ddaefed9c954ac4f1c4d0f12b26be8c8ea3a68"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/ea9826d0703a02b9be5524762ac755e6797cc0a1b53f0122f7ed01979847d8b5.png",
+      "bytes": 105,
+      "sha256": "37281596fb53c8e64cf6d2e9fddd8d0858d99fd3fab3cad2bce33445ceade559"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/ea9826d0703a02b9be5524762ac755e6797cc0a1b53f0122f7ed01979847d8b5.rgba",
+      "bytes": 4176,
+      "sha256": "e71721e2c1418bf00a46998846ddaefed9c954ac4f1c4d0f12b26be8c8ea3a68"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/f748015710876a61d4134a37493259dc76432666c9937842e168ee2917ab11d3.png",
+      "bytes": 2869,
+      "sha256": "0c63c1cc41e4bf06b330e032d918c945c44501f74aff8894774bfd7067dc5daf"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/f748015710876a61d4134a37493259dc76432666c9937842e168ee2917ab11d3.rgba",
+      "bytes": 64320,
+      "sha256": "1037eb2aa09a0f792b8c50b15b4d00f52709ec6ac91c927d72094b108345a24b"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/faaf8c9a41351ee45920a2ff806319fad18333790a122cf3e28ad9da6104290c.png",
+      "bytes": 1071,
+      "sha256": "9bb1819f51f9f786303f7026565b6c1add97b9e447bcc73651129b299c846f0d"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/faaf8c9a41351ee45920a2ff806319fad18333790a122cf3e28ad9da6104290c.rgba",
+      "bytes": 18400,
+      "sha256": "71e72feebbd9233638ab4efc099cab4560741ad77ea917a0899da2fd15e25557"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/paint-evidence/samples/samples.jsonl",
+      "bytes": 121852,
+      "sha256": "01648fcfbd886a42d5506fa9c37b64f70d856e5813a498fda32ab1208fe4e0bd"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/raii-file-api.json",
+      "bytes": 2558,
+      "sha256": "55dff18bcac914b83b958ad6681e244f499cb46427b926a8eb902e729462bf49"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/raii-original-checks.json",
+      "bytes": 26482,
+      "sha256": "330fc627c5db19af96ae7628a24fafdf0014dacb73d6d153b705033debe30451"
+    },
+    {
+      "path": "tools/math-port/tests/fixtures/scope-imports.json",
+      "bytes": 1112,
+      "sha256": "a2e01ea6ec50cf2df9570db4904292945df1f5727bce2b399f7ba95f2a53a041"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/basis-routes.json",
+      "bytes": 944,
+      "sha256": "c6a83f1e8eada06b94b6df3759c3ac7e8a9e4880a94bb814189b5385da58b1d0"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/canvas-evidence/native-observations.json",
+      "bytes": 2618,
+      "sha256": "20f73db05ee75ee20773876640484ab951ea47a711b78f90919c860e3f508af0"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/canvas-evidence/native.svg",
+      "bytes": 138,
+      "sha256": "4b5188efa7dc125557b967a6b0d460ce0c373729aa7c2531e4c5496df715fac1"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/canvas-evidence/official.json",
+      "bytes": 77260,
+      "sha256": "cb4689e1b751bd7386d854ad0360817e789783e7fa43e0c656d7e2893582e359"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/canvas-evidence/official.svg",
+      "bytes": 131,
+      "sha256": "6628667aca8050cd095585ea7b16bf551fe983c901ab8c52ae898017f11d082f"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/canvas-evidence/samples/79e37abe6db6d0794b59a675c92f9bd0505e3e1a45c25fc8274777fa1e62de32.png",
+      "bytes": 218,
+      "sha256": "01f10c21aa3d02290cd9a8633042091695594dd7c4f71d91316627aecd524cf9"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/canvas-evidence/samples/79e37abe6db6d0794b59a675c92f9bd0505e3e1a45c25fc8274777fa1e62de32.rgba",
+      "bytes": 1024,
+      "sha256": "be9f4599c3c19ada2a2f859b5db94b2f7a0c57a837f208ccf2156b01fa09221b"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/canvas-evidence/samples/d86b23c4097f57f5e5614ee957aa14bf6e73c108659b9ecbd3cf512a29e64024.png",
+      "bytes": 218,
+      "sha256": "01f10c21aa3d02290cd9a8633042091695594dd7c4f71d91316627aecd524cf9"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/canvas-evidence/samples/d86b23c4097f57f5e5614ee957aa14bf6e73c108659b9ecbd3cf512a29e64024.rgba",
+      "bytes": 1024,
+      "sha256": "be9f4599c3c19ada2a2f859b5db94b2f7a0c57a837f208ccf2156b01fa09221b"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/canvas-evidence/samples/samples.jsonl",
+      "bytes": 37064,
+      "sha256": "55f2b2ad13ece8f7e503ded07129e880866efa7ce169d413eddecf9e386ca37a"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/agentflow.json",
+      "bytes": 12443,
+      "sha256": "318f44f984bdc7aae4a290625e8c0df4e0a4df9105cfe7ffbc0fbe56231b6673"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/architecture.json",
+      "bytes": 12820,
+      "sha256": "6cd669e6a5a1ea3baa153a16708ec07d11d1b306bebaa1547b1cbddfd8c122ad"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/block.json",
+      "bytes": 13937,
+      "sha256": "cdff585aed11d01d99ca0e15d49adabca0dab9aa530d12ca7be10f3a6391192e"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/c4.json",
+      "bytes": 9191,
+      "sha256": "0a380b35e58101b012b80d15704564ea96b8fd1cbe4a196cf6258fc8500f5dda"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/class-elk.json",
+      "bytes": 29720,
+      "sha256": "439d322c3c11fa93c0231d4acbba1a236c12c0f17e1e79ccce5da3f67d159a0b"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/class.json",
+      "bytes": 29296,
+      "sha256": "b54da46b04f9aa6d04ea453b661359fdb78437994bfcf1eb1b0e7e7ff1bb100f"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/cynefin.json",
+      "bytes": 11825,
+      "sha256": "d8177bb3766104e590b3a519a440be6c762d8ddd6fab9b81d637613c5b22831a"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/er-rough.json",
+      "bytes": 4921,
+      "sha256": "99e17f1e9c87b76a35ada62cd43f3f5633476f664e419d2ac7ca3c7741d996b7"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/er.json",
+      "bytes": 19078,
+      "sha256": "4110b2250b0b9dbe9796702caa9dd3d8cbffc0635fc694e7de11d8c3d1190288"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/error.json",
+      "bytes": 6218,
+      "sha256": "a9058f1efb6ba292f73aead1871b2c28a11c01877d11a4220e3ead50a6014fec"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/eventmodeling.json",
+      "bytes": 15247,
+      "sha256": "7ce9c0bbb4f35297e98f5bb1a538013a2df2ec3f595125ee21b2b01052c216b1"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/flowchart-elk-painted-base.json",
+      "bytes": 44164,
+      "sha256": "09927118daf8bf350c1b2fad305a6cb99b622dea318acb9b7f5656c508cdf748"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/flowchart-extra-shapes-dashed-base.json",
+      "bytes": 45206,
+      "sha256": "a96b34155e6778298b6431484ef3716889ae9b6e5265077547659b0f205178ae"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/flowchart-hand-drawn-document-base.json",
+      "bytes": 45207,
+      "sha256": "5a8135ffb11dd4cb0825474f00aa81139b1163d6533bbf0073b159ed09080e90"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/flowchart-neo-document-base.json",
+      "bytes": 44297,
+      "sha256": "b59429b19aac9ec27a56e35a29e44f3e80bb69cc05505e41357c58963e4175a7"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/flowchart-plain.json",
+      "bytes": 41050,
+      "sha256": "7be59594fc07a0832401c599409c16ba4be5e5cf268c1adfa11c1af197131f0c"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/flowchart-rich-base.json",
+      "bytes": 43255,
+      "sha256": "63ffd49001602062bdc0c65fb21186c9f08e13d2e04faa6bcd933a4c7c5cf11e"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/gantt.json",
+      "bytes": 9302,
+      "sha256": "bdc898a5a182bcf46e32440ad61303bf4027a9d8d5bfabee40e2c03f1a056139"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/git-graph.json",
+      "bytes": 9444,
+      "sha256": "41150afb583ad45402a9edd2903b9e240ddf6867b76a54e29e8672b453f66521"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/info.json",
+      "bytes": 4930,
+      "sha256": "90304f648e474c4d271765f64e95b21567b8530b335de4056c46b9dc20d3cc9c"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/ishikawa.json",
+      "bytes": 7901,
+      "sha256": "b6f3e5213d590c0a2a9bb33fbecec0c9b13d979bc96affaa2452a04c08de37c2"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/journey.json",
+      "bytes": 14027,
+      "sha256": "22e95871f727a1d73e94046d65dc2ee11537316630908df279007860b606dd0b"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/kanban.json",
+      "bytes": 13982,
+      "sha256": "08f9fa2f0b74864d7605f41e0161acd1335f0aca60d80554641a42af2621ab55"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/mindmap-measured.json",
+      "bytes": 10265,
+      "sha256": "a6e175808d391288d600069c628b94ed7a110969ef3c853db5c1f910d88bf936"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/mindmap.json",
+      "bytes": 9945,
+      "sha256": "801f4cca7571d9af70e6cbe2a71b0583a562ae2896e46df6d580bd3894236c7c"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/quadrant.json",
+      "bytes": 11238,
+      "sha256": "22d4e3dfe23677a3939a17d0a50f413a71e017a94457cf95a15a1755c2a9ebe7"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/radar.json",
+      "bytes": 13929,
+      "sha256": "99e2c642ac8b645f35c1ee4a59dc56674ac0859784c5e92bb486d25868eb6c39"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/railroad.json",
+      "bytes": 8864,
+      "sha256": "2cf513aab1e1eed3c1698ca320d5acf3a8ebd342f1c9bc0ab559f2923cc3edd9"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/requirement.json",
+      "bytes": 11810,
+      "sha256": "1121db5b7cf53ff3eb9aecb1acebbe34f38a02021bd7f191dc0b30744c56b9c1"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/sankey.json",
+      "bytes": 9344,
+      "sha256": "d3d9204db31cce16506c0d38ed1e6b83ebf8c8fac1d6cad9528f2d9a5b381581"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/sequence.json",
+      "bytes": 56743,
+      "sha256": "c57004b3b7e8446be80cd8e6978832960b9cebbaf2510b4a66798b0d484cc852"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/state-rough.json",
+      "bytes": 3068,
+      "sha256": "43b12a7b11189de064f85c258c6f1fc99bb56be2777ac0609e9374bba9d81948"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/state.json",
+      "bytes": 11468,
+      "sha256": "441f43665910e6046ec7e5cb81f253489d0178b7e1c18d03642745be4ef47e5b"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/swimlane.json",
+      "bytes": 12392,
+      "sha256": "4ca599bfdacb972adff875a21916613cf85cdbd680218e617d971582575c9e93"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/timeline.json",
+      "bytes": 9408,
+      "sha256": "4e38a194a68772dc4c974221e700d795e012484dbe04a3236b3512f162ffe596"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/tree-view.json",
+      "bytes": 11012,
+      "sha256": "15d6222eaac9edb24d4f28ce64cbdd970ecda28ca1caeae0d61e4c2bf2b17cd3"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/treemap.json",
+      "bytes": 9376,
+      "sha256": "92dae4870f2e0abb067d10b00ded46c8595e82bc50cd6ce5ca818a51f0ae58a4"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/usecase.json",
+      "bytes": 21228,
+      "sha256": "cca58b947c86d1bb3dd9db2d7aaa4cc8ed85ce4b7d7606e393a8bea91c537a7f"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/venn.json",
+      "bytes": 4472,
+      "sha256": "eafa516f8a8c36757759a484d7c0d631492bbf1e63f5267543bf1242a20d9c74"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/wardley.json",
+      "bytes": 6114,
+      "sha256": "21d095e74165cf19b49ddff62559a85e7b127c0f8ea80d6f73f2c0c0a3f29f6e"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/xy.json",
+      "bytes": 9818,
+      "sha256": "3196f04014cc42ef39b8c12ec6b07f4057ed01823bb744bbcafcc07cb326a92a"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/families/zenuml.json",
+      "bytes": 8931,
+      "sha256": "3fc82df096d9785330e7a681900d17cac880fccbdc7aa496443623b3b94d8726"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/math-evidence/cases.json",
+      "bytes": 44,
+      "sha256": "40abc193875ea0b79bd915763a13e5f47ae3cf52d2ce8f2bb0726bbea4bcdb6a"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/math-evidence/native.json",
+      "bytes": 614,
+      "sha256": "fd4b99b1ed6e373abbcb77a3a05d1c6d2663826f8b1bb24a918afd8cd1e40ffa"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/math-evidence/official.json",
+      "bytes": 645,
+      "sha256": "cf7aad1d606e6005af76ba03d0572ecfb482358e76cd8d7571638102dc12b4fa"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/math-evidence/raster-observations.json",
+      "bytes": 4024,
+      "sha256": "83ee4fb2b86498ef3b7fe9926fbc64bd50e9fdb134999c32fc86e71b4b2ff658"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/math-evidence/samples/93d7e834666709de749322b37f52c35eaf3e39bb41f7ed20e6f773b8343645a1.png",
+      "bytes": 90,
+      "sha256": "e2709918996985bcfe03eff93942eb119e16d734fe15364a79c663b081040eac"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/math-evidence/samples/93d7e834666709de749322b37f52c35eaf3e39bb41f7ed20e6f773b8343645a1.rgba",
+      "bytes": 144,
+      "sha256": "81c611f35bff79491538b2f7cf201c7597a661a5c549633541c62bdc8af1613f"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/math-evidence/samples/e1750f2c1a427e841418addf438299dd2b91f413918b05256db7feecd4e5c930.png",
+      "bytes": 90,
+      "sha256": "e2709918996985bcfe03eff93942eb119e16d734fe15364a79c663b081040eac"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/math-evidence/samples/e1750f2c1a427e841418addf438299dd2b91f413918b05256db7feecd4e5c930.rgba",
+      "bytes": 144,
+      "sha256": "81c611f35bff79491538b2f7cf201c7597a661a5c549633541c62bdc8af1613f"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/math-evidence/samples/samples.jsonl",
+      "bytes": 3379,
+      "sha256": "a6ae135d7809d49ec60b0f01d0328c9e45c2d27d3c563d753012ac561b3c4eb8"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/math-svg-trees.json",
+      "bytes": 6485,
+      "sha256": "007e523bd8a2c5772000c4b947016e62e6faa4476c3e6939b8dbaec3e778ea91"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/math-tree-differences.json",
+      "bytes": 1625,
+      "sha256": "2a6d54d6d753584d4cfc2db3fba114962aff341bc260d4427be2e8fd1537c0d5"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/pie-dom.json",
+      "bytes": 59035,
+      "sha256": "eaa44be81383c755e77973406c46580d76ab6cd2f5c413e6d52ae84d507bb132"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/pixel-comparison.json",
+      "bytes": 5683,
+      "sha256": "96bc96f264a8ad383955c3e4024ec0d4ac60e58a295b29ff70c9b55bb7ed0184"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/svg-comparison.json",
+      "bytes": 29924,
+      "sha256": "5d1bb1dd643b4ec352b9b35c7ea58b6c0fda7e8511dd21117cdd1d046442ba77"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/text-comparison.json",
+      "bytes": 3821,
+      "sha256": "8edfad1562e80ae776e5bbeb06a4d7808e052ae29b9c6c01f4e61b92abb16f73"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/text-probe.json",
+      "bytes": 1085,
+      "sha256": "ee02251ef59d28bf7cc72aac4d500085a6f1e1a987637f7692a72183767f7b12"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/viewports.json",
+      "bytes": 2071,
+      "sha256": "6eb4ec538c8f749a1c5ace0c9b33127514c6db09119cdc809f5faf1e28b24bc7"
+    },
+    {
+      "path": "tools/mermaid-cpp/regression/tests/fixtures/visibility.json",
+      "bytes": 1553,
+      "sha256": "e4a92032908967e7fae7f9a7b3ea29b230e1f1ea1a8a4c5c8cab79558b12e812"
+    }
+  ]
+}
