@@ -1,4 +1,5 @@
 #include "math/support/tex_fixture.hpp"
+#include "math/support/proof_frame_fixtures.hpp"
 import folia.math.input.tex.bussproofs.items;
 import folia.math.util.utf16;
 
@@ -60,15 +61,7 @@ MmlNode &proofCreator(NodeFactory &factory, NodeKind kind, std::span<MmlNode *co
         proofRequests->push_back({kind, std::move(pointers), &result});
     return result;
 }
-struct ProofFrameTree {
-    std::u16string_view name, snapshot;
-};
-struct ProofFrameError {
-    std::u16string_view name;
-    std::string_view id;
-    std::u16string_view message;
-};
-#include "math/fixtures/bussproofs_items.inc"
+using namespace math_test::fixtures;
 std::u16string proofSnapshot(MmlNode const &root) {
     std::u16string result;
     auto add = [&](std::u16string_view value) {
@@ -159,7 +152,7 @@ void sourceError(Fixture &f, std::u16string_view name) {
 
 suite bussproofs_items = [] {
     "bussproofs proof frame empty name and inherited flags retain original behavior"_test = [] {
-        for (auto const &entry : proofFrameTrees) {
+        for (auto const &entry : proofFrameTrees()) {
             Fixture fixture;
             auto actual = proofSnapshot(sourceTree(fixture, entry.name));
             auto equal = std::ranges::equal(actual, entry.snapshot);
@@ -263,7 +256,7 @@ suite bussproofs_items = [] {
         expect(incoming->kind() == StackKind::end);
     };
     "bussproofs stop mismatched end and unfinished group retain original TeX errors"_test = [] {
-        for (auto const &entry : proofFrameErrors) {
+        for (auto const &entry : proofFrameErrors()) {
             Fixture fixture;
             try {
                 sourceError(fixture, entry.name);

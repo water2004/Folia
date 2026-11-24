@@ -1,0 +1,119 @@
+# Pinned reference observations; values exported without normalization.
+# name_utf16	glyph_utf16	font_utf16
+textasciicircum	^	
+textasciitilde	~	
+textasteriskcentered	*	
+textbackslash	\u005c	
+textbar	|	
+textbraceleft	{	
+textbraceright	}	
+textbullet	\u2022	
+textdagger	\u2020	
+textdaggerdbl	\u2021	
+textellipsis	\u2026	
+textemdash	\u2014	
+textendash	\u2013	
+textexclamdown	\u00a1	
+textgreater	>	
+textless	<	
+textordfeminine	\u00aa	
+textordmasculine	\u00ba	
+textparagraph	\u00b6	
+textperiodcentered	\u00b7	
+textquestiondown	\u00bf	
+textquotedblleft	\u201c	
+textquotedblright	\u201d	
+textquoteleft	\u2018	
+textquoteright	\u2019	
+textsection	\u00a7	
+textunderscore	_	
+textvisiblespace	\u2423	
+textacutedbl	\u02dd	
+textasciiacute	\u00b4	
+textasciibreve	\u02d8	
+textasciicaron	\u02c7	
+textasciidieresis	\u00a8	
+textasciimacron	\u00af	
+textgravedbl	\u02f5	
+texttildelow	\u02f7	
+textbaht	\u0e3f	
+textcent	\u00a2	
+textcolonmonetary	\u20a1	
+textcurrency	\u00a4	
+textdollar	$	
+textdong	\u20ab	
+texteuro	\u20ac	
+textflorin	\u0192	
+textguarani	\u20b2	
+textlira	\u20a4	
+textnaira	\u20a6	
+textpeso	\u20b1	
+textsterling	\u00a3	
+textwon	\u20a9	
+textyen	\u00a5	
+textcircledP	\u2117	
+textcompwordmark	\u200c	
+textcopyleft	\ud83c\udd2f	
+textcopyright	\u00a9	
+textregistered	\u00ae	
+textservicemark	\u2120	
+texttrademark	\u2122	
+textbardbl	\u2016	
+textbigcircle	\u25ef	
+textblank	\u2422	
+textbrokenbar	\u00a6	
+textdiscount	\u2052	
+textestimated	\u212e	
+textinterrobang	\u203d	
+textinterrobangdown	\u2e18	
+textmusicalnote	\u266a	
+textnumero	\u2116	
+textopenbullet	\u25e6	
+textpertenthousand	\u2031	
+textperthousand	\u2030	
+textrecipe	\u211e	
+textreferencemark	\u203b	
+textlangle	\u2329	
+textrangle	\u232a	
+textlbrackdbl	\u27e6	
+textrbrackdbl	\u27e7	
+textlquill	\u2045	
+textrquill	\u2046	
+textcelsius	\u2103	
+textdegree	\u00b0	
+textdiv	\u00f7	
+textdownarrow	\u2193	
+textfractionsolidus	\u2044	
+textleftarrow	\u2190	
+textlnot	\u00ac	
+textmho	\u2127	
+textminus	\u2212	
+textmu	\u00b5	
+textohm	\u2126	
+textonehalf	\u00bd	
+textonequarter	\u00bc	
+textonesuperior	\u00b9	
+textpm	\u00b1	
+textrightarrow	\u2192	
+textsurd	\u221a	
+textthreequarters	\u00be	
+textthreesuperior	\u00b3	
+texttimes	\u00d7	
+texttwosuperior	\u00b2	
+textuparrow	\u2191	
+textborn	*	
+textdied	\u2020	
+textdivorced	\u26ae	
+textmarried	\u26ad	
+textcentoldstyle	\u00a2	-tex-oldstyle
+textdollaroldstyle	$	-tex-oldstyle
+textzerooldstyle	0	-tex-oldstyle
+textoneoldstyle	1	-tex-oldstyle
+texttwooldstyle	2	-tex-oldstyle
+textthreeoldstyle	3	-tex-oldstyle
+textfouroldstyle	4	-tex-oldstyle
+textfiveoldstyle	5	-tex-oldstyle
+textsixoldstyle	6	-tex-oldstyle
+textsevenoldstyle	7	-tex-oldstyle
+texteightoldstyle	8	-tex-oldstyle
+textnineoldstyle	9	-tex-oldstyle

@@ -105,18 +105,13 @@ bad('unfinished-group-end', f => {
   f.proof.checkItem(f.factory.create('open'));
   f.proof.checkItem(f.factory.create('end').setProperty('name', 'prooftree'));
 });
-function cpp(value) {
-  return 'u"' + Array.from(value, c => {
-    if (c === '\\') return '\\\\'; if (c === '"') return '\\"';
-    const n = c.codePointAt(0);
-    return n < 32 || n > 126 ? (n > 65535 ? '\\U' + n.toString(16).padStart(8, '0') : '\\u' + n.toString(16).padStart(4, '0')) : c;
-  }).join('') + '"';
-}
-let output = '// Generated from pinned Source: tex-bussproofs-items-source.cjs --write-fixture\n';
-output += 'const std::array proofFrameTrees{\n' + trees.map(c => '    ProofFrameTree{' + cpp(c.name) + ', ' + cpp(c.snapshot) + '},').join('\n') + '\n};\n';
-output += 'const std::array proofFrameErrors{\n' + errors.map(c => '    ProofFrameError{' + cpp(c.name) + ', "' + c.id + '", ' + cpp(c.message) + '},').join('\n') + '\n};\n';
-const target = path.join(root, 'tests/math/fixtures/bussproofs_items.inc');
-if (process.argv.includes('--write-fixture')) fs.writeFileSync(target, output);
-else assert.equal(fs.readFileSync(target, 'utf8').replaceAll('\r\n', '\n'), output, 'Proof frame Source fixture changed');
+const {utf16Field, byteField, writeTables} = require('./fixture-data.cjs');
+const fixturePath = path.join(root, 'tests/math/fixtures/packages/bussproofs-items');
+writeTables(fixturePath, {
+  "trees": {columns: ["name_utf16", "snapshot_utf16"],
+    rows: trees.map(r => [r.name, r.snapshot].map(utf16Field))},
+  "errors": {columns: ["name_utf16", "id_bytes", "message_utf16"],
+    rows: errors.map(r => [utf16Field(r.name), byteField(r.id), utf16Field(r.message)])},
+});
 console.log(JSON.stringify({trees: trees.length, errors: errors.length, transfers,
   compiled_source_sha256: reference.provenance.compiled_source_sha256}));

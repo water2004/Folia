@@ -1,0 +1,8 @@
+# Pinned reference observations; values exported without normalization.
+# group_integer	source_utf16	snapshot_utf16	error_utf16	message_utf16
+0	\u005cunicode{bad}	4:math1:210:data-latex6:string13:\u005cunicode{bad}7:display6:string5:block0:0:0:1:112:inferredMrow1:00:0:0:1:16:merror1:114:data-mjx-error6:string37:Argument to \u005cunicode must be a number0:0:0:1:112:inferredMrow1:00:0:0:1:15:mtext1:00:0:37:Argument to \u005cunicode must be a number1:0	BadUnicode	Argument to \u005cunicode must be a number
+0	\u005cunicode{65}	4:math1:210:data-latex6:string12:\u005cunicode{65}7:display6:string5:block0:0:0:1:112:inferredMrow1:00:0:0:1:15:mtext1:110:data-latex6:string12:\u005cunicode{65}7:boolean4:true1:A1:0		
+1	\u005cU{110000}		RangeError	Invalid code point 1114112
+1	\u005cU{41}	4:math1:210:data-latex6:string6:\u005cU{41}7:display6:string5:block0:0:0:1:112:inferredMrow1:00:0:0:1:12:mi1:110:data-latex6:string1:A0:0:1:A1:0		
+2	\u005cchar x	4:math1:210:data-latex6:string7:\u005cchar x7:display6:string5:block0:0:0:1:112:inferredMrow1:00:0:0:1:16:merror1:114:data-mjx-error6:string34:Missing numeric constant for \u005cchar0:0:0:1:112:inferredMrow1:00:0:0:1:15:mtext1:00:0:34:Missing numeric constant for \u005cchar1:0	MissingNumber	Missing numeric constant for \u005cchar
+2	\u005cchar65	4:math1:210:data-latex6:string7:\u005cchar657:display6:string5:block0:0:0:1:112:inferredMrow1:00:0:0:1:12:mi1:110:data-latex6:string7:\u005cchar650:0:1:A1:0		

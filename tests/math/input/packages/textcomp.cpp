@@ -1,4 +1,5 @@
 #include "math/support/tex_fixture.hpp"
+#include "math/support/textcomp_fixtures.hpp"
 import folia.math.input.tex.textcomp.configuration;
 import folia.math.input.tex.textcomp.mappings;
 import folia.math.input.tex.textmacros.configuration;
@@ -6,10 +7,7 @@ import folia.math.input.tex.newcommand.configuration;
 import folia.math.input.tex.base_methods;
 
 namespace {
-struct TextcompCase {
-    std::u16string_view name, glyph, font;
-};
-#include "math/fixtures/textcomp.inc"
+using namespace math_test::fixtures;
 constexpr std::array<MacroHandler, 2> textcompCallbacks{&TextcompMappings::Insert,
                                                         &BaseMethods::Macro};
 thread_local std::string *textcompError{};
@@ -96,8 +94,8 @@ suite textcomp = [] {
         [] {
             TextcompFixture text, math(false);
             auto map = text.maps.getMap(u"textcomp-macros");
-            expect(std::size(textcompCases) == 117_u);
-            for (auto const &entry : textcompCases) {
+            expect(std::size(textcompCases()) == 117_u);
+            for (auto const &entry : textcompCases()) {
                 auto macro = std::get<Macro const *>(map->lookup(entry.name));
                 expect(std::get<MacroHandler>(macro->function) == &TextcompMappings::Insert);
                 expect(macro->arguments.size() ==
@@ -124,7 +122,7 @@ suite textcomp = [] {
     "textcomp text inserts coalesce the current text buffer and keep font-specific segments separate"_test =
         [] {
             TextcompFixture f;
-            for (auto const &entry : textcompCases) {
+            for (auto const &entry : textcompCases()) {
                 auto texts =
                     textcompTexts(f.ok(u"\\text{L\\" + std::u16string(entry.name) + u" R}"));
                 expect(texts.size() == (entry.font.empty() ? std::size_t{1} : std::size_t{3}));

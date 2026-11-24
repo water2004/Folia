@@ -1,4 +1,5 @@
 #include "math/support/tex_fixture.hpp"
+#include "math/support/unicode_package_fixtures.hpp"
 import folia.math.input.tex.base_configuration;
 import folia.math.input.tex.newcommand.configuration;
 import folia.math.input.tex.unicode.configuration;
@@ -9,26 +10,7 @@ namespace {
 using namespace std::literals;
 constexpr std::array<MacroHandler, 3> unicodeCallbacks{
     &UnicodeMethods::Unicode, &UnicodeMethods::RawUnicode, &UnicodeMethods::Char};
-struct UnicodeCase {
-    std::u16string_view name;
-    std::u16string_view source;
-    std::u16string_view snapshot;
-    std::u16string_view error;
-    std::u16string_view message;
-};
-struct UnicodeRegistryCase {
-    std::u16string_view source;
-    std::u16string_view snapshot;
-    std::u16string_view error;
-};
-struct UnicodeRecoveryCase {
-    int group;
-    std::u16string_view source;
-    std::u16string_view snapshot;
-    std::u16string_view error;
-    std::u16string_view message;
-};
-#include "math/fixtures/unicode.inc"
+using namespace math_test::fixtures;
 
 struct UnicodeObservedCreator {
     NodeKind kind;
@@ -172,7 +154,7 @@ std::u16string snapshot(MmlNode const &root) {
 
 suite unicode_package = [] {
     "Unicode commands match pinned Source MML and errors"_test = [] {
-        for (const auto &entry : unicodeCases) {
+        for (const auto &entry : unicodeCases()) {
             UnicodeFixture fixture;
             UnicodeFailure failure;
             MmlNode *tree{};
@@ -200,30 +182,30 @@ suite unicode_package = [] {
         MapHandler maps;
         UnicodeFailure failure;
         UnicodeFixture first(registry, maps);
-        auto &set = first.compile(unicodeRegistryCases[0].source, failure);
-        expect(failure.id == unicodeRegistryCases[0].error);
-        expect(snapshot(set) == unicodeRegistryCases[0].snapshot);
+        auto &set = first.compile(unicodeRegistryCases()[0].source, failure);
+        expect(failure.id == unicodeRegistryCases()[0].error);
+        expect(snapshot(set) == unicodeRegistryCases()[0].snapshot);
         first.jax->reset();
-        auto &read = first.compile(unicodeRegistryCases[1].source, failure);
-        expect(failure.id == unicodeRegistryCases[1].error);
-        expect(snapshot(read) == unicodeRegistryCases[1].snapshot);
-        auto &replace = first.compile(unicodeRegistryCases[2].source, failure);
-        expect(failure.id == unicodeRegistryCases[2].error);
-        expect(snapshot(replace) == unicodeRegistryCases[2].snapshot);
-        auto &readReplacement = first.compile(unicodeRegistryCases[3].source, failure);
-        expect(failure.id == unicodeRegistryCases[3].error);
-        expect(snapshot(readReplacement) == unicodeRegistryCases[3].snapshot);
+        auto &read = first.compile(unicodeRegistryCases()[1].source, failure);
+        expect(failure.id == unicodeRegistryCases()[1].error);
+        expect(snapshot(read) == unicodeRegistryCases()[1].snapshot);
+        auto &replace = first.compile(unicodeRegistryCases()[2].source, failure);
+        expect(failure.id == unicodeRegistryCases()[2].error);
+        expect(snapshot(replace) == unicodeRegistryCases()[2].snapshot);
+        auto &readReplacement = first.compile(unicodeRegistryCases()[3].source, failure);
+        expect(failure.id == unicodeRegistryCases()[3].error);
+        expect(snapshot(readReplacement) == unicodeRegistryCases()[3].snapshot);
         UnicodeFixture second(registry, maps);
-        auto &shared = second.compile(unicodeRegistryCases[4].source, failure);
-        expect(failure.id == unicodeRegistryCases[4].error);
-        expect(snapshot(shared) == unicodeRegistryCases[4].snapshot);
+        auto &shared = second.compile(unicodeRegistryCases()[4].source, failure);
+        expect(failure.id == unicodeRegistryCases()[4].error);
+        expect(snapshot(shared) == unicodeRegistryCases()[4].snapshot);
 
         ConfigurationHandler independentRegistry;
         MapHandler independentMaps;
         UnicodeFixture independent(independentRegistry, independentMaps);
-        auto &isolated = independent.compile(unicodeRegistryCases[5].source, failure);
-        expect(failure.id == unicodeRegistryCases[5].error);
-        expect(snapshot(isolated) == unicodeRegistryCases[5].snapshot);
+        auto &isolated = independent.compile(unicodeRegistryCases()[5].source, failure);
+        expect(failure.id == unicodeRegistryCases()[5].error);
+        expect(snapshot(isolated) == unicodeRegistryCases()[5].snapshot);
     };
 
     "Unicode configured token creator receives its original request"_test = [] {
@@ -252,15 +234,15 @@ suite unicode_package = [] {
         fixture.jax->parseOptions().request().nodeFactory.setCreators(
             NodeCreators{.token = &observeUnicodeToken});
         UnicodeFailure failure;
-        auto &tree = fixture.compile(unicodeCreatorSource, failure);
+        auto &tree = fixture.compile(unicodeCreatorSource(), failure);
         expect(failure.id.empty());
-        expect(requests.size() == std::size(unicodeCreatorRequests));
-        expect(snapshot(tree) == unicodeCreatorSnapshot);
+        expect(requests.size() == std::size(unicodeCreatorRequests()));
+        expect(snapshot(tree) == unicodeCreatorSnapshot());
         if (requests.size() == 1) {
             expect(requests[0].kind == NodeKind::mtext);
-            expect(requests[0].text == unicodeCreatorRequests[0].text);
+            expect(requests[0].text == unicodeCreatorRequests()[0].text);
             expect(attr(requests[0].definition.attributes, u"fontfamily") ==
-                   unicodeCreatorRequests[0].fontfamily);
+                   unicodeCreatorRequests()[0].fontfamily);
             auto tokens = std::vector<MmlNode *>{};
             tree.walkTree([&](auto &node) {
                 if (node.kind() == NodeKind::mtext)
@@ -275,7 +257,7 @@ suite unicode_package = [] {
     "Unicode errors recover in the same configured TeX instance"_test = [] {
         for (int group = 0; group < 3; ++group) {
             UnicodeFixture fixture;
-            for (const auto &entry : unicodeRecoveryCases) {
+            for (const auto &entry : unicodeRecoveryCases()) {
                 if (entry.group != group)
                     continue;
                 UnicodeFailure failure;

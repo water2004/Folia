@@ -1,0 +1,13 @@
+# Pinned reference observations; values exported without normalization.
+# name_utf16	snapshot_utf16
+empty	12:inferredMrow0:0:1:0
+one	2:mi1:x0:1:0
+multiple	12:inferredMrow0:0:1:22:mi1:x0:1:02:mi1:y0:1:0
+ignored-flags	12:inferredMrow0:0:1:22:mi1:x0:1:02:mi1:y0:1:0
+ignored-force-single	2:mi1:x0:1:0
+prefix	4:mrow0:0:1:22:mi1:p0:1:02:mi1:x0:1:0
+grouped-prefix	4:mrow0:0:1:27:TeXAtom0:0:1:112:inferredMrow0:0:1:12:mi1:p0:1:02:mi1:x0:1:0
+prefix-empty-proof	4:mrow0:0:1:12:mi1:p0:1:0
+matching-end	2:mi1:x4:true1:0
+matching-end-prefix	4:mrow0:4:true1:22:mi1:p0:1:02:mi1:x0:1:0
+outer-replay	4:mrow0:4:true1:27:TeXAtom0:0:1:112:inferredMrow0:0:1:12:mi1:p0:1:02:mi1:x0:1:0

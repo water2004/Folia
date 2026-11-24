@@ -1,0 +1,8 @@
+# Pinned reference observations; values exported without normalization.
+# name_utf16	id_bytes	message_utf16
+stop	EnvMissingEnd	Missing \u005cend{prooftree}
+stop-unnamed	EnvMissingEnd	Missing \u005cend{}
+mismatched-end	MissingBeginExtraEnd	Missing \u005cbegin{other} or extra \u005cend{other}
+extra-close	ExtraCloseMissingOpen	Extra close brace or missing open brace
+unfinished-group	ExtraOpenMissingClose	Extra open brace or missing close brace
+unfinished-group-end	ExtraOpenMissingClose	Extra open brace or missing close brace

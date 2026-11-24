@@ -202,46 +202,20 @@ const freshResult = fresh.compile(String.raw`\unicode{945}`);
 sharedRows.push({ input: String.raw`\unicode{945}`, snapshot:
     freshResult.tree ? snapshot(freshResult.tree) : '', error: freshResult.error?.id ?? '' });
 
-function cpp(text) {
-    let result = 'u"';
-    for (const scalar of text) {
-        const value = scalar.codePointAt(0);
-        if (scalar === '\\') result += '\\\\';
-        else if (scalar === '"') result += '\\"';
-        else if (value === 10) result += '\\n';
-        else if (value === 13) result += '\\r';
-        else if (value === 9) result += '\\t';
-        else if (value === 0) result += '\\0" u"';
-        else if (value >= 0xd800 && value <= 0xdfff)
-            result += `\\x${value.toString(16)}" u"`;
-        else if (value < 32 || value > 126)
-            result += value > 0xffff ? `\\U${value.toString(16).padStart(8, '0')}`
-                : `\\u${value.toString(16).padStart(4, '0')}`;
-        else result += scalar;
-    }
-    return `${result}"sv`;
-}
-
-let output = '// Pinned actual Source Unicode MML/errors; regenerate with unicode-source.cjs --write-fixture.\n';
-output += 'struct UnicodeCreatorRequest { std::u16string_view kind, text, fontfamily; };\n';
-output += `constexpr std::u16string_view unicodeCreatorSource = ${cpp(creatorSource)};\n`;
-output += `constexpr std::u16string_view unicodeCreatorSnapshot = ${cpp(snapshot(creatorResult.tree))};\n`;
-output += 'const std::array unicodeCreatorRequests{\n' + creatorRequests.map(request =>
-    `    UnicodeCreatorRequest{${cpp(request.kind)}, ${cpp(request.text)}, ` +
-    `${cpp(request.fontfamily)}},`).join('\n') + '\n};\n';
-output += 'const std::array unicodeCases{\n' + rows.map(row =>
-    `    UnicodeCase{${cpp(row.name)}, ${cpp(row.input)}, ${cpp(row.snapshot)}, ` +
-    `${cpp(row.error)}, ${cpp(row.message)}},`).join('\n') + '\n};\n';
-output += 'const std::array unicodeRegistryCases{\n' + sharedRows.map(row =>
-    `    UnicodeRegistryCase{${cpp(row.input)}, ${cpp(row.snapshot)}, ` +
-    `${cpp(row.error)}},`).join('\n') + '\n};\n';
-output += 'const std::array unicodeRecoveryCases{\n' + recoveryRows.map(row =>
-    `    UnicodeRecoveryCase{${row.group}, ${cpp(row.input)}, ${cpp(row.snapshot)}, ` +
-    `${cpp(row.error)}, ${cpp(row.message)}},`).join('\n') + '\n};\n';
-const fixturePath = path.join(root, 'tests/math/fixtures/unicode.inc');
-if (process.argv.includes('--write-fixture')) fs.writeFileSync(fixturePath, output);
-else assert.equal(fs.readFileSync(fixturePath, 'utf8').replaceAll('\r\n', '\n'), output,
-    'Unicode Source fixture differs; regenerate explicitly');
+const {utf16Field, byteField, writeTables} = require('./fixture-data.cjs');
+const fixturePath = path.join(root, 'tests/math/fixtures/packages/unicode');
+writeTables(fixturePath, {
+  "creator-input": {columns: ["source_utf16", "snapshot_utf16"],
+    rows: [[utf16Field(creatorSource), utf16Field(snapshot(creatorResult.tree))]]},
+  "creator-requests": {columns: ["kind_utf16", "text_utf16", "fontfamily_utf16"],
+    rows: creatorRequests.map(r => [r.kind, r.text, r.fontfamily].map(utf16Field))},
+  "cases": {columns: ["name_utf16", "source_utf16", "snapshot_utf16", "error_utf16", "message_utf16"],
+    rows: rows.map(r => [r.name, r.input, r.snapshot, r.error, r.message].map(utf16Field))},
+  "registry": {columns: ["source_utf16", "snapshot_utf16", "error_utf16"],
+    rows: sharedRows.map(r => [r.input, r.snapshot, r.error].map(utf16Field))},
+  "recovery": {columns: ["group_integer", "source_utf16", "snapshot_utf16", "error_utf16", "message_utf16"],
+    rows: recoveryRows.map(r => [r.group, ...[r.input, r.snapshot, r.error, r.message].map(utf16Field)])},
+});
 console.log(JSON.stringify({ cases: rows.length, historical: historical.length,
     trees: rows.filter(row => !row.error).length,
     errors: rows.filter(row => row.error).length,
