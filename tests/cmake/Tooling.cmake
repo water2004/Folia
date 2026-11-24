@@ -10,6 +10,10 @@ add_test(NAME FoliaMathToolTests
     COMMAND "${Python3_EXECUTABLE}" -m unittest discover
         -s "${FOLIA_SOURCE_ROOT}/tools/math-port/tests" -p "test_*.py")
 set_tests_properties(FoliaMathToolTests PROPERTIES LABELS "tooling;portable")
+add_test(NAME FoliaLatexCatalogTests
+    COMMAND "${Python3_EXECUTABLE}" -m unittest discover
+        -s "${FOLIA_SOURCE_ROOT}/tests/query" -p "test_*.py")
+set_tests_properties(FoliaLatexCatalogTests PROPERTIES LABELS "tooling;portable")
 add_test(NAME FoliaTestRunnerTests
     COMMAND "${Python3_EXECUTABLE}" -m unittest discover
         -s "${FOLIA_SOURCE_ROOT}/tests/tools" -p "test_*.py")
