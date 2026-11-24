@@ -41,6 +41,9 @@ namespace
             auto width = EditorDocumentContentWidth(context.surfaceWidth, sheet.horizontalPadding);
             auto checkFormula = [&](std::u32string_view tex, bool display, float available)
             {
+                // An empty math editor still needs a caret row, but has no
+                // rendered formula for the drag tests to wait for.
+                if (tex.empty()) return;
                 auto result = prepared->math.Lookup(folia::cps_to_utf8(tex), display,
                     sheet.body.size, available, SvgColor(sheet.textColor));
                 auto ready = result && static_cast<bool>(*result);

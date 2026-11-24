@@ -26,10 +26,11 @@ if ($appLocalRuntime) {
     Copy-Item -LiteralPath (Join-Path $app 'folia_svg_normalizer.dll') -Destination $scratch -Force
     Copy-Item -LiteralPath (Join-Path $app 'FoliaNativeMermaid.dll') -Destination $scratch -Force
 }
-# The visual host uses the real Application bootstrap. Controller tests keep
-# their minimal WindowsXamlManager host, with no application XAML/PRI files.
-if ($Visual) {
-    foreach ($resource in Get-ChildItem -LiteralPath $app -File -Recurse | Where-Object { $_.Extension -in '.xbf', '.pri' }) {
+# The visual host uses the real Application bootstrap. Preserve satellite
+# resources for app-local WinUI and copy application XAML/PRI for visual tests.
+if ($Visual -or $appLocalRuntime) {
+    foreach ($resource in Get-ChildItem -LiteralPath $app -File -Recurse |
+        Where-Object { ($appLocalRuntime -and $_.Extension -eq '.mui') -or ($Visual -and $_.Extension -in '.xbf', '.pri') }) {
         $relative = $resource.FullName.Substring($app.TrimEnd('\').Length + 1)
         $destination = Join-Path $scratch $relative
         New-Item -ItemType Directory -Force -Path (Split-Path -Parent $destination) | Out-Null
