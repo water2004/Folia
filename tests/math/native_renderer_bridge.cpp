@@ -24,7 +24,11 @@ import folia.math.output.svg.writer;
 
 using namespace boost::ut;
 
-#include "fixtures/canonical_scene_modes_source.hpp"
+#include "math/support/scene_fixtures.hpp"
+using math_test::fixtures::CanonicalSceneCase;
+using math_test::fixtures::CanonicalSceneMode;
+using math_test::fixtures::CanonicalSceneMetrics;
+using math_test::fixtures::sourceCanonicalSceneCases;
 
 namespace {
 namespace scene = folia::math::output::scene;
@@ -356,14 +360,14 @@ suite native_renderer_bridge = [] {
     "Renderer bounded batches preserve every canonical Source SVG"_test = [] {
         for (std::size_t batchSize : {32, 64}) {
             folia::math::Renderer renderer;
-            for (std::size_t begin = 0; begin < std::size(sourceCanonicalSceneCases); begin += batchSize) {
-                const auto end = (std::min)(begin + batchSize, std::size(sourceCanonicalSceneCases));
+            for (std::size_t begin = 0; begin < std::size(sourceCanonicalSceneCases()); begin += batchSize) {
+                const auto end = (std::min)(begin + batchSize, std::size(sourceCanonicalSceneCases()));
                 std::vector<std::u16string> texts;
                 std::vector<folia::math::RenderInput> inputs;
                 texts.reserve(end - begin);
                 inputs.reserve(end - begin);
                 for (auto i = begin; i < end; ++i) {
-                    auto const& source = sourceCanonicalSceneCases[i];
+                    auto const& source = sourceCanonicalSceneCases()[i];
                     texts.push_back(folia::math::utf16::decode(source.tex).text);
                     inputs.push_back({texts.back(), {},
                         {.display = source.requested_display, .em = source.em, .containerWidth = source.width}});
@@ -371,7 +375,7 @@ suite native_renderer_bridge = [] {
                 const auto output = renderer.renderBatch(inputs);
                 expect(output.size() == inputs.size());
                 for (std::size_t i = 0; i < output.size(); ++i) {
-                    auto const& source = sourceCanonicalSceneCases[begin + i];
+                    auto const& source = sourceCanonicalSceneCases()[begin + i];
                     expect(!output[i].error && output[i].result.has_value()) << source.name;
                     if (output[i].result)
                         expect(output[i].result->svg == source_svg_paint::materialize(source.modes[0].svg))
@@ -382,7 +386,7 @@ suite native_renderer_bridge = [] {
     };
     "opaque C ABI renders the canonical Source profile and retains result storage"_test = [] {
         static_assert(sizeof(char16_t) == sizeof(std::uint16_t));
-        expect(std::size(sourceCanonicalSceneCases) == 75u) << "canonical source has 75 inputs";
+        expect(std::size(sourceCanonicalSceneCases()) == 75u) << "canonical source has 75 inputs";
         auto renderer = makeRenderer();
         if (!renderer)
             return;
@@ -391,8 +395,8 @@ suite native_renderer_bridge = [] {
         std::size_t retainedSize{};
         std::string retainedCopy;
         std::size_t unicodeInputs = 0;
-        for (std::size_t i = 0; i < std::size(sourceCanonicalSceneCases); ++i) {
-            auto const &source = sourceCanonicalSceneCases[i];
+        for (std::size_t i = 0; i < std::size(sourceCanonicalSceneCases()); ++i) {
+            auto const &source = sourceCanonicalSceneCases()[i];
             auto const &mode = source.modes[0];
             const std::string label = std::string(source.name) + " [opaque C ABI]";
             const auto input = folia::math::utf16::decode(source.tex).text;

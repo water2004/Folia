@@ -7,9 +7,10 @@ const crypto = require('node:crypto');
 const assert = require('node:assert/strict');
 const {createReference} = require('./reference-profile.cjs');
 const {canonicalSceneCases} = require('./common-scene-cases.cjs');
+const {byteField, binary64, table} = require('./fixture-data.cjs');
 
 const root = path.resolve(__dirname, '../..');
-const out = path.join(root, 'tests/math/fixtures/common_scene.inc');
+const out = path.join(root, 'tests/math/fixtures/scenes/common.tsv');
 const digest = data => crypto.createHash('sha256').update(data).digest('hex');
 const profileCases = JSON.parse(fs.readFileSync(path.join(__dirname,
   'common-layout-reference/profile-cases.json'), 'utf8'));
@@ -125,30 +126,6 @@ for (const [name, style] of [['scene-border-dashed', 'dashed'],
   cases.push({name, tex: String.raw`\bbox[border:2px ${style} red]{x+y}`,
     display: false, em: 16, ex: 8, width: 1280, features: ['bbox']});
 
-function cpp(value) {
-  // MSVC rejects a single string literal token beyond 16K; keep each emitted
-  // raw token well below the compiler limit. Iterate JS code points so a
-  // UTF-8 chunk boundary can never split an astral surrogate pair.
-  const chunks = [];
-  let chunk = '', bytes = 0;
-  for (const codePoint of value) {
-    const size = Buffer.byteLength(codePoint, 'utf8');
-    if (bytes + size > 3500 && chunk) {
-      chunks.push(chunk);
-      chunk = '';
-      bytes = 0;
-    }
-    chunk += codePoint;
-    bytes += size;
-  }
-  if (chunk || chunks.length === 0) chunks.push(chunk);
-  return chunks.map(part => {
-    let delimiter = 'FOLIASCENE';
-    for (let suffix = 0; part.includes(`)${delimiter}"`); ++suffix)
-      delimiter = `FOLIASCENE${suffix + 1}`;
-    return `R"${delimiter}(${part})${delimiter}"`;
-  }).join('\n        ');
-}
 function attr(svg, name) {
   const rootTag = svg.match(/<svg\b[^>]*>/)?.[0] || '';
   return tagAttr(rootTag, name);
@@ -402,22 +379,16 @@ async function capture() {
 }
 
 function generate({records}) {
-  const baseline = profileCases.cases.length + 18;
-  let body = `// Pinned MathJax 4.1.3 Source -> Common SVG witness; raw SVG and decoded root/geometry observations.\n`+
-    `// Source corpus: original 18 baseline + profile-cases.json (${profileCases.cases.length}); canonical acceptance is recorded separately.\n`+
-    `// scope=${sourceLock.scopeHash}; profile corpus=${sourceLock.corpusSha256}; font/Common dependency files=${sourceLock.dependencies.length}.\n`+
-    `// Source is generated only by common-scene-source.cjs through reference-profile.cjs.\n`+
-    `struct CommonSceneCase { std::string_view name, tex; bool display; double em, ex; int width; std::string_view tag_side;\n`+
-    `    std::string_view svg, root_width, root_height, root_view_box; std::string_view geometry;\n`+
-    `    std::string_view error_name, error_message; };\n`+
-    `constexpr std::array commonSceneCases{\n`;
-  for (const r of records) {
-    body += `    CommonSceneCase{${cpp(r.name)}, ${cpp(r.tex)}, ${r.display}, ${r.em}, ${r.ex}, ${r.width}, ${cpp(r.tagSide ?? '')},\n`+
-      `        ${cpp(r.svg)}, ${cpp(r.root.width)}, ${cpp(r.root.height)}, ${cpp(r.root.viewBox)},\n`+
-      `        ${cpp(JSON.stringify(r.geometry))}, ${cpp(r.error?.name ?? '')}, ${cpp(r.error?.message ?? '')}},\n`;
-  }
-  body += `};\n// ${records.length} records; canonical 75 corpus=${baseline}; extra focused cases=${records.length-baseline}.\n`;
-  return body;
+  return table(
+    ['name_bytes', 'tex_bytes', 'display', 'em_binary64', 'ex_binary64', 'width',
+      'tag_side_bytes', 'svg_bytes', 'root_width_bytes', 'root_height_bytes',
+      'root_view_box_bytes', 'geometry_bytes', 'error_name_bytes', 'error_message_bytes'],
+    records.map(r => [byteField(r.name), byteField(r.tex), +r.display, binary64(r.em),
+      binary64(r.ex), r.width, byteField(r.tagSide ?? ''), byteField(r.svg),
+      byteField(r.root.width), byteField(r.root.height), byteField(r.root.viewBox),
+      byteField(JSON.stringify(r.geometry)), byteField(r.error?.name ?? ''),
+      byteField(r.error?.message ?? '')]),
+    [`scope=${sourceLock.scopeHash}; profile_corpus=${sourceLock.corpusSha256}; font_Common_dependency_files=${sourceLock.dependencies.length}`]);
 }
 
 (async () => {

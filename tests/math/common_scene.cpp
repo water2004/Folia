@@ -16,7 +16,9 @@
 #include "support/source_svg_paint.hpp"
 #include "support/folia_test.hpp"
 #include "support/tex_scene.hpp"
-#include "fixtures/common_scene.inc"
+#include "math/support/scene_fixtures.hpp"
+using math_test::fixtures::CommonSceneCase;
+using math_test::fixtures::commonSceneCases;
 import folia.math.output.svg.writer;
 
 using namespace boost::ut;
@@ -278,9 +280,9 @@ void inspect(scene::Group const &group, SceneStats &stats, bool insidePhantom = 
 }
 
 CommonSceneCase const &sourceCase(std::string_view name) {
-    auto found = std::find_if(commonSceneCases.begin(), commonSceneCases.end(),
+    auto found = std::find_if(commonSceneCases().begin(), commonSceneCases().end(),
                               [&](auto const &item) { return item.name == name; });
-    if (found == commonSceneCases.end())
+    if (found == commonSceneCases().end())
         throw std::logic_error("missing pinned Common-to-Scene Source case");
     return *found;
 }
@@ -468,14 +470,14 @@ suite common_scene_source = [] {
         }
         std::vector<CommonSceneCase const *> executionCases;
         if (canonicalProfile) {
-            if (commonSceneCases.size() < 75) {
+            if (commonSceneCases().size() < 75) {
                 std::cerr << "Common-to-Scene profile=canonical category=fixture_too_short count="
-                          << commonSceneCases.size() << '\n';
+                          << commonSceneCases().size() << '\n';
                 expect(false) << "canonical Source fixture must contain the original 75 cases";
                 return;
             }
             for (std::size_t index = 0; index < 75; ++index)
-                executionCases.push_back(&commonSceneCases[index]);
+                executionCases.push_back(&commonSceneCases()[index]);
         } else {
             for (auto name : selected)
                 executionCases.push_back(&sourceCase(name));

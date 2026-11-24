@@ -26,7 +26,11 @@ using namespace boost::ut;
 namespace scene = folia::math::output::scene;
 namespace svg = folia::math::output::svg;
 
-#include "fixtures/canonical_scene_modes_source.hpp"
+#include "math/support/scene_fixtures.hpp"
+using math_test::fixtures::CanonicalSceneCase;
+using math_test::fixtures::CanonicalSceneMode;
+using math_test::fixtures::CanonicalSceneMetrics;
+using math_test::fixtures::sourceCanonicalSceneCases;
 
 namespace {
 bool close(double actual, double expected) {
@@ -84,15 +88,15 @@ svg::SvgWriteOptions writeOptions(CanonicalSceneMode const &mode, std::size_t mo
 
 suite native_canonical_scene_source = [] {
     "pinned_TeX_hosted_canonical_75_layout_and_150_svg_modes_match_source"_test = [] {
-        expect(std::size(sourceCanonicalSceneCases) == 75u)
+        expect(std::size(sourceCanonicalSceneCases()) == 75u)
             << "hosted Source fixture contains the canonical 75 ordered inputs";
-        if (std::size(sourceCanonicalSceneCases) != 75)
+        if (std::size(sourceCanonicalSceneCases()) != 75)
             return;
 
         std::set<std::string_view> names;
         std::set<std::tuple<std::string_view, std::string_view, bool, double, double, double>>
             inputs;
-        for (const auto &source : sourceCanonicalSceneCases) {
+        for (const auto &source : sourceCanonicalSceneCases()) {
             expect(names.insert(source.name).second) << source.name << ": case name is unique";
             expect(inputs
                        .emplace(source.tex, source.tag_side, source.requested_display, source.em,
@@ -115,9 +119,9 @@ suite native_canonical_scene_source = [] {
         for (std::size_t modeIndex = 0; modeIndex < 2; ++modeIndex) {
             tex_scene_test::InputOwner owner;
             tex_scene_test::LiteUnknownTextMeasurement measurement(owner.adaptor);
-            for (std::size_t caseIndex = 0; caseIndex < std::size(sourceCanonicalSceneCases);
+            for (std::size_t caseIndex = 0; caseIndex < std::size(sourceCanonicalSceneCases());
                  ++caseIndex) {
-                const auto &source = sourceCanonicalSceneCases[caseIndex];
+                const auto &source = sourceCanonicalSceneCases()[caseIndex];
                 const auto &mode = source.modes[modeIndex];
                 const std::string modeName =
                     std::string(source.name) + (modeIndex == 0 ? " [none]" : " [local]");

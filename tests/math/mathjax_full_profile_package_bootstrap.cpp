@@ -13,7 +13,11 @@
 #include <string_view>
 #include <variant>
 #include <vector>
-#include "fixtures/canonical_scene_modes_source.hpp"
+#include "math/support/scene_fixtures.hpp"
+using math_test::fixtures::CanonicalSceneCase;
+using math_test::fixtures::CanonicalSceneMode;
+using math_test::fixtures::CanonicalSceneMetrics;
+using math_test::fixtures::sourceCanonicalSceneCases;
 #include "support/source_svg_paint.hpp"
 #include "support/folia_test.hpp"
 
@@ -205,13 +209,13 @@ suite mathjax_full_profile_package_bootstrap = [] {
     };
 
     "renderer_public_options_match_all_75_none_profile_cases_in_both_encodings"_test = [] {
-        expect(std::size(sourceCanonicalSceneCases) == 75u);
-        if (std::size(sourceCanonicalSceneCases) != 75u)
+        expect(std::size(sourceCanonicalSceneCases()) == 75u);
+        if (std::size(sourceCanonicalSceneCases()) != 75u)
             return;
 
         std::size_t utf8Metrics = 0, utf8Svg = 0, utf16Metrics = 0, utf16Svg = 0;
         std::size_t pairedSceneGeometry = 0;
-        for (const auto &source : sourceCanonicalSceneCases) {
+        for (const auto &source : sourceCanonicalSceneCases()) {
             expect(source.tag_side.empty()) << source.name << ": tag-side is default profile";
             expect(source.em == 16.0 && source.ex == 8.0)
                 << source.name << ": public renderer metrics use default em/ex profile";
@@ -228,7 +232,7 @@ suite mathjax_full_profile_package_bootstrap = [] {
         {
             Renderer renderer;
             Renderer sceneRenderer;
-            for (const auto &source : sourceCanonicalSceneCases) {
+            for (const auto &source : sourceCanonicalSceneCases()) {
                 const auto &expected = source.modes[0];
                 try {
                     auto result = renderer.render(source.tex, optionsFor(source));
@@ -251,7 +255,7 @@ suite mathjax_full_profile_package_bootstrap = [] {
         }
         {
             Renderer renderer;
-            for (const auto &source : sourceCanonicalSceneCases) {
+            for (const auto &source : sourceCanonicalSceneCases()) {
                 const auto &expected = source.modes[0];
                 try {
                     const auto utf16 = folia::math::utf16::decode(source.tex).text;

@@ -7,6 +7,7 @@ const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
 const cp = require('node:child_process');
+const {byteField, binary64, table} = require('./fixture-data.cjs');
 
 const root = path.resolve(__dirname, '../..');
 const sha = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
@@ -33,7 +34,7 @@ function runChild(mode) {
   }
   const child = cp.spawnSync(process.execPath,
     ['--max-old-space-size=512', __filename, '--capture-child', mode, evidence],
-    {cwd:'C:/Windows', encoding:'utf8', maxBuffer:64 * 1024 * 1024,
+    {cwd:root, encoding:'utf8', maxBuffer:64 * 1024 * 1024,
       timeout:180000, windowsHide:true});
   if (child.stdout) process.stdout.write(child.stdout);
   if (child.stderr) process.stderr.write(child.stderr);
@@ -61,56 +62,37 @@ function runChild(mode) {
   return result;
 }
 
-function raw(value, prefix) {
-  const chunks=[];
-  let part='', size=0;
-  for (const cp of value) {
-    const bytes=Buffer.byteLength(cp,'utf8');
-    if (size+bytes>3500 && part) { chunks.push(part); part=''; size=0; }
-    part+=cp; size+=bytes;
-  }
-  if (part || !chunks.length) chunks.push(part);
-  return chunks.map((chunk,i)=>{
-    const delimiter=`${prefix}${i}`;
-    assert.ok(delimiter.length<=16);
-    assert.ok(!chunk.includes(`)${delimiter}"`),'raw-string delimiter collision');
-    return `R"${delimiter}(${chunk})${delimiter}"`;
-  }).join('\n    ');
-}
-
-function cppCase(record, index) {
-  const modes=record.modes.map((mode,mi)=>{
-    const prefixName=`canonicalScenePrefixes${index}_${mi}`;
-    const prefixes=mode.local_cache_prefixes.map((value,i)=>raw(value,`P${index}${mi}${i}`));
-    const prefixDecl=`constexpr std::array<std::string_view, ${prefixes.length}> ${prefixName}{{${
-      prefixes.length ? `\n    ${prefixes.join(',\n    ')}\n` : ''}}};\n`;
-    const m=`{${mode.display}, ${mode.initial_allow_tex_html}, {${mode.metrics.width}, ${mode.metrics.height}, ${mode.metrics.depth}}, ${raw(mode.error_name,`EN${index}${mi}`)}, ${raw(mode.error_message,`EM${index}${mi}`)}, ${raw(mode.svg,`S${index}${mi}`)}, ${prefixName}, ${mode.listener_count}, ${mode.listener_dom_unchanged}}`;
-    return {prefixDecl,m};
-  });
-  return {prefixes:modes.map(x=>x.prefixDecl).join(''),
-    value:`  {${raw(record.name,`N${index}`)}, ${raw(record.tex,`T${index}`)}, ${raw(record.tag_side,`G${index}`)}, ${record.requested_display}, ${record.em}, ${record.ex}, ${record.width}, std::array<CanonicalSceneMode, 2>{{${modes.map(x=>x.m).join(', ')}}}}`};
-}
-
-function cppFixture(records, provenance) {
-  const header=`// Pinned MathJax 4.1.3 Source canonical none/local witnesses.\n`+
-`struct CanonicalSceneMetrics { double width; double height; double depth; };\n`+
-`struct CanonicalSceneMode { bool display; bool initial_allow_tex_html; CanonicalSceneMetrics metrics; std::string_view error_name; std::string_view error_message; std::string_view svg; std::span<std::string_view const> local_cache_prefixes; std::size_t listener_count; bool listener_dom_unchanged; };\n`+
-`struct CanonicalSceneCase { std::string_view name; std::string_view tex; std::string_view tag_side; bool requested_display; double em; double ex; double width; std::array<CanonicalSceneMode, 2> modes; };\n`+
-`// Source session provenance SHA256: ${provenance}\n`;
-  const emitted=records.map(cppCase);
-  return header+emitted.map(x=>x.prefixes).join('')+
-    `constexpr CanonicalSceneCase sourceCanonicalSceneCases[]{\n`+
-    emitted.map(x=>x.value).join(',\n')+`\n};\n`;
+function sceneFixtures(records, provenance) {
+  const cases = table(
+    ['name_bytes', 'tex_bytes', 'tag_side_bytes', 'requested_display',
+      'em_binary64', 'ex_binary64', 'width_binary64'],
+    records.map(r => [byteField(r.name), byteField(r.tex), byteField(r.tag_side),
+      +r.requested_display, binary64(r.em), binary64(r.ex), binary64(r.width)]),
+    [`Source session provenance SHA256: ${provenance}`]);
+  const modes = table(
+    ['case_index', 'mode_index', 'display', 'initial_allow_tex_html', 'width_binary64',
+      'height_binary64', 'depth_binary64', 'error_name_bytes', 'error_message_bytes',
+      'svg_bytes', 'prefix_count', 'prefixes_bytes_separated_by_pipe', 'listener_count',
+      'listener_dom_unchanged'],
+    records.flatMap((r, ci) => r.modes.map((m, mi) => [ci, mi, +m.display,
+      +m.initial_allow_tex_html, binary64(m.metrics.width), binary64(m.metrics.height),
+      binary64(m.metrics.depth), byteField(m.error_name), byteField(m.error_message),
+      byteField(m.svg), m.local_cache_prefixes.length,
+      m.local_cache_prefixes.map(value => byteField(value, true)).join('|'),
+      m.listener_count, +m.listener_dom_unchanged])));
+  return {'canonical-cases.tsv': cases, 'canonical-modes.tsv': modes};
 }
 
 function writeOrCheckFixture(records, provenance) {
-  const target=path.join(root,'tests/math/fixtures/canonical_scene_modes_source.hpp');
-  const previous=fs.existsSync(target)?fs.readFileSync(target,'utf8'):null;
-  const fixture=cppFixture(records,provenance);
-  if (process.argv[2]==='--write-fixture') {
-    if (previous!==fixture) fs.writeFileSync(target,fixture);
-  } else assert.equal(previous,fixture,'Canonical hosted Source fixture differs; review before --write-fixture');
-  process.stdout.write(`Verified ${records.length} canonical cases x 2 Source modes; fixture SHA256 ${sha(Buffer.from(fixture))}\n`);
+  for (const [name, fixture] of Object.entries(sceneFixtures(records, provenance))) {
+    const target = path.join(root, 'tests/math/fixtures/scenes', name);
+    const previous = fs.existsSync(target) ? fs.readFileSync(target, 'utf8') : null;
+    if (process.argv[2] === '--write-fixture') {
+      if (previous !== fixture) fs.writeFileSync(target, fixture);
+    } else assert.equal(previous, fixture,
+      'Canonical hosted Source fixture differs; review before --write-fixture');
+    process.stdout.write(`Verified ${records.length} canonical cases x 2 Source modes; ${name} SHA256 ${sha(Buffer.from(fixture))}\n`);
+  }
 }
 
 async function captureChild(mode, evidencePath) {
