@@ -38,7 +38,7 @@ header-only Boost.UT substitute nor concatenated source files are used.
 
 | Suite | Native targets / coverage | Additional preparation |
 | --- | --- | --- |
-| `core` | `FoliaCoreTests`: foundation, parsing, editing, queries, render models and portable key policies | Boost.UT submodule |
+| `core` | `FoliaCoreTests`, `FoliaPortablePolicyTests` and `FoliaMarkdownConsumer`: editor/model behavior, SDK-free editor policies and the standalone Markdown API | Boost.UT submodule |
 | `completion` | `FoliaCompletionTests`: context budgets, edits, cache and provider protocols | Vendored protocol sources |
 | `math-editor` | `FoliaMathEditorTests`: incremental TeX editing and syntax | Boost.UT submodule |
 | `math` | `FoliaMathTests` and `FoliaMathSvgBridgeTests`: parser/packages, MathML, layout, scenes, fonts and C ABI | Pinned MathJax/font packages for production resource generation |
@@ -48,7 +48,18 @@ header-only Boost.UT substitute nor concatenated source files are used.
 
 Selecting `math` and `mermaid` together also builds and runs
 `FoliaMermaidMathTests` against the actual Math shared library. `--suite all`
-selects every portable suite. Tooling alone does not require a C++ compiler:
+selects every portable suite. The core gate also runs the 41 existing tests in
+seven SDK-free policy files under `platform/`: display mapping, frame pacing,
+LaTeX/snippet sessions, priority queues, scrolling and selection dragging. These
+files remain part of the existing Windows suite as well.
+
+`FoliaMarkdownConsumer` retains four library-only consumer cases and links
+`folia::markdown`. Its `tests/libraries/markdown` standalone entry configures only
+the Markdown library and test support, without core, math or WinUI dependencies.
+When the optional md4c conformance target is enabled, it is included in the
+selected aggregate build.
+
+Tooling alone does not require a C++ compiler:
 
 ```sh
 python -m pip install -r tools/mermaid-cpp/regression/requirements.txt
@@ -117,10 +128,11 @@ Windows wrappers remain available. The portable entry calls the core executable
 | `math/` | Input/packages, semantic trees, layout, scenes, SVG, fonts, utilities and integration; see its README |
 | `mermaid_cpp/` | API, frontend, config, themes, labels, diagram families and layout engines; see its README |
 | `support/` | Reusable test setup, assertions and the `folia.test.fixture_data` module |
-| Feature `fixtures/` directories | Inputs and independently observed expected values |
+| Feature `fixtures/` directories | Runtime input tables, independently observed expected values, schemas and provenance |
+| `fixtures/preservation/` | Original registration inventory, current fixture byte/row checkpoint and historical migration evidence |
 | `cmake/` | Shared suite definitions used by both CMake entry points |
 | `tools/` | Portable test-system checks |
-| `platform/`, `app/`, `encoding/` | Existing Windows/WinUI/storage integration entry points |
+| `platform/`, `app/`, `encoding/` | Existing Windows/WinUI/storage integration entry points; SDK-free policies under `platform/` also participate in the portable core gate |
 
 Large data matrices belong in fixture files. Their readers preserve byte strings,
 UTF-16 code units (including isolated surrogates), Unicode scalar sequences,
@@ -128,18 +140,46 @@ ordered fields and exact floating-point representations. Missing or malformed
 files fail loudly. Paths are resolved against the configured test-data root,
 independently of the process working directory.
 
-`python tests/tools/check_inventory.py` verifies all 2,811 literal test
-registrations from the refactor's master baseline, including multiplicity.
-Dynamic corpus records are checked by their fixture readers and independent
-source verifiers. The optional `--windows-baseline` audit also checks the 120
-recorded Windows test/support sources against that baseline; it is an audit for
-this refactor, rather than a restriction on future Windows test maintenance.
-
 Small inputs that explain one behavior can remain beside that assertion. Shared
 setup belongs in a focused support file; do not assemble unrelated behaviors into
 one large translation unit. Each migrated dataset documents its schema and
 provenance. CommonMark/GFM originals and their transport rules are documented in
 `parsing/fixtures/conformance/README.md`.
+
+## Preserving cases and updating fixtures
+
+Run both preservation checks from the repository root:
+
+```sh
+python tests/tools/check_inventory.py
+python tests/tools/check_fixtures.py
+python -m unittest discover -s tests/tools -p test_fixtures.py
+```
+
+The registration inventory retains all 2,811 literal Boost.UT names from the
+refactor's master baseline, including multiplicity. Its optional
+`--windows-baseline` audit retains the original hashes for all 120 historical
+Windows-runner test/support files: 118 are unchanged under the recorded
+CRLF-to-LF hash policy. The two SDK-free LaTeX/snippet policy tests each add one
+explicit module import; removing only that declared, unique import line must
+recover the original hash. Their assertions, inputs and helpers remain intact,
+and Windows SDK tests are unchanged. This audit records the refactor's scope;
+it does not restrict future Windows test maintenance.
+
+The fixture guard discovers portable corpora independently of the checkpoint and
+checks each file's exact SHA-256, byte size and, for TSV files, record count.
+Changed values or row order, missing data and newly added unrecorded files fail.
+Raw upstream Markdown and PNG/RGBA observations retain their exact bytes; other
+portable fixture text uses LF through `.gitattributes`. The guard neither
+normalizes files nor regenerates expectations. Its negative controls and the
+repository check run with the `tooling` suite.
+
+For an intentional fixture change, verify the independent source observation,
+review the complete data diff and run its native consumers. Then record the new
+checkpoint explicitly with `python tests/tools/check_fixtures.py --refresh` and
+commit it with the reviewed data. A checkpoint proves later byte integrity;
+field-by-field migration evidence and native behavior tests establish different
+properties. See `fixtures/preservation/README.md` for their scopes.
 
 ## JavaScript and reference captures
 
