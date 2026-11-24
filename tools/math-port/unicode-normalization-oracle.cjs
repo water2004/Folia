@@ -7,7 +7,6 @@ assert.equal(hash,'d811971453e7075e1ad56fb1b301eece5aa80757b81f6156e74a1bfb3ae5c
 assert.equal(process.versions.unicode,'16.0');
 const from=x=>String.fromCodePoint(...x.trim().split(' ').filter(Boolean).map(x=>parseInt(x,16)));
 const hex=s=>Array.from({length:s.length},(_,i)=>s.charCodeAt(i).toString(16).padStart(4,'0')).join('');
-const literal=s=>'std::u16string_view(u"'+Array.from({length:s.length},(_,i)=>'\\x'+s.charCodeAt(i).toString(16).padStart(4,'0')).join('')+'",'+s.length+')';
 const rows=[];
 for(const line of source.toString().split(/\r?\n/)){
  const content=line.split('#')[0].trim();if(!content||content.startsWith('@'))continue;
@@ -22,12 +21,18 @@ for(let i=0;i<64;++i){let input='';for(let j=0;j<40;++j)input+=pool[random()%poo
 const extraRows=extras.map(input=>({input,output:input.normalize('NFD')}));
 const planeDigests=[];for(let plane=0;plane<=16;++plane){let digest=0xcbf29ce484222325n;const update=x=>{digest=BigInt.asUintN(64,(digest^BigInt(x))*0x100000001b3n);};for(let cp=plane*65536;cp<(plane+1)*65536;++cp){const output=String.fromCodePoint(cp).normalize('NFD');update(cp);update(output.length);for(let i=0;i<output.length;++i)update(output.charCodeAt(i));}planeDigests.push(digest.toString(16));}
 const corpus = rows.map(row => [...row.inputs, ...row.outputs].map(hex).join('\t')).join('\n') + '\n';
-let fixture = '// Generated from hash-locked Unicode 16 corpus and actual Node NFD.\n';
-fixture += `constexpr std::size_t corpusRows = ${rows.length};\n`;
-fixture += 'constexpr Sequence sequences[]{\n';
-fixture += extraRows.map(row => `    {${literal(row.input)}, ${literal(row.output)}}`).join(',\n');
-fixture += '\n};\nconstexpr std::uint64_t planeDigests[]{\n';
-fixture += planeDigests.map(digest => `    0x${digest}ULL`).join(',\n') + '\n};\n';
+const {utf16Field, writeTables} = require('./fixture-data.cjs');
+writeTables(path.join(root, 'tests/math/fixtures/unicode'), {
+  'normalization-metadata': {
+    columns: ['name', 'value'],
+    metadata: ['source=hash-locked Unicode 16 corpus and actual Node NFD.', `corpus_sha256=${hash}`],
+    rows: [['corpus_rows', rows.length]]
+  },
+  'normalization-sequences': {columns: ['input_utf16', 'output_utf16'],
+    rows: extraRows.map(row => [utf16Field(row.input), utf16Field(row.output)])},
+  'normalization-digests': {columns: ['plane', 'digest_hex64'],
+    rows: planeDigests.map((digest, plane) => [plane, digest.padStart(16, '0')])}
+}, !process.argv.includes('--check'));
 const manifest=JSON.stringify({stage:'original NFD host observations; not French math-style algorithm acceptance',node:process.version,icu:process.versions.icu,unicode:process.versions.unicode,corpus_sha256:hash,corpus_rows:rows.length,corpus_comparisons:rows.length*5,extra_rows:extraRows.map(x=>({input:hex(x.input),output:hex(x.output)})),plane_digests:planeDigests,plane_codepoints:17*65536},null,2)+'\n';
-for(const[file,data]of [['tests/math/fixtures/unicode/normalization-source.inc',fixture],['tests/math/fixtures/unicode/normalization-corpus.tsv',corpus],['docs/math-port/evidence/p54-unicode-normalization-source.json',manifest]]){const target=path.join(root,file);if(process.argv.includes('--check'))assert.equal(fs.readFileSync(target,'utf8').replaceAll('\r\n','\n'),data);else { fs.mkdirSync(path.dirname(target), {recursive:true}); fs.writeFileSync(target,data); }}
+for(const[file,data]of [['tests/math/fixtures/unicode/normalization-corpus.tsv',corpus],['docs/math-port/evidence/p54-unicode-normalization-source.json',manifest]]){const target=path.join(root,file);if(process.argv.includes('--check'))assert.equal(fs.readFileSync(target,'utf8').replaceAll('\r\n','\n'),data);else { fs.mkdirSync(path.dirname(target), {recursive:true}); fs.writeFileSync(target,data); }}
 console.log(JSON.stringify({corpus_rows:rows.length,corpus_comparisons:rows.length*5,sequence_cases:extraRows.length,planes:planeDigests.length,all_codepoints:17*65536}));

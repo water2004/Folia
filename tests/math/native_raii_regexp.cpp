@@ -1,15 +1,15 @@
 #include "support/folia_test.hpp"
+#include "math/support/unicode_fixtures.hpp"
 import folia.math.util.regexp_host;
 
 using namespace boost::ut;
 using folia::math::regexp_host::RegExp;
 using folia::math::regexp_host::RegexError;
-#include "fixtures/tex-source/regexp_ignore_case_groups.inc"
 
 suite native_regexp_host_tests = [] {
     "legacy_casefold_matches_every_pinned_source_bmp_equivalence_member"_test = [] {
         std::size_t checked = 0;
-        for (const auto& group : source_case_groups) {
+        for (const auto& group : math_test::fixtures::regexpCaseGroups()) {
             const std::u16string pattern{u'^', group.canonical, u'$'};
             RegExp regex(pattern, u"i");
             for (unsigned i = 0; i < group.count; ++i) {
@@ -30,7 +30,7 @@ suite native_regexp_host_tests = [] {
         bmp.reserve(65536);
         for (unsigned unit = 0; unit < 65536; ++unit) bmp.push_back(char16_t(unit));
         std::size_t checked_groups = 0, checked_matches = 0;
-        for (const auto& group : source_case_groups) {
+        for (const auto& group : math_test::fixtures::regexpCaseGroups()) {
             RegExp regex(std::u16string{group.canonical}, u"gi");
             for (unsigned i = 0; i < group.count; ++i) {
                 const auto match = regex.exec(bmp);

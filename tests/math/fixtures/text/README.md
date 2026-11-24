@@ -22,3 +22,16 @@ read their original C++ values and did not query the host Unicode implementation
 The tests continue to visit the full 0–0x10ffff domain, including surrogate units.
 All 5,091 case records and 157 argument rows were compared with the compiler-decoded
 original values during migration.
+
+## UTF input and RegExp folding
+
+`input-utf16.tsv` retains all 112 input/text-encoder records, including optional
+code points, iteration sequences and unsigned byte vectors. `input-decode.tsv`
+retains 68 valid byte inputs with exact decoded text/byte offsets;
+`input-invalid.tsv` retains 60 invalid inputs and reported byte offsets.
+Comma-separated integer vectors carry explicit counts; `null` distinguishes
+missing code points from code point zero.
+
+`regexp-case-groups.tsv` retains all 1,141 original BMP equivalence groups and
+all four slots of each member/index/cursor array, including unused padding.
+The tests still check all 2,307 active members and scan the complete BMP.

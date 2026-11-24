@@ -1,12 +1,11 @@
 #include "support/folia_test.hpp"
+#include "math/support/unicode_fixtures.hpp"
 import folia.math.util.unicode_normalization;
 
 using namespace boost::ut;
 using folia::math::Unicode16Normalization;
 
 namespace {
-struct Sequence { std::u16string_view input, output; };
-#include "fixtures/unicode/normalization-source.inc"
 
 std::u16string decodeUnits(std::string_view hex) {
     if (hex.size() % 4) throw std::runtime_error("Invalid UTF-16 fixture length");
@@ -21,15 +20,10 @@ std::u16string decodeUnits(std::string_view hex) {
     return result;
 }
 
-std::array<std::u16string, 10> decodeRow(std::string_view line) {
+std::array<std::u16string, 10> decodeRow(const std::vector<std::string>& row) {
     std::array<std::u16string, 10> fields;
-    for (std::size_t i = 0; i < fields.size(); ++i) {
-        auto tab = line.find('\t');
-        if ((i + 1 < fields.size()) != (tab != std::string_view::npos))
-            throw std::runtime_error("Invalid NFD fixture column count");
-        fields[i] = decodeUnits(line.substr(0, tab));
-        if (tab != std::string_view::npos) line.remove_prefix(tab + 1);
-    }
+    for (std::size_t index{}; index < fields.size(); ++index)
+        fields[index] = decodeUnits(row[index]);
     return fields;
 }
 
@@ -44,27 +38,28 @@ std::u16string encodePoint(std::uint32_t point) {
 suite unicode_normalization = [] {
     "unicode normalization official corpus"_test = [] {
         Unicode16Normalization host;
-        std::ifstream input(std::filesystem::path(FOLIA_MATH_FIXTURE_DIR) /
-                            "unicode/normalization-corpus.tsv");
-        if (!input) throw std::runtime_error("Cannot open NFD corpus fixture");
+        const auto corpus = folia::test::data::read_tsv(
+            "math/fixtures/unicode/normalization-corpus.tsv", 10);
         std::size_t row{};
-        for (std::string line; std::getline(input, line); ++row) {
-            if (!line.empty() && line.back() == '\r') line.pop_back();
-            auto fields = decodeRow(line);
+        for (const auto& record : corpus) {
+            auto fields = decodeRow(record);
             for (std::size_t column = 0; column < 5; ++column)
                 expect(host.nfd(fields[column]) == fields[column + 5])
                     << "corpus row " << row << " column " << column;
+            ++row;
         }
-        expect(row == corpusRows);
+        expect(row == math_test::fixtures::normalizationCorpusRows());
     };
 
     "unicode normalization UTF16 sequences"_test = [] {
+        const auto& sequences = math_test::fixtures::normalizationSequences();
         Unicode16Normalization host;
         for (std::size_t i = 0; i < std::size(sequences); ++i)
             expect(host.nfd(sequences[i].input) == sequences[i].output) << "sequence " << i;
     };
 
     "unicode normalization all codepoint planes"_test = [] {
+        const auto& planeDigests = math_test::fixtures::normalizationPlaneDigests();
         Unicode16Normalization host;
         for (std::uint32_t plane = 0; plane < std::size(planeDigests); ++plane) {
             std::uint64_t digest = 0xcbf29ce484222325ULL;
