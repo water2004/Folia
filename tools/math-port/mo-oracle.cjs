@@ -68,4 +68,4 @@ begin('lookup_hit_alias_and_constructor_capture');;
 {const sf=f(),n=token(sf,'mo','+',{form:'infix'}),def=n.op('+');assert.ok(def===D.OPTABLE.infix['+']);;eq(true);;}
 {const sf=f(),n=token(sf,'fork','+');sf.setNodeClass('fork',Mo);const def=n.op('+');;for(let i=0;i<3;i++)pp(def[i]);;}end();
 
-const profile=({assertions,cases,sourceProfile,states:states.map(s=>s.map(value)),rows:rows.map(r=>[r.key,r.form,r.id,r.extra.map(([k,v])=>[k,value(v)])])});const frozen=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/evidence/p24-mo-source.json'),'utf8'));assert.deepEqual(profile,frozen);assert.ok(process.argv.includes('--check'),'Source-only owner supports --check');console.log(JSON.stringify({profile:'p24-mo-source.json',cases:profile.cases?.length??profile.cases,assertions:profile.assertions??null,mode:'check'}));
+const profile=({assertions,cases,sourceProfile,states:states.map(s=>s.map(value)),rows:rows.map(r=>[r.key,r.form,r.id,r.extra.map(([k,v])=>[k,value(v)])])});process.stdout.write(JSON.stringify(profile) + "\n");

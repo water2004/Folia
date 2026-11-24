@@ -15,4 +15,4 @@ for(const [name,table]of [['null',null],['undefined',undefined],['missing-form',
  begin('table_failure_'+name);const old=M.OPTABLE,n=sourceNode();M.OPTABLE=table;let error;try{n.table('!');}catch(e){error=e;};assert.ok(error,'Expected failure must originate from actual CJS');observe({kind:'error',name:error.name});pp(n.attributes.getInherited('form'));pp(n.getProperty('noDictDef'));pp(n._texClass);pp(n.lspace);pp(n.rspace);M.OPTABLE=old;end();
 }
 
-const profile=({cases,assertions});const frozen=JSON.parse(fs.readFileSync(path.join(root,'docs/math-port/evidence/p24-mo-values-source.json'),'utf8'));assert.deepEqual(profile,frozen);assert.ok(process.argv.includes('--check'),'Source-only owner supports --check');console.log(JSON.stringify({profile:'p24-mo-values-source.json',cases:profile.cases?.length??profile.cases,assertions:profile.assertions??null,mode:'check'}));
+const profile=({cases,assertions});process.stdout.write(JSON.stringify(profile) + "\n");

@@ -213,4 +213,4 @@ for(const prevLevel of [null,undefined,false,true,0,1,-1,NaN,' 1 ','0x1','bad','
 cases++;assertions+=7;
 
 module.exports={assertions,cases,sourceProfile:encode(sourceProfile),directProfile};
-if(require.main===module)require('./mml-node-source-profile.cjs').check(module.exports);
+if (require.main === module) process.stdout.write(JSON.stringify(module.exports) + "\n");

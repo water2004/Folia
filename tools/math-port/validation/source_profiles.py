@@ -50,7 +50,8 @@ def compare_profile(entry, actual, expected, *, parent=None):
             'rawInheritanceRows': 240, 'tableDisplayDefaultRows': 160, 'mode': 'check'}
 
 
-def replay(entry, *, root=ROOT, tools=None, runner=subprocess.run):
+def capture(entry, *, root=ROOT, tools=None, runner=subprocess.run):
+    """Read a complete, bounded observation stream from an official generator."""
     profile = root / entry['profile']
     equal(entry['sha256'], digest(profile), f'Frozen Source profile changed: {entry["profile"]}')
     owners = Path(tools or os.environ.get('FOLIA_SOURCE_CHECK_TOOLS', root / 'tools/math-port'))
@@ -62,7 +63,12 @@ def replay(entry, *, root=ROOT, tools=None, runner=subprocess.run):
     # Observation output is larger than the old one-line acceptance report;
     # preserve bounded capture while allowing the complete existing profiles.
     require(len(result.stdout) <= 64 * 1024 * 1024, 'Source observation exceeds 64 MiB')
-    actual = loads(result.stdout.decode('utf-8'))
+    return loads(result.stdout.decode('utf-8'))
+
+
+def replay(entry, *, root=ROOT, tools=None, runner=subprocess.run):
+    actual = capture(entry, root=root, tools=tools, runner=runner)
+    profile = root / entry['profile']
     parent = read(root / entry['parent_profile']) if 'parent_profile' in entry else None
     return compare_profile(entry, actual, read(profile), parent=parent)
 

@@ -2,15 +2,13 @@
 'use strict';
 
 // Lossless scalar and own-key encoding; this file executes no C++ emitter.
-const crypto=require('node:crypto');
 function encode(v){if(v===undefined)return {$type:'undefined'};if(typeof v==='number'){if(Number.isNaN(v))return {$type:'number',value:'NaN'};if(Object.is(v,-0))return {$type:'number',value:'-0'};if(!Number.isFinite(v))return {$type:'number',value:String(v)};}if(v&&typeof v==='object'){const r=Array.isArray(v)?new Array(v.length):{};for(const k of Object.keys(v))Object.defineProperty(r,k,{value:encode(v[k]),enumerable:true,writable:true,configurable:true});return r;}return v;}
 const records=[],sourceMetadata=[];let current=null;
 function start(name){current={name,observations:[]};records.push(current);}
 function record(v){current.observations.push(encode(v));}
-function finish(profileName,quiet=false){const profilePath=path.join(root,'docs/math-port/evidence',profileName);const expected=JSON.parse(fs.readFileSync(profilePath,'utf8'));assert.equal(records.length,expected.records.length);for(let i=0;i<records.length;i++){const a=records[i],b=expected.records[i];assert.equal(a.name,b.name);assert.equal(a.observations.length,b.observations.length,a.name+' count');for(let j=0;j<a.observations.length;j++){if(JSON.stringify(a.observations[j])!==JSON.stringify(b.observations[j])){function diff(x,y,p){if(require('node:util').isDeepStrictEqual(x,y))return null;if(!x||!y||typeof x!=='object'||typeof y!=='object')return {path:p,actual:x,expected:y};for(const k of new Set([...Object.keys(x),...Object.keys(y)])){const d=diff(x[k],y[k],p+'/'+k);if(d)return d;}return {path:p,actualKeys:Object.keys(x),expectedKeys:Object.keys(y)};}throw Error(JSON.stringify({case:a.name,observation:j,...diff(a.observations[j],b.observations[j],'')}));}}}if(!quiet)console.log(JSON.stringify({profile:profileName,cases:records.length,observations:records.reduce((n,r)=>n+r.observations.length,0),mode:'check',sha256:crypto.createHash('sha256').update(fs.readFileSync(profilePath)).digest('hex')}));}
 
-const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
-const {root,MmlFactory,core,MathChoice}=require(path.join(__dirname,'inheritance-reference.cjs'));
+const path=require('node:path'),assert=require('node:assert/strict');
+const {MmlFactory,core,MathChoice}=require(path.join(__dirname,'inheritance-reference.cjs'));
 
 let active=false,events=[],calls=[],raw,mode='',choice,other,late;
 const note=x=>{if(active)events.push(x);},id=n=>n?n.getProperty('id'):null;
@@ -53,5 +51,5 @@ sourceMetadata.push(['real',display,level]);start('math_port_mathchoice_real_'+d
 const defaults=Object.assign({},MathChoice.defaults);assert.notEqual(MathChoice.defaults,core.AbstractMmlBaseNode.defaults);const old=core.AbstractMmlBaseNode.defaults['choice-root-probe'];core.AbstractMmlBaseNode.defaults['choice-root-probe']='later';assert.equal(MathChoice.defaults['choice-root-probe'],undefined);if(old===undefined)delete core.AbstractMmlBaseNode.defaults['choice-root-probe'];else core.AbstractMmlBaseNode.defaults['choice-root-probe']=old;
 start('math_port_mathchoice_defaults');record(defaults);
 
-module.exports={records,sourceMetadata,check:()=>finish("source-mathchoice-profile.json",true)};
-if(require.main===module)finish("source-mathchoice-profile.json");
+module.exports = {records, sourceMetadata};
+if (require.main === module) process.stdout.write(JSON.stringify(module.exports) + "\n");

@@ -147,6 +147,5 @@ function text(f,s){return f.create('text').setText(s);}function input(f,k,s,a={}
 cases++;assertions+=6;
 
 const profile={assertions,cases,sourceProfile:encode(sourceProfile),directProfile};
-function check(){const file=path.join(root,'docs/math-port/evidence/leaf-source-profile.json');const frozen=JSON.parse(fs.readFileSync(file,'utf8'));const legacy=fs.readFileSync(path.join(root,frozen.legacy.path));assert.equal(sha(legacy),frozen.legacy.sha256,'Original leaf profile bytes changed');assert.equal(legacy.length,frozen.legacy.bytes);assert.equal(profile.assertions,frozen.profile.assertions);assert.equal(profile.cases,frozen.profile.cases);for(const key of ['sourceProfile','directProfile']){assert.equal(profile[key].length,frozen.profile[key].length);for(let i=0;i<profile[key].length;i++)assert.equal(JSON.stringify(profile[key][i]),JSON.stringify(frozen.profile[key][i]),key+' record '+i);}return {sources:lock.files.length,legacyAssertions:assertions,legacyCases:cases,sourceCases:sourceProfile.filter(r=>r[0]==='case').length,helperObservations:sourceProfile.filter(r=>r[0]!=='case').length,directObservations:directProfile.length,profileSha256:sha(fs.readFileSync(file)),mode:'check'};}
-module.exports={profile,check};
-if(require.main===module){assert.ok(process.argv.includes('--check'),'Source-only oracle is check-only');console.log(JSON.stringify(check()));}
+module.exports = {profile, sources: lock.files.length};
+if (require.main === module) process.stdout.write(JSON.stringify(module.exports) + "\n");
