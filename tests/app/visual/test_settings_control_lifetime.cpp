@@ -76,7 +76,7 @@ namespace
                 auto scope = FindScope(content);
                 expect(static_cast<bool>(scope)) << "shortcuts page must expose a scope ComboBox in column 1";
                 if (!scope) return;
-                expect(scope.Items().Size() == 3_u) << "scope must offer global, code and math";
+                expect(scope.Items().Size() == 4_u) << "scope must offer global, code, math and table";
                 expect(Grid::GetColumn(scope) == 1_i) << "scope must occupy shortcuts column 1";
                 auto oldScope = winrt::make_weak(scope);
                 view->Reset(settings, folia::Theme::Light);
