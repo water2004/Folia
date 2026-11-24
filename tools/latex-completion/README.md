@@ -7,7 +7,7 @@ does not construct a math renderer or execute JavaScript at runtime.
   maps from the locked MathJax 4.1.3 package profile, including texvc aliases. Its
   digest binds it to `registrations.tsv` followed by `packages.tsv` in
   `tests/math/fixtures/packages/registry/`, checked against native
-  `folia::math` by `tests/math/tex_package_registry.cpp`.
+  `folia::math` by `tests/math/integration/tex_package_registry.cpp`.
   The source data is derived from MathJax (Apache-2.0); see
   `src/math/LICENSE-MathJax.txt` for the upstream license.
 - `templates.json` owns editor conveniences and curated argument templates. Stable

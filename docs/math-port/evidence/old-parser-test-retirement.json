@@ -23,7 +23,7 @@
       "sourceOwner": "tools/math-port/find-math-oracle.cjs",
       "sourceProfile": "docs/math-port/evidence/p49b-find-math-source.json",
       "profileSha256": "3816d584d59d4c7e795639a598abe780b6dde9a440f36b69ece49ad73c9fd94d",
-      "nativeOwner": "tests/math/find_tex.cpp",
+      "nativeOwner": "tests/math/input/tex/find_tex.cpp",
       "disposition": "Every original Source input/value remains in the canonical offline owner. Actual mathematical values use typed native owners; obsolete object adaptation/resource/descriptor cases retire without a second native object model."
     },
     {
@@ -111,7 +111,7 @@
       "sourceOwner": "tools/math-port/find-tex-oracle.cjs",
       "sourceProfile": "docs/math-port/evidence/p52-find-tex-source.json",
       "profileSha256": "e812378ffaad5bc4897c5f58082a648444b10ccfa920ba96b8f501a594ac2261",
-      "nativeOwner": "tests/math/find_tex.cpp",
+      "nativeOwner": "tests/math/input/tex/find_tex.cpp",
       "disposition": "Every original Source input/value remains in the canonical offline owner. Actual mathematical values use typed native owners; obsolete object adaptation/resource/descriptor cases retire without a second native object model."
     },
     {
@@ -209,7 +209,7 @@
       "sourceOwner": "tools/math-port/input-host-oracle.cjs",
       "sourceProfile": "docs/math-port/evidence/input-host-source.json",
       "profileSha256": "da065d4e4439f7af4ef23d773a34b1aaa766ac13c2d5de8709536934755780bb",
-      "nativeOwner": "tests/math/keyval_options.cpp; tests/math/native_tex_error_utf8.cpp",
+      "nativeOwner": "tests/math/input/tex/keyval_options.cpp; tests/math/input/tex/native_tex_error_utf8.cpp",
       "disposition": "Every original Source input/value remains in the canonical offline owner. Actual mathematical values use typed native owners; obsolete object adaptation/resource/descriptor cases retire without a second native object model."
     },
     {
@@ -284,7 +284,7 @@
       "sourceOwner": "tools/math-port/map-handler-source.cjs",
       "sourceProfile": "docs/math-port/evidence/p20a-map-handler-source.json",
       "profileSha256": "ab9460c1a0d8be41d3ce0b3c3b5ed6ad79db6b4468512f54e45222384d11b9d1",
-      "nativeOwner": "tests/math/map_handler.cpp",
+      "nativeOwner": "tests/math/input/tex/map_handler.cpp",
       "disposition": "Every original Source input/value remains in the canonical offline owner. Actual mathematical values use typed native owners; obsolete object adaptation/resource/descriptor cases retire without a second native object model."
     },
     {
@@ -387,7 +387,7 @@
       "sourceOwner": "tools/math-port/math-item-oracle.cjs",
       "sourceProfile": "docs/math-port/evidence/p45-math-item-source.json",
       "profileSha256": "e5613f23d7d078305926207978b1f715e590e0d45b5d303e1cd0a575fba57fae",
-      "nativeOwner": "tests/math/native_math_item.cpp",
+      "nativeOwner": "tests/math/core/native_math_item.cpp",
       "disposition": "Every original Source input/value remains in the canonical offline owner. Actual mathematical values use typed native owners; obsolete object adaptation/resource/descriptor cases retire without a second native object model."
     },
     {
@@ -589,7 +589,7 @@
       "sourceOwner": "tools/math-port/parser-record-oracle.cjs",
       "sourceProfile": "docs/math-port/evidence/p55-parser-record-source.json",
       "profileSha256": "9e9d9db76e4421c8dae8b714e9ea97a39c0f14377a00264093e381bda04a3515",
-      "nativeOwner": "tests/math/parser_declaration_contract.cpp; tests/math/tex_parser.cpp; tests/math/token_map.cpp",
+      "nativeOwner": "tests/math/parser_declaration_contract.cpp; tests/math/input/tex/tex_parser.cpp; tests/math/input/tex/token_map.cpp",
       "disposition": "Every original Source input/value remains in the canonical offline owner. Actual mathematical values use typed native owners; obsolete object adaptation/resource/descriptor cases retire without a second native object model."
     },
     {
@@ -672,7 +672,7 @@
       "sourceOwner": "tools/math-port/parser-stack-oracle.cjs",
       "sourceProfile": "docs/math-port/evidence/p43-parser-stack-source.json",
       "profileSha256": "9de7a74eefa93d78404c1ad55fb6e3adcbd02394e394b7d18ed0ced45c029d4e",
-      "nativeOwner": "tests/math/stack.cpp; tests/math/tex_parser.cpp",
+      "nativeOwner": "tests/math/input/tex/stack.cpp; tests/math/input/tex/tex_parser.cpp",
       "disposition": "Every original Source input/value remains in the canonical offline owner. Actual mathematical values use typed native owners; obsolete object adaptation/resource/descriptor cases retire without a second native object model."
     },
     {
@@ -686,7 +686,7 @@
       "sourceOwner": "tools/math-port/primitive-oracle.cjs",
       "sourceProfile": "docs/math-port/evidence/primitives-source.json",
       "profileSha256": "1cdadcbe97285235c152d0c1633d03c13f54e0398af31a49a0f988d33fc61124",
-      "nativeOwner": "tests/math/attributes_constructor_order.cpp; tests/math/bbox.cpp; tests/math/prioritized_list.cpp",
+      "nativeOwner": "tests/math/attributes_constructor_order.cpp; tests/math/input/packages/bbox.cpp; tests/math/util/prioritized_list.cpp",
       "disposition": "Every original Source input/value remains in the canonical offline owner. Actual mathematical values use typed native owners; obsolete object adaptation/resource/descriptor cases retire without a second native object model."
     },
     {
@@ -705,7 +705,7 @@
       "sourceOwner": "tools/math-port/regexp-binding-oracle.cjs",
       "sourceProfile": "docs/math-port/evidence/p51b-regexp-binding-source.json",
       "profileSha256": "338d5d730e5da964f3b13d617eac95ec28e12df97ef98a30d9840b47520781b6",
-      "nativeOwner": "tests/math/native_raii_regexp.cpp; tests/math/regexp_binding_host.cpp",
+      "nativeOwner": "tests/math/util/native_raii_regexp.cpp; tests/math/regexp_binding_host.cpp",
       "disposition": "Every original Source input/value remains in the canonical offline owner. Actual mathematical values use typed native owners; obsolete object adaptation/resource/descriptor cases retire without a second native object model."
     },
     {
@@ -750,7 +750,7 @@
       "sourceOwner": "tools/math-port/regexp-host-oracle.cjs",
       "sourceProfile": "docs/math-port/evidence/p50-regexp-host-source.json",
       "profileSha256": "59dc8b015b01b384b50ee35d5bc3ece426be211f4f5d6bf9f8d1845fbcd7edf1",
-      "nativeOwner": "tests/math/scanner_regexp_host.cpp; tests/math/native_raii_regexp.cpp; tests/math/native_tex_scanner.cpp",
+      "nativeOwner": "tests/math/scanner_regexp_host.cpp; tests/math/util/native_raii_regexp.cpp; tests/math/input/tex/native_tex_scanner.cpp",
       "disposition": "Every original Source input/value remains in the canonical offline owner. Actual mathematical values use typed native owners; obsolete object adaptation/resource/descriptor cases retire without a second native object model."
     },
     {
@@ -762,7 +762,7 @@
       "sourceOwner": "tools/math-port/freeze-sparse-node.cjs",
       "sourceProfile": "docs/math-port/evidence/p23-sparse-child-source.json",
       "profileSha256": "0a91ef40e88691fc5ae57f1406a635c4cab925d86650c1c1923fd07cb3c2e743",
-      "nativeOwner": "tests/math/native_tree_node.cpp; tests/math/native_tree_factory.cpp; tests/math/native_mml_row_tokens.cpp",
+      "nativeOwner": "tests/math/core/tree/native_tree_node.cpp; tests/math/core/tree/native_tree_factory.cpp; tests/math/core/mml/native_mml_row_tokens.cpp",
       "disposition": "Every original Source input/value remains in the canonical offline owner. Actual mathematical values use typed native owners; obsolete object adaptation/resource/descriptor cases retire without a second native object model."
     },
     {
@@ -850,7 +850,7 @@
       "sourceOwner": "tools/math-port/stack-item-oracle.cjs",
       "sourceProfile": "docs/math-port/evidence/p42-mml-stack-source.json",
       "profileSha256": "184918136c161a835c3e9a0182ca3a87ed114d532bcdc586a9e3157063154c1f",
-      "nativeOwner": "tests/math/stack.cpp; tests/math/tex_parser.cpp; tests/math/tex_stack_clear_child_owner.cpp",
+      "nativeOwner": "tests/math/input/tex/stack.cpp; tests/math/input/tex/tex_parser.cpp; tests/math/tex_stack_clear_child_owner.cpp",
       "disposition": "Every original Source input/value remains in the canonical offline owner. Actual mathematical values use typed native owners; obsolete object adaptation/resource/descriptor cases retire without a second native object model."
     },
     {
@@ -862,7 +862,7 @@
       "sourceOwner": "tools/math-port/tex-error-oracle.cjs",
       "sourceProfile": "docs/math-port/evidence/p40-tex-error-source.json",
       "profileSha256": "8133cf789bce7f21b95c685dec132b291319dc00ea1a370740dbac394807021d",
-      "nativeOwner": "tests/math/native_tex_error_source.cpp; tests/math/native_tex_error_utf8.cpp",
+      "nativeOwner": "tests/math/input/tex/native_tex_error_source.cpp; tests/math/input/tex/native_tex_error_utf8.cpp",
       "disposition": "Every original Source input/value remains in the canonical offline owner. Actual mathematical values use typed native owners; obsolete object adaptation/resource/descriptor cases retire without a second native object model."
     },
     {
@@ -917,7 +917,7 @@
       "sourceOwner": "tools/math-port/tex-token-oracle.cjs",
       "sourceProfile": "docs/math-port/evidence/tex-token-source.json",
       "profileSha256": "6e5cd7937bce7d3daaffb65bdf427af5c4106a756ffba3a201265e235e4e2bb8",
-      "nativeOwner": "tests/math/tex_parser.cpp; tests/math/token_map.cpp; tests/math/native_tex_scanner.cpp",
+      "nativeOwner": "tests/math/input/tex/tex_parser.cpp; tests/math/input/tex/token_map.cpp; tests/math/input/tex/native_tex_scanner.cpp",
       "disposition": "Every original Source input/value remains in the canonical offline owner. Actual mathematical values use typed native owners; obsolete object adaptation/resource/descriptor cases retire without a second native object model."
     },
     {
@@ -941,7 +941,7 @@
       "sourceOwner": "tools/math-port/token-map-oracle.cjs",
       "sourceProfile": "docs/math-port/evidence/p22b-token-map-source.json",
       "profileSha256": "470dba782f01758d0027a1c50bb59b52368ea367d58da8cd9880046f9c738f05",
-      "nativeOwner": "tests/math/token_map.cpp; tests/math/map_handler.cpp",
+      "nativeOwner": "tests/math/input/tex/token_map.cpp; tests/math/input/tex/map_handler.cpp",
       "disposition": "Every original Source input/value remains in the canonical offline owner. Actual mathematical values use typed native owners; obsolete object adaptation/resource/descriptor cases retire without a second native object model."
     },
     {
@@ -970,7 +970,7 @@
       "sourceOwner": "tools/math-port/tree-oracle.cjs",
       "sourceProfile": "docs/math-port/evidence/tree-source.json",
       "profileSha256": "0d6f12be99d081a0fc39f900b9241cdcffb86447ad84bacba7eed01baeedde4e",
-      "nativeOwner": "tests/math/native_tree_node.cpp; tests/math/native_tree_factory.cpp; tests/math/native_tree_visitor.cpp; tests/math/native_tree_binding.cpp",
+      "nativeOwner": "tests/math/core/tree/native_tree_node.cpp; tests/math/core/tree/native_tree_factory.cpp; tests/math/core/tree/native_tree_visitor.cpp; tests/math/native_tree_binding.cpp",
       "disposition": "Every original Source input/value remains in the canonical offline owner. Actual mathematical values use typed native owners; obsolete object adaptation/resource/descriptor cases retire without a second native object model."
     },
     {
@@ -997,7 +997,7 @@
       "sourceOwner": "tools/math-port/mo-pattern-oracle.cjs",
       "sourceProfile": "docs/math-port/evidence/p12b-mo-pattern-complete-source.json",
       "profileSha256": "dbcc8ae263e619b68dac32877ddd4c039310e2843c142bd93eaf137e1f568924",
-      "nativeOwner": "tests/math/operator_dictionary_native.cpp",
+      "nativeOwner": "tests/math/core/mml/operator_dictionary_native.cpp",
       "disposition": "Every original Source input/value remains in the canonical offline owner. Actual mathematical values use typed native owners; obsolete object adaptation/resource/descriptor cases retire without a second native object model."
     },
     {
@@ -1017,7 +1017,7 @@
       "sourceOwner": "tools/math-port/operator-oracle.cjs",
       "sourceProfile": "docs/math-port/evidence/operator-source-profile.json",
       "profileSha256": "c5f2913f724b4a987fec5f0036a363670fb8a9faae883bd8a1ada30e3e6e09d3",
-      "nativeOwner": "tests/math/operator_dictionary_native.cpp",
+      "nativeOwner": "tests/math/core/mml/operator_dictionary_native.cpp",
       "disposition": "Every original Source input/value remains in the canonical offline owner. Actual mathematical values use typed native owners; obsolete object adaptation/resource/descriptor cases retire without a second native object model."
     },
     {
@@ -1034,7 +1034,7 @@
       "sourceOwner": "tools/math-port/regexp-ignore-case-oracle.cjs",
       "sourceProfile": "docs/math-port/evidence/regexp-ignore-case-source.json",
       "profileSha256": "f9f5d07678c9c9147c4a2fb7c7b469544233be51b79273645e801a6d3e3eaf90",
-      "nativeOwner": "tests/math/native_raii_regexp.cpp",
+      "nativeOwner": "tests/math/util/native_raii_regexp.cpp",
       "disposition": "Every original Source input/value remains in the canonical offline owner. Actual mathematical values use typed native owners; obsolete object adaptation/resource/descriptor cases retire without a second native object model."
     },
     {
@@ -1290,7 +1290,7 @@
       "sourceOwner": "tools/math-port/unit-util-oracle.cjs",
       "sourceProfile": "docs/math-port/evidence/p44-unit-util-source.json",
       "profileSha256": "a07cc124748e82fbe41f3ba8aef318e2b8fb908b609e4fa3d4d936408c8bea6e",
-      "nativeOwner": "tests/math/native_tex_unit_util.cpp",
+      "nativeOwner": "tests/math/input/tex/native_tex_unit_util.cpp",
       "disposition": "Every original Source input/value remains in the canonical offline owner. Actual mathematical values use typed native owners; obsolete object adaptation/resource/descriptor cases retire without a second native object model."
     },
     {

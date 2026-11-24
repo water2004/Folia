@@ -18,11 +18,11 @@
         7
       ],
       "nativeOwners": [
-        "tests/math/native_mml_row_tokens.cpp",
-        "tests/math/mml_exact_clone_row.cpp",
-        "tests/math/native_raii_mo.cpp",
-        "tests/math/typed_mml_arithmetic.cpp",
-        "tests/math/typed_mml_containers.cpp"
+        "tests/math/core/mml/native_mml_row_tokens.cpp",
+        "tests/math/core/mml/mml_exact_clone_row.cpp",
+        "tests/math/core/mml/native_raii_mo.cpp",
+        "tests/math/core/mml/typed_mml_arithmetic.cpp",
+        "tests/math/core/mml/typed_mml_containers.cpp"
       ],
       "entries": [
         {
@@ -69,11 +69,11 @@
         28
       ],
       "nativeOwners": [
-        "tests/math/native_mml_row_tokens.cpp",
-        "tests/math/mml_exact_clone_row.cpp",
-        "tests/math/native_raii_mo.cpp",
-        "tests/math/typed_mml_arithmetic.cpp",
-        "tests/math/typed_mml_containers.cpp"
+        "tests/math/core/mml/native_mml_row_tokens.cpp",
+        "tests/math/core/mml/mml_exact_clone_row.cpp",
+        "tests/math/core/mml/native_raii_mo.cpp",
+        "tests/math/core/mml/typed_mml_arithmetic.cpp",
+        "tests/math/core/mml/typed_mml_containers.cpp"
       ],
       "entries": [
         {
@@ -148,7 +148,7 @@
       ],
       "nativeOwners": [
         {
-          "file": "tests/math/native_raii_mml_base.cpp",
+          "file": "tests/math/core/mml/native_raii_mml_base.cpp",
           "semantics": [
             "own and inherited mathsize precedence",
             "displaystyle/scriptlevel copying",
@@ -157,19 +157,19 @@
           ]
         },
         {
-          "file": "tests/math/typed_mml_scripts.cpp",
+          "file": "tests/math/core/mml/typed_mml_scripts.cpp",
           "semantics": [
             "scriptlevel changes on actual native script slots"
           ]
         },
         {
-          "file": "tests/math/mml_typed_table.cpp",
+          "file": "tests/math/core/mml/mml_typed_table.cpp",
           "semantics": [
             "rowalign and columnalign inheritance to cells"
           ]
         },
         {
-          "file": "tests/math/native_common_mrow.cpp",
+          "file": "tests/math/output/common/native_common_mrow.cpp",
           "semantics": [
             "inherited mathsize drives native row scale"
           ]

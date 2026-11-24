@@ -118,7 +118,7 @@
   },
   "nativeOwners": [
     {
-      "path": "tests/math/mml_native_factory.cpp",
+      "path": "tests/math/core/mml/mml_native_factory.cpp",
       "role": "related current responsibility; retired JS protocol is not claimed reproduced",
       "existingCases": [
         "typed_factory_owns_attributes_and_borrows_same_document_children",
@@ -135,7 +135,7 @@
       ]
     },
     {
-      "path": "tests/math/native_raii_mml_base.cpp",
+      "path": "tests/math/core/mml/native_raii_mml_base.cpp",
       "role": "related current responsibility; retired JS protocol is not claimed reproduced",
       "existingCases": [
         "mml_raw_allocation_defers_typed_semantic_initialization",
@@ -152,7 +152,7 @@
       ]
     },
     {
-      "path": "tests/math/function_list.cpp",
+      "path": "tests/math/util/function_list.cpp",
       "role": "related current responsibility; retired JS protocol is not claimed reproduced",
       "existingCases": [
         "processor list preserves void true false and priority ordering",
@@ -162,7 +162,7 @@
       ]
     },
     {
-      "path": "tests/math/native_tree_node.cpp",
+      "path": "tests/math/core/tree/native_tree_node.cpp",
       "role": "related current responsibility; retired JS protocol is not claimed reproduced",
       "existingCases": [
         "typed owner operations preserve links and source no-ops",
@@ -171,7 +171,7 @@
       ]
     },
     {
-      "path": "tests/math/mml_native_raii_foundation.cpp",
+      "path": "tests/math/core/mml/mml_native_raii_foundation.cpp",
       "role": "related current responsibility; retired JS protocol is not claimed reproduced",
       "existingCases": [
         "all_pinned_mml_factory_kinds_round_trip_exact_source_names",
@@ -185,7 +185,7 @@
       ]
     },
     {
-      "path": "tests/math/native_raii_scene.cpp",
+      "path": "tests/math/output/scene/native_raii_scene.cpp",
       "role": "related current responsibility; retired JS protocol is not claimed reproduced",
       "existingCases": [
         "scene freezes owned hierarchy and metadata",
@@ -222,7 +222,7 @@
       ]
     },
     {
-      "path": "tests/math/native_tree_factory.cpp",
+      "path": "tests/math/core/tree/native_tree_factory.cpp",
       "role": "related current responsibility; retired JS protocol is not claimed reproduced",
       "existingCases": [
         "typed_factory_constructor_ingests_ordered_map_and_optional_default",
@@ -234,7 +234,7 @@
       ]
     },
     {
-      "path": "tests/math/native_math_item.cpp",
+      "path": "tests/math/core/native_math_item.cpp",
       "role": "related current responsibility; retired JS protocol is not claimed reproduced",
       "existingCases": [
         "math_item_initial_values_and_single_display_state",
@@ -251,14 +251,14 @@
       ]
     },
     {
-      "path": "tests/math/prioritized_list.cpp",
+      "path": "tests/math/util/prioritized_list.cpp",
       "role": "related current responsibility; retired JS protocol is not claimed reproduced",
       "existingCases": [
         "priority insertion is stable and removes the last matching item"
       ]
     },
     {
-      "path": "tests/math/native_common_jax.cpp",
+      "path": "tests/math/output/common/native_common_jax.cpp",
       "role": "related current responsibility; retired JS protocol is not claimed reproduced",
       "existingCases": [
         "common subtree bbox matches real Source profile without changing document root or tree",
@@ -275,7 +275,7 @@
       ]
     },
     {
-      "path": "tests/math/parse_options.cpp",
+      "path": "tests/math/input/tex/parse_options.cpp",
       "role": "related current responsibility; retired JS protocol is not claimed reproduced",
       "existingCases": [
         "parse options defaults preserve sparse fields and later false zero empty values",
@@ -286,7 +286,7 @@
       ]
     },
     {
-      "path": "tests/math/native_renderer_bridge.cpp",
+      "path": "tests/math/integration/native_renderer_bridge.cpp",
       "role": "related current responsibility; retired JS protocol is not claimed reproduced",
       "existingCases": [
         "C ABI batch isolates item errors and shares the single rendering path",
@@ -300,7 +300,7 @@
       ]
     },
     {
-      "path": "tests/math/tags.cpp",
+      "path": "tests/math/input/tex/tags.cpp",
       "role": "related current responsibility; retired JS protocol is not claimed reproduced",
       "existingCases": [
         "tags keep nested environment labels and explicit no numbering on the request owner",
@@ -310,7 +310,7 @@
       ]
     },
     {
-      "path": "tests/math/base_items.cpp",
+      "path": "tests/math/input/tex/base_items.cpp",
       "role": "related current responsibility; retired JS protocol is not claimed reproduced",
       "existingCases": [
         "base item catalog constructs all26 original frame classes with real ParseOptions",
@@ -324,7 +324,7 @@
       ]
     },
     {
-      "path": "tests/math/amscd.cpp",
+      "path": "tests/math/input/packages/amscd.cpp",
       "role": "related current responsibility; retired JS protocol is not claimed reproduced",
       "existingCases": [
         "amscd configuration preserves three original maps defaults and existing ArrayItem",
@@ -337,7 +337,7 @@
       ]
     },
     {
-      "path": "tests/math/bboldx.cpp",
+      "path": "tests/math/input/packages/bboldx.cpp",
       "role": "related current responsibility; retired JS protocol is not claimed reproduced",
       "existingCases": [
         "bboldx all ten maps retain independent Source character rows and original command arguments",
@@ -349,7 +349,7 @@
       ]
     },
     {
-      "path": "tests/math/setoptions.cpp",
+      "path": "tests/math/input/packages/setoptions.cpp",
       "role": "related current responsibility; retired JS protocol is not claimed reproduced",
       "existingCases": [
         "setoptions original configuration metadata and default permissions",
@@ -365,7 +365,7 @@
       ]
     },
     {
-      "path": "tests/math/centernot.cpp",
+      "path": "tests/math/input/packages/centernot.cpp",
       "role": "related current responsibility; retired JS protocol is not claimed reproduced",
       "existingCases": [
         "centernot original callbacks and postprocessor copy relation binary operator and ordinary classes",
@@ -375,7 +375,7 @@
       ]
     },
     {
-      "path": "tests/math/find_tex.cpp",
+      "path": "tests/math/input/tex/find_tex.cpp",
       "role": "related current responsibility; retired JS protocol is not claimed reproduced",
       "existingCases": [
         "FindTeX matches every pinned Source ProtoItem field",
@@ -384,7 +384,7 @@
       ]
     },
     {
-      "path": "tests/math/textmacros.cpp",
+      "path": "tests/math/input/packages/textmacros.cpp",
       "role": "related current responsibility; retired JS protocol is not claimed reproduced",
       "existingCases": [
         "textmacros every original character and command mapping keeps its compiled callback and typed arguments",
@@ -402,7 +402,7 @@
       ]
     },
     {
-      "path": "tests/math/native_tex_definitions.cpp",
+      "path": "tests/math/input/tex/native_tex_definitions.cpp",
       "role": "related current responsibility; retired JS protocol is not claimed reproduced",
       "existingCases": [
         "native let definitions distinguish builtin operation and captured character token",
@@ -412,7 +412,7 @@
       ]
     },
     {
-      "path": "tests/math/native_raii_regexp.cpp",
+      "path": "tests/math/util/native_raii_regexp.cpp",
       "role": "related current responsibility; retired JS protocol is not claimed reproduced",
       "existingCases": [
         "legacy and Unicode folding retain their distinct SRELL policies",
@@ -424,7 +424,7 @@
       ]
     },
     {
-      "path": "tests/math/native_tex_session.cpp",
+      "path": "tests/math/input/tex/native_tex_session.cpp",
       "role": "related current responsibility; retired JS protocol is not claimed reproduced",
       "existingCases": [
         "tex_color_session_lifetime_follows_jax_not_equation_or_tag_reset",
@@ -437,7 +437,7 @@
       ]
     },
     {
-      "path": "tests/math/textcomp.cpp",
+      "path": "tests/math/input/packages/textcomp.cpp",
       "role": "related current responsibility; retired JS protocol is not claimed reproduced",
       "existingCases": [
         "textcomp all 117 original map arguments and math or text symbols match the independent Source table",
@@ -448,7 +448,7 @@
       ]
     },
     {
-      "path": "tests/math/units.cpp",
+      "path": "tests/math/input/packages/units.cpp",
       "role": "related current responsibility; retired JS protocol is not claimed reproduced",
       "existingCases": [
         "units original three compiled methods and upright argument expansion",
@@ -460,7 +460,7 @@
       ]
     },
     {
-      "path": "tests/math/typed_mml_scripts.cpp",
+      "path": "tests/math/core/mml/typed_mml_scripts.cpp",
       "role": "related current responsibility; retired JS protocol is not claimed reproduced",
       "existingCases": [
         "script_family_kinds_arities_and_child_slots",
@@ -611,8 +611,8 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/mml_native_factory.cpp",
-        "tests/math/native_raii_mml_base.cpp"
+        "tests/math/core/mml/mml_native_factory.cpp",
+        "tests/math/core/mml/native_raii_mml_base.cpp"
       ],
       "preservedSourceRefs": [],
       "staticGoldSections": []
@@ -628,7 +628,7 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/function_list.cpp"
+        "tests/math/util/function_list.cpp"
       ],
       "preservedSourceRefs": [],
       "staticGoldSections": []
@@ -744,8 +744,8 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/mml_native_factory.cpp",
-        "tests/math/native_tree_node.cpp"
+        "tests/math/core/mml/mml_native_factory.cpp",
+        "tests/math/core/tree/native_tree_node.cpp"
       ],
       "preservedSourceRefs": [],
       "staticGoldSections": []
@@ -813,8 +813,8 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/mml_native_raii_foundation.cpp",
-        "tests/math/native_raii_scene.cpp"
+        "tests/math/core/mml/mml_native_raii_foundation.cpp",
+        "tests/math/output/scene/native_raii_scene.cpp"
       ],
       "preservedSourceRefs": [],
       "staticGoldSections": []
@@ -858,7 +858,7 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/native_tree_node.cpp"
+        "tests/math/core/tree/native_tree_node.cpp"
       ],
       "preservedSourceRefs": [
         "s9",
@@ -922,7 +922,7 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/native_tree_factory.cpp"
+        "tests/math/core/tree/native_tree_factory.cpp"
       ],
       "preservedSourceRefs": [
         "s9",
@@ -970,7 +970,7 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/native_tree_factory.cpp"
+        "tests/math/core/tree/native_tree_factory.cpp"
       ],
       "preservedSourceRefs": [
         "s9",
@@ -1006,7 +1006,7 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/native_tree_factory.cpp"
+        "tests/math/core/tree/native_tree_factory.cpp"
       ],
       "preservedSourceRefs": [
         "s9",
@@ -1046,9 +1046,9 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/native_math_item.cpp",
-        "tests/math/function_list.cpp",
-        "tests/math/prioritized_list.cpp"
+        "tests/math/core/native_math_item.cpp",
+        "tests/math/util/function_list.cpp",
+        "tests/math/util/prioritized_list.cpp"
       ],
       "preservedSourceRefs": [],
       "staticGoldSections": []
@@ -1084,8 +1084,8 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/mml_native_raii_foundation.cpp",
-        "tests/math/native_tree_factory.cpp"
+        "tests/math/core/mml/mml_native_raii_foundation.cpp",
+        "tests/math/core/tree/native_tree_factory.cpp"
       ],
       "preservedSourceRefs": [],
       "staticGoldSections": []
@@ -1121,8 +1121,8 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/mml_native_raii_foundation.cpp",
-        "tests/math/native_common_jax.cpp"
+        "tests/math/core/mml/mml_native_raii_foundation.cpp",
+        "tests/math/output/common/native_common_jax.cpp"
       ],
       "preservedSourceRefs": [],
       "staticGoldSections": []
@@ -1150,7 +1150,7 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/native_tree_node.cpp"
+        "tests/math/core/tree/native_tree_node.cpp"
       ],
       "preservedSourceRefs": [],
       "staticGoldSections": []
@@ -1226,7 +1226,7 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/parse_options.cpp"
+        "tests/math/input/tex/parse_options.cpp"
       ],
       "preservedSourceRefs": [
         "s12",
@@ -1245,8 +1245,8 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/function_list.cpp",
-        "tests/math/native_renderer_bridge.cpp"
+        "tests/math/util/function_list.cpp",
+        "tests/math/integration/native_renderer_bridge.cpp"
       ],
       "preservedSourceRefs": [],
       "staticGoldSections": []
@@ -1262,7 +1262,7 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/tags.cpp"
+        "tests/math/input/tex/tags.cpp"
       ],
       "preservedSourceRefs": [
         "s2",
@@ -1283,8 +1283,8 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/base_items.cpp",
-        "tests/math/mml_native_raii_foundation.cpp"
+        "tests/math/input/tex/base_items.cpp",
+        "tests/math/core/mml/mml_native_raii_foundation.cpp"
       ],
       "preservedSourceRefs": [],
       "staticGoldSections": []
@@ -1300,7 +1300,7 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/native_tree_node.cpp"
+        "tests/math/core/tree/native_tree_node.cpp"
       ],
       "preservedSourceRefs": [
         "s9",
@@ -1320,7 +1320,7 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/amscd.cpp"
+        "tests/math/input/packages/amscd.cpp"
       ],
       "preservedSourceRefs": [],
       "staticGoldSections": []
@@ -1340,8 +1340,8 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/bboldx.cpp",
-        "tests/math/setoptions.cpp"
+        "tests/math/input/packages/bboldx.cpp",
+        "tests/math/input/packages/setoptions.cpp"
       ],
       "preservedSourceRefs": [
         "s1",
@@ -1360,7 +1360,7 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/centernot.cpp"
+        "tests/math/input/packages/centernot.cpp"
       ],
       "preservedSourceRefs": [],
       "staticGoldSections": [
@@ -1410,7 +1410,7 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/find_tex.cpp"
+        "tests/math/input/tex/find_tex.cpp"
       ],
       "preservedSourceRefs": [
         "s14",
@@ -1434,9 +1434,9 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/native_common_jax.cpp",
-        "tests/math/native_math_item.cpp",
-        "tests/math/function_list.cpp"
+        "tests/math/output/common/native_common_jax.cpp",
+        "tests/math/core/native_math_item.cpp",
+        "tests/math/util/function_list.cpp"
       ],
       "preservedSourceRefs": [
         "s6"
@@ -1452,7 +1452,7 @@
           "name": "parse_options_real_owner_parser_list_mutations_and_tree_filtering",
           "disposition": "migrate-real-owner-values",
           "native": {
-            "path": "tests/math/parse_options.cpp",
+            "path": "tests/math/input/tex/parse_options.cpp",
             "case": "parse_options_parser_stack_and_tree_filter_preserve_duplicates"
           }
         },
@@ -1460,13 +1460,13 @@
           "name": "parse_options_real_owner_clear_retains_persistent_fields_and_writes_before_throw",
           "disposition": "migrate-real-owner-values",
           "native": {
-            "path": "tests/math/parse_options.cpp",
+            "path": "tests/math/input/tex/parse_options.cpp",
             "case": "parse_options_clear_keeps_persistent_owners_and_clears_before_reset_failure"
           }
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/parse_options.cpp"
+        "tests/math/input/tex/parse_options.cpp"
       ],
       "preservedSourceRefs": [
         "s7",
@@ -1493,8 +1493,8 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/textmacros.cpp",
-        "tests/math/native_tex_definitions.cpp"
+        "tests/math/input/packages/textmacros.cpp",
+        "tests/math/input/tex/native_tex_definitions.cpp"
       ],
       "preservedSourceRefs": [],
       "staticGoldSections": []
@@ -1510,7 +1510,7 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/native_raii_regexp.cpp"
+        "tests/math/util/native_raii_regexp.cpp"
       ],
       "preservedSourceRefs": [
         "s17",
@@ -1553,7 +1553,7 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/native_raii_regexp.cpp"
+        "tests/math/util/native_raii_regexp.cpp"
       ],
       "preservedSourceRefs": [
         "s17",
@@ -1584,7 +1584,7 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/native_raii_regexp.cpp"
+        "tests/math/util/native_raii_regexp.cpp"
       ],
       "preservedSourceRefs": [
         "s17",
@@ -1601,13 +1601,13 @@
           "name": "math_port_scanner_regexp_supported_flags_and_invalid_flags_are_explicit",
           "disposition": "migrate-native-language-value",
           "native": {
-            "path": "tests/math/native_raii_regexp.cpp",
+            "path": "tests/math/util/native_raii_regexp.cpp",
             "case": "native_regexp_flags_accept_i_u_and_reject_uv_and_duplicates"
           }
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/native_raii_regexp.cpp"
+        "tests/math/util/native_raii_regexp.cpp"
       ],
       "preservedSourceRefs": [
         "s17",
@@ -1636,7 +1636,7 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/base_items.cpp"
+        "tests/math/input/tex/base_items.cpp"
       ],
       "preservedSourceRefs": [],
       "staticGoldSections": []
@@ -1652,8 +1652,8 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/tags.cpp",
-        "tests/math/native_tex_session.cpp"
+        "tests/math/input/tex/tags.cpp",
+        "tests/math/input/tex/native_tex_session.cpp"
       ],
       "preservedSourceRefs": [
         "s2",
@@ -1720,8 +1720,8 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/tags.cpp",
-        "tests/math/native_tex_session.cpp"
+        "tests/math/input/tex/tags.cpp",
+        "tests/math/input/tex/native_tex_session.cpp"
       ],
       "preservedSourceRefs": [
         "s2",
@@ -1740,8 +1740,8 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/tags.cpp",
-        "tests/math/native_tex_session.cpp"
+        "tests/math/input/tex/tags.cpp",
+        "tests/math/input/tex/native_tex_session.cpp"
       ],
       "preservedSourceRefs": [
         "s2",
@@ -1760,7 +1760,7 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/textcomp.cpp"
+        "tests/math/input/packages/textcomp.cpp"
       ],
       "preservedSourceRefs": [
         "s4",
@@ -1793,9 +1793,9 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/textcomp.cpp",
-        "tests/math/bboldx.cpp",
-        "tests/math/textmacros.cpp"
+        "tests/math/input/packages/textcomp.cpp",
+        "tests/math/input/packages/bboldx.cpp",
+        "tests/math/input/packages/textmacros.cpp"
       ],
       "preservedSourceRefs": [
         "s4",
@@ -1814,7 +1814,7 @@
           "name": "textmacros_textcomp_package_record_tracks_live_compile_owners_single_jax",
           "disposition": "migrate-real-compile-owner-values",
           "native": {
-            "path": "tests/math/textcomp.cpp",
+            "path": "tests/math/input/packages/textcomp.cpp",
             "case": "textcomp_compile_borrows_current_jax_after_an_uncompiled_warmup"
           }
         },
@@ -1822,13 +1822,13 @@
           "name": "textmacros_textcomp_package_record_tracks_live_compile_owners_after_uncompiled_warmup",
           "disposition": "migrate-real-compile-owner-values",
           "native": {
-            "path": "tests/math/textcomp.cpp",
+            "path": "tests/math/input/packages/textcomp.cpp",
             "case": "textcomp_compile_borrows_current_jax_after_an_uncompiled_warmup"
           }
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/textcomp.cpp"
+        "tests/math/input/packages/textcomp.cpp"
       ],
       "preservedSourceRefs": [
         "s4",
@@ -1851,7 +1851,7 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/units.cpp"
+        "tests/math/input/packages/units.cpp"
       ],
       "preservedSourceRefs": [],
       "staticGoldSections": [
@@ -1869,8 +1869,8 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/mml_native_raii_foundation.cpp",
-        "tests/math/native_common_jax.cpp"
+        "tests/math/core/mml/mml_native_raii_foundation.cpp",
+        "tests/math/output/common/native_common_jax.cpp"
       ],
       "preservedSourceRefs": [
         "s9",
@@ -1890,7 +1890,7 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/native_tex_definitions.cpp"
+        "tests/math/input/tex/native_tex_definitions.cpp"
       ],
       "preservedSourceRefs": [],
       "staticGoldSections": []
@@ -1918,7 +1918,7 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/native_math_item.cpp"
+        "tests/math/core/native_math_item.cpp"
       ],
       "preservedSourceRefs": [],
       "staticGoldSections": [
@@ -1936,8 +1936,8 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/mml_native_factory.cpp",
-        "tests/math/native_tree_factory.cpp"
+        "tests/math/core/mml/mml_native_factory.cpp",
+        "tests/math/core/tree/native_tree_factory.cpp"
       ],
       "preservedSourceRefs": [],
       "staticGoldSections": []
@@ -1951,14 +1951,14 @@
           "name": "mml_node_toString_metadata_and_output_match_source",
           "disposition": "migrate-real-string-value-retire-metadata",
           "native": {
-            "path": "tests/math/mml_native_factory.cpp",
+            "path": "tests/math/core/mml/mml_native_factory.cpp",
             "case": "mml_to_string_retains_the_source_row_token_spelling"
           }
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/mml_native_factory.cpp",
-        "tests/math/native_tree_node.cpp"
+        "tests/math/core/mml/mml_native_factory.cpp",
+        "tests/math/core/tree/native_tree_node.cpp"
       ],
       "preservedSourceRefs": [],
       "staticGoldSections": [
@@ -1978,7 +1978,7 @@
           "name": "source_mml_table_copy_and_setChildren_retain_top_row_for_phantom_bbox",
           "disposition": "migrate-real-tree-values",
           "native": {
-            "path": "tests/math/mml_native_factory.cpp",
+            "path": "tests/math/core/mml/mml_native_factory.cpp",
             "case": "table_copy_then_top_row_selection_retains_copied_cells"
           }
         },
@@ -1986,7 +1986,7 @@
           "name": "source_owned_mml_base_node_slice_visits_hidden_script_texclass_tree",
           "disposition": "migrate-real-tree-values",
           "native": {
-            "path": "tests/math/typed_mml_scripts.cpp",
+            "path": "tests/math/core/mml/typed_mml_scripts.cpp",
             "case": "hidden_phantom_script_keeps_the_copied_operator_spacing_chain"
           }
         },
@@ -1996,9 +1996,9 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/mml_native_factory.cpp",
-        "tests/math/typed_mml_scripts.cpp",
-        "tests/math/native_common_jax.cpp"
+        "tests/math/core/mml/mml_native_factory.cpp",
+        "tests/math/core/mml/typed_mml_scripts.cpp",
+        "tests/math/output/common/native_common_jax.cpp"
       ],
       "preservedSourceRefs": [
         "s9",
@@ -2077,7 +2077,7 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/mml_native_raii_foundation.cpp"
+        "tests/math/core/mml/mml_native_raii_foundation.cpp"
       ],
       "preservedSourceRefs": [],
       "staticGoldSections": []
@@ -2091,14 +2091,14 @@
           "name": "math_native_tree_binding_copy_uses_current_product_implementation",
           "disposition": "migrate-real-current-factory-copy",
           "native": {
-            "path": "tests/math/mml_native_factory.cpp",
+            "path": "tests/math/core/mml/mml_native_factory.cpp",
             "case": "mml_copy_uses_the_current_registered_product_implementation"
           }
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/mml_native_factory.cpp",
-        "tests/math/native_tree_node.cpp"
+        "tests/math/core/mml/mml_native_factory.cpp",
+        "tests/math/core/tree/native_tree_node.cpp"
       ],
       "preservedSourceRefs": [
         "s9",
@@ -2118,8 +2118,8 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/parse_options.cpp",
-        "tests/math/native_tex_session.cpp"
+        "tests/math/input/tex/parse_options.cpp",
+        "tests/math/input/tex/native_tex_session.cpp"
       ],
       "preservedSourceRefs": [],
       "staticGoldSections": []
@@ -2143,8 +2143,8 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/native_renderer_bridge.cpp",
-        "tests/math/function_list.cpp"
+        "tests/math/integration/native_renderer_bridge.cpp",
+        "tests/math/util/function_list.cpp"
       ],
       "preservedSourceRefs": [],
       "staticGoldSections": []
@@ -2160,8 +2160,8 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/mml_native_factory.cpp",
-        "tests/math/native_raii_mml_base.cpp"
+        "tests/math/core/mml/mml_native_factory.cpp",
+        "tests/math/core/mml/native_raii_mml_base.cpp"
       ],
       "preservedSourceRefs": [],
       "staticGoldSections": []
@@ -2177,7 +2177,7 @@
         }
       ],
       "relatedNativeOwners": [
-        "tests/math/native_raii_scene.cpp"
+        "tests/math/output/scene/native_raii_scene.cpp"
       ],
       "preservedSourceRefs": [],
       "staticGoldSections": []

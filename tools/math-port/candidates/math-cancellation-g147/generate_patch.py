@@ -199,7 +199,7 @@ edit('src/math/output/svg/output_jax.cpp', [
 edit('CMakeLists.txt', [
 ('    src/math/math.ixx\n', '    src/math/math.ixx\n    src/math/cancellation.ixx\n'),
 ('    src/math/math.cpp\n', '    src/math/math.cpp\n    src/math/cancellation.cpp\n'),
-('    tests/math/context_raw_edge_trace.cpp\n', '    tests/math/math_cancellation_g147.cpp\n    tests/math/context_raw_edge_trace.cpp\n')])
+('    tests/math/context_raw_edge_trace.cpp\n', '    tests/math/integration/math_cancellation_g147.cpp\n    tests/math/context_raw_edge_trace.cpp\n')])
 
 # Dedicated real Renderer tests with deterministic production checkpoints.
 tests=(root/'tools/math-port/candidates/math-cancellation-g147/tests_g147.cpp').read_text(encoding='utf-8')
@@ -224,7 +224,7 @@ test_extra=r'''    "render_scene_cancellation_never_publishes_partial_scene"_tes
 '''
 assert test_anchor in tests
 tests=tests.replace(test_anchor,test_extra+test_anchor,1)
-changes['tests/math/math_cancellation_g147.cpp']=(None,tests)
+changes['tests/math/integration/math_cancellation_g147.cpp']=(None,tests)
 
 parts=[]
 for path,(before,after) in changes.items():

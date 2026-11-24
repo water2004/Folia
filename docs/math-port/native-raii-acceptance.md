@@ -25,7 +25,7 @@
 - 字形资源按请求加载，一次请求覆盖一个批次；批次内部复用，不在请求之外保留解码轮廓。
   观察批量的实际耗时和峰值占用，不能用常驻全部字体换取速度。
 
-对应测试包括 `tests/math/request_lifetime.cpp`、`native_tex_session.cpp`、
+对应测试包括 `tests/math/input/tex/request_lifetime.cpp`、`native_tex_session.cpp`、
 原生字体测试和各 Common/Scene 家族测试。
 
 ## 与原版对照

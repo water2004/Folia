@@ -259,7 +259,7 @@
       "sourceProfile": null,
       "disposition": "Not Source-generated and not inactive dead code: preserve actual native storage tests in one configured native owner.",
       "nativeReplacement": {
-        "owner": "tests/math/ordered_map_storage.cpp",
+        "owner": "tests/math/util/ordered_map_storage.cpp",
         "scope": "All original native SameValueZero/order/reinsert/live cursor/owner release assertions; remove unused map_bindings import. Third projected_context_roundtrip is legacy JS Context host adaptation and retires."
       }
     },
@@ -298,7 +298,7 @@
       "sourceProfile": "docs/math-port/evidence/p59-case-host-source.json",
       "disposition": "All original Source values retained; mathematical values migrate to current native owners. JS object adaptation remains offline only.",
       "nativeReplacement": {
-        "owner": "tests/math/js_case.cpp",
+        "owner": "tests/math/util/js_case.cpp",
         "scope": "3 native js_case tests: full Unicode scalar/sigma context domains and all 474 strings; structured frozen data split from owner"
       }
     },
@@ -313,7 +313,7 @@
       "sourceProfile": "docs/math-port/evidence/p60-numeric-source.json",
       "disposition": "All original Source values retained; mathematical values migrate to current native owners. JS object adaptation remains offline only.",
       "nativeReplacement": {
-        "owner": "tests/math/lengths_native.cpp (Root integration)",
+        "owner": "tests/math/util/lengths_native.cpp (Root integration)",
         "scope": "Complete original mathematical corpus, Source and native focused checks passed."
       }
     },
@@ -327,7 +327,7 @@
       "sourceProfile": "docs/math-port/evidence/p20c-numeric-reductions-source.json",
       "disposition": "All original Source values retained; mathematical values migrate to current native owners. JS object adaptation remains offline only.",
       "nativeReplacement": {
-        "owner": "tests/math/lengths_native.cpp (Root integration)",
+        "owner": "tests/math/util/lengths_native.cpp (Root integration)",
         "scope": "Complete original mathematical corpus, Source and native focused checks passed."
       }
     },
@@ -353,7 +353,7 @@
       "sourceProfile": null,
       "disposition": "Preserve all 13 real Unicode regex text/UTF-16 behavior tests with typed API adaptation. Original actual-Node observer remains unchanged and C++-independent; no fabricated new Source gold.",
       "nativeReplacement": {
-        "owner": "tests/math/native_raii_regexp.cpp",
+        "owner": "tests/math/util/native_raii_regexp.cpp",
         "scope": "Complete original mathematical corpus, Source and native focused checks passed."
       }
     },
@@ -361,7 +361,7 @@
       "file": "tests/math/numeric_reductions_source.inc",
       "sha256": "2482d7159b8a871d2145764cffcbe35d5024323346b6150fce6a96b6b3fd4b0b",
       "sourceOwner": "tools/math-port/numeric-reductions-oracle.cjs",
-      "nativeReplacement": "tests/math/lengths_native.cpp + fixtures/tex-source/numeric_source_values.inc",
+      "nativeReplacement": "tests/math/util/lengths_native.cpp + fixtures/tex-source/numeric_source_values.inc",
       "disposition": "Same original145/290 complete value corpus now configured and passing; old unreferenced data duplicate retires."
     }
   ]

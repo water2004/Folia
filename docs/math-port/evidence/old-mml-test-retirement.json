@@ -20,9 +20,9 @@
       "sourceOwner": "tools/math-port/arithmetic-oracle.cjs",
       "sourceProfile": "docs/math-port/evidence/source-arithmetic-profile.json",
       "nativeOwners": [
-        "tests/math/typed_mml_arithmetic.cpp",
-        "tests/math/typed_mml_containers.cpp",
-        "tests/math/native_raii_mml_base.cpp"
+        "tests/math/core/mml/typed_mml_arithmetic.cpp",
+        "tests/math/core/mml/typed_mml_containers.cpp",
+        "tests/math/core/mml/native_raii_mml_base.cpp"
       ],
       "disposition": "All Source inputs/expected values retained offline. Real typed family mathematics remains at native owners; obsolete object-protocol and TreeCallGuard observations retire."
     },
@@ -57,9 +57,9 @@
       "sourceOwner": "tools/math-port/arithmetic-order-oracle.cjs",
       "sourceProfile": "docs/math-port/evidence/source-arithmetic-order-profile.json",
       "nativeOwners": [
-        "tests/math/typed_mml_arithmetic.cpp",
-        "tests/math/typed_mml_containers.cpp",
-        "tests/math/native_raii_mml_base.cpp"
+        "tests/math/core/mml/typed_mml_arithmetic.cpp",
+        "tests/math/core/mml/typed_mml_containers.cpp",
+        "tests/math/core/mml/native_raii_mml_base.cpp"
       ],
       "disposition": "All Source inputs/expected values retained offline. Real typed family mathematics remains at native owners; obsolete object-protocol and TreeCallGuard observations retire."
     },
@@ -146,9 +146,9 @@
       "sourceOwner": "tools/math-port/atom-semantics-oracle.cjs",
       "sourceProfile": "docs/math-port/evidence/source-atom-semantics-profile.json",
       "nativeOwners": [
-        "tests/math/typed_mml_arithmetic.cpp",
-        "tests/math/typed_mml_containers.cpp",
-        "tests/math/native_raii_mml_base.cpp"
+        "tests/math/core/mml/typed_mml_arithmetic.cpp",
+        "tests/math/core/mml/typed_mml_containers.cpp",
+        "tests/math/core/mml/native_raii_mml_base.cpp"
       ],
       "disposition": "All Source inputs/expected values retained offline. Real typed family mathematics remains at native owners; obsolete object-protocol and TreeCallGuard observations retire."
     },
@@ -1095,9 +1095,9 @@
       "sourceOwner": "tools/math-port/maction-oracle.cjs",
       "sourceProfile": "docs/math-port/evidence/source-maction-profile.json",
       "nativeOwners": [
-        "tests/math/typed_mml_arithmetic.cpp",
-        "tests/math/typed_mml_containers.cpp",
-        "tests/math/native_raii_mml_base.cpp"
+        "tests/math/core/mml/typed_mml_arithmetic.cpp",
+        "tests/math/core/mml/typed_mml_containers.cpp",
+        "tests/math/core/mml/native_raii_mml_base.cpp"
       ],
       "disposition": "All Source inputs/expected values retained offline. Real typed family mathematics remains at native owners; obsolete object-protocol and TreeCallGuard observations retire."
     },
@@ -1520,9 +1520,9 @@
       "sourceOwner": "tools/math-port/mathchoice-oracle.cjs",
       "sourceProfile": "docs/math-port/evidence/source-mathchoice-profile.json",
       "nativeOwners": [
-        "tests/math/typed_mml_arithmetic.cpp",
-        "tests/math/typed_mml_containers.cpp",
-        "tests/math/native_raii_mml_base.cpp"
+        "tests/math/core/mml/typed_mml_arithmetic.cpp",
+        "tests/math/core/mml/typed_mml_containers.cpp",
+        "tests/math/core/mml/native_raii_mml_base.cpp"
       ],
       "disposition": "All Source inputs/expected values retained offline. Real typed family mathematics remains at native owners; obsolete object-protocol and TreeCallGuard observations retire."
     },
@@ -1760,9 +1760,9 @@
       "sourceOwner": "tools/math-port/mfenced-oracle.cjs",
       "sourceProfile": "docs/math-port/evidence/source-mfenced-profile.json",
       "nativeOwners": [
-        "tests/math/typed_mml_arithmetic.cpp",
-        "tests/math/typed_mml_containers.cpp",
-        "tests/math/native_raii_mml_base.cpp"
+        "tests/math/core/mml/typed_mml_arithmetic.cpp",
+        "tests/math/core/mml/typed_mml_containers.cpp",
+        "tests/math/core/mml/native_raii_mml_base.cpp"
       ],
       "disposition": "All Source inputs/expected values retained offline. Real typed family mathematics remains at native owners; obsolete object-protocol and TreeCallGuard observations retire."
     },
@@ -1777,9 +1777,9 @@
       "sourceOwner": "tools/math-port/mml-error-oracle.cjs",
       "sourceProfile": "docs/math-port/evidence/p33-error-source.json",
       "nativeOwners": [
-        "tests/math/typed_mml_arithmetic.cpp",
-        "tests/math/typed_mml_containers.cpp",
-        "tests/math/native_raii_mml_base.cpp"
+        "tests/math/core/mml/typed_mml_arithmetic.cpp",
+        "tests/math/core/mml/typed_mml_containers.cpp",
+        "tests/math/core/mml/native_raii_mml_base.cpp"
       ],
       "disposition": "All Source inputs/expected values retained offline. Real typed family mathematics remains at native owners; obsolete object-protocol and TreeCallGuard observations retire."
     },
@@ -1793,9 +1793,9 @@
       "sourceOwner": "tools/math-port/mml-action-errors-oracle.cjs",
       "sourceProfile": "docs/math-port/evidence/p38-action-errors-source.json",
       "nativeOwners": [
-        "tests/math/typed_mml_arithmetic.cpp",
-        "tests/math/typed_mml_containers.cpp",
-        "tests/math/native_raii_mml_base.cpp"
+        "tests/math/core/mml/typed_mml_arithmetic.cpp",
+        "tests/math/core/mml/typed_mml_containers.cpp",
+        "tests/math/core/mml/native_raii_mml_base.cpp"
       ],
       "disposition": "All Source inputs/expected values retained offline. Real typed family mathematics remains at native owners; obsolete object-protocol and TreeCallGuard observations retire."
     },
@@ -1852,9 +1852,9 @@
       "sourceOwner": "tools/math-port/mml-node-oracle.cjs",
       "sourceProfile": "docs/math-port/evidence/p23k-mml-node-structured-source-profile.json",
       "nativeOwners": [
-        "tests/math/native_raii_mml_base.cpp",
-        "tests/math/native_mml_row_tokens.cpp",
-        "tests/math/mml_typed_table.cpp"
+        "tests/math/core/mml/native_raii_mml_base.cpp",
+        "tests/math/core/mml/native_mml_row_tokens.cpp",
+        "tests/math/core/mml/mml_typed_table.cpp"
       ],
       "disposition": "Source gold preserved, including 26 formerly omitted direct MmlNode values. Host null-array/TreeCallGuard cases retire without native simulation."
     },
@@ -1868,9 +1868,9 @@
       "sourceOwner": "tools/math-port/mml-table-repair-oracle.cjs",
       "sourceProfile": "docs/math-port/evidence/p36-table-repair-source.json",
       "nativeOwners": [
-        "tests/math/native_raii_mml_base.cpp",
-        "tests/math/native_mml_row_tokens.cpp",
-        "tests/math/mml_typed_table.cpp"
+        "tests/math/core/mml/native_raii_mml_base.cpp",
+        "tests/math/core/mml/native_mml_row_tokens.cpp",
+        "tests/math/core/mml/mml_typed_table.cpp"
       ],
       "disposition": "Source gold preserved, including 26 formerly omitted direct MmlNode values. Host null-array/TreeCallGuard cases retire without native simulation."
     },
@@ -1897,9 +1897,9 @@
       "sourceOwner": "tools/math-port/mo-oracle.cjs",
       "sourceProfile": "docs/math-port/evidence/p24-mo-source.json",
       "nativeOwners": [
-        "tests/math/native_raii_mo.cpp",
-        "tests/math/operator_dictionary_native.cpp",
-        "tests/math/native_raii_mml_base.cpp"
+        "tests/math/core/mml/native_raii_mo.cpp",
+        "tests/math/core/mml/operator_dictionary_native.cpp",
+        "tests/math/core/mml/native_raii_mml_base.cpp"
       ],
       "disposition": "Complete Source gold retained. Real spacing regression, complete dictionary/masks and verification remain in native owners; JS virtual receiver and native-only host budgets retire."
     },
@@ -1963,9 +1963,9 @@
       "sourceOwner": "tools/math-port/mo-order-oracle.cjs",
       "sourceProfile": "docs/math-port/evidence/p24-mo-order-source.json",
       "nativeOwners": [
-        "tests/math/native_raii_mo.cpp",
-        "tests/math/operator_dictionary_native.cpp",
-        "tests/math/native_raii_mml_base.cpp"
+        "tests/math/core/mml/native_raii_mo.cpp",
+        "tests/math/core/mml/operator_dictionary_native.cpp",
+        "tests/math/core/mml/native_raii_mml_base.cpp"
       ],
       "disposition": "Complete Source gold retained. Real spacing regression, complete dictionary/masks and verification remain in native owners; JS virtual receiver and native-only host budgets retire."
     },
@@ -1992,9 +1992,9 @@
       "sourceOwner": "tools/math-port/mo-values-oracle.cjs",
       "sourceProfile": "docs/math-port/evidence/p24-mo-values-source.json",
       "nativeOwners": [
-        "tests/math/native_raii_mo.cpp",
-        "tests/math/operator_dictionary_native.cpp",
-        "tests/math/native_raii_mml_base.cpp"
+        "tests/math/core/mml/native_raii_mo.cpp",
+        "tests/math/core/mml/operator_dictionary_native.cpp",
+        "tests/math/core/mml/native_raii_mml_base.cpp"
       ],
       "disposition": "Complete Source gold retained. Real spacing regression, complete dictionary/masks and verification remain in native owners; JS virtual receiver and native-only host budgets retire."
     },
@@ -2008,9 +2008,9 @@
       "sourceOwner": "tools/math-port/mml-spacing-oracle.cjs",
       "sourceProfile": "docs/math-port/evidence/p33-spacing-source.json",
       "nativeOwners": [
-        "tests/math/native_raii_mo.cpp",
-        "tests/math/operator_dictionary_native.cpp",
-        "tests/math/native_raii_mml_base.cpp"
+        "tests/math/core/mml/native_raii_mo.cpp",
+        "tests/math/core/mml/operator_dictionary_native.cpp",
+        "tests/math/core/mml/native_raii_mml_base.cpp"
       ],
       "disposition": "Complete Source gold retained. Real spacing regression, complete dictionary/masks and verification remain in native owners; JS virtual receiver and native-only host budgets retire."
     },
@@ -2024,9 +2024,9 @@
       "sourceOwner": "tools/math-port/mml-operator-access-oracle.cjs",
       "sourceProfile": "docs/math-port/evidence/p37-operator-access-source.json",
       "nativeOwners": [
-        "tests/math/native_raii_mo.cpp",
-        "tests/math/operator_dictionary_native.cpp",
-        "tests/math/native_raii_mml_base.cpp"
+        "tests/math/core/mml/native_raii_mo.cpp",
+        "tests/math/core/mml/operator_dictionary_native.cpp",
+        "tests/math/core/mml/native_raii_mml_base.cpp"
       ],
       "disposition": "Complete Source gold retained. Real spacing regression, complete dictionary/masks and verification remain in native owners; JS virtual receiver and native-only host budgets retire."
     },
@@ -2040,9 +2040,9 @@
       "sourceOwner": "tools/math-port/mml-token-walk-oracle.cjs",
       "sourceProfile": null,
       "nativeOwners": [
-        "tests/math/native_raii_mo.cpp",
-        "tests/math/operator_dictionary_native.cpp",
-        "tests/math/native_raii_mml_base.cpp"
+        "tests/math/core/mml/native_raii_mo.cpp",
+        "tests/math/core/mml/operator_dictionary_native.cpp",
+        "tests/math/core/mml/native_raii_mml_base.cpp"
       ],
       "disposition": "Complete Source gold retained. Real spacing regression, complete dictionary/masks and verification remain in native owners; JS virtual receiver and native-only host budgets retire."
     },
@@ -2056,9 +2056,9 @@
       "sourceOwner": "tools/math-port/mml-verification-oracle.cjs",
       "sourceProfile": null,
       "nativeOwners": [
-        "tests/math/native_raii_mo.cpp",
-        "tests/math/operator_dictionary_native.cpp",
-        "tests/math/native_raii_mml_base.cpp"
+        "tests/math/core/mml/native_raii_mo.cpp",
+        "tests/math/core/mml/operator_dictionary_native.cpp",
+        "tests/math/core/mml/native_raii_mml_base.cpp"
       ],
       "disposition": "Complete Source gold retained. Real spacing regression, complete dictionary/masks and verification remain in native owners; JS virtual receiver and native-only host budgets retire."
     },
@@ -2070,7 +2070,7 @@
       ],
       "group": "node",
       "nativeOwners": [
-        "tests/math/typed_mml_containers.cpp"
+        "tests/math/core/mml/typed_mml_containers.cpp"
       ],
       "disposition": "Retire old Unimplemented-only smoke; typed/Common owners assert actual mathematical behavior. No Source oracle/gold to preserve."
     },
@@ -2082,7 +2082,7 @@
       ],
       "group": "node",
       "nativeOwners": [
-        "tests/math/native_common_mfenced.cpp"
+        "tests/math/output/common/native_common_mfenced.cpp"
       ],
       "disposition": "Retire old Unimplemented-only smoke; typed/Common owners assert actual mathematical behavior. No Source oracle/gold to preserve."
     },
@@ -2094,7 +2094,7 @@
       ],
       "group": "node",
       "nativeOwners": [
-        "tests/math/mml_typed_table.cpp"
+        "tests/math/core/mml/mml_typed_table.cpp"
       ],
       "disposition": "Retire old Unimplemented-only smoke; typed/Common owners assert actual mathematical behavior. No Source oracle/gold to preserve."
     },
@@ -2106,7 +2106,7 @@
       ],
       "group": "node",
       "nativeOwners": [
-        "tests/math/native_raii_mo.cpp"
+        "tests/math/core/mml/native_raii_mo.cpp"
       ],
       "disposition": "Retire old Unimplemented-only smoke; typed/Common owners assert actual mathematical behavior. No Source oracle/gold to preserve."
     },

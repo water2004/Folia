@@ -27,13 +27,13 @@ add_test(NAME FoliaMathTests COMMAND FoliaMathTests)
 # remain in FoliaMathTests; this explicit target avoids compiling unrelated
 # TeX parser test translation units for an output-boundary change.
 file(GLOB FOLIA_MATH_SVG_WRITER_TEST_SOURCES CONFIGURE_DEPENDS
-    "${FOLIA_SOURCE_ROOT}/tests/math/native_svg_writer*.cpp")
+    "${FOLIA_SOURCE_ROOT}/tests/math/output/svg/native_svg_writer*.cpp")
 add_executable(FoliaMathSvgBridgeTests EXCLUDE_FROM_ALL
     ${FOLIA_SOURCE_ROOT}/tests/main.cpp ${FOLIA_MATH_SVG_WRITER_TEST_SOURCES}
-    ${FOLIA_SOURCE_ROOT}/tests/math/native_renderer_bridge.cpp
-    ${FOLIA_SOURCE_ROOT}/tests/math/native_source_svg_paint.cpp ${FOLIA_SOURCE_ROOT}/tests/math/native_common_wrapper.cpp
-    ${FOLIA_SOURCE_ROOT}/tests/math/native_svg_merror.cpp ${FOLIA_SOURCE_ROOT}/tests/math/native_table_profile_source.cpp
-    ${FOLIA_SOURCE_ROOT}/tests/math/native_common_table.cpp ${FOLIA_SOURCE_ROOT}/tests/math/native_common_text.cpp)
+    ${FOLIA_SOURCE_ROOT}/tests/math/integration/native_renderer_bridge.cpp
+    ${FOLIA_SOURCE_ROOT}/tests/math/output/svg/native_source_svg_paint.cpp ${FOLIA_SOURCE_ROOT}/tests/math/output/common/native_common_wrapper.cpp
+    ${FOLIA_SOURCE_ROOT}/tests/math/output/svg/native_svg_merror.cpp ${FOLIA_SOURCE_ROOT}/tests/math/output/common/native_table_profile_source.cpp
+    ${FOLIA_SOURCE_ROOT}/tests/math/output/common/native_common_table.cpp ${FOLIA_SOURCE_ROOT}/tests/math/output/common/native_common_text.cpp)
 target_compile_features(FoliaMathSvgBridgeTests PRIVATE cxx_std_23)
 set_target_properties(FoliaMathSvgBridgeTests PROPERTIES CXX_MODULE_STD ON CXX_SCAN_FOR_MODULES ON)
 target_include_directories(FoliaMathSvgBridgeTests PRIVATE ${FOLIA_SOURCE_ROOT}/tests)

@@ -132,7 +132,7 @@ File names describe their MathJax responsibility. Do not add `native_`, `typed_`
 `new_` or equivalent suffixes to distinguish a replacement from its original
 owner. Rewrite the owning module and remove superseded code and registrations
 within the reviewed change. `util/function_list.ixx` owns FunctionList;
-`tests/math/function_list.cpp` owns its behavior tests. A source file left out
+`tests/math/util/function_list.cpp` owns its behavior tests. A source file left out
 of CMake is still unfinished cleanup when remaining consumers reference it.
 
 ### Tag formatting ownership (2026-10-20)
@@ -2126,7 +2126,7 @@ span<mathml_scene_test::Attribute const> attributes;};
 constexpr sourceTableProfileCases[] stores the cases. Spans reference named
 namespace-scope arrays only; raw strings are split below compiler limits.
 
-Independent UT owner creates tests/math/native_table_profile_source.cpp, using
+Independent UT owner creates tests/math/output/common/native_table_profile_source.cpp, using
 support/mathml_scene.hpp and SvgWrapperFactory::defaultNodes. Capture native
 layout state after buildScene, compare every observed table and complete SVG,
 then serialize again after document/job/measurement destruction. Measurement
@@ -2197,7 +2197,7 @@ test adapter and keeps its strict/default selection, serialization, diagnostics
 and stats. Do not duplicate a TeX pipeline or expand the large test body with
 the hosted evaluator. All production files remain outside this extraction.
 
-Native hosted owner creates tests/math/native_canonical_scene_source.cpp,
+Native hosted owner creates tests/math/integration/native_canonical_scene_source.cpp,
 consuming that same helper and the new independent fixture. Use two fresh
 InputOwners and persistent TeX sessions, one per cache mode; one document per
 input. For each case compare completed Scene.metrics with Source outer w/h/d,

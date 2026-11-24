@@ -3,7 +3,7 @@
 > Historical evidence, superseded on 2026-10-20. The object/Promise-based
 > FunctionList implementation and its test generator are retired. Current
 > synchronous utility behavior is checked by `util-function-list-source.cjs`,
-> `tests/math/function_list.cpp`, and `tests/math/prioritized_list.cpp`.
+> `tests/math/util/function_list.cpp`, and `tests/math/util/prioritized_list.cpp`.
 > The claims below do not describe the current implementation or parser wiring.
 
 Root accepts all four members of pinned MathJax 4.1.3 FunctionList.ts, SHA256

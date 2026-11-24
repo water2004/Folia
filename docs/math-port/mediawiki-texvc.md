@@ -38,7 +38,7 @@ expansion alone cannot provide this: MathJax has a separate delimiter handler.
   from the captured `aliases.json`; `--check` verifies the committed C++ data.
 - `tools/latex-completion/generate.py`: builds the completion catalog from registry
   metadata and editor templates, preserving existing entries/snippets.
-- `tests/math/tex_package_registry.cpp` and `fixtures/packages/registry/` data:
+- `tests/math/integration/tex_package_registry.cpp` and `fixtures/packages/registry/` data:
   production registry and actual individual/batch renderer conformance.
 
 The generator checks the installed version, dependency lock, profile hash,

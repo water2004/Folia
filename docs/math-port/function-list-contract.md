@@ -4,8 +4,8 @@ This document records the withdrawn Context/Property/FunctionRef design. It is
 not the current implementation contract and must not guide new work. The
 current `util/function_list.ixx` owns the synchronous, compile-time callback
 list under the original MathJax class responsibility. Its tests are in
-`tests/math/function_list.cpp`; configuration-specific composition belongs to
-`input/tex/configuration` and `tests/math/configuration.cpp`. Progress and
+`tests/math/util/function_list.cpp`; configuration-specific composition belongs to
+`input/tex/configuration` and `tests/math/input/tex/configuration.cpp`. Progress and
 remaining integration limits are recorded in `HANDOFF.md`.
 
 The text below is historical evidence only.
