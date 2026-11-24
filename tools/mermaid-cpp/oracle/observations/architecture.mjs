@@ -1,0 +1,8 @@
+// Read-only browser capture. Acceptance decisions are implemented in Python.
+export default ()=>{
+  const root=document.querySelector('svg'),v=root.viewBox.baseVal;
+  const box=e=>{const b=e.getBBox();return {x:b.x,y:b.y,width:b.width,height:b.height};};
+  const position=e=>{const m=e.transform.baseVal.consolidate()?.matrix;return m?{x:m.e,y:m.f}:{x:0,y:0};};
+  const globalBox=e=>{const b=e.getBBox(),m=root.getCTM().inverse().multiply(e.getCTM()),p=new DOMPoint(b.x,b.y).matrixTransform(m);return {x:p.x,y:p.y,width:b.width,height:b.height};};
+  return {view:{x:v.x,y:v.y,width:v.width,height:v.height},services:[...root.querySelectorAll('.architecture-service,.architecture-junction')].map(n=>({position:position(n),box:box(n)})),groups:[...root.querySelectorAll('.architecture-groups>rect')].map(n=>({box:box(n),stroke:getComputedStyle(n).stroke,width:parseFloat(getComputedStyle(n).strokeWidth)})),edges:[...root.querySelectorAll('path.edge')].map(n=>({path:n.getAttribute('d'),stroke:getComputedStyle(n).stroke,width:parseFloat(getComputedStyle(n).strokeWidth)})),arrows:[...root.querySelectorAll('polygon.arrow')].map(n=>({points:n.getAttribute('points'),transform:n.getAttribute('transform'),fill:getComputedStyle(n).fill})),labels:[...root.querySelectorAll('text.architecture-label')].map(n=>({text:n.textContent,global:globalBox(n),font:getComputedStyle(n).fontFamily,size:parseFloat(getComputedStyle(n).fontSize),fill:getComputedStyle(n).fill})),iconTexts:[...root.querySelectorAll('text.architecture-icon-text')].map(n=>({text:n.textContent,fill:getComputedStyle(n).fill,global:globalBox(n)}))};
+ };

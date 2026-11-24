@@ -44,12 +44,17 @@ failure, never a skip.
 
 `../../compare-family.py FAMILY original.json native-svg-directory` compares
 the existing per-family capture formats. Shared checks live in `family_checks.py`;
-`family_simple.py` covers geometric drawings and `family_graphs.py` covers State,
-ER, Requirement, Sequence and Class. Each family keeps its original paint, text,
+`family_simple.py` covers geometric drawings; `family_graphs.py` covers State,
+ER, Requirement, Sequence and Class; `family_labels.py` covers rich and portable
+labels; `family_structures.py` covers compound and force layouts; and
+`family_flowchart.py` covers shapes, markers and sampled routes. Each family keeps its original paint, text,
 route, marker and coordinate rules, including stricter Class geometry limits.
 RoughJS random handles are accepted only when they still describe the required
 straight segments. Sequence now rejects a missing route-point array instead of
 letting an empty loop silently pass.
+Agentflow shape samples and Flowchart route samples likewise fail when missing.
+Both original Mindmap modes run: strict identical-box layouts and the native
+measurement path with its original shape, paint, connected-route and viewport checks.
 
 The capture functions in `../../oracle/observations/` only read browser state.
 Official generators and Python's Playwright driver share these exact observers;

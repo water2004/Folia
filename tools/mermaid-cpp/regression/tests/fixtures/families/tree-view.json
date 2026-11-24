@@ -1,0 +1,639 @@
+{
+  "family": "tree-view",
+  "expected": {
+    "name": "base",
+    "view": {
+      "x": 0,
+      "y": 0,
+      "width": 100,
+      "height": 100
+    },
+    "labels": [
+      {
+        "text": "hello",
+        "cls": "label",
+        "box": {
+          "x": 10,
+          "y": 20,
+          "width": 30,
+          "height": 40
+        },
+        "fill": "black",
+        "fontFamily": "Arial",
+        "fontWeight": "400",
+        "fontStyle": "normal"
+      }
+    ],
+    "lines": [
+      {
+        "x1": 1,
+        "y1": 2,
+        "x2": 3,
+        "y2": 4,
+        "stroke": "black",
+        "strokeWidth": "1px"
+      }
+    ],
+    "highlights": [
+      {
+        "box": {
+          "x": 10,
+          "y": 20,
+          "width": 30,
+          "height": 40
+        },
+        "fill": "yellow",
+        "stroke": "black",
+        "strokeWidth": "1px"
+      }
+    ],
+    "icons": [
+      {
+        "color": "black",
+        "body": [
+          {
+            "d": "M1 2L3 4",
+            "fill": "black",
+            "fillRule": "evenodd",
+            "clipRule": "evenodd"
+          }
+        ]
+      }
+    ]
+  },
+  "actual": {
+    "view": {
+      "x": 0,
+      "y": 0,
+      "width": 100,
+      "height": 100
+    },
+    "labels": [
+      {
+        "text": "hello",
+        "cls": "label",
+        "box": {
+          "x": 10,
+          "y": 20,
+          "width": 30,
+          "height": 40
+        },
+        "fill": "black",
+        "fontFamily": "Arial",
+        "fontWeight": "400",
+        "fontStyle": "normal"
+      }
+    ],
+    "lines": [
+      {
+        "x1": 1,
+        "y1": 2,
+        "x2": 3,
+        "y2": 4,
+        "stroke": "black",
+        "strokeWidth": "1px"
+      }
+    ],
+    "highlights": [
+      {
+        "box": {
+          "x": 10,
+          "y": 20,
+          "width": 30,
+          "height": 40
+        },
+        "fill": "yellow",
+        "stroke": "black",
+        "strokeWidth": "1px"
+      }
+    ],
+    "icons": [
+      {
+        "color": "black",
+        "body": [
+          {
+            "d": "M1 2L3 4",
+            "fill": "black",
+            "fillRule": "evenodd",
+            "clipRule": "evenodd"
+          }
+        ]
+      }
+    ]
+  },
+  "cases": [
+    {
+      "id": "tree-view-identical",
+      "mutations": [],
+      "accept": true
+    },
+    {
+      "id": "tree-view-mutation-0",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "x"
+          ],
+          "value": 4
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "tree-view-mutation-1",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "y"
+          ],
+          "value": 4
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "tree-view-mutation-2",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "width"
+          ],
+          "value": 104
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "tree-view-mutation-3",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "height"
+          ],
+          "value": 104
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "tree-view-mutation-4",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "text"
+          ],
+          "value": "hello changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "tree-view-mutation-5",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "cls"
+          ],
+          "value": "label changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "tree-view-mutation-6",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "box",
+            "x"
+          ],
+          "value": 14
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "tree-view-mutation-7",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "box",
+            "y"
+          ],
+          "value": 24
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "tree-view-mutation-8",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "box",
+            "width"
+          ],
+          "value": 34
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "tree-view-mutation-9",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "box",
+            "height"
+          ],
+          "value": 44
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "tree-view-mutation-10",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "fill"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "tree-view-mutation-11",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "fontFamily"
+          ],
+          "value": "Arial changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "tree-view-mutation-12",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "fontWeight"
+          ],
+          "value": "400 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "tree-view-mutation-13",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "fontStyle"
+          ],
+          "value": "normal changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "tree-view-mutation-14",
+      "mutations": [
+        {
+          "path": [
+            "lines",
+            0,
+            "x1"
+          ],
+          "value": 5
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "tree-view-mutation-15",
+      "mutations": [
+        {
+          "path": [
+            "lines",
+            0,
+            "y1"
+          ],
+          "value": 6
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "tree-view-mutation-16",
+      "mutations": [
+        {
+          "path": [
+            "lines",
+            0,
+            "x2"
+          ],
+          "value": 7
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "tree-view-mutation-17",
+      "mutations": [
+        {
+          "path": [
+            "lines",
+            0,
+            "y2"
+          ],
+          "value": 8
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "tree-view-mutation-18",
+      "mutations": [
+        {
+          "path": [
+            "lines",
+            0,
+            "stroke"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "tree-view-mutation-19",
+      "mutations": [
+        {
+          "path": [
+            "lines",
+            0,
+            "strokeWidth"
+          ],
+          "value": "1px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "tree-view-mutation-20",
+      "mutations": [
+        {
+          "path": [
+            "highlights",
+            0,
+            "box",
+            "x"
+          ],
+          "value": 14
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "tree-view-mutation-21",
+      "mutations": [
+        {
+          "path": [
+            "highlights",
+            0,
+            "box",
+            "y"
+          ],
+          "value": 24
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "tree-view-mutation-22",
+      "mutations": [
+        {
+          "path": [
+            "highlights",
+            0,
+            "box",
+            "width"
+          ],
+          "value": 34
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "tree-view-mutation-23",
+      "mutations": [
+        {
+          "path": [
+            "highlights",
+            0,
+            "box",
+            "height"
+          ],
+          "value": 44
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "tree-view-mutation-24",
+      "mutations": [
+        {
+          "path": [
+            "highlights",
+            0,
+            "fill"
+          ],
+          "value": "yellow changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "tree-view-mutation-25",
+      "mutations": [
+        {
+          "path": [
+            "highlights",
+            0,
+            "stroke"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "tree-view-mutation-26",
+      "mutations": [
+        {
+          "path": [
+            "highlights",
+            0,
+            "strokeWidth"
+          ],
+          "value": "1px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "tree-view-mutation-27",
+      "mutations": [
+        {
+          "path": [
+            "icons",
+            0,
+            "color"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "tree-view-mutation-28",
+      "mutations": [
+        {
+          "path": [
+            "icons",
+            0,
+            "body",
+            0,
+            "d"
+          ],
+          "value": "M1 2L3 4 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "tree-view-mutation-29",
+      "mutations": [
+        {
+          "path": [
+            "icons",
+            0,
+            "body",
+            0,
+            "fill"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "tree-view-mutation-30",
+      "mutations": [
+        {
+          "path": [
+            "icons",
+            0,
+            "body",
+            0,
+            "fillRule"
+          ],
+          "value": "evenodd changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "tree-view-mutation-31",
+      "mutations": [
+        {
+          "path": [
+            "icons",
+            0,
+            "body",
+            0,
+            "clipRule"
+          ],
+          "value": "evenodd changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "tree-view-missing-labels",
+      "mutations": [
+        {
+          "path": [
+            "labels"
+          ],
+          "value": []
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "tree-view-missing-lines",
+      "mutations": [
+        {
+          "path": [
+            "lines"
+          ],
+          "value": []
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "tree-view-missing-highlights",
+      "mutations": [
+        {
+          "path": [
+            "highlights"
+          ],
+          "value": []
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "tree-view-missing-icons",
+      "mutations": [
+        {
+          "path": [
+            "icons"
+          ],
+          "value": []
+        }
+      ],
+      "accept": false
+    }
+  ]
+}

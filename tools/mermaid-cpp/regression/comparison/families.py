@@ -1,9 +1,9 @@
 """Dispatch family-specific acceptance policies without loading a JS runtime."""
 
-from . import family_graphs, family_labels, family_simple
+from . import family_flowchart, family_graphs, family_labels, family_simple, family_structures
 
 
-POLICIES = (family_simple, family_graphs, family_labels)
+POLICIES = (family_simple, family_graphs, family_labels, family_structures, family_flowchart)
 FAMILIES = set().union(*(module.FAMILIES for module in POLICIES))
 
 

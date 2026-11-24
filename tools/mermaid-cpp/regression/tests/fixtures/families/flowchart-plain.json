@@ -1,0 +1,2269 @@
+{
+  "family": "flowchart",
+  "expected": {
+    "name": "plain",
+    "offset": "translate(5 6)",
+    "bounds": {
+      "x": 0,
+      "y": 0,
+      "width": 150,
+      "height": 100
+    },
+    "view": {
+      "x": 0,
+      "y": 0,
+      "width": 200,
+      "height": 200
+    },
+    "nodes": [
+      {
+        "label": "A",
+        "x": 35,
+        "y": 46,
+        "width": 30,
+        "height": 20,
+        "transform": "translate(30 40)",
+        "contained": true,
+        "labelCenter": {
+          "x": 35,
+          "y": 46
+        },
+        "lines": [
+          "A"
+        ],
+        "font": {
+          "family": "Arial",
+          "size": "12px",
+          "weight": "400",
+          "style": "normal"
+        },
+        "characters": [
+          [
+            "A",
+            "400",
+            "normal"
+          ]
+        ],
+        "fill": "white",
+        "stroke": "black",
+        "thickness": "1px",
+        "color": "black",
+        "dash": "none",
+        "dashSegments": [
+          [
+            "2, 2",
+            1
+          ]
+        ],
+        "filter": true,
+        "invisibleStrokes": 1,
+        "sketchPaths": [
+          {
+            "length": 25,
+            "stroke": "black",
+            "width": "1px",
+            "fill": "white",
+            "opacity": "1",
+            "samples": [
+              {
+                "x": 10,
+                "y": 20
+              },
+              {
+                "x": 30,
+                "y": 40
+              }
+            ]
+          }
+        ],
+        "outline": [
+          {
+            "x": 10,
+            "y": 20
+          },
+          {
+            "x": 30,
+            "y": 40
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "id": "prefix-e1",
+        "length": 100,
+        "stroke": "black",
+        "thickness": "1px",
+        "dash": "2, 2",
+        "start": null,
+        "end": {
+          "attributes": {
+            "viewBox": "0 0 10 10",
+            "refX": "5",
+            "refY": "5",
+            "markerUnits": "userSpaceOnUse",
+            "markerWidth": "10",
+            "markerHeight": "10",
+            "orient": "auto"
+          },
+          "fill": "black",
+          "stroke": "black",
+          "width": "1px",
+          "dash": "none",
+          "points": [
+            {
+              "x": 10,
+              "y": 20
+            },
+            {
+              "x": 30,
+              "y": 40
+            }
+          ]
+        },
+        "points": [
+          {
+            "x": 15,
+            "y": 26
+          },
+          {
+            "x": 35,
+            "y": 46
+          }
+        ]
+      }
+    ],
+    "labels": [
+      {
+        "text": "hello",
+        "x": 15,
+        "y": 26,
+        "width": 30,
+        "height": 20,
+        "color": "black",
+        "font": {
+          "family": "Arial",
+          "size": "12px",
+          "weight": "400",
+          "style": "normal"
+        },
+        "characters": [
+          [
+            "A",
+            "400",
+            "normal"
+          ]
+        ],
+        "lines": [
+          "hello"
+        ]
+      }
+    ],
+    "clusters": [
+      {
+        "id": "prefix-group",
+        "label": "Group",
+        "x": 50,
+        "y": 50,
+        "width": 100,
+        "height": 100,
+        "title": {
+          "x": 50,
+          "y": 10
+        },
+        "characters": [
+          [
+            "A",
+            "400",
+            "normal"
+          ]
+        ],
+        "lines": [
+          "Group"
+        ],
+        "font": {
+          "family": "Arial",
+          "size": "12px",
+          "weight": "400",
+          "style": "normal"
+        },
+        "fill": "white",
+        "stroke": "black",
+        "thickness": "1px",
+        "dash": "none",
+        "color": "black",
+        "sketchPaths": [
+          {
+            "length": 25,
+            "stroke": "black",
+            "width": "1px",
+            "fill": "white",
+            "opacity": "1",
+            "samples": [
+              {
+                "x": 10,
+                "y": 20
+              },
+              {
+                "x": 30,
+                "y": 40
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "diagramTitle": null
+  },
+  "actual": {
+    "offset": "translate(5 6)",
+    "bounds": {
+      "x": 0,
+      "y": 0,
+      "width": 150,
+      "height": 100
+    },
+    "view": {
+      "x": 0,
+      "y": 0,
+      "width": 200,
+      "height": 200
+    },
+    "nodes": [
+      {
+        "label": "A",
+        "width": 30,
+        "height": 20,
+        "transform": "translate(30 40)",
+        "contained": true,
+        "labelCenter": {
+          "x": 35,
+          "y": 46
+        },
+        "lines": [
+          "A"
+        ],
+        "font": {
+          "family": "Arial",
+          "size": "12px",
+          "weight": "400",
+          "style": "normal"
+        },
+        "characters": [
+          [
+            "A",
+            "400",
+            "normal"
+          ]
+        ],
+        "fill": "white",
+        "stroke": "black",
+        "thickness": "1px",
+        "color": "black",
+        "dash": "none",
+        "dashSegments": [
+          [
+            "2, 2",
+            1
+          ]
+        ],
+        "filter": true,
+        "invisibleStrokes": 1,
+        "sketchPaths": [
+          {
+            "length": 25,
+            "stroke": "black",
+            "width": "1px",
+            "fill": "white",
+            "opacity": "1",
+            "samples": [
+              {
+                "x": 10,
+                "y": 20
+              },
+              {
+                "x": 30,
+                "y": 40
+              }
+            ]
+          }
+        ],
+        "outline": [
+          {
+            "x": 10,
+            "y": 20
+          },
+          {
+            "x": 30,
+            "y": 40
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "id": "e1",
+        "length": 100,
+        "stroke": "black",
+        "thickness": "1px",
+        "dash": "2, 2",
+        "start": null,
+        "end": {
+          "attributes": {
+            "viewBox": "0 0 10 10",
+            "refX": "5",
+            "refY": "5",
+            "markerUnits": "userSpaceOnUse",
+            "markerWidth": "10",
+            "markerHeight": "10",
+            "orient": "auto"
+          },
+          "fill": "black",
+          "stroke": "black",
+          "width": "1px",
+          "dash": "none",
+          "points": [
+            {
+              "x": 10,
+              "y": 20
+            },
+            {
+              "x": 30,
+              "y": 40
+            }
+          ]
+        },
+        "points": [
+          {
+            "x": 10,
+            "y": 20
+          },
+          {
+            "x": 30,
+            "y": 40
+          }
+        ]
+      }
+    ],
+    "labels": [
+      {
+        "text": "hello",
+        "x": 10,
+        "y": 20,
+        "width": 30,
+        "height": 20,
+        "color": "black",
+        "font": {
+          "family": "Arial",
+          "size": "12px",
+          "weight": "400",
+          "style": "normal"
+        },
+        "characters": [
+          [
+            "A",
+            "400",
+            "normal"
+          ]
+        ],
+        "lines": [
+          "hello"
+        ]
+      }
+    ],
+    "clusters": [
+      {
+        "id": "group",
+        "label": "Group",
+        "x": 50,
+        "y": 50,
+        "width": 100,
+        "height": 100,
+        "title": {
+          "x": 50,
+          "y": 10
+        },
+        "characters": [
+          [
+            "A",
+            "400",
+            "normal"
+          ]
+        ],
+        "lines": [
+          "Group"
+        ],
+        "font": {
+          "family": "Arial",
+          "size": "12px",
+          "weight": "400",
+          "style": "normal"
+        },
+        "fill": "white",
+        "stroke": "black",
+        "thickness": "1px",
+        "dash": "none",
+        "color": "black",
+        "sketchPaths": [
+          {
+            "length": 25,
+            "stroke": "black",
+            "width": "1px",
+            "fill": "white",
+            "opacity": "1",
+            "samples": [
+              {
+                "x": 10,
+                "y": 20
+              },
+              {
+                "x": 30,
+                "y": 40
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "diagramTitle": null
+  },
+  "cases": [
+    {
+      "id": "flowchart-plain-identical",
+      "mutations": [],
+      "accept": true
+    },
+    {
+      "id": "flowchart-plain-mutation-0",
+      "mutations": [
+        {
+          "path": [
+            "offset"
+          ],
+          "value": "translate(5 6) changed"
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "flowchart-plain-mutation-1",
+      "mutations": [
+        {
+          "path": [
+            "bounds",
+            "x"
+          ],
+          "value": 4
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "flowchart-plain-mutation-2",
+      "mutations": [
+        {
+          "path": [
+            "bounds",
+            "y"
+          ],
+          "value": 4
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "flowchart-plain-mutation-3",
+      "mutations": [
+        {
+          "path": [
+            "bounds",
+            "width"
+          ],
+          "value": 154
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "flowchart-plain-mutation-4",
+      "mutations": [
+        {
+          "path": [
+            "bounds",
+            "height"
+          ],
+          "value": 104
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "flowchart-plain-mutation-5",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "x"
+          ],
+          "value": 4
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "flowchart-plain-mutation-6",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "y"
+          ],
+          "value": 4
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "flowchart-plain-mutation-7",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "width"
+          ],
+          "value": 204
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "flowchart-plain-mutation-8",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "height"
+          ],
+          "value": 204
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "flowchart-plain-mutation-9",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "label"
+          ],
+          "value": "A changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-10",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "width"
+          ],
+          "value": 34
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-11",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "height"
+          ],
+          "value": 24
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-12",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "transform"
+          ],
+          "value": "translate(30 40) changed"
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "flowchart-plain-mutation-13",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "contained"
+          ],
+          "value": false
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-14",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "labelCenter",
+            "x"
+          ],
+          "value": 39
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-15",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "labelCenter",
+            "y"
+          ],
+          "value": 50
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-16",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "lines",
+            0
+          ],
+          "value": "A changed"
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "flowchart-plain-mutation-17",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "font",
+            "family"
+          ],
+          "value": "Arial changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-18",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "font",
+            "size"
+          ],
+          "value": "12px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-19",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "font",
+            "weight"
+          ],
+          "value": "400 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-20",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "font",
+            "style"
+          ],
+          "value": "normal changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-21",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "characters",
+            0,
+            0
+          ],
+          "value": "A changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-22",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "characters",
+            0,
+            1
+          ],
+          "value": "400 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-23",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "characters",
+            0,
+            2
+          ],
+          "value": "normal changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-24",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "fill"
+          ],
+          "value": "white changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-25",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "stroke"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-26",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "thickness"
+          ],
+          "value": "1px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-27",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "color"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-28",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "dash"
+          ],
+          "value": "none changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-29",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "dashSegments",
+            0,
+            0
+          ],
+          "value": "2, 2 changed"
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "flowchart-plain-mutation-30",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "dashSegments",
+            0,
+            1
+          ],
+          "value": 5
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "flowchart-plain-mutation-31",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "filter"
+          ],
+          "value": false
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "flowchart-plain-mutation-32",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "invisibleStrokes"
+          ],
+          "value": 5
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "flowchart-plain-mutation-33",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "sketchPaths",
+            0,
+            "length"
+          ],
+          "value": 29
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-34",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "sketchPaths",
+            0,
+            "stroke"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-35",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "sketchPaths",
+            0,
+            "width"
+          ],
+          "value": "1px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-36",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "sketchPaths",
+            0,
+            "fill"
+          ],
+          "value": "white changed"
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "flowchart-plain-mutation-37",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "sketchPaths",
+            0,
+            "opacity"
+          ],
+          "value": "1 changed"
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "flowchart-plain-mutation-38",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "sketchPaths",
+            0,
+            "samples",
+            0,
+            "x"
+          ],
+          "value": 14
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-39",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "sketchPaths",
+            0,
+            "samples",
+            0,
+            "y"
+          ],
+          "value": 24
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-40",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "sketchPaths",
+            0,
+            "samples",
+            1,
+            "x"
+          ],
+          "value": 34
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-41",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "sketchPaths",
+            0,
+            "samples",
+            1,
+            "y"
+          ],
+          "value": 44
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-42",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "outline",
+            0,
+            "x"
+          ],
+          "value": 14
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-43",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "outline",
+            0,
+            "y"
+          ],
+          "value": 24
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-44",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "outline",
+            1,
+            "x"
+          ],
+          "value": 34
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-45",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "outline",
+            1,
+            "y"
+          ],
+          "value": 44
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-46",
+      "mutations": [
+        {
+          "path": [
+            "edges",
+            0,
+            "id"
+          ],
+          "value": "e1 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-47",
+      "mutations": [
+        {
+          "path": [
+            "edges",
+            0,
+            "length"
+          ],
+          "value": 104
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-48",
+      "mutations": [
+        {
+          "path": [
+            "edges",
+            0,
+            "stroke"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-49",
+      "mutations": [
+        {
+          "path": [
+            "edges",
+            0,
+            "thickness"
+          ],
+          "value": "1px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-50",
+      "mutations": [
+        {
+          "path": [
+            "edges",
+            0,
+            "dash"
+          ],
+          "value": "2, 2 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-51",
+      "mutations": [
+        {
+          "path": [
+            "edges",
+            0,
+            "start"
+          ],
+          "value": {
+            "unexpected": 1
+          }
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-52",
+      "mutations": [
+        {
+          "path": [
+            "edges",
+            0,
+            "end",
+            "attributes",
+            "viewBox"
+          ],
+          "value": "0 0 10 10 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-53",
+      "mutations": [
+        {
+          "path": [
+            "edges",
+            0,
+            "end",
+            "attributes",
+            "refX"
+          ],
+          "value": "5 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-54",
+      "mutations": [
+        {
+          "path": [
+            "edges",
+            0,
+            "end",
+            "attributes",
+            "refY"
+          ],
+          "value": "5 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-55",
+      "mutations": [
+        {
+          "path": [
+            "edges",
+            0,
+            "end",
+            "attributes",
+            "markerUnits"
+          ],
+          "value": "userSpaceOnUse changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-56",
+      "mutations": [
+        {
+          "path": [
+            "edges",
+            0,
+            "end",
+            "attributes",
+            "markerWidth"
+          ],
+          "value": "10 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-57",
+      "mutations": [
+        {
+          "path": [
+            "edges",
+            0,
+            "end",
+            "attributes",
+            "markerHeight"
+          ],
+          "value": "10 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-58",
+      "mutations": [
+        {
+          "path": [
+            "edges",
+            0,
+            "end",
+            "attributes",
+            "orient"
+          ],
+          "value": "auto changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-59",
+      "mutations": [
+        {
+          "path": [
+            "edges",
+            0,
+            "end",
+            "fill"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-60",
+      "mutations": [
+        {
+          "path": [
+            "edges",
+            0,
+            "end",
+            "stroke"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-61",
+      "mutations": [
+        {
+          "path": [
+            "edges",
+            0,
+            "end",
+            "width"
+          ],
+          "value": "1px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-62",
+      "mutations": [
+        {
+          "path": [
+            "edges",
+            0,
+            "end",
+            "dash"
+          ],
+          "value": "none changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-63",
+      "mutations": [
+        {
+          "path": [
+            "edges",
+            0,
+            "end",
+            "points",
+            0,
+            "x"
+          ],
+          "value": 14
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-64",
+      "mutations": [
+        {
+          "path": [
+            "edges",
+            0,
+            "end",
+            "points",
+            0,
+            "y"
+          ],
+          "value": 24
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-65",
+      "mutations": [
+        {
+          "path": [
+            "edges",
+            0,
+            "end",
+            "points",
+            1,
+            "x"
+          ],
+          "value": 34
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-66",
+      "mutations": [
+        {
+          "path": [
+            "edges",
+            0,
+            "end",
+            "points",
+            1,
+            "y"
+          ],
+          "value": 44
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-67",
+      "mutations": [
+        {
+          "path": [
+            "edges",
+            0,
+            "points",
+            0,
+            "x"
+          ],
+          "value": 14
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-68",
+      "mutations": [
+        {
+          "path": [
+            "edges",
+            0,
+            "points",
+            0,
+            "y"
+          ],
+          "value": 24
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-69",
+      "mutations": [
+        {
+          "path": [
+            "edges",
+            0,
+            "points",
+            1,
+            "x"
+          ],
+          "value": 34
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-70",
+      "mutations": [
+        {
+          "path": [
+            "edges",
+            0,
+            "points",
+            1,
+            "y"
+          ],
+          "value": 44
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-71",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "text"
+          ],
+          "value": "hello changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-72",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "x"
+          ],
+          "value": 14
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-73",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "y"
+          ],
+          "value": 24
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-74",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "width"
+          ],
+          "value": 34
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-75",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "height"
+          ],
+          "value": 24
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-76",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "color"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-77",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "font",
+            "family"
+          ],
+          "value": "Arial changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-78",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "font",
+            "size"
+          ],
+          "value": "12px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-79",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "font",
+            "weight"
+          ],
+          "value": "400 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-80",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "font",
+            "style"
+          ],
+          "value": "normal changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-81",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "characters",
+            0,
+            0
+          ],
+          "value": "A changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-82",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "characters",
+            0,
+            1
+          ],
+          "value": "400 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-83",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "characters",
+            0,
+            2
+          ],
+          "value": "normal changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-84",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "lines",
+            0
+          ],
+          "value": "hello changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-85",
+      "mutations": [
+        {
+          "path": [
+            "clusters",
+            0,
+            "id"
+          ],
+          "value": "group changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-86",
+      "mutations": [
+        {
+          "path": [
+            "clusters",
+            0,
+            "label"
+          ],
+          "value": "Group changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-87",
+      "mutations": [
+        {
+          "path": [
+            "clusters",
+            0,
+            "x"
+          ],
+          "value": 54
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-88",
+      "mutations": [
+        {
+          "path": [
+            "clusters",
+            0,
+            "y"
+          ],
+          "value": 54
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-89",
+      "mutations": [
+        {
+          "path": [
+            "clusters",
+            0,
+            "width"
+          ],
+          "value": 104
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-90",
+      "mutations": [
+        {
+          "path": [
+            "clusters",
+            0,
+            "height"
+          ],
+          "value": 104
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-91",
+      "mutations": [
+        {
+          "path": [
+            "clusters",
+            0,
+            "title",
+            "x"
+          ],
+          "value": 54
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-92",
+      "mutations": [
+        {
+          "path": [
+            "clusters",
+            0,
+            "title",
+            "y"
+          ],
+          "value": 14
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-93",
+      "mutations": [
+        {
+          "path": [
+            "clusters",
+            0,
+            "characters",
+            0,
+            0
+          ],
+          "value": "A changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-94",
+      "mutations": [
+        {
+          "path": [
+            "clusters",
+            0,
+            "characters",
+            0,
+            1
+          ],
+          "value": "400 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-95",
+      "mutations": [
+        {
+          "path": [
+            "clusters",
+            0,
+            "characters",
+            0,
+            2
+          ],
+          "value": "normal changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-96",
+      "mutations": [
+        {
+          "path": [
+            "clusters",
+            0,
+            "lines",
+            0
+          ],
+          "value": "Group changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-97",
+      "mutations": [
+        {
+          "path": [
+            "clusters",
+            0,
+            "font",
+            "family"
+          ],
+          "value": "Arial changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-98",
+      "mutations": [
+        {
+          "path": [
+            "clusters",
+            0,
+            "font",
+            "size"
+          ],
+          "value": "12px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-99",
+      "mutations": [
+        {
+          "path": [
+            "clusters",
+            0,
+            "font",
+            "weight"
+          ],
+          "value": "400 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-100",
+      "mutations": [
+        {
+          "path": [
+            "clusters",
+            0,
+            "font",
+            "style"
+          ],
+          "value": "normal changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-101",
+      "mutations": [
+        {
+          "path": [
+            "clusters",
+            0,
+            "fill"
+          ],
+          "value": "white changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-102",
+      "mutations": [
+        {
+          "path": [
+            "clusters",
+            0,
+            "stroke"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-103",
+      "mutations": [
+        {
+          "path": [
+            "clusters",
+            0,
+            "thickness"
+          ],
+          "value": "1px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-104",
+      "mutations": [
+        {
+          "path": [
+            "clusters",
+            0,
+            "dash"
+          ],
+          "value": "none changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-105",
+      "mutations": [
+        {
+          "path": [
+            "clusters",
+            0,
+            "color"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-106",
+      "mutations": [
+        {
+          "path": [
+            "clusters",
+            0,
+            "sketchPaths",
+            0,
+            "length"
+          ],
+          "value": 29
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-107",
+      "mutations": [
+        {
+          "path": [
+            "clusters",
+            0,
+            "sketchPaths",
+            0,
+            "stroke"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-108",
+      "mutations": [
+        {
+          "path": [
+            "clusters",
+            0,
+            "sketchPaths",
+            0,
+            "width"
+          ],
+          "value": "1px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-109",
+      "mutations": [
+        {
+          "path": [
+            "clusters",
+            0,
+            "sketchPaths",
+            0,
+            "fill"
+          ],
+          "value": "white changed"
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "flowchart-plain-mutation-110",
+      "mutations": [
+        {
+          "path": [
+            "clusters",
+            0,
+            "sketchPaths",
+            0,
+            "opacity"
+          ],
+          "value": "1 changed"
+        }
+      ],
+      "accept": true
+    },
+    {
+      "id": "flowchart-plain-mutation-111",
+      "mutations": [
+        {
+          "path": [
+            "clusters",
+            0,
+            "sketchPaths",
+            0,
+            "samples",
+            0,
+            "x"
+          ],
+          "value": 14
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-112",
+      "mutations": [
+        {
+          "path": [
+            "clusters",
+            0,
+            "sketchPaths",
+            0,
+            "samples",
+            0,
+            "y"
+          ],
+          "value": 24
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-113",
+      "mutations": [
+        {
+          "path": [
+            "clusters",
+            0,
+            "sketchPaths",
+            0,
+            "samples",
+            1,
+            "x"
+          ],
+          "value": 34
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-114",
+      "mutations": [
+        {
+          "path": [
+            "clusters",
+            0,
+            "sketchPaths",
+            0,
+            "samples",
+            1,
+            "y"
+          ],
+          "value": 44
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-mutation-115",
+      "mutations": [
+        {
+          "path": [
+            "diagramTitle"
+          ],
+          "value": {
+            "unexpected": 1
+          }
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-missing-nodes",
+      "mutations": [
+        {
+          "path": [
+            "nodes"
+          ],
+          "value": []
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-missing-edges",
+      "mutations": [
+        {
+          "path": [
+            "edges"
+          ],
+          "value": []
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-missing-labels",
+      "mutations": [
+        {
+          "path": [
+            "labels"
+          ],
+          "value": []
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-missing-clusters",
+      "mutations": [
+        {
+          "path": [
+            "clusters"
+          ],
+          "value": []
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-missing-route-points",
+      "mutations": [
+        {
+          "path": [
+            "edges",
+            0,
+            "points"
+          ],
+          "value": []
+        }
+      ],
+      "note": "Missing sample points escaped the old loop; absent geometry now fails.",
+      "accept": false
+    },
+    {
+      "id": "flowchart-plain-solid-zero-dash",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "dash"
+          ],
+          "value": "0px, 0px"
+        }
+      ],
+      "accept": true
+    }
+  ]
+}
