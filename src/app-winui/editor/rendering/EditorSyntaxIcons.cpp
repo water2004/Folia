@@ -1,39 +1,12 @@
 #include "pch.h"
+
+import folia.platform.editor_inline_layout;
 #include "editor/rendering/EditorSyntaxIcons.h"
 
 namespace winrt::Folia
 {
     namespace
     {
-        class SyntaxIconObject final : public ::Microsoft::WRL::RuntimeClass<
-            ::Microsoft::WRL::RuntimeClassFlags<::Microsoft::WRL::ClassicCom>, IDWriteInlineObject>
-        {
-        public:
-            SyntaxIconObject(float advance, float size) : advance(advance), size(size) {}
-            IFACEMETHODIMP Draw(void*, IDWriteTextRenderer*, FLOAT, FLOAT, BOOL, BOOL, IUnknown*) override
-            { return S_OK; } // The painter draws this indivisible SVG in the reserved bounds.
-            IFACEMETHODIMP GetMetrics(DWRITE_INLINE_OBJECT_METRICS* metrics) override
-            {
-                if (!metrics) return E_POINTER;
-                *metrics = {advance, size, size * .8f, FALSE};
-                return S_OK;
-            }
-            IFACEMETHODIMP GetOverhangMetrics(DWRITE_OVERHANG_METRICS* metrics) override
-            {
-                if (!metrics) return E_POINTER;
-                *metrics = {};
-                return S_OK;
-            }
-            IFACEMETHODIMP GetBreakConditions(DWRITE_BREAK_CONDITION* before, DWRITE_BREAK_CONDITION* after) override
-            {
-                if (!before || !after) return E_POINTER;
-                *before = *after = DWRITE_BREAK_CONDITION_CAN_BREAK;
-                return S_OK;
-            }
-        private:
-            float advance, size;
-        };
-
         ::Microsoft::WRL::ComPtr<ID2D1SvgDocument> LoadIcon(ID2D1DeviceContext5* context, std::string const& source)
         {
             ::Microsoft::WRL::ComPtr<IStream> stream;
@@ -49,7 +22,8 @@ namespace winrt::Folia
     void ApplySyntaxIconObject(IDWriteTextLayout* layout, UINT32 start, UINT32 length, float size, float gap)
     {
         if (!layout || length == 0) return;
-        auto object = ::Microsoft::WRL::Make<SyntaxIconObject>(size + 2 * gap, size);
+        auto object = folia::platform::editor::CreateInlinePlaceholder(
+            {size + 2 * gap, size, size * .8f, FALSE}, DWRITE_BREAK_CONDITION_CAN_BREAK, DWRITE_BREAK_CONDITION_CAN_BREAK);
         winrt::check_hresult(layout->SetInlineObject(object.Get(), {start, length}));
     }
 

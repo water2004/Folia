@@ -1,7 +1,9 @@
-#include "pch.h"
-#include "media/TreeSitterHighlighter.h"
-
+module;
 #include "tree_sitter/api.h"
+
+module folia.highlight;
+import std;
+import folia.math.editor.syntax;
 
 extern "C"
 {
@@ -109,9 +111,9 @@ namespace
         return false;
     }
 
-    winrt::Folia::SyntaxHighlightKind ClassifyLeaf(TSNode node, winrt::Folia::SyntaxHighlightKind inherited)
+    folia::highlight::SyntaxHighlightKind ClassifyLeaf(TSNode node, folia::highlight::SyntaxHighlightKind inherited)
     {
-        using Kind = winrt::Folia::SyntaxHighlightKind;
+        using Kind = folia::highlight::SyntaxHighlightKind;
         if (inherited != Kind::None) return inherited;
         std::string_view type = ts_node_type(node);
         if (Contains(type, "comment")) return Kind::Comment;
@@ -127,9 +129,9 @@ namespace
         return Kind::None;
     }
 
-    winrt::Folia::SyntaxHighlightKind InheritedKind(TSNode node, winrt::Folia::SyntaxHighlightKind inherited)
+    folia::highlight::SyntaxHighlightKind InheritedKind(TSNode node, folia::highlight::SyntaxHighlightKind inherited)
     {
-        using Kind = winrt::Folia::SyntaxHighlightKind;
+        using Kind = folia::highlight::SyntaxHighlightKind;
         std::string_view type = ts_node_type(node);
         // Embedded expressions are code even though their surrounding template
         // or formatted string owns string-colored literal fragments.
@@ -140,7 +142,7 @@ namespace
         return Kind::None;
     }
 
-    void Collect(TSNode node, winrt::Folia::SyntaxHighlightKind inherited, std::vector<winrt::Folia::SyntaxHighlightRange>& ranges, std::vector<std::uint32_t> const& byteToCodepoint)
+    void Collect(TSNode node, folia::highlight::SyntaxHighlightKind inherited, std::vector<folia::highlight::SyntaxHighlightRange>& ranges, std::vector<std::uint32_t> const& byteToCodepoint)
     {
         inherited = InheritedKind(node, inherited);
         auto childCount = ts_node_child_count(node);
@@ -150,7 +152,7 @@ namespace
             auto endByte = (std::min)(static_cast<std::size_t>(ts_node_end_byte(node)), byteToCodepoint.size() - 1);
             auto start = byteToCodepoint[startByte];
             auto end = byteToCodepoint[endByte];
-            if (kind != winrt::Folia::SyntaxHighlightKind::None && start < end) ranges.push_back({start, end - start, kind});
+            if (kind != folia::highlight::SyntaxHighlightKind::None && start < end) ranges.push_back({start, end - start, kind});
             return;
         }
         for (std::uint32_t index = 0; index < childCount; ++index) Collect(ts_node_child(node, index), inherited, ranges, byteToCodepoint);
@@ -173,7 +175,7 @@ namespace
     }
 }
 
-namespace winrt::Folia
+namespace folia::highlight
 {
     struct TreeSitterHighlighter::State
     {

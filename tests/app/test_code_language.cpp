@@ -1,11 +1,12 @@
 #include "pch.h"
 #include "support/folia_test.hpp"
-#include "media/TreeSitterHighlighter.h"
+import folia.highlight;
 #include "editor/interaction/CodeLanguageChoices.h"
 #include "editor/interaction/EditorCodeLanguageController.h"
 #include <winrt/Microsoft.UI.Xaml.Hosting.h>
 
 using namespace boost::ut;
+using namespace folia::highlight;
 using namespace winrt::Folia;
 
 namespace

@@ -8,7 +8,7 @@ namespace {
     using namespace boost::ut;
     using namespace document_tests;
     using namespace winrt::Folia;
-    using Kind = WorkspaceFileActionKind;
+    using Kind = folia::platform::WorkspaceFileActionKind;
     suite workspace_file_coordinator_tests = [] {
         "workspace file coordinator moves dirty directory tabs without rebuilding their documents"_test = [] {
             Fixture f;

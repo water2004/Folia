@@ -58,6 +58,9 @@
     <Filter Include="Platform Modules\Storage">
       <UniqueIdentifier>{086ca1e7-05ca-4ed6-9bcf-28f555569323}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Highlight Modules">
+      <UniqueIdentifier>{c0fe4eb5-79c1-4bf3-90cf-ab16a159ceb2}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Encoding Modules">
       <UniqueIdentifier>{ef44d0f2-5c53-4906-942c-215f935641b8}</UniqueIdentifier>
     </Filter>
@@ -95,6 +98,12 @@
     </ClCompile>
     <ClCompile Include="..\core\rendering\block_geometry.ixx">
       <Filter>Core Modules\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\platform\windows\editor\layout\editor_inline_projection.ixx">
+      <Filter>Platform Modules\Windows Editor</Filter>
+    </ClCompile>
+    <ClCompile Include="..\platform\windows\editor\layout\editor_inline_layout.ixx">
+      <Filter>Platform Modules\Windows Editor</Filter>
     </ClCompile>
     <ClCompile Include="..\platform\windows\editor\layout\editor_display_mapping.ixx">
       <Filter>Platform Modules\Windows Editor</Filter>
@@ -417,6 +426,9 @@
     <ClCompile Include="MainWindow.Settings.cpp">
       <Filter>Settings</Filter>
     </ClCompile>
+    <ClCompile Include="..\platform\windows\storage\WorkspaceFileOperations.cpp">
+      <Filter>Platform Modules\Storage</Filter>
+    </ClCompile>
     <ClCompile Include="..\platform\windows\storage\ClipboardImageStore.cpp">
       <Filter>Platform Modules\Storage</Filter>
     </ClCompile>
@@ -437,6 +449,27 @@
     </ClCompile>
     <ClCompile Include="editor\session\EditorSession.Search.cpp">
       <Filter>Editor\Session</Filter>
+    </ClCompile>
+    <ClCompile Include="..\platform\windows\media\math\MathJaxRenderer.Batch.cpp">
+      <Filter>Platform Modules\Media</Filter>
+    </ClCompile>
+    <ClCompile Include="..\platform\windows\media\math\MathJaxRenderer.Cache.cpp">
+      <Filter>Platform Modules\Media</Filter>
+    </ClCompile>
+    <ClCompile Include="..\platform\windows\media\math\MathJaxRenderer.Worker.cpp">
+      <Filter>Platform Modules\Media</Filter>
+    </ClCompile>
+    <ClCompile Include="..\platform\windows\media\math\MathSvgStore.cpp">
+      <Filter>Platform Modules\Media</Filter>
+    </ClCompile>
+    <ClCompile Include="..\platform\windows\media\math\NativeMathSession.cpp">
+      <Filter>Platform Modules\Media</Filter>
+    </ClCompile>
+    <ClCompile Include="..\platform\windows\media\images\ImageSource.cpp">
+      <Filter>Platform Modules\Media</Filter>
+    </ClCompile>
+    <ClCompile Include="..\platform\windows\media\images\ImageDownload.cpp">
+      <Filter>Platform Modules\Media</Filter>
     </ClCompile>
     <ClCompile Include="..\platform\windows\media\images\EditorGifDecoder.cpp">
       <Filter>Platform Modules\Media</Filter>
@@ -573,8 +606,11 @@
     <ClCompile Include="..\platform\windows\media\svg\SvgNormalizer.cpp">
       <Filter>Platform Modules\Media</Filter>
     </ClCompile>
-    <ClCompile Include="media\TreeSitterHighlighter.cpp">
-      <Filter>Media Services</Filter>
+    <ClCompile Include="..\highlight\highlight.ixx">
+      <Filter>Highlight Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="..\highlight\highlight.cpp">
+      <Filter>Highlight Modules</Filter>
     </ClCompile>
     <ClCompile Include="..\..\third_party\tree-sitter\runtime\lib.c">
       <Filter>Third Party</Filter>
@@ -671,8 +707,26 @@
     <ClInclude Include="..\platform\windows\media\ExecutableLibrary.h">
       <Filter>Platform Modules\Media</Filter>
     </ClInclude>
+    <ClInclude Include="..\platform\windows\storage\WorkspaceFileOperations.h">
+      <Filter>Platform Modules\Storage</Filter>
+    </ClInclude>
     <ClInclude Include="..\platform\windows\storage\ClipboardImageStore.h">
       <Filter>Platform Modules\Storage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\platform\windows\media\math\MathJaxRenderer.State.h">
+      <Filter>Platform Modules\Media</Filter>
+    </ClInclude>
+    <ClInclude Include="..\platform\windows\media\math\MathSvgStore.h">
+      <Filter>Platform Modules\Media</Filter>
+    </ClInclude>
+    <ClInclude Include="..\platform\windows\media\math\NativeMathSession.h">
+      <Filter>Platform Modules\Media</Filter>
+    </ClInclude>
+    <ClInclude Include="..\platform\windows\media\images\ImageSource.h">
+      <Filter>Platform Modules\Media</Filter>
+    </ClInclude>
+    <ClInclude Include="..\platform\windows\media\images\ImageDownload.h">
+      <Filter>Platform Modules\Media</Filter>
     </ClInclude>
     <ClInclude Include="..\platform\windows\media\images\EditorGifDecoder.h">
       <Filter>Platform Modules\Media</Filter>
@@ -766,9 +820,6 @@
     </ClInclude>
     <ClInclude Include="..\platform\windows\media\svg\SvgNormalizer.h">
       <Filter>Platform Modules\Media</Filter>
-    </ClInclude>
-    <ClInclude Include="media\TreeSitterHighlighter.h">
-      <Filter>Media Services</Filter>
     </ClInclude>
     <ClInclude Include="App.xaml.h">
       <Filter>Application Shell</Filter>

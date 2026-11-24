@@ -187,10 +187,11 @@
     <ClInclude Include="editor\rendering\EditorCaretAnimation.h" />
     <ClInclude Include="editor\interaction\EditorAnimationController.h" />
     <ClInclude Include="..\platform\windows\media\ExecutableLibrary.h" />
+    <ClInclude Include="..\platform\windows\media\images\ImageSource.h" />
+    <ClInclude Include="..\platform\windows\media\images\ImageDownload.h" />
     <ClInclude Include="..\platform\windows\media\images\EditorGifDecoder.h" />
     <ClInclude Include="editor\rendering\EditorRenderCache.h" />
     <ClInclude Include="editor\rendering\EditorImageCache.h" />
-    <ClInclude Include="media\ImageSource.h" />
     <ClInclude Include="media\ImageResourceCache.h" />
     <ClInclude Include="editor\rendering\EditorSvgPainter.h" />
     <ClInclude Include="editor\rendering\EditorSyntaxIcons.h" />
@@ -210,7 +211,7 @@
     <ClInclude Include="editor\interaction\EditorDocumentController.h" />
     <ClInclude Include="workspace\WorkspaceDocuments.h" />
     <ClInclude Include="workspace\WorkspaceIcons.h" />
-    <ClInclude Include="workspace\WorkspaceFileOperations.h" />
+    <ClInclude Include="..\platform\windows\storage\WorkspaceFileOperations.h" />
     <ClInclude Include="workspace\FolderEntry.h" />
     <ClInclude Include="workspace\FolderExplorerView.h" />
     <ClInclude Include="workspace\FolderExplorerState.h" />
@@ -235,7 +236,6 @@
     <ClInclude Include="..\platform\windows\media\mermaid\MermaidRenderer.h" />
     <ClInclude Include="media\MediaDisplaySettings.h" />
     <ClInclude Include="..\platform\windows\media\svg\SvgNormalizer.h" />
-    <ClInclude Include="media\TreeSitterHighlighter.h" />
     <ClInclude Include="App.xaml.h">
       <DependentUpon>App.xaml</DependentUpon>
     </ClInclude>
@@ -413,6 +413,12 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\core\rendering\render_fragments.ixx">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\platform\windows\editor\layout\editor_inline_projection.ixx">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\platform\windows\editor\layout\editor_inline_layout.ixx">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\platform\windows\editor\layout\editor_display_mapping.ixx">
@@ -658,6 +664,12 @@
     <ClCompile Include="MainWindow.Search.cpp">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </ClCompile>
+    <ClCompile Include="..\platform\windows\media\images\ImageSource.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\platform\windows\media\images\ImageDownload.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="..\platform\windows\media\images\EditorGifDecoder.cpp">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
@@ -682,7 +694,6 @@
     <ClCompile Include="editor\rendering\EditorRenderResources.cpp" />
     <ClCompile Include="editor\rendering\EditorRenderCache.cpp" />
     <ClCompile Include="editor\rendering\EditorImageCache.cpp" />
-    <ClCompile Include="media\ImageSource.cpp" />
     <ClCompile Include="media\ImageResourceCache.cpp" />
     <ClCompile Include="editor\rendering\EditorRenderCache.Layout.cpp" />
     <ClCompile Include="editor\rendering\EditorSvgPainter.cpp" />
@@ -704,7 +715,9 @@
     <ClCompile Include="editor\interaction\EditorDocumentController.cpp" />
     <ClCompile Include="workspace\WorkspaceDocuments.cpp" />
     <ClCompile Include="workspace\WorkspaceIcons.cpp" />
-    <ClCompile Include="workspace\WorkspaceFileOperations.cpp" />
+    <ClCompile Include="..\platform\windows\storage\WorkspaceFileOperations.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="workspace\FolderExplorerView.cpp" />
     <ClCompile Include="workspace\FolderExplorerController.Editing.cpp" />
     <ClCompile Include="workspace\FolderExplorerController.DragDrop.cpp" />
@@ -756,7 +769,11 @@
     <ClCompile Include="..\platform\windows\media\svg\SvgNormalizer.cpp">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="media\TreeSitterHighlighter.cpp">
+    <ClCompile Include="..\highlight\highlight.ixx">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\highlight\highlight.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <AdditionalIncludeDirectories>..\..\third_party\tree-sitter\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="..\math\editor\syntax.ixx">

@@ -1,9 +1,13 @@
 #pragma once
-#include "media/ImageSource.h"
+#include "windows/media/images/ImageSource.h"
+#include "windows/media/images/ImageDownload.h"
 
 namespace winrt::Folia
 {
-    enum class ImageFetchKind { Content, Dimensions };
+    using folia::platform::ImageDimensions;
+    using folia::platform::ImageFetchKind;
+    namespace image_source = folia::platform::image_source;
+
     enum class ImageResourceStatus { Missing, Pending, Ready, Failed };
     using EncodedImage = std::shared_ptr<std::vector<std::uint8_t> const>;
 
@@ -19,7 +23,7 @@ namespace winrt::Folia
     {
         struct State;
     public:
-        using Completion = std::function<void(std::vector<std::uint8_t>)>;
+        using Completion = folia::platform::ImageDownloadCompletion;
         using Fetch = std::function<void(std::string, ImageFetchKind, Completion)>;
         explicit ImageResourceCache(Fetch fetch = {});
         ~ImageResourceCache();

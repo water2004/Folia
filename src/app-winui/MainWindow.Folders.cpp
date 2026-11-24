@@ -37,20 +37,20 @@ namespace winrt::Folia::implementation {
         } catch (winrt::hresult_error const& error) { SetStatus(LocalizeFormat(L"StatusFolderFailed", {error.message()})); }
         catch (std::exception const& error) { SetStatus(LocalizeFormat(L"StatusFolderFailed", {winrt::to_hstring(error.what())})); }
     }
-    Windows::Foundation::IAsyncOperation<winrt::hstring> MainWindow::ApplyExplorerActionAsync(winrt::Folia::WorkspaceFileAction action) {
+    Windows::Foundation::IAsyncOperation<winrt::hstring> MainWindow::ApplyExplorerActionAsync(folia::platform::WorkspaceFileAction action) {
         if (windowClosed || closePending || closingDocument || relocatingFiles) throw winrt::hresult_illegal_method_call();
         auto lifetime = get_strong();
-        const bool relocate = action.kind == winrt::Folia::WorkspaceFileActionKind::Move || action.kind == winrt::Folia::WorkspaceFileActionKind::Rename;
+        const bool relocate = action.kind == folia::platform::WorkspaceFileActionKind::Move || action.kind == folia::platform::WorkspaceFileActionKind::Rename;
         relocatingFiles = relocate;
         UpdateLoadingState();
         struct ProgressState {
             std::mutex mutex;
-            winrt::Folia::WorkspaceFileProgress latest;
+            folia::platform::WorkspaceFileProgress latest;
             bool queued = false, finished = false;
         };
         auto progress = std::make_shared<ProgressState>();
         auto dispatcher = DispatcherQueue();
-        const auto label = std::wstring(action.kind == winrt::Folia::WorkspaceFileActionKind::Copy ? L"CopyingFile"
+        const auto label = std::wstring(action.kind == folia::platform::WorkspaceFileActionKind::Copy ? L"CopyingFile"
             : relocate ? L"MovingFile" : L"CreatingFile");
         FileOperationText().Text(LocalizeFormat(label.c_str(), {winrt::hstring(action.target.filename().c_str())}));
         FileOperationProgress().IsIndeterminate(true);
@@ -72,7 +72,7 @@ namespace winrt::Folia::implementation {
                 if (!window.windowClosed) window.FileOperationPanel().Visibility(Microsoft::UI::Xaml::Visibility::Collapsed);
             }
         } pending{*this, progress, timer};
-        auto report = [weak = get_weak(), dispatcher, progress, label](winrt::Folia::WorkspaceFileProgress const& value) {
+        auto report = [weak = get_weak(), dispatcher, progress, label](folia::platform::WorkspaceFileProgress const& value) {
             {
                 std::scoped_lock lock(progress->mutex);
                 if (progress->finished) return;
@@ -81,7 +81,7 @@ namespace winrt::Folia::implementation {
                 progress->queued = true;
             }
             dispatcher.TryEnqueue(Microsoft::UI::Dispatching::DispatcherQueuePriority::Low, [weak, progress, label] {
-                winrt::Folia::WorkspaceFileProgress value;
+                folia::platform::WorkspaceFileProgress value;
                 {
                     std::scoped_lock lock(progress->mutex);
                     progress->queued = false;

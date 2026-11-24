@@ -1,5 +1,7 @@
 add_library(folia_windows_media STATIC
     images/EditorGifDecoder.cpp
+    images/ImageDownload.cpp
+    images/ImageSource.cpp
     math/MathJaxRenderer.cpp
     math/MathJaxRenderer.Batch.cpp
     math/MathJaxRenderer.Cache.cpp

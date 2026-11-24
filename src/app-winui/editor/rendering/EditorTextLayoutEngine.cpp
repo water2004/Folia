@@ -11,6 +11,8 @@ import folia.markdown.utf;
 
 namespace winrt::Folia
 {
+    using folia::platform::editor::CodeSpanRanges;
+
     EditorTextLayoutEngine::EditorTextLayoutEngine(EditorRenderResources& resources, EditorStyleSheet const& styleSheet)
         : resources(resources), styleSheet(styleSheet)
     {
@@ -26,20 +28,6 @@ namespace winrt::Folia
 
     namespace
     {
-        struct CodeSpanRange { UINT32 start, length; folia::InlineStyle const* style; };
-        std::vector<CodeSpanRange> CodeSpanRanges(std::vector<InlineStyleRange> const& ranges)
-        {
-            std::vector<CodeSpanRange> spans;
-            for (auto const& range : ranges) {
-                if (range.marker || range.length == 0 || range.style.code != folia::CodeStyle::Inline) continue;
-                if (!spans.empty() && spans.back().start + spans.back().length == range.start
-                    && spans.back().style->code_span_id == range.style.code_span_id)
-                    spans.back().length += range.length;
-                else spans.push_back({range.start, range.length, &range.style});
-            }
-            return spans;
-        }
-
         void ApplyCodeSpanSpacing(IDWriteTextLayout* layout, std::vector<InlineStyleRange> const& ranges)
         {
             auto spans = CodeSpanRanges(ranges);
@@ -94,25 +82,9 @@ namespace winrt::Folia
             return result;
         }
 
-        std::size_t CodepointIndexAtUtf16(std::u32string_view text, UINT32 utf16Offset)
-        {
-            std::size_t index = 0;
-            UINT32 current = 0;
-            while (index < text.size() && current < utf16Offset)
-            {
-                current += text[index] > 0xffff ? 2u : 1u;
-                ++index;
-            }
-            return index;
-        }
-
         void ShiftRangesForInsertion(DisplayInlineText& display, UINT32 position)
         {
-            for (auto& range : display.ranges)
-            {
-                if (range.start >= position) ++range.start;
-                else if (range.start + range.length > position) ++range.length;
-            }
+            folia::platform::editor::ShiftStyleRangesForInsertion(display, position);
             for (auto& overlay : display.mathOverlays) if (overlay.displayStart >= position) ++overlay.displayStart;
             for (auto& overlay : display.imageOverlays) if (overlay.displayStart >= position) ++overlay.displayStart;
             for (auto& overlay : display.mermaidOverlays) if (overlay.displayStart >= position) ++overlay.displayStart;
@@ -133,7 +105,7 @@ namespace winrt::Folia
                     : display.displayToSource.back();
             mapping.affinity = folia::TextAffinity::Downstream;
             mapping.kind = EditorDisplayPositionKind::BoundaryDecoration;
-            display.text.insert(display.text.begin() + static_cast<std::ptrdiff_t>(CodepointIndexAtUtf16(display.text, position)), U'\uFFFC');
+            display.text.insert(display.text.begin() + static_cast<std::ptrdiff_t>(folia::utf16_to_char_index(display.text, position)), U'\uFFFC');
             auto mappingIndex = (std::min)(static_cast<std::size_t>(position), display.displayToSource.size());
             display.displayToSource.insert(display.displayToSource.begin() + static_cast<std::ptrdiff_t>(mappingIndex), mapping);
             ShiftRangesForInsertion(display, position);
@@ -142,38 +114,12 @@ namespace winrt::Folia
 
         DisplayInlineText SliceDisplay(DisplayInlineText const& source, UINT32 start, UINT32 end)
         {
-            DisplayInlineText result;
-            result.mathBrackets = source.mathBrackets;
-            result.pendingMermaid = source.pendingMermaid;
             const auto sourceLength = static_cast<UINT32>(folia::utf16_len(source.text));
             start = (std::min)(start, sourceLength);
             end = (std::clamp)(end, start, sourceLength);
-            const auto beginCodepoint = CodepointIndexAtUtf16(source.text, start);
-            const auto endCodepoint = CodepointIndexAtUtf16(source.text, end);
-            result.text = source.text.substr(beginCodepoint, endCodepoint - beginCodepoint);
-            if (start < source.displayToSource.size())
-            {
-                const auto mappingEnd = (std::min)(static_cast<std::size_t>(end), source.displayToSource.size());
-                result.displayToSource.insert(result.displayToSource.end(),
-                    source.displayToSource.begin() + static_cast<std::ptrdiff_t>(start),
-                    source.displayToSource.begin() + static_cast<std::ptrdiff_t>(mappingEnd));
-            }
-            EditorDisplayPosition endPosition = end < source.displayToSource.size()
-                ? source.displayToSource[end]
-                : source.displayToSource.empty() ? EditorDisplayPosition{} : source.displayToSource.back();
-            result.displayToSource.push_back(endPosition);
-
-            for (auto const& range : source.ranges)
-            {
-                const auto rangeEnd = range.start + range.length;
-                const auto overlapStart = (std::max)(start, range.start);
-                const auto overlapEnd = (std::min)(end, rangeEnd);
-                if (overlapStart >= overlapEnd) continue;
-                auto sliced = range;
-                sliced.start = overlapStart - start;
-                sliced.length = overlapEnd - overlapStart;
-                result.ranges.push_back(std::move(sliced));
-            }
+            DisplayInlineText result{folia::platform::editor::SliceInlineProjection(source, start, end)};
+            result.mathBrackets = source.mathBrackets;
+            result.pendingMermaid = source.pendingMermaid;
             for (auto overlay : source.mathOverlays)
             {
                 if (overlay.displayStart < start || overlay.displayStart >= end) continue;
@@ -277,78 +223,6 @@ namespace winrt::Folia
             }
             return style.code != folia::CodeStyle::None ? styleSheet.code.lineHeight : styleSheet.body.lineHeight;
         }
-    }
-
-    static std::vector<DWRITE_HIT_TEST_METRICS> InlineRangeMetrics(
-        IDWriteTextLayout* layout, UINT32 start, UINT32 length, D2D1_POINT_2F origin)
-    {
-        if (!layout || length == 0) return {};
-        UINT32 count = 0;
-        if (layout->HitTestTextRange(start, length, origin.x, origin.y,
-                nullptr, 0, &count) != E_NOT_SUFFICIENT_BUFFER || count == 0) return {};
-        std::vector<DWRITE_HIT_TEST_METRICS> metrics(count);
-        if (FAILED(layout->HitTestTextRange(start, length, origin.x, origin.y,
-                metrics.data(), count, &count))) return {};
-        metrics.resize(count);
-        return metrics;
-    }
-
-    static std::vector<D2D1_RECT_F> MergeRangeRectangles(std::vector<DWRITE_HIT_TEST_METRICS> metrics)
-    {
-        std::vector<D2D1_RECT_F> rectangles;
-        // Style runs and bidi runs may split one visual line. Join touching
-        // pieces only; never bridge a bidi gap or two wrapped lines.
-        std::sort(metrics.begin(), metrics.end(), [](auto const& a, auto const& b) {
-            return a.top != b.top ? a.top < b.top : a.left < b.left;
-        });
-        for (auto const& metric : metrics)
-        {
-            if (metric.width <= 0 || metric.height <= 0) continue;
-            auto rect = D2D1::RectF(metric.left, metric.top,
-                metric.left + metric.width, metric.top + metric.height);
-            if (!rectangles.empty())
-            {
-                auto& last = rectangles.back();
-                if (std::abs(last.top - rect.top) < 0.5f
-                    && std::abs(last.bottom - rect.bottom) < 0.5f
-                    && rect.left <= last.right + 0.5f)
-                {
-                    last.right = (std::max)(last.right, rect.right);
-                    continue;
-                }
-            }
-            rectangles.push_back(rect);
-        }
-        return rectangles;
-    }
-
-    std::vector<D2D1_RECT_F> InlineRangeRectangles(
-        IDWriteTextLayout* layout, UINT32 start, UINT32 length, D2D1_POINT_2F origin)
-    {
-        return MergeRangeRectangles(InlineRangeMetrics(layout, start, length, origin));
-    }
-
-    std::vector<D2D1_RECT_F> SyntaxIconRectangles(
-        IDWriteTextLayout* layout, InlineStyleRange const& range, D2D1_POINT_2F origin)
-    {
-        if (range.icon == SyntaxIcon::None || range.length == 0 || !layout) return {};
-        ::Microsoft::WRL::ComPtr<IDWriteInlineObject> object;
-        DWRITE_INLINE_OBJECT_METRICS metrics{};
-        if (FAILED(layout->GetInlineObject(range.start, object.GetAddressOf())) || !object
-            || FAILED(object->GetMetrics(&metrics))) return {};
-        auto rectangles = InlineRangeRectangles(layout, range.start, range.length, origin);
-        for (auto& rect : rectangles)
-        {
-            // Consume the actual inline object's allocation. Block delimiter
-            // rows have no clearance intended for neighboring inline text.
-            auto gap = (metrics.width - metrics.height) * .5f;
-            rect.left += gap;
-            rect.right -= gap;
-            auto height = metrics.height;
-            rect.top += (rect.bottom - rect.top - height) * .5f;
-            rect.bottom = rect.top + height;
-        }
-        return rectangles;
     }
 
     void DrawInlinePresentationBackgrounds(

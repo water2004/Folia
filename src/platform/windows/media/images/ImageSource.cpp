@@ -1,10 +1,13 @@
-﻿#include "pch.h"
-#include "media/ImageSource.h"
+﻿#include "windows/media/images/ImageSource.h"
 
+#include <winrt/base.h>
+#include <wrl/client.h>
+
+import std;
 import folia.core.image_metadata;
 import folia.markdown.slug;
 
-namespace winrt::Folia::image_source
+namespace folia::platform::image_source
 {
     std::optional<std::vector<std::uint8_t>> DecodeBase64(std::string_view source)
     {

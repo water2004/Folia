@@ -1,7 +1,10 @@
 #pragma once
-#include "workspace/WorkspaceFileOperations.h"
+#include "windows/storage/WorkspaceFileOperations.h"
 
 namespace winrt::Folia {
+    using folia::platform::WorkspaceFileAction;
+    using folia::platform::WorkspaceFileActionKind;
+
     // One directory per request. The tree owns only the entries the user has
     // expanded; enumeration and sorting never run on the XAML thread.
     class FolderExplorerController {

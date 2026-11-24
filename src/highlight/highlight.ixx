@@ -1,7 +1,8 @@
-#pragma once
+export module folia.highlight;
+import std;
 import folia.math.editor.syntax;
 
-namespace winrt::Folia
+export namespace folia::highlight
 {
     enum class SyntaxHighlightKind
     {

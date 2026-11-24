@@ -2,11 +2,14 @@
 #include "editor/rendering/EditorRenderResources.h"
 #include "media/ImageResourceCache.h"
 
+namespace folia::platform
+{
+    struct DecodedGifAnimation;
+    struct GifInitialDecode;
+}
+
 namespace winrt::Folia
 {
-    struct folia::platform::DecodedGifAnimation;
-    struct folia::platform::GifInitialDecode;
-
     // UI-thread device images and GIF presentation. Encoded downloads and their
     // completion lifetime belong to ImageResourceCache, not to the renderer.
     class EditorImageCache

@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "support/folia_test.hpp"
 #include "support/DocumentControllerFixture.h"
-#include "workspace/WorkspaceFileOperations.h"
+#include "windows/storage/WorkspaceFileOperations.h"
 
 import folia.markdown.instrumentation;
 
@@ -9,6 +9,7 @@ namespace {
     using namespace boost::ut;
     using namespace document_tests;
     using namespace winrt::Folia;
+    using namespace folia::platform;
     suite document_file_relocation_tests = [] {
         "document file relocation preserves edited source history selection and save state in both modes"_test = [] {
             for (bool sourceMode : {false, true}) {

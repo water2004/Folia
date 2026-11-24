@@ -33,45 +33,6 @@ namespace winrt::Folia
         }
     }
 
-    std::u32string InlineText(folia::InlineRenderItem const& item)
-    {
-        switch (item.kind)
-        {
-            case folia::InlineRenderItem::Kind::Text:
-                return item.text;
-            case folia::InlineRenderItem::Kind::Marker:
-                return item.special().display_text.empty() ? item.text : item.special().display_text;
-            case folia::InlineRenderItem::Kind::Math:
-                return U"$" + item.text + U"$";
-            case folia::InlineRenderItem::Kind::Image:
-                return item.special().semantic().alt.empty()
-                    ? U"image" : folia::utf8_to_cps(item.special().semantic().alt);
-            case folia::InlineRenderItem::Kind::Link: {
-                std::u32string text;
-                for (auto const& child : item.special().semantic().children)
-                {
-                    text += InlineText(child);
-                }
-                return text;
-            }
-            case folia::InlineRenderItem::Kind::FootnoteReference:
-                return item.special().display_text.empty()
-                    ? folia::utf8_to_cps(item.special().semantic().footnote_label)
-                    : item.special().display_text;
-        }
-        return {};
-    }
-
-    std::u32string InlineText(std::vector<folia::InlineRenderItem> const& items)
-    {
-        std::u32string text;
-        for (auto const& item : items)
-        {
-            text += InlineText(item);
-        }
-        return text;
-    }
-
     std::u32string FootnoteSuperscript(std::u32string_view number)
     {
         std::u32string result;
@@ -96,92 +57,9 @@ namespace winrt::Folia
         return result;
     }
 
-    EditorDisplayPosition InlineItemsEndPosition(std::vector<folia::InlineRenderItem> const& items, folia::TextPosition fallback)
-    {
-        EditorDisplayPosition result{fallback};
-        for (auto const& item : items)
-        {
-            if (item.source_span.container_id.v != 0)
-            {
-                auto generatedBoundary = item.kind == folia::InlineRenderItem::Kind::Marker
-                    && item.source_span.source_range.empty();
-                auto affinity = generatedBoundary
-                    ? item.special().generated_boundary_affinity.value_or(folia::TextAffinity::Downstream)
-                    : folia::TextAffinity::Upstream;
-                result = {
-                    item.source_span.container_id,
-                    item.source_span.source_range.end,
-                    affinity,
-                    // A suffix remains decoration. A prefix ends at the
-                    // source boundary of its possibly empty editable body.
-                    generatedBoundary && affinity == folia::TextAffinity::Upstream
-                        ? EditorDisplayPositionKind::BoundaryDecoration : EditorDisplayPositionKind::Source,
-                };
-            }
-        }
-        return result;
-    }
-
-    void AppendDisplayText(DisplayInlineText& display, std::u32string_view text, folia::TextSpan sourceSpan, folia::InlineStyle style, bool marker)
-    {
-        // During construction there is one mapping per UTF-16 unit. The final
-        // caret endpoint is appended only when the complete display is returned.
-        auto start = static_cast<UINT32>(display.displayToSource.size());
-        display.text += text;
-        auto length = static_cast<UINT32>(folia::utf16_len(text));
-        for (std::size_t index = 0; index < text.size(); ++index)
-        {
-            auto position = folia::TextPosition{
-                sourceSpan.container_id,
-                sourceSpan.source_range.start + (std::min)(index, sourceSpan.source_range.length()),
-                folia::TextAffinity::Downstream};
-            display.displayToSource.push_back(EditorDisplayPosition{
-                position,
-                EditorDisplayPositionKind::Source});
-            if (text[index] > 0xffff) display.displayToSource.push_back(EditorDisplayPosition{
-                position,
-                EditorDisplayPositionKind::Source});
-        }
-        if (length > 0)
-        {
-            InlineStyleRange range;
-            range.start = start;
-            range.length = length;
-            range.style = style;
-            range.marker = marker;
-            display.ranges.push_back(range);
-        }
-    }
-
-    void AppendGeneratedText(
-        DisplayInlineText& display,
-        std::u32string const& text,
-        folia::TextPosition sourcePosition,
-        folia::InlineStyle style,
-        EditorDisplayPositionKind kind)
-    {
-        auto start = static_cast<UINT32>(display.displayToSource.size());
-        display.text += text;
-        auto length = folia::utf16_len(text);
-        display.displayToSource.insert(
-            display.displayToSource.end(),
-            length,
-            EditorDisplayPosition{sourcePosition, kind});
-        if (!text.empty()) display.ranges.push_back(InlineStyleRange{start, static_cast<UINT32>(length), style, false, SyntaxHighlightKind::None});
-    }
-
     void MergeDisplayText(DisplayInlineText& target, DisplayInlineText source)
     {
-        auto offset = static_cast<UINT32>(target.displayToSource.size());
-        auto characterCount = folia::utf16_len(source.text);
-        target.text += source.text;
-        if (source.displayToSource.size() > characterCount) source.displayToSource.resize(characterCount);
-        target.displayToSource.insert(target.displayToSource.end(), source.displayToSource.begin(), source.displayToSource.end());
-        for (auto& range : source.ranges)
-        {
-            range.start += offset;
-            target.ranges.push_back(std::move(range));
-        }
+        auto offset = folia::platform::editor::MergeInlineProjection(target, std::move(source));
         for (auto& overlay : source.mathOverlays)
         {
             overlay.displayStart += offset;
@@ -231,12 +109,6 @@ namespace winrt::Folia
         target.pendingMath = target.pendingMath || source.pendingMath;
     }
 
-    void AppendSourceText(DisplayInlineText& display, std::u32string_view sourceText, folia::TextSpan sourceSpan, folia::InlineStyle style, bool marker)
-    {
-        auto length = (std::min)(sourceSpan.source_range.length(), sourceText.size());
-        AppendDisplayText(display, sourceText.substr(0, length), sourceSpan, style, marker);
-    }
-
     static void AppendInlineSource(DisplayInlineText& display, folia::InlineRenderItem const& item)
     {
         auto const& semantic = item.special().semantic();
@@ -261,51 +133,6 @@ namespace winrt::Folia
         append({item.source_span.source_range.start, content.start}, true, semantic.opening_marker);
         append(content, false);
         append({content.end, item.source_span.source_range.end}, true, semantic.closing_marker);
-    }
-
-    void AppendProjectedSourceText(
-        DisplayInlineText& display,
-        std::u32string_view text,
-        folia::NodeId owner,
-        folia::SourceOffsetMap const& sourceOffsets,
-        folia::InlineStyle style)
-    {
-        auto start = static_cast<UINT32>(display.displayToSource.size());
-        display.text.append(text);
-        auto source = sourceOffsets.begin();
-        for (std::size_t index = 0; index < text.size(); ++index)
-        {
-            auto offset = sourceOffsets.empty() ? index : *source;
-            if (!sourceOffsets.empty() && index + 1 < sourceOffsets.size()) ++source;
-            auto mapping = EditorDisplayPosition{
-                {owner, offset, folia::TextAffinity::Downstream},
-                EditorDisplayPositionKind::Source};
-            display.displayToSource.push_back(mapping);
-            if (text[index] > 0xffff) display.displayToSource.push_back(mapping);
-        }
-        if (!text.empty())
-        {
-            display.ranges.push_back(InlineStyleRange{
-                start,
-                static_cast<UINT32>(folia::utf16_len(text)),
-                style,
-                false,
-                SyntaxHighlightKind::None});
-        }
-    }
-
-    void AppendMathPlaceholder(DisplayInlineText& display, std::size_t count, folia::TextPosition sourcePosition)
-    {
-        auto start = static_cast<UINT32>(display.displayToSource.size());
-        display.text.append(count, U'\u2007');
-        display.displayToSource.insert(
-            display.displayToSource.end(),
-            count,
-            EditorDisplayPosition{sourcePosition, EditorDisplayPositionKind::Generated});
-        if (count > 0)
-        {
-            display.ranges.push_back(InlineStyleRange{ start, static_cast<UINT32>(count), folia::InlineStyle::plain(), false, SyntaxHighlightKind::None });
-        }
     }
 
     void AppendMathFragments(DisplayInlineText& display, folia::platform::MathJaxSvg const& math, folia::TextSpan sourceSpan, bool editing, folia::InlineStyle style, D2D1_COLOR_F foreground)

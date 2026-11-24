@@ -1,5 +1,6 @@
 #include "pch.h"
 import std;
+import folia.math.editor.syntax;
 #include "editor/rendering/EditorMathSyntax.h"
 #include "editor/rendering/EditorTextLayoutEngine.h"
 

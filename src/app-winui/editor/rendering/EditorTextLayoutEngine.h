@@ -1,18 +1,19 @@
 #pragma once
 
+import folia.platform.editor_inline_layout;
+import folia.platform.editor_inline_projection;
+
 #include "editor/rendering/EditorRenderResources.h"
 #include "editor/rendering/EditorStyleSheet.h"
 #include "editor/rendering/EditorFlowLayoutContext.h"
 
 namespace winrt::Folia
 {
-    struct InlineStyleRange;
+    using folia::platform::editor::InlineStyleRange;
     struct DisplayInlineText;
 
-    std::vector<D2D1_RECT_F> InlineRangeRectangles(
-        IDWriteTextLayout* layout, UINT32 start, UINT32 length, D2D1_POINT_2F origin);
-    std::vector<D2D1_RECT_F> SyntaxIconRectangles(
-        IDWriteTextLayout* layout, InlineStyleRange const& range, D2D1_POINT_2F origin);
+    using folia::platform::editor::InlineRangeRectangles;
+    using folia::platform::editor::SyntaxIconRectangles;
 
     void DrawInlinePresentationBackgrounds(
         EditorRenderResources& resources,

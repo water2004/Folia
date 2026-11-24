@@ -1,12 +1,13 @@
 #include "pch.h"
 #include "support/folia_test.hpp"
 #include "support/DocumentControllerFixture.h"
-#include "workspace/WorkspaceFileOperations.h"
+#include "windows/storage/WorkspaceFileOperations.h"
 
 namespace {
     using namespace boost::ut;
     using namespace document_tests;
     using namespace winrt::Folia;
+    using namespace folia::platform;
     using Kind = WorkspaceFileActionKind;
     std::filesystem::path Apply(Kind kind, std::filesystem::path source, std::filesystem::path target, bool directory = false) {
         return std::filesystem::path(Await(ApplyWorkspaceFileActionAsync({kind, std::move(source), std::move(target), directory})).c_str());

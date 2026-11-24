@@ -1,6 +1,14 @@
 #pragma once
 
-namespace winrt::Folia {
+#include <winrt/Windows.Foundation.h>
+
+#include <cstdint>
+#include <filesystem>
+#include <functional>
+#include <optional>
+#include <string_view>
+
+namespace folia::platform {
     enum class WorkspaceFileActionKind { NewFile, NewFolder, Rename, Move, Copy };
     struct WorkspaceFileAction {
         WorkspaceFileActionKind kind;
@@ -22,5 +30,5 @@ namespace winrt::Folia {
         WorkspaceFileAction const& action, std::filesystem::path const& path);
     // Exclusive creation/publication: an existing destination is never replaced.
     // Enumeration/copy/move work runs off the calling UI thread.
-    Windows::Foundation::IAsyncOperation<winrt::hstring> ApplyWorkspaceFileActionAsync(WorkspaceFileAction action, WorkspaceFileProgressHandler progress = {});
+    winrt::Windows::Foundation::IAsyncOperation<winrt::hstring> ApplyWorkspaceFileActionAsync(WorkspaceFileAction action, WorkspaceFileProgressHandler progress = {});
 }

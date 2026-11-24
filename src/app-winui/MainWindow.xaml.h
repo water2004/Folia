@@ -77,7 +77,7 @@ namespace winrt::Folia::implementation
         winrt::fire_and_forget LoadWorkspaceDocument(std::shared_ptr<winrt::Folia::WorkspaceDocument> document);
         winrt::fire_and_forget PickWorkspaceFile();
         winrt::fire_and_forget PickWorkspaceFolder();
-        Windows::Foundation::IAsyncOperation<winrt::hstring> ApplyExplorerActionAsync(winrt::Folia::WorkspaceFileAction action);
+        Windows::Foundation::IAsyncOperation<winrt::hstring> ApplyExplorerActionAsync(folia::platform::WorkspaceFileAction action);
         void RegisterWorkspaceHandlers();
         void RefreshDocumentTabs();
         void SelectDocumentTab();

@@ -30,7 +30,7 @@ namespace winrt::Folia {
         if (failure) {
             // No document metadata has been committed. Restore the original
             // paths without overwriting any file created in the meantime.
-            WorkspaceFileAction rollback{WorkspaceFileActionKind::Move, action.target, action.source, action.directory};
+            WorkspaceFileAction rollback{folia::platform::WorkspaceFileActionKind::Move, action.target, action.source, action.directory};
             co_await ApplyWorkspaceFileActionAsync(rollback);
             std::rethrow_exception(failure);
         }

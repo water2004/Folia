@@ -1,9 +1,10 @@
-#include "pch.h"
-import std;
-#include "workspace/WorkspaceFileOperations.h"
-#include <wil/resource.h>
+#include <objbase.h>
 
-namespace winrt::Folia {
+#include "windows/storage/WorkspaceFileOperations.h"
+
+import std;
+
+namespace folia::platform {
     namespace {
         std::wstring PathText(std::filesystem::path path) {
             auto result = path.lexically_normal().make_preferred().native();
@@ -88,11 +89,13 @@ namespace winrt::Folia {
             } else {
                 // Claim the unique staging name before copying so cleanup can
                 // remove only a file created by this request, including failure.
-                wil::unique_hfile file(::CreateFileW(stage.path.c_str(), GENERIC_WRITE,
-                    FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, nullptr));
-                winrt::check_bool(file.is_valid());
-                stage.owned = true;
-                file.reset();
+                {
+                    auto handle = ::CreateFileW(stage.path.c_str(), GENERIC_WRITE,
+                        FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, nullptr);
+                    winrt::check_bool(handle != INVALID_HANDLE_VALUE);
+                    winrt::handle file{handle};
+                    stage.owned = true;
+                }
                 copy.Copy(action.source, stage.path, false);
             }
             while (!::MoveFileW(stage.path.c_str(), action.target.c_str())) {
@@ -127,15 +130,16 @@ namespace winrt::Folia {
         return action.target / candidate.substr(offset);
     }
 
-    Windows::Foundation::IAsyncOperation<winrt::hstring> ApplyWorkspaceFileActionAsync(WorkspaceFileAction action, WorkspaceFileProgressHandler progress) {
+    winrt::Windows::Foundation::IAsyncOperation<winrt::hstring> ApplyWorkspaceFileActionAsync(WorkspaceFileAction action, WorkspaceFileProgressHandler progress) {
         co_await winrt::resume_background();
         if (!action.target.is_absolute() || !ValidWorkspaceEntryName(action.target.filename().native()))
             throw winrt::hresult_invalid_argument(L"Invalid destination name");
         switch (action.kind) {
         case WorkspaceFileActionKind::NewFile: {
-            wil::unique_hfile file(::CreateFileW(action.target.c_str(), GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
-                nullptr, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, nullptr));
-            winrt::check_bool(file.is_valid());
+            auto handle = ::CreateFileW(action.target.c_str(), GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
+                nullptr, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, nullptr);
+            winrt::check_bool(handle != INVALID_HANDLE_VALUE);
+            winrt::handle file{handle};
             co_return winrt::hstring(action.target.c_str());
         }
         case WorkspaceFileActionKind::NewFolder:

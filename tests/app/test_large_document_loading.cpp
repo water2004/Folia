@@ -20,7 +20,7 @@ namespace
             for (auto text : {U"abc", U"\U0001f600", U"e\u0301", U"\r\n", U"中文"}) {
                 auto begin = display.displayToSource.size();
                 std::u32string piece(text);
-                winrt::Folia::AppendSourceText(display, piece, {folia::NodeId{7}, {offset, offset + piece.size()}}, {}, false);
+                folia::platform::editor::AppendSourceText(display, piece, {folia::NodeId{7}, {offset, offset + piece.size()}}, {}, false);
                 expect(display.ranges.back().start == begin);
                 for (auto ch : piece) {
                     expect(display.displayToSource[begin++].source_offset == offset);
@@ -31,7 +31,7 @@ namespace
             }
             expect(bool(display.text == expected));
             winrt::Folia::DisplayInlineText tail;
-            winrt::Folia::AppendGeneratedText(tail, U"xy", {folia::NodeId{8}, 4, folia::TextAffinity::Upstream}, {});
+            folia::platform::editor::AppendGeneratedText(tail, U"xy", {folia::NodeId{8}, 4, folia::TextAffinity::Upstream}, {});
             tail.displayToSource.push_back({folia::NodeId{8}, 4, folia::TextAffinity::Upstream});
             auto start = display.displayToSource.size();
             winrt::Folia::MergeDisplayText(display, std::move(tail));

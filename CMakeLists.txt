@@ -3,9 +3,8 @@
 # Build design:
 #   - C++23 with C++ modules (CMake FILE_SET CXX_MODULES) + `import std;`.
 #   - Core library `folia_core` is PURE C++: no Windows / DirectX / WinUI deps.
-#   - Platform library `folia_platform` is the ONLY layer touching Win32 /
-#     Direct2D / DirectWrite / DXGI / TSF / Clipboard (Windows headers stay
-#     in that translation unit's global module fragment so no macros leak).
+#   - Platform targets own reusable Windows adapters. Windows headers in
+#     module units stay in the global module fragment.
 #   - App `Folia` is a WinUI 3 shell hosting a self-drawn EditorView surface.
 #
 # `import std;` is experimental in CMake 4.3; the UUID below is the official
@@ -56,6 +55,7 @@ endif()
 # ---------------------------------------------------------------------------
 add_subdirectory(src/markdown)
 add_subdirectory(src/math/editor)
+add_subdirectory(src/highlight)
 add_subdirectory(src/completion)
 add_subdirectory(third_party/model-providers)
 
@@ -64,7 +64,7 @@ include(cmake/FoliaCore.cmake)
 include(cmake/FoliaMath.cmake)
 
 # ---------------------------------------------------------------------------
-# Platform library — the ONLY Windows-touching layer.
+# Platform targets — Windows adapters below the WinUI shell.
 # ---------------------------------------------------------------------------
 if(WIN32)
     # Locate the Windows 10/11 SDK so platform .ixx files can #include
@@ -91,7 +91,7 @@ if(WIN32)
         target_sources(folia_platform PUBLIC
             FILE_SET CXX_MODULES FILES ${FOLIA_PLATFORM_MODULE})
         target_sources(folia_platform PRIVATE ${FOLIA_PLATFORM_SRC})
-        target_link_libraries(folia_platform PUBLIC folia_core)
+        target_link_libraries(folia_platform PUBLIC folia_core folia_highlight)
         target_include_directories(folia_platform PUBLIC
             ${CMAKE_CURRENT_SOURCE_DIR}/src/platform)
         if(FOLIA_WINSDK_INC)

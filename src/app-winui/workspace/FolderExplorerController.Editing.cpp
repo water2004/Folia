@@ -103,7 +103,7 @@ namespace winrt::Folia {
         auto entry = Entry(node);
         if (!state->tree || state->operationBusy || !entry || !entry->edit) co_return false;
         entry->edit->name = name;
-        if (!ValidWorkspaceEntryName(name)) {
+        if (!folia::platform::ValidWorkspaceEntryName(name)) {
             entry->edit->error = Localize(L"InvalidEntryName");
             entry->NotifyEdit();
             state->pendingEditFocus = true;

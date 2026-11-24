@@ -14,7 +14,6 @@ import folia.markdown.text_edit;
 #include "windows/media/math/MathJaxRenderer.h"
 #include "windows/media/mermaid/MermaidRenderer.h"
 #include "windows/media/svg/SvgNormalizer.h"
-#include "media/TreeSitterHighlighter.h"
 
 namespace winrt::Folia
 {

@@ -1,25 +1,32 @@
 #pragma once
 
+import folia.highlight;
 import folia.markdown.ids;
 import folia.markdown.image_dimension;
 import folia.core.render_model;
 import folia.markdown.text_edit;
 import folia.markdown.source_offset_map;
 import folia.platform.editor_display_mapping;
+import folia.platform.editor_inline_projection;
 import folia.platform.editor_block_spacing;
 
 #include "windows/media/math/MathJaxRenderer.h"
 #include "windows/media/mermaid/MermaidRenderer.h"
 #include "windows/media/svg/SvgNormalizer.h"
-#include "media/TreeSitterHighlighter.h"
 #include "editor/rendering/EditorSyntaxIcons.h"
 
 namespace winrt::Folia
 {
+    using folia::highlight::SyntaxHighlightKind;
+    using folia::highlight::SyntaxHighlightRange;
+    using folia::highlight::TreeSitterHighlighter;
     using folia::platform::editor::EditorDisplayMapping;
     using folia::platform::editor::EditorDisplayPosition;
     using folia::platform::editor::EditorDisplayPositionKind;
     using folia::platform::editor::EditorFootnoteControlKind;
+    using folia::platform::editor::InlineItemsEndPosition;
+    using folia::platform::editor::InlineStyleRange;
+    using folia::platform::editor::SyntaxIconPlacement;
 
     inline std::optional<float> ResolveImageDimension(
         std::optional<folia::ImageDimension> const& dimension,
@@ -31,20 +38,7 @@ namespace winrt::Folia
         return *percentBasis * dimension->value / 100.0f;
     }
 
-    struct InlineStyleRange
-    {
-        UINT32 start = 0;
-        UINT32 length = 0;
-        folia::InlineStyle style;
-        bool marker = false;
-        SyntaxHighlightKind syntax = SyntaxHighlightKind::None;
-        std::optional<EditorFootnoteControlKind> footnoteControl;
-        SyntaxIcon icon = SyntaxIcon::None;
-        SyntaxIconPlacement iconPlacement = SyntaxIconPlacement::Inline;
-        bool completion = false;
-    };
-
-    struct DisplayInlineText
+    struct DisplayInlineText : folia::platform::editor::InlineTextProjection
     {
         using BlockSpacingOverlay = folia::platform::editor::EditorBlockSpacing;
         struct MathOverlay
@@ -130,9 +124,6 @@ namespace winrt::Folia
             EditorFootnoteControlKind kind = EditorFootnoteControlKind::Reference;
         };
 
-        std::u32string text;
-        EditorDisplayMapping displayToSource;
-        std::vector<InlineStyleRange> ranges;
         std::vector<MathOverlay> mathOverlays;
         std::vector<MathPreview> mathPreviews;
         std::vector<MathSource> mathSources;
@@ -151,25 +142,9 @@ namespace winrt::Folia
     std::wstring ToWide(std::u32string_view text);
     std::string SvgColor(D2D1_COLOR_F color);
     D2D1_COLOR_F InlineForeground(folia::InlineStyle const& style, D2D1_COLOR_F fallback);
-    std::u32string InlineText(std::vector<folia::InlineRenderItem> const& items);
-    EditorDisplayPosition InlineItemsEndPosition(std::vector<folia::InlineRenderItem> const& items, folia::TextPosition fallback);
     bool IsMermaidLanguage(std::optional<std::string> const& language);
     void MergeDisplayText(DisplayInlineText& target, DisplayInlineText source);
     void InsertCompletionPreview(DisplayInlineText&, folia::TextPosition, std::u32string_view, std::u32string_view before = {});
-    void AppendSourceText(DisplayInlineText& display, std::u32string_view sourceText, folia::TextSpan sourceSpan, folia::InlineStyle style, bool marker);
-    void AppendProjectedSourceText(
-        DisplayInlineText& display,
-        std::u32string_view text,
-        folia::NodeId owner,
-        folia::SourceOffsetMap const& sourceOffsets,
-        folia::InlineStyle style);
-    void AppendGeneratedText(
-        DisplayInlineText& display,
-        std::u32string const& text,
-        folia::TextPosition sourcePosition,
-        folia::InlineStyle style,
-        EditorDisplayPositionKind kind = EditorDisplayPositionKind::Generated);
-    void AppendMathPlaceholder(DisplayInlineText& display, std::size_t count, folia::TextPosition sourcePosition);
     void AppendMathFragments(
         DisplayInlineText& display,
         folia::platform::MathJaxSvg const& math,

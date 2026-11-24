@@ -1,5 +1,6 @@
 #pragma once
 
+import folia.highlight;
 import folia.platform.editor_interaction;
 import folia.platform.editor_scroll_state;
 
@@ -7,7 +8,6 @@ import folia.platform.editor_scroll_state;
 #include "windows/media/math/MathJaxRenderer.h"
 #include "windows/media/mermaid/MermaidRenderer.h"
 #include "windows/media/svg/SvgNormalizer.h"
-#include "media/TreeSitterHighlighter.h"
 #include "editor/rendering/EditorStyleSheet.h"
 #include "editor/rendering/EditorMathPreparation.h"
 #include "editor/rendering/EditorRenderCache.h"
@@ -28,6 +28,8 @@ namespace winrt::Folia
     using folia::platform::editor::EditorVisualRawBlock;
     using folia::platform::editor::EditorVisualTable;
     using folia::platform::editor::EditorVisualTableCell;
+
+    using folia::highlight::TreeSitterHighlighter;
 
     struct EditorPreparedDocument;
     enum class EditorScrollAlignment { Nearest, Start };
