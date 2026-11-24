@@ -12,13 +12,13 @@ The focused native test covers the public `Renderer::renderScene` call, unknown-
 
 The packet includes an independent paired probe target, preserving the existing public Renderer target. It also includes the renderer-boundary annotator and verifier. The public Renderer capture is compared separately with clean G150 Source for all 150 records; the paired NativeRenderSession capture checks zero scene-only serializer calls and complete Scene equality. These are separate evidence layers.
 
-The three CJS deliverables are already present in the shared workspace and are byte-synchronized with the copies in this patch. If applying where those paths already exist, exclude these paths from `git apply` and check their SHA-256 values: `tools/math-port/candidates/shared-scene-producer-g153/measure-text-cache-source-witness.cjs` = `A1A9899A91FBB0DF076810B0AAFC68FDC87432DC935F36828A39759598C823FA`; `tools/math-port/candidates/profile75-full-svg-g147/verify-scene-measurement-native.cjs` = `1F121C6FBA5D438C922EBA3F063D9C026A2D9881009CBE1F8B95C134FB67240C`; `tools/math-port/candidates/profile75-full-svg-g147/annotate-scene-measurement-renderer-boundary.cjs` = `785492ABCC7D33865E4D8AB2AE513E4639CC2739658C57DA971FA1F7428C019C`.
+Historical G153 patch provenance (the runner and annotation tools are now maintained as Python; the MathJax source witness remains JavaScript). The original patch recorded these filenames and SHA-256 values: `tools/math-port/candidates/shared-scene-producer-g153/measure-text-cache-source-witness.cjs` = `A1A9899A91FBB0DF076810B0AAFC68FDC87432DC935F36828A39759598C823FA`; `tools/math-port/candidates/profile75-full-svg-g147/verify-scene-measurement-native.cjs` = `1F121C6FBA5D438C922EBA3F063D9C026A2D9881009CBE1F8B95C134FB67240C`; `tools/math-port/candidates/profile75-full-svg-g147/annotate-scene-measurement-renderer-boundary.cjs` = `785492ABCC7D33865E4D8AB2AE513E4639CC2739658C57DA971FA1F7428C019C`.
 
 After the Root build gate has captured its manifest and binary audit, build both probe targets:
 
 ```powershell
 cmake --build build/core --target FoliaMathProfile75FullSvgDump FoliaMathProfile75SceneMeasurementDump
-node tools/math-port/candidates/profile75-full-svg-g147/verify-scene-measurement-native.cjs build/core/FoliaMathProfile75FullSvgDump.exe build/core/FoliaMathProfile75SceneMeasurementDump.exe <gate-number>
+python tools/math-port/candidates/profile75-full-svg-g147/verify-scene-measurement-native.py build/core/FoliaMathProfile75FullSvgDump.exe build/core/FoliaMathProfile75SceneMeasurementDump.exe <gate-number>
 node tools/math-port/candidates/shared-scene-producer-g153/measure-text-cache-source-witness.cjs
 ```
 

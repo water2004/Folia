@@ -17,12 +17,12 @@ results as expectations rather than assuming success.
 After enrolling the target from `cmake-probe.patch` and building it, run:
 
 ```powershell
-node tools/math-port/candidates/profile75-full-svg-g147/run-profile75-native.cjs `
+python tools/math-port/candidates/profile75-full-svg-g147/run-profile75-native.py `
   <path-to-FoliaMathProfile75FullSvgDump.exe>
-node tools/math-port/candidates/profile75-full-svg-g147/compare-profile75-full-svg.cjs `
+python tools/math-port/candidates/profile75-full-svg-g147/compare-profile75-full-svg.py `
   tools/math-port/candidates/profile75-full-svg-g147/profile75-full-svg-source.json `
   build/math-port/profile75-full-svg-native.json
 ```
 
-`verify-comparer-tool.cjs` checks the comparer’s positive and mismatch paths
+`verify-comparer-tool.py` checks the comparer’s positive and mismatch paths
 with synthetic records; it does not assert renderer parity.

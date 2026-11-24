@@ -25,11 +25,11 @@ the first document loads a dynamic font file, a later font-data instance in the
 same module realm skips per-instance setup. That produces the mismatched glyph
 metrics and `RangeError` results observed in the G149 fresh group.
 
-`annotate-native-boundary.cjs` adds explicit metadata to the unchanged G149
+`annotate-native-boundary.py` adds explicit metadata to the unchanged G149
 native observation. It verifies the captured executable hash and the probe’s
 two construction sites: one retained `Renderer` for the continuous group and
 one new `Renderer` for each fresh row. It does not alter native output or
-require a rebuild. `compare.cjs` requires the Source and native runtime-boundary
+require a rebuild. `compare.py` requires the Source and native runtime-boundary
 metadata to agree on shared-vs-isolated owner semantics before comparing all
 150 SVG/error records.
 
@@ -39,12 +39,12 @@ existing G149 native capture, then compare:
 ```powershell
 node tools/math-port/candidates/profile75-full-svg-clean-source-g150/capture.cjs --smoke
 node tools/math-port/candidates/profile75-full-svg-clean-source-g150/capture.cjs
-node tools/math-port/candidates/profile75-full-svg-clean-source-g150/annotate-native-boundary.cjs
-node tools/math-port/candidates/profile75-full-svg-clean-source-g150/compare.cjs `
+python tools/math-port/candidates/profile75-full-svg-clean-source-g150/annotate-native-boundary.py
+python tools/math-port/candidates/profile75-full-svg-clean-source-g150/compare.py `
   build/math-port/profile75-full-svg-source-clean-g150.json `
   build/math-port/profile75-full-svg-native-boundary-g150.json `
   build/math-port/profile75-full-svg-comparison-g150.json
-node tools/math-port/candidates/profile75-full-svg-clean-source-g150/verify-comparer.cjs
+python tools/math-port/candidates/profile75-full-svg-clean-source-g150/verify-comparer.py
 ```
 
 The synthetic comparer check tests only acceptance, boundary rejection, and
