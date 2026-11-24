@@ -1,0 +1,11 @@
+# Pinned reference observations; values exported without normalization.
+# unit_utf16	factor_binary64	match_present	match_value_utf16	match_unit_utf16	matched_length	em_binary64
+em	3ff0000000000000	1	1	em	3	3ff0000000000000
+ex	3fdb851eb851eb85	1	1	ex	3	3fdb851eb851eb85
+pt	3fb999999999999a	1	1	pt	3	3fb999999999999a
+pc	3ff3333333333333	1	1	pc	3	3ff3333333333333
+px	3fb999999999999a	1	1	px	3	3fb999999999999a
+in	401ccccccccccccd	1	1	in	3	401ccccccccccccd
+cm	4006ad5ab56ad5ab	1	1	cm	3	4006ad5ab56ad5ab
+mm	3fd2244891224489	1	1	mm	3	3fd2244891224489
+mu	3fac71c71c71c71c	1	0.056	em	3	3facac083126e979

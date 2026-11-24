@@ -1,0 +1,6 @@
+# Pinned reference observations; values exported without normalization.
+# name_bytes	index	dimension_bytes
+Top	0	h
+Right	1	w
+Bottom	2	d
+Left	3	w

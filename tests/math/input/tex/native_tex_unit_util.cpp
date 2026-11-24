@@ -1,15 +1,13 @@
 #include "support/folia_test.hpp"
+#include "math/support/unit_util_fixtures.hpp"
 import folia.math.input.tex.unit_util;
 
 using namespace boost::ut;
 using namespace folia::math::tex;
 
 namespace {
-struct DefaultCase { std::u16string_view unit; double factor; Dimension match; double em; };
-struct MatchCase { std::u16string_view input; bool rest; Dimension match; double em; };
-struct FormatCase { double input; std::string_view output; };
-struct TrimCase { std::u16string_view input, output; };
-#include "math/fixtures/tex-source/unit-util-source.inc"
+using UnitData = math_test::fixtures::UnitUtilFixtureData<DimensionMatch>;
+
 
 // The utility's original public unit table is mutable. Each test restores its
 // prior value so Source mutation cases cannot affect later parser tests.
@@ -29,7 +27,7 @@ bool sameNumber(double actual, double expected) {
 suite native_tex_unit_util = [] {
     "native units retain all nine Source conversion factors and rounded mu values"_test = [] {
         UnitCasesScope scope;
-        for (auto const& row : default_cases) {
+        for (auto const& row : UnitData::default_cases()) {
             expect(scope.util.UNIT_CASES.get(row.unit) == row.factor);
             auto text = std::u16string(u"1") + std::u16string(row.unit);
             expect(scope.util.matchDimen(text) == row.match);
@@ -39,7 +37,7 @@ suite native_tex_unit_util = [] {
 
     "native dimension grammar matches pinned Source lexical values and UTF16 lengths"_test = [] {
         UnitCasesScope scope;
-        for (auto const& row : match_cases) {
+        for (auto const& row : UnitData::match_cases()) {
             expect(scope.util.matchDimen(row.input, row.rest) == row.match);
             expect(sameNumber(scope.util.dimen2em(row.input), row.em));
         }
@@ -47,13 +45,13 @@ suite native_tex_unit_util = [] {
 
     "native dimension em formatting preserves Source thresholds rounding and exponents"_test = [] {
         auto& util = UnitUtil::instance();
-        for (auto const& row : format_cases)
+        for (auto const& row : UnitData::format_cases())
             expect(util.em(row.input) == row.output);
     };
 
     "native dimension trimming preserves escaped ASCII space and Unicode whitespace rules"_test = [] {
         auto& util = UnitUtil::instance();
-        for (auto const& row : trim_cases)
+        for (auto const& row : UnitData::trim_cases())
             expect(util.trimSpaces(row.input) == row.output);
     };
 

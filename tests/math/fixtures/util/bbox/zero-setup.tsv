@@ -1,0 +1,3 @@
+# Pinned reference observations; values exported without normalization.
+# w_binary64	h_binary64	d_binary64	scale_binary64	rscale_binary64	L_binary64	R_binary64	ic_binary64	oc_binary64	sk_binary64	dx_binary64	pwidth_bytes
+0000000000000000	0000000000000000	0000000000000000	3fdb6db6db6db6db	3fe2492492492492	3fe6db6db6db6db7	3feb6db6db6db6db	3ff0000000000000	3ff2492492492492	3ff4924924924925	3ff6db6db6db6db7	83%
