@@ -1,17 +1,14 @@
-#include "storage/DocumentEncodingService.h"
-
-#include <algorithm>
-#include <array>
-#include <cstring>
-#include <limits>
-#include <memory>
+module;
 
 #include <unicode/ucnv.h>
 #include <unicode/ucnv_err.h>
 #include <unicode/ucsdet.h>
 #include <unicode/ustring.h>
 
-namespace winrt::Folia
+module folia.encoding;
+import std;
+
+namespace folia::encoding
 {
     namespace
     {

@@ -60,7 +60,7 @@ namespace winrt::Folia
         void OpenDocument();
         void OpenDocumentPath(winrt::hstring const& path);
         void ReopenDocumentWithEncoding(std::string encoding);
-        void SaveDocumentWithEncoding(DocumentEncoding encoding);
+        void SaveDocumentWithEncoding(folia::encoding::DocumentEncoding encoding);
         void SaveDocument();
         void SaveDocumentAs();
         void ReloadDocument();
@@ -119,7 +119,7 @@ namespace winrt::Folia
             std::string_view source, std::uint64_t contentState);
         static winrt::Windows::Foundation::IAsyncOperation<bool> SaveDocumentAsync(
             std::shared_ptr<State> state, std::uint64_t generation, bool saveAs = false,
-            std::optional<DocumentEncoding> encoding = std::nullopt);
+            std::optional<folia::encoding::DocumentEncoding> encoding = std::nullopt);
         static winrt::Windows::Foundation::IAsyncOperation<bool> ConfirmCloseAsync(
             std::shared_ptr<State> state, std::uint64_t generation);
         static winrt::fire_and_forget ExportPdfAsync(std::shared_ptr<State> state, std::uint64_t generation);

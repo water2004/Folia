@@ -145,28 +145,23 @@ endif()
 if(WIN32)
     set(FOLIA_ICU_ROOT
         "${CMAKE_CURRENT_SOURCE_DIR}/build/dependencies/icu-78.3/root"
-        CACHE PATH "ICU4C root used by document encoding tests")
+        CACHE PATH "ICU4C root used by the document encoding library")
     if(EXISTS "${FOLIA_ICU_ROOT}/include/unicode/ucsdet.h")
+        add_subdirectory(src/encoding)
         add_executable(FoliaEncodingTests
             ${CMAKE_CURRENT_SOURCE_DIR}/tests/encoding/main.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/tests/encoding/test_document_encoding.cpp
-            ${CMAKE_CURRENT_SOURCE_DIR}/src/app-winui/storage/DocumentEncodingService.cpp)
+            ${CMAKE_CURRENT_SOURCE_DIR}/tests/encoding/test_document_encoding.cpp)
         target_compile_features(FoliaEncodingTests PRIVATE cxx_std_23)
         set_target_properties(FoliaEncodingTests PROPERTIES
             CXX_MODULE_STD ON
             CXX_SCAN_FOR_MODULES ON)
         target_include_directories(FoliaEncodingTests PRIVATE
-            ${CMAKE_CURRENT_SOURCE_DIR}/tests
-            ${CMAKE_CURRENT_SOURCE_DIR}/src/app-winui
-            ${FOLIA_ICU_ROOT}/include)
+            ${CMAKE_CURRENT_SOURCE_DIR}/tests)
         target_sources(FoliaEncodingTests PRIVATE
             FILE_SET CXX_MODULES FILES
                 ${CMAKE_CURRENT_SOURCE_DIR}/tests/encoding/document_encoding_test_support.ixx)
         target_link_libraries(FoliaEncodingTests PRIVATE
-            Boost::ut_module
-            ${FOLIA_ICU_ROOT}/lib64/icuin.lib
-            ${FOLIA_ICU_ROOT}/lib64/icuuc.lib
-            ${FOLIA_ICU_ROOT}/lib64/icudt.lib)
+            folia::encoding Boost::ut_module)
         add_custom_command(TARGET FoliaEncodingTests POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_if_different
                 ${FOLIA_ICU_ROOT}/bin64/icuin78.dll

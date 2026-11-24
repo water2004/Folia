@@ -77,7 +77,7 @@ namespace winrt::Folia {
 
     winrt::Windows::Foundation::IAsyncOperation<bool> EditorDocumentController::SaveDocumentAsync(
         std::shared_ptr<State> state, std::uint64_t generation, bool saveAs,
-        std::optional<DocumentEncoding> requestedEncoding) {
+        std::optional<folia::encoding::DocumentEncoding> requestedEncoding) {
         if (!OwnsDocument(state, generation) || state->saving || state->documentLoading || state->fileRelocating) co_return false;
         PendingOperation pending(state->saving);
         auto document = state->loadSerial.load();
@@ -108,12 +108,12 @@ namespace winrt::Folia {
             }
             auto text = state->session->TextUtf8();
             const auto contentState = state->session->ContentState();
-            auto encoding = DocumentEncodingService::NormalizeForSave(requestedEncoding.value_or(state->session->Encoding()));
+            auto encoding = folia::encoding::DocumentEncodingService::NormalizeForSave(requestedEncoding.value_or(state->session->Encoding()));
             std::exception_ptr failure;
             folia::platform::reload::WatchedFileVersion version;
             co_await winrt::resume_background();
             try {
-                co_await WriteBytesAsync(file, DocumentEncodingService::Encode(text, encoding));
+                co_await WriteBytesAsync(file, folia::encoding::DocumentEncodingService::Encode(text, encoding));
                 version = folia::platform::reload::query_watched_file_version(std::filesystem::path(file.Path().c_str()));
             } catch (...) { failure = std::current_exception(); }
             co_await ui;

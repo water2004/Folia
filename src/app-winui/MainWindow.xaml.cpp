@@ -196,7 +196,7 @@ namespace winrt::Folia::implementation
         RevisionText().Text(LocalizeFormat(
             L"Revision", { winrt::to_hstring(editorSession().Revision()) }));
         auto encodingLabel = winrt::to_hstring(editorSession().Encoding().name);
-        if (editorSession().Encoding().byteOrderMark == DocumentByteOrderMark::Utf8)
+        if (editorSession().Encoding().byteOrderMark == folia::encoding::DocumentByteOrderMark::Utf8)
             encodingLabel = encodingLabel + L" BOM";
         EncodingButton().Content(winrt::box_value(encodingLabel));
         EncodingButton().IsEnabled(editorSession().HasFile());

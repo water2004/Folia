@@ -1,7 +1,7 @@
 #pragma once
 
 #include "editor/session/EditorRenderFrame.h"
-#include "storage/DocumentEncodingService.h"
+import folia.encoding;
 
 import folia.core.editor;
 import folia.markdown.parser;
@@ -82,8 +82,8 @@ namespace winrt::Folia
         void Open(
             winrt::Windows::Storage::StorageFile const& file,
             winrt::hstring const& text,
-            DocumentEncoding encoding,
-            std::vector<DocumentEncodingCandidate> encodingCandidates,
+            folia::encoding::DocumentEncoding encoding,
+            std::vector<folia::encoding::DocumentEncodingCandidate> encodingCandidates,
             LoadProgress progress = {},
             bool encodingExplicit = false);
         void SaveAs(winrt::Windows::Storage::StorageFile const& file);
@@ -103,9 +103,9 @@ namespace winrt::Folia
         winrt::Windows::Storage::StorageFile File() const;
         winrt::hstring Text() const;
         std::string TextUtf8() const;
-        DocumentEncoding const& Encoding() const;
-        std::span<DocumentEncodingCandidate const> EncodingCandidates() const;
-        void SetEncoding(DocumentEncoding encoding);
+        folia::encoding::DocumentEncoding const& Encoding() const;
+        std::span<folia::encoding::DocumentEncodingCandidate const> EncodingCandidates() const;
+        void SetEncoding(folia::encoding::DocumentEncoding encoding);
         bool EncodingWasExplicit() const;
         EditorReloadViewState CaptureReloadViewState() const;
         void RestoreReloadViewState(EditorReloadViewState const& state);
@@ -165,8 +165,8 @@ namespace winrt::Folia
 
         winrt::Windows::Storage::StorageFile file_{ nullptr };
         winrt::hstring text_;
-        DocumentEncoding encoding_;
-        std::vector<DocumentEncodingCandidate> encodingCandidates_;
+        folia::encoding::DocumentEncoding encoding_;
+        std::vector<folia::encoding::DocumentEncodingCandidate> encodingCandidates_;
         bool encodingExplicit_ = false;
         uint64_t revision_ = 0;
         std::unique_ptr<detail::EditorSessionCore> core_;

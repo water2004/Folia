@@ -31,8 +31,8 @@ namespace winrt::Folia
     void EditorSession::Open(
         winrt::Windows::Storage::StorageFile const& file,
         winrt::hstring const& text,
-        DocumentEncoding encoding,
-        std::vector<DocumentEncodingCandidate> encodingCandidates,
+        folia::encoding::DocumentEncoding encoding,
+        std::vector<folia::encoding::DocumentEncodingCandidate> encodingCandidates,
         LoadProgress progress,
         bool encodingExplicit)
     {
@@ -227,17 +227,17 @@ namespace winrt::Folia
             : core_->editor.markdown_utf8();
     }
 
-    DocumentEncoding const& EditorSession::Encoding() const
+    folia::encoding::DocumentEncoding const& EditorSession::Encoding() const
     {
         return encoding_;
     }
 
-    std::span<DocumentEncodingCandidate const> EditorSession::EncodingCandidates() const
+    std::span<folia::encoding::DocumentEncodingCandidate const> EditorSession::EncodingCandidates() const
     {
         return encodingCandidates_;
     }
 
-    void EditorSession::SetEncoding(DocumentEncoding encoding)
+    void EditorSession::SetEncoding(folia::encoding::DocumentEncoding encoding)
     {
         encoding_ = std::move(encoding);
         encodingCandidates_.clear();

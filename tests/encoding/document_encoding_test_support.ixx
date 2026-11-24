@@ -1,13 +1,15 @@
 module;
 
-#include "storage/DocumentEncodingService.h"
+#include <algorithm>
+#include <cstdint>
+#include <utility>
+#include <vector>
 
 export module folia.tests.document_encoding;
+import folia.encoding;
 
 namespace
 {
-    using namespace winrt::Folia;
-
     std::vector<std::uint8_t> Gb18030Fixture()
     {
         return {
@@ -27,36 +29,36 @@ export namespace folia::encoding_test
     bool utf8_bom_roundtrip()
     {
         auto bytes = std::vector<std::uint8_t>{0xEF, 0xBB, 0xBF, 'a', 'b', 'c'};
-        auto decoded = DocumentEncodingService::Decode(bytes);
+        auto decoded = folia::encoding::DocumentEncodingService::Decode(bytes);
         return decoded.utf8 == "abc"
             && decoded.encoding.name == "UTF-8"
-            && decoded.encoding.byteOrderMark == DocumentByteOrderMark::Utf8
-            && DocumentEncodingService::Encode(decoded.utf8, decoded.encoding) == bytes;
+            && decoded.encoding.byteOrderMark == folia::encoding::DocumentByteOrderMark::Utf8
+            && folia::encoding::DocumentEncodingService::Encode(decoded.utf8, decoded.encoding) == bytes;
     }
 
     bool gb18030_candidates_and_roundtrip()
     {
         auto bytes = Gb18030Fixture();
-        auto decoded = DocumentEncodingService::Decode(bytes);
+        auto decoded = folia::encoding::DocumentEncodingService::Decode(bytes);
         if (decoded.encoding.name != "GB18030" || decoded.candidates.empty()) return false;
         for (std::size_t index = 1; index < decoded.candidates.size(); ++index)
             if (decoded.candidates[index - 1].confidence < decoded.candidates[index].confidence)
                 return false;
-        return DocumentEncodingService::Encode(decoded.utf8, decoded.encoding) == bytes;
+        return folia::encoding::DocumentEncodingService::Encode(decoded.utf8, decoded.encoding) == bytes;
     }
 
     bool legacy_roundtrip_rejects_loss()
     {
         auto bytes = std::vector<std::uint8_t>{'c', 'a', 'f', 0xE9};
-        auto decoded = DocumentEncodingService::Decode(bytes, "windows-1252");
+        auto decoded = folia::encoding::DocumentEncodingService::Decode(bytes, "windows-1252");
         if (decoded.utf8 != "caf\xC3\xA9"
-            || DocumentEncodingService::Encode(decoded.utf8, decoded.encoding) != bytes)
+            || folia::encoding::DocumentEncodingService::Encode(decoded.utf8, decoded.encoding) != bytes)
             return false;
         try
         {
-            (void)DocumentEncodingService::Encode("\xF0\x9F\x98\x80", decoded.encoding);
+            (void)folia::encoding::DocumentEncodingService::Encode("\xF0\x9F\x98\x80", decoded.encoding);
         }
-        catch (DocumentEncodingError const&)
+        catch (folia::encoding::DocumentEncodingError const&)
         {
             return true;
         }
@@ -65,24 +67,24 @@ export namespace folia::encoding_test
 
     bool utf16_resolution_roundtrip()
     {
-        auto encoding = DocumentEncoding{
+        auto encoding = folia::encoding::DocumentEncoding{
             "UTF-16",
-            DocumentByteOrderMark::Utf16LittleEndian,
+            folia::encoding::DocumentByteOrderMark::Utf16LittleEndian,
             0,
             false,
         };
-        encoding = DocumentEncodingService::NormalizeForSave(std::move(encoding));
+        encoding = folia::encoding::DocumentEncodingService::NormalizeForSave(std::move(encoding));
         if (encoding.name != "UTF-16LE") return false;
-        auto bytes = DocumentEncodingService::Encode("# \xE4\xB8\xAD\xE6\x96\x87\n", encoding);
+        auto bytes = folia::encoding::DocumentEncodingService::Encode("# \xE4\xB8\xAD\xE6\x96\x87\n", encoding);
         if (bytes.size() < 2 || bytes[0] != 0xFF || bytes[1] != 0xFE) return false;
-        auto decoded = DocumentEncodingService::Decode(bytes);
+        auto decoded = folia::encoding::DocumentEncodingService::Decode(bytes);
         return decoded.encoding.name == "UTF-16LE"
             && decoded.utf8 == "# \xE4\xB8\xAD\xE6\x96\x87\n";
     }
 
     bool converter_catalog_is_complete()
     {
-        auto available = DocumentEncodingService::AvailableEncodings();
+        auto available = folia::encoding::DocumentEncodingService::AvailableEncodings();
         return available.size() > 100
             && std::find(available.begin(), available.end(), "GB18030") != available.end();
     }

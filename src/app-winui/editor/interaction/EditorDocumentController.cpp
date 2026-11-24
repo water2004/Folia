@@ -2,7 +2,7 @@
 #include "editor/interaction/EditorDocumentController.h"
 #include "editor/interaction/EditorDocumentControllerState.h"
 #include "localization/Localization.h"
-#include "storage/DocumentEncodingService.h"
+import folia.encoding;
 
 import folia.core.command;
 import folia.markdown.slug;
@@ -102,7 +102,7 @@ namespace winrt::Folia
         ReopenDocumentWithEncodingAsync(state_, state_->generation.load(), std::move(encoding));
     }
 
-    void EditorDocumentController::SaveDocumentWithEncoding(DocumentEncoding encoding)
+    void EditorDocumentController::SaveDocumentWithEncoding(folia::encoding::DocumentEncoding encoding)
     {
         if (encoding.name.empty()) return;
         SaveDocumentAsync(state_, state_->documentGeneration.load(), false, std::move(encoding));
@@ -426,7 +426,7 @@ namespace winrt::Folia
         co_await winrt::resume_background();
         try
         {
-            auto decoded = DocumentEncodingService::Decode(
+            auto decoded = folia::encoding::DocumentEncodingService::Decode(
                 bytes,
                 requestedEncoding
                     ? std::optional<std::string_view>{ *requestedEncoding }

@@ -153,7 +153,9 @@
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="storage\AssetPaths.h" />
-    <ClInclude Include="storage\DocumentEncodingService.h" />
+    <ClCompile Include="..\encoding\document_encoding.ixx">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClInclude Include="storage\ClipboardImageStore.h" />
     <ClInclude Include="localization\Localization.h" />
     <ClInclude Include="settings\AppSettings.h" />
@@ -711,7 +713,7 @@
     <ClCompile Include="storage\ClipboardImageStore.cpp" />
     <ClCompile Include="MainWindow.Lifecycle.cpp" />
     <ClCompile Include="editor\interaction\EditorDocumentController.Reload.cpp" />
-    <ClCompile Include="storage\DocumentEncodingService.cpp">
+    <ClCompile Include="..\encoding\document_encoding.cpp">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="editor\interaction\EditorDocumentController.Pdf.cpp" />

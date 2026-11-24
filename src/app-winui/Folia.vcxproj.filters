@@ -411,7 +411,7 @@
     <ClCompile Include="storage\AssetPaths.cpp">
       <Filter>Storage</Filter>
     </ClCompile>
-    <ClCompile Include="storage\DocumentEncodingService.cpp">
+    <ClCompile Include="..\encoding\document_encoding.cpp">
       <Filter>Storage</Filter>
     </ClCompile>
     <ClCompile Include="editor\session\EditorSession.cpp">
@@ -620,9 +620,9 @@
     <ClInclude Include="storage\AssetPaths.h">
       <Filter>Storage</Filter>
     </ClInclude>
-    <ClInclude Include="storage\DocumentEncodingService.h">
+    <ClCompile Include="..\encoding\document_encoding.ixx">
       <Filter>Storage</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClInclude Include="editor\session\EditorSession.h">
       <Filter>Editor\Session</Filter>
     </ClInclude>

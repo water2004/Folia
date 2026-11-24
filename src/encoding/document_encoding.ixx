@@ -1,14 +1,7 @@
-#pragma once
+export module folia.encoding;
+import std;
 
-#include <cstdint>
-#include <optional>
-#include <span>
-#include <stdexcept>
-#include <string>
-#include <string_view>
-#include <vector>
-
-namespace winrt::Folia
+export namespace folia::encoding
 {
     enum class DocumentByteOrderMark
     {

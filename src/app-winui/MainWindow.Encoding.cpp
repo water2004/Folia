@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "MainWindow.xaml.h"
 #include "localization/Localization.h"
-#include "storage/DocumentEncodingService.h"
+import folia.encoding;
 
 namespace winrt::Folia::implementation
 {
@@ -10,7 +10,7 @@ namespace winrt::Folia::implementation
         struct EncodingChoice
         {
             std::string name;
-            DocumentByteOrderMark byteOrderMark = DocumentByteOrderMark::None;
+            folia::encoding::DocumentByteOrderMark byteOrderMark = folia::encoding::DocumentByteOrderMark::None;
             int confidence = 0;
             bool detected = false;
         };
@@ -20,15 +20,15 @@ namespace winrt::Folia::implementation
             return _stricmp(std::string(left).c_str(), std::string(right).c_str()) == 0;
         }
 
-        DocumentByteOrderMark DefaultSaveBom(std::string_view name)
+        folia::encoding::DocumentByteOrderMark DefaultSaveBom(std::string_view name)
         {
-            if (SameEncoding(name, "UTF-16")) return DocumentByteOrderMark::Utf16LittleEndian;
-            if (SameEncoding(name, "UTF-16LE")) return DocumentByteOrderMark::Utf16LittleEndian;
-            if (SameEncoding(name, "UTF-16BE")) return DocumentByteOrderMark::Utf16BigEndian;
-            if (SameEncoding(name, "UTF-32")) return DocumentByteOrderMark::Utf32LittleEndian;
-            if (SameEncoding(name, "UTF-32LE")) return DocumentByteOrderMark::Utf32LittleEndian;
-            if (SameEncoding(name, "UTF-32BE")) return DocumentByteOrderMark::Utf32BigEndian;
-            return DocumentByteOrderMark::None;
+            if (SameEncoding(name, "UTF-16")) return folia::encoding::DocumentByteOrderMark::Utf16LittleEndian;
+            if (SameEncoding(name, "UTF-16LE")) return folia::encoding::DocumentByteOrderMark::Utf16LittleEndian;
+            if (SameEncoding(name, "UTF-16BE")) return folia::encoding::DocumentByteOrderMark::Utf16BigEndian;
+            if (SameEncoding(name, "UTF-32")) return folia::encoding::DocumentByteOrderMark::Utf32LittleEndian;
+            if (SameEncoding(name, "UTF-32LE")) return folia::encoding::DocumentByteOrderMark::Utf32LittleEndian;
+            if (SameEncoding(name, "UTF-32BE")) return folia::encoding::DocumentByteOrderMark::Utf32BigEndian;
+            return folia::encoding::DocumentByteOrderMark::None;
         }
 
         std::vector<EncodingChoice> BuildChoices(
@@ -52,22 +52,22 @@ namespace winrt::Folia::implementation
                 {
                     append({
                         candidate.name,
-                        DocumentByteOrderMark::None,
+                        folia::encoding::DocumentByteOrderMark::None,
                         candidate.confidence,
                         true,
                     });
                 }
             }
-            for (auto const& name : DocumentEncodingService::AvailableEncodings())
+            for (auto const& name : folia::encoding::DocumentEncodingService::AvailableEncodings())
             {
                 append({
                     name,
-                    saveWithEncoding ? DefaultSaveBom(name) : DocumentByteOrderMark::None,
+                    saveWithEncoding ? DefaultSaveBom(name) : folia::encoding::DocumentByteOrderMark::None,
                     0,
                     false,
                 });
                 if (saveWithEncoding && SameEncoding(name, "UTF-8"))
-                    append({ name, DocumentByteOrderMark::Utf8, 0, false });
+                    append({ name, folia::encoding::DocumentByteOrderMark::Utf8, 0, false });
             }
             return result;
         }
@@ -75,7 +75,7 @@ namespace winrt::Folia::implementation
         winrt::hstring ChoiceLabel(EncodingChoice const& choice)
         {
             auto label = winrt::to_hstring(choice.name);
-            if (choice.byteOrderMark == DocumentByteOrderMark::Utf8)
+            if (choice.byteOrderMark == folia::encoding::DocumentByteOrderMark::Utf8)
                 label = label + L" BOM";
             if (choice.detected)
                 label = label + L"  —  " + winrt::to_hstring(choice.confidence) + L"%";
