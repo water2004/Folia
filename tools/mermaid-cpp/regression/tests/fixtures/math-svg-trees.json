@@ -1,0 +1,296 @@
+[
+  {
+    "id": "empty",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1\" height=\"2\"/>",
+    "tree": {
+      "tag": "svg",
+      "attrs": {},
+      "children": []
+    }
+  },
+  {
+    "id": "root-annotations",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1\" height=\"2\" role=\"img\" focusable=\"false\" data-tex=\"x\" style=\"vertical-align: -1.23ex;\" viewBox=\"0,0 1e2 20\"><g data-mml-node=\"mi\"><text>x</text></g></svg>",
+    "tree": {
+      "tag": "svg",
+      "attrs": {
+        "viewBox": [
+          0,
+          0,
+          100,
+          20
+        ]
+      },
+      "children": [
+        {
+          "tag": "g",
+          "attrs": {},
+          "children": [
+            {
+              "tag": "text",
+              "attrs": {},
+              "children": [
+                "x"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "ids-and-references",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"><defs><path id=\"glyph-a\" d=\"M1 2L3,4\"/></defs><use xlink:href=\"#glyph-a\" transform=\"translate(1,2)\"/></svg>",
+    "tree": {
+      "tag": "svg",
+      "attrs": {},
+      "children": [
+        {
+          "tag": "defs",
+          "attrs": {},
+          "children": [
+            {
+              "tag": "path",
+              "attrs": {
+                "d": [
+                  "M",
+                  1,
+                  2,
+                  "L",
+                  3,
+                  4
+                ],
+                "id": "resource-0"
+              },
+              "children": []
+            }
+          ]
+        },
+        {
+          "tag": "use",
+          "attrs": {
+            "transform": [
+              "translate",
+              "(",
+              1,
+              2,
+              ")"
+            ],
+            "xlink:href": "#resource-0"
+          },
+          "children": []
+        }
+      ]
+    }
+  },
+  {
+    "id": "empty-transform",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\"><g transform=\"translate(10 20)\"><g transform=\"scale(2)\"/></g></svg>",
+    "tree": {
+      "tag": "svg",
+      "attrs": {},
+      "children": []
+    }
+  },
+  {
+    "id": "empty-paint",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\"><g fill=\"red\" transform=\"translate(10 20)\"/></svg>",
+    "tree": {
+      "tag": "svg",
+      "attrs": {},
+      "children": [
+        {
+          "tag": "g",
+          "attrs": {
+            "fill": "red",
+            "transform": [
+              "translate",
+              "(",
+              10,
+              20,
+              ")"
+            ]
+          },
+          "children": []
+        }
+      ]
+    }
+  },
+  {
+    "id": "numeric-representations",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\"><rect x=\"0x10\" y=\"-0\" width=\"1e2\" height=\"2.00\" stroke-width=\".5\" opacity=\"  \"/></svg>",
+    "tree": {
+      "tag": "svg",
+      "attrs": {},
+      "children": [
+        {
+          "tag": "rect",
+          "attrs": {
+            "height": 2,
+            "opacity": 0,
+            "stroke-width": 0.5,
+            "width": 100,
+            "x": 16,
+            "y": 0
+          },
+          "children": []
+        }
+      ]
+    }
+  },
+  {
+    "id": "invalid-numeric-stays-text",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\"><rect width=\"1px\" height=\"NaN\"/></svg>",
+    "tree": {
+      "tag": "svg",
+      "attrs": {},
+      "children": [
+        {
+          "tag": "rect",
+          "attrs": {
+            "height": "NaN",
+            "width": "1px"
+          },
+          "children": []
+        }
+      ]
+    }
+  },
+  {
+    "id": "text-whitespace",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\"> \n<text> x &amp; y <tspan> z </tspan> tail</text>\n</svg>",
+    "tree": {
+      "tag": "svg",
+      "attrs": {},
+      "children": [
+        {
+          "tag": "text",
+          "attrs": {},
+          "children": [
+            " x & y ",
+            {
+              "tag": "tspan",
+              "attrs": {},
+              "children": [
+                " z "
+              ]
+            },
+            " tail"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "empty-unicode-space",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\">﻿ <g/> </svg>",
+    "tree": {
+      "tag": "svg",
+      "attrs": {},
+      "children": []
+    }
+  },
+  {
+    "id": "xml-attribute",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\"><text xml:space=\"preserve\"> x </text></svg>",
+    "tree": {
+      "tag": "svg",
+      "attrs": {},
+      "children": [
+        {
+          "tag": "text",
+          "attrs": {
+            "xml:space": "preserve"
+          },
+          "children": [
+            " x "
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "tokens",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\"><path d=\"M1e-3 2. L.5 -.5Z\" transform=\"matrix(1 0 0 1 -2 3)\"/></svg>",
+    "tree": {
+      "tag": "svg",
+      "attrs": {},
+      "children": [
+        {
+          "tag": "path",
+          "attrs": {
+            "d": [
+              "M",
+              0.001,
+              2,
+              "L",
+              0.5,
+              -0.5,
+              "Z"
+            ],
+            "transform": [
+              "matrix",
+              "(",
+              1,
+              0,
+              0,
+              1,
+              -2,
+              3,
+              ")"
+            ]
+          },
+          "children": []
+        }
+      ]
+    }
+  },
+  {
+    "id": "root-id-not-normalized",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" id=\"root\"><g id=\"child\"/><use href=\"#child\"/><use href=\"#root\"/></svg>",
+    "tree": {
+      "tag": "svg",
+      "attrs": {
+        "id": "root"
+      },
+      "children": [
+        {
+          "tag": "g",
+          "attrs": {
+            "id": "resource-0"
+          },
+          "children": []
+        },
+        {
+          "tag": "use",
+          "attrs": {
+            "href": "#resource-0"
+          },
+          "children": []
+        },
+        {
+          "tag": "use",
+          "attrs": {
+            "href": "#root"
+          },
+          "children": []
+        }
+      ]
+    }
+  },
+  {
+    "id": "unsupported-style",
+    "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" style=\"opacity:0\"/>",
+    "error": true
+  },
+  {
+    "id": "wrong-root",
+    "svg": "<html/>",
+    "error": true
+  },
+  {
+    "id": "malformed",
+    "svg": "<svg><g></svg>",
+    "error": true
+  }
+]

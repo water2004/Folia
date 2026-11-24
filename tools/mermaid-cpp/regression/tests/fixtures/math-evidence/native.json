@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "corpusSha256": "40abc193875ea0b79bd915763a13e5f47ae3cf52d2ce8f2bb0726bbea4bcdb6a",
+  "records": [
+    {
+      "name": "empty",
+      "width": 0.2895927601809955,
+      "height": 0.2895927601809955,
+      "baseline": 0.0,
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"0.2895927601809955\" height=\"0.2895927601809955\" role=\"img\" focusable=\"false\" viewBox=\"0 0 16 16\" overflow=\"visible\"><g stroke=\"currentColor\" fill=\"currentColor\" stroke-width=\"0\" transform=\"scale(1,-1)\"><g data-mml-node=\"math\" data-latex=\"\"/></g></svg>",
+      "error": null
+    }
+  ]
+}

@@ -1,0 +1,121 @@
+[
+  {
+    "id": "equal-object",
+    "expected": {
+      "a": 1
+    },
+    "actual": {
+      "a": 1
+    },
+    "difference": null
+  },
+  {
+    "id": "key-order",
+    "expected": {
+      "a": 1,
+      "b": 2
+    },
+    "actual": {
+      "b": 2,
+      "a": 1
+    },
+    "difference": null
+  },
+  {
+    "id": "scalar",
+    "expected": 1,
+    "actual": 2,
+    "difference": {
+      "path": "$",
+      "expected": 1,
+      "actual": 2
+    }
+  },
+  {
+    "id": "bool-is-not-number",
+    "expected": false,
+    "actual": 0,
+    "difference": {
+      "path": "$",
+      "expected": false,
+      "actual": 0
+    }
+  },
+  {
+    "id": "array-count",
+    "expected": [
+      1,
+      2
+    ],
+    "actual": [
+      1
+    ],
+    "difference": {
+      "path": "$",
+      "expectedKeys": [
+        "0",
+        "1"
+      ],
+      "actualKeys": [
+        "0"
+      ]
+    }
+  },
+  {
+    "id": "array-vs-object",
+    "expected": [
+      1
+    ],
+    "actual": {
+      "0": 1
+    },
+    "difference": {
+      "path": "$",
+      "reason": "container type differs"
+    }
+  },
+  {
+    "id": "extra-key",
+    "expected": {
+      "a": 1
+    },
+    "actual": {
+      "a": 1,
+      "b": 2
+    },
+    "difference": {
+      "path": "$",
+      "expectedKeys": [
+        "a"
+      ],
+      "actualKeys": [
+        "a",
+        "b"
+      ]
+    }
+  },
+  {
+    "id": "nested",
+    "expected": {
+      "a": [
+        1,
+        {
+          "b": 2
+        }
+      ]
+    },
+    "actual": {
+      "a": [
+        1,
+        {
+          "b": 3
+        }
+      ]
+    },
+    "difference": {
+      "path": "$.a.1.b",
+      "expected": 2,
+      "actual": 3
+    }
+  }
+]

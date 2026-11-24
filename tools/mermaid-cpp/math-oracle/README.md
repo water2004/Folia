@@ -35,6 +35,7 @@ From the repository root:
 npm ci --prefix tools/mathjax-bundle --ignore-scripts
 pnpm --dir tools/mermaid-cpp/oracle install --frozen-lockfile --ignore-scripts
 npm ci --prefix tools/mermaid-cpp/math-oracle --ignore-scripts
+python -m pip install -r tools/mermaid-cpp/regression/requirements.txt
 ```
 
 `source-lock.json` pins the committed profile, dependency locks, the executable
@@ -60,7 +61,7 @@ toolchain. Then run:
 node tools/mermaid-cpp/math-oracle/capture-mathjax.mjs
 python tools/mermaid-cpp/math-oracle/capture-native.py \
   --library build/mermaid-math-runtime/libFoliaNativeMath.so
-node tools/mermaid-cpp/math-oracle/compare-fragments.mjs \
+python tools/mermaid-cpp/math-oracle/compare-fragments.py \
   build/mermaid-math/mathjax-newcm/report.json \
   build/mermaid-math/native/report.json
 node tools/mermaid-cpp/math-oracle/capture-official.mjs
@@ -86,7 +87,7 @@ The test host maps only the `mjx-container` selector tag to an outer SVG element
 preserving direct-child and descendant relationships so the selectors really
 match. Native output and comparison tolerances are unchanged.
 
-`compare-fragments.mjs` checks:
+`compare-fragments.py` checks:
 
 - CSS-pixel width, height, and baseline, with `1e-9` tolerance for floating-point
   arithmetic; graph geometry tolerances are not changed.
@@ -97,6 +98,14 @@ match. Native output and comparison tolerances are unchanged.
 - Exact RGBA pixels using the same locked sharp/librsvg rasterizer and the same
   2× SVG host canvas. There is no image registration, filtering, or fuzzy pixel
   threshold. Even the empty expression is rendered in a real SVG host canvas.
+
+The comparison and source-lock checks run in Python. The small
+`capture-raster-samples.mjs` generator only asks the pinned Sharp backend for
+actual PNG and raw RGBA observations; it does not compare native output or
+choose tolerances. Every sample is bound to its exact input SVG and report/corpus
+hashes. Use `--capture-only` to write `raster-observations.json` separately, then
+pass that file with `--observations` to compare entirely offline without Node.
+The metric, ordered-tree and zero-RGBA rules are identical in either mode.
 
 The 22-case corpus covers fractions, sums, integrals, matrices, aligned equations,
 cases, `\nabla`, delimiters, text, explicit colors, cancel marks, blackboard
