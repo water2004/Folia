@@ -1,0 +1,5 @@
+# Pinned reference observations; values exported without normalization.
+# value_utf16
+A\u000aB
+process
+tail

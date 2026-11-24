@@ -11,7 +11,7 @@ import folia.math.core.math_item;
 import folia.math.core.mml_tree.node_kind;
 import folia.math.util.js_number;
 import folia.math.util.utf16;
-#include "math/fixtures/texhtml.inc"
+#include "math/support/texhtml_fixtures.hpp"
 
 namespace {
 using namespace folia::math::adaptors::lite;
@@ -320,8 +320,8 @@ MmlNode &observeCreator(NodeFactory &factory, NodeKind kind, std::span<MmlNode *
 
 suite texhtml = [] {
     "texhtml pinned direct cases exercise enabled and disabled parser paths"_test = [] {
-        expect(std::size(texhtmlDirectCases) == 22_u);
-        for (auto const &test : texhtmlDirectCases) {
+        expect(std::size(math_test::fixtures::texhtmlDirectCases()) == 22_u);
+        for (auto const &test : math_test::fixtures::texhtmlDirectCases()) {
             const auto caseName = folia::math::utf16::encode(test.name);
             TexHtmlFixture f(test.initialAllowTexHTML);
             auto &options = f.jax->parseOptions();
@@ -355,8 +355,8 @@ suite texhtml = [] {
 
     "texhtml original render2mml cases traverse Lite, HTMLDomStrings, FindTeX and TeX compile"_test =
         [] {
-            expect(std::size(texhtmlPipelineCases) == 5_u);
-            for (auto const &test : texhtmlPipelineCases) {
+            expect(std::size(math_test::fixtures::texhtmlPipelineCases()) == 5_u);
+            for (auto const &test : math_test::fixtures::texhtmlPipelineCases()) {
                 TexHtmlFixture f;
                 BorrowTrace trace;
                 BorrowTraceScope traceScope(trace);
@@ -422,7 +422,7 @@ suite texhtml = [] {
     "texhtml direct missing marker reports Source error and the same TeX instance recovers"_test =
         [] {
             TexHtmlFixture f;
-            auto const &broken = texhtmlRecoveryCase;
+            auto const &broken = math_test::fixtures::texhtmlRecoveryCase();
             AbstractMathItem bad(std::u16string(broken.input), f.jax.get());
             auto &badRoot =
                 f.jax->compile(bad, f.document, CompileServices{nullptr, &f.adaptor});
