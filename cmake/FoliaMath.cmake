@@ -11,6 +11,14 @@ target_include_directories(folia_math PRIVATE ${FOLIA_SOURCE_ROOT}/third_party/s
 # Font tables are generated offline from the pinned Source package data. The
 # generator verifies every locked input and preserves unchanged output mtimes.
 find_program(FOLIA_NODE_EXECUTABLE NAMES node REQUIRED)
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+execute_process(
+    COMMAND "${Python3_EXECUTABLE}" "${FOLIA_SOURCE_ROOT}/tools/math-port/prepare-source.py"
+    RESULT_VARIABLE FOLIA_SOURCE_PREPARE_RESULT
+    ERROR_VARIABLE FOLIA_SOURCE_PREPARE_ERROR)
+if(NOT FOLIA_SOURCE_PREPARE_RESULT EQUAL 0)
+    message(FATAL_ERROR "MathJax source preparation failed: ${FOLIA_SOURCE_PREPARE_ERROR}")
+endif()
 execute_process(
     COMMAND ${FOLIA_NODE_EXECUTABLE} tools/math-port/font-data-generate-native.cjs
     WORKING_DIRECTORY ${FOLIA_SOURCE_ROOT}
