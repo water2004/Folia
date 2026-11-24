@@ -12,25 +12,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT / "regression"))
 from comparison.corpus import require
+from comparison.family_browser import Observer, load_cases
 from comparison.family_checks import Check
 from comparison.families import FAMILIES, compare_family
 
 
-def observation(family):
-    if family == "class-elk":
-        family = "class"
-    source = (ROOT / "oracle/observations" / (family + ".mjs")).read_text(encoding="utf-8")
-    declaration = "export default "
-    require(source.count(declaration) == 1, "Capture module must export one browser observation")
-    return "(" + source.split(declaration, 1)[1].rstrip().removesuffix(";") + ")"
-
-
 def run(args):
     from playwright.sync_api import sync_playwright
-    rows = json.loads(args.reference.read_text(encoding="utf-8"))
-    require(isinstance(rows, list) and bool(rows), "Official capture must contain cases")
-    if args.family == "er":
-        require(len(rows) == 32, "ER official corpus must contain all 32 cases")
+    rows = load_cases(args.family, args.reference, os.environ.get("FOLIA_TREE_VIEW_THEME"))
     check, results = Check(), []
     with sync_playwright() as playwright:
         options = {"headless": True}
@@ -38,36 +27,23 @@ def run(args):
             options["executable_path"] = args.browser
         browser = playwright.chromium.launch(**options)
         try:
-            page = browser.new_page(viewport={"width": 1600, "height": 1200}) if args.family == "sequence" else browser.new_page()
-            observer = observation(args.family)
-            for expected in rows:
-                prefix = "" if args.family in ("venn", "wardley") else args.family + "-"
-                if args.family == "xy" and args.oracle_measurements:
-                    prefix = "xy-oracle-"
-                elif args.family == "class-elk":
-                    prefix = "class-"
-                source = (args.native / (prefix + expected["name"] + ".svg")).read_text(encoding="utf-8")
-                if args.family == "requirement":
-                    require("<foreignObject" not in source, expected["name"] + ": labels must survive SVG normalization")
-                if args.family == "wardley":
-                    source = '<style>svg{font-family:"trebuchet ms"}</style>' + source
-                page.set_content(source)
-                if args.family in ("venn", "wardley"):
-                    actual = page.evaluate("() => (" + observer + ")(document)")
-                else:
-                    actual = page.evaluate(observer)
-                compare_family(args.family, actual, expected, check, args.oracle_measurements)
-                results.append({"name": expected["name"], "status": "passed"})
-                print("PASS " + expected["name"])
+            page_options = {"viewport": {"width": 1600, "height": 1200}} if args.family in ("sequence", "flowchart", "mindmap") else {}
+            observer = Observer(browser.new_page(**page_options), args.family)
+            for result, actual, expected in observer.pairs(rows, args.native, args.oracle_measurements):
+                if actual is not None:
+                    compare_family(args.family, actual, expected, check, args.oracle_measurements)
+                results.append(result)
+                print(result["status"].upper() + " " + result["name"])
         finally:
             browser.close()
-    report = {"checked": len(results), "family": args.family, "maximumDifference": check.maximum,
+    checked = sum(result["status"] == "passed" for result in results)
+    report = {"checked": checked, "family": args.family, "maximumDifference": check.maximum,
               "maximumDifferenceAt": check.maximum_at, "results": results,
               "measurementSource": "original-browser" if args.oracle_measurements else "native-host"}
     output = args.output or args.reference.parent / ("original-measurements-comparison.json" if args.oracle_measurements else "comparison.json")
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-    print(f"Compared {len(rows)} native {args.family} SVGs against official captures")
+    print(f"Compared {checked} native {args.family} SVGs against official captures")
 
 
 def main():

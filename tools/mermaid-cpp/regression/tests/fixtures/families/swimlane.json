@@ -1,0 +1,723 @@
+{
+  "family": "swimlane",
+  "expected": {
+    "name": "base",
+    "view": {
+      "x": 0,
+      "y": 0,
+      "width": 100,
+      "height": 100
+    },
+    "labels": [
+      {
+        "text": "hello",
+        "fontSize": "12px",
+        "fontFamily": "Arial",
+        "color": "black",
+        "fontWeight": "400",
+        "stroke": "none",
+        "box": {
+          "x": 10,
+          "y": 20,
+          "width": 30,
+          "height": 40
+        },
+        "glyphBox": {
+          "x": 10,
+          "y": 20,
+          "width": 30,
+          "height": 40
+        }
+      }
+    ],
+    "lanes": [
+      {
+        "label": "lane",
+        "box": {
+          "x": 10,
+          "y": 20,
+          "width": 30,
+          "height": 40
+        }
+      }
+    ],
+    "nodes": [
+      {
+        "label": "node",
+        "box": {
+          "x": 10,
+          "y": 20,
+          "width": 30,
+          "height": 40
+        }
+      }
+    ],
+    "edgeLabelBackgrounds": [
+      {
+        "fill": "red",
+        "stroke": "black",
+        "width": "1px"
+      }
+    ],
+    "edges": [
+      {
+        "stroke": "black",
+        "strokeWidth": 1,
+        "markerFill": "black",
+        "dasharray": "none",
+        "d": "M1 2L3 4"
+      }
+    ]
+  },
+  "actual": {
+    "view": {
+      "x": 0,
+      "y": 0,
+      "width": 100,
+      "height": 100
+    },
+    "labels": [
+      {
+        "text": "hello",
+        "fontSize": "12px",
+        "fontFamily": "Arial",
+        "color": "black",
+        "fontWeight": "400",
+        "stroke": "none",
+        "box": {
+          "x": 10,
+          "y": 20,
+          "width": 30,
+          "height": 40
+        },
+        "glyphBox": {
+          "x": 10,
+          "y": 20,
+          "width": 30,
+          "height": 40
+        }
+      }
+    ],
+    "lanes": [
+      {
+        "label": "lane",
+        "box": {
+          "x": 10,
+          "y": 20,
+          "width": 30,
+          "height": 40
+        }
+      }
+    ],
+    "nodes": [
+      {
+        "label": "node",
+        "box": {
+          "x": 10,
+          "y": 20,
+          "width": 30,
+          "height": 40
+        }
+      }
+    ],
+    "edgeLabelBackgrounds": [
+      {
+        "fill": "red",
+        "stroke": "black",
+        "width": "1px"
+      }
+    ],
+    "edges": [
+      {
+        "stroke": "black",
+        "strokeWidth": 1,
+        "markerFill": "black",
+        "dasharray": "none",
+        "d": "M1 2L3 4"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "id": "swimlane-identical",
+      "mutations": [],
+      "accept": true
+    },
+    {
+      "id": "swimlane-mutation-0",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "x"
+          ],
+          "value": 2
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-mutation-1",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "y"
+          ],
+          "value": 2
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-mutation-2",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "width"
+          ],
+          "value": 102
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-mutation-3",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "height"
+          ],
+          "value": 102
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-mutation-4",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "text"
+          ],
+          "value": "hello changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-mutation-5",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "fontSize"
+          ],
+          "value": "12px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-mutation-6",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "fontFamily"
+          ],
+          "value": "Arial changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-mutation-7",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "color"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-mutation-8",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "fontWeight"
+          ],
+          "value": "400 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-mutation-9",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "stroke"
+          ],
+          "value": "none changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-mutation-10",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "box",
+            "x"
+          ],
+          "value": 12
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-mutation-11",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "box",
+            "y"
+          ],
+          "value": 22
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-mutation-12",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "box",
+            "width"
+          ],
+          "value": 32
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-mutation-13",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "box",
+            "height"
+          ],
+          "value": 42
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-mutation-14",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "glyphBox",
+            "x"
+          ],
+          "value": 12
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-mutation-15",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "glyphBox",
+            "y"
+          ],
+          "value": 22
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-mutation-16",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "glyphBox",
+            "width"
+          ],
+          "value": 32
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-mutation-17",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "glyphBox",
+            "height"
+          ],
+          "value": 42
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-mutation-18",
+      "mutations": [
+        {
+          "path": [
+            "lanes",
+            0,
+            "label"
+          ],
+          "value": "lane changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-mutation-19",
+      "mutations": [
+        {
+          "path": [
+            "lanes",
+            0,
+            "box",
+            "x"
+          ],
+          "value": 12
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-mutation-20",
+      "mutations": [
+        {
+          "path": [
+            "lanes",
+            0,
+            "box",
+            "y"
+          ],
+          "value": 22
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-mutation-21",
+      "mutations": [
+        {
+          "path": [
+            "lanes",
+            0,
+            "box",
+            "width"
+          ],
+          "value": 32
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-mutation-22",
+      "mutations": [
+        {
+          "path": [
+            "lanes",
+            0,
+            "box",
+            "height"
+          ],
+          "value": 42
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-mutation-23",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "label"
+          ],
+          "value": "node changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-mutation-24",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "box",
+            "x"
+          ],
+          "value": 12
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-mutation-25",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "box",
+            "y"
+          ],
+          "value": 22
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-mutation-26",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "box",
+            "width"
+          ],
+          "value": 32
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-mutation-27",
+      "mutations": [
+        {
+          "path": [
+            "nodes",
+            0,
+            "box",
+            "height"
+          ],
+          "value": 42
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-mutation-28",
+      "mutations": [
+        {
+          "path": [
+            "edgeLabelBackgrounds",
+            0,
+            "fill"
+          ],
+          "value": "red changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-mutation-29",
+      "mutations": [
+        {
+          "path": [
+            "edgeLabelBackgrounds",
+            0,
+            "stroke"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-mutation-30",
+      "mutations": [
+        {
+          "path": [
+            "edgeLabelBackgrounds",
+            0,
+            "width"
+          ],
+          "value": "1px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-mutation-31",
+      "mutations": [
+        {
+          "path": [
+            "edges",
+            0,
+            "stroke"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-mutation-32",
+      "mutations": [
+        {
+          "path": [
+            "edges",
+            0,
+            "strokeWidth"
+          ],
+          "value": 3
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-mutation-33",
+      "mutations": [
+        {
+          "path": [
+            "edges",
+            0,
+            "markerFill"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-mutation-34",
+      "mutations": [
+        {
+          "path": [
+            "edges",
+            0,
+            "dasharray"
+          ],
+          "value": "none changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-mutation-35",
+      "mutations": [
+        {
+          "path": [
+            "edges",
+            0,
+            "d"
+          ],
+          "value": "M1 2L3 4 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-missing-labels",
+      "mutations": [
+        {
+          "path": [
+            "labels"
+          ],
+          "value": []
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-missing-lanes",
+      "mutations": [
+        {
+          "path": [
+            "lanes"
+          ],
+          "value": []
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-missing-nodes",
+      "mutations": [
+        {
+          "path": [
+            "nodes"
+          ],
+          "value": []
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-missing-edgeLabelBackgrounds",
+      "mutations": [
+        {
+          "path": [
+            "edgeLabelBackgrounds"
+          ],
+          "value": []
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "swimlane-missing-edges",
+      "mutations": [
+        {
+          "path": [
+            "edges"
+          ],
+          "value": []
+        }
+      ],
+      "accept": false
+    }
+  ]
+}

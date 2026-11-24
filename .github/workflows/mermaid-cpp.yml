@@ -343,7 +343,7 @@ jobs:
           $env:FOLIA_MERMAID_SVG_OUTPUT = "$pwd/build/mermaid-cpp/pie-svg"
           & "$env:FOLIA_MERMAID_BINARY_DIR/FoliaMermaidPlatformTests.exe" "*zenuml*"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          node tools/mermaid-cpp/compare-zenuml-svg.mjs build/mermaid-cpp/zenuml-browser/original.json build/mermaid-cpp/pie-svg
+          python tools/mermaid-cpp/compare-family.py zenuml build/mermaid-cpp/zenuml-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Measure original Flowchart SVGs in a real browser
@@ -454,7 +454,7 @@ jobs:
           python tools/mermaid-cpp/compare-family.py er build/mermaid-cpp/er-browser/original.json build/mermaid-cpp/pie-svg
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           foreach ($family in @('info', 'tree-view', 'ishikawa', 'cynefin', 'venn', 'railroad', 'error', 'agentflow', 'swimlane', 'eventmodeling', 'wardley', 'usecase')) {
-            if (@('block', 'c4', 'cynefin', 'gantt', 'git-graph', 'journey', 'kanban', 'quadrant', 'radar', 'sankey', 'timeline', 'treemap', 'venn', 'wardley', 'xy', 'state', 'er', 'requirement', 'sequence', 'class', 'class-elk') -contains $family) {
+            if (@('block', 'c4', 'cynefin', 'gantt', 'git-graph', 'journey', 'kanban', 'quadrant', 'radar', 'sankey', 'timeline', 'treemap', 'venn', 'wardley', 'xy', 'state', 'er', 'requirement', 'sequence', 'class', 'class-elk', 'usecase', 'swimlane', 'eventmodeling', 'ishikawa', 'railroad', 'zenuml', 'info', 'error') -contains $family) {
                 python tools/mermaid-cpp/compare-family.py $family "build/mermaid-cpp/${family}-browser/original.json" build/mermaid-cpp/pie-svg
             } else {
                 node "tools/mermaid-cpp/compare-${family}-svg.mjs" "build/mermaid-cpp/${family}-browser/original.json" build/mermaid-cpp/pie-svg
@@ -504,7 +504,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           & "$env:FOLIA_MERMAID_BINARY_DIR/FoliaMermaidTextProbe.exe" build/mermaid-cpp/browser-text.tsv build/mermaid-cpp/native-text.tsv
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          node tools/mermaid-cpp/compare-text-probe.mjs
+          python tools/mermaid-cpp/compare-text-probe.py
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Collect bounded candidate SVG failures independently
@@ -518,7 +518,7 @@ jobs:
               $failed += $family
               continue
             }
-            if (@('block', 'c4', 'cynefin', 'gantt', 'git-graph', 'journey', 'kanban', 'quadrant', 'radar', 'sankey', 'timeline', 'treemap', 'venn', 'wardley', 'xy', 'state', 'er', 'requirement', 'sequence', 'class', 'class-elk') -contains $family) {
+            if (@('block', 'c4', 'cynefin', 'gantt', 'git-graph', 'journey', 'kanban', 'quadrant', 'radar', 'sankey', 'timeline', 'treemap', 'venn', 'wardley', 'xy', 'state', 'er', 'requirement', 'sequence', 'class', 'class-elk', 'usecase', 'swimlane', 'eventmodeling', 'ishikawa', 'railroad', 'zenuml', 'info', 'error') -contains $family) {
                 python tools/mermaid-cpp/compare-family.py $family $original build/mermaid-cpp/pie-svg
             } else {
                 node "tools/mermaid-cpp/compare-$family-svg.mjs" $original build/mermaid-cpp/pie-svg

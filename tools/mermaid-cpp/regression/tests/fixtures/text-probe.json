@@ -1,0 +1,19 @@
+{
+  "reference": "Arial\t16\tA\t12\t12",
+  "native": "Arial\t16\tA\t12\t12\t12\t11\t12",
+  "cases": [
+    {"id": "identical", "accept": true},
+    {"id": "advance-boundary", "field": 5, "value": "12.0625", "bounds": "12.0625", "accept": true},
+    {"id": "advance-outside", "field": 5, "value": "12.0626", "bounds": "12.0626", "accept": false},
+    {"id": "bounds-boundary", "field": 7, "value": "14.5", "accept": true},
+    {"id": "bounds-outside", "field": 7, "value": "14.5001", "accept": false},
+    {"id": "bounds-smaller-than-advance", "field": 7, "value": "11.9", "accept": false},
+    {"id": "negative-ink", "field": 6, "value": "-1", "accept": false},
+    {"id": "nan-advance", "field": 5, "value": "NaN", "accept": false},
+    {"id": "infinite-bounds", "field": 7, "value": "Infinity", "accept": false},
+    {"id": "missing-input", "count": 95, "accept": false},
+    {"id": "extra-input", "count": 97, "accept": false},
+    {"id": "wrong-font", "field": 0, "value": "Helvetica", "accept": false},
+    {"id": "changed-source", "field": 2, "value": "B", "accept": false}
+  ]
+}

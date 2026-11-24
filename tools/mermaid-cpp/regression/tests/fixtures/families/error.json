@@ -1,0 +1,375 @@
+{
+  "family": "error",
+  "expected": {
+    "name": "base",
+    "view": "0 0 100 100",
+    "width": "100",
+    "height": "100",
+    "paths": [
+      {
+        "d": "M1 2L3 4",
+        "fill": "red",
+        "box": [
+          10,
+          20,
+          30,
+          40
+        ]
+      }
+    ],
+    "labels": [
+      {
+        "text": "Error",
+        "font": {
+          "fontFamily": "Arial",
+          "fontSize": "12px",
+          "fontWeight": "400",
+          "fill": "black"
+        },
+        "box": [
+          10,
+          20,
+          30,
+          40
+        ]
+      }
+    ]
+  },
+  "actual": {
+    "view": "0 0 100 100",
+    "width": "100",
+    "height": "100",
+    "paths": [
+      {
+        "d": "M1 2L3 4",
+        "fill": "red",
+        "box": [
+          10,
+          20,
+          30,
+          40
+        ]
+      }
+    ],
+    "labels": [
+      {
+        "text": "Error",
+        "font": {
+          "fontFamily": "Arial",
+          "fontSize": "12px",
+          "fontWeight": "400",
+          "fill": "black"
+        },
+        "box": [
+          10,
+          20,
+          30,
+          40
+        ]
+      }
+    ]
+  },
+  "cases": [
+    {
+      "id": "error-identical",
+      "mutations": [],
+      "accept": true
+    },
+    {
+      "id": "error-mutation-0",
+      "mutations": [
+        {
+          "path": [
+            "view"
+          ],
+          "value": "0 0 100 100 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "error-mutation-1",
+      "mutations": [
+        {
+          "path": [
+            "width"
+          ],
+          "value": "100 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "error-mutation-2",
+      "mutations": [
+        {
+          "path": [
+            "height"
+          ],
+          "value": "100 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "error-mutation-3",
+      "mutations": [
+        {
+          "path": [
+            "paths",
+            0,
+            "d"
+          ],
+          "value": "M1 2L3 4 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "error-mutation-4",
+      "mutations": [
+        {
+          "path": [
+            "paths",
+            0,
+            "fill"
+          ],
+          "value": "red changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "error-mutation-5",
+      "mutations": [
+        {
+          "path": [
+            "paths",
+            0,
+            "box",
+            0
+          ],
+          "value": 12
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "error-mutation-6",
+      "mutations": [
+        {
+          "path": [
+            "paths",
+            0,
+            "box",
+            1
+          ],
+          "value": 22
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "error-mutation-7",
+      "mutations": [
+        {
+          "path": [
+            "paths",
+            0,
+            "box",
+            2
+          ],
+          "value": 32
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "error-mutation-8",
+      "mutations": [
+        {
+          "path": [
+            "paths",
+            0,
+            "box",
+            3
+          ],
+          "value": 42
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "error-mutation-9",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "text"
+          ],
+          "value": "Error changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "error-mutation-10",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "font",
+            "fontFamily"
+          ],
+          "value": "Arial changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "error-mutation-11",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "font",
+            "fontSize"
+          ],
+          "value": "12px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "error-mutation-12",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "font",
+            "fontWeight"
+          ],
+          "value": "400 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "error-mutation-13",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "font",
+            "fill"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "error-mutation-14",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "box",
+            0
+          ],
+          "value": 12
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "error-mutation-15",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "box",
+            1
+          ],
+          "value": 22
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "error-mutation-16",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "box",
+            2
+          ],
+          "value": 32
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "error-mutation-17",
+      "mutations": [
+        {
+          "path": [
+            "labels",
+            0,
+            "box",
+            3
+          ],
+          "value": 42
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "error-missing-paths",
+      "mutations": [
+        {
+          "path": [
+            "paths"
+          ],
+          "value": []
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "error-missing-labels",
+      "mutations": [
+        {
+          "path": [
+            "labels"
+          ],
+          "value": []
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "error-extra-paint-or-viewport",
+      "mutations": [
+        {
+          "path": [
+            "paths",
+            0,
+            "opacity"
+          ],
+          "value": "0"
+        }
+      ],
+      "accept": false
+    }
+  ]
+}

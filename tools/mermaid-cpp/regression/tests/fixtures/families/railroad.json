@@ -1,0 +1,545 @@
+{
+  "family": "railroad",
+  "expected": {
+    "name": "base",
+    "view": [
+      0,
+      0,
+      100,
+      100
+    ],
+    "sizing": [
+      "fixed",
+      100,
+      100
+    ],
+    "accessibility": [
+      "img",
+      "railroad",
+      "Title",
+      "Description"
+    ],
+    "shapes": [
+      {
+        "identity": [
+          "path",
+          [
+            "rule"
+          ],
+          ""
+        ],
+        "style": [
+          "none",
+          "black",
+          "none"
+        ],
+        "commands": [
+          "M",
+          "L"
+        ],
+        "bounds": [
+          10,
+          20,
+          30,
+          40
+        ],
+        "numeric": [
+          1,
+          2,
+          3,
+          4
+        ]
+      }
+    ]
+  },
+  "actual": {
+    "view": [
+      0,
+      0,
+      100,
+      100
+    ],
+    "sizing": [
+      "fixed",
+      100,
+      100
+    ],
+    "accessibility": [
+      "img",
+      "railroad",
+      "Title",
+      "Description"
+    ],
+    "shapes": [
+      {
+        "identity": [
+          "path",
+          [
+            "rule"
+          ],
+          ""
+        ],
+        "style": [
+          "none",
+          "black",
+          "none"
+        ],
+        "commands": [
+          "M",
+          "L"
+        ],
+        "bounds": [
+          10,
+          20,
+          30,
+          40
+        ],
+        "numeric": [
+          1,
+          2,
+          3,
+          4
+        ]
+      }
+    ]
+  },
+  "cases": [
+    {
+      "id": "railroad-identical",
+      "mutations": [],
+      "accept": true
+    },
+    {
+      "id": "railroad-mutation-0",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            0
+          ],
+          "value": 2
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "railroad-mutation-1",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            1
+          ],
+          "value": 2
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "railroad-mutation-2",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            2
+          ],
+          "value": 102
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "railroad-mutation-3",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            3
+          ],
+          "value": 102
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "railroad-mutation-4",
+      "mutations": [
+        {
+          "path": [
+            "sizing",
+            0
+          ],
+          "value": "fixed changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "railroad-mutation-5",
+      "mutations": [
+        {
+          "path": [
+            "sizing",
+            1
+          ],
+          "value": 102
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "railroad-mutation-6",
+      "mutations": [
+        {
+          "path": [
+            "sizing",
+            2
+          ],
+          "value": 102
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "railroad-mutation-7",
+      "mutations": [
+        {
+          "path": [
+            "accessibility",
+            0
+          ],
+          "value": "img changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "railroad-mutation-8",
+      "mutations": [
+        {
+          "path": [
+            "accessibility",
+            1
+          ],
+          "value": "railroad changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "railroad-mutation-9",
+      "mutations": [
+        {
+          "path": [
+            "accessibility",
+            2
+          ],
+          "value": "Title changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "railroad-mutation-10",
+      "mutations": [
+        {
+          "path": [
+            "accessibility",
+            3
+          ],
+          "value": "Description changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "railroad-mutation-11",
+      "mutations": [
+        {
+          "path": [
+            "shapes",
+            0,
+            "identity",
+            0
+          ],
+          "value": "path changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "railroad-mutation-12",
+      "mutations": [
+        {
+          "path": [
+            "shapes",
+            0,
+            "identity",
+            1,
+            0
+          ],
+          "value": "rule changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "railroad-mutation-13",
+      "mutations": [
+        {
+          "path": [
+            "shapes",
+            0,
+            "identity",
+            2
+          ],
+          "value": " changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "railroad-mutation-14",
+      "mutations": [
+        {
+          "path": [
+            "shapes",
+            0,
+            "style",
+            0
+          ],
+          "value": "none changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "railroad-mutation-15",
+      "mutations": [
+        {
+          "path": [
+            "shapes",
+            0,
+            "style",
+            1
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "railroad-mutation-16",
+      "mutations": [
+        {
+          "path": [
+            "shapes",
+            0,
+            "style",
+            2
+          ],
+          "value": "none changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "railroad-mutation-17",
+      "mutations": [
+        {
+          "path": [
+            "shapes",
+            0,
+            "commands",
+            0
+          ],
+          "value": "M changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "railroad-mutation-18",
+      "mutations": [
+        {
+          "path": [
+            "shapes",
+            0,
+            "commands",
+            1
+          ],
+          "value": "L changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "railroad-mutation-19",
+      "mutations": [
+        {
+          "path": [
+            "shapes",
+            0,
+            "bounds",
+            0
+          ],
+          "value": 12
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "railroad-mutation-20",
+      "mutations": [
+        {
+          "path": [
+            "shapes",
+            0,
+            "bounds",
+            1
+          ],
+          "value": 22
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "railroad-mutation-21",
+      "mutations": [
+        {
+          "path": [
+            "shapes",
+            0,
+            "bounds",
+            2
+          ],
+          "value": 32
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "railroad-mutation-22",
+      "mutations": [
+        {
+          "path": [
+            "shapes",
+            0,
+            "bounds",
+            3
+          ],
+          "value": 42
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "railroad-mutation-23",
+      "mutations": [
+        {
+          "path": [
+            "shapes",
+            0,
+            "numeric",
+            0
+          ],
+          "value": 3
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "railroad-mutation-24",
+      "mutations": [
+        {
+          "path": [
+            "shapes",
+            0,
+            "numeric",
+            1
+          ],
+          "value": 4
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "railroad-mutation-25",
+      "mutations": [
+        {
+          "path": [
+            "shapes",
+            0,
+            "numeric",
+            2
+          ],
+          "value": 5
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "railroad-mutation-26",
+      "mutations": [
+        {
+          "path": [
+            "shapes",
+            0,
+            "numeric",
+            3
+          ],
+          "value": 6
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "railroad-missing-view",
+      "mutations": [
+        {
+          "path": [
+            "view"
+          ],
+          "value": []
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "railroad-missing-sizing",
+      "mutations": [
+        {
+          "path": [
+            "sizing"
+          ],
+          "value": []
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "railroad-missing-accessibility",
+      "mutations": [
+        {
+          "path": [
+            "accessibility"
+          ],
+          "value": []
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "railroad-missing-shapes",
+      "mutations": [
+        {
+          "path": [
+            "shapes"
+          ],
+          "value": []
+        }
+      ],
+      "accept": false
+    }
+  ]
+}

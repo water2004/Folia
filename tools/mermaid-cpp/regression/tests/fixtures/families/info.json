@@ -1,0 +1,297 @@
+{
+  "family": "info",
+  "expected": {
+    "name": "base",
+    "text": "Mermaid 12.2.0",
+    "view": {
+      "width": 100,
+      "height": 100
+    },
+    "width": "100%",
+    "height": null,
+    "style": "max-width: 100px;",
+    "viewport": {
+      "x": 10,
+      "y": 20,
+      "width": 30,
+      "height": 40
+    },
+    "box": {
+      "x": 10,
+      "y": 20,
+      "width": 30,
+      "height": 40
+    },
+    "font": {
+      "size": "12px",
+      "anchor": "start",
+      "fill": "black"
+    }
+  },
+  "actual": {
+    "text": "Mermaid 12.2.0",
+    "view": {
+      "width": 100,
+      "height": 100
+    },
+    "width": "100%",
+    "height": null,
+    "style": "max-width: 100px;",
+    "viewport": {
+      "x": 10,
+      "y": 20,
+      "width": 30,
+      "height": 40
+    },
+    "box": {
+      "x": 10,
+      "y": 20,
+      "width": 30,
+      "height": 40
+    },
+    "font": {
+      "size": "12px",
+      "anchor": "start",
+      "fill": "black"
+    }
+  },
+  "cases": [
+    {
+      "id": "info-identical",
+      "mutations": [],
+      "accept": true
+    },
+    {
+      "id": "info-mutation-0",
+      "mutations": [
+        {
+          "path": [
+            "text"
+          ],
+          "value": "Mermaid 12.2.0 changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "info-mutation-1",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "width"
+          ],
+          "value": 102
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "info-mutation-2",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "height"
+          ],
+          "value": 102
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "info-mutation-3",
+      "mutations": [
+        {
+          "path": [
+            "width"
+          ],
+          "value": "100% changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "info-mutation-4",
+      "mutations": [
+        {
+          "path": [
+            "height"
+          ],
+          "value": {
+            "unexpected": 1
+          }
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "info-mutation-5",
+      "mutations": [
+        {
+          "path": [
+            "style"
+          ],
+          "value": "max-width: 100px; changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "info-mutation-6",
+      "mutations": [
+        {
+          "path": [
+            "viewport",
+            "x"
+          ],
+          "value": 12
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "info-mutation-7",
+      "mutations": [
+        {
+          "path": [
+            "viewport",
+            "y"
+          ],
+          "value": 22
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "info-mutation-8",
+      "mutations": [
+        {
+          "path": [
+            "viewport",
+            "width"
+          ],
+          "value": 32
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "info-mutation-9",
+      "mutations": [
+        {
+          "path": [
+            "viewport",
+            "height"
+          ],
+          "value": 42
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "info-mutation-10",
+      "mutations": [
+        {
+          "path": [
+            "box",
+            "x"
+          ],
+          "value": 12
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "info-mutation-11",
+      "mutations": [
+        {
+          "path": [
+            "box",
+            "y"
+          ],
+          "value": 22
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "info-mutation-12",
+      "mutations": [
+        {
+          "path": [
+            "box",
+            "width"
+          ],
+          "value": 32
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "info-mutation-13",
+      "mutations": [
+        {
+          "path": [
+            "box",
+            "height"
+          ],
+          "value": 42
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "info-mutation-14",
+      "mutations": [
+        {
+          "path": [
+            "font",
+            "size"
+          ],
+          "value": "12px changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "info-mutation-15",
+      "mutations": [
+        {
+          "path": [
+            "font",
+            "anchor"
+          ],
+          "value": "start changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "info-mutation-16",
+      "mutations": [
+        {
+          "path": [
+            "font",
+            "fill"
+          ],
+          "value": "black changed"
+        }
+      ],
+      "accept": false
+    },
+    {
+      "id": "info-extra-paint-or-viewport",
+      "mutations": [
+        {
+          "path": [
+            "view",
+            "x"
+          ],
+          "value": "0"
+        }
+      ],
+      "accept": false
+    }
+  ]
+}
