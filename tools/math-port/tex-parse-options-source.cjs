@@ -55,10 +55,6 @@ assert.equal(ParseOptions.getVariant.get('tex'), undefined);
 
 const inputs = ['', 'A', 'a', 'É', 'é', 'Å', 'å', 'Å', 'ǅ', 'ά', 'Α', 'ϴ', 'ϑ', 'Ω', 'ς',
   'ß', 'ﬁ', '\ud800', '\u0301a', '𝔸', '𝑎', 'ā', 'ÿ', 'aB', 'Αabc', '\u03a2', 'K', 'ſ', 'a\0', '\0a'];
-function view(value) {
-  const units = Array.from({length: value.length}, (_, i) => `\\x${value.charCodeAt(i).toString(16).padStart(4, '0')}`).join('');
-  return `std::u16string_view(u"${units}", ${value.length})`;
-}
 const rows = inputs.map(input => [input,
   ParseOptions.getVariant.get('TeX')(input, false),
   ParseOptions.getVariant.get('TeX')(input, true),
@@ -70,10 +66,10 @@ for (const input of inputs) {
     assert.equal(ParseOptions.getVariant.get('French')(input, bold), rows[inputs.indexOf(input)][3]);
   }
 }
-const fixture = '// Generated only from the hash-locked MathJax ParseOptions.getVariant functions.\n' +
-  'constexpr StyleCase styleCases[]{\n' + rows.map(row => `    {${row.map(view).join(', ')}}`).join(',\n') + '\n};\n';
-const target = path.join(root, 'tests/math/fixtures/tex-source/parse-options-source.inc');
-if (process.argv.includes('--check')) assert.equal(fs.readFileSync(target, 'utf8').replaceAll('\r\n', '\n'), fixture);
-else fs.writeFileSync(target, fixture);
+const {utf16Field, writeTables} = require('./fixture-data.cjs');
+writeTables(path.join(root, 'tests/math/fixtures/input/parse-options'), {
+  cases: {columns: ["input_utf16", "tex_utf16", "texBold_utf16", "french_utf16"],
+    rows: rows.map(row => row.map(utf16Field))}
+});
 console.log(JSON.stringify({status: 'passed', styleObservations: inputs.length * 8, sourceFiles: Object.keys(locks).length,
   limit: 'Native option values/default layering and style resolver functions only; no constructor or complete TeX pipeline acceptance.'}));

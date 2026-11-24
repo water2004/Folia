@@ -52,9 +52,14 @@ async function main(){const rows=[];for(const display of [false,true])for(const 
  assert.equal(repeated.parent===repeatedParent,true);assert.equal(repeated.childNodes.length,repeatedChildren.length);
  assert.equal(repeated.childNodes.every((child,j)=>child===repeatedChildren[j]),true);assert.equal(output.nodeMap,null);
  if(first)for(const field of fields)assert.equal(box[field],first[field]);else first=Object.fromEntries(fields.map(k=>[k,box[k]]));}
- let text='// Generated from actual pinned CommonOutputJax.getBBox; use --write-fixture explicitly.\n';
- text+='const std::array bboxSourceCases{\n'+rows.map(r=>'    BBoxSourceCase{"'+r.name+'", '+r.display+', '+fields.map(k=>{const n=r.box[k];assert.equal(Number.isFinite(n),true,k);return Object.is(n,-0)?'-0.0':JSON.stringify(n)}).join(', ')+', "'+r.pwidth+'"},').join('\n')+'\n};\n';
- const file=path.join(root,'tests/math/fixtures/common-source/bbox.inc');if(process.argv.includes('--write-fixture'))fs.writeFileSync(file,text);else assert.equal(fs.readFileSync(file,'utf8').replaceAll('\r\n','\n'),text,'Common bbox fixture changed; regenerate explicitly');
+ const {byteField, binary64, writeTables} = require('./fixture-data.cjs');
+ writeTables(path.join(root, 'tests/math/fixtures/output/common-bbox'), {
+   cases: {columns: ["name_bytes", "display_boolean", "w_binary64", "h_binary64", "d_binary64", "scale_binary64", "rscale_binary64", "L_binary64", "R_binary64", "ic_binary64", "oc_binary64", "sk_binary64", "dx_binary64", "pwidth_bytes"],
+     rows: rows.map(r => [byteField(r.name), +r.display, ...fields.map(k => {
+       assert.equal(Number.isFinite(r.box[k]), true, k);
+       return binary64(r.box[k]);
+     }), byteField(r.pwidth)])}
+ });
  console.log(JSON.stringify({cases:rows.length,getBBoxCalls:rows.length+2,compiled_source_sha256:reference.provenance.compiled_source_sha256}));
 }
 main().catch(e=>{console.error(e);process.exitCode=1});

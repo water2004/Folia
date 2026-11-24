@@ -1,4 +1,5 @@
 #include "support/folia_test.hpp"
+#include "math/support/common_bbox_fixtures.hpp"
 import folia.math.output.common;
 import folia.math.core.mml_tree.mml_nodes.mo;
 import folia.math.util.utf16;
@@ -222,13 +223,7 @@ mml::MmlNode &bboxSourceNode(mml::MmlDocument &doc, std::string_view name) {
                          &bboxToken(doc, K::mi, u"β")});
     throw std::logic_error("Unknown Common bbox Source case");
 }
-struct BBoxSourceCase {
-    std::string_view name;
-    bool display;
-    double w, h, d, scale, rscale, L, R, ic, oc, sk, dx;
-    std::string_view pwidth;
-};
-#include "math/fixtures/common-source/bbox.inc"
+
 struct BBoxTreeState {
     mml::MmlNode *node, *parent;
     mml::AttributeSet attrs;
@@ -397,7 +392,7 @@ suite math_native_common_jax_methods = [] {
     "common subtree bbox matches real Source profile without changing document root or tree"_test =
         [] {
             auto bundle = folia::math::fonts::makeNewcmFontData();
-            for (auto const &entry : bboxSourceCases) {
+            for (auto const &entry : math_test::fixtures::bboxSourceCases()) {
                 mml::MmlDocument document;
                 auto &subtree = bboxSourceNode(document, entry.name);
                 subtree.setInheritedAttributes({}, entry.display, 0, false);

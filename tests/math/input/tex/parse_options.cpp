@@ -1,14 +1,12 @@
 #include "math/support/tex_fixture.hpp"
+#include "math/support/parse_option_fixtures.hpp"
 import folia.math.input.tex.parser;
 
 using namespace boost::ut;
 using namespace folia::math::tex;
 
 namespace {
-struct StyleCase {
-    std::u16string_view input, tex, texBold, french;
-};
-#include "math/fixtures/tex-source/parse-options-source.inc"
+
 }
 
 suite parse_options = [] {
@@ -99,7 +97,7 @@ suite parse_options = [] {
         expect(tex != nullptr && iso != nullptr && french != nullptr && upright != nullptr);
         expect(ParseOptions::getVariant(u"tex") == nullptr);
         expect(ParseOptions::getVariant(u"unknown") == nullptr);
-        for (auto const& row : styleCases) {
+        for (auto const& row : math_test::fixtures::styleCases()) {
             expect(tex(row.input, false) == row.tex);
             expect(tex(row.input, true) == row.texBold);
             for (bool bold : {false, true}) {

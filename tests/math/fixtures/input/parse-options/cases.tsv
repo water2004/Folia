@@ -1,0 +1,32 @@
+# Pinned reference observations; values exported without normalization.
+# input_utf16	tex_utf16	texBold_utf16	french_utf16
+			normal
+A			normal
+a			italic
+\u00c9			normal
+\u00e9			italic
+\u00c5			normal
+\u00e5			italic
+\u212b			normal
+\u01c5			normal
+\u03ac			normal
+\u0391		normal	normal
+\u03f4		normal	normal
+\u03d1			normal
+\u03a9		normal	normal
+\u03c2			normal
+\u00df			normal
+\ufb01			normal
+\ud800			normal
+\u0301a			normal
+\ud835\udd38			normal
+\ud835\udc4e			normal
+\u0101			italic
+\u00ff			italic
+aB			italic
+\u0391abc		normal	normal
+\u03a2		normal	normal
+\u212a			normal
+\u017f			normal
+a\u0000			italic
+\u0000a			normal

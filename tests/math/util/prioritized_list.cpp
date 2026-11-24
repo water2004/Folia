@@ -1,4 +1,5 @@
 #include "support/folia_test.hpp"
+#include "math/support/priority_fixtures.hpp"
 import folia.math.util.prioritized_list;
 
 using namespace boost::ut;
@@ -33,10 +34,7 @@ suite prioritized_list = [] {
 
 // Append to tests/math/util/prioritized_list.cpp's existing typed owner.
 namespace {
-struct SourcePrioritySnapshot {
-    std::vector<double> items, priorities;
-};
-#include "math/fixtures/tex-source/primitive_priority_values.inc"
+
 
 bool sourcePriorityEqual(double actual, double expected) {
     if (std::isnan(expected)) return std::isnan(actual);
@@ -49,7 +47,7 @@ suite native_primitive_priority_values = [] {
         PrioritizedList<double> list;
         std::size_t snapshot = 0;
         const auto verify = [&] {
-            const auto &expected = sourcePrioritySnapshots[snapshot++];
+            const auto &expected = math_test::fixtures::sourcePrioritySnapshots()[snapshot++];
             std::vector<folia::math::PrioritizedListItem<double>> actual;
             for (auto entry : list) actual.push_back(entry);
             expect(actual.size() == expected.items.size());
@@ -76,7 +74,7 @@ suite native_primitive_priority_values = [] {
         // constructor DEFAULTPRIORITY and record identity remain Source-only.
         list.add(88, 13);
         verify();
-        expect(snapshot == std::size(sourcePrioritySnapshots));
+        expect(snapshot == std::size(math_test::fixtures::sourcePrioritySnapshots()));
 
         PrioritizedList<int> dynamic;
         dynamic.add(1, 0);
