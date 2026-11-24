@@ -296,7 +296,8 @@ async function mainScene() {
   fs.mkdirSync(path.dirname(evidencePath), {recursive:true});
   fs.writeFileSync(evidencePath, JSON.stringify({provenance, records:records.map(({nodes,attributes,...rest}) =>
     ({...rest, nodes, attributes}))}, null, 2)+'\n');
-  const target = captureOnly ? '' : writeObservations('limits', observations, writeFixture);
+  const target = path.join(root, 'tests/math/fixtures/scenes/limits/observations.tsv');
+  if (!captureOnly) writeObservations('limits', observations, writeFixture);
   const numericBefore = fs.readFileSync(path.join(root, 'tests/math/fixtures/common-source/limits-source-expected.json'));
   assert.equal(crypto.createHash('sha256').update(numericBefore).digest('hex'),
     '439b8fd72e0e6a1505107e6547d385536eff2bd73108ee3958900e21e36e644e',

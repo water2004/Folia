@@ -26,6 +26,11 @@ class ObservationReader {
     explicit ObservationReader(std::string_view file)
         : file_{file}, rows_{folia::test::data::read_tsv(file, 3)} {}
 
+    ObservationReader(const ObservationReader&) = delete;
+    ObservationReader& operator=(const ObservationReader&) = delete;
+    ObservationReader(ObservationReader&&) = delete;
+    ObservationReader& operator=(ObservationReader&&) = delete;
+
     void finish() const {
         if (next_ != rows_.size())
             throw std::runtime_error(file_ + ": unconsumed observation fields");
