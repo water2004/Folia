@@ -258,13 +258,16 @@ const evidenceDir=path.join(root,'build/math-port/common-source');
 fs.mkdirSync(evidenceDir,{recursive:true});
 const evidencePath=path.join(evidenceDir,'menclose-geometry-source.json');
 fs.writeFileSync(evidencePath,JSON.stringify(generated,null,2)+'\n');
-const headerRows = output.map(row => `  {${JSON.stringify(row.case)},${JSON.stringify(row.notation)},`+
-  `${JSON.stringify(row.source_bbox.w)},${JSON.stringify(row.source_bbox.h)},${JSON.stringify(row.source_bbox.d)},`+
-  `{${row.trbl.map(value => JSON.stringify(value)).join(',')}}}`).join(',\n');
-fs.writeFileSync(path.join(evidenceDir, 'menclose-geometry-source-expected.hpp'),
-  `// Generated from actual MathJax 4.1.3 CommonMenclose.computeBBox results.\n` +
-  `// Include tests/support/folia_test.hpp before this header.\n#pragma once\n` +
-  `namespace native_common_menclose_source_geometry {\n` +
-  `struct LayoutRow { std::string_view case_name, notation; double w,h,d; std::array<double,4> trbl; };\n` +
-  `inline constexpr std::array<LayoutRow, ${output.length}> layout_rows{{\n${headerRows}\n}};\n}\n`);
+const {byteField, binary64, writeTables} = require('./fixture-data.cjs');
+// The former generated C++ header used JSON.stringify numbers, which converted
+// negative zero to zero. Keep that established persisted-reference boundary.
+const persistedNumber = value => binary64(Object.is(value, -0) ? 0 : value);
+writeTables(path.join(root, 'tests/math/fixtures/output/menclose'), {
+  geometry: {
+    columns: ['case_name_bytes', 'notation_bytes', 'w_binary64', 'h_binary64', 'd_binary64',
+      'top_binary64', 'right_binary64', 'bottom_binary64', 'left_binary64'],
+    rows: output.map(row => [byteField(row.case), byteField(row.notation),
+      ...[row.source_bbox.w, row.source_bbox.h, row.source_bbox.d, ...row.trbl].map(persistedNumber)])
+  }
+});
 console.log(`verified ${output.length} pinned Source SVG handler outputs and raw Common layout rows (${names.length} catalog names; radical handled by projection); evidence ${path.relative(root,evidencePath)}`);

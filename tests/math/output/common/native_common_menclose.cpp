@@ -1,7 +1,7 @@
 #include <cstdlib>
 #include <fstream>
 #include "support/folia_test.hpp"
-#include "math/fixtures/common-source/menclose-geometry-source-expected.hpp"
+#include "math/support/menclose_geometry_fixtures.hpp"
 import folia.math.core.mml_tree.mml_document;
 import folia.math.core.mml_tree.mml_nodes.math;
 import folia.math.core.mml_tree.mml_nodes.mi;
@@ -389,7 +389,6 @@ suite native_common_menclose = [] {
     };
 
     "source_bbox_and_extenders_match_exact_raw_values_for_positive_and_negative_height"_test = [] {
-        using namespace native_common_menclose_source_geometry;
         const auto bundle = folia::math::fonts::makeNewcmFontData();
         NoMeasurement measurement;
         mml::MmlDocument document;
@@ -423,7 +422,7 @@ suite native_common_menclose = [] {
                 row.attributes().set(u"probe-height", input.h);
                 row.attributes().set(u"probe-depth", input.d);
                 auto &wrapper = dynamic_cast<common::CommonMenclose &>(jax.factory().wrap(node));
-                const auto &expected = layout_rows.at(expectedIndex);
+                const auto &expected = math_test::fixtures::mencloseLayoutRows().at(expectedIndex);
                 expect(expected.case_name == input.name);
                 expect(expected.notation == spec.source_name);
                 auto &actualBox = wrapper.getBBox();
@@ -446,7 +445,7 @@ suite native_common_menclose = [] {
                 ++expectedIndex;
             }
         }
-        expect(expectedIndex == layout_rows.size());
+        expect(expectedIndex == math_test::fixtures::mencloseLayoutRows().size());
     };
 
     "radical_wrapper_projects_real_child_without_reparenting_or_extra_mml_edge"_test = [] {
