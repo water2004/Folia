@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "stage": "zenuml-canvas-observations",
+  "officialSha256": "cb4689e1b751bd7386d854ad0360817e789783e7fa43e0c656d7e2893582e359",
+  "corpusSha256": "04be59d74c2795b88ec501c19ea9008cc67a1d29f32d5ea3a0a936cafe6ab721",
+  "nativeProbeSha256": "d5e292b700acb15a4b70f9c55246c10c72eb44cdd8baa26a7577f4746ae43b29",
+  "backend": {
+    "name": "@napi-rs/canvas",
+    "version": "1.1.1",
+    "engine": "Skia",
+    "browser": false,
+    "estimatedWidths": false
+  },
+  "nativeFontRequests": 1,
+  "samplesSha256": "55f2b2ad13ece8f7e503ded07129e880866efa7ce169d413eddecf9e386ca37a",
+  "records": [
+    {
+      "id": "canvas-selftest",
+      "native": {
+        "ok": true,
+        "width": 16,
+        "height": 16
+      },
+      "fontRequests": 1,
+      "svg": "native.svg",
+      "svgSha256": "4b5188efa7dc125557b967a6b0d460ce0c373729aa7c2531e4c5496df715fac1",
+      "officialRaster": {
+        "schema": 1,
+        "kind": "svg",
+        "inputSha256": "d86b23c4097f57f5e5614ee957aa14bf6e73c108659b9ecbd3cf512a29e64024",
+        "backend": {
+          "name": "@napi-rs/canvas",
+          "version": "1.1.1",
+          "engine": "Skia",
+          "browser": false,
+          "estimatedWidths": false
+        },
+        "width": 16,
+        "height": 16,
+        "channels": 4,
+        "sourceSha256": "6628667aca8050cd095585ea7b16bf551fe983c901ab8c52ae898017f11d082f",
+        "rgba": "d86b23c4097f57f5e5614ee957aa14bf6e73c108659b9ecbd3cf512a29e64024.rgba",
+        "rgbaSha256": "be9f4599c3c19ada2a2f859b5db94b2f7a0c57a837f208ccf2156b01fa09221b",
+        "png": "d86b23c4097f57f5e5614ee957aa14bf6e73c108659b9ecbd3cf512a29e64024.png",
+        "pngSha256": "01f10c21aa3d02290cd9a8633042091695594dd7c4f71d91316627aecd524cf9"
+      },
+      "nativeRaster": {
+        "schema": 1,
+        "kind": "svg",
+        "inputSha256": "79e37abe6db6d0794b59a675c92f9bd0505e3e1a45c25fc8274777fa1e62de32",
+        "backend": {
+          "name": "@napi-rs/canvas",
+          "version": "1.1.1",
+          "engine": "Skia",
+          "browser": false,
+          "estimatedWidths": false
+        },
+        "width": 16,
+        "height": 16,
+        "channels": 4,
+        "sourceSha256": "4b5188efa7dc125557b967a6b0d460ce0c373729aa7c2531e4c5496df715fac1",
+        "rgba": "79e37abe6db6d0794b59a675c92f9bd0505e3e1a45c25fc8274777fa1e62de32.rgba",
+        "rgbaSha256": "be9f4599c3c19ada2a2f859b5db94b2f7a0c57a837f208ccf2156b01fa09221b",
+        "png": "79e37abe6db6d0794b59a675c92f9bd0505e3e1a45c25fc8274777fa1e62de32.png",
+        "pngSha256": "01f10c21aa3d02290cd9a8633042091695594dd7c4f71d91316627aecd524cf9"
+      }
+    }
+  ]
+}

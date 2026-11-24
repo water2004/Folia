@@ -64,3 +64,26 @@ externalized acceptance and rejection cases with:
 ```sh
 python -m unittest discover -s tools/mermaid-cpp/regression/tests -q
 ```
+
+## Exact Canvas evidence
+
+ZenUML retains the pinned `@napi-rs/canvas` 1.1.1 Skia font and raster backend.
+`../../oracle/capture-skia-samples.mjs` only generates actual font measurements
+and PNG/raw-RGBA samples. It does not launch the native renderer or decide whether
+a native result passes. `canvas_capture.py` owns the native JSON protocol and
+saves every request and sample with source, corpus, binary and byte hashes.
+
+The stages can run separately:
+
+```sh
+python tools/mermaid-cpp/regression/capture-native-canvas.py --probe=build/path/FoliaMermaidRegressionProbe --official=build/official --output=build/native
+python tools/mermaid-cpp/regression/compare-zenuml-canvas.py --official=build/official --observations=build/native/native-observations.json --output=build/native
+```
+
+The first stage needs Node only to generate the real reference-backend samples;
+the second stage is entirely Python and checks all cases, text, viewports and
+every transparent RGBA channel at zero pixel tolerance. The original `--probe`
+option remains as a convenience that runs capture before the offline comparison.
+Process timeouts, malformed responses, abnormal exits, missing glyph samples,
+changed hashes and missing coverage are failures. The committed tiny Canvas
+fixture contains real captured font metrics and raster bytes for negative tests.

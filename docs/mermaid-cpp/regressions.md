@@ -100,7 +100,7 @@ node tools/mermaid-cpp/regression/corpus.mjs
 | `run-native.py` | 全部输入经生产 C++ 测量与渲染路径生成 SVG | 与官方 SVG 一致 |
 | `capture-official.mjs` | 锁定官方 renderer 生成完整 SVG | 原生结果一致 |
 | `compare-svg.py` | 全语料 SVG、可见文字、绘制属性和实际栅格比较 | 未执行的平台 UI 交互 |
-| `compare-zenuml-canvas.mjs` | 原版 ZenUML 与原生 renderer 使用同一个真实 Skia 字体引擎，比较 SVG 文字、视口及逐像素结果 | DirectWrite／浏览器跨平台字体一致 |
+| `compare-zenuml-canvas.py` | 原版 ZenUML 与原生 renderer 使用同一个真实 Skia 字体引擎，Python 验证捕获证据、SVG 文字、视口及逐像素结果 | DirectWrite／浏览器跨平台字体一致 |
 
 完整验收必须保留每例结果，逐项核对语料散列和 SVG 散列。
 缺失样例、旧语料报告、生成失败、缺少浏览器或比较失败都会使总检查失败；
@@ -180,7 +180,7 @@ Packet 和 Info 的官方 renderer 不读取 DOM 文本几何，因此 Linux 上
 
 ```sh
 node tools/mermaid-cpp/regression/capture-zenuml.mjs
-node tools/mermaid-cpp/regression/compare-zenuml-canvas.mjs --probe=/absolute/path/to/FoliaMermaidRegressionProbe
+python tools/mermaid-cpp/regression/compare-zenuml-canvas.py --probe=/absolute/path/to/FoliaMermaidRegressionProbe
 ```
 
 几何、字体观测、官方 SVG、原生 SVG、PNG 和逐像素差异统计保存在对应的 ignored build
