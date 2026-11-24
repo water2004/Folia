@@ -5,7 +5,7 @@ Pinned Source: MathJax 4.1.3, locked through `docs/math-port/scope.json`.
 before loading modules and emits 23 actual parser cases to
 `build/math-port/tex-next-seven-original.json`. The native candidate is
 `tools/math-port/tex-next-seven-native-candidate.cpp`; compare with
-`tools/math-port/compare-tex-next-seven.cjs` once Root registers and builds it.
+`tools/math-port/compare-tex-next-seven.py` once Root registers and builds it.
 The seven owner pairs and native observer enter the Gate78 build; no native
 parity claim is made until the actual run passes the strict comparer.
 

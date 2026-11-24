@@ -33,7 +33,7 @@ hash recorded by the original corpus. It writes
 the 24-row original JSON and its cases are unchanged. A separate native
 candidate and strict comparator live at
 `tools/math-port/ams-newcommand-reference/ams-newcommand-boundary-native-candidate.cpp`
-and `tools/math-port/compare-ams-newcommand-boundary.cjs`. They compare the
+and `tools/math-port/compare-ams-newcommand-boundary.py`. They compare the
 same complete MML tree/error, dynamic map entries, and packageData snapshots.
 The candidate deliberately shares the frozen candidate's actual RuntimeGraph
 and serializer, rather than inventing a reduced node representation.

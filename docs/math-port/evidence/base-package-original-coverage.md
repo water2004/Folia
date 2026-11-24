@@ -34,7 +34,7 @@ observations, including explicit Base-only error cases and package-specific
 AMS, boldsymbol, newcommand, and configmacros profiles. The corresponding
 native full-tree candidate is
 `tools/math-port/parser-family-reference/base-methods-native-candidate.cpp`;
-`tools/math-port/compare-base-methods.cjs` compares the complete normalized
+`tools/math-port/compare-base-methods.py` compares the complete normalized
 MML tree, parser state, function-member order, error shape, and selected package
 list. The native comparison has not yet been run or accepted. Package-specific
 cases remain useful source gold even while their native package owners are
