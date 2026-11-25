@@ -70,7 +70,10 @@ namespace winrt::Folia::implementation
         bool CompleteTabTearOut(std::shared_ptr<DocumentTab> const& tab);
         bool PrepareExternalTab(Windows::Foundation::IInspectable const& item);
         bool ContainsTabDragPoint(Windows::Graphics::PointInt32 point);
+        struct TabHit { std::uint64_t id; float grabOffset; };
+        std::optional<TabHit> HitTestVisibleTab(Windows::Graphics::PointInt32 point);
         void BeginTabPointerGesture(Windows::Graphics::PointInt32 point);
+        static LRESULT CALLBACK TabPressSubclass(HWND, UINT, WPARAM, LPARAM, UINT_PTR, DWORD_PTR);
         void EndTabPointerGesture();
         void EnterTabMove(Microsoft::UI::Input::InputNonClientPointerSource const& pointer);
         void ExitTabMove();

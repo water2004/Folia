@@ -361,6 +361,39 @@ namespace {
             expect(viewport.ActualWidth() > oldWidth + 180.);
             expect(tabs.ActualWidth() <= viewport.ActualWidth() + 1.);
         };
+        "clicking a disk document tab leaves the tab strip responsive to resizing"_test = [] {
+            TestDirectory directory;
+            auto file = directory.path / L"resize.md";
+            std::ofstream(file) << "# Markdown from disk\n";
+            OwnedWindow current(App()->CreateMainWindow());
+            auto window = current.window;
+            Access::SetRecentHistory(window, directory.path / L"recent.json");
+            Access::Open(window, file);
+            auto loaded = Access::Documents(window).Active();
+            Pump([&] { return loaded->editor->loaded && !loaded->editor->opening; });
+            for (int i = 0; i < 3; ++i) Access::New(window);
+
+            auto root = window.Content().as<FrameworkElement>();
+            auto tabs = Access::Tabs(window);
+            auto first = Access::View(window, loaded->id);
+            auto add = Access::NewTabButton(window);
+            auto center = first.TransformToVisual(nullptr).TransformPoint(
+                {static_cast<float>(first.ActualWidth() / 2), static_cast<float>(first.ActualHeight() / 2)});
+            auto point = root.XamlRoot().CoordinateConverter().ConvertLocalToScreen(center);
+            int requests = 0;
+            auto observe = tabs.TabTearOutWindowRequested(winrt::auto_revoke, [&](auto&&, auto&&) { ++requests; });
+            ::SendMessageW(Access::Handle(window), WM_NCLBUTTONDOWN, HTCAPTION, MAKELPARAM(point.X, point.Y));
+            expect(fatal(Access::Documents(window).Active() == loaded));
+            expect(requests == 0);
+
+            auto width = first.ActualWidth();
+            auto addX = [&] { return add.TransformToVisual(root).TransformPoint({0, 0}).X; };
+            auto initialAddX = addX();
+            auto size = window.AppWindow().Size();
+            size.Width = static_cast<int>(740 * root.XamlRoot().RasterizationScale());
+            window.AppWindow().Resize(size);
+            Pump([&] { return first.ActualWidth() < width - 35. && addX() < initialAddX - 140.; });
+        };
         "open dropdowns and document menus use the current theme surface"_test = [] {
             using namespace Controls;
             OwnedWindow current(App()->CreateMainWindow());

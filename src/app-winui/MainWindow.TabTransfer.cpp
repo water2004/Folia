@@ -2,8 +2,12 @@
 import std;
 #include "App.xaml.h"
 #include "MainWindow.xaml.h"
+#include <commctrl.h>
 #include <dwmapi.h>
+#include <windowsx.h>
 #include <winrt/Microsoft.UI.Content.h>
+
+#pragma comment(lib, "comctl32.lib")
 
 namespace winrt::Folia::implementation {
     using namespace Microsoft::UI::Xaml;
@@ -168,11 +172,7 @@ namespace winrt::Folia::implementation {
         return local.X >= bounds.X && local.X <= bounds.X + bounds.Width
             && local.Y >= bounds.Y && local.Y <= bounds.Y + bounds.Height;
     }
-    void MainWindow::BeginTabPointerGesture(Windows::Graphics::PointInt32 point) {
-        if (tabMoveInProgress) return;
-        tabPointerDown = true;
-        EndTabDrag();
-        tabGrabOffset.reset();
+    std::optional<MainWindow::TabHit> MainWindow::HitTestVisibleTab(Windows::Graphics::PointInt32 point) {
         auto tabs = DocumentTabs();
         if (ContainsTabDragPoint(point)) {
             const auto local = tabs.XamlRoot().CoordinateConverter().ConvertScreenToLocal(point);
@@ -191,14 +191,20 @@ namespace winrt::Folia::implementation {
                 for (std::uint32_t i = 0; i < tabSource.Size(); ++i) {
                     if (auto tab = tabs.ContainerFromIndex(i).try_as<TabViewItem>()) {
                         auto rect = bounds(tab);
-                        if (contains(rect)) {
-                            tabGrabOffset = local.X - rect.X;
-                            break;
-                        }
+                        if (contains(rect)) return TabHit{
+                            winrt::unbox_value<std::uint64_t>(tabSource.GetAt(i)), local.X - rect.X};
                     }
                 }
             }
         }
+        return std::nullopt;
+    }
+    void MainWindow::BeginTabPointerGesture(Windows::Graphics::PointInt32 point) {
+        if (tabMoveInProgress) return;
+        tabPointerDown = true;
+        EndTabDrag();
+        auto hit = HitTestVisibleTab(point);
+        tabGrabOffset = hit ? std::optional{hit->grabOffset} : std::nullopt;
         // The native TabView move loop must only participate in a gesture
         // that actually started on a visible tab. Caption movement remains
         // ordinary window movement, including after a previous tab click.
@@ -272,6 +278,28 @@ namespace winrt::Folia::implementation {
         EndTabDrag();
         EndTabPointerGesture();
     }
+    LRESULT CALLBACK MainWindow::TabPressSubclass(HWND window, UINT message, WPARAM wparam, LPARAM lparam,
+        UINT_PTR id, DWORD_PTR context) {
+        if (message == WM_NCDESTROY) ::RemoveWindowSubclass(window, TabPressSubclass, id);
+        if (message == WM_NCLBUTTONDOWN && wparam == HTCAPTION) {
+            auto self = reinterpret_cast<MainWindow*>(context)->get_strong();
+            const Windows::Graphics::PointInt32 point{GET_X_LPARAM(lparam), GET_Y_LPARAM(lparam)};
+            if (!self->tabMoveInProgress && self->DocumentTabs().CanTearOutTabs()) {
+                if (auto tab = self->HitTestVisibleTab(point)) {
+                    // The SDK starts its tear-out loop on mouse-down. Wait for
+                    // the system drag threshold before forwarding a tab press.
+                    if (!(::GetAsyncKeyState(VK_LBUTTON) & 0x8000) || !::DragDetect(window, {point.X, point.Y})) {
+                        if (!self->windowClosed) {
+                            self->ActivateDocument(tab->id);
+                            self->EndTabPointerGesture();
+                        }
+                        return 0;
+                    }
+                }
+            }
+        }
+        return ::DefSubclassProc(window, message, wparam, lparam);
+    }
     void MainWindow::RegisterTabTransferHandlers() {
         tabDragEnded.Attach(Microsoft::UI::Input::InputNonClientPointerSource::GetForWindowId(AppWindow().Id()),
             WindowEvent([this](auto const&, auto const& args) {
@@ -290,6 +318,7 @@ namespace winrt::Folia::implementation {
             WindowEvent([this](auto const&, auto const&) {
                 if (!(::GetAsyncKeyState(VK_LBUTTON) & 0x8000)) EndTabPointerGesture();
             }));
+        winrt::check_bool(::SetWindowSubclass(WindowHandle(), TabPressSubclass, 0, reinterpret_cast<DWORD_PTR>(this)));
         // Register the origin check before TabView attaches its move callbacks.
         UpdateTabTransferAvailability();
         DocumentColumn().SizeChanged(WindowEvent([this](auto const&, auto const&) { RefreshTabCaptionRegion(); }));

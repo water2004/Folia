@@ -65,12 +65,16 @@ merging and tearing out again before releasing the pointer, and a single-tab
 drag that uses its existing window without requesting a new one.
 
 The shipped WinUI source leaves `TabTearOutRequested.NewWindowId` at zero, so it
-cannot identify the target. It also requests and briefly shows a preparatory
-window on an ordinary tab click. Preparatory windows are DWM-cloaked, excluded
-from switchers and marked nonactivating. The SDK's explicit `SetWindowPos` can
+cannot identify the target. It also initializes the tear-out loop before it
+knows whether a mouse press will become a drag, suspending tab width updates
+until the loop exits. For a caption press on a visible tab, Folia checks the
+system drag threshold before forwarding the press to WinUI. An ordinary click
+selects the tab directly and never creates a preparatory window.
+Preparatory windows are DWM-cloaked, excluded from switchers and marked
+nonactivating. The SDK's explicit `SetWindowPos` can
 activate even such a window: a preparation-scoped, UI-thread-local CBT guard
 vetoes activation and focus only for that HWND (including its child focus).
-It is removed on transfer or close. No window procedure or input loop is replaced.
+It is removed on transfer or close.
 Only a completed session transfer
 restores their normal presentation; an unused host closes with the native loop.
 External merges reject hidden/preparatory hosts and use the actual `TabListView`
@@ -85,8 +89,8 @@ the native tear-out callbacks for that gesture. Pressing the caption/footer
 temporarily removes those callbacks for the whole move loop, so a previous tab
 selection cannot turn a later window drag into a tab drag. Idle eligibility is
 restored after the native move ends, preserving external drop destinations;
-queued restoration cannot re-arm a newer pointer gesture. No mouse input or
-window procedure is synthesized or replaced.
+queued restoration cannot re-arm a newer pointer gesture. The platform handles
+drag detection, window movement, and tab transfer through its native move loop.
 Every native move entry rechecks its own pointer origin before TabView handles
 the move. A tab-selection click can finish through XAML without delivering a
 non-client release, so its recorded press cannot suppress a later origin check.
