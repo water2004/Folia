@@ -106,8 +106,10 @@ namespace winrt::Folia::implementation
         void RegisterWorkspaceLayout();
         void SelectWorkspacePane(bool outline);
         void SetSidebarOpen(bool open);
-        void ApplySidebarOpen(bool open);
-        void AnimateSidebar(bool open);
+        void PlanSidebarExpansion();
+        void AdvanceSidebar();
+        void ApplySidebarFrame(double fraction);
+        void LayoutSidebar();
         void ApplySidebarSurface();
         void UpdateWorkspaceAppearance(WorkspaceAppearance const& settings);
         void EnsureSelectedTabVisible();
@@ -204,11 +206,13 @@ namespace winrt::Folia::implementation
         Microsoft::UI::Xaml::Controls::SystemBackdropElement selectedTabBackdrop{nullptr};
         bool sidebarOpen = false, sidebarOverlay = false, outlineSelected = false;
         bool updatingRailSelection = false;
-        bool sidebarClosing = false;
-        Microsoft::UI::Xaml::Media::Animation::Storyboard sidebarMotion{nullptr};
-        Microsoft::UI::Xaml::Media::Animation::Timeline::Completed_revoker sidebarMotionCompleted;
-        int sidebarAddedWidth = 0;
-        int sidebarMovedLeft = 0;
+        struct {
+            double fraction = 0., from = 0.;
+            std::chrono::steady_clock::time_point started;
+            int targetWidth = 0, targetLeft = 0;
+            int appliedWidth = 0, appliedLeft = 0;
+            Microsoft::UI::Xaml::Media::CompositionTarget::Rendering_revoker rendering;
+        } sidebarMotion;
         TabDragPresentation dragPresentation;
         std::optional<float> tabGrabOffset;
         bool operationActive = false;

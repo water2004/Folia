@@ -211,7 +211,7 @@ namespace {
             expect(view.Clip().as<Media::RectangleGeometry>().Transform().as<Media::TranslateTransform>().Y() > 0.)
                 << "the document does not paint under the visible tools";
             Access::Hover(window, {100,160});
-            Pump([&] { return toolbar.Opacity() == 0.; });
+            Pump([&] { return toolbar.Opacity() == 0. && !toolbar.IsHitTestVisible(); });
             expect(!toolbar.IsHitTestVisible()) << "hidden tools leave input to the document";
             Access::Bars(window, {});
             root.UpdateLayout();
@@ -225,15 +225,54 @@ namespace {
             auto card = root.FindName(L"ReadingCard").as<FrameworkElement>();
             auto rail = root.FindName(L"WorkspaceRail").as<FrameworkElement>();
             auto sidebar = root.FindName(L"WorkspaceSidebar").as<FrameworkElement>();
+            auto appWindow = window.AppWindow();
+            auto display = winrt::Microsoft::UI::Windowing::DisplayArea::GetFromWindowId(appWindow.Id(),
+                winrt::Microsoft::UI::Windowing::DisplayAreaFallback::Nearest);
+            auto work = display ? display.WorkArea() : winrt::Windows::Graphics::RectInt32{};
+            const double scale = root.XamlRoot().RasterizationScale();
+            const bool room = work.Width > 820. * scale;
+            if (room) {
+                const int width = static_cast<int>(std::lround(560. * scale));
+                appWindow.MoveAndResize({work.X + static_cast<int>(225. * scale), work.Y + 20,
+                    width, (std::min)(appWindow.Size().Height, work.Height - 30)});
+                Pump([&] { return appWindow.Size().Width == width && root.ActualWidth() < 570.; });
+            }
             root.UpdateLayout();
             const auto original = card.ActualWidth();
+            const int closedWidth = appWindow.Size().Width;
+            auto readingOrigin = [&] {
+                return root.XamlRoot().CoordinateConverter().ConvertLocalToScreen(
+                    card.TransformToVisual(nullptr).TransformPoint({0, 0}));
+            };
+            const int originalLeft = readingOrigin().X;
+            std::vector<int> frameWidths;
+            struct ResizeObserver {
+                winrt::Microsoft::UI::Windowing::AppWindow window;
+                winrt::event_token token;
+                ~ResizeObserver() { window.Changed(token); }
+            } observer{appWindow, appWindow.Changed([&](auto const&, auto const& args) {
+                if (args.DidSizeChange()) frameWidths.push_back(appWindow.Size().Width);
+            })};
+            auto clip = sidebar.Clip().as<Media::RectangleGeometry>();
             Access::Sidebar(window, true);
-            Pump([&] { return sidebar.Visibility() == Visibility::Visible && sidebar.ActualWidth() > 0.; });
+            Pump([&] { return sidebar.Visibility() == Visibility::Visible && clip.Rect().Width > 215.; });
+            root.UpdateLayout();
             expect(std::abs(card.ActualWidth() - original) <= 1.);
             expect(rail.ActualHeight() == root.ActualHeight());
             expect(rail.TransformToVisual(root).TransformPoint({0,0}).X == 0.f);
+            const int expandedWidth = appWindow.Size().Width;
+            const bool animated = winrt::Windows::UI::ViewManagement::UISettings().AnimationsEnabled();
+            auto inBetween = [&](int width) { return closedWidth < width && width < expandedWidth; };
+            if (room) {
+                expect(expandedWidth > closedWidth);
+                expect(std::abs(readingOrigin().X - originalLeft) <= 1) << "leftward expansion keeps the reading origin on screen";
+            }
+            if (room && animated) expect(std::ranges::any_of(frameWidths, inBetween)) << "the native HWND grows in steps";
+            frameWidths.clear();
             Access::Sidebar(window, false);
-            Pump([&] { return sidebar.Visibility() == Visibility::Collapsed; });
+            Pump([&] { return sidebar.Visibility() == Visibility::Collapsed && appWindow.Size().Width == closedWidth; });
+            root.UpdateLayout();
+            if (room && animated) expect(std::ranges::any_of(frameWidths, inBetween)) << "the native HWND contracts in steps";
             expect(std::abs(card.ActualWidth() - original) <= 1.);
         };
         "workspace material can leave the reading surface opaque independently of the window"_test = [] {

@@ -73,6 +73,9 @@
                 <Button x:Name="SettingsButton" Grid.Row="2" Style="{StaticResource WorkspaceRailActionStyle}"/>
             </Grid>
             <Grid x:Name="WorkspaceSidebar" Grid.Column="1" Margin="0,36,0,0" Padding="4,0,6,7" Visibility="Collapsed" Canvas.ZIndex="1">
+            <Grid.Clip>
+                <RectangleGeometry x:Name="SidebarRevealClip"/>
+            </Grid.Clip>
             <SystemBackdropElement x:Name="FloatingSidebarBackdrop" CornerRadius="8" IsHitTestVisible="False"/>
             <Border x:Name="FloatingSidebarTint" CornerRadius="8" IsHitTestVisible="False"/>
             <Grid x:Name="DocumentNavigation">

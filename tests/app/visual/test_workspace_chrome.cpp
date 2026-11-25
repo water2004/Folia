@@ -59,7 +59,8 @@ namespace {
         winrt::Windows::Storage::Streams::IBuffer pixels{nullptr};
         double scale = 1;
         explicit Capture(Grid const& root, double requestedScale = 1) {
-            Await(bitmap.RenderAsync(root, static_cast<int>(root.ActualWidth() * requestedScale / root.XamlRoot().RasterizationScale()), static_cast<int>(root.ActualHeight() * requestedScale / root.XamlRoot().RasterizationScale())));
+            Await(bitmap.RenderAsync(root, static_cast<int>(root.ActualWidth() * requestedScale),
+                static_cast<int>(root.ActualHeight() * requestedScale)));
             pixels = Await(bitmap.GetPixelsAsync());
             scale = bitmap.PixelWidth() / root.ActualWidth();
         }
@@ -172,7 +173,8 @@ namespace {
             expect(f.Find<Grid>(L"DocumentToolbar").Background().as<Media::SolidColorBrush>().Color().A == 0);
             for (float scale : {1.f, 1.25f, 1.5f, 2.f}) {
                 Media::Imaging::RenderTargetBitmap bitmap;
-                Await(bitmap.RenderAsync(f.root, static_cast<int>(f.root.ActualWidth() * scale / f.root.XamlRoot().RasterizationScale()), static_cast<int>(f.root.ActualHeight() * scale / f.root.XamlRoot().RasterizationScale())));
+                Await(bitmap.RenderAsync(f.root, static_cast<int>(f.root.ActualWidth() * scale),
+                    static_cast<int>(f.root.ActualHeight() * scale)));
                 auto pixels = Await(bitmap.GetPixelsAsync());
                 expect(pixels.Length() == static_cast<std::uint32_t>(bitmap.PixelWidth() * bitmap.PixelHeight() * 4));
                 auto artifacts = std::filesystem::path(__FILE__).parent_path().parent_path().parent_path().parent_path() / L"build/tests/workspace-chrome";

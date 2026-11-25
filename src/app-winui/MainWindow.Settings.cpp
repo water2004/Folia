@@ -97,7 +97,7 @@ namespace winrt::Folia::implementation
     {
         if (enabled)
         {
-            documentSidebarWasOpen = sidebarOpen && !sidebarClosing;
+            documentSidebarWasOpen = sidebarOpen;
             animationController.Focus(false);
             if (!settingsView)
             {

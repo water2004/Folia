@@ -10,7 +10,6 @@ namespace winrt::Folia::implementation {
     using namespace Microsoft::UI::Windowing;
     using namespace Microsoft::UI::Xaml;
     using namespace Microsoft::UI::Xaml::Controls;
-    using namespace Microsoft::UI::Xaml::Media::Animation;
     using namespace std::chrono_literals;
 
     namespace {
@@ -46,14 +45,13 @@ namespace winrt::Folia::implementation {
         };
         watchPane(FilesTab(), false);
         watchPane(OutlineTab(), true);
-        SidebarButton().Checked(WindowEvent([this](auto const&, auto const&) {
-            if (!sidebarOpen || sidebarClosing) SetSidebarOpen(true);
-        }));
-        SidebarButton().Unchecked(WindowEvent([this](auto const&, auto const&) {
-            if (sidebarOpen && !sidebarClosing) SetSidebarOpen(false);
-        }));
+        SidebarButton().Checked(WindowEvent([this](auto const&, auto const&) { SetSidebarOpen(true); }));
+        SidebarButton().Unchecked(WindowEvent([this](auto const&, auto const&) { SetSidebarOpen(false); }));
+        WorkspaceSidebar().Width(sidebarWidth);
+        WorkspaceSidebar().HorizontalAlignment(HorizontalAlignment::Left);
+        WorkspaceSidebar().SizeChanged(WindowEvent([this](auto const&, auto const&) { LayoutSidebar(); }));
         AppWindow().Changed(WindowEvent([this](auto const&, AppWindowChangedEventArgs const& args) {
-            if (args.DidPresenterChange()) UpdateWorkspaceLayout();
+            if (args.DidPresenterChange()) LayoutSidebar();
         }));
         documentTools.Attach(ReadingCard(), DocumentToolbar(), DocumentViewport());
         for (auto const& flyout : {EncodingButton().Flyout(), DocumentActionsButton().Flyout()}) {
@@ -64,7 +62,7 @@ namespace winrt::Folia::implementation {
     }
 
     void MainWindow::SelectWorkspacePane(bool outline) {
-        const bool samePane = sidebarOpen && !sidebarClosing && outlineSelected == outline && !SettingsActive();
+        const bool samePane = sidebarOpen && outlineSelected == outline && !SettingsActive();
         const bool fromSettings = SettingsActive();
         if (fromSettings) ReturnToDocumentTab();
         outlineSelected = outline;
@@ -72,122 +70,127 @@ namespace winrt::Folia::implementation {
     }
 
     void MainWindow::SetSidebarOpen(bool open) {
-        if (open == (sidebarOpen && !sidebarClosing)) {
-            UpdateWorkspaceLayout();
-            return;
-        }
-        const bool animated = WorkspaceSidebar().IsLoaded() && AppWindow().IsVisible()
-            && Windows::UI::ViewManagement::UISettings().AnimationsEnabled();
-        if (!animated && sidebarMotion) {
-            sidebarMotionCompleted.revoke();
-            sidebarMotion.Stop();
-            WorkspaceSidebar().Opacity(1.);
-            WorkspaceSidebar().IsHitTestVisible(true);
-            WorkspaceSidebar().RenderTransform().as<Media::TranslateTransform>().X(0.);
-        }
-        sidebarClosing = !open && animated;
-        if (open || !animated) ApplySidebarOpen(open);
-        if (animated) AnimateSidebar(open);
-    }
-
-    void MainWindow::AnimateSidebar(bool open) {
-        auto sidebar = WorkspaceSidebar();
-        auto slide = sidebar.RenderTransform().try_as<Media::TranslateTransform>();
-        if (!slide) { slide = Media::TranslateTransform(); sidebar.RenderTransform(slide); }
-        const bool moving = sidebarMotion && sidebarMotion.GetCurrentState() == ClockState::Active;
-        const double opacity = moving ? sidebar.Opacity() : (open ? 0. : 1.);
-        const double offset = moving ? slide.X() : (open ? -10. : 0.);
-        sidebarMotionCompleted.revoke();
-        if (sidebarMotion) sidebarMotion.Stop();
-        sidebar.Opacity(open ? 1. : 0.);
-        slide.X(open ? 0. : -10.);
-        sidebar.IsHitTestVisible(open);
-        sidebarMotion = Storyboard();
-        auto add = [&](DependencyObject const& target, hstring const& property, double from, double to) {
-            DoubleAnimation animation;
-            animation.From(from);
-            animation.To(to);
-            animation.Duration(DurationHelper::FromTimeSpan(open ? 180ms : 135ms));
-            CubicEase easing;
-            easing.EasingMode(EasingMode::EaseOut);
-            animation.EasingFunction(easing);
-            Storyboard::SetTarget(animation, target);
-            Storyboard::SetTargetProperty(animation, property);
-            sidebarMotion.Children().Append(animation);
-        };
-        add(sidebar, L"Opacity", opacity, open ? 1. : 0.);
-        add(slide, L"X", offset, open ? 0. : -10.);
-        if (!open) {
-            UpdateWorkspaceLayout();
-            sidebarMotionCompleted = sidebarMotion.Completed(auto_revoke, [weak = get_weak()](auto const&, auto const&) {
-                if (auto window = weak.get(); window && !window->windowClosed) {
-                    window->sidebarClosing = false;
-                    window->ApplySidebarOpen(false);
-                }
-            });
-        }
-        sidebarMotion.Begin();
-    }
-
-    void MainWindow::ApplySidebarOpen(bool open) {
         if (open == sidebarOpen) {
             UpdateWorkspaceLayout();
             return;
         }
-        auto window = AppWindow();
-        auto presenter = window.Presenter().try_as<OverlappedPresenter>();
-        const bool restored = presenter && presenter.State() == OverlappedPresenterState::Restored;
-        if (window.IsVisible() && restored) {
-            auto work = DisplayArea::GetFromWindowId(window.Id(), DisplayAreaFallback::Nearest).WorkArea();
-            const auto size = window.Size();
-            const auto pos = window.Position();
-            const auto dpi = static_cast<double>(::GetDpiForWindow(WindowHandle())) / 96.;
-            const auto width = static_cast<int>(std::lround(sidebarWidth * dpi));
-            const int freeLeft = (std::max)(0, pos.X - work.X);
-            const int freeRight = (std::max)(0, work.X + work.Width - pos.X - size.Width);
-            if (open && Root().ActualWidth() >= minimumWorkspaceWidth && freeLeft + freeRight >= width) {
-                sidebarAddedWidth = width;
-                sidebarMovedLeft = (std::min)(freeLeft, width);
-                window.MoveAndResize({pos.X - sidebarMovedLeft, pos.Y, size.Width + width, size.Height});
-            } else if (!open && sidebarAddedWidth) {
-                const int shrink = (std::min)(sidebarAddedWidth, (std::max)(0, size.Width - static_cast<int>(minimumWorkspaceWidth * dpi)));
-                const int move = (std::min)(sidebarMovedLeft, shrink);
-                window.MoveAndResize({pos.X + move, pos.Y, size.Width - shrink, size.Height});
-            }
-        }
-        if (!open) sidebarMovedLeft = sidebarAddedWidth = 0;
         sidebarOpen = open;
-        // Keep the base values usable when the system skips motion.
-        WorkspaceSidebar().Opacity(1.);
-        WorkspaceSidebar().IsHitTestVisible(true);
-        if (auto slide = WorkspaceSidebar().RenderTransform().try_as<Media::TranslateTransform>()) slide.X(0.);
+        if (open && sidebarMotion.fraction == 0. && !sidebarMotion.appliedWidth) PlanSidebarExpansion();
+        sidebarMotion.rendering.revoke();
+        if (Root().IsLoaded() && AppWindow().IsVisible()
+            && Windows::UI::ViewManagement::UISettings().AnimationsEnabled()) {
+            sidebarMotion.from = sidebarMotion.fraction;
+            sidebarMotion.started = std::chrono::steady_clock::now();
+            sidebarMotion.rendering = Media::CompositionTarget::Rendering(auto_revoke, WindowEvent(
+                [this](auto const&, auto const&) { AdvanceSidebar(); }));
+        } else {
+            ApplySidebarFrame(open ? 1. : 0.);
+        }
         UpdateWorkspaceLayout();
     }
 
-    void MainWindow::UpdateWorkspaceLayout() {
-        const bool settings = SettingsActive();
-        const auto presenter = AppWindow().Presenter().try_as<OverlappedPresenter>();
+    void MainWindow::PlanSidebarExpansion() {
+        auto window = AppWindow();
+        auto presenter = window.Presenter().try_as<OverlappedPresenter>();
+        auto& motion = sidebarMotion;
+        motion.targetWidth = motion.targetLeft = 0;
+        if (!window.IsVisible() || !presenter || presenter.State() != OverlappedPresenterState::Restored
+            || Root().ActualWidth() < minimumWorkspaceWidth) return;
+        auto display = DisplayArea::GetFromWindowId(window.Id(), DisplayAreaFallback::Nearest);
+        if (!display) return;
+        auto work = display.WorkArea();
+        auto position = window.Position();
+        auto size = window.Size();
+        const double dpi = static_cast<double>(::GetDpiForWindow(WindowHandle())) / 96.;
+        const int width = static_cast<int>(std::lround(sidebarWidth * dpi));
+        const int left = (std::max)(0, position.X - work.X);
+        const int right = (std::max)(0, work.X + work.Width - position.X - size.Width);
+        if (left + right < width) return;
+        motion.targetWidth = width;
+        motion.targetLeft = (std::min)(left, width);
+    }
+
+    void MainWindow::AdvanceSidebar() {
+        auto& motion = sidebarMotion;
+        auto elapsed = std::chrono::steady_clock::now() - motion.started;
+        const auto duration = sidebarOpen ? 240ms : 190ms;
+        const double progress = std::clamp(std::chrono::duration<double>(elapsed) / duration, 0., 1.);
+        const double remaining = 1. - progress;
+        const double eased = 1. - remaining * remaining * remaining;
+        ApplySidebarFrame(std::lerp(motion.from, sidebarOpen ? 1. : 0., eased));
+        if (progress == 1.) motion.rendering.revoke();
+    }
+
+    void MainWindow::ApplySidebarFrame(double fraction) {
+        auto& motion = sidebarMotion;
+        motion.fraction = fraction;
+        auto window = AppWindow();
+        auto presenter = window.Presenter().try_as<OverlappedPresenter>();
+        if (presenter && presenter.State() == OverlappedPresenterState::Restored && window.IsVisible()) {
+            const int width = static_cast<int>(std::lround(motion.targetWidth * fraction));
+            const int left = static_cast<int>(std::lround(motion.targetLeft * fraction));
+            const int grow = width - motion.appliedWidth;
+            const int move = motion.appliedLeft - left;
+            if (grow || move) {
+                RECT bounds{};
+                if (!::GetWindowRect(WindowHandle(), &bounds)) return;
+                // Update the pane offset in the same frame as the HWND bounds,
+                // so the window can grow without reflowing the paper.
+                motion.appliedWidth = width;
+                motion.appliedLeft = left;
+                LayoutSidebar();
+                if (!::SetWindowPos(WindowHandle(), nullptr, bounds.left + move, bounds.top,
+                        bounds.right - bounds.left + grow, bounds.bottom - bounds.top,
+                        SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOACTIVATE)) {
+                    motion.appliedWidth -= grow;
+                    motion.appliedLeft += move;
+                    motion.targetWidth = motion.appliedWidth;
+                    motion.targetLeft = motion.appliedLeft;
+                }
+            }
+        }
+        LayoutSidebar();
+    }
+
+    void MainWindow::LayoutSidebar() {
+        auto& motion = sidebarMotion;
+        const bool showing = sidebarOpen || motion.fraction > 0.;
+        auto presenter = AppWindow().Presenter().try_as<OverlappedPresenter>();
         const bool restored = presenter && presenter.State() == OverlappedPresenterState::Restored;
-        // When the desktop has no room to extend the window, keep the paper
-        // at its current width and show the pane over its left edge.
-        const bool overlay = sidebarOpen && (!restored || !sidebarAddedWidth
-            || Root().ActualWidth() < minimumWorkspaceWidth + sidebarWidth);
+        const bool overlay = showing && (!restored || !motion.targetWidth);
         if (sidebarOverlay != overlay) {
             sidebarOverlay = overlay;
             ApplySidebarSurface();
         }
-        const auto width = sidebarOpen && !sidebarOverlay ? sidebarWidth : 0.;
-        if (SidebarColumn().Width().Value != width) SidebarColumn().Width(GridLengthHelper::FromPixels(width));
+        const double dpi = (std::max)(1., static_cast<double>(::GetDpiForWindow(WindowHandle())) / 96.);
+        const double docked = restored && !overlay ? (std::min)(sidebarWidth, motion.appliedWidth / dpi) : 0.;
+        const double exposed = overlay ? sidebarWidth * motion.fraction : docked;
+        if (SidebarColumn().Width().Value != docked) SidebarColumn().Width(GridLengthHelper::FromPixels(docked));
+
         auto sidebar = WorkspaceSidebar();
-        sidebar.Width(sidebarWidth);
-        sidebar.HorizontalAlignment(HorizontalAlignment::Left);
-        Grid::SetColumnSpan(sidebar, sidebarOverlay ? 2 : 1);
-        sidebar.Visibility(sidebarOpen ? Visibility::Visible : Visibility::Collapsed);
-        const bool selected = sidebarOpen && !sidebarClosing;
-        SidebarButton().IsChecked(selected);
+        const double inset = sidebarWidth - exposed;
+        auto margin = sidebar.Margin();
+        margin.Left = -inset;
+        if (sidebar.Margin() != margin) sidebar.Margin(margin);
+        const int span = overlay ? 2 : 1;
+        if (Grid::GetColumnSpan(sidebar) != span) Grid::SetColumnSpan(sidebar, span);
+        SidebarRevealClip().Rect({static_cast<float>(inset), 0, static_cast<float>(exposed), static_cast<float>(sidebar.ActualHeight())});
+        sidebar.Visibility(showing ? Visibility::Visible : Visibility::Collapsed);
+        sidebar.IsHitTestVisible(sidebarOpen);
+    }
+
+    void MainWindow::UpdateWorkspaceLayout() {
+        // If the pane was closed while maximized, remove the extension from
+        // the restored window as soon as it returns.
+        if (!sidebarOpen && sidebarMotion.fraction == 0. && sidebarMotion.appliedWidth)
+            ApplySidebarFrame(0.);
+        else
+            LayoutSidebar();
+        const bool settings = SettingsActive();
+        SidebarButton().IsChecked(sidebarOpen);
         updatingRailSelection = true;
-        FilesTab().IsChecked(selected && !settings && !outlineSelected);
-        OutlineTab().IsChecked(selected && !settings && outlineSelected);
+        FilesTab().IsChecked(sidebarOpen && !settings && !outlineSelected);
+        OutlineTab().IsChecked(sidebarOpen && !settings && outlineSelected);
         updatingRailSelection = false;
         ExplorerPane().Visibility(outlineSelected ? Visibility::Collapsed : Visibility::Visible);
         OutlinePaneContent().Visibility(outlineSelected ? Visibility::Visible : Visibility::Collapsed);

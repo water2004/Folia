@@ -107,11 +107,12 @@ sidebar while its tab is selected.
 
 `MainWindow.Workspace.cpp` coordinates the sidebar with the desktop work area.
 A restored window grows first toward its left edge, then toward available
-space on the right. When the window cannot grow, the sidebar opens over the
-reading card. `DocumentTools` owns the toolbar's hover and keyboard focus
-behavior. Its animated clip clears space for the tools without resizing the
-editor surface. The card provides the paper tint to both XAML and Direct2D
-content.
+space on the right. Each animation frame updates the native window bounds,
+the pane offset and the sidebar clip together. When the window cannot grow,
+only the sidebar clip animates over the reading card. `DocumentTools` owns the toolbar's hover
+and keyboard focus behavior. Its animated clip clears space for the tools
+without resizing the editor surface. The card provides the paper tint to both
+XAML and Direct2D content.
 
 Child XAML controls can deliver final notifications after their window closes.
 `MainWindow::WindowEvent` locks the weak window owner during delivery and skips
