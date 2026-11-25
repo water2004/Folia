@@ -43,6 +43,19 @@ namespace winrt::Folia {
         return document;
     }
 
+    std::shared_ptr<WorkspaceDocument> WorkspaceDocuments::FindSettings() const noexcept {
+        auto found = std::ranges::find(documents_, WorkspaceTabKind::Settings, [](auto const& doc) { return doc->kind; });
+        return found == documents_.end() ? nullptr : *found;
+    }
+
+    std::shared_ptr<WorkspaceDocument> WorkspaceDocuments::OpenSettings() {
+        if (auto existing = FindSettings()) return existing;
+        auto settings = std::make_shared<WorkspaceDocument>(NextDocumentId(), WorkspaceTabKind::Settings);
+        settings->kept = true;
+        documents_.push_back(settings);
+        return settings;
+    }
+
     WorkspaceOpenResult WorkspaceDocuments::Open(std::filesystem::path path, WorkspaceOpenMode mode) {
         if (path.empty() || !path.is_absolute()) throw std::invalid_argument("Workspace file paths must be absolute");
         path = path.lexically_normal();
@@ -56,7 +69,8 @@ namespace winrt::Folia {
         auto preview = std::ranges::find_if(documents_, [](auto const& document) {
             return !document->kept && !document->IsModified();
         });
-        auto document = std::make_shared<WorkspaceDocument>(NextDocumentId(), IsWorkspaceImage(ClassifyWorkspaceFile(path)));
+        auto kind = IsWorkspaceImage(ClassifyWorkspaceFile(path)) ? WorkspaceTabKind::Image : WorkspaceTabKind::Editor;
+        auto document = std::make_shared<WorkspaceDocument>(NextDocumentId(), kind);
         document->path = std::move(path);
         document->kept = mode == WorkspaceOpenMode::Keep;
         if (preview != documents_.end()) {
@@ -116,7 +130,8 @@ namespace winrt::Folia {
         auto document = Find(id);
         if (!document || this == &target || document == active_)
             throw std::logic_error("Transfer requires an inactive document and a different workspace");
-        if (target.Find(id) || (!document->path.empty() && target.Find(document->path)))
+        if (target.Find(id) || (!document->path.empty() && target.Find(document->path))
+            || (document->kind == WorkspaceTabKind::Settings && target.FindSettings()))
             throw std::logic_error("The target workspace already owns this document");
         // Allocate before changing either owner. Shared-pointer moves cannot throw.
         target.documents_.reserve(target.documents_.size() + 1);

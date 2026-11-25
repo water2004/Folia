@@ -7,6 +7,7 @@
 
 namespace winrt::Folia {
     enum class WorkspaceOpenMode { Preview, Keep };
+    enum class WorkspaceTabKind { Editor, Image, Settings };
 
     struct WorkspaceEditorDocument {
         EditorSession session;
@@ -23,11 +24,12 @@ namespace winrt::Folia {
     };
 
     struct WorkspaceDocument {
-        explicit WorkspaceDocument(std::uint64_t value, bool image = false)
-            : id(value), editor(image ? nullptr : std::make_unique<WorkspaceEditorDocument>()) {}
+        explicit WorkspaceDocument(std::uint64_t value, WorkspaceTabKind type = WorkspaceTabKind::Editor)
+            : id(value), kind(type), editor(type == WorkspaceTabKind::Editor ? std::make_unique<WorkspaceEditorDocument>() : nullptr) {}
 
         bool IsModified() const { return editor && editor->controller.IsModified(); }
         const std::uint64_t id;
+        const WorkspaceTabKind kind;
         const std::unique_ptr<WorkspaceEditorDocument> editor;
         std::filesystem::path path;
         bool kept = false;
@@ -50,6 +52,8 @@ namespace winrt::Folia {
         std::shared_ptr<WorkspaceDocument> Find(std::uint64_t id) const noexcept;
         std::shared_ptr<WorkspaceDocument> Find(std::filesystem::path const& path) const;
         std::shared_ptr<WorkspaceDocument> New(WorkspaceOpenMode mode = WorkspaceOpenMode::Keep);
+        std::shared_ptr<WorkspaceDocument> FindSettings() const noexcept;
+        std::shared_ptr<WorkspaceDocument> OpenSettings();
         WorkspaceOpenResult Open(std::filesystem::path path, WorkspaceOpenMode mode);
         void Activate(std::uint64_t id);
         bool Keep(std::uint64_t id);
